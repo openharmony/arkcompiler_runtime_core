@@ -238,7 +238,7 @@ illustration of the GUI programming capabilities. For more details of the
 
         build() {
             Flex({
-              direction: FlexDirection.Column, 
+              direction: FlexDirection.Column,
               justifyContent: FlexAlign.Start
             }) {
                 Text("Me:")

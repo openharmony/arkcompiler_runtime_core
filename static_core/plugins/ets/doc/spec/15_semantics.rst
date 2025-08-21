@@ -216,8 +216,8 @@ Specifics of Numeric Operator Contexts
 
 The ``postfix`` and ``prefix`` ``increment`` and ``decrement``
 operators evaluate ``byte`` and ``short`` operands without
-widening. Same is true also for an
-``assignment`` operator (considering ``assignment`` as a binary operator).
+widening. It is also true for an ``assignment`` operator (considering
+``assignment`` as a binary operator).
 
 For other numeric operators, the operands of unary and binary numeric expressions
 are widened to a larger numeric
@@ -393,6 +393,10 @@ of type ``S``. The set of *supertypes* includes all *direct supertypes*
 More formally speaking, the set is obtained by reflexive and transitive
 closure over the direct supertype relation.
 
+The terms *subclass*, *subinterface*, *superclass*, and *superinterface* are
+used in the following sections as synonyms for *subtype* and *supertype* 
+when considering non-generic classes, generic classes, or interface types.
+
 If a relationship of two types is not described in one of the following
 sections, then the types are not related to each other. Specifically, two
 :ref:`Resizable Array Types` and two :ref:`Tuple Types` are not related to each
@@ -413,13 +417,18 @@ other, except where they are identical (see :ref:`Type Identity`).
     }
 
 
+
 .. index::
    subtyping
    subtype
+   subclass
+   subinterface
    type
    object
    closure
    supertype
+   superclass
+   superinterface
    direct supertype
    reflexive closure
    transitive closure
@@ -431,40 +440,124 @@ other, except where they are identical (see :ref:`Type Identity`).
 
 |
 
-.. _Subtyping for Classes and Interfaces:
+.. _Subtyping for Non-Generic Classes and Interfaces:
 
-Subtyping for Classes and Interfaces
-====================================
+Subtyping for Non-Generic Classes and Interfaces
+================================================
+
 
 .. meta:
     frontend_status: Partly
 
-Terms *subclass*, *subinterface*, *superclass*, and *superinterface* are used
-when considering class or interface types.
 
-*Direct supertypes* of a non-generic class, or of the interface type ``C``
-are **all** of the following:
+``S`` for non-generic classes and interfaces is a direct *subclass* or
+*subinterface* of ``T`` (or of ``Object`` type) when one of the following
+conditions is true:
 
--  Direct superclass of ``C`` (as mentioned in its extension clause, see
-   :ref:`Class Extension Clause`) or type ``Object`` if ``C`` has no extension
-   clause specified;
+-  Class ``S`` is a *direct subtype* of class ``T`` (``S<:T``) if ``T`` is
+   mentioned in the ``extends`` clause of ``S`` (see :ref:`Class Extension Clause`):
 
--  Direct superinterfaces of ``C`` (as mentioned in the implementation
-   clause of ``C``, see :ref:`Class Implementation Clause`); and
+   .. code-block:: typescript
+      :linenos:
 
--  Class ``Object`` if ``C`` is an interface type with no direct superinterfaces
-   (see :ref:`Superinterfaces and Subinterfaces`).
+      // Illustrating S<:T
+      class T {}
+      class S extends T {}
+      function foo(t: T) {}
+
+      // Using T
+      foo(new T)
+
+      // Using S (S<:T)
+      foo(new S)
+
+-  Class ``S`` is a *direct subtype* of class ``Object`` (``S<:Object``) if
+   ``S`` has no :ref:`Class Extension Clause`:
+
+   .. code-block:: typescript
+      :linenos:
+
+      // Illustrating S<:Object
+      class S {}
+      function foo(o: Object) {}
+
+      // Using Object
+      foo(new Object)
+
+      // Using S (S<:Object)
+      foo(new S)
+
+-  Class ``S`` is a *direct subtype* of interface ``T`` (``S<:T``) if ``T`` is
+   mentioned in the ``implements`` clause of ``S`` (see
+   :ref:`Class Implementation Clause`):
+
+   .. code-block:: typescript
+      :linenos:
+
+      // Illustrating S<:T
+      // S is class, T is interface
+      interface T {}
+      class S implements T {}
+      function foo(t: T) {}
+      let s: S = new S
+
+      // Using T
+      let t: T = s
+      foo(t)
+
+      // Using S (S<:T)
+      foo(s)
+
+-  Interface ``S`` is a *direct subtype* of interface ``T`` (``S<:T``) if ``T``
+   is mentioned in the ``extends`` clause of ``S`` (see
+   :ref:`Superinterfaces and Subinterfaces`):
+
+   .. code-block:: typescript
+      :linenos:
+
+      // Illustrating S<:T
+      // S is interface, T is interface
+      interface T {}
+      interface S extends T {}
+      function foo(t: T) {}
+      let t: T
+      let s: S
+
+      // Using T
+      class A implements T {}
+      t = new A
+      foo(t)
+
+      // Using S (S<:T)
+      class B implements S {}
+      s = new B
+      foo(s)
+
+-  Interface ``S`` is a *direct subtype* of class ``Object`` (``S<:Object``) if
+   ``S`` has no ``extends`` clause (see :ref:`Superinterfaces and Subinterfaces`).
+
+   .. code-block:: typescript
+      :linenos:
+
+      // Illustrating subinterface of Object
+      interface S {}
+      function foo(o: Object) {}
+
+      // Using Object
+      foo(new Object)
+
+      // Using subinterface of Object
+      class A implements S {}
+      let s: S = new A; 
+      foo(s)
 
 .. index::
-   subclass
-   subinterface
+   subtype
+   subclasssubinterface
+   supertype
    superclass
    superinterface
    interface type
-   direct supertype
-   non-generic class
-   direct superclass
-   direct superinterface
    implementation
    non-generic class
    extension clause
@@ -472,31 +565,182 @@ are **all** of the following:
    Object
    class extension
 
-*Direct supertypes* of the generic type ``C`` <``F``:sub:`1` ``,..., F``:sub:`n`>
-(for a generic class or interface type declaration ``C`` <``F``:sub:`1` ``,..., F``:sub:`n`>
-with *n*>0) are **all** of the following:
+|
 
--  Direct superclass of ``C`` <``F``:sub:`1` ``,..., F``:sub:`n`>;
+.. _Subtyping for Generic Classes and Interfaces:
 
--  Direct superinterfaces of ``C`` <``F``:sub:`1` ``,..., F``:sub:`n`>, and
+Subtyping for Generic Classes and Interfaces
+============================================
 
--  Type ``Object`` if ``C`` <``F``:sub:`1` ``,..., F``:sub:`n`> is a generic
-   interface type with no direct superinterfaces.
+
+.. meta:
+    frontend_status: Partly
+
+
+A *generic class* or *generic interface* is declared as
+``C`` <``F``:sub:`1` ``,..., F``:sub:`n`>, where *n*>0 is a *direct subtype* of
+another generic class or interface ``T``, if one of the following conditions is
+true:
+
+-  ``T`` is a *direct superclass* of ``C`` <``F``:sub:`1` ``,..., F``:sub:`n`>
+   mentioned in the ``extends`` clause of ``C``:
+
+   .. code-block:: typescript
+      :linenos:
+
+      // T<U, V>  is direct superclass of C<U,V>
+      // T<U, V> >: C<U, V>
+   
+      class T<U, V> {
+         foo(p: U|V): U|V { return p }  
+      }
+
+      class C<U, V> extends T<U, V> {
+         bar(u: U): U { return u }         
+      }
+
+
+      // OK, exact match
+      let t: T<int, boolean>  = new T<int, boolean>
+      let c: C<int, boolean> = new C<int, boolean>
+    
+
+      // OK, assigning to direct superclass
+      t =  new C<int, boolean>
+
+      // CTE, cannot assign to subclass
+      c =  new T<int, boolean>
+
+-  ``T`` is one of direct superinterfaces of ``C``
+   <``F``:sub:`1` ``,..., F``:sub:`n`> (see
+   :ref:`Superinterfaces and Subinterfaces`):
+
+   .. code-block:: typescript
+      :linenos:
+
+      // Interface I<U, V>  is direct superinterface
+      // of J<U,V>, X<U, V>
+
+      interface I<U, V> {
+         foo(u: U): U;
+         bar(v: V): V;
+      }
+
+      // J<U, V> <: I<U, V>
+      // since J extebds I 
+      interface J<U, V> extends I<U, V>
+      {
+         foo(u: U): U
+         bar(v: V): V
+         
+         foo1(p: U|V): U|V
+      }
+
+      // X<U, V> <: I<U, V>
+      // since X implements I
+      class X<U, V> implements I<U,V> {
+        foo(u: U): U { return u }
+        bar(v: V): V { return v }
+      }
+
+      // Y<U,V> <: J<U, V>  (directly)
+      // Also Y<U, V> <: I<U, V> (transitively)
+      class Y<U, V> implements J<U,V> {
+        foo(u: U): U { return u }
+        bar(v: V): V { return v }
+
+        foo1(p: U|V): U|V { return p }
+      }
+
+      let i: I<int, boolean> 
+      let j: J<int, boolean>
+      let x = new X<int, boolean>
+      let y = new Y<int, boolean>
+
+      // OK, assigning to direct supertypes
+      i = x
+      j = y
+
+      // OK, assigning subinterface (J<:I)
+      i = j
+
+      // CTE, cannot assign superinterface (I>:JJ
+      j = i
+
+-  ``T`` is type ``Object`` (C<:Object) if
+   ``C`` <``F``:sub:`1` ``,..., F``:sub:`n`>
+   is either a generic class type with no *direct superclasses*,
+   or a generic interface type with no direct superinterfaces:
+
+   .. code-block:: typescript
+      :linenos:
+
+      // Object is direct superclass and for C<U,V> 
+      // and direct superinrerface for I<U,V>
+      //
+      class C<U, V> {
+         foo(u: U): U { return u }
+         bar(v: V): V { return v }
+      }
+      interface I<U, V> {
+         foo(u: U): U { return u }
+         bar(v: V): V { return v }
+      }
+
+      let o: Object = new Object
+      let c: C<int, boolean> = new C<int, boolean>
+      let i: I<int, boolean>
+
+      // // example1 - C<U,V> <: Object
+      function example1(o: Object) {}
+
+      // OK, example(Object)
+      example1(o)
+      // OK, C<int, boolean> <: Object
+      example1(c)
+
+      // // example2 - I<U,V> <: Object
+      function example2(o: Object) {}
+      class D<U, V> implements I<U, V> {}
+      i = new D<int, boolean>
+
+      // OK, example2(Object)
+      example2(o)
+      // OK, I<int, boolean> <: Object
+      example2(i)
 
 The direct supertype of a type parameter is the type specified as the
 constraint of that type parameter.
 
-If type parameters of a generic class or an interface have a variance specifed
+If type parameters of a generic class or an interface have a variance specified
 (see :ref:`Type Parameter Variance`), then the subtyping for instantiations of
 the class or interface is determined in accordance with the variance of the
-appropriate type parameter:
+appropriate type parameter. For example,  with generic class 
+``G<in T1,out T2>`` the ``G<S,T> <: G<U, V>``
+when ``S>:U`` and ``T<:V``
+
+The following code illustrates this:
 
 .. code-block:: typescript
    :linenos:
 
-    class G<in T1, out T2> { }
+   // Subtyping illustration for generic with parameter variance
 
-    // G<S, T> <: G <U, V> iff S >: U and T <: V
+   // U1 <: U0
+   class U0 {}
+   class U1 extends U0 {}
+
+   // Generic with contravariant parameter
+   class E<in T> {}
+
+   let e0: E<U0> = new E<U1> // CTE, E<U0> is subtype of E<U1>
+   let e1: E<U1> = new E<U0> // OK, E<U1> is supertype for E<U0>
+
+   // Generic with covariant parameter
+   class F<out T> {}
+
+   let f0: F<U0> = new F<U1> // OK, F<U0> is supertype for F<U1>
+   let f1: F<U1> = new F<U0> // CTE, F<U1> is subtype of F<U0>
 
 
 .. index::
@@ -662,17 +906,15 @@ and return type ``FR``  is a *subtype* of function type ``S`` with parameters
 ``SP``:sub:`1` ``, ... , SP``:sub:`n` and return type ``SR`` if **all** of the
 following conditions are met:
 
--  ``m <= n``
+-  ``m`` :math:`\leq` ``n``;
 
--  for each ``i <= m``
+-  Parameter type of ``SP``:sub:`i` for each ``i`` :math:`\leq` ``m`` is a
+   subtype of parameter type of ``FP``:sub:`i` (contravariance),
+   and ``SP``:sub:`i` is:
+   -  Rest parameter if ``FP``:sub:`i` is a rest parameter;
+   -  Optional parameter if ``FP``:sub:`i` is an optional parameter.
 
-   -  Parameter type of ``SP``:sub:`i` is a subtype of
-      parameter type of ``FP``:sub:`i` (contravariance),
-   -  and
-   -  if ``FP``:sub:`i` is a rest parameter then ``SP``:sub:`i` is a rest parameter too.
-   -  if ``FP``:sub:`i` is an optional parameter then ``SP``:sub:`i` is an optional parameter too.
-
--  type ``FR`` is a subtype of ``SR`` (covariance).
+-  Type ``FR`` is a subtype of ``SR`` (covariance).
 
 .. index::
    function type
@@ -794,7 +1036,7 @@ represented in the example below:
 Subtyping for Intersection Types
 ================================
 
-Intersecton type ``I`` defined as (``I``:sub:`1` ``& ... | I``:sub:`n`)
+Intersection type ``I`` defined as (``I``:sub:`1` ``& ... | I``:sub:`n`)
 is a subtype of type ``T`` if ``I``:sub:`i` is a subtype of ``T``
 for some *i*.
 
@@ -1191,7 +1433,7 @@ This technique called *type inference* allows keeping type safety and
 program code readability, doing less typing, and focusing on business logic.
 Type inference is applied by the compiler in the following contexts:
 
-- :ref:`Type Inference for Numeric Constant Expressions`;
+- :ref:`Type Inference for Numeric Literals`;
 - Variable and constant declarations (see :ref:`Type Inference from Initializer`);
 - Implicit generic instantiations (see :ref:`Implicit Generic Instantiations`);
 - Function, method or lambda return type (see :ref:`Return Type Inference`);
@@ -1235,66 +1477,62 @@ Type inference is applied by the compiler in the following contexts:
 
 |
 
-.. _Type Inference for Numeric Constant Expressions:
+.. _Type Inference for Numeric Literals:
 
-Type Inference for Numeric Constant Expressions
-===============================================
+Type Inference for Numeric Literals
+===================================
 
 .. meta:
     frontend_status: Partly
 
-The type of expression of a numeric type for :ref:`Constant Expressions` is
-first evaluated from the expression as follows:
+The type of a numeric literal (see :ref:`Numeric Literals`) is firstly 
+inferred from the context, if the context allows it.
+The following contexts allow inference:
 
-- Type of an integer literal is the default type of the literal:
-  ``int`` or ``long`` (see :ref:`Integer Literals`);
+- :ref:`Assignment-like Contexts`;
+- :ref:`Cast Expression` context.
 
-- Type of a floating-point literal is the default type of the literal:
-  ``double`` or ``float`` (see :ref:`Floating-Point Literals`);
+The default type of a numeric literal is used in all other cases as follows:
 
-- Type of a named constant is specified in the constant declaration;
+- ``int`` or ``long`` for an integer literal (see :ref:`Integer Literals`); or
+- ``double`` or ``float`` for a floating-point literal (see
+  :ref:`Floating-Point Literals`).
 
-- Result type of an operator is evaluated according to the rules of
-  the operator;
+The default type is used in :ref:`Numeric Operator Contexts` as the type of
+a literal is not inferred:
 
-- Type of a :ref:`Cast expression` is specified in the expression target type.
+.. code-block:: typescript
+   :linenos:
 
-.. index::
-   type inference
-   numeric constant expression
-   numeric constant
-   expression
-   constant
-   type
-   integer literal
-   floating-point literal
-   literal
-   named constant
-   constant declaration
-   operator
-   operator rule
-   cast expression
-   target type
+    let b: byte = 63 + 64 // compile-time error as type of expression is 'int'
+    let s: short = -32767 // compile-time error as type of expression is 'int'
+
+    let x: b = 1 as short // compile-time error as type of expression is 'short'
+
+Type inference is used only where the *target type* is one of the two cases:
+
+- Case 1: *Numeric type* (see :ref:`Numeric Types`); or
+- Case 2: Union type (see :ref:`Union Types`) containing at least one
+  *numeric type*.
+
+**Case 1: Target type is a numeric type**
+
+Where the *target type* is numeric, the type of a literal is inferred to the
+*target type* if one of following conditions is met:
+
+#. *Target type* is equal to or larger then the literal default type;
+
+#. Literal is an *integer literal* with the value that fitting into the range
+   of the *target type*; or
+
+#. Literal is an *floating-point literal* with the value fitting into the
+   range of the *target type* that is ``float``.
 
 
-The evaluated numeric result type can be inferred to a numeric *target type*
-from the context on condition that:
+If none of the conditions above is met means that the *target type* is not a
+valid type for the literal, and a :index:`compile-time error` occurs.
 
-#. Last executed operator in the expression is not a cast operator ``as``;
-
-#. *Target type* is a numeric type larger then the evaluated result type;
-   or
-
-#. The evaluated result type is an integer type, the *target type* is a smaller
-   integer type with the value of the expression fitting into its range; or
-
-#. The *target type* is ``float``, the evaluated result type is ``double`` and
-   the value of the expression fits into the range of type ``float``.
-
-A :index:`compile-time error` occurs if the context is a union type, and the
-evaluated value can be treated as value of several of union component types.
-
-Valid and invalid narrowing is represented in the examples below:
+Type inference for a numeric *target type* is represented in the examples below:
 
 .. code-block-meta:
    expect-cte:
@@ -1302,29 +1540,75 @@ Valid and invalid narrowing is represented in the examples below:
 .. code-block:: typescript
    :linenos:
 
-    let b: byte = 127 // ok, int -> byte narrowing
-    b = 64 + 63 // ok, int -> byte narrowing
-    b = 128 // compile-time-error, value is out of range
-    b = 1.0 // compile-time-error, floating-point value cannot be narrowed
-    b = 1 as short // // compile-time-error, cast expression fixes 'short' type
+    let l: long = 1     // ok, target type is larger then literal default type
+    let b: byte = 127   // ok, integer literal value fits type 'byte'
+    let f: float = 3.14 // ok, floating-point value fits type 'float'
+    
+    l = 1.0    // compile-time error, 'double' cannot be assigned to 'long'
+    b = 128    // compile-time error, value is out of range
+    f = 3.4e39 // compile-time error, value is out of range
 
-    let s: short = 32768 // compile-time-error, value is out of range
+If *target type* is a union type that contains no numeric type, then the
+default type of the literal is used. The following code is valid as 'Object',
+i.e., a supertype of a numeric type:
 
-    let u: byte | int = 1 // compile-time error, ambiguity
+.. code-block:: typescript
+   :linenos:
+
+    let x: Object | string = 1 // ok, instance of type 'int' is assigned to 'x'
+    
+    x = 1.0 // ok, instance of type 'double' is assigned to 'x'
+
+**Case 2: Target type is a union type containing at least one numeric type**
+
+If the *target type* is a union type
+(``N``:sub:`1` ``| ... | N``:sub:`k` ``| ... | U``:sub:`n`), where ``k``
+:math:`\geq` ``1`` and ``N``:sub:`i` is a numeric type, each ``N``:sub:`i`
+is considered the *target type*. Then type inference for numeric target type is
+tried, and if:
+
+#. No ``N``:sub:`i` is a valid type for the literal, then the default literal
+   type is used;
+
+#. Only a single ``N``:sub:`i` is a valid type for the literal, then
+   ``N``:sub:`i` is the inferred type;
+   
+#. Several ``N``'s are valid types, then checks are performed as follows:
+
+   - If the literal is an *integer literal*, and only one valid type is an
+     *integer type*, then this valid type becomes the inferred type;
+   
+   - If the literal is an *floating-point literal*, and only one valid type is
+     a *floating-point type*, the this valid type becomes the inferred type;
+   
+   - Otherwise, a :index:`compile-time error` due to the ambiguity.
+
+Type inference for a union target type is represented in the examples below:
+
+.. code-block:: typescript
+   :linenos:
+
+    let b: byte | Object = 127 // inferred type is 'byte'
+    b = 128 // inferred type is 'int' (default literal type)
+    
+    let c: byte | string = 127 // inferred type is 'byte'
+    b = 128 // compile-time error, invalid value
+    
+    let d: int | double = 1.0 // inferred type is 'double'
+    d = 1 // inferred type is 'int'
+
+    let i: byte | long = 128 // inferred type is 'long'
+    i = 127 // compile-time error, ambiguity
+    
+    let f: float | double = 3.4e39 // inferred type is 'double'
+    f = 1.0 // compile-time error, ambiguity
 
 .. index::
    numeric type
    inferred type
    target type
-   narrowing
-   constant
-   constant expression
-   integer conversion
    integer type
-   expression
    context
-   cast operator
-   conversion
    type
    union type
    value
@@ -1473,7 +1757,7 @@ Smart casts are applied to local variables
 (see :ref:`Variable and Constant Declarations`) and parameters
 (see :ref:`Parameter List`), except those that are captured and
 modified in lambdas.
-Furter in the text term *variable* is used for both local variables
+Further in the text term *variable* is used for both local variables
 and parameters.
 
 .. index::
@@ -1490,7 +1774,7 @@ and parameters.
    parameter
    lambda
 
-**Note.** Smart casts are not apppiled to global variabes and class fields,
+**Note.** Smart casts are not applied to global variabes and class fields,
 as it is hard to track their values.
 
 A variable has a single declared type, and can have different *smart
@@ -1588,7 +1872,7 @@ Type Expression
 The *type* of an entity is conventionally defined as the set of values
 an entity (e.g., a variable) can take, and the set of operators
 applicable to that entity. Two types with equal sets of values
-and operators are considered equal irrespective of a syntatic form used to
+and operators are considered equal irrespective of a syntactic form used to
 denote the types.
 
 However, in some cases it is useful to distinguish between equal types with
@@ -1626,9 +1910,9 @@ an :ref:`Object Literal`:
 The term *type expression* is used below as notation that consists of type
 names and operators on types, namely:
 
-- ``'|'`` for union operator;
-- ``'&'`` for intersection operator (see :ref:`Intersection Types`);
-- ``'-'`` for difference operator (see :ref:`Difference Types`).
+- '``|``' for union operator;
+- '``&``' for intersection operator (see :ref:`Intersection Types`);
+- '``-``' for difference operator (see :ref:`Difference Types`).
 
 Computing *smart types* is the process of creating, evaluating, and simplifying
 *type expressions*.
@@ -1667,7 +1951,7 @@ Intersection Types
 ==================
 
 An *intersection type* is a type created from other types by using the
-intersection operator ``'&'``.
+intersection operator '``&``'.
 The values of intersection type ``A & B`` are all values that belong
 to both ``A`` and ``B``. The same applies to the set of operations.
 
@@ -1716,7 +2000,7 @@ Difference Types
 ================
 
 A *difference type* is a type created from two other types by a subtraction
-operation, i.e., by using the operator ``'-'``.
+operation, i.e., by using the operator '``-``'.
 The values of the difference type ``A - B`` are all values that belong to type
 ``A`` but not to type ``B``. The same applies to the set of operations.
 
@@ -1824,7 +2108,7 @@ At an **assignment to the variable** ``v``: ``v = e``:
     - If *x* is a numeric type, then a larger numeric type;
     - If *x* is an enumeration type, then the *enumeration base type*.
 
-The following table summarises the contexts for map evaluation at an
+The following table summarizes the contexts for map evaluation at an
 *assumption node*:
 
 .. index::
@@ -1887,7 +2171,7 @@ The following table summarises the contexts for map evaluation at an
      - ``s'(l(v)):=s(l(v))-ec``
    * - ``typeof`` *v* ``===`` *str*
 
-       See **Note 2** below for evalution of type *T*.
+       See **Note 2** below for evaluation of type *T*.
 
      - ``s'(l(v)):= s(l(v))&T``
      - ``s'(l(v)) := s(l(v))-T``
@@ -1927,8 +2211,8 @@ The following table summarises the contexts for map evaluation at an
 
 **Notes**:
 
-#. In the table above the operator ``'==='`` can be replaced for ``'=='`` except
-   where ``'=='`` is used explicitly.
+#. In the table above the operator '``===``' can be replaced for '``==``' except
+   where '``==``' is used explicitly.
 
 #. For branching on ``typeof`` *v* ``===`` *str*, type *T* is
    evaluated in accordance with the value of *str*:
@@ -1941,7 +2225,7 @@ The following table summarises the contexts for map evaluation at an
 
     -  If a name of a numeric type, then *T* is this numeric type;
 
-    -  If ``object``, then *T* is ``Object - boolean - string - all numeric types``.
+    -  If ``"object"``, then *T* is ``Object - boolean - string - all numeric types``.
 
 
 At a node that joins two CFG branches, namely ``C``:sub:`1` :math:`\leq` :sub:`1`, ``s``:sub:`1` ``>``,
@@ -1997,7 +2281,7 @@ TBD: Describe how each language construct is translated to a CFG fragment.
 Type Expression Simplification
 ==============================
 
-The following table summarises the contexts for *type expression simplification*
+The following table summarizes the contexts for *type expression simplification*
 transformations to be performed at each node of the CFG:
 
 .. list-table::
@@ -2030,7 +2314,7 @@ transformations to be performed at each node of the CFG:
    * - Commutativity of '``|``'
      - ``A|B``
      - ``B|A``
-   * - In case of subtyping ``A<:B`` and '``|``' 
+   * - In case of subtyping ``A<:B`` and '``|``'
      - ``A|B``
      - ``B``
    * -
@@ -2042,7 +2326,7 @@ transformations to be performed at each node of the CFG:
    * - Difference with ``never``
      - ``A-never``
      - ``A``
-   * - In case of subtyping ``A<:B`` and '``-``' 
+   * - In case of subtyping ``A<:B`` and '``-``'
      - ``A-B``
      - ``never``
    * -
@@ -2148,8 +2432,8 @@ allows operations that are specific to the subtype:
 Other examples are explicit calls to ``instanceof``
 (see :ref:`InstanceOf Expression`) or checks against ``null``
 (see :ref:`Equality Expressions`) as parts of ``if`` statements
-(see :ref:`if Statements`) or conditional expressions
-(see :ref:`Conditional Expressions`):
+(see :ref:`if Statements`) or ternary conditional expressions
+(see :ref:`Ternary Conditional Expressions`):
 
 .. code-block:: typescript
    :linenos:
@@ -2168,17 +2452,17 @@ Other examples are explicit calls to ``instanceof``
    instanceof
    null
    if statement
-   conditional expression
+   ternary conditional expression
    expression
    method
 
 In like cases, a smart compiler requires no additional checks or casts (see
 :ref:`Cast Expression`) to deduce a smart type of an entity.
 
-Overloading (see :ref:`Overload Declarations`) can cause tricky situations
+:ref:`Overloading` can cause tricky situations
 when a smart type results in calling an entity that suits the smart type
 rather than a declared type of an argument (see
-:ref:`Overload Resolution for Overload Declarations`):
+:ref:`Overload Resolution`):
 
 .. code-block:: typescript
    :linenos:
@@ -2396,10 +2680,10 @@ The table below represents semantic rules that apply in various contexts:
 
 |
 
-.. _Overriding and Overload Signatures in Interfaces:
+.. _Overriding and Overloading in Interfaces:
 
-Overriding and Overload Signatures in Interfaces
-================================================
+Overriding and Overloading in Interfaces
+========================================
 
 .. meta:
     frontend_status: Done
@@ -2457,7 +2741,7 @@ Overriding and Overload Signatures in Interfaces
    :header-rows: 0
 
    * - Two or more methods with the same name are defined in the same interface.
-     - :ref:`Interface Method Overload Signatures` is used.
+     - TBD is used.
 
 .. index::
    method
@@ -2733,111 +3017,6 @@ Override compatibility with ``Object`` is represented in the example below:
 
 |
 
-.. _Overriding and Implementing Methods with Overload Signatures:
-
-Overriding and Implementing Methods with Overload Signatures
-============================================================
-
-.. meta:
-    frontend_status: None
-
-If an interface (*derived interface*) extends another interface (*base
-interface*), and the base interface has a set of overload signatures, then the
-derived interface must provide a valid overriding overload signature (or
-signatures) for all overload signatures of the base interface. The derived
-interface can introduce additional overload signatures. The situation is
-represented in the example below:
-
-
-.. code-block:: typescript
-   :linenos:
-
-    interface Interface {
-      foo (p: number): void // 1st overload signature
-      foo (p: string): void // 2nd overload signature
-    }
-
-    interface Interface1 extends Interface {
-      foo (p: number|string): void // 1st overload signature overrides both foo from Interface
-      foo (p: boolean): void       // 2nd overload signature
-    }
-
-    function demo (p1: Interface1) {
-        p1.foo (5)         // fits 1st signature of Interface1
-        p1.foo ("5 true")  // fits 1st signature of Interface1
-        p1.foo (true)      // fits 2nd signature of Interface1
-    }
-
-.. index::
-   interface
-   derived interface
-   base interface
-   overload signature
-   signature
-   overriding
-
-If a class (*derived class*) implements an interface (*base interface*), and
-the base interface has a set of overload signatures, then the derived class
-can provide a valid overriding overload signature (or signatures) for all
-overload signatures of the base interface. The derived class can introduce
-additional overload signatures. The implementation body must have
-the signature ``(...p: Any[]): Any`` (see
-:ref:`Overload Signatures Implementation Body`). This signature is a valid
-overriding for any overloaded signature. The same works if one class extends
-another class. The situation is represented in the example below:
-
-.. index::
-   derived class
-   class
-   implementation
-   interface
-   base interface
-   overload signature
-   signature
-   implementation body
-
-.. code-block:: typescript
-   :linenos:
-
-    class Class1 implements Interface {
-      foo (p: number): void // 1st overload signature
-      foo (p: string): void // 2nd overload signature
-      foo (...p: Any[]): Any {} // implementation signature + body
-    }
-
-    class Class2 implements Interface {
-      foo (...p: Any[]): Any {} // implementation signature only + body
-    }
-
-    class Class3 extends Class1 {
-      override foo (p: number): void // 1st overload signature
-      override foo (p: string): void // 2nd overload signature
-      override foo (...p: Any[]): Any {} // implementation signature + body
-    }
-
-    class Class4 extends Class3 {
-      override foo (...p: Any[]): Any {} // implementation signature only + body
-    }
-
-    new Class1().foo(5)     // OK
-    new Class1().foo("555") // OK
-    new Class1().foo(true)  // compile-time error - no boolean parameter
-
-    new Class2().foo(5)     // OK
-    new Class2().foo("555") // OK
-
-    function test (p: Interface) {
-        p.foo (5)
-        p.foo ("5555")
-    }
-
-    test(new Class1)
-    test(new Class2)
-    test(new Class3)
-    test(new Class4)
-
-|
-
 .. _Overloading:
 
 Overloading
@@ -2851,8 +3030,7 @@ compile time. Thus, *overloading* is compile-time *polymorphism by name*.
 
 |LANG| supports the following two *overloading*  mechanisms:
 
-- |TS|-compatible feature: :ref:`Declarations with Overload Signatures`
-  mainly used to improve type checking; and
+- Conventional overloading TBD; and
 
 - Innovative *managed overloading* (see :ref:`Overload Declarations`).
 
@@ -2874,13 +3052,9 @@ compile time. Thus, *overloading* is compile-time *polymorphism by name*.
    type checking
    compatibility
 
-*Signature resolution* is used to select one entity to call from a set of
-candidates if the name to call refers to a *declaration with overload signatures*
-(see :ref:`Signature Resolution for Overload Signatures`).
-
 *Overload resolution* is used to select one entity to call from a set of
 candidates if the name to call refers to an *overload declaration* (see
-:ref:`Overload Resolution for Overload Declarations`).
+:ref:`Overload Resolution`).
 
 Both mechanisms of resolution use the first-match textual order to streamline
 the resolution process.
@@ -2914,57 +3088,10 @@ selected for a call.
 
 |
 
-.. _Signature Resolution for Overload Signatures:
+.. _Overload Resolution:
 
-Signature Resolution for Overload Signatures
-============================================
-
-.. meta:
-    frontend_status: None
-
-*Overload signature* allows specifying a function, method, or constructor that
-can have multiple signatures and a single *implementation body* with its own
-fixed *implementation siganture* (see
-:ref:`Overload Signatures Implementation Body`).
-Call arguments are checked at the call site against such multiple signatures in
-their declaration order: the call is considered valid as soon as the first
-signature is found appropriate for the arguments given.
-A :index:`compile-time error` occurs if no appropriate signature is found.
-
-.. code-block:: typescript
-   :linenos:
-
-    function foo(s: string)            // signature #1
-    function foo(s: string, n: number) // signature #2
-    function foo(...x: Any[]): Any {}  // implementation signature
-
-    foo("1")     // call fits signature #1
-    foo("1", 5)  // call fits signature #2
-    foo(1, 2, 3) // compile-time error - no appropriate signature for the call
-                 // implementation signature is not accessible at call sites
-
-.. index::
-   signature resolution
-   overload signature
-   function
-   method
-   constructor
-   signature
-   implementation body
-   implementation signature
-   argument
-   call
-   declaration
-   string
-   accessibility
-   call site
-
-|
-
-.. _Overload Resolution for Overload Declarations:
-
-Overload Resolution for Overload Declarations
-=============================================
+Overload Resolution
+===================
 
 .. meta:
     frontend_status: None
@@ -3019,7 +3146,7 @@ Overload resolution for an instance method overload (see
 :ref:`Class Method Overload Declarations`) always uses the type of the
 *object reference* known at compile time. It can be either the type used
 in a declaration, or a *smart type* (see :ref:`Smart Casts and Smart Types`)
-as illustrated by the example below:
+as represented in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -3064,21 +3191,22 @@ Type Erasure
 .. meta:
     frontend_status: Done
 
-*Type erasure* is the concept that denotes a special handling of certain
-language *types*, primarily :ref:`Generics`, in the semantics of the following
-language operations that require the type to be preserved for execution:
+*Type erasure* is the compilation technique which provides a special handling
+of certain language *types*, primarily :ref:`Generics`, when applied to the
+semantics of the following expressions:
 
 -  :ref:`InstanceOf Expression`;
 -  :ref:`Cast Expression`.
 
-In these operations certain *types* are handled as their corresponding
+As a result, special types must be used for the execution of such expressions.
+Certain *types* in such expressions are handled as their corresponding
 *effective types*, while the *effective type* is defined as type mapping.
 The *effective type* of a specific type ``T`` is always a supertype of ``T``.
-As a result, the following two kinds of relationship are possible between an
-original type and an *effective type*:
+As a result, the relationship of an original type and an *effective type* can
+have the following two kinds:
 
 -  *Effective type* of ``T`` is identical to ``T``, and *type erasure* has no
-   effect.
+   effect. So, type ``T`` is *retained*.
 
 -  If *effective type* of ``T`` is not identical to ``T``, then the type ``T``
    is considered affected by *type erasure*, i.e., *erased*.
@@ -3096,11 +3224,11 @@ original type and an *effective type*:
    type mapping
    supertype
 
-In addition, accessing a value of type ``T``, including by
+In addition, accessing a value of type ``T``, particularly by
 :ref:`Field Access Expression`, :ref:`Method Call Expression`, or
-:ref:`Function Call Expression` can cause ``ClassCastError`` thrown if
+:ref:`Function Call Expression`, can cause ``ClassCastError`` thrown if
 type ``T`` and the ``target`` type are both affected by *type erasure*, and the
-value is produced by :ref:`Cast Expression`.
+value is produced by a :ref:`Cast Expression`.
 
 .. code-block:: typescript
    :linenos:
@@ -3113,14 +3241,14 @@ value is produced by :ref:`Cast Expression`.
       }
 
       cast(value: Object) {
-        return value as T          // OK, but check is postponed
+        return value as T          // OK, but check is done during execution
       }
     }
 
     function castToA(p: Object) {
       p instanceof A<number> // CTE, A<number> is erased
 
-      return p as A<number>  // OK, but check is performed against A
+      return p as A<number>  // OK, but check is performed against type A, but not A<number>
     }
 
 .. index::
@@ -3152,7 +3280,8 @@ Type mapping determines the *effective types* as follows:
    within the original union type for :ref:`Union Types` in the form
    ``T1 | T2 ... Tn``.
 
--  Same for :ref:`Array Types` in the form ``T[]`` as for generic type ``Array<T>``.
+-  Same for :ref:`Array Types` in the form ``T[]`` as for generic type
+   ``Array<T>``.
 
 -  Instantiation of ``FixedArray`` for ``FixedArray<T>`` instantiations, with
    the effective type of type argument ``T`` preserved.
@@ -3160,19 +3289,18 @@ Type mapping determines the *effective types* as follows:
 -  Instantiation of an internal generic function type with respect to
    the number of parameter types *n* for :ref:`Function Types` in the form
    ``(P1, P2 ..., Pn) => R``. Parameter types ``P1, P2 ... Pn`` are
-   instantiated with ``Any``, and the return type ``R``
-   is instantiated with type ``never``.
+   instantiated with ``Any``, and the return type ``R`` is instantiated with
+   type ``never``.
 
--  Instantiation of an internal generic tuple type with respect to
-   the number of element types *n* for :ref:`Tuple Types` in the form
-   ``[T1, T2 ..., Tn]``.
+-  Instantiation of an internal generic tuple type with respect to the number
+   of element types *n* for :ref:`Tuple Types` in the form ``[T1, T2 ..., Tn]``.
 
 -  String for :ref:`String Literal Types`.
 
 -  Enumeration base type of the same const enum type for *const enum* types
    (see :ref:`Enumerations`).
 
--  Otherwise, the original type is preserved.
+-  Otherwise, the original type is *preserved*.
 
 .. index::
    type erasure
@@ -3210,7 +3338,7 @@ Static Initialization
 
 *Static initialization* is a routine performed once for each class (see
 :ref:`Classes`), namespace (see :ref:`Namespace Declarations`), or
-module (see :ref:`Modules`).
+module (see :ref:`Modules and Namespaces`).
 
 *Static initialization* execution involves the execution of the following:
 
@@ -3402,7 +3530,7 @@ Extended Conditional Expressions
 |LANG| provides extended semantics for conditional expressions
 to ensure better |TS| alignment. It affects the semantics of the following:
 
--  Conditional expressions (see :ref:`Conditional Expressions`,
+-  Ternary conditional expressions (see :ref:`Ternary Conditional Expressions`,
    :ref:`Conditional-And Expression`, :ref:`Conditional-Or Expression`, and
    :ref:`Logical Complement`);
 
@@ -3424,7 +3552,7 @@ below:
 
 .. index::
    extended conditional expression
-   conditional expression
+   ternary conditional expression
    expression
    alignment
    semantics
@@ -3509,11 +3637,13 @@ Extended semantics of :ref:`Conditional-And Expression` and
 :ref:`Conditional-Or Expression` affects the resultant type of expressions
 as follows:
 
--  A *conditional-and* expression ``A && B`` is of type ``B`` if the result of
-   ``A`` is handled as ``true``. Otherwise, it is of type ``A``.
+-  Type of *conditional-and* expression ``A && B`` equals the type of ``B``
+   if the result of ``A`` is handled as ``true``. Otherwise, the expression
+   type equals the type of ``A``.
 
--  A *conditional-or* expression ``A || B`` is of type ``B`` if the result of
-   ``A`` is handled as ``false``. Otherwise, it is of type ``A``.
+-  Type of *conditional-or* expression ``A || B`` equals the type of ``B``
+   if the result of ``A`` is handled as ``false``. Otherwise, the expression
+   type equals the type of ``A``.
 
 The way this approach works in practice is represented in the example below.
 Any ``nonzero`` number is handled as ``true``. The loop continues until it

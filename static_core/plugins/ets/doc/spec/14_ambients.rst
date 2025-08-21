@@ -79,6 +79,18 @@ context that is already ambient:
         declare function foo(): void // compile-time error
     }
 
+A :index:`compile-time warning` occurs if an ambient declaration is marked
+with ``export`` keyword as all  ambient declarations are exported by
+default:
+
+.. code-block:: typescript
+   :linenos:
+
+    export declare namespace A{ // compile-time warning
+        function foo(): void 
+    }
+
+
 .. index::
    syntax
    ambient declaration
@@ -92,45 +104,6 @@ context that is already ambient:
    compatibility
    ambient
 
-A :index:`compile-time error` occurs if an ambient function, constructor, or
-method is found within the same compilation unit (see :ref:`Compilation Units`)
-as a non-ambient function, constructor, or method:
-
-.. code-block:: typescript
-   :linenos:
-
-    // The same module
-    declare function foo (): void
-    function bar (): void { foo() }
-
-It implies that an import (see :ref:`Import Directives`), which is allowed,
-can lead to the following situation:
-
-.. code-block:: typescript
-   :linenos:
-
-    // DeclarationModule
-    declare function foo (): void
-
-    // Module
-    export declare function bar(): void
-
-    // Program
-    import {foo} from "DeclarationModule"  // OK
-    import {bar} from "Module"             // OK
-    foo()
-    bar()
-
-.. index::
-   ambient function
-   ambient constructor
-   ambient method
-   compilation unit
-   non-ambient function
-   non-ambient constructor
-   non-ambient method
-   import
-   import directive
 
 |
 
@@ -615,7 +588,7 @@ as follows:
     declare interface I1 {
         default foo (): void // method foo will have the default implementation
     }
-    class C1 implements I1 {} // Class C1 is valid as foo() has the default implemenation
+    class C1 implements I1 {} // Class C1 is valid as foo() has the default implementation
 
     interface I1 {
         // If such interface is used as I1 it will be runtime error as there is
@@ -626,8 +599,8 @@ as follows:
     declare interface I2 {
         foo (): void // method foo has no default implementation
     }
-    class C2 implements I2 {} // Class C2 is invalid as foo() has no implemenation
-    class C3 implements I2 { foo() {} } // Class C3 is valid as foo() has implemenation
+    class C2 implements I2 {} // Class C2 is invalid as foo() has no implementation
+    class C3 implements I2 { foo() {} } // Class C3 is valid as foo() has implementation
 
 
 .. index::
@@ -714,8 +687,8 @@ accessed by using qualified names only.
    prefix
    declared type
 
-If an ambient namespace is imported from a declaration module, then all
-ambient namespace declarations are accessible (see :ref:`Accessible`) across
+If an ambient namespace is imported from a module, then all ambient
+namespace declarations are accessible (see :ref:`Accessible`) across
 all declarations and top-level statements of the current module.
 
 .. code-block:: typescript
@@ -756,7 +729,6 @@ of the namespace.
 .. index::
    ambient namespace
    ambient namespace declaration
-   declaration module
    accessible declaration
    access
    accessibility
@@ -775,12 +747,10 @@ Implementing Ambient Namespace Declaration
 
 If an *ambient namespace* is implemented in |LANG|, a namespace with the
 same name must be declared (see :ref:`Namespace Declarations`) as the
-top-level declaration of a compilation unit. All namespace names of a nested
+top-level declaration of a module. All namespace names of a nested
 namespace (i.e. a namespace embedded into another namespace) must be the same
 as in ambient context.
 
-A compilation unit that implements a namespace is the unit for which the
-declaration module is built (see :ref:`Declaration Modules`).
 
 .. index::
    ambient namespace declaration
@@ -791,11 +761,10 @@ declaration module is built (see :ref:`Declaration Modules`).
    namespace name
    declaration
    top-level declaration
-   compilation unit
+   module
    ambient context
    nested namespace
    embedded namespace
-   declaration module
 
 |
 
@@ -807,9 +776,9 @@ Ambient Accessor Declarations
 .. meta:
     frontend_status: None
     
-*Ambient accessor declaration* is the ambient version of :ref:`Accessor Declarations`.
-
-The syntax of *ambient accessor declarations* is presented below:
+*Ambient accessor declaration* is an ambient version of
+:ref:`Accessor Declarations`. The syntax of an *ambient accessor declaration*
+is presented below:
 
 .. code-block:: abnf
 

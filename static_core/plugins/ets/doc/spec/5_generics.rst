@@ -456,13 +456,13 @@ Generic Instantiations
 .. meta:
     frontend_status: Done
 
-As mentioned before, a generic declaration defines a set
-of corresponding non-generic entities. The
-process of instantiation is designed to do the following:
+As mentioned before, a generic declaration defines a set of corresponding
+generic or non-generic entities. The process of instantiation is designed to
+do the following:
 
 - Allow producing new generic or non-generic entities;
-- Provide every type parameter with a type argument that can be any kind
-  of type, including the type argument itself.
+- Provide every type parameter with a type argument that can be any kind of
+  type, including the type argument itself.
 
 As a result of the instantiation process, a new class, interface, union, array,
 method, or function is created.
@@ -532,6 +532,24 @@ arguments:
    array type
    tuple type
    function type
+
+A :index:`compile-time error` occurs if a generic instantiation leads to
+instantiation of the type FixedArray with the predefined value type (see
+:ref:`Value Types`).
+
+.. code-block:: typescript
+   :linenos:
+
+    class A <T> {
+       foo (p: FixedArray<T>) {}
+    }
+    A<int> // compile-time error as such instantiation leads to method foo()
+           // of class A to have type FixedArray<int> in it.
+
+    // The actual code could be like code below - all these fragments result in a compile-time error
+    new A<int>
+    let a: A<int>|undefined
+    function foo (p: A<int>) {}
 
 |
 
@@ -688,7 +706,7 @@ in which a generic is referred. It is represented in the example below:
 
 
     function process <P, R> (arg: P, cb?: (p: P) => R): P | R {
-       // return the data itself or if the processing function provied the
+       // return the data itself or if the processing function provided the
        // result of processing
        return cb != undefined ? cb (arg): arg
     }
@@ -726,17 +744,16 @@ which purpose notations identical to generics are used. If the initial types
 are class or interface, then the resultant utility types are also handled as
 class or interface types.
 All utility type names are accessible as simple names (see :ref:`Accessible`)
-in any compilation unit across all its scopes. Using these names as
-user-defined entities causes a :index:`compile-time error` in accordance with
-:ref:`Declarations`. An alphabetically sorted list of utility types is provided
-below.
+in any module across all its scopes. Using these names as user-defined entities
+causes a :index:`compile-time error` in accordance with :ref:`Declarations`. An
+alphabetically sorted list of utility types is provided below.
 
 .. index::
    embedded type
    class
    interface
    accessibility
-   compilation unit
+   module
    user-defined entity
    declaration
    utility type
@@ -753,7 +770,7 @@ Awaited Utility Type
 
 Type ``Awaited<T>`` constructs a type which includes no type ``Promise``. It
 is similar to ``await`` in ``async`` functions, or to the method ``.then()``
-in *Promises*. Any occurence of type ``Promise`` is recursively removed until
+in *Promises*. Any occurrence of type ``Promise`` is recursively removed until
 a generic, a function, an array, or a tuple type is detected. If type ``Promise``
 is not a part of a type ``T`` declaration, then ``Awaited<T>`` leaves ``T``
 intact.

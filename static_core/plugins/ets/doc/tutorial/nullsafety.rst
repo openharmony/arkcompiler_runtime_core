@@ -27,7 +27,7 @@ In the example below, all lines cause a compile-time error:
     let y: string = null    // ditto
     let z: number[] = null  // ditto
 
-A variable that can have a null value is defined with a union type ``T | null``:
+A variable with the null value is defined by a union type ``T | null``:
 
 .. code-block:: typescript
 
@@ -42,7 +42,7 @@ Non-Null Assertion Operator
 -----------------------------
 
 The postfix operator '``!``' can be used to assert that its operand is non-null.
-If applied to a null value, the operator throws an error. Otherwise, the
+If applied to the null value, the operator throws an error. Otherwise, the
 type of the value is changed from ``T | null`` to ``T``:
 
 .. code-block:: typescript
@@ -65,7 +65,7 @@ left-hand-side expression.
 In other words, '``a ?? b``' equals the ternary operator '``a != null ? a : b``'.
 
 In the following example, the method ``getNick`` returns a nickname if it is
-set; otherwise, an empty string is returned:
+set. Otherwise, an empty string is returned:
 
 .. code-block:: typescript
 
@@ -109,7 +109,7 @@ stops at an expression that partially evaluates to ``null`` or ``undefined``:
 ``string | null | undefined`` as the method can return ``null`` or
 ``undefined``.
 
-An optional chain can be of any length and contain any number of '``?.``'
+An optional chain can be of any length and can contain any number of '``?.``'
 operators.
 
 In the example below, if a person has a spouse, and the spouse has a

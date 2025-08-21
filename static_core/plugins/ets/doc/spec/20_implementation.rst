@@ -51,30 +51,21 @@ If an import path ``<some path>/name`` is resolved to a path in the folder
 
 |
 
-.. _Compilation Units in Host System:
+.. _Modules in Host System:
 
-Compilation Units in Host System
-********************************
+Modules in Host System
+**********************
 
 .. meta:
     frontend_status: Done
 
-Modules and libraries are created and stored in a manner that is
-determined by the host system. The exact manner modules and libraries are stored
-in a file system is determined by a particular implementation of the compiler
-and other tools.
+Modules are created and stored in a manner that is determined by the host
+system. The exact manner modules are stored in a file system is determined by
+a particular implementation of the compiler and other tools.
 
-A simple implementation is summarized as follows:
-
--  Module is stored in a single file.
-
--  Folder that can store several modules (one source file to contain a module).
-
--  Library description files are named "lib.ets". Source files are stored in
-   folders with a predefined structure.
+A simple implementation stores every module in a single file.
 
 .. index::
-   compilation unit
    host system
    storage
    storage management
@@ -121,8 +112,11 @@ value of type ``Type`` that represents type ``T`` at runtime.
    method call
    call
    method
+   compilation
    variable
    runtime
+   value
+   type
 
 If type ``T`` used as type argument is affected by :ref:`Type Erasure`, then
 the function returns value of type ``Type`` for *effective type* of ``T``
@@ -133,6 +127,13 @@ but not for ``T`` itself:
 
     let type_of_array1: Type = Type.from<int[]>() // value of Type for Array<> 
     let type_of_array2: Type = Type.from<Array<number>>() // the same Type value
+
+.. index::
+   type argument
+   type erasure
+   function
+   value type
+   array
 
 |
 
@@ -146,9 +147,10 @@ Ensuring Module Initialization
 
 The |LANG| standard library (see :ref:`Standard Library`) provides a top-level
 function ``initModule()`` with one parameter of ``string`` type. A call to this
-function ensures that the module referred by the argument is available and its
-initialization (see :ref:`Static Initialization`) is performed. An argument
-should be a string literal otherwise a :index:`compile-time error` occurs.
+function ensures that the module referred by the argument is available, and
+that its initialization (see :ref:`Static Initialization`) is performed. An
+argument must be a string literal. Otherwise, a :index:`compile-time error`
+occurs.
 
 The current module has no access to the exported declarations of the module
 referred by the argument. If such module is not available or any other runtime
@@ -158,6 +160,22 @@ issue occurs then a proper exception is thrown.
    :linenos:
 
     initModule ("@ohos/library/src/main/ets/pages/Index")
+
+.. index::
+   module initialization
+   initialization
+   top-level function
+   parameter
+   sting literal
+   module
+   argument
+   static initialization
+   function
+   argument
+   access
+   declaration
+   runtime
+   exception
 
 |
 
@@ -197,8 +215,8 @@ declarations that use specific ArkUI types.
 
 .. index::
    compiler
-   keyword struct
-   keyword class
+   struct keyword
+   class keyword
    class declaration
    ArkUI plugin
    ArkUI type
@@ -256,6 +274,17 @@ The situation is represented in the following example:
 In the example above, the compiler generates a *bridge* method with the name
 ``foo`` and signature ``(p: Object)``. The *bridge* method acts as follows:
 
+.. index::
+   bridge method
+   overriding method
+   erased type
+   subclass
+   compiler
+   type-safe call
+   generic class
+   type erasure
+   signature
+
 -  Behaves as an ordinary method in most cases, but is not accessible from
    the source code, and does not participate in overloading;
 
@@ -283,6 +312,19 @@ is created in ``D``, in the following cases:
   e.g., ``(T``:sub:`1` ``, ..., T``:sub:`n` ``)``;
 - Signature of the overridden method ``m`` is not ``(C``:sub:`1` ``, ..., C``:sub:`n` ``)``.
 
+.. index::
+   ordinary method
+   access
+   source code
+   overloading
+   argument type
+   method
+   bridge method
+   type parameter
+   subclass
+   overriding
+   signature
+   overridden method
 
 .. raw:: pdf
 

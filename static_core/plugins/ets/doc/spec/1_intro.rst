@@ -105,8 +105,7 @@ The |LANG| language as a whole is characterized by the following:
 
    The |LANG| language supports the *component programming* approach. It
    presumes that software is designed and implemented as a composition
-   of *compilation units*. A compilation unit is typically represented as
-   a *module* or a *library*.
+   of *modules*. 
 
    A *module* in |LANG| is a standalone, independently compiled unit that
    combines various programming resources (types, classes, functions, and so
@@ -115,7 +114,6 @@ The |LANG| language as a whole is characterized by the following:
 
 .. index::
    modularity
-   compilation unit
    component programming
    maintainability
    module
@@ -210,8 +208,8 @@ numbers/numeric literals, operator signs, delimiters), special characters
 
 The tokens defined by the lexical grammar are terminal symbols of syntactic
 notation. Syntactic notation defines a set of productions starting from the
-goal symbol *compilationUnit* (see :ref:`Compilation Units`). It is a sentence
-that consists of a single distinguished nonterminal, and describes how
+goal symbol *moduleDeclaration* (see :ref:`Modules and Namespaces`). It is a
+sentence that consists of a single distinguished nonterminal, and describes how
 sequences of tokens can form syntactically correct programs.
 
 .. index::
@@ -220,7 +218,6 @@ sequences of tokens can form syntactically correct programs.
    lexical grammar
    syntactic notation
    goal symbol
-   compilation unit
    module
    nonterminal
 
@@ -387,7 +384,7 @@ as used in other languages, application areas, or industries.
 
    goal symbol
      -- a sentence that consists of a single distinguished nonterminal
-     (*compilationUnit*). The *goal symbol* describes how sequences of
+     (*moduleDeclaration*). The *goal symbol* describes how sequences of
      tokens can form syntactically correct programs.
 
    token
@@ -533,7 +530,7 @@ as used in other languages, application areas, or industries.
      and signature.
 
    overloading
-     -- a lanaguage feature that allows using a single name to call several
+     -- a language feature that allows using a single name to call several
      functions (in the general sense, i.e., including methods and constructors)
      with different signatures and different bodies.
 
