@@ -35,6 +35,7 @@ export declare let a: SharedArrayBuffer;
 export declare let buffers: SharedArrayBuffer[];
 export declare function processData(buffer: SharedArrayBuffer): SharedArrayBuffer;
 export declare class DataProcessor {
+    constructor(buffer: SharedArrayBuffer, sharedBuffer: SharedArrayBuffer);
     private buffer;
     sharedBuffer: SharedArrayBuffer;
 }
@@ -44,3 +45,31 @@ export interface BufferHolder {
 }
 export type BufferType = SharedArrayBuffer;
 export type ComplexType = SharedArrayBuffer | string;
+export declare function A(): PropertyDecorator;
+export declare const propDecorator1: PropertyDecorator;
+export declare const propDecorator2: PropertyDecorator;
+export declare const PropertyDecorators: {
+    Readonly: PropertyDecorator;
+    Loggable: PropertyDecorator;
+};
+export declare const decoratorMap: Map<string, PropertyDecorator>;
+export declare function getPropertyDecorator(name: string): PropertyDecorator;
+export declare function processProperty(decorator: PropertyDecorator, target: any, propertyKey: string | symbol): void;
+export declare class DecoratedClass {
+    normalProperty: string;
+    readOnlyProperty: number;
+    customDecoratedProperty: boolean;
+}
+export type PropertyDecoratorAlias = PropertyDecorator;
+export declare const aliasedDecorator: PropertyDecoratorAlias;
+export type ComplexDecoratorType = PropertyDecorator;
+export declare const complexDecorator: ComplexDecoratorType;
+export interface DecoratorContainer {
+    decorator: PropertyDecorator;
+    applyDecorator(target: any, propertyKey: string | symbol): void;
+}
+export declare class DecoratorManager implements DecoratorContainer {
+    decorator: PropertyDecorator;
+    constructor(decorator: PropertyDecorator);
+    applyDecorator(target: any, propertyKey: string | symbol): void;
+}
