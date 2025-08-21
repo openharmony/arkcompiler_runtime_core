@@ -1021,7 +1021,7 @@ export namespace uri {
     }
 
     isHierarchical(): boolean {
-      let index = this.inputUri.indexOf(':');
+      let index = this.inputUri.indexOf(':').toInt();
       if (index == -1) {
         return true;
       }

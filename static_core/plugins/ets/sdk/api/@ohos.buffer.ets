@@ -95,7 +95,7 @@ function stringify(buffer: ArrayBuffer, encoding: string, resolvedStart: int, re
         }
         if (encoding == "base64url") {
             let lastNonEqualPos = base64.length - 1;
-            while (lastNonEqualPos >= 0 && base64.charAt(lastNonEqualPos) == '=') {
+            while (lastNonEqualPos >= 0 && base64.charAt(lastNonEqualPos) == c'=') {
                 lastNonEqualPos--;
             }
             if (lastNonEqualPos >= 0) {
@@ -150,9 +150,9 @@ function sanitizeAscii(str: string): string {
 function sanitizeUtf8(str: string): string {
     const sb = new StringBuilder();
     for (let i = 0; i < str.length; i++) {
-        const cu = str.charCodeAt(i).toChar();
+        const cu = str.charCodeAt(i).toInt().toChar();
         if (Char.isHighSurrogate(cu) && i + 1 < str.length) {
-            const cu2 = str.charCodeAt(i + 1).toChar();
+            const cu2 = str.charCodeAt(i + 1).toInt().toChar();
             if (Char.isLowSurrogate(cu2)) {
                 sb.append(str.charAt(i));
                 sb.append(str.charAt(i + 1));
