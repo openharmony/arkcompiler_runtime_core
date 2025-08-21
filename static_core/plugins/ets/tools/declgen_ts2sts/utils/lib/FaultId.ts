@@ -143,6 +143,7 @@ export enum FaultID {
   RemoveLimitDecorator,
   TupleTypeToArray,
   StructDeclaration,
+  FunctionType,
   // this should always be last enum
   LAST_ID
 }
