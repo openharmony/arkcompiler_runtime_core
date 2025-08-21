@@ -44,7 +44,7 @@ public:
 
     using CharCodeArray = EtsObjectArray;
 
-    static EtsString *CreateNewStringFromCharCode(CharCodeArray *charCodes);
+    static EtsString *CreateNewStringFromCharCode(CharCodeArray *charCodes, size_t actualLength);
 
     static EtsString *CreateNewStringFromCharCode(EtsDouble charCode);
 

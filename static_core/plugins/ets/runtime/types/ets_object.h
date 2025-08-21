@@ -74,13 +74,13 @@ public:
     }
 
     template <class T, bool IS_VOLATILE = false>
-    T GetFieldPrimitive(size_t offset)
+    T GetFieldPrimitive(size_t offset) const
     {
         return GetCoreType()->GetFieldPrimitive<T, IS_VOLATILE>(offset);
     }
 
     template <class T>
-    T GetFieldPrimitive(int32_t fieldOffset, bool isVolatile)
+    T GetFieldPrimitive(int32_t fieldOffset, bool isVolatile) const
     {
         if (isVolatile) {
             return GetCoreType()->GetFieldPrimitive<T, true>(fieldOffset);
