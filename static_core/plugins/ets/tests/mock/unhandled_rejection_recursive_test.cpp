@@ -13,55 +13,88 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
+#include "ani_gtest.h"
 
 #include "runtime/include/runtime.h"
 
 namespace ark::ets::test {
 
-class UnhandledRejectionRecursiveTest : public testing::Test {
+class UnhandledRejectionRecursiveTest : public ani::testing::AniTest {
 protected:
     void SetUp() override
     {
-        RuntimeOptions options;
-        options.SetShouldLoadBootPandaFiles(true);
-        options.SetShouldInitializeIntrinsics(true);
-        options.SetCompilerEnableJit(false);
-        options.SetGcType("epsilon");
-        options.SetLoadRuntimes({"ets"});
-        options.SetListUnhandledOnExitPromises(true);
-        auto stdlib = std::getenv("PANDA_STD_LIB");
-        if (stdlib == nullptr) {
-            std::cerr << "PANDA_STD_LIB env variable should be set and point to mock_stdlib.abc" << std::endl;
-            std::abort();
-        }
-        options.SetBootPandaFiles({stdlib, "UnhandledRejectionRecursiveTest.abc"});
-        options.SetCoroutineImpl("stackful");
-
-        Runtime::Create(options);
-        if (Runtime::GetCurrent() == nullptr) {
-            std::cerr << "Can't create runtime" << std::endl;
-            std::abort();
-        }
+        ani::testing::AniTest::SetUp();
+        [[maybe_unused]] bool listPromises = Runtime::GetOptions().IsListUnhandledOnExitPromises(
+            plugins::LangToRuntimeType(panda_file::SourceLang::ETS));
+        ASSERT(listPromises);
+        BindNativeFunctions();
+        successFlag_ = false;
     }
 
     void RunTest()
     {
-        const std::string mainFunc = "UnhandledRejectionRecursiveTest.ETSGLOBAL::main";
-        Runtime::GetCurrent()->ExecutePandaFile(abcFile_.c_str(), mainFunc.c_str(), {});
-        Runtime::Destroy();
+        CallStaticVoidMethod(env_, "testRecursive", ":");
+        ASSERT_TRUE(vm_->DestroyVM() == ANI_OK) << "Cannot destroy ANI VM";
+        ASSERT(successFlag_);
     }
 
-    // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    const std::string abcFile_ = "UnhandledRejectionRecursiveTest.abc";
+    void TearDown() override {}
+
+    template <typename... Args>
+    static void CallStaticVoidMethod(ani_env *env, std::string_view methodName, std::string_view signature,
+                                     Args &&...args)
+    {
+        auto func = ResolveFunction(env, methodName, signature);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+        env->Function_Call_Void(func, std::forward<Args>(args)...);
+
+        ani_boolean exceptionRaised {};
+        env->ExistUnhandledError(&exceptionRaised);
+        if (static_cast<bool>(exceptionRaised)) {
+            env->DescribeError();
+            env->Abort("The method call ended with an exception");
+        }
+    }
+
+private:
+    static ani_function ResolveFunction(ani_env *env, std::string_view methodName, std::string_view signature)
+    {
+        ani_module md;
+        [[maybe_unused]] auto status = env->FindModule("UnhandledRejectionRecursiveTest", &md);
+        ASSERT(status == ANI_OK);
+        ani_function func;
+        status = env->Module_FindFunction(md, methodName.data(), signature.data(), &func);
+        ASSERT(status == ANI_OK);
+        return func;
+    }
+
+    void BindNativeFunctions()
+    {
+        ani_module module {};
+        [[maybe_unused]] auto status = env_->FindModule("UnhandledRejectionRecursiveTest", &module);
+        ASSERT(status == ANI_OK);
+        std::array methods = {
+            ani_native_function {"setFlag", ":", reinterpret_cast<void *>(SetFlag)},
+        };
+        status = env_->Module_BindNativeFunctions(module, methods.data(), methods.size());
+        ASSERT(status == ANI_OK);
+    }
+
+    static void SetFlag()
+    {
+        successFlag_ = true;
+    }
+
+    static bool successFlag_;
 };
 
-using UnhandledRejectionRecursiveDeathTest = UnhandledRejectionRecursiveTest;
+// ISO C++ forbids in-class initialization of non-const static member
+bool UnhandledRejectionRecursiveTest::successFlag_ = false;
 
 /// Rejects promise inside a rejected promise handler
-TEST_F(UnhandledRejectionRecursiveDeathTest, Recursive)
+TEST_F(UnhandledRejectionRecursiveTest, Recursive)
 {
-    EXPECT_EXIT(RunTest(), testing::ExitedWithCode(2U), ".*");
+    RunTest();
 }
 
 }  // namespace ark::ets::test
