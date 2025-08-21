@@ -15,12 +15,13 @@
 
 /*---
 desc: 07.31 Lambda Expressions
-name: 07.expressions/7.32.lambda_expressions/incorrectAsyncLambdaReturnValue
-tags: [negative, compile-only]
+name: 07.expressions/7.32.lambda_expressions/correctAsyncLambdaReturnValue
+tags: []
 ---*/
 
 type fooLambda = () => void
 
 function main(): void {
     let x: fooLambda = async (): void => {}
+    x()
 }
