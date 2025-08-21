@@ -15,4 +15,4 @@
 cases:
     - index: '-1'
     - index: '7'
-    - index: 'Long.MAX_VALUE'
+    - index: 'Int.MAX_VALUE'

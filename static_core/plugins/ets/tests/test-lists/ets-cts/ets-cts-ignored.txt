@@ -1125,17 +1125,6 @@
 07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_nzfract_rte_n_1.ets
 07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_nzfract_rte_n_2.ets
 
-#27155
-07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_outofbounds_n_0.ets
-07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_outofbounds_n_1.ets
-07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_outofbounds_n_2.ets
-07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_res_n_0.ets
-07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_res_n_1.ets
-07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_res_n_2.ets
-07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_res_n_3.ets
-07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_res_n_4.ets
-07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_res_n_5.ets
-
 #27158
 07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_nzfract_cte_n_0.ets
 07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_nzfract_cte_n_1.ets

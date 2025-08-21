@@ -88,6 +88,16 @@ export class RangeError extends Error {
 }
 
 /**
+ * @class Represents exception that is thrown when negative array size is supplied
+ */
+export final class NegativeArraySizeError extends RangeError {
+    constructor(message?: String, options?: ErrorOptions) {
+        super(message, options)
+        this.name = "NegativeArraySizeError"
+    }
+}
+
+/**
  * @class Represents an error that occurs when array is oging to be indexed out of its bounds
  */
 export final class ArrayIndexOutOfBoundsError extends Error {
@@ -184,15 +194,6 @@ export final class ClassCastError extends Error {
 export final class ArrayStoreError extends Error {
     constructor(message?: String, options?: ErrorOptions) {
         super("ArrayStoreError", message, options)
-    }
-}
-
-/**
- * @class Represents exception that is thrown when negative array size is supplied
- */
-export final class NegativeArraySizeError extends Error {
-    constructor(message?: String, options?: ErrorOptions) {
-        super("NegativeArraySizeError", message, options)
     }
 }
 

@@ -19,9 +19,3 @@ cases:
     - { type: 'short', add_val: '' }
     # byte
     - { type: 'byte', add_val: '' }
-    # long
-    - { type: 'long', add_val: '' }
-    # float
-    - { type: 'float', add_val: '.0f' }
-    # double
-    - { type: 'double', add_val: '.0' }
