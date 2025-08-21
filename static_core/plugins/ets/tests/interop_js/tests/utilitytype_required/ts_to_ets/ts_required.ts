@@ -14,11 +14,6 @@
  */
 
 let etsVm = globalThis.gtest.etsVm;
-let checkRequiredDataInEts = etsVm.getFunction('Ltest_sts_required/ETSGLOBAL;', 'checkRequiredDataInEts');
-let checkOptionalDataInEts = etsVm.getFunction('Ltest_sts_required/ETSGLOBAL;', 'checkOptionalDataInEts');
-let checkDataEts = etsVm.getFunction('Ltest_sts_required/ETSGLOBAL;', 'checkDataEts');
-let checkRequiredDataNewInEts = etsVm.getFunction('Ltest_sts_required/ETSGLOBAL;', 'checkRequiredDataNewInEts');
-let checkOptionalDataNewInEts = etsVm.getFunction('Ltest_sts_required/ETSGLOBAL;', 'checkOptionalDataNewInEts');
 
 export class Test {
     public name: string;
@@ -52,6 +47,12 @@ export function checkOptionalDataInTs(data: OptionalTypeTest): number {
     }
     return val;
 }
+
+let checkRequiredDataInEts = etsVm.getFunction('Ltest_sts_required/ETSGLOBAL;', 'checkRequiredDataInEts');
+let checkOptionalDataInEts = etsVm.getFunction('Ltest_sts_required/ETSGLOBAL;', 'checkOptionalDataInEts');
+let checkDataEts = etsVm.getFunction('Ltest_sts_required/ETSGLOBAL;', 'checkDataEts');
+let checkRequiredDataNewInEts = etsVm.getFunction('Ltest_sts_required/ETSGLOBAL;', 'checkRequiredDataNewInEts');
+let checkOptionalDataNewInEts = etsVm.getFunction('Ltest_sts_required/ETSGLOBAL;', 'checkOptionalDataNewInEts');
 
 ASSERT_TRUE(checkRequiredDataInEts() === 3);
 ASSERT_TRUE(checkOptionalDataInEts() === 7);
