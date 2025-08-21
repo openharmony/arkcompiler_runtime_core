@@ -2409,7 +2409,7 @@ function isSpecificTypes(node: ts.Node): boolean {
  */
 function createNodeFromUtilType(targetType: string, factory: ts.NodeFactory):
   ts.TypeReferenceNode | ts.ArrayTypeNode {
-  if (targetType == ArrayType) {
+  if (targetType === ArrayType) {
     return factory.createArrayTypeNode(factory.createTypeReferenceNode(JSValue));
   }
   return factory.createTypeReferenceNode(JSValue);
