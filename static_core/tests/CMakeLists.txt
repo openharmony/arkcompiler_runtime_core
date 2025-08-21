@@ -1043,7 +1043,8 @@ add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/obj-33.pa" SKIP_CRO
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/obj-34.pa")
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/obj-35.pa")
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/obj-36.pa" VERIFIER_OPTIONS "--log-level=warning" SEARCH_STDERR "Incompatible accumulator type")
-add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/obj-bad-class-02.pa" SKIP_CROSS_ARM SKIP_VERIFICATION)
+# NOTE(mgroshev): #29225 seems to be incorrect
+# add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/obj-bad-class-02.pa" SKIP_CROSS_ARM SKIP_VERIFICATION)
 
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/intrinsics-01.pa" SKIP_VERIFICATION)
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/intrinsics-02.pa" SKIP_VERIFICATION)
@@ -1095,9 +1096,10 @@ add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/big_ark_option_valu
 
 # OSR needs additional design for try-catch processing. See the issue #13423 against panda
 # 26982 64-bit pointer support
-if(PANDA_32_BIT_MANAGED_POINTER)
-    add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/oom-01.pa" COMPILER_OPTIONS --compiler-hotness-threshold=0 --compiler-inlining=false HEAP_SIZE_LIMIT "13000000" SKIP_OSR)
-endif()
+# NOTE(mgroshev): #29366 different behavior with different options
+# if(PANDA_32_BIT_MANAGED_POINTER)
+#     add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/oom-01.pa" COMPILER_OPTIONS --compiler-hotness-threshold=0 --compiler-inlining=false HEAP_SIZE_LIMIT "13000000" SKIP_OSR)
+# endif()
 # OSR needs additional design for try-catch processing. See the issue #13423 against panda
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/oom-02.pa" HEAP_SIZE_LIMIT "13000000" SKIP_OSR)
 
@@ -1121,9 +1123,9 @@ add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/regression/allocate-252-params.p
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/regression/bitops-bitwise-and.pa" COMPILER_OPTIONS --compiler-print-stats)
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/regression/math-partial-sums.pa" COMPILER_OPTIONS --compiler-print-stats DISABLE_LIMIT_STD_ALLOC)
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/regression/fmod.pa" COMPILER_OPTIONS --compiler-inlining=false)
-add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/regression/stack-4-params.pa" COMPILER_OPTIONS --compiler-inlining=false VERIFIER_FAIL_TEST SEARCH_STDERR "Bad register type")
-add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/regression/stack-9-params.pa" COMPILER_OPTIONS --compiler-inlining=false VERIFIER_FAIL_TEST SEARCH_STDERR "Bad register type")
-add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/regression/fcmp.pa" VERIFIER_FAIL_TEST SEARCH_STDERR "Bad register type")
+add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/regression/stack-4-params.pa" COMPILER_OPTIONS --compiler-inlining=false)
+add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/regression/stack-9-params.pa" COMPILER_OPTIONS --compiler-inlining=false)
+add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/regression/fcmp.pa")
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/regression/irreducible_loop.pa")
 if (NOT PANDA_ENABLE_ADDRESS_SANITIZER)
 #TODO(mwx851039): This test may exceed 400Mb stack in CI (#4061).

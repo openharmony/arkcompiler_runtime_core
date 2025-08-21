@@ -90,7 +90,7 @@ TEST_F(LibAbcKitArrayStaticTest, LibAbcKitTestStoreArrayWide)
             ASSERT_NE(newValue, nullptr);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-            AbckitInst *idx = g_implG->gFindOrCreateConstantI64(graph, 2);
+            AbckitInst *idx = g_implG->gFindOrCreateConstantI32(graph, 2);
             ASSERT_NE(idx, nullptr);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
@@ -199,7 +199,7 @@ TEST_F(LibAbcKitArrayStaticTest, LibAbcKitTestLoadArray)
             AbckitInst *arr = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_NEWARRAY);
             ASSERT_NE(arr, nullptr);
 
-            AbckitInst *idx = g_implG->gFindOrCreateConstantI64(graph, 1);
+            AbckitInst *idx = g_implG->gFindOrCreateConstantI32(graph, 1);
             ASSERT_NE(idx, nullptr);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
@@ -236,7 +236,7 @@ TEST_F(LibAbcKitArrayStaticTest, LibAbcKitTestLoadArrayNeg)
             AbckitInst *fakeArr = g_implG->gFindOrCreateConstantI64(graph, 1);
             ASSERT_NE(fakeArr, nullptr);
 
-            AbckitInst *idx = g_implG->gFindOrCreateConstantI64(graph, 1);
+            AbckitInst *idx = g_implG->gFindOrCreateConstantI32(graph, 1);
             ASSERT_NE(idx, nullptr);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 

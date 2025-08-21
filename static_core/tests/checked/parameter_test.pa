@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -90,10 +90,10 @@ exit_failure:
     ldai.64 0xffffffffff
     ucmp.64 a0
     jnez exit_failure
-    ldai 0xffffffffff
+    ldai.64 0xffffffffff
     return.64
 exit_failure:
-    ldai 0xffffffff
+    ldai.64 0xffffffff
     return.64
 }
 
@@ -120,7 +120,8 @@ exit_failure:
     jne v1, exit_failure_6
     movi.64 v1, 0xffffffffff
     call.short foo_u64, v1, v1
-    jne v1, exit_failure_7
+    ucmp.64 v1
+    jnez exit_failure_7
     ldai 0
     return
 exit_failure_1:

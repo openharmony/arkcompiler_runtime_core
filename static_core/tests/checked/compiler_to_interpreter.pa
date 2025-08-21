@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,11 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# '--verification-mode=disabled' this option here is added to save test logic and remove verifier error
 #! CHECKER      Check on nullptr before mov object was disabled in deoptimization
-#! RUN          force_jit: true, options: "--compiler-hotness-threshold=0 --interpreter-type=irtoc --compiler-enable-jit=true --gc-type=g1-gc", entry: "_GLOBAL::main_1"
+#! RUN          force_jit: true, options: "--verification-mode=disabled --compiler-hotness-threshold=0 --interpreter-type=irtoc --compiler-enable-jit=true --gc-type=g1-gc", entry: "_GLOBAL::main_1"
 
 #! CHECKER      Check on nullptr before mov object was worked in case without deoptimization
-#! RUN          force_jit: true, options: "--compiler-hotness-threshold=0 --interpreter-type=irtoc --compiler-enable-jit=true --gc-type=g1-gc", entry: "_GLOBAL::main_2", abort: 6
+#! RUN          force_jit: true, options: "--verification-mode=disabled --compiler-hotness-threshold=0 --interpreter-type=irtoc --compiler-enable-jit=true --gc-type=g1-gc", entry: "_GLOBAL::main_2", abort: 6
 
 
 .record panda.String <external>

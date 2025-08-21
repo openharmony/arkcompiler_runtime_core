@@ -781,7 +781,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBvisitSuccBlocksStatic_2)
             if (curInst == nullptr) {
                 return false;
             }
-            gImplG->iSetInput(curInst, gImplG->gFindOrCreateConstantU64(graph, newPrintInt), 1);
+            gImplG->iSetInput(curInst, gImplG->gFindOrCreateConstantI32(graph, newPrintInt), 1);
             return true;
         });
     };

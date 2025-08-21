@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -372,7 +372,7 @@ TEST_F(LibAbcKitModifyApiLiteralsTest, CreateLiteralLiteralArray_2)
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_static.abc", &file);
     const double val1 = 0.7;
-    const int val2 = 7U;
+    const uint32_t val2 = 7U;
     std::array<AbckitLiteral *, 2U> statlitarr = {g_implM->createLiteralDouble(file, val1),
                                                   g_implM->createLiteralU32(file, val2)};
     AbckitLiteralArray *litarr = g_implM->createLiteralArray(file, statlitarr.data(), 2U);

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,8 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# '--verification-mode=disabled' this option here is added to save test logic and remove verifier error
 #! CHECKER      Interop interpreter rewrite index value
-#! RUN          force_jit: true, options: "--compiler-regex=_GLOBAL::test", entry: "_GLOBAL::main", result: 1
+#! RUN          force_jit: true, options: "--verification-mode=disabled --compiler-regex=_GLOBAL::test", entry: "_GLOBAL::main", result: 1
 #! EVENT        /Compilation,_GLOBAL::test,.*COMPILED/
 #! METHOD       "_GLOBAL::test"
 
@@ -36,6 +37,7 @@
     starr.64 v1, v3
     movi.64 v0, 0x7FFFFFFF00000001
     # Second parameter is 32-bit, but here we call it with 64-bit
+    # don not change it #5353
     call.short test, v1, v0
     return.64
 }

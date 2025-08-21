@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 .record Math <external>
 .record IO <external>
 .record Globals{
@@ -32,12 +33,12 @@
 .function f64 Math.absF64(f64 a0) <external>
 .function u1 main(){
     fldai.64 365.24
-    ststatic Globals.DAYS_PER_YEAR
+    ststatic.64 Globals.DAYS_PER_YEAR
     fmovi.64 v3, 3.141592653589793
     fldai.64 4.0
     fmul2.64 v3
     fmul2.64 v3
-    ststatic Globals.SOLAR_MASS
+    ststatic.64 Globals.SOLAR_MASS
     movi v0, 3
     movi v1, 5000
     fmovi.64 v2, -4.395717154909567
@@ -108,26 +109,26 @@ exit_failure:
 
 .function void BodyInit(Body a0, f64 a1, f64 a2, f64 a3, f64 a4, f64 a5, f64 a6, f64 a7){
     lda.64 a1
-    stobj a0, Body.x
+    stobj.64 a0, Body.x
     lda.64 a2
-    stobj a0, Body.y
+    stobj.64 a0, Body.y
     lda.64 a3
-    stobj a0, Body.z
+    stobj.64 a0, Body.z
     lda.64 a4
-    stobj a0, Body.vx
+    stobj.64 a0, Body.vx
     lda.64 a5
-    stobj a0, Body.vy
+    stobj.64 a0, Body.vy
     lda.64 a6
-    stobj a0, Body.vz
+    stobj.64 a0, Body.vz
     lda.64 a7
-    stobj a0, Body.mass
+    stobj.64 a0, Body.mass
     return.void
 }
 
 .function Body Jupiter(){
-    ldstatic Globals.DAYS_PER_YEAR
+    ldstatic.64 Globals.DAYS_PER_YEAR
     sta.64 v8
-    ldstatic Globals.SOLAR_MASS
+    ldstatic.64 Globals.SOLAR_MASS
     sta.64 v9
     newobj v0, Body
     fmovi.64 v1, 4.84143144246472090e+00
@@ -151,9 +152,9 @@ exit_failure:
 }
 
 .function Body Saturn(){
-    ldstatic Globals.DAYS_PER_YEAR
+    ldstatic.64 Globals.DAYS_PER_YEAR
     sta.64 v8
-    ldstatic Globals.SOLAR_MASS
+    ldstatic.64 Globals.SOLAR_MASS
     sta.64 v9
     newobj v0, Body
     fmovi.64 v1, 8.34336671824457987e+00
@@ -177,9 +178,9 @@ exit_failure:
 }
 
 .function Body Uranus(){
-    ldstatic Globals.DAYS_PER_YEAR
+    ldstatic.64 Globals.DAYS_PER_YEAR
     sta.64 v8
-    ldstatic Globals.SOLAR_MASS
+    ldstatic.64 Globals.SOLAR_MASS
     sta.64 v9
     newobj v0, Body
     fmovi.64 v1, 1.28943695621391310e+01
@@ -203,9 +204,9 @@ exit_failure:
 }
 
 .function Body Neptune(){
-    ldstatic Globals.DAYS_PER_YEAR
+    ldstatic.64 Globals.DAYS_PER_YEAR
     sta.64 v8
-    ldstatic Globals.SOLAR_MASS
+    ldstatic.64 Globals.SOLAR_MASS
     sta.64 v9
     newobj v0, Body
     fmovi.64 v1, 1.53796971148509165e+01
@@ -229,7 +230,7 @@ exit_failure:
 }
 
 .function Body Sun(){
-    ldstatic Globals.SOLAR_MASS
+    ldstatic.64 Globals.SOLAR_MASS
     sta.64 v7
     newobj v0, Body
     fmovi.64 v1, 0.0
@@ -244,20 +245,20 @@ exit_failure:
 }
 
 .function Body offsetMomentum(Body a0, f64 a1, f64 a2, f64 a3){
-    ldstatic Globals.SOLAR_MASS
+    ldstatic.64 Globals.SOLAR_MASS
     sta.64 v0
     lda.64 a1
     fneg.64
     fdiv2.64 v0
-    stobj a0, Body.vx
+    stobj.64 a0, Body.vx
     lda.64 a2
     fneg.64
     fdiv2.64 v0
-    stobj a0, Body.vy
+    stobj.64 a0, Body.vy
     lda.64 a3
     fneg.64
     fdiv2.64 v0
-    stobj a0, Body.vz
+    stobj.64 a0, Body.vz
     lda.obj a0
     return.obj
 }
@@ -274,17 +275,17 @@ loop:
     jeq v3, loop_exit
     ldarr.obj a0
     sta.obj v5
-    ldobj v5, Body.mass
+    ldobj.64 v5, Body.mass
     sta.64 v6            #m
-    ldobj v5, Body.vx
+    ldobj.64 v5, Body.vx
     fmul2.64 v6
     fadd2.64 v0
     sta.64 v0
-    ldobj v5, Body.vy
+    ldobj.64 v5, Body.vy
     fmul2.64 v6
     fadd2.64 v1
     sta.64 v1
-    ldobj v5, Body.vz
+    ldobj.64 v5, Body.vz
     fmul2.64 v6
     fadd2.64 v2
     sta.64 v2
@@ -315,19 +316,19 @@ loop2:
     jeq v0, loop2_exit
     ldarr.obj a0
     sta.obj v4             #bodyj
-    ldobj v4, Body.x
+    ldobj.64 v4, Body.x
     sta.64 v5
-    ldobj v2, Body.x
+    ldobj.64 v2, Body.x
     fsub2.64 v5
     sta.64 v6               #dx
-    ldobj v4, Body.y
+    ldobj.64 v4, Body.y
     sta.64 v5
-    ldobj v2, Body.y
+    ldobj.64 v2, Body.y
     fsub2.64 v5
     sta.64 v7               #dy
-    ldobj v4, Body.z
+    ldobj.64 v4, Body.z
     sta.64 v5
-    ldobj v2, Body.z
+    ldobj.64 v2, Body.z
     fsub2.64 v5
     sta.64 v8               #dz
     fmul2.64 v8
@@ -348,46 +349,46 @@ loop2:
     lda.64 a1
     fdiv2.64 v10
     sta.64 v10               #mag
-    ldobj v4, Body.mass
+    ldobj.64 v4, Body.mass
     fmul2.64 v10
     sta.64 v11
     fmul2.64 v6
     sta.64 v12
-    ldobj v2, Body.vx
+    ldobj.64 v2, Body.vx
     fsub2.64 v12
-    stobj v2, Body.vx
+    stobj.64 v2, Body.vx
     lda.64 v11
     fmul2.64 v7
     sta.64 v12
-    ldobj v2, Body.vy
+    ldobj.64 v2, Body.vy
     fsub2.64 v12
-    stobj v2, Body.vy
+    stobj.64 v2, Body.vy
     lda.64 v11
     fmul2.64 v8
     sta.64 v12
-    ldobj v2, Body.vz
+    ldobj.64 v2, Body.vz
     fsub2.64 v12
-    stobj v2, Body.vz
-    ldobj v2, Body.mass
+    stobj.64 v2, Body.vz
+    ldobj.64 v2, Body.mass
     fmul2.64 v10
     sta.64 v11
     fmul2.64 v6
     sta.64 v12
-    ldobj v4, Body.vx
+    ldobj.64 v4, Body.vx
     fadd2.64 v12
-    stobj v4, Body.vx
+    stobj.64 v4, Body.vx
     lda.64 v11
     fmul2.64 v7
     sta.64 v12
-    ldobj v4, Body.vy
+    ldobj.64 v4, Body.vy
     fadd2.64 v12
-    stobj v4, Body.vy
+    stobj.64 v4, Body.vy
     lda.64 v11
     fmul2.64 v8
     sta.64 v12
-    ldobj v4, Body.vz
+    ldobj.64 v4, Body.vz
     fadd2.64 v12
-    stobj v4, Body.vz
+    stobj.64 v4, Body.vz
     inci v3, 1
     jmp loop2
 loop2_exit:
@@ -400,24 +401,24 @@ loop3:
     jeq v0, loop3_exit
     ldarr.obj a0
     sta.obj v2          #body
-    ldobj v2, Body.vx
+    ldobj.64 v2, Body.vx
     fmul2.64 a1
     sta.64 v12
-    ldobj v2, Body.x
+    ldobj.64 v2, Body.x
     fadd2.64 v12
-    stobj v2, Body.x
-    ldobj v2, Body.vy
+    stobj.64 v2, Body.x
+    ldobj.64 v2, Body.vy
     fmul2.64 a1
     sta.64 v12
-    ldobj v2, Body.y
+    ldobj.64 v2, Body.y
     fadd2.64 v12
-    stobj v2, Body.y
-    ldobj v2, Body.vz
+    stobj.64 v2, Body.y
+    ldobj.64 v2, Body.vz
     fmul2.64 a1
     sta.64 v12
-    ldobj v2, Body.z
+    ldobj.64 v2, Body.z
     fadd2.64 v12
-    stobj v2, Body.z
+    stobj.64 v2, Body.z
     inci v1, 1
     jmp loop3
 loop3_exit:
@@ -434,22 +435,22 @@ loop:
     jeq v0, loop_exit
     ldarr.obj a0
     sta.obj v3                  #bodyi
-    ldobj v3, Body.vx
+    ldobj.64 v3, Body.vx
     sta.64 v4
     fmul2.64 v4
     sta.64 v4
-    ldobj v3, Body.vy
+    ldobj.64 v3, Body.vy
     sta.64 v5
     fmul2.64 v5
     sta.64 v5
-    ldobj v3, Body.vz
+    ldobj.64 v3, Body.vz
     sta.64 v6
     fmul2.64 v6
     fadd2.64 v5
     fadd2.64 v4
     sta.64 v4
     fmovi.64 v5, 0.5
-    ldobj v3, Body.mass
+    ldobj.64 v3, Body.mass
     fmul2.64 v4
     fmul2.64 v5
     fadd2.64 v1
@@ -462,23 +463,23 @@ loop2:
     jeq v0, loop2_exit
     ldarr.obj a0
     sta.obj v8                      #bodyj
-    ldobj v8, Body.x
+    ldobj.64 v8, Body.x
     sta.64 v4
-    ldobj v3, Body.x
+    ldobj.64 v3, Body.x
     fsub2.64 v4
     sta.64 v5                     #dx
     fmul2.64 v5
     sta.64 v5
-    ldobj v8, Body.y
+    ldobj.64 v8, Body.y
     sta.64 v4
-    ldobj v3, Body.y
+    ldobj.64 v3, Body.y
     fsub2.64 v4
     sta.64 v6                     #dy
     fmul2.64 v6
     sta.64 v6
-    ldobj v8, Body.z
+    ldobj.64 v8, Body.z
     sta.64 v4
-    ldobj v3, Body.z
+    ldobj.64 v3, Body.z
     fsub2.64 v4
     sta.64 v10                      #dz
     fmul2.64 v10
@@ -487,9 +488,9 @@ loop2:
     sta.64 v5
     call.short Math.sqrt, v5
     sta.64 v5                       #distance
-    ldobj v3, Body.mass
+    ldobj.64 v3, Body.mass
     sta.64 v6
-    ldobj v8, Body.mass
+    ldobj.64 v8, Body.mass
     fmul2.64 v6
     fdiv2.64 v5
     sta.64 v6

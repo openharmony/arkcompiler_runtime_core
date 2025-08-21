@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -41,6 +41,7 @@
     call.short IO.printString, v0, v0
 
     lda.64 a0
+    i64toi32
     jeqz zeroth
 
     subi 1
@@ -117,41 +118,50 @@ zeroth:
 
     call.range get, v0
     sub2.64 v1
+    i64toi32
     jnez print_fail_1
 
     movi.64 v0, 1
     call.range get, v0
     sub2.64 v2
+    i64toi32
     jnez print_fail_2
 
     movi.64 v0, 2
     call.range get, v0
     sub2.64 v3
+    i64toi32
     jnez print_fail_3
 
     movi.64 v0, 3
     call.range get, v0
     sub2.64 v4
+    i64toi32
     jnez print_fail_4
 
     movi.64 v0, 4
     call.range get, v0
     sub2.64 v5
+    i64toi32
     jnez print_fail_5
 
     movi.64 v0, 5
     call.range get, v0
     sub2.64 v6
+    i64toi32
     jnez print_fail_6
 
     movi.64 v0, 6
     call.range get, v0
     sub2.64 v7
+    i64toi32
     jnez print_fail_7
-
+    
+    i32toi64
     return.64
 
 print_fail_1:
+    i32toi64
     sta.64 v1
     lda.str "1-st paramer fail!"
     sta.obj v0
@@ -160,6 +170,7 @@ print_fail_1:
     return.64
 
 print_fail_2:
+    i32toi64
     sta.64 v1
     lda.str "2-d paramer fail!"
     sta.obj v0
@@ -168,6 +179,7 @@ print_fail_2:
     return.64
 
 print_fail_3:
+    i32toi64
     sta.64 v1
     lda.str "3-d paramer fail!"
     sta.obj v0
@@ -176,6 +188,7 @@ print_fail_3:
     return.64
 
 print_fail_4:
+    i32toi64
     sta.64 v1
     lda.str "4-d paramer fail!"
     sta.obj v0
@@ -184,6 +197,7 @@ print_fail_4:
     return.64
 
 print_fail_5:
+    i32toi64
     sta.64 v1
     lda.str "5-d paramer fail!"
     sta.obj v0
@@ -192,6 +206,7 @@ print_fail_5:
     return.64
 
 print_fail_6:
+    i32toi64
     sta.64 v1
     lda.str "6-d paramer fail!"
     sta.obj v0
@@ -200,6 +215,7 @@ print_fail_6:
     return.64
 
 print_fail_7:
+    i32toi64
     sta.64 v1
     lda.str "7-d paramer fail!"
     sta.obj v0
@@ -208,6 +224,7 @@ print_fail_7:
     return.64
 
 print_fail_8:
+    i32toi64
     sta.64 v1
     lda.str "8-d paramer fail!"
     sta.obj v0
@@ -216,6 +233,7 @@ print_fail_8:
     return.64
 
 print_fail_9:
+    i32toi64
     sta.64 v1
     lda.str "9-d paramer fail!"
     sta.obj v0

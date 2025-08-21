@@ -464,7 +464,9 @@ TEST_F(EtsClassTest, GetDirectMethod)
             return.void
         }
         .function TestObject B.foo2(i32 a0, i32 a1, f32 a2, f64 a3, f32 a4) {
-            return
+            newobj v0, TestObject
+            lda.obj v0
+            return.obj
         }
     )";
 
@@ -498,7 +500,9 @@ TEST_F(EtsClassTest, GetMethod)
             return.void
         }
         .function TestObject B.foo2(i32 a0, i32 a1, f32 a2, f64 a3, f32 a4) {
-            return
+            newobj v0, TestObject
+            lda.obj v0
+            return.obj
         }
     )";
 
@@ -537,7 +541,9 @@ TEST_F(EtsClassTest, GetMethodByIndex)
             return.void
         }
         .function TestObject B.foo3(i32 a0, i32 a1, f32 a2, f64 a3, f32 a4) {
-            return
+            newobj v0, TestObject
+            lda.obj v0
+            return.obj
         }
     )";
 
@@ -585,7 +591,9 @@ TEST_F(EtsClassTest, GetMethods)
             return.void
         }
         .function TestObject B.foo3(i32 a0, i32 a1, f32 a2, f64 a3, f32 a4) {
-            return
+            newobj v0, TestObject
+            lda.obj v0
+            return.obj
         }
     )";
 
@@ -847,11 +855,21 @@ TEST_F(EtsClassTest, EnumerateMethods)
     const char *source = R"(
         .language eTS
         .record Test {}
-        .function void Test.foo1() {}
-        .function void Test.foo2() {}
-        .function void Test.foo3() {}
-        .function void Test.foo4() {}
-        .function void Test.foo5() {}
+        .function void Test.foo1() {
+            return.void
+        }
+        .function void Test.foo2() {
+            return.void
+        }
+        .function void Test.foo3() {
+            return.void
+        }
+        .function void Test.foo4() {
+            return.void
+        }
+        .function void Test.foo5() {
+            return.void
+        }
     )";
 
     EtsClass *klass = GetTestClass(source, "LTest;");

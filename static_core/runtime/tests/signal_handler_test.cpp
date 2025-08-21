@@ -171,7 +171,7 @@ static auto g_callTestSource = R"(
         call.short main, v0
         return.void
     }
-    .function i32 main(i64 a0) {
+    .function i32 main(i32 a0) {
     movi v5, 0
     loop:
         lda v5
