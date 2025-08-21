@@ -19,8 +19,8 @@ desc: check multiplication of two integers
 ---*/
 
 function main(): void {
-    const a: int = {{v.left}}
-    const b: int = {{v.right}}
+    let a: int = {{v.left}}
+    let b: int = {{v.right}}
     arktest.assertEQ(a * b, {{v.result}})
 }
 

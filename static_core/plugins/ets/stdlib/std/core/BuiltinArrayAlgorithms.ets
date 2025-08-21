@@ -33,7 +33,7 @@ export const KEY_NOT_FOUND = -1;
  *
  * @param arr array to find a lower bound of a key. Has to be sorted, otherwise the answer is implementation-defined and may be incorrect
  *
- * @param key a value to find lower bound of. It may be not in arr, lower bound will present anyway
+ * @param key a value to find lower bound of
  *
  * @param startIndex an index of arr to begin search with
  *
@@ -53,7 +53,7 @@ export function lowerBoundSearch(arr: FixedArray<boolean>, key: boolean, startIn
         let half: int = len >>> 1;
         let middle: int = left + half;
 
-        if (arr[middle] == false && key == true) {
+        if (arr[middle].compareTo(key) < 0) {
             left = middle + 1;
             len -= half + 1;
         } else {
@@ -65,13 +65,13 @@ export function lowerBoundSearch(arr: FixedArray<boolean>, key: boolean, startIn
 }
 
 /**
- * tries to find a lower bound of a key in sorted arr.
+ *  tries to find a lower bound of a key in sorted arr.
  * The array has to be sorted before calling this function.
- * Lower bound is an index of a first element, where (element < key) is false. If no such element is found than lower bound is endIndex
+ * Lower bound is an index of a first element, where (element < key) is false. If no such element is found than lower bound is arr.length
  *
  * @param arr array to find a lower bound of a key. Has to be sorted, otherwise the answer is implementation-defined and may be incorrect
  *
- * @param key a value to find lower bound of. It may be not in arr, lower bound will present anyway
+ * @param key a value to find lower bound of
  *
  * @returns index such (arr[index] < key) is false. If no such index is found than arr.length
  */
@@ -106,7 +106,7 @@ export function upperBoundSearch(arr: FixedArray<boolean>, key: boolean, startIn
         let half: int = len >>> 1;
         let middle: int = left + half;
 
-        if (arr[middle] == false && key == true || arr[middle] == key) {
+        if (arr[middle].compareTo(key) <= 0) {
             left = middle + 1;
             len -= half + 1;
         } else {
@@ -203,7 +203,7 @@ export function lowerBoundSearch(arr: FixedArray<byte>, key: byte, startIndex: i
         let half: int = len >>> 1;
         let middle: int = left + half;
 
-        if (arr[middle] < key) {
+        if (arr[middle].compareTo(key) < 0) {
             left = middle + 1;
             len -= half + 1;
         } else {
@@ -256,7 +256,7 @@ export function upperBoundSearch(arr: FixedArray<byte>, key: byte, startIndex: i
         let half: int = len >>> 1;
         let middle: int = left + half;
 
-        if (arr[middle] <= key) {
+        if (arr[middle].compareTo(key) <= 0) {
             left = middle + 1;
             len -= half + 1;
         } else {
@@ -353,7 +353,7 @@ export function lowerBoundSearch(arr: FixedArray<short>, key: short, startIndex:
         let half: int = len >>> 1;
         let middle: int = left + half;
 
-        if (arr[middle] < key) {
+        if (arr[middle].compareTo(key) < 0) {
             left = middle + 1;
             len -= half + 1;
         } else {
@@ -406,7 +406,7 @@ export function upperBoundSearch(arr: FixedArray<short>, key: short, startIndex:
         let half: int = len >>> 1;
         let middle: int = left + half;
 
-        if (arr[middle] <= key) {
+        if (arr[middle].compareTo(key) <= 0) {
             left = middle + 1;
             len -= half + 1;
         } else {
@@ -503,7 +503,7 @@ export function lowerBoundSearch(arr: FixedArray<int>, key: int, startIndex: int
         let half: int = len >>> 1;
         let middle: int = left + half;
 
-        if (arr[middle] < key) {
+        if (arr[middle].compareTo(key) < 0) {
             left = middle + 1;
             len -= half + 1;
         } else {
@@ -556,7 +556,7 @@ export function upperBoundSearch(arr: FixedArray<int>, key: int, startIndex: int
         let half: int = len >>> 1;
         let middle: int = left + half;
 
-        if (arr[middle] <= key) {
+        if (arr[middle].compareTo(key) <= 0) {
             left = middle + 1;
             len -= half + 1;
         } else {
@@ -653,7 +653,7 @@ export function lowerBoundSearch(arr: FixedArray<long>, key: long, startIndex: i
         let half: int = len >>> 1;
         let middle: int = left + half;
 
-        if (arr[middle] < key) {
+        if (arr[middle].compareTo(key) < 0) {
             left = middle + 1;
             len -= half + 1;
         } else {
@@ -706,7 +706,7 @@ export function upperBoundSearch(arr: FixedArray<long>, key: long, startIndex: i
         let half: int = len >>> 1;
         let middle: int = left + half;
 
-        if (arr[middle] <= key) {
+        if (arr[middle].compareTo(key) <= 0) {
             left = middle + 1;
             len -= half + 1;
         } else {
@@ -803,7 +803,7 @@ export function lowerBoundSearch(arr: FixedArray<float>, key: float, startIndex:
         let half: int = len >>> 1;
         let middle: int = left + half;
 
-        if (arr[middle] < key) {
+        if (arr[middle].compareTo(key) < 0) {
             left = middle + 1;
             len -= half + 1;
         } else {
@@ -856,7 +856,7 @@ export function upperBoundSearch(arr: FixedArray<float>, key: float, startIndex:
         let half: int = len >>> 1;
         let middle: int = left + half;
 
-        if (arr[middle] <= key) {
+        if (arr[middle].compareTo(key) <= 0) {
             left = middle + 1;
             len -= half + 1;
         } else {
@@ -953,7 +953,7 @@ export function lowerBoundSearch(arr: FixedArray<double>, key: double, startInde
         let half: int = len >>> 1;
         let middle: int = left + half;
 
-        if (arr[middle] < key) {
+        if (arr[middle].compareTo(key) < 0) {
             left = middle + 1;
             len -= half + 1;
         } else {
@@ -1006,7 +1006,7 @@ export function upperBoundSearch(arr: FixedArray<double>, key: double, startInde
         let half: int = len >>> 1;
         let middle: int = left + half;
 
-        if (arr[middle] <= key) {
+        if (arr[middle].compareTo(key) <= 0) {
             left = middle + 1;
             len -= half + 1;
         } else {
@@ -1103,7 +1103,7 @@ export function lowerBoundSearch(arr: FixedArray<char>, key: char, startIndex: i
         let half: int = len >>> 1;
         let middle: int = left + half;
 
-        if (arr[middle] < key) {
+        if (arr[middle].compareTo(key) < 0) {
             left = middle + 1;
             len -= half + 1;
         } else {
@@ -1156,7 +1156,7 @@ export function upperBoundSearch(arr: FixedArray<char>, key: char, startIndex: i
         let half: int = len >>> 1;
         let middle: int = left + half;
 
-        if (arr[middle] <= key) {
+        if (arr[middle].compareTo(key) <= 0) {
             left = middle + 1;
             len -= half + 1;
         } else {

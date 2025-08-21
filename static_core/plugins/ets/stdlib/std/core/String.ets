@@ -1178,7 +1178,7 @@ export final class String extends Object implements Comparable<String>, Iterable
         if (index < 0 || index >= this.getLength() || this.getLength() == 0) {
             return NaN;
         }
-        return this.charAt(index.toInt());
+        return this.charAt(index.toInt()).toDouble();
     }
 
     /*
@@ -1468,8 +1468,8 @@ export final class String extends Object implements Comparable<String>, Iterable
                             && replacement.charAt(i) == c'$'
                             && Char.isDecDigit(replacement.charAt(i + 1))
                             && Char.isDecDigit(replacement.charAt(i + 2))) {
-                let firstDigit = replacement.charAt(i + 1) - c'0';
-                let secondDigit = replacement.charAt(i + 2) - c'0';
+                let firstDigit = replacement.charAt(i + 1).toInt() - Char.toInt(c'0');
+                let secondDigit = replacement.charAt(i + 2).toInt() - Char.toInt(c'0');
                 let digit = firstDigit * 10 + secondDigit;
                 if (digit == 0 || digit > m) {
                     doubleCapture = false;
@@ -1484,7 +1484,7 @@ export final class String extends Object implements Comparable<String>, Iterable
                         || i + 1 < replacement.getLength()
                             && replacement.charAt(i) == c'$'
                             && Char.isDecDigit(replacement.charAt(i + 1))) {
-                let digit = replacement.charAt(i + 1) - c'0';
+                let digit = replacement.charAt(i + 1).toInt() - Char.toInt(c'0');
                 if (digit == 0 || digit > m) {
                     result += replacement.substring(i, i + 2)
                 } else {

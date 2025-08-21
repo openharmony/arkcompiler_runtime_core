@@ -17,4 +17,4 @@ values:
 - { condition: 1.0f, ifTrue: 1.0f, ifFalse: 2.0f, result: 1.0f }
 - { condition: -1.0f, ifTrue: 1.0f, ifFalse: 2.0f, result: 1.0f }
 - { condition: 1.45f, ifTrue: 1.0f, ifFalse: 2.0f, result: 1.0f }
-- { condition: 1.45e38f, ifTrue: 1.0f, ifFalse: 2.0f, result: 1.0f }
+- { condition: Float.MAX_VALUE, ifTrue: 1.0f, ifFalse: 2.0f, result: 1.0f }

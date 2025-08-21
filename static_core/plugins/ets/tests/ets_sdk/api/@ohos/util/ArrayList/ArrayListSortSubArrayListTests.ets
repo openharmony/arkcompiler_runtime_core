@@ -46,10 +46,10 @@ class Temp {
 
 class TestData {
     static readonly testNumber0: double = 0;
-    static readonly testNumber1: double | int = 1;
-    static readonly testNumber3: double | int = 3;
-    static readonly testNumber5: double | int = 5;
-    static readonly testNumber8: double | int = 8;
+    static readonly testNumber1: int = 1;
+    static readonly testNumber3: int = 3;
+    static readonly testNumber5: int = 5;
+    static readonly testNumber8: int = 8;
     static readonly forNumber: Number[] = [1, 2, 3, 4, 5];
     static readonly forString: String[] = ["ssss", "2", "%", "Z"];
     static readonly forBoolean: Boolean[] = [true, false, false, true];

@@ -19,7 +19,7 @@
     }
 
 	public charByNameMethod(value1: char, value2: char): char {
-        return value1 > value2 ? value1 : value2;
+        return value1.compareTo(value2) > 0 ? value1 : value2;
     }
 }
 
@@ -35,11 +35,11 @@ class B implements ji {
     data: char;
 
     public charMethod(value1: char, value2: char): char {
-        return value1 > value2 ? value1 : value2;
+        return value1.compareTo(value2) > 0 ? value1 : value2;
     }
 
     public charMethod(value: char): char {
-        if (this.data > value) {
+        if (this.data.compareTo(value) > 0) {
             return this.data;
         } else {
             return value;
@@ -47,7 +47,7 @@ class B implements ji {
     }
 
     protected protectedMethod(value: char): char {
-        if (this.data > value) {
+        if (this.data.compareTo(value) > 0) {
             return this.data;
         } else {
             return value;
@@ -55,13 +55,13 @@ class B implements ji {
     }
 
     private privateMethod(value1: char, value2: char): char {
-        return value1 > value2 ? value1 : value2;
+        return value1.compareTo(value2) > 0 ? value1 : value2;
     }
 
     public nestedMethod(value: char): char {
         let lambdaMethod: (p1: char, p2: char) => char =
             (param1: char, param2: char): char => {
-                return param1 > param2 ? param1 : param2;
+                return param1.compareTo(param2) > 0 ? param1 : param2;
         };
         return lambdaMethod(this.data, value);
     }
@@ -87,7 +87,7 @@ class B implements ji {
     }
 
     public jf(value: char): char {
-        return this.data > value ? this.data : value;
+        return this.data.compareTo(value) > 0 ? this.data : value;
     }
 }
 
@@ -100,11 +100,11 @@ final class C extends B {
     data1: char;
 
     public charComparisonMethod(value1: char, value2: char): char {
-        return value1 > value2 ? value1 : value2;
+        return value1.compareTo(value2) > 0 ? value1 : value2;
     }
 
     public override charMethod(value1: char, value2: char): char {
-        return value1 > value2 ? value2 : value1;
+        return value1.compareTo(value2) > 0 ? value2 : value1;
     }
 
     public callProtected(value: char): char {
@@ -112,6 +112,6 @@ final class C extends B {
     }
 
     public jf(value: char): char {
-        return this.data > value ? value : this.data;
+        return this.data.compareTo(value) > 0 ? value : this.data;
     }
 }

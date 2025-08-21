@@ -560,7 +560,7 @@ export function max(v: byte, u: byte): byte {
  * @returns Largest value of `u` and `v`
  */
 export function max(v: char, u: char): char {
-    if (v > u) {
+    if (v.compareTo(u) > 0) {
         return v;
     } else {
         return u;
@@ -672,7 +672,7 @@ export function min(v: byte, u: byte): byte {
  * @returns Smallest value of `u` and `v`
  */
 export function min(v: char, u: char): char {
-    if (v < u) {
+    if (v.compareTo(u) < 0) {
         return v;
     } else {
         return u;

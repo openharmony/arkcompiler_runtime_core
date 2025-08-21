@@ -133,7 +133,7 @@ export class CharBox {
     private value: char;
 
     public constructor() {
-        this.value = 0;
+        this.value = c'\0';
     }
 
     public constructor(value: char) {

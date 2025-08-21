@@ -59,11 +59,11 @@ class Cat {
 }
 
 class TestData {
-    static readonly testNumber1: double | int = 1;
-    static readonly testNumber2: double | int = 2;
-    static readonly testNumber3: double | int = 3;
-    static readonly testNumber6: double | int = 6;
-    static readonly testNumber8: double | int = 8;
+    static readonly testNumber1: int = 1;
+    static readonly testNumber2: int = 2;
+    static readonly testNumber3: int = 3;
+    static readonly testNumber6: int = 6;
+    static readonly testNumber8: int = 8;
     static readonly testString1: string = "string";
     static readonly testString4: string = "%";
     static readonly testDouble1 = 0.4;

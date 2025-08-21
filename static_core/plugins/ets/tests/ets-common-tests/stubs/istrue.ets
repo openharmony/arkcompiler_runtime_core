@@ -66,7 +66,7 @@ function testNormal() {
     arktest.assertTrue(istrue(new Float(0.5)));
     arktest.assertTrue(!istrue(new Double(0.0)));
     arktest.assertTrue(istrue(new Double(0.5)));
-    arktest.assertTrue(!istrue(new Char(0 as char)));
+    arktest.assertTrue(!istrue(new Char(c'\0')));
     arktest.assertTrue(istrue(new Char(c'0')));
     arktest.assertTrue(!istrue(''));
     arktest.assertTrue(istrue('Hello'));
@@ -106,7 +106,7 @@ function testErase() {
     arktest.assertTrue(istrue(erase(new Float(0.5))));
     arktest.assertTrue(!istrue(erase(new Double(0.0))));
     arktest.assertTrue(istrue(erase(new Double(0.5))));
-    arktest.assertTrue(!istrue(erase(new Char(0 as char))));
+    arktest.assertTrue(!istrue(erase(new Char(c'\0'))));
     arktest.assertTrue(istrue(erase(new Char(c'0'))));
     arktest.assertTrue(!istrue(erase('')));
     arktest.assertTrue(istrue(erase('Hello')));

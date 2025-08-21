@@ -17,7 +17,7 @@ import LightWeightMap from '@ohos.util.LightWeightMap';
 import { BusinessError } from "@ohos.base";
 
 const typeErrorCodeId: int = 401;
-const OutOfBoundsErrorCodeId: number = 10200001;
+const OutOfBoundsErrorCodeId: int = 10200001;
 
 export type LightWeightSetForEachCb<T> = (value: T, key: T, set: LightWeightSet<T>) => void;
 

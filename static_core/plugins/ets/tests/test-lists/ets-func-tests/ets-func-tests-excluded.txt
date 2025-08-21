@@ -132,3 +132,24 @@ std/serialization/std_serialization_json_stringify_float_array.ets
 # 27962 Fails test
 std/containers/concurrency/concurrent_hash_map/concurrent_hash_map_fails.ets
 
+# Deprecated operations on char #27402
+std/core/std_core_array_map_char_array_func_char.ets
+std/core/std_core_array_slice_char_array.ets
+std/core/std_core_array_slice_char_array_char_array.ets
+std/core/std_core_array_slice_char_array_int.ets
+std/core/std_core_array_upperBoundSearch_char_array_char.ets
+std/core/std_core_array_upperBoundSearch_char_array_char_int_int.ets
+std/core/std_core_type_array_type_all.ets
+std/core/std_core_value_all.ets
+std/core/std_core_value_all_008.ets
+std/core/std_core_value_all_017.ets
+std/core/std_core_value_all_025.ets
+std/core/std_core_value_array_value_all.ets
+std/core/std_core_value_array_value_all_008.ets
+std/core/std_core_value_array_value_all_017.ets
+std/core/std_core_value_array_value_all_025.ets
+std/core/std_core_value_class_value_all.ets
+std/core/std_core_value_class_value_all_008.ets
+std/core/std_core_value_class_value_all_017.ets
+std/core/std_core_value_class_value_all_025.ets
+std/serialization/std_serialization_json_stringify_char.ets

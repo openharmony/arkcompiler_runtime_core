@@ -22,8 +22,8 @@ class TestChar {
     static special6: char = c'\t';
     static special7: char = c'\b';
     static special8: char = c'\0';
-    static charMin: char = 0;
-    static charMax: char = 65535;
+    static charMin: char = Int.toChar(0);
+    static charMax: char = Int.toChar(65535);
 }
 
 class TestCharA extends TestChar {

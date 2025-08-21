@@ -30,12 +30,12 @@ function main() {
 }
 
 class TestData {
-    static readonly testNumber1: double | int = 1;
-    static readonly testNumber2: double | int = 2;
-    static readonly testNumber3: double | int = 3;
-    static readonly testNumber5: double | int = 5;
-    static readonly testNumber8: double | int = 8;
-    static readonly testNumber1w: double | int = 10000;
+    static readonly testNumber1: int = 1;
+    static readonly testNumber2: int = 2;
+    static readonly testNumber3: int = 3;
+    static readonly testNumber5: int = 5;
+    static readonly testNumber8: int = 8;
+    static readonly testNumber1w: int = 10000;
     static readonly testString1: string = "string";
     static readonly testString2: string = "";
     static readonly testString4: string = "%";

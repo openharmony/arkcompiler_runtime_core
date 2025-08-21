@@ -21,6 +21,9 @@ params: {{ni.x}} / {{ni.y}} == {{ni.result}}
 ---*/
 
 function main(): void {
-  arktest.assertEQ( {{ni.x}} / {{ni.y}}, {{ni.result}} );
+  let lhs = {{ni.x}}
+  let rhs = {{ni.y}}
+  let res = lhs / rhs
+  arktest.assertEQ( res, {{ni.result}} );
 }
 {% endfor %}

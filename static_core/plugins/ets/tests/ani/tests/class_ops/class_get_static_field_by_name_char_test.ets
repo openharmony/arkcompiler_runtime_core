@@ -27,8 +27,8 @@ class GetCharStatic {
     static specia10: char = c'\f';
     static specia11: char = c'\v';
     static specia12: char = c'\0';
-    static charMin: char = 0;
-    static charMax: char = 65535;
+    static charMin: char = Int.toChar(0);
+    static charMax: char = Int.toChar(65535);
 }
 
 class CharStaticA extends GetCharStatic {

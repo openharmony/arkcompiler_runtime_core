@@ -16,7 +16,7 @@
 import {LightWeightSet} from "@ohos.util.LightWeightSet";
 import { BusinessError } from "@ohos.base";
 
-const OutOfBoundsErrorCodeId: number = 10200001;
+const OutOfBoundsErrorCodeId: int = 10200001;
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("LightWeightSet ToString IncreaseCapacityTo ToArray API tests")

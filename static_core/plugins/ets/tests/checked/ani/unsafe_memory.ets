@@ -159,7 +159,7 @@ function testInt64() : int {
 }
 
 function testFloat32() : int {
-    let vals: float[] = [1.123456f, -1.234567f, 1.2E-50f, -1.2E+50f, 1.23456E+38f, -1.23456E-50f];
+    let vals: float[] = [1.123456f, -1.234567f, 1.2E-30f, -1.2E+30f, 1.23456E+30f, -1.23456E-30f];
     let size: int = vals.length.toInt() * Float.BYTE_SIZE;
     let addend = Float.BYTE_SIZE - 1
     let addr: long = allocMem(size + addend);

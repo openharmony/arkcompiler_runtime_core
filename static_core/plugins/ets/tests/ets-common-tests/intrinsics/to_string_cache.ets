@@ -44,7 +44,7 @@ function parseLong(s: String): long|null {
         if (!Char.isDecDigit(ch)) {
             return null;
         }
-        let digit = (ch - c'0') as int;
+        let digit = (ch.toInt() - Char.toInt(c'0')) as int;
         if (negative) {
             if (result < (Long.MIN_VALUE + digit) / 10) {
                 return null;

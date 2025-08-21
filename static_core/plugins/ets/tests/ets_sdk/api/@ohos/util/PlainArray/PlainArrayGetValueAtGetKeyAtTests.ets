@@ -40,10 +40,10 @@ function initializePlainArray<T>(plainArray: PlainArray<T>, sourceArray: T[]) {
 }
 
 class TestData {
-    static readonly testNumber1: double | int = 1;
-    static readonly testNumber2: double | int = 2;
-    static readonly testNumber4: double | int = 4;
-    static readonly testNumber6: double | int = 6;
+    static readonly testNumber1: int = 1;
+    static readonly testNumber2: int = 2;
+    static readonly testNumber4: int = 4;
+    static readonly testNumber6: int = 6;
     static readonly forNumber2: Number[] = [0, 2, 2, 3, 4];
 }
 

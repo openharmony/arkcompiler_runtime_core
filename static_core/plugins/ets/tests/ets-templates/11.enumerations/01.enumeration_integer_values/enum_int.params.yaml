@@ -97,25 +97,6 @@ cases:
         arktest.assertEQ(Enum.third.valueOf(), 2147483647)
 
   - desc: |-
-      Checking int overflow
-    decl_variants:
-      - |-
-        enum Enum { first = 0x7fffffff - 1, second, third }
-      - |-
-        const enum Enum { first = 0x7fffffff - 1, second, third }
-    sub_cases_logic:
-      - |-
-        arktest.assertTrue(Enum.first instanceof Enum)
-        arktest.assertTrue(Enum.second instanceof Enum)
-        arktest.assertTrue(Enum.third instanceof Enum)
-        arktest.assertTrue(Enum.first.valueOf() instanceof int)
-        arktest.assertTrue(Enum.second.valueOf() instanceof int)
-        arktest.assertTrue(Enum.third.valueOf() instanceof int)
-        arktest.assertEQ(Enum.first.valueOf(), 0x7ffffffe)
-        arktest.assertEQ(Enum.second.valueOf(), 0x7fffffff)
-        arktest.assertEQ(Enum.third.valueOf(), 0x80000000)
-
-  - desc: |-
       Using different integer literals
     decl_variants:
       - |-

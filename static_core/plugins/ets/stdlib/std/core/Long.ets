@@ -283,7 +283,13 @@ export final class Long extends Integral implements Comparable<Long> {
      * @returns result of the comparison
      */
     public override compareTo(other: Long): int {
-        return (this.value - other.unboxed()).toInt();
+        if (this.value < other.unboxed()) {
+            return -1;
+        }
+        if (this.value == other.unboxed()) {
+            return 0;
+        }
+        return 1;
     }
 
     /**

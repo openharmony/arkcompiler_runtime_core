@@ -283,7 +283,13 @@ export final class Int extends Integral implements Comparable<Int> {
      * @returns result of the comparison
      */
     public override compareTo(other: Int): int {
-        return this.value - other.unboxed();
+        if (this.value < other.unboxed()) {
+            return -1;
+        }
+        if (this.value == other.unboxed()) {
+            return 0;
+        }
+        return 1;
     }
 
     /**
