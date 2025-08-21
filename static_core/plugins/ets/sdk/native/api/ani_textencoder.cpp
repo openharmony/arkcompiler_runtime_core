@@ -59,7 +59,7 @@ ani_object NewUint8Array(ani_env *env, const char *signature, Args... args)
 {
     ani_class arrayClass;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    ANI_RETURN_NULLPTR_ON_FAILURE(env->FindClass("Lescompat/Uint8Array;", &arrayClass),
+    ANI_RETURN_NULLPTR_ON_FAILURE(env->FindClass("escompat.Uint8Array", &arrayClass),
                                   "Internal failure: env->FindClass()");
     ani_method arrayCtor;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)

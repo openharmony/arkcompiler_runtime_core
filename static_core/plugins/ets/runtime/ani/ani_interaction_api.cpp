@@ -19,6 +19,7 @@
 #include <optional>
 #include <ostream>
 #include <string_view>
+#include <regex>
 
 #include "ani.h"
 #include "libpandabase/macros.h"
@@ -638,6 +639,18 @@ static std::optional<std::string> ReplaceArrayInSignature(const char *signature)
     return ss.str();
 }
 
+// NOTE(@srokashevich, #25051): This function is used only for warnings about old mangling, remove it after issue
+// resolution
+static void CheckSignatureMangling(const char *str)
+{
+    static std::regex rgx1(":[ZCBSIJFDV]$");
+    static std::regex rgx2(".*L.*;.*");
+    static std::regex rgx3(".*\\[.*");
+    if (std::regex_match(str, rgx1) || std::regex_match(str, rgx2) || std::regex_match(str, rgx3)) {
+        LOG(ERROR, ANI) << "Use new mangling rules for signature \"" << str << "\"";
+    }
+}
+
 template <bool IS_STATIC_METHOD>
 static ani_status DoGetClassMethod(EtsClass *klass, const char *name, const char *signature, EtsMethod **result)
 {
@@ -650,6 +663,7 @@ static ani_status DoGetClassMethod(EtsClass *klass, const char *name, const char
     }
     std::optional<std::string> replacedSignature;
     if (signature != nullptr) {
+        CheckSignatureMangling(signature);
         replacedSignature = ReplaceArrayInSignature(signature);
         signature = replacedSignature.has_value() ? replacedSignature->c_str() : signature;
     }
@@ -1914,6 +1928,7 @@ static ani_status DoBindNativeFunctions(ani_env *env, ani_namespace ns, const an
         const char *signature = fn.signature;
         std::optional<std::string> replacedSignature;
         if (signature != nullptr) {
+            CheckSignatureMangling(signature);
             replacedSignature = ReplaceArrayInSignature(signature);
             signature = replacedSignature.has_value() ? replacedSignature->c_str() : signature;
         }
@@ -2137,6 +2152,7 @@ static ani_status BindNativeMethods(ani_env *env, ani_class cls, const ani_nativ
         const char *signature = m.signature;
         std::optional<std::string> replacedSignature;
         if (signature != nullptr) {
+            CheckSignatureMangling(signature);
             replacedSignature = ReplaceArrayInSignature(signature);
             signature = replacedSignature.has_value() ? replacedSignature->c_str() : signature;
         }
