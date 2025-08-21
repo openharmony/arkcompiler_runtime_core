@@ -13,14 +13,15 @@
  * limitations under the License.
  */
 
-export function main(): int {
+native function setFlag(): void;
+
+function testRecursive(): void {
     StdProcess.on('unhandledPromiseRejection', (reason: Error, obj: Object): void => {
+        StdProcess.off('unhandledPromiseRejection');
         StdProcess.on('unhandledPromiseRejection', (reason: Error, obj: Object): void => {
-            let procManager = new StdProcess.ProcessManager();
-            procManager.exit(2);
+            setFlag();
         });
         Promise.reject(new Error('error 2'));
     });
     Promise.reject(new Error('error 1'))
-    return 0;
 }

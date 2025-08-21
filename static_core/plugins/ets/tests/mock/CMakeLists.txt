@@ -25,10 +25,9 @@ panda_ets_napi_add_gtest(
     ETS_SOURCE js_mode_launch.ets
 )
 
-panda_ets_napi_add_gtest(
-    NAME unhandled_rejection_recursive
-    CPP_SOURCE unhandled_rejection_recursive_test.cpp
-    ETS_SOURCE UnhandledRejectionRecursiveTest.ets
+ani_add_gtest(ani_test_unhandled_rejection_recursive
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/unhandled_rejection_recursive_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/UnhandledRejectionRecursiveTest.ets
 )
 
 if (NOT ENABLE_UNIT_TESTS_FULL_COVERAGE)
