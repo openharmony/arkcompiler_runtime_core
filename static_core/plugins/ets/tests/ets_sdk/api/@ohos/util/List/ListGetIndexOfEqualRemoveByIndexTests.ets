@@ -131,15 +131,21 @@ function testRemoveByIndexWithinRange() {
 function testRemoveByIndexOutsideRange() {
     let list = new List<double>();
     initializeList(list, TestData.arrayForNumber1);
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            "The value of \"index\" is out of range. It must be >= 0 && <= 20. Received value is: 10000") &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message ==
+                "The value of \"index\" is out of range. It must be >= 0 && <= 20. Received value is: 10000" &&
+                e.code == OutOfBoundsErrorCodeId;
+        }
+        return false;
     }
-    let exceptionCheckTwo = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            "The value of \"index\" is out of range. It must be >= 0 && <= 20. Received value is: -6") &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheckTwo = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message ==
+                "The value of \"index\" is out of range. It must be >= 0 && <= 20. Received value is: -6" &&
+                e.code == OutOfBoundsErrorCodeId;
+        }
+        return false;
     }
 
     arktest.expectThrow(() => {list.removeByIndex(TestData.testNumber1w)}, exceptionCheck);

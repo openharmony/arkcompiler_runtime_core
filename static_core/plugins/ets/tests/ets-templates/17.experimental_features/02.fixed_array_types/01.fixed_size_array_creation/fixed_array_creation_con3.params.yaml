@@ -36,7 +36,7 @@ cases:
       }
     logic: |-
       let res: boolean = false
-      let expectedException = (e: Error | Exception): boolean => {
+      let expectedException = (e: Error): boolean => {
         return true
       }
       arktest.expectThrow(() => {f(-1)}, expectedException)

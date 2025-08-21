@@ -114,10 +114,13 @@ function testLinkedListBasicCRUD() {
     arktest.assertEQ(list.get(1232), undefined);
     arktest.assertEQ(list.getLastIndexOf(3333), -1);
 
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            "The value of \"index\" is out of range. It must be >= 0 && <= 9. Received value is: 99") &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message ==
+                "The value of \"index\" is out of range. It must be >= 0 && <= 9. Received value is: 99" &&
+                e.code == OutOfBoundsErrorCodeId;
+        }
+        return false;
     }
     arktest.expectThrow(() => { list1.removeByIndex(99) }, exceptionCheck);
 
@@ -178,14 +181,20 @@ function testLinkedListIteration() {
 
 function testLinkedListExceptionHandling() {
     let empty_ll = new LinkedList<double>();
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message == "Container is empty") &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message == "Container is empty" &&
+                e.code == OutOfBoundsErrorCodeId;
+        }
+        return false;
     }
     arktest.expectThrow(() => { empty_ll.set(0, 1) }, exceptionCheck);
-    let exceptionCheck1 = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message == "Container is empty") &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck1 = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message == "Container is empty" &&
+                e.code == OutOfBoundsErrorCodeId;
+        }
+        return false;
     }
     arktest.expectThrow(() => { empty_ll.removeByIndex(0) }, exceptionCheck1);
 }

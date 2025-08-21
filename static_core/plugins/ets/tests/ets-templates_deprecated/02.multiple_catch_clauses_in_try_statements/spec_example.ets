@@ -17,7 +17,7 @@
 desc: A catch clause contains a block that corresponds to the exception parameter and handles exceptions.
 ---*/
 
-class ZeroDivisor extends Exception {}
+class ZeroDivisor extends Error {}
 
 function divide(a: int, b: int): int throws {
     if (b == 0) throw new ZeroDivisor()

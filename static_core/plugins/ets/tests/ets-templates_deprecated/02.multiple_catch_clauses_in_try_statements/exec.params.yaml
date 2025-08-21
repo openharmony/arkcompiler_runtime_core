@@ -15,7 +15,7 @@
 cases:
   # exception propagation to caller context
   - defs: |-
-      class Ex extends Exception {}
+      class Ex extends Error {}
       function foo(e: Ex, cnt: int): Ex throws {
           if (cnt > 0) throw foo(e, --cnt);
           return e;
@@ -49,10 +49,10 @@ cases:
 
   # UncaughtExceptionError
   - defs: |-
-      class Ex extends Exception {}
+      class Ex extends Error {}
       function foo(): void {
           try {
-              if (1 != 2) throw new Exception();
+              if (1 != 2) throw new Error();
           } catch (e: Ex) {
               return;
           } catch (e) {
@@ -72,12 +72,12 @@ cases:
 # default catch for exceptions
   - defs: |-
       interface I {}
-      class Ex extends Exception implements I {}
-      class F extends Exception implements I {}
+      class Ex extends Error implements I {}
+      class F extends Error implements I {}
     use: |-
       let exc: I = new Ex();
       try {
-          if (1 != 2) throw exc as Exception;
+          if (1 != 2) throw exc as Error;
       } catch (f: F) {
           return 1;
       } catch (def) {
@@ -104,11 +104,11 @@ cases:
 # assignment compatible to exception
   - defs: |-
       interface I {}
-      class Ex extends Exception implements I {}
+      class Ex extends Error implements I {}
     use: |-
       let exc: I = new Ex();
       try {
-          if (1 != 2) throw exc as Exception;
+          if (1 != 2) throw exc as Error;
       } catch (e: Ex) {
           return 0;
       } catch (def) {

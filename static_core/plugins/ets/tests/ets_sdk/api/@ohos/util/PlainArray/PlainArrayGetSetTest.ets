@@ -68,10 +68,13 @@ function testGetValueAtOutOfRangeIndex() {
     let plainArray = new PlainArray<string>();
     plainArray.add(1, "squirrel");
     plainArray.add(2, "sparrow");
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message == 
-            `The value of \"index\" is out of range. It must be >= 0 && <= 1. Received value is: 2`) &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message == 
+                `The value of \"index\" is out of range. It must be >= 0 && <= 1. Received value is: 2` &&
+                e.code == OutOfBoundsErrorCodeId;
+        }
+        return false;
     }
     arktest.expectThrow(() => {plainArray.getValueAt(2)}, exceptionCheck);
 }
@@ -107,9 +110,12 @@ function testSetValueAtValidIndexMixedTypes() {
 // Test cases ported from ArkTS 1.0: PLAINARRAY_SETVALUEAT_0200
 function testSetValueAtOutOfRangeIndex() {
     let plainArray = new PlainArray<string | double>();
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message == `Container is empty`) &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message == `Container is empty` &&
+                e.code == OutOfBoundsErrorCodeId;
+        }
+        return false;
     }
     arktest.expectThrow(() => {plainArray.setValueAt(0, 3546)}, exceptionCheck);
 }

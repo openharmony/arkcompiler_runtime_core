@@ -445,7 +445,7 @@ function testIU64FromArrayLikeNumber() {
 }
 
 function checkException<Arr>(creator: () => Arr, empty: Arr): void {
-    arktest.expectThrow(() => {creator();}, (e: Error | Exception) => {
+    arktest.expectThrow(() => {creator();}, (e: Error) => {
         const arrayClassName: string = (Type.of(empty) as ClassType).getName().substring('escompat.'.length);
         return e.message == arrayClassName + '.from: not implemented';
     });
@@ -454,7 +454,7 @@ function checkException<Arr>(creator: () => Arr, empty: Arr): void {
 function __noinline__Int8ArrayFromCheckException(obj: Object, factType: string): void
 {
     let arr: Array<int> = obj as Array<int>;
-    arktest.expectThrow(() => { Int8Array.from(arr); }, (e: Error | Exception) => {
+    arktest.expectThrow(() => { Int8Array.from(arr); }, (e: Error) => {
         return e instanceof ClassCastError && e.message == factType + ' cannot be cast to std.core.Int';
     });
 }
@@ -462,7 +462,7 @@ function __noinline__Int8ArrayFromCheckException(obj: Object, factType: string):
 function __noinline__Float32ArrayFromCheckException(obj: Object, factType: string): void
 {
     let arr: Array<number> = obj as Array<number>;
-    arktest.expectThrow(() => { Float32Array.from(arr); }, (e: Error | Exception) => {
+    arktest.expectThrow(() => { Float32Array.from(arr); }, (e: Error) => {
         return e instanceof ClassCastError && e.message == factType + ' cannot be cast to std.core.Double';
     });
 }
@@ -470,7 +470,7 @@ function __noinline__Float32ArrayFromCheckException(obj: Object, factType: strin
 function __noinline__BigInt64ArrayFromCheckException(obj: Object, factType: string): void
 {
     let arr: Array<bigint> = obj as Array<bigint>;
-    arktest.expectThrow(() => { BigInt64Array.from(arr); }, (e: Error | Exception) => {
+    arktest.expectThrow(() => { BigInt64Array.from(arr); }, (e: Error) => {
         return e instanceof ClassCastError && e.message == factType + ' cannot be cast to escompat.BigInt';
     });
 }

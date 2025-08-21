@@ -77,10 +77,13 @@ function testSetValueAtValidIndex() {
 function testSetValueAtNegativeIndex() {
     let lightWeightMap = new LightWeightMap<string, number>();
     lightWeightMap.set("squirrel", 123);
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            "The value of \"index\" is out of range. It must be >= 0 && <= 0. Received value is: -1") &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message ==
+                "The value of \"index\" is out of range. It must be >= 0 && <= 0. Received value is: -1" &&
+                e.code == OutOfBoundsErrorCodeId;
+        }
+        return false;
     }
     arktest.expectThrow(() => { lightWeightMap.setValueAt(-1, 356) }, exceptionCheck);
 }
@@ -109,10 +112,13 @@ function testGetValueAtInvalidIndex() {
     let lightWeightMap = new LightWeightMap<string, number>();
     lightWeightMap.set("squirrel", 123);
     lightWeightMap.set("sparrow", 356);
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            "The value of \"index\" is out of range. It must be >= 0 && <= 1. Received value is: 10") &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message ==
+                "The value of \"index\" is out of range. It must be >= 0 && <= 1. Received value is: 10" &&
+                e.code == OutOfBoundsErrorCodeId;
+        }
+        return false;
     }
     arktest.expectThrow(() => { lightWeightMap.getValueAt(10) }, exceptionCheck);
 }

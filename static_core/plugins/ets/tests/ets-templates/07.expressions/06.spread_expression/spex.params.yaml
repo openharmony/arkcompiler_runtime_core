@@ -114,7 +114,7 @@ cases:
 
     - decl: |-
           let a1: Object[]|null = null
-          let expectedException = (e: Error | Exception): boolean => {return (e instanceof NullPointerError)}
+          let expectedException = (e: Error): boolean => {return (e instanceof NullPointerError)}
       use: |-
           // ensure-not-nullish expression
           arktest.expectThrow(() => {[...a1!, new Object].length == 2}, expectedException) // NPE expected
@@ -311,7 +311,7 @@ cases:
 
     - decl: |-
           let a1: [Object, Error]|null = null
-          let expectedException = (e: Error | Exception): boolean => {return (e instanceof NullPointerError)}
+          let expectedException = (e: Error): boolean => {return (e instanceof NullPointerError)}
       use: |-
           // ensure-not-nullish expression
           arktest.expectThrow(() => {[...a1!, new Object].length == 3}, expectedException) // NPE expected
@@ -326,7 +326,7 @@ cases:
     - decl: |-
           let a1: [Object, Error]|null = null
           let a2: [Object, Error]|null = null
-          let expectedException = (e: Error | Exception): boolean => {return (e instanceof NullPointerError)}
+          let expectedException = (e: Error): boolean => {return (e instanceof NullPointerError)}
       use: |-
           // nullish-coalescing expression
           arktest.expectThrow(() => {[...(a1 ?? a2)!, new Object].length == 3}, expectedException) // NPE expected

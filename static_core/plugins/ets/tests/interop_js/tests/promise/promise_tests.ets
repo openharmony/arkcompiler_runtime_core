@@ -147,7 +147,7 @@ function testRejectedPromise(): int {
                 globalTest!.fail();
             }
         });
-    } catch (e: Exception) {
+    } catch (e) {
         globalTest!.fail();
     }
     return 0;

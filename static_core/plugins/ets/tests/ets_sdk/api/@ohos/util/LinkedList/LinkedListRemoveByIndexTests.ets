@@ -76,15 +76,21 @@ function testRemoveByIndexWithinRange() {
 function testRemoveByIndexOutsideRange() {
     let linkedList = new LinkedList<double>();
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            "The value of \"index\" is out of range. It must be >= 0 && <= 20. Received value is: 10000") &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message ==
+                "The value of \"index\" is out of range. It must be >= 0 && <= 20. Received value is: 10000" &&
+                e.code == OutOfBoundsErrorCodeId;
+        }
+        return false;
     }
-    let exceptionCheck1 = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            "The value of \"index\" is out of range. It must be >= 0 && <= 20. Received value is: -6") &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck1 = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message ==
+                "The value of \"index\" is out of range. It must be >= 0 && <= 20. Received value is: -6" &&
+                e.code == OutOfBoundsErrorCodeId;
+        }
+        return false;
     }
     arktest.expectThrow(() => {linkedList.removeByIndex(TestData.testNumber1w.toInt())}, exceptionCheck);
     arktest.expectThrow(() => {linkedList.removeByIndex(-TestData.testNumber6.toInt())}, exceptionCheck1);
@@ -122,9 +128,12 @@ function testRemoveFirstFromEmptyContainer() {
 
 function testRemoveFirstFromNonEmptyContainer() {
     let linkedList = new LinkedList<double>();
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message == "Container is empty") &&
-            ((e as BusinessError).code == EmptyContainerErrorCodeId);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message == "Container is empty" &&
+                e.code == EmptyContainerErrorCodeId;
+        }
+        return false;
     }
     arktest.expectThrow(() => {linkedList.removeFirst()}, exceptionCheck);
 }
@@ -141,9 +150,12 @@ function testRemoveLastFromEmptyContainer() {
 
 function testRemoveLastFromNonEmptyContainer() {
     let linkedList = new LinkedList<double>();
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message == "Container is empty") &&
-            ((e as BusinessError).code == EmptyContainerErrorCodeId);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message == "Container is empty" &&
+                e.code == EmptyContainerErrorCodeId;
+        }
+        return false;
     }
     arktest.expectThrow(() => {linkedList.removeLast()}, exceptionCheck);
 }

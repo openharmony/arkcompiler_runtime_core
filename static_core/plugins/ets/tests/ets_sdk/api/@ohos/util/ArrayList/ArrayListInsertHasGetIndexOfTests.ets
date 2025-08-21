@@ -87,15 +87,19 @@ function testInsertAtStartAndEnd() {
 function testInsertWithNegativeIndex() {
     let arrayList = new ArrayList<double>();
     initializeArrayList(arrayList, TestData.forNumber);
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            "The value of \"index\" is out of range. It must be >= 0 && <= 5. Received value is: -1") &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.code == OutOfBoundsErrorCodeId && e.message ==
+                "The value of \"index\" is out of range. It must be >= 0 && <= 5. Received value is: -1";
+        }
+        return false
     }
-    let exceptionCheck1 = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            "The value of \"index\" is out of range. It must be >= 0 && <= 5. Received value is: 8") &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck1 = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.code == OutOfBoundsErrorCodeId && e.message ==
+                "The value of \"index\" is out of range. It must be >= 0 && <= 5. Received value is: 8";
+        }
+        return false
     }
     arktest.expectThrow(() => {arrayList.insert(TestData.testNumber3, -TestData.testNumber1)}, exceptionCheck);
     arktest.expectThrow(() => {arrayList.insert(TestData.testNumber3, TestData.testNumber8)}, exceptionCheck1);

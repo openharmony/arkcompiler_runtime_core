@@ -66,10 +66,13 @@ function testIndexOutOfRange() {
     let list = new List<double>();
     initializeList(list, testNumbers);
 
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            "The value of \"index\" is out of range. It must be >= 0 && <= 20. Received value is: 22") &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message ==
+                "The value of \"index\" is out of range. It must be >= 0 && <= 20. Received value is: 22" &&
+                e.code == OutOfBoundsErrorCodeId;
+        }
+        return false;
     }
     arktest.expectThrow(() => {list[testNumbers.length.toInt() + 1] = 1}, exceptionCheck);
 }
@@ -105,10 +108,11 @@ function checkOutsideRangeError(list: List<double>, index: int) {
         errMsg = `The type of \"index\" must be small integer.`
         errCode = 401;
     }
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') &&
-            ((e as BusinessError).message == errMsg) &&
-            ((e as BusinessError).code == errCode);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message == errMsg && e.code == errCode;
+        }
+        return false;
     }
     arktest.expectThrow((): void => { list[index] }, exceptionCheck)
 }

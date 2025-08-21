@@ -15,8 +15,8 @@
 cases:
   # nothing to catch
   - defs: |-
-      class Ex extends Exception {}
-      class Fx extends Exception {}
+      class Ex extends Error {}
+      class Fx extends Error {}
 
     use: |-
       let exc: Fx = new Fx();
@@ -33,8 +33,8 @@ cases:
 
   # catch by exact same class
   - defs: |-
-      class Ex extends Exception {}
-      class Fx extends Exception {}
+      class Ex extends Error {}
+      class Fx extends Error {}
 
     use: |-
       let exc: Fx = new Fx();
@@ -51,8 +51,8 @@ cases:
 
   # catch by exact same class with type alias
   - defs: |-
-      class Ex extends Exception {}
-      class Fx extends Exception {}
+      class Ex extends Error {}
+      class Fx extends Error {}
       type E1 = Ex;
       type F1 = Fx;
 
@@ -71,15 +71,15 @@ cases:
 
   # catch by superclass
   - defs: |-
-      class Ex extends Exception {}
-      class Fx extends Exception {}
+      class Ex extends Error {}
+      class Fx extends Error {}
 
     use: |-
       let exc: Fx = new Fx();
       try {
           if (1 != 2) throw exc;
           return 1;
-      } catch (w: Exception) {
+      } catch (w: Error) {
           return w instanceof Fx ? 0 : 1;  // expected
       } catch (f: Fx) {
           return 1;
@@ -89,7 +89,7 @@ cases:
       return 1;
 
   - defs: |-
-      class Ex extends Exception {}
+      class Ex extends Error {}
       class Fx extends Ex {}
 
     use: |-
@@ -99,7 +99,7 @@ cases:
           return 1;
       } catch (e: Ex) {
           return e instanceof Fx ? 0 : 1;  // expected
-      } catch (w: Exception) {
+      } catch (w: Error) {
           return 1;
       } catch (f: Fx) {
           return 1;
@@ -110,9 +110,9 @@ cases:
 
   # catch by superclass with type alias
   - defs: |-
-      class Ex extends Exception {}
-      class Fx extends Exception {}
-      type Exception1 = Exception;
+      class Ex extends Error {}
+      class Fx extends Error {}
+      type Error1 = Error;
       type F1 = Fx;
 
     use: |-
@@ -120,7 +120,7 @@ cases:
       try {
           if (1 != 2) throw exc;
           return 1;
-      } catch (w: Exception1) {
+      } catch (w: Error1) {
           return w instanceof Fx ? 0 : 1;  // expected
       } catch (f: F1) {
           return 1;
@@ -131,8 +131,8 @@ cases:
 
   # catch by default clause
   - defs: |-
-      class Ex extends Exception {}
-      class Fx extends Exception {}
+      class Ex extends Error {}
+      class Fx extends Error {}
 
     use: |-
       try {
@@ -163,7 +163,7 @@ cases:
       return 1;
 
   - defs: |-
-      class Fx extends Exception {
+      class Fx extends Error {
           constructor() {
               super();
           }

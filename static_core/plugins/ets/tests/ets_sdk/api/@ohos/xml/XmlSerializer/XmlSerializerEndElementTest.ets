@@ -101,9 +101,12 @@ function testEndElementWithArrayBufferOverflow() {
     let thatSer = new xml.XmlSerializer(arrayBuffer);
     thatSer.setNamespace("h", "aaa");
     thatSer.startElement("note");
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).code == TypeErrorCodeId) &&
-            ((e as BusinessError).message == 'XmlSerializer:: EndElement memcpy_s failed');
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.code == TypeErrorCodeId &&
+                e.message == 'XmlSerializer:: EndElement memcpy_s failed';
+        }
+        return false;
     }
     arktest.expectThrow(() => {thatSer.endElement()}, exceptionCheck);
 }

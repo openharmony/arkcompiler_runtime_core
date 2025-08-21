@@ -93,10 +93,11 @@ function testSetMultipleTypes() {
 
 function testSetElementsInEmptyContainer() {
     let list = new List<double>();
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            "Container is empty") &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message == "Container is empty" && e.code == OutOfBoundsErrorCodeId;
+        }
+        return false;
     }
 
     arktest.expectThrow(() => {list.set(0, TestData.testNumber3)}, exceptionCheck);

@@ -83,7 +83,7 @@ cases:
     logic: |-
       let x: FixedArray<int> = [3, 4, 5];
       arktest.assertEQ(x.length, 3);
-      let expectedException = (e: Error | Exception): boolean => {
+      let expectedException = (e: Error): boolean => {
         return (e instanceof RangeError)
       }
       arktest.expectThrow(() => {x[3];}, expectedException)
@@ -100,7 +100,7 @@ cases:
       let foo = (i: int): int => {
         return x[i];
       }
-      let expectedException = (e: Error | Exception): boolean => {
+      let expectedException = (e: Error): boolean => {
         return (e instanceof RangeError)
       }
       arktest.expectThrow(() => {foo(3);}, expectedException)

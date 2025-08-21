@@ -51,7 +51,7 @@ function testBigIntConstructor1() {
     let n = BigInt(0x0102030405060708)
     arktest.assertEQ(n, BigInt("72623859790382848"))
 
-    const errorcheck = (e: Error | Exception) => { 
+    const errorcheck = (e: Error) => { 
         return (e instanceof RangeError) &&
             e.message === 'the number 72623859.79038285 cannot be converted to a BigInt because it is not an integer'
         }

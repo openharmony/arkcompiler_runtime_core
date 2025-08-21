@@ -262,44 +262,44 @@ function testArrayOfObjectsExceptions() {
 
     arktest.expectThrow(() => {
         copyTo(farr1, farr2, 0, 1, 0); // srcStart > srcEnd
-    }, (e: Error | Exception) => {
+    }, (e: Error) => {
         return e instanceof ArrayIndexOutOfBoundsError && e.message == 'copyTo: src bounds verification failed';
     });
     arktest.expectThrow(() => {
         copyTo(farr1, farr2, 0, farr1.length, 1); // srcStart == farr1.length
-    }, (e: Error | Exception) => {
+    }, (e: Error) => {
         return e instanceof ArrayIndexOutOfBoundsError && e.message == 'copyTo: src bounds verification failed';
     });
     arktest.expectThrow(() => {
         copyTo(farr1, farr2, 0, 0, farr1.length + 1); // srcEnd > farr1.length
-    }, (e: Error | Exception) => {
+    }, (e: Error) => {
         return e instanceof ArrayIndexOutOfBoundsError && e.message == 'copyTo: src bounds verification failed';
     });
     arktest.expectThrow(() => {
         copyTo(farr1, farr2, 0, -1, farr1.length); // srcStart < 0
-    }, (e: Error | Exception) => {
+    }, (e: Error) => {
         return e instanceof ArrayIndexOutOfBoundsError && e.message == 'copyTo: src bounds verification failed';
     });
     arktest.expectThrow(() => {
         copyTo(farr1, farr2, -1, 0, farr1.length); // dstStart < 0
-    }, (e: Error | Exception) => {
+    }, (e: Error) => {
         return e instanceof ArrayIndexOutOfBoundsError && e.message == 'copyTo: dst bounds verification failed';
     });
     arktest.expectThrow(() => {
         copyTo(farr1, farr2, farr2.length + 1, 0, farr1.length); // dstStart > farr2.length
-    }, (e: Error | Exception) => {
+    }, (e: Error) => {
         return e instanceof ArrayIndexOutOfBoundsError && e.message == 'copyTo: dst bounds verification failed';
     });
     let farr3: FixedArray<FixedArray<int>> = [f1];
     arktest.expectThrow(() => {
         copyTo(farr1, farr3, 0, 0, farr1.length); // (srcEnd - srcStart) > (dstLen - dstStart)
-    }, (e: Error | Exception) => {
+    }, (e: Error) => {
         return e instanceof ArrayIndexOutOfBoundsError && e.message == 'copyTo: Destination array doesn\'t have enough space';
     });
     let farr4: FixedArray<FixedArray<int>> = [f1, f1, f1];
     arktest.expectThrow(() => {
         copyTo(farr1, farr4, farr4.length - 1, 0, farr1.length); // (srcEnd - srcStart) > (dstLen - dstStart)
-    }, (e: Error | Exception) => {
+    }, (e: Error) => {
         return e instanceof ArrayIndexOutOfBoundsError && e.message == 'copyTo: Destination array doesn\'t have enough space';
     });
 }
