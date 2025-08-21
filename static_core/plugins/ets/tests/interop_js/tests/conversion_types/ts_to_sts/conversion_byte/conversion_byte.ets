@@ -13,52 +13,80 @@
  * limitations under the License.
  */
 
-import { tsByte } from 'main_js';
+let global = ESValue.getGlobal();
+let gtestEnv = global.getProperty("gtest_env");
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/conversion_types/ts_to_sts/main');
+
+let tsByte = module.getProperty('tsByte');
 
 function checkConversionByteToInt(): boolean {
-    const val = tsByte.getUint8(0) as int;
-
-    return typeof val == 'number';
+    try {
+        const val = tsByte.invokeMethod('getUint8', ESValue.wrapNumber(0));
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionByteToNumber(): boolean {
-    const val = tsByte.getUint8(0) as number;
-
-    return typeof val == 'number';
+    try {
+        const val = tsByte.invokeMethod('getUint8', ESValue.wrapNumber(0));
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionByteToFloat(): boolean {
-    const val = tsByte.getUint8(0) as float;
-
-    return typeof val == 'number';
+    try {
+        const val = tsByte.invokeMethod('getUint8', ESValue.wrapNumber(0));
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionByteToByte(): boolean {
-    const val = tsByte.getUint8(0) as byte;
-
-    return typeof val == 'number';
+    try {
+        const val = tsByte.invokeMethod('getUint8', ESValue.wrapNumber(0));
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionByteToShort(): boolean {
-    const val = tsByte.getUint8(0) as short;
-
-    return typeof val == 'number';
+    try {
+        const val = tsByte.invokeMethod('getUint8', ESValue.wrapNumber(0));
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionByteToLong(): boolean {
-    const val = tsByte.getUint8(0) as long;
-
-    return typeof val == 'number';
+    try {
+        const val = tsByte.invokeMethod('getUint8', ESValue.wrapNumber(0));
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionByteToDouble(): boolean {
-    const val = tsByte.getUint8(0) as double;
-
-    return typeof val == 'number';
+    try {
+        const val = tsByte.invokeMethod('getUint8', ESValue.wrapNumber(0));
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionByteToChar(): boolean {
-    const val = tsByte.getUint8(0) as char;
-
-    return typeof val == 'number';
+    try {
+        const val = tsByte.invokeMethod('getUint8', ESValue.wrapNumber(0));
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }

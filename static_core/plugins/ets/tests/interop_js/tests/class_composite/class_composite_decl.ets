@@ -16,30 +16,30 @@
 import { A } from "js"
 
 function Test1(): int {
-    let a: A = { name: "Edalyn", age: 30, location: "Boiling Isles" };
-    if (a.name != "Edalyn") {
+    let a: A = { name: 'Edalyn', age: 30, location: 'Boiling Isles' };
+    if (a.name !== 'Edalyn') {
         return 1;
     }
-    if (a.age != 30) {
+    if (a.age !== 30) {
         return 2;
     }
-    if (a.location != "Boiling Isles") {
+    if (a.location !== 'Boiling Isles') {
         return 3;
     }
     return 0;
 }
 
 function Test2(): int {
-    let a: A = { name: "Luz", age: 13, location: "Boiling Isles" };
-    a.name = "king";
-    if (a.name != "king") {
+    let a: A = { name: 'Luz', age: 13, location: 'Boiling Isles' };
+    a.name = 'king';
+    if (a.name !== 'king') {
         return 1;
     }
     a.age = 5;
-    if (a.age != 5) {
+    if (a.age !== 5) {
         return 2;
     }
-    if (a.location != "Boiling Isles") {
+    if (a.location !== 'Boiling Isles') {
         return 3;
     }
     return 0;

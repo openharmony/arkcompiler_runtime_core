@@ -13,52 +13,88 @@
  * limitations under the License.
  */
 
-import { tsIntString } from 'main_js';
+let global = ESValue.getGlobal();
+let gtestEnv = global.getProperty("gtest_env");
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/conversion_types/ts_to_sts/main');
+
+let tsIntString = module.getProperty('tsIntString');
 
 function checkConversionStringToInt(): boolean {
-    const val = Double.toInt(parseInt(tsIntString));
-
-    return typeof val == 'number';
+    try {
+        const parseInt = global.getProperty('parseInt');
+        const val = parseInt.invoke(tsIntString);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionStringToNumber(): boolean {
-    const val = parseInt(tsIntString).toDouble();
-
-    return typeof val == 'number';
+    try {
+        const parseInt = global.getProperty('parseInt');
+        const val = parseInt.invoke(tsIntString);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionStringToFloat(): boolean {
-    const val = Double.toFloat(parseInt(tsIntString));
-
-    return typeof val == 'number';
+    try {
+        const parseInt = global.getProperty('parseInt');
+        const val = parseInt.invoke(tsIntString);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionStringToByte(): boolean {
-    const val = Double.toByte(parseInt(tsIntString));
-
-    return typeof val == 'number';
+    try {
+        const parseInt = global.getProperty('parseInt');
+        const val = parseInt.invoke(tsIntString);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionStringToShort(): boolean {
-    const val = Double.toShort(parseInt(tsIntString));
-
-    return typeof val == 'number';
+    try {
+        const parseInt = global.getProperty('parseInt');
+        const val = parseInt.invoke(tsIntString);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionStringToLong(): boolean {
-    const val = Double.toLong(parseInt(tsIntString));
-
-    return typeof val == 'number';
+    try {
+        const parseInt = global.getProperty('parseInt');
+        const val = parseInt.invoke(tsIntString);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionStringToDouble(): boolean {
-    const val = parseInt(tsIntString).toDouble();
-
-    return typeof val == 'number';
+    try {
+        const parseInt = global.getProperty('parseInt');
+        const val = parseInt.invoke(tsIntString);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionStringToChar(): boolean {
-    const val = Int.toChar(Double.toInt(parseInt(tsIntString)));
-
-    return typeof val == 'number';
+    try {
+        const parseInt = global.getProperty('parseInt');
+        const val = parseInt.invoke(tsIntString);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }

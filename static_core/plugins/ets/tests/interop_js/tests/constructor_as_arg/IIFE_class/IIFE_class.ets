@@ -13,35 +13,78 @@
  * limitations under the License.
  */
 
-import {
-    tsInt,
-    IIFECreateClassMain,
-    MainClass,
-    IIFECreateClassAnonymous,
-    AnonymousClass,
-    IIFECreateClass,
-    IIFEClass,
-    checkInstance,
-} from "main_js"
+let global = ESValue.getGlobal();
+let gtestEnv = global.getProperty("gtest_env");
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/constructor_as_arg/main');
 
+let tsInt = module.getProperty('tsInt');
+let IIFECreateClassMain = module.getProperty('IIFECreateClassMain');
+let MainClass = module.getProperty('MainClass');
+let IIFECreateClassAnonymous = module.getProperty('IIFECreateClassAnonymous');
+let AnonymousClass = module.getProperty('AnonymousClass');
+let IIFECreateClass = module.getProperty('IIFECreateClass');
+let IIFEClass = module.getProperty('IIFEClass');
+let checkInstance = module.getProperty('checkInstance');
 
 function checkIIFECreateClassMain(): boolean {
-    const TSClass = IIFECreateClassMain;
+    try {
+        const TSClass = IIFECreateClassMain;
 
-    return checkInstance(MainClass, TSClass) as boolean
-        && TSClass._value as int == tsInt as int;
+        const checkResult = checkInstance.invoke(MainClass, TSClass);
+        if (!checkResult.isBoolean() || !checkResult.toBoolean()) {
+            return false;
+        }
+
+        const value = TSClass.getPropertySafe('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkIIFECreateClassAnonymous(): boolean {
-    const TSClass = IIFECreateClassAnonymous;
+    try {
+        const TSClass = IIFECreateClassAnonymous;
 
-    return checkInstance(AnonymousClass, TSClass) as boolean
-        && TSClass._value as int == tsInt as int;
+        const checkResult = checkInstance.invoke(AnonymousClass, TSClass);
+        if (!checkResult.isBoolean() || !checkResult.toBoolean()) {
+            return false;
+        }
+
+        const value = TSClass.getPropertySafe('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkIIFECreateClassIIFE(): boolean {
-    const TSClass = IIFECreateClass;
+    try {
+        const TSClass = IIFECreateClass;
 
-    return checkInstance(IIFEClass, TSClass) as boolean
-        && TSClass._value as int == tsInt as int;
+        const checkResult = checkInstance.invoke(IIFEClass, TSClass);
+        if (!checkResult.isBoolean() || !checkResult.toBoolean()) {
+            return false;
+        }
+
+        const value = TSClass.getPropertySafe('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }

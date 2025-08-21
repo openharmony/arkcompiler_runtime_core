@@ -13,9 +13,15 @@
  * limitations under the License.
  */
 
-package interop_class_extension
 
-import { DEFAULT_STRING_VALUE, TestNativeClass, TestUserClass, helperIsJSInstanceOf } from "js_code";
+let global = ESValue.getGlobal();
+let gtestEnv = global.getProperty("gtest_env");
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/interop_class_extension/interop_class_extension/index');
+
+let DEFAULT_STRING_VALUE = module.getProperty('DEFAULT_STRING_VALUE');
+let TestNativeClass = module.getProperty('TestNativeClass');
+let TestUserClass = module.getProperty('TestUserClass');
+let helperIsJSInstanceOf = module.getProperty('helperIsJSInstanceOf');
 
 // NOTE Should be commented out until #17693 is resolved
 // function extendUserClass() {

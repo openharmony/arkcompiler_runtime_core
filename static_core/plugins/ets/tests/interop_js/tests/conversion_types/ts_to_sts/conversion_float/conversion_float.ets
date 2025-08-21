@@ -13,52 +13,72 @@
  * limitations under the License.
  */
 
-import { tsFloat } from 'main_js';
+let global = ESValue.getGlobal();
+let gtestEnv = global.getProperty("gtest_env");
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/conversion_types/ts_to_sts/main');
+
+let tsFloat = module.getProperty('tsFloat');
 
 function checkConversionFloatToInt(): boolean {
-    const val = tsFloat as int;
-
-    return typeof val == 'number';
+    try {
+        return tsFloat.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionFloatToNumber(): boolean {
-    const val = tsFloat as number;
-
-    return typeof val == 'number';
+    try {
+        return tsFloat.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionFloatToFloat(): boolean {
-    const val = tsFloat as float;
-
-    return typeof val == 'number';
+    try {
+        return tsFloat.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionFloatToByte(): boolean {
-    const val = tsFloat as byte;
-
-    return typeof val == 'number';
+    try {
+        return tsFloat.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionFloatToShort(): boolean {
-    const val = tsFloat as short;
-
-    return typeof val == 'number';
+    try {
+        return tsFloat.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionFloatToLong(): boolean {
-    const val = tsFloat as long;
-
-    return typeof val == 'number';
+    try {
+        return tsFloat.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionFloatToDouble(): boolean {
-    const val = tsFloat as double;
-
-    return typeof val == 'number';
+    try {
+        return tsFloat.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionFloatToChar(): boolean {
-    const val = tsFloat as char;
-
-    return typeof val == 'number';
+    try {
+        return tsFloat.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }

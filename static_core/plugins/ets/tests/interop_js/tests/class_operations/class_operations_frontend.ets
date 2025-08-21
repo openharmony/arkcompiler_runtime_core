@@ -13,24 +13,29 @@
  * limitations under the License.
  */
 
-import {
-	evaluateNumber,
-	ExampleClass,
-	ClassWithEmptyConstructor,
-	evaluateObject,
-	MyNamespace,
-	evaluateArray,
-} from 'module';
+let global = ESValue.getGlobal();
+let gtestEnv = global.getProperty("gtest_env");
+let module = gtestEnv.getProperty("module");
+
+let evaluateNumber = module.getProperty('evaluateNumber');
+let ExampleClass = module.getProperty('ExampleClass');
+let ClassWithEmptyConstructor = module.getProperty('ClassWithEmptyConstructor');
+let evaluateObject = module.getProperty('evaluateObject');
+let MyNamespace = module.getProperty('MyNamespace');
+let evaluateArray = module.getProperty('evaluateArray');
 
 //! CHECKER      jscallEmpty JIT
 //! RUN          force_jit: true, entry: "jscallEmpty", options: "--compiler-regex=class_operations_frontend.ETSGLOBAL::jscallEmpty"
 //! METHOD       "jscallEmpty"
 //! PASS_AFTER   "IrBuilder"
 
-
 function jscallEmpty(): int {
-	evaluateNumber();
-	return 0;
+    try {
+        evaluateNumber.invoke()
+        return 0
+    } catch (e) {
+        return 1
+    }
 }
 
 //! CHECKER      testJSONStringifyESObjectInstance JIT
@@ -39,7 +44,7 @@ function jscallEmpty(): int {
 //! PASS_AFTER   "IrBuilder"
 
 function testJSONStringifyESObjectInstance(): boolean {
-	return true
+    return true
 }
 
 //! CHECKER      testJSONStringifyESObjectArray JIT
@@ -48,7 +53,7 @@ function testJSONStringifyESObjectInstance(): boolean {
 //! PASS_AFTER   "IrBuilder"
 
 function testJSONStringifyESObjectArray(): boolean {
-	return true
+    return true
 }
 
 //! CHECKER      jsnewEmpty JIT
@@ -62,14 +67,18 @@ function testJSONStringifyESObjectArray(): boolean {
 //! INST_COUNT   /i32.*Cast f64/, 2
 
 function jsnewEmpty(): int {
-	let resObj = new ClassWithEmptyConstructor();
-	let resGetV0 = resObj.v0 as int;
-	let resGetV1 = resObj.v1 as int;
-	if (resGetV0 == 42 && resGetV1 == 42) {
-		return 0;
-	} else {
-		return 1;
-	}
+    try {
+        const resObj = ClassWithEmptyConstructor.instantiate()
+        const resGetV0 = resObj.getProperty('v0').toNumber()
+        const resGetV1 = resObj.getProperty('v1').toNumber()
+        if (resGetV0 == 42 && resGetV1 == 42) {
+            return 0
+        } else {
+            return 1
+        }
+    } catch (e) {
+        return 1
+    }
 }
 
 //! CHECKER      jscallStaticMethodEmpty JIT
@@ -77,10 +86,13 @@ function jsnewEmpty(): int {
 //! METHOD       "jscallStaticMethodEmpty"
 //! PASS_AFTER   "IrBuilder"
 
-
 function jscallStaticMethodEmpty(): int {
-	ExampleClass.emptyMethod();
-	return 0;
+    try {
+        ExampleClass.invokeMethod('emptyMethod')
+        return 0
+    } catch (e) {
+        return 1
+    }
 }
 
 //! CHECKER      jscallObject JIT
@@ -93,15 +105,19 @@ function jscallStaticMethodEmpty(): int {
 //! INST_NEXT    /i32.*Cast f64/
 
 function jscallObject(): int {
-	let resObj = new ExampleClass(42, 42);
-	let res = evaluateObject(resObj);
-	let resGetV0 = res.v0 as int;
-	let resGetV1 = res.v1 as int;
-	if (resGetV0 == 84 && resGetV1 == 84) {
-		return 0;
-	} else {
-		return 1;
-	}
+    try {
+        const resObj = ExampleClass.instantiate(ESValue.wrapNumber(42), ESValue.wrapNumber(42))
+        const res = evaluateObject.invoke(resObj)
+        const resGetV0 = res.getProperty('v0').toNumber()
+        const resGetV1 = res.getProperty('v1').toNumber()
+        if (resGetV0 == 84 && resGetV1 == 84) {
+            return 0
+        } else {
+            return 1
+        }
+    } catch (e) {
+        return 1
+    }
 }
 
 //! CHECKER      jsnewObject JIT
@@ -112,15 +128,20 @@ function jscallObject(): int {
 //! INST_COUNT   "Intrinsic.JSRuntimeGetPropertyDouble", 4
 
 function jsnewObject(): int {
-	let resObj = new ExampleClass(42, 42);
-	let res = new ExampleClass(resObj, resObj);
-	let resGetV0 = res.v0;
-	let resGetV1 = res.v1;
-	if ((resGetV0.v0 as int) == 42 && (resGetV0.v1 as int) == 42 && (resGetV1.v0 as int) == 42 && (resGetV1.v1 as int) == 42) {
-		return 0;
-	} else {
-		return 1;
-	}
+    try {
+        const resObj = ExampleClass.instantiate(ESValue.wrapNumber(42), ESValue.wrapNumber(42))
+        const res = ExampleClass.instantiate(resObj, resObj)
+        const resGetV0 = res.getProperty('v0')
+        const resGetV1 = res.getProperty('v1')
+        if (resGetV0.getProperty('v0').toNumber() == 42 && resGetV0.getProperty('v1').toNumber() == 42 && 
+            resGetV1.getProperty('v0').toNumber() == 42 && resGetV1.getProperty('v1').toNumber() == 42) {
+            return 0
+        } else {
+            return 1
+        }
+    } catch (e) {
+        return 1
+    }
 }
 
 //! CHECKER      jsnewSetPropertyObject JIT
@@ -132,17 +153,22 @@ function jsnewObject(): int {
 //! INST_COUNT   "Intrinsic.JSRuntimeGetPropertyDouble", 4
 
 function jsnewSetPropertyObject(): int {
-	let resObj = new ClassWithEmptyConstructor();
-	let res = new ClassWithEmptyConstructor();
-	resObj.v0 = res;
-	resObj.v1 = res;
-	let resGetV0 = resObj.v0;
-	let resGetV1 = resObj.v1;
-	if ((resGetV0.v0 as int) == 42 && (resGetV0.v1 as int) == 42 && (resGetV1.v0 as int) == 42 && (resGetV1.v1 as int) == 42) {
-		return 0;
-	} else {
-		return 1;
-	}
+    try {
+        const resObj = ClassWithEmptyConstructor.instantiate()
+        const res = ClassWithEmptyConstructor.instantiate()
+        resObj.setProperty('v0', res)
+        resObj.setProperty('v1', res)
+        const resGetV0 = resObj.getProperty('v0')
+        const resGetV1 = resObj.getProperty('v1')
+        if (resGetV0.getProperty('v0').toNumber() == 42 && resGetV0.getProperty('v1').toNumber() == 42 && 
+            resGetV1.getProperty('v0').toNumber() == 42 && resGetV1.getProperty('v1').toNumber() == 42) {
+            return 0
+        } else {
+            return 1
+        }
+    } catch (e) {
+        return 1
+    }
 }
 
 //! CHECKER      jscallMethodObject JIT
@@ -152,15 +178,19 @@ function jsnewSetPropertyObject(): int {
 //! INST_COUNT   "Intrinsic.JSRuntimeGetPropertyDouble", 2
 
 function jscallMethodObject(): int {
-	let resObj = new ExampleClass(42, 42);
-	let res = evaluateObject(resObj);
-	let resGetV0 = res.v0 as int;
-	let resGetV1 = res.v1 as int;
-	if (resGetV0 == 84 && resGetV1 == 84) {
-		return 0;
-	} else {
-		return 1;
-	}
+    try {
+        const resObj = ExampleClass.instantiate(ESValue.wrapNumber(42), ESValue.wrapNumber(42))
+        const res = evaluateObject.invoke(resObj)
+        const resGetV0 = res.getProperty('v0').toNumber()
+        const resGetV1 = res.getProperty('v1').toNumber()
+        if (resGetV0 == 84 && resGetV1 == 84) {
+            return 0
+        } else {
+            return 1
+        }
+    } catch (e) {
+        return 1
+    }
 }
 
 //! CHECKER      jscallMethodSimple JIT
@@ -169,13 +199,17 @@ function jscallMethodObject(): int {
 //! PASS_AFTER   "IrBuilder"
 
 function jscallMethodSimple(): int {
-	let resObj = new ExampleClass(42, 42);
-	let res = resObj.instanceEvaluateNumber() as int;
-	if (res == 84) {
-		return 0;
-	} else {
-		return 1;
-	}
+    try {
+        const resObj = ExampleClass.instantiate(ESValue.wrapNumber(42), ESValue.wrapNumber(42))
+        const res = resObj.invokeMethod('instanceEvaluateNumber').toNumber()
+        if (res == 84) {
+            return 0
+        } else {
+            return 1
+        }
+    } catch (e) {
+        return 1
+    }
 }
 
 //! CHECKER      jscallString JIT
@@ -186,14 +220,18 @@ function jscallMethodSimple(): int {
 //! INST_NEXT    "Intrinsic.StdCoreStringEquals"
 
 function jscallString(): int {
-	let v0: String = 'hello';
-	let v1: String = 'world';
-	let res = evaluateNumber(v0, v1) as String;
-	if (res == 'helloworld') {
-		return 0;
-	} else {
-		return 1;
-	}
+    try {
+        const v0: String = 'hello'
+        const v1: String = 'world'
+        const res = evaluateNumber.invoke(ESValue.wrapString(v0), ESValue.wrapString(v1)).toString()
+        if (res == 'helloworld') {
+            return 0
+        } else {
+            return 1
+        }
+    } catch (e) {
+        return 1
+    }
 }
 
 //! CHECKER      jsnewString JIT
@@ -205,16 +243,20 @@ function jscallString(): int {
 //! INST_NOT     "Intrinsic.JSRuntimeGetValueString"
 
 function jsnewString(): int {
-	let v0: String = 'hello';
-	let v1: String = 'world';
-	let resObj = new ExampleClass(v0, v1);
-	let resGetV0 = resObj.v0 as String;
-	let resGetV1 = resObj.v1 as String;
-	if (resGetV0 == v0 && resGetV1 == v1) {
-		return 0;
-	} else {
-		return 1;
-	}
+    try {
+        const v0: String = 'hello'
+        const v1: String = 'world'
+        const resObj = ExampleClass.instantiate(ESValue.wrapString(v0), ESValue.wrapString(v1))
+        const resGetV0 = resObj.getProperty('v0').toString()
+        const resGetV1 = resObj.getProperty('v1').toString()
+        if (resGetV0 == v0 && resGetV1 == v1) {
+            return 0
+        } else {
+            return 1
+        }
+    } catch (e) {
+        return 1
+    }
 }
 
 //! DISABLED_CHECKER      jsnewSetPropertyString JIT
@@ -231,18 +273,22 @@ function jsnewString(): int {
 //! INST_NOT     "Intrinsic.JSRuntimeNewJSValueString"
 
 function jsnewSetPropertyString(): int {
-	let v0: String = 'hello';
-	let v1: String = 'world';
-	let resObj = new ClassWithEmptyConstructor();
-	resObj.v0 = v0;
-	resObj.v1 = v1;
-	let resGetV0 = resObj.v0 as String;
-	let resGetV1 = resObj.v1 as String;
-	if (resGetV0 == v0 && resGetV1 == v1) {
-		return 0;
-	} else {
-		return 1;
-	}
+    try {
+        const v0: String = 'hello'
+        const v1: String = 'world'
+        const resObj = ClassWithEmptyConstructor.instantiate()
+        resObj.setProperty('v0', ESValue.wrapString(v0))
+        resObj.setProperty('v1', ESValue.wrapString(v1))
+        const resGetV0 = resObj.getProperty('v0').toString()
+        const resGetV1 = resObj.getProperty('v1').toString()
+        if (resGetV0 == v0 && resGetV1 == v1) {
+            return 0
+        } else {
+            return 1
+        }
+    } catch (e) {
+        return 1
+    }
 }
 
 //! CHECKER      jscallStaticMethodString JIT
@@ -253,95 +299,119 @@ function jsnewSetPropertyString(): int {
 //! INST    "Intrinsic.JSRuntimeGetValueString"
 
 function jscallStaticMethodString(): int {
-	let v0: String = 'hello';
-	let v1: String = 'world';
-	let res = ExampleClass.evaluateNumber(v0, v1) as String;
-	if (res == 'helloworld') {
-		return 0;
-	} else {
-		return 1;
-	}
+    try {
+        const v0: String = 'hello'
+        const v1: String = 'world'
+        const res = ExampleClass.invokeMethod('evaluateNumber', ESValue.wrapString(v0), ESValue.wrapString(v1)).toString()
+        if (res == 'helloworld') {
+            return 0
+        } else {
+            return 1
+        }
+    } catch (e) {
+        return 1
+    }
 }
 
 function jscallArray(): int {
-	let v0: FixedArray<int> = new int[10];
-	for (let i = 0; i < 10; ++i) {
-		v0[i] = i * i;
-	}
+    try {
+        const v0: FixedArray<int> = new int[10]
+        for (let i = 0; i < 10; ++i) {
+            v0[i] = i * i
+        }
 
-	let res = evaluateArray(v0, 10);
-	for (let i = 0; i < 10; ++i) {
-		if ((res[i] as int) != 2 * i * i) {
-			return 1;
-		}
-	}
+        const res = evaluateArray.invoke(ESValue.wrap(v0), ESValue.wrapNumber(10))
+        for (let i = 0; i < 10; ++i) {
+            if (res.getProperty(i).toNumber() != 2 * i * i) {
+                return 1
+            }
+        }
 
-	return 0;
+        return 0
+    } catch (e) {
+        return 1
+    }
 }
 
 function jsnewArray(): int {
-	let v0: FixedArray<int> = new int[10];
-	for (let i = 0; i < 10; ++i) {
-		v0[i] = i * i;
-	}
+    try {
+        const v0: FixedArray<int> = new int[10]
+        for (let i = 0; i < 10; ++i) {
+            v0[i] = i * i
+        }
 
-	let resObj = new ExampleClass(v0, v0);
-	let resGetV0 = resObj.v0;
-	let resGetV1 = resObj.v1;
+        const resObj = ExampleClass.instantiate(ESValue.wrap(v0), ESValue.wrap(v0))
+        const resGetV0 = resObj.getProperty('v0')
+        const resGetV1 = resObj.getProperty('v1')
 
-	for (let i = 0; i < 10; ++i) {
-		if ((resGetV0[i] as int) != v0[i] || (resGetV1[i] as int) != v0[i]) {
-			return 1;
-		}
-	}
-	return 0;
+        for (let i = 0; i < 10; ++i) {
+            if (resGetV0.getProperty(i).toNumber() != v0[i] || resGetV1.getProperty(i).toNumber() != v0[i]) {
+                return 1
+            }
+        }
+        return 0
+    } catch (e) {
+        return 1
+    }
 }
 
 function jsnewSetPropertyArray(): int {
-	let v0: FixedArray<int> = new int[10];
-	for (let i = 0; i < 10; ++i) {
-		v0[i] = i * i;
-	}
+    try {
+        const v0: FixedArray<int> = new int[10]
+        for (let i = 0; i < 10; ++i) {
+            v0[i] = i * i
+        }
 
-	let resObj = new ClassWithEmptyConstructor();
+        const resObj = ClassWithEmptyConstructor.instantiate()
 
-	resObj.v0 = v0;
-	resObj.v1 = v0;
-	let resGetV0 = resObj.v0;
-	let resGetV1 = resObj.v1;
+        resObj.setProperty('v0', ESValue.wrap(v0))
+        resObj.setProperty('v1', ESValue.wrap(v0))
+        const resGetV0 = resObj.getProperty('v0')
+        const resGetV1 = resObj.getProperty('v1')
 
-	for (let i = 0; i < 10; ++i) {
-		if ((resGetV0[i] as int) != v0[i] || (resGetV1[i] as int) != v0[i]) {
-			return 1;
-		}
-	}
-	return 0;
+        for (let i = 0; i < 10; ++i) {
+            if (resGetV0.getProperty(i).toNumber() != v0[i] || resGetV1.getProperty(i).toNumber() != v0[i]) {
+                return 1
+            }
+        }
+        return 0
+    } catch (e) {
+        return 1
+    }
 }
 
 function jscallStaticMethodArray(): int {
-	let v0: FixedArray<int> = new int[10];
-	for (let i = 0; i < 10; ++i) {
-		v0[i] = i * i;
-	}
+    try {
+        const v0: FixedArray<int> = new int[10]
+        for (let i = 0; i < 10; ++i) {
+            v0[i] = i * i
+        }
 
-	let res = ExampleClass.evaluateArray(v0, 10);
-	for (let i = 0; i < 10; ++i) {
-		if ((res[i] as int) != 2 * i * i) {
-			return 1;
-		}
-	}
-	return 0;
+        const res = ExampleClass.invokeMethod('evaluateArray', ESValue.wrap(v0), ESValue.wrapNumber(10))
+        for (let i = 0; i < 10; ++i) {
+            if (res.getProperty(i).toNumber() != 2 * i * i) {
+                return 1
+            }
+        }
+        return 0
+    } catch (e) {
+        return 1
+    }
 }
 
 function testNamespace(): int {
-	let v0: int = 1;
-	let v1: String = 'Pinky';
-	let resObj = MyNamespace.createKitten(v0, v1);
-	let resId = resObj.id as int;
-	let resName = resObj.name as String;
-	if (resId == v0 && resName == v1) {
-		return 0;
-	} else {
-		return 1;
-	}
+    try {
+        const v0: int = 1
+        const v1: String = 'Pinky'
+        const resObj = MyNamespace.invokeMethod('createKitten', ESValue.wrapNumber(v0), ESValue.wrapString(v1))
+        const resId = resObj.getProperty('id').toNumber()
+        const resName = resObj.getProperty('name').toString()
+        if (resId == v0 && resName == v1) {
+            return 0
+        } else {
+            return 1
+        }
+    } catch (e) {
+        return 1
+    }
 }

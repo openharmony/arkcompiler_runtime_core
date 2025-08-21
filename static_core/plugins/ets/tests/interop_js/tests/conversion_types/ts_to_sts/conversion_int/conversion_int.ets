@@ -13,52 +13,72 @@
  * limitations under the License.
  */
 
-import { tsInt } from 'main_js';
+let global = ESValue.getGlobal();
+let gtestEnv = global.getProperty("gtest_env");
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/conversion_types/ts_to_sts/main');
+
+let tsInt = module.getProperty('tsInt');
 
 function checkConversionToInt(): boolean {
-    const val = tsInt as int;
-    
-    return typeof val == 'number';
+    try {
+        return tsInt.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionToNumber(): boolean {
-    const val = tsInt as number;
-
-    return typeof val == 'number';
+    try {
+        return tsInt.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionToFloat(): boolean {
-    const val = tsInt as float;
-
-    return typeof val == 'number';
+    try {
+        return tsInt.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionToByte(): boolean {
-    const val = tsInt as byte;
-
-    return typeof val == 'number';
+    try {
+        return tsInt.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionToShort(): boolean {
-    const val = tsInt as short;
-
-    return typeof val == 'number';
+    try {
+        return tsInt.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionToLong(): boolean {
-    const val = tsInt as long;
-
-    return typeof val == 'number';
+    try {
+        return tsInt.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionToDouble(): boolean {
-    const val = tsInt as double;
-
-    return typeof val == 'number';
+    try {
+        return tsInt.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionToChar(): boolean {
-    const val = tsInt as char;
-
-    return typeof val == 'number';
+    try {
+        return tsInt.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }

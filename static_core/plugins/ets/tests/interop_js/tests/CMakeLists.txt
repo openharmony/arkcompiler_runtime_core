@@ -12,16 +12,7 @@
 # limitations under the License.
 
 set(DISABLES_TESTS
-    callable_signature
-    cast_dynamic_to_object
     checked
-    class_composite
-    class_extension
-    class_method
-    class_operations
-    constructor
-    constructor_as_arg
-    conversion_types
     declgen_ets2ts
     dot_operator
     escompat_demo

@@ -13,68 +13,128 @@
  * limitations under the License.
  */
 
-import { tsBigInt, returnBigInt, returnBigIntObj } from 'main_js';
+let global = ESValue.getGlobal();
+let gtestEnv = global.getProperty("gtest_env");
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/conversion_types/ts_to_sts/main');
+
+let tsBigInt = module.getProperty('tsBigInt');
+let returnBigInt = module.getProperty('returnBigInt');
+let returnBigIntObj = module.getProperty('returnBigIntObj');
 
 function checkTypeBigInt(): boolean {
-    return typeof tsBigInt == 'object';
+    try {
+        return tsBigInt.typeOf() == 'bigint';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionBigIntToInt(): boolean {
-    const val = Double.toInt(Number(tsBigInt));
-
-    return typeof val == 'number';
+    try {
+        const Number = global.getProperty('Number');
+        const val = Number.invoke(tsBigInt);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionBigIntToNumber(): boolean {
-    const val = Number(tsBigInt).toDouble();
-
-    return typeof val == 'number';
+    try {
+        const Number = global.getProperty('Number');
+        const val = Number.invoke(tsBigInt);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionBigIntToFloat(): boolean {
-    const val = Double.toFloat(Number(tsBigInt));
-
-    return typeof val == 'number';
+    try {
+        const Number = global.getProperty('Number');
+        const val = Number.invoke(tsBigInt);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionBigIntToByte(): boolean {
-    const val = Double.toByte(Number(tsBigInt));
-
-    return typeof val == 'number';
+    try {
+        const Number = global.getProperty('Number');
+        const val = Number.invoke(tsBigInt);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionBigIntToShort(): boolean {
-    const val = Double.toShort(Number(tsBigInt));
-
-    return typeof val == 'number';
+    try {
+        const Number = global.getProperty('Number');
+        const val = Number.invoke(tsBigInt);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionBigIntToLong(): boolean {
-    const val = Double.toLong(Number(tsBigInt));
-
-    return typeof val == 'number';
+    try {
+        const Number = global.getProperty('Number');
+        const val = Number.invoke(tsBigInt);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionBigIntToDouble(): boolean {
-    const val = Number(tsBigInt).toDouble();
-
-    return typeof val == 'number';
+    try {
+        const Number = global.getProperty('Number');
+        const val = Number.invoke(tsBigInt);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionBigIntToChar(): boolean {
-    const val = Int.toChar(Double.toInt(Number(tsBigInt)));
-
-    return typeof val == 'number';
+    try {
+        const Number = global.getProperty('Number');
+        const val = Number.invoke(tsBigInt);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkReturnBigInt(): boolean {
-    const val = returnBigInt() as bigint;
+    try {
+        const val = returnBigInt.invoke();
 
-    return typeof val == 'bigint' && val == 1000000n;
+        if (!val.isBigInt()) {
+            return false;
+        }
+
+        const expectedBigInt = ESValue.wrapBigInt(1000000n);
+        return val.toBigInt() == expectedBigInt.toBigInt();
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkReturnBigIntObj(): boolean {
-    const val = returnBigIntObj() as bigint;
+    try {
+        const val = returnBigIntObj.invoke();
 
-    return typeof val == 'bigint' && val == 1n;
+        if (!val.isBigInt()) {
+            return false;
+        }
+
+        const expectedBigInt = ESValue.wrapBigInt(1n);
+        return val.toBigInt() == expectedBigInt.toBigInt();
+    } catch (e) {
+        return false;
+    }
 }

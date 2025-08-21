@@ -13,27 +13,120 @@
  * limitations under the License.
  */
 
-import {
-    ChildAbstractClass,
-    createChildAbstractClassFromTs,
-    instanceChildAbstractClass,
-} from 'main_js';
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/class_method/ts_to_sts/main');
+let ChildAbstractClass = module.getProperty('ChildAbstractClass');
+let createChildAbstractClassFromTs = module.getProperty('createChildAbstractClassFromTs');
+let instanceChildAbstractClass = module.getProperty('instanceChildAbstractClass');
 
 function checkAbstractClassMethod(): boolean {
-    const TSClass = new ChildAbstractClass();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(TSClass.get) as boolean;
+        if (ChildAbstractClass.isUndefined() || ChildAbstractClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = ChildAbstractClass.instantiate();
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const getMethod = TSClass.getPropertySafe('get');
+        if (getMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareMethod = TSClass.getPropertySafe('compare');
+        if (compareMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', getMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean();
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateAbstractClassFromTs(): boolean {
-    const TSClass = createChildAbstractClassFromTs();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(TSClass.get) as boolean;
+        if (createChildAbstractClassFromTs.isUndefined() || createChildAbstractClassFromTs.isNull()) {
+            return false;
+        }
+
+        const TSClass = createChildAbstractClassFromTs.invoke();
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const getMethod = TSClass.getPropertySafe('get');
+        if (getMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareMethod = TSClass.getPropertySafe('compare');
+        if (compareMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', getMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean();
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
-
 function checkInstanceAbstractClass(): boolean {
-    const TSClass = instanceChildAbstractClass;
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(TSClass.get) as boolean;
+        if (instanceChildAbstractClass.isUndefined() || instanceChildAbstractClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = instanceChildAbstractClass;
+
+        const getMethod = TSClass.getPropertySafe('get');
+        if (getMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareMethod = TSClass.getPropertySafe('compare');
+        if (compareMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', getMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean();
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
