@@ -503,7 +503,7 @@ export final class Proxy {
                 if (handler instanceof ProxyHandler) {
                     const target = proxyValue.getFieldByName(Proxy.PROXY_INSTANCE_TARGET_FIELD).getData()
                     // using "wrapper" method to "capture" <T> after smartcast
-                    const success = this.handlerSet(target as object, handler as ProxyHandler<Object>, propertyName, value as object)
+                    const success = this.handlerSet(target as object, handler as ProxyHandler<Object>, propertyName, value as (object | undefined))
                     if (!success) {
                         throw new TypeError(`proxy set handler returned false for propety '"${propertyName}"'`)
                     }
