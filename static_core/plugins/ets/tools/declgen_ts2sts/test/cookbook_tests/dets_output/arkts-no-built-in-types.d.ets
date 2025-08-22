@@ -29,10 +29,36 @@ export declare let buffers: Any[];
 export declare function processData(buffer: Any): Any;
 export type BufferType = Any;
 export type ComplexType = Any | string;
+export declare function A(): Any;
+export declare const propDecorator1: Any;
+export declare const propDecorator2: Any;
+export declare const PropertyDecorators: Any;
+export declare const decoratorMap: Map<string, Any>;
+export declare function getPropertyDecorator(name: string): Any;
+export declare function processProperty(decorator: Any, target: Any, propertyKey: string | Any): void;
+export type PropertyDecoratorAlias = Any;
+export declare const aliasedDecorator: PropertyDecoratorAlias;
+export type ComplexDecoratorType = Any;
+export declare const complexDecorator: ComplexDecoratorType;
 export declare class DataProcessor {
+    constructor(buffer: Any, sharedBuffer: Any);
     sharedBuffer: Any;
+}
+export declare class DecoratedClass {
+    normalProperty: string;
+    readOnlyProperty: number;
+    customDecoratedProperty: boolean;
+}
+export declare class DecoratorManager implements DecoratorContainer {
+    decorator: Any;
+    constructor(decorator: Any);
+    applyDecorator(target: Any, propertyKey: string | Any): void;
 }
 export declare interface BufferHolder {
     buffer: Any;
     getBuffer(): Any;
+}
+export declare interface DecoratorContainer {
+    decorator: Any;
+    applyDecorator(target: Any, propertyKey: string | Any): void;
 }
