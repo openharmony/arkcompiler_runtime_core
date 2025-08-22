@@ -137,6 +137,7 @@ export enum FaultID {
   InstanceType,
   NoEmptyImport,
   NoEmptyExport,
+  NoLazyImport,
   LimitExtends,
   PropertyAccessExpression,
   NoBuiltInType,

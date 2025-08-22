@@ -12,26 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { foo } from "./include/lib";
+import lazy { bar, qux } from "./include/lib";
+import lazy { fox } from "./include/lib";
 
-export interface I1 { }
+import { NormalClass } from "./include/lib";
+import lazy { HumanClass, AnimalClass, DogClass } from "./include/lib";
 
-export class C1 { }
 
-export class NormalClass {
-    method4(): void { }
-}
+export const vfoo = foo;
+export const vbar = bar;
+export const vqux = qux;
+export const vfox = fox;
 
-export class HumanClass {
-    run(): void { }
-}
-export class AnimalClass {
-    run(): void { }
-}
-export class DogClass extends AnimalClass {
-    bark(): void { }
-}
-
-export function bar(): void { }
-export function qux(): void { }
-export function foo(): void { }
-export function fox(): void { }
+export const vNormalClass = new NormalClass();
+export const vHumanClass = new HumanClass();
+export const vAnimalClass = new AnimalClass();
+export const vDogClass = new DogClass();

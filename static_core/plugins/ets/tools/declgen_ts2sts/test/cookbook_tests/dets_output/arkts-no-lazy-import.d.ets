@@ -13,7 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export declare class MathUtils2 {
-    add(num: number): number;
-    add(num1: number, num2: number): number;
-}
+import { foo } from "./include/lib";
+import { bar, qux } from "./include/lib";
+import { fox } from "./include/lib";
+import { NormalClass } from "./include/lib";
+import { HumanClass, AnimalClass, DogClass } from "./include/lib";
+export declare const vfoo: Any;
+export declare const vbar: Any;
+export declare const vqux: Any;
+export declare const vfox: Any;
+export declare const vNormalClass: NormalClass;
+export declare const vHumanClass: HumanClass;
+export declare const vAnimalClass: AnimalClass;
+export declare const vDogClass: DogClass;
