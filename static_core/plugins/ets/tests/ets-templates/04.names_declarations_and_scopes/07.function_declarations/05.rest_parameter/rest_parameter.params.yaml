@@ -213,7 +213,7 @@ cases:
 
       arktest.assertEQ(sum(...arr), 6)
 
-  #16. Spread readonly array
+  #17. Spread readonly array
   - sig: |-
       sum(...numbers: readonly Array<int>): number
     def: |-
@@ -223,7 +223,7 @@ cases:
       arktest.assertEQ(sum(...arr), 1)
       
 
-  #16. Spread readonly array
+  #18. Spread readonly array
   - sig: |-
       sum(...numbers: readonly Array<int>): number
     def: |-
@@ -231,3 +231,48 @@ cases:
     call: |-
       const arr: readonly Array<int> = new Array<int>(0, 1, 2, 3, 4, 5);
       arktest.assertEQ(sum(...arr), 6)
+
+  #19. Spread empty array via lambda #Issue 29268
+  - sig: |-
+      foo(...rest: readonly string[]): boolean
+    def: |-
+      return true
+    call: |-
+      const call: (...rest: readonly string[]) => boolean = foo
+      arktest.assertTrue(call())
+
+  #20. Spread empty array via lambda
+  - sig: |-
+      foo(...rest: readonly Array<string>): boolean
+    def: |-
+      return true
+    call: |-
+      const call: (...rest: readonly Array<string>) => boolean = foo
+      arktest.assertTrue(call())
+
+  #21. Spread non-empty array via lambda
+  - sig: |-
+      foo(...rest: Array<string>): boolean
+    def: |-
+      return true
+    call: |-
+      const call: (...rest: Array<string>) => boolean = foo
+      arktest.assertTrue(call("Hello"))
+
+  #22. Spread empty array via IIFE
+  - sig: |-
+      foo(): boolean
+    def: |-
+      return true
+    call: |-
+      let res = ((...rest: string[]): boolean => { return true })()
+      arktest.assertTrue(res)
+
+  #23. Spread empty array via IIFE #Issue 29268
+  - sig: |-
+      foo(): boolean
+    def: |-
+      return true
+    call: |-
+      let res = ((...rest: readonly string[]): boolean => { return true })()
+      arktest.assertTrue(res)

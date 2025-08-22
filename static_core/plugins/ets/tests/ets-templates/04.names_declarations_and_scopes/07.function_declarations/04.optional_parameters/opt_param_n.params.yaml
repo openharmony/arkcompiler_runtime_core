@@ -76,3 +76,26 @@ cases:
 
       call: |-
         arktest.assertEQ(0, OptionalMethodOwner.test(1))
+
+    - decl: |-
+        //This form with the default value can be used only for functions or methods with an implementation body
+        function foo(p: number | undefined = undefined)
+        function foo(...p: Any[]): Any {}
+      call: foo()
+
+    - decl: |-
+        //This form with the default value can be used only for functions or methods with an implementation body
+        class OMO {
+          foo(p: number | undefined = undefined)
+          foo(...p: Any[]): Any {}
+        }
+      call: let test = new OMO
+            test.foo()
+
+    - decl: |-
+        
+        class OMO {
+
+        }
+      call: let test = new OMO
+        test.foo()

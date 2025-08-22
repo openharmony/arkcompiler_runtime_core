@@ -339,3 +339,46 @@ cases:
           arktest.assertEQ(12, lc(12))
           arktest.assertEQ(42, lc())
         
+    - decl: |-
+        function foo(a?: number, ...rest: string[]): boolean {
+          return a === undefined && rest.length === 0
+        }
+      call: |-        
+        arktest.assertTrue(foo())
+
+    - decl: |-
+        function foo(a?: number, ...rest: readonly string[]): boolean {
+          return a === undefined && rest.length === 0
+        }
+      call: |-
+        arktest.assertTrue(foo())
+
+    - decl: |-
+        function foo(a?: number, ...rest: Array<String>): boolean {
+          return a === undefined && rest.length === 0
+        }
+      call: |-
+        arktest.assertTrue(foo())
+
+    - decl: |-
+        function foo(a?: number, ...rest: Array<String>): boolean {
+          return a === undefined && rest.length === 0
+        }
+      call: |-
+        const call: (...rest: Array<string>) => boolean = foo
+        arktest.assertTrue(call())
+        
+
+    - decl: |-
+        class AFoo {
+          static foo(a?: number, ...rest: string[]): boolean {
+            return a === undefined && rest.length === 0
+          }
+        }
+      call: |-
+        arktest.assertTrue(AFoo.foo())
+
+    - decl: |-
+      call: |-
+        let res = ((a?: number, ...rest:  string[]): boolean => { return true })()
+        arktest.assertTrue(res)
