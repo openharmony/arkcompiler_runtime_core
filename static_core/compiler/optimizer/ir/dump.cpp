@@ -109,41 +109,6 @@ void DumpUsers(const Inst *inst, std::ostream *out)
     }
 }
 
-ArenaString GetCondCodeToString(ConditionCode cc, ArenaAllocator *allocator)
-{
-    switch (cc) {
-        case ConditionCode::CC_EQ:
-            return ArenaString("EQ", allocator->Adapter());
-        case ConditionCode::CC_NE:
-            return ArenaString("NE", allocator->Adapter());
-
-        case ConditionCode::CC_LT:
-            return ArenaString("LT", allocator->Adapter());
-        case ConditionCode::CC_LE:
-            return ArenaString("LE", allocator->Adapter());
-        case ConditionCode::CC_GT:
-            return ArenaString("GT", allocator->Adapter());
-        case ConditionCode::CC_GE:
-            return ArenaString("GE", allocator->Adapter());
-
-        case ConditionCode::CC_B:
-            return ArenaString("B", allocator->Adapter());
-        case ConditionCode::CC_BE:
-            return ArenaString("BE", allocator->Adapter());
-        case ConditionCode::CC_A:
-            return ArenaString("A", allocator->Adapter());
-        case ConditionCode::CC_AE:
-            return ArenaString("AE", allocator->Adapter());
-
-        case ConditionCode::CC_TST_EQ:
-            return ArenaString("TST_EQ", allocator->Adapter());
-        case ConditionCode::CC_TST_NE:
-            return ArenaString("TST_NE", allocator->Adapter());
-        default:
-            UNREACHABLE();
-    }
-}
-
 ArenaString PcToString(uint32_t pc, ArenaAllocator *allocator)
 {
     std::ostringstream outString;
@@ -381,7 +346,7 @@ void CompareInst::DumpOpcode(std::ostream *out) const
     const auto &adapter = allocator->Adapter();
     ArenaString space(" ", adapter);
     ArenaString opcode(GetOpcodeString(GetOpcode()), adapter);
-    ArenaString cc(GetCondCodeToString(GetCc(), allocator), adapter);
+    ArenaString cc(GetConditionCodeString(GetCc()), adapter);
     ArenaString type(DataType::ToString(GetOperandsType()), adapter);
     (*out) << std::setw(INDENT_OPCODE) << opcode + space + cc + space + type;
 }
@@ -515,26 +480,55 @@ void LoadObjFromConstInst::DumpOpcode(std::ostream *out) const
     (*out) << std::setw(INDENT_OPCODE) << opcode << prefix << std::hex << GetObjPtr() << " ";
 }
 
+static ArenaString MakeOpcodeStringForSelectInsts(ArenaAllocator *allocator, Opcode opc, ConditionCode cc,
+                                                  DataType::Type type)
+{
+    ArenaString res(allocator->Adapter());
+    res.reserve(INDENT_OPCODE);
+    res += GetOpcodeString(opc);
+    res += ' ';
+    res += GetConditionCodeString(cc);
+    res += ' ';
+    res += DataType::ToString(type);
+    return res;
+}
+
+template <typename InstType>
+static void DumpOpcodeForSelectInsts(const InstType *inst, std::ostream *out)
+{
+    ArenaAllocator *allocator = inst->GetBasicBlock()->GetGraph()->GetLocalAllocator();
+    auto str = MakeOpcodeStringForSelectInsts(allocator, inst->GetOpcode(), inst->GetCc(), inst->GetOperandsType());
+    (*out) << std::setw(INDENT_OPCODE) << str;
+}
+
+template <typename InstType>
+static void DumpOpcodeForSelectTransformInsts(const InstType *inst, std::ostream *out)
+{
+    ArenaAllocator *allocator = inst->GetBasicBlock()->GetGraph()->GetLocalAllocator();
+    auto str = MakeOpcodeStringForSelectInsts(allocator, inst->GetOpcode(), inst->GetCc(), inst->GetOperandsType());
+    str += ' ';
+    str += GetSelectTransformTypeString(inst->GetSelectTransformType());
+    (*out) << std::setw(INDENT_OPCODE) << str;
+}
+
 void SelectInst::DumpOpcode(std::ostream *out) const
 {
-    auto allocator = GetBasicBlock()->GetGraph()->GetLocalAllocator();
-    const auto &adapter = allocator->Adapter();
-    ArenaString space(" ", adapter);
-    ArenaString opcode(GetOpcodeString(GetOpcode()), adapter);
-    ArenaString cc(GetCondCodeToString(GetCc(), allocator), adapter);
-    ArenaString type(DataType::ToString(GetOperandsType()), adapter);
-    (*out) << std::setw(INDENT_OPCODE) << opcode + space + cc + space + type;
+    DumpOpcodeForSelectInsts(this, out);
+}
+
+void SelectTransformInst::DumpOpcode(std::ostream *out) const
+{
+    DumpOpcodeForSelectTransformInsts(this, out);
 }
 
 void SelectImmInst::DumpOpcode(std::ostream *out) const
 {
-    auto allocator = GetBasicBlock()->GetGraph()->GetLocalAllocator();
-    const auto &adapter = allocator->Adapter();
-    ArenaString space(" ", adapter);
-    ArenaString opcode(GetOpcodeString(GetOpcode()), adapter);
-    ArenaString cc(GetCondCodeToString(GetCc(), allocator), adapter);
-    ArenaString type(DataType::ToString(GetOperandsType()), adapter);
-    (*out) << std::setw(INDENT_OPCODE) << opcode + space + cc + space + type;
+    DumpOpcodeForSelectInsts(this, out);
+}
+
+void SelectImmTransformInst::DumpOpcode(std::ostream *out) const
+{
+    DumpOpcodeForSelectTransformInsts(this, out);
 }
 
 void IfInst::DumpOpcode(std::ostream *out) const
@@ -543,7 +537,7 @@ void IfInst::DumpOpcode(std::ostream *out) const
     const auto &adapter = allocator->Adapter();
     ArenaString space(" ", adapter);
     ArenaString opcode(GetOpcodeString(GetOpcode()), adapter);
-    ArenaString cc(GetCondCodeToString(GetCc(), allocator), adapter);
+    ArenaString cc(GetConditionCodeString(GetCc()), adapter);
     ArenaString type(DataType::ToString(GetOperandsType()), adapter);
     (*out) << std::setw(INDENT_OPCODE) << opcode + space + cc + space + type;
 }
@@ -554,7 +548,7 @@ void IfImmInst::DumpOpcode(std::ostream *out) const
     const auto &adapter = allocator->Adapter();
     ArenaString space(" ", adapter);
     ArenaString opcode(GetOpcodeString(GetOpcode()), adapter);
-    ArenaString cc(GetCondCodeToString(GetCc(), allocator), adapter);
+    ArenaString cc(GetConditionCodeString(GetCc()), adapter);
     ArenaString type(DataType::ToString(GetOperandsType()), adapter);
     (*out) << std::setw(INDENT_OPCODE) << opcode + space + cc + space + type;
 }
@@ -930,7 +924,7 @@ void DeoptimizeCompareInst::DumpOpcode(std::ostream *out) const
     auto allocator = graph->GetLocalAllocator();
     const auto &adapter = allocator->Adapter();
     ArenaString opcode(ArenaString(GetOpcodeString(GetOpcode()), adapter).append(" "));
-    ArenaString cc(ArenaString(GetCondCodeToString(GetCc(), allocator), adapter).append(" "));
+    ArenaString cc(ArenaString(GetConditionCodeString(GetCc()), adapter).append(" "));
     ArenaString cmpType(ArenaString(DataType::ToString(GetOperandsType()), adapter).append(" "));
     ArenaString type(ArenaString(DeoptimizeTypeToString(GetDeoptimizeType()), adapter).append(" "));
     (*out) << std::setw(INDENT_OPCODE) << opcode.append(cc).append(cmpType).append(type);
@@ -942,7 +936,7 @@ void DeoptimizeCompareImmInst::DumpOpcode(std::ostream *out) const
     auto allocator = graph->GetLocalAllocator();
     const auto &adapter = allocator->Adapter();
     ArenaString opcode(ArenaString(GetOpcodeString(GetOpcode()), adapter).append(" "));
-    ArenaString cc(ArenaString(GetCondCodeToString(GetCc(), allocator), adapter).append(" "));
+    ArenaString cc(ArenaString(GetConditionCodeString(GetCc()), adapter).append(" "));
     ArenaString type(ArenaString(DeoptimizeTypeToString(GetDeoptimizeType()), adapter).append(" "));
     ArenaString cmpType(ArenaString(DataType::ToString(GetOperandsType()), adapter).append(" "));
     (*out) << std::setw(INDENT_OPCODE) << opcode.append(cc).append(cmpType).append(type);

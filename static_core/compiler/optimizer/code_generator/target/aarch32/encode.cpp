@@ -3066,7 +3066,7 @@ void Aarch32Encoder::EncodeStackOverflowCheck(ssize_t offset)
     EncodeLdr(tmp, false, MemRef(tmp));
 }
 
-void Aarch32Encoder::EncodeSelect(ArgsSelect &&args)
+void Aarch32Encoder::EncodeSelect(const ArgsSelect &args)
 {
     auto [dst, src0, src1, src2, src3, cc] = args;
     ASSERT(!src0.IsFloat() && !src1.IsFloat());
@@ -3082,7 +3082,7 @@ void Aarch32Encoder::EncodeSelect(ArgsSelect &&args)
     }
 }
 
-void Aarch32Encoder::EncodeSelect(ArgsSelectImm &&args)
+void Aarch32Encoder::EncodeSelect(const ArgsSelectImm &args)
 {
     auto [dst, src0, src1, src2, imm, cc] = args;
     ASSERT(!src0.IsFloat() && !src1.IsFloat() && !src2.IsFloat());
@@ -3130,7 +3130,7 @@ void Aarch32Encoder::EncodeSelect(ArgsSelectImm &&args)
     }
 }
 
-void Aarch32Encoder::EncodeSelectTest(ArgsSelect &&args)
+void Aarch32Encoder::EncodeSelectTest(const ArgsSelect &args)
 {
     auto [dst, src0, src1, src2, src3, cc] = args;
     ASSERT(!src0.IsFloat() && !src1.IsFloat() && !src2.IsFloat());
@@ -3146,7 +3146,7 @@ void Aarch32Encoder::EncodeSelectTest(ArgsSelect &&args)
     }
 }
 
-void Aarch32Encoder::EncodeSelectTest(ArgsSelectImm &&args)
+void Aarch32Encoder::EncodeSelectTest(const ArgsSelectImm &args)
 {
     auto [dst, src0, src1, src2, imm, cc] = args;
     ASSERT(!src0.IsFloat() && !src1.IsFloat() && !src2.IsFloat());

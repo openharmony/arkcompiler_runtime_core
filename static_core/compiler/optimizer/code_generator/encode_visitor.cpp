@@ -2283,36 +2283,81 @@ void EncodeVisitor::VisitSafePoint(GraphVisitor *visitor, Inst *inst)
     slowPath->BindBackLabel(encoder);
 }
 
+template <typename SelectInstType, typename = std::enable_if_t<!std::is_same_v<SelectInstType, Inst>>>
+static auto GetFourthOperandOfSelectInst(EncodeVisitor *enc, SelectInstType *inst)
+{
+    constexpr bool FOURTH_OPERAND_IS_IMM = std::is_base_of_v<ImmediateMixin, SelectInstType>;
+    if constexpr (FOURTH_OPERAND_IS_IMM) {
+        return Imm(inst->GetImm());
+    } else {
+        auto cmpType = inst->GetOperandsType();
+        return enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(3), cmpType);  // 3 : Index of 4th operand
+    }
+}
+
+template <typename SelectInstType, typename = std::enable_if_t<!std::is_same_v<SelectInstType, Inst>>>
+static auto DecomposeSelectInputs(EncodeVisitor *enc, SelectInstType *inst)
+{
+    constexpr int32_t IMM_2 = 2;
+    constexpr bool FOURTH_OPERAND_IS_IMM = std::is_base_of_v<ImmediateMixin, SelectInstType>;
+
+    auto [dst, src0, src1] = enc->GetCodegen()->ConvertRegisters<2U>(inst);
+    auto src2 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(IMM_2), inst->GetOperandsType());
+    auto src3OrImm = GetFourthOperandOfSelectInst(enc, inst);
+    auto cc = enc->GetCodegen()->ConvertCc(inst->GetCc());
+    if constexpr (std::is_same_v<SelectInstType, SelectTransformInst> ||
+                  std::is_same_v<SelectInstType, SelectImmTransformInst>) {
+        using ResultType =
+            std::conditional_t<FOURTH_OPERAND_IS_IMM, Encoder::ArgsSelectImmTransform, Encoder::ArgsSelectTransform>;
+        auto transform = inst->GetSelectTransformType();
+        return ResultType {dst, src0, src1, src2, src3OrImm, cc, transform};
+    } else {
+        using ResultType = std::conditional_t<FOURTH_OPERAND_IS_IMM, Encoder::ArgsSelectImm, Encoder::ArgsSelect>;
+        return ResultType {dst, src0, src1, src2, src3OrImm, cc};
+    }
+}
+
 void EncodeVisitor::VisitSelect(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
-    auto cmpType = inst->CastToSelect()->GetOperandsType();
-    constexpr int32_t IMM_2 = 2;
-    constexpr int32_t IMM_3 = 3;
-    auto [dst, src0, src1] = enc->GetCodegen()->ConvertRegisters<2U>(inst);
-    auto src2 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(IMM_2), cmpType);
-    auto src3 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(IMM_3), cmpType);
-    auto cc = enc->GetCodegen()->ConvertCc(inst->CastToSelect()->GetCc());
-    if (IsTestCc(cc)) {
-        enc->GetEncoder()->EncodeSelectTest({dst, src0, src1, src2, src3, cc});
+    auto encArgs = DecomposeSelectInputs(static_cast<EncodeVisitor *>(visitor), inst->CastToSelect());
+    if (IsTestCc(encArgs.cc)) {
+        enc->GetEncoder()->EncodeSelectTest(encArgs);
     } else {
-        enc->GetEncoder()->EncodeSelect({dst, src0, src1, src2, src3, cc});
+        enc->GetEncoder()->EncodeSelect(encArgs);
     }
 }
 
 void EncodeVisitor::VisitSelectImm(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
-    auto cmpType = inst->CastToSelectImm()->GetOperandsType();
-    constexpr int32_t IMM_2 = 2;
-    auto [dst, src0, src1] = enc->GetCodegen()->ConvertRegisters<2U>(inst);
-    auto src2 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(IMM_2), cmpType);
-    auto imm = Imm(inst->CastToSelectImm()->GetImm());
-    auto cc = enc->GetCodegen()->ConvertCc(inst->CastToSelectImm()->GetCc());
-    if (IsTestCc(cc)) {
-        enc->GetEncoder()->EncodeSelectTest({dst, src0, src1, src2, imm, cc});
+    auto encArgs = DecomposeSelectInputs(enc, inst->CastToSelectImm());
+    if (IsTestCc(encArgs.cc)) {
+        enc->GetEncoder()->EncodeSelectTest(encArgs);
     } else {
-        enc->GetEncoder()->EncodeSelect({dst, src0, src1, src2, imm, cc});
+        enc->GetEncoder()->EncodeSelect(encArgs);
+    }
+}
+
+void EncodeVisitor::VisitSelectTransform(GraphVisitor *visitor, Inst *inst)
+{
+    auto *enc = static_cast<EncodeVisitor *>(visitor);
+    auto encArgs = DecomposeSelectInputs(enc, inst->CastToSelectTransform());
+    if (IsTestCc(encArgs.cc)) {
+        enc->GetEncoder()->EncodeSelectTestTransform(encArgs);
+    } else {
+        enc->GetEncoder()->EncodeSelectTransform(encArgs);
+    }
+}
+
+void EncodeVisitor::VisitSelectImmTransform(GraphVisitor *visitor, Inst *inst)
+{
+    auto *enc = static_cast<EncodeVisitor *>(visitor);
+    auto encArgs = DecomposeSelectInputs(enc, inst->CastToSelectImmTransform());
+    if (IsTestCc(encArgs.cc)) {
+        enc->GetEncoder()->EncodeSelectTestTransform(encArgs);
+    } else {
+        enc->GetEncoder()->EncodeSelectTransform(encArgs);
     }
 }
 

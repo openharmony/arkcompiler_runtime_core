@@ -34,6 +34,7 @@
 #include "macros.h"
 #include "mem/arena_allocator.h"
 #include "opcodes.h"
+#include "optimizer/select_transform_type.h"
 #include "compiler_options.h"
 #include "runtime_interface.h"
 #include "spill_fill_data.h"
@@ -78,6 +79,7 @@ enum ConditionCode {
     CC_LAST = CC_TST_NE,
 };
 
+const char *GetConditionCodeString(ConditionCode code);
 ConditionCode GetInverseConditionCode(ConditionCode code);
 ConditionCode InverseSignednessConditionCode(ConditionCode code);
 bool IsSignedConditionCode(ConditionCode code);
@@ -2331,6 +2333,43 @@ protected:
     using CcFlag = typename T::LastField::template NextField<ConditionCode, MinimumBitsToStore(ConditionCode::CC_LAST)>;
     using PredictionFlag = typename CcFlag::template NextField<Prediction, MinimumBitsToStore(Prediction::SIZE)>;
     using LastField = PredictionFlag;
+};
+
+template <typename T>
+class SelectTransformTypeMixin : public T {
+public:
+    using T::T;
+    explicit SelectTransformTypeMixin(SelectTransformType type)
+    {
+        SetSelectTransformType(type);
+    }
+    NO_COPY_SEMANTIC(SelectTransformTypeMixin);
+    NO_MOVE_SEMANTIC(SelectTransformTypeMixin);
+    ~SelectTransformTypeMixin() override = default;
+
+    SelectTransformType GetSelectTransformType() const
+    {
+        return T::template GetField<SelectTransformTypeFlag>();
+    }
+
+    void SetSelectTransformType(SelectTransformType type)
+    {
+        T::template SetField<SelectTransformTypeFlag>(type);
+    }
+
+    Inst *Clone(const Graph *targetGraph) const override
+    {
+        auto *clone = T::Clone(targetGraph);
+        static_cast<SelectTransformTypeMixin *>(clone)->SetSelectTransformType(this->GetSelectTransformType());
+        return clone;
+    }
+
+protected:
+    SelectTransformTypeMixin() = default;
+
+    using SelectTransformTypeFlag =
+        typename T::LastField::template NextField<SelectTransformType, MinimumBitsToStore(SelectTransformType::LAST)>;
+    using LastField = SelectTransformType;
 };
 
 /// Mixin for instrucion with ShiftType
@@ -6325,10 +6364,25 @@ public:
     Inst *Clone(const Graph *targetGraph) const override
     {
         auto clone = FixedInputsInst::Clone(targetGraph);
-        ASSERT(clone->CastToSelect()->GetCc() == GetCc());
-        ASSERT(clone->CastToSelect()->GetOperandsType() == GetOperandsType());
+        ASSERT(static_cast<SelectInst *>(clone)->GetCc() == GetCc());
+        ASSERT(static_cast<SelectInst *>(clone)->GetOperandsType() == GetOperandsType());
         return clone;
     }
+};
+
+class PANDA_PUBLIC_API SelectTransformInst : public SelectTransformTypeMixin<SelectInst> {
+public:
+    using Base = SelectTransformTypeMixin<SelectInst>;
+    using Base::Base;
+
+    SelectTransformInst(Initializer t, DataType::Type operType, ConditionCode cc, SelectTransformType transform)
+        : Base(t, operType, cc)
+    {
+        SetSelectTransformType(transform);
+    }
+
+    void SetVnObject(VnObject *vnObj) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 };
 
 /// SelectImm with comparison with immediate
@@ -6366,11 +6420,27 @@ public:
     Inst *Clone(const Graph *targetGraph) const override
     {
         auto clone = FixedInputsInst::Clone(targetGraph);
-        ASSERT(clone->CastToSelectImm()->GetCc() == GetCc());
-        ASSERT(clone->CastToSelectImm()->GetOperandsType() == GetOperandsType());
-        clone->CastToSelectImm()->SetImm(GetImm());
+        ASSERT(static_cast<SelectImmInst *>(clone)->GetCc() == GetCc());
+        ASSERT(static_cast<SelectImmInst *>(clone)->GetOperandsType() == GetOperandsType());
+        static_cast<SelectImmInst *>(clone)->SetImm(GetImm());
         return clone;
     }
+};
+
+class PANDA_PUBLIC_API SelectImmTransformInst : public SelectTransformTypeMixin<SelectImmInst> {
+public:
+    using Base = SelectTransformTypeMixin<SelectImmInst>;
+    using Base::Base;
+
+    SelectImmTransformInst(Initializer t, uint64_t imm, DataType::Type operType, ConditionCode cc,
+                           SelectTransformType transform)
+        : Base(std::move(t), imm, operType, cc)
+    {
+        SetSelectTransformType(transform);
+    }
+
+    void SetVnObject(VnObject *vnObj) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 };
 
 /// Conditional jump instruction

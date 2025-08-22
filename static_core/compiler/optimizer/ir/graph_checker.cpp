@@ -2416,12 +2416,19 @@ void GraphChecker::VisitIsInstance([[maybe_unused]] GraphVisitor *v, [[maybe_unu
                                         (std::cerr << "Types of IsInstance must be BOOL:\n", inst->Dump(&std::cerr)));
 }
 
+// Shared by Select and SelectTransform
 void GraphChecker::VisitSelectWithReference([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
+    ASSERT(inst->GetOpcode() == Opcode::Select || inst->GetOpcode() == Opcode::SelectTransform);
     [[maybe_unused]] auto op1 = inst->GetInput(1).GetInst();
     [[maybe_unused]] auto op2 = inst->GetInput(2U).GetInst();
     [[maybe_unused]] auto op3 = inst->GetInput(3U).GetInst();
-    [[maybe_unused]] auto cc = inst->CastToSelect()->GetCc();
+    [[maybe_unused]] ConditionCode cc;
+    if (inst->GetOpcode() == Opcode::Select) {
+        cc = inst->CastToSelect()->GetCc();
+    } else {
+        cc = inst->CastToSelectTransform()->GetCc();
+    }
 
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
         v, cc == ConditionCode::CC_NE || cc == ConditionCode::CC_EQ,
@@ -2446,7 +2453,7 @@ void GraphChecker::VisitSelectWithReference([[maybe_unused]] GraphVisitor *v, [[
     }
 }
 
-void GraphChecker::VisitSelect([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
+void GraphChecker::VisitSelect(GraphVisitor *v, Inst *inst)
 {
     [[maybe_unused]] auto op0 = inst->GetInput(0).GetInst();
     [[maybe_unused]] auto op1 = inst->GetInput(1).GetInst();
@@ -2495,12 +2502,29 @@ void GraphChecker::VisitSelect([[maybe_unused]] GraphVisitor *v, [[maybe_unused]
     }
 }
 
-void GraphChecker::VisitSelectImmWithReference([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
+void GraphChecker::VisitSelectTransform(GraphVisitor *v, Inst *inst)
 {
+    VisitSelect(v, inst);
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v, DataType::GetCommonType(inst->GetType()) == DataType::INT64,
+        (std::cerr << "SelectTransform applies to integer types only\n", inst->Dump(&std::cerr)));
+}
+
+// Shared by SelectImm and SelectImmTransform
+void GraphChecker::VisitSelectImmWithReference([[maybe_unused]] GraphVisitor *v, Inst *inst)
+{
+    ASSERT(inst->GetOpcode() == Opcode::SelectImm || inst->GetOpcode() == Opcode::SelectImmTransform);
     [[maybe_unused]] auto op1 = inst->GetInput(1).GetInst();
     [[maybe_unused]] auto op2 = inst->GetInput(2U).GetInst();
-    [[maybe_unused]] auto op3 = inst->CastToSelectImm()->GetImm();
-    [[maybe_unused]] auto cc = inst->CastToSelectImm()->GetCc();
+    [[maybe_unused]] uint64_t op3;
+    [[maybe_unused]] ConditionCode cc;
+    if (inst->GetOpcode() == Opcode::SelectImm) {
+        op3 = inst->CastToSelectImm()->GetImm();
+        cc = inst->CastToSelectImm()->GetCc();
+    } else {
+        op3 = inst->CastToSelectImmTransform()->GetImm();
+        cc = inst->CastToSelectImmTransform()->GetCc();
+    }
 
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
         v, cc == ConditionCode::CC_NE || cc == ConditionCode::CC_EQ,
@@ -2519,8 +2543,10 @@ void GraphChecker::VisitSelectImmWithReference([[maybe_unused]] GraphVisitor *v,
         v, op3 == 0, (std::cerr << "Reference can be compared only with 0 immediate: \n", inst->Dump(&std::cerr)));
 }
 
+// Shared by SelectImm and SelectImmTransform
 void GraphChecker::VisitSelectImmNotReference([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
+    ASSERT(inst->GetOpcode() == Opcode::SelectImm || inst->GetOpcode() == Opcode::SelectImmTransform);
     [[maybe_unused]] auto op2 = inst->GetInput(2U).GetInst();
     [[maybe_unused]] bool isDynamic = static_cast<GraphChecker *>(v)->GetGraph()->IsDynamicMethod();
 
@@ -2531,7 +2557,12 @@ void GraphChecker::VisitSelectImmNotReference([[maybe_unused]] GraphVisitor *v, 
         "SelectImm 3rd operand type is not an integer or any");
 
     if (DataType::GetCommonType(op2->GetType()) == DataType::ANY) {
-        [[maybe_unused]] auto cc = inst->CastToSelectImm()->GetCc();
+        [[maybe_unused]] ConditionCode cc;
+        if (inst->GetOpcode() == Opcode::SelectImm) {
+            cc = inst->CastToSelectImm()->GetCc();
+        } else {
+            cc = inst->CastToSelectImmTransform()->GetCc();
+        }
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
             v, cc == ConditionCode::CC_NE || cc == ConditionCode::CC_EQ,
             (std::cerr << "SelectImm any comparison must be CC_NE or CC_EQ: \n", inst->Dump(&std::cerr)));
@@ -2582,6 +2613,14 @@ void GraphChecker::VisitSelectImm([[maybe_unused]] GraphVisitor *v, [[maybe_unus
     } else {
         VisitSelectImmNotReference(v, inst);
     }
+}
+
+void GraphChecker::VisitSelectImmTransform(GraphVisitor *v, Inst *inst)
+{
+    VisitSelectImm(v, inst);
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v, DataType::GetCommonType(inst->GetType()) == DataType::INT64,
+        (std::cerr << "SelectImmTransform applies to integer types only\n", inst->Dump(&std::cerr)));
 }
 
 void GraphChecker::VisitIf(GraphVisitor *v, Inst *inst)
@@ -2885,6 +2924,32 @@ VISIT_BINARY_SHIFTED_REGISTER(AndNotSR)
 VISIT_BINARY_SHIFTED_REGISTER(OrNotSR)
 VISIT_BINARY_SHIFTED_REGISTER(XorNotSR)
 #undef VISIT_BINARY_SHIFTED_REGISTER
+
+void GraphChecker::VisitExtractBitfield(GraphVisitor *v, Inst *inst)
+{
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v, DataType::GetCommonType(inst->GetType()) == DataType::INT64,
+        (std::cerr << "ExtractBitfield must have integer type\n", inst->Dump(&std::cerr)));
+    CheckUnaryOperationTypes(v, inst);
+
+    ExtractBitfieldInst *bfx = inst->CastToExtractBitfield();
+    auto arch = inst->GetBasicBlock()->GetGraph()->GetArch();
+    [[maybe_unused]] auto sourceBit = bfx->GetSourceBit();
+    [[maybe_unused]] auto width = bfx->GetWidth();
+    [[maybe_unused]] auto sourceTypeSize = DataType::GetTypeSize(bfx->GetInput(0).GetInst()->GetType(), arch);
+
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v, sourceBit < sourceTypeSize,
+        (std::cerr << "source bit of ExtractBitfield must be < size bits of input which is " << sourceTypeSize << "\n",
+         inst->Dump(&std::cerr)));
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v, width > 0, (std::cerr << "width of ExtractBitfield must be > 0\n", inst->Dump(&std::cerr)));
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v, sourceBit + width <= sourceTypeSize,
+        (std::cerr << "source bit + width of ExtractBitfield must be <= size bits of input which is " << sourceTypeSize
+                   << "\n",
+         inst->Dump(&std::cerr)));
+}
 
 void GraphChecker::VisitNegSR(GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {

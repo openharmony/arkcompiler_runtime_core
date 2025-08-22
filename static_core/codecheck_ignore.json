@@ -12,6 +12,7 @@
   "compiler/optimizer/ir/ir_constructor.h": {"huge_method": "*"},
   "compiler/optimizer/optimizations/simplify_string_builder.cpp": "*",
   "compiler/optimizer/ir/visitor.inc": "*",
+  "compiler/tests/if_conversion_test.cpp": {"G.CNS.02-CPP": "*"},
   "compiler/tests/lowering_test.cpp": {"G.CNS.02-CPP": "*"},
   "cross_values": "*",
   "docs": "*",

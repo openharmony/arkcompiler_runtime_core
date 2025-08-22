@@ -236,6 +236,8 @@ private:
                                                              [[maybe_unused]] Inst *inst);
     static PANDA_PUBLIC_API void VisitSelectImmNotReference([[maybe_unused]] GraphVisitor *v,
                                                             [[maybe_unused]] Inst *inst);
+    static PANDA_PUBLIC_API void VisitSelectTransform(GraphVisitor *v, Inst *inst);
+    static PANDA_PUBLIC_API void VisitSelectImmTransform(GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitIf([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitIfImm([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitTry([[maybe_unused]] GraphVisitor *v, Inst *inst);
@@ -254,6 +256,7 @@ private:
     static PANDA_PUBLIC_API void VisitAndNotSR(GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitOrNotSR(GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitXorNotSR(GraphVisitor *v, Inst *inst);
+    static PANDA_PUBLIC_API void VisitExtractBitfield(GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitNegSR([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
     static PANDA_PUBLIC_API void VisitCompareAnyType(GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitCastAnyTypeValue(GraphVisitor *v, Inst *inst);

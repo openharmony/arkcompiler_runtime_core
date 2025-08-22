@@ -247,6 +247,8 @@ bool Pointer::IsEscapingAlias(const Inst *inst)
             case Opcode::CatchPhi:
             case Opcode::Select:
             case Opcode::SelectImm:
+            case Opcode::SelectTransform:
+            case Opcode::SelectImmTransform:
             case Opcode::CastValueToAnyType:
             case Opcode::CastAnyTypeValue:
                 // Propagate isLocal from users

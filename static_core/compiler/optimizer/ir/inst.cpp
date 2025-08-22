@@ -21,6 +21,41 @@
 #include "profiling/profiling.h"
 
 namespace ark::compiler {
+const char *GetConditionCodeString(ConditionCode code)
+{
+    switch (code) {
+        case ConditionCode::CC_EQ:
+            return "EQ";
+        case ConditionCode::CC_NE:
+            return "NE";
+
+        case ConditionCode::CC_LT:
+            return "LT";
+        case ConditionCode::CC_LE:
+            return "LE";
+        case ConditionCode::CC_GT:
+            return "GT";
+        case ConditionCode::CC_GE:
+            return "GE";
+
+        case ConditionCode::CC_B:
+            return "B";
+        case ConditionCode::CC_BE:
+            return "BE";
+        case ConditionCode::CC_A:
+            return "A";
+        case ConditionCode::CC_AE:
+            return "AE";
+
+        case ConditionCode::CC_TST_EQ:
+            return "TST_EQ";
+        case ConditionCode::CC_TST_NE:
+            return "TST_NE";
+        default:
+            UNREACHABLE();
+            return nullptr;  // Dummy
+    }
+}
 
 ConditionCode GetInverseConditionCode(ConditionCode code)
 {
@@ -422,12 +457,29 @@ void SelectInst::SetVnObject(VnObject *vnObj) const
     vnObj->Add(static_cast<uint32_t>(GetCc()));
 }
 
+void SelectTransformInst::SetVnObject(VnObject *vnObj) const
+{
+    AppendOpcodeAndTypeToVnObject(vnObj);
+    AppendInputsToVnObject(vnObj);
+    vnObj->Add(static_cast<VnObject::HalfObjType>(GetCc()),
+               static_cast<VnObject::HalfObjType>(GetSelectTransformType()));
+}
+
 void SelectImmInst::SetVnObject(VnObject *vnObj) const
 {
     AppendOpcodeAndTypeToVnObject(vnObj);
     AppendInputsToVnObject(vnObj);
-    vnObj->Add(static_cast<VnObject::ObjType>(GetCc()));
     vnObj->Add(GetImm());
+    vnObj->Add(static_cast<VnObject::ObjType>(GetCc()));
+}
+
+void SelectImmTransformInst::SetVnObject(VnObject *vnObj) const
+{
+    AppendOpcodeAndTypeToVnObject(vnObj);
+    AppendInputsToVnObject(vnObj);
+    vnObj->Add(GetImm());
+    vnObj->Add(static_cast<VnObject::HalfObjType>(GetCc()),
+               static_cast<VnObject::HalfObjType>(GetSelectTransformType()));
 }
 
 void IfInst::SetVnObject(VnObject *vnObj) const

@@ -261,7 +261,9 @@ bool Pipeline::RunOptimizations()
     graph->RunPass<Cleanup>(false);
     graph->RunPass<CodeSink>();
     graph->RunPass<MemoryCoalescing>(g_options.IsCompilerMemoryCoalescingAligned());
-    graph->RunPass<IfConversion>(g_options.GetCompilerIfConversionLimit());
+    if (graph->RunPass<IfConversion>(g_options.GetCompilerIfConversionLimit())) {
+        graph->RunPass<Cleanup>();
+    }
     graph->RunPass<Scheduler>();
     // Perform MoveConstants after Scheduler because Scheduler can rearrange constants
     // and cause spillfill in reg alloc

@@ -2850,59 +2850,122 @@ void Aarch64Encoder::EncodeCmp(Reg dst, Reg src0, Reg src1, Condition cc)
     GetMasm()->Cneg(VixlReg(Promote(dst)), VixlReg(Promote(dst)), Convert(cc));
 }
 
-void Aarch64Encoder::EncodeSelect(ArgsSelect &&args)
+static void EncodeCmpForSelect(Aarch64Encoder *enc, Reg src2, Reg src3)
 {
-    auto [dst, src0, src1, src2, src3, cc] = args;
     if (src2.IsScalar()) {
-        GetMasm()->Cmp(VixlReg(src2), VixlReg(src3));
+        enc->GetMasm()->Cmp(VixlReg(src2), VixlReg(src3));
     } else {
-        GetMasm()->Fcmp(VixlVReg(src2), VixlVReg(src3));
-    }
-    if (dst.IsFloat()) {
-        GetMasm()->Fcsel(VixlVReg(dst), VixlVReg(src0), VixlVReg(src1), Convert(cc));
-    } else {
-        GetMasm()->Csel(VixlReg(dst), VixlReg(src0), VixlReg(src1), Convert(cc));
+        enc->GetMasm()->Fcmp(VixlVReg(src2), VixlVReg(src3));
     }
 }
 
-void Aarch64Encoder::EncodeSelect(ArgsSelectImm &&args)
+static void EncodeCmpForSelectImm(Aarch64Encoder *enc, Reg src2, Imm imm)
 {
-    auto [dst, src0, src1, src2, imm, cc] = args;
     if (src2.IsScalar()) {
-        GetMasm()->Cmp(VixlReg(src2), VixlImm(imm));
+        enc->GetMasm()->Cmp(VixlReg(src2), VixlImm(imm));
     } else {
-        GetMasm()->Fcmp(VixlVReg(src2), imm.GetAsDouble());
-    }
-    if (dst.IsFloat()) {
-        GetMasm()->Fcsel(VixlVReg(dst), VixlVReg(src0), VixlVReg(src1), Convert(cc));
-    } else {
-        GetMasm()->Csel(VixlReg(dst), VixlReg(src0), VixlReg(src1), Convert(cc));
+        enc->GetMasm()->Fcmp(VixlVReg(src2), imm.GetAsDouble());
     }
 }
 
-void Aarch64Encoder::EncodeSelectTest(ArgsSelect &&args)
+static void EncodeTstForSelect(Aarch64Encoder *enc, Reg src2, Reg src3)
 {
-    auto [dst, src0, src1, src2, src3, cc] = args;
     ASSERT(!src2.IsFloat() && !src3.IsFloat());
-    GetMasm()->Tst(VixlReg(src2), VixlReg(src3));
+    enc->GetMasm()->Tst(VixlReg(src2), VixlReg(src3));
+}
+
+static void EncodeTstForSelectImm(Aarch64Encoder *enc, Reg src2, Imm imm)
+{
+    ASSERT(!src2.IsFloat());
+    ASSERT(enc->CanEncodeImmLogical(imm.GetAsInt(), src2.GetSize() > WORD_SIZE ? DOUBLE_WORD_SIZE : WORD_SIZE));
+    enc->GetMasm()->Tst(VixlReg(src2), VixlImm(imm));
+}
+
+static void EncodeCselForSelect(Aarch64Encoder *enc, Reg dst, Reg src0, Reg src1, Condition cc)
+{
+    auto ccConverted = IsTestCc(cc) ? ConvertTest(cc) : Convert(cc);
     if (dst.IsFloat()) {
-        GetMasm()->Fcsel(VixlVReg(dst), VixlVReg(src0), VixlVReg(src1), ConvertTest(cc));
+        enc->GetMasm()->Fcsel(VixlVReg(dst), VixlVReg(src0), VixlVReg(src1), ccConverted);
     } else {
-        GetMasm()->Csel(VixlReg(dst), VixlReg(src0), VixlReg(src1), ConvertTest(cc));
+        enc->GetMasm()->Csel(VixlReg(dst), VixlReg(src0), VixlReg(src1), ccConverted);
     }
 }
 
-void Aarch64Encoder::EncodeSelectTest(ArgsSelectImm &&args)
+// CC-OFFNXT(G.FUN.01-CPP) Internal helper function
+static void EncodeCselTransformForSelect(Aarch64Encoder *enc, Reg dst, Reg src0, Reg src1, Condition cc,
+                                         SelectTransformType transform)
+{
+    ASSERT(!dst.IsFloat());
+    auto encodeFn = [transform]() {
+        switch (transform) {
+            case SelectTransformType::INC:
+                return &vixl::aarch64::MacroAssembler::Csinc;
+            case SelectTransformType::INV:
+                return &vixl::aarch64::MacroAssembler::Csinv;
+            case SelectTransformType::NEG:
+                return &vixl::aarch64::MacroAssembler::Csneg;
+            default:
+                UNREACHABLE();
+        }
+    }();
+    auto ccConverted = IsTestCc(cc) ? ConvertTest(cc) : Convert(cc);
+    (enc->GetMasm()->*encodeFn)(VixlReg(dst), VixlReg(src0), VixlReg(src1), ccConverted);
+}
+
+void Aarch64Encoder::EncodeSelect(const ArgsSelect &args)
+{
+    auto [dst, src0, src1, src2, src3, cc] = args;
+    EncodeCmpForSelect(this, src2, src3);
+    EncodeCselForSelect(this, dst, src0, src1, cc);
+}
+
+void Aarch64Encoder::EncodeSelect(const ArgsSelectImm &args)
 {
     auto [dst, src0, src1, src2, imm, cc] = args;
-    ASSERT(!src2.IsFloat());
-    ASSERT(CanEncodeImmLogical(imm.GetAsInt(), src2.GetSize() > WORD_SIZE ? DOUBLE_WORD_SIZE : WORD_SIZE));
-    GetMasm()->Tst(VixlReg(src2), VixlImm(imm));
-    if (dst.IsFloat()) {
-        GetMasm()->Fcsel(VixlVReg(dst), VixlVReg(src0), VixlVReg(src1), ConvertTest(cc));
-    } else {
-        GetMasm()->Csel(VixlReg(dst), VixlReg(src0), VixlReg(src1), ConvertTest(cc));
-    }
+    EncodeCmpForSelectImm(this, src2, imm);
+    EncodeCselForSelect(this, dst, src0, src1, cc);
+}
+
+void Aarch64Encoder::EncodeSelectTransform(const ArgsSelectTransform &args)
+{
+    auto [dst, src0, src1, src2, src3, cc, transform] = args;
+    EncodeCmpForSelect(this, src2, src3);
+    EncodeCselTransformForSelect(this, dst, src0, src1, cc, transform);
+}
+
+void Aarch64Encoder::EncodeSelectTransform(const ArgsSelectImmTransform &args)
+{
+    auto [dst, src0, src1, src2, imm, cc, transform] = args;
+    EncodeCmpForSelectImm(this, src2, imm);
+    EncodeCselTransformForSelect(this, dst, src0, src1, cc, transform);
+}
+
+void Aarch64Encoder::EncodeSelectTest(const ArgsSelect &args)
+{
+    auto [dst, src0, src1, src2, src3, cc] = args;
+    EncodeTstForSelect(this, src2, src3);
+    EncodeCselForSelect(this, dst, src0, src1, cc);
+}
+
+void Aarch64Encoder::EncodeSelectTest(const ArgsSelectImm &args)
+{
+    auto [dst, src0, src1, src2, imm, cc] = args;
+    EncodeTstForSelectImm(this, src2, imm);
+    EncodeCselForSelect(this, dst, src0, src1, cc);
+}
+
+void Aarch64Encoder::EncodeSelectTestTransform(const ArgsSelectTransform &args)
+{
+    auto [dst, src0, src1, src2, src3, cc, transform] = args;
+    EncodeTstForSelect(this, src2, src3);
+    EncodeCselTransformForSelect(this, dst, src0, src1, cc, transform);
+}
+
+void Aarch64Encoder::EncodeSelectTestTransform(const ArgsSelectImmTransform &args)
+{
+    auto [dst, src0, src1, src2, imm, cc, transform] = args;
+    EncodeTstForSelectImm(this, src2, imm);
+    EncodeCselTransformForSelect(this, dst, src0, src1, cc, transform);
 }
 
 void Aarch64Encoder::EncodeLdp(Reg dst0, Reg dst1, bool dstSigned, MemRef mem)
@@ -3170,6 +3233,11 @@ bool Aarch64Encoder::CanEncodeShiftedOperand(ShiftOpcode opcode, ShiftType shift
 bool Aarch64Encoder::CanEncodeFloatSelect()
 {
     return true;
+}
+
+bool Aarch64Encoder::CanEncodeSelectTransformFor(DataType::Type type)
+{
+    return type == DataType::INT32 || type == DataType::INT64 || type == DataType::UINT32 || type == DataType::UINT64;
 }
 
 bool Aarch64Encoder::CanEncodeBitfieldExtractionFor(DataType::Type type)
