@@ -260,12 +260,14 @@ Format:
 | ----                   | ------          | ----------- |
 | `magic`                | `uint8_t[8]`    | Magic string. Must be 'P' 'A' 'N' 'D' 'A' '\\0' '\\0' '\\0' |
 | `checksum`             | `uint8_t[4]`    | adler32 checksum of the file except magic and checksum fields. |
-| `version`              | `uint8_t[4]`    | Version of the format. Current version is 0002. |
+| `version`              | `uint8_t[4]`    | Version of the format. Current version is 0006. |
 | `file_size`            | `uint32_t`      | Size of the file in bytes. |
 | `foreign_off`          | `uint32_t`      | Offset to a foreign region. The region must contain elements of types only [ForeignField](#foreignfield), [ForeignMethod](#foreignmethod), or [ForeignClass](#foreignclass). Using `foreign_off` points to the first entity is not necessary. Runtime must use `foreign_off` and `foreign_size` to determine the type of offset. |
 | `foreign_size`         | `uint32_t`      | Size of the foreign region in bytes. |
 | `num_classes`          | `uint32_t`      | Number of classes defined in the file. This is also the number of elements in the [ClassIndex](#classindex) structure. |
 | `class_idx_off`        | `uint32_t`      | Offset to the class index structure. The offset must point to a structure in [ClassIndex](#classindex) format. |
+| `num_export_table`    | `uint32_t`      | Number of exported classes defined in the file. The number can also be zero since the field is optional.  |
+| `export_table_off`    | `uint32_t`      | Offset to the exported class index structure. The offset must point to a structure in [ClassIndex](#classindex) |
 | `num_lnps`             | `uint32_t`      | Number of line number programs in the file. This is also the number of elements in the [LineNumberProgramIndex](#linenumberprogramindex) structure. |
 | `lnp_idx_off`          | `uint32_t`      | Offset to the line number program index structure. The offset must point to a structure in [LineNumberProgramIndex](#linenumberprogramindex) format. |
 | `num_literalarrays`    | `uint32_t`      | Number of literalArrays defined in the file. This is also the number of elements in the [LiteralArrayIndex](#literalarrayindex) structure. |

@@ -38,7 +38,7 @@ TEST_F(LibAbcKitInspectApiFilesTest, StaticFileGetVersion)
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/files/file_static.abc", &file);
 
     AbckitFileVersion version = g_implI->fileGetVersion(file);
-    std::array<uint8_t, ABCKIT_VERSION_SIZE> expectedVersion = {0, 0, 0, 5};
+    std::array<uint8_t, ABCKIT_VERSION_SIZE> expectedVersion = {0, 0, 0, 6};
 
     const auto versionsEquality = std::memcmp(expectedVersion.data(), version, sizeof(uint8_t) * ABCKIT_VERSION_SIZE);
     ASSERT_EQ(versionsEquality, 0);

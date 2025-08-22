@@ -65,6 +65,8 @@ public:
         uint32_t quickenedFlag;
         uint32_t numClasses;
         uint32_t classIdxOff;
+        uint32_t numExportTable;
+        uint32_t exportTableOff;
         uint32_t numLnps;
         uint32_t lnpIdxOff;
         uint32_t numLiteralarrays;
@@ -192,6 +194,14 @@ public:
         Span file(GetBase(), header->fileSize);
         Span classIdxData = file.SubSpan(header->classIdxOff, header->numClasses * sizeof(uint32_t));
         return Span(reinterpret_cast<const uint32_t *>(classIdxData.data()), header->numClasses);
+    }
+
+    Span<const uint32_t> GetExported() const
+    {
+        const Header *header = GetHeader();
+        Span file(GetBase(), header->fileSize);
+        Span exportedIdxData = file.SubSpan(header->exportTableOff, header->numExportTable * sizeof(uint32_t));
+        return Span(reinterpret_cast<const uint32_t *>(exportedIdxData.data()), header->numExportTable);
     }
 
     Span<const uint32_t> GetLiteralArrays() const
