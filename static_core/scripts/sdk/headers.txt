@@ -1,4 +1,3 @@
-abc2program
 compiler/aot
 compiler/code_info
 compiler/compiler_options.h
