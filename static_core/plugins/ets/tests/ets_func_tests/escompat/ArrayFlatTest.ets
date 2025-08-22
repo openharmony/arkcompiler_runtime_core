@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+/*---
+ark_options: ['--compiler-inlining=false']
+---*/
+// NOTE(mgroshev): remove ark_options after #29029
+
 function compareString(first: string, second: string) {
     arktest.assertEQ(first, second)
 }

@@ -260,7 +260,7 @@ int main()
     }
     std::array optionsArray = {
         ani_option {bootFileString.c_str(), nullptr},
-        ani_option {"--ext:verification-mode=on-the-fly", nullptr},
+        ani_option {"--ext:verification-mode=ahead-of-time", nullptr},
         ani_option {"--ext:gc-type=g1-gc", nullptr},
     };
     ani_options options = {optionsArray.size(), optionsArray.data()};

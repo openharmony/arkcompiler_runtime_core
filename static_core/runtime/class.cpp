@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -104,7 +104,8 @@ Class::Class(const uint8_t *descriptor, panda_file::SourceLang lang, uint32_t vt
 }
 void Class::SetState(Class::State state)
 {
-    if (state_ == State::ERRONEOUS || state < state_ || (state_ == State::LOADED && state == State::INITIALIZED)) {
+    if ((state_ == State::ERRONEOUS && state != State::ERRONEOUS) || state < state_ ||
+        (state_ == State::LOADED && state == State::INITIALIZED)) {
         LOG(FATAL, RUNTIME) << "Invalid class state transition " << state_ << " -> " << state;
     }
 

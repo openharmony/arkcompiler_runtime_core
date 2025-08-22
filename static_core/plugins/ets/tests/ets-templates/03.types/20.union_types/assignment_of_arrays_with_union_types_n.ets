@@ -18,7 +18,9 @@
 /*---
 desc: {{c.desc}}
 tags: [compile-only, negative]
+ark_options: ['--compiler-inlining=false']
 ---*/
+// NOTE(mgroshev): remove ark_options after #29029
 
 {{c.class}}
 {{c.function}}
