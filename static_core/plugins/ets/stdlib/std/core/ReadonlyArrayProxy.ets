@@ -146,8 +146,8 @@ class ReadonlyArrayProxy<T> implements ReadonlyArray<T> {
     	return this.target.at(index)
     }
 
-    override $_get(index: number): T {
-    	return this.handler.get(this.target, index.toInt())
+    override $_get(index: int): T {
+    	return this.handler.get(this.target, index)
     }
 
     get length(): int {

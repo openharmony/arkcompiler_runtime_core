@@ -74,10 +74,6 @@ function createArraySetAndGet(): int {
             console.println("Data mismatch for {{.item.objectType}} " + " expected: " + source[i] + " at " + i + " but actual: " + back);
             return fail;
         }
-        if (target[i.toInt()] != target[i.toDouble()]) {
-            console.println("Data mismatch for $_get(int) and $_get(number): " + target[i.toInt()] + " vs " + target[i.toDouble()]);
-            return fail;
-        }
     }
 
     // NOTE: comparison of target that filled by set(int, {{.item.type}}) vs target2.$_set(number, {{.item.type}})
@@ -89,17 +85,13 @@ function createArraySetAndGet(): int {
     }
     for (let i: int = 0; i < source.length; i++) {
         try {
-            target2[i.toDouble()] = source[i] as {{.item.primitiveType}};
+            target2[i] = source[i] as {{.item.primitiveType}};
         } catch(e) {
             console.print("Catched error at insert via $_set(number, {{.item.type}})");
             return fail;
         }
         if (target[i] != target2[i]) {
             console.print("Data mismatch for $_get(int) vs $_get(int) filled by set(int, {{.item.type}}) vs $_set(number, {{.item.type}})");
-            return fail;
-        }
-        if (target[i.toDouble()] != target2[i.toDouble()]) {
-            console.print("Data mismatch for $_get(number) vs $_get(number) filled by set(int, {{.item.type}}) vs $_set(number, {{.item.type}})");
             return fail;
         }
     }

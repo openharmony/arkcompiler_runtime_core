@@ -40,7 +40,7 @@ export namespace url {
     */
     class Helper {
         static ASCII_32: number = 32;
-        static ASCII_127: number = 127;
+        static ASCII_127: int = 127;
         static specialCharForBit: Array<number> = new Array<number>(128);
         static head: Map<string, number> = new Map<string, number>();
         static doubleSegment = new Array<string>("..", ".%2e", ".%2E", "%2e.", "%2E.",
@@ -62,7 +62,7 @@ export namespace url {
                 Helper.specialCharForBit[i] = 1;
             }
             for (let i = 0; i < specialSymbolsTmp.length; i++) {
-                let specialChar = specialSymbolsTmp[i].charCodeAt(0);
+                let specialChar = specialSymbolsTmp[i].charCodeAt(0).toInt();
                 Helper.specialCharForBit[specialChar] = 1;
             }
             Helper.specialCharForBit[Helper.ASCII_127] = 1;
@@ -177,7 +177,7 @@ export namespace url {
     function checkCharacter(input: string) {
         let inputLen = input.length;
         for (let i = 0; i < inputLen; i++) {
-            let charPos: number = input.charCodeAt(i);
+            let charPos: int = input.charCodeAt(i).toInt();
             if (charPos >= 0 && charPos < 128) {
                 if (Helper.specialCharForBit[charPos]) {
                     return false;
@@ -396,7 +396,7 @@ export namespace url {
         return num;
     }
 
-    function getFormatIPv4Index(nums: Array<string>): number {
+    function getFormatIPv4Index(nums: Array<string>): int {
         let len = nums.length;
         for (let i = 0; i < len; i++) {
             if (nums[i].length > 8) {
@@ -607,8 +607,8 @@ export namespace url {
         }
 
         private formatIPv4(nums: Array<string>) {
-            let len: number = nums.length;
-            let index: number = getFormatIPv4Index(nums);
+            let len: int = nums.length;
+            let index: int = getFormatIPv4Index(nums);
             let res: string = "";
             if (index == -1) {
                 for (let i = 0; i < len - 1; i++) {
@@ -644,7 +644,7 @@ export namespace url {
             let isIPv4: boolean = false;
             isIPv4 = this.removalIPv4(input);
             let temp = this.ipv4Array;
-            let tempLen: number = temp.length;
+            let tempLen: int = temp.length;
             let lastSize: number = temp[tempLen - 1].length;
             if (isIPv4 && lastSize > 8) {
                 this.flags[INDEX_INVALID] = true;
@@ -2379,7 +2379,7 @@ export namespace url {
             let key: string = '';
             let value: string = '';
             const regStr = '%20';
-            for (let pos: number = 0; pos < arrayLen; pos += 2) { // 2:Even subscripts exist as key values
+            for (let pos: int = 0; pos < arrayLen; pos += 2) { // 2:Even subscripts exist as key values
                 key = encodePercentEncoding(array[pos], Helper.PARAMS_TOSTRING_SIGN_CHARS).replaceAll(regStr, '+');
                 value = encodePercentEncoding(array[pos + 1], Helper.PARAMS_TOSTRING_SIGN_CHARS).replaceAll(regStr, '+');
                 resultArray.push(`${pos > 0 ? '&' : ''}${key}=${value}`);
@@ -2535,8 +2535,8 @@ export namespace url {
         // Process '%' encoding
         const handlePercentEncoding = () => {
             if (srcIndex + 2 < s.length) {
-                const hex1 = Helper.unhexTable[s.charCodeAt(srcIndex + 1)];
-                const hex2 = Helper.unhexTable[s.charCodeAt(srcIndex + 2)];
+                const hex1 = Helper.unhexTable[s.charCodeAt(srcIndex + 1).toInt()];
+                const hex2 = Helper.unhexTable[s.charCodeAt(srcIndex + 2).toInt()];
 
                 if (hex1 !== -1 && hex2 !== -1) {
                     outBuffer[outIndex++] = hex1 * 16 + hex2;
@@ -2691,7 +2691,7 @@ export namespace url {
         const UNICODE_0x10000 = 0x10000;
         outer:
         for (; i < len; i++) {
-            let c = str.charCodeAt(i.toDouble());
+            let c = str.charCodeAt(i).toInt();
 
             // ASCII
             while (c < UNICODE_0x80) {
@@ -2705,7 +2705,7 @@ export namespace url {
                 if (++i == len)
                     break outer;
 
-                c = str.charCodeAt(i);
+                c = str.charCodeAt(i).toInt();
             }
 
             if (lastPos < i)
@@ -2728,7 +2728,7 @@ export namespace url {
             // Surrogate pair
             ++i;
 
-            const c2 = str.charCodeAt(i) & UNICODE_0x3FF;
+            const c2 = str.charCodeAt(i).toInt() & UNICODE_0x3FF;
 
             lastPos = i + 1;
             c = UNICODE_0x10000 + (((c & UNICODE_0x3FF) << 10) | c2);

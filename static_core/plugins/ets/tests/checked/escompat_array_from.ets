@@ -46,12 +46,11 @@ class ArrayLikeImplTest<T> implements ArrayLike<T> {
     private buffer: NullishType[]
     internal actualLength: int
 
-    override $_get(index: number): T {
-        let idx = index as int;
-        if ((idx  < 0) || (idx >= this.actualLength)) {
+    override $_get(index: int): T {
+        if ((index  < 0) || (index >= this.actualLength)) {
             throw new RangeError("Out of bounds");
         }
-        return this.buffer[idx] as T;
+        return this.buffer[index] as T;
     }
 
     get length(): int {

@@ -1079,7 +1079,7 @@ class JSONWriter {
                 if (hasJsonIgnore || field.isStatic()) {
                     continue
                 }
-                const index: number = this.findKeyIndex(field, writableFields)
+                const index: int = this.findKeyIndex(field, writableFields).toInt()
                 fieldRename = JSONAPI.getJSONRenameByIdx(classType.cls, fieldIdx);
                 if (fieldRename != undefined) {
                     if (classType.hasField(fieldRename)) {

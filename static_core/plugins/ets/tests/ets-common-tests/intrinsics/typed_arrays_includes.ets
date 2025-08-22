@@ -247,7 +247,7 @@ function testF64ArrayNaN() {
         arktest.assertLT(1, arr.length);
         const positionOfVal: number = positionOfNaN < 4 ? 4 : 3;
         arktest.assertLT(positionOfVal, arr.length);
-        const value: number = arr[positionOfVal];
+        const value: number = arr[positionOfVal.toInt()];
         arktest.assertFalse(isNaN(value));
         checkArray(arr, value, true);
         checkArray(arr, value, true, positionOfVal);
@@ -306,7 +306,7 @@ function testF32ArrayNaN() {
         arktest.assertLT(1, arr.length);
         const positionOfVal: number = positionOfNaN < 5 ? 5 : 4;
         arktest.assertLT(positionOfVal, arr.length);
-        const value: number = arr[positionOfVal];
+        const value: number = arr[positionOfVal.toInt()];
         arktest.assertFalse(isNaN(value));
         checkArray(arr, 0, true);
         checkArray(arr, Infinity, true);

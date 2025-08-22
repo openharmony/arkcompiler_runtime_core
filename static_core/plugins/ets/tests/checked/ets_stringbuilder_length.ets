@@ -57,7 +57,7 @@ function StringCalculation00() {
 
   let resources: Int32Array = GenerateFakeRandomInteger();
   for (let i: int = 0; i < count; i++) {
-    if (resources[i % res.length % 15].toInt() > resources[(i + resources[i % 15].toInt()) % res.length % 15].toInt()) {
+    if (resources[i % res.length.toInt() % 15].toInt() > resources[(i + resources[i % 15].toInt()) % res.length.toInt() % 15].toInt()) {
       res += str1 + i;
     } else {
       res += str1;
@@ -134,7 +134,7 @@ function StringCalculation02() {
     for (let i: int = 0; i < outterCount; i++) {
         res += str2 + i;
         for (let j: int = 0; j < innerCount; j++) {
-          if (resources[j % res.length % 15].toInt() > resources[(j + resources[i % 15].toInt()) % res.length % 15].toInt()) {
+          if (resources[j % res.length.toInt() % 15].toInt() > resources[(j + resources[i % 15].toInt()) % res.length.toInt() % 15].toInt()) {
             res += str1 + j;
           } else {
             res += str1;

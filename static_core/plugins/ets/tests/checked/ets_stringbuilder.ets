@@ -466,7 +466,7 @@ function encodePercentEncoding(str: string) {
 
     outer:
     for (; i < len; i++) {
-        let c = str.charCodeAt(i as number);
+        let c = str.charCodeAt(i).toInt();
 
         while (c < UNICODE_0x80) {
             if (NO_ESCAPE_TABLE[c] !== 1) {
