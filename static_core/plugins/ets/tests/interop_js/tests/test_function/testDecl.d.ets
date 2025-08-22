@@ -17,6 +17,8 @@ export declare function foo1(x: string): string
 
 export declare class X {
     s: string
+    n: number
+    constructor(...nums: number[])
 }
 
 export declare class Y {

@@ -40,6 +40,8 @@ function TestFunction2() {
 function TestFunction3() {
     let ret = Y.fooArgs(10.0, 20.0, 30.0)
     arktest.assertEQ(ret, 10.0)
+    let x = new X(1, 2, 3, 4)
+    arktest.assertEQ(x.n, 10.0)
 }
 
 function testAll() {
