@@ -105,7 +105,7 @@ inline uint8_t ToDigit(uint8_t c)
 }
 
 // CC-OFFNXT(G.FUD.06) perf critical
-inline double PowHelper(uint64_t number, int16_t exponent, uint8_t radix)
+inline double PowHelper(uint64_t number, int exponent, uint8_t radix)
 {
     const double log2Radix {std::log2(radix)};
 

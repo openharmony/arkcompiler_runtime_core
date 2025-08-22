@@ -53,6 +53,34 @@ function testNumberToExponentialUndefined(): void {
     arktest.assertEQ(m.toExponential(undefined), "1e+0")
 }
 
+function testNumberForParseFloat1(): void {
+    let num1: double = Number.parseFloat('1e-9000000000000000')
+    let num2: double = Number.parseFloat('-1e-9000000000000000')
+    arktest.assertDoubleEQ(num1, 0.0, 0.000001)
+    arktest.assertDoubleEQ(num2, 0.0, 0.000001)
+}
+
+function testNumberForParseFloat2(): void {
+    let num1: double = Number.parseFloat('1e-100000')
+    let num2: double = Number.parseFloat('-1e-100000')
+    arktest.assertDoubleEQ(num1, 0.0, 0.000001)
+    arktest.assertDoubleEQ(num2, 0.0, 0.000001)
+}
+
+function testNumberForParseFloat3(): void {
+    let num1: double = Number.parseFloat('1e-5')
+    let num2: double = Number.parseFloat('-1e-5')
+    arktest.assertDoubleEQ(num1, 0.00001, 0.000001)
+    arktest.assertDoubleEQ(num2, -0.00001, 0.000001)
+}
+
+function testNumberForParseFloat4(): void {
+    let num1: double = Number.parseFloat('1e-0000000')
+    let num2: double = Number.parseFloat('-1e-0000000')
+    arktest.assertDoubleEQ(num1, 1.0, 0.000001)
+    arktest.assertDoubleEQ(num2, -1.0, 0.000001)
+}
+
 function main() {
     let myTestsuite = new arktest.ArkTestsuite("myTestsuite");
     myTestsuite.addTest("NumberToStringTest1", numberToStringTest1);
@@ -62,5 +90,9 @@ function main() {
     myTestsuite.addTest("NumberToStringTest5", numberToStringTest5);
     myTestsuite.addTest('testNumberToExponential', testNumberToExponential);
     myTestsuite.addTest('testNumberToExponentialUndefined', testNumberToExponentialUndefined);
+    myTestsuite.addTest('testNumberForParseFloat exceeding int16_t', testNumberForParseFloat1);
+    myTestsuite.addTest('testNumberForParseFloat not exceeding int16_t', testNumberForParseFloat2);
+    myTestsuite.addTest('testNumberForParseFloat normal number', testNumberForParseFloat3);
+    myTestsuite.addTest('testNumberForParseFloat special', testNumberForParseFloat4);
     myTestsuite.run();
 }
