@@ -133,7 +133,7 @@ public:
     void FinalizeFiberScheduleLoop();
 
     /// @brief schedule runnable coroutines and wait for blocked coroutines
-    void CompleteAllAffinedCoroutines() NO_THREAD_SAFETY_ANALYSIS;
+    void CompleteAllAffinedCoroutines();
 
     /* debugging tools */
     // See CoroutineManager/StackfulCoroutineManager for details
@@ -190,6 +190,8 @@ public:
     /// migrate the coroutines of the blocked worker to other workers
     void MigrateCorosOutwardsIfBlocked();
 
+    bool ProcessAsyncWork() NO_THREAD_SAFETY_ANALYSIS override;
+
 private:
     /* schedule loop management */
     /// the EP for threaded schedule loops
@@ -205,7 +207,7 @@ private:
     void PushToRunnableQueue(Coroutine *co, CoroutinePriority priority) REQUIRES(runnablesLock_);
     Coroutine *PopFromRunnableQueue();
     bool RunnableCoroutinesExist() const;
-    void WaitForRunnables() REQUIRES(runnablesLock_);
+    void WaitForRunnables(bool needTimedWait, uint64_t waitingTime) REQUIRES(runnablesLock_);
     /**
      * @brief Register a new active (= runnable or running) coroutine on this worker.
      * @param newCoro the incoming coroutine to register
@@ -217,6 +219,7 @@ private:
      * Schedule the next ready coroutine from the runnables queue for execution if present, otherwise wait till those
      * appear, then pick the best suitable and schedule it. After that eventually the current coroutine will be
      * scheduled for execution too. Upon that, the control flow will get back to this function and it will return.
+     * This method may have no effect if another worker adds a coroutine to the current worker during this call.
      */
     void RequestScheduleImpl();
     void BlockCurrentCoroAndScheduleNext() RELEASE(runnablesLock_) RELEASE(waitersLock_);
@@ -264,6 +267,10 @@ private:
     /// worker local storage
     void CacheLocalObjectsInCoroutines() override;
 
+    void ProcessTimerEvents();
+
+    std::pair<bool, uint64_t> CalculateShortestTimerDelay();
+
 private:  // data members
     StackfulCoroutineManager *coroManager_;
     Coroutine *scheduleLoopCtx_ = nullptr;
@@ -292,7 +299,6 @@ private:  // data members
      * 2. child e-worker coroutines will be scheduled on the same worker
      */
     std::atomic<bool> inExclusiveMode_ = false;
-    GenericEvent workerCompletionEvent_;
     std::atomic<bool> isDisabledForCrossWorkersLaunch_ = false;
 
     /**
@@ -300,6 +306,8 @@ private:  // data members
      * The value 0 means that coroutine switch is ENABLED.
      */
     uint32_t disableCoroSwitchCounter_ = 0;
+
+    GenericEvent hasRunnableCoroEvent_;
 
     // stats
     CoroutineWorkerStats stats_;

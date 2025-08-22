@@ -20,6 +20,15 @@ import { launch } from "std/concurrency";
 type Handler = (message: concurrency.Message) => void;
 type Task = () => void;
 
+/**
+* @enum defines the message status
+*/
+enum MessageStatus {
+    NOT_EXECUTED = 0,
+    EXECUTED = 1,
+    CANCELLED = 2
+}
+
 export namespace concurrency {
     /**
      * MessageHandler class for handling message processing and callback management
@@ -29,6 +38,8 @@ export namespace concurrency {
         //NOTE(ekaterinzaytseva): unable to replace internal - uses as public in InteropWorker
         internal handler: Handler;
         private worker: EAWorker;
+        // TODO: using managed mutex instead of concurrent hash map
+        private messages: containers.ConcurrentHashMap<Message, MessageStatus>;
 
         /**
          * Create a MessageHandler instance
@@ -44,6 +55,7 @@ export namespace concurrency {
             }
             this.handler = handler;
             this.worker = worker as EAWorker;
+            this.messages = new containers.ConcurrentHashMap<Message, MessageStatus>();
         }
 
         /**
@@ -52,7 +64,12 @@ export namespace concurrency {
          * @returns { boolean } True if the callback exists, false otherwise
          */
         public hasCallbacks(callback: Task): boolean {
-            return this.worker.hasCallbacks(this, callback);
+            if (this.workerIsMain()) {
+                return false;
+            }
+            return this.hasMessage((value: MessageStatus, key: Message) => {
+                return key.getCallback() == callback;
+            });
         }
 
         /**
@@ -61,7 +78,12 @@ export namespace concurrency {
          * @returns { boolean } True if messages with the identifier exist, false otherwise
          */
         public hasMessages(what: int): boolean {
-            return this.worker.hasMessages(this, what, undefined);
+            if (this.workerIsMain()) {
+                return false;
+            }
+            return this.hasMessage((value: MessageStatus, key: Message) => {
+                return key.getWhat() == what && value != MessageStatus.CANCELLED;
+            });
         }
 
         /**
@@ -71,7 +93,12 @@ export namespace concurrency {
          * @returns { boolean } True if messages with the identifier and object exist, false otherwise
          */
         public hasMessages(what: int, obj: Object): boolean {
-            return this.worker.hasMessages(this, what, obj);
+            if (this.workerIsMain()) {
+                return false;
+            }
+            return this.hasMessage((value: MessageStatus, key: Message) => {
+                return key.getWhat() == what && key.getObject() == obj && value != MessageStatus.CANCELLED;
+            });
         }
 
         /**
@@ -82,8 +109,7 @@ export namespace concurrency {
         public post(callback: Task): boolean {
             try {
                 let msg = new concurrency.Message(callback, this);
-                this.worker.enqueue(msg);
-                return true;
+                return this.sendMessage(msg);
             } catch (e) {
                 return false;
             }
@@ -95,7 +121,12 @@ export namespace concurrency {
          * @returns { boolean } True if the callback was successfully removed, false otherwise
          */
         public removeCallbacks(callback: Task): boolean {
-            return this.worker.removeCallbacks(this, callback);
+            if (this.workerIsMain()) {
+                return false;
+            }
+            return this.removeMessages((value: MessageStatus, key: Message) => {
+                return key.getCallback() == callback && value != MessageStatus.CANCELLED;
+            });
         }
 
         /**
@@ -104,7 +135,12 @@ export namespace concurrency {
          * @returns { boolean } True if messages were successfully removed, false otherwise
          */
         public removeMessages(what: int): boolean {
-            return this.worker.removeMessages(this, what, undefined);
+            if (this.workerIsMain()) {
+                return false;
+            }
+            return this.removeMessages((value: MessageStatus, key: Message) => {
+                return key.getWhat() == what && value != MessageStatus.CANCELLED && key.getCallback() === undefined;
+            });
         }
 
         /**
@@ -114,7 +150,12 @@ export namespace concurrency {
          * @returns { boolean } True if messages were successfully removed, false otherwise
          */
         public removeMessages(what: int, obj: Object): boolean {
-            return this.worker.removeMessages(this, what, obj);
+            if (this.workerIsMain()) {
+                return false;
+            }
+            return this.removeMessages((value: MessageStatus, key: Message) => {
+                return key.getWhat() == what && key.getObject() == obj && value != MessageStatus.CANCELLED && key.getCallback() === undefined;
+            });
         }
 
         /**
@@ -131,12 +172,21 @@ export namespace concurrency {
          * @param { Message } message The message to send
          * @returns { boolean } True if the message was successfully sent, false otherwise
          */
-        public sendMessage(message: concurrency.Message): boolean {
+        public sendMessage(message: Message): boolean {
             try {
-                if (message.getTarget() != this) {
+                if (message.getTarget() != this || !this.worker.isAlive()) {
                     return false;
                 }
-                this.worker.enqueue(message);
+                this.messages.set(message, MessageStatus.NOT_EXECUTED);
+                let msgHandler = (msg: Message) => {
+                    if (this.messages.get(msg) == MessageStatus.CANCELLED) {
+                        this.messages.delete(msg);
+                        return;
+                    }
+                    this.handler(msg);
+                    this.messages.set(msg, MessageStatus.EXECUTED);
+                };
+                this.worker.run<void>(msgHandler, message);
                 return true;
             } catch (e) {
                 return false;
@@ -149,6 +199,31 @@ export namespace concurrency {
          */
         public getWorker(): EAWorker {
             return this.worker;
+        }
+
+        private workerIsMain(): boolean {
+            return this.worker === EAWorker.main();
+        }
+
+        private hasMessage(pred: (value: MessageStatus, key: Message) => boolean): boolean {
+            let res = false;
+            this.messages.forEach((value: MessageStatus, key: Message) => {
+                if (!res && pred(value, key)) {
+                    res = true;
+                }
+            });
+            return res;
+        }
+
+        private removeMessages(pred: (value: MessageStatus, key: Message) => boolean): boolean {
+            let res = false;
+            this.messages.forEach((value: MessageStatus, key: Message) => {
+                if (pred(value, key)) {
+                    this.messages.set(key, MessageStatus.CANCELLED);
+                    res = true;
+                }
+            });
+            return res;
         }
     }
 }

@@ -391,7 +391,9 @@ extern "C" EtsInt EtsAtomicIntFetchAndSub(EtsObject *atomicInt, EtsInt value)
 
 extern "C" EtsBoolean StdSystemIsExternalTimerEnabled()
 {
-    return ark::ets::ToEtsBoolean(EtsCoroutine::GetCurrent()->GetManager()->GetConfig().enableExternalTimer);
+    auto *coro = EtsCoroutine::GetCurrent();
+    auto extTimerOption = ark::ets::ToEtsBoolean(coro->GetManager()->GetConfig().enableExternalTimer);
+    return extTimerOption && coro->GetWorker()->IsExternalSchedulingEnabled();
 }
 
 static void SetPrimitiveFieldInClass(const char *name, ClassRoot root)
