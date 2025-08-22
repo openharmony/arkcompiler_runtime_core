@@ -68,6 +68,7 @@ entrypoints_yaml_path = "runtime/ets_entrypoints.yaml"
 irtoc_scripts = [
   "irtoc_scripts/to_string_cache.irt",
   "irtoc_scripts/typed_arrays.irt",
+  "irtoc_scripts/escompat_array.irt",
   "irtoc_scripts/map.irt",
   "irtoc_scripts/set.irt",
 ]
@@ -78,6 +79,7 @@ irtoc_plugins = [
   "irtoc_scripts/string_builder.irt",
   "irtoc_scripts/string.irt",
   "irtoc_scripts/typed_arrays.irt",
+  "irtoc_scripts/escompat_array.irt",
   "irtoc_scripts/map.irt",
   "irtoc_scripts/set.irt",
 ]

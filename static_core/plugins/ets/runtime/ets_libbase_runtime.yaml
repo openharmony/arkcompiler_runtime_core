@@ -1647,6 +1647,33 @@ intrinsics:
       args: []
     impl: ark::ets::intrinsics::EtsEscompatArrayReverse
 
+  - name: EscompatArrayIsPlatformArray
+    space: ets
+    class_name: escompat.Array
+    method_name: isPlatformArray
+    static: true
+    signature:
+      ret: u1
+      args:
+        - std.core.Object
+    impl: ark::ets::intrinsics::EtsEscompatArrayIsPlatformArray
+    safe_intrinsic: true
+    irtoc_impl: EscompatArrayIsPlatformArrayFastNativePlus
+    codegen_arch: [ arm64, amd64 ]
+    codegen_func: CreateEscompatArrayIsPlatformArray
+    llvm_codegen_func: EmitEscompatArrayIsPlatformArray
+
+  - name: EscompatArrayGetBuffer
+    space: ets
+    class_name: escompat.Array
+    method_name: getBuffer
+    static: true
+    signature:
+      ret: std.core.Object[]
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsEscompatArrayGetBuffer
+    safe_intrinsic: true
+
 ########################
 # escompat.ArrayBuffer #
 ########################

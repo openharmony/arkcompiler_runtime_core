@@ -1,0 +1,43 @@
+# plugin escompat_array
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+include_relative '../../../irtoc/scripts/common.irt'
+include_relative 'common.irt'
+
+module ArrayConstants
+  PLATFORM_TYPES_ESCOMPAT_ARRAY_CLASS_OFFSET = "cross_values::GetPlatformTypesEscompatArrayClassOffset(graph->GetArch())"
+end
+
+function(:EscompatArrayIsPlatformArrayFast,
+          params: {obj: 'ref'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [:FastPathPlus]) {
+
+  if Options.arch == :arm32
+    Intrinsic(:UNREACHABLE).Terminator.void
+    next
+  end
+
+  ptypes := LoadI(%tr).Imm(EtsConstants::CORO_LOCAL_STORAGE_OFFSET).ptr
+  arrayClass := LoadI(ptypes).Imm(ArrayConstants::PLATFORM_TYPES_ESCOMPAT_ARRAY_CLASS_OFFSET).ref_uint
+  klass := LoadI(obj).Imm(Constants::OBJECT_CLASS_OFFSET).ref_uint
+  etsKlass := SubI(klass).Imm(EtsConstants::ETS_CLASS_RUNTIME_CLASS_OFFSET).ref_uint
+  If(arrayClass, etsKlass).EQ.Likely {
+    result1 := 1
+  } Else {
+    result2 := 0
+  }
+  Return(Phi(result1, result2).i32).b
+}

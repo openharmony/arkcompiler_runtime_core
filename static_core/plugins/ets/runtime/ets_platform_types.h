@@ -171,6 +171,10 @@ public:
     {
         return MEMBER_OFFSET(EtsPlatformTypes, coreDouble);
     }
+    static constexpr size_t GetEscompatArrayClassOffset()
+    {
+        return MEMBER_OFFSET(EtsPlatformTypes, escompatArray);
+    }
 
 private:
     friend class EtsClassLinkerExtension;

@@ -892,6 +892,58 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         return ret
     }
 
+    /**
+     * Determines whether obj is exactly an instance of the escompat.Array class.
+     *
+     * @param obj
+     *
+     * @return true if obj is an instance of escompat.Array and false otherwise.
+     */
+    private static native isPlatformArray(obj: Object): boolean
+
+    /**
+     * Returns the buffer from an instance arr of the escompat.Array class. We must be sure obj is an
+     * instance of escompat.Array, the isPlatfromArray(obj: Object) method may be used for this.
+     *
+     * @param obj
+     *
+     * @return a reference to the (obj as Array<T>).buffer field.
+     */
+    private static native getBuffer(obj: Object): FixedArray<Any>;
+
+    /**
+     * Creates a new `Array` from this `Array` instance and given `Array` instance.
+     *
+     * @param other to concatenate into a new array.
+     *
+     * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
+     */
+    public concat(...items: FixedArray<ConcatArray<T>>): Array<T> {
+        let totalAdd = this.actualLength;
+        for (let i = 0; i < items.length; i++) {
+            totalAdd += items[i].length.toInt()
+        }
+
+        const buf : FixedArray<Any> = new Any[totalAdd];
+        copyTo(this.buffer, buf, 0, 0, this.actualLength)
+
+        let insertTo = this.actualLength;
+        for (let i = 0; i < items.length; i++) {
+            const arr = items[i]
+            const len = arr.length.toInt()
+            if (Array.isPlatformArray(arr)) {
+                copyTo(Array.getBuffer(arr), buf, insertTo, 0, len)
+                insertTo += len
+            } else {
+                for (let j = 0; j < len; j++) {
+                    buf[insertTo++] = arr.$_get(j)
+                }
+            }
+        }
+
+        return new Array<T>(FROM_BUFFER, buf);
+    }
+
     private flatImpl<U>(depth: int, to: Array<U>) {
         for (let i = 0; i < this.actualLength; i++) {
             let element = this.buffer[i]
@@ -943,41 +995,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      */
     public override at(index: number): T | undefined {
         return this.at(index.toInt())
-    }
-
-    /**
-     * Creates a new `Array` from this `Array` instance and given `Array` instance.
-     *
-     * @param other to concatenate into a new array.
-     *
-     * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
-     */
-    // public override concat(...items: (T | ConcatArray<T>)[]): Array<T> {
-    //     throw new Error("not implemented")
-    // }
-
-    public concat(...items: FixedArray<ConcatArray<T>>): Array<T> {
-        let totalAdd = this.actualLength;
-        for (let i = 0; i < items.length; i++) {
-            totalAdd += items[i].length.toInt()
-        }
-
-        const buf : FixedArray<Any> = new Any[totalAdd];
-
-        for (let i = 0; i < this.actualLength; i++) {
-            buf[i] = this.$_get_unsafe(i);
-        }
-
-        let insertTo = this.actualLength;
-        for (let i = 0; i < items.length; i++) {
-            const arr = items[i]
-            const len = arr.length.toInt()
-            for (let j = 0; j < len; j++) {
-                buf[insertTo++] = arr.$_get(j)
-            }
-        }
-
-        return new Array<T>(FROM_BUFFER, buf);
     }
 
     /**

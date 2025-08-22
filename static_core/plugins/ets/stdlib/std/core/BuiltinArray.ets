@@ -96,41 +96,6 @@ export function at(self: FixedArray<boolean>, index: number): Boolean | undefine
 }
 
 /**
- * Creates a new `Array` from this `Array` instance and given `Array` instance.
- *
- * @param other to concatenate into a new array.
- *
- * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
- */
-// export function concat(self: FixedArray<boolean>, ...items: (boolean | ConcatFixedArray<boolean>)[]): FixedArray<boolean> {
-//     throw new Error("not implemented")
-// }
-
-export function concat(self: FixedArray<boolean>, ...items: FixedArray<ConcatArray<boolean>>): FixedArray<boolean> {
-    let totalAdd = self.length;
-    for (let i = 0; i < items.length; i++) {
-        totalAdd += items[i].length.toInt()
-    }
-
-    const buf : FixedArray<boolean> = new boolean[totalAdd];
-
-    for (let i = 0; i < self.length; i++) {
-        buf[i] = self[i];
-    }
-
-    let insertTo = self.length;
-    for (let i = 0; i < items.length; i++) {
-        const arr = items[i]
-        const len = arr.length.toInt()
-        for (let j = 0; j < len; j++) {
-            buf[insertTo++] = arr.$_get(j)
-        }
-    }
-
-    return buf;
-}
-
-/**
  * Takes an integer value and returns the item at that index,
  * allowing for positive and negative integers. Negative integers count back
  * from the last item in the array.
@@ -922,6 +887,37 @@ export function concat(self: FixedArray<boolean>, fst: FixedArray<boolean>, ...m
 }
 
 /**
+ * Creates a new `Array` from this `Array` instance and given `Array` instance.
+ *
+ * @param other to concatenate into a new array.
+ *
+ * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
+ */
+export function concat(self: FixedArray<boolean>, ...items: FixedArray<ConcatArray<boolean>>): FixedArray<boolean> {
+    let totalAdd = self.length;
+    for (let i = 0; i < items.length; i++) {
+        totalAdd += items[i].length.toInt()
+    }
+
+    const buf : FixedArray<boolean> = new boolean[totalAdd];
+
+    for (let i = 0; i < self.length; i++) {
+        buf[i] = self[i];
+    }
+
+    let insertTo = self.length;
+    for (let i = 0; i < items.length; i++) {
+        const arr = items[i]
+        const len = arr.length.toInt()
+        for (let j = 0; j < len; j++) {
+            buf[insertTo++] = arr.$_get(j)
+        }
+    }
+
+    return buf;
+}
+
+/**
  * Reorders elements of `this` using comparator function.
  *
  * @param comparator function that defines the sort order.
@@ -1026,41 +1022,6 @@ function cloneArray(self: FixedArray<byte>): FixedArray<byte> {
  */
 export function at(self: FixedArray<byte>, index: number): Byte | undefined {
     return at(self, index.toInt())
-}
-
-/**
- * Creates a new `Array` from this `Array` instance and given `Array` instance.
- *
- * @param other to concatenate into a new array.
- *
- * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
- */
-// export function concat(self: FixedArray<byte>, ...items: (byte | ConcatFixedArray<byte>)[]): FixedArray<byte> {
-//     throw new Error("not implemented")
-// }
-
-export function concat(self: FixedArray<byte>, ...items: FixedArray<ConcatArray<byte>>): FixedArray<byte> {
-    let totalAdd = self.length;
-    for (let i = 0; i < items.length; i++) {
-        totalAdd += items[i].length.toInt()
-    }
-
-    const buf : FixedArray<byte> = new byte[totalAdd];
-
-    for (let i = 0; i < self.length; i++) {
-        buf[i] = self[i];
-    }
-
-    let insertTo = self.length;
-    for (let i = 0; i < items.length; i++) {
-        const arr = items[i]
-        const len = arr.length.toInt()
-        for (let j = 0; j < len; j++) {
-            buf[insertTo++] = arr.$_get(j)
-        }
-    }
-
-    return buf;
 }
 
 /**
@@ -1855,6 +1816,37 @@ export function concat(self: FixedArray<byte>, fst: FixedArray<byte>, ...more: F
 }
 
 /**
+ * Creates a new `Array` from this `Array` instance and given `Array` instance.
+ *
+ * @param other to concatenate into a new array.
+ *
+ * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
+ */
+export function concat(self: FixedArray<byte>, ...items: FixedArray<ConcatArray<byte>>): FixedArray<byte> {
+    let totalAdd = self.length;
+    for (let i = 0; i < items.length; i++) {
+        totalAdd += items[i].length.toInt()
+    }
+
+    const buf : FixedArray<byte> = new byte[totalAdd];
+
+    for (let i = 0; i < self.length; i++) {
+        buf[i] = self[i];
+    }
+
+    let insertTo = self.length;
+    for (let i = 0; i < items.length; i++) {
+        const arr = items[i]
+        const len = arr.length.toInt()
+        for (let j = 0; j < len; j++) {
+            buf[insertTo++] = arr.$_get(j)
+        }
+    }
+
+    return buf;
+}
+
+/**
  * Reorders elements of `this` using comparator function.
  *
  * @param comparator function that defines the sort order.
@@ -1959,41 +1951,6 @@ function cloneArray(self: FixedArray<short>): FixedArray<short> {
  */
 export function at(self: FixedArray<short>, index: number): Short | undefined {
     return at(self, index.toInt())
-}
-
-/**
- * Creates a new `Array` from this `Array` instance and given `Array` instance.
- *
- * @param other to concatenate into a new array.
- *
- * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
- */
-// export function concat(self: FixedArray<short>, ...items: (short | ConcatFixedArray<short>)[]): FixedArray<short> {
-//     throw new Error("not implemented")
-// }
-
-export function concat(self: FixedArray<short>, ...items: FixedArray<ConcatArray<short>>): FixedArray<short> {
-    let totalAdd = self.length;
-    for (let i = 0; i < items.length; i++) {
-        totalAdd += items[i].length.toInt()
-    }
-
-    const buf : FixedArray<short> = new short[totalAdd];
-
-    for (let i = 0; i < self.length; i++) {
-        buf[i] = self[i];
-    }
-
-    let insertTo = self.length;
-    for (let i = 0; i < items.length; i++) {
-        const arr = items[i]
-        const len = arr.length.toInt()
-        for (let j = 0; j < len; j++) {
-            buf[insertTo++] = arr.$_get(j)
-        }
-    }
-
-    return buf;
 }
 
 /**
@@ -2788,6 +2745,37 @@ export function concat(self: FixedArray<short>, fst: FixedArray<short>, ...more:
 }
 
 /**
+ * Creates a new `Array` from this `Array` instance and given `Array` instance.
+ *
+ * @param other to concatenate into a new array.
+ *
+ * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
+ */
+export function concat(self: FixedArray<short>, ...items: FixedArray<ConcatArray<short>>): FixedArray<short> {
+    let totalAdd = self.length;
+    for (let i = 0; i < items.length; i++) {
+        totalAdd += items[i].length.toInt()
+    }
+
+    const buf : FixedArray<short> = new short[totalAdd];
+
+    for (let i = 0; i < self.length; i++) {
+        buf[i] = self[i];
+    }
+
+    let insertTo = self.length;
+    for (let i = 0; i < items.length; i++) {
+        const arr = items[i]
+        const len = arr.length.toInt()
+        for (let j = 0; j < len; j++) {
+            buf[insertTo++] = arr.$_get(j)
+        }
+    }
+
+    return buf;
+}
+
+/**
  * Reorders elements of `this` using comparator function.
  *
  * @param comparator function that defines the sort order.
@@ -2892,41 +2880,6 @@ function cloneArray(self: FixedArray<int>): FixedArray<int> {
  */
 export function at(self: FixedArray<int>, index: number): Int | undefined {
     return at(self, index.toInt())
-}
-
-/**
- * Creates a new `Array` from this `Array` instance and given `Array` instance.
- *
- * @param other to concatenate into a new array.
- *
- * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
- */
-// export function concat(self: FixedArray<int>, ...items: (int | ConcatFixedArray<int>)[]): FixedArray<int> {
-//     throw new Error("not implemented")
-// }
-
-export function concat(self: FixedArray<int>, ...items: FixedArray<ConcatArray<int>>): FixedArray<int> {
-    let totalAdd = self.length;
-    for (let i = 0; i < items.length; i++) {
-        totalAdd += items[i].length.toInt()
-    }
-
-    const buf : FixedArray<int> = new int[totalAdd];
-
-    for (let i = 0; i < self.length; i++) {
-        buf[i] = self[i];
-    }
-
-    let insertTo = self.length;
-    for (let i = 0; i < items.length; i++) {
-        const arr = items[i]
-        const len = arr.length.toInt()
-        for (let j = 0; j < len; j++) {
-            buf[insertTo++] = arr.$_get(j)
-        }
-    }
-
-    return buf;
 }
 
 /**
@@ -3721,6 +3674,37 @@ export function concat(self: FixedArray<int>, fst: FixedArray<int>, ...more: Fix
 }
 
 /**
+ * Creates a new `Array` from this `Array` instance and given `Array` instance.
+ *
+ * @param other to concatenate into a new array.
+ *
+ * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
+ */
+export function concat(self: FixedArray<int>, ...items: FixedArray<ConcatArray<int>>): FixedArray<int> {
+    let totalAdd = self.length;
+    for (let i = 0; i < items.length; i++) {
+        totalAdd += items[i].length.toInt()
+    }
+
+    const buf : FixedArray<int> = new int[totalAdd];
+
+    for (let i = 0; i < self.length; i++) {
+        buf[i] = self[i];
+    }
+
+    let insertTo = self.length;
+    for (let i = 0; i < items.length; i++) {
+        const arr = items[i]
+        const len = arr.length.toInt()
+        for (let j = 0; j < len; j++) {
+            buf[insertTo++] = arr.$_get(j)
+        }
+    }
+
+    return buf;
+}
+
+/**
  * Reorders elements of `this` using comparator function.
  *
  * @param comparator function that defines the sort order.
@@ -3825,41 +3809,6 @@ function cloneArray(self: FixedArray<long>): FixedArray<long> {
  */
 export function at(self: FixedArray<long>, index: number): Long | undefined {
     return at(self, index.toInt())
-}
-
-/**
- * Creates a new `Array` from this `Array` instance and given `Array` instance.
- *
- * @param other to concatenate into a new array.
- *
- * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
- */
-// export function concat(self: FixedArray<long>, ...items: (long | ConcatFixedArray<long>)[]): FixedArray<long> {
-//     throw new Error("not implemented")
-// }
-
-export function concat(self: FixedArray<long>, ...items: FixedArray<ConcatArray<long>>): FixedArray<long> {
-    let totalAdd = self.length;
-    for (let i = 0; i < items.length; i++) {
-        totalAdd += items[i].length.toInt()
-    }
-
-    const buf : FixedArray<long> = new long[totalAdd];
-
-    for (let i = 0; i < self.length; i++) {
-        buf[i] = self[i];
-    }
-
-    let insertTo = self.length;
-    for (let i = 0; i < items.length; i++) {
-        const arr = items[i]
-        const len = arr.length.toInt()
-        for (let j = 0; j < len; j++) {
-            buf[insertTo++] = arr.$_get(j)
-        }
-    }
-
-    return buf;
 }
 
 /**
@@ -4654,6 +4603,37 @@ export function concat(self: FixedArray<long>, fst: FixedArray<long>, ...more: F
 }
 
 /**
+ * Creates a new `Array` from this `Array` instance and given `Array` instance.
+ *
+ * @param other to concatenate into a new array.
+ *
+ * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
+ */
+export function concat(self: FixedArray<long>, ...items: FixedArray<ConcatArray<long>>): FixedArray<long> {
+    let totalAdd = self.length;
+    for (let i = 0; i < items.length; i++) {
+        totalAdd += items[i].length.toInt()
+    }
+
+    const buf : FixedArray<long> = new long[totalAdd];
+
+    for (let i = 0; i < self.length; i++) {
+        buf[i] = self[i];
+    }
+
+    let insertTo = self.length;
+    for (let i = 0; i < items.length; i++) {
+        const arr = items[i]
+        const len = arr.length.toInt()
+        for (let j = 0; j < len; j++) {
+            buf[insertTo++] = arr.$_get(j)
+        }
+    }
+
+    return buf;
+}
+
+/**
  * Reorders elements of `this` using comparator function.
  *
  * @param comparator function that defines the sort order.
@@ -4758,41 +4738,6 @@ function cloneArray(self: FixedArray<float>): FixedArray<float> {
  */
 export function at(self: FixedArray<float>, index: number): Float | undefined {
     return at(self, index.toInt())
-}
-
-/**
- * Creates a new `Array` from this `Array` instance and given `Array` instance.
- *
- * @param other to concatenate into a new array.
- *
- * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
- */
-// export function concat(self: FixedArray<float>, ...items: (float | ConcatFixedArray<float>)[]): FixedArray<float> {
-//     throw new Error("not implemented")
-// }
-
-export function concat(self: FixedArray<float>, ...items: FixedArray<ConcatArray<float>>): FixedArray<float> {
-    let totalAdd = self.length;
-    for (let i = 0; i < items.length; i++) {
-        totalAdd += items[i].length.toInt()
-    }
-
-    const buf : FixedArray<float> = new float[totalAdd];
-
-    for (let i = 0; i < self.length; i++) {
-        buf[i] = self[i];
-    }
-
-    let insertTo = self.length;
-    for (let i = 0; i < items.length; i++) {
-        const arr = items[i]
-        const len = arr.length.toInt()
-        for (let j = 0; j < len; j++) {
-            buf[insertTo++] = arr.$_get(j)
-        }
-    }
-
-    return buf;
 }
 
 /**
@@ -5595,6 +5540,37 @@ export function concat(self: FixedArray<float>, fst: FixedArray<float>, ...more:
 }
 
 /**
+ * Creates a new `Array` from this `Array` instance and given `Array` instance.
+ *
+ * @param other to concatenate into a new array.
+ *
+ * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
+ */
+export function concat(self: FixedArray<float>, ...items: FixedArray<ConcatArray<float>>): FixedArray<float> {
+    let totalAdd = self.length;
+    for (let i = 0; i < items.length; i++) {
+        totalAdd += items[i].length.toInt()
+    }
+
+    const buf : FixedArray<float> = new float[totalAdd];
+
+    for (let i = 0; i < self.length; i++) {
+        buf[i] = self[i];
+    }
+
+    let insertTo = self.length;
+    for (let i = 0; i < items.length; i++) {
+        const arr = items[i]
+        const len = arr.length.toInt()
+        for (let j = 0; j < len; j++) {
+            buf[insertTo++] = arr.$_get(j)
+        }
+    }
+
+    return buf;
+}
+
+/**
  * Reorders elements of `this` using comparator function.
  *
  * @param comparator function that defines the sort order.
@@ -5699,41 +5675,6 @@ function cloneArray(self: FixedArray<double>): FixedArray<double> {
  */
 export function at(self: FixedArray<double>, index: number): Double | undefined {
     return at(self, index.toInt())
-}
-
-/**
- * Creates a new `Array` from this `Array` instance and given `Array` instance.
- *
- * @param other to concatenate into a new array.
- *
- * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
- */
-// export function concat(self: FixedArray<double>, ...items: (double | ConcatFixedArray<double>)[]): FixedArray<double> {
-//     throw new Error("not implemented")
-// }
-
-export function concat(self: FixedArray<double>, ...items: FixedArray<ConcatArray<double>>): FixedArray<double> {
-    let totalAdd = self.length;
-    for (let i = 0; i < items.length; i++) {
-        totalAdd += items[i].length.toInt()
-    }
-
-    const buf : FixedArray<double> = new double[totalAdd];
-
-    for (let i = 0; i < self.length; i++) {
-        buf[i] = self[i];
-    }
-
-    let insertTo = self.length;
-    for (let i = 0; i < items.length; i++) {
-        const arr = items[i]
-        const len = arr.length.toInt()
-        for (let j = 0; j < len; j++) {
-            buf[insertTo++] = arr.$_get(j)
-        }
-    }
-
-    return buf;
 }
 
 /**
@@ -6536,6 +6477,37 @@ export function concat(self: FixedArray<double>, fst: FixedArray<double>, ...mor
 }
 
 /**
+ * Creates a new `Array` from this `Array` instance and given `Array` instance.
+ *
+ * @param other to concatenate into a new array.
+ *
+ * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
+ */
+export function concat(self: FixedArray<double>, ...items: FixedArray<ConcatArray<double>>): FixedArray<double> {
+    let totalAdd = self.length;
+    for (let i = 0; i < items.length; i++) {
+        totalAdd += items[i].length.toInt()
+    }
+
+    const buf : FixedArray<double> = new double[totalAdd];
+
+    for (let i = 0; i < self.length; i++) {
+        buf[i] = self[i];
+    }
+
+    let insertTo = self.length;
+    for (let i = 0; i < items.length; i++) {
+        const arr = items[i]
+        const len = arr.length.toInt()
+        for (let j = 0; j < len; j++) {
+            buf[insertTo++] = arr.$_get(j)
+        }
+    }
+
+    return buf;
+}
+
+/**
  * Reorders elements of `this` using comparator function.
  *
  * @param comparator function that defines the sort order.
@@ -6640,41 +6612,6 @@ function cloneArray(self: FixedArray<char>): FixedArray<char> {
  */
 export function at(self: FixedArray<char>, index: number): Char | undefined {
     return at(self, index.toInt())
-}
-
-/**
- * Creates a new `Array` from this `Array` instance and given `Array` instance.
- *
- * @param other to concatenate into a new array.
- *
- * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
- */
-// export function concat(self: FixedArray<char>, ...items: (char | ConcatFixedArray<char>)[]): FixedArray<char> {
-//     throw new Error("not implemented")
-// }
-
-export function concat(self: FixedArray<char>, ...items: FixedArray<ConcatArray<char>>): FixedArray<char> {
-    let totalAdd = self.length;
-    for (let i = 0; i < items.length; i++) {
-        totalAdd += items[i].length.toInt()
-    }
-
-    const buf : FixedArray<char> = new char[totalAdd];
-
-    for (let i = 0; i < self.length; i++) {
-        buf[i] = self[i];
-    }
-
-    let insertTo = self.length;
-    for (let i = 0; i < items.length; i++) {
-        const arr = items[i]
-        const len = arr.length.toInt()
-        for (let j = 0; j < len; j++) {
-            buf[insertTo++] = arr.$_get(j)
-        }
-    }
-
-    return buf;
 }
 
 /**
@@ -7466,6 +7403,37 @@ export function concat(self: FixedArray<char>, fst: FixedArray<char>, ...more: F
         // impossible
     }
     return r
+}
+
+/**
+ * Creates a new `Array` from this `Array` instance and given `Array` instance.
+ *
+ * @param other to concatenate into a new array.
+ *
+ * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
+ */
+export function concat(self: FixedArray<char>, ...items: FixedArray<ConcatArray<char>>): FixedArray<char> {
+    let totalAdd = self.length;
+    for (let i = 0; i < items.length; i++) {
+        totalAdd += items[i].length.toInt()
+    }
+
+    const buf : FixedArray<char> = new char[totalAdd];
+
+    for (let i = 0; i < self.length; i++) {
+        buf[i] = self[i];
+    }
+
+    let insertTo = self.length;
+    for (let i = 0; i < items.length; i++) {
+        const arr = items[i]
+        const len = arr.length.toInt()
+        for (let j = 0; j < len; j++) {
+            buf[insertTo++] = arr.$_get(j)
+        }
+    }
+
+    return buf;
 }
 
 /**
