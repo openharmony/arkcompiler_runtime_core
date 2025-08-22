@@ -27,7 +27,7 @@ namespace panda {
 
 class ArkJsRuntime : public JsRuntime {
 public:
-    ~ArkJsRuntime();
+    ~ArkJsRuntime() override;
 
     bool ProcessOptions(int argc, const char **argv, arg_list_t *filenames) override;
 
