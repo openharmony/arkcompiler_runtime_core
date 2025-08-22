@@ -915,35 +915,28 @@ bool EscapeAnalysis::MergeProcessor::NeedToMaterialize(Inst *phi)
         COMPILER_LOG(DEBUG, PEA_EXT) << "Phi's inputs have diffferent or unknown classes";
         return true;
     }
-    auto inputBb = phi->CastToPhi()->GetPhiInputBb(0);
-    auto phiInput = phi->GetInput(0).GetInst();
-    if (phiInput->IsDominate(phi)) {
-        return true;
-    }
-    auto commonId = parent_->GetState(inputBb)->GetStateId(phiInput);
-    bool materialize = commonId == EscapeAnalysis::MATERIALIZED_ID;
-    if (materialize) {
-        COMPILER_LOG(DEBUG, PEA_EXT) << "Already materialized";
-        return true;
-    }
-    for (size_t inputIdx = 1; inputIdx < phi->GetInputsCount(); ++inputIdx) {
-        inputBb = phi->CastToPhi()->GetPhiInputBb(inputIdx);
-        auto phiInputBB = phi->GetInput(inputIdx).GetInst();
-        if (phiInputBB->IsDominate(phi)) {
+    for (size_t inputIdx = 0; inputIdx < phi->GetInputsCount(); ++inputIdx) {
+        auto const inputBb = phi->CastToPhi()->GetPhiInputBb(inputIdx);
+        auto const phiInput = phi->GetInput(inputIdx).GetInst();
+        if (phiInput->IsDominate(phi)) {
+            COMPILER_LOG(DEBUG, PEA_EXT) << "Phi's input " << inputIdx << " dominates phi";
             return true;
         }
-        auto predId = parent_->GetState(inputBb)->GetStateId(phiInputBB);
+        auto const predId = parent_->GetState(inputBb)->GetStateId(phiInput);
         if (predId == EscapeAnalysis::MATERIALIZED_ID) {
             COMPILER_LOG(DEBUG, PEA_EXT) << "Input already materialized";
             return true;
         }
     }
-    if (phiInput->Is(Opcode::NewArray)) {
-        auto lenArray = phiInput->GetDataFlowInput(1);
+    ASSERT(phi->GetInputsCount() > 0);
+    auto const firstInput = phi->GetInput(0).GetInst();
+    if (firstInput->Is(Opcode::NewArray)) {
+        auto const lenArray = firstInput->GetDataFlowInput(1);
         for (size_t inputIdx = 1; inputIdx < phi->GetInputsCount(); ++inputIdx) {
-            auto phiInputBB = phi->GetInput(inputIdx).GetInst();
-            ASSERT(phiInputBB->Is(Opcode::NewArray));
-            if (lenArray != phiInputBB->GetDataFlowInput(1)) {
+            auto const phiInput = phi->GetInput(inputIdx).GetInst();
+            ASSERT(phiInput->Is(Opcode::NewArray));
+            if (lenArray != phiInput->GetDataFlowInput(1)) {
+                COMPILER_LOG(DEBUG, PEA_EXT) << "Phi's inputs have different lengths";
                 return true;
             }
         }
@@ -1945,26 +1938,9 @@ void ScalarReplacement::CreatePhisAndInsertToBB(BasicBlock &bb)
     }
 }
 
-void ScalarReplacement::ErasePhiInputsFromVState(ArenaMap<Inst *, VirtualState *> &state)
-{
-    ArenaVector<Inst *> inputsToRemove {graph_->GetLocalAllocator()->Adapter()};
-    for (const auto &kv : state) {
-        auto inst = kv.first;
-        if (inst->IsPhi()) {
-            for (auto &input : inst->GetInputs()) {
-                inputsToRemove.push_back(input.GetInst());
-            }
-        }
-    }
-    for (auto inst : inputsToRemove) {
-        state.erase(inst);
-    }
-}
-
 void ScalarReplacement::MaterializeObjects()
 {
     for (auto &[site, state] : materializationSites_) {
-        ErasePhiInputsFromVState(state);
         if (std::holds_alternative<BasicBlock *>(site)) {
             MaterializeInEmptyBlock(std::get<BasicBlock *>(site), state);
             continue;
