@@ -804,6 +804,7 @@ void StackfulCoroutineManager::MainCoroutineCompleted()
     // block till only schedule loop coroutines are present
     LOG(DEBUG, COROUTINES)
         << "StackfulCoroutineManager::MainCoroutineCompleted(): waiting for other coroutines to complete";
+    GetCurrentWorker()->DestroyCallbackPoster();
     WaitForNonMainCoroutinesCompletion();
     if (GetConfig().enableMigration) {
         LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::MainCoroutineCompleted(): stop manager thread";
@@ -1030,6 +1031,7 @@ bool StackfulCoroutineManager::DestroyExclusiveWorker()
         eWorker->DisableForCrossWorkersLaunch();
     }
 
+    eWorker->DestroyCallbackPoster();
     eWorker->CompleteAllAffinedCoroutines();
 
     eWorker->SetActive(false);

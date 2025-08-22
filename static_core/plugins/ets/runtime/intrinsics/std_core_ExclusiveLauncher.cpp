@@ -114,10 +114,7 @@ void RunTaskOnEACoroutine(PandaEtsVM *etsVM, bool needInterop, mem::Reference *t
     auto *coroMan = etsVM->GetCoroutineManager();
 
     if (needInterop) {
-        auto poster = etsVM->CreateCallbackPoster();
-        ASSERT(poster != nullptr);
-        poster->Post(RunExclusiveTask, taskRef, refStorage);
-
+        etsVM->CreateCallbackPoster()->Post(RunExclusiveTask, taskRef, refStorage);
         while (g_posterState != TaskPosterState::DESTROYED) {
             etsVM->RunEventLoop(ark::EventLoopRunMode::RUN_ONCE);
         }

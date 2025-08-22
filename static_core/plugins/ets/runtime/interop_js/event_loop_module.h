@@ -105,6 +105,8 @@ public:
 
 class EventLoop {
 public:
+    using AsyncWorkDeleter = void (*)(uv_handle_t *);
+
     static uv_loop_t *GetEventLoop();
 
     static bool RunEventLoop(EventLoopRunMode mode = EventLoopRunMode::RUN_DEFAULT);
@@ -115,7 +117,19 @@ public:
 
     static void CloseTimer(uv_timer_t *timer);
 
-    static std::atomic_uint32_t eventCount_;
+    static uv_async_t *CreateAsyncWork();
+
+    static void DeleteAsyncWork(uv_async_t *async);
+
+    static void DeleteAsyncWork(uv_async_t *async, AsyncWorkDeleter deleter);
+
+private:
+    static void DefaultHandleDeleter(uv_handle_t *handle);
+
+    static void IncrementEventCount();
+    static void DecrementEventCount();
+
+    static thread_local uint32_t eventCount_;
 };
 
 }  // namespace ark::ets::interop::js
