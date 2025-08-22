@@ -58,7 +58,7 @@ def process_file_with_hiddable_interfaces(
     source_file: Path,
     target_file: Path,
     hiddable_apis: Set[str],
-    api_pattern: re.Pattern[str],
+    api_pattern: re.Pattern,
 ) -> None:
     """Replace export keyword with empty string if interface is hiddable"""
     with os.fdopen(
@@ -91,7 +91,7 @@ def process_file_with_hiddable_interfaces(
 
 
 def copy_files_with_filter(
-    std_lib_dir: Path, target_dir: Path, hiddable_apis: dict[str, Set[str]]
+    std_lib_dir: Path, target_dir: Path, hiddable_apis: dict
 ) -> None:
     """Copy stdlib files; filter interfaces by hiddable_APIs.json"""
 
