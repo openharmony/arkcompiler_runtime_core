@@ -31,7 +31,7 @@ public:
     CallbackPoster() = default;
     // NOLINTNEXTLINE(performance-unnecessary-value-param)
     using DestroyCallback = std::function<void()>;
-    explicit CallbackPoster([[maybe_unused]] DestroyCallback onDestroy) {};
+    explicit CallbackPoster([[maybe_unused]] const DestroyCallback &onDestroy) {};
     virtual ~CallbackPoster() = default;
     NO_COPY_SEMANTIC(CallbackPoster);
     NO_MOVE_SEMANTIC(CallbackPoster);
