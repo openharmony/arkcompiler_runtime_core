@@ -22,7 +22,7 @@
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)
 
 namespace OHOS {
-void AniTupleValueSetItemFloatnFuzzTest(const char *data, size_t size)
+void AniTupleValueSetItemFloatFuzzTest(const char *data, size_t size)
 {
     if (size <= 0U) {
         return;
@@ -38,7 +38,8 @@ void AniTupleValueSetItemFloatnFuzzTest(const char *data, size_t size)
     engine->AniGetTuple(&tuple);
 
     ani_float val {};
-    env->TupleValue_SetItem_Float(tuple, size, val);
+    auto index = static_cast<ani_size>(static_cast<unsigned int>(data[0]));
+    env->TupleValue_SetItem_Float(tuple, index, val);
 }
 }  // namespace OHOS
 
@@ -46,7 +47,7 @@ void AniTupleValueSetItemFloatnFuzzTest(const char *data, size_t size)
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
-    OHOS::AniTupleValueSetItemFloatnFuzzTest(reinterpret_cast<const char *>(data), size);
+    OHOS::AniTupleValueSetItemFloatFuzzTest(reinterpret_cast<const char *>(data), size);
     return 0;
 }
 

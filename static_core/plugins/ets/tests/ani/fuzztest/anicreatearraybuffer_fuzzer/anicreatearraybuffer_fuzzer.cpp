@@ -35,7 +35,8 @@ void AniCreateArrayBufferFuzzTest(const char *data, size_t size)
     engine->GetAniEnv(&env);
     ani_arraybuffer arrayBufferRes {};
     void *dataResult {};
-    env->CreateArrayBuffer(size, &dataResult, &arrayBufferRes);
+    auto bufferSize = static_cast<ani_size>(static_cast<unsigned int>(data[0]));
+    env->CreateArrayBuffer(bufferSize, &dataResult, &arrayBufferRes);
 }
 }  // namespace OHOS
 
