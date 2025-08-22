@@ -36,7 +36,8 @@ void AniEnumGetItemByIndexFuzzTest(const char *data, size_t size)
     ani_enum e {};
     env->FindEnum("std.core.LogLevel", &e);
     ani_enum_item eItem {};
-    env->Enum_GetEnumItemByIndex(e, size, &eItem);
+    auto index = static_cast<ani_size>(static_cast<unsigned int>(data[0]));
+    env->Enum_GetEnumItemByIndex(e, index, &eItem);
 }
 }  // namespace OHOS
 

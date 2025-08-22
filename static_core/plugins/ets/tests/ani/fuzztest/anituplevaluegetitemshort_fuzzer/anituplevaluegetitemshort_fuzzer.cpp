@@ -38,7 +38,8 @@ void AniTupleValueGetItemShortFuzzTest(const char *data, size_t size)
     engine->AniGetTuple(&tuple);
 
     ani_short val {};
-    env->TupleValue_GetItem_Short(tuple, size, &val);
+    auto index = static_cast<ani_size>(static_cast<unsigned int>(data[0]));
+    env->TupleValue_GetItem_Short(tuple, index, &val);
 }
 }  // namespace OHOS
 
