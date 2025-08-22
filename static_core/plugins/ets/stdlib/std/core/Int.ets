@@ -310,7 +310,7 @@ export final class Int extends Integral implements Comparable<Int> {
         return (new Long(this.value)).toString(radix);
     }
 
-    equals(other: NullishType): boolean {
+    equals(other: Any): boolean {
         if (this === other) {
             return true
         }

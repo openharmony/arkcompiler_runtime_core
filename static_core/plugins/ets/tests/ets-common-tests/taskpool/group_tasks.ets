@@ -35,11 +35,11 @@ function delayWithYield(duration: int): void {
     Coroutine.Schedule();
 }
 
-function launchImpl(func: () => NullishType): Promise<NullishType> {
-    const job: Job<NullishType> = launch<NullishType, () => NullishType>(
+function launchImpl(func: () => Any): Promise<Any> {
+    const job: Job<Any> = launch<Any, () => Any>(
         func
     );
-    return new Promise<NullishType>((resolve, reject) => {
+    return new Promise<Any>((resolve, reject) => {
         try {
             let res = job.Await();
             resolve(res);
@@ -49,7 +49,7 @@ function launchImpl(func: () => NullishType): Promise<NullishType> {
     });
 }
 
-function testDelayFunc(): NullishType {
+function testDelayFunc(): Any {
     let task = new taskpool.Task(sum, 100, 300);
     let value = await taskpool.executeDelayed(100, task);
     let g = new taskpool.TaskGroup();
@@ -75,7 +75,7 @@ function executeDelayedTest(): void {
     }, new Error('taskpool:: groupTask cannot executeDelayed outside'));
 }
 
-function testPeriodFunc(): NullishType {
+function testPeriodFunc(): Any {
     let task = new taskpool.Task(sum, 100, 300);
     taskpool.executePeriodically(200, task);
     let isTaskCanceled: AtomicFlag = new AtomicFlag(false);

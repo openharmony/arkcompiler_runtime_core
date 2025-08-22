@@ -48,7 +48,7 @@ function testStringifyObjWithArrayReplacer() {
 }
 
 function testStringifyObjWithFuncReplacer() {
-    let f = (k: string, value: NullishType): NullishType => {
+    let f = (k: string, value: Any): Any => {
         if (k === "a") {
             return 77777
         } else if (k === "not existing") {

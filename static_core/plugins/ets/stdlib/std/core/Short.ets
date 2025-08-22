@@ -312,7 +312,7 @@ export final class Short extends Integral implements Comparable<Short> {
     * @returns true if provided object and this instance have same value, false otherwise
     * Returns false if type of provided object is not the same as this type
     */
-    public equals(other: NullishType): boolean {
+    public equals(other: Any): boolean {
         if (this === other) {
             return true
         }

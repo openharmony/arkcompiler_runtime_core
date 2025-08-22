@@ -119,11 +119,11 @@ class TestClass14 extends TestClass13 {
 
 class TestClass15 {
     @JSONRename("record15")
-    record: Record<string, NullishType> = new Record<string, NullishType>()
+    record: Record<string, Any> = new Record<string, Any>()
     @JSONRename("map15")
     map: Map<string, string> = new Map<string, string>()
     @JSONRename("nestedRecord15")
-    nestedRecord: Record<string, NullishType> = new Record<string, NullishType>()
+    nestedRecord: Record<string, Any> = new Record<string, Any>()
     @JSONStringifyIgnore
     i8Array: Int8Array = Int8Array.of(INT8_MAX, INT8_MIN, 100, INT8_MIN + 1)
     @JSONRename("fixArray15")
@@ -247,7 +247,7 @@ function jsonTestWithTypes() {
     obj.record["version"] = 1
     obj.map.set("key1", "value1")
     obj.nestedRecord = { "name": "arkts", "version": 1}
-    const nest: Record<string, NullishType> = { "desc": "nested" }
+    const nest: Record<string, Any> = { "desc": "nested" }
     obj.nestedRecord["nested"] = nest
     let json = JSON.stringify(obj)
     const targetOutput = '{"record15":{"name":"arkts","version":1},"map15":{},' +

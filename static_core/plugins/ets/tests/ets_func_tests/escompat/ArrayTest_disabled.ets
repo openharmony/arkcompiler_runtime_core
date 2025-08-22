@@ -171,7 +171,7 @@ function everyFuncArg3ReadonlyArray(): int {
 // NOTE (ikorobkov): uncomment when Array will have implementation of from<T,U>(arr: ArrayLike<T>|Iterable<T>, fn: (v: T, k: number) => U)
 //
 // class ArrayLikeImplTest<T> implements ArrayLike<T> {
-//     private buffer: NullishType[]
+//     private buffer: Any[]
 //     internal actualLength: int
 //
 //     public at(index: number): T | undefined {
@@ -201,14 +201,14 @@ function everyFuncArg3ReadonlyArray(): int {
 //
 //     public push(val: T): number {
 //         this.ensureUnusedCapacity(1);
-//         this.buffer[this.actualLength] = val as NullishType;
+//         this.buffer[this.actualLength] = val as Any;
 //         this.actualLength += 1;
 //         return this.actualLength;
 //     }
 //
 //     private ensureUnusedCapacity(cap: int): void {
 //         if (this.actualLength + cap > this.buffer.length) {
-//             const copy = new NullishType[this.buffer.length * 2 + cap];
+//             const copy = new Any[this.buffer.length * 2 + cap];
 //             for (let i = 0; i < this.actualLength; i++) {
 //                 copy[i] = this.buffer[i];
 //             }
@@ -217,7 +217,7 @@ function everyFuncArg3ReadonlyArray(): int {
 //     }
 //
 //     public constructor() {
-//         this.buffer = new NullishType[4]
+//         this.buffer = new Any[4]
 //         this.actualLength = 0
 //     }
 // }

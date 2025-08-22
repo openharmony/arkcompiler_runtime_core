@@ -40,11 +40,11 @@ class StringArrayProxyHandler extends proxy.DefaultArrayProxyHandler<string> {
         return super.set(target, index, value)
     }
 
-    override get(target: Array<string>, name: string): NullishType {
+    override get(target: Array<string>, name: string): Any {
         return super.get(target, name)
     }
 
-    override set(target: Array<string>, name: string, value: NullishType): boolean {
+    override set(target: Array<string>, name: string, value: Any): boolean {
         if (name == "length") {
             this.setLengthTrapped = true
             // ignore set new length request
@@ -54,7 +54,7 @@ class StringArrayProxyHandler extends proxy.DefaultArrayProxyHandler<string> {
         return super.set(target, name, value)
     }
 
-    override invoke(target: Array<string>, method: Method, args: FixedArray<NullishType>): NullishType {
+    override invoke(target: Array<string>, method: Method, args: FixedArray<Any>): Any {
         const methodName = method.getName()
         if (methodName == "pop") {
             this.popTrapped = true

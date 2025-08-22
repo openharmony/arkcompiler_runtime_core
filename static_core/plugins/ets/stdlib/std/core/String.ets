@@ -60,11 +60,11 @@ export final class String extends Object implements Comparable<String>, Iterable
     public native constructor(otherStr: String)
 
     /**
-     * Constructs String from NullishType
+     * Constructs String from Any
      *
      * @param object initializer
      */
-    public native constructor(object: NullishType)
+    public native constructor(object: Any)
 
     /**
      * Creates a new instance of a String
@@ -82,7 +82,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      *
      * @returns A new String instance
      */
-    static $_invoke(value: Object | null | undefined): string {
+    static $_invoke(value: Any): string {
         return new String(value);
     }
 
@@ -107,7 +107,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @remarks
      * Implemented as native function,  @see `equals()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L596).
      */
-    public native equals(to: NullishType): boolean;
+    public native equals(to: Any): boolean;
 
     /**
      * Length of this string

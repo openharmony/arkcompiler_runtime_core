@@ -75,7 +75,7 @@ module ESChecker
                 end
             end
             if rb_obj == "#__undefined" || rb_obj == "#__null"
-                return { :kind => :trivial, :str => "NullishType" }
+                return { :kind => :trivial, :str => "Any" }
             end
             raise "can't detect type for #{rb_obj}"
         end

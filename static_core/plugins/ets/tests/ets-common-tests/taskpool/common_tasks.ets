@@ -67,11 +67,11 @@ function delayWithYield(duration: int): void {
     Coroutine.Schedule();
 }
 
-function launchImpl(func: () => NullishType): Promise<NullishType> {
-    const job: Job<NullishType> = launch<NullishType, () => NullishType>(
+function launchImpl(func: () => Any): Promise<Any> {
+    const job: Job<Any> = launch<Any, () => Any>(
         func
     );
-    return new Promise<NullishType>((resolve, reject) => {
+    return new Promise<Any>((resolve, reject) => {
         try {
             let res = job.Await();
             resolve(res);
@@ -100,11 +100,11 @@ class Event {
     private resolveFn: ((val: boolean) => void) | null = null;
 }
 
-function testDelayFunc(): NullishType {
+function testDelayFunc(): Any {
     let task1 = new taskpool.Task(returnFailAbc);
     let res: string = '';
     let isTask1Finished = new Event();
-    taskpool.executeDelayed(100, task1).catch((e: NullishType) => {
+    taskpool.executeDelayed(100, task1).catch((e: Any) => {
         res = (e as Error).message;
         isTask1Finished.fire();
     })
@@ -181,7 +181,7 @@ function verifySendDataRes(a:int):void{
     verifyCount++;
 }
 
-function verifySendDataResWithRestParameter(...args:FixedArray<NullishType>) {
+function verifySendDataResWithRestParameter(...args:FixedArray<Any>) {
     let arg1 = args[0] as Array<int>;
     let arg2 = args[1] as Array<string>;
     arktest.assertEQ(arg1[0], 1);
@@ -571,10 +571,10 @@ function cancelExecutingTaskTest() {
     let task2 = new taskpool.Task(testCancelFunc, 300);
     let val: int = 0;
     let isExecuted = new Event();
-    taskpool.execute(task2).then((value: NullishType): void => {
+    taskpool.execute(task2).then((value: Any): void => {
         val = 1;
         isExecuted.fire();
-    }).catch((e: NullishType): void => {
+    }).catch((e: Any): void => {
         val = 2;
         isExecuted.fire();
     });
@@ -923,7 +923,7 @@ function tasksExecutionTest() {
     }
     let allExecuted = new Event();
     for (let i: int = 0; i < count; ++i) {
-        taskpool.execute(taskArray[i]).then((value: NullishType): void => {
+        taskpool.execute(taskArray[i]).then((value: Any): void => {
             num++;
             if (num == count) {
                 allExecuted.fire();

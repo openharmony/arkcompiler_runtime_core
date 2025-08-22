@@ -120,7 +120,7 @@ function jsonStringifyArrayReplacer3() {
     arktest.assertEQ(ret, expect);
 }
 
-function replaceNumber(key: string, value: NullishType): NullishType {
+function replaceNumber(key: string, value: Any): Any {
     if (key == '1' || key == '4') {
         return key + '_' + value;
     } else {

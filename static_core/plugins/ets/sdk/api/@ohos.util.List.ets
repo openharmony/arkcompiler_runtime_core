@@ -35,7 +35,7 @@ export type RecordData = undefined | null | Object | Record<string, RecordData> 
 export class List<T> implements Iterable<T>, JsonReplacer {
     private buffer: LinkedList<T>;
 
-    public jsonReplacer(): Record<String, NullishType> {
+    public jsonReplacer(): Record<String, Any> {
         return this.buffer.jsonReplacer();
     }
 
@@ -411,7 +411,7 @@ export class List<T> implements Iterable<T>, JsonReplacer {
      * Gets the element at the specified index.
      *
      * @param index - The index of the element to retrieve.
-     * @returns { T } The element in the buffer matching the given index. 
+     * @returns { T } The element in the buffer matching the given index.
      * @throws { BusinessError } 10200001 - The value of index is out of range.
      */
     public $_get(index: int): T {

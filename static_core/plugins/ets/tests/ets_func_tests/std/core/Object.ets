@@ -39,7 +39,7 @@ function main(): int {
     return test(failures, "All tests run");
 }
 
-type TupleT = [string, NullishType]
+type TupleT = [string, Any]
 type NullishTuple = TupleT | null | undefined
 
 class Point2D {
@@ -74,7 +74,7 @@ function strArraysAreEqual(a: string[], b: string[]): boolean {
     return true
 }
 
-function objArraysAreEqual(a: NullishType[], b: NullishType[]): boolean {
+function objArraysAreEqual(a: Any[], b: Any[]): boolean {
     let alen = a.length
     if (alen != b.length) {
         return false
@@ -100,13 +100,13 @@ function tupleAreEqual(a: NullishTuple[], b: NullishTuple[]): boolean {
     return true
 }
 
-function mapAreEqual(a: Map<PropertyKey, NullishType>, b: Map<PropertyKey, NullishType>): boolean {
+function mapAreEqual(a: Map<PropertyKey, Any>, b: Map<PropertyKey, Any>): boolean {
     let alen = a.size
     if (alen != b.size) {
         return false
     }
     let areEqual: boolean = true
-    a.forEach((av: NullishType, k: PropertyKey) => {
+    a.forEach((av: Any, k: PropertyKey) => {
         const bv = b.get(k)
         if (bv == undefined || av !== bv)) {
             areEqual = false
@@ -186,7 +186,7 @@ function objectValues(): int {
         return a + 1
     }
 
-    let emptyArr: NullishType[] = []
+    let emptyArr: Any[] = []
 
     result += objArraysAreEqual(Object.values(c), emptyArr) ? 0 : 1
     result += objArraysAreEqual(Object.values(bo), emptyArr) ? 0 : 1
@@ -197,13 +197,13 @@ function objectValues(): int {
     result += objArraysAreEqual(Object.values(fl), emptyArr) ? 0 : 1
     result += objArraysAreEqual(Object.values(dou), emptyArr) ? 0 : 1
 
-    let arrVal: NullishType[] = [new Number(10), new Number(20), new Number(30)]
+    let arrVal: Any[] = [new Number(10), new Number(20), new Number(30)]
     result += objArraysAreEqual(Object.values(arr), arrVal) ? 0 : 1
 
-    let strVal: NullishType[] = ["a" as string, "b" as string, "c" as string]
+    let strVal: Any[] = ["a" as string, "b" as string, "c" as string]
     result += objArraysAreEqual(Object.values(str), strVal) ? 0 : 1
 
-    let clVal: NullishType[] = [new Number(10), new Number(20), undefined]
+    let clVal: Any[] = [new Number(10), new Number(20), undefined]
     result += objArraysAreEqual(Object.values(cl), clVal) ? 0 : 1
 
     result += objArraysAreEqual(Object.values(lambda), emptyArr) ? 0 : 1
@@ -366,7 +366,7 @@ function objectHasOwn(): int {
     return result
 }
 
-type Rec = Record<PropertyKey, NullishType>
+type Rec = Record<PropertyKey, Any>
 
 function objectFromEntries(): int {
     let result: int = 0
@@ -383,15 +383,15 @@ function objectFromEntries(): int {
         "z": new Number(30)
     }
 
-    result += mapAreEqual(Object.fromEntries<NullishType>(entries), expected) ? 0 : 1
+    result += mapAreEqual(Object.fromEntries<Any>(entries), expected) ? 0 : 1
 
-    const entriesIterable: Iterable<[PropertyKey, NullishType]> = entries
-    result += mapAreEqual(Object.fromEntries<NullishType>(entriesIterable), expected) ? 0 : 1
+    const entriesIterable: Iterable<[PropertyKey, Any]> = entries
+    result += mapAreEqual(Object.fromEntries<Any>(entriesIterable), expected) ? 0 : 1
 
     const emptyObj: Rec = {}
 
-    const emptyEntries = new Array<[PropertyKey, NullishType]>()
-    result += mapAreEqual(Object.fromEntries<NullishType>(emptyEntries), emptyObj) ? 0 : 1
+    const emptyEntries = new Array<[PropertyKey, Any]>()
+    result += mapAreEqual(Object.fromEntries<Any>(emptyEntries), emptyObj) ? 0 : 1
 
     return result
 }

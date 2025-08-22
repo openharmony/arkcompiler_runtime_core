@@ -21,13 +21,13 @@ import { jsonx } from "std/core"
 const BigIntType: Type;
 
 export interface JsonReplacer {
-    jsonReplacer(): Record<String, NullishType>
+    jsonReplacer(): Record<String, Any>
 }
 
 // NOTE (chengzhihao): $Partial is not generated for exported interfaces.issue #26111
 // now use this class to throw the error.
 export class JsonReplacerTemp implements JsonReplacer {
-    jsonReplacer(): Record<String, NullishType> {
+    jsonReplacer(): Record<String, Any> {
         throw new Error("frontend bug");
     }
 }
@@ -244,7 +244,7 @@ export class JSON {
      *
      * @returns String - JSON representation of Object
      */
-    public static stringifyNullishTypeObj(obj: NullishType): String {
+    public static stringifyAnyObj(obj: Any): String {
         if (obj === undefined) {
             return "undefined"
         }
@@ -255,7 +255,7 @@ export class JSON {
         return new JSONWriter().write(obj)
     }
 
-    private static native stringifyFast(obj: NullishType): String;
+    private static native stringifyFast(obj: Any): String;
 
     public static stringifyJsonReplacer(obj: JsonReplacer): String {
         const record = obj.jsonReplacer();
@@ -275,10 +275,10 @@ export class JSON {
      * @returns String - JSON representation of Object
      */
     public static stringifyObjValue(
-                obj: NullishType,
-                replacer: ((key: string, value: NullishType) => NullishType) | undefined | null,
+                obj: Any,
+                replacer: ((key: string, value: Any) => Any) | undefined | null,
                 space?: string | int): string {
-        const replacerOpt: ((key: string, value: NullishType) => NullishType) | undefined = (replacer === null) ? undefined : replacer
+        const replacerOpt: ((key: string, value: Any) => Any) | undefined = (replacer === null) ? undefined : replacer
 
         if (space instanceof String || space === undefined) {
             return new JSONWriter(replacerOpt, space).write(obj)
@@ -300,7 +300,7 @@ export class JSON {
      *
      * @returns String - JSON representation of Object
      */
-    public static stringifyDoubleStringFixedArray(obj: NullishType, replacer: FixedArray<double | string>, space?: int | string): string {
+    public static stringifyDoubleStringFixedArray(obj: Any, replacer: FixedArray<double | string>, space?: int | string): string {
         const filter : FixedArray<string> = new string[replacer.length]
         for (let i = 0; i < replacer.length; i++) {
             filter[i] = `${replacer[i]}`
@@ -313,7 +313,7 @@ export class JSON {
         }
     }
 
-    public static stringifyDoubleStringArray(obj: NullishType, replacer: Array<double | string>, space?: int | string): string {
+    public static stringifyDoubleStringArray(obj: Any, replacer: Array<double | string>, space?: int | string): string {
         const filter : FixedArray<string> = new string[replacer.length]
         for (let i = 0; i < replacer.length; i++) {
             filter[i] = `${replacer[i]}`
@@ -326,7 +326,7 @@ export class JSON {
         }
     }
 
-    public static stringifyStringArray(obj: NullishType, replacer: Array<string>, space?: int | string): string {
+    public static stringifyStringArray(obj: Any, replacer: Array<string>, space?: int | string): string {
         const filter : FixedArray<string> = new string[replacer.length]
         for (let i = 0; i < replacer.length; i++) {
             filter[i] = `${replacer[i]}`
@@ -557,14 +557,14 @@ export class JSON {
         return s.toString()
     }
 
-    public static overload stringify {  
-        stringifyByte, stringifyChar, stringifyInt, stringifyShort, stringifyLong, 
-        stringifyBigint, stringifyFloat, stringifyDouble, stringifyBoolean, stringifyString, 
-        stringifyByteFixedArray, stringifyCharFixedArray, stringifyShortFixedArray, stringifyIntFixedArray, 
-        stringifyLongFixedArray,  stringifyFloatFixedArray, stringifyDoubleFixedArray, 
+    public static overload stringify {
+        stringifyByte, stringifyChar, stringifyInt, stringifyShort, stringifyLong,
+        stringifyBigint, stringifyFloat, stringifyDouble, stringifyBoolean, stringifyString,
+        stringifyByteFixedArray, stringifyCharFixedArray, stringifyShortFixedArray, stringifyIntFixedArray,
+        stringifyLongFixedArray,  stringifyFloatFixedArray, stringifyDoubleFixedArray,
         stringifyBooleanFixedArray, stringifyDoubleStringFixedArray, stringifyNumberArray,
-        stringifyNumberArrayLike, stringifyStringArray, stringifyDoubleStringArray, 
-        stringifyJSValue, stringifyNullishTypeObj, stringifyJsonReplacer, stringifyObjValue, 
+        stringifyNumberArrayLike, stringifyStringArray, stringifyDoubleStringArray,
+        stringifyJSValue, stringifyAnyObj, stringifyJsonReplacer, stringifyObjValue,
     }
 
     /**
@@ -646,7 +646,7 @@ export class JSON {
         return JSON.parse<T>(text, undefined, type)
     }
 
-    public static parse<T>(text: string, reviver: ((key: string, value: NullishType) => NullishType) | undefined, type: Type, options?: jsonx.ParseOptions): Nullish<T> {
+    public static parse<T>(text: string, reviver: ((key: string, value: Any) => Any) | undefined, type: Type, options?: jsonx.ParseOptions): Nullish<T> {
         if (!JSON.checkType(type, new Array<TypeColor>())) {
             throw new Error("Incorrect type: " + type.toString())
         }
@@ -704,7 +704,7 @@ class JSONWriter {
     private static readonly ESCOMPAT_MAP_TYPE = Type.of(new Map<Object, Object>())
     private static readonly STD_CORE_PROMISE_TYPE = Type.of(new Promise<Object>((res) => {}))
 
-    private readonly replacer: ((key: String, value: NullishType) => NullishType) | undefined
+    private readonly replacer: ((key: String, value: Any) => Any) | undefined
     private readonly fieldsFilter: FixedArray<string>
     private readonly space: String | undefined
 
@@ -717,7 +717,7 @@ class JSONWriter {
     private readonly path = new Set<Object>()
     private buffer = new StringBuilder()
 
-    constructor(replacer?: (key: String, value: NullishType) => NullishType, space?: String) {
+    constructor(replacer?: (key: String, value: Any) => Any, space?: String) {
         this.replacer = replacer
         this.fieldsFilter = []
         this.space = space
@@ -737,7 +737,7 @@ class JSONWriter {
         this.useIndent = !(this.space == undefined || this.space == "")
     }
 
-    write(obj: NullishType): String {
+    write(obj: Any): String {
         if (this.useReplacer) {
             this.writeObject(this.replacer!("", obj))
         } else {
@@ -747,8 +747,7 @@ class JSONWriter {
         return this.buffer.toString()
     }
 
-    private writeObject(obj: NullishType): void {
-        obj = __narrowAny(obj)
+    private writeObject(obj: Any): void {
         if (obj === null) {
             this.buffer.append("null")
         } else if (obj === undefined) {
@@ -762,7 +761,7 @@ class JSONWriter {
         } else if (obj instanceof Record) {
             this.writeESCompatRecord(obj)
         } else if (obj instanceof JsonReplacer) {
-            let temp: Record<String, NullishType> = obj.jsonReplacer()
+            let temp: Record<String, Any> = obj.jsonReplacer()
             this.writeESCompatRecord(temp)
         } else if (obj instanceof ESValue) {
             this.writeInteropESValue(obj)
@@ -789,7 +788,7 @@ class JSONWriter {
                        objType.getName() == JSONWriter.ESCOMPAT_MAP_TYPE.getName()) {
                 this.buffer.append(JSONObject.EMPTY)
             } else if (objType instanceof ClassType) {
-                this.writeClassValue(obj, objType as ClassType)
+                this.writeClassValue(obj as Object, objType as ClassType)
             } else if (objType instanceof LambdaType) {
                 this.buffer.append("undefined")
             } else {
@@ -1003,7 +1002,7 @@ class JSONWriter {
         this.buffer = currentBuffer
     }
 
-    private writeField(fieldName: string, fieldVal: NullishType, fieldDumped: boolean): boolean {
+    private writeField(fieldName: string, fieldVal: Any, fieldDumped: boolean): boolean {
         if (fieldVal === undefined) {
             return fieldDumped
         }
@@ -1145,7 +1144,7 @@ class JSONWriter {
 
         const arrayLength = arrayValue.getLength().toInt()
         if (arrayLength > 0) {
-            const array: Object = __narrowAny(arrayValue.getData())!
+            const array: Object = arrayValue.getData() as Object
 
             this.path.add(array)
 
@@ -1179,7 +1178,7 @@ class JSONWriter {
         this.writeObjectsArrayElement(elemValue.getData(), elemIndex)
     }
 
-    private writeValueTypeWrapper(obj: Object): boolean {
+    private writeValueTypeWrapper(obj: Any): boolean {
         if (obj instanceof Boolean) {
             this.buffer.append(JSON.stringify(obj.unboxed()))
             return true
@@ -1249,7 +1248,7 @@ class JSONWriter {
         this.buffer.append("]")
     }
 
-    private writeObjectsArrayElement(arrayElement: NullishType, elementIndex: int): void {
+    private writeObjectsArrayElement(arrayElement: Any, elementIndex: int): void {
         this.writePadding()
 
         const replacedArrayElement = this.useReplacer ? this.replacer!("" + elementIndex, arrayElement) : arrayElement
@@ -1263,12 +1262,12 @@ class JSONWriter {
         }
     }
 
-    private checkReferencesCycle(obj: NullishType): void {
+    private checkReferencesCycle(obj: Any): void {
         if (obj == null) {
             return
         }
 
-        const cycleDetected = this.path.has(__narrowAny<object>(obj))
+        const cycleDetected = this.path.has(obj as Object)
         if (cycleDetected) {
             throw new TypeError("cyclic object value")
         }
@@ -1716,15 +1715,15 @@ export class JSONParser {
 }
 
 class JSONValueParser {
-    private reviver: ((key: string, value: NullishType) => NullishType) | undefined
+    private reviver: ((key: string, value: Any) => Any) | undefined
     private bigIntMode: int
 
-    constructor(reviver: ((key: string, value: NullishType) => NullishType) | undefined, bigIntMode: int) {
+    constructor(reviver: ((key: string, value: Any) => Any) | undefined, bigIntMode: int) {
         this.reviver = reviver
         this.bigIntMode = bigIntMode
     }
 
-    private createNumber(value: JSONNumber, typ: Type): NullishType {
+    private createNumber(value: JSONNumber, typ: Type): Any {
         if (typ.equals(BigIntType) && (this.bigIntMode === 2 || (!Double.isSafeInteger(value.value) && this.bigIntMode === 1))) {
             return new BigInt(value.bigintValue)
         } else if (typ instanceof DoubleType && (this.bigIntMode === 0 || (Double.isSafeInteger(value.value) && this.bigIntMode === 1))) {
@@ -1744,7 +1743,7 @@ class JSONValueParser {
         }
     }
 
-    parse(value: JSONValue, typ: Type): NullishType {
+    parse(value: JSONValue, typ: Type): Any {
         if (value instanceof JSONObject && typ instanceof ClassType) {
             return this.parseObject(value as JSONObject, typ as ClassType)
         } else if (value instanceof JSONObject && typ instanceof UnionType) {
@@ -1767,15 +1766,15 @@ class JSONValueParser {
         }
     }
 
-    private classFieldSetter(classVal: ClassValue, fieldName: string, fieldVal: NullishType): void {
+    private classFieldSetter(classVal: ClassValue, fieldName: string, fieldVal: Any): void {
         classVal.setFieldByName(fieldName, reflect.Value.of(fieldVal))
     }
 
     private parseObject(jsonObj: JSONObject, classType: ClassType): Object {
-        let setClassFieldFn = (cv: ClassValue, fn: string, fv: NullishType) => { cv.setFieldByName(fn, reflect.Value.of(fv)) }
+        let setClassFieldFn = (cv: ClassValue, fn: string, fv: Any) => { cv.setFieldByName(fn, reflect.Value.of(fv)) }
 
         if (this.reviver != undefined) {
-            setClassFieldFn = (classVal: ClassValue, fieldName: string, fieldVal: NullishType): void => {
+            setClassFieldFn = (classVal: ClassValue, fieldName: string, fieldVal: Any): void => {
                 const revivedVal = this.reviver!(fieldName, fieldVal)
 
                 // setFieldByName doesn't allow null/undefined values
@@ -1822,12 +1821,12 @@ class JSONValueParser {
 
     private parseArray(jVal: JSONArray, aType: ArrayType): Object | null {
         let len = jVal.values.length
-        let arr = aType.make(len.toInt()) as FixedArray<NullishType>
+        let arr = aType.make(len.toInt()) as FixedArray<Any>
 
-        let setArrayElementFn = (a: FixedArray<NullishType>, i: int, v: NullishType) => { a[i] = v }
+        let setArrayElementFn = (a: FixedArray<Any>, i: int, v: Any) => { a[i] = v }
 
         if (this.reviver !== undefined) {
-            setArrayElementFn = (array: FixedArray<NullishType>, index: int, elemVal: NullishType): void => {
+            setArrayElementFn = (array: FixedArray<Any>, index: int, elemVal: Any): void => {
                 const revivedVal = this.reviver!(`${index}`, elemVal)
                 array[index] = revivedVal !== undefined ? revivedVal : null
             }

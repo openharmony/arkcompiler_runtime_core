@@ -42,10 +42,10 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
         return "[object ArrayList]";
     }
 
-    public jsonReplacer(): Record<String, NullishType> {
+    public jsonReplacer(): Record<String, Any> {
         const buf = this.buffer;
         const len = buf.length;
-        let arrayObj: Record<String, NullishType> = {};
+        let arrayObj: Record<String, Any> = {};
         for (let i = 0; i < len; i++) {
             arrayObj[String(i)] = buf[i];
         }

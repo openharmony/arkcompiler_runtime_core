@@ -39,10 +39,10 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
         return "[object Deque]";
     }
 
-    public jsonReplacer(): Record<String, NullishType> {
+    public jsonReplacer(): Record<String, Any> {
         const buf = this.buffer;
         const len = buf.length;
-        let arrayObj: Record<String, NullishType> = {};
+        let arrayObj: Record<String, Any> = {};
         for (let i = 0; i < len; i++) {
             arrayObj[String(i)] = buf[i];
         }
@@ -100,7 +100,7 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
 
     /**
      * Removes and returns the last element from the deque.
-     * 
+     *
      * @returns {T | undefined} The last element of the deque if it exists, otherwise `undefined` if the deque is empty.
      */
     public popLast(): T | undefined {

@@ -272,7 +272,7 @@ function testMake() {
     const tA = Type.of(new MakeA()) as ClassType;
     arktest.assertEQ(42 as int, (tA.make() as MakeA).value);
     const tB = Type.of(new MakeB(0, "")) as ClassType;
-    const args = new Object[2] as FixedArray<NullishType>;
+    const args = new Object[2] as FixedArray<Any>;
     args[0] = new Int(7);
     args[1] = new String("hi");
     const b = tB.make(args) as MakeB;

@@ -466,7 +466,7 @@ export final class Double extends Floating implements Comparable<Double> {
     * Returns false if type of provided object is not the same as this type
     * @tag arkts
     */
-    public equals(other: NullishType): boolean {
+    public equals(other: Any): boolean {
         if (this === other) {
             return true
         }

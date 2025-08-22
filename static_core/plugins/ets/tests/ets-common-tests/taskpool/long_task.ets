@@ -32,11 +32,11 @@ function delayWithYield(duration: int): void {
     Coroutine.Schedule();
 }
 
-function launchImpl(func: () => NullishType): Promise<NullishType> {
-    const job: Job<NullishType> = launch<NullishType, () => NullishType>(
+function launchImpl(func: () => Any): Promise<Any> {
+    const job: Job<Any> = launch<Any, () => Any>(
         func
     );
-    return new Promise<NullishType>((resolve, reject) => {
+    return new Promise<Any>((resolve, reject) => {
         try {
             let res = job.Await();
             resolve(res);
@@ -46,7 +46,7 @@ function launchImpl(func: () => NullishType): Promise<NullishType> {
     });
 }
 
-function testDelayFunc(): NullishType {
+function testDelayFunc(): Any {
     let task = new taskpool.LongTask(sumFunc);
     let res = await taskpool.executeDelayed(10, task);
     arktest.expectError(() => {

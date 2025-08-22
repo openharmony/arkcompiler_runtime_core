@@ -21,7 +21,7 @@ import {
 
 class PublicGetterClass {
     _value = tsString;
-    test: null | undefined//NullishType
+    test: null | undefined//Any
     get value(): string {
         return this._value;
     }

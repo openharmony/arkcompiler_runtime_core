@@ -61,7 +61,7 @@ function testStringifyParseOptZero(): void {
 
 function testStringifyParseBigIntWithReviver(): void {
     let classType = Type.of(new SuperUser() as Object)
-    let reviver = (k: string, v: NullishType) => {
+    let reviver = (k: string, v: Any) => {
         if (k === "id") {
             return new BigInt(1)
         }

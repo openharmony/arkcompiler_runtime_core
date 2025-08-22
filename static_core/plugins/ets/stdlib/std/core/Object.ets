@@ -17,18 +17,20 @@ package std.core;
 
 /**
  * @deprecated
-*/
-export type NullishType = Any
-
-/**
- * @deprecated
-*/
+ */
 export type NullableType = Object | null
 
 /**
  * @deprecated
-*/
+ */
 export type Nullish<T> = T | null | undefined
+
+/**
+ * @deprecated
+ *
+ * Use Any instead. NullishType is a legacy name
+ */
+export type NullishType = Any
 
 export type PropertyKey = string
 
@@ -40,7 +42,7 @@ export const OBJECT_TO_STRING_MEMBER_NAME: string          = "toString"
 export const OBJECT_TO_LOCALE_STRING_MEMBER_NAME: string   = "toLocaleString"
 export const OBJECT_HAS_OWN_PROPERTY_MEMBER_NAME: string   = "hasOwnProperty"
 
-type EntryType = [PropertyKey, NullishType]
+type EntryType = [PropertyKey, Any]
 type NullishEntryType = EntryType | null | undefined
 
 /**
@@ -91,7 +93,7 @@ export class Object {
      *
      * @returns an array of strings representing the given record's property names
      */
-    public static keys(rec: Record<PropertyKey, NullishType>): string[] {
+    public static keys(rec: Record<PropertyKey, Any>): string[] {
         const keys: string[] = new string[rec.size.toInt()]
 
         let i = 0
@@ -182,8 +184,8 @@ export class Object {
         throw new AssertionError("Invalid object type");
     }
 
-    public static values(rec: Record<PropertyKey, NullishType>): NullishType[] {
-        const vals: NullishType[] = new NullishType[rec.size.toInt()]
+    public static values(rec: Record<PropertyKey, Any>): Any[] {
+        const vals: Any[] = new Any[rec.size.toInt()]
 
         let i = 0
         for (let val of rec.values()) {
@@ -201,7 +203,7 @@ export class Object {
     *
     * @returns an array containing the given object's own string-keyed field values
     */
-    public static values(o: Object): NullishType[] {
+    public static values(o: Object): Any[] {
         if (o instanceof Char ||
             o instanceof Boolean ||
             o instanceof Byte ||
@@ -210,15 +212,15 @@ export class Object {
             o instanceof Long ||
             o instanceof Float ||
             o instanceof Double) {
-            return new NullishType[0]
+            return new Any[0]
         }
         if (o instanceof String) {
             const sv = o as string
             const len = sv.getLength()
             if (len == 0) {
-                return new NullishType[0]
+                return new Any[0]
             }
-            let res: NullishType[] = new NullishType[len]
+            let res: Any[] = new Any[len]
             for (let i = 0; i < len; i++) {
                 // NOTE(shumilov-petr): must be replaced by `sv.charAt(i) as string` when #15731 will be fixed
                 res[i] = new Char(sv.charAt(i)).toString()
@@ -229,11 +231,11 @@ export class Object {
         if (t instanceof ClassType) {
             const cv = reflect.Value.of(o) as ClassValue
             if (cv.getFieldsNum() == 0) {
-                return new NullishType[0]
+                return new Any[0]
             }
             const keys = Object.keys(o)
             const len = keys.length
-            let res: NullishType[] = new NullishType[len]
+            let res: Any[] = new Any[len]
             for (let i = 0; i < len; i++) {
                 res[i] = cv.getFieldByName(keys[i]).getData()
             }
@@ -242,15 +244,15 @@ export class Object {
             const av = reflect.Value.of(o) as ArrayValue
             const len = av.getLength()
             if (len == 0) {
-                return new NullishType[0]
+                return new Any[0]
             }
-            let res: NullishType[] = new NullishType[len.toInt()]
+            let res: Any[] = new Any[len.toInt()]
             for (let i = 0; i < len; i++) {
                 res[i] = av.getElement(i).getData()
             }
             return res
         } else if (t instanceof LambdaType) {
-            return new NullishType[0]
+            return new Any[0]
         } else if (t instanceof EnumType) {
             // NOTE(shumilov-petr): Not implemented
             throw new Error("Not implemented")
@@ -272,7 +274,7 @@ export class Object {
     *
     * @returns array representation of key/value
     */
-    public static entries(rec: Record<PropertyKey, NullishType>): NullishEntryType[] {
+    public static entries(rec: Record<PropertyKey, Any>): NullishEntryType[] {
         const entries: NullishEntryType[] = new NullishEntryType[rec.size.toInt()]
 
         let i = 0
@@ -354,7 +356,7 @@ export class Object {
         throw new AssertionError("Invalid object type")
     }
 
-    public static getOwnPropertyNames(rec: Record<PropertyKey, NullishType>): string[] {
+    public static getOwnPropertyNames(rec: Record<PropertyKey, Any>): string[] {
         return Object.keys(rec)
     }
 
@@ -489,7 +491,7 @@ export class Object {
     *
     * @returns new Record whose properties are given by the elements of the Iterable
     */
-    public static fromEntries<T = NullishType>(entries: Iterable<[PropertyKey, T]>): Record<PropertyKey, T> {
+    public static fromEntries<T = Any>(entries: Iterable<[PropertyKey, T]>): Record<PropertyKey, T> {
         const result = new Record<PropertyKey, T>()
 
         const entriesIter = entries.$_iterator()
@@ -516,11 +518,11 @@ export class Object {
     *
     * @returns the modified target Record
     */
-    public static assign(target: Record<PropertyKey, NullishType>,  ...source: FixedArray<Object>): Record<PropertyKey, NullishType> {
+    public static assign(target: Record<PropertyKey, Any>,  ...source: FixedArray<Object>): Record<PropertyKey, Any> {
         for (const s of source) {
             const entries = Object.entries(s)
             for (const e of entries) {
-                target.set(e![0] as PropertyKey, e![1] as NullishType)
+                target.set(e![0] as PropertyKey, e![1] as Any)
             }
         }
         return target

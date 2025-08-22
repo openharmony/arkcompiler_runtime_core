@@ -117,7 +117,7 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      *
      * @param value value to construct class instance with
      */
-    public constructor(value: NullishType = undefined) {
+    public constructor(value: Any = undefined) {
         if (value == null || value == undefined) {
             this.value = false;
         } else if (value instanceof Boolean) {
@@ -237,7 +237,7 @@ export final class Boolean extends Object implements Comparable<Boolean> {
     * @returns true if provided object and this instance have same value, false otherwise
     * Returns false if type of provided object is not the same as this type
     */
-    public equals(other: NullishType): boolean {
+    public equals(other: Any): boolean {
         if (this === other) {
             return true
         }
