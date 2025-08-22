@@ -254,7 +254,7 @@ class VMBReport(Jsonable):
         self.print_full_time()
         caption(f'{self.summary}')
         print()
-        if self.fail_cnt > 0 or full:
+        if self.fail_cnt > 0 or full or exclude:
             time_head = '    Time    ' if 'nano' == fmt else '  Time  '
             caption(f"{'Test':<{self._name_len}} | {time_head} | "
                     f'CodeSize |   RSS    | Status  |')
@@ -681,7 +681,7 @@ def report_main(args: Args,
             r.compile_time()
             sys.exit(0)
         if not args.status_only:
-            r.text_report(full=args.full, exclude=args.exclude_list, fmt=args.number_format)
+            r.text_report(full=args.full, exclude=flaky, fmt=args.number_format)
             print_flaky(flaky)
         exit_code = r.get_exit_code()
         if exit_code == 0:
