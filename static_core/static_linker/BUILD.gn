@@ -142,6 +142,7 @@ ohos_executable("ark_link") {
 group("static_linker") {
   deps = [
     ":ark_link",
+    ":ark_link($host_toolchain)",
     ":arklinker",
   ]
 }
