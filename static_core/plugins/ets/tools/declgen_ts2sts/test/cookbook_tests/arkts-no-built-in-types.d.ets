@@ -24,3 +24,28 @@ export declare function printSymbol(value: Any): void;
 export type SymbolAlias = Any;
 export declare const sym6: SymbolAlias;
 export declare const obj3: Any;
+export declare function A(): Any;
+export declare const propDecorator1: Any;
+export declare const propDecorator2: Any;
+export declare const PropertyDecorators: Any;
+export declare const decoratorMap: Map<string, Any>;
+export declare function getPropertyDecorator(name: string): Any;
+export declare function processProperty(decorator: Any, target: Any, propertyKey: string | Any): void;
+export type PropertyDecoratorAlias = Any;
+export declare const aliasedDecorator: PropertyDecoratorAlias;
+export type ComplexDecoratorType = Any;
+export declare const complexDecorator: ComplexDecoratorType;
+export declare class DecoratedClass {
+    normalProperty: string;
+    readOnlyProperty: number;
+    customDecoratedProperty: boolean;
+}
+export declare class DecoratorManager implements DecoratorContainer {
+    decorator: Any;
+    constructor(decorator: Any);
+    applyDecorator(target: Any, propertyKey: string | Any): void;
+}
+export declare interface DecoratorContainer {
+    decorator: Any;
+    applyDecorator(target: Any, propertyKey: string | Any): void;
+}

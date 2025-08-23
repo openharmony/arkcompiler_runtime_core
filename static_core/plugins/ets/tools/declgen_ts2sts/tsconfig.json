@@ -10,6 +10,8 @@
     "sourceMap": true,
     "outDir": "build",
     "strict": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
   },
 
   "include": ["src/", "utils/"]
