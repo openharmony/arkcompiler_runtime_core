@@ -175,3 +175,14 @@ ark_gen_file("abc_type_convert_cpp") {
   requires = [ "$ark_root/libpandafile/types.rb" ]
   output_file = "$target_gen_dir/abc_type_convert.cpp"
 }
+
+if (!ark_standalone_build && !is_arkui_x) {
+  ohos_shared_headers("arkabc2program_public_headers") {
+    include_dirs = [
+      "$ark_root/abc2program",
+      "$ark_root/abc2program/common",
+    ]
+    part_name = "runtime_core"
+    subsystem_name = "arkcompiler"
+  }
+}
