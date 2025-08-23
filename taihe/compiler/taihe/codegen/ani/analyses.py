@@ -454,13 +454,12 @@ class ArkTsModule(ArkTsModuleOrNamespace):
 
     def get_member(self, target: StsWriter, name: str, is_default: bool) -> str:
         filtered_name = "".join(c if c.isalnum() else "_" for c in self.mod_name)
+        import_name = f"_taihe_{filtered_name}_{name}"
         if is_default:
-            decl_name = f"_taihe_{filtered_name}_default"
-            target.add_import_default(f"./{self.mod_name}", decl_name)
-            return decl_name
-        scope_name = f"_taihe_{filtered_name}"
-        target.add_import_module(f"./{self.mod_name}", scope_name)
-        return f"{scope_name}.{name}"
+            target.add_import_default(f"./{self.mod_name}", import_name)
+        else:
+            target.add_import_decl(f"./{self.mod_name}", name, import_name)
+        return import_name
 
 
 @dataclass
