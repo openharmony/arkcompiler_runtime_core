@@ -40,38 +40,40 @@ parameters:
     # adds --panda-files option to ark with all dependent and the current abc files
     is-panda: True
 steps:
-    imports:
-        only-es2panda:
-            opt-level: ${parameters.opt-level}
-            build: ${parameters.build}
-            work-dir: ${parameters.work-dir}
-            extension: ${parameters.extension}
-            load-runtimes: ${parameters.load-runtimes}
-            enable-es2panda: ${parameters.enable-es2panda}
-            enable-verifier: ${parameters.enable-verifier}
-            es2panda-timeout: ${parameters.es2panda-timeout}
-            verifier-timeout: ${parameters.verifier-timeout}
-        ark-aot-pgo:
-            build: ${parameters.build}
-            work-dir: ${parameters.work-dir}
-            heap-verifier: ${parameters.heap-verifier}
-            gc-type: ${parameters.gc-type}
-            full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
-            load-runtimes: ${parameters.load-runtimes}
-            compiler-enable-jit: "true"
-            ark-timeout: ${parameters.ark-profile-timeout}
-            aot-timeout: ${parameters.aot-timeout}
-            aot-args: ${parameters.aot-args}
-        only-runtime:
-            ark-timeout: ${parameters.ark-timeout}
-            build: ${parameters.build}
-            work-dir: ${parameters.work-dir}
-            heap-verifier: ${parameters.heap-verifier}
-            gc-type: ${parameters.gc-type}
-            full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
-            load-runtimes: ${parameters.load-runtimes}
-            compiler-enable-jit: "false"
-            ark-args:
-                - ${parameters.ark-args}
-                - "--aot-files=${parameters.paoc-output-file}"
-                - "--enable-an:force"
+    compile:
+        from: only-es2panda
+        opt-level: ${parameters.opt-level}
+        build: ${parameters.build}
+        work-dir: ${parameters.work-dir}
+        extension: ${parameters.extension}
+        load-runtimes: ${parameters.load-runtimes}
+        enable-es2panda: ${parameters.enable-es2panda}
+        enable-verifier: ${parameters.enable-verifier}
+        es2panda-timeout: ${parameters.es2panda-timeout}
+        verifier-timeout: ${parameters.verifier-timeout}
+    aot-pgo:
+        from: ark-aot-pgo
+        build: ${parameters.build}
+        work-dir: ${parameters.work-dir}
+        heap-verifier: ${parameters.heap-verifier}
+        gc-type: ${parameters.gc-type}
+        full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
+        load-runtimes: ${parameters.load-runtimes}
+        compiler-enable-jit: "true"
+        ark-timeout: ${parameters.ark-profile-timeout}
+        aot-timeout: ${parameters.aot-timeout}
+        aot-args: ${parameters.aot-args}
+    ark-after-aot-pgo:
+        from: only-runtime
+        ark-timeout: ${parameters.ark-timeout}
+        build: ${parameters.build}
+        work-dir: ${parameters.work-dir}
+        heap-verifier: ${parameters.heap-verifier}
+        gc-type: ${parameters.gc-type}
+        full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
+        load-runtimes: ${parameters.load-runtimes}
+        compiler-enable-jit: "false"
+        ark-args:
+            - ${parameters.ark-args}
+            - "--aot-files=${parameters.paoc-output-file}"
+            - "--enable-an:force"

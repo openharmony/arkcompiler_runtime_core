@@ -42,19 +42,19 @@ parameters:
     # adds --panda-files option to ark with all dependent and the current abc files
     is-panda: True
 steps:
-    imports:
-        only-runtime:
-            ark-timeout: ${parameters.ark-timeout}
-            build: ${parameters.build}
-            work-dir: ${parameters.work-dir}
-            heap-verifier: ${parameters.heap-verifier}
-            gc-type: ${parameters.gc-type}
-            full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
-            load-runtimes: ${parameters.load-runtimes}
-            compiler-enable-jit: ${parameters.compiler-enable-jit}
-            ark-args:
-                - ${parameters.ark-full-args}
-    ark-aot:
+    ark-creates-profile-for-aot-pgo:
+        from: only-runtime
+        ark-timeout: ${parameters.ark-timeout}
+        build: ${parameters.build}
+        work-dir: ${parameters.work-dir}
+        heap-verifier: ${parameters.heap-verifier}
+        gc-type: ${parameters.gc-type}
+        full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
+        load-runtimes: ${parameters.load-runtimes}
+        compiler-enable-jit: ${parameters.compiler-enable-jit}
+        ark-args:
+            - ${parameters.ark-full-args}
+    ark-aot-with-profile:
         executable-path: ${parameters.build}/bin/ark_aot
         timeout: ${parameters.aot-timeout}
         step-type: aot

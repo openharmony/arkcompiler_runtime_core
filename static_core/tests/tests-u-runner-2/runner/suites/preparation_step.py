@@ -38,8 +38,8 @@ _LOGGER = Log.get_logger(__file__)
 class TestPreparationStep(ABC):
     def __init__(self, test_source_path: Path, *, test_gen_path: Path, config: Config, collection: CollectionsOptions,
                  extension: str = "ets") -> None:
-        self.__test_source_path = test_source_path
-        self.__test_gen_path = test_gen_path
+        self.__test_source_path = test_source_path.resolve()
+        self.__test_gen_path = test_gen_path.resolve()
         self.config = config
         self.extension = extension
         self.collection = collection

@@ -16,10 +16,12 @@
 import random
 import unittest
 from collections.abc import Callable
+from pathlib import Path
 from typing import Any, TypeVar
 
 from runner import utils
 from runner.common_exceptions import InvalidConfiguration
+from runner.suites.test_lists import TestLists
 
 MethodType = Any    # type: ignore[explicit-any]
 CLASSTYPE = TypeVar("CLASSTYPE", bound='object')
@@ -81,3 +83,33 @@ def assert_not_raise(test_case: unittest.TestCase, cls: type[Exception], functio
 
 def random_suffix() -> str:
     return str(round(random.random() * 1000_000))
+
+
+def create_runner_test_id(test_file: str) -> str:
+    current_file_parent = Path(__file__).parent
+    return Path(test_file).relative_to(current_file_parent).as_posix()
+
+
+def test_cmake_cache(_: TestLists) -> list[str]:
+    return [
+        'PANDA_ENABLE_UNDEFINED_BEHAVIOR_SANITIZER=false',
+        'PANDA_ENABLE_ADDRESS_SANITIZER=true',
+        'PANDA_ENABLE_THREAD_SANITIZER=false',
+        'CMAKE_BUILD_TYPE=fastverify'
+    ]
+
+
+def test_environ(test_root_name: str | None = None, test_root_value: str | None = None) -> dict[str, str]:
+    env = {
+        'ARKCOMPILER_RUNTIME_CORE_PATH': Path.cwd().as_posix(),
+        'ARKCOMPILER_ETS_FRONTEND_PATH': Path.cwd().as_posix(),
+        'PANDA_BUILD': Path.cwd().as_posix(),
+        'WORK_DIR': (Path.cwd() / f"work-{random_suffix()}").as_posix(),
+    }
+    if test_root_name and test_root_value:
+        env[test_root_name] = test_root_value
+    return env
+
+
+def data_folder(main_path: str) -> Path:
+    return Path(main_path).parent / "data"

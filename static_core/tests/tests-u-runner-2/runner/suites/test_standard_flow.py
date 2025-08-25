@@ -74,12 +74,12 @@ class TestStandardFlow(Test):
         self.test_abc.parent.mkdir(parents=True, exist_ok=True)
 
         self.validator: IValidator = self.__init_validator()
-        self.__dependent_tests: list[TestStandardFlow] = []
+        self._dependent_tests: list[TestStandardFlow] = []
         self.__is_dependent = is_dependent
         self.__boot_panda_files: str = ""
 
     @property
-    def all_dependent_tests(self) -> list['TestStandardFlow']:
+    def direct_dependent_tests(self) -> list['TestStandardFlow']:
         if not self.metadata.files:
             return []
         id_pos: int = str(self.path).find(self.test_id)
@@ -90,14 +90,14 @@ class TestStandardFlow(Test):
         for file in self.metadata.files:
             new_test_file_path: Path = self.path.parent.joinpath(file).resolve()
             new_test_id: Path = new_test_file_path.relative_to(test_root)
+            if new_test_id in dependent_tests:
+                continue
             test = self.__class__(self.test_env, new_test_file_path,
                                   params=self.test_extra_params,
                                   test_id=str(new_test_id),
                                   is_dependent=True,
                                   parent_test_id=self.test_id)
             dependent_tests.append(test)
-            if (sub_tests := test.all_dependent_tests) is not None:
-                dependent_tests.extend(sub_tests)
 
         return dependent_tests
 
@@ -127,12 +127,12 @@ class TestStandardFlow(Test):
         if not self.metadata.files:
             return []
 
-        if self.__dependent_tests:
-            return self.__dependent_tests
+        if self._dependent_tests:
+            return self._dependent_tests
 
-        self.__dependent_tests.extend(self.all_dependent_tests)
+        self._dependent_tests.extend(self.direct_dependent_tests)
         current_test_id: Path = Path(self.test_id)
-        for test in self.__dependent_tests:
+        for test in self._dependent_tests:
             prefix = Path(self.parent_test_id).stem if self.parent_test_id else current_test_id.stem
 
             test_abc_name = f'{prefix}_{Path(test.test_abc).name}'
@@ -149,17 +149,15 @@ class TestStandardFlow(Test):
                 for dep_key, dep_item in test.dependent_packages.items():
                     self.dependent_packages[dep_key] = self.dependent_packages.get(dep_key, False) or dep_item
 
-        return self.__dependent_tests
+        return self._dependent_tests
 
-    @staticmethod
-    def _get_return_code_from_device(output: str, actual_return_code: int) -> int:
-        if output.find('TypeError:') > -1 or output.find('FatalOutOfMemoryError:') > -1:
-            return actual_return_code if actual_return_code else -1
-        match = re.search(r'Exit code:\s*(-?\d+)', output)
-        if match:
-            return_code_from_device = int(match.group(1))
-            return return_code_from_device
-        return actual_return_code
+    @property
+    def dependent_abc_files(self) -> list[str]:
+        abc_files_lists = [[*df.dependent_abc_files, df.test_abc.as_posix()] for df in self.dependent_tests]
+        result = []
+        for abc_files_list in abc_files_lists:
+            result += abc_files_list
+        return list(result)
 
     @staticmethod
     def __add_options(options: list[str]) -> list[str]:
@@ -193,6 +191,16 @@ class TestStandardFlow(Test):
         pattern = r'\s*\[\s*[^]]+\.ets:\d+:\d+\s*]|\s*\[\s*[^]]+\.abc\s*]'
         return re.sub(pattern, '', error_message)
 
+    @staticmethod
+    def _get_return_code_from_device(output: str, actual_return_code: int) -> int:
+        if output.find('TypeError:') > -1 or output.find('FatalOutOfMemoryError:') > -1:
+            return actual_return_code if actual_return_code else -1
+        match = re.search(r'Exit code:\s*(-?\d+)', output)
+        if match:
+            return_code_from_device = int(match.group(1))
+            return return_code_from_device
+        return actual_return_code
+
     def continue_after_process_dependent_files(self) -> bool:
         """
         Processes dependent files
@@ -217,19 +225,25 @@ class TestStandardFlow(Test):
         if not self.continue_after_process_dependent_files():
             return self
 
-        for step in self.test_env.config.workflow.steps:
-            if step.executable_path is not None:
-                self.passed, self.report, self.fail_kind = self.__do_run_one_step(step)
-                is_break = ((not self.passed) or
-                            (step.step_kind == StepKind.COMPILER and
-                             (self.is_compile_only or self.metadata.tags.not_a_test)))
-                if is_break:
-                    return self
+        compile_only_test = self.is_compile_only or self.metadata.tags.not_a_test or self.parent_test_id != ""
+        allowed_steps = [StepKind.COMPILER]  # steps to run for compile only or not-a-test tests
+        steps = [step for step in self.test_env.config.workflow.steps
+                 if step.executable_path is not None and
+                 ((compile_only_test and step.step_kind in allowed_steps) or not compile_only_test)]
+
+        for step in steps:
+            self.passed, self.report, self.fail_kind = self.__do_run_one_step(step)
+            if step.step_kind in allowed_steps:
+                allowed_steps.remove(step.step_kind)
+            if not self.passed or (compile_only_test and not allowed_steps):
+                return self
+
+        if not steps:
+            # no step runs, so nothing bad occurs, and we consider the test is passed
+            self.passed = True
+            self.fail_kind = 'PASSED'
 
         return self
-
-    def dependent_abc_files(self) -> list[str]:
-        return [df.test_abc.as_posix() for df in self.dependent_tests]
 
     def prepare_compiler_step(self, step: Step) -> Step:
         new_step = copy.copy(step)
@@ -255,7 +269,7 @@ class TestStandardFlow(Test):
         new_step = copy.copy(step)
         new_step.args = step.args[:]
         if self.dependent_tests:
-            for abc_file in list(self.dependent_abc_files()):
+            for abc_file in list(self.dependent_abc_files):
                 new_step.args.extend([f'--paoc-panda-files={abc_file}'])
         new_step.args.extend([f'--paoc-panda-files={self.test_abc}'])
         return new_step
@@ -392,7 +406,7 @@ class TestStandardFlow(Test):
             if name in arg:
                 if not self.__boot_panda_files:
                     _, value = arg.split('=')
-                    boot_panda_files = [value, *self.dependent_abc_files(), self.test_abc.as_posix()]
+                    boot_panda_files = [value, *self.dependent_abc_files, self.test_abc.as_posix()]
                     self.__boot_panda_files = f'{name}={":".join(boot_panda_files)}'
                 dep_files_args.append(self.__boot_panda_files)
             else:
@@ -401,8 +415,8 @@ class TestStandardFlow(Test):
 
     def __add_panda_files(self) -> str:
         opt_name = '--panda-files'
-        if self.dependent_abc_files():
-            return f'{opt_name}={":".join(self.dependent_abc_files())}'
+        if self.dependent_abc_files:
+            return f'{opt_name}={":".join(self.dependent_abc_files)}'
 
         return f'{opt_name}={self.test_abc!s}'
 
