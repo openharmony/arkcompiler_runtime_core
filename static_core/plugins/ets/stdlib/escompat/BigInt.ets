@@ -754,10 +754,34 @@ export final class BigInt {
         }
 
         let limit:long = other.getLong()
-        for (let i:long = 0; i<limit; i++) {
-            lhs = lhs + lhs
+
+        let wordSize:int = 32
+
+        let wordShift: int = ((limit / wordSize).toInt());
+        let bitShift: int = ((limit % wordSize).toInt());
+
+        let oldLength: int = this.bytes.length;
+        let newLength: int = oldLength + wordShift + (bitShift > 0 ? 1 : 0);
+        let newBytes: FixedArray<int> = new int[newLength];
+
+        if (bitShift > 0) {
+            let carry: int = 0;
+            let rightShift = wordSize - bitShift;
+            for (let i: int = 0; i < oldLength; i++) {
+                let currentWord: int = this.bytes[i];
+                let newWord: int = ((currentWord << bitShift) | carry) & 0xFFFFFFFF;
+                carry = (currentWord >>> rightShift);
+                newBytes[i + wordShift] = newWord;
+            }
+            if (carry > 0) {
+                newBytes[newLength - 1] = carry;
+            }
+        } else {
+            copyTo(this.bytes, newBytes, wordShift, 0, oldLength);
         }
-        return new BigInt(lhs.bytes, lhs.sign)
+
+        return new BigInt(newBytes, this.sign);
+
     }
 
     public operatorRightShift(other: BigInt): BigInt {
