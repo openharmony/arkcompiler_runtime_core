@@ -64,7 +64,7 @@ export class HashSet<T> implements ReadonlyHashSet<T> {
     }
 
     public toString(): string {
-        return "[object HashSet]";
+        return '[object HashSet]';
     }
 
     /**

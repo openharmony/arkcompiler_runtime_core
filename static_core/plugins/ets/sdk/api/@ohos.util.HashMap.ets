@@ -73,7 +73,7 @@ export default class HashMap<K, V> implements ReadonlyHashMap<K, V> {
     }
 
     public toString(): string {
-        return "[object HashMap]";
+        return '[object HashMap]';
     }
 
     /**

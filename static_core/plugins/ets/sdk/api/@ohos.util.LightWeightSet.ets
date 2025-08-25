@@ -17,7 +17,7 @@ import LightWeightMap from '@ohos.util.LightWeightMap';
 import { BusinessError } from "@ohos.base";
 
 const typeErrorCodeId: int = 401;
-const OutOfBoundsErrorCodeId: int = 10200001;
+const outOfBoundsErrorCodeId: int = 10200001;
 
 export type LightWeightSetForEachCb<T> = (value: T, key: T, set: LightWeightSet<T>) => void;
 
@@ -288,7 +288,7 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T>, JsonReplace
             return;
         }
         if (minimumCapacity <= 0 || this.capacity >= minimumCapacity) {
-            throw new BusinessError(OutOfBoundsErrorCodeId,
+            throw new BusinessError(outOfBoundsErrorCodeId,
                 new Error(`The value of "minimumCapacity" is out of range. It must be > ${this.capacity}. Received value is: ${minimumCapacity}`));
         }
         this.capacity = minimumCapacity;
