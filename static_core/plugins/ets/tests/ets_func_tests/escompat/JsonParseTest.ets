@@ -174,6 +174,33 @@ function jsonParseWithBoolean(): int {
     return RESULT_SUCCESS
 }
 
+interface IState {
+    change()
+}
+
+class IStateCLASS implements IState {
+    change(){}
+}
+
+class classfactory {
+    static getIState(): IState {
+        return new IStateCLASS()
+    }
+}
+
+class interfaceTest {
+    @JSONParseIgnore() meta: IState = classfactory.getIState()
+    name:string = ""
+}
+
+function jsonParseWithInterface(): int {
+    let str = '{"name":"tester"}'
+    let type = Type.from<interfaceTest>()
+    let ret = JSON.parse<interfaceTest>(str, type) as interfaceTest
+    arktest.assertEQ(ret.name, "tester")
+    return RESULT_SUCCESS
+}
+
 function main(): int {
     let failures = RESULT_SUCCESS
 
@@ -185,6 +212,7 @@ function main(): int {
     //failures += test(jsonParseUsingReplacingReviver, "JSON.parse() using replacing 'reviver'")
     failures += test(jsonParseArrayWithReplacingReviver, "JSON.parse(array) using replacing 'reviver'")
     failures += test(jsonParseWithBoolean, 'JSON.parse boolean in class')
+    failures += test(jsonParseWithInterface, 'JSON.parse interface(ignore) in class')
 
     if (failures == RESULT_SUCCESS) {
         consolePrint(Color.Green, "PASSED: ")
