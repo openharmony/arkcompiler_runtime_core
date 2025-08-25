@@ -321,6 +321,10 @@ export namespace util {
             if (options === undefined) {
                 options = Type.BASIC;
             }
+            if (options != Type.BASIC && options != Type.BASIC_URL_SAFE){
+                throw createBusinessError(TypeErrorCodeId,
+                    `Parameter error. The target encoding type option must be BASIC or BASIC_URL_SAFE.`);
+            }
             let encoded: string = Base64Helper.encodeBase64(src, options === Type.BASIC_URL_SAFE || options === Type.MIME_URL_SAFE, options === Type.MIME || options === Type.MIME_URL_SAFE);
             let result: Uint8Array = new Uint8Array(encoded.length);
             for (let i: int = 0; i < encoded.length; i++) {
