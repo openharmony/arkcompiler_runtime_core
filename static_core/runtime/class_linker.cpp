@@ -1793,4 +1793,32 @@ void ClassLinker::RemoveCreatedClassInExtension(Class *klass)
     }
 }
 
+void ClassLinker::TryReLinkAotCodeForBoot(const panda_file::File *pf, const compiler::AotPandaFile *aotPfile,
+                                          panda_file::SourceLang language)
+{
+    auto bootContext = GetExtension(language)->GetBootContext();
+
+    bootContext->EnumerateClasses([pf, aotPfile](Class *klass) {
+        LOG(DEBUG, RUNTIME) << "TryReLinkAotCode() for boot class: " << klass->GetName();
+
+        ASSERT(aotPfile != nullptr);
+        compiler::AotClass aotClass = aotPfile->GetClass(klass->GetFileId().GetOffset());
+
+        Span<Method> methods = klass->GetMethods();
+        panda_file::ClassDataAccessor cda(*pf, klass->GetFileId());
+        size_t methodIdx = 0;
+        size_t smethodIdx = klass->GetNumVirtualMethods();
+        size_t vmethodIdx = 0;
+
+        cda.EnumerateMethods(
+            [&smethodIdx, &vmethodIdx, &methods, &methodIdx, aotClass](panda_file::MethodDataAccessor &mda) {
+                Method &method = mda.IsStatic() ? methods[smethodIdx++] : methods[vmethodIdx++];
+                if (aotClass.IsValid()) {
+                    MaybeLinkMethodToAotCode(&method, aotClass, methodIdx);
+                }
+                methodIdx++;
+            });
+        return true;
+    });
+}
 }  // namespace ark
