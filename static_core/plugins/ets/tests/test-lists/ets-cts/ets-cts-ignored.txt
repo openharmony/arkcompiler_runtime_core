@@ -1464,8 +1464,14 @@
 
 #28235
 09.classes/09.constructor_declaration/02.constructor_body/invocation_another_constructor_of_same_class.ets
-09.classes/09.constructor_declaration/02.constructor_body/primary.ets
-09.classes/09.constructor_declaration/02.constructor_body/secondary.ets
+09.classes/09.constructor_declaration/02.constructor_body/primary01.ets
+09.classes/09.constructor_declaration/02.constructor_body/primary02.ets
+09.classes/09.constructor_declaration/02.constructor_body/primary03.ets
+09.classes/09.constructor_declaration/02.constructor_body/primary04.ets
+09.classes/09.constructor_declaration/02.constructor_body/secondary01.ets
+09.classes/09.constructor_declaration/02.constructor_body/secondary02.ets
+09.classes/09.constructor_declaration/02.constructor_body/secondary03.ets
+09.classes/09.constructor_declaration/02.constructor_body/secondary04.ets
 09.classes/09.constructor_declaration/02.constructor_body/spec_example2.ets
 09.classes/09.constructor_declaration/02.constructor_body/invocation_another_constructor_of_superclass1.ets
 09.classes/09.constructor_declaration/02.constructor_body/invocation_another_constructor_of_superclass2.ets

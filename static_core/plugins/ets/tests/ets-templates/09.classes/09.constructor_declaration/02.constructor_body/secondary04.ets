@@ -19,6 +19,8 @@ desc: >-
     on all execution paths of the constructor body.
 ---*/
 
+enum Color { Red, Green, Blue }
+
 abstract class A {
     fldA: string
 
@@ -28,50 +30,33 @@ abstract class A {
 }
 
 final class B extends A {
-    fldB: string = this.fldA
-    fldC: string = this.fldA + '=' + this.fldB
-
-    // primary constructor
-    constructor fromString(a: string) {
+    constructor(a: string) {
         super(a)
     }
 
-    // secondary constructor
+    constructor fromEnum(a: Color) {
+        this('valid color = ' + a.getName())
+    }
+
     constructor fromInt(a: int) {
-        // 1. Optional arbitrary code that does not use this or super.
-        if (a == 0) {
-            throw new Error()
-        }
-        // 2. Call to another same-class constructor that uses the keyword this
-        switch (a) {
-            case 1:
-                this.fromString('' + a)
-                break
-            case 2:
-                this.fromString('' + a + a)
-                break
-            default:
-                throw new Error()
+        try {
+            this.fromEnum(Color.fromValue(a))
+        } catch (e) {
+            this('invalid color')
         }
     }
 }
 
 function main() {
-    let b: B
-    try {
-        b = new B.fromInt(0)
-        arktest.assertTrue(false, 'Error expected')
-    } catch (e) {
-        // OK, expected
-    }
+    let b = new B.fromInt(0)
+    arktest.assertEQ(b.fldA, 'valid color = Red')
 
     b = new B.fromInt(1)
-    arktest.assertEQ(b.fldA, '1')
-    arktest.assertEQ(b.fldB, '1')
-    arktest.assertEQ(b.fldC, '1=1')
+    arktest.assertEQ(b.fldA, 'valid color = Green')
 
     b = new B.fromInt(2)
-    arktest.assertEQ(b.fldA, '22')
-    arktest.assertEQ(b.fldB, '22')
-    arktest.assertEQ(b.fldC, '22=22')
+    arktest.assertEQ(b.fldA, 'valid color = Blue')
+
+    b = new B.fromInt(3)
+    arktest.assertEQ(b.fldA, 'invalid color')
 }

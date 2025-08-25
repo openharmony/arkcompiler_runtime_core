@@ -28,47 +28,35 @@ class A {
 }
 
 class B extends A {
-    fldB: string = this.fldA
-    fldC: string = this.fldA + '=' + this.fldB
-
-    // primary constructor
     constructor(a: string) {
-        // 1. Optional arbitrary code that does not use this or super
         if (a == '') {
-            throw new Error()
+            res = -1
+            throw new Error('empty')
         }
-        // 2. Mandatory call to a superconstructor
-        switch (a) {
-            case '1':
-                super(a)
-                break
-            case '2':
-                super(a + a)
-                break
-            default:
-                throw new Error()
+        if (a == '1') {
+            super('1')
+            res = 1
+            return
         }
-        // 3. Implicitly executed field initializers in the order they
-        // appear in a class body
+        super('2')
+        res = 2
     }
 }
 
+let res: int
+
 function main() {
+    res = 0
+
     let b: B
-    try {
-        b = new B('')
-        arktest.assertTrue(false, 'Error expected')
-    } catch (e) {
-        // OK, expected
-    }
+    arktest.expectError(() => { b = new B('') }, 'empty')
+    arktest.assertEQ(res, -1)
 
     b = new B('1')
+    arktest.assertEQ(res, 1)
     arktest.assertEQ(b.fldA, '1')
-    arktest.assertEQ(b.fldB, '1')
-    arktest.assertEQ(b.fldC, '1=1')
 
     b = new B('2')
-    arktest.assertEQ(b.fldA, '22')
-    arktest.assertEQ(b.fldB, '22')
-    arktest.assertEQ(b.fldC, '22=22')
+    arktest.assertEQ(res, 2)
+    arktest.assertEQ(b.fldA, '2')
 }
