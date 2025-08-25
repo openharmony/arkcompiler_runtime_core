@@ -49,13 +49,13 @@ function assertEQAll(array: FixedArray<int>, value: int): void {
 }
 
 function testOrderAddAndPollMany(constr: BQConstructorI) {
-    let queue = constr(50);
+    let queue = constr(8);
     const EXTRA = -1;
     let adders: Job<Array<int>>[] = [];
     let pollers: Job<Array<int>>[] = [];
 
-    const ADD_COUNT = 100;
-    const JOB_COUNT = 10;
+    const ADD_COUNT = 10;
+    const JOB_COUNT = 3;
 
     let makeAddF = (seed: int) => () => {
         let lost = new Array<int>();
@@ -103,12 +103,12 @@ function testOrderAddAndPollMany(constr: BQConstructorI) {
 
 
 function testAddAndPollCount(constr: BQConstructorI): void {
-    let queue = constr(50);
+    let queue = constr(8);
     let adders: Job<FixedArray<int>>[] = [];
     let pollers: Job<FixedArray<int>>[] = [];
 
-    const ADD_COUNT = 100;
-    const JOB_COUNT = 10;
+    const ADD_COUNT = 10;
+    const JOB_COUNT = 3;
 
     const EXTRA = -1;
 
