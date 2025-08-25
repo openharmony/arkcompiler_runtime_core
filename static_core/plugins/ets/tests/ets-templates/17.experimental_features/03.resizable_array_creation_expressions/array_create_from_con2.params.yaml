@@ -55,8 +55,8 @@ cases:
       let expectedError = (e: Error): boolean => {
         return true
       }
-      arktest.expectThrowError(() => {f(-1)}, expectedError)
-      arktest.expectThrowError(() => {f(-30)}, expectedError)
+      arktest.expectThrow(() => {f(-1)}, expectedError)
+      arktest.expectThrow(() => {f(-30)}, expectedError)
 
   - desc: Create Array with different length fractional part
     decl: |-
@@ -72,10 +72,10 @@ cases:
       }
       f1(2.0)
       f1(35.0)
-      arktest.expectThrowError(() => {f1(3.141592653589)}, expectedError)
+      arktest.expectThrow(() => {f1(3.141592653589)}, expectedError)
       f2(5.0, 3.0)
-      arktest.expectThrowError(() => {f2(5, 3.7)}, expectedError)
-      arktest.expectThrowError(() => {f2(3.7, 5)}, expectedError)
+      arktest.expectThrow(() => {f2(5, 3.7)}, expectedError)
+      arktest.expectThrow(() => {f2(3.7, 5)}, expectedError)
 
   - desc: Create Array with predefined types
     check_variants:
