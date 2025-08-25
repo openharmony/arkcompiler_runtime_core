@@ -18,7 +18,7 @@ export const JSValue: string = 'Any';
 export const ESObject: string = 'ESObject';
 export const ArrayType: string = 'Array';
 export const KitPrefix: string[] = [];
-export const BuiltInType: string[] = ['Symbol'];
+export const BuiltInType: string[] = ['Symbol', 'PropertyDecorator'];
 export const ETSKeyword: string[] = ['Class', 'ESObject', 'MethodType'];
 export const UtilityTypes = new Map<string, string>([
     ['Capitalize', JSValue],
