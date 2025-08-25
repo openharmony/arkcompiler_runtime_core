@@ -13,24 +13,21 @@
  * limitations under the License.
  */
 
-import {
-    Foo,
-    createFooClassFromTs,
-} from 'main_js';
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/coroutines/ts_to_ets/main');
+let Foo = module.getProperty('Foo');
+let createFooClassFromTs = module.getProperty('createFooClassFromTs');
 
-import { launch } from "std/concurrency"
+function EtsGlobalInitPlaceholder(): void {}
 
-function EtsGlobalInitPlaceholder() {}
-
-function Bar() {
-    return createFooClassFromTs(JSRuntime.newJSValueInt(42));
+function Bar(): object {
+    return createFooClassFromTs.invoke(JSRuntime.newJSValueInt(42));
 }
 
 function checkInteropNegative(): boolean {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
     EtsGlobalInitPlaceholder();
     try {
-        launch<JSValue, () => JSValue>(Bar).Await();
+        launch<Any, () => Any>(Bar).Await();
     } catch (e: NoInteropContextError) {
         return true;
     }

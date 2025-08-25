@@ -13,12 +13,8 @@
  * limitations under the License.
  */
 
-import { createProxy } from 'utils_js';
-import { 
-    tsInt,
-    handler,
-    SimpleObject 
-} from 'main_js';
+let module1 = ESValue.load('../../plugins/ets/tests/interop_js/tests/indexed_signature/indexed_signature')
+let createProxy = module1.getProperty('createProxy');
 
 const stsInt = 2;
 const arr: FixedArray<int> = [];

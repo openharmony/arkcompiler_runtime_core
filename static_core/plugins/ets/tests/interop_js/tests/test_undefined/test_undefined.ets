@@ -13,29 +13,31 @@
  * limitations under the License.
  */
 
-import { etsUndefinedProduce, etsUndefinedConsume, etsNullProduce, etsNullConsume } from "js_code"
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/test_undefined/index')
+let etsUndefinedProduce = module.getProperty('etsUndefinedProduce');
+let etsUndefinedConsume = module.getProperty('etsUndefinedConsume');
+let etsNullProduce = module.getProperty('etsNullProduce');
+let etsNullConsume = module.getProperty('etsNullConsume');
 
 function TestPassUndefinedToEts(): boolean {
-    let a: Any = etsUndefinedProduce()
-    if (a as JSValue !== JSRuntime.getUndefined()) {
+  
+    let a: ESValue = etsUndefinedProduce.invoke()
+    if (a.toUndefined() !== JSRuntime.getUndefined()) {
         return false;
     }
     if (a == null) {
         return false;
     }
-    return true;
-}
+    return true;}
 
 function TestPassUndefinedFromEts(): boolean {
     let mUndefined: Any = undefined;
-    return etsUndefinedConsume(mUndefined) as boolean;
+    let testtmp =etsUndefinedConsume.invoke(mUndefined);
+    return testtmp.toBoolean();
 }
 
 function TestPassNullToEts(): boolean {
-    if (etsNullProduce() as Any !== null) {
-        return false;
-    }
-    if (etsNullProduce() as Any === undefined) {
+    if (etsNullProduce.invoke().toNull() as Any === undefined) {
         return false;
     }
     return true;
@@ -43,5 +45,5 @@ function TestPassNullToEts(): boolean {
 
 function TestPassNullFromEts(): boolean {
     let mNull: Any = null;
-    return etsNullConsume(mNull) as boolean;
+    return etsNullConsume.invoke(ESValue.wrap(mNull)).toBoolean();
 }

@@ -13,117 +13,113 @@
  * limitations under the License.
  */
  
-import {
-    staticFunctionWithCustomException,
-    staticFunctionWithBuiltinException,
-    CustomError,
-    createError
-} from "static_function_exception";
+let module1 = ESValue.load('../../plugins/ets/tests/interop_js/tests/exceptions/js_to_sts/static_function_exception')
+let staticFunctionWithCustomException = module1.getProperty('staticFunctionWithCustomException');
+let staticFunctionWithBuiltinException = module1.getProperty('staticFunctionWithBuiltinException');
+let CustomError = module1.getProperty('CustomError');
+let createError = module1.getProperty('createError');
 
-import {
-    CustomErrorTypeA,
-    createCustomErrorA
-} from "ts_custom_exception";
+let module2 = ESValue.load('../../plugins/ets/tests/interop_js/tests/exceptions/js_to_sts/ts_custom_exception')
+let CustomErrorTypeA = module2.getProperty('CustomErrorTypeA');
+let createCustomErrorA = module2.getProperty('createCustomErrorA');
 
 //1 Static function throws user-defined exception E
 
 //Test 1.1 catch and check  
-function CheckCustomException():boolean{
+function CheckCustomException(): boolean {
     try {
-        staticFunctionWithCustomException()
-        return false
+        staticFunctionWithCustomException.invoke();
+        return false;
     } catch(e: Error) {
-        return e instanceof ESError
+        return e instanceof Error;
     }
 
 }
 
 // Test 1.2 Check exception name
-function CheckNameCustomException():boolean{
+function CheckNameCustomException(): boolean {
     try {
-        staticFunctionWithCustomException()
-        return false
+        staticFunctionWithCustomException.invoke();
+        return false;
     } catch(e: Error) {
-        return e.name == 'CustomErrorA'
+        return e.name == 'CustomErrorA';
 
     }
 }
 
 // Test 1.3 Check exception message
-function CheckMessageCustomException():boolean{
+function CheckMessageCustomException(): boolean {
     try {
-        staticFunctionWithCustomException()
-        return false
+        staticFunctionWithCustomException.invoke();
+        return false;
     } catch(e: Error) {
-        return e.message == 'This is a custom error(from static function)'
+        return e.message == 'This is a custom error(from static function)';
     }
 }
 
 // 2 Static function throws builtin exception
 
 //Test 2.1 catch and check  
-function CheckBuiltinExceptionInStatic():boolean{
+function CheckBuiltinExceptionInStatic(): boolean {
     try {
-        staticFunctionWithBuiltinException()
-        return false
+        staticFunctionWithBuiltinException.invoke();
+        return false;
     } catch(e: Error) {
-        return e instanceof TypeError
+        return e instanceof TypeError;
     }
 
 }
 
 // Test 2.2 Check exception name
-function CheckNameBuiltinExceptionInStatic():boolean{
+function CheckNameBuiltinExceptionInStatic(): boolean {
     try {
-        staticFunctionWithBuiltinException()
-        return false
+        staticFunctionWithBuiltinException.invoke();
+        return false;
     } catch(e: Error) {
-        return e.name == 'TypeError'
+        return e.name == 'TypeError';
     }
 }
 
 // Test 2.3 Check exception message
 
-function CheckMessageBuiltinExceptionInStatic():boolean{
+function CheckMessageBuiltinExceptionInStatic(): boolean {
     try {
-        staticFunctionWithBuiltinException()
-        return false
+        staticFunctionWithBuiltinException.invoke();
+        return false;
     } catch(e: Error) {
-        return e.message == 'This is a TypeError'
+        return e.message == 'This is a TypeError';
     }
 }
 
 // 3 Throw imported custom error
 
-function ThrowCustomError():boolean{
+function ThrowCustomError(): boolean {
     try {
-        throw new CustomError('This is a custom error(from static function)') as Error
-    } catch(e: Error) {
-        return true
+        throw CustomError.instantiate('This is a custom error(from static function)').unwrap() as Error;
+    } catch (e: Error) {
+        return true;
     }
 }
 
 // 4 Throw error from imported function
 
-const myError = createError('NewError', 'New error message')
-
 function CheckThrowNewError(): boolean {
     try {
-        throw myError as Error
-    } catch(e: Error) {
-        return true
+        const myError = createError.invoke('NewError', 'New error message');
+        throw myError.unwrap() as Error;
+    } catch (e: Error) {
+        return true;
     }
 }
 
 // 5 Throwing an exception with an imported function and an imported type
 
-const myErrorA: CustomErrorTypeA = createCustomErrorA('NewError', 500)
-
-function throwTSCustomExceptionWithImportType():boolean {
+function throwTSCustomExceptionWithImportType(): boolean {
     try {
-        throw myErrorA as Error
-    } catch(e: Error) {
-        return true
+        const myErrorA = createCustomErrorA.invoke('NewError', 500);
+        throw myErrorA.unwrap() as Error;
+    } catch (e: Error) {
+        return true;
     }
 }
 

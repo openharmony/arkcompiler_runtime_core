@@ -14,13 +14,21 @@
  */
 //NOTE(andreypetukhov) enable after fixibng #12808
 
-import {ArkTestClass} from 'arkts_test_class'
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/implement_interfaces/arkts_class')
+let arkTestClass = module.getProperty('ArkTestClass');
 
-function arktsClassGetProperty():boolean{
-    
-   return ArkTestClass.name == 'TestArkTSClass' && ArkTestClass.id as number == 555;
+function arktsClassGetProperty(): boolean {
+   return arkTestClass.getProperty('name').toString() === 'TestArkTSClass' &&
+      arkTestClass.getProperty('id').toNumber() === 555;
 }
 
+function arktsClassUseStringFn():boolean{
+  return arkTestClass.getProperty('greet').invoke().toString() === 'This is TestArkTSClass';
+}
+
+function arktsClassUseNumberFn():boolean{
+  return arkTestClass.invokeMethod('myId').toNumber() === 555;
+}
 // function arktsClassUseStringFn():boolean{
 
 //   return ArkTestClass.greet() == 'This is TestArkTSClass'
