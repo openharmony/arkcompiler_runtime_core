@@ -197,16 +197,16 @@ public:
             thread->ManagedCodeBegin();
         }
         auto etx = runtime->GetClassLinker()->GetExtension(runtime->GetLanguageContext(runtime->GetRuntimeType()));
-        auto klass = etx->CreateClass(reinterpret_cast<const uint8_t *>(className_.data()), 0, 0,
-                                      AlignUp(sizeof(Class), OBJECT_POINTER_SIZE));
+        klass_ = etx->CreateClass(reinterpret_cast<const uint8_t *>(className_.data()), 0, 0,
+                                  AlignUp(sizeof(Class), OBJECT_POINTER_SIZE));
         if (thread != nullptr) {
             thread->ManagedCodeEnd();
         }
 
-        klass->SetFileId(panda_file::File::EntityId(13U));
-        aotBuilder.StartClass(*klass);
+        klass_->SetFileId(panda_file::File::EntityId(13U));
+        aotBuilder.StartClass(*klass_);
 
-        Method method1(klass, nullptr, File::EntityId(method1Id_), File::EntityId(), 0U, 1U, nullptr);
+        Method method1(klass_, nullptr, File::EntityId(method1Id_), File::EntityId(), 0U, 1U, nullptr);
         {
             CodeInfoBuilder codeBuilder(RUNTIME_ARCH, GetAllocator());
             ArenaVector<uint8_t> data(GetAllocator()->Adapter());
@@ -218,7 +218,7 @@ public:
             aotBuilder.AddMethod(compiledMethod1);
         }
 
-        Method method2(klass, nullptr, File::EntityId(method2Id_), File::EntityId(), 0U, 1U, nullptr);
+        Method method2(klass_, nullptr, File::EntityId(method2Id_), File::EntityId(), 0U, 1U, nullptr);
         {
             CodeInfoBuilder codeBuilder(RUNTIME_ARCH, GetAllocator());
             ArenaVector<uint8_t> data(GetAllocator()->Adapter());
@@ -229,6 +229,7 @@ public:
             aotBuilder.AddMethod(compiledMethod2);
         }
 
+        klass_->SetMethods(Span<Method>(&method1, &method2), 2U, 0U);
         aotBuilder.EndClass();
         uint32_t hash = GetHash32String(reinterpret_cast<const uint8_t *>(className_.data()));
         aotBuilder.InsertEntityPairHeader(hash, 13U);
@@ -268,6 +269,52 @@ public:
         }
     }
 
+    void CheckLinkAotCodeForBoot(AotManager *aotManager, const char *tmpfilePn)
+    {
+        auto aotFile = aotManager->GetFile(tmpfilePn);
+        ASSERT_TRUE(aotFile);
+        ASSERT_TRUE(strcmp(cmdline_, aotFile->GetCommandLine()) == 0U);
+        ASSERT_TRUE(strcmp(tmpfilePn, aotFile->GetFileName()) == 0U);
+        ASSERT_EQ(aotFile->GetFilesCount(), 1U);
+
+        const AotPandaFile *aotPfile = aotManager->FindPandaFile(tmpFilePf_);
+        ASSERT_NE(aotPfile, nullptr);
+
+        Runtime *runtime = Runtime::GetCurrent();
+        ClassLinker *classLinker = runtime->GetClassLinker();
+        panda_file::SourceLang lang = plugins::RuntimeTypeToLang(runtime->GetRuntimeType());
+        ClassLinkerContext *bootContext = classLinker->GetExtension(lang)->GetBootContext();
+
+        bootContext->InsertClass(klass_);
+
+        bootContext->EnumerateClasses([aotPfile, this](Class *klass) -> bool {
+            if (klass->GetFileId().GetOffset() != 13U) {
+                return true;
+            }
+
+            EXPECT_EQ(klass, klass_);
+            Span<Method> methods = klass->GetMethods();
+            EXPECT_EQ(methods.size(), 2U);
+
+            compiler::AotClass aotClass = aotPfile->GetClass(klass->GetFileId().GetOffset());
+            EXPECT_TRUE(aotClass.IsValid());
+            auto entry0 = aotClass.FindMethodCodeEntry(0U);
+            EXPECT_FALSE(entry0 == nullptr);
+            EXPECT_EQ(methodName_, reinterpret_cast<const char *>(entry0));
+
+            auto entry1 = aotClass.FindMethodCodeEntry(1U);
+            EXPECT_FALSE(entry1 == nullptr);
+            EXPECT_EQ(std::memcmp(x86Add_.data(), entry1, x86Add_.size()), 0U);
+#ifdef PANDA_TARGET_AMD64
+            auto funcAdd = reinterpret_cast<int (*)(int, int)>(const_cast<void *>(entry1));
+            EXPECT_EQ(funcAdd(2U, 3U), 5U);
+#endif
+            return true;
+        });
+
+        bootContext->RemoveClass(klass_);
+    };
+
 private:
     const char *tmpFilePf_ = "test.pf";
     const char *cmdline_ = "cmdline";
@@ -279,6 +326,7 @@ private:
         0x8dU, 0x04U, 0x37U,  // lea    eax,[rdi+rdi*1]
         0xc3U                 // ret
     };
+    Class *klass_ {nullptr};
 };
 
 TEST_F(AotTestBuildAndCheck, BuildAndLoad)
@@ -321,6 +369,28 @@ TEST_F(AotTestBuildAndCheck, BuildAndLoadAn)
     }
     auto aotManager = Runtime::GetCurrent()->GetClassLinker()->GetAotManager();
     DoChecks(aotManager, tmpfilePn);
+}
+
+TEST_F(AotTestBuildAndCheck, LinkAotCodeForBoot)
+{
+    if (RUNTIME_ARCH == Arch::AARCH32) {
+        // NOTE(compiler): for some reason dlopen cannot open aot file in qemu-arm
+        return;
+    }
+    uint32_t tid = os::thread::GetCurrentThreadId();
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    std::string tmpfile = helpers::string::Format("test.an", tid);
+    const char *tmpfilePn = tmpfile.c_str();
+
+    auto runtime = Runtime::GetCurrent();
+    auto gcType = Runtime::GetGCType(runtime->GetOptions(), plugins::RuntimeTypeToLang(runtime->GetRuntimeType()));
+    BuildAot(tmpfilePn, gcType);
+    {
+        auto res = FileManager::LoadAnFile(tmpfilePn);
+        ASSERT_TRUE(res) << "Fail to load an file";
+    }
+    auto aotManager = Runtime::GetCurrent()->GetClassLinker()->GetAotManager();
+    CheckLinkAotCodeForBoot(aotManager, tmpfilePn);
 }
 
 static void PaocSpecifyMethodsEmit(const TmpFile &pandaFname)
