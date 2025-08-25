@@ -1593,6 +1593,9 @@
 14.ambient_declarations/03.ambient_overload_function_declarations/overload_function_usage_2.ets
 14.ambient_declarations/03.ambient_overload_function_declarations/overload_function_usage_3.ets
 
+#29153
+14.ambient_declarations/04.class_declarations/02.ambient_call_signature/call_sig_declarations_neg_2.ets
+
 #28326
 15.semantic_rules/02.subtyping/01.subtyping_for_classes_and_interfaces/generic_cast_to_generic_superclass.ets
 15.semantic_rules/02.subtyping/01.subtyping_for_classes_and_interfaces/generic_cast_to_object_with_parameters.ets
