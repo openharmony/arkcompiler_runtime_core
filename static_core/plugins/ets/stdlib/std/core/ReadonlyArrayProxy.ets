@@ -98,7 +98,7 @@ class ReadonlyArrayProxy<T> implements ReadonlyArray<T> {
     	return this.target.keys()
     }
 
-    override lastIndexOf(searchElement: T, fromIndex?: number): number {
+    override lastIndexOf(searchElement: T, fromIndex?: int): int {
     	return this.target.lastIndexOf(searchElement, fromIndex)
     }
 

@@ -518,11 +518,11 @@ export function slice(self: FixedArray<boolean>, start: int): FixedArray<boolean
  *
  * @returns The last index of the element in the array; -1 if not found.
  */
-export function lastIndexOf(self: FixedArray<boolean>, element: boolean, fromIndex: int): int {
+export function lastIndexOf(self: FixedArray<boolean>, element: boolean, fromIndex?: int): int {
     if (self.length == 0) {
         return -1;
     }
-    let n = fromIndex;
+    let n = fromIndex ?? self.length - 1;
     let k: int;
     if (n >= 0) {
         k = min(self.length - 1, n);
@@ -537,22 +537,6 @@ export function lastIndexOf(self: FixedArray<boolean>, element: boolean, fromInd
         k--;
     }
     return -1;
-}
-
-/**
- * Returns the last index at which a given element can be found in the array,
- * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
- *
- * @param element element to locate in the array.
- * @param fromIndex zero-based index at which to start searching backwards.
- * Negative index counts back from the end of the array — if `fromIndex` < 0, `fromIndex` + `length()` is used.
- * If `fromIndex` < `-length()`, the array is not searched and -1 is returned.
- * If `fromIndex` >= `length()` then `array.length - 1` is used, causing the entire array to be searched.
- *
- * @returns The last index of the element in the array; -1 if not found.
- */
-export function lastIndexOf(self: FixedArray<boolean>, element: boolean, fromIndex?: Number): number {
-    return lastIndexOf(self, element, asIntOrDefault(fromIndex, self.length - 1));
 }
 
 /**
@@ -1467,11 +1451,11 @@ export function slice(self: FixedArray<byte>, start: int): FixedArray<byte> {
  *
  * @returns The last index of the element in the array; -1 if not found.
  */
-export function lastIndexOf(self: FixedArray<byte>, element: byte, fromIndex: int): int {
+export function lastIndexOf(self: FixedArray<byte>, element: byte, fromIndex?: int): int {
     if (self.length == 0) {
         return -1;
     }
-    let n = fromIndex;
+    let n = fromIndex ?? self.length - 1;
     let k: int;
     if (n >= 0) {
         k = min(self.length - 1, n);
@@ -1486,22 +1470,6 @@ export function lastIndexOf(self: FixedArray<byte>, element: byte, fromIndex: in
         k--;
     }
     return -1;
-}
-
-/**
- * Returns the last index at which a given element can be found in the array,
- * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
- *
- * @param element element to locate in the array.
- * @param fromIndex zero-based index at which to start searching backwards.
- * Negative index counts back from the end of the array — if `fromIndex` < 0, `fromIndex` + `length()` is used.
- * If `fromIndex` < `-length()`, the array is not searched and -1 is returned.
- * If `fromIndex` >= `length()` then `array.length - 1` is used, causing the entire array to be searched.
- *
- * @returns The last index of the element in the array; -1 if not found.
- */
-export function lastIndexOf(self: FixedArray<byte>, element: byte, fromIndex?: Number): number {
-    return lastIndexOf(self, element, asIntOrDefault(fromIndex, self.length - 1));
 }
 
 /**
@@ -2416,11 +2384,11 @@ export function slice(self: FixedArray<short>, start: int): FixedArray<short> {
  *
  * @returns The last index of the element in the array; -1 if not found.
  */
-export function lastIndexOf(self: FixedArray<short>, element: short, fromIndex: int): int {
+export function lastIndexOf(self: FixedArray<short>, element: short, fromIndex?: int): int {
     if (self.length == 0) {
         return -1;
     }
-    let n = fromIndex;
+    let n = fromIndex ?? self.length - 1;
     let k: int;
     if (n >= 0) {
         k = min(self.length - 1, n);
@@ -2435,22 +2403,6 @@ export function lastIndexOf(self: FixedArray<short>, element: short, fromIndex: 
         k--;
     }
     return -1;
-}
-
-/**
- * Returns the last index at which a given element can be found in the array,
- * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
- *
- * @param element element to locate in the array.
- * @param fromIndex zero-based index at which to start searching backwards.
- * Negative index counts back from the end of the array — if `fromIndex` < 0, `fromIndex` + `length()` is used.
- * If `fromIndex` < `-length()`, the array is not searched and -1 is returned.
- * If `fromIndex` >= `length()` then `array.length - 1` is used, causing the entire array to be searched.
- *
- * @returns The last index of the element in the array; -1 if not found.
- */
-export function lastIndexOf(self: FixedArray<short>, element: short, fromIndex?: Number): number {
-    return lastIndexOf(self, element, asIntOrDefault(fromIndex, self.length - 1));
 }
 
 /**
@@ -3365,11 +3317,11 @@ export function slice(self: FixedArray<int>, start: int): FixedArray<int> {
  *
  * @returns The last index of the element in the array; -1 if not found.
  */
-export function lastIndexOf(self: FixedArray<int>, element: int, fromIndex: int): int {
+export function lastIndexOf(self: FixedArray<int>, element: int, fromIndex?: int): int {
     if (self.length == 0) {
         return -1;
     }
-    let n = fromIndex;
+    let n = fromIndex ?? self.length - 1;
     let k: int;
     if (n >= 0) {
         k = min(self.length - 1, n);
@@ -3384,22 +3336,6 @@ export function lastIndexOf(self: FixedArray<int>, element: int, fromIndex: int)
         k--;
     }
     return -1;
-}
-
-/**
- * Returns the last index at which a given element can be found in the array,
- * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
- *
- * @param element element to locate in the array.
- * @param fromIndex zero-based index at which to start searching backwards.
- * Negative index counts back from the end of the array — if `fromIndex` < 0, `fromIndex` + `length()` is used.
- * If `fromIndex` < `-length()`, the array is not searched and -1 is returned.
- * If `fromIndex` >= `length()` then `array.length - 1` is used, causing the entire array to be searched.
- *
- * @returns The last index of the element in the array; -1 if not found.
- */
-export function lastIndexOf(self: FixedArray<int>, element: int, fromIndex?: Number): number {
-    return lastIndexOf(self, element, asIntOrDefault(fromIndex, self.length - 1));
 }
 
 /**
@@ -4314,11 +4250,11 @@ export function slice(self: FixedArray<long>, start: int): FixedArray<long> {
  *
  * @returns The last index of the element in the array; -1 if not found.
  */
-export function lastIndexOf(self: FixedArray<long>, element: long, fromIndex: int): int {
+export function lastIndexOf(self: FixedArray<long>, element: long, fromIndex?: int): int {
     if (self.length == 0) {
         return -1;
     }
-    let n = fromIndex;
+    let n = fromIndex ?? self.length - 1;
     let k: int;
     if (n >= 0) {
         k = min(self.length - 1, n);
@@ -4333,22 +4269,6 @@ export function lastIndexOf(self: FixedArray<long>, element: long, fromIndex: in
         k--;
     }
     return -1;
-}
-
-/**
- * Returns the last index at which a given element can be found in the array,
- * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
- *
- * @param element element to locate in the array.
- * @param fromIndex zero-based index at which to start searching backwards.
- * Negative index counts back from the end of the array — if `fromIndex` < 0, `fromIndex` + `length()` is used.
- * If `fromIndex` < `-length()`, the array is not searched and -1 is returned.
- * If `fromIndex` >= `length()` then `array.length - 1` is used, causing the entire array to be searched.
- *
- * @returns The last index of the element in the array; -1 if not found.
- */
-export function lastIndexOf(self: FixedArray<long>, element: long, fromIndex?: Number): number {
-    return lastIndexOf(self, element, asIntOrDefault(fromIndex, self.length - 1));
 }
 
 /**
@@ -5263,11 +5183,11 @@ export function slice(self: FixedArray<float>, start: int): FixedArray<float> {
  *
  * @returns The last index of the element in the array; -1 if not found.
  */
-export function lastIndexOf(self: FixedArray<float>, element: float, fromIndex: int): int {
+export function lastIndexOf(self: FixedArray<float>, element: float, fromIndex?: int): int {
     if (self.length == 0) {
         return -1;
     }
-    let n = fromIndex;
+    let n = fromIndex ?? self.length - 1;
     let k: int;
     if (n >= 0) {
         k = min(self.length - 1, n);
@@ -5282,22 +5202,6 @@ export function lastIndexOf(self: FixedArray<float>, element: float, fromIndex: 
         k--;
     }
     return -1;
-}
-
-/**
- * Returns the last index at which a given element can be found in the array,
- * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
- *
- * @param element element to locate in the array.
- * @param fromIndex zero-based index at which to start searching backwards.
- * Negative index counts back from the end of the array — if `fromIndex` < 0, `fromIndex` + `length()` is used.
- * If `fromIndex` < `-length()`, the array is not searched and -1 is returned.
- * If `fromIndex` >= `length()` then `array.length - 1` is used, causing the entire array to be searched.
- *
- * @returns The last index of the element in the array; -1 if not found.
- */
-export function lastIndexOf(self: FixedArray<float>, element: float, fromIndex?: Number): number {
-    return lastIndexOf(self, element, asIntOrDefault(fromIndex, self.length - 1));
 }
 
 /**
@@ -6220,11 +6124,11 @@ export function slice(self: FixedArray<double>, start: int): FixedArray<double> 
  *
  * @returns The last index of the element in the array; -1 if not found.
  */
-export function lastIndexOf(self: FixedArray<double>, element: double, fromIndex: int): int {
+export function lastIndexOf(self: FixedArray<double>, element: double, fromIndex?: int): int {
     if (self.length == 0) {
         return -1;
     }
-    let n = fromIndex;
+    let n = fromIndex ?? self.length - 1;
     let k: int;
     if (n >= 0) {
         k = min(self.length - 1, n);
@@ -6239,22 +6143,6 @@ export function lastIndexOf(self: FixedArray<double>, element: double, fromIndex
         k--;
     }
     return -1;
-}
-
-/**
- * Returns the last index at which a given element can be found in the array,
- * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
- *
- * @param element element to locate in the array.
- * @param fromIndex zero-based index at which to start searching backwards.
- * Negative index counts back from the end of the array — if `fromIndex` < 0, `fromIndex` + `length()` is used.
- * If `fromIndex` < `-length()`, the array is not searched and -1 is returned.
- * If `fromIndex` >= `length()` then `array.length - 1` is used, causing the entire array to be searched.
- *
- * @returns The last index of the element in the array; -1 if not found.
- */
-export function lastIndexOf(self: FixedArray<double>, element: double, fromIndex?: Number): number {
-    return lastIndexOf(self, element, asIntOrDefault(fromIndex, self.length - 1));
 }
 
 /**
@@ -7177,11 +7065,11 @@ export function slice(self: FixedArray<char>, start: int): FixedArray<char> {
  *
  * @returns The last index of the element in the array; -1 if not found.
  */
-export function lastIndexOf(self: FixedArray<char>, element: char, fromIndex: int): int {
+export function lastIndexOf(self: FixedArray<char>, element: char, fromIndex?: int): int {
     if (self.length == 0) {
         return -1;
     }
-    let n = fromIndex;
+    let n = fromIndex ?? self.length - 1;
     let k: int;
     if (n >= 0) {
         k = min(self.length - 1, n);
@@ -7196,22 +7084,6 @@ export function lastIndexOf(self: FixedArray<char>, element: char, fromIndex: in
         k--;
     }
     return -1;
-}
-
-/**
- * Returns the last index at which a given element can be found in the array,
- * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
- *
- * @param element element to locate in the array.
- * @param fromIndex zero-based index at which to start searching backwards.
- * Negative index counts back from the end of the array — if `fromIndex` < 0, `fromIndex` + `length()` is used.
- * If `fromIndex` < `-length()`, the array is not searched and -1 is returned.
- * If `fromIndex` >= `length()` then `array.length - 1` is used, causing the entire array to be searched.
- *
- * @returns The last index of the element in the array; -1 if not found.
- */
-export function lastIndexOf(self: FixedArray<char>, element: char, fromIndex?: Number): number {
-    return lastIndexOf(self, element, asIntOrDefault(fromIndex, self.length - 1));
 }
 
 /**

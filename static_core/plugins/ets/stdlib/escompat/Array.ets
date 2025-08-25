@@ -312,103 +312,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         return new Array<T>(FROM_BUFFER, ret)
     }
 
-    private lastIndexOfUndefined(fi: int): int {
-        for (let i = fi; i >= 0; i--) {
-            if (this.$_get_unsafe(i) instanceof undefined) {
-                return i
-            }
-        }
-        return -1
-    }
-
-    private lastIndexOfNull(fi: int): int {
-        for (let i = fi; i >= 0; i--) {
-            if (this.$_get_unsafe(i) instanceof null) {
-                return i
-            }
-        }
-        return -1
-    }
-
-    private lastIndexOfString(val: String, fi: int): int {
-        for (let i = fi; i >= 0; i--) {
-            const tmp = this.$_get_unsafe(i)
-            if (tmp instanceof String) {
-                if (tmp == val) {
-                    return i
-                }
-            }
-        }
-        return -1
-    }
-
-    private lastIndexOfNumber(val: Number, fi: int): int {
-        const unboxedVal: number = val
-        if (isNaN(val)) {
-            return -1
-        }
-        for (let i = fi; i >= 0; i--) {
-            const tmp = this.$_get_unsafe(i)
-            if (tmp instanceof Number) {
-                if (unboxedVal == tmp.unboxed()) {
-                    return i
-                }
-            }
-        }
-        return -1
-    }
-
-    private lastIndexOfFloat(val: Float, fi: int): int {
-        const unboxedVal: float = val
-        if (isNaN(val)) {
-            return -1
-        }
-        for (let i = fi; i >= 0; i--) {
-            const tmp = this.$_get_unsafe(i)
-            if (tmp instanceof Float) {
-                if (unboxedVal == tmp.unboxed()) {
-                        return i
-                }
-            }
-        }
-        return -1
-    }
-
-    private lastIndexOfLong(val: Long, fi: int): int {
-        const unboxedVal: long = val.unboxed()
-        for (let i = fi; i >= 0; i--) {
-            const tmp = this.$_get_unsafe(i)
-            if (tmp instanceof Long) {
-                if (tmp == unboxedVal) {
-                    return i
-                }
-            }
-        }
-        return -1
-    }
-
-    private lastIndexOfInt(val: Int, fi: int): int {
-        const unboxedVal: int = val.unboxed()
-        for (let i = fi; i >= 0; i--) {
-            const tmp = this.$_get_unsafe(i)
-            if (tmp instanceof Int) {
-                if (tmp == unboxedVal) {
-                    return i
-                }
-            }
-        }
-        return -1
-    }
-
-    private lastIndexOfCommon(val: T, fi: int): int {
-        for (let i = fi; i >= 0; i--) {
-            if (val == this.$_get_unsafe(i)) {
-                return i
-            }
-        }
-        return -1
-    }
-
     private searchUndefined(fi: int, len: int): boolean {
         for (let i = fi; i < len; i++) {
             if (this.$_get_unsafe(i) instanceof undefined) {
@@ -522,102 +425,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         return false
     }
 
-    private indexOfUndefined(fi: int, len: int): int {
-        for (let i = fi; i < len; i++) {
-            if (this.$_get_unsafe(i) instanceof undefined) {
-                return i
-            }
-        }
-        return -1
-    }
-
-    private indexOfNull(fi: int, len: int): int {
-        for (let i = fi; i < len; i++) {
-            if (this.$_get_unsafe(i) instanceof null) {
-                return i
-            }
-        }
-        return -1
-    }
-
-    private indexOfString(val: String, fi: int, len: int): int {
-        for (let i = fi; i < len; i++) {
-            const tmp = this.$_get_unsafe(i)
-            if (tmp instanceof String) {
-                if (tmp == val) {
-                    return i
-                }
-            }
-        }
-        return -1
-    }
-
-    private indexOfNumber(val: Number, fi: int, len: int): int {
-        const unboxedVal: number = val.valueOf()
-        if (isNaN(val)) {
-            return -1
-        }
-        for (let i = fi; i < len; i++) {
-            const tmp = this.$_get_unsafe(i)
-            if (tmp instanceof Number) {
-                if (unboxedVal == tmp.unboxed()) {
-                    return i
-                }
-            }
-        }
-        return -1
-    }
-
-    private indexOfFloat(val: Float, fi: int, len: int): int {
-        const unboxedVal: float = val.unboxed()
-        if (isNaN(val)) {
-            return -1
-        }
-        for (let i = fi; i < len; i++) {
-            const tmp = this.$_get_unsafe(i)
-            if (tmp instanceof Float) {
-                if (unboxedVal == tmp.unboxed()) {
-                    return i
-                }
-            }
-        }
-        return -1
-    }
-
-    private indexOfLong(val: Long, fi: int, len: int): int {
-        const unboxedVal: long = val.unboxed()
-        for (let i = fi; i < len; i++) {
-            const tmp = this.$_get_unsafe(i)
-            if (tmp instanceof Long) {
-                if (tmp == unboxedVal) {
-                    return i
-                }
-            }
-        }
-        return -1
-    }
-
-    private indexOfInt(val: Int, fi: int, len: int): int {
-        const unboxedVal: int = val.unboxed()
-        for (let i = fi; i < len; i++) {
-            const tmp = this.$_get_unsafe(i)
-            if (tmp instanceof Int) {
-                if (tmp == unboxedVal) {
-                    return i
-                }
-            }
-        }
-        return -1
-    }
-
-    private indexOfCommon(val: T, fi: int, len: int): int {
-        for (let i = fi; i < len; i++) {
-            if (val == this.$_get_unsafe(i)) {
-                return i
-            }
-        }
-        return -1
-    }
     /**
      * Default comparison function for sort algorithm.
      * Objects are compared as string. Both objects are convereted to string
@@ -1554,7 +1361,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns The last index of the element in the array; -1 if not found.
      */
-     public native lastIndexOf(searchElement: T, fromIndex: int): int;
+     private native lastIndexOfImpl(searchElement: T, fromIndex: int): int;
 
     /**
      * Returns the last index at which a given element can be found in the array,
@@ -1571,8 +1378,8 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns The last index of the element in the array; -1 if not found.
      */
-    public lastIndexOf(searchElement: T, fromIndex: number|undefined): number {
-        return this.lastIndexOf(searchElement, asIntOrDefault(fromIndex, 0));
+    public lastIndexOf(searchElement: T, fromIndex?: int): int {
+        return this.lastIndexOfImpl(searchElement, fromIndex ?? 0);
     }
 
     /**
@@ -1590,7 +1397,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns The last index of the element in the array; -1 if not found.
      */
-    public native lastIndexOf(searchElement: T): number;
+    public native lastIndexOf(searchElement: T): int;
 
     private isPrimitive(element: T): boolean {
         return (element instanceof String ||
