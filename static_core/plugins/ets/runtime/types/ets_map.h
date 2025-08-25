@@ -232,6 +232,7 @@ public:
     static EtsBoolean Has(EtsEscompatMap *map, EtsObject *key);
     static EtsObject *Get(EtsEscompatMap *map, EtsObject *key);
     static EtsBoolean Delete(EtsEscompatMap *map, EtsObject *key);
+    static uint32_t GetHashCode(EtsObject *&key);
 
 private:
     ObjectPointer<EtsEscompatMapEntry> head_;

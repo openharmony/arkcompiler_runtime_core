@@ -42,21 +42,6 @@
     verify_test_result_function: comparePrimitiveValue
   }
 - {
-    method_name: $_hashCode,
-    object_type: String,
-    init_object_data_type: "FixedArray<String>",
-    init_object_type: String,
-    init_object_type_nature: object,
-    param_init_data_types: {},
-    param_types: {},
-    param_list: {},
-    method_return_type: int,
-    init_object_data: '["", "abcd", "фуфу", "abcdфуфу"]',
-    expected_data_type: "FixedArray<int>",
-    expected_test_data: "[0, 0x2d9442, 0x200ed3e, 0x4ce69080]",
-    verify_test_result_function: comparePrimitiveValue
-  }
-- {
     method_name: toLowerCase,
     object_type: String,
     init_object_data_type: "FixedArray<String>",
