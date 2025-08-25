@@ -730,35 +730,28 @@ void Codegen::CreateMapGet([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREG
 {
     ASSERT(GetArch() != Arch::AARCH32);
     auto entrypointId = EntrypointId::MAP_GET;
-    CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND]);
+    CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND]);
 }
 
 void Codegen::CreateMapHas([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
     ASSERT(GetArch() != Arch::AARCH32);
     auto entrypointId = EntrypointId::MAP_HAS;
-    CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND]);
+    CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND]);
 }
 
 void Codegen::CreateMapDelete([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
     ASSERT(GetArch() != Arch::AARCH32);
     auto entrypointId = EntrypointId::MAP_DELETE;
-    CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND]);
+    CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND]);
 }
 
-void Codegen::CreateSetHas([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
+void Codegen::CreateGetHashCodeByValue([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
     ASSERT(GetArch() != Arch::AARCH32);
-    auto entrypointId = EntrypointId::SET_HAS;
-    CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND]);
-}
-
-void Codegen::CreateSetDelete([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
-{
-    ASSERT(GetArch() != Arch::AARCH32);
-    auto entrypointId = EntrypointId::SET_DELETE;
-    CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND]);
+    auto entrypointId = EntrypointId::GET_HASH_CODE_BY_VALUE_FAST_PATH;
+    CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND]);
 }
 
 }  // namespace ark::compiler

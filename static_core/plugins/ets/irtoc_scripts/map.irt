@@ -17,7 +17,7 @@ include_relative 'map_set_common.irt'
 def GenerateMapGet(cgmode)
   prefix = (cgmode == :NativePlus ? 'NativePlus' : '')
   function("MapGet#{prefix}".to_sym,
-          params: {map: 'ref', key: 'ref'},
+          params: {map: 'ref', key: 'ref', idx: 'i32'},
           regmap: $full_regmap,
           regalloc_set: $panda_mask,
           mode: [cgmode]) {
@@ -27,14 +27,14 @@ def GenerateMapGet(cgmode)
       next
     end
 
-    processMapGet(map, key, cgmode)
+    processMapGet(map, key, idx, cgmode)
 }
 end
 
 def GenerateMapDelete(cgmode)
   prefix = (cgmode == :NativePlus ? 'NativePlus': '')
   function("MapDelete#{prefix}".to_sym,
-          params: {map: 'ref', key: 'ref'},
+          params: {map: 'ref', key: 'ref', idx: 'i32'},
           regmap: $full_regmap,
           regalloc_set: $panda_mask,
           mode: [cgmode]) {
@@ -44,14 +44,14 @@ def GenerateMapDelete(cgmode)
       next
     end
 
-    processMapDelete(map, key, cgmode)
+    processMapDelete(map, key, idx, cgmode)
 }
 end
 
 def GenerateMapHas(cgmode)
   prefix = (cgmode == :NativePlus ? 'NativePlus': '')
   function("MapHas#{prefix}".to_sym,
-          params: {map: 'ref', key: 'ref'},
+          params: {map: 'ref', key: 'ref', idx: 'i32'},
           regmap: $full_regmap,
           regalloc_set: $panda_mask,
           mode: [cgmode]) {
@@ -61,7 +61,7 @@ def GenerateMapHas(cgmode)
       next
     end
 
-    processMapHas(map, key, cgmode)
+    processMapHas(map, key, idx, cgmode)
 }
 end
 GenerateMapGet(:FastPath)
@@ -70,3 +70,72 @@ GenerateMapDelete(:FastPath)
 GenerateMapDelete(:NativePlus)
 GenerateMapHas(:FastPath)
 GenerateMapHas(:NativePlus)
+
+
+def GenerateGetHashCodeByValue(cgmode)
+  prefix = (cgmode == :NativePlus ? 'NativePlus': '')
+  function("GetHashCodeByValue#{prefix}".to_sym,
+          params: {obj: 'ref'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [cgmode]) {
+
+    if Options.arch == :arm32
+      Intrinsic(:UNREACHABLE).Terminator.void
+      next
+    end
+
+    klass := LoadI(obj).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+    If(isString(klass), 0).NE.b {
+      If(isHashedString(obj), 0).EQ.b {
+        Goto(:SlowPathEntrypointString)
+      }
+      Return(Cast(fetchHashCodeString(obj)).u64).i64
+    }
+
+    flags := LoadI(klass).Imm(EtsConstants::ETS_CLASS_FLAGS_FROM_RUNTIME_CLASS_OFFSET).u32
+    If(isBoxedType(flags), 0).NE.b {
+      type := LoadI(klass).Imm(Constants::BASE_CLASS_MANAGED_OBJECT_OFFSET).ref
+      Return(Cast(calcHashCode(obj, type)).u64).i64
+    }
+    If(isBigintType(flags), 0).NE.b {
+      Goto(:SlowPathEntrypointBigint)
+    }
+
+    If(isHashedObject(obj), 0).EQ.b {
+      Goto(:SlowPathEntrypointObject)
+    }
+
+    Return(Cast(fetchHashCodeObject(obj)).u64).i64
+
+Label(:SlowPathEntrypointString)
+  if mode == :NativePlus
+    Return(Call(obj).Method('GetHashCodeStringSlowPath').i64).i64
+  else
+    entrypoint = get_entrypoint_offset("GET_HASH_CODE_STRING_ODD_SAVED")
+    Intrinsic(:SLOW_PATH_ENTRY, obj).AddImm(entrypoint).MethodAsImm("GetHashCodeStringOddSavedBridge").Terminator.i64
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  end
+
+Label(:SlowPathEntrypointBigint)
+  if mode == :NativePlus
+    Return(Call(obj).Method('GetHashCodeBigintSlowPath').i64).i64
+  else
+    entrypoint = get_entrypoint_offset("GET_HASH_CODE_BIGINT_ODD_SAVED")
+    Intrinsic(:SLOW_PATH_ENTRY, obj).AddImm(entrypoint).MethodAsImm("GetHashCodeBigintOddSavedBridge").Terminator.i64
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  end
+
+Label(:SlowPathEntrypointObject)
+  if mode == :NativePlus
+    Return(Call(obj).Method('GetHashCodeBigintSlowPath').i64).i64
+  else
+    entrypoint = get_entrypoint_offset("GET_HASH_CODE_OBJECT_ODD_SAVED")
+    Intrinsic(:SLOW_PATH_ENTRY, obj).AddImm(entrypoint).MethodAsImm("GetHashCodeObjectOddSavedBridge").Terminator.i64
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  end
+}
+end
+GenerateGetHashCodeByValue(:FastPath)
+#GenerateGetHashCodeByValue(:NativePlus)
+

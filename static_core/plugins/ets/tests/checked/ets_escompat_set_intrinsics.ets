@@ -68,10 +68,10 @@ class MySet<K> extends Set<K> {
 //! RUN           force_jit: true, options: "--compiler-regex='.*(test_set|SetHas|SetDelete)_.*'", entry: "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_bool_double_overrided1"
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::__noinline__SetHas_bool"
 //! PASS_AFTER    "Inline"
-//! INST          "Intrinsic.SetHas"
+//! INST          "Intrinsic.MapHas"
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::__noinline__SetDelete_bool"
 //! PASS_AFTER    "Inline"
-//! INST          "Intrinsic.SetDelete"
+//! INST          "Intrinsic.MapDelete"
 
 function test_set_bool_double_overrided1() {
     let set: Set<boolean> = new Set<boolean>()
@@ -138,75 +138,75 @@ function __noinline__SetDelete_bool(set: Set<boolean>): boolean {
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_bool"
 //! PASS_AFTER    "IrBuilder"
-//! INST_NOT      "Intrinsic.SetHas"
-//! INST_NOT      "Intrinsic.SetDelete"
+//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*escompat\.Set::delete/
 //! PASS_AFTER    "Inline"
-//! INST          "Intrinsic.SetHas"
-//! INST          "Intrinsic.SetDelete"
+//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*escompat\.Set::delete/
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_char"
 //! PASS_AFTER    "IrBuilder"
-//! INST_NOT      "Intrinsic.SetHas"
-//! INST_NOT      "Intrinsic.SetDelete"
+//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*escompat\.Set::delete/
 //! PASS_AFTER    "Inline"
-//! INST          "Intrinsic.SetHas"
-//! INST          "Intrinsic.SetDelete"
+//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*escompat\.Set::delete/
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_byte"
 //! PASS_AFTER    "IrBuilder"
-//! INST_NOT      "Intrinsic.SetHas"
-//! INST_NOT      "Intrinsic.SetDelete"
+//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*escompat\.Set::delete/
 //! PASS_AFTER    "Inline"
-//! INST          "Intrinsic.SetHas"
-//! INST          "Intrinsic.SetDelete"
+//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*escompat\.Set::delete/
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_short"
 //! PASS_AFTER    "IrBuilder"
-//! INST_NOT      "Intrinsic.SetHas"
-//! INST_NOT      "Intrinsic.SetDelete"
+//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*escompat\.Set::delete/
 //! PASS_AFTER    "Inline"
-//! INST          "Intrinsic.SetHas"
-//! INST          "Intrinsic.SetDelete"
+//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*escompat\.Set::delete/
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_int"
 //! PASS_AFTER    "IrBuilder"
-//! INST_NOT      "Intrinsic.SetHas"
-//! INST_NOT      "Intrinsic.SetDelete"
+//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*escompat\.Set::delete/
 //! PASS_AFTER    "Inline"
-//! INST          "Intrinsic.SetHas"
-//! INST          "Intrinsic.SetDelete"
+//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*escompat\.Set::delete/
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_long"
 //! PASS_AFTER    "IrBuilder"
-//! INST_NOT      "Intrinsic.SetHas"
-//! INST_NOT      "Intrinsic.SetDelete"
+//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*escompat\.Set::delete/
 //! PASS_AFTER    "Inline"
-//! INST          "Intrinsic.SetHas"
-//! INST          "Intrinsic.SetDelete"
+//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*escompat\.Set::delete/
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_float"
 //! PASS_AFTER    "IrBuilder"
-//! INST_NOT      "Intrinsic.SetHas"
-//! INST_NOT      "Intrinsic.SetDelete"
+//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*escompat\.Set::delete/
 //! PASS_AFTER    "Inline"
-//! INST          "Intrinsic.SetHas"
-//! INST          "Intrinsic.SetDelete"
+//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*escompat\.Set::delete/
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_double"
 //! PASS_AFTER    "IrBuilder"
-//! INST_NOT      "Intrinsic.SetHas"
-//! INST_NOT      "Intrinsic.SetDelete"
+//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*escompat\.Set::delete/
 //! PASS_AFTER    "Inline"
-//! INST          "Intrinsic.SetHas"
-//! INST          "Intrinsic.SetDelete"
+//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*escompat\.Set::delete/
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_string"
 //! PASS_AFTER    "IrBuilder"
-//! INST_NOT      "Intrinsic.SetHas"
-//! INST_NOT      "Intrinsic.SetDelete"
+//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*escompat\.Set::delete/
 //! PASS_AFTER    "Inline"
-//! INST          "Intrinsic.SetHas"
-//! INST          "Intrinsic.SetDelete"
+//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*escompat\.Set::delete/
 
 //! CHECKER       AOT PGO: Set intrinsics
 //! SKIP_IF       @architecture == "arm32"
@@ -215,75 +215,75 @@ function __noinline__SetDelete_bool(set: Set<boolean>): boolean {
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_bool"
 //! PASS_AFTER    "IrBuilder"
-//! INST_NOT      "Intrinsic.SetHas"
-//! INST_NOT      "Intrinsic.SetDelete"
+//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*escompat\.Set::delete/
 //! PASS_AFTER    "Inline"
-//! INST          "Intrinsic.SetHas"
-//! INST          "Intrinsic.SetDelete"
+//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*escompat\.Set::delete/
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_char"
 //! PASS_AFTER    "IrBuilder"
-//! INST_NOT      "Intrinsic.SetHas"
-//! INST_NOT      "Intrinsic.SetDelete"
+//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*escompat\.Set::delete/
 //! PASS_AFTER    "Inline"
-//! INST          "Intrinsic.SetHas"
-//! INST          "Intrinsic.SetDelete"
+//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*escompat\.Set::delete/
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_byte"
 //! PASS_AFTER    "IrBuilder"
-//! INST_NOT      "Intrinsic.SetHas"
-//! INST_NOT      "Intrinsic.SetDelete"
+//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*escompat\.Set::delete/
 //! PASS_AFTER    "Inline"
-//! INST          "Intrinsic.SetHas"
-//! INST          "Intrinsic.SetDelete"
+//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*escompat\.Set::delete/
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_short"
 //! PASS_AFTER    "IrBuilder"
-//! INST_NOT      "Intrinsic.SetHas"
-//! INST_NOT      "Intrinsic.SetDelete"
+//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*escompat\.Set::delete/
 //! PASS_AFTER    "Inline"
-//! INST          "Intrinsic.SetHas"
-//! INST          "Intrinsic.SetDelete"
+//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*escompat\.Set::delete/
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_int"
 //! PASS_AFTER    "IrBuilder"
-//! INST_NOT      "Intrinsic.SetHas"
-//! INST_NOT      "Intrinsic.SetDelete"
+//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*escompat\.Set::delete/
 //! PASS_AFTER    "Inline"
-//! INST          "Intrinsic.SetHas"
-//! INST          "Intrinsic.SetDelete"
+//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*escompat\.Set::delete/
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_long"
 //! PASS_AFTER    "IrBuilder"
-//! INST_NOT      "Intrinsic.SetHas"
-//! INST_NOT      "Intrinsic.SetDelete"
+//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*escompat\.Set::delete/
 //! PASS_AFTER    "Inline"
-//! INST          "Intrinsic.SetHas"
-//! INST          "Intrinsic.SetDelete"
+//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*escompat\.Set::delete/
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_float"
 //! PASS_AFTER    "IrBuilder"
-//! INST_NOT      "Intrinsic.SetHas"
-//! INST_NOT      "Intrinsic.SetDelete"
+//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*escompat\.Set::delete/
 //! PASS_AFTER    "Inline"
-//! INST          "Intrinsic.SetHas"
-//! INST          "Intrinsic.SetDelete"
+//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*escompat\.Set::delete/
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_double"
 //! PASS_AFTER    "IrBuilder"
-//! INST_NOT      "Intrinsic.SetHas"
-//! INST_NOT      "Intrinsic.SetDelete"
+//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*escompat\.Set::delete/
 //! PASS_AFTER    "Inline"
-//! INST          "Intrinsic.SetHas"
-//! INST          "Intrinsic.SetDelete"
+//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*escompat\.Set::delete/
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_string"
 //! PASS_AFTER    "IrBuilder"
-//! INST_NOT      "Intrinsic.SetHas"
-//! INST_NOT      "Intrinsic.SetDelete"
+//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*escompat\.Set::delete/
 //! PASS_AFTER    "Inline"
-//! INST          "Intrinsic.SetHas"
-//! INST          "Intrinsic.SetDelete"
+//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*escompat\.Set::delete/
 
 //! CHECKER       JIT: Set intrinsics
 //! RUN           force_jit: true, options: "--compiler-regex='.*test_set_.*'", entry: "ets_escompat_set_intrinsics.ETSGLOBAL::main"
@@ -293,72 +293,72 @@ function __noinline__SetDelete_bool(set: Set<boolean>): boolean {
 //! INST_NOT      "Intrinsic.SetHas"
 //! INST_NOT      "Intrinsic.SetDelete"
 //! PASS_AFTER    "Inline"
-//! INST          "Intrinsic.SetHas"
-//! INST          "Intrinsic.SetDelete"
+//! INST          "Intrinsic.MapHas"
+//! INST          "Intrinsic.MapDelete"
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_char"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.SetHas"
 //! INST_NOT      "Intrinsic.SetDelete"
 //! PASS_AFTER    "Inline"
-//! INST          "Intrinsic.SetHas"
-//! INST          "Intrinsic.SetDelete"
+//! INST          "Intrinsic.MapHas"
+//! INST          "Intrinsic.MapDelete"
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_byte"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.SetHas"
 //! INST_NOT      "Intrinsic.SetDelete"
 //! PASS_AFTER    "Inline"
-//! INST          "Intrinsic.SetHas"
-//! INST          "Intrinsic.SetDelete"
+//! INST          "Intrinsic.MapHas"
+//! INST          "Intrinsic.MapDelete"
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_short"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.SetHas"
 //! INST_NOT      "Intrinsic.SetDelete"
 //! PASS_AFTER    "Inline"
-//! INST          "Intrinsic.SetHas"
-//! INST          "Intrinsic.SetDelete"
+//! INST          "Intrinsic.MapHas"
+//! INST          "Intrinsic.MapDelete"
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_int"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.SetHas"
 //! INST_NOT      "Intrinsic.SetDelete"
 //! PASS_AFTER    "Inline"
-//! INST          "Intrinsic.SetHas"
-//! INST          "Intrinsic.SetDelete"
+//! INST          "Intrinsic.MapHas"
+//! INST          "Intrinsic.MapDelete"
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_long"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.SetHas"
 //! INST_NOT      "Intrinsic.SetDelete"
 //! PASS_AFTER    "Inline"
-//! INST          "Intrinsic.SetHas"
-//! INST          "Intrinsic.SetDelete"
+//! INST          "Intrinsic.MapHas"
+//! INST          "Intrinsic.MapDelete"
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_float"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.SetHas"
 //! INST_NOT      "Intrinsic.SetDelete"
 //! PASS_AFTER    "Inline"
-//! INST          "Intrinsic.SetHas"
-//! INST          "Intrinsic.SetDelete"
+//! INST          "Intrinsic.MapHas"
+//! INST          "Intrinsic.MapDelete"
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_double"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.SetHas"
 //! INST_NOT      "Intrinsic.SetDelete"
 //! PASS_AFTER    "Inline"
-//! INST          "Intrinsic.SetHas"
-//! INST          "Intrinsic.SetDelete"
+//! INST          "Intrinsic.MapHas"
+//! INST          "Intrinsic.MapDelete"
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_string"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.SetHas"
 //! INST_NOT      "Intrinsic.SetDelete"
 //! PASS_AFTER    "Inline"
-//! INST          "Intrinsic.SetHas"
-//! INST          "Intrinsic.SetDelete"
+//! INST          "Intrinsic.MapHas"
+//! INST          "Intrinsic.MapDelete"
 
 function test_set_bool() {
     let set: Set<boolean> = new Set<boolean>

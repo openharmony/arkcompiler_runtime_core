@@ -6339,6 +6339,11 @@ intrinsics:
       ret: i64
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::StdRuntimeGetHashCodeByValue
+    #irtoc_impl: getHashCodeByValueNativePlus
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateGetHashCodeByValue
+    llvm_codegen_func: EmitGetHashCodeByValue
+    need_param_locations: true
 
   - name: StdCoreRuntimeFailedTypeCastException
     space: ets
@@ -9029,11 +9034,11 @@ intrinsics:
   - name: MapGet
     space: ets
     class_name: escompat.Map
-    method_name: get
+    method_name: getNat
     static: false
     signature:
       ret: std.core.Object
-      args: [ std.core.Object ]
+      args: [ std.core.Object, i32 ]
     impl: ark::ets::intrinsics::EtsEscompatMapGet
     irtoc_impl: MapGetNativePlus
     codegen_arch: [arm64, amd64]
@@ -9043,11 +9048,11 @@ intrinsics:
   - name: MapHas
     space: ets
     class_name: escompat.Map
-    method_name: has
+    method_name: hasNat
     static: false
     signature:
       ret: u1
-      args: [ std.core.Object ]
+      args: [ std.core.Object, i32 ]
     impl: ark::ets::intrinsics::EtsEscompatMapHas
     irtoc_impl: MapHasNativePlus
     codegen_arch: [arm64, amd64]
@@ -9057,44 +9062,13 @@ intrinsics:
   - name: MapDelete
     space: ets
     class_name: escompat.Map
-    method_name: delete
+    method_name: deleteNat
     static: false
     signature:
       ret: u1
-      args: [ std.core.Object ]
+      args: [ std.core.Object, i32 ]
     impl: ark::ets::intrinsics::EtsEscompatMapDelete
     irtoc_impl: MapDeleteNativePlus
     codegen_arch: [arm64, amd64]
     codegen_func: CreateMapDelete
     llvm_codegen_func: EmitMapDelete
-
-########################
-# escompat.Set #
-########################
-  - name: SetHas
-    space: ets
-    class_name: escompat.Set
-    method_name: has
-    static: false
-    signature:
-      ret: u1
-      args: [ std.core.Object ]
-    impl: ark::ets::intrinsics::EtsEscompatSetHas
-    irtoc_impl: SetHasNativePlus
-    codegen_arch: [arm64, amd64]
-    codegen_func: CreateSetHas
-    llvm_codegen_func: EmitSetHas
-
-  - name: SetDelete
-    space: ets
-    class_name: escompat.Set
-    method_name: delete
-    static: false
-    signature:
-      ret: u1
-      args: [ std.core.Object ]
-    impl: ark::ets::intrinsics::EtsEscompatSetDelete
-    irtoc_impl: SetDeleteNativePlus
-    codegen_arch: [arm64, amd64]
-    codegen_func: CreateSetDelete
-    llvm_codegen_func: EmitSetDelete

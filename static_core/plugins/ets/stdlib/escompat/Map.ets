@@ -350,7 +350,12 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
      *
      * @returns true if the value is in the Map
      */
-    override native has(key: K): boolean;
+    override has(key: K): boolean {
+        const idx = this.getBucketIndex(key)
+        return this.hasNat(key, idx)
+    }
+    // Internal method to speed-up 'has'
+    private final native hasNat(key: K, idx: int): boolean;
 
     /**
      * Returns number of Entries with unique keys in the Map
@@ -366,7 +371,12 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
      *
      * @param key the key to remove
      */
-    native delete(key: K): boolean;
+    delete(key: K): boolean {
+        const idx = this.getBucketIndex(key)
+        return this.deleteNat(key, idx)
+    }
+    // Internal method to speed-up 'delete'
+    private final native deleteNat(key: K, idx: int): boolean;
 
     /**
      * Deletes all elements from the Map
@@ -387,7 +397,12 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
      *
      * @returns value if assosiated with key presents.
      */
-    override native get(key: K): V | undefined;
+    override get(key: K): V | undefined {
+        const idx = this.getBucketIndex(key)
+        return this.getNat(key, idx)
+    }
+    // Internal method to speed-up 'get'
+    private final native getNat(key: K, idx: int): V | undefined;
 
     /**
      * Returns a value assosiated with key if present, or a default value otherwise

@@ -137,25 +137,18 @@ bool EmitBigUint64ArraySetValuesFromArray(Inst *inst)
 
 bool EmitMapGet(Inst *inst)
 {
-    return EmitFastPath(inst, RuntimeInterface::EntrypointId::MAP_GET, 2U);
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::MAP_GET, 3U);
 }
-
 bool EmitMapHas(Inst *inst)
 {
-    return EmitFastPath(inst, RuntimeInterface::EntrypointId::MAP_HAS, 2U);
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::MAP_HAS, 3U);
 }
-
 bool EmitMapDelete(Inst *inst)
 {
-    return EmitFastPath(inst, RuntimeInterface::EntrypointId::MAP_DELETE, 2U);
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::MAP_DELETE, 3U);
 }
 
-bool EmitSetHas(Inst *inst)
+bool EmitGetHashCodeByValue(Inst *inst)
 {
-    return EmitFastPath(inst, RuntimeInterface::EntrypointId::SET_HAS, 2U);
-}
-
-bool EmitSetDelete(Inst *inst)
-{
-    return EmitFastPath(inst, RuntimeInterface::EntrypointId::SET_DELETE, 2U);
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::GET_HASH_CODE_BY_VALUE_FAST_PATH, 1U);
 }

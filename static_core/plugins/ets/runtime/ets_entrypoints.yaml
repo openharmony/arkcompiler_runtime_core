@@ -1582,15 +1582,18 @@
     - ark::ObjectHeader*  # object pointer
     - ark::ObjectHeader*  # src map
     - ark::ObjectHeader*  # key
+    - uint32_t            # bucket index
 
-- name: MapGetUsual
+- name: MapGetOddSaved
   entrypoint: EtsEscompatMapGet
-  bridge: slow_path
+  bridge: odd_saved
   properties: [intrinsic]
   signature:
     - ark::ObjectHeader*  # object pointer
     - ark::ObjectHeader*  # src map
     - ark::ObjectHeader*  # key
+    - uint32_t            # bucket index
+
 
 - name: MapHas
   entrypoint: MapHas
@@ -1600,15 +1603,18 @@
     - uint8_t             # boolean
     - ark::ObjectHeader*  # src map
     - ark::ObjectHeader*  # key
+    - uint32_t            # bucket index
 
-- name: MapHasUsual
+- name: MapHasOddSaved
   entrypoint: EtsEscompatMapHas
-  bridge: slow_path
+  bridge: odd_saved
   properties: [intrinsic]
   signature:
     - uint8_t             # boolean
     - ark::ObjectHeader*  # src map
     - ark::ObjectHeader*  # key
+    - uint32_t            # bucket index
+
 
 - name: MapDelete
   entrypoint: MapDelete
@@ -1618,52 +1624,50 @@
     - uint8_t             # boolean
     - ark::ObjectHeader*  # src map
     - ark::ObjectHeader*  # key
+    - uint32_t            # bucket index
 
-- name: MapDeleteUsual
+- name: MapDeleteOddSaved
   entrypoint: EtsEscompatMapDelete
-  bridge: entrypoint
+  bridge: odd_saved
   properties: [intrinsic]
   signature:
     - uint8_t             # boolean
     - ark::ObjectHeader*  # src map
     - ark::ObjectHeader*  # key
+    - uint32_t            # bucket index
 
-# Set
-- name: SetHas
-  entrypoint: SetHas
+- name: GetHashCodeByValueFastPath
+  entrypoint: GetHashCodeByValue
   bridge: none
   properties: [irtoc]
   signature:
-    - uint8_t             # boolean
-    - ark::ObjectHeader*  # src set
-    - ark::ObjectHeader*  # key
+    - int64_t
+    - ark::ObjectHeader*
 
-- name: SetHasUsual
-  entrypoint: EtsEscompatSetHas
-  bridge: entrypoint
+- name: GetHashCodeStringOddSaved
+  entrypoint: GetHashCodeString
+  bridge: odd_saved
   properties: [intrinsic]
   signature:
-    - uint8_t             # boolean
-    - ark::ObjectHeader*  # src set
-    - ark::ObjectHeader*  # key
+    - int64_t
+    - ark::ObjectHeader*
 
-- name: SetDelete
-  entrypoint: SetDelete
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - uint8_t             # boolean
-    - ark::ObjectHeader*  # src set
-    - ark::ObjectHeader*  # key
-
-- name: SetDeleteUsual
-  entrypoint: EtsEscompatSetDelete
-  bridge: entrypoint
+- name: GetHashCodeBigintOddSaved
+  entrypoint: GetHashCodeBigint
+  bridge: odd_saved
   properties: [intrinsic]
   signature:
-    - uint8_t             # boolean
-    - ark::ObjectHeader*  # src set
-    - ark::ObjectHeader*  # key
+    - int64_t
+    - ark::ObjectHeader*
+
+- name: GetHashCodeObjectOddSaved
+  entrypoint: GetHashCodeObject
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - int64_t
+    - ark::ObjectHeader*
+
 
 - name: StringTrimSlowPath
   entrypoint: StdCoreStringTrim
