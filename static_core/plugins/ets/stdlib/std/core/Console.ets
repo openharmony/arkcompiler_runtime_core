@@ -102,6 +102,7 @@ export final class Console {
      * Internal constructor for Console class
      * @internal
      */
+    // NOTE(ekaterinzaytseva): unable to replace internal - used as public
     internal constructor() {
         this.timers = new Map<string, long>
         this.counters = new Map<string, int>

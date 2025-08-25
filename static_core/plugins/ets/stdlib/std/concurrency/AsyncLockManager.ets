@@ -103,7 +103,7 @@ class AsyncLockManager {
         this.finreg.register(asyncLock, asyncLock.name, asyncLock);
     }
 
-    internal locks: Map<string, WeakRef<AsyncLock>> = new Map<string, WeakRef<AsyncLock>>();
+    private locks: Map<string, WeakRef<AsyncLock>> = new Map<string, WeakRef<AsyncLock>>();
     private mutex: Object = ConcurrencyHelpers.mutexCreate();
     private finreg: FinalizationRegistry<String> 
 }

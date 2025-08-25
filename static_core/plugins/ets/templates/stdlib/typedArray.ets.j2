@@ -106,7 +106,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
     public static readonly BYTES_PER_ELEMENT: int = {{S}}
     public readonly BYTES_PER_ELEMENT: int = {{N}}Array.BYTES_PER_ELEMENT
     public overload subarray { subarrayII, subarrayNI, subarrayIN, subarrayNN }
-    internal readonly lengthInt: int
+    protected readonly lengthInt: int
 
     /**
      * Creates an empty {{N}}Array.
@@ -355,7 +355,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
 
     {%- if N not in ['Float32', 'Float64', 'BigInt64'] %}
 
-    internal zeroIfInfinity(val: {{elementCompat}}): {{elementCompat}} {
+    private zeroIfInfinity(val: {{elementCompat}}): {{elementCompat}} {
         {%- if elementCompat == 'number' %}
         if ((val == Infinity) || (val == -Infinity)) {
         {%- else %}
@@ -366,7 +366,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         return {{asElementCompat % 'val'}}
     }
 
-    internal zeroIfInfinity(val: {{T}}): {{T}} {
+    private zeroIfInfinity(val: {{T}}): {{T}} {
         if ((val == Infinity) || (val == -Infinity)) {
             return {{ '0' if S >= 4 else 'Int.to' + BT + '(0)' }}
         }
@@ -2025,7 +2025,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
 
     private final native getUnsafe(index: int): {{T}}
 
-    internal setUnsafe(insertPos: int, val: {{T}}): void {
+    private setUnsafe(insertPos: int, val: {{T}}): void {
         const BPE = {{N}}Array.BYTES_PER_ELEMENT.toInt()
         let byteIndex = insertPos * BPE + this.byteOffset.toInt()
         let buf = this.buffer

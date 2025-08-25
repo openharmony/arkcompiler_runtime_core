@@ -32,6 +32,7 @@ export final class AsyncLock {
         this(AsyncLock.generateAnonymousLockName());
     }
 
+    //NOTE(ekaterinzaytseva): used as public in AsyncLockManager
     internal constructor(name: string) {
         this.name = name;
         asyncLockManager.setElem(this);

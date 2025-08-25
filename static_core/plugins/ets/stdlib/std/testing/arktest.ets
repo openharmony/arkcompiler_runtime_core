@@ -373,7 +373,7 @@ export namespace arktest {
             return name + this.name;
         }
 
-        internal setSuite(suite: ArkTestsuite): void {
+        public setSuite(suite: ArkTestsuite): void {
             this.suite = suite;
         }
 

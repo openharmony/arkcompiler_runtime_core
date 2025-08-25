@@ -31,7 +31,7 @@ export class RegExpResultArray /*extends Array<String>*/ {
     /** The original string that was matched against */
     protected input_: String = ""
 
-    internal endIndex: number = 0
+    private endIndex: number = 0
 
     // NOTE(shumilov-petr): Make nullable when #14813 will be fixed
     protected indices_: Array<Array<number>> = []
@@ -62,7 +62,7 @@ export class RegExpResultArray /*extends Array<String>*/ {
         this.isUndefined = isUndefined
     }
 
-    internal constructor() {
+    protected constructor() {
 
     }
 
@@ -81,6 +81,7 @@ export class RegExpResultArray /*extends Array<String>*/ {
         else if (index == 9) RegExp.$9_ = value
     }
 
+    // NOTE(ekaterinzaytseva): unable to replace internal - crash in analyzer
     internal postExecProcessing(res: RegExpResultArray, input: String, index: number, hasIndices: boolean): void {
         if (!res.isCorrect) {
             return
@@ -192,7 +193,7 @@ export class RegExpResultArray /*extends Array<String>*/ {
     /**
      * Parses groupsRaw_ to groups
      */
-    internal updateGroups(): void {
+    protected updateGroups(): void {
         throw new Error("not overridden")
     }
 
@@ -206,7 +207,7 @@ export class RegExpResultArray /*extends Array<String>*/ {
         this.setNumberedField(index, str)
     }
 
-    internal updateIndicesAndResult(hasIndices: boolean): void {
+    private updateIndicesAndResult(hasIndices: boolean): void {
         let data = this.resultRaw_.split(',')
         this.result_ = new Array<String>(data.length / 2)
         this.isUndefined = new Array<boolean>(data.length / 2)
@@ -758,7 +759,7 @@ export class RegExpMatchArray extends RegExpResultArray {
         this(Double.toInt(index), input, result)
     }
 
-    internal constructor() {
+    protected constructor() {
         super()
     }
 
@@ -797,7 +798,7 @@ export class RegExpMatchArray extends RegExpResultArray {
     /**
      * Parses groupsRaw_ to groups
      */
-    internal override updateGroups(): void {
+    protected override updateGroups(): void {
         if (this.groupsRaw_ == "") {
             this.groups = undefined
             return
@@ -852,7 +853,7 @@ export class RegExpExecArray extends RegExpResultArray {
         this(Double.toInt(index), input, result)
     }
 
-    internal constructor() {
+    protected constructor() {
         super()
     }
 
@@ -875,7 +876,7 @@ export class RegExpExecArray extends RegExpResultArray {
     /**
      * Parses groupsRaw_ to groups
      */
-    internal override updateGroups(): void {
+    protected override updateGroups(): void {
         if (this.groupsRaw_ == "") {
             this.groups = undefined
             return
@@ -1225,6 +1226,7 @@ export class RegExp extends Object {
 
     private native matchImpl(pattern: String, flags: String, str: String, patternLength: int, strLength: int, lastIndex: int, hasSlashU: boolean): RegExpMatchArray;
 
+    // NOTE(ekaterinazaytseva): used as public
     internal exec(str: String, index: int): RegExpExecArray | null {
         const hasSlashU = str.contains("\\u", 0) || this.pattern_.contains("\\u", 0)
         const res = this.execImpl(this.pattern_, this.flags_, str, this.pattern_.length, str.length, index, hasSlashU)
@@ -1252,6 +1254,7 @@ export class RegExp extends Object {
         return this.exec(str, this.lastIndex.toInt())
     }
 
+    // NOTE(ekaterinzaytseva): unable to replace internal - used as public
     internal matchInternal(str: String, index: int): RegExpMatchArray | null {
         const hasSlashU = str.contains("\\u", 0) || this.pattern_.contains("\\u", 0)
         const res = this.matchImpl(this.pattern_, this.flags_, str, this.pattern_.length, str.length, index, hasSlashU)
@@ -1264,6 +1267,7 @@ export class RegExp extends Object {
         }
     }
 
+    // NOTE(ekaterinazaytseva): unable to replace internal - used in friend class 
     internal matchInternal(str: String): RegExpMatchArray | null {
         return this.matchInternal(str, this.lastIndex.toInt())
     }
@@ -1570,7 +1574,7 @@ export class RegExp extends Object {
         this.init(regexp.pattern_, flags === undefined ? regexp.flags : flags!)
     }
 
-    internal regexp_parser(pattern: String): void {
+    private regexp_parser(pattern: String): void {
         let err: String | undefined = RegExp.parse(pattern)
         if (err != undefined) {
             throw new SyntaxError(err as String)

@@ -673,7 +673,7 @@ export default namespace buffer {
         /** The underlying ArrayBuffer storing the binary data */
         private bufferData: ArrayBuffer;
         /** The offset into the buffer where this Buffer instance starts */
-        internal readonly byteOffsetNumber: int;
+        private readonly byteOffsetNumber: int;
 
         /**
          * Gets the length of the buffer in bytes
@@ -1301,18 +1301,18 @@ Received value is: ${value}`)
             return offset + byteLength;
         }
 
-        internal getMultiplier(i: int): long {
+        private getMultiplier(i: int): long {
             return Math.pow(2, i * 8).toLong()
         }
 
-        internal toUByte(b: byte): int {
+        private toUByte(b: byte): int {
             if (b < 0) {
                 return b + 256;
             }
             return b;
         }
 
-        internal readBytes(view: DataView, offset: int, byteLength: int, LE: boolean = false): long {
+        private readBytes(view: DataView, offset: int, byteLength: int, LE: boolean = false): long {
             let val: long = 0;
             for (let i = 0; i < byteLength; i++) {
                 let idx = LE ? i : byteLength - i - 1
@@ -1322,7 +1322,7 @@ Received value is: ${value}`)
             return val
         }
 
-        internal toSigned(val: long, byteLength: int)
+        private toSigned(val: long, byteLength: int)
         {
             const unsignedMax = this.getMultiplier(byteLength)
             const half = unsignedMax / 2

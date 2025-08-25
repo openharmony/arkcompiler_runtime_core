@@ -752,7 +752,7 @@ abstract class ArrayProxy<T> extends Array<T> {
 
             const methodType = method.getType()
             const methodParamsCount = methodType.getParametersNum()
-            if (methodParamsCount != signature.actualLength) {
+            if (methodParamsCount != signature.length) {
                 continue
             }
 

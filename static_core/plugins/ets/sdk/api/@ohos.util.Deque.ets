@@ -30,10 +30,10 @@ export type DequeforEachCb<T> = (value: T, index: int, deque: Deque<T>) => void;
 
 export default class Deque<T> implements Iterable<T>, JsonReplacer {
     private readonly DEFAULT_CAPACITY = 8;
-    internal capacity: int;
-    internal buffer: Array<T>;
-    internal front: int = 0;
-    internal rear: int = 0;
+    private capacity: int = this.DEFAULT_CAPACITY;
+    private buffer: Array<T>;
+    private front: int = 0;
+    private rear: int = 0;
 
     public toString(): string {
         return "[object Deque]";
@@ -188,7 +188,7 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
      * @returns {IterableIterator<T>} An iterator for the deque.
      */
     public override $_iterator(): IterableIterator<T> {
-        return new DequeValuesIterator_T<T>(this);
+        return new DequeValuesIterator_T<T>(this, this.front, this.rear, this.capacity, this.buffer);
     }
 
     /**
@@ -286,19 +286,25 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
 class DequeValuesIterator_T<T> implements IterableIterator<T> {
     private parent: Deque<T>
     private idx: int = 0;
+    private capacity: int
+    private buffer: Array<T>;
+    private rear: int = 0;
 
-    constructor(parent: Deque<T>) {
+    constructor(parent: Deque<T>, front: int, rear: int, capacity: int, buffer: Array<T>) {
         this.parent = parent
-        this.idx = parent.front;
+        this.idx = front;
+        this.rear = rear
+        this.capacity = capacity
+        this.buffer = buffer
     }
 
     override next(): IteratorResult<T> {
-        if (this.parent.length == 0 || this.parent.rear == this.idx) {
+        if (this.parent.length == 0 || this.rear == this.idx) {
             return new IteratorResult<T>()
         }
 
-        let val = new IteratorResult<T>(this.parent.buffer[this.idx]);
-        this.idx = (this.idx + 1) % this.parent.capacity;
+        let val = new IteratorResult<T>(this.buffer[this.idx]);
+        this.idx = (this.idx + 1) % this.capacity;
 
         return val;
     }

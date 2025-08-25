@@ -61,13 +61,13 @@ export final class BigInt {
     private static readonly BITS_PER_1024_DEC = 3402
     private static readonly BIGINT64_MASK = new BigInt(0xffffffffffffffff)
 
-    internal static resetBytes(b: FixedArray<int>):void {
+    private static resetBytes(b: FixedArray<int>):void {
         for (let i = 0; i<b.length; i++) {
             b[i] = 0
         }
     }
 
-    internal static fromLongHelper(val: long, bitLen: int, sign: int): FixedArray<int> {
+    private static fromLongHelper(val: long, bitLen: int, sign: int): FixedArray<int> {
         // get required array of Ints' size to store whole value
         // split by suported mode (baseSys)
         let size: int = ((bitLen + BigInt.shiftSys - 1) / BigInt.shiftSys).toInt()
@@ -152,6 +152,7 @@ export final class BigInt {
         this.sign = this.bytes.length == 0 ? 0 : sign
     }
 
+    //NOTE(ekaterinazaytseva): unable to replace internal - used in typedArrays
     internal static fromULong(val: long): BigInt {
         let ret = val == 0 ? new BigInt([], 0) : new BigInt(BigInt.fromLongHelper(val, 64, 1), 1)
         return ret
@@ -301,6 +302,7 @@ export final class BigInt {
         return (this.negative() ? "-" : "").concat((fastToStringHandler != undefined) ? fastToStringHandler!(this) : this.toStringAsGenericRadix(radix))
     }
 
+    //NOTE(ekaterinazaytseva): unable to replace internal - used as public in initializerBlock
     internal toStringAsBinary(): string {
         let reversedInts = BigInt.reverse(this.bytes)
         let intToBinaryString = (value: Long) => { return value.toString(2) }
@@ -311,6 +313,7 @@ export final class BigInt {
         return result.toString()
     }
 
+    //NOTE(ekaterinazaytseva): unable to replace internal - used as public in initializerBlock
     internal toStringAsDecimal(): string {
         let digits = this.bytesToDigits(this.bytes)
         let result = new StringBuilder
@@ -320,7 +323,7 @@ export final class BigInt {
         return result.toString()
     }
 
-    internal toStringAsGenericRadix(radix: int): string {
+    private toStringAsGenericRadix(radix: int): string {
         const radixBigInt = new BigInt(radix)
         let result: string = ""
         let dividend = this.abs()
@@ -338,6 +341,7 @@ export final class BigInt {
         return result.toString()
     }
 
+    //NOTE(ekaterinazaytseva): unable to replace internal - used as public in initializerBlock
     internal toStringAsPowerOfTwoRadix(radix: int): string {
         let chunkSize: Number = Math.log2(radix)
         if (!chunkSize.isInteger() || radix < 2) {

@@ -85,9 +85,12 @@ export interface DecimalConfig {
 }
 
 export class Decimal {
+    //NOTE(ekaterinazaytseva): unable to replace internal - used in friend class Utils
     internal digits: Array<double> | null = new Array<double>();
+    //NOTE(ekaterinazaytseva): unable to replace internal - used in friend class Utils
     internal exponent: double;
-    internal sign: double;
+    private sign: double;
+    //NOTE(ekaterinazaytseva): unable to replace internal - used in friend class Utils
     internal toStringTag: string = '[object Decimal]';
     private static quadrant: int = 0;
 
@@ -258,7 +261,7 @@ export class Decimal {
      * @returns { boolean } the boolean type
      */
     public isZero(): boolean {
-        return !!this.digits && this.digits![0] === 0;
+        return !!this.digits && this.digits!.at(0) === 0;
     }
 
     /**
@@ -747,9 +750,10 @@ export class Decimal {
         if (digits) {
             let len = digits!.length - 1;
             result = (len - Math.floor(this.exponent / LOG_BASE)) * LOG_BASE;
-            let value = digits[len];
+            let value = digits!.at(len);
             if (value) {
-                for (; value % 10 == 0; value /= 10) {
+                let v: double = value! 
+                for (; v % 10 == 0; v /= 10) {
                     result--;
                 }
             }
@@ -2559,8 +2563,8 @@ export class Decimal {
         let y = new Decimal(n);
         let yd = y.d;
         y.sign *= this.sign;
-        if (!xd || !(xd![0]) || !yd || !(yd![0])) {
-            return new Decimal((!y.s || xd && !(xd![0]) && !yd || yd && !(yd![0]) && !xd)
+        if (!xd || !(xd!.at(0)) || !yd || !(yd!.at(0))) {
+            return new Decimal((!y.s || xd && !(xd!.at(0)) && !yd || yd && !(yd!.at(0)) && !xd)
                 ? NaN
                 : (!xd || !yd) ? y.s / 0 : y.s * 0);
         }
@@ -2590,7 +2594,7 @@ export class Decimal {
         for (i = ydL; --i >= 0;) {
           carry = 0;
           for (k = xdL + i; k > i;) {
-            t = r[k] + yd![i] * xd![k - i - 1] + carry;
+            t = r[k] + yd!.at(i)! * xd!.at(k - i - 1)! + carry;
             r[k--] = t % BASE | 0;
             carry = t / BASE | 0;
           }
@@ -2899,7 +2903,7 @@ export class Decimal {
         return arr.reverse();
     }
 
-    internal finiteToString(isExp: boolean, sd?: double): string {
+    private finiteToString(isExp: boolean, sd?: double): string {
         if (!this.isFinite()) {
             return this.nonFiniteToString();
         }
