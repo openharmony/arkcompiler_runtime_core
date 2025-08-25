@@ -22,7 +22,14 @@ interface A {
 function testReflectLamdaTest() {
     let obja: A = { a:(index: number, str:ClassA) => {return [1, 2] as [number, number]} }
     let objb: A = { a:(index: number, str:ClassA) => {return [3, 4] as [number, number]} }
-    let ret = Reflect.set(obja, "a", objb.a)
+    let ret = false
+    try {
+        (reflect.Value.of(obja) as ClassValue).setFieldByName("a", reflect.Value.of(objb.a))
+        ret = true
+    } catch(e) {
+        console.error(e)
+        ret = false
+    }
     arktest.assertEQ(ret, true);
 }
 
