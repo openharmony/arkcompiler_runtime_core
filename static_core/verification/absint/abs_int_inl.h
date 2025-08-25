@@ -3437,7 +3437,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        SetAcc(refType_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3448,7 +3448,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        SetAcc(refType_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3457,7 +3457,7 @@ public:
     bool HandleAnyCallShort()
     {
         // NOTE: handle properly
-        SetAcc(refType_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3468,7 +3468,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        SetAcc(refType_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3479,7 +3479,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        SetAcc(refType_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3488,7 +3488,7 @@ public:
     bool HandleAnyCallThisShort()
     {
         // NOTE: handle properly
-        SetAcc(refType_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3499,7 +3499,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        SetAcc(refType_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3510,7 +3510,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        SetAcc(refType_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3521,7 +3521,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        SetAcc(refType_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3627,7 +3627,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        SetAcc(refType_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3639,7 +3639,7 @@ public:
         DBGBRK();
         Sync();
         uint16_t vOut = inst_.GetVReg<FORMAT, 0x0>();
-        SetReg(vOut, refType_);
+        SetReg(vOut, objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3670,7 +3670,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        SetAcc(refType_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3691,7 +3691,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        SetAcc(refType_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3712,7 +3712,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        SetAcc(u1_);
+        SetAcc(i32_);
 
         MoveToNextInst<FORMAT>();
         return true;

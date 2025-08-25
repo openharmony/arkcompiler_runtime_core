@@ -1214,9 +1214,10 @@ public:
         auto ret = intrinsics::AnyCall0(this->GetThread(), funcObj);
         if (UNLIKELY(this->GetThread()->HasPendingException())) {
             this->MoveToExceptionHandler();
+        } else {
+            this->GetAccAsVReg().SetReference(ret);
+            this->template MoveToNextInst<FORMAT, true>();
         }
-        this->GetAccAsVReg().SetReference(ret);
-        this->template MoveToNextInst<FORMAT, false>();
     }
 
     template <BytecodeInstruction::Format FORMAT>
@@ -1230,9 +1231,10 @@ public:
         auto ret = intrinsics::AnyCallRange(this->GetThread(), this->GetFrame(), funcObj, argStart, argc);
         if (UNLIKELY(this->GetThread()->HasPendingException())) {
             this->MoveToExceptionHandler();
+        } else {
+            this->GetAccAsVReg().SetReference(ret);
+            this->template MoveToNextInst<FORMAT, true>();
         }
-        this->GetAccAsVReg().SetReference(ret);
-        this->template MoveToNextInst<FORMAT, false>();
     }
 
     template <BytecodeInstruction::Format FORMAT>
@@ -1247,9 +1249,10 @@ public:
         auto ret = intrinsics::AnyCallShort(this->GetThread(), funcObj, arg);
         if (UNLIKELY(this->GetThread()->HasPendingException())) {
             this->MoveToExceptionHandler();
+        } else {
+            this->GetAccAsVReg().SetReference(ret);
+            this->template MoveToNextInst<FORMAT, true>();
         }
-        this->GetAccAsVReg().SetReference(ret);
-        this->template MoveToNextInst<FORMAT, false>();
     }
 
     template <BytecodeInstruction::Format FORMAT>
@@ -1262,9 +1265,10 @@ public:
         auto ret = intrinsics::AnyCallThis0(this->GetThread(), this->GetFrame(), thisObj, stringId);
         if (UNLIKELY(this->GetThread()->HasPendingException())) {
             this->MoveToExceptionHandler();
+        } else {
+            this->GetAccAsVReg().SetReference(ret);
+            this->template MoveToNextInst<FORMAT, true>();
         }
-        this->GetAccAsVReg().SetReference(ret);
-        this->template MoveToNextInst<FORMAT, false>();
     }
 
     template <BytecodeInstruction::Format FORMAT>
@@ -1279,9 +1283,10 @@ public:
         auto ret = intrinsics::AnyCallThisRange(this->GetThread(), this->GetFrame(), thisObj, stringId, argStart, argc);
         if (UNLIKELY(this->GetThread()->HasPendingException())) {
             this->MoveToExceptionHandler();
+        } else {
+            this->GetAccAsVReg().SetReference(ret);
+            this->template MoveToNextInst<FORMAT, true>();
         }
-        this->GetAccAsVReg().SetReference(ret);
-        this->template MoveToNextInst<FORMAT, false>();
     }
 
     template <BytecodeInstruction::Format FORMAT>
@@ -1296,9 +1301,10 @@ public:
         auto ret = intrinsics::AnyCallThisShort(this->GetThread(), this->GetFrame(), thisObj, stringId, arg);
         if (UNLIKELY(this->GetThread()->HasPendingException())) {
             this->MoveToExceptionHandler();
+        } else {
+            this->GetAccAsVReg().SetReference(ret);
+            this->template MoveToNextInst<FORMAT, true>();
         }
-        this->GetAccAsVReg().SetReference(ret);
-        this->template MoveToNextInst<FORMAT, false>();
     }
 
     template <BytecodeInstruction::Format FORMAT>
@@ -1310,9 +1316,10 @@ public:
         auto ret = intrinsics::AnyCallNew0(this->GetThread(), ctor);
         if (UNLIKELY(this->GetThread()->HasPendingException())) {
             this->MoveToExceptionHandler();
+        } else {
+            this->GetAccAsVReg().SetReference(ret);
+            this->template MoveToNextInst<FORMAT, true>();
         }
-        this->GetAccAsVReg().SetReference(ret);
-        this->template MoveToNextInst<FORMAT, false>();
     }
 
     template <BytecodeInstruction::Format FORMAT>
@@ -1326,9 +1333,10 @@ public:
         auto ret = intrinsics::AnyCallNewRange(this->GetThread(), this->GetFrame(), ctor, argStart, argc);
         if (UNLIKELY(this->GetThread()->HasPendingException())) {
             this->MoveToExceptionHandler();
+        } else {
+            this->GetAccAsVReg().SetReference(ret);
+            this->template MoveToNextInst<FORMAT, true>();
         }
-        this->GetAccAsVReg().SetReference(ret);
-        this->template MoveToNextInst<FORMAT, false>();
     }
 
     template <BytecodeInstruction::Format FORMAT>
@@ -1342,9 +1350,10 @@ public:
         auto ret = intrinsics::AnyCallNewShort(this->GetThread(), ctor, arg);
         if (UNLIKELY(this->GetThread()->HasPendingException())) {
             this->MoveToExceptionHandler();
+        } else {
+            this->GetAccAsVReg().SetReference(ret);
+            this->template MoveToNextInst<FORMAT, true>();
         }
-        this->GetAccAsVReg().SetReference(ret);
-        this->template MoveToNextInst<FORMAT, false>();
     }
 
     template <BytecodeInstruction::Format FORMAT>
@@ -1358,9 +1367,10 @@ public:
         bool ret = intrinsics::AnyIsinstance(this->GetThread(), lhsObj, rhsObj);
         if (UNLIKELY(this->GetThread()->HasPendingException())) {
             this->MoveToExceptionHandler();
+        } else {
+            this->GetAccAsVReg().SetPrimitive(ret);
+            this->template MoveToNextInst<FORMAT, true>();
         }
-        this->GetAccAsVReg().SetPrimitive(ret);
-        this->template MoveToNextInst<FORMAT, false>();
     }
 
     template <BytecodeInstruction::Format FORMAT>
@@ -3947,8 +3957,12 @@ public:
 
         ObjectHeader *obj = this->GetFrame()->GetVReg(vs).GetReference();
         auto ret = intrinsics::AnyLdbyname(this->GetThread(), this->GetFrame(), obj, id.AsRawValue());
-        this->GetAccAsVReg().SetReference(ret);
-        this->template MoveToNextInst<FORMAT, true>();
+        if (UNLIKELY(this->GetThread()->HasPendingException())) {
+            this->MoveToExceptionHandler();
+        } else {
+            this->GetAccAsVReg().SetReference(ret);
+            this->template MoveToNextInst<FORMAT, true>();
+        }
     }
 
     template <BytecodeInstruction::Format FORMAT>
@@ -3962,8 +3976,12 @@ public:
 
         ObjectHeader *obj = this->GetFrame()->GetVReg(vs).GetReference();
         auto ret = intrinsics::AnyLdbyname(this->GetThread(), this->GetFrame(), obj, id.AsRawValue());
-        this->GetFrameHandler().GetVReg(vd).SetReference(ret);
-        this->template MoveToNextInst<FORMAT, true>();
+        if (UNLIKELY(this->GetThread()->HasPendingException())) {
+            this->MoveToExceptionHandler();
+        } else {
+            this->GetFrameHandler().GetVReg(vd).SetReference(ret);
+            this->template MoveToNextInst<FORMAT, true>();
+        }
     }
 
     template <BytecodeInstruction::Format FORMAT>
@@ -3977,7 +3995,11 @@ public:
         ObjectHeader *obj = this->GetFrame()->GetVReg(vs).GetReference();
         ObjectHeader *val = this->GetAccAsVReg().GetReference();
         intrinsics::AnyStbyname(this->GetThread(), this->GetFrame(), obj, id.AsRawValue(), val);
-        this->template MoveToNextInst<FORMAT, true>();
+        if (UNLIKELY(this->GetThread()->HasPendingException())) {
+            this->MoveToExceptionHandler();
+        } else {
+            this->template MoveToNextInst<FORMAT, true>();
+        }
     }
 
     template <BytecodeInstruction::Format FORMAT>
@@ -3992,7 +4014,11 @@ public:
         ObjectHeader *obj = this->GetFrame()->GetVReg(vs2).GetReference();
         ObjectHeader *val = this->GetFrame()->GetVReg(vs1).GetReference();
         intrinsics::AnyStbyname(this->GetThread(), this->GetFrame(), obj, id.AsRawValue(), val);
-        this->template MoveToNextInst<FORMAT, true>();
+        if (UNLIKELY(this->GetThread()->HasPendingException())) {
+            this->MoveToExceptionHandler();
+        } else {
+            this->template MoveToNextInst<FORMAT, true>();
+        }
     }
 
     template <BytecodeInstruction::Format FORMAT>
@@ -4008,7 +4034,11 @@ public:
         double index = this->GetAccAsVReg().GetDouble();
         auto ldObj = intrinsics::AnyLdbyidx(this->GetThread(), obj, index);
         this->GetAccAsVReg().SetReference(ldObj);
-        this->template MoveToNextInst<FORMAT, true>();
+        if (UNLIKELY(this->GetThread()->HasPendingException())) {
+            this->MoveToExceptionHandler();
+        } else {
+            this->template MoveToNextInst<FORMAT, true>();
+        }
     }
 
     template <BytecodeInstruction::Format FORMAT>
@@ -4023,7 +4053,11 @@ public:
         [[maybe_unused]] double index = this->GetFrame()->GetVReg(vs2).GetDouble();
         ObjectHeader *val = this->GetAccAsVReg().GetReference();
         intrinsics::AnyStbyidx(this->GetThread(), obj, index, val);
-        this->template MoveToNextInst<FORMAT, true>();
+        if (UNLIKELY(this->GetThread()->HasPendingException())) {
+            this->MoveToExceptionHandler();
+        } else {
+            this->template MoveToNextInst<FORMAT, true>();
+        }
     }
 
     template <BytecodeInstruction::Format FORMAT>
@@ -4036,8 +4070,12 @@ public:
         ObjectHeader *obj = this->GetFrame()->GetVReg(vs1).GetReference();
         ObjectHeader *valObj = this->GetFrame()->GetVReg(vs2).GetReference();
         auto ldObj = intrinsics::AnyLdbyval(this->GetThread(), obj, valObj);
-        this->GetAccAsVReg().SetReference(ldObj);
-        this->template MoveToNextInst<FORMAT, true>();
+        if (UNLIKELY(this->GetThread()->HasPendingException())) {
+            this->MoveToExceptionHandler();
+        } else {
+            this->GetAccAsVReg().SetReference(ldObj);
+            this->template MoveToNextInst<FORMAT, true>();
+        }
     }
 
     template <BytecodeInstruction::Format FORMAT>
@@ -4052,7 +4090,11 @@ public:
         ObjectHeader *key = this->GetFrame()->GetVReg(vs2).GetReference();
         ObjectHeader *val = this->GetAccAsVReg().GetReference();
         intrinsics::AnyStbyval(this->GetThread(), obj, key, val);
-        this->template MoveToNextInst<FORMAT, true>();
+        if (UNLIKELY(this->GetThread()->HasPendingException())) {
+            this->MoveToExceptionHandler();
+        } else {
+            this->template MoveToNextInst<FORMAT, true>();
+        }
     }
 
 private:
