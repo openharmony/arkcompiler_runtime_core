@@ -433,9 +433,11 @@ export class EAWorker {
         if (this.isMain) {
             throw new Error("Main worker cannot be stopped");
         }
-        if (!this.loopStarted.get()) {
-            return;
+
+        if (!this.isStarted.get()) {
+             throw new Error("Cannot stop worker before start");
         }
+
         this.worker.join();
         EAWorker.workers.delete(this.eaworkerNum);
         this.loopStarted.set(false);
