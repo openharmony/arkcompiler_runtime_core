@@ -18,6 +18,10 @@ function asIntOrDefault(n: Number | undefined, def: int): int {
     return (n!).toInt();
 }
 
+function asIntOrDefault(n: int | undefined, def: int): int {
+    return n ?? def
+}
+
 function normalizeIndex(idx: int, len: int): int {
     if (idx < -len) {
         return 0

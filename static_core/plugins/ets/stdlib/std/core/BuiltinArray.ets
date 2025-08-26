@@ -24,6 +24,10 @@ function asIntOrDefault(n: Number | undefined, def: int): int {
     return (n!).toInt();
 }
 
+function asIntOrDefault(n: int | undefined, def: int): int {
+    return n ?? def
+}
+
 function normalizeIndex(idx: int, len: int): int {
     if (idx < -len) {
         return 0
@@ -731,28 +735,14 @@ export function includes(self: FixedArray<boolean>, val: boolean, fromIndex?: Nu
  *
  * @returns index of val, -1 otherwise
  */
-export function indexOf(self: FixedArray<boolean>, val: boolean, fromIndex: int): int {
-    fromIndex = normalizeIndex(fromIndex, self.length)
-    for (let i = fromIndex; i < self.length; i++) {
+export function indexOf(self: FixedArray<boolean>, val: boolean, fromIndex?: int): int {
+    const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
+    for (let i = normFromIndex; i < self.length; i++) {
         if (__runtimeEquals(val, self[i])) {
             return i
         }
     }
     return -1
-}
-
-/**
- * Returns the first index at which a given element
- * can be found in the array, or -1 if it is not present.
- *
- * @param val value to search
- *
- * @param fromIndex index to search from
- *
- * @returns index of val, -1 otherwise
- */
-export function indexOf(self: FixedArray<boolean>, val: boolean, fromIndex?: Number): number {
-    return indexOf(self, val, asIntOrDefault(fromIndex, 0))
 }
 
 /**
@@ -1694,28 +1684,14 @@ export function includes(self: FixedArray<byte>, val: byte, fromIndex?: Number):
  *
  * @returns index of val, -1 otherwise
  */
-export function indexOf(self: FixedArray<byte>, val: byte, fromIndex: int): int {
-    fromIndex = normalizeIndex(fromIndex, self.length)
-    for (let i = fromIndex; i < self.length; i++) {
+export function indexOf(self: FixedArray<byte>, val: byte, fromIndex?: int): int {
+    const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
+    for (let i = normFromIndex; i < self.length; i++) {
         if (__runtimeEquals(val, self[i])) {
             return i
         }
     }
     return -1
-}
-
-/**
- * Returns the first index at which a given element
- * can be found in the array, or -1 if it is not present.
- *
- * @param val value to search
- *
- * @param fromIndex index to search from
- *
- * @returns index of val, -1 otherwise
- */
-export function indexOf(self: FixedArray<byte>, val: byte, fromIndex?: Number): number {
-    return indexOf(self, val, asIntOrDefault(fromIndex, 0))
 }
 
 /**
@@ -2657,28 +2633,14 @@ export function includes(self: FixedArray<short>, val: short, fromIndex?: Number
  *
  * @returns index of val, -1 otherwise
  */
-export function indexOf(self: FixedArray<short>, val: short, fromIndex: int): int {
-    fromIndex = normalizeIndex(fromIndex, self.length)
-    for (let i = fromIndex; i < self.length; i++) {
+export function indexOf(self: FixedArray<short>, val: short, fromIndex?: int): int {
+    const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
+    for (let i = normFromIndex; i < self.length; i++) {
         if (__runtimeEquals(val, self[i])) {
             return i
         }
     }
     return -1
-}
-
-/**
- * Returns the first index at which a given element
- * can be found in the array, or -1 if it is not present.
- *
- * @param val value to search
- *
- * @param fromIndex index to search from
- *
- * @returns index of val, -1 otherwise
- */
-export function indexOf(self: FixedArray<short>, val: short, fromIndex?: Number): number {
-    return indexOf(self, val, asIntOrDefault(fromIndex, 0))
 }
 
 /**
@@ -3620,28 +3582,14 @@ export function includes(self: FixedArray<int>, val: int, fromIndex?: Number): b
  *
  * @returns index of val, -1 otherwise
  */
-export function indexOf(self: FixedArray<int>, val: int, fromIndex: int): int {
-    fromIndex = normalizeIndex(fromIndex, self.length)
-    for (let i = fromIndex; i < self.length; i++) {
+export function indexOf(self: FixedArray<int>, val: int, fromIndex?: int): int {
+    const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
+    for (let i = normFromIndex; i < self.length; i++) {
         if (__runtimeEquals(val, self[i])) {
             return i
         }
     }
     return -1
-}
-
-/**
- * Returns the first index at which a given element
- * can be found in the array, or -1 if it is not present.
- *
- * @param val value to search
- *
- * @param fromIndex index to search from
- *
- * @returns index of val, -1 otherwise
- */
-export function indexOf(self: FixedArray<int>, val: int, fromIndex?: Number): number {
-    return indexOf(self, val, asIntOrDefault(fromIndex, 0))
 }
 
 /**
@@ -4583,28 +4531,14 @@ export function includes(self: FixedArray<long>, val: long, fromIndex?: Number):
  *
  * @returns index of val, -1 otherwise
  */
-export function indexOf(self: FixedArray<long>, val: long, fromIndex: int): int {
-    fromIndex = normalizeIndex(fromIndex, self.length)
-    for (let i = fromIndex; i < self.length; i++) {
+export function indexOf(self: FixedArray<long>, val: long, fromIndex?: int): int {
+    const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
+    for (let i = normFromIndex; i < self.length; i++) {
         if (__runtimeEquals(val, self[i])) {
             return i
         }
     }
     return -1
-}
-
-/**
- * Returns the first index at which a given element
- * can be found in the array, or -1 if it is not present.
- *
- * @param val value to search
- *
- * @param fromIndex index to search from
- *
- * @returns index of val, -1 otherwise
- */
-export function indexOf(self: FixedArray<long>, val: long, fromIndex?: Number): number {
-    return indexOf(self, val, asIntOrDefault(fromIndex, 0))
 }
 
 /**
@@ -5554,28 +5488,14 @@ export function includes(self: FixedArray<float>, val: float, fromIndex?: Number
  *
  * @returns index of val, -1 otherwise
  */
-export function indexOf(self: FixedArray<float>, val: float, fromIndex: int): int {
-    fromIndex = normalizeIndex(fromIndex, self.length)
-    for (let i = fromIndex; i < self.length; i++) {
+export function indexOf(self: FixedArray<float>, val: float, fromIndex?: int): int {
+    const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
+    for (let i = normFromIndex; i < self.length; i++) {
         if (__runtimeEquals(val, self[i])) {
             return i
         }
     }
     return -1
-}
-
-/**
- * Returns the first index at which a given element
- * can be found in the array, or -1 if it is not present.
- *
- * @param val value to search
- *
- * @param fromIndex index to search from
- *
- * @returns index of val, -1 otherwise
- */
-export function indexOf(self: FixedArray<float>, val: float, fromIndex?: Number): number {
-    return indexOf(self, val, asIntOrDefault(fromIndex, 0))
 }
 
 /**
@@ -6525,28 +6445,14 @@ export function includes(self: FixedArray<double>, val: double, fromIndex?: Numb
  *
  * @returns index of val, -1 otherwise
  */
-export function indexOf(self: FixedArray<double>, val: double, fromIndex: int): int {
-    fromIndex = normalizeIndex(fromIndex, self.length)
-    for (let i = fromIndex; i < self.length; i++) {
+export function indexOf(self: FixedArray<double>, val: double, fromIndex?: int): int {
+    const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
+    for (let i = normFromIndex; i < self.length; i++) {
         if (__runtimeEquals(val, self[i])) {
             return i
         }
     }
     return -1
-}
-
-/**
- * Returns the first index at which a given element
- * can be found in the array, or -1 if it is not present.
- *
- * @param val value to search
- *
- * @param fromIndex index to search from
- *
- * @returns index of val, -1 otherwise
- */
-export function indexOf(self: FixedArray<double>, val: double, fromIndex?: Number): number {
-    return indexOf(self, val, asIntOrDefault(fromIndex, 0))
 }
 
 /**
@@ -7488,28 +7394,14 @@ export function includes(self: FixedArray<char>, val: char, fromIndex?: Number):
  *
  * @returns index of val, -1 otherwise
  */
-export function indexOf(self: FixedArray<char>, val: char, fromIndex: int): int {
-    fromIndex = normalizeIndex(fromIndex, self.length)
-    for (let i = fromIndex; i < self.length; i++) {
+export function indexOf(self: FixedArray<char>, val: char, fromIndex?: int): int {
+    const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
+    for (let i = normFromIndex; i < self.length; i++) {
         if (__runtimeEquals(val, self[i])) {
             return i
         }
     }
     return -1
-}
-
-/**
- * Returns the first index at which a given element
- * can be found in the array, or -1 if it is not present.
- *
- * @param val value to search
- *
- * @param fromIndex index to search from
- *
- * @returns index of val, -1 otherwise
- */
-export function indexOf(self: FixedArray<char>, val: char, fromIndex?: Number): number {
-    return indexOf(self, val, asIntOrDefault(fromIndex, 0))
 }
 
 /**
