@@ -160,6 +160,9 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      */
     public extendTo(arrayLength: number, initialValue: T): void {
+        if(arrayLength < 0){
+            throw new RangeError("Parameter error.Invalid array length.")
+        }
         if (arrayLength > Int.MAX_VALUE) {
             throw new RangeError("arrayLength must be <= int32 max")
         }
@@ -182,6 +185,9 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      */
     public shrinkTo(arrayLength: number): void {
+        if(arrayLength < 0){
+            throw new RangeError("Parameter error.Invalid array length.")
+        }
         if (arrayLength >= this.actualLength) {
             return
         }
