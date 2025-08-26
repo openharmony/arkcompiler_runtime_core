@@ -392,6 +392,10 @@ EtsString *TypeAPITypeCreatorCtxMethodAddBodyFromLambda(EtsLong methodPtr, EtsIn
     } else {
         m->GetFn().AddInstruction(pandasm::Create_CALL_VIRT_RANGE(0, externalFn.GetFunctionName()));
     }
+    auto returnType = m->GetFn().returnType;
+    if (returnType.IsObject() && (returnType.GetName() != typeapi_create_consts::TYPE_OBJECT)) {
+        m->GetFn().AddInstruction(pandasm::Create_CHECKCAST(returnType.GetName()));
+    }
 
     m->GetFn().AddInstruction(GetReturnStatement(meth->GetReturnValueType()));
 
