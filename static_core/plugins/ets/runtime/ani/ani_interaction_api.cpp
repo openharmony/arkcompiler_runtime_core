@@ -2163,6 +2163,27 @@ static ani_status GetDirectMethodOverload(EtsClass *klass, const char *name, con
     return ANI_OK;
 }
 
+static void CheckWrongBindingMethodType(EtsClass *klass, bool isStatic, const char *name, const char *signature)
+{
+    EtsMethod *method = nullptr;
+    if (signature == nullptr) {
+        bool isUnique = false;
+        method = klass->GetDirectMethod(!isStatic, name, &isUnique);
+    } else {
+        method = klass->GetDirectMethod(!isStatic, name, signature);
+    }
+    if (method != nullptr) {
+        if (!isStatic && method->IsStatic()) {
+            LOG(ERROR, ANI) << "Use 'Class_BindStaticNativeMethods()' to bind static methods, method="
+                            << method->GetFullName(true);
+        }
+        if (isStatic && !method->IsStatic()) {
+            LOG(ERROR, ANI) << "Use 'Class_BindNativeMethods()' to bind non-static methods, method="
+                            << method->GetFullName(true);
+        }
+    }
+}
+
 static ani_status BindNativeMethods(ani_env *env, ani_class cls, const ani_native_function *methods, ani_size nrMethods,
                                     bool isStatic)
 {
@@ -2187,37 +2208,25 @@ static ani_status BindNativeMethods(ani_env *env, ani_class cls, const ani_nativ
             signature = replacedSignature.has_value() ? replacedSignature->c_str() : signature;
         }
         EtsMethod *method = nullptr;
-        if (isStatic) {
-            if (signature == nullptr) {
-                bool isUnique = false;
-                method = klass->GetDirectStaticMethod(name, &isUnique);
-                ANI_CHECK_RETURN_IF_EQ(isUnique, false, ANI_AMBIGUOUS);
-            } else {
-                method = klass->GetDirectStaticMethod(name, signature);
-            }
+        if (signature == nullptr) {
+            bool isUnique = false;
+            method = klass->GetDirectMethod(isStatic, name, &isUnique);
+            ANI_CHECK_RETURN_IF_EQ(isUnique, false, ANI_AMBIGUOUS);
         } else {
-            if (signature == nullptr) {
-                method = klass->GetDirectMethod(name);
-            } else {
-                method = klass->GetDirectMethod(name, signature, true);
-            }
-            if (method == nullptr) {
-                ani_status status = GetDirectMethodOverload(klass, name, signature, &method);
-                ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
-            }
+            method = klass->GetDirectMethod(isStatic, name, signature);
         }
+        if (method == nullptr && !isStatic) {
+            ani_status status = GetDirectMethodOverload(klass, name, signature, &method);
+            ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+        }
+
+        if (method == nullptr) {
+            CheckWrongBindingMethodType(klass, isStatic, name, signature);
+        }
+
         ANI_CHECK_RETURN_IF_EQ(method, nullptr, ANI_NOT_FOUND);
         ANI_CHECK_RETURN_IF_EQ(method->IsNative(), false, ANI_NOT_FOUND);
 
-        // NOTE:
-        //  Replace condition by 'ANI_CHECK_RETURN_IF_NE(isStatic, method->IsStatic(), ANI_INVALID_ARGS)'
-        //  when all parts that uses Class_BindNativeMethods for static method will be fixed, #23863
-        ANI_CHECK_RETURN_IF_EQ(isStatic && !method->IsStatic(), true, ANI_INVALID_ARGS);
-
-        if (!isStatic && method->IsStatic()) {
-            LOG(ERROR, ANI) << "Use 'Class_BindStaticNativeMethods()' to bind static methods, method="
-                            << method->GetFullName(true);
-        }
         etsMethods.push_back(method);
     }
     return DoBindNative(s, etsMethods, methods, nrMethods);

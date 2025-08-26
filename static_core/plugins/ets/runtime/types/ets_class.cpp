@@ -330,9 +330,11 @@ EtsMethod *EtsClass::GetDirectMethod(const char *name, const Method::Proto &prot
     return EtsMethod::FromRuntimeMethod(method);
 }
 
-EtsMethod *EtsClass::GetDirectStaticMethod(const char *name, const char *signature) const
+EtsMethod *EtsClass::GetDirectMethod(bool isStatic, const char *name, const char *signature) const
 {
-    Span<Method> methods = GetRuntimeClass()->GetStaticMethods();
+    const Class *rtClass = GetRuntimeClass();
+    Span<Method> methods = isStatic ? rtClass->GetStaticMethods() : rtClass->GetVirtualMethods();
+
     const uint8_t *mutf8Name = utf::CStringAsMutf8(name);
     const MethodNameComp comp;
     panda_file::File::StringData key = {static_cast<uint32_t>(ark::utf::MUtf8ToUtf16Size(mutf8Name)), mutf8Name};
@@ -357,12 +359,13 @@ EtsMethod *EtsClass::GetDirectStaticMethod(const char *name, const char *signatu
     return nullptr;
 }
 
-EtsMethod *EtsClass::GetDirectStaticMethod(const char *name, bool *outIsUnique) const
+EtsMethod *EtsClass::GetDirectMethod(bool isStatic, const char *name, bool *outIsUnique) const
 {
     ASSERT(outIsUnique != nullptr);
     *outIsUnique = true;
 
-    Span<Method> methods = GetRuntimeClass()->GetStaticMethods();
+    const Class *rtClass = GetRuntimeClass();
+    Span<Method> methods = isStatic ? rtClass->GetStaticMethods() : rtClass->GetVirtualMethods();
     const uint8_t *mutf8Name = utf::CStringAsMutf8(name);
     const MethodNameComp comp;
     panda_file::File::StringData key = {static_cast<uint32_t>(ark::utf::MUtf8ToUtf16Size(mutf8Name)), mutf8Name};
