@@ -776,8 +776,8 @@ Every variable in a program must have an initial value before it can be used:
    + If the type of a variable is ``T``, and ``T`` has a *default value*
      (see :ref:`Default Values for Types`), then the variable is initialized
      with the default value.
-   + If a variable has no default value, then a value must be set by the
-     :ref:`Simple Assignment Operator` before attempting to use the variable.
+   + If a variable has no default value, then its value must be set by the
+     :ref:`Simple Assignment Operator` before any use of the variable.
 
 .. index::
    value
@@ -1185,11 +1185,11 @@ Optional Parameters
 .. code-block:: abnf
 
     optionalParameter:
-        identifier ':' type '=' expression
+        identifier (':' type)? '=' expression
         | identifier '?' ':' type
         ;
 
-The first form contains an expression that specifies a *default value*. It is
+The first form contains an ``expression`` that specifies a *default value*. It is
 called a *parameter with default value*. The value of the parameter is set
 to the *default value* if the argument corresponding to that parameter is
 omitted in a function or method call:
@@ -1227,6 +1227,18 @@ occurs.
         foo (p: number|undefined = undefined): void // compile-time error
         foo (...p: Any[]): Any {}
     }
+
+If type annotation is omitted, then the parameter type is inferred from
+the type of the ``expression``. If the type cannot be inferred, then a
+:index:`compile-time error` occurs.
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo (p = new Object) {} //  the type of 'p' is Object
+    function foo (p = {f: 1}) {} // compile-time error, type of 'p' cannot be inferred
+
+
 
 
 The second form is a short-cut notation and ``identifier '?' ':' type``
@@ -1459,6 +1471,32 @@ generics as a *rest parameter*.
         res += n
       return res
     }
+
+**Note**. Any call to a function, method, constructor, or lambda with a rest
+parameter implies that a new array or tuple is created from the arguments
+provided.
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo(...array_parameter: number[], ...tuple_parameter: [number, string]) {
+       // array_parameter is a new array created from the arguments passed
+       // tuple_parameter is a new tuple created from the arguments passed
+       array_parameter[0] = 1234
+       tuple_parameter[0] = 1234
+       console.log (array_parameter[0], tuple_parameter[0]) // 1234 1234 is the output
+    }
+
+    const array_argument: number[] =  [1,2,3,4]
+    const tuple_argument: [number, string] =  [1,"234"]
+
+    console.log (array_argument[0], tuple_argument[0]) // 1 1 is the output
+
+    foo (...array_argument, ...tuple_argument) 
+         // array_argument is spread into a sequence of its elements
+         // tuple_argument is spread into a sequence of its elements
+
+    console.log (array_argument[0], tuple_argument[0]) // 1 1 is the output
 
 
 .. index::

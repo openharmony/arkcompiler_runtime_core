@@ -38,6 +38,10 @@ Semantic Essentials
 The section gives a brief introduction to the major semantic terms
 and their usage in several contexts.
 
+.. index::
+   semantic term
+   context
+
 |
 
 .. _Type of Standalone Expression:
@@ -69,6 +73,22 @@ The type of a *standalone expression* is determined as follows:
   as a *standalone expression*.
 
 The situation is represented in the example below:
+
+.. index::
+   standalone expression
+   type of expression
+   expression
+   target type
+   context
+   type
+   integer literal
+   floating-point literal
+   constant expression
+   inferred type
+   operand type
+   operand
+   array literal
+   object literal
 
 .. code-block:: typescript
    :linenos:
@@ -102,6 +122,15 @@ necessarily known in the context as follows:
    itself, then the :ref:`Assignability` check is performed as in the example
    below:
 
+.. index::
+   assignment-like context
+   context
+   assignment
+   expression
+   type
+   assign
+   assignability
+
 .. code-block:: typescript
    :linenos:
 
@@ -120,6 +149,11 @@ necessarily known in the context as follows:
         x = 1 // ok, type of '1' is inferred from type of 'x'
         y = [1, 2] // ok, array literal is evaluated as [1.0, 2.0]
     }
+
+.. index::
+   assignability
+   expression
+   type
 
 |
 
@@ -156,6 +190,20 @@ as follows:
         let y = [1, 2] // x is of type 'number[]'
     }
 
+.. index::
+   variable
+   initialization
+   context
+   constant declaration
+   assignment-like context
+   annotation
+   declaration
+   type inference
+   initializer
+   expression
+   standalone expression
+   function
+
 |
 
 .. _Specifics of Numeric Operator Contexts:
@@ -166,10 +214,27 @@ Specifics of Numeric Operator Contexts
 .. meta:
     frontend_status: Done
 
-Operands of unary and binary numeric expressions are widened to a larger numeric
-type. The minimum type is ``int``. Specifically, no arithmetic operator
+The ``postfix`` and ``prefix`` ``increment`` and ``decrement``
+operators evaluate ``byte`` and ``short`` operands without
+widening. Same is true also for an
+``assignment`` operator (considering ``assignment`` as a binary operator).
+
+For other numeric operators, the operands of unary and binary numeric expressions
+are widened to a larger numeric
+type. The minimum type is ``int``. None of those operators
 evaluates values of types ``byte`` and ``short`` without widening. Details of
 specific operators are discussed in corresponding sections of the Specification.
+
+.. index::
+   numeric operator
+   context
+   numeric operator context
+   operand
+   unary numeric expression
+   binary numeric expression
+   widening
+   numeric type
+   type
 
 |
 
@@ -185,6 +250,17 @@ If one operand of the binary operator ‘`+`’ is of type ``string``, then the
 string conversion applies to another non-string operand to convert it to string
 (see :ref:`String Concatenation` and :ref:`String Operator Contexts`).
 
+.. index::
+   string operator
+   string operator context
+   context
+   operand
+   binary operator
+   string type
+   string conversion
+   non-string operand
+   string concatenation
+
 |
 
 .. _Other Contexts:
@@ -197,6 +273,12 @@ Other Contexts
 
 The only semantic rule for all other contexts, and specifically for
 :ref:`Overriding`, is to use :ref:`Subtyping`.
+
+.. index::
+   context
+   semantic rule
+   overriding
+   subtyping
 
 |
 
@@ -217,6 +299,18 @@ the expression is inferred as the type of a *standalone expression*.
 
 The semantics is represented in the example below:
 
+.. index::
+   type parameter
+   type
+   assignment-like context
+   context
+   type inference
+   constraint
+   target type
+   expression
+   standalone expression
+   semantics
+
 .. code-block:: typescript
    :linenos:
 
@@ -232,6 +326,16 @@ a :index:`compile-time error` because ``int`` is not a subtype of ``number``
 (type parameter constraint).
 
 Explicit type argument ``new C<number>(1)`` must be used to fix the code.
+
+.. index::
+   inferred type
+   default type
+   integer literal
+   expression
+   subtype
+   parameter constraint
+   type
+   argument
 
 |
 
@@ -252,6 +356,20 @@ Major semantic terms are listed below:
 - :ref:`Overriding`;
 - :ref:`Overloading`;
 - :ref:`Type Inference`.
+
+.. index::
+   semantics
+   type inference
+   initializer
+   string operator
+   context
+   subtyping
+   assignment-like context
+   expression
+   assignability
+   numeric operator
+   overriding
+   overloading
 
 |
 
@@ -298,6 +416,8 @@ other, except where they are identical (see :ref:`Type Identity`).
 .. index::
    subtyping
    subtype
+   type
+   object
    closure
    supertype
    direct supertype
@@ -308,7 +428,6 @@ other, except where they are identical (see :ref:`Type Identity`).
    resizable array
    fixed-size array
    tuple type
-   type
 
 |
 
@@ -350,12 +469,8 @@ are **all** of the following:
    non-generic class
    extension clause
    implementation clause
-   superinterface
    Object
-   interface type
-   direct superinterface
    class extension
-   subinterface
 
 *Direct supertypes* of the generic type ``C`` <``F``:sub:`1` ``,..., F``:sub:`n`>
 (for a generic class or interface type declaration ``C`` <``F``:sub:`1` ``,..., F``:sub:`n`>
@@ -398,6 +513,11 @@ appropriate type parameter:
    constraint
    type parameter
    superinterface
+   variance
+   subtyping
+   instantiation
+   class
+   interface
    bound
    Object
 
@@ -439,13 +559,15 @@ itself.
 .. index::
    literal type
    subtype
-   type string
+   subtyping
+   string type
    overriding
    supertype
    string literal
-   null
-   undefined
+   null type
+   undefined type
    literal type
+   supertype
 
 |
 
@@ -494,6 +616,8 @@ type ``T`` if each ``U``:sub:`i` is a subtype of ``T``.
    subtyping
    subtype
    type
+   string
+   boolean
 
 2. Type ``T`` is a subtype of union type ``U``
 (``U``:sub:`1` ``| ... | U``:sub:`n`) if for some ``i``
@@ -516,6 +640,7 @@ in the example below:
    union type
    union type normalization
    subtype
+   number type
 
 .. code-block:: typescript
    :linenos:
@@ -542,23 +667,24 @@ following conditions are met:
 -  for each ``i <= m``
 
    -  Parameter type of ``SP``:sub:`i` is a subtype of
-      parameter type of ``FP``:sub:`i` (contravariance), and
+      parameter type of ``FP``:sub:`i` (contravariance),
+   -  and
+   -  if ``FP``:sub:`i` is a rest parameter then ``SP``:sub:`i` is a rest parameter too.
+   -  if ``FP``:sub:`i` is an optional parameter then ``SP``:sub:`i` is an optional parameter too.
 
-   -  ``FP``:sub:`i` is a rest parameter if ``SP``:sub:`i` is a rest parameter.
-   -  ``FP``:sub:`i` is an optional parameter if ``SP``:sub:`i` is an optional
-      parameter.
-
--  Otherwise, type ``FR`` is a subtype of ``SR`` (covariance).
+-  type ``FR`` is a subtype of ``SR`` (covariance).
 
 .. index::
    function type
    subtype
+   subtyping
    parameter type
    contravariance
    rest parameter
    parameter
    covariance
    return type
+   optional parameter
 
 .. code-block:: typescript
    :linenos:
@@ -583,18 +709,19 @@ following conditions are met:
        /* OK: subtype has less parameters */
 
        let g: () => Base = bb
-       /* Compile-time error: too less parameters */
+       /* Compile-time error: less parameters than expected */
     }
 
     let foo: (x?: number, y?: string) => void = (): void => {} // OK: ``m <= n``
     foo = (p?: number): void => {}                             // OK:  ``m <= n``
     foo = (p1?: number, p2?: string): void => {}               // OK: Identical types
     foo = (p: number): void => {}
-          // Compile-time error: 1st parameter in type is optional but in lambda mandatory
+          // Compile-time error: 1st parameter in type is optional but mandatory in lambda
     foo = (p1: number, p2?: string): void => {}
-          // Compile-time error:  1st parameter in type is optional but in lambda mandatory
+          // Compile-time error:  1st parameter in type is optional but mandatory in lambda
 
 .. index::
+   type
    parameter type
    covariance
    contravariance
@@ -602,6 +729,7 @@ following conditions are met:
    contravariant return type
    supertype
    parameter
+   lambda
 
 |
 
@@ -630,6 +758,20 @@ one array is put into that array by using the subtyping of another array
 element type.
 Type safety is ensured by runtime checks performed by the runtime system as
 represented in the example below:
+
+.. index::
+   type
+   subtype
+   subtyping
+   fixed-size array
+   fixed-size array type
+   array element
+   parameter type
+   runtime check
+   array
+   array element type
+   type safety
+   runtime system
 
 .. code-block:: typescript
    :linenos:
@@ -660,6 +802,11 @@ Type ``T`` is a subtype of intersection type
 (``I``:sub:`1` ``& ... | I``:sub:`n`) if ``T`` is a subtype of each
 ``I``:sub:`i`.
 
+.. index::
+   subtype
+   subtyping
+   intersection type
+
 |
 
 .. _Subtyping for Difference Types:
@@ -673,6 +820,11 @@ a subtype of ``T``.
 Type ``T`` is a subtype of the difference type ``A - B`` if ``T`` is
 a subtype of ``A``, and no value belongs both to ``T`` and ``B``
 (i.e., ``T & B = never``).
+
+.. index::
+   subtype
+   subtyping
+   difference type
 
 |
 
@@ -732,12 +884,14 @@ and unrelated.
    type identity
    identity
    indistinguishable type
+   permutation
    array type
    tuple type
    union type
    subtype
    type
    type alias
+   type alias declaration
    declaration
    base type
 
@@ -769,12 +923,14 @@ assignable to type ``T``:sub:`1`.
 
 .. index::
    assignability
+   assignment
    type
    type identity
    subtyping
    conversion
    implicit conversion
    asymmetric relationship
+   value
 
 |
 
@@ -809,7 +965,6 @@ Variance can be of three kinds:
    overriding entity
    override-compatible signature
    parameter
-   return type
    variance
    invariance
    covariance
@@ -820,20 +975,25 @@ originally specified.
 
 .. index::
    covariance
+   type
 
 *Contravariance* means it is possible to use a type which is more general than
 originally specified.
 
 .. index::
    contravariance
+   type
 
 *Invariance* means it is only possible to use the original type, i.e., there is
 no subtyping for derived types.
 
 .. index::
    invariance
+   type
+   subtyping
+   derived type
 
-The examples below illustrate valid and invalid usages of variance.
+Valid and invalid usages of variance are represented in the examples below.
 If class ``Base`` is defined as follows:
 
 .. index::
@@ -867,7 +1027,13 @@ If class ``Base`` is defined as follows:
 
 .. index::
    variance
+   parameter type
+   invariance
+   covariance
+   contravariance
    subtype
+   supertype
+   override method
    base
    overriding
    method
@@ -940,6 +1106,7 @@ right, starting from ``arg_pos`` = 1 and ``par_pos`` = 1:
 
 .. index::
    assignability
+   call argument
    compatibility
    semantic check
    function call
@@ -961,8 +1128,9 @@ right, starting from ``arg_pos`` = 1 and ``par_pos`` = 1:
    increment
    array type
    rest parameter
+   check
 
-The examples below represent the checks:
+Checks are represented in the examples below:
 
 .. code-block:: typescript
    :linenos:
@@ -998,9 +1166,8 @@ The examples below represent the checks:
               // p1 becomes 1, p2 becomes array [2, 3]
 
 
-
-
 .. index::
+   check
    assignable type
    Object
    string
@@ -1037,13 +1204,18 @@ Type inference is applied by the compiler in the following contexts:
 .. index::
    strong typing
    type annotation
+   annotation
    smart compiler
    type inference
+   inferred type
+   expression
    entity
    surrounding context
    code readability
    type safety
    context
+   numeric constant expression
+   initializer
    variable declaration
    constant declaration
    generic instantiation
@@ -1051,12 +1223,15 @@ Type inference is applied by the compiler in the following contexts:
    function
    method return type
    method
+   lambda
+   lambda return type
    return type
    lambda expression
    parameter type
    array literal
    Object literal
    smart type
+   smart cast
 
 |
 
@@ -1084,6 +1259,24 @@ first evaluated from the expression as follows:
 
 - Type of a :ref:`Cast expression` is specified in the expression target type.
 
+.. index::
+   type inference
+   numeric constant expression
+   numeric constant
+   expression
+   constant
+   type
+   integer literal
+   floating-point literal
+   literal
+   named constant
+   constant declaration
+   operator
+   operator rule
+   cast expression
+   target type
+
+
 The evaluated numeric result type can be inferred to a numeric *target type*
 from the context on condition that:
 
@@ -1093,16 +1286,15 @@ from the context on condition that:
    or
 
 #. The evaluated result type is an integer type, the *target type* is a smaller
-   integer type with the value of the expression fiting into its range; or
+   integer type with the value of the expression fitting into its range; or
 
 #. The *target type* is ``float``, the evaluated result type is ``double`` and
    the value of the expression fits into the range of type ``float``.
 
-A :index:`compile-time error` occurs if the context is a union type,
-and the evaluated value can be treated
-as value of several of union component types.
+A :index:`compile-time error` occurs if the context is a union type, and the
+evaluated value can be treated as value of several of union component types.
 
-The examples below illustrate valid and invalid narrowing.
+Valid and invalid narrowing is represented in the examples below:
 
 .. code-block-meta:
    expect-cte:
@@ -1121,14 +1313,20 @@ The examples below illustrate valid and invalid narrowing.
     let u: byte | int = 1 // compile-time error, ambiguity
 
 .. index::
+   numeric type
+   inferred type
+   target type
    narrowing
    constant
    constant expression
    integer conversion
    integer type
    expression
+   context
+   cast operator
    conversion
    type
+   union type
    value
 
 |
@@ -1175,7 +1373,11 @@ Return type inference is represented in the example below:
    return type
    function
    method
+   getter
    lambda
+   value
+   getter return type
+   lambda return type
    function return type
    method return type
    native function
@@ -1183,6 +1385,7 @@ Return type inference is represented in the example below:
    type inference
    inferred type
    method body
+   void type
    return statement
    normalization
    expression type
@@ -1193,6 +1396,7 @@ Return type inference is represented in the example below:
    union type
    never type
    async type
+   lambda body
 
 .. code-block:: typescript
    :linenos:
@@ -1240,6 +1444,11 @@ that can not be expressed in |LANG|:
    union type
    type inference
    inferred type
+   smart type
+   function
+   return type
+   execution path
+   smart cast
 
 |
 
@@ -1252,32 +1461,46 @@ Smart Casts and Smart Types
     frontend_status: Partly
     todo: implement a dataflow check for loops and try-catch blocks
 
-|LANG| supports the concept of *smart casts*, meaning that
+|LANG| uses the concept of *smart casts*, meaning that
 in some cases the compiler can implicitly cast
-a value of a variable to a type which is more specific that
+a value of a variable to a type which is more specific than
 the declared type of the variable.
 The more specific type is called *smart type*.
-*Smart casts* allows keeping type safety, doing less typing,
-and improving performance.
+*Smart casts* allow keeping type safety, require less typing from
+programmer and improve performance.
 
 Smart casts are applied to local variables
 (see :ref:`Variable and Constant Declarations`) and parameters
-(see :ref:`Parameter List`), expect those that are captured and
+(see :ref:`Parameter List`), except those that are captured and
 modified in lambdas.
-In the subsequent text term *variable* is used for both local variables
+Furter in the text term *variable* is used for both local variables
 and parameters.
+
+.. index::
+   smart cast
+   smart type
+   cast
+   value
+   variable
+   type
+   declared type
+   type safety
+   performance
+   local variable
+   parameter
+   lambda
 
 **Note.** Smart casts are not apppiled to global variabes and class fields,
 as it is hard to track their values.
 
 A variable has a single declared type, and can have different *smart
-types* in different contexts. A variable *smart type* is always
-a subtype of the declared type.
+types* in different contexts. A *smart type* of variable is always
+a subtype of its declared type.
 
 *Smart type* is used by the compiler each time the value of a variable is read.
-It never used when a variable value is changed.
+It is never used when a variable value is changed.
 
-The example below illustrates usage and benefits of a *smart type*:
+The usage and benefits of a *smart type* are represented in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -1295,6 +1518,17 @@ The example below illustrates usage and benefits of a *smart type*:
         (c as D).foo() // no compile-time error, can throw runtime error
     }
 
+.. index::
+   smart cast
+   smart type
+   global variable
+   variable
+   value
+   declared type
+   context
+   subtype
+   runtime
+   call
 
 The compiler uses data-flow analysis based on :ref:`Control-flow Graph` to
 compute *smart types* (see :ref:`Computing Smart Types`). The following
@@ -1326,6 +1560,7 @@ contain types not otherwise represented in |LANG|, namely:
 .. index::
    smart type
    data-flow analysis
+   control-flow graph
    variable
    variable declaration
    variable assignment
@@ -1335,8 +1570,10 @@ contain types not otherwise represented in |LANG|, namely:
    conditional expression
    equality expression
    null
+   expression
    undefined
    string literal
+   loop statement
    extended conditional expression
    intersection type
    difference type
@@ -1350,7 +1587,7 @@ Type Expression
 
 The *type* of an entity is conventionally defined as the set of values
 an entity (e.g., a variable) can take, and the set of operators
-applicable to the entity of a given type. Two types with equal sets of values
+applicable to that entity. Two types with equal sets of values
 and operators are considered equal irrespective of a syntatic form used to
 denote the types.
 
@@ -1371,12 +1608,27 @@ an :ref:`Object Literal`:
     foo({num: 42}} // ok, object literal is of type 'C'
     bar({num: 42}} // compile-time error, Object does not have field 'num'
 
+.. index::
+   type expression
+   type
+   entity
+   value
+   variable
+   operator
+   set of values
+   syntactic form
+   equal type
+   context
+   object
+   object literal
+   field
+
 The term *type expression* is used below as notation that consists of type
 names and operators on types, namely:
 
 - ``'|'`` for union operator;
 - ``'&'`` for intersection operator (see :ref:`Intersection Types`);
-- ``'&'`` for difference operator (see :ref:`Difference Types`).
+- ``'-'`` for difference operator (see :ref:`Difference Types`).
 
 Computing *smart types* is the process of creating, evaluating, and simplifying
 *type expressions*.
@@ -1404,6 +1656,8 @@ syntactic notions) that cannot be represented in |LANG|.
    union operator
    intersection operator
    difference operator
+   semantic notion
+   syntactic notion
 
 |
 
@@ -1434,7 +1688,7 @@ represented below:
     function test(i: I) {
         if (i instanceof C) {
             // smart type of 'i' here is of some subtype of 'C' that implements 'I'
-            // type expression for this type is I & C
+            // type expression for this type is I & subtype of C
             i.foo() // ok
             i.bar() // ok
         }
@@ -1446,8 +1700,13 @@ See also :ref:`Subtyping for Intersection Types`.
    intersection type
    intersection operator
    value
+   set of operators
    operation
    variable
+   type
+   subtype
+   implementation
+   subtyping
 
 |
 
@@ -1472,12 +1731,25 @@ Difference types in |LANG| cannot be expressed directly. They appear as
             return 0
         } else {
             // smart type of 'x' here is (string | undefined - undefined) = string,
-            // hence, string propety can be applied to 'x'
+            // hence, string property can be applied to 'x'
             return x.length
         }
     }
 
 This is discussed in detail in :ref:`Subtyping for Difference Types`.
+
+.. index::
+   difference type
+   difference operator
+   subtraction operation
+   operator
+   value
+   set of operators
+   smart type
+   variable
+   type
+   string
+   property
 
 |
 
@@ -1509,10 +1781,32 @@ Control-flow graph (CFG) contains the following kinds of nodes:
 -  *Backedge nodes* that mark the transfer of control from the end
    point of a loop to its start point.
 
-The way how maps *(l, s*) are changed when processing the
-specific nodes is described below.
-Notation :math:`x'` is used to denote a map that replaces any previous map
-during the node evaluation.
+.. index::
+   smart type
+   location
+   set of variables
+   context
+   value
+   map
+   variable
+   node
+   control-flow graph (CFG)
+   expression
+   branching node
+   assuming node
+   backedge node
+   control
+   control transfer
+   loop
+   start point
+   branch
+   true branch
+   false branch
+
+The way maps *(l, s*) are changed when processing specific nodes is described
+below.
+The notation :math:`x'` is used to denote a map that replaces any previous map
+during node evaluation.
 
 At a **variable declaration** ``let v``:
 
@@ -1532,6 +1826,20 @@ At an **assignment to the variable** ``v``: ``v = e``:
 
 The following table summarises the contexts for map evaluation at an
 *assumption node*:
+
+.. index::
+   map
+   node
+   notation
+   node evaluation
+   conversion
+   variable
+   smart type
+   type
+   numeric type
+   enumeration base type
+   context
+   assumption node
 
 .. list-table::
    :width: 100%
@@ -1602,7 +1910,20 @@ The following table summarises the contexts for map evaluation at an
      - ``s'(l(v)):=s(l(v)) - (null|undefined|"")``
      - ``s'(l(v)):=s(l(v))&T``,
 
-       where T is union of all types the contain at least one falsy value.
+       where T is union of all types the contain at least one value considered as ``false`` 
+       in :ref:`Extended Conditional Expressions`.
+
+.. index::
+   positive branch
+   negative branch
+   string literal
+   branching
+   conversion
+   expression
+   value
+   truthiness check
+   union
+   type
 
 **Notes**:
 
@@ -1623,7 +1944,7 @@ The following table summarises the contexts for map evaluation at an
     -  If ``object``, then *T* is ``Object - boolean - string - all numeric types``.
 
 
-At a node that joins two CFG brances, namely ``C``:sub:`1` :math:`\leq` :sub:`1`, ``s``:sub:`1` ``>``,
+At a node that joins two CFG branches, namely ``C``:sub:`1` :math:`\leq` :sub:`1`, ``s``:sub:`1` ``>``,
 and ``C``:sub:`2` :math:`\leq` ``l``:sub:`2`, ``s``:sub:`2` ``>``, for each variable *v*:
 
 - ``l'(v):=l``:sub:`1` ``(v)``:math:`\cap` ``l``:sub:`2` ``(v)``; and
@@ -1632,6 +1953,20 @@ and ``C``:sub:`2` :math:`\leq` ``l``:sub:`2`, ``s``:sub:`2` ``>``, for each vari
 
 At each *backedge node*, smart type of each variable attached to the node is set
 to its declared type.
+
+.. index::
+   operator
+   branching
+   value
+   boolean
+   string
+   char
+   numeric type
+   node
+   branch
+   variable
+   declared type
+   control-flow graph (CFG)
 
 |
 
@@ -1648,6 +1983,12 @@ See :ref:`Computing Smart Types` for a list of CFG nodes that influences
 computation.
 
 TBD: Describe how each language construct is translated to a CFG fragment.
+
+.. index::
+   control-flow graph (CFG)
+   smart type
+   evaluation path
+   function body
 
 |
 
@@ -1726,6 +2067,18 @@ transformations to be performed at each node of the CFG:
      - ``(A-B)-C``
      - ``(A-(B|C)``
 
+
+.. index::
+   control-flow graph (CFG)
+   type expression
+   type
+   expression
+   node
+   commutativity
+   associativity
+   subtyping
+   simplification transformation
+
 The following simplifications for object types are also taken into account:
 
 #. If ``A`` and ``B`` are classes and neither transitively extends the other,
@@ -1748,6 +2101,15 @@ every node of CFG where possible:
 After a simplification, *smart types* undergo approximation with *difference
 types* ``A-B`` recursively replaced by ``A``.
 
+.. index::
+   control-flow graph (CFG)
+   intersection type
+   smart type
+   difference type
+   union
+   union type
+   implementation
+
 |
 
 .. _Smart Cast Examples:
@@ -1756,8 +2118,8 @@ Smart Cast Examples
 ===================
 
 By using variable initializers or an assignment the compiler can narrow
-(smart cast) a declared type to a more precise subtype (smart type), and
-allow operations that are specific to the subtype:
+(smart cast) a declared type to a more precise subtype (smart type). It
+allows operations that are specific to the subtype:
 
 .. code-block:: typescript
    :linenos:
@@ -1777,18 +2139,11 @@ allow operations that are specific to the subtype:
     }
 
 .. index::
-   class type
-   interface type
-   union type
+   assignment
    compiler
-   smart cast
-   narrowing
-   smart type
-   static type
-   operation
-   type-safe operation
-   derived operation
-   derived-specific operation
+   subtype
+   type safety
+   interface type
 
 Other examples are explicit calls to ``instanceof``
 (see :ref:`InstanceOf Expression`) or checks against ``null``
@@ -1814,6 +2169,8 @@ Other examples are explicit calls to ``instanceof``
    null
    if statement
    conditional expression
+   expression
+   method
 
 In like cases, a smart compiler requires no additional checks or casts (see
 :ref:`Cast Expression`) to deduce a smart type of an entity.
@@ -1842,12 +2199,16 @@ rather than a declared type of an argument (see
     }
 
 .. index::
+   smart compiler
+   check
    smart type
    entity
    cast expression
    check
    overloading
    overload declaration
+   type
+   type argument
    function
    overload resolution
    compiler
@@ -1870,20 +2231,29 @@ Thus, overriding is related to *runtime polymorphism*.
 |LANG| uses the *override-compatibility* rule to check the correctness of
 overriding. The *overriding* is correct if method signature in a subtype
 (subclass or subinterface) is *override-compatible* with the method defined
-in a supertype    (see :ref:`Override-Compatible Signatures`).
+in a supertype (see :ref:`Override-Compatible Signatures`).
+
+An implementation is forced to :ref:`Make a Bridge Method for Overriding Method`
+in some cases of *method overriding*.
 
 .. index::
    overriding
+   method overriding
    subclass
+   subinterface
+   supertype
+   signature
+   method signature
    runtime polymorphism
    inheritance
    parent class
    object type
    runtime
    override-compatibility
-
-An implementation is forced to :ref:`Make a Bridge Method for Overriding Method`
-in some cases of *method overriding*.
+   override-compatible signature
+   implementation
+   bridge method
+   method overriding
 
 |
 
@@ -1911,6 +2281,7 @@ A :index:`compile-time error` occurs if an attempt is made to do the following:
 
 .. index::
    overloading
+   class
    inheritance
    overriding
    class
@@ -1952,6 +2323,12 @@ A :index:`compile-time error` occurs if an attempt is made to do the following:
 
 The table below represents semantic rules that apply in various contexts:
 
+.. index::
+   interface
+   public
+   implementation
+   private method
+
 .. list-table::
    :width: 100%
    :widths: 50 50
@@ -1965,6 +2342,15 @@ The table below represents semantic rules that apply in various contexts:
        :ref:`Override-Compatible Signatures`), then *overriding* is used.
        Otherwise, a :index:`compile-time error` occurs.
 
+.. index::
+   context
+   semantic check
+   instance method
+   subclass
+   superclass
+   override-compatible signature
+   overriding
+   override-compatibility
 
 .. code-block:: typescript
    :linenos:
@@ -1978,40 +2364,6 @@ The table below represents semantic rules that apply in various contexts:
       method_2(p: string) {} // compile-time error
    }
 
-.. list-table::
-   :width: 100%
-   :widths: 50 50
-   :header-rows: 0
-
-   * - A *static method* is defined in a subclass with the same name as the
-       *static method* in a superclass.
-     - If signatures are *override-compatible* (see
-       :ref:`Override-Compatible Signatures`), then the static method in the
-       subclass *hides* the previous static method.
-       Otherwise, a :index:`compile-time error` occurs.
-
-.. index::
-   instance method
-   static method
-   subclass
-   superclass
-   override-compatible signature
-   override-compatibility
-   overloading
-   hiding
-   overriding
-
-.. code-block:: typescript
-   :linenos:
-
-   class Base {
-      static method_1() {}
-      static method_2(p: number) {}
-   }
-   class Derived extends Base {
-      static method_1() {} // hiding
-      static method_2(p: string) {} // compile-time error
-   }
 
 .. list-table::
    :width: 100%
@@ -2038,6 +2390,8 @@ The table below represents semantic rules that apply in various contexts:
    constructor
    subclass
    class constructor
+   super call
+   constructor call
    derived class constructor
 
 |
@@ -2066,6 +2420,21 @@ Overriding and Overload Signatures in Interfaces
        private method in the superinterface.
      - A :index:`compile-time error` occurs.
 
+.. index::
+   overriding
+   overload signature
+   interface
+   semantic check
+   subinterface
+   name
+   method
+   superinterface
+   signature
+   override-compatible signature
+   override-compatibility
+   overriding
+   subinterface
+   private method
 
 .. code-block:: typescript
    :linenos:
@@ -2090,14 +2459,18 @@ Overriding and Overload Signatures in Interfaces
    * - Two or more methods with the same name are defined in the same interface.
      - :ref:`Interface Method Overload Signatures` is used.
 
-
 .. index::
    method
    subinterface
    superinterface
    semantic check
    override-compatible
+   override-compatible signature
+   signature
+   method overload signature
+   non-compatible signature
    interface
+   private method
 
 .. code-block:: typescript
    :linenos:
@@ -2126,6 +2499,7 @@ signature ``S``:sub:`1` <``V``:sub:`1` ``, ... V``:sub:`k`>
 
 .. index::
    override-compatible signature
+   override-compatibility
    class
    base class
    derived class
@@ -2163,6 +2537,9 @@ if **all** of the following conditions are met:
    signature
    method
    parameter
+   superinterface
+   superclass
+   return type
    type
    contravariant
    covariance
@@ -2217,6 +2594,7 @@ The semantics is represented in the examples below:
 
 .. index::
    class type
+   semantics
    interface type
    contravariant parameter
    covariant return type
@@ -2269,6 +2647,8 @@ The semantics is represented in the examples below:
 .. index::
    union type
    return type
+   parameter
+   overriding
 
 4. **Type Parameter Constraint**
 
@@ -2284,7 +2664,6 @@ The semantics is represented in the examples below:
         param<T extends Base>(p: T): void       // Contravariance for constraints of type parameters
         ret<T extends Base>(): T                // Contravariance for constraints of the return type
     }
-
 
 Override compatibility with ``Object`` is represented in the example below:
 
@@ -2389,6 +2768,13 @@ represented in the example below:
         p1.foo (true)      // fits 2nd signature of Interface1
     }
 
+.. index::
+   interface
+   derived interface
+   base interface
+   overload signature
+   signature
+   overriding
 
 If a class (*derived class*) implements an interface (*base interface*), and
 the base interface has a set of overload signatures, then the derived class
@@ -2400,6 +2786,15 @@ the signature ``(...p: Any[]): Any`` (see
 overriding for any overloaded signature. The same works if one class extends
 another class. The situation is represented in the example below:
 
+.. index::
+   derived class
+   class
+   implementation
+   interface
+   base interface
+   overload signature
+   signature
+   implementation body
 
 .. code-block:: typescript
    :linenos:
@@ -2441,7 +2836,6 @@ another class. The situation is represented in the example below:
     test(new Class3)
     test(new Class4)
 
-
 |
 
 .. _Overloading:
@@ -2464,14 +2858,21 @@ compile time. Thus, *overloading* is compile-time *polymorphism by name*.
 
 .. index::
    overloading
+   name
    context
    entity
    function
    constructor
    method
    signature
+   compile type
    compile-time polymorphism
-   overloading
+   polymorphism by name
+   overload signature
+   overload declaration
+   managed overloading
+   type checking
+   compatibility
 
 *Signature resolution* is used to select one entity to call from a set of
 candidates if the name to call refers to a *declaration with overload signatures*
@@ -2498,6 +2899,18 @@ selected for a call.
 
     foo (5)                    // f1() is called
     foo ("5")                  // f2() is called
+
+.. index::
+   signature resolution
+   entity
+   call
+   candidate
+   signature resolution
+   overload signature
+   signature
+   overload declaration
+   resolution process
+   call
 
 |
 
@@ -2530,6 +2943,22 @@ A :index:`compile-time error` occurs if no appropriate signature is found.
     foo(1, 2, 3) // compile-time error - no appropriate signature for the call
                  // implementation signature is not accessible at call sites
 
+.. index::
+   signature resolution
+   overload signature
+   function
+   method
+   constructor
+   signature
+   implementation body
+   implementation signature
+   argument
+   call
+   declaration
+   string
+   accessibility
+   call site
+
 |
 
 .. _Overload Resolution for Overload Declarations:
@@ -2545,7 +2974,7 @@ from this set that is *accessible* and has an appropriate signature is used to
 call at the call site.
 This approach is called *managed overloading* because the *first-match*
 algorithm provides full control for a developer to select a specific entity
-to call. This developer control over calls is represented by the following
+to call. This developer control over calls is represented in the following
 example:
 
 .. code-block:: typescript
@@ -2572,11 +3001,25 @@ example:
     max(1) // maxN is used
     max(false, true) // compile-time error, no appropriate signature
 
+.. index::
+   overload declaration
+   signature
+   entity
+   set
+   access
+   accessible
+   call site
+   managed overloading
+   first-match algorithm
+   function
+   control
+   call
+
 Overload resolution for an instance method overload (see
 :ref:`Class Method Overload Declarations`) always uses the type of the
 *object reference* known at compile time. It can be either the type used
-in a declaration, or a *smart type* (see :ref:`Smart Casts and Smart Types`) as illustrated
-by the example below:
+in a declaration, or a *smart type* (see :ref:`Smart Casts and Smart Types`)
+as illustrated by the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -2599,6 +3042,18 @@ by the example below:
     let b = new B()
     b.foo(b) // output: B.foo, as overload from 'B' is used
 
+.. index::
+   overload resolution
+   method overload
+   class method
+   overload declaration
+   type
+   object reference
+   compile time
+   smart type
+   smart cast
+   signature
+
 |
 
 .. _Type Erasure:
@@ -2609,18 +3064,18 @@ Type Erasure
 .. meta:
     frontend_status: Done
 
-*Type erasure* is the concept that denotes a special handling of some language
-*types*, primarily :ref:`Generics`, in the semantics of the following language
-operations that require the type to be preserved for execution:
+*Type erasure* is the concept that denotes a special handling of certain
+language *types*, primarily :ref:`Generics`, in the semantics of the following
+language operations that require the type to be preserved for execution:
 
 -  :ref:`InstanceOf Expression`;
 -  :ref:`Cast Expression`.
 
-In these operations some *types* are handled as their corresponding *effective
-types*, while the *effective type* is defined as type mapping. The *effective
-type* of a specific type ``T`` is always a supertype of ``T``. As a result,
-two kinds of relationship are possible between an original type and an
-*effective type*:
+In these operations certain *types* are handled as their corresponding
+*effective types*, while the *effective type* is defined as type mapping.
+The *effective type* of a specific type ``T`` is always a supertype of ``T``.
+As a result, the following two kinds of relationship are possible between an
+original type and an *effective type*:
 
 -  *Effective type* of ``T`` is identical to ``T``, and *type erasure* has no
    effect.
@@ -2632,8 +3087,11 @@ two kinds of relationship are possible between an original type and an
    type erasure
    instanceof expression
    cast expression
+   execution
    operation
    type
+   generic
+   semantics
    effective type
    type mapping
    supertype
@@ -2666,8 +3124,10 @@ value is produced by :ref:`Cast Expression`.
     }
 
 .. index::
+   access
    type erasure
    field access
+   function call
    method call
    target type
    cast expression
@@ -2718,15 +3178,24 @@ Type mapping determines the *effective types* as follows:
    type erasure
    type mapping
    generic type
+   type parameter
+   constraint
    effective type
    instantiation
    type argument
    covariant type parameter
    type parameter
    contravariant type parameter
+   type
+   generic tuple
+   tuple type
+   string
+   literal type
+   enumeration base type
+   const enum type
+   enumeration
    invariant type parameter
    parameter type
-   type argument
    type preservation
 
 |
@@ -2751,6 +3220,18 @@ module (see :ref:`Modules`).
 
 - Code inside a *static block*.
 
+.. index::
+   static initialization
+   routine
+   class
+   namespace
+   namespace declaration
+   module
+   initializer
+   variable
+   static field
+   top-level statement
+   static block
 
 *Static initialization* is performed before the first execution of one of the
 following operations:
@@ -2771,8 +3252,8 @@ namespace members are used in the program (an example is provided in
 :ref:`Namespace Declarations`).
 
 If *static initialization* routine execution is terminated due to an
-exception thrown, then the initialization is not complete. A repetitive attempt
-to execute the *static initialization* produces an exception again.
+exception thrown, then the initialization is not complete. Repeating an attempt
+to execute a *static initialization* produces an exception again.
 
 *Static initialization* routine invocation of a concurrent execution (see
 :ref:`Coroutines (Experimental)`) involves synchronization of all *coroutines*
@@ -2782,6 +3263,25 @@ initialization* to be performed are executed after the initialization completes.
 
 If *static initialization* routines of two concurrently initialized classes are
 circularly dependent, then a deadlock can occur.
+
+.. index::
+   static initialization
+   entity
+   scope
+   static field
+   variable
+   access
+   direct subclass
+   subclass
+   class
+   interface
+   operation
+   exception
+   invocation
+   concurrent execution
+   coroutine
+   synchronization
+   deadlock
 
 |
 
@@ -2807,6 +3307,23 @@ runtime evaluation is performed as follows:
 - Default value is produced if the type of an entity has a default value;
 
 - Otherwise, ``NullPointerError`` is thrown.
+
+.. index::
+   static initialization
+   safety
+   named reference
+   initialization
+   entity
+   variable
+   module
+   namespace
+   static field
+   class
+   access
+   runtime evaluation
+   default value
+   value
+   type
 
 |
 
@@ -2850,9 +3367,10 @@ program code execution. Compilation tools can optimize dynamic to static dispatc
    inferred type
    point of declaration
    dynamic dispatch
-   OOP (object-oriented programming)
+   object-oriented programming (OOP)
    static dispatch
    compile time
+   compilation tool
 
 |
 
@@ -2907,10 +3425,12 @@ below:
 .. index::
    extended conditional expression
    conditional expression
+   expression
    alignment
    semantics
    conditional-and expression
    conditional-or expression
+   logical complement
    while statement
    do statement
    for statement
@@ -2918,7 +3438,10 @@ below:
    truthiness
    non-boolean type
    expression type
-
+   extended semantics
+   boolean logic
+   boolean type
+   non-boolean type
 
 .. list-table::
    :width: 100%
@@ -2970,6 +3493,17 @@ below:
      - ``always``
      - ``new SomeType != null``
 
+.. index::
+   value type
+   integer type
+   union type
+   nullish type
+   empty string
+   non-empty string
+   string
+   number
+   nonzero
+
 
 Extended semantics of :ref:`Conditional-And Expression` and
 :ref:`Conditional-Or Expression` affects the resultant type of expressions
@@ -2981,9 +3515,9 @@ as follows:
 -  A *conditional-or* expression ``A || B`` is of type ``B`` if the result of
    ``A`` is handled as ``false``. Otherwise, it is of type ``A``.
 
-The example below illustrates the way this approach works in practice. Any
-``nonzero`` number is handled as ``true``. The loop continues until it becomes
-``zero`` that is handled as ``false``:
+The way this approach works in practice is represented in the example below.
+Any ``nonzero`` number is handled as ``true``. The loop continues until it
+becomes ``zero`` that is handled as ``false``:
 
 .. code-block-meta:
 
@@ -3010,14 +3544,10 @@ The example below illustrates the way this approach works in practice. Any
    NaN
    nullish expression
    numeric expression
+   semantics
    conditional-and expression
    conditional-or expression
    loop
-   string
-   integer type
-   union type
-   nullish type
-   nonzero
 
 .. raw:: pdf
 

@@ -320,6 +320,15 @@ as used in other languages, application areas, or industries.
 .. glossary::
    :sorted:
 
+   compile-time error
+     -- a text message displayed by the compiler if an error is identified
+     in a program code that prevents the code to be generated.
+
+   compile-time warning
+     -- a text message displayed by the compiler if a program code is found
+     to have some logical inconsistencies, and it is recommended that the
+     programmer reconsiders the design and actual coding.
+
    expression
      -- a formula for calculating values. An expression has the syntactic
      form that is a composition of operators and parentheses, where

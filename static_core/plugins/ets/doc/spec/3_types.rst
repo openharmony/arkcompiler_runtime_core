@@ -37,7 +37,7 @@ The types integral to |LANG| are called *predefined types* (see
 
 The types introduced, declared, and defined by a developer are called
 *user-defined types*.
-All *user-defined types* must have complete type definitions presented as
+All *user-defined types* must have complete type declarations presented as
 source code in |LANG|.
 
 .. index::
@@ -48,7 +48,7 @@ source code in |LANG|.
    compiler
    predefined type
    user-defined type
-   type definition
+   type declaration
    source code
    value
 
@@ -218,7 +218,7 @@ Source code can refer to a type by using the following:
    + :ref:`Named Types`, or
    + Type aliases (see :ref:`Type Alias Declaration`);
 
--  In-place type definition for:
+-  In-place type declaration for:
 
    + :ref:`Array Types`,
    + :ref:`Tuple Types`,
@@ -231,7 +231,7 @@ Source code can refer to a type by using the following:
 .. index::
    named type
    type alias
-   in-place type definition
+   in-place type declaration
    type reference
    array type
    function type
@@ -272,12 +272,17 @@ The usage of types is represented by the example below:
     let o: Object   // using identifier as a predefined class type name
     let a: number[] // using array type
     let t: [number, number] // using tuple type
-    let f: ()=>number       // using function type
+    let f: ()=>number      // using function type
     let u: number|string    // using union type
     let l: "xyz"            // using string literal type
 
     class C { n = 1; s = "aa"}
     let k: keyof C  // using keyof to build union type
+
+
+.. let f1: ()=>number      // using function type
+   let f2: <T>(p: T)=>T    // using generic function type
+
 
 Parentheses are used to specify the required type structure if the type is a
 combination of array, function, or union types. Without parentheses, the symbol
@@ -557,6 +562,7 @@ context (see :ref:`Assignment-like Contexts`). The methods of class ``BigInt``
    value
    double
    float
+   number type
    long
    int
    short
@@ -670,22 +676,23 @@ below.
 
 If either operand of a binary integer operation except :ref:`Shift Expressions`
 is of type ``long`` and the other operand is of a lesser type, then numeric
-conversion (see :ref:`Widening Numeric Conversions`) must be used first to widen
-the second operand to type ``long``. In this case:
+conversion (see :ref:`Widening Numeric Conversions`) is used to widen
+the second operand first to type ``long``. In this case:
 
 -  Operation implementation uses 64-bit precision; and
 -  Result of the numeric operator is of type ``long``.
 
 
 If otherwise neither operand is of type ``long`` and any operand is of a type
-other than ``int``, then numeric conversion must be used to widen the latter
-to type ``int``. In this case:
+other than ``int``, then numeric conversion is used to widen the latter
+first to type ``int``. In this case:
 
 -  Operation implementation uses 32-bit precision; and
 -  Result of the numeric operator is of type ``int``.
 
-
 Conversions between integer types and type ``boolean`` are not allowed.
+However, the value of integer type can be used as a logical condition
+in some cases (see :ref:`Extended Conditional Expressions`)
 
 The integer operators cannot indicate an overflow or an underflow.
 
@@ -754,6 +761,7 @@ Floating-Point Types and Operations
    IEEE 754
    floating-point number
    floating-point type
+   number type
 
 
 |LANG| provides a number of operators to act on floating-point type values as
@@ -839,16 +847,16 @@ If at least one operand of the numeric operator is of type ``double``,
 then the operation implementation uses the 64-bit floating-point arithmetic.
 The result of the numeric operator is a value of type ``double``.
 
-If the other operand is not of type ``double``, then the numeric conversion (see
-:ref:`Widening Numeric Conversions`) must be used to widen the operand first to
-type ``double``.
+If the other operand is not of type ``double``, then the numeric conversion
+(see :ref:`Widening Numeric Conversions`) is used to widen the operand
+first to type ``double``.
 
 If neither operand is of type ``double``, then the operation implementation
 is to use the 32-bit floating-point arithmetic. The result of the numeric
 operator is a value of type ``float``.
 
 If the other operand is not of type ``float``, then the numeric conversion
-must be used to widen the operator first to type ``float``.
+is used to widen the operator first to type ``float``.
 
 Any floating-point type value can be cast to or from any numeric type (see
 :ref:`Numeric Types`).
@@ -873,7 +881,10 @@ Any floating-point type value can be cast to or from any numeric type (see
    binary operator
    floating-point type
 
-Conversions between floating-point types and type ``boolean`` are not allowed.
+Conversions between floating-point types and type ``boolean`` are
+not allowed. However, the value of floating-point type can be used
+as a logical condition in some cases 
+(see :ref:`Extended Conditional Expressions`)
 
 Operators on floating-point numbers, except the remainder operator (see
 :ref:`Remainder`), behave in compliance with the IEEE 754 Standard.
@@ -1065,6 +1076,10 @@ supertype of :ref:`Type void` and :ref:`Type null` in particular.
 
 Type ``Any`` has no methods or fields.
 
+.. Type ``NonNullable<Any>`` provides ability to call ``toString()`` from any 
+   non-nullable object returning a string representation of that object. This is
+   used in the examples in this document. 
+
 |
 
 .. _Type Object:
@@ -1086,6 +1101,7 @@ All subtypes of ``Object`` inherit the methods of class ``Object`` (see
 The method ``toString`` used in the examples in this document returns a
 string representation of the object.
 
+
 .. index::
    class
    interface
@@ -1102,7 +1118,6 @@ string representation of the object.
    union type
    inheritance
    string
-   oblect
 
 The term *object* is used in the Specification to refer to an instance of any
 type.
@@ -1940,6 +1955,7 @@ Function Types
 *Function type* can be used to express the expected signature of a function.
 A function type consists of the following:
 
+-  Optional type parameters;
 -  List of parameters (which can be empty);
 -  Optional return type.
 
@@ -1952,6 +1968,12 @@ A function type consists of the following:
    parameter list
 
 The syntax of *function type* is as follows:
+
+
+.. functionType:
+   typeParameters? '(' ftParameterList? ')' ftReturnType
+   ;
+
 
 .. code-block:: abnf
 
@@ -2132,7 +2154,7 @@ in the following way:
 
    print_name (():void=>{}) // output: ""
 
-The definitions of the ``unsafeCall`` method, ``name`` property, and all other
+The declarations of the ``unsafeCall`` method, ``name`` property, and all other
 methods and properties of type ``Function`` are included in the |LANG|
 :ref:`Standard Library`.
 

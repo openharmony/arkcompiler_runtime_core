@@ -55,6 +55,7 @@ All *compilation units* are stored in a file system or a database (see
    compilation unit
    compilation
    scope
+   own scope
    variable
    function
    class
@@ -68,6 +69,7 @@ All *compilation units* are stored in a file system or a database (see
    storage
    file system
    database
+   host system
 
 |
 
@@ -120,7 +122,9 @@ Every module can directly use all exported entities from the standard library
    re-export directive
    import
    console
+   syntax
    standard library
+   console
 
 |
 
@@ -152,11 +156,13 @@ An import declaration has the following two parts:
    entity
    binding
    module
+   directive
    import declaration
    import path
    import binding
    qualified form
    unqualified form
+   syntax
 
 The syntax of *import directives* is presented below:
 
@@ -181,7 +187,7 @@ The syntax of *import directives* is presented below:
         ;
 
     defaultBinding:
-        identifier
+        'type'? identifier
         ;
 
     selectiveBindings:
@@ -189,7 +195,7 @@ The syntax of *import directives* is presented below:
         ;
 
     nameBinding:
-        identifier bindingAlias?
+        `type`? identifier bindingAlias?
         | 'default' 'as' identifier
         ;
 
@@ -208,7 +214,8 @@ A :index:`compile-time error` occurs if:
 -  Declaration added to the scope of a module by a binding is not
    distinguishable;
 -  Compilation unit imports itself directly: ``importPath`` refers to the
-   file in which the current module is stored.
+   file in which the current module is stored; or
+-  ``import type`` is used, and one of bindings also uses ``type``.
 
 
 .. index::
@@ -219,6 +226,12 @@ A :index:`compile-time error` occurs if:
    declaration
    declaration scope
    import directive
+   type
+   type modifier
+   modifier
+   storage
+   import type
+   compilation unit
 
 |
 
@@ -254,11 +267,11 @@ the name of the imported compilation unit.
 .. index::
    import binding
    import
+   binding
    qualified name
    entity
    declaration scope
    module
-   entity
    name
    access
    export
@@ -312,6 +325,9 @@ There are two forms of *default import binding*:
    declaration
    export
    module
+   default keyword
+   identifier
+   selective import
 
 |
 
@@ -367,6 +383,7 @@ below:
    simple name
    identifier
    export
+   call
    name
    declaration scope
    overloaded function
@@ -376,6 +393,7 @@ below:
    bound entity
    selective binding
    overload alias
+   overload declaration
    binding
 
 .. code-block:: typescript
@@ -432,6 +450,7 @@ below in :ref:`Several Bindings for One Import Path`.
    import statement
    import path
    binding
+   import
 
 |
 
@@ -471,11 +490,43 @@ are represented by the following code:
     let c1 = new Class1() // OK
     let c2 = new Class2() // Compile-time error in Typescript, OK in ArkTS
 
+Another form of *type import* is used  when ``type`` is attached to a name
+binding. This allows mixing general import and ``type`` import.
+
+.. code-block:: typescript
+   :linenos:
+
+    // File module.ets
+    console.log ("Module initialization code")
+
+    class Class1 {/*body*/}
+    class Class2 {}
+    export {Class1, type Class2}
+
+    // MainProgram.ets
+
+    import {Class1, type Class2 } from "./module.ets"
+
+    let c1 = new Class1() // OK
+    let c2 = new Class2() // Compile-time error in Typescript, OK in ArkTS
+
 .. index::
    import binding
-   export type
+   import directive
    import
    import type
+   import type directive
+   type modifier
+   semantic check
+   syntax
+   compatibility
+   name binding
+   binding
+   export type
+   compiler
+   module
+   general import
+   type import
 
 |
 
@@ -506,16 +557,25 @@ the import path to a file path of the host system.
 
 .. index::
    import binding
+   string literal
+   compilation unit
    import path
    alpha-numeric character
    import
    compilation
    import path
    context
-   file system
+   filesystem
    relative import path
    non-relative import path
    resolution
+   path component
+   case sensitivity
+   subset
+   file path
+   path rule
+   slash character
+   backslash character
 
 The compiler uses the following rule to define the kind of imported
 compilation units, and the exact placement of the source code:
@@ -544,8 +604,13 @@ compilation units, and the exact placement of the source code:
 
 .. index::
    compilation unit
+   compiler
    import path
    file path
+   storage
+   declaration module
+   compiler implementation
+   implementation
    import
    resolution
    host system
@@ -611,7 +676,9 @@ below.
 
 .. index::
    relative import path
+   relative path
    non-relative import path
+   non-relative path
    compilation environment
    compiler environment
    imported file
@@ -624,6 +691,9 @@ below.
    path mapping
    resolution
    implementation
+   treemap
+   filesystem
+
 
 |
 
@@ -669,10 +739,14 @@ applied to a single name:
    import directive
    import path
    import declaration
+   import
    import outcome
    declaration scope
+   scope
    entity
    binding
+   module
+   name
 
 +-----------------------------+----------------------------+------------------------------+
 |   Case                      |   Sample                   |   Rule                       |
@@ -725,6 +799,9 @@ applied to a single name:
    import
    alias
    access
+   binding
+   qualified name
+   accessibility
 
 |
 
@@ -754,6 +831,8 @@ to a :index:`compile-time error` in accordance to :ref:`Declarations`.
    compilation unit
    entity
    export
+   scope
+   name
    accessibility
    access
    simple name
@@ -792,7 +871,9 @@ The syntax of *declaration module* is presented below:
    compilation unit
    import
    ambient declaration
+   type alias
    declaration module
+   declaration
 
 The following example shows how ambient functions can be declared and exported:
 
@@ -810,8 +891,9 @@ and cannot be used by modules that import this declaration module:
 .. index::
    declaration
    export
-   keyword export
+   export keyword
    declaration module
+   declaration
    ambient function
 
 .. code-block:: typescript
@@ -863,8 +945,14 @@ Top-Level Declarations
 *Top-level declarations* declare top-level types (``class``, ``interface``,
 or ``enum`` see :ref:`Type Declarations`), top-level variables (see
 :ref:`Variable Declarations`), constants (see :ref:`Constant Declarations`),
-functions (see :ref:`Function Declarations`), or namespaces (see
-:ref:`Namespace Declarations`). Top-level declarations can be exported.
+functions (see :ref:`Function Declarations` and
+:ref:`Function with Overload Signatures`),
+overloads (see :ref:`Overload Declarations`),
+namespaces (see :ref:`Namespace Declarations`),
+or other declarations (see :ref:`Ambient Declarations`, :ref:`Annotations`,
+:ref:`Accessor Declarations`, :ref:`Functions with Receiver`, 
+:ref:`Accessors with Receiver`). 
+Top-level declarations can be exported.
 
 The syntax of *top-level declarations* is presented below:
 
@@ -879,11 +967,12 @@ The syntax of *top-level declarations* is presented below:
         | functionDeclaration
         | functionWithOverloadSignatures
         | overloadFunctionDeclaration
-        | functionWithReceiverDeclaration
-        | accessorWithReceiverDeclaration
         | namespaceDeclaration
         | ambientDeclaration
         | annotationDeclaration
+        | accessorDeclaration
+        | functionWithReceiverDeclaration
+        | accessorWithReceiverDeclaration
         )
         ;
 
@@ -907,6 +996,19 @@ The syntax of *top-level declarations* is presented below:
    function
    variable declaration
    type declaration
+   function declaration
+   accessor declaration
+   function with receiver
+   accessor with receiver
+   overload signature
+   overload
+   overload declaration
+   namespace
+   namespace declaration
+   declaration
+   ambient declaration
+   annotation
+   syntax
 
 The usage of annotations is discussed in :ref:`Using Annotations`.
 
@@ -940,10 +1042,11 @@ used only inside the compilation unit they are declared in.
    export modifier
    access
    accessible declaration
+   declaration
    accessibility
    compilation unit
    import directive
-   declaration
+   import
 
 In addition, only one top-level declaration can be exported by using the default
 export directive. It allows specifying no declared name when importing (see
@@ -961,6 +1064,8 @@ occurs if more than one top-level declaration is marked as ``default``.
    top-level declaration
    export
    default export directive
+   declaration
+   name
    import
    import binding
 
@@ -993,12 +1098,14 @@ constant variable that is exported by using this export directive. Otherwise, a
 
 .. index::
    exported declaration
+   expression
    top-level declaration
    modifier export
    constant variable
    evaluation result
    export
-   export default
+   default target
+   export target
    export directive
    accessibility
    declaration
@@ -1007,6 +1114,7 @@ constant variable that is exported by using this export directive. Otherwise, a
    compilation unit
    default export directive
    import
+   value
 
 |
 
@@ -1080,13 +1188,18 @@ The usage of a namespace is represented in the example below:
 .. index::
    namespace
    namespace declaration
+   qualified name
    qualifier
    access
    entity
+   syntax
    export
    qualified name
    initializer block
    namespace variable
+   static initialization
+   call
+
 
 **Note**. A namespace must be exported to be used in another compilation unit.
 
@@ -1115,6 +1228,12 @@ The usage of a namespace is represented in the example below:
 .. index::
    namespace
    compilation unit
+   variable
+   constant
+   function
+   compatibility
+   string
+   embedded namespace
 
 **Note**. Embedded namespaces are allowed.
 
@@ -1133,8 +1252,6 @@ The usage of a namespace is represented in the example below:
         ExternalSpace.variable = 4321
     }
 
-.. index::
-   embedded namespace
 
 **Note**. Namespaces with identical namespace names in a single compilation
 unit merge their exported declarations into a single namespace. A duplication
@@ -1144,11 +1261,14 @@ Only one of the merging namespaces can have an initializer. Otherwise, a
 :index:`compile-time error` occurs.
 
 .. index::
+   embedded namespace
    namespace
    namespace name
    compilation unit
    export
    declaration
+   exported declaration
+   non-exported declaration
    initializer
 
 .. code-block:: typescript
@@ -1212,8 +1332,15 @@ embedded namespaces as represented below:
 
 .. index::
    namespace
+   export function
+   qualified name
+   notation
    shortcut notation
    embedded namespace
+   access
+   accessibility
+   export function
+   initializer
 
 .. code-block:: typescript
    :linenos:
@@ -1270,6 +1397,7 @@ the module.
 
 .. index::
    namespace
+   export namespace
    module
    ambient namespace
    declaration
@@ -1277,6 +1405,7 @@ the module.
    access
    accessibility
    top-level statement
+   module
 
 |
 
@@ -1311,10 +1440,12 @@ The syntax of *export directive* is presented below:
    export directive
    export
    declaration
+   exported declaration
    renaming
    re-export
    re-exporting declaration
    compilation unit
+   syntax
 
 |
 
@@ -1353,6 +1484,7 @@ module.
 
 .. index::
    selective export directive
+   selective export
    top-level declaration
    export
    export directive
@@ -1385,7 +1517,7 @@ The syntax of *single export directive* is presented below:
 
     singleExportDirective:
         'export'
-        ( identifier
+        ( `type`? identifier
         | 'default' (expression | identifier)
         | '{' identifier 'as' 'default' '}'
         )
@@ -1394,6 +1526,7 @@ The syntax of *single export directive* is presented below:
 .. index::
    export directive
    declaration
+   export
    declaration name
    compilation unit
    syntax
@@ -1424,6 +1557,7 @@ export:
    export directive
    compilation unit
    directive
+   syntax
 
 The directive in the example below exports a constant variable anonymously:
 
@@ -1449,6 +1583,7 @@ The directive in the example below exports a constant variable anonymously:
    constant variable
    export directive
    re-export
+   declaration
    identifier
    import
 
@@ -1473,16 +1608,22 @@ The *export type directive* syntax is presented below:
         'export' 'type' selectiveBindings
         ;
 
+|LANG| supports no additional semantic checks for entities exported by using
+*export type* directives.
+
+If a binding uses ``type``, then a :index:`compile-time error` occurs.
+
 .. index::
    export
    declaration
    export type
    export directive
+   semantic check
+   entity
+   directive
+   binding
+   type
    syntax
-
-|LANG| supports no additional semantic checks for entities exported by using
-*export type* directives.
-
 
 |
 
@@ -1520,12 +1661,17 @@ The syntax of *re-export directive* is presented below:
    declaration
    re-export declaration
    re-export
+   re-export directive
    import
 
 An ``importPath`` cannot refer to the file the current module is stored in.
 Otherwise, a :index:`compile-time error` occurs.
 
-The re-exporting practice is represented in the following examples:
+If re-exported declarations are not distinguishable (see :ref:`Declarations`)
+within the scope of the current module, then a :index:`compile-time error`
+occurs.
+
+The re-exporting practices are represented in the following examples:
 
 .. code-block:: typescript
    :linenos:
@@ -1545,6 +1691,9 @@ The re-exporting practice is represented in the following examples:
    module
    storage
    re-export
+   re-exported declaration
+   declaration
+   scope
 
 |
 
@@ -1570,8 +1719,8 @@ The syntax of *top-level statements* is presented below:
 .. index::
    top-level statement
    module
-   module
    statement
+   syntax
 
 A module can contain any number of top-level statements that logically
 merge into a single sequence in the textual order:
@@ -1595,7 +1744,11 @@ The sequence above is equal to the following:
 This situation is represented by the example below:
 
 .. index::
+   module
    top-level statement
+   variable declaration
+   constant declaration
+   declaration
 
 .. code-block:: typescript
    :linenos:
@@ -1638,6 +1791,7 @@ This situation is represented by the example below:
 
 .. index::
    module
+   imported module
    semantics
    top-level statement
    initialization
@@ -1646,7 +1800,7 @@ This situation is represented by the example below:
    call
    access
    accessibility
-   entry point
+   program entry point
    function
 
 .. code-block:: typescript
@@ -1688,6 +1842,8 @@ appearance within the module until an error situation is thrown (see
 .. index::
    top-level statement
    return statement
+   expression statement
+   expression
    statement
    type declaration
    module
@@ -1715,7 +1871,8 @@ kinds:
    top-level statement
    return statement
    execution
-   entry point
+   program entry point
+   entry point function
 
 A module can have the following forms of entry point:
 
@@ -1728,6 +1885,9 @@ A module can have the following forms of entry point:
 .. index::
    module
    entry point
+   entry point function
+   top-level statement
+   statement
 
 Entry point functions have the following features:
 
@@ -1743,16 +1903,20 @@ Entry point functions have the following features:
 
 .. index::
    entry point
+   entry point function
    function
+   compiler
+   execution
    parameter
    string type
    access
    argument
    return type
-   type void
-   type int
+   void type
+   int type
    overloading
    top-level statements
+   default
 
 The example below represents different forms of valid and invalid entry points:
 
@@ -1793,6 +1957,15 @@ The example below represents different forms of valid and invalid entry points:
     // Option 5: top-level exported function with command-line arguments
     export function entry(cmdLine: string[]) {}
 
+.. index::
+   entry point
+   entry point function
+   command-line argument
+   signature
+   function body
+   inferred type
+   integer expression
+   function body
 
 |
 

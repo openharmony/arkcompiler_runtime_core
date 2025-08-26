@@ -306,31 +306,31 @@ cannot be used as identifiers:
 +--------------------+-------------------+------------------+------------------+
 |                    |                   |                  |                  |
 +====================+===================+==================+==================+
-|   ``abstract``     |   ``else``        |   ``instanceof`` |   ``switch``     |
+|   ``abstract``     |   ``enum``        |   ``let``        |   ``this``       |
 +--------------------+-------------------+------------------+------------------+
-|   ``as``           |   ``enum``        |   ``interface``  |   ``super``      |
+|   ``as``           |   ``export``      |   ``native``     |   ``throw``      |
 +--------------------+-------------------+------------------+------------------+
-|   ``async``        |   ``export``      |   ``let``        |   ``this``       |
+|   ``async``        |   ``extends``     |   ``new``        |   ``true``       |
 +--------------------+-------------------+------------------+------------------+
-|   ``await``        |   ``extends``     |   ``native``     |   ``throw``      |
+|   ``await``        |   ``false``       |   ``null``       |   ``try``        |
 +--------------------+-------------------+------------------+------------------+
-|   ``break``        |   ``false``       |   ``new``        |   ``true``       |
-+--------------------+-------------------+------------------+------------------+
-|   ``case``         |   ``final``       |   ``null``       |   ``try``        |
-+--------------------+-------------------+------------------+------------------+
-|   ``catch``        |   ``finally``     |   ``overload``   |   ``typeof``     |
-+--------------------+-------------------+------------------+------------------+
-|   ``class``        |   ``for``         |   ``override``   |   ``undefined``  |
+|   ``break``        |   ``final``       |   ``overload``   |   ``typeof``     |
++--------------------+-------------------+-------------+----+------------------+
+|   ``case``         |   ``for``         |   ``override``   |   ``undefined``  |
 +--------------------+----+--------------+------------------+------------------+
-|   ``const``        |   ``function``    |   ``private``    |   ``while``      |
+|   ``class``        |   ``function``    |   ``private``    |   ``while``      |
 +--------------------+-------------------+------------------+------------------+
-|   ``constructor``  |   ``if``          |   ``protected``  |                  |
+|   ``const``        |   ``if``          |   ``protected``  |                  |
 +--------------------+-------------------+------------------+------------------+
-|   ``continue``     |   ``implements``  |   ``public``     |                  |
+|   ``constructor``  |   ``implements``  |   ``public``     |                  |
 +--------------------+-------------------+------------------+------------------+
-|   ``default``      |   ``import``      |   ``return``     |                  |
+|   ``continue``     |   ``import``      |   ``return``     |                  |
 +--------------------+-------------------+------------------+------------------+
-|   ``do``           |   ``in``          |   ``static``     |                  |
+|   ``default``      |   ``in``          |   ``static``     |                  |
++--------------------+-------------------+------------------+------------------+
+|   ``do``           |   ``instanceof``  |   ``switch``     |                  |
++--------------------+-------------------+------------------+------------------+
+|   ``else``         |   ``interface``   |   ``super``      |                  |
 +--------------------+-------------------+------------------+------------------+
 
 
@@ -382,15 +382,17 @@ are valid identifiers elsewhere:
 +--------------------+--------------------+
 |                    |                    |
 +====================+====================+
+|      ``catch``     |     ``namespace``  |
++--------------------+--------------------+
 |      ``declare``   |     ``of``         |
 +--------------------+--------------------+
-|      ``from``      |     ``out``        |
+|      ``finally``   |     ``out``        |
 +--------------------+--------------------+
-|      ``get``       |    ``readonly``    |
-+--------------------+--------+-----------+
-|      ``keyof``     |    ``set``         |
+|      ``from``      |    ``readonly``    |
 +--------------------+--------------------+
-|      ``namespace`` |    ``type``        |
+|      ``get``       |    ``set``         |
++--------------------+--------------------+
+|      ``keyof``     |    ``type``        |
 +--------------------+--------------------+
 
 4. The following identifiers are also treated as *soft keywords* reserved for
@@ -591,8 +593,8 @@ Integral literals with different radices are represented by the examples below:
     0o777 // octal literal
     0b101 // binary literal
 
-The underscore character '``_``' after the radix prefix or between successive
-digits can be used to denote an integer literal and improve readability.
+The underscore character '``_``' between successive
+digits can be used to improve readability.
 Underscore characters in such positions do not change the values of literals.
 However, the underscore character must be neither the very first nor the very
 last symbol of an integer literal.
@@ -685,11 +687,11 @@ The concept is represented by the examples below:
     1e10
     1e10f
 
-The underscore character '``_``' after the radix prefix or between successive
-digits can be used to denote a floating-point literal and improve readability.
+The underscore character '``_``' between successive
+digits can be used to improve readability.
 Underscore characters in such positions do not change the values of literals.
 However, the underscore character must be neither the very first nor the very
-last symbol of an integer literal.
+last symbol of a literal.
 
 Floating-point literals are of floating-point types that match literals as
 follows:
@@ -744,8 +746,8 @@ The concept is represented by the examples below:
     -153n // negative bigint literal
     0xBAD_3n // bigint literal in hexadecimal notation
 
-The underscore character '``_``' used between successive digits can be used to
-denote a ``bigint`` literal and improve readability. Underscore characters in
+The underscore character '``_``' between successive digits can be used to
+improve readability. Underscore characters in
 such positions do not change the values of literals. However, the underscore
 character must be neither the very first nor the very last symbol of a ``bigint``
 literal.
