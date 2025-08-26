@@ -18,8 +18,6 @@
 
 #include "libabckit/c/metadata_core.h"
 
-#include <iostream>
-
 namespace libabckit {
 
 // ========================================
@@ -41,17 +39,27 @@ AbckitString *NamespaceGetNameStatic(AbckitCoreNamespace *ns);
 
 AbckitString *ClassGetNameStatic(AbckitCoreClass *klass);
 
+bool ClassIsExternalStatic(AbckitCoreClass *klass);
+
+bool ClassIsFinalStatic(AbckitCoreClass *klass);
+
+bool ClassIsAbstractStatic(AbckitCoreClass *klass);
+
 // ========================================
 // Interface
 // ========================================
 
 AbckitString *InterfaceGetNameStatic(AbckitCoreInterface *iface);
 
+bool InterfaceIsExternalStatic(AbckitCoreInterface *iface);
+
 // ========================================
 // Enum
 // ========================================
 
 AbckitString *EnumGetNameStatic(AbckitCoreEnum *enm);
+
+bool EnumIsExternalStatic(AbckitCoreEnum *enm);
 
 // ========================================
 // Field
@@ -72,8 +80,18 @@ AbckitString *FunctionGetNameStatic(AbckitCoreFunction *function);
 AbckitGraph *CreateGraphFromFunctionStatic(AbckitCoreFunction *function);
 bool FunctionIsStaticStatic(AbckitCoreFunction *function);
 bool FunctionIsCtorStatic(AbckitCoreFunction *function);
+bool FunctionIsCctorStatic(AbckitCoreFunction *function);
 bool FunctionIsAnonymousStatic(AbckitCoreFunction *function);
 bool FunctionIsNativeStatic(AbckitCoreFunction *function);
+bool FunctionIsPublicStatic(AbckitCoreFunction *function);
+bool FunctionIsProtectedStatic(AbckitCoreFunction *function);
+bool FunctionIsPrivateStatic(AbckitCoreFunction *function);
+bool FunctionIsInternalStatic(AbckitCoreFunction *function);
+bool FunctionIsExternalStatic(AbckitCoreFunction *function);
+bool FunctionIsAbstractStatic(AbckitCoreFunction *function);
+bool FunctionIsFinalStatic(AbckitCoreFunction *function);
+bool FunctionIsOverrideStatic(AbckitCoreFunction *function);
+bool FunctionIsAsyncStatic(AbckitCoreFunction *function);
 AbckitType *FunctionGetReturnTypeStatic(AbckitCoreFunction *function);
 
 // ========================================

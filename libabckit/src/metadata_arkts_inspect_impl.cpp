@@ -369,23 +369,44 @@ extern "C" bool FunctionIsNative(AbckitArktsFunction *function)
 
 extern "C" bool FunctionIsAsync(AbckitArktsFunction *function)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)function;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_BAD_ARGUMENT(function, false);
+
+    switch (function->core->owningModule->target) {
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return FunctionIsAsyncStatic(function->core);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
 }
 
 extern "C" bool FunctionIsFinal(AbckitArktsFunction *function)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)function;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_BAD_ARGUMENT(function, false);
+
+    switch (function->core->owningModule->target) {
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return FunctionIsFinalStatic(function->core);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
 }
 
 extern "C" bool FunctionIsAbstract(AbckitArktsFunction *function)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)function;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_BAD_ARGUMENT(function, false);
+
+    switch (function->core->owningModule->target) {
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return FunctionIsAbstractStatic(function->core);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
 }
 
 // ========================================

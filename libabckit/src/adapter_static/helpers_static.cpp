@@ -1168,4 +1168,25 @@ AbckitTypeId ArkPandasmTypeToAbckitTypeId(const ark::pandasm::Type &type)
     }
 }
 
+ark::pandasm::Record *GetStaticImplRecord(
+    const std::variant<AbckitCoreModule *, AbckitCoreNamespace *, AbckitCoreClass *, AbckitCoreInterface *,
+                       AbckitCoreEnum *, AbckitCoreAnnotationInterface *> &coreObject)
+{
+    return std::visit(
+        [](auto *obj) -> ark::pandasm::Record * {
+            if constexpr (std::is_same_v<decltype(obj), AbckitCoreModule *>) {
+                return obj->GetArkTSImpl()->impl.GetStatModule().record;
+            } else if constexpr (std::is_same_v<decltype(obj), AbckitCoreAnnotationInterface *>) {
+                return obj->GetArkTSImpl()->GetStaticImpl();
+            } else if constexpr (std::is_same_v<decltype(obj), AbckitCoreNamespace *> ||
+                                 std::is_same_v<decltype(obj), AbckitCoreClass *> ||
+                                 std::is_same_v<decltype(obj), AbckitCoreInterface *> ||
+                                 std::is_same_v<decltype(obj), AbckitCoreEnum *>) {
+                return obj->GetArkTSImpl()->impl.GetStaticClass();
+            }
+            return nullptr;
+        },
+        coreObject);
+}
+
 }  // namespace libabckit
