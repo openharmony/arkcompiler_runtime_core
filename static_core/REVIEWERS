@@ -143,8 +143,8 @@ static_core/plugins/ets/tests/libani_helpers/                                 @w
 static_core/plugins/ets/tests/stdlib-templates/                               ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin @dreamdoomwalker
 static_core/plugins/ets/tests/test-lists/                                     ^amate ^sergeyandreev @kuchkovairina
 static_core/plugins/ets/tests/test-lists/declgenets2ts                        ^amate ^sergeyandreev @kuchkovairina @dreamdoomwalker
-static_core/plugins/ets/tools/declgen_ts2sts/                                 @dreamdoomwalker ^trubachevilya ^hufeng20 @nazarovkonstantin @zenghang11 @lihao000
-static_core/tests/tests-u-runner/runner/plugins/declgenets2ts                 @dreamdoomwalker ^amate @sergeyandreev @anton-sysoev @lihao000 @hufeng20
+static_core/plugins/ets/tools/declgen_ts2sts/                                 @dreamdoomwalker ^trubachevilya @nazarovkonstantin
+static_core/tests/tests-u-runner/runner/plugins/declgenets2ts                 @dreamdoomwalker ^amate @sergeyandreev @anton-sysoev
 static_core/tests/tests-u-runner/tools/generate-es-checked/                   ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin @dreamdoomwalker
 static_core/plugins/ets/runtime/interop_js/ets_proxy/shared_reference*        ^dmitriitr @udav ^ipetrov
 static_core/plugins/ets/runtime/interop_js/xgc/                               ^dmitriitr @udav ^ipetrov
@@ -182,7 +182,7 @@ static_core/plugins/ets/stdlib/std/debug/concurrency/                         @k
 static_core/plugins/ets/tests/ets_ts_subset/std/core/Promise*                 ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin ^dmitriitr @konstanting ^udav ^dreamdoomwalker
 static_core/plugins/ets/tests/interop_js/tests/checked/                       ^igelhaus @nazarovkonstantin @ignatenkooleg ^rokashevichsvetlana @Prof1983 ^kurnevichstanislav @dingding5
 static_core/plugins/ets/tests/interop_js/tests/compiler/                      ^igelhaus @nazarovkonstantin @ignatenkooleg ^rokashevichsvetlana @Prof1983 @dingding5
-static_core/plugins/ets/tests/interop_js/tests/declgen_ets2ts/                @dreamdoomwalker ^igelhaus ^trubachevilya ^ivagin ^hufeng20 ^Prof1983 @zenghang11
+static_core/plugins/ets/tests/interop_js/tests/declgen_ets2ts/                @dreamdoomwalker ^igelhaus ^trubachevilya ^ivagin ^Prof1983 
 static_core/plugins/ets/tests/interop_js/tests/promise/                       @udav
 
 /abc2program/ @oatuwwutao @hufeng20
