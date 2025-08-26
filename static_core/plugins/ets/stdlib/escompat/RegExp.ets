@@ -855,15 +855,15 @@ export class RegExpExecArray extends RegExpResultArray {
         super()
     }
 
-    public get index(): number {
-        return this.index_
+    public get index(): int {
+        return this.index_.toInt()
     }
 
     public get input(): String {
         return this.input_
     }
 
-    public set index(val: number) {
+    public set index(val: int) {
         this.index_ = val
     }
 
@@ -924,7 +924,7 @@ class GlobalRegExpStringIterator implements IterableIterator<RegExpMatchArray> {
         }
         let matchStr = match.$_get(0)
         if (matchStr == "") {
-            let nextIndex = RegExp.advanceStringIndex(this.string, this.regexp.lastIndex, this.regexp.unicode)
+            let nextIndex = RegExp.advanceStringIndex(this.string, this.regexp.lastIndex.toInt(), this.regexp.unicode)
             this.regexp.lastIndex = nextIndex
         }
         return new IteratorResult<RegExpMatchArray>(match)
@@ -1224,11 +1224,11 @@ export class RegExp extends Object {
         return this.compile()
     }
 
-    private native execImpl(pattern: String, flags: String, str: String, patternLength: number, strLength: number, lastIndex: number, hasSlashU: boolean): RegExpExecArray;
+    private native execImpl(pattern: String, flags: String, str: String, patternLength: int, strLength: int, lastIndex: int, hasSlashU: boolean): RegExpExecArray;
 
-    private native matchImpl(pattern: String, flags: String, str: String, patternLength: number, strLength: number, lastIndex: number, hasSlashU: boolean): RegExpMatchArray;
+    private native matchImpl(pattern: String, flags: String, str: String, patternLength: int, strLength: int, lastIndex: int, hasSlashU: boolean): RegExpMatchArray;
 
-    internal exec(str: String, index: number): RegExpExecArray | null {
+    internal exec(str: String, index: int): RegExpExecArray | null {
         const hasSlashU = str.contains("\\u", 0) || this.pattern_.contains("\\u", 0)
         const res = this.execImpl(this.pattern_, this.flags_, str, this.pattern_.length, str.length, index, hasSlashU)
         if (res.isCorrect) {
@@ -1252,10 +1252,10 @@ export class RegExp extends Object {
      * @see RegExpExecArray
      */
     public exec(str: String): RegExpExecArray | null {
-        return this.exec(str, this.lastIndex)
+        return this.exec(str, this.lastIndex.toInt())
     }
 
-    internal matchInternal(str: String, index: number): RegExpMatchArray | null {
+    internal matchInternal(str: String, index: int): RegExpMatchArray | null {
         const hasSlashU = str.contains("\\u", 0) || this.pattern_.contains("\\u", 0)
         const res = this.matchImpl(this.pattern_, this.flags_, str, this.pattern_.length, str.length, index, hasSlashU)
         if (res.isCorrect) {
@@ -1268,10 +1268,10 @@ export class RegExp extends Object {
     }
 
     internal matchInternal(str: String): RegExpMatchArray | null {
-        return this.matchInternal(str, this.lastIndex)
+        return this.matchInternal(str, this.lastIndex.toInt())
     }
 
-    public search(str: String): number {
+    public search(str: String): int {
         let previousLastIndex = this.lastIndex
         this.lastIndex = 0
         let result = this.exec(str)
@@ -1279,7 +1279,7 @@ export class RegExp extends Object {
         if (result == null) {
             return -1
         } else {
-            return result.index
+            return result.index.toInt()
         }
     }
 
@@ -1300,7 +1300,7 @@ export class RegExp extends Object {
             }
             let matchStr = result.$_get(0)
             if (matchStr == "") {
-                let thisIndex = this.lastIndex
+                let thisIndex: int = this.lastIndex.toInt()
                 let nextIndex = RegExp.advanceStringIndex(str, thisIndex, this.unicode)
                 this.lastIndex = nextIndex
             }
@@ -1348,7 +1348,7 @@ export class RegExp extends Object {
             }
             let matchStr = result.$_get(0)
             if (matchStr == "") {
-                let thisIndex = this.lastIndex
+                let thisIndex: int = this.lastIndex.toInt()
                 let nextIndex = RegExp.advanceStringIndex(str, thisIndex, this.unicode)
                 this.lastIndex = nextIndex
             }
@@ -1408,7 +1408,7 @@ export class RegExp extends Object {
         }
         let splittedStrings = new containers.UndefinableStringArray()
         let lastStart = 0
-        for (let lastEnd = 0; lastEnd < size;) {
+        for (let lastEnd: int = 0; lastEnd < size;) {
             splitter.lastIndex = lastEnd
             let z = splitter.exec(str)
             if (z == null) {
@@ -1464,7 +1464,7 @@ export class RegExp extends Object {
                 indices = indices.concat(result.indices)
                 isUndefined = isUndefined.concat(result.isUndefined)
                 if (matchStr == "") {
-                    this.lastIndex = RegExp.advanceStringIndex(str, this.lastIndex, this.unicode)
+                    this.lastIndex = RegExp.advanceStringIndex(str, this.lastIndex.toInt(), this.unicode)
                 }
                 n++
             }
@@ -1525,21 +1525,6 @@ export class RegExp extends Object {
             return index + 1
         }
         return index + s.codePointCount(index, index + 1);
-    }
-
-    /**
-     * Returns next index from a passed one
-     *
-     * @param s
-     *
-     * @param index start position
-     *
-     * @param unicode true if unicode is used
-     *
-     * @returns new index
-     */
-    public static advanceStringIndex(s: String, index: number, unicode: boolean): number {
-        return RegExp.advanceStringIndex(s, index.toInt(), unicode)
     }
 
     public static $_invoke(pattern: RegExp | String, flags?: String) : RegExp {
