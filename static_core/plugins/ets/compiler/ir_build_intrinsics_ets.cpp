@@ -297,7 +297,6 @@ void InstBuilder::BuildBigUint64ArrayGetIntrinsic(const BytecodeInstruction *bcI
     7. ZeroCheck D v6
     4. Bitcast INT64->POINTER v7
     9. LoadObject v3, TYPED_ARRAY_BUFFER_BYTE_OFFSET_OFFSET
-    10. Cast FLOAT64->INT32 v9
     11. LoadObject v3, TYPED_ARRAY_LENGTH_OFFSET
     12. BoundsCheck v11, v2
     14. Add v2, v10
@@ -348,12 +347,9 @@ std::tuple<Inst *, Inst *> InstBuilder::BuildTypedArrayLoadDataAndOffset(const B
     loadDataInst = graph->CreateInstBitcast(DataType::POINTER, bcAddr, loadDataInst, loadDataInst->GetType());
     AddInstruction(loadDataInst);
 
-    auto *loadDataOffsetFloat64Inst = graph->CreateInstLoadObject(
-        DataType::FLOAT64, bcAddr, nullCheck, TypeIdMixin {runtime->GetFieldId(byteOffsetField), calleeMethod},
+    auto *loadDataOffsetInst = graph->CreateInstLoadObject(
+        DataType::INT32, bcAddr, nullCheck, TypeIdMixin {runtime->GetFieldId(byteOffsetField), calleeMethod},
         byteOffsetField, runtime->IsFieldVolatile(byteOffsetField));
-    AddInstruction(loadDataOffsetFloat64Inst);
-    auto *loadDataOffsetInst =
-        graph->CreateInstCast(DataType::INT32, bcAddr, loadDataOffsetFloat64Inst, loadDataOffsetFloat64Inst->GetType());
     AddInstruction(loadDataOffsetInst);
 
     if (needBoundCheck) {
