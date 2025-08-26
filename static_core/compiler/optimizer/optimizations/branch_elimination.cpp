@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,6 +46,10 @@ bool BranchElimination::RunImpl()
     sameInputCompares_.clear();
     auto markerHolder = MarkerHolder(GetGraph());
     rmBlockMarker_ = markerHolder.GetMarker();
+    // Additional removal marker for blocks that were NOT originally marked for elimination, but have ALL their
+    // predecessors marked for elimination.
+    auto auxMarkerHolder = MarkerHolder(GetGraph());
+    auxRmMarker_ = auxMarkerHolder.GetMarker();
     for (auto block : GetGraph()->GetBlocksRPO()) {
         if (block->IsEmpty() || (block->IsTry() && GetGraph()->IsBytecodeOptimizer())) {
             continue;
@@ -237,11 +241,12 @@ void BranchElimination::MarkUnreachableBlocks(BasicBlock *block)
 {
     for (auto dom : block->GetDominatedBlocks()) {
         dom->SetMarker(rmBlockMarker_);
+        dom->SetMarker(auxRmMarker_);
         MarkUnreachableBlocks(dom);
     }
 }
 
-bool AllPredecessorsMarked(BasicBlock *block, Marker marker)
+bool AllPredecessorsMarked(BasicBlock *block, Marker rmBlockMarker, Marker auxRmMarker)
 {
     if (block->GetPredsBlocks().empty()) {
         ASSERT(block->IsStartBlock());
@@ -249,22 +254,164 @@ bool AllPredecessorsMarked(BasicBlock *block, Marker marker)
     }
 
     for (auto pred : block->GetPredsBlocks()) {
-        if (!pred->IsMarked(marker)) {
+        if (!pred->IsMarked(rmBlockMarker)) {
             return false;
         }
     }
-    block->SetMarker(marker);
+    block->SetMarker(rmBlockMarker);
+    block->SetMarker(auxRmMarker);
     return true;
+}
+
+void BranchElimination::UnmarkConnectionPath(BasicBlock *current, BasicBlock *target)
+{
+    if (current == target || !current->IsMarked(rmBlockMarker_)) {
+        return;
+    }
+
+    current->ResetMarker(rmBlockMarker_);
+    current->ResetMarker(auxRmMarker_);
+
+    // Unmark all predecessors of the current block.
+    for (auto *pred : current->GetPredsBlocks()) {
+        if (pred->IsMarked(rmBlockMarker_)) {
+            UnmarkConnectionPath(pred, target);
+        }
+    }
+}
+
+void BranchElimination::UnmarkConnectionToLiveCode(BasicBlock *block)
+{
+    if (!block->IsMarked(rmBlockMarker_)) {
+        return;
+    }
+
+    block->ResetMarker(rmBlockMarker_);
+    block->ResetMarker(auxRmMarker_);
+
+    for (auto *pred : block->GetSuccsBlocks()) {
+        UnmarkConnectionToLiveCode(pred);
+    }
+}
+
+bool BranchElimination::HasThrowInBlock(const BasicBlock *block) const
+{
+    if (block->IsEmpty()) {
+        return false;
+    }
+
+    return block->GetLastInst()->GetOpcode() == Opcode::Throw;
+}
+
+bool BranchElimination::IsNeedToProtect(BasicBlock *block) const
+{
+    if (HasThrowInBlock(block)) {
+        return false;
+    }
+
+    MarkerHolder markerHolder(GetGraph());
+    auto marker = markerHolder.GetMarker();
+    if (HasThrowInSuccessors(block, marker)) {
+        return false;
+    }
+
+    block->ResetMarker(marker);
+
+    return !HasThrowInPredecessors(block, marker);
+}
+
+bool BranchElimination::HasThrowInSuccessors(BasicBlock *block, Marker marker) const
+{
+    if (block->IsMarked(marker)) {
+        return false;
+    }
+
+    block->SetMarker(marker);
+
+    if (HasThrowInBlock(block)) {
+        return true;
+    }
+
+    for (auto succ : block->GetSuccsBlocks()) {
+        if (HasThrowInSuccessors(succ, marker)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool BranchElimination::HasThrowInPredecessors(BasicBlock *block, Marker marker) const
+{
+    if (block->IsMarked(marker)) {
+        return false;
+    }
+
+    block->SetMarker(marker);
+
+    if (HasThrowInBlock(block)) {
+        return true;
+    }
+
+    for (auto pred : block->GetPredsBlocks()) {
+        if (pred->IsMarked(rmBlockMarker_)) {
+            if (HasThrowInPredecessors(pred, marker)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+void BranchElimination::ProcessReturnInlinedInstruction(Inst *inst, BasicBlock *block)
+{
+    // If BE has marked a block with ReturnInlined as unreachable (flagged with rmBlockMarker_), we can safely remove
+    // such block or if either its successor or predecessor references a throw block.
+    if (!block->IsMarked(auxRmMarker_) || !IsNeedToProtect(block)) {
+        return;
+    }
+
+    // Only proceed if the calling block isn't marked for deletion.
+    auto *callBlock = const_cast<BasicBlock *>(inst->CastToReturnInlined()->GetSaveState()->GetBasicBlock());
+    if (callBlock->IsMarked(rmBlockMarker_) || callBlock->IsMarked(auxRmMarker_)) {
+        return;
+    }
+
+    // Restore the execution path between the call and return: unmark all blocks along the call-inlined
+    // to return-inlined path. This maintains the inlined function's control flow.
+    UnmarkConnectionPath(block, callBlock);
+
+    // We also need to restore the path to the first live successor.
+    for (auto *succ : block->GetSuccsBlocks()) {
+        if (succ->IsMarked(rmBlockMarker_)) {
+            UnmarkConnectionToLiveCode(succ);
+        }
+    }
+}
+
+void BranchElimination::ProtectReturnInlinedPaths()
+{
+    for (auto *block : GetGraph()->GetBlocksRPO()) {
+        for (auto *inst : block->AllInsts()) {
+            if (inst->GetOpcode() == Opcode::ReturnInlined) {
+                ProcessReturnInlinedInstruction(inst, block);
+            }
+        }
+    }
 }
 
 /// Disconnect selected blocks
 void BranchElimination::DisconnectBlocks()
 {
     for (auto block : GetGraph()->GetBlocksRPO()) {
-        if (block->IsMarked(rmBlockMarker_) || AllPredecessorsMarked(block, rmBlockMarker_)) {
+        if (block->IsMarked(rmBlockMarker_) || AllPredecessorsMarked(block, rmBlockMarker_, auxRmMarker_)) {
             MarkUnreachableBlocks(block);
         }
     }
+
+    // Protect some blocks containing ReturnInlined instructions from being deleted.
+    ProtectReturnInlinedPaths();
 
     const auto &rpoBlocks = GetGraph()->GetBlocksRPO();
     for (auto it = rpoBlocks.rbegin(); it != rpoBlocks.rend(); it++) {
