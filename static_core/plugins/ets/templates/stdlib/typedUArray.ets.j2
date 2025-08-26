@@ -132,8 +132,8 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
         const items: Object = elements as Object
         if (items instanceof ArrayLike) {
             const arr = Types.identity_cast<{{element['subsetTypeValues']}}>(items as ArrayLike<{{element['subsetTypeValues']}}>)
-            this.byteLengthInt = arr.length.toInt() * {{element['name']}}Array.BYTES_PER_ELEMENT
-            this.lengthInt = arr.length.toInt()
+            this.byteLengthInt = arr.length * {{element['name']}}Array.BYTES_PER_ELEMENT
+            this.lengthInt = arr.length
             this.buffer = new ArrayBuffer(this.byteLengthInt)
             this.byteOffsetInt = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
@@ -268,8 +268,8 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             // NOTE (ikorobkov): dealing with this overload is tricky
             // with banned `instanceof` generic, so it is delegated to array here. Initial idea from Set.ets
             let arr = Array.from<Number>((buf as ArrayLike<Number>))
-            this.byteLengthInt = arr.length.toInt() * {{element['name']}}Array.BYTES_PER_ELEMENT
-            this.lengthInt = arr.length.toInt()
+            this.byteLengthInt = arr.length * {{element['name']}}Array.BYTES_PER_ELEMENT
+            this.lengthInt = arr.length
             this.buffer = new ArrayBuffer(this.byteLengthInt)
             this.byteOffsetInt = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
@@ -314,9 +314,9 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @param other data initializer
      */
     public constructor(other: {{element['name']}}Array) {
-        this.buffer = other.buffer.slice(other.byteOffset.toInt(), (other.byteOffset + other.byteLength).toInt()) as ArrayBuffer
-        this.byteLengthInt = other.byteLength.toInt()
-        this.lengthInt = other.length.toInt()
+        this.buffer = other.buffer.slice(other.byteOffset, other.byteOffset + other.byteLength) as ArrayBuffer
+        this.byteLengthInt = other.byteLength
+        this.lengthInt = other.length
         this.byteOffsetInt = 0
     }
 
@@ -1959,12 +1959,12 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
     }
 
     /** Byte offset within the underlying Buffer */
-    public get byteOffset(): number {
+    public get byteOffset(): int {
         return this.byteOffsetInt
     }
 
     /** Number of bytes used */
-    public get byteLength(): number {
+    public get byteLength(): int {
         return this.byteLengthInt
     }
 

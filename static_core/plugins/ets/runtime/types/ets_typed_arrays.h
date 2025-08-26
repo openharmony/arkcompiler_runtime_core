@@ -78,22 +78,22 @@ public:
         buffer_ = buffer;
     }
 
-    EtsDouble GetByteOffset() const
+    EtsInt GetByteOffset() const
     {
         return byteOffset_;
     }
 
-    void SetByteOffset(EtsDouble offset)
+    void SetByteOffset(EtsInt offset)
     {
         byteOffset_ = offset;
     }
 
-    EtsDouble GetByteLength() const
+    EtsInt GetByteLength() const
     {
         return byteLength_;
     }
 
-    void SetByteLength(EtsDouble byteLength)
+    void SetByteLength(EtsInt byteLength)
     {
         byteLength_ = byteLength;
     }
@@ -133,10 +133,10 @@ public:
 private:
     ObjectPointer<EtsObject> buffer_;
     ObjectPointer<EtsString> name_;
-    EtsDouble byteOffset_;
-    EtsDouble byteLength_;
     EtsInt bytesPerElement_;
     EtsInt lengthInt_;
+    EtsInt byteOffset_;
+    EtsInt byteLength_;
 
     friend class test::EtsEscompatTypedArrayBaseTest;
 };
