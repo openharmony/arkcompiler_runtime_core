@@ -152,6 +152,7 @@ export const InvalidFuncParaNames: Set<string> = new Set([
     'double',
     'boolean',
     'abstract',
-    'async'
+    'async',
+    'object'
 ]);
 export const LIMIT_DECORATOR: string[] = ['Sendable', 'Concurrent'];
