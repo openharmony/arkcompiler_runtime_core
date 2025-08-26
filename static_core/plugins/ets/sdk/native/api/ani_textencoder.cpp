@@ -328,14 +328,13 @@ ani_array DoEncodeIntoUint8Array(ani_env *env, [[maybe_unused]] ani_object objec
 
     ani_method intCtor;
     ANI_FATAL_IF_ERROR(env->Class_FindMethod(intClass, "<ctor>", "i:", &intCtor));
-    const ani_size offset = 0;
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     ani_int nativeParams[] = {static_cast<ani_int>(writeRes->nInputCharsConsumed),
                               static_cast<ani_int>(writeRes->resultSizeBytes)};
-    for (size_t i = offset; i < 2U; ++i) {
+    for (size_t i = 0; i < 2U; ++i) {
         ani_object boxedInt {};
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        ANI_FATAL_IF_ERROR(env->Object_New(intClass, intCtor, &boxedInt, nativeParams[i - offset]));
+        ANI_FATAL_IF_ERROR(env->Object_New(intClass, intCtor, &boxedInt, nativeParams[i]));
         ANI_FATAL_IF_ERROR(env->Array_Set(pathsArray, i, boxedInt));
     }
     return pathsArray;
