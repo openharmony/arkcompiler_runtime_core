@@ -21,7 +21,7 @@
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)
 
 namespace OHOS {
-void AniArrayGetRegionRefFuzzTest(const char *data, size_t size)
+void AniArrayGetRefFuzzTest(const char *data, size_t size)
 {
     if (size <= 0U) {
         return;
@@ -37,7 +37,7 @@ void AniArrayGetRegionRefFuzzTest(const char *data, size_t size)
     engine->AniGetArray(&array);
 
     ani_ref ref {};
-    auto index = static_cast<ani_size>(size);
+    auto index = static_cast<ani_size>(static_cast<unsigned int>(data[0]));
     env->Array_Get_Ref(array, index, &ref);
 }
 }  // namespace OHOS
@@ -46,7 +46,7 @@ void AniArrayGetRegionRefFuzzTest(const char *data, size_t size)
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
-    OHOS::AniArrayGetRegionRefFuzzTest(reinterpret_cast<const char *>(data), size);
+    OHOS::AniArrayGetRefFuzzTest(reinterpret_cast<const char *>(data), size);
     return 0;
 }
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)
