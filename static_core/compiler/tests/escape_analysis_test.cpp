@@ -27,6 +27,8 @@ inline const RuntimeInterface::FieldPtr INT32_FIELD = reinterpret_cast<void *>(0
 inline const RuntimeInterface::FieldPtr UINT8_FIELD = reinterpret_cast<void *>(0xB00B00UL);
 inline const RuntimeInterface::FieldPtr INT8_FIELD = reinterpret_cast<void *>(0xB00B01UL);
 inline const RuntimeInterface::ClassPtr INT32_CLASS = reinterpret_cast<void *>(0xDEAD5320U);
+inline const RuntimeInterface::IdType CUSTOM_CLASS_ID = 0xDEAD1337U;
+inline const RuntimeInterface::ClassPtr CUSTOM_CLASS = reinterpret_cast<void *>(0x00133700U);
 
 class EscapeAnalysisTest : public GraphTest {
 public:
@@ -39,7 +41,9 @@ public:
         RegisterFieldType(UINT8_FIELD, DataType::UINT8);
         RegisterFieldType(INT8_FIELD, DataType::INT8);
 
-        RegisterClassType(INT32_CLASS, DataType::INT32);
+        RegisterArrayComponentType(INT32_CLASS, DataType::INT32);
+
+        RegisterClass(CUSTOM_CLASS_ID, CUSTOM_CLASS);
     }
 
     bool Run() const
@@ -3948,4 +3952,146 @@ TEST_F(EscapeAnalysisTest, SplitDeoptimizationN2)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
+// CC-OFFNXT(G.FUD.05) long test representation of IR
+SRC_GRAPH(PhiAndPhiInputMaterialization, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        PARAMETER(0U, 0U).b();
+        PARAMETER(1U, 1U).b();
+
+        CONSTANT(2U, 1U).i32();
+        CONSTANT(3U, 2U).i32();
+        CONSTANT(4U, 3U).i32();
+
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(20U, Opcode::SaveState);
+            INST(21U, Opcode::LoadAndInitClass).ref().Inputs(20U).Class(CUSTOM_CLASS);
+            INST(22U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_EQ).Inputs(0U).Imm(0U);
+        }
+        BASIC_BLOCK(3U, 5U)
+        {
+            INST(30U, Opcode::SaveState);
+            INST(31U, Opcode::NewObject).ref().Inputs(21U, 30U).TypeId(CUSTOM_CLASS_ID);
+            INST(32U, Opcode::StoreObject).s32().Inputs(31U, 2U).ObjField(INT32_FIELD);
+        }
+        BASIC_BLOCK(4U, 5U)
+        {
+            INST(40U, Opcode::SaveState);
+            INST(41U, Opcode::NewObject).ref().Inputs(21U, 40U).TypeId(CUSTOM_CLASS_ID);
+            INST(42U, Opcode::StoreObject).s32().Inputs(41U, 3U).ObjField(INT32_FIELD);
+        }
+        BASIC_BLOCK(5U, 6U, 7U)
+        {
+            INST(50U, Opcode::Phi).ref().Inputs(31U, 41U, 53U);
+            INST(51U, Opcode::Phi).s32().Inputs(2U, 2U, 77U);
+            INST(52U, Opcode::SaveState).Inputs(50U, 51U).SrcVregs({0U, 1U});
+            INST(53U, Opcode::NewObject).ref().Inputs(21U, 52U).TypeId(CUSTOM_CLASS_ID);
+            INST(54U, Opcode::StoreObject).s32().Inputs(53U, 4U).ObjField(INT32_FIELD);
+            INST(55U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_EQ).Inputs(1U).Imm(0U);
+        }
+        BASIC_BLOCK(6U, -1L)
+        {
+            INST(61U, Opcode::SaveStateDeoptimize).Inputs(50U, 51U, 53U).SrcVregs({0U, 1U, 2U});
+            INST(62U, Opcode::Deoptimize).Inputs(61U);
+        }
+        BASIC_BLOCK(7U, 5U, 8U)
+        {
+            INST(71U, Opcode::SaveState).Inputs(50U, 51U, 53U).SrcVregs({0U, 1U, 2U});
+            INST(72U, Opcode::CallStatic).v0id().InputsAutoType(50U, 53U, 71U).Inlined();
+            INST(73U, Opcode::LoadObject).s32().Inputs(50U).ObjField(INT32_FIELD);
+            INST(74U, Opcode::LoadObject).s32().Inputs(53U).ObjField(INT32_FIELD);
+            INST(75U, Opcode::Add).s32().Inputs(73U, 74U);
+            INST(76U, Opcode::ReturnInlined).v0id().Inputs(71U);
+            INST(77U, Opcode::Add).s32().Inputs(51U, 75U);
+            INST(78U, Opcode::IfImm).SrcType(DataType::INT32).CC(CC_GT).Inputs(77U).Imm(30U);
+        }
+        BASIC_BLOCK(8U, -1L)
+        {
+            INST(81U, Opcode::Return).i32().Inputs(77U);
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+}
+
+// CC-OFFNXT(G.FUD.05) long test representation of IR
+OUT_GRAPH(PhiAndPhiInputMaterialization, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        PARAMETER(0U, 0U).b();
+        PARAMETER(1U, 1U).b();
+
+        CONSTANT(2U, 1U).i32();
+        CONSTANT(3U, 2U).i32();
+        CONSTANT(4U, 3U).i32();
+        NULLPTR(115U);
+
+        BASIC_BLOCK(2U, 14U, 4U)
+        {
+            INST(20U, Opcode::SaveState);
+            INST(21U, Opcode::LoadAndInitClass).ref().Inputs(20U).Class(CUSTOM_CLASS);
+            INST(22U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_EQ).Inputs(0U).Imm(0U);
+        }
+        BASIC_BLOCK(4U, 14U) {}
+        BASIC_BLOCK(14U, 5U)
+        {
+            // preheader
+            INST(105, Opcode::Phi).i32().Inputs(2U, 3U);
+            INST(109U, Opcode::SaveState);
+            INST(110U, Opcode::NewObject).Inputs(21U, 109U).ref();
+            INST(111U, Opcode::StoreObject).s32().Inputs(110U, 105U).ObjField(INT32_FIELD);
+        }
+        BASIC_BLOCK(5U, 6U, 7U)
+        {
+            // First input dominates phi, materialized
+            INST(50U, Opcode::Phi).ref().Inputs(110U, 113U);
+            INST(51U, Opcode::Phi).s32().Inputs(2U, 77U);
+            INST(55U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_EQ).Inputs(1U).Imm(0U);
+        }
+        BASIC_BLOCK(7U, 5U, 8U)
+        {
+            INST(71U, Opcode::SaveState).Inputs(50U, 51U).SrcVregs({0U, 1U});
+            INST(72U, Opcode::CallStatic).v0id().InputsAutoType(50U, 115U, 71U).Inlined();
+            INST(73U, Opcode::LoadObject).s32().Inputs(50U).ObjField(INT32_FIELD);
+            INST(75U, Opcode::Add).s32().Inputs(73U, 4U);
+            INST(76U, Opcode::ReturnInlined).v0id().Inputs(71U);
+            INST(77U, Opcode::Add).s32().Inputs(51U, 75U);
+            INST(112U, Opcode::SaveState).Inputs();
+            INST(113U, Opcode::NewObject).Inputs(21U, 112U).ref();
+            INST(114U, Opcode::StoreObject).s32().Inputs(113U, 4U).ObjField(INT32_FIELD);
+            INST(78U, Opcode::IfImm).SrcType(DataType::INT32).CC(CC_GT).Inputs(77U).Imm(30U);
+        }
+        BASIC_BLOCK(8U, -1L)
+        {
+            INST(81U, Opcode::Return).i32().Inputs(77U);
+        }
+        BASIC_BLOCK(6U, -1L)
+        {
+            INST(106U, Opcode::SaveState).Inputs(50U).SrcVregs({VirtualRegister::BRIDGE});
+            INST(107U, Opcode::NewObject).Inputs(21U, 106U).ref();
+            INST(108U, Opcode::StoreObject).s32().Inputs(107U, 4U).ObjField(INT32_FIELD);
+            // Do not crash when phi (v50) input (new v107) is also input to savestate
+            INST(61U, Opcode::SaveStateDeoptimize).Inputs(50U, 51U, 107U).SrcVregs({0U, 1U, 2U});
+            INST(62U, Opcode::Deoptimize).Inputs(61U);
+        }
+
+        // NOLINTEND(readability-magic-numbers)
+    }
+}
+
+TEST_F(EscapeAnalysisTest, PhiAndPhiInputMaterialization)
+{
+    src_graph::PhiAndPhiInputMaterialization::CREATE(GetGraph());
+
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::PhiAndPhiInputMaterialization::CREATE(graph);
+
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
 }  // namespace ark::compiler

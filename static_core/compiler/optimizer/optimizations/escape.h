@@ -451,7 +451,6 @@ private:
     Inst *ResolveAlias(const StateOwner &alias, const Inst *inst);
     void InitializeObject(Inst *alloc, Inst *instBefore, VirtualState *state, Inst *newAlloc);
     void MaterializeObjects();
-    void ErasePhiInputsFromVState(ArenaMap<Inst *, VirtualState *> &state);
     Inst *Materialize(Inst *originalInst, Inst *ssAlloc, Inst *ssInit, VirtualState *state);
     void MaterializeAtNewSaveState(Inst *site, ArenaMap<Inst *, VirtualState *> &state);
     void MaterializeInEmptyBlock(BasicBlock *block, ArenaMap<Inst *, VirtualState *> &state);

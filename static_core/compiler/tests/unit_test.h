@@ -97,7 +97,13 @@ struct RuntimeInterfaceMock : public compiler::RuntimeInterface {
 
     DataType::Type GetArrayComponentType(PandaRuntimeInterface::ClassPtr klass) const override
     {
-        return classTypes_ == nullptr ? DataType::NO_TYPE : (*classTypes_)[klass];
+        return arrayComponentTypes_ == nullptr ? DataType::NO_TYPE : (*arrayComponentTypes_)[klass];
+    }
+
+    PandaRuntimeInterface::ClassPtr GetClass([[maybe_unused]] MethodPtr method,
+                                             [[maybe_unused]] IdType id) const override
+    {
+        return classes_ == nullptr ? nullptr : (*classes_)[id];
     }
 
 private:
@@ -110,7 +116,8 @@ private:
     DataType::Type returnType_ {DataType::NO_TYPE};
     ArenaVector<DataType::Type> *argTypes_ {nullptr};
     ArenaUnorderedMap<PandaRuntimeInterface::FieldPtr, DataType::Type> *fieldTypes_ {nullptr};
-    ArenaUnorderedMap<PandaRuntimeInterface::ClassPtr, DataType::Type> *classTypes_ {nullptr};
+    ArenaUnorderedMap<PandaRuntimeInterface::ClassPtr, DataType::Type> *arrayComponentTypes_ {nullptr};
+    ArenaUnorderedMap<IdType, PandaRuntimeInterface::ClassPtr> *classes_ {nullptr};
 
     friend class GraphTest;
     friend class GraphCreator;
@@ -265,9 +272,14 @@ public:
             graph_->GetAllocator()->New<ArenaUnorderedMap<PandaRuntimeInterface::FieldPtr, DataType::Type>>(
                 graph_->GetAllocator()->Adapter());
 
-        runtime_.classTypes_ =
+        runtime_.arrayComponentTypes_ =
             graph_->GetAllocator()->New<ArenaUnorderedMap<PandaRuntimeInterface::ClassPtr, DataType::Type>>(
                 graph_->GetAllocator()->Adapter());
+
+        runtime_.classes_ =
+            graph_->GetAllocator()
+                ->New<ArenaUnorderedMap<PandaRuntimeInterface::IdType, PandaRuntimeInterface::ClassPtr>>(
+                    graph_->GetAllocator()->Adapter());  // CC-OFF(G.FMT.06-CPP) project code style
     }
     ~GraphTest() override = default;
 
@@ -308,9 +320,14 @@ public:
         (*runtime_.fieldTypes_)[field] = type;
     }
 
-    void RegisterClassType(PandaRuntimeInterface::ClassPtr klass, DataType::Type type)
+    void RegisterArrayComponentType(PandaRuntimeInterface::ClassPtr klass, DataType::Type type)
     {
-        (*runtime_.classTypes_)[klass] = type;
+        (*runtime_.arrayComponentTypes_)[klass] = type;
+    }
+
+    void RegisterClass(PandaRuntimeInterface::IdType id, PandaRuntimeInterface::ClassPtr klass)
+    {
+        (*runtime_.classes_)[id] = klass;
     }
 
 protected:
