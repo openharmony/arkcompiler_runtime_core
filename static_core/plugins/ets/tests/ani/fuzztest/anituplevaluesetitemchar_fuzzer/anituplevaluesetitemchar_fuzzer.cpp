@@ -38,7 +38,8 @@ void AniTupleValueSetItemCharFuzzTest(const char *data, size_t size)
     engine->AniGetTuple(&tuple);
 
     ani_char val {};
-    env->TupleValue_SetItem_Char(tuple, size, val);
+    auto index = static_cast<ani_size>(static_cast<unsigned int>(data[0]));
+    env->TupleValue_SetItem_Char(tuple, index, val);
 }
 }  // namespace OHOS
 

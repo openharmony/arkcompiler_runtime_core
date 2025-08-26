@@ -38,7 +38,8 @@ void AniTupleValueGetItemBooleanFuzzTest(const char *data, size_t size)
     engine->AniGetTuple(&tuple);
 
     ani_boolean val {};
-    env->TupleValue_GetItem_Boolean(tuple, size, &val);
+    auto index = static_cast<ani_size>(static_cast<unsigned int>(data[0]));
+    env->TupleValue_GetItem_Boolean(tuple, index, &val);
 }
 }  // namespace OHOS
 
