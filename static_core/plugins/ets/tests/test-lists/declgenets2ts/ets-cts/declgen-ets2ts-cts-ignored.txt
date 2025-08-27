@@ -40,6 +40,7 @@
 07.expressions/32.lambda_expression/01.lambda_signature/positive_2.ets
 07.expressions/32.lambda_expression/01.lambda_signature/positive_3.ets
 07.expressions/32.lambda_expression/01.lambda_signature/positive_4.ets
+04.names_declarations_and_scopes/07.function_declarations/03.readonly_parameters/readonly_custom_neg_33.ets
 #FailKind.ABORT_FAIL - 68 tests:
 07.expressions/05.object_literal/03.object_literal_of_record_type/re_14.ets
 13.compilation_units/06.namespace_declarations/namespace_declarations_neg15.ets
