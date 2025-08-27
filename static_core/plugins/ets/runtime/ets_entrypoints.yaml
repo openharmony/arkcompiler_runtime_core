@@ -602,7 +602,7 @@
 - name: StringStartsWithBaseNativePlus
   entrypoint: StringStartsWithBaseNativePlus
   bridge: none
-  properties: []
+  properties: [irtoc]
   signature:
     - uint8_t             # boolean (result)
     - ark::ObjectHeader*  # string to check
@@ -632,7 +632,7 @@
 - name: StringEndsWithBaseNativePlus
   entrypoint: StringEndsWithBaseNativePlus
   bridge: none
-  properties: []
+  properties: [irtoc]
   signature:
     - uint8_t             # boolean (result)
     - ark::ObjectHeader*  # string to check
@@ -763,7 +763,7 @@
 - name: StringIndexOfCompressedSmallNativePlus
   entrypoint: StringIndexOfCompressedSmallNativePlus
   bridge: none
-  properties: []
+  properties: [irtoc]
   signature:
     - int32_t             # index of char in the string if any (result)
     - void*               # u8 string data ptr
@@ -773,7 +773,7 @@
 - name: StringIndexOfCompressedMediumNativePlus
   entrypoint: StringIndexOfCompressedMediumNativePlus
   bridge: none
-  properties: []
+  properties: [irtoc]
   signature:
     - int32_t             # index of char in the string if any (result)
     - void*               # u8 string data ptr
@@ -783,7 +783,7 @@
 - name: StringIndexOfCompressedLargeNativePlus
   entrypoint: StringIndexOfCompressedLargeNativePlus
   bridge: none
-  properties: []
+  properties: [irtoc]
   signature:
     - int32_t             # index of char in the string if any (result)
     - void*               # u8 string data ptr
@@ -793,7 +793,7 @@
 - name: StringIndexOfCompressedNativePlus
   entrypoint: StringIndexOfCompressedNativePlus
   bridge: none
-  properties: []
+  properties: [irtoc]
   signature:
     - int32_t             # index of char in the string if any (result)
     - void*               # u8 string data ptr
@@ -803,7 +803,7 @@
 - name: StringIndexOfUncompressedSmallNativePlus
   entrypoint: StringIndexOfUncompressedSmallNativePlus
   bridge: none
-  properties: []
+  properties: [irtoc]
   signature:
     - int32_t             # index of char in the string if any (result)
     - void*               # u16 string data ptr
@@ -813,7 +813,7 @@
 - name: StringIndexOfUncompressedMediumNativePlus
   entrypoint: StringIndexOfUncompressedMediumNativePlus
   bridge: none
-  properties: []
+  properties: [irtoc]
   signature:
     - int32_t             # index of char in the string if any (result)
     - void*               # u16 string data ptr
@@ -823,7 +823,7 @@
 - name: StringIndexOfUncompressedNativePlus
   entrypoint: StringIndexOfUncompressedNativePlus
   bridge: none
-  properties: []
+  properties: [irtoc]
   signature:
     - int32_t             # index of char in the string if any (result)
     - void*               # u16 string data ptr

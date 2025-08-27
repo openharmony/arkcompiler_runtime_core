@@ -1417,7 +1417,7 @@ entrypoints:
 - name: StringEqualsUnrollCompressedNativePlus
   entrypoint: StringEqualsUnrollCompressedNativePlus
   bridge: none
-  properties: []
+  properties: [irtoc]
   signature:
     - uint8_t
     - void*                     # MethodPtr, fake
