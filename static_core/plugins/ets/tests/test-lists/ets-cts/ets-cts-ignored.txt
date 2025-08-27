@@ -86,20 +86,6 @@
 #24420
 03.types/20.union_types/ut_34.ets
 
-# 26826, 21255 (no type Exception)
-03.types/15.type_bigint/bint_n_0.ets
-03.types/15.type_bigint/bint_n_1.ets
-03.types/15.type_bigint/bint_n_2.ets
-03.types/15.type_bigint/bint_n_3.ets
-03.types/15.type_bigint/bint_n_4.ets
-03.types/15.type_bigint/bint_n_5.ets
-03.types/15.type_bigint/bint_n_6.ets
-03.types/15.type_bigint/bint_n_7.ets
-03.types/15.type_bigint/bint_n_8.ets
-03.types/15.type_bigint/bint_n_9.ets
-03.types/15.type_bigint/bint_n_10.ets
-03.types/15.type_bigint/bint_n_11.ets
-
 #26072 expected equality failed: '0' === ' ''
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/assn_var/assn-var_1.ets
 
@@ -806,29 +792,6 @@
 04.names_declarations_and_scopes/08.declarations_with_overload_signatures/03.constructor_with_overload_signatures/overload_constructor_decl_99.ets
 04.names_declarations_and_scopes/08.declarations_with_overload_signatures/03.constructor_with_overload_signatures/overload_constructor_decl_9.ets
 
-# 28694
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_type_alias/generic_type_alias_example_8.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_type_alias/generic_type_alias_wrong_constraint_0.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_type_alias/generic_type_alias_wrong_constraint_1.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_type_alias/generic_type_alias_wrong_constraint_10.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_type_alias/generic_type_alias_wrong_constraint_11.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_type_alias/generic_type_alias_wrong_constraint_2.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_type_alias/generic_type_alias_wrong_constraint_3.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_type_alias/generic_type_alias_wrong_constraint_4.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_type_alias/generic_type_alias_wrong_constraint_5.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_type_alias/generic_type_alias_wrong_constraint_6.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_type_alias/generic_type_alias_wrong_constraint_7.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_type_alias/generic_type_alias_wrong_constraint_8.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_type_alias/generic_type_alias_wrong_constraint_9.ets
-
-#24441
-05.generics/01.type_parameters/03.type_parameter_variance/generic_classes/type_parameter_variance_out_1.ets
-05.generics/01.type_parameters/03.type_parameter_variance/generic_classes/type_parameter_variance_out_2.ets
-05.generics/01.type_parameters/03.type_parameter_variance/generic_classes/type_parameter_variance_out_4.ets
-05.generics/01.type_parameters/03.type_parameter_variance/generic_interfaces/type_parameter_variance_out_1.ets
-05.generics/01.type_parameters/03.type_parameter_variance/generic_interfaces/type_parameter_variance_out_2.ets
-05.generics/01.type_parameters/03.type_parameter_variance/generic_interfaces/type_parameter_variance_out_4.ets
-
 #24448
 05.generics/01.type_parameters/03.type_parameter_variance/generic_classes/wrong_type_parameter_variance_4.ets
 
@@ -1193,73 +1156,20 @@
 07.expressions/20.unary_expressions/06.unary_minus/unary_minus_long_enum.ets
 
 #28004 Exponentiation operator rejected
-07.expressions/21.multiplicative_expressions/04.exponentiation/inf_0.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/inf_1.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/inf_10.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/inf_11.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/inf_12.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/inf_13.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/inf_14.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/inf_15.ets
 07.expressions/21.multiplicative_expressions/04.exponentiation/inf_16.ets
 07.expressions/21.multiplicative_expressions/04.exponentiation/inf_17.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/inf_18.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/inf_19.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/inf_2.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/inf_20.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/inf_21.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/inf_22.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/inf_23.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/inf_24.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/inf_25.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/inf_3.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/inf_4.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/inf_5.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/inf_6.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/inf_7.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/inf_8.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/inf_9.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_0.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_1.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_10.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_11.ets
 07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_12.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_13.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_14.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_15.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_16.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_17.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_18.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_19.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_2.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_20.ets
 07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_21.ets
 07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_22.ets
 07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_23.ets
 07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_24.ets
 07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_25.ets
 07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_26.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_3.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_4.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_5.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_6.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_7.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_8.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_9.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/nan_0.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/nan_1.ets
 07.expressions/21.multiplicative_expressions/04.exponentiation/nan_10.ets
 07.expressions/21.multiplicative_expressions/04.exponentiation/nan_11.ets
 07.expressions/21.multiplicative_expressions/04.exponentiation/nan_12.ets
 07.expressions/21.multiplicative_expressions/04.exponentiation/nan_13.ets
 07.expressions/21.multiplicative_expressions/04.exponentiation/nan_14.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/nan_2.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/nan_3.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/nan_4.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/nan_5.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/nan_6.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/nan_7.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/nan_8.ets
 07.expressions/21.multiplicative_expressions/04.exponentiation/nan_9.ets
 
 #24367 no CTE on equality expressions with numeric types vs. enum int
@@ -1496,7 +1406,7 @@
 09.classes/09.constructor_declaration/constructor_declaration_singleton5.ets
 09.classes/09.constructor_declaration/constructor_declaration_with_type_parameters6.ets
 
-#28059
+#16088
 09.classes/09.constructor_declaration/constructor_declaration_internal1.ets
 09.classes/09.constructor_declaration/constructor_declaration_internal2.ets
 
@@ -1573,20 +1483,6 @@
 10.interfaces/06.interface_inheritance/multiple_interface/child_specifies_parent_use_case/child_specifies_parent_use_case_18.ets
 10.interfaces/06.interface_inheritance/multi_layer_interface/type_system/type_system_23.ets
 10.interfaces/06.interface_inheritance/superinterfaces_and_subinterfaces/interface_inheritance_const/const_06.ets
-
-#28964
-11.enumerations/01.enumeration_integer_values/enum_long_10.ets
-11.enumerations/01.enumeration_integer_values/enum_long_11.ets
-11.enumerations/01.enumeration_integer_values/enum_long_12.ets
-11.enumerations/01.enumeration_integer_values/enum_long_13.ets
-11.enumerations/01.enumeration_integer_values/enum_long_14.ets
-11.enumerations/01.enumeration_integer_values/enum_long_15.ets
-
-#28992
-11.enumerations/01.enumeration_integer_values/enum_long_16.ets
-11.enumerations/01.enumeration_integer_values/enum_long_17.ets
-11.enumerations/01.enumeration_integer_values/enum_long_18.ets
-11.enumerations/01.enumeration_integer_values/enum_long_19.ets
 
 #28994
 11.enumerations/01.enumeration_integer_values/enum_long_20.ets
@@ -2115,7 +2011,6 @@
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_17.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_18.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_19.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_1.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_20.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_21.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_22.ets
@@ -2126,7 +2021,6 @@
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_27.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_28.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_29.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_2.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_30.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_31.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_32.ets
@@ -2137,7 +2031,6 @@
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_37.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_38.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_39.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_3.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_40.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_41.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_42.ets
@@ -2146,24 +2039,8 @@
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_45.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_46.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_47.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_48.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_49.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_4.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_50.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_51.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_52.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_53.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_54.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_55.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_56.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_57.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_58.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_59.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_5.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_60.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_61.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_62.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_6.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_7.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_8.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_9.ets
@@ -2178,7 +2055,6 @@
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_17.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_18.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_19.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_1.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_20.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_21.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_22.ets
@@ -2189,32 +2065,15 @@
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_27.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_28.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_29.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_2.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_30.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_31.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_32.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_33.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_34.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_35.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_36.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_37.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_38.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_39.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_3.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_40.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_41.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_42.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_43.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_44.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_45.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_46.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_47.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_48.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_49.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_4.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_50.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_5.ets
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_6.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_7.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_8.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_9.ets
