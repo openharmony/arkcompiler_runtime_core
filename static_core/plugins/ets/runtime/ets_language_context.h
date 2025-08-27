@@ -75,6 +75,11 @@ public:
         return utf::CStringAsMutf8(panda_file_items::class_descriptors::CLASS.data());
     }
 
+    const uint8_t *GetUniqueObjectClassDescriptor() const override
+    {
+        return utf::CStringAsMutf8(panda_file_items::class_descriptors::NULL_VALUE.data());
+    }
+
     const uint8_t *GetClassArrayClassDescriptor() const override
     {
         return utf::CStringAsMutf8(panda_file_items::class_descriptors::CLASS_ARRAY.data());

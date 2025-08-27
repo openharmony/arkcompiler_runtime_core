@@ -183,7 +183,7 @@ Type Builder::BuildUndefined()
 
 Type Builder::BuildNull()
 {
-    return CreateType("Lstd/core/Object;");
+    return CreateType("Lstd/core/Null;");
 }
 
 Type Builder::BuildBoolean()
