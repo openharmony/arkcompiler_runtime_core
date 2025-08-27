@@ -53,7 +53,7 @@ export const SpecificTypes = [
     ts.SyntaxKind.UnknownKeyword
 ];
 export const FINAL_CLASS: string[] = [
-    'ArgumentOutOfRangeException',
+    'ArgumentOutOfRangeError',
     'ArrayIndexOutOfBoundsError',
     'ArrayStoreError',
     'ArrayType',

@@ -697,7 +697,7 @@ export final class Double extends Floating implements Comparable<Double> {
      * @returns the result of parsing
      *
      * @note
-     * If args ('10', 1) -> thrown ArgumentOutOfRangeException, ('10', 37) -> thrown ArgumentOutOfRangeException
+     * If args ('10', 1) -> thrown ArgumentOutOfRangeError, ('10', 37) -> thrown ArgumentOutOfRangeError
      * If args ('10', 2) -> 2
      * If args ('10', 10) -> 10, ('10', 0) -> 10
      * If args ('ff', 16) -> 255
@@ -720,7 +720,7 @@ export final class Double extends Floating implements Comparable<Double> {
      * @returns the result of parsing
      *
      * @note
-     * If args ('10', 1) -> thrown ArgumentOutOfRangeException, ('10', 37) -> thrown ArgumentOutOfRangeException
+     * If args ('10', 1) -> thrown ArgumentOutOfRangeError, ('10', 37) -> thrown ArgumentOutOfRangeError
      * If args ('10', 2) -> 2
      * If args ('10', 10) -> 10, ('10', 0) -> 10
      * If args ('ff', 16) -> 255
@@ -752,7 +752,7 @@ export final class Double extends Floating implements Comparable<Double> {
      * @returns the result of parsing
      *
      * @note
-     * If args ('10', 1) -> thrown ArgumentOutOfRangeException, ('10', 37) -> thrown ArgumentOutOfRangeException
+     * If args ('10', 1) -> thrown ArgumentOutOfRangeError, ('10', 37) -> thrown ArgumentOutOfRangeError
      * If args ('10', 2) -> 2
      * If args ('10', 10) -> 10, ('10', 0) -> 10
      * If args ('ff', 16) -> 255
@@ -842,7 +842,7 @@ export final class Double extends Floating implements Comparable<Double> {
      * @note
      * If d = new Double(0.25); d.toPrecision(4) -> '0.2500'
      * If d = new Double(1.01); d.toPrecision(4.7) -> '1.010'
-     * If d = new Double(0.25); d.toPrecision(0) -> thrown ArgumentOutOfRangeException
+     * If d = new Double(0.25); d.toPrecision(0) -> thrown ArgumentOutOfRangeError
      * If d = new Double(12345.123455); d.toPrecision(10) -> '12345.12346'
      *
      * @remark
@@ -879,7 +879,7 @@ export final class Double extends Floating implements Comparable<Double> {
      * If d = new Double(0.12345); d.toFixed(3) -> '0.123'
      * If d = new Double(Double.POSITIVE_INFINITY); d.toFixed(3) -> 'Infinity'
      * If d = new Double(Double.NaN); d.toFixed(3) -> 'NaN'
-     * If d = new Double(0.25); d.toFixed(200) -> thrown ArgumentOutOfRangeException
+     * If d = new Double(0.25); d.toFixed(200) -> thrown ArgumentOutOfRangeError
      *
      * @remark
      * Implemented as native function,  @see `toFixed()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#693).

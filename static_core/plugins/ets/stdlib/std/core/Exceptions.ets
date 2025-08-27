@@ -36,17 +36,10 @@ export final class NoDataException extends Exception {
 /**
  * Represents exception that is thrown when provided argument have value outside the allowable range
  */
-export final class ArgumentOutOfRangeException extends Exception {
-    constructor() {
-        super();
-    }
-
-    constructor(s: String) {
-        super(s);
-    }
-
-    constructor(s: String, cause: Object) {
-        super(s, cause);
+export final class ArgumentOutOfRangeError extends Error {
+    // NOTE(kparshukov): #28318 move to std/core/Errors.ets
+    constructor(message?: String, options?: ErrorOptions) {
+        super("ArgumentOutOfRangeError", message, options)
     }
 }
 

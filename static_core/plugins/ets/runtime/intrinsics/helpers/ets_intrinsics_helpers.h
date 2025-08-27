@@ -382,8 +382,8 @@ EtsString *FpToString(FpType number, int radix)
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         snprintf_s(buf.data(), buf.size(), buf.size() - 1, "radix must be %.f to %.f", helpers::MIN_RADIX,
                    helpers::MAX_RADIX);
-        ThrowEtsException(EtsCoroutine::GetCurrent(),
-                          panda_file_items::class_descriptors::ARGUMENT_OUT_OF_RANGE_EXCEPTION, buf.data());
+        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::ARGUMENT_OUT_OF_RANGE_ERROR,
+                          buf.data());
         return nullptr;
     }
 

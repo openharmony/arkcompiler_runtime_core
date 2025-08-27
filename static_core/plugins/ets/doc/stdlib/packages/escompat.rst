@@ -15991,7 +15991,7 @@ Methods
 
  - d\: :kw:`number` ---  fixed size (integer part); must be in \[0, 100\]
 
-| **Note\:** If d = new number(0.1); d.toFixed(0) -\> \"0\" If d = new number(0.7); d.toFixed(0) -\> \"1\" If d = new number(0.12345); d.toFixed(1) -\> \"0.1\" If d = new number(0.12345); d.toFixed(3) -\> \"0.123\" If d = new number(number.POSITIVE_INFINITY); d.toFixed(3) -\> \"Infinity\" If d = new number(number.NaN); d.toFixed(3) -\> \"NaN\" If d = new number(0.25); d.toFixed(200) -\> thrown ArgumentOutOfRangeException
+| **Note\:** If d = new number(0.1); d.toFixed(0) -\> \"0\" If d = new number(0.7); d.toFixed(0) -\> \"1\" If d = new number(0.12345); d.toFixed(1) -\> \"0.1\" If d = new number(0.12345); d.toFixed(3) -\> \"0.123\" If d = new number(number.POSITIVE_INFINITY); d.toFixed(3) -\> \"Infinity\" If d = new number(number.NaN); d.toFixed(3) -\> \"NaN\" If d = new number(0.25); d.toFixed(200) -\> thrown ArgumentOutOfRangeError
 |
 | **Remark\:** Implemented as native function,
 |
@@ -16075,7 +16075,7 @@ Methods
 
  - d\: :kw:`number` ---  precision (rounded to nearest integer); must be in \[1, 100\]
 
-| **Note\:** If d = new number(0.25); d.toPrecision(4) -\> \"0.2500\" If d = new number(1.01); d.toPrecision(4.7) -\> \"1.010\" If d = new number(0.25); d.toPrecision(0) -\> thrown ArgumentOutOfRangeException If d = new number(12345.123455); d.toPrecision(10) -\> \"12345.12346\"
+| **Note\:** If d = new number(0.25); d.toPrecision(4) -\> \"0.2500\" If d = new number(1.01); d.toPrecision(4.7) -\> \"1.010\" If d = new number(0.25); d.toPrecision(0) -\> thrown ArgumentOutOfRangeError If d = new number(12345.123455); d.toPrecision(10) -\> \"12345.12346\"
 |
 | **Remark\:** Implemented as native function,
 |
@@ -16227,7 +16227,7 @@ Methods
  - s\: :ref:`string<LsLtLd.LcLoLrLe.USLtLrLiLnLg>` ---  the string to convert
  - r\: :kw:`number` ---  the radix of conversion; should be \[2, 36\]; 0 assumed to be 10
 
-| **Note\:** If args (\"10\", 1) -\> thrown ArgumentOutOfRangeException, (\"10\", 37) -\> thrown ArgumentOutOfRangeException If args (\"10\", 2) -\> 2 If args (\"10\", 10) -\> 10, (\"10\", 0) -\> 10 If args (\"ff\", 16) -\> 255 etc.
+| **Note\:** If args (\"10\", 1) -\> thrown ArgumentOutOfRangeError, (\"10\", 37) -\> thrown ArgumentOutOfRangeError If args (\"10\", 2) -\> 2 If args (\"10\", 10) -\> 10, (\"10\", 0) -\> 10 If args (\"ff\", 16) -\> 255 etc.
 |
 | **Remark\:** Implemented as native function,
 |

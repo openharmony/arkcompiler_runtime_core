@@ -24,13 +24,13 @@ function main(): int {
 
 function test1NegInf() {
     // Test with doubleInf has already added in {tests}/stdlib-templates/std/math/list.std_math_log.yaml
-    let expectedException = new ArgumentOutOfRangeException("Integer argument for log10 should be positive")
+    let expectedError = new ArgumentOutOfRangeError("Integer argument for log10 should be positive")
     const v : int = (doubleNegInf).toInt();
-    arktest.expectException((): void => { log10(v) }, expectedException);
+    arktest.expectError((): void => { log10(v) }, expectedError);
 }
 
 function test2NaN() {
-    let expectedException = new ArgumentOutOfRangeException("Integer argument for log10 should be positive")
+    let expectedError = new ArgumentOutOfRangeError("Integer argument for log10 should be positive")
     const v : int = (doubleNaN).toInt();
-    arktest.expectException((): void => { log10(v) }, expectedException);
+    arktest.expectError((): void => { log10(v) }, expectedError);
 }
