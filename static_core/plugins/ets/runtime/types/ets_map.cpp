@@ -15,6 +15,7 @@
 
 #include "plugins/ets/runtime/types/ets_map.h"
 #include "plugins/ets/runtime/types/ets_base_enum.h"
+#include "plugins/ets/runtime/types/ets_bigint.h"
 
 namespace ark::ets {
 static constexpr uint32_t HASH_SIGN_SHIFT = 31;
@@ -42,6 +43,25 @@ static inline bool Compare(EtsObject *a, EtsObject *b)
     T aVal = EtsBoxPrimitive<T>::FromCoreType(a)->GetValue();
     T bVal = EtsBoxPrimitive<T>::FromCoreType(b)->GetValue();
     return aVal == bVal;
+}
+
+static bool CompareBigInt(EtsObject *a, EtsObject *b)
+{
+    auto *bigA = reinterpret_cast<EtsBigInt *>(a);
+    auto *bigB = reinterpret_cast<EtsBigInt *>(b);
+
+    if (bigA->GetSign() != bigB->GetSign()) {
+        return false;
+    }
+    if (bigA->GetBytes()->GetLength() != bigB->GetBytes()->GetLength()) {
+        return false;
+    }
+    for (uint32_t i = 0; i < bigA->GetBytes()->GetLength(); ++i) {
+        if (bigA->GetBytes()->Get(i) != bigB->GetBytes()->Get(i)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 static bool CompareBoxed(EtsObject *a, EtsObject *b)
@@ -117,6 +137,10 @@ static bool Compare(EtsObject *a, EtsObject *b)
         return aEnumValue == bEnumValue;
     }
 
+    if (aKlass->IsBigInt()) {
+        return CompareBigInt(a, b);
+    }
+
     return false;
 }
 
@@ -135,6 +159,19 @@ static inline uint32_t GetHashFloats(EtsObject *obj)
 
     // AARCH64 needs float->int->uint cast to avoid returning 0.
     return static_cast<uint32_t>(static_cast<int32_t>(val));
+}
+
+static uint32_t GetBigIntHashCode(EtsBigInt *b)
+{
+    auto hashCode = static_cast<uint32_t>(b->GetSign());
+    auto *bytes = reinterpret_cast<EtsIntArray *>(b->GetBytes());
+    if (bytes == nullptr) {
+        return hashCode;
+    }
+    for (size_t i = 0; i < bytes->GetLength(); i++) {
+        hashCode = hashCode * HASH_SIGN_SHIFT + static_cast<int32_t>(bytes->Get(i));
+    }
+    return hashCode;
 }
 
 uint32_t EtsEscompatMap::GetHashCode(EtsObject *&key)
@@ -171,6 +208,10 @@ uint32_t EtsEscompatMap::GetHashCode(EtsObject *&key)
 
     if (klass->IsStringClass()) {
         return EtsString::FromEtsObject(key)->GetCoreType()->GetHashcode();
+    }
+
+    if (klass->IsBigInt()) {
+        return GetBigIntHashCode(reinterpret_cast<EtsBigInt *>(key));
     }
 
     return key->GetHashCode();
