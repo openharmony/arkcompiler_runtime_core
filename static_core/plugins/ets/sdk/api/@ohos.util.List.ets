@@ -30,6 +30,7 @@ function createBusinessError(code: int, message: string) {
 export type ListComparatorFn<T> = (firstValue: T, secondValue: T) => double;
 export type ListForEachCb<T> = (value: T, index: int, list: List<T>) => void;
 export type ListReplaceCb<T> = (value: T, index: int, list: List<T>) => T;
+export type RecordData = undefined | null | Object | Record<string, RecordData> | Array<RecordData>;
 
 export class List<T> implements Iterable<T>, JsonReplacer {
     private buffer: LinkedList<T>;
@@ -90,12 +91,12 @@ export class List<T> implements Iterable<T>, JsonReplacer {
      * @param obj The object to compare with.
      * @returns True if the list is equal to the object.
      */
-    public equal(obj: Object): boolean {
+    public equal(obj: RecordData): boolean {
         if (!(obj instanceof Iterable)) {
             return false;
         }
 
-        let iterator = obj.$_iterator();
+        let iterator = (obj as Iterable<Any>).$_iterator();
         let element = iterator.next();
         let currentNode: ListNode<T> | undefined = this.buffer.head
         while (!element.done && currentNode !== undefined) {
