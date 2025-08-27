@@ -1684,16 +1684,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @note Mutating method
      */
-    public reverse(): this {
-        for (let i = 0; i < this.actualLength / 2; i++) {
-            const tmp = this.$_get_unsafe(i);
-            const idx_r = this.actualLength - 1 - i;
-            const val_r = this.$_get_unsafe(idx_r);
-            this.$_set_unsafe(i, val_r);
-            this.$_set_unsafe(idx_r, tmp);
-        }
-        return this;
-    }
+    public native reverse(): this;
 
     /**
      * Copying version of the reverse() method.

@@ -19,6 +19,7 @@
 #include <endian.h>
 #include "runtime/include/coretypes/string.h"
 #include "intrinsics.h"
+#include "interpreter/runtime_interface.h"
 #include "libpandabase/utils/utf.h"
 #include "libpandabase/utils/utils.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
@@ -467,6 +468,132 @@ extern "C" EtsEscompatArray *EtsEscompatArrayFill(EtsEscompatArray *array, EtsOb
     auto startInd = NormalizeIndex(start, actualLength);
     auto endInd = NormalizeIndex(end, actualLength);
     arrayHandle->GetData()->Fill(value, startInd, endInd);
+    return arrayHandle.GetPtr();
+}
+
+template <typename T>
+static void MemAtomicSwap(void *aAddr, void *bAddr)
+{
+    auto a = reinterpret_cast<std::atomic<T> *>(aAddr);
+    auto b = reinterpret_cast<std::atomic<T> *>(bAddr);
+    // NOTE: exchange works slower on device than load/store pair
+    // Atomic with relaxed order reason: use the relaxed memory order in hope the GC takes care
+    // of the memory ordering at a higher logical level
+    auto v1 = a->load(std::memory_order_relaxed);
+    // Atomic with relaxed order reason: use the relaxed memory order in hope the GC takes care
+    // of the memory ordering at a higher logical level
+    auto v2 = b->load(std::memory_order_relaxed);
+    // Atomic with relaxed order reason: use the relaxed memory order in hope the GC takes care
+    // of the memory ordering at a higher logical level
+    a->store(v2, std::memory_order_relaxed);
+    // Atomic with relaxed order reason: use the relaxed memory order in hope the GC takes care
+    // of the memory ordering at a higher logical level
+    b->store(v1, std::memory_order_relaxed);
+}
+
+template <typename T>
+static void MemAtomicSwapReadBarrier(mem::GCBarrierSet *barrierSet, const void *memStart, void *aAddr, void *bAddr)
+{
+    auto *a1 = reinterpret_cast<std::atomic<T> *>(aAddr);
+    auto *a2 = reinterpret_cast<std::atomic<T> *>(bAddr);
+    auto *b1 = reinterpret_cast<const std::atomic<T> *>(barrierSet->PreReadBarrier(
+        memStart, reinterpret_cast<uint8_t *>(aAddr) - reinterpret_cast<const uint8_t *>(memStart)));
+    auto *b2 = reinterpret_cast<const std::atomic<T> *>(barrierSet->PreReadBarrier(
+        memStart, reinterpret_cast<const uint8_t *>(bAddr) - reinterpret_cast<const uint8_t *>(memStart)));
+    // Atomic with relaxed order reason: use the relaxed memory order in hope the GC takes care
+    // of the memory ordering at a higher logical level
+    auto v1 = b1->load(std::memory_order_relaxed);
+    // Atomic with relaxed order reason: use the relaxed memory order in hope the GC takes care
+    // of the memory ordering at a higher logical level
+    auto v2 = b2->load(std::memory_order_relaxed);
+    // Atomic with relaxed order reason: use the relaxed memory order in hope the GC takes care
+    // of the memory ordering at a higher logical level
+    a2->store(v1, std::memory_order_relaxed);
+    // Atomic with relaxed order reason: use the relaxed memory order in hope the GC takes care
+    // of the memory ordering at a higher logical level
+    a1->store(v2, std::memory_order_relaxed);
+}
+
+template <typename T>
+static auto GetSwap([[maybe_unused]] void *arrAddr, [[maybe_unused]] mem::GCBarrierSet *readBarrierSet)
+{
+#ifdef ARK_HYBRID
+    bool usePreReadBarrier = readBarrierSet->IsPreReadBarrierEnabled();
+
+    return [usePreReadBarrier, readBarrierSet, arrAddr](T *aPtr, T *bPtr) {
+        if (usePreReadBarrier) {
+            MemAtomicSwapReadBarrier<T>(readBarrierSet, arrAddr, aPtr, bPtr);
+        } else {
+            MemAtomicSwap<T>(aPtr, bPtr);
+        }
+    };
+#else
+    return [](T *aPtr, T *bPtr) { MemAtomicSwap<T>(aPtr, bPtr); };
+#endif
+}
+
+// Performance measurement demonstrates that SWAPPED_BETWEEN_SAFEPOINT_THRESHOLD object pointers
+// are swapped in 0.20-0.40 ms.
+static constexpr size_t SWAPPED_BETWEEN_SAFEPOINT_THRESHOLD = 50000UL;
+
+template <typename T>
+static void RefReverse(void *arrAddr, int32_t length, mem::GCBarrierSet *barrierSet)
+{
+    auto *arr = static_cast<T *>(arrAddr);
+    auto swap = GetSwap<T>(arrAddr, barrierSet);
+    bool usePreBarrier = barrierSet->IsPreBarrierEnabled();
+
+    auto swapWithBarriers = [&swap, &usePreBarrier, barrierSet](T *aPtr, T *bPtr) {
+        if (usePreBarrier) {
+            barrierSet->PreBarrier(reinterpret_cast<void *>(*aPtr));
+            barrierSet->PreBarrier(reinterpret_cast<void *>(*bPtr));
+        }
+        swap(aPtr, bPtr);
+    };
+    auto putSafepoint = [&usePreBarrier, barrierSet]() {
+        ark::interpreter::RuntimeInterface::Safepoint();
+        usePreBarrier = barrierSet->IsPreBarrierEnabled();
+    };
+    auto halfLength = static_cast<size_t>(length) / 2;
+    for (size_t i = 0; i < halfLength / SWAPPED_BETWEEN_SAFEPOINT_THRESHOLD; ++i) {
+        for (size_t j = i * SWAPPED_BETWEEN_SAFEPOINT_THRESHOLD; j < (i + 1) * SWAPPED_BETWEEN_SAFEPOINT_THRESHOLD;
+             ++j) {
+            swapWithBarriers(&arr[j], &arr[length - 1 - j]);  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        }
+        if (barrierSet->GetPostType() != ark::mem::BarrierType::POST_WRB_NONE) {
+            barrierSet->PostBarrier(arr, i, halfLength / SWAPPED_BETWEEN_SAFEPOINT_THRESHOLD);
+        }
+        putSafepoint();
+    }
+    for (size_t i = (halfLength / SWAPPED_BETWEEN_SAFEPOINT_THRESHOLD) * SWAPPED_BETWEEN_SAFEPOINT_THRESHOLD;
+         i < halfLength; ++i) {
+        swapWithBarriers(&arr[i], &arr[length - 1 - i]);  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    }
+}
+
+extern "C" EtsEscompatArray *EtsEscompatArrayReverse(EtsEscompatArray *array)
+{
+    ASSERT(array != nullptr);
+    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(coro);
+    EtsHandle<EtsEscompatArray> arrayHandle(coro, array);
+    auto actualLength = static_cast<EtsInt>(array->GetActualLength());
+    /* the result will be exactly the same as it is */
+    const EtsInt minLength = 2;
+    if (actualLength < minLength) {
+        return array;
+    }
+
+    auto arrAddr = ToVoidPtr(ToUintPtr(arrayHandle->GetData()->GetData<ObjectPointerType>()));
+    auto *barrierSet = Thread::GetCurrent()->GetBarrierSet();
+
+    RefReverse<ObjectPointerType>(arrAddr, actualLength, barrierSet);
+
+    if (barrierSet->GetPostType() != ark::mem::BarrierType::POST_WRB_NONE) {
+        constexpr uint32_t OFFSET = ark::coretypes::Array::GetDataOffset();
+        const uint32_t size = actualLength * sizeof(ObjectPointerType);
+        barrierSet->PostBarrier(arrayHandle.GetPtr(), OFFSET, size);
+    }
     return arrayHandle.GetPtr();
 }
 

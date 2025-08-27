@@ -876,6 +876,7 @@ private joinObject(sep?: String): string {
  *
  * @note Mutating method
  */
+% if function_type != 'has_native'
 <%= access_public %> reverse<%= this_generic %>(<%= this_arg.chomp(', ') %>): <%= this_return_type %> {
     for (let i = 0; i < <%= this_len_int %> / 2; i++) {
         const tmp = <%= get_unsafe.(this, 'i') %>;
@@ -886,6 +887,9 @@ private joinObject(sep?: String): string {
     }
     return <%= this %>;
 }
+% else
+<%= access_public %> native reverse<%= this_generic %>(): <%= this_return_type %>;
+% end
 
 /**
  * Copying version of the reverse() method.

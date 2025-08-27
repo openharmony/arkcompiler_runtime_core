@@ -1637,6 +1637,16 @@ intrinsics:
         - escompat.Array
     impl: ark::ets::intrinsics::EtsEscompatArrayUnshiftInternal
 
+  - name: EscompatArrayReverse
+    space: ets
+    class_name: escompat.Array
+    method_name: reverse
+    static: false
+    signature:
+      ret: escompat.Array
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatArrayReverse
+
 ########################
 # escompat.ArrayBuffer #
 ########################
