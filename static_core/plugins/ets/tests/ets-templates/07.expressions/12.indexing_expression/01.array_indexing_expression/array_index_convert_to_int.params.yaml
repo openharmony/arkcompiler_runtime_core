@@ -13,25 +13,9 @@
 
 ---
 cases:
-    - index: 'true'
-    - index: 'false'
-    - index: 'null'
-    - index: 'undefined'
-    - index: 'never'
-    - index: 'void'
-    - index: 'Long.MAX_VALUE'
-    - index: 'new Object()'
-    - index: 'new Boolean()'
-    - index: 'Number.POSITIVE_INFINITY'
-    - index: 'Number.NEGATIVE_INFINITY'
-    - index: 'Number.MIN_VALUE'
-    - index: 'Number.MAX_VALUE'
-    - index: '" "'
-    - index: '1.0'
-    - index: '1.5'
-    - index: '1.1f'
-    - index: '2n'
-    - index: 'new Long(1)'
-    - index: 'new BigInt(0)'
-    - index: 'new Float(1)'
-    - index: 'new Number(2)'
+  - { type: long,   value: 0,    expected: 'Alice' }
+  - { type: Long,   value: 1,    expected: 'Bob'   }
+  - { type: float,  value: 1.0f, expected: 'Bob'   }
+  - { type: Float,  value: 0.8f, expected: 'Alice' }
+  - { type: double, value: 2.1,  expected: 'Carol' }
+  - { type: Number, value: 1.9,  expected: 'Bob'   }

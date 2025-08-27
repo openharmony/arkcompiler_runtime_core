@@ -15,15 +15,22 @@
 
 /*---
 desc: Test the array index access of an empty array.
-tags: [compile-only, positive]
 ---*/
 
 function main(): void {
+  let isPassed: boolean = false;
   let numbers: Array<number> = new Array<number>();
-  let first: number | undefined = numbers[0];
-  if (first !== undefined) {
-    // Safe to use `first` as a number
-  } else {
-    // Handle the case where the array is empty
+
+  try {
+    let first: number | undefined = numbers[0];
+  } catch (error) {
+    error = error as Error;
+    arktest.assertEQ('RangeError', error.name);
+    arktest.assertEQ('Out of bounds', error.message);
+    isPassed = true;
+  } finally {
+    if (!isPassed) {
+      throw new Error('No RangeError occured, but "Out of bounds" expected.');
+    }
   }
 }

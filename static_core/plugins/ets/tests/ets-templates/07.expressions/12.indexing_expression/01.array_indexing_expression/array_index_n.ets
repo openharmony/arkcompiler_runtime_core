@@ -15,7 +15,8 @@ limitations under the License.
 
 {% for c in cases %}
 /*---
-desc: For an array indexing, a type of index expression must be of a numeric type.
+desc: >-
+    Index expression for array indexing must be one of integer types, namely byte, short, or int. Otherwise, a compile-time error occurs.
 tags: [compile-only, negative]
 ---*/
 

@@ -13,15 +13,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+{% for c in cases %}
 /*---
-desc: Array access expression
+desc: >-
+    Index expression for array indexing must be one of integer types, namely byte, short, or int.
 ---*/
 
 let arr: int[] = [1, 2, 3];
 
 function main(): void {
-  let x = arr[0];
-  let y = arr[x];
-  let z = arr[x+1];
-  arktest.assertTrue( x == 1 && y == 2 && z == 3 )
+    let x: {{c.type}} = {{c.x}};
+    arktest.assertEQ({{c.value}}, arr[{{c.index}}])
 }
+{% endfor %}

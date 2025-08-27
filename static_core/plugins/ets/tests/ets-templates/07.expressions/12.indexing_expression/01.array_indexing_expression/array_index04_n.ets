@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,24 +13,15 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
 desc: >-
-    The object reference expression must be checked to evaluate to nullish value;
-    if it does, then the entire indexing-Expression equals undefined.
+    Index expression for array indexing must be one of integer types, namely byte, short, or int. Otherwise, a compile-time error occurs.
+tags: [compile-only, negative]
 ---*/
 
-function test(b: boolean) {
-    if (!b) {
-        throw new Error()
-    }
+function main(): void {
+  let an_array = [1, 2, 3];
+  let element = an_array[{{c.index}}];
 }
-
-function refNullish(): string[]|undefined {
-    let res: string[]|undefined = ["abc"]
-    return res
-}
-
-function main() {
-    test(refNullish()?.[0] == "abc")
-}
-
+{% endfor %}

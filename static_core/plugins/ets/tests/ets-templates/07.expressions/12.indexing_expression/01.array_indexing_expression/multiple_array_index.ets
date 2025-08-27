@@ -13,14 +13,19 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
-desc: Test the array index expression to modify array elements.
+desc: >-
+    Index expression for array indexing must be one of integer types, namely byte, short, or int. Otherwise, a compile-time error occurs.
 ---*/
 
+const arr: Array<FixedArray<ReadonlyArray<string|null|undefined>>> = [
+  [ [ "ab", "cd" ],       [ "ef", "gh" ], [ "ij", "kl" ] ],
+  [ [ null ],             [ undefined ],  [ "3", null ]  ],
+  [ [ undefined, "one" ], [ null, null ], [ "end" ]      ]
+]
+
 function main(): void {
-  let names: string[] = ["Alice", "Bob", "Carol"];
-  names[1] = "Martin";
-  arktest.assertEQ(names[0], "Alice");
-  arktest.assertEQ(names[1], "Martin");
-  arktest.assertEQ(names[2], "Carol");
+  arktest.assertEQ({{c.value}}, arr{{c.index}});
 }
+{% endfor %}

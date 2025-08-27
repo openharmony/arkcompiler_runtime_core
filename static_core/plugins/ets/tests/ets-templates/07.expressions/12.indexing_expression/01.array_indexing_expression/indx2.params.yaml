@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,8 +13,8 @@
 
 ---
 cases:
-    - index: '1.5'
-    - index: 'Number.POSITIVE_INFINITY'
-    - index: 'Number.NEGATIVE_INFINITY'
-    - index: 'Number.MIN_VALUE'
-    - index: 'Number.MAX_VALUE'
+  - { type: 'null',      value: '["abc", "def"]',   expected: '"abc"'     }
+  - { type: 'null',      value: 'null',             expected: 'undefined' }
+  - { type: 'undefined', value: '["abc", "def"]',   expected: '"abc"'     }
+  - { type: 'undefined', value: 'undefined',        expected: 'undefined' }
+    
