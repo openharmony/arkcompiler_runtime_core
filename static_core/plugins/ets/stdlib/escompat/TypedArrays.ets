@@ -87,7 +87,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     public static readonly BYTES_PER_ELEMENT: int = 1
     public readonly BYTES_PER_ELEMENT: int = Int8Array.BYTES_PER_ELEMENT
     public overload subarray { subarrayII, subarrayNI, subarrayIN, subarrayNN }
-    internal readonly lengthInt: int
+    protected readonly lengthInt: int
 
     /**
      * Creates an empty Int8Array.
@@ -291,14 +291,14 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         }
     }
 
-    internal zeroIfInfinity(val: number): number {
+    private zeroIfInfinity(val: number): number {
         if ((val == Infinity) || (val == -Infinity)) {
             return 0
         }
         return (val).toDouble()
     }
 
-    internal zeroIfInfinity(val: byte): byte {
+    private zeroIfInfinity(val: byte): byte {
         if ((val == Infinity) || (val == -Infinity)) {
             return Int.toByte(0)
         }
@@ -1820,7 +1820,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
 
     private final native getUnsafe(index: int): byte
 
-    internal setUnsafe(insertPos: int, val: byte): void {
+    private setUnsafe(insertPos: int, val: byte): void {
         const BPE = Int8Array.BYTES_PER_ELEMENT.toInt()
         let byteIndex = insertPos * BPE + this.byteOffset.toInt()
         let buf = this.buffer
@@ -1910,7 +1910,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     public static readonly BYTES_PER_ELEMENT: int = 2
     public readonly BYTES_PER_ELEMENT: int = Int16Array.BYTES_PER_ELEMENT
     public overload subarray { subarrayII, subarrayNI, subarrayIN, subarrayNN }
-    internal readonly lengthInt: int
+    protected readonly lengthInt: int
 
     /**
      * Creates an empty Int16Array.
@@ -2121,14 +2121,14 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         }
     }
 
-    internal zeroIfInfinity(val: number): number {
+    private zeroIfInfinity(val: number): number {
         if ((val == Infinity) || (val == -Infinity)) {
             return 0
         }
         return (val).toDouble()
     }
 
-    internal zeroIfInfinity(val: short): short {
+    private zeroIfInfinity(val: short): short {
         if ((val == Infinity) || (val == -Infinity)) {
             return Int.toShort(0)
         }
@@ -3650,7 +3650,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
 
     private final native getUnsafe(index: int): short
 
-    internal setUnsafe(insertPos: int, val: short): void {
+    private setUnsafe(insertPos: int, val: short): void {
         const BPE = Int16Array.BYTES_PER_ELEMENT.toInt()
         let byteIndex = insertPos * BPE + this.byteOffset.toInt()
         let buf = this.buffer
@@ -3753,7 +3753,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     public static readonly BYTES_PER_ELEMENT: int = 4
     public readonly BYTES_PER_ELEMENT: int = Int32Array.BYTES_PER_ELEMENT
     public overload subarray { subarrayII, subarrayNI, subarrayIN, subarrayNN }
-    internal readonly lengthInt: int
+    protected readonly lengthInt: int
 
     /**
      * Creates an empty Int32Array.
@@ -3964,14 +3964,14 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         }
     }
 
-    internal zeroIfInfinity(val: number): number {
+    private zeroIfInfinity(val: number): number {
         if ((val == Infinity) || (val == -Infinity)) {
             return 0
         }
         return (val).toDouble()
     }
 
-    internal zeroIfInfinity(val: int): int {
+    private zeroIfInfinity(val: int): int {
         if ((val == Infinity) || (val == -Infinity)) {
             return 0
         }
@@ -5445,7 +5445,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
 
     private final native getUnsafe(index: int): int
 
-    internal setUnsafe(insertPos: int, val: int): void {
+    private setUnsafe(insertPos: int, val: int): void {
         const BPE = Int32Array.BYTES_PER_ELEMENT.toInt()
         let byteIndex = insertPos * BPE + this.byteOffset.toInt()
         let buf = this.buffer
@@ -5548,7 +5548,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     public static readonly BYTES_PER_ELEMENT: int = 8
     public readonly BYTES_PER_ELEMENT: int = BigInt64Array.BYTES_PER_ELEMENT
     public overload subarray { subarrayII, subarrayNI, subarrayIN, subarrayNN }
-    internal readonly lengthInt: int
+    protected readonly lengthInt: int
 
     /**
      * Creates an empty BigInt64Array.
@@ -7253,7 +7253,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
 
     private final native getUnsafe(index: int): long
 
-    internal setUnsafe(insertPos: int, val: long): void {
+    private setUnsafe(insertPos: int, val: long): void {
         const BPE = BigInt64Array.BYTES_PER_ELEMENT.toInt()
         let byteIndex = insertPos * BPE + this.byteOffset.toInt()
         let buf = this.buffer
@@ -7356,7 +7356,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     public static readonly BYTES_PER_ELEMENT: int = 4
     public readonly BYTES_PER_ELEMENT: int = Float32Array.BYTES_PER_ELEMENT
     public overload subarray { subarrayII, subarrayNI, subarrayIN, subarrayNN }
-    internal readonly lengthInt: int
+    protected readonly lengthInt: int
 
     /**
      * Creates an empty Float32Array.
@@ -9047,7 +9047,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
 
     private final native getUnsafe(index: int): float
 
-    internal setUnsafe(insertPos: int, val: float): void {
+    private setUnsafe(insertPos: int, val: float): void {
         const BPE = Float32Array.BYTES_PER_ELEMENT.toInt()
         let byteIndex = insertPos * BPE + this.byteOffset.toInt()
         let buf = this.buffer
@@ -9150,7 +9150,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     public static readonly BYTES_PER_ELEMENT: int = 8
     public readonly BYTES_PER_ELEMENT: int = Float64Array.BYTES_PER_ELEMENT
     public overload subarray { subarrayII, subarrayNI, subarrayIN, subarrayNN }
-    internal readonly lengthInt: int
+    protected readonly lengthInt: int
 
     /**
      * Creates an empty Float64Array.
@@ -10721,7 +10721,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
 
     private final native getUnsafe(index: int): double
 
-    internal setUnsafe(insertPos: int, val: double): void {
+    private setUnsafe(insertPos: int, val: double): void {
         const BPE = Float64Array.BYTES_PER_ELEMENT.toInt()
         let byteIndex = insertPos * BPE + this.byteOffset.toInt()
         let buf = this.buffer

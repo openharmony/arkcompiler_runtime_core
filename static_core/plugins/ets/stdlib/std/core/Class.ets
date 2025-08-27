@@ -60,5 +60,6 @@ export final class Class {
     /**
      * Get internal string descriptor
      */
+    // NOTE(ekaterinazaytseva): unable to replace internal - used in RuntimeLinker.ets as public
     internal native getDescriptor(): string
 }

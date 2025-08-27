@@ -30,8 +30,8 @@ export namespace concurrency {
         private what: int;
         private callback: CB | undefined = undefined;
         private obj: Object | undefined = undefined;
-        internal isSent: AtomicFlag = new AtomicFlag(false);
-        internal isProcessed: AtomicFlag = new AtomicFlag(false);
+        private isSent: AtomicFlag = new AtomicFlag(false);
+        private isProcessed: AtomicFlag = new AtomicFlag(false);
 
         /**
          * Create a basic message instance

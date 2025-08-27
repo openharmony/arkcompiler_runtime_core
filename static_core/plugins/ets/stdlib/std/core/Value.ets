@@ -285,7 +285,8 @@ export final class ClassValue extends reflect.Value {
     public override getData(): NullishType {
         return this.data
     }
-
+    
+    // NOTE(ekaterinazaytseva): unable to replace internal - used as public
     internal constructor(typ: ClassType, data: Object) {
         this.typ = typ
         this.data = data

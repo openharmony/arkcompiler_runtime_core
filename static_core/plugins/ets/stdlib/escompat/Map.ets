@@ -147,7 +147,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
         const keyHash: int = Runtime.getHashCodeByValue(k! as object).toInt() // #26217
         const t = keyHash >> 31
 
-        return ((keyHash ^ t) - t) & (this.buckets.actualLength - 1)
+        return ((keyHash ^ t) - t) & (this.buckets.length - 1)
     }
 
     private getInitialBucketsCount(entriesCount: int): int {
@@ -172,7 +172,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
                     entriesBuf.push(entry)
                 }
             }
-            const bucketsCount = this.getInitialBucketsCount(entriesBuf.actualLength)
+            const bucketsCount = this.getInitialBucketsCount(entriesBuf.length)
             this.buckets = new MapBucket<K, V>[bucketsCount]
 
             entriesBuf.forEach((e: [K, V]) => {
@@ -208,7 +208,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
      * @param entries Array of entries
      */
     constructor(entries: Array<[K, V]>) {
-        const bucketsCount = this.getInitialBucketsCount(entries.actualLength)
+        const bucketsCount = this.getInitialBucketsCount(entries.length)
         this.buckets = new MapBucket<K, V>[bucketsCount]
 
         entries.forEach((entry: [K, V]) => {
@@ -292,7 +292,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
     set(key: K, val: V): this {
         // insert into buckets
         const buck = this.getOrCreateBucket(key)
-        const buckSize = buck.actualLength
+        const buckSize = buck.length
         for (let i = 0; i < buckSize; i++) {
             const entry = buck.$_get_unsafe(i)
             if (__runtimeSameValueZero(entry.key, key)) {
@@ -389,7 +389,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
         return def
     }
 
-    internal mappedIterator<R>(fn: (e: MapEntry<K, V>) => R): IterableIterator<R> {
+    private mappedIterator<R>(fn: (e: MapEntry<K, V>) => R): IterableIterator<R> {
         const headEntry = this.headEntry
         if (headEntry !== undefined) {
             return new MapIterator<K, V, R>(headEntry, headEntry, fn)
