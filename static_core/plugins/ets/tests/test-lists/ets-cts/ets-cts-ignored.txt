@@ -793,3 +793,6 @@
 # 27159
 04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_27.ets
 04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_28.ets
+
+# 27209
+07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/oome1.ets
