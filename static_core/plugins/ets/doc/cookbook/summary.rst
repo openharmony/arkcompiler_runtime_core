@@ -224,7 +224,7 @@ Structural Typing Is Not Supported (Yet)
 ----------------------------------------
 
 Assume that two unrelated classes ``T`` and ``U`` have the same or compatible
-sets of public properties and no non-public ones:
+sets of public properties, and no properties that are non-public:
 
 .. code-block:: typescript
 
