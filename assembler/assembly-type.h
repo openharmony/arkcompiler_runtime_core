@@ -22,6 +22,8 @@
 
 namespace panda::pandasm {
 
+constexpr std::string_view STRING_CLASS_NAME = "panda.String";
+
 class Type {
 public:
     enum VerificationType {
