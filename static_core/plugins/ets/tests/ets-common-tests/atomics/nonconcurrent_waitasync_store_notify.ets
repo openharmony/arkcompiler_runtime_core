@@ -16,7 +16,7 @@
 let buf: ArrayBuffer;
 let arr: Int32Array;
 
-function testMain() {
+async function testMain() {
     let c = new Console()
 
     buf = new ArrayBuffer(4);
@@ -31,6 +31,6 @@ function testMain() {
 
 function main() {
     const suite = new arktest.ArkTestsuite('Function Atomics nonconcurrent_waitasync_store_notify tests')
-    suite.addTest('Function testMain', testMain)
+    suite.addAsyncTest('Function testMain', testMain)
     return suite.run()
 }

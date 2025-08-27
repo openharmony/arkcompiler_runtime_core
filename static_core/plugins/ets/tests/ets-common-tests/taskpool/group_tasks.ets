@@ -43,13 +43,13 @@ function launchImpl(func: () => Any): Promise<Any> {
         try {
             let res = job.Await();
             resolve(res);
-        } catch(e: Error) {
-            reject(e);
+        } catch (e) {
+            reject(e as Error);
         }
     });
 }
 
-function testDelayFunc(): Any {
+async function testDelayFunc(): Promise<Any> {
     let task = new taskpool.Task(sum, 100, 300);
     let value = await taskpool.executeDelayed(100, task);
     let g = new taskpool.TaskGroup();
@@ -59,11 +59,11 @@ function testDelayFunc(): Any {
     return value;
 }
 
-function executeDelayedTest(): void {
+async function executeDelayedTest() {
     try {
         let res = await launchImpl(testDelayFunc);
         arktest.assertEQ(res, 400);
-    } catch(e: Error) {
+    } catch (e) {
         // NOTE(wangzhaoyong, #25035): del try catch when fix stackoverflow and invalid error message
         arktest.assertEQ(e instanceof NullPointerError, true);
     }
@@ -93,12 +93,12 @@ function testPeriodFunc(): Any {
     return 'success';
 }
 
-function executePeriodicallyTest(): void {
+async function executePeriodicallyTest() {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
     try {
         let res1 = await launchImpl(testPeriodFunc);
         arktest.assertEQ(res1, 'success');
-    } catch(e: Error) {
+    } catch (e) {
         // NOTE(wangzhaoyong, #25035): del try catch when fix stackoverflow and invalid error message
         arktest.assertEQ(e instanceof NullPointerError, true);
     }
@@ -114,7 +114,7 @@ function grouptaskExecutePeriodicallyTest(): void {
     }, new Error('taskpool:: The concurrent task has been executed and cannot be executed periodically'));
 }
 
-function groupTaskExecuteRepeat(): void {
+async function groupTaskExecuteRepeat() {
     let task : taskpool.Task = new taskpool.Task(sum, 100, 300);
     let group = new taskpool.TaskGroup();
     group.addTask(task);
@@ -132,11 +132,13 @@ function taskGroupNestedTaskTest(): void {
     })
     group.addTask(task);
     arktest.expectError(() => {
-        await taskpool.execute(task);
+        waitForCompletion<void>(async (): Promise<void> => {
+            await taskpool.execute(task);
+        })
     }, new Error('taskpool:: groupTask cannot execute outside'));
 }
 
-function runOneGroupTest() {
+async function runOneGroupTest() {
     let g2 = new taskpool.TaskGroup('g2');
     arktest.assertEQ(g2.name, 'g2');
     let t1 = new taskpool.Task(returnAbc);
@@ -161,7 +163,7 @@ function runOneGroupTest() {
     arktest.assertEQ(g0.name, 'g0');
 }
 
-function runSeveralGroupsTest() {
+async function runSeveralGroupsTest() {
     let g1 = new taskpool.TaskGroup();
     let g2 = new taskpool.TaskGroup();
     let g3 = new taskpool.TaskGroup();
@@ -223,11 +225,16 @@ function cancelExecutingGroupTest() {
     let p = taskpool.execute(g);
     try {
         taskpool.cancel(g);
-    } catch(e: Error) {
-        arktest.assertEQ(e.message, 'taskpool:: taskGroup is not executed or has been executed');
+    } catch (e) {
+        let err = e as Error;
+        arktest.assertEQ(err.message, 'taskpool:: taskGroup is not executed or has been executed');
         return;
     }
-    arktest.expectError(() => { await p }, new Error('taskpool:: taskGroup has been canceled'));
+    arktest.expectError(() => {
+        waitForCompletion(async (): Promise<void> => {
+            await p;
+        })
+    }, new Error('taskpool:: taskGroup has been canceled'));
 }
 
 function cancelExecutedGroupTest1() {
@@ -366,13 +373,13 @@ function addTaskWithDifferentParamsTest() {
 
 function main(): int {
     let taskGroupTestsuite = new arktest.ArkTestsuite('taskpool.TaskGroup');
-    taskGroupTestsuite.addTest('ExecuteDelayedTest', executeDelayedTest);
-    taskGroupTestsuite.addTest('ExecutePeriodicallyTest', executePeriodicallyTest);
+    taskGroupTestsuite.addAsyncTest('ExecuteDelayedTest', executeDelayedTest);
+    taskGroupTestsuite.addAsyncTest('ExecutePeriodicallyTest', executePeriodicallyTest);
     taskGroupTestsuite.addTest('GrouptaskExecutePeriodicallyTest', grouptaskExecutePeriodicallyTest);
-    taskGroupTestsuite.addTest('GroupTaskExecuteRepeatTest', groupTaskExecuteRepeat);
+    taskGroupTestsuite.addAsyncTest('GroupTaskExecuteRepeatTest', groupTaskExecuteRepeat);
     taskGroupTestsuite.addTest('taskGroupNestedTaskTest', taskGroupNestedTaskTest);
-    taskGroupTestsuite.addTest('RunOneGroupTest', runOneGroupTest);
-    taskGroupTestsuite.addTest('RunSeveralGroupsTest', runSeveralGroupsTest);
+    taskGroupTestsuite.addAsyncTest('RunOneGroupTest', runOneGroupTest);
+    taskGroupTestsuite.addAsyncTest('RunSeveralGroupsTest', runSeveralGroupsTest);
     taskGroupTestsuite.addTest('CancelNonStartedGroupTest', cancelNonStartedGroupTest);
     taskGroupTestsuite.addTest('CancelExecutingGroupTest', cancelExecutingGroupTest);
     taskGroupTestsuite.addTest('CancelExecutedGroupTest1', cancelExecutedGroupTest1);
