@@ -94,35 +94,35 @@ function Array_TestJSJoin(arr: Array<FooClass>): void {
 
 function Array_TestJSSome(arr: Array<FooClass>): void {
     let fnTrue: (v: FooClass) => boolean = (v: FooClass): boolean => { return true; }
-    let fn1True: (v: FooClass, k: number) => boolean = (v: FooClass, k: number): boolean => { return true; }
+    let fn1True = (v: FooClass, k: int): boolean => true;
     arktest.assertEQ(arr.some(fnTrue), true);
     arktest.assertEQ(arr.some(fn1True), true);
     let fnFalse: (v: FooClass) => boolean = (v: FooClass): boolean => { return false; }
-    let fn1False: (v: FooClass, k: number) => boolean = (v: FooClass, k: number): boolean => { return k < 0; }
+    let fn1False = (v: FooClass, k: int): boolean => k < 0;
     arktest.assertEQ(!arr.some(fnFalse), true);
     arktest.assertEQ(!arr.some(fn1False), true);
 }
 
 function Array_TestJSEvery(arr: Array<FooClass>): void {
     let fnTrue: (v: FooClass) => boolean = (v: FooClass): boolean => { return true; }
-    let fn1True: (v: FooClass, k: number) => boolean = (v: FooClass, k: number): boolean => { return true; }
+    let fn1True = (v: FooClass, k: int): boolean => true;
     arktest.assertEQ(arr.every(fnTrue), true);
     arktest.assertEQ(arr.every(fn1True), true);
     let fnFalse: (v: FooClass) => boolean = (v: FooClass): boolean => { return false; }
-    let fn1False: (v: FooClass, k: number) => boolean = (v: FooClass, k: number): boolean => { return k < 0; }
+    let fn1False = (v: FooClass, k: int): boolean => k < 0;
     arktest.assertEQ(!arr.every(fnFalse), true);
     arktest.assertEQ(!arr.every(fn1False), true);
 }
 
 function Array_TestJSFilter(arr: Array<FooClass>): void {
     let fnTrue: (v: FooClass) => boolean = (v: FooClass): boolean => { return true; }
-    let fn1True: (v: FooClass, k: number) => boolean = (v: FooClass, k: number): boolean => { return true; }
+    let fn1True = (v: FooClass, k: int): boolean => true;
     let filter = arr.filter(fnTrue);
     let filter1 = arr.filter(fn1True);
     arktest.assertEQ(arr.at(0), filter.at(0));
     arktest.assertEQ(arr.at(0), filter1.at(0));
     let fnFalse: (v: FooClass) => boolean = (v: FooClass): boolean => { return false; }
-    let fn1False: (v: FooClass, k: number) => boolean = (v: FooClass, k: number): boolean => { return k < 0; }
+    let fn1False = (v: FooClass, k: int): boolean => k < 0;
     let filterFalse = arr.filter(fnFalse);
     let filter1False = arr.filter(fn1False);
     arktest.assertNE(arr.at(0), filterFalse.at(0));

@@ -1340,10 +1340,10 @@ export namespace taskpool {
         const Info: TaskPoolInfo = new TaskPoolInfo();
         const taskInfosRes: TaskInfo[] = new TaskInfo[taskInfos.length.toInt()];
         const threadInfosRes: ThreadInfo[] = new ThreadInfo[threadInfos.length.toInt()];
-        taskInfos.forEach((taskInfo: TaskInfo, index: number) => {
+        taskInfos.forEach((taskInfo: TaskInfo, index: int) => {
             taskInfosRes[index.toInt()] = taskInfo;
         });
-        threadInfos.forEach((threadInfo: ThreadInfo, index: number) => {
+        threadInfos.forEach((threadInfo: ThreadInfo, index: int) => {
             threadInfosRes[index.toInt()] = threadInfo;
         });
         Info.taskInfos = taskInfosRes;

@@ -19,12 +19,12 @@ function main(): int {
     return suite.run(); 
 }
 
-type FuncType = (val: number, index: number, obj: Array<number>) => number;
+type FuncType = (val: number, index: int, obj: Array<number>) => number;
 
 class TestData {
     static callCnt = 0;
     static readonly srcArr: Array<number> = new Array<number>(1, 2, 3, 4, 5);
-    static readonly callbackfn: FuncType = (val: number, index: number, obj: Array<number>): number => {
+    static readonly callbackfn: FuncType = (val: number, index: int, obj: Array<number>): number => {
         TestData.srcArr.length = 2;
         TestData.callCnt++;
         return 1;

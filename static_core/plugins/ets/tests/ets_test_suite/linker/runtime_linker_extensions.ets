@@ -139,7 +139,7 @@ class Test {
         // Cut out "additional1.ets" from the ABC files list
         const reducedAbcFiles = Array.from(Test.getAdditionalFilesList()).slice(1);
         const abcFiles = new string[reducedAbcFiles.length];
-        reducedAbcFiles.forEach((path: string, idx: number) => { abcFiles[idx.toInt()] = path; });
+        reducedAbcFiles.forEach((path, idx) => { abcFiles[idx.toInt()] = path; });
         // Create linkers
         const placeholderClass = Class.of(new A());
         const baseLinker = new AbcRuntimeLinker(undefined, abcFiles);
@@ -159,7 +159,7 @@ class Test {
         // Cut out "additional1.ets" from the ABC files list
         const reducedAbcFiles = Array.from(Test.getAdditionalFilesList()).slice(1);
         const abcFiles = new string[reducedAbcFiles.length];
-        reducedAbcFiles.forEach((path: string, idx: number) => { abcFiles[idx.toInt()] = path; });
+        reducedAbcFiles.forEach((path, idx) => { abcFiles[idx.toInt()] = path; });
         // Create linker
         const linker = new AbcRuntimeLinker(undefined, abcFiles);
 
@@ -227,7 +227,7 @@ class Test {
         // Cut out "additional1.ets" from the ABC files list
         const reducedAbcFiles = Array.from(allAbcFiles).slice(1);
         const abcFiles = new string[reducedAbcFiles.length];
-        reducedAbcFiles.forEach((path: string, idx: number) => { abcFiles[idx.toInt()] = path; });
+        reducedAbcFiles.forEach((path, idx) => { abcFiles[idx.toInt()] = path; });
         // Create linker
         const linker = new AbcRuntimeLinker(undefined, abcFiles);
         Test.testAddAbcFiles(linker, [allAbcFiles[0]]);
@@ -238,7 +238,7 @@ class Test {
         // Cut out "additional1.ets" from the ABC files list
         const reducedAbcFiles = Array.from(allAbcFiles).slice(1);
         const abcFiles = new string[reducedAbcFiles.length];
-        reducedAbcFiles.forEach((path: string, idx: number) => { abcFiles[idx.toInt()] = path; });
+        reducedAbcFiles.forEach((path, idx) => { abcFiles[idx.toInt()] = path; });
         // Create linker
         const linker = new MemoryRuntimeLinker(undefined, Test.loadRawFiles(abcFiles));
         Test.testAddAbcFiles(linker, [allAbcFiles[0]]);

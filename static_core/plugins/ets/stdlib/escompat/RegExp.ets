@@ -206,7 +206,6 @@ export class RegExpResultArray extends Array<String | undefined> {
             }
         }
     }
-
 }
 
 export class RegExpMatchArray extends RegExpResultArray {
