@@ -13,12 +13,14 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
-desc: Prefix increment operator. TypeError Bad operand type, the type of the operand must be numeric type.
-tags: [negative, compile-only]
+desc: >-
+    A compile-time error occurs if the type of the expression is not convertible
+tags: [compile-only, negative]
 ---*/
 
 function main(): void {
-  let c = "110"
-  arktest.assertEQ(++c, "110", "If prefix increment expression completes abruptly then no incrementation occurs.")
+    {{c.use|indent}}
 }
+{% endfor %}

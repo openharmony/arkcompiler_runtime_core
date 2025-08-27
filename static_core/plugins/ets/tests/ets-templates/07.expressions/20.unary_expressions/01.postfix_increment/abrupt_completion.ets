@@ -13,14 +13,36 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
 desc: >-
-    The expression must be left-hand-side expression
-tags: [compile-only, negative]
+    Otherwise, the postfix increment expression completes abruptly,
+    and no incrementation occurs.
 ---*/
 
-function main(): void {
-    {{c.use|indent}}
+class A {
+    private _i: int = 42;
+    get i(): int {
+        if (this._i == 13) {
+            throw new Error()
+        }
+        return this._i
+    }
+    set i(v: int) { this._i = v }
+    get_i(): int { // bypass getter
+        return this._i;
+    }
 }
-{% endfor %}
+
+
+function main(): void {
+    let a = new A
+    let check: int = -100
+    a.i = 13
+    try {
+        check = a.i++
+    } catch (e) {
+        arktest.assertEQ(a.get_i(), 13)
+    }
+    arktest.assertEQ(a.get_i(), 13)
+    arktest.assertEQ(check, -100)
+}

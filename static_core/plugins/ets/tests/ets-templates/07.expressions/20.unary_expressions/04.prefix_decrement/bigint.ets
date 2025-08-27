@@ -13,14 +13,32 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
 desc: >-
-    The expression must be left-hand-side expression
-tags: [compile-only, negative]
+    The value 1 is subtracted from the value of the variable
+    by using necessary conversions
 ---*/
 
-function main(): void {
-    {{c.use|indent}}
+class A {
+    bi: bigint = 13n
 }
-{% endfor %}
+
+
+function main(): void {
+    let x = 13n
+    let a = new A
+    let ar: bigint[] = [-1n, 1n]
+    let r: Record<int, bigint> = {0: 42n}
+
+    arktest.assertEQ(--x, 12n)
+    arktest.assertEQ(x, 12n)
+
+    arktest.assertEQ(--a.bi, 12n)
+    arktest.assertEQ(a.bi, 12n)
+
+    arktest.assertEQ(--ar[0], -2n)
+    arktest.assertEQ(ar[0], -2n)
+
+    arktest.assertEQ(--r[0], 41n)
+    arktest.assertEQ(r[0], 41n)
+}
