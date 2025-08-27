@@ -1799,11 +1799,13 @@ void ClassLinker::TryReLinkAotCodeForBoot(const panda_file::File *pf, const comp
     auto bootContext = GetExtension(language)->GetBootContext();
 
     bootContext->EnumerateClasses([pf, aotPfile](Class *klass) {
-        LOG(DEBUG, RUNTIME) << "TryReLinkAotCode() for boot class: " << klass->GetName();
-
         ASSERT(aotPfile != nullptr);
         compiler::AotClass aotClass = aotPfile->GetClass(klass->GetFileId().GetOffset());
+        if (!aotClass.IsValid()) {
+            return true;
+        }
 
+        LOG(DEBUG, RUNTIME) << "TryReLinkAotCode() for boot class: " << klass->GetName();
         Span<Method> methods = klass->GetMethods();
         panda_file::ClassDataAccessor cda(*pf, klass->GetFileId());
         size_t methodIdx = 0;
@@ -1813,9 +1815,7 @@ void ClassLinker::TryReLinkAotCodeForBoot(const panda_file::File *pf, const comp
         cda.EnumerateMethods(
             [&smethodIdx, &vmethodIdx, &methods, &methodIdx, aotClass](panda_file::MethodDataAccessor &mda) {
                 Method &method = mda.IsStatic() ? methods[smethodIdx++] : methods[vmethodIdx++];
-                if (aotClass.IsValid()) {
-                    MaybeLinkMethodToAotCode(&method, aotClass, methodIdx);
-                }
+                MaybeLinkMethodToAotCode(&method, aotClass, methodIdx);
                 methodIdx++;
             });
         return true;
