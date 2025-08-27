@@ -18,6 +18,7 @@
 #include "bytecode_instruction-inl.h"
 #include "emit-item.h"
 #include "mangling.h"
+
 namespace {
 
 using panda::os::file::Mode;
@@ -1518,6 +1519,10 @@ TypeItem *AsmEmitter::GetTypeItem(
     }
 
     const auto &name = type.GetName();
+    if (name == STRING_CLASS_NAME) {
+        return items->GetOrCreateForeignClassItem(type.GetDescriptor());
+    }
+
     auto iter = program.record_table.find(name);
     if (iter == program.record_table.end()) {
         return nullptr;
