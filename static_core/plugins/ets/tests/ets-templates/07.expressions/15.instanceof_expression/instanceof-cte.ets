@@ -16,17 +16,15 @@ limitations under the License.
 {% for case in cases %}
 
 /*---
-desc: CTE message on instanceof A<TypeArgument> 
-tags: [compile-only, negative]
+desc: CTE message on instanceof A<TypeArgument>
+tags: [{{case.tags}}]
 ---*/
 
 class A<T> {
   data: T
-}
 
-function main(): void {
-  let a = new A<String>();
-  arktest.assertTrue( a instanceof {{case.type}} )
+  meth(p: Any) {
+    return p instanceof {{case.type}}
+  }
 }
-
 {% endfor %}

@@ -2,3 +2,6 @@
 13.compilation_units/02.import_directives/04.import_type_directive/type_binding_class.ets
 13.compilation_units/02.import_directives/04.import_type_directive/type_binding_class_alias.ets
 13.compilation_units/02.import_directives/04.import_type_directive/type_binding_interface.ets
+
+#29205 Instanceof gives different results on INT and AOT
+15.semantic_rules/11.type_erasure/instanceof_26.ets

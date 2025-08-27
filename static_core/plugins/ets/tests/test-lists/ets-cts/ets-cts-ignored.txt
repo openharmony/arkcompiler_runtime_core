@@ -1156,6 +1156,15 @@
 07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_nzfract_cte_n_5.ets
 07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_nzfract_cte_n_6.ets
 
+#29202 CTE expected in `instanceof T`
+07.expressions/15.instanceof_expression/instanceof-cte_0.ets
+
+#29203 Warning: Type parameter is erased from type 'type' when used in instanceof expression.
+07.expressions/15.instanceof_expression/instanceof-cte_1.ets
+07.expressions/15.instanceof_expression/instanceof-cte_2.ets
+07.expressions/15.instanceof_expression/instanceof-cte_3.ets
+07.expressions/15.instanceof_expression/instanceof-cte_4.ets
+
 #28907 Specifying type for too large integer number with as doesn't produce CTE
 07.expressions/16.cast_expressions/01.type_inference_in_cast_expression/type_inference_negative_0.ets
 07.expressions/16.cast_expressions/01.type_inference_in_cast_expression/type_inference_negative_1.ets
@@ -1954,6 +1963,52 @@
 15.semantic_rules/10.overloading/01.signature_resolution_for_overload_signatures/meth/meth_async_0.ets
 15.semantic_rules/10.overloading/01.signature_resolution_for_overload_signatures/meth/meth_async_1.ets
 15.semantic_rules/10.overloading/01.signature_resolution_for_overload_signatures/meth/meth_order_0.ets
+
+#29202 CTE expected in `instanceof T`
+15.semantic_rules/11.type_erasure/instanceof_gen_0.ets
+15.semantic_rules/11.type_erasure/instanceof_gen_12.ets
+15.semantic_rules/11.type_erasure/instanceof_gen_15.ets
+15.semantic_rules/11.type_erasure/instanceof_gen_18.ets
+15.semantic_rules/11.type_erasure/instanceof_gen_21.ets
+15.semantic_rules/11.type_erasure/instanceof_gen_24.ets
+15.semantic_rules/11.type_erasure/instanceof_gen_25.ets
+15.semantic_rules/11.type_erasure/instanceof_gen_26.ets
+15.semantic_rules/11.type_erasure/instanceof_gen_27.ets
+15.semantic_rules/11.type_erasure/instanceof_gen_3.ets
+15.semantic_rules/11.type_erasure/instanceof_gen_31.ets
+15.semantic_rules/11.type_erasure/instanceof_gen_6.ets
+15.semantic_rules/11.type_erasure/instanceof_gen_9.ets
+
+#29203 Warning: Type parameter is erased from type 'type' when used in instanceof expression.
+15.semantic_rules/11.type_erasure/instanceof_0.ets
+15.semantic_rules/11.type_erasure/instanceof_1.ets
+15.semantic_rules/11.type_erasure/instanceof_16.ets
+15.semantic_rules/11.type_erasure/instanceof_18.ets
+15.semantic_rules/11.type_erasure/instanceof_28.ets
+15.semantic_rules/11.type_erasure/instanceof_5.ets
+15.semantic_rules/11.type_erasure/instanceof_6.ets
+15.semantic_rules/11.type_erasure/instanceof_7.ets
+15.semantic_rules/11.type_erasure/instanceof_9.ets
+15.semantic_rules/11.type_erasure/instanceof_gen_1.ets
+15.semantic_rules/11.type_erasure/instanceof_gen_10.ets
+15.semantic_rules/11.type_erasure/instanceof_gen_11.ets
+15.semantic_rules/11.type_erasure/instanceof_gen_13.ets
+15.semantic_rules/11.type_erasure/instanceof_gen_14.ets
+15.semantic_rules/11.type_erasure/instanceof_gen_16.ets
+15.semantic_rules/11.type_erasure/instanceof_gen_17.ets
+15.semantic_rules/11.type_erasure/instanceof_gen_19.ets
+15.semantic_rules/11.type_erasure/instanceof_gen_2.ets
+15.semantic_rules/11.type_erasure/instanceof_gen_20.ets
+15.semantic_rules/11.type_erasure/instanceof_gen_22.ets
+15.semantic_rules/11.type_erasure/instanceof_gen_23.ets
+15.semantic_rules/11.type_erasure/instanceof_gen_29.ets
+15.semantic_rules/11.type_erasure/instanceof_gen_30.ets
+15.semantic_rules/11.type_erasure/instanceof_gen_32.ets
+15.semantic_rules/11.type_erasure/instanceof_gen_33.ets
+15.semantic_rules/11.type_erasure/instanceof_gen_4.ets
+15.semantic_rules/11.type_erasure/instanceof_gen_5.ets
+15.semantic_rules/11.type_erasure/instanceof_gen_7.ets
+15.semantic_rules/11.type_erasure/instanceof_gen_8.ets
 
 #27260
 17.experimental_features/02.fixed_array_types/01.fixed_size_array_creation/fixed_array_creation_con1_0.ets
