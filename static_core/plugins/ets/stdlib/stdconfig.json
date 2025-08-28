@@ -8,10 +8,6 @@
             "escompat": [
                 "ets/stdlib/escompat"
             ]
-        },
-        "outDir": "../cache"
-    },
-    "include": [
-        "./**/*.ets"
-    ]
+        }
+    }
 }

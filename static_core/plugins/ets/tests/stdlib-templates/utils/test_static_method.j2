@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { E } from "std/math";
+import { E } from "std/math/consts";
 
 {%- for number, param in item.param_list.items() %}
 const TEST_DATA_{{.number|upper}} : {{.item.param_init_data_types[number]}} = {{.item.param_list[number]}};

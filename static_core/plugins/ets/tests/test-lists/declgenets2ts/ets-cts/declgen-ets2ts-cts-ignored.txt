@@ -889,6 +889,7 @@
 14.ambient_declarations/03.class_declarations/class_declarations_10.ets
 14.ambient_declarations/bad_ambient_declarations_13.ets
 14.ambient_declarations/bad_ambient_declarations_7.ets
+15.semantic_rules/01.semantic_essentials/04.specifics_of_numeric_operator_contexts/negative_unary_operator.ets
 15.semantic_rules/02.subtyping/04.subtyping_for_function_types/positive_function_generic_0.ets
 15.semantic_rules/02.subtyping/04.subtyping_for_function_types/positive_function_generic_1.ets
 15.semantic_rules/02.subtyping/04.subtyping_for_function_types/positive_function_generic_2.ets
