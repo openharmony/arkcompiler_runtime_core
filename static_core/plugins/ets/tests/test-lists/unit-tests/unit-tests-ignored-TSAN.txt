@@ -23,3 +23,9 @@ ets-common-tests/unions/union_method_virtual.ets
 
 #29408
 ets_test_suite/strings/string_concat.ets
+#30109
+ets-common-tests/atomics/concurrent_wait_store_notify.ets
+
+#30196
+ets-common-tests/intrinsics/copyTo.ets
+ets-common-tests/intrinsics/map_set.ets

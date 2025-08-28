@@ -27,8 +27,10 @@ set(BOOT_PANDA_FILES ${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc)
 add_panda_assembly(TARGET mock_stdlib SOURCE integrational/mock_stdlib.pa)
 
 function(panda_ets_add_gtest)
+    if(NOT "TEST_GROUP" IN_LIST ARGV)
+        list(APPEND ARGV "TEST_GROUP" "ets_panda_gtests")
+    endif()
     panda_add_gtest(
-        TEST_GROUP ets_panda_gtests
         STASH_LIST ets_stash_list
         ${ARGV}
     )
@@ -652,8 +654,13 @@ if(NOT PANDA_ENABLE_THREAD_SANITIZER OR PANDA_CI_TESTING_MODE STREQUAL "Nightly"
     add_target_to_group(ets_time01_tests es2panda_tests)
 endif()
 if(PANDA_COMPILER_ENABLE)
-    add_target_to_group(ets_time01_tests ets_checked_tests)
+    if(NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" OR
+       NOT PANDA_ENABLE_THREAD_SANITIZER OR
+       PANDA_CI_TESTING_MODE STREQUAL "Nightly")
+        add_target_to_group(ets_time01_tests ets_checked_tests)
+    endif()
 endif()
+add_target_to_group(ets_time01_tests ets_gtests)
 
 add_target_to_group(ets_time02_tests etsnative_symbols_test)
 add_target_to_group(ets_time02_tests ets_code_verifier_tests)
@@ -667,8 +674,6 @@ if (PANDA_USE_CUSTOM_SIGNAL_STACK)
     add_target_to_group(ets_time02_tests sampler_test_suite)
 endif()
 
-add_target_to_group(ets_time03_tests ets_gtests)
-add_target_to_group(ets_time03_tests ets_panda_gtests)
 add_target_to_group(ets_time03_tests ets_run_aot_ets_code_tests)
 if(PANDA_TEST_COMPILE_STDLIB)
     add_target_to_group(ets_time03_tests ets-compile-stdlib)
@@ -680,7 +685,12 @@ add_target_to_group(ets_time04_tests ets_run_int_ets_code_tests)
 add_target_to_group(ets_time05_tests ets_run_int_ets_code_tests)
 # ---- end of groups by time
 
-add_target_to_group(ets_time06_tests ani_tests)
+if(NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" OR
+   NOT (PANDA_ENABLE_THREAD_SANITIZER OR PANDA_ENABLE_ADDRESS_SANITIZER) OR
+   PANDA_CI_TESTING_MODE STREQUAL "Nightly")
+    add_target_to_group(ets_time06_tests ani_tests)
+endif()
+add_target_to_group(ets_time06_tests ets_panda_gtests)
 add_target_to_group(ets_time07_tests sampler_ani_test_suite)
 add_target_to_group(ets_time08_tests es2panda_gtests)
 add_target_to_group(ets_time09_tests compiler_tests)
