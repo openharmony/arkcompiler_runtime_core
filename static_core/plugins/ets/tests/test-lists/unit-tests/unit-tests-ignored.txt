@@ -24,6 +24,9 @@ ets-common-tests/intrinsics/float32array_sort.ets
 # 29091
 ets-common-tests/intrinsics/float64array_sort.ets
 
+# 29295
+ets-common-tests/intrinsics/stringbuilder.ets
+
 # 28957
 ets-common-tests/intrinsics/string_compare_to.ets
 
@@ -32,3 +35,6 @@ ets-common-tests/intrinsics/typed_arrays_reverse.ets
 
 # 29089
 ets-common-tests/stubs/typeof.ets
+
+# 28060
+ets-common-tests/taskpool/common_tasks.ets 
