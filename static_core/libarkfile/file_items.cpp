@@ -560,6 +560,7 @@ size_t BaseMethodItem::CalculateSize() const
 
 bool BaseMethodItem::Write(Writer *writer)
 {
+    ASSERT(writer != nullptr);
     ASSERT(GetOffset() == writer->GetOffset());
     ASSERT(class_ != nullptr);
     ASSERT(class_->HasIndex(this));
@@ -776,6 +777,7 @@ size_t CodeItem::CatchBlock::CalculateSize() const
 
 bool CodeItem::CatchBlock::Write(Writer *writer)
 {
+    ASSERT(writer != nullptr);
     ASSERT(GetOffset() == writer->GetOffset());
     ASSERT(type_ == nullptr || type_->HasIndex(method_));
 
@@ -1326,6 +1328,7 @@ size_t BaseFieldItem::CalculateSize() const
 
 bool BaseFieldItem::Write(Writer *writer)
 {
+    ASSERT(writer != nullptr);
     ASSERT(GetOffset() == writer->GetOffset());
     ASSERT(class_->HasIndex(this));
     ASSERT(type_->HasIndex(this));
@@ -1759,6 +1762,7 @@ size_t DebugInfoItem::CalculateSize() const
 
 bool DebugInfoItem::Write(Writer *writer)
 {
+    ASSERT(writer != nullptr);
     ASSERT(GetOffset() == writer->GetOffset());
 
     if (!writer->WriteUleb128(lineNum_)) {

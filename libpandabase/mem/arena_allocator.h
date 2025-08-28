@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,7 +73,7 @@ public:
     [[nodiscard]] virtual void *Alloc(size_t size, Alignment align = DEFAULT_ARENA_ALIGNMENT);
 
     template <typename T, typename... Args>
-    [[nodiscard]] std::enable_if_t<!std::is_array_v<T>, T *> New(Args &&... args)
+    [[nodiscard]] std::enable_if_t<!std::is_array_v<T>, T *> New(Args &&...args)
     {
         auto p = reinterpret_cast<void *>(Alloc(sizeof(T)));
         if (UNLIKELY(p == nullptr)) {

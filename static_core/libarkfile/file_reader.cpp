@@ -1102,6 +1102,8 @@ void FileReader::UpdateDebugInfoDependecies(File::EntityId debugInfoId)
 
 void FileReader::UpdateDebugInfo(DebugInfoItem *debugInfoItem, File::EntityId debugInfoId)
 {
+    ASSERT(debugInfoItem != nullptr);
+    ASSERT(file_ != nullptr);
     auto updater = FileReaderDebugInfoUpdater(file_.get(), &container_);
     updater.Emit(debugInfoItem->GetLineNumberProgram(), debugInfoItem->GetConstantPool(), debugInfoId);
 }
