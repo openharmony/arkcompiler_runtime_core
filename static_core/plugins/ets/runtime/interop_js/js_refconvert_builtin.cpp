@@ -468,6 +468,7 @@ public:
         RegisterClassWithLeafMatcher(descriptors::MAPENTRY, nullptr);
         RegisterClassWithLeafMatcher(descriptors::MAPITERATOR, nullptr);
         RegisterClassWithLeafMatcher(descriptors::EMPTYMAPITERATOR, nullptr);
+        RegisterClassWithLeafMatcher(descriptors::SETITERATOR, nullptr);
 
         RegisterMap();
         RegisterSet();
