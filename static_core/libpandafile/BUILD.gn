@@ -159,7 +159,8 @@ ohos_source_set("libarktsfile_frontend_set_static") {
 
   if (!ark_standalone_build) {
     public_external_deps = [ "zlib:libz" ]
-    if (!is_mac) {
+    if (!is_mac &&
+        !(defined(ohos_indep_compiler_enable) && ohos_indep_compiler_enable)) {
       public_external_deps += [ "zlib:shared_libz" ]
     }
   } else {
