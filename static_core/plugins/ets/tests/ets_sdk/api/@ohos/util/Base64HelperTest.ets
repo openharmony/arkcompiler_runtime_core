@@ -28,6 +28,7 @@ function main(): int {
     testEmptyEncode();
     testEmptyDecode();
     testBase64WithoutPadding();
+    suite.addTest("Test encodeSync with MIME and MINE_URL_SAFE", testEncodeSyncMineAndMineUrlSafe);
     suite.addTest("Test encode and decode with no options", testNoOptionsEncodeDecode);
     suite.addTest("Test encodeSync and decodeSync with no options", testNoOptionsEncodeDecodeSync);
 
@@ -181,6 +182,17 @@ function testNoOptionsEncodeDecodeSync(): void {
     let decoded: Uint8Array = helper.decodeSync(encodedStr);
     arktest.assertEQ(decoded.length, input.length);
     assertUint8ArraysEqual(decoded, input);
+}
+
+function testEncodeSyncMineAndMineUrlSafe():void{
+    let helper = new util.Base64Helper();
+    let input = new Uint8Array([115, 49, 51]);
+    arktest.expectError(() => {
+		helper.encodeSync(input, util.Type.MIME);
+	}, 'Parameter error. The target encoding type option must be BASIC or BASIC_URL_SAFE.');
+    arktest.expectError(() => {
+		helper.encodeSync(input, util.Type.MIME_URL_SAFE);
+	}, 'Parameter error. The target encoding type option must be BASIC or BASIC_URL_SAFE.');
 }
 
 async function testEncodeDecodeBasicAsync(): Promise<int> {
