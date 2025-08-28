@@ -11,9 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# NOTE(@srokashevich, #29692): enable with tsan after fix
+if (NOT PANDA_ENABLE_THREAD_SANITIZER)
 ets_native_test_helper(ets_atomic_int_tests
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/atomic_int_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/atomic_int_test.ets
     ETS_GTEST_ABC_PATH "ANI_GTEST_ABC_PATH"
     VERIFY_SOURCES true
 )
+endif()

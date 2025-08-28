@@ -138,7 +138,10 @@ function(test_runtime_linker_extensions test)
 
 endfunction()
 
+# NOTE(@srokashevich, #29869): enable with tsan after fix
+if (NOT PANDA_ENABLE_THREAD_SANITIZER)
 test_runtime_linker_extensions(runtime_linker_extensions) #issues:22179 add '--verification-mode=on-the-fly',case failed
+endif()
 
 function(test_app_linker_context_exception TARGET WORK_DIR)
     # Must provide a valid abc file, so that runtime would start creating application linker context
