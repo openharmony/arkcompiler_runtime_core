@@ -20,6 +20,7 @@
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_vm.h"
+#include "verification/type/type_system.h"
 #include "utils/utf.h"
 
 namespace ark::ets::test {
@@ -117,8 +118,6 @@ TEST_F(EtsUnionTest, CreateUnionClass)
     ASSERT(classLinker);
     classLinker->AddPandaFile(std::move(pf));
 
-    EtsClassLinker *etsClassLinker = vm_->GetClassLinker();
-
     std::map<PandaString, std::tuple<bool, PandaString, std::vector<PandaString>>> descMap {
         {"LA;", {false, "", {}}},
         {"{ULA;LB;}", {true, "LA;", {"LA;", "LB;"}}},
@@ -131,7 +130,7 @@ TEST_F(EtsUnionTest, CreateUnionClass)
     auto *ext = static_cast<ark::ets::EtsClassLinkerExtension *>(
         ark::Runtime::GetCurrent()->GetClassLinker()->GetExtension(ark::panda_file::SourceLang::ETS));
     for (const auto &[desc, infoList] : descMap) {
-        EtsClass *klass = etsClassLinker->GetClass(desc.c_str());
+        EtsClass *klass = vm_->GetClassLinker()->GetClass(desc.c_str());
         ASSERT_NE(klass, nullptr);
         ASSERT_TRUE(klass->GetRuntimeClass()->IsLoaded());
 
@@ -145,8 +144,10 @@ TEST_F(EtsUnionTest, CreateUnionClass)
         }
         ASSERT_TRUE(klass->IsInitialized());
 
-        const uint8_t *descLUB = ext->ComputeLUB(klass->GetLoadContext(), utf::CStringAsMutf8(klass->GetDescriptor()));
-        EXPECT_EQ(PandaString(utf::Mutf8AsCString(descLUB)), classLUB);
+        auto RtKlass =
+            verifier::FindCommonAncestor(ark::Runtime::GetCurrent()->GetClassLinker(), klass->GetLoadContext(),
+                                         ext->GetLanguageContext(), klass->GetRuntimeClass(), nullptr);
+        EXPECT_EQ(PandaString(utf::Mutf8AsCString(RtKlass->GetDescriptor())), classLUB);
         ASSERT_TRUE(CheckConstituentClasses(klass, consClassesList));
     }
 }

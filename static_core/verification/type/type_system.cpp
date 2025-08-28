@@ -16,12 +16,16 @@
 #include "verification/type/type_system.h"
 
 #include "assembler/assembly-type.h"
+#include "include/class_helper.h"
+#include "include/class_linker.h"
+#include "include/mem/panda_string.h"
 #include "runtime/include/thread_scopes.h"
 #include "verification/jobs/job.h"
 #include "verification/jobs/service.h"
 #include "verification/public_internal.h"
 #include "verification/plugins.h"
 #include "verifier_messages.h"
+#include "verification/type/type_type.h"
 
 namespace ark::verifier {
 
@@ -36,18 +40,84 @@ static PandaString ClassNameToDescriptorString(char const *name)
     return str;
 }
 
-static Type DescriptorToType(ClassLinker *linker, ClassLinkerContext *ctx, const LanguageContext &langCtx,
-                             uint8_t const *descr)
+std::optional<Class *> GetClosestCommonAncestor(const ClassLinkerContext *ctx, Class *source, Class *target)
 {
-    PandaString strDesc = utf::Mutf8AsCString(descr);
+    // remove IsObject() as base oh type hierarchy can change
+    if (target->IsInterface() || target->IsObjectClass()) {
+        return std::nullopt;
+    }
+
+    auto targetBase = target->GetBase();
+    if (source == targetBase) {
+        return targetBase;
+    }
+
+    if (targetBase->IsAssignableFrom(source)) {
+        return targetBase;
+    }
+    return GetClosestCommonAncestor(ctx, source, targetBase);
+}
+
+Class *FindCommonAncestorForConstituentTypes(ClassLinker *linker, ClassLinkerContext *ctx,
+                                             const LanguageContext &langCtx, const Class *unionClass,
+                                             ClassLinkerErrorHandler *handler /* = nullptr */)
+{
+    Class *bestAnces {nullptr};
+    auto unionConstituentTypes = unionClass->GetConstituentTypes();
+    for (const auto unionType : unionConstituentTypes) {
+        if (unionType->IsPrimitive() || unionType->IsArrayClass()) {
+            return linker->GetClass(langCtx.GetObjectClassDescriptor(), true, ctx, handler);
+        }
+
+        if (bestAnces == nullptr || bestAnces == unionType) {
+            bestAnces = unionType;
+            continue;
+        }
+        if (ClassHelper::IsReference(bestAnces->GetDescriptor()) &&
+            ClassHelper::IsReference(unionType->GetDescriptor())) {
+            auto lubDescOpt = GetClosestCommonAncestor(ctx, bestAnces, unionType);
+            if (!lubDescOpt.has_value()) {
+                return linker->GetClass(langCtx.GetObjectClassDescriptor(), true, ctx, handler);
+            }
+            bestAnces = lubDescOpt.value();
+            continue;
+        }
+
+        return linker->GetClass(langCtx.GetObjectClassDescriptor(), true, ctx, handler);
+    }
+    // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+
+    return bestAnces;
+}
+
+Class *FindCommonAncestor(ClassLinker *linker, ClassLinkerContext *ctx, const LanguageContext &langCtx,
+                          const Class *klass, ClassLinkerErrorHandler *handler /* = nullptr */)
+{
+    if (klass->IsArrayClass()) {
+        const auto *handledComponent = FindCommonAncestor(linker, ctx, langCtx, klass->GetComponentType(), handler);
+        ASSERT(handledComponent != nullptr);
+        auto descrCopy = PandaString("[") + utf::Mutf8AsCString(handledComponent->GetDescriptor());
+        return linker->GetClass(utf::CStringAsMutf8(descrCopy.c_str()), true, ctx, handler);
+    }
+    return FindCommonAncestorForConstituentTypes(linker, ctx, langCtx, klass, handler);
+}
+
+static Type DescriptorToType(ClassLinker *linker, ClassLinkerContext *ctx,
+                             [[maybe_unused]] const LanguageContext &langCtx, uint8_t const *descr)
+{
     ark::Class *klass {nullptr};
     Job::ErrorHandler handler;
     if (ClassHelper::IsUnionOrArrayUnionDescriptor(descr)) {
+        PandaString strDesc = utf::Mutf8AsCString(descr);
         auto canonDesc = pandasm::Type::FromDescriptor(strDesc).GetDescriptor();
         if (canonDesc != std::string(strDesc)) {
             LOG_VERIFIER_NOT_CANONICALIZED_UNION_TYPE(strDesc, canonDesc);
         }
-        klass = ClassHelper::GetUnionLUBClass(descr, linker, ctx, linker->GetExtension(langCtx), &handler);
+        klass = linker->GetClass(descr, true, ctx, &handler);
+        if (klass == nullptr) {
+            return Type {};
+        }
+        klass = FindCommonAncestor(linker, ctx, langCtx, klass, &handler);
     } else {
         klass = linker->GetClass(descr, true, ctx, &handler);
     }

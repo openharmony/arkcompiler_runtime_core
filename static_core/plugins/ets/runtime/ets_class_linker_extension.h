@@ -130,9 +130,6 @@ public:
     /// @brief Removes reference to `RuntimeLinker` from `BootContext` and `EtsClassLinkerContext`.
     static void RemoveRefToLinker(ClassLinkerContext *ctx);
 
-    /// @brief Compute LUB type for union.
-    const uint8_t *ComputeLUB(const ClassLinkerContext *ctx, const uint8_t *descriptor) override;
-
     NO_COPY_SEMANTIC(EtsClassLinkerExtension);
     NO_MOVE_SEMANTIC(EtsClassLinkerExtension);
 
