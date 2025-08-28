@@ -19,6 +19,7 @@ const TypeErrorCodeId: int = 401;
 const percentRate = 100;
 const syntaxErrorCode: int = 10200002;
 export type RecordData = undefined | null | Object | Record<string, RecordData> | Array<RecordData>;
+export type PromisifiedFunc = (...args: FixedArray<Any>) => Promise<Any>;
 
 function createBusinessError(code: int, message: string) {
     let err = new BusinessError();
@@ -1629,7 +1630,7 @@ export namespace util {
         }
     }
 
-    export function promisify(original: Function): (...args: FixedArray<Any>) => Promise<Any> {
+    export function promisify(original: Function): PromisifiedFunc {
         return (...args: FixedArray<Any>): Promise<Any> => {
             return new Promise<Any>((resolve, reject) => {
                 let callback: Function = (err: Error | null, ...value: FixedArray<Any>) => {
