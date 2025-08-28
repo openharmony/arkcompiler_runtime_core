@@ -467,10 +467,15 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
      * @param callbackfn to apply
      */
     override forEach(callbackfn: (v: V, k: K, map: Map<K, V>) => void): void {
-        const entriesIter = this.mappedIterator<MapEntry<K, V>>((e: MapEntry<K, V>): MapEntry<K, V> => e)
-        iteratorForEach<MapEntry<K, V>>(entriesIter, (e: MapEntry<K, V>): void => {
-            callbackfn(e.val, e.key, this)
-        })
+        if (this.headEntry === undefined) {
+            return
+        }
+        const headEntry = this.headEntry!
+        let curNode = headEntry.next!
+        while (curNode != headEntry){
+            callbackfn(curNode.val, curNode.key, this)
+            curNode = curNode.next!
+        }
     }
 }
 
