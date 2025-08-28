@@ -116,11 +116,29 @@
 #26657
 04.names_declarations_and_scopes/07.function_declarations/04.optional_parameters/opt_param_23.ets
 
+#29268
+04.names_declarations_and_scopes/07.function_declarations/04.optional_parameters/opt_param_31.ets
+04.names_declarations_and_scopes/07.function_declarations/04.optional_parameters/opt_param_32.ets
+04.names_declarations_and_scopes/07.function_declarations/04.optional_parameters/opt_param_33.ets
+04.names_declarations_and_scopes/07.function_declarations/04.optional_parameters/opt_param_35.ets
+
 #27046
 04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/generic_rest_tuple_negative.ets
 
 #26981
 04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/record_to_rest.ets
+
+#29268
+04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/rest_parameter_19.ets
+04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/rest_parameter_23.ets
+
+#29318
+04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/generic_array_type_as_rest.ets
+
+#29319
+04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/optional_and_rest_tuple_to_spread_0.ets
+04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/optional_and_rest_tuple_to_spread_1.ets
+04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/optional_and_rest_tuple_to_spread_2.ets
 
 #26730
 04.names_declarations_and_scopes/08.declarations_with_overload_signatures/01.function_with_overload_signatures/overload_function_decl_0.ets

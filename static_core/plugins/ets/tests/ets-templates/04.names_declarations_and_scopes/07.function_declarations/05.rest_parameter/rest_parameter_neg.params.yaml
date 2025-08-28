@@ -74,3 +74,21 @@ cases:
       foo(...numbers: int|undefined[] = []): number
     def: |-
       return numbers.length;
+
+  # 11. param and optional rest param
+  - sig: |-
+      foo(param0: int, ...numbers?: int[]): number
+    def: |-
+      return numbers.length;
+
+  # 12. optional param and optional rest param
+  - sig: |-
+      foo(param0?: int, ...numbers?: int[]): number
+    def: |-
+      return numbers.length;
+
+  # 13. optional param and optional rest param
+  - sig: |-
+      foo(param0?: int, ...numbers: int[] = [0, 1, 2, 3]): number
+    def: |-
+      return numbers.length;
