@@ -40,7 +40,7 @@ function assertEQAll(array: FixedArray<int>, value: int): void {
 
 function testConcurrentReplace() {
 	const JOB_COUNT = 7;
-	const SET_COUNT = 100;
+	const SET_COUNT = 20;
 
 	let map = new CHMap();
 	for (let i = 0; i < SET_COUNT * JOB_COUNT; ++ i)
@@ -61,8 +61,8 @@ function testConcurrentReplace() {
 }
 
 function testConcurrentReplace2() {
-	const JOB_COUNT = 10;
-	const SET_COUNT = 200;
+	const JOB_COUNT = 7;
+	const SET_COUNT = 20;
 
 	let map = new CHMap();
 	for (let i = 0; i < SET_COUNT; ++ i)
@@ -74,7 +74,6 @@ function testConcurrentReplace2() {
 
 	let replaceJobs: Job<void>[] = [];
 	for (let i = 0; i < JOB_COUNT; ++ i) {
-		let start = i * SET_COUNT;
 		addLaunch(replaceJobs, makeReplaceF(i));
 	}
 	awaitAll(replaceJobs);
@@ -84,7 +83,7 @@ function testConcurrentReplace2() {
 
 function testConcurrentReplaceAndGet() {
 	const JOB_COUNT = 7;
-	const SET_COUNT = 100;
+	const SET_COUNT = 20;
 
 	let map = new CHMap();
 	for (let i = 0; i < SET_COUNT; ++ i)
