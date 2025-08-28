@@ -34,6 +34,9 @@ function(add_ets_gc_test)
     string(TOLOWER "${ARG_MODE}" run_mode)
     set(target ets_test_suite_gc_${TEST_NAME}-ets-${run_mode})
 
+    # NOTE(26403) Profilesaver is turned off because of data race
+    list(APPEND ARG_OPTIONS "--profilesaver-enabled=false" "--incremental-profilesaver-enabled=false")
+
     if ("${ARG_MODE}" STREQUAL "INT")
         run_int_ets_code(${target} ${test_out_dir} SOURCES "${test_in}" RUNTIME_EXTRA_OPTIONS ${ARG_OPTIONS})
     elseif ("${ARG_MODE}" STREQUAL "AOT")
@@ -97,23 +100,23 @@ endif()
 
 add_ets_gc_test(FILE pin_object.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug-never" MODE "INT")
 # NOTE(26403) Profilesaver is turned off because of data race
-add_ets_gc_test(FILE get_object_address_test.ets OPTIONS "--gc-trigger-type=debug-never" "--profilesaver-enabled=false" "--incremental-profilesaver-enabled=false" MODE "INT")
+add_ets_gc_test(FILE get_object_address_test.ets OPTIONS "--gc-trigger-type=debug-never" MODE "INT")
 add_ets_gc_test(FILE space_type_test.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug-never" MODE "INT")
 # NOTE(26403) Profilesaver is turned off because of data race
-add_ets_gc_test(FILE weak_ref_test.ets OPTIONS "--gc-type=g1-gc" "--run-gc-in-place" "--max-free=1" "--gc-trigger-type=debug-never" "--profilesaver-enabled=false" "--incremental-profilesaver-enabled=false" MODE "INT")
+add_ets_gc_test(FILE weak_ref_test.ets OPTIONS "--gc-type=g1-gc" "--run-gc-in-place" "--max-free=1" "--gc-trigger-type=debug-never" MODE "INT")
 add_ets_gc_test(FILE concurrent_start_gc.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug-never" MODE "INT")
 add_ets_gc_test(FILE register_native_allocation_test.ets OPTIONS "--gc-type=g1-gc" "--run-gc-in-place" "--gc-trigger-type=debug-never" MODE "INT")
 add_ets_gc_test(FILE finalization_registry_test.ets OPTIONS "--gc-type=g1-gc" "--run-gc-in-place" "--gc-trigger-type=debug-never" MODE "INT")
 add_ets_gc_test(TIMEOUT_CMD timeout TIMEOUT_TIME 10m FILE test_finreg_in_different_coros.ets OPTIONS "--gc-type=g1-gc" "--run-gc-in-place" "--gc-trigger-type=debug-never" MODE "INT")
 # NOTE(26403) Profilesaver is turned off because of data race
-add_ets_gc_test(FILE finalization_registry_coro_test.ets OPTIONS  "--coroutine-workers-count=10" "--gc-type=g1-gc" "--run-gc-in-place"  "--gc-trigger-type=debug-never" "--profilesaver-enabled=false" "--incremental-profilesaver-enabled=false" MODE "INT")
+add_ets_gc_test(FILE finalization_registry_coro_test.ets OPTIONS  "--coroutine-workers-count=10" "--gc-type=g1-gc" "--run-gc-in-place"  "--gc-trigger-type=debug-never" MODE "INT")
 
 add_ets_gc_test(TIMEOUT_CMD timeout TIMEOUT_TIME 10m FILE finalization_registry_deadlock_test.ets OPTIONS "--gc-type=g1-gc" "--run-gc-in-place" "--gc-trigger-type=debug-never" MODE "INT")
 add_ets_gc_test(FILE scheduled_gc.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug-never" "--gc-use-nth-alloc-trigger=true" MODE "INT")
 add_ets_gc_test(FILE scheduled_gc_trigger_exception.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug-never" MODE "INT")
 
 # NOTE(26403) Profilesaver is turned off because of data race
-add_ets_gc_test(FILE postpone_gc_test.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug" "--profilesaver-enabled=false" "--incremental-profilesaver-enabled=false" MODE "INT")
+add_ets_gc_test(FILE postpone_gc_test.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug" MODE "INT")
 
 add_ets_gc_test(FILE run_gc_every_safepoint.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug" "--run-gc-in-place" "--run-gc-every-safepoint" MODE "INT")
 add_ets_gc_test(FILE run_gc_every_safepoint.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug" "--run-gc-in-place" "--run-gc-every-safepoint" MODE "JIT")
