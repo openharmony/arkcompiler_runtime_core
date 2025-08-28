@@ -1806,3 +1806,11 @@
     - ark::ObjectHeader*  # string
     - uint16_t            # char to look up
     - int32_t             # unused (always zero)
+
+- name: EscompatArrayIsPlatformArrayFast
+  entrypoint: EscompatArrayIsPlatformArrayFast
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - uint8_t             # boolean
+    - ark::ObjectHeader*

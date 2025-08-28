@@ -62,6 +62,7 @@ DEFINE_VALUE(ARRAY_BUFFER_IS_RESIZABLE_OFFSET, ark::ets::EtsEscompatArrayBuffer:
 DEFINE_VALUE(PLATFORM_TYPES_CORE_LONG_TYPE_OFFSET, ark::ets::EtsPlatformTypes::GetCoreLongTypeOffset())
 DEFINE_VALUE(PLATFORM_TYPES_CORE_FLOAT_TYPE_OFFSET, ark::ets::EtsPlatformTypes::GetCoreFloatTypeOffset())
 DEFINE_VALUE(PLATFORM_TYPES_CORE_DOUBLE_TYPE_OFFSET, ark::ets::EtsPlatformTypes::GetCoreDoubleTypeOffset())
+DEFINE_VALUE(PLATFORM_TYPES_ESCOMPAT_ARRAY_CLASS_OFFSET, ark::ets::EtsPlatformTypes::GetEscompatArrayClassOffset())
 
 DEFINE_VALUE(ESCOMPAT_MAP_SIZE_OFFSET, ark::ets::EtsEscompatMap::GetSizeOffset())
 DEFINE_VALUE(ESCOMPAT_MAP_BUCKETS_OFFSET, ark::ets::EtsEscompatMap::GetBucketsOffset())

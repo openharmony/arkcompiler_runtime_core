@@ -170,6 +170,37 @@ export function concat<%= ctx.this_generic %>(self: <%= ctx.this_type %>, fst: <
 }
 
 /**
+ * Creates a new `Array` from this `Array` instance and given `Array` instance.
+ *
+ * @param other to concatenate into a new array.
+ *
+ * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
+ */
+export function concat<%= ctx.this_generic %>(self: <%= ctx.this_type %>, ...items: FixedArray<ConcatArray<<%= ctx.el_type %>>>): <%= ctx.this_type %> {
+    let totalAdd = self.length;
+    for (let i = 0; i < items.length; i++) {
+        totalAdd += items[i].length.toInt()
+    }
+
+    const buf : <%= ctx.make_fixed_array %> = <%= ctx.make_buffer.('totalAdd') %>;
+
+    for (let i = 0; i < self.length; i++) {
+        buf[i] = self[i];
+    }
+
+    let insertTo = self.length;
+    for (let i = 0; i < items.length; i++) {
+        const arr = items[i]
+        const len = arr.length.toInt()
+        for (let j = 0; j < len; j++) {
+            buf[insertTo++] = arr.$_get(j)
+        }
+    }
+
+    return buf;
+}
+
+/**
  * Reorders elements of `this` using comparator function.
  *
  * @param comparator function that defines the sort order.

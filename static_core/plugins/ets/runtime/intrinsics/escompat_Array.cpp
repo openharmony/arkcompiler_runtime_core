@@ -1034,4 +1034,18 @@ extern "C" void EtsEscompatArrayUnshiftInternal(EtsEscompatArray *array, ObjectH
         barrierSet->PostBarrier(buffer, EtsArray::GetDataOffset(), arraySrcLen + valuesSrcLen);
     }
 }
+
+extern "C" EtsBoolean EtsEscompatArrayIsPlatformArray(EtsObject *obj)
+{
+    auto *escompatArray = PlatformTypes(EtsCoroutine::GetCurrent())->escompatArray;
+    return obj->GetClass() == escompatArray;
+}
+
+extern "C" ObjectHeader *EtsEscompatArrayGetBuffer(EtsObject *obj)
+{
+    ASSERT(obj->GetClass() == PlatformTypes(EtsCoroutine::GetCurrent())->escompatArray);
+    auto *array = EtsEscompatArray::FromEtsObject(obj);
+    return array->GetData()->GetCoreType();
+}
+
 }  // namespace ark::ets::intrinsics

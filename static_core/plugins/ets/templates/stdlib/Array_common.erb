@@ -29,41 +29,6 @@
 }
 
 /**
- * Creates a new `Array` from this `Array` instance and given `Array` instance.
- *
- * @param other to concatenate into a new array.
- *
- * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
- */
-// <%= access_public %> <%= override %> concat<%= this_generic %>(<%= this_arg %>...items: (<%= el_type %> | Concat<%= this_type %>)[]): <%= this_type %> {
-//     throw new Error("not implemented")
-// }
-
-<%= access_public %> concat<%= this_generic %>(<%= this_arg %>...items: FixedArray<ConcatArray<<%= el_type %>>>): <%= this_type %> {
-    let totalAdd = <%= this_len_int %>;
-    for (let i = 0; i < items.length; i++) {
-        totalAdd += items[i].length.toInt()
-    }
-
-    const buf : <%= make_fixed_array %> = <%= make_buffer.('totalAdd') %>;
-
-    for (let i = 0; i < <%= this_len_int %>; i++) {
-        buf[i] = <%= get_unsafe.(this, 'i') %>;
-    }
-
-    let insertTo = <%= this_len_int %>;
-    for (let i = 0; i < items.length; i++) {
-        const arr = items[i]
-        const len = arr.length.toInt()
-        for (let j = 0; j < len; j++) {
-            buf[insertTo++] = arr.$_get(j)
-        }
-    }
-
-    return <%= from_buffer.('buf') %>;
-}
-
-/**
  * Takes an integer value and returns the item at that index,
  * allowing for positive and negative integers. Negative integers count back
  * from the last item in the array.

@@ -120,6 +120,11 @@ void Codegen::CreateArrayCopyTo(IntrinsicInst *inst, [[maybe_unused]] Reg dst, S
                  srcEnd);
 }
 
+void Codegen::CreateEscompatArrayIsPlatformArray(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    CallFastPath(inst, EntrypointId::ESCOMPAT_ARRAY_IS_PLATFORM_ARRAY_FAST, dst, {}, src[FIRST_OPERAND]);
+}
+
 // Generates a call to StringBuilder.append() for values (EtsBool/Char/Bool/Short/Int/Long),
 // which are translated to array of utf16 chars.
 static inline void GenerateSbAppendCall(Codegen *cg, IntrinsicInst *inst, SbAppendArgs args,
