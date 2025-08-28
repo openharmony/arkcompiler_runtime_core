@@ -51,5 +51,8 @@ panda_ets_add_gtest(
 add_dependencies(ets_test_suite_tooling_profiler ${target}_cpp_test_gtests)
 endfunction()
 
-# Running tests via API calls
-add_ets_tooling_profiler_test(FILE profile_arkapi_test.ets CPP_SOURCE profile_arkapi_test.cpp OPTIONS "")
+# NOTE(@srokashevich, #29469): enable with tsan after fix
+if (NOT PANDA_ENABLE_THREAD_SANITIZER)
+    # Running tests via API calls
+    add_ets_tooling_profiler_test(FILE profile_arkapi_test.ets CPP_SOURCE profile_arkapi_test.cpp OPTIONS "")
+endif()
