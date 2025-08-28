@@ -22,10 +22,10 @@ function testArrayLikeNumber(): void {
 	const ta = Float64Array.from(arr);
 	arktest.assertEQ(ta.length, 4);
 	const epsilon = 1e-12;
-	arktest.assertTrue(Math.abs(ta.$_get(0).toDouble() - 1.23456789012345) < epsilon);
-	arktest.assertTrue(Math.abs(ta.$_get(1).toDouble() + 2.34567890123456) < epsilon);
-	arktest.assertTrue(Math.abs(ta.$_get(2).toDouble() - 3.45678901234567) < epsilon);
-	arktest.assertTrue(Math.abs(ta.$_get(3).toDouble() + 4.56789012345678) < epsilon);
+	arktest.assertDoubleEQ(ta.$_get(0).toDouble(), 1.23456789012345, epsilon);
+	arktest.assertDoubleEQ(ta.$_get(1).toDouble(), -2.34567890123456, epsilon);
+	arktest.assertDoubleEQ(ta.$_get(2).toDouble(), 3.45678901234567, epsilon);
+	arktest.assertDoubleEQ(ta.$_get(3).toDouble(), -4.56789012345678, epsilon);
 }
 
 function testIterableNumberWithoutMap(): void {
@@ -33,9 +33,9 @@ function testIterableNumberWithoutMap(): void {
 	const ta = Float64Array.from(iterable);
 	arktest.assertEQ(ta.length, 3);
 	const epsilon = 1e-12;
-	arktest.assertTrue(Math.abs(ta.$_get(0).toDouble() - 0.125) < epsilon);
-	arktest.assertTrue(Math.abs(ta.$_get(1).toDouble() + 0.875) < epsilon);
-	arktest.assertTrue(Math.abs(ta.$_get(2).toDouble() - 2.5) < epsilon);
+	arktest.assertDoubleEQ(ta.$_get(0).toDouble(), 0.125, epsilon);
+	arktest.assertDoubleEQ(ta.$_get(1).toDouble(), -0.875, epsilon);
+	arktest.assertDoubleEQ(ta.$_get(2).toDouble(), 2.5, epsilon);
 }
 
 function testIterableNumberWithMap(): void {
@@ -43,9 +43,9 @@ function testIterableNumberWithMap(): void {
 	const ta = Float64Array.from(arr, (v: number, idx: number): number => v + idx * 0.5);
 	arktest.assertEQ(ta.length, 3);
 	const epsilon = 1e-12;
-	arktest.assertTrue(Math.abs(ta.$_get(0).toDouble() - 1.0) < epsilon);
-	arktest.assertTrue(Math.abs(ta.$_get(1).toDouble() - 2.5) < epsilon);
-	arktest.assertTrue(Math.abs(ta.$_get(2).toDouble() - 4.0) < epsilon);
+	arktest.assertDoubleEQ(ta.$_get(0).toDouble(), 1.0, epsilon);
+	arktest.assertDoubleEQ(ta.$_get(1).toDouble(), 2.5, epsilon);
+	arktest.assertDoubleEQ(ta.$_get(2).toDouble(), 4.0, epsilon);
 }
 
 function testMapfnInfinity(): void {
@@ -79,7 +79,7 @@ function testDynamicReallocation(): void {
 	const epsilon = 1e-12;
 	let idx = 0;
 	for (const v of iterable) {
-		arktest.assertTrue(Math.abs(ta.$_get(idx).toDouble() - v) < epsilon);
+		arktest.assertDoubleEQ(ta.$_get(idx).toDouble(), v, epsilon);
 		idx++;
 	}
 }
@@ -89,7 +89,7 @@ function testBufferIndependence(): void {
 	const ta = Float64Array.from(src);
 	src[0] = 9.999;
 	const epsilon = 1e-12;
-	arktest.assertTrue(Math.abs(ta.$_get(0).toDouble() - 0.123) < epsilon);
+	arktest.assertDoubleEQ(ta.$_get(0).toDouble(), 0.123, epsilon);
 }
 
 function main(): int {
