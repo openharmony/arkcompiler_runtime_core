@@ -1412,7 +1412,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin?: number, end?: number): {{element['name']}}Array {
-        return this.slice(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
+        return this.sliceImpl(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -1427,7 +1427,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: number, end: int): {{element['name']}}Array {
-        return this.slice(begin.toInt(), end.toInt())
+        return this.sliceImpl(begin.toInt(), end.toInt())
     }
 
     /**
@@ -1442,7 +1442,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: number): {{element['name']}}Array {
-        return this.slice(begin.toInt(), end.toInt())
+        return this.sliceImpl(begin.toInt(), end.toInt())
     }
 
     /**
@@ -1457,15 +1457,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: int): {{element['name']}}Array {
-        const len: int = this.lengthInt
-        const relStart = normalizeIndex(begin, len)
-        const relEnd = normalizeIndex(end, len)
-        let count = relEnd - relStart
-        if (count < 0) {
-            count = 0
-        }
-        let buf = this.buffer.slice(relStart * {{element['name']}}Array.BYTES_PER_ELEMENT.toInt(), relEnd * {{element['name']}}Array.BYTES_PER_ELEMENT.toInt()) as ArrayBuffer
-        return new {{element['name']}}Array(buf)
+        return this.sliceImpl(begin, end)
     }
 
     /**
@@ -1660,7 +1652,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns a reversed copy
      */
     public toReversed(): {{element['name']}}Array {
-        return new {{element['name']}}Array(this).reverse()
+        return this.toReversedImpl()
     }
 
     /**
@@ -1700,7 +1692,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns an {{element['name']}}Array with replaced value on index
      */
     public with(index: number, value: {{element['subsetType']}}): {{element['name']}}Array {
-        return this.with(index.toInt(), {{fromElementCompat % 'value'}})
+        return this.withImpl(index.toInt(), {{fromElementCompat % 'value'}})
     }
 
     /**
@@ -1713,9 +1705,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns an {{element['name']}}Array with replaced value on index
      */
     public with(index: int, value: {{element['primitiveType']}}): {{element['name']}}Array {
-        let res = new {{element['name']}}Array(this)
-        res.setUnsafeClamp(index, value)
-        return res
+        return this.withImpl(index, value)
     }
 
     /// === with element lambda functions ===
@@ -1855,7 +1845,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
         let res = new {{element['name']}}Array(resBuf)
         for (let i = 0; i < this.lengthInt; i++) {
             const fnRes = fn({{castToEl % 'this.getUnsafe(i)'}}, i{{castToIdx}}, this)
-			
+
             {%- if element.get('name') == 'Uint8Clamped' %}
             res.setUnsafeClamp(i, round(fnRes).toInt())
             {%- else %}
@@ -2024,6 +2014,22 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
 
     /** String \"{{element['name']}}Array\" */
     public readonly name = "{{element['name']}}Array"
+
+    private final sliceImpl(begin: int, end: int): {{element['name']}}Array {
+        return new {{element['name']}}Array(this.allocSlicedBuffer(begin, end))
+    }
+
+    private final toReversedImpl(): {{element['name']}}Array {
+        return new {{element['name']}}Array(this.allocReversedBuffer())
+    }
+
+    private final withImpl(index: int, value: {{element['primitiveType']}}): {{element['name']}}Array {
+        return new {{element['name']}}Array(this.allocBufferWith(index, value))
+    }
+
+    private final native allocSlicedBuffer(beg: int, end: int): ArrayBuffer
+    private final native allocReversedBuffer(): ArrayBuffer
+    private final native allocBufferWith(index: int, value: {{element['primitiveType']}}): ArrayBuffer
 
     private static clamp(val: {{element['primitiveType']}}): {{element['primitiveType']}} {
         {%- if element.get('clamped', False) %}

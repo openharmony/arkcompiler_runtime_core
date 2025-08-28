@@ -26,6 +26,7 @@
 #include "intrinsics.h"
 #include "cross_values.h"
 #include "types/ets_object.h"
+#include "types/ets_primitives.h"
 
 constexpr uint64_t DOUBLE_SIGNIFICAND_SIZE = 52;
 constexpr uint64_t DOUBLE_EXPONENT_BIAS = 1023;
@@ -951,7 +952,7 @@ extern "C" void EtsEscompatBigUInt64ArrayFillInternal(ark::ets::EtsEscompatBigUI
  * Typed Arrays: Reverse Implementation
  */
 template <typename T>
-static T *EtsEscompatTypedArrayReverseImpl(T *thisArray)
+static inline T *EtsEscompatTypedArrayReverseImpl(T *thisArray)
 {
     auto *arrData = GetNativeData(thisArray);
     if (UNLIKELY(arrData == nullptr)) {
@@ -1000,7 +1001,143 @@ REVERSE_CALL_DECL(BigUInt64)
 
 #undef REVERSE_CALL_DECL
 
-static int32_t NormalizeIndex(int32_t idx, int32_t arrayLength)
+/// @brief Creates a new ByteArray (for ArrayBuffer) with specified size. Should be nonMovable.
+static inline EtsByteArray *CreateByteArrayNonMov(EtsInt byteLen)
+{
+    auto klass = EtsByteArray::GetComponentClass()->GetRuntimeClass();
+    EtsByteArray *array =
+        reinterpret_cast<EtsByteArray *>(Thread::GetCurrent()->GetVM()->GetHeapManager()->AllocateNonMovableObject(
+            klass, sizeof(EtsByteArray) + byteLen, DEFAULT_ALIGNMENT, ManagedThread::GetCurrent(),
+            mem::ObjectAllocatorBase::ObjMemInitPolicy::NO_INIT));
+    array->UpdateLength(byteLen);
+    return array;
+}
+
+/// @brief Creates a new ArrayBuffer with specified ByteArray and size.
+static inline EtsEscompatArrayBuffer *CreateArrayBufferExternalData(EtsInt byteLen, EtsByteArray *externalData)
+{
+    auto *klass = PlatformTypes(EtsCoroutine::GetCurrent())->escompatArrayBuffer->GetRuntimeClass();
+    EtsEscompatArrayBuffer *buffer =
+        reinterpret_cast<EtsEscompatArrayBuffer *>(Thread::GetCurrent()->GetVM()->GetHeapManager()->AllocateObject(
+            klass, sizeof(EtsEscompatArrayBuffer), DEFAULT_ALIGNMENT, ManagedThread::GetCurrent(),
+            mem::ObjectAllocatorBase::ObjMemInitPolicy::NO_INIT, false));
+    buffer->Initialize(EtsCoroutine::GetCurrent(), byteLen, externalData);
+    return buffer;
+}
+
+/*
+ * Typed Arrays: reversed alloc data implementation: needs for toReversed().
+ */
+template <typename T>
+static EtsEscompatArrayBuffer *EtsEscompatTypedArrayAllocReversedBuffer(T *thisArray)
+{
+    using ElementType = typename T::ElementType;
+    const EtsInt srcLength = thisArray->GetLengthInt();
+    const ElementType *src = static_cast<ElementType *>(GetNativeData(thisArray));
+    const EtsInt lenBytes = srcLength * sizeof(ElementType);
+    EtsByteArray *data = CreateByteArrayNonMov(lenBytes);
+    if (UNLIKELY(src == nullptr || data == nullptr)) {
+        return nullptr;
+    }
+    ElementType *dest = data->GetData<ElementType>();
+    ASSERT(dest != nullptr);
+    for (int i = 0; i < srcLength; i++) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic, clang-analyzer-core.NullDereference)
+        dest[i] = src[(srcLength - 1) - i];
+    }
+    return CreateArrayBufferExternalData(lenBytes, data);
+}
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define ALLOC_REVERSED_BUFFER_CALL_DECL(Type)                                       \
+    /* CC-OFFNXT(G.PRE.02) name part */                                             \
+    extern "C" EtsEscompatArrayBuffer *EtsEscompat##Type##ArrayAllocReversedBuffer( \
+        ark::ets::EtsEscompat##Type##Array *thisArray)                              \
+    {                                                                               \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                      \
+        return EtsEscompatTypedArrayAllocReversedBuffer(thisArray);                 \
+    }
+
+ALLOC_REVERSED_BUFFER_CALL_DECL(Int8)
+ALLOC_REVERSED_BUFFER_CALL_DECL(Int16)
+ALLOC_REVERSED_BUFFER_CALL_DECL(Int32)
+ALLOC_REVERSED_BUFFER_CALL_DECL(BigInt64)
+ALLOC_REVERSED_BUFFER_CALL_DECL(Float32)
+ALLOC_REVERSED_BUFFER_CALL_DECL(Float64)
+
+ALLOC_REVERSED_BUFFER_CALL_DECL(UInt8)
+ALLOC_REVERSED_BUFFER_CALL_DECL(UInt8Clamped)
+ALLOC_REVERSED_BUFFER_CALL_DECL(UInt16)
+ALLOC_REVERSED_BUFFER_CALL_DECL(UInt32)
+ALLOC_REVERSED_BUFFER_CALL_DECL(BigUInt64)
+
+#undef ALLOC_REVERSED_BUFFER_CALL_DECL
+
+/*
+ * Typed Arrays: alloc data with insert value to pos implementation: needs for with().
+ */
+template <typename T>
+static EtsEscompatArrayBuffer *EtsEscompatTypedArrayAllocBufferWith(T *thisArray, EtsInt pos,
+                                                                    typename T::ElementType val)
+{
+    using ElementType = typename T::ElementType;
+    const EtsInt srcLength = thisArray->GetLengthInt();
+    if (UNLIKELY(pos < 0 || pos >= srcLength)) {
+        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR,
+                          "offset is out of bounds");
+        return nullptr;
+    }
+    const ElementType *src = static_cast<ElementType *>(GetNativeData(thisArray));
+    const EtsInt lenBytes = srcLength * sizeof(ElementType);
+    EtsByteArray *data = CreateByteArrayNonMov(lenBytes);
+    if (UNLIKELY(src == nullptr || data == nullptr)) {
+        return nullptr;
+    }
+    ElementType *dest = data->GetData<ElementType>();
+    ASSERT(dest != nullptr);
+    if (LIKELY(lenBytes > 0)) {
+        [[maybe_unused]] auto err = memcpy_s(dest, lenBytes, src, lenBytes);
+        ASSERT(err == EOK);
+    }
+    dest[pos] = val;
+    return CreateArrayBufferExternalData(lenBytes, data);
+}
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define ALLOC_BUFFER_WITH_CALL_DECL(AType, EType)                                \
+    /* CC-OFFNXT(G.PRE.02) name part */                                          \
+    extern "C" EtsEscompatArrayBuffer *EtsEscompat##AType##ArrayAllocBufferWith( \
+        ark::ets::EtsEscompat##AType##Array *thisArray, EtsInt pos, EType val)   \
+    {                                                                            \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                   \
+        return EtsEscompatTypedArrayAllocBufferWith(thisArray, pos, val);        \
+    }
+
+extern "C" EtsEscompatArrayBuffer *EtsEscompatUInt8ClampedArrayAllocBufferWith(
+    ark::ets::EtsEscompatUInt8ClampedArray *thisArray, EtsInt pos, EtsInt val)
+{
+    if (val > ark::ets::EtsEscompatUInt8ClampedArray::MAX) {
+        val = ark::ets::EtsEscompatUInt8ClampedArray::MAX;
+    } else if (val < ark::ets::EtsEscompatUInt8ClampedArray::MIN) {
+        val = ark::ets::EtsEscompatUInt8ClampedArray::MIN;
+    }
+    return EtsEscompatTypedArrayAllocBufferWith(thisArray, pos, val);
+}
+
+ALLOC_BUFFER_WITH_CALL_DECL(Int8, EtsByte)
+ALLOC_BUFFER_WITH_CALL_DECL(Int16, EtsShort)
+ALLOC_BUFFER_WITH_CALL_DECL(Int32, EtsInt)
+ALLOC_BUFFER_WITH_CALL_DECL(BigInt64, EtsLong)
+ALLOC_BUFFER_WITH_CALL_DECL(Float32, EtsFloat)
+ALLOC_BUFFER_WITH_CALL_DECL(Float64, EtsDouble)
+ALLOC_BUFFER_WITH_CALL_DECL(UInt8, EtsInt)
+ALLOC_BUFFER_WITH_CALL_DECL(UInt16, EtsInt)
+ALLOC_BUFFER_WITH_CALL_DECL(UInt32, EtsLong)
+ALLOC_BUFFER_WITH_CALL_DECL(BigUInt64, EtsLong)
+
+#undef ALLOC_BUFFER_WITH_CALL_DECL
+
+static inline int32_t NormalizeIndex(int32_t idx, int32_t arrayLength)
 {
     if (idx < -arrayLength) {
         return 0;
@@ -1013,6 +1150,57 @@ static int32_t NormalizeIndex(int32_t idx, int32_t arrayLength)
     }
     return idx;
 }
+
+/*
+ * Typed Arrays: sliced alloc data implementation: needs for slice().
+ */
+template <typename T>
+static EtsEscompatArrayBuffer *EtsEscompatTypedArrayAllocSlicedBufferImpl(T *thisArray, EtsInt beg, EtsInt end)
+{
+    using ElementType = typename T::ElementType;
+    const EtsInt srcLength = thisArray->GetLengthInt();
+    beg = NormalizeIndex(beg, srcLength);
+    end = NormalizeIndex(end, srcLength);
+    const EtsInt lengthInt = beg <= end ? end - beg : 0;
+    const ElementType *src = static_cast<ElementType *>(GetNativeData(thisArray)) + beg;
+    const EtsInt lenBytes = lengthInt * sizeof(ElementType);
+    EtsByteArray *data = CreateByteArrayNonMov(lenBytes);
+    if (UNLIKELY(src == nullptr || data == nullptr)) {
+        return nullptr;
+    }
+    ElementType *dest = data->GetData<ElementType>();
+    ASSERT(dest != nullptr);
+    if (LIKELY(lenBytes > 0)) {
+        [[maybe_unused]] auto err = memcpy_s(dest, lenBytes, src, lenBytes);
+        ASSERT(err == EOK);
+    }
+    return CreateArrayBufferExternalData(lenBytes, data);
+}
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define ALLOC_SLICED_BUFFER_CALL_DECL(Type)                                       \
+    /* CC-OFFNXT(G.PRE.02) name part */                                           \
+    extern "C" EtsEscompatArrayBuffer *EtsEscompat##Type##ArrayAllocSlicedBuffer( \
+        ark::ets::EtsEscompat##Type##Array *thisArray, EtsInt beg, EtsInt end)    \
+    {                                                                             \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                    \
+        return EtsEscompatTypedArrayAllocSlicedBufferImpl(thisArray, beg, end);   \
+    }
+
+ALLOC_SLICED_BUFFER_CALL_DECL(Int8)
+ALLOC_SLICED_BUFFER_CALL_DECL(Int16)
+ALLOC_SLICED_BUFFER_CALL_DECL(Int32)
+ALLOC_SLICED_BUFFER_CALL_DECL(BigInt64)
+ALLOC_SLICED_BUFFER_CALL_DECL(Float32)
+ALLOC_SLICED_BUFFER_CALL_DECL(Float64)
+
+ALLOC_SLICED_BUFFER_CALL_DECL(UInt8)
+ALLOC_SLICED_BUFFER_CALL_DECL(UInt8Clamped)
+ALLOC_SLICED_BUFFER_CALL_DECL(UInt16)
+ALLOC_SLICED_BUFFER_CALL_DECL(UInt32)
+ALLOC_SLICED_BUFFER_CALL_DECL(BigUInt64)
+
+#undef ALLOC_SLICED_BUFFER_CALL_DECL
 
 template <typename T>
 T *EtsEscompatTypedArrayCopyWithinImpl(T *thisArray, EtsInt target, EtsInt start, EtsInt end)

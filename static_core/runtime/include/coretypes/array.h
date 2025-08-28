@@ -244,7 +244,7 @@ public:
     static Array *CreateMultiDimensionalArray(ManagedThread *thread, ark::Class *klass, uint32_t nargs,
                                               const DimIterator &iter, size_t dimIdx = 0);
 
-private:
+protected:
     void SetLength(ArraySizeT length)
     {
         // Atomic with relaxed order reason: data race with length_ with no synchronization or ordering constraints
@@ -252,6 +252,7 @@ private:
         length_.store(length, std::memory_order_relaxed);
     }
 
+private:
     template <class T>
     void FillPrimitiveElem(T elem, ArraySizeT start, ArraySizeT end, size_t elemSize);
 

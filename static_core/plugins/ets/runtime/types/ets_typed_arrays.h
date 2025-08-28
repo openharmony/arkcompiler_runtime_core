@@ -118,18 +118,6 @@ public:
         return EtsString::FromEtsObject(EtsObject::FromCoreType(ObjectAccessor::GetObject(this, GetNameOffset())));
     }
 
-    void Initialize(EtsCoroutine *coro, EtsInt lengthInt, EtsInt bytesPerElement, EtsDouble byteOffset,
-                    EtsObject *buffer, EtsString *name)
-    {
-        ASSERT(buffer != nullptr);
-        ObjectAccessor::SetObject(coro, this, GetBufferOffset(), buffer->GetCoreType());
-        ObjectAccessor::SetObject(coro, this, GetNameOffset(), name != nullptr ? name->GetCoreType() : nullptr);
-        bytesPerElement_ = bytesPerElement;
-        byteOffset_ = byteOffset;
-        byteLength_ = static_cast<EtsDouble>(lengthInt) * bytesPerElement;
-        lengthInt_ = lengthInt;
-    }
-
 private:
     ObjectPointer<EtsObject> buffer_;
     ObjectPointer<EtsString> name_;
