@@ -55,7 +55,7 @@ sub:
         - |
           (x: number, i: number): void => { x = x*2 }
         - |
-          (x: number, i: number, s: Float64Array): void => { s[i] = x + 1000 }
+          (x: number, i: number, s: Float64Array): void => { x = x + 1000 }
     sub:
       - method: find
         params:

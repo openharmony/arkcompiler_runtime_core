@@ -437,17 +437,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *
      * @returns a primitive at index
      */
-    public override $_get(index: number): {{element['subsetTypeValues']}} {
-        return {{ asElementCompat % 'this.$_get(index.toInt())' }}
-    }
-
-    /**
-     * Returns an instance of {{element['subsetType']}} at passed index.
-     *
-     * @param index index to look at
-     *
-     * @returns a primitive at index
-     */
     {%- if element['name'] == 'BigUint64' %}
     public $_get(i: int): {{element['subsetType']}} {
         return BigInt.fromULong(this.getLong(i))
@@ -456,17 +445,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
     {%- else %}
     public native $_get(i: int): {{element['subsetType']}}
     {%- endif %}
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
-    public $_set(index: number, val: {{element['subsetType']}}): void {
-        this.$_set(index.toInt(), val)
-    }
 
     /**
      * Assigns val as element on index.
@@ -491,30 +469,8 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *
      * @param index index to change
      */
-    public $_set(index: number, val: {{element['primitiveType']}}): void {
-        this.$_set(index.toInt(), val)
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
     public native $_set(index: int, val: {{element['primitiveType']}}): void
     {%- if element['primitiveType'] != 'int' %}
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
-    public $_set(index: number, val: int): void {
-        this.$_set(index.toInt(), val.toInt())
-    }
 
     /**
      * Assigns val as element on index.

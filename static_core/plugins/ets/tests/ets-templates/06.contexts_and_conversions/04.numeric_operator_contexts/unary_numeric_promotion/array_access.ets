@@ -26,7 +26,7 @@ enum IntEnum {One = 1, Two = 0x2, Three}
 function main() {
   let v: {{c.type}} = {{c.val}};
   let arr: {{c.type}}[] = new {{c.type}}[{{c.len}} + 1];
-  arr[v] = v;
-  arktest.assertEQ(arr[v], {{c.len}})
+  arr[v.toInt()] = v;
+  arktest.assertEQ(arr[v.toInt()], {{c.len}})
 }
 {% endfor %}

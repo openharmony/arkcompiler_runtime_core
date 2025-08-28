@@ -166,7 +166,7 @@ bridge_methods_generic:
         add(item: T): void {
           this.items.push(item);
         }
-        get(index: number): T {
+        get(index: int): T {
           return this.items[index];
         }
       }

@@ -633,7 +633,7 @@ export final class Console {
             let hasPrimitive = false;
             let columnMap = new ColumnMap();
             const arrayValue = objValue as ClassValue;
-            const keyLength =objType.getFieldsNum();
+            const keyLength = objType.getFieldsNum().toInt();
             let keyArray = new Array<string>();
             let valuesKeyArray:Array<string> = new Array<string>(keyLength).fill("");
             for (let i = 0; i < keyLength; i++) {
@@ -661,7 +661,7 @@ export final class Console {
         }
     }
 
-    private static parseObjectInner(value: Any, valueType:Type, keyLength: number, columnMap: ColumnMap, index: number): void {
+    private static parseObjectInner(value: Any, valueType:Type, keyLength: number, columnMap: ColumnMap, index: int): void {
         let initialMap = new Map<string, boolean>();
         let keys:Array<string> = new Array<string>();
         let innerLength: number = 0;
@@ -680,7 +680,7 @@ export final class Console {
         Console.setColumnMap(innerLength, initialMap, columnMap, innerValue, keys, keyLength, index);
     }
 
-    private static setColumnMap(innerLength: number, initialMap: Map<string, boolean>, columnMap: ColumnMap, innerValue: Array<string>, keys:Array<string>, keyLength:number, i: number): void {
+    private static setColumnMap(innerLength: number, initialMap: Map<string, boolean>, columnMap: ColumnMap, innerValue: Array<string>, keys:Array<string>, keyLength:number, i: int): void {
         for (let j = 0; j < innerLength; j++) {
             let innerKey = keys[j];
             if (!initialMap.has(innerKey)) {
@@ -791,7 +791,7 @@ export final class Console {
         }
     }
 
-    private static graphTable(head: Array<string>, columns: Array<string>, length: number): Array<string> {
+    private static graphTable(head: Array<string>, columns: Array<string>, length: int): Array<string> {
         let columnLen = head.length;
         let columnWidths: Array<number> = new Array<number>(columnLen);
         let rowDivider: Array<string> = new Array<string>(columnLen);
@@ -873,7 +873,7 @@ export final class Console {
         return result;
     }
 
-    private static printRows(Rows: Array<string>, columnWidths: Array<number>, indexNum: number): Array<string> {
+    private static printRows(Rows: Array<string>, columnWidths: Array<number>, indexNum: int): Array<string> {
         let rows:Array<string> = new Array<string>();
         let length = columnWidths.length;
         for (let i = 0; i < indexNum; i++) {
@@ -1034,7 +1034,7 @@ class DataFrame {
      * @returns {string} Formatted data row
      * @private
      */
-    private buildDataRow(rowIndex: number): string {
+    private buildDataRow(rowIndex: int): string {
         const paddedIndex = `${rowIndex}`.padEnd(this._indexColumnWidth - 4);
         let row: string = `│ ${paddedIndex} │`;
         for (const col of this.tableModel.keys()) {

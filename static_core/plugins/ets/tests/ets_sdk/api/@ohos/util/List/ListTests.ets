@@ -157,7 +157,7 @@ function testBasicOperationsAndMethods() {
     }
 
     list1.forEach((i, d) => {
-        arktest.assertEQ(d, testArray2[i]);
+        arktest.assertEQ(d, testArray2[i.toInt()]);
     })
 
     arktest.assertEQ(list1.get(200), undefined);

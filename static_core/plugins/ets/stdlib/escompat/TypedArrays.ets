@@ -312,31 +312,9 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param index index to change
      */
-    public $_set(index: number, val: number): void {
-        this.$_set(index.toInt(), val)
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
     public $_set(index: int, val: number): void {
         let v = this.zeroIfInfinity(val)
         this.$_set(index, v.toByte())
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
-    public $_set(index: number, val: int): void {
-        this.$_set(index.toInt(), val)
     }
 
     /**
@@ -355,33 +333,11 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param index index to change
      */
-    public $_set(index: number, val: byte): void {
-        this.$_set(index.toInt(), val)
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
     public native $_set(index: int, val: byte): void
 
     /** Number of byte stored in Int8Array */
     public get length(): int {
         return this.lengthInt
-    }
-
-    /**
-     * Returns an instance of number at passed index.
-     *
-     * @param index index to look at
-     *
-     * @returns a primitive at index
-     */
-    public override $_get(index: number): Number {
-        return this.$_get(index.toInt())
     }
 
     /**
@@ -643,7 +599,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @param insertPos index to change
      */
     public set(insertPos: number, val: number): void {
-        this.$_set(insertPos, val)
+        this.$_set(insertPos.toInt(), val)
     }
 
     /**
@@ -2142,31 +2098,9 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param index index to change
      */
-    public $_set(index: number, val: number): void {
-        this.$_set(index.toInt(), val)
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
     public $_set(index: int, val: number): void {
         let v = this.zeroIfInfinity(val)
         this.$_set(index, v.toShort())
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
-    public $_set(index: number, val: int): void {
-        this.$_set(index.toInt(), val)
     }
 
     /**
@@ -2185,33 +2119,11 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param index index to change
      */
-    public $_set(index: number, val: short): void {
-        this.$_set(index.toInt(), val)
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
     public native $_set(index: int, val: short): void
 
     /** Number of short stored in Int16Array */
     public get length(): int {
         return this.lengthInt
-    }
-
-    /**
-     * Returns an instance of number at passed index.
-     *
-     * @param index index to look at
-     *
-     * @returns a primitive at index
-     */
-    public override $_get(index: number): Number {
-        return this.$_get(index.toInt())
     }
 
     /**
@@ -2473,7 +2385,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @param insertPos index to change
      */
     public set(insertPos: number, val: number): void {
-        this.$_set(insertPos, val)
+        this.$_set(insertPos.toInt(), val)
     }
 
     /**
@@ -3985,31 +3897,9 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param index index to change
      */
-    public $_set(index: number, val: number): void {
-        this.$_set(index.toInt(), val)
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
     public $_set(index: int, val: number): void {
         let v = this.zeroIfInfinity(val)
         this.$_set(index, v.toInt())
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
-    public $_set(index: number, val: int): void {
-        this.$_set(index.toInt(), val)
     }
 
     /**
@@ -4024,17 +3914,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     /** Number of int stored in Int32Array */
     public get length(): int {
         return this.lengthInt
-    }
-
-    /**
-     * Returns an instance of number at passed index.
-     *
-     * @param index index to look at
-     *
-     * @returns a primitive at index
-     */
-    public override $_get(index: number): Number {
-        return this.$_get(index.toInt())
     }
 
     /**
@@ -4296,7 +4175,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param insertPos index to change
      */
     public set(insertPos: number, val: number): void {
-        this.$_set(insertPos, val)
+        this.$_set(insertPos.toInt(), val)
     }
 
     /**
@@ -5770,30 +5649,8 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @param index index to change
      */
-    public $_set(index: number, val: BigInt): void {
-        this.$_set(index.toInt(), val)
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
     public $_set(index: int, val: BigInt): void {
         this.$_set(index, val.getLong())
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
-    public $_set(index: number, val: long): void {
-        this.$_set(index.toInt(), val)
     }
 
     /**
@@ -5808,17 +5665,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     /** Number of long stored in BigInt64Array */
     public get length(): int {
         return this.lengthInt
-    }
-
-    /**
-     * Returns an instance of BigInt at passed index.
-     *
-     * @param index index to look at
-     *
-     * @returns a primitive at index
-     */
-    public override $_get(index: number): BigInt {
-        return new BigInt(this.$_get(index.toInt()))
     }
 
     /**
@@ -6080,7 +5926,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @param insertPos index to change
      */
     public set(insertPos: number, val: BigInt): void {
-        this.$_set(insertPos, val)
+        this.$_set(insertPos.toInt(), val)
     }
 
     /**
@@ -6170,7 +6016,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         }
         for (let i = 0; i < array.length.toInt(); ++i) {
             let truncatedVal: BigInt = BigInt.asIntN(64, array[i])
-            this.$_set(offset + i, truncatedVal.getLong())
+            this.$_set(insertPos + i, truncatedVal.getLong())
         }
     }
 
@@ -7568,30 +7414,8 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param index index to change
      */
-    public $_set(index: number, val: number): void {
-        this.$_set(index.toInt(), val)
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
     public $_set(index: int, val: number): void {
         this.$_set(index, val.toFloat())
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
-    public $_set(index: number, val: float): void {
-        this.$_set(index.toInt(), val)
     }
 
     /**
@@ -7606,17 +7430,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     /** Number of float stored in Float32Array */
     public get length(): int {
         return this.lengthInt
-    }
-
-    /**
-     * Returns an instance of number at passed index.
-     *
-     * @param index index to look at
-     *
-     * @returns a primitive at index
-     */
-    public override $_get(index: number): Number {
-        return this.$_get(index.toInt())
     }
 
     /**
@@ -7874,7 +7687,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param insertPos index to change
      */
     public set(insertPos: number, val: number): void {
-        this.$_set(insertPos, val)
+        this.$_set(insertPos.toInt(), val)
     }
 
     /**
@@ -9362,33 +9175,11 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param index index to change
      */
-    public $_set(index: number, val: double): void {
-        this.$_set(index.toInt(), val)
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
     public native $_set(index: int, val: double): void
 
     /** Number of double stored in Float64Array */
     public get length(): int {
         return this.lengthInt
-    }
-
-    /**
-     * Returns an instance of number at passed index.
-     *
-     * @param index index to look at
-     *
-     * @returns a primitive at index
-     */
-    public override $_get(index: number): Number {
-        return this.$_get(index.toInt())
     }
 
     /**
@@ -9598,7 +9389,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @param insertPos index to change
      */
     public set(insertPos: number, val: number): void {
-        this.$_set(insertPos, val)
+        this.$_set(insertPos.toInt(), val)
     }
 
     /**

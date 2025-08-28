@@ -53,7 +53,7 @@ function testBasicOperations() {
     }
 
     deque.forEach((i, d) => {
-        arktest.assertEQ(d, testArray[i]);
+        arktest.assertEQ(d, testArray[i.toInt()]);
     });
 
     let j = 0;

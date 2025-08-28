@@ -535,7 +535,7 @@ export namespace uri {
     let g_rulePathLookup = new Uint8Array(128);
 
     for (let i = 0; i < digitAggregate.length; i++) {
-      const code = digitAggregate.charCodeAt(i);
+      const code = digitAggregate.charCodeAt(i).toInt();
       if (code < 128) {
         g_ruleSchemeLookup[code] = 1;
         g_ruleUrlcLookup[code] = 1;
@@ -547,7 +547,7 @@ export namespace uri {
     }
 
     for (let i = 0; i < alphasAggregate.length; i++) {
-      const code = alphasAggregate.charCodeAt(i);
+      const code = alphasAggregate.charCodeAt(i).toInt();
       if (code < 128) {
         g_ruleSchemeLookup[code] = 1;
         g_ruleUrlcLookup[code] = 1;
@@ -559,7 +559,7 @@ export namespace uri {
     }
 
     for (let i = 0; i < schemeAggregate.length; i++) {
-      const code = schemeAggregate.charCodeAt(i);
+      const code = schemeAggregate.charCodeAt(i).toInt();
       if (code < 128) {
         g_ruleSchemeLookup[code] = 1;
         g_ruleUrlcLookup[code] = 1;
@@ -569,28 +569,28 @@ export namespace uri {
     }
 
     for (let i = 0; i < uricAggregate.length; i++) {
-      const code = uricAggregate.charCodeAt(i);
+      const code = uricAggregate.charCodeAt(i).toInt();
       if (code < 128) {
         g_ruleUrlcLookup[code] = 1;
       }
     }
 
     for (let i = 0; i < pathAggregate.length; i++) {
-      const code = pathAggregate.charCodeAt(i);
+      const code = pathAggregate.charCodeAt(i).toInt();
       if (code < 128) {
         g_rulePathLookup[code] = 1;
       }
     }
 
     for (let i = 0; i < userInfoAggregate.length; i++) {
-      const code = userInfoAggregate.charCodeAt(i);
+      const code = userInfoAggregate.charCodeAt(i).toInt();
       if (code < 128) {
         g_ruleUserInfoLookup[code] = 1;
       }
     }
 
     for (let i = 0; i < portAggregate.length; i++) {
-      const code = portAggregate.charCodeAt(i);
+      const code = portAggregate.charCodeAt(i).toInt();
       if (code < 128) {
         g_rulePortLookup[code] = 1;
       }
@@ -712,7 +712,7 @@ export namespace uri {
       const len = data.length;
 
       for (let i = 0; i < len; i++) {
-        const code = data.charCodeAt(i);
+        const code = data.charCodeAt(i).toInt();
 
         if (code < 128) {
           if (rule[code] === 0) {
