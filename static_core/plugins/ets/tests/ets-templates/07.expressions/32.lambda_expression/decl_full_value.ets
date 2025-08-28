@@ -14,6 +14,7 @@
  */
 
 {% for c in cases %}
+
 /*---
 desc: Full declaration with value arguments, {{c.desc}}
 ---*/

@@ -14,11 +14,10 @@
  */
 
 {% for c in cases %}
+
 /*---
 desc: Full declaration with reference arguments, {{c.desc}}
 ---*/
-
- {{c.decl}}
 
 function main() {
     {{c.impl|indent}}
