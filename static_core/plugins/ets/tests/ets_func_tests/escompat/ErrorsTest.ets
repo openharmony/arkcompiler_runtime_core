@@ -82,7 +82,7 @@ function testCreateError() {
         "Error",
         "Test Error"
     )
-    arktest.assertEQ(Error("Test Error", new ErrorOptions("Cause")).cause, "Cause")
+    arktest.assertEQ(Error("Test Error", {cause: "Cause" as Object} as ErrorOptions).cause, "Cause")
 }
 
 function testThrowError() {
@@ -103,7 +103,7 @@ function testErrorMessage() {
 }
 
 function testErrorWithCause() {
-    const options = new ErrorOptions("Test cause")
+    const options = {cause: "Test cause" as Object} as ErrorOptions
     const err = new Error("Test error with cause", options)
     const errSc = Error("Test error with cause", options)
     arktest.assertEQ(errSc.cause, err.cause)
@@ -121,7 +121,7 @@ function testCreateAggregateError() {
     const errInArr = [new Error()]
     const emptyStr = ""
     const nonEmptyStr = "text"
-    const errOpts = new ErrorOptions()
+    const errOpts = {} as ErrorOptions
     const assertMsg = "length of errors has to be 1"
 
     // AggregateError(Error)
@@ -216,7 +216,7 @@ function testEvalError() {
         "Test EvalError"
     )
     arktest.assertEQ(
-        EvalError("Test EvalError", new ErrorOptions("Test cause")).cause,
+        EvalError("Test EvalError", {cause: "Test cause" as Object} as ErrorOptions).cause,
         "Test cause"
     )
 }
@@ -229,7 +229,7 @@ function testRangeError() {
         "Test RangeError"
     )
     arktest.assertEQ(
-        RangeError("Test RangeError", new ErrorOptions("Test cause")).cause,
+        RangeError("Test RangeError", {cause: "Test cause" as Object} as ErrorOptions).cause,
         "Test cause"
     )
 }
@@ -242,7 +242,7 @@ function testReferenceError() {
         "Test ReferenceError"
     )
     arktest.assertEQ(
-        ReferenceError("Test ReferenceError", new ErrorOptions("Test cause")).cause,
+        ReferenceError("Test ReferenceError", {cause: "Test cause" as Object} as ErrorOptions).cause,
         "Test cause"
     )
 }
@@ -255,7 +255,7 @@ function testSyntaxError() {
         "Test SyntaxError"
     )
     arktest.assertEQ(
-        SyntaxError("Test SyntaxError", new ErrorOptions("Test cause")).cause,
+        SyntaxError("Test SyntaxError", {cause: "Test cause" as Object} as ErrorOptions).cause,
         "Test cause"
     )
 }
@@ -268,7 +268,7 @@ function testTypeError() {
         "Test TypeError"
     )
     arktest.assertEQ(
-        TypeError("Test TypeError", new ErrorOptions("Test cause")).cause,
+        TypeError("Test TypeError", {cause: "Test cause" as Object} as ErrorOptions).cause,
         "Test cause"
     )
 }
@@ -281,7 +281,7 @@ function testURIError() {
         "Test URIError"
     )
     arktest.assertEQ(
-        URIError("Test URIError", new ErrorOptions("Test cause")).cause,
+        URIError("Test URIError", {cause: "Test cause" as Object} as ErrorOptions).cause,
         "Test cause"
     )
 }

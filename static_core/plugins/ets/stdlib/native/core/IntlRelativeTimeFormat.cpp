@@ -39,33 +39,6 @@ static bool IsUndefined(ani_env *env, ani_ref ref)
     return isUndefined == ANI_TRUE;
 }
 
-static std::string CallOptionGetter(ani_env *env, ani_object options, const char *getterName)
-{
-    ani_class optionsClass = nullptr;
-    if (env->FindClass("std.core.Intl.RelativeTimeFormatOptionsImpl", &optionsClass) != ANI_OK) {
-        return "";
-    }
-
-    ani_method getter = nullptr;
-    if (env->Class_FindGetter(optionsClass, getterName, &getter) != ANI_OK) {
-        return "";
-    }
-
-    ani_ref resultRef = nullptr;
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    if (env->Object_CallMethod_Ref(options, getter, &resultRef) != ANI_OK || IsUndefined(env, resultRef)) {
-        return "";
-    }
-
-    auto resultStr = static_cast<ani_string>(resultRef);
-    ani_size len = 0;
-    env->String_GetUTF8Size(resultStr, &len);
-    std::vector<char> buf(len + 1);
-    ani_size copied = 0;
-    env->String_GetUTF8(resultStr, buf.data(), buf.size(), &copied);
-    return std::string(buf.data());
-}
-
 static ani_status ThrowError(ani_env *env, const char *errorClassName, const std::string &message)
 {
     ani_status aniStatus = ANI_OK;
@@ -185,7 +158,7 @@ static URelativeDateTimeUnit ToICUUnitOrThrow(ani_env *env, const std::string &u
     return static_cast<URelativeDateTimeUnit>(-1);
 }
 
-static ani_object StdCoreIntlRelativeTimeFormatResolvedOptionsImpl(ani_env *env, ani_object self)
+static ani_string StdCoreIntlGetLocale(ani_env *env, ani_object self)
 {
     std::unique_ptr<icu::Locale> icuLocale = ToIcuLocale(env, self);
     if (!icuLocale) {
@@ -197,51 +170,7 @@ static ani_object StdCoreIntlRelativeTimeFormatResolvedOptionsImpl(ani_env *env,
         ThrowInternalError(env, "failed to get locale lang tag: " + std::string(u_errorName(status)));
         return nullptr;
     }
-
-    std::string numberingSystemStr = "latn";
-    std::string numericStr = "always";
-    std::string styleStr = "long";
-
-    ani_ref optionsRef = nullptr;
-    if (env->Object_GetFieldByName_Ref(self, "options", &optionsRef) == ANI_OK && optionsRef != nullptr) {
-        auto options = static_cast<ani_object>(optionsRef);
-
-        std::string maybeNumeric = CallOptionGetter(env, options, "numeric");
-        std::string maybeStyle = CallOptionGetter(env, options, "style");
-
-        if (!maybeNumeric.empty()) {
-            numericStr = maybeNumeric;
-        }
-        if (!maybeStyle.empty()) {
-            styleStr = maybeStyle;
-        }
-    }
-
-    ani_string locale = CreateUtf8String(env, langTagStr.c_str(), langTagStr.length());
-    ani_string numberingSystem = CreateUtf8String(env, numberingSystemStr.c_str(), numberingSystemStr.length());
-    ani_string numeric = CreateUtf8String(env, numericStr.c_str(), numericStr.length());
-    ani_string style = CreateUtf8String(env, styleStr.c_str(), styleStr.length());
-
-    ani_class optsCls = nullptr;
-    ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.ResolvedRelativeTimeFormatOptionsImpl", &optsCls));
-    ani_method ctor = nullptr;
-    ANI_FATAL_IF_ERROR(env->Class_FindMethod(optsCls, "<ctor>", "C{std.core.String}C{std.core.String}:", &ctor));
-
-    ani_object resolvedOpts = nullptr;
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    ANI_FATAL_IF_ERROR(env->Object_New(optsCls, ctor, &resolvedOpts, locale, numberingSystem));
-
-    ani_method numericSetter = nullptr;
-    ANI_FATAL_IF_ERROR(env->Class_FindSetter(optsCls, "numeric", &numericSetter));
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    ANI_FATAL_IF_ERROR(env->Object_CallMethod_Void(resolvedOpts, numericSetter, numeric));
-
-    ani_method styleSetter = nullptr;
-    ANI_FATAL_IF_ERROR(env->Class_FindSetter(optsCls, "style", &styleSetter));
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    ANI_FATAL_IF_ERROR(env->Object_CallMethod_Void(resolvedOpts, styleSetter, style));
-
-    return resolvedOpts;
+    return CreateUtf8String(env, langTagStr.c_str(), langTagStr.length());
 }
 
 static ani_string StdCoreIntlRelativeTimeFormatFormatImpl(ani_env *env, ani_object self, ani_double value,
@@ -279,8 +208,7 @@ ani_status RegisterIntlRelativeTimeFormatMethods(ani_env *env)
     std::array methods = {
         ani_native_function {"formatImpl", "dC{std.core.String}:C{std.core.String}",
                              reinterpret_cast<void *>(StdCoreIntlRelativeTimeFormatFormatImpl)},
-        ani_native_function {"resolvedOptionsImpl", ":C{std.core.Intl.ResolvedRelativeTimeFormatOptions}",
-                             reinterpret_cast<void *>(StdCoreIntlRelativeTimeFormatResolvedOptionsImpl)}};
+        ani_native_function {"getLocale", ":C{std.core.String}", reinterpret_cast<void *>(StdCoreIntlGetLocale)}};
     ani_class rtfClass;
     ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.RelativeTimeFormat", &rtfClass));
 
