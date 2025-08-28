@@ -894,13 +894,6 @@
 06.contexts_and_conversions/02.assignment-like_contexts/call2_7.ets
 06.contexts_and_conversions/02.assignment-like_contexts/call2_9.ets
 06.contexts_and_conversions/02.assignment-like_contexts/null_call.ets
-06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/double2enum_1.ets
-06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/double2enum_2.ets
-06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/double2enum_3.ets
-06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/double2enum_4.ets
-06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/double2enum_5.ets
-06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/double2enum_6.ets
-06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/double2enum_8.ets
 06.contexts_and_conversions/attempt_invalid_type_conversion/attemp_invalid_type_conversion_only_compile_7.ets
 07.expressions/03.named_reference/01.function_reference/function_reference_neg.ets
 07.expressions/03.named_reference/named_reference_46.ets

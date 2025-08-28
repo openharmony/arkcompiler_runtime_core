@@ -324,9 +324,6 @@
 6.5.2:
     title: Enumeration to Constants Type Conversions
     status: ''
-6.5.3:
-    title: Constant to Enumeration Conversions
-    status: ''
 '6.6':
     title: Numeric Casting Conversions
     status: ''
