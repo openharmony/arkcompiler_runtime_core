@@ -2835,3 +2835,8 @@
 
 #29866
 09.classes/07.method_declarations/method_declaration_with_existed_name_3.ets
+
+#29939
+13.compilation_units/02.import_directives/05.import_path/file/import_path_file_global_0.ets
+13.compilation_units/02.import_directives/05.import_path/file/import_path_file_global_1.ets
+

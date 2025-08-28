@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { PI } from "std/math";
+import { PI } from "std/math/consts";
 
 const nan = Double.NaN;
 const posInf = Double.POSITIVE_INFINITY;
