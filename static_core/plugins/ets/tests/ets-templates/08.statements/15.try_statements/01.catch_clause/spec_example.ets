@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-{% for t in cases %}
 /*---
 desc: >-
     A catch clause consists of two parts:
@@ -21,9 +20,23 @@ desc: >-
     - Block of code that handles the situation.
 ---*/
 
-{{t.defs}}
+class ZeroDivisor extends Error {}
+
+function divide(a: number, b: number): number {
+    if (b == 0) throw new ZeroDivisor()
+    return a / b
+}
+
+function processNumbers(a: number, b: number): number {
+    try {
+        let res = divide(a, b)
+        return res
+    } catch (e) {
+        return e instanceof ZeroDivisor ? -1 : 0
+    }
+}
 
 function main() {
-    {{t.use|indent}}
+    arktest.assertEQ(processNumbers(4, 2), 2)
+    arktest.assertEQ(processNumbers(4, 0), -1)
 }
-{% endfor %}

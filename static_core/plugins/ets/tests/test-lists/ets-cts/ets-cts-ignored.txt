@@ -1293,7 +1293,14 @@
 08.statements/11.continue_statements/continue_for_of5l.ets
 
 #27010
-08.statements/15.try_statements/01.catch_clauses/catch_2.ets
+08.statements/15.try_statements/01.catch_clause/catch_2.ets
+
+#29409
+08.statements/15.try_statements/01.catch_clause/catch_3.ets
+
+#22428
+08.statements/15.try_statements/01.catch_clause/catch_6.ets
+08.statements/15.try_statements/01.catch_clause/catch_9.ets
 
 #28738
 09.classes/03.class_implementation_clause/direct_interface_Implementation_twice.ets

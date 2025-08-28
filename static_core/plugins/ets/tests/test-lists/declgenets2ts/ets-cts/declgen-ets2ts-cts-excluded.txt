@@ -3932,6 +3932,7 @@
 08.statements/13.switch_statements/switch_negative_2.ets
 08.statements/13.switch_statements/switch_negative_3.ets
 08.statements/13.switch_statements/switch_negative_4.ets
+08.statements/15.try_statements/01.catch_clause/catch_5.ets
 08.statements/15.try_statements/02.finally_clause/finally_n_0.ets
 08.statements/15.try_statements/02.finally_clause/finally_n_1.ets
 08.statements/15.try_statements/02.finally_clause/finally_n_2.ets
