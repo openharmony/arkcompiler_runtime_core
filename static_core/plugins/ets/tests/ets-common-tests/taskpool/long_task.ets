@@ -17,19 +17,9 @@ function sumFunc(): int {
     return (() => 10)() + (() => 20)();
 }
 
-function sum(a: int, b: int): int {
-    let t = Date.now();
-    // mock time-consuming operation
-    while ((Date.now() - t) < 500) {
-        continue;
-    }
+async function sum(a: int, b: int): int {
+    await new Promise<int>( res=>{ setTimeout(res, 200, 0) });
     return a + b;
-}
-
-function delayWithYield(duration: int): void {
-    let t = Date.now();
-    while ((Date.now() - t) < duration) {}
-    Coroutine.Schedule();
 }
 
 function launchImpl(func: () => Any): Promise<Any> {
@@ -40,8 +30,8 @@ function launchImpl(func: () => Any): Promise<Any> {
         try {
             let res = job.Await();
             resolve(res);
-        } catch(e: Error) {
-            reject(e);
+        } catch(e) {
+            reject(e as Error);
         }
     });
 }
@@ -60,7 +50,7 @@ async function executeDelayedTest(): Promise<void> {
     try {
         let res = await launchImpl(testDelayFunc);
         arktest.assertEQ(res, 30);
-    } catch(e: Error) {
+    } catch(e) {
         // NOTE(wangzhaoyong, #25035): del try catch when fix stackoverflow and invalid error message
         arktest.assertEQ(e instanceof StackOverflowError, true);
     }

@@ -125,7 +125,7 @@ function RunSetTimeoutTest(): void {
         let p2 = p1.then<Any, Any>((value: Any) => {
             setTimeout(() => {
                 job.finish();
-            }, 100);
+            }, 10);
 
         });
     });
@@ -147,7 +147,7 @@ function RunNewCoroInSetTimeoutTest(): void {
                 let p3 = asyncCall(()=>{
                     job.finish();
                 });
-            }, 100);
+            }, 10);
         });
     });
     w.join();
