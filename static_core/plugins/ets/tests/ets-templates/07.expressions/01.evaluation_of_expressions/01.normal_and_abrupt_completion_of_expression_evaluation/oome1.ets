@@ -32,7 +32,7 @@ function main() {
         let w = new Array<Object>(ARRAY_SIZE);
 
         for (let j: int = 0; j < ARRAY_SIZE; j++) {
-          w[j] = new Object();
+          w[j] = new Array<number>(100).fill(ARRAY_SIZE);
         }
 
         v[i] = w;
