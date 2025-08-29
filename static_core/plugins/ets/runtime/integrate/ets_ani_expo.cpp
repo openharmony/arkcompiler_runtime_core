@@ -101,6 +101,10 @@ void ETSAni::TryLoadAotFileForBoot()
         const compiler::AotPandaFile *aotFile = linker->GetAotManager()->FindPandaFile(location);
         if (aotFile != nullptr) {
             pf->SetClassHashTable(aotFile->GetClassHashTable());
+            // Issue 29288, temporary solution, need to support preload `an` files in hybridspawn nextly
+            if (location == ETSSTDLIB_ABC) {
+                linker->TryReLinkAotCodeForBoot(pf, aotFile, panda_file::SourceLang::ETS);
+            }
         }
     }
 }

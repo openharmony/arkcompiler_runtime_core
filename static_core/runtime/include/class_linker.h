@@ -331,6 +331,10 @@ public:
 
     Class *LoadClass(const panda_file::File *pf, const uint8_t *descriptor, panda_file::SourceLang lang);
 
+    // Issue 29288, temporary solution
+    void TryReLinkAotCodeForBoot(const panda_file::File *pf, const compiler::AotPandaFile *aotPfile,
+                                 panda_file::SourceLang language);
+
 private:
     struct ClassInfo {
         PandaUniquePtr<VTableBuilder> vtableBuilder;
