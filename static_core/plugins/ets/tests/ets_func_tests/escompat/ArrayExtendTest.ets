@@ -34,10 +34,12 @@ class TestData {
 }
 
 function testExtendToNegLength() {
-    let a = Array.from<number>(TestData.src);
-    a.extendTo(TestData.arrayLength1, TestData.initialValue1);
-    let result: boolean = equaled(TestData.expected1, a);
-    arktest.assertTrue(result, "Error. Got: " + a + ". Expected: " + TestData.expected1);
+    try {
+        let a = Array.from<number>(TestData.src);
+        a.extendTo(TestData.arrayLength1, TestData.initialValue1);
+    } catch(error) {
+        arktest.assertEQ(error.toString(), 'RangeError: Parameter error.Invalid array length.')
+    }
 }
 
 function testExtendToPosLength() {
