@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Dict, Any, List, Tuple
 
 import yaml
-from jinja2 import Environment, select_autoescape, TemplateSyntaxError
+from jinja2 import Environment, select_autoescape, TemplateSyntaxError, FileSystemLoader
 from runner.plugins.ets.utils.constants import META_COPYRIGHT, META_START_STRING, \
     META_END_STRING, META_START_COMMENT, META_END_COMMENT
 from runner.plugins.ets.utils.exceptions import \
@@ -40,11 +40,14 @@ class Meta:
 
 
 class Template:
-    def __init__(self, test_path: Path, params: Dict[str, Any]) -> None:
+    def __init__(self, test_path: Path, params: Dict[str, Any], ets_templates_path: Path) -> None:
         self.test_path = str(test_path)
         self.text = read_file(test_path)
         self.__params = params
-        self.__jinja_env = Environment(autoescape=select_autoescape())
+        self.__jinja_env = Environment(
+            loader=FileSystemLoader([str(test_path.parent), str(ets_templates_path)]),
+            autoescape=select_autoescape()
+        )
 
         if self.is_copyright:
             self.__copyright = read_file(COPYRIGHT_PATH)

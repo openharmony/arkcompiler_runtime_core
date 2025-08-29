@@ -35,18 +35,19 @@ _LOGGER = logging.getLogger("runner.plugins.ets.ets_templates.benchmark")
 
 
 class Benchmark:
-    def __init__(self, test_path: Path, output: Path, test_full_name: str) -> None:
+    def __init__(self, test_path: Path, output: Path, test_full_name: str, ets_templates_path: Path) -> None:
         self.__input = test_path
         self.__output = output.parent
         self.__name = test_path.name
         self.__full_name = Path(test_full_name).with_suffix('').name
+        self.__ets_templates_path = ets_templates_path
 
     def generate(self) -> List[str]:
         Log.all(_LOGGER, f"Generating test: {self.__name}")
         name_without_ext = self.__input.stem
         params = Params(self.__input, name_without_ext).generate()
 
-        template = Template(self.__input, params)
+        template = Template(self.__input, params, self.__ets_templates_path)
         Log.all(_LOGGER, f"Starting generate test template: {self.__name}")
         rendered_tests = template.render_template()
         TestCase().assertTrue(len(rendered_tests) > 0, f"Internal error: there should be tests in {self.__name}")
