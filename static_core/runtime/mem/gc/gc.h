@@ -367,6 +367,13 @@ public:
         canAddGcTask_.store(canAddTask, std::memory_order_relaxed);
     }
 
+    bool CanAddGCTask() const
+    {
+        // Atomic with relaxed order reason: data race with can_add_gc_task_ with no synchronization or ordering
+        // constraints imposed on other reads or writes
+        return canAddGcTask_.load(std::memory_order_relaxed);
+    }
+
     GCExtensionData *GetExtensionData() const
     {
         return extensionData_;
