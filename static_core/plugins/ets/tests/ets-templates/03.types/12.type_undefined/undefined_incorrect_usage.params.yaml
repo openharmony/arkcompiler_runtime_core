@@ -11,10 +11,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # List of named type declarationarations
+--- # List of named type declaration operations
 incorrect_cases:
   - { declaration: 'undefined class A {}', usage: 'let a = new A' }
   - { declaration: 'class undefined {}', usage: 'let a = new undefined()' }
+  - { declaration: 'class MCU implements undefined {}', usage: 'let a = new MCU'}
+  - { declaration: 'class MCU extends undefined {}', usage: 'let a = new MCU'}
+  - { declaration: 'interface undefined {}',  usage: 'let a: undefined'}
   - { declaration: 'undefined interface I {}', usage: 'let a = 1' }
   - { declaration: 'undefined function foo() { return 1}', usage: 'arktest.assertTrue(foo() == 2)' }
   - { declaration: 'function undefined() { return 1}', usage: 'arktest.assertTrue(undefined() == 1)' }
