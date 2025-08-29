@@ -1,6 +1,9 @@
 #24352
 algorithms/SampleAppTest.ets
 
+#28355
+escompat/escompat_regexp_match_String.ets
+
 #24357 Koala related issues
 koala-related-benchmarks/benchmark-lambda-no-lambda-original.ets
 
