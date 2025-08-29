@@ -72,7 +72,7 @@ public:
     };
     static_assert(sizeof(Data) == sizeof(ObjectPointerType) * 2U);
     // NOTE(ipetrov): hack for 128 bit ObjectHeader
-#if !defined(ARK_HYBRID) && PANDA_USE_32_BIT_POINTER
+#if !defined(ARK_HYBRID) && defined(PANDA_32_BIT_MANAGED_POINTER) && defined(PANDA_TARGET_64)
     static_assert(std::atomic<Data>::is_always_lock_free);
 #endif
 
@@ -267,7 +267,7 @@ std::pair<EtsString *, ToStringResult> EtsToStringCache<T, Derived, Hash>::Finis
     EtsCoroutine *coro, T number, EtsToStringCacheElement<T> *elem, uint64_t cachedAsInt)
 {
     // NOTE(ipetrov): hack for 128 bit ObjectHeader
-#if defined(PANDA_TARGET_64) && !defined(PANDA_USE_32_BIT_POINTER)
+#if !defined(PANDA_32_BIT_MANAGED_POINTER)
     UNUSED_VAR(coro);
     UNUSED_VAR(elem);
     UNUSED_VAR(cachedAsInt);
@@ -302,7 +302,7 @@ template <typename T, typename Derived, typename Hash>
 std::pair<EtsString *, ToStringResult> EtsToStringCache<T, Derived, Hash>::GetOrCacheImpl(EtsCoroutine *coro, T number)
 {
     // NOTE(ipetrov): hack for 128 bit ObjectHeader
-#if defined(PANDA_TARGET_64) && !defined(PANDA_USE_32_BIT_POINTER)
+#if !defined(PANDA_32_BIT_MANAGED_POINTER)
     UNUSED_VAR(coro);
     return {ToString(number), ToStringResult::STORE_NEW};
 #else

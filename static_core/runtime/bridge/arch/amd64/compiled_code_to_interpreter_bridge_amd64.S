@@ -228,7 +228,7 @@ CompiledCodeToInterpreterBridge:
     jne 2f
     // Result is a reference
     callq FreeFrame@plt
-#if defined(PANDA_TARGET_64) && !defined(PANDA_USE_32_BIT_POINTER)
+#if !defined(PANDA_32_BIT_MANAGED_POINTER)
     // Ref is a 64-bit value, copy all bits
     movq %r12, %rax
 #else
