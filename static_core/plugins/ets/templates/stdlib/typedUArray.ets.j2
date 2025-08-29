@@ -105,7 +105,6 @@ class {{element['name']}}ArrayIteratorEntries implements IterableIterator<{{subs
 export final class {{element['name']}}Array implements Iterable<{{element['subsetTypeValues']}}>, ArrayLike<{{element['subsetTypeValues']}}> {
     public static readonly BYTES_PER_ELEMENT: int = {{element['bytes']}}
     public readonly BYTES_PER_ELEMENT: int = {{element['name']}}Array.BYTES_PER_ELEMENT
-    public overload subarray { subarrayII, subarrayNI, subarrayIN, subarrayNN }
 
     /** Underlying Buffer */
     public readonly buffer: ArrayBuffer
@@ -396,17 +395,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
     }
 
     /**
-     * Returns an instance of primitive type at passed index.
-     *
-     * @param index index to look at
-     *
-     * @returns a primitive at index
-     */
-    public at(index: number): {{element['subsetTypeBoxed']}} | undefined {
-        return this.at(index.toInt())
-    }
-
-    /**
      * Returns an instance of primitive type at passed index if index is correct.
      *
      * @param index index to look at
@@ -595,11 +583,11 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *
      * @returns modified {{element['name']}}Array
      */
-    public fill(value: {{element['subsetType']}}, start?: number, end?: number): {{element['name']}}Array {
+    public fill(value: {{element['subsetType']}}, start?: int, end?: int): {{element['name']}}Array {
         {%- if not element.get('name') in ['Uint8Clamped', 'BigUint64'] %}
         value = this.zeroIfInfinity(value)
         {%- endif %}
-        this.fill({{fromElementCompat % 'value'}}, asIntOrDefault(start, 0), asIntOrDefault(end, this.lengthInt))
+        this.fill({{fromElementCompat % 'value'}}, start, end)
         return this
     }
 
@@ -610,93 +598,12 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *
      * @returns modified {{element['name']}}Array
      */
-    public fill(value: {{element['subsetType']}}, start: int, end?: number): {{element['name']}}Array {
-        {%- if not element.get('name') in ['Uint8Clamped', 'BigUint64'] %}
-        value = this.zeroIfInfinity(value)
-        {%- endif %}
-        this.fill({{fromElementCompat % 'value'}}, start.toInt(), asIntOrDefault(end, this.lengthInt))
-        return this
-    }
-
-    /**
-     * Fills the {{element['name']}}Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified {{element['name']}}Array
-     */
-    public fill(value: {{element['subsetType']}}, start: number, end: int): {{element['name']}}Array {
-        {%- if not element.get('name') in ['Uint8Clamped', 'BigUint64'] %}
-        value = this.zeroIfInfinity(value)
-        {%- endif %}
-        this.fill({{fromElementCompat % 'value'}}, start.toInt(), end.toInt())
-        return this
-    }
-
-    /**
-     * Fills the {{element['name']}}Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified {{element['name']}}Array
-     */
-    public fill(value: {{element['subsetType']}}, start: int, end: int): {{element['name']}}Array {
-        {%- if not element.get('name') in ['Uint8Clamped', 'BigUint64'] %}
-        value = this.zeroIfInfinity(value)
-        {%- endif %}
-        this.fill({{fromElementCompat % 'value'}}, start.toInt(), end.toInt())
-        return this
-    }
-
-    /**
-     * Fills the {{element['name']}}Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified {{element['name']}}Array
-     */
-    public fill(value: {{element['primitiveType']}}, start?: number, end?: number): {{element['name']}}Array {
-        this.fill(value, asIntOrDefault(start, 0), asIntOrDefault(end, this.lengthInt))
-        return this
-    }
-
-    /**
-     * Fills the {{element['name']}}Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified {{element['name']}}Array
-     */
-    public fill(value: {{element['primitiveType']}}, start: int, end?: number): {{element['name']}}Array {
-        this.fill(value, start.toInt(), asIntOrDefault(end, this.lengthInt))
-        return this
-    }
-
-    /**
-     * Fills the {{element['name']}}Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified {{element['name']}}Array
-     */
-    public fill(value: {{element['primitiveType']}}, start: number, end: int): {{element['name']}}Array {
-        this.fill(value, start.toInt(), end.toInt())
-        return this
-    }
-
-    /**
-     * Fills the {{element['name']}}Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified {{element['name']}}Array
-     */
-    public fill(value: {{element['primitiveType']}}, start: int, end: int): {{element['name']}}Array {
+    public fill(value: {{element['primitiveType']}}, start?: int, end?: int): {{element['name']}}Array {
         {%- if element.get('clamped', False) %}
         value = {{element['name']}}Array.clamp(value)
         {%- endif %}
-        const k = normalizeIndex(start, this.lengthInt)
-        const finalPos = normalizeIndex(end, this.lengthInt)
+        const k = normalizeIndex(start ?? 0, this.lengthInt)
+        const finalPos = normalizeIndex(end ?? this.lengthInt, this.lengthInt)
         this.fillInternal(value, k, finalPos)
         return this
     }
@@ -1411,53 +1318,8 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
-    public slice(begin?: number, end?: number): {{element['name']}}Array {
+    public slice(begin?: int, end?: int): {{element['name']}}Array {
         return this.sliceImpl(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Creates a slice of current {{element['name']}}Array using range [begin, end)
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @param end last index to be taken into slice
-     *
-     * @returns a new {{element['name']}}Array with elements of current {{element['name']}}Array[begin;end) where end index is excluded
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
-     */
-    public slice(begin: number, end: int): {{element['name']}}Array {
-        return this.sliceImpl(begin.toInt(), end.toInt())
-    }
-
-    /**
-     * Creates a slice of current {{element['name']}}Array using range [begin, end)
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @param end last index to be taken into slice
-     *
-     * @returns a new {{element['name']}}Array with elements of current {{element['name']}}Array[begin;end) where end index is excluded
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
-     */
-    public slice(begin: int, end: number): {{element['name']}}Array {
-        return this.sliceImpl(begin.toInt(), end.toInt())
-    }
-
-    /**
-     * Creates a slice of current {{element['name']}}Array using range [begin, end)
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @param end last index to be taken into slice
-     *
-     * @returns a new {{element['name']}}Array with elements of current {{element['name']}}Array[begin;end) where end index is excluded
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
-     */
-    public slice(begin: int, end: int): {{element['name']}}Array {
-        return this.sliceImpl(begin, end)
     }
 
     /**
@@ -1547,46 +1409,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *
      * @returns new {{element['name']}}Array with the same underlying Buffer
      */
-    public subarrayNN(begin?: number, end?: number): {{element['name']}}Array {
-        return this.subarray(asIntOrDefault(begin, 0), asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Creates a {{element['name']}}Array with the same underlying Buffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @param end last index, exclusive
-     *
-     * @returns new {{element['name']}}Array with the same underlying Buffer
-     */
-    public subarrayNI(begin?: number, end?: int): {{element['name']}}Array {
-        return this.subarray(asIntOrDefault(begin, 0), end)
-    }
-
-    /**
-     * Creates a {{element['name']}}Array with the same underlying Buffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @param end last index, exclusive
-     *
-     * @returns new {{element['name']}}Array with the same underlying Buffer
-     */
-    public subarrayIN(begin?: int, end?: number): {{element['name']}}Array {
-        return this.subarray(begin, asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Creates a {{element['name']}}Array with the same underlying Buffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @param end last index, exclusive
-     *
-     * @returns new {{element['name']}}Array with the same underlying Buffer
-     */
-    public subarrayII(begin: int | undefined = 0, end: int | undefined = this.lengthInt): {{element['name']}}Array {
+    public subarray(begin?: int, end?: int): {{element['name']}}Array {
         const len: int = this.lengthInt
         const relStart = normalizeIndex(begin ?? 0, len)
         const relEnd = normalizeIndex(end ?? this.lengthInt, len)

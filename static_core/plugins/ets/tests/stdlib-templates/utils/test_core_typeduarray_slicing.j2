@@ -264,7 +264,7 @@ function testSliceTwoParams(): int {
   }
 
   try {
-    target = origin.slice(new Number(sliceStart), undefined);
+    target = origin.slice(sliceStart, undefined);
   } catch(e) {
     console.log(e);
     return fail;
@@ -310,7 +310,7 @@ function testSliceTwoParams(): int {
   }
 
   try {
-    target = origin.slice(undefined, new Number(sliceEnd));
+    target = origin.slice(undefined, sliceEnd);
   } catch(e) {
     console.log(e);
     return fail;

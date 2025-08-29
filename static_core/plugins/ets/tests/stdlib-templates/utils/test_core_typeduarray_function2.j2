@@ -311,7 +311,7 @@ function testSubarrayTwoParams(): int {
   }
 
   try {
-    target = origin.subarray(new Number(subarrayStart), undefined);
+    target = origin.subarray(subarrayStart, undefined);
   } catch(e) {
     console.log(e);
     return fail;
@@ -357,7 +357,7 @@ function testSubarrayTwoParams(): int {
   }
 
   try {
-    target = origin.subarray(undefined, new Number(subarrayEnd));
+    target = origin.subarray(undefined, subarrayEnd);
   } catch(e) {
     console.log(e);
     return fail;
