@@ -39,6 +39,15 @@
 #27986 Indexing doesn't work for arrays in union
 03.types/03.using_types/types_declaration_spec.ets
 
+#29471 Exponentiation doesn't work for BigInt
+03.types/06.value_types/01.numeric_types/conversions_with_bigint_10.ets
+03.types/06.value_types/01.numeric_types/conversions_with_bigint_100.ets
+03.types/06.value_types/01.numeric_types/conversions_with_bigint_118.ets
+03.types/06.value_types/01.numeric_types/conversions_with_bigint_28.ets
+03.types/06.value_types/01.numeric_types/conversions_with_bigint_46.ets
+03.types/06.value_types/01.numeric_types/conversions_with_bigint_64.ets
+03.types/06.value_types/01.numeric_types/conversions_with_bigint_82.ets
+
 #26515 Double too large value causes abort_fail
 03.types/06.value_types/03.floating-point_types_and_operations/division/division_double_3.ets
 03.types/06.value_types/03.floating-point_types_and_operations/division/division_double_2.ets
