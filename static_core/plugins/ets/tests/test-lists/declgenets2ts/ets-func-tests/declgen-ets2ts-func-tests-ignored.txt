@@ -196,3 +196,6 @@ std/core/std_core_string_String_lastIndexOf_String_int.ets
 std/core/std_core_string_String_lastIndexOf_char_int.ets
 std/core/std_core_string_String_search_String.ets
 std/containers/BlockingQueue/AddAndPollStress.ets
+spec/16.Support_for_GUI_Programming/struct-type/anno/test-builder-func_0.ets
+spec/16.Support_for_GUI_Programming/struct-type/anno/test-struct-builder-param.ets
+spec/16.Support_for_GUI_Programming/struct-type/builder/test-struct-call-function-in-build_2.ets
