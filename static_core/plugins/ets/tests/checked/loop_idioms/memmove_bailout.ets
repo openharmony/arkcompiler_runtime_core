@@ -23,8 +23,25 @@ function check(arr1: Object, arr2: Object): int {
 
 class TestBailout {
     //! CHECKER       TestBailout1
-    //! RUN           force_jit: true, entry: "memmove_bailout.TestBailout::mayAlias"
+    //! RUN           force_jit: true, options: "--compiler-inlining-blacklist='memmove_bailout.TestBailout::mayAlias,memmove_bailout.TestBailout::patternMissmatch_offsets1,memmove_bailout.TestBailout::patternMissmatch_offsets2,memmove_bailout.TestBailout::refArray,memmove_bailout.TestBailout::differentTypes'", entry: "memmove_bailout.TestBailout::main"
+    //!
     //! METHOD        "memmove_bailout.TestBailout::mayAlias"
+    //! PASS_AFTER    "LoopIdioms"
+    //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
+    //!
+    //! METHOD        "memmove_bailout.TestBailout::patternMissmatch_offsets1"
+    //! PASS_AFTER    "LoopIdioms"
+    //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
+    //!
+    //! METHOD        "memmove_bailout.TestBailout::patternMissmatch_offsets2"
+    //! PASS_AFTER    "LoopIdioms"
+    //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
+    //!
+    //! METHOD        "memmove_bailout.TestBailout::refArray"
+    //! PASS_AFTER    "LoopIdioms"
+    //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
+    //!
+    //! METHOD        "memmove_bailout.TestBailout::differentTypes"
     //! PASS_AFTER    "LoopIdioms"
     //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
     static mayAlias(): int {
@@ -40,11 +57,6 @@ class TestBailout {
         return dst;
     }
 
-    //! CHECKER       TestBailout2
-    //! RUN           force_jit: true, entry: "memmove_bailout.TestBailout::patternMissmatch_offsets1"
-    //! METHOD        "memmove_bailout.TestBailout::patternMissmatch_offsets1"
-    //! PASS_AFTER    "LoopIdioms"
-    //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
     static patternMissmatch_offsets1(): int {
         let src: FixedArray<int> = [6, 7, 8];
         let dst: FixedArray<int> = [1, 2, 3, 4, 5];
@@ -55,11 +67,6 @@ class TestBailout {
         return check(dst, [8, 7, 6, 4, 5]);
     }
 
-    //! CHECKER       TestBailout3
-    //! RUN           force_jit: true, entry: "memmove_bailout.TestBailout::patternMissmatch_offsets2"
-    //! METHOD        "memmove_bailout.TestBailout::patternMissmatch_offsets2"
-    //! PASS_AFTER    "LoopIdioms"
-    //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
     static patternMissmatch_offsets2(): int {
         let src: FixedArray<int> = [6, 7, 8];
         let dst: FixedArray<int> = [1, 2, 3, 4, 5];
@@ -70,11 +77,6 @@ class TestBailout {
         return check(dst, [1, 2, 8, 7, 6]);
     }
 
-    //! CHECKER       TestBailout4
-    //! RUN           force_jit: true, entry: "memmove_bailout.TestBailout::refArray"
-    //! METHOD        "memmove_bailout.TestBailout::refArray"
-    //! PASS_AFTER    "LoopIdioms"
-    //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
     static refArray(): int {
         let src = new Array<int>(6, 7, 8);
         let dst = new Array<int>(1, 2, 3, 4, 5);
@@ -85,11 +87,6 @@ class TestBailout {
         return check(dst, [6, 7, 8, 4, 5]);
     }
 
-    //! CHECKER       TestBailout5
-    //! RUN           force_jit: true, entry: "memmove_bailout.TestBailout::differentTypes"
-    //! METHOD        "memmove_bailout.TestBailout::differentTypes"
-    //! PASS_AFTER    "LoopIdioms"
-    //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
     static differentTypes(): int {
         let src: FixedArray<int> = [6, 7, 8];
         let dst: FixedArray<long> = [1, 2, 3, 4, 5];
@@ -98,5 +95,13 @@ class TestBailout {
             dst[i] = src[i];
         }
         return check(dst, [6, 7, 8, 4, 5]);
+    }
+
+    static main(): void {
+        TestBailout.mayAlias();
+        TestBailout.patternMissmatch_offsets1();
+        TestBailout.patternMissmatch_offsets2();
+        TestBailout.refArray();
+        TestBailout.differentTypes();
     }
 }
