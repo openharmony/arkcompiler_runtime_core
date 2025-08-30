@@ -14,10 +14,10 @@
  */
 export declare let cb: (this: X1) => void;
 export declare interface I0 {
-    I0Method(a: string): string;
+    I0Method?(a: string): string;
 }
 export declare interface I1 {
-    I1Method(a: number): number;
+    I1Method?(a: number): number;
 }
 export declare class Base {
     public get a(): number;
@@ -141,4 +141,10 @@ export declare class Dog {
     public set n(value: number);
     public foo1(s?: string, n?: number): void;
     public constructor(s?: string | undefined, n?: number | undefined);
+}
+export declare interface I2 {
+    test(): void;
+}
+export declare interface I3 extends I2 {
+    foo?(): void;
 }

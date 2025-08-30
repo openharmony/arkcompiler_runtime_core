@@ -159,3 +159,11 @@ export class Dog {
     }
   }
 }
+
+export interface I2 {
+  test(): void;
+}
+
+export declare interface I3 extends I2 {
+  default foo(): void;
+}
