@@ -40,6 +40,7 @@ public:
         std::unordered_map<uint32_t, std::string> classes;
         std::unordered_map<uint32_t, std::string> strings;
         std::unordered_map<uint32_t, std::string> literalarrays;
+        std::unordered_set<uint32_t> staticMethods;
     };
 
     struct AsmEntityCollections {

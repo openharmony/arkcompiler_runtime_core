@@ -841,7 +841,8 @@ static void AddBytecodeIndexDependencies(MethodItem *method, const Function &fun
             continue;
         }
 
-        if (insn.HasFlag(InstFlags::METHOD_ID)) {
+        bool isDevirtualCall = insn.IsDevirtual() && insn.HasFlag(InstFlags::STATIC_METHOD_ID);
+        if (insn.HasFlag(InstFlags::METHOD_ID) || isDevirtualCall) {
             AddBytecodeIndexDependencies(method, insn, entities.methodItems, entities);
             continue;
         }
@@ -1628,6 +1629,7 @@ void AsmEmitter::FillMap(PandaFileToPandaAsmMaps *maps, AsmEmitter::AsmEntityCol
 
     for (const auto &[name, method] : entities.staticMethodItems) {
         maps->methods.insert({method->GetFileId().GetOffset(), std::string(name)});
+        maps->staticMethods.insert(method->GetFileId().GetOffset());
     }
 
     for (const auto &[name, field] : entities.fieldItems) {
