@@ -560,6 +560,16 @@ public:
         return insDebug.LineNumber() != 0U;
     }
 
+    bool IsDevirtual() const
+    {
+        return isDevirtual_;
+    }
+
+    void SetIsDevirtual()
+    {
+        isDevirtual_ = true;
+    }
+
 private:
     std::string OperandsToString(bool printArgs = false, size_t firstArgIdx = 0) const;
     std::string RegsToString(bool &first, bool printArgs = false, size_t firstArgIdx = 0) const;
@@ -569,6 +579,7 @@ private:
     std::string IdToString(size_t idx, bool isFirst) const;
     std::string ImmToString(size_t idx, bool isFirst) const;
     std::string RegToString(size_t idx, bool isFirst, bool printArgs = false, size_t firstArgIdx = 0) const;
+    bool isDevirtual_ = false;
 };
 // NOLINTEND(misc-non-private-member-variables-in-classes)
 
