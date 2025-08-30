@@ -28,6 +28,7 @@ template <typename Impl>
 class BaseStringTableInterface;
 class BaseObject;
 class HeapManager;
+class Mutator;
 class MutatorManager;
 class ThreadHolderManager;
 class ThreadHolder;
@@ -127,7 +128,7 @@ public:
 
     // Need refactor, move to other file
     static void WriteRoot(void* obj);
-    static void WriteBarrier(void* obj, void* field, void* ref);
+    static void WriteBarrier(void* obj, void* field, void* ref, Mutator *mutator = nullptr);
     static void* ReadBarrier(void* obj, void* field);
     static void* ReadBarrier(void* field);
     static void* AtomicReadBarrier(void* obj, void* field, std::memory_order order);
