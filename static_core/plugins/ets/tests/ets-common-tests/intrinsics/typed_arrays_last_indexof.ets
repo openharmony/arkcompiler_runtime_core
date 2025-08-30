@@ -17,14 +17,14 @@ function checkArrayForInt(data: BigInt64Array, elem: int, expected: number): voi
     arktest.assertEQ(data.lastIndexOf(elem), expected, 'data.lastIndexOf(elem: int) must return ' + expected);
 }
 
-function checkArrayForInt(data: BigInt64Array, elem: int, expected: number, fromIndex: number): void {
-    arktest.assertEQ(data.lastIndexOf(elem, fromIndex.toInt()), expected,
+function checkArrayForInt(data: BigInt64Array, elem: int, expected: number, fromIndex: int): void {
+    arktest.assertEQ(data.lastIndexOf(elem, fromIndex), expected,
         'data.lastIndexOf(elem: int, fromIndex: int) must return ' + expected);
 }
 
-function checkArray(data: BigInt64Array, elem: BigInt, expected: number, fromIndex: number | undefined): void {
+function checkArray(data: BigInt64Array, elem: BigInt, expected: number, fromIndex: int | undefined): void {
     arktest.assertEQ(data.lastIndexOf(elem, fromIndex), expected,
-        'data.lastIndexOf(elem: BigInt, fromIndex: number | undefined) must return ' + expected);
+        'data.lastIndexOf(elem: BigInt, fromIndex: int | undefined) must return ' + expected);
 }
 
 function checkArray(data: BigInt64Array, elem: BigInt, expected: number): void {
@@ -35,14 +35,14 @@ function checkArrayForInt(data: BigUint64Array, elem: int, expected: number): vo
     arktest.assertEQ(data.lastIndexOf(elem), expected, 'data.lastIndexOf(elem: int) must return ' + expected);
 }
 
-function checkArrayForInt(data: BigUint64Array, elem: int, expected: number, fromIndex: number): void {
-    arktest.assertEQ(data.lastIndexOf(elem, fromIndex.toInt()), expected,
+function checkArrayForInt(data: BigUint64Array, elem: int, expected: number, fromIndex: int): void {
+    arktest.assertEQ(data.lastIndexOf(elem, fromIndex), expected,
         'data.lastIndexOf(elem: int, fromIndex: int) must return ' + expected);
 }
 
-function checkArray(data: BigUint64Array, elem: BigInt, expected: number, fromIndex: number | undefined): void {
+function checkArray(data: BigUint64Array, elem: BigInt, expected: number, fromIndex: int | undefined): void {
     arktest.assertEQ(data.lastIndexOf(elem, fromIndex), expected,
-        'data.includes(elem: BigInt, fromIndex: number | undefined) must return ' + expected);
+        'data.includes(elem: BigInt, fromIndex: int | undefined) must return ' + expected);
 }
 
 function checkArray(data: BigUint64Array, elem: BigInt, expected: number): void {
@@ -53,14 +53,14 @@ function checkArrayForInt(data: Int32Array, elem: int, expected: number): void {
     arktest.assertEQ(data.lastIndexOf(elem), expected, 'data.lastIndexOf(elem: int) must return ' + expected);
 }
 
-function checkArrayForInt(data: Int32Array, elem: int, expected: number, fromIndex: number): void {
-    arktest.assertEQ(data.lastIndexOf(elem, fromIndex.toInt()), expected,
+function checkArrayForInt(data: Int32Array, elem: int, expected: number, fromIndex: int): void {
+    arktest.assertEQ(data.lastIndexOf(elem, fromIndex), expected,
         'data.lastIndexOf(elem: int, fromIndex: int) must return ' + expected);
 }
 
-function checkArray(data: Int32Array, elem: number, expected: number, fromIndex: number | undefined): void {
+function checkArray(data: Int32Array, elem: number, expected: number, fromIndex: int | undefined): void {
     arktest.assertEQ(data.lastIndexOf(elem, fromIndex), expected,
-        'data.lastIndexOf(elem: number, fromIndex: number | undefined) must return ' + expected);
+        'data.lastIndexOf(elem: number, fromIndex: int | undefined) must return ' + expected);
 }
 
 function checkArray(data: Int32Array, elem: number, expected: number): void {
@@ -71,14 +71,14 @@ function checkArrayForInt(data: Uint32Array, elem: int, expected: number): void 
     arktest.assertEQ(data.lastIndexOf(elem), expected, 'data.lastIndexOf(elem: int) must return ' + expected);
 }
 
-function checkArrayForInt(data: Uint32Array, elem: int, expected: number, fromIndex: number): void {
-    arktest.assertEQ(data.lastIndexOf(elem, fromIndex.toInt()), expected,
+function checkArrayForInt(data: Uint32Array, elem: int, expected: number, fromIndex: int): void {
+    arktest.assertEQ(data.lastIndexOf(elem, fromIndex), expected,
         'data.lastIndexOf(elem: int, fromIndex: int) must return ' + expected);
 }
 
-function checkArray(data: Uint32Array, elem: number, expected: number, fromIndex: number | undefined): void {
+function checkArray(data: Uint32Array, elem: number, expected: number, fromIndex: int | undefined): void {
     arktest.assertEQ(data.lastIndexOf(elem, fromIndex), expected,
-        'data.lastIndexOf(elem: number, fromIndex?: number) must return ' + expected);
+        'data.lastIndexOf(elem: number, fromIndex?: int) must return ' + expected);
 }
 
 function checkArray(data: Uint32Array, elem: number, expected: number): void {
@@ -89,14 +89,14 @@ function checkArrayForInt(data: Int16Array, elem: int, expected: number): void {
     arktest.assertEQ(data.lastIndexOf(elem), expected, 'data.lastIndexOf(elem: int) must return ' + expected);
 }
 
-function checkArrayForInt(data: Int16Array, elem: int, expected: number, fromIndex: number): void {
-    arktest.assertEQ(data.lastIndexOf(elem, fromIndex.toInt()), expected,
+function checkArrayForInt(data: Int16Array, elem: int, expected: number, fromIndex: int): void {
+    arktest.assertEQ(data.lastIndexOf(elem, fromIndex), expected,
         'data.lastIndexOf(elem: int, fromIndex: int) must return ' + expected);
 }
 
-function checkArray(data: Int16Array, elem: number, expected: number, fromIndex: number | undefined): void {
+function checkArray(data: Int16Array, elem: number, expected: number, fromIndex: int | undefined): void {
     arktest.assertEQ(data.lastIndexOf(elem, fromIndex), expected,
-        'data.lastIndexOf(elem: number, fromIndex: number | undefined) must return ' + expected);
+        'data.lastIndexOf(elem: number, fromIndex: int | undefined) must return ' + expected);
 }
 
 function checkArray(data: Int16Array, elem: number, expected: number): void {
@@ -107,23 +107,23 @@ function checkArrayForInt(data: Uint16Array, elem: int, expected: number): void 
     arktest.assertEQ(data.lastIndexOf(elem), expected, 'data.lastIndexOf(elem: int) must return ' + expected);
 }
 
-function checkArrayForInt(data: Uint16Array, elem: int, expected: number, fromIndex: number): void {
-    arktest.assertEQ(data.lastIndexOf(elem, fromIndex.toInt()), expected,
+function checkArrayForInt(data: Uint16Array, elem: int, expected: number, fromIndex: int): void {
+    arktest.assertEQ(data.lastIndexOf(elem, fromIndex), expected,
         'data.lastIndexOf(elem: int, fromIndex: int) must return ' + expected);
 }
 
-function checkArray(data: Uint16Array, elem: number, expected: number, fromIndex: number | undefined): void {
+function checkArray(data: Uint16Array, elem: number, expected: number, fromIndex: int | undefined): void {
     arktest.assertEQ(data.lastIndexOf(elem, fromIndex), expected,
-        'data.lastIndexOf(elem: number, fromIndex: number | undefined) must return ' + expected);
+        'data.lastIndexOf(elem: number, fromIndex: int | undefined) must return ' + expected);
 }
 
 function checkArray(data: Uint16Array, elem: number, expected: number): void {
-    arktest.assertEQ(data.lastIndexOf(elem), expected, 'data.lastIndexOf(elem: number, fromIndex: number | undefined) ' +
+    arktest.assertEQ(data.lastIndexOf(elem), expected, 'data.lastIndexOf(elem: number, fromIndex: int | undefined) ' +
         'must return ' + expected);
 }
 
-function checkArrayForInt(data: Int8Array, elem: int, expected: number, fromIndex: number): void {
-    arktest.assertEQ(data.lastIndexOf(elem, fromIndex.toInt()), expected,
+function checkArrayForInt(data: Int8Array, elem: int, expected: number, fromIndex: int): void {
+    arktest.assertEQ(data.lastIndexOf(elem, fromIndex), expected,
         'data.lastIndexOf(elem: int, fromIndex: int) must return ' + expected);
 }
 
@@ -132,9 +132,9 @@ function checkArrayForInt(data: Int8Array, elem: int, expected: number): void {
         'data.lastIndexOf(elem: int) must return ' + expected);
 }
 
-function checkArray(data: Int8Array, elem: number, expected: number, fromIndex: number | undefined): void {
+function checkArray(data: Int8Array, elem: number, expected: number, fromIndex: int | undefined): void {
     arktest.assertEQ(data.lastIndexOf(elem, fromIndex), expected,
-        'data.lastIndexOf(elem: number, fromIndex: number | undefined) must return ' + expected);
+        'data.lastIndexOf(elem: number, fromIndex: int | undefined) must return ' + expected);
 }
 
 function checkArray(data: Int8Array, elem: number, expected: number): void {
@@ -145,22 +145,22 @@ function checkArrayForInt(data: Uint8Array, elem: int, expected: number): void {
     arktest.assertEQ(data.lastIndexOf(elem), expected, 'data.lastIndexOf(elem: int) must return ' + expected);
 }
 
-function checkArrayForInt(data: Uint8Array, elem: int, expected: number, fromIndex: number): void {
-    arktest.assertEQ(data.lastIndexOf(elem, fromIndex.toInt()), expected,
+function checkArrayForInt(data: Uint8Array, elem: int, expected: number, fromIndex: int): void {
+    arktest.assertEQ(data.lastIndexOf(elem, fromIndex), expected,
         'data.lastIndexOf(elem: int, fromIndex: int) must return ' + expected);
 }
 
-function checkArray(data: Uint8Array, elem: number, expected: number, fromIndex: number | undefined): void {
+function checkArray(data: Uint8Array, elem: number, expected: number, fromIndex: int | undefined): void {
     arktest.assertEQ(data.lastIndexOf(elem, fromIndex), expected,
-        'data.lastIndexOf(elem: number, fromIndex: number | undefined) must return ' + expected);
+        'data.lastIndexOf(elem: number, fromIndex: int | undefined) must return ' + expected);
 }
 
 function checkArray(data: Uint8Array, elem: number, expected: number): void {
     arktest.assertEQ(data.lastIndexOf(elem), expected, 'data.lastIndexOf(elem: number) must return ' + expected);
 }
 
-function checkArrayForInt(data: Float32Array, elem: int, expected: number, fromIndex: number): void {
-    arktest.assertEQ(data.lastIndexOf(elem, fromIndex.toInt()), expected,
+function checkArrayForInt(data: Float32Array, elem: int, expected: number, fromIndex: int): void {
+    arktest.assertEQ(data.lastIndexOf(elem, fromIndex), expected,
         'data.lastIndexOf(elem: int, fromIndex: int) must return ' + expected);
 }
 
@@ -168,9 +168,9 @@ function checkArrayForInt(data: Float32Array, elem: int, expected: number): void
     arktest.assertEQ(data.lastIndexOf(elem), expected, 'data.lastIndexOf(elem: int) must return ' + expected);
 }
 
-function checkArray(data: Float32Array, elem: number, expected: number, fromIndex: number | undefined): void {
+function checkArray(data: Float32Array, elem: number, expected: number, fromIndex: int | undefined): void {
     arktest.assertEQ(data.lastIndexOf((elem.toFloat()).toDouble(), fromIndex), expected,
-        'data.lastIndexOf(elem: number, fromIndex: number | undefined) must return ' + expected);
+        'data.lastIndexOf(elem: number, fromIndex: int | undefined) must return ' + expected);
 }
 
 function checkArray(data: Float32Array, elem: number, expected: number): void {
@@ -183,8 +183,8 @@ function checkArrayExactlyNumber(data: Float32Array, elem: number, expected: num
         'data.lastIndexOf(elem: number, data.length - 1) must return ' + expected);
 }
 
-function checkArrayForInt(data: Float64Array, elem: int, expected: number, fromIndex: number): void {
-    arktest.assertEQ(data.lastIndexOf(elem, fromIndex.toInt()), expected,
+function checkArrayForInt(data: Float64Array, elem: int, expected: number, fromIndex: int): void {
+    arktest.assertEQ(data.lastIndexOf(elem, fromIndex), expected,
         'data.lastIndexOf(elem: int, fromIndex: int) must return ' + expected);
 }
 
@@ -192,9 +192,9 @@ function checkArrayForInt(data: Float64Array, elem: int, expected: number): void
     arktest.assertEQ(data.lastIndexOf(elem), expected, 'data.lastIndexOf(elem: int) must return ' + expected);
 }
 
-function checkArray(data: Float64Array, elem: number, expected: number, fromIndex: number | undefined): void {
+function checkArray(data: Float64Array, elem: number, expected: number, fromIndex: int | undefined): void {
     arktest.assertEQ(data.lastIndexOf(elem, fromIndex), expected,
-        'data.lastIndexOf(elem: number, fromIndex: number | undefined) must return ' + expected);
+        'data.lastIndexOf(elem: number, fromIndex: int | undefined) must return ' + expected);
 }
 
 function checkArray(data: Float64Array, elem: number, expected: number): void {

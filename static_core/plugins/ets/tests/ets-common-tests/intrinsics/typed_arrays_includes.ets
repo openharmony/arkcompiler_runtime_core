@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-function checkArray(data: Float64Array, elem: number, expected: boolean, fromIndex?: number): void {
+function checkArray(data: Float64Array, elem: number, expected: boolean, fromIndex?: int): void {
     arktest.assertEQ(data.includes(elem, fromIndex), expected,
-        'data.includes(elem: number, fromIndex?: number) must return ' + expected);
+        'data.includes(elem: number, fromIndex?: int) must return ' + expected);
 }
 
-function checkArray(data: Float32Array, elem: number, expected: boolean, fromIndex?: number): void {
+function checkArray(data: Float32Array, elem: number, expected: boolean, fromIndex?: int): void {
     arktest.assertEQ(data.includes((elem.toFloat()).toDouble(), fromIndex), expected,
-        'data.includes(elem: number, fromIndex?: number) must return ' + expected);
+        'data.includes(elem: number, fromIndex?: int) must return ' + expected);
 }
 
 function checkArrayForFloat(data: Float32Array, elem: float): void {
@@ -229,11 +229,11 @@ function testF32ArrayInf() {
 }
 
 function testF64ArrayNaN() {
-    const checkNaN = (arr: Float64Array, positionOfNaN: number) => {
+    const checkNaN = (arr: Float64Array, positionOfNaN: int) => {
         arktest.assertLT(1, arr.length);
         arktest.assertLT(positionOfNaN, arr.length);
         checkArray(arr, NaN, true);
-        checkArray(arr, NaN, true, 0 as number);
+        checkArray(arr, NaN, true, 0);
         checkArray(arr, NaN, true, positionOfNaN);
         checkArray(arr, NaN, true, -(arr.length + positionOfNaN));
         checkArray(arr, NaN, false, positionOfNaN + 1);
@@ -243,11 +243,11 @@ function testF64ArrayNaN() {
         checkArray(arr, NaN, true, -(arr.length + 1));
         checkArray(arr, NaN, true, -(arr.length - positionOfNaN));
     }
-    const checkNoNaN = (arr: Float64Array, positionOfNaN: number) => {
+    const checkNoNaN = (arr: Float64Array, positionOfNaN: int) => {
         arktest.assertLT(1, arr.length);
-        const positionOfVal: number = positionOfNaN < 4 ? 4 : 3;
+        const positionOfVal = positionOfNaN < 4 ? 4 : 3;
         arktest.assertLT(positionOfVal, arr.length);
-        const value: number = arr[positionOfVal.toInt()];
+        const value: number = arr[positionOfVal];
         arktest.assertFalse(isNaN(value));
         checkArray(arr, value, true);
         checkArray(arr, value, true, positionOfVal);
@@ -287,11 +287,11 @@ function testF64ArrayNaN() {
 }
 
 function testF32ArrayNaN() {
-    const checkNaN = (arr: Float32Array, positionOfNaN: number) => {
+    const checkNaN = (arr: Float32Array, positionOfNaN: int) => {
         arktest.assertLT(1, arr.length);
         arktest.assertLT(positionOfNaN, arr.length);
         checkArray(arr, NaN, true);
-        checkArray(arr, NaN, true, 0 as number);
+        checkArray(arr, NaN, true, 0);
         checkArray(arr, NaN, true, positionOfNaN);
         checkArray(arr, NaN, true, -(arr.length + positionOfNaN));
         checkArray(arr, NaN, false, positionOfNaN + 1);
@@ -302,11 +302,11 @@ function testF32ArrayNaN() {
         checkArray(arr, NaN, true, -(arr.length - positionOfNaN));
         checkArrayForFloat(arr, NaN.toFloat()); // No special case for NaN in Float32Array.includes(float)
     }
-    const checkNoNaN = (arr: Float32Array, positionOfNaN: number) => {
+    const checkNoNaN = (arr: Float32Array, positionOfNaN: int) => {
         arktest.assertLT(1, arr.length);
-        const positionOfVal: number = positionOfNaN < 5 ? 5 : 4;
+        const positionOfVal = positionOfNaN < 5 ? 5 : 4;
         arktest.assertLT(positionOfVal, arr.length);
-        const value: number = arr[positionOfVal.toInt()];
+        const value: number = arr[positionOfVal];
         arktest.assertFalse(isNaN(value));
         checkArray(arr, 0, true);
         checkArray(arr, Infinity, true);

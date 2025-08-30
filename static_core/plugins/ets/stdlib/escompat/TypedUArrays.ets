@@ -360,53 +360,8 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public copyWithin(target: number, start: number, end?: number): Uint8ClampedArray {
-        return this.copyWithin(target.toInt(), start.toInt(), asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Makes a copy of internal elements to targetPos from startPos to endPos.
-     *
-     * @param target insert index to place copied elements
-     *
-     * @param start start index to begin copy from
-     *
-     * @param end last index to end copy from, excluded
-     *
-     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
-     */
-    public copyWithin(target: int, start: number, end?: number): Uint8ClampedArray {
-        return this.copyWithin(target.toInt(), start.toInt(), asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Makes a copy of internal elements to targetPos from startPos to endPos.
-     *
-     * @param target insert index to place copied elements
-     *
-     * @param start start index to begin copy from
-     *
-     * @param end last index to end copy from, excluded
-     *
-     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
-     */
-    public copyWithin(target: number, start: int, end?: number): Uint8ClampedArray {
-        return this.copyWithin(target.toInt(), start.toInt(), asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Makes a copy of internal elements to targetPos from startPos to endPos.
-     *
-     * @param target insert index to place copied elements
-     *
-     * @param start start index to begin copy from
-     *
-     * @param end last index to end copy from, excluded
-     *
-     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
-     */
-    public copyWithin(target: int, start: int, end?: number): Uint8ClampedArray {
-        return this.copyWithin(target.toInt(), start.toInt(), asIntOrDefault(end, this.lengthInt))
+    public copyWithin(target: int, start: int, end?: int): Uint8ClampedArray {
+        return this.copyWithinImpl(target, start, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -420,19 +375,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public native copyWithin(target: int, start: int, end: int): Uint8ClampedArray
-
-    /**
-     * Makes a copy of internal elements to targetPos from begin to end of Uint8ClampedArray.
-     *
-     * @param target insert index to place copied elements
-     *
-     * See rules of parameters normalization:
-     * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
-     */
-    public copyWithin(target: number): Uint8ClampedArray {
-        return this.copyWithin(target.toInt())
-    }
+    private native copyWithinImpl(target: int, start: int, end: int): Uint8ClampedArray
 
     /**
      * Makes a copy of internal elements to targetPos from begin to end of Uint8ClampedArray.
@@ -443,7 +386,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
     public copyWithin(target: int): Uint8ClampedArray {
-        return this.copyWithin(target, 0, this.lengthInt)
+        return this.copyWithinImpl(target, 0, this.lengthInt)
     }
 
     /**
@@ -491,30 +434,8 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @param index index to change
      */
-    public set(insertPos: number, val: number): void {
-        this.$_set(insertPos.toInt(), val)
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
     public set(insertPos: int, val: number): void {
-        this.$_set(insertPos.toInt(), val)
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
-    public set(insertPos: number, val: int): void {
-        this.$_set(insertPos.toInt(), val)
+        this.$_set(insertPos, val)
     }
 
     /**
@@ -525,7 +446,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      * @param index index to change
      */
     public set(insertPos: int, val: int): void {
-        this.$_set(insertPos.toInt(), val)
+        this.$_set(insertPos, val)
     }
 
     /**
@@ -537,13 +458,12 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
-    public set(arr: FixedArray<number>, insertPos1: number): void {
-        const insertPos = insertPos1.toInt()
+    public set(arr: FixedArray<number>, insertPos: int): void {
         if (insertPos < 0 || insertPos + arr.length > this.lengthInt) {
             throw new RangeError("set(insertPos: int, arr: FixedArray<int>): size of arr is greater than Uint8ClampedArray.length")
         }
         for (let i = 0; i < arr.length; i++) {
-            this.setUnsafeClamp(insertPos.toInt() + i.toInt(), arr[i].toInt())
+            this.setUnsafeClamp(insertPos + i, arr[i].toInt())
         }
     }
 
@@ -585,7 +505,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
 
     public native set(array: Uint8ClampedArray): void
 
-    public native set(array: Uint8ClampedArray, offset: number): void
+    public native set(array: Uint8ClampedArray, offset: int): void
 
     /**
      * Copies elements from an ArrayLike object to the Uint8ClampedArray.
@@ -594,13 +514,13 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @param offset Optional. The offset into the target array at which to begin writing values from the source array
      */
-    public set(array: ArrayLike<number>, offset: number = 0): void {
-        const insertPos = offset.toInt()
+    public set(array: ArrayLike<number>, offset: int = 0): void {
+        const insertPos = offset
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
         for (let i = 0; i < array.length; ++i) {
-            this.setUnsafeClamp(insertPos.toInt() + i.toInt(), array[i].toInt())
+            this.setUnsafeClamp(insertPos + i, array[i].toInt())
         }
     }
 
@@ -838,7 +758,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @returns true if searchElement is in Uint8ClampedArray, false otherwise
      */
-    public includes(searchElement: number, fromIndex?: number): boolean {
+    public includes(searchElement: number, fromIndex?: int): boolean {
         return this.indexOf(searchElement, asIntOrDefault(fromIndex, 0)) != -1
     }
 
@@ -878,8 +798,8 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(searchElement: number, fromIndex?: number): number {
-        return this.indexOf(searchElement, asIntOrDefault(fromIndex, 0))
+    public indexOf(searchElement: number, fromIndex?: int): int {
+            return this.indexOfImpl(searchElement, fromIndex ?? 0)
     }
 
     /**
@@ -892,21 +812,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(searchElement: number, fromIndex: int): number {
-            return this.indexOfImpl(searchElement, fromIndex)
-    }
-
-    /**
-     * Returns the index of the first occurrence of a value in Uint8ClampedArray.
-     *
-     * @param searchElement The value to locate in the array.
-     *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     *  search starts at index 0.
-     *
-     * @returns index of element if it presents, -1 otherwise
-     */
-    public indexOf(searchElement: int, fromIndex: int): number {
+    public indexOf(searchElement: int, fromIndex: int): int {
         return this.indexOfImpl(searchElement.toLong(), fromIndex)
     }
 
@@ -920,7 +826,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    private final native indexOfImpl(searchElement: number, fromIndex: int): number
+    private final native indexOfImpl(searchElement: number, fromIndex: int): int
 
     /**
      * Returns the index of the first occurrence of a value in Array.
@@ -932,7 +838,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    private final native indexOfImpl(searchElement: long, fromIndex: int): number
+    private final native indexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
      * Returns the index of the first occurrence of a value in Uint8ClampedArray.
@@ -944,10 +850,9 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(searchElement: int): number {
+    public indexOf(searchElement: int): int {
         return this.indexOf(searchElement, 0)
     }
-
 
     /**
      * Converts all elements of an array to strings and joins them using the specified separator.
@@ -992,21 +897,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: number, fromIndex: number|undefined): number {
-        return this.lastIndexOf(searchElement, asIntOrDefault(fromIndex, 0))
-    }
-
-    /**
-     * Returns the index of the last occurrence of a value in Uint8ClampedArray.
-     *
-     * @param searchElement The value to locate in the array.
-     *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
-     * search starts at index 0. If fromIndex is omitted, the search begins at index length-1
-     *
-     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
-     */
-    public lastIndexOf(searchElement: number): number {
+    public lastIndexOf(searchElement: number): int {
         return this.lastIndexOf(searchElement, this.lengthInt - 1)
     }
 
@@ -1020,8 +911,8 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: number, fromIndex: int): number {
-            return this.lastIndexOfImpl(searchElement, fromIndex)
+    public lastIndexOf(searchElement: number, fromIndex: int | undefined): int {
+            return this.lastIndexOfImpl(searchElement, fromIndex ?? 0)
     }
 
     /**
@@ -1034,7 +925,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: int, fromIndex: int): number {
+    public lastIndexOf(searchElement: int, fromIndex: int): int {
         return this.lastIndexOfImpl(searchElement.toLong(), fromIndex)
     }
 
@@ -1048,7 +939,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    private final native lastIndexOfImpl(searchElement: number, fromIndex: int): number
+    private final native lastIndexOfImpl(searchElement: number, fromIndex: int): int
 
     /**
      * Returns the index of the first occurrence of a value in Array.
@@ -1060,7 +951,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    private final native lastIndexOfImpl(searchElement: long, fromIndex: int): number
+    private final native lastIndexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
      * Returns the index of the last occurrence of a value in Uint8ClampedArray.
@@ -1072,7 +963,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: int): number {
+    public lastIndexOf(searchElement: int): int {
         return this.lastIndexOf(searchElement, this.lengthInt - 1)
     }
 
@@ -1280,8 +1171,8 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @returns an Uint8ClampedArray with replaced value on index
      */
-    public with(index: number, value: number): Uint8ClampedArray {
-        return this.withImpl(index.toInt(), value.toInt())
+    public with(index: int, value: number): Uint8ClampedArray {
+        return this.withImpl(index, value.toInt())
     }
 
     /**
@@ -1988,53 +1879,8 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public copyWithin(target: number, start: number, end?: number): Uint8Array {
-        return this.copyWithin(target.toInt(), start.toInt(), asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Makes a copy of internal elements to targetPos from startPos to endPos.
-     *
-     * @param target insert index to place copied elements
-     *
-     * @param start start index to begin copy from
-     *
-     * @param end last index to end copy from, excluded
-     *
-     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
-     */
-    public copyWithin(target: int, start: number, end?: number): Uint8Array {
-        return this.copyWithin(target.toInt(), start.toInt(), asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Makes a copy of internal elements to targetPos from startPos to endPos.
-     *
-     * @param target insert index to place copied elements
-     *
-     * @param start start index to begin copy from
-     *
-     * @param end last index to end copy from, excluded
-     *
-     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
-     */
-    public copyWithin(target: number, start: int, end?: number): Uint8Array {
-        return this.copyWithin(target.toInt(), start.toInt(), asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Makes a copy of internal elements to targetPos from startPos to endPos.
-     *
-     * @param target insert index to place copied elements
-     *
-     * @param start start index to begin copy from
-     *
-     * @param end last index to end copy from, excluded
-     *
-     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
-     */
-    public copyWithin(target: int, start: int, end?: number): Uint8Array {
-        return this.copyWithin(target.toInt(), start.toInt(), asIntOrDefault(end, this.lengthInt))
+    public copyWithin(target: int, start: int, end?: int): Uint8Array {
+        return this.copyWithinImpl(target, start, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -2048,19 +1894,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public native copyWithin(target: int, start: int, end: int): Uint8Array
-
-    /**
-     * Makes a copy of internal elements to targetPos from begin to end of Uint8Array.
-     *
-     * @param target insert index to place copied elements
-     *
-     * See rules of parameters normalization:
-     * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
-     */
-    public copyWithin(target: number): Uint8Array {
-        return this.copyWithin(target.toInt())
-    }
+    private native copyWithinImpl(target: int, start: int, end: int): Uint8Array
 
     /**
      * Makes a copy of internal elements to targetPos from begin to end of Uint8Array.
@@ -2071,7 +1905,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
     public copyWithin(target: int): Uint8Array {
-        return this.copyWithin(target, 0, this.lengthInt)
+        return this.copyWithinImpl(target, 0, this.lengthInt)
     }
 
     /**
@@ -2119,30 +1953,8 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param index index to change
      */
-    public set(insertPos: number, val: number): void {
-        this.$_set(insertPos.toInt(), val)
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
     public set(insertPos: int, val: number): void {
-        this.$_set(insertPos.toInt(), val)
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
-    public set(insertPos: number, val: int): void {
-        this.$_set(insertPos.toInt(), val)
+        this.$_set(insertPos, val)
     }
 
     /**
@@ -2153,7 +1965,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      * @param index index to change
      */
     public set(insertPos: int, val: int): void {
-        this.$_set(insertPos.toInt(), val)
+        this.$_set(insertPos, val)
     }
 
     /**
@@ -2165,14 +1977,13 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
-    public set(arr: FixedArray<number>, insertPos1: number): void {
-        const insertPos = insertPos1.toInt()
+    public set(arr: FixedArray<number>, insertPos: int): void {
         if (insertPos < 0 || insertPos + arr.length > this.lengthInt) {
             throw new RangeError("set(insertPos: int, arr: FixedArray<int>): size of arr is greater than Uint8Array.length")
         }
         for (let i = 0; i < arr.length; i++) {
             let v = this.zeroIfInfinity(arr[i])
-            this.setUnsafeClamp(insertPos.toInt() + i.toInt(), v.toInt())
+            this.setUnsafeClamp(insertPos + i, v.toInt())
         }
     }
 
@@ -2216,7 +2027,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     public native set(array: Uint8Array): void
     private native final set(array: Int8Array): void
 
-    public native set(array: Uint8Array, offset: number): void
+    public native set(array: Uint8Array, offset: int): void
 
     /**
      * Copies elements from an ArrayLike object to the Uint8Array.
@@ -2225,14 +2036,14 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param offset Optional. The offset into the target array at which to begin writing values from the source array
      */
-    public set(array: ArrayLike<number>, offset: number = 0): void {
-        const insertPos = offset.toInt()
+    public set(array: ArrayLike<number>, offset: int = 0): void {
+        const insertPos = offset
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
         for (let i = 0; i < array.length; ++i) {
             let v = this.zeroIfInfinity(array[i])
-            this.setUnsafeClamp(insertPos.toInt() + i.toInt(), v.toInt())
+            this.setUnsafeClamp(insertPos + i, v.toInt())
         }
     }
 
@@ -2454,7 +2265,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns true if searchElement is in Uint8Array, false otherwise
      */
-    public includes(searchElement: number, fromIndex?: number): boolean {
+    public includes(searchElement: number, fromIndex?: int): boolean {
         return this.indexOf(searchElement, asIntOrDefault(fromIndex, 0)) != -1
     }
 
@@ -2494,8 +2305,8 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(searchElement: number, fromIndex?: number): number {
-        return this.indexOf(searchElement, asIntOrDefault(fromIndex, 0))
+    public indexOf(searchElement: number, fromIndex?: int): int {
+            return this.indexOfImpl(searchElement, fromIndex ?? 0)
     }
 
     /**
@@ -2508,21 +2319,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(searchElement: number, fromIndex: int): number {
-            return this.indexOfImpl(searchElement, fromIndex)
-    }
-
-    /**
-     * Returns the index of the first occurrence of a value in Uint8Array.
-     *
-     * @param searchElement The value to locate in the array.
-     *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     *  search starts at index 0.
-     *
-     * @returns index of element if it presents, -1 otherwise
-     */
-    public indexOf(searchElement: int, fromIndex: int): number {
+    public indexOf(searchElement: int, fromIndex: int): int {
         return this.indexOfImpl(searchElement.toLong(), fromIndex)
     }
 
@@ -2536,7 +2333,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    private final native indexOfImpl(searchElement: number, fromIndex: int): number
+    private final native indexOfImpl(searchElement: number, fromIndex: int): int
 
     /**
      * Returns the index of the first occurrence of a value in Array.
@@ -2548,7 +2345,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    private final native indexOfImpl(searchElement: long, fromIndex: int): number
+    private final native indexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
      * Returns the index of the first occurrence of a value in Uint8Array.
@@ -2560,10 +2357,9 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(searchElement: int): number {
+    public indexOf(searchElement: int): int {
         return this.indexOf(searchElement, 0)
     }
-
 
     /**
      * Converts all elements of an array to strings and joins them using the specified separator.
@@ -2608,21 +2404,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: number, fromIndex: number|undefined): number {
-        return this.lastIndexOf(searchElement, asIntOrDefault(fromIndex, 0))
-    }
-
-    /**
-     * Returns the index of the last occurrence of a value in Uint8Array.
-     *
-     * @param searchElement The value to locate in the array.
-     *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
-     * search starts at index 0. If fromIndex is omitted, the search begins at index length-1
-     *
-     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
-     */
-    public lastIndexOf(searchElement: number): number {
+    public lastIndexOf(searchElement: number): int {
         return this.lastIndexOf(searchElement, this.lengthInt - 1)
     }
 
@@ -2636,8 +2418,8 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: number, fromIndex: int): number {
-            return this.lastIndexOfImpl(searchElement, fromIndex)
+    public lastIndexOf(searchElement: number, fromIndex: int | undefined): int {
+            return this.lastIndexOfImpl(searchElement, fromIndex ?? 0)
     }
 
     /**
@@ -2650,7 +2432,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: int, fromIndex: int): number {
+    public lastIndexOf(searchElement: int, fromIndex: int): int {
         return this.lastIndexOfImpl(searchElement.toLong(), fromIndex)
     }
 
@@ -2664,7 +2446,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    private final native lastIndexOfImpl(searchElement: number, fromIndex: int): number
+    private final native lastIndexOfImpl(searchElement: number, fromIndex: int): int
 
     /**
      * Returns the index of the first occurrence of a value in Array.
@@ -2676,7 +2458,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    private final native lastIndexOfImpl(searchElement: long, fromIndex: int): number
+    private final native lastIndexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
      * Returns the index of the last occurrence of a value in Uint8Array.
@@ -2688,7 +2470,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: int): number {
+    public lastIndexOf(searchElement: int): int {
         return this.lastIndexOf(searchElement, this.lengthInt - 1)
     }
 
@@ -2896,8 +2678,8 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns an Uint8Array with replaced value on index
      */
-    public with(index: number, value: number): Uint8Array {
-        return this.withImpl(index.toInt(), value.toInt())
+    public with(index: int, value: number): Uint8Array {
+        return this.withImpl(index, value.toInt())
     }
 
     /**
@@ -3605,53 +3387,8 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public copyWithin(target: number, start: number, end?: number): Uint16Array {
-        return this.copyWithin(target.toInt(), start.toInt(), asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Makes a copy of internal elements to targetPos from startPos to endPos.
-     *
-     * @param target insert index to place copied elements
-     *
-     * @param start start index to begin copy from
-     *
-     * @param end last index to end copy from, excluded
-     *
-     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
-     */
-    public copyWithin(target: int, start: number, end?: number): Uint16Array {
-        return this.copyWithin(target.toInt(), start.toInt(), asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Makes a copy of internal elements to targetPos from startPos to endPos.
-     *
-     * @param target insert index to place copied elements
-     *
-     * @param start start index to begin copy from
-     *
-     * @param end last index to end copy from, excluded
-     *
-     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
-     */
-    public copyWithin(target: number, start: int, end?: number): Uint16Array {
-        return this.copyWithin(target.toInt(), start.toInt(), asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Makes a copy of internal elements to targetPos from startPos to endPos.
-     *
-     * @param target insert index to place copied elements
-     *
-     * @param start start index to begin copy from
-     *
-     * @param end last index to end copy from, excluded
-     *
-     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
-     */
-    public copyWithin(target: int, start: int, end?: number): Uint16Array {
-        return this.copyWithin(target.toInt(), start.toInt(), asIntOrDefault(end, this.lengthInt))
+    public copyWithin(target: int, start: int, end?: int): Uint16Array {
+        return this.copyWithinImpl(target, start, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -3665,19 +3402,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public native copyWithin(target: int, start: int, end: int): Uint16Array
-
-    /**
-     * Makes a copy of internal elements to targetPos from begin to end of Uint16Array.
-     *
-     * @param target insert index to place copied elements
-     *
-     * See rules of parameters normalization:
-     * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
-     */
-    public copyWithin(target: number): Uint16Array {
-        return this.copyWithin(target.toInt())
-    }
+    private native copyWithinImpl(target: int, start: int, end: int): Uint16Array
 
     /**
      * Makes a copy of internal elements to targetPos from begin to end of Uint16Array.
@@ -3688,7 +3413,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
     public copyWithin(target: int): Uint16Array {
-        return this.copyWithin(target, 0, this.lengthInt)
+        return this.copyWithinImpl(target, 0, this.lengthInt)
     }
 
     /**
@@ -3736,30 +3461,8 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param index index to change
      */
-    public set(insertPos: number, val: number): void {
-        this.$_set(insertPos.toInt(), val)
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
     public set(insertPos: int, val: number): void {
-        this.$_set(insertPos.toInt(), val)
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
-    public set(insertPos: number, val: int): void {
-        this.$_set(insertPos.toInt(), val)
+        this.$_set(insertPos, val)
     }
 
     /**
@@ -3770,7 +3473,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      * @param index index to change
      */
     public set(insertPos: int, val: int): void {
-        this.$_set(insertPos.toInt(), val)
+        this.$_set(insertPos, val)
     }
 
     /**
@@ -3782,14 +3485,13 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
-    public set(arr: FixedArray<number>, insertPos1: number): void {
-        const insertPos = insertPos1.toInt()
+    public set(arr: FixedArray<number>, insertPos: int): void {
         if (insertPos < 0 || insertPos + arr.length > this.lengthInt) {
             throw new RangeError("set(insertPos: int, arr: FixedArray<int>): size of arr is greater than Uint16Array.length")
         }
         for (let i = 0; i < arr.length; i++) {
             let v = this.zeroIfInfinity(arr[i])
-            this.setUnsafeClamp(insertPos.toInt() + i.toInt(), v.toInt())
+            this.setUnsafeClamp(insertPos + i, v.toInt())
         }
     }
 
@@ -3833,7 +3535,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     public native set(array: Uint16Array): void
     private native final set(array: Int16Array): void
 
-    public native set(array: Uint16Array, offset: number): void
+    public native set(array: Uint16Array, offset: int): void
 
     /**
      * Copies elements from an ArrayLike object to the Uint16Array.
@@ -3842,14 +3544,14 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param offset Optional. The offset into the target array at which to begin writing values from the source array
      */
-    public set(array: ArrayLike<number>, offset: number = 0): void {
-        const insertPos = offset.toInt()
+    public set(array: ArrayLike<number>, offset: int = 0): void {
+        const insertPos = offset
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
         for (let i = 0; i < array.length; ++i) {
             let v = this.zeroIfInfinity(array[i])
-            this.setUnsafeClamp(insertPos.toInt() + i.toInt(), v.toInt())
+            this.setUnsafeClamp(insertPos + i, v.toInt())
         }
     }
 
@@ -4057,7 +3759,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns true if searchElement is in Uint16Array, false otherwise
      */
-    public includes(searchElement: number, fromIndex?: number): boolean {
+    public includes(searchElement: number, fromIndex?: int): boolean {
         return this.indexOf(searchElement, asIntOrDefault(fromIndex, 0)) != -1
     }
 
@@ -4097,8 +3799,8 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(searchElement: number, fromIndex?: number): number {
-        return this.indexOf(searchElement, asIntOrDefault(fromIndex, 0))
+    public indexOf(searchElement: number, fromIndex?: int): int {
+            return this.indexOfImpl(searchElement, fromIndex ?? 0)
     }
 
     /**
@@ -4111,21 +3813,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(searchElement: number, fromIndex: int): number {
-            return this.indexOfImpl(searchElement, fromIndex)
-    }
-
-    /**
-     * Returns the index of the first occurrence of a value in Uint16Array.
-     *
-     * @param searchElement The value to locate in the array.
-     *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     *  search starts at index 0.
-     *
-     * @returns index of element if it presents, -1 otherwise
-     */
-    public indexOf(searchElement: int, fromIndex: int): number {
+    public indexOf(searchElement: int, fromIndex: int): int {
         return this.indexOfImpl(searchElement.toLong(), fromIndex)
     }
 
@@ -4139,7 +3827,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    private final native indexOfImpl(searchElement: number, fromIndex: int): number
+    private final native indexOfImpl(searchElement: number, fromIndex: int): int
 
     /**
      * Returns the index of the first occurrence of a value in Array.
@@ -4151,7 +3839,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    private final native indexOfImpl(searchElement: long, fromIndex: int): number
+    private final native indexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
      * Returns the index of the first occurrence of a value in Uint16Array.
@@ -4163,10 +3851,9 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(searchElement: int): number {
+    public indexOf(searchElement: int): int {
         return this.indexOf(searchElement, 0)
     }
-
 
     /**
      * Converts all elements of an array to strings and joins them using the specified separator.
@@ -4211,21 +3898,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: number, fromIndex: number|undefined): number {
-        return this.lastIndexOf(searchElement, asIntOrDefault(fromIndex, 0))
-    }
-
-    /**
-     * Returns the index of the last occurrence of a value in Uint16Array.
-     *
-     * @param searchElement The value to locate in the array.
-     *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
-     * search starts at index 0. If fromIndex is omitted, the search begins at index length-1
-     *
-     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
-     */
-    public lastIndexOf(searchElement: number): number {
+    public lastIndexOf(searchElement: number): int {
         return this.lastIndexOf(searchElement, this.lengthInt - 1)
     }
 
@@ -4239,8 +3912,8 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: number, fromIndex: int): number {
-            return this.lastIndexOfImpl(searchElement, fromIndex)
+    public lastIndexOf(searchElement: number, fromIndex: int | undefined): int {
+            return this.lastIndexOfImpl(searchElement, fromIndex ?? 0)
     }
 
     /**
@@ -4253,7 +3926,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: int, fromIndex: int): number {
+    public lastIndexOf(searchElement: int, fromIndex: int): int {
         return this.lastIndexOfImpl(searchElement.toLong(), fromIndex)
     }
 
@@ -4267,7 +3940,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    private final native lastIndexOfImpl(searchElement: number, fromIndex: int): number
+    private final native lastIndexOfImpl(searchElement: number, fromIndex: int): int
 
     /**
      * Returns the index of the first occurrence of a value in Array.
@@ -4279,7 +3952,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    private final native lastIndexOfImpl(searchElement: long, fromIndex: int): number
+    private final native lastIndexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
      * Returns the index of the last occurrence of a value in Uint16Array.
@@ -4291,7 +3964,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: int): number {
+    public lastIndexOf(searchElement: int): int {
         return this.lastIndexOf(searchElement, this.lengthInt - 1)
     }
 
@@ -4499,8 +4172,8 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns an Uint16Array with replaced value on index
      */
-    public with(index: number, value: number): Uint16Array {
-        return this.withImpl(index.toInt(), value.toInt())
+    public with(index: int, value: number): Uint16Array {
+        return this.withImpl(index, value.toInt())
     }
 
     /**
@@ -5228,53 +4901,8 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public copyWithin(target: number, start: number, end?: number): Uint32Array {
-        return this.copyWithin(target.toInt(), start.toInt(), asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Makes a copy of internal elements to targetPos from startPos to endPos.
-     *
-     * @param target insert index to place copied elements
-     *
-     * @param start start index to begin copy from
-     *
-     * @param end last index to end copy from, excluded
-     *
-     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
-     */
-    public copyWithin(target: int, start: number, end?: number): Uint32Array {
-        return this.copyWithin(target.toInt(), start.toInt(), asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Makes a copy of internal elements to targetPos from startPos to endPos.
-     *
-     * @param target insert index to place copied elements
-     *
-     * @param start start index to begin copy from
-     *
-     * @param end last index to end copy from, excluded
-     *
-     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
-     */
-    public copyWithin(target: number, start: int, end?: number): Uint32Array {
-        return this.copyWithin(target.toInt(), start.toInt(), asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Makes a copy of internal elements to targetPos from startPos to endPos.
-     *
-     * @param target insert index to place copied elements
-     *
-     * @param start start index to begin copy from
-     *
-     * @param end last index to end copy from, excluded
-     *
-     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
-     */
-    public copyWithin(target: int, start: int, end?: number): Uint32Array {
-        return this.copyWithin(target.toInt(), start.toInt(), asIntOrDefault(end, this.lengthInt))
+    public copyWithin(target: int, start: int, end?: int): Uint32Array {
+        return this.copyWithinImpl(target, start, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -5288,19 +4916,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public native copyWithin(target: int, start: int, end: int): Uint32Array
-
-    /**
-     * Makes a copy of internal elements to targetPos from begin to end of Uint32Array.
-     *
-     * @param target insert index to place copied elements
-     *
-     * See rules of parameters normalization:
-     * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
-     */
-    public copyWithin(target: number): Uint32Array {
-        return this.copyWithin(target.toInt())
-    }
+    private native copyWithinImpl(target: int, start: int, end: int): Uint32Array
 
     /**
      * Makes a copy of internal elements to targetPos from begin to end of Uint32Array.
@@ -5311,7 +4927,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
     public copyWithin(target: int): Uint32Array {
-        return this.copyWithin(target, 0, this.lengthInt)
+        return this.copyWithinImpl(target, 0, this.lengthInt)
     }
 
     /**
@@ -5359,30 +4975,8 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param index index to change
      */
-    public set(insertPos: number, val: number): void {
-        this.$_set(insertPos.toInt(), val)
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
     public set(insertPos: int, val: number): void {
-        this.$_set(insertPos.toInt(), val)
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
-    public set(insertPos: number, val: long): void {
-        this.$_set(insertPos.toInt(), val)
+        this.$_set(insertPos, val)
     }
 
     /**
@@ -5393,7 +4987,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param index index to change
      */
     public set(insertPos: int, val: long): void {
-        this.$_set(insertPos.toInt(), val)
+        this.$_set(insertPos, val)
     }
 
     /**
@@ -5405,14 +4999,13 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
-    public set(arr: FixedArray<number>, insertPos1: number): void {
-        const insertPos = insertPos1.toInt()
+    public set(arr: FixedArray<number>, insertPos: int): void {
         if (insertPos < 0 || insertPos + arr.length > this.lengthInt) {
             throw new RangeError("set(insertPos: int, arr: FixedArray<long>): size of arr is greater than Uint32Array.length")
         }
         for (let i = 0; i < arr.length; i++) {
             let v = this.zeroIfInfinity(arr[i])
-            this.setUnsafeClamp(insertPos.toInt() + i.toInt(), v.toLong())
+            this.setUnsafeClamp(insertPos + i, v.toLong())
         }
     }
 
@@ -5456,7 +5049,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     public native set(array: Uint32Array): void
     private native final set(array: Int32Array): void
 
-    public native set(array: Uint32Array, offset: number): void
+    public native set(array: Uint32Array, offset: int): void
 
     /**
      * Copies elements from an ArrayLike object to the Uint32Array.
@@ -5465,14 +5058,14 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param offset Optional. The offset into the target array at which to begin writing values from the source array
      */
-    public set(array: ArrayLike<number>, offset: number = 0): void {
-        const insertPos = offset.toInt()
+    public set(array: ArrayLike<number>, offset: int = 0): void {
+        const insertPos = offset
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
         for (let i = 0; i < array.length; ++i) {
             let v = this.zeroIfInfinity(array[i])
-            this.setUnsafeClamp(insertPos.toInt() + i.toInt(), v.toLong())
+            this.setUnsafeClamp(insertPos + i, v.toLong())
         }
     }
 
@@ -5694,7 +5287,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns true if searchElement is in Uint32Array, false otherwise
      */
-    public includes(searchElement: number, fromIndex?: number): boolean {
+    public includes(searchElement: number, fromIndex?: int): boolean {
         return this.indexOf(searchElement, asIntOrDefault(fromIndex, 0)) != -1
     }
 
@@ -5734,8 +5327,8 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(searchElement: number, fromIndex?: number): number {
-        return this.indexOf(searchElement, asIntOrDefault(fromIndex, 0))
+    public indexOf(searchElement: number, fromIndex?: int): int {
+            return this.indexOfImpl(searchElement, fromIndex ?? 0)
     }
 
     /**
@@ -5748,21 +5341,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(searchElement: number, fromIndex: int): number {
-            return this.indexOfImpl(searchElement, fromIndex)
-    }
-
-    /**
-     * Returns the index of the first occurrence of a value in Uint32Array.
-     *
-     * @param searchElement The value to locate in the array.
-     *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     *  search starts at index 0.
-     *
-     * @returns index of element if it presents, -1 otherwise
-     */
-    public indexOf(searchElement: int, fromIndex: int): number {
+    public indexOf(searchElement: int, fromIndex: int): int {
         return this.indexOfImpl(searchElement.toLong(), fromIndex)
     }
 
@@ -5776,7 +5355,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    private final native indexOfImpl(searchElement: number, fromIndex: int): number
+    private final native indexOfImpl(searchElement: number, fromIndex: int): int
 
     /**
      * Returns the index of the first occurrence of a value in Array.
@@ -5788,7 +5367,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    private final native indexOfImpl(searchElement: long, fromIndex: int): number
+    private final native indexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
      * Returns the index of the first occurrence of a value in Uint32Array.
@@ -5800,10 +5379,9 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(searchElement: int): number {
+    public indexOf(searchElement: int): int {
         return this.indexOf(searchElement, 0)
     }
-
 
     /**
      * Converts all elements of an array to strings and joins them using the specified separator.
@@ -5848,21 +5426,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: number, fromIndex: number|undefined): number {
-        return this.lastIndexOf(searchElement, asIntOrDefault(fromIndex, 0))
-    }
-
-    /**
-     * Returns the index of the last occurrence of a value in Uint32Array.
-     *
-     * @param searchElement The value to locate in the array.
-     *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
-     * search starts at index 0. If fromIndex is omitted, the search begins at index length-1
-     *
-     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
-     */
-    public lastIndexOf(searchElement: number): number {
+    public lastIndexOf(searchElement: number): int {
         return this.lastIndexOf(searchElement, this.lengthInt - 1)
     }
 
@@ -5876,8 +5440,8 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: number, fromIndex: int): number {
-            return this.lastIndexOfImpl(searchElement, fromIndex)
+    public lastIndexOf(searchElement: number, fromIndex: int | undefined): int {
+            return this.lastIndexOfImpl(searchElement, fromIndex ?? 0)
     }
 
     /**
@@ -5890,7 +5454,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: int, fromIndex: int): number {
+    public lastIndexOf(searchElement: int, fromIndex: int): int {
         return this.lastIndexOfImpl(searchElement.toLong(), fromIndex)
     }
 
@@ -5904,7 +5468,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    private final native lastIndexOfImpl(searchElement: number, fromIndex: int): number
+    private final native lastIndexOfImpl(searchElement: number, fromIndex: int): int
 
     /**
      * Returns the index of the first occurrence of a value in Array.
@@ -5916,7 +5480,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    private final native lastIndexOfImpl(searchElement: long, fromIndex: int): number
+    private final native lastIndexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
      * Returns the index of the last occurrence of a value in Uint32Array.
@@ -5928,7 +5492,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: int): number {
+    public lastIndexOf(searchElement: int): int {
         return this.lastIndexOf(searchElement, this.lengthInt - 1)
     }
 
@@ -6136,8 +5700,8 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns an Uint32Array with replaced value on index
      */
-    public with(index: number, value: number): Uint32Array {
-        return this.withImpl(index.toInt(), value.toLong())
+    public with(index: int, value: number): Uint32Array {
+        return this.withImpl(index, value.toLong())
     }
 
     /**
@@ -6858,53 +6422,8 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public copyWithin(target: number, start: number, end?: number): BigUint64Array {
-        return this.copyWithin(target.toInt(), start.toInt(), asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Makes a copy of internal elements to targetPos from startPos to endPos.
-     *
-     * @param target insert index to place copied elements
-     *
-     * @param start start index to begin copy from
-     *
-     * @param end last index to end copy from, excluded
-     *
-     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
-     */
-    public copyWithin(target: int, start: number, end?: number): BigUint64Array {
-        return this.copyWithin(target.toInt(), start.toInt(), asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Makes a copy of internal elements to targetPos from startPos to endPos.
-     *
-     * @param target insert index to place copied elements
-     *
-     * @param start start index to begin copy from
-     *
-     * @param end last index to end copy from, excluded
-     *
-     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
-     */
-    public copyWithin(target: number, start: int, end?: number): BigUint64Array {
-        return this.copyWithin(target.toInt(), start.toInt(), asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Makes a copy of internal elements to targetPos from startPos to endPos.
-     *
-     * @param target insert index to place copied elements
-     *
-     * @param start start index to begin copy from
-     *
-     * @param end last index to end copy from, excluded
-     *
-     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
-     */
-    public copyWithin(target: int, start: int, end?: number): BigUint64Array {
-        return this.copyWithin(target.toInt(), start.toInt(), asIntOrDefault(end, this.lengthInt))
+    public copyWithin(target: int, start: int, end?: int): BigUint64Array {
+        return this.copyWithinImpl(target, start, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -6918,19 +6437,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public native copyWithin(target: int, start: int, end: int): BigUint64Array
-
-    /**
-     * Makes a copy of internal elements to targetPos from begin to end of BigUint64Array.
-     *
-     * @param target insert index to place copied elements
-     *
-     * See rules of parameters normalization:
-     * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
-     */
-    public copyWithin(target: number): BigUint64Array {
-        return this.copyWithin(target.toInt())
-    }
+    private native copyWithinImpl(target: int, start: int, end: int): BigUint64Array
 
     /**
      * Makes a copy of internal elements to targetPos from begin to end of BigUint64Array.
@@ -6941,7 +6448,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
     public copyWithin(target: int): BigUint64Array {
-        return this.copyWithin(target, 0, this.lengthInt)
+        return this.copyWithinImpl(target, 0, this.lengthInt)
     }
 
     /**
@@ -6988,30 +6495,8 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @param index index to change
      */
-    public set(insertPos: number, val: BigInt): void {
-        this.$_set(insertPos.toInt(), val)
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
     public set(insertPos: int, val: BigInt): void {
-        this.$_set(insertPos.toInt(), val)
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
-    public set(insertPos: number, val: long): void {
-        this.$_set(insertPos.toInt(), val)
+        this.$_set(insertPos, val)
     }
 
     /**
@@ -7022,7 +6507,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      * @param index index to change
      */
     public set(insertPos: int, val: long): void {
-        this.$_set(insertPos.toInt(), val)
+        this.$_set(insertPos, val)
     }
 
     /**
@@ -7034,13 +6519,12 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
-    public set(arr: FixedArray<BigInt>, insertPos1: number): void {
-        const insertPos = insertPos1.toInt()
+    public set(arr: FixedArray<BigInt>, insertPos: int): void {
         if (insertPos < 0 || insertPos + arr.length > this.lengthInt) {
             throw new RangeError("set(insertPos: int, arr: FixedArray<long>): size of arr is greater than BigUint64Array.length")
         }
         for (let i = 0; i < arr.length; i++) {
-            this.setUnsafeClamp(insertPos.toInt() + i.toInt(), arr[i].getULong())
+            this.setUnsafeClamp(insertPos + i, arr[i].getULong())
         }
     }
 
@@ -7082,7 +6566,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
 
     public native set(array: BigUint64Array): void
 
-    public native set(array: BigUint64Array, offset: number): void
+    public native set(array: BigUint64Array, offset: int): void
 
     /**
      * Copies elements from an ArrayLike object to the BigUint64Array.
@@ -7091,13 +6575,13 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @param offset Optional. The offset into the target array at which to begin writing values from the source array
      */
-    public set(array: ArrayLike<BigInt>, offset: number = 0): void {
-        const insertPos = offset.toInt()
+    public set(array: ArrayLike<BigInt>, offset: int = 0): void {
+        const insertPos = offset
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
         for (let i = 0; i < array.length; ++i) {
-            this.setUnsafeClamp(insertPos.toInt() + i.toInt(), array[i].getULong())
+            this.setUnsafeClamp(insertPos + i, array[i].getULong())
         }
     }
 
@@ -7321,7 +6805,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @returns true if searchElement is in BigUint64Array, false otherwise
      */
-    public includes(searchElement: BigInt, fromIndex?: number): boolean {
+    public includes(searchElement: BigInt, fromIndex?: int): boolean {
         return this.indexOf(searchElement, asIntOrDefault(fromIndex, 0)) != -1
     }
 
@@ -7361,8 +6845,8 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(searchElement: BigInt, fromIndex?: number): number {
-        return this.indexOf(searchElement, asIntOrDefault(fromIndex, 0))
+    public indexOf(searchElement: BigInt, fromIndex?: int): int {
+            return this.indexOfImpl(searchElement.getLong(), fromIndex ?? 0)
     }
 
     /**
@@ -7375,21 +6859,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(searchElement: BigInt, fromIndex: int): number {
-            return this.indexOfImpl(searchElement.getLong(), fromIndex)
-    }
-
-    /**
-     * Returns the index of the first occurrence of a value in BigUint64Array.
-     *
-     * @param searchElement The value to locate in the array.
-     *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     *  search starts at index 0.
-     *
-     * @returns index of element if it presents, -1 otherwise
-     */
-    public indexOf(searchElement: int, fromIndex: int): number {
+    public indexOf(searchElement: int, fromIndex: int): int {
         return this.indexOfImpl(searchElement.toLong(), fromIndex)
     }
 
@@ -7403,7 +6873,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    private final native indexOfImpl(searchElement: number, fromIndex: int): number
+    private final native indexOfImpl(searchElement: number, fromIndex: int): int
 
     /**
      * Returns the index of the first occurrence of a value in Array.
@@ -7415,7 +6885,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    private final native indexOfImpl(searchElement: long, fromIndex: int): number
+    private final native indexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
      * Returns the index of the first occurrence of a value in BigUint64Array.
@@ -7427,10 +6897,9 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(searchElement: int): number {
+    public indexOf(searchElement: int): int {
         return this.indexOf(searchElement, 0)
     }
-
 
     /**
      * Converts all elements of an array to strings and joins them using the specified separator.
@@ -7475,21 +6944,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: BigInt, fromIndex: number|undefined): number {
-        return this.lastIndexOf(searchElement, asIntOrDefault(fromIndex, 0))
-    }
-
-    /**
-     * Returns the index of the last occurrence of a value in BigUint64Array.
-     *
-     * @param searchElement The value to locate in the array.
-     *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
-     * search starts at index 0. If fromIndex is omitted, the search begins at index length-1
-     *
-     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
-     */
-    public lastIndexOf(searchElement: BigInt): number {
+    public lastIndexOf(searchElement: BigInt): int {
         return this.lastIndexOf(searchElement, this.lengthInt - 1)
     }
 
@@ -7503,8 +6958,8 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: BigInt, fromIndex: int): number {
-            return this.lastIndexOfImpl(searchElement.getLong(), fromIndex)
+    public lastIndexOf(searchElement: BigInt, fromIndex: int | undefined): int {
+            return this.lastIndexOfImpl(searchElement.getLong(), fromIndex ?? 0)
     }
 
     /**
@@ -7517,7 +6972,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: int, fromIndex: int): number {
+    public lastIndexOf(searchElement: int, fromIndex: int): int {
         return this.lastIndexOfImpl(searchElement.toLong(), fromIndex)
     }
 
@@ -7531,7 +6986,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    private final native lastIndexOfImpl(searchElement: number, fromIndex: int): number
+    private final native lastIndexOfImpl(searchElement: number, fromIndex: int): int
 
     /**
      * Returns the index of the first occurrence of a value in Array.
@@ -7543,7 +6998,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    private final native lastIndexOfImpl(searchElement: long, fromIndex: int): number
+    private final native lastIndexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
      * Returns the index of the last occurrence of a value in BigUint64Array.
@@ -7555,7 +7010,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: int): number {
+    public lastIndexOf(searchElement: int): int {
         return this.lastIndexOf(searchElement, this.lengthInt - 1)
     }
 
@@ -7767,8 +7222,8 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @returns an BigUint64Array with replaced value on index
      */
-    public with(index: number, value: BigInt): BigUint64Array {
-        return this.withImpl(index.toInt(), value.getULong())
+    public with(index: int, value: BigInt): BigUint64Array {
+        return this.withImpl(index, value.getULong())
     }
 
     /**
