@@ -106,6 +106,10 @@ function main(): int {
     suite.addTest("Test buffer from string in base64", testBufferFrom40002)
     suite.addTest("Test buffer from string in utf8", testBufferFrom30006)
     suite.addTest("Test buffer from Uint8Array in base64url", testBufferBase64Url)
+    suite.addTest("Test UInt32 BE write", testUInt32BEWrite)
+    suite.addTest("Test UInt32 LE write", testUInt32LEWrite)
+    suite.addTest("Test UInt BE write", testUIntBEWrite)
+    suite.addTest("Test UInt LE write", testUIntLEWrite)
 
     suite.addTest("Test buffer toJSON", testBufferToJSON)
     suite.addTest("Test readIntLE, readUIntLE, readIntBE, readUIntBE", testReadIntUintLEBE)
@@ -1257,4 +1261,32 @@ function testBufferToString00001() {
     str = buf.toString('base64', -Infinity.toInt(), 0);
     arktest.assertEQ(str.length, 0);
     arktest.assertEQ(str, '');
+}
+
+function testUIntLEWrite() {
+    let buf = buffer.allocUninitializedFromPool(4);
+    arktest.expectError(() => {
+        let ref = buf.writeUIntLE(0x13141516, 0, 1);
+    }, `The value of "value" is out of range. It must be >= 0 and <= 255. Received value is: 320083222`)
+}
+
+function testUIntBEWrite() {
+    let buf = buffer.allocUninitializedFromPool(4);
+    arktest.expectError(() => {
+        let ref = buf.writeUIntBE(0x13141516, 0, 1);
+    }, `The value of "value" is out of range. It must be >= 0 and <= 255. Received value is: 320083222`)
+}
+
+function testUInt32BEWrite() {
+    let buf = buffer.allocUninitializedFromPool(4);
+    arktest.expectError(() => {
+        buf.writeUInt32BE(0xfeedface, -1);
+    }, `The value of "offset" is out of range. It must be >= 0 and <= 0. Received value is: -1`)
+}
+
+function testUInt32LEWrite() {
+    let buf = buffer.allocUninitializedFromPool(4);
+    arktest.expectError(() => {
+        buf.writeUInt32LE(0xfeedface, -1);
+    }, `The value of "offset" is out of range. It must be >= 0 and <= 0. Received value is: -1`)
 }
