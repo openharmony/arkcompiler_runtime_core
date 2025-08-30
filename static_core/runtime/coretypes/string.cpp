@@ -507,12 +507,12 @@ String *String::CreateTreeString(String *left, String *right, uint32_t length, b
     treeStr->InitLengthAndFlags(length, compressed);
     treeStr->SetRawHashcode(0);
 
-    auto writeBarrierLeft = [](void *obj, size_t offset, common::BaseObject *str) {
-        ObjectAccessor::SetObject(obj, offset, reinterpret_cast<ObjectHeader *>(str));
+    auto writeBarrierLeft = [thread](void *obj, size_t offset, common::BaseObject *str) {
+        ObjectAccessor::SetObject(thread, obj, offset, reinterpret_cast<ObjectHeader *>(str));
     };
     treeStr->SetLeftSubString(std::move(writeBarrierLeft), leftHandle->ToString());
-    auto writeBarrierRight = [](void *obj, size_t offset, common::BaseObject *str) {
-        ObjectAccessor::SetObject(obj, offset, reinterpret_cast<ObjectHeader *>(str));
+    auto writeBarrierRight = [thread](void *obj, size_t offset, common::BaseObject *str) {
+        ObjectAccessor::SetObject(thread, obj, offset, reinterpret_cast<ObjectHeader *>(str));
     };
     treeStr->SetRightSubString(std::move(writeBarrierRight), rightHandle->ToString());
 

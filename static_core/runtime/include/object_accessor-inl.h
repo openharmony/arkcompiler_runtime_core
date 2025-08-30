@@ -49,7 +49,7 @@ template <bool IS_VOLATILE /* = false */, bool NEED_WRITE_BARRIER /* = true */, 
 // CC-OFFNXT(G.FUD.06) perf critical
 inline void ObjectAccessor::SetObject(void *obj, size_t offset, ObjectHeader *value)
 {
-    if (NEED_WRITE_BARRIER) {
+    if constexpr (NEED_WRITE_BARRIER) {
         auto *barrierSet = GetBarrierSet();
 
         if (barrierSet->IsPreBarrierEnabled()) {
@@ -67,7 +67,7 @@ inline void ObjectAccessor::SetObject(void *obj, size_t offset, ObjectHeader *va
             barrierSet->PostBarrier(ToVoidPtr(ToUintPtr(obj)), offset, value);
         }
     } else {
-        if (!IS_DYN) {
+        if constexpr (!IS_DYN) {
             Set<ObjectPointerType, IS_VOLATILE>(obj, offset, ToObjPtrType(value));
         } else {
             Set<ObjectHeader *, IS_VOLATILE>(obj, offset, value);
@@ -148,7 +148,7 @@ template <bool IS_VOLATILE /* = false */, bool NEED_WRITE_BARRIER /* = true */, 
 // CC-OFFNXT(G.FUD.06) perf critical
 inline void ObjectAccessor::SetObject(const ManagedThread *thread, void *obj, size_t offset, ObjectHeader *value)
 {
-    if (NEED_WRITE_BARRIER) {
+    if constexpr (NEED_WRITE_BARRIER) {
         auto *barrierSet = GetBarrierSet(thread);
         if (barrierSet->IsPreBarrierEnabled()) {
             ObjectHeader *preVal = GetObject<IS_VOLATILE, IS_DYN>(obj, offset);
@@ -164,7 +164,7 @@ inline void ObjectAccessor::SetObject(const ManagedThread *thread, void *obj, si
             barrierSet->PostBarrier(ToVoidPtr(ToUintPtr(obj)), offset, value);
         }
     } else {
-        if (!IS_DYN) {
+        if constexpr (!IS_DYN) {
             Set<ObjectPointerType, IS_VOLATILE>(obj, offset, ToObjPtrType(value));
         } else {
             Set<ObjectHeader *, IS_VOLATILE>(obj, offset, value);
