@@ -132,7 +132,7 @@ export class Autofixer {
       ts.SyntaxKind.ClassDeclaration, 
       [
         this[FaultID.NoPrivateMember].bind(this), 
-        this[FaultID.DefaultExport].bind(this),
+        this[FaultID.AddDeclareToClass].bind(this),
         this[FaultID.NoETSKeyword].bind(this),
         this[FaultID.RemoveLimitDecorator].bind(this),
         this[FaultID.NoOptionalMemberFunction].bind(this)
@@ -147,7 +147,9 @@ export class Autofixer {
     [ts.SyntaxKind.TupleType, [this[FaultID.TupleTypeToArray].bind(this)]],
     [ts.SyntaxKind.StructDeclaration, [this[FaultID.StructDeclaration].bind(this)]],
     [ts.SyntaxKind.IndexedAccessType, [this[FaultID.IndexAccessType].bind(this)]],
-    [ts.SyntaxKind.FunctionType, [this[FaultID.FunctionType].bind(this)]]
+    [ts.SyntaxKind.FunctionType, [this[FaultID.FunctionType].bind(this)]],
+    [ts.SyntaxKind.UnionType, [this[FaultID.NoVoidUnionType].bind(this)]],
+    [ts.SyntaxKind.VariableDeclaration, [this[FaultID.ConstLiteralToType].bind(this)]]
   ]);
 
   fixNode(node: ts.Node): ts.VisitResult<ts.Node> {
@@ -970,6 +972,52 @@ export class Autofixer {
   }
 
   /**
+   * Rule: `arkts-add-declare-to-classes`
+   */
+  private [FaultID.AddDeclareToClass](node: ts.Node): ts.VisitResult<ts.Node> {
+    if (!ts.isClassDeclaration(node)) {
+      return node;
+    }
+
+    const modifiers = node.modifiers;
+    if (!modifiers) {
+      return node;
+    }
+
+    const isExported = modifiers.some(m => m.kind === ts.SyntaxKind.ExportKeyword);
+    if (!isExported) {
+      return node;
+    }
+
+    const hasDeclare = modifiers.some(m => m.kind === ts.SyntaxKind.DeclareKeyword);
+    if (hasDeclare) {
+      return node;
+    }
+
+    const isDefaultExport = modifiers.some(m => m.kind === ts.SyntaxKind.DefaultKeyword);
+    
+    if (isDefaultExport) {
+      // For default export class, add declare after 'export default'
+      return exportDefaultAssignment(node, this.context);
+    } else {
+      //For regular export class, add declare after 'export'
+      const newModifiers = [
+        ...modifiers.filter(m => ts.isModifier(m)),
+        this.context.factory.createModifier(ts.SyntaxKind.DeclareKeyword)
+      ] as ts.Modifier[];
+
+      return this.context.factory.updateClassDeclaration(
+        node,
+        newModifiers,
+        node.name,
+        node.typeParameters,
+        node.heritageClauses,
+        node.members
+      );
+    }
+  }
+
+  /**
    * Rule: `arkts-no-call-signature-or-optional-methods`
    */
   private [FaultID.CallorOptionFuncs](node: ts.Node): ts.VisitResult<ts.Node> {
@@ -1406,7 +1454,57 @@ export class Autofixer {
         );
       }
     }
-  
+    
+    return node;
+  }
+
+  /*
+   * Rule: `union type with void mapped to Any`
+   */
+  private [FaultID.NoVoidUnionType](node: ts.Node): ts.VisitResult<ts.Node> {
+    
+    /**
+     * If a union type contains the void type,
+     * convert the union type to Any.
+     */
+    if (ts.isUnionTypeNode(node)) {
+      const hasVoid = node.types.some((type) => type.kind === ts.SyntaxKind.VoidKeyword);
+      if (hasVoid) {
+        return this.context.factory.createTypeReferenceNode(JSValue);
+      }
+    }
+    
+    return node;
+  }  
+
+  /*      
+  * Rule: `arkts-const-literal-to-type`
+  */
+  private [FaultID.ConstLiteralToType](node: ts.Node): ts.VisitResult<ts.Node> {
+    /**
+     * Convert const variable declarations with literal values to type declarations.
+     * e.g. export declare const c = 123; -> export declare const c: number;
+     */
+    
+    if (ts.isVariableDeclaration(node) && node.initializer) {
+      let typeNode: ts.TypeNode | undefined;
+
+      if (ts.isNumericLiteral(node.initializer)) {
+        typeNode = this.context.factory.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword);
+      }
+
+      if (typeNode) {
+        const result = this.context.factory.createVariableDeclaration(
+          node.name,
+          node.exclamationToken,
+          typeNode,
+          undefined
+        );
+
+        return result;
+      }
+    }
+
     return node;
   }
 }
@@ -2246,9 +2344,18 @@ function exportDefaultAssignment(
   }
 
   if (modifiers.some(modifier => modifier.kind === ts.SyntaxKind.DefaultKeyword)) {
-    const newModifiers = modifiers.filter(modifier =>
-      ts.isModifier(modifier)
-    ).concat(context.factory.createModifier(ts.SyntaxKind.DeclareKeyword));
+    const newModifiers = [...modifiers];
+    
+    if (!modifiers.some(modifier => modifier.kind === ts.SyntaxKind.DeclareKeyword)) {
+      const declareModifier = context.factory.createModifier(ts.SyntaxKind.DeclareKeyword);
+      
+      const defaultIndex = modifiers.findIndex(mod => mod.kind === ts.SyntaxKind.DefaultKeyword);
+      if (defaultIndex !== -1) {
+        newModifiers.splice(defaultIndex + 1, 0, declareModifier);
+      } else {
+        newModifiers.push(declareModifier);
+      }
+    }
 
     const safeModifiers = newModifiers as ts.Modifier[];
 

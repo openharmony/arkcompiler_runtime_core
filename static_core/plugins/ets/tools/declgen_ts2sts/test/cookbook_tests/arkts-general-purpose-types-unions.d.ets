@@ -15,3 +15,5 @@
  */
 export type union = number | string;
 export declare let u: union;
+export declare function a(x: number): Any;
+export type c = Any;

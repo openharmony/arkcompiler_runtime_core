@@ -145,6 +145,9 @@ export enum FaultID {
   TupleTypeToArray,
   StructDeclaration,
   FunctionType,
+  NoVoidUnionType,
+  ConstLiteralToType,
+  AddDeclareToClass,
   // this should always be last enum
   LAST_ID
 }

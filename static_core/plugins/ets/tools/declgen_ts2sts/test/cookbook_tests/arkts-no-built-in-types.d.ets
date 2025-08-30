@@ -35,6 +35,11 @@ export type PropertyDecoratorAlias = Any;
 export declare const aliasedDecorator: PropertyDecoratorAlias;
 export type ComplexDecoratorType = Any;
 export declare const complexDecorator: ComplexDecoratorType;
+export declare let a: Any;
+export declare let buffers: Any[];
+export declare function processData(buffer: Any): Any;
+export type BufferType = Any;
+export type ComplexType = Any | string;
 export declare class DecoratedClass {
     normalProperty: string;
     readOnlyProperty: number;
@@ -45,7 +50,14 @@ export declare class DecoratorManager implements DecoratorContainer {
     constructor(decorator: Any);
     applyDecorator(target: Any, propertyKey: string | Any): void;
 }
+export declare class DataProcessor {
+    sharedBuffer: Any;
+}
 export declare interface DecoratorContainer {
     decorator: Any;
     applyDecorator(target: Any, propertyKey: string | Any): void;
+}
+export declare interface BufferHolder {
+    buffer: Any;
+    getBuffer(): Any;
 }

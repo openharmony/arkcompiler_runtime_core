@@ -1,3 +1,4 @@
+'use static'
 /*
  * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,13 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export type union = number | string
-export let u: union = 123
-export function a(x:number):string | number | void {
-  if(x>0){
-    return x;
-  }else if (x<0){
-    return "x";
-  }
+export default declare abstract class MyClass {
+    A: number;
+    constructor(a: number);
 }
-export type c = void | string | number;
+export declare class UserIns {
+    name: string;
+    age: number;
+    constructor(name: string, age: number);
+}
+export declare class user extends UserIns {
+    sex: string;
+    constructor(name: string, age: number, sex: string);
+}
+export declare class cla implements X {
+    name: string;
+    constructor(name: string);
+    print(): void;
+}
+export declare interface X {
+    name: string;
+    print(): void;
+}
