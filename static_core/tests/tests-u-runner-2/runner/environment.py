@@ -56,7 +56,8 @@ class RunnerEnv:
         if var_value is None:
             raise OSError(f"Mandatory environment variable '{prop_desc.name}' is not set. "
                           "Either specify it in the system environment or "
-                          "run the runner with the only option `--init`")
+                          "run the runner with only init command: "
+                          "./runner.sh init")
         if not prop_desc.is_path:
             return
         expanded = Path(var_value).expanduser().resolve()

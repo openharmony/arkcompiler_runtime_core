@@ -422,10 +422,11 @@ class CliOptionsParser:
 
 
 def get_args() -> dict[str, OptionType]:
-    usage = ("Urunner should be run with at least two options: WORKFLOW_NAME, TEST_SUITE."
+    usage = ("Urunner should be run with at least two options: <workflow_name> <test_suite_name>."
              "\nIn order to explore possible workflow and test suite options "
-             "please run 'runner.sh workflow_name test_suite_name --help'")
-    parser = argparse.ArgumentParser(description="Urunner arg parser", usage=usage)
+             "please run 'runner.sh <workflow_name> <test_suite_name> --help'"
+             "e.g. ./runner.sh panda-int ets-cts --help")
+    parser = argparse.ArgumentParser(description="URunner arg parser", usage=usage)
 
     parser.add_argument("workflow_name", help="Workflow name")
     parser.add_argument("test_suite_name", help="Test suite name")
