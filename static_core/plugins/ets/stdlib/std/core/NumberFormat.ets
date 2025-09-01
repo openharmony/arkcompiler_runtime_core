@@ -196,7 +196,7 @@ export namespace Intl {
                     throw new RangeError("Invalid maximumSignificantDigits")
                 }
                 if (options.minimumFractionDigits != undefined) {
-                    if (options.maximumSignificantDigits! < options.minimumSignificantDigits!) {
+                    if ((options.minimumSignificantDigits != undefined) && options.maximumSignificantDigits! < options.minimumSignificantDigits!) {
                         throw new RangeError("Invalid maximumSignificantDigits")
                     }
                 }
