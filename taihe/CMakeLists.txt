@@ -301,10 +301,6 @@ endfunction()
 
 
 function(add_ani_demo demo_name idl_files taihe_configs gen_ets_names user_ets_files user_include_dir user_cpp_files)
-  if("${demo_name}" MATCHES "java")
-    message(STATUS "Skipping ${demo_name} because it contains 'java'")
-    return()
-  endif()
 
   set(MAIN_ABC "${CMAKE_CURRENT_BINARY_DIR}/main.abc")
 
