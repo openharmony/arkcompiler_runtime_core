@@ -41,6 +41,14 @@
             return ANI_ERROR; /* CC-OFF(G.PRE.05) function gen */ \
         }                                                         \
     } while (false)
+
+// CC-OFFNXT(G.PRE.02) should be with define
+#define ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult) \
+    do {                                                            \
+        if (LIKELY((status) == ANI_OK)) {                           \
+            *(vresult) = (venv)->AddLocalVerifiedRef(result);       \
+        }                                                           \
+    } while (false)
 // NOLINTEND(cppcoreguidelines-macro-usage)
 
 namespace ark::ets::ani::verify {
@@ -180,9 +188,7 @@ NO_UB_SANITIZE static ani_status Object_New(VEnv *venv, VClass *vclass, ani_meth
     ani_object result {};
     ani_status status =
         GetInteractionAPI(venv)->Object_New_A(venv->GetEnv(), vclass->GetRef(), ctor, &result, args.data());
-    if (LIKELY(status == ANI_OK)) {
-        *vresult = venv->AddLocalVerifiedRef(result);
-    }
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
 
@@ -205,9 +211,7 @@ NO_UB_SANITIZE static ani_status Object_New_A(VEnv *venv, VClass *vclass, ani_me
     ani_object result {};
     ani_status status =
         GetInteractionAPI(venv)->Object_New_A(venv->GetEnv(), vclass->GetRef(), ctor, &result, args.data());
-    if (LIKELY(status == ANI_OK)) {
-        *vresult = venv->AddLocalVerifiedRef(result);
-    }
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
 
@@ -230,9 +234,7 @@ NO_UB_SANITIZE static ani_status Object_New_V(VEnv *venv, VClass *vclass, ani_me
     ani_object result {};
     ani_status status =
         GetInteractionAPI(venv)->Object_New_A(venv->GetEnv(), vclass->GetRef(), ctor, &result, args.data());
-    if (LIKELY(status == ANI_OK)) {
-        *vresult = venv->AddLocalVerifiedRef(result);
-    }
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
 
@@ -271,9 +273,7 @@ NO_UB_SANITIZE static ani_status FindModule(VEnv *venv, const char *moduleDescri
     VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
     ani_module result {};
     ani_status status = GetInteractionAPI(venv)->FindModule(venv->GetEnv(), moduleDescriptor, &result);
-    if (LIKELY(status == ANI_OK)) {
-        *vresult = venv->AddLocalVerifiedRef(result);
-    }
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
 
@@ -290,9 +290,7 @@ NO_UB_SANITIZE static ani_status FindClass(VEnv *venv, const char *classDescript
     VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
     ani_class result {};
     ani_status status = GetInteractionAPI(venv)->FindClass(venv->GetEnv(), classDescriptor, &result);
-    if (LIKELY(status == ANI_OK)) {
-        *vresult = venv->AddLocalVerifiedRef(result);
-    }
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
 
@@ -497,9 +495,7 @@ NO_UB_SANITIZE static ani_status GetNull(VEnv *venv, VRef **vresult)
     VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
     ani_ref result {};
     ani_status status = GetInteractionAPI(venv)->GetNull(venv->GetEnv(), &result);
-    if (LIKELY(status == ANI_OK)) {
-        *vresult = venv->AddLocalVerifiedRef(result);
-    }
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
 
@@ -514,9 +510,7 @@ NO_UB_SANITIZE static ani_status GetUndefined(VEnv *venv, VRef **vresult)
     // clang-format on
     ani_ref result {};
     ani_status status = GetInteractionAPI(venv)->GetUndefined(venv->GetEnv(), &result);
-    if (LIKELY(status == ANI_OK)) {
-        *vresult = venv->AddLocalVerifiedRef(result);
-    }
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
 
@@ -563,72 +557,142 @@ NO_UB_SANITIZE static ani_status Reference_StrictEquals(VEnv *venv, ani_ref ref0
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status String_NewUTF16(VEnv *venv, const uint16_t *utf16String, ani_size utf16Size,
-                                                 ani_string *result)
+                                                 VString **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->String_NewUTF16(venv->GetEnv(), utf16String, utf16Size, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForUTF16String(utf16String, "utf16String"),
+        ANIArg::MakeForSize(utf16Size, "utf16Size"),
+        ANIArg::MakeForStringStorage(vresult, "result")
+    );
+    // clang-format on
+    ani_string result {};
+    ani_status status = GetInteractionAPI(venv)->String_NewUTF16(venv->GetEnv(), utf16String, utf16Size, &result);
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status String_GetUTF16Size(VEnv *venv, ani_string string, ani_size *result)
+NO_UB_SANITIZE static ani_status String_GetUTF16Size(VEnv *venv, VString *vstring, ani_size *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->String_GetUTF16Size(venv->GetEnv(), string, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForString(vstring, "string"),
+        ANIArg::MakeForSizeStorage(result, "result")
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->String_GetUTF16Size(venv->GetEnv(), vstring->GetRef(), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status String_GetUTF16(VEnv *venv, ani_string string, uint16_t *utf16Buffer,
+NO_UB_SANITIZE static ani_status String_GetUTF16(VEnv *venv, VString *vstring, uint16_t *utf16Buffer,
                                                  ani_size utf16BufferSize, ani_size *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->String_GetUTF16(venv->GetEnv(), string, utf16Buffer, utf16BufferSize, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForString(vstring, "string"),
+        ANIArg::MakeForUTF16Buffer(utf16Buffer, "utf16Buffer"),
+        ANIArg::MakeForSize(utf16BufferSize, "utf16BufferSize"),
+        ANIArg::MakeForSizeStorage(result, "result")
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->String_GetUTF16(venv->GetEnv(), vstring->GetRef(), utf16Buffer, utf16BufferSize,
+                                                    result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status String_GetUTF16SubString(VEnv *venv, ani_string string, ani_size substrOffset,
+NO_UB_SANITIZE static ani_status String_GetUTF16SubString(VEnv *venv, VString *vstring, ani_size substrOffset,
                                                           ani_size substrSize, uint16_t *utf16Buffer,
                                                           ani_size utf16BufferSize, ani_size *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->String_GetUTF16SubString(venv->GetEnv(), string, substrOffset, substrSize,
-                                                             utf16Buffer, utf16BufferSize, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForString(vstring, "string"),
+        ANIArg::MakeForSize(substrOffset, "substrOffset"),
+        ANIArg::MakeForSize(substrSize, "substrSize"),
+        ANIArg::MakeForUTF16Buffer(utf16Buffer, "utf16Buffer"),
+        ANIArg::MakeForSizeStorage(result, "result")
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->String_GetUTF16SubString(venv->GetEnv(), vstring->GetRef(), substrOffset,
+                                                             substrSize, utf16Buffer, utf16BufferSize, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status String_NewUTF8(VEnv *venv, const char *utf8String, ani_size utf8Size,
                                                 VString **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForUTF8String(utf8String, "utf8String"),
+        ANIArg::MakeForSize(utf8Size, "utf8Size"),
+        ANIArg::MakeForStringStorage(vresult, "result")
+    );
+    // clang-format on
+
     ani_string result {};
     ani_status status = GetInteractionAPI(venv)->String_NewUTF8(venv->GetEnv(), utf8String, utf8Size, &result);
-    if (LIKELY(status == ANI_OK)) {
-        *vresult = venv->AddLocalVerifiedRef(result);
-    }
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status String_GetUTF8Size(VEnv *venv, ani_string string, ani_size *result)
+NO_UB_SANITIZE static ani_status String_GetUTF8Size(VEnv *venv, VString *vstring, ani_size *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->String_GetUTF8Size(venv->GetEnv(), string, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForString(vstring, "string"),
+        ANIArg::MakeForSizeStorage(result, "result")
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->String_GetUTF8Size(venv->GetEnv(), vstring->GetRef(), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status String_GetUTF8(VEnv *venv, ani_string string, char *utf8Buffer,
-                                                ani_size utf8BufferSize, ani_size *result)
+NO_UB_SANITIZE static ani_status String_GetUTF8(VEnv *venv, VString *vstring, char *utf8Buffer, ani_size utf8BufferSize,
+                                                ani_size *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->String_GetUTF8(venv->GetEnv(), string, utf8Buffer, utf8BufferSize, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForString(vstring, "string"),
+        ANIArg::MakeForUTF8Buffer(utf8Buffer, "utf8Buffer"),
+        ANIArg::MakeForSize(utf8BufferSize, "utf8BufferSize"),
+        ANIArg::MakeForSizeStorage(result, "result")
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->String_GetUTF8(venv->GetEnv(), vstring->GetRef(), utf8Buffer, utf8BufferSize,
+                                                   result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status String_GetUTF8SubString(VEnv *venv, ani_string string, ani_size substrOffset,
+NO_UB_SANITIZE static ani_status String_GetUTF8SubString(VEnv *venv, VString *vstring, ani_size substrOffset,
                                                          ani_size substrSize, char *utf8Buffer, ani_size utf8BufferSize,
                                                          ani_size *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->String_GetUTF8SubString(venv->GetEnv(), string, substrOffset, substrSize,
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForString(vstring, "string"),
+        ANIArg::MakeForSize(substrOffset, "substrOffset"),
+        ANIArg::MakeForSize(substrSize, "substrSize"),
+        ANIArg::MakeForUTF8Buffer(utf8Buffer, "utf8Buffer"),
+        ANIArg::MakeForSizeStorage(result, "result")
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->String_GetUTF8SubString(venv->GetEnv(), vstring->GetRef(), substrOffset, substrSize,
                                                             utf8Buffer, utf8BufferSize, result);
 }
 

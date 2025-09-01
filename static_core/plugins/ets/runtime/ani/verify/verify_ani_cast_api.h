@@ -63,6 +63,11 @@ struct TypeMapping<VModule *> {
 };
 
 template <>
+struct TypeMapping<VString *> {
+    using Type = ani_string;
+};
+
+template <>
 struct TypeMapping<VClass *> {
     using Type = ani_class;
 };

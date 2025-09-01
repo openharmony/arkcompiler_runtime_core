@@ -130,12 +130,19 @@ PandaString ANIArg::GetStringType() const
         case ValueType::ANI_REF:             return "ani_ref";
         case ValueType::ANI_CLASS:           return "ani_class";
         case ValueType::ANI_METHOD:          return "ani_method";
+        case ValueType::ANI_STRING:          return "ani_string";
         case ValueType::ANI_VALUE_ARGS:      return "const ani_value *";
+        case ValueType::ANI_UTF8_BUFFER:     return "char *";
+        case ValueType::ANI_UTF8_STRING:     return "const char *";
+        case ValueType::ANI_UTF16_BUFFER:    return "uint16_t *";
+        case ValueType::ANI_UTF16_STRING:    return "const uint16_t *";
         case ValueType::ANI_ENV_STORAGE:     return "ani_env **";
         case ValueType::ANI_VM_STORAGE:      return "ani_env **";
         case ValueType::ANI_BOOLEAN_STORAGE: return "ani_boolean *";
         case ValueType::ANI_REF_STORAGE:     return "ani_ref *";
         case ValueType::ANI_OBJECT_STORAGE:  return "ani_object *";
+        case ValueType::ANI_STRING_STORAGE:  return "ani_string *";
+        case ValueType::ANI_SIZE_STORAGE:    return "ani_size *";
         case ValueType::UINT32:              return "uint32_t";
         default:                             UNREACHABLE(); return "";
         case ValueType::METHOD_ARGS:
@@ -266,6 +273,28 @@ public:
         return {};
     }
 
+    template <typename Type>
+    std::optional<PandaString> VerifyTypeStorage(Type value, std::string_view TypeName)
+    {
+        if (value == nullptr) {
+            PandaStringStream ss;
+            ss << "wrong pointer for storing '" << TypeName << "'";
+            return ss.str();
+        }
+        return {};
+    }
+
+    template <typename Type>
+    std::optional<PandaString> VerifyTypePtr(Type value, std::string_view TypeName)
+    {
+        if (value == nullptr) {
+            PandaStringStream ss;
+            ss << "wrong pointer to use as argument in '" << TypeName << "'";
+            return ss.str();
+        }
+        return {};
+    }
+
     std::optional<PandaString> VerifyEnvVersion(uint32_t version)
     {
         if (!IsVersionSupported(version)) {
@@ -307,6 +336,22 @@ public:
             ss << "wrong reference type: " << ANIRefTypeToString(refType);
             return ss.str();
         }
+        return {};
+    }
+
+    std::optional<PandaString> VerifyString(VString *vstr)
+    {
+        auto err = VerifyRef(vstr);
+        if (err) {
+            return err;
+        }
+        ANIRefType refType = vstr->GetRefType();
+        if (refType != ANIRefType::STRING) {
+            PandaStringStream ss;
+            ss << "wrong reference type: " << ANIRefTypeToString(refType);
+            return ss.str();
+        }
+
         return {};
     }
 
@@ -371,47 +416,6 @@ public:
         return err;
     }
 
-    std::optional<PandaString> VerifyVmStorage(ani_vm **vmStorage)
-    {
-        if (vmStorage == nullptr) {
-            return "wrong pointer for storing 'ani_vm *'";
-        }
-        return {};
-    }
-
-    std::optional<PandaString> VerifyEnvStorage(VEnv **envStorage)
-    {
-        if (envStorage == nullptr) {
-            return "wrong pointer for storing 'ani_env *'";
-        }
-        return {};
-    }
-
-    // NOLINTNEXTLINE(readability-non-const-parameter)
-    std::optional<PandaString> VerifyBooleanStorage(ani_boolean *result)
-    {
-        if (result == nullptr) {
-            return "wrong pointer for storing 'ani_boolean'";
-        }
-        return {};
-    }
-
-    std::optional<PandaString> VerifyRefStorage(VRef **result)
-    {
-        if (result == nullptr) {
-            return "wrong pointer for storing 'ani_ref'";
-        }
-        return {};
-    }
-
-    std::optional<PandaString> VerifyObjectStorage(VObject **result)
-    {
-        if (result == nullptr) {
-            return "wrong pointer for storing 'ani_object'";
-        }
-        return {};
-    }
-
 private:
     EnvANIVerifier *GetEnvANIVerifier()
     {
@@ -473,6 +477,36 @@ static std::optional<PandaString> VerifyClass(Verifier &v, const ANIArg &arg)
     return v.VerifyClass(arg.GetValueClass());
 }
 
+static std::optional<PandaString> VerifyString(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_STRING);
+    return v.VerifyString(arg.GetValueString());
+}
+
+static std::optional<PandaString> VerifyUTF8Buffer(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_UTF8_BUFFER);
+    return v.VerifyTypePtr(arg.GetValueUTF8Buffer(), "char *");
+}
+
+static std::optional<PandaString> VerifyUTF8String(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_UTF8_STRING);
+    return v.VerifyTypePtr(arg.GetValueUTF8String(), "const char *");
+}
+
+static std::optional<PandaString> VerifyUTF16Buffer(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_UTF16_BUFFER);
+    return v.VerifyTypePtr(arg.GetValueUTF16Buffer(), "uint16_t *");
+}
+
+static std::optional<PandaString> VerifyUTF16String(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_UTF16_STRING);
+    return v.VerifyTypePtr(arg.GetValueUTF16String(), "const uint16_t *");
+}
+
 static std::optional<PandaString> VerifyDelLocalRef(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_DEL_LOCAL_REF);
@@ -506,31 +540,49 @@ static std::optional<PandaString> VerifyMethodVArgs(Verifier &v, const ANIArg &a
 static std::optional<PandaString> VerifyVmStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_VM_STORAGE);
-    return v.VerifyVmStorage(arg.GetValueVmStorage());
+    return v.VerifyTypeStorage(arg.GetValueVmStorage(), "ani_vm *");
 }
 
 static std::optional<PandaString> VerifyEnvStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_ENV_STORAGE);
-    return v.VerifyEnvStorage(arg.GetValueEnvStorage());
+    return v.VerifyTypeStorage(arg.GetValueEnvStorage(), "ani_env *");
 }
 
 static std::optional<PandaString> VerifyBooleanStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_BOOLEAN_STORAGE);
-    return v.VerifyBooleanStorage(arg.GetValueBooleanStorage());
+    return v.VerifyTypeStorage(arg.GetValueBooleanStorage(), "ani_boolean");
+}
+
+static std::optional<PandaString> VerifyStringStorage(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_STRING_STORAGE);
+    return v.VerifyTypeStorage(arg.GetValueStringStorage(), "ani_string");
+}
+
+static std::optional<PandaString> VerifySizeStorage(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_SIZE_STORAGE);
+    return v.VerifyTypeStorage(arg.GetValueSizeStorage(), "ani_size");
+}
+
+static std::optional<PandaString> VerifySize([[maybe_unused]] Verifier &v, [[maybe_unused]] const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_SIZE);
+    return {};
 }
 
 static std::optional<PandaString> VerifyRefStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_REF_STORAGE);
-    return v.VerifyRefStorage(arg.GetValueRefStorage());
+    return v.VerifyTypeStorage(arg.GetValueRefStorage(), "ani_ref");
 }
 
 static std::optional<PandaString> VerifyObjectStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_OBJECT_STORAGE);
-    return v.VerifyObjectStorage(arg.GetValueObjectStorage());
+    return v.VerifyTypeStorage(arg.GetValueObjectStorage(), "ani_object");
 }
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
