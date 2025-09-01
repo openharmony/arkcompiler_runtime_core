@@ -902,7 +902,7 @@ export final class CharType extends Type {
     }
 
     public override equals(other: Type): boolean {
-        return other instanceof CharType && this.isValue != (other as CharType).isReference()
+        return other instanceof CharType
     }
 
     internal override convertObject(obj: NullishType): NullishType {
@@ -986,7 +986,7 @@ export final class BooleanType extends Type {
     }
 
     public override equals(other: Type): boolean {
-        return other instanceof BooleanType && this.isValue != (other as BooleanType).isReference()
+        return other instanceof BooleanType
     }
 
     internal override convertObject(obj: NullishType): NullishType {
@@ -1070,7 +1070,7 @@ export final class ByteType extends Type {
     }
 
     public override equals(other: Type): boolean {
-        return other instanceof ByteType && this.isValue != (other as ByteType).isReference()
+        return other instanceof ByteType
     }
 
     internal override convertObject(obj: NullishType): NullishType {
@@ -1165,7 +1165,7 @@ export final class ShortType extends Type {
      * this type and other type both are reference or value
      */
     public override equals(other: Type): boolean {
-        return other instanceof ShortType && this.isValue != (other as ShortType).isReference()
+        return other instanceof ShortType
     }
 
     internal override convertObject(obj: NullishType): NullishType {
@@ -1260,7 +1260,7 @@ export final class IntType extends Type {
      * this type and other type both are reference or value
      */
     public override equals(other: Type): boolean {
-        return other instanceof IntType && this.isValue != (other as IntType).isReference()
+        return other instanceof IntType
     }
 
     internal override convertObject(obj: NullishType): NullishType {
@@ -1355,7 +1355,7 @@ export final class LongType extends Type {
      * this type and other type both are reference or value
      */
     public override equals(other: Type): boolean {
-        return other instanceof LongType && this.isValue != (other as LongType).isReference()
+        return other instanceof LongType
     }
 
     internal override convertObject(obj: NullishType): NullishType {
@@ -1450,7 +1450,7 @@ export final class FloatType extends Type {
      * this type and other type both are reference or value
      */
     public override equals(other: Type): boolean {
-        return other instanceof FloatType && this.isValue != (other as FloatType).isReference()
+        return other instanceof FloatType
     }
 
     internal override convertObject(obj: NullishType): NullishType {
@@ -1545,7 +1545,7 @@ export final class DoubleType extends Type {
      * this type and other type both are reference or value
      */
     public override equals(other: Type): boolean {
-        return other instanceof DoubleType && this.isValue != (other as DoubleType).isReference()
+        return other instanceof DoubleType
     }
 
     internal override convertObject(obj: NullishType): NullishType {
