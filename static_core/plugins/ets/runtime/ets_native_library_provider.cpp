@@ -175,8 +175,8 @@ bool NativeLibraryProvider::CheckLibraryPermission([[maybe_unused]] EtsEnv *env,
     auto &instance = EtsNamespaceManagerImpl::GetInstance();
     const auto cb = instance.GetExtensionApiCheckCallback();
     if (cb == nullptr) {
-        LOG(INFO, RUNTIME) << "ExtensionApiCheckCallback is not registered";
-        return false;
+        LOG(DEBUG, RUNTIME) << "ExtensionApiCheckCallback is not registered";
+        return true;
     }
     if (!cb(className, fileName.c_str())) {
         LOG(ERROR, RUNTIME) << "CheckLibraryPermission failed: class name: " << className
