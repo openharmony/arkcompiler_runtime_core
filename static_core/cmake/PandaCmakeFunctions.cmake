@@ -18,9 +18,9 @@
 function(panda_add_executable target)
     # When using rapidcheck we should use linker scripts with
     # definitions for exception handling sections
-    cmake_parse_arguments(ARG "RAPIDCHECK_ON" "OUTPUT_DIRECTORY" "" ${ARGN})
+    cmake_parse_arguments(ARG "RAPIDCHECK_ON;FORCE_REBUILD" "OUTPUT_DIRECTORY" "" ${ARGN})
 
-    if(PANDA_USE_PREBUILT_TARGETS)
+    if(PANDA_USE_PREBUILT_TARGETS AND NOT ARG_FORCE_REBUILD)
         if(NOT DEFINED ARG_OUTPUT_DIRECTORY)
             set(ARG_OUTPUT_DIRECTORY "${PANDA_BINARY_ROOT}/bin/${target}")
         endif()
@@ -77,10 +77,12 @@ function(panda_set_lib_32bit_property target)
 endfunction()
 
 function(panda_add_library target lib_type)
-    if(NOT PANDA_USE_PREBUILT_TARGETS OR
+    cmake_parse_arguments(ARG "FORCE_REBUILD" "" "" ${ARGN})
+    if(ARG_FORCE_REBUILD OR
+       NOT PANDA_USE_PREBUILT_TARGETS OR
        NOT (lib_type STREQUAL SHARED) OR
-       NOT ARGN)
-        add_library(${ARGV})
+       NOT ARG_UNPARSED_ARGUMENTS)
+        add_library(${target} ${lib_type} ${ARG_UNPARSED_ARGUMENTS})
         return()
     endif()
 
