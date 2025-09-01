@@ -286,8 +286,7 @@ export final class ClassValue extends reflect.Value {
         return this.data
     }
     
-    // NOTE(ekaterinazaytseva): unable to replace internal - used as public
-    internal constructor(typ: ClassType, data: Object) {
+    public constructor(typ: ClassType, data: Object) {
         this.typ = typ
         this.data = data
     }
@@ -587,7 +586,7 @@ export final class ArrayValue extends reflect.Value {
         return this.data
     }
 
-    internal constructor(typ: ArrayType, data: Object) {
+    public constructor(typ: ArrayType, data: Object) {
         this.typ = typ
         this.data = data
     }
@@ -725,7 +724,7 @@ export final class LambdaValue extends reflect.Value {
         return this.data
     }
 
-    internal constructor(typ: LambdaType, data: Object) {
+    public constructor(typ: LambdaType, data: Object) {
         this.typ = typ
         this.data = data
     }
@@ -767,7 +766,7 @@ export final class BooleanValue extends reflect.Value {
         return this.data
     }
 
-    internal constructor(typ: BooleanType, data: boolean) {
+    public constructor(typ: BooleanType, data: boolean) {
         this.typ = typ
         this.data = data
     }
@@ -804,7 +803,7 @@ export final class ByteValue extends reflect.Value {
         return this.data
     }
 
-    internal constructor(typ: ByteType, data: byte) {
+    public constructor(typ: ByteType, data: byte) {
         this.typ = typ
         this.data = data
     }
@@ -841,7 +840,7 @@ export final class ShortValue extends reflect.Value {
         return this.data
     }
 
-    internal constructor(typ: ShortType, data: short) {
+    public constructor(typ: ShortType, data: short) {
         this.typ = typ
         this.data = data
     }
@@ -878,7 +877,7 @@ export final class CharValue extends reflect.Value {
         return this.data
     }
 
-    internal constructor(typ: CharType, data: char) {
+    public constructor(typ: CharType, data: char) {
         this.typ = typ
         this.data = data
     }
@@ -915,7 +914,7 @@ export final class IntValue extends reflect.Value {
         return this.data
     }
 
-    internal constructor(typ: IntType, data: int) {
+    public constructor(typ: IntType, data: int) {
         this.typ = typ
         this.data = data
     }
@@ -952,7 +951,7 @@ export final class FloatValue extends reflect.Value {
         return this.data
     }
 
-    internal constructor(typ: FloatType, data: float) {
+    public constructor(typ: FloatType, data: float) {
         this.typ = typ
         this.data = data
     }
@@ -989,7 +988,7 @@ export final class DoubleValue extends reflect.Value {
         return this.data
     }
 
-    internal constructor(typ: DoubleType, data: double) {
+    public constructor(typ: DoubleType, data: double) {
         this.typ = typ
         this.data = data
     }
@@ -1026,7 +1025,7 @@ export final class LongValue extends reflect.Value {
         return this.data
     }
 
-    internal constructor(typ: LongType, data: long) {
+    public constructor(typ: LongType, data: long) {
         this.typ = typ
         this.data = data
     }
@@ -1059,7 +1058,7 @@ export final class StringValue extends reflect.Value {
         return this.data
     }
 
-    internal constructor(typ: StringType, data: String) {
+    public constructor(typ: StringType, data: String) {
         this.typ = typ
         this.data = data
     }
@@ -1091,7 +1090,7 @@ export final class NullValue extends reflect.Value {
         return null
     }
 
-    internal constructor() {}
+    public constructor() {}
 
     public override toPrint(depth: int): string {
         return NullType.REF.toString()
@@ -1120,7 +1119,7 @@ export final class UndefinedValue extends reflect.Value {
         return undefined
     }
 
-    internal constructor() {}
+    public constructor() {}
 
     public override toPrint(depth: int): string {
         return UndefinedType.REF.toString()
@@ -1149,7 +1148,7 @@ export final class VoidValue extends reflect.Value {
         return Void.void_instance
     }
 
-    internal constructor() {}
+    public constructor() {}
 
     public override toPrint(depth: int): string {
         return VoidType.REF.toString()

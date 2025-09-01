@@ -91,8 +91,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
 
     public override native $_get(idx: int): T;
 
-    //NOTE(ekaterinazaytseva): unable to replace internal - using from friend class ArrayValuesIterator_T provide accsess problems
-    internal final native $_get_unsafe(idx: int): T
+    private final native $_get_unsafe(idx: int): T
 
     public native $_set(idx: int, val: T): void;
 
@@ -115,8 +114,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         this.actualLength = buf.length
     }
 
-    //NOTE(ekaterinazaytseva): unable to replace internal - using default c-tor from non-inherited classes provide accsess problems
-    internal constructor() {
+    public constructor() {
         this.buffer = new Any[4]
         this.actualLength = 0
     }
@@ -1844,7 +1842,7 @@ class ArrayValuesIterator_T<T> implements IterableIterator<T> {
             this.isDone = true
             return new IteratorResult<T>()
         }
-        return new IteratorResult<T>(this.parent.$_get_unsafe(this.idx++))
+        return new IteratorResult<T>(this.parent[this.idx++])
     }
 
     override $_iterator(): IterableIterator<T> {
@@ -1871,7 +1869,7 @@ class ArrayEntriesIterator_T<T> implements IterableIterator<[number, T]> {
             return new IteratorResult<[number, T]>()
         }
         const i = this.idx++;
-        const vl: [number, T] = [i.toDouble(), this.parent.$_get_unsafe(i)]
+        const vl: [number, T] = [i.toDouble(), this.parent[i]]
         return new IteratorResult<[number, T]>(vl);
     }
 

@@ -62,6 +62,7 @@ class BuiltinArrayKeysIterator implements IterableIterator<number> {
 % ctx.access_private = 'function'
 % ctx.override = ''
 % ctx.get_unsafe = Proc.new { |t, i| "#{t}[#{i}]" }
+% ctx.get = Proc.new { |t, i| "#{t}[#{i}]" }
 % ctx.set_unsafe = Proc.new { |t, i, v| "#{t}[#{i}] = #{v}" }
 % ctx.arr_method_call = Proc.new { |t, f, *args| "#{f}(#{args.prepend(t).join(', ')})" }
 % primitive_types = ['boolean', 'byte', 'short', 'int', 'long', 'float', 'double', 'char']
