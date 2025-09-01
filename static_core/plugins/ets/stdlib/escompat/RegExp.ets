@@ -181,8 +181,8 @@ export class RegExpResultArray extends Array<String | undefined> {
         if (hasIndices) {
             this.indices_ = new Array<Array<int>>(n)
             for (let i = 0; i < data.length; i += 2) {
-                const index: int = Number.parseInt(data[i])
-                const endIndex: int = Number.parseInt(data[i + 1])
+                const index: int = Number.parseInt(data[i]).toInt()
+                const endIndex: int = Number.parseInt(data[i + 1]).toInt()
                 const pos: int = (i / 2);
                 if (index == -1 || endIndex == -1) {
                     this.indices_[pos] = [0, 0]
@@ -751,7 +751,7 @@ export class RegExp extends Object {
             }
             let matchStr = result.$_get(0)
             if (matchStr == "") {
-                this.lastIndex = RegExp.advanceStringIndex(str, this.lastIndex, this.unicode)
+                this.lastIndex = RegExp.advanceStringIndex(str, this.lastIndex.toInt(), this.unicode)
             }
         }
         let lengthS = str.getLength()
@@ -797,7 +797,7 @@ export class RegExp extends Object {
             }
             let matchStr = result.$_get(0)
             if (matchStr == "") {
-                this.lastIndex = RegExp.advanceStringIndex(str, this.lastIndex, this.unicode)
+                this.lastIndex = RegExp.advanceStringIndex(str, this.lastIndex.toInt(), this.unicode)
             }
         }
         let lengthS = str.getLength()
