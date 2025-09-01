@@ -181,7 +181,7 @@ TEST_F(ClassSetStaticFieldByNameRefTest, check_initialization)
     ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_ref_test.BoxStaticFinal", &cls), ANI_OK);
 
     ani_string stringValue {};
-    ASSERT_EQ(env_->String_NewUTF8("test", 6U, &stringValue), ANI_OK);
+    ASSERT_EQ(env_->String_NewUTF8("test", 4U, &stringValue), ANI_OK);
 
     ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.BoxStaticFinal"));
 

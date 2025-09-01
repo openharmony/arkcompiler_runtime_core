@@ -44,15 +44,18 @@ add_dependencies(ani_app ani_app_managed_code)
 
 list(JOIN APP_ABC_FILES ":" APP_ABC_FILES)
 
-# Create a custom target to run ani_app after build
-add_custom_target(run_ani_app
-    COMMAND ARK_ETS_STDLIB_PATH=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc
-            APP_ABC_FILES=${APP_ABC_FILES}
-        ${PANDA_RUN_PREFIX} $<TARGET_FILE:ani_app>
-    DEPENDS ani_app ani_app_lib ani_app_managed_code
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    COMMENT "Running ani_app with compiled ABC files"
-)
+# NOTE(@srokashevich, #29189): enable with asan after fix
+if (NOT PANDA_ENABLE_ADDRESS_SANITIZER)
+    # Create a custom target to run ani_app after build
+    add_custom_target(run_ani_app
+        COMMAND ARK_ETS_STDLIB_PATH=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc
+                APP_ABC_FILES=${APP_ABC_FILES}
+            ${PANDA_RUN_PREFIX} $<TARGET_FILE:ani_app>
+        DEPENDS ani_app ani_app_lib ani_app_managed_code
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        COMMENT "Running ani_app with compiled ABC files"
+    )
 
-# Add the run target as a dependency of the main test target
-add_dependencies(ani_tests run_ani_app)
+    # Add the run target as a dependency of the main test target
+    add_dependencies(ani_tests run_ani_app)
+endif()

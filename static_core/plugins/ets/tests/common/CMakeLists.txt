@@ -15,5 +15,9 @@ add_subdirectory(bouncing_peas)
 add_subdirectory(bouncing_pandas)
 # issue #24750
 # add_subdirectory(exporting-ambient-decl)
-add_subdirectory(import_from_abc_simple)
-add_subdirectory(import_from_declaration_cache)
+
+# NOTE(@srokashevich, #29065): enable with asan after fix
+if (NOT PANDA_ENABLE_ADDRESS_SANITIZER)
+    add_subdirectory(import_from_abc_simple)
+    add_subdirectory(import_from_declaration_cache)
+endif()

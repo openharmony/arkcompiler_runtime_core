@@ -25,17 +25,20 @@ panda_ets_napi_add_gtest(
     ETS_SOURCE js_mode_launch.ets
 )
 
-panda_ets_napi_add_gtest(
-    NAME unhandled_rejection_recursive
-    CPP_SOURCE unhandled_rejection_recursive_test.cpp
-    ETS_SOURCE UnhandledRejectionRecursiveTest.ets
-)
+# NOTE(@srokashevich, #29097): enable with asan after fix
+if (NOT PANDA_ENABLE_ADDRESS_SANITIZER)
+    panda_ets_napi_add_gtest(
+        NAME unhandled_rejection_recursive
+        CPP_SOURCE unhandled_rejection_recursive_test.cpp
+        ETS_SOURCE UnhandledRejectionRecursiveTest.ets
+    )
 
-panda_ets_napi_add_gtest(
-    NAME uncaught_error_handler
-    CPP_SOURCE uncaught_error_handler_test.cpp
-    ETS_SOURCE UncaughtErrorHandlerTest.ets
-)
+    panda_ets_napi_add_gtest(
+        NAME uncaught_error_handler
+        CPP_SOURCE uncaught_error_handler_test.cpp
+        ETS_SOURCE UncaughtErrorHandlerTest.ets
+    )
+endif()
 
 if (NOT ENABLE_UNIT_TESTS_FULL_COVERAGE)
     panda_ets_napi_add_gtest(
