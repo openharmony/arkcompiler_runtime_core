@@ -94,6 +94,7 @@ function(common_add_gtest)
         panda_target_include_directories(${ARG_NAME} SYSTEM PUBLIC
             ${PANDA_THIRD_PARTY_SOURCES_DIR}/googletest/googlemock/include
         )
+        panda_target_link_libraries(${ARG_NAME} gmock)
     endif()
 
     if (ARG_USE_GTESTS)
