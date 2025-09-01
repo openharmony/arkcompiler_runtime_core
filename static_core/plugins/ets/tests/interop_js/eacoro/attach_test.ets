@@ -100,7 +100,7 @@ class TestClass {
             modified = true;
         });
 
-        await p1;
+        waitForCompletion(() => p1);
 
         try {
             let value = JSRuntime.getPropertyInt(JSRuntime.getGlobal(), 'value');

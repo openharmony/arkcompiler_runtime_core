@@ -72,7 +72,7 @@ function RunTasksWithJsAsyncCallTest(): void {
             modified = true;
         });
 
-        await promise1;
+        waitForCompletion(() => promise1);
 
         try {
             let value = JSRuntime.getPropertyInt(JSRuntime.getGlobal(), 'value');

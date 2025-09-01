@@ -38,7 +38,7 @@ async function awaitee(): Promise<boolean> {
 
 function testLaunch(): void {
     let wId = CoroutineExtras.getWorkerId();
-    await awaitee();
+    waitForCompletion(awaitee);
     // migrate to the worker with the least load after await
     if (wId != CoroutineExtras.getWorkerId()) {
         isLaunchMigrated.set(true);

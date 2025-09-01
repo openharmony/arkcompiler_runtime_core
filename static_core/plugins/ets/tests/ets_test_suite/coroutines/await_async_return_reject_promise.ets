@@ -27,7 +27,7 @@ async function returnRejectingPromise(): Promise<void> {
     })
 }
 
-function testRejectedPromise(): void {
+async function testRejectedPromise(): Promise<void> {
     try {
         await returnRejectedPromise();
         arktest.assertTrue(false, 'Awaited a reject Promise should throw the reason.');
@@ -37,7 +37,7 @@ function testRejectedPromise(): void {
     }
 }
 
-function testRejectingPromise(): void {
+async function testRejectingPromise(): Promise<void> {
     try {
         await returnRejectingPromise();
         arktest.assertTrue(false, 'Awaited a reject Promise should throw the reason.');
@@ -49,8 +49,8 @@ function testRejectingPromise(): void {
 
 function main(): int {
     let testSuite = new arktest.ArkTestsuite('coroutines.await_async_return_reject_promise');
-    testSuite.addTest('testRejectedPromise', testRejectedPromise);
-    testSuite.addTest('testRejectingPromise', testRejectingPromise);
+    testSuite.addAsyncTest('testRejectedPromise', testRejectedPromise);
+    testSuite.addAsyncTest('testRejectingPromise', testRejectingPromise);
     let res = testSuite.run();
     return res;    
 }

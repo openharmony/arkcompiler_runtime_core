@@ -137,7 +137,7 @@ async function createCoroA(idx: int): Promise<FinalizationRegistry<String>> {
 }
 
 
-function ctorTests() {
+async function ctorTests() {
 
 	for (let i = 0; i < promise_count; i++) {
 		regs_promise.push(createCoroA(i));
@@ -158,7 +158,7 @@ function main(): void {
 	getSizeTests(registry!);
 	unregisterTests(registry!);
 
-	ctorTests();
+	waitForCompletion(ctorTests);
  arktest.assertEQ(cntr, promise_count, "Counter of ctors is not valid");
 
 }

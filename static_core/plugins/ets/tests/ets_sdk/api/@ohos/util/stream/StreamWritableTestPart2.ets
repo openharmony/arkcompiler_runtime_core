@@ -21,10 +21,10 @@ const mustChecks: Array<Function> = new Array<Function>();
 function main(): int {
     const suite = new arktest.ArkTestsuite("Stream API tests");
 
-    suite.addTest("Multiple callbacks", testWritableMultipleCallbacks);
-    suite.addTest("Callback repeatedly", testWritableCallbackRepeatedly);
-    suite.addTest("Callback duplicate", testWritableCallbackDuplicate);
-    suite.addTest("Write data error", testWritableWriteError);
+    suite.addAsyncTest("Multiple callbacks", testWritableMultipleCallbacks);
+    suite.addAsyncTest("Callback repeatedly", testWritableCallbackRepeatedly);
+    suite.addAsyncTest("Callback duplicate", testWritableCallbackDuplicate);
+    suite.addAsyncTest("Write data error", testWritableWriteError);
     suite.addTest("Unknown encoding error", testWritableUnknownEncoding);
 
     return suite.run();
@@ -89,7 +89,7 @@ class MyWritable1 extends stream.Writable {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamWritableCbTwice001
-function testWritableMultipleCallbacks() {
+async function testWritableMultipleCallbacks() {
     mustChecks.push(() => {
         if (callCount_MyWritable1 !== 1) {
             throw new Error(`Function was expected to be called 1 times, `
@@ -119,7 +119,7 @@ class MyWritable2 extends stream.Writable {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamWritableCbTwice002
-function testWritableCallbackRepeatedly() {
+async function testWritableCallbackRepeatedly() {
     let writableStream = new MyWritable2();
     writableStream.write('test');
     writableStream.on('error', mustCall((error: Error): void => {
@@ -144,7 +144,7 @@ class MyWritable3 extends stream.Writable {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamWritableCbTwice003
-function testWritableCallbackDuplicate() {
+async function testWritableCallbackDuplicate() {
     let writableStream = new MyWritable3();
     writableStream.write('test');
     writableStream.on('error', mustCall((error: Error): void => {
@@ -163,7 +163,7 @@ class MyWritable4 extends stream.Writable {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamWritableWriteError001
-function testWritableWriteError() {
+async function testWritableWriteError() {
     let writableStream = new MyWritable4();
     let ticked = false;
     writableStream.end();

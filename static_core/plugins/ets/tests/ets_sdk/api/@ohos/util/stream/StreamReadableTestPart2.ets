@@ -22,13 +22,13 @@ function main(): int {
     const suite = new arktest.ArkTestsuite("Stream API tests");
 
     suite.addTest("Resume behavior of readable stream", testReadableStreamResumeBehavior);
-    suite.addTest("Set encoding and readable behavior", testStreamReadableSetEncodingAndReadableBehavior);
+    suite.addAsyncTest("Set encoding and readable behavior", testStreamReadableSetEncodingAndReadableBehavior);
     suite.addTest("Data event handling in readable stream", testReadableStreamDataEventBehavior);
     suite.addTest("Set encoding parameter error in readable stream", testReadableStreamSetEncodingParameterError);
     suite.addTest("Emit readable event after data push", testReadableStreamEmitReadableBehavior);
     suite.addTest("Emit readable event for short stream", testReadableStreamEmitReadableShortStreamBehavior);
     suite.addTest("Readable ended state verification", testReadableStreamReadableEndedBehavior);
-    suite.addTest("Edge case for readable ended state", testReadableStreamReadableEndedEdgeCase);
+    suite.addAsyncTest("Edge case for readable ended state", testReadableStreamReadableEndedEdgeCase);
     suite.addTest("High watermark async behavior in readable stream", testReadableStreamHighWaterMarkAsyncBehavior);
 
     return suite.run();
@@ -114,7 +114,7 @@ class MyRead2 extends stream.Readable {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamReadableData001
-function testStreamReadableSetEncodingAndReadableBehavior() {
+async function testStreamReadableSetEncodingAndReadableBehavior() {
     let readable = new MyRead2();
     readable.setEncoding('utf8');
     readable.on('readable', (): void => {
@@ -220,7 +220,7 @@ function testReadableStreamReadableEndedBehavior() {
 }
 
 // Test cases ported from ArkTS 1.0:testStreamReadableEnded003
-function testReadableStreamReadableEndedEdgeCase() {
+async function testReadableStreamReadableEndedEdgeCase() {
     let readable = new stream.Readable();
     readable.on('readable', (): void => {
         readable.read();

@@ -23,10 +23,10 @@ function main(): int {
 
     suite.addTest("Create a writable stream", testWritableCreation);
     suite.addTest("The state when closing the flow", testWritableCloseState);
-    suite.addTest("The state of the writable attribute of a writable", testWritableAttributeState);
-    suite.addTest("Write data to stream", testWritableWriteData);
-    suite.addTest("DoWrite not called", testWritableDoWriteNotCalled);
-    suite.addTest("Write data failed", testWritableWriteDataFailed);
+    suite.addAsyncTest("The state of the writable attribute of a writable", testWritableAttributeState);
+    suite.addAsyncTest("Write data to stream", testWritableWriteData);
+    suite.addAsyncTest("DoWrite not called", testWritableDoWriteNotCalled);
+    suite.addAsyncTest("Write data failed", testWritableWriteDataFailed);
     suite.addTest("Error on write", testWritableErrorOnWrite);
 
     return suite.run();
@@ -122,7 +122,7 @@ class MyWritable1 extends stream.Writable {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamWritable003
-function testWritableAttributeState() {
+async function testWritableAttributeState() {
     let writableStream = new MyWritable1();
     arktest.assertEQ(writableStream.writable, true);
     writableStream.on('error', mustCall());
@@ -142,7 +142,7 @@ class MyWritable2 extends stream.Writable {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamWritable004
-function testWritableWriteData() {
+async function testWritableWriteData() {
     let param: Object[] = [];
     let writableStream = new MyWritable2();
     writableStream.write('write content', 'utf8', (...param: Object[]): void => {
@@ -165,7 +165,7 @@ class MyWritable3 extends stream.Writable {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamWritable005
-function testWritableDoWriteNotCalled() {
+async function testWritableDoWriteNotCalled() {
     mustChecks.push(() => {
         if (callCount_MyWritable3 !== 0) {
             throw new Error(`Function was expected to be called 0 times, `
@@ -190,7 +190,7 @@ class MyWritable4 extends stream.Writable {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamWritableCbError001
-function testWritableWriteDataFailed() {
+async function testWritableWriteDataFailed() {
     let callbackCalled = false;
 
     let writable = new MyWritable4();

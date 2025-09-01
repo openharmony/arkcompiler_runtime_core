@@ -20,13 +20,13 @@ const mustChecks: Array<Function> = new Array<Function>();
 function main(): int {
     const suite = new arktest.ArkTestsuite("Stream API tests");
 
-    suite.addTest("Set default encoding validation (gb2312).", testWritableStreamSetDefaultEncodingGb2312);
+    suite.addAsyncTest("Set default encoding validation (gb2312).", testWritableStreamSetDefaultEncodingGb2312);
     suite.addTest("Readable stream set encoding validation (gb18030).", testReadableStreamSetEncodingGb18030);
     suite.addTest("Readable stream set encoding validation (gbk).", testReadableStreamSetEncodingGbk);
     suite.addTest("Readable stream set encoding validation (gb2312).", testReadableStreamSetEncodingGb2312);
-    suite.addTest("Duplex stream write method validation (gb18030).", testDuplexStreamWriteEncodingGb18030);
-    suite.addTest("Duplex stream write method validation (gbk).", testDuplexStreamWriteEncodingGbk);
-    suite.addTest("Duplex stream write method validation (gb2312).", testDuplexStreamWriteEncodingGb2312);
+    suite.addAsyncTest("Duplex stream write method validation (gb18030).", testDuplexStreamWriteEncodingGb18030);
+    suite.addAsyncTest("Duplex stream write method validation (gbk).", testDuplexStreamWriteEncodingGbk);
+    suite.addAsyncTest("Duplex stream write method validation (gb2312).", testDuplexStreamWriteEncodingGb2312);
 
     return suite.run();
 }
@@ -76,7 +76,7 @@ class MyWrite extends stream.Writable {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamEncoding009
-function testWritableStreamSetDefaultEncodingGb2312() {
+async function testWritableStreamSetDefaultEncodingGb2312() {
     mustChecks.push(() => {
         if (callCount_MyWrite !== 1) {
             throw new Error(`Function was expected to be called 1 times, but was called ${callCount_MyWrite} times.`);
@@ -124,7 +124,7 @@ class MyDuplex1 extends stream.Duplex {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamEncoding016
-function testDuplexStreamWriteEncodingGb18030() {
+async function testDuplexStreamWriteEncodingGb18030() {
     mustChecks.push(() => {
         if (callCount_MyDuplex1 !== 1) {
             throw new Error(`Function was expected to be called 1 times, but was called ${callCount_MyDuplex1} times.`);
@@ -150,7 +150,7 @@ class MyDuplex2 extends stream.Duplex {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamEncoding017
-function testDuplexStreamWriteEncodingGbk() {
+async function testDuplexStreamWriteEncodingGbk() {
     mustChecks.push(() => {
         if (callCount_MyDuplex2 !== 1) {
             throw new Error(`Function was expected to be called 1 times, but was called ${callCount_MyDuplex2} times.`);
@@ -176,7 +176,7 @@ class MyDuplex3 extends stream.Duplex {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamEncoding018
-function testDuplexStreamWriteEncodingGb2312() {
+async function testDuplexStreamWriteEncodingGb2312() {
     mustChecks.push(() => {
         if (callCount_MyDuplex3 !== 1) {
             throw new Error(`Function was expected to be called 1 times, but was called ${callCount_MyDuplex3} times.`);

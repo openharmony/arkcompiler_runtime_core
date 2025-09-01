@@ -25,7 +25,7 @@ async function async_f(a: int): Promise<String> {
     return 'Some dummy string:' + a
 }
 
-function testCoroStats(): void {
+async function testCoroStats(): Promise<void> {
     for (let i = 0; i < 10; ++i) {
         launch<String, (i: int) => String>(sync_f, 5);
     }
@@ -42,7 +42,7 @@ function testCoroStats(): void {
 
 function main(): int {
     let testSuite = new arktest.ArkTestsuite('coroutines.stats');
-    testSuite.addTest('testCoroStats', testCoroStats);
+    testSuite.addAsyncTest('testCoroStats', testCoroStats);
     let res = testSuite.run();
     return res;
 }

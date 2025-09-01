@@ -22,7 +22,7 @@ function main(): int {
     const suite = new arktest.ArkTestsuite("Stream API tests");
 
     suite.addTest("Pause and Resume in Readable Stream.", testReadablePauseAndResume)
-    suite.addTest("Readable property in Readable.", testReadablePropertyReadable)
+    suite.addAsyncTest("Readable property in Readable.", testReadablePropertyReadable)
     suite.addTest("Set encoding for Readable.", testReadableSetEncoding)
 
     return suite.run();
@@ -95,7 +95,7 @@ class MyRead2 extends stream.Readable {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamReadableReadable001
-function testReadablePropertyReadable() {
+async function testReadablePropertyReadable() {
     let readable = new MyRead2();
     let testMustNotCall = mustNotCall();
     arktest.assertEQ(readable.readable, true);

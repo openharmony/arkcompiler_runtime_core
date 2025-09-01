@@ -24,12 +24,12 @@ class MethodReturnDouble {
     }
 }
 
-function startTest() {
+async function startTest() {
     const example = new MethodReturnDouble();
     const result = await example.methodReturnDouble();
     arktest.assertEQ(result, 10.0);
 }
 
 function main(): void {
-    startTest();
+    waitForCompletion(startTest);
 }

@@ -87,9 +87,9 @@ async function testBoolean() {
 }
 
 function main(): void {
-    let a = await testDotChainAndCast();
-    let b = await testInstanceof();
-    let c = await testNullCoalesce();
-    let d = await testArithmetic();
-    let e = await testBoolean();
+    waitForCompletion(testDotChainAndCast);
+    waitForCompletion(testInstanceof);
+    waitForCompletion(testNullCoalesce);
+    waitForCompletion(testArithmetic);
+    waitForCompletion(testBoolean);
 }

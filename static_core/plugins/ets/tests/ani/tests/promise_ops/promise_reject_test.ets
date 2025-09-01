@@ -14,6 +14,10 @@
  */
 
 function checkReject(promise: Promise<String>, rejection: Error): boolean {
+    return waitForCompletion(() => checkRejectAsync(promise, rejection));
+}
+
+async function checkRejectAsync(promise: Promise<String>, rejection: Error): Promise<boolean> {
     try {
         await promise;
         return false;

@@ -23,14 +23,14 @@ async function bar() {
     return foo('A');
 }
 
-function testLaunch() {
+async function testLaunch() {
     let res: Promise<Promise<string>> = bar();
     arktest.assertEQ((await res), 'AA');
 }
 
 function main(): int {
     let testSuite = new arktest.ArkTestsuite('coroutines.launch_launch');
-    testSuite.addTest('testLaunch', testLaunch);
+    testSuite.addAsyncTest('testLaunch', testLaunch);
     let res = testSuite.run();
     return res;
 }

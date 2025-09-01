@@ -28,9 +28,9 @@ class MethodReturnVoid {
 
 async function startTest() {
     const example = new MethodReturnVoid();
-    const result = await example.methodReturnVoid();
+    await example.methodReturnVoid();
 }
 
 function main(): void {
-    startTest();
+    waitForCompletion(startTest);
 }

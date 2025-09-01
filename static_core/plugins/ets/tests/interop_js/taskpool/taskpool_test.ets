@@ -31,8 +31,8 @@ function RunTasksWithJsCallTest(): void {
 
     let p1 = taskpool.execute(callback);
     let p2 = taskpool.execute(callback);
-    let result1 = await p1;
-    let result2 = await p2;
+    let result1 = waitForCompletion(() => p1);
+    let result2 = waitForCompletion(() => p2);
     arktest.assertEQ(result1, 0);
     arktest.assertEQ(result2, 0);
 }
@@ -50,7 +50,7 @@ function RunTasksWithJsAsyncCallTest(): void {
             modified = true;
         });
 
-        await promise1;
+        waitForCompletion(() => promise1);
 
         try {
             let value = JSRuntime.getPropertyInt(JSRuntime.getGlobal(), 'value');
@@ -66,7 +66,7 @@ function RunTasksWithJsAsyncCallTest(): void {
     };
 
     let p = taskpool.execute(callback);
-    let result = await p;
+    let result = waitForCompletion(() => p);
     arktest.assertEQ(result, 0);
     arktest.assertEQ(CoroutineExtras.isTaskpoolSupportingInterop(), true);
     CoroutineExtras.stopTaskpool();
@@ -89,7 +89,7 @@ function testCPUTaskDuration(): void {
     arktest.assertTrue(task.cpuDuration == 0);
     arktest.assertTrue(task.totalDuration == 0);
 
-    await runner.execute(task); 
+    waitForCompletion(() => runner.execute(task)); 
 
     arktest.assertTrue(task.cpuDuration > 0);
     arktest.assertTrue(task.totalDuration > 0);

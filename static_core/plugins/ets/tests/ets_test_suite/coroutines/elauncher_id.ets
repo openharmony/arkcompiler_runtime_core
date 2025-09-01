@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-function testElauncherId(): void {
+async function testElauncherId(): Promise<void> {
     let resolveFn: (val: number) => void;
     let p = new Promise<number>((resolve: (val: number) => void) => {
         resolveFn = resolve;
@@ -27,7 +27,7 @@ function testElauncherId(): void {
 
 function main(): int {
     let testSuite = new arktest.ArkTestsuite('coroutines.elauncher_id');
-    testSuite.addTest('testElauncherId', testElauncherId);
+    testSuite.addAsyncTest('testElauncherId', testElauncherId);
     let res = testSuite.run();
     return res;
 }
