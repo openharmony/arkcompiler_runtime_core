@@ -21,7 +21,7 @@ cases:
               arktest.assertEQ(a[2], -9223372036854775808)
           }
       use: |-
-          // call context, tuple of primitives
+          // call context, tuple of value types
           foo([0b11, 42, -9223372036854775808])
 
     - decl: |-
@@ -32,7 +32,7 @@ cases:
               arktest.assertEQ(a[3], 1.7976931348623157e+308)
           }
       use: |-
-          // call context, tuple of primitives
+          // call context, tuple of value types
           foo([111e11f, 33, Number.NaN, 1.7976931348623157e+308, ])
 
     - decl: |-
@@ -43,7 +43,7 @@ cases:
               arktest.assertEQ(a[3], -9223372036854775808)
           }
       use: |-
-          // call context, tuple of boxed
+          // call context, tuple of value types
           foo([1, 2, 3, -9223372036854775808,])
 
     - decl: |-
@@ -53,7 +53,7 @@ cases:
               arktest.assertEQ(a[2], -2147483647)
           }
       use: |-
-          // call context, tuple of boxed
+          // call context, tuple of value types
           foo([Number.NaN, 0.0f, -2147483647])
 
     - decl: |-
@@ -98,7 +98,7 @@ cases:
               arktest.assertEQ(a[1][1], 2)
           }
       use: |-
-          // call context, tuple of tuple of primitives
+          // call context, tuple of tuple of value types
           foo([[0x03, 222e22], [333e33, 0x02]])
 
     - decl: |-
@@ -110,7 +110,7 @@ cases:
               arktest.assertEQ(a[2][0], 32767)
           }
       use: |-
-          // call context, tuple of tuple of boxed
+          // call context, tuple of tuple of value types
           foo([[-16777215, 16777215], [-9223372036854775808, 9223372036854775807], [32767]])
 
     - decl: |-

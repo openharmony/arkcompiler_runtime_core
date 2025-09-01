@@ -17,7 +17,7 @@ cases:
     - decl: |-
           let a: [byte, int, long]|undefined
       use: |-
-          // assignment context, tuple of primitives
+          // assignment context, tuple of value types
           a = [0b11, 42, -9223372036854775808]
           arktest.assertEQ(a![0], 3)
           arktest.assertEQ(a![1], 42)
@@ -26,7 +26,7 @@ cases:
     - decl: |-
           let a: [float, short, double, number]|undefined
       use: |-
-          // assignment context, tuple of primitives
+          // assignment context, tuple of value types
           a = [111e11f, 33, Number.NaN, 1.7976931348623157e+308, ]
           arktest.assertEQ(a![0], 111e11f)
           arktest.assertEQ(a![1], 33)
@@ -36,7 +36,7 @@ cases:
     - decl: |-
           let a: [Byte, Short, Int, Long]|undefined
       use: |-
-          // assignment context, tuple of boxed
+          // assignment context, tuple of value types
           a = [1, 2, 3, -9223372036854775808,]
           arktest.assertEQ(a![0], 1)
           arktest.assertEQ(a![1], 2)
@@ -46,7 +46,7 @@ cases:
     - decl: |-
           let a: [Number, Float, Int]|undefined
       use: |-
-          // assignment context, tuple of boxed
+          // assignment context, tuple of value types
           a = [Number.NaN, 0.0f, -2147483647]
           arktest.assertTrue(Number.isNaN(a![0]))
           arktest.assertEQ(a![1], 0.0f)
@@ -86,7 +86,7 @@ cases:
     - decl: |-
           let a: [[byte, number], [number, byte]]|null
       use: |-
-          // assignment context, tuple of tuple of primitives
+          // assignment context, tuple of tuple of value types
           a = [[0x03, 222e22], [333e33, 0x02]]
           arktest.assertEQ(a![0][0], 3)
           arktest.assertEQ(a![0][1], 222e22)
@@ -96,7 +96,7 @@ cases:
     - decl: |-
           let a: [[Float, Float], [Long, Long], [Short]]|undefined
       use: |-
-          // assignment context, tuple of tuple of boxed
+          // assignment context, tuple of tuple of value types
           a = [[-16777215, 16777215], [-9223372036854775808, 9223372036854775807], [32767]]
           arktest.assertEQ(a![0][0], -16777215.0f)
           arktest.assertEQ(a![0][1], 16777215.0f)
