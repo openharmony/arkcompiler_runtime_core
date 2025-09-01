@@ -43,8 +43,8 @@ let smallFromUint8ClampedArray: Uint8ClampedArray = new Uint8ClampedArray(shortS
 let bigFromUint8ClampedArray: Uint8ClampedArray = new Uint8ClampedArray(longSize);
 
 class ArrayLikeImplTest<T> implements ArrayLike<T> {
-    private buffer: NullishType[]
-    internal actualLength: int
+    private buffer: Any[]
+    protected actualLength: int
 
     override $_get(index: int): T {
         if ((index  < 0) || (index >= this.actualLength)) {

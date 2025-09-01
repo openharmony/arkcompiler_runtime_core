@@ -240,7 +240,7 @@ export namespace containers {
                 if (i >= bucket.length || i < 0) {
                     return null;
                 }
-                return bucket.$_get_unsafe(i);
+                return bucket[i];
             } finally {
                 ConcurrencyHelpers.mutexUnlock(mutex);
             }

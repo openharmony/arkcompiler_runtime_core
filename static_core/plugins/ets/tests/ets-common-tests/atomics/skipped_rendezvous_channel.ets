@@ -28,7 +28,7 @@ function testMain() {
 }
 
 function producer(): Int {
-    let c = new Console() // workaround, issue: #12996
+    let c = Console.getInstance() // workaround, issue: #12996
     
     for (let i = 1; i < 10; i++) {
         c.println('sending ' + i)
@@ -39,7 +39,7 @@ function producer(): Int {
 }
 
 function consumer(): Int {
-    let c = new Console() // workaround, issue: #12996 
+    let c = Console.getInstance() // workaround, issue: #12996 
 
     for (let i = 1; i < 10; i++) {
         c.println('receiving')

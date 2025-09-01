@@ -42,8 +42,7 @@ type CollectTypesCB = (tc: TypeOrCreator) => void
  * Base for all type creators, supports creation of {@link Type}
  */
 export abstract class TypeCreator {
-    // NOTE(ekaterinazaytseva): unable to replace internal - used as public in FreezableCreator
-    internal typ?: Type // not undefined if already created
+    protected typ?: Type // not undefined if already created
     protected ctxItemPtr: long = 0 // resides in ctx, no need to free
 
     /**
@@ -69,26 +68,22 @@ export abstract class TypeCreator {
      * Traverses all types on which this `TypeCreator` depends
      * @param collector callback to be called with every type
      */
-    // NOTE(ekaterinazaytseva): unable to replace internal - used as public
-    internal abstract collectTypes(collector: CollectTypesCB): void
+    public abstract collectTypes(collector: CollectTypesCB): void
 
     /**
      * Must declare up to the point where future type descriptor is determinated
      * @param ctx current context
      */
-    // NOTE(ekaterinazaytseva): unable to replace internal - used as public
-    internal abstract declare(ctx: TypeCreatorCtx): void
+    public abstract declare(ctx: TypeCreatorCtx): void
 
     /**
      * Defines rest of the body, called after {@link declare}
      * @param ctx current context
      */
-    // NOTE(ekaterinazaytseva): unable to replace internal - used as public
-    internal abstract define(ctx: TypeCreatorCtx): void
+    public abstract define(ctx: TypeCreatorCtx): void
 
     /** Makes class sealed in stdlib */
-    // NOTE(ekaterinazaytseva): unable to replace internal - used as public
-    internal constructor() {}
+    public constructor() {}
 
     /**
      * Functions that verifies that this can be modified
@@ -101,8 +96,7 @@ export abstract class TypeCreator {
      * @returns type descriptor that created type will habe
      * @note will be called only after {@link define}
      */
-    // NOTE(ekaterinazaytseva): unable to replace internal - used as public
-    internal getTypeDescriptor(): RuntimeTypeDescriptor {
+    public getTypeDescriptor(): RuntimeTypeDescriptor {
         if (this.typ != undefined) {
             return this.typ!.getTypeDesc()
         }
@@ -437,7 +431,7 @@ export final class ClassTypeCreator extends TypeCreator {
         return this;
     }
 
-    internal override collectTypes(collector: CollectTypesCB): void {
+    public override collectTypes(collector: CollectTypesCB): void {
         collector(this.base)
         for (let i = 0; i < this.ifaces.length; i++) {
             collector(this.ifaces.$_get(i))
@@ -454,14 +448,14 @@ export final class ClassTypeCreator extends TypeCreator {
         }
     }
 
-    internal override declare(ctx: TypeCreatorCtx): void {
+    public override declare(ctx: TypeCreatorCtx): void {
         if (this.ctxItemPtr !== 0) {
             throw new AssertionError("this.ctxItemPtr is not 0")
         }
         this.ctxItemPtr = ctx.checkCtxItemPtr(TypeCreatorCtx.classCreate(ctx.ctxPtr, this.name, this.attrs.get()))
     }
 
-    internal override define(ctx: TypeCreatorCtx): void {
+    public override define(ctx: TypeCreatorCtx): void {
         const classPtr = this.ctxItemPtr
         ctx.checkError(TypeCreatorCtx.classSetBase(classPtr, this.base.getTypeDescriptor()))
         for (let i = 0; i < this.ifaces.length; i++) {
@@ -593,7 +587,7 @@ export final class InterfaceTypeCreator extends TypeCreator {
         return this;
     }
 
-    internal override collectTypes(collector: CollectTypesCB): void {
+    public override collectTypes(collector: CollectTypesCB): void {
         for (let i = 0; i < this.bases.length; i++) {
             collector(this.bases.$_get(i))
         }
@@ -606,7 +600,7 @@ export final class InterfaceTypeCreator extends TypeCreator {
         }
     }
 
-    internal override define(ctx: TypeCreatorCtx): void {
+    public override define(ctx: TypeCreatorCtx): void {
         const classPtr = this.ctxItemPtr
         for (let i = 0; i < this.bases.length; i++) {
             ctx.checkError(TypeCreatorCtx.interfaceAddBase(classPtr, this.bases.$_get(i).getTypeDescriptor()))
@@ -617,7 +611,7 @@ export final class InterfaceTypeCreator extends TypeCreator {
         }
     }
 
-    internal override declare(ctx: TypeCreatorCtx): void {
+    public override declare(ctx: TypeCreatorCtx): void {
         if (this.ctxItemPtr !== 0) {
             throw new AssertionError("this.ctxItemPtr is not 0")
         }
@@ -633,8 +627,8 @@ export final class InterfaceTypeCreator extends TypeCreator {
  * Creator for {@link LambdaType}
  */
 export final class LambdaTypeCreator extends TypeCreator {
-    internal params: Array<ParameterCreator> = new Array<ParameterCreator>();
-    internal result: TypeOrCreator = TypeOrCreator.from(VoidType.REF);
+    public params: Array<ParameterCreator> = new Array<ParameterCreator>();
+    public result: TypeOrCreator = TypeOrCreator.from(VoidType.REF);
     private attrs: HasAttributes = new HasAttributes(new FreezableCreator(this), AllowedAttributes.LAMBDA)
     private targetLinker: RuntimeLinker
 
@@ -689,7 +683,7 @@ export final class LambdaTypeCreator extends TypeCreator {
      * @param typ type of result
      * @returns this
      */
-    internal addResult(typ: TypeOrCreator): LambdaTypeCreator {
+    public addResult(typ: TypeOrCreator): LambdaTypeCreator {
         this.checkNotCreated()
         this.result = typ
         return this;
@@ -714,14 +708,14 @@ export final class LambdaTypeCreator extends TypeCreator {
         return this;
     }
 
-    internal override collectTypes(collector: CollectTypesCB): void {
+    public override collectTypes(collector: CollectTypesCB): void {
         collector(this.result)
         for (let i = 0; i < this.params.length; i++) {
             collector(this.params.$_get(i).typ)
         }
     }
 
-    internal override declare(ctx: TypeCreatorCtx): void {
+    public override declare(ctx: TypeCreatorCtx): void {
         if (this.ctxItemPtr !== 0) {
             throw new AssertionError("this.ctxItemPtr is not 0")
         }
@@ -735,7 +729,7 @@ export final class LambdaTypeCreator extends TypeCreator {
         ctx.checkError(TypeCreatorCtx.lambdaTypeAdd(ftPtr))
     }
 
-    internal override define(ctx: TypeCreatorCtx): void {
+    public override define(ctx: TypeCreatorCtx): void {
     }
 
     protected override getTargetLinker(): RuntimeLinker {
@@ -761,16 +755,26 @@ function checkNotFrozen(freezable: Freezable): void {
     }
 }
 
-final class FreezableCreator implements Freezable {
-    private creator: TypeCreator
+final class FreezableCreator extends TypeCreator implements Freezable {
 
     constructor(creator: TypeCreator) {
-        this.creator = creator
+        super()
+        this.typ = creator.typ
     }
 
     override isFrozen(): boolean {
-        return this.creator.typ != undefined
+        return this.typ != undefined
     }
+
+    protected override getTargetLinker(): RuntimeLinker {
+        return getNearestNonBootRuntimeLinker()!
+    }
+
+    public override collectTypes(collector: CollectTypesCB): void {}
+
+    public override declare(ctx: TypeCreatorCtx): void {}
+
+    public override define(ctx: TypeCreatorCtx): void {}
 }
 
 /**
@@ -873,13 +877,20 @@ class HasAccessMod {
  * Creator for {@link Field}. Must be used as a part of {@link TypeCreator}.
  */
 export final class FieldCreator {
-    // NOTE(ekaterinazaytseva): unable to replace internal - used as public
-    internal name: string
-    // NOTE(ekaterinazaytseva): unable to replace internal - used as public
-    internal typ: TypeOrCreator
+    public name: string
+    public typ: TypeOrCreator
+
+    /**
+     * @param name new field name
+     * @param typ new field type
+     */
+    private constructor(name: string, typ: TypeOrCreator) {
+        this.name = name
+        this.typ = typ
+    }
+
     private frozen: FreezableImpl = new FreezableImpl()
-    // NOTE(ekaterinazaytseva): unable to replace internal - used as public
-    internal attrs: HasAttributes = new HasAttributes(this.frozen, AllowedAttributes.FIELD)
+    public attrs: HasAttributes = new HasAttributes(this.frozen, AllowedAttributes.FIELD)
     private accessMod: HasAccessMod = new HasAccessMod(this.frozen)
 
     /**
@@ -925,11 +936,10 @@ export final class FieldCreator {
  * Creator for {@link Parameter}. Must be used as a part of {@link MethodCreator}.
  */
 export final class ParameterCreator {
-    // NOTE(ekaterinazaytseva): unable to replace internal - used as public
-    internal typ: TypeOrCreator
-    internal name?: string
-    internal frozen: FreezableImpl = new FreezableImpl()
-    internal attrs: HasAttributes = new HasAttributes(this.frozen, AllowedAttributes.PARAMETER)
+    public typ: TypeOrCreator
+    public name?: string
+    public frozen: FreezableImpl = new FreezableImpl()
+    public attrs: HasAttributes = new HasAttributes(this.frozen, AllowedAttributes.PARAMETER)
 
     /**
      * @param parameter type
@@ -957,7 +967,7 @@ export final class ParameterCreator {
     /**
      * @param parameter type
      */
-    internal constructor(typ: TypeOrCreator) {
+    public constructor(typ: TypeOrCreator) {
         this.typ = typ
     }
 
@@ -1003,13 +1013,12 @@ export final class ParameterCreator {
  * Creator for {@link Method}. Must be used as a part of {@link ClassTypeCreator} or {@link InterfaceTypeCreatpr}.
  */
 export final class MethodCreator {
-    // NOTE(ekaterinazaytseva): unable to replace internal - used as public
-    internal name: string
-    internal params: Array<ParameterCreator> = new Array<ParameterCreator>();
-    internal result: TypeOrCreator = TypeOrCreator.from(VoidType.REF);
+    public name: string
+    public params: Array<ParameterCreator> = new Array<ParameterCreator>();
+    public result: TypeOrCreator = TypeOrCreator.from(VoidType.REF);
     private body?: CallableBody
-    internal frozen: FreezableImpl = new FreezableImpl()
-    internal attrs: HasAttributes = new HasAttributes(this.frozen, AllowedAttributes.METHOD)
+    public frozen: FreezableImpl = new FreezableImpl()
+    public attrs: HasAttributes = new HasAttributes(this.frozen, AllowedAttributes.METHOD)
     private accessMod: HasAccessMod = new HasAccessMod(this.frozen)
 
     /**
@@ -1064,8 +1073,7 @@ export final class MethodCreator {
      * @param typ type of result
      * @returns this
      */
-    // NOTE(ekaterinazaytseva): unable to replace internal - used as public
-    internal addResult(typ: TypeOrCreator): MethodCreator {
+    public addResult(typ: TypeOrCreator): MethodCreator {
         checkNotFrozen(this.frozen)
         this.result = typ
         return this;
@@ -1147,8 +1155,7 @@ export final class MethodCreator {
     /**
      * adds method to interface or class
      */
-    // NOTE(ekaterinazaytseva): unable to replace internal - used as public
-    internal addToCtxItemPtr(ctx: TypeCreatorCtx, classOrIfacePtr: long): void {
+    public addToCtxItemPtr(ctx: TypeCreatorCtx, classOrIfacePtr: long): void {
         const fptr = ctx.checkCtxItemPtr(TypeCreatorCtx.methodCreate(classOrIfacePtr, this.name, this.attrs.get()))
         ctx.checkError(TypeCreatorCtx.methodAddAccessMod(fptr, this.accessMod.get()))
         for (let a = 0; a < this.params.length; a++) {

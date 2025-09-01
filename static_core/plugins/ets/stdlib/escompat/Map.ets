@@ -294,8 +294,8 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
         const buck = this.getOrCreateBucket(key)
         const buckSize = buck.length
         for (let i = 0; i < buckSize; i++) {
-            const entry = buck.$_get_unsafe(i)
-            if (__runtimeSameValueZero(entry.key, key)) {
+            const entry = buck[i]
+            if (Runtime.sameValueZero(entry.key, key)) {
                 entry.val = val
                 return this
             }

@@ -368,8 +368,7 @@ export final class ESValue {
         return new ESValue(JSRuntime.invoke(ESValue.Undefined.ev, this.ev, ...argsAny));
     }
 
-    // NOTE(ekaterinazaytseva): unable to replace internal - used as public
-    internal invokeWithRecv(recv: ESValue, ...args: FixedArray<StaticOrESValue>): ESValue {
+    public invokeWithRecv(recv: ESValue, ...args: FixedArray<StaticOrESValue>): ESValue {
         let argsAny: FixedArray<Any> = new Any[args.length];
         for (let i = 0; i < args.length; i++) {
             if (args[i] instanceof ESValue) {

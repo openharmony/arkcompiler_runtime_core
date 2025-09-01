@@ -85,13 +85,10 @@ export interface DecimalConfig {
 }
 
 export class Decimal {
-    //NOTE(ekaterinazaytseva): unable to replace internal - used in friend class Utils
-    internal digits: Array<double> | null = new Array<double>();
-    //NOTE(ekaterinazaytseva): unable to replace internal - used in friend class Utils
-    internal exponent: double;
+    public digits: Array<double> | null = new Array<double>();
+    public exponent: double;
     private sign: double;
-    //NOTE(ekaterinazaytseva): unable to replace internal - used in friend class Utils
-    internal toStringTag: string = '[object Decimal]';
+    public readonly toStringTag: string = '[object Decimal]';
     private static quadrant: int = 0;
 
     public static maxE: double = EXP_LIMIT;

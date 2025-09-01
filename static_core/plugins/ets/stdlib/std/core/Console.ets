@@ -102,8 +102,7 @@ export final class Console {
      * Internal constructor for Console class
      * @internal
      */
-    // NOTE(ekaterinzaytseva): unable to replace internal - used as public
-    internal constructor() {
+    private constructor() {
         this.timers = new Map<string, long>
         this.counters = new Map<string, int>
         this.lvl2Buf = new Map<LogLevel, StringBuilder>
@@ -113,6 +112,15 @@ export final class Console {
         this.lvl2Buf.set(LogLevel.WARN, new StringBuilder)
         this.lvl2Buf.set(LogLevel.ERROR, new StringBuilder)
         this.lvl2Buf.set(LogLevel.PRINTLN, new StringBuilder)
+    }
+
+    private static instance?: Console
+
+    public static getInstance(): Console {
+        if (Console.instance == undefined) {
+            Console.instance = new Console()
+        }
+        return Console.instance!;
     }
 
     private native printString(s: String, lvl: int): void;

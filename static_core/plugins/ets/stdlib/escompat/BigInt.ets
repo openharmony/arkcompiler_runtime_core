@@ -152,8 +152,7 @@ export final class BigInt {
         this.sign = this.bytes.length == 0 ? 0 : sign
     }
 
-    //NOTE(ekaterinazaytseva): unable to replace internal - used in typedArrays
-    internal static fromULong(val: long): BigInt {
+    public static fromULong(val: long): BigInt {
         let ret = val == 0 ? new BigInt([], 0) : new BigInt(BigInt.fromLongHelper(val, 64, 1), 1)
         return ret
     }
@@ -306,8 +305,7 @@ export final class BigInt {
         return (this.negative() ? "-" : "").concat((fastToStringHandler != undefined) ? fastToStringHandler!(this) : this.toStringAsGenericRadix(radix))
     }
 
-    //NOTE(ekaterinazaytseva): unable to replace internal - used as public in initializerBlock
-    internal toStringAsBinary(): string {
+    public toStringAsBinary(): string {
         let reversedInts = BigInt.reverse(this.bytes)
         let intToBinaryString = (value: Long) => { return value.toString(2) }
         let result = new StringBuilder(intToBinaryString((reversedInts[0]!).toLong()))
@@ -317,8 +315,7 @@ export final class BigInt {
         return result.toString()
     }
 
-    //NOTE(ekaterinazaytseva): unable to replace internal - used as public in initializerBlock
-    internal toStringAsDecimal(): string {
+    public toStringAsDecimal(): string {
         let digits = this.bytesToDigits(this.bytes)
         let result = new StringBuilder
         for (let i = 0; i < digits.length; i++) {
@@ -345,8 +342,7 @@ export final class BigInt {
         return result.toString()
     }
 
-    //NOTE(ekaterinazaytseva): unable to replace internal - used as public in initializerBlock
-    internal toStringAsPowerOfTwoRadix(radix: int): string {
+    public toStringAsPowerOfTwoRadix(radix: int): string {
         let chunkSize: Number = Math.log2(radix)
         if (!chunkSize.isInteger() || radix < 2) {
             throw new Error("BigInt::toStringAsPowerOfTwoRadix(): invalid radix: " + radix)
