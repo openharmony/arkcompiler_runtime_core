@@ -49,6 +49,9 @@ function prepare_file_test2() {
     if [ "$TS_LINTER" = "true" ]; then
         cat "$SCRIPT_DIR"/test/test_file_expected_list_ts_linter.txt >> "$EXPECTED"
     fi
+    if [ "$ES2PANDA_DRIVER" = "true" ]; then
+        cat "$SCRIPT_DIR"/test/test_file_expected_list_es2panda_driver.txt >> "$EXPECTED"
+    fi
     if [ "$ETS_STD_LIB" = "true" ]; then
         cat "$SCRIPT_DIR"/test/test_file_expected_list_ets.txt >> "$EXPECTED"
     fi
