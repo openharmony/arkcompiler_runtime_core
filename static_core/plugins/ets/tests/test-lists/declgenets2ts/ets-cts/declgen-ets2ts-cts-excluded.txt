@@ -3679,10 +3679,6 @@
 06.contexts_and_conversions/04.numeric_operator_contexts/unary_numeric_promotion/unary_plus_n_0.ets
 06.contexts_and_conversions/04.numeric_operator_contexts/unary_numeric_promotion/unary_plus_n_1.ets
 06.contexts_and_conversions/04.numeric_operator_contexts/unary_numeric_promotion/unary_plus_n_2.ets
-06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/int2enum_n_0.ets
-06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/int2enum_n_1.ets
-06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/str2enum_n_0.ets
-06.contexts_and_conversions/05.implicit_conversions/03.constant_to_enum_conversions/str2enum_n_1.ets
 07.expressions/04.array_literal/01.type_inference_from_context/arr_inf_n_0.ets
 07.expressions/04.array_literal/01.type_inference_from_context/arr_inf_n_1.ets
 07.expressions/04.array_literal/01.type_inference_from_context/arr_inf_n_2.ets
