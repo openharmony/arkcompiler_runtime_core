@@ -19,7 +19,6 @@ desc: >-
     In an implicit instantiation, type arguments are not specified explicitly.
     Such type arguments are inferred from the context the generic is referred in.
 params: method
-tags: [{{c.tags}}]
 ---*/
 
 {{c.decl}}
