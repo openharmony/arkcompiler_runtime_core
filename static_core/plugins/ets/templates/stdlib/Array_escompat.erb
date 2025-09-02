@@ -711,9 +711,10 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         }
         // this: [left middle right], we must replace middle with `items`
 
-        this.ensureUnusedCapacity(items.length.toInt() - delete)
+        const itemsLength = items.length
+        this.ensureUnusedCapacity(itemsLength - delete)
         const oldLen = this.actualLength
-        this.actualLength = this.actualLength - delete + items.length.toInt()
+        this.actualLength = this.actualLength - delete + itemsLength
 
         let ret = new Array<T>(delete)
         let lastSet = start
@@ -724,17 +725,17 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         }
         // move right part to the right of the buffer
         const rightLen = oldLen - start - delete
-        if (items.length > delete) {
+        if (itemsLength > delete) {
             for (let i = 0; i < rightLen; i++) {
                 this.$_set_unsafe(this.actualLength - 1 - i, this.$_get_unsafe(oldLen - 1 - i))
             }
         } else {
             for (let i = 0; i < rightLen; i++) {
-                this.$_set_unsafe(start + items.length.toInt() + i, this.$_get_unsafe(start + delete + i))
+                this.$_set_unsafe(start + itemsLength + i, this.$_get_unsafe(start + delete + i))
             }
         }
         // insert middle part
-        for (let i = 0; i < items.length; i++) {
+        for (let i = 0; i < itemsLength; i++) {
             this.$_set_unsafe(start + i, items.$_get_unsafe(i))
         }
         return ret
