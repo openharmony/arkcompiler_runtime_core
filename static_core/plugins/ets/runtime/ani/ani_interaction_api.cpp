@@ -3634,6 +3634,7 @@ static ani_status DoGetPropertyByName(ani_env *env, ani_object object, const cha
     static constexpr auto IS_REF = std::is_same_v<R, ani_ref>;
     using Res = std::conditional_t<IS_REF, EtsObject *, R>;
 
+    ASSERT(env != nullptr);
     ASSERT(name != nullptr);
     ASSERT(result != nullptr);
 

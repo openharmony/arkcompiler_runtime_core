@@ -136,6 +136,7 @@ static int64_t GetValueFromVregAcc(const Frame *iframe, LanguageContext &ctx, VR
 extern "C" void *PrepareOsrEntry(const Frame *iframe, uintptr_t bcOffset, const void *osrCode, void *cframePtr,
                                  uintptr_t *regBuffer, uintptr_t *fpRegBuffer)
 {
+    ASSERT(cframePtr != nullptr);
     CodeInfo codeInfo(CodeInfo::GetCodeOriginFromEntryPoint(osrCode));
     CFrame cframe(cframePtr);
     auto stackmap = codeInfo.FindOsrStackMap(bcOffset);

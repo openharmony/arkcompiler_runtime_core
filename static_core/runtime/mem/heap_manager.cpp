@@ -109,6 +109,7 @@ ObjectHeader *HeapManager::AllocateObject(BaseClass *cls, size_t size, Alignment
 {
     ASSERT(size >= ObjectHeader::ObjectHeaderSize());
     ASSERT(GetGC()->IsMutatorAllowed());
+    ASSERT(cls != nullptr);
     TriggerGCIfNeeded();
     if (thread == nullptr) {
         // NOTE(dtrubenkov): try to avoid this
