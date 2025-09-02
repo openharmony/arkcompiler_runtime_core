@@ -146,6 +146,27 @@ export class EAWorker {
 
     overload constructor { supportInterop, withName, withTask, withNameAndTask }
 
+    
+    /**
+     * Get all registered EAWorker instances.
+     *
+     * @returns { containers.ConcurrentHashMap<int, EAWorker> } 
+     *   A concurrent hash map containing all EAWorker instances, 
+     *   keyed by their integer identifiers.
+     */
+    internal static getWorkers(): containers.ConcurrentHashMap<int, EAWorker> {
+        return EAWorker.workers;
+    }
+
+    /**
+     * Set the state of the loopStarted flag.
+     *
+     * @param flag - A boolean value indicating whether the loop has started.
+     */
+    internal setLoopStarted(flag: boolean) {
+        this.loopStarted.set(flag);
+    }
+
     /**
      * Get the worker identifier
      * @returns { int } The unique identifier of the worker
@@ -239,12 +260,6 @@ export class EAWorker {
             throw new Error("Cannot stop worker before start");
         }
         this.worker.quit();
-        if (this.loopStarted.get()) {
-            this.loopStarted.set(false);
-            if (EAWorker.workers.get(this.eaworkerNum) != undefined) {
-                EAWorker.workers.delete(this.eaworkerNum);
-            }
-        }
     }
 
     /**
@@ -259,10 +274,6 @@ export class EAWorker {
             throw new Error("Cannot stop worker before start");
         }
         this.worker.join();
-        if (this.loopStarted.get()) {
-            EAWorker.workers.delete(this.eaworkerNum);
-            this.loopStarted.set(false);
-        }
     }
 
     /**
@@ -467,10 +478,6 @@ export class EAWorker {
             throw new Error("Main worker cannot be stopped");
         }
         this.worker.join();
-        if (this.loopStarted.get()) {
-            EAWorker.workers.delete(this.eaworkerNum);
-            this.loopStarted.set(false);
-        }
     }
 
     /**
@@ -661,6 +668,12 @@ class InteropWorker implements InternalWorker {
 
     public join() {
         this.initEvent.wait();
+        let finalTask = () => {
+            let current = EAWorker.current() as EAWorker;
+            EAWorker.getWorkers().delete(this.eaworkerNum);
+            current.setLoopStarted(false);
+        }
+        this.poster?.post(finalTask);
         this.poster!.destroy();
     }
 
@@ -815,6 +828,9 @@ class StaticWorker implements InternalWorker {
         while (true) {
             let task = this.tasks.pop();
             if (task === StaticWorker.closingTask) {
+                let current = EAWorker.current() as EAWorker;
+                EAWorker.getWorkers().delete(this.eaworkerNum);
+                current.setLoopStarted(false);
                 break;
             }
             let shouldExecute = true;

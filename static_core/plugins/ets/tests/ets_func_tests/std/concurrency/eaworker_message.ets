@@ -59,6 +59,14 @@ function testTaskEAWorker() {
     eaw.join();
 }
 
+const sleep = (ms: int): Promise<int> => {
+    return new Promise<int>(resolve => {
+        setTimeout(() => {
+            resolve(1)
+        }, ms)
+    });
+}
+
 function testIsAliveAndQuit() {
     let eaw1 = new EAWorker();
     let eaw2 = new EAWorker('custom name');
@@ -75,6 +83,14 @@ function testIsAliveAndQuit() {
     eaw1.quit();
     eaw2.quitSafely();
     eaw3.join();
+    let maxChecks = 10;
+    let sleepTime = 10;
+    for (let i = 0; i < maxChecks; i++) {
+        if (!eaw1.isAlive() && !eaw2.isAlive() && !eaw3.isAlive()) {
+            break;
+        }
+        waitForCompletion(() => sleep(sleepTime));
+    }
     arktest.assertFalse(eaw1.isAlive());
     arktest.assertFalse(eaw2.isAlive());
     arktest.assertFalse(eaw3.isAlive());
@@ -137,7 +153,7 @@ function testQuitSafely() {
 
 function testCurrent() {
     let main = EAWorker.current();
-    arktest.assertEQ(main, undefined);
+    arktest.assertEQ(main, EAWorker.main());
     let eaw = new EAWorker();
     eaw.start();
     let waiter = new Event();
