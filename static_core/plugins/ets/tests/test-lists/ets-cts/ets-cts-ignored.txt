@@ -2977,9 +2977,6 @@
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_27.ets
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_28.ets
 
-# 27383
-15.semantic_rules/01.semantic_essentials/01.type_of_standalone_expression/consecutive_arrays.ets
-
 # 27390
 15.semantic_rules/01.semantic_essentials/01.type_of_standalone_expression/union_types.ets
 
