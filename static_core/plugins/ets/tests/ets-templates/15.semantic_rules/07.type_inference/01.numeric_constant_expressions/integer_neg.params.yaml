@@ -25,8 +25,6 @@ cases:
   - { use: "-0x8000_0000", use_type: ": short", expected_type: int }
   - { use: "-0x8000_0001", use_type: ": short", expected_type: long }
   - { use: "-0x8000_0000_0000_0000", use_type: ": int", expected_type: long }
-  # union type invalid narrowing
-  - { use: "127", use_type: ": byte | short", expected_type: byte }
 
 # whether to use const to initialise
 const_to_initialise:

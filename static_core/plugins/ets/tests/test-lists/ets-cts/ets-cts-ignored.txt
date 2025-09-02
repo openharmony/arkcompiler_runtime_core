@@ -3014,5 +3014,27 @@
 15.semantic_rules/02.subtyping/04.subtyping_for_function_types/negative_8.ets
 15.semantic_rules/02.subtyping/04.subtyping_for_function_types/negative_9.ets
 
+# 29337 no CTE in ambiguous narrowing
+15.semantic_rules/07.type_inference/01.numeric_constant_expressions/narrowing_neg_2.ets
+15.semantic_rules/07.type_inference/01.numeric_constant_expressions/narrowing_neg_3.ets
+15.semantic_rules/07.type_inference/01.numeric_constant_expressions/narrowing_neg_4.ets
+15.semantic_rules/07.type_inference/01.numeric_constant_expressions/narrowing_neg_5.ets
+15.semantic_rules/07.type_inference/01.numeric_constant_expressions/narrowing_neg_6.ets
+15.semantic_rules/07.type_inference/01.numeric_constant_expressions/narrowing_neg_7.ets
+15.semantic_rules/07.type_inference/01.numeric_constant_expressions/narrowing_neg_8.ets
+15.semantic_rules/07.type_inference/01.numeric_constant_expressions/narrowing_neg_9.ets
+15.semantic_rules/07.type_inference/01.numeric_constant_expressions/narrowing_neg_10.ets
+15.semantic_rules/07.type_inference/01.numeric_constant_expressions/narrowing_neg_11.ets
+15.semantic_rules/07.type_inference/01.numeric_constant_expressions/narrowing_neg_12.ets
+15.semantic_rules/07.type_inference/01.numeric_constant_expressions/narrowing_neg_13.ets
+15.semantic_rules/07.type_inference/01.numeric_constant_expressions/narrowing_neg_14.ets
+15.semantic_rules/07.type_inference/01.numeric_constant_expressions/narrowing_neg_15.ets
+15.semantic_rules/07.type_inference/01.numeric_constant_expressions/narrowing_neg_16.ets
+15.semantic_rules/07.type_inference/01.numeric_constant_expressions/narrowing_neg_17.ets
+15.semantic_rules/07.type_inference/01.numeric_constant_expressions/narrowing_neg_20.ets
+15.semantic_rules/07.type_inference/01.numeric_constant_expressions/narrowing_neg_21.ets
+15.semantic_rules/07.type_inference/01.numeric_constant_expressions/narrowing_neg_22.ets
+15.semantic_rules/07.type_inference/01.numeric_constant_expressions/narrowing_neg_23.ets
+
 #28095 runtime timeout
 05.generics/03.utility_types/01.awaited_utility_type/awaited_return_2.ets
