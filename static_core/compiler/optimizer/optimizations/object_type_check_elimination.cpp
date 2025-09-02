@@ -73,16 +73,6 @@ static bool CheckIsInstanceRef(RuntimeInterface *runtime, Inst *ref)
     if (runtime->GetClassType(refInfo.GetClass()) == ClassType::UNION_CLASS) {
         return false;
     }
-    // Cannot remove IsInstance if ref is element of untyped array
-    // Same instruction could be used to check other elements of array
-    // NOTE(compiler): shall be in TypePropagation #29029
-    if (ref->GetOpcode() == Opcode::LoadArray) {
-        auto arrayObj = ref->GetDataFlowInput(0);
-        if (arrayObj != nullptr &&
-            runtime->GetClassType(arrayObj->GetObjectTypeInfo().GetClass()) == ClassType::ARRAY_OBJECT_CLASS) {
-            return false;
-        }
-    }
     return true;
 }
 

@@ -72,7 +72,7 @@ set(PANDA_RUN_PREFIX
 add_custom_target(ani_tests_bridges_tests COMMENT "Common target to run ANI bridges tests")
 
 function(add_tests pref suff)
-    #  NOTE(mgroshev): #29029
+    #  NOTE(mgroshev): #29597
     if(${pref} STREQUAL "types_double")
         set(RT_OPTION "--compiler-inlining=false")
     endif()
