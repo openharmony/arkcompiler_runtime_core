@@ -105,7 +105,6 @@ class {{N}}ArrayIteratorEntries implements IterableIterator<{{subsetTypeValuesEn
 export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLike<{{subsetTypeValues}}> {
     public static readonly BYTES_PER_ELEMENT: int = {{S}}
     public readonly BYTES_PER_ELEMENT: int = {{N}}Array.BYTES_PER_ELEMENT
-    public overload subarray { subarrayII, subarrayNI, subarrayIN, subarrayNN }
     protected readonly lengthInt: int
 
     /**
@@ -444,17 +443,6 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns a primitive at index
      */
-    public at(index: number): Number | undefined {
-        return this.at(index.toInt())
-    }
-
-    /**
-     * Returns an instance of primitive type at passed index.
-     *
-     * @param index index to look at
-     *
-     * @returns a primitive at index
-     */
     public at(index: int): Number | undefined {
         let k: int
         if (index >= 0) {
@@ -468,17 +456,6 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         return new Number(this.getUnsafe(k))
     }
     {%- else %}
-
-    /**
-     * Returns an instance of primitive type at passed index.
-     *
-     * @param index index to look at
-     *
-     * @returns a primitive at index
-     */
-    public at(index: number): {{elementCompat}} | undefined {
-        return this.at(index.toInt())
-    }
 
     /**
      * Returns an instance of primitive type at passed index.
@@ -609,51 +586,6 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         return new {{N}}ArrayIteratorEntries(this)
     }
 
-    /**
-     * Fills the {{N}}Array with specified value
-     *
-     * @param value new valuy
-     *
-     * @returns modified {{N}}Array
-     */
-    public fill(value: {{elementCompat}}, start?: number, end?: number): this {
-        {%- if not N in ['Float32', 'Float64', 'BigInt64'] %}
-        value = this.zeroIfInfinity(value)
-        {%- endif %}
-        this.fill(value{{fromElementCompat}}, asIntOrDefault(start, 0), asIntOrDefault(end, this.lengthInt))
-        return this
-    }
-
-    /**
-     * Fills the {{N}}Array with specified value
-     *
-     * @param value new valuy
-     *
-     * @returns modified {{N}}Array
-     */
-    public fill(value: {{elementCompat}}, start: int, end?: number): this {
-        {%- if not N in ['Float32', 'Float64', 'BigInt64'] %}
-        value = this.zeroIfInfinity(value)
-        {%- endif %}
-        this.fill(value{{fromElementCompat}}, start, asIntOrDefault(end, this.lengthInt))
-        return this
-    }
-
-    /**
-     * Fills the {{N}}Array with specified value
-     *
-     * @param value new valuy
-     *
-     * @returns modified {{N}}Array
-     */
-    public fill(value: {{elementCompat}}, start: number, end: int): this {
-        {%- if not N in ['Float32', 'Float64', 'BigInt64'] %}
-        value = this.zeroIfInfinity(value)
-        {%- endif %}
-        this.fill(value{{fromElementCompat}}, start.toInt(), end)
-        return this
-    }
-
     {%- if N != 'Float64' %}
 
     /**
@@ -663,8 +595,8 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns modified {{N}}Array
      */
-    public fill(value: {{elementCompat}}, start: int, end: int): this {
-        {%- if N not in ['Float32', 'BigInt64'] %}
+    public fill(value: {{elementCompat}}, start?: int, end?: int): this {
+        {%- if not N in ['Float32', 'Float64', 'BigInt64'] %}
         value = this.zeroIfInfinity(value)
         {%- endif %}
         this.fill(value{{fromElementCompat}}, start, end)
@@ -678,10 +610,14 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns modified {{N}}Array
      */
-    public fill(value: {{T}}, start?: number, end?: number): this {
-        this.fill(value, asIntOrDefault(start, 0), asIntOrDefault(end, this.lengthInt))
+    public fill(value: {{T}}, start?: int, end?: int): this {
+        const k = normalizeIndex(start ?? 0, this.lengthInt)
+        const finalPos = normalizeIndex(end ?? this.lengthInt, this.lengthInt)
+        this.fillInternal(value, k, finalPos)
         return this
     }
+
+    {%- else %}
 
     /**
      * Fills the {{N}}Array with specified value
@@ -690,38 +626,17 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns modified {{N}}Array
      */
-    public fill(value: {{T}}, start: int, end?: number): this {
-        this.fill(value, start, asIntOrDefault(end, this.lengthInt))
-        return this
-    }
-
-    /**
-     * Fills the {{N}}Array with specified value
-     *
-     * @param value new valuy
-     *
-     * @returns modified {{N}}Array
-     */
-    public fill(value: {{T}}, start: number, end: int): this {
-        this.fill(value, start.toInt(), end)
+    public fill(value: {{elementCompat}}, start?: int, end?: int): this {
+        {%- if not N in ['Float32', 'Float64', 'BigInt64'] %}
+        value = this.zeroIfInfinity(value)
+        {%- endif %}
+        const k = normalizeIndex(start ?? 0, this.lengthInt)
+        const finalPos = normalizeIndex(end ?? this.lengthInt, this.lengthInt)
+        this.fillInternal(value{{fromElementCompat}}, k, finalPos)
         return this
     }
 
     {%- endif %}
-
-    /**
-     * Fills the {{N}}Array with specified value
-     *
-     * @param value new valuy
-     *
-     * @returns modified {{N}}Array
-     */
-    public fill(value: {{T}}, start: int, end: int): this {
-        const k = normalizeIndex(start, this.lengthInt)
-        const finalPos = normalizeIndex(end, this.lengthInt)
-        this.fillInternal(value, k, finalPos)
-        return this
-    }
 
     private final native fillInternal(value: {{T}}, start: int, end: int): void
 
@@ -1397,53 +1312,8 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
-    public slice(begin?: number, end?: number): {{N}}Array {
+    public slice(begin?: int, end?: int): {{N}}Array {
         return this.sliceImpl(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Creates a slice of current {{N}}Array using range [begin, end)
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @param end last index to be taken into slice
-     *
-     * @returns a new {{N}}Array with elements of current {{N}}Array[begin;end) where end index is excluded
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
-     */
-    public slice(begin: number, end: int): {{N}}Array {
-        return this.sliceImpl(begin.toInt(), end.toInt())
-    }
-
-    /**
-     * Creates a slice of current {{N}}Array using range [begin, end)
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @param end last index to be taken into slice
-     *
-     * @returns a new {{N}}Array with elements of current {{N}}Array[begin;end) where end index is excluded
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
-     */
-    public slice(begin: int, end: number): {{N}}Array {
-        return this.sliceImpl(begin.toInt(), end.toInt())
-    }
-
-    /**
-     * Creates a slice of current {{N}}Array using range [begin, end)
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @param end last index to be taken into slice
-     *
-     * @returns a new {{N}}Array with elements of current {{N}}Array[begin;end) where end index is excluded
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
-     */
-    public slice(begin: int, end: int): {{N}}Array {
-        return this.sliceImpl(begin, end)
     }
 
     /**
@@ -1466,46 +1336,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns new {{N}}Array with the same underlying ArrayBuffer
      */
-    public subarrayNN(begin?: number, end?: number): {{N}}Array {
-        return this.subarray(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Creates a {{N}}Array with the same underlying ArrayBuffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @param end last index, exclusive
-     *
-     * @returns new {{N}}Array with the same underlying ArrayBuffer
-     */
-    public subarrayIN(begin?: int, end?: number): {{N}}Array {
-        return this.subarray(begin ?? 0, asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Creates a {{N}}Array with the same underlying ArrayBuffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @param end last index, exclusive
-     *
-     * @returns new {{N}}Array with the same underlying ArrayBuffer
-     */
-    public subarrayNI(begin?: number, end?: int): {{N}}Array {
-        return this.subarray(asIntOrDefault(begin, 0 as int), end ?? this.lengthInt)
-    }
-
-    /**
-     * Creates a {{N}}Array with the same underlying ArrayBuffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @param end last index, exclusive
-     *
-     * @returns new {{N}}Array with the same underlying ArrayBuffer
-     */
-    public subarrayII(begin: int | undefined = 0, end: int | undefined = this.lengthInt): {{N}}Array {
+    public subarray(begin?: int, end?: int): {{N}}Array {
         const len: int = this.lengthInt
         const relStart = normalizeIndex(begin ?? 0, len)
         const relEnd = normalizeIndex(end ?? this.lengthInt, len)
