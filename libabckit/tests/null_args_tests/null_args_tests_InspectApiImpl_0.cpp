@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -683,6 +683,34 @@ TEST_F(LibAbcKitNullptrTestsInspectApiImpl0, interfaceEnumerateSubInterfaces)
 TEST_F(LibAbcKitNullptrTestsInspectApiImpl0, interfaceEnumerateSuperInterfaces)
 {
     helpers_nullptr::TestNullptr(g_inspectApiImp->interfaceEnumerateSuperInterfaces);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::namespaceFieldGetNamespace,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsInspectApiImpl0, namespaceFieldGetNamespace)
+{
+    helpers_nullptr::TestNullptr(g_inspectApiImp->namespaceFieldGetNamespace);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::namespaceFieldGetName,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsInspectApiImpl0, namespaceFieldGetName)
+{
+    helpers_nullptr::TestNullptr(g_inspectApiImp->namespaceFieldGetName);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::namespaceFieldGetType,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsInspectApiImpl0, namespaceFieldGetType)
+{
+    helpers_nullptr::TestNullptr(g_inspectApiImp->namespaceFieldGetType);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::AbckitGetInspectApiImpl,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsInspectApiImpl0, AbckitGetInspectApiImpl)
+{
+    helpers_nullptr::TestNullptr(AbckitGetInspectApiImpl);
 }
 
 }  // namespace libabckit::test

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -313,6 +313,45 @@ TEST_F(LibAbcKitInspectApiValuesTest, ValueGetType_2)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
+// Test: test-kind=api, api=InspectApiImpl::valueGetType, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitInspectApiValuesTest, ValueGetType_Coverage)
+{
+    struct ValueMock {
+        uint8_t tmp[8];
+        uint32_t type;
+    };
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/values/values_static.abc", &file);
+    auto *res = g_implM->createValueString(file, "test", strlen("test"));
+    auto valImpl = reinterpret_cast<ValueMock *>(res->val.get());
+    const uint32_t typeU8 = 2;
+    valImpl->type = typeU8;
+    auto val = g_implI->valueGetType(res);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_EQ(val->id, ABCKIT_TYPE_ID_U8);
+
+    const uint32_t typeU16 = 4;
+    valImpl->type = typeU16;
+    val = g_implI->valueGetType(res);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_EQ(val->id, ABCKIT_TYPE_ID_U16);
+
+    const uint32_t typeU32 = 6;
+    valImpl->type = typeU32;
+    val = g_implI->valueGetType(res);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_EQ(val->id, ABCKIT_TYPE_ID_U32);
+
+    const uint32_t typeU64 = 8;
+    valImpl->type = typeU64;
+    val = g_implI->valueGetType(res);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_EQ(val->id, ABCKIT_TYPE_ID_U64);
+
+    g_impl->closeFile(file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
 // Test: test-kind=api, api=InspectApiImpl::valueGetU1, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiValuesTest, ValueGetU1_3)
 {
@@ -408,4 +447,23 @@ TEST_F(LibAbcKitInspectApiValuesTest, ArrayValueGetLiteralArray_3)
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
+
+// Test: test-kind=api, api=InspectApiImpl::arrayValueGetLiteralArray, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitInspectApiValuesTest, ArrayValueGetLiteralArray_4)
+{
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/modify_api/values/values_static.abc", &file);
+
+    auto *arr = g_implM->createValueU1(file, true);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(arr, nullptr);
+
+    auto *larr = g_implI->arrayValueGetLiteralArray(arr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_UNSUPPORTED);
+    ASSERT_EQ(larr, nullptr);
+
+    g_impl->closeFile(file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
 }  // namespace libabckit::test

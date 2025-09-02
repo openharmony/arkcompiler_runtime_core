@@ -43,6 +43,8 @@ template("create_merge_file") {
 }
 
 abckit_gtests_sources = [
+  "adapter_static/ir_static_test.cpp",
+  "adapter_static/runtime_adapter_static_test.cpp",
   "clean_scenarios/c_api/dynamic/add_log/add_log_dynamic_test.cpp",
   "clean_scenarios/c_api/dynamic/add_try_catch/add_try_catch_test.cpp",
   "clean_scenarios/c_api/dynamic/api_scanner/api_scanner_test.cpp",
@@ -71,6 +73,8 @@ abckit_gtests_sources = [
   "internal/implementation_api/abc_stuff.cpp",
   "internal/implementation_api/graph_stuff.cpp",
   "internal/mem_manager/several_abc.cpp",
+  "logger/logger_test.cpp",
+  "adapter_dynamic/convert_test.cpp",
   "null_args_tests/null_args_tests_ApiImpl_0.cpp",
   "null_args_tests/null_args_tests_ArktsInspectApiImpl_0.cpp",
   "null_args_tests/null_args_tests_ArktsModifyApiImpl_0.cpp",
@@ -107,6 +111,7 @@ abckit_gtests_sources = [
   "ut/extensions/arkts/inspect_api/methods/methods_static_test.cpp",
   "ut/extensions/arkts/inspect_api/modules/modules_dynamic_test.cpp",
   "ut/extensions/arkts/inspect_api/namespace/namespace_arkts.cpp",
+  "ut/extensions/arkts/inspect_api/helpers/helpers_static_test.cpp",
   "ut/extensions/arkts/modify_api/annotations/annotations_test.cpp",
   "ut/extensions/arkts/modify_api/modules/modules_dynamic_modify_test.cpp",
   "ut/extensions/js/inspect_api/api_casts/api_casts.cpp",
@@ -433,6 +438,7 @@ test_ts_files = [
 
   "ut/extensions/arkts/inspect_api/api_casts/api_casts",
   "ut/extensions/arkts/inspect_api/namespace/namespace_arkts_dynamic",
+  "ut/extensions/arkts/inspect_api/helpers/helpers_dynamic_test",
   "regression/issue_IB1YEI/issue_IB1YEI",
   "regression/issue_IB2T4M/issue_IB2T4M",
 ]
@@ -442,8 +448,11 @@ test_ets_files = [
   "ut/metadata_core/inspect_api/annotations/annotations_static",
   "ut/metadata_core/inspect_api/modules/targets/ArkTS2_target",
   "ut/metadata_core/inspect_api/modules/modules_static",
+  "ut/metadata_core/inspect_api/modules/modules_static_test",
+  "ut/metadata_core/inspect_api/modules/import_test",
   "ut/metadata_core/inspect_api/classes/classes_static",
   "ut/metadata_core/inspect_api/interfaces/interfaces_static",
+  "ut/metadata_core/inspect_api/interfaces/interface_test",
   "ut/metadata_core/inspect_api/enums/enums_static",
   "ut/metadata_core/inspect_api/classes/classes_empty_static",
   "ut/metadata_core/inspect_api/methods/methods_static_other",
@@ -511,6 +520,7 @@ test_ets_files = [
   "ut/ir_core/graph_verifier/graph_verifier",
   "ut/extensions/arkts/inspect_api/methods/methods_static",
   "ut/extensions/arkts/modify_api/modules/modules_static_modify",
+  "ut/extensions/arkts/inspect_api/helpers/helpers_static_test",
 
   "internal/implementation_api/abc_static",
   "internal/mem_manager/abc_static_1",
@@ -883,19 +893,42 @@ libabckit_host_unittest_action("abckit_gtests") {
   sources = abckit_gtests_sources
 
   include_dirs = [
+    "$ark_root_dynamic/static_core",  # this target should not include headers
+                                      # from dynamic runtime, so static_core
+                                      # must be listed first
     "$ark_root_dynamic",
     "$abckit_root",
     "$abckit_root/include",
     "$abckit_root/src",
     "$abckit_root/tests",
+    "$ark_root_static/assembler",
+    "$ark_root_static/compiler",
+    "$ark_root_static/libpandabase",
+    "$ark_root_static/runtime",
+    "$target_gen_dir/../../static_core/",
+    "$target_gen_dir/../../static_core/assembler",
+    "$target_gen_dir/../../static_core/compiler/generated",
+    "$target_gen_dir/../../static_core/cross_values",
+    "$target_gen_dir/../../static_core/libpandabase",
+    "$target_gen_dir/../../static_core/libpandabase/generated",
+    "$target_gen_dir/../../static_core/runtime",
+    "$target_gen_dir/../../static_core/runtime/generated",
   ]
 
-  configs = [ "$abckit_root:abckit_config" ]
+  configs = [
+    "$abckit_root:abckit_config",
+    "$ark_root_static/assembler:arkassembler_public_config",
+    "$ark_root_static/libpandabase:arkbase_public_config",
+  ]
 
   deps = [
     ":abckit_ets_vm_helpers",
     ":abckit_js_vm_helpers",
     "$abckit_root/src:libabckit",
+    "$ark_root_static/assembler:libarktsassembler",
+    "$ark_root_static/compiler:libarktscompiler",
+    "$ark_root_static/libarkfile:libarktsfile",
+    "$ark_root_static/libpandabase:libarktsbase",
   ]
 
   foreach(file, test_js_files) {
@@ -931,6 +964,8 @@ libabckit_host_unittest_action("abckit_gtests") {
   defines = [
     "ABCKIT_ABC_DIR=\"${test_abc_dir}/\"",
     "ABCKIT_TEST_DIR=\"${test_js_dir}\"",
+    "PANDA_WITH_ETS",
+    "ENABLE_LIBABCKIT",
   ]
 }
 
@@ -940,20 +975,43 @@ libabckit_host_unittest_action("arklink_strip_unused_code_gtests") {
   sources = abckit_gtests_sources
 
   include_dirs = [
+    "$ark_root_dynamic/static_core",  # this target should not include headers
+                                      # from dynamic runtime, so static_core
+                                      # must be listed first
     "$ark_root_dynamic",
     "$abckit_root",
     "$abckit_root/include",
     "$abckit_root/src",
     "$abckit_root/tests",
+    "$ark_root_static/assembler",
+    "$ark_root_static/compiler",
+    "$ark_root_static/libpandabase",
+    "$ark_root_static/runtime",
+    "$target_gen_dir/../../static_core/",
+    "$target_gen_dir/../../static_core/assembler",
+    "$target_gen_dir/../../static_core/compiler/generated",
+    "$target_gen_dir/../../static_core/cross_values",
+    "$target_gen_dir/../../static_core/libpandabase",
+    "$target_gen_dir/../../static_core/libpandabase/generated",
+    "$target_gen_dir/../../static_core/runtime",
+    "$target_gen_dir/../../static_core/runtime/generated",
   ]
 
-  configs = [ "$abckit_root:abckit_config" ]
+  configs = [
+    "$abckit_root:abckit_config",
+    "$ark_root_static/assembler:arkassembler_public_config",
+    "$ark_root_static/libpandabase:arkbase_public_config",
+  ]
 
   deps = [
     ":abckit_ets_vm_helpers",
     ":abckit_gtests_action",
     ":abckit_js_vm_helpers",
     "$abckit_root/src:libabckit",
+    "$ark_root_static/assembler:libarktsassembler",
+    "$ark_root_static/compiler:libarktscompiler",
+    "$ark_root_static/libarkfile:libarktsfile",
+    "$ark_root_static/libpandabase:libarktsbase",
   ]
 
   foreach(file, test_js_files) {
@@ -983,6 +1041,8 @@ libabckit_host_unittest_action("arklink_strip_unused_code_gtests") {
   defines = [
     "ABCKIT_ABC_DIR=\"${test_abc_dir}/\"",
     "ABCKIT_TEST_DIR=\"${test_js_dir}\"",
+    "PANDA_WITH_ETS",
+    "ENABLE_LIBABCKIT",
   ]
 }
 

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,18 @@
  * limitations under the License.
  */
 
-const moduleField: string = 'Module Field';
+#include "gtest/gtest.h"
+#include <iostream>
+#include "libabckit/src/adapter_static/ir_static.h"
 
-interface InterfaceA {}
+namespace libabckit::test::adapter_static {
+class IrStaticTest : public ::testing::Test {};
 
-enum EnumA {
-    RED,
-}
-
-namespace Ns1 {}
-
-function main()
+TEST_F(IrStaticTest, IrStaticTestInvalid)
 {
-    let add = (a: int, b: int): int => a + b;
-    console.log(add(1, 2));
+    EXPECT_EQ(GfindOrCreateConstantI64Static(nullptr, 0), nullptr);
+    EXPECT_EQ(GfindOrCreateConstantI32Static(nullptr, 0), nullptr);
+    EXPECT_EQ(GfindOrCreateConstantU64Static(nullptr, 0), nullptr);
+    EXPECT_EQ(GfindOrCreateConstantF64Static(nullptr, 0), nullptr);
 }
+}  // namespace libabckit::test::adapter_static

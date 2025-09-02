@@ -13,18 +13,6 @@
  * limitations under the License.
  */
 
-const moduleField: string = 'Module Field';
+ export namespace Ns3 {}
 
-interface InterfaceA {}
-
-enum EnumA {
-    RED,
-}
-
-namespace Ns1 {}
-
-function main()
-{
-    let add = (a: int, b: int): int => a + b;
-    console.log(add(1, 2));
-}
+ export class testA {}

@@ -12,19 +12,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { Ns3 } from './import_test.ets';
+import { testA } from './import_test.ets';
 
 const moduleField: string = 'Module Field';
 
-interface InterfaceA {}
-
-enum EnumA {
-    RED,
+interface InterfaceTest {
+    value: number;
+    name: string;
 }
 
-namespace Ns1 {}
+let add = (a: number, b: number) => {
+    return a + b;
+}
 
-function main()
-{
-    let add = (a: int, b: int): int => a + b;
-    console.log(add(1, 2));
+class Test {
+    static TestA: testA = new testA()
+    a: number = 10
+    b: Array<number> = [1, 2, 3]
+    d: string = "abc"
+
+    func() {
+        console.log("this is class Test");
+    }
+}
+
+namespace Ns2 {
+interface InterfaceTest1 {}
+
+enum EnumTest {
+    Type1,
+    Type2,
+}
 }

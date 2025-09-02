@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -353,6 +353,15 @@ void TestNullptr(AbckitCoreImportDescriptor *(*apiToCheck)(AbckitJsImportDescrip
 void TestNullptr(AbckitCoreExportDescriptor *(*apiToCheck)(AbckitJsExportDescriptor *));
 void TestNullptr(AbckitJsImportDescriptor *(*apiToCheck)(AbckitCoreImportDescriptor *));
 void TestNullptr(AbckitLiteral *(*apiToCheck)(AbckitFile *, AbckitLiteralArray *));
+void TestNullptr(const AbckitArktsModifyApi *(*apiToCheck)(AbckitApiVersion version));
+void TestNullptr(const AbckitArktsInspectApi *(*apiToCheck)(AbckitApiVersion version));
+void TestNullptr(const AbckitModifyApi *(*apiToCheck)(AbckitApiVersion version));
+void TestNullptr(AbckitCoreNamespace *(*apiToCheck)(AbckitCoreNamespaceField *));
+void TestNullptr(AbckitString *(*apiToCheck)(AbckitCoreNamespaceField *));
+void TestNullptr(AbckitType *(*apiToCheck)(AbckitCoreNamespaceField *));
+void TestNullptr(const AbckitInspectApi *(*apiToCheck)(AbckitApiVersion version));
+void TestNullptr(const AbckitApi *(*apiToCheck)(AbckitApiVersion version));
+void TestNullptr(const AbckitIsaApiDynamic *(*apiToCheck)(AbckitApiVersion version));
 
 }  // namespace libabckit::test::helpers_nullptr
 

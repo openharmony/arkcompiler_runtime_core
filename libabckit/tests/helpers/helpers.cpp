@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -405,6 +405,21 @@ void AssertModuleVisitor([[maybe_unused]] AbckitCoreModule *module, [[maybe_unus
     EXPECT_TRUE(data != nullptr);
 }
 
+void AssertInterfaceVisitor([[maybe_unused]] AbckitCoreInterface *iface, [[maybe_unused]] void *data)
+{
+    EXPECT_TRUE(iface != nullptr);
+    EXPECT_TRUE(iface->owningModule != nullptr);
+    EXPECT_TRUE(iface->owningModule->file != nullptr);
+    EXPECT_TRUE(data != nullptr);
+}
+
+void AssertFieldVisitor([[maybe_unused]] AbckitCoreInterfaceField *field, [[maybe_unused]] void *data)
+{
+    EXPECT_TRUE(field != nullptr);
+    EXPECT_TRUE(field->owner != nullptr);
+    EXPECT_TRUE(data != nullptr);
+}
+
 void AssertImportVisitor([[maybe_unused]] AbckitCoreImportDescriptor *id, [[maybe_unused]] void *data)
 {
     EXPECT_TRUE(id != nullptr);
@@ -501,6 +516,34 @@ bool ModuleByNameFinder(AbckitCoreModule *module, void *data)
     auto name = helpers::AbckitStringToString(g_implI->moduleGetName(module));
     if (name == ctxFinder->name) {
         ctxFinder->module = module;
+        return false;
+    }
+
+    return true;
+}
+
+bool InterfaceByNameFinder(AbckitCoreInterface *iface, void *data)
+{
+    AssertInterfaceVisitor(iface, data);
+
+    auto ctxFinder = reinterpret_cast<InterfaceByNameContext *>(data);
+    auto name = helpers::AbckitStringToString(g_implI->interfaceGetName(iface));
+    if (name == ctxFinder->name) {
+        ctxFinder->face = iface;
+        return false;
+    }
+
+    return true;
+}
+
+bool FiledByNameFinder(AbckitCoreInterfaceField *field, void *data)
+{
+    AssertFieldVisitor(field, data);
+
+    auto ctxFinder = reinterpret_cast<FieldByNameContext *>(data);
+    auto name = helpers::AbckitStringToString(g_implI->interfaceFieldGetName(field));
+    if (name == ctxFinder->name) {
+        ctxFinder->field = field;
         return false;
     }
 

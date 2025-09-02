@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -241,6 +241,60 @@ TEST_F(LibAbcKitModifyApiLiteralsTest, CreateLiteralArray_2)
 
     // Write output file
     g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    g_impl->closeFile(file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+// Test: test-kind=api, api=ModifyApiImpl::createLiteralArray, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitModifyApiLiteralsTest, CreateLiteralArray_3)
+{
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_static.abc", &file);
+    auto arr = std::vector<AbckitLiteral *>();
+    auto literal = g_implM->createLiteralBool(file, true);
+    arr.emplace_back(literal);
+    auto litArr = g_implM->createLiteralArray(file, arr.data(), arr.size());
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(litArr, nullptr);
+
+    arr = std::vector<AbckitLiteral *>();
+    literal = g_implM->createLiteralU8(file, 0);
+    arr.emplace_back(literal);
+    litArr = g_implM->createLiteralArray(file, arr.data(), arr.size());
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(litArr, nullptr);
+
+    arr = std::vector<AbckitLiteral *>();
+    literal = g_implM->createLiteralU16(file, 0);
+    arr.emplace_back(literal);
+    litArr = g_implM->createLiteralArray(file, arr.data(), arr.size());
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(litArr, nullptr);
+
+    arr = std::vector<AbckitLiteral *>();
+    literal = g_implM->createLiteralU64(file, 0);
+    arr.emplace_back(literal);
+    litArr = g_implM->createLiteralArray(file, arr.data(), arr.size());
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(litArr, nullptr);
+
+    arr = std::vector<AbckitLiteral *>();
+    literal = g_implM->createLiteralFloat(file, 1.0);
+    arr.emplace_back(literal);
+    litArr = g_implM->createLiteralArray(file, arr.data(), arr.size());
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(litArr, nullptr);
+
+    arr = std::vector<AbckitLiteral *>();
+    literal = g_implM->createLiteralString(file, "asdf", strlen("asdf"));
+    arr.emplace_back(literal);
+    litArr = g_implM->createLiteralArray(file, arr.data(), arr.size());
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(litArr, nullptr);
+
+    // Write output file
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
