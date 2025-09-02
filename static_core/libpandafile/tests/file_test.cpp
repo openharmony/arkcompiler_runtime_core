@@ -199,6 +199,102 @@ TEST(File, OpenPandaFileFromZipNameAnonMem)
     remove(zipFilename);
 }
 
+TEST(File, OpenPandaFile_Zip_Failure_FpClosed)
+{
+    // Create an empty zip file
+    const char *zipFilename = "__TestZipFclose__.zip";
+
+    {
+        FILE *zip = fopen(zipFilename, "wbe");
+        ASSERT_NE(zip, nullptr);
+
+        // NOLINTNEXTLINE(readability-magic-numbers)
+        std::array<uint8_t, 16> emptyZipData {
+            // NOLINTNEXTLINE(readability-magic-numbers)
+            {0x50, 0x4B, 0x05, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}};
+
+        size_t written = fwrite(emptyZipData.data(), 1, emptyZipData.size(), zip);
+        ASSERT_EQ(written, sizeof(emptyZipData));
+
+        fclose(zip);
+    }
+
+    std::unique_ptr<const panda_file::File> file = OpenPandaFile(zipFilename);
+    EXPECT_EQ(file, nullptr);
+
+    // Reopen the file to ensure it was properly closed and is accessible again.
+    FILE *fp = fopen(zipFilename, "rbe");
+    EXPECT_NE(fp, nullptr);
+    fclose(fp);
+
+    remove(zipFilename);
+}
+
+TEST(File, OpenPandaFile_Zip_Success_FpClosed)
+{
+    const char *zipFilename = "__TestNotEmptyZip__.zip";
+    const char *abcFilename = ARCHIVE_FILENAME;
+
+    auto data = GetEmptyPandaFileBytes();
+
+    int ret = CreateOrAddZipPandaFile(&data, zipFilename, abcFilename, APPEND_STATUS_CREATE, Z_BEST_COMPRESSION);
+    ASSERT_EQ(ret, 0);
+
+    std::unique_ptr<const panda_file::File> file = OpenPandaFile(zipFilename);
+    EXPECT_NE(file, nullptr);
+
+    FILE *fp = fopen(zipFilename, "rbe");
+    EXPECT_NE(fp, nullptr);
+    fclose(fp);
+
+    remove(zipFilename);
+}
+
+TEST(File, OpenPandaFile_File_Success_FpClosed)
+{
+    const char *filename = "__TestPandaFile__.abc";
+
+    {
+        auto data = GetEmptyPandaFileBytes();
+        FILE *fp = fopen(filename, "wbe");
+        ASSERT_NE(fp, nullptr);
+        size_t written = fwrite(data.data(), sizeof(uint8_t), data.size(), fp);
+        ASSERT_EQ(written, data.size());
+        fclose(fp);
+    }
+
+    std::unique_ptr<const panda_file::File> file = OpenPandaFile(filename);
+    EXPECT_NE(file, nullptr);
+
+    FILE *check = fopen(filename, "rbe");
+    EXPECT_NE(check, nullptr);
+    fclose(check);
+
+    remove(filename);
+}
+
+constexpr uint32_t FAKE_MAGIC = 0x12345678;
+TEST(File, OpenPandaFile_File_Failure_FpClosed)
+{
+    const char *filename = "__TestBadPandaFile__.abc";
+
+    {
+        FILE *fp = fopen(filename, "wbe");
+        ASSERT_NE(fp, nullptr);
+        fwrite(&FAKE_MAGIC, sizeof(FAKE_MAGIC), 1, fp);
+        fclose(fp);
+    }
+
+    std::unique_ptr<const panda_file::File> file = OpenPandaFile(filename);
+    EXPECT_EQ(file, nullptr);
+
+    FILE *check = fopen(filename, "rbe");
+    EXPECT_NE(check, nullptr);
+    fclose(check);
+
+    remove(filename);
+}
+
 TEST(File, OpenPandaFileOrZip)
 {
     // Create ZIP
