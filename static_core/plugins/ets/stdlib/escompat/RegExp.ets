@@ -812,7 +812,7 @@ export class RegExpMatchArray extends RegExpResultArray {
             let index = Double.parseInt(unitData[1])
             let endIndex = Double.parseInt(unitData[2])
             if (index >= 0 && endIndex >= 0) {
-                if (endIndex > this.input_.length || index >= endIndex) {
+                if (endIndex > this.input_.length || index > endIndex) {
                     throw new Error("internal error: incorrect substring indexes")
                 }
                 result.set(unitData[0], this.input!.substring(index, endIndex))
@@ -878,7 +878,7 @@ export class RegExpExecArray extends RegExpResultArray {
             let index = Double.parseInt(unitData[1])
             let endIndex = Double.parseInt(unitData[2])
             if (index >= 0 && endIndex >= 0) {
-                if (endIndex > this.input_.length || index >= endIndex) {
+                if (endIndex > this.input_.length || index > endIndex) {
                     throw new Error("internal error: incorrect substring indexes")
                 }
                 result.set(unitData[0], this.input.substring(index, endIndex))

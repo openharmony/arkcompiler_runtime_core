@@ -22,6 +22,7 @@ function main(): int {
     suite.addTest("test RegExp.exec5", testRegExpExec5);
     suite.addTest("test RegExp.exec6", testRegExpExec6);
     suite.addTest("test RegExp.exec7", testRegExpExec7);
+    suite.addTest("test RegExp.exec8", testRegExpExec8);
 
     return suite.run();
 }
@@ -77,5 +78,14 @@ function testRegExpExec7(): void {
     arktest.assertNE(arr, null);
     if (arr != null) {
         arktest.assertEQ(arr[0]!.length, 0, "testRegExpExec7");
+    }
+}
+
+function testRegExpExec8(): void {
+    let arr = new RegExp("(?<name>)b").exec("test b");
+    arktest.assertNE(arr, null);
+    if (arr != null) {
+        arktest.assertEQ(arr[0]!, "b", "testRegExpExec8");
+        arktest.assertEQ(arr[1]!, "", "testRegExpExec8");
     }
 }
