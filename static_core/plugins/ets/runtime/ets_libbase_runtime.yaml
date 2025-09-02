@@ -1541,14 +1541,14 @@ intrinsics:
     method_name: lastIndexOf
     static: false
     signature:
-      ret: f64
+      ret: i32
       args: [ std.core.Object]
     impl: ark::ets::intrinsics::EtsEscompatArrayLastIndexOf
 
   - name: EscompatArrayInternalLastIndexOf
     space: ets
     class_name: escompat.Array
-    method_name: lastIndexOf
+    method_name: lastIndexOfImpl
     static: false
     signature:
       ret: i32

@@ -463,11 +463,11 @@
  *
  * @returns The last index of the element in the array; -1 if not found.
  */
-<%= access_public %> lastIndexOf<%= this_generic %>(<%= this_arg %>element: <%= el_type %>, fromIndex: int): int {
+<%= access_public %> lastIndexOf<%= this_generic %>(<%= this_arg %>element: <%= el_type %>, fromIndex?: int): int {
     if (<%= this_len_int %> == 0) {
         return -1;
     }
-    let n = fromIndex;
+    let n = fromIndex ?? <%= this_len_int %> - 1;
     let k: int;
     if (n >= 0) {
         k = min(<%= this_len_int %> - 1, n);
@@ -482,22 +482,6 @@
         k--;
     }
     return -1;
-}
-
-/**
- * Returns the last index at which a given element can be found in the array,
- * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
- *
- * @param element element to locate in the array.
- * @param fromIndex zero-based index at which to start searching backwards.
- * Negative index counts back from the end of the array — if `fromIndex` < 0, `fromIndex` + `length()` is used.
- * If `fromIndex` < `-length()`, the array is not searched and -1 is returned.
- * If `fromIndex` >= `length()` then `array.length - 1` is used, causing the entire array to be searched.
- *
- * @returns The last index of the element in the array; -1 if not found.
- */
-<%= access_public %> <%= override %> lastIndexOf<%= this_generic %>(<%= this_arg %>element: <%= el_type %>, fromIndex?: Number): number {
-    return <%= this_call.('lastIndexOf') %>element, asIntOrDefault(fromIndex, <%= this_len_int %> - 1));
 }
 <% else %><% #generate code for Array.ets %>
 /**
@@ -515,7 +499,7 @@
  *
  * @returns The last index of the element in the array; -1 if not found.
  */
- <%= access_public %> native lastIndexOf<%= this_generic %>(<%= this_arg %>searchElement: T, fromIndex: int): int;
+ <%= access_private %> native lastIndexOfImpl<%= this_generic %>(<%= this_arg %>searchElement: T, fromIndex: int): int;
 
 /**
  * Returns the last index at which a given element can be found in the array,
@@ -532,8 +516,8 @@
  *
  * @returns The last index of the element in the array; -1 if not found.
  */
-<%= access_public %> lastIndexOf<%= this_generic %>(<%= this_arg %>searchElement: <%= el_type %>, fromIndex: number|undefined): number {
-    return <%= this_call.('lastIndexOf') %>searchElement, asIntOrDefault(fromIndex, 0));
+<%= access_public %> lastIndexOf<%= this_generic %>(<%= this_arg %>searchElement: <%= el_type %>, fromIndex?: int): int {
+    return <%= this_call.('lastIndexOfImpl') %>searchElement, fromIndex ?? 0);
 }
 
 /**
@@ -551,7 +535,7 @@
  *
  * @returns The last index of the element in the array; -1 if not found.
  */
-<%= access_public %> native lastIndexOf<%= this_generic %>(<%= this_arg %>searchElement: <%= el_type %>): number;
+<%= access_public %> native lastIndexOf<%= this_generic %>(<%= this_arg %>searchElement: <%= el_type %>): int;
 <% end %>
 
 <% if el_type == "T" %>

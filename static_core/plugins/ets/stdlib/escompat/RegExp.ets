@@ -493,7 +493,8 @@ export class RegExpResultArray /*extends Array<String>*/ {
      * Returns the last index of the specified element.
      */
     public lastIndexOf(searchElement: String, fromIndex: number|undefined): number {
-        return this.result_.lastIndexOf(searchElement, fromIndex)
+        // NOTE(cheezzario) workaround for #23963
+        return this.result_.lastIndexOf(searchElement, fromIndex === undefined ? undefined : Int.valueOf(fromIndex.toInt()))
     }
 
     /**
