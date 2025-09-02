@@ -23,6 +23,6 @@ class A {
 }
 
 function main(): void {
-  let instance: A = new A();
+  let instance: A = new A;
   arktest.assertEQ( instance.x, 0 )
 }

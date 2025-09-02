@@ -19,22 +19,22 @@ assert: A field access expression may access a field of an object which is refer
 ---*/
 
 class A {
-  private _x: int;
+  private _x: Int;
 
-  get x():int {
+  final get x(): Int {
     return this._x;
   }
 
 }
 
 final class B extends A {
-  public bar(): int {
+  public bar(): Int {
     return super.x;
   }
 }
 
 function main(): void {
-    let instance: B = new B();
-
+    let instance = new B
     arktest.assertEQ( instance.bar(), 0 );
 }
+

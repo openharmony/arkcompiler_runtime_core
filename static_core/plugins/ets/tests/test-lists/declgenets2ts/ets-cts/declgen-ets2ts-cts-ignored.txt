@@ -911,6 +911,7 @@
 07.expressions/06.spread_expression/spex_46.ets
 07.expressions/06.spread_expression/spex_47.ets
 07.expressions/09.field_access_expressions/02.accessing_superclass_fields/access_by_super_in_constructor_2.ets
+07.expressions/09.field_access_expressions/02.accessing_superclass_fields/accessing_by_super_indirect_2.ets
 07.expressions/10.method_call_expression/03.step_3_checking_method_modifiers/step3c_n_0.ets
 07.expressions/10.method_call_expression/03.step_3_checking_method_modifiers/step3c_n_1.ets
 07.expressions/10.method_call_expression/03.step_3_checking_method_modifiers/step3c_n_2.ets

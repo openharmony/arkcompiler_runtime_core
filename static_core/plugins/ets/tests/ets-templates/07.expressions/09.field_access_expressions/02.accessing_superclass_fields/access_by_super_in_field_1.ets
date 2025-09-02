@@ -25,7 +25,7 @@ class A {
   }
 }
 
-class B extends A{
+class B extends A {
   private y: int = super.x;
   foo(): int {
     return this.y;

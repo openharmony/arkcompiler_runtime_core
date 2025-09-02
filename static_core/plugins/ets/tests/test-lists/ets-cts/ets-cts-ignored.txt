@@ -1085,6 +1085,12 @@
 07.expressions/06.spread_expression/spex_lmbd_30.ets
 07.expressions/06.spread_expression/spex_lmbd_31.ets
 
+#28326
+07.expressions/09.field_access_expressions/field_access_to_override.ets
+
+#26730
+07.expressions/09.field_access_expressions/02.accessing_superclass_fields/access_by_super_from_method_3.ets
+
 #29053
 07.expressions/10.method_call_expression/01.step_1_selection_of_type_to_use/step1_7.ets
 
@@ -1107,7 +1113,7 @@
 
 #23062
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_23.ets
-
+07.expressions/09.field_access_expressions/field_access_to_override.ets
 #28526
 07.expressions/11.function_call_expression/fcall_20.ets
 

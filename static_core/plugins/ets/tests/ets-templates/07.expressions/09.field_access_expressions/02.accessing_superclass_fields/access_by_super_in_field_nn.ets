@@ -23,6 +23,10 @@ desc: >-
     is used to determine the field to be accessed
 ---*/
 
+interface IName {
+    name: String;
+}
+
 class A {
   private _a: {{case.type}} = {{case.value}};
 
@@ -32,11 +36,14 @@ class A {
 }
 
 class B extends A {
+}
+
+final class C extends B {
   b: {{case.type}} = super.a;
 }
 
 function main(): void {
-  let instance: B = new B();
+  let instance: C = new C;
   arktest.assertTrue( {{case.assert}} )
 }
 

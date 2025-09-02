@@ -24,7 +24,7 @@ tags: [negative, compile-only]
 class A {
   readonly a: int;
   constructor() {
-    a = 1;
+    this.a = 1;
   }
 }
 

@@ -18,6 +18,8 @@ cases:
   - { type: "long", value: "2", assert: "instance.b == 2"}
   - { type: "float", value: "1.2f", assert: "instance.b == 1.2f.toFloat()"}
   - { type: "double", value: "2", assert: "instance.b == 2"}
+  - { type: "number", value: "2", assert: "instance.b == 2"}
+  - { type: "bigint", value: "new BigInt(Long.MAX_VALUE * 2)", assert: "instance.b == new BigInt(Long.MAX_VALUE * 2)"}
   - { type: "char", value: "c'a'", assert: "instance.b == c'a'"}
   - { type: "boolean", value: "true", assert: "instance.b == true"}
   - { type: "string", value: "\"some string\"", assert: "instance.b == \"some string\""}
@@ -30,3 +32,4 @@ cases:
   - { type: "Char", value: "new Char(c'a')", assert: "instance.b == c'a'"}
   - { type: "Boolean", value: "new Boolean(true)", assert: "instance.b == true"}
   - { type: "String", value: "new String(\"some string\")", assert: "instance.b == \"some string\""}
+  - { type: "IName", value: "{name: \"Bob\"}", assert: "instance.b.name == \"Bob\""}
