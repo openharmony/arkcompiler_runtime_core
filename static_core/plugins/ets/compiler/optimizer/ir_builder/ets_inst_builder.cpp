@@ -38,6 +38,7 @@ static RuntimeInterface::IntrinsicId GetIntrinsicId(DataType::Type type)
         case DataType::UINT64:
         case DataType::INT64:
             return RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_LD_OBJ_BY_NAME_I64;
+        case DataType::BOOL:
         case DataType::UINT8:
         case DataType::INT8:
         case DataType::UINT16:
