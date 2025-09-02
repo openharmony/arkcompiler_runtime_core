@@ -15,39 +15,35 @@
 --- # Callbacks and type inference
 cases:
   - desc: one value arg
-    impl: |-
-        function test(op: (a: int) => int) {
+    call: |-
+        let test = (op: (a: int) => int): int => {
             const arg = 4
             return op(arg)
         }
-    call:
         arktest.assertEQ(test((n) => n + n), 8, 'Dub failed')
 
   - desc: two value args
-    impl: |-
-        function test(op: (a: int, b: int) => int) {
+    call: |-
+        let test = (op: (a: int, b: int) => int): int => {
             const a = 5
             const b = 3
             return op(a, b)
         }
-    call:
         arktest.assertEQ(test((a, b) => a + b), 8, 'Sum failed')
 
   - desc: two reference args
-    impl: |-
-        function test(op: (a: String, b: String) => String) {
+    call: |-
+        let test = (op: (a: String, b: String) => String): String => {
             const a = 'Hello, '
             const b = 'World!'
             return op(a, b)
         }
-    call:
         arktest.assertEQ(test((a, b) => a + b), 'Hello, World!', 'Concatenation failed')
 
   - desc: one value arg without parentheses
-    impl: |-
-        function test(op: (a: int) => int) {
+    call: |-
+        let test = (op: (a: int) => int): int => {
             const arg = 4
             return op(arg)
         }
-    call:
         arktest.assertEQ(test(n => n), 4, 'Same failed')
