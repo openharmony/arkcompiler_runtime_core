@@ -17,6 +17,7 @@ config("arkbase_public_config") {
   include_dirs = [
     "$ark_root",
     "$ark_root/libpandabase",
+    "$ark_root/platforms",
     "$target_gen_dir/include",
     "$target_gen_dir",
   ]
@@ -39,7 +40,12 @@ if (!ark_standalone_build && !is_arkui_x) {
     part_name = "runtime_core"
     subsystem_name = "arkcompiler"
   }
-}  
+  ohos_shared_headers("arkplatform_public_headers") {
+    include_dirs = [ "$ark_root/platforms" ]
+    part_name = "runtime_core"
+    subsystem_name = "arkcompiler"
+  }
+}
 
 config("arkbase_fuzz_config") {
   configs = [ "$build_root/config/compiler:exceptions" ]

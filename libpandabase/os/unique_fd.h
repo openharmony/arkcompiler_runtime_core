@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,9 +17,9 @@
 #define LIBPANDABASE_OS_UNIQUE_FD_H
 
 #ifdef PANDA_TARGET_UNIX
-#include "platforms/unix/libpandabase//unique_fd.h"
+#include "unix/libpandabase//unique_fd.h"
 #elif PANDA_TARGET_WINDOWS
-#include "platforms/windows/libpandabase//unique_fd.h"
+#include "windows/libpandabase//unique_fd.h"
 #else
 #error "Unsupported platform"
 #endif  // PANDA_TARGET_UNIX

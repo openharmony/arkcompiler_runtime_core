@@ -19,7 +19,7 @@
 #include <string>
 #include <vector>
 
-#include "libpandafile/literal_data_accessor-inl.h"
+#include "literal_data_accessor-inl.h"
 
 namespace panda::pandasm {
 

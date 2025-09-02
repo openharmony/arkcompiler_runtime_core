@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,7 @@
 #define LIBPANDABASE_OS_MUTEX_H
 
 #if defined(PANDA_USE_FUTEX)
-#include "platforms/unix/libpandabase/futex/mutex.h"
+#include "unix/libpandabase/futex/mutex.h"
 #elif !defined(PANDA_TARGET_UNIX) && !defined(PANDA_TARGET_WINDOWS)
 #error "Unsupported platform"
 #endif

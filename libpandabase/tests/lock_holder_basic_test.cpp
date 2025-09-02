@@ -14,7 +14,7 @@
  */
 
 
-#include "libpandabase/os/mutex.h"
+#include "os/mutex.h"
 #include <gtest/gtest.h>
 #include <thread>
 

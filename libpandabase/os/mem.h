@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,13 +20,13 @@
 #include "macros.h"
 #include "utils/expected.h"
 #include "utils/span.h"
-#include "libpandabase/mem/mem.h"
+#include "mem/mem.h"
 
 #include <cstddef>
 #ifdef PANDA_TARGET_UNIX
-#include "platforms/unix/libpandabase/unix_mem.h"
+#include "unix/libpandabase/unix_mem.h"
 #elif PANDA_TARGET_WINDOWS
-#include "platforms/windows/libpandabase/windows_mem.h"
+#include "windows/libpandabase/windows_mem.h"
 #else
 #error "Unsupported target: please provide mmap API"
 #endif

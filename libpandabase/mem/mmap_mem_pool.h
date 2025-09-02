@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,11 +16,11 @@
 #ifndef LIBPANDABASE_MEM_MMAP_MEM_POOL_H
 #define LIBPANDABASE_MEM_MMAP_MEM_POOL_H
 
-#include "libpandabase/mem/mem_pool.h"
-#include "libpandabase/mem/mem.h"
-#include "libpandabase/os/mem.h"
-#include "libpandabase/os/mutex.h"
-#include "libpandabase/mem/space.h"
+#include "mem/mem_pool.h"
+#include "mem/mem.h"
+#include "os/mem.h"
+#include "os/mutex.h"
+#include "mem/space.h"
 
 #include <map>
 #include <tuple>

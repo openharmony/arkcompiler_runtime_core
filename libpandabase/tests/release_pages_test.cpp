@@ -14,7 +14,7 @@
  */
 
 
-#include "libpandabase/os/mem.h"
+#include "os/mem.h"
 #include <gtest/gtest.h>
 
 namespace panda {
