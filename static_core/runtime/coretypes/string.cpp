@@ -14,6 +14,7 @@
  */
 
 #include <cstddef>
+#include <cstdint>
 #include <cstring>
 #include <limits>
 
@@ -751,9 +752,13 @@ String *String::DoReplace(String *src, uint16_t oldC, uint16_t newC, const Langu
     VMHandle<String> srcHandle(thread, src);
     FlatStringInfo srcFlat = FlatStringInfo::FlattenAllString(srcHandle, ctx);
     if (srcFlat.IsUtf16()) {
-        canBeCompressed = canBeCompressed && CanBeCompressedUtf16(srcFlat.GetDataUtf16(), length, oldC);
+        const uint16_t *flatData16 = srcFlat.GetDataUtf16();
+        ASSERT(flatData16 != nullptr);
+        canBeCompressed = canBeCompressed && CanBeCompressedUtf16(flatData16, length, oldC);
     } else {
-        canBeCompressed = canBeCompressed && CanBeCompressedMUtf8(srcFlat.GetDataUtf8(), length, oldC);
+        const uint8_t *flatData8 = srcFlat.GetDataUtf8();
+        ASSERT(flatData8 != nullptr);
+        canBeCompressed = canBeCompressed && CanBeCompressedMUtf8(flatData8, length, oldC);
     }
 
     auto string = String::AllocLineStringObject(length, canBeCompressed, ctx, vm);

@@ -326,9 +326,11 @@ VMHandle<EtsObject> &StringBuilderAppendStringsChecked(VMHandle<EtsObject> &sbHa
     auto str0 = str0Handle.GetPtr();
     auto str1 = str1Handle.GetPtr();
 
+    ASSERT(sb != nullptr);
     // sb.append(str0, str1)
     auto index = sb->GetFieldPrimitive<uint32_t>(SB_INDEX_OFFSET);
     auto *buf = EtsObjectArray::FromCoreType(sb->GetFieldObject(SB_BUFFER_OFFSET));
+    ASSERT(buf != nullptr);
     // Check buf overflow
     if (index + 1U >= buf->GetLength()) {
         auto *coroutine = EtsCoroutine::GetCurrent();
@@ -343,10 +345,13 @@ VMHandle<EtsObject> &StringBuilderAppendStringsChecked(VMHandle<EtsObject> &sbHa
         str0 = str0Handle.GetPtr();
         str1 = str1Handle.GetPtr();
         // Remember the new buffer
+        ASSERT(sb != nullptr);
         sb->SetFieldObject(SB_BUFFER_OFFSET, buf->GetCoreType());
     }
     // Append strings to the buf
     // NOLINTNEXTLINE(clang-analyzer-core.CallAndMessage)
+    ASSERT(str0 != nullptr);
+    ASSERT(str1 != nullptr);
     buf->Set(index + 0U, EtsObject::FromCoreType(str0->GetCoreType()));
     buf->Set(index + 1U, EtsObject::FromCoreType(str1->GetCoreType()));
     // Increment the index
@@ -412,10 +417,12 @@ VMHandle<EtsObject> &StringBuilderAppendStringsChecked(VMHandle<EtsObject> &sbHa
     auto str1 = str1Handle.GetPtr();
     auto str2 = str2Handle.GetPtr();
 
+    ASSERT(sb != nullptr);
     // sb.append(str0, str2, str3)
     auto index = sb->GetFieldPrimitive<uint32_t>(SB_INDEX_OFFSET);
     auto *buf = EtsObjectArray::FromCoreType(sb->GetFieldObject(SB_BUFFER_OFFSET));
     // Check buf overflow
+    ASSERT(buf != nullptr);
     if (index + 2U >= buf->GetLength()) {
         auto *coroutine = EtsCoroutine::GetCurrent();
         EtsHandle<EtsObjectArray> bufHandle(coroutine, buf);
@@ -430,10 +437,14 @@ VMHandle<EtsObject> &StringBuilderAppendStringsChecked(VMHandle<EtsObject> &sbHa
         str1 = str1Handle.GetPtr();
         str2 = str2Handle.GetPtr();
         // Remember the new buffer
+        ASSERT(sb != nullptr);
         sb->SetFieldObject(SB_BUFFER_OFFSET, buf->GetCoreType());
     }
     // Append strings to the buf
     // NOLINTNEXTLINE(clang-analyzer-core.CallAndMessage)
+    ASSERT(str0 != nullptr);
+    ASSERT(str1 != nullptr);
+    ASSERT(str2 != nullptr);
     buf->Set(index + 0U, EtsObject::FromCoreType(str0->GetCoreType()));
     buf->Set(index + 1U, EtsObject::FromCoreType(str1->GetCoreType()));
     buf->Set(index + 2U, EtsObject::FromCoreType(str2->GetCoreType()));
@@ -513,9 +524,11 @@ VMHandle<EtsObject> &StringBuilderAppendStringsChecked(VMHandle<EtsObject> &sbHa
     auto str2 = str2Handle.GetPtr();
     auto str3 = str3Handle.GetPtr();
 
+    ASSERT(sb != nullptr);
     // sb.append(str0, str2, str3, str4)
     auto index = sb->GetFieldPrimitive<uint32_t>(SB_INDEX_OFFSET);
     auto *buf = EtsObjectArray::FromCoreType(sb->GetFieldObject(SB_BUFFER_OFFSET));
+    ASSERT(buf != nullptr);
     // Check buf overflow
     if (index + 3U >= buf->GetLength()) {
         auto *coroutine = EtsCoroutine::GetCurrent();
@@ -532,10 +545,15 @@ VMHandle<EtsObject> &StringBuilderAppendStringsChecked(VMHandle<EtsObject> &sbHa
         str2 = str2Handle.GetPtr();
         str3 = str3Handle.GetPtr();
         // Remember the new buffer
+        ASSERT(sb != nullptr);
         sb->SetFieldObject(SB_BUFFER_OFFSET, buf->GetCoreType());
     }
     // Append strings to the buf
     // NOLINTNEXTLINE(clang-analyzer-core.CallAndMessage)
+    ASSERT(str0 != nullptr);
+    ASSERT(str1 != nullptr);
+    ASSERT(str2 != nullptr);
+    ASSERT(str3 != nullptr);
     buf->Set(index + 0U, EtsObject::FromCoreType(str0->GetCoreType()));
     buf->Set(index + 1U, EtsObject::FromCoreType(str1->GetCoreType()));
     buf->Set(index + 2U, EtsObject::FromCoreType(str2->GetCoreType()));

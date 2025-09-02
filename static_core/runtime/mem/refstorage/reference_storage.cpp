@@ -210,6 +210,7 @@ ObjectHeader *ReferenceStorage::GetObject(const Reference *ref)
              * not
              */
             auto baseCls = obj->ClassAddr<BaseClass>();
+            ASSERT(baseCls != nullptr);
             if (!baseCls->IsDynamicClass()) {
                 auto cls = static_cast<Class *>(baseCls);
                 if (!cls->IsClassClass()) {

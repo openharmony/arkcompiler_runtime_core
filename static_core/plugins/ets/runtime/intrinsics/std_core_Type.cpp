@@ -472,7 +472,9 @@ EtsTypeAPIMethod *TypeAPIGetMethod(ObjectHeader *methodTypeObj, EtsTypeAPIType *
 
     auto *method = GetEtsMethod(methodTypeHandle.GetPtr());
     ASSERT(method != nullptr);
+    ASSERT(method->GetClass() != nullptr);
     ASSERT(ownerTypeHandle.GetPtr() != nullptr);
+    ASSERT(ownerTypeHandle.GetPtr()->GetRuntimeTypeDescriptor() != nullptr);
     ASSERT(ownerTypeHandle.GetPtr()->GetRuntimeTypeDescriptor()->GetMutf8() == method->GetClass()->GetDescriptor());
     return CreateMethodUnderHandleScope(methodTypeHandle, method, ownerTypeHandle);
 }
