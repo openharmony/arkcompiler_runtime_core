@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,18 @@
  * limitations under the License.
  */
 
-{% for lc in logical_complement %}
 /*---
 desc: Logical complement operator
-params: "{{lc.origin}} => {{lc.dest}}"
 ---*/
 
 function main(): void {
-  let a = {{lc.origin}};
-  arktest.assertEQ(!a, {{lc.dest}});
+  let c: int | float | boolean | char
+  c = 1
+  arktest.assertEQ(!c, false)
+  c = 0.0f
+  arktest.assertEQ(!c, true)
+  c = true
+  arktest.assertEQ(!c, false)
+  c = c'\u0000'
+  arktest.assertEQ(!c, true)
 }
-
-{% endfor %}

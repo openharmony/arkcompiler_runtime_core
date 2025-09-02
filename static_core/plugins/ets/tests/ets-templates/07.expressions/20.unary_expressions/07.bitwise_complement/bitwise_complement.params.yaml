@@ -56,6 +56,8 @@ bitwise_complement:
   - {type: float, origin: 0.0f,  dest:   -1.0f}
   - {type: float, origin: 127.0f, dest:   -128.0f}
   - {type: float, origin: 32767.0f, dest: -32768.0f}
+  - {type: float, origin: 32767.251f, dest: -32768.0f}
+  - {type: float, origin: 32767.851f, dest: -32768.0f}
   - {type: float, origin: 2147483647.0f, dest: -2147483648.0f}
   - {type: float, origin: 2147483648.0f, dest: -2147483648.0f}
   - {type: float, origin: 2147483649.0f, dest: -2147483648.0f}
@@ -64,5 +66,20 @@ bitwise_complement:
   - {type: double, origin: 0.0,  dest: -1.0}
   - {type: double, origin: 127.0, dest: -128.0}
   - {type: double, origin: 32767.0, dest: -32768.0}
+  - {type: double, origin: 32767.251, dest: -32768.0}
+  - {type: double, origin: 32767.851, dest: -32768.0}
   - {type: double, origin: 2147483647.0, dest:   -2147483648.0}
   - {type: double, origin: 9223372036854775807.0, dest: -9223372036854775808.0}
+
+
+  - {type: bigint, origin:     0n, dest:     -1n}
+  - {type: bigint, origin:     1n, dest:     -2n}
+  - {type: bigint, origin:   127n, dest:   -128n}
+  - {type: bigint, origin:   -86n, dest:     85n}
+  - {type: bigint, origin:    15n, dest:    -16n}
+  - {type: bigint, origin:    51n, dest:    -52n}
+  - {type: bigint, origin:   255n, dest:   -256n}
+  - {type: bigint, origin: 21845n, dest: -21846n}
+  - {type: bigint, origin: -3856n, dest:   3855n}
+  - {type: bigint,  origin: 9223372036854775807n, dest: -9223372036854775808n}
+  - {type: bigint,  origin: 92233720368547745654568564565807n, dest: -92233720368547745654568564565808n}

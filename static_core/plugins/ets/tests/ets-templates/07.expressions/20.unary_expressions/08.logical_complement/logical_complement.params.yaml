@@ -17,4 +17,11 @@ logical_complement:
   - {origin: "false", dest: "true"}
   - {origin: "0", dest: "true"}
   - {origin: "1", dest: "false"}
-
+  - {origin: "1.0", dest: "false"}
+  - {origin: "1n", dest: "false"}
+  - {origin: "undefined", dest: "true"}
+  - {origin: "null", dest: "true"}
+  - {origin: "c'v'", dest: "false"}
+  - {origin: "new Object()", dest: "false"}
+  - {origin: "''", dest: "true"}
+  - {origin: "'fghdm'", dest: "false"}
