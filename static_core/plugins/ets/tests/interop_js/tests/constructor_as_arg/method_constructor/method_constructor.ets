@@ -13,53 +13,155 @@
  * limitations under the License.
  */
 
-import {
-    tsInt,
-    MainClass,
-    MethodClass,
-    ParentClass,
-    ChildClass,
-    AnonymousClass,
-    IIFEClass,
-    checkInstance,
-} from "main_js"
+let global = ESValue.getGlobal();
+let gtestEnv = global.getProperty("gtest_env");
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/constructor_as_arg/main');
 
+let tsInt = module.getProperty('tsInt');
+let MainClass = module.getProperty('MainClass');
+let MethodClass = module.getProperty('MethodClass');
+let ParentClass = module.getProperty('ParentClass');
+let ChildClass = module.getProperty('ChildClass');
+let AnonymousClass = module.getProperty('AnonymousClass');
+let IIFEClass = module.getProperty('IIFEClass');
+let checkInstance = module.getProperty('checkInstance');
 
 function checkMethodConstructorMainClass(): boolean {
-    const MClass = new MethodClass();
-    const TSClass = MClass.init(MainClass, tsInt);
+    try {
+        const MClass = MethodClass.instantiate();
+        const TSClass = MClass.invokeMethod('init', MainClass, tsInt);
 
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
 
-    return checkInstance(MainClass, TSClass) as boolean
-        && TSClass._value as int == tsInt as int;
+        const checkResult = checkInstance.invoke(MainClass, TSClass);
+        if (!checkResult.isBoolean() || !checkResult.toBoolean()) {
+            return false;
+        }
+
+        const value = TSClass.getPropertySafe('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkMethodClassParentClass(): boolean {
-    const MClass = new MethodClass();
-    const TSClass = MClass.init(ParentClass, MainClass);
-    return checkInstance(ParentClass, TSClass) as boolean
-        && TSClass._otherClass._value as int == tsInt as int;
+    try {
+        const MClass = MethodClass.instantiate();
+        const TSClass = MClass.invokeMethod('init', ParentClass, MainClass);
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const checkResult = checkInstance.invoke(ParentClass, TSClass);
+        if (!checkResult.isBoolean() || !checkResult.toBoolean()) {
+            return false;
+        }
+
+        const otherClass = TSClass.getPropertySafe('_otherClass');
+        if (otherClass.isUndefined()) {
+            return false;
+        }
+
+        const value = otherClass.getPropertySafe('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkMethodClassChildClass(): boolean {
-    const MClass = new MethodClass();
-    const TSClass = MClass.init(ChildClass, MainClass);
-    return checkInstance(ChildClass, TSClass) as boolean
-        && TSClass._otherClass._value as int == tsInt as int;
+    try {
+        const MClass = MethodClass.instantiate();
+        const TSClass = MClass.invokeMethod('init', ChildClass, MainClass);
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const checkResult = checkInstance.invoke(ChildClass, TSClass);
+        if (!checkResult.isBoolean() || !checkResult.toBoolean()) {
+            return false;
+        }
+
+        const otherClass = TSClass.getPropertySafe('_otherClass');
+        if (otherClass.isUndefined()) {
+            return false;
+        }
+
+        const value = otherClass.getPropertySafe('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkMethodClassAnonymousClass(): boolean {
-    const MClass = new MethodClass();
-    const TSClass = MClass.init(AnonymousClass, tsInt);
+    try {
+        const MClass = MethodClass.instantiate();
+        const TSClass = MClass.invokeMethod('init', AnonymousClass, tsInt);
 
-    return checkInstance(AnonymousClass, TSClass) as boolean
-        && TSClass._value as int == tsInt as int;
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const checkResult = checkInstance.invoke(AnonymousClass, TSClass);
+        if (!checkResult.isBoolean() || !checkResult.toBoolean()) {
+            return false;
+        }
+
+        const value = TSClass.getPropertySafe('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkMethodClassIIFEClass(): boolean {
-    const MClass = new MethodClass();
-    const TSClass = MClass.init(IIFEClass, tsInt);
+    try {
+        const MClass = MethodClass.instantiate();
+        const TSClass = MClass.invokeMethod('init', IIFEClass, tsInt);
 
-    return checkInstance(IIFEClass, TSClass) as boolean
-        && TSClass._value as int == tsInt as int;
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const checkResult = checkInstance.invoke(IIFEClass, TSClass);
+        if (!checkResult.isBoolean() || !checkResult.toBoolean()) {
+            return false;
+        }
+
+        const value = TSClass.getPropertySafe('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }

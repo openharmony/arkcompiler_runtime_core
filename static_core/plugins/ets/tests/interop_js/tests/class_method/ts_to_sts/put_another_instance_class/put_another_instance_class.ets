@@ -13,213 +13,937 @@
  * limitations under the License.
  */
 
-import {
-    UserClass,
-    createUserClassFromTs,
-    instanceUserClass,
-    ChildClass,
-    createChildClassFromTs,
-    instanceChildClass,
-    InterfaceClass,
-    createInterfaceClassFromTs,
-    instanceInterfaceClass,
-    StaticClass,
-    createStaticClassFromTs,
-    PrivateClass,
-    createPrivateClassFromTs,
-    instancePrivateClass,
-    ChildProtectedClass,
-    createChildProtectedClassFromTs,
-    instanceChildProtectedClass,
-    ProtectedClass,
-    createProtectedClassFromTs,
-    instanceProtectedClass,
-    ChildAbstractClass,
-    createChildAbstractClassFromTs,
-    instanceChildAbstractClass,
-} from 'main_js';
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/class_method/ts_to_sts/main');
+let UserClass = module.getProperty('UserClass');
+let createUserClassFromTs = module.getProperty('createUserClassFromTs');
+let instanceUserClass = module.getProperty('instanceUserClass');
+let ChildClass = module.getProperty('ChildClass');
+let createChildClassFromTs = module.getProperty('createChildClassFromTs');
+let instanceChildClass = module.getProperty('instanceChildClass');
+let InterfaceClass = module.getProperty('InterfaceClass');
+let createInterfaceClassFromTs = module.getProperty('createInterfaceClassFromTs');
+let instanceInterfaceClass = module.getProperty('instanceInterfaceClass');
+let StaticClass = module.getProperty('StaticClass');
+let createStaticClassFromTs = module.getProperty('createStaticClassFromTs');
+let PrivateClass = module.getProperty('PrivateClass');
+let createPrivateClassFromTs = module.getProperty('createPrivateClassFromTs');
+let instancePrivateClass = module.getProperty('instancePrivateClass');
+let ChildProtectedClass = module.getProperty('ChildProtectedClass');
+let createChildProtectedClassFromTs = module.getProperty('createChildProtectedClassFromTs');
+let instanceChildProtectedClass = module.getProperty('instanceChildProtectedClass');
+let ProtectedClass = module.getProperty('ProtectedClass');
+let createProtectedClassFromTs = module.getProperty('createProtectedClassFromTs');
+let instanceProtectedClass = module.getProperty('instanceProtectedClass');
+let ChildAbstractClass = module.getProperty('ChildAbstractClass');
+let createChildAbstractClassFromTs = module.getProperty('createChildAbstractClassFromTs');
+let instanceChildAbstractClass = module.getProperty('instanceChildAbstractClass');
 
 function checkChildClassMethod(): boolean {
-    const TSClass = new ChildClass();
-    const AnotherClass = new InterfaceClass();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(AnotherClass.get) as boolean == false;
+        if (ChildClass.isUndefined() || ChildClass.isNull() || InterfaceClass.isUndefined() || InterfaceClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = ChildClass.instantiate();
+        const AnotherClass = InterfaceClass.instantiate();
+
+        if (TSClass.isUndefined() || TSClass.isNull() || AnotherClass.isUndefined() || AnotherClass.isNull()) {
+            return false;
+        }
+
+        const anotherGetMethod = AnotherClass.getPropertySafe('get');
+        if (anotherGetMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', anotherGetMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean() == false;
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateChildClassFromTs(): boolean {
-    const TSClass = createChildClassFromTs();
-    const AnotherClass = new InterfaceClass();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(AnotherClass.get) as boolean == false;
+        if (createChildClassFromTs.isUndefined() || createChildClassFromTs.isNull() || InterfaceClass.isUndefined() || InterfaceClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = createChildClassFromTs.invoke();
+        const AnotherClass = InterfaceClass.instantiate();
+
+        if (TSClass.isUndefined() || TSClass.isNull() || AnotherClass.isUndefined() || AnotherClass.isNull()) {
+            return false;
+        }
+
+        const anotherGetMethod = AnotherClass.getPropertySafe('get');
+        if (anotherGetMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', anotherGetMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean() == false;
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkInstanceChildClass(): boolean {
-    const TSClass = instanceChildClass;
-    const AnotherClass = new InterfaceClass();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(AnotherClass.get) as boolean == false;
+        if (instanceChildClass.isUndefined() || instanceChildClass.isNull() || InterfaceClass.isUndefined() || InterfaceClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = instanceChildClass;
+        const AnotherClass = InterfaceClass.instantiate();
+
+        if (AnotherClass.isUndefined() || AnotherClass.isNull()) {
+            return false;
+        }
+
+        const anotherGetMethod = AnotherClass.getPropertySafe('get');
+        if (anotherGetMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', anotherGetMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean() == false;
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkChildClassMethodOwnMethod(): boolean {
-    const TSClass = new ChildClass();
-    const AnotherClass = new InterfaceClass();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.childMethodCompare(AnotherClass.get) as boolean == false;
+        if (ChildClass.isUndefined() || ChildClass.isNull() || InterfaceClass.isUndefined() || InterfaceClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = ChildClass.instantiate();
+        const AnotherClass = InterfaceClass.instantiate();
+
+        if (TSClass.isUndefined() || TSClass.isNull() || AnotherClass.isUndefined() || AnotherClass.isNull()) {
+            return false;
+        }
+
+        const anotherGetMethod = AnotherClass.getPropertySafe('get');
+        if (anotherGetMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('childMethodCompare', anotherGetMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean() == false;
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateChildClassFromTsOwnMethod(): boolean {
-    const TSClass = createChildClassFromTs();
-    const AnotherClass = new InterfaceClass();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.childMethodCompare(AnotherClass.get) as boolean == false;
+        if (createChildClassFromTs.isUndefined() || createChildClassFromTs.isNull() || InterfaceClass.isUndefined() || InterfaceClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = createChildClassFromTs.invoke();
+        const AnotherClass = InterfaceClass.instantiate();
+
+        if (TSClass.isUndefined() || TSClass.isNull() || AnotherClass.isUndefined() || AnotherClass.isNull()) {
+            return false;
+        }
+
+        const anotherGetMethod = AnotherClass.getPropertySafe('get');
+        if (anotherGetMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('childMethodCompare', anotherGetMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean() == false;
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkInstanceChildClassOwnMethod(): boolean {
-    const TSClass = instanceChildClass;
-    const AnotherClass = new InterfaceClass();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.childMethodCompare(AnotherClass.get) as boolean == false;
+        if (instanceChildClass.isUndefined() || instanceChildClass.isNull() || InterfaceClass.isUndefined() || InterfaceClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = instanceChildClass;
+        const AnotherClass = InterfaceClass.instantiate();
+
+        if (AnotherClass.isUndefined() || AnotherClass.isNull()) {
+            return false;
+        }
+
+        const anotherGetMethod = AnotherClass.getPropertySafe('get');
+        if (anotherGetMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('childMethodCompare', anotherGetMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean() == false;
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkUserClassMethod(): boolean {
-    const TSClass = new UserClass();
-    const AnotherClass = new InterfaceClass();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(AnotherClass.get) as boolean == false;
+        if (UserClass.isUndefined() || UserClass.isNull() || InterfaceClass.isUndefined() || InterfaceClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = UserClass.instantiate();
+        const AnotherClass = InterfaceClass.instantiate();
+
+        if (TSClass.isUndefined() || TSClass.isNull() || AnotherClass.isUndefined() || AnotherClass.isNull()) {
+            return false;
+        }
+
+        const anotherGetMethod = AnotherClass.getPropertySafe('get');
+        if (anotherGetMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', anotherGetMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean() == false;
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateUserClassFromTs(): boolean {
-    const TSClass = createUserClassFromTs();
-    const AnotherClass = new InterfaceClass();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(AnotherClass.get) as boolean == false;
+        if (createUserClassFromTs.isUndefined() || createUserClassFromTs.isNull() || InterfaceClass.isUndefined() || InterfaceClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = createUserClassFromTs.invoke();
+        const AnotherClass = InterfaceClass.instantiate();
+
+        if (TSClass.isUndefined() || TSClass.isNull() || AnotherClass.isUndefined() || AnotherClass.isNull()) {
+            return false;
+        }
+
+        const anotherGetMethod = AnotherClass.getPropertySafe('get');
+        if (anotherGetMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', anotherGetMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean() == false;
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkInstanceUserClass(): boolean {
-    const TSClass = instanceUserClass;
-    const AnotherClass = new InterfaceClass();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(AnotherClass.get) as boolean == false;
+        if (instanceUserClass.isUndefined() || instanceUserClass.isNull() || InterfaceClass.isUndefined() || InterfaceClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = instanceUserClass;
+        const AnotherClass = InterfaceClass.instantiate();
+
+        if (AnotherClass.isUndefined() || AnotherClass.isNull()) {
+            return false;
+        }
+
+        const anotherGetMethod = AnotherClass.getPropertySafe('get');
+        if (anotherGetMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', anotherGetMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean() == false;
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkInterfaceClassMethod(): boolean {
-    const TSClass = new InterfaceClass();
-    const AnotherClass = new UserClass();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(AnotherClass.get) as boolean == false;
+        if (InterfaceClass.isUndefined() || InterfaceClass.isNull() || UserClass.isUndefined() || UserClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = InterfaceClass.instantiate();
+        const AnotherClass = UserClass.instantiate();
+
+        if (TSClass.isUndefined() || TSClass.isNull() || AnotherClass.isUndefined() || AnotherClass.isNull()) {
+            return false;
+        }
+
+        const anotherGetMethod = AnotherClass.getPropertySafe('get');
+        if (anotherGetMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', anotherGetMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean() == false;
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateInterfaceClassFromTs(): boolean {
-    const TSClass = createInterfaceClassFromTs();
-    const AnotherClass = new UserClass();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(AnotherClass.get) as boolean == false;
+        if (createInterfaceClassFromTs.isUndefined() || createInterfaceClassFromTs.isNull() || UserClass.isUndefined() || UserClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = createInterfaceClassFromTs.invoke();
+        const AnotherClass = UserClass.instantiate();
+
+        if (TSClass.isUndefined() || TSClass.isNull() || AnotherClass.isUndefined() || AnotherClass.isNull()) {
+            return false;
+        }
+
+        const anotherGetMethod = AnotherClass.getPropertySafe('get');
+        if (anotherGetMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', anotherGetMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean() == false;
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkInstanceInterfaceClass(): boolean {
-    const TSClass = instanceInterfaceClass;
-    const AnotherClass = new UserClass();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(AnotherClass.get) as boolean == false;
+        if (instanceInterfaceClass.isUndefined() || instanceInterfaceClass.isNull() || UserClass.isUndefined() || UserClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = instanceInterfaceClass;
+        const AnotherClass = UserClass.instantiate();
+
+        if (AnotherClass.isUndefined() || AnotherClass.isNull()) {
+            return false;
+        }
+
+        const anotherGetMethod = AnotherClass.getPropertySafe('get');
+        if (anotherGetMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', anotherGetMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean() == false;
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkStaticClassMethod(): boolean {
-    const TSClass = StaticClass;
-    const AnotherClass = new UserClass();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(AnotherClass.get) as boolean == false;
+        if (StaticClass.isUndefined() || StaticClass.isNull() || UserClass.isUndefined() || UserClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = StaticClass;
+        const AnotherClass = UserClass.instantiate();
+
+        if (AnotherClass.isUndefined() || AnotherClass.isNull()) {
+            return false;
+        }
+
+        const anotherGetMethod = AnotherClass.getPropertySafe('get');
+        if (anotherGetMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', anotherGetMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean() == false;
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateStaticClassFromTs(): boolean {
-    const TSClass = createStaticClassFromTs();
-    const AnotherClass = new UserClass();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(AnotherClass.get) as boolean == false;
+        if (createStaticClassFromTs.isUndefined() || createStaticClassFromTs.isNull() || UserClass.isUndefined() || UserClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = createStaticClassFromTs.invoke();
+        const AnotherClass = UserClass.instantiate();
+
+        if (TSClass.isUndefined() || TSClass.isNull() || AnotherClass.isUndefined() || AnotherClass.isNull()) {
+            return false;
+        }
+
+        const anotherGetMethod = AnotherClass.getPropertySafe('get');
+        if (anotherGetMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', anotherGetMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean() == false;
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkPrivateClassMethod(): boolean {
-    const TSClass = new PrivateClass();
-    const AnotherClass = new UserClass();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(AnotherClass.get) as boolean == false;
+        if (PrivateClass.isUndefined() || PrivateClass.isNull() || UserClass.isUndefined() || UserClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = PrivateClass.instantiate();
+        const AnotherClass = UserClass.instantiate();
+
+        if (TSClass.isUndefined() || TSClass.isNull() || AnotherClass.isUndefined() || AnotherClass.isNull()) {
+            return false;
+        }
+
+        const anotherGetMethod = AnotherClass.getPropertySafe('get');
+        if (anotherGetMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', anotherGetMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean() == false;
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreatePrivateClassFromTs(): boolean {
-    const TSClass = createPrivateClassFromTs();
-    const AnotherClass = new UserClass();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(AnotherClass.get) as boolean == false;
+        if (createPrivateClassFromTs.isUndefined() || createPrivateClassFromTs.isNull() || UserClass.isUndefined() || UserClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = createPrivateClassFromTs.invoke();
+        const AnotherClass = UserClass.instantiate();
+
+        if (TSClass.isUndefined() || TSClass.isNull() || AnotherClass.isUndefined() || AnotherClass.isNull()) {
+            return false;
+        }
+
+        const anotherGetMethod = AnotherClass.getPropertySafe('get');
+        if (anotherGetMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', anotherGetMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean() == false;
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
-
 function checkInstancePrivateClass(): boolean {
-    const TSClass = instancePrivateClass;
-    const AnotherClass = new UserClass();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(AnotherClass.get) as boolean == false;
+        if (instancePrivateClass.isUndefined() || instancePrivateClass.isNull() || UserClass.isUndefined() || UserClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = instancePrivateClass;
+        const AnotherClass = UserClass.instantiate();
+
+        if (AnotherClass.isUndefined() || AnotherClass.isNull()) {
+            return false;
+        }
+
+        const anotherGetMethod = AnotherClass.getPropertySafe('get');
+        if (anotherGetMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', anotherGetMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean() == false;
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkChildProtectedClassMethod(): boolean {
-    const TSClass = new ChildProtectedClass();
-    const AnotherClass = new UserClass();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(AnotherClass.get) as boolean == false;
+        if (ChildProtectedClass.isUndefined() || ChildProtectedClass.isNull() || UserClass.isUndefined() || UserClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = ChildProtectedClass.instantiate();
+        const AnotherClass = UserClass.instantiate();
+
+        if (TSClass.isUndefined() || TSClass.isNull() || AnotherClass.isUndefined() || AnotherClass.isNull()) {
+            return false;
+        }
+
+        const anotherGetMethod = AnotherClass.getPropertySafe('get');
+        if (anotherGetMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', anotherGetMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean() == false;
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateChildProtectedClassFromTs(): boolean {
-    const TSClass = createChildProtectedClassFromTs();
-    const AnotherClass = new UserClass();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(AnotherClass.get) as boolean == false;
+        if (createChildProtectedClassFromTs.isUndefined() || createChildProtectedClassFromTs.isNull() || UserClass.isUndefined() || UserClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = createChildProtectedClassFromTs.invoke();
+        const AnotherClass = UserClass.instantiate();
+
+        if (TSClass.isUndefined() || TSClass.isNull() || AnotherClass.isUndefined() || AnotherClass.isNull()) {
+            return false;
+        }
+
+        const anotherGetMethod = AnotherClass.getPropertySafe('get');
+        if (anotherGetMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', anotherGetMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean() == false;
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
-
 function checkInstanceChildProtectedClass(): boolean {
-    const TSClass = instanceChildProtectedClass;
-    const AnotherClass = new UserClass();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(AnotherClass.get) as boolean == false;
+        if (instanceChildProtectedClass.isUndefined() || instanceChildProtectedClass.isNull() || UserClass.isUndefined() || UserClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = instanceChildProtectedClass;
+        const AnotherClass = UserClass.instantiate();
+
+        if (AnotherClass.isUndefined() || AnotherClass.isNull()) {
+            return false;
+        }
+
+        const anotherGetMethod = AnotherClass.getPropertySafe('get');
+        if (anotherGetMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', anotherGetMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean() == false;
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkProtectedClassMethod(): boolean {
-    const TSClass = new ProtectedClass();
-    const AnotherClass = new UserClass();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(AnotherClass.get) as boolean == false;
+        if (ProtectedClass.isUndefined() || ProtectedClass.isNull() || UserClass.isUndefined() || UserClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = ProtectedClass.instantiate();
+        const AnotherClass = UserClass.instantiate();
+
+        if (TSClass.isUndefined() || TSClass.isNull() || AnotherClass.isUndefined() || AnotherClass.isNull()) {
+            return false;
+        }
+
+        const anotherGetMethod = AnotherClass.getPropertySafe('get');
+        if (anotherGetMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', anotherGetMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean() == false;
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateProtectedClassFromTs(): boolean {
-    const TSClass = createProtectedClassFromTs();
-    const AnotherClass = new UserClass();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(AnotherClass.get) as boolean == false;
+        if (createProtectedClassFromTs.isUndefined() || createProtectedClassFromTs.isNull() || UserClass.isUndefined() || UserClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = createProtectedClassFromTs.invoke();
+        const AnotherClass = UserClass.instantiate();
+
+        if (TSClass.isUndefined() || TSClass.isNull() || AnotherClass.isUndefined() || AnotherClass.isNull()) {
+            return false;
+        }
+
+        const anotherGetMethod = AnotherClass.getPropertySafe('get');
+        if (anotherGetMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', anotherGetMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean() == false;
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
-
 function checkInstanceProtectedClass(): boolean {
-    const TSClass = instanceProtectedClass;
-    const AnotherClass = new UserClass();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(AnotherClass.get) as boolean == false;
+        if (instanceProtectedClass.isUndefined() || instanceProtectedClass.isNull() || UserClass.isUndefined() || UserClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = instanceProtectedClass;
+        const AnotherClass = UserClass.instantiate();
+
+        if (AnotherClass.isUndefined() || AnotherClass.isNull()) {
+            return false;
+        }
+
+        const anotherGetMethod = AnotherClass.getPropertySafe('get');
+        if (anotherGetMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', anotherGetMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean() == false;
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkAbstractClassMethod(): boolean {
-    const TSClass = new ChildAbstractClass();
-    const AnotherClass = new UserClass();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(AnotherClass.get) as boolean == false;
+        if (ChildAbstractClass.isUndefined() || ChildAbstractClass.isNull() || UserClass.isUndefined() || UserClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = ChildAbstractClass.instantiate();
+        const AnotherClass = UserClass.instantiate();
+
+        if (TSClass.isUndefined() || TSClass.isNull() || AnotherClass.isUndefined() || AnotherClass.isNull()) {
+            return false;
+        }
+
+        const anotherGetMethod = AnotherClass.getPropertySafe('get');
+        if (anotherGetMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', anotherGetMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean() == false;
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateAbstractClassFromTs(): boolean {
-    const TSClass = createChildAbstractClassFromTs();
-    const AnotherClass = new UserClass();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(AnotherClass.get) as boolean == false;
+        if (createChildAbstractClassFromTs.isUndefined() || createChildAbstractClassFromTs.isNull() || UserClass.isUndefined() || UserClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = createChildAbstractClassFromTs.invoke();
+        const AnotherClass = UserClass.instantiate();
+
+        if (TSClass.isUndefined() || TSClass.isNull() || AnotherClass.isUndefined() || AnotherClass.isNull()) {
+            return false;
+        }
+
+        const anotherGetMethod = AnotherClass.getPropertySafe('get');
+        if (anotherGetMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', anotherGetMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean() == false;
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkInstanceAbstractClass(): boolean {
-    const TSClass = instanceChildAbstractClass;
-    const AnotherClass = new UserClass();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(AnotherClass.get) as boolean == false;
+        if (instanceChildAbstractClass.isUndefined() || instanceChildAbstractClass.isNull() || UserClass.isUndefined() || UserClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = instanceChildAbstractClass;
+        const AnotherClass = UserClass.instantiate();
+
+        if (AnotherClass.isUndefined() || AnotherClass.isNull()) {
+            return false;
+        }
+
+        const anotherGetMethod = AnotherClass.getPropertySafe('get');
+        if (anotherGetMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', anotherGetMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean() == false;
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }

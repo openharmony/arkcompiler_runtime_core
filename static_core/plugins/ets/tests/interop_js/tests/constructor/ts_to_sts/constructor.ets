@@ -13,139 +13,463 @@
  * limitations under the License.
  */
 
-import {
-    tsInt,
-    NamedClass,
-    createNamedClassFromTs,
-    namedClassInstance,
-    //
-    AnonymousClass,
-    createAnonymousClassFromTs,
-    anonymousClassInstance,
-    //
-    FunctionConstructor,
-    createFunctionConstructorFromTs,
-    functionConstructorInstance,
-    //
-    IIFEClass,
-    createIIFEClassFromTs,
-    IIFEClassInstance,
-    IIFEConstructor,
-    createIIFEConstructorFromTs,
-    IIFEConstructorInstance,
-    //
-    MethodCreateConstructor,
-    createMethodConstructorClass,
-    methodConstructorInstance,
-    methodCreateAnonymousClass,
-    methodCreateClassInstance,
-    //
-    SimpleObject,
-    simpleArrowFunction,
-    //
-    AbstractClass,
-    createAbstractClassFromTs,
-    abstractClassInstance,
-    //
-    ChildClass,
-    createChildClassFromTs,
-    childClassInstance,
-} from 'main_js';
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/constructor/ts_to_sts/constructor');
+let tsInt = module.getProperty('tsInt');
+let NamedClass = module.getProperty('NamedClass');
+let createNamedClassFromTs = module.getProperty('createNamedClassFromTs');
+let namedClassInstance = module.getProperty('namedClassInstance');
+let AnonymousClass = module.getProperty('AnonymousClass');
+let createAnonymousClassFromTs = module.getProperty('createAnonymousClassFromTs');
+let anonymousClassInstance = module.getProperty('anonymousClassInstance');
+let FunctionConstructor = module.getProperty('FunctionConstructor');
+let createFunctionConstructorFromTs = module.getProperty('createFunctionConstructorFromTs');
+let functionConstructorInstance = module.getProperty('functionConstructorInstance');
+let IIFEClass = module.getProperty('IIFEClass');
+let createIIFEClassFromTs = module.getProperty('createIIFEClassFromTs');
+let IIFEClassInstance = module.getProperty('IIFEClassInstance');
+let IIFEConstructor = module.getProperty('IIFEConstructor');
+let createIIFEConstructorFromTs = module.getProperty('createIIFEConstructorFromTs');
+let IIFEConstructorInstance = module.getProperty('IIFEConstructorInstance');
+let MethodCreateConstructor = module.getProperty('MethodCreateConstructor');
+let createMethodConstructorClass = module.getProperty('createMethodConstructorClass');
+let methodConstructorInstance = module.getProperty('methodConstructorInstance');
+let methodCreateAnonymousClass = module.getProperty('methodCreateAnonymousClass');
+let methodCreateClassInstance = module.getProperty('methodCreateClassInstance');
+let SimpleObject = module.getProperty('SimpleObject');
+let simpleArrowFunction = module.getProperty('simpleArrowFunction');
+let AbstractClass = module.getProperty('AbstractClass');
+let createAbstractClassFromTs = module.getProperty('createAbstractClassFromTs');
+let abstractClassInstance = module.getProperty('abstractClassInstance');
+let ChildClass = module.getProperty('ChildClass');
+let createChildClassFromTs = module.getProperty('createChildClassFromTs');
+let childClassInstance = module.getProperty('childClassInstance');
 
 function checkNamedClass(): boolean {
-    const TSClass = new NamedClass(tsInt);
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass._value as int == tsInt as int;
+        if (NamedClass.isUndefined() || NamedClass.isNull() || tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
+
+        const TSClass = NamedClass.instantiate(tsInt);
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const value = TSClass.getProperty('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateNamedClassFromTs(): boolean {
-    return createNamedClassFromTs()._value as int == tsInt as int;
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
+
+        if (createNamedClassFromTs.isUndefined() || createNamedClassFromTs.isNull() || tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
+
+        const TSClass = createNamedClassFromTs.invoke();
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const value = TSClass.getProperty('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkNamedClassInstance(): boolean {
-    return namedClassInstance._value as int == tsInt as int;
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
+
+        if (namedClassInstance.isUndefined() || namedClassInstance.isNull() || tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
+
+        const value = namedClassInstance.getProperty('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkAnonymousClass(): boolean {
-    const TSClass = new AnonymousClass(tsInt);
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass._value as int == tsInt as int;
+        if (AnonymousClass.isUndefined() || AnonymousClass.isNull() || tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
+
+        const TSClass = AnonymousClass.instantiate(tsInt);
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const value = TSClass.getProperty('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateAnonymousClassFromTs(): boolean {
-    return createAnonymousClassFromTs()._value as int == tsInt as int;
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
+
+        if (createAnonymousClassFromTs.isUndefined() || createAnonymousClassFromTs.isNull() || tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
+
+        const TSClass = createAnonymousClassFromTs.invoke();
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const value = TSClass.getProperty('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkAnonymousClassInstance(): boolean {
-    return anonymousClassInstance._value as int == tsInt as int;
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
+
+        if (anonymousClassInstance.isUndefined() || anonymousClassInstance.isNull() || tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
+
+        const value = anonymousClassInstance.getProperty('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkFunctionConstructor(): boolean {
-    const TSClass = new FunctionConstructor(tsInt);
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass._value as int == tsInt as int;
+        if (FunctionConstructor.isUndefined() || FunctionConstructor.isNull() || tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
+
+        const TSClass = FunctionConstructor.instantiate(tsInt);
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const value = TSClass.getProperty('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateFunctionConstructorFromTs(): boolean {
-    const TSClass = createFunctionConstructorFromTs();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass._value as int == tsInt as int;
+        if (createFunctionConstructorFromTs.isUndefined() || createFunctionConstructorFromTs.isNull() || tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
+
+        const TSClass = createFunctionConstructorFromTs.invoke();
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const value = TSClass.getProperty('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkFunctionConstructorInstance(): boolean {
-    return functionConstructorInstance._value as int == tsInt as int;
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
+
+        if (functionConstructorInstance.isUndefined() || functionConstructorInstance.isNull() || tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
+
+        const value = functionConstructorInstance.getProperty('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkIIFEClass(): boolean {
-    const TSClass = new IIFEClass(tsInt);
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass._value as int == tsInt as int;
+        if (IIFEClass.isUndefined() || IIFEClass.isNull() || tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
+
+        const TSClass = IIFEClass.instantiate(tsInt);
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const value = TSClass.getProperty('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkIIFEClassError(): boolean {
     try {
-        const TSClass = IIFEClass(tsInt);
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
+        if (IIFEClass.isUndefined() || IIFEClass.isNull() || tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
+
+        const TSClass = IIFEClass.invoke(tsInt);
         return false;
+
     } catch (e) {
         console.log(e);
-
         return true;
     }
 }
 
 function checkCreateIIFEClassFromTs(): boolean {
-    const TSClass = createIIFEClassFromTs()
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass._value as int == tsInt as int;
+        if (createIIFEClassFromTs.isUndefined() || createIIFEClassFromTs.isNull() || tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
+
+        const TSClass = createIIFEClassFromTs.invoke();
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const value = TSClass.getProperty('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkIIFEClassInstance(): boolean {
-    return IIFEClassInstance._value as int == tsInt as int;
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
+
+        if (IIFEClassInstance.isUndefined() || IIFEClassInstance.isNull() || tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
+
+        const value = IIFEClassInstance.getProperty('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkIIFEConstructor(): boolean {
-    const TSClass = new IIFEConstructor(tsInt);
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass._value as int == tsInt as int;
+        if (IIFEConstructor.isUndefined() || IIFEConstructor.isNull() || tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
+
+        const TSClass = IIFEConstructor.instantiate(tsInt);
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const value = TSClass.getProperty('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkIIFEConstructorUndefined(): boolean {
-    const TSClass = IIFEConstructor(tsInt);
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass as Any == undefined;
+        if (IIFEConstructor.isUndefined() || IIFEConstructor.isNull() || tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
+
+        const TSClass = IIFEConstructor.invoke(tsInt);
+        return TSClass.isUndefined();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateIIFEConstructorFromTs(): boolean {
-    const TSClass = createIIFEConstructorFromTs()
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass._value as int == tsInt as int;
+        if (createIIFEConstructorFromTs.isUndefined() || createIIFEConstructorFromTs.isNull() || tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
+
+        const TSClass = createIIFEConstructorFromTs.invoke();
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const value = TSClass.getProperty('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkIIFEConstructorInstance(): boolean {
-    return IIFEConstructorInstance._value as int == tsInt as int;
-}
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
+        if (IIFEConstructorInstance.isUndefined() || IIFEConstructorInstance.isNull() || tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
+
+        const value = IIFEConstructorInstance.getProperty('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
+}
 //NOTE issue(18077) enable after fix 'SyntaxError: Cannot find type' when  try to call method with constructor.
 // function checkMethodCreateConstructor(): boolean {
 //     const ParentClass = new MethodCreateConstructor();
@@ -173,20 +497,68 @@ function checkIIFEConstructorInstance(): boolean {
 // }
 
 function checkMethodCreateAnonymousClass(): boolean {
-    const TSClass = new methodCreateAnonymousClass(tsInt);
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass._value as int == tsInt as int;
+        if (methodCreateAnonymousClass.isUndefined() || methodCreateAnonymousClass.isNull() || tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
+
+        const TSClass = methodCreateAnonymousClass.instantiate(tsInt);
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const value = TSClass.getProperty('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkMethodCreateClassInstance(): boolean {
-    return methodCreateClassInstance._value as int == tsInt as int;
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
+
+        if (methodCreateClassInstance.isUndefined() || methodCreateClassInstance.isNull() || tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
+
+        const value = methodCreateClassInstance.getProperty('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkSimpleObject(): boolean {
     try {
-        new SimpleObject();
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
+        if (SimpleObject.isUndefined() || SimpleObject.isNull()) {
+            return false;
+        }
+
+        SimpleObject.instantiate();
         return false;
+
     } catch (e) {
         return true;
     }
@@ -194,8 +566,15 @@ function checkSimpleObject(): boolean {
 
 function checkSimpleArrowFunction(): boolean {
     try {
-        const test = new simpleArrowFunction(tsInt);
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
+        if (simpleArrowFunction.isUndefined() || simpleArrowFunction.isNull() || tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
+
+        const test = simpleArrowFunction.instantiate(tsInt);
         return false;
 
     } catch (e) {
@@ -204,41 +583,157 @@ function checkSimpleArrowFunction(): boolean {
 }
 
 function checkAbstractClass(): boolean {
-    const TSClass = new AbstractClass(tsInt);
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass._value as int == tsInt as int;
+        if (AbstractClass.isUndefined() || AbstractClass.isNull() || tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
+
+        const TSClass = AbstractClass.instantiate(tsInt);
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const value = TSClass.getProperty('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateAbstractClassFromTs(): boolean {
-    const TSClass = createAbstractClassFromTs();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass._value as int == tsInt as int;
+        if (createAbstractClassFromTs.isUndefined() || createAbstractClassFromTs.isNull() || tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
 
+        const TSClass = createAbstractClassFromTs.invoke();
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const value = TSClass.getProperty('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkAbstractInstance(): boolean {
-    const TSClass = abstractClassInstance;
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass._value as int == tsInt as int;
+        if (abstractClassInstance.isUndefined() || abstractClassInstance.isNull() || tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
 
+        const value = abstractClassInstance.getProperty('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkChildClass(): boolean {
-    const TSClass = new ChildClass(tsInt);
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass._value as int == tsInt as int;
+        if (ChildClass.isUndefined() || ChildClass.isNull() || tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
 
+        const TSClass = ChildClass.instantiate(tsInt);
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const value = TSClass.getProperty('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateChildClassFromTs(): boolean {
-    const TSClass = createChildClassFromTs();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass._value as int == tsInt as int;
+        if (createChildClassFromTs.isUndefined() || createChildClassFromTs.isNull() || tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
 
+        const TSClass = createChildClassFromTs.invoke();
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const value = TSClass.getProperty('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkChildInstance(): boolean {
-    const TSClass = childClassInstance;
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass._value as int == tsInt as int;
+        if (childClassInstance.isUndefined() || childClassInstance.isNull() || tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
+
+        const value = childClassInstance.getProperty('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }

@@ -13,52 +13,89 @@
  * limitations under the License.
  */
 
-import { tsHexadecimal, systemHexadecimal } from 'main_js';
+let global = ESValue.getGlobal();
+let gtestEnv = global.getProperty("gtest_env");
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/conversion_types/ts_to_sts/main');
+
+let tsHexadecimal = module.getProperty('tsHexadecimal');
+let systemHexadecimal = module.getProperty('systemHexadecimal');
 
 function checkConversionHexadecimalToInt(): boolean {
-    const val = Double.toInt(parseInt(tsHexadecimal, systemHexadecimal as int));
-
-    return typeof val == 'number';
+    try {
+        const parseInt = global.getProperty('parseInt');
+        const val = parseInt.invoke(tsHexadecimal, systemHexadecimal);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionHexadecimalToNumber(): boolean {
-    const val = parseInt(tsHexadecimal, systemHexadecimal as int).toDouble();
-
-    return typeof val == 'number';
+    try {
+        const parseInt = global.getProperty('parseInt');
+        const val = parseInt.invoke(tsHexadecimal, systemHexadecimal);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionHexadecimalToFloat(): boolean {
-    const val = Double.toFloat(parseInt(tsHexadecimal, systemHexadecimal as int));
-
-    return typeof val == 'number';
+    try {
+        const parseInt = global.getProperty('parseInt');
+        const val = parseInt.invoke(tsHexadecimal, systemHexadecimal);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionHexadecimalToByte(): boolean {
-    const val = Double.toByte(parseInt(tsHexadecimal, systemHexadecimal as int));
-
-    return typeof val == 'number';
+    try {
+        const parseInt = global.getProperty('parseInt');
+        const val = parseInt.invoke(tsHexadecimal, systemHexadecimal);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionHexadecimalToShort(): boolean {
-    const val = Double.toShort(parseInt(tsHexadecimal, systemHexadecimal as int));
-
-    return typeof val == 'number';
+    try {
+        const parseInt = global.getProperty('parseInt');
+        const val = parseInt.invoke(tsHexadecimal, systemHexadecimal);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionHexadecimalToLong(): boolean {
-    const val = Double.toLong(parseInt(tsHexadecimal, systemHexadecimal as int));
-
-    return typeof val == 'number';
+    try {
+        const parseInt = global.getProperty('parseInt');
+        const val = parseInt.invoke(tsHexadecimal, systemHexadecimal);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionHexadecimalToDouble(): boolean {
-    const val = parseInt(tsHexadecimal, systemHexadecimal as int).toDouble();
-
-    return typeof val == 'number';
+    try {
+        const parseInt = global.getProperty('parseInt');
+        const val = parseInt.invoke(tsHexadecimal, systemHexadecimal);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionHexadecimalToChar(): boolean {
-    const val = Int.toChar(Double.toInt(parseInt(tsHexadecimal, systemHexadecimal as int)));
-
-    return typeof val == 'number';
+    try {
+        const parseInt = global.getProperty('parseInt');
+        const val = parseInt.invoke(tsHexadecimal, systemHexadecimal);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }

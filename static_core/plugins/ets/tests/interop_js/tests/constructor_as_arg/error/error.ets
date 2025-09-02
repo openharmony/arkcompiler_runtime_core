@@ -13,24 +13,25 @@
  * limitations under the License.
  */
 
-import {
-    tsInt,
-    ParentClass,
-    ChildClass,
-    MethodClass,
-    CreateClassFunction,
-} from "main_js"
+let global = ESValue.getGlobal();
+let gtestEnv = global.getProperty("gtest_env");
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/constructor_as_arg/main');
 
-const num = 1;
-const str = 'str';
-const foo = () => { }
-const obj: object = {}
-const arr: FixedArray<int> = []
+let tsInt = module.getProperty('tsInt');
+let ParentClass = module.getProperty('ParentClass');
+let ChildClass = module.getProperty('ChildClass');
+let MethodClass = module.getProperty('MethodClass');
+let CreateClassFunction = module.getProperty('CreateClassFunction');
+
+const num = ESValue.wrapNumber(1);
+const str = ESValue.wrapString('str');
+const foo = global.getProperty('eval').invoke(ESValue.wrapString('() => {}'));
+const obj = ESValue.instantiateEmptyObject();
+const arr = ESValue.instantiateEmptyArray();
 
 function checkCreateClassFunctionInt(): boolean {
     try {
-        const TSClass = CreateClassFunction(num, tsInt);
-
+        CreateClassFunction.invoke(num, tsInt);
         return false;
     } catch (e) {
         return true;
@@ -39,8 +40,7 @@ function checkCreateClassFunctionInt(): boolean {
 
 function checkCreateClassFunctionString(): boolean {
     try {
-        const TSClass = CreateClassFunction(str, tsInt);
-
+        CreateClassFunction.invoke(str, tsInt);
         return false;
     } catch (e) {
         return true;
@@ -49,8 +49,7 @@ function checkCreateClassFunctionString(): boolean {
 
 function checkCreateClassFunctionObj(): boolean {
     try {
-        const TSClass = CreateClassFunction(obj, tsInt);
-
+        CreateClassFunction.invoke(obj, tsInt);
         return false;
     } catch (e) {
         return true;
@@ -59,8 +58,7 @@ function checkCreateClassFunctionObj(): boolean {
 
 function checkCreateClassFunctionArr(): boolean {
     try {
-        const TSClass = CreateClassFunction(arr, tsInt);
-
+        CreateClassFunction.invoke(arr, tsInt);
         return false;
     } catch (e) {
         return true;
@@ -69,8 +67,7 @@ function checkCreateClassFunctionArr(): boolean {
 
 function checkCreateClassFunctionArrow(): boolean {
     try {
-        CreateClassFunction(foo, tsInt);
-
+        CreateClassFunction.invoke(foo, tsInt);
         return false;
     } catch (e) {
         return true;
@@ -79,8 +76,7 @@ function checkCreateClassFunctionArrow(): boolean {
 
 function checkCreateClassArrowFunctionInt(): boolean {
     try {
-        const TSClass = CreateClassFunction(num, tsInt);
-
+        CreateClassFunction.invoke(num, tsInt);
         return false;
     } catch (e) {
         return true;
@@ -89,8 +85,7 @@ function checkCreateClassArrowFunctionInt(): boolean {
 
 function checkCreateClassArrowFunctionString(): boolean {
     try {
-        const TSClass = CreateClassFunction(str, tsInt);
-
+        CreateClassFunction.invoke(str, tsInt);
         return false;
     } catch (e) {
         return true;
@@ -99,8 +94,7 @@ function checkCreateClassArrowFunctionString(): boolean {
 
 function checkCreateClassArrowFunctionObj(): boolean {
     try {
-        const TSClass = CreateClassFunction(obj, tsInt);
-
+        CreateClassFunction.invoke(obj, tsInt);
         return false;
     } catch (e) {
         return true;
@@ -109,8 +103,7 @@ function checkCreateClassArrowFunctionObj(): boolean {
 
 function checkCreateClassArrowFunctionArr(): boolean {
     try {
-        const TSClass = CreateClassFunction(arr, tsInt);
-
+        CreateClassFunction.invoke(arr, tsInt);
         return false;
     } catch (e) {
         return true;
@@ -119,8 +112,7 @@ function checkCreateClassArrowFunctionArr(): boolean {
 
 function checkCreateClassArrowFunctionArrow(): boolean {
     try {
-        CreateClassFunction(foo, tsInt);
-
+        CreateClassFunction.invoke(foo, tsInt);
         return false;
     } catch (e) {
         return true;
@@ -129,8 +121,7 @@ function checkCreateClassArrowFunctionArrow(): boolean {
 
 function checkParentClassInt(): boolean {
     try {
-        new ParentClass(num);
-
+        ParentClass.instantiate(num);
         return false;
     } catch (e) {
         return true;
@@ -139,8 +130,7 @@ function checkParentClassInt(): boolean {
 
 function checkParentClassString(): boolean {
     try {
-        new ParentClass(str);
-
+        ParentClass.instantiate(str);
         return false;
     } catch (e) {
         return true;
@@ -149,8 +139,7 @@ function checkParentClassString(): boolean {
 
 function checkParentClassArray(): boolean {
     try {
-        new ParentClass(arr);
-
+        ParentClass.instantiate(arr);
         return false;
     } catch (e) {
         return true;
@@ -159,8 +148,7 @@ function checkParentClassArray(): boolean {
 
 function checkParentClassObj(): boolean {
     try {
-        new ParentClass(obj);
-
+        ParentClass.instantiate(obj);
         return false;
     } catch (e) {
         return true;
@@ -169,8 +157,7 @@ function checkParentClassObj(): boolean {
 
 function checkParentClassArrow(): boolean {
     try {
-        new ParentClass(foo);
-
+        ParentClass.instantiate(foo);
         return false;
     } catch (e) {
         return true;
@@ -179,8 +166,7 @@ function checkParentClassArrow(): boolean {
 
 function checkChildClassInt(): boolean {
     try {
-        new ChildClass(num);
-
+        ChildClass.instantiate(num);
         return false;
     } catch (e) {
         return true;
@@ -189,8 +175,7 @@ function checkChildClassInt(): boolean {
 
 function checkChildClassString(): boolean {
     try {
-        new ChildClass(str);
-
+        ChildClass.instantiate(str);
         return false;
     } catch (e) {
         return true;
@@ -199,8 +184,7 @@ function checkChildClassString(): boolean {
 
 function checkChildClassArray(): boolean {
     try {
-        new ChildClass(arr);
-
+        ChildClass.instantiate(arr);
         return false;
     } catch (e) {
         return true;
@@ -209,8 +193,7 @@ function checkChildClassArray(): boolean {
 
 function checkChildClassObj(): boolean {
     try {
-        new ChildClass(obj);
-
+        ChildClass.instantiate(obj);
         return false;
     } catch (e) {
         return true;
@@ -219,8 +202,7 @@ function checkChildClassObj(): boolean {
 
 function checkChildClassArrow(): boolean {
     try {
-        new ChildClass(foo);
-
+        ChildClass.instantiate(foo);
         return false;
     } catch (e) {
         return true;
@@ -229,9 +211,8 @@ function checkChildClassArrow(): boolean {
 
 function checkMethodClassInt(): boolean {
     try {
-        const TSClass = new MethodClass();
-        TSClass.init(num, num);
-
+        const TSClass = MethodClass.instantiate();
+        TSClass.invokeMethod('init', num, num);
         return false;
     } catch (e) {
         return true;
@@ -240,9 +221,8 @@ function checkMethodClassInt(): boolean {
 
 function checkMethodClassString(): boolean {
     try {
-        const TSClass = new MethodClass();
-        TSClass.init(str, num);
-
+        const TSClass = MethodClass.instantiate();
+        TSClass.invokeMethod('init', str, num);
         return false;
     } catch (e) {
         return true;
@@ -251,9 +231,8 @@ function checkMethodClassString(): boolean {
 
 function checkMethodClassArr(): boolean {
     try {
-        const TSClass = new MethodClass();
-        TSClass.init(arr, num);
-
+        const TSClass = MethodClass.instantiate();
+        TSClass.invokeMethod('init', arr, num);
         return false;
     } catch (e) {
         return true;
@@ -262,9 +241,8 @@ function checkMethodClassArr(): boolean {
 
 function checkMethodClassObj(): boolean {
     try {
-        const TSClass = new MethodClass();
-        TSClass.init(obj, num);
-
+        const TSClass = MethodClass.instantiate();
+        TSClass.invokeMethod('init', obj, num);
         return false;
     } catch (e) {
         return true;
@@ -273,9 +251,8 @@ function checkMethodClassObj(): boolean {
 
 function checkMethodClassArrow(): boolean {
     try {
-        const TSClass = new MethodClass();
-        TSClass.init(foo, num);
-
+        const TSClass = MethodClass.instantiate();
+        TSClass.invokeMethod('init', foo, num);
         return false;
     } catch (e) {
         return true;

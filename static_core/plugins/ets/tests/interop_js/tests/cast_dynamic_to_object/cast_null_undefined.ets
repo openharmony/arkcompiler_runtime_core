@@ -13,29 +13,49 @@
  * limitations under the License.
  */
 
-import {
-  funcReturnTypeNull,
-  funcReturnTypeUndefined,
-  funcArgType
-} from "js_code"
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/cast_dynamic_to_object/pure');
+let funcReturnTypeNull = module.getProperty('funcReturnTypeNull');
+let funcReturnTypeUndefined = module.getProperty('funcReturnTypeUndefined');
+let funcArgType = module.getProperty('funcArgType');
 
-function TestFuncCallArg(): boolean{
-  if (funcReturnTypeNull() as null !== null) {
-      return false;
-  }
+function TestFuncCallArg(): boolean {
+    if (module.isUndefined() || module.isNull()) {
+        return false;
+    }
+    if (funcReturnTypeNull.isUndefined() || funcReturnTypeNull.isNull()) {
+        return false;
+    }
+    if (funcReturnTypeUndefined.isUndefined() || funcReturnTypeUndefined.isNull()) {
+        return false;
+    }
+    if (funcArgType.isUndefined() || funcArgType.isNull()) {
+        return false;
+    }
 
-  if (funcReturnTypeUndefined() !== undefined) {
-      return false;
-  }
+    try {
+        const result1 = funcReturnTypeNull.invoke();
+        if (!result1.isNull()) {
+            return false;
+        }
 
-  let arg13: undefined = undefined;
-  if (funcArgType(arg13) !== undefined) {
-      return false;
-  }
+        const result2 = funcReturnTypeUndefined.invoke();
+        if (!result2.isUndefined()) {
+            return false;
+        }
 
-  let arg14: null = null;
-  if (funcArgType(arg14) as null !== null) {
-      return false;
-  }
-  return true;
+        const result3 = funcArgType.invoke(ESValue.Undefined);
+        if (!result3.isUndefined()) {
+            return false;
+        }
+
+        const result4 = funcArgType.invoke(ESValue.Null);
+        if (!result4.isNull()) {
+            return false;
+        }
+
+        return true;
+
+    } catch (e) {
+        return false;
+    }
 }

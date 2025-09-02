@@ -14,27 +14,120 @@
  * limitations under the License.
  */
 
-import {
-    PrivateClass,
-    createPrivateClassFromTs,
-    instancePrivateClass,
-} from 'main_js';
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/class_method/ts_to_sts/main');
+let PrivateClass = module.getProperty('PrivateClass');
+let createPrivateClassFromTs = module.getProperty('createPrivateClassFromTs');
+let instancePrivateClass = module.getProperty('instancePrivateClass');
 
 function checkPrivateClassMethod(): boolean {
-    const TSClass = new PrivateClass();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(TSClass.get) as boolean;
+        if (PrivateClass.isUndefined() || PrivateClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = PrivateClass.instantiate();
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const getMethod = TSClass.getPropertySafe('get');
+        if (getMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareMethod = TSClass.getPropertySafe('compare');
+        if (compareMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', getMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean();
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreatePrivateClassFromTs(): boolean {
-    const TSClass = createPrivateClassFromTs();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(TSClass.get) as boolean;
+        if (createPrivateClassFromTs.isUndefined() || createPrivateClassFromTs.isNull()) {
+            return false;
+        }
+
+        const TSClass = createPrivateClassFromTs.invoke();
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const getMethod = TSClass.getPropertySafe('get');
+        if (getMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareMethod = TSClass.getPropertySafe('compare');
+        if (compareMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', getMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean();
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
-
 function checkInstancePrivateClass(): boolean {
-    const TSClass = instancePrivateClass;
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(TSClass.get) as boolean;
+        if (instancePrivateClass.isUndefined() || instancePrivateClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = instancePrivateClass;
+
+        const getMethod = TSClass.getPropertySafe('get');
+        if (getMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareMethod = TSClass.getPropertySafe('compare');
+        if (compareMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', getMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean();
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
