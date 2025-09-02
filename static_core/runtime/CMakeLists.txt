@@ -1013,17 +1013,24 @@ if (NOT PANDA_PRODUCT_BUILD)
 endif()
 
 if (TARGET arkruntime_test_interpreter_impl)
-    add_gtests(
+    set(INTERPRETER_TESTS_SOURCES
         arkruntime_interpreter_test
         tests/c2i_bridge_test.cpp
         tests/class_linker_test.cpp
         tests/class_linker_test_extension.cpp
-        tests/exception_test.cpp
         tests/interpreter/test_interpreter.cpp
         tests/interpreter/test_runtime_interface.cpp
         tests/interpreter_test.cpp
         tests/interpreter_test_switch.cpp
         tests/invokation_helper.cpp
+    )
+    if (NOT PANDA_QEMU_BUILD OR NOT PANDA_TARGET_ARM32)
+        # NOTE: not enough user space for class allocation after enabling AOT veifier by default. Issue: #29519
+        list(APPEND INTERPRETER_TESTS_SOURCES tests/exception_test.cpp)
+    endif()
+        
+    add_gtests(
+        ${INTERPRETER_TESTS_SOURCES}
         $<TARGET_OBJECTS:arkruntime_test_interpreter_impl>
         ${INVOKE_HELPER}
     )

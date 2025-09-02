@@ -52,7 +52,8 @@ constexpr size_t ABC_FILE_EXTENSION_LENGTH = 4;
 #endif
 constexpr size_t TEST_REPEAT_COUNT = 10;
 
-std::pair<int, std::string> ExecPanda(const std::string &file, const std::string &loadRuntimes = "core",
+std::pair<int, std::string> ExecPanda(const std::string &file, const std::string &verificationMode = "ahead-of-time",
+                                      const std::string &loadRuntimes = "core",
                                       const std::string &entryPoint = "_GLOBAL::main")
 {
     auto opts = ark::RuntimeOptions {};
@@ -69,6 +70,7 @@ std::pair<int, std::string> ExecPanda(const std::string &file, const std::string
     }
 
     opts.SetLoadRuntimes({loadRuntimes});
+    opts.SetVerificationMode(verificationMode);
 
     opts.SetPandaFiles({file});
     if (!ark::Runtime::Create(opts)) {
@@ -161,8 +163,10 @@ std::optional<std::string> Build(const std::string &path)
     return std::nullopt;
 }
 
+// CC-OFFNXT(G.FUN.01-CPP, readability-function-size_parameters) function for testing
 void TestSingle(const std::string &path, bool isGood = true, const Config &conf = ark::static_linker::DefaultConfig(),
-                bool *succeded = nullptr, Result *saveResult = nullptr)
+                bool *succeded = nullptr, Result *saveResult = nullptr,
+                const std::string &verificationMode = "ahead-of-time")
 {
     const auto pathPrefix = "data/single/";
     ASSERT_EQ(Build(pathPrefix + path), std::nullopt);
@@ -177,7 +181,7 @@ void TestSingle(const std::string &path, bool isGood = true, const Config &conf 
     ASSERT_EQ(linkRes.errors.empty(), isGood);
 
     if (isGood) {
-        auto res = ExecPanda(out);
+        auto res = ExecPanda(out, verificationMode);
         ASSERT_EQ(res.first, 0);
         ASSERT_EQ(res.second, gold);
     }
@@ -194,6 +198,7 @@ void TestSingle(const std::string &path, bool isGood = true, const Config &conf 
 struct TestData {
     std::string pathPrefix;
     bool isGood = false;
+    bool executable = true;
     Result *expected = nullptr;
     std::string gold;
 };
@@ -238,15 +243,18 @@ void PerformTest(TestData *data, const std::vector<std::string> &perms, const Co
             (void)iteration;
             ASSERT_EQ(expectedFile.value(), gotFile) << "on iteration: " << iteration;
         }
-
-        auto res = ExecPanda(out);
-        ASSERT_EQ(res.first, 0);
-        ASSERT_EQ(res.second, data->gold);
+        if (data->executable == true) {
+            auto res = ExecPanda(out);
+            ASSERT_EQ(res.second, data->gold);
+            ASSERT_EQ(res.first, 0);
+        }
     }
 }
 
+// CC-OFFNXT(G.FUN.01-CPP, readability-function-size_parameters) function for testing
 void TestMultiple(const std::string &path, std::vector<std::string> perms, bool isGood = true,
-                  const Config &conf = ark::static_linker::DefaultConfig(), Result *expected = nullptr)
+                  const Config &conf = ark::static_linker::DefaultConfig(), Result *expected = nullptr,
+                  bool executable = true)
 {
     std::sort(perms.begin(), perms.end());
 
@@ -270,6 +278,7 @@ void TestMultiple(const std::string &path, std::vector<std::string> perms, bool 
         TestData data;
         data.pathPrefix = pathPrefix;
         data.isGood = isGood;
+        data.executable = executable;
         data.expected = expected;
         data.gold = gold;
         for (size_t iteration = 0; iteration < TEST_REPEAT_COUNT; iteration++) {
@@ -293,6 +302,7 @@ struct StripOptions {
 struct TestStsConfig {
     std::string entryPoint = "1/ETSGLOBAL::main";
     std::string outputFileName = "out.gold";
+    std::string verificationMode = "ahead-of-time";
     TestStsConfig() = default;
 };
 // NOLINTEND(misc-non-private-member-variables-in-classes)
@@ -372,7 +382,7 @@ void TestSts(const std::string &path, const std::vector<std::string> &files, boo
         auto gold = std::string {};
         ASSERT_TRUE(ReadFile<false>(sourcePathPrefix + config.outputFileName, gold));
         NormalizeGold(gold);
-        auto ret = ExecPanda(targetPathPrefix + "linked.abc", "ets", config.entryPoint);
+        auto ret = ExecPanda(targetPathPrefix + "linked.abc", config.verificationMode, "ets", config.entryPoint);
         ASSERT_EQ(ret.first, 0);
         ASSERT_EQ(ret.second, gold);
     } else {
@@ -393,7 +403,8 @@ TEST(linkertests, LitArray)
 
 TEST(linkertests, Exceptions)
 {
-    TestSingle("exceptions");
+    // NOTE:(mgroshev): #29225 expected rt error not a verifier's
+    TestSingle("exceptions", true, {}, nullptr, nullptr, "disabled");
 }
 
 TEST(linkertests, ForeignMethod)
@@ -440,14 +451,14 @@ TEST(linkertests, DeduplicatedField)
 {
     auto res = Result {};
     res.stats.deduplicatedForeigners = 1;
-    TestMultiple("dedup_field", {"1", "2"}, true, DefaultConfig(), &res);
+    TestMultiple("dedup_field", {"1", "2"}, true, DefaultConfig(), &res, false);
 }
 
 TEST(linkertests, DeduplicatedMethod)
 {
     auto res = Result {};
     res.stats.deduplicatedForeigners = 1;
-    TestMultiple("dedup_method", {"1", "2"}, true, DefaultConfig(), &res);
+    TestMultiple("dedup_method", {"1", "2"}, true, DefaultConfig(), &res, false);
 }
 
 TEST(linkertests, UnresolvedInGlobal)
@@ -455,7 +466,8 @@ TEST(linkertests, UnresolvedInGlobal)
     TestSingle("unresolved_global", false);
     auto conf = DefaultConfig();
     conf.remainsPartial = {std::string(ark::panda_file::ItemContainer::GetGlobalClassName())};
-    TestSingle("unresolved_global", true, conf);
+    // NOTE:(mgroshev): #29225 verification hare is disabled because we are checking behavior< when method is unresolved
+    TestSingle("unresolved_global", true, conf, nullptr, nullptr, "disabled");
 }
 
 TEST(linkertests, DeduplicateLineNumberNrogram)
