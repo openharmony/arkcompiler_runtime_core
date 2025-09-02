@@ -748,24 +748,16 @@ export class RegExpMatchArray extends RegExpResultArray {
     }
 
     constructor(index: int, input: String, result: Array<String>) {
-        this(Double.toInt(index), input, result, [])
-    }
-
-    constructor(index: number, input: String, result: Array<String>, indices: Array<Array<number>>) {
-        this(Double.toInt(index), input, result, indices)
-    }
-
-    constructor(index: number, input: String, result: Array<String>) {
-        this(Double.toInt(index), input, result)
+        super(Double.toInt(index), input, result, [])
     }
 
     protected constructor() {
         super()
     }
 
-    public get index(): number | undefined {
+    public get index(): int | undefined {
         if (this.hasIndex_) {
-            return this.index_
+            return this.index_.toInt()
         }
         return undefined
     }
@@ -777,7 +769,7 @@ export class RegExpMatchArray extends RegExpResultArray {
         return undefined
     }
 
-    public set index(val: number | undefined) {
+    public set index(val: int | undefined) {
         if (val == undefined) {
             this.hasIndex_ = false
             return
@@ -838,19 +830,11 @@ export class RegExpMatchArray extends RegExpResultArray {
 
 export class RegExpExecArray extends RegExpResultArray {
     constructor(index: int, input: String, result: Array<String>, indices: Array<Array<number>>) {
-        super(Double.toInt(index), input, result, indices)
+        super(index, input, result, indices)
     }
 
     constructor(index: int, input: String, result: Array<String>) {
-        this(Double.toInt(index), input, result, [])
-    }
-
-    constructor(index: number, input: String, result: Array<String>, indices: Array<Array<number>>) {
-        this(Double.toInt(index), input, result, indices)
-    }
-
-    constructor(index: number, input: String, result: Array<String>) {
-        this(Double.toInt(index), input, result)
+        super(index, input, result, [])
     }
 
     protected constructor() {
@@ -926,8 +910,7 @@ class GlobalRegExpStringIterator implements IterableIterator<RegExpMatchArray> {
         }
         let matchStr = match.$_get(0)
         if (matchStr == "") {
-            let nextIndex = RegExp.advanceStringIndex(this.string, this.regexp.lastIndex.toInt(), this.regexp.unicode)
-            this.regexp.lastIndex = nextIndex
+            this.regexp.lastIndex = RegExp.advanceStringIndex(this.string, this.regexp.lastIndex, this.regexp.unicode)
         }
         return new IteratorResult<RegExpMatchArray>(match)
     }
@@ -967,7 +950,7 @@ class RegExpStringIterator implements IterableIterator<RegExpMatchArray> {
  */
 export class RegExp extends Object {
     private pattern_: String = ""
-    public lastIndex: number = 0
+    public lastIndex: int = 0
     private source_: String = ""
     private flags_: String = ""
 
@@ -1251,7 +1234,7 @@ export class RegExp extends Object {
      * @see RegExpExecArray
      */
     public exec(str: String): RegExpExecArray | null {
-        return this.exec(str, this.lastIndex.toInt())
+        return this.exec(str, this.lastIndex)
     }
 
     // NOTE(ekaterinzaytseva): unable to replace internal - used as public
@@ -1267,13 +1250,13 @@ export class RegExp extends Object {
         }
     }
 
-    // NOTE(ekaterinazaytseva): unable to replace internal - used in friend class 
+    // NOTE(ekaterinazaytseva): unable to replace internal - used in friend class
     internal matchInternal(str: String): RegExpMatchArray | null {
-        return this.matchInternal(str, this.lastIndex.toInt())
+        return this.matchInternal(str, this.lastIndex)
     }
 
     public search(str: String): int {
-        let previousLastIndex = this.lastIndex
+        let previousLastIndex: int = this.lastIndex
         this.lastIndex = 0
         let result = this.exec(str)
         this.lastIndex = previousLastIndex
@@ -1301,9 +1284,7 @@ export class RegExp extends Object {
             }
             let matchStr = result.$_get(0)
             if (matchStr == "") {
-                let thisIndex: int = this.lastIndex
-                let nextIndex = RegExp.advanceStringIndex(str, thisIndex, this.unicode)
-                this.lastIndex = nextIndex
+                this.lastIndex = RegExp.advanceStringIndex(str, this.lastIndex, this.unicode)
             }
         }
         let lengthS = str.getLength()
@@ -1349,9 +1330,7 @@ export class RegExp extends Object {
             }
             let matchStr = result.$_get(0)
             if (matchStr == "") {
-                let thisIndex: int = this.lastIndex
-                let nextIndex = RegExp.advanceStringIndex(str, thisIndex, this.unicode)
-                this.lastIndex = nextIndex
+                this.lastIndex = RegExp.advanceStringIndex(str, this.lastIndex, this.unicode)
             }
         }
         let lengthS = str.getLength()
@@ -1386,8 +1365,7 @@ export class RegExp extends Object {
         return accumulatedResult + str.substring(nextSourcePosition)
     }
 
-    public split(str: String, limit: Number | undefined): String[] {
-
+    public split(str: String, limit: Int | undefined): String[] {
         let unicodeMatching = this.unicode
         let newFlags = this.sticky ? this.flags : this.flags + "y";
         let splitter = new RegExp(this.pattern_, newFlags)
@@ -1397,7 +1375,7 @@ export class RegExp extends Object {
         } else if (limit == 0) {
             return new String[0]
         } else {
-            lim = limit.toLong()
+            lim = limit!.toLong()
         }
         let size = str.getLength()
         if (size == 0) {
@@ -1415,7 +1393,7 @@ export class RegExp extends Object {
             if (z == null) {
                 lastEnd = RegExp.advanceStringIndex(str, lastEnd, unicodeMatching)
             } else {
-                let separatorRight = (splitter.lastIndex < size) ? splitter.lastIndex.toInt() : size
+                let separatorRight = (splitter.lastIndex < size) ? splitter.lastIndex : size
                 if (separatorRight == lastStart) {
                     lastEnd = RegExp.advanceStringIndex(str, lastEnd, unicodeMatching)
                 } else {
@@ -1439,7 +1417,8 @@ export class RegExp extends Object {
         }
         let substr = str.substring(lastStart, size)
         splittedStrings.pushBack(substr)
-        return splittedStrings.toArray() as String[]
+        let res = splittedStrings.toArray() as String[]
+        return res
     }
 
     public match(str: String): RegExpMatchArray | null {
@@ -1465,7 +1444,7 @@ export class RegExp extends Object {
                 indices = indices.concat(result.indices)
                 isUndefined = isUndefined.concat(result.isUndefined)
                 if (matchStr == "") {
-                    this.lastIndex = RegExp.advanceStringIndex(str, this.lastIndex.toInt(), this.unicode)
+                    this.lastIndex = RegExp.advanceStringIndex(str, this.lastIndex, this.unicode)
                 }
                 n++
             }
