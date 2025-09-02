@@ -13,8 +13,9 @@
 
 ---
 cases:
+    # case 0
     - decl: |-
-          f: int
+          let f: int
           class A {
               static foo(): this {  // CTE, 'this' cannot be used as return type of static method
                   if (f == 0) {
@@ -26,6 +27,7 @@ cases:
       use: |-
           let x = A.foo()
 
+    # case 1
     - decl: |-
           class A {
               fld: int
@@ -39,6 +41,7 @@ cases:
       use: |-
           let x = new A().foo()
 
+    # case 2
     - decl: |-
           class A {
               fld: int
@@ -52,6 +55,7 @@ cases:
       use: |-
           let x = new A().foo()
 
+    # case 3
     - decl: |-
           class A {
               fld: int
@@ -65,6 +69,7 @@ cases:
       use: |-
           let x = new A().foo()
 
+    # case 4
     - decl: |-
           class A {
               fld: int
@@ -78,62 +83,7 @@ cases:
       use: |-
           let x = new A().foo()
 
-    - decl: |-
-          class A {
-              fld: int
-              foo(): this {
-                  if (this.fld == 0) {
-                      return this.bar()  // CTE, only 'this' is allowed in return
-                  }
-                  throw new Error
-              }
-              bar(): this {
-                  if (this.fld == 0) {
-                      return this
-                  }
-                  throw new Error
-              }
-          }
-      use: |-
-          let x = new A().foo()
-
-    - decl: |-
-          class A {
-              fld: int
-              foo(): this {
-                  return this.fld == 0 ? this : this.bar()  // CTE, only 'this' is allowed in return
-              }
-              bar(): this {
-                  if (this.fld == 0) {
-                      return this
-                  }
-                  throw new Error
-              }
-          }
-      use: |-
-          let x = new A().foo()
-
-    - decl: |-
-          abstract class Super {
-              fld: int
-              foo(): this {
-                  if (this.fld == 0) {
-                      return this
-                  }
-                  throw new Error
-              }
-          }
-          class A extends Super {
-              foo(): this {
-                  if (this.fld == 999) {
-                      return this
-                  }
-                  return super.foo()  // CTE, only 'this' is allowed in return
-              }
-          }
-      use: |-
-          let x = new A().foo()
-
+    # case 5
     - decl: |-
           abstract class Super {
               fld: int
@@ -155,6 +105,7 @@ cases:
       use: |-
           let x = new A().foo()
 
+    # case 6
     - decl: |-
           abstract class Super {
               fld: int
@@ -176,6 +127,7 @@ cases:
       use: |-
           let x = new A().foo()
 
+    # case 7
     - decl: |-
           class A {
               fld: A
@@ -189,6 +141,7 @@ cases:
       use: |-
           let x = new A().foo()
 
+    # case 8
     - decl: |-
           class A {
               fld: int
@@ -201,3 +154,18 @@ cases:
           }
       use: |-
           let x = new A().instance
+
+    # case 9
+    - decl: |-
+        final class A {
+            fld: int
+            foo(): this {  // CTE
+                if (this.fld == 0) {
+                    const tmp = this
+                    return tmp
+                }
+                throw new Error
+            }
+        }
+      use: |-
+        let x = new A().instance

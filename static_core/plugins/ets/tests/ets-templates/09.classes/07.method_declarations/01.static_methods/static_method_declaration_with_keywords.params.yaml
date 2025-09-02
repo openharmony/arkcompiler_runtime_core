@@ -11,9 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # List of valid method modifiers
+--- # List of invalid static method modifiers
 modifiers:
   - "abstract"
   - "override"
   - "open"
   - "synchronized"
+  - 'final'

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,13 @@
  * limitations under the License.
  */
 
-/*---
-desc: Abstract method declaraion with block of code.
-assert: It is a compile-time error if a method declaration is either abstract or native and has a block for its body.
-tags: [compile-only, negative]
----*/
+ /*---
+ desc: Method declaration with duplicated modifier
 
-abstract class A {
-  abstract run(): void {
-    let result: int = 5 + 5;
-  }
+ tags: [compile-only, negative]
+ ---*/
+
+
+final class A {
+  native static native run(): void;
 }

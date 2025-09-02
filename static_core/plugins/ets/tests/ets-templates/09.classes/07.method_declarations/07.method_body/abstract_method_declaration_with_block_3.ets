@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,13 +14,13 @@
  */
 
 /*---
-desc: Native method declaration with block of code.
-assert: It is a compile-time error if a method declaration is either abstract or native and has a block for its body. 
+desc: Abstract method declaration with block of code.
+assert: It is a compile-time error if a method declaration is either abstract or native and has a block for its body.
 tags: [compile-only, negative]
 ---*/
 
-class A {
-  native run(): void {
-    let result: int = 5 + 5;
+abstract class A {
+  abstract run(): void {
+    ;
   }
 }

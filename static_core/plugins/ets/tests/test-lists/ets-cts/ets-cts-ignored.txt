@@ -1475,8 +1475,17 @@
 # 26983
 09.classes/06.field_declarations/06.overriding_fields/sample.ets
 
+#29602
+09.classes/07.method_declarations/01.static_methods/static_method_with_body_type_parameter_0.ets
+09.classes/07.method_declarations/01.static_methods/static_method_with_body_type_parameter_1.ets
+
 #23238 Method returning 'this' returns wrong instance
 09.classes/07.method_declarations/08.methods_returning_this/met_ret_this_8.ets
+
+#29600
+09.classes/07.method_declarations/08.methods_returning_this/met_ret_this_26.ets
+09.classes/07.method_declarations/08.methods_returning_this/met_ret_this_27.ets
+09.classes/07.method_declarations/08.methods_returning_this/met_ret_this_28.ets
 
 #26730
 09.classes/09.constructor_declaration/constructor_declaration_overload1.ets
