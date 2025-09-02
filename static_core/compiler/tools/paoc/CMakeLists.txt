@@ -34,9 +34,13 @@ endif()
 
 panda_add_executable(ark_aot ${PAOC_SOURCES})
 
-add_dependencies(ark_aot arkcompiler_options es2panda-public)
-
-panda_target_link_libraries(ark_aot arkbase arkruntime aot_builder es2panda-public arkassembler)
+if(PANDA_WITH_ETS)
+    add_dependencies(ark_aot arkcompiler_options es2panda-public)
+    panda_target_link_libraries(ark_aot arkbase arkruntime aot_builder es2panda-public arkassembler)
+else()
+    add_dependencies(ark_aot arkcompiler_options)
+    panda_target_link_libraries(ark_aot arkbase arkruntime aot_builder arkassembler)
+endif()
 
 if (PANDA_LLVM_AOT)
     panda_target_include_directories(ark_aot SYSTEM PRIVATE ${LLVM_INCLUDE_DIRS})
