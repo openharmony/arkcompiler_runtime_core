@@ -24,28 +24,10 @@ export namespace Intl {
         style: RelativeTimeFormatStyle;
     }
 
-    export class RelativeTimeFormatOptions {
-        public numeric: RelativeTimeFormatNumeric = "always";
-        public style: RelativeTimeFormatStyle = "long";
-        public localeMatcher?: RelativeTimeFormatLocaleMatcher;
-
-        constructor(options?: RelativeTimeFormatOptions) {
-            if (options !== undefined) {
-                this.numeric = options.numeric ?? "always";
-                this.style = options.style ?? "long";
-                this.localeMatcher = options.localeMatcher;
-            }
-        }
-
-        public static isEmpty(options: RelativeTimeFormatOptions): boolean {
-            return options.numeric === undefined &&
-                options.style === undefined &&
-                options.localeMatcher === undefined;
-        }
-
-        public toString(): string {
-            return JSON.stringify(this);
-        }
+    export interface RelativeTimeFormatOptions {
+        numeric?: RelativeTimeFormatNumeric
+        style?: RelativeTimeFormatStyle
+        localeMatcher?: RelativeTimeFormatLocaleMatcher;
     }
 
     class ResolvedRelativeTimeFormatOptionsImpl implements ResolvedRelativeTimeFormatOptions {
@@ -101,12 +83,8 @@ export namespace Intl {
     }
 
     export class RelativeTimeFormat {
-        private static readonly DEFAULT_OPTIONS: RelativeTimeFormatOptions = {
-            numeric: "always",
-            style: "long"
-        };
         private readonly locale: string | undefined
-        private readonly options: RelativeTimeFormatOptions
+        private readonly options: ResolvedRelativeTimeFormatOptions
 
         constructor(locales?: string | string[], options?: RelativeTimeFormatOptions) {
             if (locales !== undefined) {
@@ -115,13 +93,9 @@ export namespace Intl {
             } else {
                 this.locale = undefined
             }
-            const resolved: RelativeTimeFormatOptions = {
-                numeric: options?.numeric ?? RelativeTimeFormat.DEFAULT_OPTIONS.numeric,
-                style: options?.style ?? RelativeTimeFormat.DEFAULT_OPTIONS.style,
-                localeMatcher: options?.localeMatcher
-            }
-
-            this.options = resolved
+            this.options = new ResolvedRelativeTimeFormatOptionsImpl(this.getLocale(), "latn")
+            this.options.numeric = options?.numeric ?? "always"
+            this.options.style = options?.style ?? "long"
         }
 
         public static $_invoke(locales?: string | string[], options?: RelativeTimeFormatOptions): RelativeTimeFormat {
@@ -139,22 +113,18 @@ export namespace Intl {
         }
 
         resolvedOptions(): ResolvedRelativeTimeFormatOptions {
-            const opt = this.resolvedOptionsImpl()
-            opt.numeric = this.options.numeric ?? 'always';
-            opt.style = this.options.style ?? 'long';
-            return opt
+            return this.options
         }
 
-        static supportedLocalesOf(locales: string, options?: RelativeTimeFormatOptions): string[] {
-            return RelativeTimeFormat.supportedLocalesOfImpl([locales], options ?? RelativeTimeFormat.DEFAULT_OPTIONS)
-        }
-
-        static supportedLocalesOf(locales: string[], options?: RelativeTimeFormatOptions): string[] {
-            return RelativeTimeFormat.supportedLocalesOfImpl(locales, options ?? RelativeTimeFormat.DEFAULT_OPTIONS)
+        static supportedLocalesOf(locales: string | string[], options?: RelativeTimeFormatOptions): string[] {
+            return RelativeTimeFormat.supportedLocalesOfImpl(
+                (locales instanceof string) ? [locales] : locales, 
+                options ?? { numeric: "always", style: "long" } as RelativeTimeFormatOptions
+            )
         }
 
         private native formatImpl(value: number, unit: string): string
-        private native resolvedOptionsImpl(): ResolvedRelativeTimeFormatOptions
+        private native getLocale(): string
 
         private static supportedLocalesOfImpl(locales: string[], options: RelativeTimeFormatOptions): string[] {
             return options.localeMatcher === "lookup" ? intlLookUpLocales(locales) : intlBestFitLocales(locales)

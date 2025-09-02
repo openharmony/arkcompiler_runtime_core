@@ -52,7 +52,7 @@ function testSelect() {
     runSelectTest("ja", 5, "other")
   
     runSelectTest(fakeLocale, 1, "one")
-    runSelectTest(fakeLocale, 2, "other")
+    runSelectTest(fakeLocale, 2, "few")
 }
 
 function testResolvedOptions() {

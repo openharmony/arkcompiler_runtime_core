@@ -338,7 +338,7 @@ function Error_CreateEtsSample(): Error {
 }
 
 function Error_CreateEtsSampleWithCause(): Error {
-    return new Error("message", new ErrorOptions("cause"));
+    return new Error("message", {cause: "cause" as Object} as ErrorOptions)
 }
 
 function ArrayBuffer_TestJSLength(dynArr: Any): void {

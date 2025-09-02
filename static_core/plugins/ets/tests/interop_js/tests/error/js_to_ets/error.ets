@@ -124,7 +124,7 @@ function checkErrorCause(): boolean {
 
 // Check Error
 function checkError(): boolean {
-    let cause: ErrorOptions = new ErrorOptions('Test cause');
+    let cause: ErrorOptions = {cause: 'Test cause' as Object} as ErrorOptions
     let err = new Error('original error', cause);
     let orgName = err.name;
     let orgMsg = err.message;
