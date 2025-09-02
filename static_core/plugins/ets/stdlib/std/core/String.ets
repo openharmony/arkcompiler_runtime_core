@@ -723,13 +723,19 @@ export final class String extends Object implements Comparable<String>, Iterable
      */
     public split(separator: StringOrRegExp, limit?: Number): String[] {
         if (separator instanceof RegExp) {
-            return (separator as RegExp).split(this, limit)
+            if (limit == undefined) {
+                return (separator as RegExp).split(this, undefined)
+            }
+            return (separator as RegExp).split(this, limit!.toInt())
         }
         return this.split(separator as String, limit)
     }
 
     public split(separator: RegExp, limit?: Number): String[] {
-        return separator.split(this, limit)
+        if (limit == undefined) {
+            return separator.split(this, undefined)
+        }
+        return separator.split(this, limit!.toInt())
     }
 
     public split(separator: String, limit?: Number): String[] {

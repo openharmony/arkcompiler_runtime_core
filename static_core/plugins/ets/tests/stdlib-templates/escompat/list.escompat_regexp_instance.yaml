@@ -608,8 +608,8 @@
   method_nature: function,
   result_type: 'String[]',
   result_nature: 'array',
-  method_signature: { str: String, limit: Number },
-  method_signature_desc: { str: String, limit: Number },
+  method_signature: { str: String, limit: Int },
+  method_signature_desc: { str: String, limit: Int },
 
   method_throws: "true",
   object_constructor_index_data:
@@ -624,13 +624,13 @@
     },
   method_test_index_data:
     {
-      test10: { str: '"No pattern found"', limit: Number.valueOf(1) },
-      test20: { str: '"value0->value1->value2->value3->value4"', limit: Number.valueOf(3) },
-      test30: { str: '"\nvalue0\nvalue1\nvalue2\nvalue3\nvalue4\n"', limit: Number.valueOf(7) },
-      test40: { str:  '"empty"', limit: Number.valueOf(2)},
-      test50: { str:  '"abcd"', limit: Number.valueOf(2)},
-      test60: { str: '"aaaaa"', limit: Number.valueOf(3)},
-      test70: { str: '"aaaaa"', limit: Number.valueOf(6)},
+      test10: { str: '"No pattern found"', limit: 1 },
+      test20: { str: '"value0->value1->value2->value3->value4"', limit: 3 },
+      test30: { str: '"\nvalue0\nvalue1\nvalue2\nvalue3\nvalue4\n"', limit: 7 },
+      test40: { str:  '"empty"', limit: 2},
+      test50: { str:  '"abcd"', limit: 2},
+      test60: { str: '"aaaaa"', limit: 3},
+      test70: { str: '"aaaaa"', limit: 6},
     },
   method_expected_data:
     {
