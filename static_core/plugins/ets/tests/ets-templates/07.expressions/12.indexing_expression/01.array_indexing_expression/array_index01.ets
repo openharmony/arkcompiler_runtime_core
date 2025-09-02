@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
 desc: Test the array index expression to access array elements normally.
 ---*/
 
 function main(): void {
   let names: string[] = ["Alice", "Bob", "Carol"];
-  arktest.assertEQ(names[0], "Alice");
-  arktest.assertEQ(names[1], "Bob");
-  arktest.assertEQ(names[2], "Carol");
+  {{c.change}}
+  arktest.assertEQ(names[{{c.index}}], "{{c.value}}");
 }
+{% endfor %}

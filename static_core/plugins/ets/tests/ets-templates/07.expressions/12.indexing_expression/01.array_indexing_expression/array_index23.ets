@@ -15,7 +15,6 @@
 
 /*---
 desc: Test the array index using an enumeration type as an index.
-tags: [compile-only, positive]
 ---*/
 
 enum Color { Red, Green, Blue }

@@ -13,20 +13,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+{% for c in cases %}
 /*---
 desc: >-
     Array access expression. The array access expression's result is a type T variable
     (i.e., a variable within the array selected by the value of that index expression).
 ---*/
 
-let arr: (Int|null)[] = [new Int(1), new Int(2), null];
+let arr: (Int|{{c.type}})[] = [new Int(1), 2, {{c.list}}];
 
-function getArrElem(i: int): Object|null {
+function getArrElem(i: int): Object|{{c.type}} {
     return arr[i];
 }
 
 function main(): void {
-  arktest.assertTrue( getArrElem(0) instanceof Int )
-  arktest.assertTrue( getArrElem(1) instanceof Object )
-  arktest.assertTrue( getArrElem(2) == null )
+  arktest.assertTrue(getArrElem({{c.index}}) instanceof {{c.eType}});
+  arktest.assertEQ({{c.value}}, getArrElem({{c.index}}));
 }
+{% endfor %}

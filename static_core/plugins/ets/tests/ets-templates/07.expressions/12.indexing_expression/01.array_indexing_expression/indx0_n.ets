@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
 desc: >-
     If no ‘?.’ is present in an indexing expression, then the type of object reference
@@ -22,15 +23,16 @@ tags: [compile-only, negative]
 
 function test(b: boolean) {
     if (!b) {
-        throw new Error()
+        throw new Error('CTE expected but compiled successfully');
     }
 }
 
-function refNullish(): string[]|null {
-    let res: string[]|null = null
-    return res
+function refNullish(): string[]|{{c.type}} {
+    let res: string[]|{{c.type}} = {{c.value}};
+    return res;
 }
 
 function main() {
-    test(refNullish()[0] == "abc") // CTE expected
+    test(refNullish()[0] == "abc"); // CTE expected
 }
+{% endfor %}

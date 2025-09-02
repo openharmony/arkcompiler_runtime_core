@@ -15,17 +15,27 @@
 
 /*---
 desc: Test the array index expression to Out-of-bounds access of multi-dimensional arrays.
-tags: [compile-only, positive]
 ---*/
 
-type ArrayIndexError = object | null | undefined;
-
 function main(): void {
-  let matrix: number[][] = [
-    [1, 2, 3],
-    [4, 5, 6],
-    [7, 8, 9]
-  ];
+    let matrix: number[][] = [
+      [1, 2, 3],
+      [4, 5, 6],
+      [7, 8, 9]
+    ];
 
-  console.error("Two dimensional array out of bounds:", matrix[3][0]);
+    let isError: boolean = false;
+
+    try {
+        matrix[3][0];
+    } catch (error) {
+        error = error as Error;
+        arktest.assertEQ('RangeError', error.name);
+        arktest.assertEQ('Out of bounds', error.message);
+        isError = true;
+    } finally {
+        if (!isError) {
+            throw new Error('No RangeError occured, but "Out of bounds" expected.');
+        }
+    }
 }

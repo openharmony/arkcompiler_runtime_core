@@ -13,19 +13,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+{% for c in cases %}
 /*---
 desc: >-
-    For an array indexing, a type of index expression must be of a numeric type.
-    if type of index expression is number or other floating-point type and its fractional
-    part is different from 0 then it will be runtime error if such situation is identified
-    during program execution and compile-time one if detected during compilation.
+    If the index expression value of an array is less than zero, greater than or equal to that array’s length, then RangeError is thrown.
 ---*/
 
-let arr: int[] = [1, 2, 3];
+let arr: number[] = [{{c.list}}];
 
-function main(): void {
-  let x: Int = new Int(1)
-  let y: Int = new Int(2)
-
-  arktest.assertTrue( arr[x] == 2 && arr[y] == 3 )
+function main(): int {
+    let index: int = {{c.index}};
+    try {
+        let a: number = arr[index];
+    } catch (error) {
+        error = error as Error;
+        arktest.assertEQ('RangeError', error.name);
+        arktest.assertEQ('Out of bounds', error.message);
+        return 0;
+    }
+    throw new Error('RTE RangeError expected but no error was thrown');
 }
+{% endfor %}

@@ -13,18 +13,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+{% for c in cases %}
 /*---
 desc: >-
-    Array access expression. The array reference expression must be checked to evaluate to null, and if
-    so then the entire arrayAccessExpression equals null.
+    Other numeric types (long, float, and double/number) must be converted explicitly by applying the methods
+    defined in the classes of the Standard Library.
 ---*/
 
-let arr: Int[] = [new Int(11), new Int(22), new Int(33)];
-
-function getArrRef(): Int[]|null {
-    return arr;
-}
+const a = ["Alice", "Bob", "Carol"];
 
 function main(): void {
-  arktest.assertTrue( getArrRef()?.[0] == 11 )
+    let index: {{c.type}} = {{c.value}};
+    arktest.assertEQ("{{c.expected}}", a[index.toInt()]);
 }
+{% endfor %}

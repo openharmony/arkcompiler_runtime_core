@@ -32,7 +32,7 @@ function main(): int {
     let indexingExpressionEvaluated: boolean = false
     try {
         arktest.assertTrue( arrRef(true)[(():int => { indexingExpressionEvaluated = true; return 2 })()] == 3 )
-    } catch (e: Error) {
+    } catch (e) {
         return (indexingExpressionEvaluated ? 1 : 0)
     }
     return 1
