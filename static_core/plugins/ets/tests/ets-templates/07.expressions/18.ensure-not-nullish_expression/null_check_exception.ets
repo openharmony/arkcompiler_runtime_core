@@ -22,14 +22,6 @@ function main(): void {
   let res = 0;
   let a: Int|null = (): Int|null => { return null; }();
   let b: Int = 4;
-
-  try {
-    let x = a! + b;
-  } catch (e: NullPointerError) {
-    res = 1;
-  } catch (e) {
-    res = 0;
-  }
-
-  arktest.assertEQ( res, 1, "NPE caught - correct" )
+  let expectedException = (e: Error): boolean => { return (e instanceof NullPointerError) }
+  arktest.expectThrow(() => { let x = a! + b; }, expectedException)
 }

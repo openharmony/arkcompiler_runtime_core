@@ -430,10 +430,12 @@ cases:
               if (a.foo(1) == a) {
                   throw a.foo(1).foo(2).foo(3)
               }
-          } catch (e: A) {
+          } catch (e) {
+            if (e instanceof A) {
               arktest.assertEQ(e.message, 'Error in main')
               arktest.assertEQ(e.fld, 7)
               return
+            }
           }
           arktest.assertTrue(false, 'Expected error not thrown')
 
@@ -459,10 +461,12 @@ cases:
               if (a.foo(1) == a) {
                   throw a.foo(1).foo(2).foo(3)
               }
-          } catch (e: A) {
-              arktest.assertEQ(e.message, 'Error in main')
-              arktest.assertEQ(e.fld, 7)
-              return
+          } catch (e) {
+              if (e instanceof A) {
+                arktest.assertEQ(e.message, 'Error in main')
+                arktest.assertEQ(e.fld, 7)
+                return
+              }
           }
           arktest.assertTrue(false, 'Expected error not thrown')
 
@@ -487,10 +491,12 @@ cases:
               if (a.fld == 0) {
                   throw a.foo(0).foo(1).foo(2)
               }
-          } catch (e: A) {
-              arktest.assertEQ(e.message, 'Error in A')
-              arktest.assertEQ(e.fld, 0)
-              return
+          } catch (e) {
+              if (e instanceof A) {
+                arktest.assertEQ(e.message, 'Error in A')
+                arktest.assertEQ(e.fld, 0)
+                return
+              }
           }
           arktest.assertTrue(false, 'Expected error not thrown')
 
@@ -516,10 +522,12 @@ cases:
               if (a.fld == 0) {
                   throw a.foo(0).foo(1).foo(2)
               }
-          } catch (e: A) {
-              arktest.assertEQ(e.message, 'Error in A')
-              arktest.assertEQ(e.fld, 0)
-              return
+          } catch (e) {
+              if (e instanceof A) {
+                arktest.assertEQ(e.message, 'Error in A')
+                arktest.assertEQ(e.fld, 0)
+                return
+              }
           }
           arktest.assertTrue(false, 'Expected error not thrown')
 

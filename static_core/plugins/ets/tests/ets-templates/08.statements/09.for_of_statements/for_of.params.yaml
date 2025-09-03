@@ -136,25 +136,13 @@ cases:
 
     - use: |-
           let s: string|null = (): string|null => { return null; }();
-          try {
-              for (let v of s!) res += v
-              arktest.assertTrue( false )
-          } catch (e: NullPointerError) {
-              arktest.assertTrue( true )
-          } catch (e) {
-              arktest.assertTrue( false )
-          }
+          let expectedException = (e: Error): boolean => { return (e instanceof NullPointerError) }
+          arktest.expectThrow(() => { for (let v of s!) res += v; arktest.assertTrue( false ) }, expectedException)
 
     - use: |-
           let s: string|undefined = (): string|undefined => { return undefined; }();
-          try {
-              for (let v of s!) res += v
-              arktest.assertTrue( false )
-          } catch (e: NullPointerError) {
-              arktest.assertTrue( true )
-          } catch (e) {
-              arktest.assertTrue( false )
-          }
+          let expectedException = (e: Error): boolean => { return (e instanceof NullPointerError) }
+          arktest.expectThrow(() => { for (let v of s!) res += v; arktest.assertTrue( false ) }, expectedException)
 
     - decl: |-
           let i = 0;
@@ -173,25 +161,13 @@ cases:
 
     - use: |-
           let s: number[]|null = (): number[]|null => { return null; }();
-          try {
-              for (let v of s!) res += v
-              arktest.assertTrue(false)
-          } catch (e: NullPointerError) {
-              arktest.assertTrue(true)
-          } catch (e) {
-              arktest.assertTrue(false)
-          }
+          let expectedException = (e: Error): boolean => { return (e instanceof NullPointerError) }
+          arktest.expectThrow(() => { for (let v of s!) res += v; arktest.assertTrue( false ) }, expectedException)
 
     - use: |-
           let s: number[]|undefined = (): number[]|undefined => { return undefined; }();
-          try {
-              for (let v of s!) res += v
-              arktest.assertTrue( false )
-          } catch (e: NullPointerError) {
-              arktest.assertTrue(true)
-          } catch (e) {
-              arktest.assertTrue(false)
-          }
+          let expectedException = (e: Error): boolean => { return (e instanceof NullPointerError) }
+          arktest.expectThrow(() => { for (let v of s!) res += v; arktest.assertTrue( false ) }, expectedException)
 
     - decl: |-
           class A {

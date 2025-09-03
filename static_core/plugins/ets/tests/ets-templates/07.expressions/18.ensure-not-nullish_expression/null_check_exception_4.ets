@@ -19,12 +19,6 @@ desc: The type of ensure-not-nullish expression is the non-nullish variant of th
 
 function main(): void {
   let i: Int|undefined = (): Int|undefined => { return undefined; }();
-  try {
-    let ii = i!;
-    arktest.assertTrue( false, "evaluation of e seems to be e" )
-  } catch(npe: NullPointerError) {
-    arktest.assertTrue( true, "NPE caught - correct")
-  } catch(e) {
-    arktest.assertTrue( false, "Some other Error thrown, not correct")
-  }
+  let expectedException = (e: Error): boolean => { return (e instanceof NullPointerError) }
+  arktest.expectThrow(() => { let ii = i!; arktest.assertTrue( false, "evaluation of e seems to be e" ) }, expectedException)
 }

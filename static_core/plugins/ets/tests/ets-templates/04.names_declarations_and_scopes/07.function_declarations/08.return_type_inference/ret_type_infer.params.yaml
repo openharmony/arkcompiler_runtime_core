@@ -366,12 +366,8 @@ cases:
     - decl: |-
         const lb: () => void = () => { throw new Error('never returns') }
       call: |-
-        try {
-          lb()
-        } catch(e: Error) {
-          return;
-        }
-        throw new Error('Error to be here')
+        let expectedException = (e: Error): boolean => { return (e instanceof Error) }
+        arktest.expectThrow(() => { lb() }, expectedException)
 
     - decl: |-
         class Person {

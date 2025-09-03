@@ -26,8 +26,10 @@ function main(): void {
   try {
     throw new TestError();
   }
-  catch (p: TestError) {
-    i = 5;
+  catch (p) {
+    if (p instanceof TestError) {
+        i = 5;
+    }
   }
 
   arktest.assertEQ( i, 5 )

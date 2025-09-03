@@ -28,8 +28,6 @@ function main(): int {
     let v: boolean = (++a > 0) || (i / j) > 0;
     if (a != 2 || b != 1) return 1;
     return 0;
-  } catch (e: ArithmeticError) {
-    return 1;
   } catch (e) {
     return 1;
   }

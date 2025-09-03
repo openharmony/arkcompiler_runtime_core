@@ -229,8 +229,8 @@ cases:
           try {
               x = foo(true)
               return 1
-          } catch (e: Error) {
-              if (e.message != 'invoke error') return 1
+          } catch (e) {
+              if (e instanceof Error && e.message != 'invoke error') return 1
           }
 
     - decl: |-

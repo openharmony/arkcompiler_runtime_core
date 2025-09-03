@@ -39,10 +39,13 @@ cases:
           try {
               foo(bar(1))
               arktest.assertTrue(false)
-          } catch (e: Error) {
-              arktest.assertTrue(e.message == 'ABC')  // expected
           } catch (e) {
-              arktest.assertTrue(false)
+              if (e instanceof Error) {
+                arktest.assertTrue(e.message == 'ABC')  // expected
+              }
+              else {
+                arktest.assertTrue(false)
+              }
           }
 
     - decl: |-
@@ -60,10 +63,13 @@ cases:
           try {
               foo(bar(1), 1)
               arktest.assertTrue(false)
-          } catch (e: Error) {
-              arktest.assertTrue(e.message == 'ABC')  // expected
           } catch (e) {
+            if (e instanceof Error) {
+              arktest.assertTrue(e.message == 'ABC')  // expected
+            }
+            else {
               arktest.assertTrue(false)
+            }
           }
 
     - decl: |-
@@ -78,8 +84,11 @@ cases:
           function bar(p: Promise<string>): string {
               try {
                   return await p
-              } catch (e: Error) {
-                  return e.message
+              } catch (e) {
+                  if (e instanceof Error) {
+                    return e.message
+                  }
+                  return ''
               }
           }
 

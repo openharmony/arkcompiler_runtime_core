@@ -161,15 +161,10 @@ cases:
           arktest.assertTrue( p[0] == "A" )
 
     - use: |-
-          let res: boolean = false
           let v: [string]|null = ["A"]
-          try {
-              v = null
-              v![0] = "A"
-          } catch (e: NullPointerError) {
-              res = true // OK
-          }
-          arktest.assertTrue( res )
+          v = null
+          let expectedException = (e: Error): boolean => { return (e instanceof NullPointerError) }
+          arktest.expectThrow(() => { v![0] = "A" }, expectedException)
 
     - decl: |-
           type TUPLE = [number, string]

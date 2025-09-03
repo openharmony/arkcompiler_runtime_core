@@ -47,17 +47,11 @@ function val(): int {
     return 1
 }
 
-function main(): int {
+function main() {
     result = "";  // reset due to jit mode warmup
 
     let s: string = ""
-    try {
-      let tmp = ref("A")[idx(2)] = ref("B")[idx(1)] = ref("C")[idx(0)] = val();
-      s = s + tmp;
-    } catch (e: ArithmeticError) {
-        if (result == "A2B1" && s == "") {
-            return 0
-        }
-    }
-    return 1
+    let expectedException = (e: Error): boolean => { return (e instanceof ArithmeticError) }
+    arktest.expectThrow(() => { let tmp = ref("A")[idx(2)] = ref("B")[idx(1)] = ref("C")[idx(0)] = val(); s = s + tmp }, expectedException)
+    arktest.assertTrue(result == "A2B1" && s == "")
 }

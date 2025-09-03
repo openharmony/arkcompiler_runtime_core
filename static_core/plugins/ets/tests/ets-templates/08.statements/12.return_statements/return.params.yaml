@@ -54,7 +54,7 @@ block_statements:
   - decl: |
       function test(): void {
         return;
-        arktest.assertTrue(true);
+        arktest.assertTrue(true); // DTS2025032419456 Checks that unreachable statements after return doesn't cause compilation failure
       }
     use: |
       test()
