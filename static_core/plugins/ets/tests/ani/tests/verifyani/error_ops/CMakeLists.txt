@@ -11,11 +11,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include(cmake/ani_verify_tests.cmake)
+ani_verify_add_gtest(ani_verify_test_describe_error
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_describe_error_test.cpp
+)
 
-add_subdirectory(error_ops)
-add_subdirectory(object_ops)
-add_subdirectory(ref_ops)
-add_subdirectory(scope_ops)
-add_subdirectory(string_ops)
-add_subdirectory(vm_ops)
+ani_verify_add_gtest(ani_verify_test_exist_unhandled_error
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_exist_unhandled_error_test.cpp
+)
+
+ani_verify_add_gtest(ani_verify_test_get_unhandled_error
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_get_unhandled_error_test.cpp
+)
+
+ani_verify_add_gtest(ani_verify_test_reset_error
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_reset_error_test.cpp
+)

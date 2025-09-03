@@ -93,6 +93,14 @@ public:
     }
 };
 
+class VError final : public VObject {
+public:
+    ani_error GetRef()
+    {
+        return static_cast<ani_error>(VRef::GetRef());
+    }
+};
+
 }  // namespace ark::ets::ani::verify
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_ANI_VERIFY_TYPES_VREF_H

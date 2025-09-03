@@ -60,6 +60,8 @@ public:
             return static_cast<VModule *>(DoAddLocalVerifiedRef(ref, ANIRefType::MODULE));
         } else if constexpr (std::is_same_v<RefType, ani_string>) {
             return static_cast<VString *>(DoAddLocalVerifiedRef(ref, ANIRefType::STRING));
+        } else if constexpr (std::is_same_v<RefType, ani_error>) {
+            return static_cast<VError *>(DoAddLocalVerifiedRef(ref, ANIRefType::ERROR));
         } else {
             UNREACHABLE_CONSTEXPR();
         }

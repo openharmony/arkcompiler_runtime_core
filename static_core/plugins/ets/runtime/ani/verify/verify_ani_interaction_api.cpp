@@ -448,44 +448,74 @@ NO_UB_SANITIZE static ani_status DestroyEscapeLocalScope(VEnv *venv, VRef *vref,
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status ThrowError(VEnv *venv, ani_error err)
+NO_UB_SANITIZE static ani_status ThrowError(VEnv *venv, VError *verr)
 {
     VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->ThrowError(venv->GetEnv(), err);
+    return GetInteractionAPI(venv)->ThrowError(venv->GetEnv(), verr->GetRef());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status ExistUnhandledError(VEnv *venv, ani_boolean *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env", false),
+        ANIArg::MakeForBooleanStorage(result, "result"),
+    );
+    // clang-format on
+
     return GetInteractionAPI(venv)->ExistUnhandledError(venv->GetEnv(), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status GetUnhandledError(VEnv *venv, ani_error *result)
+NO_UB_SANITIZE static ani_status GetUnhandledError(VEnv *venv, VError **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->GetUnhandledError(venv->GetEnv(), result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env", false),
+        ANIArg::MakeForErrorStorage(vresult, "result"),
+    );
+    // clang-format on
+    ani_error result {};
+    ani_status status = GetInteractionAPI(venv)->GetUnhandledError(venv->GetEnv(), &result);
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status ResetError(VEnv *venv)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env", false), /* NOTE: Add checkers */);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env", false),
+    );
+    // clang-format on
+
     return GetInteractionAPI(venv)->ResetError(venv->GetEnv());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status DescribeError(VEnv *venv)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env", false),
+    );
+    // clang-format on
+
     return GetInteractionAPI(venv)->DescribeError(venv->GetEnv());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Abort(VEnv *venv, const char *message)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForUTF8String(message, "message")
+    );
+    // clang-format on
+
     return GetInteractionAPI(venv)->Abort(venv->GetEnv(), message);
 }
 
