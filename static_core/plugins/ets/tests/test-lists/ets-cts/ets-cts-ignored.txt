@@ -2593,6 +2593,9 @@
 18.annotations/05.standard_annotations/02.target_annotation/AnnotationTargets_80.ets
 18.annotations/05.standard_annotations/02.target_annotation/ClassAnnoTest.ets
 
+#29116
+18.annotations/05.standard_annotations/02.target_annotation/use_annotation_with_type_bad.ets
+
 #29172
 18.annotations/05.standard_annotations/02.target_annotation/AnnotationTargets_20.ets
 
