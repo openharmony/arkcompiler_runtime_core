@@ -13,13 +13,13 @@
 
 ---
 cases:
-    - index: '-1'
-    - index: '-2 as Short'
-    - index: '-3 as Byte'
-    - index: '7'
-    - index: '8 as Short'
-    - index: '9 as Byte'
-    - index: 'Int.MAX_VALUE'
-    - index: 'Short.MAX_VALUE'
-    - index: 'Byte.MAX_VALUE'
-    - index: 'str.length'
+    - index: '2n'
+    - index: '2.3f'
+    - index: '5.7'
+    - index: 'true'
+    - index: 'false'
+    - index: '"a"'
+    - index: 'null'
+    - index: 'undefined'
+    - index: 'never'
+    - index: 'void'

@@ -11,11 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # List of valid cases with Numeric Types
+---
 cases:
-    # int
-    - { type: 'int', add_val: '' }
-    # short
-    - { type: 'short', add_val: '' }
-    # byte
-    - { type: 'byte', add_val: '' }
+    - { index: '0',            value: 'a' }
+    - { index: '1 as Byte',    value: 'b' }
+    - { index: '2 as Short',   value: 'c' }
+    - { index: '3 as Int',     value: 'd' }
+    - { index: 'new Byte(4)',  value: 'e' }
+    - { index: 'new Short(5)', value: 'f' }
+    - { index: 'new Int(6)',   value: 'g' }

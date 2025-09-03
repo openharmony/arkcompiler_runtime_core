@@ -16,18 +16,14 @@
 {% for c in cases %}
 /*---
 desc: >-
-    7.12.2 String Indexing Expression
-    Index expression for array indexing must be of a numeric type (see Numeric Types).
-    The same rules apply as those for Array Indexing Expression.
-    7.12.1 Array Indexing Expression
-    Index expression for array indexing must be of a numeric type (see Numeric Types).
-    Otherwise, a compile-time error occurs.
-tags: [compile-only, negative]
+    Index expression for string indexing must be of one of integer types, namely byte, short, or int.
 ---*/
 
-let str: string = "abcdefg"
+let str: string = "abcdefg";
 
 function main(): void {
-  let val = str[{{c['index']}}]
+  let i: {{c.type}} = {{c.value}};
+  arktest.assertEQ(str[i], '{{c.letter}}');
+  arktest.assertEQ("abcdefg"[i], '{{c.letter}}');
 }
 {% endfor %}

@@ -11,14 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # List of cases with not Numeric Types
+---
 cases:
-    - index: 'true'
-    - index: 'false'
-    - index: 'null'
-    - index: 'undefined'
-    - index: 'never'
-    - index: 'void'
-    - index: 'new Object()'
-    - index: "new Boolean()"
-    - index: '"a"'
+    - { type: byte,  value: '0',            letter: 'a' }
+    - { type: short, value: '1',            letter: 'b' }
+    - { type: int,   value: '2',            letter: 'c' }
+    - { type: Byte,  value: 'new Byte(3)',  letter: 'd' }
+    - { type: Short, value: 'new Short(4)', letter: 'e' }
+    - { type: Int,   value: 'new Int(5)',   letter: 'f' }

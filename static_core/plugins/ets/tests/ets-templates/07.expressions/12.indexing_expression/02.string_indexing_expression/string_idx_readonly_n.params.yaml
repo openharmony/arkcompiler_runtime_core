@@ -13,8 +13,8 @@
 
 ---
 cases:
-    - { index: '0', val: '"h"' }
-    - { index: '2', val: '"i"' }
-    - { index: '6', val: '"j"' }
-    - { index: '3', val: 'c''k''' }
-    - { index: '4', val: '''l''' }
+    - { index: '0', value: 'h'   }
+    - { index: '2', value: 'i'   }
+    - { index: '6', value: 'j'   }
+    - { index: '3', value: '"k"' }
+    - { index: '4', value: '4'   }

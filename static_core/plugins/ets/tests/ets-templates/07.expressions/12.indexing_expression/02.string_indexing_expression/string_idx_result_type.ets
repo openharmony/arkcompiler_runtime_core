@@ -15,13 +15,16 @@
 
 {% for c in cases %}
 /*---
-desc: String value is immutable, and is not allowed to change a value of a string element by indexing.
-tags: [compile-only, negative]
+desc: >-
+    The result of a string indexing expression is a value of string type.
 ---*/
 
-let str: string = "abcdefg"
+let str: string = "\x17\x2b\xef\0\u1f48\u2331\u2b03\u2eec \n \u{CAFE}\n\uBABF生日快乐!С Днём рождения!";
 
 function main(): void {
-  str[{{c.index}}] = '{{c.value}}'
+  let index: {{c.type}} = {{c.value}};
+  arktest.assertEQ(str[index], '{{c.symbol}}');
+  arktest.assertTrue(str[index] instanceof string)
+  arktest.assertEQ(typeof str[index], 'string')
 }
 {% endfor %}

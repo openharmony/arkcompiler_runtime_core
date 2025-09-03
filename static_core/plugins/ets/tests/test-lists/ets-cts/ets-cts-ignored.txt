@@ -1052,11 +1052,6 @@
 #28526
 07.expressions/11.function_call_expression/fcall_20.ets
 
-#27157
-07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_nzfract_rte_n_0.ets
-07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_nzfract_rte_n_1.ets
-07.expressions/12.indexing_expression/02.string_indexing_expression/string_idx_nzfract_rte_n_2.ets
-
 #29202 CTE expected in `instanceof T`
 07.expressions/15.instanceof_expression/instanceof-cte_0.ets
 
