@@ -55,6 +55,7 @@ class BuiltinArrayKeysIterator implements IterableIterator<number> {
 % ctx = OpenStruct.new
 % $ctx = ctx
 % ctx.this = 'self'
+% ctx.this_buffer = 'self'
 % ctx.this_len_int = 'self.length'
 % ctx.array_len_int = Proc.new { |v| "#{v}.length" }
 % ctx.access_public = 'export function'
@@ -92,6 +93,9 @@ class BuiltinArrayKeysIterator implements IterableIterator<number> {
 %     ctx.this_generic = '<T>'
 %     ctx.this_iterator_generic = '<T>'
 %     ctx.this_generic_one = 'T, '
+%     ctx.copy_function = 'copyToFast'
+%   else
+%     ctx.copy_function = 'copyTo'
 %   end
 % ctx.this_call = Proc.new { |f| "#{f}#{ctx.this_generic}(self, " }
 function cloneArray<%= ctx.this_generic %>(self: <%= ctx.this_type %>): <%= ctx.this_type %> {

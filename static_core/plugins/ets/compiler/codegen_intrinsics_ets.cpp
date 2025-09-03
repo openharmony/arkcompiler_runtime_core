@@ -759,4 +759,49 @@ void Codegen::CreateGetHashCodeByValue([[maybe_unused]] IntrinsicInst *inst, Reg
     CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND]);
 }
 
+static RuntimeInterface::EntrypointId GetArrayFastCopyToRefEntrypointId(mem::BarrierType barrierType)
+{
+    using EntrypointId = RuntimeInterface::EntrypointId;
+    switch (barrierType) {
+        case mem::BarrierType::POST_INTERGENERATIONAL_BARRIER:  // Gen GC
+            return EntrypointId::ARRAY_FAST_COPY_TO_REF_ASYNC_MANUAL;
+        case mem::BarrierType::POST_CMC_WRITE_BARRIER:  // CMC GC
+            return EntrypointId::ARRAY_FAST_COPY_TO_REF_HYBRID;
+        case mem::BarrierType::POST_INTERREGION_BARRIER:  // G1 GC
+            return EntrypointId::ARRAY_FAST_COPY_TO_REF_ASYNC;
+        default:  // STW GC
+            return EntrypointId::ARRAY_FAST_COPY_TO_REF_SYNC;
+    }
+}
+
+void Codegen::CreateArrayFastCopyToRef(IntrinsicInst *inst, [[maybe_unused]] Reg dst, SRCREGS src)
+{
+    ASSERT(IntrinsicNeedsParamLocations(inst->GetIntrinsicId()));
+
+    auto srcObj = src[FIRST_OPERAND];
+    auto dstObj = src[SECOND_OPERAND];
+    auto dstStart = src[THIRD_OPERAND];
+    auto srcStart = src[FOURTH_OPERAND];
+    auto srcEnd = src[FIFTH_OPERAND];
+
+    ScopedTmpReg tmpReg(enc_);
+    auto tmp = tmpReg.GetReg().As(dstStart.GetType());
+    enc_->EncodeSub(tmp, srcEnd, srcStart);
+    // Check whether the source range less or equal to what fits in a single GC card table. If not, go to the
+    // slow path.
+    static constexpr size_t IN_ONE_CARD_TABLE_PAGE_ITERATION_THRESHOLD =
+        mem::CardTable::GetCardSize() / sizeof(ObjectPointerType);
+    auto labelSlowPath = enc_->CreateLabel();
+    auto labelEnd = enc_->CreateLabel();
+    enc_->EncodeJump(labelSlowPath, tmp, Imm(IN_ONE_CARD_TABLE_PAGE_ITERATION_THRESHOLD), Condition::GT);
+    auto fastPathEntrypointId = GetArrayFastCopyToRefEntrypointId(GetGraph()->GetRuntime()->GetPostType());
+    CallFastPath(inst, fastPathEntrypointId, INVALID_REGISTER, {}, srcObj, dstObj, dstStart, srcStart, srcEnd);
+    enc_->EncodeJump(labelEnd);
+
+    enc_->BindLabel(labelSlowPath);
+    static constexpr auto SLOW_PATH_ENTRYPOINT_ID = EntrypointId::ARRAY_FAST_COPY_TO_REF_ENTRYPOINT;
+    CallRuntime(inst, SLOW_PATH_ENTRYPOINT_ID, INVALID_REGISTER, {}, srcObj, dstObj, dstStart, srcStart, srcEnd);
+    enc_->BindLabel(labelEnd);
+}
+
 }  // namespace ark::compiler

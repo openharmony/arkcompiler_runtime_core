@@ -203,7 +203,8 @@ set(IRTOC_ETS_SCRIPTS ${PANDA_ROOT}/plugins/ets/irtoc_scripts)
 set(IRTOC_ETS_SCRIPTS ${IRTOC_ETS_SCRIPTS} PARENT_SCOPE)
 if(NOT (CMAKE_CROSSCOMPILING OR PANDA_TARGET_OHOS))
     irtoc_compile(TARGET_NAME irtoc_ets_fastpath
-                  INPUT_FILES ${IRTOC_ETS_SCRIPTS}/to_string_cache.irt
+                  INPUT_FILES ${IRTOC_ETS_SCRIPTS}/arrays.irt
+                              ${IRTOC_ETS_SCRIPTS}/to_string_cache.irt
                               ${IRTOC_ETS_SCRIPTS}/typed_arrays.irt
                               ${IRTOC_ETS_SCRIPTS}/escompat_array.irt
                               ${IRTOC_ETS_SCRIPTS}/map.irt

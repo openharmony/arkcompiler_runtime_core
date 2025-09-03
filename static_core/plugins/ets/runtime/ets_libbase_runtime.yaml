@@ -5185,6 +5185,25 @@ intrinsics:
         - i32
     impl: ark::ets::intrinsics::StdCoreObjectCopyTo
 
+  - name: EscompatObjectFastCopyToUnchecked
+    space: ets
+    class_name: escompat.ETSGLOBAL
+    method_name: copyToFast
+    static: true
+    signature:
+      ret: void
+      args:
+        - std.core.Object\[
+        - std.core.Object\[
+        - i32
+        - i32
+        - i32
+    impl: ark::ets::intrinsics::EscompatObjectFastCopyToUnchecked
+    codegen_arch: [ arm64, amd64 ]
+    codegen_func: CreateArrayFastCopyToRef
+    llvm_codegen_func: EmitArrayFastCopyToRef
+    need_param_locations: true
+
   - name: StdCoreFloatCopyTo
     space: ets
     class_name: std.core.ETSGLOBAL

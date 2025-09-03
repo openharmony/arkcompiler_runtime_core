@@ -452,10 +452,7 @@ export function slice(self: FixedArray<boolean>, start: int, end: int): FixedArr
         count = 0;
     }
     let res : FixedArray<boolean> = new boolean[count]
-    for (let i = 0; i < count; i++) {
-        res[i] = self[relStart + i];
-    }
-
+    copyTo(self, res, 0, relStart, relStart + count);
     return res
 }
 
@@ -1381,10 +1378,7 @@ export function slice(self: FixedArray<byte>, start: int, end: int): FixedArray<
         count = 0;
     }
     let res : FixedArray<byte> = new byte[count]
-    for (let i = 0; i < count; i++) {
-        res[i] = self[relStart + i];
-    }
-
+    copyTo(self, res, 0, relStart, relStart + count);
     return res
 }
 
@@ -2310,10 +2304,7 @@ export function slice(self: FixedArray<short>, start: int, end: int): FixedArray
         count = 0;
     }
     let res : FixedArray<short> = new short[count]
-    for (let i = 0; i < count; i++) {
-        res[i] = self[relStart + i];
-    }
-
+    copyTo(self, res, 0, relStart, relStart + count);
     return res
 }
 
@@ -3239,10 +3230,7 @@ export function slice(self: FixedArray<int>, start: int, end: int): FixedArray<i
         count = 0;
     }
     let res : FixedArray<int> = new int[count]
-    for (let i = 0; i < count; i++) {
-        res[i] = self[relStart + i];
-    }
-
+    copyTo(self, res, 0, relStart, relStart + count);
     return res
 }
 
@@ -4168,10 +4156,7 @@ export function slice(self: FixedArray<long>, start: int, end: int): FixedArray<
         count = 0;
     }
     let res : FixedArray<long> = new long[count]
-    for (let i = 0; i < count; i++) {
-        res[i] = self[relStart + i];
-    }
-
+    copyTo(self, res, 0, relStart, relStart + count);
     return res
 }
 
@@ -5097,10 +5082,7 @@ export function slice(self: FixedArray<float>, start: int, end: int): FixedArray
         count = 0;
     }
     let res : FixedArray<float> = new float[count]
-    for (let i = 0; i < count; i++) {
-        res[i] = self[relStart + i];
-    }
-
+    copyTo(self, res, 0, relStart, relStart + count);
     return res
 }
 
@@ -6034,10 +6016,7 @@ export function slice(self: FixedArray<double>, start: int, end: int): FixedArra
         count = 0;
     }
     let res : FixedArray<double> = new double[count]
-    for (let i = 0; i < count; i++) {
-        res[i] = self[relStart + i];
-    }
-
+    copyTo(self, res, 0, relStart, relStart + count);
     return res
 }
 
@@ -6971,10 +6950,7 @@ export function slice(self: FixedArray<char>, start: int, end: int): FixedArray<
         count = 0;
     }
     let res : FixedArray<char> = new char[count]
-    for (let i = 0; i < count; i++) {
-        res[i] = self[relStart + i];
-    }
-
+    copyTo(self, res, 0, relStart, relStart + count);
     return res
 }
 
