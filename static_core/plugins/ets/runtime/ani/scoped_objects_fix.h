@@ -391,6 +391,7 @@ public:
         : ManagedCodeAccessor(env), alreadyInManaged_(ManagedThread::IsManagedScope())
     {
         ASSERT(env == PandaEnv::GetCurrent());
+        ASSERT(alreadyInManaged_ ? !StackWalker::Create(GetCoroutine()).GetMethod()->IsCriticalNative() : true);
 
         if (alreadyInManaged_ && IsAccessFromManagedAllowed()) {
             return;
