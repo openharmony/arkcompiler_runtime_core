@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,7 +75,7 @@ static constexpr auto CODEGEN_OBJECT_PARAMS_SOURCE = R"(
 }
 
 .function i64 get_Value_b(Value a0) {
-    ldobj a0, Value.b
+    ldobj.64 a0, Value.b
     return.64
 }
 
@@ -166,7 +166,10 @@ static constexpr auto CODEGEN_OBJECT_PARAMS_SOURCE = R"(
     sub2.64 v23
     sub2.64 v24
 
-    jeq v17, success_label
+    sta.64 v25
+    cmp.64 v17
+    jeqz success_label
+    lda.64 v25
     add2.64 v8
     add2.64 v9
     add2.64 v10
@@ -290,17 +293,17 @@ success_label:
     stobj v5, Value.a
     ## b - i64
     ldai.64 0x800000000000000
-    stobj v0, Value.b
+    stobj.64 v0, Value.b
     ldai.64 0x200000000000000
-    stobj v1, Value.b
+    stobj.64 v1, Value.b
     ldai.64 0x80000000000000
-    stobj v2, Value.b
+    stobj.64 v2, Value.b
     ldai.64 0x20000000000000
-    stobj v3, Value.b
+    stobj.64 v3, Value.b
     ldai.64 0x8000000000000
-    stobj v4, Value.b
+    stobj.64 v4, Value.b
     ldai.64 0x2000000000000
-    stobj v5, Value.b
+    stobj.64 v5, Value.b
 
     ldai.64 0xaaa00000aaa0aaa
     sta.64 v7
@@ -308,12 +311,14 @@ success_label:
     call.short hook
 
     call.range  foo, v0
-
-    jeq v7, success_label
+    sta.64 v8
+    cmp.64 v7
+    jeqz success_label
+    lda.64 v8
     return.64
 
 success_label:
-    ldai 123
+    ldai.64 123
     return.64
 }
 

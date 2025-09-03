@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,9 +12,9 @@
 # limitations under the License.
 
 
-
+# '--verification-mode=disabled' this option here is added to save test logic and remove verifier error
 #! CHECKER     Acc undefined value [pri | 0] after return from initobj with OSR'ed initializer
-#! RUN          options: "--interpreter-type=irtoc --compiler-enable-jit=true --compiler-check-final=true --compiler-force-unresolved=true --compiler-hotness-threshold=3 --enable-an --no-async-jit=true", entry: "_GLOBAL::main"
+#! RUN          options: "--verification-mode=disabled --interpreter-type=irtoc --compiler-enable-jit=true --compiler-check-final=true --compiler-force-unresolved=true --compiler-hotness-threshold=3 --enable-an --no-async-jit=true", entry: "_GLOBAL::main"
 #! EVENT        /OsrEntry,classTest::_ctor_,.*,AFTER_IFRAME,SUCCESS/
 
 .record classTest

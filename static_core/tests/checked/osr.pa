@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,9 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
+# '--verification-mode=disabled' this option here is added to save test logic and remove verifier error
 #! CHECKER      Stack parameters in OSR
-#! RUN          options: "--no-async-jit --compiler-hotness-threshold=10", entry: "_GLOBAL::main2"
+#! RUN          options: "--verification-mode=disabled --no-async-jit --compiler-hotness-threshold=10", entry: "_GLOBAL::main2"
 #! EVENT        /OsrEntry,_GLOBAL::bar,.*,AFTER_IFRAME,SUCCESS/
 
 .function i64 bar(i64 a0, i64 a1, i64 a2, i64 a3, i64 a4, i64 a5, i64 a6, i64 a7, i64 a8, i64 a9, i64 a10, i64 a11, i64 a12, i64 a13, i64 a14, i64 a15, i64 a16, i64 a17, i64 a18, i64 a19) {

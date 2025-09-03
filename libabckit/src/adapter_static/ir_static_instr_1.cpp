@@ -1869,7 +1869,7 @@ AbckitInst *IcreateLoadArrayStatic(AbckitGraph *graph, AbckitInst *arrayRef, Abc
 
     loadArrayImpl->ReserveInputs(argsCount);
     loadArrayImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);
-    loadArrayImpl->AppendInput(idx->impl, compiler::DataType::INT64);
+    loadArrayImpl->AppendInput(idx->impl, compiler::DataType::INT32);
     loadArrayImpl->AppendInput(arrayRef->impl, compiler::DataType::REFERENCE);
 
     return CreateInstFromImpl(graph, loadArrayImpl);
@@ -1888,7 +1888,8 @@ static AbckitInst *IcreateStoreArrayBody(AbckitInst *arrayRef, AbckitInst *idx, 
     // ARRAY VERIFICATION!!! :()
     auto dataType = TypeIdToType(valueTypeId);
 
-    auto intrinsicId = compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_STORE_ARRAY;
+    auto intrinsicId = isWide ? compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_STORE_ARRAY_WIDE
+                              : compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_STORE_ARRAY;
     auto storeArrayImpl = graph->impl->CreateInstIntrinsic(dataType, 0, intrinsicId);
     size_t argsCount {3U};
 
@@ -1896,11 +1897,7 @@ static AbckitInst *IcreateStoreArrayBody(AbckitInst *arrayRef, AbckitInst *idx, 
     storeArrayImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);
     storeArrayImpl->AppendInput(value->impl, dataType);
     storeArrayImpl->AppendInput(arrayRef->impl, compiler::DataType::REFERENCE);
-    if (isWide) {
-        storeArrayImpl->AppendInput(idx->impl, compiler::DataType::INT64);
-    } else {
-        storeArrayImpl->AppendInput(idx->impl, compiler::DataType::INT32);
-    }
+    storeArrayImpl->AppendInput(idx->impl, compiler::DataType::INT32);
 
     return CreateInstFromImpl(graph, storeArrayImpl);
 }

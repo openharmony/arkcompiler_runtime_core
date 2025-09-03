@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 .function i32 Math.absI32(i32 a0)<external>
 .function i32 main(){
     movi v0, 2
-    movi.64 v1, 2
+    movi v1, 2
     call.short Math.absI32, v0, v0
     jne v1, exit_failure
     movi v0, -2

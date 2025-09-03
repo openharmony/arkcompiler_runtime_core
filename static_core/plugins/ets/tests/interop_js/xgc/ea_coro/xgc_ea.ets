@@ -20,12 +20,12 @@ const SHARED_OBJECTS_COUNT: int = 10;
 class SharedClass {
     public jsRef?: JSValue;
 }
-
-const sharedObjects: FixedArray<(WeakRef<SharedClass>|undefined)>;
+// NOTE(mgroshev): revert this change, when #29283
+let sharedObjects: Array<(WeakRef<SharedClass>)>;
 static {
-    sharedObjects = new undefined[SHARED_OBJECTS_COUNT];
+    sharedObjects = new Array<(WeakRef<SharedClass>)>();
     for (let i: int = 0; i < SHARED_OBJECTS_COUNT; ++i) {
-        sharedObjects[i] = new WeakRef<SharedClass>(new SharedClass());
+        sharedObjects.push(new WeakRef<SharedClass>(new SharedClass()));
     }
 }
 
