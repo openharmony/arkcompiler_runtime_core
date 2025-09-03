@@ -110,7 +110,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         this(arrayLen.toInt())
     }
 
-    protected constructor(_tag: FromBuffer, buf: FixedArray<NullishType>) {
+    protected constructor(_tag: FromBuffer, buf: FixedArray<Any>) {
         this.buffer = buf
         this.actualLength = buf.length
     }

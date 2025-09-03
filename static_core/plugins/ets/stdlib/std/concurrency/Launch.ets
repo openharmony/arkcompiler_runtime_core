@@ -129,7 +129,7 @@ export function launch<R, F extends CoroFunT<never, R>>(coroFun: F, launchParams
  * @param asyncCallback Asynchronous callback function that returns a promise.
  *
  * @returns The resolved value from the promise returned by the callback.
- * 
+ *
  * @throws The rejection error if the promise is rejected.
  */
 export function waitForCompletion<T>(asyncCallback: () => Promise<T>): T {
@@ -143,7 +143,7 @@ export function waitForCompletion<T>(asyncCallback: () => Promise<T>): T {
     return job.Await();
 }
 
-function launchInternal<R, F extends CoroFunT<never, R>>(coroFun: F, args: FixedArray<NullishType>, launchParams?: LaunchParams): Job<R> {
+function launchInternal<R, F extends CoroFunT<never, R>>(coroFun: F, args: FixedArray<Any>, launchParams?: LaunchParams): Job<R> {
   const paddedArgs = padArrayToMaxArgs(args);
   if (launchParams) {
     return launchInternalJobNative<F, R>(coroFun, args as FixedArray<Any>, launchParams.abortFlag, launchParams.workerGroupId);
