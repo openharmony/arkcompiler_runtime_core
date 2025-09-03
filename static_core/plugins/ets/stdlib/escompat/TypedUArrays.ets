@@ -88,7 +88,6 @@ class Uint8ClampedArrayIteratorEntries implements IterableIterator<[Number, Numb
 export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
     public static readonly BYTES_PER_ELEMENT: int = 1
     public readonly BYTES_PER_ELEMENT: int = Uint8ClampedArray.BYTES_PER_ELEMENT
-    public overload subarray { subarrayII, subarrayNI, subarrayIN, subarrayNN }
 
     /** Underlying Buffer */
     public readonly buffer: ArrayBuffer
@@ -302,17 +301,6 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
     }
 
     /**
-     * Returns an instance of primitive type at passed index.
-     *
-     * @param index index to look at
-     *
-     * @returns a primitive at index
-     */
-    public at(index: number): Number | undefined {
-        return this.at(index.toInt())
-    }
-
-    /**
      * Returns an instance of primitive type at passed index if index is correct.
      *
      * @param index index to look at
@@ -474,8 +462,8 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @returns modified Uint8ClampedArray
      */
-    public fill(value: number, start?: number, end?: number): Uint8ClampedArray {
-        this.fill(value.toInt(), asIntOrDefault(start, 0), asIntOrDefault(end, this.lengthInt))
+    public fill(value: number, start?: int, end?: int): Uint8ClampedArray {
+        this.fill(value.toInt(), start, end)
         return this
     }
 
@@ -486,82 +474,10 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @returns modified Uint8ClampedArray
      */
-    public fill(value: number, start: int, end?: number): Uint8ClampedArray {
-        this.fill(value.toInt(), start.toInt(), asIntOrDefault(end, this.lengthInt))
-        return this
-    }
-
-    /**
-     * Fills the Uint8ClampedArray with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified Uint8ClampedArray
-     */
-    public fill(value: number, start: number, end: int): Uint8ClampedArray {
-        this.fill(value.toInt(), start.toInt(), end.toInt())
-        return this
-    }
-
-    /**
-     * Fills the Uint8ClampedArray with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified Uint8ClampedArray
-     */
-    public fill(value: number, start: int, end: int): Uint8ClampedArray {
-        this.fill(value.toInt(), start.toInt(), end.toInt())
-        return this
-    }
-
-    /**
-     * Fills the Uint8ClampedArray with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified Uint8ClampedArray
-     */
-    public fill(value: int, start?: number, end?: number): Uint8ClampedArray {
-        this.fill(value, asIntOrDefault(start, 0), asIntOrDefault(end, this.lengthInt))
-        return this
-    }
-
-    /**
-     * Fills the Uint8ClampedArray with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified Uint8ClampedArray
-     */
-    public fill(value: int, start: int, end?: number): Uint8ClampedArray {
-        this.fill(value, start.toInt(), asIntOrDefault(end, this.lengthInt))
-        return this
-    }
-
-    /**
-     * Fills the Uint8ClampedArray with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified Uint8ClampedArray
-     */
-    public fill(value: int, start: number, end: int): Uint8ClampedArray {
-        this.fill(value, start.toInt(), end.toInt())
-        return this
-    }
-
-    /**
-     * Fills the Uint8ClampedArray with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified Uint8ClampedArray
-     */
-    public fill(value: int, start: int, end: int): Uint8ClampedArray {
+    public fill(value: int, start?: int, end?: int): Uint8ClampedArray {
         value = Uint8ClampedArray.clamp(value)
-        const k = normalizeIndex(start, this.lengthInt)
-        const finalPos = normalizeIndex(end, this.lengthInt)
+        const k = normalizeIndex(start ?? 0, this.lengthInt)
+        const finalPos = normalizeIndex(end ?? this.lengthInt, this.lengthInt)
         this.fillInternal(value, k, finalPos)
         return this
     }
@@ -1191,55 +1107,10 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
-    public slice(begin?: number, end?: number): Uint8ClampedArray {
-        return this.slice(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Creates a slice of current Uint8ClampedArray using range [begin, end)
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @param end last index to be taken into slice
-     *
-     * @returns a new Uint8ClampedArray with elements of current Uint8ClampedArray[begin;end) where end index is excluded
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
-     */
-    public slice(begin: number, end: int): Uint8ClampedArray {
-        return this.slice(begin.toInt(), end.toInt())
-    }
-
-    /**
-     * Creates a slice of current Uint8ClampedArray using range [begin, end)
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @param end last index to be taken into slice
-     *
-     * @returns a new Uint8ClampedArray with elements of current Uint8ClampedArray[begin;end) where end index is excluded
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
-     */
-    public slice(begin: int, end: number): Uint8ClampedArray {
-        return this.slice(begin.toInt(), end.toInt())
-    }
-
-    /**
-     * Creates a slice of current Uint8ClampedArray using range [begin, end)
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @param end last index to be taken into slice
-     *
-     * @returns a new Uint8ClampedArray with elements of current Uint8ClampedArray[begin;end) where end index is excluded
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
-     */
-    public slice(begin: int, end: int): Uint8ClampedArray {
+    public slice(begin?: int, end?: int): Uint8ClampedArray {
         const len: int = this.lengthInt
-        const relStart = normalizeIndex(begin, len)
-        const relEnd = normalizeIndex(end, len)
+        const relStart = normalizeIndex(begin ?? 0, len)
+        const relEnd = normalizeIndex(end ?? len, len)
         let count = relEnd - relStart
         if (count < 0) {
             count = 0
@@ -1322,46 +1193,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @returns new Uint8ClampedArray with the same underlying Buffer
      */
-    public subarrayNN(begin?: number, end?: number): Uint8ClampedArray {
-        return this.subarray(asIntOrDefault(begin, 0), asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Creates a Uint8ClampedArray with the same underlying Buffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @param end last index, exclusive
-     *
-     * @returns new Uint8ClampedArray with the same underlying Buffer
-     */
-    public subarrayNI(begin?: number, end?: int): Uint8ClampedArray {
-        return this.subarray(asIntOrDefault(begin, 0), end)
-    }
-
-    /**
-     * Creates a Uint8ClampedArray with the same underlying Buffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @param end last index, exclusive
-     *
-     * @returns new Uint8ClampedArray with the same underlying Buffer
-     */
-    public subarrayIN(begin?: int, end?: number): Uint8ClampedArray {
-        return this.subarray(begin, asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Creates a Uint8ClampedArray with the same underlying Buffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @param end last index, exclusive
-     *
-     * @returns new Uint8ClampedArray with the same underlying Buffer
-     */
-    public subarrayII(begin: int | undefined = 0, end: int | undefined = this.lengthInt): Uint8ClampedArray {
+    public subarray(begin?: int, end?: int): Uint8ClampedArray {
         const len: int = this.lengthInt
         const relStart = normalizeIndex(begin ?? 0, len)
         const relEnd = normalizeIndex(end ?? this.lengthInt, len)
@@ -1861,7 +1693,6 @@ class Uint8ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
 export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     public static readonly BYTES_PER_ELEMENT: int = 1
     public readonly BYTES_PER_ELEMENT: int = Uint8Array.BYTES_PER_ELEMENT
-    public overload subarray { subarrayII, subarrayNI, subarrayIN, subarrayNN }
 
     /** Underlying Buffer */
     public readonly buffer: ArrayBuffer
@@ -2093,17 +1924,6 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Returns an instance of primitive type at passed index.
-     *
-     * @param index index to look at
-     *
-     * @returns a primitive at index
-     */
-    public at(index: number): Number | undefined {
-        return this.at(index.toInt())
-    }
-
-    /**
      * Returns an instance of primitive type at passed index if index is correct.
      *
      * @param index index to look at
@@ -2266,9 +2086,9 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns modified Uint8Array
      */
-    public fill(value: number, start?: number, end?: number): Uint8Array {
+    public fill(value: number, start?: int, end?: int): Uint8Array {
         value = this.zeroIfInfinity(value)
-        this.fill(value.toInt(), asIntOrDefault(start, 0), asIntOrDefault(end, this.lengthInt))
+        this.fill(value.toInt(), start, end)
         return this
     }
 
@@ -2279,84 +2099,9 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns modified Uint8Array
      */
-    public fill(value: number, start: int, end?: number): Uint8Array {
-        value = this.zeroIfInfinity(value)
-        this.fill(value.toInt(), start.toInt(), asIntOrDefault(end, this.lengthInt))
-        return this
-    }
-
-    /**
-     * Fills the Uint8Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified Uint8Array
-     */
-    public fill(value: number, start: number, end: int): Uint8Array {
-        value = this.zeroIfInfinity(value)
-        this.fill(value.toInt(), start.toInt(), end.toInt())
-        return this
-    }
-
-    /**
-     * Fills the Uint8Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified Uint8Array
-     */
-    public fill(value: number, start: int, end: int): Uint8Array {
-        value = this.zeroIfInfinity(value)
-        this.fill(value.toInt(), start.toInt(), end.toInt())
-        return this
-    }
-
-    /**
-     * Fills the Uint8Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified Uint8Array
-     */
-    public fill(value: int, start?: number, end?: number): Uint8Array {
-        this.fill(value, asIntOrDefault(start, 0), asIntOrDefault(end, this.lengthInt))
-        return this
-    }
-
-    /**
-     * Fills the Uint8Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified Uint8Array
-     */
-    public fill(value: int, start: int, end?: number): Uint8Array {
-        this.fill(value, start.toInt(), asIntOrDefault(end, this.lengthInt))
-        return this
-    }
-
-    /**
-     * Fills the Uint8Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified Uint8Array
-     */
-    public fill(value: int, start: number, end: int): Uint8Array {
-        this.fill(value, start.toInt(), end.toInt())
-        return this
-    }
-
-    /**
-     * Fills the Uint8Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified Uint8Array
-     */
-    public fill(value: int, start: int, end: int): Uint8Array {
-        const k = normalizeIndex(start, this.lengthInt)
-        const finalPos = normalizeIndex(end, this.lengthInt)
+    public fill(value: int, start?: int, end?: int): Uint8Array {
+        const k = normalizeIndex(start ?? 0, this.lengthInt)
+        const finalPos = normalizeIndex(end ?? this.lengthInt, this.lengthInt)
         this.fillInternal(value, k, finalPos)
         return this
     }
@@ -2974,55 +2719,10 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
-    public slice(begin?: number, end?: number): Uint8Array {
-        return this.slice(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Creates a slice of current Uint8Array using range [begin, end)
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @param end last index to be taken into slice
-     *
-     * @returns a new Uint8Array with elements of current Uint8Array[begin;end) where end index is excluded
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
-     */
-    public slice(begin: number, end: int): Uint8Array {
-        return this.slice(begin.toInt(), end.toInt())
-    }
-
-    /**
-     * Creates a slice of current Uint8Array using range [begin, end)
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @param end last index to be taken into slice
-     *
-     * @returns a new Uint8Array with elements of current Uint8Array[begin;end) where end index is excluded
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
-     */
-    public slice(begin: int, end: number): Uint8Array {
-        return this.slice(begin.toInt(), end.toInt())
-    }
-
-    /**
-     * Creates a slice of current Uint8Array using range [begin, end)
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @param end last index to be taken into slice
-     *
-     * @returns a new Uint8Array with elements of current Uint8Array[begin;end) where end index is excluded
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
-     */
-    public slice(begin: int, end: int): Uint8Array {
+    public slice(begin?: int, end?: int): Uint8Array {
         const len: int = this.lengthInt
-        const relStart = normalizeIndex(begin, len)
-        const relEnd = normalizeIndex(end, len)
+        const relStart = normalizeIndex(begin ?? 0, len)
+        const relEnd = normalizeIndex(end ?? len, len)
         let count = relEnd - relStart
         if (count < 0) {
             count = 0
@@ -3105,46 +2805,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Uint8Array with the same underlying Buffer
      */
-    public subarrayNN(begin?: number, end?: number): Uint8Array {
-        return this.subarray(asIntOrDefault(begin, 0), asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Creates a Uint8Array with the same underlying Buffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @param end last index, exclusive
-     *
-     * @returns new Uint8Array with the same underlying Buffer
-     */
-    public subarrayNI(begin?: number, end?: int): Uint8Array {
-        return this.subarray(asIntOrDefault(begin, 0), end)
-    }
-
-    /**
-     * Creates a Uint8Array with the same underlying Buffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @param end last index, exclusive
-     *
-     * @returns new Uint8Array with the same underlying Buffer
-     */
-    public subarrayIN(begin?: int, end?: number): Uint8Array {
-        return this.subarray(begin, asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Creates a Uint8Array with the same underlying Buffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @param end last index, exclusive
-     *
-     * @returns new Uint8Array with the same underlying Buffer
-     */
-    public subarrayII(begin: int | undefined = 0, end: int | undefined = this.lengthInt): Uint8Array {
+    public subarray(begin?: int, end?: int): Uint8Array {
         const len: int = this.lengthInt
         const relStart = normalizeIndex(begin ?? 0, len)
         const relEnd = normalizeIndex(end ?? this.lengthInt, len)
@@ -3638,7 +3299,6 @@ class Uint16ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
 export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     public static readonly BYTES_PER_ELEMENT: int = 2
     public readonly BYTES_PER_ELEMENT: int = Uint16Array.BYTES_PER_ELEMENT
-    public overload subarray { subarrayII, subarrayNI, subarrayIN, subarrayNN }
 
     /** Underlying Buffer */
     public readonly buffer: ArrayBuffer
@@ -3877,17 +3537,6 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Returns an instance of primitive type at passed index.
-     *
-     * @param index index to look at
-     *
-     * @returns a primitive at index
-     */
-    public at(index: number): Number | undefined {
-        return this.at(index.toInt())
-    }
-
-    /**
      * Returns an instance of primitive type at passed index if index is correct.
      *
      * @param index index to look at
@@ -4050,9 +3699,9 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns modified Uint16Array
      */
-    public fill(value: number, start?: number, end?: number): Uint16Array {
+    public fill(value: number, start?: int, end?: int): Uint16Array {
         value = this.zeroIfInfinity(value)
-        this.fill(value.toInt(), asIntOrDefault(start, 0), asIntOrDefault(end, this.lengthInt))
+        this.fill(value.toInt(), start, end)
         return this
     }
 
@@ -4063,84 +3712,9 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns modified Uint16Array
      */
-    public fill(value: number, start: int, end?: number): Uint16Array {
-        value = this.zeroIfInfinity(value)
-        this.fill(value.toInt(), start.toInt(), asIntOrDefault(end, this.lengthInt))
-        return this
-    }
-
-    /**
-     * Fills the Uint16Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified Uint16Array
-     */
-    public fill(value: number, start: number, end: int): Uint16Array {
-        value = this.zeroIfInfinity(value)
-        this.fill(value.toInt(), start.toInt(), end.toInt())
-        return this
-    }
-
-    /**
-     * Fills the Uint16Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified Uint16Array
-     */
-    public fill(value: number, start: int, end: int): Uint16Array {
-        value = this.zeroIfInfinity(value)
-        this.fill(value.toInt(), start.toInt(), end.toInt())
-        return this
-    }
-
-    /**
-     * Fills the Uint16Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified Uint16Array
-     */
-    public fill(value: int, start?: number, end?: number): Uint16Array {
-        this.fill(value, asIntOrDefault(start, 0), asIntOrDefault(end, this.lengthInt))
-        return this
-    }
-
-    /**
-     * Fills the Uint16Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified Uint16Array
-     */
-    public fill(value: int, start: int, end?: number): Uint16Array {
-        this.fill(value, start.toInt(), asIntOrDefault(end, this.lengthInt))
-        return this
-    }
-
-    /**
-     * Fills the Uint16Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified Uint16Array
-     */
-    public fill(value: int, start: number, end: int): Uint16Array {
-        this.fill(value, start.toInt(), end.toInt())
-        return this
-    }
-
-    /**
-     * Fills the Uint16Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified Uint16Array
-     */
-    public fill(value: int, start: int, end: int): Uint16Array {
-        const k = normalizeIndex(start, this.lengthInt)
-        const finalPos = normalizeIndex(end, this.lengthInt)
+    public fill(value: int, start?: int, end?: int): Uint16Array {
+        const k = normalizeIndex(start ?? 0, this.lengthInt)
+        const finalPos = normalizeIndex(end ?? this.lengthInt, this.lengthInt)
         this.fillInternal(value, k, finalPos)
         return this
     }
@@ -4743,55 +4317,10 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
-    public slice(begin?: number, end?: number): Uint16Array {
-        return this.slice(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Creates a slice of current Uint16Array using range [begin, end)
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @param end last index to be taken into slice
-     *
-     * @returns a new Uint16Array with elements of current Uint16Array[begin;end) where end index is excluded
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
-     */
-    public slice(begin: number, end: int): Uint16Array {
-        return this.slice(begin.toInt(), end.toInt())
-    }
-
-    /**
-     * Creates a slice of current Uint16Array using range [begin, end)
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @param end last index to be taken into slice
-     *
-     * @returns a new Uint16Array with elements of current Uint16Array[begin;end) where end index is excluded
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
-     */
-    public slice(begin: int, end: number): Uint16Array {
-        return this.slice(begin.toInt(), end.toInt())
-    }
-
-    /**
-     * Creates a slice of current Uint16Array using range [begin, end)
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @param end last index to be taken into slice
-     *
-     * @returns a new Uint16Array with elements of current Uint16Array[begin;end) where end index is excluded
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
-     */
-    public slice(begin: int, end: int): Uint16Array {
+    public slice(begin?: int, end?: int): Uint16Array {
         const len: int = this.lengthInt
-        const relStart = normalizeIndex(begin, len)
-        const relEnd = normalizeIndex(end, len)
+        const relStart = normalizeIndex(begin ?? 0, len)
+        const relEnd = normalizeIndex(end ?? len, len)
         let count = relEnd - relStart
         if (count < 0) {
             count = 0
@@ -4874,46 +4403,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Uint16Array with the same underlying Buffer
      */
-    public subarrayNN(begin?: number, end?: number): Uint16Array {
-        return this.subarray(asIntOrDefault(begin, 0), asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Creates a Uint16Array with the same underlying Buffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @param end last index, exclusive
-     *
-     * @returns new Uint16Array with the same underlying Buffer
-     */
-    public subarrayNI(begin?: number, end?: int): Uint16Array {
-        return this.subarray(asIntOrDefault(begin, 0), end)
-    }
-
-    /**
-     * Creates a Uint16Array with the same underlying Buffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @param end last index, exclusive
-     *
-     * @returns new Uint16Array with the same underlying Buffer
-     */
-    public subarrayIN(begin?: int, end?: number): Uint16Array {
-        return this.subarray(begin, asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Creates a Uint16Array with the same underlying Buffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @param end last index, exclusive
-     *
-     * @returns new Uint16Array with the same underlying Buffer
-     */
-    public subarrayII(begin: int | undefined = 0, end: int | undefined = this.lengthInt): Uint16Array {
+    public subarray(begin?: int, end?: int): Uint16Array {
         const len: int = this.lengthInt
         const relStart = normalizeIndex(begin ?? 0, len)
         const relEnd = normalizeIndex(end ?? this.lengthInt, len)
@@ -5418,7 +4908,6 @@ class Uint32ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
 export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     public static readonly BYTES_PER_ELEMENT: int = 4
     public readonly BYTES_PER_ELEMENT: int = Uint32Array.BYTES_PER_ELEMENT
-    public overload subarray { subarrayII, subarrayNI, subarrayIN, subarrayNN }
 
     /** Underlying Buffer */
     public readonly buffer: ArrayBuffer
@@ -5657,17 +5146,6 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Returns an instance of primitive type at passed index.
-     *
-     * @param index index to look at
-     *
-     * @returns a primitive at index
-     */
-    public at(index: number): Number | undefined {
-        return this.at(index.toInt())
-    }
-
-    /**
      * Returns an instance of primitive type at passed index if index is correct.
      *
      * @param index index to look at
@@ -5839,9 +5317,9 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns modified Uint32Array
      */
-    public fill(value: number, start?: number, end?: number): Uint32Array {
+    public fill(value: number, start?: int, end?: int): Uint32Array {
         value = this.zeroIfInfinity(value)
-        this.fill(value.toLong(), asIntOrDefault(start, 0), asIntOrDefault(end, this.lengthInt))
+        this.fill(value.toLong(), start, end)
         return this
     }
 
@@ -5852,84 +5330,9 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns modified Uint32Array
      */
-    public fill(value: number, start: int, end?: number): Uint32Array {
-        value = this.zeroIfInfinity(value)
-        this.fill(value.toLong(), start.toInt(), asIntOrDefault(end, this.lengthInt))
-        return this
-    }
-
-    /**
-     * Fills the Uint32Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified Uint32Array
-     */
-    public fill(value: number, start: number, end: int): Uint32Array {
-        value = this.zeroIfInfinity(value)
-        this.fill(value.toLong(), start.toInt(), end.toInt())
-        return this
-    }
-
-    /**
-     * Fills the Uint32Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified Uint32Array
-     */
-    public fill(value: number, start: int, end: int): Uint32Array {
-        value = this.zeroIfInfinity(value)
-        this.fill(value.toLong(), start.toInt(), end.toInt())
-        return this
-    }
-
-    /**
-     * Fills the Uint32Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified Uint32Array
-     */
-    public fill(value: long, start?: number, end?: number): Uint32Array {
-        this.fill(value, asIntOrDefault(start, 0), asIntOrDefault(end, this.lengthInt))
-        return this
-    }
-
-    /**
-     * Fills the Uint32Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified Uint32Array
-     */
-    public fill(value: long, start: int, end?: number): Uint32Array {
-        this.fill(value, start.toInt(), asIntOrDefault(end, this.lengthInt))
-        return this
-    }
-
-    /**
-     * Fills the Uint32Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified Uint32Array
-     */
-    public fill(value: long, start: number, end: int): Uint32Array {
-        this.fill(value, start.toInt(), end.toInt())
-        return this
-    }
-
-    /**
-     * Fills the Uint32Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified Uint32Array
-     */
-    public fill(value: long, start: int, end: int): Uint32Array {
-        const k = normalizeIndex(start, this.lengthInt)
-        const finalPos = normalizeIndex(end, this.lengthInt)
+    public fill(value: long, start?: int, end?: int): Uint32Array {
+        const k = normalizeIndex(start ?? 0, this.lengthInt)
+        const finalPos = normalizeIndex(end ?? this.lengthInt, this.lengthInt)
         this.fillInternal(value, k, finalPos)
         return this
     }
@@ -6547,55 +5950,10 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
-    public slice(begin?: number, end?: number): Uint32Array {
-        return this.slice(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Creates a slice of current Uint32Array using range [begin, end)
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @param end last index to be taken into slice
-     *
-     * @returns a new Uint32Array with elements of current Uint32Array[begin;end) where end index is excluded
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
-     */
-    public slice(begin: number, end: int): Uint32Array {
-        return this.slice(begin.toInt(), end.toInt())
-    }
-
-    /**
-     * Creates a slice of current Uint32Array using range [begin, end)
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @param end last index to be taken into slice
-     *
-     * @returns a new Uint32Array with elements of current Uint32Array[begin;end) where end index is excluded
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
-     */
-    public slice(begin: int, end: number): Uint32Array {
-        return this.slice(begin.toInt(), end.toInt())
-    }
-
-    /**
-     * Creates a slice of current Uint32Array using range [begin, end)
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @param end last index to be taken into slice
-     *
-     * @returns a new Uint32Array with elements of current Uint32Array[begin;end) where end index is excluded
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
-     */
-    public slice(begin: int, end: int): Uint32Array {
+    public slice(begin?: int, end?: int): Uint32Array {
         const len: int = this.lengthInt
-        const relStart = normalizeIndex(begin, len)
-        const relEnd = normalizeIndex(end, len)
+        const relStart = normalizeIndex(begin ?? 0, len)
+        const relEnd = normalizeIndex(end ?? len, len)
         let count = relEnd - relStart
         if (count < 0) {
             count = 0
@@ -6678,46 +6036,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Uint32Array with the same underlying Buffer
      */
-    public subarrayNN(begin?: number, end?: number): Uint32Array {
-        return this.subarray(asIntOrDefault(begin, 0), asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Creates a Uint32Array with the same underlying Buffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @param end last index, exclusive
-     *
-     * @returns new Uint32Array with the same underlying Buffer
-     */
-    public subarrayNI(begin?: number, end?: int): Uint32Array {
-        return this.subarray(asIntOrDefault(begin, 0), end)
-    }
-
-    /**
-     * Creates a Uint32Array with the same underlying Buffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @param end last index, exclusive
-     *
-     * @returns new Uint32Array with the same underlying Buffer
-     */
-    public subarrayIN(begin?: int, end?: number): Uint32Array {
-        return this.subarray(begin, asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Creates a Uint32Array with the same underlying Buffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @param end last index, exclusive
-     *
-     * @returns new Uint32Array with the same underlying Buffer
-     */
-    public subarrayII(begin: int | undefined = 0, end: int | undefined = this.lengthInt): Uint32Array {
+    public subarray(begin?: int, end?: int): Uint32Array {
         const len: int = this.lengthInt
         const relStart = normalizeIndex(begin ?? 0, len)
         const relEnd = normalizeIndex(end ?? this.lengthInt, len)
@@ -7222,7 +6541,6 @@ class BigUint64ArrayIteratorEntries implements IterableIterator<[Number, BigInt]
 export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
     public static readonly BYTES_PER_ELEMENT: int = 8
     public readonly BYTES_PER_ELEMENT: int = BigUint64Array.BYTES_PER_ELEMENT
-    public overload subarray { subarrayII, subarrayNI, subarrayIN, subarrayNN }
 
     /** Underlying Buffer */
     public readonly buffer: ArrayBuffer
@@ -7452,17 +6770,6 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
     }
 
     /**
-     * Returns an instance of primitive type at passed index.
-     *
-     * @param index index to look at
-     *
-     * @returns a primitive at index
-     */
-    public at(index: number): BigInt | undefined {
-        return this.at(index.toInt())
-    }
-
-    /**
      * Returns an instance of primitive type at passed index if index is correct.
      *
      * @param index index to look at
@@ -7636,8 +6943,8 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @returns modified BigUint64Array
      */
-    public fill(value: BigInt, start?: number, end?: number): BigUint64Array {
-        this.fill(value.getULong(), asIntOrDefault(start, 0), asIntOrDefault(end, this.lengthInt))
+    public fill(value: BigInt, start?: int, end?: int): BigUint64Array {
+        this.fill(value.getULong(), start, end)
         return this
     }
 
@@ -7648,81 +6955,9 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @returns modified BigUint64Array
      */
-    public fill(value: BigInt, start: int, end?: number): BigUint64Array {
-        this.fill(value.getULong(), start.toInt(), asIntOrDefault(end, this.lengthInt))
-        return this
-    }
-
-    /**
-     * Fills the BigUint64Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified BigUint64Array
-     */
-    public fill(value: BigInt, start: number, end: int): BigUint64Array {
-        this.fill(value.getULong(), start.toInt(), end.toInt())
-        return this
-    }
-
-    /**
-     * Fills the BigUint64Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified BigUint64Array
-     */
-    public fill(value: BigInt, start: int, end: int): BigUint64Array {
-        this.fill(value.getULong(), start.toInt(), end.toInt())
-        return this
-    }
-
-    /**
-     * Fills the BigUint64Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified BigUint64Array
-     */
-    public fill(value: long, start?: number, end?: number): BigUint64Array {
-        this.fill(value, asIntOrDefault(start, 0), asIntOrDefault(end, this.lengthInt))
-        return this
-    }
-
-    /**
-     * Fills the BigUint64Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified BigUint64Array
-     */
-    public fill(value: long, start: int, end?: number): BigUint64Array {
-        this.fill(value, start.toInt(), asIntOrDefault(end, this.lengthInt))
-        return this
-    }
-
-    /**
-     * Fills the BigUint64Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified BigUint64Array
-     */
-    public fill(value: long, start: number, end: int): BigUint64Array {
-        this.fill(value, start.toInt(), end.toInt())
-        return this
-    }
-
-    /**
-     * Fills the BigUint64Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified BigUint64Array
-     */
-    public fill(value: long, start: int, end: int): BigUint64Array {
-        const k = normalizeIndex(start, this.lengthInt)
-        const finalPos = normalizeIndex(end, this.lengthInt)
+    public fill(value: long, start?: int, end?: int): BigUint64Array {
+        const k = normalizeIndex(start ?? 0, this.lengthInt)
+        const finalPos = normalizeIndex(end ?? this.lengthInt, this.lengthInt)
         this.fillInternal(value, k, finalPos)
         return this
     }
@@ -8336,55 +7571,10 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
-    public slice(begin?: number, end?: number): BigUint64Array {
-        return this.slice(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Creates a slice of current BigUint64Array using range [begin, end)
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @param end last index to be taken into slice
-     *
-     * @returns a new BigUint64Array with elements of current BigUint64Array[begin;end) where end index is excluded
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
-     */
-    public slice(begin: number, end: int): BigUint64Array {
-        return this.slice(begin.toInt(), end.toInt())
-    }
-
-    /**
-     * Creates a slice of current BigUint64Array using range [begin, end)
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @param end last index to be taken into slice
-     *
-     * @returns a new BigUint64Array with elements of current BigUint64Array[begin;end) where end index is excluded
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
-     */
-    public slice(begin: int, end: number): BigUint64Array {
-        return this.slice(begin.toInt(), end.toInt())
-    }
-
-    /**
-     * Creates a slice of current BigUint64Array using range [begin, end)
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @param end last index to be taken into slice
-     *
-     * @returns a new BigUint64Array with elements of current BigUint64Array[begin;end) where end index is excluded
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
-     */
-    public slice(begin: int, end: int): BigUint64Array {
+    public slice(begin?: int, end?: int): BigUint64Array {
         const len: int = this.lengthInt
-        const relStart = normalizeIndex(begin, len)
-        const relEnd = normalizeIndex(end, len)
+        const relStart = normalizeIndex(begin ?? 0, len)
+        const relEnd = normalizeIndex(end ?? len, len)
         let count = relEnd - relStart
         if (count < 0) {
             count = 0
@@ -8471,46 +7661,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @returns new BigUint64Array with the same underlying Buffer
      */
-    public subarrayNN(begin?: number, end?: number): BigUint64Array {
-        return this.subarray(asIntOrDefault(begin, 0), asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Creates a BigUint64Array with the same underlying Buffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @param end last index, exclusive
-     *
-     * @returns new BigUint64Array with the same underlying Buffer
-     */
-    public subarrayNI(begin?: number, end?: int): BigUint64Array {
-        return this.subarray(asIntOrDefault(begin, 0), end)
-    }
-
-    /**
-     * Creates a BigUint64Array with the same underlying Buffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @param end last index, exclusive
-     *
-     * @returns new BigUint64Array with the same underlying Buffer
-     */
-    public subarrayIN(begin?: int, end?: number): BigUint64Array {
-        return this.subarray(begin, asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Creates a BigUint64Array with the same underlying Buffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @param end last index, exclusive
-     *
-     * @returns new BigUint64Array with the same underlying Buffer
-     */
-    public subarrayII(begin: int | undefined = 0, end: int | undefined = this.lengthInt): BigUint64Array {
+    public subarray(begin?: int, end?: int): BigUint64Array {
         const len: int = this.lengthInt
         const relStart = normalizeIndex(begin ?? 0, len)
         const relEnd = normalizeIndex(end ?? this.lengthInt, len)
