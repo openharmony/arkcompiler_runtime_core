@@ -34,7 +34,7 @@
 #include "objects/base_object_operator.h"
 #include "objects/base_state_word.h"
 namespace common {
-class BaseObject {
+class PUBLIC_API BaseObject {
 public:
     BaseObject() : state_(0) {}
     static BaseObject *Cast(MAddress address)

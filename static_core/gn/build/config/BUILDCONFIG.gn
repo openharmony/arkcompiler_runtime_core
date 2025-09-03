@@ -31,7 +31,9 @@ declare_args() {
   is_llvmbackend = true
   is_ccache = false
   is_ohos = false
-  ark_hybrid = false
+  if (!defined(ark_hybrid)) {
+    ark_hybrid = false
+  }
 }
 
 if (ark_hybrid) {

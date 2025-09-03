@@ -29,11 +29,11 @@ using CommonRootVisitor = void (*)(void *root);
 using RefFieldVisitor = std::function<void(RefField<> &)>;
 using WeakRefFieldVisitor = std::function<bool(RefField<> &)>;
 
-void VisitRoots(const RefFieldVisitor &visitor);
+void VisitRoots(const RefFieldVisitor &visitor, bool isMark);
 void VisitWeakRoots(const WeakRefFieldVisitor &visitorFunc);
 
 // GlobalRoots are subsets of roots which are shared in all mutator threads.
-void VisitGlobalRoots(const RefFieldVisitor &visitor);
+void VisitGlobalRoots(const RefFieldVisitor &visitor, bool isMark);
 void VisitWeakGlobalRoots(const WeakRefFieldVisitor &visitorFunc);
 void VisitMutatorRoot(const RefFieldVisitor &visitor, Mutator &mutator);
 void VisitWeakMutatorRoot(const WeakRefFieldVisitor &visitor, Mutator &mutator);
