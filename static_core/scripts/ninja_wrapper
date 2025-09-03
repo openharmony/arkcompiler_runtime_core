@@ -21,9 +21,6 @@ ninja_targets=()
 
 after_double_dash=false
 
-parent_dir=$(dirname "$PWD")
-current_dir_name=$(basename "$PWD")
-
 save_source_files_for_each_target=false
 verbose=false
 chapters=""
@@ -79,9 +76,7 @@ fi
 if [[ "${save_source_files_for_each_target}" == "true" ]]; then
     for target in "${ninja_targets[@]}"; do
         file_name="$PWD/component_${target}_component_cpp_files.txt"
-        ninja -t commands ${target} | grep 'c++.*\.cpp' | awk '{print $NF}' > ${file_name}
-        sed -i "s|${parent_dir}||g" ${file_name}
-        sed -i "s|${current_dir_name}/||g" ${file_name}
+        ninja -t commands ${target} | grep -o '\-c\s\+[^ ]\+' | cut -d' ' -f2 > ${file_name}
         sed -i "\|third_party/|d" ${file_name}
     done
 fi
