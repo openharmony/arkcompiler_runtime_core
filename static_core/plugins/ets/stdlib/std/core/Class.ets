@@ -38,6 +38,8 @@ export final class Class {
 
     public native getLinker(): RuntimeLinker
 
+    public native getInterfaces(): FixedArray<Class>
+
     /**
      * Invoke class initializer once if class is not initialized
      */
@@ -62,4 +64,11 @@ export final class Class {
      */
     // NOTE(ekaterinazaytseva): unable to replace internal - used in RuntimeLinker.ets as public
     internal native getDescriptor(): string
+
+    public native isEnum(): boolean
+
+    public native isInterface(): boolean
+
+    public native isFixedArray(): boolean
+
 }

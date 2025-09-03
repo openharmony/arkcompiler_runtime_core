@@ -6850,6 +6850,46 @@ intrinsics:
       args: [ ]
     impl: ark::ets::intrinsics::StdCoreClassGetDescriptor
 
+  - name: StdCoreClassGetInterfaces
+    space: ets
+    class_name: std.core.Class
+    method_name: getInterfaces
+    static: false
+    signature:
+      ret: std.core.Class[]
+      args: [ ]
+    impl: ark::ets::intrinsics::StdCoreClassGetInterfaces
+
+  - name: StdCoreClassIsEnum
+    space: ets
+    class_name: std.core.Class
+    method_name: isEnum
+    static: false
+    signature:
+      ret: u1
+      args: [ ]
+    impl: ark::ets::intrinsics::StdCoreClassIsEnum
+
+  - name: StdCoreClassIsInterface
+    space: ets
+    class_name: std.core.Class
+    method_name: isInterface
+    static: false
+    signature:
+      ret: u1
+      args: [ ]
+    impl: ark::ets::intrinsics::StdCoreClassIsInterface
+
+  - name: StdCoreClassIsFixedArray
+    space: ets
+    class_name: std.core.Class
+    method_name: isFixedArray
+    static: false
+    signature:
+      ret: u1
+      args: [ ]
+    impl: ark::ets::intrinsics::StdCoreClassIsFixedArray
+
 ##########################
 # std.core.RuntimeLinker #
 ##########################
