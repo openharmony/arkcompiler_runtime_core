@@ -1,3 +1,6 @@
+#28347
+escompat/RegExpMatchAllTest.ets
+
 #25889
 spec/07.expressions/7.32.Lambda_Expressions/callAsyncMethodFromAsyncLambda2.ets
 

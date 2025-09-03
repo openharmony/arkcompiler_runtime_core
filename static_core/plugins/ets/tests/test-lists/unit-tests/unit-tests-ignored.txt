@@ -13,6 +13,15 @@ ets-common-tests/exporting-ambient-decl/main.ets
 # 25057
 ets-common-tests/annotation_import_export_test/AmbientImportAl.ets
 
+#28470
+ets-common-tests/atomics/base_operation_xor.ets
+ets-common-tests/atomics/base_operation_sub.ets
+
+#29378
+ets-common-tests/atomics/base_operation_add.ets
+ets-common-tests/taskpool/long_task.ets
+ets-common-tests/taskpool/seqrunner_tasks.ets
+
 # 24986
 ets-common-tests/generics/generics_methods.ets
 ets-common-tests/intrinsics/bigint64array_sort.ets
