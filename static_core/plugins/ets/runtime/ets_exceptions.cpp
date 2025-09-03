@@ -43,35 +43,6 @@ static EtsClass *GetExceptionClass(EtsCoroutine *coro, const char *classDescript
     return cls;
 }
 
-static EtsObject *CreateExceptionInstance(EtsCoroutine *coro, EtsClass *cls, EtsHandle<EtsString> msg,
-                                          EtsHandle<EtsObject> pending)
-{
-    EtsHandle<EtsObject> error(coro, EtsObject::Create(cls));
-    if (UNLIKELY(error.GetPtr() == nullptr)) {
-        return nullptr;
-    }
-
-    Method::Proto proto(Method::Proto::ShortyVector {panda_file::Type(panda_file::Type::TypeId::VOID),
-                                                     panda_file::Type(panda_file::Type::TypeId::REFERENCE),
-                                                     panda_file::Type(panda_file::Type::TypeId::REFERENCE)},
-                        Method::Proto::RefTypeVector {panda_file_items::class_descriptors::STRING,
-                                                      panda_file_items::class_descriptors::OBJECT});
-    EtsMethod *ctor = cls->GetDirectMethod(panda_file_items::CTOR.data(), proto);
-    if (ctor == nullptr) {
-        LOG(FATAL, RUNTIME) << "No method " << panda_file_items::CTOR << " in class " << cls->GetDescriptor();
-        return nullptr;
-    }
-
-    std::array args {Value(error.GetPtr()->GetCoreType()), Value(msg.GetPtr()->GetCoreType()),
-                     Value(pending.GetPtr()->GetCoreType())};
-
-    EtsMethod::ToRuntimeMethod(ctor)->InvokeVoid(coro, args.data());
-    if (UNLIKELY(coro->HasPendingException())) {
-        return nullptr;
-    }
-    return error.GetPtr();
-}
-
 static EtsObject *CreateErrorInstance(EtsCoroutine *coro, EtsClass *cls, EtsHandle<EtsString> msg,
                                       EtsHandle<EtsObject> pending)
 {
@@ -130,10 +101,7 @@ EtsObject *SetupEtsException(EtsCoroutine *coro, const char *classDescriptor, co
     if (PlatformTypes(coro)->escompatError->IsAssignableFrom(cls)) {
         return CreateErrorInstance(coro, cls, etsMsg, pending);
     }
-    if (PlatformTypes(coro)->coreException->IsAssignableFrom(cls)) {
-        return CreateExceptionInstance(coro, cls, etsMsg, pending);
-    }
-    LOG(FATAL, RUNTIME) << "Class " << cls->GetDescriptor() << " is not compatible with (Error | Exception)";
+    LOG(FATAL, RUNTIME) << "Class " << cls->GetDescriptor() << " is not compatible with Error";
     return nullptr;
 }
 

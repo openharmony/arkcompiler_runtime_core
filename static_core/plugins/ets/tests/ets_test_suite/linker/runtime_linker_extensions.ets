@@ -276,7 +276,7 @@ class Test {
     static testWrongClassName() {
         const linker = new AbcRuntimeLinker(undefined, []);
 
-        const errorCheck = (e: Error | Exception) => { return (e instanceof LinkerClassNotFoundError) }
+        const errorCheck = (e: Error) => { return (e instanceof LinkerClassNotFoundError) }
         arktest.expectThrow(() => { linker.loadClass(Test.stdCoreObjectWrongName1) }, errorCheck);
         arktest.expectThrow(() => { linker.loadClass(Test.stdCoreObjectWrongName2) }, errorCheck);
         arktest.expectThrow(() => { linker.loadClass(Test.stdCoreObjectWrongName3) }, errorCheck);

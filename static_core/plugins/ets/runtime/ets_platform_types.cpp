@@ -189,7 +189,6 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     findType(&EtsPlatformTypes::coreAbcFile, ABC_FILE);
 
     findType(&EtsPlatformTypes::coreOutOfMemoryError, OUT_OF_MEMORY_ERROR);
-    findType(&EtsPlatformTypes::coreException, EXCEPTION);
     findType(&EtsPlatformTypes::coreStackTraceElement, STACK_TRACE_ELEMENT);
 
     findType(&EtsPlatformTypes::coreStringBuilder, STRING_BUILDER);

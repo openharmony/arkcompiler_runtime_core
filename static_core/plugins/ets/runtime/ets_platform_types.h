@@ -73,7 +73,6 @@ public:
 
     /* Error handling */
     EtsClass *coreOutOfMemoryError {};
-    EtsClass *coreException {};
     EtsClass *coreStackTraceElement {};
 
     /* StringBuilder */
