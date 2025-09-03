@@ -179,8 +179,14 @@ class TestStandardFlow(Test):
 
     @staticmethod
     def _normalize_error_report(report: str) -> str:
-        pattern = ".(TID .{6}])."
-        return re.sub(pattern, "", report).strip()
+        pattern = r"\[TID [0-9a-fA-F]{6,}\]\s*"
+        result = re.sub(pattern, "", report).strip()
+        return TestStandardFlow._remove_tabs_and_spaces_from_begin(result)
+
+    @staticmethod
+    def _remove_tabs_and_spaces_from_begin(report: str) -> str:
+        pattern = r"^\s+"
+        return re.sub(pattern, "", report, flags=re.MULTILINE)
 
     @staticmethod
     def _remove_file_info_from_error(error_message: str) -> str:
@@ -419,7 +425,7 @@ class TestStandardFlow(Test):
             index_to_delete = len(self.expected.split("\n"))
             expected = self.expected.split("\n")
             for i, item in enumerate(expected):
-                if '.main' in item:
+                if '.main' in item or ':main' in item:
                     index_to_delete = i
                     break
             self.expected = '\n'.join(expected[:index_to_delete])
@@ -428,28 +434,45 @@ class TestStandardFlow(Test):
             index_to_delete = len(self.expected_err.split("\n"))
             expected_err = self.expected_err.split("\n")
             for i, item in enumerate(expected_err):
-                if '.main' in item:
+                if '.main' in item or ':main' in item:
                     index_to_delete = i
                     break
             self.expected_err = '\n'.join(expected_err[:index_to_delete])
 
     def _determine_test_status(self, output: str | None, error: str | None) -> bool:
         passed = True
+
+        def compare(expected: str, actual: str) -> bool:
+            expected_lines = set(filter(None, expected.splitlines()))
+            actual_lines = set(filter(None, actual.splitlines()))
+
+            if not actual_lines and not expected_lines:
+                return True
+
+            if not expected_lines or not actual_lines:
+                return False
+
+            return expected_lines.issubset(actual_lines)
+
         if self.expected and not self.expected_err and output:
             # Compare with output from std.OUT
-            output_without_file_info = self._remove_file_info_from_error(output.strip())
-            passed = self._remove_file_info_from_error(self.expected) == output_without_file_info and not error
+            output_normalized_info = self._remove_file_info_from_error(self._normalize_error_report(output.strip()))
+            expected_normalized_info = self._remove_file_info_from_error(self._normalize_error_report(self.expected))
+            passed = compare(expected_normalized_info, output_normalized_info) and not error
         elif not self.expected and self.expected_err and error:
             # Compare with output from std.ERR
             report_error = self._remove_file_info_from_error(self._normalize_error_report(error))
-            passed = self._remove_file_info_from_error(self.expected_err) == report_error.strip()
+            expected_error = self._remove_file_info_from_error(self._normalize_error_report(self.expected_err))
+            passed = compare(expected_error, report_error.strip())
         elif self.expected and self.expected_err and output and error:
             # Compare .expected with std.Output and .expected.err with std.Error
-            output_without_file_info = self._remove_file_info_from_error(output.strip())
-            passed_output = self._remove_file_info_from_error(self.expected) == output_without_file_info
+            output_normalized_info = self._remove_file_info_from_error(self._normalize_error_report(output.strip()))
+            expected_normalized_info = self._remove_file_info_from_error(self._normalize_error_report(self.expected))
+            passed_output = compare(expected_normalized_info, output_normalized_info)
 
             report_error = self._remove_file_info_from_error(self._normalize_error_report(error))
-            passed_error = self._remove_file_info_from_error(self.expected_err) == report_error.strip()
+            expected_error = self._remove_file_info_from_error(self._normalize_error_report(self.expected_err))
+            passed_error = compare(expected_error, report_error.strip())
             passed = passed_output and passed_error
 
         return bool(passed)

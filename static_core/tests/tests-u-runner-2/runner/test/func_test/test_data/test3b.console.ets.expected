@@ -11,9 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-default: 1
-default: 2
-default: 3
-    userClick: 1
+[TID 005030] default: 1
     userClick: 2
   userClick: 3

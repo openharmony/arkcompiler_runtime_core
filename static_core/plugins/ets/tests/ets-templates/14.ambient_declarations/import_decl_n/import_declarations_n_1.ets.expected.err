@@ -11,12 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-E/verifier: Cannot link class: Cannot find method '<ctor> (D)V' in class 'declarations_n.B'
-E/verifier: Cannot link class: Cannot find method 'foo (D)D' in class 'declarations_n.B'
-E/verifier: Verifier error 54: Cache miss for method at offset
-E/verifier: Verifier error 62: Cannot resolve method id
-E/verifier: Method verification failed: void import_declarations_n_1.ETSGLOBAL::main()
+[TID 005e60] E/verifier: Cannot link class: Cannot find method '<ctor> (D)V' in class 'declarations_n.B'
+[TID 005e60] E/verifier: Cannot link class: Cannot find method 'foo (D)D' in class 'declarations_n.B'
+[TID 005e60] E/verifier: Verifier error 54: Cache miss for method at offset
+[TID 005e60] E/verifier: Verifier error 62: Cannot resolve method id
+[TID 005e60] E/verifier: Class verification failed: 'import_declarations_n_1.ETSGLOBAL' method: void import_declarations_n_1.ETSGLOBAL::main()
 Unhandled exception: std.core.LinkerVerificationError
-LinkerVerificationError: import_declarations_n_1.ETSGLOBAL::main
-	at std.core.LinkerError.<ctor> (etsstdlib.ets:20:0)
-	at std.core.LinkerVerificationError.<ctor> (etsstdlib.ets:30:0)
+LinkerVerificationError: Limport_declarations_n_1/ETSGLOBAL;
