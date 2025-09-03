@@ -785,9 +785,9 @@ bool EtsClass::CompareAndSetName(EtsString *oldName, EtsString *newName)
 
 EtsField *EtsClass::GetFieldIDByName(const char *name, const char *sig)
 {
+    ASSERT(name != nullptr);
     auto u8name = reinterpret_cast<const uint8_t *>(name);
     auto *field = reinterpret_cast<EtsField *>(GetRuntimeClass()->GetInstanceFieldByName(u8name));
-
     if (sig != nullptr && field != nullptr) {
         if (strcmp(field->GetTypeDescriptor(), sig) != 0) {
             return nullptr;
@@ -826,8 +826,10 @@ EtsField *EtsClass::GetStaticFieldIDByName(const char *name, const char *sig)
 
 EtsField *EtsClass::GetDeclaredFieldIDByName(const char *name)
 {
+    ASSERT(name != nullptr);
     return reinterpret_cast<EtsField *>(GetRuntimeClass()->FindDeclaredField([name](const ark::Field &field) -> bool {
         auto *efield = EtsField::FromRuntimeField(&field);
+        ASSERT(efield != nullptr);
         return ::strcmp(efield->GetName(), name) == 0;
     }));
 }

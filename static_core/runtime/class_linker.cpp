@@ -1011,6 +1011,7 @@ Class *ClassLinker::LoadClass(const panda_file::File *pf, panda_file::File::Enti
                               ClassLinkerContext *context, ClassLinkerErrorHandler *errorHandler,
                               bool addToRuntime /* = true */)
 {
+    ASSERT(pf != nullptr);
     ASSERT(!pf->IsExternal(classId));
     ASSERT(context != nullptr);
     panda_file::ClassDataAccessor classDataAccessor(*pf, classId);
@@ -1060,8 +1061,11 @@ Class *ClassLinker::LoadClass(const panda_file::File *pf, panda_file::File::Enti
         return nullptr;
     }
 
-    Runtime::GetCurrent()->GetCha()->Update(klass);
+    auto *cha = Runtime::GetCurrent()->GetCha();
+    ASSERT(cha != nullptr);
+    cha->Update(klass);
 
+    ASSERT(ext != nullptr);
     if (LIKELY(ext->CanInitializeClasses())) {
         if (!ext->InitializeClass(klass)) {
             LOG(ERROR, CLASS_LINKER) << "Language specific initialization for class '" << descriptor << "' failed";
@@ -1082,6 +1086,7 @@ Class *ClassLinker::LoadClass(const panda_file::File *pf, panda_file::File::Enti
         }
 
         RemoveCreatedClassInExtension(klass);
+
         Runtime::GetCurrent()->GetNotificationManager()->ClassPrepareEvent(klass);
     }
     return klass;
@@ -1548,6 +1553,7 @@ Method *ClassLinker::GetMethod(const Method &caller, panda_file::File::EntityId 
                                ClassLinkerErrorHandler *errorHandler /* = nullptr */)
 {
     auto *pf = caller.GetPandaFile();
+    ASSERT(pf != nullptr);
     Method *method = pf->GetPandaCache()->GetMethodFromCache(id);
     if (method != nullptr) {
         return method;
@@ -1558,6 +1564,7 @@ Method *ClassLinker::GetMethod(const Method &caller, panda_file::File::EntityId 
 
     auto *context = caller.GetClass()->GetLoadContext();
     auto *ext = GetExtension(caller.GetClass()->GetSourceLang());
+    ASSERT(ext != nullptr);
     Class *klass = ext->GetClass(*pf, classId, context, errorHandler);
 
     if (klass == nullptr) {

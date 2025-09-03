@@ -65,6 +65,7 @@ bool OsrEntry(uintptr_t loopHeadBc, const void *osrCode)
     auto stack = StackWalker::Create(ManagedThread::GetCurrent());
     Frame *frame = stack.GetIFrame();
     LOG(DEBUG, INTEROP) << "OSR entry in method '" << stack.GetMethod()->GetFullName() << "': " << osrCode;
+    ASSERT(osrCode != nullptr);
     CodeInfo codeInfo(CodeInfo::GetCodeOriginFromEntryPoint(osrCode));
     auto stackmap = codeInfo.FindOsrStackMap(loopHeadBc);
     if (!stackmap.IsValid()) {
@@ -136,12 +137,14 @@ static int64_t GetValueFromVregAcc(const Frame *iframe, LanguageContext &ctx, VR
 extern "C" void *PrepareOsrEntry(const Frame *iframe, uintptr_t bcOffset, const void *osrCode, void *cframePtr,
                                  uintptr_t *regBuffer, uintptr_t *fpRegBuffer)
 {
+    ASSERT(osrCode != nullptr);
     ASSERT(cframePtr != nullptr);
     CodeInfo codeInfo(CodeInfo::GetCodeOriginFromEntryPoint(osrCode));
     CFrame cframe(cframePtr);
     auto stackmap = codeInfo.FindOsrStackMap(bcOffset);
 
-    ASSERT(stackmap.IsValid() && osrCode != nullptr);
+    ASSERT(stackmap.IsValid());
+    ASSERT(iframe != nullptr);
 
     cframe.SetMethod(iframe->GetMethod());
     cframe.SetFrameKind(CFrameLayout::FrameKind::OSR);
@@ -162,7 +165,9 @@ extern "C" void *PrepareOsrEntry(const Frame *iframe, uintptr_t bcOffset, const 
     auto ctx {vm->GetLanguageContext()};
     ctx.InitializeOsrCframeSlots(paramSlots);
 
-    for (auto vreg : codeInfo.GetVRegList(stackmap, mem::InternalAllocator<>::GetInternalAllocatorFromRuntime())) {
+    auto *internalAllocator = mem::InternalAllocator<>::GetInternalAllocatorFromRuntime();
+    ASSERT(internalAllocator != nullptr);
+    for (auto vreg : codeInfo.GetVRegList(stackmap, internalAllocator)) {
         if (!vreg.IsLive()) {
             continue;
         }

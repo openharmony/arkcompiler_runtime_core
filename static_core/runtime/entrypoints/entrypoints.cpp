@@ -20,6 +20,7 @@
 #include "libpandabase/macros.h"
 #include "libpandabase/utils/utils.h"
 #include "compiler/compiler_options.h"
+#include "compiler/optimizer/ir/inst.h"
 #include "runtime/deoptimization.h"
 #include "runtime/arch/memory_helpers.h"
 #include "runtime/jit/profiling_data.h"
@@ -98,6 +99,8 @@ private:
 
 extern "C" NO_ADDRESS_SANITIZE void InterpreterEntryPoint(Method *method, Frame *frame)
 {
+    ASSERT(method != nullptr);
+    ASSERT(frame != nullptr);
     auto pc = method->GetInstructions();
     Method *callee = frame->GetMethod();
     ASSERT(callee != nullptr);
@@ -1157,7 +1160,9 @@ extern "C" NO_ADDRESS_SANITIZE void IncompatibleClassChangeErrorForMethodConflic
     BEGIN_ENTRYPOINT();
     LOG(DEBUG, INTEROP) << "IncompatibleClassChangeErrorForMethodConflictEntrypoint \n";
     ManagedThread *thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
     ASSERT(!thread->HasPendingException());
+    ASSERT(method != nullptr);
     auto stack = StackWalker::Create(thread, UnwindPolicy::SKIP_INLINED);
     ThrowIncompatibleClassChangeErrorForMethodConflict(method);
     ASSERT(thread->HasPendingException());

@@ -109,6 +109,7 @@ bool EtsITableBuilder::Build(ClassLinker *classLinker, Class *base, Span<Class *
     }
 
     for (auto interface : classInterfaces) {
+        ASSERT(interface != nullptr);
         auto table = interface->GetITable().Get();
         for (auto item : table) {
             interfaces.insert(item.GetInterface());

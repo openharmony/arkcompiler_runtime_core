@@ -581,10 +581,13 @@ static std::optional<uint32_t> GetQnameCount(Class *klass)
 static uint8_t InitCallJSClass(bool isNewCall)
 {
     auto coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
     auto ctx = InteropCtx::Current(coro);
+    ASSERT(ctx != nullptr);
     auto *classInFrame = GetMethodOwnerClassInFrames(coro, 0);
     ASSERT(classInFrame != nullptr);
     auto *klass = classInFrame->GetRuntimeClass();
+    ASSERT(klass != nullptr);
     INTEROP_LOG(DEBUG) << "Bind bridge call methods for " << utf::Mutf8AsCString(klass->GetDescriptor());
 
     for (auto &method : klass->GetMethods()) {

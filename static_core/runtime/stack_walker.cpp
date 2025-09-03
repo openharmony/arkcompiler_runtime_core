@@ -80,6 +80,7 @@ Method *StackWalker::GetMethod()
 {
     ASSERT(HasFrame());
     if (!IsCFrame()) {
+        ASSERT(GetIFrame() != nullptr);
         return GetIFrame()->GetMethod();
     }
     auto &cframe = GetCFrame();

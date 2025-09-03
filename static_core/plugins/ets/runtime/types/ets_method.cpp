@@ -15,6 +15,7 @@
 
 #include "plugins/ets/runtime/types/ets_method.h"
 
+#include "plugins/ets/runtime/ets_vm.h"
 #include "libpandabase/macros.h"
 #include "libpandabase/utils/utf.h"
 #include "libarkfile/param_annotations_data_accessor.h"
@@ -176,7 +177,10 @@ EtsClass *EtsMethod::ResolveArgType(uint32_t idx)
     }
 
     // get reference type
-    EtsClassLinker *classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
+    PandaEtsVM *currentVM = PandaEtsVM::GetCurrent();
+    ASSERT(currentVM != nullptr);
+    EtsClassLinker *classLinker = currentVM->GetClassLinker();
+    ASSERT(classLinker != nullptr);
     auto type = GetPandaMethod()->GetArgType(idx);
     if (!type.IsPrimitive()) {
         size_t refIdx = 0;
