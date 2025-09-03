@@ -39,6 +39,7 @@ Codegen interface for compiler
 #include "optimizer/ir/graph_visitor.h"
 #include "optimizer/optimizations/regalloc/spill_fills_resolver.h"
 #include "optimizer/pass_manager.h"
+#include "utils/arena_containers.h"
 #include "utils/cframe_layout.h"
 
 namespace ark::compiler {
@@ -482,6 +483,10 @@ private:
 
     Disassembly disasm_;
     SpillFillsResolver spillFillsResolver_;
+
+    // Used in `CheckPhiClassInputsAreEqual` to collect
+    // origin (not aliased) instructions
+    ArenaVector<Inst *> phiInputInstructions_;
 
     friend class EncodeVisitor;
     friend class BaselineCodegen;

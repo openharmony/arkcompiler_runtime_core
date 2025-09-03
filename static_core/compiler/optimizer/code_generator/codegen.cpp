@@ -20,6 +20,7 @@ Codegen Hi-Level implementation
 #include "codegen.h"
 #include "encode_visitor.h"
 #include "compiler_options.h"
+#include "optimizer/ir/inst.h"
 #include "relocations.h"
 #include "include/compiler_interface.h"
 #include "ir-dyn-base-types.h"
@@ -31,6 +32,7 @@ Codegen Hi-Level implementation
 #include "events/events.h"
 #include "libpandabase/utils/tsan_interface.h"
 #include "libpandabase/utils/utils.h"
+#include "utils/arena_containers.h"
 #include <algorithm>
 #include <iomanip>
 
@@ -154,7 +156,8 @@ Codegen::Codegen(Graph *graph)
       target_(graph->GetArch()),
       liveOuts_(graph->GetLocalAllocator()->Adapter()),
       disasm_(this),
-      spillFillsResolver_(graph)
+      spillFillsResolver_(graph),
+      phiInputInstructions_(graph->GetLocalAllocator()->Adapter())
 {
     graph->SetCodeBuilder(codeBuilder_);
     regfile_ = graph->GetRegisters();
@@ -1159,18 +1162,41 @@ void Codegen::CreateDebugRuntimeCallsForNewObject(Inst *inst, [[maybe_unused]] R
     }
 }
 
+void GetOriginalInstInputs(Inst *inst, ArenaVector<Inst *> &v)
+{
+    switch (inst->GetOpcode()) {
+        case Opcode::NullCheck:
+            GetOriginalInstInputs(inst->GetInput(0).GetInst(), v);
+            break;
+        case Opcode::Select:
+        case Opcode::SelectImm:
+            GetOriginalInstInputs(inst->GetInput(0).GetInst(), v);
+            GetOriginalInstInputs(inst->GetInput(1).GetInst(), v);
+            break;
+        case Opcode::Phi:
+            for (auto &phiInput : inst->GetInputs()) {
+                GetOriginalInstInputs(phiInput.GetInst(), v);
+            }
+            break;
+        default:
+            v.push_back(inst);
+    }
+}
+
 bool Codegen::CheckPhiClassInputsAreEqual(Inst *phi)
 {
     ASSERT(phi->IsPhi());
     // We can omit runtime call only if all inputs are of the same class,
     // see checks in CreateNewObjCall below.
-    auto inputOpcode = phi->GetInput(0).GetInst()->GetOpcode();
+    GetOriginalInstInputs(phi, phiInputInstructions_);
 
     auto checkOpcode = [](Opcode op) {
         // Fastpath only works for these opcodes
         return op == Opcode::LoadAndInitClass || op == Opcode::LoadImmediate;
     };
-    if (!checkOpcode(inputOpcode)) {
+
+    auto checkInst = phiInputInstructions_.front();
+    if (!checkOpcode(checkInst->GetOpcode())) {
         return false;
     }
 
@@ -1181,13 +1207,13 @@ bool Codegen::CheckPhiClassInputsAreEqual(Inst *phi)
         return inst->CastToLoadImmediate()->GetClass();
     };
 
-    auto klass = getClass(phi->GetInput(0).GetInst());
-    for (auto &input : phi->GetInputs().SubSpan(1)) {
-        if (!checkOpcode(input.GetInst()->GetOpcode())) {
+    auto klass = getClass(checkInst);
+    for (auto inst : phiInputInstructions_) {
+        if (!checkOpcode(inst->GetOpcode())) {
             return false;
         }
         // We don't care about opcode equality, if klass is the same
-        if (klass != getClass(input.GetInst())) {
+        if (klass != getClass(inst)) {
             return false;
         }
     }
