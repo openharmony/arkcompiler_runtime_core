@@ -1,3 +1,5 @@
+# #20992
+test_gc_old.ets
 # #20150
 test_stress_gc_humongous.ets
 test_stress_gc_humongous_bq.ets
