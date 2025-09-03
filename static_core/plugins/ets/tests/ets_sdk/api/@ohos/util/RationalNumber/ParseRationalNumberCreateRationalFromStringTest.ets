@@ -164,9 +164,12 @@ function testCreateRationalFromString006() {
  * @tc.level: Level 1
  */
 function testCreateRationalFromString007() {
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            "Parameter error. The type of 123 must be effective string") && ((e as BusinessError).code == 401);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message ==
+                "Parameter error. The type of 123 must be effective string" && e.code == 401;
+        }
+        return false;
     }
     arktest.expectThrow(() => { let rational = util.RationalNumber.createRationalFromString('123') }, exceptionCheck);
 }
@@ -180,9 +183,12 @@ function testCreateRationalFromString007() {
  * @tc.level: Level 1
  */
 function testCreateRationalFromString008() {
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            "Parameter error. The type of abc must be effective string") && ((e as BusinessError).code == 401);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message ==
+                "Parameter error. The type of abc must be effective string" && e.code == 401;
+        }
+        return false;
     }
     arktest.expectThrow(() => { let rational = util.RationalNumber.createRationalFromString('abc') }, exceptionCheck);
 }
@@ -196,9 +202,12 @@ function testCreateRationalFromString008() {
  * @tc.level: Level 1
  */
 function testCreateRationalFromString009() {
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            "Parameter error. The type of 123abc must be effective string") && ((e as BusinessError).code == 401);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message ==
+                "Parameter error. The type of 123abc must be effective string" && e.code == 401;
+        }
+        return false;
     }
     arktest.expectThrow(() => { let rational = util.RationalNumber.createRationalFromString('123abc') }, exceptionCheck);
 }
@@ -212,9 +221,12 @@ function testCreateRationalFromString009() {
  * @tc.level: Level 1
  */
 function testCreateRationalFromString010() {
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            "Parameter error. The type of abc: must be character string") && ((e as BusinessError).code == 401);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message ==
+                "Parameter error. The type of abc: must be character string" && e.code == 401;
+        }
+        return false;
     }
     arktest.expectThrow(() => { let rational = util.RationalNumber.createRationalFromString('abc:') }, exceptionCheck);
 }
@@ -228,9 +240,12 @@ function testCreateRationalFromString010() {
  * @tc.level: Level 1
  */
 function testCreateRationalFromString011() {
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            "Parameter error. The type of :abc must be character string") && ((e as BusinessError).code == 401);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message ==
+                "Parameter error. The type of :abc must be character string" && e.code == 401;
+        }
+        return false;
     }
     arktest.expectThrow(() => { let rational = util.RationalNumber.createRationalFromString(':abc') }, exceptionCheck);
 }
@@ -244,9 +259,12 @@ function testCreateRationalFromString011() {
  * @tc.level: Level 1
  */
 function testCreateRationalFromString012() {
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            "Parameter error. The type of abc/ must be character string") && ((e as BusinessError).code == 401);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message ==
+                "Parameter error. The type of abc/ must be character string" && e.code == 401;
+        }
+        return false;
     }
     arktest.expectThrow(() => { let rational = util.RationalNumber.createRationalFromString('abc/') }, exceptionCheck);
 }
@@ -260,9 +278,12 @@ function testCreateRationalFromString012() {
  * @tc.level: Level 1
  */
 function testCreateRationalFromString013() {
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            "Parameter error. The type of 123:abc must be character string") && ((e as BusinessError).code == 401);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message ==
+                "Parameter error. The type of 123:abc must be character string" && e.code == 401;
+        }
+        return false;
     }
     arktest.expectThrow(() => { let rational = util.RationalNumber.createRationalFromString('123:abc') }, exceptionCheck);
 }
@@ -276,9 +297,12 @@ function testCreateRationalFromString013() {
  * @tc.level: Level 1
  */
 function testCreateRationalFromString014() {
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            "Parameter error. The type of abc/123 must be character string") && ((e as BusinessError).code == 401);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message ==
+                "Parameter error. The type of abc/123 must be character string" && e.code == 401;
+        }
+        return false;
     }
     arktest.expectThrow(() => { let rational = util.RationalNumber.createRationalFromString('abc/123') }, exceptionCheck);
 }
@@ -292,9 +316,12 @@ function testCreateRationalFromString014() {
  * @tc.level: Level 1
  */
 function testCreateRationalFromString015() {
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            "Parameter error. The type of abc/abcd must be character string") && ((e as BusinessError).code == 401);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message ==
+                "Parameter error. The type of abc/abcd must be character string" && e.code == 401;
+        }
+        return false;
     }
     arktest.expectThrow(() => { let rational = util.RationalNumber.createRationalFromString('abc/abcd') }, exceptionCheck);
 }
@@ -308,9 +335,12 @@ function testCreateRationalFromString015() {
  * @tc.level: Level 1
  */
 function testCreateRationalFromString016() {
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            "Parameter error. The type of  must be effective string") && ((e as BusinessError).code == 401);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message ==
+                "Parameter error. The type of  must be effective string" && e.code == 401;
+        }
+        return false;
     }
     arktest.expectThrow(() => { let rational = util.RationalNumber.createRationalFromString('') }, exceptionCheck);
 }

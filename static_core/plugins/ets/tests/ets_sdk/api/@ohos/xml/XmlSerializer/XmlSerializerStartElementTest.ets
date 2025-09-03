@@ -55,9 +55,12 @@ function performXmlTest(serializerOperation: (serializer: xml.XmlSerializer) => 
 
 function testInvalidEncodingForXmlSerializer() {
     let arrayBuffer = new ArrayBuffer(MaxBufferLength);
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).code == TypeErrorCodeId) &&
-            ((e as BusinessError).message == 'Parameter error.Just support utf-8');
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.code == TypeErrorCodeId &&
+                e.message == "Parameter error.Just support utf-8";
+        }
+        return false;
     }
     arktest.expectThrow(() => {let thatSer = new xml.XmlSerializer(arrayBuffer, 'utf-16')}, exceptionCheck);
 }
@@ -117,9 +120,12 @@ function testSiblingElementsWithinParent() {
 function testEmptyNameForStartElement() {
     let arrayBuffer = new ArrayBuffer(MaxBufferLength);
     let thatSer = new xml.XmlSerializer(arrayBuffer);
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).code == TypeErrorCodeId) &&
-            ((e as BusinessError).message == 'Parameter error. Parameter cannot be empty');
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.code == TypeErrorCodeId &&
+                e.message == "Parameter error. Parameter cannot be empty";
+        }
+        return false;
     }
     arktest.expectThrow(() => {thatSer.startElement("")}, exceptionCheck);
 }
@@ -130,9 +136,12 @@ function testStartElementWithArrayBufferOverflow() {
     thatSer.setNamespace("h", "aaa");
     thatSer.startElement("note");
     thatSer.endElement();
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).code == TypeErrorCodeId) &&
-            ((e as BusinessError).message == 'XmlSerializer:: StartElement memcpy_s failed');
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.code == TypeErrorCodeId &&
+                e.message == "XmlSerializer:: StartElement memcpy_s failed";
+        }
+        return false;
     }
     arktest.expectThrow(() => {thatSer.startElement("note1")}, exceptionCheck);
 }

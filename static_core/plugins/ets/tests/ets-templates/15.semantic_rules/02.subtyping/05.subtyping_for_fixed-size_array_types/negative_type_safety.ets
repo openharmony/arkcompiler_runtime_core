@@ -33,7 +33,7 @@ function foo(ca: FixedArray<{{c.dtype}}>) {
 }
 
 function main() {
-    let exceptionCheck = (e: Error|Exception): Boolean|String => {
+    let exceptionCheck = (e: Error): Boolean|String => {
         return e instanceof ArrayStoreError && 
         (e as ArrayStoreError).message.includes('cannot be stored in an array of type');
     };

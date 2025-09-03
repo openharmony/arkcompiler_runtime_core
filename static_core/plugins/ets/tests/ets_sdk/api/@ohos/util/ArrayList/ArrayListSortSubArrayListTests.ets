@@ -237,10 +237,13 @@ function testSubArrayList() {
 function testSubArrayListStartIndexOutOfRange() {
     let arrayList = new ArrayList<double>();
     initializeArrayList(arrayList, TestData.forNumber);
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            "The value of \"fromIndex\" is out of range. It must be >= 0 && <= 4. Received value is: -1") &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message ==
+                "The value of \"fromIndex\" is out of range. It must be >= 0 && <= 4. Received value is: -1" &&
+                e.code == OutOfBoundsErrorCodeId;
+        }
+        return false;
     }
     arktest.expectThrow(() => {arrayList.subArrayList(-TestData.testNumber1, TestData.testNumber5)}, exceptionCheck);
 }
@@ -248,10 +251,13 @@ function testSubArrayListStartIndexOutOfRange() {
 function testSubArrayListEndIndexOutOfRange() {
     let arrayList = new ArrayList<double>();
     initializeArrayList(arrayList, TestData.forNumber);
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            "The value of \"toIndex\" is out of range. It must be >= 0 && <= 5. Received value is: 8") &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message ==
+                "The value of \"toIndex\" is out of range. It must be >= 0 && <= 5. Received value is: 8" &&
+                e.code == OutOfBoundsErrorCodeId;
+        }
+        return false;
     }
     arktest.expectThrow(() => {arrayList.subArrayList(TestData.testNumber1, TestData.testNumber8)}, exceptionCheck);
 }
@@ -259,10 +265,13 @@ function testSubArrayListEndIndexOutOfRange() {
 function testSubArrayListEndIndexSmallerThanStartIndex() {
     let arrayList = new ArrayList<double>();
     initializeArrayList(arrayList, TestData.forNumber);
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            "The value of \"fromIndex\" is out of range. It must be >= 0 && <= 0. Received value is: 5") &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message ==
+                "The value of \"fromIndex\" is out of range. It must be >= 0 && <= 0. Received value is: 5" &&
+                e.code == OutOfBoundsErrorCodeId;
+        }
+        return false;
     }
     arktest.expectThrow(() => {arrayList.subArrayList(TestData.testNumber5, TestData.testNumber1)}, exceptionCheck);
 }
@@ -282,9 +291,12 @@ function testSubArrayListWithChange() {
 
 function testSubArrayListEmptyContainer() {
     let arrayList = new ArrayList<double>();
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message == "Container is empty") &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message == "Container is empty" &&
+                e.code == OutOfBoundsErrorCodeId;
+        }
+        return false;
     }
     arktest.expectThrow(() => {arrayList.subArrayList(TestData.testNumber1, TestData.testNumber3)}, exceptionCheck);
 }

@@ -139,10 +139,13 @@ function testInsertGetIndexOfRemoveByIndexHas() {
 function testInsertIndexGreaterThanLength() {
     let list = new List<double>();
     initializeList(list, TestData.arrayForNumber1);
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            "The value of \"index\" is out of range. It must be >= 0 && <= 21. Received value is: 10000") &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message ==
+                "The value of \"index\" is out of range. It must be >= 0 && <= 21. Received value is: 10000" &&
+                e.code == OutOfBoundsErrorCodeId;
+        }
+        return false;
     }
 
     arktest.expectThrow(() => {list.insert(TestData.testNumber6, 10000)}, exceptionCheck);
@@ -151,10 +154,13 @@ function testInsertIndexGreaterThanLength() {
 function testInsertIndexLessThanZero() {
     let list = new List<double>();
     initializeList(list, TestData.arrayForNumber1);
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            "The value of \"index\" is out of range. It must be >= 0 && <= 21. Received value is: -1") &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message ==
+                "The value of \"index\" is out of range. It must be >= 0 && <= 21. Received value is: -1" &&
+                e.code == OutOfBoundsErrorCodeId;
+        }
+        return false;
     }
 
     arktest.expectThrow(() => {list.insert(TestData.testNumber6, -TestData.testNumber1)}, exceptionCheck);

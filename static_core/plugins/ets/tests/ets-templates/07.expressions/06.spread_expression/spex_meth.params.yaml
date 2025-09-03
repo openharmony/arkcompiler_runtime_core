@@ -175,7 +175,7 @@ cases:
           }
           class A implements I {}
           let a1: Object[]|null = null
-          let expectedException = (e: Error | Exception): boolean => {return (e instanceof NullPointerError)}
+          let expectedException = (e: Error): boolean => {return (e instanceof NullPointerError)}
       use: |-
           // ensure-not-nullish expression
           let obj = new A
@@ -513,7 +513,7 @@ cases:
               }
           }
           let a1: [Object, Error]|null = null, obj = new A
-          let expectedException = (e: Error | Exception): boolean => {return (e instanceof NullPointerError)}
+          let expectedException = (e: Error): boolean => {return (e instanceof NullPointerError)}
       use: |-
           // ensure-not-nullish expression
           arktest.expectThrow(() => {obj.foo(...a1!) == 3}, expectedException) // NPE expected
@@ -540,7 +540,7 @@ cases:
               }
           }
           let obj = new A()
-          let expectedException = (e: Error | Exception): boolean => {return (e instanceof NullPointerError)}
+          let expectedException = (e: Error): boolean => {return (e instanceof NullPointerError)}
       use: |-
           // nullish-coalescing expression
           arktest.expectThrow(() => {obj.foo(...(a1 ?? a2)!) == 3}, expectedException) // NPE expected

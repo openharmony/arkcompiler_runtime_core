@@ -37,19 +37,25 @@ function testParseValidUUID() {
 }
 
 function testParseInvalidUUIDMissingChars() {
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') &&
-            ((e as BusinessError).message == 'Syntax Error.Invalid 84df796-66cc-4655-9b89-d6218d100f9c string') &&
-            ((e as BusinessError).code == syntaxErrorCode);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" &&
+                e.message == "Syntax Error.Invalid 84df796-66cc-4655-9b89-d6218d100f9c string" &&
+                e.code == syntaxErrorCode;
+        }
+        return false;
     }
     arktest.expectThrow(() => { util.parseUUID('84df796-66cc-4655-9b89-d6218d100f9c') }, exceptionCheck);
 }
 
 function testParseInvalidUUIDNonHexChars() {
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') &&
-            ((e as BusinessError).message == 'Syntax Error.Invalid 84Wdf796-66cc-4655-9b89-d6218d100f9c string') &&
-            ((e as BusinessError).code == syntaxErrorCode);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" &&
+                e.message == "Syntax Error.Invalid 84Wdf796-66cc-4655-9b89-d6218d100f9c string" &&
+                e.code == syntaxErrorCode;
+        }
+        return false;
     }
     arktest.expectThrow(() => { util.parseUUID('84Wdf796-66cc-4655-9b89-d6218d100f9c') }, exceptionCheck);
 }

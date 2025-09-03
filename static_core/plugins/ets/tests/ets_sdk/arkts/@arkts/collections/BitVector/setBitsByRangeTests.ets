@@ -74,10 +74,12 @@ function BitVector_setBitsByRange_Func_002() {
     bitVector.push(0);
     bitVector.push(1);
     bitVector.push(0);
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return e instanceof BusinessError && (e as BusinessError).name == 'BusinessError' &&
-            (e as BusinessError).code === OutOfBoundsErrorCodeId &&
-            (e as BusinessError).message === `The value of "toIndex" is out of range. It must be >= 0 && <= 8. Received value is: -3`;
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.code === OutOfBoundsErrorCodeId &&
+                e.message === `The value of "toIndex" is out of range. It must be >= 0 && <= 8. Received value is: -3`;
+        }
+        return false;
     };
     arktest.expectThrow(() => { bitVector.setBitsByRange(0, 8, -3); }, exceptionCheck);
 }
@@ -100,10 +102,12 @@ function BitVector_setBitsByRange_Func_004() {
     bitVector.push(0);
     bitVector.push(1);
     bitVector.push(0);
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return e instanceof BusinessError && (e as BusinessError).name == 'BusinessError' &&
-            (e as BusinessError).code === OutOfBoundsErrorCodeId &&
-            (e as BusinessError).message === `The value of "toIndex" is out of range. It must be >= 0 && <= 8. Received value is: -3`;
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.code === OutOfBoundsErrorCodeId &&
+                e.message === `The value of "toIndex" is out of range. It must be >= 0 && <= 8. Received value is: -3`;
+        }
+        return false;
     };
     arktest.expectThrow(() => { bitVector.setBitsByRange(0, -3, -3); }, exceptionCheck);
 }
@@ -126,10 +130,12 @@ function BitVector_setBitsByRange_Func_005() {
     bitVector.push(0);
     bitVector.push(1);
     bitVector.push(0);
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return e instanceof BusinessError && (e as BusinessError).name == 'BusinessError' &&
-            (e as BusinessError).code === OutOfBoundsErrorCodeId &&
-            (e as BusinessError).message === `The value of "fromIndex" is out of range. It must be >= 0 && <= 7. Received value is: -3`;
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.code === OutOfBoundsErrorCodeId &&
+                e.message === `The value of "fromIndex" is out of range. It must be >= 0 && <= 7. Received value is: -3`;
+        }
+        return false;
     };
     arktest.expectThrow(() => { bitVector.setBitsByRange(0, -3, 8); }, exceptionCheck);
 }

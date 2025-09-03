@@ -18,11 +18,11 @@ desc: Throwing function call if a call of a throwing function is not enclosed in
 assert: Exception propagation occurs in two cases. If a call of a throwing function is not enclosed in a try statement; If the enclosed try statement does not contain a clause that catches the raised exception.
 ---*/
 
-class TestException extends Exception {}
+class TestError extends Error {}
 
 class A {
   public constructor() throws {
-    throw new TestException();
+    throw new TestError();
   }
 }
 
@@ -32,7 +32,7 @@ function main(): void {
   try {
     let a: A = new A();
   }
-  catch(e: TestException) {
+  catch(e: TestError) {
     i = 5
   }
   catch (e) {

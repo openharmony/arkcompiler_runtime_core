@@ -111,7 +111,7 @@ function testwrite003() {
     let input = new Uint8Array(0);
     arktest.expectThrow(() => {
         decoder.write(input);
-    }, (e: Error | Exception) => {
+    }, (e: Error) => {
         arktest.assertTrue(e instanceof BusinessError);
         const err = e as BusinessError;
         arktest.assertEQ(err.code, 401);
@@ -128,7 +128,7 @@ function testend005() {
     arktest.assertEQ(decoded, '你');
     arktest.expectThrow(() => {
         decoder.end(new Uint8Array(0));
-    }, (e: Error | Exception) => {
+    }, (e: Error) => {
         arktest.assertTrue(e instanceof BusinessError);
         const err = e as BusinessError;
         arktest.assertEQ(err.code, 401);
