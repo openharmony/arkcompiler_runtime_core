@@ -101,7 +101,6 @@ const MosaicApp = (): JSX.Element => {
     return (
         <div
             id='app'
-            className={cx({[styles.App]: true})}
             data-testid='mosaic-app-component'
         >
             <Mosaic<ViewId>
@@ -117,7 +116,9 @@ const MosaicApp = (): JSX.Element => {
                                 {header(id)}
                             </div>
                         )}
-                        className={styles.window}
+                        className={cx(styles.window, {
+                            [styles.windowCode]: TITLE_MAP[id] === 'Code editor'
+                        })}
                     >
                         {TITLE_MAP[id] === 'Code editor' ? (
                             <div className={cx({
@@ -127,7 +128,7 @@ const MosaicApp = (): JSX.Element => {
                                 <div className={cx(styles.code, 'monaco-editor')}>
                                     <ArkTSEditor />
                                 </div>
-                                {withDisasmRender && <div className={styles.disasm}>
+                                {withDisasmRender && <div className={cx(styles.disasm, 'monaco-editor')}>
                                     <DisasmCode />
                                 </div>}
                             </div>

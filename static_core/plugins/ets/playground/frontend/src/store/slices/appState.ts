@@ -31,7 +31,7 @@ export interface Versions {
     frontend?: string;
     backendVersion?: string;
     arktsVersion?: string;
-    es2panda?: string;
+    es2pandaVersion?: string;
 }
 
 const initialState: IState = {
@@ -44,7 +44,7 @@ const initialState: IState = {
         frontend: '',
         backendVersion: '',
         arktsVersion: '',
-        es2panda: ''
+        es2pandaVersion: ''
     },
     versionsLoading: false,
     clearLogsEachRun: localStorage.getItem('clearLogsEachRun') === 'false' ? false : true,

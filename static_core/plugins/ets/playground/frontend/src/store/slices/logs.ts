@@ -28,7 +28,9 @@ interface IState {
     out: ILog[]
     err: ILog[]
     highlightErrors: HighlightError[];
+    jumpTo: JumpTo | null;
 }
+export type JumpTo = { line: number; column: number; nonce?: number };
 
 export interface HighlightError {
     message: string;
@@ -48,7 +50,8 @@ const initialState: IState = {
     verifierErr: [],
     out: [],
     err: [],
-    highlightErrors: []
+    highlightErrors: [],
+    jumpTo: null
 };
 
 const logsSlice = createSlice({
@@ -90,7 +93,10 @@ const logsSlice = createSlice({
         },
         setClearHighLightErrs: (state, action) => {
             state.highlightErrors = [];
-        }
+        },
+        setJumpTo(state, action: PayloadAction<JumpTo | null>) {
+            state.jumpTo = action.payload;
+        },
     }
 });
 
@@ -106,7 +112,8 @@ export const {
     setOutLogs,
     setErrLogs,
     setHighlightErrors,
-    setClearHighLightErrs
+    setClearHighLightErrs,
+    setJumpTo,
 } = logsSlice.actions;
 
 export default logsSlice.reducer;

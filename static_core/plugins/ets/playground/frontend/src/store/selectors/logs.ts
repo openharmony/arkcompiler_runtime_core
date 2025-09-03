@@ -15,7 +15,7 @@
 
 import { RootState } from '..';
 import { ILog } from '../../models/logs';
-import { HighlightError } from '../slices/logs';
+import { HighlightError, JumpTo } from '../slices/logs';
 
 export const selectCompileOutLogs = (state: RootState): ILog[] => state.logs.compileOut;
 export const selectCompileErrLogs = (state: RootState): ILog[] => state.logs.compileErr;
@@ -26,3 +26,4 @@ export const selectDisasmErrLogs = (state: RootState): ILog[] => state.logs.disa
 export const selectOutLogs = (state: RootState): ILog[] => state.logs.out;
 export const selectErrLogs = (state: RootState): ILog[] => state.logs.err;
 export const selectHighlightErrors = (state: RootState): HighlightError[] => state.logs.highlightErrors;
+export const selectJumpTo = (state: RootState): JumpTo | null => state.logs.jumpTo;

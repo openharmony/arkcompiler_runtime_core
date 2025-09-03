@@ -26,8 +26,8 @@ const mockClearFilters = jest.fn();
 const mockStore = configureMockStore<AppDispatch>();
 
 const mockLogs: ILog[] = [
-    { message: 'This is a log message', from: ELogType.RUN_OUT },
-    { message: 'This is an error message', from: ELogType.RUN_ERR },
+    { message: [{message: 'This is a log message'}], from: ELogType.RUN_OUT },
+    { message: [{message: 'This is an error message'}], from: ELogType.RUN_ERR },
 ];
 
 describe('LogsView component', () => {
@@ -57,8 +57,8 @@ describe('LogsView component', () => {
 
         expect(screen.getByText('[LOG]:')).toBeInTheDocument();
         expect(screen.getByText('[ERR]:')).toBeInTheDocument();
-        expect(screen.getByText(mockLogs[0].message)).toBeInTheDocument();
-        expect(screen.getByText(mockLogs[1].message)).toBeInTheDocument();
+        expect(screen.getByText(mockLogs[0].message[0].message)).toBeInTheDocument();
+        expect(screen.getByText(mockLogs[1].message[0].message)).toBeInTheDocument();
     });
 
     it('filters log messages based on input', () => {
@@ -67,8 +67,8 @@ describe('LogsView component', () => {
         const filterInput = screen.getByPlaceholderText('Filter');
         fireEvent.change(filterInput, { target: { value: 'error' } });
 
-        expect(screen.queryByText(mockLogs[0].message)).not.toBeInTheDocument();
-        expect(screen.getByText(mockLogs[1].message)).toBeInTheDocument();
+        expect(screen.queryByText(mockLogs[0].message[0].message)).not.toBeInTheDocument();
+        expect(screen.getByText(mockLogs[1].message[0].message)).toBeInTheDocument();
     });
 
     it('resets log messages on empty input', () => {
@@ -76,12 +76,12 @@ describe('LogsView component', () => {
 
         const filterInput = screen.getByPlaceholderText('Filter');
         fireEvent.change(filterInput, { target: { value: 'log' } });
-        expect(screen.getByText(mockLogs[0].message)).toBeInTheDocument();
-        expect(screen.queryByText(mockLogs[1].message)).not.toBeInTheDocument();
+        expect(screen.getByText(mockLogs[0].message[0].message)).toBeInTheDocument();
+        expect(screen.queryByText(mockLogs[1].message[0].message)).not.toBeInTheDocument();
 
         fireEvent.change(filterInput, { target: { value: '' } });
-        expect(screen.getByText(mockLogs[0].message)).toBeInTheDocument();
-        expect(screen.getByText(mockLogs[1].message)).toBeInTheDocument();
+        expect(screen.getByText(mockLogs[0].message[0].message)).toBeInTheDocument();
+        expect(screen.getByText(mockLogs[1].message[0].message)).toBeInTheDocument();
     });
 
     it('calls clearFilters when clear icon is clicked', () => {

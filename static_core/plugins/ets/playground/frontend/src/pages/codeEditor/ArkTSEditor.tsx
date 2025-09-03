@@ -25,7 +25,7 @@ import debounce from 'lodash.debounce';
 import * as monaco from 'monaco-editor';
 import { editor as monacoEditor } from 'monaco-editor';
 import { loader } from '@monaco-editor/react';
-import { selectHighlightErrors } from '../../store/selectors/logs';
+import { selectHighlightErrors, selectJumpTo } from '../../store/selectors/logs';
 
 loader.config({ monaco });
 
@@ -36,7 +36,35 @@ const ArkTSEditor: React.FC = () => {
     const {theme} = useTheme();
     const [syn, setSyn] = useState(backendSyntax);
     const highlightErrors = useSelector(selectHighlightErrors);
+    const jumpTo = useSelector(selectJumpTo);
     const [editorInstance, setEditorInstance] = useState<monaco.editor.IStandaloneCodeEditor | null>(null);
+    const [cursorPos, setCursorPos] = useState<{ lineNumber: number; column: number }>({ lineNumber: 1, column: 1 });
+
+    useEffect(() => {
+        let cleanup: (() => void) | undefined;
+        if (editorInstance) {
+            setCursorPos(editorInstance.getPosition() ?? { lineNumber: 1, column: 1 });
+            const sub = editorInstance.onDidChangeCursorPosition(e => setCursorPos(e.position));
+            cleanup = (): void => sub.dispose();
+        }
+        return cleanup;
+    }, [editorInstance]);
+
+    useEffect(() => {
+        if (!editorInstance || !jumpTo) {
+            return;
+        }
+        const pos = { lineNumber: jumpTo.line, column: jumpTo.column || 1 };
+      
+        editorInstance.setSelection({
+          startLineNumber: pos.lineNumber,
+          startColumn: pos.column,
+          endLineNumber: pos.lineNumber,
+          endColumn: pos.column,
+        });
+        editorInstance.revealPositionInCenter(pos, monacoEditor.ScrollType.Smooth);
+        editorInstance.focus();
+      }, [jumpTo, editorInstance]);
 
     useEffect(() => {
         setSyn(backendSyntax);
@@ -93,7 +121,7 @@ const ArkTSEditor: React.FC = () => {
         if (!model) {
             return;
         }
-        const markers: monaco.editor.IMarkerData[] = highlightErrors.map(err => ({
+        const markers: monaco.editor.IMarkerData[] = highlightErrors.filter(el => !!el.line).map(err => ({
             startLineNumber: err.line,
             startColumn: err.column,
             endLineNumber: err.line,
@@ -109,16 +137,26 @@ const ArkTSEditor: React.FC = () => {
     }, [highlightErrors, monaco, editorInstance]);
 
     return (
-        <Editor
-            onMount={(editor): void => {
-                setEditorInstance(editor);
-            }}
-            defaultLanguage="arkts"
-            defaultValue={'console.log("Hello, ArkTS!");'}
-            theme={theme === 'dark' ? 'vs-dark' : 'light'}
-            onChange={handleEditorChange}
-            className={styles.editor}
-        />
+        <div className={styles.editorContent}>
+            <Editor
+                onMount={(editor): void => {
+                    setEditorInstance(editor);
+                }}
+                defaultLanguage="arkts"
+                defaultValue={'console.log("Hello, ArkTS!");'}
+                theme={theme === 'dark' ? 'vs-dark' : 'light'}
+                onChange={handleEditorChange}
+                className={styles.editor}
+                options={{ 
+                    fixedOverflowWidgets: true,
+                    automaticLayout: true
+                 }}
+                height="100%"
+            />
+            <div className={styles.statusBar}>
+                Ln {cursorPos.lineNumber}, Col {cursorPos.column}
+            </div>
+        </div>
     );
 };
 
