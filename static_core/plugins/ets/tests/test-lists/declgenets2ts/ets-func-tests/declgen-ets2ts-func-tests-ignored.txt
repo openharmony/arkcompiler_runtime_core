@@ -206,6 +206,8 @@ regression/23623.ets
 regression/23735.ets
 std/core/DeepCopyTest.ets
 std/core/json/JsonElementParseTest.ets
+std/core/json/JsonElementFromJsonTest.ets
+std/core/json/JsonElementToJsonTest.ets
 std/core/std_core_char_static_Char_charsToCodePoint.ets
 std/core/std_core_char_static_Char_codeUnitsToEncode.ets
 std/core/std_core_char_static_Char_getHighSurrogate.ets
