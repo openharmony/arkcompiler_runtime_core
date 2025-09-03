@@ -36,7 +36,7 @@ function MapBigInt(a: @record Map<String, @bigint Array<u64>>): @record Map<Stri
 
 union MyUnion {
     bigIntValue: @bigint Array<u64>;
-    @null empty;
+    empty: unit;
     stringValue: String;
 }
 

@@ -35,7 +35,7 @@ char *tstr_initialize(struct TString *tstr_ptr, uint32_t capacity)
 {
     size_t bytes_required = sizeof(struct TStringData) + sizeof(char) * capacity;
     struct TStringData *sh = reinterpret_cast<struct TStringData *>(malloc(bytes_required));
-    tref_set(&sh->count, 1);
+    tref_init(&sh->count, 1);
     tstr_ptr->flags = 0;
     tstr_ptr->ptr = sh->buffer;
     return sh->buffer;

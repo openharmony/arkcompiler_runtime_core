@@ -17,11 +17,12 @@
 
 from collections.abc import Callable
 from itertools import chain
-from typing import TYPE_CHECKING, Any
+from json import dumps
+from typing import TYPE_CHECKING
 
 from typing_extensions import override
 
-from taihe.semantics.visitor import DeclVisitor
+from taihe.semantics.visitor import ExplicitTypeRefVisitor, RecursiveDeclVisitor
 from taihe.utils.diagnostics import AnsiStyle
 from taihe.utils.outputs import BaseWriter
 
@@ -34,11 +35,13 @@ if TYPE_CHECKING:
         DeclarationRefDecl,
         EnumDecl,
         EnumItemDecl,
+        ExplicitTypeRefDecl,
+        GenericArgDecl,
         GenericTypeRefDecl,
         GlobFuncDecl,
         IfaceDecl,
+        IfaceExtendDecl,
         IfaceMethodDecl,
-        IfaceParentDecl,
         LongTypeRefDecl,
         PackageDecl,
         PackageGroup,
@@ -48,7 +51,6 @@ if TYPE_CHECKING:
         ShortTypeRefDecl,
         StructDecl,
         StructFieldDecl,
-        TypeRefDecl,
         UnionDecl,
         UnionFieldDecl,
     )
@@ -56,7 +58,7 @@ if TYPE_CHECKING:
 WrapF = Callable[[str], str]
 
 
-class PrettyFormatter(DeclVisitor[str]):
+class PrettyFormatter(ExplicitTypeRefVisitor[str]):
     as_keyword: WrapF
     as_attr: WrapF
     as_comment: WrapF
@@ -72,84 +74,88 @@ class PrettyFormatter(DeclVisitor[str]):
             self.as_attr = lambda s: s
             self.as_comment = lambda s: s
 
-    def with_attr(self, d: "Decl", s: str) -> str:
+    def with_attr(self, d: "Decl", s: str, bracket: bool = False) -> str:
+        attrs: list[str] = []
         for item in chain(*d.attributes.values()):
-            fmt_attrs = self.as_attr(f"@{self.get_format_attr(item)}")
-            s = f"{fmt_attrs} {s}"
-        return s
+            attr = self.as_attr(f"@{self.get_format_attr(item)}")
+            attrs.append(attr)
+        if not attrs:
+            return s
+        attrs_fmt = " ".join(attrs)
+        if bracket:
+            attrs_fmt = f"[{attrs_fmt}]"
+        return f"{attrs_fmt} {s}"
 
-    def get_type_ref_decl(self, d: "TypeRefDecl"):
-        type_ref_repr = self.handle_decl(d)
-        if not self.show_resolved:
+    def get_type_ref(self, d: "ExplicitTypeRefDecl") -> str:
+        type_ref_repr = d.accept(self)
+        if not d.is_resolved or not self.show_resolved:
             return type_ref_repr
-        real_type = d.resolved_ty.signature
-        comment = self.as_comment(f"/* {real_type} */")
+        if (ty := d.resolved_ty_or_none) is None:
+            ty_sig = "<ERROR>"
+        else:
+            ty_sig = ty.signature
+        comment = self.as_comment(f"/* {ty_sig} */")
         return f"{type_ref_repr} {comment}"
 
     @override
-    def visit_long_type_ref_decl(self, d: "LongTypeRefDecl") -> str:
+    def visit_long_type_ref(self, d: "LongTypeRefDecl") -> str:
         return self.with_attr(d, f"{d.pkname}.{d.symbol}")
 
     @override
-    def visit_short_type_ref_decl(self, d: "ShortTypeRefDecl") -> str:
+    def visit_short_type_ref(self, d: "ShortTypeRefDecl") -> str:
         return self.with_attr(d, d.symbol)
 
     @override
-    def visit_generic_type_ref_decl(self, d: "GenericTypeRefDecl") -> str:
-        args_fmt = ", ".join(map(self.get_type_ref_decl, d.args_ty_ref))
+    def visit_generic_type_ref(self, d: "GenericTypeRefDecl") -> str:
+        args_fmt = ", ".join(map(self.get_generic_arg_decl, d.args))
         return self.with_attr(d, f"{d.symbol}<{args_fmt}>")
 
     @override
-    def visit_callback_type_ref_decl(self, d: "CallbackTypeRefDecl") -> str:
-        fmt_args = ", ".join(map(self.get_param_decl, d.params))
-        ret = self.get_type_ref_decl(d.return_ty_ref) if d.return_ty_ref else "void"
-        return self.with_attr(d, f"({fmt_args}) => {ret}")
+    def visit_callback_type_ref(self, d: "CallbackTypeRefDecl") -> str:
+        params_fmt = ", ".join(map(self.get_param_decl, d.params))
+        ret = d.return_ty_ref.format(self)
+        return self.with_attr(d, f"({params_fmt}) => {ret}")
 
-    def get_package_ref_decl(self, d: "PackageRefDecl") -> str:
+    def get_package_ref(self, d: "PackageRefDecl") -> str:
         package_ref_repr = d.symbol
         if not d.is_resolved or not self.show_resolved:
             return package_ref_repr
-        real_package = (
-            d.maybe_resolved_pkg.description if d.maybe_resolved_pkg else "<ERROR>"
-        )
-        comment = self.as_comment(f"/* {real_package} */")
+        if (pkg := d.resolved_pkg_or_none) is None:
+            pkg_desc = "<ERROR>"
+        else:
+            pkg_desc = pkg.description
+        comment = self.as_comment(f"/* {pkg_desc} */")
         return f"{package_ref_repr} {comment}"
 
-    def get_declaration_ref_decl(self, d: "DeclarationRefDecl") -> str:
+    def get_declaration_ref(self, d: "DeclarationRefDecl") -> str:
         decl_ref_repr = d.symbol
         if not d.is_resolved or not self.show_resolved:
             return decl_ref_repr
-        real_decl = (
-            d.maybe_resolved_decl.description if d.maybe_resolved_decl else "<ERROR>"
-        )
-        comment = self.as_comment(f"/* {real_decl} */")
+        if (decl := d.resolved_decl_or_none) is None:
+            desc_desc = "<ERROR>"
+        else:
+            desc_desc = decl.description
+        comment = self.as_comment(f"/* {desc_desc} */")
         return f"{decl_ref_repr} {comment}"
 
-    def get_parent_decl(self, d: "IfaceParentDecl") -> str:
-        res = self.get_type_ref_decl(d.ty_ref)
-        return self.with_attr(d, res)
+    def get_generic_arg_decl(self, d: "GenericArgDecl") -> str:
+        res = d.ty_ref.format(self)
+        return self.with_attr(d, res, bracket=True)
+
+    def get_extend_decl(self, d: "IfaceExtendDecl") -> str:
+        res = d.ty_ref.format(self)
+        return self.with_attr(d, res, bracket=True)
 
     def get_param_decl(self, d: "ParamDecl") -> str:
-        res = f"{d.name}: {self.get_type_ref_decl(d.ty_ref)}"
+        res = f"{d.name}: {d.ty_ref.format(self)}"
         return self.with_attr(d, res)
-
-    def get_value(self, obj: Any) -> str:
-        if isinstance(obj, str):
-            return '"' + obj.encode("unicode_escape").decode("utf-8") + '"'
-        if isinstance(obj, bool):
-            return "true" if obj else "false"
-        if isinstance(obj, int):
-            return f"{obj:d}"
-        if isinstance(obj, float):
-            return f"{obj:f}"
-        raise TypeError(f"Unsupported type: {type(obj)}")
 
     def get_format_attr(self, item: "AnyAttribute") -> str:
         name = item.get_name()
         args = item.get_args()
         args_str: list[str] = []
         for arg in args:
-            value = self.get_value(arg.value)
+            value = dumps(arg.value)
             if arg.key:
                 arg_str = f"{arg.key}={value}"
             else:
@@ -161,7 +167,7 @@ class PrettyFormatter(DeclVisitor[str]):
         return f"{name}({args_fmt})"
 
 
-class PrettyPrinter(DeclVisitor[None]):
+class PrettyPrinter(RecursiveDeclVisitor):
     def __init__(
         self,
         out: BaseWriter,
@@ -182,22 +188,22 @@ class PrettyPrinter(DeclVisitor[None]):
             self.out.writeln(f"{attr}")
 
     @override
-    def visit_package_import_decl(self, d: "PackageImportDecl"):
+    def visit_package_import(self, d: "PackageImportDecl"):
         self.write_attr(d)
 
         use_kw = self.fmt.as_keyword("use")
         as_kw = self.fmt.as_keyword("as")
 
         alias_pair = (
-            f"{self.fmt.get_package_ref_decl(d.pkg_ref)} {as_kw} {d.name}"
+            f"{self.fmt.get_package_ref(d.pkg_ref)} {as_kw} {d.name}"
             if d.is_alias()
-            else self.fmt.get_package_ref_decl(d.pkg_ref)
+            else self.fmt.get_package_ref(d.pkg_ref)
         )
 
         self.out.writeln(f"{use_kw} {alias_pair};")
 
     @override
-    def visit_decl_import_decl(self, d: "DeclarationImportDecl"):
+    def visit_declaration_import(self, d: "DeclarationImportDecl"):
         self.write_attr(d)
 
         from_kw = self.fmt.as_keyword("from")
@@ -205,34 +211,36 @@ class PrettyPrinter(DeclVisitor[None]):
         as_kw = self.fmt.as_keyword("as")
 
         alias_pair = (
-            f"{self.fmt.get_declaration_ref_decl(d.decl_ref)} {as_kw} {d.name}"
+            f"{self.fmt.get_declaration_ref(d.decl_ref)} {as_kw} {d.name}"
             if d.is_alias()
-            else self.fmt.get_declaration_ref_decl(d.decl_ref)
+            else self.fmt.get_declaration_ref(d.decl_ref)
         )
 
         self.out.writeln(
-            f"{from_kw} {self.fmt.get_package_ref_decl(d.decl_ref.pkg_ref)} {use_kw} {alias_pair};"
+            f"{from_kw} {self.fmt.get_package_ref(d.decl_ref.pkg_ref)} {use_kw} {alias_pair};"
         )
 
     @override
-    def visit_glob_func_decl(self, d: "GlobFuncDecl"):
+    def visit_glob_func(self, d: "GlobFuncDecl"):
         self.write_attr(d)
 
         func_kw = self.fmt.as_keyword("function")
 
-        fmt_args = ", ".join(map(self.fmt.get_param_decl, d.params))
-        ret = self.fmt.get_type_ref_decl(d.return_ty_ref) if d.return_ty_ref else "void"
+        params_fmt = ", ".join(map(self.fmt.get_param_decl, d.params))
 
-        self.out.writeln(f"{func_kw} {d.name}({fmt_args}): {ret};")
+        if (ret := d.return_ty_ref.format(self.fmt)) is None:
+            self.out.writeln(f"{func_kw} {d.name}({params_fmt});")
+        else:
+            self.out.writeln(f"{func_kw} {d.name}({params_fmt}): {ret};")
 
     @override
-    def visit_enum_item_decl(self, d: "EnumItemDecl") -> None:
+    def visit_enum_item(self, d: "EnumItemDecl") -> None:
         self.write_attr(d)
 
         if d.value is None:
             self.out.writeln(f"{d.name},")
         else:
-            self.out.writeln(f"{d.name} = {self.fmt.get_value(d.value)},")
+            self.out.writeln(f"{d.name} = {dumps(d.value)},")
 
     @override
     def visit_enum_decl(self, d: "EnumDecl") -> None:
@@ -240,25 +248,25 @@ class PrettyPrinter(DeclVisitor[None]):
 
         enum_kw = self.fmt.as_keyword("enum")
 
-        full_decl = f"{d.name}: {self.fmt.get_type_ref_decl(d.ty_ref)}"
+        full_decl = f"{d.name}: {d.ty_ref.format(self.fmt)}"
         prologue = f"{enum_kw} {full_decl} {{"
         epilogue = f"}}"
 
         if d.items:
             with self.out.indented(prologue, epilogue):
                 for i in d.items:
-                    self.handle_decl(i)
+                    i.accept(self)
         else:
             self.out.writeln(prologue + epilogue)
 
     @override
-    def visit_union_field_decl(self, d: "UnionFieldDecl"):
+    def visit_union_field(self, d: "UnionFieldDecl"):
         self.write_attr(d)
 
-        if d.ty_ref:
-            self.out.writeln(f"{d.name}: {self.fmt.get_type_ref_decl(d.ty_ref)};")
-        else:
+        if (ret := d.ty_ref.format(self.fmt)) is None:
             self.out.writeln(f"{d.name};")
+        else:
+            self.out.writeln(f"{d.name}: {ret};")
 
     @override
     def visit_union_decl(self, d: "UnionDecl"):
@@ -271,15 +279,15 @@ class PrettyPrinter(DeclVisitor[None]):
         if d.fields:
             with self.out.indented(prologue, epilogue):
                 for f in d.fields:
-                    self.handle_decl(f)
+                    f.accept(self)
         else:
             self.out.writeln(prologue + epilogue)
 
     @override
-    def visit_struct_field_decl(self, d: "StructFieldDecl"):
+    def visit_struct_field(self, d: "StructFieldDecl"):
         self.write_attr(d)
 
-        self.out.writeln(f"{d.name}: {self.fmt.get_type_ref_decl(d.ty_ref)};")
+        self.out.writeln(f"{d.name}: {d.ty_ref.format(self.fmt)};")
 
     @override
     def visit_struct_decl(self, d: "StructDecl"):
@@ -292,18 +300,20 @@ class PrettyPrinter(DeclVisitor[None]):
         if d.fields:
             with self.out.indented(prologue, epilogue):
                 for f in d.fields:
-                    self.handle_decl(f)
+                    f.accept(self)
         else:
             self.out.writeln(prologue + epilogue)
 
     @override
-    def visit_iface_func_decl(self, d: "IfaceMethodDecl"):
+    def visit_iface_method(self, d: "IfaceMethodDecl"):
         self.write_attr(d)
 
-        fmt_args = ", ".join(map(self.fmt.get_param_decl, d.params))
-        ret = self.fmt.get_type_ref_decl(d.return_ty_ref) if d.return_ty_ref else "void"
+        params_fmt = ", ".join(map(self.fmt.get_param_decl, d.params))
 
-        self.out.writeln(f"{d.name}({fmt_args}): {ret};")
+        if (ret := d.return_ty_ref.format(self.fmt)) is None:
+            self.out.writeln(f"{d.name}({params_fmt});")
+        else:
+            self.out.writeln(f"{d.name}({params_fmt}): {ret};")
 
     @override
     def visit_iface_decl(self, d: "IfaceDecl"):
@@ -312,8 +322,8 @@ class PrettyPrinter(DeclVisitor[None]):
         iface_kw = self.fmt.as_keyword("interface")
 
         full_decl = (
-            f"{d.name}: " + ", ".join(map(self.fmt.get_parent_decl, d.parents))
-            if d.parents
+            f"{d.name}: " + ", ".join(map(self.fmt.get_extend_decl, d.extends))
+            if d.extends
             else d.name
         )
         prologue = f"{iface_kw} {full_decl} {{"
@@ -322,24 +332,24 @@ class PrettyPrinter(DeclVisitor[None]):
         if d.methods:
             with self.out.indented(prologue, epilogue):
                 for f in d.methods:
-                    self.handle_decl(f)
+                    f.accept(self)
         else:
             self.out.writeln(prologue + epilogue)
 
     @override
-    def visit_package_decl(self, p: "PackageDecl"):
+    def visit_package(self, p: "PackageDecl"):
         self.out.writeln(f"// {p.name}")
         self.write_pkg_attr(p)
         for d in p.pkg_imports:
-            self.handle_decl(d)
+            d.accept(self)
         for d in p.decl_imports:
-            self.handle_decl(d)
+            d.accept(self)
         for d in p.declarations:
-            self.handle_decl(d)
+            d.accept(self)
 
     @override
     def visit_package_group(self, g: "PackageGroup"):
-        for i, p in enumerate(g.packages):
+        for i, p in enumerate(g.all_packages):
             if i != 0:
                 self.out.newline()
-            self.handle_decl(p)
+            p.accept(self)

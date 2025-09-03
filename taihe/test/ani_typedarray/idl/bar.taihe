@@ -145,7 +145,7 @@ union MyUnion {
     i64Value: @typedarray Array<i64>;
     f32Value: @typedarray Array<f32>;
     f64Value: @typedarray Array<f64>;
-    @null empty;
+    empty: unit;
 }
 function MakeMyUnion(n: i32): MyUnion;
 function ShowMyUnion(u: MyUnion): void;

@@ -35,14 +35,15 @@ from pathlib import Path
 from typing_extensions import Self
 
 from taihe.driver.backend import Backend, BackendConfig
+from taihe.parse.convert import convert_ast
 from taihe.semantics.analysis import analyze_semantics
 from taihe.semantics.attributes import AttributeRegistry
 from taihe.semantics.declarations import PackageGroup
 from taihe.utils.analyses import AnalysisManager
 from taihe.utils.diagnostics import ConsoleDiagnosticsManager, DiagnosticsManager
 from taihe.utils.exceptions import IgnoredFileReason, IgnoredFileWarn
-from taihe.utils.outputs import OutputConfig
-from taihe.utils.sources import SourceFile, SourceLocation, SourceManager
+from taihe.utils.outputs import OutputConfig, OutputManager
+from taihe.utils.sources import IDL_FILE_EXTS, SourceFile, SourceLocation, SourceManager
 
 
 def validate_source_file(path: Path) -> IgnoredFileReason | None:
@@ -53,7 +54,7 @@ def validate_source_file(path: Path) -> IgnoredFileReason | None:
     if not path.is_file():
         return IgnoredFileReason.IS_DIRECTORY
     # unexpected file extension
-    if path.suffix != ".taihe":
+    if path.suffix not in IDL_FILE_EXTS:
         return IgnoredFileReason.EXTENSION_MISMATCH
     return None
 
@@ -111,13 +112,16 @@ class CompilerInstance:
     """
 
     invocation: CompilerInvocation
-    backends: list[Backend]
+    config: CompilerConfig
+
     diagnostics_manager: DiagnosticsManager
     source_manager: SourceManager
     package_group: PackageGroup
-    analysis_manager: AnalysisManager
     attribute_registry: AttributeRegistry
-    config: CompilerConfig
+    analysis_manager: AnalysisManager
+
+    backends: list[Backend]
+    output_manager: OutputManager
 
     def __init__(
         self,
@@ -126,17 +130,19 @@ class CompilerInstance:
         dm: type[DiagnosticsManager] = ConsoleDiagnosticsManager,
     ):
         self.invocation = invocation
+        self.config = CompilerConfig.construct(invocation.extra)
+
         self.diagnostics_manager = dm()
         self.source_manager = SourceManager()
         self.package_group = PackageGroup()
-        self.output_manager = invocation.output_config.construct(self)
         self.attribute_registry = AttributeRegistry()
+        self.analysis_manager = AnalysisManager(self.config)
+
+        self.output_manager = invocation.output_config.construct(self)
         self.backends = [
             backend_config.construct(self)
             for backend_config in invocation.backend_configs
         ]
-        self.config = CompilerConfig.construct(invocation.extra)
-        self.analysis_manager = AnalysisManager(self.config)
 
     ##########################
     # The compilation phases #
@@ -147,25 +153,23 @@ class CompilerInstance:
         direct = self.invocation.src_files
         scanned = chain.from_iterable(p.iterdir() for p in self.invocation.src_dirs)
 
-        for file in chain(direct, scanned):
-            source = SourceFile(file)
-            if warning := validate_source_file(file):
-                warn = IgnoredFileWarn(
-                    reason=warning,
-                    loc=SourceLocation(source),
-                )
+        for path in chain(direct, scanned):
+            source = SourceFile(path)
+            if reason := validate_source_file(path):
+                warn = IgnoredFileWarn(reason=reason, loc=SourceLocation(source))
                 self.diagnostics_manager.emit(warn)
             else:
                 self.source_manager.add_source(source)
 
-    def parse(self):
-        from taihe.parse.convert import AstConverter
+        for b in self.backends:
+            b.inject()
 
-        for src in self.source_manager.sources:
-            conv = AstConverter(src, self.diagnostics_manager)
-            with self.diagnostics_manager.capture_error():
-                pkg = conv.convert()
-                self.package_group.add(pkg)
+    def parse(self):
+        convert_ast(
+            self.source_manager,
+            self.package_group,
+            self.diagnostics_manager,
+        )
 
         for b in self.backends:
             b.post_process()

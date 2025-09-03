@@ -18,6 +18,8 @@ from typing import ClassVar
 
 from taihe.driver.backend import Backend, BackendConfig
 from taihe.driver.contexts import CompilerInstance
+from taihe.utils.resources import StandardLibrary
+from taihe.utils.sources import SourceFile
 
 
 @dataclass
@@ -33,13 +35,20 @@ class AniBridgeBackendConfig(BackendConfig):
         from taihe.codegen.ani.gen_ani import AniCodeGenerator
         from taihe.codegen.ani.gen_sts import StsCodeGenerator
 
-        instance.attribute_registry.register(*all_attr_types)
-
         # TODO: unify {Ani,Sts}CodeGenerator
         class AniBridgeBackendImpl(Backend):
             def __init__(self, ci: "CompilerInstance"):
                 super().__init__(ci)
                 self._ci = ci
+                self._ci.attribute_registry.register(*all_attr_types)
+
+            def inject(self):
+                self._ci.source_manager.add_source(
+                    SourceFile(
+                        StandardLibrary.resolve_path() / "taihe.platform.ani.taihe",
+                        is_stdlib=True,
+                    )
+                )
 
             def generate(self):
                 om = self._ci.output_manager

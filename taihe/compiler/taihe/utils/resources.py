@@ -64,7 +64,7 @@ def fetch_url(url: str, output: Path, curl_extra_args: Sequence[str] | None = No
     ]
     ok = False
     try:
-        logging.info(f"Downloading {url} to {output}")
+        logging.info("Downloading %s to %s", url, output)
         subprocess.check_call(curl_args)
         ok = output.exists()
         return output
@@ -75,7 +75,7 @@ def fetch_url(url: str, output: Path, curl_extra_args: Sequence[str] | None = No
         raise FileNotFoundError("curl command not found.") from e
     finally:
         if ok:
-            logging.info(f"Successfully downloaded to {output}")
+            logging.info("Downloaded %s successfully", output)
         else:
             output.unlink(missing_ok=True)
 
@@ -373,6 +373,12 @@ class Documentation(PathResource):
     PATH_BUNDLE = "share/doc/taihe"
 
 
+class CMakeModulesResource(PathResource):
+    CLI_NAME = "cmake"
+    PATH_PKG = PATH_DEV = "cmake"
+    PATH_BUNDLE = "lib/cmake/taihe"
+
+
 class _LegacyPandaVm(PathResource):
     PATH_DEV = ".panda_vm"
     PATH_PKG = "<no-panda-vm-in-pkg-mode>"
@@ -383,7 +389,7 @@ class _LegacyPandaVm(PathResource):
 class PandaVm(CachedResource):
     CLI_NAME = "panda-vm"
     PATH_CACHE = "panda-vm"
-    VERSION: Final = "sdk-1.5.0-dev.38664"
+    VERSION: Final = "sdk-1.5.0-dev.43957"
     CREDENTIAL = "koala-pub:y3t!n0therP"
     URL: Final = (
         "https://nexus.cn.bz-openlab.ru:10443/repository/koala-npm/@panda/sdk/-"
@@ -473,7 +479,7 @@ class PythonBuild(CachedResource):
     @override
     def fetch(self):
         shutil.rmtree(self.base_path, ignore_errors=True)
-        logging.info(f"Cloning repo from {self.REPO} to {self.base_path}")
+        logging.info("Cloning Python packages from %s to %s", self.REPO, self.base_path)
         subprocess.run(["git", "clone", self.REPO, self.base_path], check=True)
 
     def extract_to(self, target_dir: Path, *, system: str):
@@ -492,7 +498,7 @@ class PythonBuild(CachedResource):
 class Antlr(CachedResource):
     CLI_NAME = "antlr"
 
-    VERSION: Final = "4.13.2"
+    VERSION: Final = "4.11.1"
     MAVEN_REMOTE: Final = "https://mirrors.huaweicloud.com/repository/maven"
     MAVEN_LOCAL: Final = "~/.m2/repository"
     MAVEN_PATH: Final = f"org/antlr/antlr4/{VERSION}/antlr4-{VERSION}-complete.jar"
@@ -500,7 +506,6 @@ class Antlr(CachedResource):
     @override
     @classmethod
     def locate(cls, ctx: ResourceContext) -> Path:
-        del ctx
         return Path(f"{cls.MAVEN_LOCAL}/{cls.MAVEN_PATH}").expanduser()
 
     @override
@@ -518,6 +523,7 @@ BUILTIN_RESOURCES: Sequence[ResourceT] = [
     RuntimeHeader,
     StandardLibrary,
     Documentation,
+    CMakeModulesResource,
 ]
 ALL_RESOURCES: Sequence[ResourceT] = [
     *BUILTIN_RESOURCES,

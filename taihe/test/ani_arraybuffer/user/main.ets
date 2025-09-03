@@ -83,7 +83,7 @@ function arraybuffer_uint8toarraybuffer() {
 }
 
 function arraybuffer_dataview() {
-    // case 6 ： test Uint8Array to ArrayBuffer conversion, use DataView
+    // case 6 : test Uint8Array to ArrayBuffer conversion, use DataView
     let uint8ArrayData: Uint8Array = new Uint8Array([8, 9, 10]);
     let arrayBufferFromUint8Array: ArrayBuffer =
         new ArrayBuffer(uint8ArrayData.length);

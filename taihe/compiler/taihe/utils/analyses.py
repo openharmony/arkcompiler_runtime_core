@@ -34,11 +34,11 @@ from typing import (
 if TYPE_CHECKING:
     from taihe.driver.contexts import CompilerConfig
 
-P = ParamSpec("P")
-A = TypeVar("A", bound="AbstractAnalysis[Any]")
+_P = ParamSpec("_P")
+_A = TypeVar("_A", bound="AbstractAnalysis[Any]")
 
 
-class AbstractAnalysis(Generic[P], ABC):
+class AbstractAnalysis(Generic[_P], ABC):
     """Abstract Base class for all analyses.
 
     Enforcing the use of hashable argument for unique identification and caching.
@@ -46,22 +46,22 @@ class AbstractAnalysis(Generic[P], ABC):
 
     @classmethod
     def get(
-        cls: type[A],
+        cls: type[_A],
         am: "AnalysisManager",
-        *args: P.args,
-        **kwargs: P.kwargs,
-    ) -> A:
+        *args: _P.args,
+        **kwargs: _P.kwargs,
+    ) -> _A:
         """Get or create an analysis instance using the factory."""
         return am.get_or_create(cls, *args, **kwargs)
 
     @classmethod
     @abstractmethod
     def _create(
-        cls: type[A],
+        cls: type[_A],
         am: "AnalysisManager",
-        *args: P.args,
-        **kwargs: P.kwargs,
-    ) -> A:
+        *args: _P.args,
+        **kwargs: _P.kwargs,
+    ) -> _A:
         """Create an instance of an analysis with the given arguments."""
         raise NotImplementedError("Subclasses must implement this method.")
 
@@ -85,14 +85,14 @@ class AnalysisManager:
         self._cache: dict[CacheKey, AbstractAnalysis[Any]] = {}
         self.config = config
 
-    def get_or_create(self, analysis_type: type[A], *args: Any, **kwargs: Any) -> A:
+    def get_or_create(self, analysis_type: type[_A], *args: Any, **kwargs: Any) -> _A:
         """Get existing analysis or create new one if not cached."""
         hashable_args = tuple(args)
         hashable_kwargs = tuple(sorted(kwargs.items()))
         key = CacheKey(analysis_type, hashable_args, hashable_kwargs)
 
         if cached := self._cache.get(key):
-            return cast(A, cached)
+            return cast(_A, cached)
 
         new_instance = analysis_type._create(self, *args, **kwargs)  # type: ignore
         self._cache[key] = new_instance

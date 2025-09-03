@@ -16,6 +16,7 @@
 #define RUNTIME_INCLUDE_TAIHE_SET_HPP_
 // NOLINTBEGIN
 
+#include <taihe/set.abi.h>
 #include <taihe/common.hpp>
 
 #include <utility>
@@ -36,8 +37,8 @@ public:
     using item_t = K const;
 
     struct node_t {
-        item_t item;
         node_t *next;
+        item_t item;
     };
 
     void reserve(std::size_t cap) const
@@ -162,8 +163,8 @@ public:
             if ((*current_ptr)->item == key) {
                 if (cover) {
                     node_t *replaced = new node_t {
-                        .item = key,
                         .next = (*current_ptr)->next,
+                        .item = std::forward<as_param_t<K>>(key),
                     };
                     node_t *current = *current_ptr;
                     *current_ptr = replaced;
@@ -174,8 +175,8 @@ public:
             current_ptr = &(*current_ptr)->next;
         }
         node_t *node = new node_t {
-            .item = key,
             .next = m_handle->bucket[index],
+            .item = std::forward<as_param_t<K>>(key),
         };
         m_handle->bucket[index] = node;
         m_handle->size++;
@@ -292,7 +293,7 @@ struct set : set_view<K> {
 
     explicit set(std::size_t cap = SET_DEFAULT_CAPACITY) : set(new handle_t)
     {
-        tref_set(&m_handle->count, 1);
+        tref_init(&m_handle->count, 1);
         m_handle->cap = cap;
         m_handle->bucket = new node_t *[cap]();
         m_handle->size = 0;
@@ -338,12 +339,12 @@ private:
 
 template <typename K>
 struct as_abi<set<K>> {
-    using type = void *;
+    using type = TSet;
 };
 
 template <typename K>
 struct as_abi<set_view<K>> {
-    using type = void *;
+    using type = TSet;
 };
 
 template <typename K>

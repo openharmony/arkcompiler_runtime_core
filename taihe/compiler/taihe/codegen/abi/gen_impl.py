@@ -26,6 +26,7 @@ from taihe.semantics.declarations import (
     PackageDecl,
     PackageGroup,
 )
+from taihe.semantics.types import NonVoidType
 from taihe.utils.analyses import AnalysisManager
 from taihe.utils.outputs import FileKind, OutputManager
 
@@ -50,11 +51,11 @@ class CImplHeadersGenerator:
             pkg_c_impl_target.add_include("taihe/common.h", pkg_abi_info.header)
             for func in pkg.functions:
                 for param in func.params:
-                    type_abi_info = TypeAbiInfo.get(self.am, param.ty_ref.resolved_ty)
-                    pkg_c_impl_target.add_include(*type_abi_info.impl_headers)
-                if return_ty_ref := func.return_ty_ref:
-                    type_abi_info = TypeAbiInfo.get(self.am, return_ty_ref.resolved_ty)
-                    pkg_c_impl_target.add_include(*type_abi_info.impl_headers)
+                    param_ty_abi_info = TypeAbiInfo.get(self.am, param.ty)
+                    pkg_c_impl_target.add_include(*param_ty_abi_info.impl_headers)
+                if isinstance(return_ty := func.return_ty, NonVoidType):
+                    return_ty_abi_info = TypeAbiInfo.get(self.am, return_ty)
+                    pkg_c_impl_target.add_include(*return_ty_abi_info.impl_headers)
                 self.gen_func(func, pkg_c_impl_target)
 
     def gen_func(
@@ -68,19 +69,19 @@ class CImplHeadersGenerator:
         params = []
         args = []
         for param in func.params:
-            type_abi_info = TypeAbiInfo.get(self.am, param.ty_ref.resolved_ty)
-            params.append(f"{type_abi_info.as_param} {param.name}")
+            param_ty_abi_info = TypeAbiInfo.get(self.am, param.ty)
+            params.append(f"{param_ty_abi_info.as_param} {param.name}")
             args.append(param.name)
         params_str = ", ".join(params)
         args_str = ", ".join(args)
-        if return_ty_ref := func.return_ty_ref:
-            type_abi_info = TypeAbiInfo.get(self.am, return_ty_ref.resolved_ty)
-            return_ty_name = type_abi_info.as_owner
+        if isinstance(return_ty := func.return_ty, NonVoidType):
+            return_ty_abi_info = TypeAbiInfo.get(self.am, return_ty)
+            return_ty_abi_name = return_ty_abi_info.as_owner
         else:
-            return_ty_name = "void"
+            return_ty_abi_name = "void"
         pkg_c_impl_target.writelns(
             f"#define {func_c_impl_info.macro}({func_impl}) \\",
-            f"    {return_ty_name} {func_abi_info.mangled_name}({params_str}) {{ \\",
+            f"    {return_ty_abi_name} {func_abi_info.mangled_name}({params_str}) {{ \\",
             f"        return {func_impl}({args_str}); \\",
             f"    }}",
         )
@@ -115,16 +116,16 @@ class CImplSourcesGenerator:
         func_c_impl_name = f"{func.name}_impl"
         params = []
         for param in func.params:
-            type_abi_info = TypeAbiInfo.get(self.am, param.ty_ref.resolved_ty)
-            params.append(f"{type_abi_info.as_param} {param.name}")
+            param_ty_abi_info = TypeAbiInfo.get(self.am, param.ty)
+            params.append(f"{param_ty_abi_info.as_param} {param.name}")
         params_str = ", ".join(params)
-        if return_ty_ref := func.return_ty_ref:
-            type_abi_info = TypeAbiInfo.get(self.am, return_ty_ref.resolved_ty)
-            return_ty_name = type_abi_info.as_owner
+        if isinstance(return_ty := func.return_ty, NonVoidType):
+            return_ty_abi_info = TypeAbiInfo.get(self.am, return_ty)
+            return_ty_abi_name = return_ty_abi_info.as_owner
         else:
-            return_ty_name = "void"
+            return_ty_abi_name = "void"
         with pkg_c_impl_target.indented(
-            f"{return_ty_name} {func_c_impl_name}({params_str}) {{",
+            f"{return_ty_abi_name} {func_c_impl_name}({params_str}) {{",
             f"}}",
         ):
             pkg_c_impl_target.writelns(

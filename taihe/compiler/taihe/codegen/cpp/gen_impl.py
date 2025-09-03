@@ -36,9 +36,7 @@ from taihe.semantics.declarations import (
     PackageDecl,
     PackageGroup,
 )
-from taihe.semantics.types import (
-    IfaceType,
-)
+from taihe.semantics.types import IfaceType, NonVoidType
 from taihe.utils.analyses import AnalysisManager
 from taihe.utils.outputs import FileKind, OutputManager
 
@@ -64,11 +62,11 @@ class CppImplHeadersGenerator:
             pkg_cpp_impl_target.add_include(pkg_abi_info.header)
             for func in pkg.functions:
                 for param in func.params:
-                    type_cpp_info = TypeCppInfo.get(self.am, param.ty_ref.resolved_ty)
-                    pkg_cpp_impl_target.add_include(*type_cpp_info.impl_headers)
-                if return_ty_ref := func.return_ty_ref:
-                    type_cpp_info = TypeCppInfo.get(self.am, return_ty_ref.resolved_ty)
-                    pkg_cpp_impl_target.add_include(*type_cpp_info.impl_headers)
+                    param_ty_cpp_info = TypeCppInfo.get(self.am, param.ty)
+                    pkg_cpp_impl_target.add_include(*param_ty_cpp_info.impl_headers)
+                if isinstance(return_ty := func.return_ty, NonVoidType):
+                    return_ty_cpp_info = TypeCppInfo.get(self.am, return_ty)
+                    pkg_cpp_impl_target.add_include(*return_ty_cpp_info.impl_headers)
                 self.gen_func(func, pkg_cpp_impl_target)
 
     def gen_func(
@@ -79,28 +77,28 @@ class CppImplHeadersGenerator:
         func_abi_info = GlobFuncAbiInfo.get(self.am, func)
         func_cpp_impl_info = GlobFuncCppImplInfo.get(self.am, func)
         func_impl = "CPP_FUNC_IMPL"
-        args_from_abi = []
-        abi_params = []
+        args_cpp = []
+        params_abi = []
         for param in func.params:
-            type_cpp_info = TypeCppInfo.get(self.am, param.ty_ref.resolved_ty)
-            type_abi_info = TypeAbiInfo.get(self.am, param.ty_ref.resolved_ty)
-            args_from_abi.append(type_cpp_info.pass_from_abi(param.name))
-            abi_params.append(f"{type_abi_info.as_param} {param.name}")
-        args_from_abi_str = ", ".join(args_from_abi)
-        abi_params_str = ", ".join(abi_params)
-        cpp_result = f"{func_impl}({args_from_abi_str})"
-        if return_ty_ref := func.return_ty_ref:
-            type_cpp_info = TypeCppInfo.get(self.am, return_ty_ref.resolved_ty)
-            type_abi_info = TypeAbiInfo.get(self.am, return_ty_ref.resolved_ty)
-            abi_return_ty_name = type_abi_info.as_owner
-            abi_result = type_cpp_info.return_into_abi(cpp_result)
+            param_ty_cpp_info = TypeCppInfo.get(self.am, param.ty)
+            param_ty_abi_info = TypeAbiInfo.get(self.am, param.ty)
+            args_cpp.append(param_ty_cpp_info.pass_from_abi(param.name))
+            params_abi.append(f"{param_ty_abi_info.as_param} {param.name}")
+        args_cpp_str = ", ".join(args_cpp)
+        params_abi_str = ", ".join(params_abi)
+        result_cpp = f"{func_impl}({args_cpp_str})"
+        if isinstance(return_ty := func.return_ty, NonVoidType):
+            return_ty_cpp_info = TypeCppInfo.get(self.am, return_ty)
+            return_ty_abi_info = TypeAbiInfo.get(self.am, return_ty)
+            return_ty_abi_name = return_ty_abi_info.as_owner
+            result_abi = return_ty_cpp_info.return_into_abi(result_cpp)
         else:
-            abi_return_ty_name = "void"
-            abi_result = cpp_result
+            return_ty_abi_name = "void"
+            result_abi = result_cpp
         pkg_cpp_impl_target.writelns(
             f"#define {func_cpp_impl_info.macro}({func_impl}) \\",
-            f"    {abi_return_ty_name} {func_abi_info.mangled_name}({abi_params_str}) {{ \\",
-            f"        return {abi_result}; \\",
+            f"    {return_ty_abi_name} {func_abi_info.mangled_name}({params_abi_str}) {{ \\",
+            f"        return {result_abi}; \\",
             f"    }}",
         )
 
@@ -230,26 +228,26 @@ class CppImplSourcesGenerator:
     ):
         method_cpp_info = IfaceMethodCppInfo.get(self.am, func)
         func_cpp_impl_name = method_cpp_info.impl_name
-        cpp_params = []
+        params_cpp = []
         for param in func.params:
-            type_cpp_info = TypeCppInfo.get(self.am, param.ty_ref.resolved_ty)
-            cpp_params.append(f"{self.mask(type_cpp_info.as_param)} {param.name}")
-        cpp_params_str = ", ".join(cpp_params)
-        if return_ty_ref := func.return_ty_ref:
-            type_cpp_info = TypeCppInfo.get(self.am, return_ty_ref.resolved_ty)
-            cpp_return_ty_name = self.mask(type_cpp_info.as_owner)
+            param_ty_cpp_info = TypeCppInfo.get(self.am, param.ty)
+            params_cpp.append(f"{self.mask(param_ty_cpp_info.as_param)} {param.name}")
+        params_cpp_str = ", ".join(params_cpp)
+        if isinstance(return_ty := func.return_ty, NonVoidType):
+            return_ty_cpp_info = TypeCppInfo.get(self.am, return_ty)
+            return_ty_cpp_name = self.mask(return_ty_cpp_info.as_owner)
         else:
-            cpp_return_ty_name = "void"
+            return_ty_cpp_name = "void"
         with pkg_cpp_impl_target.indented(
-            f"{cpp_return_ty_name} {func_cpp_impl_name}({cpp_params_str}) {{",
+            f"{return_ty_cpp_name} {func_cpp_impl_name}({params_cpp_str}) {{",
             f"}}",
         ):
-            if return_ty_ref and isinstance(return_ty_ref.resolved_ty, IfaceType):
-                impl_name = f"{return_ty_ref.resolved_ty.ty_decl.name}Impl"
+            if isinstance(return_ty := func.return_ty, IfaceType):
+                impl_name = f"{return_ty.decl.name}Impl"
                 pkg_cpp_impl_target.writelns(
                     f"// The parameters in the make_holder function should be of the same type",
                     f"// as the parameters in the constructor of the actual implementation class.",
-                    f"return {self.make_holder}<{impl_name}, {cpp_return_ty_name}>();",
+                    f"return {self.make_holder}<{impl_name}, {return_ty_cpp_name}>();",
                 )
             else:
                 pkg_cpp_impl_target.writelns(
@@ -262,26 +260,26 @@ class CppImplSourcesGenerator:
         pkg_cpp_impl_target: CSourceWriter,
     ):
         func_cpp_impl_name = func.name
-        cpp_params = []
+        params_cpp = []
         for param in func.params:
-            type_cpp_info = TypeCppInfo.get(self.am, param.ty_ref.resolved_ty)
-            cpp_params.append(f"{self.mask(type_cpp_info.as_param)} {param.name}")
-        cpp_params_str = ", ".join(cpp_params)
-        if return_ty_ref := func.return_ty_ref:
-            type_cpp_info = TypeCppInfo.get(self.am, return_ty_ref.resolved_ty)
-            cpp_return_ty_name = self.mask(type_cpp_info.as_owner)
+            param_ty_cpp_info = TypeCppInfo.get(self.am, param.ty)
+            params_cpp.append(f"{self.mask(param_ty_cpp_info.as_param)} {param.name}")
+        params_cpp_str = ", ".join(params_cpp)
+        if isinstance(return_ty := func.return_ty, NonVoidType):
+            return_ty_cpp_info = TypeCppInfo.get(self.am, return_ty)
+            return_ty_cpp_name = self.mask(return_ty_cpp_info.as_owner)
         else:
-            cpp_return_ty_name = "void"
+            return_ty_cpp_name = "void"
         with pkg_cpp_impl_target.indented(
-            f"{cpp_return_ty_name} {func_cpp_impl_name}({cpp_params_str}) {{",
+            f"{return_ty_cpp_name} {func_cpp_impl_name}({params_cpp_str}) {{",
             f"}}",
         ):
-            if return_ty_ref and isinstance(return_ty_ref.resolved_ty, IfaceType):
-                impl_name = f"{return_ty_ref.resolved_ty.ty_decl.name}Impl"
+            if isinstance(return_ty := func.return_ty, IfaceType):
+                impl_name = f"{return_ty.decl.name}Impl"
                 pkg_cpp_impl_target.writelns(
                     f"// The parameters in the make_holder function should be of the same type",
                     f"// as the parameters in the constructor of the actual implementation class.",
-                    f"return {self.make_holder}<{impl_name}, {cpp_return_ty_name}>();",
+                    f"return {self.make_holder}<{impl_name}, {return_ty_cpp_name}>();",
                 )
             else:
                 pkg_cpp_impl_target.writelns(

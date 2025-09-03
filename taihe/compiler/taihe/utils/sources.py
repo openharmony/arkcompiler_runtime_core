@@ -17,7 +17,7 @@
 
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from io import StringIO
 from pathlib import Path
 from typing import NamedTuple
@@ -29,19 +29,22 @@ from typing_extensions import override
 class SourceBase(ABC):
     """Base class reprensenting all kinds of source code."""
 
+    is_stdlib: bool = field(default=False, kw_only=True)
+    """Indicates whether the source code is part of the standard library."""
+
     @property
     @abstractmethod
     def source_identifier(self) -> str:
-        ...
+        """Returns a unique identifier for the source code."""
 
     @property
     @abstractmethod
     def pkg_name(self) -> str:
-        ...
+        """Returns the package name of the source code."""
 
     @abstractmethod
     def read(self) -> str:
-        ...
+        """Reads the source code and returns it as a string."""
 
 
 @dataclass(frozen=True)
@@ -62,8 +65,7 @@ class SourceFile(SourceBase):
 
     @override
     def read(self) -> str:
-        with open(self.path, encoding="utf-8") as f:
-            return f.read()
+        return self.path.read_text(encoding="utf-8", errors="replace")
 
 
 @dataclass(frozen=True)
@@ -86,6 +88,9 @@ class SourceBuffer(SourceBase):
     @override
     def read(self) -> str:
         return self.buf.getvalue()
+
+
+IDL_FILE_EXTS = {".taihe", ".ohidl", ".hmidl"}
 
 
 class SourceManager:

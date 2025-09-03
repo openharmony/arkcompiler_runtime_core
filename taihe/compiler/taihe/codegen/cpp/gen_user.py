@@ -29,6 +29,7 @@ from taihe.semantics.declarations import (
     PackageDecl,
     PackageGroup,
 )
+from taihe.semantics.types import NonVoidType
 from taihe.utils.analyses import AnalysisManager
 from taihe.utils.outputs import FileKind, OutputManager
 
@@ -39,7 +40,7 @@ class CppUserHeadersGenerator:
         self.am = am
 
     def generate(self, pg: PackageGroup):
-        for pkg in pg.packages:
+        for pkg in pg.all_packages:
             self.gen_package_file(pkg)
 
     def gen_package_file(self, pkg: PackageDecl):
@@ -58,11 +59,11 @@ class CppUserHeadersGenerator:
             pkg_cpp_target.add_include(pkg_abi_info.header)
             for func in pkg.functions:
                 for param in func.params:
-                    type_cpp_info = TypeCppInfo.get(self.am, param.ty_ref.resolved_ty)
-                    pkg_cpp_target.add_include(*type_cpp_info.impl_headers)
-                if return_ty_ref := func.return_ty_ref:
-                    type_cpp_info = TypeCppInfo.get(self.am, return_ty_ref.resolved_ty)
-                    pkg_cpp_target.add_include(*type_cpp_info.impl_headers)
+                    param_ty_cpp_info = TypeCppInfo.get(self.am, param.ty)
+                    pkg_cpp_target.add_include(*param_ty_cpp_info.impl_headers)
+                if isinstance(return_ty := func.return_ty, NonVoidType):
+                    return_ty_cpp_info = TypeCppInfo.get(self.am, return_ty)
+                    pkg_cpp_target.add_include(*return_ty_cpp_info.impl_headers)
                 self.gen_func(func, pkg_cpp_target)
 
     def gen_func(
@@ -73,30 +74,30 @@ class CppUserHeadersGenerator:
         func_abi_info = GlobFuncAbiInfo.get(self.am, func)
         func_cpp_user_info = GlobFuncCppUserInfo.get(self.am, func)
         params_cpp = []
-        args_into_abi = []
+        args_abi = []
         for param in func.params:
-            type_cpp_info = TypeCppInfo.get(self.am, param.ty_ref.resolved_ty)
-            params_cpp.append(f"{type_cpp_info.as_param} {param.name}")
-            args_into_abi.append(type_cpp_info.pass_into_abi(param.name))
+            param_ty_cpp_info = TypeCppInfo.get(self.am, param.ty)
+            params_cpp.append(f"{param_ty_cpp_info.as_param} {param.name}")
+            args_abi.append(param_ty_cpp_info.pass_into_abi(param.name))
         params_cpp_str = ", ".join(params_cpp)
-        args_into_abi_str = ", ".join(args_into_abi)
-        abi_result = f"{func_abi_info.mangled_name}({args_into_abi_str})"
-        if return_ty_ref := func.return_ty_ref:
-            type_cpp_info = TypeCppInfo.get(self.am, return_ty_ref.resolved_ty)
-            cpp_return_ty_name = type_cpp_info.as_owner
-            cpp_result = type_cpp_info.return_from_abi(abi_result)
+        args_abi_str = ", ".join(args_abi)
+        result_abi = f"{func_abi_info.mangled_name}({args_abi_str})"
+        if isinstance(return_ty := func.return_ty, NonVoidType):
+            return_ty_cpp_info = TypeCppInfo.get(self.am, return_ty)
+            return_ty_cpp_name = return_ty_cpp_info.as_owner
+            result_cpp = return_ty_cpp_info.return_from_abi(result_abi)
         else:
-            cpp_return_ty_name = "void"
-            cpp_result = abi_result
+            return_ty_cpp_name = "void"
+            result_cpp = result_abi
         with pkg_cpp_target.indented(
             f"namespace {func_cpp_user_info.namespace} {{",
             f"}}",
             indent="",
         ):
             with pkg_cpp_target.indented(
-                f"inline {cpp_return_ty_name} {func_cpp_user_info.call_name}({params_cpp_str}) {{",
+                f"inline {return_ty_cpp_name} {func_cpp_user_info.call_name}({params_cpp_str}) {{",
                 f"}}",
             ):
                 pkg_cpp_target.writelns(
-                    f"return {cpp_result};",
+                    f"return {result_cpp};",
                 )

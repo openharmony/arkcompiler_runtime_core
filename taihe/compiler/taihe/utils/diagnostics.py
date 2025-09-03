@@ -32,19 +32,15 @@ from typing_extensions import override
 from taihe.utils.logging import AnsiStyle, should_use_color
 from taihe.utils.sources import SourceLocation
 
-T = TypeVar("T")
+_T = TypeVar("_T")
 
 
 def _passthrough(x: str) -> str:
     return x
 
 
-def _discard(x: str) -> str:
-    del x
+def _discard(_: str) -> str:
     return ""
-
-
-FilterT = Callable[[str], str]
 
 
 ###################
@@ -90,7 +86,7 @@ class DiagBase(ABC):
         """
         return ()
 
-    def format_message(self, f: FilterT) -> str:
+    def format_message(self, f: Callable[[str], str]) -> str:
         """Formats the diagnostic message, optionally applying ANSI styling.
 
         Args:
@@ -194,7 +190,7 @@ class DiagnosticsManager(ABC):
         except DiagError as e:
             self.emit(e)
 
-    def for_each(self, xs: Iterable[T], cb: Callable[[T], bool | None]) -> bool:
+    def for_each(self, xs: Iterable[_T], cb: Callable[[_T], bool | None]) -> bool:
         """Calls `cb` for each element. Records and recovers from `DiagError`s.
 
         Returns `True` if no errors are encountered.

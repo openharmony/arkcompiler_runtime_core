@@ -715,7 +715,6 @@ function testCasebaseFunctionTest64() {
     arktest.assertEQ(res, true)
 }
 
-// Frontend Bug
 // function testCasebaseFunctionTest64_1() {
 //     let record: Record<long, boolean> = {
 //         [-100]: false,
@@ -726,6 +725,7 @@ function testCasebaseFunctionTest64() {
 //     let res = namespaceTest.functiontest.BaseFunctionTest60(record);
 //     arktest.assertEQ(res, false)
 // }
+
 
 function testCasebaseFunctionTest64_2() {
     let record: Record<long, boolean> = {
@@ -1535,7 +1535,6 @@ function main() {
         "check testCasebaseFunctionTest63", testCasebaseFunctionTest63);
     suite.addTest(
         "check testCasebaseFunctionTest64", testCasebaseFunctionTest64);
-    // Frontend Bug
     // suite.addTest(
     //     "check testCasebaseFunctionTest64_1", testCasebaseFunctionTest64_1);
     suite.addTest(

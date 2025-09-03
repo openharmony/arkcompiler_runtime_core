@@ -42,3 +42,25 @@ interface SubBaseElem: BaseElem {
     Sub(): String;
 }
 function GetSubBaseElem(): SubBaseElem;
+
+interface IBase {
+    GetId(): String;
+    SetId(s: String): void;
+}
+
+function MakeIBase(id: String): IBase;
+function CopyIBase(a: IBase, b: IBase): void;
+
+interface IShape: IBase {
+    CalculateArea(): f64;
+}
+
+function MakeIShape(id: String, a: f64, b: f64): IShape;
+
+@class
+interface IDerived: IShape {
+    Call(): void;
+}
+
+@ctor("IDerived")
+function CreateIDerived(): IDerived;

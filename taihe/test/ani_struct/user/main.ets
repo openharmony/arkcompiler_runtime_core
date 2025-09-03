@@ -120,6 +120,39 @@ function test_struct_addNewDraw() {
     console.log("draw's color is " + draw.r + "," + draw.g + "," + draw.b);
 }
 
+function test_struct_process_student() {
+    let student: StructTest.Student = {name: "Jack", age: 10};
+    let pro_student = StructTest.process_student(student);
+    console.log("process student: ", pro_student.name, pro_student.age);
+    arktest.assertEQ(pro_student.name, "Jack student");
+    arktest.assertEQ(pro_student.age, 20);
+}
+
+function test_struct_process_teacher() {
+    let teacher: StructTest.Teacher = new StructTest.Teacher("Jony", 30);
+    let pro_teacher = StructTest.process_teacher(teacher);
+    console.log("process teacher:", pro_teacher.name, pro_teacher.age);
+    arktest.assertEQ(pro_teacher.name, "Jony teacher");
+    arktest.assertEQ(pro_teacher.age, 45);
+}
+
+function test_struct_process_g() {
+    let g: StructTest.G = {f: 0, g: 0};
+    let new_g = StructTest.process_g(g);
+    console.log("process g:", new_g.f, new_g.g);
+    arktest.assertEQ(new_g.f, 1);
+    arktest.assertEQ(new_g.g, 2);
+}
+
+function test_struct_process_h() {
+    let h = new StructTest.H(0, 0, 0);
+    let new_h = StructTest.process_h(h);
+    console.log("process h:", new_h.f, new_h.g, new_h.h);
+    arktest.assertEQ(new_h.f, 1);
+    arktest.assertEQ(new_h.g, 2);
+    arktest.assertEQ(new_h.h, 3);
+}
+
 function main() {
     let a: StructTest.A = {
         param1: 1,
@@ -145,6 +178,10 @@ function main() {
     suite.addTest("test_struct_dbase5readonly", test_struct_dbase5readonly);
     suite.addTest("test_struct_sebreadonly", test_struct_sebreadonly);
     suite.addTest("test_struct_addNewDraw", test_struct_addNewDraw);
+    suite.addTest("test_struct_process_student", test_struct_process_student);
+    suite.addTest("test_struct_process_teacher", test_struct_process_teacher);
+    suite.addTest("test_struct_process_g", test_struct_process_g);
+    suite.addTest("test_struct_process_h", test_struct_process_h);
 
     exit(suite.run());
 }
