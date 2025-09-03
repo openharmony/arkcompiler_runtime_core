@@ -15,17 +15,10 @@
 
 /*---
 desc: >-
-    A namespace declaration introduces the qualified name to be used as a qualifier
-    for access to each exported entity of a namespace. Next cases tests basic top-level
-    declarations.
-files:
-- ./declaration_module.ets
-- ./declaration_module.d.ets
+      A compile-time error occurs if compilation unit imports itself directly.
+      importPath refers to the file in which the current module is stored.
+tags: [compile-only, negative]
 ---*/
 
-import * as dm from "./declaration_module.d"
-
-function main() {
-    let myZZ = new dm.ZZ();
-    arktest.assertEQ(myZZ.fee(), "EE str");
-}
+import foo from "./import_self"
+export function foo() { }

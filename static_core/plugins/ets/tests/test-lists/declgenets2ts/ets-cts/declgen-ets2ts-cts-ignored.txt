@@ -1285,8 +1285,6 @@
 11.enumerations/enum_cte_36.ets
 11.enumerations/repeating_constants.ets
 13.compilation_units/01.separate_modules/cyclic_dependency/module.ets
-13.compilation_units/01.separate_modules/cyclic_dependency/module.ets
-13.compilation_units/01.separate_modules/cyclic_dependency/test.ets
 13.compilation_units/01.separate_modules/cyclic_dependency/test.ets
 13.compilation_units/01.separate_modules/import_declarations_0.ets
 13.compilation_units/01.separate_modules/import_declarations_2.ets
@@ -1299,8 +1297,8 @@
 13.compilation_units/02.import_directives/02.default_import_binding/multiple_default_export_neg.ets
 13.compilation_units/02.import_directives/02.default_import_binding/multiple_default_export_neg_2.ets
 13.compilation_units/02.import_directives/04.import_type_directive/export_multiple_default_types.ets
-13.compilation_units/02.import_directives/04.import_type_directive/export_multiple_default_types.ets
 13.compilation_units/02.import_directives/04.import_type_directive/type_binding_interface.ets
+13.compilation_units/02.import_directives/04.import_type_directive/type_binding_abstract_class.ets
 13.compilation_units/03.import_directives/04.default_import_binding/default_import_abstract_class.ets
 13.compilation_units/03.import_directives/05.type_binding/type_binding_abstract_class.ets
 13.compilation_units/04.declaration_modules/declaration_usage_neg.ets
@@ -1308,7 +1306,9 @@
 13.compilation_units/05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_type_2_level.ets
 13.compilation_units/05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_type_2_level_2.ets
 13.compilation_units/05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_type_2_level_3.ets
+13.compilation_units/05.top-level_declarations/01.exported_declarations/default_exported_declarations/multiple_default_declarations.ets
 13.compilation_units/05.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_class_same_name_2.ets
+13.compilation_units/05.top-level_declarations/01.exported_declarations/default_exported_declarations/multiple_default_declarations_declare.ets
 13.compilation_units/05.top-level_declarations/bad_top_level_declarations_0.ets
 13.compilation_units/05.top-level_declarations/bad_top_level_declarations_1.ets
 13.compilation_units/05.top-level_declarations/top_level_declarations_12.ets

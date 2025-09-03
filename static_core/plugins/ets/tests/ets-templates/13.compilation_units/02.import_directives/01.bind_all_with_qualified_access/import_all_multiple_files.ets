@@ -14,18 +14,20 @@
  */
 
 /*---
-desc: >-
-    A namespace declaration introduces the qualified name to be used as a qualifier
-    for access to each exported entity of a namespace. Next cases tests basic top-level
-    declarations.
+desc: import entities from multiple modules using bind all method
 files:
-- ./declaration_module.ets
-- ./declaration_module.d.ets
+- ./modules/mod1.ets
+- ./modules/mod2.ets
 ---*/
 
-import * as dm from "./declaration_module.d"
+import * as A from "./modules/mod1"
+import * as B from "./modules/mod2"
 
 function main() {
-    let myZZ = new dm.ZZ();
-    arktest.assertEQ(myZZ.fee(), "EE str");
+  arktest.assertEQ(A.foo(), 1)
+  arktest.assertEQ(A.f, 2)
+  arktest.assertEQ(new A.C().foo(), 3)
+  arktest.assertEQ(B.foo(), 4)
+  arktest.assertEQ(B.f, 5)
+  arktest.assertEQ(new B.C().foo(), 6)
 }

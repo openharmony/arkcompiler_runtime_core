@@ -15,17 +15,16 @@
 
 /*---
 desc: >-
-    A namespace declaration introduces the qualified name to be used as a qualifier
-    for access to each exported entity of a namespace. Next cases tests basic top-level
-    declarations.
+    Export default target effectively means that an anonymous constant variable is created with a value
+    equal to the value of the expression evaluation result. The export can be imported only by providing
+    a name for the constant variable that is exported by using this export directive.
+    Otherwise, a compile-time error occurs.
 files:
-- ./declaration_module.ets
-- ./declaration_module.d.ets
+- ./default_export_target_custom_constructor.ets
 ---*/
 
-import * as dm from "./declaration_module.d"
+import {default as a} from "./default_export_target_custom_constructor"
 
 function main() {
-    let myZZ = new dm.ZZ();
-    arktest.assertEQ(myZZ.fee(), "EE str");
+  arktest.assertEQ(a.foo(), 7)
 }

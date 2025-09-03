@@ -14,17 +14,18 @@
  */
 
 /*---
-desc: A namespace declaration introduces the qualified name to be used as a qualifier
-  for access to each exported entity of a namespace. Next cases tests basic top-level
-  declarations.
-tags: [compile-only]
+desc: >-
+    A namespace declaration introduces the qualified name to be used as a qualifier
+    for access to each exported entity of a namespace. Next cases tests basic top-level
+    declarations.
 files:
 - ./declaration_module.ets
+- ./declaration_module.d.ets
 ---*/
 
-import * as dm from "./declaration_module.ets"
+import * as dm from "./declaration_module.d"
 
 function main() {
     let b = new dm.B() // B instance is created
-    dm.process_field(b.a) // exported field is passed to function as an argument
+    arktest.assertEQ(dm.process_field(b.a), 4) // exported field is passed to function as an argument
 }

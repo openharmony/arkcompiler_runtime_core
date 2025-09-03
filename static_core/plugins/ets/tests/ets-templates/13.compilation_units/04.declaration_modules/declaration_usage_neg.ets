@@ -18,9 +18,10 @@ desc: ES2PANDA_FAIL, TypeError, C type does not exist.
 tags: [compile-only, negative]
 files:
 - ./declaration_module.ets
+- ./declaration_module.d.ets
 ---*/
 
 // Module describes C, but C not exported
-import * as m from "./declaration_module.ets"
+import * as m from "./declaration_module.d"
 
 let c = new m.C // compile-time error as C is not exported

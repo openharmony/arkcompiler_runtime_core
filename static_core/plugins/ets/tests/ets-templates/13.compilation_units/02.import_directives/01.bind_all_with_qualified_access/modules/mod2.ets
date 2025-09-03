@@ -14,18 +14,18 @@
  */
 
 /*---
-desc: >-
-    A namespace declaration introduces the qualified name to be used as a qualifier
-    for access to each exported entity of a namespace. Next cases tests basic top-level
-    declarations.
-files:
-- ./declaration_module.ets
-- ./declaration_module.d.ets
+desc: export multiple different entities
+tags: [compile-only, not-a-test]
 ---*/
 
-import * as dm from "./declaration_module.d"
+export function foo(): int {
+  return 4
+}
 
-function main() {
-    let myZZ = new dm.ZZ();
-    arktest.assertEQ(myZZ.fee(), "EE str");
+export let f: int = 5
+
+export class C {
+  foo(): int {
+    return 6
+  }
 }

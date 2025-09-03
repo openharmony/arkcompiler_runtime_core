@@ -13,19 +13,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
 /*---
 desc: >-
-    A namespace declaration introduces the qualified name to be used as a qualifier for access to each exported entity of a namespace.
-    Next cases tests basic top-level declarations.
-files:
-    - ./declaration_module.d.ets
-    - ./declaration_module.ets
+      Another form of type import is used when type is attached to a name binding. This allows mixing general import
+      and type import.
+tags: [compile-only, not-a-test]
 ---*/
 
-{{c.imp}}
-
-function main() {
-    {{c.use|indent}}
+class Class1 {
+  f: int = 1
 }
-{% endfor %}
+class Class2 {
+  f: int = 2
+}
+export {Class1, type Class2}

@@ -17,7 +17,6 @@
 desc: |-
     Module imports default entity A from another module, then exports own default entity B.
     Only one default export is allowed in a module.
-tags: [compile-only]
 files:
 - ../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_variable.ets
 ---*/
@@ -25,3 +24,7 @@ files:
 import test_var from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_variable"
 
 export default let i: string = test_var;
+
+function main() {
+  arktest.assertEQ(i, test_var)
+}

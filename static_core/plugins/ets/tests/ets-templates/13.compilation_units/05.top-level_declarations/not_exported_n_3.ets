@@ -15,17 +15,16 @@
 
 /*---
 desc: >-
-    A namespace declaration introduces the qualified name to be used as a qualifier
-    for access to each exported entity of a namespace. Next cases tests basic top-level
-    declarations.
+      The declarations not marked as exported can be used only inside the compilation unit they are declared in.
+      Call not exported declared item using import all directive.
+tags: [compile-only, negative]
 files:
-- ./declaration_module.ets
-- ./declaration_module.d.ets
+- ./modules/partial_export.ets
+- ./modules/partial_export.d.ets
 ---*/
 
-import * as dm from "./declaration_module.d"
+import * as A from "./modules/partial_export.d"
 
 function main() {
-    let myZZ = new dm.ZZ();
-    arktest.assertEQ(myZZ.fee(), "EE str");
+  A.foo()
 }
