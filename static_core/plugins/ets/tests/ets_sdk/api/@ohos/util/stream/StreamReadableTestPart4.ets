@@ -167,6 +167,13 @@ function testReadablePushAndReadDefaultUtf8() {
     arktest.assertEQ((res as Object).toString(), '你好');
 }
 
+function testReadableEmitClose() {
+    const stringdecoder = new StringDecoderReadable();
+    stringdecoder.on('close', mustCall());
+    stringdecoder.push("test");
+    stringdecoder.push(null);
+}
+
 class StringDecoderReadable extends stream.Readable {
     constructor() {
         super();

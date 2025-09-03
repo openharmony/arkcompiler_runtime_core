@@ -1214,6 +1214,7 @@ export namespace stream {
                 stream.readableEndEmitted = true;
                 stream.listener?.emit(ReadableEvent.END);
             }
+            emitClose(stream);
         }
 
         private emitReadableInner(stream: Readable): void {
