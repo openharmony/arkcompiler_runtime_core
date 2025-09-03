@@ -48,6 +48,11 @@ enum class GcType : uint8_t {
     APPSPAWN,
     FULL_WITH_XREF,     // Waiting finish
 };
+enum class MemoryReduceDegree : uint8_t {
+    LOW = 0,
+    HIGH,
+};
+
 using HeapVisitor = const std::function<void(BaseObject*)>;
 
 class PUBLIC_API BaseRuntime {
@@ -80,6 +85,8 @@ public:
     static void NotifyNativeFree(size_t bytes);
     static void NotifyNativeReset(size_t oldBytes, size_t newBytes);
     static size_t GetNotifiedNativeSize();
+    static void ChangeGCParams(bool isBackground);
+    static bool CheckAndTriggerHintGC(MemoryReduceDegree degree);
 
     HeapParam &GetHeapParam()
     {
