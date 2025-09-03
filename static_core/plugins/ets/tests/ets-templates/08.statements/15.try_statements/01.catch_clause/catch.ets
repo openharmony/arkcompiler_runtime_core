@@ -13,32 +13,18 @@
  * limitations under the License.
  */
 
+{% for t in cases %}
 /*---
 desc: >-
     A catch clause consists of two parts:
     - Catch identifier that provides access to the object associated with the error thrown; and
     - Block of code that handles the situation.
+tags: [{{t.tags}}]
 ---*/
 
-class ZeroDivisor extends Error {}
-
-function divide(a: number, b: number): number {
-    if (b == 0)
-        throw new ZeroDivisor()
-    return a / b
-}
-
-function processNumbers(a: number, b: number): number {
-    try {
-        let res = divide(a, b)
-        return res
-    }
-    catch (e) {
-        return e instanceof ZeroDivisor? -1 : 0
-    }
-}
+{{t.defs}}
 
 function main() {
-    arktest.assertEQ( processNumbers(4, 2), 2 )
-    arktest.assertEQ( processNumbers(4, 0), -1 )
+    {{t.use|indent}}
 }
+{% endfor %}
