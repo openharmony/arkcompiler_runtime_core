@@ -17,6 +17,7 @@
 #define BYTECODE_OPTIMIZER_TESTS_COMMON_H
 
 #include <gtest/gtest.h>
+#include <cstdint>
 #include <string>
 #include <string_view>
 
@@ -827,6 +828,22 @@ public:
         auto function = const_cast<pandasm::Function *>(&functionTable.at(funcName));
         EXPECT_TRUE(GetGraph()->RunPass<BytecodeGen>(function, GetIrInterface()));
         ASSERT(pandasm::AsmEmitter::Emit("LiteralArrayIntAccess.panda", *prog, nullptr, nullptr, false));
+    }
+
+    void CheckVirtualCallsNoExist(const int expStaticCallsCount)
+    {
+        uint16_t staticCallCount = 0;
+        for (auto block : GetGraph()->GetVectorBlocks()) {
+            for (auto inst : block->AllInsts()) {
+                auto u = inst->GetFirstUser();
+                if (u != nullptr) {
+                    auto intsOpcode = u->GetInst()->GetOpcode();
+                    ASSERT_FALSE(intsOpcode == Opcode::CallVirtual);
+                    staticCallCount = (intsOpcode == Opcode::CallStatic) ? (staticCallCount + 1) : staticCallCount;
+                }
+            }
+        }
+        ASSERT_TRUE(staticCallCount == expStaticCallsCount);
     }
 };
 

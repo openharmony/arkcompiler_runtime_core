@@ -21,6 +21,7 @@ set(BYTECODE_OPT_SOURCES
     canonicalization.cpp
     codegen.cpp
     bytecodeopt_peepholes.cpp
+    call_devirtualization.cpp
     optimize_bytecode.cpp
     reg_acc_alloc.cpp
     reg_encoder.cpp

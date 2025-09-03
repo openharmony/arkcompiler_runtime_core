@@ -20,6 +20,7 @@
 #include "libarkfile/bytecode_instruction.h"
 #include "bytecodeopt_options.h"
 #include "bytecodeopt_peepholes.h"
+#include "call_devirtualization.h"
 #include "canonicalization.h"
 #include "check_resolver.h"
 #include "codegen.h"
@@ -105,9 +106,9 @@ bool RunOptimizations(compiler::Graph *graph, BytecodeOptIrInterface *iface)
     } else if (ark::bytecodeopt::g_options.GetOptLevel() == OPT_LEVEL_2) {
         // ConstArrayResolver Pass is disabled as it requires fixes for stability
         RunOpts<ConstArrayResolver, compiler::BranchElimination, compiler::ValNum, compiler::IfMerging, compiler::Cse,
-                compiler::Peepholes, compiler::Licm, compiler::Lse, compiler::ValNum, compiler::Cse,
-                compiler::BranchElimination, Canonicalization, compiler::Lowering, compiler::MoveConstants,
-                BytecodeOptPeepholes>(graph, iface);
+                compiler::Peepholes, CallDevirtualization, compiler::Licm, compiler::Lse, compiler::ValNum,
+                compiler::Cse, compiler::BranchElimination, Canonicalization, compiler::Lowering,
+                compiler::MoveConstants, BytecodeOptPeepholes>(graph, iface);
     } else {
         UNREACHABLE();
     }

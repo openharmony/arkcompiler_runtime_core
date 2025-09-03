@@ -28,7 +28,7 @@ function check_array<T>(src: Array<T>, exp: Array<T>) {
 //! METHOD        "escompat_array_reverse.ETSGLOBAL::test_array_int_reverse"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      /Intrinsic.EscompatArrayReverse/
-//! INST          /CallVirtual.*escompat\.Array::reverse/
+//! INST          /CallStatic.*escompat\.Array::reverse/
 //! PASS_AFTER    "Inline"
 //! INST_NOT      /Intrinsic.EscompatArrayReverse/
 
@@ -37,7 +37,7 @@ function check_array<T>(src: Array<T>, exp: Array<T>) {
 //! METHOD        "escompat_array_reverse.ETSGLOBAL::test_array_int_reverse"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      /Intrinsic.EscompatArrayReverse/
-//! INST          /CallVirtual.*escompat\.Array::reverse/
+//! INST          /CallStatic.*escompat\.Array::reverse/
 //! PASS_AFTER    "Inline"
 //! INST_NOT      /Intrinsic.EscompatArrayReverse/
 
@@ -47,7 +47,7 @@ function check_array<T>(src: Array<T>, exp: Array<T>) {
 //! METHOD        "escompat_array_reverse.ETSGLOBAL::test_array_int_reverse"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      /Intrinsic.EscompatArrayReverse/
-//! INST          /CallVirtual.*escompat\.Array::reverse/
+//! INST          /CallStatic.*escompat\.Array::reverse/
 //! PASS_AFTER    "Inline"
 //! INST_NOT      /Intrinsic.EscompatArrayReverse/
 
@@ -65,7 +65,7 @@ function test_array_int_reverse() {
 //! METHOD        "escompat_array_reverse.ETSGLOBAL::test_array_union_reverse"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      /Intrinsic.EscompatArrayReverse/
-//! INST          /CallVirtual.*escompat\.Array::reverse/
+//! INST          /CallStatic.*escompat\.Array::reverse/
 //! PASS_AFTER    "Inline"
 //! INST_NOT      /Intrinsic.EscompatArrayReverse/
 
@@ -74,7 +74,7 @@ function test_array_int_reverse() {
 //! METHOD        "escompat_array_reverse.ETSGLOBAL::test_array_union_reverse"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      /Intrinsic.EscompatArrayReverse/
-//! INST          /CallVirtual.*escompat\.Array::reverse/
+//! INST          /CallStatic.*escompat\.Array::reverse/
 //! PASS_AFTER    "Inline"
 //! INST_NOT      /Intrinsic.EscompatArrayReverse/
 
@@ -84,7 +84,7 @@ function test_array_int_reverse() {
 //! METHOD        "escompat_array_reverse.ETSGLOBAL::test_array_union_reverse"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      /Intrinsic.EscompatArrayReverse/
-//! INST          /CallVirtual.*escompat\.Array::reverse/
+//! INST          /CallStatic.*escompat\.Array::reverse/
 //! PASS_AFTER    "Inline"
 //! INST_NOT      /Intrinsic.EscompatArrayReverse/
 
