@@ -71,11 +71,8 @@ private:
 
     void BindAtomicIntNativeFunctions()
     {
-        ani_module module {};
-        [[maybe_unused]] auto status = env_->FindModule("atomic_int_test", &module);
-        ASSERT(status == ANI_OK);
         ani_class cls = {};
-        status = env_->Module_FindClass(module, "AtomicInt", &cls);
+        [[maybe_unused]] auto status = env_->FindClass("atomic_int_test.AtomicInt", &cls);
         ASSERT(status == ANI_OK);
         std::array nativeMethods = {
             ani_native_function {"set", "i:", reinterpret_cast<void *>(EtsAtomicIntSetValue)},

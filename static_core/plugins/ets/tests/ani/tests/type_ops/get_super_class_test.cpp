@@ -37,14 +37,10 @@ public:
         }
     }
 
-    void TestGetSuperClass(const char *namespacePath)
+    void TestGetSuperClass(const std::string &namespacePath)
     {
-        ani_namespace ns {};
-        ASSERT_EQ(env_->FindNamespace(namespacePath, &ns), ANI_OK);
-        ASSERT_NE(ns, nullptr);
-
         ani_class resultChild {};
-        ASSERT_EQ(env_->Namespace_FindClass(ns, "Child", &resultChild), ANI_OK);
+        ASSERT_EQ(env_->FindClass((namespacePath + ".Child").c_str(), &resultChild), ANI_OK);
         ASSERT_NE(resultChild, nullptr);
 
         ani_type typeRefChild = resultChild;

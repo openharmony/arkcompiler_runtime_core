@@ -249,10 +249,8 @@ TEST_F(ClassCallStaticMethodByNameTest, call_static_method_by_name_char_A_null_a
 
 TEST_F(ClassCallStaticMethodByNameTest, call_static_method_by_name_char_combine_scenes_1)
 {
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("class_call_static_method_by_name_char_test.na", &ns), ANI_OK);
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(ns, "A", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_char_test.na.A", &cls), ANI_OK);
 
     ani_char value = '\0';
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Char(cls, "funcA", "cc:c", &value, 'A', 'C'), ANI_OK);
@@ -272,12 +270,8 @@ TEST_F(ClassCallStaticMethodByNameTest, call_static_method_by_name_char_combine_
 
 TEST_F(ClassCallStaticMethodByNameTest, call_static_method_by_name_char_combine_scenes_2)
 {
-    ani_namespace nb {};
-    ASSERT_EQ(env_->FindNamespace("class_call_static_method_by_name_char_test.nb", &nb), ANI_OK);
-    ani_namespace nc {};
-    ASSERT_EQ(env_->Namespace_FindNamespace(nb, "nc", &nc), ANI_OK);
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(nc, "A", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_char_test.nb.nc.A", &cls), ANI_OK);
 
     ani_char value = '\0';
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Char(cls, "funcA", "cc:c", &value, 'A', 'C'), ANI_OK);
@@ -297,10 +291,8 @@ TEST_F(ClassCallStaticMethodByNameTest, call_static_method_by_name_char_combine_
 
 TEST_F(ClassCallStaticMethodByNameTest, call_static_method_by_name_char_combine_scenes_3)
 {
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("class_call_static_method_by_name_char_test.na", &ns), ANI_OK);
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(ns, "A", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_char_test.na.A", &cls), ANI_OK);
 
     ani_char value = '\0';
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Char(cls, "funcA", "cc:c", &value, 'A', 'C'), ANI_OK);
@@ -326,10 +318,8 @@ TEST_F(ClassCallStaticMethodByNameTest, call_static_method_by_name_char_combine_
 
 TEST_F(ClassCallStaticMethodByNameTest, call_static_method_by_name_char_combine_scenes_4)
 {
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("class_call_static_method_by_name_char_test.nd", &ns), ANI_OK);
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(ns, "B", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_char_test.nd.B", &cls), ANI_OK);
     ani_char value = '\0';
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Char(cls, "funcA", "cc:c", &value, 'A', 'C'), ANI_OK);
     ASSERT_EQ(value, 'A' + 'C');

@@ -34,11 +34,9 @@ void AniModuleFindNamespaceFuzzTest(const char *data, size_t size)
     AniFuzzEngine *engine = AniFuzzEngine::GetInstance();
     ani_env *env {};
     engine->GetAniEnv(&env);
-    ani_module md {};
-    env->FindModule("std.core", &md);
     ani_namespace ns {};
-    std::string input(data, size);
-    env->Module_FindNamespace(md, input.c_str(), &ns);
+    std::string nsName = "std.core." + std::string(data, size);
+    env->FindNamespace(nsName.c_str(), &ns);
 }
 }  // namespace OHOS
 

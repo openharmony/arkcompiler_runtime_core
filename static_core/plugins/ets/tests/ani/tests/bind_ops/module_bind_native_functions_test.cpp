@@ -203,16 +203,9 @@ static ani_long NativeMethodsLongFooNative(ani_env *, ani_class)
 
 TEST_F(ModuleBindNativeFunctionsTest, class_bindNativeMethods_combine_scenes_001)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
-    ani_namespace ns {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "test001A", &ns), ANI_OK);
-    ASSERT_NE(ns, nullptr);
-
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(ns, "TestA001", &cls), ANI_OK);
+    const std::string clsName = std::string(MODULE_NAME).append(".test001A.TestA001");
+    ASSERT_EQ(env_->FindClass(clsName.c_str(), &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     std::array methods = {
@@ -249,16 +242,9 @@ TEST_F(ModuleBindNativeFunctionsTest, class_bindNativeMethods_combine_scenes_001
 
 TEST_F(ModuleBindNativeFunctionsTest, class_bindNativeMethods_combine_scenes_001_not_found)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
-    ani_namespace ns {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "test001A", &ns), ANI_OK);
-    ASSERT_NE(ns, nullptr);
-
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(ns, "TestA001", &cls), ANI_OK);
+    const std::string clsName = std::string(MODULE_NAME).append(".test001A.TestA001");
+    ASSERT_EQ(env_->FindClass(clsName.c_str(), &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     std::array methods = {
@@ -271,16 +257,9 @@ TEST_F(ModuleBindNativeFunctionsTest, class_bindNativeMethods_combine_scenes_001
 
 TEST_F(ModuleBindNativeFunctionsTest, class_bindNativeMethods_combine_scenes_001_already_binded)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
-    ani_namespace ns {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "test001A", &ns), ANI_OK);
-    ASSERT_NE(ns, nullptr);
-
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(ns, "TestA001", &cls), ANI_OK);
+    const std::string clsName = std::string(MODULE_NAME).append(".test001A.TestA001");
+    ASSERT_EQ(env_->FindClass(clsName.c_str(), &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     std::array methods = {

@@ -169,10 +169,8 @@ TEST_F(ClassCallStaticMethodByNameDoubleTest, call_static_method_by_name_double_
 
 TEST_F(ClassCallStaticMethodByNameDoubleTest, call_static_method_by_name_double_combine_scenes_1)
 {
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("class_call_static_method_by_name_double_test.na", &ns), ANI_OK);
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(ns, "A", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_double_test.na.A", &cls), ANI_OK);
 
     ani_double value = 0.0;
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Double(cls, "funcA", "dd:d", &value, VAL1, VAL2), ANI_OK);
@@ -192,12 +190,8 @@ TEST_F(ClassCallStaticMethodByNameDoubleTest, call_static_method_by_name_double_
 
 TEST_F(ClassCallStaticMethodByNameDoubleTest, call_static_method_by_name_double_combine_scenes_2)
 {
-    ani_namespace nb {};
-    ASSERT_EQ(env_->FindNamespace("class_call_static_method_by_name_double_test.nb", &nb), ANI_OK);
-    ani_namespace nc {};
-    ASSERT_EQ(env_->Namespace_FindNamespace(nb, "nc", &nc), ANI_OK);
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(nc, "A", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_double_test.nb.nc.A", &cls), ANI_OK);
 
     ani_double value = 0.0;
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Double(cls, "funcA", "dd:d", &value, VAL1, VAL2), ANI_OK);
@@ -217,10 +211,8 @@ TEST_F(ClassCallStaticMethodByNameDoubleTest, call_static_method_by_name_double_
 
 TEST_F(ClassCallStaticMethodByNameDoubleTest, call_static_method_by_name_double_combine_scenes_3)
 {
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("class_call_static_method_by_name_double_test.na", &ns), ANI_OK);
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(ns, "A", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_double_test.na.A", &cls), ANI_OK);
 
     ani_double value = 0.0;
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Double(cls, "funcA", "dd:d", &value, VAL1, VAL2), ANI_OK);
@@ -246,10 +238,8 @@ TEST_F(ClassCallStaticMethodByNameDoubleTest, call_static_method_by_name_double_
 
 TEST_F(ClassCallStaticMethodByNameDoubleTest, call_static_method_by_name_double_combine_scenes_4)
 {
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("class_call_static_method_by_name_double_test.nd", &ns), ANI_OK);
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(ns, "B", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_double_test.nd.B", &cls), ANI_OK);
     ani_double value = 0.0;
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Double(cls, "funcA", "dd:d", &value, VAL1, VAL2), ANI_OK);
     ASSERT_EQ(value, VAL2 - VAL1);

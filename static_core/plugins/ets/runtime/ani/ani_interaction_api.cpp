@@ -971,66 +971,6 @@ NO_UB_SANITIZE static ani_status Namespace_FindFunction(ani_env *env, ani_namesp
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Namespace_FindNamespace(ani_env *env, ani_namespace ns,
-                                                         const char *namespaceDescriptor, ani_namespace *result)
-{
-    ANI_DEBUG_TRACE(env);
-    CHECK_ENV(env);
-    CHECK_PTR_ARG(ns);
-    CHECK_PTR_ARG(namespaceDescriptor);
-    CHECK_PTR_ARG(result);
-
-    auto pandaEnv = PandaEtsNapiEnv::FromAniEnv(env);
-    ScopedManagedCodeFix s(pandaEnv);
-    EtsNamespace *etsNs = EtsNamespace::FromClass(s.ToInternalType(ns)->AsClass());
-    std::string_view nsDescriptor = etsNs->AsClass()->GetDescriptor();
-    ASSERT(nsDescriptor.size() > 2U);
-
-    PandaString nameDescriptor = Mangle::ConvertDescriptor(namespaceDescriptor);
-    if (nameDescriptor[0] == 'L') {
-        nameDescriptor[0] = '/';
-    } else {
-        return ANI_NOT_FOUND;
-    }
-
-    PandaString descriptor(nsDescriptor.data(), nsDescriptor.size() - 1);
-    descriptor += nameDescriptor;
-
-    // NOTE: Check that results is namespace, #22400
-    return DoFind<true>(pandaEnv, descriptor.c_str(), s, result);
-}
-
-// NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Namespace_FindClass(ani_env *env, ani_namespace ns, const char *classDescriptor,
-                                                     ani_class *result)
-{
-    ANI_DEBUG_TRACE(env);
-    CHECK_ENV(env);
-    CHECK_PTR_ARG(ns);
-    CHECK_PTR_ARG(classDescriptor);
-    CHECK_PTR_ARG(result);
-
-    auto pandaEnv = PandaEtsNapiEnv::FromAniEnv(env);
-    ScopedManagedCodeFix s(pandaEnv);
-    EtsNamespace *etsNs = EtsNamespace::FromClass(s.ToInternalType(ns)->AsClass());
-    std::string_view nsDescriptor = etsNs->AsClass()->GetDescriptor();
-    ASSERT(nsDescriptor.size() > 2U);
-
-    PandaString clDescriptor = Mangle::ConvertDescriptor(classDescriptor);
-    if (clDescriptor[0] == 'L') {
-        clDescriptor[0] = '/';
-    } else {
-        return ANI_NOT_FOUND;
-    }
-
-    PandaString descriptor(nsDescriptor.data(), nsDescriptor.size() - 1);
-    descriptor += clDescriptor;
-
-    // NOTE: Check that results is class, #22400
-    return DoFind<false>(pandaEnv, descriptor.c_str(), s, result);
-}
-
-// NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Namespace_FindVariable(ani_env *env, ani_namespace ns, const char *variableDescriptor,
                                                         ani_variable *result)
 {
@@ -1083,22 +1023,6 @@ NO_UB_SANITIZE static ani_status Module_FindVariable(ani_env *env, ani_module mo
 
     *result = ToAniVariable(variable);
     return ANI_OK;
-}
-
-// NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Module_FindClass(ani_env *env, ani_module module, const char *classDescriptor,
-                                                  ani_class *result)
-{
-    ANI_DEBUG_TRACE(env);
-    return FindInModule<false>(env, module, classDescriptor, result);
-}
-
-// NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Module_FindNamespace(ani_env *env, ani_module module, const char *namespaceDescriptor,
-                                                      ani_namespace *result)
-{
-    ANI_DEBUG_TRACE(env);
-    return FindInModule<true>(env, module, namespaceDescriptor, result);
 }
 
 template <typename InternalType, typename AniFixedArrayType>
@@ -6532,49 +6456,6 @@ NO_UB_SANITIZE static ani_status FindEnum(ani_env *env, const char *enumDescript
     return DoFind<false>(env, enumDesc.c_str(), result);
 }
 
-// NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Namespace_FindEnum(ani_env *env, ani_namespace ns, const char *enumDescriptor,
-                                                    ani_enum *result)
-{
-    ANI_DEBUG_TRACE(env);
-    CHECK_ENV(env);
-    CHECK_PTR_ARG(ns);
-    CHECK_PTR_ARG(enumDescriptor);
-    CHECK_PTR_ARG(result);
-
-    PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env);
-    ScopedManagedCodeFix s(env);
-    EtsNamespace *etsNs = EtsNamespace::FromClass(s.ToInternalType(ns)->AsClass());
-
-    PandaString enumDescriptorPandStr = Mangle::ConvertDescriptor(enumDescriptor);
-    if (!enumDescriptorPandStr.empty() && enumDescriptorPandStr[0] == 'L') {
-        enumDescriptorPandStr[0] = '/';
-    } else {
-        return ANI_NOT_FOUND;
-    }
-
-    PandaString etsNsDescriptorPandStr(etsNs->AsClass()->GetDescriptor());
-    etsNsDescriptorPandStr.pop_back();
-    etsNsDescriptorPandStr += enumDescriptorPandStr;
-
-    // NOTE: Check that result is enum, #22400
-    return DoFind<false>(pandaEnv, etsNsDescriptorPandStr.c_str(), s, result);
-}
-
-// NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Module_FindEnum(ani_env *env, ani_module module, const char *enumDescriptor,
-                                                 ani_enum *result)
-{
-    ANI_DEBUG_TRACE(env);
-    CHECK_ENV(env);
-    CHECK_PTR_ARG(module);
-    CHECK_PTR_ARG(enumDescriptor);
-    CHECK_PTR_ARG(result);
-
-    // NOTE: Check that result is enum, #22400
-    return FindInModule<false>(env, module, enumDescriptor, result);
-}
-
 static ani_status GetArrayFromEnum(ScopedManagedCodeFix &s, ani_enum enm, const char *name, EtsObjectArray **result)
 {
     EtsField *field = nullptr;
@@ -7074,14 +6955,8 @@ const __ani_interaction_api INTERACTION_API = {
     FindNamespace,
     FindClass,
     FindEnum,
-    Module_FindNamespace,
-    Module_FindClass,
-    Module_FindEnum,
     Module_FindFunction,
     Module_FindVariable,
-    Namespace_FindNamespace,
-    Namespace_FindClass,
-    Namespace_FindEnum,
     Namespace_FindFunction,
     Namespace_FindVariable,
     Module_BindNativeFunctions,
