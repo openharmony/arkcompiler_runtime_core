@@ -111,6 +111,26 @@ function testArrayConstructorsFromNumbersInts(): int {
         "1,2,3,4,5,4294967295,4294901760",
         "Uint32Array(int[])"
     )
+    const buffer1 = new ArrayBuffer(17);
+    const array1 = new Uint32Array(buffer1, 0, 2);
+    array1[0] = 42;
+    array1[1] = 100;
+    failures += test(
+        array1.toString(),
+        "42,100",
+        "Uint32Array(ArrayBuffer, byteOffset, length) with values"
+    )
+    const buffer2 = new ArrayBuffer(41);
+    const array2 = new Uint32Array(buffer2, 8, 3);
+    array2[0] = 1;
+    array2[1] = 4294967295;
+    array2[2] = 4294901760;
+    failures += test(
+        array2.toString(),
+        "1,4294967295,4294901760",
+        "Uint32Array(ArrayBuffer, byteOffset, length) with values"
+    )
+
 
     failures += test(
         (new Uint8Array(nums)).toString(),
