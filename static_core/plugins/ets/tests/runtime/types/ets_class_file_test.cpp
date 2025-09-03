@@ -221,9 +221,12 @@ TEST_F(EtsClassTest, GetFieldIndexByName)
                 TestObject obj_z
                 TestObject obj_k
             }
+            .record B <ets.extends = A> {
+                TestObject obj_l
+            }
         )";
 
-    EtsClass *klass = GetTestClass(source, "LA;");
+    EtsClass *klass = GetTestClass(source, "LB;");
     ASSERT_NE(klass, nullptr);
 
     std::unordered_set<std::uint32_t> descSetIndex = {0, 1, 2, 3};

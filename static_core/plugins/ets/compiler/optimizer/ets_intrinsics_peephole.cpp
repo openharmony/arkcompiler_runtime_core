@@ -18,6 +18,8 @@
 #include "compiler/optimizer/ir/runtime_interface.h"
 #include "compiler/optimizer/optimizations/const_folding.h"
 #include "runtime/include/coretypes/string.h"
+#include "optimizer/analysis/dominators_tree.h"
+#include "optimizer/analysis/loop_analyzer.h"
 
 namespace ark::compiler {
 
@@ -351,6 +353,335 @@ bool Peepholes::PeepholeStrictEquals([[maybe_unused]] GraphVisitor *v, Intrinsic
 bool Peepholes::PeepholeTypeof([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
 {
     return ReplaceTypeofWithIsInstance(intrinsic);
+}
+
+bool HandleIstrueNullAndUnique(Inst *input, IntrinsicInst *intrinsic, Graph *graph)
+{
+    if (!input->IsNullPtr() && !input->IsLoadUniqueObject()) {
+        return false;
+    }
+    intrinsic->ReplaceUsers(graph->FindOrCreateConstant<bool>(false));
+    return true;
+}
+
+bool HandleIstrueFunctionReference(RuntimeInterface::ClassPtr klass, IntrinsicInst *intrinsic, Graph *graph,
+                                   RuntimeInterface *runtime)
+{
+    if (!runtime->IsFunctionReference(klass)) {
+        return false;
+    }
+    intrinsic->ReplaceUsers(graph->FindOrCreateConstant<bool>(true));
+    return true;
+}
+
+bool HandleIstrueNonValueTypedClass(RuntimeInterface::ClassPtr klass, Inst *input, IntrinsicInst *intrinsic,
+                                    Graph *graph, RuntimeInterface *runtime)
+{
+    if (runtime->IsClassValueTyped(klass) || input->GetOpcode() != Opcode::NewObject) {
+        return false;
+    }
+    // Assume new objects are always truthy.
+    intrinsic->ReplaceUsers(graph->FindOrCreateConstant<bool>(true));
+    return true;
+}
+
+bool HandleIstrueBigInt(RuntimeInterface::ClassPtr klass, Inst *input, IntrinsicInst *intrinsic, Graph *graph,
+                        RuntimeInterface *runtime)
+{
+    if (!runtime->IsBigIntClass(klass)) {
+        return false;
+    }
+    auto fieldPtr = runtime->GetFieldPtrByName(input->GetObjectTypeInfo().GetClass(), "sign");
+    if (fieldPtr == nullptr) {
+        return false;
+    }
+    auto fieldId = fieldPtr->GetFileId().GetOffset();
+    auto loadField =
+        graph->CreateInstLoadObject(DataType::INT32, input->GetPc(), input, TypeIdMixin {fieldId, graph->GetMethod()},
+                                    fieldPtr, runtime->IsFieldVolatile(fieldPtr));
+    intrinsic->InsertBefore(loadField);
+    auto checkNonZero = graph->CreateInstCompare(DataType::BOOL, intrinsic->GetPc(), loadField,
+                                                 graph->FindOrCreateConstant(0), DataType::INT32, ConditionCode::CC_NE);
+    intrinsic->InsertBefore(checkNonZero);
+    intrinsic->ReplaceUsers(checkNonZero);
+    return true;
+}
+
+bool FindNullCheckAndSaveStateInUsers(Inst *input, Inst *&nullCheck, Inst *&saveState)
+{
+    nullCheck = nullptr;
+    saveState = nullptr;
+    for (auto &user : input->GetUsers()) {
+        auto userInst = user.GetInst();
+        if (userInst->GetOpcode() == Opcode::NullCheck) {
+            nullCheck = userInst;
+        }
+        if (userInst->GetOpcode() == Opcode::SaveState) {
+            saveState = userInst;
+        }
+    }
+    return nullCheck != nullptr && saveState != nullptr;
+}
+
+Inst *CreateValueOfCall(IntrinsicInst *intrinsic, Inst *input, Graph *graph, RuntimeInterface *runtime,
+                        RuntimeInterface::MethodPtr valueOf)
+{
+    Inst *nullCheckInst = nullptr;
+    Inst *saveStateInst = nullptr;
+    if (!FindNullCheckAndSaveStateInUsers(input, nullCheckInst, saveStateInst)) {
+        return nullptr;
+    }
+    auto saveStateClone = CopySaveState(graph, saveStateInst->CastToSaveState());
+    auto callStaticInst = graph->CreateInstCallStatic(runtime->GetMethodReturnType(valueOf), intrinsic->GetPc(),
+                                                      runtime->GetMethodId(valueOf), valueOf);
+    callStaticInst->SetInputs(graph->GetAllocator(),
+                              {{nullCheckInst, nullCheckInst->GetType()}, {saveStateClone, saveStateClone->GetType()}});
+    nullCheckInst->InsertAfter(callStaticInst->GetSaveState());
+    callStaticInst->GetSaveState()->InsertAfter(callStaticInst);
+    return callStaticInst;
+}
+
+void PrepareZeroConstAndInputInst(Graph *graph, IntrinsicInst *intrinsic, DataType::Type &type, Inst *&inputInst,
+                                  ConstantInst *&zeroConst)
+{
+    zeroConst = nullptr;
+    if (type == DataType::INT32) {
+        zeroConst = graph->FindOrCreateConstant<int32_t>(0);
+    } else if (type == DataType::INT64) {
+        zeroConst = graph->FindOrCreateConstant<int64_t>(0);
+    } else {
+        // For other types, replace the type with INT32 and create the array length inst
+        type = DataType::INT32;
+        inputInst = graph->CreateInstLenArray(type, intrinsic->GetPc(), inputInst, false);
+        intrinsic->InsertBefore(inputInst);
+        zeroConst = graph->FindOrCreateConstant<int32_t>(0);
+    }
+}
+
+bool HandleIstrueEnumClass(RuntimeInterface::ClassPtr klass, Inst *input, IntrinsicInst *intrinsic, Graph *graph,
+                           RuntimeInterface *runtime)
+{
+    if (!runtime->IsEnumClass(klass) || input->GetOpcode() != Opcode::LoadStatic) {
+        return false;
+    }
+    if (input->GetBasicBlock() != intrinsic->GetBasicBlock()) {
+        return false;
+    }
+    auto objField = input->CastToLoadStatic()->GetObjField();
+    auto objClass = runtime->GetClassForField(objField);
+    auto valueOf = runtime->GetInstanceMethodByName(objClass, "valueOf");
+    if (valueOf == nullptr) {
+        return false;
+    }
+    auto callStatic = CreateValueOfCall(intrinsic, input, graph, runtime, valueOf);
+    if (callStatic == nullptr) {
+        return false;
+    }
+    ConstantInst *zeroConst = nullptr;
+    Inst *inputInst = callStatic;
+    DataType::Type type = runtime->GetMethodReturnType(valueOf);
+    PrepareZeroConstAndInputInst(graph, intrinsic, type, inputInst, zeroConst);
+    auto checkNonZero =
+        graph->CreateInstCompare(DataType::BOOL, intrinsic->GetPc(), inputInst, zeroConst, type, ConditionCode::CC_NE);
+    intrinsic->InsertBefore(checkNonZero);
+    intrinsic->ReplaceUsers(checkNonZero);
+    return true;
+}
+
+bool HandleIstrueStringClass(RuntimeInterface::ClassPtr klass, Inst *input, IntrinsicInst *intrinsic, Graph *graph,
+                             RuntimeInterface *runtime)
+{
+    if (!runtime->IsStringClass(klass) || input->GetOpcode() != Opcode::LoadString) {
+        return false;
+    }
+    auto pc = intrinsic->GetPc();
+    auto lenArrayInst = graph->CreateInstLenArray(DataType::INT32, pc, input, false);
+    auto checkNonZero = graph->CreateInstCompare(DataType::BOOL, pc, lenArrayInst, graph->FindOrCreateConstant(0),
+                                                 DataType::INT32, ConditionCode::CC_NE);
+    intrinsic->InsertBefore(lenArrayInst);
+    intrinsic->InsertBefore(checkNonZero);
+    intrinsic->ReplaceUsers(checkNonZero);
+    return true;
+}
+
+Inst *CreateLoadFieldInst(Inst *input, Graph *graph, RuntimeInterface *runtime, DataType::Type valueType)
+{
+    auto fieldPtr = runtime->GetFieldPtrByName(input->GetObjectTypeInfo().GetClass(), "value");
+    if (fieldPtr == nullptr) {
+        return nullptr;
+    }
+    auto loadObjectInst = graph->CreateInstLoadObject(
+        valueType, input->GetPc(), input, TypeIdMixin {fieldPtr->GetFileId().GetOffset(), graph->GetMethod()}, fieldPtr,
+        runtime->IsFieldVolatile(fieldPtr));
+
+    return loadObjectInst;
+}
+
+template <typename FloatType, typename IntType>
+Inst *CreateIstrueFloatCheck(Graph *graph, BasicBlock *trueBlock, Inst *loadObjectInst, IntrinsicInst *intrinsic)
+{
+    auto pc = intrinsic->GetPc();
+
+    // NaN check:
+    // NaN == NaN => false
+    // for any other values: val == val => true
+    auto checkIsNotNanInst = graph->CreateInstCompare(
+        DataType::BOOL, pc, loadObjectInst, loadObjectInst,
+        std::is_same_v<FloatType, float> ? DataType::FLOAT32 : DataType::FLOAT64, ConditionCode::CC_EQ);
+
+    // Check not equal to 0.0.
+    auto checkZeroInst = graph->CreateInstCompare(
+        DataType::BOOL, pc, loadObjectInst, graph->FindOrCreateConstant<FloatType>(0),
+        std::is_same_v<FloatType, float> ? DataType::FLOAT32 : DataType::FLOAT64, ConditionCode::CC_NE);
+
+    // Append instructions to block.
+    trueBlock->AppendInst(checkIsNotNanInst);
+    trueBlock->AppendInst(checkZeroInst);
+
+    // Combine checks.
+    return graph->CreateInstAnd(DataType::BOOL, pc, checkIsNotNanInst, checkZeroInst);
+}
+
+Inst *HandleIstrueNonFloatBoxed(IntrinsicInst *intrinsic, Graph *graph, Inst *loadField, DataType::Type valueType)
+{
+    ConstantInst *zeroConst = nullptr;
+    switch (valueType) {
+        case DataType::BOOL:
+            zeroConst = graph->FindOrCreateConstant<bool>(false);
+            break;
+        case DataType::UINT8:
+            zeroConst = graph->FindOrCreateConstant<uint8_t>(0);
+            break;
+        case DataType::INT8:
+            zeroConst = graph->FindOrCreateConstant<int8_t>(0);
+            break;
+        case DataType::UINT16:
+            zeroConst = graph->FindOrCreateConstant<uint16_t>(0);
+            break;
+        case DataType::INT16:
+            zeroConst = graph->FindOrCreateConstant<int16_t>(0);
+            break;
+        case DataType::UINT32:
+            zeroConst = graph->FindOrCreateConstant<uint32_t>(0);
+            break;
+        case DataType::INT32:
+            zeroConst = graph->FindOrCreateConstant<int32_t>(0);
+            break;
+        case DataType::UINT64:
+            zeroConst = graph->FindOrCreateConstant<uint64_t>(0);
+            break;
+        case DataType::INT64:
+            zeroConst = graph->FindOrCreateConstant<int64_t>(0);
+            break;
+        default:
+            UNREACHABLE();
+            return nullptr;
+    }
+    return graph->CreateInstCompare(DataType::BOOL, intrinsic->GetPc(), loadField, zeroConst, valueType,
+                                    ConditionCode::CC_NE);
+}
+
+bool HandleIstrueBoxedClass(RuntimeInterface::ClassPtr klass, Inst *input, IntrinsicInst *intrinsic, Graph *graph,
+                            RuntimeInterface *runtime)
+{
+    if (!runtime->IsBoxedClass(klass)) {
+        return false;
+    }
+
+    DataType::Type valueType = runtime->GetBoxedClassDataType(klass);
+    if (valueType == DataType::NO_TYPE) {
+        return false;
+    }
+
+    // Load the actual value from the boxed object.
+    auto loadObjectInst = CreateLoadFieldInst(input, graph, runtime, valueType);
+    if (loadObjectInst == nullptr) {
+        return false;
+    }
+
+    // Check if the boxed object is `nullptr` (comparison + conditional branch).
+    auto compareNullPtrInst =
+        graph->CreateInstCompare(DataType::BOOL, intrinsic->GetPc(), input, graph->GetOrCreateNullPtr(),
+                                 DataType::REFERENCE, ConditionCode::CC_EQ);
+    auto ifImmInst = graph->CreateInstIfImm(DataType::BOOL, intrinsic->GetPc(), compareNullPtrInst, 0U, DataType::BOOL,
+                                            ConditionCode::CC_EQ);
+
+    intrinsic->InsertBefore(compareNullPtrInst);
+    intrinsic->InsertBefore(ifImmInst);
+
+    // Split the current block to handle nullptr and non-nullptr cases.
+    auto resultBB = intrinsic->GetBasicBlock()->SplitBlockAfterInstruction(ifImmInst, false);
+    auto phiInst = graph->CreateInstPhi(DataType::BOOL, intrinsic->GetPc());
+    resultBB->AppendPhi(phiInst);
+
+    // Create "true" block (object is not nullptr).
+    auto ifImmBB = ifImmInst->GetBasicBlock();
+    auto trueBlock = graph->CreateEmptyBlock(ifImmBB);
+    trueBlock->AddSucc(resultBB);
+    ifImmBB->GetLoop()->AppendBlock(trueBlock);
+    ifImmBB->AddSucc(trueBlock);
+
+    // Create "false" block (object is nullptr).
+    auto falseBlock = graph->CreateEmptyBlock(ifImmBB);
+    falseBlock->AddSucc(resultBB);
+    ifImmBB->GetLoop()->AppendBlock(falseBlock);
+    ifImmBB->AddSucc(falseBlock);
+
+    trueBlock->AppendInst(loadObjectInst);
+
+    // Generate the actual truthiness check depending on the boxed type.
+    Inst *result = nullptr;
+    if (valueType == DataType::FLOAT64) {
+        result = CreateIstrueFloatCheck<double, int64_t>(graph, trueBlock, loadObjectInst, intrinsic);
+    } else if (valueType == DataType::FLOAT32) {
+        result = CreateIstrueFloatCheck<float, int32_t>(graph, trueBlock, loadObjectInst, intrinsic);
+    } else {
+        result = HandleIstrueNonFloatBoxed(intrinsic, graph, loadObjectInst, valueType);
+    }
+
+    trueBlock->AppendInst(result);
+
+    // Build the PHI node: result if non-null, false if null.
+    phiInst->AppendInput(result);
+    phiInst->AppendInput(graph->FindOrCreateConstant<bool>(0));
+    intrinsic->ReplaceUsers(phiInst);
+
+    graph->RunPass<DominatorsTree>();
+    graph->InvalidateAnalysis<LoopAnalyzer>();
+    graph->RunPass<LoopAnalyzer>();
+
+    return true;
+}
+
+bool Peepholes::PeepholeIstrue([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] IntrinsicInst *intrinsic)
+{
+    if (intrinsic->GetIntrinsicId() != RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ISTRUE ||
+        !intrinsic->HasUsers()) {
+        return false;
+    }
+
+    auto input = intrinsic->GetInput(0).GetInst();
+    auto graph = intrinsic->GetBasicBlock()->GetGraph();
+    auto runtime = graph->GetRuntime();
+    if (HandleIstrueNullAndUnique(input, intrinsic, graph)) {
+        return true;
+    }
+
+    auto klass = input->GetObjectTypeInfo().GetClass();
+    if (klass == nullptr) {
+        return false;
+    }
+
+    if (HandleIstrueFunctionReference(klass, intrinsic, graph, runtime) ||
+        HandleIstrueNonValueTypedClass(klass, input, intrinsic, graph, runtime) ||
+        HandleIstrueBigInt(klass, input, intrinsic, graph, runtime) ||
+        HandleIstrueEnumClass(klass, input, intrinsic, graph, runtime) ||
+        HandleIstrueStringClass(klass, input, intrinsic, graph, runtime) ||
+        HandleIstrueBoxedClass(klass, input, intrinsic, graph, runtime)) {
+        return true;
+    }
+
+    return false;
 }
 
 bool Peepholes::PeepholeDoubleToString([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)

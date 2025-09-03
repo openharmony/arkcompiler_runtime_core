@@ -38,6 +38,7 @@ public:
     char *GetFuncPropName(MethodPtr methodPtr, uint32_t strId) const override;
     uint64_t GetFuncPropNameOffset(MethodPtr methodPtr, uint32_t strId) const override;
     bool IsMethodStringConcat(MethodPtr method) const override;
+    Field *GetFieldPtrByName(ClassPtr klass, std::string_view name) const override;
     bool IsMethodStringBuilderConstructorWithStringArg(MethodPtr method) const override;
     bool IsMethodStringBuilderConstructorWithCharArrayArg(MethodPtr method) const override;
     bool IsMethodStringBuilderDefaultConstructor(MethodPtr method) const override;
@@ -68,6 +69,7 @@ public:
     ClassPtr GetEscompatArrayClass() const override;
     MethodPtr GetStringBuilderDefaultConstructor() const override;
     uint32_t GetMethodId([[maybe_unused]] MethodPtr method) const override;
+    MethodPtr GetInstanceMethodByName(ClassPtr klass, std::string_view name) const override;
     bool IsFieldBooleanFalse(FieldPtr field) const override;
     bool IsFieldBooleanTrue(FieldPtr field) const override;
     bool IsFieldBooleanValue(FieldPtr field) const override;
@@ -100,7 +102,11 @@ public:
     bool IsNativeMethodOptimizationEnabled() const override;
     uint32_t GetRuntimeClassOffset(Arch arch) const override;
     bool IsBoxedClass(ClassPtr klass) const override;
+    bool IsEnumClass(ClassPtr klass) const override;
+    bool IsBigIntClass(ClassPtr klass) const override;
+    bool IsFunctionReference(ClassPtr klass) const override;
     bool IsClassBoxedBoolean(ClassPtr klass) const override;
+    compiler::DataType::Type GetBoxedClassDataType(ClassPtr klass) const override;
 
     FieldPtr ResolveLookUpField(FieldPtr rawField, ClassPtr klass) override;
     MethodPtr ResolveLookUpCall(FieldPtr rawField, ClassPtr klass, bool isSetter) override;

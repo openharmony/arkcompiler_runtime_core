@@ -476,6 +476,7 @@ public:
     bool IsArrayClass(MethodPtr method, IdType id) const override;
 
     bool IsStringClass(MethodPtr method, IdType id) const override;
+    bool IsStringClass(ClassPtr klass) const override;
 
     bool IsArrayClass(ClassPtr cls) const override
     {
