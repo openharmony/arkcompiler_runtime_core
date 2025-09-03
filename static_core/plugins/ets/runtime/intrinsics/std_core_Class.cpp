@@ -78,6 +78,17 @@ EtsString *StdCoreClassGetDescriptor(EtsClass *cls)
     return EtsString::CreateFromMUtf8(cls->GetDescriptor());
 }
 
+ObjectHeader *StdCoreClassGetInterfaces(EtsClass *cls)
+{
+    auto *coro = EtsCoroutine::GetCurrent();
+    const auto interfaces = cls->GetRuntimeClass()->GetInterfaces();
+    auto result = EtsObjectArray::Create(PlatformTypes(coro)->coreClass, interfaces.size());
+    for (size_t i = 0; i < interfaces.size(); i++) {
+        result->Set(i, reinterpret_cast<EtsObject *>(EtsClass::FromRuntimeClass(interfaces[i])));
+    }
+    return reinterpret_cast<ObjectHeader *>(result);
+}
+
 EtsObject *StdCoreClassCreateInstance(EtsClass *cls)
 {
     ASSERT(cls != nullptr);
@@ -152,6 +163,24 @@ EtsRuntimeLinker *EtsGetNearestNonBootRuntimeLinker()
         }
     }
     return nullptr;
+}
+
+EtsBoolean StdCoreClassIsEnum(EtsClass *cls)
+{
+    ASSERT(cls != nullptr);
+    return cls->IsEtsEnum();
+}
+
+EtsBoolean StdCoreClassIsInterface(EtsClass *cls)
+{
+    ASSERT(cls != nullptr);
+    return cls->IsInterface();
+}
+
+EtsBoolean StdCoreClassIsFixedArray(EtsClass *cls)
+{
+    ASSERT(cls != nullptr);
+    return cls->IsArrayClass();
 }
 
 }  // namespace ark::ets::intrinsics
