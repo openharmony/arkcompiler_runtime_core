@@ -442,7 +442,7 @@ extern "C" EtsInt EtsEscompatArrayInternalLastIndexOf(EtsEscompatArray *array, E
     return EtsEscompatArrayInternalLastIndexOfImpl(array, value, fromIndex);
 }
 
-extern "C" EtsDouble EtsEscompatArrayLastIndexOf(EtsEscompatArray *array, EtsObject *value)
+extern "C" EtsInt EtsEscompatArrayLastIndexOf(EtsEscompatArray *array, EtsObject *value)
 {
     auto actualLength = static_cast<EtsInt>(array->GetActualLength());
     return EtsEscompatArrayInternalLastIndexOfImpl(array, value, actualLength - 1);
