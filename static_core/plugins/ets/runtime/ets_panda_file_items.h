@@ -236,6 +236,7 @@ static constexpr std::string_view ARRAY_VALUES_ITERATOR_T              = "Lescom
 static constexpr std::string_view MAP                                  = "Lescompat/Map;";
 static constexpr std::string_view MAPENTRY                             = "Lescompat/MapEntry;";
 static constexpr std::string_view MAPITERATOR                          = "Lescompat/MapIterator;";
+static constexpr std::string_view SETITERATOR                          = "Lescompat/SetIterator;";
 static constexpr std::string_view EMPTYMAPITERATOR                     = "Lescompat/EmptyMapIterator;";
 static constexpr std::string_view SET                                  = "Lescompat/Set;";
 static constexpr std::string_view RECORD                               = "Lescompat/Record;";
