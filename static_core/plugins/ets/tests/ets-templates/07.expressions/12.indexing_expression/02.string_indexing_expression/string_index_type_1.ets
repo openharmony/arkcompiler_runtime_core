@@ -15,13 +15,14 @@
 
 {% for c in cases %}
 /*---
-desc: String value is immutable, and is not allowed to change a value of a string element by indexing.
-tags: [compile-only, negative]
+desc: >-
+    Index expression for string indexing must be of one of integer types, namely byte, short, or int.
 ---*/
 
-let str: string = "abcdefg"
+let str: string = "abcdefg";
 
 function main(): void {
-  str[{{c.index}}] = '{{c.value}}'
+  arktest.assertEQ(str[{{c.index}}], '{{c.value}}');
+  arktest.assertEQ("abcdefg"[{{c.index}}], '{{c.value}}');
 }
 {% endfor %}

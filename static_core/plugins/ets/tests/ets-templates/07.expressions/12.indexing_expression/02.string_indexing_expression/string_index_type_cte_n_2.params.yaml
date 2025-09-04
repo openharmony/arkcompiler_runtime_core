@@ -13,10 +13,11 @@
 
 ---
 cases:
-    - index: '2.3f'
-    - index: '5.7'
-    - index: 'Number.NaN'
-    - index: 'Number.POSITIVE_INFINITY'
-    - index: 'Number.NEGATIVE_INFINITY'
-    - index: 'Number.MIN_VALUE'
-    - index: 'Number.MAX_VALUE'
+    - { type: long,    value: '1'          }
+    - { type: bigint,  value: '2n'         }
+    - { type: float,   value: '2.3f'       }
+    - { type: double,  value: '4.2'        }
+    - { type: number,  value: '5.7'        }
+    - { type: number,  value: 'Number.NaN' }
+    - { type: boolean, value: 'true'       }
+    - { type: string,  value: '"a"'        }

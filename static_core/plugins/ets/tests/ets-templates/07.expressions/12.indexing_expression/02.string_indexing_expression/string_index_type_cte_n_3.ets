@@ -13,19 +13,14 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
 desc: >-
-    The result of a string indexing expression is a value of string type.
-    Index expression for array indexing must be of a numeric type (see Numeric Types).
-    The same rules apply as those for Array Indexing Expression.
+    Index expression for string indexing must be of one of integer types, namely byte, short, or int.
+tags: [compile-only, negative]
 ---*/
 
-let str: string = "\x17\x2b\xef\0\u1f48\u2331\u2b03\u2eec \n \u{CAFE}\n\uBABF生日快乐!С Днём рождения!"
-
 function main(): void {
-  for (let i = 0; i < str.length; i++) {
-    arktest.assertTrue(str[i] instanceof string)
-    arktest.assertEQ(typeof str[i], "string")
-  }
-  arktest.assertEQ(str.length, 35)
+  let val = "abcdefg"[{{c.index}}];
 }
+{% endfor %}

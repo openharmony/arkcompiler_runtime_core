@@ -24,11 +24,10 @@ let str: string = "abcdefg"
 
 function main(): int {
   try {
-    let val = str[{{c['index']}}]
-  } catch (e) {
-    if (e instanceof RangeError) {
-      return 0
-    }
+    let val = str[{{c.index}}]
+  } catch (error) {
+      arktest.assertTrue(error instanceof RangeError);
+      return 0;
   }
   return 1
 }

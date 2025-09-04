@@ -16,25 +16,14 @@
 {% for c in cases %}
 /*---
 desc: >-
-    If an index expression is of type number or other floating-point type,
-    and the fractional part differs from 0, then errors occur as follows:
-    A runtime error, if the situation is identified during program execution; and
-    A compile-time error, if the situation is detected during compilation.
+    Index expression for string indexing must be of one of integer types, namely byte, short, or int.
+tags: [compile-only, negative]
 ---*/
 
-let str: string = "abcdefg"
+let str: string = "abcdefg";
 
-function foo (index: {{c['type']}}) {
-  let val = str[index]
+function main(): void {
+  let i: {{c.type}} = {{c.value}};
+  let val = str[i];
 }
-
-function main(): int {
-  try {
-    foo({{c['index']}})
-  } catch (e) {
-    return 0
-  }
-  return 1
-}
-
 {% endfor %}
