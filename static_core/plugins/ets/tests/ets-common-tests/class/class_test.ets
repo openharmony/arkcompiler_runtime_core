@@ -15,8 +15,22 @@
 
 const globalClassName = "class_test.ETSGLOBAL"
 
+namespace Outer {
+    export namespace Inner {
+        export class C {}
+
+        export function getNamespace(): Class {
+            return Class.current()
+        }
+    }
+
+    export function getNamespace(): Class {
+        return Class.current()
+    }
+}
+
 class Test {
-    public static testMethodsFromClass() {
+    public static testMethodsFromClass(): void {
         const currentClass = Class.current()
         arktest.assertNE(currentClass, undefined)
         arktest.assertEQ(currentClass.getName(), "class_test.Test")
@@ -25,9 +39,21 @@ class Test {
         arktest.assertNE(callerClass, undefined)
         arktest.assertEQ(callerClass!.getName(), globalClassName)
     }
+
+    public static testClassIsNamespace(): void {
+        const innerNs = Outer.Inner.getNamespace()
+        arktest.assertNE(innerNs, undefined)
+        arktest.assertTrue(innerNs!.isNamespace())
+        arktest.assertEQ(innerNs!.getName(), "class_test.Outer.Inner")
+
+        const outerNs = Outer.getNamespace()
+        arktest.assertNE(outerNs, undefined)
+        arktest.assertTrue(outerNs!.isNamespace())
+        arktest.assertEQ(outerNs!.getName(), "class_test.Outer")
+    }
 }
 
-function main() {
+function main(): void {
     // For the test purposes these checks must be located in the entrypoint function
     const currentClass = Class.current()
     arktest.assertNE(currentClass, undefined)
@@ -38,4 +64,5 @@ function main() {
     arktest.assertEQ(callerClass, undefined)
 
     Test.testMethodsFromClass()
+    Test.testClassIsNamespace()
 }
