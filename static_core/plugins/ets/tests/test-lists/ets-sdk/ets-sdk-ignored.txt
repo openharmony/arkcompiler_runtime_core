@@ -6,7 +6,5 @@ api/@ohos/util/stream/StreamReadableTestPart4.ets
 ### Issue 25591
 api/@ohos/util/TextDecoder/TextDecoderDecodeToStringTest.ets
 
-### Issue 27038
-api/@ohos/util/types/IsSetIteratorTest.ets
 ### Issue 27033
 api/@ohos/util/LightWeightMap/LightWeightMapGetKeysValuesSetValueAtTest.ets

@@ -1546,7 +1546,7 @@ export namespace util {
          * Since the current interface cannot be correctly determined, it returns false by default
          */
         isSetIterator(value: Object): boolean {
-            return false;
+            return value instanceof SetIterator
         }
 
         /**

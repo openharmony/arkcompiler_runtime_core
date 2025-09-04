@@ -18,86 +18,90 @@ import {util} from "@ohos.util";
 function main(): int {
     const suite = new arktest.ArkTestsuite("CommonUtil types.isSetIterator() API tests")
 
-    suite.addTest("Verify Set.keys() is identified as SetIterator", testIsSetIterator001)
-    suite.addTest("Verify Set.values() is identified as SetIterator", testIsSetIterator002)
-    suite.addTest("Verify Set.entries() is identified as SetIterator", testIsSetIterator003)
-    suite.addTest("Verify Set.$_iterator() is identified as SetIterator", testIsSetIterator004)
-    suite.addTest("Verify Set is not identified as SetIterator", testIsSetIterator005)
+    // test set
+    suite.addTest("Verify Set.keys() is identified as SetIterator", testSetKeysIsSetIterator)
+    suite.addTest("Verify Set.values() is identified as SetIterator", testSetValuesIsSetIterator)
+    suite.addTest("Verify Set.entries() is identified as SetIterator", testSetEntriesIsSetIterator)
+    suite.addTest("Verify Set.$_iterator() is identified as SetIterator", testSetIteratorIsSetIterator)
+    suite.addTest("Verify Set is not identified as SetIterator", testSetIsNotSetIterator)
+
+    // test map
+    suite.addTest("Verify Map.keys() is not identified as SetIterator", testMapKeysIsNotSetIterator)
+    suite.addTest("Verify Map.values() is not identified as SetIterator", testMapValuesIsNotSetIterator)
+    suite.addTest("Verify Map.entries() is not identified as SetIterator", testMapEntriesIsNotSetIterator)
+    suite.addTest("Verify Map.$_iterator() is not identified as SetIterator", testMapIteratorIsNotSetIterator)
+    suite.addTest("Verify Map is not identified as SetIterator", testMapIsNotSetIterator)
+
 
     return suite.run()
 }
 
-/**
- * @tc.number: SUB_COMMONLIBRARY_UTIL_IS_SET_ITERATOR_001
- * @tc.name: testIsSetIterator001
- * @tc.desc: Verify Set.keys() is identified as SetIterator
- * @tc.size: MediumTest
- * @tc.type: Function
- * @tc.level: Level 1
- */
-function testIsSetIterator001() {
+function testSetKeysIsSetIterator() {
   let proc = new util.types();
   const set = new Set<int>();
   let result = proc.isSetIterator(set.keys());
-  arktest.assertTrue(result, "The SetIterator should be of the same type as the SetIterator");
+  arktest.assertTrue(result, "set.keys() should be SetIterator type");
 }
 
-/**
-* @tc.number: SUB_COMMONLIBRARY_UTIL_IS_SET_ITERATOR_002
-* @tc.name: testIsSetIterator002
-* @tc.desc: Verify Set.values() is identified as SetIterator
-* @tc.size: MediumTest
-* @tc.type: Function
-* @tc.level: Level 1
-*/
-function testIsSetIterator002() {
+function testSetValuesIsSetIterator() {
   let proc = new util.types();
   const set = new Set<int>();
   let result = proc.isSetIterator(set.values());
-  arktest.assertTrue(result, "The SetIterator should be of the same type as the SetIterator");
+  arktest.assertTrue(result, "set.values() should be SetIterator type");
 }
 
-/**
-* @tc.number: SUB_COMMONLIBRARY_UTIL_IS_SET_ITERATOR_003
-* @tc.name: testIsSetIterator003
-* @tc.desc: Verify Set.entries() is identified as SetIterator
-* @tc.size: MediumTest
-* @tc.type: Function
-* @tc.level: Level 1
-*/
-function testIsSetIterator003() {
+function testSetEntriesIsSetIterator() {
   let proc = new util.types();
   const set = new Set<int>();
   let result = proc.isSetIterator(set.entries());
-  arktest.assertTrue(result, "The SetIterator should be of the same type as the SetIterator");
+  arktest.assertTrue(result, "set.entries() should be SetIterator type");
 }
 
-/**
-* @tc.number: SUB_COMMONLIBRARY_UTIL_IS_SET_ITERATOR_004
-* @tc.name: testIsSetIterator004
-* @tc.desc: Verify Set.$_iterator() is identified as SetIterator
-* @tc.size: MediumTest
-* @tc.type: Function
-* @tc.level: Level 1
-*/
-function testIsSetIterator004() {
+function testSetIteratorIsSetIterator() {
   let proc = new util.types();
   const set = new Set<int>();
   let result = proc.isSetIterator(set.$_iterator());
-  arktest.assertTrue(result, "The SetIterator should be of the same type as the SetIterator");
+  arktest.assertTrue(result, "set.$_iterator() should be SetIterator type");
 }
 
-/**
-* @tc.number: SUB_COMMONLIBRARY_UTIL_IS_SET_ITERATOR_005
-* @tc.name: testIsSetIterator005
-* @tc.desc: Verify Set is not identified as SetIterator
-* @tc.size: MediumTest
-* @tc.type: Function
-* @tc.level: Level 1
-*/
-function testIsSetIterator005() {
+function testSetIsNotSetIterator() {
   let proc = new util.types();
   const set = new Set<int>();
   let result = proc.isSetIterator(set);
-  arktest.assertTrue(result == false, "The SetIterator should be of the same type as the SetIterator");
+  arktest.assertFalse(result, "set shouldn't be SetIterator type");
+}
+
+function testMapIsNotSetIterator() {
+  let proc = new util.types();
+  const map = new Map<int, string>();
+  let result = proc.isSetIterator(map);
+  arktest.assertFalse(result, "map shouldn't be SetIterator type");
+}
+
+function testMapKeysIsNotSetIterator() {
+  let proc = new util.types();
+  const map = new Map<int, string>();
+  let result = proc.isSetIterator(map.keys());
+  arktest.assertFalse(result, "map.keys() shouldn't be SetIterator type");
+}
+
+function testMapValuesIsNotSetIterator() {
+  let proc = new util.types();
+  const map = new Map<int, string>();
+  let result = proc.isSetIterator(map.values());
+  arktest.assertFalse(result, "map.values() shouldn't be SetIterator type");
+}
+
+function testMapEntriesIsNotSetIterator() {
+  let proc = new util.types();
+  const map = new Map<int, string>();
+  let result = proc.isSetIterator(map.entries());
+  arktest.assertFalse(result, "map.entries() shouldn't be SetIterator type");
+}
+
+function testMapIteratorIsNotSetIterator() {
+  let proc = new util.types();
+  const map = new Map<int, string>();
+  let result = proc.isSetIterator(map.$_iterator());
+  arktest.assertFalse(result, "map.$_iterator() shouldn't be SetIterator type");
 }
