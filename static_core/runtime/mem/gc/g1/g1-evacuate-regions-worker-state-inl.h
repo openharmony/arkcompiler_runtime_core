@@ -218,5 +218,26 @@ void G1EvacuateRegionsWorkerState<LanguageConfig>::EvacuateLiveObjects()
 {
     refStack_->TraverseObjects(*this);
 }
+
+template <typename LanguageConfig>
+void G1EvacuateRegionsWorkerState<LanguageConfig>::PrintObjectEvents(const CollectionSet &collectionSet)
+{
+    for (auto *region : collectionSet) {
+        auto objectVisitor = [region](ObjectHeader *obj) {
+            MarkWord markWord = obj->GetMark();
+            if (markWord.IsForwarded()) {
+                auto dst = reinterpret_cast<ObjectHeader *>(markWord.GetForwardingAddress());
+                LOG_DEBUG_OBJECT_EVENTS << "MOVE object " << obj << " -> " << dst << " region " << region;
+            } else if (region->HasFlag(RegionFlag::IS_OLD)) {
+                LOG_DEBUG_OBJECT_EVENTS << "DELETE tenured object " << obj << " region " << region;
+            } else {
+                ASSERT(region->HasFlag(RegionFlag::IS_EDEN));
+                LOG_DEBUG_OBJECT_EVENTS << "DELETE young object " << obj << " region " << region;
+            }
+        };
+        region->IterateOverObjects(objectVisitor);
+    }
+}
+
 }  // namespace ark::mem
 #endif

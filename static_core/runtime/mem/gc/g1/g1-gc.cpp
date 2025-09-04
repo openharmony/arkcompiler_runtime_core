@@ -1362,6 +1362,10 @@ void G1GC<LanguageConfig>::EvacuateCollectionSet(const RemSet<> &remset)
     analytics_.ReportEvacuationStart(startEvacuation);
     state.EvacuateLiveObjects();
 
+    if (static_cast<bool>(LOG_DEBUG_OBJECT_EVENTS)) {
+        state.PrintObjectEvents(collectionSet_);
+    }
+
     ASSERT(refStack.Empty());
     if (useGcWorkers) {
         this->GetWorkersTaskPool()->WaitUntilTasksEnd();
