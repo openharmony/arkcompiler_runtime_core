@@ -43,6 +43,14 @@ enum MessageType {
     ARRAY,
 }
 
+function sleep(ms: int) {
+    return new Promise<void>((res, rej) => {
+        setTimeout(() => {
+            res(undefined);
+        }, ms);
+    });
+}
+
 function testMessageHandlerCreation() {
     let eaw = new EAWorker();
     eaw.start();
@@ -305,6 +313,20 @@ function testMessageHandlerMismatch() {
     eaw.join();
 }
 
+function testDoubleRemoveMessage() {
+    let worker = new EAWorker();
+    worker.start();
+    let handler = new concurrency.MessageHandler((msg: concurrency.Message) => {
+        await sleep(5000);
+    }, worker);
+
+    let message = new concurrency.Message(1, handler);
+    handler.sendMessage(message);
+    arktest.assertEQ(handler.removeMessages(1), true);
+    arktest.assertEQ(handler.removeMessages(1), false);
+    worker.quit();
+}
+
 function main() {
     let testSuite = new arktest.ArkTestsuite('messageHandlerBasicInterface');
     
@@ -319,6 +341,7 @@ function main() {
     testSuite.addTest("testMessageCallback", testMessageCallback);
     testSuite.addTest("testRemoveMultipleMessage", testRemoveMultipleMessages);
     testSuite.addTest("testMessageHandlerMismatch", testMessageHandlerMismatch);
+    testSuite.addTest("testDoubleRemoveMessage", testDoubleRemoveMessage);
 
     testSuite.run();
 }
