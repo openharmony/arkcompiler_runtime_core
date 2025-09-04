@@ -4048,6 +4048,17 @@ intrinsics:
         - i32\[
     impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayOfInt
 
+  - name: BigInt64ArrayOfBigInt
+    space: ets
+    class_name: escompat.BigInt64Array
+    method_name: ofBigInt
+    static: false
+    signature:
+      ret: void
+      args:
+        - std.core.Object[]
+    impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayOfBigInt
+
   - name: BigInt64ArrayOfLong
     space: ets
     class_name: escompat.BigInt64Array
@@ -4267,6 +4278,17 @@ intrinsics:
       args:
         - i64\[
     impl: ark::ets::intrinsics::EtsEscompatBigUint64ArrayOfLong
+
+  - name: BigUint64ArrayOfBigInt
+    space: ets
+    class_name: escompat.BigUint64Array
+    method_name: ofBigInt
+    static: false
+    signature:
+      ret: void
+      args:
+        - std.core.Object[]
+    impl: ark::ets::intrinsics::EtsEscompatBigUint64ArrayOfBigInt
 
   - name: Uint8ClampedArrayToUint8Clamped
     space: ets

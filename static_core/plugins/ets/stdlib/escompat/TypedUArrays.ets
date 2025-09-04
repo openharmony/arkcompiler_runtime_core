@@ -654,6 +654,19 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
         return result
     }
 
+    /**
+     * Creates an array from an object of FixedArray<int>.
+     *
+     * @param arr An instance of the FixedArray type to convert to an array.
+     *
+     * @returns new Uint8ClampedArray
+     */
+    public static fromFixedArrayint(arr: FixedArray<int>): Uint8ClampedArray {
+        let result = new Uint8ClampedArray(arr.length)
+        result.ofInt(arr)
+        return result
+    }
+
     private native final set(array: Array<int>): void;
 
     /**
@@ -666,7 +679,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
     public static fromArrayint(arr: Array<int>): Uint8ClampedArray {
         let result = new Uint8ClampedArray(arr.length)
         result.set(arr)
-        return result;
+        return result
     }
 
     /**
@@ -746,7 +759,8 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
 
     public static overload from {
         fromSetint, fromUint8ClampedArray
-        ,fromArrayint, fromArrayLikenumber, fromArrayLike, fromIterable
+        ,fromFixedArrayint, fromArrayint, fromArrayLikenumber,
+        fromArrayLike, fromIterable
     };
 
     /**
@@ -2161,6 +2175,19 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
         return result
     }
 
+    /**
+     * Creates an array from an object of FixedArray<int>.
+     *
+     * @param arr An instance of the FixedArray type to convert to an array.
+     *
+     * @returns new Uint8Array
+     */
+    public static fromFixedArrayint(arr: FixedArray<int>): Uint8Array {
+        let result = new Uint8Array(arr.length)
+        result.ofInt(arr)
+        return result
+    }
+
     private native final set(array: Array<int>): void;
 
     /**
@@ -2173,7 +2200,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     public static fromArrayint(arr: Array<int>): Uint8Array {
         let result = new Uint8Array(arr.length)
         result.set(arr)
-        return result;
+        return result
     }
 
     /**
@@ -2253,7 +2280,8 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
 
     public static overload from {
         fromSetint, fromUint8Array ,fromInt8Array
-        ,fromArrayint, fromArrayLikenumber, fromArrayLike, fromIterable
+        ,fromFixedArrayint, fromArrayint, fromArrayLikenumber,
+        fromArrayLike, fromIterable
     };
 
     /**
@@ -3652,6 +3680,19 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
         return result
     }
 
+    /**
+     * Creates an array from an object of FixedArray<int>.
+     *
+     * @param arr An instance of the FixedArray type to convert to an array.
+     *
+     * @returns new Uint16Array
+     */
+    public static fromFixedArrayint(arr: FixedArray<int>): Uint16Array {
+        let result = new Uint16Array(arr.length)
+        result.ofInt(arr)
+        return result
+    }
+
     private native final set(array: Array<int>): void;
 
     /**
@@ -3664,7 +3705,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     public static fromArrayint(arr: Array<int>): Uint16Array {
         let result = new Uint16Array(arr.length)
         result.set(arr)
-        return result;
+        return result
     }
 
     /**
@@ -3744,7 +3785,8 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
 
     public static overload from {
         fromSetint, fromUint16Array ,fromInt16Array
-        ,fromArrayint, fromArrayLikenumber, fromArrayLike, fromIterable
+        ,fromFixedArrayint, fromArrayint, fromArrayLikenumber,
+        fromArrayLike, fromIterable
     };
 
     /**
@@ -5177,6 +5219,19 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
         return result
     }
 
+    /**
+     * Creates an array from an object of FixedArray<int>.
+     *
+     * @param arr An instance of the FixedArray type to convert to an array.
+     *
+     * @returns new Uint32Array
+     */
+    public static fromFixedArrayint(arr: FixedArray<int>): Uint32Array {
+        let result = new Uint32Array(arr.length)
+        result.ofInt(arr)
+        return result
+    }
+
     private native final set(array: Array<int>): void;
 
     /**
@@ -5189,7 +5244,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     public static fromArrayint(arr: Array<int>): Uint32Array {
         let result = new Uint32Array(arr.length)
         result.set(arr)
-        return result;
+        return result
     }
 
     /**
@@ -5269,7 +5324,8 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
 
     public static overload from {
         fromSetint, fromUint32Array ,fromInt32Array
-        ,fromArrayint, fromArrayLikenumber, fromArrayLike, fromIterable
+        ,fromFixedArrayint, fromArrayint, fromArrayLikenumber,
+        fromArrayLike, fromIterable
     };
 
     /**
@@ -6626,15 +6682,14 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      */
     public static of(...items: FixedArray<bigint>): BigUint64Array {
         let res = new BigUint64Array(items.length.toInt())
-        for (let i: int = 0; i < items.length; i++) {
-            res.setUnsafeClamp(i, items[i].getULong())
-        }
+        res.ofBigInt(items)
         return res
     }
 
     private final native ofInt(items: FixedArray<int>): void
     private final native ofNumber(items: FixedArray<number>): void
     private final native ofLong(items: FixedArray<long>): void
+    private final native ofBigInt(items: FixedArray<Object>): void
 
     /**
      * Returns a new array from a set of elements.
@@ -6692,6 +6747,19 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
         return result
     }
 
+    /**
+     * Creates an array from an object of FixedArray<BigInt>.
+     *
+     * @param arr An instance of the FixedArray type to convert to an array.
+     *
+     * @returns new BigUint64Array
+     */
+    public static fromFixedArrayBigInt(arr: FixedArray<BigInt>): BigUint64Array {
+        let result = new BigUint64Array(arr.length)
+        result.ofBigInt(arr)
+        return result
+    }
+
     private native final set(array: Array<BigInt>): void;
 
     /**
@@ -6704,7 +6772,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
     public static fromArrayBigInt(arr: Array<BigInt>): BigUint64Array {
         let result = new BigUint64Array(arr.length)
         result.set(arr)
-        return result;
+        return result
     }
 
     /**
@@ -6784,7 +6852,8 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
 
     public static overload from {
         fromSetBigInt, fromBigUint64Array
-        ,fromArrayBigInt, fromArrayLikeBigInt, fromArrayLike, fromIterable
+        ,fromFixedArrayBigInt, fromArrayBigInt, fromArrayLikeBigInt,
+        fromArrayLike, fromIterable
     };
 
     /**

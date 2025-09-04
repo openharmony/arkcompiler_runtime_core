@@ -737,9 +737,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         {%- elif argType == 'float' %}
         res.ofFloat(items)
         {%- elif argType == 'bigint' %}
-        for (let i: int = 0; i < items.length; i++) {
-            res.setUnsafe(i, items[i].getLong())
-        }
+        res.ofBigInt(items)
         {%- else %}
         res.ofNumber(items)
         {%- endif %}
@@ -757,6 +755,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
     private final native ofShort(items: FixedArray<short>): void
     {%- elif N == 'BigInt64' %}
     private final native ofLong(items: FixedArray<long>): void
+    private final native ofBigInt(items: FixedArray<Object>): void
     {%- elif N == 'Float32' %}
     private final native ofFloat(items: FixedArray<float>): void
     {%- endif %}
@@ -836,6 +835,25 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
     }
     {%- endif %}
 
+    /**
+     * Creates an array from an object of FixedArray<{{updatedElementCompat}}>.
+     *
+     * @param arr An instance of the FixedArray type to convert to an array.
+     *
+     * @returns new {{N}}Array
+     */
+    public static fromFixedArray{{updatedElementCompat}}(arr: FixedArray<{{updatedElementCompat}}>): {{N}}Array {
+        let result = new {{N}}Array(arr.length)
+        {%- if updatedElementCompat == 'number' %}
+        result.ofNumber(arr)
+        {%- elif updatedElementCompat == 'BigInt' %}
+        result.ofBigInt(arr)
+        {%- else %}
+        result.ofInt(arr)
+        {%- endif %}
+        return result
+    }
+
     private native final set(array: Array<{{updatedElementCompat}}>): void;
 
     /**
@@ -848,7 +866,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
     public static fromArray{{updatedElementCompat}}(arr: Array<{{updatedElementCompat}}>): {{N}}Array {
         let result = new {{N}}Array(arr.length)
         result.set(arr)
-        return result;
+        return result
     }
 
     /**
@@ -946,7 +964,8 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
 
     public static overload from {
         fromSet{{updatedElementCompat}}, from{{N}}Array{%- if U|length %} ,from{{U}}Array{%- endif %},
-        fromArray{{updatedElementCompat}}, fromArrayLikeNumber, fromArrayLike, fromIterable
+        fromFixedArray{{updatedElementCompat}}, fromArray{{updatedElementCompat}}, fromArrayLikeNumber,
+        fromArrayLike, fromIterable
     };
 
     {%- if (N == 'Float32') or (N == 'Float64') %}
