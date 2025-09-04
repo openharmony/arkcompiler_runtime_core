@@ -77,8 +77,6 @@ bool Utf8ToUtf16LEByteCheck(const unsigned char *data, std::u16string &u16Str, s
     for (size_t i = 0; i < inputSizeBytes;) {
         // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         uint8_t c1 = data[i];
-        uint8_t c2 = data[i + 1];
-        uint8_t c3 = data[i + 2];
         // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         if (IsOneByte(c1)) {
             i += 1;  // 1 : Proceeds 1 byte
@@ -98,6 +96,8 @@ bool Utf8ToUtf16LEByteCheck(const unsigned char *data, std::u16string &u16Str, s
                 break;
             }
             case THREE_BYTES_STYLE: {
+                uint8_t c2 = data[i + 1];
+                uint8_t c3 = data[i + 2];
                 if (i + TWO_MORE_BYTES_TO_CONSUME >= inputSizeBytes) {
                     return false;
                 }
@@ -112,6 +112,7 @@ bool Utf8ToUtf16LEByteCheck(const unsigned char *data, std::u16string &u16Str, s
             }
             case TWO_BYTES_STYLE1:
             case TWO_BYTES_STYLE2: {
+                uint8_t c2 = data[i + 1];
                 if (i + ONE_MORE_BYTE_TO_CONSUME >= inputSizeBytes) {
                     return false;
                 }
