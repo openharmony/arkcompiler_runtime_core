@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,3 +19,8 @@ string_concat:
   - {x: '"a"', y: '"a"', result: '"aa"'}
   - {x: '"aaa"', y: '"AAA"', result: '"aaaAAA"'}
   - {x: '"фыва"', y: '"ФЫВА"', result: '"фываФЫВА"'} # Text in Russian
+  - {
+      x: '`multiline\rstring\rliteral 1\r`', 
+      y: '`multiline\rstring\rliteral 2\r`', 
+      result: '`multiline\rstring\rliteral 1\rmultiline\rstring\rliteral 2\r`'
+    }
