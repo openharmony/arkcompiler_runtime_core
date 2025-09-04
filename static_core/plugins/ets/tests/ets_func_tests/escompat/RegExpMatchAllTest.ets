@@ -101,7 +101,7 @@ function checkTestResult(actual : RegExpMatchArray | null, expected : RegExpMatc
     }
 
     for (let i = 0; i < actual.result.length; i++ ) {
-        if (!actual.result[i].equals(expected.result[i])) {
+        if (!actual.result[i]!.equals(expected.result[i])) {
             console.println ("check index : " + i);
             console.println("content of result array from actual is not equals to expected");
             console.println("actual  : " + actual.result[i]);
