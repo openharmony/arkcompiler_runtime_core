@@ -15,7 +15,7 @@
 cases:
     # declaration context
     - use: |-
-          // declaration context, array of primitives
+          // declaration context, array of value types
           let a: FixedArray<boolean> = [!true, true, true]
           arktest.assertEQ(a[0], false)
           arktest.assertEQ(a[1], true)
@@ -23,27 +23,27 @@ cases:
           arktest.assertEQ(a.length, 3)
 
     - use: |-
-          // declaration context, array of primitives
+          // declaration context, array of value types
           let a: FixedArray<long> = [1, 2, 3, -9223372036854775807 - 1]
           arktest.assertEQ(a[3], -9223372036854775808)
           arktest.assertEQ(a.length, 4)
 
     - use: |-
-          // declaration context, array of array of primitives
+          // declaration context, array of array of value types
           let a: FixedArray<FixedArray<int>> = [[-2147483647, 2, ], [3, ], [2 + 2, 5, 2147483646 + 1, ], [], ]
           arktest.assertEQ(a.length, 4)
           arktest.assertEQ(a[0][0], -2147483647)
           arktest.assertEQ(a[2][2], 2147483647)
 
     - use: |-
-          // declaration context, array of primitives
+          // declaration context, array of value types
           let a: FixedArray<number> = [Number.NaN, 0, 3.14, 1.7976931348623157e+308, ]
           arktest.assertTrue(Number.isNaN(a[0]))
           arktest.assertEQ(a[3], 1.7976931348623157e+308)
           arktest.assertEQ(a.length, 4)
 
     - use: |-
-          // declaration context, array of boxed
+          // declaration context, array of value types
           let a: FixedArray<Boolean> = [false, true, true]
           arktest.assertEQ(a[0], false)
           arktest.assertEQ(a[1], true)
@@ -51,20 +51,20 @@ cases:
           arktest.assertEQ(a.length, 3)
 
     - use: |-
-          // declaration context, array of boxed
+          // declaration context, array of value types
           let a: FixedArray<Long> = [1, 2, 3, -9223372036854775808,]
           arktest.assertEQ(a[3], -9223372036854775808)
           arktest.assertEQ(a.length, 4)
 
     - use: |-
-          // declaration context, array of boxed
+          // declaration context, array of value types
           let a: FixedArray<Number> = [Number.NaN, 0, 3.14, 1.7976931348623157e+308, ]
           arktest.assertTrue(Number.isNaN(a[0]))
           arktest.assertEQ(a[3], 1.7976931348623157e+308)
           arktest.assertEQ(a.length, 4)
 
     - use: |-
-          // declaration context, array of array of boxed
+          // declaration context, array of array of value types
           let a: FixedArray<FixedArray<Number>> = [[1.7976931348623157e+308, 2, ], [3, ], [4, 5, 6, ], [], ]
           arktest.assertEQ(a.length, 4)
           arktest.assertEQ(a[0][0], 1.7976931348623157e+308)
@@ -87,7 +87,7 @@ cases:
 
     - decl: |-
           function bar(i: Int): Char {
-              let v: Int = i + 1   
+              let v: Int = i + 1
               return v.toChar()
           }
       use: |-
@@ -224,7 +224,7 @@ cases:
     - decl: |-
           let e = new Error
       use: |-
-          // declaration context, array of union with boxed
+          // declaration context, array of union with value types
           let a: FixedArray<Number|Error|((p: string)=>string)|Boolean> = [e, false, (p: string): string => p + p, 42]
           arktest.assertEQ(a[0] as Error, e)
           arktest.assertEQ(a[1] as Boolean, false)
@@ -235,7 +235,7 @@ cases:
     - decl: |-
           let e = new Error
       use: |-
-          // declaration context, array of array of union with boxed
+          // declaration context, array of array of union with value types
           let a: FixedArray<FixedArray<Number|Error|((p: string)=>string)|Boolean>> = [[e], [false], [(p: string): string => p + p], [42]]
           arktest.assertEQ(a[0][0] as Error, e)
           arktest.assertEQ(a[1][0] as Boolean, false)
@@ -245,7 +245,7 @@ cases:
 
     - use: |-
           // declaration context, union of arrays
-          let a: FixedArray<Number>|FixedArray<String>|FixedArray<Boolean> = [false, !false, false] as FixedArray<Boolean>
+          let a: FixedArray<Number>|FixedArray<String>|FixedArray<Boolean> = [false, !false, false]
           arktest.assertEQ((a as FixedArray<Boolean>)[0], false)
           arktest.assertEQ((a as FixedArray<Boolean>)[1], true)
           arktest.assertEQ((a as FixedArray<Boolean>)[2], false)

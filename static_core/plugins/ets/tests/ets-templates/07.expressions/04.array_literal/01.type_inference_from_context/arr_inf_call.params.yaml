@@ -22,7 +22,7 @@ cases:
               arktest.assertEQ(a.length, 3)
           }
       use: |-
-          // call context, array of primitives
+          // call context, array of value types
           foo([!true, true, true])
 
     - decl: |-
@@ -31,7 +31,7 @@ cases:
               arktest.assertEQ(a.length, 4)
           }
       use: |-
-          // call context, array of primitives
+          // call context, array of value types
           foo([1, 2, 3, -9223372036854775808])
 
     - decl: |-
@@ -41,7 +41,7 @@ cases:
               arktest.assertEQ(a[2][2], 2147483647)
           }
       use: |-
-          // call context, array of array of primitives
+          // call context, array of array of value types
           foo([[-2147483647, 2, ], [3, ], [4, 5, 2147483647, ], [], ])
 
     - decl: |-
@@ -51,7 +51,7 @@ cases:
               arktest.assertEQ(a.length, 4)
           }
       use: |-
-          // call context, array of primitives
+          // call context, array of value types
           foo([Number.NaN, 0, 3.14, 1.7976931348623157e+308, ])
 
     - decl: |-
@@ -61,7 +61,7 @@ cases:
               arktest.assertEQ(a.length, 4)
           }
       use: |-
-          // call context, array of boxed
+          // call context, array of value types
           foo([Number.NaN, 0, 3.14, 1.7976931348623157e+308, ])
 
     - decl: |-
@@ -72,7 +72,7 @@ cases:
               arktest.assertEQ(a.length, 3)
           }
       use: |-
-          // call context, array of boxed
+          // call context, array of value types
           foo([false, true, true])
 
     - decl: |-
@@ -81,7 +81,7 @@ cases:
               arktest.assertEQ(a.length, 4)
           }
       use: |-
-          // call context, array of boxed
+          // call context, array of value types
           foo([1, 2, 3, -9223372036854775808,])
 
     - decl: |-
@@ -107,7 +107,7 @@ cases:
 
     - decl: |-
           function bar(i: Int): Char {
-              let v: Int = i + 1 
+              let v: Int = i + 1
               return v.toChar()
           }
           function foo(a: char[]) {
@@ -183,7 +183,7 @@ cases:
               arktest.assertEQ(a[2][2], 6.0)
           }
       use: |-
-          // call context, array of array of boxed
+          // call context, array of array of value types
           foo([[1.7976931348623157e+308, 2, ], [3, ], [4, 5, 6, ], [], ])
 
     - decl: |-
@@ -324,7 +324,7 @@ cases:
               arktest.assertEQ(a.length, 4)
           }
       use: |-
-          // call context, array of union with boxed
+          // call context, array of union with value types
           foo([e, false, (p: string): string => p + p, 42])
 
     - decl: |-
@@ -337,7 +337,7 @@ cases:
               arktest.assertEQ(a.length, 4)
           }
       use: |-
-          // call context, array of array of union with boxed
+          // call context, array of array of union with value types
           foo([[e], [false], [(p: string): string => p + p], [42]])
 
     - decl: |-

@@ -945,16 +945,23 @@
 # 27209
 07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/oome1.ets
 
-#22791 FixedArray and Array<T> support is not implemented yet
-07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_cast_23.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_decl_27.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_cast_23.ets
-
 #24879 Cannot determine type of array expression in Union type
+07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_call_28.ets
 07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_call_30.ets
 
-#23453 Cannot cast array literal to union of arrays
-07.expressions/04.array_literal/01.type_inference_from_context/arr_inf_cast_27.ets
+#29499
+07.expressions/04.array_literal/01.type_inference_from_context/arr4_inf_assn_45.ets
+07.expressions/04.array_literal/01.type_inference_from_context/arr4_inf_assn_58.ets
+07.expressions/04.array_literal/01.type_inference_from_context/arr4_inf_call_40.ets
+07.expressions/04.array_literal/01.type_inference_from_context/arr4_inf_call_45.ets
+07.expressions/04.array_literal/01.type_inference_from_context/arr4_inf_call_47.ets
+07.expressions/04.array_literal/01.type_inference_from_context/arr4_inf_call_49.ets
+07.expressions/04.array_literal/01.type_inference_from_context/arr4_inf_call_60.ets
+07.expressions/04.array_literal/01.type_inference_from_context/arr4_inf_call_61.ets
+07.expressions/04.array_literal/01.type_inference_from_context/arr4_inf_decl_41.ets
+07.expressions/04.array_literal/01.type_inference_from_context/arr4_inf_decl_45.ets
+07.expressions/04.array_literal/01.type_inference_from_context/arr4_inf_decl_47.ets
+07.expressions/04.array_literal/01.type_inference_from_context/arr4_inf_decl_60.ets
 
 #23363 No CTE when array type cannot be determined
 07.expressions/04.array_literal/arr_n_2.ets
@@ -2616,7 +2623,6 @@
 
 # 1.
 # verifier error - not supported cast array literal to union of fixedarrays
-07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_cast_26.ets
 
 # 2.
 # TypeError: Type '[String, Double]' is not compatible with the enclosing method's

@@ -15,7 +15,7 @@
 cases:
     # casting context
     - use: |-
-          // casting context, array of primitives
+          // casting context, array of value types
           let a = [!true, true, true] as FixedArray<boolean>
           arktest.assertEQ(a[0], false)
           arktest.assertEQ(a[1], true)
@@ -23,27 +23,27 @@ cases:
           arktest.assertEQ(a.length, 3)
 
     - use: |-
-          // casting context, array of primitives
+          // casting context, array of value types
           let a = [1, 2, 3, -9223372036854775807 - 1] as FixedArray<long>
           arktest.assertEQ(a[3], -9223372036854775808)
           arktest.assertEQ(a.length, 4)
 
     - use: |-
-          // casting context, array of array of primitives
+          // casting context, array of array of value types
           let a = [[-2147483647, 2, ], [3, ], [2 + 2, 5, 2147483646 + 1, ], [], ] as FixedArray<FixedArray<int>>
           arktest.assertEQ(a.length, 4)
           arktest.assertEQ(a[0][0], -2147483647)
           arktest.assertEQ(a[2][2], 2147483647)
 
     - use: |-
-          // casting context, array of primitives
+          // casting context, array of value types
           let a = [Number.NaN, 0, 3.14, 1.7976931348623157e+308, ] as FixedArray<number>
           arktest.assertTrue(Number.isNaN(a[0]))
           arktest.assertEQ(a[3], 1.7976931348623157e+308)
           arktest.assertEQ(a.length, 4)
 
     - use: |-
-          // casting context, array of boxed
+          // casting context, array of value types
           let a = [false, true, true] as FixedArray<Boolean>
           arktest.assertEQ(a[0], false)
           arktest.assertEQ(a[1], true)
@@ -51,20 +51,20 @@ cases:
           arktest.assertEQ(a.length, 3)
 
     - use: |-
-          // casting context, array of boxed
+          // casting context, array of value types
           let a = [1, 2, 3, -9223372036854775808,] as FixedArray<Long>
           arktest.assertEQ(a[3], -9223372036854775808)
           arktest.assertEQ(a.length, 4)
 
     - use: |-
-          // casting context, array of boxed
+          // casting context, array of value types
           let a = [Number.NaN, 0, 3.14, 1.7976931348623157e+308, ] as FixedArray<Number>
           arktest.assertTrue(Number.isNaN(a[0]))
           arktest.assertEQ(a[3], 1.7976931348623157e+308)
           arktest.assertEQ(a.length, 4)
 
     - use: |-
-          // casting context, array of array of boxed
+          // casting context, array of array of value types
           let a = [[1.7976931348623157e+308, 2, ], [3, ], [4, 5, 6, ], [], ] as FixedArray<FixedArray<Number>>
           arktest.assertEQ(a.length, 4)
           arktest.assertEQ(a[0][0], 1.7976931348623157e+308)
@@ -87,7 +87,7 @@ cases:
 
     - decl: |-
           function bar(i: Int): Char {
-              let v: Int = i + 1   
+              let v: Int = i + 1
               return v.toChar()
           }
       use: |-
@@ -214,7 +214,7 @@ cases:
 
     - use: |-
           // casting context, array of array of unions
-          let a = [[true, 1, 'a', null]] as FixedArray<boolean|int|string|null>
+          let a = [[true, 1, 'a', null]] as FixedArray<FixedArray<boolean|int|string|null>>
           arktest.assertEQ(a[0][0] as boolean, true)
           arktest.assertEQ(a[0][1] as int, 1)
           arktest.assertEQ(a[0][2] as string, 'a')
@@ -224,7 +224,7 @@ cases:
     - decl: |-
           let e = new Error
       use: |-
-          // casting context, array of union with boxed
+          // casting context, array of union with value types
           let a = [e, false, (p: string): string => p + p, 42] as FixedArray<Number|Error|((p: string)=>string)|Boolean>
           arktest.assertEQ(a[0] as Error, e)
           arktest.assertEQ(a[1] as Boolean, false)
@@ -235,7 +235,7 @@ cases:
     - decl: |-
           let e = new Error
       use: |-
-          // casting context, array of array of union with boxed
+          // casting context, array of array of union with value types
           let a = [[e], [false], [(p: string): string => p + p], [42]] as FixedArray<FixedArray<Number|Error|((p: string)=>string)|Boolean>>
           arktest.assertEQ(a[0][0] as Error, e)
           arktest.assertEQ(a[1][0] as Boolean, false)

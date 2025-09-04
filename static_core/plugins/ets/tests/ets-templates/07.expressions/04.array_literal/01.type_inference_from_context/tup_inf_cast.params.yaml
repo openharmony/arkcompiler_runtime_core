@@ -15,13 +15,13 @@
 cases:
     # casting context
     - use: |-
-          // casting context, tuple of primitives
+          // casting context, tuple of value types
           let a = [1, 2, 3, -9223372036854775808] as [short, int, int, long]
           arktest.assertEQ(a[0], 1)
           arktest.assertEQ(a[3], -9223372036854775808)
 
     - use: |-
-          // casting context, tuple of primitives
+          // casting context, tuple of value types
           let a = [Number.NaN, 0, 3.14f, 1.7976931348623157e+308, ] as [number, byte, float, number]
           arktest.assertTrue(Number.isNaN(a[0].toDouble()))
           arktest.assertEQ(a[1], 0)
@@ -29,7 +29,7 @@ cases:
           arktest.assertEQ(a[3], 1.7976931348623157e+308)
 
     - use: |-
-          // casting context, tuple of boxed
+          // casting context, tuple of value types
           let a = [0b1, 2, 0x7f, -9223372036854775808,] as [Short, Int, Byte, Long]
           arktest.assertEQ(a[0], 1)
           arktest.assertEQ(a[1], 2)
@@ -37,7 +37,7 @@ cases:
           arktest.assertEQ(a[3], -9223372036854775808)
 
     - use: |-
-          // casting context, tuple of boxed
+          // casting context, tuple of value types
           let a = [Number.NaN, 0, 3.14f, 1.7976931348623157e+308, ] as [Number, Byte, Float, Double]
           arktest.assertTrue(Number.isNaN(a[0].toDouble()))
           arktest.assertEQ(a[1], 0)
@@ -71,7 +71,7 @@ cases:
           arktest.assertEQ(a[1][1], 16777215.0f)
 
     - use: |-
-          // casting context, tuple of tuple of primitives
+          // casting context, tuple of tuple of value types
           let a = [[-2147483647, Double.NEGATIVE_INFINITY], [ 0x7f, 16777215.0f, -32768]] as [[int, double], [byte, float, short]]
           arktest.assertEQ(a[0][0], -2147483647)
           arktest.assertEQ(a[0][1], Double.NEGATIVE_INFINITY)
@@ -80,7 +80,7 @@ cases:
           arktest.assertEQ(a[1][2], -32768)
 
     - use: |-
-          // casting context, tuple of tuple of boxed
+          // casting context, tuple of tuple of value types
           let a = [9223372036854775807, [9007199254740991, -9007199254740991], [ 2147483647, -9223372036854775808]] as [Long, [Double, Number], [Int, Long]]
           arktest.assertEQ(a[0], 9223372036854775807)
           arktest.assertEQ(a[1][0], 9007199254740991)

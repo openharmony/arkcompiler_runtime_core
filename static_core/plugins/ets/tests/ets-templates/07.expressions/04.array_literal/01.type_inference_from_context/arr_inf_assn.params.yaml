@@ -17,7 +17,7 @@ cases:
     - decl: |-
           let a: boolean[] = [true, true, true, true, true, true]
       use: |-
-          // assignment context, array of primitives
+          // assignment context, array of value types
           a = [!true, true, false]
           arktest.assertEQ(a[0], false)
           arktest.assertEQ(a[1], true)
@@ -27,7 +27,7 @@ cases:
     - decl: |-
           let a: long[] = []
       use: |-
-          // assignment context, array of primitives
+          // assignment context, array of value types
           a = [1, 2, 3, -9223372036854775807 - 1]
           arktest.assertEQ(a[3], -9223372036854775808)
           arktest.assertEQ(a.length, 4)
@@ -35,7 +35,7 @@ cases:
     - decl: |-
           let a: int[][] = []
       use: |-
-          // assignment context, array of array of primitives
+          // assignment context, array of array of value types
           a = [[-2147483647, 2, ], [3, ], [2 + 2, 5, 2147483646 + 1, ], [], ]
           arktest.assertEQ(a.length, 4)
           arktest.assertEQ(a[0][0], -2147483647)
@@ -44,7 +44,7 @@ cases:
     - decl: |-
           let a: number[] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,]
       use: |-
-          // assignment context, array of primitives
+          // assignment context, array of value types
           a = [Number.NaN, 0, 3.14, 1.7976931348623157e+308, ]
           arktest.assertTrue(Number.isNaN(a[0]))
           arktest.assertEQ(a[3], 1.7976931348623157e+308)
@@ -53,7 +53,7 @@ cases:
     - decl: |-
           let a: Boolean[] = []
       use: |-
-          // assignment context, array of boxed
+          // assignment context, array of value types
           a = [false, true, true]
           arktest.assertEQ(a[0], false)
           arktest.assertEQ(a[1], true)
@@ -63,7 +63,7 @@ cases:
     - decl: |-
           let a: Long[] = []
       use: |-
-          // assignment context, array of boxed
+          // assignment context, array of value types
           a = [1, 2, 3, -9223372036854775808,]
           arktest.assertEQ(a[3], -9223372036854775808)
           arktest.assertEQ(a.length, 4)
@@ -71,7 +71,7 @@ cases:
     - decl: |-
           let a: Number[] = []
       use: |-
-          // assignment context, array of boxed
+          // assignment context, array of value types
           a = [Number.NaN, 0, 3.14, 1.7976931348623157e+308, ]
           arktest.assertTrue(Number.isNaN(a[0]))
           arktest.assertEQ(a[3], 1.7976931348623157e+308)
@@ -80,7 +80,7 @@ cases:
     - decl: |-
           let a: Number[][] = []
       use: |-
-          // assignment context, array of array of boxed
+          // assignment context, array of array of value types
           a = [[1.7976931348623157e+308, 2, ], [3, ], [4, 5, 6, ], [], ]
           arktest.assertEQ(a.length, 4)
           arktest.assertEQ(a[0][0], 1.7976931348623157e+308)
@@ -107,7 +107,7 @@ cases:
 
     - decl: |-
           function bar(i: Int): Char {
-              let v: Int = i + 1 
+              let v: Int = i + 1
               return v.toChar()
           }
           let a: Char[] = []
@@ -282,7 +282,7 @@ cases:
           let e = new Error
           let a: (Number|Error|((p: string)=>string)|Boolean)[] = []
       use: |-
-          // assignment context, array of union with boxed
+          // assignment context, array of union with value types
           a = [e, false, (p: string): string => p + p, 42]
           arktest.assertEQ(a[0] as Error, e)
           arktest.assertEQ(a[1] as Boolean, false)
@@ -294,7 +294,7 @@ cases:
           let e = new Error
           let a: (Number|Error|((p: string)=>string)|Boolean)[][] = []
       use: |-
-          // assignment context, array of array of union with boxed
+          // assignment context, array of array of union with value types
           a = [[e], [false], [(p: string): string => p + p], [42]]
           arktest.assertEQ(a[0][0] as Error, e)
           arktest.assertEQ(a[1][0] as Boolean, false)

@@ -15,9 +15,8 @@
 
 /*---
 desc: >-
-  There are cases when every array or tuple element of primitive type is boxed
-  (see Boxing Conversions) according to the type of the context that creates a
-  new array or tuple.
+    There are cases when every array or tuple element of value type is converted
+    to the type of the context that creates a new array or tuple.
 ---*/
 
 function foo (array: Number[]) {
