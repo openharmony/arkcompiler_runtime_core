@@ -2404,15 +2404,15 @@
 17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_string_decl_18.ets
 17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_string_decl_19.ets
 
-#28992
+#29682
 17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_long_decl_0.ets
 17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_long_decl_1.ets
-17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_long_decl_4.ets
-17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_long_decl_5.ets
-17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_long_decl_6.ets
-17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_long_decl_7.ets
 17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_long_decl_9.ets
 17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_long_decl_11.ets
+
+#29683
+17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_long_decl_4.ets
+17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_long_decl_5.ets
 
 #18763 es2panda aborts on for-of over a union type array
 17.experimental_features/06.iterable_types/it_11.ets
