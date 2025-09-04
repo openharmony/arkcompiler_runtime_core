@@ -26,7 +26,7 @@ describe('appStateSlice reducer', () => {
         versions: {
             arktsVersion: '',
             backendVersion: '',
-            es2panda: '',
+            es2pandaVersion: '',
             frontend: '',
         },
         versionsLoading: false,

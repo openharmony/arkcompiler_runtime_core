@@ -22,6 +22,7 @@ import {
     selectDisasmErrLogs,
     selectOutLogs,
     selectErrLogs,
+    selectHighlightErrors
 } from './logs';
 import { RootState } from '..';
 import {mockAllState} from './appState.test';
@@ -32,57 +33,67 @@ describe('Log Selectors', () => {
     beforeEach(() => {
         mockState = {...mockAllState,
             logs: {
-                compileOut: [{ message: 'compile output log', isRead: true }],
-                compileErr: [{ message: 'compile error log', isRead: false }],
-                runOut: [{ message: 'run output log', isRead: true }],
-                runErr: [{ message: 'run error log', isRead: false }],
-                disasmOut: [{ message: 'disassembly output log', isRead: true }],
-                disasmErr: [{ message: 'disassembly error log', isRead: false }],
-                verifierOut: [{ message: 'verifier output log', isRead: true }],
-                verifierErr: [{ message: 'verifier error log', isRead: false }],
-                out: [{ message: 'general output log', isRead: true }],
-                err: [{ message: 'general error log', isRead: false }],
+                compileOut: [{ message: [{message: 'compile output log'}], isRead: true }],
+                compileErr: [{ message: [{message:  'compile error log'}], isRead: false }],
+                runOut: [{ message: [{message:  'run output log'}], isRead: true }],
+                runErr: [{ message: [{message:  'run error log'}], isRead: false }],
+                disasmOut: [{ message: [{message:  'disassembly output log'}], isRead: true }],
+                disasmErr: [{ message: [{message:  'disassembly error log'}], isRead: false }],
+                verifierOut: [{ message: [{message:  'verifier output log'}], isRead: true }],
+                verifierErr: [{ message: [{message:  'verifier error log'}], isRead: false }],
+                out: [{ message: [{message:  'general output log'}], isRead: true }],
+                err: [{ message: [{message:  'general error log'}], isRead: false }],
+                highlightErrors: [],
+                jumpTo: null
             },
         };
     });
 
     it('should select compile output logs', () => {
         expect(selectCompileOutLogs(mockState))
-            .toEqual([{ message: 'compile output log', isRead: true }]);
+            .toEqual([{ message: [{message: 'compile output log'}], isRead: true }]);
     });
 
     it('should select compile error logs', () => {
         expect(selectCompileErrLogs(mockState))
-            .toEqual([{ message: 'compile error log', isRead: false }]);
+            .toEqual([{ message: [{message:  'compile error log'}], isRead: false }]);
     });
 
     it('should select run output logs', () => {
         expect(selectRunOutLogs(mockState))
-            .toEqual([{ message: 'run output log', isRead: true }]);
+            .toEqual([{ message: [{message:  'run output log'}], isRead: true }]);
     });
 
     it('should select run error logs', () => {
         expect(selectRunErrLogs(mockState))
-            .toEqual([{ message: 'run error log', isRead: false }]);
+            .toEqual([{ message: [{message:  'run error log'}], isRead: false }]);
     });
 
     it('should select disassembly output logs', () => {
         expect(selectDisasmOutLogs(mockState))
-            .toEqual([{ message: 'disassembly output log', isRead: true }]);
+            .toEqual([{ message: [{message:  'disassembly output log'}], isRead: true }]);
     });
 
     it('should select disassembly error logs', () => {
         expect(selectDisasmErrLogs(mockState))
-            .toEqual([{ message: 'disassembly error log', isRead: false }]);
+            .toEqual([{ message: [{message:  'disassembly error log'}], isRead: false }]);
     });
 
     it('should select general output logs', () => {
         expect(selectOutLogs(mockState))
-            .toEqual([{ message: 'general output log', isRead: true }]);
+            .toEqual([{ message: [{message:  'general output log'}], isRead: true }]);
     });
 
     it('should select general error logs', () => {
         expect(selectErrLogs(mockState))
             .toEqual([{ message: 'general error log', isRead: false }]);
+    });
+    it('should select highlight errors', () => {
+        mockState.logs.highlightErrors = [
+            { line: 1, column: 2, message: 'Syntax error' },
+        ];
+        expect(selectHighlightErrors(mockState)).toEqual([
+            { line: 1, column: 2, message: 'Syntax error' },
+        ]);
     });
 });

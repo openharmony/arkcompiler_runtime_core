@@ -45,6 +45,7 @@
 }
 .code {
   flex: 1 1 100%;
+  min-width: 0;
 }
 .disasm {
   flex: 0 0 50%;
@@ -71,4 +72,7 @@
 .customHeader {
   width: 100%;
   padding: 0 20px;
+}
+.windowCode {
+  z-index: 1000;
 }
