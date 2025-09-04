@@ -15,11 +15,13 @@ limitations under the License.
 
 /*---
 desc: Export type directive
-tags: [compile-only]
+files:
+- ./class_a_as_b.ets
 ---*/
 
 import { ClassB } from './class_a_as_b'
 
-function main(): int {
-    return 0
+function main() {
+    let i: ClassB = new ClassB(3)
+    arktest.assertEQ(i.f, 3)
 }

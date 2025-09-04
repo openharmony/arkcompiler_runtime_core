@@ -15,8 +15,8 @@
 
 /*---
 tags: [not-a-test, compile-only]
+files:
+- ./default_module.ets
 ---*/
 
-package pkg01b;
-
-export { ClassA, InterfaceA, foo, BAR } from '../pkg01a'  // re-export from package module
+export {default as B} from "./default_module"

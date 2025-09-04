@@ -14,12 +14,15 @@
  */
 
 /*---
-desc: Re-export directive, new names should be available
-files: ['./modules/module_all_renamed.ets', './modules/module_a.ets']
+desc: re-export default declaration from the other module
+files:
+- ./modules/re-export_default.ets
+- ./modules/default_module.ets
 ---*/
 
-import { NewClassA, NewInterfaceA, newFoo, NEW_BAR } from './modules/module_all_renamed'
+import {A} from "./modules/re-export_default"
 
 function main() {
-    arktest.assertEQ(NEW_BAR, 146)
+  let i = new A()
+  arktest.assertEQ(i.f, 3)
 }

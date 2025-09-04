@@ -14,12 +14,9 @@
  */
 
 /*---
-desc: Re-export directive, new names should be available
-files: ['./pkg02a/a.ets', './pkg02b/a.ets']
+tags: [not-a-test, compile-only]
+files:
+- ./default_module.ets
 ---*/
 
-import { NewClassA, NewInterfaceA, newFoo, NEW_BAR } from './pkg02b'
-
-function main() {
-    arktest.assertEQ(NEW_BAR, 146)
-}
+export {default} from "./default_module"

@@ -14,7 +14,15 @@
  */
 
 /*---
-tags: [not-a-test, compile-only]
+desc: TBD
+files:
+- ./modules/re-export_non-default.ets
+- ./modules/module_a.ets
 ---*/
 
-export * as name from "./module_b";
+import {ClassA} from "./modules/re-export_non-default"
+
+function main() {
+  let i = new ClassA()
+  arktest.assertEQ(i.f, 3)
+}

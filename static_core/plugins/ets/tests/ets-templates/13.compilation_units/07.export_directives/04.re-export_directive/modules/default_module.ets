@@ -14,12 +14,10 @@
  */
 
 /*---
-desc: Re-export directive, all names should be available
-files: ['./pkg03a/a.ets', './pkg03b/a.ets']
+desc: module contains default exported entity
+tags: [not-a-test, compile-only]
 ---*/
 
-import { ClassA, InterfaceA, foo, BAR } from './pkg03b'
-
-function main() {
-    arktest.assertEQ(BAR, 146)
+export default class A {
+  f: int = 3
 }

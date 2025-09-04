@@ -14,10 +14,10 @@
  */
 
 /*---
-tags: [not-a-test, compile-only]
+desc: An importPath cannot refer to the file the current module is stored in. Otherwise, a compile-time error occurs.
+tags: [negative, compile-only]
 ---*/
 
-export class ClassA {}
-export interface InterfaceA {}
-export function foo(): void {}
-export const BAR: int = 146
+export class A {}
+
+export {A as B} from "./modules/reexport_from_self"

@@ -15,10 +15,10 @@
 
 /*---
 desc: Re-export directive
-files: ['./module_b_re-export.ets', './module_b.ets']
+files: ['./modules/module_b_re-export.ets', './modules/module_b.ets']
 ---*/
 
-import { name } from "./module_b_re-export"
+import { name } from "./modules/module_b_re-export"
 
 function main() : void
 {

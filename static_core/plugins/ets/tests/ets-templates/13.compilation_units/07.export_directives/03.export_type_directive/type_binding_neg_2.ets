@@ -14,10 +14,11 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Export type directive, ClassA is exported as ClassB, therefore is not available
+desc: If a binding uses type, then a compile-time error occurs.
 tags: [compile-only, negative]
-files:
-- ./class_a_as_b.ets
 ---*/
 
-import { ClassA } from './class_a_as_b'
+class C {}
+class D {}
+
+export {C, type D}

@@ -16,10 +16,8 @@ limitations under the License.
 /*---
 desc: Export type directive, ClassA is exported as ClassB twice, therefore must fail
 tags: [compile-only, negative]
+files:
+- ./class_a_as_b_twice.ets
 ---*/
 
 import { ClassA } from './class_a_as_b_twice'
-
-function main(): int {
-    return 0
-}
