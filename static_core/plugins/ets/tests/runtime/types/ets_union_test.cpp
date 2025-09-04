@@ -144,10 +144,10 @@ TEST_F(EtsUnionTest, CreateUnionClass)
         }
         ASSERT_TRUE(klass->IsInitialized());
 
-        auto RtKlass =
+        auto rtKlass =
             verifier::FindCommonAncestor(ark::Runtime::GetCurrent()->GetClassLinker(), klass->GetLoadContext(),
                                          ext->GetLanguageContext(), klass->GetRuntimeClass(), nullptr);
-        EXPECT_EQ(PandaString(utf::Mutf8AsCString(RtKlass->GetDescriptor())), classLUB);
+        EXPECT_EQ(PandaString(utf::Mutf8AsCString(rtKlass->GetDescriptor())), classLUB);
         ASSERT_TRUE(CheckConstituentClasses(klass, consClassesList));
     }
 }

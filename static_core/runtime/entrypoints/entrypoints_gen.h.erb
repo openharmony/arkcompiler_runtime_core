@@ -50,7 +50,7 @@ using FileEntityId = uint64_t;
 %   next if entrypoint.external?
 %   prefix = '"C"'
 %   if entrypoint.has_bridge? && !entrypoints_map.include?(entrypoint.bridge_name)
-// NOLINTNEXTLINE(readability-named-parameter)
+// NOLINTNEXTLINE(readability-named-parameter, readability-redundant-declaration)
 extern <%= prefix %> <%= entrypoint.signature[0] %> <%= entrypoint.bridge_name %>(<%= entrypoint.signature[1..-1].join(', ') %>);
 %     entrypoints_map.add(entrypoint.bridge_name)
 %   end
@@ -60,11 +60,11 @@ extern <%= prefix %> <%= entrypoint.signature[0] %> <%= entrypoint.bridge_name %
 // NOLINTNEXTLINE(readability-identifier-naming)
 static constexpr <%= entrypoint.signature[0] %> (*<%= entrypoint.entrypoint %>)(<%= entrypoint.signature[1.. - 1].join(', ') %>) = nullptr;
 #else
-// NOLINTNEXTLINE(readability-named-parameter)
+// NOLINTNEXTLINE(readability-named-parameter, readability-redundant-declaration)
 extern <%= prefix %> <%= entrypoint.signature[0] %> <%= entrypoint.entrypoint %>(<%= entrypoint.signature[1.. - 1].join(', ') %>);
 #endif
 %     else
-// NOLINTNEXTLINE(readability-named-parameter)
+// NOLINTNEXTLINE(readability-named-parameter, readability-redundant-declaration)
 extern <%= prefix %> <%= entrypoint.signature[0] %> <%= entrypoint.entrypoint %>(<%= entrypoint.signature[1.. - 1].join(', ') %>);
 %     end
 %     entrypoints_map.add(entrypoint.entrypoint)

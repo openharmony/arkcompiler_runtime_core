@@ -517,7 +517,7 @@ uint32_t ItemContainer::DeleteForeignItems()
 
 void ItemContainer::FillExportMap()
 {
-    for (auto it : classMap_) {
+    for (auto &it : classMap_) {
         if (!it.second->IsForeign() && it.first.rfind("ETSGLOBAL") != std::string::npos) {
             exportMap_.insert({it.first, it.second});
         }

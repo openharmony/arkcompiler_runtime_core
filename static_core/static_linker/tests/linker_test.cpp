@@ -243,7 +243,7 @@ void PerformTest(TestData *data, const std::vector<std::string> &perms, const Co
             (void)iteration;
             ASSERT_EQ(expectedFile.value(), gotFile) << "on iteration: " << iteration;
         }
-        if (data->executable == true) {
+        if (data->executable) {
             auto res = ExecPanda(out);
             ASSERT_EQ(res.second, data->gold);
             ASSERT_EQ(res.first, 0);
