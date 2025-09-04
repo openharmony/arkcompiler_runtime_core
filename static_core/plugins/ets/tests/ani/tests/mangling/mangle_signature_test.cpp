@@ -380,6 +380,18 @@ TEST_F(MangleSignatureTest, Format_Wrong)
 
     desc = Mangle::ConvertSignature("C{a:b}:f");
     EXPECT_STREQ(desc.c_str(), "La:b;:F");
+
+    desc = Mangle::ConvertSignature("C{a/b}:");
+    EXPECT_STREQ(desc.c_str(), "C{a/b}:");
+
+    desc = Mangle::ConvertSignature("A{C{a/b}}:");
+    EXPECT_STREQ(desc.c_str(), "A{C{a/b}}:");
+
+    desc = Mangle::ConvertSignature("C{a.b}:C{a/b}");
+    EXPECT_STREQ(desc.c_str(), "C{a.b}:C{a/b}");
+
+    desc = Mangle::ConvertSignature(":X{C{a.b}C{c/d}}");
+    EXPECT_STREQ(desc.c_str(), ":X{C{a.b}C{c/d}}");
 }
 
 TEST_F(MangleSignatureTest, Module_FindFunction)
