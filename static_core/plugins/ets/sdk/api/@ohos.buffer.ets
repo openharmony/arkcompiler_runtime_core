@@ -81,16 +81,16 @@ function stringify(buffer: ArrayBuffer, encoding: string, resolvedStart: int, re
             const byte3 = i + 2 < resolvedEnd ? (buffer.at(i + 2) & 0xff) : NaN;
 
             const enc1 = byte1 >> 2;
-            const enc2 = ((byte1 & 3) << 4) | (byte2 >> 4);
-            const enc3 = ((byte2 & 15) << 2) | (byte3 >> 6);
-            const enc4 = byte3 & 63;
+            const enc2 = (((byte1 & 3) << 4) | (byte2 >> 4)).toInt();
+            const enc3 = (((byte2 & 15) << 2) | (byte3 >> 6)).toInt();
+            const enc4 = (byte3 & 63).toInt();
 
             if (isNaN(byte2)) {
-                base64 += encodings.charAt(enc1) + encodings.charAt(enc2) + '==';
+                base64 += encodings.charAt(enc1).toString() + encodings.charAt(enc2).toString() + '==';
             } else if (isNaN(byte3)) {
-                base64 += encodings.charAt(enc1) + encodings.charAt(enc2) + encodings.charAt(enc3) + '=';
+                base64 += encodings.charAt(enc1).toString() + encodings.charAt(enc2).toString() + encodings.charAt(enc3).toString() + '=';
             } else {
-                base64 += encodings.charAt(enc1) + encodings.charAt(enc2) + encodings.charAt(enc3) + encodings.charAt(enc4);
+                base64 += encodings.charAt(enc1).toString() + encodings.charAt(enc2).toString() + encodings.charAt(enc3).toString() + encodings.charAt(enc4).toString();
             }
         }
         if (encoding == "base64url") {

@@ -49,9 +49,6 @@ sub:
       - method: big
       - method: blink
       - method: bold
-      - method: charAt
-        params:
-          - paramOf(*inds)
       - method: charCodeAt
         params:
           - paramOf(*inds)

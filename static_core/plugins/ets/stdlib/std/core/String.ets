@@ -140,27 +140,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @remarks
      * Implemented as native function,  @see `charAt()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L585).
      */
-    public charAt(index: number): String {
-        if (index < 0 || index >= this.getLength() || this.getLength() == 0) {
-            return '';
-        }
-        let c : FixedArray<char> = new char[1];
-        c[0] = this.charAt(index.toInt())
-        return new String(c)
-    }
-
-    /**
-     * Getter for char at some index
-     *
-     * @param index index in char array inside String
-     *
-     * @returns char value at index
-     *
-     * @throws StringIndexOutOfBoundsError if index is negative or >= length
-     *
-     * @remarks
-     * Implemented as native function,  @see `charAt()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L585).
-     */
     public native charAt(index: int): char;
 
     /**
@@ -183,43 +162,10 @@ export final class String extends Object implements Comparable<String>, Iterable
      *
      * @returns the codepoint at the specified index
      */
-    public codePointAt(index: number): Number | undefined {
+    public codePointAt(index: int): int | undefined {
         if (index < 0 || index >= this.getLength() || this.getLength() == 0) {
             return undefined
         }
-        return (this.codePointAtInt(index.toInt())).toDouble();
-    }
-
-    /**
-     * Gets the codepoint at the specified index in this string.
-     * Is similar to charAt(index), but if the character at the
-     * index is the beginning of a surrogate pair, the int
-     * representation for this codepoint is returned. Otherwise,
-     * the character at the index is returned.
-     *
-     * @param index index of the potential surrogate pair
-     *
-     * @returns the codepoint at the specified index
-     */
-    public codePointAt(index: int): Number | undefined {
-        if (index < 0 || index >= this.getLength() || this.getLength() == 0) {
-            return undefined
-        }
-        return (this.codePointAtInt(index)).toDouble();
-    }
-
-    /**
-     * Gets the codepoint at the specified index in this string.
-     * Is similar to charAt(index), but if the character at the
-     * index is the beginning of a surrogate pair, the int
-     * representation for this codepoint is returned. Otherwise,
-     * the character at the index is returned.
-     *
-     * @param index index of the potential surrogate pair
-     *
-     * @returns the codepoint at the specified index
-     */
-    private codePointAtInt(index: int): int {
         let highValue: char = this.charAt(index);
         if (!Char.isHighSurrogate(highValue) || ++index == this.getLength()) {
             return highValue.toInt();
@@ -696,11 +642,11 @@ export final class String extends Object implements Comparable<String>, Iterable
             return q;
         }
         for (let i = 0; i < rLength - 1; ++i) {
-            if (s.codePointAtInt(q + i) != r.codePointAtInt(i)) {
+            if (s.codePointAt(q + i) != r.codePointAt(i)) {
                 return -1;
             }
         }
-        if (s.codePointAtInt(q + rLength - 1) != r.codePointAtInt(rLength - 1) as int) {
+        if (s.codePointAt(q + rLength - 1) != r.codePointAt(rLength - 1) as int) {
             // For making algorithm compiler-friendly
             // should be removed after BoundsAnalysis improvement
             return -1;

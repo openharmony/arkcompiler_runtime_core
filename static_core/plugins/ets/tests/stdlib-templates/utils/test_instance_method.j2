@@ -83,13 +83,13 @@ function main(): int {
         let actual: {{.actualType}}{% if item.method_throws == true %} | undefined | null{%- endif %}{%- if item.init_object_init_value is defined %} = {{.item.init_object_init_value}}{%- endif %};
       {% if item.method_throws == true %} try { {%- endif %}
         {%- if item.method_name == "codePointAt" %}
-      let tmp: Number | undefined = obj{{.item.object_type}}.{{.item.method_name}}({{.item.param_list.keys()|list|join(', ')}});
+      let tmp: int | undefined = obj{{.item.object_type}}.{{.item.method_name}}({{.item.param_list.keys()|list|join(', ')}});
       if (tmp == undefined) {
         console.print("FAILED");
         console.println();
         continue;
       }
-        actual = tmp.toDouble();
+        actual = tmp;
         {%- else %}
         actual = obj{{.item.object_type}}.{{.item.method_name}}({{.item.param_list.keys()|list|join(', ')}});
         {%- endif %}
