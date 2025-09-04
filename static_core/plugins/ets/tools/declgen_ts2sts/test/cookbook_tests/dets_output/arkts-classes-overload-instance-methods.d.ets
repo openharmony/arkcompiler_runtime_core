@@ -14,6 +14,5 @@
  * limitations under the License.
  */
 export declare class MathUtils2 {
-    add(num: number): number;
-    add(num1: number, num2: number): number;
+    add(param0: number, param1?: number): number;
 }

@@ -14,6 +14,5 @@
  * limitations under the License.
  */
 export declare class MathUtils {
-    static add(num: number): number;
-    static add(num1: number, num2: number): number;
+    static add(param0: number, param1?: number): number;
 }
