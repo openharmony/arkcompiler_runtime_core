@@ -1800,11 +1800,11 @@ class TypedArrayTypeAniInfo(TypeAniInfo):
         ani_data = f"{cpp_result}_data"
         ani_length = f"{cpp_result}_length"
         target.writelns(
-            f"ani_double {ani_byte_length} = {{}};",
-            f"ani_double {ani_byte_offset} = {{}};",
+            f"ani_int {ani_byte_length} = {{}};",
+            f"ani_int {ani_byte_offset} = {{}};",
             f"ani_arraybuffer {ani_arrbuf} = {{}};",
-            f'{env}->Object_GetPropertyByName_Double({ani_value}, "byteLength", &{ani_byte_length});',
-            f'{env}->Object_GetPropertyByName_Double({ani_value}, "byteOffset", &{ani_byte_offset});',
+            f'{env}->Object_GetPropertyByName_Int({ani_value}, "byteLength", &{ani_byte_length});',
+            f'{env}->Object_GetPropertyByName_Int({ani_value}, "byteOffset", &{ani_byte_offset});',
             f'{env}->Object_GetPropertyByName_Ref({ani_value}, "buffer", reinterpret_cast<ani_ref*>(&{ani_arrbuf}));',
             f"void* {ani_data} = {{}};",
             f"ani_size {ani_length} = {{}};",

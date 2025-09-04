@@ -122,9 +122,9 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         const items: Object = elements as Object
         if (items instanceof ArrayLike) {
             const arr = Types.identity_cast<{{subsetTypeValues}}>(items as ArrayLike<{{subsetTypeValues}}>)
-            this.byteLength = arr.length.toInt() * {{N}}Array.BYTES_PER_ELEMENT
-            this.lengthInt = arr.length.toInt()
-            this.buffer = new ArrayBuffer(this.byteLength.toInt())
+            this.byteLength = arr.length * {{N}}Array.BYTES_PER_ELEMENT
+            this.lengthInt = arr.length
+            this.buffer = new ArrayBuffer(this.byteLength)
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 {%- if N == 'BigInt64' %}
@@ -258,9 +258,9 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
             // NOTE (ikorobkov): dealing with this overload is tricky
             // with banned `instanceof` generic, so it is delegated to array here. Initial idea from Set.ets
             let arr = Array.from<Number>((buf as ArrayLike<Number>))
-            this.byteLength = arr.length.toInt() * {{N}}Array.BYTES_PER_ELEMENT.toInt()
-            this.lengthInt = arr.length.toInt()
-            this.buffer = new ArrayBuffer(this.byteLength.toInt())
+            this.byteLength = arr.length * {{N}}Array.BYTES_PER_ELEMENT
+            this.lengthInt = arr.length
+            this.buffer = new ArrayBuffer(this.byteLength)
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).to{{T.capitalize()}}())
@@ -291,7 +291,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         this.lengthInt = length.toInt()
         this.byteLength = this.lengthInt * {{N}}Array.BYTES_PER_ELEMENT
         this.byteOffset = 0
-        this.buffer = new ArrayBuffer(this.byteLength.toInt())
+        this.buffer = new ArrayBuffer(this.byteLength)
     }
 
     /**
@@ -300,9 +300,9 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @param other data initializer
      */
     public constructor(other: {{N}}Array) {
-        this.buffer = other.buffer.slice(other.byteOffset.toInt(), (other.byteOffset + other.byteLength).toInt()) as ArrayBuffer
+        this.buffer = other.buffer.slice(other.byteOffset, other.byteOffset + other.byteLength) as ArrayBuffer
         this.byteLength = other.byteLength
-        this.lengthInt = other.length.toInt()
+        this.lengthInt = other.length
         this.byteOffset = 0
     }
 
@@ -2044,7 +2044,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
 
     private setUnsafe(insertPos: int, val: {{T}}): void {
         const BPE = {{N}}Array.BYTES_PER_ELEMENT.toInt()
-        let byteIndex = insertPos * BPE + this.byteOffset.toInt()
+        let byteIndex = insertPos * BPE + this.byteOffset
         let buf = this.buffer
         {%- if T != "byte" %}
             {%- if T == "float" %}
@@ -2075,10 +2075,10 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
     public readonly buffer: ArrayBuffer
 
     /** Byte offset within the underlying ArrayBuffer */
-    public readonly byteOffset: number
+    public readonly byteOffset: int
 
     /** Number of bytes used */
-    public readonly byteLength: number
+    public readonly byteLength: int
 
     /** String \"{{N}}Array\" */
     public readonly name = "{{N}}Array"
