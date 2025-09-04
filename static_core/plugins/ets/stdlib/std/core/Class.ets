@@ -37,6 +37,11 @@ export final class Class {
     }
 
     public native getLinker(): RuntimeLinker
+    public native isNamespace(): boolean;
+
+    public getNamespace(): Class | undefined {
+        throw new Error("not implemented")
+    }
 
     public native getInterfaces(): FixedArray<Class>
 

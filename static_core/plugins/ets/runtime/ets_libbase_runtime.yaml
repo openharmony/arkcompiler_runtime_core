@@ -5956,6 +5956,16 @@ intrinsics:
       args: [ ]
     impl: ark::ets::intrinsics::StdCoreClassGetNameInternal
 
+  - name: StdCoreClassIsNamespace
+    space: ets
+    class_name: std.core.Class
+    method_name: isNamespace
+    static: false
+    signature:
+      ret: u1
+      args: [ ]
+    impl: ark::ets::intrinsics::StdCoreClassIsNamespace
+
   - name: StdCoreClassGetLinker
     space: ets
     class_name: std.core.Class
