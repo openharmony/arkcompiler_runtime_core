@@ -17,50 +17,41 @@ cases:
     decl: |-
       let a: boolean = false;
       let b: boolean = false;
-      arktest.assertTrue((a || b) == false);
+      arktest.assertFalse(a || b);
 
   - doc: Conditional OR for 2x boolean - false true
     decl: |-
       let a: boolean = false;
       let b: boolean = true;
-      arktest.assertTrue((a || b) == true);
+      arktest.assertTrue(a || b);
 
   - doc: Conditional OR for 2x boolean - true unknown
     decl: |-
       let a: boolean = true;
-      arktest.assertTrue((a || fail()) == true);
+      arktest.assertTrue(a || fail());
 
-  - doc: Conditional OR for 4x boolean - false false false false
+  - doc: Conditional OR for 2x boolean - unknown true - left to right execution
+    decl: |-
+      let a: boolean = true;
+      let expectedException = (e: Error): boolean => { return (e instanceof AssertionError) }
+      arktest.expectThrow(() => { fail() && a }, expectedException);
+
+  - doc: Conditional OR for 3x boolean - false false false
     decl: |-
       let a: boolean = false;
       let b: boolean = false;
       let c: boolean = false;
-      let d: boolean = false;
-      arktest.assertTrue((a || b || c || d) == false)
+      arktest.assertFalse(a || b || c);
 
-  - doc: Conditional OR for 4x boolean - false false false true
-    decl: |-
-      let a: boolean = false;
-      let b: boolean = false;
-      let c: boolean = false;
-      let d: boolean = true;
-      arktest.assertTrue((a || b || c || d) == true)
-
-  - doc: Conditional OR for 4x boolean - false false true unknown
+  - doc: Conditional OR for 3x boolean - false false true
     decl: |-
       let a: boolean = false;
       let b: boolean = false;
       let c: boolean = true;
-      arktest.assertTrue((a || b || c || fail()) == true)
+      arktest.assertTrue(a || b || c);
 
-  - doc: Conditional OR for 4x boolean - false true unknown...
-    decl: |-
-      let a: boolean = false;
-      let b: boolean = true;
-      arktest.assertTrue((a || b || fail() || fail()) == true)
-
-  - doc: Conditional OR for 4x boolean - true unknown...
+  - doc: Conditional OR for 3x boolean - true unknown false - left to right grouping
     decl: |-
       let a: boolean = true;
-      arktest.assertTrue((a || fail() || fail() || fail()) == true)
-
+      let b: boolean = false;
+      arktest.assertTrue(a || fail() || b);

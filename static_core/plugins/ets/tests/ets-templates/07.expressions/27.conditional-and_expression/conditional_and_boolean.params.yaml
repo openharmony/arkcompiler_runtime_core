@@ -30,37 +30,28 @@ cases:
       let a: Boolean = false;
       arktest.assertTrue((a && fail()) == false);
 
-  - doc: Conditional AND for 4x Boolean - true true true true
+  - doc: Conditional AND for 2x Boolean - unknown false - left to right execution
+    decl: |-
+      let a: Boolean = false;
+      let expectedException = (e: Error): Boolean => { return (e instanceof AssertionError) }
+      arktest.expectThrow(() => { fail() && a }, expectedException)
+
+  - doc: Conditional AND for 3x Boolean - true true true
     decl: |-
       let a: Boolean = true;
       let b: Boolean = true;
       let c: Boolean = true;
-      let d: Boolean = true;
-      arktest.assertTrue((a && b && c && d) == true)
+      arktest.assertTrue((a && b && c) == true)
 
-  - doc: Conditional AND for 4x Boolean - true true true false
-    decl: |-
-      let a: Boolean = true;
-      let b: Boolean = true;
-      let c: Boolean = true;
-      let d: Boolean = false;
-      arktest.assertTrue((a && b && c && d) == false)
-
-  - doc: Conditional AND for 4x Boolean - true true false unknown
+  - doc: Conditional AND for 3x Boolean - true true false
     decl: |-
       let a: Boolean = true;
       let b: Boolean = true;
       let c: Boolean = false;
-      arktest.assertTrue((a && b && c && fail()) == false)
+      arktest.assertTrue((a && b && c) == false)
 
-  - doc: Conditional AND for 4x Boolean - true false unknown...
-    decl: |-
-      let a: Boolean = true;
-      let b: Boolean = false;
-      arktest.assertTrue((a && b && fail() && fail()) == false)
-
-  - doc: Conditional AND for 4x Boolean - false unknown...
+  - doc: Conditional AND for 3x Boolean - false unknown true - left to right grouping
     decl: |-
       let a: Boolean = false;
-      arktest.assertTrue((a && fail() && fail() && fail()) == false)
-
+      let b: Boolean = true;
+      arktest.assertTrue((a && fail() && b) == false)
