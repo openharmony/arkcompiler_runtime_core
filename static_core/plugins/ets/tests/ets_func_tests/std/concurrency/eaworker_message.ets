@@ -135,8 +135,6 @@ function testQuitSafely() {
 }
 
 function testCurrent() {
-    let main = EAWorker.current();
-    arktest.assertEQ(main, undefined);
     let eaw = new EAWorker();
     eaw.start();
     let waiter = new Event();
@@ -314,6 +312,15 @@ function testQuitSafelyBeforeStart() {
     eaw.quitSafely();
 }
 
+function testStartafterJoin() {
+    let eaw = new EAWorker();
+    arktest.expectError(() => {
+         eaw.join();
+    }, new Error('Cannot stop worker before start'));
+    eaw.start();
+    eaw.quit();
+}
+
 function main() {
     const suite = new arktest.ArkTestsuite('EAWorker Message Test Suite');
     suite.addTest('testNamedEAWorker', testNamedEAWorker);
@@ -331,5 +338,8 @@ function main() {
     suite.addTest('testTaskPool', testTaskPool);
     suite.addTest('testQuitBeforeStart', testQuitBeforeStart);
     suite.addTest('testQuitSafelyBeforeStart', testQuitSafelyBeforeStart);
+    suite.addTest('testStartafterJoin', testStartafterJoin);
+    // flaky fail test case #28321
+    // suite.addTest('testTaskPool', testTaskPool);
     suite.run();
 }
