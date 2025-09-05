@@ -13,20 +13,20 @@
  * limitations under the License.
  */
 
-function main(): int {
-    let suite = new arktest.ArkTestsuite("Intl. NumberFormat numberingSystem ");
-    suite.addTest("testNumberingSystem ", testNumberingSystem);
-    return suite.run();
-}
+#ifndef PANDA_PLUGINS_ETS_STDLIB_NATIVE_CORE_INTLLOCALEHELPER_H
+#define PANDA_PLUGINS_ETS_STDLIB_NATIVE_CORE_INTLLOCALEHELPER_H
 
-function testNumberingSystem() {
-    const locales: string[] = [ "en-US", "zh", "ar-SA"];
-    const expected: string[] = [ "latn", "latn", "arab"];
-    let i: int = 0;
-    for (const l of locales) {
-        const nf = new Intl.NumberFormat(l);
-        const result = nf.resolvedOptions().numberingSystem;
-        arktest.assertEQ(expected[i], result, "#" + i + " test-case for " + l);
-        i++
-    }
-}
+#include "stdlib_ani_helpers.h"
+
+#include <ani.h>
+#include <string>
+
+namespace ark::ets::stdlib::intl {
+
+ani_status RegisterIntlLocaleHelper(ani_env *env);
+
+void StdCoreVerifyBCP47LanguageTag(ani_env *env, [[maybe_unused]] ani_class klass, ani_string locale);
+
+}  // namespace ark::ets::stdlib::intl
+
+#endif  // PANDA_PLUGINS_ETS_STDLIB_NATIVE_CORE_INTLLOCALEHELPER_H
