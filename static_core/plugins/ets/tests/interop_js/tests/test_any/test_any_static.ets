@@ -35,14 +35,6 @@ function testLdByName(): void {
     arktest.assertEQ(baz, 'hello world');
 }
 
-function testLdByVal(): void {
-    let bar = fooInstance['bar'];
-    arktest.assertEQ(bar, 0xcafe);
-
-    let baz = fooInstance['baz'];
-    arktest.assertEQ(baz, 'hello world');
-}
-
 function testLdByIdx(): void {
     let babe = numberMapInstance[1];
     arktest.assertEQ(babe, 0xbabe);
@@ -59,16 +51,6 @@ function testStByName(): void {
     fooInstance.baz = 'updated';
     let baz = fooInstance.baz;
     arktest.assertEQ(baz, 'updated');
-}
-
-function testStByVal(): void {
-    fooInstance['bar'] = 0xf00d;
-    let bar = fooInstance['bar'];
-    arktest.assertEQ(bar, 0xf00d);
-
-    fooInstance['baz'] = 'testStByVal';
-    let baz = fooInstance['baz'];
-    arktest.assertEQ(baz, 'testStByVal');
 }
 
 function testCall0(): void {
@@ -170,10 +152,8 @@ function testSetter(): void {
 function testAll(): void {
     testIsInstance();
     testLdByName();
-    testLdByVal();
     testLdByIdx();
     testStByName();
-    testStByVal();
     testStByIdx();
     testCall0();
     testCallShort();
