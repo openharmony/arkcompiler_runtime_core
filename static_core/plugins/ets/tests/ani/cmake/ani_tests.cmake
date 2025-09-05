@@ -36,10 +36,20 @@ function(ani_add_gtest TARGET)
     cmake_parse_arguments(
         ARG # give prefix `ARG` to each argument
         ""
-        "ETS_CONFIG"
+        "ETS_CONFIG;TARGET_PREFIX"
         "CPP_SOURCES;ETS_SOURCES;LIBRARIES;TSAN_EXTRA_OPTIONS"
         ${ARGN}
     )
+
+    # Check TARGET prefix
+    set(TARGET_PREFIX "ani_test_")
+    if(DEFINED ARG_TARGET_PREFIX)
+        set(TARGET_PREFIX ${ARG_TARGET_PREFIX})
+    endif()
+    string(FIND "${TARGET}" "${TARGET_PREFIX}" PREFIX_INDEX)
+    if(NOT ${PREFIX_INDEX} EQUAL 0)
+        message(FATAL_ERROR "TARGET (${TARGET}) should have '${TARGET_PREFIX}' prefix")
+    endif()
 
     set(VERIFY_SOURCES true)
     # NOTE(dslynko, #24335) Disable verifier on arm32 qemu due to flaky OOM

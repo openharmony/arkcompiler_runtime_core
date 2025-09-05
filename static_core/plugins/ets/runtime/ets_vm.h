@@ -59,6 +59,7 @@
 #include "plugins/ets/runtime/mem/ets_gc_stat.h"
 #include "runtime/coroutines/coroutine_manager.h"
 #include "plugins/ets/runtime/ani/ani.h"
+#include "plugins/ets/runtime/ani/verify/ani_verifier.h"
 #include "plugins/ets/runtime/ets_native_library_provider.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
@@ -297,6 +298,16 @@ public:
         return aniBindMutex_;
     }
 
+    bool IsVerifyANI() const
+    {
+        return aniVerifier_.get() != nullptr;
+    }
+
+    ani::verify::ANIVerifier *GetANIVerifier()
+    {
+        return aniVerifier_.get();
+    }
+
     os::memory::Mutex &GetAtomicsMutex()
     {
         return atomicsMutex_;
@@ -459,6 +470,7 @@ private:
     os::memory::Mutex rootProviderlock_;
     PandaUnorderedSet<mem::RootProvider *> rootProviders_ GUARDED_BY(rootProviderlock_);
     os::memory::Mutex aniBindMutex_;
+    PandaUniquePtr<ani::verify::ANIVerifier> aniVerifier_;
     // optional for lazy initialization
     std::optional<std::mt19937> randomEngine_;
     // for JS Atomics

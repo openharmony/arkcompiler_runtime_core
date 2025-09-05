@@ -22,6 +22,7 @@
 #include "jit/profile_saver_worker.h"
 #include "libpandabase/macros.h"
 #include "plugins/ets/runtime/ani/ani_vm_api.h"
+#include "plugins/ets/runtime/ani/verify/verify_ani_vm_api.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
@@ -29,6 +30,7 @@
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/ets_runtime_interface.h"
+#include "plugins/ets/runtime/ets_vm_options.h"
 #include "plugins/ets/runtime/mem/ets_reference_processor.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
@@ -55,6 +57,9 @@
 #include "libpandabase/taskmanager/task_manager.h"
 
 namespace ark::ets {
+
+static PandaEtsVM *g_pandaEtsVM = nullptr;
+
 // Create MemoryManager by RuntimeOptions
 static mem::MemoryManager *CreateMM(Runtime *runtime, const RuntimeOptions &options)
 {
@@ -134,6 +139,7 @@ Expected<PandaEtsVM *, PandaString> PandaEtsVM::Create(Runtime *runtime, const R
 
     vm->coroutineManager_->Initialize(runtime, vm);
 
+    g_pandaEtsVM = vm;
     return vm;
 }
 
@@ -142,6 +148,7 @@ bool PandaEtsVM::Destroy(PandaEtsVM *vm)
     if (vm == nullptr) {
         return false;
     }
+    g_pandaEtsVM = nullptr;
 
     vm->SaveProfileInfo();
     vm->UninitializeThreads();
@@ -153,11 +160,19 @@ bool PandaEtsVM::Destroy(PandaEtsVM *vm)
     return true;
 }
 
+// CC-OFFNXT(G.FUD.05) solid logic
 PandaEtsVM::PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::MemoryManager *mm)
     : ani_vm {ani::GetVMAPI()}, runtime_(runtime), mm_(mm)
 {
     ASSERT(runtime_ != nullptr);
     ASSERT(mm_ != nullptr);
+
+    const EtsVmOptions *etsVmOptions = GetEtsVmOptions(options);
+    bool isVerifyANI = etsVmOptions == nullptr ? false : etsVmOptions->IsVerifyANI();
+    if (isVerifyANI) {
+        aniVerifier_ = MakePandaUnique<ani::verify::ANIVerifier>();
+        c_api = ani::verify::GetVerifyVMAPI();
+    }
 
     auto heapManager = mm_->GetHeapManager();
     auto allocator = heapManager->GetInternalAllocator();
@@ -243,8 +258,7 @@ PandaEtsVM::~PandaEtsVM()
 
 PandaEtsVM *PandaEtsVM::GetCurrent()
 {
-    // Use Thread class for possible to use it from native and manage threads
-    return static_cast<PandaEtsVM *>(Thread::GetCurrent()->GetVM());
+    return g_pandaEtsVM;
 }
 
 static mem::Reference *PreallocSpecialReference(PandaEtsVM *vm, const char *desc, bool nonMovable = false)

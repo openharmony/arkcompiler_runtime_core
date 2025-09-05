@@ -76,12 +76,6 @@ public:
     EtsClass *coreException {};
     EtsClass *coreStackTraceElement {};
 
-    /* Core module*/
-    EtsClass *core {};
-
-    /* Console*/
-    EtsClass *coreConsole {};
-
     /* StringBuilder */
     EtsClass *coreStringBuilder {};
 
