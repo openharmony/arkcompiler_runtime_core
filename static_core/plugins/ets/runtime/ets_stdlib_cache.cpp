@@ -72,7 +72,7 @@ PandaUniquePtr<StdlibCache> CreateStdLibCache(ani_env *env)
                 "C{escompat.Array}:", &stdlibCache->std_core_Console_error);
     CacheMethod(env, stdlibCache->std_core_String_Builder, "<ctor>", ":",
                 &stdlibCache->std_core_String_Builder_default_ctor);
-    CacheMethod(env, stdlibCache->std_core_String_Builder, "toString", ":C{std/core/String}",
+    CacheMethod(env, stdlibCache->std_core_String_Builder, "toString", ":C{std.core.String}",
                 &stdlibCache->std_core_String_Builder_toString);
     CacheMethod(env, stdlibCache->std_core_String_Builder, "append",
                 "C{std.core.String}C{std.core.String}C{std.core.String}:C{std.core.StringBuilder}",

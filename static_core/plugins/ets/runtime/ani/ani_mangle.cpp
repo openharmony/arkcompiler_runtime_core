@@ -121,6 +121,10 @@ static size_t ParseBody(char type, const std::string_view data, PandaStringStrea
             continue;
         }
         PandaString oldName(data.substr(1, pos - 1));
+        if (oldName.find("/") != std::string::npos) {
+            // The new format 'descriptor' can't contain '/'
+            return std::string_view::npos;
+        }
         std::replace(oldName.begin(), oldName.end(), '.', '/');
         ss << 'L';
         ss << oldName;
