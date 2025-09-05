@@ -43,7 +43,7 @@ class PrettyPrintBackendConfig(BackendConfig):
                 self._config = config
 
             def generate(self):
-                PrettyPrinter(
+                printer = PrettyPrinter(
                     BaseWriter(
                         sys.stdout,
                         default_indent=DEFAULT_INDENT,
@@ -51,6 +51,7 @@ class PrettyPrintBackendConfig(BackendConfig):
                     ),
                     self._config.show_resolved,
                     self._config.colorize,
-                ).handle_decl(self._ci.package_group)
+                )
+                self._ci.package_group.accept(printer)
 
         return PrettyPrintBackendImpl(instance, self)

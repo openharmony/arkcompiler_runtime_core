@@ -12,25 +12,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {BusinessError} from "@ohos.base";
-import * as test from "inject_test";
-import * as moduleA from "moduleA";
+#ifndef RUNTIME_INCLUDE_TAIHE_MAP_ABI_H_
+#define RUNTIME_INCLUDE_TAIHE_MAP_ABI_H_
 
-loadLibrary("ani_inject");
+#include <taihe/common.h>
 
-function main() {
-    let res1: String = moduleA.toplevelFunc("hello");
-    console.log("toplevelFunc: " + res1);
-    let res2: int = moduleA.foo.foo(100);
-    console.log("foo.foo: " + res2);
-    let foo = new test.Foo();
-    foo.callWithThis();
-    foo.callWithThis();
-    let structObj: test.RGB = {
-        color: "red",
-        r: 255,
-        g: 0,
-        b: 0,
-    };
-    console.log(structObj.color + " " + structObj.r);
-}
+struct TMapNode {
+    TMapNode *next;
+    char data[];
+};
+
+struct TMapHandle {
+    TRefCount count;
+    size_t cap;
+    TMapNode **bucket;
+    size_t length;
+};
+
+struct TMap {
+    TMapHandle *m_handle;
+};
+#endif  // RUNTIME_INCLUDE_TAIHE_MAP_ABI_H_

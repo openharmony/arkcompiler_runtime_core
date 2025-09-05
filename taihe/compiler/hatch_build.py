@@ -68,28 +68,31 @@ class Inspector:
 
 def generate_ast(file: TextIO, parser: Any):
     file.write(
-        "from dataclasses import dataclass\n"
-        "from typing import Any, Union, List, Optional\n"
-        "\n"
-        "from taihe.utils.sources import SourceLocation\n"
-        "\n"
-        "\n"
-        "class TaiheAST:\n"
-        "    @dataclass(kw_only=True)\n"
-        "    class any:\n"
-        "        loc: SourceLocation\n"
-        "\n"
-        "        def _accept(self, visitor) -> Any:\n"
-        "            raise NotImplementedError()\n"
-        "\n"
-        "\n"
-        "    @dataclass\n"
-        "    class TOKEN(any):\n"
-        "        text: str\n"
-        "\n"
-        "        def _accept(self, visitor) -> Any:\n"
-        "            return visitor.visit_token(self)\n"
-        "\n"
+        f"from dataclasses import dataclass\n"
+        f"from typing import TYPE_CHECKING, Any, List, Optional, Union\n"
+        f"\n"
+        f"from taihe.utils.sources import SourceLocation\n"
+        f"\n"
+        f"if TYPE_CHECKING:\n"
+        f"    from {ANTLR_PKG}.TaiheVisitor import TaiheVisitor\n"
+        f"\n"
+        f"\n"
+        f"class TaiheAST:\n"
+        f"    @dataclass(kw_only=True)\n"
+        f"    class any:\n"
+        f"        loc: SourceLocation\n"
+        f"\n"
+        f'        def accept(self, visitor: "TaiheVisitor") -> Any:\n'
+        f"            raise NotImplementedError()\n"
+        f"\n"
+        f"\n"
+        f"    @dataclass\n"
+        f"    class TOKEN(any):\n"
+        f"        text: str\n"
+        f"\n"
+        f'        def accept(self, visitor: "TaiheVisitor") -> Any:\n'
+        f"            return visitor.visit_token(self)\n"
+        f"\n"
     )
     type_list = []
     for rule_name in parser.ruleNames:
@@ -116,7 +119,7 @@ def generate_ast(file: TextIO, parser: Any):
                 file.write(f"        {attr_name}: {attr_hint}\n")
             file.write(
                 f"\n"
-                f"        def _accept(self, visitor) -> Any:\n"
+                f'        def accept(self, visitor: "TaiheVisitor") -> Any:\n'
                 f"            return visitor.visit_{snake_case(node_kind)}(self)\n"
                 f"\n"
             )
@@ -124,17 +127,15 @@ def generate_ast(file: TextIO, parser: Any):
 
 def generate_visitor(file: TextIO, parser: Any):
     file.write(
-        f"from {ANTLR_PKG}.TaiheAST import TaiheAST\n"
+        f"from typing import TYPE_CHECKING, Any\n"
         f"\n"
-        f"from typing import Any\n"
+        f"if TYPE_CHECKING:\n"
+        f"    from {ANTLR_PKG}.TaiheAST import TaiheAST\n"
         f"\n"
         f"\n"
         f"class TaiheVisitor:\n"
-        f"    def visit(self, node: TaiheAST.any) -> Any:\n"
-        f"        return node._accept(self)\n"
-        f"\n"
-        f"    def visit_token(self, node: TaiheAST.TOKEN) -> Any:\n"
-        f"        raise NotImplementedError()\n"
+        f'    def visit_token(self, node: "TaiheAST.TOKEN") -> Any:\n'
+        f"        raise NotImplementedError\n"
         f"\n"
     )
     type_list = []
@@ -150,13 +151,13 @@ def generate_visitor(file: TextIO, parser: Any):
                 sub_kind = sub_type.__name__
                 attr_kind = sub_kind[:-7]
                 file.write(
-                    f"    def visit_{snake_case(attr_kind)}(self, node: TaiheAST.{attr_kind}) -> Any:\n"
+                    f'    def visit_{snake_case(attr_kind)}(self, node: "TaiheAST.{attr_kind}") -> Any:\n'
                     f"        return self.visit_{snake_case(node_kind)}(node)\n"
                     f"\n"
                 )
         file.write(
-            f"    def visit_{snake_case(node_kind)}(self, node: TaiheAST.{node_kind}) -> Any:\n"
-            f"        raise NotImplementedError()\n"
+            f'    def visit_{snake_case(node_kind)}(self, node: "TaiheAST.{node_kind}") -> Any:\n'
+            f"        raise NotImplementedError\n"
             f"\n"
         )
 

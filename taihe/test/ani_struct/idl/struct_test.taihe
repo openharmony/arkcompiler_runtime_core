@@ -144,3 +144,37 @@ struct Draw {
     name: String;
 }
 function AddNewDraw(drawName: String): Draw;
+
+struct Student {
+    @readonly name: String;
+    age: i32;
+}
+function create_student(): Student;
+function process_student(a: Student): Student;
+
+@class
+struct Teacher {
+    @readonly name: String;
+    age: i32;
+}
+
+function create_teacher(): Teacher;
+function process_teacher(a: Teacher): Teacher;
+
+struct F {
+    f: i32;
+}
+
+struct G {
+    @extends f: F;
+    g: i32;
+}
+
+@class
+struct H {
+    @extends g: G;
+    h: i32;
+}
+
+function process_g(a: G): G;
+function process_h(a: H): H;

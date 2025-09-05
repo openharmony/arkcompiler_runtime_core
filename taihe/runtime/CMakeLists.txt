@@ -29,11 +29,11 @@ set(CMAKE_CXX_VISIBILITY_PRESET "hidden")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 
-set(TH_SOURCE src/string.cpp
+set(TAIHE_SOURCE src/string.cpp
               src/object.cpp
               src/runtime.cpp)
 
-add_library(taihe_runtime STATIC ${TH_SOURCE})
+add_library(taihe_runtime STATIC ${TAIHE_SOURCE})
 
 set_target_properties(taihe_runtime PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib

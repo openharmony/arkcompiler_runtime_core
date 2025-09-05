@@ -16,6 +16,7 @@
 #define RUNTIME_INCLUDE_TAIHE_MAP_HPP_
 // NOLINTBEGIN
 
+#include <taihe/map.abi.h>
 #include <taihe/common.hpp>
 
 #include <utility>
@@ -36,8 +37,8 @@ public:
     using item_t = std::pair<K const, V>;
 
     struct node_t {
-        item_t item;
         node_t *next;
+        item_t item;
     };
 
     void reserve(std::size_t cap) const
@@ -162,8 +163,8 @@ public:
             if ((*current_ptr)->item.first == key) {
                 if (cover) {
                     node_t *replaced = new node_t {
-                        .item = {key, V {std::forward<Args>(args)...}},
                         .next = (*current_ptr)->next,
+                        .item = {std::forward<as_param_t<K>>(key), V {std::forward<Args>(args)...}},
                     };
                     node_t *current = *current_ptr;
                     *current_ptr = replaced;
@@ -174,8 +175,8 @@ public:
             current_ptr = &(*current_ptr)->next;
         }
         node_t *node = new node_t {
-            .item = {key, V {std::forward<Args>(args)...}},
             .next = m_handle->bucket[index],
+            .item = {std::forward<as_param_t<K>>(key), V {std::forward<Args>(args)...}},
         };
         m_handle->bucket[index] = node;
         m_handle->size++;
@@ -292,7 +293,7 @@ struct map : map_view<K, V> {
 
     explicit map(std::size_t cap = MAP_DEFAULT_CAPACITY) : map(new handle_t)
     {
-        tref_set(&m_handle->count, 1);
+        tref_init(&m_handle->count, 1);
         m_handle->cap = cap;
         m_handle->bucket = new node_t *[cap]();
         m_handle->size = 0;
@@ -338,12 +339,12 @@ private:
 
 template <typename K, typename V>
 struct as_abi<map<K, V>> {
-    using type = void *;
+    using type = TMap;
 };
 
 template <typename K, typename V>
 struct as_abi<map_view<K, V>> {
-    using type = void *;
+    using type = TMap;
 };
 
 template <typename K, typename V>

@@ -39,12 +39,15 @@ from taihe.semantics.declarations import (
 from taihe.semantics.types import (
     ArrayType,
     MapType,
+    NonVoidType,
+    OptionalType,
     ScalarKind,
     ScalarType,
     StructType,
+    UnitType,
 )
 from taihe.utils.diagnostics import DiagnosticsManager
-from taihe.utils.exceptions import AdhocError
+from taihe.utils.exceptions import AdhocError, AdhocWarn
 
 
 @dataclass
@@ -119,19 +122,23 @@ class ExtendsAttr(TypedAttribute[StructFieldDecl]):
     NAME = "extends"
     TARGETS = (StructFieldDecl,)
 
+    ty: StructType = field(init=False)
+
     @override
     def check_typed_context(
         self,
         parent: StructFieldDecl,
         dm: DiagnosticsManager,
     ) -> None:
-        if not isinstance(parent.ty_ref.resolved_ty, StructType):
+        if not isinstance(parent.ty, StructType):
             dm.emit(
                 AdhocError(
                     f"Attribute '{self.NAME}' can only be attached to struct fields with struct types.",
                     loc=self.loc,
                 )
             )
+        else:
+            self.ty = parent.ty
 
         super().check_typed_context(parent, dm)
 
@@ -146,21 +153,31 @@ NULL_UNDEFINED_GROUP = AttributeGroupTag()
 
 
 @dataclass
-class NullAttr(TypedAttribute[UnionFieldDecl]):
+class NullAttr(TypedAttribute[UnionFieldDecl | StructFieldDecl | TypeRefDecl]):
     NAME = "null"
-    TARGETS = (UnionFieldDecl,)
+    TARGETS = (UnionFieldDecl, StructFieldDecl, TypeRefDecl)
     ATTRIBUTE_GROUP_TAGS = frozenset({NULL_UNDEFINED_GROUP})
 
     @override
     def check_typed_context(
         self,
-        parent: UnionFieldDecl,
+        parent: UnionFieldDecl | StructFieldDecl | TypeRefDecl,
         dm: DiagnosticsManager,
     ) -> None:
-        if parent.ty_ref is not None:
+        if isinstance(parent, TypeRefDecl):
+            ty = parent.resolved_ty
+        else:
+            dm.emit(
+                AdhocWarn(
+                    f"Attachment of attribute '{self.NAME}' to a field will be deprecated. Should be attached to a type reference instead.",
+                    loc=self.loc,
+                )
+            )
+            ty = parent.ty
+        if not isinstance(ty, UnitType):
             dm.emit(
                 AdhocError(
-                    f"Attribute '{self.NAME}' can only be attached to union fields without a type.",
+                    f"Attribute '{self.NAME}' can only be attached to fields with unit type.",
                     loc=self.loc,
                 )
             )
@@ -169,21 +186,31 @@ class NullAttr(TypedAttribute[UnionFieldDecl]):
 
 
 @dataclass
-class UndefinedAttr(TypedAttribute[UnionFieldDecl]):
+class UndefinedAttr(TypedAttribute[UnionFieldDecl | StructFieldDecl | TypeRefDecl]):
     NAME = "undefined"
-    TARGETS = (UnionFieldDecl,)
+    TARGETS = (UnionFieldDecl, StructFieldDecl, TypeRefDecl)
     ATTRIBUTE_GROUP_TAGS = frozenset({NULL_UNDEFINED_GROUP})
 
     @override
     def check_typed_context(
         self,
-        parent: UnionFieldDecl,
+        parent: UnionFieldDecl | StructFieldDecl | TypeRefDecl,
         dm: DiagnosticsManager,
     ) -> None:
-        if parent.ty_ref is not None:
+        if isinstance(parent, TypeRefDecl):
+            ty = parent.resolved_ty
+        else:
+            dm.emit(
+                AdhocWarn(
+                    f"Attachment of attribute '{self.NAME}' to a field will be deprecated. Should be attached to a type reference instead.",
+                    loc=self.loc,
+                )
+            )
+            ty = parent.ty
+        if not isinstance(ty, UnitType):
             dm.emit(
                 AdhocError(
-                    f"Attribute '{self.NAME}' can only be attached to union fields without a type.",
+                    f"Attribute '{self.NAME}' can only be attached to fields with unit type.",
                     loc=self.loc,
                 )
             )
@@ -198,6 +225,22 @@ PARAM_ATTRIBUTE_GROUP = AttributeGroupTag()
 class OptionalAttr(TypedAttribute[ParamDecl | StructFieldDecl]):
     NAME = "optional"
     TARGETS = (ParamDecl, StructFieldDecl)
+
+    @override
+    def check_typed_context(
+        self,
+        parent: ParamDecl | StructFieldDecl,
+        dm: DiagnosticsManager,
+    ) -> None:
+        if not isinstance(parent.ty, OptionalType):
+            dm.emit(
+                AdhocError(
+                    f"Attribute '{self.NAME}' can only be attached to parameters or fields with optional types.",
+                    loc=self.loc,
+                )
+            )
+
+        super().check_typed_context(parent, dm)
 
 
 @dataclass
@@ -412,7 +455,7 @@ class GenAsyncAttr(TypedAttribute[GlobFuncDecl | IfaceMethodDecl]):
     ) -> None:
         if self.func_name is None:
             if len(parent.name) > 4 and parent.name[-4:].lower() == "sync":
-                self.func_prefix = parent.name[-4:]
+                self.func_prefix = parent.name[:-4]
             else:
                 dm.emit(
                     AdhocError(
@@ -513,10 +556,18 @@ class GetAttr(TypedAttribute[GlobFuncDecl | IfaceMethodDecl]):
         parent: GlobFuncDecl | IfaceMethodDecl,
         dm: DiagnosticsManager,
     ) -> None:
-        if len(parent.params) != 0 or parent.return_ty_ref is None:
+        if len(parent.params) != 0:
             dm.emit(
                 AdhocError(
                     f"Attribute '{self.NAME}' can only be attached to functions with no parameters and a return type.",
+                    loc=self.loc,
+                )
+            )
+
+        if not isinstance(parent.return_ty, NonVoidType):
+            dm.emit(
+                AdhocError(
+                    f"Attribute '{self.NAME}' can only be attached to functions with a non-void return type.",
                     loc=self.loc,
                 )
             )
@@ -550,10 +601,18 @@ class SetAttr(TypedAttribute[GlobFuncDecl | IfaceMethodDecl]):
         parent: GlobFuncDecl | IfaceMethodDecl,
         dm: DiagnosticsManager,
     ) -> None:
-        if len(parent.params) != 1 or parent.return_ty_ref is not None:
+        if len(parent.params) != 1:
             dm.emit(
                 AdhocError(
-                    f"Attribute '{self.NAME}' can only be attached to functions with one parameter and no return type.",
+                    f"Attribute '{self.NAME}' can only be attached to functions with one parameter.",
+                    loc=self.loc,
+                )
+            )
+
+        if isinstance(parent.return_ty, NonVoidType):
+            dm.emit(
+                AdhocError(
+                    f"Attribute '{self.NAME}' can only be attached to functions returning void.",
                     loc=self.loc,
                 )
             )
@@ -602,7 +661,7 @@ class OnOffAttr(TypedAttribute[GlobFuncDecl | IfaceMethodDecl]):
     ATTRIBUTE_GROUP_TAGS = frozenset({OVERLOAD_KIND_ATTRIBUTE_GROUP})
 
     type: str | None = None
-    overload: str = field(kw_only=True, default="")
+    name: str = field(kw_only=True, default="")
     func_suffix: str = field(default="", init=False)
 
     @override
@@ -611,27 +670,26 @@ class OnOffAttr(TypedAttribute[GlobFuncDecl | IfaceMethodDecl]):
         parent: GlobFuncDecl | IfaceMethodDecl,
         dm: DiagnosticsManager,
     ) -> None:
-        if self.overload:
+        if self.name:
             if self.type is None:
                 if (
-                    len(parent.name) > len(self.overload)
-                    and parent.name[: len(self.overload)].lower()
-                    == self.overload.lower()
+                    len(parent.name) > len(self.name)
+                    and parent.name[: len(self.name)].lower() == self.name.lower()
                 ):
-                    self.func_suffix = parent.name[len(self.overload) :]
+                    self.func_suffix = parent.name[len(self.name):]
                 else:
                     dm.emit(
                         AdhocError(
-                            f"Attribute '{self.NAME}' requires the type to be specified when the function name does not start with '{self.overload}'.",
+                            f"Attribute '{self.NAME}' requires the type to be specified when the function name does not start with '{self.name}'.",
                             loc=self.loc,
                         )
                     )
         elif len(parent.name) > 2 and parent.name[:2].lower() == "on":
-            self.overload = "on"
+            self.name = "on"
             if self.type is None:
                 self.func_suffix = parent.name[2:]
         elif len(parent.name) > 3 and parent.name[:3].lower() == "off":
-            self.overload = "off"
+            self.name = "off"
             if self.type is None:
                 self.func_suffix = parent.name[3:]
         else:
