@@ -125,6 +125,12 @@ public:
     EtsClass *coreParameter {};
     EtsClass *coreClassType {};
 
+    EtsClass *reflectInstanceField {};
+    EtsClass *reflectInstanceMethod {};
+    EtsClass *reflectStaticField {};
+    EtsClass *reflectStaticMethod {};
+    EtsClass *reflectConstructor {};
+
     /* escompat.Process */
     EtsClass *escompatProcess {};
     EtsMethod *escompatProcessListUnhandledJobs {};

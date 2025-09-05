@@ -33,12 +33,6 @@ ALWAYS_INLINE inline bool EtsReferenceNullish(EtsCoroutine *coro, EtsObject *ref
     return ref == nullptr || ref == EtsObject::FromCoreType(coro->GetNullValue());
 }
 
-ALWAYS_INLINE inline bool IsReferenceNullish(EtsCoroutine *coro, EtsObject *ref)
-{
-    ASSERT(coro != nullptr);
-    return ref == nullptr || ref == EtsObject::FromCoreType(coro->GetNullValue());
-}
-
 template <bool IS_STRICT>
 ALWAYS_INLINE inline bool EtsReferenceEquals(EtsCoroutine *coro, EtsObject *ref1, EtsObject *ref2)
 {
@@ -46,11 +40,11 @@ ALWAYS_INLINE inline bool EtsReferenceEquals(EtsCoroutine *coro, EtsObject *ref1
         return true;
     }
 
-    if (IsReferenceNullish(coro, ref1) || IsReferenceNullish(coro, ref2)) {
+    if (EtsReferenceNullish(coro, ref1) || EtsReferenceNullish(coro, ref2)) {
         if constexpr (IS_STRICT) {
             return false;
         } else {
-            return IsReferenceNullish(coro, ref1) && IsReferenceNullish(coro, ref2);
+            return EtsReferenceNullish(coro, ref1) && EtsReferenceNullish(coro, ref2);
         }
     }
 
