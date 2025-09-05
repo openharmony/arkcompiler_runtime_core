@@ -15,7 +15,7 @@
 
 //! CHECKER          Block with ReturnInlined inst with an infinite loop is preserved
 //! SKIP_IF          @architecture == "arm32"
-//! RUN_PAOC         options: "--compiler-regex=.*inlined_inf_loop"
+//! RUN_PAOC         options: "--compiler-inline-external-methods-aot=true --compiler-regex=.*inlined_inf_loop"
 //! METHOD           "branch_elimination_protect_returninlined.ETSGLOBAL::inlined_inf_loop"
 //! PASS_AFTER       "Inline"
 //! INST             /Call.*Inlined.*inf_loop/
@@ -163,7 +163,7 @@ function complex_inlined_inf_loop(): int {
 
 //! CHECKER          Check proper elimination of block with Throw and ReturnInlined instructions
 //! SKIP_IF          @architecture == "arm32"
-//! RUN_PAOC         options: "--compiler-regex=.*test_eliminate_throw"
+//! RUN_PAOC         options: "--compiler-inline-external-methods-aot=true --compiler-regex=.*test_eliminate_throw"
 //! METHOD           "branch_elimination_protect_returninlined.ETSGLOBAL::test_eliminate_throw"
 //! PASS_AFTER       "Inline"
 //! INST             /Call.*Inlined.*eliminate_throw/

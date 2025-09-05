@@ -306,7 +306,7 @@ exit:
 }
 
 #! CHECKER      Inline external files in AOT mode
-#! RUN_PAOC     options: "--panda-files=../../inline_external.checked/test.abc --paoc-use-cha=true --compiler-regex=Test4.*"
+#! RUN_PAOC     options: "--panda-files=../../inline_external.checked/test.abc --paoc-use-cha=true --compiler-inline-external-methods-aot=true --compiler-regex=Test4.*"
 #! METHOD       "Test4::func_A_getConst_static__noinline__"
 #! PASS_AFTER   "IrBuilder"
 #! INST         /CallStatic.*A::getConst/
@@ -403,7 +403,7 @@ exit:
 #! RUN          options: "--panda-files=../../inline_external.checked/test.abc", entry: "Test4::main"
 
 #! CHECKER      Inline external files in LLVM AOT mode
-#! RUN_LLVM     options: "--panda-files=../../inline_external.checked/test.abc --paoc-use-cha=true --compiler-regex=Test4.*"
+#! RUN_LLVM     options: "--panda-files=../../inline_external.checked/test.abc --paoc-use-cha=true --compiler-inline-external-methods-aot=true --compiler-regex=Test4.*"
 #! METHOD       "Test4::func_A_getConst_static__noinline__"
 #! PASS_AFTER   "IrBuilder"
 #! INST         /CallStatic.*A::getConst/
@@ -498,7 +498,7 @@ exit:
 #! RUN          options: "--panda-files=../../inline_external.checked/test.abc", entry: "Test4::main"
 
 #! CHECKER      CallVirtual for external method is replaced with CallStatic
-#! RUN_PAOC     options: "--panda-files=../../inline_external.checked/test.abc --paoc-use-cha=true \
+#! RUN_PAOC     options: "--panda-files=../../inline_external.checked/test.abc --paoc-use-cha=true --compiler-inline-external-methods-aot=true \
 #!                        --compiler-regex=Test4.* --compiler-inlining-max-insts=0 --compiler-inlining-always-inline-bc-size=0"
 #! METHOD       "Test4::func_A_complexMethod__noinline__"
 #! PASS_AFTER   "IrBuilder"

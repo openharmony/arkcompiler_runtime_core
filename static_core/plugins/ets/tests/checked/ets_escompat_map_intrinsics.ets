@@ -76,7 +76,7 @@ class MyMap<K, V> extends Map<K, V> {
 //! CHECKER       AOT PGO: Map<boolean, double> overrided intrinsics
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PGO_PROF entry: "ets_escompat_map_intrinsics.ETSGLOBAL::test_map_bool_double_overrided1"
-//! RUN_PGO_PAOC options: "--compiler-regex='.*(test_map|MapHas|MapGet|MapDelete)_.*'"
+//! RUN_PGO_PAOC options: "--compiler-inline-external-methods-aot=true --compiler-regex='.*(test_map|MapHas|MapGet|MapDelete)_.*'"
 //! METHOD        "ets_escompat_map_intrinsics.ETSGLOBAL::__noinline__MapHas_bool_double"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.MapHas"

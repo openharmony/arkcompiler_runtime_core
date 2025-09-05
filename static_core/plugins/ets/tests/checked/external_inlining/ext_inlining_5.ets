@@ -16,7 +16,7 @@
 import { middle } from "./ext_funcs_4_1.ets";
 
 //! CHECKER    Check external inlining with deoptimization
-//! RUN_PAOC   options: "--panda-files=../../ext_inlining_5.checked/ext_funcs_4.abc:../../ext_inlining_5.checked/ext_funcs_4_1.abc --log-level=debug --log-components=compiler --compiler-log=inlining", entry: "ext_inlining_5.ETSGLOBAL::main_1"
+//! RUN_PAOC   options: "--panda-files=../../ext_inlining_5.checked/ext_funcs_4.abc:../../ext_inlining_5.checked/ext_funcs_4_1.abc --compiler-inline-external-methods-aot=true", entry: "ext_inlining_5.ETSGLOBAL::main_1"
 //! EVENT      /Inline,ext_funcs_4_1.ETSGLOBAL::middle,ext_funcs_4.ETSGLOBAL::risky_array,.*,STATIC,SUCCESS/
 //! EVENT      /Inline,ext_inlining_5.ETSGLOBAL::main_1,ext_funcs_4_1.ETSGLOBAL::middle,.*,STATIC,SUCCESS/
 //! RUN        options: "--panda-files=../../ext_inlining_5.checked/ext_funcs_4.abc:../../ext_inlining_5.checked/ext_funcs_4_1.abc", entry: "ext_inlining_5.ETSGLOBAL::main_1"

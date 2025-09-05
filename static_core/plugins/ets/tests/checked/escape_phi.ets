@@ -48,7 +48,7 @@ function __noinline__getLength(flag: boolean): int {
 
 //! CHECKER       AOT Escape eliminate phi with objects
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC      options: "--compiler-regex='.*test.*'"
+//! RUN_PAOC      options: "--compiler-inline-external-methods-aot=true --compiler-regex='.*test.*'"
 //! METHOD        "ETSGLOBAL::test_simple_phi1"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewObject/, 2

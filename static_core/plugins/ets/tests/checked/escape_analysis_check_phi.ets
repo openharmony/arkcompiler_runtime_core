@@ -15,7 +15,7 @@
 
 //! CHECKER           AOT: EscapeAnalysis Phi aliasing regression
 //! SKIP_IF           @architecture == "arm32"
-//! RUN_PAOC          options: "--compiler-regex='.*test.*'", entry: "escape_analysis_check_phi.ETSGLOBAL::main"
+//! RUN_PAOC          options: "--compiler-inline-external-methods-aot=true --compiler-regex='.*test.*'", entry: "escape_analysis_check_phi.ETSGLOBAL::main"
 //! METHOD            "escape_analysis_check_phi.ETSGLOBAL::test"
 //! PASS_BEFORE       "EscapeAnalysis"
 //! INST_COUNT        "Phi", 2

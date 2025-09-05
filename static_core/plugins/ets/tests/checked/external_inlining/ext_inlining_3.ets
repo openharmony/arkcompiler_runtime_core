@@ -22,7 +22,7 @@ import { stringify } from "./ext_funcs_2.ets";
 import { safe_div } from "./ext_funcs_2.ets";
 
 //! CHECKER    Check external inlining without side effects
-//! RUN_PAOC   options: "--panda-files=../../ext_inlining_3.checked/ext_funcs_2.abc --log-level=debug --log-components=compiler --compiler-log=inlining", entry: "ext_inlining_3.ETSGLOBAL::main_1"
+//! RUN_PAOC   options: "--panda-files=../../ext_inlining_3.checked/ext_funcs_2.abc --compiler-inline-external-methods-aot=true", entry: "ext_inlining_3.ETSGLOBAL::main_1"
 //! EVENT      /Inline,ext_inlining_3.ETSGLOBAL::main_1,ext_funcs_2.ETSGLOBAL::add,.*,STATIC,SUCCESS/
 //! RUN        options: "--panda-files=../../ext_inlining_3.checked/ext_funcs_2.abc", entry: "ext_inlining_3.ETSGLOBAL::main_1"
 
@@ -41,7 +41,7 @@ function main_1(): int {
 }
 
 //! CHECKER    Check external inlining function with runtime call from std core
-//! RUN_PAOC   options: "--panda-files=../../ext_inlining_3.checked/ext_funcs_2.abc --log-level=debug --log-components=compiler --compiler-log=inlining", entry: "ext_inlining_3.ETSGLOBAL::main_2"
+//! RUN_PAOC   options: "--panda-files=../../ext_inlining_3.checked/ext_funcs_2.abc --compiler-inline-external-methods-aot=true", entry: "ext_inlining_3.ETSGLOBAL::main_2"
 //! EVENT      /Inline,ext_inlining_3.ETSGLOBAL::main_2,ext_funcs_2.ETSGLOBAL::add_with_log,.*,STATIC,SUCCESS/
 //! RUN        options: "--panda-files=../../ext_inlining_3.checked/ext_funcs_2.abc", entry: "ext_inlining_3.ETSGLOBAL::main_2"
 
@@ -60,7 +60,7 @@ function main_2(): int {
 }
 
 //! CHECKER    Check inlining of external function with runtime call of managed func
-//! RUN_PAOC   options: "--panda-files=../../ext_inlining_3.checked/ext_funcs_2.abc --log-level=debug --log-components=compiler --compiler-log=inlining", entry: "ext_inlining_3.ETSGLOBAL::main_3"
+//! RUN_PAOC   options: "--panda-files=../../ext_inlining_3.checked/ext_funcs_2.abc --compiler-inline-external-methods-aot=true", entry: "ext_inlining_3.ETSGLOBAL::main_3"
 //! EVENT      /Inline,ext_inlining_3.ETSGLOBAL::main_3,ext_funcs_2.ETSGLOBAL::rand_plus,.*,STATIC,SUCCESS/
 //! RUN        options: "--panda-files=../../ext_inlining_3.checked/ext_funcs_2.abc", entry: "ext_inlining_3.ETSGLOBAL::main_3"
 
@@ -77,7 +77,7 @@ function main_3(): int {
 }
 
 //! CHECKER    Check external inlining with possible ArrayIndexOutOfBounds
-//! RUN_PAOC   options: "--panda-files=../../ext_inlining_3.checked/ext_funcs_2.abc --log-level=debug --log-components=compiler --compiler-log=inlining", entry: "ext_inlining_3.ETSGLOBAL::main_4"
+//! RUN_PAOC   options: "--panda-files=../../ext_inlining_3.checked/ext_funcs_2.abc --compiler-inline-external-methods-aot=true", entry: "ext_inlining_3.ETSGLOBAL::main_4"
 //! EVENT      /Inline,ext_inlining_3.ETSGLOBAL::main_4,ext_funcs_2.ETSGLOBAL::get_arr_element,.*,STATIC,SUCCESS/
 //! RUN        options: "--panda-files=../../ext_inlining_3.checked/ext_funcs_2.abc", entry: "ext_inlining_3.ETSGLOBAL::main_4"
 
@@ -88,7 +88,7 @@ function main_4(): int {
 }
 
 //! CHECKER    Check external inlining with heap allocation
-//! RUN_PAOC   options: "--panda-files=../../ext_inlining_3.checked/ext_funcs_2.abc --log-level=debug --log-components=compiler --compiler-log=inlining", entry: "ext_inlining_3.ETSGLOBAL::main_5"
+//! RUN_PAOC   options: "--panda-files=../../ext_inlining_3.checked/ext_funcs_2.abc --compiler-inline-external-methods-aot=true", entry: "ext_inlining_3.ETSGLOBAL::main_5"
 //! EVENT      /Inline,ext_inlining_3.ETSGLOBAL::main_5,ext_funcs_2.ETSGLOBAL::make_array,.*,STATIC,SUCCESS/
 //! RUN        options: "--panda-files=../../ext_inlining_3.checked/ext_funcs_2.abc", entry: "ext_inlining_3.ETSGLOBAL::main_5"
 
@@ -98,7 +98,7 @@ function main_5(): int {
 }
 
 //! CHECKER    Check external inlining with virtual call
-//! RUN_PAOC   options: "--panda-files=../../ext_inlining_3.checked/ext_funcs_2.abc --log-level=debug --log-components=compiler --compiler-log=inlining", entry: "ext_inlining_3.ETSGLOBAL::main_6"
+//! RUN_PAOC   options: "--panda-files=../../ext_inlining_3.checked/ext_funcs_2.abc --compiler-inline-external-methods-aot=true", entry: "ext_inlining_3.ETSGLOBAL::main_6"
 //! EVENT      /Inline,ext_inlining_3.ETSGLOBAL::main_6,ext_funcs_2.ETSGLOBAL::stringify,.*,STATIC,SUCCESS/
 //! RUN        options: "--panda-files=../../ext_inlining_3.checked/ext_funcs_2.abc", entry: "ext_inlining_3.ETSGLOBAL::main_6"
 
@@ -113,7 +113,7 @@ function main_6(): int {
 }
 
 //! CHECKER    Check external inlining with possible ZeroDivision
-//! RUN_PAOC   options: "--panda-files=../../ext_inlining_3.checked/ext_funcs_2.abc --log-level=debug --log-components=compiler --compiler-log=inlining", entry: "ext_inlining_3.ETSGLOBAL::main_7"
+//! RUN_PAOC   options: "--panda-files=../../ext_inlining_3.checked/ext_funcs_2.abc --compiler-inline-external-methods-aot=true", entry: "ext_inlining_3.ETSGLOBAL::main_7"
 //! EVENT      /Inline,ext_inlining_3.ETSGLOBAL::main_7,ext_funcs_2.ETSGLOBAL::safe_div,.*,STATIC,SUCCESS/
 //! RUN        options: "--panda-files=../../ext_inlining_3.checked/ext_funcs_2.abc", entry: "ext_inlining_3.ETSGLOBAL::main_7"
 
