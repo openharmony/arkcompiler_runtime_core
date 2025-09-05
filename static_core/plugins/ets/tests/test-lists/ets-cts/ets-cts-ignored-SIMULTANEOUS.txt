@@ -76,6 +76,16 @@
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_a_7.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_a_9.ets
 
+#28169
+03.types/15.literal_types/01.supertypes_of_literal_types/primitive_type_default_tests_02.ets
+04.names_declarations_and_scopes/07.variable_and_constant_declarations/01.variable_declarations/incorrect_var_decl_7.ets
+04.names_declarations_and_scopes/08.function_declarations/07.return_type/ret_type_neg_1.ets
+04.names_declarations_and_scopes/08.function_declarations/07.return_type/ret_type_neg_2.ets
+05.generics/01.type_parameters/01.type_parameter_constraint/example.ets
+09.classes/06.method_declarations/08.method_body/method_without_return_statement.ets
+09.classes/08.class_initializer/class_initializer_ensure_fields_initialized.ets
+09.classes/08.class_initializer/class_initializer_ensure_fields_initialized_1.ets
+09.classes/09.constructor_declaration/02.constructor_body/circular_reference.ets
 
 # multi static block #26663
 04.names_declarations_and_scopes/01.names/qualified_name_0.ets
