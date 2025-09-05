@@ -41,6 +41,24 @@ public:
         va_end(args);
     }
 
+    void TestFuncVCorrectSignature(ani_class cls, ani_float *value, ...)
+    {
+        va_list args {};
+        va_start(args, value);
+        ASSERT_EQ(env_->Class_CallStaticMethodByName_Float_V(cls, "method", "C{std.core.String}:f", value, args),
+                  ANI_OK);
+        va_end(args);
+    }
+
+    void TestFuncVWrongSignature(ani_class cls, ani_float *value, ...)
+    {
+        va_list args {};
+        va_start(args, value);
+        ASSERT_EQ(env_->Class_CallStaticMethodByName_Float_V(cls, "method", "C{std/core/String}:f", value, args),
+                  ANI_NOT_FOUND);
+        va_end(args);
+    }
+
     void TestCombineScene(const char *className, const char *methodName, ani_float expectedValue)
     {
         ani_class cls {};
@@ -418,6 +436,32 @@ TEST_F(ClassCallStaticMethodByNameFloatTest, check_initialization_float_a)
 
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Float_A(cls, "publicMethod", "ff:f", &value, args), ANI_OK);
     ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.G"));
+}
+
+TEST_F(ClassCallStaticMethodByNameFloatTest, check_wrong_signature)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_float_test.CheckWrongSignature", &cls), ANI_OK);
+
+    std::string input = "hello";
+
+    ani_string str;
+    ASSERT_EQ(env_->String_NewUTF8(input.c_str(), input.size(), &str), ANI_OK);
+
+    ani_float value {};
+    ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_Float(env_, cls, "method", "C{std.core.String}:f", &value, str),
+              ANI_OK);
+    ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_Float(env_, cls, "method", "C{std/core/String}:f", &value, str),
+              ANI_NOT_FOUND);
+
+    ani_value arg;
+    arg.r = str;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float_A(cls, "method", "C{std.core.String}:f", &value, &arg), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float_A(cls, "method", "C{std/core/String}:f", &value, &arg),
+              ANI_NOT_FOUND);
+
+    TestFuncVCorrectSignature(cls, &value, str);
+    TestFuncVWrongSignature(cls, &value, str);
 }
 
 }  // namespace ark::ets::ani::testing

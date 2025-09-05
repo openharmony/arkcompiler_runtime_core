@@ -139,4 +139,14 @@ TEST_F(NamespaceFindFunctionTest, check_initialization)
     ASSERT_FALSE(IsRuntimeClassInitialized("namespace_find_function_test.Fnns"));
 }
 
+TEST_F(NamespaceFindFunctionTest, wrong_signature)
+{
+    ani_namespace ns {};
+    ASSERT_EQ(env_->FindNamespace("namespace_find_function_test.Fnns", &ns), ANI_OK);
+    ASSERT_NE(ns, nullptr);
+
+    ani_function fn2 {};
+    ASSERT_EQ(env_->Namespace_FindFunction(ns, "getInitialStringValue", ":C{std/core/String}", &fn2), ANI_NOT_FOUND);
+}
+
 }  // namespace ark::ets::ani::testing

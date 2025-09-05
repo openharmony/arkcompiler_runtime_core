@@ -246,4 +246,10 @@ TEST_F(EnumFindTest, check_initialization)
     ASSERT_FALSE(IsRuntimeClassInitialized("find_enum_test.EnumA001"));
 }
 
+TEST_F(EnumFindTest, wrong_signature)
+{
+    ani_enum aniEnum {};
+    ASSERT_EQ(env_->FindEnum("find_enum_test/EnumA001", &aniEnum), ANI_NOT_FOUND);
+}
+
 }  // namespace ark::ets::ani::testing

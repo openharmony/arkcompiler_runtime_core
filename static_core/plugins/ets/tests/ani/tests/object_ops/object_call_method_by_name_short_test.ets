@@ -114,3 +114,9 @@ final class C extends B {
         return (this.data1 + value).toShort();
     }
 }
+
+class CheckWrongSignature {
+    public method(a: String): short {
+        return 1;
+    }
+}

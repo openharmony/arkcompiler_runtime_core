@@ -108,3 +108,9 @@ class G {
         return G.privateMethod(a0, a1);
     }
 }
+
+class CheckWrongSignature {
+    static method(a: String): short {
+        return 1;
+    }
+}

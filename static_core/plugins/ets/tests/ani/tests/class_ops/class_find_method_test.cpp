@@ -1149,5 +1149,19 @@ TEST_F(ClassFindMethodTest, check_initalization)
     ASSERT_FALSE(IsRuntimeClassInitialized("test.NotOverloaded"));
 }
 
+TEST_F(ClassFindMethodTest, wrong_signature)
+{
+    ani_class cls {};
+    ani_method m {};
+    ASSERT_EQ(env_->FindClass("test.C", &cls), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "imethod", "C{std/core/String}:i", &m), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "imethod", "C{std.core.String}:i", &m), ANI_OK);
+
+    ani_static_method sm {};
+    ASSERT_EQ(env_->FindClass("test.CheckWrongSignature", &cls), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "method", "C{std/core/String}:", &sm), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "method", "C{std.core.String}:", &sm), ANI_OK);
+}
+
 }  // namespace ark::ets::ani::testing
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

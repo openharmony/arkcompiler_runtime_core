@@ -37,6 +37,23 @@ public:
         ASSERT_EQ(env_->Class_CallStaticMethod_Ref(cls, newMethod, &ref), ANI_OK);
         *objectResult = static_cast<ani_object>(ref);
     }
+
+    void TestFuncVCorrectSignature(ani_object obj, ani_byte *value, ...)
+    {
+        va_list args {};
+        va_start(args, value);
+        ASSERT_EQ(env_->Object_CallMethodByName_Byte_V(obj, "method", "C{std.core.String}:b", value, args), ANI_OK);
+        va_end(args);
+    }
+
+    void TestFuncVWrongSignature(ani_object obj, ani_byte *value, ...)
+    {
+        va_list args {};
+        va_start(args, value);
+        ASSERT_EQ(env_->Object_CallMethodByName_Byte_V(obj, "method", "C{std/core/String}:b", value, args),
+                  ANI_NOT_FOUND);
+        va_end(args);
+    }
 };
 
 TEST_F(CallObjectMethodByteByNameTest, object_call_method_byte_a)
@@ -466,6 +483,39 @@ TEST_F(CallObjectMethodByteByNameTest, object_call_method_by_name_byte_013)
                   ANI_NOT_FOUND);
     }
 }
+
+TEST_F(CallObjectMethodByteByNameTest, check_wrong_signature)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_byte_test.CheckWrongSignature", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    ani_method method {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":", &method), ANI_OK);
+
+    ani_object obj {};
+    ASSERT_EQ(env_->Object_New(cls, method, &obj), ANI_OK);
+
+    std::string input = "hello";
+
+    ani_string str;
+    ASSERT_EQ(env_->String_NewUTF8(input.c_str(), input.size(), &str), ANI_OK);
+
+    ani_byte res;
+    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Byte(env_, obj, "method", "C{std.core.String}:b", &res, str),
+              ANI_OK);
+    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Byte(env_, obj, "method", "C{std/core/String}:b", &res, str),
+              ANI_NOT_FOUND);
+
+    ani_value arg;
+    arg.r = str;
+    ASSERT_EQ(env_->Object_CallMethodByName_Byte_A(obj, "method", "C{std.core.String}:b", &res, &arg), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Byte_A(obj, "method", "C{std/core/String}:b", &res, &arg), ANI_NOT_FOUND);
+
+    TestFuncVCorrectSignature(obj, &res, str);
+    TestFuncVWrongSignature(obj, &res, str);
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

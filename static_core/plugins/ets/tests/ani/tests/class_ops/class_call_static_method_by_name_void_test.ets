@@ -167,3 +167,8 @@ class G {
 
     static count: int = 0;
 }
+
+class CheckWrongSignature {
+    static method(a: String): void {
+    }
+}

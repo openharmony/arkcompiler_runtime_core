@@ -24,25 +24,28 @@ class ClassBindNativeMethodsTest : public AniTest {};
 constexpr const char *MODULE_NAME = "@defModule.class_bind_native_methods_test";
 
 // NOLINTNEXTLINE(readability-named-parameter)
-static ani_int NativeMethodsFooNative(ani_env *, ani_class)
+static ani_int NativeMethodsFooNative(ani_env *, ani_object)
 {
     const ani_int answer = 42U;
     return answer;
 }
 
 // NOLINTNEXTLINE(readability-named-parameter)
-static ani_int NativeMethodsFooNativeOverride(ani_env *, ani_class)
+static ani_int NativeMethodsFooNativeOverride(ani_env *, ani_object)
 {
     const ani_int answer = 43U;
     return answer;
 }
 
 // NOLINTNEXTLINE(readability-named-parameter)
-static ani_long NativeMethodsLongFooNative(ani_env *, ani_class)
+static ani_long NativeMethodsLongFooNative(ani_env *, ani_object)
 {
     // NOLINTNEXTLINE(readability-magic-numbers)
     return static_cast<ani_long>(84L);
 }
+
+// NOLINTNEXTLINE(readability-named-parameter)
+static void CheckSignature(ani_env *, ani_object, ani_string) {}
 
 TEST_F(ClassBindNativeMethodsTest, class_bindNativeMethods_combine_scenes_002)
 {
@@ -322,6 +325,24 @@ TEST_F(ClassBindNativeMethodsTest, bind_constructor)
         ani_native_function {"<ctor>", nullptr, reinterpret_cast<void *>(Ctor)},
     };
     ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), methods.size()), ANI_OK);
+}
+
+TEST_F(ClassBindNativeMethodsTest, method_bind_bad_signature)
+{
+    ani_class cls {};
+    const std::string clsName = std::string(MODULE_NAME).append(".CheckWrongSignature");
+    ASSERT_EQ(env_->FindClass(clsName.c_str(), &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    std::array m = {
+        ani_native_function {"method", "C{std/core/String}:", reinterpret_cast<void *>(CheckSignature)},
+    };
+    ASSERT_EQ(env_->c_api->Class_BindNativeMethods(env_, cls, m.data(), m.size()), ANI_NOT_FOUND);
+
+    m = {
+        ani_native_function {"method", "C{std.core.String}:", reinterpret_cast<void *>(CheckSignature)},
+    };
+    ASSERT_EQ(env_->c_api->Class_BindNativeMethods(env_, cls, m.data(), m.size()), ANI_OK);
 }
 
 }  // namespace ark::ets::ani::testing
