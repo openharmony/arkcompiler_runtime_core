@@ -189,4 +189,12 @@ EtsBoolean StdCoreClassIsFixedArray(EtsClass *cls)
     return cls->IsArrayClass();
 }
 
+EtsBoolean StdCoreClassIsSubtypeOf(EtsClass *cls, EtsClass *other)
+{
+    if (LIKELY(other->IsInterface())) {
+        return static_cast<EtsBoolean>(cls->GetRuntimeClass()->Implements(other->GetRuntimeClass()));
+    }
+    return static_cast<EtsBoolean>(cls->IsSubClass(other));
+}
+
 }  // namespace ark::ets::intrinsics
