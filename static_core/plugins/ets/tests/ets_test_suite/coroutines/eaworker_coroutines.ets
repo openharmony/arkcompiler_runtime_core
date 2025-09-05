@@ -86,10 +86,7 @@ function testLaunchThrow(): boolean {
 }
 
 function testFooAsync(): number {
-    let p: Promise<number> = fooAsync();
-    let result = await p;
-
-    return result as number;
+    return waitForCompletion<number>(fooAsync);
 }
 
 function testAddAsyncSchedule(): void {
@@ -99,17 +96,15 @@ function testAddAsyncSchedule(): void {
     Coroutine.Schedule();
 }
 
-async function recursiveAsyncFoo(): Promise<Promise<number>> {
+async function recursiveAsyncFoo(): Promise<number> {
     return fooAsync();
 }
 
 function testRecursiveAsync(): number {
-    let p: Promise<Promise<number>> = recursiveAsyncFoo();
-
-    return await p;
+    return waitForCompletion<number>(recursiveAsyncFoo);
 }
 
-function testAsyncThrow(): boolean {
+async function testAsyncThrow(): Promise<boolean> {
     try {
         let p: Promise<void> = throwAsyncError();
         await p;
@@ -172,15 +167,14 @@ function testACoroutineCallAJCoroutine(): void {
     let ew = new EAWorker();
     ew.start();
     let job1 = ew.run<number>(() => {
-        let job2: Job<Promise<number>> = launch<Promise<number>, ()=>Promise<number>>(fooAsync)
-        let p = job2.Await();
-        let result = await p;
-
-        return result;
+        return waitForCompletion<number>(async (): Promise<number> => {
+            let job2: Job<Promise<number>> = launch<Promise<number>, ()=>Promise<number>>(fooAsync)
+            let p = job2.Await();
+            let result = await p;
+            return result;
+        });
     });
-
     ew.join();
-
     arktest.assertEQ(EXPECTED_VALUE, job1.Await());
 }
 
@@ -190,7 +184,7 @@ async function AsyncCallLaunch(): Promise<Job<number>> {
     return job;
 }
 
-function testAJCoroutineCallACoroutine(): void {
+async function testAJCoroutineCallACoroutine(): Promise<void> {
     let ew = new EAWorker();
     ew.start();
     let job1 = ew.run<Promise<Job<number>>>(AsyncCallLaunch);
@@ -231,7 +225,7 @@ function main(): int {
     suite.addTest('testAJCoroutineEaworker', testAJCoroutineEaworker);
     suite.addTest('testACAJcoroutine', testACAJcoroutine);
     suite.addTest('testACoroutineCallAJCoroutine', testACoroutineCallAJCoroutine);
-    suite.addTest('testAJCoroutineCallACoroutine', testAJCoroutineCallACoroutine);
+    suite.addAsyncTest('testAJCoroutineCallACoroutine', testAJCoroutineCallACoroutine);
     suite.addTest('testNestedEAWorker', testNestedEAWorker);
     
     return suite.run();
