@@ -148,7 +148,7 @@ extern "C" void EtsEscompatArrayBufferSet(EtsEscompatArrayBuffer *arrayBuffer, E
 
 extern "C" ObjectHeader *EtsEscompatArrayBufferAllocateNonMovable(EtsInt length)
 {
-    return EtsEscompatArrayBuffer::AllocateNonMovableArray(length);
+    return EtsEscompatArrayBuffer::AllocateNonMovableArray(length)->GetCoreType();
 }
 
 extern "C" EtsLong EtsEscompatArrayBufferGetAddress(ObjectHeader *byteArray)
