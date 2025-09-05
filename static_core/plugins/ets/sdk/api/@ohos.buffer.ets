@@ -669,7 +669,7 @@ export default namespace buffer {
      * A class representing a fixed-length sequence of bytes.
      * Provides methods for reading and manipulating binary data with various encodings.
      */
-    export class Buffer implements JsonElementDeserializable {
+    export class Buffer implements jsonx.JsonElementDeserializable {
         /** The underlying ArrayBuffer storing the binary data */
         private bufferData: ArrayBuffer;
         /** The offset into the buffer where this Buffer instance starts */

@@ -568,6 +568,26 @@ export class JSON {
     }
 
     /**
+      * Converts a JsonElementDeserializable to a JSON string.
+     * @param elem - The JsonElementDeserializable to stringify
+     * @returns The JSON string representation
+     */
+    public static stringifyJsonElement(elem: jsonx.JsonElementDeserializable): string {
+        return JSON.stringifyJsonElement(elem.toJSON())
+    }
+
+    /**
+      * Converts a JsonElementDeserializable to a JSON string with optional formatting.
+     * @param elem - The JsonElementDeserializable to stringify
+     * @param replacer - Array of keys to include (currently not implemented)
+     * @param space - String or number of spaces for indentation
+     * @returns The JSON string representation
+     */
+    public static stringifyJsonElement(elem: jsonx.JsonElementDeserializable, replacer?: (double | string)[], space?: int | string): string {
+        return JSON.stringifyJsonElement(elem.toJSON(), replacer, space)
+    }
+
+    /**
       * Converts a JsonElement to a JSON string.
      * @param elem - The JsonElement to stringify
      * @returns The JSON string representation
@@ -692,14 +712,6 @@ export class JSON {
     }
 }
 
-export interface JsonElementDeserializable {
-    /**
-        * Serializes an object to a JsonElement.
-        * @returns {JsonElement} The JSON representation of the object
-        */
-    toJSON(): jsonx.JsonElement
-}
-
 class JSONWriter {
     // NOTE(cheezzario) replace with Type.for<JSValue>() when it will be implemented
     private static readonly STD_CORE_INTEROP_JSVALUE_TYPE = (Type.of([] as FixedArray<JSValue>) as ArrayType).getElementType()
@@ -769,8 +781,8 @@ class JSONWriter {
             this.writeESCompatRecord(temp)
         } else if (obj instanceof ESValue) {
             this.writeInteropESValue(obj)
-        } else if (obj instanceof JsonElementDeserializable) {
-            this.buffer.append(JSON.stringifyJsonElement((obj as JsonElementDeserializable).toJSON()))
+        } else if (obj instanceof jsonx.JsonElementDeserializable) {
+            this.buffer.append(JSON.stringifyJsonElement(obj))
         } else if (obj instanceof ArrayBuffer) {
             this.buffer.append(JSONObject.EMPTY)
         } else if (this.writeValueTypeWrapper(obj)) {
@@ -779,8 +791,6 @@ class JSONWriter {
             const objType = Type.of(obj)
             if (objType.getName() == "escompat.Date") {
                 this.buffer.append("\"").append((obj as Date).toISOString()).append("\"")
-            // } else if (objType.getName() == "@ohos.buffer.buffer.Buffer") {
-            //     this.buffer.append(JSON.stringifyJsonElement((obj as JsonElementDeserializable).toJSON()))
             } else if (objType.getName() == JSONWriter.STD_CORE_INTEROP_JSVALUE_TYPE.getName()) {
                 this.buffer.append(JSON.stringify(obj as JSValue))
             } else if (objType instanceof ArrayType) {
