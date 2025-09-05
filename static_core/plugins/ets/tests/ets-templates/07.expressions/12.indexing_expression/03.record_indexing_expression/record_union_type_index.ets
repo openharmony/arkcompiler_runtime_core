@@ -13,19 +13,21 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
-desc: Record index expression - record and default values.
+desc: Record index expression - record union type index.
 ---*/
 
-let recordWithDefaults: Record<string, number> = {
-  "a": 1,
-  "b": 2,
-};
+type Keys = 'key1' | 'key2' | 'key3';
 
-function getValueOrDefault(key: string, defaultValue: number): number {
-  return recordWithDefaults[key] ?? defaultValue;
+let x: Record<Keys, number> = {
+  'key1': 1,
+  'key2': 2,
+  'key3': 4,
 }
 
 function main(): void {
-  arktest.assertEQ(getValueOrDefault("c", 0), 0);
+  let s = {{c.call}};
+  arktest.assertEQ({{c.value}}, {{c.result}});
 }
+{% endfor %}

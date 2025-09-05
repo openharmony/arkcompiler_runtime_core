@@ -13,16 +13,28 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
-desc: Record index expression - record with optional keys.
+desc: An index expression has no restriction. The result of an indexing expression is of type Value | undefined.
 ---*/
 
-let optionalRecord: Record<string, string> = {
-  "name": "Alice",
-  "age": "30",
-};
+let x: Record<number, string> = {
+    1: "hello",
+    2: "buy"
+}
+
+function foo(n: number): string | undefined {
+    return x[n];
+}
+
+function bar(n: number): string {
+    let s = x[n];
+    if (s == undefined) { return "no" };
+    return s!;
+}
 
 function main(): void {
-  arktest.assertEQ(optionalRecord["name"], "Alice");
-  arktest.assertEQ(optionalRecord["age"], "30");
+  let s = {{c.call}};
+  arktest.assertEQ({{c.value}}, {{c.result}});
 }
+{% endfor %}

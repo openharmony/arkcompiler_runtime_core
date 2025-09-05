@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,26 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
-desc: >-
-    If no ‘?.’ is present in an indexing expression, then the type of object reference
-    expression must be an array type, or the Record type; a compile-time error occurs otherwise.
-tags: [compile-only, negative]
+desc: Record index expression - record string-number.
 ---*/
 
-function refNullish(): Record<string, number> | undefined {
-    let res: Record<string, number> | undefined = { "magic": 42 }
-    return res
+let rec: Record<string, number> = {
+  "a": 1,
+  "b": 2,
+  "c": 3,
+};
+
+function getValue(key: string): number | undefined {
+  return rec[key];
 }
 
-function main() {
-    arktest.assertTrue(refNullish()["magic"] == 42) // CTE expected
+function getValueOrDefault(key: string, defaultValue: number): number {
+  return rec[key] ?? defaultValue;
 }
+
+function main(): void {
+  arktest.assertEQ({{c.call}}, {{c.value}});
+}
+{% endfor %}

@@ -13,19 +13,21 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
-desc: Record index expression - record and default value filling.
+desc: Record index expression - record union type index.
 ---*/
 
-let config: Record<string, string> = {
-  "theme": "dark",
-  "language": "en",
-};
+enum Keys { k1, k2, k3 };
 
-function getConfigValue(key: string, defaultValue: string): string {
-  return config[key] ?? defaultValue;
+let x: Record<Keys, number> = {
+    Keys.k1: 1;
+    Keys.k2: 2;
+    Keys.k3: 4;
 }
 
 function main(): void {
-  arktest.assertEQ(getConfigValue("theme", "light"), "dark");
+    let s = {{c.call}};
+    arktest.assertEQ({{c.value}}, {{c.result}});
 }
+{% endfor %}

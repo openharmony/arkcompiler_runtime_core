@@ -13,22 +13,28 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
-desc: Record index expression - key is of other types.
+desc: Record index expression - spread from a record cast from Object.
 ---*/
 
-type Keys = 'key1' | 'key2' | 'key3';
+let y: Record<string, string> = {
+    "name": "Alice",
+    "age": "30"
+}
 
-let x2: Record<number, string> = {
-  1: "hello",
-  2: "buy",
-};
+function spreadFromObject(y: Record<string, string>): Record<string, string> {
+    let x: Record<string, string>  = { ...y };
+    return x;
+}
 
-function foo(n: number): string | undefined {
-  return x2[n];
+function getValue(key: string, defaultValue: string): string {
+    let x = spreadFromObject(y);
+    return x[key] ?? defaultValue;
 }
 
 function main(): void {
-  let x = foo(3);
-  arktest.assertEQ(x, undefined);
+    let x = spreadFromObject(y);
+    arktest.assertEQ({{c.call}}, {{c.value}});
 }
+{% endfor %}

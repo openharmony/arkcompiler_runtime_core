@@ -13,17 +13,22 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
-desc: Record index expression - runtime valid indexing.
+desc: >-
+    The record indexing expression can be written by using a field access notation
+    if its index expression is formed as an identifier of type string.
 ---*/
 
-let scores: Record<number, string> = {
-  90: "A",
-  80: "B",
-  70: "C",
-};
+type Keys = 'key1' | 'key2' | 'key3'
+
+let x: Record<Keys, number> = {
+    'key1': 1,
+    'key2': 2,
+    'key3': 4,
+}
 
 function main(): void {
-  let gradeA = scores[90];
-  arktest.assertEQ(gradeA, "A");
+  arktest.assertEQ(x.{{c.index}}, {{c.value}});
 }
+{% endfor %}

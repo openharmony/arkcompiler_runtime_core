@@ -1068,6 +1068,21 @@
 #28526
 07.expressions/11.function_call_expression/fcall_20.ets
 
+#28679
+07.expressions/12.indexing_expression/03.record_indexing_expression/record_enum_index_0.ets
+07.expressions/12.indexing_expression/03.record_indexing_expression/record_enum_index_1.ets
+07.expressions/12.indexing_expression/03.record_indexing_expression/record_enum_index_2.ets
+07.expressions/12.indexing_expression/03.record_indexing_expression/record_enum_index_3.ets
+07.expressions/12.indexing_expression/03.record_indexing_expression/record_enum_index_4.ets
+
+#29719
+07.expressions/12.indexing_expression/03.record_indexing_expression/record_field_access_0.ets
+07.expressions/12.indexing_expression/03.record_indexing_expression/record_field_access_1.ets
+07.expressions/12.indexing_expression/03.record_indexing_expression/record_field_access_2.ets
+07.expressions/12.indexing_expression/03.record_indexing_expression/record_field_set_0.ets
+07.expressions/12.indexing_expression/03.record_indexing_expression/record_field_set_1.ets
+07.expressions/12.indexing_expression/03.record_indexing_expression/record_field_set_2.ets
+
 #29202 CTE expected in `instanceof T`
 07.expressions/15.instanceof_expression/instanceof-cte_0.ets
 
@@ -2679,7 +2694,6 @@
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/call_func/call-func-n3_7.ets
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/call_lmbd/call-lmbd-n3_7.ets
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/call_meth/call-meth-n3_7.ets
-07.expressions/12.indexing_expression/03.record_indexing_expression/ind_1.ets
 07.expressions/25.equality_expressions/eq_neg_101.ets
 07.expressions/25.equality_expressions/eq_neg_146.ets
 07.expressions/25.equality_expressions/eq_neg_148.ets
@@ -2759,8 +2773,6 @@
 09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_12.ets
 
 # 21255 no type Exception
-07.expressions/12.indexing_expression/01.array_indexing_expression/array_index3_n_0.ets
-07.expressions/12.indexing_expression/01.array_indexing_expression/array_index3_n_1.ets
 09.classes/07.method_declarations/05.overriding_methods/override_method_declaration_with_keywords_4.ets
 
 # 29337 no CTE in ambiguous narrowing

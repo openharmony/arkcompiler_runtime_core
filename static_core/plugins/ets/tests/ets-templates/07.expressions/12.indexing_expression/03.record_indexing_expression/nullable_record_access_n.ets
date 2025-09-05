@@ -13,17 +13,20 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
 desc: >-
-    The object reference expression must be checked to evaluate to nullish value;
-    if it does, then the entire indexing-Expression equals undefined.
+    If no ‘?.’ is present in an indexing expression, then the type of object reference
+    expression must be an array type, or the Record type; a compile-time error occurs otherwise.
+tags: [compile-only, negative]
 ---*/
 
-function refNullish(): Record<string, number> | undefined {
-    let res: Record<string, number> | undefined = undefined
-    return res
+function refNullish(): Record<string, number> | {{c.type}} {
+    let res: Record<string, number> | {{c.type}} = {{c.value}};
+    return res;
 }
 
 function main() {
-    arktest.assertTrue(refNullish()?.["magic"] === undefined)
+    let a = refNullish()["magic"]; // CTE expected
 }
+{% endfor %}
