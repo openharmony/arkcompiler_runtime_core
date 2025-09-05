@@ -36,6 +36,8 @@ export final class Class {
         return this.superClass
     }
 
+    public native final isSubtypeOf(other: Class): boolean
+
     public native getLinker(): RuntimeLinker
     public native isNamespace(): boolean;
 

@@ -205,6 +205,63 @@ function checkFunctions() {
     }
 }
 
+class AA {}
+
+class BB extends AA {}
+
+class CC extends BB {}
+
+interface I1 {}
+
+interface I2 {}
+
+interface I3 extends I2 {}
+
+class C3 implements I3 {}
+
+class Multi extends AA implements I1, I2 {}
+
+function checkSubTypeOf() {
+    let a = Class.of(new AA)
+    let b = Class.of(new BB)
+    let c = Class.of(new CC)
+
+    arktest.assertTrue(c.isSubtypeOf(Class.of(new Object)), "C is subtype of object")
+
+    arktest.assertTrue(a.isSubtypeOf(a), "AA is subtype of AA")
+    arktest.assertTrue(b.isSubtypeOf(a), "BB is subtype of AA")
+    arktest.assertTrue(c.isSubtypeOf(a), "CC is subtype of AA")
+    arktest.assertTrue(c.isSubtypeOf(b), "CC is subtype of BB")
+    
+    arktest.assertFalse(a.isSubtypeOf(b), "AA is not subtype of BB")
+    arktest.assertFalse(a.isSubtypeOf(c), "AA is not subtype of CC")
+}
+
+function checkSubTypeOfMultipleInterfaces() {
+    let a = Class.of(new AA)
+    let b = Class.of(new BB)
+    let m = Class.of(new Multi)
+    let ifaces = m.getInterfaces()
+    let i1 = ifaces[0]
+    let i2 = ifaces[1]
+
+    arktest.assertTrue(m.isSubtypeOf(a), "Multi is subtype of AA")
+    arktest.assertTrue(m.isSubtypeOf(i1), "Multi is subtype of I1")
+    arktest.assertTrue(m.isSubtypeOf(i2), "Multi is subtype of I2")
+    arktest.assertFalse(m.isSubtypeOf(b), "Multi is not subtype of B")
+}
+
+function checkSubTypeOfInterfaces() {
+    let m = Class.of(new Multi)
+    let c3 = Class.of(new C3)
+    let ifaces = m.getInterfaces()
+    let i1 = ifaces[0]
+    let i2 = ifaces[1]
+    let i3 = c3.getInterfaces()[0]
+    arktest.assertTrue(i3.isSubtypeOf(i2), "I3 extends I2")
+    arktest.assertFalse(i2.isSubtypeOf(i3), "I2 doesn't extends I3")
+}
+
 function main(): void {
     let ts = new arktest.ArkTestsuite("Class API test")
     ts.addTest("checkClassIsNotEnumAndNotInterface", checkClassIsNotEnumAndNotInterface)
@@ -212,5 +269,8 @@ function main(): void {
     ts.addTest("checkInterfaceIsInterfaceAndNotEnum", checkInterfaceIsInterfaceAndNotEnum)
     ts.addTest("checkFixedArray", checkFixedArray)
     ts.addTest("checkFunctions", checkFunctions)
+    ts.addTest('SubtypeOf', checkSubTypeOf)
+    ts.addTest('Subtypeof multiple interfaces', checkSubTypeOfMultipleInterfaces)
+    ts.addTest('Subtypeof interfaces', checkSubTypeOfInterfaces)
     ts.run();
 }
