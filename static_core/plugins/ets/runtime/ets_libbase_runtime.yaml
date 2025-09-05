@@ -8884,12 +8884,12 @@ intrinsics:
     impl: ark::ets::intrinsics::EtsCondVarNotifyAll
 
 ##############################
-#      escompat.Reflect      #
+#      std.core.Reflect      #
 ##############################
 
-  - name: escompatReflectIsInterfaceLiteral
+  - name: stdCoreReflectIsInterfaceLiteral
     space: ets
-    class_name: escompat.Reflect
+    class_name: std.core.Reflect
     method_name: isLiteralInitializedInterfaceImpl
     static: true
     signature:
