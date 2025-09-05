@@ -472,6 +472,18 @@ export namespace arktest {
         }
 
         /**
+        * Add new async test to the testsuite
+        * @param name name of async test
+        * @param asyncCallback callback with async test body
+        */
+        final addAsyncTest(name: string, asyncCallback: () => Promise<void>): void {
+            let callback = () => {
+                waitForCompletion(asyncCallback);
+            };
+            this.addTest(new ArkTest(name, callback));
+        }
+
+        /**
         * Add new test to the testsuite
         * @param test test instance
         */

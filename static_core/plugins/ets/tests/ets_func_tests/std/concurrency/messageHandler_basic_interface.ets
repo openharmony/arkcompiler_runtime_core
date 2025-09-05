@@ -24,7 +24,9 @@ class Event {
     }
 
     public wait(): boolean {
-        return await this.promise;
+        return waitForCompletion<boolean>(() => {
+            return this.promise;
+        });
     }
 
     public fire(val: boolean = true) {
@@ -316,8 +318,10 @@ function testMessageHandlerMismatch() {
 function testDoubleRemoveMessage() {
     let worker = new EAWorker();
     worker.start();
-    let handler = new concurrency.MessageHandler((msg: concurrency.Message) => {
-        await sleep(5000);
+    let handler = new concurrency.MessageHandler((msg: concurrency.Message): void => {
+        waitForCompletion(async (): Promise<void> => {
+            await sleep(5000);
+        });
     }, worker);
 
     let message = new concurrency.Message(1, handler);
