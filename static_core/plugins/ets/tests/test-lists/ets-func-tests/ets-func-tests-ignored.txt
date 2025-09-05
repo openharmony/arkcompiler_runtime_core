@@ -4,6 +4,12 @@ algorithms/SampleAppTest.ets
 #28355
 escompat/escompat_regexp_match_String.ets
 
+#28354
+escompat/escompat_regexp_match_String_001.ets
+
+#28357
+escompat/escompat_regexp_test_StringWithUnicodeFlag.ets
+
 #24357 Koala related issues
 koala-related-benchmarks/benchmark-lambda-no-lambda-original.ets
 
@@ -494,6 +500,3 @@ escompat/JsonStringifyRegExpExecArrayTest.ets
 std/core/std_core_typeduarrays_methods__BigUint64Array.ets
 regression/15278_0.ets
 spec/07.expressions/7.32.Lambda_Expressions/callMethodFromAsyncLambda2.ets
-
-#28648
-std/core/TypeClassInfoTest.ets
