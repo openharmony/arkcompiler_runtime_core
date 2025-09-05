@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import Editor, {useMonaco} from '@monaco-editor/react';
 import styles from './styles.module.scss';
 import {useTheme} from '../../components/theme/ThemeContext';
@@ -108,10 +108,20 @@ const ArkTSEditor: React.FC = () => {
             });
         }
     }, [monaco, syn]);
+    
+    const debouncedDispatchRef = useRef(
+        debounce((value: string) => {
+          dispatch(setCodeAction(value));
+        }, 800)
+      );
+      
+      useEffect(() => {
+        return () => debouncedDispatchRef.current.cancel();
+      }, []);
 
-    const handleEditorChange = debounce((value: string = '') => {
-        dispatch(setCodeAction(value));
-    }, 300);
+    const handleEditorChange = (value?: string) => {
+        debouncedDispatchRef.current(value ?? '');
+    };
 
     useEffect(() => {
         if (!monaco || !editorInstance) {

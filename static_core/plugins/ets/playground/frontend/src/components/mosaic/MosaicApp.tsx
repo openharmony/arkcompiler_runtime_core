@@ -20,11 +20,11 @@ import '@blueprintjs/core/lib/css/blueprint.css';
 import '@blueprintjs/icons/lib/css/blueprint-icons.css';
 import ArkTSEditor from '../../pages/codeEditor/ArkTSEditor';
 import cx from 'classnames';
-import { Tab, Tabs } from '@blueprintjs/core';
+import { Button, Icon, Tab, Tabs } from '@blueprintjs/core';
 import styles from './styles.module.scss';
 import ControlPanel from '../controlPanel/ControlPanel';
 import {useDispatch, useSelector} from 'react-redux';
-import {withDisasm} from '../../store/selectors/appState';
+import {withAstView, withDisasm} from '../../store/selectors/appState';
 import DisasmCode from '../../pages/disasmView/DisasmCode';
 import {AppDispatch} from '../../store';
 import {fetchOptions} from '../../store/actions/options';
@@ -32,6 +32,11 @@ import {fetchSyntax} from '../../store/actions/syntax';
 import {selectErrLogs, selectOutLogs} from '../../store/selectors/logs';
 import LogsView from '../../pages/logs/LogsView';
 import {clearErrLogs, clearOutLogs} from '../../store/actions/logs';
+import AstView from '../../pages/astView/AstView';
+import { fetchFeatures } from '../../store/actions/features';
+import { selectASTLoading } from '../../store/selectors/ast';
+import { fetchAst } from '../../store/actions/ast';
+import { selectAstMode } from '../../store/selectors/features';
 
 export type ViewId = 'code' | 'disasm' | 'logs' | 'ast';
 
@@ -45,6 +50,9 @@ const TITLE_MAP: Record<ViewId, string> = {
 const MosaicApp = (): JSX.Element => {
     const [activeTab, setActiveTab] = useState<'output' | 'err'>('output');
     const withDisasmRender = useSelector(withDisasm);
+    const withASTRender = useSelector(withAstView);
+    const isAstLoading = useSelector(selectASTLoading);
+    const astmode = useSelector(selectAstMode);
     const outLogsSelector = useSelector(selectOutLogs);
     const errLogsSelector = useSelector(selectErrLogs);
     const dispatch = useDispatch<AppDispatch>();
@@ -54,10 +62,15 @@ const MosaicApp = (): JSX.Element => {
     useLayoutEffect(() => {
         dispatch(fetchOptions());
         dispatch(fetchSyntax());
+        dispatch(fetchFeatures());
     }, []);
 
     const handleTabChange = (newTab: 'output' | 'err'): void => {
         setActiveTab(newTab);
+    };
+
+    const handleASTView = (): void => {
+        dispatch(fetchAst('manual'))
     };
 
     useEffect(() => {
@@ -71,6 +84,19 @@ const MosaicApp = (): JSX.Element => {
                 return <ControlPanel />;
             case 'disasm':
                 return <div>disasm</div>;
+            case 'ast':
+                return <div className={styles.astHeader}>
+                AST view
+                {astmode === 'manual' && <Button
+                        icon={isAstLoading
+                            ? <div className={styles.icon}><Icon icon="build" size={11}/></div>
+                            : <div className={styles.icon}><Icon icon="play" size={20}/></div>}
+                        className={styles.btn}
+                        onClick={handleASTView}
+                        disabled={isAstLoading}
+                        data-testid="run-btn"
+                    />}
+                </div>;
             case 'logs':
                 return (<Tabs
                     id="logs-tabs"
@@ -89,7 +115,7 @@ const MosaicApp = (): JSX.Element => {
             default:
                 return <></>;
         }
-    }, [activeTab, outLogsCount, errLogsCount]);
+    }, [activeTab, outLogsCount, errLogsCount, astmode, isAstLoading]);
 
     const handleClearOutLogs = (): void => {
         dispatch(clearOutLogs());
@@ -97,6 +123,54 @@ const MosaicApp = (): JSX.Element => {
     const handleClearErrLogs = (): void => {
         dispatch(clearErrLogs());
     };
+
+    const content = useCallback((title: string): JSX.Element => {
+        switch (title) {
+            case 'Code editor':
+                return (
+                    <div className={cx({
+                        [styles.codeContainer]: true,
+                        [styles.part]: withDisasmRender
+                    })}>
+                        <div className={cx(styles.code, 'monaco-editor')}>
+                            <ArkTSEditor />
+                        </div>
+                        {withDisasmRender && <div className={cx(styles.disasm, 'monaco-editor')}>
+                            <DisasmCode />
+                        </div>}
+                    </div>
+                )
+            case 'Logs':
+                return (
+                    <div className={styles.tabContent}>
+                                {activeTab === 'output' ? (
+                                    <LogsView
+                                        logArr={outLogsSelector}
+                                        logType='out'
+                                        clearFilters={handleClearOutLogs}
+                                    />
+                                ) : (
+                                    <LogsView
+                                        logArr={errLogsSelector}
+                                        logType='err'
+                                        clearFilters={handleClearErrLogs}
+                                    />
+                                )}
+                    </div>)
+            case 'AST viewer':
+                return (
+                    <div className={cx({
+                        [styles.codeContainer]: true,
+                    })}>
+                        <div className={cx(styles.code, 'monaco-editor')}>
+                            <AstView />
+                        </div>
+                    </div>
+                )
+            default:
+                return <h1>{title}</h1>
+        }
+    }, [withDisasmRender, outLogsSelector, errLogsSelector, activeTab]);
 
     return (
         <div
@@ -120,44 +194,24 @@ const MosaicApp = (): JSX.Element => {
                             [styles.windowCode]: TITLE_MAP[id] === 'Code editor'
                         })}
                     >
-                        {TITLE_MAP[id] === 'Code editor' ? (
-                            <div className={cx({
-                                [styles.codeContainer]: true,
-                                [styles.part]: withDisasmRender
-                            })}>
-                                <div className={cx(styles.code, 'monaco-editor')}>
-                                    <ArkTSEditor />
-                                </div>
-                                {withDisasmRender && <div className={cx(styles.disasm, 'monaco-editor')}>
-                                    <DisasmCode />
-                                </div>}
-                            </div>
-                        ) : TITLE_MAP[id] === 'Logs' ? (
-                            <div className={styles.tabContent}>
-                                {activeTab === 'output' ? (
-                                    <LogsView
-                                        logArr={outLogsSelector}
-                                        logType='out'
-                                        clearFilters={handleClearOutLogs}
-                                    />
-                                ) : (
-                                    <LogsView
-                                        logArr={errLogsSelector}
-                                        logType='err'
-                                        clearFilters={handleClearErrLogs}
-                                    />
-                                )}
-                            </div>
-                        ) : (
-                            <h1>{TITLE_MAP[id]}</h1>
-                        )}
+                        {content(TITLE_MAP[id])}
                     </MosaicWindow>
                 )}
-                initialValue={{
-                    direction: 'row',
+                initialValue={!withASTRender ?
+                    {
+                    direction: withDisasmRender ? 'column' : 'row',
                     first: 'code',
                     second: 'logs',
                     splitPercentage: withDisasmRender ? 70 : 50
+                } : {
+                    direction: 'column',
+                    first: {
+                        direction: 'row',
+                        first: 'code',
+                        second: 'ast',
+                    },
+                    second: 'logs',
+                    splitPercentage: 70
                 }}
             />
         </div>

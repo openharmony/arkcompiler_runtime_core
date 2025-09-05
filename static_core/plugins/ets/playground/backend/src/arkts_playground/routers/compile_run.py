@@ -16,11 +16,15 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from ..deps.runner import get_runner, Runner
+from ..models.ast import AstRequestModel, AstResponse
 from ..models.common import VersionsResponse
 from ..models.compile import CompileResponse, CompileRequestModel, RunResponse
+from ..models.features import FeaturesResponse
+
+from ..config import get_settings
 
 router = APIRouter()
 
@@ -63,3 +67,32 @@ async def compile_run_arkts_code(body: CompileRequestModel,
 async def get_versions(runner: Annotated[Runner, Depends(get_runner)]) -> VersionsResponse:
     playground_ver, ark_ver, es2panda_ver = await runner.get_versions()
     return VersionsResponse(backendVersion=playground_ver, arktsVersion=ark_ver, es2pandaVersion=es2panda_ver)
+
+
+@router.post("/ast",
+             response_model=AstResponse,
+             tags=["run"],
+             description="Parse ETS code and return AST dump from es2panda")
+async def dump_ast(body: AstRequestModel,
+                   runner: Annotated[Runner, Depends(get_runner)],
+                   manual: bool = Query(False)) -> AstResponse:
+    sett = get_settings()
+    if sett.features.ast_mode == "manual" and not manual:
+        raise HTTPException(
+            status_code=403,
+            detail={"code": "AST_AUTO_DISABLED",
+                    "message": "AST is manual-only; call /ast?manual=1"}
+        )
+    result = await runner.dump_ast(
+        body.code,
+        options=runner.parse_compile_options(body.options),
+    )
+    return AstResponse(**result)
+
+
+@router.get("/features",
+             response_model=FeaturesResponse,
+             tags=["run"])
+async def get_features() -> FeaturesResponse:
+    sett = get_settings()
+    return FeaturesResponse(ast_mode=sett.features.ast_mode)

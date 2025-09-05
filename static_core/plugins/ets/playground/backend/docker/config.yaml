@@ -18,6 +18,8 @@ server:
 binary:
   build: "/playground/build"
   icu_data: "/playground/icudt72l.dat"
+features:
+  ast_mode: manual   # auto | manual
 options:
   - flag: "--opt-level"
     values: [ 0,1,2 ]
