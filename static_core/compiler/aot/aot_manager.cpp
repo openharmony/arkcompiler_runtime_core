@@ -77,6 +77,70 @@ const AotFile *AotManager::GetFile(const std::string &fileName) const
     return res == aotFiles_.end() ? nullptr : (*res).get();
 }
 
+void AotManager::UpdatePandaFilesSnapshot(const panda_file::File *pf, ClassLinkerContext *ctx, bool isArkAot)
+{
+    if (pf->GetFilename().empty()) {
+        return;
+    }
+    if (isArkAot) {
+        pandaFilesSnapshot_.emplace_back(pf->GetFullFileName(), std::make_pair(pf, ctx));
+    } else {
+        pandaFilesLoaded_.try_emplace(pf->GetFullFileName(), std::make_pair(pf, ctx));
+        UpdatePandaFilesSnapshot(isArkAot, true, true);
+    }
+}
+
+void AotManager::UpdatePandaFilesSnapshot(bool isArkAot, [[maybe_unused]] bool bootContext,
+                                          [[maybe_unused]] bool appContext)
+{
+    if (isArkAot) {
+        return;
+    }
+
+    auto parseClassContext = [this](std::string_view context) {
+        size_t start = 0;
+        size_t end;
+        size_t pathEnd;
+        if (context.empty()) {
+            return;
+        }
+        auto parseAndAddFile = [this, &context, &start, &pathEnd]() {
+            pathEnd = context.find(AotClassContextCollector::HASH_DELIMETER, start);
+            ASSERT(pathEnd != std::string_view::npos);
+            auto fileName = context.substr(start, pathEnd - start);
+            auto loadedFile = pandaFilesLoaded_.find(fileName);
+            pandaFilesSnapshot_.emplace_back(fileName, loadedFile != pandaFilesLoaded_.end()
+                                                           ? loadedFile->second
+                                                           : std::make_pair(nullptr, nullptr));
+        };
+        while ((end = context.find(AotClassContextCollector::DELIMETER, start)) != std::string_view::npos) {
+            parseAndAddFile();
+            start = end + 1;
+        }
+        parseAndAddFile();
+    };
+
+    pandaFilesSnapshot_.clear();
+    parseClassContext(bootClassContext_);
+    parseClassContext(appClassContext_);
+}
+
+uint32_t AotManager::GetPandaFileSnapshotIndex(const std::string &fileName)
+{
+    for (uint32_t i = 0; i < pandaFilesSnapshot_.size(); i++) {
+        if (fileName == pandaFilesSnapshot_.at(i).first) {
+            return i;
+        }
+    }
+    UNREACHABLE();
+}
+
+const panda_file::File *AotManager::GetPandaFileBySnapshotIndex(uint32_t index) const
+{
+    ASSERT(index < pandaFilesSnapshot_.size());
+    return pandaFilesSnapshot_.at(index).second.first;
+}
+
 /* We need such kind of complex print because line length of some tool is limited by 4000 characters */
 static void FancyClassContextPrint(std::string_view context)
 {

@@ -26,7 +26,7 @@ function(:CallStaticPltResolver,
     next
   end
   caller := LoadI(%fp).Imm("-WordSize()").ptr
-  method_id := LoadI(method).Imm("cross_values::GetMethodCompiledEntryPointOffset(GetArch()) - WordSize()").ptr
+  method_id := LoadI(method).Imm("cross_values::GetMethodCompiledEntryPointOffset(GetArch()) - WordSize()").u64
 
   entry := LoadI(%tr).Imm(Constants::GET_CALLEE_METHOD).ptr
   callee := CallIndirect(entry, caller, method_id).ptr
@@ -54,7 +54,7 @@ function(:CallVirtualResolver,
   slot := LiveIn(:tmp0)
 
   # Load method id from plt entry
-  method_id := LoadI(slot).Imm("-WordSize()").ptr
+  method_id := LoadI(slot).Imm("-WordSize()").u64
   # Load pointer to caller method from `fp` register, which should point to the CFrame
   caller := LoadI(%fp).Imm("-WordSize()").ptr
 
@@ -83,7 +83,7 @@ function(:ClassResolver,
 
   slot := LiveIn(:tmp0)
 
-  class_id := LoadI(slot).Imm("-2 * WordSize()").ptr
+  class_id := LoadI(slot).Imm("-2 * WordSize()").u64
 
   caller := LoadI(%fp).Imm("-WordSize()").ptr
   klass := call_runtime(Constants::RESOLVE_CLASS, caller, class_id).ptr
@@ -109,7 +109,7 @@ function(:ClassInitResolver,
 
   slot := LiveIn(:tmp0)
 
-  class_id := LoadI(slot).Imm("-WordSize()").ptr
+  class_id := LoadI(slot).Imm("-WordSize()").u64
 
   caller := LoadI(%fp).Imm("-WordSize()").ptr
   klass := call_runtime(Constants::INITIALIZE_CLASS_BY_ID, caller, class_id).ptr

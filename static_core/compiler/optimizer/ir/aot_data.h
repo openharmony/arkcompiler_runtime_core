@@ -60,7 +60,7 @@ public:
         SharedSlowPathData *slowPathData;
         AddressType codeAddr;
         uint64_t *intfInlineCacheIndex;
-        std::array<std::map<std::pair<const File *, uint32_t>, int32_t> *, 4U> mapArgs32;
+        std::array<std::map<std::pair<const File *, uint32_t>, std::pair<int32_t, bool>> *, 4U> mapArgs32;
         std::array<std::map<std::pair<const File *, uint64_t>, int32_t> *, 2U> mapArgs64;
     };
 
@@ -83,16 +83,16 @@ public:
     intptr_t GetEntrypointOffset(uint64_t pc, int32_t slotId) const;
     intptr_t GetSharedSlowPathOffset(RuntimeInterface::EntrypointId id, uintptr_t pc) const;
     void SetSharedSlowPathOffset(RuntimeInterface::EntrypointId id, uintptr_t pc);
-    intptr_t GetPltSlotOffset(uint64_t pc, uint32_t methodId);
-    intptr_t GetVirtIndexSlotOffset(uint64_t pc, uint32_t methodId);
-    intptr_t GetClassSlotOffset(uint64_t pc, uint32_t klassId, bool init);
+    intptr_t GetPltSlotOffset(uint64_t pc, uint32_t methodId, uint32_t fileIndex);
+    intptr_t GetVirtIndexSlotOffset(uint64_t pc, uint32_t methodId, uint32_t fileIndex);
+    intptr_t GetClassSlotOffset(uint64_t pc, uint32_t klassId, bool init, uint32_t fileIndex);
     intptr_t GetCommonSlotOffset(uint64_t pc, uint32_t id);
-    intptr_t GetStringSlotOffset(uint64_t pc, uint32_t stringId);
+    intptr_t GetStringSlotOffset(uint64_t pc, uint32_t stringId, uint32_t fileIndex);
     uint64_t GetInfInlineCacheSlotOffset(uint64_t pc, uint64_t cacheIdx);
 
-    int32_t GetClassSlotId(uint32_t klassId);
-    int32_t GetStringSlotId(uint32_t stringId);
-    int32_t GetPltSlotId(uint32_t methodId);
+    int32_t GetClassSlotId(uint32_t klassId, uint32_t fileIndex);
+    int32_t GetStringSlotId(uint32_t stringId, uint32_t fileIndex);
+    int32_t GetPltSlotId(uint32_t methodId, uint32_t fileIndex);
     int32_t GetIntfInlineCacheSlotId(uint64_t cacheIdx);
 
     AddressType GetCodeOffset() const
@@ -128,22 +128,37 @@ public:
         hasProfileData_ = hasProfileData;
     }
 
+    bool IsLLVMAotMode() const
+    {
+        return isLLVMAot_;
+    }
+
+    void SetIsLLVMAotMode(bool isLLVMAot)
+    {
+        isLLVMAot_ = isLLVMAot;
+    }
+
 private:
     inline int32_t GetSlotId() const;
+
+    inline std::pair<const File *, bool> GetPandaFileByIndex(uint32_t fileIndex) const;
+    uint32_t FindOrInsertSlotId(std::map<std::pair<const File *, uint32_t>, std::pair<int32_t, bool>> *gotTable,
+                                uint32_t id, uint32_t fileIndex);
 
     const File *pfile_;
     Graph *graph_ {nullptr};
     SharedSlowPathData *slowPathData_;
     AddressType codeAddress_ {INVALID_ADDRESS};
     uint64_t *intfInlineCacheIndex_;
-    std::map<std::pair<const File *, uint32_t>, int32_t> *gotPlt_;
-    std::map<std::pair<const File *, uint32_t>, int32_t> *gotVirtIndexes_;
-    std::map<std::pair<const File *, uint32_t>, int32_t> *gotClass_;
-    std::map<std::pair<const File *, uint32_t>, int32_t> *gotString_;
+    std::map<std::pair<const File *, uint32_t>, std::pair<int32_t, bool>> *gotPlt_;
+    std::map<std::pair<const File *, uint32_t>, std::pair<int32_t, bool>> *gotVirtIndexes_;
+    std::map<std::pair<const File *, uint32_t>, std::pair<int32_t, bool>> *gotClass_;
+    std::map<std::pair<const File *, uint32_t>, std::pair<int32_t, bool>> *gotString_;
     std::map<std::pair<const File *, uint64_t>, int32_t> *gotIntfInlineCache_;
     std::map<std::pair<const File *, uint64_t>, int32_t> *gotCommon_;
     bool useCha_ {false};
     bool hasProfileData_ {false};
+    bool isLLVMAot_ {false};
 };
 }  // namespace ark::compiler
 

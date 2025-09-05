@@ -517,6 +517,62 @@ extern "C" void SafepointEntrypoint()
     interpreter::RuntimeInterface::Safepoint();
 }
 
+static std::tuple<const panda_file::File *, panda_file::File::EntityId> GetPandaFileByIndex(
+    // CC-OFFNXT(G.FMT.06-CPP) project code style
+    [[maybe_unused]] FileEntityId packedFileEntityId)
+{
+#ifdef PANDA_TARGET_ARM32
+    UNREACHABLE();
+#else
+    ASSERT(panda_file::File::IsFileEntityIdWithIndex(packedFileEntityId));
+    auto [entityId, pandaFileIndex] = panda_file::File::UnpackFileEntityIdWithIndex(packedFileEntityId);
+    // Index is stored with offset +1. The purpose is to have "0" as "non AOT" marker compatible with JIT mode, where HI
+    // bits are just zero by default. To get real index (0-based) of file we need to subtract this offset.
+    pandaFileIndex -= panda_file::File::FILE_INDEX_BASE_OFFSET;
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    auto pf = classLinker->GetAotManager()->GetPandaFileBySnapshotIndex(pandaFileIndex);
+    return {pf, entityId};
+#endif
+}
+
+static Class *GetClass(const Method *caller, FileEntityId fileEntityId, ClassLinkerErrorHandler *errorHandler)
+{
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    auto [pf, entityId] = GetPandaFileByIndex(fileEntityId);
+
+    ASSERT(!MTManagedThread::ThreadIsMTManagedThread(Thread::GetCurrent()) ||
+           !PandaVM::GetCurrent()->GetGC()->IsGCRunning() || PandaVM::GetCurrent()->GetMutatorLock()->HasLock());
+
+    Class *klass = caller->GetPandaFile()->GetPandaCache()->GetClassFromCache(entityId);
+    if (klass != nullptr) {
+        return klass;
+    }
+    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*caller);
+    auto *ext = classLinker->GetExtension(ctx);
+    ASSERT(ext != nullptr);
+    klass = ext->GetClass(*pf, entityId, caller->GetClass()->GetLoadContext(),
+                          (errorHandler == nullptr) ? ext->GetErrorHandler() : errorHandler);
+    if (LIKELY(klass != nullptr)) {
+        caller->GetPandaFile()->GetPandaCache()->SetClassCache(entityId, klass);
+    }
+    return klass;
+}
+
+static Field *GetField(const Method *method, FileEntityId fileEntityId, bool isStatic,
+                       ClassLinkerErrorHandler *errorHandler)
+{
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    auto [pf, entityId] = GetPandaFileByIndex(fileEntityId);
+    return classLinker->GetField(*pf, entityId, isStatic, method->GetClass()->GetLoadContext(), errorHandler);
+}
+
+static Method *GetMethod(const Method *caller, FileEntityId fileEntityId, ClassLinkerErrorHandler *errorHandler)
+{
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    auto [pf, entityId] = GetPandaFileByIndex(fileEntityId);
+    return classLinker->GetMethod(*pf, entityId, caller->GetClass()->GetLoadContext(), errorHandler);
+}
+
 extern "C" ObjectHeader *ResolveClassObjectEntrypoint(const Method *caller, FileEntityId typeId)
 {
     BEGIN_ENTRYPOINT();
@@ -528,7 +584,9 @@ extern "C" Class *ResolveClassEntrypoint(const Method *caller, FileEntityId type
 {
     BEGIN_ENTRYPOINT();
     ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
-    Class *klass = classLinker->GetClass(*caller, panda_file::File::EntityId(typeId));
+    auto klass = panda_file::File::IsFileEntityIdWithIndex(typeId)
+                     ? GetClass(caller, typeId, nullptr)
+                     : classLinker->GetClass(*caller, panda_file::File::EntityId(typeId));
     if (UNLIKELY(klass == nullptr)) {
         HandlePendingException();
         UNREACHABLE();
@@ -553,7 +611,13 @@ extern "C" coretypes::String *ResolveStringAotEntrypoint(const Method *caller, F
     auto thread = ManagedThread::GetCurrent();
     ASSERT(thread != nullptr);
     auto vm = thread->GetVM();
-    auto str = runtime->ResolveStringFromCompiledCode(vm, *caller, ark::panda_file::File::EntityId(id));
+    coretypes::String *str = nullptr;
+    if (panda_file::File::IsFileEntityIdWithIndex(id)) {
+        auto [pf, entityId] = GetPandaFileByIndex(id);
+        str = vm->ResolveStringFromCompiledCode(*pf, entityId);
+    } else {
+        str = runtime->ResolveStringFromCompiledCode(vm, *caller, ark::panda_file::File::EntityId(id));
+    }
     if (UNLIKELY(str == nullptr)) {
         return nullptr;
     }
@@ -691,11 +755,13 @@ extern "C" void FreeFrame(Frame *frame)
     thread->GetStackFrameAllocator()->Free(frame->GetExt());
 }
 
-extern "C" uintptr_t GetStaticFieldAddressEntrypoint(Method *method, uint32_t fieldId)
+extern "C" uintptr_t GetStaticFieldAddressEntrypoint(Method *method, FileEntityId fieldId)
 {
     BEGIN_ENTRYPOINT();
-    auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
-    auto field = classLinker->GetField(*method, panda_file::File::EntityId(fieldId), true);
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    auto field = panda_file::File::IsFileEntityIdWithIndex(fieldId)
+                     ? GetField(method, fieldId, true, nullptr)
+                     : classLinker->GetField(*method, panda_file::File::EntityId(fieldId), true);
     if (UNLIKELY(field == nullptr)) {
         HandlePendingException();
         UNREACHABLE();
@@ -705,7 +771,7 @@ extern "C" uintptr_t GetStaticFieldAddressEntrypoint(Method *method, uint32_t fi
     return reinterpret_cast<uintptr_t>(klass) + field->GetOffset();
 }
 
-extern "C" void UnresolvedStoreStaticBarrieredEntrypoint(Method *method, uint32_t fieldId, ObjectHeader *obj)
+extern "C" void UnresolvedStoreStaticBarrieredEntrypoint(Method *method, FileEntityId fieldId, ObjectHeader *obj)
 {
     BEGIN_ENTRYPOINT();
     auto thread = ManagedThread::GetCurrent();
@@ -714,7 +780,10 @@ extern "C" void UnresolvedStoreStaticBarrieredEntrypoint(Method *method, uint32_
     [[maybe_unused]] HandleScope<ObjectHeader *> objHandleScope(thread);
     VMHandle<ObjectHeader> objHandle(thread, obj);
 
-    auto field = Runtime::GetCurrent()->GetClassLinker()->GetField(*method, panda_file::File::EntityId(fieldId), true);
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    auto field = panda_file::File::IsFileEntityIdWithIndex(fieldId)
+                     ? GetField(method, fieldId, true, nullptr)
+                     : classLinker->GetField(*method, panda_file::File::EntityId(fieldId), true);
     if (UNLIKELY(field == nullptr)) {
         HandlePendingException();
         UNREACHABLE();
@@ -751,11 +820,13 @@ extern "C" void UnresolvedStoreStaticBarrieredEntrypoint(Method *method, uint32_
     }
 }
 
-extern "C" uintptr_t GetUnknownStaticFieldMemoryAddressEntrypoint(Method *method, uint32_t fieldId, size_t *slot)
+extern "C" uintptr_t GetUnknownStaticFieldMemoryAddressEntrypoint(Method *method, FileEntityId fieldId, size_t *slot)
 {
     BEGIN_ENTRYPOINT();
-    auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
-    auto field = classLinker->GetField(*method, panda_file::File::EntityId(fieldId), true);
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    auto field = panda_file::File::IsFileEntityIdWithIndex(fieldId)
+                     ? GetField(method, fieldId, true, nullptr)
+                     : classLinker->GetField(*method, panda_file::File::EntityId(fieldId), true);
     if (UNLIKELY(field == nullptr)) {
         HandlePendingException();
         UNREACHABLE();
@@ -771,11 +842,13 @@ extern "C" uintptr_t GetUnknownStaticFieldMemoryAddressEntrypoint(Method *method
     return addr;
 }
 
-extern "C" size_t GetFieldOffsetEntrypoint(Method *method, uint32_t fieldId)
+extern "C" size_t GetFieldOffsetEntrypoint(Method *method, FileEntityId fieldId)
 {
     BEGIN_ENTRYPOINT();
-    auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
-    auto field = classLinker->GetField(*method, panda_file::File::EntityId(fieldId), false);
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    auto field = panda_file::File::IsFileEntityIdWithIndex(fieldId)
+                     ? GetField(method, fieldId, false, nullptr)
+                     : classLinker->GetField(*method, panda_file::File::EntityId(fieldId), false);
     if (UNLIKELY(field == nullptr)) {
         HandlePendingException();
         UNREACHABLE();
@@ -797,7 +870,9 @@ extern "C" Class *InitializeClassByIdEntrypoint(const Method *caller, FileEntity
 {
     BEGIN_ENTRYPOINT();
     ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
-    Class *klass = classLinker->GetClass(*caller, panda_file::File::EntityId(id));
+    auto klass = panda_file::File::IsFileEntityIdWithIndex(id)
+                     ? GetClass(caller, id, nullptr)
+                     : classLinker->GetClass(*caller, panda_file::File::EntityId(id));
     if (UNLIKELY(klass == nullptr)) {
         HandlePendingException();
         UNREACHABLE();
@@ -826,7 +901,7 @@ extern "C" uintptr_t NO_ADDRESS_SANITIZE ResolveVirtualCallEntrypoint(const Meth
 }
 
 extern "C" uintptr_t NO_ADDRESS_SANITIZE ResolveVirtualCallAotEntrypoint(const Method *caller, ObjectHeader *obj,
-                                                                         size_t calleeId,
+                                                                         FileEntityId calleeId,
                                                                          [[maybe_unused]] uintptr_t cacheAddr)
 {
     BEGIN_ENTRYPOINT();
@@ -834,7 +909,10 @@ extern "C" uintptr_t NO_ADDRESS_SANITIZE ResolveVirtualCallAotEntrypoint(const M
     // Since we need only class and class in a non-movalble object
     // it is ok to get it here.
     auto *objKlass = obj->ClassAddr<Class>();
-    Method *method = Runtime::GetCurrent()->GetClassLinker()->GetMethod(*caller, panda_file::File::EntityId(calleeId));
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    auto *method = panda_file::File::IsFileEntityIdWithIndex(calleeId)
+                       ? GetMethod(caller, calleeId, nullptr)
+                       : classLinker->GetMethod(*caller, panda_file::File::EntityId(calleeId));
     if (UNLIKELY(method == nullptr)) {
         HandlePendingException();
         UNREACHABLE();
@@ -871,7 +949,7 @@ extern "C" uintptr_t NO_ADDRESS_SANITIZE ResolveVirtualCallAotEntrypoint(const M
 }
 
 extern "C" uintptr_t NO_ADDRESS_SANITIZE ResolveUnknownVirtualCallEntrypoint(const Method *caller, ObjectHeader *obj,
-                                                                             size_t calleeId, size_t *slot)
+                                                                             FileEntityId calleeId, size_t *slot)
 {
     {
         auto thread = ManagedThread::GetCurrent();
@@ -880,8 +958,10 @@ extern "C" uintptr_t NO_ADDRESS_SANITIZE ResolveUnknownVirtualCallEntrypoint(con
         VMHandle<ObjectHeader> handleObj(thread, obj);
 
         BEGIN_ENTRYPOINT();
-        auto runtime = Runtime::GetCurrent();
-        Method *method = runtime->GetClassLinker()->GetMethod(*caller, panda_file::File::EntityId(calleeId));
+        ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+        auto *method = panda_file::File::IsFileEntityIdWithIndex(calleeId)
+                           ? GetMethod(caller, calleeId, nullptr)
+                           : classLinker->GetMethod(*caller, panda_file::File::EntityId(calleeId));
         if (LIKELY(method != nullptr)) {
             // Cache a method index in vtable
             if (slot != nullptr && (!method->GetClass()->IsInterface() || method->IsDefaultInterfaceMethod())) {
@@ -935,10 +1015,13 @@ extern "C" void CheckStoreArrayReferenceDeoptimizeEntrypoint(coretypes::Array *a
     }
 }
 
-extern "C" Method *GetCalleeMethodEntrypoint(const Method *caller, size_t calleeId)
+extern "C" Method *GetCalleeMethodEntrypoint(const Method *caller, FileEntityId calleeId)
 {
     BEGIN_ENTRYPOINT();
-    auto *method = Runtime::GetCurrent()->GetClassLinker()->GetMethod(*caller, panda_file::File::EntityId(calleeId));
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    auto *method = panda_file::File::IsFileEntityIdWithIndex(calleeId)
+                       ? GetMethod(caller, calleeId, nullptr)
+                       : classLinker->GetMethod(*caller, panda_file::File::EntityId(calleeId));
     if (UNLIKELY(method == nullptr)) {
         HandlePendingException();
         UNREACHABLE();
@@ -947,10 +1030,13 @@ extern "C" Method *GetCalleeMethodEntrypoint(const Method *caller, size_t callee
     return method;
 }
 
-extern "C" Method *GetUnknownCalleeMethodEntrypoint(const Method *caller, size_t calleeId, size_t *slot)
+extern "C" Method *GetUnknownCalleeMethodEntrypoint(const Method *caller, FileEntityId calleeId, size_t *slot)
 {
     BEGIN_ENTRYPOINT();
-    auto *method = Runtime::GetCurrent()->GetClassLinker()->GetMethod(*caller, panda_file::File::EntityId(calleeId));
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    auto *method = panda_file::File::IsFileEntityIdWithIndex(calleeId)
+                       ? GetMethod(caller, calleeId, nullptr)
+                       : classLinker->GetMethod(*caller, panda_file::File::EntityId(calleeId));
     if (UNLIKELY(method == nullptr)) {
         HandlePendingException();
         UNREACHABLE();

@@ -215,7 +215,8 @@ void SlowPathResolveStringAot::GenerateImpl(Codegen *codegen)
     if (tmpAddrReg.GetReg() != addrReg_) {
         codegen->GetEncoder()->EncodeMov(tmpAddrReg, addrReg_);
     }
-    codegen->CallRuntimeWithMethod(GetInst(), method_, GetEntrypoint(), dstReg_, TypedImm(stringId_), tmpAddrReg);
+    auto typeIdImm = codegen->GetTypeIdImm(GetInst(), stringId_);
+    codegen->CallRuntimeWithMethod(GetInst(), method_, GetEntrypoint(), dstReg_, typeIdImm, tmpAddrReg);
 }
 
 void SlowPathRefCheck::GenerateImpl(Codegen *codegen)
@@ -250,7 +251,7 @@ void SlowPathUnresolved::GenerateImpl(Codegen *codegen)
     ASSERT(method_ != nullptr);
     ASSERT(typeId_ != 0);
     ASSERT(slotAddr_ != 0);
-    auto typeImm = TypedImm(typeId_);
+    auto typeIdImm = codegen->GetTypeIdImm(GetInst(), typeId_);
     auto arch = codegen->GetGraph()->GetArch();
     // On 32-bit architecture slot address requires additional down_cast,
     // similar to `method` address processing in `CallRuntimeWithMethod`
@@ -258,12 +259,12 @@ void SlowPathUnresolved::GenerateImpl(Codegen *codegen)
 
     ScopedTmpReg valueReg(codegen->GetEncoder());
     if (GetInst()->GetOpcode() == Opcode::ResolveVirtual || GetInst()->GetOpcode() == Opcode::ResolveByName) {
-        codegen->CallRuntimeWithMethod(GetInst(), method_, GetEntrypoint(), valueReg, argReg_, typeImm, slotImm);
+        codegen->CallRuntimeWithMethod(GetInst(), method_, GetEntrypoint(), valueReg, argReg_, typeIdImm, slotImm);
     } else if (GetEntrypoint() == EntrypointId::GET_UNKNOWN_CALLEE_METHOD ||
                GetEntrypoint() == EntrypointId::GET_UNKNOWN_STATIC_FIELD_MEMORY_ADDRESS) {
-        codegen->CallRuntimeWithMethod(GetInst(), method_, GetEntrypoint(), valueReg, typeImm, slotImm);
+        codegen->CallRuntimeWithMethod(GetInst(), method_, GetEntrypoint(), valueReg, typeIdImm, slotImm);
     } else {
-        codegen->CallRuntimeWithMethod(GetInst(), method_, GetEntrypoint(), valueReg, typeImm);
+        codegen->CallRuntimeWithMethod(GetInst(), method_, GetEntrypoint(), valueReg, typeIdImm);
 
         ScopedTmpReg addrReg(codegen->GetEncoder());
         codegen->GetEncoder()->EncodeMov(addrReg, Imm(slotAddr_));

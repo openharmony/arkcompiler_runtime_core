@@ -79,15 +79,15 @@ class MyMap<K, V> extends Map<K, V> {
 //! RUN_PGO_PAOC options: "--compiler-regex='.*(test_map|MapHas|MapGet|MapDelete)_.*'"
 //! METHOD        "ets_escompat_map_intrinsics.ETSGLOBAL::__noinline__MapHas_bool_double"
 //! PASS_AFTER    "Inline"
-//! INST_NOT      "Intrinsic.MapHas"
+//! INST          "Intrinsic.MapHas"
 //! INST          /CallVirtual.*escompat\.Map::has/
 //! METHOD        "ets_escompat_map_intrinsics.ETSGLOBAL::__noinline__MapGet_bool_double"
 //! PASS_AFTER    "Inline"
-//! INST_NOT      "Intrinsic.MapGet"
+//! INST          "Intrinsic.MapGet"
 //! INST          /CallVirtual.*escompat\.Map::get/
 //! METHOD        "ets_escompat_map_intrinsics.ETSGLOBAL::__noinline__MapDelete_bool_double"
 //! PASS_AFTER    "Inline"
-//! INST_NOT      "Intrinsic.MapDelete"
+//! INST          "Intrinsic.MapDelete"
 //! INST          /CallVirtual.*escompat\.Map::delete/
 
 //! CHECKER       JIT: Map<boolean, double> overrided intrinsics

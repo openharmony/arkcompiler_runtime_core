@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,73 +49,45 @@ intptr_t AotData::GetEntrypointOffset(uint64_t pc, int32_t slotId) const
     return offset;
 }
 
-intptr_t AotData::GetPltSlotOffset(uint64_t pc, uint32_t methodId)
+intptr_t AotData::GetPltSlotOffset(uint64_t pc, uint32_t methodId, uint32_t fileIndex)
 {
-    int32_t slotId = GetPltSlotId(methodId);
+    int32_t slotId = GetPltSlotId(methodId, fileIndex);
     return GetEntrypointOffset(pc, slotId);
 }
 
-int32_t AotData::GetPltSlotId(uint32_t methodId)
+int32_t AotData::GetPltSlotId(uint32_t methodId, uint32_t fileIndex)
 {
-    int32_t slotId;
-    auto slot = gotPlt_->find({pfile_, methodId});
-    if (slot != gotPlt_->end()) {
-        slotId = slot->second;
-    } else {
-        slotId = GetSlotId();
-        gotPlt_->insert({{pfile_, methodId}, slotId});
-    }
+    int32_t slotId = FindOrInsertSlotId(gotPlt_, methodId, fileIndex);
     return slotId;
 }
 
-intptr_t AotData::GetVirtIndexSlotOffset(uint64_t pc, uint32_t methodId)
+intptr_t AotData::GetVirtIndexSlotOffset(uint64_t pc, uint32_t methodId, uint32_t fileIndex)
 {
-    int32_t slotId;
-    auto slot = gotVirtIndexes_->find({pfile_, methodId});
-    if (slot != gotVirtIndexes_->end()) {
-        slotId = slot->second;
-    } else {
-        slotId = GetSlotId();
-        gotVirtIndexes_->insert({{pfile_, methodId}, slotId});
-    }
+    int32_t slotId = FindOrInsertSlotId(gotVirtIndexes_, methodId, fileIndex);
     return GetEntrypointOffset(pc, slotId);
 }
 
-intptr_t AotData::GetClassSlotOffset(uint64_t pc, uint32_t klassId, bool init)
+intptr_t AotData::GetClassSlotOffset(uint64_t pc, uint32_t klassId, bool init, uint32_t fileIndex)
 {
-    int32_t slotId = GetClassSlotId(klassId);
+    int32_t slotId = GetClassSlotId(klassId, fileIndex);
     return GetEntrypointOffset(pc, init ? slotId - 1 : slotId);
 }
 
-intptr_t AotData::GetStringSlotOffset(uint64_t pc, uint32_t stringId)
+intptr_t AotData::GetStringSlotOffset(uint64_t pc, uint32_t stringId, uint32_t fileIndex)
 {
-    int32_t slotId = GetStringSlotId(stringId);
+    int32_t slotId = GetStringSlotId(stringId, fileIndex);
     return GetEntrypointOffset(pc, slotId);
 }
 
-int32_t AotData::GetClassSlotId(uint32_t klassId)
+int32_t AotData::GetClassSlotId(uint32_t klassId, uint32_t fileIndex)
 {
-    int32_t slotId;
-    auto slot = gotClass_->find({pfile_, klassId});
-    if (slot != gotClass_->end()) {
-        slotId = slot->second;
-    } else {
-        slotId = GetSlotId();
-        gotClass_->insert({{pfile_, klassId}, slotId});
-    }
+    int32_t slotId = FindOrInsertSlotId(gotClass_, klassId, fileIndex);
     return slotId;
 }
 
-int32_t AotData::GetStringSlotId(uint32_t stringId)
+int32_t AotData::GetStringSlotId(uint32_t stringId, uint32_t fileIndex)
 {
-    int32_t slotId;
-    auto slot = gotString_->find({pfile_, stringId});
-    if (slot != gotString_->end()) {
-        slotId = slot->second;
-    } else {
-        slotId = GetSlotId();
-        gotString_->insert({{pfile_, stringId}, slotId});
-    }
+    int32_t slotId = FindOrInsertSlotId(gotString_, stringId, fileIndex);
     return slotId;
 }
 
@@ -158,4 +130,35 @@ int32_t AotData::GetSlotId() const
     return -1 - IMM_3 * (gotPlt_->size() + gotClass_->size()) - IMM_2 * (gotVirtIndexes_->size() + gotString_->size()) -
            gotIntfInlineCache_->size() - gotCommon_->size();
 }
+
+std::pair<const panda_file::File *, bool> AotData::GetPandaFileByIndex(uint32_t fileIndex) const
+{
+    if (fileIndex == panda_file::File::INVALID_FILE_INDEX) {
+        return {pfile_, false};
+    }
+    auto pfile =
+        reinterpret_cast<const panda_file::File *>(graph_->GetRuntime()->GetAOTBinaryFileBySnapshotIndex(fileIndex));
+    auto isExternal = pfile != pfile_;
+    return {pfile, isExternal};
+}
+
+uint32_t AotData::FindOrInsertSlotId(
+    std::map<std::pair<const panda_file::File *, uint32_t>, std::pair<int32_t, bool>> *gotTable, uint32_t id,
+    uint32_t fileIndex)
+{
+    int32_t slotId;
+    auto [pfile, isExternal] = GetPandaFileByIndex(fileIndex);
+    auto slot = gotTable->find({pfile, id});
+    if (slot != gotTable->end()) {
+        slotId = slot->second.first;
+        if (isExternal && !slot->second.second) {
+            slot->second.second = true;
+        }
+    } else {
+        slotId = GetSlotId();
+        gotTable->insert({{pfile, id}, {slotId, isExternal}});
+    }
+    return slotId;
+}
+
 }  // namespace ark::compiler

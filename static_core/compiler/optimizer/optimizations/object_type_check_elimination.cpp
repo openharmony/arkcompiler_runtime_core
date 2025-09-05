@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -63,6 +63,29 @@ void ObjectTypeCheckElimination::ReplaceCheckMustThrowByUnconditionalDeoptimize(
     }
 }
 
+static bool CheckIsInstanceRef(RuntimeInterface *runtime, Inst *ref)
+{
+    auto refInfo = ref->GetObjectTypeInfo();
+    if (!refInfo) {
+        return false;
+    }
+    // NOTE(compiler): support union types #27093
+    if (runtime->GetClassType(refInfo.GetClass()) == ClassType::UNION_CLASS) {
+        return false;
+    }
+    // Cannot remove IsInstance if ref is element of untyped array
+    // Same instruction could be used to check other elements of array
+    // NOTE(compiler): shall be in TypePropagation #29029
+    if (ref->GetOpcode() == Opcode::LoadArray) {
+        auto arrayObj = ref->GetDataFlowInput(0);
+        if (arrayObj != nullptr &&
+            runtime->GetClassType(arrayObj->GetObjectTypeInfo().GetClass()) == ClassType::ARRAY_OBJECT_CLASS) {
+            return false;
+        }
+    }
+    return true;
+}
+
 /**
  * This function try to replace IsInstance with a constant.
  * If input of IsInstance is Nullptr then it replaced by zero constant.
@@ -99,6 +122,9 @@ bool ObjectTypeCheckElimination::TryEliminateIsInstance(Inst *inst)
     auto refInfo = ref->GetObjectTypeInfo();
     if (refInfo) {
         auto refKlass = refInfo.GetClass();
+        if (!CheckIsInstanceRef(graph->GetRuntime(), ref)) {
+            return false;
+        }
         bool result = graph->GetRuntime()->IsAssignableFrom(tgtKlass, refKlass);
         // If ref can be null, IsInstance cannot be changed to true
         if (result) {

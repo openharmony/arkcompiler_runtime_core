@@ -763,15 +763,15 @@ bool Runtime::CreatePandaVM(std::string_view runtimeType)
         auto idx = aotBootCtx.find_last_of(compiler::AotClassContextCollector::DELIMETER);
         if (idx == std::string::npos) {
             // Only application file is in aot_boot_ctx
-            classLinker_->GetAotManager()->SetAppClassContext(aotBootCtx);
+            classLinker_->GetAotManager()->SetAppClassContext(aotBootCtx, options_.IsArkAot());
             aotBootCtx = "";
         } else {
             // Last file is an application
-            classLinker_->GetAotManager()->SetAppClassContext(aotBootCtx.substr(idx + 1));
+            classLinker_->GetAotManager()->SetAppClassContext(aotBootCtx.substr(idx + 1), options_.IsArkAot());
             aotBootCtx = aotBootCtx.substr(0, idx);
         }
     }
-    classLinker_->GetAotManager()->SetBootClassContext(aotBootCtx);
+    classLinker_->GetAotManager()->SetBootClassContext(aotBootCtx, options_.IsArkAot());
     if (pandaVm_->GetLanguageContext().IsEnabledCHA()) {
         classLinker_->GetAotManager()->VerifyClassHierarchy();
     }
@@ -923,6 +923,22 @@ void Runtime::SetThreadClassPointers()
     }
 }
 
+static inline void InitializeCompilerOptions()
+{
+    // NOTE(compiler team): #27075 Remove this after full support of LineString, TreeString and SliceString
+    // Disable String Concat optimizations for new types of string, due to expected performance degradation
+    if (!compiler::g_options.WasSetCompilerOptimizeStringConcat()) {
+        compiler::g_options.SetCompilerOptimizeStringConcat(!Runtime::GetOptions().IsUseAllStrings());
+    }
+
+#ifdef PANDA_TARGET_OHOS
+    // NOTE(compiler team): #29517 Remove this after full support of inline external methods in AOT mode
+    if (!compiler::g_options.WasSetCompilerInlineExternalMethodsAot()) {
+        compiler::g_options.SetCompilerInlineExternalMethodsAot(false);
+    }
+#endif
+}
+
 bool Runtime::Initialize()
 {
     trace::ScopedTrace scopedTrace("Runtime::Initialize");
@@ -977,11 +993,7 @@ bool Runtime::Initialize()
         StartMemAllocDumper(ConvertToString(options_.GetMemAllocDumpFile()));
     }
 
-    // NOTE(compiler team): #27075 Remove this after full support of LineString, TreeString and SliceString
-    // Disable String Concat optimizations for new types of string, due to expected performance degradation
-    if (!compiler::g_options.WasSetCompilerOptimizeStringConcat()) {
-        compiler::g_options.SetCompilerOptimizeStringConcat(!Runtime::GetOptions().IsUseAllStrings());
-    }
+    InitializeCompilerOptions();
 
 #ifdef PANDA_TARGET_MOBILE
     mem::GcHung::InitPreFork(true);
@@ -1188,7 +1200,7 @@ std::optional<Runtime::Error> Runtime::CreateApplicationClassLinkerContext(std::
         appContext_.ctx->EnumeratePandaFiles(
             compiler::AotClassContextCollector(&aotCtx, options_.IsAotVerifyAbsPath()));
     }
-    classLinker_->GetAotManager()->SetAppClassContext(aotCtx);
+    classLinker_->GetAotManager()->SetAppClassContext(aotCtx, options_.IsArkAot());
 
     tooling::DebugInf::AddCodeMetaInfo(pf.get());
     return {};

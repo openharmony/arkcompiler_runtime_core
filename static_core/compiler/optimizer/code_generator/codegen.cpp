@@ -864,6 +864,45 @@ void Codegen::EmitSlowPaths()
     }
 }
 
+uint32_t Codegen::GetAOTBinaryFileSnapshotIndexForInst([[maybe_unused]] const Inst *inst) const
+{
+#ifdef PANDA_TARGET_OHOS  // NOTE(compiler): remove #29517
+    return panda_file::File::INVALID_FILE_INDEX;
+#else
+    ASSERT(GetGraph()->IsAotMode());
+    // If external methods are not inlined we always use original logic (current method's file)
+    if (!g_options.IsCompilerInlineExternalMethods() || !g_options.IsCompilerInlineExternalMethodsAot()) {
+        return panda_file::File::INVALID_FILE_INDEX;
+    }
+    const SaveStateInst *saveState =
+        !inst->IsSaveState() ? inst->GetSaveState() : static_cast<const SaveStateInst *>(inst);
+    ASSERT(saveState != nullptr);
+
+    uint32_t index = panda_file::File::INVALID_FILE_INDEX;
+    if (auto callInst = saveState->GetCallerInst()) {
+        auto callMethod = callInst->GetCallMethod();
+        ASSERT(callMethod != nullptr);
+        auto runtime = GetGraph()->GetRuntime();
+        // Write index only if inst is externally inlined
+        if (runtime->GetBinaryFileForMethod(callMethod) == runtime->GetBinaryFileForMethod(GetGraph()->GetMethod())) {
+            index = panda_file::File::INVALID_FILE_INDEX;
+        } else {
+            index = GetGraph()->GetRuntime()->GetAOTBinaryFileSnapshotIndexForMethod(callMethod);
+        }
+    }
+
+    return index;
+#endif
+}
+
+TypedImm Codegen::GetTypeIdImm(const Inst *inst, uint32_t typeId) const
+{
+    if (!GetGraph()->IsAotMode() || GetArch() == Arch::AARCH32) {
+        return TypedImm(typeId);
+    }
+    return TypedImm(panda_file::File::PackFileEntityIdWithIndex(typeId, GetAOTBinaryFileSnapshotIndexForInst(inst)));
+}
+
 void Codegen::CreateStackMap(Inst *inst, Inst *user)
 {
     SaveStateInst *saveState = nullptr;
@@ -923,8 +962,10 @@ void Codegen::CreateStackMapRec(SaveStateInst *saveState, bool requireVregMap, I
     if (auto callInst = saveState->GetCallerInst()) {
         CreateStackMapRec(callInst->GetSaveState(), requireVregMap, targetSite);
         auto method = GetGraph()->IsAotMode() ? nullptr : callInst->GetCallMethod();
+        auto pandaFileIndex = GetGraph()->IsAotMode() ? GetAOTBinaryFileSnapshotIndexForInst(saveState)
+                                                      : panda_file::File::INVALID_FILE_INDEX;
         codeBuilder_->BeginInlineInfo(method, GetRuntime()->GetMethodId(callInst->GetCallMethod()), saveState->GetPc(),
-                                      vregsCount);
+                                      vregsCount, pandaFileIndex);
     }
 
     if (requireVregMap) {
@@ -1318,7 +1359,7 @@ void Codegen::CreateNewObjCallOld(NewObjectInst *newObj)
     slowPath->BindBackLabel(encoder);
 }
 
-// CC-OFFNXT(G.FUD.05) CodeCheck yields iocorrect line count
+// CC-OFFNXT(G.FUD.05) CodeCheck yields incorrect line count
 void Codegen::LoadClassFromObject(Reg classReg, Reg objReg)
 {
     Reg reg = ConvertRegister(classReg.GetId(), DataType::REFERENCE);
@@ -1379,7 +1420,8 @@ void Codegen::CreateLoadClassFromPLT(Inst *inst, Reg tmpReg, Reg dst, size_t cla
     auto encoder = GetEncoder();
     auto graph = GetGraph();
     auto aotData = graph->GetAotData();
-    intptr_t offset = aotData->GetClassSlotOffset(encoder->GetCursorOffset(), classId, false);
+    intptr_t offset = aotData->GetClassSlotOffset(encoder->GetCursorOffset(), classId, false,
+                                                  GetAOTBinaryFileSnapshotIndexForInst(inst));
     auto label = encoder->CreateLabel();
     ASSERT(tmpReg.GetId() != dst.GetId());
     ASSERT(inst->IsRuntimeCall());
@@ -1524,7 +1566,7 @@ void Codegen::IntfInlineCachePass(ResolveVirtualInst *resolver, Reg methodReg, R
         GetEncoder()->MakeLoadAotTableAddr(offset, regTmp64, INVALID_REGISTER);
         LoadMethod(methodReg);
         CallFastPath(resolver, EntrypointId::INTF_INLINE_CACHE, methodReg, {}, methodReg, objReg,
-                     TypedImm(resolver->GetCallMethodId()), regTmp64);
+                     GetTypeIdImm(resolver, resolver->GetCallMethodId()), regTmp64);
     } else {
         // we don't have tmp reg here, so use x3 directly
         Reg reg3 = Reg(3U, INT64_TYPE);
@@ -1534,7 +1576,7 @@ void Codegen::IntfInlineCachePass(ResolveVirtualInst *resolver, Reg methodReg, R
         GetEncoder()->MakeLoadAotTableAddr(offset, reg3, INVALID_REGISTER);
         LoadMethod(methodReg);
         CallFastPath(resolver, EntrypointId::INTF_INLINE_CACHE, methodReg, {}, methodReg, objReg,
-                     TypedImm(resolver->GetCallMethodId()), reg3);
+                     GetTypeIdImm(resolver, resolver->GetCallMethodId()), reg3);
         GetEncoder()->EncodeMov(reg3, vtmp);
     }
 
@@ -1600,7 +1642,7 @@ void Codegen::EmitResolveUnknownVirtual(ResolveVirtualInst *resolver, Reg method
     if (GetGraph()->IsAotMode()) {
         LoadMethod(methodReg);
         CallRuntime(resolver, EntrypointId::RESOLVE_VIRTUAL_CALL_AOT, methodReg, {}, methodReg, objReg,
-                    TypedImm(resolver->GetCallMethodId()), TypedImm(0));
+                    GetTypeIdImm(resolver, resolver->GetCallMethodId()), TypedImm(0));
     } else {
         auto runtime = GetRuntime();
         auto utypes = runtime->GetUnresolvedTypes();
@@ -1636,7 +1678,8 @@ void Codegen::EmitResolveVirtualAot(ResolveVirtualInst *resolver, Reg methodReg)
     auto methodReg64 = Reg(methodReg.GetId(), INT64_TYPE);
     auto tmpReg64 = Reg(tmpReg.GetReg().GetId(), INT64_TYPE);
     auto aotData = GetGraph()->GetAotData();
-    intptr_t offset = aotData->GetVirtIndexSlotOffset(GetEncoder()->GetCursorOffset(), resolver->GetCallMethodId());
+    intptr_t offset = aotData->GetVirtIndexSlotOffset(GetEncoder()->GetCursorOffset(), resolver->GetCallMethodId(),
+                                                      GetAOTBinaryFileSnapshotIndexForInst(resolver));
     GetEncoder()->MakeLoadAotTableAddr(offset, tmpReg64, methodReg64);
     auto label = GetEncoder()->CreateLabel();
     GetEncoder()->EncodeJump(label, methodReg, Condition::NE);
@@ -1679,7 +1722,7 @@ void Codegen::EmitResolveVirtual(ResolveVirtualInst *resolver)
                 EVENT_CODEGEN("Interface cache not used");
                 LoadMethod(tmpMethodReg);
                 CallRuntime(resolver, EntrypointId::RESOLVE_VIRTUAL_CALL_AOT, tmpMethodReg, {}, tmpMethodReg, objectReg,
-                            TypedImm(resolver->GetCallMethodId()), TypedImm(0));
+                            GetTypeIdImm(resolver, resolver->GetCallMethodId()), TypedImm(0));
 #ifdef PANDA_32_BIT_MANAGED_POINTER
             }
 #endif
@@ -1778,7 +1821,7 @@ void Codegen::EmitResolveStatic(ResolveStaticInst *resolver)
     if (GetGraph()->IsAotMode()) {
         LoadMethod(methodReg);
         CallRuntime(resolver, EntrypointId::GET_UNKNOWN_CALLEE_METHOD, methodReg, RegMask::GetZeroMask(), methodReg,
-                    TypedImm(resolver->GetCallMethodId()), TypedImm(0));
+                    GetTypeIdImm(resolver, resolver->GetCallMethodId()), TypedImm(0));
         return;
     }
     auto method = GetCallerOfUnresolvedMethod(resolver);
@@ -1836,7 +1879,8 @@ void Codegen::EmitCallStatic(CallInst *call)
     } else {
         if (GetGraph()->IsAotMode()) {
             auto aotData = GetGraph()->GetAotData();
-            intptr_t offset = aotData->GetPltSlotOffset(GetEncoder()->GetCursorOffset(), call->GetCallMethodId());
+            intptr_t offset = aotData->GetPltSlotOffset(GetEncoder()->GetCursorOffset(), call->GetCallMethodId(),
+                                                        GetAOTBinaryFileSnapshotIndexForInst(call));
             // PLT CallStatic Resolver transparently uses param_0 (Method) register
             GetEncoder()->MakeLoadAotTable(offset, param0);
         } else {  // usual JIT case

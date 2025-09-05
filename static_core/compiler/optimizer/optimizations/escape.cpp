@@ -1294,9 +1294,13 @@ void EscapeAnalysis::MaterializeDeoptSaveState(Inst *inst)
 std::pair<PhiState *, bool> EscapeAnalysis::CreatePhi(BasicBlock *targetBlock, BasicBlockState *blockState, Field field,
                                                       ArenaVector<StateOwner> &inputs, VirtualState *state)
 {
-    // try to reuse existing phi
-    auto it = phis_.at(targetBlock->GetId()).find(field);
-    if (it != phis_.at(targetBlock->GetId()).end()) {
+    // Create key with virtualState identifier.
+    // This guarantees PhiStates are tracked per object + field.
+    auto key = std::make_pair(field, state->GetId());
+    auto &blockPhiStates = phis_.at(targetBlock->GetId());
+
+    // If Phi already exists for this (object, field) pair, reuse it.
+    if (auto it = blockPhiStates.find(key); it != blockPhiStates.end()) {
         auto phi = it->second;
         for (size_t idx = 0; idx < inputs.size(); ++idx) {
             ASSERT(GetState(targetBlock->GetPredsBlocks()[idx])->GetStateId(inputs[idx]) == MATERIALIZED_ID);
@@ -1305,20 +1309,15 @@ std::pair<PhiState *, bool> EscapeAnalysis::CreatePhi(BasicBlock *targetBlock, B
         blockState->Materialize(phi);
         return std::make_pair(phi, false);
     }
-    auto fieldType = DataType::INT32;
-    if (std::holds_alternative<FieldPtr>(field)) {
-        fieldType = GetGraph()->GetRuntime()->GetFieldType(std::get<FieldPtr>(field));
-    } else {
-        ASSERT(std::holds_alternative<Index>(field));
-        fieldType = state->GetArrayComponentType();
-    }
+
+    auto fieldType = std::holds_alternative<FieldPtr>(field)
+                         ? GetGraph()->GetRuntime()->GetFieldType(std::get<FieldPtr>(field))
+                         : state->GetArrayComponentType();
+
     auto phiState = GetLocalAllocator()->New<PhiState>(GetLocalAllocator(), fieldType);
-    if (phiState == nullptr) {
-        UNREACHABLE();
-    }
+    bool newMaterialization = false;
     auto &preds = targetBlock->GetPredsBlocks();
     ASSERT(inputs.size() == preds.size());
-    bool newMaterialization = false;
     for (size_t idx = 0; idx < inputs.size(); ++idx) {
         phiState->AddInput(inputs[idx]);
         newMaterialization = newMaterialization || GetState(preds[idx])->GetStateId(inputs[idx]) != MATERIALIZED_ID;
@@ -1328,7 +1327,7 @@ std::pair<PhiState *, bool> EscapeAnalysis::CreatePhi(BasicBlock *targetBlock, B
         // phi is always materialized
         blockState->Materialize(phiState);
     }
-    phis_.at(targetBlock->GetId())[field] = phiState;
+    blockPhiStates[key] = phiState;
     return std::make_pair(phiState, newMaterialization);
 }
 

@@ -1881,7 +1881,7 @@ llvm::Value *LLVMIrConstructor::CreateLoadClassById(Inst *inst, uint32_t typeId,
         func_->getContext(), func_->getParent(), LLVMArkInterface::RuntimeCallType::ENTRYPOINT,
         static_cast<LLVMArkInterface::EntrypointId>(RuntimeInterface::EntrypointId::CLASS_INIT_RESOLVER));
 
-    auto callInst = builder_.CreateCall(builtin, {builder_.getInt32(typeId), slotIdVal}, CreateSaveStateBundle(inst));
+    auto callInst = builder_.CreateCall(builtin, {builder_.getInt64(typeId), slotIdVal}, CreateSaveStateBundle(inst));
     WrapArkCall(inst, callInst);
     return callInst;
 }
@@ -2073,7 +2073,7 @@ llvm::Value *LLVMIrConstructor::CreateResolveVirtualCallBuiltin(Inst *inst, llvm
     auto arrayType = llvm::ArrayType::get(builder_.getInt64Ty(), 0);
     auto offset = builder_.CreateIntToPtr(zero, arrayType->getPointerTo());
     auto callInst =
-        builder_.CreateCall(builtin, {thiz, ToSizeT(builder_.getInt32(methodId)), offset}, CreateSaveStateBundle(inst));
+        builder_.CreateCall(builtin, {thiz, ToSizeT(builder_.getInt64(methodId)), offset}, CreateSaveStateBundle(inst));
     WrapArkCall(inst, callInst);
     return builder_.CreateIntToPtr(callInst, builder_.getPtrTy());
 }
@@ -3524,7 +3524,7 @@ void LLVMIrConstructor::VisitLoadString(GraphVisitor *v, Inst *inst)
         ASSERT(aotData != nullptr);
 
         auto typeId = inst->CastToLoadString()->GetTypeId();
-        auto typeVal = ctor->builder_.getInt32(typeId);
+        auto typeVal = ctor->builder_.getInt64(typeId);
         auto slotVal = ctor->builder_.getInt32(ctor->arkInterface_->GetStringSlotId(aotData, typeId));
         ctor->arkInterface_->GetOrCreateRuntimeFunctionType(
             ctor->func_->getContext(), ctor->func_->getParent(), LLVMArkInterface::RuntimeCallType::ENTRYPOINT,
@@ -3535,7 +3535,7 @@ void LLVMIrConstructor::VisitLoadString(GraphVisitor *v, Inst *inst)
         ctor->WrapArkCall(inst, call);
         result = call;
     } else {
-        auto stringType = ctor->builder_.getInt32(inst->CastToLoadString()->GetTypeId());
+        auto stringType = ctor->builder_.getInt64(inst->CastToLoadString()->GetTypeId());
         auto entrypointId = RuntimeInterface::EntrypointId::RESOLVE_STRING;
         result = ctor->CreateEntrypointCall(entrypointId, inst, {ctor->GetMethodArgument(), stringType});
     }
@@ -3827,7 +3827,7 @@ void LLVMIrConstructor::VisitResolveObjectField(GraphVisitor *v, Inst *inst)
 {
     auto ctor = static_cast<LLVMIrConstructor *>(v);
 
-    auto typeId = ctor->builder_.getInt32(inst->CastToResolveObjectField()->GetTypeId());
+    auto typeId = ctor->builder_.getInt64(inst->CastToResolveObjectField()->GetTypeId());
 
     auto entrypointId = RuntimeInterface::EntrypointId::GET_FIELD_OFFSET;
     auto offset = ctor->CreateEntrypointCall(entrypointId, inst, {ctor->GetMethodArgument(), typeId});
@@ -3877,7 +3877,7 @@ void LLVMIrConstructor::VisitResolveObjectFieldStatic(GraphVisitor *v, Inst *ins
 
     auto entrypoint = RuntimeInterface::EntrypointId::GET_UNKNOWN_STATIC_FIELD_MEMORY_ADDRESS;
 
-    auto typeId = ctor->builder_.getInt32(resolverInst->GetTypeId());
+    auto typeId = ctor->builder_.getInt64(resolverInst->GetTypeId());
     auto slotPtr = llvm::Constant::getNullValue(ctor->builder_.getPtrTy());
 
     auto ptrInt = ctor->CreateEntrypointCall(entrypoint, inst, {ctor->GetMethodArgument(), typeId, slotPtr});
@@ -4579,7 +4579,7 @@ void LLVMIrConstructor::VisitResolveStatic(GraphVisitor *v, Inst *inst)
     auto slotPtr = llvm::Constant::getNullValue(ctor->builder_.getPtrTy());
     auto methodPtr = ctor->CreateEntrypointCall(
         RuntimeInterface::EntrypointId::GET_UNKNOWN_CALLEE_METHOD, inst,
-        {ctor->GetMethodArgument(), ctor->ToSizeT(ctor->builder_.getInt32(call->GetCallMethodId())), slotPtr});
+        {ctor->GetMethodArgument(), ctor->ToSizeT(ctor->builder_.getInt64(call->GetCallMethodId())), slotPtr});
     auto method = ctor->builder_.CreateIntToPtr(methodPtr, ctor->builder_.getPtrTy());
 
     ctor->ValueMapAdd(inst, method);
@@ -4859,7 +4859,7 @@ void LLVMIrConstructor::VisitUnresolvedStoreStatic(GraphVisitor *v, Inst *inst)
     ASSERT(unresolvedStore->GetNeedBarrier());
     ASSERT(DataType::IsReference(inst->GetType()));
 
-    auto typeId = ctor->builder_.getInt32(unresolvedStore->GetTypeId());
+    auto typeId = ctor->builder_.getInt64(unresolvedStore->GetTypeId());
     auto value = ctor->GetInputValue(inst, 0);
 
     auto entrypoint = RuntimeInterface::EntrypointId::UNRESOLVED_STORE_STATIC_BARRIERED;

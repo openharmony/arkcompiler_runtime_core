@@ -315,7 +315,7 @@ entrypoints:
   signature:
   - ark::Method*
   - const ark::Method*
-  - size_t
+  - ark::FileEntityId
 
 - name: GetCalleeMethodDirect
   entrypoint: GetCalleeMethodEntrypoint
@@ -324,7 +324,7 @@ entrypoints:
   signature:
   - ark::Method*
   - const ark::Method*
-  - size_t
+  - ark::FileEntityId
 
 - name: GetUnknownCalleeMethod
   entrypoint: GetUnknownCalleeMethodEntrypoint
@@ -333,7 +333,7 @@ entrypoints:
   signature:
   - ark::Method*
   - const ark::Method*
-  - size_t
+  - ark::FileEntityId
   - size_t*
 
 - name: GetFieldOffset
@@ -343,7 +343,7 @@ entrypoints:
   signature:
   - size_t
   - ark::Method*
-  - uint32_t
+  - ark::FileEntityId
 
 - name: GetStaticFieldAddress
   entrypoint: GetStaticFieldAddressEntrypoint
@@ -352,7 +352,7 @@ entrypoints:
   signature:
   - uintptr_t
   - ark::Method*
-  - uint32_t
+  - ark::FileEntityId
 
 - name: UnresolvedStoreStaticBarriered
   entrypoint: UnresolvedStoreStaticBarrieredEntrypoint
@@ -361,7 +361,7 @@ entrypoints:
   signature:
   - void
   - ark::Method*
-  - uint32_t
+  - ark::FileEntityId
   - ark::ObjectHeader*
 
 - name: GetUnknownStaticFieldMemoryAddress
@@ -371,7 +371,7 @@ entrypoints:
   signature:
   - uintptr_t
   - ark::Method*
-  - uint32_t
+  - ark::FileEntityId
   - size_t*
 
 - name: InitializeClass
@@ -472,7 +472,7 @@ entrypoints:
   - uintptr_t
   - const ark::Method*
   - ark::ObjectHeader*
-  - size_t
+  - ark::FileEntityId
   - size_t*
 
 - name: ResolveVirtualCallAot
@@ -483,7 +483,7 @@ entrypoints:
   - uintptr_t
   - const ark::Method*
   - ark::ObjectHeader*
-  - size_t
+  - ark::FileEntityId
   - uintptr_t
 
 - name: ResolveVirtualCallAotSlowPath
@@ -494,7 +494,7 @@ entrypoints:
   - uintptr_t
   - const ark::Method*
   - ark::ObjectHeader*
-  - size_t
+  - ark::FileEntityId
   - uintptr_t
 
 - name: ResolveVirtualCall

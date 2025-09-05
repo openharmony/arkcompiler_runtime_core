@@ -486,8 +486,8 @@ void EncodeVisitor::VisitLoadConstArray(GraphVisitor *visitor, Inst *inst)
     auto method = inst->CastToLoadConstArray()->GetMethod();
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), inst->GetType());
     auto arrayType = inst->CastToLoadConstArray()->GetTypeId();
-    enc->GetCodegen()->CallRuntimeWithMethod(inst, method, EntrypointId::RESOLVE_LITERAL_ARRAY, dst,
-                                             TypedImm(arrayType));
+    auto typeIdImm = enc->GetCodegen()->GetTypeIdImm(inst, arrayType);
+    enc->GetCodegen()->CallRuntimeWithMethod(inst, method, EntrypointId::RESOLVE_LITERAL_ARRAY, dst, typeIdImm);
 }
 
 void EncodeVisitor::VisitFillConstArray(GraphVisitor *visitor, Inst *inst)
@@ -871,7 +871,8 @@ void EncodeVisitor::VisitLoadString(GraphVisitor *visitor, Inst *inst)
     auto isCctor = graph->GetRuntime()->IsMethodStaticConstructor(method);
     if (graph->IsAotMode() && g_options.IsCompilerAotLoadStringPlt() && !isCctor) {
         auto aotData = graph->GetAotData();
-        intptr_t slotOffset = aotData->GetStringSlotOffset(encoder->GetCursorOffset(), stringType);
+        intptr_t slotOffset = aotData->GetStringSlotOffset(
+            encoder->GetCursorOffset(), stringType, enc->GetCodegen()->GetAOTBinaryFileSnapshotIndexForInst(inst));
         ScopedTmpRegU64 addrReg(encoder);
         ScopedTmpRegU64 tmpDst(encoder);
         encoder->MakeLoadAotTableAddr(slotOffset, addrReg, tmpDst);
@@ -896,7 +897,8 @@ void EncodeVisitor::VisitLoadString(GraphVisitor *visitor, Inst *inst)
             return;
         }
     }
-    enc->GetCodegen()->CallRuntimeWithMethod(inst, method, EntrypointId::RESOLVE_STRING, dst, TypedImm(stringType));
+    auto typeIdImm = enc->GetCodegen()->GetTypeIdImm(inst, stringType);
+    enc->GetCodegen()->CallRuntimeWithMethod(inst, method, EntrypointId::RESOLVE_STRING, dst, typeIdImm);
 }
 
 void EncodeVisitor::VisitLoadObject(GraphVisitor *visitor, Inst *inst)
@@ -937,7 +939,8 @@ void EncodeVisitor::VisitResolveObjectField(GraphVisitor *visitor, Inst *inst)
     auto typeId = resolver->GetTypeId();
     auto method = resolver->GetMethod();
     if (graph->IsAotMode()) {
-        enc->GetCodegen()->CallRuntimeWithMethod(inst, method, EntrypointId::GET_FIELD_OFFSET, dst, TypedImm(typeId));
+        auto typeIdImm = enc->GetCodegen()->GetTypeIdImm(inst, typeId);
+        enc->GetCodegen()->CallRuntimeWithMethod(inst, method, EntrypointId::GET_FIELD_OFFSET, dst, typeIdImm);
     } else {
         auto skind = UnresolvedTypesInterface::SlotKind::FIELD;
         ASSERT(graph->GetRuntime()->GetUnresolvedTypes() != nullptr);
@@ -1128,7 +1131,8 @@ void EncodeVisitor::VisitInitClass(GraphVisitor *visitor, Inst *inst)
         ScopedTmpReg tmpReg(encoder);
         ScopedTmpReg classReg(encoder);
         auto aotData = graph->GetAotData();
-        intptr_t offset = aotData->GetClassSlotOffset(encoder->GetCursorOffset(), classId, true);
+        intptr_t offset = aotData->GetClassSlotOffset(encoder->GetCursorOffset(), classId, true,
+                                                      enc->GetCodegen()->GetAOTBinaryFileSnapshotIndexForInst(inst));
         encoder->MakeLoadAotTableAddr(offset, tmpReg, classReg);
         auto label = encoder->CreateLabel();
         encoder->EncodeJump(label, classReg, Condition::NE);
@@ -1264,7 +1268,8 @@ void EncodeVisitor::EncodeLoadAndInitClassInAot(EncodeVisitor *enc, Encoder *enc
     auto graph = enc->cg_->GetGraph();
     ScopedTmpReg tmpReg(encoder);
     auto aotData = graph->GetAotData();
-    intptr_t offset = aotData->GetClassSlotOffset(encoder->GetCursorOffset(), classId, true);
+    intptr_t offset = aotData->GetClassSlotOffset(encoder->GetCursorOffset(), classId, true,
+                                                  enc->GetCodegen()->GetAOTBinaryFileSnapshotIndexForInst(inst));
     encoder->MakeLoadAotTableAddr(offset, tmpReg, dst);
     auto label = encoder->CreateLabel();
     encoder->EncodeJump(label, dst, Condition::NE);
@@ -1378,7 +1383,8 @@ void EncodeVisitor::VisitResolveObjectFieldStatic(GraphVisitor *visitor, Inst *i
     EntrypointId entrypoint = EntrypointId::GET_UNKNOWN_STATIC_FIELD_MEMORY_ADDRESS;  // REFERENCE
     UnresolvedTypesInterface::SlotKind slotKind = UnresolvedTypesInterface::SlotKind::FIELD;
     if (graph->IsAotMode()) {
-        enc->GetCodegen()->CallRuntimeWithMethod(inst, method, entrypoint, dst, TypedImm(typeId), TypedImm(0));
+        auto typeIdImm = enc->GetCodegen()->GetTypeIdImm(inst, typeId);
+        enc->GetCodegen()->CallRuntimeWithMethod(inst, method, entrypoint, dst, TypedImm(typeIdImm), TypedImm(0));
     } else {
         ScopedTmpReg tmpReg(enc->GetEncoder());
         ASSERT(graph->GetRuntime()->GetUnresolvedTypes() != nullptr);
@@ -1474,7 +1480,8 @@ void EncodeVisitor::VisitUnresolvedStoreStatic(GraphVisitor *visitor, Inst *inst
     auto entrypoint = RuntimeInterface::EntrypointId::UNRESOLVED_STORE_STATIC_BARRIERED;
     auto method = storeStatic->GetMethod();
     ASSERT(method != nullptr);
-    enc->GetCodegen()->CallRuntimeWithMethod(storeStatic, method, entrypoint, Reg(), TypedImm(typeId), value);
+    auto typeIdImm = enc->GetCodegen()->GetTypeIdImm(inst, typeId);
+    enc->GetCodegen()->CallRuntimeWithMethod(storeStatic, method, entrypoint, Reg(), typeIdImm, value);
 }
 
 void EncodeVisitor::VisitStoreResolvedObjectFieldStatic(GraphVisitor *visitor, Inst *inst)

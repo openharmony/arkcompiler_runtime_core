@@ -49,6 +49,7 @@ struct Index;
 using StateOwner = std::variant<Inst *, PhiState *, const ZeroInst *>;
 using MaterializationSite = std::variant<Inst *, BasicBlock *>;
 using Field = std::variant<FieldPtr, Index>;
+using FieldKey = std::pair<Field, StateId>;
 
 struct Index {
     ClassPtr klass;  // NOLINT(misc-non-private-member-variables-in-classes)
@@ -80,6 +81,18 @@ private:
         auto index = std::get<Index>(field);
         // NOLINTNEXTLINE(readability-magic-numbers)
         return (reinterpret_cast<uint64_t>(index.klass) << 32U) | index.index;
+    }
+};
+
+// Comparator for FieldKey: first compare by StateId (i.e. different objects),
+// and only if equal, compare the Field itself using FieldComporator.
+struct FieldKeyComporator {
+    bool operator()(const FieldKey &a, const FieldKey &b) const
+    {
+        if (a.second != b.second) {
+            return a.second < b.second;
+        }
+        return FieldComporator {}(a.first, b.first);
     }
 };
 
@@ -315,7 +328,7 @@ private:
     // list of instructions with corresponding virtual state values bound
     // to a save state or an allocation site
     ArenaUnorderedMap<MaterializationSite, ArenaMap<Inst *, VirtualState *>> materializationInfo_;
-    ArenaVector<ArenaMap<Field, PhiState *, FieldComporator>> phis_;
+    ArenaVector<ArenaMap<FieldKey, PhiState *, FieldKeyComporator>> phis_;
     ArenaUnorderedMap<Inst *, ArenaBitVector> saveStateInfo_;
     ArenaSet<Inst *> virtualizableAllocations_;
     MergeProcessor mergeProcessor_;
@@ -407,7 +420,7 @@ public:
 class ScalarReplacement {
 public:
     ScalarReplacement(Graph *graph, ArenaMap<Inst *, StateOwner> &aliases,
-                      ArenaVector<ArenaMap<Field, PhiState *, FieldComporator>> &phis,
+                      ArenaVector<ArenaMap<FieldKey, PhiState *, FieldKeyComporator>> &phis,
                       ArenaUnorderedMap<MaterializationSite, ArenaMap<Inst *, VirtualState *>> &materializationSites,
                       ArenaUnorderedMap<Inst *, ArenaBitVector> &saveStateLiveness)
         : graph_(graph),
@@ -430,7 +443,7 @@ public:
 private:
     Graph *graph_;
     ArenaMap<Inst *, StateOwner> &aliases_;
-    ArenaVector<ArenaMap<Field, PhiState *, FieldComporator>> &phis_;
+    ArenaVector<ArenaMap<FieldKey, PhiState *, FieldKeyComporator>> &phis_;
     ArenaUnorderedMap<MaterializationSite, ArenaMap<Inst *, VirtualState *>> &materializationSites_;
     ArenaUnorderedMap<Inst *, ArenaBitVector> &saveStateLiveness_;
 
