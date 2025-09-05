@@ -21,6 +21,7 @@ describe('appStateSlice reducer', () => {
         (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
         disasm: false,
         verifier: true,
+        astView: false,
         runtimeVerify: false,
         primaryColor: '#e32b49',
         versions: {

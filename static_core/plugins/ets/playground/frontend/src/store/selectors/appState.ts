@@ -20,6 +20,7 @@ export const theme = (state: RootState): Theme => state.appState.theme;
 export const primaryColor = (state: RootState): string => state.appState.primaryColor;
 export const withDisasm = (state: RootState): boolean => state.appState.disasm;
 export const withVerifier = (state: RootState): boolean => state.appState.verifier;
+export const withAstView = (state: RootState): boolean => state.appState.astView;
 export const withRuntimeVerify = (state: RootState): boolean => state.appState.runtimeVerify;
 export const versions = (state: RootState): Versions => state.appState.versions;
 export const isVersionsLoading = (state: RootState): boolean => state.appState.versionsLoading;
