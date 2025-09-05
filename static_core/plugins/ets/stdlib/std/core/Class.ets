@@ -78,4 +78,78 @@ export final class Class {
 
     public native isFixedArray(): boolean
 
+    /**
+     * Gets only public instance methods of a class
+     *
+     * @returns Immutable array of instance {@link reflect.InstanceMethod} objects
+     */
+    public getInstanceMethods(): FixedArray<reflect.InstanceMethod> {
+        return this.getInstanceMethodsInternal(true)
+    }
+
+    /**
+     * Looks up an public instance method by name
+     *
+     * @param name - The method name to search for
+     *
+     * @returns The {@link reflect.InstanceMethod} if found, `undefined` otherwise
+     */
+    public getInstanceMethodByName(name: string): reflect.InstanceMethod | undefined {
+        return this.getInstanceMethodByNameInternal(name, true)
+    }
+
+    /**
+     * Looks up an public instance field by name
+     *
+     * @param name - The field name to search for
+     *
+     * @returns The {@link reflect.InstanceField} if found, `undefined` otherwise
+     */
+    public getInstanceFieldByName(name: string): reflect.InstanceField | undefined {
+        return this.getInstanceFieldByNameInternal(name, true)
+    }
+
+    /**
+     * Gets only public instance fields of a class
+     *
+     * @returns Immutable array of instance {@link reflect.InstanceField} objects
+     */
+    public getInstanceFields(): FixedArray<reflect.InstanceField> {
+        return this.getInstanceFieldsInternal(true)
+    }
+
+    /**
+     * Gets only public static methods of a class
+     *
+     * @returns Immutable array of static {@link reflect.StaticMethod} objects
+     */
+    public getStaticMethods(): FixedArray<reflect.StaticMethod> {
+        return this.getStaticMethodsInternal(true)
+    }
+
+    /**
+     * Gets only public static fields of a class
+     *
+     * @returns Immutable array of static {@link reflect.StaticField} objects
+     */
+    public getStaticFields(): FixedArray<reflect.StaticField> {
+        return this.getStaticFieldsInternal(true)
+    }
+
+    /**
+     * Gets all public constructors of a class
+     *
+     * @returns Immutable array of constructor {@link reflect.Constructor} objects
+     */
+    public getConstructors(): FixedArray<reflect.Constructor> {
+        return this.getConstructorsInternal(true)
+    }
+
+    private native getInstanceMethodsInternal(publicOnly: boolean): FixedArray<reflect.InstanceMethod>
+    private native getInstanceMethodByNameInternal(name: string, publicOnly: boolean): reflect.InstanceMethod | undefined
+    private native getInstanceFieldByNameInternal(name: string, publicOnly: boolean): reflect.InstanceField | undefined
+    private native getInstanceFieldsInternal(publicOnly: boolean): FixedArray<reflect.InstanceField>
+    private native getStaticMethodsInternal(publicOnly: boolean): FixedArray<reflect.StaticMethod>
+    private native getStaticFieldsInternal(publicOnly: boolean): FixedArray<reflect.StaticField>
+    private native getConstructorsInternal(publicOnly: boolean): FixedArray<reflect.Constructor>
 }

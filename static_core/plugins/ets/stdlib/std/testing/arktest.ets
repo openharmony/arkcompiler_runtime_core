@@ -241,7 +241,7 @@ export namespace arktest {
             cb()
         } catch (e) {
             e = (e instanceof Error) ? e as Error
-                : failingAssertion("An arbitrary object instance was caught!") 
+                : failingAssertion("An arbitrary object instance was caught!")
             let res = test?.(e)
             if (res != undefined && res != true) {
                 failingAssertion((typeof res == "string") ? res as string : ("Unexpected value thrown: " + e))
@@ -391,7 +391,7 @@ export namespace arktest {
 
         /**
         * Create a testsuite instance
-        * @param name name of testsuite 
+        * @param name name of testsuite
         */
         constructor(name: string) {
             this.name = name;

@@ -83,6 +83,8 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Type.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_TypeCreator.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Method.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_reflect_Method.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_reflect_Field.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Value.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Arrays.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Job.cpp
@@ -113,7 +115,9 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/types/ets_string.cpp
     ${ETS_EXT_SOURCES}/types/ets_typeapi_create.cpp
     ${ETS_EXT_SOURCES}/types/ets_typeapi_field.cpp
+    ${ETS_EXT_SOURCES}/types/ets_reflect_field.cpp
     ${ETS_EXT_SOURCES}/types/ets_typeapi_method.cpp
+    ${ETS_EXT_SOURCES}/types/ets_reflect_method.cpp
     ${ETS_EXT_SOURCES}/types/ets_typeapi_parameter.cpp
     ${ETS_EXT_SOURCES}/types/ets_waiters_list.cpp
     ${ETS_EXT_SOURCES}/types/ets_finalizable_weak_ref.cpp

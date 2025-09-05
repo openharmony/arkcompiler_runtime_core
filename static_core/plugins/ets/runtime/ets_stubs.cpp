@@ -300,7 +300,7 @@ EtsString *EtsGetTypeof(EtsCoroutine *coro, EtsObject *obj)
 
 bool EtsGetIstrue(EtsCoroutine *coro, EtsObject *obj)
 {
-    if (IsReferenceNullish(coro, obj)) {
+    if (EtsReferenceNullish(coro, obj)) {
         return false;
     }
     EtsClass *cls = obj->GetClass();

@@ -236,3 +236,4 @@ std/core/std_core_string_String_lastIndexOf_String_int.ets
 std/core/std_core_string_String_lastIndexOf_char_int.ets
 std/core/std_core_string_String_search_String.ets
 std/containers/BlockingQueue/AddAndPollStress.ets
+std/core/ReflectTypeTest.ets

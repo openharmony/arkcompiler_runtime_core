@@ -888,7 +888,7 @@ TEST_F(EtsClassTest, EnumerateMethods)
     methods.push_back(klass->GetInstanceMethod("foo4", nullptr));
     methods.push_back(klass->GetInstanceMethod("foo5", nullptr));
 
-    klass->EnumerateMethods([&enumerateMethods, &methodsVectorSize](EtsMethod *method) {
+    klass->EnumerateDirectMethods([&enumerateMethods, &methodsVectorSize](EtsMethod *method) {
         enumerateMethods.push_back(method);
         return enumerateMethods.size() == methodsVectorSize;
     });
@@ -930,6 +930,51 @@ TEST_F(EtsClassTest, EnumerateInterfaces)
 
     for (std::size_t i = 0; i < interfaceVectorSize; ++i) {
         ASSERT_EQ(interfaces[i], enumerateInterfaces[i]);
+    }
+}
+
+TEST_F(EtsClassTest, EnumerateVTable)
+{
+    const char *source = R"(
+        .language eTS
+        .record Test {}
+        .function void Test.foo1() {
+            return.void
+        }
+        .function void Test.foo2() {
+            return.void
+        }
+        .function void Test.foo3() {
+            return.void
+        }
+        .function void Test.foo4() {
+            return.void
+        }
+        .function void Test.foo5() {
+            return.void
+        }
+    )";
+
+    EtsClass *klass = GetTestClass(source, "LTest;");
+    ASSERT_NE(klass, nullptr);
+
+    std::size_t methodsVectorSize = 5;
+    std::vector<EtsMethod *> methods(methodsVectorSize);
+    std::vector<EtsMethod *> enumerateMethods(methodsVectorSize);
+
+    methods.push_back(klass->GetInstanceMethod("foo1", nullptr));
+    methods.push_back(klass->GetInstanceMethod("foo2", nullptr));
+    methods.push_back(klass->GetInstanceMethod("foo3", nullptr));
+    methods.push_back(klass->GetInstanceMethod("foo4", nullptr));
+    methods.push_back(klass->GetInstanceMethod("foo5", nullptr));
+
+    klass->EnumerateVtable([&enumerateMethods, &methodsVectorSize](Method *method) {
+        enumerateMethods.push_back(EtsMethod::FromRuntimeMethod(method));
+        return enumerateMethods.size() == methodsVectorSize;
+    });
+
+    for (std::size_t i = 0; i < methodsVectorSize; ++i) {
+        ASSERT_EQ(methods[i], enumerateMethods[i]);
     }
 }
 

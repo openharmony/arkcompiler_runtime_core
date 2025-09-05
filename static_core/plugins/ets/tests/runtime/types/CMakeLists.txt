@@ -55,6 +55,7 @@ panda_ets_add_gtest(
         ets_runtime_linker_test.cpp
         ets_abc_runtime_linker_test.cpp
         ets_typeapi_test.cpp
+        ets_reflect_test.cpp
         typed_arrays_test.cpp
         ets_base_enum_test.cpp
         ets_error_test.cpp
