@@ -94,6 +94,7 @@ export class Autofixer {
     [
       ts.SyntaxKind.InterfaceDeclaration, 
       [
+        this[FaultID.MergeOverloadedMethods].bind(this),
         this[FaultID.NoETSKeyword].bind(this),
         this[FaultID.CallorOptionFuncs].bind(this)
       ]
@@ -132,6 +133,7 @@ export class Autofixer {
     [
       ts.SyntaxKind.ClassDeclaration, 
       [
+        this[FaultID.MergeOverloadedMethods].bind(this),
         this[FaultID.NoPrivateMember].bind(this), 
         this[FaultID.AddDeclareToClass].bind(this),
         this[FaultID.NoETSKeyword].bind(this),
@@ -1533,6 +1535,72 @@ export class Autofixer {
   
     return node;
   }
+
+  /**
+   * Rule: `Merge overloaded methods in interfaces and classes`
+   */
+  private [FaultID.MergeOverloadedMethods](node: ts.Node): ts.VisitResult<ts.Node> {
+    if (ts.isInterfaceDeclaration(node)) {
+      const hasOverloads = node.members.some((member) => {
+        if ((ts.isMethodSignature(member) || ts.isMethodDeclaration(member)) && ts.isIdentifier(member.name)) {
+          const memberName = member.name.getText();
+          return (
+            node.members.filter(
+              (m: ts.TypeElement): m is typeof member =>
+                (ts.isMethodSignature(m) || ts.isMethodDeclaration(m)) &&
+                ts.isIdentifier(m.name) &&
+                m.name.getText() === memberName
+            ).length > 1
+          );
+        }
+        return false;
+      });
+
+      if (!hasOverloads) {
+        return node;
+      }
+
+      const mergedMembers = mergeOverloadedMembers(node.members, this.context) as ts.NodeArray<ts.TypeElement>;
+      return this.context.factory.updateInterfaceDeclaration(
+        node,
+        node.modifiers,
+        node.name,
+        node.typeParameters,
+        node.heritageClauses,
+        mergedMembers
+      );
+    } else if (ts.isClassDeclaration(node)) {
+      const hasOverloads = node.members.some((member) => {
+        if ((ts.isMethodSignature(member) || ts.isMethodDeclaration(member)) && ts.isIdentifier(member.name)) {
+          const memberName = member.name.getText();
+          return (
+            node.members.filter(
+              (m: ts.ClassElement): m is typeof member =>
+                (ts.isMethodSignature(m) || ts.isMethodDeclaration(m)) &&
+                ts.isIdentifier(m.name) &&
+                m.name.getText() === memberName
+            ).length > 1
+          );
+        }
+        return false;
+      });
+
+      if (!hasOverloads) {
+        return node;
+      }
+
+      const mergedMembers = mergeOverloadedMembers(node.members, this.context) as ts.NodeArray<ts.ClassElement>;
+      return this.context.factory.updateClassDeclaration(
+        node,
+        node.modifiers,
+        node.name,
+        node.typeParameters,
+        node.heritageClauses,
+        mergedMembers
+      );
+    }
+    return node;
+  }
 }
 
 /**
@@ -2632,4 +2700,159 @@ function createNodeFromUtilType(targetType: string, factory: ts.NodeFactory):
     return factory.createArrayTypeNode(factory.createTypeReferenceNode(JSValue));
   }
   return factory.createTypeReferenceNode(JSValue);
+}
+
+function mergeOverloadedMembers(
+  members: readonly ts.TypeElement[] | readonly ts.ClassElement[],
+  context: ts.TransformationContext
+): ts.NodeArray<ts.TypeElement> | ts.NodeArray<ts.ClassElement> {
+  const memberMap = new Map<string, { signatures: ts.SignatureDeclarationBase[]; isMethod: boolean }>();
+
+  // Step 1: Group members by name
+  for (const member of members) {
+    if (
+      (ts.isMethodSignature(member) || ts.isMethodDeclaration(member)) &&
+      ts.isIdentifier(member.name)
+    ) {
+      const name = member.name.text;
+      if (!memberMap.has(name)) {
+        memberMap.set(name, { signatures: [], isMethod: true });
+      }
+      memberMap.get(name)!.signatures.push(member as ts.SignatureDeclarationBase);
+    }
+  }
+
+  // Step 2: Merge overloaded methods
+  const mergedMembers: (ts.TypeElement | ts.ClassElement)[] = [];
+  memberMap.forEach(({ signatures }, name) => {
+    if (signatures.length > 1) {
+      const mergedSignature = mergeSignatures(signatures, context);
+      mergedMembers.push(mergedSignature);
+    } else {
+      signatures.forEach(signature => {
+        if (ts.isTypeElement(signature)) {
+          mergedMembers.push(signature);
+        } else if (ts.isClassElement(signature)) {
+          mergedMembers.push(signature);
+        }
+      });
+    }
+  });
+
+  // Step 3: Return the correct type based on input
+  if (members.some(member => ts.isClassElement(member))) {
+    return ts.factory.createNodeArray(mergedMembers as ts.ClassElement[]);
+  } else {
+    return ts.factory.createNodeArray(mergedMembers as ts.TypeElement[]);
+  }
+}
+
+function mergeSignatures(
+  signatures: ts.SignatureDeclarationBase[],
+  context: ts.TransformationContext
+): ts.MethodSignature | ts.MethodDeclaration {
+  const firstSignature = signatures[0];
+  const parameters = mergeParameters(signatures, context);
+  const returnType = mergeReturnTypes(signatures, context);
+  
+  let typeParameters: ts.NodeArray<ts.TypeParameterDeclaration> | undefined;
+  if (firstSignature.typeParameters) {
+    typeParameters = firstSignature.typeParameters;
+  }
+
+  if (ts.isMethodSignature(firstSignature)) {
+    return context.factory.createMethodSignature(
+      firstSignature.modifiers,
+      firstSignature.name,
+      firstSignature.questionToken,
+      typeParameters,
+      parameters,
+      returnType
+    );
+  } else if (ts.isMethodDeclaration(firstSignature)) {
+    return context.factory.createMethodDeclaration(
+      firstSignature.modifiers,
+      firstSignature.asteriskToken,
+      firstSignature.name,
+      firstSignature.questionToken,
+      typeParameters,
+      parameters,
+      returnType,
+      undefined
+    );
+  }
+
+  throw new Error('Unsupported signature type');
+}
+
+function mergeParameters(
+  signatures: ts.SignatureDeclarationBase[],
+  context: ts.TransformationContext
+): ts.ParameterDeclaration[] {
+  const mergedParameters: ts.ParameterDeclaration[] = [];
+  const maxParams = Math.max(...signatures.map(sig => sig.parameters.length));
+
+  for (let i = 0; i < maxParams; i++) {
+    const paramTypes: ts.TypeNode[] = [];
+    let isOptional = false;
+
+    for (const sig of signatures) {
+      const param = sig.parameters[i];
+      if (param) {
+        if (param.questionToken || param.initializer) {
+          isOptional = true;
+        }
+        if (param.type) {
+          paramTypes.push(param.type);
+        }
+      } else {
+        // If a signature does not have the parameter, mark it as optional.
+        isOptional = true;
+      }
+    }
+
+    const uniqueTypes = removeDuplicateTypes(paramTypes);
+    const newParamType = uniqueTypes.length > 1
+      ? context.factory.createUnionTypeNode(uniqueTypes)
+      : uniqueTypes[0];
+
+    const newParam = context.factory.createParameterDeclaration(
+      undefined,
+      undefined,
+      `param${i}`,
+      isOptional ? context.factory.createToken(ts.SyntaxKind.QuestionToken) : undefined,
+      newParamType,
+      undefined
+    );
+
+    mergedParameters.push(newParam);
+  }
+
+  return mergedParameters;
+}
+
+function mergeReturnTypes(
+  signatures: ts.SignatureDeclarationBase[],
+  context: ts.TransformationContext
+): ts.TypeNode {
+  let returnTypes = signatures.map(sig => sig.type).filter(Boolean) as ts.TypeNode[];
+  returnTypes = removeDuplicateTypes(returnTypes);
+  return returnTypes.length > 1
+    ? context.factory.createUnionTypeNode(returnTypes)
+    : returnTypes[0];
+}
+
+function removeDuplicateTypes(types: ts.TypeNode[]): ts.TypeNode[] {
+  const seenTypes = new Set<string>();
+  const uniqueTypes: ts.TypeNode[] = [];
+
+  for (const type of types) {
+    const typeText = type.getText();
+    if (!seenTypes.has(typeText)) {
+      seenTypes.add(typeText);
+      uniqueTypes.push(type);
+    }
+  }
+
+  return uniqueTypes;
 }

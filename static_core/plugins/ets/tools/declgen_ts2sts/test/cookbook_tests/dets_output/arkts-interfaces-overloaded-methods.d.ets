@@ -14,6 +14,5 @@
  * limitations under the License.
  */
 export declare interface Iface {
-    foo(n: number): void;
-    foo(s: string): void;
+    foo(param0: number | string): void;
 }
