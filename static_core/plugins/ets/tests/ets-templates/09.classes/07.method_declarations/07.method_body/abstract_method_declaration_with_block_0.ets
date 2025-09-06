@@ -14,13 +14,13 @@
  */
 
 /*---
-desc: Native method declaration with block of code.
-assert: It is a compile-time error if a method declaration is either abstract or native and has a block for its body. 
+desc: Abstract method declaration with block of code.
+assert: It is a compile-time error if a method declaration is either abstract or native and has a block for its body.
 tags: [compile-only, negative]
 ---*/
 
-class A {
-  native run(): void {
+abstract class A {
+  abstract run(): void {
     let result: int = 5 + 5;
   }
 }

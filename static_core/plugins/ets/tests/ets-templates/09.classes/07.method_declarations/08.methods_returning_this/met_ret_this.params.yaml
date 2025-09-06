@@ -583,3 +583,59 @@ cases:
           let a = new A
           arktest.assertEQ((await (await a.foo()).foo()), a)
           arktest.assertEQ(a.fld, 2)
+
+    - decl: |-
+        class A {
+            fld: int
+            foo(): this {
+                if (this.fld == 0) {
+                    return this.bar()
+                }
+                throw new Error
+            }
+            bar(): this {
+                if (this.fld == 0) {
+                    return this
+                }
+                throw new Error
+            }
+        }
+      use: |-
+        let x = new A().foo()
+
+    - decl: |-
+        class A {
+            fld: int
+            foo(): this {
+                return this.fld == 0 ? this : this.bar()
+            }
+            bar(): this {
+                if (this.fld == 0) {
+                    return this
+                }
+                throw new Error
+            }
+        }
+      use: |-
+        let x = new A().foo()
+
+    - decl: |-
+        abstract class Super {
+            fld: int
+            foo(): this {
+                if (this.fld == 0) {
+                    return this
+                }
+                throw new Error
+            }
+        }
+        class A extends Super {
+            foo(): this {
+                if (this.fld == 999) {
+                    return this
+                }
+                return super.foo()
+            }
+        }
+      use: |-
+        let x = new A().foo()
