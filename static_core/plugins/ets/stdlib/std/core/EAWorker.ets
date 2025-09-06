@@ -83,6 +83,8 @@ export class EAWorker {
         let mainWorker = mainWorkerObj as EAWorker;
         mainWorker.isMain = true;
         EAWorker.mainWorker = mainWorker;
+        mainWorker.name = "MAIN";
+        EAWorker.workers.set(MAIN_WORKER_ID, mainWorker);
     }
 
     private worker: InternalWorker;
@@ -143,6 +145,27 @@ export class EAWorker {
     }
 
     overload constructor { supportInterop, withName, withTask, withNameAndTask }
+
+    
+    /**
+     * Get all registered EAWorker instances.
+     *
+     * @returns { containers.ConcurrentHashMap<int, EAWorker> } 
+     *   A concurrent hash map containing all EAWorker instances, 
+     *   keyed by their integer identifiers.
+     */
+    internal static getWorkers(): containers.ConcurrentHashMap<int, EAWorker> {
+        return EAWorker.workers;
+    }
+
+    /**
+     * Set the state of the loopStarted flag.
+     *
+     * @param flag - A boolean value indicating whether the loop has started.
+     */
+    internal setLoopStarted(flag: boolean) {
+        this.loopStarted.set(flag);
+    }
 
     /**
      * Get the worker identifier
@@ -236,14 +259,7 @@ export class EAWorker {
         if (!this.isStarted.get()) {
             throw new Error("Cannot stop worker before start");
         }
-        if (!this.loopStarted.get()) {
-            return;
-        }
         this.worker.quit();
-        this.loopStarted.set(false);
-        if (EAWorker.workers.get(this.eaworkerNum) != undefined) {
-            EAWorker.workers.delete(this.eaworkerNum);
-        }
     }
 
     /**
@@ -257,12 +273,7 @@ export class EAWorker {
         if (!this.isStarted.get()) {
             throw new Error("Cannot stop worker before start");
         }
-        if (!this.loopStarted.get()) {
-            return;
-        }
         this.worker.join();
-        EAWorker.workers.delete(this.eaworkerNum);
-        this.loopStarted.set(false);
     }
 
     /**
@@ -333,34 +344,67 @@ export class EAWorker {
         return res;
     }
 
-    internal getMessage(message: concurrency.Message): concurrency.Message | undefined {
+    internal hasMessages(handler: concurrency.MessageHandler, what: int, object: Object | undefined): boolean {
         if (this.isMain) {
-            return undefined;
+            return false;
         }
-        let res: concurrency.Message | undefined = undefined;
+        let res = false;
         this.messages.forEach((value: MessageStatus, key: concurrency.Message) => {
-            if (key.equals(message) && value != MessageStatus.CANCELLED) {
-                res = key;
+            if (key.getTarget() == handler
+                && key.getWhat() == what
+                && (object == undefined || key.getObject() == object)
+                && value != MessageStatus.CANCELLED) {
+                res = true;
             }
         });
         return res;
     }
 
-    /**
-     * Cancel a message by setting its status to CANCELLED
-     * @param { Message } message The message to cancel
-     * @returns { boolean } True if the message was cancelled, false otherwise
-     */
-    internal cancelMessage(message: concurrency.Message): boolean {
+    internal hasCallbacks(handler: concurrency.MessageHandler, callback: Task): boolean {
         if (this.isMain) {
             return false;
         }
-        let msg = this.getMessage(message);
-        if (msg != undefined) {
-            this.messages.set(msg, MessageStatus.CANCELLED);
-            return true;
+        let res = false;
+        this.messages.forEach((value: MessageStatus, key: concurrency.Message) => {
+            if (key.getTarget() == handler && key.getCallback() == callback) {
+                res = true;
+            }
+        });
+        return res;
+    }
+
+    internal removeCallbacks(handler: concurrency.MessageHandler, callback: Task): boolean {
+        if (this.isMain) {
+            return false;
         }
-        return false;
+        let res = false;
+        this.messages.forEach((value: MessageStatus, key: concurrency.Message) => {
+            if (key.getTarget() == handler
+                && key.getCallback() == callback
+                && value != MessageStatus.CANCELLED) {
+                this.messages.set(key, MessageStatus.CANCELLED);
+                res = true;
+            }
+        });
+        return res;
+    }
+
+    internal removeMessages(handler: concurrency.MessageHandler, what: int, object: Object | undefined): boolean {
+        if (this.isMain) {
+            return false;
+        }
+        let res = false;
+        this.messages.forEach((value: MessageStatus, key: concurrency.Message) => {
+            if (key.getTarget() == handler
+                && key.getWhat() == what 
+                && (object == undefined || key.getObject() == object)
+                && value != MessageStatus.CANCELLED
+                && key.getCallback() == undefined) {
+                this.messages.set(key, MessageStatus.CANCELLED);
+                res = true;
+            }
+        });
+        return res;
     }
 
     /**
@@ -439,8 +483,6 @@ export class EAWorker {
         }
 
         this.worker.join();
-        EAWorker.workers.delete(this.eaworkerNum);
-        this.loopStarted.set(false);
     }
 
     /**
@@ -629,6 +671,12 @@ class InteropWorker implements InternalWorker {
 
     public join() {
         this.initEvent.wait();
+        let finalTask = () => {
+            let current = EAWorker.current() as EAWorker;
+            EAWorker.getWorkers().delete(this.eaworkerNum);
+            current.setLoopStarted(false);
+        }
+        this.poster?.post(finalTask);
         this.poster!.destroy();
     }
 
@@ -759,6 +807,7 @@ class StaticWorker implements InternalWorker {
         while (this.tasks.size > 0) {
             this.tasks.poll();
         }
+        this.messages.clear();
         this.join();
     }
 
@@ -780,6 +829,9 @@ class StaticWorker implements InternalWorker {
         while (true) {
             let task = this.tasks.pop();
             if (task === StaticWorker.closingTask) {
+                let current = EAWorker.current() as EAWorker;
+                EAWorker.getWorkers().delete(this.eaworkerNum);
+                current.setLoopStarted(false);
                 break;
             }
             let shouldExecute = true;
