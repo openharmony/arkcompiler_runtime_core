@@ -842,9 +842,6 @@
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/decl_var/decl-var-n3_6.ets
 07.expressions/12.indexing_expression/01.array_indexing_expression/array_access8.ets
 07.expressions/12.indexing_expression/01.array_indexing_expression/array_access9.ets
-07.expressions/22.additive_expressions/02.additive_operators_for_numeric_types/int_28.ets
-07.expressions/22.additive_expressions/02.additive_operators_for_numeric_types/int_29.ets
-07.expressions/22.additive_expressions/02.additive_operators_for_numeric_types/int_30.ets
 07.expressions/29.assignment/02.compound_assignment_operators/ops_102.ets
 07.expressions/29.assignment/02.compound_assignment_operators/ops_103.ets
 07.expressions/29.assignment/02.compound_assignment_operators/ops_104.ets

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,16 +13,17 @@
  * limitations under the License.
  */
 
-{% for ni in float %}
+{% for op in operations %}
 
 /*---
-desc: Additions for float and double
-params: {{ni.x}} + {{ni.y}} == {{ni.result}}
+desc: Additive operations with bigint
+params: {{op.value1}} {{op.operation}} {{op.value2}} == {{op.result_value}}
 ---*/
 
 function main(): void {
-  let x: {{ni.type}} = {{ni.x}};
-  let y: {{ni.type}} = {{ni.y}};
-  arktest.assertEQ( (x + y), {{ni.result}} )
+  let x: bigint = {{op.value1}};
+  let y: bigint = {{op.value2}};
+  let z = x {{op.operation}} y;
+  arktest.assertEQ(z, {{op.result_value}})
 }
 {% endfor %}
