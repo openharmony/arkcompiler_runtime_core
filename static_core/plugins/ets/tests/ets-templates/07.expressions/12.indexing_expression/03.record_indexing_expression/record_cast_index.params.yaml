@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,8 +13,10 @@
 
 ---
 cases:
-    - { ref_fail: 'false', idx_fail: 'false', idx: '"1"', res: '" ref idx passed 42"'        }
-    - { ref_fail: 'false', idx_fail: 'false', idx: '"2"', res: '" ref idx passed undefined"' }
-    - { ref_fail: 'false', idx_fail: 'true',  idx: '"1"', res: '" ref idx failed 99"'        }
-    - { ref_fail: 'true',  idx_fail: 'false', idx: '"1"', res: '" ref failed 99"'            }
-    - { ref_fail: 'true',  idx_fail: 'true',  idx: '"1"', res: '" ref failed 99"'            }
+    - { call: 'x.get("name")',            value: '"Alice"'   }
+    - { call: 'x.get("age")',             value: '"30"'      }
+    - { call: 'x["name"]',                value: '"Alice"'   }
+    - { call: 'x["age"]',                 value: '"30"'      }
+    - { call: 'x["gender"]',              value: 'undefined' }
+    - { call: 'getValue("name", "none")', value: '"Alice"'   }
+    - { call: 'getValue("id", "none")',   value: '"none"'    }

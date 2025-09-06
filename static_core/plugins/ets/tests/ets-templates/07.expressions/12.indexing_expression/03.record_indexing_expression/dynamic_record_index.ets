@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,20 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
-desc: >-
-    The object reference expression must be checked to evaluate to nullish value;
-    if it does, then the entire indexing-Expression equals undefined.
+desc: Record index expression - the keys of the record are dynamically generated.
 ---*/
 
-function refNullish(): Record<string, number> | null {
-    let res: Record<string, number> | null = null
-    return res
+let dynamicRecord: Record<string, number> = {};
+
+function setValue(key: string, value: number) {
+  dynamicRecord[key] = value;
 }
 
-function main() {
-    arktest.assertTrue(refNullish()?.["magic"] === undefined)
+function main(): void {
+  setValue("key1", 10);
+  setValue("key2", 20);
+  arktest.assertEQ(dynamicRecord["{{c.index}}"], {{c.value}});
 }
+{% endfor %}

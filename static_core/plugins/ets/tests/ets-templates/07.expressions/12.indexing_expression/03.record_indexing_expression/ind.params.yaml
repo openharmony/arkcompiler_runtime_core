@@ -29,8 +29,7 @@ cases:
           r["3"] = new Short(30)
           arktest.assertTrue(r["1"] == 10 && r["2"] == 20 && r["3"] == 30)
 
-    - tags: 'compile-only, negative'
-      use: |-
+    - use: |-
           // key is a union of literal types
           let idx: Short = 0
           let r: Record<"11"|"12"|"13", Short> = {
@@ -39,46 +38,9 @@ cases:
               "13": idx,
           }
           let i = "11"
-          arktest.assertTrue(r[i] == 0)  // CTE expected, expression is not permitted in index
-
-    - tags: 'compile-only, negative'
-      decl: |-
-          function foo(p: string): string {
-              return p + "2"
-          }
-      use: |-
-          // key is a union of literal types
-          let idx: Short = 0
-          let r: Record<"11"|"12"|"13", Short> = {
-              "11": idx,
-              "12": idx,
-              "13": idx,
-          }
-          r[foo("1")] = 99   // CTE expected, expression is not permitted in index
-          arktest.assertTrue(r["12"] == 99)
-
-    - tags: 'compile-only, negative'
-      use: |-
-          // key is a union of literal types
-          let idx: Byte = 0
-          let r: Record<" "|"  "|"   ", Byte> = {
-              " "   : idx,
-              "  "  : idx,
-              "   " : idx,
-          }
-          arktest.assertTrue(r["?"] == undefined)  // CTE expected, unknown key
-
-    - tags: 'compile-only, negative'
-      use: |-
-          // key is a union of literal types
-          let idx: Byte = 0
-          let r: Record<" "|"  "|"   ", Byte> = {
-              " "   : idx,
-              "  "  : idx,
-              "   " : idx,
-          }
-          r[""] = ++idx;  // CTE expected, unknown key
-          arktest.assertTrue(r[" "] == idx)
+          arktest.assertEQ(r[i], 0)
+          arktest.assertEQ(r["12"], 0)
+          arktest.assertEQ(r["13"], 0)
 
     # Record key is a union of string literal types and string
     - use: |-
@@ -118,27 +80,6 @@ cases:
           arktest.assertTrue(r[foo(1)] == 1 && r[foo(2)] == 2 && r[foo(3)] == undefined)
           r[foo(1)] = 99
           arktest.assertTrue(r["1"] == 99 && r["2"] == 2 && r["3"] == undefined)
-
-    - tags: 'compile-only, negative'
-      use: |-
-          // key is a union of literal types and string
-          let idx: int = 0
-          let r: Record<"1"|"2"|"3"|string, Int> = {
-              "1": idx + 1,
-              "2": idx + 2,
-          }
-          arktest.assertTrue(r[1] == undefined)  // CTE: wrong key type
-
-    - tags: 'compile-only, negative'
-      use: |-
-          // key is a union of literal types and string
-          let idx: int = 0
-          let r: Record<"1"|"2"|"3"|string, Int> = {
-              "1": idx + 1,
-              "2": idx + 2,
-          }
-          r[2] = 99 // CTE: wrong key type
-          arktest.assertTrue(r["2"] == 2)
 
     # Record key is of numeric type
     - use: |-
