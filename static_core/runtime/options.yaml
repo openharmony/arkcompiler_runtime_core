@@ -733,7 +733,7 @@ options:
 
 - name: verification-mode
   type: std::string
-  default: disabled
+  default: ahead-of-time
   possible_values:
     - disabled
     - on-the-fly

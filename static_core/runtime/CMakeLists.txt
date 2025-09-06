@@ -820,17 +820,25 @@ add_gtests(
     NO_WARNING_FILTER
 )
 
-add_gtests(
-    arkruntime_core_layout_test
+set(LAYOUT_TESTS_SOURCES
     tests/array_test.cpp
     tests/mark_word_test.cpp
-    tests/method_test.cpp
     tests/compiler_thread_pool.cpp
     tests/mock_queue_thread_pool.cpp
     tests/string_table_test.cpp
     tests/string_test.cpp
     tests/compilation_status_test.cpp
     tests/osr_code_test.cpp
+)
+if (NOT PANDA_QEMU_BUILD OR NOT PANDA_TARGET_ARM32)
+    # NOTE: not enough user space for class allocation after enabling AOT veifier by default.
+    # Issue: #29519
+    list(APPEND LAYOUT_TESTS_SOURCES tests/method_test.cpp)
+endif()
+
+add_gtests(
+    arkruntime_core_layout_test
+    ${LAYOUT_TESTS_SOURCES}
 )
 
 add_gtests(
@@ -1025,7 +1033,8 @@ if (TARGET arkruntime_test_interpreter_impl)
         tests/invokation_helper.cpp
     )
     if (NOT PANDA_QEMU_BUILD OR NOT PANDA_TARGET_ARM32)
-        # NOTE: not enough user space for class allocation after enabling AOT veifier by default. Issue: #29519
+        # NOTE: not enough user space for class allocation after enabling AOT veifier by default.
+        # Issue: #29519
         list(APPEND INTERPRETER_TESTS_SOURCES tests/exception_test.cpp)
     endif()
         
