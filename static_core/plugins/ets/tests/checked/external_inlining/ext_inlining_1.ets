@@ -16,7 +16,7 @@
 import { get_sum_element } from "./ext_funcs.ets";
 
 //! CHECKER    Check external inlining with depth 1 and one panda file
-//! RUN_PAOC   options: "--panda-files=../../ext_inlining_1.checked/ext_funcs.abc --log-level=debug --log-components=compiler --compiler-log=inlining", entry: "ext_inlining_1.ETSGLOBAL::main"
+//! RUN_PAOC   options: "--panda-files=../../ext_inlining_1.checked/ext_funcs.abc --compiler-inline-external-methods-aot=true", entry: "ext_inlining_1.ETSGLOBAL::main"
 //! EVENT      /Inline,ext_funcs.ETSGLOBAL::get_sum_element,ext_funcs.ETSGLOBAL::add,.*,STATIC,SUCCESS/
 //! EVENT_NEXT /Inline,ext_inlining_1.ETSGLOBAL::main,ext_funcs.ETSGLOBAL::get_sum_element,.*,STATIC,SUCCESS/
 //! RUN        options: "--panda-files=../../ext_inlining_1.checked/ext_funcs.abc", entry: "ext_inlining_1.ETSGLOBAL::main"

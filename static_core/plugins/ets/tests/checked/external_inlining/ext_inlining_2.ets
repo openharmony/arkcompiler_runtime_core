@@ -16,7 +16,7 @@
 import { get_element } from "./ext_funcs_1.ets";
 
 //! CHECKER    Check external inlining with depth 1 and two panda files
-//! RUN_PAOC   options: "--panda-files=../../ext_inlining_2.checked/ext_funcs.abc:../../ext_inlining_2.checked/ext_funcs_1.abc --log-level=debug --log-components=compiler --compiler-log=inlining", entry: "ext_inlining_2.ETSGLOBAL::main"
+//! RUN_PAOC   options: "--panda-files=../../ext_inlining_2.checked/ext_funcs.abc:../../ext_inlining_2.checked/ext_funcs_1.abc --compiler-inline-external-methods-aot=true", entry: "ext_inlining_2.ETSGLOBAL::main"
 //! EVENT      /Inline,ext_funcs_1.ETSGLOBAL::get_element,ext_funcs.ETSGLOBAL::add,.*,STATIC,SUCCESS/
 //! EVENT_NEXT /Inline,ext_inlining_2.ETSGLOBAL::main,ext_funcs_1.ETSGLOBAL::get_element,.*,STATIC,SUCCESS/
 //! RUN        options: "--panda-files=../../ext_inlining_2.checked/ext_funcs.abc:../../ext_inlining_2.checked/ext_funcs_1.abc", entry: "ext_inlining_2.ETSGLOBAL::main"

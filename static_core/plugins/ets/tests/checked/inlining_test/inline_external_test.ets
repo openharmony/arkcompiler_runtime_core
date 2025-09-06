@@ -14,7 +14,7 @@
  */
 
 //! CHECKER      Check retrieving external method info during deoptimization
-//! RUN_PAOC     options: "--panda-files=../../inline_external_test.checked/external_file_1.abc:../../inline_external_test.checked/external_file_2.abc:../../inline_external_test.checked/external_file_3.abc --paoc-use-cha=true"
+//! RUN_PAOC     options: "--panda-files=../../inline_external_test.checked/external_file_1.abc:../../inline_external_test.checked/external_file_2.abc:../../inline_external_test.checked/external_file_3.abc --paoc-use-cha=true --compiler-inline-external-methods-aot=true"
 //! METHOD       "inline_external_test.ETSGLOBAL::main"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /CallStatic.*B::array_test/
