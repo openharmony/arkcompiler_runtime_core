@@ -88,7 +88,10 @@ EtsClass *EtsRuntimeLinkerFindLoadedClass(EtsRuntimeLinker *runtimeLinker, EtsSt
 {
     const auto name = clsName->GetMutf8();
     PandaString descriptor;
-    const auto *classDescriptor = ClassHelper::GetDescriptor(utf::CStringAsMutf8(name.c_str()), &descriptor);
+    const auto *classDescriptor = ClassHelper::GetDescriptor(utf::CStringAsMutf8(name.c_str()), &descriptor, true);
+    if (classDescriptor == nullptr) {
+        return nullptr;
+    }
     return runtimeLinker->FindLoadedClass(classDescriptor);
 }
 
@@ -114,7 +117,10 @@ EtsClass *EtsBootRuntimeLinkerFindAndLoadClass(ObjectHeader *runtimeLinker, EtsS
 {
     const auto name = clsName->GetMutf8();
     PandaString descriptor;
-    auto *classDescriptor = ClassHelper::GetDescriptor(utf::CStringAsMutf8(name.c_str()), &descriptor);
+    auto *classDescriptor = ClassHelper::GetDescriptor(utf::CStringAsMutf8(name.c_str()), &descriptor, true);
+    if (classDescriptor == nullptr) {
+        return nullptr;
+    }
 
     auto *coro = EtsCoroutine::GetCurrent();
     // Use core ClassLinker in order to pass nullptr as error handler,
