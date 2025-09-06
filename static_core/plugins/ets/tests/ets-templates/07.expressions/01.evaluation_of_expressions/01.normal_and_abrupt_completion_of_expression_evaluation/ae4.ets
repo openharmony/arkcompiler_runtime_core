@@ -19,17 +19,10 @@ desc: ArithmeticError is thrown by an integer division or integer
 params: 0%0
 ---*/
 
-function main(): int {
+function main() {
   let a = 0;
   let b = 1;
-
-  try {
-    let v: String = "X" + a++ % (a++ >> 1) % (b = 2);
-    return 1;
-  } catch (e: ArithmeticError) {
-    if (a != 2 || b != 1) return 1;
-    return 0;
-  } catch (e) {
-    return 1;
-  }
+  let expectedException = (e: Error): boolean => { return (e instanceof ArithmeticError) }
+  arktest.expectThrow(() => { let v: String = "X" + a++ % (a++ >> 1) % (b = 2); }, expectedException)
+  arktest.assertEQ(a != 2 || b != 1, false)
 }

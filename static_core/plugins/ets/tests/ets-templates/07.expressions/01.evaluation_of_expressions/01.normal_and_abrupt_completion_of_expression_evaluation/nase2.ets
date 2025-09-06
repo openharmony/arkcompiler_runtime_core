@@ -27,8 +27,6 @@ function main(): int {
     let v: int = 42 + (a = 2) + new byte[sz].length.toInt() + (b = 2);
     if (a != 2 || b != 2) return 1;
     return 0;
-  } catch (e: NegativeArraySizeError) {
-    return 1;
   } catch (e) {
     return 1;
   }

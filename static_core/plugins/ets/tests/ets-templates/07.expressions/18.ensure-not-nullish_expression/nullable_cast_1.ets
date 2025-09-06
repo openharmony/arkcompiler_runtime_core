@@ -19,14 +19,6 @@ desc: nullable Cast T | null -> T with ensure not-null expression. null value
 
 function main(): void {
   let a: Int | null = (): Int|null => { return null; }();
-  let res: int = 0;
-
-  try {
-    let b: Int = a!;
-    res = 0;
-  } catch (e: NullPointerError) {
-    res = 1;
-  }
-
-  arktest.assertEQ( res, 1, "NPE caught - correct" )
+  let expectedException = (e: Error): boolean => { return (e instanceof NullPointerError) }
+  arktest.expectThrow(() => { let b: Int = a! }, expectedException)
 }

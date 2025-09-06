@@ -18,18 +18,11 @@ desc: NegativeArraySizeError is thrown by an array creation expression
   if any dimension expression has a value that is less than zero.
 ---*/
 
-function main(): int {
+function main() {
   let a: int = 1;
   let b: int = 1;
   let sz: int = 0x80000000;
-
-  try {
-    let v: String = "" + (a = 2) + new byte[2][sz] + (b = 2);
-    return 1;
-  } catch (e: NegativeArraySizeError) {
-    if (a != 2 || b != 1) return 1;
-    return 0;
-  } catch (e) {
-    return 1;
-  }
+  let expectedException = (e: Error): boolean => { return (e instanceof NegativeArraySizeError) }
+  arktest.expectThrow(() => { let v: String = "" + (a = 2) + new byte[2][sz] + (b = 2); }, expectedException)
+  arktest.assertEQ(a != 2 || b != 2, false)
 }

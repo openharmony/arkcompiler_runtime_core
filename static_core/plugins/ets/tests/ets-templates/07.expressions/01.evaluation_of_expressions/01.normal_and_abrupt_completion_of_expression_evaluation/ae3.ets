@@ -18,19 +18,13 @@ desc: ArithmeticError is thrown by an integer division or integer
   remainder operator if the right-hand operand expression has the zero value.
 ---*/
 
-function main(): int {
+function main() {
   let a = 1;
   let b = 1;
   let i: long = 0x00000000ffffffff;
   let j: long = 0x0fffffff00000000;
 
-  try {
-    let v: String = "X" + (a = 2) + (i.toInt()) / (j.toInt()) / (b = 2);
-    return 1;
-  } catch (e: ArithmeticError) {
-    if (a != 2 || b != 1) return 1;
-    return 0;
-  } catch (e) {
-    return 1;
-  }
+  let expectedException = (e: Error): boolean => { return (e instanceof ArithmeticError) }
+  arktest.expectThrow(() => { let v: String = "X" + (a = 2) + (i.toInt()) / (j.toInt()) / (b = 2); }, expectedException)
+  arktest.assertEQ(a != 2 || b != 1, false)
 }

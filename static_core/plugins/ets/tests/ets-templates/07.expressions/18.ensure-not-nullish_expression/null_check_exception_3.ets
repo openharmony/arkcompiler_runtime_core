@@ -20,12 +20,6 @@ desc: If the result of the evaluation of e is equal to null or undefined, then N
 function main(): void {
   let i: Int|null = 5;
   let ii: Int|null = null;
-  try {
-    (1 ? ii : i)!;
-    arktest.assertTrue( false, "evaluation of e seems to be e" )
-  } catch(npe: NullPointerError) {
-    arktest.assertTrue( true, "NPE caught - correct")
-  } catch(e) {
-    arktest.assertTrue( false, "Some other Error thrown, not correct")
-  }
+  let expectedException = (e: Error): boolean => { return (e instanceof NullPointerError) }
+  arktest.expectThrow(() => { (1 ? ii : i)!; arktest.assertTrue( false, "evaluation of e seems to be e" ) }, expectedException)
 }

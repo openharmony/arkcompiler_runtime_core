@@ -128,12 +128,8 @@ cases:
           }
       call: |-
           arktest.assertEQ( foo(1, 2), 3 )
-          try {
-              foo(1)
-              arktest.assertTrue( false )
-          } catch (e: NullPointerError) {
-              // expected
-          }
+          let expectedException = (e: Error): boolean => { return (e instanceof NullPointerError) }
+          arktest.expectThrow(() => { foo(1) }, expectedException)
 
     - decl: |-
           type XYZ=number
