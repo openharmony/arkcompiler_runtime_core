@@ -25,5 +25,5 @@ class A {
 }
 
 function main(): void {
-    arktest.assertTrue( A.x == 5 );
+    arktest.assertEQ(A.x, 5);
 }
