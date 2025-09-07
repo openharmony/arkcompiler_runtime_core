@@ -25,18 +25,6 @@ static {
     NaN = Double.NaN;
     Infinity = Double.POSITIVE_INFINITY;
     IS_LITTLE_ENDIAN = Runtime.isLittleEndianPlatform()
-    MAX_REGULAR_INTEGER = new BigInt(Number.MAX_SAFE_INTEGER)
-
-    FAST_TO_STRING_HANDLER_MAP = () => {
-        let result = new ToStringHandlerMap
-        result[2] = (instance: BigInt):string => { return instance.toStringAsBinary() }
-        result[4] = (instance: BigInt):string => { return instance.toStringAsPowerOfTwoRadix(4) }
-        result[8] = (instance: BigInt):string => { return instance.toStringAsPowerOfTwoRadix(8) }
-        result[10] = (instance: BigInt):string => { return instance.toStringAsDecimal() }
-        result[16] = (instance: BigInt):string => { return instance.toStringAsPowerOfTwoRadix(16) }
-        result[32] = (instance: BigInt):string => { return instance.toStringAsPowerOfTwoRadix(32) }
-        return result
-    }()
 
     dayNames = [
         "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"

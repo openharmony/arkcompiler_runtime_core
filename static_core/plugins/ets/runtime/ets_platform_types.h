@@ -56,7 +56,7 @@ public:
     EtsClass *coreDouble {};
 
     /* ets base language classes */
-    EtsClass *escompatBigint {};
+    EtsClass *coreBigint {};
     EtsClass *escompatError {};
     EtsClass *coreFunction {};
     std::array<EtsClass *, CORE_FUNCTION_ARITY_THRESHOLD> coreFunctions {};

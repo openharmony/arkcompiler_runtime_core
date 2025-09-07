@@ -621,14 +621,14 @@ function __noinline__BigInt64ArrayFromArrayCheckException(obj: Object, factType:
 {
     let arr: Array<bigint> = obj as Array<bigint>;
     arktest.expectThrow(() => { BigInt64Array.from(arr); }, (e: Error) => {
-        return e instanceof ClassCastError && e.message == factType + ' cannot be cast to escompat.BigInt';
+        return e instanceof ClassCastError && e.message == factType + ' cannot be cast to std.core.BigInt';
     });
 }
 
 function __noinline__BigInt64ArrayFromFixedArrayCheckException(obj: Object, factType: string): void
 {
     arktest.expectThrow(() => { let arr: FixedArray<bigint> = obj as FixedArray<bigint> }, (e: Error) => {
-        return e instanceof ClassCastError && e.message == factType + ' cannot be cast to [Lescompat/BigInt;';
+        return e instanceof ClassCastError && e.message == factType + ' cannot be cast to [Lstd/core/BigInt;';
     });
 }
 

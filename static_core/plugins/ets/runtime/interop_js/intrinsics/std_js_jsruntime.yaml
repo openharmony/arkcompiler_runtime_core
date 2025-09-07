@@ -27,7 +27,7 @@ coretypes:
 - managed_class: std.interop.js.JSValue
   mirror_class: ark::ets::interop::js::JSValue
 
-- managed_class: escompat.BigInt
+- managed_class: std.core.BigInt
   mirror_class: ark::ets::EtsBigInt
 
 - managed_class: std.core.Type
@@ -116,7 +116,7 @@ intrinsics:
       ret: u1
       args: [ std.core.Object ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeIsJSValueIntrinsic
-    clear_flags: [can_throw, heap_inv, no_cse]    
+    clear_flags: [can_throw, heap_inv, no_cse]
 
   - name: JSRuntimeNewJSValueBigInt
     space: ets
@@ -125,7 +125,7 @@ intrinsics:
     static: true
     signature:
       ret: std.interop.js.JSValue
-      args: [ escompat.BigInt ]
+      args: [ std.core.BigInt ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeNewJSValueBigIntIntrinsic
     clear_flags: [can_throw, heap_inv, no_cse]
 
@@ -641,7 +641,7 @@ intrinsics:
     static: true
     signature:
       ret: std.core.Object
-      args: 
+      args:
         - std.core.Object
         - std.core.Object[]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeInvokeDynamicFunctionIntrinsic

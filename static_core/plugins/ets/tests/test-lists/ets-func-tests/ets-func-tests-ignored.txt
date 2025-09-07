@@ -437,7 +437,7 @@ std/core/NumberTest.ets
 # 9.
 # other fails
 escompat/JsonStringifyTest.ets
-escompat/escompat_BigInt_instance_BigInt_toString_011.ets
+std/core/std_core_BigInt_instance_BigInt_toString_011.ets
 spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-11.ets
 spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-12.ets
 spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-13.ets

@@ -164,7 +164,7 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     findType(&EtsPlatformTypes::coreFloat, BOX_FLOAT);
     findType(&EtsPlatformTypes::coreDouble, BOX_DOUBLE);
 
-    findType(&EtsPlatformTypes::escompatBigint, BIG_INT);
+    findType(&EtsPlatformTypes::coreBigint, BIG_INT);
     findType(&EtsPlatformTypes::escompatError, ERROR);
     findType(&EtsPlatformTypes::coreFunction, FUNCTION);
 

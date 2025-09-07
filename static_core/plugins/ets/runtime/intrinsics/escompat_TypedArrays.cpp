@@ -350,7 +350,7 @@ class BigInt64ArrayElement {
 public:
     using Type = typename ArrayType::ElementType;
 
-    BigInt64ArrayElement() : escompatBigIntClass_(PlatformTypes(EtsCoroutine::GetCurrent())->escompatBigint) {}
+    BigInt64ArrayElement() : stdCoreBigIntClass_(PlatformTypes(EtsCoroutine::GetCurrent())->coreBigint) {}
 
     std::optional<Type> GetTyped(EtsObject *object) const
     {
@@ -361,7 +361,7 @@ public:
 private:
     const EtsBigInt *Cast(EtsObject *object) const
     {
-        if (CheckCastedClass([](const EtsClass *klass) { return klass->IsBigInt(); }, escompatBigIntClass_,
+        if (CheckCastedClass([](const EtsClass *klass) { return klass->IsBigInt(); }, stdCoreBigIntClass_,
                              object->GetClass())) {
             return EtsBigInt::FromEtsObject(object);
         }
@@ -372,7 +372,7 @@ private:
 
     friend ArrayElement<ArrayType>;
 
-    const EtsClass *escompatBigIntClass_;
+    const EtsClass *stdCoreBigIntClass_;
 };
 
 template <>
