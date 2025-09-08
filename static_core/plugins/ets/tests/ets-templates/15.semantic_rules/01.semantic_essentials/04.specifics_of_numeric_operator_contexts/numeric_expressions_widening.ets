@@ -21,9 +21,9 @@ desc: >-
 
 function main() {
     let b: byte = 1
-    let s: short = 2
+    let s: Short = 2
     let i: int = 3
-    let l: long = 4
+    let l: Long = 4
 
 {%- for c in binary %}
     let x1_{{loop.index}} = b {{c}} b
@@ -43,5 +43,9 @@ function main() {
     arktest.assertTrue(y1_{{loop.index}} instanceof int)
     let y2_{{loop.index}} = {{c}}s
     arktest.assertTrue(y2_{{loop.index}} instanceof int)
+    let y3_{{loop.index}} = {{c}}i
+    arktest.assertTrue(y3_{{loop.index}} instanceof int)
+    let y4_{{loop.index}} = {{c}}l
+    arktest.assertTrue(y4_{{loop.index}} instanceof long)
 {%- endfor -%}
 }

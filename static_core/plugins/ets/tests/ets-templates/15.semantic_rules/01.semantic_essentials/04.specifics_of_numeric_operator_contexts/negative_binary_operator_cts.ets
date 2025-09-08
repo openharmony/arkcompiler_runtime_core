@@ -13,9 +13,11 @@
  * limitations under the License.
  */
 
-
+{%- for c in cases %}
 /*---
-desc: Specifically, no arithmetic operator evaluates values of types byte and short without widening.
+desc: For other numeric operators, the operands of unary and binary numeric expressions are widened to a larger numeric
+      type. The minimum type is int. None of those operators evaluates values of types byte and short without
+      widening.
 tags: [compile-only, negative]
 ---*/
 
@@ -24,5 +26,9 @@ function foo(x: short) {
 
 function main() {
     let b: byte = 1
-    foo(b++)  // #27628: Should be CTE: TypeError: No matching call signature for foo(Int)
+    let s: short = 2
+    let x = b {{c}} s
+
+    foo(x); // Should be CTE: TypeError: No matching call signature for foo(Int)
 }
+{%- endfor %}
