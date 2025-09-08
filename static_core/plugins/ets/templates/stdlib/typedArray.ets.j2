@@ -174,9 +174,6 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
             throw new RangeError("Range Error: byteLength " + intByteLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
         }
 {% if S != 1 %}
-        if (intByteLength % {{N}}Array.BYTES_PER_ELEMENT.toInt() != 0) {
-            throw new RangeError("ArrayBuffer.byteLength should be multiple of {{S}} as {{N}}Array.BYTES_PER_ELEMENT")
-        }
         if (intByteOffset % {{N}}Array.BYTES_PER_ELEMENT != 0) {
             throw new RangeError("byteOffset should be multiple of {{S}} as {{N}}Array.BYTES_PER_ELEMENT")
         }

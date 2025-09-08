@@ -1754,9 +1754,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
             throw new RangeError("Range Error: byteLength " + intByteLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
         }
 
-        if (intByteLength % Int16Array.BYTES_PER_ELEMENT.toInt() != 0) {
-            throw new RangeError("ArrayBuffer.byteLength should be multiple of 2 as Int16Array.BYTES_PER_ELEMENT")
-        }
         if (intByteOffset % Int16Array.BYTES_PER_ELEMENT != 0) {
             throw new RangeError("byteOffset should be multiple of 2 as Int16Array.BYTES_PER_ELEMENT")
         }
@@ -3382,9 +3379,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
             throw new RangeError("Range Error: byteLength " + intByteLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
         }
 
-        if (intByteLength % Int32Array.BYTES_PER_ELEMENT.toInt() != 0) {
-            throw new RangeError("ArrayBuffer.byteLength should be multiple of 4 as Int32Array.BYTES_PER_ELEMENT")
-        }
         if (intByteOffset % Int32Array.BYTES_PER_ELEMENT != 0) {
             throw new RangeError("byteOffset should be multiple of 4 as Int32Array.BYTES_PER_ELEMENT")
         }
@@ -4967,9 +4961,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
             throw new RangeError("Range Error: byteLength " + intByteLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
         }
 
-        if (intByteLength % BigInt64Array.BYTES_PER_ELEMENT.toInt() != 0) {
-            throw new RangeError("ArrayBuffer.byteLength should be multiple of 8 as BigInt64Array.BYTES_PER_ELEMENT")
-        }
         if (intByteOffset % BigInt64Array.BYTES_PER_ELEMENT != 0) {
             throw new RangeError("byteOffset should be multiple of 8 as BigInt64Array.BYTES_PER_ELEMENT")
         }
@@ -6574,9 +6565,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
             throw new RangeError("Range Error: byteLength " + intByteLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
         }
 
-        if (intByteLength % Float32Array.BYTES_PER_ELEMENT.toInt() != 0) {
-            throw new RangeError("ArrayBuffer.byteLength should be multiple of 4 as Float32Array.BYTES_PER_ELEMENT")
-        }
         if (intByteOffset % Float32Array.BYTES_PER_ELEMENT != 0) {
             throw new RangeError("byteOffset should be multiple of 4 as Float32Array.BYTES_PER_ELEMENT")
         }
@@ -8167,9 +8155,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
             throw new RangeError("Range Error: byteLength " + intByteLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
         }
 
-        if (intByteLength % Float64Array.BYTES_PER_ELEMENT.toInt() != 0) {
-            throw new RangeError("ArrayBuffer.byteLength should be multiple of 8 as Float64Array.BYTES_PER_ELEMENT")
-        }
         if (intByteOffset % Float64Array.BYTES_PER_ELEMENT != 0) {
             throw new RangeError("byteOffset should be multiple of 8 as Float64Array.BYTES_PER_ELEMENT")
         }

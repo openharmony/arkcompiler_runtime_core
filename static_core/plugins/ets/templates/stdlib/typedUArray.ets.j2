@@ -186,9 +186,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             throw new RangeError("Range Error: byteLength " + intByteLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
         }
 {% if element.get('bytes') != 1 %}
-        if (intByteLength % {{element['name']}}Array.BYTES_PER_ELEMENT.toInt() != 0) {
-            throw new RangeError("ArrayBuffer.byteLength should be multiple of {{element['bytes']}} as {{element['name']}}Array.BYTES_PER_ELEMENT")
-        }
         if (intByteOffset % {{element['name']}}Array.BYTES_PER_ELEMENT != 0) {
             throw new RangeError("byteOffset should be multiple of {{element['bytes']}} as {{element['name']}}Array.BYTES_PER_ELEMENT")
         }
