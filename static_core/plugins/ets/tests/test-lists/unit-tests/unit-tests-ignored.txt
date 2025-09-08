@@ -13,20 +13,6 @@ ets-common-tests/exporting-ambient-decl/main.ets
 # 25057
 ets-common-tests/annotation_import_export_test/AmbientImportAl.ets
 
-#29490 28470
-ets-common-tests/atomics/base_operation_add.ets
-ets-common-tests/atomics/base_operation_sub.ets
-ets-common-tests/atomics/base_operation_compare_exchange.ets
-
-#29746
-ets-common-tests/atomics/base_operation_or.ets
-
-#29489
-ets-common-tests/atomics/base_operation_xor.ets
-
-#28473
-ets-common-tests/atomics/base_operation_exchange.ets
-
 #29378
 ets-common-tests/taskpool/group_tasks.ets
 ets-common-tests/taskpool/long_task.ets
