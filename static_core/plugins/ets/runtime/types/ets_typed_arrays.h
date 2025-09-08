@@ -131,12 +131,21 @@ public:
     }
 
 private:
+#if !defined(PANDA_32_BIT_MANAGED_POINTER)
+    ObjectPointer<EtsObject> buffer_;
+    ObjectPointer<EtsString> name_;
+    EtsInt bytesPerElement_;
+    EtsInt byteOffset_;
+    EtsInt byteLength_;
+    EtsInt lengthInt_;
+#else
     ObjectPointer<EtsObject> buffer_;
     ObjectPointer<EtsString> name_;
     EtsInt bytesPerElement_;
     EtsInt lengthInt_;
     EtsInt byteOffset_;
     EtsInt byteLength_;
+#endif
 
     friend class test::EtsEscompatTypedArrayBaseTest;
 };
