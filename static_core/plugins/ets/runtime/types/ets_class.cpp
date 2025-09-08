@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "ets_panda_file_items.h"
 #include "include/language_context.h"
 #include "include/mem/panda_containers.h"
 #include "libpandabase/utils/utf.h"
@@ -33,6 +34,33 @@
 
 namespace ark::ets {
 
+static bool MatchesValueClassStorage(const ark::panda_file::Type &prim, const ark::Class *owner)
+{
+    auto *pt = ark::ets::PlatformTypes();
+    auto eq = [owner](ark::ets::EtsClass *c) -> bool { return c != nullptr && owner == c->GetRuntimeClass(); };
+
+    switch (prim.GetId()) {
+        case ark::panda_file::Type::TypeId::I32:
+            return eq(pt->coreInt);
+        case ark::panda_file::Type::TypeId::I64:
+            return eq(pt->coreLong);
+        case ark::panda_file::Type::TypeId::F64:
+            return eq(pt->coreDouble);
+        case ark::panda_file::Type::TypeId::F32:
+            return eq(pt->coreFloat);
+        case ark::panda_file::Type::TypeId::I8:
+            return eq(pt->coreByte);
+        case ark::panda_file::Type::TypeId::I16:
+            return eq(pt->coreShort);
+        case ark::panda_file::Type::TypeId::U16:
+            return eq(pt->coreChar);
+        case ark::panda_file::Type::TypeId::U1:
+            return eq(pt->coreBoolean);
+        default:
+            return false;
+    }
+}
+
 static bool VerifyLambdaClass(EtsClass *etsClass, Method *method, ClassLinkerErrorHandler *errorHandler)
 {
     ASSERT(etsClass != nullptr);
@@ -45,12 +73,22 @@ static bool VerifyLambdaClass(EtsClass *etsClass, Method *method, ClassLinkerErr
         LOG(ERROR, CLASS_LINKER) << "Invalid LambdaClass: Expected at most 1 field, but got " << fields.size();
         return false;
     }
-    auto klass = etsClass->GetFieldByIndex(0)->GetRuntimeField()->ResolveTypeClass(errorHandler);
+    auto *rf = etsClass->GetFieldByIndex(0)->GetRuntimeField();
+    auto ftype = rf->GetType();
+    auto *owner = method->GetClass();
+
+    if (ftype.IsPrimitive()) {
+        if (!MatchesValueClassStorage(ftype, owner)) {
+            LOG(ERROR, CLASS_LINKER) << "FR: primitive $this does not match value-class storage";
+            return false;
+        }
+        return true;
+    }
+    auto klass = rf->ResolveTypeClass(errorHandler);
     if (klass == nullptr) {
         return false;
     }
-    auto baseClass = method->GetClass();
-    return baseClass->IsAssignableFrom(klass);
+    return owner->IsAssignableFrom(klass);
 }
 
 static void ReportInvalidLambdaClass(const uint8_t *descriptor, [[maybe_unused]] ClassLinkerErrorHandler *errorHandler)
