@@ -265,7 +265,7 @@ function testSplice(): void {
  */
 function testConcat(): void {
     let match = new RegExpExecArray(0, "abc", ["a", "b"]);
-    let result = match.concat(["c", "d"]);
+    let result = match.concat(["c", "d"] as Array<String | undefined>);
 
     arktest.assertEQ(result.length, 4, "concat length");
     arktest.assertEQ(result[0], "a", "original elements");
@@ -360,8 +360,8 @@ function testIncludes(): void {
 function testFilter(): void {
     let match = new RegExpExecArray(0, "abc", ["apple", "banana", "apricot", "cherry"]);
 
-    let filtered = match.filter((value: String, index: number, array: RegExpResultArray) => {
-        return value.startsWith("a");
+    let filtered = match.filter((value: String | undefined, index: number, array: Array<String | undefined>) => {
+        return value!.startsWith("a");
     });
 
     arktest.assertEQ(filtered.length, 2, "filter result length");
@@ -375,8 +375,8 @@ function testFilter(): void {
 function testMap(): void {
     let match = new RegExpExecArray(0, "abc", ["a", "b", "c"]);
 
-    let mapped = match.map((value: String, index: number, array: RegExpResultArray) => {
-        return value.toUpperCase();
+    let mapped = match.map((value: String | undefined, index: number, array: Array<String | undefined>) => {
+        return value!.toUpperCase();
     });
 
     arktest.assertEQ(mapped.length, 3, "map result length");
@@ -391,14 +391,14 @@ function testMap(): void {
 function testFind(): void {
     let match = new RegExpExecArray(0, "abc", ["apple", "banana", "apricot"]);
 
-    let found = match.find((value: String, index: number, array: RegExpResultArray) => {
-        return value.startsWith("b");
+    let found = match.find((value: String | undefined, index: number, array: Array<String | undefined>) => {
+        return value!.startsWith("b");
     });
 
     arktest.assertEQ(found, "banana", "find returns element");
 
-    let notFound = match.find((value: String, index: number, array: RegExpResultArray) => {
-        return value.startsWith("z");
+    let notFound = match.find((value: String | undefined, index: number, array: Array<String | undefined>) => {
+        return value!.startsWith("z");
     });
 
     arktest.assertEQ(notFound, undefined, "find returns undefined for not found");
@@ -410,14 +410,14 @@ function testFind(): void {
 function testFindIndex(): void {
     let match = new RegExpExecArray(0, "abc", ["apple", "banana", "apricot"]);
 
-    let foundIndex = match.findIndex((value: String, index: number, array: RegExpResultArray) => {
-        return value.startsWith("b");
+    let foundIndex = match.findIndex((value: String | undefined, index: number, array: Array<String | undefined>) => {
+        return value!.startsWith("b");
     });
 
     arktest.assertEQ(foundIndex, 1, "findIndex returns index");
 
-    let notFoundIndex = match.findIndex((value: String, index: number, array: RegExpResultArray) => {
-        return value.startsWith("z");
+    let notFoundIndex = match.findIndex((value: String | undefined, index: number, array: Array<String | undefined>) => {
+        return value!.startsWith("z");
     });
 
     arktest.assertEQ(notFoundIndex, -1, "findIndex returns -1 for not found");
@@ -429,14 +429,14 @@ function testFindIndex(): void {
 function testEvery(): void {
     let match = new RegExpExecArray(0, "abc", ["apple", "apricot", "avocado"]);
 
-    let allStartWithA = match.every((value: String, index: number, array: RegExpResultArray) => {
-        return value.startsWith("a");
+    let allStartWithA = match.every((value: String | undefined, index: number, array: Array<String | undefined>) => {
+        return value!.startsWith("a");
     });
 
     arktest.assertTrue(allStartWithA, "every returns true when all match");
 
-    let allStartWithB = match.every((value: String, index: number, array: RegExpResultArray) => {
-        return value.startsWith("b");
+    let allStartWithB = match.every((value: String | undefined, index: number, array: Array<String | undefined>) => {
+        return value!.startsWith("b");
     });
 
     arktest.assertFalse(allStartWithB, "every returns false when not all match");
@@ -448,14 +448,14 @@ function testEvery(): void {
 function testSome(): void {
     let match = new RegExpExecArray(0, "abc", ["apple", "banana", "cherry"]);
 
-    let someStartWithB = match.some((value: String, index: number, array: RegExpResultArray) => {
-        return value.startsWith("b");
+    let someStartWithB = match.some((value: String | undefined, index: number, array: Array<String | undefined>) => {
+        return value!.startsWith("b");
     });
 
     arktest.assertTrue(someStartWithB, "some returns true when any match");
 
-    let someStartWithZ = match.some((value: String, index: number, array: RegExpResultArray) => {
-        return value.startsWith("z");
+    let someStartWithZ = match.some((value: String | undefined, index: number, array: Array<String | undefined>) => {
+        return value!.startsWith("z");
     });
 
     arktest.assertFalse(someStartWithZ, "some returns false when none match");
@@ -467,14 +467,14 @@ function testSome(): void {
 function testReduce(): void {
     let match = new RegExpExecArray(0, "abc", ["a", "b", "c"]);
 
-    let concatenated = match.reduce((prev: String, curr: String, index: number, array: RegExpResultArray) => {
-        return prev + curr;
+    let concatenated = match.reduce((prev: String | undefined, curr: String | undefined, index: number, array: Array<String | undefined>) => {
+        return prev! + curr!;
     });
 
     arktest.assertEQ(concatenated, "abc", "reduce concatenates");
 
-    let withInitial = match.reduce((prev: String, curr: String, index: number, array: RegExpResultArray) => {
-        return prev + curr;
+    let withInitial = match.reduce((prev: String | undefined, curr: String | undefined, index: number, array: Array<String | undefined>) => {
+        return prev! + curr!;
     }, "start:");
 
     arktest.assertEQ(withInitial, "start:abc", "reduce with initial value");
@@ -487,8 +487,8 @@ function testForEach(): void {
     let match = new RegExpExecArray(0, "abc", ["a", "b", "c"]);
     let result = "";
 
-    match.forEach((value: String, index: number, array: RegExpResultArray) => {
-        result += value + index.toString();
+    match.forEach((value: String | undefined, index: number, array: Array<String | undefined>) => {
+        result += value! + index.toString();
     });
 
     arktest.assertEQ(result, "a0b1c2", "forEach iterates correctly");

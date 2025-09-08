@@ -20,11 +20,10 @@ type RegExpGroupsContainer = Record<String, String | undefined>
 /**
  * Regular expression result descriptor
  */
-export class RegExpResultArray /*extends Array<String>*/ {
+export class RegExpResultArray extends Array<String | undefined> {
     /** true if match present */
     readonly isCorrect: boolean
-    /** result itself */
-    protected result_: Array<String> = []
+
     private resultRaw_: String = ""
     /** The 0-based index of the match in the string */
     protected index_: number = 0
@@ -42,28 +41,26 @@ export class RegExpResultArray /*extends Array<String>*/ {
     /** named groups names and indeces */
     public groups: RegExpGroupsContainer | undefined = undefined
 
-    protected isUndefined: Array<boolean> = []
-
-    constructor(index: int, input: String, result: Array<String>, indices: Array<Array<number>>) {
+    constructor(index: int, input: String, result: Array<String | undefined>, indices: Array<Array<number>>) {
+        super(0)
         this.isCorrect = true
         this.index_ = index
         this.input_ = input
-        this.result_ = result
         this.indices_ = indices
-    }
 
-    constructor(index : int, input : String, result : Array<String>, indices : Array<Array<number>>,
-                isUndefined : Array<boolean>) {
-        this.isCorrect = true
-        this.index_ = index
-        this.input_ = input
-        this.result_ = result
-        this.indices_ = indices
-        this.isUndefined = isUndefined
+        this.extendTo(result.length, undefined as (String | undefined))
+        for (let i: int = 0; i < result.length; i++) {
+            this.$_set(i, result.$_get(i))
+        }
     }
 
     protected constructor() {
+        super(0)
+        this.isCorrect = false
+    }
 
+    public get result(): Array<String | undefined> {
+        return this
     }
 
     private setNumberedField(index: number, value: String): void {
@@ -99,7 +96,7 @@ export class RegExpResultArray /*extends Array<String>*/ {
         this.updateIndicesAndResult(hasIndices)
         RegExp.input_ = input
         RegExp.leftContext_ = input.substring(0, index)
-        RegExp.rightContext_ = input.substring(index + res.result[0].length)
+        RegExp.rightContext_ = input.substring(index + res.result[0]!.length)
     }
 
     /**
@@ -111,10 +108,9 @@ export class RegExpResultArray /*extends Array<String>*/ {
      */
     public $_get(index: String): String {
         if (index == "0") {
-            if (this.result_.length > 0) {
-                return this.result_[0]
-            }
-            throw new Error("result is empty")
+            const v = this.$_get(0)
+            if (v !== undefined) return v
+            throw new Error("result[0] is undefined")
         }
         throw new Error("unsupported field name")
     }
@@ -127,53 +123,17 @@ export class RegExpResultArray /*extends Array<String>*/ {
      * @returns resulting string
      */
     public $_get(index: int): String | undefined {
-        if (index < this.isUndefined.length && this.isUndefined[index]) {
-            return undefined
-        }
-        return this.result_[index];
+        return super.$_get(index)
     }
-
-    /**
-     * Returns result string by index
-     *
-     * @param index
-     *
-     * @returns resulting string
-     */
     public $_get(index: number): String | undefined {
-        return this.$_get(index.toInt());
+        return this.$_get(index.toInt())
     }
-
-    /**
-     * Sets value by index
-     *
-     * @param index
-     *
-     * @param val
-     */
-    public $_set(index: int, val: String) {
-        this.result_[index] = val
+    public $_set(index: int, val: String | undefined): void {
+        super.$_set(index, val)
     }
-
-    /**
-     * Sets value by index
-     *
-     * @param index
-     *
-     * @param val
-     */
-    public $_set(index: number, val: String) {
-        return this.$_set(index.toInt(), val);
+    public $_set(index: number, val: String | undefined): void {
+        this.$_set(index.toInt(), val)
     }
-
-    get length(): int {
-        return Double.toInt(this.result_.length)
-    }
-
-    public get result(): Array<String> {
-        return this.result_
-    }
-
     public get indices(): Array<Array<number>> {
         return this.indices_
     }
@@ -184,8 +144,8 @@ export class RegExpResultArray /*extends Array<String>*/ {
      * @returns a string representing the match result
      */
     public toString(): String {
-        if (this.result_.length > 0) {
-            return this.result_.toString();
+        if (this.length > 0) {
+            return super.toString();
         }
         throw new Error("result is empty")
     }
@@ -201,554 +161,72 @@ export class RegExpResultArray /*extends Array<String>*/ {
         if (index == 0) {
             RegExp.lastMatch_ = str
         }
-        if (index == this.result_.length - 1) {
+        if (index == this.length - 1) {
             RegExp.lastParen_ = str
         }
         this.setNumberedField(index, str)
     }
 
     private updateIndicesAndResult(hasIndices: boolean): void {
-        let data = this.resultRaw_.split(',')
-        this.result_ = new Array<String>(data.length / 2)
-        this.isUndefined = new Array<boolean>(data.length / 2)
+        const data = this.resultRaw_.split(',')
+        const n: int = (data.length / 2)
+
+        if (n > this.length) {
+            this.extendTo(n, undefined as (String | undefined))
+        } else if (n < this.length) {
+            this.shrinkTo(n)
+        }
+
         if (hasIndices) {
-            this.indices_ = new Array<Array<number>>(data.length / 2)
-            for (let i = 0; i < data.length; i+= 2) {
+            this.indices_ = new Array<Array<number>>(n)
+            for (let i = 0; i < data.length; i += 2) {
                 const index = Number.parseInt(data[i])
                 const endIndex = Number.parseInt(data[i + 1])
+                const pos: int = (i / 2);
                 if (index == -1 || endIndex == -1) {
-                    this.indices_[i / 2] = [0, 0]
-                    this.isUndefined[i / 2] = true
+                    this.indices_[pos] = [0, 0]
                 } else {
-                    this.indices_[i / 2] = [index, endIndex]
-                    this.result_[i / 2] = this.input_.substring(index, endIndex)
-                    this.processStaticFields(i / 2, this.result_[i / 2])
-                    this.isUndefined[i / 2] = false
+                    this.indices_[pos] = [index, endIndex]
+                    const str = this.input_.substring(index, endIndex)
+                    this.$_set(pos, str)
+                    this.processStaticFields(pos, str)
                 }
             }
         } else {
             this.indices_ = []
-            for (let i = 0; i < data.length; i+= 2) {
+            for (let i = 0; i < data.length; i += 2) {
                 const index = Number.parseInt(data[i])
                 const endIndex = Number.parseInt(data[i + 1])
+                const pos: int = (i / 2);
                 if (index != -1 && endIndex != -1) {
-                    this.result_[i / 2] = this.input_.substring(index, endIndex)
-                    this.processStaticFields(i / 2, this.result_[i / 2])
-                    this.isUndefined[i / 2] = false
-                } else {
-                    this.isUndefined[i / 2] = true
+                    const str = this.input_.substring(index, endIndex)
+                    this.$_set(pos, str)
+                    this.processStaticFields(pos, str)
                 }
             }
         }
     }
 
-    /**
-     * Removes and returns the last match result in the array.
-     * Simulates the behavior of Array.prototype.pop().
-     *
-     * @returns The last matched string if present; otherwise, undefined.
-     */
-    public pop(): String | undefined {
-        return this.result_.pop()
-    }
-
-    /**
-     * Takes an integer value and returns the item at that index,
-     * allowing for positive and negative integers.
-     */
-    public at(index: number): String | undefined {
-        return this.result_.at(index)
-    }
-
-    /**
-     * Takes an integer value and returns the item at that index,
-     * allowing for positive and negative integers.
-     */
-    public at(index: int): String | undefined {
-        return this.result_.at(index)
-    }
-
-    /**
-     * Creates a new array with all elements concatenated.
-     */
-    public concat(...items: FixedArray<ConcatArray<String>>): Array<String> {
-        return this.result_.concat(...items)
-    }
-
-    /**
-     * Makes a shallow copy of part to another location in the same array.
-     */
-    public copyWithin(target: number, start: number, end?: Number): RegExpResultArray {
-        this.result_.copyWithin(target, start, end)
-        return this
-    }
-
-    /**
-     * Makes a shallow copy of part to another location in the same array.
-     */
-    public copyWithin(target: int, start: int, end: int): RegExpResultArray {
-        this.result_.copyWithin(target, start, end)
-        return this
-    }
-
-    /**
-     * Makes a shallow copy of part to another location in the same array.
-     */
-    public copyWithin(target: int, start: int): RegExpResultArray {
-        this.result_.copyWithin(target, start)
-        return this
-    }
-
-    /**
-     * Makes a shallow copy of part to another location in the same array.
-     */
-    public copyWithin(target: int): RegExpResultArray {
-        this.result_.copyWithin(target)
-        return this
-    }
-
-    /**
-     * Changes all elements to a static value.
-     */
-    public fill(value: String, start?: Number, end?: Number): RegExpResultArray {
-        this.result_.fill(value, start, end)
-        return this
-    }
-
-    /**
-     * Changes all elements to a static value.
-     */
-    public fill(value: String, start: int, end: int): RegExpResultArray {
-        this.result_.fill(value, start, end)
-        return this
-    }
-
-    /**
-     * Returns elements that meet the condition specified in a callback function.
-     */
-    public filter(predicate: (value: String, index: number, array: RegExpResultArray) => boolean): Array<String> {
-        return this.result_.filter((value: String, index: number, array: Array<String>) => {
-            return predicate(value, index, this)
-        })
-    }
-
-    /**
-     * Returns the value of the first element where predicate is true.
-     */
-    public find(predicate: (value: String, index: number, array: RegExpResultArray) => boolean): String | undefined {
-        return this.result_.find((value: String, index: number, array: Array<String>) => {
-            return predicate(value, index, this)
-        })
-    }
-
-    /**
-     * Returns the index of the first element where predicate is true.
-     */
-    public findIndex(predicate: (value: String, index: number, array: RegExpResultArray) => boolean): number {
-        return this.result_.findIndex((value: String, index: number, array: Array<String>) => {
-            return predicate(value, index, this)
-        })
-    }
-
-    /**
-     * Returns the value of the last element that satisfies the testing function.
-     */
-    public findLast(predicate: (elem: String, index: number, array: RegExpResultArray) => boolean): String | undefined {
-        return this.result_.findLast((elem: String, index: number, array: Array<String>) => {
-            return predicate(elem, index, this)
-        })
-    }
-
-    /**
-     * Returns the index of the last element that satisfies the testing function.
-     */
-    public findLastIndex(predicate: (element: String, index: number, array: RegExpResultArray) => boolean): number {
-        return this.result_.findLastIndex((element: String, index: number, array: Array<String>) => {
-            return predicate(element, index, this)
-        })
-    }
-
-    /**
-     * Creates a new array with all sub-array elements concatenated.
-     */
-    public flat<U>(depth: number): Array<U> {
-        return this.result_.flat<U>(depth)
-    }
-
-    /**
-     * Creates a new array with all sub-array elements concatenated.
-     */
-    public flat<U>(depth: int): Array<U> {
-        return this.result_.flat<U>(depth)
-    }
-
-    /**
-     * Creates a new array with all sub-array elements concatenated.
-     */
-    public flat<U>(): Array<U> {
-        return this.result_.flat<U>()
-    }
-
-    /**
-     * Applies flat and then map.
-     */
-    public flatMap<U>(fn: (v: String, k: number, arr: RegExpResultArray) => U): Array<U> {
-        return this.result_.flatMap<U>((v: String, k: number, arr: Array<String>) => {
-            return fn(v, k, this)
-        })
-    }
-
-    /**
-     * Determines whether all members satisfy the specified test.
-     */
-    public every(predicate: (value: String, index: number, array: RegExpResultArray) => boolean): boolean {
-        return this.result_.every((value: String, index: number, array: Array<String>) => {
-            return predicate(value, index, this)
-        })
-    }
-
-    /**
-     * Determines whether any element satisfies the specified test.
-     */
-    public some(predicate: (value: String, index: number, array: RegExpResultArray) => boolean): boolean {
-        return this.result_.some((value: String, index: number, array: Array<String>) => {
-            return predicate(value, index, this)
-        })
-    }
-
-    /**
-     * Calls the callback function for all elements and accumulates the result.
-     */
-    public reduce(callbackfn: (previousValue: String, currentValue: String, index: number, array: RegExpResultArray) => String): String {
-        return this.result_.reduce((previousValue: String, currentValue: String, index: number, array: Array<String>) => {
-            return callbackfn(previousValue, currentValue, index, this)
-        })
-    }
-
-    /**
-     * Calls the callback function for all elements and accumulates the result.
-     */
-    public reduce<U = String>(callbackfn: (previousValue: U, currentValue: String, index: number, array: RegExpResultArray) => U, initialValue: U): U {
-        return this.result_.reduce<U>((previousValue: U, currentValue: String, index: number, array: Array<String>) => {
-            return callbackfn(previousValue, currentValue, index, this)
-        }, initialValue)
-    }
-
-    /**
-     * Calls the callback function for all elements in descending order and accumulates the result.
-     */
-    public reduceRight<U>(callbackfn: (previousValue: U, currentValue: String, index: number, array: RegExpResultArray) => U, initialValue: U): U {
-        return this.result_.reduceRight<U>((previousValue: U, currentValue: String, index: number, array: Array<String>) => {
-            return callbackfn(previousValue, currentValue, index, this)
-        }, initialValue)
-    }
-
-    /**
-     * Calls the callback function for all elements in descending order and accumulates the result.
-     */
-    public reduceRight(callbackfn: (previousValue: String, currentValue: String, index: number, array: RegExpResultArray) => String): String {
-        return this.result_.reduceRight((previousValue: String, currentValue: String, index: number, array: Array<String>) => {
-            return callbackfn(previousValue, currentValue, index, this)
-        })
-    }
-
-    /**
-     * Performs the specified action for each element.
-     */
-    public forEach(callbackfn: (value: String, index: number, array: RegExpResultArray) => void): void {
-        this.result_.forEach((value: String, index: number, array: Array<String>) => {
-            callbackfn(value, index, this)
-        })
-    }
-
-    /**
-     * Creates a new array with elements selected from start to end.
-     */
-    public slice(start?: Number, end?: Number): Array<String> {
-        return this.result_.slice(start, end)
-    }
-
-    /**
-     * Creates a new array with elements selected from start to end.
-     */
-    public slice(start: int, end: int): Array<String> {
-        return this.result_.slice(start, end)
-    }
-
-    /**
-     * Creates a new array with elements selected from start to end.
-     */
-    public slice(start: int): Array<String> {
-        return this.result_.slice(start)
-    }
-
-    /**
-     * Returns the last index of the specified element.
-     */
-    public lastIndexOf(searchElement: String, fromIndex: int): int {
-        return this.result_.lastIndexOf(searchElement, fromIndex)
-    }
-
-    /**
-     * Returns the last index of the specified element.
-     */
-    public lastIndexOf(searchElement: String, fromIndex: number|undefined): number {
-        // NOTE(cheezzario) workaround for #23963
-        return this.result_.lastIndexOf(searchElement, fromIndex === undefined ? undefined : Int.valueOf(fromIndex.toInt()))
-    }
-
-    /**
-     * Returns the last index of the specified element.
-     */
-    public lastIndexOf(searchElement: String): number {
-        return this.result_.lastIndexOf(searchElement)
-    }
-
-    /**
-     * Creates a string by concatenating all elements, separated by a separator.
-     */
-    public join(sep?: String): string {
-        return this.result_.join(sep)
-    }
-
-    /**
-     * Returns a locale string representing the array.
-     */
-    public toLocaleString(locales: Object, options: Object): string {
-        return this.result_.toLocaleString(locales, options)
-    }
-
-    /**
-     * Returns a locale string representing the array.
-     */
-    public toLocaleString(locales: Object): string {
-        return this.result_.toLocaleString(locales)
-    }
-
-    /**
-     * Returns a locale string representing the array.
-     */
-    public toLocaleString(): string {
-        return this.result_.toLocaleString()
-    }
-
-    /**
-     * Copying version of the splice method.
-     */
-    public toSpliced(start?: Number, delete?: Number): Array<String> {
-        return this.result_.toSpliced(start, delete)
-    }
-
-    /**
-     * Copying version of the splice method.
-     */
-    public toSpliced(start: number, delete: number, ...items: FixedArray<String>): Array<String> {
-        return this.result_.toSpliced(start, delete, ...items)
-    }
-
-    /**
-     * Copying version of the splice method.
-     */
-    public toSpliced(start: int, delete: int, ...items: FixedArray<String>): Array<String> {
-        return this.result_.toSpliced(start, delete, ...items)
-    }
-
-    /**
-     * Copying version of the splice method.
-     */
-    public toSpliced(start: int): Array<String> {
-        return this.result_.toSpliced(start)
-    }
-
-    /**
-     * Checks whether an array includes a certain value.
-     */
-    public includes(val: String, fromIndex?: Number): boolean {
-        return this.result_.includes(val, fromIndex)
-    }
-
-    /**
-     * Returns the first index of the specified element.
-     */
-    public indexOf(val: String, fromIndex: int): int {
-        return this.result_.indexOf(val, fromIndex)
-    }
-
-    /**
-     * Returns the first index of the specified element.
-     */
-    public indexOf(val: String, fromIndex?: Number): number {
-        // NOTE(cheezzario) workaround for #23963
-        return this.result_.indexOf(val, fromIndex === undefined ? undefined : Int.valueOf(fromIndex.toInt()))
-    }
-
-    /**
-     * Returns the first index of the specified element.
-     */
-    public indexOf(val: String): number {
-        return this.result_.indexOf(val)
-    }
-
-    /**
-     * Copying version of the sort method using default comparator.
-     */
-    public toSorted(): Array<String> {
-        return this.result_.toSorted()
-    }
-
-    /**
-     * Copying version of the sort method.
-     */
-    public toSorted(comparator: (a: String, b: String) => number): Array<String> {
-        return this.result_.toSorted(comparator)
-    }
-
-    /**
-     * Reverses the elements in place.
-     */
-    public reverse(): RegExpResultArray {
-        this.result_.reverse()
-        return this
-    }
-
-    /**
-     * Copying version of the reverse method.
-     */
-    public toReversed(): Array<String> {
-        return this.result_.toReversed()
-    }
-
-    /**
-     * Copying version of setting a value at an index.
-     */
-    public with(index: number, value: String): Array<String> {
-        return this.result_.with(index, value)
-    }
-
-    /**
-     * Copying version of setting a value at an index.
-     */
-    public with(index: int, value: String): Array<String> {
-        return this.result_.with(index, value)
-    }
-
-    /**
-     * Removes the first element and returns it.
-     */
-    public shift(): String | undefined {
-        return this.result_.shift()
-    }
-
-    /**
-     * Adds elements to the end and returns the new length.
-     */
-    public push(...val: String[]): number {
-        return this.result_.push(...val)
-    }
-
-    /**
-     * Adds elements to the end and returns the new length.
-     */
-    public pushECMA(...val: String[]): number {
-        return this.result_.pushECMA(...val)
-    }
-
-    /**
-     * Changes contents by removing/replacing existing elements and/or adding new elements.
-     */
-    public splice(start: number, delete: Number | undefined, ...items: String[]): Array<String> {
-        return this.result_.splice(start, delete, ...items)
-    }
-
-    /**
-     * Changes contents by removing/replacing existing elements and/or adding new elements.
-     */
-    public splice(start: int, delete: int, ...items: String[]): Array<String> {
-        return this.result_.splice(start, delete, ...items)
-    }
-
-    /**
-     * Changes contents by removing elements from start to end.
-     */
-    public splice(start: number): Array<String> {
-        return this.result_.splice(start)
-    }
-
-    /**
-     * Changes contents by removing elements from start to end.
-     */
-    public splice(start: int): Array<String> {
-        return this.result_.splice(start)
-    }
-
-    /**
-     * Adds elements to the beginning and returns the new length.
-     */
-    public unshift(...values: String[]): number {
-        return this.result_.unshift(...values)
-    }
-
-    /**
-     * Returns an iterator over all indices.
-     */
-    public keys(): IterableIterator<Number> {
-        return this.result_.keys()
-    }
-
-    /**
-     * Returns an iterator over all values.
-     */
-    public $_iterator(): IterableIterator<String> {
-        return this.result_.$_iterator()
-    }
-
-    /**
-     * Returns an iterator over all values.
-     */
-    public values(): IterableIterator<String> {
-        return this.result_.values()
-    }
-
-    /**
-     * Returns an iterable of key, value pairs.
-     */
-    public entries(): IterableIterator<[number, String]> {
-        return this.result_.entries()
-    }
-
-    /**
-     * Calls a callback function on each element and returns an array with the results.
-     */
-    public map<U>(callbackfn: (value: String, index: number, array: RegExpResultArray) => U): Array<U> {
-        return this.result_.map<U>((value: String, index: number, array: Array<String>) => {
-            return callbackfn(value, index, this)
-        })
-    }
-
-    /**
-     * Reorders elements using comparator function.
-     */
-    public sort(comparator?: (a: String, b: String) => number): RegExpResultArray {
-        this.result_.sort(comparator)
-        return this
-    }
 }
 
 export class RegExpMatchArray extends RegExpResultArray {
     private hasIndex_: boolean = true
     private hasInput_: boolean = true
 
-    constructor(index : int, input : String, result : Array<String>, indices : Array<Array<number>>,
-                isUndefined : Array<boolean>) {
-        super(Double.toInt(index), input, result, indices, isUndefined)
-    };
-
-    constructor(index: int, input: String, result: Array<String>, indices: Array<Array<number>>) {
+    constructor(index: int, input: String, result: Array<String | undefined>, indices: Array<Array<number>>) {
         super(Double.toInt(index), input, result, indices)
     }
 
-    constructor(index: int, input: String, result: Array<String>) {
-        super(Double.toInt(index), input, result, [])
+    constructor(index: int, input: String, result: Array<String | undefined>) {
+        this(Double.toInt(index), input, result, [])
+    }
+
+    constructor(index: number, input: String, result: Array<String | undefined>, indices: Array<Array<number>>) {
+        this(Double.toInt(index), input, result, indices)
+    }
+
+    constructor(index: number, input: String, result: Array<String | undefined>) {
+        this(Double.toInt(index), input, result)
     }
 
     protected constructor() {
@@ -829,12 +307,20 @@ export class RegExpMatchArray extends RegExpResultArray {
 }
 
 export class RegExpExecArray extends RegExpResultArray {
-    constructor(index: int, input: String, result: Array<String>, indices: Array<Array<number>>) {
-        super(index, input, result, indices)
+    constructor(index: int, input: String, result: Array<String | undefined>, indices: Array<Array<number>>) {
+        super(Double.toInt(index), input, result, indices)
     }
 
-    constructor(index: int, input: String, result: Array<String>) {
-        super(index, input, result, [])
+    constructor(index: int, input: String, result: Array<String | undefined>) {
+        this(Double.toInt(index), input, result, [])
+    }
+
+    constructor(index: number, input: String, result: Array<String | undefined>, indices: Array<Array<number>>) {
+        this(Double.toInt(index), input, result, indices)
+    }
+
+    constructor(index: number, input: String, result: Array<String | undefined>) {
+        this(Double.toInt(index), input, result)
     }
 
     protected constructor() {
@@ -1436,13 +922,12 @@ export class RegExp extends Object {
                 if (n == 0) {
                     return null
                 }
-                return new RegExpMatchArray(-1, "", matches.toArray(), indices, isUndefined)
+                return new RegExpMatchArray(-1, "", matches.toUndefinableArray(), indices)
             }
             else {
                 let matchStr = result.$_get(0)
                 matches.pushBack(matchStr)
                 indices = indices.concat(result.indices)
-                isUndefined = isUndefined.concat(result.isUndefined)
                 if (matchStr == "") {
                     this.lastIndex = RegExp.advanceStringIndex(str, this.lastIndex, this.unicode)
                 }
