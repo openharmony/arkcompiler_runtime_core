@@ -493,7 +493,7 @@ static ark::compiler::CallInst *CastToCall(ark::compiler::Inst *inst)
     }
 }
 
-void BytecodeGen::CallHandler(GraphVisitor *visitor, Inst *inst, std::string methodId)
+void BytecodeGen::CallHandler(GraphVisitor *visitor, Inst *inst, std::string methodId, bool isDevirtual)
 {
     auto op = inst->GetOpcode();
     ASSERT(op == compiler::Opcode::CallStatic || op == compiler::Opcode::CallVirtual ||
@@ -507,6 +507,9 @@ void BytecodeGen::CallHandler(GraphVisitor *visitor, Inst *inst, std::string met
     size_t start = op == compiler::Opcode::InitObject ? 1U : 0U;  // exclude LoadAndInitClass
     auto nargs = sfCount - start;                                 // exclude LoadAndInitClass
     pandasm::Ins ins {};
+    if (isDevirtual) {
+        ins.SetIsDevirtual();
+    }
 
     ins.opcode = ChooseCallOpcode(op, nargs);
 
@@ -544,7 +547,8 @@ void BytecodeGen::CallHandler(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<BytecodeGen *>(visitor);
     auto methodOffset = CastToCall(inst)->GetCallMethodId();
-    CallHandler(visitor, inst, enc->irInterface_->GetMethodIdByOffset(methodOffset));
+    bool isDevirtual = !enc->irInterface_->IsMethodStatic(methodOffset);
+    CallHandler(visitor, inst, enc->irInterface_->GetMethodIdByOffset(methodOffset), isDevirtual);
 }
 
 void BytecodeGen::VisitCallStatic(GraphVisitor *visitor, Inst *inst)

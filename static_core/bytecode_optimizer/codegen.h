@@ -125,7 +125,7 @@ public:
     static void IfImmNonZero(GraphVisitor *v, Inst *instBase);
     static void IfImm64(GraphVisitor *v, Inst *instBase);
     static void VisitIntrinsic(GraphVisitor *v, Inst *instBase);
-    static void CallHandler(GraphVisitor *visitor, Inst *inst, std::string methodId);
+    static void CallHandler(GraphVisitor *visitor, Inst *inst, std::string methodId, bool isDevirtual = false);
     static void CallHandler(GraphVisitor *visitor, Inst *inst);
     static void VisitStoreObject(GraphVisitor *v, Inst *instBase);
     static void VisitStoreStatic(GraphVisitor *v, Inst *instBase);
