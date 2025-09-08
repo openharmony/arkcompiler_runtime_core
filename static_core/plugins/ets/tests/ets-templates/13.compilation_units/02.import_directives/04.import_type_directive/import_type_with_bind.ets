@@ -13,19 +13,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
 /*---
 desc: >-
-    A namespace declaration introduces the qualified name to be used as a qualifier for access to each exported entity of a namespace.
-    Next cases tests basic top-level declarations.
+      Another form of type import is used when type is attached to a name binding. This allows mixing general import
+      and type import.
 files:
-    - ./declaration_module.d.ets
-    - ./declaration_module.ets
+- ./export_type_with_bind.ets
 ---*/
 
-{{c.imp}}
+import {Class1, type Class2 } from "./export_type_with_bind"
 
-function main() {
-    {{c.use|indent}}
+class C extends AC {};
+
+function main(): void {
+    let c1 = new Class1();
+    let c2 = new Class2();
+    arktest.assertEQ(c1.f, 1);
+    arktest.assertEQ(c2.f, 2);
 }
-{% endfor %}

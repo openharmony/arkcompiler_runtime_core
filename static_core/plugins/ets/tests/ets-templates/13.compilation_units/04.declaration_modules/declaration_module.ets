@@ -21,40 +21,61 @@ desc: >-
 tags: [compile-only, not-a-test]
 ---*/
 
-export declare namespace NS_A{
-    export function foo(): void
+export namespace NS_A{
+    export function foo(): int {
+      return 1
+    }
 }
 
 export namespace NS_B{
-    export declare function foo(): void
+    export function foo(): int {
+      return 2
+    }
 }
 
-export declare class A {}
-
-export declare class B {
-    public a: A // the field is exported but its type is not
+export class A {
+    f: int = 7
 }
 
-declare class C {}
-
-declare class DD {
-    public static fdd(): void
+export class B {
+    public a: A = new A() // the field is exported but its type is not
 }
 
-declare class EE {
-    public fee(): string
+export class C {}
+
+export class DD {
+    public static fdd(): int {
+      return 3
+    }
 }
 
-export {DD, EE as ZZ}
-
-export declare class Person {
-  constructor(name: string, age: number);
-  getName(): string;
-  getAge(): number;
-  static createDefault(): Person;
+export class EE {
+    public fee(): string {
+      return "EE str"
+    }
 }
 
-export declare function process_field(p: A): void
+export class Person {
+  name: string
+  age: number
+  constructor(name: string, age: number) {
+    this.name = name
+    this.age = age
+  }
+  getName(): string {
+    return this.name
+  }
+  getAge(): number {
+    return this.age
+  }
+  static createDefault(): Person {
+    return new Person("name not set", 999)
+  }
+}
+
+export function process_field(p: A): int {
+  return 4
+}
 
 export type Matrix = number[][]
 export type Handler = (s: string, no: number) => string

@@ -15,14 +15,14 @@
 
 /*---
 desc: First simple sample from spec
-tags: [compile-only]
 files:
 - ./declaration_module.ets
+- ./declaration_module.d.ets
 ---*/
 
 // Module which uses B and process_field
-import * as m from "./declaration_module.ets"
+import * as m from "./declaration_module.d"
 
 function main() {
-    m.NS_A.foo();
+    arktest.assertEQ(m.NS_A.foo(), 1);
 }

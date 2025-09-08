@@ -13,19 +13,12 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
-desc: >-
-    A namespace declaration introduces the qualified name to be used as a qualifier
-    for access to each exported entity of a namespace. Next cases tests basic top-level
-    declarations.
-files:
-- ./declaration_module.ets
-- ./declaration_module.d.ets
+desc: CTE if declaration added to the scope of a module or a package by a binding is not distinguishable
+tags: [compile-only, negative]
 ---*/
 
-import * as dm from "./declaration_module.d"
+{{c.decl}}
 
-function main() {
-    let myZZ = new dm.ZZ();
-    arktest.assertEQ(myZZ.fee(), "EE str");
-}
+{% endfor %}

@@ -14,18 +14,14 @@
  */
 
 /*---
-desc: >-
-    A namespace declaration introduces the qualified name to be used as a qualifier
-    for access to each exported entity of a namespace. Next cases tests basic top-level
-    declarations.
+desc: Edit import default const variable.
 files:
-- ./declaration_module.ets
-- ./declaration_module.d.ets
+- ../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_const.ets
+tags: [compile-only, negative]
 ---*/
 
-import * as dm from "./declaration_module.d"
+import {default as const_var} from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_const"
 
-function main() {
-    let myZZ = new dm.ZZ();
-    arktest.assertEQ(myZZ.fee(), "EE str");
+function main(): void {
+    const_var = 3
 }

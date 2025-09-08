@@ -18,10 +18,11 @@ desc: ES2PANDA_FAIL, TypeError,  fdd is a static property of DD
 tags: [compile-only, negative]
 files:
 - ./declaration_module.ets
+- ./declaration_module.d.ets
 ---*/
 
 // public static fdd(): void
-import * as dm from "./declaration_module.ets"
+import * as dm from "./declaration_module.d"
 
 let myDD = new dm.DD()
 myDD.fdd()

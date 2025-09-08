@@ -17,8 +17,6 @@
 desc: Import a default exported function with namespace import.
 files:
 - ../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_function.ets
-tags:
-- compile-only
 ---*/
 
 import {default as TestFunc} from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_function"

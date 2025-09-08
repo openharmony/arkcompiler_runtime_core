@@ -14,15 +14,8 @@
  */
 
 /*---
-desc: |-
-    Export 2 default entities from the same module, one entity imported from another module.
-    Only one default export is allowed in a module.
-tags: [compile-only]
-files:
-- ../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_variable.ets
+desc: export single function
+tags: [compile-only, not-a-test]
 ---*/
 
-import test_var from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_variable"
-
-export test_var;
-export default let i: string = test_var;
+export function foo() { }

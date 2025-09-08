@@ -1597,6 +1597,20 @@
 11.enumerations/01.enumeration_integer_values/enum_long_23.ets
 
 #29393
+13.compilation_units/02.import_directives/import_utf16.ets
+
+#29515
+13.compilation_units/02.import_directives/not_distinguishable_import_2.ets
+13.compilation_units/02.import_directives/not_distinguishable_import_3.ets
+
+#26714
+13.compilation_units/02.import_directives/test.ets
+
+#29656
+13.compilation_units/02.import_directives/04.import_type_directive/export_type_with_bind.ets
+13.compilation_units/02.import_directives/04.import_type_directive/import_type_with_bind.ets
+
+#29393
 13.compilation_units/07.export_directives/02.single_export_directive/re_export_test_3.ets
 13.compilation_units/07.export_directives/02.single_export_directive/re_export_test_4.ets
 13.compilation_units/07.export_directives/02.single_export_directive/re_export_test_5.ets

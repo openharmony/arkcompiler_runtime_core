@@ -14,18 +14,13 @@
  */
 
 /*---
-desc: >-
-    A namespace declaration introduces the qualified name to be used as a qualifier
-    for access to each exported entity of a namespace. Next cases tests basic top-level
-    declarations.
+desc: Import from file with utf-16 chars
 files:
-- ./declaration_module.ets
-- ./declaration_module.d.ets
+- ./文件名.ets
 ---*/
 
-import * as dm from "./declaration_module.d"
+import A from "./文件名.ets"
 
 function main() {
-    let myZZ = new dm.ZZ();
-    arktest.assertEQ(myZZ.fee(), "EE str");
+  arktest.assertEQ(new A().foo(), 7)
 }

@@ -14,18 +14,8 @@
  */
 
 /*---
-desc: >-
-    A namespace declaration introduces the qualified name to be used as a qualifier
-    for access to each exported entity of a namespace. Next cases tests basic top-level
-    declarations.
-files:
-- ./declaration_module.ets
-- ./declaration_module.d.ets
+desc: Self imported file
+tags: [compile-only, negative]
 ---*/
 
-import * as dm from "./declaration_module.d"
-
-function main() {
-    let myZZ = new dm.ZZ();
-    arktest.assertEQ(myZZ.fee(), "EE str");
-}
+import * as __main from "./test"

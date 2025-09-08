@@ -12,20 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /*---
-desc: >-
-    A namespace declaration introduces the qualified name to be used as a qualifier
-    for access to each exported entity of a namespace. Next cases tests basic top-level
-    declarations.
-files:
-- ./declaration_module.ets
-- ./declaration_module.d.ets
+tags: [not-a-test, compile-only]
 ---*/
 
-import * as dm from "./declaration_module.d"
-
-function main() {
-    let myZZ = new dm.ZZ();
-    arktest.assertEQ(myZZ.fee(), "EE str");
+export class A {
+  foo(): int {
+    return 7
+  }
 }
