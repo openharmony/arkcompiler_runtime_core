@@ -164,6 +164,7 @@ void RootManager<LanguageConfig>::VisitLocalRoots(const GCRootVisitor &gcRootVis
     auto threadVisitor = [this, &gcRootVisitor](ManagedThread *thread) {
         VisitRootsForThread(thread, gcRootVisitor);
         for (auto stack = StackWalker::Create(thread); stack.HasFrame(); stack.NextFrame()) {
+            ASSERT(!stack.GetMethod()->IsCriticalNative());
             LOG(DEBUG, GC) << " VisitRoots frame " << std::hex << stack.GetFp();
             stack.IterateObjects([this, &gcRootVisitor](auto &vreg) {
                 this->VisitRegisterRoot(vreg, gcRootVisitor);
