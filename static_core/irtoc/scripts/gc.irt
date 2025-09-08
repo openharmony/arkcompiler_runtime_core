@@ -211,7 +211,7 @@ def PostInterRegionBarrierSlow()
     if Options.arch == :arm64
         mask = RegMask.new($full_regmap, :arg0, :callee0, :callee1, :callee2, :tmp0, :tmp1)
     elsif Options.arch == :x86_64
-        mask = RegMask.new($full_regmap, :arg0, :callee0, :caller0, :caller3, :tmp0, :tmp1)
+        mask = RegMask.new($full_regmap, :arg0, :callee0, :tmp0, :tmp1)
     else
         mask = $panda_mask
     end

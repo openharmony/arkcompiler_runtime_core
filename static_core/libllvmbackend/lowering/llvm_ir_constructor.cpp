@@ -2478,6 +2478,9 @@ void LLVMIrConstructor::CreatePostWRB(Inst *inst, llvm::Value *mem, llvm::Value 
         return;
     }
 
+    ASSERT(offset->getType()->isIntegerTy());
+    offset = builder_.CreateSExtOrTrunc(offset, builder_.getInt32Ty());
+
     bool irtoc = arkInterface_->IsIrtocMode();
     if (!irtoc && llvmbackend::g_options.IsLlvmBuiltinWrb()) {
         auto builtin = llvmbackend::builtins::PostWRB(func_->getParent(), mem->getType()->getPointerAddressSpace());
