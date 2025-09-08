@@ -97,14 +97,6 @@ export namespace containers {
             return newData
         }
 
-        public toUndefinableArray(): (String | undefined)[] {
-            let newData = new (String | undefined)[this.curSize]
-            for (let i = 0; i < this.curSize; ++i) {
-                newData[i] = this.data[i]
-            }
-            return newData
-        }
-
 
         private static getNewCapacity(currentCapacity: int): int {
             const fastGrowThreshold = 8192

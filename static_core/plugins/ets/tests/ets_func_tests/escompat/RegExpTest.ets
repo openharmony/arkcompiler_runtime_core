@@ -386,23 +386,18 @@ function GreekAlphabetTest(): void {
     GreekAlphabetTestFunction48();
 }
 
-function asNonUndefined(r: RegExpExecArray | null): Array<String> {
-  return r!.map((x: String | undefined): String => x!);
-}
-
-
 function main(): void {
     {
         let reg = new RegExp("ab|cd||")
-        arktest.assertEQ(JSON.stringify(asNonUndefined(reg.exec("cd"))), '["cd"]')
+        arktest.assertEQ(JSON.stringify(reg.exec("cd")), '["cd"]')
     }
     {
         let reg = new RegExp("ab||")
-        arktest.assertEQ(JSON.stringify(asNonUndefined(reg.exec("cd"))), '[""]')
+        arktest.assertEQ(JSON.stringify(reg.exec("cd")), '[""]')
     }
     {
         let reg = new RegExp("ab|cd|ef")
-        arktest.assertEQ(JSON.stringify(asNonUndefined(reg.exec("cd"))), '["cd"]')
+        arktest.assertEQ(JSON.stringify(reg.exec("cd")), '["cd"]')
     }
     {
         let str = "😀";
@@ -728,14 +723,14 @@ function main(): void {
         try {
             let pattern = "\\[";
             let reg = new RegExp(pattern);
-            arktest.assertEQ(pattern + " " + JSON.stringify(asNonUndefined(reg.exec(str))), '\\[ ["["]')
+            arktest.assertEQ(pattern + " " + JSON.stringify(reg.exec(str)), '\\[ ["["]')
         } catch (error) {
             arktest.assertEQ(true, false, "Expected SyntaxError but got none");
         }
         try {
             let pattern = "\\\[";
             let reg = new RegExp(pattern);
-            arktest.assertEQ(pattern + " " + JSON.stringify(asNonUndefined(reg.exec(str))), '\\[ ["["]')
+            arktest.assertEQ(pattern + " " + JSON.stringify(reg.exec(str)), '\\[ ["["]')
         } catch (error) {
             arktest.assertEQ(true, false, "Expected SyntaxError but got none");
         }
@@ -756,14 +751,14 @@ function main(): void {
         try {
             let pattern = "\\\\\\[";
             let reg = new RegExp(pattern);
-            arktest.assertEQ(pattern + " " + JSON.stringify(asNonUndefined(reg.exec(str))), '\\\\\\[ ["\\\\["]')
+            arktest.assertEQ(pattern + " " + JSON.stringify(reg.exec(str)), '\\\\\\[ ["\\\\["]')
         } catch (error) {
             arktest.assertEQ(true, false, "Expected SyntaxError but got none");
         }
         try {
             let pattern = "\\\\\\\[";
             let reg = new RegExp(pattern);
-            arktest.assertEQ(pattern + " " + JSON.stringify(asNonUndefined(reg.exec(str))), '\\\\\\[ ["\\\\["]')
+            arktest.assertEQ(pattern + " " + JSON.stringify(reg.exec(str)), '\\\\\\[ ["\\\\["]')
         } catch (error) {
             arktest.assertEQ(true, false, "Expected SyntaxError but got none");
         }
@@ -805,6 +800,6 @@ function main(): void {
 
     {
         let reg = new RegExp("a(?:|x)$");
-        arktest.assertEQ(JSON.stringify(asNonUndefined(reg.exec("ax"))), '["ax"]')
+        arktest.assertEQ(JSON.stringify(reg.exec("ax")), '["ax"]')
     }
 }
