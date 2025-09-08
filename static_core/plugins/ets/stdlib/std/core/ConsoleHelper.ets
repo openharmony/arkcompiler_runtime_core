@@ -135,7 +135,16 @@ export class Formatter {
     }
 
     private static arrayToString(delimiter: string, arr: Array<Object>, depth: number, full: boolean = false): string {
-        return ('[ ' + Formatter.arrayToStringImpl(delimiter, arr, depth, full) + (full ? ('[length]: ' + arr.length) : '') + ' ]')
+        let stringifiedArray = Formatter.arrayToStringImpl(delimiter, arr, depth, full);
+        let postfix = '';
+        if (full) {
+            if (arr.length == 0) {
+                postfix = '[length]: ' + arr.length;
+            } else {
+                postfix = ', [length]: ' + arr.length;
+            }
+        }
+        return ('[ ' + stringifiedArray + postfix + ' ]')
     }
 
     private static functionDescription(obj: Object, delimiter: string = '\n', isSub: boolean = false, full: boolean = false, inArray: boolean = false): string {
@@ -228,48 +237,148 @@ export class Formatter {
             .trim()
     }
 
-    private static processArg(flag: string, arg: Object): string {
-        // %c: CSS. This specifier is ignored and will skip any CSS passed in.
-        if (flag == "c" && (arg instanceof String)) {
-            return Formatter.extractContents(arg.toString())
-        } else if (flag == "s" && !(arg instanceof BigInt)) {
-            return arg.toString()
-        } else if (flag == "d") {
-            if (arg instanceof BigInt) {
-                throw new Error("invalid flag " + flag + " for arg " + arg)
-            }
-            return "" + new Number(arg.toString())
-        } else if (flag == "i") {
-            if (arg instanceof BigInt) {
-                throw new Error("invalid flag " + flag + " for arg " + arg)
-            }
-            return "" + parseInt(arg.toString(), 10)
+    private static formatAsLittleObject(item: Any): string
+    {
+        if (item === undefined) {
+            return "undefined"
         }
-        else if (flag == "f") {
-            return "" + parseFloat(arg.toString())
-        } else if (flag == "j") {
-            let res = ""
-            try {
-                res = JSON.stringify(arg)
-            }
-            catch(error) {
-                if (typeof arg === "object") {
-                    return Formatter.objectToString(arg)
-                } else {
-                    throw new Error("error parse json")
-                }
-            }
-            return res
-        } else if (flag == "o") {
-            // Object. A string representation of an object
-            // Similar to util.inspect() with options { showHidden: true, showProxy: true }
-            return Formatter.objectToString(arg, true)
-        } else if (flag == "O") {
-            // Object. A string representation of an object
-            // Similar to util.inspect() without options
-            return Formatter.objectToString(arg)
+        if (item === null) {
+            return "null"
         }
+        return Formatter.objectToString(__narrowAny<Object>(item), true)
+    }
 
+    private static formatAsBigObject(item: Any): string
+    {
+        if (item === undefined) {
+            return "undefined"
+        }
+        if (item === null) {
+            return "null"
+        }
+        return Formatter.objectToString(__narrowAny<Object>(item))
+    }
+
+    private static formatAsNumeric(item: Any, policy: "nan-int" | "nan-num" | "zero-num"): string
+    {
+        if (item === null || item === undefined) {
+            return "NaN"
+        }
+        if (item instanceof BigInt)
+        {
+            return item.toString() + "n"
+        }
+        if (item instanceof String && item == "") {
+            if (policy == "nan-int" || policy == "nan-num") {
+                return "NaN"
+            } else {
+                return "0"
+            }
+        }
+        if (item instanceof String && isNaN(new Number(item as String))) {
+            return "NaN"
+        }
+        if (item instanceof String) {
+            if (policy == "nan-int") {
+                return parseInt(item, 10).toString();
+            } else if (policy == "nan-num") {
+                return parseFloat(item).toString()
+            } else {
+                return (new Number(item)).toString()
+            }
+        }
+        if (item instanceof Array && item.length > 0) {
+            return Formatter.formatAsNumeric(item[0], policy)
+        }
+        if (item instanceof Array) {
+            return "NaN"
+        }
+        if (item instanceof Object) {
+            let itemstr = item.toString();
+            if (policy == "nan-int") {
+                return parseInt(itemstr, 10).toString();
+            } else if (policy == "nan-num") {
+                return parseFloat(itemstr).toString()
+            } else {
+                return (new Number(itemstr)).toString()
+            }
+        }
+        return "NaN";
+    }
+
+    private static formatAsJson(item: Any): string
+    {
+        if (item === null) {
+            return "null"
+        }
+        if (item === undefined) {
+            return "undefined"
+        }
+        let res = ""
+        try {
+            res = JSON.stringify(item)
+        }
+        catch(error) {
+            if (item instanceof Object) {
+                return Formatter.objectToString(item)
+            } else {
+                throw new Error("error parse json")
+            }
+        }
+        return res
+    }
+
+    private static formatAsString(item: Any): string
+    {
+        if (item instanceof BigInt) {
+            return item.toString() + "n"
+        }
+        if (item === null) {
+            return "null"
+        }
+        if (item === undefined) {
+            return "undefined"
+        }
+        return __narrowAny<Object>(item).toString()
+    }
+
+    private static formatAsC(item: Any): string
+    {
+        if (item === null) {
+            return "null"
+        }
+        if (item === undefined) {
+            return "undefined"
+        }
+        return __narrowAny<Object>(item).toString()
+    }
+
+    private static processArg(flag: string, item: Any): string
+    {
+        if (flag == "o") {
+            return Formatter.formatAsLittleObject(item)
+        }
+        if (flag == "O") {
+            return Formatter.formatAsBigObject(item)
+        }
+        if (flag == "i") {
+            return Formatter.formatAsNumeric(item, "nan-int")
+        }
+        if (flag == "d") {
+            return Formatter.formatAsNumeric(item, "zero-num")
+        }
+        if (flag == "f") {
+            return Formatter.formatAsNumeric(item, "nan-num")
+        }
+        if (flag == "j") {
+            return Formatter.formatAsJson(item)
+        }
+        if (flag == "s") {
+            return Formatter.formatAsString(item)
+        }
+        if (flag == "c") {
+            return Formatter.formatAsC(item)
+        }
         return "%" + flag
     }
 
@@ -309,13 +418,10 @@ export class Formatter {
                 res.append(s[j]);
             }
             const flagIndex = preI + i + 1;
-            const flag = s[flagIndex];
+            const flag: string = s[flagIndex];
             if (flags.includes(flag)) {
                 let d = args[argCounter];
-                if (d == undefined || d == null) {
-                    d = "";
-                }
-                res.append(Formatter.processArg(flag, __narrowAny<object>(d)));
+                res.append(Formatter.processArg(flag, d));
                 ++argCounter;
             } else if (flag == "%") {
                 res.append("%");
