@@ -1165,8 +1165,9 @@ bool AsmEmitter::HandleRecord(ItemContainer *items, const Program &program, AsmE
     Type recordType = Type::FromName(name);
     auto *record = items->GetOrCreateClassItem(recordType.GetDescriptor(rec.conflict));
     entities.classItems.insert({name, record});
-
-    record->SetAccessFlags(rec.metadata->GetAccessFlags());
+    if (rec.metadata != nullptr) {
+        record->SetAccessFlags(rec.metadata->GetAccessFlags());
+    }
     record->SetSourceLang(rec.language);
 
     if (!rec.sourceFile.empty()) {

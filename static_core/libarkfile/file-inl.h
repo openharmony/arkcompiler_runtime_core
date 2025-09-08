@@ -35,6 +35,54 @@ inline File::StringData File::GetStringData(EntityId id) const
     return strData;
 }
 
+// CC-OFFNXT(G.FUD.06) switch-case
+inline std::string StringDataToString(File::StringData sd)
+{
+    std::string str = std::string(utf::Mutf8AsCString(sd.data));
+    size_t symPos = 0;
+    while (symPos = str.find_first_of("\a\b\f\n\r\t\v\'\?\\", symPos), symPos != std::string::npos) {
+        std::string sym;
+        switch (str[symPos]) {
+            case '\a':
+                sym = R"(\a)";
+                break;
+            case '\b':
+                sym = R"(\b)";
+                break;
+            case '\f':
+                sym = R"(\f)";
+                break;
+            case '\n':
+                sym = R"(\n)";
+                break;
+            case '\r':
+                sym = R"(\r)";
+                break;
+            case '\t':
+                sym = R"(\t)";
+                break;
+            case '\v':
+                sym = R"(\v)";
+                break;
+            case '\'':
+                sym = R"(\')";
+                break;
+            case '\?':
+                sym = R"(\?)";
+                break;
+            case '\\':
+                sym = R"(\\)";
+                break;
+            default:
+                UNREACHABLE();
+        }
+        str = str.replace(symPos, 1, sym);
+        ASSERT(sym.size() == 2U);
+        symPos += 2U;
+    }
+    return str;
+}
+
 }  // namespace ark::panda_file
 
 #endif

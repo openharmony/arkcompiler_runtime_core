@@ -114,6 +114,7 @@ public:
         return ret;
     }
 
+    PANDA_PUBLIC_API void FillExportMap();
     PANDA_PUBLIC_API uint32_t ComputeLayout();
     PANDA_PUBLIC_API void MarkLiteralarrayMap();
     PANDA_PUBLIC_API void DeleteReferenceFromAnno(AnnotationItem *annoItem);
@@ -140,6 +141,11 @@ public:
     std::map<std::string, BaseClassItem *> *GetClassMap()
     {
         return &classMap_;
+    }
+
+    std::map<std::string, BaseClassItem *> *GetExportMap()
+    {
+        return &exportMap_;
     }
 
     std::unordered_map<uint32_t, ValueItem *> *GetIntValueMap()
@@ -558,6 +564,7 @@ private:
     std::map<std::string, LiteralArrayItem *, LiteralArrayCompare> literalarrayMap_;
 
     std::map<std::string, BaseClassItem *> classMap_;
+    std::map<std::string, BaseClassItem *> exportMap_;
 
     std::unordered_map<uint32_t, ValueItem *> intValueMap_;
     std::unordered_map<uint64_t, ValueItem *> longValueMap_;

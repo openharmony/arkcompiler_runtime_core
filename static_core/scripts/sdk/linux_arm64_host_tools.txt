@@ -6,7 +6,6 @@ bin/aspt_converter
 bin/dependency_analyzer
 bin/es2panda
 bin/verifier
-lib/libabc2program.so
 lib/libarkaotmanager.so
 lib/libarkassembler.so
 lib/libarkbase.so
