@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,25 @@
  * limitations under the License.
  */
 
-{% for lc in logical_complement %}
+{% for ni in integer_mul %}
+
 /*---
-desc: Logical complement operator
-params: "{{lc.origin}} => {{lc.dest}}"
+desc: Multiplication of integer numbers
+params: {{ni.x}} * {{ni.y}} == {{ni.result}}
 ---*/
 
 function main(): void {
-  let a = {{lc.origin}};
-  arktest.assertEQ(!a, {{lc.dest}});
+  let x: {{ni.typex}} = {{ni.x}}
+  let y: {{ni.typey}} = {{ni.y}}
+  {% if ni.typex == 'bigint' %}
+  arktest.assertEQ(x * BigInt(y), {{ni.result}})
+  arktest.assertEQ(BigInt(y) * x, {{ni.result}})
+  {% elif ni.typey =='bigint' %}
+  arktest.assertEQ(BigInt(x) * y, {{ni.result}})
+  arktest.assertEQ(y * BigInt(x), {{ni.result}})
+  {% else %}
+  arktest.assertEQ(x * y, {{ni.result}})
+  arktest.assertEQ(y * x, {{ni.result}})
+  {% endif %}
 }
-
 {% endfor %}
