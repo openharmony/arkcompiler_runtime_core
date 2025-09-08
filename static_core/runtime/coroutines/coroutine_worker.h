@@ -55,8 +55,9 @@ public:
     virtual ~CoroutineWorker()
     {
         os::memory::LockHolder l(posterLock_);
-        if (callbackPoster_ != nullptr) {
-            callbackPoster_->SetDestroyInPlace();
+        if (extSchedulingPoster_ != nullptr) {
+            extSchedulingPoster_->SetDestroyInPlace();
+            extSchedulingPoster_.reset(nullptr);
         }
     }
 
@@ -97,22 +98,13 @@ public:
 
     void SetCallbackPoster(PandaUniquePtr<CallbackPoster> poster)
     {
-        ASSERT(!callbackPoster_);
-        callbackPoster_ = std::move(poster);
+        ASSERT(!extSchedulingPoster_);
+        extSchedulingPoster_ = std::move(poster);
     }
 
     bool IsExternalSchedulingEnabled() const
     {
-        return callbackPoster_ != nullptr;
-    }
-
-    template <typename PosterCallback>
-    void PostExternalCallback(PosterCallback cb)
-    {
-        os::memory::LockHolder l(posterLock_);
-        if (callbackPoster_ != nullptr) {
-            callbackPoster_->Post(std::move(cb));
-        }
+        return extSchedulingPoster_ != nullptr;
     }
 
     void OnCoroBecameActive(Coroutine *co);
@@ -128,7 +120,7 @@ private:
     LocalStorage localStorage_;
     // event loop poster
     os::memory::Mutex posterLock_;
-    PandaUniquePtr<CallbackPoster> callbackPoster_;
+    PandaUniquePtr<CallbackPoster> extSchedulingPoster_;
 };
 
 }  // namespace ark

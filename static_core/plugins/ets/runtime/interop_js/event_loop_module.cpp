@@ -171,6 +171,44 @@ void EventLoopCallbackPoster::AsyncEventToExecuteCallbacks(uv_async_t *async)
     callbackQueue->ExecuteAllCallbacks();
 }
 
+SingleEventPoster::SingleEventPoster(WrappedCallback &&callback) : callback_(std::move(callback))
+{
+    auto loop = EventLoop::GetEventLoop();
+    // These resources will be deleted in the event loop callback after Runtime destruction,
+    // so we need to use a standard allocator
+    async_ = new uv_async_t();
+    [[maybe_unused]] auto uvstatus = uv_async_init(loop, async_, CallbackExecutor);
+    ASSERT(uvstatus == 0);
+    async_->data = this;
+}
+
+SingleEventPoster::~SingleEventPoster()
+{
+    ASSERT(async_ != nullptr);
+    if (NeedDestroyInPlace()) {
+        uv_close(reinterpret_cast<uv_handle_t *>(async_), [](auto *handle) { delete handle; });
+        return;
+    }
+    async_->data = nullptr;
+    uv_async_send(async_);
+}
+
+/* static */
+void SingleEventPoster::CallbackExecutor(uv_async_t *async)
+{
+    auto *eventPoster = static_cast<SingleEventPoster *>(async->data);
+    if (eventPoster == nullptr) {
+        uv_close(reinterpret_cast<uv_handle_t *>(async), [](auto *handle) { delete handle; });
+        return;
+    }
+    eventPoster->callback_();
+}
+
+void SingleEventPoster::PostImpl()
+{
+    uv_async_send(async_);
+}
+
 void EventLoopCallbackPoster::ThreadSafeCallbackQueue::PushCallback(WrappedCallback &&callback, uv_async_t *async)
 {
     {

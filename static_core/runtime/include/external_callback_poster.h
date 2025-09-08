@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_EXTERNAL_CALLBACK_POSTER_H
-#define PANDA_PLUGINS_ETS_RUNTIME_ETS_EXTERNAL_CALLBACK_POSTER_H
+#ifndef PANDA_RUNTIME_EXTERNAL_CALLBACK_POSTER_H
+#define PANDA_RUNTIME_EXTERNAL_CALLBACK_POSTER_H
 
 #include <functional>
 
@@ -35,6 +35,13 @@ public:
     virtual ~CallbackPoster() = default;
     NO_COPY_SEMANTIC(CallbackPoster);
     NO_MOVE_SEMANTIC(CallbackPoster);
+
+    template <typename... Args>
+    void Post(Args... args)
+    {
+        static_assert(sizeof...(args) == 0);
+        PostImpl();
+    }
 
     template <class Callback, class... Args>
     void Post(Callback callback, Args... args)
@@ -61,6 +68,8 @@ protected:
 
     virtual void PostImpl(WrappedCallback &&callback) = 0;
 
+    virtual void PostImpl() {}
+
 private:
     bool destroyInPlace_ = false;
 };
@@ -77,4 +86,4 @@ public:
 
 }  // namespace ark
 
-#endif  // PANDA_PLUGINS_ETS_RUNTIME_ETS_EXTERNAL_CALLBACK_POSTER_H
+#endif  // PANDA_RUNTIME_EXTERNAL_CALLBACK_POSTER_H
