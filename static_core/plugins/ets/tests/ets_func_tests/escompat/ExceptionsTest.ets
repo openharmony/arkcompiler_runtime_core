@@ -16,75 +16,57 @@
 const success = 0;
 const fail = 1;
 
-class ExceptionCause {
-    reason: String = "";
-}
-
 function main(): int {
     let failures = 0;
 
-    failures += test(testThrowException(), "Throw an Exception and catch it");
-    failures += test(testExceptionWithCause(), "Exception object with cause");
-    failures += test(testThrowRuntimeException(), "Throw an RuntimeException object with message & cause");
-    failures += test(testThrowRuntimeExceptionWithoutArgs(), "Throw an RuntimeException object");
-    failures += test(testThrowRuntimeExceptionWithoutReason(), "Throw an RuntimeException object with message");
+    failures += test(testThrowError(), "Throw an Error and catch it");
+    failures += test(testErrorWithMessage(), "Error object with cause");
+    failures += test(testThrowRuntimeErrorWithoutArgs(), "Throw an RuntimeError object");
+    failures += test(testThrowRuntimeErrorWithoutReason(), "Throw an RuntimeError object with message");
     return failures;
 }
 
-function testThrowException(): int {
+function testThrowError(): int {
     try {
-        throw new Exception("Test throw");
+        throw new Error("Test throw");
     } catch (ex) {
-        if (ex instanceof Exception) {
+        if (ex instanceof Error) {
             return success;
         }
         return fail;
     }
 }
 
-function testExceptionWithCause(): int {
+function testErrorWithMessage(): int {
     try {
-        let cause: ExceptionCause = { reason: "Test cause" };
-        throw new Exception("Test Exception with cause", cause);
+        let message = "Test Error with message";
+        throw new Error(message);
     } catch (ex) {
-        if (ex instanceof Exception) {
+        if (ex instanceof Error) {
             return success;
         }
         return fail;
     }
 }
 
-function testThrowRuntimeException(): int {
+function testThrowRuntimeErrorWithoutArgs(): int {
     try {
-        let cause: ExceptionCause = { reason: "Test cause" };
-        throw new RuntimeException("Test RuntimeException", cause);
+        throw new RuntimeError();
     }
     catch (ex) {
-        if (ex instanceof RuntimeException) {
+        if (ex instanceof RuntimeError) {
             return success;
         }
         return fail;
     }
 }
 
-function testThrowRuntimeExceptionWithoutArgs(): int {
+function testThrowRuntimeErrorWithoutReason(): int {
     try {
-        throw new RuntimeException();
+        throw new RuntimeError("Test RuntimeError");
     }
     catch (ex) {
-        if (ex instanceof RuntimeException) {
-            return success;
-        }
-        return fail;
-    }
-}
-
-function testThrowRuntimeExceptionWithoutReason(): int {
-    try {
-        throw new RuntimeException("Test RuntimeException");
-    }
-    catch (ex) {
-        if (ex instanceof RuntimeException) {
+        if (ex instanceof RuntimeError) {
             return success;
         }
         return fail;

@@ -154,7 +154,7 @@ static URelativeDateTimeUnit ToICUUnitOrThrow(ani_env *env, const std::string &u
     if (unit == "year") {
         return UDAT_REL_UNIT_YEAR;
     }
-    ThrowNewError(env, "std.core.RuntimeException", ("Invalid unit: " + unitStr).c_str(), "C{std.core.String}:");
+    ThrowNewError(env, "std.core.RuntimeError", ("Invalid unit: " + unitStr).c_str(), "C{std.core.String}:");
     return static_cast<URelativeDateTimeUnit>(-1);
 }
 
