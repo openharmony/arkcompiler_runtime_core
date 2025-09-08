@@ -103,6 +103,11 @@ public:
     {
         return "";
     }
+
+    bool IsMethodStatic(uint32_t offset) const override
+    {
+        return IsMapsSet() && BytecodeOptIrInterface::IsMethodStatic(offset);
+    }
 };
 
 namespace test {
