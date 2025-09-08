@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,15 +13,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for qname in qualified_name %}
 /*---
-desc: Qualified name {{qname}}
-params: {{qname}}
+desc: names to export
+tags: [compile-only, not-a-test]
 ---*/
 
-package test;
-
-class Clazz{{loop.index0}} {
+export class Clazz {
     static staticField: int = 1;
     static staticMethod(): int { return 2; }
 
@@ -29,16 +26,8 @@ class Clazz{{loop.index0}} {
     method(): int { return 4; }
 }
 
-let instance{{loop.index0}}: Clazz{{loop.index0}};
-static {
-   instance{{loop.index0}} = new Clazz{{loop.index0}}();
+export interface Intf {
+    field1: int;
+    field2: string;
 }
 
-{% if loop.last %}
-function main(): void {
-    {% for qname1 in qualified_name %}
- arktest.assertEQ( {{qname1}} )
-    {% endfor %}
-}
-{% endif %}
-{% endfor %}
