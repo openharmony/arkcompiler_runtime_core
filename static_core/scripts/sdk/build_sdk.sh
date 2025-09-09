@@ -37,6 +37,7 @@ export LLVM_BIN_OHOS_FASTVERIFY="/opt/llvm-15-release-ohos-fastverify"
 export SCRIPT_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
 
 export ARK_ROOT="$SCRIPT_DIR/../.."
+export ETS_FRONTEND_ROOT="$ARK_ROOT/../../ets_frontend"
 
 export BUILD_TYPE_RELEASE="Release"
 BUILD_TYPE_FAST_VERIFY="FastVerify"
