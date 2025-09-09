@@ -20,5 +20,5 @@ const ClassReturnThis = etsMod.getClass('ClassReturnThis');
 {
   let obj = new ClassReturnThis();
   ASSERT_EQ(obj.returnThis(), obj);
-  ASSERT_EQ(obj.returnThisAsJSValue(), obj);
+  ASSERT_EQ(obj.returnThisAsAny(), obj);
 }

@@ -13,78 +13,76 @@
  * limitations under the License.
  */
 
-import {
-    tsNumber,
-    tsString,
-    checkLiteralType,
-    AgeNameLiteralClass,
-    createAgeNameLiteralClassFromTs,
-    callMethodAgeNameLiteralClassFromTs,
-    instanceAgeNameLiteralClass,
-    ChildAgeNameLiteralClass,
-    createChildAgeNameLiteralClassFromTs,
-    callMethodChildAgeNameLiteralClassFromTs,
-    instanceChildAgeNameLiteralClass,
-} from 'main_js';
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/intersection_signature/main');
+let tsNumber = module.getProperty('tsNumber').toNumber();
+let tsString = module.getProperty('tsString').toString();
+let checkLiteralType = module.getProperty('checkLiteralType');
+let AgeNameLiteralClass = module.getProperty('AgeNameLiteralClass');
+let createAgeNameLiteralClassFromTs = module.getProperty('createAgeNameLiteralClassFromTs');
+let callMethodAgeNameLiteralClassFromTs = module.getProperty('callMethodAgeNameLiteralClassFromTs');
+let instanceAgeNameLiteralClass = module.getProperty('instanceAgeNameLiteralClass');
+let ChildAgeNameLiteralClass = module.getProperty('ChildAgeNameLiteralClass');
+let createChildAgeNameLiteralClassFromTs = module.getProperty('createChildAgeNameLiteralClassFromTs');
+let callMethodChildAgeNameLiteralClassFromTs = module.getProperty('callMethodChildAgeNameLiteralClassFromTs');
+let instanceChildAgeNameLiteralClass = module.getProperty('instanceChildAgeNameLiteralClass');
 
-
+class Intersection {
+    age = tsNumber;
+    name = tsString;
+}
 function checkArgFuFromSts(): boolean {
-    class Intersection {
-        age = tsNumber;
-        name = tsString;
-    }
 
-    return checkLiteralType(new Intersection()) as boolean;
+    return checkLiteralType.invoke(new Intersection()).toBoolean();
 }
 
 function checkIntersectionTypeClass(): boolean {
-    new AgeNameLiteralClass(tsString, tsNumber);
+    AgeNameLiteralClass.instantiate(tsString, tsNumber);
 
     return true;
 }
 
 function checkIntersectionClassMethod(): boolean {
-    const Intersection = new AgeNameLiteralClass(tsString, tsNumber);
-    Intersection.createUser(tsString, tsNumber);
+    const Intersection = AgeNameLiteralClass.instantiate(tsString, tsNumber);
+    Intersection.invokeMethod('createUser', tsString, tsNumber);
 
     return true;
 }
 
 function checkCreateIntersectionClassTypeFromTs(): boolean {
-    return createAgeNameLiteralClassFromTs() as boolean;
+    return createAgeNameLiteralClassFromTs.invoke().toBoolean();
 }
 
 function checkCallMethodIntersectionClassTypeFromTs(): boolean {
-    return callMethodAgeNameLiteralClassFromTs() as boolean;
+    return callMethodAgeNameLiteralClassFromTs.invoke().toBoolean();
 }
 
 function checkInstanceIntersectionTypeClass(): boolean {
-    instanceAgeNameLiteralClass.createUser(tsString, tsNumber);
+    instanceAgeNameLiteralClass.invokeMethod('createUser', tsString, tsNumber);
     return true;
 }
 
 function checkChildIntersectionTypeClass(): boolean {
-    new ChildAgeNameLiteralClass(tsString, tsNumber);
+    ChildAgeNameLiteralClass.instantiate(tsString, tsNumber);
 
     return true;
 }
 
 function checkChildIntersectionTypeClassMethod(): boolean {
-    const Intersection = new ChildAgeNameLiteralClass(tsString, tsNumber);
-    Intersection.createUser(tsString, tsNumber);
+    const Intersection = ChildAgeNameLiteralClass.instantiate(tsString, tsNumber);
+    Intersection.invokeMethod('createUser', tsString, tsNumber);
 
     return true;
 }
 
 function checkCreateChildIntersectionClassTypeFromTs(): boolean {
-    return createChildAgeNameLiteralClassFromTs() as boolean;
+    return createChildAgeNameLiteralClassFromTs.invoke().toBoolean();
 }
 
 function checkCallMethodChildIntersectionClassTypeFromTs(): boolean {
-    return callMethodChildAgeNameLiteralClassFromTs() as boolean;
+    return callMethodChildAgeNameLiteralClassFromTs.invoke().toBoolean();
 }
 
 function checkInstanceChildIntersectionTypeClass(): boolean {
-    instanceChildAgeNameLiteralClass.createUser(tsString, tsNumber);
+    instanceChildAgeNameLiteralClass.invokeMethod('createUser', tsString, tsNumber);
     return true;
 }

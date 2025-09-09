@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,9 +39,20 @@ export interface TestUserType {
 	address?: AddressType;
 }
 
-export type UserPick = Pick<TestUserType, 'name' | 'address'>;
-export type UserOmit = Omit<TestUserType, 'id' | 'age'>;
-export type UserPartial = Partial<TestUserType>;
+export interface UserPick {
+    name: string;
+    address?: AddressType;
+};
+export interface UserOmit {
+    name: string;
+    address?: AddressType;
+};
+export interface UserPartial {
+    id?: number;
+    name?: string;
+    age?: number;
+    address?: AddressType;
+}
 
 export function fnWithSubsetPick(obj: UserPick): string {
 	return obj.address ? obj.address.city : 'Adress not found';

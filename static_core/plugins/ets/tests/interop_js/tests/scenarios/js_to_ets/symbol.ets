@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-import { functionArgTypeClassToCheckSymbol, ClassToCheckSymbol }
-    from "symbol"
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/scenarios/js_to_ets/symbol');
+let functionArgTypeClassToCheckSymbol = module.getProperty('functionArgTypeClassToCheckSymbol');
+let ClassToCheckSymbol = module.getProperty('ClassToCheckSymbol');
 
 function Test_function_arg_type_class_to_check_symbol(): boolean {
-    let testClass = new ClassToCheckSymbol('a');
-    let resClass = functionArgTypeClassToCheckSymbol(testClass) as ClassToCheckSymbol;
-    return resClass.x == 'a';
+    let testClass = ClassToCheckSymbol.instantiate('a');
+    let resClass = functionArgTypeClassToCheckSymbol.invoke(testClass);
+    return resClass.getProperty('x').toString() === 'a';
 }

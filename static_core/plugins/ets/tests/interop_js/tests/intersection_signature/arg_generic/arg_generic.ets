@@ -13,77 +13,76 @@
  * limitations under the License.
  */
 
-import {
-    tsNumber,
-    tsString,
-    checkAgeNameGeneric,
-    AgeNameGenericClass,
-    createAgeNameClassGenericFromTs,
-    callMethodAgeNameClassGenericFromTs,
-    instanceAgeNameGenericClass,
-    ChildAgeNameGenericClass,
-    createChildAgeNameClassGenericFromTs,
-    callMethodChildAgeNameClassGenericFromTs,
-    instanceChildAgeNameGenericClass,
-} from 'main_js';
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/intersection_signature/main');
+let tsNumber = module.getProperty('tsNumber').toNumber();
+let tsString = module.getProperty('tsString').toString();
+let checkAgeNameGeneric = module.getProperty('checkAgeNameGeneric');
+let AgeNameGenericClass = module.getProperty('AgeNameGenericClass');
+let createAgeNameClassGenericFromTs = module.getProperty('createAgeNameClassGenericFromTs');
+let callMethodAgeNameClassGenericFromTs = module.getProperty('callMethodAgeNameClassGenericFromTs');
+let instanceAgeNameGenericClass = module.getProperty('instanceAgeNameGenericClass');
+let ChildAgeNameGenericClass = module.getProperty('ChildAgeNameGenericClass');
+let createChildAgeNameClassGenericFromTs = module.getProperty('createChildAgeNameClassGenericFromTs');
+let callMethodChildAgeNameClassGenericFromTs = module.getProperty('callMethodChildAgeNameClassGenericFromTs');
+let instanceChildAgeNameGenericClass = module.getProperty('instanceChildAgeNameGenericClass');
 
+class TypeClass {
+    age = tsNumber;
+    name = tsString;
+}
 function checkArgFuFromSts(): boolean {
-    class TypeClass {
-        age = tsNumber;
-        name = tsString;
-    }
 
-    return checkAgeNameGeneric(new TypeClass()) as boolean;
+    return checkAgeNameGeneric.invoke(new TypeClass()).toBoolean();
 }
 
 function checkTypeClass(): boolean {
-    new AgeNameGenericClass(tsString, tsNumber);
+    AgeNameGenericClass.instantiate(tsString, tsNumber);
 
     return true;
 }
 
 function checkClassMethod(): boolean {
-    const Type = new AgeNameGenericClass(tsString, tsNumber);
-    Type.createUser(tsString, tsNumber);
+    const Type = AgeNameGenericClass.instantiate(tsString, tsNumber);
+    Type.invokeMethod('createUser', tsString, tsNumber);
 
-    return true;
+    return !Type.isUndefined();
 }
 
 function checkCreateClassFromTs(): boolean {
-    return createAgeNameClassGenericFromTs() as boolean;
+    return createAgeNameClassGenericFromTs.invoke().toBoolean();
 }
 
 function checkCallMethodClassFromTs(): boolean {
-    return callMethodAgeNameClassGenericFromTs() as boolean;
+    return callMethodAgeNameClassGenericFromTs.invoke().toBoolean();
 }
 
 function checkInstanceClass(): boolean {
-    instanceAgeNameGenericClass.createUser(tsString, tsNumber);
+    instanceAgeNameGenericClass.invokeMethod('createUser', tsString, tsNumber);
     return true;
 }
 
 function checkChildClass(): boolean {
-    const Type = new ChildAgeNameGenericClass(tsString, tsNumber);
+    const Type = ChildAgeNameGenericClass.instantiate(tsString, tsNumber);
 
-    return true;
+    return !Type.isUndefined();
 }
 
 function checkChildClassMethod(): boolean {
-    const Type = new ChildAgeNameGenericClass(tsString, tsNumber);
-    Type.createUser(tsString, tsNumber);
+    const Type = ChildAgeNameGenericClass.instantiate(tsString, tsNumber);
+    Type.invokeMethod('createUser', tsString, tsNumber);
 
-    return true;
+    return !Type.isUndefined();
 }
 
 function checkCreateChildClassFromTs(): boolean {
-    return createChildAgeNameClassGenericFromTs() as boolean;
+    return createChildAgeNameClassGenericFromTs.invoke().toBoolean();
 }
 
 function checkCallMethodChildClassFromTs(): boolean {
-    return callMethodChildAgeNameClassGenericFromTs() as boolean;
+    return callMethodChildAgeNameClassGenericFromTs.invoke().toBoolean();
 }
 
 function checkInstanceChildClass(): boolean {
-    instanceChildAgeNameGenericClass.createUser(tsString, tsNumber);
+    instanceChildAgeNameGenericClass.invokeMethod('createUser', tsString, tsNumber);
     return true;
 }

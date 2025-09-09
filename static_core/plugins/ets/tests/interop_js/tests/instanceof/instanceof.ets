@@ -14,13 +14,6 @@
  */
 
 import {
-    AValue,
-    CValue,
-    jsAvalue,
-    jsCvalue,
-    jsFn,
-} from "js"
-import {
     ADeclared,
     BDeclared,
     CDeclared,
@@ -29,16 +22,19 @@ import {
     createError,
 } from "dynamic_import_with_decl"
 
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/instanceof/js/instanceof_with_decl')
+let AValue = module.getProperty('AValue');
+let CValue = module.getProperty('CValue');
+let jsAvalue = module.getProperty('jsAvalue');
+let jsCvalue = module.getProperty('jsCvalue');
+let jsFn = module.getProperty('jsFn');
 
-class A {}
-class C extends A {}
-
+class A { }
+class C extends A { }
 
 function errLog(op: String) {
     console.println("Bug operation: " + op);
 }
-
-
 
 /*
  * =====================================
@@ -66,11 +62,11 @@ function TestEtstypeInstanceofObject(): boolean {
 
 function TestJsvalueInstanceofObject(): boolean {
     // Check js object as left argument
-    if (!(jsAvalue instanceof Object)) {
+    if (!(jsAvalue.unwrap() instanceof Object)) {
         errLog("js_avalue instanceof Object");
         return false;
     }
-    let jsAvalueX = asJsvalue(jsAvalue);
+    let jsAvalueX = asJsvalue(jsAvalue.unwrap());
     if (!(jsAvalueX instanceof Object)) {
         errLog("js_avalue_x instanceof Object");
         return false;
@@ -78,7 +74,7 @@ function TestJsvalueInstanceofObject(): boolean {
 
     // Check ets object as left argumet
     let a = new A();
-    let aJsvalue: JSValue = asJsvalue(a);
+    let aJsvalue: Any = asJsvalue(a);
     if (!(aJsvalue instanceof Object)) {
         errLog("a_jsvalue instanceof Object");
         return false;
@@ -87,13 +83,13 @@ function TestJsvalueInstanceofObject(): boolean {
 }
 
 function TestDynvalueInstanceofObject(): boolean {
-    let avalue: AValue = new AValue();
-    if (!(avalue instanceof Object)) {
+    let avalue: ESValue = AValue.instantiate();
+    if (!(avalue.unwrap() instanceof Object)) {
         errLog("avalue instanceof Object");
         return false;
     }
-    let cvalue: CValue = new CValue();
-    if (!(cvalue instanceof Object)) {
+    let cvalue: ESValue = CValue.instantiate();
+    if (!(cvalue.unwrap() instanceof Object)) {
         errLog("cvalue instanceof Object");
         return false;
     }
@@ -108,8 +104,6 @@ function TestDyndeclInstanceofObject(): boolean {
     }
     return true;
 }
-
-
 
 /*
  * ==============================================
@@ -148,11 +142,11 @@ function TestEtstypeInstanceofEtstype(): boolean {
 
 function TestJsvalueInstanceofEtstype(): boolean {
     // Check js object as left argument
-    if (jsAvalue instanceof A) {
+    if (jsAvalue.unwrap() instanceof A) {
         errLog("js_avalue instanceof A");
         return false;
     }
-    let jsAvalueX = asJsvalue(jsAvalue);
+    let jsAvalueX = asJsvalue(jsAvalue.unwrap());
     if (jsAvalueX instanceof A) {
         errLog("js_avalue_x instanceof A");
         return false;
@@ -160,7 +154,7 @@ function TestJsvalueInstanceofEtstype(): boolean {
 
     // Check ets object as left argumet
     let a = new A();
-    let aJsvalue: JSValue = asJsvalue(a);
+    let aJsvalue: Any = asJsvalue(a);
     if (!(aJsvalue instanceof A)) {
         errLog("a_jsvalue instanceof A");
         return false;
@@ -171,7 +165,7 @@ function TestJsvalueInstanceofEtstype(): boolean {
     //    return false;
     //}
     let c = new C();
-    let cJsvalue: JSValue = asJsvalue(c);
+    let cJsvalue: Any = asJsvalue(c);
     if (!(cJsvalue instanceof A)) {
         errLog("c_jsvalue instanceof A");
         return false;
@@ -180,13 +174,13 @@ function TestJsvalueInstanceofEtstype(): boolean {
 }
 
 function TestDynvalueInstanceofEtstype(): boolean {
-    let avalue: AValue = new AValue();
-    if (avalue instanceof A) {
+    let avalue: ESValue = AValue.instantiate();
+    if (avalue.unwrap() instanceof A) {
         errLog("avalue instanceof A");
         return false;
     }
     // TODO(v.cherkashin): Enable when inheritance from declared type will be implemented, #13552
-    //let cvalue: CValue = new CValue();
+    //let cvalue: ESValue = CValue.instantiate();
     //if (!(cvalue instanceof B)) {
     //    errLog("cvalue instanceof B");
     //    return false;
@@ -208,7 +202,7 @@ function TestDyndeclInstanceofEtstype(): boolean {
 
     // Check compat class
     let etsError = new Error("ets error message")
-    let etsErrorJsval: JSValue = etsError;
+    let etsErrorJsval: Any = etsError;
     if (!(etsErrorJsval instanceof Error)) {
         errLog("etsErrorJsval instanceof Error");
         return false;
@@ -220,14 +214,13 @@ function TestDyndeclInstanceofEtstype(): boolean {
         return false;
     }
     // TODO(v.cherkashin): Enable when processing the compat types will be implemented, #13577
-    //let jsErrorJsval: JSValue = jsError;
+    //let jsErrorJsval: Any = jsError;
     //if (!(js_error_jsval instanceof Error)) {
     //    errLog("js_error_jsval instanceof Error");
     //    return false;
     //}
     return true;
 }
-
 
 /*
  * ==============================================
@@ -263,11 +256,11 @@ function TestEtstypeInstanceofDyndecl(): boolean {
 
 function TestJsvalueInstanceofDyndecl(): boolean {
     // Check 'jsvalue instanceof dyndecl'
-    if (jsAvalue instanceof BDeclared) {
+    if (jsAvalue.unwrap() instanceof BDeclared) {
         errLog("js_avalue instanceof BDeclared");
         return false;
     }
-    if (!(jsCvalue instanceof BDeclared)) {
+    if (!(jsCvalue.unwrap() instanceof BDeclared)) {
         errLog("jsCvalue instanceof BDeclared");
         return false;
     }
@@ -276,13 +269,13 @@ function TestJsvalueInstanceofDyndecl(): boolean {
 
 function TestDynvalueInstanceofDyndecl(): boolean {
     // Check 'dynvalue instanceof dyndecl'
-    let avalue: AValue = new AValue();
-    if (avalue instanceof BDeclared) {
+    let avalue: ESValue = AValue.instantiate();
+    if (avalue.unwrap() instanceof BDeclared) {
         errLog("avalue instanceof BDeclared");
         return false;
     }
-    let cvalue: CValue = new CValue();
-    if (!(cvalue instanceof BDeclared)) {
+    let cvalue: ESValue = CValue.instantiate();
+    if (!(cvalue.unwrap() instanceof BDeclared)) {
         errLog("cvalue instanceof BDeclared");
         return false;
     }
@@ -311,7 +304,7 @@ function TestDyndeclInstanceofDyndecl(): boolean {
     }
 
     // Check 'js_fn instanceof dyndecl'
-    if (jsFn instanceof BDeclared) {
+    if (jsFn.unwrap() instanceof BDeclared) {
         errLog("js_fn instanceof BDeclared");
         return false;
     }

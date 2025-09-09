@@ -62,12 +62,13 @@ export class TsClass {
 }
 
 export function changeTsClass(obj: TsClass): void {
-    print(obj, 'TS LOG<<');
-    
     obj.name = tsString + tsString;
 }
 
-export const tsObject = {
+interface Iobj {
+    value: string,
+}
+export const tsObject: Iobj = {
     value: 'tsString',
 };
 

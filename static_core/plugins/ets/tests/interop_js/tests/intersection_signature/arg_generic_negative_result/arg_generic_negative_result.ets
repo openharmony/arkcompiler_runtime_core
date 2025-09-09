@@ -13,50 +13,49 @@
  * limitations under the License.
  */
 
-import {
-    tsNumber,
-    tsString,
-    checkAgeNameGeneric,
-    AgeNameGenericClass,
-    instanceAgeNameGenericClass,
-    ChildAgeNameGenericClass,
-    instanceChildAgeNameGenericClass,
-} from 'main_js';
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/intersection_signature/main');
+let tsNumber = module.getProperty('tsNumber').toNumber();
+let tsString = module.getProperty('tsString').toString();
+let checkAgeNameGeneric = module.getProperty('checkAgeNameGeneric');
+let AgeNameGenericClass = module.getProperty('AgeNameGenericClass');
+let instanceAgeNameGenericClass = module.getProperty('instanceAgeNameGenericClass');
+let ChildAgeNameGenericClass = module.getProperty('ChildAgeNameGenericClass');
+let instanceChildAgeNameGenericClass = module.getProperty('instanceChildAgeNameGenericClass');
 
+class TypeWrong {
+    age = tsNumber;
+}
 function checkArgFuFromSts(): boolean {
-    class TypeWrong {
-        age = tsNumber;
-    }
-    return checkAgeNameGeneric(new TypeWrong()) as boolean == false;
+    return checkAgeNameGeneric.invoke(new TypeWrong()).toBoolean() == false;
 }
 
 function checkTypeClass(): boolean {
-    return isThrowing(() => { new AgeNameGenericClass(tsNumber); });
+    return isThrowing(() => { AgeNameGenericClass.instantiate(tsNumber); });
 }
 
 function checkClassMethod(): boolean {
     return isThrowing(() => {
-        const Type = new AgeNameGenericClass(tsString, tsNumber);
-        Type.createUser(tsNumber);
+        const Type = AgeNameGenericClass.instantiate(tsString, tsNumber);
+        Type.invokeMethod('createUser', tsNumber);
     });
 }
 function checkInstanceClass(): boolean {
-    return isThrowing(() => { instanceAgeNameGenericClass.createUser(tsNumber); });
+    return isThrowing(() => { instanceAgeNameGenericClass.invokeMethod('createUser', tsNumber); });
 }
 
 function checkChildClass(): boolean {
-    return isThrowing(() => { new ChildAgeNameGenericClass(tsNumber); });
+    return isThrowing(() => { ChildAgeNameGenericClass.instantiate(tsNumber); });
 }
 
 function checkChildClassMethod(): boolean {
     return isThrowing(() => {
-        const Type = new ChildAgeNameGenericClass(tsString, tsNumber);
-        Type.createUser(tsNumber);
+        const Type = ChildAgeNameGenericClass.instantiate(tsString, tsNumber);
+        Type.invokeMethod('createUser', tsNumber);
     });
 }
 
 function checkInstanceChildClassMethod(): boolean {
-    return isThrowing(() => { instanceChildAgeNameGenericClass.createUser(tsNumber); });
+    return isThrowing(() => { instanceChildAgeNameGenericClass.invokeMethod('createUser', tsNumber); });
 }
 
 function isThrowing(f: () => void): boolean {

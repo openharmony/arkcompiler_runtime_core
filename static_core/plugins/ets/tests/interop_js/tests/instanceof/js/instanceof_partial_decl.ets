@@ -18,5 +18,5 @@ export declare class BDeclared {}
 export declare class CDeclared {}
 export declare class DDeclared {}
 
-export declare function asJsvalue(x: JSValue): JSValue;
+export declare function asJsvalue(x: Any): Any;
 export declare function createError(msg: String): Error;
