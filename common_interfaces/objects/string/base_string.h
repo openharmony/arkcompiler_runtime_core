@@ -80,11 +80,12 @@ public:
     static constexpr size_t MAX_STRING_LENGTH = 0x40000000U; // 30 bits for string length, 2 bits for special meaning
     static constexpr uint32_t MAX_ELEMENT_INDEX_LEN = 10;
     static constexpr size_t HASH_SHIFT = 5;
-#if defined(ARK_HYBRID) || defined(USE_CMC_GC)
-    static constexpr size_t PADDING_OFFSET = BaseObjectSize();
-#else
+// Open after adaptation
+// #if defined(ARK_HYBRID) || defined(USE_CMC_GC)
+//     static constexpr size_t PADDING_OFFSET = BaseObjectSize();
+// #else
     static constexpr size_t LENGTH_AND_FLAGS_OFFSET = BaseObjectSize();
-#endif
+// #endif
     static constexpr uint32_t STRING_LENGTH_BITS_NUM = 30;
 
     enum CompressedStatus {
@@ -117,10 +118,11 @@ public:
     static_assert(LengthBits::START_BIT + LengthBits::SIZE == sizeof(uint32_t) * BITS_PER_BYTE,
                   "LengthBits does not match the field size");
 
-#if defined(ARK_HYBRID) || defined(USE_CMC_GC)
-    // When enable cmcgc, the ObjectHeader in 1.2 is 128 bits, to align with it, a 64bits padding is needed.
-    PRIMITIVE_FIELD(padding, uint64_t, PADDING_OFFSET, LENGTH_AND_FLAGS_OFFSET)
-#endif
+// Open after adaptation
+// #if defined(ARK_HYBRID) || defined(USE_CMC_GC)
+//     // When enable cmcgc, the ObjectHeader in 1.2 is 128 bits, to align with it, a 64bits padding is needed.
+//     PRIMITIVE_FIELD(padding, uint64_t, PADDING_OFFSET, LENGTH_AND_FLAGS_OFFSET)
+// #endif
     PRIMITIVE_FIELD(LengthAndFlags, uint32_t, LENGTH_AND_FLAGS_OFFSET, MIX_HASHCODE_OFFSET)
 
     using RawHashcode = BitField<uint32_t, 0, RAW_HASH_LENGTH>;                   // 31
@@ -856,4 +858,13 @@ inline uint32_t BaseString::MixHashcode(uint32_t hashcode, bool isInteger)
     return isInteger ? (hashcode | IS_INTEGER_MASK) : (hashcode & (~IS_INTEGER_MASK));
 }
 } // namespace common
-#endif // COMMON_INTERFACES_OBJECTS_STRING_BASE_STRING_DECLARE_H
+#endif  // COMMON_INTERFACES_OBJECTS_STRING_BASE_STRING_DECLARE_H
+
+// NOLINTEND(readability-identifier-naming, cppcoreguidelines-macro-usage,
+//             cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
+//             readability-else-after-return, readability-duplicate-include,
+//             misc-non-private-member-variables-in-classes, cppcoreguidelines-pro-type-member-init,
+//             google-explicit-constructor, cppcoreguidelines-pro-type-union-access,
+//             modernize-use-auto, llvm-namespace-comment,
+//             cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
+//             readability-implicit-bool-conversion)
