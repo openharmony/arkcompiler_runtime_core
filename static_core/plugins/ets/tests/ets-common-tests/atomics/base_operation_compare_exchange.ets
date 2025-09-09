@@ -40,6 +40,7 @@ let typeArrayList = [
 function testCompareExchange() {
     for (let i = 0; i < typeArrayList.length; i++) {
         let ta = typeArrayList[i]
+        arktest.assertEQ(ta.byteOffset, 0)
         let arraySize = ta.length
 
         for (let j = 1; j < arraySize; j++) {
