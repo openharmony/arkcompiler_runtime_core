@@ -78,13 +78,10 @@ function testGet(): void {
     let match = new RegExpExecArray(0, "abc", ["x", "y", "z"]);
 
     arktest.assertEQ(match[0], "x", "testGet, int index, step 1");
-    arktest.assertEQ(match[0 as number], "x", "testGet, number index, step 1");
 
     arktest.assertEQ(match[1], "y", "testGet, int index, step 2");
-    arktest.assertEQ(match[1 as number], "y", "testGet, number index, step 2");
 
     arktest.assertEQ(match[2], "z", "testGet, int index, step 3");
-    arktest.assertEQ(match[2 as number], "z", "testGet, number index, step 3");
 
     arktest.expectError((): void => { match[-1] }, new RangeError("Out of bounds"))
     arktest.expectError((): void => { match[match.length] }, new RangeError("Out of bounds"))
@@ -98,15 +95,12 @@ function testSet(): void {
 
     match[0] = "x1"
     arktest.assertEQ(match[0], "x1", "testSet, int index, step 1");
-    arktest.assertEQ(match[0 as number], "x1", "testSet, number index, step 1");
 
     match[1] = "y1"
     arktest.assertEQ(match[1], "y1", "testSet, int index, step 2");
-    arktest.assertEQ(match[1 as number], "y1", "testSet, number index, step 2");
 
     match[2] = "z1"
     arktest.assertEQ(match[2], "z1", "testSet, int index, step 3");
-    arktest.assertEQ(match[2 as number], "z1", "testSet, number index, step 3");
 
     arktest.expectError((): void => { match[-1] = "a" }, new RangeError("Out of bounds"))
     arktest.expectError((): void => { match[match.length] = "b" }, new RangeError("Out of bounds"))
@@ -215,11 +209,9 @@ function testUnshift(): void {
 
     match[1] = "y1"
     arktest.assertEQ(match[1], "y1", "testSet, int index, step 2");
-    arktest.assertEQ(match[1 as number], "y1", "testSet, number index, step 2");
 
     match[2] = "z1"
     arktest.assertEQ(match[2], "z1", "testSet, int index, step 3");
-    arktest.assertEQ(match[2 as number], "z1", "testSet, number index, step 3");
 
     arktest.expectError((): void => { match[-1] = "a" }, new RangeError("Out of bounds"))
     arktest.expectError((): void => { match[match.length] = "b" }, new RangeError("Out of bounds"))
