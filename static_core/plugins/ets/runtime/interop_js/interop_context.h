@@ -369,11 +369,6 @@ public:
         return sharedEtsVmState_->errorClass;
     }
 
-    Class *GetExceptionClass() const
-    {
-        return sharedEtsVmState_->exceptionClass;
-    }
-
     Class *GetTypeClass() const
     {
         return sharedEtsVmState_->typeClass;
@@ -567,7 +562,6 @@ private:
         Class *nullValueClass {};
         Class *promiseClass {};
         Class *errorClass {};
-        Class *exceptionClass {};
         Class *typeClass {};
         Class *arrayClass {};
         Class *boxIntClass {};

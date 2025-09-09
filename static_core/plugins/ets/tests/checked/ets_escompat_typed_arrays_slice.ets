@@ -171,11 +171,11 @@ function check_array<T extends Number | BigInt>(source_data: ArrayLike<T>, actua
     const actualLen = (actual_data.length).toInt()
     const expectedLen = (source_data.length).toInt() - (beginPlus + endMinus)
     if (actualLen != expectedLen) {
-        throw new Exception("Unexpected array length! Current: " + actualLen + " Expected: " + expectedLen)
+        throw new Error("Unexpected array length! Current: " + actualLen + " Expected: " + expectedLen)
     }
     for (let i : int = 0; i < expectedLen; i++) {
         if (source_data[i + beginPlus] != actual_data[i]) {
-            throw new Exception("Unexpected element with index " + i)
+            throw new Error("Unexpected element with index " + i)
         }
     }
 }

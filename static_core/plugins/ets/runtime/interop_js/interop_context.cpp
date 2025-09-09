@@ -394,7 +394,6 @@ void InteropCtx::SharedEtsVmState::CacheClasses(EtsClassLinker *etsClassLinker)
     nullValueClass = CacheClass(etsClassLinker, descriptors::NULL_VALUE);
     promiseClass = CacheClass(etsClassLinker, descriptors::PROMISE);
     errorClass = CacheClass(etsClassLinker, descriptors::ERROR);
-    exceptionClass = CacheClass(etsClassLinker, descriptors::EXCEPTION);
     typeClass = CacheClass(etsClassLinker, descriptors::TYPE);
 
     boxIntClass = CacheClass(etsClassLinker, descriptors::BOX_INT);
@@ -555,7 +554,7 @@ void InteropCtx::ThrowETSError(EtsCoroutine *coro, napi_value val)
     }
 
     auto klass = etsObj->GetClass()->GetRuntimeClass();
-    if (LIKELY(ctx->GetErrorClass()->IsAssignableFrom(klass) || ctx->GetExceptionClass()->IsAssignableFrom(klass))) {
+    if (LIKELY(ctx->GetErrorClass()->IsAssignableFrom(klass))) {
         coro->SetException(etsObj->GetCoreType());
         return;
     }
@@ -651,7 +650,7 @@ void InteropCtx::ForwardEtsException(EtsCoroutine *coro)
     coro->ClearException();
 
     auto klass = exc->ClassAddr<Class>();
-    ASSERT(GetErrorClass()->IsAssignableFrom(klass) || GetExceptionClass()->IsAssignableFrom(klass));
+    ASSERT(GetErrorClass()->IsAssignableFrom(klass));
     JSRefConvert *refconv = JSRefConvertResolve<true>(this, klass);
     if (UNLIKELY(refconv == nullptr)) {
         INTEROP_LOG(INFO) << "Exception thrown while forwarding ets exception: " << klass->GetDescriptor();

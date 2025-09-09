@@ -137,10 +137,7 @@ private:
     {
         static const ets_proxy::EtsClassWrapper::OverloadsMap W_ERROR_OVERLOADS = {
             {utf::CStringAsMutf8("<ctor>"), {"Lstd/core/String;Lescompat/ErrorOptions;:V", 2, "<ctor>"}}};
-        static const ets_proxy::EtsClassWrapper::OverloadsMap W_EXCEPTION_OVERLOADS = {
-            {utf::CStringAsMutf8("<ctor>"), {"Lstd/core/String;:V", 1, "<ctor>"}}};
         wError_ = RegisterClass(descriptors::ERROR, "Error", &W_ERROR_OVERLOADS);
-        RegisterClass(descriptors::EXCEPTION, nullptr, &W_EXCEPTION_OVERLOADS);
 
         static const std::array STD_EXCEPTIONS_LIST = {
             // Errors
@@ -160,8 +157,7 @@ private:
             std::make_tuple("Lstd/core/LinkerClassNotFoundError;", NO_MIRROR, &W_ERROR_OVERLOADS),
             std::make_tuple("Lstd/core/ArgumentOutOfRangeError;", NO_MIRROR, &W_ERROR_OVERLOADS),
             std::make_tuple("Lstd/core/UnsupportedOperationError;", NO_MIRROR, &W_ERROR_OVERLOADS),
-            // Exceptions
-            std::make_tuple("Lstd/core/IllegalMonitorStateError;", NO_MIRROR, &W_EXCEPTION_OVERLOADS),
+            std::make_tuple("Lstd/core/IllegalMonitorStateError;", NO_MIRROR, &W_ERROR_OVERLOADS),
         };
         for (const auto &[descr, mirror, ovl] : STD_EXCEPTIONS_LIST) {
             RegisterClass(descr, mirror, ovl);

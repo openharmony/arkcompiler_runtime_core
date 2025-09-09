@@ -71,14 +71,6 @@ export namespace StdProcess {
                 stack = 'exception dump failed';
             }
             out += '\n' + stack;
-        } else if (error instanceof Exception) {
-            error = error as Exception;
-            try {
-                toStr = error.toString() as string;
-            } catch (e) {
-                toStr = 'invoke toString failed';
-            }
-            out += toStr;
         } else {
             throw new Error('unknown error type');
         }

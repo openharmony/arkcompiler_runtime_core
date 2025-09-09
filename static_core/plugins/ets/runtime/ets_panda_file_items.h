@@ -28,7 +28,6 @@ static constexpr std::string_view ERROR                                = "Lescom
 static constexpr std::string_view ARRAY_BUFFER                         = "Lescompat/ArrayBuffer;";
 static constexpr std::string_view BIG_INT                              = "Lescompat/BigInt;";
 static constexpr std::string_view ASYNC                                = "Lets/coroutine/Async;";
-static constexpr std::string_view EXCEPTION                            = "Lstd/core/Exception;";
 static constexpr std::string_view OBJECT                               = "Lstd/core/Object;";
 static constexpr std::string_view PROMISE                              = "Lstd/core/Promise;";
 static constexpr std::string_view JOB                                  = "Lstd/core/Job;";
