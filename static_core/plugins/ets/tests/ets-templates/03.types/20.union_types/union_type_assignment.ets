@@ -17,9 +17,7 @@
 
 /*---
 desc: {{case.desc}}
-ark_options: ['--compiler-inlining=false']
 ---*/
-// NOTE(mgroshev): remove ark_options after #29029
 
 {{case.dec1|indent}}
 

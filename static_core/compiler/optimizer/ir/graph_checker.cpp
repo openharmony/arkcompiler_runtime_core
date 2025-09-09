@@ -1798,14 +1798,14 @@ void GraphChecker::VisitNewObject([[maybe_unused]] GraphVisitor *v, Inst *inst)
         return;
     }
     [[maybe_unused]] auto opcode = initInst->GetOpcode();
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v,
-                                        opcode == Opcode::LoadAndInitClass || opcode == Opcode::LoadRuntimeClass ||
-                                            opcode == Opcode::UnresolvedLoadAndInitClass ||
-                                            opcode == Opcode::LoadImmediate || opcode == Opcode::Phi ||
-                                            opcode == Opcode::Select,
-                                        (std::cerr << "The first input for the NewObject should be LoadAndInitClass or "
-                                                      "UnresolvedLoadAndInitClass or LoadRuntimeClass or LoadImmediate",
-                                         inst->Dump(&std::cerr), initInst->Dump(&std::cerr)));
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v,
+        opcode == Opcode::LoadAndInitClass || opcode == Opcode::LoadRuntimeClass ||
+            opcode == Opcode::UnresolvedLoadAndInitClass || opcode == Opcode::LoadImmediate || opcode == Opcode::Phi ||
+            opcode == Opcode::Select || opcode == Opcode::SelectImm,
+        (std::cerr << "The first input for the NewObject should be LoadAndInitClass, "
+                      "LoadRuntimeClass, UnresolvedLoadAndInitClass, LoadImmediate, Phi, Select or SelectImm",
+         inst->Dump(&std::cerr), initInst->Dump(&std::cerr)));
     [[maybe_unused]] auto ssInst = inst->GetInputs()[1].GetInst();
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, ssInst->GetOpcode() == Opcode::SaveState,
                                         (std::cerr << "The second input for the NewObject should be SaveState",

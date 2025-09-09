@@ -407,6 +407,7 @@ panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_cache_opt
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/optimize_istrue.ets)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/interface_cache_intrinsic.ets)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/lambda_with_capture_optimized.ets)
+panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/type_propagation_unknown_offset.ets)
 
 if (NOT ENABLE_UNIT_TESTS_FULL_COVERAGE)
     # NOTE #28944
