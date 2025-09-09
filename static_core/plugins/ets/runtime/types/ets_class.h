@@ -505,8 +505,6 @@ public:
         return FromClassObject(reinterpret_cast<ObjectHeader *>(obj));
     }
 
-    static EtsClass *GetPrimitiveClass(EtsString *primitiveName);
-
     void Initialize(EtsClass *superClass, uint16_t accessFlags, bool isPrimitiveType,
                     ClassLinkerErrorHandler *errorHandler);
 
