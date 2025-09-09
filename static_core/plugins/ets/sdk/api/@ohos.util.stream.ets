@@ -299,23 +299,23 @@ export namespace stream {
         protected encoder = new util.TextEncoder();
 
         private buffer: Array<WritableBuffer>;
-        private closedInner: boolean | undefined;
+        private closedInner: boolean;
         private defaultEncoding: string | undefined;
         private encoding: string | undefined;
         private endCallback: Function | undefined;
         private ending: boolean;
-        private erroredInner: Error | undefined | null;
+        private erroredInner: Error | null;
         private isDoWritevOverride: boolean;
         private writableBufferLength: int;
         private writableCb: int;
         private writableCorkedInner: int;
-        private writableEndedInner: boolean | undefined;
-        private writableFinishedInner: boolean | undefined;
+        private writableEndedInner: boolean;
+        private writableFinishedInner: boolean;
         private writableHighWatermarkInner: int;
-        private writableInner: boolean | undefined;
-        private writableLengthInner: int | undefined;
-        private writableNeedDrainInner: boolean | undefined;
-        private writableObjectModeInner: boolean | undefined;
+        private writableInner: boolean;
+        private writableLengthInner: int;
+        private writableNeedDrainInner: boolean;
+        private writableObjectModeInner: boolean;
         private writableSync: boolean;
         private writeCallbackBuffer: Array<Function>;
         private writaCallbackMove: boolean;
@@ -991,14 +991,14 @@ export namespace stream {
         /**
          * Returns boolean indicating whether it is in ObjectMode.
          */
-        get writableObjectMode(): boolean | undefined {
+        get writableObjectMode(): boolean {
             return this.writableObjectModeInner;
         }
 
         /**
          * Value of highWatermark.
          */
-        get writableHighWatermark(): int | undefined {
+        get writableHighWatermark(): int {
             return this.writableHighWatermarkInner;
         }
 
@@ -1007,56 +1007,56 @@ export namespace stream {
          * the stream has not been destroyed or emitted 'error' or 'end'.
          *
          */
-        get writable(): boolean | undefined {
+        get writable(): boolean {
             return this.writableInner;
         }
 
         /**
          * Size of data that can be flushed, in bytes or objects.
          */
-        get writableLength(): int | undefined {
+        get writableLength(): int {
             return this.writableLengthInner;
         }
 
         /**
          * If the buffer of the stream is full and true, otherwise it is false.
          */
-        get writableNeedDrain(): boolean | undefined {
+        get writableNeedDrain(): boolean {
             return this.writableNeedDrainInner;
         }
 
         /**
          * Number of times Writable.uncork() needs to be called in order to fully uncork the stream.
          */
-        get writableCorked(): int | undefined {
+        get writableCorked(): int {
             return this.writableCorkedInner;
         };
 
         /**
          * Whether Writable.end has been called.
          */
-        get writableEnded(): boolean | undefined {
+        get writableEnded(): boolean {
             return this.writableEndedInner;
         }
 
         /**
          * Whether Writable.end has been called and all buffers have been flushed.
          */
-        get writableFinished(): boolean | undefined {
+        get writableFinished(): boolean {
             return this.writableFinishedInner;
         }
 
         /**
          * Returns error if the stream has been destroyed with an error.
          */
-        get errored(): Error | undefined | null {
+        get errored(): Error | null {
             return this.erroredInner;
         }
 
         /**
          * Writable completes destroyfile and returns true, otherwise returns false.
          */
-        get closed(): boolean | undefined {
+        get closed(): boolean {
             return this.closedInner;
         }
     }
@@ -2031,7 +2031,7 @@ export namespace stream {
          * Returns boolean indicating whether it is in ObjectMode.
          *
          */
-        get readableObjectMode(): boolean | undefined {
+        get readableObjectMode(): boolean {
             return this.readableObjectModeInner;
         }
 
