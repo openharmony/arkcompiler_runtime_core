@@ -53,6 +53,14 @@ void StaticObjectOperator::ForEachRefField(const panda::BaseObject *object, cons
     ObjectIterator<LANG_TYPE_STATIC>::template Iterate<false>(objHeader->ClassAddr<Class>(), objHeader, &handler);
 }
 
+size_t StaticObjectOperator::ForEachRefFieldAndGetSize(const panda::BaseObject *object,
+                                                       const panda::RefFieldVisitor &visitor) const
+{
+    size_t size = GetSize(object);
+    ForEachRefField(object, visitor);
+    return size;
+}
+
 panda::BaseObject *StaticObjectOperator::GetForwardingPointer(const panda::BaseObject *object) const
 {
     // Overwrite class by forwarding address. Read barrier must be called before reading class.
