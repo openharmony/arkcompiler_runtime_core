@@ -73,7 +73,7 @@ cases:
         arktest.assertTrue(Enum.third.valueOf() instanceof long)
         arktest.assertEQ(Enum.first.valueOf(), 0x7ffffffe)
         arktest.assertEQ(Enum.second.valueOf(), 0x7fffffff)
-        arktest.assertEQ(Enum.third.valueOf(), 0x80000000)
+        arktest.assertEQ(Enum.third.valueOf(), 2147483648)
 
   - desc: |-
       Checking int overflow on Int.MAX_VALUE in enum
