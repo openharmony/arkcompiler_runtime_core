@@ -35,14 +35,9 @@ function foo(x: string): int {
     return 4;
 }
 
-function main(): int {
-    if (foo() != 1) return 1;
-
-    if (foo(1) != 2) return 1;
-
-    if (foo(new int[0]) != 3) return 1;
-
-    if (foo("") != 4) return 1;
-
-    return 0;
+function main() {
+    arktest.assertEQ(foo(), 1)
+    arktest.assertEQ(foo(1), 2)
+    arktest.assertEQ(foo(new int[0]), 3)
+    arktest.assertEQ(foo(""), 4)
 }

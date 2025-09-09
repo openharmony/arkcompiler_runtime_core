@@ -21,5 +21,3 @@ tags: [compile-only, negative]
 // CTE: Name of the declaration clashes with the predefined type or standard library entity name.
 
 let Array = 6666
-
-function main() {}

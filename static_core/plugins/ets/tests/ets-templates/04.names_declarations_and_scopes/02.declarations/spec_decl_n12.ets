@@ -18,6 +18,12 @@ desc: Declarations must be distinguishable in a declaration space.
 tags: [compile-only, negative]
 ---*/
 
-// CTE: Name of the declaration clashes with the predefined type or standard library entity name.
+// CTE: Class and enum have the same name.
 
-let String = true
+class Person {
+    name: string = 'Alex'
+    age: string = '20'
+}
+
+enum Person (name = 'Alex', age = '20')
+

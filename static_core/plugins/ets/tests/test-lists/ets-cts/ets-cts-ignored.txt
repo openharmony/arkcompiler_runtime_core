@@ -932,8 +932,6 @@
 06.contexts_and_conversions/01.type_of_expression/standalone_expression_n_1.ets
 
 #29887
-06.contexts_and_conversions/04.numeric_operator_contexts/unary_numeric_promotion/unary_minus_14.ets
-06.contexts_and_conversions/04.numeric_operator_contexts/unary_numeric_promotion/unary_plus_14.ets
 06.contexts_and_conversions/04.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_72.ets
 06.contexts_and_conversions/04.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_73.ets
 06.contexts_and_conversions/04.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_74.ets
@@ -2876,4 +2874,3 @@
 #29939
 13.compilation_units/02.import_directives/05.import_path/file/import_path_file_global_0.ets
 13.compilation_units/02.import_directives/05.import_path/file/import_path_file_global_1.ets
-

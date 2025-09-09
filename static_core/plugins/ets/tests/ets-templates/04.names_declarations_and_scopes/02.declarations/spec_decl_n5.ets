@@ -25,7 +25,3 @@ function foo(x: int) {}
 type MyInt = int
 
 function foo(x: MyInt) {}
-
-function main(): int {
-  return 0;
-}

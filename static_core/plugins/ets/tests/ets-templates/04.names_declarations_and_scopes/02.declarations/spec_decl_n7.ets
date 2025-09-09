@@ -22,4 +22,3 @@ tags: [compile-only, negative]
 
 let number: number = 1.0
 
-function main() {}

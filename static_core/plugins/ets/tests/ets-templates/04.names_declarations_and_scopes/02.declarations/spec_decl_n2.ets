@@ -18,8 +18,9 @@ desc: Declarations must be distinguishable in a declaration space.
 tags: [compile-only, negative]
 ---*/
 
-// Functions have override-equivalent signatures
+// The constant and enum have the same name:
 
-function foo(x: int) {}
+const PI = 3.14
 
-function foo(y: int) {}
+enum PI { One = 1, Two, Three }
+
