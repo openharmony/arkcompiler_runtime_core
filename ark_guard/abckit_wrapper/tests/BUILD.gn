@@ -11,17 +11,43 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//arkcompiler/ets_frontend/ets2panda/ets2abc_config.gni")
 import("//arkcompiler/runtime_core/ark_config.gni")
 import("$ark_root/tests/test_helper.gni")
+
+test_ets_path = "$ark_root/ark_guard/abckit_wrapper/tests/"
+
+test_ets_files = [
+  "ut/module_static",
+]
+
+foreach(file, test_ets_files) {
+  ets2abc_gen_abc("gen_${file}_abc") {
+    test_ets = "${test_ets_path}${file}.ets"
+    test_abc = "$target_out_dir/${file}.abc"
+
+    # Only targets in this file can depend on this.
+    extra_visibility = [ ":*" ]
+    src_ets = rebase_path(test_ets)
+    dst_file = rebase_path(test_abc)
+
+    in_puts = [ test_ets ]
+    out_puts = [ test_abc ]
+  }
+}
 
 host_unittest_action("AbckitWrapperUnitTest") {
   module_out_path = "$ark_root"
 
-  sources = [ "ut/file_view_test.cpp" ]
+  sources = [
+    "ut/file_view_test.cpp",
+    "ut/visitor_test.cpp",
+  ]
 
   include_dirs = [
     "$ark_root/libabckit/include",
     "$ark_root/ark_guard/abckit_wrapper/tests/util/include",
+    "$ark_root/static_core",
   ]
 
   configs = [
@@ -31,6 +57,18 @@ host_unittest_action("AbckitWrapperUnitTest") {
   ]
 
   deps = [ "$ark_root/ark_guard/abckit_wrapper:abckit_wrapper_static" ]
+
+  foreach(file, test_ets_files) {
+    deps += [ ":gen_${file}_abc" ]
+  }
+
+  if (is_ohos && is_standard_system) {
+    test_abc_dir = "/data/test"
+  } else {
+    test_abc_dir = rebase_path(target_out_dir)
+  }
+
+  defines = [ "ABCKIT_WRAPPER_ABC_FILE_DIR=\"${test_abc_dir}/\"" ]
 }
 
 group("host_unittest") {

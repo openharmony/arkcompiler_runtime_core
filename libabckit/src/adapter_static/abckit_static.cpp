@@ -473,7 +473,7 @@ static void AssignObjectLiteral(std::vector<std::unique_ptr<AbckitCoreClass>> &o
     for (auto &objectLiteral : objectLiterals) {
         auto record = GetStaticImplRecord(objectLiteral.get());
         auto implements = record->metadata->GetAttributeValues(ETS_IMPLEMENTS.data());
-        if (implements.size() > 0) {
+        if (!implements.empty()) {
             auto interfaceName = implements.front();
             ASSERT(nameToInterface.find(interfaceName) != nameToInterface.end());
             LIBABCKIT_LOG(DEBUG) << "Assign Interface Object Literal: " << record->name << '\n';
@@ -642,7 +642,8 @@ static void AssignFunctions(std::unordered_map<std::string, std::unique_ptr<Abck
     for (auto &function : functions) {
         std::string functionName = FunctionGetImpl(function.get())->name;
         auto [moduleName, className] = FuncGetNames(functionName);
-        auto recordName = moduleName + "." + className;
+        auto recordName = moduleName;
+        recordName.append(".").append(className);
         if (nameToObjectLiteral.find(recordName) != nameToObjectLiteral.end()) {
             auto &objectLiteral = nameToObjectLiteral.at(recordName);
             function->parentClass = objectLiteral;
@@ -695,41 +696,34 @@ static bool IsAnnotationInterface(const pandasm::Record &record)
 }
 
 static const std::string LAMBDA_RECORD_KEY = "%%lambda-";
-static const std::string INIT_FUNC_NAME = "_$init$_";
+[[maybe_unused]] static const std::string INIT_FUNC_NAME = "_$init$_";
 static const std::string TRIGGER_CCTOR_FUNC_NAME = "_$trigger_cctor$_";
 
 static bool ShouldCreateFuncWrapper(pandasm::Function &functionImpl, const std::string &className,
-                                    const std::string &functionName,
-                                    const std::unordered_map<std::string, AbckitCoreInterface *> &nameToInterface)
+                                    const std::string &functionName)
 {
-    if (functionImpl.metadata->IsForeign() || (className.substr(0, LAMBDA_RECORD_KEY.size()) == LAMBDA_RECORD_KEY) ||
-        (functionName.find(INIT_FUNC_NAME, 0) != std::string::npos) ||
-        (functionName.find(TRIGGER_CCTOR_FUNC_NAME, 0) != std::string::npos)) {
-        // NOTE: find and fill AbckitCoreImportDescriptor
-        return false;
-    }
-
-    return true;
+    return (!functionImpl.metadata->IsForeign() &&
+            (className.substr(0, LAMBDA_RECORD_KEY.size()) != LAMBDA_RECORD_KEY) &&
+            (functionName.find(TRIGGER_CCTOR_FUNC_NAME, 0) == std::string::npos));
 }
 
 static std::vector<std::unique_ptr<AbckitCoreFunction>> CollectAllFunctions(
     pandasm::Program *prog, AbckitFile *file,
     std::unordered_map<std::string, std::unique_ptr<AbckitCoreModule>> &nameToModule,
-    std::unordered_map<std::string, AbckitCoreNamespace *> &nameToNamespace,
-    const std::unordered_map<std::string, AbckitCoreInterface *> &nameToInterface)
+    std::unordered_map<std::string, AbckitCoreNamespace *> &nameToNamespace)
 {
     std::vector<std::unique_ptr<AbckitCoreFunction>> functions;
     for (auto &[functionName, functionImpl] : prog->functionStaticTable) {
         auto [moduleName, className] = FuncGetNames(functionName);
 
-        if (ShouldCreateFuncWrapper(functionImpl, className, functionName, nameToInterface)) {
+        if (ShouldCreateFuncWrapper(functionImpl, className, functionName)) {
             functions.emplace_back(CollectFunction(file, nameToModule, nameToNamespace, functionName, functionImpl));
         }
     }
     for (auto &[functionName, functionImpl] : prog->functionInstanceTable) {
         auto [moduleName, className] = FuncGetNames(functionName);
 
-        if (ShouldCreateFuncWrapper(functionImpl, className, functionName, nameToInterface)) {
+        if (ShouldCreateFuncWrapper(functionImpl, className, functionName)) {
             functions.emplace_back(CollectFunction(file, nameToModule, nameToNamespace, functionName, functionImpl));
         }
     }
@@ -854,7 +848,7 @@ static void CreateWrappers(pandasm::Program *prog, AbckitFile *file)
     CollectAllInstances(file, prog, container);
 
     // Functions
-    container.functions = CollectAllFunctions(prog, file, nameToModule, nameToNamespace, container.nameToInterface);
+    container.functions = CollectAllFunctions(prog, file, nameToModule, nameToNamespace);
 
     AssignAsyncFunction(file, container.functions);
     AssignAnnotationInterfaceToAnnotation(container);

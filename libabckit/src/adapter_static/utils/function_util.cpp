@@ -25,22 +25,19 @@
 #include <sstream>
 #include <string>
 
-using namespace libabckit;
 namespace abckit::util {
-
-using namespace ark;
 
 std::string ReplaceFunctionModuleName(const std::string &oldModuleName, const std::string &newName)
 {
     size_t pos = oldModuleName.rfind('.');
     if (pos == std::string::npos) {
-        statuses::SetLastError(ABCKIT_STATUS_INTERNAL_ERROR);
+        libabckit::statuses::SetLastError(ABCKIT_STATUS_INTERNAL_ERROR);
         return newName;
     }
     return oldModuleName.substr(0, pos + 1) + newName;
 }
 
-std::string GenerateFunctionMangleName(const std::string &moduleName, const pandasm::Function &func)
+std::string GenerateFunctionMangleName(const std::string &moduleName, const ark::pandasm::Function &func)
 {
     std::ostringstream ss;
     ss << moduleName << ":";
@@ -52,7 +49,7 @@ std::string GenerateFunctionMangleName(const std::string &moduleName, const pand
     return ss.str();
 }
 
-bool UpdateFunctionTableKey(pandasm::Program *prog, pandasm::Function *impl, const std::string &newName,
+bool UpdateFunctionTableKey(ark::pandasm::Program *prog, ark::pandasm::Function *impl, const std::string &newName,
                             std::string &oldMangleName, std::string &newMangleName)
 {
     if (newMangleName.empty()) {
@@ -112,7 +109,7 @@ void ReplaceInstructionIds(ark::pandasm::Program *prog, ark::pandasm::Function *
 
 static std::string GetReferenceTypeName(AbckitCoreFunction *coreFunc, const AbckitType *type)
 {
-    AbckitString *classNameStr = ClassGetNameStatic(type->klass);
+    AbckitString *classNameStr = libabckit::ClassGetNameStatic(type->klass);
     if (classNameStr == nullptr) {
         LIBABCKIT_LOG(ERROR) << "[Error] Class name is null" << std::endl;
         return {};
@@ -124,7 +121,7 @@ static std::string GetReferenceTypeName(AbckitCoreFunction *coreFunc, const Abck
 
 static std::string GetPrimitiveTypeName(AbckitTypeId typeId, bool useComponentFormat)
 {
-    static const std::map<AbckitTypeId, std::pair<std::string, std::string>> typeMap = {
+    static const std::map<AbckitTypeId, std::pair<std::string, std::string>> TYPE_MAP = {
         {ABCKIT_TYPE_ID_STRING, {"std.core.String", "std.core.String"}},
         {ABCKIT_TYPE_ID_U1, {"std.core.u1", "u1"}},
         {ABCKIT_TYPE_ID_U8, {"std.core.u8", "u8"}},
@@ -140,8 +137,8 @@ static std::string GetPrimitiveTypeName(AbckitTypeId typeId, bool useComponentFo
         {ABCKIT_TYPE_ID_ANY, {"std.core.any", "any"}},
         {ABCKIT_TYPE_ID_VOID, {"void", "void"}}};
 
-    auto it = typeMap.find(typeId);
-    if (it != typeMap.end()) {
+    auto it = TYPE_MAP.find(typeId);
+    if (it != TYPE_MAP.end()) {
         return useComponentFormat ? it->second.first : it->second.second;
     }
     LIBABCKIT_LOG(ERROR) << "[Error] Invalid type id: " << typeId << std::endl;
@@ -156,11 +153,11 @@ std::string GetTypeName(AbckitCoreFunction *coreFunc, const AbckitType *type, bo
     return GetPrimitiveTypeName(type->id, useComponentFormat);
 }
 
-void AddFunctionParameterImpl(AbckitCoreFunction *coreFunc, pandasm::Function *funcImpl,
+void AddFunctionParameterImpl(AbckitCoreFunction *coreFunc, ark::pandasm::Function *funcImpl,
                               const AbckitCoreFunctionParam *paramCore, const std::string &componentName)
 {
-    pandasm::Type type(componentName, paramCore->type->rank);
-    pandasm::Function::Parameter pandaParam(type, ark::panda_file::SourceLang::ETS);
+    ark::pandasm::Type type(componentName, paramCore->type->rank);
+    ark::pandasm::Function::Parameter pandaParam(type, ark::panda_file::SourceLang::ETS);
     funcImpl->params.push_back(std::move(pandaParam));
 
     auto paramHolder = std::make_unique<AbckitCoreFunctionParam>();
@@ -175,7 +172,8 @@ void AddFunctionParameterImpl(AbckitCoreFunction *coreFunc, pandasm::Function *f
     coreFunc->parameters.emplace_back(std::move(paramHolder));
 }
 
-bool RemoveFunctionParameterByIndexImpl(AbckitCoreFunction *coreFunc, pandasm::Function *impl, size_t index)
+bool RemoveFunctionParameterByIndexImpl([[maybe_unused]] AbckitCoreFunction *coreFunc, ark::pandasm::Function *impl,
+                                        size_t index)
 {
     if (index >= impl->params.size()) {
         LIBABCKIT_LOG(ERROR) << "Index " << index << " exceeds impl->params.size(): " << impl->params.size()
