@@ -89,7 +89,7 @@ function testCreateFromString2(): int {
 function testFiltered(): int {
     let src: String = "HHeelllloo";
     let exp: String = "Hello";
-    let test = Array.from(src, (c: string, i: number): string => c).filter((v: String, k: number): boolean => k%2 == 0);
+    let test = Array.from(src, (c: string, i: number): string => c).filter((v: String, k: int): boolean => k%2 == 0);
 
     if(test.length != exp.length) {
         console.println("Array size mismatch");

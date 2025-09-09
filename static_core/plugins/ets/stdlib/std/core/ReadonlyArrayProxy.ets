@@ -54,31 +54,31 @@ class ReadonlyArrayProxy<T> implements ReadonlyArray<T> {
     	return this.target.entries()
     }
 
-    override every(predicate: (value: T, index: number, array: ReadonlyArray<T>) => boolean): boolean {
+    override every(predicate: (value: T, index: int, array: ReadonlyArray<T>) => boolean): boolean {
     	return this.target.every(predicate)
     }
 
-    override filter(predicate: (value: T, index: number, array: ReadonlyArray<T>) => boolean): Array<T> {
+    override filter(predicate: (value: T, index: int, array: ReadonlyArray<T>) => boolean): Array<T> {
     	return this.target.filter(predicate)
     }
 
-    override find(predicate: (value: T, index: number, obj: ReadonlyArray<T>) => boolean): T | undefined {
+    override find(predicate: (value: T, index: int, obj: ReadonlyArray<T>) => boolean): T | undefined {
     	return this.target.find(predicate)
     }
 
-    override findLast(predicate: (value: T, index: number, obj: ReadonlyArray<T>) => boolean): T | undefined {
+    override findLast(predicate: (value: T, index: int, obj: ReadonlyArray<T>) => boolean): T | undefined {
     	return this.target.findLast(predicate)
     }
 
-    override findIndex(predicate: (value: T, index: number, obj: ReadonlyArray<T>) => boolean): number {
+    override findIndex(predicate: (value: T, index: int, obj: ReadonlyArray<T>) => boolean): number {
     	return this.target.findIndex(predicate)
     }
 
-    override findLastIndex(predicate: (value: T, index: number, obj: ReadonlyArray<T>) => boolean): number {
+    override findLastIndex(predicate: (value: T, index: int, obj: ReadonlyArray<T>) => boolean): number {
     	return this.target.findLastIndex(predicate)
     }
 
-    override forEach(action: (value: T, index: number, array: ReadonlyArray<T>) => void): void {
+    override forEach(action: (value: T, index: int, array: ReadonlyArray<T>) => void): void {
     	return this.target.forEach(action)
     }
 
@@ -102,23 +102,23 @@ class ReadonlyArrayProxy<T> implements ReadonlyArray<T> {
     	return this.target.lastIndexOf(searchElement, fromIndex)
     }
 
-    override map<U>(mapper: (value: T, index: number, array: ReadonlyArray<T>) => U): Array<U> {
+    override map<U>(mapper: (value: T, index: int, array: ReadonlyArray<T>) => U): Array<U> {
     	return this.target.map<U>(mapper)
     }
 
-    override reduce(reducer: (previousValue: T, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => T): T {
+    override reduce(reducer: (previousValue: T, currentValue: T, currentIndex: int, array: ReadonlyArray<T>) => T): T {
     	return this.target.reduce(reducer)
     }
 
-    override reduce<U>(reducer: (previousValue: U, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => U, initialValue: U): U {
+    override reduce<U>(reducer: (previousValue: U, currentValue: T, currentIndex: int, array: ReadonlyArray<T>) => U, initialValue: U): U {
     	return this.target.reduce<U>(reducer, initialValue)
     }
 
-    override reduceRight(reducer: (previousValue: T, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => T): T {
+    override reduceRight(reducer: (previousValue: T, currentValue: T, currentIndex: int, array: ReadonlyArray<T>) => T): T {
     	return this.target.reduceRight(reducer)
     }
 
-    override reduceRight<U>(reducer: (previousValue: U, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => U, initialValue: U): U {
+    override reduceRight<U>(reducer: (previousValue: U, currentValue: T, currentIndex: int, array: ReadonlyArray<T>) => U, initialValue: U): U {
     	return this.target.reduceRight<U>(reducer, initialValue)
     }
 
@@ -126,7 +126,7 @@ class ReadonlyArrayProxy<T> implements ReadonlyArray<T> {
     	return this.target.slice(start, end)
     }
 
-    override some(predicate: (value: T, index: number, array: ReadonlyArray<T>) => boolean): boolean {
+    override some(predicate: (value: T, index: int, array: ReadonlyArray<T>) => boolean): boolean {
     	return this.target.some(predicate)
     }
 

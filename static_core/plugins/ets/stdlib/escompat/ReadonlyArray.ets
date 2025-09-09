@@ -23,17 +23,17 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
 
     entries(): IterableIterator<[number, T]>;
 
-    every(predicate: (value: T, index: number, array: ReadonlyArray<T>) => boolean): boolean;
+    every(predicate: (value: T, index: int, array: ReadonlyArray<T>) => boolean): boolean;
 
-    filter(predicate: (value: T, index: number, array: ReadonlyArray<T>) => boolean): Array<T>;
+    filter(predicate: (value: T, index: int, array: ReadonlyArray<T>) => boolean): Array<T>;
 
-    find(predicate: (value: T, index: number, obj: ReadonlyArray<T>) => boolean): T | undefined;
+    find(predicate: (value: T, index: int, obj: ReadonlyArray<T>) => boolean): T | undefined;
 
-    findLast(predicate: (value: T, index: number, obj: ReadonlyArray<T>) => boolean): T | undefined;
+    findLast(predicate: (value: T, index: int, obj: ReadonlyArray<T>) => boolean): T | undefined;
 
-    findIndex(predicate: (value: T, index: number, obj: ReadonlyArray<T>) => boolean): number;
+    findIndex(predicate: (value: T, index: int, obj: ReadonlyArray<T>) => boolean): number;
 
-    findLastIndex(predicate: (value: T, index: number, obj: ReadonlyArray<T>) => boolean): number;
+    findLastIndex(predicate: (value: T, index: int, obj: ReadonlyArray<T>) => boolean): number;
 
     // NOTE(ivan-tyulyandin): TBD, FlatArray is non-subset type
     // flat<A, D extends number = 1>(
@@ -47,7 +47,7 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
     //     thisArg?: This,
     // ): U[];
 
-    forEach(action: (value: T, index: number, array: ReadonlyArray<T>) => void): void;
+    forEach(action: (value: T, index: int, array: ReadonlyArray<T>) => void): void;
 
     join(separator?: string): string;
 
@@ -59,19 +59,19 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
 
     lastIndexOf(searchElement: T, fromIndex?: int): int;
 
-    map<U>(mapper: (value: T, index: number, array: ReadonlyArray<T>) => U): Array<U>;
+    map<U>(mapper: (value: T, index: int, array: ReadonlyArray<T>) => U): Array<U>;
 
-    reduce(reducer: (previousValue: T, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => T): T;
+    reduce(reducer: (previousValue: T, currentValue: T, currentIndex: int, array: ReadonlyArray<T>) => T): T;
 
-    reduce<U>(reducer: (previousValue: U, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => U, initialValue: U): U;
+    reduce<U>(reducer: (previousValue: U, currentValue: T, currentIndex: int, array: ReadonlyArray<T>) => U, initialValue: U): U;
 
-    reduceRight(reducer: (previousValue: T, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => T): T;
+    reduceRight(reducer: (previousValue: T, currentValue: T, currentIndex: int, array: ReadonlyArray<T>) => T): T;
 
-    reduceRight<U>(reducer: (previousValue: U, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => U, initialValue: U): U;
+    reduceRight<U>(reducer: (previousValue: U, currentValue: T, currentIndex: int, array: ReadonlyArray<T>) => U, initialValue: U): U;
 
     slice(start?: number, end?: number): Array<T>;
 
-    some(predicate: (value: T, index: number, array: ReadonlyArray<T>) => boolean): boolean;
+    some(predicate: (value: T, index: int, array: ReadonlyArray<T>) => boolean): boolean;
 
     // toLocaleString(): string;
     // All objects in ArkTS have such method, no need to define it here

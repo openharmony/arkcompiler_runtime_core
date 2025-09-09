@@ -1070,13 +1070,11 @@ class JSONWriter {
     }
 
     private checkSameRename(field: Field, fields: Array<[Field, reflect.Value]>): boolean {
-        return fields.some((value: [Field, reflect.Value], index: number, array:Array<[Field, reflect.Value]>)
-            => {return value[0].getName() == field.getName()});
+        return fields.some((value, index, array) => value[0].getName() == field.getName());
     }
 
     private findKeyIndex(field: Field, fields: Array<[Field, reflect.Value]>): number {
-        return fields.findIndex((value: [Field, reflect.Value], index: number, array:Array<[Field, reflect.Value]>)
-            => {return value[0].getName() == field.getName()});
+        return fields.findIndex((value, index, array) => value[0].getName() == field.getName());
     }
 
     private getWritableFields(classType: ClassType, classValue: ClassValue): Array<[Field, reflect.Value]> {

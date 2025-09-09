@@ -756,7 +756,7 @@ abstract class ArrayProxy<T> extends Array<T> {
                 continue
             }
 
-            const signatureMatch = signature.every((paramType: Type, index: number) => {
+            const signatureMatch = signature.every((paramType, index) => {
                 const param = methodType.getParameter(index.toInt())
                 let tmp = paramType.equals(param.getType())
                 return tmp
