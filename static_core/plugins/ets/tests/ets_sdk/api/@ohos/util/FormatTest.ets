@@ -34,7 +34,6 @@ function main(): int {
     failures += check(testFormatNoMatchArgs(), "Test util.format() with no matching flags & arguments")
     failures += check(testFormatMoreArgsThanInUtilFormat(), "Test util.format() with more args than in format string")
     failures += check(testFormatJSON(), "Test util.format() JSON")
-    failures += check(testFormatRemoveCSS(), "Test util.format() remove CSS from string")
     failures += check(testFormatEscapePercent(), "Test util.format() for %%")
     failures += check(testEmptyFormatWithArgs(), "Test util.format() with args & empty format string")
     failures += check(testNonEmptyFormatWithArgs(), "Test util.format() with args & non-empty format string")
@@ -106,25 +105,6 @@ function testFormatMoreArgsThanInUtilFormat(): int {
     return success
 }
 
-function testFormatRemoveCSS(): int {
-    let text = '<!DOCTYPE html>\
-                    <html lang="en"><head>\
-                        <meta charset="UTF-8">\
-                        <meta name="viewport" content="width=device-width, initial-scale=1.0">\
-                        <style>\
-                            .elem {\
-                                color: green;\
-                                font-size: 3rem;\
-                                text-decoration: underline;\
-                            }\
-                        </style>\
-                        </head><body>Content</body>'
-
-    let res = util.format("without css: %c", text)
-    arktest.assertEQ(res, "without css: Content")
-    return success
-}
-
 class TestObject1 {
     x: int = 5
     y: int = 6
@@ -154,7 +134,7 @@ class TestObject2 {
     }
 }
 function testFormatObject(): int {
-    
+
     let res = util.format("Object: %o", new TestObject2("k28", 14, 0.1f))
     let expected = "Object: { strField: 'k28',\nintField: 14,\nfloatField: 0.1,\nboolField: false }"
     arktest.assertEQ(res, expected)
@@ -198,7 +178,7 @@ function testArrayOfCircularObjects() : int {
     arr[0] = circularObject
     arr[1] = circularObject
 
-    let expected = "[ { prop: 'Circular Reference Example',\n  reference: [Circular]\n   }, \n{ prop: 'Circular Reference Example',\n  reference: [Circular]\n   }[length]: 2 ]"
+    let expected = "[ { prop: 'Circular Reference Example',\n  reference: [Circular]\n   }, \n{ prop: 'Circular Reference Example',\n  reference: [Circular]\n   }, [length]: 2 ]"
     let expected1 = "[ { prop: 'Circular Reference Example',\n  reference: [Circular]\n   }, \n{ prop: 'Circular Reference Example',\n  reference: [Circular]\n   } ]"
 
     let res = util.format("%o", arr)
@@ -251,7 +231,7 @@ function testFormatArrayObect(): int {
         let arr =  new Array<TestObject4>(1)
         arr[0] = new TestObject4()
 
-        let expected = "Array: [ { f1: '',\n  k1: 8,\n  t: false }[length]: 1 ]"
+        let expected = "Array: [ { f1: '',\n  k1: 8,\n  t: false }, [length]: 1 ]"
         let expected1 = "Array: [ { f1: '',\n  k1: 8,\n  t: false } ]"
 
         arktest.assertEQ(util.format('Array: %o', arr), expected)
@@ -280,7 +260,7 @@ function testFunctionsArrayObject() : int {
     let arr = new Array<(arg: string)=>string>(1)
     arr[0] = lambda
 
-    let expected = "Array of functions: [ { [Function: null]  [length]: 0,  [name] :'null',  [prototype]: null { [constructor]: [Circular] } }[length]: 1 ]"
+    let expected = "Array of functions: [ { [Function: null]  [length]: 0,  [name] :'null',  [prototype]: null { [constructor]: [Circular] } }, [length]: 1 ]"
     let expected1 = "Array of functions: [ [Function: null] ]"
 
     arktest.assertEQ(util.format('Array of functions: %o', arr), expected)

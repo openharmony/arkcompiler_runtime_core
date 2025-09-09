@@ -455,7 +455,7 @@ export namespace util {
     * %O: Object. A string representation of an object with generic JavaScript object formatting.
     *     Similar to util.inspect() without options. This will show the full object not including non-enumerable
     *     properties and proxies.
-    * %c: CSS. This specifier is ignored and will skip any CSS passed in.
+    * %c: [DEPRECATED] - this specifier is ignored with they argument
     * %%: single percent sign ('%'). This does not consume an argument.
     *
     * @param s: <string> A printf-like format string.
