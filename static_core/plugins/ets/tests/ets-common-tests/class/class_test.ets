@@ -30,7 +30,7 @@ namespace Outer {
 }
 
 class Test {
-    public static testMethodsFromClass(): void {
+    public testMethodsFromClass(): void {
         const currentClass = Class.current()
         arktest.assertNE(currentClass, undefined)
         arktest.assertEQ(currentClass.getName(), "class_test.Test")
@@ -40,7 +40,7 @@ class Test {
         arktest.assertEQ(callerClass!.getName(), globalClassName)
     }
 
-    public static testClassIsNamespace(): void {
+    public testClassIsNamespace(): void {
         const innerNs = Outer.Inner.getNamespace()
         arktest.assertNE(innerNs, undefined)
         arktest.assertTrue(innerNs!.isNamespace())
@@ -50,6 +50,74 @@ class Test {
         arktest.assertNE(outerNs, undefined)
         arktest.assertTrue(outerNs!.isNamespace())
         arktest.assertEQ(outerNs!.getName(), "class_test.Outer")
+    }
+
+    private intArrayComponentType(): void {
+        const ints: FixedArray<int> = [1, 2]
+        const compCls = Class.of(ints).getFixedArrayComponentType()
+        arktest.assertEQ(compCls, Class.of(new Int(1)))
+    }
+
+    private longArrayComponentType(): void {
+        const longs: FixedArray<long> = [1, 2]
+        const compCls = Class.of(longs).getFixedArrayComponentType()
+        arktest.assertEQ(compCls, Class.of(new Long(1)))
+    }
+
+    private doubleArrayComponentType(): void {
+        const doubles: FixedArray<double> = [1.0, 2.0]
+        const compCls = Class.of(doubles).getFixedArrayComponentType()
+        arktest.assertEQ(compCls, Class.of(new Double(1.0)))
+    }
+
+    private floatArrayComponentType(): void {
+        const floats: FixedArray<float> = [1.0, 2.0]
+        const compCls = Class.of(floats).getFixedArrayComponentType()
+        arktest.assertEQ(compCls, Class.of(new Float(1.0)))
+    }
+
+    private byteArrayComponentType(): void {
+        const bytes: FixedArray<byte> = [1, 2]
+        const compCls = Class.of(bytes).getFixedArrayComponentType()
+        arktest.assertEQ(compCls, Class.of(new Byte(1)))
+    }
+
+    private shortArrayComponentType(): void {
+        const shorts: FixedArray<short> = [1, 2]
+        const compCls = Class.of(shorts).getFixedArrayComponentType()
+        arktest.assertEQ(compCls, Class.of(new Short(1)))
+    }
+
+    private charArrayComponentType(): void {
+        const chars: FixedArray<char> = [c'A', c'B']
+        const compCls = Class.of(chars).getFixedArrayComponentType()
+        arktest.assertEQ(compCls, Class.of(new Char(c'A')))
+    }
+
+    private booleanArrayComponentType(): void {
+        const bools: FixedArray<boolean> = [true, false]
+        const compCls = Class.of(bools).getFixedArrayComponentType()
+        arktest.assertEQ(compCls, Class.of(new Boolean(true)))
+    }
+
+    public testClassGetFixedArrayComponentType(): void {
+        const obj = new Object()
+        const objCls = Class.of(obj)
+        arktest.assertEQ(objCls.getFixedArrayComponentType(), undefined)
+
+        this.intArrayComponentType()
+        this.longArrayComponentType()
+        this.doubleArrayComponentType()
+        this.floatArrayComponentType()
+        this.byteArrayComponentType()
+        this.shortArrayComponentType()
+        this.charArrayComponentType()
+
+        const arrays: FixedArray<FixedArray<int>> = [[1], [2]]
+        const arraysCompCls = Class.of(arrays).getFixedArrayComponentType()
+        arktest.assertNE(arraysCompCls, undefined)
+        arktest.assertNE(arraysCompCls!.getFixedArrayComponentType(), undefined)
+        arktest.assertEQ(arraysCompCls!.getFixedArrayComponentType(), Class.of(new Int(1)))
     }
 }
 
@@ -63,6 +131,8 @@ function main(): void {
     const callerClass = Class.ofCaller()
     arktest.assertEQ(callerClass, undefined)
 
-    Test.testMethodsFromClass()
-    Test.testClassIsNamespace()
+    const test = new Test()
+    test.testMethodsFromClass()
+    test.testClassIsNamespace()
+    test.testClassGetFixedArrayComponentType()
 }

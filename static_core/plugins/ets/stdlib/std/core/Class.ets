@@ -39,11 +39,14 @@ export final class Class {
     public native final isSubtypeOf(other: Class): boolean
 
     public native getLinker(): RuntimeLinker
+
     public native isNamespace(): boolean;
 
     public getNamespace(): Class | undefined {
         throw new Error("not implemented")
     }
+
+    public native getFixedArrayComponentType(): Class | undefined
 
     public native getInterfaces(): FixedArray<Class>
 

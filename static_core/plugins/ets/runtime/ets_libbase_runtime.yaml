@@ -6047,6 +6047,16 @@ intrinsics:
       args: [ ]
     impl: ark::ets::intrinsics::StdCoreClassIsNamespace
 
+  - name: StdCoreClassGetFixedArrayComponentType
+    space: ets
+    class_name: std.core.Class
+    method_name: getFixedArrayComponentType
+    static: false
+    signature:
+      ret: std.core.Class
+      args: [ ]
+    impl: ark::ets::intrinsics::StdCoreClassGetFixedArrayComponentType
+
   - name: StdCoreClassGetLinker
     space: ets
     class_name: std.core.Class
