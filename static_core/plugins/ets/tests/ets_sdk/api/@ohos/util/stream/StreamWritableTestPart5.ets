@@ -29,15 +29,15 @@ function main(): int {
     suite.addTest("Writable initial length", testWritableInitialLength);
     suite.addTest("Custom writable length", testCustomWritableLength);
     suite.addTest("Custom writable length after multiple writes", testCustomWritableLengthAfterMultipleWrites);
-    suite.addTest("Writable length after finish", testWritableLengthAfterFinish);
+    suite.addAsyncTest("Writable length after finish", testWritableLengthAfterFinish);
     suite.addTest("Writable write large data", testWritableWriteLargeData);
-    suite.addTest("Writable drain after large data", testWritableDrainAfterLargeData);
-    suite.addTest("Writable drain event", testWritableDrainEvent);
+    suite.addAsyncTest("Writable drain after large data", testWritableDrainAfterLargeData);
+    suite.addAsyncTest("Writable drain event", testWritableDrainEvent);
     suite.addTest("Writable state after end", testWritableStateAfterEnd);
     suite.addTest("Writable cork uncork state", testWritableCorkUncorkState);
     suite.addTest("Writable error event", testWritableErrorEvent);
     suite.addTest("Writable error handling", testWritableErrorHandling);
-    suite.addTest("Writable close event", testWritableCloseEvent);
+    suite.addAsyncTest("Writable close event", testWritableCloseEvent);
 
     return suite.run();
 }
@@ -168,7 +168,7 @@ function testCustomWritableLengthAfterMultipleWrites() {
 }
 
 // Test cases ported from ArkTS 1.0:testStreamWritableProperties009
-function testWritableLengthAfterFinish() {
+async function testWritableLengthAfterFinish() {
     let customWritable = new CustomWritable();
     customWritable.write('hello');
     arktest.assertEQ(customWritable.writableLength, 5);
@@ -197,7 +197,7 @@ function testWritableWriteLargeData() {
 }
 
 // Test cases ported from ArkTS 1.0:testStreamWritableProperties011
-function testWritableDrainAfterLargeData() {
+async function testWritableDrainAfterLargeData() {
     const largeData = 'ab'.repeat(Math.floor(16384 / 2));
     let writableStream = new CustomWritable();
     writableStream.write(largeData);
@@ -212,7 +212,7 @@ function testWritableDrainAfterLargeData() {
 }
 
 // Test cases ported from ArkTS 1.0:testStreamWritableProperties012
-function testWritableDrainEvent() {
+async function testWritableDrainEvent() {
     const largeData = 'ab'.repeat(Math.floor(16384 / 2));
     let writableStream = new CustomWritable();
     writableStream.write(largeData);
@@ -264,7 +264,7 @@ function testWritableErrorHandling() {
 }
 
 // Test cases ported from ArkTS 1.0:testStreamWritableProperties017
-function testWritableCloseEvent() {
+async function testWritableCloseEvent() {
     let writableStream = new stream.Writable();
     writableStream.on('close', mustCall((): void => {
         arktest.assertEQ(writableStream.writableFinished, true);

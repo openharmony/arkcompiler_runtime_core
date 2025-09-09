@@ -197,63 +197,63 @@ try {
     arktest.assertTrue(e instanceof InvalidCoroutineOperationError);
 }
 
-function testNoArgsStaticFuncCall(): void {
+async function testNoArgsStaticFuncCall(): Promise<void> {
     prepare();
     let p = foo();
     arktest.assertTrue(called);
     await p;
 }
 
-function testAmd64SmallFuncCall(): void {
+async function testAmd64SmallFuncCall(): Promise<void> {
     prepare();
     let p = amd64_small(1, 2, 3, 4, 5, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0);
     arktest.assertTrue(called);
     await p;
 }
 
-function testAmd64LargeFuncCall(): void {
+async function testAmd64LargeFuncCall(): Promise<void> {
     prepare();
     let p = amd64_large(1, 2, 3, 4, 5, 6, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0);
     arktest.assertTrue(called);
     await p;
 }
 
-function testArm32SmallFuncCall(): void {
+async function testArm32SmallFuncCall(): Promise<void> {
     prepare();
     let p = arm32_small(1, 2, 3);
     arktest.assertTrue(called);
     await p;
 }
 
-function testArm32LargeFuncCall(): void {
+async function testArm32LargeFuncCall(): Promise<void> {
     prepare();
     let p = arm32_large(1, 2, 3, 4, 5);
     arktest.assertTrue(called);
     await p;
 }
 
-function testArm32hfSmallFuncCall(): void {
+async function testArm32hfSmallFuncCall(): Promise<void> {
     prepare();
     let p = arm32hf_small(1, 2, 3, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0);
     arktest.assertTrue(called);
     await p;
 }
 
-function testArm32hfLargeFuncCall(): void {
+async function testArm32hfLargeFuncCall(): Promise<void> {
     prepare();
     let p = arm32hf_large(1, 2, 3, 4, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0);
     arktest.assertTrue(called);
     await p;
 }
 
-function testArm64SmallFuncCall(): void {
+async function testArm64SmallFuncCall(): Promise<void> {
     prepare();
     let p = arm64_small(1, 2, 3, 4, 5, 6, 7, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0);
     arktest.assertTrue(called);
     await p;
 }
 
-function testArm64LargeFuncCall(): void {
+async function testArm64LargeFuncCall(): Promise<void> {
     prepare();
     let p = arm64_large(1, 2, 3, 4, 5, 6, 7, 8, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0);
     arktest.assertTrue(called);
@@ -262,15 +262,15 @@ function testArm64LargeFuncCall(): void {
 
 function main(): int {
     let testSuite = new arktest.ArkTestsuite('coroutines.async_call');
-    testSuite.addTest('testNoArgsStaticFuncCall', testNoArgsStaticFuncCall);
-    testSuite.addTest('testAmd64SmallFuncCall', testAmd64SmallFuncCall);
-    testSuite.addTest('testAmd64LargeFuncCall', testAmd64LargeFuncCall);
-    testSuite.addTest('testArm32SmallFuncCall', testArm32SmallFuncCall);
-    testSuite.addTest('testArm32LargeFuncCall', testArm32LargeFuncCall);
-    testSuite.addTest('testArm32hfSmallFuncCall', testArm32hfSmallFuncCall);
-    testSuite.addTest('testArm32hfLargeFuncCall', testArm32hfLargeFuncCall);
-    testSuite.addTest('testArm64SmallFuncCall', testArm64SmallFuncCall);
-    testSuite.addTest('testArm64LargeFuncCall', testArm64LargeFuncCall);
+    testSuite.addAsyncTest('testNoArgsStaticFuncCall', testNoArgsStaticFuncCall);
+    testSuite.addAsyncTest('testAmd64SmallFuncCall', testAmd64SmallFuncCall);
+    testSuite.addAsyncTest('testAmd64LargeFuncCall', testAmd64LargeFuncCall);
+    testSuite.addAsyncTest('testArm32SmallFuncCall', testArm32SmallFuncCall);
+    testSuite.addAsyncTest('testArm32LargeFuncCall', testArm32LargeFuncCall);
+    testSuite.addAsyncTest('testArm32hfSmallFuncCall', testArm32hfSmallFuncCall);
+    testSuite.addAsyncTest('testArm32hfLargeFuncCall', testArm32hfLargeFuncCall);
+    testSuite.addAsyncTest('testArm64SmallFuncCall', testArm64SmallFuncCall);
+    testSuite.addAsyncTest('testArm64LargeFuncCall', testArm64LargeFuncCall);
     let res = testSuite.run();
     return res;
 }

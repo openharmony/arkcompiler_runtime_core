@@ -25,7 +25,7 @@ async function foo<T>(awaited: Awaited<T>, expected: T) {
 }
 
 function main() {
-    await foo<string>({{c.awaited_param}}, {{c.expected_param}})
+    waitForCompletion(() => foo<string>({{c.awaited_param}}, {{c.expected_param}}))
 }
 
 {% endfor %}

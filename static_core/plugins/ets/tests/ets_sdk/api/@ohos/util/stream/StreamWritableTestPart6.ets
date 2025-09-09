@@ -32,7 +32,7 @@ function main(): int {
     suite.addTest("Writable set default encoding empty string", testWritableSetDefaultEncodingEmptyString);
     suite.addTest("Writable default encoding behavior", testWritableDefaultEncodingBehavior);
     suite.addTest("Writable drain event high watermark", testWritableDrainEventHighWatermark);
-    suite.addTest("Writable drain event async high watermark", testWritableDrainEventAsyncHighWatermark);
+    suite.addAsyncTest("Writable drain event async high watermark", testWritableDrainEventAsyncHighWatermark);
 
     return suite.run();
 }
@@ -297,7 +297,7 @@ class MyWritable7 extends stream.Writable {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamWritableWritev001
-function testWritableDrainEventAsyncHighWatermark() {
+async function testWritableDrainEventAsyncHighWatermark() {
     mustChecks.push(() => {
         if (callCount_MyWritable7 !== 1) {
             throw new Error(`Function was expected to be called 1 times, `

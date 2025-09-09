@@ -21,10 +21,10 @@ function main(): int {
     const suite = new arktest.ArkTestsuite("Stream API tests");
 
     suite.addTest("Duplex finish event should not be triggered", testDuplexFinishEventNotTriggered);
-    suite.addTest("Duplex writableFinished state validation", testDuplexWritableFinishedState);
+    suite.addAsyncTest("Duplex writableFinished state validation", testDuplexWritableFinishedState);
     suite.addTest("Duplex basic read and write functionality", testDuplexBasicReadWrite);
-    suite.addTest("Duplex read with valid size", testDuplexReadWithValidSize);
-    suite.addTest("Duplex error handling during write", testDuplexErrorHandlingOnWrite);
+    suite.addAsyncTest("Duplex read with valid size", testDuplexReadWithValidSize);
+    suite.addAsyncTest("Duplex error handling during write", testDuplexErrorHandlingOnWrite);
     suite.addTest("Duplex read and write with synchronous data", testDuplexReadWriteWithSyncData);
 
     return suite.run();
@@ -137,7 +137,7 @@ class MyDuplex2 extends stream.Duplex {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamDuplexWritableFinished002
-function testDuplexWritableFinishedState() {
+async function testDuplexWritableFinishedState() {
     let duplex = new MyDuplex2();
     let func: Function =  mustCallNoArgs((): void => {
         arktest.assertTrue(duplex.writableFinished, "writableFinished should be true");
@@ -200,7 +200,7 @@ class MyDuplex4 extends stream.Duplex {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamDuplex002
-function testDuplexReadWithValidSize() {
+async function testDuplexReadWithValidSize() {
     mustChecks.push(() => {
         if (callCount_MyDuplex4 !== 1) {
             throw new Error(`Function was expected to be called 1 times, but was called ${callCount_MyDuplex4} times.`);
@@ -233,7 +233,7 @@ class MyDuplex5 extends stream.Duplex {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamDuplex003
-function testDuplexErrorHandlingOnWrite() {
+async function testDuplexErrorHandlingOnWrite() {
     let duplex = new MyDuplex5();
     let func: Function = (err: Error) => {
         arktest.assertEQ(err.message, "Write error", "err.message is valid");

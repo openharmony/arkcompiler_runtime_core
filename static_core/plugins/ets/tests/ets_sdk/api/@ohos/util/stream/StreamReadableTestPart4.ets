@@ -21,7 +21,7 @@ const mustChecks: Array<Function> = new Array<Function>();
 function main(): int {
     const suite = new arktest.ArkTestsuite("Stream API tests");
 
-    suite.addTest("Readable does not implement DoRead.", testReadableErrorOnUnimplementedDoRead);
+    suite.addAsyncTest("Readable does not implement DoRead.", testReadableErrorOnUnimplementedDoRead);
     suite.addTest("Reads a buffer of a specified size from the buffer001.", testReadableSetEncodingUtf8);
     suite.addTest("Reads a buffer of a specified size from the buffer002.", testReadableSetEncodingUtf8Alias);
     suite.addTest("Reads a buffer of a specified size from the buffer003.", testReadablePushAndReadWithInvalidEncoding);
@@ -70,7 +70,7 @@ function mustCall(fn?: Function, times: number = 1) {
 }
 
 // Test cases ported from ArkTS 1.0:testStreamReadableWithUnimplementedDoRead001
-function testReadableErrorOnUnimplementedDoRead() {
+async function testReadableErrorOnUnimplementedDoRead() {
     let readable = new stream.Readable();
     readable.on('error', mustCall((error: Error): void => {
         arktest.assertEQ(error.name, 'BusinessError');

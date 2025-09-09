@@ -22,18 +22,18 @@ const mustChecks: Array<Function> = new Array<Function>();
 function main(): int {
     const suite = new arktest.ArkTestsuite("Stream API tests");
 
-    suite.addTest("Call Callback twice in Transform.", testTransformCallbackTwice);
+    suite.addAsyncTest("Call Callback twice in Transform.", testTransformCallbackTwice);
     suite.addTest("Transform constructor.", testTransformConstructor);
     suite.addTest("Event triggering of Transform.", testTransformEventTriggering);
     suite.addTest("Event handling of Transform.", testTransformEventHandling);
     suite.addTest("Initialization of Transform.", testTransformInitialization);
     suite.addTest("Default encoding of Transform.", testTransformDefaultEncoding);
-    suite.addTest("Read operation of Transform.", testTransformReadOperation);
+    suite.addAsyncTest("Read operation of Transform.", testTransformReadOperation);
     suite.addTest("Pause behavior of Transform.", testTransformPauseBehavior);
     suite.addTest("Resume behavior of Transform.", testTransformResumeBehavior);
     suite.addTest("Set encoding of Transform.", testTransformSetEncoding);
     suite.addTest("Pause state of Transform.", testTransformPauseState);
-    suite.addTest("Read callback of Transform.", testTransformReadCallback);
+    suite.addAsyncTest("Read callback of Transform.", testTransformReadCallback);
     suite.addTest("Writable properties of Transform.", testTransformWritableProperties);
     suite.addTest("Readable properties of Transform.", testTransformReadableProperties);
 
@@ -112,7 +112,7 @@ class MyTransform1 extends stream.Transform {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamTransformCallbackTwice001
-function testTransformCallbackTwice() {
+async function testTransformCallbackTwice() {
     let transform = new MyTransform1();
     transform.on('error', mustCall((error: Error): void => {
         arktest.assertEQ(error.name, 'BusinessError');
@@ -222,7 +222,7 @@ class MyTransform5 extends stream.Transform {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamTransform005
-function testTransformReadOperation() {
+async function testTransformReadOperation() {
     let transformStream = new MyTransform5();
     let func: Function = mustCallChunk((chunk: Object): void => {
         arktest.assertEQ(chunk.toString(), 'x');
@@ -300,7 +300,7 @@ class MyTransform6 extends stream.Transform {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamTransform012
-function testTransformReadCallback() {
+async function testTransformReadCallback() {
     mustChecks.push(() => {
         if (callCount_MyTransform6 !== 1) {
             throw new Error(`Function was expected to be called 1 times, `

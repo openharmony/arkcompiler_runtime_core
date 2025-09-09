@@ -42,5 +42,5 @@ function main(): void {
         arktest.assertTrue( arr2 instanceof Object)
         arktest.assertTrue( arr2[0] instanceof Int)
     }
-    await foo();
+    waitForCompletion(foo);
 }
