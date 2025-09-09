@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -345,4 +345,28 @@ TEST_F(Callconv32Test, NativeParams)
 
     BigCheckMixHfloatSfloatSlots();
 }
+
+class Callconv32ParamTypedTest : public Callconv32Test, public testing::WithParamInterface<TypeInfo> {};
+
+TEST_P(Callconv32ParamTypedTest, NativeParamsAndTmpRegs)
+{
+    // no tmp registers in param registers
+    auto param_info = GetCallconv()->GetParameterInfo(0);
+    const auto &target = GetEncoder()->GetTarget();
+    auto getTempRegsMaskByType = [&target](Reg &reg) {
+        return reg.IsFloat() ? target.GetTempVRegsMask() : target.GetTempRegsMask();
+    };
+
+    while (true) {
+        auto ret = param_info->GetNativeParam(GetParam());
+        if (!std::holds_alternative<Reg>(ret)) {
+            break;
+        }
+        auto &reg = std::get<Reg>(ret);
+        EXPECT_FALSE(getTempRegsMaskByType(reg).Test(reg.GetId()));
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(AllTypes, Callconv32ParamTypedTest,
+                         testing::Values(INT8_TYPE, INT16_TYPE, INT32_TYPE, INT64_TYPE, FLOAT32_TYPE, FLOAT64_TYPE));
 }  // namespace ark::compiler

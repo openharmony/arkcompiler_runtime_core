@@ -72,11 +72,6 @@ set(PANDA_RUN_PREFIX
 add_custom_target(ani_tests_bridges_tests COMMENT "Common target to run ANI bridges tests")
 
 function(add_tests pref suff)
-    #  NOTE(mgroshev): #29597
-    if(${pref} STREQUAL "types_double")
-        set(RT_OPTION "--compiler-inlining=false")
-    endif()
-        
     set(test_name ${pref}_${suff})
     panda_add_library(${test_name} SHARED ${CMAKE_CURRENT_BINARY_DIR}/tests/${test_name}/${test_name}.cpp)
     add_dependencies(${test_name} ani_tests_bridges_generate_test_files)

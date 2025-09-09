@@ -40,8 +40,8 @@ const std::array<unsigned, AARCH32_COUNT_REG> AARCH32_TMP_REG = {
     vixl::aarch32::r8.GetCode(), vixl::aarch32::r9.GetCode(), vixl::aarch32::r12.GetCode()};
 
 // Temporary vector registers used
-const std::array<unsigned, AARCH32_COUNT_VREG> AARCH32_TMP_VREG = {vixl::aarch32::s14.GetCode(),
-                                                                   vixl::aarch32::s15.GetCode()};
+const std::array<unsigned, AARCH32_COUNT_VREG> AARCH32_TMP_VREG = {vixl::aarch32::s30.GetCode(),
+                                                                   vixl::aarch32::s31.GetCode()};
 
 static inline constexpr const uint8_t UNDEF_REG = std::numeric_limits<uint8_t>::max();
 
