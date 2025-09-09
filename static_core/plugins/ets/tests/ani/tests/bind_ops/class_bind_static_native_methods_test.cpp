@@ -103,6 +103,7 @@ TEST_F(ClassBindStaticNativeMethodsTest, success)
         ani_native_function {"foo", ":i", reinterpret_cast<void *>(NativeMethod)},
         ani_native_function {"foo1", ":i", reinterpret_cast<void *>(NativeMethod)},
     };
+    ASSERT_EQ(env_->c_api->Class_BindNativeMethods(env_, smallBoxCls_, m.data(), m.size()), ANI_NOT_FOUND);
     ASSERT_EQ(env_->c_api->Class_BindStaticNativeMethods(env_, smallBoxCls_, m.data(), m.size()), ANI_OK);
 }
 
@@ -112,6 +113,7 @@ TEST_F(ClassBindStaticNativeMethodsTest, success_with_overload_methods)
         ani_native_function {"overload_fn_int", "i:", reinterpret_cast<void *>(NativeMethod)},
         ani_native_function {"overload_fn_long", "l:", reinterpret_cast<void *>(NativeMethod)},
     };
+    ASSERT_EQ(env_->c_api->Class_BindNativeMethods(env_, smallBoxCls_, m.data(), m.size()), ANI_NOT_FOUND);
     ASSERT_EQ(env_->c_api->Class_BindStaticNativeMethods(env_, smallBoxCls_, m.data(), m.size()), ANI_OK);
 }
 
@@ -121,6 +123,7 @@ TEST_F(ClassBindStaticNativeMethodsTest, success_without_signature)
         ani_native_function {"foo", nullptr, reinterpret_cast<void *>(NativeMethod)},
         ani_native_function {"foo1", nullptr, reinterpret_cast<void *>(NativeMethod)},
     };
+    ASSERT_EQ(env_->c_api->Class_BindNativeMethods(env_, smallBoxCls_, m.data(), m.size()), ANI_NOT_FOUND);
     ASSERT_EQ(env_->c_api->Class_BindStaticNativeMethods(env_, smallBoxCls_, m.data(), m.size()), ANI_OK);
 }
 
@@ -129,6 +132,7 @@ TEST_F(ClassBindStaticNativeMethodsTest, success_for_child_class)
     std::array m = {
         ani_native_function {"bar", nullptr, reinterpret_cast<void *>(NativeMethod)},
     };
+    ASSERT_EQ(env_->c_api->Class_BindNativeMethods(env_, bigBoxCls_, m.data(), m.size()), ANI_NOT_FOUND);
     ASSERT_EQ(env_->c_api->Class_BindStaticNativeMethods(env_, bigBoxCls_, m.data(), m.size()), ANI_OK);
 }
 
