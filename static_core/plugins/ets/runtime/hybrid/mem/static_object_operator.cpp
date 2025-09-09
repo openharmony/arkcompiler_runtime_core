@@ -127,6 +127,14 @@ void StaticObjectOperator::IterateXRef(const common::BaseObject *object, const c
 #endif  // PANDA_JS_ETS_HYBRID_MODE
 }
 
+size_t StaticObjectOperator::ForEachRefFieldAndGetSize(const panda::BaseObject *object,
+                                                       const panda::RefFieldVisitor &visitor) const
+{
+    size_t size = GetSize(object);
+    ForEachRefField(object, visitor);
+    return size;
+}
+
 common::BaseObject *StaticObjectOperator::GetForwardingPointer(const common::BaseObject *object) const
 {
     // Overwrite class by forwarding address. Read barrier must be called before reading class.

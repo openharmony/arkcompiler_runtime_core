@@ -74,6 +74,11 @@ public:
         GetOperator()->IterateXRef(this, visitor);
     }
 
+    size_t ForEachRefFieldAndGetSize(const RefFieldVisitor &visitor)
+    {
+        return GetOperator()->ForEachRefFieldAndGetSize(this, visitor);
+    }
+
     inline BaseObject *GetForwardingPointer() const
     {
         if (IsForwarded()) {
