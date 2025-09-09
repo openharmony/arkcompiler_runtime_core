@@ -108,6 +108,15 @@ export namespace util {
         }
 
         public put(key: K, value: V): V | undefined {
+            if (key == undefined) {
+              throw createBusinessError(TypeErrorCodeId, `Parameter error. The type of ${key} must be Object`);
+            }
+            if (value === undefined) {
+              throw createBusinessError(TypeErrorCodeId, `Parameter error. The type of ${value} must be Object`);
+            }
+            if (key === null || value === null) {
+              throw createBusinessError(TypeErrorCodeId, `Parameter error. The type of key and value must be Object`);
+            }
             let valueBefore: V | undefined = undefined;
             this.putCount++;
             if (this.cache.has(key)) {
@@ -173,6 +182,9 @@ export namespace util {
         }
 
         public remove(key: K): V | undefined {
+            if (key == null) {
+              throw createBusinessError(TypeErrorCodeId, `Parameter error. The type of ${key} must be Object`);
+            }
             if (this.cache.has(key)) {
                 let former: V | undefined = this.cache.get(key);
                 this.cache.delete(key);
@@ -185,6 +197,9 @@ export namespace util {
         }
 
         public get(key: K): V | undefined {
+            if (key == null) {
+              throw createBusinessError(TypeErrorCodeId, `Parameter error. The type of ${key} must be Object`);
+            }
             if (this.cache.has(key)) {
                 return this.containsInner(key);
             }
@@ -213,6 +228,9 @@ export namespace util {
         }
 
         public contains(key: K): boolean {
+            if (key == null) {
+              throw createBusinessError(TypeErrorCodeId, `Parameter error. The type of ${key} must be Object`);
+            }
             if (this.cache.has(key)) {
                 this.containsInner(key);
                 return true;
