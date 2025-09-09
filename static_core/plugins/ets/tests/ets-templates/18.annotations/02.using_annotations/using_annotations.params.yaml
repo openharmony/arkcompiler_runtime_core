@@ -20,3 +20,11 @@ cases:
       }
     value: |-
       = 100
+
+  - decl: |-
+      @SomeAnnotation({field2: "Some string" })
+      abstract class SomeAbstractClass {        
+        foo() {}      
+      }
+    value: |-
+      = 100

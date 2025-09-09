@@ -10,7 +10,7 @@
                 "${PANDA_ROOT}/plugins/ets/stdlib/std"
             ]
         },
-        "dynamicPaths": {
+        "dependencies": {
 			"promiseProxy": { "language": "js", "ohmUrl": "${CMAKE_CURRENT_BINARY_DIR}/promise_proxy_test_exports" }
         }
     }

@@ -39,6 +39,7 @@ ohos_source_set("abckit_pandasm_wrapper_source_set") {
 
   include_dirs = [
     "$ark_root_dynamic",
+    "$ark_root_dynamic/libabckit/include",
     "$target_gen_dir",
   ]
 

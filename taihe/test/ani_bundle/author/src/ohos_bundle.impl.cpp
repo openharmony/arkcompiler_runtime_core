@@ -12,14 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include "ohos_bundle.proj.hpp"
 #include "ohos_bundle.impl.hpp"
 #include <iomanip>
 #include <iostream>
-#include "taihe/runtime.hpp"
-#include "stdexcept"
+#include "ohos_bundle.proj.hpp"
 #include "optional"
+#include "stdexcept"
+#include "taihe/runtime.hpp"
 
 using namespace taihe;
 
@@ -45,6 +44,7 @@ public:
 class OverloadInterfaceImpl {
 public:
     optional<int32_t> id;
+
     OverloadInterfaceImpl() {}
 
     void GetApplicationInfo3param(string_view bundleName, int32_t bundleFlags, int32_t userId)
@@ -60,7 +60,7 @@ public:
     void GetApplicationInfoOptional(string_view bundleName, int32_t bundleFlags, optional_view<int32_t> userId)
     {
         id = userId;
-        std::cout << bundleName + ":" << bundleFlags << ":" << id.value_or(0)<< std::endl;
+        std::cout << bundleName + ":" << bundleFlags << ":" << id.value_or(0) << std::endl;
     }
 };
 

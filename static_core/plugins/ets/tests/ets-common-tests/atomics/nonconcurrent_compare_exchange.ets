@@ -18,7 +18,7 @@ let buf_2: ArrayBuffer;
 let arr: Int8Array;
 let arr_2: BigUint64Array; 
 
-function main() {
+function testMain() {
     buf = new ArrayBuffer(1);
     buf_2 = new ArrayBuffer(8);
     arr = new Int8Array(buf, 0, 1);
@@ -26,13 +26,19 @@ function main() {
 
     for (let i = 1; i < 100; i++) {
         let old = Atomics.compareExchange(arr, 0, i - 1, i)
-        assertEQ(old, i - 1)
+        arktest.assertEQ(old, i - 1)
     }
-    assertEQ(Atomics.load(arr, 0), 99)
+    arktest.assertEQ(Atomics.load(arr, 0), 99)
 
     for (let i = 1; i < 100; i++) {
         let old = Atomics.compareExchange(arr_2, 0, new BigInt(i - 1), new BigInt(i)).getLong()
-        assertEQ(old, i - 1)
+        arktest.assertEQ(old, i - 1)
     }
-    assertEQ(Atomics.load(arr_2, 0).getLong(), 99)
+    arktest.assertEQ(Atomics.load(arr_2, 0).getLong(), 99)
+}
+
+function main() {
+    const suite = new arktest.ArkTestsuite('Function Atomics nonconcurrent_compare_exchange tests')
+    suite.addTest('Function testMain', testMain)
+    return suite.run()
 }

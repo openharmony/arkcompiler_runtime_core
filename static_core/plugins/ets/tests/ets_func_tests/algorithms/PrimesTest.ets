@@ -33,7 +33,7 @@ function prime_factors_trivial(n0: long): FixedArray<long> {
     while (n > 1 && factor < n0) {
         if (n % factor == 0) {
             primes = concat(primes, [factor]);
-            n = (n / factor) as long;
+            n = (n / factor).toLong();
         } else {
             factor++;
         }
@@ -47,12 +47,12 @@ function prime_factors_trivial_plus(n0: long): FixedArray<long> {
     let n: long = n0;
     while (n % 2 == 0) {
         primes = concat(primes, [2 as long]);
-        n = (n / 2) as long;
+        n = (n / 2).toLong();
     }
     while (factor * factor <= n) {
         if (n % factor == 0) {
             primes = concat(primes, [factor]);
-            n = (n / factor) as long;
+            n = (n / factor).toLong();
         } else {
             factor += 2;
         }
@@ -77,7 +77,7 @@ function sieve_primes(n: int): FixedArray<long> {
     }
     for (let i = 2; i < n+1; i++) {
         if (is_prime[i]) {
-            primes = concat(primes, [i as long]);
+            primes = concat(primes, [i.toLong()]);
         }
     }
     return primes;

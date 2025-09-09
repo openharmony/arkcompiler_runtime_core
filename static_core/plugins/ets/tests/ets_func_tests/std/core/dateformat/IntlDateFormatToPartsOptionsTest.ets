@@ -92,14 +92,14 @@ function dateFormatToPartsWithOptions(): void {
         const expectedResult = res[2]
 
         const failMsg = `Unexpected DateTimeFormat.formatToParts(${locale}, ${options}) result`
-        assertTrue(verifyResults(actualResult, expectedResult), failMsg)
+        arktest.assertTrue(verifyResults(actualResult, expectedResult), failMsg)
     })
 }
 
 function main(): int {
     initFormatResults()
 
-    const suite = new ArkTestsuite("Intl.DateTimeFormat.formatToParts()")
+    const suite = new arktest.ArkTestsuite("Intl.DateTimeFormat.formatToParts()")
     suite.addTest("with formatting options", dateFormatToPartsWithOptions)
     return suite.run()
 }

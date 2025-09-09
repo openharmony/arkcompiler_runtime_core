@@ -358,7 +358,6 @@ set(ARKBASE_TESTS_SOURCES
     tests/bit_vector_test.cpp
     tests/string_helpers_test.cpp
     tests/type_converter_tests.cpp
-    tests/logger_test.cpp
     tests/dfx_test.cpp
     tests/leb128_test.cpp
     tests/utf_test.cpp
@@ -387,6 +386,14 @@ set(ARKBASE_TESTS_SOURCES
     tests/base_thread_test.cpp
     tests/mem_hooks_test.cpp
 )
+
+if (NOT ENABLE_UNIT_TESTS_FULL_COVERAGE)
+    set(ARKBASE_TESTS_SOURCES
+        ${ARKBASE_TESTS_SOURCES}
+        tests/logger_test.cpp
+    )
+endif()
+
 if (PANDA_TARGET_UNIX)
     list(APPEND ARKBASE_TESTS_SOURCES
             tests/unix_signal_test.cpp
@@ -520,7 +527,7 @@ if(PANDA_TARGET_32)
     )
 endif()
 
-panda_gen_options(TARGET arkbase_obj YAML_FILE options.yaml GENERATED_HEADER base_options.h)
+panda_gen_options(TARGET arkbase_obj YAML_FILE utils/logger_options.yaml GENERATED_HEADER logger_options.h)
 
 panda_add_sanitizers(TARGET arkbase_obj SANITIZERS ${PANDA_SANITIZERS_LIST})
 

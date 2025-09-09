@@ -22,10 +22,10 @@ public:
     void GetTestData(ani_class *clsResult, ani_method *ctorResult)
     {
         ani_class cls;
-        ASSERT_EQ(env_->FindClass("Lclass_find_iterator_test/Singleton;", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("class_find_iterator_test.Singleton", &cls), ANI_OK);
 
         ani_method ctor;
-        ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":V", &ctor), ANI_OK);
+        ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":", &ctor), ANI_OK);
 
         *clsResult = cls;
         *ctorResult = ctor;
@@ -35,7 +35,7 @@ public:
 TEST_F(ClassFindIteratorTest, find_iterator)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("Lclass_find_iterator_test/Singleton;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_iterator_test.Singleton", &cls), ANI_OK);
 
     ani_method result;
     ASSERT_EQ(env_->Class_FindIterator(cls, &result), ANI_OK);
@@ -46,7 +46,7 @@ TEST_F(ClassFindIteratorTest, find_iterator)
 TEST_F(ClassFindIteratorTest, find_iterator_in_namespace)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("Lclass_find_iterator_test/ops/Singleton;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_iterator_test.ops.Singleton", &cls), ANI_OK);
 
     ani_method result;
     ASSERT_EQ(env_->Class_FindIterator(cls, &result), ANI_OK);
@@ -57,7 +57,7 @@ TEST_F(ClassFindIteratorTest, find_iterator_in_namespace)
 TEST_F(ClassFindIteratorTest, invalid_argument1)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("Lclass_find_iterator_test/ops/Singleton;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_find_iterator_test.ops.Singleton", &cls), ANI_OK);
     ani_method result;
     ASSERT_EQ(env_->Class_FindIterator(nullptr, &result), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Class_FindIterator(cls, nullptr), ANI_INVALID_ARGS);

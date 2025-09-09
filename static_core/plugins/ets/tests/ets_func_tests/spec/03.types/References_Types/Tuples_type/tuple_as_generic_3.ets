@@ -34,6 +34,6 @@ function main(): void {
 
     let getme = ct.get();
 
-    assertEQ( getme[0], "12")
-    assertEQ( getme[1], 12)
+    arktest.assertEQ( getme[0], "12")
+    arktest.assertEQ( getme[1], 12)
 }

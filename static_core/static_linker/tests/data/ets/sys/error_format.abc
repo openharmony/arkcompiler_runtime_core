@@ -13,4 +13,7 @@
  * limitations under the License.
  */
 
-This file is used to mock a error format abc file.
+package std.annotations
+
+@Retention("RUNTIME")
+export @interface InterfaceObjectLiteral {}

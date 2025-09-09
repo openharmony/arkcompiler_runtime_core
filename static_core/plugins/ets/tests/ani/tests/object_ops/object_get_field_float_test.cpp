@@ -25,7 +25,7 @@ public:
         auto sarah = static_cast<ani_object>(sarahRef);
 
         ani_class cls;
-        ASSERT_EQ(env_->FindClass("Lobject_get_field_float_test/Woman;", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("object_get_field_float_test.Woman", &cls), ANI_OK);
 
         ani_field fieldName;
         ASSERT_EQ(env_->Class_FindField(cls, "name", &fieldName), ANI_OK);

@@ -18,24 +18,24 @@ const globalClassName = "class_test.ETSGLOBAL"
 class Test {
     public static testMethodsFromClass() {
         const currentClass = Class.current()
-        assertNE(currentClass, undefined)
-        assertEQ(currentClass.getName(), "class_test.Test")
+        arktest.assertNE(currentClass, undefined)
+        arktest.assertEQ(currentClass.getName(), "class_test.Test")
 
         const callerClass = Class.ofCaller()
-        assertNE(callerClass, undefined)
-        assertEQ(callerClass!.getName(), globalClassName)
+        arktest.assertNE(callerClass, undefined)
+        arktest.assertEQ(callerClass!.getName(), globalClassName)
     }
 }
 
 function main() {
     // For the test purposes these checks must be located in the entrypoint function
     const currentClass = Class.current()
-    assertNE(currentClass, undefined)
-    assertEQ(currentClass.getName(), globalClassName)
+    arktest.assertNE(currentClass, undefined)
+    arktest.assertEQ(currentClass.getName(), globalClassName)
 
     // `main` is entrypoint, hence it does not have managed callers
     const callerClass = Class.ofCaller()
-    assertEQ(callerClass, undefined)
+    arktest.assertEQ(callerClass, undefined)
 
     Test.testMethodsFromClass()
 }

@@ -16,15 +16,15 @@
 const etsVm = globalThis.gtest.etsVm;
 const areFuncsEqual1 = etsVm.getFunction('Lets_shared_reference/ETSGLOBAL;', 'areFuncsEqual1');
 const areFuncsEqual2 = etsVm.getFunction('Lets_shared_reference/ETSGLOBAL;', 'areFuncsEqual2');
-const areArraysEqual1 = etsVm.getFunction('Lets_shared_reference/ETSGLOBAL;','areArraysEqual1');
-const areArraysEqual2 = etsVm.getFunction('Lets_shared_reference/ETSGLOBAL;','areArraysEqual2');
-const areArraysEqual3 = etsVm.getFunction('Lets_shared_reference/ETSGLOBAL;','areArraysEqual3');
-const areDatasEqual = etsVm.getFunction('Lets_shared_reference/ETSGLOBAL;','areDatasEqual');
-const areMapsEqual = etsVm.getFunction('Lets_shared_reference/ETSGLOBAL;','areMapsEqual');
-const areSetsEqual = etsVm.getFunction('Lets_shared_reference/ETSGLOBAL;','areSetsEqual');
-const areRangeErrorEqual = etsVm.getFunction('Lets_shared_reference/ETSGLOBAL;','areRangeErrorEqual');
-const areSyntaxErrorEqual = etsVm.getFunction('Lets_shared_reference/ETSGLOBAL;','areSyntaxErrorEqual');
-const areURIErrorEqual = etsVm.getFunction('Lets_shared_reference/ETSGLOBAL;','areURIErrorEqual');
+const areArraysEqual1 = etsVm.getFunction('Lets_shared_reference/ETSGLOBAL;', 'areArraysEqual1');
+const areArraysEqual2 = etsVm.getFunction('Lets_shared_reference/ETSGLOBAL;', 'areArraysEqual2');
+const areArraysEqual3 = etsVm.getFunction('Lets_shared_reference/ETSGLOBAL;', 'areArraysEqual3');
+const areDatasEqual = etsVm.getFunction('Lets_shared_reference/ETSGLOBAL;', 'areDatasEqual');
+const areMapsEqual = etsVm.getFunction('Lets_shared_reference/ETSGLOBAL;', 'areMapsEqual');
+const areSetsEqual = etsVm.getFunction('Lets_shared_reference/ETSGLOBAL;', 'areSetsEqual');
+const areRangeErrorEqual = etsVm.getFunction('Lets_shared_reference/ETSGLOBAL;', 'areRangeErrorEqual');
+const areSyntaxErrorEqual = etsVm.getFunction('Lets_shared_reference/ETSGLOBAL;', 'areSyntaxErrorEqual');
+const areURIErrorEqual = etsVm.getFunction('Lets_shared_reference/ETSGLOBAL;', 'areURIErrorEqual');
 
 export let jsArray = ['foo', 1, true];
 export let o = {a:1};

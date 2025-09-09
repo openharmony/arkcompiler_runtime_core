@@ -23,6 +23,6 @@ class C1 {
 
 function main() {
     let x1: C1 = {x1: {x0: false}}
-    assertTrue((!x1.x1.x0)   )
+    arktest.assertTrue((!x1.x1.x0)   )
     while(x1.x1.x0) {}
 }

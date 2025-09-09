@@ -16,7 +16,7 @@
 function check(current_answer: number, correct_answer: number, test: string) {
     if (current_answer != correct_answer) {
         if (!Number.isNaN(current_answer) || !Number.isNaN(correct_answer)) {
-            assertTrue( false, "incorrect " + test + " answer " + current_answer + " instead of " + correct_answer)
+            arktest.assertTrue( false, "incorrect " + test + " answer " + current_answer + " instead of " + correct_answer)
             return 1;
         }
     }

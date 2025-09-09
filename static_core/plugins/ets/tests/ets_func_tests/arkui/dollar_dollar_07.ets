@@ -27,5 +27,5 @@ function increment(n: int): void {
 function main(): void {
   let $$$$n = 5
   increment($$$$n)
-  assertEQ($$$$n,  5)
+  arktest.assertEQ($$$$n,  5)
 }

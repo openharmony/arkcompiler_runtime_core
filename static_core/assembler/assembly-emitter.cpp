@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "assembly-context.h"
 #include "assembly-emitter.h"
 #include "file_items.h"
 #include "file_writer.h"
@@ -24,8 +23,6 @@
 #include "libpandafile/type_helper.h"
 
 #include <algorithm>
-#include <cstddef>
-#include <cstdint>
 #include <iostream>
 
 namespace {
@@ -808,9 +805,10 @@ static void AddBytecodeIndexDependencies(MethodItem *method, const Ins &insn,
                                          const std::unordered_map<std::string, T *> &items,
                                          const AsmEmitter::AsmEntityCollections &entities, bool lookupInStatic = true)
 {
-    ASSERT(!insn.ids.empty());
+    ASSERT(!insn.IDEmpty());
 
-    for (const auto &id : insn.ids) {
+    for (std::size_t i = 0U; i < insn.IDSize(); ++i) {
+        const auto &id = insn.GetID(i);
         auto it = items.find(id);
         if (it == items.cend()) {
             if (lookupInStatic && insn.HasFlag(InstFlags::STATIC_METHOD_ID)) {
@@ -889,11 +887,6 @@ void AsmEmitter::MakeStringItems(ItemContainer *items, const Program &program,
     for (const auto &s : program.strings) {
         auto *item = items->GetOrCreateStringItem(s);
         entities.stringItems.insert({s, item});
-    }
-
-    for (const auto &s : program.exportStrMap) {
-        auto *item = items->GetOrCreateStringItem(s.first);
-        entities.stringItems.insert({s.first, item});
     }
 }
 
@@ -998,8 +991,8 @@ static std::vector<std::pair<std::string, ark::pandasm::LiteralArray>> SortByLas
                                                                           literalarrayTable.end());
 
     std::sort(items.begin(), items.end(), [](const auto &a, const auto &b) {
-        size_t posA = a.first.rfind('$');
-        size_t posB = b.first.rfind('$');
+        size_t posA = a.first.rfind('-');
+        size_t posB = b.first.rfind('-');
 
         std::string lastNumberA = (posA != std::string::npos) ? a.first.substr(posA + 1) : "";
         std::string lastNumberB = (posB != std::string::npos) ? b.first.substr(posB + 1) : "";
@@ -1535,7 +1528,7 @@ bool AsmEmitter::AddMethodAndParamsAnnotations(ItemContainer *items, const Progr
         size_t paramIdx = method->IsStatic() ? protoIdx : protoIdx + 1;
         auto &param = func.params[paramIdx];
         auto &paramItem = paramItems[protoIdx];
-        if (!AddAnnotations(&paramItem, items, param.GetOrCreateMetadata(), program, entities)) {
+        if (!AddAnnotations(&paramItem, items, *param.GetOrCreateMetadata(), program, entities)) {
             SetLastError("Cannot emit annotations for parameter a" + std::to_string(paramIdx) + " of function " +
                          func.name + ": " + GetLastError());
             return false;
@@ -1661,68 +1654,6 @@ void AsmEmitter::FillMap(PandaFileToPandaAsmMaps *maps, AsmEmitter::AsmEntityCol
     }
 }
 
-static uint32_t FindOffset(AsmEmitter::AsmEntityCollections &entities, const std::string &name)
-{
-    auto methodIt = entities.methodItems.find(name);
-    if (methodIt != entities.methodItems.end()) {
-        return methodIt->second->GetOffset();
-    }
-    auto staticMethodIt = entities.staticMethodItems.find(name);
-    if (staticMethodIt != entities.staticMethodItems.end()) {
-        return staticMethodIt->second->GetOffset();
-    }
-    auto fieldIt = entities.fieldItems.find(name);
-    if (fieldIt != entities.fieldItems.end()) {
-        return fieldIt->second->GetOffset();
-    }
-    auto staticFieldIt = entities.staticFieldItems.find(name);
-    if (staticFieldIt != entities.staticFieldItems.end()) {
-        return staticFieldIt->second->GetOffset();
-    }
-    auto classIt = entities.classItems.find(name);
-    if (classIt != entities.classItems.end()) {
-        return classIt->second->GetOffset();
-    }
-    UNREACHABLE();
-}
-
-/* static */
-static void SetOffsetForExportTable(std::vector<std::pair<std::string, std::string>> &declToAssmb,
-                                    const std::string &literalArrayName, AsmEmitter::AsmEntityCollections &entities)
-{
-    // export entities are align as:
-    // exportentites{
-    //    Type: uint32_t
-    //    declTextOffset: offset to decl string
-    //    Type: uint32_t
-    //    entitiesType: type of function,class,const,interface
-    //    Type: uint32_t
-    //    abcOffset: offset to effective bytecode
-    //    ...
-    // }
-    constexpr size_t FIELDS_PER_ENTITY = 6;
-    constexpr size_t ABC_OFFSET_RELATIVE_POS = 4;  // Position of abcOffset relative to declTextOffset
-
-    auto arrayItemIt = entities.literalarrayItems.find(literalArrayName);
-    if (arrayItemIt == entities.literalarrayItems.end()) {
-        return;
-    }
-    auto &exportEntitiesList = arrayItemIt->second->GetItemsUnsafe();
-    ASSERT(exportEntitiesList.size() == declToAssmb.size() * FIELDS_PER_ENTITY);
-
-    for (size_t declTextOffsetIndex = 1; declTextOffsetIndex < exportEntitiesList.size();
-         declTextOffsetIndex += FIELDS_PER_ENTITY) {
-        auto stringIt = entities.stringItems.find(declToAssmb[declTextOffsetIndex / FIELDS_PER_ENTITY].first);
-        ASSERT(stringIt != entities.stringItems.end());
-        uint32_t declTextOffset = stringIt->second->GetOffset();
-        exportEntitiesList[declTextOffsetIndex].SetValueUnsafe<uint32_t>(declTextOffset);
-
-        Type recordName = Type::FromName(declToAssmb[declTextOffsetIndex / FIELDS_PER_ENTITY].second);
-        uint32_t abcOffset = FindOffset(entities, recordName.GetName());
-        exportEntitiesList[declTextOffsetIndex + ABC_OFFSET_RELATIVE_POS].SetValueUnsafe<uint32_t>(abcOffset);
-    }
-}
-
 /* static */
 // CC-OFFNXT(G.FUN.01-CPP) solid logic
 void AsmEmitter::EmitDebugInfo(ItemContainer *items, const Program &program, const std::vector<uint8_t> *bytes,
@@ -1784,8 +1715,8 @@ bool AsmEmitter::EmitFunctions(ItemContainer *items, const Program &program,
         code->SetNumVregs(func.regsNum);
         code->SetNumArgs(func.GetParamsNum());
 
-        auto numIns = static_cast<uint32_t>(
-            std::count_if(func.ins.begin(), func.ins.end(), [](auto it) { return it.opcode != Opcode::INVALID; }));
+        auto numIns = static_cast<uint32_t>(std::count_if(func.ins.cbegin(), func.ins.cend(),
+                                                          [](auto const &it) { return it.opcode != Opcode::INVALID; }));
         code->SetNumInstructions(numIns);
 
         auto *bytes = code->GetInstructions();
@@ -1858,8 +1789,6 @@ bool AsmEmitter::Emit(ItemContainer *items, Program &program, PandaFileToPandaAs
     }
 
     items->ComputeLayout();
-
-    SetOffsetForExportTable(program.exportStrMap, "export_entities", entities);
 
     if (maps != nullptr) {
         FillMap(maps, entities);
@@ -1968,7 +1897,7 @@ TypeItem *AsmEmitter::GetTypeItem(
         return Find(primitiveTypes, type.GetId());
     }
 
-    if (type.IsArray()) {
+    if (type.IsArray() || type.IsUnion()) {
         return items->GetOrCreateForeignClassItem(type.GetDescriptor());
     }
 
@@ -2000,14 +1929,14 @@ bool Function::Emit(BytecodeEmitter &emitter, panda_file::MethodItem *method,
     auto labels = std::unordered_map<std::string_view, ark::Label> {};
 
     for (const auto &insn : ins) {
-        if (insn.setLabel) {
-            labels.insert_or_assign(insn.label, emitter.CreateLabel());
+        if (insn.HasLabel()) {
+            labels.insert_or_assign(insn.Label(), emitter.CreateLabel());
         }
     }
 
     for (const auto &insn : ins) {
-        if (insn.setLabel) {
-            auto search = labels.find(insn.label);
+        if (insn.HasLabel()) {
+            auto search = labels.find(insn.Label());
             ASSERT(search != labels.end());
             emitter.Bind(search->second);
         }
@@ -2056,12 +1985,12 @@ void Function::EmitLocalVariable(panda_file::LineNumberProgramItem *program, Ite
 
 size_t Function::GetLineNumber(size_t i) const
 {
-    return static_cast<int32_t>(ins[i].insDebug.lineNumber);
+    return static_cast<size_t>(ins[i].insDebug.LineNumber());
 }
 
 uint32_t Function::GetColumnNumber(size_t i) const
 {
-    return static_cast<int32_t>(ins[i].insDebug.columnNumber);
+    return ins[i].insDebug.ColumnNumber();
 }
 
 void Function::EmitNumber(panda_file::LineNumberProgramItem *program, std::vector<uint8_t> *constantPool,
@@ -2145,9 +2074,9 @@ void Function::BuildLineNumberProgram(panda_file::DebugInfoItem *debugItem, cons
 
 Function::TryCatchInfo Function::MakeOrderAndOffsets(const std::vector<uint8_t> &bytecode) const
 {
-    std::unordered_map<std::string_view, size_t> tryCatchLabels;
-    std::unordered_map<std::string, std::vector<const CatchBlock *>> tryCatchMap;
-    std::vector<std::string> tryCatchOrder;
+    std::unordered_map<std::string_view, size_t> tryCatchLabels {};
+    std::unordered_map<std::string, std::vector<const CatchBlock *>> tryCatchMap {};
+    std::vector<std::string> tryCatchOrder {};
 
     for (auto &catchBlock : catchBlocks) {
         tryCatchLabels.insert_or_assign(catchBlock.tryBeginLabel, 0);
@@ -2168,10 +2097,10 @@ Function::TryCatchInfo Function::MakeOrderAndOffsets(const std::vector<uint8_t> 
     size_t pcOffset = 0;
 
     for (const auto &i : ins) {
-        if (i.setLabel) {
-            auto it = tryCatchLabels.find(i.label);
+        if (i.HasLabel()) {
+            auto it = tryCatchLabels.find(i.Label());
             if (it != tryCatchLabels.cend()) {
-                tryCatchLabels[i.label] = pcOffset;
+                tryCatchLabels[i.Label()] = pcOffset;
             }
         }
         if (i.opcode == Opcode::INVALID) {
@@ -2182,7 +2111,7 @@ Function::TryCatchInfo Function::MakeOrderAndOffsets(const std::vector<uint8_t> 
         bi = bi.GetNext();
     }
 
-    return Function::TryCatchInfo {tryCatchLabels, tryCatchMap, tryCatchOrder};
+    return Function::TryCatchInfo {std::move(tryCatchLabels), std::move(tryCatchMap), std::move(tryCatchOrder)};
 }
 
 std::vector<CodeItem::TryBlock> Function::BuildTryBlocks(
@@ -2204,7 +2133,7 @@ std::vector<CodeItem::TryBlock> Function::BuildTryBlocks(
 
         ASSERT(!tryCatchBlocks.empty());
 
-        std::vector<CodeItem::CatchBlock> catchBlockItems;
+        std::vector<CodeItem::CatchBlock> catchBlockItems {};
 
         for (auto *catchBlock : tryCatchBlocks) {
             auto className = catchBlock->exceptionRecord;

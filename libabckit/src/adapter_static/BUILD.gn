@@ -60,6 +60,7 @@ ohos_source_set("abckit_adapter_static_source_set") {
                                       # from dynamic runtime, so static_core
                                       # must be listed first
     "$ark_root_dynamic",
+    "$ark_root_dynamic/libabckit/include",
     "$abckit_root",
     "$target_gen_dir/../codegen",
     "$target_gen_dir/../adapter_static",

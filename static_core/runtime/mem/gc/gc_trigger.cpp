@@ -123,6 +123,11 @@ void GCTriggerHeap::TriggerGcIfNeeded(GC *gc)
         skipGcCount_--;
         return;
     }
+
+    if (!gc->CanAddGCTask()) {
+        return;
+    }
+
     size_t bytesInHeap = memStats_->GetFootprintHeap();
     // Atomic with relaxed order reason: data race with target_footprint_ with no synchronization or ordering
     // constraints imposed on other reads or writes

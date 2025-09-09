@@ -30,5 +30,5 @@ class Derived  {
 function main(): void {
     callRef = 0;
     let t = new Derived();
-    assertEQ( t.is, 1)
+    arktest.assertEQ( t.is, 1)
 }

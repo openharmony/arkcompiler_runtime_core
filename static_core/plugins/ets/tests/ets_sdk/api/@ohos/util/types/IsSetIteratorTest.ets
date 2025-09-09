@@ -16,7 +16,7 @@
 import {util} from "@ohos.util";
 
 function main(): int {
-    const suite = new ArkTestsuite("CommonUtil types.isSetIterator() API tests")
+    const suite = new arktest.ArkTestsuite("CommonUtil types.isSetIterator() API tests")
 
     suite.addTest("Verify Set.keys() is identified as SetIterator", testIsSetIterator001)
     suite.addTest("Verify Set.values() is identified as SetIterator", testIsSetIterator002)
@@ -39,7 +39,7 @@ function testIsSetIterator001() {
   let proc = new util.types();
   const set = new Set<int>();
   let result = proc.isSetIterator(set.keys());
-  assertTrue(result, "The SetIterator should be of the same type as the SetIterator");
+  arktest.assertTrue(result, "The SetIterator should be of the same type as the SetIterator");
 }
 
 /**
@@ -54,7 +54,7 @@ function testIsSetIterator002() {
   let proc = new util.types();
   const set = new Set<int>();
   let result = proc.isSetIterator(set.values());
-  assertTrue(result, "The SetIterator should be of the same type as the SetIterator");
+  arktest.assertTrue(result, "The SetIterator should be of the same type as the SetIterator");
 }
 
 /**
@@ -69,7 +69,7 @@ function testIsSetIterator003() {
   let proc = new util.types();
   const set = new Set<int>();
   let result = proc.isSetIterator(set.entries());
-  assertTrue(result, "The SetIterator should be of the same type as the SetIterator");
+  arktest.assertTrue(result, "The SetIterator should be of the same type as the SetIterator");
 }
 
 /**
@@ -84,7 +84,7 @@ function testIsSetIterator004() {
   let proc = new util.types();
   const set = new Set<int>();
   let result = proc.isSetIterator(set.$_iterator());
-  assertTrue(result, "The SetIterator should be of the same type as the SetIterator");
+  arktest.assertTrue(result, "The SetIterator should be of the same type as the SetIterator");
 }
 
 /**
@@ -99,5 +99,5 @@ function testIsSetIterator005() {
   let proc = new util.types();
   const set = new Set<int>();
   let result = proc.isSetIterator(set);
-  assertTrue(result == false, "The SetIterator should be of the same type as the SetIterator");
+  arktest.assertTrue(result == false, "The SetIterator should be of the same type as the SetIterator");
 }

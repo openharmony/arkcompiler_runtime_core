@@ -145,7 +145,7 @@ end
 
 macro(:"load_field_obj") do |field, klass|
   offset := LoadI(field).Imm(Constants::FIELD_OFFSET_OFFSET).u32
-  Load(klass, offset).ref
+  Load(klass, offset).SetNeedBarrier(true).ref
 end
 
 ['short', 'long', 'obj'].each do |flavor|
@@ -388,4 +388,11 @@ macro(:"handle_ets_call_name_range") do |v, id, size|
     Label(:Exit)
   }
   generic_call(id, size, false, method, nil, copy_lambda)
+end
+
+macro(:handle_ets_nullcheck) do
+  If(acc.ref, 0).EQ.Unlikely {
+    call_runtime("ThrowNullPointerExceptionFromInterpreter").void
+    move_to_exception
+  }
 end

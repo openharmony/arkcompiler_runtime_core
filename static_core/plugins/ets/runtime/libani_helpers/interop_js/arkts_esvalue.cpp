@@ -14,7 +14,7 @@
  */
 
 #include "arkts_esvalue.h"
-#include "plugins/ets/runtime/interop_js/native_api/arkts_esvalue.h"
+#include "plugins/ets/runtime/interop_js/native_api/arkts_interop_js_api_impl.h"
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 extern "C" bool arkts_esvalue_unwrap(ani_env *env, ani_object esValue, void **result)

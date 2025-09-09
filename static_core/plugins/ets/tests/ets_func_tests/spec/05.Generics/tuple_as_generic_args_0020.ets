@@ -24,6 +24,6 @@ function foo<T>(data : T): void {
 
 
 function main() {
-    let a: [number, string, float] = [1,"2", 2.0]
+    let a: [number, string, float] = [1,"2", 2.0f]
     foo<[number, string, float]>(a)
 }

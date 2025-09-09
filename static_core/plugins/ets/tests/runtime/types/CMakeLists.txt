@@ -35,7 +35,6 @@ panda_ets_add_gtest(
         $<TARGET_PROPERTY:mock_stdlib,FILE>
     DEPS_TARGETS
         mock_stdlib
-    TEST_GROUP ets_tests_runtime_gtests
 )
 
 panda_ets_add_gtest(
@@ -45,6 +44,7 @@ panda_ets_add_gtest(
         ets_promise_test.cpp
         ets_job_test.cpp
         ets_class_test.cpp
+        ets_union_test.cpp
         ets_string_from_char_code_test.cpp
         ets_sync_primitives_test.cpp
         ets_arraybuf_test.cpp
@@ -58,6 +58,11 @@ panda_ets_add_gtest(
         typed_arrays_test.cpp
         ets_base_enum_test.cpp
         ets_error_test.cpp
+        ets_atomic_flag_test.cpp
+        ets_error_options_test.cpp
+        ets_stacktrace_element_test.cpp
+        ets_typed_arrays_test.cpp
+        ets_typed_unsigned_arrays_test.cpp
     LIBRARIES
         arkassembler
         arkruntime
@@ -69,5 +74,8 @@ panda_ets_add_gtest(
         $<TARGET_PROPERTY:etsstdlib,FILE>
     DEPS_TARGETS
         etsstdlib
-    TEST_GROUP ets_tests_runtime_gtests
 )
+
+add_dependencies(ets_tests_runtime_gtests
+    ets_internal_objects_tests_gtests
+    ets_internal_objects_mock_tests_gtests)

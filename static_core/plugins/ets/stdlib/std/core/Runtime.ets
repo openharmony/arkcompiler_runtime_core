@@ -26,6 +26,18 @@ export final class Runtime {
      */
     public static native getHashCode(o: Object): int;
 
+    /**
+     * Returns a hash code for the Object. The hash code algorithm  depends
+     * on the actual type of the input parameter. Special algorithm is used for 
+     * Byte, Short, Int, Long, Char, String. In other cases the result is same
+     * as getHashCode.
+     *
+     * @param o to calculate hash code from
+     *
+     * @returns hash code
+     */
+    public static native getHashCodeByValue(o: Object): long;
+
      /**
       * Checks if two items are equal.
       *
@@ -147,9 +159,11 @@ export final class Runtime {
      *
      * @param dstStr target type string
      *
+     * @param isUndef true if undefined is in target type
+     *
      * @returns exception object to throw
      */
-    static native failedTypeCastException(src: Any, dstStr: string): ClassCastError
+    static native failedTypeCastException(src: Any, dstStr: string, isUndef: boolean): ClassCastError
 
     native static __getTypeInfo(o: Any): Class|undefined;
 

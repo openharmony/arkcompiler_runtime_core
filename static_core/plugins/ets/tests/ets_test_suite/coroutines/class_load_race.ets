@@ -15,6 +15,8 @@
 
 import { launch } from "std/concurrency"
 
+type L = StdDebug.Logger
+
 class Racer {
     static x: int = Racer.f();
 
@@ -34,19 +36,21 @@ class Racer {
 
 function reader(): Int {
     if (Racer.x != 1) {
-        console.println("Data race in class initializer detected!");
+        L.log('Data race in class initializer detected!');
         exit(1);
     }
     return 0;
 }
 
-function raceInTheCCtor(): void {
+function testRaceInTheCCtor(): void {
     for (let i = 0; i < 20; i++) {
         launch<Int, () => Int>(reader);
     }
 }
 
 function main(): int {
-    raceInTheCCtor();
-    return 0;
+    let testSuite = new arktest.ArkTestsuite('coroutines.class_load_race');
+    testSuite.addTest('testRaceInTheCCtor', testRaceInTheCCtor);
+    let res = testSuite.run();
+    return res;
 }

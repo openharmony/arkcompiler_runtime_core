@@ -27,19 +27,30 @@ async function returnRejectingPromise(): Promise<void> {
     })
 }
 
-function main() {
+function testRejectedPromise(): void {
     try {
         await returnRejectedPromise();
-        assertTrue(false, 'Awaited a reject Promise should throw the reason.');
+        arktest.assertTrue(false, 'Awaited a reject Promise should throw the reason.');
     } catch (err: Error) {
-        assertTrue(err.toString().contains('Reject', 0), 'Awaited value of rejected promise is different\
+        arktest.assertTrue(err.toString().contains('Reject', 0), 'Awaited value of rejected promise is different\
                                                           from the expected value. Actual value: ' + err);
     }
+}
+
+function testRejectingPromise(): void {
     try {
         await returnRejectingPromise();
-        assertTrue(false, 'Awaited a reject Promise should throw the reason.');
+        arktest.assertTrue(false, 'Awaited a reject Promise should throw the reason.');
     } catch (err: Error) {
-        assertTrue(err.toString().contains('Reject', 0), 'Awaited value of rejected promise is different\
+        arktest.assertTrue(err.toString().contains('Reject', 0), 'Awaited value of rejected promise is different\
                                                           from the expected value. Actual value: ' + err);
     }
+}
+
+function main(): int {
+    let testSuite = new arktest.ArkTestsuite('coroutines.await_async_return_reject_promise');
+    testSuite.addTest('testRejectedPromise', testRejectedPromise);
+    testSuite.addTest('testRejectingPromise', testRejectingPromise);
+    let res = testSuite.run();
+    return res;    
 }

@@ -20,5 +20,5 @@ tags: [negative, compile-only]
 
 function main(): void {
   let c = "110"
-  assertEQ(c--, "110",  "If posfix decrement expression completes abruptly then no decrementation occurs.")
+  arktest.assertEQ(c--, "110",  "If posfix decrement expression completes abruptly then no decrementation occurs.")
 }

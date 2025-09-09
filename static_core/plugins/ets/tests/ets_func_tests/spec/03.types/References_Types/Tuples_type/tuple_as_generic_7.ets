@@ -39,9 +39,9 @@ function main(): void {
     let ress = ts.publish();
     let resn = tn.publish();
 
-    assertEQ( ress[0], "Hello World")
-    assertEQ( ress[1], "Hello World")
+    arktest.assertEQ( ress[0], "Hello World")
+    arktest.assertEQ( ress[1], "Hello World")
 
-    assertEQ( resn[0], 42.0)
-    assertEQ( resn[1], 42.0)
+    arktest.assertEQ( resn[0], 42.0)
+    arktest.assertEQ( resn[1], 42.0)
 }

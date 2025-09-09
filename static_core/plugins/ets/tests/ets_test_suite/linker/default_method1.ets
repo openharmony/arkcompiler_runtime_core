@@ -28,5 +28,5 @@ class A2 extends A1 implements I2 {
 }
 
 function main() {
-    assertEQ(((x: I1) => x.foo())(new A2()), "A2");
+    arktest.assertEQ(((x: I1) => x.foo())(new A2()), "A2");
 }

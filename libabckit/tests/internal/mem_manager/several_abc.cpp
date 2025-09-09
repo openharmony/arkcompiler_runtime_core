@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 
-#include "libabckit/include/c/abckit.h"
+#include "libabckit/c/abckit.h"
 #include "helpers/helpers.h"
 
 namespace libabckit::test {

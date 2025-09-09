@@ -16,8 +16,8 @@
 #include "mock/abckit_mock.h"
 #include "mock/mock_values.h"
 
-#include "include/c/statuses.h"
-#include "include/c/abckit.h"
+#include "include/libabckit/c/statuses.h"
+#include "include/libabckit/c/abckit.h"
 
 #include <gtest/gtest.h>
 

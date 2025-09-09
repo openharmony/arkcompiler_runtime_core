@@ -28,5 +28,5 @@ class A<T> {
 
 function main(): void {
   let x = new A<String>("str")
-  assertTrue( x.data instanceof String)
+  arktest.assertTrue( x.data instanceof String)
 }

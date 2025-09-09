@@ -20,5 +20,5 @@ desc: Chaining operator, access to an element of an array.
 function main(): void {
   let users: string[] | null = null;
   users = ["John", "Jane"];
-  assertEQ(users?.[1], "Jane");
+  arktest.assertEQ(users?.[1], "Jane");
 }

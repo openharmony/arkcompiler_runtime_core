@@ -16,7 +16,7 @@
 import { Decimal } from "@arkts.math.Decimal";
 
 function main(): int {
-    const suite = new ArkTestsuite("Decimal isFiniteEtc API tests");
+    const suite = new arktest.ArkTestsuite("Decimal isFiniteEtc API tests");
     suite.addTest("Decimal isFinite and isNaN with constructor form 1;", testWithConstructorfrom1);
     suite.addTest("Decimal isFinite and isNaN with constructor form '-0.1';", testWithConstructorfromString0_1);
     suite.addTest("Decimal isFinite and isNaN with constructor form Infinity;", testWithConstructorfromInfinity);

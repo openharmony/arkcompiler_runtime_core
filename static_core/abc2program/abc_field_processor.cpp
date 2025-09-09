@@ -88,6 +88,16 @@ void AbcFieldProcessor::FillFieldMetaData(pandasm::Field &field)
 
     SetEntityAttribute(
         field, [&fieldAccessor]() { return fieldAccessor.IsFinal(); }, "final");
+
+    // NOTE: Default values are not suppported #25313
+    if (field.type.GetId() == panda_file::Type::TypeId::REFERENCE && field.type.GetName() == "std.core.String") {
+        std::optional<uint32_t> stringOffsetVal = fieldAccessor.GetValue<uint32_t>();
+        if (stringOffsetVal.has_value()) {
+            std::string_view val {reinterpret_cast<const char *>(
+                file_->GetStringData(panda_file::File::EntityId(stringOffsetVal.value())).data)};
+            field.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::STRING>(val));
+        }
+    }
 }
 
 }  // namespace ark::abc2program

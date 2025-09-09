@@ -26,6 +26,6 @@ function test(): NullableInt {
 }
 
 function main(): void {
-    assertTrue( test() === null)
+    arktest.assertTrue( test() === null)
 
 }

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -48,16 +48,20 @@ foreach(NAME ${LOOKUP_BY_NAME_TEST_LIST})
     )
     add_dependencies(ets_tests_lookup_by_name ets_lookup_by_name_${NAME})
     if(PANDA_COMPILER_ENABLE AND NOT PANDA_TARGET_ARM32)
-        panda_add_asm_file(
-            FILE ${PANDA_ETS_PLUGIN_SOURCE}/tests/lookup_by_name/${NAME}.pa
-            TARGET ets_lookup_by_name_${NAME}_enforce_jit
-            DEPENDS etsstdlib
-            LANGUAGE_CONTEXT ets
-            ADDITIONAL_STDLIBS $<TARGET_PROPERTY:etsstdlib,FILE>
-            ASSEMBLER_OPTIONS "--optimize"
-            RUNTIME_OPTIONS "--compiler-enable-jit=true" "--compiler-hotness-threshold=0" "--no-async-jit"
-        )
-        add_dependencies(ets_tests_lookup_by_name ets_lookup_by_name_${NAME}_enforce_jit)
+
+        # 26982 64-bit pointer support
+        if (PANDA_32_BIT_MANAGED_POINTER OR NOT PANDA_TARGET_ARM64)
+            panda_add_asm_file(
+                FILE ${PANDA_ETS_PLUGIN_SOURCE}/tests/lookup_by_name/${NAME}.pa
+                TARGET ets_lookup_by_name_${NAME}_enforce_jit
+                DEPENDS etsstdlib
+                LANGUAGE_CONTEXT ets
+                ADDITIONAL_STDLIBS $<TARGET_PROPERTY:etsstdlib,FILE>
+                ASSEMBLER_OPTIONS "--optimize"
+                RUNTIME_OPTIONS "--compiler-enable-jit=true" "--compiler-hotness-threshold=0" "--no-async-jit"
+            )
+            add_dependencies(ets_tests_lookup_by_name ets_lookup_by_name_${NAME}_enforce_jit)
+        endif()
 
         if (PANDA_TARGET_ARM64 OR PANDA_TARGET_AMD64)
             panda_add_asm_file(

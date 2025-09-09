@@ -34,6 +34,7 @@ public:
     static constexpr size_t CLASSES_COUNT = 4;
     static constexpr uintptr_t MEGAMORPHIC_FLAG = static_cast<uintptr_t>(-1);
 
+    // NOLINTNEXTLINE(misc-unused-parameters)
     static Span<CallSiteInlineCache> From(void *mem, PandaVector<uint32_t> vcalls)
     {
         auto inlineCaches = reinterpret_cast<CallSiteInlineCache *>(mem);
@@ -198,6 +199,7 @@ private:
 
 class ThrowData {
 public:
+    // NOLINTNEXTLINE(misc-unused-parameters)
     static Span<ThrowData> From(void *mem, PandaVector<uint32_t> throws)
     {
         auto throwData = reinterpret_cast<ThrowData *>(mem);

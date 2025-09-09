@@ -33,6 +33,7 @@ config("arkruntime_public_config") {
 
     # The line below needed only for stdlib. It must be removed after stdlib separation from runtime is implemented(#18135).
     "$ark_root/plugins/ets/runtime/ani/",
+    "$ark_root/runtime/tooling/inspector",
     get_label_info(
         "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})",
         "target_gen_dir"),
@@ -42,6 +43,7 @@ config("arkruntime_public_config") {
   ]
 
   include_dirs += platform_include_dirs
+  include_dirs += [ "$ark_root/../common_interfaces" ]
 
   if (ark_hybrid) {
     include_dirs += [ "$ark_root/../common_interfaces" ]
@@ -88,6 +90,7 @@ config("arkruntime_config") {
     include_dirs += [ "//third_party/icu/icu4c/source" ]
   }
 
+
   cflags_cc = [
     "-Wno-invalid-offsetof",
     "-Wno-unused-parameter",
@@ -102,6 +105,9 @@ config("arkruntime_config") {
     "$build_root/config/compiler:no_exceptions",
     "$build_root/config/compiler:no_rtti",
   ]
+  if (is_ohos && is_standard_system) {
+    configs += [ "$hitrace_root:libhitrace_pub_config" ]
+  }
 }
 
 group("arkruntime_header_deps") {
@@ -117,6 +123,7 @@ group("arkruntime_header_deps") {
     ":isa_gen_libarkruntime_interpreter-inl_gen_h",
     ":isa_gen_libarkruntime_isa_constants_gen_h",
     ":language_config_gen_inc",
+    ":core_any_intrinsics_inc",
     ":libarkruntime_options_gen_h",
     ":libarkruntime_shorty_values_h",
     ":plugin_clear_profile_h",
@@ -133,7 +140,7 @@ group("arkruntime_header_deps") {
     ":plugins_interpreters_inl_h",
     ":profiling_gen_profiling_gen_h",
     ":substitute_icu_path",
-    "$ark_root/libpandabase:base_options_h",
+    "$ark_root/libpandabase:gen_logger_options_h",
     "$ark_root/verification/gen:isa_gen_verification_gen_abs_int_inl_gen_h",
     "$ark_root/verification/gen:isa_gen_verification_gen_cflow_iterate_inl_gen_h",
     "$ark_root/verification/gen:isa_gen_verification_gen_handle_gen_h",
@@ -166,6 +173,7 @@ ohos_source_set("libarkruntime_set_static") {
     "compiler_task_manager_worker.cpp",
     "compiler_thread_pool_worker.cpp",
     "coretypes/array.cpp",
+    "coretypes/line_string.cpp",
     "coretypes/string.cpp",
     "coroutines/coroutine.cpp",
     "coroutines/coroutine_events.cpp",
@@ -176,6 +184,7 @@ ohos_source_set("libarkruntime_set_static") {
     "coroutines/stackful_coroutine.cpp",
     "coroutines/stackful_coroutine_manager.cpp",
     "coroutines/stackful_coroutine_worker.cpp",
+    "coroutines/stackful_coroutine_state_info.cpp",
     "coroutines/threaded_coroutine.cpp",
     "coroutines/threaded_coroutine_manager.cpp",
     "default_debugger_agent.cpp",
@@ -197,6 +206,7 @@ ohos_source_set("libarkruntime_set_static") {
     "jit/libprofile/pgo_file_builder.cpp",
     "jit/profiling_loader.cpp",
     "jit/profiling_saver.cpp",
+    "jit/profile_saver_worker.cpp",
     "language_context.cpp",
     "loadable_agent.cpp",
     "lock_order_graph.cpp",
@@ -205,6 +215,8 @@ ohos_source_set("libarkruntime_set_static") {
     "mem/allocator.cpp",
     "mem/gc/bitmap.cpp",
     "mem/gc/card_table.cpp",
+    "mem/gc/cmc-gc-adapter/cmc-allocator-adapter.cpp",
+    "mem/gc/cmc-gc-adapter/cmc-gc-adapter.cpp",
     "mem/gc/epsilon-g1/epsilon-g1.cpp",
     "mem/gc/epsilon/epsilon.cpp",
     "mem/gc/epsilon/epsilon_barrier.cpp",
@@ -218,8 +230,6 @@ ohos_source_set("libarkruntime_set_static") {
     "mem/gc/g1/update_remset_task_queue.cpp",
     "mem/gc/g1/update_remset_thread.cpp",
     "mem/gc/g1/update_remset_worker.cpp",
-    "mem/gc/cmc-gc-adapter/cmc-allocator-adapter.cpp",
-    "mem/gc/cmc-gc-adapter/cmc-gc-adapter.cpp",
     "mem/gc/gc-hung/gc_hung.cpp",
     "mem/gc/gc.cpp",
     "mem/gc/gc_adaptive_marking_stack.cpp",
@@ -290,6 +300,7 @@ ohos_source_set("libarkruntime_set_static") {
     "tooling/debugger.cpp",
     "tooling/evaluation/expression_loader.cpp",
     "tooling/inspector/debugger_arkapi.cpp",
+    "tooling/inspector/types/profile_result.cpp",
     "tooling/pt_default_lang_extension.cpp",
     "tooling/pt_thread.cpp",
     "tooling/sampler/lock_free_queue.cpp",
@@ -416,6 +427,7 @@ ohos_source_set("libarkruntime_set_static") {
   deps = [
     ":arkruntime_header_deps",
     ":arkruntime_interpreter_impl",
+    "$ark_root/assembler:libarktsassembler",
     "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_entrypoints_bridge_asm_macro_inl",
     "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_intrinsics_enum_inl",
     "$ark_root/compiler:libarktscompiler",
@@ -495,10 +507,16 @@ ohos_source_set("libarkruntime_set_static") {
   }
 
   if (is_ohos && is_standard_system) {
-    defines = [ "PANDA_OHOS_USE_INNER_HILOG" ]
+    defines = [
+      "PANDA_OHOS_USE_INNER_HILOG",
+      "PANDA_USE_HITRACE",
+      "PANDA_USE_QOS",
+    ]
     external_deps += [
       "hilog:libhilog",
+      "hitrace:hitrace_meter",
       "libuv:uv",
+      "qos_manager:qos",
     ]
   }
 
@@ -520,6 +538,10 @@ config("ark_integrate_public_config") {
 ohos_shared_library("libarkruntime") {
   public_configs = [ ":ark_integrate_public_config" ]
   deps = [ ":libarkruntime_set_static" ]
+
+  if (ark_hybrid) {
+    external_deps = [ "ets_runtime:libark_jsruntime" ]
+  }
 
   if ((current_cpu == "amd64" || current_cpu == "x64" ||
       current_cpu == "x86_64") && (ark_standalone_build || ark_static_standalone_build)) {
@@ -742,11 +764,19 @@ ark_gen("arkruntime_gen_entrypoints") {
 action("substitute_icu_path") {
   script = "templates/substitute_icu_path.rb"
   outputs = [ "$target_gen_dir/init_icu_gen.cpp" ]
-  args = [
-    rebase_path("templates/init_icu_gen.cpp.erb"),
-    rebase_path("$target_gen_dir/init_icu_gen.cpp"),
-    rebase_path(ark_third_party_root),
-  ]
+  if (ark_standalone_build) {
+    args = [
+      rebase_path("templates/init_icu_gen.cpp.erb"),
+      rebase_path("$target_gen_dir/init_icu_gen.cpp"),
+      rebase_path("//third_party"),
+    ]
+  } else {
+    args = [
+      rebase_path("templates/init_icu_gen.cpp.erb"),
+      rebase_path("$target_gen_dir/init_icu_gen.cpp"),
+      rebase_path(ark_third_party_root),
+    ]
+  }
 }
 
 ark_gen("arkruntime_gen_entrypoints_compiler_checksum") {
@@ -785,6 +815,14 @@ ark_gen("arkruntime_gen_intrinsics") {
     extra_dependencies +=
         [ "$ark_root/../libabckit/src:abckit_concat_intrinsics_yaml" ]
   }
+}
+
+ark_gen_file("core_any_intrinsics_inc") {
+  template_file = "../runtime/interpreter/templates/core_any_intrinsics.inc.erb"
+  data = [ "$target_gen_dir/../plugin_options.yaml" ]
+  api = [ "$ark_root/templates/plugin_options.rb" ]
+  output_file = "$gen_include_dir/core_any_intrinsics.inc"
+  extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
 }
 
 ark_gen_file("libarkruntime_options_gen_h") {

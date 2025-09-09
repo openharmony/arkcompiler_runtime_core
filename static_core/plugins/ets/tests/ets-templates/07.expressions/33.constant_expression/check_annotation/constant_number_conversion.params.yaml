@@ -17,6 +17,6 @@ cases:
   - { type: char,   value: c'p'    }
   - { type: int,    value: 3000    }
   - { type: long,   value: 50000   }
-  - { type: float,  value: 120.2f, asInt: ' as int' }
-  - { type: number, value: 5050.9, asInt: ' as int' }
+  - { type: float,  value: 120.2f }
+  - { type: number, value: 5050.9 }
       

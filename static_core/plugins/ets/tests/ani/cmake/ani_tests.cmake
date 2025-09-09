@@ -13,6 +13,8 @@
 
 add_custom_target(ani_tests COMMENT "Common target to run ANI ETS tests")
 
+add_dependencies(ets_tests ani_tests)
+
 # Add gtest-based tests to ani_tests target.
 #
 # Example usage:

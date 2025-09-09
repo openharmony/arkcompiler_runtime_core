@@ -80,13 +80,13 @@ function weakSetElementGarbageCollection(): void {
                 GC.waitForFinishGC(gcId)
             }
         } catch (gcEx) {
-            assertTrue(false)
+            arktest.assertTrue(false)
         }
     }
 }
 
 function main(): int {
-    const suite = new ArkTestsuite("WeakSet GC tests")
+    const suite = new arktest.ArkTestsuite("WeakSet GC tests")
     suite.addTest("WeakSet element garbage collection", weakSetElementGarbageCollection)
 
     return suite.run()

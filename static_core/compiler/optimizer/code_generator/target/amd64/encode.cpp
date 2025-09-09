@@ -2803,7 +2803,7 @@ void Amd64Encoder::EncodeIsInf(Reg dst, Reg src)
     GetMasm()->sete(ArchReg(dst, BYTE_SIZE));
 }
 
-void Amd64Encoder::EncodeCmpFracWithDelta(Reg src)
+void Amd64Encoder::EncodeCmpFracWithZero(Reg src)
 {
     ASSERT(src.IsFloat());
     ASSERT(src.GetType() == FLOAT32_TYPE || src.GetType() == FLOAT64_TYPE);
@@ -2818,7 +2818,7 @@ void Amd64Encoder::EncodeCmpFracWithDelta(Reg src)
         GetMasm()->roundss(ArchVReg(tmp), ArchVReg(src), asmjit::imm(RND_CTL_TRUNCATED));
         EncodeSub(tmp, src, tmp);
         EncodeAbs(tmp, tmp);
-        EncodeMov(delta, Imm(std::numeric_limits<float>::epsilon()));
+        EncodeMov(delta, Imm(static_cast<float>(0.0)));
         GetMasm()->ucomiss(ArchVReg(tmp), ArchVReg(delta));
     } else {
         ScopedTmpRegF64 tmp(this);
@@ -2826,7 +2826,7 @@ void Amd64Encoder::EncodeCmpFracWithDelta(Reg src)
         GetMasm()->roundsd(ArchVReg(tmp), ArchVReg(src), asmjit::imm(RND_CTL_TRUNCATED));
         EncodeSub(tmp, src, tmp);
         EncodeAbs(tmp, tmp);
-        EncodeMov(delta, Imm(std::numeric_limits<double>::epsilon()));
+        EncodeMov(delta, Imm(static_cast<double>(0.0)));
         GetMasm()->ucomisd(ArchVReg(tmp), ArchVReg(delta));
     }
 }
@@ -2839,7 +2839,7 @@ void Amd64Encoder::EncodeIsInteger(Reg dst, Reg src)
     auto labelExit = static_cast<Amd64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
 
     GetMasm()->xor_(ArchReg(dst, WORD_SIZE), ArchReg(dst, WORD_SIZE));
-    EncodeCmpFracWithDelta(src);
+    EncodeCmpFracWithZero(src);
     GetMasm()->jp(*labelExit);  // Inf or NaN
     GetMasm()->set(ArchCc(Condition::LE, true), ArchReg(dst, BYTE_SIZE));
     GetMasm()->bind(*labelExit);
@@ -2855,7 +2855,7 @@ void Amd64Encoder::EncodeIsSafeInteger(Reg dst, Reg src)
     GetMasm()->xor_(ArchReg(dst, WORD_SIZE), ArchReg(dst, WORD_SIZE));
 
     // Check if IsInteger
-    EncodeCmpFracWithDelta(src);
+    EncodeCmpFracWithZero(src);
     GetMasm()->jp(*labelExit);  // Inf or NaN
     GetMasm()->j(ArchCc(Condition::GT, true), *labelExit);
 

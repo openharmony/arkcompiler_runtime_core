@@ -119,4 +119,4 @@ cases:
   - use: |-
       let v: Color = Color.Red
       let q: Color = Color.Blue
-      assertEQ(foo<Color>(v, q), v)
+      arktest.assertEQ(foo<Color>(v, q), v)

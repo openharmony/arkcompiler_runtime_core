@@ -14,7 +14,7 @@
 
 #include <cassert>
 #include <cstdint>
-#include "libabckit/include/c/abckit.h"
+#include "libabckit/c/abckit.h"
 
 #include "libabckit/src/macros.h"
 #include "libabckit/src/metadata_unknown_inspect_impl.h"

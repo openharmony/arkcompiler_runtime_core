@@ -16,14 +16,16 @@
 import re
 
 from taihe.codegen.abi.analyses import (
-    GlobFuncABIInfo,
-    IfaceABIInfo,
-    PackageABIInfo,
-    TypeABIInfo,
+    GlobFuncAbiInfo,
+    IfaceAbiInfo,
+    PackageAbiInfo,
+    TypeAbiInfo,
 )
 from taihe.codegen.abi.writer import CHeaderWriter, CSourceWriter
 from taihe.codegen.cpp.analyses import (
+    GlobFuncCppImplInfo,
     IfaceMethodCppInfo,
+    PackageCppImplInfo,
     PackageCppInfo,
     TypeCppInfo,
 )
@@ -37,21 +39,8 @@ from taihe.semantics.declarations import (
 from taihe.semantics.types import (
     IfaceType,
 )
-from taihe.utils.analyses import AbstractAnalysis, AnalysisManager
+from taihe.utils.analyses import AnalysisManager
 from taihe.utils.outputs import FileKind, OutputManager
-
-
-class PackageCppImplInfo(AbstractAnalysis[PackageDecl]):
-    def __init__(self, am: AnalysisManager, p: PackageDecl) -> None:
-        super().__init__(am, p)
-        self.header = f"{p.name}.impl.hpp"
-        self.source = f"{p.name}.impl.cpp"
-
-
-class GlobFuncCppImplInfo(AbstractAnalysis[GlobFuncDecl]):
-    def __init__(self, am: AnalysisManager, f: GlobFuncDecl) -> None:
-        super().__init__(am, f)
-        self.macro = f"TH_EXPORT_CPP_API_{f.name}"
 
 
 class CppImplHeadersGenerator:
@@ -64,7 +53,7 @@ class CppImplHeadersGenerator:
             self.gen_package_file(pkg)
 
     def gen_package_file(self, pkg: PackageDecl):
-        pkg_abi_info = PackageABIInfo.get(self.am, pkg)
+        pkg_abi_info = PackageAbiInfo.get(self.am, pkg)
         pkg_cpp_impl_info = PackageCppImplInfo.get(self.am, pkg)
         with CHeaderWriter(
             self.om,
@@ -87,14 +76,14 @@ class CppImplHeadersGenerator:
         func: GlobFuncDecl,
         pkg_cpp_impl_target: CHeaderWriter,
     ):
-        func_abi_info = GlobFuncABIInfo.get(self.am, func)
+        func_abi_info = GlobFuncAbiInfo.get(self.am, func)
         func_cpp_impl_info = GlobFuncCppImplInfo.get(self.am, func)
         func_impl = "CPP_FUNC_IMPL"
         args_from_abi = []
         abi_params = []
         for param in func.params:
             type_cpp_info = TypeCppInfo.get(self.am, param.ty_ref.resolved_ty)
-            type_abi_info = TypeABIInfo.get(self.am, param.ty_ref.resolved_ty)
+            type_abi_info = TypeAbiInfo.get(self.am, param.ty_ref.resolved_ty)
             args_from_abi.append(type_cpp_info.pass_from_abi(param.name))
             abi_params.append(f"{type_abi_info.as_param} {param.name}")
         args_from_abi_str = ", ".join(args_from_abi)
@@ -102,7 +91,7 @@ class CppImplHeadersGenerator:
         cpp_result = f"{func_impl}({args_from_abi_str})"
         if return_ty_ref := func.return_ty_ref:
             type_cpp_info = TypeCppInfo.get(self.am, return_ty_ref.resolved_ty)
-            type_abi_info = TypeABIInfo.get(self.am, return_ty_ref.resolved_ty)
+            type_abi_info = TypeAbiInfo.get(self.am, return_ty_ref.resolved_ty)
             abi_return_ty_name = type_abi_info.as_owner
             abi_result = type_cpp_info.return_into_abi(cpp_result)
         else:
@@ -213,7 +202,7 @@ class CppImplSourcesGenerator:
         iface: IfaceDecl,
         pkg_cpp_impl_target: CSourceWriter,
     ):
-        iface_abi_info = IfaceABIInfo.get(self.am, iface)
+        iface_abi_info = IfaceAbiInfo.get(self.am, iface)
         impl_name = f"{iface.name}Impl"
         with pkg_cpp_impl_target.indented(
             f"class {impl_name} {{",

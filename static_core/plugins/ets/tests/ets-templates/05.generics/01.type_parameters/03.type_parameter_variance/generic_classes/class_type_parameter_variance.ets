@@ -33,6 +33,6 @@ class X<in T1, out T2, T3> {
 
 function main(): void {
     let x: X<number, number, number> = new X<number, number, number>(1)
-    assertEQ(x.f2(), 1)
-    assertEQ(x.f3(1), 1)
+    arktest.assertEQ(x.f2(), 1)
+    arktest.assertEQ(x.f3(1), 1)
 }

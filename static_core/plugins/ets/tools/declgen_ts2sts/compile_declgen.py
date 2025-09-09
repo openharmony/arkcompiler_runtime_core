@@ -23,7 +23,7 @@ import shutil
 
 def copy_dir(source_path, dest_path):
     try:
-        shutil.rmtree(dest_path)
+        run_cmd(["rm", "-rf", dest_path])
         shutil.copytree(source_path, dest_path, dirs_exist_ok=True, symlinks=True)
     except Exception as err:
         raise Exception(err.decode())
@@ -49,12 +49,32 @@ def run_pack(execution_path):
     run_cmd(cmd, execution_path)
 
 
+# Note:
+# The original script built and packed directly inside dest_and_exec_path.
+# However, the ohos_copy GN action also writes temporary files into the same
+# directory. If we run `rm -rf dest_and_exec_path`, it can cause race conditions
+# with ohos_copy writing files, leading to build failures or missing files.
+#
+# Solution:
+# Create a build_tmp subdirectory inside dest_and_exec_path, copy the source
+# files into it, and perform the build/pack steps there. When cleaning, only
+# remove build_tmp to avoid touching ohos_copy’s temporary files. Finally,
+# move the generated panda-declgen-1.0.0.tgz back to dest_and_exec_path so the
+# GN outputs path remains unchanged.
 def main(args):
     source_path = args[0]
     dest_and_exec_path = args[1]
-    copy_dir(source_path, dest_and_exec_path)
-    run_build(dest_and_exec_path)
-    run_pack(dest_and_exec_path)
+    tgz_name = args[2]
+    tmp_build_dir = os.path.join(dest_and_exec_path, "build_tmp")
+
+    copy_dir(source_path, tmp_build_dir)
+    run_build(tmp_build_dir)
+    run_pack(tmp_build_dir)
+
+    src_file = os.path.join(tmp_build_dir, tgz_name)
+    dst_file = os.path.join(dest_and_exec_path, tgz_name)
+    run_cmd(["cp", src_file, dst_file])
+
 
 
 if __name__ == '__main__':

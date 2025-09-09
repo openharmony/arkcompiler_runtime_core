@@ -20,12 +20,14 @@ import { visitVisitResult } from './utils/ASTHelpers';
 import {
   ETSKeyword,
   FINAL_CLASS,
+  ArrayType,
   JSValue,
   ESObject,
   KitPrefix,
   LIMIT_DECORATOR,
   UtilityTypes,
   SpecificTypes,
+  InvalidFuncParaNames,
   BuiltInType
 } from '../utils/lib/TypeUtils';
 
@@ -71,10 +73,11 @@ export class Autofixer {
         this[FaultID.StringTypeAlias].bind(this),
         this[FaultID.IndexAccessType].bind(this),
         this[FaultID.ConditionalTypes].bind(this),
-        this[FaultID.TypeQuery].bind(this),
-        this[FaultID.TypeGeneric].bind(this)
+        this[FaultID.TypeQuery].bind(this)
       ]
     ],
+    [ts.SyntaxKind.ConstructorType, [this[FaultID.ConstructorType].bind(this)]],
+    [ts.SyntaxKind.TemplateLiteralType, [this[FaultID.TemplateLiteralType].bind(this)]],
     [ts.SyntaxKind.ModuleDeclaration, [this[FaultID.Module].bind(this)]],
     [
       ts.SyntaxKind.ModuleBlock,
@@ -104,7 +107,8 @@ export class Autofixer {
         this[FaultID.ObjectParametersToJSValue].bind(this),
         this[FaultID.InstanceType].bind(this),
         this[FaultID.NoBuiltInType].bind(this),
-        this[FaultID.ESObjectType].bind(this)
+        this[FaultID.ESObjectType].bind(this),
+        this[FaultID.UtilityType].bind(this)
       ]
     ],
     [
@@ -116,13 +120,19 @@ export class Autofixer {
         this[FaultID.RemoveLimitDecorator].bind(this)
       ]
     ],
+    [ts.SyntaxKind.Parameter,
+      [
+        this[FaultID.ReservedFuncParameter].bind(this),
+        this[FaultID.RestParameterArray].bind(this)
+      ]
+    ],
     [ts.SyntaxKind.TypeQuery, [this[FaultID.TypeQuery].bind(this)]],
     [ts.SyntaxKind.TypeParameter, [this[FaultID.LiteralType].bind(this)]],
     [
       ts.SyntaxKind.ClassDeclaration,
       [
-        this[FaultID.NoPrivateMember].bind(this),
-        this[FaultID.DefaultExport].bind(this),
+        this[FaultID.NoPrivateMember].bind(this), 
+        this[FaultID.AddDeclareToClass].bind(this),
         this[FaultID.NoETSKeyword].bind(this),
         this[FaultID.RemoveLimitDecorator].bind(this),
         this[FaultID.NoOptionalMemberFunction].bind(this)
@@ -136,6 +146,8 @@ export class Autofixer {
     [ts.SyntaxKind.MappedType, [this[FaultID.MappedType].bind(this)]],
     [ts.SyntaxKind.TupleType, [this[FaultID.TupleTypeToArray].bind(this)]],
     [ts.SyntaxKind.StructDeclaration, [this[FaultID.StructDeclaration].bind(this)]],
+    [ts.SyntaxKind.IndexedAccessType, [this[FaultID.IndexAccessType].bind(this)]],
+    [ts.SyntaxKind.FunctionType, [this[FaultID.FunctionType].bind(this)]],
     [ts.SyntaxKind.UnionType, [this[FaultID.NoVoidUnionType].bind(this)]],
     [ts.SyntaxKind.VariableDeclaration, [this[FaultID.ConstLiteralToType].bind(this)]]
   ]);
@@ -344,6 +356,8 @@ export class Autofixer {
         // Create a new type alias declaration node
         return ts.factory.createTypeAliasDeclaration(node.modifiers, node.name, node.typeParameters, newType);
       }
+    } else if (ts.isIndexedAccessTypeNode(node) && !ts.isLiteralTypeNode(node.indexType)) {
+      return this.context.factory.createTypeReferenceNode(this.context.factory.createIdentifier(JSValue), undefined);
     }
 
     return node;
@@ -958,6 +972,52 @@ export class Autofixer {
   }
 
   /**
+   * Rule: `arkts-add-declare-to-classes`
+   */
+  private [FaultID.AddDeclareToClass](node: ts.Node): ts.VisitResult<ts.Node> {
+    if (!ts.isClassDeclaration(node)) {
+      return node;
+    }
+
+    const modifiers = node.modifiers;
+    if (!modifiers) {
+      return node;
+    }
+
+    const isExported = modifiers.some(m => m.kind === ts.SyntaxKind.ExportKeyword);
+    if (!isExported) {
+      return node;
+    }
+
+    const hasDeclare = modifiers.some(m => m.kind === ts.SyntaxKind.DeclareKeyword);
+    if (hasDeclare) {
+      return node;
+    }
+
+    const isDefaultExport = modifiers.some(m => m.kind === ts.SyntaxKind.DefaultKeyword);
+    
+    if (isDefaultExport) {
+      // For default export class, add declare after 'export default'
+      return exportDefaultAssignment(node, this.context);
+    } else {
+      //For regular export class, add declare after 'export'
+      const newModifiers = [
+        ...modifiers.filter(m => ts.isModifier(m)),
+        this.context.factory.createModifier(ts.SyntaxKind.DeclareKeyword)
+      ] as ts.Modifier[];
+
+      return this.context.factory.updateClassDeclaration(
+        node,
+        newModifiers,
+        node.name,
+        node.typeParameters,
+        node.heritageClauses,
+        node.members
+      );
+    }
+  }
+
+  /**
    * Rule: `arkts-no-call-signature-or-optional-methods`
    */
   private [FaultID.CallorOptionFuncs](node: ts.Node): ts.VisitResult<ts.Node> {
@@ -994,41 +1054,41 @@ export class Autofixer {
     return node;
   }
 
-  /*
-   * Rule: `arkts-no-type-generic`
-   */
-  private [FaultID.TypeGeneric](node: ts.Node): ts.VisitResult<ts.Node> {
-    void this;
-
+  /**
+    * Rule: `arkts-no-ts-utility-type`
+    */
+  private [FaultID.UtilityType](node: ts.Node): ts.VisitResult<ts.Node> {
     /**
-     * Generic type alias mapped to JSValue in arkts1.2
+     * Map TS utility type to JSValue in arkts1.2
      */
 
-    if (ts.isTypeAliasDeclaration(node)) {
-      const shouldReplace = [
-        (checkNode: ts.Node): boolean => {
-          return SpecificTypes.includes(ts.SyntaxKind[checkNode.kind]);
-        },
-        (checkNode: ts.Node): boolean => {
-          return (
-            ts.isTypeReferenceNode(checkNode) &&
-            ts.isIdentifier(checkNode.typeName) &&
-            UtilityTypes.includes(checkNode.typeName.text)
-          );
-        }
-      ].some((check) => {
-        return check(node.type);
-      });
-      if (shouldReplace) {
-        return ts.factory.createTypeAliasDeclaration(
-          node.modifiers,
-          node.name,
-          node.typeParameters,
-          ts.factory.createTypeReferenceNode(JSValue, undefined)
-        );
-      }
+    if (ts.isTypeReferenceNode(node) && isUtilityTypes(node)) {
+      return createNodeFromUtilType(
+        UtilityTypes.get((node.typeName as ts.Identifier).text)!,
+        this.context.factory
+      );
     }
     return node;
+  }
+
+  /**
+   * Rule: `arkts-no-constructor-type`
+   */
+  private [FaultID.ConstructorType](node: ts.Node): ts.VisitResult<ts.Node> {
+    return this.context.factory.createTypeReferenceNode(
+      this.context.factory.createIdentifier(JSValue),
+      undefined
+    );
+  }
+
+  /**
+   * Rule: `arkts-no-template-literal-type`
+   */
+  private [FaultID.TemplateLiteralType](node: ts.Node): ts.VisitResult<ts.Node> {
+    return this.context.factory.createTypeReferenceNode(
+      this.context.factory.createIdentifier(JSValue),
+      undefined
+    );
   }
 
   /**
@@ -1230,6 +1290,33 @@ export class Autofixer {
   }
 
   /**
+   * Rule: `arkts-reserved-function-parameter-name`
+   */
+  private [FaultID.ReservedFuncParameter](node: ts.Node): ts.VisitResult<ts.Node> {
+    /**
+     * Some of the function parameters are reserved keywords in ArkTS 1.2.
+     * decorate them with underscore prefix to avoid conflicts.
+     */
+    if (
+      ts.isParameter(node) &&
+      ts.isIdentifier(node.name) &&
+      InvalidFuncParaNames.has(node.name.text)
+    ) {
+      const updatedNode = this.context.factory.updateParameterDeclaration(
+        node,
+        node.modifiers,
+        node.dotDotDotToken,
+        this.context.factory.createIdentifier(`_${node.name.text}`),
+        node.questionToken,
+        node.type,
+        node.initializer
+      );
+      return updatedNode;
+    }
+    return node;
+  }
+
+  /** 
    * Rule: `arkts-no-optional-member-function`
    */
   private [FaultID.NoOptionalMemberFunction](node: ts.Node): ts.VisitResult<ts.Node> {
@@ -1247,6 +1334,41 @@ export class Autofixer {
         node.heritageClauses,
         updatedMembers
       );
+    }
+    return node;
+  }
+
+  /**
+   * Rule: `arkts-rest-parameter-array`
+   */
+  private [FaultID.RestParameterArray](node: ts.Node): ts.VisitResult<ts.Node> {
+    /**
+     * Rest parameters named `ESObject` will be converted to `Any[]` type in ArkTS 1.2.
+     */
+    if (
+      ts.isParameter(node) &&
+      node.dotDotDotToken &&
+      node.type &&
+      ts.isTypeReferenceNode(node.type)
+    ) {
+      const typeName = node.type.typeName;
+      if (
+        ts.isIdentifier(typeName) &&
+        (typeName.text === ESObject || typeName.text === JSValue)
+      ) {
+        const typeNode = this.context.factory.createArrayTypeNode(
+          this.context.factory.createTypeReferenceNode(JSValue, undefined)
+        );
+        return this.context.factory.updateParameterDeclaration(
+          node,
+          node.modifiers,
+          node.dotDotDotToken,
+          node.name,
+          node.questionToken,
+          typeNode,
+          node.initializer
+        );
+      }
     }
     return node;
   }
@@ -1292,6 +1414,51 @@ export class Autofixer {
   }
 
   /**
+   * Rule: `arkts-no-generic-function-type`
+   */
+  private [FaultID.FunctionType](node: ts.Node): ts.VisitResult<ts.Node> {
+    /**
+     * For function types with generic parameters, convert them to Any
+     */
+    if (ts.isFunctionTypeNode(node)) {
+      if (node.typeParameters && node.typeParameters.length > 0) {
+        return this.context.factory.createTypeReferenceNode(
+          this.context.factory.createIdentifier(JSValue),
+          undefined
+        );
+      }
+
+      let hasImportType = false;
+      const visitNode = (childNode: ts.Node) => {
+        if (ts.isImportTypeNode(childNode)) {
+          hasImportType = true;
+          return;
+        }
+        ts.forEachChild(childNode, visitNode);
+      };
+
+      node.parameters.forEach(param => {
+        if (param.type) {
+          visitNode(param.type);
+        }
+      });
+    
+      if (node.type) {
+        visitNode(node.type);
+      }
+    
+      if (hasImportType) {
+        return this.context.factory.createTypeReferenceNode(
+          this.context.factory.createIdentifier(JSValue),
+          undefined
+        );
+      }
+    }
+    
+    return node;
+  }
+
+  /*
    * Rule: `union type with void mapped to Any`
    */
   private [FaultID.NoVoidUnionType](node: ts.Node): ts.VisitResult<ts.Node> {
@@ -2409,7 +2576,7 @@ function replaceEsObjectTypeName(node: ts.TypeReferenceNode, factory: ts.NodeFac
     node.typeArguments
   );
 }
-  
+
 /**
  * helper function to filter out optional(with question token) methods in class declaration.
  */ 
@@ -2418,4 +2585,25 @@ function isNotOptionalMemberFunction(member: ts.ClassElement): boolean {
     return false;
   }
   return true;
+}
+
+function isUtilityTypes(node: ts.TypeReferenceNode): boolean {
+  return ts.isIdentifier(node.typeName) &&
+    UtilityTypes.has(node.typeName.text);
+}
+
+function isSpecificTypes(node: ts.Node): boolean {
+  return SpecificTypes.includes(node.kind);
+}
+
+/**
+ * Creates an AST node that represents a type compatible with ArkTS 1.2,
+ * based on the given utility type in ArkTS 1.1
+ */
+function createNodeFromUtilType(targetType: string, factory: ts.NodeFactory):
+  ts.TypeReferenceNode | ts.ArrayTypeNode {
+  if (targetType === ArrayType) {
+    return factory.createArrayTypeNode(factory.createTypeReferenceNode(JSValue));
+  }
+  return factory.createTypeReferenceNode(JSValue);
 }

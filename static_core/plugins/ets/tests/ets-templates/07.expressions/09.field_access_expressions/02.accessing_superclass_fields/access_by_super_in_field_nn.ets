@@ -37,7 +37,7 @@ class B extends A {
 
 function main(): void {
   let instance: B = new B();
-  assertTrue( {{case.assert}} )
+  arktest.assertTrue( {{case.assert}} )
 }
 
 {% endfor %}

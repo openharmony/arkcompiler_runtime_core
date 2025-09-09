@@ -19,5 +19,5 @@
 ---*/
 
 export function bar() {
-    assertEQ(1, 1);
+    arktest.assertEQ(1, 1);
 }

@@ -15,13 +15,15 @@
 
 let mainId = CoroutineExtras.getWorkerId();
 
-// Using one worker in runtime options allows to use 63 free worker id's
-const NUM_EWORKERS: int = 63;
+// Using one worker in runtime options allows to use 127 free worker id's
+const NUM_EWORKERS: int = 127;
 
 function CreateWorkers(): Array<EAWorker> {
     let workers = new Array<EAWorker>();
     for (let i = 0; i < NUM_EWORKERS; i++) {
-        workers.push(new EAWorker());
+        let eaWorker = new EAWorker();
+        eaWorker.start();
+        workers.push(eaWorker);
     }
     return workers;
 }
@@ -30,6 +32,7 @@ function CheckLimitReached() {
     let catched = false;
     try {
         let w = new EAWorker();
+        w.start();
         w.join();
     } catch(e) {
         catched = true;
@@ -44,7 +47,7 @@ function LoadWorkers(workers: Array<EAWorker>): Array<Job<int>> {
     for (let i = 0; i < NUM_EWORKERS; i++) {
         let job = workers[i].run<int>(():int => {
             let runId = CoroutineExtras.getWorkerId();
-            assertNE(runId, mainId);
+            arktest.assertNE(runId, mainId);
             return runId;
         });
         jobs.push(job);
@@ -72,19 +75,26 @@ function JoinWorkers(workers: Array<EAWorker>) {
 
 function CheckUnique(arr: Array<int>) {
     let s = new Set<int>(arr);
-    assertEQ(s.size, arr.length);
+    arktest.assertEQ(s.size, arr.length);
 }
 
-function main() {
+function testEworkerUnlimited(): void {
     let workers = CreateWorkers();
 
     if (!CheckLimitReached()) {
         JoinWorkers(workers);
-        assertTrue(false, 'EAWorkers limit should be reached before');
+        arktest.assertTrue(false, 'EAWorkers limit should be reached before');
     }
 
     let jobs = LoadWorkers(workers);
     let ids = AwaitJobs(jobs);
     CheckUnique(ids);
     JoinWorkers(workers);
+}
+
+function main(): int {
+    let testSuite = new arktest.ArkTestsuite('coroutines.eworker_unlimited');
+    testSuite.addTest('testEworkerUnlimited', testEworkerUnlimited);
+    let res = testSuite.run();
+    return res;
 }

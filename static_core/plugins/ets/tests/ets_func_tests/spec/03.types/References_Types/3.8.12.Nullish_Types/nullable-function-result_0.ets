@@ -24,6 +24,6 @@ function test(): int | null {
 }
 
 function main(): void {
-    assertTrue( test() === null)
+    arktest.assertTrue( test() === null)
 
 }

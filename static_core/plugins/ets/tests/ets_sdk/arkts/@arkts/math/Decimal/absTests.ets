@@ -16,7 +16,7 @@
 import { Decimal } from "@arkts.math.Decimal";
 
 function main() {
-    const suite = new ArkTestsuite("Decimal abs API tests");
+    const suite = new arktest.ArkTestsuite("Decimal abs API tests");
     suite.addTest('Decimal abs with default config', testAbsWithDefaultConfig001);
     suite.addTest('Decimal abs with default config', testAbsWithDefaultConfig002);
     suite.addTest('Decimal abs with default config', testAbsWithDefaultConfig003);

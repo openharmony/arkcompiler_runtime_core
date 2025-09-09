@@ -19,7 +19,7 @@ class A {
     }
 
     shortByNameMethod(a0: short, a1: short): short {
-        return a0 + a1 as short;
+        return (a0 + a1).toShort();
     }
 }
 
@@ -38,7 +38,7 @@ class B implements ji {
         if (this.data > value1 + value2) {
             return this.data;
         } else {
-            return value1 + value2 as short;
+            return (value1 + value2).toShort();
         }
     }
 
@@ -51,17 +51,17 @@ class B implements ji {
     }
 
     protected protectedMethod(value: short): short {
-        return this.data + value as short;
+        return (this.data + value).toShort();
     }
 
     private privateMethod(value: short): short {
-        return this.data - value as short;
+        return (this.data - value).toShort();
     }
 
     public nestedMethod(value: short): short {
         let lambdaMethod: (p1: short, p2: short) => short =
             (param1: short, param2: short): short => {
-                return param1 + param2 as short;
+                return (param1 + param2).toShort();
         };
         return lambdaMethod(this.data, value);
     }
@@ -70,23 +70,23 @@ class B implements ji {
         if (value <= 0) {
             return 1;
         } else {
-            return value * this.recursiveMethod(value - 1) as short;
+            return (value * this.recursiveMethod(value - 1)).toShort();
         }
     }
 
     calculateSum(value1: short, value2: char, value3: double): short {
         let aChar: char = c'A';
         if (value2 == aChar) {
-            return this.data - value1 as short;
+            return (this.data - value1).toShort();
         }
         if (value3 == 1.0) {
             return value1;
         }
-        return this.data + value1 as short;
+        return (this.data + value1).toShort();
     }
 
     public jf(value: short): short {
-        return this.data - value as short;
+        return (this.data - value).toShort();
     }
 }
 
@@ -99,11 +99,11 @@ final class C extends B {
     data1: short;
 
     public shortAddMethod(value1: short, value2: short): short {
-        return this.data1 + value1 + value2 as short;
+        return (this.data1 + value1 + value2).toShort();
     }
 
     public override shortMethod(value1: short, value2: short): short {
-        return this.data1 - value1 - value2 as short;
+        return (this.data1 - value1 - value2).toShort();
     }
 
     public callProtected(value: short): short {
@@ -111,6 +111,6 @@ final class C extends B {
     }
 
     public jf(value: short): short {
-        return this.data1 + value as short;
+        return (this.data1 + value).toShort();
     }
 }

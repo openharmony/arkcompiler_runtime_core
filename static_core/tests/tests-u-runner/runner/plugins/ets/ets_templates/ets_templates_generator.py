@@ -15,7 +15,6 @@
 # limitations under the License.
 #
 
-import os
 import shutil
 import logging
 from pathlib import Path
@@ -27,6 +26,8 @@ from runner.plugins.ets.utils.exceptions import InvalidFileFormatException, Inva
 from runner.plugins.ets.ets_templates.benchmark import Benchmark, TEMPLATE_EXTENSION, TEMPLATE_EXTENSION_TS
 
 _LOGGER = logging.getLogger("runner.plugins.ets.ets_templates.ets_templates_generator")
+
+EXPECTED_FILE_EXTENSION = ".expected"
 
 
 class EtsTemplatesGenerator:
@@ -50,6 +51,11 @@ class EtsTemplatesGenerator:
             self.__generate_test(path)
         elif path.suffix == TEMPLATE_EXTENSION_TS:
             self.__generate_test(path)
+        elif EXPECTED_FILE_EXTENSION in path.suffixes:
+            test_full_name = path.relative_to(self.__root_path)
+            output = self.__output_path / test_full_name
+            shutil.copy(path, output)
+
 
     def generate(self) -> List[str]:
         Log.all(_LOGGER, "Starting generate test")
@@ -68,7 +74,7 @@ class EtsTemplatesGenerator:
         return self.generated_tests
 
     def __generate_test(self, path: Path) -> None:
-        test_full_name = os.path.relpath(path, self.__root_path)
+        test_full_name = str(path.relative_to(self.__root_path))
         output = self.__output_path / test_full_name
         bench = Benchmark(path, output, test_full_name)
         self.generated_tests.extend(bench.generate())

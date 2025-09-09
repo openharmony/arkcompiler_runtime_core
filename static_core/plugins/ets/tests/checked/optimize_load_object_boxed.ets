@@ -22,7 +22,7 @@
 //! INST_COUNT    /LoadObject.*Byte/, 0
 //! PASS_AFTER    "LICM"
 //! IN_BLOCK      /prehead/
-//! INST_COUNT    /LoadObject.*Byte/, 1
+//! INST_COUNT    /LoadObject.*Byte/, 0
 //!
 //! METHOD        "optimize_load_object_boxed.ETSGLOBAL::testChar"
 //! PASS_BEFORE   "LICM"
@@ -30,7 +30,7 @@
 //! INST_COUNT    /LoadObject.*Char/, 0
 //! PASS_AFTER    "LICM"
 //! IN_BLOCK      /prehead/
-//! INST_COUNT    /LoadObject.*Char/, 1
+//! INST_COUNT    /LoadObject.*Char/, 0
 //!
 //! METHOD        "optimize_load_object_boxed.ETSGLOBAL::testShort"
 //! PASS_BEFORE   "LICM"
@@ -38,7 +38,7 @@
 //! INST_COUNT    /LoadObject.*Short/, 0
 //! PASS_AFTER    "LICM"
 //! IN_BLOCK      /prehead/
-//! INST_COUNT    /LoadObject.*Short/, 1
+//! INST_COUNT    /LoadObject.*Short/, 0
 //!
 //! METHOD        "optimize_load_object_boxed.ETSGLOBAL::testInt"
 //! PASS_BEFORE   "LICM"
@@ -46,7 +46,7 @@
 //! INST_COUNT    /LoadObject.*Int/, 0
 //! PASS_AFTER    "LICM"
 //! IN_BLOCK      /prehead/
-//! INST_COUNT    /LoadObject.*Int/, 1
+//! INST_COUNT    /LoadObject.*Int/, 0
 //!
 //! METHOD        "optimize_load_object_boxed.ETSGLOBAL::testLong"
 //! PASS_BEFORE   "LICM"
@@ -54,7 +54,7 @@
 //! INST_COUNT    /LoadObject.*Long/, 0
 //! PASS_AFTER    "LICM"
 //! IN_BLOCK      /prehead/
-//! INST_COUNT    /LoadObject.*Long/, 1
+//! INST_COUNT    /LoadObject.*Long/, 0
 //!
 //! METHOD        "optimize_load_object_boxed.ETSGLOBAL::testFloat"
 //! PASS_BEFORE   "LICM"
@@ -62,7 +62,7 @@
 //! INST_COUNT    /LoadObject.*Float/, 0
 //! PASS_AFTER    "LICM"
 //! IN_BLOCK      /prehead/
-//! INST_COUNT    /LoadObject.*Float/, 1
+//! INST_COUNT    /LoadObject.*Float/, 0
 //!
 //! METHOD        "optimize_load_object_boxed.ETSGLOBAL::testNumber"
 //! PASS_BEFORE   "LICM"
@@ -70,52 +70,52 @@
 //! INST_COUNT    /LoadObject.*Double/, 0
 //! PASS_AFTER    "LICM"
 //! IN_BLOCK      /prehead/
-//! INST_COUNT    /LoadObject.*Double/, 1
+//! INST_COUNT    /LoadObject.*Double/, 0
 //!
 //! METHOD        "optimize_load_object_boxed.ETSGLOBAL::testByteVN"
 //! PASS_BEFORE   "LSE"
-//! INST_COUNT    /LoadObject.*Byte/, 8
+//! INST_COUNT    /LoadObject.*Byte/, 6
 //! PASS_AFTER    "LSE"
-//! INST_COUNT    /LoadObject.*Byte/, 2
+//! INST_COUNT    /LoadObject.*Byte/, 0
 //!
 //! METHOD        "optimize_load_object_boxed.ETSGLOBAL::testCharVN"
 //! PASS_BEFORE   "LSE"
-//! INST_COUNT    /LoadObject.*Char/, 8
+//! INST_COUNT    /LoadObject.*Char/, 6
 //! PASS_AFTER    "LSE"
-//! INST_COUNT    /LoadObject.*Char/, 2
+//! INST_COUNT    /LoadObject.*Char/, 0
 //!
 //! METHOD        "optimize_load_object_boxed.ETSGLOBAL::testShortVN"
 //! PASS_BEFORE   "LSE"
-//! INST_COUNT    /LoadObject.*Short/, 8
+//! INST_COUNT    /LoadObject.*Short/, 6
 //! PASS_AFTER    "LSE"
-//! INST_COUNT    /LoadObject.*Short/, 2
+//! INST_COUNT    /LoadObject.*Short/, 0
 //!
 //! METHOD        "optimize_load_object_boxed.ETSGLOBAL::testIntVN"
 //! PASS_BEFORE   "LSE"
-//! INST_COUNT    /LoadObject.*Int/, 8
+//! INST_COUNT    /LoadObject.*Int/, 6
 //! PASS_AFTER    "LSE"
-//! INST_COUNT    /LoadObject.*Int/, 2
+//! INST_COUNT    /LoadObject.*Int/, 0
 //!
 //! METHOD        "optimize_load_object_boxed.ETSGLOBAL::testLongVN"
 //! PASS_BEFORE   "LSE"
-//! INST_COUNT    /LoadObject.*Long/, 8
+//! INST_COUNT    /LoadObject.*Long/, 6
 //! PASS_AFTER    "LSE"
-//! INST_COUNT    /LoadObject.*Long/, 2
+//! INST_COUNT    /LoadObject.*Long/, 0
 //!
 //! METHOD        "optimize_load_object_boxed.ETSGLOBAL::testFloatVN"
 //! PASS_BEFORE   "LSE"
-//! INST_COUNT    /LoadObject.*Float/, 8
+//! INST_COUNT    /LoadObject.*Float/, 6
 //! PASS_AFTER    "LSE"
-//! INST_COUNT    /LoadObject.*Float/, 2
+//! INST_COUNT    /LoadObject.*Float/, 0
 //!
 //! METHOD        "optimize_load_object_boxed.ETSGLOBAL::testNumberVN"
 //! PASS_BEFORE   "LSE"
-//! INST_COUNT    /LoadObject.*Double/, 8
+//! INST_COUNT    /LoadObject.*Double/, 6
 //! PASS_AFTER    "LSE"
-//! INST_COUNT    /LoadObject.*Double/, 2
+//! INST_COUNT    /LoadObject.*Double/, 0
 
 function testByte(input: Byte): byte {
-    let result: byte = 0 as byte;
+    let result: byte = (0).toByte();
 
     for (let i = 0; i < 5000; i++) {
         result += Byte.valueOf(input);
@@ -192,48 +192,48 @@ function __noinline__dummyReturn(): Int {
 }
 
 function testByteVN(a: Byte, b: Byte): byte {
-    let x: byte = Byte.valueOf(a) + Byte.valueOf(b) as byte;
+    let x: byte = (Byte.valueOf(a) + Byte.valueOf(b)).toByte();
     __noinline__dummy(x);
-    let y: byte = Byte.valueOf(a) + Byte.valueOf(b) as byte;
+    let y: byte = (Byte.valueOf(a) + Byte.valueOf(b)).toByte();
     __noinline__dummy(y);
-    let z: byte = Byte.valueOf(b) + Byte.valueOf(a) as byte;
+    let z: byte = (Byte.valueOf(b) + Byte.valueOf(a)).toByte();
     __noinline__dummy(z);
 
     for (let i = 0; i < 5000; i++) {
         let t: Int = __noinline__dummyReturn()
     }
 
-    return x + y + z as byte;
+    return (x + y + z).toByte();
 }
 
 function testCharVN(a: Char, b: Char): char {
-    let x: char = Char.valueOf(a) + Char.valueOf(b) as char;
+    let x: char = (Char.valueOf(a) + Char.valueOf(b)).toChar();
     __noinline__dummy(x);
-    let y: char = Char.valueOf(a) + Char.valueOf(b) as char;
+    let y: char = (Char.valueOf(a) + Char.valueOf(b)).toChar();
     __noinline__dummy(y);
-    let z: char = Char.valueOf(b) + Char.valueOf(a) as char;
+    let z: char = (Char.valueOf(b) + Char.valueOf(a)).toChar();
     __noinline__dummy(z);
 
     for (let i = 0; i < 5000; i++) {
         let t: Int = __noinline__dummyReturn()
     }
 
-    return x + y + z as char;
+    return (x + y + z).toChar();
 }
 
 function testShortVN(a: Short, b: Short): short {
-    let x: short = Short.valueOf(a) + Short.valueOf(b) as short;
+    let x: short = (Short.valueOf(a) + Short.valueOf(b)).toShort();
     __noinline__dummy(x);
-    let y: short = Short.valueOf(a) + Short.valueOf(b) as short;
+    let y: short = (Short.valueOf(a) + Short.valueOf(b)).toShort();
     __noinline__dummy(y);
-    let z: short = Short.valueOf(b) + Short.valueOf(a) as short;
+    let z: short = (Short.valueOf(b) + Short.valueOf(a)).toShort();
     __noinline__dummy(z);
 
     for (let i = 0; i < 5000; i++) {
         let t: Int = __noinline__dummyReturn()
     }
 
-    return x + y + z as short;
+    return (x + y + z).toShort();
 }
 
 function testIntVN(a: Int, b: Int): int {

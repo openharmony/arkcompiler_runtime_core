@@ -74,7 +74,6 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 % dispatch_table_hash = Hash.new()
 % Panda::instructions.each do |i|
 %   combination_flags = ""
-%   mnemonic = i.mnemonic.split('.').map { |p| p == '64' ? 'Wide' : p.capitalize }.join
 %   value_dispatch = "HANDLE_" + i.handler_name
 %   if i.properties.any? {  |prop| ['method_id', 'static_method_id', 'field_id', 'static_field_id', 'type_id', 'literalarray_id'].include?(prop)}
 %                           combination_flags += "Prop_"
@@ -107,6 +106,10 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 %   end
 %   if i.properties.include?('string_id')
 %       combination_flags += "StringId_"
+%   end
+%   # special case for ets.ldnullvalue and ets.movnullvalue
+%   if i.handler_name.include?('LDNULLVALUE') or i.handler_name.include?('MOVNULLVALUE')
+%       combination_flags += "NullValue_"
 %   end
 %   combination_flags += "GetNext_"
 %   flag = dispatch_table_hash.include?(combination_flags)
@@ -196,7 +199,7 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 %        bool isArrayConstructorCall = false;
 %        if (calledMethod == nullptr) {
 %            panda_file::MethodDataAccessor const mda(*pf, methodId);
-%            Class *cls = classLinker_->GetClass(*method_, mda.GetClassId(), &errorHandler);
+%            Class *cls = GetClass(panda_file::MethodDataAccessor(*method_->GetPandaFile(), methodId).GetClassId(), &errorHandler);
 %
 %            auto opcode = inst.GetOpcode();
 %            if (UNLIKELY((opcode == BytecodeInstructionSafe::Opcode::INITOBJ_SHORT_V4_V4_ID16 ||
@@ -222,7 +225,7 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 %    "StaticFieldId_" => %({
 %        ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
 %        auto fieldIdx = method_->GetClass()->ResolveFieldIndex(id.AsIndex());
-%        auto *cachedField = classLinker_->GetField(*method_, fieldIdx, true, &errorHandler);
+%        auto *cachedField = GetField(fieldIdx, true, &errorHandler);
 %        if (cachedField != nullptr) {
 %            AddField(inst.GetOffset(), cachedField);
 %            auto classType = Type {cachedField->GetClass()};
@@ -235,7 +238,7 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 %    "FieldId_" => %({
 %        ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
 %        auto fieldIdx = method_->GetClass()->ResolveFieldIndex(id.AsIndex());
-%        auto *cachedField = classLinker_->GetField(*method_, fieldIdx, false, &errorHandler);
+%        auto *cachedField = GetField(fieldIdx, false, &errorHandler);
 %        if (cachedField != nullptr) {
 %            AddField(inst.GetOffset(), cachedField);
 %            auto classType = Type {cachedField->GetClass()};
@@ -248,7 +251,7 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 %    "TypeId_" => %({
 %        auto classIdx = method_->GetClass()->ResolveClassIndex(id.AsIndex());
 %        ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
-%        auto *cachedClass = classLinker_->GetClass(*method_, classIdx, &errorHandler);
+%        auto *cachedClass = GetClass(classIdx, &errorHandler);
 %        if (cachedClass != nullptr) {
 %            auto classType = Type {cachedClass};
 %            AddType(inst.GetOffset(), &classType);
@@ -278,6 +281,16 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 %            LOG(ERROR, VERIFIER) << "JOBFILL: Cannot resolve Class class in method " << method_->GetFullName();
 %        }
 %    }),
+%    "NullValue_" => %(
+%        ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
+%        auto cachedUniqueObjectClass = classLinker_->GetClass(langContext_.GetUniqueObjectClassDescriptor(), false, classLinkerCtx_, &errorHandler);
+%        if (cachedUniqueObjectClass != nullptr) {
+%            auto cachedClassType = Type {cachedUniqueObjectClass};
+%            AddType(inst.GetOffset(), &cachedClassType);
+%        } else {
+%            LOG(ERROR, VERIFIER) << "JOBFILL: Cannot resolve Null class in method " << method_->GetFullName();
+%        }
+%     ),
 %    "GetNext_" => %(
 %        if (inst.IsLast()) {
 %            return true;

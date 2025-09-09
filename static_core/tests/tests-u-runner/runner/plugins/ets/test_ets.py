@@ -16,7 +16,7 @@
 #
 
 from __future__ import annotations
-
+import re
 from unittest import TestCase
 from os import path, makedirs
 from pathlib import Path
@@ -54,7 +54,8 @@ class TestETS(TestFileBased):
         makedirs(self.bytecode_path, exist_ok=True)
         self.test_abc = path.join(self.bytecode_path, f"{self.test_id}.abc")
         self.test_an = path.join(self.bytecode_path, f"{self.test_id}.an")
-        self.test_expected = path.join(test_env.work_dir.gen, f"{self.test_id}.expected")
+        self.test_expected = Path(test_env.work_dir.gen) / f"{self.test_id}.expected"
+        self.test_expected_err = Path(test_env.work_dir.gen) / f"{self.test_id}.expected.err"
         makedirs(path.dirname(self.test_abc), exist_ok=True)
 
     @property
@@ -82,6 +83,11 @@ class TestETS(TestFileBased):
     def has_expected(self) -> bool:
         """ True if test.expected file exists """
         return path.isfile(self.test_expected)
+
+    @property
+    def has_expected_err(self) -> bool:
+        """ True if test.expected.err file exists """
+        return path.isfile(self.test_expected_err)
 
     @property
     def ark_extra_options(self) -> List[str]:
@@ -135,6 +141,16 @@ class TestETS(TestFileBased):
         if not self.dependent_files:
             return super().verifier_args
         return self.add_panda_files(super().verifier_args)
+
+    @staticmethod
+    def _read_file(path_to_file: Path) -> str:
+        with open(path_to_file, 'r', encoding='utf-8') as f:
+            return ''.join(line for line in f if not line.startswith('#'))
+
+    @staticmethod
+    def _normalize_error_report(report: TestReport) -> str:
+        pattern = ".(TID .{6}])."
+        return re.sub(pattern, "", report.error)
 
     def get_all_abc_dependent_files(self) -> List[str]:
         result: List[str] = []
@@ -222,21 +238,15 @@ class TestETS(TestFileBased):
             self.test_abc,
             lambda _, _2, rc: self._runtime_result_validator(rc))
 
-        if self.has_expected and self.passed:
-            self.passed, self.report, self.fail_kind = self._compare_output_with_expected()
+        if self.passed and (self.has_expected or self.has_expected_err):
+            self.passed, self.report, self.fail_kind = self.compare_output_with_expected()
+        elif self.passed:
+            self.passed = not self.report.error
+
         return self
 
-    def _read_expected_file(self) -> None:
-        with open(self.test_expected, 'r', encoding="utf-8") as file_pointer:
-            expected = ""
-            for line in file_pointer.readlines():
-                if line.startswith("#"):
-                    continue
-                expected += line
 
-            self.expected = expected
-
-    def _compare_output_with_expected(self) -> Tuple[bool, TestReport, Optional[FailKind]]:
+    def compare_output_with_expected(self) -> Tuple[bool, TestReport, Optional[FailKind]]:
         """Compares test output with expected"""
         fail_kind = None
         if not self.report:
@@ -244,17 +254,35 @@ class TestETS(TestFileBased):
         report = self.report
         try:
             self._read_expected_file()
-            if not self.test_env.config.ark.jit.enable:
-                passed = self.expected == self.report.output + '\n' and self.report.return_code in [0, 1]
-            else:
-                passed = self.expected in self.report.output + '\n' and self.report.return_code in [0, 1]
+            passed = self.passed
+            if self.expected and not self.expected_err:
+                # Compare with output from std.OUT
+                passed = (self.expected in report.output + '\n'
+                                 and report.return_code in [0, 1]
+                                 and not report.error)
+            elif self.expected_err and not self.expected:
+                # Compare with output from std.ERR
+                report_error = self._normalize_error_report(report)
+                passed = self.expected_err in report_error + '\n' and self.report.return_code in [0, 1]
+            elif self.expected and self.expected_err:
+                # Compare .expected file with std.OUT and .expected.err with std.ERR
+                passed_stdout = self.expected in report.output + '\n' and self.report.return_code in [0, 1]
+                passed_stderr = self.expected_err in report.error + '\n' and self.report.return_code in [0, 1]
+                passed = passed_stdout and passed_stderr
+
         except OSError as error:
             passed = False
             report = TestReport(error=str(error), output=self.report.output, return_code=self.report.return_code)
 
         if not passed:
             fail_kind = FailKind.COMPARE_OUTPUT_FAIL
-        return passed, report, fail_kind
+        return bool(passed), report, fail_kind
+
+    def _read_expected_file(self) -> None:
+        if self.has_expected:
+            self.expected = self._read_file(self.test_expected)
+        if self.has_expected_err:
+            self.expected_err = self._read_file(self.test_expected_err)
 
     def _run_compare_mode(self) -> TestETS:
         files = []

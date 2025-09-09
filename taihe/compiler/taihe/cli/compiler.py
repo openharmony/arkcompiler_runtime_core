@@ -19,8 +19,13 @@ from pathlib import Path
 
 from taihe.driver.backend import BackendRegistry
 from taihe.driver.contexts import CompilerInstance, CompilerInvocation
+from taihe.utils.build_metadata import BuildMetadata
 from taihe.utils.outputs import CMakeOutputConfig, OutputConfig
-from taihe.utils.resources import ResourceLocator, ResourceType
+from taihe.utils.resources import (
+    ResourceContext,
+    RuntimeHeader,
+    RuntimeSource,
+)
 
 
 def main():
@@ -51,7 +56,7 @@ def main():
         "-O",
         type=Path,
         dest="dst_dir",
-        required=True,
+        default="taihe-generated",
         help="directory for generated files",
     )
     parser.add_argument(
@@ -59,59 +64,71 @@ def main():
         "-G",
         dest="backends",
         nargs="*",
+        action="extend",
         default=[],
         choices=registry.get_backend_names(),
         help="backends to generate sources, default: abi-header, abi-source, c-author",
     )
     parser.add_argument(
-        "--codegen",
-        "-C",
-        dest="config",
-        action="append",
-        default=[],
-        help="additional code generation configuration",
-    )
-    parser.add_argument(
         "--build",
         "-B",
-        dest="build_system",
+        dest="buildsys",
         choices=["cmake"],
         help="build system to use for generated sources",
     )
+    parser.add_argument(
+        "--codegen",
+        "-C",
+        dest="config",
+        nargs="*",
+        action="extend",
+        default=[],
+        help="additional code generation configuration",
+    )
+
+    # Special options {{
+    ResourceContext.register_cli_options(parser)
+    parser.add_argument("--version", action="store_true")
+
     args = parser.parse_args()
+    if args.version:
+        BuildMetadata.get().print_info(tool="Taihe compiler (taihec)", auto_exit=True)
+    ResourceContext.initialize(args)
+    # }} Special options
+
+    if not args.src_files and not args.src_dirs:
+        print("taihec: error: no input files", file=sys.stderr)
+        return -1
 
     backends = registry.collect_required_backends(args.backends)
     resolved_backends = [b() for b in backends]
 
-    locator = ResourceLocator.detect()
-    if args.build_system == "cmake":
+    if args.buildsys == "cmake":
         output_config = CMakeOutputConfig(
             dst_dir=Path(args.dst_dir),
-            runtime_include_dir=locator.get(ResourceType.RUNTIME_HEADER),
-            runtime_src_dir=locator.get(ResourceType.RUNTIME_SOURCE),
+            runtime_include_dir=RuntimeHeader.resolve_path(),
+            runtime_src_dir=RuntimeSource.resolve_path(),
         )
     else:
         output_config = OutputConfig(
             dst_dir=Path(args.dst_dir),
         )
 
+    extra: dict[str, str | None] = {}
+    for config in args.config:
+        k, *v = config.split("=", 1)
+        if v:
+            extra[k] = v[0]
+        else:
+            extra[k] = None
+
     invocation = CompilerInvocation(
         src_files=args.src_files,
         src_dirs=args.src_dirs,
-        output_config=output_config,
         backends=resolved_backends,
+        output_config=output_config,
+        extra=extra,
     )
-
-    for config in args.config:
-        k, *v = config.split("=", 1)
-        if k == "sts:keep-name":
-            invocation.sts_keep_name = True
-        elif k == "arkts:module-prefix":
-            invocation.arkts_module_prefix = v[0] if v else None
-        elif k == "arkts:path-prefix":
-            invocation.arkts_path_prefix = v[0] if v else None
-        else:
-            raise ValueError(f"unknown codegen config {k!r}")
 
     instance = CompilerInstance(invocation)
 

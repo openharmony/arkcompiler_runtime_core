@@ -16,7 +16,7 @@
 #ifndef LIBABCKIT_CONVERT_H
 #define LIBABCKIT_CONVERT_H
 
-#include "libabckit/include/c/metadata_core.h"
+#include "libabckit/c/metadata_core.h"
 
 #include <cstdint>
 #include <string_view>

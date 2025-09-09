@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -153,33 +153,37 @@ RegionAllocator<AllocConfigT, LockConfigT>::RegionAllocator(MemStatsType *memSta
 
 template <typename AllocConfigT, typename LockConfigT>
 template <RegionFlag REGION_TYPE>
-void *RegionAllocator<AllocConfigT, LockConfigT>::AllocRegular(size_t alignSize)
+RegionMem RegionAllocator<AllocConfigT, LockConfigT>::AllocRegular(size_t alignSize)
 {
     static constexpr bool IS_ATOMIC = std::is_same_v<LockConfigT, RegionAllocatorLockConfig::CommonLock>;
+    bool isRegionZeroed = false;
     static_assert((REGION_TYPE == RegionFlag::IS_EDEN) || (REGION_TYPE == RegionFlag::IS_OLD) ||
                   (REGION_TYPE == RegionFlag::IS_PINNED));
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
     if constexpr (REGION_TYPE == RegionFlag::IS_EDEN) {
-        void *mem = GetCurrentRegion<IS_ATOMIC, REGION_TYPE>()->template Alloc<IS_ATOMIC>(alignSize);
+        Region *region = GetCurrentRegion<IS_ATOMIC, REGION_TYPE>();
+        void *mem = region->template Alloc<IS_ATOMIC>(alignSize);
         if (mem != nullptr) {
-            return mem;
+            return RegionMem {mem, region->HasFlag(RegionFlag::IS_ZEROED)};
         }
 
         os::memory::LockHolder lock(this->regionLock_);
-        mem = GetCurrentRegion<IS_ATOMIC, REGION_TYPE>()->template Alloc<IS_ATOMIC>(alignSize);
+        region = GetCurrentRegion<IS_ATOMIC, REGION_TYPE>();
+        mem = region->template Alloc<IS_ATOMIC>(alignSize);
         if (mem != nullptr) {
-            return mem;
+            return RegionMem {mem, region->HasFlag(RegionFlag::IS_ZEROED)};
         }
 
-        Region *region = this->template CreateAndSetUpNewRegion<AllocConfigT>(REGION_SIZE, REGION_TYPE);
+        region = this->template CreateAndSetUpNewRegion<AllocConfigT>(REGION_SIZE, REGION_TYPE);
         if (LIKELY(region != nullptr)) {
             // Here we need memory barrier to make the allocation visible
             // in all threads before SetCurrentRegion
             mem = region->template Alloc<IS_ATOMIC>(alignSize);
+            isRegionZeroed = region->HasFlag(RegionFlag::IS_ZEROED);
             SetCurrentRegion<IS_ATOMIC, REGION_TYPE>(region);
         }
 
-        return mem;
+        return RegionMem {mem, isRegionZeroed};
     }
     void *mem = nullptr;
     Region *regionTo = PopFromRegionQueue<IS_ATOMIC, REGION_TYPE>();
@@ -192,58 +196,70 @@ void *RegionAllocator<AllocConfigT, LockConfigT>::AllocRegular(size_t alignSize)
                 regionTo->PinObject();
             }
             PushToRegionQueue<IS_ATOMIC, REGION_TYPE>(regionTo);
-            return mem;
+            return RegionMem {mem, regionTo->HasFlag(RegionFlag::IS_ZEROED)};
         }
     }
 
     os::memory::LockHolder lock(this->regionLock_);
-    regionTo = this->template CreateAndSetUpNewRegion<AllocConfigT>(REGION_SIZE, RegionFlag::IS_OLD);
+    regionTo = this->template CreateAndSetUpNewRegion<AllocConfigT, OSPagesAllocPolicy::ZEROED_MEMORY>(
+        REGION_SIZE, RegionFlag::IS_OLD);
     if (LIKELY(regionTo != nullptr)) {
         // Here we need memory barrier to make the allocation visible
         // in all threads before SetCurrentRegion
         mem = regionTo->template Alloc<IS_ATOMIC>(alignSize);
+        isRegionZeroed = regionTo->HasFlag(RegionFlag::IS_ZEROED);
         if constexpr (REGION_TYPE == RegionFlag::IS_PINNED) {
             regionTo->PinObject();
         }
         PushToRegionQueue<IS_ATOMIC, REGION_TYPE>(regionTo);
     }
-    return mem;
+    return RegionMem {mem, isRegionZeroed};
 }
 
 template <typename AllocConfigT, typename LockConfigT>
 template <RegionFlag REGION_TYPE, bool UPDATE_MEMSTATS>
 void *RegionAllocator<AllocConfigT, LockConfigT>::Alloc(size_t size, Alignment align, bool pinned)
 {
+    RegionMem regionMem = AllocExt<REGION_TYPE, UPDATE_MEMSTATS>(size, align, pinned);
+    return regionMem.mem;
+}
+
+template <typename AllocConfigT, typename LockConfigT>
+template <RegionFlag REGION_TYPE, bool UPDATE_MEMSTATS>
+RegionMem RegionAllocator<AllocConfigT, LockConfigT>::AllocExt(size_t size, Alignment align, bool pinned)
+{
     ASSERT(GetAlignmentInBytes(align) % GetAlignmentInBytes(DEFAULT_ALIGNMENT) == 0);
     size_t alignSize = AlignUp(size, GetAlignmentInBytes(align));
-    void *mem = nullptr;
+    RegionMem regionMem {nullptr, false};
     // for movable & regular size object, allocate it from a region
     // for nonmovable or large size object, allocate a seprate large region for it
     if (this->GetSpaceType() != SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT &&
         LIKELY(alignSize <= GetMaxRegularObjectSize())) {
-        mem = pinned ? AllocRegular<IS_PINNED>(alignSize) : AllocRegular<REGION_TYPE>(alignSize);
+        regionMem = pinned ? AllocRegular<IS_PINNED>(alignSize) : AllocRegular<REGION_TYPE>(alignSize);
     } else {
         os::memory::LockHolder lock(this->regionLock_);
         Region *region = this->template CreateAndSetUpNewRegion<AllocConfigT>(
             Region::RegionSize(alignSize, REGION_SIZE), REGION_TYPE, IS_LARGE_OBJECT);
         if (LIKELY(region != nullptr)) {
-            mem = region->Alloc<false>(alignSize);
+            regionMem = RegionMem {region->Alloc<false>(alignSize), region->HasFlag(RegionFlag::IS_ZEROED)};
         }
     }
-    if (mem != nullptr) {
+    if (regionMem.mem != nullptr) {
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
         if constexpr (UPDATE_MEMSTATS) {
             AllocConfigT::OnAlloc(alignSize, this->spaceType_, this->memStats_);
-            AllocConfigT::MemoryInit(mem);
+            if (!regionMem.isZeroed) {
+                AllocConfigT::MemoryInit(regionMem.mem);
+            }
         }
         // Do it after memory init because we can reach this memory after setting live bitmap
         if ((REGION_TYPE == RegionFlag::IS_OLD) || pinned) {
-            auto liveBitmap = this->GetRegion(reinterpret_cast<ObjectHeader *>(mem))->GetLiveBitmap();
+            auto liveBitmap = this->GetRegion(reinterpret_cast<ObjectHeader *>(regionMem.mem))->GetLiveBitmap();
             ASSERT(liveBitmap != nullptr);
-            liveBitmap->AtomicTestAndSet(mem);
+            liveBitmap->AtomicTestAndSet(regionMem.mem);
         }
     }
-    return mem;
+    return regionMem;
 }
 
 template <typename AllocConfigT, typename LockConfigT>

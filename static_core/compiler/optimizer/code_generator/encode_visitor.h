@@ -140,6 +140,8 @@ protected:
 
 #undef BINARY_SHIFTED_REGISTER_OPERATION_DEF
 
+    static void VisitExtractBitfield(GraphVisitor *visitor, Inst *inst);
+
     static void VisitShrI(GraphVisitor *visitor, Inst *inst);
 
     static void VisitCast(GraphVisitor *visitor, Inst *inst);
@@ -388,6 +390,7 @@ protected:
     static void FillArrayObjectClass(GraphVisitor *visitor, Reg tmpReg, LabelHolder::LabelId throwLabel);
     static void FillArrayClass(GraphVisitor *visitor, Inst *inst, Reg tmpReg, LabelHolder::LabelId throwLabel);
     static void FillInterfaceClass(GraphVisitor *visitor, Inst *inst);
+    static void FillUnionClass(GraphVisitor *visitor, Inst *inst);
 
     static void FillLoadClassUnresolved(GraphVisitor *visitor, Inst *inst);
 

@@ -32,5 +32,3 @@ constraints:
     use: char
   - type: char
     use: string
-  - type: void
-    use: void

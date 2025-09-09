@@ -26,9 +26,9 @@ function concat(s: string): void {
 function main(): void {
   let s = "Hello"
   concat($$s)
-  assertEQ(s,  "Hello World!")
+  arktest.assertEQ(s,  "Hello World!")
 
   let ss = "Hello"
   concat(ss)
-  assertEQ(ss,  "Hello")
+  arktest.assertEQ(ss,  "Hello")
 }

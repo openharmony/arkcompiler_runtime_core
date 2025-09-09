@@ -21,9 +21,9 @@ params: 1 => false
 
 function main(): void {
   let b: int | null = null
-  assertEQ(!b, true, "Null is false");
+  arktest.assertEQ(!b, true, "Null is false");
   b = 3
-  assertEQ(!b, false, "Int not 0 is true");
+  arktest.assertEQ(!b, false, "Int not 0 is true");
   b = 0
-  assertEQ(!b, true, "Int 0 is true");
+  arktest.assertEQ(!b, true, "Int 0 is true");
 }

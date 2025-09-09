@@ -26,3 +26,5 @@ cases:
       enum Now { DateNow = Date.now() }
   - use: |
       enum Num { One = Number(1.0), Two = Number(2.0) }
+  - use: |
+      enum Bool { Or = 3 || 3, And = 3 && 3 }

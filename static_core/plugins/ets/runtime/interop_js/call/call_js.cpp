@@ -130,7 +130,7 @@ private:
 template <bool IS_NEWCALL, typename ArgSetup>
 ALWAYS_INLINE inline uint64_t CallJSHandler::Handle()
 {
-    [[maybe_unused]] InteropCodeScopeETS codeScope(coro_, __PRETTY_FUNCTION__);
+    [[maybe_unused]] InteropETSToJSCodeScope codeScope(coro_, __PRETTY_FUNCTION__);
     napi_env env = ctx_->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -157,7 +157,8 @@ ALWAYS_INLINE inline std::optional<napi_value> CallJSHandler::ConvertVarargsAndC
     auto *klass = ref->template ClassAddr<Class>();
     if (!klass->IsArrayClass()) {
         ASSERT(klass == ctx_->GetArrayClass());
-        VMHandle<EtsArrayObject<EtsObject>> etsArr(coro_, ref);
+        VMHandle<EtsEscompatArray> etsArr(coro_, ref);
+        ASSERT(etsArr.GetPtr() != nullptr);
         auto allJsArgs = ctx_->GetTempArgs<napi_value>(etsArr->GetActualLength() + jsargs.size());
         for (uint32_t el = 0; el < jsargs.size(); ++el) {
             allJsArgs[el] = jsargs[el];
@@ -298,6 +299,7 @@ ALWAYS_INLINE inline std::optional<Value> CallJSHandler::ConvertRetval(napi_valu
         if (UNLIKELY(!res.has_value())) {
             return std::nullopt;
         }
+        ASSERT(res.value() != nullptr);
         etsRet = Value(res.value()->GetCoreType());
     } else {
         auto store = [&etsRet](auto val) { etsRet = Value(val); };
@@ -455,9 +457,13 @@ extern "C" uint64_t CallJSProxy(Method *method, uint8_t *args, uint8_t *inStackA
             napi_env env = ctx->GetJSEnv();
 
             auto refconv = JSRefConvertResolve(ctx, etsThis->ClassAddr<Class>());
+            ASSERT(refconv != nullptr);
             napi_value jsThis = refconv->Wrap(ctx, EtsObject::FromCoreType(etsThis));
             ASSERT(GetValueType(env, jsThis) == napi_object);
-            const char *methodName = utf::Mutf8AsCString(st->GetMethod()->GetName().data);
+            auto *refconvProxy = static_cast<ets_proxy::JSRefConvertJSProxy *>(refconv);
+            ASSERT(refconvProxy != nullptr);
+            std::string methodNameStr = refconvProxy->GetJSMethodName(st->GetMethod());
+            const char *methodName = methodNameStr.c_str();
             napi_value jsFn;
             if (!NapiGetNamedProperty(env, jsThis, methodName, &jsFn)) {
                 ASSERT(NapiIsExceptionPending(env));
@@ -479,6 +485,7 @@ extern "C" uint64_t CallJSFunction(Method *method, uint8_t *args, uint8_t *inSta
             ObjectHeader *etsThis = st->SetupArgreader(true);
 
             auto refconv = JSRefConvertResolve(ctx, etsThis->ClassAddr<Class>());
+            ASSERT(refconv != nullptr);
             napi_value jsCallBackFn = refconv->Wrap(ctx, EtsObject::FromCoreType(etsThis));
 
             st->SetupJSCallee(jsCallBackFn, jsCallBackFn);
@@ -512,7 +519,7 @@ static void *SelectCallJSEntrypoint(InteropCtx *ctx, Method *method)
         }
         return reinterpret_cast<void *>(JSRuntimeCallJSBridge);
     }
-    if (protoReader.GetClass() == ctx->GetStringClass()) {
+    if (protoReader.GetClass()->IsStringClass()) {
         return reinterpret_cast<void *>(JSRuntimeCallJSQNameBridge);
     }
     if (protoReader.GetClass() == ctx->GetJSValueClass()) {
@@ -575,7 +582,9 @@ static uint8_t InitCallJSClass(bool isNewCall)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
-    auto *klass = GetMethodOwnerClassInFrames(coro, 0)->GetRuntimeClass();
+    auto *classInFrame = GetMethodOwnerClassInFrames(coro, 0);
+    ASSERT(classInFrame != nullptr);
+    auto *klass = classInFrame->GetRuntimeClass();
     INTEROP_LOG(DEBUG) << "Bind bridge call methods for " << utf::Mutf8AsCString(klass->GetDescriptor());
 
     for (auto &method : klass->GetMethods()) {

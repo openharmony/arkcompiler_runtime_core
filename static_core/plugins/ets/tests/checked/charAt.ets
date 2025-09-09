@@ -17,12 +17,13 @@
 //! RUN          force_jit: true, options: "", entry: "charAt.ETSGLOBAL::main"
 //! METHOD       "charAt.ETSGLOBAL::main"
 //! PASS_AFTER   "IrBuilder"
+//! INST_NOT     "Call.*std.core.String::charAt"
 //! INST_NOT     "Intrinsic.StdCoreStringCharAt"
 
 function main(): void {
     let str: String = new String("aBCd");
-    assertEQ(str.charAt(0), c'a', "Wrong str.charAt(0)");
-    assertEQ(str.charAt(1), c'B', "Wrong str.charAt(1)");
-    assertEQ(str.charAt(2), c'C', "Wrong str.charAt(2)");
-    assertEQ(str.charAt(3), c'd', "Wrong str.charAt(3)");
+    arktest.assertEQ(str.charAt(0), c'a', "Wrong str.charAt(0)");
+    arktest.assertEQ(str.charAt(1), c'B', "Wrong str.charAt(1)");
+    arktest.assertEQ(str.charAt(2), c'C', "Wrong str.charAt(2)");
+    arktest.assertEQ(str.charAt(3), c'd', "Wrong str.charAt(3)");
 }

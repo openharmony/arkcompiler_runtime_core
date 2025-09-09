@@ -31,6 +31,9 @@ export class D {}
 export class E {}
 export class F {}
 export class G {}
+export class H {}
+export class O {}
+export class P {}
 export type I = string
 export type J = string
 export type K = string

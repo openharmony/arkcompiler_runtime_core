@@ -14,7 +14,7 @@
  */
 
 function main(): int {
-    const suite = new ArkTestsuite("Array.keys() iterator behavior")
+    const suite = new arktest.ArkTestsuite("Array.keys() iterator behavior")
 
     suite.addTest("Test Array.keys() is not restored after done", testArrayKeysIteratorFinal)
 
@@ -28,15 +28,15 @@ function testArrayKeysIteratorFinal() {
 
     array.push('a');
     result = iterator.next();
-    assertEQ(result.done, false, 'First result `done` flag');
-    assertEQ(result.value, 0, 'First result `value`');
+    arktest.assertEQ(result.done, false, 'First result `done` flag');
+    arktest.assertEQ(result.value, 0, 'First result `value`');
 
     result = iterator.next();
-    assertEQ(result.done, true, 'Exhausted result `done` flag');
-    assertEQ(result.value, undefined, 'Exhausted result `value`');
+    arktest.assertEQ(result.done, true, 'Exhausted result `done` flag');
+    arktest.assertEQ(result.value, undefined, 'Exhausted result `value`');
 
     array.push('b');
     result = iterator.next();
-    assertEQ(result.done, true, 'Exhausted result `done` flag (after push)');
-    assertEQ(result.value, undefined, 'Exhausted result `value` (after push)');
+    arktest.assertEQ(result.done, true, 'Exhausted result `done` flag (after push)');
+    arktest.assertEQ(result.value, undefined, 'Exhausted result `value` (after push)');
 }

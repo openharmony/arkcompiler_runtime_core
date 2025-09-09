@@ -32,5 +32,5 @@ function getX(): Int|undefined {
 }
 
 function main(): void {
-  assertTrue( getX() === undefined )
+  arktest.assertTrue( getX() === undefined )
 }

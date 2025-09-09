@@ -15,7 +15,9 @@ limitations under the License.
 
 /*---
 desc: Invocation constructor of superclass.
-assert: The first statement of a constructor body may be an explicit invocation of another constructor of the same class or of the direct superclass.
+assert: >-
+    The first statement of a constructor body may be an explicit invocation of another constructor of the same class
+    or of the direct superclass.
 tags: [compile-only]
 ---*/
 

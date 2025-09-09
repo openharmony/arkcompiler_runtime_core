@@ -12,9 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "overload_test.ani.hpp"
-#include "taihe.platform.ani.ani.hpp"
 #include "overload.ani.hpp"
+#include "overload_test.ani.hpp"
+
 #if __has_include(<ani.h>)
 #include <ani.h>
 #elif __has_include(<ani/ani.h>)
@@ -22,17 +22,15 @@
 #else
 #error "ani.h not found. Please ensure the Ani SDK is correctly installed."
 #endif
-ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result) {
+
+ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
+{
     ani_env *env;
     if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
         return ANI_ERROR;
     }
     if (ANI_OK != overload_test::ANIRegister(env)) {
         std::cerr << "Error from overload_test::ANIRegister" << std::endl;
-        return ANI_ERROR;
-    }
-    if (ANI_OK != taihe::platform::ani::ANIRegister(env)) {
-        std::cerr << "Error from taihe::platform::ani::ANIRegister" << std::endl;
         return ANI_ERROR;
     }
     if (ANI_OK != overload::ANIRegister(env)) {

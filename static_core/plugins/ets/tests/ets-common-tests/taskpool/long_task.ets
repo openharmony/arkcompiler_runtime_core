@@ -1,13 +1,13 @@
 /*
  * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the 'License');
+ * Licensed under the Apache License, Version 2.0 (the ”="License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an 'AS IS' BASIS,
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -48,8 +48,8 @@ function launchImpl(func: () => NullishType): Promise<NullishType> {
 
 function testDelayFunc(): NullishType {
     let task = new taskpool.LongTask(sumFunc);
-    let res = await taskpool.executeDelayed(10.0, task);
-    expectError(() => {
+    let res = await taskpool.executeDelayed(10, task);
+    arktest.expectError(() => {
         taskpool.execute(task);
     }, new Error('taskpool:: The long task can only be executed once'));
     return res;
@@ -59,15 +59,15 @@ function executeDelayedTest(): void {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
     try {
         let res = await launchImpl(testDelayFunc);
-        assertEQ(res, 30);
+        arktest.assertEQ(res, 30);
     } catch(e: Error) {
         // NOTE(wangzhaoyong, #25035): del try catch when fix stackoverflow and invalid error message
-        assertEQ(e instanceof StackOverflowError, true);
+        arktest.assertEQ(e instanceof StackOverflowError, true);
     }
     let task = new taskpool.LongTask(sum, 10, 80);
     await taskpool.execute(task);
-    expectError(() => {
-        taskpool.executeDelayed(10.0, task);
+    arktest.expectError(() => {
+        taskpool.executeDelayed(10, task);
     }, new Error('taskpool:: Multiple executions of LongTask are not supported in the executeDelayed'));
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
 }
@@ -75,8 +75,8 @@ function executeDelayedTest(): void {
 function executePeriodicallyTest(): void {
     let task1 = new taskpool.LongTask(sumFunc);
     await taskpool.execute(task1);
-    expectError(() => {
-        taskpool.executePeriodically(100.0, task1);
+    arktest.expectError(() => {
+        taskpool.executePeriodically(100, task1);
     }, new Error('taskpool:: The concurrent task has been executed and cannot be executed periodically'));
 }
 

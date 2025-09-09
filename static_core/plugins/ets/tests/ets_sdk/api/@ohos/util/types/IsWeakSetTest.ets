@@ -16,7 +16,7 @@
 import {util} from "@ohos.util";
 
 function main(): int {
-    const suite = new ArkTestsuite("CommonUtil types.isWeakSet() API tests")
+    const suite = new arktest.ArkTestsuite("CommonUtil types.isWeakSet() API tests")
 
     suite.addTest("Verify WeakSet is identified as WeakSet", testIsWeakSet001)
     suite.addTest("Verify WeakMap is not identified as WeakSet", testIsWeakSet002)
@@ -38,7 +38,7 @@ function main(): int {
 function testIsWeakSet001() {
     let proc = new util.types();
     let result = proc.isWeakSet(new WeakSet<int>());
-    assertTrue(result, "The Number WeakSet be of the same type as the WeakSet");
+    arktest.assertTrue(result, "The Number WeakSet be of the same type as the WeakSet");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_UTIL_IS_WEAK_SET_002
@@ -51,7 +51,7 @@ function testIsWeakSet001() {
 function testIsWeakSet002() {
     let proc = new util.types();
     let result = proc.isWeakSet(new WeakMap<int, int>());
-    assertTrue(result == false, "The WeakMap should be of the same type as the WeakMap");
+    arktest.assertTrue(result == false, "The WeakMap should be of the same type as the WeakMap");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_UTIL_IS_WEAK_SET_003
@@ -64,7 +64,7 @@ function testIsWeakSet002() {
 function testIsWeakSet003() {
     let proc = new util.types();
     let result = proc.isWeakSet(new String());
-    assertTrue(result == false, "The String should be of the same type as the String");
+    arktest.assertTrue(result == false, "The String should be of the same type as the String");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_UTIL_IS_WEAK_SET_004
@@ -77,7 +77,7 @@ function testIsWeakSet003() {
 function testIsWeakSet004() {
     let proc = new util.types();
     let result = proc.isWeakSet(new Set<int>());
-    assertTrue(result == false, "The Set should be of the same type as the Set");
+    arktest.assertTrue(result == false, "The Set should be of the same type as the Set");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_UTIL_IS_WEAK_SET_005
@@ -90,5 +90,5 @@ function testIsWeakSet004() {
 function testIsWeakSet005() {
     let proc = new util.types();
     let result = proc.isWeakSet(new Map<int, int>());
-    assertTrue(result == false, "The Map should be of the same type as the Map");
+    arktest.assertTrue(result == false, "The Map should be of the same type as the Map");
 }

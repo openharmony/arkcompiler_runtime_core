@@ -18,7 +18,7 @@ package std.core;
 /**
  * Represents boxed byte value and related operations
  */
-export final class Byte extends Integral implements Comparable<Byte>, JSONable<Byte> {
+export final class Byte extends Integral implements Comparable<Byte> {
     private value: byte;
 
     /**
@@ -90,6 +90,18 @@ export final class Byte extends Integral implements Comparable<Byte>, JSONable<B
     /**
      * Returns value of this instance
      *
+     * Supportive interface
+     *
+     * @returns value as byte
+     */
+    public override byteValue(): byte {
+        return this.toByte();
+    }
+
+
+    /**
+     * Returns value of this instance
+     *
      * @returns value as short
      */
     public override toShort(): short {
@@ -99,10 +111,33 @@ export final class Byte extends Integral implements Comparable<Byte>, JSONable<B
     /**
      * Returns value of this instance
      *
+     * Supportive interface
+     *
+     * @returns value as short
+     */
+    public override shortValue(): short {
+        return this.toShort();
+    }
+
+
+    /**
+     * Returns value of this instance
+     *
      * @returns value as int
      */
     public override toInt(): int {
         return this.value.toInt();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * Supportive interface
+     *
+     * @returns value as int
+     */
+    public override intValue(): int {
+        return this.toInt();
     }
 
     /**
@@ -117,6 +152,17 @@ export final class Byte extends Integral implements Comparable<Byte>, JSONable<B
     /**
      * Returns value of this instance
      *
+     * Supportive interface
+     *
+     * @returns value as long
+     */
+    public override longValue(): long {
+        return this.toLong();
+    }
+
+    /**
+     * Returns value of this instance
+     *
      * @returns value as float
      */
     public override toFloat(): float {
@@ -126,10 +172,32 @@ export final class Byte extends Integral implements Comparable<Byte>, JSONable<B
     /**
      * Returns value of this instance
      *
+     * Supportive interface
+     *
+     * @returns value as float
+     */
+    public override floatValue(): float {
+        return this.toFloat();
+    }
+
+    /**
+     * Returns value of this instance
+     *
      * @returns value as double
      */
     public override toDouble(): double {
         return this.value.toDouble();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * Supportive interface
+     *
+     * @returns value as double
+     */
+    public override doubleValue(): double {
+        return this.toDouble();
     }
 
     /**
@@ -228,7 +296,7 @@ export final class Byte extends Integral implements Comparable<Byte>, JSONable<B
     public override toString(): String {
         // Check for zero, log10 would go inf otherwise
         if (this.value == 0) {
-            return "0";
+            return '0';
         }
         let val = this.value;
         let negative: boolean = (val < 0);
@@ -260,15 +328,6 @@ export final class Byte extends Integral implements Comparable<Byte>, JSONable<B
      */
     public toString(radix: number): string {
         return (new Long(this.value)).toString(radix);
-    }
-
-    /**
-     * Returns a hash code (integer representation) for this instance
-     *
-     * @returns representation of this instance
-     */
-    public override $_hashCode(): int {
-        return this.toInt();
     }
 
     /**
@@ -378,25 +437,4 @@ export final class Byte extends Integral implements Comparable<Byte>, JSONable<B
     public isGreaterEqualThan(other: Byte): boolean {
         return this.value >= other.toByte();
     }
-
-
-    /**
-     * Creates a Byte instance based on JSONValue
-     *
-     * @param json: JSONValue - a JSON representation
-     *
-     * @throws JSONTypeError if json does not encode a valid byte
-     *
-     * @returns Byte - byte value decoded from JSON
-     */
-    public createFromJSONValue(json: JSONValue): Byte {
-        if (json instanceof JSONNumber) {
-            let num = (json as JSONNumber).value
-            if (Double.isInteger(num) && Byte.MIN_VALUE <= num && num <= Byte.MAX_VALUE) {
-                return num.toByte()
-            }
-        }
-        throw new JSONTypeError("Cannot create Byte from JSON", new ErrorOptions(json as Object))
-    }
-
- }
+}

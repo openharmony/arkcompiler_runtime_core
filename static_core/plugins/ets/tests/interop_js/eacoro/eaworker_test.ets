@@ -16,30 +16,33 @@
 function RunTasksTest(): void {
     let mainId = CoroutineExtras.getWorkerId();
     let w = new EAWorker(true);
+    w.start();
     let p1 = w.run<int>(():int => {
         let runId = CoroutineExtras.getWorkerId();
-        assertNE(runId, mainId);
+        arktest.assertNE(runId, mainId);
         return runId;
     });
     let p2 = w.run<int>(():int => {
         let runId = CoroutineExtras.getWorkerId();
-        assertNE(runId, mainId);
+        arktest.assertNE(runId, mainId);
         return runId;
     });
     w.join();
     let runId1 = p1.Await();
     let runId2 = p2.Await();
-    assertEQ(runId1, runId2);
+    arktest.assertEQ(runId1, runId2);
 }
 
 function RunTasksWithJsCallTest(): void {
     let mainId = CoroutineExtras.getWorkerId();
     let w = new EAWorker(true);
+    w.start();
     let callback = ():int => {
         let module = JSRuntime.loadModule("./eaworker_test_helpers_js");
-        let val = JSRuntime.getPropertyJSValue(module, 'returnTwo')();
+        let method = JSRuntime.getPropertyJSValue(module, 'returnTwo');
+        let val = JSRuntime.invoke(module, method);
         try {
-            assertEQ(val as int, 2);
+            arktest.assertEQ(val, 2);
         }
         catch(e: Error) {
             console.log("RunTasksWithJsCallTest failed");
@@ -53,16 +56,18 @@ function RunTasksWithJsCallTest(): void {
     w.join();
     let result1 = p1.Await();
     let result2 = p2.Await();
-    assertEQ(result1, 0);
-    assertEQ(result2, 0);
+    arktest.assertEQ(result1, 0);
+    arktest.assertEQ(result2, 0);
 }
 
 function RunTasksWithJsAsyncCallTest(): void {
     let w = new EAWorker(true);
+    w.start();
     let callback = ():int => {
         let module = JSRuntime.loadModule("./eaworker_test_helpers_js");
         let modified = false;
-        let promise = JSRuntime.getPropertyJSValue(module, 'asyncWithAwait')() as Promise<Object>;
+        let method = JSRuntime.getPropertyJSValue(module, 'asyncWithAwait');
+        let promise = (ESValue.wrap(JSRuntime.invoke(module, method))).toPromise();
         let promise1 = promise.then((x:Object): void => {
             modified = true;
         });
@@ -70,9 +75,9 @@ function RunTasksWithJsAsyncCallTest(): void {
         await promise1;
 
         try {
-            let value = JSRuntime.getPropertyJSValue(JSRuntime.getGlobal(), 'value') as int;
-            assertEQ(value, 7);
-            assertEQ(modified, true);
+            let value = JSRuntime.getPropertyInt(JSRuntime.getGlobal(), 'value');
+            arktest.assertEQ(value, 7);
+            arktest.assertEQ(modified, true);
         }
         catch(error) {
             console.log("Value modifications failed");
@@ -85,11 +90,12 @@ function RunTasksWithJsAsyncCallTest(): void {
     let p = w.run<int>(callback);
     w.join();
     let result = p.Await();
-    assertEQ(result, 0);
+    arktest.assertEQ(result, 0);
 }
 
 function CreateEAWorkerWithoutInterop(): void {
     let eaw = new EAWorker();
+    eaw.start();
     let res = false;
     try {
         let callback = () => {
@@ -101,5 +107,5 @@ function CreateEAWorkerWithoutInterop(): void {
         res = true;
         eaw.join();
     }
-    assertEQ(res, true);
+    arktest.assertEQ(res, true);
 }

@@ -22,7 +22,7 @@ tags: []
 type Margin = number | string
 
 function formatNumber(n: string) {
-    assertEQ( n, "5 px")
+    arktest.assertEQ( n, "5 px")
 }
 
 function formatMargin(margin: Margin) {

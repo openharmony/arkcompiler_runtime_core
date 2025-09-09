@@ -21,7 +21,7 @@ export interface ReadonlyMap<K, V> extends Iterable<[K, V]> {
      *
      * @returns number of Entries with unique keys in the Map
      */
-    get size(): number;
+    get size(): int;
 
     /**
      * Returns a value assosiated with key if present
@@ -87,7 +87,7 @@ final class MapEntry<K, V> {
     }
 }
 
-final class MapIterator<K, V, R> implements IterableIterator<R> {
+export final class MapIterator<K, V, R> implements IterableIterator<R> {
     private node: MapEntry<K, V>
     private tail: MapEntry<K, V>
 
@@ -113,7 +113,7 @@ final class MapIterator<K, V, R> implements IterableIterator<R> {
     }
 }
 
-final class EmptyMapIterator<R> implements IterableIterator<R> {
+export final class EmptyMapIterator<R> implements IterableIterator<R> {
     override next(): IteratorResult<R> {
         return new IteratorResult<R>()
     }
@@ -144,10 +144,10 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
             return 1;
         }
 
-        const keyHash: int = (k! as object).$_hashCode() // #26217
+        const keyHash: int = Runtime.getHashCodeByValue(k! as object).toInt() // #26217
         const t = keyHash >> 31
 
-        return ((keyHash ^ t) - t) & (this.buckets.actualLength - 1)
+        return ((keyHash ^ t) - t) & (this.buckets.length - 1)
     }
 
     private getInitialBucketsCount(entriesCount: int): int {
@@ -172,14 +172,14 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
                     entriesBuf.push(entry)
                 }
             }
-            const bucketsCount = this.getInitialBucketsCount(entriesBuf.actualLength)
+            const bucketsCount = this.getInitialBucketsCount(entriesBuf.length)
             this.buckets = new MapBucket<K, V>[bucketsCount]
 
             entriesBuf.forEach((e: [K, V]) => {
-                this.set(e[0] as K, e[1] as V)
+                this.set(e[Map.ENTRY_KEY] as K, e[Map.ENTRY_VAL] as V)
             })
         } else {
-            const bucketsCount = this.getInitialBucketsCount(entries.actualLength)
+            const bucketsCount = this.getInitialBucketsCount(entries.length.toInt())
             this.buckets = new MapBucket<K, V>[bucketsCount]
             for (let i = 0; i < entries.length; ++i) {
                 if (entries[i] == null) {
@@ -208,7 +208,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
      * @param entries Array of entries
      */
     constructor(entries: Array<[K, V]>) {
-        const bucketsCount = this.getInitialBucketsCount(entries.actualLength)
+        const bucketsCount = this.getInitialBucketsCount(entries.length)
         this.buckets = new MapBucket<K, V>[bucketsCount]
 
         entries.forEach((entry: [K, V]) => {
@@ -228,6 +228,11 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
             }
             this.set(values[i][0] as K, values[i][1] as V)
         }
+    }
+
+    // NOTE: This API may be removed someday due #28030 internal issue
+    constructor(bucketsCount: int) {
+        this.buckets = new MapBucket<K, V>[bucketsCount]
     }
 
     override toString(): String {
@@ -287,7 +292,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
     set(key: K, val: V): this {
         // insert into buckets
         const buck = this.getOrCreateBucket(key)
-        const buckSize = buck.actualLength
+        const buckSize = buck.length
         for (let i = 0; i < buckSize; i++) {
             const entry = buck.$_get_unsafe(i)
             if (__runtimeSameValueZero(entry.key, key)) {
@@ -328,27 +333,14 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
      *
      * @returns true if the value is in the Map
      */
-    override has(key: K): boolean {
-        const buck = this.getBucket(key)
-        if (buck !== undefined) {
-            const buckSize = buck.actualLength
-            for (let i = 0; i < buckSize; i++) {
-                const entry = buck.$_get_unsafe(i)
-                if (__runtimeSameValueZero(entry.key, key)) {
-                    return true
-                }
-            }
-        }
-
-        return false;
-    }
+    override native has(key: K): boolean;
 
     /**
      * Returns number of Entries with unique keys in the Map
      *
      * @returns number of Entries with unique keys in the Map
      */
-    override get size(): number {
+    override get size(): int {
         return this.sizeVal
     }
 
@@ -357,43 +349,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
      *
      * @param key the key to remove
      */
-    delete(key: K): boolean {
-        if (!this.deleteImpl(key)) {
-            return false
-        }
-
-        this.sizeVal--
-        if (this.sizeVal == 0) {
-            this.headEntry = undefined
-        }
-        return true
-    }
-
-    private deleteImpl(key: K): boolean {
-        const buck = this.getBucket(key)
-        if (buck === undefined) {
-            return false
-        }
-
-        const buckSize = buck.actualLength
-        for (let i = 0; i < buckSize; i++) {
-            const entry = buck.$_get_unsafe(i)
-            if (!__runtimeSameValueZero(entry.key, key)) {
-                continue
-            }
-
-            entry.prev.next = entry.next
-            entry.next.prev = entry.prev
-
-            const popped = buck.pop()!
-            if (i != buckSize - 1) {
-                buck[i] = popped
-            }
-            return true
-        }
-
-        return false
-    }
+    native delete(key: K): boolean;
 
     /**
      * Deletes all elements from the Map
@@ -414,20 +370,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
      *
      * @returns value if assosiated with key presents.
      */
-    override get(key: K): V | undefined {
-        const buck = this.getBucket(key)
-        if (buck !== undefined) {
-            const buckSize = buck.actualLength
-            for (let i = 0; i < buckSize; i++) {
-                const entry = buck.$_get_unsafe(i)
-                if (__runtimeSameValueZero(entry.key, key)) {
-                    return entry.val
-                }
-            }
-        }
-
-        return undefined;
-    }
+    override native get(key: K): V | undefined;
 
     /**
      * Returns a value assosiated with key if present, or a default value otherwise
@@ -446,7 +389,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
         return def
     }
 
-    internal mappedIterator<R>(fn: (e: MapEntry<K, V>) => R): IterableIterator<R> {
+    private mappedIterator<R>(fn: (e: MapEntry<K, V>) => R): IterableIterator<R> {
         const headEntry = this.headEntry
         if (headEntry !== undefined) {
             return new MapIterator<K, V, R>(headEntry, headEntry, fn)

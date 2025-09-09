@@ -14,8 +14,8 @@
 
 #include <cassert>
 #include <cstdint>
-#include "libabckit/include/c/abckit.h"
-#include "libabckit/include/c/extensions/arkts/metadata_arkts.h"
+#include "libabckit/c/abckit.h"
+#include "libabckit/c/extensions/arkts/metadata_arkts.h"
 
 #include "libabckit/src/macros.h"
 #include "scoped_timer.h"
@@ -294,6 +294,372 @@ extern "C" void ClassRemoveAnnotation(AbckitArktsClass *klass, AbckitArktsAnnota
     }
 }
 
+extern "C" bool ClassAddInterface(AbckitArktsClass *klass, AbckitArktsInterface *iface)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)klass;
+    (void)iface;
+    return false;
+}
+
+extern "C" bool ClassRemoveInterface(AbckitArktsClass *klass, AbckitArktsInterface *iface)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)klass;
+    (void)iface;
+    return false;
+}
+
+extern "C" bool ClassSetSuperClass(AbckitArktsClass *klass, AbckitArktsClass *superClass)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)klass;
+    (void)superClass;
+    return false;
+}
+
+extern "C" bool ClassSetName(AbckitArktsClass *klass, const char *name)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)klass;
+    (void)name;
+    return false;
+}
+
+extern "C" bool ClassAddField(AbckitArktsClass *klass, AbckitArktsClassField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)klass;
+    (void)field;
+    return false;
+}
+
+extern "C" bool ClassRemoveField(AbckitArktsClass *klass, AbckitArktsClassField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)klass;
+    (void)field;
+    return false;
+}
+
+extern "C" bool ClassAddMethod(AbckitArktsClass *klass, AbckitArktsFunction *method)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)klass;
+    (void)method;
+    return false;
+}
+
+extern "C" bool ClassRemoveMethod(AbckitArktsClass *klass, AbckitArktsFunction *method)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)klass;
+    (void)method;
+    return false;
+}
+
+extern "C" AbckitArktsClass *CreateClass(const char *name)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)name;
+    return nullptr;
+}
+
+extern "C" bool ClassSetOwningModule(AbckitArktsClass *klass, AbckitArktsModule *module)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)klass;
+    (void)module;
+    return false;
+}
+
+extern "C" bool ClassSetParentFunction(AbckitArktsClass *klass, AbckitArktsFunction *func)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)klass;
+    (void)func;
+    return false;
+}
+
+// ========================================
+// Interface
+// ========================================
+
+extern "C" bool InterfaceAddSuperInterface(AbckitArktsInterface *iface, AbckitArktsInterface *superIface)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)iface;
+    (void)superIface;
+    return false;
+}
+
+extern "C" bool InterfaceRemoveSuperInterface(AbckitArktsInterface *iface, AbckitArktsInterface *superIface)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)iface;
+    (void)superIface;
+    return false;
+}
+
+extern "C" bool InterfaceSetName(AbckitArktsInterface *iface, const char *name)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)iface;
+    (void)name;
+    return false;
+}
+
+extern "C" bool InterfaceAddField(AbckitArktsInterface *iface, AbckitArktsInterfaceField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)iface;
+    (void)field;
+    return false;
+}
+
+extern "C" bool InterfaceRemoveField(AbckitArktsInterface *iface, AbckitArktsInterfaceField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)iface;
+    (void)field;
+    return false;
+}
+
+extern "C" bool InterfaceAddMethod(AbckitArktsInterface *iface, AbckitArktsFunction *method)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)iface;
+    (void)method;
+    return false;
+}
+
+extern "C" bool InterfaceRemoveMethod(AbckitArktsInterface *iface, AbckitArktsFunction *method)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)iface;
+    (void)method;
+    return false;
+}
+
+extern "C" bool InterfaceSetOwningModule(AbckitArktsInterface *iface, AbckitArktsModule *module)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)iface;
+    (void)module;
+    return false;
+}
+
+extern "C" bool InterfaceSetParentFunction(AbckitArktsInterface *iface, AbckitArktsFunction *func)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)iface;
+    (void)func;
+    return false;
+}
+
+extern "C" AbckitArktsInterface *CreateInterface(const char *name)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)name;
+    return nullptr;
+}
+
+// ========================================
+// Module Field
+// ========================================
+
+extern "C" bool ModuleFieldAddAnnotation(AbckitArktsModuleField *field, AbckitArktsAnnotation *anno)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    (void)anno;
+    return false;
+}
+
+extern "C" bool ModuleFieldRemoveAnnotation(AbckitArktsModuleField *field, AbckitArktsAnnotation *anno)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    (void)anno;
+    return false;
+}
+
+extern "C" bool ModuleFieldSetName(AbckitArktsModuleField *field, const char *name)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    (void)name;
+    return false;
+}
+
+extern "C" bool ModuleFieldSetType(AbckitArktsModuleField *field, AbckitType *type)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    (void)type;
+    return false;
+}
+
+extern "C" bool ModuleFieldSetValue(AbckitArktsModuleField *field, AbckitValue *value)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    (void)value;
+    return false;
+}
+
+extern "C" AbckitArktsModuleField *CreateModuleField(AbckitArktsModule *module, const char *name, AbckitType *type,
+                                                     AbckitValue *value)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)module;
+    (void)name;
+    (void)type;
+    (void)value;
+    return nullptr;
+}
+
+// ========================================
+// Class Field
+// ========================================
+
+extern "C" bool ClassFieldAddAnnotation(AbckitArktsClassField *field, AbckitArktsAnnotation *anno)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    (void)anno;
+    return false;
+}
+
+extern "C" bool ClassFieldRemoveAnnotation(AbckitArktsClassField *field, AbckitArktsAnnotation *anno)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    (void)anno;
+    return false;
+}
+
+extern "C" bool ClassFieldSetName(AbckitArktsClassField *field, const char *name)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    (void)name;
+    return false;
+}
+
+extern "C" bool ClassFieldSetType(AbckitArktsClassField *field, AbckitType *type)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    (void)type;
+    return false;
+}
+
+extern "C" bool ClassFieldSetValue(AbckitArktsClassField *field, AbckitValue *value)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    (void)value;
+    return false;
+}
+
+extern "C" AbckitArktsClassField *CreateClassField(AbckitArktsClass *klass, const char *name, AbckitType *type,
+                                                   AbckitValue *value)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)klass;
+    (void)name;
+    (void)type;
+    (void)value;
+    return nullptr;
+}
+
+// ========================================
+// Interface Field
+// ========================================
+
+extern "C" bool InterfaceFieldAddAnnotation(AbckitArktsInterfaceField *field, AbckitArktsAnnotation *anno)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    (void)anno;
+    return false;
+}
+
+extern "C" bool InterfaceFieldRemoveAnnotation(AbckitArktsInterfaceField *field, AbckitArktsAnnotation *anno)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    (void)anno;
+    return false;
+}
+
+extern "C" bool InterfaceFieldSetName(AbckitArktsInterfaceField *field, const char *name)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    (void)name;
+    return false;
+}
+
+extern "C" bool InterfaceFieldSetType(AbckitArktsInterfaceField *field, AbckitType *type)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    (void)type;
+    return false;
+}
+
+extern "C" AbckitArktsInterfaceField *CreateInterfaceField(AbckitArktsInterface *iface, const char *name,
+                                                           AbckitType *type, AbckitValue *value)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)iface;
+    (void)name;
+    (void)type;
+    (void)value;
+    return nullptr;
+}
+
+// ========================================
+// Enum Field
+// ========================================
+
+extern "C" bool EnumFieldSetName(AbckitArktsEnumField *field, const char *name)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    (void)name;
+    return false;
+}
+
+extern "C" bool EnumFieldSetType(AbckitArktsEnumField *field, AbckitType *type)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    (void)type;
+    return false;
+}
+
+extern "C" bool EnumFieldSetValue(AbckitArktsEnumField *field, AbckitValue *value)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    (void)value;
+    return false;
+}
+
+extern "C" AbckitArktsEnumField *CreateEnumField(AbckitArktsEnum *enm, const char *name, AbckitType *type,
+                                                 AbckitValue *value)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)enm;
+    (void)name;
+    (void)type;
+    (void)value;
+    return nullptr;
+}
+
 // ========================================
 // AnnotationInterface
 // ========================================
@@ -409,6 +775,70 @@ extern "C" void FunctionRemoveAnnotation(AbckitArktsFunction *function, AbckitAr
     }
 }
 
+extern "C" bool FunctionSetOwningModule(AbckitArktsFunction *function, AbckitArktsModule *module)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)function;
+    (void)module;
+    return false;
+}
+
+extern "C" bool FunctionSetParentClass(AbckitArktsFunction *function, AbckitArktsClass *klass)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)function;
+    (void)klass;
+    return false;
+}
+
+extern "C" bool FunctionSetParentFunction(AbckitArktsFunction *function, AbckitArktsFunction *parentFunction)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)function;
+    (void)parentFunction;
+    return false;
+}
+
+extern "C" bool FunctionSetName(AbckitArktsFunction *function, const char *name)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)function;
+    (void)name;
+    return false;
+}
+
+extern "C" bool FunctionAddParameter(AbckitArktsFunction *func, AbckitArktsFunctionParam *param)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)func;
+    (void)param;
+    return false;
+}
+
+extern "C" bool FunctionRemoveParameter(AbckitArktsFunction *func, AbckitArktsFunctionParam *param)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)func;
+    (void)param;
+    return false;
+}
+
+extern "C" bool FunctionSetReturnType(AbckitArktsFunction *func, AbckitType *type)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)func;
+    (void)type;
+    return false;
+}
+
+extern "C" AbckitArktsFunction *CreateFunction(const char *name, AbckitType *returnType)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)name;
+    (void)returnType;
+    return nullptr;
+}
+
 // ========================================
 // Annotation
 // ========================================
@@ -505,7 +935,44 @@ AbckitArktsModifyApi g_arktsModifyApiImpl = {
     // Class
     // ========================================
 
-    ClassAddAnnotation, ClassRemoveAnnotation,
+    ClassAddAnnotation, ClassRemoveAnnotation, ClassAddInterface, ClassRemoveInterface, ClassSetSuperClass,
+    ClassSetName, ClassAddField, ClassRemoveField, ClassAddMethod, ClassRemoveMethod, CreateClass, ClassSetOwningModule,
+    ClassSetParentFunction,
+
+    // ========================================
+    // Interface
+    // ========================================
+
+    InterfaceAddSuperInterface, InterfaceRemoveSuperInterface, InterfaceSetName, InterfaceAddField,
+    InterfaceRemoveField, InterfaceAddMethod, InterfaceRemoveMethod, InterfaceSetOwningModule,
+    InterfaceSetParentFunction, CreateInterface,
+
+    // ========================================
+    // Module Field
+    // ========================================
+
+    ModuleFieldAddAnnotation, ModuleFieldRemoveAnnotation, ModuleFieldSetName, ModuleFieldSetType, ModuleFieldSetValue,
+    CreateModuleField,
+
+    // ========================================
+    // Class Field
+    // ========================================
+
+    ClassFieldAddAnnotation, ClassFieldRemoveAnnotation, ClassFieldSetName, ClassFieldSetType, ClassFieldSetValue,
+    CreateClassField,
+
+    // ========================================
+    // Interface Field
+    // ========================================
+
+    InterfaceFieldAddAnnotation, InterfaceFieldRemoveAnnotation, InterfaceFieldSetName, InterfaceFieldSetType,
+    CreateInterfaceField,
+
+    // ========================================
+    // Enum Field
+    // ========================================
+
+    EnumFieldSetName, EnumFieldSetType, EnumFieldSetValue, CreateEnumField,
 
     // ========================================
     // AnnotationInterface
@@ -517,7 +984,9 @@ AbckitArktsModifyApi g_arktsModifyApiImpl = {
     // Function
     // ========================================
 
-    FunctionAddAnnotation, FunctionRemoveAnnotation,
+    FunctionAddAnnotation, FunctionRemoveAnnotation, FunctionSetOwningModule, FunctionSetParentClass,
+    FunctionSetParentFunction, FunctionSetName, FunctionAddParameter, FunctionRemoveParameter, FunctionSetReturnType,
+    CreateFunction,
 
     // ========================================
     // Annotation

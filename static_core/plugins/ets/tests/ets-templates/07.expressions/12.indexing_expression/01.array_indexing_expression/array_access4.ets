@@ -26,7 +26,7 @@ function getArrElem(i: int): Object|null {
 }
 
 function main(): void {
-  assertTrue( getArrElem(0) instanceof Int )
-  assertTrue( getArrElem(1) instanceof Object )
-  assertTrue( getArrElem(2) == null )
+  arktest.assertTrue( getArrElem(0) instanceof Int )
+  arktest.assertTrue( getArrElem(1) instanceof Object )
+  arktest.assertTrue( getArrElem(2) == null )
 }

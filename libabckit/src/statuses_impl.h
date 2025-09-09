@@ -16,7 +16,7 @@
 #ifndef LIBABCKIT_SRC_STATUSES_IMPL_H
 #define LIBABCKIT_SRC_STATUSES_IMPL_H
 
-#include "libabckit/include/c/statuses.h"
+#include "libabckit/c/statuses.h"
 
 namespace libabckit::statuses {
 

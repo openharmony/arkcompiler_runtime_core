@@ -32,7 +32,7 @@ function main() {
         index++;
     }
 
-    assertEQ(index, testStr.length)
-    assertEQ(result, 0)
+    arktest.assertEQ(index, testStr.length)
+    arktest.assertEQ(result, 0)
 }
 

@@ -16,11 +16,11 @@
 #include <gtest/gtest.h>
 #include <cstring>
 
-#include "libabckit/include/c/abckit.h"
-#include "libabckit/include/c/extensions/js/metadata_js.h"
+#include "libabckit/c/abckit.h"
+#include "libabckit/c/extensions/js/metadata_js.h"
 #include "helpers/helpers.h"
-#include "libabckit/include/c/metadata_core.h"
-#include "libabckit/include/c/statuses.h"
+#include "libabckit/c/metadata_core.h"
+#include "libabckit/c/statuses.h"
 
 namespace libabckit::test {
 

@@ -17,6 +17,7 @@
 
 /*---
 desc: Test of covariant _out_ type parameter modifier. 
+tags: [compile-only, {{c.tag}}]
 ---*/
 
 class A<out T> {
@@ -27,7 +28,7 @@ class A<out T> {
 function main(): void {
   let arg: {{c.type}} = {{c.value}}
   let a: A<{{c.type}}> = new A<{{c.type}}>()
-  assertEQ(a.f(), arg)
+  arktest.assertEQ(a.f(), arg)
 }
 
 {% endfor %}

@@ -31,13 +31,14 @@ constexpr Language DEFAULT_LANGUAGE = panda::panda_file::DEFUALT_SOURCE_LANG;
 
 class MetadataExtension {
 public:
-    static std::unique_ptr<RecordMetadata> CreateRecordMetadata(panda::panda_file::SourceLang lang);
+    static PANDA_PUBLIC_API std::unique_ptr<RecordMetadata> CreateRecordMetadata(panda::panda_file::SourceLang lang);
 
-    static std::unique_ptr<FieldMetadata> CreateFieldMetadata(panda::panda_file::SourceLang lang);
+    static PANDA_PUBLIC_API std::unique_ptr<FieldMetadata> CreateFieldMetadata(panda::panda_file::SourceLang lang);
 
-    static std::unique_ptr<FunctionMetadata> CreateFunctionMetadata(panda::panda_file::SourceLang lang);
+    static PANDA_PUBLIC_API std::unique_ptr<FunctionMetadata> CreateFunctionMetadata(
+        panda::panda_file::SourceLang lang);
 
-    static std::unique_ptr<ParamMetadata> CreateParamMetadata(panda::panda_file::SourceLang lang);
+    static PANDA_PUBLIC_API std::unique_ptr<ParamMetadata> CreateParamMetadata(panda::panda_file::SourceLang lang);
 };
 
 }  // namespace panda::pandasm::extensions

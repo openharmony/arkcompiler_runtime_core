@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-let Empty: String = new String('');
-let EscChars: String = new String('\f\n\r\t\v');
-let RusChars: String = new String('АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя'); // 16-bit
-let EngChars: String = new String('AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz');               //  8-bit
-let DupChars: String = new String('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');               //  8-bit
+let Empty: String = '';
+let EscChars: String = '\f\n\r\t\v';
+let RusChars: String = 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя'; // 16-bit
+let EngChars: String = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz';               //  8-bit
+let DupChars: String = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';               //  8-bit
 const Digits: String = '0123456789';
 const Symbols: String = '`~!@#$%^&*()_-+={}[]:;\"\'\\|/<>,.';
 const CharNotFound: int = -1;
@@ -67,7 +67,7 @@ function main(): int {
     }
 
     for (let i = 0; i < Digits.getLength(); ++i) {
-        if (Digits.indexOf(Digits.charAt(i)) as char != i) {
+        if (Digits.indexOf(Digits.charAt(i)).toChar() != i) {
             return 9;
         }
     }
@@ -134,6 +134,6 @@ function main(): int {
         return 43;
     }
 
-    console.println("PASS");
+    console.println('PASS');
     return 0;
 }

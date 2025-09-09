@@ -19,11 +19,11 @@ import {
 } from 'main_js';
 
 function checkOptionalOperatorWithValue(): boolean {
-    return Obj?.name as string == Obj.name as string;
+    return Obj?.name?.toString() == Obj.name?.toString();
 }
 
 function checkOptionalOperatorReturnUndefined(): boolean {
-    const res: undefined = Obj?.test as undefined;
+    const res: undefined | Object = Obj?.test as undefined | Object;
     
     return res == undefined;
 }
@@ -39,11 +39,11 @@ function checkOptionalOperatorReturnUndefined(): boolean {
 // }
 
 function checkOptionalOperatorInsideObjectWithValue(): boolean {
-    return Obj.inside?.name as string == Obj.inside.name as string;
+    return new Obj.inside?.name?.toString() == Obj.inside.name?.toString();
 }
 
 function checkOptionalOperatorInsideObjectReturnUndefined(): boolean {
-    const res: undefined = Obj.inside?.test as undefined;
+    const res: undefined | Object = Obj.inside?.test as undefined | Object;
 
     return res == undefined;
 }

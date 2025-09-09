@@ -21,5 +21,5 @@ tags: [compile-only, negative]
 function main(): void {
   let values: Array <number> = new Array <number>(10, 20, 30);
   let index = new Uint8Array([1]);
-  assertEQ(values[index], 20);
+  arktest.assertEQ(values[index], 20);
 }

@@ -18,7 +18,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from os import path, makedirs
+from os import path, makedirs, O_WRONLY, O_CREAT, open as os_open, fdopen as os_fdopen
 from typing import Tuple, Optional, List
 
 from runner.enum_types.fail_kind import FailKind
@@ -37,7 +37,8 @@ class TestDeclgenETS2TS(TestFileBased):
     state: DeclgenEts2tsStage = DeclgenEts2tsStage.DECLGEN
     results: List[Test] = []
 
-    def __init__(self, test_env: TestEnv, test_path: str, flags: List[str], test_id: str, build_dir: str) -> None:
+    def __init__(self, test_env: TestEnv, test_path: str, flags: List[str], test_id: str,
+                 build_dir: str, suite_name: str) -> None:
         super().__init__(test_env, test_path, flags, test_id)
         self.declgen_ets2ts_executor = path.join(
             build_dir, "bin", "declgen_ets2ts")
@@ -52,6 +53,7 @@ class TestDeclgenETS2TS(TestFileBased):
         self.test_ets = path.join(self.decl_path, "ets", f"{name_without_ext}.ets")
         makedirs(path.dirname(self.test_dets), exist_ok=True)
         makedirs(path.dirname(self.test_ets), exist_ok=True)
+        self.suite_name = suite_name
 
     def do_run(self) -> TestDeclgenETS2TS:
         if TestDeclgenETS2TS.state == DeclgenEts2tsStage.DECLGEN:
@@ -88,10 +90,33 @@ class TestDeclgenETS2TS(TestFileBased):
         return passed, report, fail_kind
 
     def _run_tsc(self, test_dets: str) -> Tuple[bool, TestReport, Optional[FailKind]]:
+
         tsc_flags = []
         tsc_flags.append("--lib")
         tsc_flags.append("es2020")
-        tsc_flags.append(test_dets)
+
+        if self.suite_name == "declgen-ets2ts-sdk":
+            tsconfig_file = path.join(path.dirname(test_dets), path.basename(test_dets) + "_tsconfig.json")
+            with os_fdopen(os_open(tsconfig_file, O_WRONLY|O_CREAT, 0o644), "w", encoding="utf-8") as handler:
+                tsconfig = f"""\
+                {{
+                    "compilerOptions": {{
+                    "baseUrl": "{self.decl_path}",
+                    "paths": {{
+                        "@ohos.base": [
+                            "{self.decl_path}/api/@ohos.base.d.ets"
+                        ]
+                    }}
+                }},
+                "files" : [
+                    "{test_dets}"
+                ]
+                }}"""
+                handler.write(tsconfig)
+            tsc_flags.append("--project")
+            tsc_flags.append(tsconfig_file)
+        else:
+            tsc_flags.append(test_dets)
 
         params = Params(
             executor=self.tsc_executor,

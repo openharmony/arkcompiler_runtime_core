@@ -40,7 +40,7 @@ public:
 TEST_F(ClassGetStaticFieldCharTest, get_char)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_char_test/TestChar;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_char_test.TestChar", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "char_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -53,7 +53,7 @@ TEST_F(ClassGetStaticFieldCharTest, get_char)
 TEST_F(ClassGetStaticFieldCharTest, get_char_c_api)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_char_test/TestChar;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_char_test.TestChar", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "char_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -66,7 +66,7 @@ TEST_F(ClassGetStaticFieldCharTest, get_char_c_api)
 TEST_F(ClassGetStaticFieldCharTest, get_invalid_field_type)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_char_test/TestChar;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_char_test.TestChar", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -77,7 +77,7 @@ TEST_F(ClassGetStaticFieldCharTest, get_invalid_field_type)
 TEST_F(ClassGetStaticFieldCharTest, invalid_argument1)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_char_test/TestChar;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_char_test.TestChar", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "char_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -88,7 +88,7 @@ TEST_F(ClassGetStaticFieldCharTest, invalid_argument1)
 TEST_F(ClassGetStaticFieldCharTest, invalid_argument2)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_char_test/TestChar;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_char_test.TestChar", &cls), ANI_OK);
     ani_char result = '\0';
     ASSERT_EQ(env_->Class_GetStaticField_Char(cls, nullptr, &result), ANI_INVALID_ARGS);
 }
@@ -96,7 +96,7 @@ TEST_F(ClassGetStaticFieldCharTest, invalid_argument2)
 TEST_F(ClassGetStaticFieldCharTest, invalid_argument3)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_char_test/TestChar;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_char_test.TestChar", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "char_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -106,7 +106,7 @@ TEST_F(ClassGetStaticFieldCharTest, invalid_argument3)
 TEST_F(ClassGetStaticFieldCharTest, invalid_argument4)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_char_test/TestChar;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_char_test.TestChar", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "char_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -117,7 +117,7 @@ TEST_F(ClassGetStaticFieldCharTest, invalid_argument4)
 TEST_F(ClassGetStaticFieldCharTest, special_values)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_char_test/TestChar;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_char_test.TestChar", &cls), ANI_OK);
     ani_char single = '\0';
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "special1", &field), ANI_OK);
@@ -155,7 +155,7 @@ TEST_F(ClassGetStaticFieldCharTest, combination_test1)
     const ani_char setTarget = 'a';
     const ani_char setTarget2 = 'b';
     ani_char single;
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_char_test/TestChar;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_char_test.TestChar", &cls), ANI_OK);
     ASSERT_EQ(env_->Class_FindStaticField(cls, "char_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
     const int32_t loopNum = 3;
@@ -171,12 +171,12 @@ TEST_F(ClassGetStaticFieldCharTest, combination_test1)
 
 TEST_F(ClassGetStaticFieldCharTest, combination_test2)
 {
-    CheckFieldValue("Lclass_get_static_field_char_test/TestCharA;", "char_value");
+    CheckFieldValue("class_get_static_field_char_test.TestCharA", "char_value");
 }
 
 TEST_F(ClassGetStaticFieldCharTest, combination_test3)
 {
-    CheckFieldValue("Lclass_get_static_field_char_test/TestCharFinal;", "char_value");
+    CheckFieldValue("class_get_static_field_char_test.TestCharFinal", "char_value");
 }
 
 TEST_F(ClassGetStaticFieldCharTest, check_initialization)

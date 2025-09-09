@@ -16,15 +16,15 @@
 function foo(): Void { return Void.void_instance }
 
 function test(a: Object): void {
-	assertTrue((a instanceof Void))
+ arktest.assertTrue((a instanceof Void))
 }
 
 class C {
-	foo(): Void { throw new Error("not overriden")  }
-	bar(): Void { throw new Error("not overriden")  }
+	foo(): Void { throw new Error("not overriden") }
+	bar(): Void { throw new Error("not overriden") }
 }
 
-function main(): void throws {
+function main(): void {
 	test(foo());
 
 	const called = new boolean[1];
@@ -67,5 +67,5 @@ function main(): void throws {
 
 	// TODO(kprokopenko): as this function is called multiple times,
 	// same class creation will lead to mismatched lambda context...
-	//assertTrue( called[0])
+	// assertTrue called on called[0]
 }

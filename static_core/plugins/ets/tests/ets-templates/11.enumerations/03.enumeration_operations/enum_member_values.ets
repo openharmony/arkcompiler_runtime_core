@@ -23,7 +23,7 @@ enum Color { Red = {{ c.value1 }}, Green{{ c.value2 }}, Blue = {{ c.value3 }} }
 function main() {
     let v = Color.values()
     {% for value in c.valuesArr %}
-    assertEQ(v[{{ loop.index0 }}].valueOf(), {{ value }})
+    arktest.assertEQ(v[{{ loop.index0 }}].valueOf(), {{ value }})
     {% endfor %}
 }
 {% endfor %}

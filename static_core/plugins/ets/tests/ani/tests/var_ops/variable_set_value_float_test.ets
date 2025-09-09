@@ -15,11 +15,11 @@
 
 namespace anyns {
     export let intValue: int = 3;
-    export let floatValue: float = 3.14;
+    export let floatValue: float = 3.14f;
     export let sum: float;
     class A {
-        static val1: float = 1.5;
-        static val2: float = 2.5;
+        static val1: float = 1.5f;
+        static val2: float = 2.5f;
         public static add(): float {
             sum = A.val1 + A.val2;
             return sum;
@@ -27,10 +27,10 @@ namespace anyns {
     }
 
     namespace second {
-        export let aValue: float = 5.0;
+        export let aValue: float = 5.0f;
     }
 }
 
 namespace anyns {
-    export let testValue: float = 3.14;
+    export let testValue: float = 3.14f;
 }

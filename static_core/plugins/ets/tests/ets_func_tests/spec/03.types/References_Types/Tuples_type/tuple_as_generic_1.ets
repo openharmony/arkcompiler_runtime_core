@@ -32,5 +32,5 @@ function main(): void {
     let ct = new TupleFunction<NumberPair>();
     ct.field = [12, 12];
 
-    assertEQ( ct.get()[0], 12)
+    arktest.assertEQ( ct.get()[0], 12)
 }

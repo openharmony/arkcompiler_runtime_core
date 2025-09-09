@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {doubleNaN, doubleInf, doubleNegInf, doubleEpsilon, PI, E, SQRT1_2} from "std/math/consts";
+import {doubleNaN, doubleInf, doubleNegInf, doubleEpsilon, PI, E, SQRT1_2, SQRT2} from "std/math/consts";
 {%- for test_name, test_data in item.method_test_index_data.items() %}
 {% include 'utils/test_function_template.j2' with context %}
 {%endfor %}

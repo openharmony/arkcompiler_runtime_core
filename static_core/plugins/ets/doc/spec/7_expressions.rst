@@ -88,10 +88,12 @@ expression syntax rules:
 ``objectReference`` refers to one of the following three options:
 
 - Class that is to handle static members;
+
 - ``super`` that is to access constructors declared in the
   superclass, or the overridden method version of the superclass;
-- *primaryExpression* that is to refer to an instance variable of a class,
-  interface, or function type after evaluation, unless the manner of the
+
+- *primaryExpression* that is to refer to a variable
+  after evaluation, unless the manner of the
   evaluation is altered by the chaining operator '``?.``' (see
   :ref:`Chaining Operator`).
 
@@ -229,17 +231,17 @@ in the value attached to the error object.
 Runtime errors can occur as a result of expression or operator evaluation as
 follows:
 
--  If an *array reference expression* has the value ``null``, then an *array
-   indexing expression* (see :ref:`Array Indexing Expression`) throws
-   ``NullPointerError``.
 -  If the value of an array index expression is negative, or greater than, or
    equal to the length of the array, then an *array indexing expression* (see
-   :ref:`Array Indexing Expression`) throws ``ArrayIndexOutOfBoundsError``.
--  If a conversion cannot be performed at runtime, then a
-   :ref:`Cast Expression` throws ``ClassCastError``.
--  If the right-hand expression has the zero value, then integer
-   division (see :ref:`Division`), or integer remainder (see :ref:`Remainder`)
-   operators throw ``ArithmeticError``.
+   :ref:`Array Indexing Expression`) throws ``RangeError``.
+-  If the type of a value being assigned to a fixed-size array element is not
+   a subtype of an array element type, then an :ref:`Assignment` throws
+   *ArrayStoreError*.
+-  If a :ref:`Cast Expression` conversion cannot be performed at runtime, then
+   it throws ``ClassCastError``.
+-  If a right-hand expression has the zero value, then integer division or
+   integer remainder (see :ref:`Division` and :ref:`Remainder`) operators throw
+   ``ArithmeticError``.
 
 .. index::
    predefined operator
@@ -597,82 +599,157 @@ If *typeArguments* are provided, then *qualifiedName* is a valid instantiation
 of the generic method or function. Otherwise, a :index:`compile-time error`
 occurs.
 
-A :index:`compile-time error` also occurs in the following situations:
-
--  If a name referred by *qualifiedName* is undefined or inaccessible; or
--  If ambiguity occurs while resolving a name except the function or method
-   overloading case (see :ref:`Function, Method and Constructor Overloading`).
+A :index:`compile-time error` also occurs if a name referred by *qualifiedName*
+is undefined or inaccessible.
 
 Type of a *named reference* is the type of an expression.
 
-If a *named reference* refers to a non-static method of a class or an interface
-then the named reference is bounded with the object of that class or interface.
+If a *named reference* refers to a function name, it is called :ref:`Function Reference`.
+If a *named reference* refers to a method name, it is called :ref:`Method Reference`.
 
-.. index::
-   simple name
-   entity
-   compilation unit
-   compile-time error
-   namespace
-   named reference
-   expression
-   overloading
-   generic method
-   ambiguity
+|
+
+.. _Function Reference:
+
+Function Reference
+==================
+
+A *function reference* refers to a declared or imported function.
+Type of a *function reference* is derived from the function signature:
 
 .. code-block:: typescript
    :linenos:
 
-    import * as compilationUnitName from "someFile"
+   function foo(n: number): string {}
 
-    class Type {
-      static method() {}
-      method () {
-         let local = this.method // Qualified name referring an instance method
-      }
+   let func = foo // type of func is '(n: number) => string'
+
+A *function reference* can refer to a generic function but only
+if :ref:`Explicit Generic Instantiations` is present, otherwise
+a :index:`compile-time error` occurs:
+
+.. code-block:: typescript
+   :linenos:
+
+    function gen<T> (x: T) {}
+
+    let a = gen<string> // ok
+    let b = gen // compile-time error: no explicit type arguments
+
+A :index:`compile-time error` occurs if an *overload alias* is
+used in a named reference:
+
+.. code-block:: typescript
+   :linenos:
+
+   function foo1(n: number) {}
+   function foo2(s: string) {}
+   overload foo( foo1, foo2 )
+
+   let x = foo // compile-time error, ambiguity
+   let y = foo2 // ok
+
+A name of a :ref:`Function with Overload Signatures` can be used
+as named reference. The type of a *function reference* is derived
+from a signature of implementation body
+(see :ref:`Overload Signatures Implementation Body`):
+
+.. code-block:: typescript
+   :linenos:
+
+   function foo(n: number)
+   function foo(s: string)
+   function foo(...x: Any[]): Any {)
+
+   let x = foo // ok, type is (...x: Any[]) => Any
+
+|
+
+.. _Method Reference:
+
+Method Reference
+================
+
+A *method reference* refers to a *static* or *instance* method
+of a class or an interface.
+Type of a *method reference* is derived from the method signature:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+      static foo(n: number) {}
+      bar (s: string): boolean {}
     }
-    const m1 = Type.method  // Qualified name referring a static method
-    const m2 = (new Type).method
 
-    function foo (parameter: Type) {
-      let local: Type = parameter /* 'parameter' here is the
-          expression in the form of simple name, type of 'parameter' is the
-          explicitly declared function parameter type */
-      local = new Type () /* 'local' here is the expression in the
-          form of simple name */
-      local = compilationUnitName.someExportedVariable /* qualifiedName here
-          refers to a variable imported from a compilation unit */
-      let func = foo /* foo is a simple name of the function declared in this
-          module, type of 'func' is the function type derived from the function
-          'foo()' signature. func itself is a new function object */
+    // Method reference to a static method
+    const m1 = C.foo  // type of 'm1' is (n: number) => void
 
-      goo() // goo is an undefined name - compile-time error
-      let bar_ref = bar // bar is an ambiguous reference - compile-time error
-    }
-
-    function bar (p: string) {}
-    function bar (p: number) {}
-
-    function generic_function<T> () {}
-    let instantiation = generic_function<string> /* type of 'instantiation' is
-         a function type derived from the signature of instantiated function
-         'generic_function<string> ()' */
+    // Method reference to an instance method
+    const m2 = new C().bar // type of 'm1' is (s: string) => boolean
 
 
-    class aClass {
+If *method reference* refers to an instance method, that the named reference
+is bounded with the used instance of that class or interface.
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
         field = 123
         method(): number { return this.field }
     }
-    const anObject = new aClass
-    const aMethod = anObject.method
-    anObject.field = 42
-    console.log (aMethod()) // Outputs 42
+    let c1 = new C
+    let c2 = new C
+    let m1 = c1.method // 'c1' is bounded
+    let m2 = c2.method // 'c2' is bounded
+    c1.field = 42
+    console.log (m1(), m2()) // Outputs: 42 123
 
-    let global: Object = goo()
-    function goo() {
-        console.log (global) // compile-time or runtime error
+A *method reference* can refer to a generic method but only
+if :ref:`Explicit Generic Instantiations` is present, otherwise
+a :index:`compile-time error` occurs:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        gen<T> (x: T) {}
     }
 
+    let a = new C().gen<string> // ok
+    let b = new C().gen // compile-time error: no explicit type arguments
+
+A :index:`compile-time error` occurs if a method *overload alias* is
+used in a named reference:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        foo1(n: number) {}
+        foo2(s: string)
+        overload foo { foo1, foo2 }
+    }
+
+    let f = new C().foo // compile-time error
+
+A name of a :ref:`Class Method with Overload Signatures`
+or :ref:`Interface Method Overload Signatures` can be used
+as a named reference. The type of a *method reference* is derived
+from a signature of implementation body
+(see :ref:`Overload Signatures Implementation Body`):
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        foo1(n: number)
+        foo2(s: string)
+        foo(...x: Any[]): Any {)
+    }
+
+    let f = new C().foo // ok, type is (...x: Any[]) => Any
 
 |
 
@@ -939,37 +1016,40 @@ Array Type Inference from Types of Elements
 .. meta:
     frontend_status: Done
 
-When type of an array literal ``[`` ``expr``:sub:`1`, ``...`` , ``expr``:sub:`N` ``]``
-cannot be inferred from the context, then the following algorithm is
-used to infer it from initialization expressions:
+Where no context is set and thus the type of an array literal cannot be inferred
+from the context (see :ref:`Type of Expression`), the type of array literal
+``[`` ``expr``:sub:`1`, ``...`` , ``expr``:sub:`N` ``]`` is inferred from the
+initialization expression instead by using the following algorithm:
+
 
 .. #. If there is no expression (*N == 0*), then type is ``Object[]``.
 
-#. If there are no elements in the array literal (*N == 0*), then type of
+#. If array literal (*N == 0*) includes no element, then the type of
    the array literal cannot be inferred, and a :index:`compile-time error`
    occurs.
 
-#. If type of at least one of element expression cannot be determined, then
-   type of the array literal cannot be inferred, and a
+#. If at least one element of an expression type cannot be determined, then
+   the type of the array literal cannot be inferred, and a
    :index:`compile-time error` occurs.
 
-#. If each initialization expression is of numeric type (see
-   :ref:`Numeric Types`), then the type of the array literal is ``number[]``.
+#. If each initialization expression is of a numeric type (see
+   :ref:`Numeric Types`), then the array literal type is ``number[]``.
 
-#. If all initialization expressions are of the same type ``T``, then the
-   type of the array literal is ``T[]``.
+#. If all initialization expressions are of the same type ``T``,
+   then the array literal type is ``T[]``.
 
-#. Otherwise, the type of array literal is constructed as the union type
+#. Otherwise, the array literal type is constructed as the union type
    ``T``:sub:1 ``| ... | T``:sub:N,
-   where ``T``:sub:i is the type of *expr*:sub:i and then:
+   where ``T``:sub:i is the type of *expr*:sub:i, and then:
 
-    - If ``T``:sub:i is a literal type, then it is  replaced for its supertype;
+    - If ``T``:sub:i is a literal type, then it is replaced for its supertype;
 
-    - If ``T``:sub:i is a union type that contains literal types,
-      then each literal type is replaced for its supertype.
+    - If ``T``:sub:i is a union type comprised of literal types, then each
+      constituent literal type is replaced for its supertype.
 
-    - :ref:`Union Types Normalization` is applied
-      to the resultant union type after these replacements.
+    - :ref:`Union Types Normalization` is applied to the resultant union type
+      after the above replacements.
+
 
 .. index::
    type inference
@@ -1124,8 +1204,9 @@ override-compatible signatures (see :ref:`Override-Compatible Signatures`):
     o.method (new Derived) // OK
     o.method (new Base) // compile-time error
 
-If a class or an interface has some method implementaion, then its object
-literal can skip providing a new implemention of this method:
+If a class or an interface has some method implementation, then its object
+literal can either skip providing a new method implementation, or
+provide its own version of method implementatino:
 
 .. code-block:: typescript
    :linenos:
@@ -1133,26 +1214,49 @@ literal can skip providing a new implemention of this method:
     class Base {
       method () { console.log ("method() from Base is called") }
     }
-    const x: Base = {} // Valid literal of type Base
-    x.method ()
+    const x1: Base = {} // Valid literal of type Base
+    x1.method ()
+
+    const x2: Base = { // Valid literal of type compatible to Base
+      method () { console.log ("method() from object literal is called") }
+    }
+    x2.method ()
 
     interface I {
       method () { console.log ("method() from I is called") }
     }
-    const x: I = {} // Valid literal of anonymous class type
-    x.method ()
+    const x3: I = {} // Valid literal of anonymous class type
+    x3.method ()
 
+    const x4: I = { // Valid literal of anonymous class type
+      method () { console.log ("method() from object literal is called") }
+    }
+    x4.method ()
 
 
 Type of an *object literal expression* is always some class ``C`` that is
 inferred from the context. A type inferred from the context can be either a
-named class (see :ref:`Object Literal of Class Type`), or an anonymous class
-created for the inferred interface type (see
-:ref:`Object Literal of Interface Type`).
+class (see :ref:`Object Literal of Class Type`), or an anonymous class created
+for the inferred interface type (see :ref:`Object Literal of Interface Type`).
+
+Thus any reference to ``this`` in object literals methods is the reference to
+the type of the object literal - the class defined above.
+
+.. code-block:: typescript
+   :linenos:
+
+    class A {
+      method () {
+         this /* refers to class A type */
+         const b: B = { method () {  this /* refers to class B type */ } }
+      }
+    }
+
+
 
 A :index:`compile-time error` occurs if:
 
--  Type of an object literal cannot be inferred from the context;
+-  Type of an object literal cannot be inferred from the context (see an example in :ref:`Type of Expression`);
 -  The inferred type is not a class or interface type;
 -  The context is a union type, and an object literal can be treated
    as value of several of union component types; or
@@ -1590,7 +1694,7 @@ initialized class instance if so do all name-value pairs.
 
 |
 
-.. _spread Expression:
+.. _Spread Expression:
 
 Spread Expression
 *****************
@@ -1600,8 +1704,8 @@ Spread Expression
 
 *Spread expression* can be used only within an array literal (see
 :ref:`Array Literal`) or argument passing. The *expression* must be of
-array type (see :ref:`Array Types`) or tuple type (see :ref:`Tuple Types`) or
-any type which has iteraror defined (see :ref:`Iterable Types`). 
+array type (see :ref:`Array Types`), tuple type (see :ref:`Tuple Types`), or
+any type which has the iterator defined (see :ref:`Iterable Types`).
 Otherwise, a :index:`compile-time error` occurs.
 
 The syntax of *spread expression* is presented below:
@@ -1612,14 +1716,14 @@ The syntax of *spread expression* is presented below:
         '...' expression
         ;
 
-A *spread expression* for arrays or tuples or iterable types can be evaluated
+A *spread expression* for arrays, tuples, or iterable types can be evaluated
 as follows:
 
 -  By the compiler at compile time if *expression* is constant (see
    :ref:`Constant Expressions`);
 -  At runtime otherwise.
 
-An array or tuple or iterable object referred by the *expression* is broken by
+An array, tuple, or iterable object referred by the *expression* is broken by
 the evaluation into a sequence of values. This sequence is used where a
 *spread expression* is used. It can be an assignment, a call of a function,
 method, or constructor. A sequence of types of these values is the type of the
@@ -1651,16 +1755,16 @@ method, or constructor. A sequence of types of these values is the type of the
        // while building new array literal during compile-time
     console.log(array3) // prints [1, 2, 3, 4, 5]
 
-    foo (...array2)  // spread array2 elements into arguments of the foo() call
     function foo (...array: number[]) {
       console.log (array)
     }
+    foo (...array2)  // spread array2 elements into arguments of the foo() call
 
-    run_time_spread_application1 (array1, array2) // prints [1, 2, 3, 42, 4, 5]
     function run_time_spread_application1 (a1: number[], a2: number[]) {
       console.log ([...a1, 42, ...a2])
         // array literal will be built at runtime
     }
+    run_time_spread_application1 (array1, array2) // prints [1, 2, 3, 42, 4, 5]
 
     let tuple1: [number, string, boolean] = [1, "2", true]
     let tuple2: [number, string] = [4, "5"]
@@ -1668,23 +1772,23 @@ method, or constructor. A sequence of types of these values is the type of the
        // while building new tuple object during compile-time
     console.log(tuple3) // prints [1, "2", true, 4, "5"]
 
-    bar (...tuple2)  // spread tuple2 elements into arguments of the foo() call
     function bar (...tuple: [number, string]) {
       console.log (tuple)
     }
+    bar (...tuple2)  // spread tuple2 elements into arguments of the foo() call
 
-    run_time_spread_application2 (tuple1, tuple2) // prints [1, "2", true, 42, 4, "5"]
     function run_time_spread_application2 (a1: [number, string, boolean], a2: [number, string]) {
       console.log ([...a1, 42, ...a2])
         // such array literal will be built at runtime
     }
+    run_time_spread_application2 (tuple1, tuple2) // prints [1, "2", true, 42, 4, "5"]
 
     class A<T> implements Iterable<T|undefined> { // variables of type A can be spread
         $_iterator(): Iterator<T|undefined>  {
           return new MyIteratorResult<T|undefined>(this.data)
         }
         private data: T[]
-        constructor (...data: T[]) { this.data = data }       
+        constructor (...data: T[]) { this.data = data }
     }
     class MyIteratorResult <T> implements Iterator<T|undefined> {
         private data: T[]
@@ -1709,9 +1813,9 @@ method, or constructor. A sequence of types of these values is the type of the
 
 
 **Note**. If an argument is spread at the call site, then an appropriate
-parameter must be of the rest kind (see :ref:`Rest Parameter`). If an argument
-is spread into a sequence of ordinary non-optional parameters, then a
-:index:`compile-time error` occurs:
+parameter must be of the rest kind (see :ref:`Rest Parameter`). A
+:index:`compile-time error` occurs if an argument is spread into a sequence of
+ordinary non-optional parameters as follows:
 
 .. code-block:: typescript
    :linenos:
@@ -1770,10 +1874,6 @@ the contained expression.
 .. meta:
     frontend_status: Done
 
-Keyword ``this`` can be used as an expression in the body of an instance
-method of a class (see :ref:`Method Body`) or an interface (see
-:ref:`Default Interface Method Declarations`). The type of *this* expression
-is the appropriate class or interface type.
 
 The syntax of *this expression* is presented below:
 
@@ -1783,11 +1883,20 @@ The syntax of *this expression* is presented below:
         'this'
         ;
 
-The keyword ``this`` can be used in a lambda expression only if it is allowed
-in the context in which the lambda expression occurs.
+The keyword ``this`` can be used as an expression in the body of an instance
+method of a class (see :ref:`Method Body`) or an interface (see
+:ref:`Default Interface Method Declarations`). A corresponding class or
+interface type is the type of *this* expression. If a method is declared in an
+object literal (see :ref:`Object Literal`), then the type of the object literal
+is the type of ``this``.
 
-The keyword ``this`` in a *direct call* ``this(`` *arguments* ``)`` expression
-can only be used in the explicit constructor call statement (see
+The keyword ``this`` can be used in a lambda expression only if it is allowed
+in the context in which the lambda expression occurs. The type of ``this`` is
+the type of a class or an interface in which it is declared, but not the type
+of the surrounding object literal type, if any.
+
+The keyword ``this`` in a *direct call* expression ``this(`` *arguments* ``)``
+can only be used in an explicit constructor call statement (see
 :ref:`Explicit Constructor Call`).
 
 The keyword ``this`` can also be used in the body of a function with receiver
@@ -1833,6 +1942,38 @@ a class type, or a subclass of ``T`` (see :ref:`Subtyping`) .
    runtime
    class type
    class
+
+The semantics of ``this`` in different contexts is represented in the example
+below:
+
+.. code-block:: typescript
+   :linenos:
+
+    interface anInterface {
+        method() {
+           this // type of 'this' is anInterface
+        }
+    }
+    class aClass implements anInterface {
+        method() {
+           this // type of 'this' is aClass
+        }
+        field = (): void => {
+           this // type of 'this' is aClass
+        }
+    }
+    class AnotherClass {
+        anotherMethod() {
+            const object: aClass = { // Object literal
+              method () {
+                  this // type of 'this' is aClass
+              },
+              field: (): void => {
+                  this // type of 'this' is AnotherClass
+              }
+            }
+        }
+    }
 
 |
 
@@ -2033,9 +2174,6 @@ form called *trailing lambda call* (see :ref:`Trailing Lambdas` for details).
 A method call with '``?.``' (see :ref:`Chaining Operator`) is called a
 *safe method call* because it handles nullish values safely.
 
-Resolving a method at compile time is more complicated than resolving a field
-because method overloading (see :ref:`Class Method Overloading`) can occur.
-
 There are several steps that determine and check the method to be called at
 compile time (see :ref:`Step 1 Selection of Type to Use`,
 :ref:`Step 2 Selection of Method`, and
@@ -2096,23 +2234,16 @@ Step 2: Selection of Method
 .. meta:
     frontend_status: Done
 
-After the type to use is known, the method to call must be determined. |LANG|
-supports overloading, and more than one method can be accessible under the
-method name used in the call.
-
-All accessible methods (see :ref:`Accessible`) are called
-*potentially applicable candidates*, and :ref:`Overload Resolution` is used to
-select the method to call. If *overload resolution* can definitely select a
-single method, then this method is called.
-A :index:`compile-time error` occurs in the following cases:
-
--  If no method is available for the call, or
--  If there is more than one applicable method, thus causing ambiguity.
+After the type to use is known, the method to call must be determined.
+If a method name in the call refers an *overload declaration* (see
+:ref:`Overload Declarations`), then
+:ref:`Overload Resolution for Overload Declarations` is used
+to select the method to call.
+A :index:`compile-time error` occurs if no method is available to call.
 
 .. index::
    overload resolution
    method call
-   potentially applicable candidate
    accessible method
    access
 
@@ -2171,8 +2302,8 @@ Type of a *method call expression* is the return type of the method.
 
     let x = A.method()     // compile-time error as void cannot be used as type annotation
     A.method ()            // OK
-    let y = new A.method() // compile-time error as void cannot be used as type annotation
-    new A.method()         // OK
+    let y = new A().method() // compile-time error as void cannot be used as type annotation
+    new A().method()         // OK
 
 .. index::
    method call expression
@@ -2240,40 +2371,25 @@ The function call is *safe* because it handles nullish values properly.
    undefined
    function call
 
-The following important situations depend on the form of expression in a call,
-and require different semantic checks:
+If the form of expression in the call is *qualifiedName*, and *qualifiedName*
+refers an *overload declaration* (:ref:`Overload Declarations`), then
+:ref:`Overload Resolution for Overload Declarations` is used
+to select the function to call.
+A :index:`compile-time error` occurs if no function is available to call.
 
-- The form of expression in the call is *qualifiedName*, and *qualifiedName*
-  refers to an accessible function (:ref:`Function Declarations`), or to a set
-  of accessible overloaded functions.
-
-  In this case, all accessible functions (see :ref:`Accessible`) are
-  *potentially applicable candidates*. :ref:`Overload Resolution` is used to
-  select the function to call. If *overload resolution* can definitely select a
-  single function, then this function is called.
-
-A :index:`compile-time error` occurs in the following cases:
-
--  If no function is available to call;
--  If there is more than one applicable function, thus causing ambiguity; or
--  All other forms of expression.
-
-  In this case, *overload resolution* is not required as the expression
-  determines the entity to call unambiguously. Semantic check is performed
-  in accordance with :ref:`Compatibility of Call Arguments`.
+Semantic check for call is performed in accordance with
+:ref:`Compatibility of Call Arguments`.
 
 .. index::
    call
    expression
    qualified name
    accessible function
-   overloaded function
    overload resolution
    expression
    semantic check
    compatibility
    function call
-   potentially applicable candidate
    accessibility
    qualified name
    function
@@ -2323,10 +2439,9 @@ Indexing Expressions
     frontend_status: Done
 
 *Indexing expressions* are used to access elements of arrays (see
-:ref:`Array Types`), strings (see :ref:`Type string`) and
-``Record`` instances (see :ref:`Record Utility Type`).
-Indexing expressions can also be applied to instances of indexable types (see
-:ref:`Indexable Types`).
+:ref:`Array Types`), strings (see :ref:`Type string`), and ``Record`` instances
+(see :ref:`Record Utility Type`). Indexing expressions can also be applied to
+instances of indexable types (see :ref:`Indexable Types`).
 
 The syntax of *indexing expression* is presented below:
 
@@ -2390,7 +2505,7 @@ Array Indexing Expression
     todo: implement floating point index support - #14001
 
 *Index expression* for array indexing must be of a numeric type (see
-:ref:`Numeric Types`).
+:ref:`Numeric Types`). Otherwise, a :index:`compile-time error` occurs.
 
 If an *index expression* is of type ``number`` or other floating-point type,
 and the fractional part differs from 0, then errors occur as follows:
@@ -2444,6 +2559,8 @@ array elements can be modified by changing the resultant variable fields:
     names[1] = "Martin"
     console.log(names[1]) // prints Martin
 
+    console.log (names["1"]) // compile-time error as index of non-numeric type
+
     class RefType {
         field: number = 42
     }
@@ -2454,10 +2571,9 @@ array elements can be modified by changing the resultant variable fields:
     console.log(objects[1].field) // prints 777
 
     let an_array = [1, 2, 3]
-    let element = an_array [3.5] // Compile-time error
+    let element = an_array [3.5] // compile-time error as index is not integer
     function foo (index: number) {
-       let element = an_array [index]
-          // Runtime-time error if index is not integer
+       let element = an_array [index] // runtime error if index is not integer
     }
 
 An array indexing expression evaluated at runtime behaves as follows:
@@ -2468,8 +2584,7 @@ An array indexing expression evaluated at runtime behaves as follows:
 -  If the evaluation completes normally, then the index expression is evaluated.
    The resultant value of the object reference expression refers to an array.
 -  If the index expression value of an array is less than zero, greater than
-   or equal to that array’s *length*, then the ``ArrayIndexOutOfBoundsError``
-   is thrown.
+   or equal to that array’s *length*, then ``RangeError`` is thrown.
 -  Otherwise, the result of the array access is a type ``T`` variable within
    the array selected by the value of the index expression.
 
@@ -2477,7 +2592,7 @@ An array indexing expression evaluated at runtime behaves as follows:
    :linenos:
 
     function setElement(names: string[], i: number, name: string) {
-        names[i] = name // run-time error, if 'i' is out of bounds
+        names[i] = name // runtime error, if 'i' is out of bounds
     }
 
 .. index::
@@ -2496,20 +2611,19 @@ An array indexing expression evaluated at runtime behaves as follows:
 
 .. _String Indexing Expression:
 
-_String Indexing Expression
-===========================
+String Indexing Expression
+==========================
 
 .. meta:
     frontend_status: Partly
     todo: return type is string
 
 *Index expression* for array indexing must be of a numeric type (see
-:ref:`Numeric Types`), the rules are the same as for
+:ref:`Numeric Types`). The same rules apply as those for
 :ref:`Array Indexing Expression`.
 
-If the index expression value of an array is less than zero, greater than
-or equal to that string’s *length*, then the ``ArrayIndexOutOfBoundsError``
-is thrown.
+If the index expression value of a string is less than zero, greater than
+or equal to that string’s *length*, then ``RangeError`` is thrown.
 
 .. index::
    string indexing
@@ -2520,20 +2634,20 @@ is thrown.
    :linenos:
 
     console.log("abc"[1]]) // prints: b
-    console.log("abc"[3]]) // run-time exception
-	
-The result of an string indexing expression is a value of ``string`` type.
+    console.log("abc"[3]]) // runtime exception
 
-**Note.** String value is immutable, it is not allowed to change a value of
-string element by indexing.
-	
+The result of a string indexing expression is a value of ``string`` type.
+
+**Note.** String value is immutable, and is not allowed to change a value of
+a string element by indexing.
+
 .. code-block:: typescript
    :linenos:
 
-	let x = "abc"
-	x[1] = "d" // compile-time error, string value is immutable
-	
-|	
+    let x = "abc"
+    x[1] = "d" // compile-time error, string value is immutable
+
+|
 
 .. _Record Indexing Expression:
 
@@ -2860,6 +2974,7 @@ as object reference in a method call expression, then empty parentheses
 
     new A.method()   // compile-time error
     new A().method() // OK
+    (new A).method() // OK
     let a = new A    // OK
 
 
@@ -2950,8 +3065,8 @@ The ``type`` of an ``instanceof`` expression is used for *smart typing*
 .. meta:
     frontend_status: Done
 
-*Cast expression* in the form ``expr instanceof target`` applies *cast operator*
-``as`` to an expression by issuing a value of a specified ``target`` type. The
+*Cast expression* in the form ``expr as target`` applies the *cast operator*
+``as`` to ``expr`` by issuing the value of a specified ``target`` type. The
 syntax of *cast expression* is as follows:
 
 .. code-block:: abnf
@@ -2972,7 +3087,6 @@ syntax of *cast expression* is as follows:
 .. index::
    cast expression
    operand
-   instanceof
    cast operator
 
 The following cases are considered for an *expr as T* in a sequence as follows:
@@ -2980,9 +3094,6 @@ The following cases are considered for an *expr as T* in a sequence as follows:
 - If ``expr`` is a constant expression (see :ref:`Constant Expressions`),
   :ref:`Array literal`, or :ref:`Object Literal`, then an attempt is made to
   apply :ref:`Type Inference in Cast Expression`;
-
-- If the ``target`` type is an enumeration type (see :ref:`Enumerations`),
-  then an attempt is made to apply :ref:`Casting to Enumeration`;
 
 - Otherwise, :ref:`Runtime Checking in Cast Expression` is applied.
 
@@ -3036,6 +3147,9 @@ operator.
 
 Type Inference in Cast Expression
 =================================
+
+.. meta:
+    frontend_status: Partly
 
 The following combinations of ``expr`` and ``target`` are considered for the
 ``expr as target`` expression:
@@ -3103,45 +3217,13 @@ Examples with object literals are provided in :ref:`Object literal`.
 
 |
 
-.. _Casting to Enumeration:
-
-Casting to Enumeration
-======================
-
-There are two cases where an ``expr as target`` expression is used to convert
-an expression value to the ``target`` enumeration type:
-
--  If the *enumeration base type* is an integer type, and the
-   expression is of integer type; or
-
--  If the *enumeration base type* is type ``string``, and the
-   expression is of string type.
-
-In both cases, the check is performed at runtime:
-
--  If the value of ``expr`` is the value of some constant of the enumeration
-   type, then the value is converted to the enumeration type;
-
--  Otheriwise, a runtime error occurs.
-
-.. code-block:: typescript
-   :linenos:
-
-    enum NumE {A, B}
-
-    function foo(x: int): NumE {
-        return x as NumE
-    }
-
-    foo(1) // ok
-    foo(2) // runtime error occurs in 'foo'
-
-|
-
 .. _Runtime Checking in Cast Expression:
 
 Runtime Checking in Cast Expression
 ===================================
+
+.. meta:
+    frontend_status: Partly
 
 If none of the previous kinds of *cast expression* can be applied, then
 ``expr as target`` checks that the type of ``expr`` is a subtype of
@@ -3175,11 +3257,11 @@ This situation is represented in the following example:
    :linenos:
 
     function foo (x: Object) {
-        console.log(x as string)
+        x as string
     }
 
     foo("aa") // OK
-    foo(1)    // runtime error is thrown in foo
+    foo(1)    // runtime error is thrown in foo by as operator application
 
 :ref:`Instanceof Expression` can be used to prevent runtime errors. Moreover,
 in many cases :ref:`Instanceof Expression` makes *cast conversion* unnecessary
@@ -3198,12 +3280,12 @@ as *smart casting* is applied (see :ref:`Smart Types`):
             // no need to cast, type of 'x' is 'Person' here
             console.log(x.name)
         } else {
-            console.log("no name")
+            console.log("not a Person")
         }
     }
 
     printName(new Person("Bob")) // output: Bob
-    printName(1)                 // output: no name
+    printName(1)                 // output: not a Person
 
 |
 
@@ -3225,13 +3307,15 @@ The syntax of *typeof expression* is presented below:
 
 Any ``typeof`` expression is of type ``string``.
 
-If *typeof expression* refers to a name of the overloaded function or method,
+If *typeof expression* refers to a name of an overloaded function or method,
 then a :index:`compile-time error` occurs.
 
 The evaluation of a *typeof expression* starts with the ``expression``
 evaluation. If this evaluation causes an error, then the ``typeof`` expression
 evaluation terminates abruptly. Otherwise, the value of a ``typeof expression``
 is defined as follows:
+
+|
 
 1. **Expression type defined at compile time**
 
@@ -3244,11 +3328,6 @@ is defined as follows:
 +---------------------------------+-------------------------+-----------------------------+
 |       Type of Expression        |     Resulting String    |   Code Example              |
 +=================================+=========================+=============================+
-| ``number``                      | "number"                | .. code-block:: typescript  |
-|                                 |                         |                             |
-|                                 |                         |  let n: number = ...        |
-|                                 |                         |  typeof n                   |
-+---------------------------------+-------------------------+-----------------------------+
 | ``string``                      | "string"                | .. code-block:: typescript  |
 |                                 |                         |                             |
 |                                 |                         |  let s: string = ...        |
@@ -3288,22 +3367,32 @@ is defined as follows:
 | interface or array              |                         |  let x: C | null = ...      |
 |                                 |                         |  typeof x                   |
 +---------------------------------+-------------------------+-----------------------------+
-| ``enum``                        | "number" or "string",   | .. code-block:: typescript  |
-|                                 | depending of constant   |                             |
-|                                 | type                    |  enum C {R, G, B}           |
+| enumeration type                | name of enumeration     | .. code-block:: typescript  |
+|                                 | base type               |                             |
+|                                 |                         |  enum C {R, G, B}           |
 |                                 |                         |  let c: C = ...             |
-|                                 |                         |  typeof c                   |
+|                                 |                         |  typeof c // "int"          |
 +---------------------------------+-------------------------+-----------------------------+
-| Numeric types:                  | "number"                | .. code-block:: typescript  |
+| ``number``, ``double``          | "number"                | .. code-block:: typescript  |
 |                                 |                         |                             |
-|                                 |                         |  let x: byte = ...          |
-| ``byte``, ``short``, ``int``,   |                         |  typeof x                   |
-| ``long``, ``float``, ``double`` |                         |  ...                        |
+|                                 |                         |  let n: number = ...        |
+|                                 |                         |  typeof n                   |
++---------------------------------+-------------------------+-----------------------------+
+| Other numeric types:            | "byte", "short", "int", | .. code-block:: typescript  |
+|                                 | "long" or "float",      |                             |
+| ``byte``, ``short``, ``int``,   | depending on type of    |  let x: byte = ...          |
+| ``long``, ``float``             | expression              |  typeof x // "byte"         |
++---------------------------------+-------------------------+-----------------------------+
+| ``char``                        | "char"                  | .. code-block:: typescript  |
+|                                 |                         |                             |
+|                                 |                         |  let x: char = ...          |
+|                                 |                         |  typeof x                   |
 +---------------------------------+-------------------------+-----------------------------+
 
-|
+2. **Expression type determined at runtime**
 
-2. **Expression type defined at runtime**
+The result is a name of the actual type used at runtime for the following
+expression types:
 
 +------------------------+-----------------------------+
 |   Type of Expression   |   Code Example              |
@@ -4965,17 +5054,15 @@ The syntax of *equality expression* is presented below:
         expression ('==' | '===' | '!=' | '!==') expression
         ;
 
-Any equality expression is of type ``boolean``. The result of operators '``==``'
-and '``===``' is ``true`` if operands are *equal* as shown below. Otherwise, the
-result is ``false``.
-
 Equality operators group left-to-right.
 Equality operators are commutative if operand expressions cause no side
 effects.
 
-Equality operators are similar to relational operators, except for their
-lower precedence (:math:`a < b==c < d` is ``true`` if both :math:`a < b`
-and :math:`c < d` have the same ``truth`` value).
+Similarly to relational operators, equality operators return ``true`` or
+``false`` but the latter have a lower precedence (:math:`a < b==c < d` is
+``true`` if both :math:`a < b` and :math:`c < d` have the same ``truth`` value).
+
+Any equality expression is of type ``boolean``.
 
 .. index::
    equality operator
@@ -4983,94 +5070,107 @@ and :math:`c < d` have the same ``truth`` value).
    boolean type
    relational operator
 
-In all cases, ``a != b`` produces the same result as ``!(a == b)``, and
-``a !== b`` produces the same result as ``!(a === b)``.
+The results produced by ``a != b`` and ``!(a == b)`` is the same in all cases.
+The results produced by ``a !== b`` and as ``!(a === b)`` is the same.
 
-The result of operators '``==``' and '``===``' is the same in all cases,
+The result of the operators '``==``' and '``===``' is the same in all cases
 except when comparing the values ``null`` and ``undefined`` (see
-:ref:`Reference Equality`).
+:ref:`Extended Equality with null or undefined`).
 
-The variant of equality evaluation to be used depends on types of the
-operands used as follows:
+A comparison that uses the operators '``==``' and '``===``' is evaluated to
+``true`` with the following:
 
--  *Value equality* is applied to entities of :ref:`Value Types`,
-   type ``string`` (see :ref:`Type string`) and type ``bigint`` (see
-   :ref:`Type bigint`).
--  *Reference Equality based on actual (dynamic) type* is applied to values of
-   type ``Object`` (:ref:`Type Object`), values of union types
-   (:ref:`Union Types`), type parameters (:ref:`Type Parameters`), and if at
-   least one type is of interface type (:ref:`Interfaces`).
--  *Reference equality* is applied to entities of all other reference types
-   (see :ref:`Reference Types`).
+- Operands of :ref:`Type boolean` of the same value;
 
-.. index::
-   operator
-   value
-   value equality
-   primitive type
-   value type
-   enumeration type
-   bigint
-   reference equality
-   object
-   type parameter
+- Operands of :ref:`Type string` or string literal type
+  (see :ref:`String Literal Types`) with the same contents;
 
-Operators '``===``' and '``==``', or '``!==``' and '``!=``' are used for:
+- Operands of :ref:`Type bigint` of the same value;
 
-- :ref:`Numerical Equality Operators` if both operands are
-  of :ref:`Numeric Types`);
+- Operands of :ref:`Type char` of the same value (both operands represent the
+  same Unicode code point);
 
-- :ref:`String Equality Operators` if both operands are of type ``string``;
+- Operands of :ref:`Numeric Types` of the same value except ``NaN``
+  (see :ref:`Numerical Equality Operators` for details);
 
-- :ref:`Bigint Equality Operators` if both operands are of type ``bigint``;
+- Operands of the same enumeration type (see :ref:`Enumerations`)
+  that have the same numeric values or the same string contents,
+  depending on the type of enumeration constant values;
 
-- :ref:`Boolean Equality Operators` if both operands are of type ``boolean``;
+- Function references that refer to the same functional object (see details in
+  :ref:`Function Type Equality Operators`).
 
-- :ref:`Character Equality Operators` if both operands are of type ``char``;
+In all other cases, if a comparison of values of types ``A`` and ``B``  is
+always known to evaluate to ``false`` at compile time, then a
+:index:`compile-time error` occurs. Otherwise, the result of the comparison
+is evaluated at runtime, i.e., during program execution.
 
-- :ref:`Enumeration Equality Operators` if both operands are of an enumeration
-  type;
-
-- :ref:`Function type Equality Operators` if both operands are of a function
-  type;
-
-- :ref:`Reference Equality based on actual type` if at least one operand is of
-  ``Object`` type, union type, interface type, or is a type parameter;
-
-- :ref:`Reference Equality` if both operands are of compatible reference types,
-  except types ``string``, ``bigint``, ``Object``, union types, and type
-  parameters;
-
-- :ref:`Extended Equality with null or undefined` if one operand is ``null`` or
-  ``undefined``.
-
-- Otherwise, a :index:`compile-time error` occurs.
+This semantics is represented in the examples below:
 
 .. code-block:: typescript
    :linenos:
 
-   // Entities of value types are not comparable between each other
-   5 == "5" // compile-time error
-   5 == true // compile-time error
-   "5" == true // compile-time error
+   class X {}
+   new X() == new X()  // false, two different instances of class X
+   new X() === new X() // false, two different instances of class X
+   let x1 = new X()
+   let x2 = x1
+   x1 == x2 // true, as x1 and x2 refer to the same instance
+   x1 === x2 // true, the same instance
 
-.. index::
-   value equality
-   comparison
-   operand
-   operator
-   numerical equality
-   enumeration
-   equality operator
-   numeric type
-   string
-   equality operator
-   boolean type
-   type parameter
-   object
-   reference type
-   union type
-   type parameter
+   let x = 5
+   x == 5 // true, values are compared
+
+   new Number(5) === new Number(5) // true, values are equal
+   new Number(5) == new Number(6) // false, values are not equal
+
+   1 == "a" // compile-time error, as type int and type string do not overlap
+
+   class X {}
+   class Y {}
+
+   new X() == new Y() // compile-time error, as type X and type Y do not overlap
+
+
+An evaluation of equality expressions always uses the actual types of operands
+as in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    function equ(a: Object, b: Object): boolean {
+        return a == b
+    }
+
+    equ(1, 1) // true, values are compared
+    equ(1, 2) // false, value are compared
+
+    equ("aa", "aa") // true, string contexts are compared
+    equ(1, "aa") // false, not compatible types
+
+    interface I1 {}
+    interface I2 {}
+
+    function equ1 (i1: I1, i2: I2) {
+       return i1 == i2 // to be resolved during program execution
+    }
+    class A implements I1, I2 {}
+    const a = new A
+    equ1 (a, a) // true, the same values
+
+
+An equality with values of two union types is represented in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    function f1(x: number | string, y: boolean | null): boolean {
+        return x == y // compile-time error, always evaluates to false
+    }
+
+    function f2(x: number | string, y: boolean | "abc"): boolean {
+        return x == y // ok, can be evaluated to true
+    }
 
 |
 
@@ -5112,7 +5212,7 @@ following IEEE 754 standard rules:
    integer equality test
    IEEE 754
    widening
-   primitive conversion
+   numeric conversion
 
 -  The result of '``==``' or '``===``' is ``false`` but the result of '``!=``'
    is ``true`` if either operand is ``NaN``.
@@ -5169,129 +5269,18 @@ The following example illustrates *numerical equality*:
 
 |
 
-.. _String Equality Operators:
-
-String Equality Operators
-=========================
-
-.. meta:
-    frontend_status: Done
-
-Type of one operand must be of type ``string``, other operand must
-be convertible (see :ref:`Implicit Conversions`) to ``string`` type.
-
-Two strings are equal if they represent the same sequence of characters:
-
-.. code-block:: typescript
-   :linenos:
-
-   "abc" == "abc" // true
-   "abc" === "ab" + "c" // true
-
-   function foo(s: string) {
-      console.log(s == "hello")
-   }
-   foo("hello") // prints "true"
-
-.. index::
-   value equality
-   string
-   string equality operator
-   operand
-   convertibility
-
-|
-
-.. _Bigint Equality Operators:
-
-Bigint Equality Operators
-==========================
-
-.. meta:
-    frontend_status: Done
-
-*Bigint equality* is used for operands of type ``bigint``.
-
-Two ``bigints`` are equal if they have the same value:
-
-.. code-block:: typescript
-   :linenos:
-
-   let x = 2n
-   x == 2n // true
-
-.. index::
-   value equality
-   bigint equality operator
-   bigint
-   equality operator
-   boolean equality
-   operand
-   value
-
-|
-
-.. _Boolean Equality Operators:
-
-Boolean Equality Operators
-==========================
-
-.. meta:
-    frontend_status: Done
-
-*Boolean equality* is used for operands of type ``boolean``.
-
-If both operands are
-either ``true`` or ``false``, then the result of ':math:`==`' or ':math:`===`'
-is ``true``. Otherwise, the result is ``false``.
-
-If both operands are either ``true`` or ``false``, then the result of '``!=``'
-or '``!==``' is ``false``. Otherwise, the result is ``true``.
-
-.. index::
-   value equality
-   boolean type
-   boolean equality
-   boolean equality operator
-   equality operator
-   value equality operator
-   operand
-
-|
-
-.. _Enumeration Equality Operators:
-
-Enumeration Equality Operators
-==============================
-
-.. meta:
-    frontend_status: Done
-
-If both operands are of the same enumeration type (see :ref:`Enumerations`),
-then :ref:`Numerical Equality Operators` or :ref:`String Equality Operators`
-are used depending on the kind of enumeration constant value
-(:ref:`Enumeration Integer Values` or :ref:`Enumeration String Values`).
-Otherwise, a :index:`compile-time error` occurs.
-
-.. index::
-   value equality
-   enumeration type
-   enumeration constant value
-   constant value
-
-|
-
 .. _Function Type Equality Operators:
 
 Function Type Equality Operators
 ================================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
 If both operands refer to the same function object, then the comparison
-returns ``true``. Otherwise, it is ``false``.
-
+returns ``true``.
+When comparing method references, not only the same method must be used,
+but also its bounded instances must be equal.
 
 .. code-block:: typescript
    :linenos:
@@ -5325,267 +5314,6 @@ returns ``true``. Otherwise, it is ``false``.
 
 |
 
-.. _Reference Equality Based on Actual Type:
-
-Reference Equality Based on Actual Type
-=======================================
-
-.. meta:
-    frontend_status: Done
-
-If an operand of an equality operator is of type ``Object``, a union type,
-an interface type, or is a type parameter, then the operator is evaluated at
-runtime, and is based on the actual type of this operand. If the other operand
-is of a type other than that above, then the static type of this operand is
-used for evaluation.
-
-If actual types of objects are compatible, then the corresponding evaluation of
-equality operator is used. Otherwise, the result of the operators '``==``' and
-'``===``' is ``false``.
-
-.. index::
-   reference equality
-   union type
-   operand
-   compatibility
-   equality operator
-   object
-   type parameter
-   evaluation
-   operator
-
-|
-
-.. _Object Type Equality Operators:
-
-Object Type Equality Operators
-------------------------------
-
-.. meta:
-    frontend_status: Done
-
-A value of type ``Object`` can be compared to a value of any reference type.
-
-The following example illustrates an equality with a value of type ``Object``:
-
-.. code-block:: typescript
-   :linenos:
-
-    function equToString(a: Object, b: string): boolean {
-        return a == b
-    }
-
-    equToString("aa", "aa") // true, string equality
-    equToString(1,  "aa") // false, not compatible types
-
-    function equ(a: Object, b: Object): boolean {
-        return a == b
-    }
-
-    equ(1, 1) // true, numerical equality
-    equ(1, 2) // false, numerical equality
-
-    equ("aa", "aa") // true, string equality
-    equ(1, "aa") // false, not compatible types
-
-.. index::
-   object type
-   equality operator
-   value
-   compatible type
-   compatibility
-
-**Note**. The actual type of an ``Object`` value can be none of the following:
-
-- Union type, as only the current value of a union type variable can be assigned
-  to an ``Object`` variable;
-
-- Type parameter, if it has no type constraint (see
-  :ref:`Type Parameter Constraint`) as in the example below:
-
-.. code-block:: typescript
-   :linenos:
-
-    function check(a: Object) {}
-
-    class MyType {}
-
-    class G<A, B extends MyType> {
-        foo(x: A, y: B) {
-            check(x) // compile-type error, A is not assignable to Object
-            check(y) // ok, B is assignable to Object as its constraint does
-        }
-    }
-
-.. index::
-   value
-   union type
-   variable
-   type constraint
-   assignment
-   constraint
-   type parameter
-   object type
-
-|
-
-.. _Union Equality Operators:
-
-Union Equality Operators
-------------------------
-
-Where one operand is of type ``T``:sub:`1`, and the other operand is of type
-``T``:sub:`2`, while ``T``:sub:`1`, ``T``:sub:`2`, or both are a union type,
-then a :index:`compile-time error` occurs if ``T``:sub:`1` and ``T``:sub:`2`
-have no overlap (i.e., if no value belongs to both ``T``:sub:`1` and
-``T``:sub:`2`).
-
-**Note**. Any union type has an overlap with a value of type ``Object``.
-
-The following example illustrates an equality with values of two union types:
-
-.. code-block:: typescript
-   :linenos:
-
-    function f1(x: number | string, y: boolean | null): boolean {
-        return x == y // compile-time error, types have no overlap
-    }
-
-    function f2(x: number | string, y: boolean | "abc"): boolean {
-        return x == y // ok, types have overlap - value "abc"
-    }
-
-.. index::
-   union equality
-   equality operator
-   type
-   operand
-   union type
-   value
-   object type
-
-If actual types of values are compatible, then the corresponding evaluation of
-an equality operator is used. Otherwise, the result of the operators '``==``'
-and '``===``' is ``false``:
-
-.. code-block:: typescript
-   :linenos:
-
-    function equ(x: number | string, y: string): boolean {
-        return x == y
-    }
-
-    console.log(equ("aa", "aa")) // string equality: prints true
-    console.log(equ("ab", "aa")) // string equality: prints false
-    console.log(equ(1, "aa")) // different types: prints false
-
-.. index::
-   compatibility
-   evaluation
-   equality operator
-   value
-   operator
-
-|
-
-.. _Type Parameter Equality Operators:
-
-Type Parameter Equality Operators
----------------------------------
-
-.. meta:
-    frontend_status: Done
-
-If one operand is a type parameter, then the other operand can be of any
-reference type, including type parameter.
-
-If actual object types are compatible, then the corresponding evaluation of an
-equality operator is used. Otherwise, the result of the operators '``==``' and
-'``===``' is ``false``:
-
-.. code-block:: typescript
-   :linenos:
-
-    function equ<A>(x: A, y: A): boolean {
-        return x == y
-    }
-
-    console.log(equ<string>("aa", "aa")) // string equality: prints true
-    console.log(equ<number>(1, 2)) // numerical equality: prints false
-
-.. index::
-   equality operator
-   type parameter
-   operand
-   reference type
-   compatibility
-   evaluation
-
-|
-
-.. _Reference Equality:
-
-Reference Equality
-==================
-
-.. meta:
-    frontend_status: Partly
-    todo: adapt latest specification changes
-
-Reference equality compares operands of two reference types except types
-``string``, ``bigint``, ``Object``, union types, and type parameters. The
-extended semantics is discussed in :ref:`Extended Equality with null or undefined`.
-
-A :index:`compile-time error` occurs if:
-
--  Any operand is not of a reference type;
-
--  There is no implicit conversion (see :ref:`Implicit Conversions`) that
-   can convert type of either operand to the type of the other operand.
-
-The result of '``==``' or '``===``' is ``true`` if both operand values:
-
--  Are ``null``;
--  Are ``undefined``; or
--  Refer to the same object, array, or function.
-
-In addition, the result of the '``==``' operator is ``true`` if one operand
-value is ``null``, and the other operand value is ``undefined``. Otherwise,
-the result is ``false``. This semantics is illustrated by the example below:
-
-.. index::
-   reference equality
-   reference type
-   union type
-   extended equality
-   operand
-   entity
-   null
-   undefined
-   array
-   operator
-   operand value
-   semantics
-
-.. code-block:: typescript
-   :linenos:
-
-   class X {}
-   new X() == new X() // false, two different object of class X
-   new X() === new X() // false, the same
-   let x1 = new X()
-   let x2 = x1
-   x1 == x2 // true, as x1 and x2 refer to the same object
-   x1 === x2 // true, the same
-
-   new Number(5) === new Number(5) // true, value equality is used
-   new Number(5) == new Number(6) // false, value equality is used
-
-   null == undefined // true
-   null === undefined // false
-
-|
-
 .. _Extended Equality with null or undefined:
 
 Extended Equality with ``null`` or ``undefined``
@@ -5597,67 +5325,32 @@ Extended Equality with ``null`` or ``undefined``
 |LANG| provides extended semantics for equalities with ``null`` and ``undefined``
 to ensure better alignment with |TS|.
 
-Any entity can be compared to ``null`` by using the operators '``==``' and
-'``===``'. This comparison can return ``true`` only for the entities of
-*nullable* types if they actually have the ``null`` value during program
-execution. In all other cases the comparison to ``null`` returns ``false``.
-
-.. index::
-   extended equality
-   semantics
-   nullable type
-   null
-   operator
-   entity
-
-Operators  '``!=``' and '``!==``' return ``true`` for any entity of
-*non-nullable* types, and for *nullable* entities if they actually have no
-``null`` value during program execution.
-
-These situations are to be known at compile time.
-
-Similarly, an equality comparison to ``undefined`` returns ``false`` if the
-variable being compared is neither type ``undefined`` nor a union type with
-``undefined`` as one of its types.
-
-The following comparisons evaluate to ``false`` at compile time:
+If one operand in an equality expression is ``null``, and other is ``undefined``,
+then the operator '``!=``' returns ``true``, and the operator '``!==``' returns
+``false``:
 
 .. code-block-meta:
 
 .. code-block:: typescript
    :linenos:
 
-   5 == null // false
-   5 == undefined // false
-   ((): void => {}) == null // false
+    function foo(x: Object | null, y: Object | null | undefined) {
+        console.log(x == y, x === y)
+    }
 
-   class X {}
-   new X() == null // false
+    foo(null, undefined) // output: true, false
+    foo(null, null)      // output: true, true
 
-The following comparison is evaluated at runtime:
+
+Comparison the values ``null`` and ``undefined`` directly is also allowed:
+
+.. code-block-meta:
 
 .. code-block:: typescript
    :linenos:
 
-    function foo<T> (p1: string | null, p2: T) {
-        console.log (p1 == undefined, p1 == null, p2 == undefined, p2 == null)
-    }
-    let nullable: string|null = "a string"
-    let undefinedable: Object|undefined = undefined
-
-    foo (nullable, undefinedable) // Output: false false true true
-
-.. index::
-   entity
-   non-nullable type
-   nullable type
-   null
-   variable
-   equality
-   comparison
-   undefined
-   evaluation
-   runtime
+    console.log(null == undefined)  // output: true
+    console.log(null === undefined) // output: false
 
 |
 
@@ -5809,8 +5502,8 @@ The *conditional-and* operator '``&&``' is similar to '``&``' (see
 :ref:`Bitwise and Logical Expressions`) but evaluates its right-hand-side
 operand only if the value of the left-hand-side operand is ``true``.
 
-The results of computation of '``&&``' and '``&``' on ``boolean`` operands are
-the same, but the right-hand-side operand in '``&&``' cannot be evaluated.
+The computation results of '``&&``' and '``&``' on ``boolean`` operands are
+the same. The right-hand-side operand of '``&&``' is not necessarily evaluated.
 
 The syntax of *conditional-and expression* is presented below:
 
@@ -6018,26 +5711,34 @@ Simple Assignment Operator
 
 The form of a simple assignment expression is ``lhsExpression = rhsExpression``.
 
-A :index:`compile-time error` occurs if type of *rhsExpression*
-is not assignable (see :ref:`Assignability`) to
-the type of the variable. Otherwise, the assignment expression is evaluated
-at runtime in one of the following ways:
+A :index:`compile-time error` occurs in the following situations:
 
-1. If *lhsExpression* is a field access expression
-   ``e.f`` (see :ref:`Field Access Expression`), possibly enclosed in parentheses,
-   then:
+   - Type of *rhsExpression* is not assignable (see :ref:`Assignability`) to
+     the type of the variable; or
+   - Type of *lhsExpression* is one of the following:
 
-   #. *lhsExpression* *e* is evaluated: if the evaluation of *e*
-      completes abruptly, then so does the assignment expression.
-   #. *rhsExpression* is evaluated: if the evaluation
-      completes abruptly, then so does the assignment expression.
-   #. Value of *rhsExpression* as computed above is assigned
-      to the variable denoted by ``e.f``.
+       - ``readonly`` array (see :ref:`Readonly Parameters`), while the
+         converted type of *rhsExpression* is a non-``readonly`` array;
+       - ``readonly`` tuple (see :ref:`Readonly Parameters`), while the
+         converted type of *rhsExpression* is a non-``readonly`` tuple.
+
+Otherwise, the assignment expression is evaluated at runtime in one of the
+following ways:
+
+1. If *lhsExpression* is a field access expression ``e.f`` (see
+   :ref:`Field Access Expression`), possibly enclosed in parentheses, then:
+
+   #. *lhsExpression* *e* is evaluated: if the evaluation of *e* completes
+      abruptly, then so does the assignment expression.
+   #. *rhsExpression* is evaluated: if the evaluation completes abruptly, then
+      so does the assignment expression.
+   #. If that evaluation completes normally, then the value of *rhsExpression*
+      is converted to the type of the field. In that case, the result of the
+      conversion is assigned to the field.
 
 .. index::
    simple assignment operator
    operator
-   assignable type
    assignability
    access
    field access
@@ -6051,26 +5752,29 @@ at runtime in one of the following ways:
 2. If the *lhsExpression* is an array reference expression (see
    :ref:`Array Indexing Expression`), possibly enclosed in parentheses, then:
 
-   #. Array reference subexpression of *lhsExpression* is evaluated.
-      If this evaluation completes abruptly, then so does the assignment
-      expression. In that case, *rhsExpression* and the index
-      subexpression are not evaluated, and the assignment does not occur.
+   #. Array reference subexpression of *lhsExpression* is evaluated. If this
+      evaluation completes abruptly, then so does the assignment expression. In
+      that case, *rhsExpression* and the index subexpression are not evaluated,
+      and no assignment occurs.
    #. If the evaluation completes normally, then the index subexpression of
-      *lhsExpression* is evaluated. If this evaluation completes abruptly,
-      then so does the assignment expression. In that case, *rhsExpression*
-      is not evaluated, and the assignment does not occur.
-   #. If the evaluation completes normally, then *rhsExpression* is
-      evaluated. If this evaluation completes abruptly, then so does the
-      assignment expression, and the assignment does not occur.
+      *lhsExpression* is evaluated. If this evaluation completes abruptly, then
+      so does the assignment expression. In that case, *rhsExpression* is not
+      evaluated, and no assignment occurs.
+   #. If the evaluation completes normally, then *rhsExpression* is evaluated.
+      If this evaluation completes abruptly, then so does the assignment
+      expression, and no assignment occurs.
    #. If the evaluation completes normally, but the value of the index
       subexpression is less than zero, or greater than, or equal to the
-      *length* of the array, then ``ArrayIndexOutOfBoundsError`` is thrown,
-      and the assignment does not occur.
+      *length* of the array, then ``RangeError`` is thrown,
+      and no assignment occurs.
+   #. If *lhsExpression* denotes indexing of *fixed-size array*, and
+      the type of *rhsExpression* is not a subtype of array element type,
+      then *ArrayStoreError* is thrown, and no assignment occurs.
    #. Otherwise, the value of the index subexpression is used to select an
       element of the array referred to by the value of the array reference
-      subexpression.
-
-      The value of *rhsExpression* is assigned to the array element.
+      subexpression and the value of *rhsExpression* is converted to the type
+      of the array element. In that case, the result of the conversion is
+      assigned to the array element.
 
 .. index::
    operand
@@ -6100,20 +5804,19 @@ at runtime in one of the following ways:
 
    #. Object reference subexpression of *lhsExpression* is evaluated.
       If this evaluation completes abruptly, then so does the assignment
-      expression.
-      In that case, *rhsExpression* and the index subexpression are
-      not evaluated, and the assignment does not occur.
+      expression. In that case, *rhsExpression* and the index subexpression are
+      not evaluated, and no assignment occurs.
    #. If the evaluation completes normally, the index subexpression of
       *lhsExpression* is evaluated. If this evaluation completes abruptly,
-      then so does the assignment expression.
-      In the last case, *rhsExpression* is not evaluated, and the
-      assignment does not occur.
-   #. If the evaluation completes normally, *rhsExpression* is
-      evaluated. If this evaluation completes abruptly, then so does the
-      assignment expression. In that case, the assignment does not occur.
-   #. Otherwise, the value of the index subexpression is used as the ``key``.
-      In that case, the value of *rhsExpression* is used as the ``value``, and
-      the key-value pair is stored in the record instance.
+      then so does the assignment expression. In that case, *rhsExpression* is
+      not evaluated, and no assignment occurs.
+   #. If the evaluation completes normally, *rhsExpression* is evaluated. If
+      this evaluation completes abruptly, then so does the assignment
+      expression. In that case, no assignment occurs.
+   #. Otherwise, the value of the index subexpression is used as the ``key``,
+      and the value of *rhsExpression* converted to the type of the record
+      value is used as the ``value``. In that case, the assignment results in
+      storing the key-value pair in the record instance.
 
 .. index::
    operand
@@ -6133,27 +5836,19 @@ at runtime in one of the following ways:
    key
 
 
-If none of the above is true, then the following three steps are required:
+If none of the above is true, then the following three steps are performed:
 
-#. *lhsExpression* is evaluated to produce a variable. If the
-   evaluation completes abruptly, then so does the assignment expression.
-   In that case, *rhsExpression* is not evaluated, and the
-   assignment does not occur.
+#. *lhsExpression* is evaluated to produce a variable. If the evaluation
+   completes abruptly, then so does the assignment expression. In that case,
+   *rhsExpression* is not evaluated, and no assignment occurs.
 
-#. If the evaluation completes normally, then *rhsExpression* is
-   evaluated. If the evaluation completes abruptly, then so does the assignment
-   expression. In that case, the assignment does not occur.
+#. If the evaluation completes normally, then *rhsExpression* is evaluated. If
+   the evaluation completes abruptly, then so does the assignment expression.
+   In that case, no assignment occurs.
 
 #. If that evaluation completes normally, then the value of *rhsExpression*
-   is converted to the type of the left-hand-side variable.
-   In that case, the result of the conversion is stored into the variable.
-   A :index:`compile-time error` occurs if type of *lhsExpression*
-   is one of the following:
-
-   - ``readonly`` array (see :ref:`Readonly Parameters`), while the
-     converted type of *rhsExpression* is a non-``readonly`` array;
-   - ``readonly`` tuple (see :ref:`Readonly Parameters`), while the
-     converted type of *rhsExpression* is a non-``readonly`` tuple.
+   is converted to the type of the left-hand-side variable. In that case, the
+   result of the conversion is assigned to the variable.
 
 .. index::
    evaluation
@@ -6166,7 +5861,6 @@ If none of the above is true, then the following three steps are required:
    variable
    readonly array
    readonly tuple
-   converted type
 
 |
 
@@ -6251,7 +5945,7 @@ of the following ways:
    -  If the evaluation completes normally, the value of the array
       reference subexpression refers to an array, and the value of the
       index subexpression is less than zero, greater than, or equal to
-      the *length* of the array, then ``ArrayIndexOutOfBoundsError`` is
+      the *length* of the array, then ``RangeError`` is
       thrown. In that case, no assignment occurs.
 
    -  If the evaluation completes normally, then the value of the index
@@ -6268,7 +5962,7 @@ of the following ways:
       determined at compile time:
 
 
-      - If ``T`` is a primitive type, then ``S`` is the same as ``T``.
+      - If ``T`` is a predefined value type, then ``S`` is the same as ``T``.
 
         The saved value of the array element, and the value of
         *rhsExpression* are used to perform the binary operation of the
@@ -6311,7 +6005,7 @@ of the following ways:
    subexpression
    variable
    assignment operator
-   primitive type
+   predefined value type
    array element
    value
    operand
@@ -6493,8 +6187,7 @@ The examples below represent different scenarios with standalone expressions:
 
 .. index::
    conditional expression
-   normalization
-   union type
+   union type normalization
    evaluation
    operand expression
    conversion
@@ -6588,8 +6281,9 @@ Lambda Expressions
     frontend_status: Done
 
 *Lambda expression* fully defines an instance of a function type (see
-:ref:`Function Types`) by providing optional ``async`` mark, type parameters
-(see :ref:`Type Parameters`), mandatory lambda signature, and its body. The
+:ref:`Function Types`) by providing optional annotation usage
+(see :ref:`Using Annotations`), optional ``async`` mark
+(see :ref:`Async Lambdas`), mandatory lambda signature, and its body. The
 definition of *lambda expression* is generally similar to that of a function
 declaration (see :ref:`Function Declarations`), except that a lambda expression
 has no function name specified, and can have types of parameters omitted.
@@ -6599,8 +6293,7 @@ The syntax of *lambda expression* is presented below:
 .. code-block:: abnf
 
     lambdaExpression:
-        annotationUsage?
-        ('async'|typeParameters)? lambdaSignature '=>' lambdaBody
+        annotationUsage? 'async'? lambdaSignature '=>' lambdaBody
         ;
 
     lambdaBody:
@@ -6652,7 +6345,6 @@ The examples of usage are presented below:
 
     (x: number): number => { return Math.sin(x) } // block as lambda body
     (x: number) => Math.sin(x)                    // expression as lambda body
-    <T> (x: T, y: T) => { let local = x }         // generic lambda
     e => e                                        // shortest form of lambda
 
 A *lambda expression* evaluation creates an instance of a function type (see
@@ -6691,7 +6383,7 @@ type annotations of formal parameters can be omitted.
     foo ((e1: Object, e2, e3) => e1)
     foo ((e1: Object, ...e2) => e1)
 
-    foo (<Object>(e1: Object, e2: Object) => e1)
+    foo ((e1: Object, e2: Object) => e1)
 
     function bar<T> (a: (...p: T[]) => T) {}
     // Type can be omitted for the rest parameter
@@ -6709,7 +6401,7 @@ A :index:`compile-time error` occurs if:
 
 - Lambda expression declares two formal parameters with the same name.
 - Formal parameter contains no type provided, and type cannot be derived
-  by type inference.
+  by :ref:`Type Inference`.
 
 
 .. index::
@@ -6767,10 +6459,10 @@ If a *lambda body* is a single ``expression`` it is treated as
 
 -  Otherwise, the body is equivalent to the block: ``{ return expression }``
 
-If *lambda signature* return type is not ``void`` (see :ref:`Type void`), and
-the execution path of the lambda body has no return statement (see
-:ref:`Return Statements`) or no single expression as a body, then a
-:index:`compile-time error` occurs.
+If *lambda signature* return type is not ``void`` (see :ref:`Type void`) or
+``never`` (see :ref:`Type never`), and the execution path of the lambda body
+has no return statement (see :ref:`Return Statements`) or no single expression
+as a body, then a :index:`compile-time error` occurs.
 
 .. index::
    lambda body
@@ -6919,10 +6611,10 @@ can act as follows:
 
 -  Replace the captured variable’s type for a proxy class that contains an
    original reference (x: T for x: Proxy<T>; x.ref = original-ref) if that
-   captured variable is of non-primitive type.
+   captured variable is of non-value type (see :ref:`Value Types`).
 
-If the captured variable is defined as ``const``, then
-proxying is not required.
+If the captured variable is defined as ``const``, then proxying is not
+required.
 
 If the captured formal parameter can be neither boxed nor proxied, then
 the implementation can require addition of a local variable as follows:
@@ -6930,11 +6622,10 @@ the implementation can require addition of a local variable as follows:
 .. index::
    lambda
    implementation
-   primitive type
+   predefined value type
    proxy class
    captured variable
    captured variable type
-   non-primitive type
    proxying
    local variable
    variable
@@ -6977,7 +6668,7 @@ A *constant expression* is an expression of a value type (see
 :ref:`Value Types`), or of type ``string`` that completes normally
 while being composed only of the following:
 
--  Literals of a primitive type, and literals of type ``string`` (see
+-  Literals of a predefined value types, and literals of type ``string`` (see
    :ref:`Literals`);
 
 -  Enumeration type constants;
@@ -7018,7 +6709,7 @@ while being composed only of the following:
 
 .. index::
    constant expression
-   primitive type
+   predefined value type
    string type
    enumeration type
    conversion

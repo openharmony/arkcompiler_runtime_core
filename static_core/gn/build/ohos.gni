@@ -61,6 +61,7 @@ template("ohos_shared_library") {
                "relative_install_dir",
                "install_enable",
                "stack_protector_ret",
+               "license_file",
              ])
 
   shared_library("${target_name}") {

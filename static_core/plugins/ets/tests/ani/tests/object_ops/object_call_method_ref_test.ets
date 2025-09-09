@@ -64,7 +64,7 @@ class A {
         if (a0 > 100) {
             return "hello";
         } else {
-            return this.recursionMethod((a0 + 10) as short);
+            return this.recursionMethod((a0 + 10).toShort());
         }
     }
 }

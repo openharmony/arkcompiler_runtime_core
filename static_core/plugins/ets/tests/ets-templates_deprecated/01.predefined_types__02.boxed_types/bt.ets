@@ -27,7 +27,7 @@ function main() {
 {%- for t in c['values'] %}
     let prim{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
     boxed = new {{c.to_type}}(prim{{loop.index}})
-    assertEQ( boxed.unboxed(), {{t.val}} )
+    arktest.assertEQ( boxed.unboxed(), {{t.val}} )
 {%- endfor %}
 }
 {%- endfor %}

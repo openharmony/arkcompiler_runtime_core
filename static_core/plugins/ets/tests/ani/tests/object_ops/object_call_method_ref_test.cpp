@@ -32,7 +32,7 @@ TEST_F(ObjectCallMethodRefTest, object_call_method_ref_a)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lobject_call_method_ref_test/A;", "stringMethod", nullptr, &object, &method);
+    GetMethodAndObject("object_call_method_ref_test.A", "stringMethod", nullptr, &object, &method);
 
     ani_value args[2U];
     ani_int arg1 = VAL;
@@ -52,7 +52,7 @@ TEST_F(ObjectCallMethodRefTest, object_call_method_ref_v)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lobject_call_method_ref_test/A;", "stringMethod", nullptr, &object, &method);
+    GetMethodAndObject("object_call_method_ref_test.A", "stringMethod", nullptr, &object, &method);
 
     ani_int arg1 = VAL;
     ani_int arg2 = VAL1;
@@ -68,7 +68,7 @@ TEST_F(ObjectCallMethodRefTest, call_method_ref_v_invalid_env)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lobject_call_method_ref_test/A;", "stringMethod", nullptr, &object, &method);
+    GetMethodAndObject("object_call_method_ref_test.A", "stringMethod", nullptr, &object, &method);
 
     ani_ref result {};
     ani_int arg1 = VAL2;
@@ -80,7 +80,7 @@ TEST_F(ObjectCallMethodRefTest, call_method_ref_v_invalid_method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lobject_call_method_ref_test/A;", "stringMethod", nullptr, &object, &method);
+    GetMethodAndObject("object_call_method_ref_test.A", "stringMethod", nullptr, &object, &method);
 
     ani_ref result {};
     ani_int arg1 = VAL2;
@@ -92,7 +92,7 @@ TEST_F(ObjectCallMethodRefTest, call_method_ref_v_invalid_result)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lobject_call_method_ref_test/A;", "stringMethod", nullptr, &object, &method);
+    GetMethodAndObject("object_call_method_ref_test.A", "stringMethod", nullptr, &object, &method);
 
     ani_int arg1 = VAL2;
     ani_int arg2 = VAL3;
@@ -103,7 +103,7 @@ TEST_F(ObjectCallMethodRefTest, call_method_ref_v_invalid_object)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lobject_call_method_ref_test/A;", "stringMethod", nullptr, &object, &method);
+    GetMethodAndObject("object_call_method_ref_test.A", "stringMethod", nullptr, &object, &method);
 
     ani_ref result {};
     ani_int arg1 = VAL2;
@@ -115,7 +115,7 @@ TEST_F(ObjectCallMethodRefTest, call_method_ref_a_invalid_args)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lobject_call_method_ref_test/A;", "stringMethod", nullptr, &object, &method);
+    GetMethodAndObject("object_call_method_ref_test.A", "stringMethod", nullptr, &object, &method);
 
     ani_ref result {};
     ASSERT_EQ(env_->Object_CallMethod_Ref_A(object, method, &result, nullptr), ANI_INVALID_ARGS);
@@ -125,7 +125,7 @@ TEST_F(ObjectCallMethodRefTest, call_Void_Param_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lobject_call_method_ref_test/A;", "stringMethodVoidParam", nullptr, &object, &method);
+    GetMethodAndObject("object_call_method_ref_test.A", "stringMethodVoidParam", nullptr, &object, &method);
 
     std::string str {};
     ani_ref result {};
@@ -145,7 +145,7 @@ TEST_F(ObjectCallMethodRefTest, call_Multiple_Param_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lobject_call_method_ref_test/A;", "stringMethodMultipleParam", nullptr, &object, &method);
+    GetMethodAndObject("object_call_method_ref_test.A", "stringMethodMultipleParam", nullptr, &object, &method);
 
     ani_value args[5U] = {};
     ani_int arg1 = VAL;
@@ -176,7 +176,7 @@ TEST_F(ObjectCallMethodRefTest, call_Parent_Class_Void_Param_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lobject_call_method_ref_test/A;", "stringMethodVoidParam", nullptr, &object, &method);
+    GetMethodAndObject("object_call_method_ref_test.A", "stringMethodVoidParam", nullptr, &object, &method);
 
     std::string str {};
     ani_ref result {};
@@ -195,7 +195,7 @@ TEST_F(ObjectCallMethodRefTest, call_Parent_Class_Void_Param_Method)
 TEST_F(ObjectCallMethodRefTest, call_Parent_Class_Method)
 {
     ani_class clsC {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_ref_test/C;", &clsC), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_ref_test.C", &clsC), ANI_OK);
     ASSERT_NE(clsC, nullptr);
 
     ani_method method {};
@@ -203,10 +203,10 @@ TEST_F(ObjectCallMethodRefTest, call_Parent_Class_Method)
     ASSERT_NE(method, nullptr);
 
     ani_class clsD {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_ref_test/D;", &clsD), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_ref_test.D", &clsD), ANI_OK);
     ASSERT_NE(clsD, nullptr);
     ani_method ctor {};
-    ASSERT_EQ(env_->Class_FindMethod(clsD, "<ctor>", ":V", &ctor), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(clsD, "<ctor>", ":", &ctor), ANI_OK);
 
     ani_object object {};
     ASSERT_EQ(env_->Object_New(clsD, ctor, &object), ANI_OK);
@@ -235,7 +235,7 @@ TEST_F(ObjectCallMethodRefTest, call_Sub_Class_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lobject_call_method_ref_test/E;", "func", nullptr, &object, &method);
+    GetMethodAndObject("object_call_method_ref_test.E", "func", nullptr, &object, &method);
 
     ani_value args[2U] = {};
     ani_int arg1 = VAL3;
@@ -260,7 +260,7 @@ TEST_F(ObjectCallMethodRefTest, multiple_Call_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lobject_call_method_ref_test/A;", "stringMethod", nullptr, &object, &method);
+    GetMethodAndObject("object_call_method_ref_test.A", "stringMethod", nullptr, &object, &method);
 
     std::string str {};
     ani_ref result {};
@@ -286,7 +286,7 @@ TEST_F(ObjectCallMethodRefTest, call_Nested_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lobject_call_method_ref_test/A;", "nestedMethod", nullptr, &object, &method);
+    GetMethodAndObject("object_call_method_ref_test.A", "nestedMethod", nullptr, &object, &method);
 
     std::string str {};
     ani_ref result {};
@@ -310,7 +310,7 @@ TEST_F(ObjectCallMethodRefTest, call_Recursion_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lobject_call_method_ref_test/A;", "recursionMethod", nullptr, &object, &method);
+    GetMethodAndObject("object_call_method_ref_test.A", "recursionMethod", nullptr, &object, &method);
 
     std::string str {};
     ani_ref result {};

@@ -23,7 +23,9 @@ class UtilHelper {
         loadLibrary("ets_sdk_native")
     }
 
-    internal static native generateRandomUUID(entropyCache: boolean): string
+    public static native generateRandomUUID(entropyCache: boolean): string
+
+    public static native generateRandomBinaryUUID(entropyCache: boolean): Uint8Array
 
 }  // class UtilHelper
 } // namespace util

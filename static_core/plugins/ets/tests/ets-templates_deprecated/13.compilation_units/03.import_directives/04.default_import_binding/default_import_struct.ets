@@ -24,6 +24,6 @@ import DefaultExportedStruct from "../../07.top-level_declarations/01.exported_d
 function main(): void {
     let test_class = new DefaultExportedStruct();
 
-    assertTrue(test_class.hello("hello") == "hello_world");
-    assertTrue((test_class.test_member + "_member") == "test_member");
+    arktest.assertTrue(test_class.hello("hello") == "hello_world");
+    arktest.assertTrue((test_class.test_member + "_member") == "test_member");
 }

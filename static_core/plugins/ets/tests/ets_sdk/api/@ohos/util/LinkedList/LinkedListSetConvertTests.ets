@@ -14,9 +14,12 @@
  */
 
 import {LinkedList} from "@ohos.util.LinkedList";
+import {BusinessError} from "@ohos.base";
+
+const OutOfBoundsErrorCodeId: int = 10200001;
 
 function main() {
-    const suite = new ArkTestsuite("LinkedList API tests");
+    const suite = new arktest.ArkTestsuite("LinkedList API tests");
 
     suite.addTest("LinkedList set multiple types of data in the container", testSetMultipleTypes);
     suite.addTest("LinkedList set elements when the container is empty", testSetElementsInEmptyContainer);
@@ -32,70 +35,69 @@ function main() {
 }
 
 function initializeLinkedList<T>(linkedList: LinkedList<T>, sourceArray: Array<T>) {
-    for (let i = 0; i < sourceArray.length; i++) {
+    for (let i: int = 0; i < sourceArray.length; i++) {
         linkedList.add(sourceArray[i]);
     }
 }
 
 class Temp {
-    age: number = 0;
+    age: double = 0;
     name: string = "";
 }
 
 class TestData {
-    static readonly testNumber1: number = 1;
-    static readonly testNumber2: number = 2;
-    static readonly testNumber3: number = 3;
-    static readonly testNumber4: number = 4;
-    static readonly testNumber5: number = 5;
-    static readonly testNumber6: number = 6;
+    static readonly testNumber1: double | int = 1;
+    static readonly testNumber2: double | int = 2;
+    static readonly testNumber3: double | int = 3;
+    static readonly testNumber4: double | int = 4;
+    static readonly testNumber5: double | int = 5;
+    static readonly testNumber6: double | int = 6;
     static readonly testString1: string = "string";
     static readonly testString2: string = "!\"#$%'()+,-./:;<=>?@[\\]^_`{|}~";
     static readonly testObject1: Temp = { age: 10, name: "zhang" };
     static readonly testObject2 = [0, 1, null];
     static readonly forNumber1: Number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
-    static readonly arrayForNumber1 = Array.from<number>(TestData.forNumber1);
+    static readonly arrayForNumber1 = Array.from<double>(TestData.forNumber1);
 }
 
 function testSetMultipleTypes() {
-    let linkedList = new LinkedList<number | string | boolean | null | object | undefined>();
-    for (let i = 0; i < TestData.testNumber6; i++) {
+    let linkedList = new LinkedList<double | string | boolean | null | object | undefined>();
+    for (let i: int = 0; i < TestData.testNumber6; i++) {
         linkedList.add(i);
     }
 
-    assertEQ(linkedList.set(0, TestData.testString1), TestData.testString1, "Set successful");
-    assertEQ(linkedList.set(TestData.testNumber1, TestData.testNumber3), TestData.testNumber3, "Set successful");
-    assertEQ(linkedList.set(TestData.testNumber2, null), null, "Set successful");
-    assertEQ(linkedList.set(TestData.testNumber3, true), true, "Set successful");
-    assertEQ(linkedList.set(TestData.testNumber4, TestData.testObject2), TestData.testObject2, "Set successful");
-    assertEQ(linkedList.set(TestData.testNumber5, undefined), undefined, "Set successful");
+    arktest.assertEQ(linkedList.set(0, TestData.testString1), TestData.testString1, "Set successful");
+    arktest.assertEQ(linkedList.set(TestData.testNumber1, TestData.testNumber3), TestData.testNumber3, "Set successful");
+    arktest.assertEQ(linkedList.set(TestData.testNumber2, null), null, "Set successful");
+    arktest.assertEQ(linkedList.set(TestData.testNumber3, true), true, "Set successful");
+    arktest.assertEQ(linkedList.set(TestData.testNumber4, TestData.testObject2), TestData.testObject2, "Set successful");
+    arktest.assertEQ(linkedList.set(TestData.testNumber5, undefined), undefined, "Set successful");
 }
 
 function testSetElementsInEmptyContainer() {
-    let linkedList = new LinkedList<number>();
-    try {
-        linkedList.set(0, TestData.testNumber1);
-    } catch (e) {
-        assertEQ(e instanceof RangeError, true, "The result should be 'RangeError'");
-        assertEQ((e as RangeError).message, "The value of index is out of range.", "The result should be 'Index out of bounds'");
+    let linkedList = new LinkedList<double>();
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message == "Container is empty") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
+    arktest.expectThrow(() => {linkedList.set(0, TestData.testNumber1)}, exceptionCheck);
 }
 
 function testSetGetIndexOfRemoveByIndex() {
     let linkedList = initMultiTypeLinkedList();
 
     let index = linkedList.getIndexOf(TestData.testObject1);
-    let elem1 = linkedList.set(Math.floor(index), TestData.testString2);
-    let elem2 = linkedList.removeByIndex(Math.floor(index));
-    assertEQ(elem1, elem2, "The result should be the same for both operations");
+    let elem1 = linkedList.set(Math.floor(index).toInt(), TestData.testString2);
+    let elem2 = linkedList.removeByIndex(Math.floor(index).toInt());
+    arktest.assertEQ(elem1, elem2, "The result should be the same for both operations");
 }
 
 function testSetGetIndexOfHas() {
     let linkedList = initMultiTypeLinkedList();
 
     let index = linkedList.getIndexOf(TestData.testObject1);
-    let elem = linkedList.set(Math.floor(index), TestData.testString2);
-    assertTrue(linkedList.has(elem), "The element set successful");
+    let elem = linkedList.set(Math.floor(index).toInt(), TestData.testString2);
+    arktest.assertTrue(linkedList.has(elem), "The element set successful");
 }
 
 function testSetGetLast() {
@@ -103,7 +105,7 @@ function testSetGetLast() {
 
     let elem1 = linkedList.set(linkedList.length - TestData.testNumber1, TestData.testString2);
     let elem2 = linkedList.getLast();
-    assertEQ(elem1, elem2, "The result should be the same for both operations");
+    arktest.assertEQ(elem1, elem2, "The result should be the same for both operations");
 }
 
 function testSetGetFirst() {
@@ -111,47 +113,47 @@ function testSetGetFirst() {
 
     let elem1 = linkedList.set(0, TestData.testString2);
     let elem2 = linkedList.getFirst();
-    assertEQ(elem1, elem2, "The result should be the same for both operations");
+    arktest.assertEQ(elem1, elem2, "The result should be the same for both operations");
 }
 
 function testConvertToArrayNonEmptyContainer() {
-    let linkedList = new LinkedList<number>();
+    let linkedList = new LinkedList<double>();
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
     let array = linkedList.convertToArray();
-    assertTrue(Array.isArray(array), "The result should be an Array");
-    assertEQ(array.length, linkedList.length, "Array length should be same as LinkedList length");
-    for (let i = 0; i < TestData.arrayForNumber1.length; i++) {
-        assertEQ(array[i], linkedList.get(i), `Element at index ${i} should be equal`);
+    arktest.assertTrue(Array.isArray(array), "The result should be an Array");
+    arktest.assertEQ(array.length, linkedList.length, "Array length should be same as LinkedList length");
+    for (let i: int = 0; i < TestData.arrayForNumber1.length.toInt(); i++) {
+        arktest.assertEQ(array[i], linkedList.get(i), `Element at index ${i} should be equal`);
     }
 }
 
 function testConvertToArrayEmptyContainer() {
-    let linkedList = new LinkedList<number>();
+    let linkedList = new LinkedList<double>();
     let array = linkedList.convertToArray();
-    assertEQ(array.length, 0, "Array length should be 0");
+    arktest.assertEQ(array.length, 0, "Array length should be 0");
 }
 
 function testConvertToArrayChangeArray() {
-    let linkedList = new LinkedList<number>();
+    let linkedList = new LinkedList<double>();
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
     let array = linkedList.convertToArray();
     array.push(TestData.testNumber1);
-    assertEQ(array.length, linkedList.length + TestData.testNumber1, "Array length should be LinkedList length + 1");
-    assertEQ(linkedList.length, TestData.arrayForNumber1.length,
+    arktest.assertEQ(array.length, linkedList.length + TestData.testNumber1, "Array length should be LinkedList length + 1");
+    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length.toInt(),
         "LinkedList length should not change");
-    for (let i = 0; i < TestData.arrayForNumber1.length; i++) {
-        assertEQ(linkedList.get(i), TestData.arrayForNumber1[i], `Element at index ${i} should be equal`);
+    for (let i: int = 0; i < TestData.arrayForNumber1.length.toInt(); i++) {
+        arktest.assertEQ(linkedList.get(i), TestData.arrayForNumber1[i], `Element at index ${i} should be equal`);
     }
 }
 
 function initMultiTypeLinkedList() {
-    let linkedList = new LinkedList<number | string | boolean | null | object | undefined>();
+    let linkedList = new LinkedList<double | string | boolean | null | object | undefined>();
     linkedList.add(TestData.testString1);
     linkedList.add(TestData.testNumber1);
     linkedList.add(TestData.testObject1);
     linkedList.add(undefined);
     linkedList.add(null);
     linkedList.add(true);
-    
+
     return linkedList;
 }

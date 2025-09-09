@@ -26,8 +26,8 @@ function increment(n: int): void {
 function main(): void {
   let nArr: int[] = [5,5]
   increment($$nArr[0])
-  assertEQ(nArr[0],  6)
+  arktest.assertEQ(nArr[0],  6)
 
   increment(nArr[1])
-  assertEQ(nArr[1],  5)
+  arktest.assertEQ(nArr[1],  5)
 }

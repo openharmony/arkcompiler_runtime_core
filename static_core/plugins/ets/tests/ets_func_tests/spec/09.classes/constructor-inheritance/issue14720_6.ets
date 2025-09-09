@@ -31,8 +31,8 @@ tags: []
 
  function main(): void {
     let b = new Derive();
-    assertEQ( b.name, null)
+    arktest.assertEQ( b.name, null)
 
     b = new Derive("Hello");
-    assertEQ( b.name, "Hello")
+    arktest.assertEQ( b.name, "Hello")
  }

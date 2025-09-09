@@ -27,7 +27,7 @@ let a: int = 5
 
 function main(): void {
     no_param((): void => {
-        assertEQ( a, 5)
+        arktest.assertEQ( a, 5)
     })
 }
 

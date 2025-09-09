@@ -58,6 +58,7 @@ public:
         MULTIPLE_OVERRIDE,
         MULTIPLE_IMPLEMENT,
         INVALID_LAMBDA_CLASS,
+        INVALID_CLASS_OVERLOAD,
     };
 
     ClassLinker(mem::InternalAllocatorPtr allocator, std::vector<std::unique_ptr<ClassLinkerExtension>> &&extensions);
@@ -92,10 +93,16 @@ public:
     Method *GetMethod(const Method &caller, panda_file::File::EntityId id,
                       ClassLinkerErrorHandler *errorHandler = nullptr);
 
+    Method *GetMethod(const Class *klass, const panda_file::MethodDataAccessor &methodDataAccessor,
+                      ClassLinkerErrorHandler *errorHandler);
+
     Field *GetField(const panda_file::File &pf, panda_file::File::EntityId id, bool isStatic,
                     ClassLinkerContext *context = nullptr, ClassLinkerErrorHandler *errorHandler = nullptr);
 
     Field *GetField(const Method &caller, panda_file::File::EntityId id, bool isStatic,
+                    ClassLinkerErrorHandler *errorHandler = nullptr);
+
+    Field *GetField(Class *klass, const panda_file::FieldDataAccessor &fda, bool isStatic,
                     ClassLinkerErrorHandler *errorHandler = nullptr);
 
     PANDA_PUBLIC_API void AddPandaFile(std::unique_ptr<const panda_file::File> &&pf,
@@ -265,6 +272,8 @@ public:
 
     Class *CreateArrayClass(ClassLinkerExtension *ext, const uint8_t *descriptor, bool needCopyDescriptor,
                             Class *componentClass);
+    Class *CreateUnionClass(ClassLinkerExtension *ext, const uint8_t *descriptor, bool needCopyDescriptor,
+                            Span<Class *> constituentClasses, ClassLinkerContext *commonContext);
 
     void FreeClassData(Class *classPtr);
 
@@ -322,6 +331,10 @@ public:
 
     Class *LoadClass(const panda_file::File *pf, const uint8_t *descriptor, panda_file::SourceLang lang);
 
+    // Issue 29288, temporary solution
+    void TryReLinkAotCodeForBoot(const panda_file::File *pf, const compiler::AotPandaFile *aotPfile,
+                                 panda_file::SourceLang language);
+
 private:
     struct ClassInfo {
         PandaUniquePtr<VTableBuilder> vtableBuilder;
@@ -340,13 +353,17 @@ private:
     Field *GetFieldBySignature(Class *klass, const panda_file::FieldDataAccessor &fieldDataAccessor,
                                ClassLinkerErrorHandler *errorHandler, bool isStatic);
 
-    Method *GetMethod(const Class *klass, const panda_file::MethodDataAccessor &methodDataAccessor,
-                      ClassLinkerErrorHandler *errorHandler);
-
     bool LinkBootClass(Class *klass);
 
     Class *LoadArrayClass(const uint8_t *descriptor, bool needCopyDescriptor, ClassLinkerContext *context,
                           ClassLinkerErrorHandler *errorHandler);
+
+    Class *LoadUnionClass(const uint8_t *descriptor, bool needCopyDescriptor, ClassLinkerContext *context,
+                          ClassLinkerErrorHandler *errorHandler);
+
+    std::optional<Span<Class *>> LoadConstituentClasses(const uint8_t *descriptor, bool needCopyDescriptor,
+                                                        ClassLinkerContext *context,
+                                                        ClassLinkerErrorHandler *errorHandler);
 
     Class *LoadClass(const panda_file::File *pf, panda_file::File::EntityId classId, const uint8_t *descriptor,
                      ClassLinkerContext *context, ClassLinkerErrorHandler *errorHandler, bool addToRuntime = true);

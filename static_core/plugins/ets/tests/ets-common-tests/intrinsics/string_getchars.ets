@@ -15,8 +15,10 @@
 
 const DUMP: boolean = false;
 const HITS_EXPECTED: int = 21;
-let golden: String = new String("abcΣΨΩ0123456789!");
+let golden: String = 'abcΣΨΩ0123456789!';
 let hits: int = 0;
+let silver: String = 'abcΣΨΩ'.concat('0123456789!');  // TreeString
+let copper: String = 'sub_abcΣΨΩ0123456789!_sub'.substring(4, 21);  // SlicedString
 
 let table1: char[][] = [
     [c'a', c'b', c'c', c'Σ', c'Ψ', c'Ω', c'0', c'1', c'2', c'3', c'4', c'5', c'6', c'7', c'8', c'9', c'!'],
@@ -41,12 +43,12 @@ let table1: char[][] = [
 
 function printArray(a: char[], name: String): void
 {
-    console.println(name + " length: " + a.length)
-    console.print(name + " data:   [")
+    console.println(name + ' length: ' + a.length)
+    console.print(name + ' data:   [')
     for (let n: int = 0; n < a.length; ++n) {
         console.print(a[n]);
     }
-    console.println("]");
+    console.println(']');
 }
 
 function equals(lhs: char[], rhs: char[]): boolean
@@ -68,8 +70,8 @@ function main(): int {
             ++hits;
         }
         if (DUMP) {
-            printArray(table1[i], "expected");
-            printArray(arr, "getChars");
+            printArray(table1[i], 'expected');
+            printArray(arr, 'getChars');
             console.println();
         }
     }
@@ -80,7 +82,7 @@ function main(): int {
     } catch (e: StringIndexOutOfBoundsError) {
         ++hits;
         if (DUMP) {
-            console.println("end > length");
+            console.println('end > length');
             console.println(e);
         }
     }
@@ -91,7 +93,7 @@ function main(): int {
     } catch (e: StringIndexOutOfBoundsError) {
         ++hits;
         if (DUMP) {
-            console.println("begin > end");
+            console.println('begin > end');
             console.println(e);
         }
     }
@@ -102,16 +104,110 @@ function main(): int {
     } catch (e: StringIndexOutOfBoundsError) {
         ++hits;
         if (DUMP) {
-            console.println("begin < 0");
+            console.println('begin < 0');
             console.println(e);
         }
     }
 
-    if (hits != HITS_EXPECTED) {
-        if (DUMP) {
-            console.println("hits: " + hits + " (expected " + HITS_EXPECTED + ")");
+    arktest.assertTrue(golden=== silver);
+    arktest.assertTrue(golden=== copper);
+    // test for TreeString
+    for (let i: int = 0; i <= silver.getLength(); ++i) {
+        let arr: char[] = silver.getChars(i, silver.getLength());
+        if (equals(arr, table1[i])) {
+            ++hits;
         }
-        console.println("FAIL");
+        if (DUMP) {
+            printArray(table1[i], 'expected');
+            printArray(arr, 'getChars');
+            console.println();
+        }
+    }
+
+    try {
+        // end > length
+        let arr: char[] = silver.getChars(1, silver.getLength() + 1);
+    } catch (e: StringIndexOutOfBoundsError) {
+        ++hits;
+        if (DUMP) {
+            console.println('end > length');
+            console.println(e);
+        }
+    }
+
+    try {
+        // begin > end
+        let arr: char[] = silver.getChars(2, 1);
+    } catch (e: StringIndexOutOfBoundsError) {
+        ++hits;
+        if (DUMP) {
+            console.println('begin > end');
+            console.println(e);
+        }
+    }
+
+    try {
+        // begin < 0
+        let arr: char[] = silver.getChars(-1, 1);
+    } catch (e: StringIndexOutOfBoundsError) {
+        ++hits;
+        if (DUMP) {
+            console.println('begin < 0');
+            console.println(e);
+        }
+    }
+    // test for SlicedString
+    for (let i: int = 0; i <= copper.getLength(); ++i) {
+        let arr: char[] = copper.getChars(i, copper.getLength());
+        if (equals(arr, table1[i])) {
+            ++hits;
+        }
+        if (DUMP) {
+            printArray(table1[i], 'expected');
+            printArray(arr, 'getChars');
+            console.println();
+        }
+    }
+
+    try {
+        // end > length
+        let arr: char[] = copper.getChars(1, copper.getLength() + 1);
+    } catch (e: StringIndexOutOfBoundsError) {
+        ++hits;
+        if (DUMP) {
+            console.println('end > length');
+            console.println(e);
+        }
+    }
+
+    try {
+        // begin > end
+        let arr: char[] = copper.getChars(2, 1);
+    } catch (e: StringIndexOutOfBoundsError) {
+        ++hits;
+        if (DUMP) {
+            console.println('begin > end');
+            console.println(e);
+        }
+    }
+
+    try {
+        // begin < 0
+        let arr: char[] = copper.getChars(-1, 1);
+    } catch (e: StringIndexOutOfBoundsError) {
+        ++hits;
+        if (DUMP) {
+            console.println('begin < 0');
+            console.println(e);
+        }
+    }
+
+
+    if (hits != 3*HITS_EXPECTED) {
+        if (DUMP) {
+            console.println('hits: ' + hits + ' (expected ' + HITS_EXPECTED + ')');
+        }
+        console.println('FAIL');
         return 1;
     }
     return 0;

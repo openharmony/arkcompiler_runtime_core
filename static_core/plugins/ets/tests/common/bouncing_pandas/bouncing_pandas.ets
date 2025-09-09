@@ -21,8 +21,10 @@ export class Ball {
 
         this.x = x;
         this.y = y;
-        this.vx = sqrt(2) as float * speed;
-        this.vy = sqrt(2) as float * speed;
+        this.vx = sqrt(2).toFloat() * speed;
+        this.vy = sqrt(2).toFloat() * speed;
+        this.vx = Double.toFloat(sqrt(2)) * speed;
+        this.vy = Double.toFloat(sqrt(2)) * speed;
     }
 
     move(): void {
@@ -56,7 +58,7 @@ export function recomputeFrameBall(balls: Ball[], frameWidth: float, frameHeight
             let nx: float = b2.x - b1.x;
             let ny: float = b2.y - b1.y;
 
-            let dist: float = sqrt(nx * nx + ny * ny) as float;
+            let dist: float = Double.toFloat(sqrt(nx * nx + ny * ny));
             if (dist > (b1.radius + b2.radius)) continue;
 
             nx = nx / dist;
@@ -66,7 +68,7 @@ export function recomputeFrameBall(balls: Ball[], frameWidth: float, frameHeight
             b1.vx -= nx * 2 * dot;
             b1.vy -= ny * 2 * dot;
 
-            let d: float = b1.radius + b2.radius - dist - 0.1 as float;
+            let d: float = Double.toFloat(b1.radius + b2.radius - dist - 0.1);
             b1.x -= nx * d;
             b1.y -= ny * d;
         }
@@ -115,7 +117,7 @@ function v2scale(a: float, b: Vec2): Vec2 {
 }
 
 export function v2len(a: Vec2): float {
-    return sqrt(a.x * a.x + a.y * a.y) as float;
+    return Double.toFloat(sqrt(a.x * a.x + a.y * a.y));
 }
 
 export class SBody {
@@ -206,10 +208,10 @@ function main(): int {
         result_hash += resArr[i].r.x + resArr[i].r.y + resArr[i].v.x + resArr[i].v.y + resArr[i].rad + resArr[i].m;
     }
 
-    if (result_hash as int != 392623)
+    if (Float.toInt(result_hash) != 392623)
     {
         console.print("Wrong result hash: ");
-        console.print(result_hash as int);
+        console.print(Float.toInt(result_hash));
         console.println();
         return 1;
     }

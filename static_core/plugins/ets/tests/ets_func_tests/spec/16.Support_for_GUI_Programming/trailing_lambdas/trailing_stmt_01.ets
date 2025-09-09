@@ -32,7 +32,7 @@ function with_param(n: int, fn: () => void): void {
 function main(): void {
     with_param(5) {
         if (is_active() { return true }) {
-            assertEQ( a, 5)
+            arktest.assertEQ( a, 5)
         }
     }
 }

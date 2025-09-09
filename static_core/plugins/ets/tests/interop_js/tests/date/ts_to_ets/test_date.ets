@@ -31,35 +31,35 @@ function funDateTypeOf(val: Date) {
 }
 
 function funDateGetFullYear(val: Date) {
-    return val.getFullYear() === 2025;
+    return val.getUTCFullYear() === 2025;
 }
 
 function funDateGetMonth(val: Date) {
-    return val.getMonth() === 3;
+    return val.getUTCMonth() === 2;
 }
 
 function funDateGetDate(val: Date) {
-    return val.getDate() === 1;
+    return val.getUTCDate() === 1;
 }
 
 function funDateGetDay(val: Date) {
-    return val.getDay() === 6;
+    return val.getUTCDay() === 6;
 }
 
 function funDateGetHours(val: Date) {
-    return val.getHours() === 1;
+    return val.getUTCHours() === 1;
 }
 
 function funDateGetMinutes(val: Date) {
-    return val.getMinutes() === 2;
+    return val.getUTCMinutes() === 2;
 }
 
 function funDateGetSeconds(val: Date) {
-    return val.getSeconds() === 3;
+    return val.getUTCSeconds() === 3;
 }
 
 function funDateGetMilliseconds(val: Date) {
-    return val.getMilliseconds() === 0;
+    return val.getUTCMilliseconds() === 0;
 }
 
 function funDateToISOString(val: Date) {

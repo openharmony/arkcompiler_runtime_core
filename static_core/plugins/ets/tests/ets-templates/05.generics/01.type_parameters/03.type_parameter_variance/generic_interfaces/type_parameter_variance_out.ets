@@ -17,6 +17,7 @@
 
 /*---
 desc: Test of covariant _out_ type parameter modifier. 
+tags: [compile-only, {{c.tag}}]
 ---*/
 
 interface I<out T> {
@@ -31,7 +32,7 @@ class A<out T> implements I<T> {
 function main(): void {
   let arg: {{c.type}} = {{c.value}}
   let a: I<{{c.type}}> = new A<{{c.type}}>()
-  assertEQ(a.f(), arg)
+  arktest.assertEQ(a.f(), arg)
 }
 
 {% endfor %}

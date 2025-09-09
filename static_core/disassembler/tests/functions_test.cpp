@@ -186,7 +186,59 @@ TEST(FunctionsTest, SerializeLineTable)
     ASSERT_EQ(lineTable[3].offset, 4);
     ASSERT_EQ(lineTable[3].line, 6);
 }
+static std::unique_ptr<const panda_file::File> GetPandaFile(std::vector<uint8_t> *data)
+{
+    os::mem::ConstBytePtr ptr(reinterpret_cast<std::byte *>(data->data()), data->size(),
+                              [](std::byte *, size_t) noexcept {});
+    return panda_file::File::OpenFromMemory(std::move(ptr));
+}
 
+TEST(DisassemblerTest, FullRecordNameEmptyNameDeathTest)
+{
+    // Write panda file to memory
+    ark::panda_file::ItemContainer container;
+
+    // set current class's superclass to self
+    ark::panda_file::ClassItem *classItem = container.GetOrCreateClassItem("");
+    classItem->SetAccessFlags(ark::ACC_PUBLIC);
+    classItem->SetSuperClass(classItem);
+
+    // Add interface
+    ark::panda_file::ClassItem *ifaceItem = container.GetOrCreateClassItem("Iface");
+    ifaceItem->SetAccessFlags(ark::ACC_PUBLIC);
+    classItem->AddInterface(ifaceItem);
+
+    // Add method
+    ark::panda_file::StringItem *methodName = container.GetOrCreateStringItem("foo");
+    ark::panda_file::PrimitiveTypeItem *retType =
+        container.GetOrCreatePrimitiveTypeItem(ark::panda_file::Type::TypeId::VOID);
+    std::vector<ark::panda_file::MethodParamItem> params;
+    ark::panda_file::ProtoItem *protoItem = container.GetOrCreateProtoItem(retType, params);
+    classItem->AddMethod(methodName, protoItem, ark::ACC_PUBLIC | ark::ACC_STATIC, params);
+
+    // Add field
+    ark::panda_file::StringItem *fieldName = container.GetOrCreateStringItem("field");
+    ark::panda_file::PrimitiveTypeItem *fieldType =
+        container.GetOrCreatePrimitiveTypeItem(ark::panda_file::Type::TypeId::I32);
+    classItem->AddField(fieldName, fieldType, ark::ACC_PUBLIC);
+
+    // Add source file
+    ark::panda_file::StringItem *sourceFile = container.GetOrCreateStringItem("source_file");
+    classItem->SetSourceFile(sourceFile);
+    auto fwriter = ark::panda_file::FileWriter("test.abc");
+    ASSERT_TRUE(container.Write(&fwriter));
+    panda_file::MemoryWriter writer;
+    ASSERT_TRUE(container.Write(&writer));
+    auto data = writer.GetData();
+
+    auto pandaFile = GetPandaFile(&data);
+    ASSERT_NE(pandaFile, nullptr);
+
+    ark::disasm::Disassembler d {};
+    ark::Logger::InitializeStdLogging(ark::Logger::Level::FATAL,
+                                      ark::Logger::ComponentMask().set(ark::Logger::Component::DISASSEMBLER));
+    EXPECT_DEATH({ d.Disassemble(*pandaFile); }, ".*Record name is empty.*|.*");
+}
 #undef DISASM_BIN_DIR
 
 }  // namespace ark::disasm::test

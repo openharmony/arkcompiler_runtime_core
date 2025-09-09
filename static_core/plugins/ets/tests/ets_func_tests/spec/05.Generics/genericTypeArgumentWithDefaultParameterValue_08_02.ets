@@ -69,12 +69,12 @@ function main(): void {
     let ra21 = a2.bar(new UserType(), new UserName());
     let ra31 = a3.bar("hello", "world")
 
-    assertTrue( ra1 instanceof UserType)
-    assertTrue( ra2 instanceof UserType)
-    assertTrue( ra3 instanceof string)
+    arktest.assertTrue( ra1 instanceof UserType)
+    arktest.assertTrue( ra2 instanceof UserType)
+    arktest.assertTrue( ra3 instanceof string)
 
-    assertTrue( ra11 instanceof UserName)
-    assertTrue( ra21 instanceof UserName)
-    assertTrue( ra31 instanceof string)
+    arktest.assertTrue( ra11 instanceof UserName)
+    arktest.assertTrue( ra21 instanceof UserName)
+    arktest.assertTrue( ra31 instanceof string)
 }
 

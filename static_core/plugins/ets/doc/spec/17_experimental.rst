@@ -34,11 +34,10 @@ expressions that provide the array size. This addition is useful to other
 array-related features of the language, such as array literals.
 This feature can also be used to create multidimensional arrays.
 
-The feature *function and method overloading* is supported in many
-(if not all) modern programming languages. Overloading functions/methods
-is a practical and convenient way to write program actions that are similar
-in logic but different in implementation. It is discussed in detail in section
-:ref:`Function, Method and Constructor Overloading`.
+Overloading functions, methods, or constructors is a practical and convenient
+way to write program actions that are similar in logic but different in
+implementation. |LANG| uses :ref:`Overload Declarations` as an innovative
+form of *managed overloading*.
 
 .. index::
    implementation
@@ -62,7 +61,8 @@ Section :ref:`Native Functions and Methods` introduces practically important
 and useful mechanisms for the inclusion of components written in other languages
 into a program written in |LANG|.
 
-Section :ref:`Final Classes and Methods` discusses the well-known feature that
+Sections :ref:`Final Classes` and :ref:`Final Methods`
+discuss the well-known feature that
 in many OOP languages provides a way to restrict class inheritance and method
 overriding. Making a class *final* prohibits defining classes derived from it,
 whereas making a method *final* prevents it from overriding in derived classes.
@@ -113,47 +113,17 @@ the standard library.
    launch function
    asynchronous launch
 
-Section :ref:`Packages` discusses a well-known and proven language feature
-intended to organize large pieces of software that typically consist of many
-components. *Packages* allow developers to construct a software product
-as a composition of subsystems, and organize the development process in a way
-that is appropriate for independent teams to work in parallel.
-
-*Package* is the language construct that combines a number of declarations,
-and makes them parts of an independent compilation unit.
-
-The *export* and *import* features are used to organize communication between
-*packages*. An entity exported from one package becomes known to and
-accessible (see :ref:`Accessible`) in another package which imports that
-feature. Various options are provided to simplify export/import, e.g., by
-defining non-exported, i.e., ``internal`` declarations that are not accessible
-(see :ref:`Accessible`) from the outside of the package.
-
-In addition, |LANG| supports the *package* initialization semantics that
-makes a *package* even more independent from its environment.
-
-.. index::
-   package
-   construct
-   declaration
-   compilation unit
-   export
-   import
-   internal declaration
-   non-exported declaration
-   access
-   accessibility
-   initialization
-   semantics
-
 |
 
-.. _Character Type and Literals:
+.. _Type char:
 
-Character Type and Literals
-***************************
+Type ``char``
+*************
 
-Value of ``char`` type are Unicode code points.
+.. meta:
+    frontend_status: Partly
+
+Values of ``char`` type are Unicode code points.
 
 .. list-table::
    :width: 100%
@@ -163,11 +133,11 @@ Value of ``char`` type are Unicode code points.
    * - Type
      - Type's Set of Values
    * - ``char`` (32-bits)
-     - Symbols with codes from \U+0000 to \U+10FFFF (maximum valid unicode code
+     - Symbols with codes from \U+0000 to \U+10FFFF (maximum valid Unicode code
        point) inclusive
 
-Predefined constructors, methods, and constants for ``char`` type are 
-parts of the ArkTS standard library (see :ref:`Standard Library`).
+Predefined constructors, methods, and constants for ``char`` type are
+parts of the |LANG| :ref:`Standard Library`.
 
 |
 
@@ -229,9 +199,9 @@ Character Equality Operators
     frontend_status: Partly
     todo: need to adapt the implementation to the latest specification
 
-*Character equality* is used for operands of type ``boolean``.
+*Value equality* is used for operands of type ``char``.
 
-If both operands represent the same Unicode code point, 
+If both operands represent the same Unicode code point,
 then the result of ':math:`==`' or ':math:`===`'
 is ``true``. Otherwise, the result is ``false``.
 
@@ -253,8 +223,8 @@ Fixed-Size Array Types
 *Fixed-size array type*, written as ``FixedArray<T>``, is the built-in type
 characterized by the following:
 
--  Any object of array type contains elements, and the number of such elements
-   is known as *array length*.
+-  Any instance of array type contains elements. The number of elements is known
+   as *array length*, and can be accessed by using the ``length`` property.
 -  Array length is a non-negative integer number.
 -  Array length is set once at runtime and cannot be changed after that.
 -  Array element is accessed by its index. *Index* is an integer number
@@ -269,12 +239,12 @@ characterized by the following:
 
 - Fixed-size array length is set once to achieve better performance;
 - Fixed-size arrays have no methods defined;
-- Fixed-size arrays have several constructors,
-  see :ref:`Fixed-Size Array Creation`;
+- Fixed-size arrays have several constructors (see
+  :ref:`Fixed-Size Array Creation`);
 - Fixed-size arrays are not compatible with *resizable arrays*.
 
-The example below represents incompatibility between a resizable array and a
-fixed-size array:
+Incompatibility between a resizable array and a fixed-size array is represented
+by the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -297,9 +267,9 @@ Fixed-Size Array Creation
     frontend_status: Partly
 
 *Fixed-size array* can be created by using :ref:`Array Literal` or
-using constructors defined for ``FixedArray<T>`` type.
+the constructors defined for type ``FixedArray<T>``.
 
-The example of creating using *array literal* is presented below:
+Using *array literal* to create an array is represented by the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -325,11 +295,12 @@ The example of creating using *array literal* is presented below:
    assignability
    resizable array
 
-There are several constructors that can be used to create ``FixedArray<T>`` instance:
+Several constructors can be called to create a ``FixedArray<T>`` instance as
+follows:
 
-- ``constructor(len: int)`` can be used if type ``T`` has a default value
-  (see :ref:`Default Values for Types`) or has a contructor that can be called
-  with no arguments provided:
+- ``constructor(len: int)``, if type ``T`` has either a default value (see
+  :ref:`Default Values for Types`) or a constructor that can be called with
+  no argument provided:
 
 .. code-block:: typescript
    :linenos:
@@ -342,17 +313,17 @@ There are several constructors that can be used to create ``FixedArray<T>`` inst
     }
     let b = new FixedArray<C>(2) // creates array [new C(), new C()]
 
-- ``constructor(len: int, elem: T)`` can be called for any ``T``.
-  It creates an array instance filled with a single value ``elem``:
+- ``constructor(len: int, elem: T)`` for any ``T``. The constructor creates an
+  array instance filled with a single value ``elem``:
 
 .. code-block:: typescript
    :linenos:
 
     let a = new FixedArray<string>(3, "a") // creates array ["a", "a", "a"]
 
-- ``constructor(len: int, elems: (inx: int) => T)`` can be called for any ``T``.
-  It creates an array instance where each *i* element is evaluated as result of
-  the ``elems`` call with argument *i*:
+- ``constructor(len: int, elems: (inx: int) => T)`` for any ``T``. The
+  constructor creates an array instance where each *i* element is evaluated
+  as a result of the ``elems`` call with argument *i*:
 
 .. code-block:: typescript
    :linenos:
@@ -370,7 +341,7 @@ Resizable Array Creation Expressions
 .. meta:
     frontend_status: Done
 
-*Array creation expression* creates new objects that are instances of *resiable
+*Array creation expression* creates new objects that are instances of *resizable
 arrays* (see :ref:`Resizable Array Types`). An array instance can be created
 alternatively by using :ref:`Array literal`.
 
@@ -413,11 +384,11 @@ The syntax of *array creation expression* is presented below:
 *Array creation expression* creates an object that is a new array with the
 elements of the type specified by ``arrayElelementType``.
 
-The type of each *dimensionExpression* must be assignable (see
+The type of each *dimension expression* must be assignable (see
 :ref:`Assignability`) to an ``int`` type. Otherwise,
 a :index:`compile-time error` occurs.
 
-A :index:`compile-time error` occurs if any *dimensionExpression* is a
+A :index:`compile-time error` occurs if any *dimension expression* is a
 constant expression that is evaluated to a negative integer value at compile
 time.
 
@@ -425,7 +396,6 @@ time.
    array creation expression
    type
    expression
-   primitive type
    conversion
    integer
    integer type
@@ -438,7 +408,7 @@ time.
    negative integer
    compile time
 
-If the type of any *dimensionExpression* is ``number`` or other floating-point
+If the type of any *dimension expression* is ``number`` or other floating-point
 type, and its fractional part is different from '0', then errors occur as
 follows:
 
@@ -594,8 +564,8 @@ as follows:
    the expressions to the right of it are not evaluated.
 
 #. The values of dimension expressions are checked. If the value of any
-   ``dimExpr`` expression is less than zero, then ``NegativeArraySizeError`` is
-   thrown.
+   dimension expression is less than zero, then ``NegativeArraySizeError``
+   is thrown.
 
 #. Space for the new array is allocated. If the available space is not
    sufficient to allocate the array, then ``OutOfMemoryError`` is thrown,
@@ -641,20 +611,19 @@ as follows:
 Enumerations Experimental
 *************************
 
-Several experimental features are available for enumerations and described below
-
+Several experimental features  described below are available for enumerations
 
 |
 
-.. _Enumeration with explicit type:
+.. _Enumeration with Explicit Type:
 
-Enumeration with explicit type
+Enumeration with Explicit Type
 ==============================
 
 .. meta:
     frontend_status: None
 
-The syntax of the enumeration with the *explicit type* is
+*Enumeration with explicit type* uses the following syntax:
 
 .. code-block:: abnf
 
@@ -662,15 +631,32 @@ The syntax of the enumeration with the *explicit type* is
         'const'? 'enum' identifier ':' type '{' enumConstantList? '}'
         ;
 
-A :index:`compile-time error` occurs if
+All enumeration constants of declared enumeration are of the *explicit type*
+specified in the declaration. It also means that
+*explicit type* is the *enumeration base type* (see :ref:`Enumerations`).
 
-- The *explicit type* is different from any numeric or string type.
-- The value of an enum constant is missed.
-- Enumeration constant type is not a subtype of the *explicit type*.
+.. index::
+   enumeration base type
+   enumeration with explicit type
+
+If *explicit type* is an integer type then omitted values for constants allowed,
+the same rules applied as for enum with non-explicit type (see :ref:`Enumeration Integer Values`).
+
+A :index:`compile-time error` occurs in the following situations:
+
+- *Explicit type* is different from any numeric or string type.
+- Enumeration constant has no value and *Explicit type* is not not an integer type.
+- Enumeration constant type is not assignable (see :ref:`Assignability`)
+  to the *explicit type*.
 
 .. index::
    enum constant
-
+   enumeration constant
+   numeric type
+   string type
+   value
+   type
+   syntax
 
 .. code-block:: typescript
    :linenos:
@@ -691,12 +677,17 @@ Enumeration Methods
 .. meta:
     frontend_status: Done
 
-Several static methods are available to handle each enumeration type as follows:
+Several static methods are available to handle each enumeration type
+as follows:
 
--  Method ``values()`` returns an array of enumeration constants in the order of
-   declaration.
--  Method ``getValueOf(name: string)`` returns an enumeration constant with the
-   given name, or throws an error if no constant with such name exists.
+-  Method ``static values()`` returns an array of enumeration constants
+   in the order of declaration.
+-  Method ``static getValueOf(name: string)`` returns an enumeration constant
+   with the given name, or throws an error if no constant with such name
+   exists.
+-  Method ``static fromValue(value: T)``, where ``T`` is the base type
+   of the enumeration returns an enumeration constant with the
+   given value, or throws an error if no constant with such value exists.
 
 .. index::
    enumeration method
@@ -709,14 +700,18 @@ Several static methods are available to handle each enumeration type as follows:
 .. code-block:: typescript
    :linenos:
 
-      enum Color { Red, Green, Blue }
+      enum Color { Red, Green, Blue = 5 }
       let colors = Color.values()
       //colors[0] is the same as Color.Red
+
       let red = Color.getValueOf("Red")
 
-There are additional methods for instances of any enumeration type:
+      Color.fromValue(5) // ok, retuns Color.Blue
+      Color.fromValue(6) // throws runtime error
 
--  Method ``valueOf()`` returns an numeric or ``string`` value of an enumeration
+Additional methods for instances of an enumeration type are as follows:
+
+-  Method ``valueOf()`` returns a numeric or ``string`` value of an enumeration
    constant depending on the type of the enumeration constant.
 
 -  Method ``getName()`` returns the name of an enumeration constant.
@@ -741,7 +736,9 @@ same value.
    value
    enumeration constant
    numeric type
-   type string
+   string type
+   numeric value
+   sting value
 
 
 |
@@ -905,16 +902,18 @@ Iterable Types
 .. meta:
     frontend_status: Done
 
-A class or an interface can be made *iterable*. It means that instances of the
-class or the interface can be used in ``for-of`` statements (see
-:ref:`For-Of Statements`).
+A class or an interface is *iterable* if it implements the interface ``Iterable``
+defined in the :ref:`Standard Library`, and thus has an accessible parameterless
+method with the name ``$_iterator`` and a return type that is a subtype (see
+:ref:`Subtyping`) of type ``Iterator`` as defined in the :ref:`Standard Library`.
+It guarantees that an object returned by the ``$_iterator`` method is of the
+type which implements ``Iterator``, and thus allows traversing an object of the
+*iterable* type.
 
-Some type ``C`` is *iterable* if it declares a parameterless method with name
-``$_iterator`` and return type that is assignable (see :ref:`Assignability`)
-to type ``Iterator`` as defined in the standard library (see
-:ref:`Standard Library`). It guarantees that the object returned is of the
-class type which implements ``Iterator`` and allows traversing an object of
-class type ``C``. The example below defines *iterable* class ``C``:
+A union of iterable types is also *iterable*. It means that instances of such
+types can be used in ``for-of`` statements (see :ref:`For-Of Statements`).
+
+An *iterable* class ``C`` is represented by the example below:
 
 .. index::
    iterable type
@@ -933,7 +932,7 @@ class type ``C``. The example below defines *iterable* class ``C``:
 .. code-block:: typescript
    :linenos:
 
-      class C {
+      class C implements Iterable {
         data: string[] = ['a', 'b', 'c']
         $_iterator() { // Return type is inferred from the method body
           return new CIterator(this)
@@ -1095,7 +1094,7 @@ Callable Types with ``$_invoke`` Method
 .. meta:
     frontend_status: Done
 
-The method ``$_invoke`` can have an arbitrary signature. The method can be used
+The ``static`` method ``$_invoke`` can have an arbitrary signature. The method can be used
 in a *type call expression* in either case above. If the signature has
 parameters, then the call must contain corresponding arguments.
 
@@ -1120,6 +1119,9 @@ parameters, then the call must contain corresponding arguments.
    type call expression
    argument
 
+That a type contains the instance method ``$_invoke`` does not make the type
+*callable*.
+
 |
 
 .. _Callable Types with $_instantiate Method:
@@ -1130,7 +1132,7 @@ Callable Types with ``$_instantiate`` Method
 .. meta:
     frontend_status: Done
 
-The method ``$_instantiate`` can have an arbitrary signature by itself.
+The ``static`` method ``$_instantiate`` can have an arbitrary signature by itself.
 If it is to be used in a *type call expression*, then its first parameter
 must be a ``factory`` (i.e., it must be a *parameterless function type
 returning some class type*).
@@ -1207,6 +1209,9 @@ if:
     }
     let x = C() // compile-time error, wrong '$_instantiate' 1st parameter
 
+That a type contains the instance method ``$_instantiate`` does not make the
+type *callable*.
+
 |
 
 .. _Statements Experimental:
@@ -1219,14 +1224,14 @@ Statements
 
 |
 
-.. _For-of Type Annotation:
+.. _For-of Explicit Type Annotation:
 
-For-of Type Annotation
-======================
+For-of Explicit Type Annotation
+===============================
 
 .. meta:
     frontend_status: Partly
-	todo: check assignability
+    todo: check assignability
 
 An explicit type annotation is allowed for a *ForVariable*
 (see :ref:`For-Of Statements`):
@@ -1240,9 +1245,9 @@ An explicit type annotation is allowed for a *ForVariable*
         console.log(n)
       }
 
-Type of elements of *for-of expression* must be assignable
-(see :ref:`Assignability`) to the type of the variable,
-otherwise a :index:`compile-time error` occurs.
+Type of elements in a ``for-of`` expression must be assignable
+(see :ref:`Assignability`) to the type of the variable. Otherwise, a
+:index:`compile-time error` occurs.
 
 .. index::
    type annotation
@@ -1251,293 +1256,691 @@ otherwise a :index:`compile-time error` occurs.
 
 |
 
-.. _Function, Method and Constructor Overloading:
+.. _Overload Declarations:
 
-Function, Method and Constructor Overloading
-********************************************
-
-.. meta:
-    frontend_status: Done
-
-As many other languages do, |LANG| supports overloading. Overloading allows
-declaring several functions or methods with the same name but different
-signatures.
-|LANG| does not support |TS| overload signatures that allow
-specifying several headers for a function or method with a single body but
-different signatures (see :ref:`TS Overload Signatures`).
-
-The |LANG| approach delivers better performance because no extra checks
-are performed during the execution of a specific body at runtime.
-
-.. index::
-   function overloading
-   method overloading
-   constructor overloading
-   overloading
-   overload signature
-   header
-   function
-   method
-   signature
-
-|
-
-.. _Function Overloading:
-
-Function Overloading
-====================
-
-.. meta:
-    frontend_status: Done
-
-If a declaration scope declares and/or imports two or more functions with the
-same name but different signatures that are not *overload-equivalent* (see
-:ref:`Overload-Equivalent Signatures`), then such functions are *overloaded*.
-Function overload declarations cause no :index:`compile-time error` on their
-own.
-
-No specific relationship is required between the return types of the two
-functions with the same name but different signatures that are not
-*overload-equivalent* (see :ref:`Overload-Equivalent Signatures`).
-
-When calling an overloaded function, the number of actual arguments (and any
-explicit type arguments) and compile-time argument types are used at compile
-time to determine exactly which one is to be called (see
-:ref:`Function Call Expression`).
-
-.. index::
-   function overloading
-   declaration scope
-   declaration
-   signature
-   name
-   overload-equivalence
-   overload-equivalent signature
-   overloaded function name
-   overloaded function
-   argument
-   argument type
-   function call
-
-|
-
-.. _Class Method Overloading:
-
-Class Method Overloading
-========================
-
-.. meta:
-    frontend_status: Done
-
-If two or more methods within a class have the same name, and their signatures
-are not *overload-equivalent* (see :ref:`Overload-Equivalent Signatures`), then
-such methods are considered *overloaded*.
-
-Method overloading declarations cause no :index:`compile-time error` on their
-own, except where a possible instantiation causes an *overload-equivalent*
-method (see :ref:`Overload-Equivalent Signatures`) in the instantiated class or
-interface:
-
-.. index::
-   class method overloading
-   class
-   signature
-   overload-equivalent signature
-   overload equivalence
-   overloading
-   overloading declaration
-   overloaded method
-   method
-   instantiation
-   interface
-
-.. code-block:: typescript
-   :linenos:
-
-     class Template<T> {
-        foo (p: number) { ... }
-        foo (p: T) { ... }
-     }
-     let instantiation: Template<number>
-       // Leads to two *overload-equivalent* methods
-
-     interface ITemplate<T> {
-        foo (p: number)
-        foo (p: T)
-     }
-     function foo (instantiation: ITemplate<number>) { ... }
-       // Leads to two *overload-equivalent* methods
-
-If signatures of two or more methods with the same name are not
-*overload-equivalent* (see :ref:`Overload-Equivalent Signatures`), then return
-types of those methods can have any kind of relationship.
-
-When calling an overloaded method, the number of actual arguments (and any
-explicit type arguments) and compile-time argument types are used at compile
-time to determine exactly which one is to be called (see
-:ref:`Method Call Expression` and :ref:`Step 2 Selection of Method`).
-
-.. index::
-   signature
-   method
-   overload-equivalent signature
-   overload equivalence
-   type argument
-   return type
-   argument type
-   compile time
-   call
-   method call
-   method call expression
-   instance method
-
-|
-
-.. _Constructor Overloading:
-
-Constructor Overloading
-=======================
-
-.. meta:
-    frontend_status: Done
-
-Constructor overloading behavior is identical to that of method overloading (see
-:ref:`Class Method Overloading`). Each class instance creation expression (see
-:ref:`New Expressions`) resolves the constructor overloading call if any at
-compile time.
-
-.. index::
-   constructor overloading
-   constructor overloading behavior
-   constructor
-   method overloading
-   class instance
-   instance creation
-   instance creation expression
-   constructor overloading call
-   compile time
-
-|
-
-.. _Declaration Distinguishable by Signatures:
-
-Declaration Distinguishable by Signatures
-=========================================
-
-.. meta:
-    frontend_status: Done
-
-Same-name declarations are distinguishable by signatures if such
-declarations are one of the following:
-
--  Functions with the same name and signatures that are not
-   *overload-equivalent* (see :ref:`Overload-Equivalent Signatures` and
-   :ref:`Function Overloading`).
-
--  Methods with the same name and signatures that are not
-   *overload-equivalent* (see :ref:`Overload-Equivalent Signatures`,
-   :ref:`Class Method Overloading`, and :ref:`Interface Method Overloading`).
-
--  Constructors of the same class and signatures that are not
-   *overload-equivalent* (see :ref:`Overload-Equivalent Signatures` and
-   :ref:`Constructor Overloading`).
-
-.. index::
-   distinguishable declaration
-   signature
-   function
-   function overload
-   overloading
-   overload-equivalent signature
-   overload-equivalence
-   constructor
-   constructor class
-
-The example below represents the functions distinguishable by signatures:
-
-.. code-block:: typescript
-   :linenos:
-
-      function foo() {}
-      function foo(x: number) {}
-      function foo(x: number[]) {}
-      function foo(x: string) {}
-
-The following example represents the functions indistinguishable by signatures
-that cause a :index:`compile-time error`:
-
-.. code-block:: typescript
-   :linenos:
-
-      // Functions have overload-equivalent signatures
-      function foo(x: number) {}
-      function foo(y: number) {}
-
-      // Functions have overload-equivalent signatures
-      function foo(x: number) {}
-      type MyNumber = number
-      function foo(x: MyNumber) {}
-
-.. index::
-   distinguishable function
-   function
-   signature
-
-|
-
-.. _TS Overload Signatures:
-
-|TS| Overload Signatures
-========================
+Overload Declarations
+*********************
 
 .. meta:
     frontend_status: None
 
-|LANG| does not support overload signatures like |TS| where several function
-headers can be followed by a single body. Each overloaded function, method, or
-constructor in |LANG| must have a separate body.
+|LANG| support both |TS| compatible feature *overload signatures*
+(see :ref:`Declarations with Overload Signatures`) and an innovative
+form of *managed overloading* that provides a developer with
+full control over selecting specific entity to call from several
+overloaded entities.
 
-The following code is valid in |TS| but causes a compile-time error in |LANG|:
+An *overload declaration* is used for *managed overloading* to
+define a set and order of overloaded entities (functions, methods,
+or constructors).
 
-.. code-block-meta:
-   expect-cte
+An *overload declaration* can be used as follows:
 
-.. code-block:: typescript
-   :linenos:
+-  As a *top-level declaration* (see :ref:`Top-Level Declarations`)
+   to specify the overload for functions;
 
-    function foo(): void
-    function foo(x: string): void
-    function foo(x?: string): void {
-        /*body*/
-    }
+-  In a class declaration (see :ref:`Class Members`); or
 
-The following code is valid in |LANG|
-(see :ref:`Function, Method and Constructor Overloading`):
+-  In an interface declaration (see :ref:`Interface Members`).
 
-.. code-block-meta:
-   not-subset
+An *overload declaration* starts with the keyword ``overload`` and
+declares an *overload alias* for a set of explicitly listed entities as follows:
 
 .. code-block:: typescript
    :linenos:
 
-    function foo(): void {
-      /*body1*/
+    function max2(a: number, b: number): number {
+        return  a > b ? a : b
     }
-    function foo(x: string): void {
-      /*body2*/
+    function maxN(...a: number[]): number {
+        // return max element
     }
 
-.. index::
-   signature
-   overload signature
-   function header
-   overloaded function
-   overloaded method
-   overloaded constructor
-   compile-time error
+    // declare 'max' as an ordered set of functions max2 and maxN
+    overload max { max2, maxN }
+
+    max(1, 2)     // max2 is called
+    max(3, 2, 4)  // maxN is called
+    max("a", "b") // compile-time error, no function to call
+
+    maxN(1, 2)    // maxN is explicitly called
+
+The semantics of an entity included into an overloaded set does not change.
+Such entities follow the ordinary accessibility rules, and can be used
+separately from the overload alias, e.g., called explicitly as follows:
+
+.. code-block:: typescript
+   :linenos:
+
+    maxN(1, 2) // maxN is explicitly called
+    max2(2, 3) // max2 is explicitly called
+
+When calling an *overload alias*, entities from the *overload set* are checked
+in the listed order, and the first entity with an appropriate signature is
+called (see :ref:`Overload resolution for Overload Declarations` for detail).
+A :index:`compile-time error` occurs if no entity with an appropriate signature
+is available:
+
+.. code-block-meta:
+    expect-cte
+
+.. code-block:: typescript
+   :linenos:
+
+    max(1)    // maxN is called
+    max(1, 2) // max2 is called, as is the first in order
+
+    max("a", "b") // compile-time error, no function to call
+
+It means that exactly one entity is selected for the call at the call site.
+Otherwise, a :index:`compile-time error` occurs.
+
+An overloaded entity in an *overload declaration* can be *generic* (see
+:ref:`Generics`).
+
+If *type arguments* are explicitly provided in a call of *overload alias*
+(see :ref:`Explicit Generic Instantiations`), then consideration is given
+only to the entities with equal numbers of *type parameters* and *type arguments*
+in the process of :ref:`Overload Resolution for Overload Declarations`.
+All entities are considered in the case of :ref:`Implicit Generic Instantiations`
+as represented by the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo1(s: string) {}
+    function foo2<T>(x: T) {}
+
+    overload foo { foo1, foo2 }
+
+    foo("aa")   // foo1 is called
+    foo(1) // foo2 is called, implicit generic instantiation
+    foo<string>("aa") // foo2 is called
+
+
+An entity can be listed in several *overload declarations*:
+
+.. code-block:: typescript
+   :linenos:
+
+    function max2i(a: int, b: int): int {
+        return  a > b ? a : b
+    }
+    function maxNi(...a: int[]): int {
+        // return max element
+    }
+    function maxN(...a: number[]): number {
+        // return max element
+    }
+
+    overload maxi { max2i, maxNi }
+    overload max { max2i, maxNi, maxN }
 
 |
 
+.. _Function Overload Declarations:
+
+Function Overload Declarations
+==============================
+
+.. meta:
+    frontend_status: None
+
+An *overload function declaration* allows declaring an *overload alias*
+for a set of functions (see :ref:`Function Declarations`).
+
+The syntax is presented below:
+
+.. code-block:: abnf
+
+    overloadFunctionDeclaration:
+        'overload' identifier '{' qualifiedName (',' qualifiedName)* ','? '}'
+        ;
+
+A :index:`compile-time error` occurs, if
+
+- a *qualified name* does not refer to an accessible function;
+
+- a *qualified name* refers to a function with overload signatures
+  (see :ref:`Function with Overload Signatures`).
+
+An *overload alias* can be exported or imported the same way as any other
+top-level declaration (see :ref:`Top-Level Declarations`).
+
+If an *overload alias* is exported but some overloaded functions are not, then
+the *overload alias* is accessible in its import context but not all overloaded
+functions are. In this case, only the accessible functions are considered in
+the process of :ref:`Overload Resolution for Overload Declarations` as in the
+following example:
+
+.. code-block:: typescript
+   :linenos:
+
+    // File1
+    export function foo1(p: string) {}
+    function foo2(p: number) {}
+    export overload foo { foo1, foo2 }
+
+    // File2
+    import {foo} from "File1"
+    foo("a string")  // ok, foo1() is called
+    foo1("a string") // compile-time error as f1() is not imported
+
+|
+
+.. _Class Method Overload Declarations:
+
+Class Method Overload Declarations
+==================================
+
+.. meta:
+    frontend_status: None
+
+An *overload method declaration* allows declaring an *overload alias*
+as a class member (see :ref:`Class Members`)
+for a set of static or instance methods (see :ref:`Method Declarations`).
+
+The syntax is presented below:
+
+.. code-block:: abnf
+
+    overloadMethodDeclaration:
+        overloadMethodModifier*
+        'overload' identifier '{' identifier (',' identifier)* ','? '}'
+        ;
+
+    overloadMethodModifier: 'static' | 'async';
+
+Using *overload method declaration* and calls of *overload alias*
+are illustrated by the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    class Processor {
+        overload process { processNumber, processString }
+        processNumber(n: number) {/*body*/}
+        processString(s: string) {/*body*/}
+    }
+
+    let c = new C()
+    c.process(42) // calls processNumber
+    c.process("aa") // calls processString
+
+*Static overload alias* is represented by the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        static one(n: number) {/*body*/}
+        static two(s: string) {/*body*/}
+        static overload foo { one, two }
+    }
+
+A :index:`compile-time error` occurs if:
+
+-  Method modifier appears more than once in an overload method declaration;
+
+-  *Identifier* in the overloaded methods list does not refer to an accessible
+   method (either declared or inherited) of the current class;
+
+-  *Identifier* in the overloaded methods list refers to a method with overload
+   signatures (see :ref:`Class Method with Overload Signatures`);
+
+-  Overloaded method is *abstract*;
+
+-  *Overload alias* is *static* but the overloaded method is not;
+
+-  *Overload alias* is *non-static* but the overloaded method is not;
+
+-  *Overload alias* is marked ``async`` but the overloaded method is not; or
+
+-  *Overload alias* is not ``async`` but the overloaded method is.
+
+Overloaded methods and overload aliases can have different access modifiers.
+If an *overload alias* is accessible in some context but not all overloaded
+methods are, then only the accessible methods are considered in the process
+of :ref:`Overload Resolution for Overload Declarations`:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        private foo1(x: number) {/*body*/}
+        protected foo2(x: string) {/*body*/}
+        public foo3(x: boolean) {/*body*/}
+        public overload foo { foo1, foo2, foo3 }
+
+        bar() {
+            this.foo(1)    // ok, foo1 is accessible
+            this.foo("a")  // ok, foo2 is accessible
+            this.foo(true) // ok, foo3 is accessible
+        }
+    }
+
+    let c = new C()
+    c.foo(1)    // compile-time error, private foo1 is not accessible
+    c.foo("a")  // compile-time error, protected foo2 is not accessible
+    c.foo(true) // ok, foo3 is accessible
+
+    class D extends C {
+        bar() {
+            this.foo(1)    // compile-time error, private foo1 is not accessible
+            this.foo("a")  // ok, foo2 is accessible
+            this.foo(true) // ok, foo3 is accessible
+        }
+    }
+
+
+Some or all overloaded functions can be ``native`` as follows:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        native foo1(x: number)
+        foo2(x: string) {/*body*/}
+        overload foo { foo1, foo2 }
+    }
+
+If a superclass has an *overload declaration* it can be overridden in a
+subclass, if not, the declaration from the superclass in used.
+*Overload declaration* in a subclass (if present) must contain all methods that
+overloaded in a superclass, otherwise a :index:`compile-time error` occurs.
+*Overload declaration* can add new methods and change methods order.
+
+An *overload alias* is used the same as an ordinary class method, except that
+in a call it is replaced (in compile-time) by one of overloaded method using
+the type of *object reference*.
+
+The example below illustrates *overload declaration* in subtypes:
+
+.. code-block:: typescript
+   :linenos:
+
+    class Base {
+        overload process { processNumber, processString }
+        processNumber(n: number) {/*body*/}
+        processString(s: string) {/*body*/}
+    }
+
+    class D1 extends Base {
+        // method is overridden
+        override processNumber(n: number) {/*body*/}
+        // overload declaration is inherited
+    }
+
+    class D2 extends Base {
+        // method is added:
+        processInt(n: int) {/*body*/}
+        // new order for overloaded methods is specified:
+        overload process { processInt, processNumber, processString }
+    }
+
+    new D1().process(1)   // calls processNumber from D1
+
+    new D2().process(1)   // calls processInt from D2 (as it is listed earlier)
+    new D2().process(1.0) // calls processNumber from Base (first appropriate)
+
+Methods with special names (see :ref:`Indexable Types`, :ref:`Iterable Types`,
+and :ref:`Callable Types`) can be overloaded in the same manner as ordinary
+methods are:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        getByNumber(n: number): string {...}
+        getByString(s: string): string {...}
+        overload $_get { getByNumber, getByString }
+    }
+
+    let c = new C()
+
+    c[1]     // getByNumber is used
+    c["abc"] // getByString is used
+
+If a class implements some interfaces where *overload declarations* for the
+same alias then new *overload declaration* which includes all overloaded
+methods is to be defined, otherwise a :index:`compile-time error` occurs.
+
+.. code-block:: typescript
+   :linenos:
+
+    interface I1 {
+        overload foo {f1, f2}
+        // f1 and f2 are declared in I1
+    }
+    interface I2 {
+        overload foo {f3, f4}
+        // f3 and f4 are declared in I2
+    }
+    class C implements I1, I2 {
+       // compile-time error as no new overload is defined
+    }
+    class D implements I1, I2 {
+        overload foo { f2, f3, f1, f4 } // OK, as new overload is defined
+    }
+    class E implements I1, I2 {
+        overload foo { f2, f4 } // compile-time error as not all methods are used
+    }
+
+    const i1: I1 = new D
+    i1.foo(<arguments>) // call is valid if arguments fit first signature of {f1, f2} set
+
+    const i2: I2 = new D
+    i2.foo(<arguments>) // call is valid if arguments fit first signature of {f3, f4} set
+
+    const d: D = new D
+    d.foo(<arguments>) // call is valid if arguments fit first signature of {f2, f3, f1, f4} set
+
+|
+
+.. _Interface Method Overload Declarations:
+
+Interface Method Overload Declarations
+======================================
+
+.. meta:
+    frontend_status: None
+
+*Interface method overload declaration* allows declaring an *overload alias*
+as an interface member (see :ref:`Interface Members`)
+for a set of interface methods (see :ref:`Interface Method Declarations`).
+
+The syntax is presented below:
+
+.. code-block:: abnf
+
+    overloadInterfaceMethodDeclaration:
+        'overload' identifier '{' identifier (',' identifier)* ','? '}'
+        ;
+
+Using *overload method declaration* is illustrated by the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    interface I {
+        foo(): void
+        bar(n?: string): void
+        overload goo { foo, bar }
+    }
+
+    function example(i: I) {
+        i.goo()        // calls i.foo()
+        i.goo("hello") // calls i.bar("hello")
+        i.bar()        // explicit call: i.bar(undefined)
+    }
+
+An *overload alias* is used like an ordinary interface method, except that in
+a call it is replaced at compile time by one of overloaded methods by using
+the type of *object reference*.
+
+A class that implements an interface with an *overload alias* usually implements
+all interface methods, except those having a default body (see
+:ref:`Default Interface Method Declarations`):
+
+.. code-block:: typescript
+   :linenos:
+
+   // Using interface overload declaration
+   class C implements I {
+        foo(): void {/*body*/}
+        bar(n?: string): void {/*body*/}
+   }
+
+   let c = new C()
+   c.goo() // calls c.foo()
+
+An interface *overload alias* can be redefined in a class. In this case, the
+*overload declaration* in the class must contain all methods overloaded in the
+interface. Otherwise, a :index:`compile-time error` occurs.
+
+.. code-block:: typescript
+   :linenos:
+
+   class D implements I {
+        foo(): void {/*body*/}
+        bar(n?: string): void {/*body*/}
+        overload goo( bar, foo) // order is changes
+   }
+
+   let d = new D()
+   d.goo() // d.bar(undefined) is used, as it is the first appropriate method
+
+An *overload alias* defined in a superinterface can be redefined in a
+subinterface. In this case, the *overload declaration* of the subinterface
+must contain all methods overloaded in superinterface. Otherwise, a
+:index:`compile-time error` occurs.
+
+The *overload alias* defined in superinterfaces must be redefined
+in a subinterface if several *overload declarations* for the same alias are
+inherited into the interface, otherwise a :index:`compile-time error` occurs.
+
+.. code-block:: typescript
+   :linenos:
+
+    interface I1 {
+        overload foo {f1, f2}
+        // f1 and f2 are declared in I1
+    }
+    interface I2 {
+        overload foo {f3, f4}
+        // f3 and f4 are declared in I2
+    }
+    interface I3 extends I1, I2 {
+       // compile-time error as no new overload for 'foo' is defined
+    }
+    interface I4 extends I1, I2 {
+        overload foo { f4, f1, f3, f2 } // OK, as new overload is defined
+    }
+    interface I5 extends I1, I2 {
+        overload foo { f1, f3 } // compile-time error as not all mehtods are included
+    }
+
+
+|
+
+.. _Constructor Overload Declarations:
+
+Constructor Overload Declarations
+=================================
+
+An *overload constructor declaration* allows declaring an *overload alias*
+and setting an order of constructors for the call in new expressions.
+
+The syntax is presented below:
+
+.. code-block:: abnf
+
+    overloadConstructorDeclaration:
+        'overload' 'constructor' '{' identifier (',' identifier)* ','? '}'
+        ;
+
+This feature can be used if there are more then one constructors declared
+in the class, and maximum one of them is anonymous (see
+:ref:`Constructor Names`).
+
+Only a single *overload constructor declaration* is allowed in a class.
+Otherwise, a :index:`compile-time error` occurs.
+
+*Overload alias* for constructors is used the same way as anonymous constructor
+(see :ref:`New Expressions`).
+
+The use of *overload constructor declaration* is represented by the example
+below:
+
+.. code-block:: typescript
+   :linenos:
+
+    class BigFloat {
+        constructor fromNumber(n: number) {/*body1*/}
+        constructor fromString(s: string) {/*body2*/}
+
+        overload constructor { fromNumber, fromString }
+    }
+
+    new BigFloat(1)      // fromNumber is used
+    new BigFloat("3.14") // fromString is used
+
+
+If a class has an anonymous constructor it is implicitly placed at first
+position in a list of overloaded constructors:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        constructor () {/*body*/}
+        constructor fromString(s?: string) {/*body*/}
+
+        overload constructor { fromString }
+    }
+
+    new C()                // anonymous constructor is used
+    new C("abc")           // fromString is used
+    new C.fromString("aa") // fromString is explicitly used
+
+A :index:`compile-time error` occurs if both *overload constructor declaration* and
+constructor *overload signature* (see
+:ref:`Declarations with Overload Signatures`) are used:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        // overload signature
+        constructor (n: number)
+        constructor (b: boolean)
+        constructor (...x: Any[]) {/*body1*/}
+
+        constructor fromString(s: string) {/*body2*/}
+
+        // overload declaration
+        overload constructor { fromString }
+        // compile-time error: mix of both overload schemes
+    }
+
+|
+
+.. _Overload Alias Name Same As Method Name:
+
+Overload Alias Name Same As Method Name
+=======================================
+
+A name of a class or interface *overload declaration* can be the same as the
+name of an overloaded method. As one example, a method defined in a superclass
+can be used as one of overloaded methods in a same-name subclass *overload
+declaration*. This important case is represented by the following example:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        foo(n: number): number {/*body*/}
+    }
+    class D implements C {
+        fooString(s: number): string {/*body*/}
+
+        overload foo {
+            foo, // method 'foo' from C
+            fooString
+        }
+    }
+
+    let d = new D()
+    let c: C = d
+
+    d.foo(1)    // overload alias is used to call 'foo' from C
+    d.foo("aa") // overload alias is used to call 'fooString' from D
+    c.foo(1)    // method 'foo' from is called (no overload)
+
+If names of a method and of an *overload alias* are the same, then the method
+can be overriden as usual:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        foo(n: number): number {/*body*/}
+    }
+    class D implements C {
+        foo(n: number): number {/*body*/} // method is overriden
+        fooString(s: number): string {/*body*/}
+
+        overload foo { foo, fooString }
+    }
+
+This feature is also valid in interfaces, or in an interface and a class that
+implements the interface:
+
+.. code-block:: typescript
+   :linenos:
+
+    interface I {
+        foo(n: number): number {/*body*/}
+    }
+    interface J extends I {
+        fooString(s: number): string
+        overload foo { foo, fooString }
+    }
+
+    class K implements I {
+        foo(n: number): number {/*body*/}
+        fooString(s: number): string {/*body*/}
+
+        overload foo { foo, fooString }
+    }
+
+Semantically, it means than the *overload alias* is considered at the call
+site only, and **not** in the following situations:
+
+- :ref:`Overriding`;
+
+- Overloaded entities list (see :ref:`Class Method Overload Declarations` and
+  :ref:`Interface Method Overload Declarations`);
+
+- :ref:`Method Reference`.
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        foo(n: number): number {/*body*/}
+    }
+
+    class D implements C {
+        fooString(s: number): string {/*body*/}
+
+        overload foo { foo, fooString }
+    }
+
+    let d = new D()
+    let c: C = d
+
+    let func1 = c.foo // method 'foo' is used
+    let func2 = d.foo // method 'foo' is used, not overload alias
+
+A :index:`compile-time error` occurs if the name of an *overload alias*
+is the same as the name of a method (with the same static or non-static
+modifier) that is not listed as an overloaded method as follows:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        foo(n: number) {/*body*/}
+        fooString(s: number) {/*body*/}
+        fooBoolean(b: boolean) {/*body*/}
+
+        overload foo { // compile-time error
+            fooBoolean, fooString
+        }
+    }
+
+|
 
 .. _Native Functions and Methods:
 
@@ -1638,17 +2041,17 @@ body (see :ref:`Constructor Body`).
 
 |
 
-.. _Final Classes and Methods:
+.. _Classes Experimental:
 
-Final Classes and Methods
-*************************
+Classes Experimental
+********************
 
 .. meta:
     frontend_status: Done
 
 |
 
-.. _Final Classes Experimental:
+.. _Final Classes:
 
 Final Classes
 =============
@@ -1680,7 +2083,7 @@ declaration contains another class that is ``final``.
 
 |
 
-.. _Final Methods Experimental:
+.. _Final Methods:
 
 Final Methods
 =============
@@ -1689,7 +2092,7 @@ Final Methods
     frontend_status: Done
 
 A method can be declared ``final`` to prevent it from being overridden (see
-:ref:`Overloading and Overriding`) in subclasses.
+:ref:`Overriding Methods`) in subclasses.
 
 A :index:`compile-time error` occurs if:
 
@@ -1707,6 +2110,51 @@ A :index:`compile-time error` occurs if:
    keyword abstract
    keyword static
    keyword final
+
+|
+
+.. _Constructor Names:
+
+Constructor Names
+=================
+
+.. meta:
+    frontend_status: None
+
+A :ref:`Constructor Declaration` allows a developer to set a name used to
+explicitly specify constructor to call in :ref:`New Expressions`:
+
+.. code-block:: typescript
+   :linenos:
+
+    class Temperature{
+        // use specified scale:
+        constructor Celsius(n: double)    {/*body1*/}
+        constructor Fahrenheit(n: double) {/*body2*/}
+    }
+
+    new Temperature.Celsius(0)
+    new Temperature.Fahrenheit(32)
+
+If a constructor has a name then the direct application of this constructor in
+the new expression implies explicit usage of the constructor name:
+
+.. code-block:: typescript
+   :linenos:
+
+    class X{
+        constructor ctor1(p: number) {/*body1*/}
+        constructor ctor2(p: string) {/*body2*/}
+    }
+
+    new X(1)      // compile-time error
+    new X("abs")  // compile-time error
+    new X.ctor1(1)      // OK
+    new X.ctor2("abs")  // OK
+
+
+
+The feature is also important for :ref:`Constructor Overload Declarations`.
 
 |
 
@@ -1834,7 +2282,7 @@ The syntax of *function with receiver* is presented below:
    function call
    parameter
    method call
-   mathod call expression
+   method call expression
    argument
    object reference
    function name
@@ -1878,10 +2326,7 @@ called the *receiver type* (see :ref:`Receiver Type`).
 
 If the *receiver type* is a class or interface type, then ``private`` or
 ``protected`` members are not accessible (see :ref:`Accessible`) within the
-body of a *function with receiver*. Only ``public`` and  ``internal`` members
-can be accessed. The ``internal`` members can be accessed only when *function
-with receiver* and its class or interface type are declared in the same
-compilation unit:
+body of a *function with receiver*. Only ``public`` members can be accessed:
 
 .. index::
    keyword this
@@ -1889,7 +2334,6 @@ compilation unit:
    receiver type
    public member
    private member
-   internal member
    protected member
    access
    parameter
@@ -1928,17 +2372,14 @@ overload a method defined for the receiver type:
 
       function foo(this: A) { ... } // Compile-time error
 
-*Function with receiver* can overload a global function of the same name.
-A compile-time error occurs if the signature of a *function with receiver* is
-overload-equivalent (see :ref:`Overload-Equivalent Signatures`) to the function
-so overloaded.
+*Function with receiver* cannot have the same name as a global function,
+otherwise :index:`compile-time error` occurs.
 
 .. code-block:: typescript
    :linenos:
 
       function foo(this: A) { ... }
-      function foo(param: A) { ... } /* Compile-time error as it is a
-                                        non-distinguishable declaration */
+      function foo() { ... } // Compile-time error
 
 *Function with receiver* can be generic as in the following example:
 
@@ -1952,7 +2393,6 @@ so overloaded.
    public method
    overload
    compile-time error
-   overload-equivalent signature
    overloaded function
    receiver type
    generic function
@@ -2254,7 +2694,7 @@ The syntax of *lambda expression with receiver* is presented below:
 .. code-block:: abnf
 
     lambdaExpressionWithReceiver:
-        annotationUsage? typeParameters?
+        annotationUsage?
         '(' receiverParameter (',' lambdaParameterList)? ')'
         returnType? '=>' lambdaBody
         ;
@@ -2282,8 +2722,7 @@ It corresponds to the first parameter:
           console.log(this.name)
       }
 
-There are two syntactical ways how to call lambda as illustrated by the
-example below:
+Lambda can be called in two syntactical ways represented by the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -2306,10 +2745,10 @@ example below:
       foo(aa, (this: A) => { console.log(this.name)} ) // output: "aa" "bb"
 
 **Note**. If *lambda expression with receiver* is declared in a class or
-interface, then the use of ``this`` in a lambda body always refers to the first
-lambda parameter, but not to ``this`` of the surrounding class or interface. And
-any call of such lambda outside of the class has to use ordinary syntax of
-arguments passing as illustrated by the example below:
+interface, then ``this`` use in the lambda body refers to the first lambda
+parameter and not to the surrounding class or interface. Any lambda call
+outside a class has to use the ordinary syntax of arguments as represented by
+the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -2560,391 +2999,32 @@ trailing lambda only. This implies that the value of all skipped arguments is
     foo(1) { return "lambda" }      // 1 undefined lambda
     foo(1, "a") { return "lambda" } // 1 a lambda
 
-
 |
 
-.. _Packages:
+.. _Libraries:
 
-Packages
-********
+Libraries
+*********
 
 .. meta:
-    frontend_status: Partly
-    todo: Implement compiling a package module as a single compilation unit - #16267
+    frontend_status: None
 
-One or more *package modules* form a package.
-
-The syntax of *package* is presented below:
+The syntax of a *library description* is presented below:
 
 .. code-block:: abnf
 
-      packageDeclaration:
-          packageModule+
-          ;
+    libraryDescription:
+        (importDirective|reExportDirective)*
+        ;
 
-*Packages* are stored in a file system or a database (see
+
+*Libraries* are constructed from modules or other libraries. They can control
+what is exported from a library by using the import-and-then-export scheme.
+
+*Libraries* are stored in a file system or a database (see
 :ref:`Compilation Units in Host System`).
 
-A *package* can consist of several package modules if all such modules
-have the same *package header*.
 
-.. index::
-   package module
-   package
-   file system
-   database
-   package header
-   module
-
-The syntax of *package module* is presented below:
-
-
-.. code-block:: abnf
-
-    packageModule:
-        packageHeader packageModuleDeclaration
-        ;
-
-    packageHeader:
-        'package' qualifiedName
-        ;
-
-    packageModuleDeclaration:
-        importDirective* packageModuleDeclaration*
-        ;
-
-    packageModuleDeclaration:
-        packageTopDeclaration | initializerBlock
-        ;
-
-    packageTopDeclaration:
-        ('export' 'default'?)?
-        annotationUsage?
-        ( typeDeclaration
-        | variableDeclarations
-        | packageConstantDeclarations
-        | functionDeclaration
-        | functionWithReceiverDeclaration
-        | accessorWithReceiverDeclaration
-        | namespaceDeclaration
-        | ambientDeclaration
-        )
-        ;
-
-
-A :index:`compile-time error` occurs if:
-
--  *Package module* contains no package header; or
--  Package headers of two package modules in the same package have
-   different identifiers.
-
-Every *package module* can directly use all exported entities from the core
-packages of the standard library (see :ref:`Standard Library Usage`).
-
-A *package module* can directly access all top-level entities declared in all
-modules that constitute the package.
-
-If a top-level declaration in any package module contains an initializer for a
-variable or a constant, then the form of the initializer must be
-*constantExpression*. Otherwise, a :index:`compile-time error` occurs.
-
-Initializer block is to be used for initialization to ensure an explicit order
-of initialization.
-
-.. code-block:: typescript
-   :linenos:
-
-   package P
-     let v1 = foo() // Compile-time error as call to foo() is not a constant expression
-     function foo() { return 1 }
-
-     let v2 = 2 + 3 * 4 // OK
-
-     let v2: number
-     static {
-        v2 = foo() // OK
-     }
-
-A :index:`compile-time error` occurs if a package contains *initializer block*
-in more than one source file.
-
-.. code-block:: typescript
-   :linenos:
-
-      // Source file 1
-      package P
-         static { // P initializer part one
-         }
-         function foo() {}
-         static { // P initializer part two
-         }
-
-
-      // Source file 2
-      package P
-         static {} // compile-time error as initializer in a different source file
-
-
-.. index::
-   package module
-   package header
-   package
-   header
-   module
-   core package
-   top-level entity
-   initializer
-   top-level declaration
-   variable
-   constant
-   block
-   initialization
-
-|
-
-.. _Constants in Packages:
-
-Constants in Packages
-=====================
-
-Constant declarations in packages can be defined without the mandatory
-initializer, and must be initialized in the body of the initializer block
-block (see :ref:`Static Initialization`) before the first use of the constant as
-represented in the example below.
-
-.. code-block:: typescript
-   :linenos:
-
-   package P
-     function foo() { return 1 }
-
-     const c1: number
-     static {
-        c1 = foo() // OK
-     }
-
-The syntax of *package constant declaration* is presented below:
-
-.. code-block:: abnf
-
-    packageConstantDeclaration:
-        identifier ':' type initializer?
-        | identifier initializer
-        ;
-
-.. index::
-   package
-   constant declaration
-   constant
-   initializer
-   block
-
-|
-
-.. _Internal Access Modifier Experimental:
-
-Internal Access Modifier
-========================
-
-.. meta:
-    frontend_status: Partly
-    todo: Implement in libpandafile, implement semantic, now it is parsed and ignored - #16088
-
-The modifier ``internal`` indicates that a class member, a constructor, or
-an interface member is accessible (see :ref:`Accessible`) within its
-compilation unit only. If the compilation unit is a package (see
-:ref:`Packages`), then ``internal`` members can be used in any
-*package module*. If the compilation unit is a separate module (see
-:ref:`Separate Modules`), then ``internal`` members can be used within this
-module.
-
-.. index::
-   internal access modifier
-   access modifier
-   modifier
-   access modifier
-   modifier internal
-   access
-   accessibility
-   compilation unit
-   package
-   separate module
-   internal member
-   class member
-   module
-
-.. code-block:: typescript
-   :linenos:
-
-      class C {
-        internal count: int
-        getCount(): int {
-          return this.count // ok
-        }
-      }
-
-      function increment(c: C) {
-        c.count++ // ok
-      }
-
-
-|
-
-.. _Import and Overloading of Function Names:
-
-Import and Overloading of Function Names
-========================================
-
-.. meta:
-    frontend_status: Done
-
-While importing functions, the following situations can occur:
-
--  Different imported functions have the same name but different signatures, or
-   a function (functions) of the current module and an imported function
-   (functions) have the same name but different signatures. This situation is
-   called *overloading*. All such functions are accessible (see :ref:`Accessible`).
-
--  A function (functions) of the current module and an imported function
-   (functions) have the same name and an overload-equivalent signature (see
-   :ref:`Overload-Equivalent Signatures`). This situation causes a
-   :index:`compile-time error` as declarations are duplicated. Qualified import
-   or alias in import can be used to access the imported entity.
-
-.. index::
-   import
-   function
-   overloading
-   function name
-   function
-   imported function
-   signature
-   module
-   access
-   accessibility
-   overload-equivalent signature
-   declaration
-   qualified import
-   alias
-   imported entity
-
-The two situations are illustrated by the examples below:
-
-.. code-block-meta:
-   skip
-
-.. code-block:: typescript
-   :linenos:
-
-      // Overloading case
-      package P1
-      function foo(p: int) {}
-
-      package P2
-      function foo(p: string) {}
-
-      // Main module
-      import {foo} from "path_to_file_with_P1"
-      import {foo} from "path_to_file_with_P2"
-
-      function foo (p: double) {}
-
-      function main() {
-        foo(5) // Call to P1.foo(int)
-        foo("A string") // Call to P2.foo(string)
-        foo(3.141592653589) // Call to local foo(double)
-      }
-
-      // Declaration duplication case
-      package P1
-         function foo() {}
-      package P2
-         function foo() {}
-      // Main program
-      import {foo} from "path_to_file_with_P1"
-      import {foo} from "path_to_file_with_P2" /* Error: duplicating
-          declarations imported*/
-      function foo() {} /* Error: duplicating declaration identified
-          */
-      function main() {
-        foo() // Error: ambiguous function call
-        // But not a call to local foo()
-        // foo() from P1 and foo() from P2 are not accessible
-      }
-
-|
-
-.. _Generics Experimental:
-
-Generics Experimental
-*********************
-
-.. meta:
-    frontend_status: Done
-
-|
-
-.. _NonNullish Type Parameter:
-
-NonNullish Type Parameter
-=========================
-
-.. meta:
-    frontend_status: Partly
-
-If some generic class has a type parameter with a nullish union type constraint,
-then special syntax can be used for type annotation to get a non-nullish
-version of the type parameter variable. The example below illustrates this
-possibility:
-
-.. index::
-   generic class
-   type parameter
-   nullish union type
-   nullish union
-   constraint
-   type
-   type annotation
-   annotation
-   non-nullish type
-   type parameter
-   variable
-   parameter
-
-.. code-block:: typescript
-   :linenos:
-
-      class A<T> {  // in fact it extends Object|null|undefined
-          foo (p: T): T! { // foo returns non-nullish value of p
-             return p!
-          }
-      }
-
-      class B<T extends SomeType | null> {
-          foo (p: T): T! { // foo returns non-nullish value of p
-             return p!
-          }
-      }
-
-      class C<T extends SomeType | undefined> {
-          foo (p: T): T! { // foo returns non-nullish value of p
-             return p!
-          }
-      }
-
-      let a = new A<Object>
-      let b = new B<SomeType>
-      let c = new C<SomeType>
-
-      let result: Object = new Object  // Type of result is non-nullish !
-      result = a.foo(result)
-      result = b.foo(new SomeType)
-      result = c.foo(new SomeType)
-
-      // All such assignments are type-valid as well
-      result = a.foo(void)      // void! => never
-      result = b.foo(null)      // null! => never
-      result = c.foo(undefined) // undefined! => never
 
 .. raw:: pdf
 

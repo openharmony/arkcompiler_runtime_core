@@ -15,11 +15,10 @@
 
 const CROSS_REFS_NUMBER: number = 10;
 
-function loadStaticVM() {
+function loadStaticVM(): Object {
     let etsVm = requireNapiPreview('ets_interop_js_napi', true);
     if (!etsVm.createRuntime({
         'log-level': 'debug',
-        'load-runtimes': 'ets',
         'log-components': 'ets_interop_js:gc_trigger',
         'boot-panda-files': 'etsstdlib.abc:gc_test_sts_common.abc',
         'gc-trigger-type': 'heap-trigger',

@@ -74,11 +74,11 @@ ani_object StdCoreIntlCreateClusterObject(ani_env *env, [[maybe_unused]] ani_cla
 {
     // Find the cluster class
     ani_class clusterClass;
-    ANI_FATAL_IF_ERROR(env->FindClass("Lstd/core/Intl/Cluster;", &clusterClass));
+    ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.Cluster", &clusterClass));
 
     // Find the constructor method
     ani_method constructorMethod;
-    ANI_FATAL_IF_ERROR(env->Class_FindMethod(clusterClass, "<ctor>", ":V", &constructorMethod));
+    ANI_FATAL_IF_ERROR(env->Class_FindMethod(clusterClass, "<ctor>", ":", &constructorMethod));
 
     // Create a new instance
     ani_object clusterObj;
@@ -133,14 +133,14 @@ ani_boolean IntlCurrentClusterIsWordLike(std::unique_ptr<icu::BreakIterator> &br
  * @return Array of IntlCluster objects representing the segments, nullptr if operation fails
  * @throws RuntimeException if locale creation or break iterator initialization fails
  */
-ani_array_ref IntlClusters(ani_env *env, [[maybe_unused]] ani_class klass, BreakerFactory factory, ani_string str,
-                           ani_string localeStr)
+ani_array IntlClusters(ani_env *env, [[maybe_unused]] ani_class klass, BreakerFactory factory, ani_string str,
+                       ani_string localeStr)
 {
     std::optional<icu::Locale> locale = EtsToLocale(env, localeStr);
     if (!locale) {
         std::string message = "Unable to create ICU locale for specified tag (bcp47): ";
         message += ConvertFromAniString(env, localeStr);
-        ThrowNewError(env, "Lstd/core/RuntimeException;", message.c_str(), "Lstd/core/String;:V");
+        ThrowNewError(env, "std.core.RuntimeException", message.c_str(), "C{std.core.String}:");
         return nullptr;
     }
     icu::Locale breakLocale = locale.value();
@@ -149,7 +149,7 @@ ani_array_ref IntlClusters(ani_env *env, [[maybe_unused]] ani_class klass, Break
     std::unique_ptr<icu::BreakIterator> breaker(factory(breakLocale, status));
     if (UNLIKELY(U_FAILURE(status))) {
         std::string message = "Unable to create break iterator";
-        ThrowNewError(env, "Lstd/core/RuntimeException;", message.c_str(), "Lstd/core/String;:V");
+        ThrowNewError(env, "std.core.RuntimeException", message.c_str(), "C{std.core.String}:");
         return nullptr;
     }
 
@@ -177,15 +177,17 @@ ani_array_ref IntlClusters(ani_env *env, [[maybe_unused]] ani_class klass, Break
 
     // Find cluster class for array creation
     ani_class clusterClass;
-    ANI_FATAL_IF_ERROR(env->FindClass("Lstd/core/Intl/Cluster;", &clusterClass));
+    ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.Cluster", &clusterClass));
 
     // Create array of the correct size
-    ani_array_ref resultArray;
-    ANI_FATAL_IF_ERROR(env->Array_New_Ref(clusterClass, clusters.size(), nullptr, &resultArray));
+    ani_ref undefined {};
+    ANI_FATAL_IF_ERROR(env->GetUndefined(&undefined));
+    ani_array resultArray;
+    ANI_FATAL_IF_ERROR(env->Array_New(clusters.size(), undefined, &resultArray));
 
     // Fill the array with cluster objects
     for (size_t i = 0; i < clusters.size(); ++i) {
-        ANI_FATAL_IF_ERROR(env->Array_Set_Ref(resultArray, i, clusters[i]));
+        ANI_FATAL_IF_ERROR(env->Array_Set(resultArray, i, clusters[i]));
     }
 
     return resultArray;
@@ -199,7 +201,7 @@ ani_array_ref IntlClusters(ani_env *env, [[maybe_unused]] ani_class klass, Break
  * @param localeStr BCP47 language tag string for locale-specific segmentation
  * @return Array of IntlCluster objects representing grapheme clusters
  */
-ani_array_ref StdCoreIntlGraphemeClusters(ani_env *env, ani_class klass, ani_string str, ani_string localeStr)
+ani_array StdCoreIntlGraphemeClusters(ani_env *env, ani_class klass, ani_string str, ani_string localeStr)
 {
     return IntlClusters(env, klass, icu::BreakIterator::createCharacterInstance, str, localeStr);
 }
@@ -212,7 +214,7 @@ ani_array_ref StdCoreIntlGraphemeClusters(ani_env *env, ani_class klass, ani_str
  * @param localeStr BCP47 language tag string for locale-specific segmentation
  * @return Array of IntlCluster objects representing word clusters
  */
-ani_array_ref StdCoreIntlWordClusters(ani_env *env, ani_class klass, ani_string str, ani_string localeStr)
+ani_array StdCoreIntlWordClusters(ani_env *env, ani_class klass, ani_string str, ani_string localeStr)
 {
     return IntlClusters(env, klass, icu::BreakIterator::createWordInstance, str, localeStr);
 }
@@ -225,7 +227,7 @@ ani_array_ref StdCoreIntlWordClusters(ani_env *env, ani_class klass, ani_string 
  * @param localeStr BCP47 language tag string for locale-specific segmentation
  * @return Array of IntlCluster objects representing sentence clusters
  */
-ani_array_ref StdCoreIntlSentenceClusters(ani_env *env, ani_class klass, ani_string str, ani_string localeStr)
+ani_array StdCoreIntlSentenceClusters(ani_env *env, ani_class klass, ani_string str, ani_string localeStr)
 {
     return IntlClusters(env, klass, icu::BreakIterator::createSentenceInstance, str, localeStr);
 }
@@ -238,18 +240,18 @@ ani_array_ref StdCoreIntlSentenceClusters(ani_env *env, ani_class klass, ani_str
 ani_status RegisterIntlSegmenter(ani_env *env)
 {
     const auto methods = std::array {
-        ani_native_function {"graphemeClusters", "Lstd/core/String;Lstd/core/String;:[Lstd/core/Intl/Cluster;",
+        ani_native_function {"graphemeClusters", "C{std.core.String}C{std.core.String}:C{escompat.Array}",
                              reinterpret_cast<void *>(StdCoreIntlGraphemeClusters)},
-        ani_native_function {"wordClusters", "Lstd/core/String;Lstd/core/String;:[Lstd/core/Intl/Cluster;",
+        ani_native_function {"wordClusters", "C{std.core.String}C{std.core.String}:C{escompat.Array}",
                              reinterpret_cast<void *>(StdCoreIntlWordClusters)},
-        ani_native_function {"sentenceClusters", "Lstd/core/String;Lstd/core/String;:[Lstd/core/Intl/Cluster;",
+        ani_native_function {"sentenceClusters", "C{std.core.String}C{std.core.String}:C{escompat.Array}",
                              reinterpret_cast<void *>(StdCoreIntlSentenceClusters)},
     };
 
     ani_class segmenterClass;
-    ANI_FATAL_IF_ERROR(env->FindClass("Lstd/core/Intl/Segmenter;", &segmenterClass));
+    ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.Segmenter", &segmenterClass));
 
-    return env->Class_BindNativeMethods(segmenterClass, methods.data(), methods.size());
+    return env->Class_BindStaticNativeMethods(segmenterClass, methods.data(), methods.size());
 }
 
 }  // namespace ark::ets::stdlib::intl

@@ -18,7 +18,7 @@ package std.core;
 /**
  * Represents boxed int value and related operations
  */
-export final class Int extends Integral implements Comparable<Int>, JSONable<Int> {
+export final class Int extends Integral implements Comparable<Int> {
     private value: int;
 
     /**
@@ -90,10 +90,32 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
     /**
      * Returns value of this instance
      *
+     * Supportive interface
+     *
+     * @returns value as byte
+     */
+    public override byteValue(): byte {
+        return this.toByte();
+    }
+
+    /**
+     * Returns value of this instance
+     *
      * @returns value as short
      */
     public override toShort(): short {
         return this.value.toShort();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * Supportive interface
+     *
+     * @returns value as short
+     */
+    public override shortValue(): short {
+        return this.toShort();
     }
 
     /**
@@ -108,6 +130,17 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
     /**
      * Returns value of this instance
      *
+     * Supportive interface
+     *
+     * @returns value as int
+     */
+    public override intValue(): int {
+        return this.toInt();
+    }
+
+    /**
+     * Returns value of this instance
+     *
      * @returns value as long
      */
     public override toLong(): long {
@@ -117,10 +150,32 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
     /**
      * Returns value of this instance
      *
+     * Supportive interface
+     *
+     * @returns value as long
+     */
+    public override longValue(): long {
+        return this.toLong();
+    }
+
+    /**
+     * Returns value of this instance
+     *
      * @returns value as float
      */
     public override toFloat(): float {
-        return Int.toFloat(this.value);
+        return this.value.toFloat();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * Supportive interface
+     *
+     * @returns value as float
+     */
+    public override floatValue(): float {
+        return this.toFloat();
     }
 
     /**
@@ -130,6 +185,17 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
      */
     public override toDouble(): double {
         return this.value.toDouble();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * Supportive interface
+     *
+     * @returns value as double
+     */
+    public override doubleValue(): double {
+        return this.toDouble();
     }
 
     /**
@@ -238,15 +304,6 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
         return (new Long(this.value)).toString(radix);
     }
 
-    /**
-     * Returns a hash code (integer representation) for this instance
-     *
-     * @returns representation of this instance
-     */
-    public override $_hashCode(): int {
-        return this.value;
-    }
-
     equals(other: NullishType): boolean {
         if (this === other) {
             return true
@@ -345,24 +402,5 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
      */
     public isGreaterEqualThan(other: Int): boolean {
         return this.value >= other.toInt();
-    }
-
-    /**
-     * Creates a Int instance based on JSONValue
-     *
-     * @param json: JSONValue - a JSON representation
-     *
-     * @throws JSONTypeError if json does not encode a valid int
-     *
-     * @returns Int - int value decoded from JSON
-     */
-    public createFromJSONValue(json: JSONValue): Int {
-        if (json instanceof JSONNumber) {
-            let num = (json as JSONNumber).value
-            if (Double.isInteger(num) && Int.MIN_VALUE <= num && num <= Int.MAX_VALUE) {
-                return Int.valueOf(Double.toInt(num))
-            }
-        }
-        throw new JSONTypeError("Cannot create Int from JSON", new ErrorOptions(json as Object))
     }
 }

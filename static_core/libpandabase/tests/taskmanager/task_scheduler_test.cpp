@@ -280,6 +280,7 @@ TEST_F(TaskSchedulerTest, TasksWithMutex)
     gcQueue->WaitTasks();
     jitQueue->WaitTasks();
     for (auto &counter : counters) {
+        os::memory::LockHolder lockHolder(mainMutex);
         ASSERT_EQ(counter, COUNT_OF_TASK) << "seed:" << GetSeed();
     }
     TaskManager::DestroyTaskQueue(gcQueue);

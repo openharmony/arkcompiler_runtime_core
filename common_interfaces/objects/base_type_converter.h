@@ -29,15 +29,5 @@ public:
     // convert JSTaggedValue to BaseType
     virtual BaseType UnWrapTagged(JSTaggedValue value) = 0;
 };
-
-// Type Converter implemented for static vm.
-class StaticTypeConverterInterface {
-public:
-    // convert BaseType to BoxedValue
-    virtual BoxedValue WrapBoxed(BaseType value) = 0;
-
-    // convert BoxedValue to BaseType
-    virtual BaseType UnWrapBoxed(BoxedValue value) = 0;
-};
 }  // namespace common
 #endif  // COMMON_INTERFACES_OBJECTS_BASE_TYPE_CONVERTER_H

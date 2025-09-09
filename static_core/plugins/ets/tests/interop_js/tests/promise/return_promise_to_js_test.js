@@ -71,9 +71,9 @@ function runTest(test, iter) {
 			return;
 		}
 		print('Test passed');
-		clearInterval(tId);
+		helper.clearInterval(tId);
 	};
-	tId = setInterval(callback, 0);
+	tId = helper.setInterval(callback, 0);
 }
 
 let args = helper.getArgv();

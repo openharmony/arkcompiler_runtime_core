@@ -60,7 +60,10 @@ void LowerBoxedBoolean::VisitCompare(GraphVisitor *v, Inst *inst)
         << "Applied LowerBoxedBoolean optimization to Compare with id = " << inst->GetId();
 
     auto graph = inst->GetBasicBlock()->GetGraph();
-    inst->ReplaceUsers(graph->FindOrCreateConstant(0));
+    auto cc = inst->CastToCompare()->GetCc();
+    ASSERT(cc == ConditionCode::CC_NE || cc == ConditionCode::CC_EQ);
+    int value = cc == ConditionCode::CC_NE ? 1 : 0;
+    inst->ReplaceUsers(graph->FindOrCreateConstant(value));
     visitor->SetApplied();
 }
 

@@ -82,8 +82,8 @@ function test3(): number {
         arr[0] = 1;
         arr[1] = 2;
     } catch (e) {
-        assertTrue(e instanceof ArrayIndexOutOfBoundsError, "Throwed not ArrayIndexOutOfBoundsError");
-        assertEQ(arr[0], 1);
+        arktest.assertTrue(e instanceof ArrayIndexOutOfBoundsError, "Throwed not ArrayIndexOutOfBoundsError");
+        arktest.assertEQ(arr[0], 1);
         return 0;
     }
     return 1;
@@ -99,9 +99,9 @@ function test5(a: String, b: String, c: String, d: String, e: String, f: String,
 }
 
 function main() {
-    assertEQ(test1(), 21, "test1 failed");
-    assertEQ(test2(true), 10, "test2 failed");
-    assertEQ(test3(), 0, "test3 failed");
-    assertEQ(test4(), "aBcDaBcD", "test4 failed");
-    assertEQ(test5("a", "B", "c", "D", "a", "B", "c", "D"), "aBcDaBcD", "test5 failed");
+    arktest.assertEQ(test1(), 21, "test1 failed");
+    arktest.assertEQ(test2(true), 10, "test2 failed");
+    arktest.assertEQ(test3(), 0, "test3 failed");
+    arktest.assertEQ(test4(), "aBcDaBcD", "test4 failed");
+    arktest.assertEQ(test5("a", "B", "c", "D", "a", "B", "c", "D"), "aBcDaBcD", "test5 failed");
 }

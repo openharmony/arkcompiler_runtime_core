@@ -20,15 +20,19 @@
       lang_context_class: ark::ets::EtsLanguageContext
       lang_context_header_path: plugins/ets/runtime/ets_language_context.h
       additional_interpter_inl: plugins/ets/runtime/interpreter/interpreter-inl.h
+      entrypoints_header_path: plugins/ets/runtime/ets_entrypoints.h
       language_config:
         lang_type: static
         mt_mode: task
         has_value_object_types: false
+        has_any_insturction_handlers: true
       ctor_name: <ctor>
       cctor_name: <cctor>
 
       directive_name: eTS
       string_class_descriptor: Lstd/core/String;
+      any:
+        handlers_path: plugins/ets/runtime/interpreter/any_opcodes.inc
 
       Intrinsics:
         header: plugins/ets/runtime/intrinsics_declaration.h
@@ -66,6 +70,8 @@
         - plugins_string: plugins/ets/irtoc_scripts/string.irt
         - plugins_to_string_cache: plugins/ets/irtoc_scripts/to_string_cache.irt
         - plugins_typed_arrays: plugins/ets/irtoc_scripts/typed_arrays.irt
+        - plugins_map: plugins/ets/irtoc_scripts/map.irt
+        - plugins_set: plugins/ets/irtoc_scripts/set.irt
 
       Metadatas:
         - RecordMetadata:

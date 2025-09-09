@@ -20,8 +20,8 @@ tags: [negative, compile-only]
 
 function main(): void {
   let a: double = 9223372036854775808;
-  assertEQ(~a, -9223372036854775808);
+  arktest.assertEQ(~a, -9223372036854775808);
 
   let b: double = 9223372036854775809;
-  assertEQ(~b, -9223372036854775808);
+  arktest.assertEQ(~b, -9223372036854775808);
 git}

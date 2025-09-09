@@ -21,9 +21,9 @@
     param_types: {},
     param_list: {},
     method_return_type: long,
-    init_object_data: "[0 as long, 1 as int, -1 as int, Long.MIN_VALUE as long, Long.MAX_VALUE as long]",
+    init_object_data: "[0 as long, 1 as int, -1 as int, Long.MIN_VALUE.toLong(), Long.MAX_VALUE.toLong()]",
     expected_data_type: "FixedArray<long>",
-    expected_test_data: "[0 as long, 1 as long, -1 as long, Long.MIN_VALUE as long, Long.MAX_VALUE as long]",
+    expected_test_data: "[0 as long, 1 as long, -1 as long, Long.MIN_VALUE.toLong(), Long.MAX_VALUE.toLong()]",
     verify_test_result_function: comparePrimitiveValue
   }
 
@@ -38,9 +38,9 @@
     param_types: {},
     param_list: {},
     method_return_type: byte,
-    init_object_data: "[0 as long, 1 as long, Byte.MIN_VALUE as long, Byte.MAX_VALUE as long]",
+    init_object_data: "[0 as long, 1 as long, Byte.MIN_VALUE.toLong(), Byte.MAX_VALUE.toLong()]",
     expected_data_type: "FixedArray<byte>",
-    expected_test_data: "[0 as byte, 1 as byte, Byte.MIN_VALUE as byte, Byte.MAX_VALUE as byte]",
+    expected_test_data: "[0 as byte, 1 as byte, Byte.MIN_VALUE.toByte(), Byte.MAX_VALUE.toByte()]",
     verify_test_result_function: comparePrimitiveValue
   }
 - {
@@ -53,9 +53,9 @@
     param_types: {},
     param_list: {},
     method_return_type: short,
-    init_object_data: "[0 as long, 1 as long, Short.MIN_VALUE as long, Short.MAX_VALUE as long]",
+    init_object_data: "[0 as long, 1 as long, Short.MIN_VALUE.toLong(), Short.MAX_VALUE.toLong()]",
     expected_data_type: "FixedArray<short>",
-    expected_test_data: "[0 as short, 1 as short, Short.MIN_VALUE as short, Short.MAX_VALUE as short]",
+    expected_test_data: "[0 as short, 1 as short, Short.MIN_VALUE.toShort(), Short.MAX_VALUE.toShort()]",
     verify_test_result_function: comparePrimitiveValue
   }
 - {
@@ -68,9 +68,9 @@
     param_types: {},
     param_list: {},
     method_return_type: int,
-    init_object_data: "[0 as long, 1 as long, -1 as long, Int.MIN_VALUE as long, Int.MAX_VALUE as long]",
+    init_object_data: "[0 as long, 1 as long, -1 as long, Int.MIN_VALUE.toLong(), Int.MAX_VALUE.toLong()]",
     expected_data_type: "FixedArray<int>",
-    expected_test_data: "[0 as int, 1 as int, -1 as int, Int.MIN_VALUE as int, Int.MAX_VALUE as int]",
+    expected_test_data: "[0 as int, 1 as int, -1 as int, Int.MIN_VALUE.toInt(), Int.MAX_VALUE.toInt()]",
     verify_test_result_function: comparePrimitiveValue
   }
 - {
@@ -83,9 +83,9 @@
     param_types: {},
     param_list: {},
     method_return_type: long,
-    init_object_data: "[0 as long, 1 as long, -1 as long, Long.MIN_VALUE as long, Long.MAX_VALUE as long]",
+    init_object_data: "[0 as long, 1 as long, -1 as long, Long.MIN_VALUE.toLong(), Long.MAX_VALUE.toLong()]",
     expected_data_type: "FixedArray<long>",
-    expected_test_data: "[0 as long, 1 as long, -1 as long, Long.MIN_VALUE as long, Long.MAX_VALUE as long]",
+    expected_test_data: "[0 as long, 1 as long, -1 as long, Long.MIN_VALUE.toLong(), Long.MAX_VALUE.toLong()]",
     verify_test_result_function: comparePrimitiveValue
   }
 - {
@@ -98,9 +98,9 @@
     param_types: {},
     param_list: {},
     method_return_type: float,
-    init_object_data: "[0 as long, 1 as long, -1 as long, Long.MIN_VALUE as long, Long.MAX_VALUE as long]",
+    init_object_data: "[0 as long, 1 as long, -1 as long, Long.MIN_VALUE.toLong(), Long.MAX_VALUE.toLong()]",
     expected_data_type: "FixedArray<float>",
-    expected_test_data: "[0 as float, 1 as float, -1 as float, Long.MIN_VALUE as float, Long.MAX_VALUE as float]",
+    expected_test_data: "[0 as float, 1 as float, -1 as float, Long.MIN_VALUE.toFloat(), Long.MAX_VALUE.toFloat()]",
     verify_test_result_function: compareFloatPointValue
   }
 - {
@@ -113,13 +113,43 @@
     param_types: {},
     param_list: {},
     method_return_type: double,
-    init_object_data: "[0 as long, 1 as long, -1 as long, Long.MIN_VALUE as long, Long.MAX_VALUE as long]",
+    init_object_data: "[0 as long, 1 as long, -1 as long, Long.MIN_VALUE.toLong(), Long.MAX_VALUE.toLong()]",
     expected_data_type: "FixedArray<double>",
-    expected_test_data: "[0 as double, 1 as double, -1 as double, Long.MIN_VALUE as double, Long.MAX_VALUE as double]",
+    expected_test_data: "[0 as double, 1 as double, -1 as double, Long.MIN_VALUE.toDouble(), Long.MAX_VALUE.toDouble()]",
     verify_test_result_function: compareFloatPointValue
   }
 - {
-    method_name: $_hashCode,
+    method_name: byteValue,
+    object_type: Long,
+    init_object_data_type: "FixedArray<long>",
+    init_object_type: long,
+    init_object_type_nature: primitive,
+    param_init_data_types: {} ,
+    param_types: {},
+    param_list: {},
+    method_return_type: byte,
+    init_object_data: "[0 as long, 1 as long, Byte.MIN_VALUE.toLong(), Byte.MAX_VALUE.toLong()]",
+    expected_data_type: "FixedArray<byte>",
+    expected_test_data: "[0 as byte, 1 as byte, Byte.MIN_VALUE.toByte(), Byte.MAX_VALUE.toByte()]",
+    verify_test_result_function: comparePrimitiveValue
+  }
+- {
+    method_name: shortValue,
+    object_type: Long,
+    init_object_data_type: "FixedArray<long>",
+    init_object_type: long,
+    init_object_type_nature: primitive,
+    param_init_data_types: {} ,
+    param_types: {},
+    param_list: {},
+    method_return_type: short,
+    init_object_data: "[0 as long, 1 as long, Short.MIN_VALUE.toLong(), Short.MAX_VALUE.toLong()]",
+    expected_data_type: "FixedArray<short>",
+    expected_test_data: "[0 as short, 1 as short, Short.MIN_VALUE.toShort(), Short.MAX_VALUE.toShort()]",
+    verify_test_result_function: comparePrimitiveValue
+  }
+- {
+    method_name: intValue,
     object_type: Long,
     init_object_data_type: "FixedArray<long>",
     init_object_type: long,
@@ -128,10 +158,55 @@
     param_types: {},
     param_list: {},
     method_return_type: int,
-    init_object_data: "[0 as long, 1 as long, -1 as long, Int.MIN_VALUE as long, Int.MAX_VALUE as long]",
+    init_object_data: "[0 as long, 1 as long, -1 as long, Int.MIN_VALUE.toLong(), Int.MAX_VALUE.toLong()]",
     expected_data_type: "FixedArray<int>",
-    expected_test_data: '[0 as int, 1 as int, -1 as int, Int.MIN_VALUE as int, Int.MAX_VALUE as int]',
+    expected_test_data: "[0 as int, 1 as int, -1 as int, Int.MIN_VALUE.toInt(), Int.MAX_VALUE.toInt()]",
     verify_test_result_function: comparePrimitiveValue
+  }
+- {
+    method_name: longValue,
+    object_type: Long,
+    init_object_data_type: "FixedArray<long>",
+    init_object_type: long,
+    init_object_type_nature: primitive,
+    param_init_data_types: {} ,
+    param_types: {},
+    param_list: {},
+    method_return_type: long,
+    init_object_data: "[0 as long, 1 as long, -1 as long, Long.MIN_VALUE.toLong(), Long.MAX_VALUE.toLong()]",
+    expected_data_type: "FixedArray<long>",
+    expected_test_data: "[0 as long, 1 as long, -1 as long, Long.MIN_VALUE.toLong(), Long.MAX_VALUE.toLong()]",
+    verify_test_result_function: comparePrimitiveValue
+  }
+- {
+    method_name: floatValue,
+    object_type: Long,
+    init_object_data_type: "FixedArray<long>",
+    init_object_type: long,
+    init_object_type_nature: primitive,
+    param_init_data_types: {} ,
+    param_types: {},
+    param_list: {},
+    method_return_type: float,
+    init_object_data: "[0 as long, 1 as long, -1 as long, Long.MIN_VALUE.toLong(), Long.MAX_VALUE.toLong()]",
+    expected_data_type: "FixedArray<float>",
+    expected_test_data: "[0 as float, 1 as float, -1 as float, Long.MIN_VALUE.toFloat(), Long.MAX_VALUE.toFloat()]",
+    verify_test_result_function: compareFloatPointValue
+  }
+- {
+    method_name: doubleValue,
+    object_type: Long,
+    init_object_data_type: "FixedArray<long>",
+    init_object_type: long,
+    init_object_type_nature: primitive,
+    param_init_data_types: {} ,
+    param_types: {},
+    param_list: {},
+    method_return_type: double,
+    init_object_data: "[0 as long, 1 as long, -1 as long, Long.MIN_VALUE.toLong(), Long.MAX_VALUE.toLong()]",
+    expected_data_type: "FixedArray<double>",
+    expected_test_data: "[0 as double, 1 as double, -1 as double, Long.MIN_VALUE.toDouble(), Long.MAX_VALUE.toDouble()]",
+    verify_test_result_function: compareFloatPointValue
   }
 - {
     method_name: toString,
@@ -143,7 +218,7 @@
     param_types: {},
     param_list: {},
     method_return_type: String,
-    init_object_data: "[0 as long, 1 as long, -1 as long, Long.MIN_VALUE as long, Long.MAX_VALUE as long]",
+    init_object_data: "[0 as long, 1 as long, -1 as long, Long.MIN_VALUE.toLong(), Long.MAX_VALUE.toLong()]",
     expected_data_type: "FixedArray<String>",
     expected_test_data: '["0", "1", "-1", "-9223372036854775808", "9223372036854775807"]',
     verify_test_result_function: compareStringTrivial

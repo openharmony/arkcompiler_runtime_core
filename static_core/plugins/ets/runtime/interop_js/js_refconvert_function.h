@@ -25,22 +25,15 @@ namespace ark::ets::interop::js {
 
 class JSRefConvertFunction : public JSRefConvert {
 public:
-    explicit JSRefConvertFunction(Class *klass) : JSRefConvert(this), klass_ {EtsClass::FromRuntimeClass(klass)}
-    {
-        // function proxy wrapper
-        // it will be lazily created when we need to wrap a function
-        jsFunctionProxyWrapper_ = nullptr;
-    }
+    explicit JSRefConvertFunction(Class *klass);
 
     napi_value WrapImpl(InteropCtx *ctx, EtsObject *obj);
     EtsObject *UnwrapImpl(InteropCtx *ctx, napi_value jsFun);
 
 private:
+    EtsClass *interopDynamicFunctionClass_;
+    EtsMethod *interopCreateDynamicFunctionMethod_;
     EtsClass *klass_;
-    js_proxy::JSProxy *jsFunctionProxyWrapper_;
-
-    void LazyInitJsFunctionProxyWrapper(InteropCtx *ctx);
-    EtsObject *CreateJSFunctionProxy(InteropCtx *ctx, napi_value jsFun);
 };
 
 }  // namespace ark::ets::interop::js

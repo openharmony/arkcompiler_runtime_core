@@ -53,12 +53,12 @@ bitwise_complement:
   - {type: long, origin: -3856, dest:   3855}
   - {type: long,  origin: 9223372036854775807, dest: -9223372036854775808}
 
-  - {type: float, origin: 0.0,  dest:   -1.0}
-  - {type: float, origin: 127.0, dest:   -128.0}
-  - {type: float, origin: 32767.0, dest: -32768.0}
-  - {type: float, origin: 2147483647.0, dest: -2147483648.0}
-  - {type: float, origin: 2147483648.0, dest: -2147483648.0}
-  - {type: float, origin: 2147483649.0, dest: -2147483648.0}
+  - {type: float, origin: 0.0f,  dest:   -1.0f}
+  - {type: float, origin: 127.0f, dest:   -128.0f}
+  - {type: float, origin: 32767.0f, dest: -32768.0f}
+  - {type: float, origin: 2147483647.0f, dest: -2147483648.0f}
+  - {type: float, origin: 2147483648.0f, dest: -2147483648.0f}
+  - {type: float, origin: 2147483649.0f, dest: -2147483648.0f}
 
 
   - {type: double, origin: 0.0,  dest: -1.0}

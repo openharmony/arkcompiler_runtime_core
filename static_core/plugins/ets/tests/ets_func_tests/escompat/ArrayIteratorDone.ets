@@ -14,7 +14,7 @@
  */
 
 function main(): int {
-    let arrayTestsuite = new ArkTestsuite("arrayTestsuite");
+    let arrayTestsuite = new arktest.ArkTestsuite("arrayTestsuite");
     arrayTestsuite.addTest("valuesDoneStrTest", valuesDoneStrTest);
     arrayTestsuite.addTest("entriesDoneStrTest", entriesDoneStrTest);
 
@@ -28,15 +28,15 @@ function valuesDoneStrTest() {
     let iterator = array.values();
     array.push("a");
     let result = iterator.next();
-    assertEQ(result.done, false, 'First result `done` flag for values() of Array<string>');
-    assertEQ(result.value, "a", 'First result `value` for values() of Array<string>');
+    arktest.assertEQ(result.done, false, 'First result `done` flag for values() of Array<string>');
+    arktest.assertEQ(result.value, "a", 'First result `value` for values() of Array<string>');
     result = iterator.next();
-    assertEQ(result.done, true, 'Exhausted result `done` flag for values() of Array<string>');
-    assertEQ(result.value, undefined, 'Exhausted result `value` for values() of Array<string>');
+    arktest.assertEQ(result.done, true, 'Exhausted result `done` flag for values() of Array<string>');
+    arktest.assertEQ(result.value, undefined, 'Exhausted result `value` for values() of Array<string>');
     array.push("b");
     result = iterator.next();
-    assertEQ(result.done, true, 'Exhausted result `done` flag after push for values() of Array<string>');
-    assertEQ(result.value, undefined, 'Exhausted result `value` after push for values() of Array<string>');
+    arktest.assertEQ(result.done, true, 'Exhausted result `done` flag after push for values() of Array<string>');
+    arktest.assertEQ(result.value, undefined, 'Exhausted result `value` after push for values() of Array<string>');
 }
 
 function entriesDoneStrTest() {
@@ -44,16 +44,16 @@ function entriesDoneStrTest() {
     let iterator = array.entries();
     array.push("a");
     let result  = iterator.next();
-    assertEQ(result.done, false, 'First result `done` flag for entries() of Array<string>');
-    assertEQ(result.value![0], 0 , 'First result `value` for entries() of Array<string>');
-    assertEQ(result.value![1], "a", 'First result `value` for entries() of Array<string>');
+    arktest.assertEQ(result.done, false, 'First result `done` flag for entries() of Array<string>');
+    arktest.assertEQ(result.value![0], 0 , 'First result `value` for entries() of Array<string>');
+    arktest.assertEQ(result.value![1], "a", 'First result `value` for entries() of Array<string>');
     result = iterator.next();
-    assertEQ(result.done, true, 'Exhausted result `done` flag for entries() of Array<string>');
-    assertEQ(result.value, undefined, 'Exhausted result `value` for entries() of Array<string>');
+    arktest.assertEQ(result.done, true, 'Exhausted result `done` flag for entries() of Array<string>');
+    arktest.assertEQ(result.value, undefined, 'Exhausted result `value` for entries() of Array<string>');
     array.push("b");
     result = iterator.next();
-    assertEQ(result.done, true, 'Exhausted result `done` flag after push for entries() of Array<string>');
-    assertEQ(result.value, undefined, 'Exhausted result `value` after push for entries() of Array<string>');
+    arktest.assertEQ(result.done, true, 'Exhausted result `done` flag after push for entries() of Array<string>');
+    arktest.assertEQ(result.value, undefined, 'Exhausted result `value` after push for entries() of Array<string>');
 }
 
 class MyObject {
@@ -77,20 +77,20 @@ function valuesDoneObjTest() {
     let array = new Array<MyObject>(obj1, obj2);
     let iterator = array.values();
     let result = iterator.next();
-    assertEQ(result.done, false, 'First result `done` flag for values() of Array<Object>');
-    assertEQ(result.value!.getA(), 1, 'First result `value.a` for values() of Array<Object>');
-    assertEQ(result.value!.getB(), 1.1, 'First result `value.b` for values() of Array<Object>');
+    arktest.assertEQ(result.done, false, 'First result `done` flag for values() of Array<Object>');
+    arktest.assertEQ(result.value!.getA(), 1, 'First result `value.a` for values() of Array<Object>');
+    arktest.assertEQ(result.value!.getB(), 1.1, 'First result `value.b` for values() of Array<Object>');
     result = iterator.next();
-    assertEQ(result.done, false, 'Second result `done` flag for values() of Array<Object>');
-    assertEQ(result.value!.getA(), 2, 'Second result `value.a` for values() of Array<Object>');
-    assertEQ(result.value!.getB(), 2.2, 'Second result `value.b` for values() of Array<Object>');
+    arktest.assertEQ(result.done, false, 'Second result `done` flag for values() of Array<Object>');
+    arktest.assertEQ(result.value!.getA(), 2, 'Second result `value.a` for values() of Array<Object>');
+    arktest.assertEQ(result.value!.getB(), 2.2, 'Second result `value.b` for values() of Array<Object>');
     result = iterator.next();
-    assertEQ(result.done, true, 'Exhausted result `done` flag for values() of Array<Object>');
-    assertEQ(result.value, undefined, 'Exhausted result `value` for values() of Array<Object>');
+    arktest.assertEQ(result.done, true, 'Exhausted result `done` flag for values() of Array<Object>');
+    arktest.assertEQ(result.value, undefined, 'Exhausted result `value` for values() of Array<Object>');
     array.push(new MyObject(3, 3.3));
     result = iterator.next();
-    assertEQ(result.done, true, 'Exhausted result `done` flag after push for values() of Array<Object>');
-    assertEQ(result.value, undefined, 'Exhausted result `value` after push for values() of Array<Object>');
+    arktest.assertEQ(result.done, true, 'Exhausted result `done` flag after push for values() of Array<Object>');
+    arktest.assertEQ(result.value, undefined, 'Exhausted result `value` after push for values() of Array<Object>');
 }
 
 function entriesDoneObjTest() {
@@ -99,20 +99,20 @@ function entriesDoneObjTest() {
     let array = new Array<MyObject>(obj1, obj2);
     let iterator = array.entries();
     let result = iterator.next();
-    assertEQ(result.done, false, 'First result `done` flag for entries() of Array<Object>');
-    assertEQ(result.value![0], 0 , 'First result `value[0]` for entries() of Array<Object>');
-    assertEQ(result.value![1].getA(), 1, 'First result `value[1].a` for entries() of Array<Object>');
-    assertEQ(result.value![1].getB(), 1.1, 'First result `value[1].b` for entries() of Array<Object>');
+    arktest.assertEQ(result.done, false, 'First result `done` flag for entries() of Array<Object>');
+    arktest.assertEQ(result.value![0], 0 , 'First result `value[0]` for entries() of Array<Object>');
+    arktest.assertEQ(result.value![1].getA(), 1, 'First result `value[1].a` for entries() of Array<Object>');
+    arktest.assertEQ(result.value![1].getB(), 1.1, 'First result `value[1].b` for entries() of Array<Object>');
     result = iterator.next();
-    assertEQ(result.done, false, 'Second result `done` flag for entries() of Array<Object>');
-    assertEQ(result.value![0], 1 , 'Second result `value[0]` for entries() of Array<Object>');
-    assertEQ(result.value![1].getA(), 2, 'Second result `value[1].a` for entries() of Array<Object>');
-    assertEQ(result.value![1].getB(), 2.2, 'Second result `value[1].b` for entries() of Array<Object>');
+    arktest.assertEQ(result.done, false, 'Second result `done` flag for entries() of Array<Object>');
+    arktest.assertEQ(result.value![0], 1 , 'Second result `value[0]` for entries() of Array<Object>');
+    arktest.assertEQ(result.value![1].getA(), 2, 'Second result `value[1].a` for entries() of Array<Object>');
+    arktest.assertEQ(result.value![1].getB(), 2.2, 'Second result `value[1].b` for entries() of Array<Object>');
     result = iterator.next();
-    assertEQ(result.done, true, 'Exhausted result `done` flag for entries() of Array<Object>');
-    assertEQ(result.value, undefined, 'Exhausted result `value` for entries() of Array<Object>');
+    arktest.assertEQ(result.done, true, 'Exhausted result `done` flag for entries() of Array<Object>');
+    arktest.assertEQ(result.value, undefined, 'Exhausted result `value` for entries() of Array<Object>');
     array.push(new MyObject(3, 3.3));
     result = iterator.next();
-    assertEQ(result.done, true, 'Exhausted result `done` flag after push for entries() of Array<Object>');
-    assertEQ(result.value, undefined, 'Exhausted result `value` after push for entries() of Array<Object>');
+    arktest.assertEQ(result.done, true, 'Exhausted result `done` flag after push for entries() of Array<Object>');
+    arktest.assertEQ(result.value, undefined, 'Exhausted result `value` after push for entries() of Array<Object>');
 }

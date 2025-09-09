@@ -26,7 +26,7 @@
 //! METHOD        "cleanup_call_inlined.ETSGLOBAL::test_after_escape"
 //! PASS_AFTER    "Inline"
 //! INST_COUNT    /Call.*Inlined/, 9
-//! INST_COUNT    /ReturnInlined/, 13
+//! INST_COUNT    /ReturnInlined/, 11
 //! PASS_AFTER    "EscapeAnalysis"
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_NOT      /Inlined/

@@ -14,7 +14,7 @@
  */
 
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
-
+#include "objects/string/base_string-inl.h"
 #include "include/method.h"
 #include "include/thread_scopes.h"
 #include "libpandabase/macros.h"
@@ -24,6 +24,7 @@
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/ets_vm.h"
+#include "plugins/ets/runtime/ets_vtable_builder.h"
 #include "plugins/ets/runtime/napi/ets_napi_helpers.h"
 #include "plugins/ets/runtime/types/ets_abc_runtime_linker.h"
 #include "plugins/ets/runtime/types/ets_method.h"
@@ -86,6 +87,7 @@ static std::string_view GetClassLinkerErrorDescriptor(ClassLinker::Error error)
         case ClassLinker::Error::OVERRIDES_FINAL:
         case ClassLinker::Error::MULTIPLE_OVERRIDE:
         case ClassLinker::Error::MULTIPLE_IMPLEMENT:
+        case ClassLinker::Error::INVALID_CLASS_OVERLOAD:
             return panda_file_items::class_descriptors::LINKER_METHOD_CONFLICT_ERROR;
         default:
             LOG(FATAL, CLASS_LINKER) << "Unhandled class linker error (" << helpers::ToUnderlying(error) << "): ";
@@ -133,6 +135,101 @@ void EtsClassLinkerExtension::InitializeClassRoots()
                              utf::Mutf8AsCString(langCtx_.GetStringArrayClassDescriptor()));
 }
 
+Class *EtsClassLinkerExtension::CreateStringSubClass(const uint8_t *descriptor, Class *stringClass, ClassRoot type)
+{
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    ClassLinkerContext *context = stringClass->GetLoadContext();
+
+    uint32_t accessFlags = stringClass->GetAccessFlags() | ACC_FINAL;
+
+    Span<Field> fields {};
+    Span<Method> methodsSpan {};
+    Span<Class *> interfacesSpan {};
+    Class *subClass = classLinker->BuildClass(descriptor, true, accessFlags, methodsSpan, fields, stringClass,
+                                              interfacesSpan, context, false);
+
+    subClass->SetState(Class::State::INITIALIZING);
+    subClass->SetStringClass();
+    switch (type) {
+        case ClassRoot::LINE_STRING: {
+            subClass->SetLineStringClass();
+            break;
+        }
+
+        case ClassRoot::SLICED_STRING: {
+            // used for gc
+            subClass->SetSlicedStringClass();
+            subClass->SetRefFieldsNum(common::SlicedString::REF_FIELDS_COUNT, false);
+            subClass->SetRefFieldsOffset(common::SlicedString::PARENT_OFFSET, false);
+            (static_cast<BaseClass *>(subClass))->SetObjectSize(common::SlicedString::SIZE);
+            break;
+        }
+
+        case ClassRoot::TREE_STRING: {
+            // used for gc
+            subClass->SetTreeStringClass();
+            subClass->SetRefFieldsNum(common::TreeString::REF_FIELDS_COUNT, false);
+            subClass->SetRefFieldsOffset(common::TreeString::LEFT_OFFSET, false);
+            (static_cast<BaseClass *>(subClass))->SetObjectSize(common::TreeString::SIZE);
+            break;
+        }
+
+        default:
+            UNREACHABLE();
+    }
+
+    subClass->SetState(Class::State::INITIALIZED);
+    return subClass;
+}
+
+const uint8_t *EtsClassLinkerExtension::GetStringClassDescriptor(ClassRoot strCls)
+{
+    switch (strCls) {
+        case ClassRoot::LINE_STRING:
+            return utf::CStringAsMutf8(panda_file_items::class_descriptors::LINE_STRING.data());
+
+        case ClassRoot::SLICED_STRING:
+            return utf::CStringAsMutf8(panda_file_items::class_descriptors::SLICED_STRING.data());
+
+        case ClassRoot::TREE_STRING:
+            return utf::CStringAsMutf8(panda_file_items::class_descriptors::TREE_STRING.data());
+
+        default:
+            UNREACHABLE();
+    }
+}
+
+bool EtsClassLinkerExtension::InitializeStringClass([[maybe_unused]] Class *classClass)
+{
+    // 1. create StringClass
+    auto *strCls = GetClassLinker()->GetClass(langCtx_.GetStringClassDescriptor(), false, GetBootContext());
+    if (strCls == nullptr) {
+        LOG(ERROR, CLASS_LINKER) << "Cannot create string class '" << langCtx_.GetStringClassDescriptor() << "'";
+        return false;
+    }
+    strCls->RemoveFinal();
+    strCls->SetStringClass();
+    EtsClass::FromRuntimeClass(strCls)->AsObject()->GetCoreType()->SetClass(classClass);
+    SetClassRoot(ClassRoot::STRING, strCls);
+
+    // 2. create LineStringClass / SlicedStringClass / TreeStringClass
+    auto first = static_cast<int>(ClassRoot::LINE_STRING);
+    auto last = static_cast<int>(ClassRoot::TREE_STRING);
+    for (auto i = first; i <= last; i++) {
+        auto flag = static_cast<ClassRoot>(i);
+        auto *cls = CreateStringSubClass(GetStringClassDescriptor(flag), strCls, flag);
+        if (cls == nullptr) {
+            LOG(ERROR, CLASS_LINKER) << "Cannot create sub string class '" << GetStringClassDescriptor(flag) << "'";
+            return false;
+        }
+        cls->SetFinal();
+        EtsClass::FromRuntimeClass(cls)->AsObject()->GetCoreType()->SetClass(classClass);
+        SetClassRoot(flag, cls);
+    }
+
+    return true;
+}
+
 bool EtsClassLinkerExtension::InitializeImpl(bool compressedStringEnabled)
 {
     // NOLINTNEXTLINE(google-build-using-namespace)
@@ -152,7 +249,7 @@ bool EtsClassLinkerExtension::InitializeImpl(bool compressedStringEnabled)
 
     auto *classClass = GetClassLinker()->GetClass(langCtx_.GetClassClassDescriptor(), false, GetBootContext());
     if (classClass == nullptr) {
-        LOG(ERROR, CLASS_LINKER) << "Cannot create class '" << langCtx_.GetClassClassDescriptor() << "'";
+        LOG(ERROR, CLASS_LINKER) << "Cannot create class class '" << langCtx_.GetClassClassDescriptor() << "'";
         return false;
     }
     SetClassRoot(ClassRoot::CLASS, classClass);
@@ -162,16 +259,19 @@ bool EtsClassLinkerExtension::InitializeImpl(bool compressedStringEnabled)
 
     coretypes::String::SetCompressedStringsEnabled(compressedStringEnabled);
 
-    auto *stringClass = GetClassLinker()->GetClass(langCtx_.GetStringClassDescriptor(), false, GetBootContext());
-    if (stringClass == nullptr) {
-        LOG(ERROR, CLASS_LINKER) << "Cannot create class '" << langCtx_.GetStringClassDescriptor() << "'";
+    // Set String Classes
+    if (!InitializeStringClass(classClass)) {
+        LOG(ERROR, CLASS_LINKER) << "Cannot create String classes";
         return false;
     }
-    SetClassRoot(ClassRoot::STRING, stringClass);
-    stringClass->SetStringClass();
 
+    auto *jsValueClass = GetClassLinker()->GetClass(utf::CStringAsMutf8(JS_VALUE.data()), false, GetBootContext());
+    if (jsValueClass == nullptr) {
+        LOG(ERROR, CLASS_LINKER) << "Cannot create class '" << JS_VALUE << "'";
+        return false;
+    }
+    jsValueClass->SetXRefClass();
     InitializeClassRoots();
-
     return true;
 }
 
@@ -201,6 +301,21 @@ bool EtsClassLinkerExtension::InitializeArrayClass(Class *arrayClass, Class *com
     arrayClass->SetState(Class::State::INITIALIZED);
 
     ASSERT(arrayClass->IsArrayClass());  // After init, we give out a well-formed array class.
+    return true;
+}
+
+bool EtsClassLinkerExtension::InitializeUnionClass(Class *unionClass, Span<Class *> constituentClasses)
+{
+    ASSERT(IsInitialized());
+
+    ASSERT(!unionClass->IsInitialized());
+    ASSERT(unionClass->GetConstituentTypes().begin() == nullptr);
+
+    unionClass->SetBase(nullptr);
+    unionClass->SetConstituentTypes(constituentClasses);
+    unionClass->SetState(Class::State::INITIALIZED);
+
+    ASSERT(unionClass->IsUnionClass());  // After init, we give out a well-formed union class.
     return true;
 }
 
@@ -270,6 +385,9 @@ size_t EtsClassLinkerExtension::GetClassVTableSize(ClassRoot root)
             return GetArrayClassVTableSize();
         case ClassRoot::OBJECT:
         case ClassRoot::STRING:
+        case ClassRoot::LINE_STRING:
+        case ClassRoot::SLICED_STRING:
+        case ClassRoot::TREE_STRING:
             return GetClassRoot(root)->GetVTableSize();
         case ClassRoot::CLASS:
             return 0;
@@ -319,6 +437,9 @@ size_t EtsClassLinkerExtension::GetClassIMTSize(ClassRoot root)
         case ClassRoot::OBJECT:
         case ClassRoot::CLASS:
         case ClassRoot::STRING:
+        case ClassRoot::LINE_STRING:
+        case ClassRoot::SLICED_STRING:
+        case ClassRoot::TREE_STRING:
             return 0;
         default: {
             break;
@@ -366,6 +487,9 @@ size_t EtsClassLinkerExtension::GetClassSize(ClassRoot root)
         case ClassRoot::OBJECT:
         case ClassRoot::CLASS:
         case ClassRoot::STRING:
+        case ClassRoot::LINE_STRING:
+        case ClassRoot::SLICED_STRING:
+        case ClassRoot::TREE_STRING:
             return Class::ComputeClassSize(GetClassVTableSize(root), GetClassIMTSize(root), 0, 0, 0, 0, 0, 0);
         default: {
             break;
@@ -463,6 +587,7 @@ void EtsClassLinkerExtension::FreeClass(Class *klass)
 {
     ASSERT(IsInitialized());
 
+    EtsClass::FromRuntimeClass(klass)->RemoveOverloadMap();
     RemoveCreatedClass(klass);
 }
 
@@ -584,22 +709,23 @@ void EtsClassLinkerExtension::InitializeBuiltinSpecialClasses()
     using namespace panda_file_items::class_descriptors;
 
     CacheClass(STRING, [](auto *c) { c->SetValueTyped(); });
+    CacheClass(LINE_STRING, [](auto *c) { c->SetValueTyped(); });
+    CacheClass(SLICED_STRING, [](auto *c) { c->SetValueTyped(); });
+    CacheClass(TREE_STRING, [](auto *c) { c->SetValueTyped(); });
     CacheClass(NULL_VALUE, [](auto *c) {
         c->SetNullValue();
         c->SetValueTyped();
     });
-    auto const setupBoxedFlags = [](EtsClass *c) {
-        c->SetBoxed();
-        c->SetValueTyped();
-    };
-    CacheClass(BOX_BOOLEAN, setupBoxedFlags);
-    CacheClass(BOX_BYTE, setupBoxedFlags);
-    CacheClass(BOX_CHAR, setupBoxedFlags);
-    CacheClass(BOX_SHORT, setupBoxedFlags);
-    CacheClass(BOX_INT, setupBoxedFlags);
-    CacheClass(BOX_LONG, setupBoxedFlags);
-    CacheClass(BOX_FLOAT, setupBoxedFlags);
-    CacheClass(BOX_DOUBLE, setupBoxedFlags);
+
+    CacheClass(BOX_BOOLEAN, [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::BOOLEAN); });
+    CacheClass(BOX_BYTE, [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::BYTE); });
+    CacheClass(BOX_CHAR, [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::CHAR); });
+    CacheClass(BOX_SHORT, [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::SHORT); });
+    CacheClass(BOX_INT, [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::INT); });
+    CacheClass(BOX_LONG, [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::LONG); });
+    CacheClass(BOX_FLOAT, [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::FLOAT); });
+    CacheClass(BOX_DOUBLE, [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::DOUBLE); });
+
     CacheClass(BIG_INT, [](auto *c) {
         c->SetBigInt();
         c->SetValueTyped();
@@ -624,18 +750,22 @@ void EtsClassLinkerExtension::InitializeBuiltinClasses()
 
     InitializeBuiltinSpecialClasses();
 
-    plaformTypes_ = PandaUniquePtr<EtsPlatformTypes>(
-        Runtime::GetCurrent()->GetInternalAllocator()->New<EtsPlatformTypes>(EtsCoroutine::GetCurrent()));
+    auto *coro = EtsCoroutine::GetCurrent();
+    plaformTypes_ =
+        PandaUniquePtr<EtsPlatformTypes>(Runtime::GetCurrent()->GetInternalAllocator()->New<EtsPlatformTypes>(coro));
 
     // NOTE (electronick, #15938): Refactor the managed class-related pseudo TLS fields
     // initialization in MT ManagedThread ctor and EtsCoroutine::Initialize
-    auto coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
     coro->SetPromiseClass(GetPlatformTypes()->corePromise->GetRuntimeClass());
     coro->SetJobClass(GetPlatformTypes()->coreJob->GetRuntimeClass());
-    coro->SetStringClassPtr(GetClassRoot(ClassRoot::STRING));
+    coro->SetStringClassPtr(GetClassRoot(ClassRoot::LINE_STRING));
     coro->SetArrayU16ClassPtr(GetClassRoot(ClassRoot::ARRAY_U16));
     coro->SetArrayU8ClassPtr(GetClassRoot(ClassRoot::ARRAY_U8));
+}
+
+void EtsClassLinkerExtension::InitializeFinish()
+{
+    plaformTypes_->InitializeClasses(EtsCoroutine::GetCurrent());
 }
 
 static EtsRuntimeLinker *GetEtsRuntimeLinker(ClassLinkerContext *ctx)
@@ -709,6 +839,79 @@ ClassLinkerContext *EtsClassLinkerExtension::CreateApplicationClassLinkerContext
     ClassLinkerContext *ctx = PandaEtsVM::GetCurrent()->CreateApplicationRuntimeLinker(path);
     ASSERT(ctx != nullptr);
     return ctx;
+}
+
+/* static */
+ClassLinkerContext *EtsClassLinkerExtension::GetParentContext(ClassLinkerContext *ctx)
+{
+    auto *linker = GetOrCreateEtsRuntimeLinker(ctx);
+    auto *abcRuntimeLinker = EtsAbcRuntimeLinker::FromEtsObject(linker);
+    auto *parentLinker = abcRuntimeLinker->GetParentLinker();
+    return parentLinker->GetClassLinkerContext();
+}
+
+ClassLinkerContext *EtsClassLinkerExtension::GetCommonContext(Span<Class *> classes) const
+{
+    ASSERT(!classes.Empty());
+    auto *commonCtx = classes[0]->GetLoadContext();
+
+    size_t foundClassesNum = 0;
+    while (!commonCtx->IsBootContext()) {
+        for (auto *klass : classes) {
+            if (commonCtx->FindClass(klass->GetDescriptor()) != nullptr) {
+                foundClassesNum++;
+            }
+        }
+        if (foundClassesNum == classes.Size()) {
+            break;
+        }
+        commonCtx = GetParentContext(commonCtx);
+    }
+    return commonCtx;
+}
+
+const uint8_t *EtsClassLinkerExtension::ComputeLUB(const ClassLinkerContext *ctx, const uint8_t *descriptor)
+{
+    // Union descriptor format: '{' 'U' TypeDescriptor+ '}'
+    RefTypeLink lub(ctx, nullptr);
+    auto idx = 2;
+    // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    while (descriptor[idx] != '}') {
+        auto typeSp = ClassHelper::GetUnionComponent(&(descriptor[idx]));
+        if (ClassHelper::IsPrimitive(typeSp.begin()) || ClassHelper::IsArrayDescriptor(typeSp.begin())) {
+            // NOTE(aantipina): Process arrays:
+            // compute GetClosestCommonAncestor for component type, lub = GetClosestCommonAncestor[]
+            return langCtx_.GetObjectClassDescriptor();
+        }
+        idx += typeSp.Size();
+
+        PandaString typeDescCopy(utf::Mutf8AsCString(typeSp.Data()), typeSp.Size());
+        auto [typePf, typeClassId] = GetClassInfo(ctx, utf::CStringAsMutf8(typeDescCopy.c_str()));
+
+        if (lub.GetDescriptor() == nullptr) {
+            lub = RefTypeLink(ctx, typePf, typeClassId);
+            continue;
+        }
+
+        auto type = RefTypeLink(ctx, typePf, typeClassId);
+        if (RefTypeLink::AreEqual(lub, type)) {
+            continue;
+        }
+
+        if (ClassHelper::IsReference(type.GetDescriptor()) && ClassHelper::IsReference(lub.GetDescriptor())) {
+            auto lubDescOpt = GetClosestCommonAncestor(GetClassLinker(), ctx, lub, type);
+            if (!lubDescOpt.has_value()) {
+                return langCtx_.GetObjectClassDescriptor();
+            }
+            lub = lubDescOpt.value();
+            continue;
+        }
+
+        return langCtx_.GetObjectClassDescriptor();
+    }
+    // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+
+    return lub.GetDescriptor();
 }
 
 }  // namespace ark::ets

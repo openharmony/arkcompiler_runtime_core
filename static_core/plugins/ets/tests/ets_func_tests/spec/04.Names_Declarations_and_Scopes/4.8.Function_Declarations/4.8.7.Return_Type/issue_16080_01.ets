@@ -40,8 +40,8 @@ class Foo {
 function main(): void {
   let foo = new Foo()
 
-  assertEQ( foo.barString(), "barString")
-  assertEQ( foo.barNumber(), 0)
-  assertEQ( foo.barBoolean(), true)
-  assertEQ( foo.barFloat(), 0.0f)
+  arktest.assertEQ( foo.barString(), "barString")
+  arktest.assertEQ( foo.barNumber(), 0)
+  arktest.assertEQ( foo.barBoolean(), true)
+  arktest.assertEQ( foo.barFloat(), 0.0f)
 }

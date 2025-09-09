@@ -27,7 +27,7 @@ class Thenable implements PromiseLike<string> {
 
 let error = new Error();
 let thenable = new Thenable(error);
-Promise.race([thenable]).then<void, void>((value: string): void => {
+Promise.race<string>([thenable]).then<void, void>((value): void => {
     console.log('Test failed. The promise should not be resolved.');
 }, (err: Error): void => {
     if (err != error) {

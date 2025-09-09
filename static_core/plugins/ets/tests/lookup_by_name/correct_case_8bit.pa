@@ -35,16 +35,16 @@
     return.void
 }
 
-.record $NamedAccessMeta-i8 {
+.record %%union_prop-i8 {
     i8 bar
     i8 baz
 }
 
 .function i32 test(std.core.Object a0, std.core.Object a1) {
-    ets.ldobj.name a0, $NamedAccessMeta-i8.baz
+    ets.ldobj.name a0, %%union_prop-i8.baz
     movi v0, 5
     add2 v0
-    ets.stobj.name a1, $NamedAccessMeta-i8.bar
+    ets.stobj.name a1, %%union_prop-i8.bar
     return
 }
 

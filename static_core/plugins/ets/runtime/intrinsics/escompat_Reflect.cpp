@@ -31,6 +31,10 @@ extern "C" EtsBoolean IsLiteralInitializedInterfaceImpl(EtsObject *target)
 
     auto *etsClass = target->GetClass();
     auto *runtimeClass = etsClass->GetRuntimeClass();
+    if (runtimeClass->GetPandaFile() == nullptr) {
+        return ToEtsBoolean(false);
+    }
+
     const panda_file::File &pf = *runtimeClass->GetPandaFile();
     panda_file::ClassDataAccessor cda(pf, runtimeClass->GetFileId());
     bool retBoolVal = false;

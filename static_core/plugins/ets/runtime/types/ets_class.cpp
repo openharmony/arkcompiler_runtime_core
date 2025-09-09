@@ -79,6 +79,176 @@ static void FunctionalReferenceAnnotationCallBack(EtsClass *etsClass, const pand
     }
 }
 
+static void ReportInvalidClassOverload(const uint8_t *descriptor, ClassLinkerErrorHandler *errorHandler)
+{
+    if (errorHandler != nullptr) {
+        PandaStringStream ss;
+        ss << "Found invalid class overload " << descriptor;
+        errorHandler->OnError(ClassLinker::Error::INVALID_CLASS_OVERLOAD, ss.str());
+    }
+}
+
+PandaVector<EtsMethod *> EtsClass::ProcessOverloadAnnotation(const panda_file::File *pfile,
+                                                             panda_file::ArrayValue &overloadArray)
+{
+    PandaVector<EtsMethod *> overloadDeclRecords;
+    const uint32_t methodCount = overloadArray.GetCount();
+    auto link = Runtime::GetCurrent()->GetClassLinker();
+
+    overloadDeclRecords.reserve(methodCount);
+
+    for (uint32_t i = 0; i < methodCount; i++) {
+        auto implMethod = overloadArray.Get<panda_file::File::EntityId>(i);
+        auto methodId = panda_file::File::EntityId(implMethod.GetOffset());
+        panda_file::MethodDataAccessor methodDataAccessor(*pfile, methodId);
+        auto method = EtsMethod::FromRuntimeMethod(link->GetMethod(GetRuntimeClass(), methodDataAccessor, nullptr));
+        if (method == nullptr) {
+            overloadDeclRecords.clear();
+            break;
+        }
+        overloadDeclRecords.emplace_back(method);
+    }
+
+    return overloadDeclRecords;
+}
+
+bool EtsClass::FunctionalOverloadAnnotationCallBack(const panda_file::File *pfile,
+                                                    panda_file::AnnotationDataAccessor *ada,
+                                                    ClassLinkerErrorHandler *errorHandler)
+{
+    const uint32_t annotationCount = ada->GetCount();
+    if (annotationCount == 0) {
+        ReportInvalidClassOverload(utf::CStringAsMutf8(GetDescriptor()), errorHandler);
+        return false;
+    }
+    ASSERT(Runtime::GetCurrent() != nullptr && Runtime::GetCurrent()->GetClassLinker() != nullptr);
+    auto allocator = Runtime::GetCurrent()->GetClassLinker()->GetAllocator();
+    auto overloadMap = allocator->New<PandaUnorderedMap<OverloadKey, PandaVector<EtsMethod *>, OverloadKeyHash>>();
+    SetOverloadMap(reinterpret_cast<EtsLong>(overloadMap));
+    overloadMap->reserve(annotationCount);
+
+    for (uint32_t i = 0; i < annotationCount; i++) {
+        auto elem = ada->GetElement(i);
+        auto nameData = pfile->GetStringData(elem.GetNameId());
+        auto overloadName = PandaString(utf::Mutf8AsCString(nameData.data));
+        auto overloadArray = elem.GetArrayValue();
+        if (overloadArray.GetCount() == 0) {
+            ReportInvalidClassOverload(utf::CStringAsMutf8(GetDescriptor()), errorHandler);
+            return false;
+        }
+        auto overloadDeclRecords = ProcessOverloadAnnotation(pfile, overloadArray);
+        if (overloadDeclRecords.empty()) {
+            ReportInvalidClassOverload(utf::CStringAsMutf8(GetDescriptor()), errorHandler);
+            return false;
+        }
+        auto firstMethod = overloadDeclRecords.front();
+        auto overloadKey = OverloadKey(overloadName, firstMethod->IsStatic());
+        if (overloadMap->find(overloadKey) != overloadMap->end()) {
+            ReportInvalidClassOverload(utf::CStringAsMutf8(GetDescriptor()), errorHandler);
+            return false;
+        }
+        overloadMap->emplace(std::move(overloadKey), std::move(overloadDeclRecords));
+    }
+
+    return true;
+}
+
+static bool CheckOverloadMethod(EtsClass *etsClass, PandaVector<EtsMethod *> &etsMethods)
+{
+    bool isValid = true;
+    auto firstEtsMethod = etsMethods.front();
+    for (auto etsMethod : etsMethods) {
+        if (!etsClass->IsInterface() && etsMethod->IsAbstract()) {
+            isValid = false;
+            break;
+        }
+        if (etsMethod->IsStatic() != firstEtsMethod->IsStatic()) {
+            isValid = false;
+            break;
+        }
+        if (!etsMethod->GetClass()->IsAssignableFrom(etsClass)) {
+            isValid = false;
+            break;
+        }
+        if (etsMethod->IsPrivate() && etsMethod->GetClass() != etsClass) {
+            isValid = false;
+            break;
+        }
+    }
+    return isValid;
+}
+
+bool EtsClass::CheckBaseClassOverload(const OverloadKey &overloadKey, PandaVector<EtsMethod *> &overloadDeclRecords)
+{
+    for (auto curClass = this->GetBase(); curClass != nullptr; curClass = curClass->GetBase()) {
+        auto overloadMapPtr = GetOverloadMap();
+        if (overloadMapPtr == nullptr) {
+            continue;
+        }
+        auto &mapRef = *overloadMapPtr;
+        auto item = mapRef.find(overloadKey);
+        if (item == mapRef.end()) {
+            continue;
+        }
+        for (auto etsMethod : item->second) {
+            auto it = std::find(overloadDeclRecords.begin(), overloadDeclRecords.end(), etsMethod);
+            // Subclass overload needs to include parent class overload
+            if (it == overloadDeclRecords.end()) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+void EtsClass::VerifyOverloadMap(ClassLinkerErrorHandler *errorHandler, bool isOverloadCbOk)
+{
+    auto overloadMapPtr = GetOverloadMap();
+    if (!isOverloadCbOk || overloadMapPtr == nullptr) {
+        return;
+    }
+
+    auto it = overloadMapPtr->begin();
+    while (it != overloadMapPtr->end()) {
+        if (!CheckOverloadMethod(this, it->second) || !CheckBaseClassOverload(it->first, it->second)) {
+            it = overloadMapPtr->erase(it);
+            ReportInvalidClassOverload(utf::CStringAsMutf8(GetDescriptor()), errorHandler);
+            return;
+        }
+        ++it;
+    }
+}
+
+bool EtsClass::FindMethodFromOverloadMap(OverloadKey &overloadKey, PandaVector<EtsMethod *> &dstEtsMethod,
+                                         std::optional<EtsMethodSignature> &methodSignature)
+{
+    bool findMethod = false;
+    auto overloadMapPtr = GetOverloadMap();
+    if (overloadMapPtr == nullptr) {
+        return false;
+    }
+    auto &mapRef = *overloadMapPtr;
+    auto item = mapRef.find(overloadKey);
+    if (item == mapRef.end()) {
+        return false;
+    }
+    auto &srcMethodList = item->second;
+    ASSERT(!srcMethodList.empty());
+    for (auto etsMethod : srcMethodList) {
+        auto method = EtsMethod::ToRuntimeMethod(etsMethod);
+        if (methodSignature) {
+            if (methodSignature->IsValid() && methodSignature->GetProto() == method->GetProto()) {
+                dstEtsMethod.push_back(etsMethod);
+                return true;
+            }
+        } else {
+            dstEtsMethod.push_back(etsMethod);
+            findMethod = true;
+        }
+    }
+    return findMethod;
+}
+
 uint32_t EtsClass::GetFieldsNumber()
 {
     uint32_t fnumber = 0;
@@ -130,10 +300,10 @@ EtsField *EtsClass::GetOwnFieldByIndex(uint32_t i)
     return EtsField::FromRuntimeField(&GetRuntimeClass()->GetFields()[i]);
 }
 
-EtsMethod *EtsClass::GetDirectMethod(const char *name, const char *signature)
+EtsMethod *EtsClass::GetDirectMethod(const char *name, const char *signature, bool isANIFormat)
 {
     auto coreName = reinterpret_cast<const uint8_t *>(name);
-    return GetDirectMethod(coreName, signature);
+    return GetDirectMethod(coreName, signature, isANIFormat);
 }
 
 EtsMethod *EtsClass::GetDirectMethod(const char *name)
@@ -143,9 +313,9 @@ EtsMethod *EtsClass::GetDirectMethod(const char *name)
     return EtsMethod::FromRuntimeMethod(rtMethod);
 }
 
-EtsMethod *EtsClass::GetDirectMethod(const uint8_t *name, const char *signature)
+EtsMethod *EtsClass::GetDirectMethod(const uint8_t *name, const char *signature, bool isANIFormat)
 {
-    EtsMethodSignature methodSignature(signature);
+    EtsMethodSignature methodSignature(signature, isANIFormat);
     if (!methodSignature.IsValid()) {
         LOG(ERROR, ETS_NAPI) << "Wrong method signature: " << signature;
         return nullptr;
@@ -159,6 +329,54 @@ EtsMethod *EtsClass::GetDirectMethod(const char *name, const Method::Proto &prot
 {
     Method *method = klass_.GetDirectMethod(utf::CStringAsMutf8(name), proto);
     return EtsMethod::FromRuntimeMethod(method);
+}
+
+EtsMethod *EtsClass::GetDirectStaticMethod(const char *name, const char *signature) const
+{
+    Span<Method> methods = GetRuntimeClass()->GetStaticMethods();
+    const uint8_t *mutf8Name = utf::CStringAsMutf8(name);
+    const MethodNameComp comp;
+    panda_file::File::StringData key = {static_cast<uint32_t>(ark::utf::MUtf8ToUtf16Size(mutf8Name)), mutf8Name};
+    auto it = std::lower_bound(methods.begin(), methods.end(), key, comp);
+
+    EtsMethodSignature methodSignature(signature, true);
+    if (!methodSignature.IsValid()) {
+        LOG(ERROR, ANI) << "Wrong method signature: " << signature;
+        return nullptr;
+    }
+    Method::Proto &proto = methodSignature.GetProto();
+    while (it != methods.end()) {
+        auto &m = *it;
+        if (!comp.equal(m, key)) {
+            break;
+        }
+        if (m.GetProto() == proto) {
+            return EtsMethod::FromRuntimeMethod(it);
+        }
+        ++it;
+    }
+    return nullptr;
+}
+
+EtsMethod *EtsClass::GetDirectStaticMethod(const char *name, bool *outIsUnique) const
+{
+    ASSERT(outIsUnique != nullptr);
+    *outIsUnique = true;
+
+    Span<Method> methods = GetRuntimeClass()->GetStaticMethods();
+    const uint8_t *mutf8Name = utf::CStringAsMutf8(name);
+    const MethodNameComp comp;
+    panda_file::File::StringData key = {static_cast<uint32_t>(ark::utf::MUtf8ToUtf16Size(mutf8Name)), mutf8Name};
+    auto it = std::lower_bound(methods.begin(), methods.end(), key, comp);
+    if (it == methods.cend() || !comp.equal(*it, key)) {
+        return nullptr;
+    }
+    auto next = std::next(it);
+    // Check that class has more than one method with that name.
+    if (next != methods.cend() && comp.equal(*next, key)) {
+        *outIsUnique = false;
+    }
+    return EtsMethod::FromRuntimeMethod(it);
 }
 
 uint32_t EtsClass::GetMethodsNum()
@@ -431,10 +649,13 @@ void EtsClass::SetNullValue()
     flags_ = flags_ | IS_NULLVALUE;
     ASSERT(IsNullValue());
 }
-void EtsClass::SetBoxed()
+void EtsClass::SetBoxedKind(BoxedType boxedKind)
 {
     flags_ = flags_ | IS_BOXED;
     ASSERT(IsBoxed());
+    SetValueTyped();
+    auto kind = helpers::ToUnderlying(boxedKind);
+    BoxedTypeField::Set(kind, &flags_);
 }
 void EtsClass::SetFunction()
 {
@@ -471,7 +692,6 @@ void EtsClass::Initialize(EtsClass *superClass, uint16_t accessFlags, bool isPri
                           ClassLinkerErrorHandler *errorHandler)
 {
     ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
-
     SetName(nullptr);
     SetSuperClass(superClass);
 
@@ -479,7 +699,6 @@ void EtsClass::Initialize(EtsClass *superClass, uint16_t accessFlags, bool isPri
     if (isPrimitiveType) {
         flags |= ETS_ACC_PRIMITIVE;
     }
-
     if (superClass != nullptr) {
         static constexpr uint32_t COPIED_MASK = IS_WEAK_REFERENCE | IS_FINALIZE_REFERENCE;
         flags |= superClass->GetFlags() & COPIED_MASK;
@@ -491,28 +710,48 @@ void EtsClass::Initialize(EtsClass *superClass, uint16_t accessFlags, bool isPri
     if (UNLIKELY(GetBase() != nullptr && GetBase()->IsEtsEnum())) {
         flags |= (IS_ETS_ENUM | IS_VALUE_TYPED);
     }
+    if (UNLIKELY(GetRuntimeClass()->IsXRefClass())) {
+        flags |= IS_VALUE_TYPED;
+    }
 
     auto *runtimeClass = GetRuntimeClass();
     auto *pfile = runtimeClass->GetPandaFile();
+    bool isOverloadCbOk = false;
     if (pfile != nullptr) {
         panda_file::ClassDataAccessor cda(*pfile, runtimeClass->GetFileId());
-
-        cda.EnumerateAnnotations([this, &pfile, &flags, &errorHandler](panda_file::File::EntityId annotationId) {
-            panda_file::AnnotationDataAccessor ada(*pfile, annotationId);
-            auto *annotationName = pfile->GetStringData(ada.GetClassId()).data;
-            auto *annotationModuleName = panda_file_items::class_descriptors::ANNOTATION_MODULE.data();
-            auto *annotationFunctionalReferenceName =
-                panda_file_items::class_descriptors::ANNOTATION_FUNCTIONAL_REFERENCE.data();
-            if (utf::IsEqual(utf::CStringAsMutf8(annotationModuleName), annotationName)) {
-                flags |= IS_MODULE;
-            } else if (utf::IsEqual(utf::CStringAsMutf8(annotationFunctionalReferenceName), annotationName)) {
-                flags |= (IS_FUNCTION_REFERENCE | IS_VALUE_TYPED);
-                FunctionalReferenceAnnotationCallBack(this, pfile, &ada, errorHandler);
-            }
-        });
+        cda.EnumerateAnnotations(
+            [this, &pfile, &flags, &errorHandler, &isOverloadCbOk](panda_file::File::EntityId annotationId) {
+                panda_file::AnnotationDataAccessor ada(*pfile, annotationId);
+                auto *annotationName = pfile->GetStringData(ada.GetClassId()).data;
+                auto *annotationModuleName = panda_file_items::class_descriptors::ANNOTATION_MODULE.data();
+                auto *annotationFunctionalReferenceName =
+                    panda_file_items::class_descriptors::ANNOTATION_FUNCTIONAL_REFERENCE.data();
+                auto annotationFunctionalOverloadName =
+                    panda_file_items::class_descriptors::ANNOTATION_FUNCTIONAL_OVERLOAD.data();
+                if (utf::IsEqual(utf::CStringAsMutf8(annotationModuleName), annotationName)) {
+                    flags |= IS_MODULE;
+                } else if (utf::IsEqual(utf::CStringAsMutf8(annotationFunctionalReferenceName), annotationName)) {
+                    flags |= (IS_FUNCTION_REFERENCE | IS_VALUE_TYPED);
+                    FunctionalReferenceAnnotationCallBack(this, pfile, &ada, errorHandler);
+                } else if (utf::IsEqual(utf::CStringAsMutf8(annotationFunctionalOverloadName), annotationName)) {
+                    isOverloadCbOk = FunctionalOverloadAnnotationCallBack(pfile, &ada, errorHandler);
+                }
+            });
     }
-
     SetFlags(flags);
+    VerifyOverloadMap(errorHandler, isOverloadCbOk);
+}
+
+void EtsClass::RemoveOverloadMap()
+{
+    ASSERT(Runtime::GetCurrent() != nullptr && Runtime::GetCurrent()->GetClassLinker() != nullptr);
+    auto allocator = Runtime::GetCurrent()->GetClassLinker()->GetAllocator();
+    auto overloadMapPtr = GetOverloadMap();
+    if (overloadMapPtr != nullptr) {
+        allocator->Delete(overloadMapPtr);
+        overloadMapPtr = nullptr;
+        SetOverloadMap(reinterpret_cast<EtsLong>(overloadMapPtr));
+    }
 }
 
 void EtsClass::SetComponentType(EtsClass *componentType)
@@ -562,10 +801,10 @@ EtsField *EtsClass::GetFieldIDByName(const char *name, const char *sig)
 uint32_t EtsClass::GetFieldIndexByName(const char *name)
 {
     auto u8name = reinterpret_cast<const uint8_t *>(name);
-    auto fields = GetRuntimeClass()->GetFields();
+    auto fields = GetFields();
     panda_file::File::StringData sd = {static_cast<uint32_t>(ark::utf::MUtf8ToUtf16Size(u8name)), u8name};
     for (uint32_t i = 0; i < GetFieldsNumber(); i++) {
-        if (fields[i].GetName() == sd) {
+        if (fields[i]->GetCoreType()->GetName() == sd) {
             return i;
         }
     }

@@ -19,16 +19,14 @@ interface IBase {
     @on_off
     offSet(a: () => void): void;
 
-    @on_off
-    @overload("mytest")
+    @on_off(overload = "mytest")
     mytestNew();
 
     @on_off("type_name")
     onTest(): i32;
 }
 
-@on_off
-@overload("mytest")
+@on_off(overload = "mytest")
 function mytestGlobalnew(): i32;
 
 @class

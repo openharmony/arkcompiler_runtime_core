@@ -28,8 +28,10 @@ ManagedThread *EtsPlugin::CreateManagedThread() const
     auto rt = Runtime::GetCurrent();
     auto vm = rt->GetPandaVM();
     auto coroman = static_cast<CoroutineManager *>(vm->GetThreadManager());
-    return coroman->CreateEntrypointlessCoroutine(rt, vm, true, "_coro_", Coroutine::Type::MUTATOR,
-                                                  CoroutinePriority::DEFAULT_PRIORITY);
+    auto coro = coroman->CreateEntrypointlessCoroutine(rt, vm, true, "_coro_", Coroutine::Type::MUTATOR,
+                                                       CoroutinePriority::DEFAULT_PRIORITY);
+    ASSERT(coro != nullptr);
+    return coro;
 }
 
 void EtsPlugin::DestroyManagedThread(ManagedThread *thr) const

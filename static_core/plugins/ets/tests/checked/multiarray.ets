@@ -65,5 +65,5 @@ function main2(): int {
 function main3(): int {
     let arr: FixedArray<FixedArray<String>> = new String[2][3];
     arr[0][0] = new String();
-    return arr[0][0].length as int;  // Should be "0"
+    return arr[0][0].length.toInt();  // Should be "0"
 }

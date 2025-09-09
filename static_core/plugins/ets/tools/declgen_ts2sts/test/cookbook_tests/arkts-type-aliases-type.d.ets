@@ -1,3 +1,4 @@
+'use static'
 /*
  * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +14,7 @@
  * limitations under the License.
  */
 export type Matrix = number[][];
-export type Handler = Any;
-export type Predicate<T> = Any;
+export type Handler = (s: string, no: number) => string;
+export type Predicate<T> = (x: T) => boolean;
 export type NullableNumber = number | null;
 export type Dictionary = Map<string, string>;

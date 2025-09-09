@@ -1054,7 +1054,7 @@ add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/intrinsics-06.pa")
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/intrinsics-07.pa" SKIP_VERIFICATION)
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/intrinsics-08.pa")
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/intrinsics-09.pa" SKIP_VERIFICATION)
-add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/intrinsics-10.pa" RUNTIME_OPTIONS --load-in-boot)
+add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/intrinsics-10.pa")
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/intrinsics-11.pa" SKIP_VERIFICATION)
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/intrinsics-12.pa")
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/intrinsics-13.pa" EXPECTED_STDOUT "23")
@@ -1094,7 +1094,10 @@ add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/initobj-bad-02.pa" 
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/big_ark_option_value.pa" RUNTIME_OPTIONS --code-cache-size-limit=3221225472)
 
 # OSR needs additional design for try-catch processing. See the issue #13423 against panda
-add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/oom-01.pa" COMPILER_OPTIONS --compiler-hotness-threshold=0 --compiler-inlining=false HEAP_SIZE_LIMIT "13000000" SKIP_OSR)
+# 26982 64-bit pointer support
+if(PANDA_32_BIT_MANAGED_POINTER)
+    add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/oom-01.pa" COMPILER_OPTIONS --compiler-hotness-threshold=0 --compiler-inlining=false HEAP_SIZE_LIMIT "13000000" SKIP_OSR)
+endif()
 # OSR needs additional design for try-catch processing. See the issue #13423 against panda
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/oom-02.pa" HEAP_SIZE_LIMIT "13000000" SKIP_OSR)
 

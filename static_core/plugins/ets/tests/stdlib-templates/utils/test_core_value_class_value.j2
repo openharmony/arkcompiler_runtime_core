@@ -23,11 +23,11 @@ class TestClass {
 function main(): int {
     let failCounter: int = 0;
     let testResult: int = 0;
-    let classValue : ClassValue = Value.of(new TestClass()) as ClassValue;
+    let classValue : ClassValue = reflect.Value.of(new TestClass()) as ClassValue;
     let actualValue : {{.item.value_name}}Value;
     let storedValue : {{.item.value_name}}Value;
     {% for init_value in item.init_values %}
-      actualValue = Value.of({{.init_value}}) as {{.item.value_name}}Value;
+      actualValue = reflect.Value.of({{.init_value}}) as {{.item.value_name}}Value;
       classValue.setFieldByName("field", actualValue);
       storedValue = classValue.getFieldByName("field") as {{.item.value_name}}Value;
       {% if item.primitive %}

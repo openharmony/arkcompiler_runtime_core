@@ -17,9 +17,9 @@
 
 #include <cassert>
 
-#include "libabckit/include/c/abckit.h"
-#include "libabckit/include/c/ir_core.h"
-#include "libabckit/include/c/isa/isa_dynamic.h"
+#include "libabckit/c/abckit.h"
+#include "libabckit/c/ir_core.h"
+#include "libabckit/c/isa/isa_dynamic.h"
 
 #include "libabckit/src/metadata_inspect_impl.h"
 #include "libabckit/src/helpers_common.h"

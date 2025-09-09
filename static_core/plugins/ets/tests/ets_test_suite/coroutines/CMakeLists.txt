@@ -68,8 +68,8 @@ function(add_ets_coroutines_test)
 
             foreach(option_set ${ARG_OPTION_SETS_${impl}})
                 set(additional_options "")
-                if(option_set STREQUAL "POOL")
-                    set(additional_options "--use-coroutine-pool=true")
+                if(option_set STREQUAL "NO_POOL")
+                    set(additional_options "--use-coroutine-pool=false")
                 elseif(option_set STREQUAL "STATS")
                     set(additional_options "--coroutine-dump-stats=true")
                 elseif(option_set STREQUAL "MIGRATION_AWAIT")
@@ -107,6 +107,23 @@ add_ets_coroutines_test(FILE unhandled_rejection.ets
                         MODE "INT" "JIT" "AOT"
 )
 
+add_ets_coroutines_test(FILE unhandled_rejection_event.ets
+                        SKIP_ARM32_COMPILER
+                        LIST_UNHANDLED
+                        IMPL "STACKFUL"
+                        OPTION_SETS_STACKFUL "DEFAULT"
+                        WORKERS "AUTO" "ONE"
+                        MODE "INT" "JIT" "AOT"
+)
+
+add_ets_coroutines_test(FILE unhandled_rejection_promise.ets
+                        SKIP_ARM32_COMPILER
+                        IMPL "STACKFUL"
+                        OPTION_SETS_STACKFUL "DEFAULT"
+                        WORKERS "AUTO" "ONE"
+                        MODE "INT" "JIT" "AOT"
+)
+
 add_ets_coroutines_test(FILE async_call.ets
                         SKIP_ARM32_COMPILER
                         IMPL "STACKFUL"
@@ -118,7 +135,7 @@ add_ets_coroutines_test(FILE async_call.ets
 add_ets_coroutines_test(FILE launch_instruction.ets
                         SKIP_ARM32_COMPILER
                         IMPL "STACKFUL"
-                        OPTION_SETS_STACKFUL "POOL"
+                        OPTION_SETS_STACKFUL "NO_POOL"
                         WORKERS "ONE"
                         MODE "INT" "JIT" "AOT"
 )
@@ -152,7 +169,7 @@ if (NOT PANDA_TARGET_ARM32)
     add_ets_coroutines_test(FILE await.ets
                             SKIP_ARM32_COMPILER
                             IMPL "STACKFUL"
-                            OPTION_SETS_STACKFUL "POOL"
+                            OPTION_SETS_STACKFUL "NO_POOL"
                             WORKERS "AUTO"
                             MODE "INT" "JIT" "AOT"
     )
@@ -160,7 +177,7 @@ if (NOT PANDA_TARGET_ARM32)
     add_ets_coroutines_test(FILE await.ets
                             SKIP_ARM32_COMPILER
                             IMPL "STACKFUL"
-                            OPTION_SETS_STACKFUL "DEFAULT" "POOL"
+                            OPTION_SETS_STACKFUL "DEFAULT" "NO_POOL"
                             WORKERS "ONE"
                             MODE "INT" "JIT"
     )
@@ -169,7 +186,7 @@ if (NOT PANDA_TARGET_ARM32)
                             SKIP_ARM32_COMPILER
                             IMPL "THREADED" "STACKFUL"
                             OPTION_SETS_THREADED "DEFAULT"
-                            OPTION_SETS_STACKFUL "DEFAULT" "POOL"
+                            OPTION_SETS_STACKFUL "DEFAULT" "NO_POOL"
                             WORKERS "AUTO" "ONE"
                             MODE "INT" "JIT"
     )
@@ -178,7 +195,7 @@ if (NOT PANDA_TARGET_ARM32)
                             SKIP_ARM32_COMPILER
                             IMPL "STACKFUL" "THREADED"
                             OPTION_SETS_THREADED "DEFAULT"
-                            OPTION_SETS_STACKFUL "DEFAULT" "POOL"
+                            OPTION_SETS_STACKFUL "DEFAULT" "NO_POOL"
                             WORKERS "AUTO" "ONE"
                             MODE "INT" "JIT"
     )
@@ -186,7 +203,7 @@ if (NOT PANDA_TARGET_ARM32)
     add_ets_coroutines_test(FILE launch_instr_array.ets
                             SKIP_ARM32_COMPILER
                             IMPL "STACKFUL"
-                            OPTION_SETS_STACKFUL "POOL"
+                            OPTION_SETS_STACKFUL "NO_POOL"
                             WORKERS "ONE"
                             MODE "AOT"
     )
@@ -194,7 +211,7 @@ if (NOT PANDA_TARGET_ARM32)
     # NOTE(26403) Profilesaver is turned off because of data race
     add_ets_coroutines_test(FILE class_load_race.ets
                             SKIP_ARM32_COMPILER
-                            OPTIONS "--profilesaver-enabled=false"
+                            OPTIONS "--profilesaver-enabled=false" "--incremental-profilesaver-enabled=false"
                             IMPL "THREADED" "STACKFUL"
                             OPTION_SETS_THREADED "DEFAULT"
                             OPTION_SETS_STACKFUL "DEFAULT" "POOL"
@@ -205,7 +222,7 @@ if (NOT PANDA_TARGET_ARM32)
     # NOTE(26403) Profilesaver is turned off because of data race
     add_ets_coroutines_test(FILE launch_n_workers.ets
                             SKIP_ARM32_COMPILER
-                            OPTIONS "--profilesaver-enabled=false"
+                            OPTIONS "--profilesaver-enabled=false" "--incremental-profilesaver-enabled=false"
                             IMPL "STACKFUL"
                             OPTION_SETS_STACKFUL "DEFAULT"
                             WORKERS "AUTO"
@@ -215,7 +232,7 @@ if (NOT PANDA_TARGET_ARM32)
     # NOTE(26403) Profilesaver is turned off because of data race
     add_ets_coroutines_test(FILE launch_n_workers.ets
                             SKIP_ARM32_COMPILER
-                            OPTIONS "--profilesaver-enabled=false"
+                            OPTIONS "--profilesaver-enabled=false" "--incremental-profilesaver-enabled=false"
                             IMPL "STACKFUL"
                             OPTION_SETS_STACKFUL "POOL"
                             WORKERS "AUTO"
@@ -225,7 +242,7 @@ if (NOT PANDA_TARGET_ARM32)
     # NOTE(26403) Profilesaver is turned off because of data race
     add_ets_coroutines_test(FILE launch_oom.ets
                             SKIP_ARM32_COMPILER
-                            OPTIONS "--gc-type=epsilon" "--profilesaver-enabled=false"
+                            OPTIONS "--gc-type=epsilon" "--profilesaver-enabled=false" "--incremental-profilesaver-enabled=false"
                             IMPL "STACKFUL"
                             OPTION_SETS_STACKFUL "POOL"
                             WORKERS "ONE"
@@ -235,7 +252,7 @@ if (NOT PANDA_TARGET_ARM32)
     # NOTE(26403) Profilesaver is turned off because of data race
     add_ets_coroutines_test(FILE launch_oom.ets
                             SKIP_ARM32_COMPILER
-                            OPTIONS "--gc-type=epsilon" "--profilesaver-enabled=false"
+                            OPTIONS "--gc-type=epsilon" "--profilesaver-enabled=false" "--incremental-profilesaver-enabled=false"
                             IMPL "STACKFUL"
                             OPTION_SETS_STACKFUL "DEFAULT"
                             WORKERS "ONE"
@@ -247,7 +264,7 @@ if (NOT PANDA_TARGET_ARM32)
                             SKIP_ARM32_COMPILER
                             IMPL "THREADED" "STACKFUL"
                             OPTION_SETS_THREADED "DEFAULT"
-                            OPTION_SETS_STACKFUL "DEFAULT" "POOL"
+                            OPTION_SETS_STACKFUL "DEFAULT" "NO_POOL"
                             WORKERS "AUTO" "ONE"
                             MODE "INT" "JIT"
     )
@@ -255,7 +272,7 @@ if (NOT PANDA_TARGET_ARM32)
     add_ets_coroutines_test(FILE multiple_launch.ets
                             SKIP_ARM32_COMPILER
                             IMPL "STACKFUL"
-                            OPTION_SETS_STACKFUL "POOL"
+                            OPTION_SETS_STACKFUL "NO_POOL"
                             WORKERS "AUTO"
                             MODE "AOT"
     )
@@ -263,7 +280,7 @@ if (NOT PANDA_TARGET_ARM32)
     add_ets_coroutines_test(FILE multiple_launch.ets
                             SKIP_ARM32_COMPILER
                             IMPL "STACKFUL"
-                            OPTION_SETS_STACKFUL "DEFAULT" "POOL"
+                            OPTION_SETS_STACKFUL "DEFAULT" "NO_POOL"
                             WORKERS "ONE"
                             MODE "AOT"
     )
@@ -316,7 +333,7 @@ add_ets_coroutines_test(FILE launch_yield.ets
 add_ets_coroutines_test(FILE launch_yield.ets
                         SKIP_ARM32_COMPILER
                         IMPL "STACKFUL"
-                        OPTION_SETS_STACKFUL "POOL"
+                        OPTION_SETS_STACKFUL "NO_POOL"
                         WORKERS "ONE"
                         MODE "INT" "JIT"
 )
@@ -448,3 +465,5 @@ add_ets_coroutines_test(FILE eworker_post_to_main.ets
                         WORKERS "AUTO"
                         MODE "INT"
 )
+
+add_subdirectory(dfx)

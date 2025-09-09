@@ -26,6 +26,6 @@ function callee(a: int, b: boolean): int {
 }
 
 function main(): void {
-  assertTrue(callee(1,  true) ==  1);
-  assertTrue(callee(1, false) == -1);
+  arktest.assertTrue(callee(1,  true) ==  1);
+  arktest.assertTrue(callee(1, false) == -1);
 }

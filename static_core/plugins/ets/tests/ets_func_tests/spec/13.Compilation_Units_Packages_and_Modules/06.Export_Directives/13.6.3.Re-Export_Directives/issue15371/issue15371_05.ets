@@ -23,5 +23,5 @@ files: [./issue15371_03.ets]
 import { voo } from './issue15371_03'
 
 function main(): void {
-  assertEQ( voo(3), 6)
+  arktest.assertEQ( voo(3), 6)
 }

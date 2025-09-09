@@ -45,7 +45,7 @@ class TestJSParser(TestFileBased):
 
         self.passed, self.report, self.fail_kind = self.run_es2panda(
             flags=es2panda_flags,
-            test_abc="",
+            test_abc=self.get_tests_abc(),
             result_validator=self.es2panda_result_validator
         )
 

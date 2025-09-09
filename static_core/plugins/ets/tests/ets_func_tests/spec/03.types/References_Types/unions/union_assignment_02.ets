@@ -25,5 +25,5 @@ type ANumber = A | number
 function main(): void {
     let a2: ANumber = new A()
     a2 = 5
-    assertEQ( a2, 5)
+    arktest.assertEQ( a2, 5)
 }

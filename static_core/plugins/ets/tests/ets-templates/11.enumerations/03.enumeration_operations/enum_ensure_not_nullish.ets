@@ -26,5 +26,5 @@ function main() : void
   let x : E
   let p : E | undefined = E.A
   x = p!
-  assertEQ( x, E.A )
+  arktest.assertEQ( x, E.A )
 }

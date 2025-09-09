@@ -16,7 +16,7 @@
 let p1 = Promise.resolve<string>('abc');
 let p2 = Promise.resolve<string>('def');
 let p3 = Promise.resolve<string>('xyz');
-Promise.allSettled([p1, p2, p3]).then<void, void>((values: PromiseSettledResult<string>[]): void => {
+Promise.allSettled<string>([p1, p2, p3]).then<void, void>((values): void => {
     if (values.length != 3) {
         console.log('Test failed. Expected a string array of length 3 but got length ' + values.length + '.');
         return;

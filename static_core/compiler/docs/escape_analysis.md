@@ -43,6 +43,16 @@ Scalar replacement algorithm performs following steps:
 * Update save states and users of materialized allocations;
 * Remove dead allocations, loads/stores and alias instructions.
 
+Decompose analysis splits deoptimization insts carry CAN_DEOPTIMIZE flag into two basic blocks for further optimization.
+Decompose analysis algorithm performs following steps:
+* Identify deopt insts have CAN_DEOPTIMIZE flag and not deoptimization inst;
+* Split basic blocks at above deopt insts position in reversed order;
+* Create new deopt basic block and create new deoptimization inst in this block;
+* Replace origin deopt insts by new compare and ifimm insts;
+* Create new savestate inst for users in splited basic block;
+* If materialization happened in new deopt basic block, will finish analysis;
+* Otherwise, recover origin insts and control flow graph before decompose analysis.
+
 ## Pseudocode
 ``
 EscapeAnalysis:

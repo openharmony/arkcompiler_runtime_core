@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -26,8 +26,9 @@ from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional, Union
 from operator import add
 from pathlib import Path
-
 from vmb.helpers import Jsonable, StringEnum
+from vmb.helpers_numbers import format_number
+
 
 Stat = namedtuple("Stat",
                   "runs ir_mem local_mem time")
@@ -201,20 +202,14 @@ class TestResult(Jsonable):
     gc_stats: Optional[GCStats] = None
     aot_stats: Optional[AOTStats] = None
     jit_stats: Optional[List[JITStat]] = None
+    full_time: float = 0.0
     # no-exportable:
     _status: BUStatus = BUStatus.NOT_RUN
     _ext_time: float = 0.0
     __test__ = None
 
     def __str__(self) -> str:
-        # Note: using avg, as it reported by test itself
-        # not `mean_time` which re-calculate by iteration results
-        if self._status == BUStatus.PASS:
-            time = self.get_avg_time()
-            return f'{time:.2e} | ' \
-                   f'{self.code_size:.2e} | ' \
-                   f'{self.mem_bytes:.2e} | {self._status.value:<7}'
-        return ' | '.join(['.' * 8] * 3 + [f'{self._status.value:<7}'])
+        return self.to_str()
 
     @property
     def code_size(self) -> int:
@@ -281,6 +276,17 @@ class TestResult(Jsonable):
             if 'jit_stats' == k:
                 kwargs[k] = [JITStat(**i) for i in v if i] if v else None
         return cls(**kwargs)
+
+    def to_str(self, fmt: str = 'expo') -> str:
+        # Note: using avg_time, as it reported by test itself
+        # not `mean_time` which re-calculate by iteration results
+        if self._status == BUStatus.PASS:
+            time = format_number(self.get_avg_time() * 1e-9, fmt)
+            code = format_number(self.code_size, 'auto' if fmt == 'nano' else fmt)
+            mem = format_number(self.mem_bytes, 'auto' if fmt == 'nano' else fmt)
+        else:
+            time, code, mem = '.' * (12 if fmt == 'nano' else 8), '.' * 8, '.' * 8
+        return ' | '.join((time, code, mem, f'{self._status.value:<7}'))
 
     def get_avg_time(self) -> float:
         """Get mean of avg_time by executions."""

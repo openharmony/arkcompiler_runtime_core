@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #define LIBPANDABASE_MEM_ARENA_ALLOCATOR_H
 
 #include <array>
+#include <atomic>
 #include <cstdint>
 #include <cstdlib>
 #include <limits>
@@ -30,6 +31,7 @@
 #include "mem.h"
 #include "mem_pool.h"
 #include "arena-inl.h"
+#include "os/mutex.h"
 
 #define USE_MMAP_POOL_FOR_ARENAS
 
@@ -64,11 +66,16 @@ public:
     ArenaAllocatorT(OOMHandler oomHandler, SpaceType spaceType, BaseMemStats *memStats = nullptr,
                     bool limitAllocSizeByPool = false);
 
-    PANDA_PUBLIC_API ~ArenaAllocatorT();
+    PANDA_PUBLIC_API virtual ~ArenaAllocatorT();
     NO_COPY_SEMANTIC(ArenaAllocatorT);
     NO_MOVE_SEMANTIC(ArenaAllocatorT);
 
-    [[nodiscard]] PANDA_PUBLIC_API void *Alloc(size_t size, Alignment align = DEFAULT_ARENA_ALIGNMENT);
+    [[nodiscard]] PANDA_PUBLIC_API virtual void *Alloc(size_t size, Alignment align);
+
+    [[nodiscard]] PANDA_PUBLIC_API virtual void *Alloc(size_t size)
+    {
+        return Alloc(size, DEFAULT_ARENA_ALIGNMENT);
+    };
 
     template <typename T, typename... Args>
     [[nodiscard]] std::enable_if_t<!std::is_array_v<T>, T *> New(Args &&...args)
@@ -238,6 +245,29 @@ T *ArenaAllocatorT<USE_OOM_HANDLER>::AllocArray(size_t arrLength)
     // NOTE(Dmitrii Trubenkov): change to the proper implementation
     return static_cast<T *>(Alloc(sizeof(T) * arrLength));
 }
+
+class ThreadSafeArenaAllocator : public ArenaAllocator {
+public:
+    ThreadSafeArenaAllocator(SpaceType spaceType, BaseMemStats *memStats, bool limitAllocSizeByPool)
+        : ArenaAllocator(spaceType, memStats, limitAllocSizeByPool)
+    {
+    }
+
+    [[nodiscard]] PANDA_PUBLIC_API void *Alloc(size_t size, Alignment align) override
+    {
+        ark::os::memory::LockHolder lock(allocMutex_);
+        return ArenaAllocator::Alloc(size, align);
+    }
+
+    [[nodiscard]] PANDA_PUBLIC_API void *Alloc(size_t size) override
+    {
+        ark::os::memory::LockHolder lock(allocMutex_);
+        return ArenaAllocator::Alloc(size, DEFAULT_ARENA_ALIGNMENT);
+    }
+
+private:
+    ark::os::memory::Mutex allocMutex_ {};
+};
 
 }  // namespace ark
 

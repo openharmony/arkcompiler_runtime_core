@@ -17,6 +17,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_STUBS_H
 
 #include <cstdint>
+#include "include/field.h"
 #include "plugins/ets/runtime/types/ets_bigint.h"
 
 namespace ark::ets {
@@ -46,6 +47,37 @@ inline EtsClass *GetMethodOwnerClassInFrames(EtsCoroutine *coro, uint32_t depth)
 EtsString *EtsGetTypeof(EtsCoroutine *coro, EtsObject *obj);
 
 bool EtsGetIstrue(EtsCoroutine *coro, EtsObject *obj);
+
+EtsObject *EtsLdbyname(EtsCoroutine *coro, EtsObject *thisObj, panda_file::File::StringData name);
+
+bool EtsStbyname(EtsCoroutine *coro, EtsObject *thisObj, panda_file::File::StringData name, EtsObject *value);
+
+EtsObject *EtsLdbyidx(EtsCoroutine *coro, EtsObject *thisObj, uint32_t index);
+
+bool EtsStbyidx(EtsCoroutine *coro, EtsObject *thisObj, uint32_t idx, EtsObject *value);
+
+bool EtsStbyval(EtsCoroutine *coro, EtsObject *thisObj, EtsObject *key, EtsObject *value);
+
+EtsObject *EtsLdbyval(EtsCoroutine *coro, EtsObject *thisObj, EtsObject *valObj);
+
+bool EtsIsinstance(EtsCoroutine *coro, EtsObject *lhsObj, EtsObject *rhsObj);
+
+EtsObject *EtsCall(EtsCoroutine *coro, EtsObject *funcObj, Span<VMHandle<ObjectHeader>> args);
+
+EtsObject *EtsCallThis(EtsCoroutine *coro, EtsObject *thisObj, panda_file::File::StringData name,
+                       Span<VMHandle<ObjectHeader>> args);
+EtsObject *EtsCallThis(EtsCoroutine *coro, EtsObject *thisObj, EtsObject *funcObj, Span<VMHandle<ObjectHeader>> args);
+
+EtsObject *EtsCallObject(EtsCoroutine *coro, EtsObject *thisObj, EtsObject *funcObj, Span<VMHandle<ObjectHeader>> args);
+
+EtsObject *EtsCallNew(EtsCoroutine *coro, EtsObject *ctor, Span<VMHandle<ObjectHeader>> args);
+
+bool EtsHasPropertyByName([[maybe_unused]] EtsCoroutine *coro, EtsObject *thisObj, [[maybe_unused]] EtsString *name);
+bool EtsHasPropertyByIdx([[maybe_unused]] EtsCoroutine *coro, EtsObject *thisObj, [[maybe_unused]] uint32_t idx);
+bool EtsHasPropertyByValue([[maybe_unused]] EtsCoroutine *coro, EtsObject *thisObj,
+                           [[maybe_unused]] EtsObject *property, bool isOwn);
+
+bool EtsHasOwnPropertyByName([[maybe_unused]] EtsCoroutine *coro, EtsObject *thisObj, [[maybe_unused]] EtsString *name);
 
 template <bool IS_GETTER>
 inline void LookUpException(ark::Class *klass, Field *rawField);

@@ -103,32 +103,32 @@ TEST_F(RegExpTest, UnicodeTest)
 {
     RegExpParser parser = RegExpParser();
     {
-        PandaString source = u8"A";  // u8前缀确保UTF-8编码
+        PandaString source = u8"A";
         parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 0);
         const auto *p = reinterpret_cast<const uint8_t *>(source.c_str());
         PandaString name {};
-        parser.ParseGroupSpecifier(&p, name);
+        ASSERT_FALSE(parser.ParseGroupSpecifier(&p, name));
     }
     {
-        PandaString source = u8"¢";  // u8前缀确保UTF-8编码
+        PandaString source = u8"¢";
         parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 0);
         const auto *p = reinterpret_cast<const uint8_t *>(source.c_str());
         PandaString name {};
-        parser.ParseGroupSpecifier(&p, name);
+        ASSERT_FALSE(parser.ParseGroupSpecifier(&p, name));
     }
     {
-        PandaString source = u8"€";  // u8前缀确保UTF-8编码
+        PandaString source = u8"€";
         parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 0);
         const auto *p = reinterpret_cast<const uint8_t *>(source.c_str());
         PandaString name {};
-        parser.ParseGroupSpecifier(&p, name);
+        ASSERT_FALSE(parser.ParseGroupSpecifier(&p, name));
     }
     {
-        PandaString source = u8"𐍈";  // u8前缀确保UTF-8编码
+        PandaString source = u8"𐍈";
         parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 0);
         const auto *p = reinterpret_cast<const uint8_t *>(source.c_str());
         PandaString name {};
-        parser.ParseGroupSpecifier(&p, name);
+        ASSERT_FALSE(parser.ParseGroupSpecifier(&p, name));
     }
 }
 

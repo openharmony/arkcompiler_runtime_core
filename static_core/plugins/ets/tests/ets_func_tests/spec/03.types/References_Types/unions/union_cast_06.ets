@@ -23,6 +23,6 @@ type Margin = number | string
 
 function main(): void {
     let a1: Margin = 65536
-    let b1: long = a1 as long
-    assertEQ( b1, 65536)
+    let b1: long = a1.toLong()
+    arktest.assertEQ( b1, 65536)
 }

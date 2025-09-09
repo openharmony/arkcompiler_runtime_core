@@ -21,10 +21,10 @@ let shadowVar = "global";
 
 function foo(): void {
   let shadowVar = "local";
-  assertEQ(shadowVar, "local");
+  arktest.assertEQ(shadowVar, "local");
 }
 
 function main(): void {
   foo();
-  assertEQ(shadowVar, "global");
+  arktest.assertEQ(shadowVar, "global");
 }

@@ -20,14 +20,14 @@ cases:
           import { A } from './dir_int_1/file_A';
       use: |-
           // separate module, negative case with internal method
-          assertEQ( new A().foo(42), 84 )
+          arktest.assertEQ( new A().foo(42), 84 )
 
     - files: './dir_int_1/file_A.ets'
       decl: |-
           import { C } from './dir_int_1/file_A';
       use: |-
           // separate module, positive case with internal method, from same-module public subclass
-          assertEQ( new C().foo(42), 94 )
+          arktest.assertEQ( new C().foo(42), 94 )
 
     - files: './dir_int_1/file_A.ets'
       tags: 'negative, compile-only'
@@ -35,7 +35,7 @@ cases:
           import { D } from './dir_int_1/file_A';
       use: |-
           // separate module, negative case with internal method, from same-module subclass
-          assertEQ( new D().foo(42), 184 )
+          arktest.assertEQ( new D().foo(42), 184 )
 
     - files: './dir_int_2/file_A.ets, ./dir_int_2/file_B.ets'
       tags: 'negative, compile-only'
@@ -43,7 +43,7 @@ cases:
           import { B } from './dir_int_2/file_B';
       use: |-
           // separate module, negative case with internal method, from other-module subclass
-          assertEQ( new B().foo(42), 184 )
+          arktest.assertEQ( new B().foo(42), 184 )
 
     - files: './dir_int_3/file_A.ets, ./dir_int_3/file_B.ets'
       tags: 'negative, compile-only'
@@ -51,4 +51,4 @@ cases:
           import { F } from './dir_int_3/file_B';
       use: |-
           // separate module, negative case with internal method, from other-module subclass
-          assertEQ( new F().foo(42), 184 )
+          arktest.assertEQ( new F().foo(42), 184 )

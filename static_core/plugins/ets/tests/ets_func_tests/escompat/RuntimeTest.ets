@@ -15,11 +15,12 @@
 
 
 function main(): void {
-    assertTrue(Runtime.sameValue(0.0, 0.0))
-    assertFalse(Runtime.sameValue(0.0, -0.0))
-    assertFalse(Runtime.sameValue(-0.0, 0.0))
-    assertTrue(Runtime.sameValue(-0.0, -0.0))
+    arktest.assertTrue(Runtime.sameValue(0.0, 0.0))
+    arktest.assertFalse(Runtime.sameValue(0.0, -0.0))
+    arktest.assertFalse(Runtime.sameValue(-0.0, 0.0))
+    arktest.assertTrue(Runtime.sameValue(-0.0, -0.0))
 
-    assertTrue(Runtime.sameValueZero(0.0, -0.0))
-    assertTrue(Runtime.sameValueZero(-0.0, 0.0))
+    arktest.assertTrue(Runtime.sameValueZero(0.0, -0.0))
+    arktest.assertTrue(Runtime.sameValueZero(-0.0, 0.0))
+
 }

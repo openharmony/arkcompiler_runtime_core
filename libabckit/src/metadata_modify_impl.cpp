@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,10 +14,10 @@
 
 #include <cassert>
 #include <cstdint>
-#include "libabckit/include/c/abckit.h"
-#include "libabckit/include/c/metadata_core.h"
+#include "libabckit/c/abckit.h"
+#include "libabckit/c/metadata_core.h"
 
-#include "libabckit/include/c/statuses.h"
+#include "libabckit/c/statuses.h"
 #include "libabckit/src/macros.h"
 #include "scoped_timer.h"
 
@@ -40,6 +40,26 @@ namespace libabckit {
 
 // ========================================
 // Class
+// ========================================
+
+// ========================================
+// Interface
+// ========================================
+
+// ========================================
+// Module Field
+// ========================================
+
+// ========================================
+// Class Field
+// ========================================
+
+// ========================================
+// Interface Field
+// ========================================
+
+// ========================================
+// Enum Field
 // ========================================
 
 // ========================================
@@ -425,6 +445,26 @@ AbckitModifyApi g_modifyApiImpl = {
 
     // ========================================
     // Class
+    // ========================================
+
+    // ========================================
+    // Interface
+    // ========================================
+
+    // ========================================
+    // Module Field
+    // ========================================
+
+    // ========================================
+    // Class Field
+    // ========================================
+
+    // ========================================
+    // Interface Field
+    // ========================================
+
+    // ========================================
+    // Enum Field
     // ========================================
 
     // ========================================

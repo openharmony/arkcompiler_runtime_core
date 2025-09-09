@@ -38,9 +38,9 @@ class Bar {
 
 function main() {
     let x : Bar = new Bar(new Foo(1));
-    assertEQ(x[0].i, 1)
+    arktest.assertEQ(x[0].i, 1)
     let y : Foo = new Foo(100);
     x[0] = y;
-    assertEQ(x[0].i, 100)
+    arktest.assertEQ(x[0].i, 100)
     return 1;
 }

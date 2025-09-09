@@ -27,8 +27,8 @@ function main() {
 {%- for t in c['values'] %}
     let prim{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
     boxed = new {{c.to_type}}(prim{{loop.index}})
-    assertTrue( boxed.isNaN() )
-    assertTrue( {{c.to_type}}.isNaN(boxed.unboxed()) )
+    arktest.assertTrue( boxed.isNaN() )
+    arktest.assertTrue( {{c.to_type}}.isNaN(boxed.unboxed()) )
 {%- endfor %}
 }
 {%- endfor %}

@@ -28,8 +28,9 @@ namespace ark {
 // CC-OFFNXT(C_RULE_ID_MACRODEFINE_ENDWITH_SEMICOLON) code generation
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFINE_VALUE(name, value) static_assert((name) == (value));
+// CC-OFFNXT(G.PRE.09,G.PRE.02) code generation
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DEFINE_VALUE_WITH_TYPE(name, value, type) static_assert((name) == (value));
+#define DEFINE_VALUE_WITH_TYPE(name, value, type) static_assert(static_cast<type>((name)) == (value));
 #include "asm_defines/asm_defines.def"
 
 // Frame doesn't have aligned storage, so check its offset manually

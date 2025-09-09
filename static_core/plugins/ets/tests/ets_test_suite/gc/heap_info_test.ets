@@ -20,7 +20,7 @@ function checkHeapInfo(): void {
     let free_size = GC.getFreeHeapSize();
     let used_size = GC.getUsedHeapSize();
 
-    assertLE(free_size + used_size, reserved_size, "Incorrect heap info statistics");
+    arktest.assertLE(free_size + used_size, reserved_size, "Incorrect heap info statistics");
 }
 
 function main(): void {
@@ -28,7 +28,7 @@ function main(): void {
     const MAX_ALLOCATION_COUNT = 100;
     const MAX_ALLOC_SIZE = 100;
     for (let i = 0; i < MAX_ALLOCATION_COUNT; ++i) {
-        let alloc_size = (random() * MAX_ALLOC_SIZE) as int;
+        let alloc_size = (random() * MAX_ALLOC_SIZE).toInt();
         new Object[alloc_size];
         checkHeapInfo();
     }

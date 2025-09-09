@@ -14,7 +14,7 @@
  */
 
 function main(): int {
-    const suite = new ArkTestsuite("Array API tests for SDK");
+    const suite = new arktest.ArkTestsuite("Array API tests for SDK");
     suite.addTest("Test reduceRight with array length reducing", testreduceRight);
     suite.addTest("Test reduceRight with array length increasing", testreduceRight1);
     return suite.run(); 
@@ -43,11 +43,11 @@ class TestData1 {
 function testreduceRight() {
     TestData.arr = new Array<number>(1, 2, 3, 4, 5);
     let res = TestData.arr.reduceRight(TestData.callbackfn);
-    assertEQ(TestData.expected, res, `Expected: "${TestData.expected}", Actual: "${res}"`);
+    arktest.assertEQ(TestData.expected, res, `Expected: "${TestData.expected}", Actual: "${res}"`);
 }
 
 function testreduceRight1() {
     TestData1.arr = new Array<number>(1, 2, 3, 4, 5); 
     let res = TestData1.arr.reduceRight(TestData1.callbackfn);
-    assertEQ(TestData1.expected, res, `Expected: "${TestData1.expected}", Actual: "${res}"`);
+    arktest.assertEQ(TestData1.expected, res, `Expected: "${TestData1.expected}", Actual: "${res}"`);
 }

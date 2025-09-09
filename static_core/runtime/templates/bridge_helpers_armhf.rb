@@ -12,7 +12,13 @@
 # limitations under the License.
 
 def cmp_opcode(imm)
-  return "cmp r10, ##{imm}"
+  if imm <= 255
+    return "cmp r10, ##{imm}"
+  end
+  # We need to save imm to temporary register before cmp,
+  # because it is too large for ARM instruction format
+  return "mov r3, ##{imm}
+    cmp r10, r3"
 end
 
 def jump_eq(target)

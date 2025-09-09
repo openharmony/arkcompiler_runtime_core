@@ -26,7 +26,7 @@ const UTF16_JOINED_1 = '5e-324ΩNaNΩ-1.1Ω0Ω0.2Ω1Ω2Ω3Ω4Ω5Ω6Ω7Ω8Ω9ΩIn
 function joinEmpty(): void {
     let a: Float64Array = new Float64Array(0);
     let s = a.join();
-    assertTrue(s.isEmpty());
+    arktest.assertTrue(s.isEmpty());
 }
 
 function joinSingle(): void {
@@ -37,7 +37,7 @@ function joinSingle(): void {
 
 function joinDefaultDelim(): void {
     let a: Float64Array = new Float64Array(ARRAY);
-    assertEQ(a.join(), COMMA_JOINED);
+    arktest.assertEQ(a.join(), COMMA_JOINED);
 }
 
 function joinEmptyDelim(): void {

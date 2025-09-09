@@ -108,21 +108,18 @@ ALWAYS_INLINE inline bool CallETSHandler::ConvertArgs(Span<Value> etsArgs)
             // `nullptr` stand for undefined here
             store(nullptr);
         } else {
-            auto jsVal = jsargv_[argIdx];
-
-            if (UNLIKELY(!ConvertArgToEts(ctx_, protoReader_, store, jsVal))) {
+            if (UNLIKELY(!ConvertArgToEts(ctx_, protoReader_, store, jsargv_[argIdx]))) {
                 return false;
             }
         }
     }
 
     if (protoReader_.GetMethod()->HasVarArgs()) {
-        const auto restIdx = numArgs - 1;
-        auto restParams = ConvertRestParams(jsargv_.SubSpan(restIdx));
+        auto restParams = ConvertRestParams(jsargv_.SubSpan(numArgs - 1));
         if (UNLIKELY(restParams == nullptr)) {
             return false;
         }
-        etsBoxedArgs[restIdx] = restParams;
+        etsBoxedArgs[numArgs - 1] = restParams;
     }
 
     // Unbox values

@@ -20,7 +20,7 @@ function main() {
         try {
             arr = GC.allocatePinnedBooleanArray(size);
         } catch (e) {
-            console.log("Allocation exception")
+            console.log("Allocation error")
         }
     }
 }

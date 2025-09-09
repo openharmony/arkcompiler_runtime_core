@@ -20,7 +20,7 @@
 #include <sstream>
 #include <vector>
 
-#include "generated/base_options.h"
+#include "generated/logger_options.h"
 #include "libpandabase/utils/logger.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_vm.h"
@@ -212,10 +212,10 @@ struct ParsedOptions final {
     std::vector<std::string> bootPandaFiles;
     std::vector<std::string> aotFiles;
     std::vector<std::string> arkFiles;
-    base_options::Options baseOptions;
+    logger::Options loggerOptions;
     // NOLINTEND(misc-non-private-member-variables-in-classes)
 
-    explicit ParsedOptions(const std::string &exePath) : baseOptions(exePath) {}
+    explicit ParsedOptions(const std::string &exePath) : loggerOptions(exePath) {}
 };
 
 static arg_list_t SplitString(const std::string &from, char delim)
@@ -238,7 +238,7 @@ static void ParseOptionsHelper(RuntimeOptions &runtimeOptions, ParsedOptions &pa
 
         switch (o.option) {
             case EtsOptionType::ETS_LOG_LEVEL:
-                parsedOptions.baseOptions.SetLogLevel(extraStr);
+                parsedOptions.loggerOptions.SetLogLevel(extraStr);
                 break;
             case EtsOptionType::ETS_MOBILE_LOG:
                 g_logPrintFunction = const_cast<void *>(o.extraInfo);
@@ -298,7 +298,7 @@ static bool ParseOptions(const EtsVMInitArgs *args, RuntimeOptions &runtimeOptio
     Span<const EtsVMOption> options(args->options, args->nOptions);
     ParseOptionsHelper(runtimeOptions, parsedOptions, options);
 
-    Logger::Initialize(parsedOptions.baseOptions);
+    Logger::Initialize(parsedOptions.loggerOptions);
 
     runtimeOptions.SetBootPandaFiles(parsedOptions.bootPandaFiles);
     runtimeOptions.SetAotFiles(parsedOptions.aotFiles);

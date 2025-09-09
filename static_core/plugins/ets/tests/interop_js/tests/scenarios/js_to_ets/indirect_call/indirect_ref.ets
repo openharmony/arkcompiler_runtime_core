@@ -18,7 +18,7 @@ function Test_indirect_call_type_ref_array_call(): boolean {
     const ARG: FixedArray<number> = [42, 73];
 
     let result = js.indirectCallTypeByRefArray.call(null, ARG) as FixedArray<number>;
-    assertTrue(JSON.stringify(result) == JSON.stringify(ARG));
+    arktest.assertTrue(JSON.stringify(result) == JSON.stringify(ARG));
 
     return true;
 }
@@ -27,7 +27,7 @@ function Test_indirect_call_type_ref_array_apply(): boolean {
     const ARG: FixedArray<number> = [42, 73];
 
     let result = js.indirectCallTypeByRefArray.apply(null, [ARG] as FixedArray<FixedArray<number>>) as FixedArray<number>;
-    assertTrue(JSON.stringify(result) == JSON.stringify(ARG));
+    arktest.assertTrue(JSON.stringify(result) == JSON.stringify(ARG));
 
     return true;
 }
@@ -38,7 +38,7 @@ function Test_indirect_call_type_ref_array_bind_with_arg(): boolean {
     let boundWithArg = js.indirectCallTypeByRefArray.bind(null, ARG);
     let result = boundWithArg() as FixedArray<number>;
 
-    assertTrue(JSON.stringify(result) == JSON.stringify(ARG));
+    arktest.assertTrue(JSON.stringify(result) == JSON.stringify(ARG));
 
     return true;
 }
@@ -49,7 +49,7 @@ function Test_indirect_call_type_ref_array_bind_without_arg(): boolean {
     let boundWithoutArg = js.indirectCallTypeByRefArray.bind(null);
     let result = boundWithoutArg(ARG) as FixedArray<number>;
 
-    assertTrue(JSON.stringify(result) == JSON.stringify(ARG));
+    arktest.assertTrue(JSON.stringify(result) == JSON.stringify(ARG));
 
     return true;
 }
@@ -58,7 +58,7 @@ function Test_indirect_call_type_ref_tuple_call(): boolean {
     const ARG: [number, string] = [42, '73'];
 
     let result = js.indirectCallTypeByRefTuple.call(null, ARG) as [number, string];
-    assertTrue(JSON.stringify(result) == JSON.stringify(ARG));
+    arktest.assertTrue(JSON.stringify(result) == JSON.stringify(ARG));
 
     return true;
 }
@@ -67,7 +67,7 @@ function Test_indirect_call_type_ref_tuple_apply(): boolean {
     const ARG: [number, string] = [42, '73'];
 
     let result = js.indirectCallTypeByRefTuple.apply(null, [ARG] as FixedArray<[number, string]>) as [number, string];
-    assertTrue(JSON.stringify(result) == JSON.stringify(ARG));
+    arktest.assertTrue(JSON.stringify(result) == JSON.stringify(ARG));
 
     return true;
 }
@@ -77,7 +77,7 @@ function Test_indirect_call_type_ref_tuple_bind_with_arg(): boolean {
 
     let boundWithArg = js.indirectCallTypeByRefTuple.bind(null, ARG);
     let result = boundWithArg() as [number, string];
-    assertTrue(JSON.stringify(result) == JSON.stringify(ARG));
+    arktest.assertTrue(JSON.stringify(result) == JSON.stringify(ARG));
 
     return true;
 }
@@ -87,7 +87,7 @@ function Test_indirect_call_type_ref_tuple_bind_without_arg(): boolean {
 
     let boundWithoutArg = js.indirectCallTypeByRefTuple.bind(null);
     let result = boundWithoutArg(ARG) as [number, string];
-    assertTrue(JSON.stringify(result) == JSON.stringify(ARG));
+    arktest.assertTrue(JSON.stringify(result) == JSON.stringify(ARG));
 
     return true;
 }
@@ -102,7 +102,7 @@ function Test_indirect_call_type_ref_map_call(): boolean {
 
     let result = js.indirectCallTypeByRefMap.call(null, arg) as Map<string, number>;
 
-    assertTrue(result.get(KEY2) == EXPECTED_VALUE);
+    arktest.assertTrue(result.get(KEY2) == EXPECTED_VALUE);
 
     return true;
 }
@@ -117,7 +117,7 @@ function Test_indirect_call_type_ref_map_apply(): boolean {
 
     let result = js.indirectCallTypeByRefMap.apply(null, [arg]) as Map<string, number>;
 
-    assertTrue(result.get(KEY2) == EXPECTED_VALUE);
+    arktest.assertTrue(result.get(KEY2) == EXPECTED_VALUE);
 
     return true;
 }
@@ -133,7 +133,7 @@ function Test_indirect_call_type_ref_map_bind_with_arg(): boolean {
     let boundWithArg = js.indirectCallTypeByRefMap.bind(null, arg);
     let result = boundWithArg() as Map<string, number>;
 
-    assertTrue(result.get(KEY2) == EXPECTED_VALUE);
+    arktest.assertTrue(result.get(KEY2) == EXPECTED_VALUE);
 
     return true;
 }
@@ -149,7 +149,7 @@ function Test_indirect_call_type_ref_map_bind_without_arg(): boolean {
     let boundWithArg = js.indirectCallTypeByRefMap.bind(null);
     let result = boundWithArg(arg) as Map<string, number>;
 
-    assertTrue(result.get(KEY2) == EXPECTED_VALUE);
+    arktest.assertTrue(result.get(KEY2) == EXPECTED_VALUE);
 
     return true;
 }

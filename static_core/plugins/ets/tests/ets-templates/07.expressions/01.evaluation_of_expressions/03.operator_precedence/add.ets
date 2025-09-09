@@ -21,10 +21,10 @@ function main(): int {
     let res: int, t2 = 2, t3 = 3, t4 = 4, t8 = 8, t255  = 255
 
     // cast
-    res = t2 + t255 as byte
+    res = (t2 + t255).toByte()
     if (res != 1) return 1;
 
-    res = t255 as byte + t3
+    res = t255.toByte() + t3
     if (res != 2) return 1;
 
     // shifts

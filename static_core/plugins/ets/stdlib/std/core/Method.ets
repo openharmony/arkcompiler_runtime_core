@@ -87,7 +87,11 @@ export final class Method extends Object {
         }
         let convertedArgs: FixedArray<NullishType> = new NullishType[args.length]
         for (let i = 0; i < convertedArgs.length; i++) {
-            convertedArgs[i] = thisType.getParameter(i).getType().convertObject(args[i])
+            if (args[i] === undefined) {
+                convertedArgs[i] = args[i]
+            } else {
+                convertedArgs[i] = thisType.getParameter(i).getType().convertObject(args[i])
+            }
         }
         if (isCtor) {
             return TypeAPIMethodInvokeConstructor(this.methodType!, convertedArgs)

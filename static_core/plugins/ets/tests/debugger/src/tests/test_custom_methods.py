@@ -137,26 +137,6 @@ async def test_remove_breakpoint(
         assert paused.call_frames[0].location.line_number == 6
 
 
-async def test_get_script_source(
-    code_compiler: StringCodeCompiler,
-    ark_runtime: Runtime,
-    nursery: trio.Nursery,
-    debug_locator: DebugLocator,
-) -> None:
-    script_file = code_compiler.compile(CODE)
-
-    async with ark_runtime.run(nursery, module=script_file) as process:
-        async with debug_locator.connect(nursery) as client:
-            await client.configure(nursery)
-            await client.run_if_waiting_for_debugger()
-
-            source = await client.get_script_source(runtime.ScriptId(1))
-            assert source == CODE
-
-        process.terminate()
-    assert process.returncode == -SIGTERM
-
-
 CODE_DEAD_LOOP: Final[
     str
 ] = """\

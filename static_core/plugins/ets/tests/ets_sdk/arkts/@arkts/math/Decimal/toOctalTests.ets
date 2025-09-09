@@ -31,7 +31,7 @@ function main(): int {
     return suite.run();
 }
 
-function checkToOctalResult(expected: string, n: string | number, sd: number, rm: number) {
+function checkToOctalResult(expected: string, n: string | double, sd: double, rm: int) {
     Decimal.precision = sd;
     Decimal.rounding = rm;
     arktest.assertEQ(new Decimal(n).toOctal(), expected);

@@ -24,7 +24,7 @@ let map: Record<Number, String> = {
 };
 
 function main() {
-  assertEQ( map.size, 2)
-  assertEQ( map.get(10), "hello")
-  assertEQ( map.get(20), "world")
+  arktest.assertEQ( map.size, 2)
+  arktest.assertEQ( map.get(10), "hello")
+  arktest.assertEQ( map.get(20), "world")
 }

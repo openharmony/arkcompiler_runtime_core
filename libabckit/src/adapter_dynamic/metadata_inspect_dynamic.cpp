@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "libabckit/include/c/statuses.h"
-#include "libabckit/include/c/metadata_core.h"
+#include "libabckit/c/statuses.h"
+#include "libabckit/c/metadata_core.h"
 #include "libabckit/src/adapter_dynamic/metadata_inspect_dynamic.h"
 #include "libabckit/src/adapter_dynamic/metadata_modify_dynamic.h"
 #include "libabckit/src/adapter_dynamic/helpers_dynamic.h"

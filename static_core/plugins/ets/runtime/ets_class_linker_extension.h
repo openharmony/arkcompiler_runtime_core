@@ -49,6 +49,8 @@ public:
 
     bool InitializeArrayClass(Class *arrayClass, Class *componentClass) override;
 
+    bool InitializeUnionClass(Class *unionClass, Span<Class *> constituentClasses) override;
+
     void InitializePrimitiveClass(Class *primitiveClass) override;
 
     size_t GetClassVTableSize(ClassRoot root) override;
@@ -68,6 +70,12 @@ public:
     void FreeClass(Class *klass) override;
 
     void InitializeClassRoots();
+
+    Class *CreateStringSubClass(const uint8_t *descriptor, Class *stringClass, ClassRoot type);
+
+    const uint8_t *GetStringClassDescriptor(ClassRoot strCls);
+
+    bool InitializeStringClass(Class *classClass);
 
     bool InitializeClass(Class *klass) override;
 
@@ -112,10 +120,18 @@ public:
         return langCtx_;
     }
 
+    void InitializeFinish();
+
     static EtsRuntimeLinker *GetOrCreateEtsRuntimeLinker(ClassLinkerContext *ctx);
+
+    ClassLinkerContext *GetCommonContext(Span<Class *> classes) const override;
+    static ClassLinkerContext *GetParentContext(ClassLinkerContext *ctx);
 
     /// @brief Removes reference to `RuntimeLinker` from `BootContext` and `EtsClassLinkerContext`.
     static void RemoveRefToLinker(ClassLinkerContext *ctx);
+
+    /// @brief Compute LUB type for union.
+    const uint8_t *ComputeLUB(const ClassLinkerContext *ctx, const uint8_t *descriptor) override;
 
     NO_COPY_SEMANTIC(EtsClassLinkerExtension);
     NO_MOVE_SEMANTIC(EtsClassLinkerExtension);

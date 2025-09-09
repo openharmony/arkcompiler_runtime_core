@@ -35,5 +35,5 @@
 
  function main() {
     let result: Object = new Derived().foo;
-    assertTrue(result instanceof Object)
+    arktest.assertTrue(result instanceof Object)
  }

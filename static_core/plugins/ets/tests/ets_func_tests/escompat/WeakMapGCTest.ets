@@ -88,13 +88,13 @@ function weakMapKeyGarbageCollection(): void {
                 GC.waitForFinishGC(gcId)
             }
         } catch (gcEx) {
-            assertTrue(false)
+            arktest.assertTrue(false)
         }
     }
 }
 
 function main(): int {
-    const suite = new ArkTestsuite("WeakMap GC tests")
+    const suite = new arktest.ArkTestsuite("WeakMap GC tests")
 
     suite.addTest("WeakMap keys garbage collection", weakMapKeyGarbageCollection)
 

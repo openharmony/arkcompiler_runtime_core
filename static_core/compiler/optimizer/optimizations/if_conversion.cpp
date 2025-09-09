@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,9 @@ bool IfConversion::RunImpl()
         if (block->GetSuccsBlocks().size() == MAX_SUCCS_NUM) {
             result |= TryTriangle(block) || TryDiamond(block);
         }
+    }
+    if (GetGraph()->GetArch() == Arch::AARCH64) {
+        result |= TryReplaceSelectImmVariablesWithConstants();
     }
     COMPILER_LOG(DEBUG, IFCONVERSION) << GetPassName() << " complete";
     return result;
@@ -280,6 +283,61 @@ bool IfConversion::IsConditionChainPhi(Inst *phi)
         }
     }
     return true;
+}
+
+// It is optimized for special SelectImm insts, so that using ubfx replacing test and csel inst on arm64 target.
+// 2.i32  AddI v1, 0x1
+// 3.i32  SelectImm v1, v2, v0, 0x2, CC_TST_EQ
+// 4.i32  AddI v3, 0x1
+// 5.i32  SelectImm v3, v4, v0, 0x4, CC_TST_EQ
+// ====>
+// 2.i32  ExtractBitfield, v0, 1, 1 [ZeroExtension]
+// 3.i32  Add v1, v2
+// 4.i32  ExtractBitfield, v0, 2, 1 [ZeroExtension]
+// 5.i32  Add v3, v4
+bool IfConversion::TryReplaceSelectImmVariablesWithConstants()
+{
+    bool result = false;
+    for (auto it : GetGraph()->GetBlocksRPO()) {
+        for (auto inst : it->AllInsts()) {
+            if (inst->GetOpcode() != Opcode::SelectImm) {
+                continue;
+            }
+            auto selectImm = inst->CastToSelectImm();
+            auto cc = selectImm->GetCc();
+            auto imm = selectImm->GetImm();
+            // Optimized Conditions:
+            // (1) condition code is TST_CC_EQ
+            // (2) the imm of SelectImm inst is the power of 2
+            // (3) the input1 of SelectImm inst is an AddI inst, and the imm of AddI inst is 1
+            // (4) the input0 of SelectImm inst is equal to the input0 of the AddI inst in (3)
+            if (cc != CC_TST_EQ || static_cast<int64_t>(imm) <= 0 || !helpers::math::IsPowerOfTwo(imm)) {
+                continue;
+            }
+            auto operand0 = inst->GetInput(0).GetInst();
+            auto operand1 = inst->GetInput(1).GetInst();
+            if (operand1->GetOpcode() != Opcode::AddI) {
+                continue;
+            }
+            auto addImm = operand1->CastToAddI()->GetImm();
+            if (addImm != 1ULL) {
+                continue;
+            }
+            if (operand1->GetInput(0).GetInst() != operand0) {
+                continue;
+            }
+
+            auto operand2 = inst->GetInput(2).GetInst();
+            auto newUbfxInst =
+                GetGraph()->CreateInstExtractBitfield(inst, operand2, helpers::math::GetIntLog2(imm), 1U);
+            auto newAddInst = GetGraph()->CreateInstAdd(inst, operand0, newUbfxInst);
+            inst->InsertBefore(newUbfxInst);
+            inst->InsertBefore(newAddInst);
+            inst->ReplaceUsers(newAddInst);
+            result = true;
+        }
+    }
+    return result;
 }
 
 void IfConversion::InvalidateAnalyses()

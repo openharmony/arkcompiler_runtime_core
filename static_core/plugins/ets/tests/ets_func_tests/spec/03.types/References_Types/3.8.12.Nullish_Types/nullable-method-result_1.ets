@@ -31,6 +31,6 @@ class TestC {
 
 
 function main(): void {
-    assertTrue( new TestC().test() === null)
+    arktest.assertTrue( new TestC().test() === null)
 
 }

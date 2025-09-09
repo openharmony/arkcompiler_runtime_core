@@ -23,6 +23,6 @@ name: eval-lazy_0.ets
 
 function main(): void {
     let ns: Int | undefined;
-    assertEQ( (ns ?? 42), 42)
+    arktest.assertEQ( (ns ?? 42), 42)
 
 }

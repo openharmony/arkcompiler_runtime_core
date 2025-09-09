@@ -223,7 +223,7 @@ void BalanceExpressions::TryExtendChainRec(Inst *inst)
 {
     ASSERT(inst);
     if (inst->GetOpcode() == GetOpcode()) {
-        if (inst->HasSingleUser()) {
+        if (inst->HasSingleUser() && !inst->IsIntrinsic()) {
             inst->SetMarker(processedInstMrk_);
 
             AnalyzeInputsRec(inst);

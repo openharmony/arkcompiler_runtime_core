@@ -15,103 +15,73 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_ANI_OPTIONS_PARSER_H
 #define PANDA_PLUGINS_ETS_RUNTIME_ANI_OPTIONS_PARSER_H
 
-#include <string>
-#include <vector>
-
 #include "ani.h"
-#ifdef PANDA_TARGET_OHOS
-#include "plugins/ets/runtime/platform/ohos/logger.h"
-#endif
+
+#include "generated/logger_options.h"
+#include "libpandabase/utils/pandargs.h"
+#include "libpandabase/utils/span.h"
+#include "plugins/ets/runtime/ani/ani_options.h"
+#include "runtime/include/runtime_options.h"
 
 namespace ark::ets::ani {
 
-/**
- * @brief Class represents ANI options parser
- *
- * Class unites panda runtime options and ANI specific options parsing
- *
- */
-class ANIOptionsParser {
+class OptionsParser final {
 public:
-    using LoggerCallback = void (*)(FILE *stream, int level, const char *component, const char *message);
+    using ErrorMsg = std::optional<std::string>;
 
-    ANIOptionsParser(size_t optionsSize, const ani_option *inputOptions)
-        : optionsSize_(optionsSize), inputOptions_(inputOptions)
+    OptionsParser();
+    ~OptionsParser() = default;
+
+    ErrorMsg Parse(const ani_options *options);
+
+    const ANIOptions &GetANIOptions()
     {
-        Parse();
+        return aniOptions_;
     }
 
-    const std::vector<std::string> &GetRuntimeOptions()
+    const logger::Options &GetLoggerOptions()
+    {
+        return loggerOptions_;
+    }
+
+    const RuntimeOptions &GetRuntimeOptions()
     {
         return runtimeOptions_;
     }
 
-    const std::vector<ani_option> &GetANIOptions()
-    {
-        return aniSpecificOptions_;
-    }
-
-    bool IsInteropMode() const
-    {
-        return isInteropMode_;
-    }
-
-    void *GetInteropEnv() const
-    {
-        return interopEnv_;
-    }
-
-    LoggerCallback GetLoggerCallback()
-    {
-#ifdef PANDA_TARGET_OHOS
-        return loggerCallback_ == nullptr ? ohos::DefaultLogger : loggerCallback_;
-#else
-        return loggerCallback_;
-#endif
-    }
-
 private:
-    void Parse()
-    {
-        const std::string depricatedPref = "--ext:--";
-        const std::string prefix = "--ext:";
+    struct Option {
+        std::string_view fullName;
+        std::string_view name;
+        std::string_view value;
+        const ani_option *opt;
+    };
 
-        for (size_t i = 0; i < optionsSize_; ++i) {
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            const ani_option opt = inputOptions_[i];
-            std::string option(opt.option);
+    using OptionsMap = std::map<std::string_view, std::unique_ptr<Option>>;
 
-            if (option == "--logger") {
-                loggerCallback_ = reinterpret_cast<LoggerCallback>(opt.extra);
-                continue;
-            }
+    ErrorMsg GetParserDependentArgs(const PandArgParser &parser, const std::set<std::string> &productOptions,
+                                    OptionsMap &extOptionsMap, std::vector<std::string> &outArgs);
+    ErrorMsg RunOptionsParser(PandArgParser &parser, const std::vector<std::string> &args);
+    ErrorMsg RunLoggerOptionsParser(const std::vector<std::string> &args);
+    ErrorMsg RunRuntimeOptionsParser(const std::vector<std::string> &args);
+    ErrorMsg RunCompilerOptionsParser(const std::vector<std::string> &args);
+    std::unique_ptr<Option> ParseExtendedOption(std::string_view name, std::string_view value, const ani_option *opt);
+    ErrorMsg ParseExtOptions(OptionsMap extOptionsMap);
 
-            // NOTE(konstanting, #23205): this explicit comparison was requested by v.cherkashin
-            // for better readability. To be refactored.
-            if (option == "--ext:interop") {
-                isInteropMode_ = true;
-                interopEnv_ = opt.extra;
-                continue;
-            }
+    ANIOptions aniOptions_;
 
-            // NOTE: need to skip forbidden options, such as "--load-runtimes"
-            if (option.size() >= depricatedPref.size() && option.substr(0, depricatedPref.size()) == depricatedPref) {
-                runtimeOptions_.push_back("--" + option.substr(depricatedPref.size()));
-            } else if (option.size() >= prefix.size() && option.substr(0, prefix.size()) == prefix) {
-                runtimeOptions_.push_back("--" + option.substr(prefix.size()));
-            }
-        }
-    }
+    PandArgParser loggerOptionsParser_;
+    logger::Options loggerOptions_ {""};
 
-    void *interopEnv_ {nullptr};
-    bool isInteropMode_ {false};
-    LoggerCallback loggerCallback_ = nullptr;
+    PandArgParser runtimeOptionsParser_;
+    RuntimeOptions runtimeOptions_;
 
-    size_t optionsSize_;
-    const ani_option *inputOptions_;
-    std::vector<ani_option> aniSpecificOptions_;
-    std::vector<std::string> runtimeOptions_;
+    PandArgParser compilerOptionsParser_;
+
+    NO_COPY_SEMANTIC(OptionsParser);
+    NO_MOVE_SEMANTIC(OptionsParser);
 };
+
 }  // namespace ark::ets::ani
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_ANI_OPTIONS_PARSER_H

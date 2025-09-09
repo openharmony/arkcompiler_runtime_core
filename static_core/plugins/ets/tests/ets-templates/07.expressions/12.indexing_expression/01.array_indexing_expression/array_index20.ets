@@ -24,9 +24,9 @@ class Container {
 function main(): void {
   let containers: Container[] = [new Container(), new Container()];
   containers[0].value = 10;
-  assertEQ(containers[1].value, 0);
+  arktest.assertEQ(containers[1].value, 0);
 
   let first = containers[0];
   first.value = 20;
-  assertEQ(containers[0].value, 20);
+  arktest.assertEQ(containers[0].value, 20);
 }

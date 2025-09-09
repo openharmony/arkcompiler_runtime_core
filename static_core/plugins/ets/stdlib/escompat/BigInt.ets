@@ -61,13 +61,13 @@ export final class BigInt {
     private static readonly BITS_PER_1024_DEC = 3402
     private static readonly BIGINT64_MASK = new BigInt(0xffffffffffffffff)
 
-    internal static resetBytes(b: FixedArray<int>):void {
+    private static resetBytes(b: FixedArray<int>):void {
         for (let i = 0; i<b.length; i++) {
             b[i] = 0
         }
     }
 
-    internal static fromLongHelper(val: long, bitLen: int, sign: int): FixedArray<int> {
+    private static fromLongHelper(val: long, bitLen: int, sign: int): FixedArray<int> {
         // get required array of Ints' size to store whole value
         // split by suported mode (baseSys)
         let size: int = ((bitLen + BigInt.shiftSys - 1) / BigInt.shiftSys).toInt()
@@ -114,7 +114,18 @@ export final class BigInt {
     constructor(d: double) {
         // should we cast it to long at then use internal helper?
         // i.e. like this: this.bytes = BigInt.fromLongHelper(d as long, 64)
-        this((d as Double).toString())
+        if (!d.isInteger()) {
+            throw new RangeError(`the number ${d} cannot be converted to a BigInt because it is not an integer`)
+        }
+        if (d > Long.MAX_VALUE || d < Long.MIN_VALUE) {
+            let trimmed = d.toString().trim()
+            let a = BigInt.parseFromString(trimmed)
+            this.bytes = a[0] as FixedArray<int>
+            this.sign = a[1] as int
+            return
+        }
+        this.sign = d < 0 ? -1 : (d == 0 ? 0 : 1)
+        this.bytes = this.sign == 0 ? [] as FixedArray<int> : BigInt.fromLongHelper(d.toLong(), 64, this.sign)
     }
 
     constructor(d: string) {
@@ -141,6 +152,7 @@ export final class BigInt {
         this.sign = this.bytes.length == 0 ? 0 : sign
     }
 
+    //NOTE(ekaterinazaytseva): unable to replace internal - used in typedArrays
     internal static fromULong(val: long): BigInt {
         let ret = val == 0 ? new BigInt([], 0) : new BigInt(BigInt.fromLongHelper(val, 64, 1), 1)
         return ret
@@ -272,7 +284,10 @@ export final class BigInt {
         return this.toString(10)
     }
 
-    public toString(radix: double): string {
+    public toString(radix?: double): string {
+        if (radix == undefined) {
+            return this.toString(10)
+        }
         if (radix == -Infinity || radix == +Infinity || radix == NaN) {
             throw new RangeError(BigInt.INVALID_RADIX_MESSAGE)
         }
@@ -291,6 +306,7 @@ export final class BigInt {
         return (this.negative() ? "-" : "").concat((fastToStringHandler != undefined) ? fastToStringHandler!(this) : this.toStringAsGenericRadix(radix))
     }
 
+    //NOTE(ekaterinazaytseva): unable to replace internal - used as public in initializerBlock
     internal toStringAsBinary(): string {
         let reversedInts = BigInt.reverse(this.bytes)
         let intToBinaryString = (value: Long) => { return value.toString(2) }
@@ -301,6 +317,7 @@ export final class BigInt {
         return result.toString()
     }
 
+    //NOTE(ekaterinazaytseva): unable to replace internal - used as public in initializerBlock
     internal toStringAsDecimal(): string {
         let digits = this.bytesToDigits(this.bytes)
         let result = new StringBuilder
@@ -310,24 +327,25 @@ export final class BigInt {
         return result.toString()
     }
 
-    internal toStringAsGenericRadix(radix: int): string {
+    private toStringAsGenericRadix(radix: int): string {
         const radixBigInt = new BigInt(radix)
         let result: string = ""
         let dividend = this.abs()
         while (dividend > 0n) {
             if (dividend < MAX_REGULAR_INTEGER) {
-                result = StringBuilder.concatStrings((dividend.getLong() as Number).toString(radix), result)
+                result = StringBuilder.concatStrings(Long.toDouble(dividend.getLong()).toString(radix), result)
                 break
             }
             // NOTE(@aendrewpolyakov, #18313): Rewrite once destructuring assignment got support
             let divisionResult = dividend.operatorDivideInternal(radixBigInt)
             let quotent = divisionResult[0], remainder = divisionResult[1]
-            result = StringBuilder.concatStrings((remainder.getLong() as Number).toString(radix), result)
+            result = StringBuilder.concatStrings(Long.toDouble(remainder.getLong()).toString(radix), result)
             dividend = quotent
         }
         return result.toString()
     }
 
+    //NOTE(ekaterinazaytseva): unable to replace internal - used as public in initializerBlock
     internal toStringAsPowerOfTwoRadix(radix: int): string {
         let chunkSize: Number = Math.log2(radix)
         if (!chunkSize.isInteger() || radix < 2) {
@@ -336,7 +354,7 @@ export final class BigInt {
         let result = new StringBuilder
         let bitChunks = this.sliceToBinaryChunks(chunkSize)
         for (let bitChunk of bitChunks) {
-            result = result.append((parseInt(bitChunk!, 2) as Number).toString(radix))
+            result = result.append(parseInt(bitChunk!, 2).toString(radix))
         }
         return result.toString()
     }
@@ -370,7 +388,7 @@ export final class BigInt {
         if (bits < 0 || bits > Double.MAX_SAFE_INTEGER) {
             throw new RangeError('bits < 0 or bits > Double.MAX_SAFE_INTEGER')
         }
-        if (bits >= num.length() * BigInt.shiftSys) {
+        if (bits > num.length() * BigInt.shiftSys) {
             return num
         }
         // operatorLeftShift temporary has limitations to 255 on rhs

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,32 +17,108 @@
 #define PANDA_ASSEMBLER_ASSEMBLY_DEBUG_H
 
 #include <cstdint>
+#include <limits>
 #include <string>
+#include <memory>
+#include "macros.h"
 
 namespace ark::pandasm::debuginfo {
 
+inline const std::string EMPTY_LINE {};  // NOLINT(fuchsia-statically-constructed-objects)
+
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
-struct Ins {
-    size_t lineNumber = 0;
-    uint32_t columnNumber = 0;
-    std::string wholeLine;  // NOTE(mbolshov): redundant given file and line_number
-    size_t boundLeft = 0;
-    size_t boundRight = 0;
+class Ins {
+#if defined(NOT_OPTIMIZE_PERFORMANCE)
+    std::shared_ptr<std::string> wholeLine_ = nullptr;
+#else
+    std::unique_ptr<std::string> wholeLine_ = nullptr;
+#endif
+    std::uint32_t lineNumber_ = 0U;
+    std::uint32_t columnNumber_ = 0U;
+    std::uint32_t boundLeft_ = 0U;
+    std::uint32_t boundRight_ = 0U;
 
-    void SetLineNumber(size_t ln)
-    {
-        lineNumber = ln;
-    }
-
-    void SetColumnNumber(size_t cn)
-    {
-        columnNumber = cn;
-    }
-
+public:
     Ins() = default;
-    Ins(size_t lN, std::string &fC, size_t bL, size_t bR)
-        : lineNumber(lN), wholeLine(std::move(fC)), boundLeft(bL), boundRight(bR)
+    ~Ins() = default;
+#if defined(NOT_OPTIMIZE_PERFORMANCE)
+    DEFAULT_COPY_SEMANTIC(Ins);
+#else
+    NO_COPY_SEMANTIC(Ins);
+#endif
+    DEFAULT_MOVE_SEMANTIC(Ins);
+
+    void SetLineNumber(size_t const ln)
     {
+        ASSERT(ln <= std::numeric_limits<uint32_t>::max());
+        lineNumber_ = ln;
+    }
+
+    void SetColumnNumber(size_t const cn)
+    {
+        ASSERT(cn <= std::numeric_limits<uint32_t>::max());
+        columnNumber_ = cn;
+    }
+
+    void SetBoundLeft(size_t const bl)
+    {
+        ASSERT(bl <= std::numeric_limits<uint32_t>::max());
+        boundLeft_ = bl;
+    }
+
+    void SetBoundRight(size_t const br)
+    {
+        ASSERT(br <= std::numeric_limits<uint32_t>::max());
+        boundRight_ = br;
+    }
+
+    template <typename... Args>
+    void SetWholeLine(Args &&...args)
+    {
+        static_assert(std::is_constructible_v<std::string, Args...>, "Invalid string initialization value.");
+#if defined(NOT_OPTIMIZE_PERFORMANCE)
+        wholeLine_ = std::make_shared<std::string>(std::forward<Args>(args)...);
+#else
+        wholeLine_ = std::make_unique<std::string>(std::forward<Args>(args)...);
+#endif
+    }
+
+    std::uint32_t LineNumber() const noexcept
+    {
+        return lineNumber_;
+    }
+
+    std::uint32_t ColumnNumber() const noexcept
+    {
+        return columnNumber_;
+    }
+
+    std::uint32_t BoundLeft() const noexcept
+    {
+        return boundLeft_;
+    }
+
+    std::uint32_t BoundRight() const noexcept
+    {
+        return boundRight_;
+    }
+
+    std::string const &WholeLine() const noexcept
+    {
+        return wholeLine_ != nullptr ? *wholeLine_ : EMPTY_LINE;
+    }
+
+    Ins Clone() const
+    {
+        Ins clone {};
+        clone.SetLineNumber(lineNumber_);
+        clone.SetColumnNumber(columnNumber_);
+        clone.SetBoundLeft(boundLeft_);
+        clone.SetBoundRight(boundRight_);
+        if (wholeLine_ != nullptr) {
+            clone.SetWholeLine(WholeLine());
+        }
+        return clone;
     }
 };
 // NOLINTEND(misc-non-private-member-variables-in-classes)

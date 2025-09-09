@@ -14,7 +14,7 @@
  */
 
 function main(): int {
-    const suite = new ArkTestsuite("Intl. NumberFormat $_invoke call constructor with NumberFormatOptios");
+    const suite = new arktest.ArkTestsuite("Intl. NumberFormat $_invoke call constructor with NumberFormatOptios");
     // Tests from https://gitee.com/openharmony/xts_acts/tree/master/commonlibrary/ets_utils/codeparsingtest/builtinstest/entry/src/ohosTest/ets/test/Intl/Intl.test.ets
     suite.addTest("testNumberFormatConstructorNew0001", testNumberFormatConstructorNew0001);
     suite.addTest("testNumberFormatConstructorNew0002", testNumberFormatConstructorNew0002);
@@ -78,41 +78,41 @@ function main(): int {
 
 function testNumberFormatConstructorNew0001() {
     let numberFormat = Intl.NumberFormat.$_invoke();
-    assertTrue(numberFormat instanceof Intl.NumberFormat);
+    arktest.assertTrue(numberFormat instanceof Intl.NumberFormat);
 }
 
 function testNumberFormatConstructorNew0002() {
     let locales = "zh";
     let numberFormat = Intl.NumberFormat.$_invoke(locales);
-    assertTrue(numberFormat instanceof Intl.NumberFormat);
+    arktest.assertTrue(numberFormat instanceof Intl.NumberFormat);
 }
 
 function testNumberFormatConstructorNew0003() {
     let locales: string = "";
     let numberFormat = Intl.NumberFormat.$_invoke(locales);
-    assertTrue(numberFormat instanceof Intl.NumberFormat);
+    arktest.assertTrue(numberFormat instanceof Intl.NumberFormat);
 }
 
 function testNumberFormatConstructorNew0004() {
-    expectError((): void throws => { Intl.NumberFormat.$_invoke("test") });
+    arktest.expectError((): void => { Intl.NumberFormat.$_invoke("test") });
 }
 
 function testNumberFormatConstructorNew0005() {
     let locales: string[] = [];
     let numberFormat = Intl.NumberFormat.$_invoke(locales);
-    assertTrue(numberFormat instanceof Intl.NumberFormat);
+    arktest.assertTrue(numberFormat instanceof Intl.NumberFormat);
 }
 
 function testNumberFormatConstructorNew0006() {
     let locales = ["zh"];
     let numberFormat = Intl.NumberFormat.$_invoke(locales);
-    assertTrue(numberFormat instanceof Intl.NumberFormat);
+    arktest.assertTrue(numberFormat instanceof Intl.NumberFormat);
 }
 
 function testNumberFormatConstructorNew0007() {
     let locales = ["zh", "en-US", "de"];
     let numberFormat = Intl.NumberFormat.$_invoke(locales);
-    assertTrue(numberFormat instanceof Intl.NumberFormat);
+    arktest.assertTrue(numberFormat instanceof Intl.NumberFormat);
 }
 
 function testNumberFormatConstructorNew0009() {
@@ -121,7 +121,7 @@ function testNumberFormatConstructorNew0009() {
         localeMatcher: "lookup"
     }
     let numberFormat = Intl.NumberFormat.$_invoke(locales, options);
-    assertTrue(numberFormat instanceof Intl.NumberFormat);
+    arktest.assertTrue(numberFormat instanceof Intl.NumberFormat);
 }
 
 function testNumberFormatConstructorNew0010() {
@@ -130,7 +130,7 @@ function testNumberFormatConstructorNew0010() {
         localeMatcher: "best fit"
     }
     let numberFormat = Intl.NumberFormat.$_invoke(locales, options);
-    assertTrue(numberFormat instanceof Intl.NumberFormat);
+    arktest.assertTrue(numberFormat instanceof Intl.NumberFormat);
 }
 
 function testNumberFormatConstructorNew0011() {
@@ -139,7 +139,7 @@ function testNumberFormatConstructorNew0011() {
         localeMatcher: undefined
     }
     let numberFormat = Intl.NumberFormat.$_invoke(locales, options);
-    assertTrue(numberFormat instanceof Intl.NumberFormat);
+    arktest.assertTrue(numberFormat instanceof Intl.NumberFormat);
 }
 
 function testNumberFormatConstructorNew0013() {
@@ -148,7 +148,7 @@ function testNumberFormatConstructorNew0013() {
           style: "decimal"
     }
     let numberFormat = Intl.NumberFormat.$_invoke(locales, options);
-    assertTrue(numberFormat instanceof Intl.NumberFormat);
+    arktest.assertTrue(numberFormat instanceof Intl.NumberFormat);
 }
 
 function testNumberFormatConstructorNew0014() {
@@ -156,7 +156,7 @@ function testNumberFormatConstructorNew0014() {
     let options: Intl.NumberFormatOptions = {
           style: "currency"
     }
-    expectError((): void throws => { Intl.NumberFormat.$_invoke(locales, options) }, new RangeError("Style is currency but currency is undefined"));
+    arktest.expectError((): void => { Intl.NumberFormat.$_invoke(locales, options) }, new RangeError("Style is currency but currency is undefined"));
 }
 
 function testNumberFormatConstructorNew0015() {
@@ -166,7 +166,7 @@ function testNumberFormatConstructorNew0015() {
           currency: "USD"
     }
     let numberFormat = Intl.NumberFormat.$_invoke(locales, options);
-    assertTrue(numberFormat instanceof Intl.NumberFormat);
+    arktest.assertTrue(numberFormat instanceof Intl.NumberFormat);
 }
 
 function testNumberFormatConstructorNew0016() {
@@ -175,7 +175,7 @@ function testNumberFormatConstructorNew0016() {
           style: "percent"
     }
     let numberFormat = Intl.NumberFormat.$_invoke(locales, options);
-    assertTrue(numberFormat instanceof Intl.NumberFormat);
+    arktest.assertTrue(numberFormat instanceof Intl.NumberFormat);
 }
 
 function testNumberFormatConstructorNew0017() {
@@ -185,7 +185,7 @@ function testNumberFormatConstructorNew0017() {
           unit: "kilometer"
     }
     let numberFormat = Intl.NumberFormat.$_invoke(locales, options);
-    assertTrue(numberFormat instanceof Intl.NumberFormat);
+    arktest.assertTrue(numberFormat instanceof Intl.NumberFormat);
 }
 
 function testNumberFormatConstructorNew0018() {
@@ -194,7 +194,7 @@ function testNumberFormatConstructorNew0018() {
           style: undefined
     }
     let numberFormat = Intl.NumberFormat.$_invoke(locales, options);
-    assertTrue(numberFormat instanceof Intl.NumberFormat);
+    arktest.assertTrue(numberFormat instanceof Intl.NumberFormat);
 }
 
 function testNumberFormatConstructorNew0019() {
@@ -203,7 +203,7 @@ function testNumberFormatConstructorNew0019() {
           currency: "EUR"
     }
     let numberFormat = Intl.NumberFormat.$_invoke(locales, options);
-    assertTrue(numberFormat instanceof Intl.NumberFormat);
+    arktest.assertTrue(numberFormat instanceof Intl.NumberFormat);
 }
 
 function testNumberFormatConstructorNew0020() {
@@ -212,7 +212,7 @@ function testNumberFormatConstructorNew0020() {
           currency: undefined
     }
     let numberFormat = Intl.NumberFormat.$_invoke(locales, options);
-    assertTrue(numberFormat instanceof Intl.NumberFormat);
+    arktest.assertTrue(numberFormat instanceof Intl.NumberFormat);
 }
 
 function testNumberFormatConstructorNew0021() {
@@ -220,7 +220,7 @@ function testNumberFormatConstructorNew0021() {
     let options: Intl.NumberFormatOptions = {
           currency: "test"
     }
-    expectError((): void throws => { Intl.NumberFormat.$_invoke(locales, options) }, new RangeError("Invalid currency"));
+    arktest.expectError((): void => { Intl.NumberFormat.$_invoke(locales, options) }, new RangeError("Invalid currency"));
 }
 
 function testNumberFormatConstructorNew0022() {
@@ -230,7 +230,7 @@ function testNumberFormatConstructorNew0022() {
     }
     let numberFormat = Intl.NumberFormat.$_invoke(locales, options);
     let formattedNumber = numberFormat.format(1234567.89);
-    assertEQ(formattedNumber, "1,234,567.89");
+    arktest.assertEQ(formattedNumber, "1,234,567.89");
 }
 
 function testNumberFormatConstructorNew0023() {
@@ -242,7 +242,7 @@ function testNumberFormatConstructorNew0023() {
     }
     let numberFormat = Intl.NumberFormat.$_invoke(locales, options);
     let formattedNumber = numberFormat.format(-1234567.89);
-    assertEQ(formattedNumber, "(¥1,234,567.89)");
+    arktest.assertEQ(formattedNumber, "(¥1,234,567.89)");
 }
 
 function testNumberFormatConstructorNew0024() {
@@ -252,7 +252,7 @@ function testNumberFormatConstructorNew0024() {
     }
     let numberFormat = Intl.NumberFormat.$_invoke(locales, options);
     let formattedNumber = numberFormat.format(1234567.89);
-    assertEQ(formattedNumber, "1,234,567.89");
+    arktest.assertEQ(formattedNumber, "1,234,567.89");
 }
 
 function testNumberFormatConstructorNew0026() {
@@ -262,7 +262,7 @@ function testNumberFormatConstructorNew0026() {
     }
     let numberFormat = Intl.NumberFormat.$_invoke(locales, options);
     let formattedNumber = numberFormat.format(1234567.89);
-    assertEQ(formattedNumber, "1,234,567.89");
+    arktest.assertEQ(formattedNumber, "1,234,567.89");
 }
 
 function testNumberFormatConstructorNew0027() {
@@ -272,7 +272,7 @@ function testNumberFormatConstructorNew0027() {
     }
     let numberFormat = Intl.NumberFormat.$_invoke(locales, options);
     let formattedNumber = numberFormat.format(1234567.89);
-    assertEQ(formattedNumber, "1234567.89");
+    arktest.assertEQ(formattedNumber, "1234567.89");
 }
 
 function testNumberFormatConstructorNew0028() {
@@ -282,7 +282,7 @@ function testNumberFormatConstructorNew0028() {
     }
     let numberFormat = Intl.NumberFormat.$_invoke(locales, options);
     let formattedNumber = numberFormat.format(1234567.89);
-    assertEQ(formattedNumber, "1,234,567.89");
+    arktest.assertEQ(formattedNumber, "1,234,567.89");
 }
 
 function testNumberFormatConstructorNew0029() {
@@ -292,7 +292,7 @@ function testNumberFormatConstructorNew0029() {
     }
     let numberFormat = Intl.NumberFormat.$_invoke(locales, options);
     let formattedNumber = numberFormat.format(1234567.89);
-    assertEQ(formattedNumber, "1,234,567.89");
+    arktest.assertEQ(formattedNumber, "1,234,567.89");
 }
 
 function testNumberFormatConstructorNew0030() {
@@ -302,7 +302,7 @@ function testNumberFormatConstructorNew0030() {
     }
     let numberFormat = Intl.NumberFormat.$_invoke(locales, options);
     let formattedNumber = numberFormat.format(1234567.89);
-    assertEQ(formattedNumber, "0,001,234,567.89");
+    arktest.assertEQ(formattedNumber, "0,001,234,567.89");
 }
 
 function testNumberFormatConstructorNew0031() {
@@ -312,7 +312,7 @@ function testNumberFormatConstructorNew0031() {
     }
     let numberFormat = Intl.NumberFormat.$_invoke(locales, options);
     let formattedNumber = numberFormat.format(1234567.89);
-    assertEQ(formattedNumber, "000,000,000,000,001,234,567.89");
+    arktest.assertEQ(formattedNumber, "000,000,000,000,001,234,567.89");
 }
 
 function testNumberFormatConstructorNew0032() {
@@ -322,7 +322,7 @@ function testNumberFormatConstructorNew0032() {
     }
     let numberFormat = Intl.NumberFormat.$_invoke(locales, options);
     let formattedNumber = numberFormat.format(1234567.89);
-    assertEQ(formattedNumber, "1,234,567.89");
+    arktest.assertEQ(formattedNumber, "1,234,567.89");
 }
 
 function testNumberFormatConstructorNew0033() {
@@ -330,7 +330,7 @@ function testNumberFormatConstructorNew0033() {
     let options: Intl.NumberFormatOptions = {
           minimumIntegerDigits: 0
     }
-    expectError((): void throws => { Intl.NumberFormat.$_invoke(locales, options) }, new RangeError("Invalid minimumIntegerDigits"));
+    arktest.expectError((): void => { Intl.NumberFormat.$_invoke(locales, options) }, new RangeError("Invalid minimumIntegerDigits"));
 }
 
 function testNumberFormatConstructorNew0034() {
@@ -338,7 +338,7 @@ function testNumberFormatConstructorNew0034() {
     let options: Intl.NumberFormatOptions = {
           minimumIntegerDigits: 22
     }
-    expectError((): void throws => { Intl.NumberFormat.$_invoke(locales, options) }, new RangeError("Invalid minimumIntegerDigits"));
+    arktest.expectError((): void => { Intl.NumberFormat.$_invoke(locales, options) }, new RangeError("Invalid minimumIntegerDigits"));
 }
 
 function testNumberFormatConstructorNew0035() {
@@ -347,7 +347,7 @@ function testNumberFormatConstructorNew0035() {
           minimumFractionDigits: 0
     }
     let numberFormat = Intl.NumberFormat.$_invoke(locales, options);
-    assertTrue(numberFormat instanceof Intl.NumberFormat);
+    arktest.assertTrue(numberFormat instanceof Intl.NumberFormat);
 }
 
 function testNumberFormatConstructorNew0036() {
@@ -355,7 +355,7 @@ function testNumberFormatConstructorNew0036() {
     let options: Intl.NumberFormatOptions = {
           minimumFractionDigits: 50
     }
-    expectNoThrow((): void throws => { Intl.NumberFormat.$_invoke(locales, options) });
+    arktest.expectNoThrow((): void => { Intl.NumberFormat.$_invoke(locales, options) });
 }
 
 function testNumberFormatConstructorNew0037() {
@@ -363,7 +363,7 @@ function testNumberFormatConstructorNew0037() {
     let options: Intl.NumberFormatOptions = {
           minimumFractionDigits: 100
     }
-    expectNoThrow((): void throws => { Intl.NumberFormat.$_invoke(locales, options) });
+    arktest.expectNoThrow((): void => { Intl.NumberFormat.$_invoke(locales, options) });
 }
 
 function testNumberFormatConstructorNew0038() {
@@ -373,7 +373,7 @@ function testNumberFormatConstructorNew0038() {
     }
     let numberFormat = Intl.NumberFormat.$_invoke(locales, options);
     let formattedNumber = numberFormat.format(1234567.89);
-    assertEQ(formattedNumber, "1,234,567.89");
+    arktest.assertEQ(formattedNumber, "1,234,567.89");
 }
 
 function testNumberFormatConstructorNew0039() {
@@ -381,7 +381,7 @@ function testNumberFormatConstructorNew0039() {
     let options: Intl.NumberFormatOptions = {
           minimumFractionDigits: -1
     }
-    expectError((): void throws => { Intl.NumberFormat.$_invoke(locales, options) }, new RangeError("Invalid minimumFractionDigits"));
+    arktest.expectError((): void => { Intl.NumberFormat.$_invoke(locales, options) }, new RangeError("Invalid minimumFractionDigits"));
 }
 
 function testNumberFormatConstructorNew0040() {
@@ -389,7 +389,7 @@ function testNumberFormatConstructorNew0040() {
     let options: Intl.NumberFormatOptions = {
           minimumFractionDigits: 101
     }
-    expectError((): void throws => { Intl.NumberFormat.$_invoke(locales, options) }, new RangeError("Invalid minimumFractionDigits"));
+    arktest.expectError((): void => { Intl.NumberFormat.$_invoke(locales, options) }, new RangeError("Invalid minimumFractionDigits"));
 }
 
 function testNumberFormatConstructorNew0041() {
@@ -398,7 +398,7 @@ function testNumberFormatConstructorNew0041() {
           maximumFractionDigits: 0
     }
     let numberFormat = Intl.NumberFormat.$_invoke(locales, options);
-    assertTrue(numberFormat !== undefined && numberFormat !== null);
+    arktest.assertTrue(numberFormat !== undefined && numberFormat !== null);
 }
 
 function testNumberFormatConstructorNew0042() {
@@ -406,7 +406,7 @@ function testNumberFormatConstructorNew0042() {
     let options: Intl.NumberFormatOptions = {
           maximumFractionDigits: 50
     }
-    expectNoThrow((): void throws => { Intl.NumberFormat.$_invoke(locales, options) });
+    arktest.expectNoThrow((): void => { Intl.NumberFormat.$_invoke(locales, options) });
 }
 
 function testNumberFormatConstructorNew0043() {
@@ -414,7 +414,7 @@ function testNumberFormatConstructorNew0043() {
     let options: Intl.NumberFormatOptions = {
           maximumFractionDigits: 100
     }
-    expectNoThrow((): void throws => { Intl.NumberFormat.$_invoke(locales, options) });
+    arktest.expectNoThrow((): void => { Intl.NumberFormat.$_invoke(locales, options) });
 }
 
 function testNumberFormatConstructorNew0044() {
@@ -423,7 +423,7 @@ function testNumberFormatConstructorNew0044() {
           maximumFractionDigits: undefined
     }
     let numberFormat = Intl.NumberFormat.$_invoke(locales, options);
-    assertTrue(numberFormat !== undefined && numberFormat !== null);
+    arktest.assertTrue(numberFormat !== undefined && numberFormat !== null);
 }
 
 function testNumberFormatConstructorNew0045() {
@@ -431,7 +431,7 @@ function testNumberFormatConstructorNew0045() {
     let options: Intl.NumberFormatOptions = {
           maximumFractionDigits: -1
     }
-    expectError((): void throws => { Intl.NumberFormat.$_invoke(locales, options) }, new RangeError("Invalid maximumFractionDigits"));
+    arktest.expectError((): void => { Intl.NumberFormat.$_invoke(locales, options) }, new RangeError("Invalid maximumFractionDigits"));
 }
 
 function testNumberFormatConstructorNew0046() {
@@ -439,7 +439,7 @@ function testNumberFormatConstructorNew0046() {
     let options: Intl.NumberFormatOptions = {
           maximumFractionDigits: 101
     }
-    expectError((): void throws => { Intl.NumberFormat.$_invoke(locales, options) }, new RangeError("Invalid maximumFractionDigits"));
+    arktest.expectError((): void => { Intl.NumberFormat.$_invoke(locales, options) }, new RangeError("Invalid maximumFractionDigits"));
 }
 
 function testNumberFormatConstructorNew0047() {
@@ -448,7 +448,7 @@ function testNumberFormatConstructorNew0047() {
           minimumSignificantDigits: 1
     }
     let numberFormat = Intl.NumberFormat.$_invoke(locales, options);
-    assertTrue(numberFormat !== undefined && numberFormat !== null);
+    arktest.assertTrue(numberFormat !== undefined && numberFormat !== null);
 }
 
 function testNumberFormatConstructorNew0048() {
@@ -457,7 +457,7 @@ function testNumberFormatConstructorNew0048() {
           minimumSignificantDigits: 10
     }
     let numberFormat = Intl.NumberFormat.$_invoke(locales, options);
-    assertTrue(numberFormat !== undefined && numberFormat !== null);
+    arktest.assertTrue(numberFormat !== undefined && numberFormat !== null);
 }
 
 function testNumberFormatConstructorNew0049() {
@@ -466,7 +466,7 @@ function testNumberFormatConstructorNew0049() {
           minimumSignificantDigits: 21
     }
     let numberFormat = Intl.NumberFormat.$_invoke(locales, options);
-    assertTrue(numberFormat !== undefined && numberFormat !== null);
+    arktest.assertTrue(numberFormat !== undefined && numberFormat !== null);
 }
 
 function testNumberFormatConstructorNew0050() {
@@ -475,7 +475,7 @@ function testNumberFormatConstructorNew0050() {
           minimumSignificantDigits: undefined
     }
     let numberFormat = Intl.NumberFormat.$_invoke(locales, options);
-    assertTrue(numberFormat !== undefined && numberFormat !== null);
+    arktest.assertTrue(numberFormat !== undefined && numberFormat !== null);
 }
 
 function testNumberFormatConstructorNew0051() {
@@ -483,7 +483,7 @@ function testNumberFormatConstructorNew0051() {
     let options: Intl.NumberFormatOptions = {
           minimumSignificantDigits: 0
     }
-    expectError((): void throws => { Intl.NumberFormat.$_invoke(locales, options) }, new RangeError("Invalid minimumSignificantDigits"));
+    arktest.expectError((): void => { Intl.NumberFormat.$_invoke(locales, options) }, new RangeError("Invalid minimumSignificantDigits"));
 }
 
 function testNumberFormatConstructorNew0052() {
@@ -491,7 +491,7 @@ function testNumberFormatConstructorNew0052() {
     let options: Intl.NumberFormatOptions = {
           minimumSignificantDigits: 22
     }
-    expectError((): void throws => { Intl.NumberFormat.$_invoke(locales, options) }, new RangeError("Invalid minimumSignificantDigits"));
+    arktest.expectError((): void => { Intl.NumberFormat.$_invoke(locales, options) }, new RangeError("Invalid minimumSignificantDigits"));
 }
 
 function testNumberFormatConstructorNew0053() {
@@ -500,7 +500,7 @@ function testNumberFormatConstructorNew0053() {
           maximumSignificantDigits: 1
     }
     let numberFormat = Intl.NumberFormat.$_invoke(locales, options);
-    assertTrue(numberFormat !== undefined && numberFormat !== null);
+    arktest.assertTrue(numberFormat !== undefined && numberFormat !== null);
 }
 
 function testNumberFormatConstructorNew0054() {
@@ -509,7 +509,7 @@ function testNumberFormatConstructorNew0054() {
           maximumSignificantDigits: 10
     }
     let numberFormat = Intl.NumberFormat.$_invoke(locales, options);
-    assertTrue(numberFormat !== undefined && numberFormat !== null);
+    arktest.assertTrue(numberFormat !== undefined && numberFormat !== null);
 }
 
 function testNumberFormatConstructorNew0055() {
@@ -518,7 +518,7 @@ function testNumberFormatConstructorNew0055() {
           maximumSignificantDigits: 21
     }
     let numberFormat = Intl.NumberFormat.$_invoke(locales, options);
-    assertTrue(numberFormat !== undefined && numberFormat !== null);
+    arktest.assertTrue(numberFormat !== undefined && numberFormat !== null);
 }
 
 function testNumberFormatConstructorNew0056() {
@@ -528,7 +528,7 @@ function testNumberFormatConstructorNew0056() {
     }
     let numberFormat = Intl.NumberFormat.$_invoke(locales, options);
     let formattedNumber = numberFormat.format(1234567.89);
-    assertEQ(formattedNumber, "1,234,567.89");
+    arktest.assertEQ(formattedNumber, "1,234,567.89");
 }
 
 function testNumberFormatConstructorNew0057() {
@@ -536,7 +536,7 @@ function testNumberFormatConstructorNew0057() {
     let options: Intl.NumberFormatOptions = {
           maximumSignificantDigits: 0
     }
-    expectError((): void throws => { Intl.NumberFormat.$_invoke(locales, options) }, new RangeError("Invalid maximumSignificantDigits"));
+    arktest.expectError((): void => { Intl.NumberFormat.$_invoke(locales, options) }, new RangeError("Invalid maximumSignificantDigits"));
 }
 
 function testNumberFormatConstructorNew0058() {
@@ -544,15 +544,15 @@ function testNumberFormatConstructorNew0058() {
     let options: Intl.NumberFormatOptions = {
           maximumSignificantDigits: 22
     }
-    expectError((): void throws => { Intl.NumberFormat.$_invoke(locales, options) }, new RangeError("Invalid maximumSignificantDigits"));
+    arktest.expectError((): void => { Intl.NumberFormat.$_invoke(locales, options) }, new RangeError("Invalid maximumSignificantDigits"));
 }
 
 function testNumberFormatConstructorNew0059() {
     let numberFormat = Intl.NumberFormat.$_invoke(undefined);
-    assertTrue(numberFormat !== undefined && numberFormat !== null);
+    arktest.assertTrue(numberFormat !== undefined && numberFormat !== null);
 }
 
 function testNumberFormatConstructorNew0060() {
     let numberFormat = Intl.NumberFormat.$_invoke(undefined, undefined);
-    assertTrue(numberFormat !== undefined && numberFormat !== null);
+    arktest.assertTrue(numberFormat !== undefined && numberFormat !== null);
 }

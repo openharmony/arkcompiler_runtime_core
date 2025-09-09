@@ -29,8 +29,8 @@ const g{{loop.index}}:{{v.type}} = {{v.expr}}
 function main() {
 {%- for v in c['vals'] %}
     const c{{loop.index}}:{{v.type}} = {{v.expr}}
-    assertEQ( typeof c{{loop.index}}, "{{c.res}}" )
-    assertEQ( typeof g{{loop.index}}, "{{c.res}}" )
+    arktest.assertEQ( typeof c{{loop.index}}, "{{c.res}}" )
+    arktest.assertEQ( typeof g{{loop.index}}, "{{c.res}}" )
 {%- endfor %}
 }
 {%- endfor %}

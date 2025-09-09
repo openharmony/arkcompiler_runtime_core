@@ -33,6 +33,6 @@ function main(): void {
 
     let result = ct.field();
 
-    assertEQ( result[0], "12")
-    assertEQ( result[1], 12.0)
+    arktest.assertEQ( result[0], "12")
+    arktest.assertEQ( result[1], 12.0)
 }

@@ -95,7 +95,7 @@ function getOperationFactory(): int {
 function main(): void {
   loadLibrary("call_backtrace");
   let res = TestBacktrace_entry_simple();
-  assertEQ(res, 1);
+  arktest.assertEQ(res, 1);
   let res2 = TestBacktrace_entry_complex();
-  assertEQ(res, 1);
+  arktest.assertEQ(res, 1);
 }

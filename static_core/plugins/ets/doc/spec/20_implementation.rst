@@ -33,13 +33,11 @@ If an import path ``<some path>/name`` is resolved to a path in the folder
 '*name*', then  the compiler executes the following lookup sequence:
 
 -   If the folder contains the file ``index.ets``, then this file is imported
-    as a separate module written in |LANG|;
+    as a module written in |LANG|;
 
 -   If the folder contains the file ``index.ts``, then this file is imported
-    as a separate module written in |TS|;
+    as a module written in |TS|.
 
--   Otherwise, the compiler imports the package constituted by files
-    ``name/*.ets``.
 
 .. index::
    implementation
@@ -50,8 +48,6 @@ If an import path ``<some path>/name`` is resolved to a path in the folder
    compiler
    lookup sequence
    module
-   separate module
-   package
 
 |
 
@@ -63,22 +59,19 @@ Compilation Units in Host System
 .. meta:
     frontend_status: Done
 
-Modules and packages are created and stored in a manner determined by the
-host system. The exact manner modules and packages are stored in a file
-system is determined by a particular implementation of the compiler and other
-tools.
+Modules and libraries are created and stored in a manner that is
+determined by the host system. The exact manner modules and libraries are stored
+in a file system is determined by a particular implementation of the compiler
+and other tools.
 
-A simple implementation is summarized in the following example:
+A simple implementation is summarized as follows:
 
--  Module (package module) is stored in a single file.
+-  Module is stored in a single file.
 
--  All package modules are stored in files of the same folder.
+-  Folder that can store several modules (one source file to contain a module).
 
--  Folder that can store several separate modules (one source file to contain a
-   separate module or a package module).
-
--  Folder that stores a single package must not contain separate module
-   files or package modules from other packages.
+-  Library description files are named "lib.ets". Source files are stored in
+   folders with a predefined structure.
 
 .. index::
    compilation unit
@@ -86,21 +79,18 @@ A simple implementation is summarized in the following example:
    storage
    storage management
    module
-   package
-   separate module
    file system
    implementation
-   package module
    file
    folder
    source file
 
 |
 
-.. _How to get type via reflection:
+.. _Getting Type Via Reflection:
 
-How to Get Type Via Reflection
-******************************
+Getting Type Via Reflection
+***************************
 
 .. meta:
     frontend_status: None
@@ -108,14 +98,13 @@ How to Get Type Via Reflection
 The |LANG| standard library (see :ref:`Standard Library`) provides a
 pseudogeneric static method ``Type.from<T>()`` to be processed by the compiler
 in a specific way during compilation. A call to this method allows getting a
-value of type ``Type`` that represents type ``T`` at runtime. 
+value of type ``Type`` that represents type ``T`` at runtime.
 
 .. code-block:: typescript
    :linenos:
 
     let type_of_int: Type = Type.from<int>()
     let type_of_string: Type = Type.from<String>()
-    let type_of_array_of_int: Type = Type.from<int[]>()
     let type_of_number: Type = Type.from<number>()
     let type_of_Object: Type = Type.from<Object>()
 
@@ -135,8 +124,40 @@ value of type ``Type`` that represents type ``T`` at runtime.
    variable
    runtime
 
-There are some restrictions on type ``T``, see :ref:`Standard Library` for 
-details.
+If type ``T`` used as type argument is affected by :ref:`Type Erasure`, then
+the function returns value of type ``Type`` for *effective type* of ``T``
+but not for ``T`` itself:
+
+.. code-block:: typescript
+   :linenos:
+
+    let type_of_array1: Type = Type.from<int[]>() // value of Type for Array<> 
+    let type_of_array2: Type = Type.from<Array<number>>() // the same Type value
+
+|
+
+.. _Ensuring Module Initialization:
+
+Ensuring Module Initialization
+******************************
+
+.. meta:
+    frontend_status: None
+
+The |LANG| standard library (see :ref:`Standard Library`) provides a top-level
+function ``initModule()`` with one parameter of ``string`` type. A call to this
+function ensures that the module referred by the argument is available and its
+initialization (see :ref:`Static Initialization`) is performed. An argument
+should be a string literal otherwise a :index:`compile-time error` occurs. The
+current module has no access to the exported declarations of the module
+referred by the argument. If such module is not available or any other runtime
+issue occurs then a proper exception is thrown. All these details are part of
+the standard library documentation.
+
+.. code-block:: typescript
+   :linenos:
+
+    initModule ("@ohos/library/src/main/ets/pages/Index")
 
 |
 
@@ -206,6 +227,61 @@ sufficient to perform it.
    allocation
    object
    available memory
+
+|
+
+.. _Make a Bridge Method for Overriding Method:
+
+Make a Bridge Method for Overriding Method
+******************************************
+
+.. meta:
+    frontend_status: None
+
+Situations are possible where the compiler must create an additional bridge
+method to provide a type-safe call for the overriding method in a subclass of
+a generic class. Overriding is based on *erased types* (see :ref:`Type Erasure`).
+The situation is represented in the following example:
+
+.. code-block:: typescript
+   :linenos:
+
+    class B<T extends Object> {
+        foo(p: T) {}
+    }
+    class D extends B<string> {
+        foo(p: string> {} // original overriding method
+    }
+
+In the example above, the compiler generates a *bridge* method with the name
+``foo`` and signature ``(p: Object)``. The *bridge* method acts as follows:
+
+-  Behaves as an ordinary method in most cases, but is not accessible from
+   the source code, and does not participate in overloading;
+
+-  Applies narrowing to argument types inside its body to match the parameter
+   types of the original method, and invokes the original method.
+
+The use of the *bridge* method is represented by the following code:
+
+.. code-block:: typescript
+   :linenos:
+
+    let d = new D()
+    d.foo("aa") // original method from 'D' is called
+    let b: B<string> = d
+    b.foo("aa") // bridge method with signature (p: Object) is called
+    // its body calls original method, using (p as string) to check the type of the argument
+
+More formally, a bridge method ``m(C``:sub:`1` ``, ..., C``:sub:`n` ``)``
+is created in ``D``, in the following cases:
+
+- Class ``B`` comprises type parameters
+  ``B<T``:sub:`1` ``extends C``:sub:`1` ``, ..., T``:sub:`n` ``extends C``:sub:`n` ``>``;
+- Subclass ``D`` is defined as ``class D extends B<X``:sub:`1` ``, ..., X``:sub:`n` ``>``;
+- Method ``m`` of class ``D`` overrides ``m`` from ``B`` with type parameters in signature,
+  e.g., ``(T``:sub:`1` ``, ..., T``:sub:`n` ``)``;
+- Signature of the overriden method ``m`` is not ``(C``:sub:`1` ``, ..., C``:sub:`n` ``)``.
 
 .. raw:: pdf
 

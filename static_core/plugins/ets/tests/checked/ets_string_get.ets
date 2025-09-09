@@ -17,42 +17,36 @@
 //! RUN         force_jit: true, options: "", entry: "ets_string_get.ETSGLOBAL::main"
 //! METHOD      "ets_string_get.ETSGLOBAL::main"
 //! PASS_AFTER  "IrBuilder"
-//! INST_NOT    "Intrinsic.StdCoreStringGet"
-//! INST        /NullCheck/
-//! INST        /BoundsCheck/
-//! INST        /LoadCompressedStringChar/
+//! INST        "Intrinsic.StdCoreStringGet"
 
 //! CHECKER AOT IR Builder StringGet get inlining.
 //! RUN_PAOC    options: "--compiler-regex='.*main.*'"
 //! METHOD      "ets_string_get.ETSGLOBAL::main"
 //! PASS_AFTER  "IrBuilder"
-//! INST_NOT    /Intrinsic.StdCoreStringGet/
-//! INST        /NullCheck/
-//! INST        /BoundsCheck/
-//! INST        /LoadCompressedStringChar/
+//! INST        /Intrinsic.StdCoreStringGet/
 
 function main(): void {
     let str = "abcdefg";
-    assertEQ(str[0], c'a', "Wrong str.get(0)");
-    assertEQ(str[6], c'g', "Wrong str.get(6)");
+    arktest.assertEQ(str[0], "a", "Wrong str.get(0)");
+    arktest.assertEQ(str[6], "g", "Wrong str.get(6)");
 
-    let exceptionFlag = 0;
+    let errorFlag = 0;
     try {
         console.log(str[-1]);
     } catch (e: StringIndexOutOfBoundsError) {
-        exceptionFlag = 1;
+        errorFlag = 1;
     } catch (e) {
-        exceptionFlag = 2;
+        errorFlag = 2;
     }
-    assertEQ(1, exceptionFlag);
+    arktest.assertEQ(1, errorFlag);
 
-    exceptionFlag = 0;
+    errorFlag = 0;
     try {
         console.log(str[7]);
     } catch (e: StringIndexOutOfBoundsError) {
-        exceptionFlag = 1;
+        errorFlag = 1;
     } catch (e) {
-        exceptionFlag = 2;
+        errorFlag = 2;
     }
-    assertEQ(1, exceptionFlag);
+    arktest.assertEQ(1, errorFlag);
 }

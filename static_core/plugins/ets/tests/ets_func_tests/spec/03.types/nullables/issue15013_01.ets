@@ -28,5 +28,5 @@ function foo<T>(x: T): TestNullishType {
 
 function main(): void {
   let y = foo(new Object())
-  assertTrue( y instanceof Object)
+  arktest.assertTrue( y instanceof Object)
 }

@@ -15,11 +15,8 @@
 
 import LightWeightMap from "@ohos.util.LightWeightMap";
 
-const success = 0;
-const fail = 1;
-
 function main(): int {
-    const suite = new ArkTestsuite("LightWeightMap ToString IncreaseCapacityTo API tests")
+    const suite = new arktest.ArkTestsuite("LightWeightMap ToString IncreaseCapacityTo API tests")
 
     suite.addTest("LightWeightMap toString output data as a string",
         testToStringOutputData)
@@ -40,71 +37,55 @@ function main(): int {
 }
 
 function testToStringOutputData() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 111);
     let result = lightWeightMap.toString();
-    assertEQ(result, "gull:111,sparrow:123", "The lightWeightMap should return the correct string representation");
+    arktest.assertEQ(result, "gull:111,sparrow:123", "The lightWeightMap should return the correct string representation");
 }
 
 function testToStringEmptyMap() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     let result = lightWeightMap.toString();
-    assertEQ(result, '', "The lightWeightMap should return the correct string representation");
+    arktest.assertEQ(result, '', "The lightWeightMap should return the correct string representation");
 }
 
 function testToStringInLoop() {
     const VALUE = 'VALUE';
-    let lightWeightMap: LightWeightMap<number, string> = new LightWeightMap<number, string>();
-    for (let i = 0; i < 5; i++) {
+    let lightWeightMap: LightWeightMap<double, string> = new LightWeightMap<double, string>();
+    for (let i: int = 0; i < 5; i++) {
         lightWeightMap.set(i, VALUE);
     }
     let result = lightWeightMap.toString();
-    assertEQ(result, '0:VALUE,1:VALUE,2:VALUE,3:VALUE,4:VALUE',
+    arktest.assertEQ(result, '0:VALUE,1:VALUE,2:VALUE,3:VALUE,4:VALUE',
         "The lightWeightMap should return the correct string representation");
 }
 
 function testIncreaseCapacity() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 111);
-    try {
-        lightWeightMap.increaseCapacityTo(2);
-        lightWeightMap.increaseCapacityTo(10);
-    } catch (err: Error) {
-        assertEQ(err.message, "The lightWeightMap should increase the capacity");
-    }
+    arktest.expectNoThrow(() => { lightWeightMap.increaseCapacityTo(2) });
+    arktest.expectNoThrow(() => { lightWeightMap.increaseCapacityTo(10) });
 }
 
 function testIncreaseCapacityLessThanLength() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 111);
-    try {
-        lightWeightMap.increaseCapacityTo(1);
-    } catch (err: Error) {
-        assertEQ(err.message, "The lightWeightMap should not increase the capacity less than the length");
-    }
+    arktest.expectNoThrow(() => { lightWeightMap.increaseCapacityTo(1) });
 }
 
 function testIncreaseCapacityLeftFloat() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 111);
-    try {
-        lightWeightMap.increaseCapacityTo(Math.floor(1.2));
-    } catch (err: Error) {
-        assertEQ(err.message, "The lightWeightMap should not increase the left float capacity");
-    }
+    arktest.expectNoThrow(() => { lightWeightMap.increaseCapacityTo(Math.floor(1.2).toInt()) });
 }
 
 function testIncreaseCapacityRightFloat() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 111);
-    try {
-        lightWeightMap.increaseCapacityTo(Math.floor(3.8));
-    } catch (err: Error) {
-        assertEQ(err.message, "The lightWeightMap should increase the right float capacity");
-    }
+    arktest.expectNoThrow(() => { lightWeightMap.increaseCapacityTo(Math.floor(3.8).toInt()) });
 }

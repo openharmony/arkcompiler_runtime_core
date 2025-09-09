@@ -185,8 +185,8 @@
         test30:  1.14159265,
         test40: -1.14159265,
         test50:  doubleNaN,
-        test60:  doubleInf,
-        test70:  doubleNegInf,
+        test60:  doubleNaN,
+        test70:  doubleNaN,
         test80: -doubleNaN,
       },
   }
@@ -213,9 +213,8 @@
         test30: -0.858407,
         test40:  0.858407,
         test50:  doubleNaN,
-        test60:  doubleInf,
-        test70:  doubleNegInf,
-        test80: -doubleNaN,
+        test60:  doubleNaN,
+        test70:  doubleNaN,
       },
   }
 - {
@@ -311,22 +310,46 @@
 
     method_test_index_data:
       {
-        test10:  {a:  2.5, b:  2.5},
-        test20:  {a:  5.0, b:  5.05},
-        test21:  {a:  -5.0, b:  5.05},
-        test22:  {a:  5.0, b: -5.05},
-        test23:  {a: -5.0, b: -5.05},
-        test30:  {a: floatNan, b:  1},
-        test40:  {a: floatInf, b:  1},
-        test50:  {a: floatNegInf, b:  1},
+        test10:  {a:  2.5f, b:  2.5f},
+        test20:  {a:  5.0f, b:  5.05f},
+        test21:  {a:  -5.0f, b:  5.05f},
+        test22:  {a:  5.0f, b: -5.05f},
+        test23:  {a: -5.0f, b: -5.05f},
 
       },
     method_expected_data:
       {
         test10:  4,
         test20:  25,
-        test21:  25,
-        test22:  25,
+        test21:  -25,
+        test22:  -25,
+        test23:  25,
+      },
+  }
+- {
+    method_name: imul,
+    method_nature: function,
+    result_type: int,
+    method_signature:  {a: "double", b: "double"},
+
+    method_test_index_data:
+      {
+        test10:  {a:  2.5, b:  2.5},
+        test20:  {a:  5.0, b:  5.05},
+        test21:  {a:  -5.0, b:  5.05},
+        test22:  {a:  5.0, b: -5.05},
+        test23:  {a: -5.0, b: -5.05},
+        test30:  {a: doubleNaN, b:  1},
+        test40:  {a: doubleInf, b:  1},
+        test50:  {a: doubleNegInf, b:  1},
+
+      },
+    method_expected_data:
+      {
+        test10:  4,
+        test20:  25,
+        test21:  -25,
+        test22:  -25,
         test23:  25,
         test30:  0,
         test40:  0,

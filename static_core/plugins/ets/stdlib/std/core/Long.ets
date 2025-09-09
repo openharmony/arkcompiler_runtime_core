@@ -18,7 +18,7 @@ package std.core;
 /**
  * Represents boxed long value and related operations
  */
-export final class Long extends Integral implements Comparable<Long>, JSONable<Long> {
+export final class Long extends Integral implements Comparable<Long> {
     private value: long;
 
     /**
@@ -90,10 +90,32 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
     /**
      * Returns value of this instance
      *
+     * Supportive interface
+     *
+     * @returns value as byte
+     */
+    public override byteValue(): byte {
+        return this.toByte();
+    }
+
+    /**
+     * Returns value of this instance
+     *
      * @returns value as short
      */
     public override toShort(): short {
         return this.value.toShort();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * Supportive interface
+     *
+     * @returns value as short
+     */
+    public override shortValue(): short {
+        return this.toShort();
     }
 
     /**
@@ -108,6 +130,17 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
     /**
      * Returns value of this instance
      *
+     * Supportive interface
+     *
+     * @returns value as int
+     */
+    public override intValue(): int {
+        return this.toInt();
+    }
+
+    /**
+     * Returns value of this instance
+     *
      * @returns value as long
      */
     public override toLong(): long {
@@ -117,10 +150,32 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
     /**
      * Returns value of this instance
      *
+     * Supportive interface
+     *
+     * @returns value as long
+     */
+    public override longValue(): long {
+        return this.toLong();
+    }
+
+    /**
+     * Returns value of this instance
+     *
      * @returns value as long
      */
     public override toFloat(): float {
-        return Long.toFloat(this.value);
+        return this.value.toFloat();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * Supportive interface
+     *
+     * @returns value as float
+     */
+    public override floatValue(): float {
+        return this.toFloat();
     }
 
     /**
@@ -130,6 +185,17 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
      */
     public override toDouble(): double {
         return this.value.toDouble();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * Supportive interface
+     *
+     * @returns value as double
+     */
+    public override doubleValue(): double {
+        return this.toDouble();
     }
 
     /**
@@ -239,7 +305,7 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
             throw new RangeError('Radix must be between 2 and 36');
         }
         if (this.value == 0) {
-            return "0";
+            return '0';
         }
         const chars = '0123456789abcdefghijklmnopqrstuvwxyz';
         let val = this.value;
@@ -263,15 +329,6 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
             data[0] = c'-';
         }
         return new String(data);
-    }
-
-    /**
-     * Returns a hash code (integer representation) for this instance
-     *
-     * @returns representation of this instance
-     */
-    public override $_hashCode(): int {
-        return this.toInt();
     }
 
     /**
@@ -380,24 +437,5 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
      */
     public isGreaterEqualThan(other: Long): boolean {
         return this.value >= other.toLong();
-    }
-
-    /**
-     * Creates a Long instance based on JSONValue
-     *
-     * @param json: JSONValue - a JSON representation
-     *
-     * @throws JSONTypeError if json does not encode a valid long
-     *
-     * @returns Long - long value decoded from JSON
-     */
-    public createFromJSONValue(json: JSONValue): Long {
-        if (json instanceof JSONNumber) {
-            let num = (json as JSONNumber).value
-            if (Double.isInteger(num) && Long.MIN_VALUE <= num && num <= Long.MAX_VALUE) {
-                return Long.valueOf(Double.toLong(num))
-            }
-        }
-        throw new JSONTypeError("Cannot create Long from JSON", new ErrorOptions(json as Object))
     }
 }

@@ -17,6 +17,7 @@
 
 #include "runtime/include/runtime.h"
 #include "runtime/mem/object_helpers.h"
+#include "runtime/include/coretypes/string.h"
 
 namespace ark {
 
@@ -103,7 +104,7 @@ coretypes::String *StringTable::Table::GetString(const uint8_t *utf8Data, uint32
 coretypes::String *StringTable::Table::GetString(const uint16_t *utf16Data, uint32_t utf16Length,
                                                  [[maybe_unused]] const LanguageContext &ctx)
 {
-    uint32_t hashCode = coretypes::String::ComputeHashcodeUtf16(const_cast<uint16_t *>(utf16Data), utf16Length);
+    uint32_t hashCode = coretypes::String::ComputeHashcodeUtf16(utf16Data, utf16Length);
     os::memory::ReadLockHolder holder(tableLock_);
     for (auto it = table_.find(hashCode); it != table_.end(); it++) {
         auto foundString = it->second;
@@ -118,7 +119,7 @@ coretypes::String *StringTable::Table::GetString(coretypes::String *string, [[ma
 {
     ASSERT(string != nullptr);
     os::memory::ReadLockHolder holder(tableLock_);
-    auto hash = string->GetHashcode();
+    auto hash = coretypes::String::Cast(string)->GetHashcode();
     for (auto it = table_.find(hash); it != table_.end(); it++) {
         auto foundString = it->second;
         if (coretypes::String::StringsAreEqual(foundString, string)) {
@@ -131,14 +132,14 @@ coretypes::String *StringTable::Table::GetString(coretypes::String *string, [[ma
 void StringTable::Table::ForceInternString(coretypes::String *string, [[maybe_unused]] const LanguageContext &ctx)
 {
     os::memory::WriteLockHolder holder(tableLock_);
-    table_.insert(std::pair<uint32_t, coretypes::String *>(string->GetHashcode(), string));
+    table_.insert(std::pair<uint32_t, coretypes::String *>(coretypes::String::Cast(string)->GetHashcode(), string));
 }
 
 coretypes::String *StringTable::Table::InternString(coretypes::String *string,
                                                     [[maybe_unused]] const LanguageContext &ctx)
 {
     ASSERT(string != nullptr);
-    uint32_t hashCode = string->GetHashcode();
+    uint32_t hashCode = coretypes::String::Cast(string)->GetHashcode();
     os::memory::WriteLockHolder holder(tableLock_);
     // Check string is not present before actually creating and inserting
     for (auto it = table_.find(hashCode); it != table_.end(); it++) {

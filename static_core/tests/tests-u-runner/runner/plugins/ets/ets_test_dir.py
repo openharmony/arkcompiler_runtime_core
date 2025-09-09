@@ -61,6 +61,10 @@ class EtsTestDir:
     def ets_sdk(self) -> Path:
         return self.tests / "ets_sdk"
 
+    @property
+    def declgen_sdk(self) -> Path:
+        return self.__static_core_root / "plugins" / "ets" / "sdk"
+
     @cached_property
     def root(self) -> Path:
         return Path(self.__root) if self.__root else self.__static_core_root / "plugins" / "ets"

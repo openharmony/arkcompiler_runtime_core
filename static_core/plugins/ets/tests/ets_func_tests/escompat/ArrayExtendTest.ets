@@ -14,7 +14,7 @@
  */
 
 function main(): int {
-    const suite = new ArkTestsuite("Array API tests for SDK");
+    const suite = new arktest.ArkTestsuite("Array API tests for SDK");
     suite.addTest("Array extendTo with negative length ", testExtendToNegLength);
     suite.addTest("Array extendTo with positivie length ", testExtendToPosLength);
     suite.addTest("Array extendTo incorrect length", testExtendToError);
@@ -37,19 +37,19 @@ function testExtendToNegLength() {
     let a = Array.from<number>(TestData.src);
     a.extendTo(TestData.arrayLength1, TestData.initialValue1);
     let result: boolean = equaled(TestData.expected1, a);
-    assertTrue(result, "Error. Got: " + a + ". Expected: " + TestData.expected1);
+    arktest.assertTrue(result, "Error. Got: " + a + ". Expected: " + TestData.expected1);
 }
 
 function testExtendToPosLength() {
     let a = Array.from<number>(TestData.src);
     a.extendTo(TestData.arrayLength2, TestData.initialValue2);
     let result: boolean = equaled(TestData.expected2, a);
-    assertTrue(result, "Error. Got: " + a + ". Expected: " + TestData.expected2);
+    arktest.assertTrue(result, "Error. Got: " + a + ". Expected: " + TestData.expected2);
 }
 
 function testExtendToError() {
     let a = Array.from<number>(TestData.src);
-    expectError(
+    arktest.expectError(
         () => { a.extendTo(TestData.arrayLength3, TestData.initialValue3) },
         new RangeError("arrayLength must be <= int32 max")
     )

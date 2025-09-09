@@ -27,5 +27,5 @@ function main(): void {
   const calculableShape: ShapeInterfaces.Calculable = new Circle(5);
 
   const area = calculableShape.calculateArea();
-  assertEQ(area, 7);
+  arktest.assertEQ(area, 7);
 }

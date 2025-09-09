@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,12 +16,12 @@
 #ifndef LIBPANDABASE_OS_STACKTRACE_H
 #define LIBPANDABASE_OS_STACKTRACE_H
 
+#include <cstdint>
 #include <vector>
 #include <iostream>
+#include "../panda_visibility.h"
 
 namespace panda {
-
-class StackPrinterImpl;
 
 /*
  * Return stack trace as a vector of PCs
@@ -31,14 +31,14 @@ class StackPrinterImpl;
  * Since PandaVector uses internal allocator it leads to
  * infinite recursion.
  */
-std::vector<uintptr_t> GetStacktrace();
+PANDA_PUBLIC_API std::vector<uintptr_t> GetStacktrace();
 
 /*
  * Print stack trace provided into 'Print' function.
  * The class caches information. So it is aimed to be used
  * to print multiple stack traces.
  */
-std::ostream &PrintStack(const std::vector<uintptr_t> &stacktrace, std::ostream &out);
+PANDA_PUBLIC_API std::ostream &PrintStack(const std::vector<uintptr_t> &stacktrace, std::ostream &out);
 
 /*
  * Print stack trace

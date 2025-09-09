@@ -18,10 +18,10 @@ import { Job } from "std/core"
 
 const stressNum: int = 100;
 
-let sMTQueueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>(stressNum);
+let sMTQueueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>(stressNum);
 
 function main(): int {
-    let LinkedBlockingQueueTestsuite = new ArkTestsuite("LinkedBlockingQueuePopTest");
+    let LinkedBlockingQueueTestsuite = new arktest.ArkTestsuite("LinkedBlockingQueuePopTest");
 
     LinkedBlockingQueueTestsuite.addTest("ThreadsPopStressTest004", () =>
     {
@@ -38,7 +38,7 @@ function main(): int {
         for (let i: int = 0; i < 100; i++) {
             jobs[i].Await();
         }
-        assertEQ(sMTQueueInt.size, 0);
+        arktest.assertEQ(sMTQueueInt.size, 0);
     });
 
     return LinkedBlockingQueueTestsuite.run();

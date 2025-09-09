@@ -34,6 +34,6 @@ function main(): void {
 
     let is_resolution1: Boolean = booleanPromise().awaitResolution();
 
-    assertTrue( is_resolution1 instanceof Boolean)
-    assertEQ(is_resolution1, is_true)
+    arktest.assertTrue( is_resolution1 instanceof Boolean)
+    arktest.assertEQ(is_resolution1, is_true)
 }

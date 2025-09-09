@@ -368,7 +368,7 @@ function testUptime(): int {
 }
 
 function testProcessManagerIsAppUid(): int {
-    let result: int = 0;
+    let result: int  = 0;
 
     try {
         let mgr = new StdProcess.ProcessManager();
@@ -389,8 +389,9 @@ function testProcessManagerIsAppUid(): int {
         if (err.message == 'not implemented for Non-OHOS target') {
             // Regard as passed for Non-OHOS target here
             result = 0;
-        } else {
-            // Otherwise, Regard it as failed.
+        }
+        // Otherwise, Regard it as failed.
+        else {
             result = 1;
         }
     }
@@ -399,7 +400,7 @@ function testProcessManagerIsAppUid(): int {
 }
 
 function testIsIsolatedProcess(): int {
-    let result: int = 0;
+    let result: int  = 0;
 
     try {
         let isIsolated = StdProcess.isIsolatedProcess();
@@ -414,8 +415,9 @@ function testIsIsolatedProcess(): int {
         if (err.message == 'not implemented for Non-OHOS target') {
             // Regard as passed for Non-OHOS target here
             result = 0;
-        } else {
-            // Otherwise, Regard it as failed.
+        }
+        // Otherwise, Regard it as failed.
+        else {
             result = 1;
         }
     }
@@ -438,7 +440,7 @@ function main(): int {
     failures += test(testChildKill(), "ChildProcess.kill() / ChildProcess.killed");
     failures += test(testChildClose(), "ChildProcess.close()");
 
-    failures += test(testProcessManagerIsAppUid(), 'ProcessManager.isAppUid()');
+    failures += test(testProcessManagerIsAppUid(), "ProcessManager.isAppUid()");
     failures += test(testProcessManagerGetUidForName(), "ProcessManager.getUidForName()");
     failures += test(testProcessManagerGetThreadPriority(), "ProcessManager.getThreadPriority()");
     failures += test(testProcessManagerGetSystemConfig(), "ProcessManager.getSystemConfig()");
@@ -466,7 +468,7 @@ function main(): int {
     failures += test(testCwd(), "process.cwd() test");
     failures += test(testChangeDir(), "process.chdir() test");
     failures += test(testUptime(), "process.uptime() test");
-    failures += test(testIsIsolatedProcess(), 'process.isIsolatedProcess() test');
+    failures += test(testIsIsolatedProcess(), "process.isIsolatedProcess() test");
 
     if (failures != 0) {
         console.log("FAILED: All tests run");

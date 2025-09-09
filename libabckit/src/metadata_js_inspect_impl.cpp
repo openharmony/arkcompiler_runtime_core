@@ -14,8 +14,8 @@
  */
 
 #include <cassert>
-#include "libabckit/include/c/abckit.h"
-#include "libabckit/include/c/extensions/js/metadata_js.h"
+#include "libabckit/c/abckit.h"
+#include "libabckit/c/extensions/js/metadata_js.h"
 
 #include "libabckit/src/adapter_dynamic/metadata_modify_dynamic.h"
 #include "libabckit/src/macros.h"

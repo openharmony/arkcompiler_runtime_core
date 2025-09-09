@@ -98,7 +98,8 @@ export function getObjectName(obj) {
 export function getObjectId(obj) {
 	return obj.getProtectedId();
 }
-export let testObjCls = new TestUserClass('TestName', 30, 456, 'testEdu', 'testDescription');
+export let testObjCls1 = new TestUserClass('TestName', 30, 456, 'testEdu', 'testDescription');
+export let testObjCls2 = new TestUserClass('TestName', 30, 456, 'testEdu', 'testDescription');
 export let testSecondObjCls = new TestSecondClass('TestNameTwo', 40, 789, 'testEdu1', 'testDescription1');
 let testInnerObject = { id: 123 };
 export let testOuterObject = { id: 456, testInnerObject: testInnerObject };

@@ -15,14 +15,11 @@
 
 import LightWeightMap from "@ohos.util.LightWeightMap";
 
-const success = 0;
-const fail = 1;
-
 function main(): int {
-    const suite = new ArkTestsuite("LightWeightMap Set Get API tests")
+    const suite = new arktest.ArkTestsuite("LightWeightMap Set Get API tests")
 
     suite.addTest("LightWeightMap set valid data", testSetValidData)
-    suite.addTest("LightWeightMap set larger number value", testSetLargeNumberValue)
+    suite.addTest("LightWeightMap set larger double value", testSetLargeNumberValue)
     suite.addTest("LightWeightMap get valid key", testGetValidKey)
     suite.addTest("LightWeightMap get not set key", testGetNonExistingKey)
     suite.addTest("LightWeightMap get key from the null lightWeightMap", testGetKeyFromEmptyMap)
@@ -37,50 +34,50 @@ function main(): int {
 }
 
 function testSetValidData() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("squirrel", 123);
     let result = lightWeightMap.get("squirrel");
-    assertEQ(result, 123, "The lightWeightMap should return the correct value for the key");
-    assertEQ(lightWeightMap.length, 1, "The lightWeightMap length should be 1");
+    arktest.assertEQ(result, 123, "The lightWeightMap should return the correct value for the key");
+    arktest.assertEQ(lightWeightMap.length, 1, "The lightWeightMap length should be 1");
 }
 
 function testSetLargeNumberValue() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("squirrel", Number.MAX_VALUE);
     let result = lightWeightMap.get("squirrel");
-    assertEQ(result, Number.MAX_VALUE, "The lightWeightMap should return the correct value for the key");
-    assertEQ(lightWeightMap.length, 1, "The lightWeightMap length should be 1");
+    arktest.assertEQ(result, Number.MAX_VALUE, "The lightWeightMap should return the correct value for the key");
+    arktest.assertEQ(lightWeightMap.length, 1, "The lightWeightMap length should be 1");
 }
 
 function testGetValidKey() {
-    let lightWeightMap: LightWeightMap<number, number> = new LightWeightMap<number, number>();
+    let lightWeightMap: LightWeightMap<double, double> = new LightWeightMap<double, double>();
     lightWeightMap.set(123, 356);
     let result = lightWeightMap.get(123);
-    assertEQ(result, 356, "The lightWeightMap should return the correct value for the key");
-    assertEQ(lightWeightMap.length, 1, "The lightWeightMap length should be 1");
+    arktest.assertEQ(result, 356, "The lightWeightMap should return the correct value for the key");
+    arktest.assertEQ(lightWeightMap.length, 1, "The lightWeightMap length should be 1");
 }
 
 function testGetNonExistingKey() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("sparrow", 356);
     let result = lightWeightMap.get("squirrel");
-    assertEQ(result, undefined, "The lightWeightMap should return undefined for the key that is not set");
-    assertEQ(lightWeightMap.length, 1, "The lightWeightMap length should be 1");
+    arktest.assertEQ(result, undefined, "The lightWeightMap should return undefined for the key that is not set");
+    arktest.assertEQ(lightWeightMap.length, 1, "The lightWeightMap length should be 1");
 }
 
 function testGetKeyFromEmptyMap() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     let result = lightWeightMap.get("sparrow");
-    assertEQ(result, undefined, "The lightWeightMap should return undefined for the key in an empty map");
-    assertEQ(lightWeightMap.length, 0, "The lightWeightMap length should be 0");
+    arktest.assertEQ(result, undefined, "The lightWeightMap should return undefined for the key in an empty map");
+    arktest.assertEQ(lightWeightMap.length, 0, "The lightWeightMap length should be 0");
 }
 
 function testGetBlankKey() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("sparrow", 356);
     let result = lightWeightMap.get(" sparrow ");
-    assertEQ(result, undefined, "The lightWeightMap should return undefined for the key that is not set");
-    assertEQ(lightWeightMap.length, 1, "The lightWeightMap length should be 1");
+    arktest.assertEQ(result, undefined, "The lightWeightMap should return undefined for the key that is not set");
+    arktest.assertEQ(lightWeightMap.length, 1, "The lightWeightMap length should be 1");
 }
 
 interface ComplexValue {
@@ -98,8 +95,8 @@ function testGetKeyWithComplexValue() {
     let lightWeightMap: LightWeightMap<string, ComplexValue> = new LightWeightMap<string, ComplexValue>();
     lightWeightMap.set("squirrel", value);
     let result = lightWeightMap.get("squirrel");
-    assertEQ(result, value, "The lightWeightMap should return the correct value for the key");
-    assertEQ(lightWeightMap.length, 1, "The lightWeightMap length should be 1");
+    arktest.assertEQ(result, value, "The lightWeightMap should return the correct value for the key");
+    arktest.assertEQ(lightWeightMap.length, 1, "The lightWeightMap length should be 1");
 }
 
 interface ComplexKey {
@@ -114,34 +111,34 @@ function testGetComplexKey() {
         gender: 'male',
         age: 30,
     };
-    let lightWeightMap: LightWeightMap<ComplexKey, number> = new LightWeightMap<ComplexKey, number>();
+    let lightWeightMap: LightWeightMap<ComplexKey, double> = new LightWeightMap<ComplexKey, double>();
     lightWeightMap.set(key, 123);
     let result = lightWeightMap.get(key);
-    assertEQ(result, 123, "The lightWeightMap should return the correct value for the complex key");
-    assertEQ(lightWeightMap.length, 1, "The lightWeightMap length should be 1");
+    arktest.assertEQ(result, 123, "The lightWeightMap should return the correct value for the complex key");
+    arktest.assertEQ(lightWeightMap.length, 1, "The lightWeightMap length should be 1");
 }
 
 function testGetSpecialKey() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set('鸿蒙', 123);
     let result = lightWeightMap.get('鸿蒙');
-    assertEQ(result, 123, "The lightWeightMap should return the correct value for the special key");
-    assertEQ(lightWeightMap.length, 1, "The lightWeightMap length should be 1");
+    arktest.assertEQ(result, 123, "The lightWeightMap should return the correct value for the special key");
+    arktest.assertEQ(lightWeightMap.length, 1, "The lightWeightMap length should be 1");
 }
 
 function testGetSameKeyWithDifferentValue() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("squirrel", 123);
     lightWeightMap.set("squirrel", 456);
     let result = lightWeightMap.get("squirrel");
-    assertEQ(result, 456, "The lightWeightMap should return the correct value for the key");
-    assertEQ(lightWeightMap.length, 1, "The lightWeightMap length should be 1");
+    arktest.assertEQ(result, 456, "The lightWeightMap should return the correct value for the key");
+    arktest.assertEQ(lightWeightMap.length, 1, "The lightWeightMap length should be 1");
 }
 
 function testGetEmptyStringKey() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set('', 123);
     let result = lightWeightMap.get('');
-    assertEQ(result, 123, "The lightWeightMap should return the correct value for the key");
-    assertEQ(lightWeightMap.length, 1, "The lightWeightMap length should be 1");
+    arktest.assertEQ(result, 123, "The lightWeightMap should return the correct value for the key");
+    arktest.assertEQ(lightWeightMap.length, 1, "The lightWeightMap length should be 1");
 }

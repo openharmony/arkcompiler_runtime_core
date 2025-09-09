@@ -23,7 +23,10 @@
 
 namespace ark::ets {
 
-// Arguments type separated from return type by ":". Object names bounded by 'L' and ';'
+/**
+ * @brief Represents arguments type separated from return type by ":".
+ * Object names bounded by 'L' and ';', and union constituent types are bounded by "{U" and '}'.
+ */
 class EtsMethodSignature {
 public:
     explicit EtsMethodSignature(const std::string_view sign, bool isANIFormat = false)
@@ -91,6 +94,7 @@ private:
 
     size_t ProcessObjectParameter(const PandaString &signature, size_t i)
     {
+        ASSERT(i < signature.size());
         while (signature[i] == '[') {
             ++i;
             if (i >= signature.size()) {
@@ -108,6 +112,16 @@ private:
             if (i == PandaString::npos || i == (prevI + 1)) {
                 return PandaString::npos;
             }
+        } else if (signature[i] == '{') {
+            if (i == signature.size() - 1 || signature[i + 1] != 'U') {
+                return PandaString::npos;
+            }
+            // Get union constituent types bounded between "{U" and '}'
+            size_t prevI = i + 1;
+            i = signature.find('}', prevI);
+            if (i == PandaString::npos || i == (prevI + 1)) {
+                return PandaString::npos;
+            }
         }
         return i;
     }
@@ -115,6 +129,7 @@ private:
     {
         switch (c) {
             case 'L':
+            case '{':
             case '[':
                 return EtsType::OBJECT;
             case 'Z':

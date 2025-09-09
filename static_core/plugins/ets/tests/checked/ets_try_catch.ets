@@ -41,8 +41,8 @@
 //! PASS_AFTER   "TryCatchResolving"
 //! INST_NOT     "Throw"
 
-class Exception0 extends Exception {}
-class Exception1 extends Exception {}
+class Error0 extends Error {}
+class Error1 extends Error {}
 
 class MultipleCatch {
   __noinline__defaultCatch() : int {
@@ -54,23 +54,25 @@ class MultipleCatch {
      return res;
   }
 
-  __noinline__multipleCatch() : int throws {
+  __noinline__multipleCatch() : int {
     let res : int = 0;
     for (let i : int = 0; i < 16; i++) {
       let k : int = i % 2;
       try {
         switch (k) {
           case 0:
-            throw new Exception0();
+            throw new Error0();
           case 1:
-            throw new Exception1();
+            throw new Error1();
           default:
             break;
         }
-      } catch (e: Exception0) {
-        res += 1;
-      } catch (e: Exception1) {
-        res += 2;
+      } catch (e) {
+        if (e instanceof Error0) {
+          res += 1;
+        } else if (e instanceof Error1) {
+          res += 2;
+        }
       }
     }
     return res;

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "libabckit/include/cpp/abckit_cpp.h"
+#include "libabckit/cpp/abckit_cpp.h"
 
 #include "helpers/helpers.h"
 #include "helpers/helpers_runtime.h"

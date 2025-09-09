@@ -15,7 +15,9 @@
 
 /*---
 desc: Default class constructor.
-assert: If a class contains no constructor declarations, then a default constructor is implicitly declared. The semantics of such constructor is to provide default values to class fields which have default values.
+assert: >-
+    If a class contains no constructor declarations, then a default constructor is implicitly declared.
+    The semantics of such constructor is to provide default values to class fields which have default values.
 ---*/
 
 class A {
@@ -31,7 +33,7 @@ class B {
 function main(): void {
   let instance: A = new A();
 
-  assertEQ(instance.x, 0);
-  assertEQ(instance.b1, undefined);
-  assertEQ(instance.b2, null);
+  arktest.assertEQ(instance.x, 0);
+  arktest.assertEQ(instance.b1, undefined);
+  arktest.assertEQ(instance.b2, null);
 }

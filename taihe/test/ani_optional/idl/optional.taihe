@@ -37,7 +37,7 @@ interface ExampleInterface {
     @get Geti8(): Optional<i8>;
     @get Geti16(): Optional<i16>;
     @get Geti32(): Optional<i32>;
-    @get Geti64(): Optional<i64>;  // 注意：这里应该是i64，你可能需要修正类型
+    @get Geti64(): Optional<i64>;  // 注意：这里应该是 i64，你可能需要修正类型
     @get Getf32(): Optional<f32>;
     @get Getf64(): Optional<f64>;
     @get Getbool(): Optional<bool>;

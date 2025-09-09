@@ -17,17 +17,23 @@
 
 from __future__ import annotations
 
+import argparse
 from datetime import datetime
 from pathlib import Path
+from typing import Any, Literal, cast
 
 import pytz
 
+from runner import utils
+from runner.common_exceptions import ParameterNotFound
 from runner.enum_types.base_enum import BaseEnum
 from runner.enum_types.params import TestEnv, TestReport
 from runner.enum_types.verbose_format import VerboseFilter, VerboseKind
 from runner.logger import Log
 from runner.options.local_env import LocalEnv
+from runner.options.macros import Macros
 from runner.options.options import IOptions
+from runner.options.options_general import GeneralOptions
 from runner.reports.report import ReportGenerator
 from runner.reports.report_format import ReportFormat
 
@@ -126,14 +132,120 @@ class Test:
             if self.ignored else f"\033[1;31m{TestStatus.NEW_FAILURE.value}\033[0m"
 
     def get_command_line(self) -> str:
-        config_cmd = self.test_env.config.get_command_line()
         reproduce_message = [
-            f'{self.test_env.config.general.static_core_root}/tests/tests-u-runner-2/runner.sh',
-            config_cmd
+            f'(min parameters set): {self.get_short_cli()}',
+            f'(full parameters set): {self.get_full_cli()}'
         ]
-        if config_cmd.find('--test-file') < 0:
+
+        return '\n'.join(reproduce_message)
+
+    def get_short_cli(self) -> str:
+        reproduce_message = [f'{Path(__file__).parent.parent}/runner.sh',
+                             f'{self.test_env.config.workflow.name}', f'{self.test_env.config.test_suite.suite_name}',
+                             f'{" ".join(self.test_env.config.general.cli_options)}']
+        if '--test-file' not in ' '.join(reproduce_message):
             reproduce_message.append(f" --test-file {self.test_id}")
+
         return ' '.join(reproduce_message)
+
+    def get_full_cli(self) -> str:
+        reproduce_message = [
+            f'{Path(__file__).parent.parent}/runner.sh',
+            f'{self.test_env.config.workflow.name}',
+            f'{self.test_env.config.test_suite.suite_name}']
+
+        workflow_params = self.get_entity_params("workflow")
+        test_suite_main_params = self.get_entity_params("test-suite")
+        test_suite_collections_params = self.get_collection_params()
+        runner_params = self.get_changed_runner_params()
+
+        for key, val in workflow_params.items():
+            if isinstance(val, list):
+                for i, val_elem in enumerate(val):
+                    val[i] = Macros.correct_macro(val_elem, self.test_env.config.workflow)
+                workflow_params[key] = val
+            else:
+                workflow_params[key] = Macros.correct_macro(val, self.test_env.config.workflow)
+
+        # workflow params has higher priority than test suite params
+        #  the workflow values will override the test-suite values in case they both present in config files
+        all_params = {**test_suite_main_params, **test_suite_collections_params, **workflow_params, **runner_params}
+        all_params = {f"--{key}": val.value if isinstance(val, BaseEnum) else val for key, val in all_params.items()}
+        all_params_list = utils.convert_dict_params_into_list(utils.delete_filtering_options_nested_keys(all_params))
+        reproduce_message.extend(all_params_list)
+
+        if '--test-file' not in ' '.join(reproduce_message):
+            reproduce_message.append(f"--test-file {self.test_id}")
+
+        return ' '.join(reproduce_message)
+
+    def get_entity_params(self,                         # type: ignore[explicit-any]
+                          entity: Literal["workflow", "test-suite"]) -> dict[str, Any]:
+        match entity:
+            case "workflow":
+                data = f"{utils.convert_minus(self.test_env.config.workflow.name)}.data"
+            case "test-suite":
+                data = f"{utils.convert_minus(self.test_env.config.test_suite.suite_name)}.data"
+            case _:
+                raise ParameterNotFound
+
+        return cast(dict, getattr(self.test_env.config.general, data)["parameters"])
+
+    def get_changed_runner_params(self) -> dict:
+        cli_options = self.test_env.config.general.cli_options
+        cli_options_splited = []
+        for option in cli_options:
+            if "=" in option:
+                cli_options_splited.extend(option.split("=", 1))
+            else:
+                cli_options_splited.append(option)
+
+        runner_parser = argparse.ArgumentParser(description="Runner args parser")
+        GeneralOptions.add_cli_args(runner_parser)
+        runner_args, other_args = runner_parser.parse_known_args(cli_options)
+
+        test_suite_parser = argparse.ArgumentParser(description="Test Suite args parser")
+        for key, val in self.test_env.config.test_suite.parameters.items():
+            if isinstance(val, bool):
+                test_suite_parser.add_argument(f'--{key}',
+                                               dest=f"{key}", action='store_true')
+            elif isinstance(val, list):
+                test_suite_parser.add_argument(f'--{key}', dest=f"{key}", action='append')
+            else:
+                test_suite_parser.add_argument(f'--{key}', dest=f"{key}", type=type(val))
+
+        test_suite_args, other_args = test_suite_parser.parse_known_args(other_args)
+
+        workflow_parser = argparse.ArgumentParser(description="Workflow args parser")
+        for key, val in self.test_env.config.workflow.parameters.items():
+            if isinstance(val, bool):
+                workflow_parser.add_argument(f'--{key}',
+                                               dest=f"{key}", action='store_true')
+            elif isinstance(val, list):
+                workflow_parser.add_argument(f'--{key}', dest=f"{key}", action='append')
+            else:
+                workflow_parser.add_argument(f'--{key}', dest=f"{key}", type=type(val))
+
+        workflow_args, other_args = workflow_parser.parse_known_args(other_args)
+
+        return {**{key: val for key, val in vars(runner_args).items() if f"--{key}" in cli_options_splited},
+                **{key: val for key, val in vars(test_suite_args).items() if f"--{key}" in cli_options_splited},
+                **{key: val for key, val in vars(workflow_args).items() if f"--{key}" in cli_options_splited}}
+
+    def get_collection_params(self) -> dict:
+        """ there might be additional params for the test-suite in the collections section"""
+        collection_params: dict[str, list] = {}
+        collections = self.test_env.config.test_suite.collections
+        for collection in collections:
+            if not collection.parameters:
+                continue
+            for key, val in collection.parameters.items():
+                if key in collection_params:
+                    collection_params[key] += [*val.split()]
+                else:
+                    collection_params[key] = [*val.split()]
+
+        return collection_params
 
     def is_output_log(self) -> bool:
         """

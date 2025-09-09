@@ -37,7 +37,7 @@ enum class <%= enum_name %>_Opcode {
 };
 % end
 
-enum Flags : uint32_t {
+enum Flags : uint64_t {
 % Panda::properties.each_with_index do |f, i|
     <%= f.tag.upcase %> = <%= format("0x%x", 1 << i) %>,
 % end

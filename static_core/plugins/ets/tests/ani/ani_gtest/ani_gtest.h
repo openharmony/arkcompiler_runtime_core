@@ -67,13 +67,12 @@ public:
         ASSERT_TRUE(vm_->DestroyVM() == ANI_OK) << "Cannot destroy ANI VM";
     }
 
-    /// Call function with name `fnName` from module denoted by `moduleDescriptor`
+    /// Call function with name `fnName` from module denoted by `moduleName`
     template <typename R, typename... Args>
     R CallEtsFunction(const std::string &moduleName, const std::string &fnName, Args &&...args)
     {
         std::optional<R> result;
-        auto moduleDescriptor = "L" + moduleName + ";";
-        CallEtsFunctionImpl(&result, moduleDescriptor, fnName, std::forward<Args>(args)...);
+        CallEtsFunctionImpl(&result, moduleName, fnName, std::forward<Args>(args)...);
         if constexpr (!std::is_same_v<R, void>) {
             return result.value();
         }
@@ -192,11 +191,10 @@ private:
     template <typename R, typename... Args>
     void CallEtsNativeMethodImpl(std::optional<R> *result, const NativeFunction &fn, Args &&...args)
     {
-        const auto moduleDescriptor = std::string("L") + fn.GetModule() + ";";
+        const auto *moduleDescriptor = fn.GetModule();
         const auto *fnName = fn.GetName();
         ani_module mod {};
-        ASSERT_EQ(env_->FindModule(moduleDescriptor.c_str(), &mod), ANI_OK)
-            << GetFindModuleFailureMsg(moduleDescriptor);
+        ASSERT_EQ(env_->FindModule(moduleDescriptor, &mod), ANI_OK) << GetFindModuleFailureMsg(moduleDescriptor);
         ani_function aniFn {};
         ASSERT_EQ(env_->Module_FindFunction(mod, fnName, nullptr, &aniFn), ANI_OK)
             << GetFindFunctionFailureMsg(moduleDescriptor, fnName);

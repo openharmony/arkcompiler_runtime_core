@@ -17,7 +17,7 @@
 #define ABCKIT_API_MODIFIER_H
 
 #include <vector>
-#include "libabckit/include/c/abckit.h"
+#include "libabckit/c/abckit.h"
 #include "helpers/visit_helper/visit_helper.h"
 
 struct MethodInfo {

@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#include "../../../include/c/abckit.h"
-#include "../../../include/c/statuses.h"
-#include "../../../include/c/ir_core.h"
-#include "../../../include/c/metadata_core.h"
-#include "../../../include/c/isa/isa_dynamic.h"
-#include "../../../include/c/extensions/arkts/metadata_arkts.h"
-#include "../../../include/c/extensions/js/metadata_js.h"
+#include "../../../include/libabckit/c/abckit.h"
+#include "../../../include/libabckit/c/statuses.h"
+#include "../../../include/libabckit/c/ir_core.h"
+#include "../../../include/libabckit/c/metadata_core.h"
+#include "../../../include/libabckit/c/isa/isa_dynamic.h"
+#include "../../../include/libabckit/c/extensions/arkts/metadata_arkts.h"
+#include "../../../include/libabckit/c/extensions/js/metadata_js.h"
 
 /*
  * This a canary file to check that the public API conforms to:

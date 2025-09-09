@@ -13,7 +13,10 @@
 * limitations under the License.
 */
 
-case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_GET:
+case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_GET: {
+    Builder()->BuildStringGetIntrinsic(bcInst_, ACC_READ, intrinsicId);
+    break;
+}
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_CHAR_AT: {
     if (!Builder()->TryBuildStringCharAtIntrinsic(bcInst_, ACC_READ)) {
         BuildDefaultVirtualCallIntrinsic(intrinsicId);
@@ -26,15 +29,18 @@ case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_GET_LENGTH: {
 }
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_LENGTH: {
     Builder()->BuildStringLengthIntrinsic(bcInst_, ACC_READ);
-    auto input = Builder()->GetDefinitionAcc();
-    auto inst = GetGraph()->CreateInstCast(DataType::FLOAT64, Builder()->GetPc(bcInst_->GetAddress()),
-                                           input, DataType::INT32);
-    Builder()->UpdateDefinitionAcc(inst);
-    Builder()->AddInstruction(inst);
     break;
 }
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_IS_EMPTY: {
     Builder()->BuildStringIsEmptyIntrinsic(bcInst_, ACC_READ);
+    break;
+}
+case RuntimeInterface::IntrinsicId::INTRINSIC_ESCOMPAT_ARRAY_GET_UNSAFE: {
+    Builder()->BuildEscompatArrayGetUnsafeIntrinsic(bcInst_, ACC_READ);
+    break;
+}
+case RuntimeInterface::IntrinsicId::INTRINSIC_ESCOMPAT_ARRAY_SET_UNSAFE: {
+    Builder()->BuildEscompatArraySetUnsafeIntrinsic(bcInst_, ACC_READ);
     break;
 }
 case RuntimeInterface::IntrinsicId::INTRINSIC_INT8_ARRAY_SET_INT:

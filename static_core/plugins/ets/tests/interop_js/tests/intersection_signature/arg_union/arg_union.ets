@@ -27,12 +27,13 @@ import {
     instanceChildAgeNameUnionClass,
 } from 'main_js';
 
-class Intersection1 {
-    age = tsNumber;
-    name = tsString;
-}
 function checkArgFuFromSts(): boolean {
-    return checkUnionType(new Intersection1()) as boolean;
+    class Intersection {
+        age = tsNumber;
+        name = tsString;
+    }
+
+    return checkUnionType(new Intersection()) as boolean;
 }
 
 function checkIntersectionTypeClass(): boolean {

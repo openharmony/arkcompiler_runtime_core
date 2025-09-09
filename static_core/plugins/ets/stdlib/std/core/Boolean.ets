@@ -109,7 +109,7 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @param value value to construct class instance with
      */
     public constructor(value: string) {
-        this.value = value != "";
+        this.value = value != '';
     }
 
     /**
@@ -137,7 +137,7 @@ export final class Boolean extends Object implements Comparable<Boolean> {
         } else if (value instanceof Short) {
             this.value = value.unboxed() != 0;
         } else if (value instanceof String) {
-            this.value = value != "";
+            this.value = value != '';
         } else if (value instanceof Object) {
             this.value = true;
         } else {
@@ -187,6 +187,26 @@ export final class Boolean extends Object implements Comparable<Boolean> {
     public static readonly FALSE = new Boolean(false);
 
     /**
+     * Returns the primitive as boolean value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static toBoolean(value: boolean): boolean {
+        return value;
+    }
+
+     /**
+     * Returns value of this instance
+     *
+     * @returns value as boolean
+     */
+    public toBoolean(): boolean {
+        return this.value;
+    }
+
+    /**
      * Static method that converts primitive boolean to boxed version
      *
      * @param b value to be converted
@@ -230,27 +250,15 @@ export final class Boolean extends Object implements Comparable<Boolean> {
     }
 
     /**
-     * Returns a hash code (integer representation) for this instance
-     *
-     * @returns representation of this instance
-     */
-    public override $_hashCode(): int {
-        if (this.value) {
-            return 1;
-        }
-        return 0;
-    }
-
-    /**
      * Converts this object to a string
      *
-     * @returns "True" if this instance is true, "False" otherwise
+     * @returns 'True' if this instance is true, 'False' otherwise
      */
     public override toString(): String {
         if (this.value) {
-            return "true";
+            return 'true';
         }
-        return "false";
+        return 'false';
     }
 
     /**
@@ -264,7 +272,9 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @returns result of the comparison
      */
     public override compareTo(other: Boolean): int {
-        return this.$_hashCode() - other.$_hashCode();
+        let thisInt = this.value ? 1 : 0
+        let otherInt = other.value ? 1 : 0
+        return thisInt - otherInt;
     }
 
     /**
@@ -325,23 +335,5 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      */
     public xor(other: Boolean): Boolean {
         return Boolean.valueOf(this.value ^ other.unboxed())
-    }
-
-    /**
-     * Creates a Boolean instance based on JSONValue
-     *
-     * @param json: JSONValue - a JSON representation
-     *
-     * @throws JSONTypeError if json does not encode a valid boolean literal
-     *
-     * @returns Boolean - true if JSON encodes true literal, false if JSON encodes false literal
-     */
-    public createFromJSONValue(json: JSONValue): Boolean {
-        if (json instanceof JSONFalse) {
-            return Boolean.FALSE
-        } else if (json instanceof JSONTrue) {
-            return Boolean.TRUE
-        }
-        throw new JSONTypeError("Cannot create Boolean from JSON", new ErrorOptions(json as Object))
     }
 }

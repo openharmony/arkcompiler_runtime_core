@@ -30,7 +30,6 @@ function runTest(test) {
         'panda-files': gtestAbcPath,
         'boot-panda-files': `${stdlibPath}:${gtestAbcPath}`,
         'gc-trigger-type': 'heap-trigger',
-        'load-runtimes': 'ets',
         'compiler-enable-jit': 'false',
         'xgc-trigger-type': 'never',
     };
@@ -45,11 +44,11 @@ function runTest(test) {
         if (is_unset()) {
             return;
         }
-        clearInterval(tId);
+        helper.clearInterval(tId);
         const check = etsVm.getFunction(globalName, 'check');
         check();
     };
-    tId = setInterval(checkFn);
+    tId = helper.setInterval(checkFn);
 }
 
 let args = helper.getArgv();

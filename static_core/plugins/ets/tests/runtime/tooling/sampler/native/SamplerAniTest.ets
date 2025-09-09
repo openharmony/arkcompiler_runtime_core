@@ -13,63 +13,63 @@
  * limitations under the License.
  */
 
-function main(): int {
+export function debugMain(): int {
     loadLibrary("sampler_ani_lib");
 
     let res: int = 0;
     res = CallNativeSlowFunction(20000000);
     if (res != 20000000) {
-        // throw new Exception("ERROR: CallNativeSlowFunction worked wrong");
+        // throw new Error("ERROR: CallNativeSlowFunction worked wrong");
         return 1;
     }
 
     res = CallNativeFastFunction(100000);
     if (res != 100000) {
-        // throw new Exception("ERROR: CallNativeFastFunction worked wrong");
+        // throw new Error("ERROR: CallNativeFastFunction worked wrong");
         return 2;
     }
 
     res = CallNativeANISlowFunction(500000);
     if (res != 500000) {
-        // throw new Exception("ERROR: CallNativeANISlowFunction worked wrong");
+        // throw new Error("ERROR: CallNativeANISlowFunction worked wrong");
         return 3;
     }
 
     res = CallNativeANIFastFunction(100000);
     if (res != 100000) {
-        // throw new Exception("ERROR: CallNativeANIFastFunction worked wrong");
+        // throw new Error("ERROR: CallNativeANIFastFunction worked wrong");
         return 4;
     }
 
     return 0;
 }
 
-function release_main(): int {
+export function releaseMain(): int {
     loadLibrary("sampler_ani_lib");
 
     let res: int = 0;
     res = CallNativeSlowFunction(2000000000);
     // res = 2 billion
     if (res != 2000000000) {
-        // throw new Exception("ERROR: CallNativeSlowFunction worked wrong");
+        // throw new Error("ERROR: CallNativeSlowFunction worked wrong");
         return 1;
     }
 
     res = CallNativeFastFunction(5000000);
     if (res != 5000000) {
-        // throw new Exception("ERROR: CallNativeFastFunction worked wrong");
+        // throw new Error("ERROR: CallNativeFastFunction worked wrong");
         return 2;
     }
 
     res = CallNativeANISlowFunction(5000000);
     if (res != 5000000) {
-        // throw new Exception("ERROR: CallNativeANISlowFunction worked wrong");
+        // throw new Error("ERROR: CallNativeANISlowFunction worked wrong");
         return 3;
     }
 
     res = CallNativeANIFastFunction(1000000);
     if (res != 1000000) {
-        // throw new Exception("ERROR: CallNativeANIFastFunction worked wrong");
+        // throw new Error("ERROR: CallNativeANIFastFunction worked wrong");
         return 4;
     }
 

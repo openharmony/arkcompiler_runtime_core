@@ -13,6 +13,15 @@
  * limitations under the License.
  */
 
+// NOLINTBEGIN(readability-identifier-naming, cppcoreguidelines-macro-usage,
+//             cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
+//             readability-else-after-return, readability-duplicate-include,
+//             misc-non-private-member-variables-in-classes, cppcoreguidelines-pro-type-member-init,
+//             google-explicit-constructor, cppcoreguidelines-pro-type-union-access,
+//             modernize-use-auto, llvm-namespace-comment,
+//             cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
+//             readability-implicit-bool-conversion)
+
 #ifndef COMMON_INTERFACES_OBJECTS_BASE_TYPE_H
 #define COMMON_INTERFACES_OBJECTS_BASE_TYPE_H
 
@@ -22,8 +31,7 @@
 #include <memory>
 
 #include "objects/base_object.h"
-#include "objects/string/base_string_declare.h"
-
+#include "objects/string/base_string.h"
 namespace panda::ecmascript {
 class JSTaggedValue;
 }
@@ -31,6 +39,7 @@ class JSTaggedValue;
 using JSTaggedValue = panda::ecmascript::JSTaggedValue;
 namespace common {
 
+using TaggedType = uint64_t;
 struct BaseUndefined {};
 struct BaseNull {};
 struct BaseBigInt {
@@ -40,12 +49,20 @@ struct BaseBigInt {
 };
 
 // The common consensus type between static and dynamic
-using BaseType = std::variant<std::monostate, bool, int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, float,
-                               double, int64_t, uint64_t, BaseUndefined, BaseNull, BaseBigInt, BaseObject*,
-                               BaseString*>;
+using BaseType =
+    std::variant<std::monostate, bool, int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, float, double, int64_t,
+                 uint64_t, BaseUndefined, BaseNull, BaseBigInt, BaseObject *, BaseString *>;
 
 // base type for static vm
 using BoxedValue = BaseObject *;
 
 }  // namespace common
 #endif  // COMMON_INTERFACES_OBJECTS_BASE_TYPE_H
+// NOLINTEND(readability-identifier-naming, cppcoreguidelines-macro-usage,
+//           cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
+//           readability-else-after-return, readability-duplicate-include,
+//           misc-non-private-member-variables-in-classes, cppcoreguidelines-pro-type-member-init,
+//           google-explicit-constructor, cppcoreguidelines-pro-type-union-access,
+//           modernize-use-auto, llvm-namespace-comment,
+//           cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
+//           readability-implicit-bool-conversion)

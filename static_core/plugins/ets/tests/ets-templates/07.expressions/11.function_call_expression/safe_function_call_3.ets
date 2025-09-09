@@ -28,5 +28,5 @@ function f(): A|null {
 }
 
 function main(): void {
-    assertTrue( f()?.check() === undefined )
+    arktest.assertTrue( f()?.check() === undefined )
 }

@@ -56,7 +56,7 @@ cases:
       function main() {
           res = 0
           new C<A>(new A())
-          assertEQ( res, 1)
+          arktest.assertEQ( res, 1)
       }
   - tags: compile-only, negative
     code: |-

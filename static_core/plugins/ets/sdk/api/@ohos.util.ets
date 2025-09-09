@@ -15,10 +15,13 @@
 
 import { BusinessError } from "@ohos.base";
 
-const TypeErrorCodeId: number = 401;
+const TypeErrorCodeId: int = 401;
 const percentRate = 100;
+const syntaxErrorCode: int = 10200002;
+export type RecordData = undefined | null | Object | Record<string, RecordData> | Array<RecordData>;
+export type PromisifiedFunc = (...args: FixedArray<Any>) => Promise<Any>;
 
-function createBusinessError(code: number, message: string) {
+function createBusinessError(code: int, message: string) {
     let err = new BusinessError();
     err.code = code;
     err.name = 'BusinessError';
@@ -132,23 +135,23 @@ export namespace util {
         }
 
         public getCreateCount(): number {
-            return this.createCount as number;
+            return this.createCount.toDouble();
         }
 
         public getMissCount(): number {
-            return this.missCount as number;
+            return this.missCount.toDouble();
         }
 
         public getRemovalCount(): number {
-            return this.evictionCount as number;
+            return this.evictionCount.toDouble();
         }
 
         public getMatchCount(): number {
-            return this.hitCount as number;
+            return this.hitCount.toDouble();
         }
 
         public getPutCount(): number {
-            return this.putCount as number;
+            return this.putCount.toDouble();
         }
 
         public $_iterator(): IterableIterator<[K, V]> {
@@ -246,16 +249,12 @@ export namespace util {
          */
         private static encodeBase64(bytes: Uint8Array, urlSafe: boolean, mime: boolean): string {
             let table = urlSafe ? Base64Helper.BASE64_URL_SAFE_CHARS : Base64Helper.BASE64_CHARS;
-            let binaryString: string = "";
-            for (let i = 0; i < bytes.length; i++) {
-                binaryString += String.fromCharCode(bytes[i]);
-            }
             let encoded: string = "";
             let buffer: int = 0;
             let bufferLength: int = 0;
 
-            for (let i = 0; i < binaryString.length; i++) {
-                buffer = (buffer << Base64Helper.BYTE_SIZE) | binaryString.charCodeAt(i);
+            for (let i = 0; i < bytes.length; i++) {
+                buffer = (buffer << Base64Helper.BYTE_SIZE) | bytes[i].toInt();
                 bufferLength += Base64Helper.BYTE_SIZE;
                 while (bufferLength >= Base64Helper.BASE64_GROUP_SIZE) {
                     bufferLength -= Base64Helper.BASE64_GROUP_SIZE;
@@ -295,11 +294,11 @@ export namespace util {
             let bytes: Array<number> = new Array<number>();
 
             for (let i = 0; i < cleaned.length; i++) {
-                let ch = cleaned[i];
+                let ch = cleaned.charAt(i);
                 if (ch == c'=') {
                     break;
                 }
-                let index: int = table.indexOf(ch) as int;
+                let index: int = table.indexOf(ch).toInt();
                 if (index == -1) {
                     continue;
                 }
@@ -322,6 +321,10 @@ export namespace util {
         encodeSync(src: Uint8Array, options?: Type): Uint8Array {
             if (options === undefined) {
                 options = Type.BASIC;
+            }
+            if (options != Type.BASIC && options != Type.BASIC_URL_SAFE){
+                throw createBusinessError(TypeErrorCodeId,
+                    `Parameter error. The target encoding type option must be BASIC or BASIC_URL_SAFE.`);
             }
             let encoded: string = Base64Helper.encodeBase64(src, options === Type.BASIC_URL_SAFE || options === Type.MIME_URL_SAFE, options === Type.MIME || options === Type.MIME_URL_SAFE);
             let result: Uint8Array = new Uint8Array(encoded.length);
@@ -714,21 +717,6 @@ export namespace util {
         private native decode(input: Uint8Array, decodeWithStream: boolean): string;
         private static native nativeDestroy(ptr: long): void;
     }
-
-    export interface EncodeIntoUint8ArrayInfo {
-        read: int;
-        written: int;
-    }
-
-    class EncodeIntoUint8ArrayInfoInner implements EncodeIntoUint8ArrayInfo {
-        read: int;
-        written: int;
-        constructor(outRead: int, outWritten: int) {
-            this.read = outRead;
-            this.written = outWritten;
-        }
-    }
-
     export class RationalNumber {
         private mnum: number = 0;
         private mden: number = 0;
@@ -790,12 +778,12 @@ export namespace util {
             const regex = new RegExp('^(.*)([:\\/])(.*)$');
             const match = str.match(regex);
             if (!match) {
-                throw new BusinessError(TypeErrorCodeId,
-                    new Error(`Parameter error. The type of ${str} must be effective string`));
+                throw createBusinessError(TypeErrorCodeId,
+                    `Parameter error. The type of ${str} must be effective string`);
             }
-            const str1 = match[1];
+            const str1 = match[1]!;
             const separator = match[2];
-            const str2 = match[3];
+            const str2 = match[3]!;
             if (RationalNumber.isNumeric(str1) && RationalNumber.isNumeric(str2)) {
                 const num1 = Number(str1);
                  const num2 = Number(str2);
@@ -804,8 +792,8 @@ export namespace util {
                 }
                 return RationalNumber.parseRationalNumber(num1, num2);
             } else {
-                throw new BusinessError(TypeErrorCodeId,
-                    new Error(`Parameter error. The type of ${str} must be character string`));
+                throw createBusinessError(TypeErrorCodeId,
+                    `Parameter error. The type of ${str} must be character string`);
             }
         }
 
@@ -874,8 +862,8 @@ export namespace util {
          */
         static getCommonFactor(firNum: number, SecNum: number): number {
             if (firNum === 0 || SecNum === 0) {
-                throw new BusinessError(TypeErrorCodeId,
-                    new Error(`Parameter error. The Parameter cannot be zero`));
+                throw createBusinessError(TypeErrorCodeId,
+                    `Parameter error. The Parameter cannot be zero`);
             }
             if (!Number.isInteger(firNum) || !Number.isInteger(SecNum)) {
                 console.error('getCommonFactor: The type of Parameter must be integer');
@@ -964,6 +952,11 @@ export namespace util {
         }
     }
 
+    export interface EncodeIntoUint8ArrayInfo {
+        read: int;
+        written: int;
+    }
+
     export class TextEncoder {
 
         static { loadLibrary("ets_sdk_native") }
@@ -977,8 +970,7 @@ export namespace util {
                 return;
             }
             let tempString: string = encoding.toLowerCase();
-            let flag: boolean = TextEncoder.checkEncodingFormat(tempString);
-            if (!flag) {
+            if (!(TextEncoder.KNOWN_ENCODINGS.has(tempString))) {
                 throw createBusinessError(TypeErrorCodeId, `Wrong encoding format, the current '${encoding}' format is not support.`)
             }
             this.encoding_ = encoding;
@@ -994,43 +986,38 @@ export namespace util {
             if (!input) {
                 return new Uint8Array(0);
             }
-            return TextEncoder.doEncodeInto(input, this.encoding_);
+            return new Uint8Array(TextEncoder.doEncodeInto(input, this.encoding_));
         }
 
         encodeIntoUint8Array(input: string, dest: Uint8Array): EncodeIntoUint8ArrayInfo
         {
-            return TextEncoder.doEncodeInfoUint8Array(input, this.encoding_, dest);
+            let res: Array<int> = TextEncoder.doEncodeInfoUint8Array(input, this.encoding_, dest);
+            let result: EncodeIntoUint8ArrayInfo = {read: 0, written: 0};
+            result.read = res[0];
+            result.written = res[1];
+            return result;
         }
 
         get encoding(): string {
             return this.encoding_;
         }
 
-        private static checkEncodingFormat(encoding: string): boolean
-        {
-            const knownEncodings: string[] = [
-                "utf-8", "utf-16be", "utf-16le", "gbk", "gb2312", "gb18030", "ibm866",
-                "iso-8859-1", "iso-8859-2", "iso-8859-3", "iso-8859-4", "iso-8859-5", "iso-8859-6",
-                "iso-8859-7", "iso-8859-8", "iso-8859-8-i", "iso-8859-10", "iso-8859-13",
-                "iso-8859-14", "iso-8859-15", "koi8-r", "koi8-u", "macintosh",
-                "windows-874", "windows-1250", "windows-1251", "windows-1252",
-                "windows-1253", "windows-1254", "windows-1255", "windows-1256",
-                "windows-1257", "windows-1258", "big5", "euc-jp", "iso-2022-jp",
-                "shift_jis", "euc-kr", "x-mac-cyrillic"
-            ];
-            for (const enc of knownEncodings) {
-                if (enc == encoding) {
-                    return true;
-                }
-            }
-            return false;
-        }
+        private static readonly KNOWN_ENCODINGS: Set<string> = new Set<string>([
+            "utf-8", "utf-16be", "utf-16le", "gbk", "gb2312", "gb18030", "ibm866",
+            "iso-8859-1", "iso-8859-2", "iso-8859-3", "iso-8859-4", "iso-8859-5", "iso-8859-6",
+            "iso-8859-7", "iso-8859-8", "iso-8859-8-i", "iso-8859-10", "iso-8859-13",
+            "iso-8859-14", "iso-8859-15", "koi8-r", "koi8-u", "macintosh",
+            "windows-874", "windows-1250", "windows-1251", "windows-1252",
+            "windows-1253", "windows-1254", "windows-1255", "windows-1256",
+            "windows-1257", "windows-1258", "big5", "euc-jp", "iso-2022-jp",
+            "shift_jis", "euc-kr", "x-mac-cyrillic"
+        ]);
 
         private static native doEncodeInto(
-            input: string, inputEncoding: string): Uint8Array;
+            input: string, inputEncoding: string): ArrayBuffer;
 
         private static native doEncodeInfoUint8Array(
-            input: string, inputEncoding: string, destArray: Uint8Array): EncodeIntoUint8ArrayInfo;
+            input: string, inputEncoding: string, destArray: Uint8Array): Array<int>;
     }
 
     export class StringDecoder {
@@ -1106,7 +1093,9 @@ export namespace util {
 
         static native generateRandomUUID(entropyCache: boolean): string
 
-    internal static objectToString(obj: Object, full: boolean = false): string {
+        static native generateRandomBinaryUUID(entropyCache: boolean): Uint8Array
+
+        private static objectToString(obj: Object, full: boolean = false): string {
             return (new UtilHelper).stringifyObject(obj, '\n', 1, full)
         }
 
@@ -1510,7 +1499,7 @@ export namespace util {
          * @returns { boolean } Returns true if the value is an iterator returned for a built-in Map instance.
          */
         isMapIterator(value: Object): boolean {
-            return value instanceof IterableIterator;
+            return value instanceof MapIterator || value instanceof EmptyMapIterator;
         }
 
         /**
@@ -1553,9 +1542,11 @@ export namespace util {
          * Check whether the entered value is the iterator type of set.
          * @param { Object } value - A Set iterator value
          * @returns { boolean } Returns true if the value is an iterator returned for a built-in Set instance.
+         *
+         * Since the current interface cannot be correctly determined, it returns false by default
          */
         isSetIterator(value: Object): boolean {
-            return value instanceof IterableIterator;
+            return false;
         }
 
         /**
@@ -1630,15 +1621,101 @@ export namespace util {
         isWeakSet(value: Object): boolean {
             return value instanceof WeakSet;
         }
+
+        /**
+         * Check whether the entered value is of type asyncfunction.
+         * @param { Object } value - A AsyncFunction value
+         * @returns { boolean } Returns true if the value is a built-in AsyncFunction instance.
+         *
+         * Since the current interface cannot be correctly determined, it returns false by default
+         */
+        isAsyncFunction(value: Object): boolean {
+            return false;
+        }
+    }
+
+    export function promisify(original: Function): PromisifiedFunc {
+        return (...args: FixedArray<Any>): Promise<Any> => {
+            return new Promise<Any>((resolve, reject) => {
+                let callback: Function = (err: Error | null, ...value: FixedArray<Any>) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(value);
+                    }
+                };
+                const newArgs: FixedArray<Any> = new Any[args.length + 1];
+                for (let i = 0; i < args.length; i++) {
+                    newArgs[i] = args[i];
+                }
+                newArgs[args.length] = callback;
+                original.unsafeCall(...newArgs);
+            });
+        };
+    }
+
+    export function callbackWrapper(original: Function): Function {
+        return (...args: FixedArray<string | number | Function>): void => {
+            if (typeof args[args.length - 1] != 'function') {
+                throw new Error('maybe is not function');
+            }
+            const func: Function = args[args.length - 1] as Function;
+            const newArgs: FixedArray<Any> = new Any[args.length - 1];
+            for (let i = 0; i < args.length - 1; i++) {
+                newArgs[i] = args[i];
+            }
+            const funcReturn = original.unsafeCall(...newArgs);
+            if (funcReturn instanceof Promise) {
+                const func1 = funcReturn as Promise<Any>
+                func1.then((result: Any) => {
+                    func.unsafeCall(null, result);
+                }).catch((err: Error) => {
+                    func.unsafeCall(err, null);
+                });
+            } else {
+                throw new Error('The function passed to callbackWrapper must return a Promise.');
+            }
+        }
     }
 
     /**
      * Get the hash code of an object.
-     * @param { object } [object] - The object that need to get hash code.
+     * @param { RecordData } [obj] - The object that need to get hash code.
      * @returns { number } Return a hash code of an object.
      */
-    export function getHash(obj: object): number {
-        let result: number = obj.$_hashCode();
+    export function getHash(obj: RecordData): number {
+        if (obj === undefined || obj === null) {
+            throw createBusinessError(TypeErrorCodeId, `Parameter error. The type of Parameter must be object.`);
+        }
+        let result: number = Runtime.getHashCodeByValue(obj!);
         return result;
+    }
+
+    /**
+    * Generates a random binary UUID.
+    * @param { boolean } entropyCache - Whether to use cached UUIDs for generation
+    * @returns { Uint8Array | undefined } A Uint8Array containing the generated binary UUID, or undefined on failure.
+    */
+    export function generateRandomBinaryUUID(entropyCache?: boolean): Uint8Array | undefined {
+        let arr = UtilHelper.generateRandomBinaryUUID((entropyCache == undefined) ? false : entropyCache)
+        return arr;
+    }
+
+    /**
+    * Parses a UUID string into a binary representation (Uint8Array).
+    * @param { string } uuid - The UUID string to parse
+    * @returns { Uint8Array } A Uint8Array containing the 16-byte binary representation of the UUID.
+    */
+    export function parseUUID(uuid: string): Uint8Array {
+        const format = new RegExp("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
+        if (!format.test(uuid)) {
+            throw createBusinessError(syntaxErrorCode, `Syntax Error.Invalid ${uuid} string`);
+        }
+        const hex = uuid.replace(new RegExp('-', 'g'), '');
+        const uuidArray = new Uint8Array(16);
+        for (let i = 0; i < 16; i++) {
+            uuidArray[i] = parseInt(hex.substr(i * 2, 2), 16);
+        }
+        return uuidArray;
     }
 }

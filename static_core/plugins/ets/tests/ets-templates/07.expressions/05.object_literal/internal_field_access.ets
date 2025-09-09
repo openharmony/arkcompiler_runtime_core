@@ -25,5 +25,5 @@ class Person {
 function main(): void {
   let obj: Person = { name: "Ben", age: 3 };
 
-  assertEQ( obj.name, "Ben" )
+  arktest.assertEQ( obj.name, "Ben" )
 }

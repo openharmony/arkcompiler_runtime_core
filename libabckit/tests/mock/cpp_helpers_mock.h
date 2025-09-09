@@ -17,16 +17,16 @@
 #define ABCKIT_CPP_HELPERS_MOCK
 
 #include <string>
-#include "../../include/cpp/abckit_cpp.h"
+#include "../../include/libabckit/cpp/abckit_cpp.h"
 #include "check_mock.h"
-#include "include/cpp/headers/value.h"
-#include "include/cpp/headers/arkts/annotation.h"
-#include "include/cpp/headers/arkts/annotation_interface.h"
-#include "include/cpp/headers/arkts/annotation_interface_field.h"
-#include "include/cpp/headers/arkts/class.h"
-#include "include/cpp/headers/arkts/function.h"
-#include "include/cpp/headers/core/annotation_element.h"
-#include "include/cpp/headers/core/annotation_interface_field.h"
+#include "include/libabckit/cpp/headers/value.h"
+#include "include/libabckit/cpp/headers/arkts/annotation.h"
+#include "include/libabckit/cpp/headers/arkts/annotation_interface.h"
+#include "include/libabckit/cpp/headers/arkts/annotation_interface_field.h"
+#include "include/libabckit/cpp/headers/arkts/class.h"
+#include "include/libabckit/cpp/headers/arkts/function.h"
+#include "include/libabckit/cpp/headers/core/annotation_element.h"
+#include "include/libabckit/cpp/headers/core/annotation_interface_field.h"
 #include "mock/mock_values.h"
 
 #include <gtest/gtest.h>
@@ -98,6 +98,38 @@ inline abckit::arkts::Class GetMockArktsClass(const abckit::File &file)
     auto c = abckit::arkts::Class(GetMockCoreClass(file));
     EXPECT_TRUE(CheckMockedApi("CoreClassToArktsClass"));
     return c;
+}
+
+inline abckit::core::Interface GetMockCoreInterface(const abckit::File &file)
+{
+    abckit::core::Module cmd = GetMockCoreModule(file);
+
+    std::vector<abckit::core::Interface> interfaces;
+
+    cmd.EnumerateInterfaces([&interfaces](abckit::core::Interface iface) -> bool {
+        interfaces.push_back(iface);
+        return true;
+    });
+
+    EXPECT_TRUE(CheckMockedApi("ModuleEnumerateInterfaces"));
+
+    return interfaces.front();
+}
+
+inline abckit::core::Enum GetMockCoreEnum(const abckit::File &file)
+{
+    abckit::core::Module cmd = GetMockCoreModule(file);
+
+    std::vector<abckit::core::Enum> enums;
+
+    cmd.EnumerateEnums([&enums](abckit::core::Enum enm) -> bool {
+        enums.push_back(enm);
+        return true;
+    });
+
+    EXPECT_TRUE(CheckMockedApi("ModuleEnumerateEnums"));
+
+    return enums.front();
 }
 
 inline abckit::core::Function GetMockCoreFunction(const abckit::File &file)

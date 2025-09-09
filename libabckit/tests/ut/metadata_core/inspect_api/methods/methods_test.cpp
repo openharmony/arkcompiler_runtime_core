@@ -17,10 +17,10 @@
 #include <cstring>
 #include <gtest/gtest.h>
 
-#include "libabckit/include/c/abckit.h"
+#include "libabckit/c/abckit.h"
 #include "helpers/helpers.h"
-#include "libabckit/include/c/metadata_core.h"
-#include "libabckit/include/c/extensions/arkts/metadata_arkts.h"
+#include "libabckit/c/metadata_core.h"
+#include "libabckit/c/extensions/arkts/metadata_arkts.h"
 #include "helpers/visit_helper/visit_helper-inl.h"
 
 namespace libabckit::test {
@@ -56,25 +56,23 @@ TEST_F(LibAbcKitInspectApiMethodsTest, StaticMethodGetName)
     std::set<std::string> names = {
         "main:void;",
         "m0F0:void;",
-        "m0F1:void;",
-        "m0F2$asyncimpl:std.core.Object;",
+        "%%async-m0F2:std.core.Object;",
         "m0F2:std.core.Promise;",
         "m0N0F0:void;",
-        "m0N0F1:void;",
-        "m0N0F2$asyncimpl:std.core.Object;",
+        "%%async-m0N0F2:std.core.Object;",
         "m0N0F2:std.core.Promise;",
         "m0N0N0F0:void;",
         "_cctor_:void;",
-        "lambda$invoke$0:void;",
-        "lambda$invoke$1:void;",
+        "lambda_invoke-0:void;",
+        "lambda_invoke-1:void;",
         "M0C0F0:methods_static.M0C0;void;",
         "M0C0F1:void;",
-        "M0C0F2$asyncimpl:methods_static.M0C0;std.core.Object;",
+        "%%async-M0C0F2:methods_static.M0C0;std.core.Object;",
         "M0C0F2:methods_static.M0C0;std.core.Promise;",
         "_ctor_:methods_static.M0C0;void;",
         "M0N0C0F0:methods_static.M0N0C0;void;",
         "M0N0C0F1:void;",
-        "M0N0C0F2$asyncimpl:methods_static.M0N0C0;std.core.Object;",
+        "%%async-M0N0C0F2:methods_static.M0N0C0;std.core.Object;",
         "M0N0C0F2:methods_static.M0N0C0;std.core.Promise;",
         "_ctor_:methods_static.M0N0C0;void;",
     };
@@ -142,6 +140,9 @@ TEST_F(LibAbcKitInspectApiMethodsTest, FunctionGetFile)
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/methods/methods_static.abc", &file);
 
     g_implI->fileEnumerateModules(file, nullptr, [](AbckitCoreModule *m, [[maybe_unused]] void *data) -> bool {
+        if (g_implI->moduleIsExternal(m)) {
+            return false;
+        }
         helpers::ClassByNameContext ctxClassFinder = {nullptr, "M0C0"};
         g_implI->moduleEnumerateClasses(m, &ctxClassFinder, helpers::ClassByNameFinder);
         EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -294,17 +295,15 @@ TEST_F(LibAbcKitInspectApiMethodsTest, StaticFunctionIsStatic)
         "M0N0C0F1:void;",
         "M0C0F1:void;",
         "m0F0:void;",
-        "m0F1:void;",
-        "m0F2$asyncimpl:std.core.Object;",
+        "%%async-m0F2:std.core.Object;",
         "m0F2:std.core.Promise;",
         "m0N0F0:void;",
-        "m0N0F1:void;",
-        "m0N0F2$asyncimpl:std.core.Object;",
+        "%%async-m0N0F2:std.core.Object;",
         "m0N0F2:std.core.Promise;",
         "m0N0N0F0:void;",
         "_cctor_:void;",
-        "lambda$invoke$0:void;",
-        "lambda$invoke$1:void;",
+        "lambda_invoke-0:void;",
+        "lambda_invoke-1:void;",
     };
 
     helpers::EnumerateAllMethods(file, [&staticMethods](AbckitCoreFunction *method) {
@@ -360,8 +359,8 @@ TEST_F(LibAbcKitInspectApiMethodsTest, StaticFunctionIsAnonymous)
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/methods/methods_static.abc", &file);
 
     std::set<std::string> anonymousMethods = {
-        "lambda$invoke$0:void;",
-        "lambda$invoke$1:void;",
+        "lambda_invoke-0:void;",
+        "lambda_invoke-1:void;",
     };
 
     helpers::EnumerateAllMethods(file, [&anonymousMethods](AbckitCoreFunction *method) {
@@ -485,25 +484,23 @@ TEST_F(LibAbcKitInspectApiMethodsTest, StaticFunctionGetParentClass)
     std::unordered_map<std::string, std::string> methodClasses = {
         {"main:void;", ""},
         {"m0F0:void;", ""},
-        {"m0F1:void;", ""},
-        {"m0F2$asyncimpl:std.core.Object;", ""},
+        {"%%async-m0F2:std.core.Object;", ""},
         {"m0F2:std.core.Promise;", ""},
         {"m0N0F0:void;", ""},
-        {"m0N0F1:void;", ""},
-        {"m0N0F2$asyncimpl:std.core.Object;", ""},
+        {"%%async-m0N0F2:std.core.Object;", ""},
         {"m0N0F2:std.core.Promise;", ""},
         {"m0N0N0F0:void;", ""},
         {"_cctor_:void;", ""},
-        {"lambda$invoke$0:void;", ""},
-        {"lambda$invoke$1:void;", ""},
+        {"lambda_invoke-0:void;", ""},
+        {"lambda_invoke-1:void;", ""},
         {"M0C0F0:methods_static.M0C0;void;", "M0C0"},
         {"M0C0F1:void;", "M0C0"},
-        {"M0C0F2$asyncimpl:methods_static.M0C0;std.core.Object;", "M0C0"},
+        {"%%async-M0C0F2:methods_static.M0C0;std.core.Object;", "M0C0"},
         {"M0C0F2:methods_static.M0C0;std.core.Promise;", "M0C0"},
         {"_ctor_:methods_static.M0C0;void;", "M0C0"},
         {"M0N0C0F0:methods_static.M0N0C0;void;", "M0N0C0"},
         {"M0N0C0F1:void;", "M0N0C0"},
-        {"M0N0C0F2$asyncimpl:methods_static.M0N0C0;std.core.Object;", "M0N0C0"},
+        {"%%async-M0N0C0F2:methods_static.M0N0C0;std.core.Object;", "M0N0C0"},
         {"M0N0C0F2:methods_static.M0N0C0;std.core.Promise;", "M0N0C0"},
         {"_ctor_:methods_static.M0N0C0;void;", "M0N0C0"},
     };
@@ -554,6 +551,9 @@ TEST_F(LibAbcKitInspectApiMethodsTest, StaticMethodIsNative)
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/methods/native_method.abc", &file);
 
     g_implI->fileEnumerateModules(file, nullptr, [](AbckitCoreModule *m, [[maybe_unused]] void *data) {
+        if (g_implI->moduleIsExternal(m)) {
+            return false;
+        }
         helpers::ClassByNameContext ctxFinder = {nullptr, "Y"};
         g_implI->moduleEnumerateClasses(m, &ctxFinder, helpers::ClassByNameFinder);
         EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);

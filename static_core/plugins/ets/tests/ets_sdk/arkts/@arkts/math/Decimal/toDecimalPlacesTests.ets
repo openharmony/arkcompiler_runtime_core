@@ -15,7 +15,7 @@
 
 import { Decimal } from "@arkts.math.Decimal";
 
-function checkToDecimalPlacesResult(expected: string, n: number | string, d?: number, r?: number) {
+function checkToDecimalPlacesResult(expected: string, n: double | string, d?: int, r?: int) {
     if (d == undefined && r == undefined) {
         arktest.assertEQ(new Decimal(n).toDecimalPlaces().valueOf(), expected);
         return;

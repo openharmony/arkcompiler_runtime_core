@@ -19,6 +19,7 @@
 #include "runtime/include/class.h"
 #include "runtime/include/coretypes/array.h"
 #include "runtime/include/coretypes/class.h"
+#include "runtime/include/coretypes/string.h"
 #include "runtime/include/hclass.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/thread.h"

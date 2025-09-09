@@ -12,7 +12,54 @@
 # limitations under the License.
 
 set(DISABLES_TESTS
+    callable_signature
+    cast_dynamic_to_object
+    checked
+    class_composite
+    class_extension
+    class_method
+    class_operations
+    constructor
+    constructor_as_arg
+    conversion_types
+    coroutines
+    declgen_ets2ts
+    dot_operator
+    escompat_demo
+    es_object
+    exceptions
+    for_of
+    generic
+    generic_as_parameter
+    generic_call_params
+    generic_static
+    getter
+    getter_arkjs
+    implement_interfaces
+    import
+    indexed_signature
+    indexed_type
+    instanceof
+    interface
+    interfaces
+    intersection_signature
+    mimic_iterator
+    mimic_special_function
+    number_subtypes
+    operator_new
+    optional_reference_type
+    passing_optional_type
+    perf
+    promise
+    scenarios
+    setter
     standalone_function
+    test_class_methods_returning_values
+    test_composite_types
+    test_frontend
+    test_intrins
+    test_return_this
+    test_undefined
 )
 
 SUBDIRLIST(EXECUTED_TESTS

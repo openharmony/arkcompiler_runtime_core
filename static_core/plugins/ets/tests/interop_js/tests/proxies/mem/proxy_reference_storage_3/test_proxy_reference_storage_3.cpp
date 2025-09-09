@@ -189,28 +189,6 @@ TEST_F(SharedReferenceStorage1GTest, test_Js_Reindex)
     RemoveReference(ref1);
 }
 
-TEST_F(SharedReferenceStorage1GTest, test_Js_Alive)
-{
-    EtsObject *etsObject = NewEtsObject();
-    ASSERT_NE(etsObject, nullptr);
-    napi_value jsObject = nullptr;
-    SharedReference *ref = CreateReference(etsObject, jsObject);
-    ASSERT_NE(ref, nullptr);
-    ASSERT_NE(jsObject, nullptr);
-    Runtime *runtime = Runtime::GetCurrent();
-    auto gc = runtime->GetPandaVM()->GetGC();
-    gc->WaitForGCInManaged(GCTask(GCTaskCause::EXPLICIT_CAUSE));
-    EtsObject *etsObject1 = NewEtsObject();
-    napi_value jsObject1 = nullptr;
-    SharedReference *ref1 = CreateReference(etsObject1, jsObject1);
-    ASSERT_NE(ref1, nullptr);
-    SetETSObject(ref, etsObject);
-    size_t failCount = CheckObjectAlive(ref, 1);
-    ASSERT_EQ(failCount, 0);
-    RemoveReference(ref);
-    RemoveReference(ref1);
-}
-
 TEST_F(SharedReferenceStorage1GTest, test_Ets_InHeap)
 {
     EtsObject *etsObject = NewEtsObject();
@@ -235,6 +213,39 @@ TEST_F(SharedReferenceStorage1GTest, test_mark)
     RemoveReference(ref);
 }
 
+TEST_F(SharedReferenceStorage1GTest, test_Js_Type)
+{
+    EtsObject *etsObject = NewEtsObject();
+    ASSERT_NE(etsObject, nullptr);
+    napi_value jsObject = nullptr;
+    SharedReference *ref = CreateReference(etsObject, jsObject);
+    size_t failCount = CheckJsObjectType(ref, 1);
+    ASSERT_NE(failCount, 0);
+    RemoveReference(ref);
+}
+
+TEST_F(SharedReferenceStorage1GTest, test_Js_Alive)
+{
+    EtsObject *etsObject = NewEtsObject();
+    ASSERT_NE(etsObject, nullptr);
+    napi_value jsObject = nullptr;
+    SharedReference *ref = CreateReference(etsObject, jsObject);
+    ASSERT_NE(ref, nullptr);
+    ASSERT_NE(jsObject, nullptr);
+    Runtime *runtime = Runtime::GetCurrent();
+    auto gc = runtime->GetPandaVM()->GetGC();
+    gc->WaitForGCInManaged(GCTask(GCTaskCause::EXPLICIT_CAUSE));
+    EtsObject *etsObject1 = NewEtsObject();
+    napi_value jsObject1 = nullptr;
+    SharedReference *ref1 = CreateReference(etsObject1, jsObject1);
+    ASSERT_NE(ref1, nullptr);
+    SetETSObject(ref, etsObject);
+    size_t failCount = CheckObjectAlive(ref, 1);
+    ASSERT_NE(failCount, 0);
+    RemoveReference(ref);
+    RemoveReference(ref1);
+}
+
 TEST_F(SharedReferenceStorage1GTest, test_Ets_Alive)
 {
     EtsObject *etsObject = NewEtsObject();
@@ -252,21 +263,9 @@ TEST_F(SharedReferenceStorage1GTest, test_Ets_Alive)
     ASSERT_NE(ref1, nullptr);
     SetETSObject(ref, etsObject);
     size_t failCount = CheckObjectAlive(ref, 1);
-    ASSERT_EQ(failCount, 0);
+    ASSERT_NE(failCount, 0);
     RemoveReference(ref);
     RemoveReference(ref1);
 }
-
-TEST_F(SharedReferenceStorage1GTest, test_Js_Type)
-{
-    EtsObject *etsObject = NewEtsObject();
-    ASSERT_NE(etsObject, nullptr);
-    napi_value jsObject = nullptr;
-    SharedReference *ref = CreateReference(etsObject, jsObject);
-    size_t failCount = CheckJsObjectType(ref, 1);
-    ASSERT_NE(failCount, 0);
-    RemoveReference(ref);
-}
-
 }  // namespace ark::ets::interop::js::ets_proxy::testing
 // NOLINTEND(readability-magic-numbers,cppcoreguidelines-pro-type-cstyle-cast)

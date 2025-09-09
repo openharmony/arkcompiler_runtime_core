@@ -25,5 +25,5 @@ function main(): void {
         if (i > 10) continue;
         j++;
     }
-    assertTrue( i == 20 && j == 10 )
+    arktest.assertTrue( i == 20 && j == 10 )
 }

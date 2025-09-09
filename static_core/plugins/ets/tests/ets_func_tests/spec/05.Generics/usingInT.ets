@@ -29,7 +29,7 @@ class A {
 
 class B<in T> {
     method1(arg: T): void {
-        assertTrue((arg instanceof A))
+        arktest.assertTrue((arg instanceof A))
     }
 }
 

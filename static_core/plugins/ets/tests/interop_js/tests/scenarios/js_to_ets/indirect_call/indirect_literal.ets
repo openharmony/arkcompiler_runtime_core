@@ -19,7 +19,7 @@ function Test_indirect_call_type_literal_call(): boolean {
     const EXPECTED_RESULT = 'foobar'
 
     let result: string = js.indirectCallTypeLiteral.call(null, ARG);
-    assertTrue(result == EXPECTED_RESULT);
+    arktest.assertTrue(result == EXPECTED_RESULT);
 
     return true;
 }
@@ -29,7 +29,7 @@ function Test_indirect_call_type_literal_apply(): boolean {
     const EXPECTED_RESULT = 'foobar'
 
     let result: string = js.indirectCallTypeLiteral.apply(null, [ARG] as FixedArray<string>);
-    assertTrue(result == EXPECTED_RESULT);
+    arktest.assertTrue(result == EXPECTED_RESULT);
 
     return true;
 }
@@ -39,7 +39,7 @@ function Test_indirect_call_type_literal_bind_with_arg(): boolean {
     const EXPECTED_RESULT = 'foobar'
 
     let boundWithArg = js.indirectCallTypeLiteral.bind(null, ARG);
-    assertTrue(boundWithArg() == EXPECTED_RESULT);
+    arktest.assertTrue(boundWithArg() == EXPECTED_RESULT);
 
     return true;
 }
@@ -49,7 +49,7 @@ function Test_indirect_call_type_literal_bind_without_arg(): boolean {
     const EXPECTED_RESULT = 'foobar'
 
     let boundWithoutArg = js.indirectCallTypeLiteral.bind(null);
-    assertTrue(boundWithoutArg(ARG) == EXPECTED_RESULT);
+    arktest.assertTrue(boundWithoutArg(ARG) == EXPECTED_RESULT);
 
     return true;
 }

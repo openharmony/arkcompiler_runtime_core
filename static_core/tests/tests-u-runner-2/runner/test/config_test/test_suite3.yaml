@@ -50,5 +50,4 @@ collections:
         - "--dump-ast"
         - "--extension=${parameters.extension}"
         - "--thread=0"
-        - "--output=/dev/null"
         - "--arktsconfig=${parameters.arktsconfig}"

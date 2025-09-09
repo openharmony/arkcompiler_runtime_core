@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,12 +16,13 @@
 #include <array>
 #include <atomic>
 #include <condition_variable>
+#include <ostream>
 #include <thread>
 
 #include "gtest/gtest.h"
 #include "iostream"
 #include "runtime/handle_base-inl.h"
-#include "runtime/include/coretypes/string.h"
+#include "runtime/include/coretypes/line_string.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/mem/gc/gc_phase.h"
@@ -93,7 +94,8 @@ TEST_F(MemStatsAdditionalInfoTest, AdditionalStatistic)
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread_);
     [[maybe_unused]] VMHandle<ObjectHeader> handle(thread_, stringObject);
 #ifndef NDEBUG
-    Class *stringClass = Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::STRING);
+    Class *stringClass =
+        Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::LINE_STRING);
     auto statistics = thread_->GetVM()->GetMemStats()->GetStatistics();
     // allocated
     ASSERT_TRUE(statistics.find(stringClass->GetName()) != std::string::npos);

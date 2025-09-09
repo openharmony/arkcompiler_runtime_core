@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -108,6 +108,7 @@ TLAB *Region::CreateTLAB(size_t size)
     }
     ASSERT(End() > remainingSize);
     TLAB *tlab = GetInternalAllocator()->New<TLAB>(ToVoidPtr(End() - remainingSize), size);
+    tlab->SetZeroedFlag(HasFlag(RegionFlag::IS_ZEROED));
     tlabVector_->push_back(tlab);
     return tlab;
 }
@@ -308,6 +309,7 @@ Region *RegionPool::NewRegion(RegionSpace *space, SpaceType spaceType, Allocator
 
     // 1.get region from pre-allocated region block(e.g. a big mmaped continuous space)
     void *region = nullptr;
+    RegionFlag zeroed = RegionFlag::IS_UNUSED;
     if (block_.GetFreeRegionsNum() > 0) {
         region = (regionSize <= regionSize_) ? block_.AllocRegion() : block_.AllocLargeRegion(regionSize);
     }
@@ -315,20 +317,29 @@ Region *RegionPool::NewRegion(RegionSpace *space, SpaceType spaceType, Allocator
         IsYoungRegionFlag(edenOrOldOrNonmovable) ? spaces_->IncreaseYoungOccupiedInSharedPool(regionSize)
                                                  : spaces_->IncreaseTenuredOccupiedInSharedPool(regionSize);
     } else if (extend_) {  // 2.mmap region directly, this is more flexible for memory usage
-        region =
-            IsYoungRegionFlag(edenOrOldOrNonmovable)
-                ? spaces_->TryAllocPoolForYoung(regionSize, spaceType, allocatorType, this).GetMem()
-                : spaces_->TryAllocPoolForTenured(regionSize, spaceType, allocatorType, this, allocPolicy).GetMem();
+        Pool pool(0, nullptr);
+
+        if (IsYoungRegionFlag(edenOrOldOrNonmovable)) {
+            pool = spaces_->TryAllocPoolForYoung(regionSize, spaceType, allocatorType, this);
+        } else {
+            pool = spaces_->TryAllocPoolForTenured(regionSize, spaceType, allocatorType, this, allocPolicy);
+        }
+
+        if (pool.IsZeroed()) {
+            zeroed = RegionFlag::IS_ZEROED;
+        }
+
+        region = pool.GetMem();
     }
 
     if (UNLIKELY(region == nullptr)) {
         return nullptr;
     }
-    return NewRegion(region, space, regionSize, edenOrOldOrNonmovable, properties);
+    return NewRegion(region, space, regionSize, edenOrOldOrNonmovable, properties, zeroed);
 }
 
 Region *RegionPool::NewRegion(void *region, RegionSpace *space, size_t regionSize, RegionFlag edenOrOldOrNonmovable,
-                              RegionFlag properties)
+                              RegionFlag properties, RegionFlag zeroed)
 {
     ASSERT(Region::IsAlignment(ToUintPtr(region), regionSize_));
 
@@ -338,6 +349,7 @@ Region *RegionPool::NewRegion(void *region, RegionSpace *space, size_t regionSiz
     TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
     ret->AddFlag(edenOrOldOrNonmovable);
     ret->AddFlag(properties);
+    ret->AddFlag(zeroed);
     ret->CreateRemSet();
     ret->SetupAtomics();
     ret->CreateMarkBitmap();

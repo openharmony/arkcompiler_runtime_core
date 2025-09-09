@@ -31,5 +31,5 @@ class C {
 
 function main(): void {
   const a1 = new A();
-  assertEQ(a1?.b?.c?.value, undefined);
+  arktest.assertEQ(a1?.b?.c?.value, undefined);
 }

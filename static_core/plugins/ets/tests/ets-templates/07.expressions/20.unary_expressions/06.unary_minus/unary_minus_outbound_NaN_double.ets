@@ -19,5 +19,5 @@ desc: Unary minus operator. Operand NaN results in NaN (NaN has no sign).
 
 function main(): void {
   let a: double =  Double.NaN
-  assertEQ(Double.isNaN(a), Double.isNaN(-a))
+  arktest.assertEQ(Double.isNaN(a), Double.isNaN(-a))
 }

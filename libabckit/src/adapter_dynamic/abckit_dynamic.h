@@ -16,8 +16,8 @@
 #ifndef LIBABCKIT_SRC_ADAPTER_DYNAMIC_ABCKIT_DYNAMIC_H
 #define LIBABCKIT_SRC_ADAPTER_DYNAMIC_ABCKIT_DYNAMIC_H
 
-#include "libabckit/include/c/ir_core.h"
-#include "libabckit/include/c/metadata_core.h"
+#include "libabckit/c/ir_core.h"
+#include "libabckit/c/metadata_core.h"
 
 namespace libabckit {
 

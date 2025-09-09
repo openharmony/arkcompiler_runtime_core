@@ -14,101 +14,102 @@
  */
 
 //! CHECKER       PEA_propagate_load_objects_upwards JIT
-//! RUN           force_jit: true, options: "--compiler-regex='.*test.*'", entry: "ets_pea_loads_upward_propagation.ETSGLOBAL::main"
-//! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::test1"
+//! # Always inline escompat.IteratorResult::<ctor> because numbers depend on it
+//! RUN           force_jit: true, options: "--compiler-regex='.*test.*' --compiler-inlining-always-inline-bc-size=50", entry: "ets_pea_loads_upward_propagation.ETSGLOBAL::main"
 //!
+//! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::test1"
 //! PASS_BEFORE   "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 5
+//! INST_COUNT    /NewObject/, 4
 //! INST_COUNT    /StoreObject.*res/, 4
 //! INST_COUNT    /LoadObject.*res/, 1
 //! PASS_AFTER    "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 3
+//! INST_COUNT    /NewObject/, 1
 //! INST_COUNT    /StoreObject.*res/, 0
 //! INST_COUNT    /LoadObject.*res/, 0
 //!
 //! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::test2"
 //! PASS_BEFORE   "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 5
+//! INST_COUNT    /NewObject/, 4
 //! INST_COUNT    /StoreObject.*res/, 4
 //! INST_COUNT    /LoadObject.*res/, 2
 //! PASS_AFTER    "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 3
+//! INST_COUNT    /NewObject/, 1
 //! INST_COUNT    /StoreObject.*res/, 0
 //! INST_COUNT    /LoadObject.*res/, 0
 //!
 //! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::test3"
 //! PASS_BEFORE   "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 5
+//! INST_COUNT    /NewObject/, 4
 //! INST_COUNT    /StoreObject.*res/, 4
 //! INST_COUNT    /LoadObject.*res/, 3
 //! PASS_AFTER    "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 3
+//! INST_COUNT    /NewObject/, 1
 //! INST_COUNT    /StoreObject.*res/, 0
 //! INST_COUNT    /LoadObject.*res/, 0
 //!
 //! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::test4"
 //! PASS_BEFORE   "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 6
+//! INST_COUNT    /NewObject/, 5
 //! INST_COUNT    /StoreObject.*res/, 6
 //! INST_COUNT    /LoadObject.*res/, 1
 //! PASS_AFTER    "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 3
+//! INST_COUNT    /NewObject/, 1
 //! INST_COUNT    /StoreObject.*res/, 0
 //! INST_COUNT    /LoadObject.*res/, 0
 //!
 //! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::test5"
 //! PASS_BEFORE   "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 15
+//! INST_COUNT    /NewObject/, 14
 //! INST_COUNT    /StoreObject.*res/, 24
 //! INST_COUNT    /LoadObject.*res/, 1
 //! PASS_AFTER    "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 10
+//! INST_COUNT    /NewObject/, 8
 //! INST_COUNT    /StoreObject.*res/, 14
 //! INST_COUNT    /LoadObject.*res/, 1
 //!
 //! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::test9"
 //! PASS_BEFORE   "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 10
-//! INST_COUNT    /StoreObject.*done/, 1
+//! INST_COUNT    /NewObject/, 7
+//! INST_COUNT    /StoreObject.*done/, 2
 //! PASS_AFTER    "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 9
+//! INST_COUNT    /NewObject/, 5
 //! INST_COUNT    /StoreObject.*done/, 0
 //!
 //! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::ntest1"
 //! PASS_BEFORE   "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 5
+//! INST_COUNT    /NewObject/, 4
 //! INST_COUNT    /StoreObject.*res/, 4
 //! PASS_AFTER    "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 5
+//! INST_COUNT    /NewObject/, 3
 //! INST_COUNT    /StoreObject.*res/, 4
 //!
 //! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::ntest2"
 //! PASS_BEFORE   "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 5
+//! INST_COUNT    /NewObject/, 4
 //! INST_COUNT    /StoreObject.*res/, 4
 //! INST_COUNT    /LoadObject.*res/, 1
 //! PASS_AFTER    "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 5
+//! INST_COUNT    /NewObject/, 3
 //! INST_COUNT    /StoreObject.*res/, 4
 //! INST_COUNT    /LoadObject.*res/, 1
 //!
 //! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::ntest3"
 //! PASS_BEFORE   "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 5
+//! INST_COUNT    /NewObject/, 4
 //! INST_COUNT    /StoreObject.*res/, 4
 //! INST_COUNT    /LoadObject.*res/, 1
 //! PASS_AFTER    "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 5
+//! INST_COUNT    /NewObject/, 3
 //! INST_COUNT    /StoreObject.*res/, 4
 //! INST_COUNT    /LoadObject.*res/, 1
 //!
 //! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::ntest4"
 //! PASS_BEFORE   "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 6
+//! INST_COUNT    /NewObject/, 5
 //! INST_COUNT    /StoreObject.*res/, 6
 //! INST_COUNT    /LoadObject.*res/, 1
 //! PASS_AFTER    "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 6
+//! INST_COUNT    /NewObject/, 4
 //! INST_COUNT    /StoreObject.*res/, 6
 //! INST_COUNT    /LoadObject.*res/, 1
 
@@ -119,89 +120,89 @@
 //! RUN           entry: "ets_pea_loads_upward_propagation.ETSGLOBAL::main"
 //! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::test1"
 //! PASS_BEFORE   "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 3
+//! INST_COUNT    /NewObject/, 4
 //! INST_COUNT    /StoreObject.*res/, 4
 //! INST_COUNT    /LoadObject.*res/, 1
 //! PASS_AFTER    "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 1
+//! INST_COUNT    /NewObject/, 2
 //! INST_COUNT    /StoreObject.*res/, 0
 //! INST_COUNT    /LoadObject.*res/, 0
 //!
 //! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::test2"
 //! PASS_BEFORE   "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 3
+//! INST_COUNT    /NewObject/, 4
 //! INST_COUNT    /StoreObject.*res/, 4
 //! INST_COUNT    /LoadObject.*res/, 2
 //! PASS_AFTER    "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 1
+//! INST_COUNT    /NewObject/, 2
 //! INST_COUNT    /StoreObject.*res/, 0
 //! INST_COUNT    /LoadObject.*res/, 0
 //!
 //! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::test3"
 //! PASS_BEFORE   "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 3
+//! INST_COUNT    /NewObject/, 4
 //! INST_COUNT    /StoreObject.*res/, 4
 //! INST_COUNT    /LoadObject.*res/, 3
 //! PASS_AFTER    "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 1
+//! INST_COUNT    /NewObject/, 2
 //! INST_COUNT    /StoreObject.*res/, 0
 //! INST_COUNT    /LoadObject.*res/, 0
 //!
 //! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::test4"
 //! PASS_BEFORE   "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 4
+//! INST_COUNT    /NewObject/, 5
 //! INST_COUNT    /StoreObject.*res/, 6
 //! INST_COUNT    /LoadObject.*res/, 1
 //! PASS_AFTER    "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 1
+//! INST_COUNT    /NewObject/, 2
 //! INST_COUNT    /StoreObject.*res/, 0
 //! INST_COUNT    /LoadObject.*res/, 0
 //!
 //! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::test5"
 //! PASS_BEFORE   "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 13
+//! INST_COUNT    /NewObject/, 14
 //! INST_COUNT    /StoreObject.*res/, 24
 //! INST_COUNT    /LoadObject.*res/, 1
 //! PASS_AFTER    "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 8
+//! INST_COUNT    /NewObject/, 9
 //! INST_COUNT    /StoreObject.*res/, 14
 //! INST_COUNT    /LoadObject.*res/, 1
 //!
 //! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::ntest1"
 //! PASS_BEFORE   "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 3
+//! INST_COUNT    /NewObject/, 4
 //! INST_COUNT    /StoreObject.*res/, 4
 //! PASS_AFTER    "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 3
+//! INST_COUNT    /NewObject/, 4
 //! INST_COUNT    /StoreObject.*res/, 4
 //!
 //! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::ntest2"
 //! PASS_BEFORE   "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 3
+//! INST_COUNT    /NewObject/, 4
 //! INST_COUNT    /StoreObject.*res/, 4
 //! INST_COUNT    /LoadObject.*res/, 1
 //! PASS_AFTER    "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 3
+//! INST_COUNT    /NewObject/, 4
 //! INST_COUNT    /StoreObject.*res/, 4
 //! INST_COUNT    /LoadObject.*res/, 1
 //!
 //! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::ntest3"
 //! PASS_BEFORE   "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 3
+//! INST_COUNT    /NewObject/, 4
 //! INST_COUNT    /StoreObject.*res/, 4
 //! INST_COUNT    /LoadObject.*res/, 1
 //! PASS_AFTER    "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 3
+//! INST_COUNT    /NewObject/, 4
 //! INST_COUNT    /StoreObject.*res/, 4
 //! INST_COUNT    /LoadObject.*res/, 1
 //!
 //! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::ntest4"
 //! PASS_BEFORE   "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 4
+//! INST_COUNT    /NewObject/, 5
 //! INST_COUNT    /StoreObject.*res/, 6
 //! INST_COUNT    /LoadObject.*res/, 1
 //! PASS_AFTER    "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 4
+//! INST_COUNT    /NewObject/, 5
 //! INST_COUNT    /StoreObject.*res/, 6
 //! INST_COUNT    /LoadObject.*res/, 1
 
@@ -254,7 +255,7 @@ function foo3(a: Array<number>): number
 function test1(): boolean {
     let aa: Array<number> = new Array<number>
     aa.push(3);
-    return foo1(aa[0]).res as int == 3;
+    return foo1(aa[0]).res.toInt() == 3;
 }
 
 /* two loads case (two phi users) */
@@ -262,7 +263,7 @@ function test2(): boolean {
     let aa: Array<number> = new Array<number>
     aa.push(3)
     let z: BBB = foo1(aa[0])
-    return (z.res + z.res1) as int == 6;
+    return (z.res + z.res1).toInt() == 6;
 }
 
 /* more complex CFG: different number of loads in different branchs */
@@ -272,17 +273,26 @@ function test3(): boolean {
     let t: boolean = (aa[0] > 0)
     let z: BBB = foo1(aa[0])
     if (t) {
-        return z.res as int == 3
+        return z.res.toInt() == 3
     } else {
-        return (z.res + z.res1) as int == 6;
+        return (z.res + z.res1).toInt() == 6;
     }
+}
+
+/* test the stdlib iterator */
+function test9(): boolean {
+    let aa: Array<number> = new Array<number>
+    aa.push(3);
+    aa.push(5);
+    aa.push(1);
+    return foo3(aa).toInt() == 9;
 }
 
 /* many inputs phi */
 function test4(): boolean {
     let aa: Array<number> = new Array<number>
     aa.push(3)
-    let t: int = aa[0] as int;
+    let t: int = aa[0].toInt();
     let a: BBB;
     if (t > 0) {
         if (t > 2) {
@@ -305,7 +315,7 @@ function test5(): boolean {
     let aa: Array<number> = new Array<number>
     aa.push(3)
     let a: BBB = new BBB();
-    let t: int = aa[0] as int;
+    let t: int = aa[0].toInt();
     for (let i:int = 0; i < t; ++i) {
         a = new BBB(i)
         if (i % 2 == 0) {
@@ -316,15 +326,6 @@ function test5(): boolean {
         return true
     }
     return false;
-}
-
-/* test the stdlib iterator */
-function test9(): boolean {
-    let aa: Array<number> = new Array<number>
-    aa.push(3);
-    aa.push(5);
-    aa.push(1);
-    return foo3(aa) as int == 9;
 }
 
 // Negative tests
@@ -355,7 +356,7 @@ function ntest2(): boolean {
     let z: BBB = foo1(aa[0])
     let res: number = z.res
     if (getRef(z)) {
-        return res as int == 3;
+        return res.toInt() == 3;
     }
     return false
 }
@@ -364,14 +365,14 @@ function ntest2(): boolean {
 function ntest3(): boolean {
     let aa: Array<number> = new Array<number>
     aa.push(3);
-    return foo2(aa[0]).res as int == 3;
+    return foo2(aa[0]).res.toInt() == 3;
 }
 
 /* negative: many inputs phi, different object types */
 function ntest4(): boolean {
     let aa: Array<number> = new Array<number>
     aa.push(3)
-    let t: int = aa[0] as int;
+    let t: int = aa[0].toInt();
     let a: BBB;
     if (t > 0) {
         if (t > 2) {

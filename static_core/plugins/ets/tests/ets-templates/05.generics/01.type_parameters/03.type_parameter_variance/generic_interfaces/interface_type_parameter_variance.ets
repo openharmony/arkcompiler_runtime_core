@@ -40,6 +40,6 @@ class A<in T1, out T2, T3> implements I<T1, T2, T3> {
 
 function main(): void {  
     let a: A<number, number, number> = new A<number, number, number>(1, 2)
-    assertEQ(a.f2(), 1)
-    assertEQ(a.f3(1), 1)
+    arktest.assertEQ(a.f2(), 1)
+    arktest.assertEQ(a.f3(1), 1)
 }

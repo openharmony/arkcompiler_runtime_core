@@ -18,9 +18,9 @@
 #include <gtest/gtest.h>
 #include <numeric>
 
-#include "libabckit/include/c/abckit.h"
+#include "libabckit/c/abckit.h"
 #include "helpers/helpers.h"
-#include "libabckit/include/c/statuses.h"
+#include "libabckit/c/statuses.h"
 
 namespace libabckit::test {
 

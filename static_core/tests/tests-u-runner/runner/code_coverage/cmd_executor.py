@@ -22,7 +22,12 @@ from abc import ABC, abstractmethod
 
 class CmdExecutor(ABC):
     @abstractmethod
-    def run_command(self, command: List[str], stdout: Union[TextIO, int] = subprocess.PIPE) -> Union[str, int]:
+    def run_command(
+        self,
+        command: List[str],
+        stdout: Union[TextIO, int] = subprocess.PIPE,
+        stderror: Union[TextIO, int] = subprocess.DEVNULL
+    ) -> subprocess.CompletedProcess:
         pass
 
     @abstractmethod
@@ -31,8 +36,13 @@ class CmdExecutor(ABC):
 
 
 class LinuxCmdExecutor(CmdExecutor):
-    def run_command(self, command: List[str], stdout: Union[TextIO, int] = subprocess.PIPE) -> Union[str, int]:
-        return subprocess.run(command, check=True, text=True, stdout=stdout, timeout=5400).stdout
+    def run_command(
+        self,
+        command: List[str],
+        stdout: Union[TextIO, int] = subprocess.PIPE,
+        stderror: Union[TextIO, int] = subprocess.DEVNULL
+    ) -> subprocess.CompletedProcess:
+        return subprocess.run(command, check=True, text=True, stdout=stdout, stderr=stderror, timeout=5400)
 
     def get_binary(self, binary_name: str, version: Optional[str] = None) -> str:
         return f"{binary_name}-{version}" if version else binary_name

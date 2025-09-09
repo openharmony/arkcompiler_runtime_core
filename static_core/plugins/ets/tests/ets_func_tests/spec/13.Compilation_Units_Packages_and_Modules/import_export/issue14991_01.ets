@@ -31,5 +31,5 @@ class B implements I {
 
 function main() {
   const a: A = new A();
-  assertEQ(a.foo(), "A implements I")
+  arktest.assertEQ(a.foo(), "A implements I")
 }

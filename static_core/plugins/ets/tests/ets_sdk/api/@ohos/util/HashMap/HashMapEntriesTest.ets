@@ -16,7 +16,7 @@
 import HashMap from "@ohos.util.HashMap";
 
 function main(): int {
-    const suite = new ArkTestsuite("HashMap Entries API tests")
+    const suite = new arktest.ArkTestsuite("HashMap Entries API tests")
 
     suite.addTest("HashMap entries return iterator by key and value",
         testEntriesReturnIteratorByKeyValue)
@@ -41,11 +41,11 @@ function testEntriesReturnIteratorByKeyValue() {
         }
     }
     let strAll = "sparrow,123,gull,357,test,111,apply,222";
-    assertEQ(str, strAll, "The hashMap entries iterator should return all key-value pairs");
+    arktest.assertEQ(str, strAll, "The hashMap entries iterator should return all key-value pairs");
 }
 
 function testEntriesReturnIteratorByKeyValueWithEmptyHashMap() {
-    let hashMap: HashMap<string, number> = new HashMap<string, number>();
+    let hashMap: HashMap<string, double> = new HashMap<string, double>();
     let iteratorSetValues = hashMap.entries();
     arktest.assertTrue(iteratorSetValues.next().done,
         "The hashMap entries iterator.done should true when the hashMap is empty");

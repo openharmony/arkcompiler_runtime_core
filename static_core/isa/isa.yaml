@@ -128,6 +128,10 @@ properties:
     description: Pass control to the callee method.
   - tag: call_virt
     description: Pass control to the callee method via virtual call.
+  - tag: any_call
+    description: Pass control to the callee method via call with ANY type used as this
+  - tag: id_shift
+    description: Shift id operand of the instruction to the end of it's encoding
   - tag: return
     description: Pass control to the caller method.
   - tag: suspend
@@ -258,6 +262,9 @@ prefixes:
   - name: f32
     description: IEEE-754 single precision floating-point operations.
     opcode_idx: 0xec
+  - name: any
+    description: Operations with ANY supertype
+    opcode_idx: 0xeb
 
 # Define elements allowed to be used in a profile description.
 profiles_schema: {}
@@ -2288,6 +2295,7 @@ groups:
       - initialize_type
       - init_obj
       - short_long_range
+      - id_shift
     pseudo: |
       init, type = resolve(method_id)
       if not initialized(type)
@@ -2707,6 +2715,7 @@ groups:
       - call
       - initialize_type
       - short_long_range
+      - id_shift
     exceptions:
       - x_call
     pseudo: |
@@ -2754,6 +2763,7 @@ groups:
       - static_method_id
       - call
       - short_long_range
+      - id_shift
     exceptions:
       - x_call
     pseudo: |
@@ -2814,6 +2824,7 @@ groups:
       - call
       - call_virt
       - short_long_range
+      - id_shift
     pseudo: |
       if args[0] == null then
         throw NullPointerException
@@ -2870,6 +2881,7 @@ groups:
       - call
       - call_virt
       - short_long_range
+      - id_shift
     pseudo: |
       args = []
       for (i = 0; i < 4; ++i)
@@ -2971,3 +2983,409 @@ groups:
         format: [op_imm_64]
         opcode_idx: [0xa5]
         properties: [float, dynamic]
+
+  - title: Get field from reference of any type by name
+    description: >
+      Get field value from reference of any type by field name string_id and put it into
+      accumulator
+    verification:
+      - v1_object
+    properties:
+      - string_id
+    exceptions:
+      - x_null
+    pseudo: |
+      if vs == null then
+        throw NullPointerException
+      end
+      field = resolve_field_by_name(vs, string_id)
+      if op == any.ldbyname and size(field) < 32 then
+        acc = extendto32(vs.get(field))
+      else
+        acc = vs.get(field)
+      end
+    instructions:
+      - sig: any.ldbyname v:in:ref, string_id
+        acc: out:ref
+        format: [pref_op_v_8_id_32]
+        prefix: any
+        opcode_idx: [0x0]
+
+  - title: Get field from reference of any type by name
+    description: >
+      Get field value from reference of any type by field name string_id and put it into
+      register
+    verification:
+      - v2_object
+    properties:
+      - string_id
+    exceptions:
+      - x_null
+    pseudo: |
+      if v2 == null then
+        throw NullPointerException
+      end
+      field = resolve_field_by_name(v2, string_id)
+      if op == any.ldbyname.v and size(field) < 32 then
+        v1 = extendto32(v2.get(field))
+      else
+        v1 = v2.get(field)
+      end
+    instructions:
+      - sig: any.ldbyname.v v1:out:ref, v2:in:ref, string_id
+        acc: none
+        format: [pref_op_v1_8_v2_8_id_32]
+        prefix: any
+        opcode_idx: [0x1]
+
+  - title: Store accumulator content into reference of any type field by name
+    description: >
+      Store accumulator content into reference of any type field by field name string_id
+    verification:
+      - acc_obj_or_null
+      - v1_object
+    properties:
+      - string_id
+    exceptions:
+      - x_null
+    pseudo: |
+      if vs == null then
+        throw NullPointerException
+      end
+      field = resolve_field_by_name(vs, string_id)
+      if op == any.stbyname and size(field) < 32 then
+        vs.set(field, truncate(field, acc))
+      else
+        vs.set(field, acc)
+      end
+    instructions:
+      - sig: any.stbyname v:in:ref, string_id
+        acc: in:ref
+        format: [pref_op_v_8_id_32]
+        prefix: any
+        opcode_idx: [0x2]
+
+  - title: Store register content into reference of any type field by name
+    description: >
+      Store register content into reference of any type field by field name string_id
+    verification:
+      - v1_obj_or_null
+      - v2_object
+    properties:
+      - string_id
+    exceptions:
+      - x_null
+    pseudo: |
+      if v1 == null then
+        throw NullPointerException
+      end
+      field = resolve_field_by_name(v1, string_id)
+      if op == any.stbyname.v and size(field) < 32 then
+        v1.set(field, truncate(field, v2))
+      else
+        v1.set(field, v2)
+      end
+    instructions:
+      - sig: any.stbyname.v v1:in:ref, v2:in:ref, string_id
+        acc: none
+        format: [pref_op_v1_8_v2_8_id_32]
+        prefix: any
+        opcode_idx: [0x3]
+
+  - title: Load value to accumulator from reference of any type by index
+    description: >
+      Load content from reference of any type by index and put it into accumulator
+    verification:
+      - v1_object
+      - acc_i32
+    exceptions:
+      - x_null
+    pseudo: |
+      if vs == null then
+        throw NullPointerException
+      end
+      acc = vs[acc]
+    instructions:
+      - sig: any.ldbyidx v:in:ref
+        acc: inout:f64->ref
+        format: [pref_op_v_8]
+        prefix: any
+        properties: [float]
+        opcode_idx: [0x4]
+
+  - title: Store value from accumulator in reference of any type by index
+    description: >
+      Store content from accumulator in reference of any type by index
+    verification:
+      - acc_obj_or_null
+      - v1_object
+      - v2_i32
+    exceptions:
+      - x_null
+    pseudo: |
+      if v1 == null then
+        throw NullPointerException
+      end
+      v1[v2] = acc
+    instructions:
+      - sig: any.stbyidx v1:in:ref, v2:in:f64
+        acc: in:ref
+        format: [pref_op_v1_8_v2_8]
+        prefix: any
+        properties: [ float ]
+        opcode_idx: [0x5]
+
+  - title: Load value to accumulator from reference of any type by value
+    description: >
+      Load content from reference of any type by value and put it into accumulator
+    verification:
+      - v1_object
+      - v2_object
+    exceptions:
+      - x_null
+    pseudo: |
+      if v1 == null || v2 == null then
+        throw NullPointerException
+      end
+      acc = v1[v2]
+    instructions:
+      - sig: any.ldbyval v1:in:ref, v2:in:ref
+        acc: out:ref
+        format: [pref_op_v1_8_v2_8]
+        prefix: any
+        opcode_idx: [0x6]
+
+  - title: Store value from accumulator in reference of any type by value
+    description: >
+      Store content from accumulator in reference of any type by value
+    verification:
+      - acc_obj_or_null
+      - v1_object
+      - v2_object
+    exceptions:
+      - x_null
+    pseudo: |
+      if v1 == null || v2 == null then
+        throw NullPointerException
+      end
+      v1[v2] = acc
+    instructions:
+      - sig: any.stbyval v1:in:ref, v2:in:ref
+        acc: in:ref
+        format: [pref_op_v1_8_v2_8]
+        prefix: any
+        opcode_idx: [0x7]
+
+  - title: Any call 0
+    description: >
+      Call a function with no argument
+    verification:
+      - compatible_arguments
+    properties:
+      - any_call
+    exceptions:
+      - x_call
+    pseudo: |
+      if v1 == null then
+        throw NullPointerException
+      end
+      acc = v1()
+    instructions:
+      - sig: any.call.0 v1:in:ref
+        acc: out:ref
+        prefix: any
+        format: [pref_op_v1_8]
+        opcode_idx: [0x8]
+
+  - title: Any call range
+    description: >
+      Call a function with range argument
+    verification:
+      - compatible_arguments
+    properties:
+      - any_call
+    exceptions:
+      - x_call
+    pseudo: |
+      if v1 == null then
+        throw NullPointerException
+      end
+      acc = v1(v2, v2 + 1, ..., v2 + imm - 1)
+    instructions:
+      - sig: any.call.range v1:in:ref, v2:in:ref, imm:u8
+        acc: out:ref
+        prefix: any
+        format: [pref_op_v1_8_v2_8_imm_8]
+        opcode_idx: [0x9]
+
+  - title: Any call short
+    description: >
+      Call a function with one argument
+    verification:
+      - compatible_arguments
+    properties:
+      - any_call
+    exceptions:
+      - x_call
+    pseudo: |
+      if v1 == null then
+        throw NullPointerException
+      end
+      acc = v1(v2)
+    instructions:
+      - sig: any.call.short v1:in:ref, v2:in:ref
+        acc: out:ref
+        prefix: any
+        format: [pref_op_v1_4_v2_4]
+        opcode_idx: [0xa]
+
+  - title: Any call this 0
+    description: >
+      Call a method with no argument
+    verification:
+      - compatible_arguments
+    properties:
+      - any_call
+      - string_id
+      - id_shift
+    exceptions:
+      - x_call
+    pseudo: |
+      if v1 == null then
+        throw NullPointerException
+      end
+      acc = v1.string_id()
+    instructions:
+      - sig: any.call.this.0 string_id, v1:in:ref
+        acc: out:ref
+        prefix: any
+        format: [pref_op_v1_8_id_32]
+        opcode_idx: [0xb]
+
+  - title: Any call this range
+    description: >
+      Call a method with range argument
+    verification:
+      - compatible_arguments
+    properties:
+      - any_call
+      - string_id
+      - id_shift
+    exceptions:
+      - x_call
+    pseudo: |
+      if v1 == null then
+        throw NullPointerException
+      end
+      acc = v1.string_id(v2, v2 + 1, ..., v2 + imm - 1)
+    instructions:
+      - sig: any.call.this.range string_id, v1:in:ref, v2:in:ref, imm:u8
+        acc: out:ref
+        prefix: any
+        format: [pref_op_v1_8_v2_8_imm_8_id_32]
+        opcode_idx: [0xc]
+
+  - title: Any call this short
+    description: >
+      Call a method with short argument
+    verification:
+      - compatible_arguments
+    properties:
+      - any_call
+      - string_id
+      - id_shift
+    exceptions:
+      - x_call
+    pseudo: |
+      if v1 == null then
+        throw NullPointerException
+      end
+      acc = v1.string_id(v2)
+    instructions:
+      - sig: any.call.this.short string_id, v1:in:ref, v2:in:ref
+        acc: out:ref
+        prefix: any
+        format: [pref_op_v1_4_v2_4_id_32]
+        opcode_idx: [0xd]
+
+  - title: Any call new 0
+    description: >
+      Create an object with no argument to constructor
+    verification:
+      - compatible_arguments
+    properties:
+      - any_call
+    exceptions:
+      - x_call
+    pseudo: |
+      if v1 == null then
+        throw NullPointerException
+      end
+      acc = new v1()
+    instructions:
+      - sig: any.call.new.0 v1:in:ref
+        acc: out:ref
+        prefix: any
+        format: [pref_op_v1_8]
+        opcode_idx: [0xe]
+
+  - title: Any call new range
+    description: >
+      Create an object with range argument to constructor
+    verification:
+      - compatible_arguments
+    properties:
+      - any_call
+    exceptions:
+      - x_call
+    pseudo: |
+      if v1 == null then
+        throw NullPointerException
+      end
+      acc = new v1(v2, v2 + 1, ..., v2 + imm - 1)
+    instructions:
+      - sig: any.call.new.range v1:in:ref, v2:in:ref, imm:u8
+        acc: out:ref
+        prefix: any
+        format: [pref_op_v1_8_v2_8_imm_8]
+        opcode_idx: [0xf]
+
+  - title: Any call new short
+    description: >
+      Create an object with short argument to constructor
+    verification:
+      - compatible_arguments
+    properties:
+      - any_call
+    exceptions:
+      - x_call
+    pseudo: |
+      if v1 == null then
+        throw NullPointerException
+      end
+      acc = new v1(v2)
+    instructions:
+      - sig: any.call.new.short v1:in:ref, v2:in:ref
+        acc: out:ref
+        prefix: any
+        format: [pref_op_v1_4_v2_4]
+        opcode_idx: [0x10]
+
+  - title: Any instanceof check
+    description: >
+      check whether an object belongs to a class
+    verification:
+      - v1_object
+    exceptions:
+      - x_null
+    pseudo: |
+      if v1 == null then
+        throw NullPointerException
+      end
+      acc = acc instanceof v1
+    instructions:
+      - sig: any.isinstance v1:in:ref
+        acc: inout:ref->u1
+        prefix: any
+        format: [pref_op_v1_8]
+        opcode_idx: [0x11]

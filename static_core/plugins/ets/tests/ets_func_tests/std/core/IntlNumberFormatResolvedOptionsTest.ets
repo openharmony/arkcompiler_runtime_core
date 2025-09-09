@@ -14,7 +14,7 @@
  */
 
 function main(): int {
-    let suite = new ArkTestsuite("Intl. NumberFormat resolvedOptions");
+    let suite = new arktest.ArkTestsuite("Intl. NumberFormat resolvedOptions");
     suite.addTest("testResolvedOptionsDefault", testResolvedOptionsDefault);
     suite.addTest("testResolvedOptionsNotDefault", testResolvedOptionsNotDefault);
     suite.addTest("testResolvedOptionsDecimal", testResolvedOptionsDecimal);
@@ -33,20 +33,20 @@ function main(): int {
 
 function testResolvedOptions0001() {
     let options = Intl.NumberFormat.$_invoke().resolvedOptions();
-    assertTrue(options.locale.includes('en-US'));
-    assertEQ(options.numberingSystem, 'latn');
-    assertEQ(options.style, 'decimal');
-    assertEQ(options.minimumIntegerDigits, 1);
-    assertEQ(options.minimumFractionDigits, 0);
-    assertEQ(options.maximumFractionDigits, 3);
-    assertEQ(options.useGrouping, true);
-    assertEQ(options.notation, "standard");
-    assertEQ(options.signDisplay, "auto");
+    arktest.assertTrue(options.locale.includes('en-US'));
+    arktest.assertEQ(options.numberingSystem, 'latn');
+    arktest.assertEQ(options.style, 'decimal');
+    arktest.assertEQ(options.minimumIntegerDigits, 1);
+    arktest.assertEQ(options.minimumFractionDigits, 0);
+    arktest.assertEQ(options.maximumFractionDigits, 3);
+    arktest.assertEQ(options.useGrouping, true);
+    arktest.assertEQ(options.notation, "standard");
+    arktest.assertEQ(options.signDisplay, "auto");
 }
 
 function testResolvedOptions0002() {
     let options = Intl.NumberFormat.$_invoke("de").resolvedOptions();
-    assertEQ(options.locale, "de");
+    arktest.assertEQ(options.locale, "de");
 }
 
 function testResolvedOptions0003() {
@@ -54,18 +54,18 @@ function testResolvedOptions0003() {
         style: "currency", currency: "EUR"
     }
     let getOptions = new Intl.NumberFormat("de", options).resolvedOptions();
-    assertEQ(getOptions.locale, 'de');
-    assertEQ(getOptions.numberingSystem, 'latn');
-    assertEQ(getOptions.style, 'currency');
-    assertEQ(getOptions.currency, 'EUR');
-    assertEQ(getOptions.currencyDisplay, 'symbol');
-    assertEQ(getOptions.currencySign, 'standard');
-    assertEQ(getOptions.minimumIntegerDigits, 1);
-    assertEQ(getOptions.minimumFractionDigits, 2);
-    assertEQ(getOptions.maximumFractionDigits, 2);
-    assertEQ(getOptions.useGrouping, true);
-    assertEQ(getOptions.notation, 'standard');
-    assertEQ(getOptions.signDisplay, 'auto');
+    arktest.assertEQ(getOptions.locale, 'de');
+    arktest.assertEQ(getOptions.numberingSystem, 'latn');
+    arktest.assertEQ(getOptions.style, 'currency');
+    arktest.assertEQ(getOptions.currency, 'EUR');
+    arktest.assertEQ(getOptions.currencyDisplay, 'symbol');
+    arktest.assertEQ(getOptions.currencySign, 'standard');
+    arktest.assertEQ(getOptions.minimumIntegerDigits, 1);
+    arktest.assertEQ(getOptions.minimumFractionDigits, 2);
+    arktest.assertEQ(getOptions.maximumFractionDigits, 2);
+    arktest.assertEQ(getOptions.useGrouping, true);
+    arktest.assertEQ(getOptions.notation, 'standard');
+    arktest.assertEQ(getOptions.signDisplay, 'auto');
 }
 
 function testResolvedOptions0004() {
@@ -73,15 +73,15 @@ function testResolvedOptions0004() {
         style: "percent"
     }
     let getOptions = new Intl.NumberFormat("de", options).resolvedOptions();
-    assertEQ(getOptions.locale, 'de');
-    assertEQ(getOptions.numberingSystem, 'latn');
-    assertEQ(getOptions.style, 'percent');
-    assertEQ(getOptions.minimumIntegerDigits, 1);
-    assertEQ(getOptions.minimumFractionDigits, 0);
-    assertEQ(getOptions.maximumFractionDigits, 0);
-    assertEQ(getOptions.useGrouping, true);
-    assertEQ(getOptions.notation, 'standard');
-    assertEQ(getOptions.signDisplay, 'auto');
+    arktest.assertEQ(getOptions.locale, 'de');
+    arktest.assertEQ(getOptions.numberingSystem, 'latn');
+    arktest.assertEQ(getOptions.style, 'percent');
+    arktest.assertEQ(getOptions.minimumIntegerDigits, 1);
+    arktest.assertEQ(getOptions.minimumFractionDigits, 0);
+    arktest.assertEQ(getOptions.maximumFractionDigits, 0);
+    arktest.assertEQ(getOptions.useGrouping, true);
+    arktest.assertEQ(getOptions.notation, 'standard');
+    arktest.assertEQ(getOptions.signDisplay, 'auto');
 }
 
 function testResolvedOptions0005() {
@@ -89,18 +89,18 @@ function testResolvedOptions0005() {
         style: "currency", currency: "EUR", currencySign: "accounting"
     }
     let getOptions = new Intl.NumberFormat("de", options).resolvedOptions();
-    assertEQ(getOptions.locale, 'de');
-    assertEQ(getOptions.numberingSystem, 'latn');
-    assertEQ(getOptions.style, 'currency');
-    assertEQ(getOptions.currency, 'EUR');
-    assertEQ(getOptions.currencyDisplay, 'symbol');
-    assertEQ(getOptions.currencySign, 'accounting');
-    assertEQ(getOptions.minimumIntegerDigits, 1);
-    assertEQ(getOptions.minimumFractionDigits, 2);
-    assertEQ(getOptions.maximumFractionDigits, 2);
-    assertEQ(getOptions.useGrouping, true);
-    assertEQ(getOptions.notation, 'standard');
-    assertEQ(getOptions.signDisplay, 'auto');
+    arktest.assertEQ(getOptions.locale, 'de');
+    arktest.assertEQ(getOptions.numberingSystem, 'latn');
+    arktest.assertEQ(getOptions.style, 'currency');
+    arktest.assertEQ(getOptions.currency, 'EUR');
+    arktest.assertEQ(getOptions.currencyDisplay, 'symbol');
+    arktest.assertEQ(getOptions.currencySign, 'accounting');
+    arktest.assertEQ(getOptions.minimumIntegerDigits, 1);
+    arktest.assertEQ(getOptions.minimumFractionDigits, 2);
+    arktest.assertEQ(getOptions.maximumFractionDigits, 2);
+    arktest.assertEQ(getOptions.useGrouping, true);
+    arktest.assertEQ(getOptions.notation, 'standard');
+    arktest.assertEQ(getOptions.signDisplay, 'auto');
 }
 
 function testResolvedOptions0006() {
@@ -108,15 +108,15 @@ function testResolvedOptions0006() {
         useGrouping: false
     }
     let getOptions = new Intl.NumberFormat("de", options).resolvedOptions();
-    assertEQ(getOptions.locale, 'de');
-    assertEQ(getOptions.numberingSystem, 'latn');
-    assertEQ(getOptions.style, 'decimal');
-    assertEQ(getOptions.minimumIntegerDigits, 1);
-    assertEQ(getOptions.minimumFractionDigits, 0);
-    assertEQ(getOptions.maximumFractionDigits, 3);
-    assertEQ(getOptions.useGrouping, false);
-    assertEQ(getOptions.notation, 'standard');
-    assertEQ(getOptions.signDisplay, 'auto');
+    arktest.assertEQ(getOptions.locale, 'de');
+    arktest.assertEQ(getOptions.numberingSystem, 'latn');
+    arktest.assertEQ(getOptions.style, 'decimal');
+    arktest.assertEQ(getOptions.minimumIntegerDigits, 1);
+    arktest.assertEQ(getOptions.minimumFractionDigits, 0);
+    arktest.assertEQ(getOptions.maximumFractionDigits, 3);
+    arktest.assertEQ(getOptions.useGrouping, false);
+    arktest.assertEQ(getOptions.notation, 'standard');
+    arktest.assertEQ(getOptions.signDisplay, 'auto');
 }
 
 function testResolvedOptions0007() {
@@ -124,7 +124,7 @@ function testResolvedOptions0007() {
         minimumIntegerDigits: 10
     }
     let getOptions = new Intl.NumberFormat("de", options).resolvedOptions();
-    assertEQ(getOptions.minimumIntegerDigits, 10);
+    arktest.assertEQ(getOptions.minimumIntegerDigits, 10);
 }
 
 function testResolvedOptionsDefault() {
@@ -141,10 +141,10 @@ function testResolvedOptionsDefault() {
         }
     let result = new Intl.NumberFormat("en", undefined).resolvedOptions();
     let isEqualed = equaledResolvedNumberFormatOptions(result, expected);
-    assertTrue(isEqualed);
+    arktest.assertTrue(isEqualed);
     result = new Intl.NumberFormat("en").resolvedOptions();
     isEqualed = equaledResolvedNumberFormatOptions(result, expected);
-    assertTrue(isEqualed);
+    arktest.assertTrue(isEqualed);
 }
 
 function testResolvedOptionsNotDefault() {
@@ -162,23 +162,23 @@ function testResolvedOptionsNotDefault() {
     };
 
     let x = new Intl.NumberFormat("zh", options).resolvedOptions();
-    assertEQ(x.compactDisplay, "long");
-    assertEQ(x.currencySign, undefined);
-    assertEQ(x.currency, undefined);
-    assertEQ(x.currencyDisplay, undefined);
-    assertEQ(x.locale, "zh");
-    assertEQ(x.minimumFractionDigits, 19);
-    assertEQ(x.maximumFractionDigits, 21);
-    assertEQ(x.minimumSignificantDigits, undefined);
-    assertEQ(x.maximumSignificantDigits, undefined);
-    assertEQ(x.minimumIntegerDigits, 18);
-    assertEQ(x.notation, "compact");
-    assertEQ(x.numberingSystem, "latn");
-    assertEQ(x.signDisplay, "auto");
-    assertEQ(x.style, "decimal");
-    assertEQ(x.unit, undefined);
-    assertEQ(x.unitDisplay, undefined);
-    assertEQ(x.useGrouping, false);
+    arktest.assertEQ(x.compactDisplay, "long");
+    arktest.assertEQ(x.currencySign, undefined);
+    arktest.assertEQ(x.currency, undefined);
+    arktest.assertEQ(x.currencyDisplay, undefined);
+    arktest.assertEQ(x.locale, "zh");
+    arktest.assertEQ(x.minimumFractionDigits, 19);
+    arktest.assertEQ(x.maximumFractionDigits, 21);
+    arktest.assertEQ(x.minimumSignificantDigits, undefined);
+    arktest.assertEQ(x.maximumSignificantDigits, undefined);
+    arktest.assertEQ(x.minimumIntegerDigits, 18);
+    arktest.assertEQ(x.notation, "compact");
+    arktest.assertEQ(x.numberingSystem, "latn");
+    arktest.assertEQ(x.signDisplay, "auto");
+    arktest.assertEQ(x.style, "decimal");
+    arktest.assertEQ(x.unit, undefined);
+    arktest.assertEQ(x.unitDisplay, undefined);
+    arktest.assertEQ(x.useGrouping, false);
 }
 
 
@@ -187,15 +187,15 @@ function testResolvedOptionsDecimal() {
         style: "decimal"
     }
     let getOptions = new Intl.NumberFormat("de", options).resolvedOptions();
-    assertEQ(getOptions.locale, "de");
-    assertEQ(getOptions.numberingSystem, "latn");
-    assertEQ(getOptions.style, "decimal");
-    assertEQ(getOptions.minimumIntegerDigits, 1.0);
-    assertEQ(getOptions.minimumFractionDigits, 0.0);
-    assertEQ(getOptions.maximumFractionDigits, 3.0);
-    assertEQ(getOptions.useGrouping, true);
-    assertEQ(getOptions.notation, "standard");
-    assertEQ(getOptions.signDisplay, "auto");
+    arktest.assertEQ(getOptions.locale, "de");
+    arktest.assertEQ(getOptions.numberingSystem, "latn");
+    arktest.assertEQ(getOptions.style, "decimal");
+    arktest.assertEQ(getOptions.minimumIntegerDigits, 1.0);
+    arktest.assertEQ(getOptions.minimumFractionDigits, 0.0);
+    arktest.assertEQ(getOptions.maximumFractionDigits, 3.0);
+    arktest.assertEQ(getOptions.useGrouping, true);
+    arktest.assertEQ(getOptions.notation, "standard");
+    arktest.assertEQ(getOptions.signDisplay, "auto");
 }
 
 function testResolvedOptionsPercent() {
@@ -203,15 +203,15 @@ function testResolvedOptionsPercent() {
         style: "percent"
     }
     let getOptions = new Intl.NumberFormat("de", options).resolvedOptions();
-    assertEQ(getOptions.locale, "de");
-    assertEQ(getOptions.numberingSystem, "latn");
-    assertEQ(getOptions.style, "percent");
-    assertEQ(getOptions.minimumIntegerDigits, 1.0);
-    assertEQ(getOptions.minimumFractionDigits, 0.0);
-    assertEQ(getOptions.maximumFractionDigits, 0.0);
-    assertEQ(getOptions.useGrouping, true)
-    assertEQ(getOptions.notation, "standard");
-    assertEQ(getOptions.signDisplay, "auto");
+    arktest.assertEQ(getOptions.locale, "de");
+    arktest.assertEQ(getOptions.numberingSystem, "latn");
+    arktest.assertEQ(getOptions.style, "percent");
+    arktest.assertEQ(getOptions.minimumIntegerDigits, 1.0);
+    arktest.assertEQ(getOptions.minimumFractionDigits, 0.0);
+    arktest.assertEQ(getOptions.maximumFractionDigits, 0.0);
+    arktest.assertEQ(getOptions.useGrouping, true)
+    arktest.assertEQ(getOptions.notation, "standard");
+    arktest.assertEQ(getOptions.signDisplay, "auto");
 }
 
 function testResolvedOptionsCurrency() {
@@ -219,37 +219,37 @@ function testResolvedOptionsCurrency() {
         style: "currency", currency: "CNY"
     }
     let getOptions = new Intl.NumberFormat("zh", options).resolvedOptions();
-    assertEQ(getOptions.locale, "zh");
-    assertEQ(getOptions.numberingSystem, "latn");
-    assertEQ(getOptions.style, "currency");
-    assertEQ(getOptions.currency, "CNY");
-    assertEQ(getOptions.currencyDisplay, "symbol");
-    assertEQ(getOptions.currencySign, "standard");
-    assertEQ(getOptions.minimumIntegerDigits, 1.0);
-    assertEQ(getOptions.minimumFractionDigits, 2.0);
-    assertEQ(getOptions.maximumFractionDigits, 2.0);
-    assertEQ(getOptions.useGrouping, true);
-    assertEQ(getOptions.notation, "standard");
-    assertEQ(getOptions.signDisplay, "auto");
+    arktest.assertEQ(getOptions.locale, "zh");
+    arktest.assertEQ(getOptions.numberingSystem, "latn");
+    arktest.assertEQ(getOptions.style, "currency");
+    arktest.assertEQ(getOptions.currency, "CNY");
+    arktest.assertEQ(getOptions.currencyDisplay, "symbol");
+    arktest.assertEQ(getOptions.currencySign, "standard");
+    arktest.assertEQ(getOptions.minimumIntegerDigits, 1.0);
+    arktest.assertEQ(getOptions.minimumFractionDigits, 2.0);
+    arktest.assertEQ(getOptions.maximumFractionDigits, 2.0);
+    arktest.assertEQ(getOptions.useGrouping, true);
+    arktest.assertEQ(getOptions.notation, "standard");
+    arktest.assertEQ(getOptions.signDisplay, "auto");
 }
 
 function equaledResolvedNumberFormatOptions(a: Intl.ResolvedNumberFormatOptions, b: Intl.ResolvedNumberFormatOptions): boolean {
-    assertEQ(a.compactDisplay,b.compactDisplay);
-    assertEQ(a.currencySign, b.currencySign);
-    assertEQ(a.currency, b.currency);
-    assertEQ(a.currencyDisplay, b.currencyDisplay);
-    assertEQ(a.locale, b.locale);
-    assertEQ(a.maximumFractionDigits, b.maximumFractionDigits);
-    assertEQ(a.maximumSignificantDigits, b.maximumSignificantDigits);
-    assertEQ(a.minimumFractionDigits, b.minimumFractionDigits);
-    assertEQ(a.minimumIntegerDigits, b.minimumIntegerDigits);
-    assertEQ(a.minimumSignificantDigits, b.minimumSignificantDigits);
-    assertEQ(a.notation, b.notation);
-    assertEQ(a.numberingSystem, b.numberingSystem);
-    assertEQ(a.signDisplay, b.signDisplay);
-    assertEQ(a.style, b.style);
-    assertEQ(a.unit, b.unit);
-    assertEQ(a.unitDisplay, b.unitDisplay);
-    assertEQ(a.useGrouping, b.useGrouping);
+    arktest.assertEQ(a.compactDisplay,b.compactDisplay);
+    arktest.assertEQ(a.currencySign, b.currencySign);
+    arktest.assertEQ(a.currency, b.currency);
+    arktest.assertEQ(a.currencyDisplay, b.currencyDisplay);
+    arktest.assertEQ(a.locale, b.locale);
+    arktest.assertEQ(a.maximumFractionDigits, b.maximumFractionDigits);
+    arktest.assertEQ(a.maximumSignificantDigits, b.maximumSignificantDigits);
+    arktest.assertEQ(a.minimumFractionDigits, b.minimumFractionDigits);
+    arktest.assertEQ(a.minimumIntegerDigits, b.minimumIntegerDigits);
+    arktest.assertEQ(a.minimumSignificantDigits, b.minimumSignificantDigits);
+    arktest.assertEQ(a.notation, b.notation);
+    arktest.assertEQ(a.numberingSystem, b.numberingSystem);
+    arktest.assertEQ(a.signDisplay, b.signDisplay);
+    arktest.assertEQ(a.style, b.style);
+    arktest.assertEQ(a.unit, b.unit);
+    arktest.assertEQ(a.unitDisplay, b.unitDisplay);
+    arktest.assertEQ(a.useGrouping, b.useGrouping);
     return true;
 }

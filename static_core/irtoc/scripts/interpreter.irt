@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -1194,7 +1194,7 @@ macro(:handle_ldarr_obj_v8) do |vs|
     move_to_exception
   }
   elem_offset = AddI(ShlI(acc.i32).Imm(Constants::REFERENCE_TYPE_SHIFT).i32).Imm(Constants::ARRAY_DATA_OFFSET).u32
-  load_array := Load(vs, elem_offset).ref
+  load_array := Load(vs, elem_offset).SetNeedBarrier(true).ref
   set_acc_object(load_array)
 end
 
@@ -1459,7 +1459,7 @@ macro(:handle_ldobj_obj_v8_id16) do |vs, id|
   assert_non_volatile(field)
 
   offset := LoadI(field).Imm(Constants::FIELD_OFFSET_OFFSET).u32
-  value := Load(vs, offset).ref
+  value := Load(vs, offset).SetNeedBarrier(true).ref
   set_acc_object(value).ref
 end
 
@@ -1522,7 +1522,7 @@ macro(:handle_ldobj_v_obj_v4_v4_id16) do |vd, vs, id|
   assert_non_volatile(field)
 
   offset := LoadI(field).Imm(Constants::FIELD_OFFSET_OFFSET).u32
-  value := Load(vs, offset).ref
+  value := Load(vs, offset).SetNeedBarrier(true).ref
   set_object(vd, value).ref
 end
 
@@ -1659,7 +1659,7 @@ macro(:handle_ldstatic_obj_id16) do |id|
   class_managed_object := LoadI(bitcast_to_ref(field_class)).Imm(Constants::BASE_CLASS_MANAGED_OBJECT_OFFSET).ref_uint
   offset_managed_object := Add(offset, Sub(field_class, class_managed_object).ref_uint).u32
 
-  value := Load(bitcast_to_ref(class_managed_object), offset_managed_object).ref
+  value := Load(bitcast_to_ref(class_managed_object), offset_managed_object).SetNeedBarrier(true).ref
   set_acc_object(value).ref
 end
 
@@ -2091,6 +2091,147 @@ macro(:handle_return_void) do
 end
 
 include_plugin 'interpreter_handlers'
+
+# Any type support
+macro(:handle_any_ldbyname_v8_id32) do |vs, id|
+  ret := call_runtime("AnyLdbyname", %tr, %frame, vs, id).ref
+  If(exception_val(), 0).NE.Unlikely {
+    move_to_exception
+  }
+  set_acc_object(ret)
+end
+
+macro(:handle_any_ldbyname_v_v8_v8_id32) do |vd, vs, id|
+  ret := call_runtime("AnyLdbyname", %tr, %frame, vs, id).ref
+  If(exception_val(), 0).NE.Unlikely {
+    move_to_exception
+  }
+  set_object(vd, ret).ref
+end
+
+macro(:handle_any_stbyname_v8_id32) do |vs, id|
+  call_runtime("AnyStbyname", %tr, %frame, vs, id, acc.ref).void
+  If(exception_val(), 0).NE.Unlikely {
+    move_to_exception
+  }
+end
+
+macro(:handle_any_stbyname_v_v8_v8_id32) do |vs1, vs2, id|
+  call_runtime("AnyStbyname", %tr, %frame, vs2, id, vs1).void
+  If(exception_val(), 0).NE.Unlikely {
+    move_to_exception
+  }
+end
+
+macro(:handle_any_ldbyidx_v8) do |vs|
+  ret := call_runtime("AnyLdbyidx", %tr, vs, acc.f64).ref
+  If(exception_val(), 0).NE.Unlikely {
+    move_to_exception
+  }
+  set_acc_object(ret)
+end
+
+macro(:handle_any_stbyidx_v8_v8) do |vs1, vs2|
+  call_runtime("AnyStbyidx", %tr, vs1, vs2, acc.ref).void
+  If(exception_val(), 0).NE.Unlikely {
+    move_to_exception
+  }
+end
+
+macro(:handle_any_ldbyval_v8_v8) do |vs1, vs2|
+  ret := call_runtime("AnyLdbyval", %tr, vs1, vs2).ref
+  If(exception_val(), 0).NE.Unlikely {
+    move_to_exception
+  }
+  set_acc_object(ret)
+end
+
+macro(:handle_any_stbyval_v8_v8) do |vs1, vs2|
+  call_runtime("AnyStbyval", %tr, vs1, vs2, acc.ref).void
+  If(exception_val(), 0).NE.Unlikely {
+    move_to_exception
+  }
+end
+
+macro(:handle_any_isinstance_v8) do |vs|
+  ret := btou8(call_runtime("AnyIsinstance", %tr, acc.ref, vs).b)
+  If(exception_val(), 0).NE.Unlikely {
+    move_to_exception
+  }
+  set_acc_primitive(ret)
+end
+
+macro(:handle_any_call_0_v8) do |vs|
+  ret := call_runtime("AnyCall0", %tr, vs).ref
+  If(exception_val(), 0).NE.Unlikely {
+    move_to_exception
+  }
+  set_acc_object(ret)
+end
+
+macro(:handle_any_call_short_v4_v4) do |vs1, vs2|
+  ret := call_runtime("AnyCallShort", %tr, vs1, vs2).ref
+  If(exception_val(), 0).NE.Unlikely {
+    move_to_exception
+  }
+  set_acc_object(ret)
+end
+
+macro(:handle_any_call_range_v8_v8_imm8) do |vs1, first_arg, argc|
+  ret := call_runtime("AnyCallRange", %tr, %frame, vs1, first_arg, argc).ref
+  If(exception_val(), 0).NE.Unlikely {
+    move_to_exception
+  }
+  set_acc_object(ret)
+end
+
+macro(:handle_any_call_this_0_v8_id32) do |vs, id|
+  ret := call_runtime("AnyCallThis0", %tr, %frame, vs, id).ref
+  If(exception_val(), 0).NE.Unlikely {
+    move_to_exception
+  }
+  set_acc_object(ret)
+end
+
+macro(:handle_any_call_this_short_v4_v4_id32) do |vs1, vs2, id|
+  ret := call_runtime("AnyCallThisShort", %tr, %frame, vs1, id, vs2).ref
+  If(exception_val(), 0).NE.Unlikely {
+    move_to_exception
+  }
+  set_acc_object(ret)
+end
+
+macro(:handle_any_call_this_range_v8_v8_imm8_id32) do |vs1, first_arg, argc, id|
+  ret := call_runtime("AnyCallThisRange", %tr, %frame, vs1, id, first_arg, argc).ref
+  If(exception_val(), 0).NE.Unlikely {
+    move_to_exception
+  }
+  set_acc_object(ret)
+end
+
+macro(:handle_any_call_new_0_v8) do |vs|
+  ret := call_runtime("AnyCallNew0", %tr, vs).ref
+  If(exception_val(), 0).NE.Unlikely {
+    move_to_exception
+  }
+  set_acc_object(ret)
+end
+
+macro(:handle_any_call_new_short_v4_v4) do |vs1, vs2|
+  ret := call_runtime("AnyCallNewShort", %tr, vs1, vs2).ref
+  If(exception_val(), 0).NE.Unlikely {
+    move_to_exception
+  }
+  set_acc_object(ret)
+end
+
+macro(:handle_any_call_new_range_v8_v8_imm8) do |vs1, first_arg, argc|
+  ret := call_runtime("AnyCallNewRange", %tr, %frame, vs1, first_arg, argc).ref
+  If(exception_val(), 0).NE.Unlikely {
+    move_to_exception
+  }
+  set_acc_object(ret)
+end
 
 # Functions:
 
@@ -2880,6 +3021,43 @@ Panda.instructions.each do |i|
     # throw
     when "THROW_V8"
       handle_throw(vreg_value(op[0]).ref)
+    # any type support
+    when "ANY_LDBYNAME_PREF_V8_ID32"
+      handle_any_ldbyname_v8_id32(vreg_value(op[0]).ref, as_id(op[1]))
+    when "ANY_LDBYNAME_V_PREF_V8_V8_ID32"
+      handle_any_ldbyname_v_v8_v8_id32(vreg_ptr(op[0]), vreg_value(op[1]).ref, as_id(op[2]))
+    when "ANY_STBYNAME_PREF_V8_ID32"
+      handle_any_stbyname_v8_id32(vreg_value(op[0]).ref, as_id(op[1]))
+    when "ANY_STBYNAME_V_PREF_V8_V8_ID32"
+      handle_any_stbyname_v_v8_v8_id32(vreg_value(op[0]).ref, vreg_value(op[1]).ref, as_id(op[2]))
+    when "ANY_LDBYIDX_PREF_V8"
+      handle_any_ldbyidx_v8(vreg_value(op[0]).ref)
+    when "ANY_STBYIDX_PREF_V8_V8"
+      handle_any_stbyidx_v8_v8(vreg_value(op[0]).ref, vreg_value(op[1]).f64)
+    when "ANY_LDBYVAL_PREF_V8_V8"
+      handle_any_ldbyval_v8_v8(vreg_value(op[0]).ref, vreg_value(op[1]).ref)
+    when "ANY_STBYVAL_PREF_V8_V8"
+      handle_any_stbyval_v8_v8(vreg_value(op[0]).ref, vreg_value(op[1]).ref)
+    when "ANY_ISINSTANCE_PREF_V8"
+      handle_any_isinstance_v8(vreg_value(op[0]).ref)
+    when "ANY_CALL_0_PREF_V8"
+      handle_any_call_0_v8(vreg_value(op[0]).ref)
+    when "ANY_CALL_SHORT_PREF_V4_V4"
+      handle_any_call_short_v4_v4(vreg_value(op[0]).ref, vreg_value(op[1]).ref)
+    when "ANY_CALL_RANGE_PREF_V8_V8_IMM8"
+      handle_any_call_range_v8_v8_imm8(vreg_value(op[0]).ref, as_vreg_idx(op[1]).u8, as_imm(op[2]).u8)
+    when "ANY_CALL_THIS_0_PREF_V8_ID32"
+      handle_any_call_this_0_v8_id32(vreg_value(op[1]).ref, as_id(op[0]))
+    when "ANY_CALL_THIS_SHORT_PREF_V4_V4_ID32"
+      handle_any_call_this_short_v4_v4_id32(vreg_value(op[1]).ref, vreg_value(op[2]).ref, as_id(op[0]))
+    when "ANY_CALL_THIS_RANGE_PREF_V8_V8_IMM8_ID32"
+      handle_any_call_this_range_v8_v8_imm8_id32(vreg_value(op[1]).ref, as_vreg_idx(op[2]).u8, as_imm(op[3]).u8, as_id(op[0]))
+    when "ANY_CALL_NEW_0_PREF_V8"
+      handle_any_call_new_0_v8(vreg_value(op[0]).ref)
+    when "ANY_CALL_NEW_SHORT_PREF_V4_V4"
+      handle_any_call_new_short_v4_v4(vreg_value(op[0]).ref, vreg_value(op[1]).ref)
+    when "ANY_CALL_NEW_RANGE_PREF_V8_V8_IMM8"
+      handle_any_call_new_range_v8_v8_imm8(vreg_value(op[0]).ref, as_vreg_idx(op[1]).u8, as_imm(op[2]).u8)
 
 include_plugin 'interpreter_main_loop'
 

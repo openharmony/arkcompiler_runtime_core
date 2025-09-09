@@ -24,5 +24,5 @@ function updateValue(x: number): void {
 function main(): void {
   let value: number = 10;
   updateValue(value);
-  assertEQ(value, 10);
+  arktest.assertEQ(value, 10);
 }

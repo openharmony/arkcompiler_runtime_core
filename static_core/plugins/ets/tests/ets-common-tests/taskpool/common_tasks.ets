@@ -1,13 +1,13 @@
 /*
  * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the 'License');
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an 'AS IS' BASIS,
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -116,14 +116,14 @@ function taskExecuteDelayedTest(): void {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
     try {
         let res1 = await launchImpl(testDelayFunc);
-        assertEQ(res1, 'Concurrent function failed');
+        arktest.assertEQ(res1, 'Concurrent function failed');
         let task2 = new taskpool.Task(longFunc, 50);
-        expectError(() => {
-            await taskpool.executeDelayed(-100.0, task2);
+        arktest.expectError(() => {
+            await taskpool.executeDelayed(-100, task2);
         }, new Error('taskpool:: The delayTime is less than zero'));
     } catch(e: Error) {
         // NOTE(wangzhaoyong, #25035): del try catch when fix stackoverflow and invalid error message
-        assertEQ(e instanceof NullPointerError, true);
+        arktest.assertEQ(e instanceof NullPointerError, true);
     }
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
 }
@@ -140,9 +140,9 @@ function getDelayedTaskInfoTest(): void {
             state = taskInfo.state;
         }
     }
-    assertEQ(taskpool.State.DELAYED as int, state);
+    arktest.assertEQ(taskpool.State.DELAYED as int, state);
 
-    assertEQ(await p, 'success');
+    arktest.assertEQ(await p, 'success');
 
     taskpoolInfo = taskpool.getTaskPoolInfo();
     let delayedExists = true;
@@ -151,7 +151,7 @@ function getDelayedTaskInfoTest(): void {
             delayedExists = false;
         }
     }
-    assertTrue(delayedExists);
+    arktest.assertTrue(delayedExists);
 }
 
 function getDelayedTaskInfoWithCancelTest(): void {
@@ -168,26 +168,26 @@ function getDelayedTaskInfoWithCancelTest(): void {
             state = taskInfo.state;
         }
     }
-    assertEQ(taskpool.State.CANCELED as int, state);
+    arktest.assertEQ(taskpool.State.CANCELED as int, state);
 
-    expectError(() => {
+    arktest.expectError(() => {
         await p;
     }, new Error('taskpool:: task has been canceled'));
 }
 
 let verifyCount = 0;
 function verifySendDataRes(a:int):void{
-    assertEQ(a, 10)
+    arktest.assertEQ(a, 10)
     verifyCount++;
 }
 
 function verifySendDataResWithRestParameter(...args:FixedArray<NullishType>) {
     let arg1 = args[0] as Array<int>;
     let arg2 = args[1] as Array<string>;
-    assertEQ(arg1[0], 1);
-    assertEQ(arg1[1], 2);
-    assertEQ(arg2[0], 'hello');
-    assertEQ(arg2[1], 'world');
+    arktest.assertEQ(arg1[0], 1);
+    arktest.assertEQ(arg1[1], 2);
+    arktest.assertEQ(arg2[0], 'hello');
+    arktest.assertEQ(arg2[1], 'world');
 }
 
 function testOnReceiveDataRestParameter():void {
@@ -209,7 +209,7 @@ function taskOnReceiveData():void {
     });
     task.onReceiveData(verifySendDataRes);
     await taskpool.execute(task);
-    assertEQ(verifyCount, 4);
+    arktest.assertEQ(verifyCount, 4);
 }
 
 function clearCount():void {
@@ -230,7 +230,7 @@ function taskSendData():void {
         verifyCount++
     });
     await taskpool.execute(task);
-    assertEQ(verifyCount, 5);
+    arktest.assertEQ(verifyCount, 5);
 }
 
 function taskSendDataInAsyncFunction():void {
@@ -253,13 +253,13 @@ function taskSendDataInAsyncFunction():void {
 
 function taskExecutePeriodicallyTest(): void {
     let task1 = new taskpool.Task(returnAbc);
-    expectError(() => {
-        taskpool.executePeriodically(-100.0, task1);
+    arktest.expectError(() => {
+        taskpool.executePeriodically(-100, task1);
     }, new Error('taskpool:: The period value is less than zero'));
     let res = await taskpool.execute(task1);
-    assertEQ(res, 'abc');
-    expectError(() => {
-        taskpool.executePeriodically(100.0, task1);
+    arktest.assertEQ(res, 'abc');
+    arktest.expectError(() => {
+        taskpool.executePeriodically(100, task1);
     }, new Error('taskpool:: The concurrent task has been executed and cannot be executed periodically'));
 }
 
@@ -267,11 +267,11 @@ function taskWithDependencyExecutePeriodicallyTest(): void {
     let task1 = new taskpool.Task(sum, 5, 25);
     let task2 = new taskpool.Task(max, 36, 12);
     task1.addDependency(task2);
-    expectError(() => {
-        taskpool.executePeriodically(10.0, task1);
+    arktest.expectError(() => {
+        taskpool.executePeriodically(10, task1);
     }, new Error('taskpool:: the task with dependency cannot executePeriodically'));
-    expectError(() => {
-        taskpool.executePeriodically(100.0, task2);
+    arktest.expectError(() => {
+        taskpool.executePeriodically(100, task2);
     }, new Error('taskpool:: the task with dependency cannot executePeriodically'));
 }
 
@@ -283,7 +283,7 @@ function testTaskpoolInfo() {
     // When taskpool using launch we do not have default worker for it
     // So the behavior is little bit different with taskpool using EAWorker
     if (!CoroutineExtras.isTaskpoolUsingLaunchMode()) {
-        assertNE(emptyThreadInfo.threadInfos.length, 0);
+        arktest.assertNE(emptyThreadInfo.threadInfos.length, 0);
     }
     let funcForTask = (): string => {
         isRunTask.fire();
@@ -294,7 +294,7 @@ function testTaskpoolInfo() {
     let info1 = taskpool.getTaskPoolInfo();
     // Obtain the worker pool info, and the behavior is the same as 1.0 taskpool
     if (!CoroutineExtras.isTaskpoolUsingLaunchMode()) {
-        assertNE(info1.threadInfos.length, 0);
+        arktest.assertNE(info1.threadInfos.length, 0);
     }
     let p = taskpool.execute(task, taskpool.Priority.HIGH);
     // wait for task started
@@ -303,19 +303,19 @@ function testTaskpoolInfo() {
     // Notify to continue task
     flagForTask.fire();
     // Check current priority of the worker
-    assertEQ(info2.threadInfos[0].priority, taskpool.Priority.HIGH);
-    assertEQ(info2.taskInfos.length, 1);
-    assertNE(info2.threadInfos.length, 0);
+    arktest.assertEQ(info2.threadInfos[0].priority, taskpool.Priority.HIGH);
+    arktest.assertEQ(info2.taskInfos.length, 1);
+    arktest.assertNE(info2.threadInfos.length, 0);
     let isNonEmptyWorker: boolean = false;
     for (let threadInfo of info2.threadInfos) {
-        assertLT(0, threadInfo.tid);
+        arktest.assertLT(0, threadInfo.tid);
         isNonEmptyWorker = isNonEmptyWorker || (threadInfo.taskIds != undefined);
     }
-    assertEQ(isNonEmptyWorker, true);
+    arktest.assertEQ(isNonEmptyWorker, true);
     // NOTE(ipetrov, #20349): uncomment when frontend fix enum comparison
-    assertEQ(info2.taskInfos[0].state as int, taskpool.State.RUNNING as int);
-    assertEQ(info2.taskInfos[0].name, 'task_name');
-    assertEQ(await p, 'result');
+    arktest.assertEQ(info2.taskInfos[0].state as int, taskpool.State.RUNNING as int);
+    arktest.assertEQ(info2.taskInfos[0].name, 'task_name');
+    arktest.assertEQ(await p, 'result');
 }
 
 function namedTaskFunction(flagForTask:Event, isRunTask:Event):string {
@@ -362,6 +362,32 @@ function testTaskpoolInfoOfNoneNameTask() {
     arktest.assertEQ(await p, 'result');
 }
 
+function testTaskPoolInfoasyncawaitTask() {
+    const caseName : string = 'testasyncawaitTask';
+    let flagforTask = new Event();
+    let isRunTask = new Event();
+    let asyncfuncforTask = async (ms : int) : Promise<int> => {
+        const promise = await new Promise<int>(reslove => {
+            isRunTask.fire();
+            flagforTask.wait();
+            resolve(ms);
+        })
+        return promise;
+    };
+    let task : taskpool.Task = new taskpool.Task(caseName, asyncfuncforTask, 3000);
+    taskpool.execute(task, taskpool.Priority.HIGH);
+    isRunTask.wait();
+    let taskpoolInfo: taskpool.TaskPoolInfo =  taskpool.getTaskPoolInfo();
+    flagforTask.fire();
+    let state = 0;
+    for(const taskInfo of taskpoolInfo.taskInfos) {
+        if(taskInfo.name == caseName) {
+            state = taskInfo.state;
+        }
+    }
+    arktest.assertEQ(state.toInt(), taskpool.State.RUNNING);
+}
+
 function returnNumber(): int {
     return 100;
 }
@@ -370,7 +396,7 @@ async function executeNestedTask():Promise<int> {
     let count = 0; 
     for(let a = 0; a < 10; a++) {
         let res = await taskpool.execute(returnNumber);
-        assertEQ(res, 100);
+        arktest.assertEQ(res, 100);
         count++;
     }
     return count
@@ -378,7 +404,7 @@ async function executeNestedTask():Promise<int> {
 
 function exceedContinueTaskTest() {
     let res = await taskpool.execute(executeNestedTask);
-    assertEQ(res, 10)
+    arktest.assertEQ(res, 10)
 }
 
 function oneTaskExecutionTest() {
@@ -929,6 +955,42 @@ function taskDurationTest() {
     arktest.assertNE(task2.totalDuration, 0);
 }
 
+function taskAssigmentTest() {
+    let task1WorkerId = 0;
+    let task2WorkerId = 0;
+    let task1 = new taskpool.Task(() => {
+        longFunc(50);
+        task1WorkerId = CoroutineExtras.getWorkerId();
+    });
+    let task2 = new taskpool.Task(() => {
+        longFunc(50);
+        task2WorkerId = CoroutineExtras.getWorkerId();
+    });
+    let p1 = taskpool.execute(task1);
+    let p2 = taskpool.execute(task2);
+    await p1;
+    await p2;
+    arktest.assertNE(task1WorkerId, 0);
+    arktest.assertNE(task2WorkerId, 0);
+}
+
+class ArgTestClass {
+    a1: string = 'a1';
+    a2: number = 2.0;
+}
+
+function taskArgumentsTest() {
+    let taskFunc = (p1: string, p2: number, p3: int, p4: ArgTestClass) => { };
+    let argTestObj = new ArgTestClass();
+    let task = new taskpool.Task(taskFunc, 'p1', 2.0, 2, argTestObj);
+    let arguments = task.arguments as Array<Any>;
+    arktest.assertEQ(arguments.length, 4);
+    arktest.assertEQ(arguments[0], 'p1');
+    arktest.assertEQ(arguments[1], 2.0);
+    arktest.assertEQ(arguments[2], 2);
+    arktest.assertEQ(arguments[3], argTestObj);
+}
+
 function dependencyThenCallbackExecuteSequenceTest() {
     let checkPoints = new Array<number>();
     checkPoints.push(1);
@@ -974,49 +1036,157 @@ function dependencyErrorTaskTest() {
     arktest.assertEQ(checkPoints.length, 4);
 }
 
-function taskAssigmentTest() {
-    let task1WorkerId = 0;
-    let task2WorkerId = 0;
-    let task1 = new taskpool.Task(() => {
-        longFunc(50);
-        task1WorkerId = CoroutineExtras.getWorkerId();
+async function delay(ms: int) {
+    await new Promise<void>((res, rej) => {
+        setTimeout(() => {
+            res(undefined);
+        }, ms);
     });
-    let task2 = new taskpool.Task(() => {
-        longFunc(50);
-        task2WorkerId = CoroutineExtras.getWorkerId();
-    });
-    let p1 = taskpool.execute(task1);
-    let p2 = taskpool.execute(task2);
-    await p1;
-    await p2;
-    arktest.assertNE(task1WorkerId, 0);
-    arktest.assertNE(task2WorkerId, 0);
-    arktest.assertNE(task1WorkerId, task2WorkerId);
 }
 
-class ArgTestClass {
-    a1: string = 'a1';
-    a2: number = 2.0;
+function dependencyCancelTaskTest() {
+    let checkPoints = new Array<number>();
+    let task1 = new taskpool.Task('task1', () => {
+        checkPoints.push(1);
+    });
+    let task2 = new taskpool.Task('task2', () => {
+        checkPoints.push(2);
+    });
+    let task3 = new taskpool.Task('task3', () => {
+        checkPoints.push(3);
+    });
+    task2.addDependency(task1);
+    task3.addDependency(task2);
+    taskpool.execute(task3);
+    taskpool.execute(task2);
+    await taskpool.execute(task1).then(() => {
+        taskpool.cancel(task2);
+    });
+    await delay(50);
+    arktest.assertEQ(checkPoints.length, 1);
+    arktest.assertEQ(checkPoints[0], 1);
 }
 
-function taskArgumentsTest() {
-    let taskFunc = (p1: string, p2: number, p3: int, p4: ArgTestClass) => { };
-    let argTestObj = new ArgTestClass();
-    let task = new taskpool.Task(taskFunc, 'p1', 2.0, 2, argTestObj);
-    let arguments = task.arguments as Array<Any>;
-    arktest.assertEQ(arguments.length, 4);
-    arktest.assertEQ(arguments[0], 'p1');
-    arktest.assertEQ(arguments[1], 2.0);
-    arktest.assertEQ(arguments[2], 2);
-    arktest.assertEQ(arguments[3], argTestObj);
+function doubleCancelByDependencyTest() {
+    let checkPoints = new Array<number>();
+    let task1 = new taskpool.Task('task1', () => {
+        checkPoints.push(1);
+    });
+    let task2 = new taskpool.Task('task2', () => {
+        checkPoints.push(2);
+    });
+    let task3 = new taskpool.Task('task3', () => {
+        checkPoints.push(3);
+    });
+    task2.addDependency(task1);
+    task3.addDependency(task2);
+    taskpool.execute(task3);
+    taskpool.execute(task2);
+    taskpool.cancel(task3);
+    await taskpool.execute(task1).then(() => {
+        taskpool.cancel(task2);
+    });
+    await delay(50);
+    arktest.assertEQ(checkPoints.length, 1);
+    arktest.assertEQ(checkPoints[0], 1);
+}
+
+let isExecuted: AtomicFlag = new AtomicFlag(false);
+let maxCount: int = max(4, CoroutineExtras.getTaskPoolWorkersLimit());
+let executedCount: int = 0;
+function expandTest() {
+    while (!isExecuted.get()) {}
+}
+
+function reset() {
+    isExecuted.set(false);
+    executedCount = 0;
+}
+
+function taskpoolExpandTest() {
+    for (let i = 1; i <= 20; ++i) {
+        taskpool.execute(expandTest, 10).then(() => {
+            executedCount++;
+        })
+    }
+    while (CoroutineExtras.getTaskPoolWorkersNum() < maxCount) {
+        delayWithYield(10);
+    }
+    isExecuted.set(true);
+    while (executedCount != 20) {
+        delayWithYield(10);
+    }
+    arktest.assertTrue(CoroutineExtras.getTaskPoolWorkersNum() > 2);
+    reset();
+}
+
+function taskpoolMaxWorkersTest() {
+    maxCount = max(10, CoroutineExtras.getTaskPoolWorkersLimit());
+    CoroutineExtras.setTaskPoolWorkersLimit(maxCount);
+    for (let i = 1; i <= 50; ++i) {
+        taskpool.execute(expandTest, 10).then(() => {
+            executedCount++;
+        })
+    }
+    while (CoroutineExtras.getTaskPoolWorkersNum() < maxCount) {
+        delayWithYield(10);
+    }
+    isExecuted.set(true);
+    while (executedCount != 50) {
+        delayWithYield(10);
+    }
+    arktest.assertEQ(CoroutineExtras.getTaskPoolWorkersNum(), maxCount);
+    reset();
+}
+
+function taskpoolRetriggerShrinkTest() {
+    CoroutineExtras.setTaskPoolTriggerShrinkInterval(100000);
+    CoroutineExtras.setTaskPoolIdleThreshold(200000);
+    CoroutineExtras.retriggerTaskPoolShrink();
+    for (let i = 1; i <= 20; ++i) {
+        taskpool.execute(expandTest).then(() => {
+            executedCount++;
+        })
+    }
+    while(CoroutineExtras.getTaskPoolWorkersNum() < maxCount) {
+        delayWithYield(10);
+    }
+    isExecuted.set(true);
+    while (executedCount != 20) {
+        delayWithYield(10);
+    }
+    await taskpool.execute(longFunc, 200);
+    let num = CoroutineExtras.getTaskPoolWorkersNum();
+    arktest.assertEQ(num, maxCount);
+    reset();
+}
+
+function taskpoolShrinkTest() {
+    let expandedNum: int = CoroutineExtras.getTaskPoolWorkersNum();
+    CoroutineExtras.setTaskPoolTriggerShrinkInterval(50);
+    CoroutineExtras.setTaskPoolIdleThreshold(50);
+    CoroutineExtras.retriggerTaskPoolShrink();
+    await taskpool.execute(longFunc, 200);
+    let shrinkedNum = CoroutineExtras.getTaskPoolWorkersNum();
+    arktest.assertTrue(expandedNum > shrinkedNum);
+    reset();
+}
+
+function testExecuteUndefined() {
+    let callback = (arg?: int) => {
+        arktest.assertEQ(arg, undefined);
+    }
+    let task = new taskpool.Task(callback, undefined);
+    await taskpool.execute(task);
 }
 
 function main(): int {
-    let commonTaskSuite = new ArkTestsuite('taskpool.CommonTask');
-    let commonTaskSuiteDisabled = new ArkTestsuite('taskpool.CommonTask.DISABLED');
+    let commonTaskSuite = new arktest.ArkTestsuite('taskpool.CommonTask');
+    let commonTaskSuiteDisabled = new arktest.ArkTestsuite('taskpool.CommonTask.DISABLED');
     commonTaskSuite.addTest('GetTaskpoolInfoTest', testTaskpoolInfo);
     commonTaskSuite.addTest('GetTaskpoolInfoOfNoneNameTaskTest', testTaskpoolInfoOfNoneNameTask);
     commonTaskSuite.addTest('ExceedContinueTaskCountTest', exceedContinueTaskTest);
+    commonTaskSuite.addTest('GetTaskpoolInfoOfasyncawaitTaskTest', testTaskPoolInfoasyncawaitTask);
     commonTaskSuite.addTest('OneTaskExecutionTest', oneTaskExecutionTest);
     commonTaskSuite.addTest('CallbackTest', callbackTest);
     commonTaskSuite.addTest('IsCancelTest', isCancelTest);
@@ -1043,10 +1213,17 @@ function main(): int {
     commonTaskSuite.addTest('TaskSendDataTest', taskSendData);
     commonTaskSuite.addTest('TaskSendDataInAsyncFunction', taskSendDataInAsyncFunction);
     commonTaskSuite.addTest('testOnReceiveDataRestParameter', testOnReceiveDataRestParameter);
-    commonTaskSuite.addTest('DependencyThenCallbackExecuteSequenceTest', dependencyThenCallbackExecuteSequenceTest);
-    commonTaskSuite.addTest('dependencyErrorTaskTest', dependencyErrorTaskTest);
     commonTaskSuite.addTest('taskAssigmentTest', taskAssigmentTest);
     commonTaskSuite.addTest('taskArgumentsTest', taskArgumentsTest);
+    commonTaskSuite.addTest('DependencyThenCallbackExecuteSequenceTest', dependencyThenCallbackExecuteSequenceTest);
+    commonTaskSuite.addTest('dependencyErrorTaskTest', dependencyErrorTaskTest);
+    commonTaskSuite.addTest('dependencyCancelTaskTest', dependencyCancelTaskTest);
+    commonTaskSuite.addTest('doubleCancelByDependencyTest', doubleCancelByDependencyTest);
+    commonTaskSuite.addTest('taskpoolExpandTest', taskpoolExpandTest);
+    commonTaskSuite.addTest('taskpoolMaxWorkersTest', taskpoolMaxWorkersTest);
+    commonTaskSuite.addTest('taskpoolRetriggerShrinkTest', taskpoolRetriggerShrinkTest);
+    commonTaskSuite.addTest('taskpoolShrinkTest', taskpoolShrinkTest);
+    commonTaskSuite.addTest('TestExecuteUndefined', testExecuteUndefined);
     let res = commonTaskSuite.run();
     CoroutineExtras.stopTaskpool();
     return res;

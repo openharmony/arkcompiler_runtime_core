@@ -24,11 +24,11 @@ public:
     void GetMethodData(ani_class *clsResult, ani_static_method *methodResult)
     {
         ani_class cls {};
-        ASSERT_EQ(env_->FindClass("Lcall_static_method_bool_test/Operations;", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("call_static_method_bool_test.Operations", &cls), ANI_OK);
         ASSERT_NE(cls, nullptr);
 
         ani_static_method method;
-        ASSERT_EQ(env_->Class_FindStaticMethod(cls, "or", "ZZ:Z", &method), ANI_OK);
+        ASSERT_EQ(env_->Class_FindStaticMethod(cls, "or", "zz:z", &method), ANI_OK);
         ASSERT_NE(method, nullptr);
 
         *clsResult = cls;
@@ -40,7 +40,7 @@ public:
         ani_class cls {};
         ASSERT_EQ(env_->FindClass(className, &cls), ANI_OK);
         ani_static_method method {};
-        ASSERT_EQ(env_->Class_FindStaticMethod(cls, "funcA", "ZZ:Z", &method), ANI_OK);
+        ASSERT_EQ(env_->Class_FindStaticMethod(cls, "funcA", "zz:z", &method), ANI_OK);
 
         ani_boolean value = expectedValue == ANI_TRUE ? ANI_FALSE : ANI_TRUE;
         ASSERT_EQ(env_->Class_CallStaticMethod_Boolean(cls, method, &value, ANI_TRUE, ANI_FALSE), ANI_OK);
@@ -187,14 +187,14 @@ TEST_F(CallStaticMethodTest, DISABLED_call_static_method_bool_overflow)
 TEST_F(CallStaticMethodTest, call_static_method_bool_combine_scenes_1)
 {
     ani_class clsA {};
-    ASSERT_EQ(env_->FindClass("Lcall_static_method_bool_test/A;", &clsA), ANI_OK);
+    ASSERT_EQ(env_->FindClass("call_static_method_bool_test.A", &clsA), ANI_OK);
     ani_static_method methodA;
-    ASSERT_EQ(env_->Class_FindStaticMethod(clsA, "funcA", "ZZ:Z", &methodA), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(clsA, "funcA", "zz:z", &methodA), ANI_OK);
 
     ani_class clsB {};
-    ASSERT_EQ(env_->FindClass("Lcall_static_method_bool_test/B;", &clsB), ANI_OK);
+    ASSERT_EQ(env_->FindClass("call_static_method_bool_test.B", &clsB), ANI_OK);
     ani_static_method methodB;
-    ASSERT_EQ(env_->Class_FindStaticMethod(clsB, "funcB", "ZZ:Z", &methodB), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(clsB, "funcB", "zz:z", &methodB), ANI_OK);
 
     ani_boolean valueA = ANI_FALSE;
     ASSERT_EQ(env_->Class_CallStaticMethod_Boolean(clsA, methodA, &valueA, ANI_TRUE, ANI_FALSE), ANI_OK);
@@ -219,11 +219,11 @@ TEST_F(CallStaticMethodTest, call_static_method_bool_combine_scenes_1)
 TEST_F(CallStaticMethodTest, call_static_method_bool_combine_scenes_2)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lcall_static_method_bool_test/A;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("call_static_method_bool_test.A", &cls), ANI_OK);
     ani_static_method methodA;
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "funcA", "ZZ:Z", &methodA), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "funcA", "zz:z", &methodA), ANI_OK);
     ani_static_method methodB;
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "funcA", "II:I", &methodB), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "funcA", "ii:i", &methodB), ANI_OK);
 
     ani_boolean value = ANI_FALSE;
     ASSERT_EQ(env_->Class_CallStaticMethod_Boolean(cls, methodA, &value, ANI_TRUE, ANI_FALSE), ANI_OK);
@@ -244,9 +244,9 @@ TEST_F(CallStaticMethodTest, call_static_method_bool_combine_scenes_2)
 TEST_F(CallStaticMethodTest, call_static_method_bool_combine_scenes_3)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lcall_static_method_bool_test/A;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("call_static_method_bool_test.A", &cls), ANI_OK);
     ani_static_method method;
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "funcB", "ZZ:Z", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "funcB", "zz:z", &method), ANI_OK);
 
     ani_boolean value = ANI_FALSE;
     ASSERT_EQ(env_->Class_CallStaticMethod_Boolean(cls, method, &value, ANI_TRUE, ANI_FALSE), ANI_OK);
@@ -277,23 +277,23 @@ TEST_F(CallStaticMethodTest, call_static_method_bool_null_env)
 
 TEST_F(CallStaticMethodTest, call_static_method_bool_combine_scenes_4)
 {
-    TestCombineScene("Lcall_static_method_bool_test/C;", ANI_TRUE);
+    TestCombineScene("call_static_method_bool_test.C", ANI_TRUE);
 }
 
 TEST_F(CallStaticMethodTest, call_static_method_bool_combine_scenes_5)
 {
-    TestCombineScene("Lcall_static_method_bool_test/D;", ANI_FALSE);
+    TestCombineScene("call_static_method_bool_test.D", ANI_FALSE);
 }
 
 TEST_F(CallStaticMethodTest, call_static_method_bool_combine_scenes_6)
 {
-    TestCombineScene("Lcall_static_method_bool_test/E;", ANI_TRUE);
+    TestCombineScene("call_static_method_bool_test.E", ANI_TRUE);
 }
 
 TEST_F(CallStaticMethodTest, call_static_method_bool_combine_scenes_7)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lcall_static_method_bool_test/F;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("call_static_method_bool_test.F", &cls), ANI_OK);
     ani_static_method method1 {};
     ASSERT_EQ(env_->Class_FindStaticMethod(cls, "increment", nullptr, &method1), ANI_OK);
     ani_static_method method2 {};
@@ -314,11 +314,11 @@ TEST_F(CallStaticMethodTest, call_static_method_bool_combine_scenes_7)
 TEST_F(CallStaticMethodTest, call_static_method_bool_combine_scenes_8)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lcall_static_method_bool_test/G;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("call_static_method_bool_test.G", &cls), ANI_OK);
     ani_static_method method1 {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "publicMethod", "ZZ:Z", &method1), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "publicMethod", "zz:z", &method1), ANI_OK);
     ani_static_method method2 {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "callPrivateMethod", "ZZ:Z", &method2), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "callPrivateMethod", "zz:z", &method2), ANI_OK);
     ani_boolean value = ANI_FALSE;
     ASSERT_EQ(env_->Class_CallStaticMethod_Boolean(cls, method1, &value, ANI_TRUE, ANI_FALSE), ANI_OK);
     ASSERT_EQ(value, ANI_TRUE);

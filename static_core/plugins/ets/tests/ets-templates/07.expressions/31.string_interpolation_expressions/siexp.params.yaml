@@ -95,6 +95,10 @@ cases:
 
     - use: |-
           const v = `'value' = ${c'\u0000' + '0000'}`
+          const expected = "'value' = 00000"
+
+    - use: |-
+          const v = `'value' = ${'\u0000' + '0000'}`
           const expected = "'value' = \u00000000"
 
     - use: |-

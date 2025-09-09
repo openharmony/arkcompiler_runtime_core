@@ -20,6 +20,7 @@
 #include "include/object_header.h"
 #include "mem/object_pointer.h"
 #include "plugins/ets/runtime/types/ets_array.h"
+#include "plugins/ets/runtime/types/ets_escompat_array.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_runtime_linker.h"
 
@@ -64,10 +65,17 @@ public:
             ObjectAccessor::GetObject(this, MEMBER_OFFSET(EtsAbcRuntimeLinker, parentLinker_)));
     }
 
+    EtsObject *GetSharedLibraryRuntimeLinkers()
+    {
+        return EtsObject::FromCoreType(
+            ObjectAccessor::GetObject(this, MEMBER_OFFSET(EtsAbcRuntimeLinker, sharedRuntimeLinkers_)));
+    }
+
 private:
     // ets.AbcRuntimeLinker fields BEGIN
     ObjectPointer<EtsObject> parentLinker_;
     ObjectPointer<EtsObjectArray> abcFiles_;
+    ObjectPointer<EtsEscompatArray> sharedRuntimeLinkers_;
     // ets.AbcRuntimeLinker fields END
 
     friend class test::EtsAbcRuntimeLinkerTest;

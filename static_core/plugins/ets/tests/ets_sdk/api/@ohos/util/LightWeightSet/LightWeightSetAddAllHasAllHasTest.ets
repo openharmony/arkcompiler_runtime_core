@@ -15,11 +15,8 @@
 
 import {LightWeightSet} from "@ohos.util.LightWeightSet";
 
-const success = 0;
-const fail = 1;
-
 function main(): int {
-    const suite = new ArkTestsuite("LightWeightSet AddAll HasAll Has API tests")
+    const suite = new arktest.ArkTestsuite("LightWeightSet AddAll HasAll Has API tests")
 
     suite.addTest("LightWeightSet addAll data", testAddAllData)
     suite.addTest("LightWeightSet addAll empty data", testAddAllEmptyData)
@@ -38,30 +35,30 @@ function main(): int {
 }
 
 function testAddAllData() {
-    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
-    let lightWeightSett: LightWeightSet<number | string> = new LightWeightSet<number | string>();
+    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSett: LightWeightSet<double | string> = new LightWeightSet<double | string>();
     lightWeightSett.add("aa");
     lightWeightSett.add("bb");
     let result = lightWeightSet.addAll(lightWeightSett);
-    assertEQ(result, true, "The lightWeightSet should add all elements from another lightWeightSet");
-    assertEQ(lightWeightSet.length, 2, "The lightWeightSet length should be 2");
-    assertEQ(lightWeightSett.length, 2, "The lightWeightSet length should be 2");
+    arktest.assertEQ(result, true, "The lightWeightSet should add all elements from another lightWeightSet");
+    arktest.assertEQ(lightWeightSet.length, 2, "The lightWeightSet length should be 2");
+    arktest.assertEQ(lightWeightSett.length, 2, "The lightWeightSet length should be 2");
 }
 
 function testAddAllEmptyData() {
-    let set: LightWeightSet<number | string> = new LightWeightSet<number | string>();
+    let set: LightWeightSet<double | string> = new LightWeightSet<double | string>();
     let result = set.addAll(set);
-    assertEQ(result, false, "The lightWeightSet should add all elements from another lightWeightSet");
+    arktest.assertEQ(result, false, "The lightWeightSet should add all elements from another lightWeightSet");
 }
 
 function testAddAllWithNonEmptySet() {
-    let setA: LightWeightSet<number | string> = new LightWeightSet<number | string>();
-    let setB: LightWeightSet<number | string> = new LightWeightSet<number | string>();
+    let setA: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let setB: LightWeightSet<double | string> = new LightWeightSet<double | string>();
 
     setA.add("aa");
     setB.add("bb");
     let result = setB.addAll(setA);
-    assertEQ(result, true, "The lightWeightSet should add all elements from another lightWeightSet");
+    arktest.assertEQ(result, true, "The lightWeightSet should add all elements from another lightWeightSet");
 }
 
 function testAddAllWithMultipleSets() {
@@ -74,97 +71,97 @@ function testAddAllWithMultipleSets() {
     setB.add("s");
     setB.add("squirrel");
 
-    assertEQ(setA.addAll(setB), true, "The addAll method should return true when new elements are added");
-    assertEQ(setA.length, 3, "The set length should be 3 after adding all elements");
+    arktest.assertEQ(setA.addAll(setB), true, "The addAll method should return true when new elements are added");
+    arktest.assertEQ(setA.length, 3, "The set length should be 3 after adding all elements");
 
     let setC: LightWeightSet<string> = new LightWeightSet<string>();
     setC.add("s");
 
-    assertEQ(setA.addAll(setC), false, "The addAll method should return false when no new elements are added");
+    arktest.assertEQ(setA.addAll(setC), false, "The addAll method should return false when no new elements are added");
 }
 
 function testHasAllData() {
-    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
-    let lightWeightSett: LightWeightSet<number | string> = new LightWeightSet<number | string>();
+    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSett: LightWeightSet<double | string> = new LightWeightSet<double | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
     lightWeightSett.add("aa");
     let result = lightWeightSet.hasAll(lightWeightSett);
-    assertEQ(result, true, "The lightWeightSet should contain all elements from another lightWeightSet");
-    assertEQ(lightWeightSet.length, 2, "The lightWeightSet length should be 2");
-    assertEQ(lightWeightSett.length, 1, "The lightWeightSett length should be 1");
+    arktest.assertEQ(result, true, "The lightWeightSet should contain all elements from another lightWeightSet");
+    arktest.assertEQ(lightWeightSet.length, 2, "The lightWeightSet length should be 2");
+    arktest.assertEQ(lightWeightSett.length, 1, "The lightWeightSett length should be 1");
 }
 
 function testHasAllNotSetData() {
-    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
-    let lightWeightSett: LightWeightSet<number | string> = new LightWeightSet<number | string>();
+    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSett: LightWeightSet<double | string> = new LightWeightSet<double | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
     lightWeightSett.add("cc");
     let result = lightWeightSet.hasAll(lightWeightSett);
-    assertEQ(result, false,
+    arktest.assertEQ(result, false,
         "The lightWeightSet should not contain elements that are not set in another lightWeightSet");
-    assertEQ(lightWeightSet.length, 2, "The lightWeightSet length should be 2");
-    assertEQ(lightWeightSett.length, 1, "The lightWeightSett length should be 1");
+    arktest.assertEQ(lightWeightSet.length, 2, "The lightWeightSet length should be 2");
+    arktest.assertEQ(lightWeightSett.length, 1, "The lightWeightSett length should be 1");
 }
 
 function testHasAllOutOfRangeData() {
-    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
-    let lightWeightSett: LightWeightSet<number | string> = new LightWeightSet<number | string>();
+    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSett: LightWeightSet<double | string> = new LightWeightSet<double | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
     lightWeightSett.add("aa");
     lightWeightSett.add("bb");
     lightWeightSett.add("cc");
     let result = lightWeightSet.hasAll(lightWeightSett);
-    assertEQ(result, false,
+    arktest.assertEQ(result, false,
         "The lightWeightSet should not contain elements that are out of range in another lightWeightSet");
-    assertEQ(lightWeightSet.length, 2, "The lightWeightSet length should be 2");
-    assertEQ(lightWeightSett.length, 3, "The lightWeightSett length should be 3");
+    arktest.assertEQ(lightWeightSet.length, 2, "The lightWeightSet length should be 2");
+    arktest.assertEQ(lightWeightSett.length, 3, "The lightWeightSett length should be 3");
 }
 
 function testHasAllEmptyData() {
-    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
-    let lightWeightSett: LightWeightSet<number | string> = new LightWeightSet<number | string>();
+    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
+    let lightWeightSett: LightWeightSet<double | string> = new LightWeightSet<double | string>();
     lightWeightSett.add("aa");
     lightWeightSett.add("bb");
     let result = lightWeightSett.hasAll(lightWeightSet);
-    assertEQ(result, true, "The lightWeightSet should add all elements from an empty lightWeightSet");
-    assertEQ(lightWeightSet.length, 0, "The lightWeightSet length should be 0");
-    assertEQ(lightWeightSett.length, 2, "The lightWeightSett length should be 2");
+    arktest.assertEQ(result, true, "The lightWeightSet should add all elements from an empty lightWeightSet");
+    arktest.assertEQ(lightWeightSet.length, 0, "The lightWeightSet length should be 0");
+    arktest.assertEQ(lightWeightSett.length, 2, "The lightWeightSett length should be 2");
 }
 
 function testHasValue() {
-    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
+    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
     lightWeightSet.add(123);
     let result = lightWeightSet.has(123);
-    assertEQ(result, true, "The lightWeightSet should contain the value");
-    assertEQ(lightWeightSet.length, 1, "The lightWeightSet length should be 1");
+    arktest.assertEQ(result, true, "The lightWeightSet should contain the value");
+    arktest.assertEQ(lightWeightSet.length, 1, "The lightWeightSet length should be 1");
 }
 
 function testHasNotSetValue() {
-    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
+    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
     lightWeightSet.add(123);
     let result = lightWeightSet.has(456);
-    assertEQ(result, false, "The lightWeightSet should not contain the value that is not set");
-    assertEQ(lightWeightSet.length, 1, "The lightWeightSet length should be 1");
+    arktest.assertEQ(result, false, "The lightWeightSet should not contain the value that is not set");
+    arktest.assertEQ(lightWeightSet.length, 1, "The lightWeightSet length should be 1");
 }
 
 function testHasValueOfEmptySet() {
-    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
+    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
     let result = lightWeightSet.has(456);
-    assertEQ(result, false, "The lightWeightSet should not contain any value when the lightWeightSet is empty");
-    assertEQ(lightWeightSet.length, 0, "The lightWeightSet length should be 0");
+    arktest.assertEQ(result, false, "The lightWeightSet should not contain any value when the lightWeightSet is empty");
+    arktest.assertEQ(lightWeightSet.length, 0, "The lightWeightSet length should be 0");
 }
 
 function testHasStringValue() {
-    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
+    let lightWeightSet: LightWeightSet<double | string> = new LightWeightSet<double | string>();
     let str: string = ''
     for (let index = 0; index < 10000; index++) {
         str.concat(index + '')
     }
     lightWeightSet.add(str);
     let result = lightWeightSet.has(str);
-    assertEQ(result, true, "The lightWeightSet should contain the value");
-    assertEQ(lightWeightSet.length, 1, "The lightWeightSet length should be 1");
+    arktest.assertEQ(result, true, "The lightWeightSet should contain the value");
+    arktest.assertEQ(lightWeightSet.length, 1, "The lightWeightSet length should be 1");
 }

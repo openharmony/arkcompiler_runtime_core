@@ -33,7 +33,7 @@ class Bar {
 function main() {
     let x : Bar = new Bar();
     let lambda = x[0];
-    assertEQ(lambda("hello"), "hellohello")
+    arktest.assertEQ(lambda("hello"), "hellohello")
 
     let lambda2: fooLambda = (s: String) => {
         return s + s + s;
@@ -41,6 +41,6 @@ function main() {
 
     x[0] = lambda2;
     lambda = x[0];
-    assertEQ(lambda("hello"), "hellohellohello")
+    arktest.assertEQ(lambda("hello"), "hellohellohello")
     return 0;
 }

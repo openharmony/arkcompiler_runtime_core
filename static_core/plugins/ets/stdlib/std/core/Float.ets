@@ -18,7 +18,7 @@ package std.core;
 /**
  * Represents boxed float value and related operations
  */
-export final class Float extends Floating implements Comparable<Float>, JSONable<Float> {
+export final class Float extends Floating implements Comparable<Float> {
     private value: float;
 
     /**
@@ -136,10 +136,32 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
     /**
      * Returns value of this instance
      *
+     * Supportive interface
+     *
+     * @returns value as byte
+     */
+    public override byteValue(): byte {
+        return this.toByte();
+    }
+
+    /**
+     * Returns value of this instance
+     *
      * @returns value as short
      */
     public override toShort(): short {
         return this.value.toShort();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * Supportive interface
+     *
+     * @returns value as short
+     */
+    public override shortValue(): short {
+        return this.toShort();
     }
 
     /**
@@ -154,10 +176,32 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
     /**
      * Returns value of this instance
      *
+     * Supportive interface
+     *
+     * @returns value as int
+     */
+    public override intValue(): int {
+        return this.toInt();
+    }
+
+    /**
+     * Returns value of this instance
+     *
      * @returns value as long
      */
     public override toLong(): long {
         return this.value.toLong();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * Supportive interface
+     *
+     * @returns value as long
+     */
+    public override longValue(): long {
+        return this.toLong();
     }
 
     /**
@@ -172,19 +216,33 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
     /**
      * Returns value of this instance
      *
+     * Supportive interface
+     *
+     * @returns value as float
+     */
+    public override floatValue(): float {
+        return this.toFloat();
+    }
+
+    /**
+     * Returns value of this instance
+     *
      * @returns value as double
      */
     public override toDouble(): double {
         return this.value.toDouble();
     }
 
+
     /**
      * Returns value of this instance
      *
-     * @returns value as char
+     * Supportive interface
+     *
+     * @returns value as double
      */
-    public toChar(): char {
-        return this.value.toChar();
+    public override doubleValue(): double {
+        return this.toDouble();
     }
 
     /**
@@ -244,15 +302,6 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
     public static native toDouble(value: float): double;
 
     /**
-     * Returns the primitive as char value
-     *
-     * @param value value to cast
-     *
-     * @returns casted value
-     */
-    public static native toChar(value: float): char;
-
-    /**
      * Compares this instance to other Float object
      * The result is less than 0 if this instance lesser than provided object
      * 0 if they are equal
@@ -294,15 +343,6 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
      */
     public override toString(): String {
         return Float.toString(this.value, 10);
-    }
-
-    /**
-     * Returns a hash code (integer representation) for this instance
-     *
-     * @returns representation of this instance
-     */
-    public override $_hashCode(): int {
-        return this.toInt();
     }
 
     /**
@@ -523,23 +563,4 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
      * @returns int - bit representation
      */
     public static native bitCastToInt(val: float): int
-
-    /**
-     * Creates a Float instance based on JSONValue
-     *
-     * @param json: JSONValue - a JSON representation
-     *
-     * @throws JSONTypeError if json does not encode a valid float
-     *
-     * @returns Float - float value decoded from JSON
-     */
-    public createFromJSONValue(json: JSONValue): Float {
-        if (json instanceof JSONNumber) {
-            let val = (json as JSONNumber).value
-            if (-Float.MAX_VALUE <= val && val <= Float.MAX_VALUE) {
-                return Float.valueOf(((json as JSONNumber).value).toFloat())
-            }
-        }
-        throw new JSONTypeError("Cannot create Double from JSON", new ErrorOptions(json as Object))
-    }
 }

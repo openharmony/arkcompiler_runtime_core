@@ -27,5 +27,5 @@ const config: Config = {
 
 function main(): void {
   let timeoutValue = config?.timeout ?? 3000;
-  assertEQ(timeoutValue, 3000);
+  arktest.assertEQ(timeoutValue, 3000);
 }

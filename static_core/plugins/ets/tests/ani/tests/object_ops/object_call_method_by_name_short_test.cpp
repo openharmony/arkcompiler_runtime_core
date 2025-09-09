@@ -27,11 +27,11 @@ public:
     void GetMethodData(ani_object *objectResult)
     {
         ani_class cls {};
-        ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_short_test/A;", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("object_call_method_by_name_short_test.A", &cls), ANI_OK);
         ASSERT_NE(cls, nullptr);
 
         ani_static_method newMethod {};
-        ASSERT_EQ(env_->Class_FindStaticMethod(cls, "new_A", ":Lobject_call_method_by_name_short_test/A;", &newMethod),
+        ASSERT_EQ(env_->Class_FindStaticMethod(cls, "new_A", ":C{object_call_method_by_name_short_test.A}", &newMethod),
                   ANI_OK);
         ani_ref ref {};
         ASSERT_EQ(env_->Class_CallStaticMethod_Ref(cls, newMethod, &ref), ANI_OK);
@@ -50,7 +50,7 @@ TEST_F(CallObjectMethodShortByNameTest, object_call_method_short_a)
     args[1U].s = VAL2;
 
     ani_short res {};
-    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(object, "shortByNameMethod", "SS:S", &res, args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(object, "shortByNameMethod", "ss:s", &res, args), ANI_OK);
     ASSERT_EQ(res, VAL1 + VAL2);
 }
 
@@ -60,7 +60,7 @@ TEST_F(CallObjectMethodShortByNameTest, object_call_method_short_v)
     GetMethodData(&object);
 
     ani_short res {};
-    ASSERT_EQ(env_->Object_CallMethodByName_Short(object, "shortByNameMethod", "SS:S", &res, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short(object, "shortByNameMethod", "ss:s", &res, VAL1, VAL2), ANI_OK);
     ASSERT_EQ(res, VAL1 + VAL2);
 }
 
@@ -70,7 +70,7 @@ TEST_F(CallObjectMethodShortByNameTest, object_call_method_short)
     GetMethodData(&object);
 
     ani_short res {};
-    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Short(env_, object, "shortByNameMethod", "SS:S", &res, VAL1, VAL2),
+    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Short(env_, object, "shortByNameMethod", "ss:s", &res, VAL1, VAL2),
               ANI_OK);
     ASSERT_EQ(res, VAL1 + VAL2);
 }
@@ -81,9 +81,9 @@ TEST_F(CallObjectMethodShortByNameTest, object_call_method_short_v_abnormal)
     GetMethodData(&object);
 
     ani_short res {};
-    ASSERT_EQ(env_->Object_CallMethodByName_Short(object, "shortByNameMethod", "SS:X", &res, VAL1, VAL2),
+    ASSERT_EQ(env_->Object_CallMethodByName_Short(object, "shortByNameMethod", "ss:x", &res, VAL1, VAL2),
               ANI_NOT_FOUND);
-    ASSERT_EQ(env_->Object_CallMethodByName_Short(object, "unknown_function", "SS:S", &res, VAL1, VAL2), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short(object, "unknown_function", "ss:s", &res, VAL1, VAL2), ANI_NOT_FOUND);
 }
 
 TEST_F(CallObjectMethodShortByNameTest, object_call_method_short_v_invalid_method)
@@ -92,7 +92,7 @@ TEST_F(CallObjectMethodShortByNameTest, object_call_method_short_v_invalid_metho
     GetMethodData(&object);
 
     ani_short res {};
-    ASSERT_EQ(env_->Object_CallMethodByName_Short(object, nullptr, "SS:S", &res, VAL1, VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short(object, nullptr, "ss:s", &res, VAL1, VAL2), ANI_INVALID_ARGS);
 }
 
 TEST_F(CallObjectMethodShortByNameTest, object_call_method_short_v_invalid_result)
@@ -100,7 +100,7 @@ TEST_F(CallObjectMethodShortByNameTest, object_call_method_short_v_invalid_resul
     ani_object object {};
     GetMethodData(&object);
 
-    ASSERT_EQ(env_->Object_CallMethodByName_Short(object, "shortByNameMethod", "SS:S", nullptr, VAL1, VAL2),
+    ASSERT_EQ(env_->Object_CallMethodByName_Short(object, "shortByNameMethod", "ss:s", nullptr, VAL1, VAL2),
               ANI_INVALID_ARGS);
 }
 
@@ -110,7 +110,7 @@ TEST_F(CallObjectMethodShortByNameTest, object_call_method_short_v_invalid_objec
     GetMethodData(&object);
 
     ani_short res {};
-    ASSERT_EQ(env_->Object_CallMethodByName_Short(nullptr, "shortByNameMethod", "SS:S", &res, VAL1, VAL2),
+    ASSERT_EQ(env_->Object_CallMethodByName_Short(nullptr, "shortByNameMethod", "ss:s", &res, VAL1, VAL2),
               ANI_INVALID_ARGS);
 }
 
@@ -120,109 +120,109 @@ TEST_F(CallObjectMethodShortByNameTest, object_call_method_short_a_invalid_args)
     GetMethodData(&object);
 
     ani_short res {};
-    ASSERT_EQ(env_->Object_CallMethodByName_Short(nullptr, "shortByNameMethod", "SS:S", &res, nullptr),
+    ASSERT_EQ(env_->Object_CallMethodByName_Short(nullptr, "shortByNameMethod", "ss:s", &res, nullptr),
               ANI_INVALID_ARGS);
 }
 
 TEST_F(CallObjectMethodShortByNameTest, object_call_method_by_name_short_001)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_short_test/B;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_short_test.B", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "S:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "s:", &method), ANI_OK);
 
     ani_object obj {};
     ASSERT_EQ(env_->Object_New(cls, method, &obj, VAL0), ANI_OK);
 
     ani_short sum {};
-    ASSERT_EQ(env_->Object_CallMethodByName_Short(obj, "shortMethod", "SS:S", &sum, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short(obj, "shortMethod", "ss:s", &sum, VAL1, VAL2), ANI_OK);
     ASSERT_EQ(sum, VAL0);
 
     ani_value args[2U];
     args[0U].s = VAL1;
     args[1U].s = VAL2;
-    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(obj, "shortMethod", "SS:S", &sum, args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(obj, "shortMethod", "ss:s", &sum, args), ANI_OK);
     ASSERT_EQ(sum, VAL0);
 }
 
 TEST_F(CallObjectMethodShortByNameTest, object_call_method_by_name_short_002)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_short_test/B;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_short_test.B", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "S:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "s:", &method), ANI_OK);
 
     ani_object obj {};
     ASSERT_EQ(env_->Object_New(cls, method, &obj, VAL0), ANI_OK);
 
     ani_short sum {};
-    ASSERT_EQ(env_->Object_CallMethodByName_Short(obj, "shortMethod", "S:S", &sum, VAL1), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short(obj, "shortMethod", "s:s", &sum, VAL1), ANI_OK);
     ASSERT_EQ(sum, VAL0);
 
     ani_value args[1U];
     args[0U].s = VAL1;
-    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(obj, "shortMethod", "S:S", &sum, args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(obj, "shortMethod", "s:s", &sum, args), ANI_OK);
     ASSERT_EQ(sum, VAL0);
 }
 
 TEST_F(CallObjectMethodShortByNameTest, object_call_method_by_name_short_003)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_short_test/C;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_short_test.C", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "S:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "s:", &method), ANI_OK);
 
     ani_object obj {};
     ASSERT_EQ(env_->Object_New(cls, method, &obj, VAL0), ANI_OK);
 
     ani_short sum {};
-    ASSERT_EQ(env_->Object_CallMethodByName_Short(obj, "shortAddMethod", "SS:S", &sum, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short(obj, "shortAddMethod", "ss:s", &sum, VAL1, VAL2), ANI_OK);
     ASSERT_EQ(sum, VAL0 + VAL1 + VAL2);
 
     ani_value args[2U];
     args[0U].s = VAL1;
     args[1U].s = VAL2;
-    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(obj, "shortAddMethod", "SS:S", &sum, args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(obj, "shortAddMethod", "ss:s", &sum, args), ANI_OK);
     ASSERT_EQ(sum, VAL0 + VAL1 + VAL2);
 }
 
 TEST_F(CallObjectMethodShortByNameTest, object_call_method_by_name_short_004)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_short_test/C;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_short_test.C", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "S:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "s:", &method), ANI_OK);
 
     ani_object obj {};
     ASSERT_EQ(env_->Object_New(cls, method, &obj, VAL0), ANI_OK);
 
     ani_short sum {};
-    ASSERT_EQ(env_->Object_CallMethodByName_Short(obj, "shortMethod", "SS:S", &sum, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short(obj, "shortMethod", "ss:s", &sum, VAL1, VAL2), ANI_OK);
     ASSERT_EQ(sum, VAL0 - VAL1 - VAL2);
 
     ani_value args[2U];
     args[0U].s = VAL1;
     args[1U].s = VAL2;
-    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(obj, "shortMethod", "SS:S", &sum, args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(obj, "shortMethod", "ss:s", &sum, args), ANI_OK);
     ASSERT_EQ(sum, VAL0 - VAL1 - VAL2);
 }
 
 TEST_F(CallObjectMethodShortByNameTest, object_call_method_by_name_short_005)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_short_test/B;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_short_test.B", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "S:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "s:", &method), ANI_OK);
 
     ani_object obj {};
     ASSERT_EQ(env_->Object_New(cls, method, &obj, VAL0), ANI_OK);
@@ -230,56 +230,56 @@ TEST_F(CallObjectMethodShortByNameTest, object_call_method_by_name_short_005)
     ani_short num {};
     ani_value args[1U];
     args[0U].s = VAL1;
-    ASSERT_EQ(env_->Object_CallMethodByName_Short(obj, "protectedMethod", "S:S", &num, VAL1), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short(obj, "protectedMethod", "s:s", &num, VAL1), ANI_OK);
     ASSERT_EQ(num, VAL0 + VAL1);
-    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(obj, "protectedMethod", "S:S", &num, args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(obj, "protectedMethod", "s:s", &num, args), ANI_OK);
     ASSERT_EQ(num, VAL0 + VAL1);
 
-    ASSERT_EQ(env_->Object_CallMethodByName_Short(obj, "privateMethod", "S:S", &num, VAL1), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short(obj, "privateMethod", "s:s", &num, VAL1), ANI_OK);
     ASSERT_EQ(num, VAL0 - VAL1);
-    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(obj, "privateMethod", "S:S", &num, args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(obj, "privateMethod", "s:s", &num, args), ANI_OK);
     ASSERT_EQ(num, VAL0 - VAL1);
 
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_short_test/C;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_short_test.C", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "S:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "s:", &method), ANI_OK);
     ASSERT_EQ(env_->Object_New(cls, method, &obj, VAL0), ANI_OK);
-    ASSERT_EQ(env_->Object_CallMethodByName_Short(obj, "callProtected", "S:S", &num, VAL1), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short(obj, "callProtected", "s:s", &num, VAL1), ANI_OK);
     ASSERT_EQ(num, VAL0 + VAL1);
-    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(obj, "callProtected", "S:S", &num, args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(obj, "callProtected", "s:s", &num, args), ANI_OK);
     ASSERT_EQ(num, VAL0 + VAL1);
 }
 
 TEST_F(CallObjectMethodShortByNameTest, object_call_method_by_name_short_006)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_short_test/B;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_short_test.B", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "S:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "s:", &method), ANI_OK);
 
     ani_object obj {};
     ASSERT_EQ(env_->Object_New(cls, method, &obj, VAL2), ANI_OK);
 
     ani_short sum {};
-    ASSERT_EQ(env_->Object_CallMethodByName_Short(obj, "nestedMethod", "S:S", &sum, VAL1), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short(obj, "nestedMethod", "s:s", &sum, VAL1), ANI_OK);
     ASSERT_EQ(sum, VAL2 + VAL1);
 
     ani_value args[1U];
     args[0U].s = VAL1;
-    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(obj, "nestedMethod", "S:S", &sum, args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(obj, "nestedMethod", "s:s", &sum, args), ANI_OK);
     ASSERT_EQ(sum, VAL2 + VAL1);
 }
 
 TEST_F(CallObjectMethodShortByNameTest, object_call_method_by_name_short_007)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_short_test/B;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_short_test.B", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "S:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "s:", &method), ANI_OK);
 
     ani_object obj {};
     ASSERT_EQ(env_->Object_New(cls, method, &obj, VAL2), ANI_OK);
@@ -287,23 +287,23 @@ TEST_F(CallObjectMethodShortByNameTest, object_call_method_by_name_short_007)
     ani_short sum {};
     const ani_int value1 = 5;
     const ani_short result = 120;
-    ASSERT_EQ(env_->Object_CallMethodByName_Short(obj, "recursiveMethod", "I:S", &sum, value1), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short(obj, "recursiveMethod", "i:s", &sum, value1), ANI_OK);
     ASSERT_EQ(sum, result);
 
     ani_value args[1U];
     args[0U].i = VAL1;
-    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(obj, "recursiveMethod", "I:S", &sum, args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(obj, "recursiveMethod", "i:s", &sum, args), ANI_OK);
     ASSERT_EQ(sum, result);
 }
 
 TEST_F(CallObjectMethodShortByNameTest, object_call_method_by_name_short_008)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_short_test/B;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_short_test.B", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "S:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "s:", &method), ANI_OK);
 
     ani_object obj {};
     ASSERT_EQ(env_->Object_New(cls, method, &obj, VAL2), ANI_OK);
@@ -312,7 +312,7 @@ TEST_F(CallObjectMethodShortByNameTest, object_call_method_by_name_short_008)
     const ani_short value1 = 1;
     const ani_char value2 = 'A';
     const ani_double value3 = 1.0;
-    ASSERT_EQ(env_->Object_CallMethodByName_Short(obj, "calculateSum", "SCD:S", &sum, value1, value2, value3), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short(obj, "calculateSum", "scd:s", &sum, value1, value2, value3), ANI_OK);
     ASSERT_EQ(sum, VAL2 - value1);
 
     const ani_char value4 = 'B';
@@ -320,22 +320,22 @@ TEST_F(CallObjectMethodShortByNameTest, object_call_method_by_name_short_008)
     args[0U].s = value1;
     args[1U].c = value4;
     args[2U].d = value3;
-    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(obj, "calculateSum", "SCD:S", &sum, args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(obj, "calculateSum", "scd:s", &sum, args), ANI_OK);
     ASSERT_EQ(sum, value1);
 
     const ani_double value5 = 2U;
-    ASSERT_EQ(env_->Object_CallMethodByName_Short(obj, "calculateSum", "SCD:S", &sum, value1, value4, value5), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short(obj, "calculateSum", "scd:s", &sum, value1, value4, value5), ANI_OK);
     ASSERT_EQ(sum, VAL2 + value1);
 }
 
 TEST_F(CallObjectMethodShortByNameTest, object_call_method_by_name_short_009)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_short_test/B;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_short_test.B", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "S:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "s:", &method), ANI_OK);
 
     ani_object obj {};
     const ani_short arg = 15;
@@ -344,37 +344,37 @@ TEST_F(CallObjectMethodShortByNameTest, object_call_method_by_name_short_009)
     ani_short sum {};
     const ani_short value1 = 5;
     const ani_short value2 = 6;
-    ASSERT_EQ(env_->Object_CallMethodByName_Short(obj, "shortMethod", "SS:S", &sum, value1, value2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short(obj, "shortMethod", "ss:s", &sum, value1, value2), ANI_OK);
     ASSERT_EQ(sum, arg);
 
     const ani_short value3 = 7;
-    ASSERT_EQ(env_->Object_CallMethodByName_Short(obj, "shortMethod", "SS:S", &sum, value1, value3), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short(obj, "shortMethod", "ss:s", &sum, value1, value3), ANI_OK);
     ASSERT_EQ(sum, arg);
 
     const ani_short value4 = 3;
     ani_value args[2U];
     args[0U].s = value1;
     args[1U].s = value4;
-    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(obj, "shortMethod", "SS:S", &sum, args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(obj, "shortMethod", "ss:s", &sum, args), ANI_OK);
     ASSERT_EQ(sum, arg);
 
     const ani_short value5 = 10;
-    ASSERT_EQ(env_->Object_CallMethodByName_Short(obj, "shortMethod", "SS:S", &sum, value1, value5), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short(obj, "shortMethod", "ss:s", &sum, value1, value5), ANI_OK);
     ASSERT_EQ(sum, value1 + value5);
 
     const ani_short value6 = 12;
-    ASSERT_EQ(env_->Object_CallMethodByName_Short(obj, "shortMethod", "SS:S", &sum, value1, value6), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short(obj, "shortMethod", "ss:s", &sum, value1, value6), ANI_OK);
     ASSERT_EQ(sum, value1 + value6);
 }
 
 TEST_F(CallObjectMethodShortByNameTest, object_call_method_by_name_short_010)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_short_test/C;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_short_test.C", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "S:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "s:", &method), ANI_OK);
 
     ani_object obj {};
     const ani_short arg = 10;
@@ -382,12 +382,12 @@ TEST_F(CallObjectMethodShortByNameTest, object_call_method_by_name_short_010)
 
     ani_short sum {};
     const ani_short value = 2;
-    ASSERT_EQ(env_->Object_CallMethodByName_Short(obj, "jf", "S:S", &sum, value), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short(obj, "jf", "s:s", &sum, value), ANI_OK);
     ASSERT_EQ(sum, arg + value);
 
     ani_value args[1U];
     args[0U].s = value;
-    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(obj, "jf", "S:S", &sum, args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(obj, "jf", "s:s", &sum, args), ANI_OK);
     ASSERT_EQ(sum, arg + value);
 }
 
@@ -402,18 +402,18 @@ TEST_F(CallObjectMethodShortByNameTest, object_call_method_by_name_short_011)
     ani_value args1[2U];
     args1[0U].s = value1;
     args1[1U].s = value2;
-    ASSERT_EQ(env_->Object_CallMethodByName_Short(obj, "shortByNameMethod", "SS:S", &sum, value1, value2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short(obj, "shortByNameMethod", "ss:s", &sum, value1, value2), ANI_OK);
     ASSERT_EQ(sum, value1 + value2);
-    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(obj, "shortByNameMethod", "SS:S", &sum, args1), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(obj, "shortByNameMethod", "ss:s", &sum, args1), ANI_OK);
     ASSERT_EQ(sum, value1 + value2);
 
     const ani_short value3 = std::numeric_limits<ani_short>::min();
     ani_value args2[2U];
     args2[0U].s = value3;
     args2[1U].s = value2;
-    ASSERT_EQ(env_->Object_CallMethodByName_Short(obj, "shortByNameMethod", "SS:S", &sum, value3, value2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short(obj, "shortByNameMethod", "ss:s", &sum, value3, value2), ANI_OK);
     ASSERT_EQ(sum, value3 + value2);
-    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(obj, "shortByNameMethod", "SS:S", &sum, args2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(obj, "shortByNameMethod", "ss:s", &sum, args2), ANI_OK);
     ASSERT_EQ(sum, value3 + value2);
 }
 
@@ -428,25 +428,25 @@ TEST_F(CallObjectMethodShortByNameTest, object_call_method_by_name_short_012)
 
     ani_short res {};
     ASSERT_EQ(
-        env_->c_api->Object_CallMethodByName_Short(nullptr, object, "shortByNameMethod", "SS:S", &res, VAL1, VAL2),
+        env_->c_api->Object_CallMethodByName_Short(nullptr, object, "shortByNameMethod", "ss:s", &res, VAL1, VAL2),
         ANI_INVALID_ARGS);
-    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Short_A(nullptr, object, "shortByNameMethod", "SS:S", &res, args),
+    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Short_A(nullptr, object, "shortByNameMethod", "ss:s", &res, args),
               ANI_INVALID_ARGS);
 
-    ASSERT_EQ(env_->Object_CallMethodByName_Short(nullptr, "shortByNameMethod", "SS:S", &res, VAL1, VAL2),
+    ASSERT_EQ(env_->Object_CallMethodByName_Short(nullptr, "shortByNameMethod", "ss:s", &res, VAL1, VAL2),
               ANI_INVALID_ARGS);
-    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(nullptr, "shortByNameMethod", "SS:S", &res, args),
+    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(nullptr, "shortByNameMethod", "ss:s", &res, args),
               ANI_INVALID_ARGS);
 
-    ASSERT_EQ(env_->Object_CallMethodByName_Short(object, nullptr, "SS:S", &res, VAL1, VAL2), ANI_INVALID_ARGS);
-    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(object, nullptr, "SS:S", &res, args), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short(object, nullptr, "ss:s", &res, VAL1, VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(object, nullptr, "ss:s", &res, args), ANI_INVALID_ARGS);
 
     ASSERT_EQ(env_->Object_CallMethodByName_Short(object, "shortByNameMethod", nullptr, &res, VAL1, VAL2), ANI_OK);
     ASSERT_EQ(env_->Object_CallMethodByName_Short_A(object, "shortByNameMethod", nullptr, &res, args), ANI_OK);
 
-    ASSERT_EQ(env_->Object_CallMethodByName_Short(object, "shortByNameMethod", "SS:S", nullptr, VAL1, VAL2),
+    ASSERT_EQ(env_->Object_CallMethodByName_Short(object, "shortByNameMethod", "ss:s", nullptr, VAL1, VAL2),
               ANI_INVALID_ARGS);
-    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(object, "shortByNameMethod", "SS:S", nullptr, args),
+    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(object, "shortByNameMethod", "ss:s", nullptr, args),
               ANI_INVALID_ARGS);
 }
 
@@ -463,9 +463,9 @@ TEST_F(CallObjectMethodShortByNameTest, object_call_method_by_name_short_013)
     const std::array<std::string_view, 4U> invalidMethodNames = {{"", "测试emoji🙂🙂", "\n\r\t", "\x01\x02\x03"}};
 
     for (const auto &methodName : invalidMethodNames) {
-        ASSERT_EQ(env_->Object_CallMethodByName_Short(object, methodName.data(), "SS:S", &res, VAL1, VAL2),
+        ASSERT_EQ(env_->Object_CallMethodByName_Short(object, methodName.data(), "ss:s", &res, VAL1, VAL2),
                   ANI_NOT_FOUND);
-        ASSERT_EQ(env_->Object_CallMethodByName_Short_A(object, methodName.data(), "SS:S", &res, args), ANI_NOT_FOUND);
+        ASSERT_EQ(env_->Object_CallMethodByName_Short_A(object, methodName.data(), "ss:s", &res, args), ANI_NOT_FOUND);
     }
 }
 

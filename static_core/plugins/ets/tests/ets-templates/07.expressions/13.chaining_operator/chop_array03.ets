@@ -20,5 +20,5 @@ tags: [compile-only, negative]
 
 function main(): void {
   let users: string[] | null = null;
-  assertEQ(users?.[0], undefined);
+  arktest.assertEQ(users?.[0], undefined);
 }

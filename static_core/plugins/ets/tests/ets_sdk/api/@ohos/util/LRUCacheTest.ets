@@ -19,7 +19,7 @@ const success = 0
 const fail = 1
 
 function main(): int {
-    const suite = new ArkTestsuite("LRUCache API tests")
+    const suite = new arktest.ArkTestsuite("LRUCache API tests")
 
     suite.addTest("LRUCache Constructor No Parameter", testLRUCacheConstructorNoParameter);
     suite.addTest("LRUCache Constructor Int", testLRUCacheConstructorInt);
@@ -55,24 +55,24 @@ function testLRUCacheUpdateGetCapacityInt() {
     let that = new util.LRUCache<number, number>();
     that.updateCapacity(10);
     let res1: number = that.getCapacity();
-    assertEQ(res1, 10);
+    arktest.assertEQ(res1, 10);
     that.updateCapacity(2147483646);
     let res2: number = that.getCapacity();
-    assertEQ(res2, 2147483646);
+    arktest.assertEQ(res2, 2147483646);
 }
 
 function testLRUCacheUpdateGetCapacityDotZero() {
     let that = new util.LRUCache<number, number>(20);
     that.updateCapacity(10.0);
     let res: number = that.getCapacity();
-    assertEQ(res, 10);
+    arktest.assertEQ(res, 10);
 }
 
 function testLRUCacheGetInt() {
     let that = new util.LRUCache<number, number>();
     that.put(1,2);
     let res = that.get(1);
-    assertEQ(res, 2);
+    arktest.assertEQ(res, 2);
 }
 
 function testLRUCacheGetStrAndUndefined() {
@@ -83,9 +83,9 @@ function testLRUCacheGetStrAndUndefined() {
     let res1 = that.get(20)
     let res2 = that.get('abcd')
     let res3 = that.get(2)
-    assertEQ(res1, undefined);
-    assertEQ(res2, 15);
-    assertEQ(res3, 10);
+    arktest.assertEQ(res1, undefined);
+    arktest.assertEQ(res2, 15);
+    arktest.assertEQ(res3, 10);
 }
 
 function testLRUCacheGetCapacityChenged() {
@@ -96,23 +96,23 @@ function testLRUCacheGetCapacityChenged() {
     that.put('abcd',15)
     let res1 = that.get('1111')
     let res2 = that.get('abcd')
-    assertEQ(res1, undefined);
-    assertEQ(res2, 15);
+    arktest.assertEQ(res1, undefined);
+    arktest.assertEQ(res2, 15);
 }
 
 function testLRUCachePutOnce() {
     let that = new util.LRUCache<string|number, string|number>();
     that.put('1111', 'bcjdshc');
     let res1 = that.get('1111');
-    assertEQ(res1, 'bcjdshc');
+    arktest.assertEQ(res1, 'bcjdshc');
 }
 
 function testLRUCachePutTwice() {
     let that = new util.LRUCache<string|number, string|number>();
     let temp = that.put('1111', 'bcjdshc');
     let temp2 = that.put('1111', 22);
-    assertEQ(temp, undefined);
-    assertEQ(temp2, 'bcjdshc');
+    arktest.assertEQ(temp, undefined);
+    arktest.assertEQ(temp2, 'bcjdshc');
 }
 
 function testLRUCachePutAndGet() {
@@ -125,11 +125,11 @@ function testLRUCachePutAndGet() {
     let temp3 = that.put(2,30);
     let res1 = that.get(1);
     let res2 = that.get(2);
-    assertEQ(temp, 12);
-    assertEQ(temp2, 5);
-    assertEQ(temp3, 22);
-    assertEQ(res1, 10);
-    assertEQ(res2, 30);
+    arktest.assertEQ(temp, 12);
+    arktest.assertEQ(temp2, 5);
+    arktest.assertEQ(temp3, 22);
+    arktest.assertEQ(res1, 10);
+    arktest.assertEQ(res2, 30);
 }
 
 function testLRUCachePutCapacityChenged() {
@@ -141,7 +141,7 @@ function testLRUCachePutCapacityChenged() {
     that.put(2,'adasfdad');
     that.put(3,'a');
     let res1 = that.get(1);
-    assertEQ(res1, undefined);
+    arktest.assertEQ(res1, undefined);
 }
 
 function testLRUCacheClearOne() {
@@ -150,8 +150,8 @@ function testLRUCacheClearOne() {
     let result1 = that.length;
     that.clear();
     let result2 = that.length;
-    assertEQ(result1, 1);
-    assertEQ(result2, 0);
+    arktest.assertEQ(result1, 1);
+    arktest.assertEQ(result2, 0);
 }
 
 function testLRUCacheClearMulti() {
@@ -164,22 +164,22 @@ function testLRUCacheClearMulti() {
     let result1 = that.length;
     that.clear();
     let result2 = that.length;
-    assertEQ(result1, 3);
-    assertEQ(result2, 0);
+    arktest.assertEQ(result1, 3);
+    arktest.assertEQ(result2, 0);
 }
 
 function testLRUCacheContainsTrue() {
     let that = new util.LRUCache<number, number>();
     that.put(1,2);
     let result1 = that.contains(1);
-    assertEQ(result1, true);
+    arktest.assertEQ(result1, true);
 }
 
 function testLRUCacheContainsFalse() {
     let that = new util.LRUCache<string|number, string|number>();
     that.put('abc','abc');
     let result1 = that.contains(1);
-    assertEQ(result1, false);
+    arktest.assertEQ(result1, false);
 }
 
 function testLRUCacheContainsMixed() {
@@ -189,16 +189,16 @@ function testLRUCacheContainsMixed() {
     let result1 = that.contains(1)
     let result2 = that.contains('string')
     let result3 = that.contains(0)
-    assertEQ(result1, true);
-    assertEQ(result2, true);
-    assertEQ(result3, false);
+    arktest.assertEQ(result1, true);
+    arktest.assertEQ(result2, true);
+    arktest.assertEQ(result3, false);
 }
 
 function testLRUCacheRemoveOnce() {
     let that = new util.LRUCache<string|number, string|number>();
     that.put(1,2);
     let res1 = that.remove(1);
-    assertEQ(res1, 2);
+    arktest.assertEQ(res1, 2);
 }
 
 function testLRUCacheRemoveTwice() {
@@ -207,8 +207,8 @@ function testLRUCacheRemoveTwice() {
     that.put('abcd',20);
     let res1 = that.remove(1);
     let res2 = that.remove('abcd');
-    assertEQ(res1, 2);
-    assertEQ(res2, 20);
+    arktest.assertEQ(res1, 2);
+    arktest.assertEQ(res2, 20);
 }
 
 function testLRUCacheRemoveUndefined() {
@@ -216,8 +216,8 @@ function testLRUCacheRemoveUndefined() {
     that.put(1,2);
     let res1 = that.remove(1);
     let res2 = that.remove(5);
-    assertEQ(res1, 2);
-    assertEQ(res2, undefined);
+    arktest.assertEQ(res1, 2);
+    arktest.assertEQ(res2, undefined);
 }
 
 function testLRUCacheRemoveAndGet() {
@@ -228,9 +228,9 @@ function testLRUCacheRemoveAndGet() {
     let res1 = that.remove(3);
     let res2 = that.get(3);
     let res3 = that.remove(3);
-    assertEQ(res1, 10);
-    assertEQ(res2, undefined);
-    assertEQ(res3, undefined);
+    arktest.assertEQ(res1, 10);
+    arktest.assertEQ(res2, undefined);
+    arktest.assertEQ(res3, undefined);
 }
 
 function testLRUCacheToStringPut() {
@@ -238,7 +238,7 @@ function testLRUCacheToStringPut() {
     that.put('1111','bcjdshc')
     that.put(1,2)
     let result = that.toString();
-    assertEQ(result, 'LRUCache[ maxSize = 64, hits = 0, misses = 0, hitRate = 0% ]');
+    arktest.assertEQ(result, 'LRUCache[ maxSize = 64, hits = 0, misses = 0, hitRate = 0% ]');
 }
 
 function testLRUCacheToStringHitAll() {
@@ -248,7 +248,7 @@ function testLRUCacheToStringHitAll() {
     that.get(1);
     that.get('1111');
     let result = that.toString();
-    assertEQ(result, 'LRUCache[ maxSize = 64, hits = 2, misses = 0, hitRate = 100% ]');
+    arktest.assertEQ(result, 'LRUCache[ maxSize = 64, hits = 2, misses = 0, hitRate = 100% ]');
 }
 
 function testLRUCacheToStringHitOnce() {
@@ -259,7 +259,7 @@ function testLRUCacheToStringHitOnce() {
     that.put('abc',20)
     that.get(3)
     let result = that.toString();
-    assertEQ(result, 'LRUCache[ maxSize = 100, hits = 1, misses = 0, hitRate = 100% ]');
+    arktest.assertEQ(result, 'LRUCache[ maxSize = 100, hits = 1, misses = 0, hitRate = 100% ]');
 }
 
 function testLRUCacheToStringHitAndMiss() {
@@ -271,7 +271,7 @@ function testLRUCacheToStringHitAndMiss() {
     that.get(3)
     that.get(2);
     let result = that.toString();
-    assertEQ(result, 'LRUCache[ maxSize = 64, hits = 1, misses = 1, hitRate = 50% ]');
+    arktest.assertEQ(result, 'LRUCache[ maxSize = 64, hits = 1, misses = 1, hitRate = 50% ]');
 }
 
 function testLRUCacheToStringMixed() {
@@ -285,23 +285,23 @@ function testLRUCacheToStringMixed() {
     that.get(1);
     that.contains(5);
     let result = that.toString();
-    assertEQ(result, 'LRUCache[ maxSize = 123456, hits = 3, misses = 1, hitRate = 75% ]');
+    arktest.assertEQ(result, 'LRUCache[ maxSize = 123456, hits = 3, misses = 1, hitRate = 75% ]');
 }
 
 function testLRUCacheConstructorNoParameter() {
     let that = new util.LRUCache<number, number>();
     let res: number = that.getCapacity();
-    assertEQ(res, 64);
+    arktest.assertEQ(res, 64);
 }
 
 function testLRUCacheConstructorInt() {
     let that = new util.LRUCache<number, number>(2147483646);
     let res: number = that.getCapacity();
-    assertEQ(res, 2147483646);
+    arktest.assertEQ(res, 2147483646);
 }
 
 function testLRUCacheConstructorDotZero() {
     let that = new util.LRUCache<number, number>(21.0);
     let res: number = that.getCapacity();
-    assertEQ(res, 21);
+    arktest.assertEQ(res, 21);
 }

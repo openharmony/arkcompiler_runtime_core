@@ -24,6 +24,6 @@ type MyNumber = byte | undefined;
 
 function main(): void {
     let t: MyNumber;
-    assertTrue( t === undefined)
+    arktest.assertTrue( t === undefined)
 
 }

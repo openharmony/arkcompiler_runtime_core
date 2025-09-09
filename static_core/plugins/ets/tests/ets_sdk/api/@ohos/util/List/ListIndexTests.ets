@@ -14,13 +14,19 @@
  */
 
 import { List } from '@ohos.util.List';
+import {BusinessError} from "@ohos.base";
+
+const OutOfBoundsErrorCodeId: int = 10200001;
 
 function main() {
-    const suite = new ArkTestsuite("List API tests");
+    const suite = new arktest.ArkTestsuite("List API tests");
 
     suite.addTest("List index getter", testIndexGetter);
     suite.addTest("List index setter", testIndexSetter);
     suite.addTest("List index out of range", testIndexOutOfRange);
+    suite.addTest("List index input negative", testIndexInputNegative);
+    suite.addTest("List empty getter out of range", testEmptyGetterOutOfRange);
+    suite.addTest("List getter out of range", testGetterOutOfRange);
 
     return suite.run();
 }
@@ -28,43 +34,81 @@ function main() {
 const testNumbers: Number[] = [45, 89, 12, 1, 34, 90, 56, 78, 23, 5, 81, 60,
     19, 41, 73, 9, 50, 38, 6, 77, 28];
 
-function initializeList(list: List<number>, sourceArray: Number[]) {
-    for (let i = 0; i < sourceArray.length; i++) {
+function initializeList(list: List<double>, sourceArray: Number[]) {
+    for (let i: int = 0; i < sourceArray.length; i++) {
         list.add(sourceArray[i]);
     }
 }
 
 function testIndexGetter() {
-    let list = new List<number>();
+    let list = new List<double>();
     initializeList(list, testNumbers);
     for (let i: int = 0; i < list.length; i++) {
-        assertEQ(list[i], testNumbers[i], `Element at index ${i} should match`);
+        arktest.assertEQ(list[i], testNumbers[i], `Element at index ${i} should match`);
     }
 }
 
 function testIndexSetter() {
-    let list = new List<number>();
+    let list = new List<double>();
     initializeList(list, testNumbers);
-    for (let i: number = 0; i < list.length; i++) {
+    for (let i: int = 0; i < list.length; i++) {
         list[i] = 5;
     }
     let forEachCount = 0;
-    list.forEach((value: number) => {
-        assertEQ(value, 5, `Element should match`);
+    list.forEach((value: double) => {
+        arktest.assertEQ(value, 5, `Element should match`);
         forEachCount++;
     });
-    assertEQ(list.length, forEachCount, "List length should match forEach count");
+    arktest.assertEQ(list.length, forEachCount, "List length should match forEach count");
 }
 
 function testIndexOutOfRange() {
-    let list = new List<number>();
+    let list = new List<double>();
     initializeList(list, testNumbers);
-    let result = list[testNumbers.length + 1];
-    assertEQ(result, undefined, "The result should be undefined");
-    
+
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof RangeError) && ((e as RangeError).message ==
-            `The value of index is out of range.`)
+        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
+            "The value of \"index\" is out of range. It must be >= 0 && <= 20. Received value is: 22") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    expectThrow(() => {list[testNumbers.length + 1] = 1}, exceptionCheck);
+    arktest.expectThrow(() => {list[testNumbers.length.toInt() + 1] = 1}, exceptionCheck);
+}
+
+function testIndexInputNegative() {
+    let list = new List<double>();
+    arktest.expectNoThrow(() => {list[-1] = 1});
+
+    list.add(1);
+    arktest.expectNoThrow(() => {list[-1] = 1});
+}
+
+function testEmptyGetterOutOfRange() {
+    let list = new List<double>();
+
+    checkOutsideRangeError(list, -1);
+    checkOutsideRangeError(list, 10000);
+}
+
+function testGetterOutOfRange() {
+    let list = new List<double>();
+    initializeList(list, testNumbers);
+
+    arktest.assertEQ(list[1], testNumbers[1], `Element at index 0 should match`)
+    checkOutsideRangeError(list, -1);
+    checkOutsideRangeError(list, 10000);
+}
+
+function checkOutsideRangeError(list: List<double>, index: int) {
+    let errMsg = `The value of \"index\" is out of range. It must be >= 0 && <= ${list.length - 1}. Received value is: ${index}`;
+    let errCode = 10200001;
+    if (index > Int.MAX_VALUE) {
+        errMsg = `The type of \"index\" must be small integer.`
+        errCode = 401;
+    }
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') &&
+            ((e as BusinessError).message == errMsg) &&
+            ((e as BusinessError).code == errCode);
+    }
+    arktest.expectThrow((): void => { list[index] }, exceptionCheck)
 }

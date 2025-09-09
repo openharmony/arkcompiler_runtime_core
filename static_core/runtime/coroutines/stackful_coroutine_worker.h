@@ -24,6 +24,8 @@
 #include "runtime/coroutines/priority_queue.h"
 #include "runtime/include/external_callback_poster.h"
 
+#include "runtime/coroutines/stackful_coroutine_state_info.h"
+
 namespace ark {
 
 class StackfulCoroutineContext;
@@ -47,7 +49,7 @@ public:
      * @param type defines the schedule loop type for this worker: a separate thread or a coroutine ("FIBER")
      */
     StackfulCoroutineWorker(Runtime *runtime, PandaVM *vm, StackfulCoroutineManager *coroManager, ScheduleLoopType type,
-                            PandaString name, size_t id);
+                            PandaString name, Id id, bool isMainWorker);
     ~StackfulCoroutineWorker() override = default;
 
     /// @return false if the worker is stopped and does not schedule anything, otherwise true
@@ -69,26 +71,6 @@ public:
     double GetLoadFactor() const
     {
         return loadFactor_;
-    }
-
-    PandaString GetName() const
-    {
-        return name_;
-    }
-
-    void SetName(PandaString name)
-    {
-        name_ = std::move(name);
-    }
-
-    size_t GetId() const
-    {
-        return id_;
-    }
-
-    bool IsMainWorker() const
-    {
-        return id_ == stackful_coroutines::MAIN_WORKER_ID;
     }
 
     void DisableForCrossWorkersLaunch()
@@ -161,6 +143,12 @@ public:
 
     /// @brief Migrate all not affinned coroutines from worker
     void MigrateCoroutines() {}
+
+    /**
+     * @brief Method prints in info next information about coroutine worker:
+     *  - list of coroutine stacks on this worker
+     */
+    void GetFullWorkerStateInfo(StackfulCoroutineWorkerStateInfo *info) const;
 
 #ifndef NDEBUG
     void PrintRunnables(const PandaString &requester);
@@ -267,9 +255,12 @@ private:
     bool IsPotentiallyBlocked();
     void MigrateCoroutinesImpl(StackfulCoroutineWorker *to, size_t migrateCount) REQUIRES(runnablesLock_);
 
-    /// called when the coroutineContext is switched
-    void OnContextSwitch();
+    /// called right before the coroutineContext is switched
+    void OnBeforeContextSwitch(StackfulCoroutineContext *from, StackfulCoroutineContext *to);
+    /// called right after the coroutineContext is switched (in case if no migration happened)
+    void OnAfterContextSwitch(StackfulCoroutineContext *to);
 
+private:  // data members
     StackfulCoroutineManager *coroManager_;
     Coroutine *scheduleLoopCtx_ = nullptr;
     bool active_ GUARDED_BY(runnablesLock_) = true;
@@ -309,11 +300,8 @@ private:
     // stats
     CoroutineWorkerStats stats_;
 
-    PandaString name_;
-    stackful_coroutines::WorkerId id_ = stackful_coroutines::INVALID_WORKER_ID;
-
     // the maximum continuous execution time of a coroutine
-    static constexpr uint32_t MAX_EXECUTION_DURATION = 6000;
+    static constexpr uint32_t MAX_EXECUTION_DURATION_MS = 6000;
 };
 
 }  // namespace ark

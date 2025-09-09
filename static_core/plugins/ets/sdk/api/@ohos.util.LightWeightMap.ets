@@ -13,13 +13,28 @@
  * limitations under the License.
  */
 
+import { BusinessError } from "@ohos.base";
+
+const TypeErrorCodeId: int = 401;
+const OutOfBoundsErrorCodeId: int = 10200001;
+
+function createBusinessError(code: int, message: string) {
+    let err = new BusinessError();
+    err.code = code;
+    err.name = 'BusinessError';
+    err.message = message;
+    return err;
+}
+
+export type LightWeightMapCbFn<K, V> = (value: V, key: K, map: LightWeightMap<K, V>) => void;
+
 interface ReadonlyLightWeightMap<K, V> extends Iterable<[K, V]> {
     /**
      * Returns number of Entries with unique keys in the LightWeightMap
      *
      * @returns number of Entries with unique keys in the LightWeightMap
      */
-    get length(): number;
+    get length(): int;
 
     /**
      * Returns a value associated with key if present
@@ -74,7 +89,7 @@ class LightWeightMapEntry<K, V> {
         this.entryValues = new Array<V>(this.capacity);
     }
 
-    set(index: number, hash: int, key: K, value: V): void {
+    set(index: int, hash: int, key: K, value: V): void {
         this.insert<int>(this.entryHashs, index, hash);
         this.insert<K>(this.entryKeys, index, key);
         this.insert<V>(this.entryValues, index, value);
@@ -97,7 +112,7 @@ class LightWeightMapEntry<K, V> {
         }
     }
 
-    remove(index: number): void {
+    remove(index: int): void {
         this.entryHashs.splice(index, 1);
         this.entryKeys.splice(index, 1);
         this.entryValues.splice(index, 1);
@@ -112,8 +127,8 @@ class LightWeightMapEntry<K, V> {
         this.entryValues = new Array<V>(this.capacity);
     }
 
-    private insert<T>(a: Array<T>, index: number, value: T): void {
-        for (let i: number = this.actualLength; i > index; i--) {
+    private insert<T>(a: Array<T>, index: int, value: T): void {
+        for (let i: int = this.actualLength; i > index; i--) {
             a[i] = a[i - 1];
         }
         a[index] = value;
@@ -127,7 +142,7 @@ class LightWeightMapEntry<K, V> {
         return newArray;
     }
 
-    private remove<T>(array: Array<T>, index: number): Array<T> {
+    private remove<T>(array: Array<T>, index: int): Array<T> {
         const len = this.actualLength;
         for (let i = index; i < len; i++) {
             if ((i + 1) === len) {
@@ -177,8 +192,8 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
      *
      * @returns number of Entries with unique keys in the LightWeightMap
      */
-    get length(): number {
-        return this.buckets.actualLength.toDouble();
+    get length(): int {
+        return this.buckets.actualLength;
     }
 
     /**
@@ -201,7 +216,7 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
      *
      * @param callbackFn to apply
      */
-    forEach(callbackFn: (value: V, key: K, map: LightWeightMap<K, V>) => void): void {
+    forEach(callbackFn: LightWeightMapCbFn<K, V>): void {
         const iter = this.entries();
         let res = iter.next();
         while (!res.done) {
@@ -254,7 +269,7 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
      *
      * @returns the index of the key, or -1 if the key is not found
      */
-    getIndexOfKey(key: K): number {
+    getIndexOfKey(key: K): int {
         const index = this.checkIndexOfKey(key);
         return index < 0 ? -1 : index;
     }
@@ -266,8 +281,8 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
      *
      * @returns the index of the value, or -1 if the value is not found
      */
-    getIndexOfValue(value: V): number {
-        return this.buckets.entryValues.indexOf(value) as number;
+    getIndexOfValue(value: V): int {
+        return this.buckets.entryValues.indexOf(value).toInt();
     }
 
     /**
@@ -276,11 +291,14 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
      * @param index the index to get the key from
      *
      * @returns the key at the specified index
+     * 
+     * @throws BusinessError if the index is out of range, the container is empty or the index exceeds Int.MAX_VALUE.
      */
-    getKeyAt(index: number): K | undefined {
-        if (index > Int.MAX_VALUE || index < 0 || this.buckets.actualLength <= index) {
-            throw new RangeError("The value of index is out of range.");
-        }
+    getKeyAt(index: int): K {
+        this.checkIndex(index);
+        this.checkEmptyContainer();
+        this.checkRange(index, this.buckets.actualLength);
+
         return this.buckets.entryKeys[index];
     }
 
@@ -290,11 +308,13 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
      * @param index the index to get the value from
      *
      * @returns the value at the specified index
+     * 
+     * @throws BusinessError if the index is out of range, the container is empty or the index exceeds Int.MAX_VALUE.
      */
-    getValueAt(index: number): V | undefined {
-        if (index > Int.MAX_VALUE || index < 0 || this.buckets.actualLength <= index) {
-            throw new RangeError("The value of index is out of range.");
-        }
+    getValueAt(index: int): V {
+        this.checkEmptyContainer();
+        this.checkRange(index, this.buckets.actualLength);
+
         return this.buckets.entryValues[index];
     }
 
@@ -309,7 +329,7 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
         if (map.length > this.buckets.actualLength) {
             return false;
         }
-        for (let index: number = 0; index < map.length; index++) {
+        for (let index: int = 0; index < map.length; index++) {
             const key = map.getKeyAt(index)!;
             if (!this.hasKey(key)) {
                 return false;
@@ -351,11 +371,11 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
      *
      * @param minimumCapacity the minimum capacity to increase to
      */
-    increaseCapacityTo(minimumCapacity: number): void {
+    increaseCapacityTo(minimumCapacity: int): void {
         if (minimumCapacity > Int.MAX_VALUE) {
             return;
         }
-        this.buckets.increaseCapacityTo(minimumCapacity.toInt());
+        this.buckets.increaseCapacityTo(minimumCapacity);
     }
 
     /**
@@ -390,9 +410,11 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
      * @param index the index to remove the entry from
      *
      * @returns true if the entry was removed, false otherwise
+     * 
+     * @throws BusinessError if the index exceeds Int.MAX_VALUE.
      */
-    removeAt(index: number): boolean {
-        if (index < 0 || this.buckets.actualLength <= (index.toInt())) {
+    removeAt(index: int): boolean {
+        if (index < 0 || this.buckets.actualLength <= index) {
             return false;
         }
         this.buckets.remove(index);
@@ -437,12 +459,14 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
      * @param index the index to set the value at
      * @param newValue the new value to set at the specified index
      *
-     * @returns true if the value was set, false otherwise
+     * @returns true if the value was set
+     * 
+     * @throws BusinessError if the index is out of range, the container is empty or the index exceeds Int.MAX_VALUE.
      */
-    setValueAt(index: number, newValue: V): boolean {
-        if (index < 0 || index >= this.buckets.actualLength) {
-            throw new RangeError("The value of index is out of range.");
-        }
+    setValueAt(index: int, newValue: V): boolean {
+        this.checkEmptyContainer();
+        this.checkRange(index, this.buckets.actualLength.toInt());
+
         this.buckets.entryValues[index] = newValue;
         return true;
     }
@@ -467,21 +491,21 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
         this.buckets.clear();
     }
 
-    private checkIndexOfKey(key: K): number {
+    private checkIndexOfKey(key: K): int {
         const hashCode = this.hash(key);
         const index = this.binarySearchHashes(this.buckets.entryHashs, hashCode, this.buckets.actualLength);
         if (index >= 0) {
             let right = index;
             while ((right < this.buckets.actualLength) && (this.buckets.entryHashs[right] === hashCode)) {
                 if (this.buckets.entryKeys[right] === key) {
-                    return right.toDouble();
+                    return right;
                 }
                 right++;
             }
             let left = index - 1;
             while ((left > 0) && (this.buckets.entryHashs[right] === hashCode)) {
                 if (this.buckets.entryKeys[left] === key) {
-                    return left.toDouble();
+                    return left;
                 }
                 left--;
             }
@@ -498,7 +522,7 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
             return 1;
         }
 
-        const keyHash: int = (key! as object).$_hashCode(); // #26217
+        const keyHash: int = Runtime.getHashCodeByValue(key! as object).toInt(); // #26217
         const positiveMask: int = 1 << LightWeightMap.SHIFT_COUNT;
         if (keyHash >= 0) {
             return (keyHash | positiveMask)
@@ -522,5 +546,24 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
             }
         }
         return -(low + 1);
+    }
+
+    private checkIndex(index: int): void {
+        if (index > Int.MAX_VALUE) {
+            throw createBusinessError(TypeErrorCodeId,
+                `The type of "index" must be small integer. Received value is: ${index}`)
+        }
+    }
+
+    private checkRange(index: int, length: int): void {
+        if (index < 0 || index >= this.buckets.actualLength) {
+            throw createBusinessError(OutOfBoundsErrorCodeId, `The value of \"index\" is out of range. It must be >= 0 && <= ${this.buckets.actualLength - 1}. Received value is: ${index}`);
+        }
+    }
+
+    private checkEmptyContainer(): void {
+        if(this.isEmpty()) {
+            throw createBusinessError(OutOfBoundsErrorCodeId, `Container is empty`);
+        }
     }
 }

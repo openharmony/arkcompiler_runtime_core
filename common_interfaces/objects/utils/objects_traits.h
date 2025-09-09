@@ -13,11 +13,21 @@
  * limitations under the License.
  */
 
+// NOLINTBEGIN(readability-identifier-naming, cppcoreguidelines-macro-usage,
+//             cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
+//             readability-else-after-return, readability-duplicate-include,
+//             misc-non-private-member-variables-in-classes, cppcoreguidelines-pro-type-member-init,
+//             google-explicit-constructor, cppcoreguidelines-pro-type-union-access,
+//             modernize-use-auto, llvm-namespace-comment,
+//             cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
+//             readability-implicit-bool-conversion)
+
 #ifndef COMMON_INTERFACES_OBJECTS_TRAITS_H
 #define COMMON_INTERFACES_OBJECTS_TRAITS_H
 
-#include "common_interfaces/objects/base_object.h"
+#include "objects/base_object.h"
 #include <type_traits>
+#include <vector>
 
 namespace common::objects_traits {
 
@@ -39,7 +49,7 @@ constexpr bool is_read_barrier_callable_v =
 // Allocator: U (size_t, CommonType)
 template <typename F, typename U>
 constexpr bool is_allocate_callable_v =
-    is_heap_object_v<U> && std::is_invocable_r_v<U, F, size_t, CommonType>;
+    is_heap_object_v<U> && std::is_invocable_r_v<U, F, size_t, ObjectType>;
 
 // ---- enable_if_is_* traits ----
 template <typename F>
@@ -76,3 +86,11 @@ using vector_with_same_alloc_t =
 
 
 #endif //COMMON_INTERFACES_OBJECTS_TRAITS_H
+// NOLINTEND(readability-identifier-naming, cppcoreguidelines-macro-usage,
+//           cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
+//           readability-else-after-return, readability-duplicate-include,
+//           misc-non-private-member-variables-in-classes, cppcoreguidelines-pro-type-member-init,
+//           google-explicit-constructor, cppcoreguidelines-pro-type-union-access,
+//           modernize-use-auto, llvm-namespace-comment,
+//           cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
+//           readability-implicit-bool-conversion)

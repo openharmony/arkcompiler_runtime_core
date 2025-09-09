@@ -47,7 +47,7 @@ isa.each { |isa_title|
   }
 }
 
-dyn_opcodes = File.open("../include/c/isa/isa_dynamic.h").read.split()
+dyn_opcodes = File.open("../include/libabckit/c/isa/isa_dynamic.h").read.split()
   .select{ |str|
     str.start_with?("ABCKIT_ISA_API_DYNAMIC_OPCODE_")
   }.map!{ |str|

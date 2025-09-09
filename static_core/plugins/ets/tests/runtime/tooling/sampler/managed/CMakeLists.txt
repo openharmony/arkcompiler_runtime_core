@@ -56,9 +56,10 @@ add_custom_target(sampler_es2panda
     DEPENDS ${es2panda_target}
 )
 
-set(ETS_ENTRY_POINT "main")
-if (CMAKE_BUILD_TYPE STREQUAL "Release")
-    set(ETS_ENTRY_POINT "release_main")
+# In order to make sure that the test passes in CI, we need to make more iterations in non-debug builds
+set(ETS_ENTRY_POINT "releaseMain")
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(ETS_ENTRY_POINT "debugMain")
 endif()
 
 # NOTE(kurnevichstanislav): fix SIGSEGV in sampler tests with TaskManager (#14278)

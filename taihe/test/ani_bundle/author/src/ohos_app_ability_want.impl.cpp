@@ -12,11 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include "ohos_app_ability_want.proj.hpp"
 #include "ohos_app_ability_want.impl.hpp"
-#include "taihe/runtime.hpp"
+#include "ohos_app_ability_want.proj.hpp"
 #include "stdexcept"
+#include "taihe/runtime.hpp"
 
 using namespace taihe;
 using namespace ohos_app_ability_want;

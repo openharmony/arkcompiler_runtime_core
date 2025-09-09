@@ -16,7 +16,7 @@
 import {Queue} from "@ohos.util.Queue";
 
 function main() {
-    const suite = new ArkTestsuite("Queue API tests");
+    const suite = new arktest.ArkTestsuite("Queue API tests");
 
     suite.addTest("Queue forEach with no parameter function", testQueueForEachNoParam);
     suite.addTest("Queue forEach with function with value", testQueueForEachWithValue);
@@ -33,60 +33,60 @@ function main() {
 }
 
 class TestData {
-    static readonly testNumber1: number = 1;
-    static readonly testNumber3: number = 3;
-    static readonly testNumber6: number = 6;
+    static readonly testNumber1: double | int = 1;
+    static readonly testNumber3: double | int = 3;
+    static readonly testNumber6: double | int = 6;
     static readonly forNumber: Number[] = [17, 3, 22, 8, 29, 11, 5, 19, 2, 26, 14, 7, 28, 10, 1, 24, 16, 13,
         21, 6, 27, 18, 4, 25, 12, 23, 9, 15, 20, 30];
 }
 
 function testQueueForEachNoParam() {
-    let queue = new Queue<number>();
+    let queue = new Queue<double>();
     initializeQueue(queue, TestData.forNumber);
-    let forEachCount: number = 0;
+    let forEachCount: int = 0;
     queue.forEach(() => {
         forEachCount++;
     });
-    assertEQ(forEachCount, TestData.forNumber.length, "ForEach count should match queue length");
+    arktest.assertEQ(forEachCount, TestData.forNumber.length, "ForEach count should match queue length");
 }
 
 function testQueueForEachWithValue() {
-    let queue = new Queue<number>();
+    let queue = new Queue<double>();
     initializeQueue(queue, TestData.forNumber);
-    let forEachCount: number = 0;
-    let forEachFlag: number = 0;
-    queue.forEach((value: number) => {
+    let forEachCount: int = 0;
+    let forEachFlag: double = 0;
+    queue.forEach((value: double) => {
         if (value != queue.pop()) {
             forEachFlag = TestData.testNumber1;
         }
         forEachCount++;
     });
-    assertEQ(forEachFlag, 0, "ForEach should iterate and modify elements correctly");
-    assertEQ(forEachCount, TestData.forNumber.length, "ForEach count should match queue length");
+    arktest.assertEQ(forEachFlag, 0, "ForEach should iterate and modify elements correctly");
+    arktest.assertEQ(forEachCount, TestData.forNumber.length, "ForEach count should match queue length");
 }
 
 function testQueueForEachWithValueAndIndex() {
-    let queue = new Queue<number>();
+    let queue = new Queue<double>();
     initializeQueue(queue, TestData.forNumber);
-    let forEachCount: number = 0;
-    let forEachFlag: number = 0;
-    queue.forEach((value: number, index: number) => {
+    let forEachCount: int = 0;
+    let forEachFlag: double = 0;
+    queue.forEach((value: double, index: int) => {
         if (value != queue.pop() || index != forEachCount) {
             forEachFlag = TestData.testNumber1;
         }
         forEachCount++;
     });
-    assertEQ(forEachFlag, 0, "ForEach should iterate and modify elements correctly");
-    assertEQ(forEachCount, TestData.forNumber.length, "ForEach count should match queue length");
+    arktest.assertEQ(forEachFlag, 0, "ForEach should iterate and modify elements correctly");
+    arktest.assertEQ(forEachCount, TestData.forNumber.length, "ForEach count should match queue length");
 }
 
 function testQueueForEachWithAllParams() {
-    let queue = new Queue<number>();
+    let queue = new Queue<double>();
     initializeQueue(queue, TestData.forNumber);
-    let forEachCount: number = 0;
-    let forEachFlag: number = 0;
-    queue.forEach((value: number, index: number, tempQueue: Queue<number>) => {
-        assertEQ(queue, tempQueue, "TempQueue should be this");
+    let forEachCount: int = 0;
+    let forEachFlag: double = 0;
+    queue.forEach((value: double, index: int, tempQueue: Queue<double>) => {
+        arktest.assertEQ(queue, tempQueue, "TempQueue should be this");
         let elem1 = tempQueue.getFirst();
         let elem2 = queue.pop();
         if (value != elem2 || index != forEachCount || elem1 != elem2) {
@@ -94,90 +94,90 @@ function testQueueForEachWithAllParams() {
         }
         forEachCount++;
     });
-    assertEQ(forEachFlag, 0, "ForEach should iterate and modify elements correctly");
-    assertEQ(forEachCount, TestData.forNumber.length, "ForEach count should match queue length");
+    arktest.assertEQ(forEachFlag, 0, "ForEach should iterate and modify elements correctly");
+    arktest.assertEQ(forEachCount, TestData.forNumber.length, "ForEach count should match queue length");
 }
 
 function testQueueForEachChangeElements() {
-    let queue = new Queue<number>();
+    let queue = new Queue<double>();
     initializeQueue(queue, TestData.forNumber);
 
-    queue.forEach((value: number) => {
+    queue.forEach((value: double) => {
         value = 0;
     });
     for (let i: int = 0; i < TestData.forNumber.length; i++) {
-        assertEQ(queue.pop(), TestData.forNumber[i], "ForEach should keep all elements the same");
+        arktest.assertEQ(queue.pop(), TestData.forNumber[i], "ForEach should keep all elements the same");
     }
 }
 
 function testQueueGetFirstEmpty() {
-    let queue = new Queue<number>();
-    assertEQ(queue.length, 0, "Initial queue length should be 0");
-    assertEQ(queue.getFirst(), undefined, "Get first from empty queue should return undefined");
+    let queue = new Queue<double>();
+    arktest.assertEQ(queue.length, 0, "Initial queue length should be 0");
+    arktest.assertEQ(queue.getFirst(), undefined, "Get first from empty queue should return undefined");
 }
 
 function testQueueGetFirst() {
-    let queue = new Queue<number>();
+    let queue = new Queue<double>();
     queue.add(TestData.testNumber1);
-    for (let i: number = TestData.testNumber1; i < TestData.testNumber6; i++) {
+    for (let i: int = TestData.testNumber1; i < TestData.testNumber6; i++) {
         queue.add(TestData.testNumber3);
     }
-    assertEQ(queue.length, TestData.testNumber6, "Queue length should be 6 after inserting six elements");
-    assertEQ(queue.getFirst(), TestData.testNumber1, "Get first from non-empty queue should return first element");
+    arktest.assertEQ(queue.length, TestData.testNumber6, "Queue length should be 6 after inserting six elements");
+    arktest.assertEQ(queue.getFirst(), TestData.testNumber1, "Get first from non-empty queue should return first element");
 }
 
 function testQueueIteratorEmpty() {
-    let queue = new Queue<number>();
-    let elem: number = 0;
+    let queue = new Queue<double>();
+    let elem: double = 0;
     for (let item of queue) {
         elem = TestData.testNumber1;
     }
     let iter = queue.$_iterator();
-    let temp: IteratorResult<number> = iter.next();
+    let temp: IteratorResult<double> = iter.next();
     while (!temp.done) {
         elem = TestData.testNumber1;
     }
-    assertEQ(elem, 0, "Iterator over empty queue should not iterate any elements");
+    arktest.assertEQ(elem, 0, "Iterator over empty queue should not iterate any elements");
 }
 
 function testQueueIterator() {
-    let queue = new Queue<number>();
-    for (let i: number = TestData.testNumber1; i < TestData.testNumber6; i++) {
+    let queue = new Queue<double>();
+    for (let i: int = TestData.testNumber1; i < TestData.testNumber6; i++) {
         queue.add(i);
     }
-    let elem1: number = TestData.testNumber1;
+    let elem1: int = TestData.testNumber1;
     for (let item of queue) {
-        assertEQ(item, elem1++, "Iterator should iterate elements in correct order");
+        arktest.assertEQ(item, elem1++, "Iterator should iterate elements in correct order");
     }
-    assertEQ(elem1, TestData.testNumber6, "Iterator should iterate all elements correctly");
+    arktest.assertEQ(elem1, TestData.testNumber6, "Iterator should iterate all elements correctly");
     let iter = queue.$_iterator();
-    let temp: IteratorResult<number> = iter.next();
-    let elem2: number = TestData.testNumber1;
+    let temp: IteratorResult<double> = iter.next();
+    let elem2: int = TestData.testNumber1;
     while (!temp.done) {
-        assertEQ(temp.value, elem2++, "Iterator should iterate elements in correct order");
+        arktest.assertEQ(temp.value, elem2++, "Iterator should iterate elements in correct order");
         temp = iter.next();
     }
-    assertEQ(elem2, TestData.testNumber6, "Iterator should iterate all elements correctly");
+    arktest.assertEQ(elem2, TestData.testNumber6, "Iterator should iterate all elements correctly");
 }
 
 function testQueueInterfaceComposition() {
-    let queue = new Queue<number>();
+    let queue = new Queue<double>();
     queue.add(TestData.testNumber3);
-    assertEQ(queue.length, TestData.testNumber1, "Queue length should be 1 after inserting one element");
+    arktest.assertEQ(queue.length, TestData.testNumber1, "Queue length should be 1 after inserting one element");
 
     initializeQueue(queue, TestData.forNumber);
 
-    assertEQ(queue.getFirst(), queue.pop(), "Pop from Queue should return first element");
+    arktest.assertEQ(queue.getFirst(), queue.pop(), "Pop from Queue should return first element");
 
-    let forEachCount: number = 0;
+    let forEachCount: int = 0;
     queue.forEach(() => {
         forEachCount++;
     });
-    assertEQ(forEachCount, TestData.forNumber.length, "ForEach count should match Queue length");
+    arktest.assertEQ(forEachCount, TestData.forNumber.length, "ForEach count should match Queue length");
 }
 
 function initializeQueue<T>(queue: Queue<T>, sourceArray: T[]) {
-    for (let i = 0; i < sourceArray.length; i++) {
+    for (let i: int = 0; i < sourceArray.length; i++) {
         queue.add(sourceArray[i]);
     }
 }

@@ -23,7 +23,7 @@
 
 #include <cstdint>
 #include <iomanip>
-#include <charconv>
+#include <cstdlib>
 
 #include "get_language_specific_metadata.inc"
 
@@ -289,7 +289,7 @@ void Disassembler::Serialize(const pandasm::Function &method, std::ostream &os, 
         std::ostringstream insSs;
 
         std::string ins = method.ins[i].ToString("", method.GetParamsNum() != 0, method.regsNum);
-        if (method.ins[i].setLabel) {
+        if (method.ins[i].HasLabel()) {
             insSs << ins.substr(0, ins.find(": ")) << ":\n";
             ins.erase(0, ins.find(": ") + std::string(": ").length());
         }
@@ -310,7 +310,7 @@ void Disassembler::Serialize(const pandasm::Function &method, std::ostream &os, 
 
         if (lineTable != nullptr) {
             lineTable->emplace_back(
-                panda_file::LineTableEntry {static_cast<uint32_t>(method.ins[i].insDebug.boundLeft), lineNumber - 1});
+                panda_file::LineTableEntry {static_cast<uint32_t>(method.ins[i].insDebug.BoundLeft()), lineNumber - 1});
         }
 
         os << insSsStr;
@@ -730,9 +730,9 @@ LabelTable Disassembler::GetExceptions(pandasm::Function *method, panda_file::Fi
                 return false;
             }
 
-            method->catchBlocks.push_back(catchBlockPa);
-            catchBlockPa.catchBeginLabel = "";
-            catchBlockPa.catchEndLabel = "";
+            method->catchBlocks.emplace_back(catchBlockPa);
+            catchBlockPa.catchBeginLabel.clear();
+            catchBlockPa.catchEndLabel.clear();
             catchIdx++;
 
             return true;
@@ -1252,9 +1252,14 @@ std::string Disassembler::GetMethodSignature(const panda_file::File::EntityId &m
 std::string Disassembler::GetFullRecordName(const panda_file::File::EntityId &classId) const
 {
     std::string name = StringDataToString(file_->GetStringData(classId));
-
+    if (name.empty()) {
+        LOG(FATAL, DISASSEMBLER) << "Record name is empty";
+    }
     auto type = pandasm::Type::FromDescriptor(name);
-    type = pandasm::Type(type.GetComponentName(), type.GetRank());
+    if (type.GetName().empty()) {
+        LOG(FATAL, DISASSEMBLER) << "Type name is empty";
+    }
+    type = pandasm::Type(type.GetNameWithoutRank(), type.GetRank());
 
     return type.GetPandasmName();
 }
@@ -1590,9 +1595,8 @@ void Disassembler::DumpLiteralArray(const pandasm::LiteralArray &literalArray, s
                 std::string offsetStr = std::get<std::string>(item.value);
                 const int hexBase = 16;
                 const char *begin = offsetStr.data();
-                const char *end = &(*offsetStr.end());
                 uint32_t litArrayOffset = 0;
-                std::from_chars(begin, end, litArrayOffset, hexBase);
+                litArrayOffset = strtoul(begin, nullptr, hexBase);
                 pandasm::LiteralArray litArray;
                 GetLiteralArrayByOffset(&litArray, panda_file::File::EntityId(litArrayOffset));
                 DumpLiteralArray(litArray, ss);
@@ -1626,7 +1630,7 @@ void Disassembler::SerializeFieldValue(const pandasm::Field &f, std::stringstrea
     } else if (f.type.GetRank() > 0) {
         uint32_t litArrayOffset = 0;
         auto value = f.metadata->GetValue().value().GetValue<std::string>();
-        std::from_chars(value.data(), &(*value.end()), litArrayOffset);
+        litArrayOffset = strtoul(value.data(), nullptr, 0);
         pandasm::LiteralArray litArray;
         GetLiteralArrayByOffset(&litArray, panda_file::File::EntityId(litArrayOffset));
         ss << " = ";
@@ -1933,7 +1937,7 @@ static void TranslateImmToLabel(pandasm::Ins *paIns, LabelTable *labelTable, con
                                 BytecodeInstruction bcIns, BytecodeInstruction bcInsLast,
                                 panda_file::File::EntityId codeId)
 {
-    const int32_t jmpOffset = std::get<int64_t>(paIns->imms.at(0));
+    const int32_t jmpOffset = paIns->GetImm<int64_t>(0U);
     const auto bcInsDest = bcIns.JumpTo(jmpOffset);
     if (bcInsLast.GetAddress() > bcInsDest.GetAddress()) {
         size_t idx = GetBytecodeInstructionNumber(BytecodeInstruction(insArr), bcInsDest);
@@ -1944,8 +1948,8 @@ static void TranslateImmToLabel(pandasm::Ins *paIns, LabelTable *labelTable, con
                 (*labelTable)[idx] = ss.str();
             }
 
-            paIns->imms.clear();
-            paIns->ids.push_back(labelTable->at(idx));
+            paIns->ClearImm();
+            paIns->EmplaceID(labelTable->at(idx));
         } else {
             LOG(ERROR, DISASSEMBLER) << "> error encountered at " << codeId << " (0x" << std::hex << codeId
                                      << "). incorrect instruction at offset: 0x" << (bcIns.GetAddress() - insArr)
@@ -2019,8 +2023,8 @@ IdList Disassembler::GetInstructions(pandasm::Function *method, panda_file::File
         }
 
         auto paIns = BytecodeInstructionToPandasmInstruction(bcIns, methodId);
-        paIns.insDebug.boundLeft =
-            bcIns.GetAddress() - from;  // It is used to produce a line table during method serialization
+        paIns.insDebug.SetBoundLeft(bcIns.GetAddress() -
+                                    from);  // It is used to produce a line table during method serialization
         if (paIns.IsJump()) {
             TranslateImmToLabel(&paIns, &labelTable, insArr, bcIns, bcInsLast, codeId);
         }
@@ -2042,13 +2046,12 @@ IdList Disassembler::GetInstructions(pandasm::Function *method, panda_file::File
             }
         }
 
-        method->ins.push_back(paIns);
+        method->ins.emplace_back(std::move(paIns));
         bcIns = bcIns.GetNext();
     }
 
     for (const auto &pair : labelTable) {
-        method->ins[pair.first].label = pair.second;
-        method->ins[pair.first].setLabel = true;
+        method->ins[pair.first].SetLabel(pair.second);
     }
 
     return unknownExternalMethods;

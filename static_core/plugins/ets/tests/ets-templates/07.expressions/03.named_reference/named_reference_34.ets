@@ -22,9 +22,9 @@ let count = 10;
 function testBlockScope(): void {
   if (true) {
     let count = 20;
-    assertEQ(count, 20);
+    arktest.assertEQ(count, 20);
   }
-  assertEQ(count, 10);
+  arktest.assertEQ(count, 10);
 }
 
 function main(): void {

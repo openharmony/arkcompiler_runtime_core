@@ -214,6 +214,18 @@ intrinsics:
     llvm_codegen_func: EmitDoubleToStringDecimal
     need_param_locations: true
 
+  - name: CompilerEtsNullcheck
+    space: ets
+    compiler_only: true
+    static: true
+    signature:
+      ret: void
+      args: [ ref ]
+    impl: ark::ets::intrinsics::CompilerEtsNullcheck
+    set_flags: [ no_nullptr ]
+    clear_flags: [ ]
+    peephole_func: PeepholeNullcheck
+
   - name: CompilerEtsStringFromCharCodeSingle
     space: ets
     compiler_only: true

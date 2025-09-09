@@ -17,9 +17,9 @@ namespace ops {
 function sub(c0: char, c1: char): char {
     let c: Char = new Char(c'0');
     if (c0 > c1) {
-        c = c0 - c1 as char;
+        c = (c0 - c1).toChar();
     } else {
-        c = c1 - c0 as char;
+        c = (c1 - c0).toChar();
     }
     return c as char;
 }

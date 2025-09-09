@@ -14,11 +14,16 @@
  */
 
 
-function main() {
+function testMain() {
     let buf = new ArrayBuffer(4);
     let arr = new Int32Array(buf, 0, 1);
 
     let x = Atomics.notify(arr, 0)
-    assertEQ(x, 0)
+    arktest.assertEQ(x, 0)
 }
 
+function main() {
+    const suite = new arktest.ArkTestsuite('Function Atomics nonconcurrent_notify_zero tests')
+    suite.addTest('Function testMain', testMain)
+    return suite.run()
+}

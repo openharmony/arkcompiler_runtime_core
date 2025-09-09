@@ -23,5 +23,5 @@ import {ColorSet} from './named_reference_export11.ets';
 
 function main(): void {
   let a: number = ColorSet.Green;
-  assertEQ(a, 1);
+  arktest.assertEQ(a, 1);
 }

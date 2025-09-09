@@ -17,6 +17,7 @@
 desc: ArrayIndexOutOfBoundsError is thrown by an array access expression
   if the array index expression has a value that is negative, or greater
   than, or equal to the length of the array.
+tags:
 ---*/
 
 function main(): int {

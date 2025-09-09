@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include "libabckit/include/c/abckit.h"
+#include "libabckit/c/abckit.h"
 
-#include "libabckit/include/c/statuses.h"
+#include "libabckit/c/statuses.h"
 #include "libabckit/src/macros.h"
 #include "libabckit/src/helpers_common.h"
 #include "libabckit/src/statuses_impl.h"

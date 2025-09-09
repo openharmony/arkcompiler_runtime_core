@@ -52,6 +52,14 @@ public:
     {
     }
 
+#if defined(ARK_HYBRID)
+    void MarkFromObject(napi_ref obj, const common::RefFieldVisitor &visitor) override
+    {
+        values_->markFromObjectCalled = true;
+        XGCVmAdaptor::MarkFromObject(obj, visitor);
+    }
+#endif
+
     void MarkFromObject(napi_ref obj) override
     {
         values_->markFromObjectCalled = true;

@@ -34,5 +34,5 @@ function main(): void {
     }
     a++;
   }
-  assertEQ( a, 5 );
+  arktest.assertEQ( a, 5 );
 }

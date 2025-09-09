@@ -21,8 +21,6 @@ Grammar Summary
 
     identifier: Identifier;
 
-    indexType: 'number';
-
     type:
         annotationUsage?
         ( typeReference
@@ -39,7 +37,6 @@ Grammar Summary
 
     typeReference:
         typeReferencePart ('.' typeReferencePart)*
-        |  identifier '!'
         ;
 
     typeReferencePart:
@@ -189,6 +186,11 @@ Grammar Summary
     typeArguments:
         '<' type (',' type)* '>'
         ;
+
+    overloadFunctionDeclaration:
+        'overload' identifier '{' qualifiedName (',' qualifiedName)* ','? '}'
+        ;
+
 
     expression:
         primaryExpression
@@ -428,7 +430,7 @@ Grammar Summary
         ;
 
     lambdaExpression:
-        annotationUsage? ('async'|typeParameters)? lambdaSignature '=>' lambdaBody
+        annotationUsage? 'async'? lambdaSignature '=>' lambdaBody
         ;
 
     lambdaBody:
@@ -437,7 +439,7 @@ Grammar Summary
 
     lambdaSignature:
         '(' lambdaParameterList? ')' returnType?
-        | identifier    
+        | identifier
         ;
 
     lambdaParameterList:
@@ -446,7 +448,7 @@ Grammar Summary
         ;
 
     lambdaParameter:
-        annotationUsage? (lambdaRequiredParameter | lambdaOptionalParameter)    
+        annotationUsage? (lambdaRequiredParameter | lambdaOptionalParameter)
         ;
 
     lambdaRequiredParameter:
@@ -577,19 +579,11 @@ Grammar Summary
         ;
 
     tryStatement:
-          'try' block catchClauses finallyClause?
-          ;
-
-    catchClauses:
-          typedCatchClause* catchClause?
+          'try' block catchClause? finallyClause?
           ;
 
     catchClause:
           'catch' '(' identifier ')' block
-          ;
-
-    typedCatchClause:
-          'catch' '(' identifier ':' typeReference ')' block
           ;
 
     finallyClause:
@@ -598,7 +592,8 @@ Grammar Summary
 
     classDeclaration:
         classModifier? ('class' | 'struct') identifier typeParameters?
-          classExtendsClause? implementsClause? classBody
+          classExtendsClause? implementsClause?
+          classMembers
         ;
 
     classModifier:
@@ -617,31 +612,37 @@ Grammar Summary
         typeReference (',' typeReference)*
         ;
 
-    classBody:
+    classMembers:
         '{'
-           classBodyDeclaration* globalInitializer? classBodyDeclaration*
+           classMember* staticBlock? classMember*
         '}'
         ;
 
-    classBodyDeclaration:
+    classMember:
         annotationUsage?
         accessModifier?
         ( constructorDeclaration
+        | overloadConstructorDeclaration
         | classFieldDeclaration
         | classMethodDeclaration
+        | overloadMethodDeclaration
         | classAccessorDeclaration
         )
         ;
 
+
+    staticBlock:
+        'static' block
+          ;
+
     accessModifier:
         'private'
-        | 'internal'
         | 'protected'
         | 'public'
         ;
 
     classFieldDeclaration:
-        fieldModifier* 
+        fieldModifier*
         identifier
         ( '?'? ':' type initializer?
         | '?'? initializer
@@ -666,6 +667,14 @@ Grammar Summary
         | 'async'
         ;
 
+    overloadMethodDeclaration:
+        overloadMethodModifier*
+        'overload' identifier '{' identifier (',' identifier)* ','? '}'
+        ;
+
+    overloadMethodModifier: 'static' | 'async';
+
+
     classAccessorDeclaration:
         accessorModifier*
         ( 'get' identifier '(' ')' returnType block?
@@ -684,10 +693,14 @@ Grammar Summary
         'constructor' parameters constructorBody
         ;
 
-
     constructorBody:
         '{' statement* '}'
         ;
+
+    overloadConstructorDeclaration:
+        'overload' 'constructor' '{' identifier (',' identifier)* ','? '}'
+        ;
+
 
     interfaceDeclaration:
         'interface' identifier typeParameters?
@@ -698,10 +711,11 @@ Grammar Summary
         'extends' interfaceTypeList
         ;
 
-    interfaceMember:
-        annotationUsage?
+    interfaceMember
+        : annotationUsage?
         ( interfaceProperty
         | interfaceMethodDeclaration
+        | overloadInterfaceMethodDeclaration
         )
         ;
 
@@ -714,6 +728,10 @@ Grammar Summary
     interfaceMethodDeclaration:
         identifier signature
         | interfaceDefaultMethodDeclaration
+        ;
+
+    overloadInterfaceMethodDeclaration:
+        'overload' identifier '{' identifier (',' identifier)* ','? '}'
         ;
 
     enumDeclaration:
@@ -729,17 +747,17 @@ Grammar Summary
         ;
 
     compilationUnit:
-        separateModuleDeclaration
-        | packageDeclaration
+        moduleDeclaration
         | declarationModule
+        | libraryDescription
         ;
 
-    packageDeclaration:
-        packageModule+
-        ;
-
-    separateModuleDeclaration:
+    moduleDeclaration:
         importDirective* (topDeclaration | topLevelStatements | exportDirective)*
+        ;
+
+    libraryDescription:
+        (importDirective|reExportDirective)*
         ;
 
     importDirective:
@@ -792,6 +810,7 @@ Grammar Summary
         | variableDeclarations
         | constantDeclarations
         | functionDeclaration
+        | overloadFunctionDeclaration
         | functionWithReceiverDeclaration
         | accessorWithReceiverDeclaration
         | namespaceDeclaration
@@ -801,7 +820,12 @@ Grammar Summary
         ;
 
     namespaceDeclaration:
-        'namespace' qualifiedName '{' topDeclaration* '}'
+        'namespace' qualifiedName
+        '{' namespaceMember* staticBlock? namespaceMember* '}'
+        ;
+
+    namespaceMember:
+        topDeclaration | exportDirective
         ;
 
     exportDirective:
@@ -817,7 +841,7 @@ Grammar Summary
 
     singleExportDirective:
         'export'
-        ( identifier 
+        ( identifier
         | 'default' (expression | identifier)
         | '{' identifier 'as' 'default' '}'
         )
@@ -828,9 +852,9 @@ Grammar Summary
         ;
 
     reExportDirective:
-        'export' 
-        ('*' bindingAlias? 
-        | selectiveBindings 
+        'export'
+        ('*' bindingAlias?
+        | selectiveBindings
         | '{' 'default' bindingAlias? '}'
         )
         'from' importPath
@@ -872,10 +896,10 @@ Grammar Summary
     ambientClassDeclaration:
         'class'|'struct' identifier typeParameters?
         classExtendsClause? implementsClause?
-        '{' ambientClassBodyDeclaration* '}'
+        '{' ambientClassMember* '}'
         ;
 
-    ambientClassBodyDeclaration:
+    ambientClassMember:
         ambientAccessModifier?
         ( ambientFieldDeclaration
         | ambientConstructorDeclaration
@@ -900,7 +924,7 @@ Grammar Summary
         ;
 
     ambientConstructorDeclaration:
-        'constructor' parameters 
+        'constructor' parameters
         ;
 
     ambientMethodDeclaration:
@@ -919,7 +943,7 @@ Grammar Summary
         ;
 
     ambientIndexerDeclaration:
-        'readonly'? '[' identifier ':' indexType ']' returnType
+        'readonly'? '[' identifier ':' type ']' returnType
         ;
 
     ambientCallSignatureDeclaration:
@@ -936,13 +960,18 @@ Grammar Summary
         '{' ambientInterfaceMember* '}'
         ;
 
+
     ambientInterfaceMember
         : interfaceProperty
-        | interfaceMethodDeclaration
+        | ambientInterfaceMethodDeclaration
         | ambientIndexerDeclaration
-        | ambientCallSignatureDeclaration
         | ambientIterableDeclaration
         ;
+
+    ambientInterfaceMethodDeclaration:
+        'default'? identifier signature
+        ;
+
 
     ambientNamespaceDeclaration:
         'namespace' qualifiedName '{' ambientNamespaceElement* '}'
@@ -990,7 +1019,7 @@ Grammar Summary
         ;
 
     signatureWithReceiver:
-        '(' receiverParameter (', ' parameterList)? ')' returnType? 
+        '(' receiverParameter (', ' parameterList)? ')' returnType?
         ;
 
     receiverParameter:
@@ -1007,7 +1036,8 @@ Grammar Summary
         ;
 
     lambdaExpressionWithReceiver:
-        annotationUsage? typeParameters? '(' receiverParameter (',' lambdaParameterList)? ')'
+        annotationUsage?
+        '(' receiverParameter (',' lambdaParameterList)? ')'
         returnType? '=>' lambdaBody
         ;
 
@@ -1024,47 +1054,6 @@ Grammar Summary
       awaitExpression:
         'await' expression
         ;
-
-      packageModule:
-          packageHeader packageModuleDeclaration
-          ;
-
-      packageHeader:
-          'package' qualifiedName
-          ;
-
-
-    packageModuleDeclaration:
-        importDirective* packageModuleDeclaration*
-        ;
-
-    packageModuleDeclaration:
-        packageTopDeclaration | initializerBlock
-        ;
-
-    packageTopDeclaration:
-        ('export' 'default'?)?
-        annotationUsage?
-        ( typeDeclaration
-        | variableDeclarations
-        | packageConstantDeclarations
-        | functionDeclaration
-        | functionWithReceiverDeclaration
-        | accessorWithReceiverDeclaration
-        | namespaceDeclaration
-        | ambientDeclaration
-        )
-        ;
-
-    packageConstantDeclaration:
-        identifier ':' type initializer?
-        | identifier initializer
-        ;
-
-
-      initializerBlock:
-          'static' block
-          ;
 
     annotationDeclaration:
         '@interface' identifier '{' annotationField* '}'
@@ -1299,23 +1288,23 @@ Grammar Summary
         ~["'\\\r\n] ('*'|'+'|'?'|('{' DecimalIntegerLiteral (',' DecimalIntegerLiteral? )? '}'))?
         ;
 
-    RegexSpecialForms:   
-        CharacterClass ('(' '?='|'?!' CharacterClasse ')')? 
+    RegexSpecialForms:
+        CharacterClass ('(' '?='|'?!' CharacterClasse ')')?
         ('(' '?<='|'?<!' CharacterClasse ')') CharacterClass
         ;
 
-    CharacterClass: 
+    CharacterClass:
         '[' '^'? '\b'? (RegexCharacter | (RegexCharacter '-' RegexCharacter) '\B'?)+ '\b'? ']'
         | '.'
         | '\' ('d' | 'D' | 'w' | 'W' | 's' | 'S' | 't' | 'r' | 'n' | 'v' | 'f' | '0' | 'c' ['A'-'Z'] | 'x' DecimalDigit DecimalDigit | DecimalIntegerLiteral | 'k<' Identifier '>')
-        | 'u' HexDigit HexDigit HexDigit HexDigit 
+        | 'u' HexDigit HexDigit HexDigit HexDigit
         | 'u{' HexDigit HexDigit HexDigit HexDigit HexDigit? '}'
-        | '[\b]' 
+        | '[\b]'
         | (RegexCharacter '|' RegexCharacter)
         ;
 
     RegExFlags:
-        'g'? 'i'? 'm'? 's'? 'u'? 'v'? 'y'? 
+        'g'? 'i'? 'm'? 's'? 'u'? 'v'? 'y'?
         ;
 
 

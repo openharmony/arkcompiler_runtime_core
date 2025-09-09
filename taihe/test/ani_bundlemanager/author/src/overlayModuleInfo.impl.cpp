@@ -12,10 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "overlayModuleInfo.proj.hpp"
 #include "overlayModuleInfo.impl.hpp"
-#include "taihe/runtime.hpp"
+#include "overlayModuleInfo.proj.hpp"
 #include "stdexcept"
+#include "taihe/runtime.hpp"
 
 using namespace taihe;
 using namespace overlayModuleInfo;
@@ -26,6 +26,7 @@ namespace {
 class OverlayModuleInfoImpl {
 public:
     int32_t overlayModuleInfoImpl = 21474;
+
     OverlayModuleInfoImpl() {}
 
     string GetBundleName()

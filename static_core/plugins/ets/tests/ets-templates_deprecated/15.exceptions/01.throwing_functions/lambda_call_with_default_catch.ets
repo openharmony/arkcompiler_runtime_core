@@ -15,15 +15,15 @@
 
 /*---
 desc: Throwing function call if a call of a throwing function is not enclosed in a try statement;.
-assert: Exception propagation occurs in two cases. If a call of a throwing function is not enclosed in a try statement; If the enclosed try statement does not contain a clause that catches the raised exception.
+assert: Error propagation occurs in two cases. If a call of a throwing function is not enclosed in a try statement; If the enclosed try statement does not contain a clause that catches the raised error.
 ---*/
 
-class TestException extends Exception {}
+class TestError extends Error {}
 type func = (x: int) => int throws;
 
 function main(): void {
   let i: int = 1;
-  let bar: func = (x: int): int throws => { throw new TestException(); return 5; };
+  let bar: func = (x: int): int throws => { throw new TestError(); return 5; };
 
   try {
     bar(2);
@@ -32,5 +32,5 @@ function main(): void {
     i = 5;
   }
 
-  assertEQ( i, 5 );
+  arktest.assertEQ( i, 5 );
 }

@@ -22,6 +22,7 @@
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/types/ets_string.h"
+#include "plugins/ets/runtime/types/ets_map.h"
 #include "plugins/ets/runtime/ets_stubs.h"
 
 namespace ark::ets::intrinsics {
@@ -43,26 +44,38 @@ EtsInt StdCoreRuntimeGetHashCode(EtsObject *source)
     return bit_cast<EtsInt>(source->GetHashCode());
 }
 
-static char const *ReferenceTypeString(EtsCoroutine *coro, EtsObject *obj)
+EtsLong StdRuntimeGetHashCodeByValue(EtsObject *source)
 {
-    ASSERT(coro != nullptr);
+    return static_cast<EtsLong>(EtsEscompatMap::GetHashCode(source));
+}
+
+static char const *ReferenceTypeString(EtsObject *obj)
+{
     if (obj == nullptr) {
         return "undefined";
-    }
-    ASSERT(coro != nullptr);
-    if (obj == EtsObject::FromCoreType(coro->GetNullValue())) {
-        return "null";
     }
     return obj->GetClass()->GetDescriptor();
 }
 
-ObjectHeader *StdCoreRuntimeFailedTypeCastException(EtsObject *source, EtsString *target)
+ObjectHeader *StdCoreRuntimeFailedTypeCastException(EtsObject *source, EtsString *target,
+                                                    EtsBoolean isUndefinedInTarget)
 {
     auto coro = EtsCoroutine::GetCurrent();
 
     ASSERT(coro != nullptr);
 
-    auto message = PandaString(ReferenceTypeString(coro, source)) + " cannot be cast to " + target->GetMutf8();
+    auto message = PandaString(ReferenceTypeString(source)) + " cannot be cast to ";
+    if (isUndefinedInTarget != 0U) {
+        if (!ClassHelper::IsUnionDescriptor(target->GetDataMUtf8())) {
+            message += "{U" + target->GetMutf8();
+            message += EtsString::FastSubString(target, 0, target->GetLength() - 1)->GetMutf8();
+        } else {
+            message += EtsString::FastSubString(target, 0, target->GetLength() - 1)->GetMutf8();
+        }
+        message += ",undefined}";
+    } else {
+        message += target->GetMutf8();
+    }
 
     auto *exc =
         ets::SetupEtsException(coro, panda_file_items::class_descriptors::CLASS_CAST_ERROR.data(), message.data());

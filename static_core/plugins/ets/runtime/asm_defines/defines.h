@@ -19,8 +19,12 @@
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_arraybuffer.h"
+#include "plugins/ets/runtime/types/ets_bigint.h"
 #include "plugins/ets/runtime/types/ets_escompat_array.h"
 #include "plugins/ets/runtime/types/ets_typed_arrays.h"
 #include "plugins/ets/runtime/types/ets_typed_unsigned_arrays.h"
+#include "plugins/ets/runtime/types/ets_map.h"
+#include "plugins/ets/runtime/types/ets_set.h"
+#include "plugins/ets/runtime/types/ets_taskpool.h"
 
 #endif  // PLUGINS_ETS_RUNTIME_ASM_DEFINES_DEFINES_H

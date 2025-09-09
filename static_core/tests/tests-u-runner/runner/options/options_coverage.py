@@ -18,7 +18,7 @@
 from functools import cached_property
 from typing import Dict, Optional
 
-from runner.options.decorator_value import value, _to_bool, _to_str, _to_dir
+from runner.options.decorator_value import _to_bool, _to_dir, _to_str, value
 
 
 class CoverageOptions:
@@ -34,6 +34,7 @@ class CoverageOptions:
             "coverage-per-binary": self.coverage_per_binary,
             "llvm-cov-exclude": self.llvm_cov_exclude,
             "lcov-exclude": self.lcov_exclude,
+            "gcov-tool": self.gcov_tool,
         }
 
     @cached_property
@@ -97,6 +98,14 @@ class CoverageOptions:
     def lcov_exclude(self) -> Optional[str]:
         return None
 
+    @cached_property
+    @value(
+        yaml_path="general.coverage.gcov-tool",
+        cli_name="gcov_tool",
+    )
+    def gcov_tool(self) -> Optional[str]:
+        return None
+
     def get_command_line(self) -> str:
         options = [
             '--use-llvm-cov' if self.use_llvm_cov else '',
@@ -116,5 +125,8 @@ class CoverageOptions:
 
             f'--lcov-exclude="{self.lcov_exclude}"'
             if self.lcov_exclude is not None else '',
+
+            f'--gcov-tool="{self.gcov_tool}"'
+            if self.gcov_tool is not None else '',
         ]
         return ' '.join(options)

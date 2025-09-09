@@ -29,7 +29,7 @@ function main(): int {
   try {
       a = { name: "Bob", age: t[5] } as A
   } catch (e: RangeError) {
-      assertTrue( a == null );
+      arktest.assertTrue( a == null );
       return 0;
   }
   return 1;

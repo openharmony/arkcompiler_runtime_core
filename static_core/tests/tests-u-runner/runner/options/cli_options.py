@@ -15,13 +15,13 @@
 # limitations under the License.
 
 import argparse
-from os import path, makedirs
-from typing import Type, Optional, Union, Sequence
+from os import makedirs, path
+from typing import Optional, Sequence, Type, Union
 
-from runner.enum_types.verbose_format import VerboseKind, VerboseFilter
-from runner.reports.report_format import ReportFormat
-from runner.utils import enum_from_str, EnumT
+from runner.enum_types.verbose_format import VerboseFilter, VerboseKind
 from runner.path_utils import is_sudo_user
+from runner.reports.report_format import ReportFormat
+from runner.utils import EnumT, enum_from_str
 
 
 def is_directory(arg: str) -> str:
@@ -529,6 +529,10 @@ def add_coverage_args(parser: argparse.ArgumentParser) -> None:
         '--coverage-per-binary', action='store_true', dest='coverage_per_binary',
         default=None, help='Creates a separate coverage report for each binary running')
 
+    parser.add_argument(
+        '--gcov-tool', dest='gcov_tool', default=None,
+        help='Specify gcov binary name (Needed for lcov --gcov-tool)')
+
 
 def add_declgen_ets2ts_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
@@ -543,6 +547,10 @@ def add_declgen_ets2ts_args(parser: argparse.ArgumentParser) -> None:
         '--declgen-ets2ts-runtime', action='store_true', dest='declgen_ets2ts_runtime',
         default=None,
         help="run declgen_ets2ts ETS runtime tests")
+    parser.add_argument(
+        '--declgen-ets2ts-sdk', action='store_true', dest='declgen_ets2ts_sdk',
+        default=None,
+        help="run declgen_ets2ts ETS sdk")
 
 
 def add_declgen_ts2ets_args(parser: argparse.ArgumentParser) -> None:
@@ -557,15 +565,6 @@ def add_declgen_ets2ets_args(parser: argparse.ArgumentParser) -> None:
         '--declgen-ets2ets', action='store_true', dest='declgen_ets2ets',
         default=None,
         help="run declgen_ets2ets tests")
-
-
-def add_declgen_ets2ets_isolated_args(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument(
-        "--declgen-ets2ets-isolated",
-        action="store_true",
-        dest="declgen_ets2etsisolated",
-        default=None,
-        help="run declgen-ets2ets-isolated tests")
 
 
 def get_args() -> argparse.Namespace:
@@ -589,6 +588,5 @@ def get_args() -> argparse.Namespace:
     add_declgen_ets2ts_args(parser)
     add_declgen_ts2ets_args(parser)
     add_declgen_ets2ets_args(parser)
-    add_declgen_ets2ets_isolated_args(parser)
 
     return parser.parse_args()

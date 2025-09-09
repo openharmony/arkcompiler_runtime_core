@@ -59,8 +59,8 @@ export function TestMapSize(map: Map<string, number>): boolean {
 
 export function TestMapKeys(map: Map<string, number>): boolean {
     let res: boolean = true;
-    map.set('banana', 2);
     map.set('cherry', 3);
+    map.set('banana', 2);
     let keys: string[] = [];
     let mm: Map<string, number> = map as Map<string, number>;
     for (let key of mm.keys()) {
@@ -73,8 +73,8 @@ export function TestMapKeys(map: Map<string, number>): boolean {
 
 export function TestMapValues(map: Map<string, number>): boolean {
     let res: boolean = true;
-    map.set('banana', 2);
     map.set('cherry', 3);
+    map.set('banana', 2);
     let values: number[] = [];
     let mm: Map<string, number> = map as Map<string, number>;
     for (let value of mm.values()) {
@@ -100,8 +100,8 @@ export function TestMapEntries(map: Map<string, number>): boolean {
 
 export function TestMapForEach(map: Map<string, number>): boolean {
     let res: boolean = true;
-    map.set('banana', 2);
     map.set('cherry', 3);
+    map.set('banana', 2);
     let keys: string[] = [];
     let values: number[] = [];
     const processElement = (val: number, key: string, map: Map<string, number>): void => {

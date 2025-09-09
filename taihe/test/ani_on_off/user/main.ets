@@ -190,7 +190,7 @@ function toplevelFuncBOff() {
 }
 
 function main() {
-    const suite = new ArkTestsuite("on off testcase")
+    const suite = new arktest.ArkTestsuite("on off testcase")
 
     suite.addTest("ibase_on", ibase_on)
     suite.addTest("ibase_off", ibase_off)

@@ -32,5 +32,5 @@ const run: (value: int) => int | never = (value: int): int | never => {
 
 function main(): void {
     let ret = run(0)
-    assertEQ(ret, 0)
+    arktest.assertEQ(ret, 0)
 }

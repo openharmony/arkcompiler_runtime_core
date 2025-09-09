@@ -16,9 +16,10 @@
 #
 
 import logging
-from typing import List
+from typing import List, Optional
 from vmb.unit import BenchUnit
 from vmb.platform import PlatformBase
+from vmb.gensettings import GenSettings
 from vmb.target import Target
 from vmb.cli import Args
 
@@ -46,8 +47,10 @@ class Platform(PlatformBase):
         return ['tsc', 'v_8'] if 'ts' in self.langs else ['v_8']
 
     @property
-    def required_hooks(self) -> List[str]:
-        return ['fix_print_call']
+    def template(self) -> Optional[GenSettings]:
+        """Special template because of print  method."""
+        return GenSettings(src=set(), template='', out='',
+                           print_func='console')
 
     @property
     def langs(self) -> List[str]:

@@ -20,7 +20,7 @@ cases:
         type lmbd = () => A|null
         let lambda: lmbd = (): A|null => { return new A() }
       use: |-
-          assertEQ( lambda()?.check(), 1 )
+          arktest.assertEQ( lambda()?.check(), 1 )
           
     - decl: |-
         class A {
@@ -29,7 +29,7 @@ cases:
         type lmbd = () => A|null
         let lambda: lmbd = (): A|null => { return new A() }
       use: |-
-          assertTrue( lambda()?.check() === null )
+          arktest.assertTrue( lambda()?.check() === null )
           
     - decl: |-
         class A {
@@ -38,7 +38,7 @@ cases:
         type lmbd = () => A|null
         let lambda: lmbd = (): A|null => { return null }
       use: |-
-          assertTrue( lambda()?.check() === undefined )
+          arktest.assertTrue( lambda()?.check() === undefined )
           
     - decl: |-
         class A {
@@ -47,4 +47,4 @@ cases:
         type lmbd = () => A|null
         let lambda: lmbd = (): A|null => { return null }
       use: |-
-          assertTrue( lambda()?.check() === undefined )
+          arktest.assertTrue( lambda()?.check() === undefined )

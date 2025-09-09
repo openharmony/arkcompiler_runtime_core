@@ -35,7 +35,7 @@ ohos_source_set("abckit_adapter_dynamic_source_set") {
   ]
 
   include_dirs = [
-    "$ark_root_dynamic",
+    "$ark_root_dynamic/libabckit/include",
     "$abckit_root",
     get_label_info(
         "$abckit_root/wrappers:abckit_isa_gen_ins_create_wrapper_api_inc",
@@ -57,7 +57,7 @@ ohos_source_set("abckit_adapter_dynamic_source_set") {
     ":abckit_adapter_dynamic_header_deps",
     "$abckit_root/src:abckit_concat_intrinsics_yaml",
     "$abckit_root/src/wrappers/graph_wrapper:libabckit_graph_wrapper_source_set",
-    "$ark_root_dynamic/abc2program:abc2program",
+    "$ark_root_dynamic/abc2program:abc2program_frontend_static",
     "$ark_root_dynamic/assembler:libarkassembler",
   ]
 }

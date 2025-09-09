@@ -32,7 +32,7 @@ function main(): void {
             continue
         }
         got++
-        assertEQ( m.invoke(new C(), new NullishType[0]) as Int, 30)
+        arktest.assertEQ( m.invoke(new C(), new NullishType[0]) as Int, 30)
     }
-    assertEQ( got, 1)
+    arktest.assertEQ( got, 1)
 }

@@ -235,15 +235,15 @@ function step5_loop_reserve19() : string {
 }
 
 function main() : int {
-    assertEQ(uncountable_loop_reserve11(), "012", "Wrong result at uncountable_loop_reserve11")
-    assertEQ(uncountable_loop_reserve12(), "012", "Wrong result at uncountable_loop_reserve12")
-    assertEQ(uncountable_loop_reserve13(), "012", "Wrong result at uncountable_loop_reserve13")
-    assertEQ(switch_reserve14(3), "012", "Wrong result at switch_reserve14")
-    assertEQ(switch_reserve15(3), "0120123", "Wrong result at switch_reserve15")
-    assertEQ(reverse_loop_reserve16(), "210", "Wrong result at reverse_loop_reserve16")
-    assertEQ(step2_reverse_loop_reserve17(), "420", "Wrong result at step2_reverse_loop_reserve17")
-    assertEQ(step2_reverse_loop_reserve18(), "531", "Wrong result at step2_reverse_loop_reserve18")
-    assertEQ(step5_loop_reserve19(), "27121722", "Wrong result at step5_loop_reserve19")
+    arktest.assertEQ(uncountable_loop_reserve11(), "012", "Wrong result at uncountable_loop_reserve11")
+    arktest.assertEQ(uncountable_loop_reserve12(), "012", "Wrong result at uncountable_loop_reserve12")
+    arktest.assertEQ(uncountable_loop_reserve13(), "012", "Wrong result at uncountable_loop_reserve13")
+    arktest.assertEQ(switch_reserve14(3), "012", "Wrong result at switch_reserve14")
+    arktest.assertEQ(switch_reserve15(3), "0120123", "Wrong result at switch_reserve15")
+    arktest.assertEQ(reverse_loop_reserve16(), "210", "Wrong result at reverse_loop_reserve16")
+    arktest.assertEQ(step2_reverse_loop_reserve17(), "420", "Wrong result at step2_reverse_loop_reserve17")
+    arktest.assertEQ(step2_reverse_loop_reserve18(), "531", "Wrong result at step2_reverse_loop_reserve18")
+    arktest.assertEQ(step5_loop_reserve19(), "27121722", "Wrong result at step5_loop_reserve19")
 
     return 0
 }

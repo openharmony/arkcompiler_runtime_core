@@ -19,10 +19,10 @@
 #include "helpers/helpers.h"
 #include "helpers/helpers_runtime.h"
 #include "helpers/visit_helper/visit_helper.h"
-#include "libabckit/include/c/ir_core.h"
-#include "libabckit/include/c/isa/isa_dynamic.h"
-#include "libabckit/include/c/metadata_core.h"
-#include "libabckit/include/c/extensions/arkts/metadata_arkts.h"
+#include "libabckit/c/ir_core.h"
+#include "libabckit/c/isa/isa_dynamic.h"
+#include "libabckit/c/metadata_core.h"
+#include "libabckit/c/extensions/arkts/metadata_arkts.h"
 #include "metadata_inspect_impl.h"
 
 namespace libabckit::test {

@@ -16,5 +16,5 @@
 package setter.test;
 
 function callObjSetter(classObjWithSetter: JSValue, targetValue: JSValue) {
-    classObjWithSetter.hello = targetValue;
+    ESValue.wrap(classObjWithSetter).setProperty('hello', ESValue.wrap(targetValue));
 }

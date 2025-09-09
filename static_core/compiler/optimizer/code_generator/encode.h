@@ -287,7 +287,7 @@ public:
     virtual void EncodeNeg(Reg dst, Shift src);
     virtual void EncodeFpToBits(Reg dst, Reg src);
     virtual void EncodeMoveBitsRaw(Reg dst, Reg src);
-    virtual void EncodeExtractBits(Reg dst, Reg src, Imm imm1, Imm imm2);
+    virtual void EncodeExtractBits(Reg dst, Reg src, Imm imm1, Imm imm2, bool signExt);
     virtual void EncodeCrc32Update(Reg dst, Reg crcReg, Reg valReg);
     virtual void EncodeGetCurrentPc(Reg dst);
     /**

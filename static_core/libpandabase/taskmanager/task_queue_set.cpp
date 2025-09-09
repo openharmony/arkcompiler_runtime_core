@@ -69,8 +69,8 @@ TaskQueueInterface *TaskQueueSet::SelectQueue()
     size_t countOfQueues = 0;
     size_t prioritySum = 0;
     for (size_t i = 0; i < MAX_COUNT_OF_QUEUE; i++) {
-        // Atomic with relaxed order reason: no order dependency with another variables
-        auto *queue = queues_[i].load(std::memory_order_relaxed);
+        // Atomic with acquire order reason: need to guaranty visibility of queue init
+        auto *queue = queues_[i].load(std::memory_order_acquire);
         if (queue == nullptr || queue->IsEmpty()) {
             continue;
         }
@@ -99,8 +99,8 @@ TaskQueueInterface *TaskQueueSet::SelectQueue()
 bool TaskQueueSet::AreQueuesEmpty() const
 {
     for (size_t i = 0; i < MAX_COUNT_OF_QUEUE; i++) {
-        // Atomic with relaxed order reason: no order dependency with another variables
-        auto *queue = queues_[i].load(std::memory_order_relaxed);
+        // Atomic with acquire order reason: need to guaranty visibility of queue init
+        auto *queue = queues_[i].load(std::memory_order_acquire);
         if (queue == nullptr) {
             continue;
         }
@@ -115,8 +115,8 @@ size_t TaskQueueSet::GetCountOfLiveTasks() const
 {
     size_t count = 0;
     for (size_t i = 0; i < MAX_COUNT_OF_QUEUE; i++) {
-        // Atomic with relaxed order reason: no order dependency with another variables
-        auto *queue = queues_[i].load(std::memory_order_relaxed);
+        // Atomic with acquire order reason: need to guaranty visibility of queue init
+        auto *queue = queues_[i].load(std::memory_order_acquire);
         if (queue == nullptr) {
             continue;
         }

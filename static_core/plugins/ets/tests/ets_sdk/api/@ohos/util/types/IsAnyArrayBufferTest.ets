@@ -16,7 +16,7 @@
 import {util} from "@ohos.util";
 
 function main(): int {
-    const suite = new ArkTestsuite("CommonUtil types.isAnyArrayBuffer() API tests")
+    const suite = new arktest.ArkTestsuite("CommonUtil types.isAnyArrayBuffer() API tests")
 
     suite.addTest("Verify ArrayBuffer is identified as AnyArrayBuffer", testIsAnyArrayBuffer001)
     suite.addTest("Verify Boolean is not identified as AnyArrayBuffer", testIsAnyArrayBuffer002)
@@ -38,7 +38,7 @@ function main(): int {
 function testIsAnyArrayBuffer001() {
   let proc = new util.types();
   let result = proc.isAnyArrayBuffer(new ArrayBuffer(1));
-  assertTrue(result, "The ArrayBuffer should be of the same type as the ArrayBuffer");
+  arktest.assertTrue(result, "The ArrayBuffer should be of the same type as the ArrayBuffer");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0002
@@ -51,7 +51,7 @@ function testIsAnyArrayBuffer001() {
 function testIsAnyArrayBuffer002() {
   let proc = new util.types();
   let result = proc.isAnyArrayBuffer(true);
-  assertTrue(result == false, "The Boolean should not be of the same type as the ArrayBuffer");
+  arktest.assertTrue(result == false, "The Boolean should not be of the same type as the ArrayBuffer");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0003
@@ -64,7 +64,7 @@ function testIsAnyArrayBuffer002() {
 function testIsAnyArrayBuffer003() {
   let proc = new util.types();
   let result = proc.isAnyArrayBuffer(false);
-  assertTrue(result == false, "The Boolean should not be of the same type as the ArrayBuffer");
+  arktest.assertTrue(result == false, "The Boolean should not be of the same type as the ArrayBuffer");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0004
@@ -78,7 +78,7 @@ function testIsAnyArrayBuffer004() {
   let proc = new util.types();
   let buf = new ArrayBuffer(1);
   let result = proc.isAnyArrayBuffer(buf);
-  assertTrue(result, "The ArrayBuffer should be of the same type as the ArrayBuffer");
+  arktest.assertTrue(result, "The ArrayBuffer should be of the same type as the ArrayBuffer");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0005
@@ -91,5 +91,5 @@ function testIsAnyArrayBuffer004() {
 function testIsAnyArrayBuffer005() {
   let proc = new util.types();
   let result = proc.isAnyArrayBuffer(new Boolean(false));
-  assertTrue(result == false, "The Boolean should not be of the same type as the ArrayBuffer");
+  arktest.assertTrue(result == false, "The Boolean should not be of the same type as the ArrayBuffer");
 }

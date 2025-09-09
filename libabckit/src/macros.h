@@ -18,7 +18,7 @@
 #include <iostream>
 #include "libabckit/src/statuses_impl.h"
 
-#include "libabckit/include/c/statuses.h"
+#include "libabckit/c/statuses.h"
 #include "libabckit/src/logger.h"
 
 /*

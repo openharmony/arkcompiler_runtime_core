@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,7 @@ class G1GC;
 template <typename LanguageConfig>
 class G1EvacuateRegionsWorkerState;
 
+template <typename LanguageConfig>
 class RemsetObjectPointerHandler {
 public:
     RemsetObjectPointerHandler(Region *fromRegion, size_t regionSizeBits, const std::atomic_bool &deferCards)
@@ -54,11 +55,11 @@ private:
         ASSERT(AddrToRegion(ref)->GetRemSet() == fromRemset_);
 
         auto o = ObjectAccessor::LoadAtomic(ref);
-        if (!ObjectAccessor::IsHeapObject(o)) {
+        if (!ObjectAccessor::IsHeapObject<LanguageConfig::LANG_TYPE>(o)) {
             return;
         }
 
-        auto *obj = ObjectAccessor::DecodeNotNull(o);
+        auto *obj = ObjectAccessor::DecodeNotNull<LanguageConfig::LANG_TYPE>(o);
         if (ark::mem::IsSameRegion(ref, obj, regionSizeBits_)) {
             return;
         }
@@ -95,10 +96,10 @@ private:
     void ProcessObjectPointerHelper(Ref ref) const
     {
         auto o = ObjectAccessor::Load(ref);
-        if (!ObjectAccessor::IsHeapObject(o)) {
+        if (!ObjectAccessor::IsHeapObject<LanguageConfig::LANG_TYPE>(o)) {
             return;
         }
-        auto *obj = ObjectAccessor::DecodeNotNull(o);
+        auto *obj = ObjectAccessor::DecodeNotNull<LanguageConfig::LANG_TYPE>(o);
         if (gc_->InGCSweepRange(obj)) {
             workerState_->PushToQueue(ref);
         } else if (!workerState_->IsSameRegion(ref, obj)) {

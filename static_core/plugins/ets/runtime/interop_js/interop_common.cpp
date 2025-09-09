@@ -128,6 +128,13 @@ void ThrowNoInteropContextException()
     ThrowException(ctx, thread, descriptor, utf::CStringAsMutf8(msg.c_str()));
 }
 
+void ThrowJSErrorNotAssignable(napi_env env, const EtsClass *fromKlass, EtsClass *toKlass)
+{
+    const char *from = fromKlass->GetDescriptor();
+    const char *to = toKlass->GetDescriptor();
+    InteropCtx::ThrowJSTypeError(env, std::string(from) + " is not assignable to " + to);
+}
+
 static bool GetPropertyStatusHandling([[maybe_unused]] napi_env env, napi_status rc)
 {
 #if !defined(PANDA_TARGET_OHOS) && !defined(PANDA_JS_ETS_HYBRID_MODE)

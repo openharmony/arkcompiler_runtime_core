@@ -24,6 +24,6 @@ desc: >-
 function main(): void {
   let c1 = {{c.c1}}
   let c2 = {{c.c2}}
-  assertTrue( c1 {{c.op}} c2 && c2 {{c.op}} c1 ) // test associativity
+  arktest.assertTrue( c1 {{c.op}} c2 && c2 {{c.op}} c1 ) // test associativity
 }
 {% endfor %}

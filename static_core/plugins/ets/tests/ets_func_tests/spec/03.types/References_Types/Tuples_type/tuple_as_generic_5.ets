@@ -38,6 +38,6 @@ function main(): void {
 
     let result = tuple.provide();
 
-    assertEQ( result[0], "Hello")
-    assertEQ( result[1], 12345.0)
+    arktest.assertEQ( result[0], "Hello")
+    arktest.assertEQ( result[1], 12345.0)
 }

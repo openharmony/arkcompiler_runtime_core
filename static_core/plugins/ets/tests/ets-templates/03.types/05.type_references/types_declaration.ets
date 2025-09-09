@@ -16,7 +16,7 @@
 {% for t in named_types_generics %}
 
 /*---
-desc: Generic bamed type {{named}}
+desc: Generic named type {{named}}
 params: {{t.type}}, {{t.value}}
 tags: [compile-only]
 ---*/

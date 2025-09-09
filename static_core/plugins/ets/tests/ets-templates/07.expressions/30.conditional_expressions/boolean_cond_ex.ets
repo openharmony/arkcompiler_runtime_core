@@ -22,5 +22,5 @@ function main(): void {
   let bool1: boolean = true
   let notBool: String = "Hello"
   let bool3: boolean = bool1 ? notBool : bool1
-  assertEQ( bool3, false )
+  arktest.assertEQ( bool3, false )
 }

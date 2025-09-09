@@ -13,15 +13,6 @@
  * limitations under the License.
  */
 
-class RegisteringNativeMethodsTest {
-    public static native foo(): int;
-    public static native long_foo(): long;
-
-    public bar(): int {
-        return 21;
-    }
-}
-
 namespace test002A {
     namespace test002B {
         class TestA002 {
@@ -62,8 +53,9 @@ class TestA005 {
 };
 
 class TestA006 {
-    public native foo(x: int, y: int): int;
-    public native foo(x: int, y: int, z: int): int;
+    public native foo1(x: int, y: int): int;
+    public native foo2(x: int, y: int, z: int): int;
+    overload foo {foo1, foo2};
 }
 
 interface Iface {
@@ -85,4 +77,8 @@ class B extends A {
 }
 
 class C extends B {
+}
+
+class D {
+    native constructor();
 }

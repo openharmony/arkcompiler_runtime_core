@@ -358,6 +358,7 @@ GraphCloner::LoopUnrollData *GraphCloner::PrepareLoopToUnroll(Loop *loop, bool c
     auto unrollData = allocator->New<LoopUnrollData>();
     ASSERT(unrollData != nullptr);
     unrollData->blocks = allocator->New<ArenaVector<BasicBlock *>>(allocator->Adapter());
+    ASSERT(unrollData->blocks != nullptr);
     unrollData->blocks->resize(loop->GetBlocks().size());
     std::copy(loop->GetBlocks().begin(), loop->GetBlocks().end(), unrollData->blocks->begin());
     // Split loop-header

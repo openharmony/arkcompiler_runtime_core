@@ -9,7 +9,7 @@
                 "${PANDA_ROOT}/plugins/ets/stdlib/std"
             ]
         },
-        "dynamicPaths": {
+        "dependencies": {
 			"test_class": { "language": "js", "ohmUrl": "${CMAKE_CURRENT_BINARY_DIR}/test_class" },
 			"arkts_test_class": { "language": "js", "ohmUrl": "${CMAKE_CURRENT_BINARY_DIR}/arkts_class" }
         }

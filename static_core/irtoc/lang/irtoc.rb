@@ -38,6 +38,7 @@ FILE_BEGIN = %{
 #include "asm_defines.h"
 #include "cross_values.h"
 #include "runtime/include/managed_thread.h"
+#include "runtime/include/coretypes/string.h"
 #include "runtime/mem/gc/g1/g1-allocator.h"
 
 #ifndef __clang_analyzer__

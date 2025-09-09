@@ -16,8 +16,8 @@
 #ifndef LIBABCKIT_SRC_WRAPPERS_GRAPH_WRAPPER_H
 #define LIBABCKIT_SRC_WRAPPERS_GRAPH_WRAPPER_H
 
-#include "libabckit/include/c/metadata_core.h"
-#include "libabckit/include/c/statuses.h"
+#include "libabckit/c/metadata_core.h"
+#include "libabckit/c/statuses.h"
 #include "libabckit/src/ir_impl.h"
 
 #include <cstdint>

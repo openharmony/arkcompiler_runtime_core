@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,7 +54,7 @@
 
     // it is an integer arg
 
-#ifdef PANDA_USE_32_BIT_POINTER
+#if defined(PANDA_32_BIT_MANAGED_POINTER) && defined(PANDA_TARGET_64)
     // if arg is a reference, zero out garbage in upper 32 bits
     cmpl $(SHORTY_REFERENCE - SHORTY_FIRST_FLOAT), %r11d
     jne 4f
@@ -298,9 +298,18 @@ InterpreterToCompiledCodeBridge:
     // store method (the first arg)
     movq %r13, (%rdx)
     addq $8, %rdx
+
+    // the dispatch routine expects opcode in ecx
     movzbl (%rbx), %ecx
+    cmpl $MIN_PREFIX_OPCODE_INDEX, %ecx
+    jl .Lnonprefixed
+    movzwl (%rbx), %ecx
+    addq $2, %rbx
+    jmp .Ldispatch
+.Lnonprefixed:
     addq $1, %rbx // read opcode and advance insn_ptr
 
+.Ldispatch:
     // The file contains code which checks opcode and jumps
     // to the corresponding handler.
     // At the end each handler jumps to .Lload_reg_args label.

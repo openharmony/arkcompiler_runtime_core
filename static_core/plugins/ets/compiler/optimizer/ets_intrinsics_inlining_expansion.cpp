@@ -26,10 +26,11 @@ Returns value
 */
 void Inlining::ExpandIntrinsicEscompatArrayGet(CallInst *callInst)
 {
+    int virtualIndex = callInst->GetOpcode() == Opcode::CallResolvedVirtual ? 1 : 0;
     auto bcAddr = callInst->GetPc();
-    auto *obj = callInst->GetInput(0).GetInst()->CastToNullCheck();
-    auto *index = callInst->GetInput(1).GetInst();
-    auto *saveState = callInst->GetInput(2).GetInst()->CastToSaveState();
+    auto *obj = callInst->GetInput(0 + virtualIndex).GetInst()->CastToNullCheck();
+    auto *index = callInst->GetInput(1 + virtualIndex).GetInst();
+    auto *saveState = callInst->GetInput(2 + virtualIndex).GetInst()->CastToSaveState();
 
     auto *runtime = GetGraph()->GetRuntime();
     auto *arrayClass = runtime->GetEscompatArrayClass();

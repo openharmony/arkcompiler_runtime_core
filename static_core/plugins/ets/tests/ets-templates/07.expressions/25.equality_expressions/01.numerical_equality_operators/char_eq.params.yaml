@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -30,3 +30,21 @@ cases:
     # with boxed char not equal
     - { c1: "new Char(c'E')", c2: "c'Е'", op: "!=" }
     - { c1: "c'\\x20'", c2: "new Char(c'_')", op: "!=" }
+
+    # primitives equal
+    - { c1: "c'\\u0000'", c2: "c'\\x00'", op: "===" }
+    - { c1: "c'\\r'", c2: "c'\\u000D'", op: "===" }
+    - { c1: "c'ㇰ'", c2: "c'\\u31f0'", op: "===" }
+
+    # with boxed char equal
+    - { c1: "c'\\u22ff'", c2: "new Char(c1)", op: "===" }
+    - { c1: "new Char(c'A')", c2: "c'A'", op: "===" }
+    - { c1: "c'∓'", c2: "new Char(c'\\u2213')", op: "===" }
+
+    # primitives not equal
+    - { c1: "c'A'", c2: "c'А'", op: "!=" }
+    - { c1: "c'-'", c2: "new Char(c'−')", op: "!==" }
+
+    # with boxed char not equal
+    - { c1: "new Char(c'E')", c2: "c'Е'", op: "!==" }
+    - { c1: "c'\\x20'", c2: "new Char(c'_')", op: "!==" }

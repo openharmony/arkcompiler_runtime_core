@@ -16,7 +16,7 @@
 import {LinkedList} from "@ohos.util.LinkedList";
 
 function main() {
-    const suite = new ArkTestsuite("LinkedList API tests");
+    const suite = new arktest.ArkTestsuite("LinkedList API tests");
 
     suite.addTest("LinkedList getFirst when the container is non-empty", testGetFirstNonEmptyContainer);
     suite.addTest("LinkedList getFirst when the container is empty", testGetFirstEmptyContainer);
@@ -29,62 +29,50 @@ function main() {
 }
 
 function initializeLinkedList<T>(linkedList: LinkedList<T>, sourceArray: Array<T>) {
-    for (let i = 0; i < sourceArray.length; i++) {
+    for (let i: int = 0; i < sourceArray.length; i++) {
         linkedList.add(sourceArray[i]);
     }
 }
 
 class TestData {
-    static readonly testNumber1: number = 1;
-    static readonly testNumber20: number = 20;
+    static readonly testNumber1: double | int = 1;
+    static readonly testNumber20: double | int = 20;
     static readonly forNumber1: Number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
-    static readonly arrayForNumber1 = Array.from<number>(TestData.forNumber1);
+    static readonly arrayForNumber1 = Array.from<double>(TestData.forNumber1);
 }
 
 function testGetFirstNonEmptyContainer() {
-    let linkedList = new LinkedList<number>();
+    let linkedList = new LinkedList<double>();
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
-    assertEQ(linkedList.getFirst(), 0, "First element should be 0");
+    arktest.assertEQ(linkedList.getFirst(), 0, "First element should be 0");
 }
 
 function testGetFirstEmptyContainer() {
-    let linkedList = new LinkedList<number>();
-    try {
-        linkedList.getFirst();
-    } catch (e) {
-        assertTrue(e instanceof RangeError, "Throw error when out of range");
-        return;
-    }
-    assertFalse(false, "Throw error when out of range");
+    let linkedList = new LinkedList<double>();
+    arktest.assertEQ(linkedList.getFirst(), undefined);
 }
 
 function testGetFirstUndefined() {
-    let linkedList = new LinkedList<number | undefined>();
+    let linkedList = new LinkedList<double | undefined>();
     linkedList.add(undefined);
     linkedList.add(TestData.testNumber1);
-    assertEQ(linkedList.getFirst(), undefined, "First element should be undefined");
+    arktest.assertEQ(linkedList.getFirst(), undefined, "First element should be undefined");
 }
 
 function testGetLastNonEmptyContainer() {
-    let linkedList = new LinkedList<number>();
+    let linkedList = new LinkedList<double>();
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
-    assertEQ(linkedList.getLast(), TestData.testNumber20, "Last element should be 20");
+    arktest.assertEQ(linkedList.getLast(), TestData.testNumber20, "Last element should be 20");
 }
 
 function testGetLastEmptyContainer() {
-    let linkedList = new LinkedList<number>();
-    try {
-        linkedList.getLast();
-    } catch (e) {
-        assertTrue(e instanceof RangeError, "Throw error when out of range");
-        return;
-    }
-    assertFalse(false, "Throw error when out of range");
+    let linkedList = new LinkedList<double>();
+    arktest.assertEQ(linkedList.getLast(), undefined);
 }
 
 function testGetLastUndefined() {
-    let linkedList = new LinkedList<number | undefined>();
+    let linkedList = new LinkedList<double | undefined>();
     linkedList.add(TestData.testNumber1);
     linkedList.add(undefined);
-    assertEQ(linkedList.getLast(), undefined, "Last element should be undefined");
+    arktest.assertEQ(linkedList.getLast(), undefined, "Last element should be undefined");
 }

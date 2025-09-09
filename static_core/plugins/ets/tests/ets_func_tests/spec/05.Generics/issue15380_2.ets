@@ -24,6 +24,6 @@ function foo<T>(val: T|(() => T)): boolean {
 }
 
 function main(): void {
-    assertEQ( foo<String>("Hello foo"), true)
-    assertEQ( foo<String>(() => "Hello foo"), true)
+    arktest.assertEQ( foo<String>("Hello foo"), true)
+    arktest.assertEQ( foo<String>(() => "Hello foo"), true)
 }

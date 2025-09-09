@@ -14,30 +14,42 @@
  */
 
 import LightWeightMap from '@ohos.util.LightWeightMap';
+import { BusinessError } from "@ohos.base";
+
+const TypeErrorCodeId: int = 401;
+const OutOfBoundsErrorCodeId: int = 10200001;
+
+function createBusinessError(code: int, message: string) {
+    let err = new BusinessError();
+    err.code = code;
+    err.name = 'BusinessError';
+    err.message = message;
+    return err;
+}
+
+export type PlainArrayForEachCb<T> = (value: T, key: int, PlainArray: PlainArray<T>) => void;
 
 /**
  * The PlainArray class is a collection of key-value pairs.
  */
-export class PlainArray<T> implements Iterable<[Number, T]> {
-    private buckets: LightWeightMap<number, T>;
+export class PlainArray<T> implements Iterable<[Int, T]> {
+    private buckets: LightWeightMap<int, T>;
 
     /**
      * Returns number of Entries with unique keys in the PlainArray
      *
      * @returns number of Entries with unique keys in the PlainArray
      */
-    public get length(): number {
-        return this.buckets.length;
+    public get length(): int {
+        return this.buckets.length.toInt();
     }
 
     /**
      * Add a set of data to PlainArray.
      * @param key the key of the element to add
      */
-    public add(key: number, value: T): void {
-        if (key > Int.MAX_VALUE) {
-            throw new RangeError("The value of key is out of range.");
-        }
+    public add(key: int, value: T): void {
+        this.checkKey(key);
         this.buckets.set(key, value);
     }
 
@@ -54,7 +66,7 @@ export class PlainArray<T> implements Iterable<[Number, T]> {
      */
     public clone(): PlainArray<T> {
         const clone: PlainArray<T> = new PlainArray<T>()
-        this.buckets.forEach((value: T, key: number) => {
+        this.buckets.forEach((value: T, key: int) => {
             clone.add(key, value);
         })
 
@@ -65,7 +77,7 @@ export class PlainArray<T> implements Iterable<[Number, T]> {
      * Creates a new instance of PlainArray
      */
     public constructor() {
-        this.buckets = new LightWeightMap<number, T>();
+        this.buckets = new LightWeightMap<int, T>();
     }
 
     /**
@@ -75,8 +87,8 @@ export class PlainArray<T> implements Iterable<[Number, T]> {
      * @param callbackFn.key the key of the element
      * @param callbackFn.PlainArray the instance of this object
      */
-    public forEach(callbackFn: (value: T, key: number, PlainArray: PlainArray<T>) => void): void {
-        this.buckets.forEach((value: T, key: number) => {
+    public forEach(callbackFn: PlainArrayForEachCb<T>): void {
+        this.buckets.forEach((value: T, key: int) => {
             callbackFn(value, key, this);
         });
     }
@@ -86,10 +98,7 @@ export class PlainArray<T> implements Iterable<[Number, T]> {
      * @param key the key of the element to get
      * @returns the value of the key
      */
-    public get(key: number): T | undefined {
-        if (key > Int.MAX_VALUE) {
-            throw new RangeError("The value of key is out of range.");
-        }
+    public get(key: int): T | undefined {
         return this.buckets.get(key);
     }
 
@@ -99,12 +108,8 @@ export class PlainArray<T> implements Iterable<[Number, T]> {
      *
      * @returns the index of the key, or -1 if the key is not found
      */
-    public getIndexOfKey(key: number): number {
-        if (key > Int.MAX_VALUE) {
-            throw new RangeError("The value of key is out of range.");
-        }
-
-        return this.buckets.getIndexOfKey(key);
+    public getIndexOfKey(key: int): int {
+        return this.buckets.getIndexOfKey(key).toInt();
     }
 
     /**
@@ -113,8 +118,8 @@ export class PlainArray<T> implements Iterable<[Number, T]> {
      *
      * @returns the index of the value, or -1 if the value is not found
      */
-    public getIndexOfValue(value: T): number {
-        return this.buckets.getIndexOfValue(value);
+    public getIndexOfValue(value: T): int {
+        return this.buckets.getIndexOfValue(value).toInt();
     }
 
     /**
@@ -122,11 +127,15 @@ export class PlainArray<T> implements Iterable<[Number, T]> {
      * @param index the index of the element to get the key of
      *
      * @returns the key of the index
+     * 
+     * @throws BusinessError if the index is out of range.
      */
-    public getKeyAt(index: number): number {
-        if (index < 0 || index >= this.length || index > Int.MAX_VALUE) {
-            throw new RangeError("The value of index is out of range.");
+    public getKeyAt(index: int): int {
+        this.checkIndexType(index);
+        if (index < 0 || index >= this.length) {
+            return -1;
         }
+
         return this.buckets.getKeyAt(index)!;
     }
 
@@ -136,10 +145,10 @@ export class PlainArray<T> implements Iterable<[Number, T]> {
      *
      * @returns the value of the index, or -1 if the index is not found
      */
-    public getValueAt(index: number): T {
-        if (index < 0 || index >= this.length || index > Int.MAX_VALUE) {
-            throw new RangeError("The value of index is out of range.");
-        }
+    public getValueAt(index: int): T {
+        this.checkIndexType(index);
+        this.checkEmptyContainer();
+        this.checkIndex(index, this.length - 1);
 
         return this.buckets.getValueAt(index)!;
     }
@@ -150,10 +159,7 @@ export class PlainArray<T> implements Iterable<[Number, T]> {
      *
      * @returns true if the key is in the PlainArray, false otherwise
      */
-    public has(key: number): boolean {
-        if (key > Int.MAX_VALUE) {
-            throw new RangeError("The value of key is out of range.");
-        }
+    public has(key: int): boolean {
         return this.buckets.hasKey(key);
     }
 
@@ -172,10 +178,7 @@ export class PlainArray<T> implements Iterable<[Number, T]> {
      *
      * @returns the value of the key, or undefined if the key is not found
      */
-    public remove(key: number): T | undefined {
-        if (key > Int.MAX_VALUE) {
-            throw new RangeError("The value of key is out of range.");
-        }
+    public remove(key: int): T | undefined {
         return this.buckets.remove(key);
     }
 
@@ -185,9 +188,10 @@ export class PlainArray<T> implements Iterable<[Number, T]> {
      *
      * @returns the value of the index, or undefined if the index is not found
      */
-    public removeAt(index: number): T | undefined {
-        if (index < 0 || index >= this.length || index > Int.MAX_VALUE) {
-            throw new RangeError("The value of index is out of range.");
+    public removeAt(index: int): T | undefined {
+        this.checkIndexType(index);
+        if (index < 0 || index >= this.length) {
+            return undefined;
         }
 
         const value: T | undefined = this.getValueAt(index);
@@ -204,13 +208,20 @@ export class PlainArray<T> implements Iterable<[Number, T]> {
      *
      * @returns the number of elements removed
      */
-    public removeRangeFrom(index: number, size: number): number {
-        if (index < 0 || index >= this.length || size + index > Int.MAX_VALUE) {
-            throw new RangeError("The value of index is out of range.");
+    public removeRangeFrom(index: int, size: int): int {
+        this.checkIndexType(index);
+        this.checkEmptyContainer();
+        if (size > Int.MAX_VALUE) {
+            throw createBusinessError(TypeErrorCodeId,
+                `The type of \"size\" must be small integer. Received value is: ${size}`);
+        }
+        this.checkIndex(index, this.length - 1);
+        if (size < 1) {
+            throw createBusinessError(OutOfBoundsErrorCodeId, `The value of \"size\" is out of range. It must be > 0. Received value is: ${size}`);
         }
 
         const elemNum = this.length - index;
-        let removedSize: number = 0;
+        let removedSize: int = 0;
         while(removedSize < min(size, elemNum)) {
             this.buckets.removeAt(index);
             removedSize++;
@@ -222,11 +233,13 @@ export class PlainArray<T> implements Iterable<[Number, T]> {
      * Replace the container specified in the index corresponding keys on the key-value pair.
      * @param index the index of the element to replace
      * @param value the value of the element to replace
+     * 
+     * @throws BusinessError if the index is out of range or the container is empty.
      */
-    public setValueAt(index: number, value: T): void {
-        if (index < 0 || index >= this.length || index > Int.MAX_VALUE) {
-            throw new RangeError("The value of index is out of range.");
-        }
+    public setValueAt(index: int, value: T): void {
+        this.checkIndexType(index);
+        this.checkEmptyContainer();
+        this.checkIndex(index, this.length - 1);
 
         this.buckets.setValueAt(index, value);
     }
@@ -243,7 +256,31 @@ export class PlainArray<T> implements Iterable<[Number, T]> {
     /*
      * Returns an iterator object containing a key-value pair
      */
-    override $_iterator(): IterableIterator<[Number, T]> {
+    override $_iterator(): IterableIterator<[Int, T]> {
         return this.buckets.$_iterator();
+    }
+
+    private checkIndexType(index: int): void {
+        if (index > Int.MAX_VALUE) {
+            throw createBusinessError(TypeErrorCodeId, `The type of \"index\" must be small integer. Received value is: ${index}`);
+        }
+    }
+
+    private checkEmptyContainer(): void {
+        if (this.isEmpty()) {
+            throw createBusinessError(OutOfBoundsErrorCodeId, `Container is empty`);
+        }
+    }
+
+    private checkIndex(index: int, length: int): void {
+        if (index < 0 || index > length) {
+            throw createBusinessError(OutOfBoundsErrorCodeId, `The value of \"index\" is out of range. It must be >= 0 && <= ${length}. Received value is: ${index}`);
+        }
+    }
+
+    private checkKey(key: int): void {
+        if (key > Int.MAX_VALUE) {
+            throw createBusinessError(TypeErrorCodeId, `The type of \"key\" must be small integer. Received value is: ${key}`);
+        }
     }
 }

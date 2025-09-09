@@ -18,30 +18,30 @@ break_statements:
         while (i > 0) {
           break;
         }
-        assertEQ(i, 2)
+        arktest.assertEQ(i, 2)
   - use: |
         let i = 2;
         for (;;) {
           break;
         }
-        assertEQ(i, 2)
+        arktest.assertEQ(i, 2)
   - use: |
         let i = 0
         for (let ch of "string") {
           i++
           break;
         }
-        assertEQ(i, 1)
+        arktest.assertEQ(i, 1)
   - use: |
         let i = 2;
         for (;;) {
           if (true) { break; }
         }
-        assertEQ(i, 2)
+        arktest.assertEQ(i, 2)
   - use: |
         let i = 2;
           while (i > 0) {
             break;
             i--;
           }
-        assertEQ(i, 2)
+        arktest.assertEQ(i, 2)

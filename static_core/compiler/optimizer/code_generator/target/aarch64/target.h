@@ -300,7 +300,7 @@ public:
     void EncodeAndNot(Reg dst, Reg src0, Reg src1) override;
     void EncodeOrNot(Reg dst, Reg src0, Reg src1) override;
 
-    void EncodeExtractBits(Reg dst, Reg src0, Imm imm1, Imm imm2) override;
+    void EncodeExtractBits(Reg dst, Reg src0, Imm imm1, Imm imm2, bool signExt) override;
 
     /* builtins-related encoders */
     void EncodeIsInf(Reg dst, Reg src) override;
@@ -467,7 +467,7 @@ private:
     void HandleChar(int32_t ch, const vixl::aarch64::Register &tmp, vixl::aarch64::Label *labelNotFound,
                     vixl::aarch64::Label *labelUncompressedString);
 
-    void EncodeCmpFracWithDelta(Reg src);
+    void EncodeCmpFracWithZero(Reg src);
 
 private:
     Aarch64LabelHolder *labels_ {nullptr};

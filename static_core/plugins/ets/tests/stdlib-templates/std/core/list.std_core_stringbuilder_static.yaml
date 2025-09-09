@@ -98,7 +98,7 @@
     method_return_type: String,
     expected_data_item_type: String,
     expected_data_type: "FixedArray<String>",
-    param_list: {"param1": "[E as float, (-E) as float, 0.0 as float]"},
+    param_list: {"param1": "[E.toFloat(), (-E).toFloat(), 0.0.toFloat()]"},
     expected_test_data: '["2.7182817", "-2.7182817", "0"]',
     verify_test_result_function: compareStringTrivial,
   }

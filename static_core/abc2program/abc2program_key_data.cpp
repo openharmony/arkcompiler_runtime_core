@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,6 +51,9 @@ pandasm::Program &Abc2ProgramKeyData::GetProgram() const
 std::string Abc2ProgramKeyData::GetFullRecordNameById(const panda_file::File::EntityId &classId) const
 {
     std::string name = stringTable_.GetStringById(classId);
+    if (name.empty()) {
+        LOG(FATAL, ABC2PROGRAM) << "Record name is empty";
+    }
     pandasm::Type type = pandasm::Type::FromDescriptor(name);
     return type.GetPandasmName();
 }
@@ -87,6 +90,11 @@ ark::panda_file::SourceLang Abc2ProgramKeyData::GetFileLanguage() const
 void Abc2ProgramKeyData::SetFileLanguage(ark::panda_file::SourceLang language)
 {
     fileLanguage_ = language;
+}
+
+std::string Abc2ProgramKeyData::GetLiteralArrayIdName(uint32_t literalArrayId)
+{
+    return std::to_string(literalArrayId);
 }
 
 }  // namespace ark::abc2program

@@ -21,5 +21,5 @@
 
 function main(): void {
   let x = new Array<Boolean>(true)
-  assertEQ( x[0], true)
+  arktest.assertEQ( x[0], true)
 }

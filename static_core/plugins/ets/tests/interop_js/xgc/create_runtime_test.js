@@ -15,7 +15,6 @@
 let etsVm = requireNapiPreview('ets_interop_js_napi', true);
 
 let etsVmRes = etsVm.createRuntime({
-    'load-runtimes': 'ets',
     'boot-panda-files': 'etsstdlib.abc',
     'gc-type': 'epsilon'
 });
@@ -24,11 +23,9 @@ if (etsVmRes) {
 }
 
 etsVmRes = etsVm.createRuntime({
-    'load-runtimes': 'ets',
     'boot-panda-files': 'etsstdlib.abc',
     'no-async-jit': 'true'
 });
 if (etsVmRes) {
     throw new Error('Test failed: expected runtime cannot be created with "no-async-jit" option');
 }
-

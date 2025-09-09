@@ -52,12 +52,12 @@
         test1:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:byte): byte =>  {return (value * 2) as byte}',
+            fn: '(value:byte): byte =>  {return (value * 2).toByte()}',
           },
         test2:
           {
             arr: "[]",
-            fn: '(value:byte): byte =>  {return (value * 2) as byte}',
+            fn: '(value:byte): byte =>  {return (value * 2).toByte()}',
           },          
       },
     method_expected_data:
@@ -79,12 +79,12 @@
         test1:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:short): short =>  {return ((value * 2) as short)}',
+            fn: '(value:short): short =>  {return ((value * 2).toShort())}',
           },
         test2:
           {
             arr: "[]",
-            fn: '(value:short): short =>  {return ((value * 2) as short)}',
+            fn: '(value:short): short =>  {return ((value * 2).toShort())}',
           },
       },
     method_expected_data:
@@ -214,12 +214,12 @@
         test1:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:char): char =>  {return ((value * 2) as char)}',
+            fn: '(value:char): char =>  {return ((value * 2).toChar())}',
           },
         test2:
           {
             arr: "[]",
-            fn: '(value:char): char =>  {return ((value * 2) as char)}',
+            fn: '(value:char): char =>  {return ((value * 2).toChar())}',
           },          
       },
     method_expected_data:

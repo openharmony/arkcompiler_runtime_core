@@ -20,7 +20,7 @@ import { C } from "../interfaces_1.base"
 class evalPatchFunction {
     private static evalPatchFunction() {
         let c = new C();
-        assertEQ(c.foo(123.321), 123.321);
-        assertEQ(c.goo(123456), 123456);
+        arktest.assertEQ(c.foo(123.321), 123.321);
+        arktest.assertEQ(c.goo(123456), 123456);
     }
 }

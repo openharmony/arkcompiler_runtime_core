@@ -37,6 +37,7 @@
 #include "runtime/include/thread.h"
 
 #include "runtime/osr.h"
+#include "source_language.h"
 
 namespace ark {
 
@@ -276,17 +277,22 @@ public:
 
     bool IsClassExternal(MethodPtr method, ClassPtr calleeClass) const override;
 
-    bool IsMethodIntrinsic(MethodPtr method) const override
-    {
-        return MethodCast(method)->IsIntrinsic();
-    }
-
     bool IsMethodAbstract(MethodPtr method) const override
     {
         return MethodCast(method)->IsAbstract();
     }
 
-    bool IsMethodIntrinsic(MethodPtr parentMethod, MethodId id) const override;
+    bool IsMethodIntrinsic(MethodPtr method) const override
+    {
+        return MethodCast(method)->IsIntrinsic();
+    }
+
+    bool IsMethodIntrinsic(MethodPtr parentMethod, MethodId id) const override
+    {
+        return GetMethodAsIntrinsic(parentMethod, id) != nullptr;
+    }
+
+    MethodPtr GetMethodAsIntrinsic(MethodPtr parentMethod, MethodId id) const override;
 
     bool IsMethodFinal(MethodPtr method) const override
     {
@@ -401,6 +407,8 @@ public:
 
     /**********************************************************************************/
     /// Thread information
+    ::ark::mem::BarrierType GetPreReadType() const override;
+
     ::ark::mem::BarrierType GetPreType() const override;
 
     ::ark::mem::BarrierType GetPostType() const override;
@@ -430,6 +438,9 @@ public:
     ObjectPointerType GetNonMovableString(MethodPtr method, StringId id) const override;
 
     ClassPtr GetStringClass(MethodPtr method, uint32_t *typeId) const override;
+
+    ClassPtr GetLineStringClass(MethodPtr method, uint32_t *typeId) const override;
+
     ClassPtr GetNumberClass(MethodPtr method, const char *name, uint32_t *typeId) const override;
 
     std::string GetStringValue(MethodPtr method, size_t id) const override
@@ -562,7 +573,14 @@ public:
 
     bool IsClassFinal(ClassPtr klass) const override
     {
-        return ClassCast(klass)->IsFinal();
+        auto *kls = ClassCast(klass);
+        return kls->IsFinal() && !kls->IsUnionClass();
+    }
+
+    bool IsClassFinalOrString(ClassPtr klass) const override
+    {
+        ark::Class *cls = ClassCast(klass);
+        return cls->IsFinal() || cls->IsStringClass();
     }
 
     bool IsInterface(ClassPtr klass) const override
@@ -820,7 +838,9 @@ private:
 };
 
 #ifndef PANDA_PRODUCT_BUILD
-uint8_t CompileMethodImpl(coretypes::String *fullMethodName, panda_file::SourceLang sourceLang);
+// Exists only for tests purposes, must not be used in release builds
+uint8_t CompileMethodImpl(coretypes::String *fullMethodName, ClassLinkerContext *ctx);
+uint8_t CompileMethodImpl(coretypes::String *fullMethodName, SourceLanguage sourceLang);
 #endif
 
 }  // namespace ark

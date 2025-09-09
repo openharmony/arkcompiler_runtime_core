@@ -12,15 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {BusinessError} from "@ohos.base";
 import * as bigint_new from "bigint_new";
 import * as bigint_test from "bigint_test";
-import {BusinessError} from "@ohos.base";
 
 loadLibrary("ani_bigint");
 
 function main() {
     console.info("bigint_test run start...");
-    const suite = new ArkTestsuite("bigint_test ut")
+    const suite = new arktest.ArkTestsuite("bigint_test ut")
     suite.addTest("testBigint01", testBigint01);
     suite.addTest("testBigint02", testBigint02);
     suite.addTest("testBigint03", testBigint03);
@@ -36,11 +36,19 @@ function main() {
     suite.addTest("testProcessBigInt_6", testProcessBigInt_6);
 
     suite.addTest("test_bigint_with_printBigInt", test_bigint_with_printBigInt);
-    suite.addTest("test_bigint_with_createBigInt", test_bigint_with_createBigInt);
-    suite.addTest("test_bigint_with_setAndgetBigInt", test_bigint_with_setAndgetBigInt);
-    suite.addTest("test_bigint_with_setupStructAndPrint", test_bigint_with_setupStructAndPrint);
-    suite.addTest("test_bigint_with_getBigIntOptional_1", test_bigint_with_getBigIntOptional_1);
-    suite.addTest("test_bigint_with_getBigIntOptional_2", test_bigint_with_getBigIntOptional_2);
+    suite.addTest(
+        "test_bigint_with_createBigInt", test_bigint_with_createBigInt);
+    suite.addTest(
+        "test_bigint_with_setAndgetBigInt", test_bigint_with_setAndgetBigInt);
+    suite.addTest(
+        "test_bigint_with_setupStructAndPrint",
+        test_bigint_with_setupStructAndPrint);
+    suite.addTest(
+        "test_bigint_with_getBigIntOptional_1",
+        test_bigint_with_getBigIntOptional_1);
+    suite.addTest(
+        "test_bigint_with_getBigIntOptional_2",
+        test_bigint_with_getBigIntOptional_2);
     suite.addTest("test_bigint_with_mapBigInt", test_bigint_with_mapBigInt);
     suite.addTest("test_bigint_with_union", test_bigint_with_union);
 
@@ -51,37 +59,37 @@ function main() {
 function testProcessBigInt_1() {
     let arg: bigint = (1n << 63n) - 1n;
     let res: bigint = bigint_new.processBigInt(arg);
-    assertEQ(res, arg << 64n);
+    arktest.assertEQ(res, arg << 64n);
 }
 
 function testProcessBigInt_2() {
     let arg: bigint = 1n << 63n;
     let res: bigint = bigint_new.processBigInt(arg);
-    assertEQ(res, arg << 64n);
+    arktest.assertEQ(res, arg << 64n);
 }
 
 function testProcessBigInt_3() {
     let arg: bigint = (1n << 64n) - 1n;
     let res: bigint = bigint_new.processBigInt(arg);
-    assertEQ(res, arg << 64n);
+    arktest.assertEQ(res, arg << 64n);
 }
 
 function testProcessBigInt_4() {
     let arg: bigint = 1n << 64n;
     let res: bigint = bigint_new.processBigInt(arg);
-    assertEQ(res, arg << 64n);
+    arktest.assertEQ(res, arg << 64n);
 }
 
 function testProcessBigInt_5() {
     let arg: bigint = -1n << 63n;
     let res: bigint = bigint_new.processBigInt(arg);
-    assertEQ(res, arg << 64n);
+    arktest.assertEQ(res, arg << 64n);
 }
 
 function testProcessBigInt_6() {
     let arg: bigint = -1n << 64n;
     let res: bigint = bigint_new.processBigInt(arg);
-    assertEQ(res, arg << 64n);
+    arktest.assertEQ(res, arg << 64n);
 }
 
 // test function Bigint01(a : number, b : BigInt) : boolean
@@ -89,21 +97,21 @@ function testBigint01() {
     let a: number = 666666;
     let b: bigint = 77777777777777777777777777n;
     let result: boolean = bigint_test.bigInt001(a, b);
-    assertEQ(result, true);
+    arktest.assertEQ(result, true);
 }
 
 // test function Bigint02(a: number) : number
 function testBigint02() {
     let a: number = 77777777777;
     let result: number = bigint_test.bigInt002(a);
-    assertEQ(result, a);
+    arktest.assertEQ(result, a);
 }
 
 // test function Bigint03(a : BigInt) : BigInt
 function testBigint03() {
     let a: bigint = 8888888888888888888888888888n;
     let result: bigint = bigint_test.bigInt003(a);
-    assertEQ(result, a);
+    arktest.assertEQ(result, a);
 }
 
 // test function Bigint04(a : BigInt) : void
@@ -117,7 +125,7 @@ function testBigint05() {
     let a: number = 1;
     let b: bigint = 8888888888888888888888888888n;
     let result: bigint = bigint_test.bigInt005(a, b);
-    assertEQ(result, b);
+    arktest.assertEQ(result, b);
 }
 
 // test function Bigint06(a : number, b : BigInt) : number
@@ -125,7 +133,7 @@ function testBigint06() {
     let a: number = 1;
     let b: bigint = 8888888888888888888888888888n;
     let result: number = bigint_test.bigInt006(a, b);
-    assertEQ(result, a);
+    arktest.assertEQ(result, a);
 }
 
 
@@ -137,65 +145,67 @@ function test_bigint_with_printBigInt() {
     bigint_new.printBigInt(num2);
 }
 
-//function createBigInt(a: @bigint Array<u64>): @bigint Array<u64>; 
+// function createBigInt(a: @bigint Array<u64>): @bigint Array<u64>;
 function test_bigint_with_createBigInt() {
     let num1: BigInt = 18446744073709551616n;
     let res = bigint_new.createBigInt(num1);
     let expect: BigInt = res as BigInt;
-    assertEQ(expect.toString(), num1.toString());
+    arktest.assertEQ(expect.toString(), num1.toString());
 }
 
-//BigInt set and get
+// BigInt set and get
 let want: bigint_new.Want = bigint_new.getWant();
-function test_bigint_with_setAndgetBigInt(){
+function test_bigint_with_setAndgetBigInt() {
     want.bigInt = 123n;
     let res = want.bigInt;
-    assertEQ(res, 123n);
+    arktest.assertEQ(res, 123n);
 }
 
-//function setupStructAndPrint(v: BigInt1): void;
-function test_bigint_with_setupStructAndPrint(){
+// function setupStructAndPrint(v: BigInt1): void;
+function test_bigint_with_setupStructAndPrint() {
     let a: bigint_new.BigInt1 = {a: 123n};
     bigint_new.setupStructAndPrint(a);
 }
 
-//function getBigIntOptional(a: Optional<@bigint Array<u64>>): @bigint Array<u64>; 
-function test_bigint_with_getBigIntOptional_1(){
+// function getBigIntOptional(a: Optional<@bigint Array<u64>>): @bigint
+// Array<u64>;
+function test_bigint_with_getBigIntOptional_1() {
     let a: BigInt = 123n;
     let res = bigint_new.getBigIntOptional(a);
     console.log("test_bigint_with_getBigIntOptional_1 have Optional: ", res);
 }
 
-function test_bigint_with_getBigIntOptional_2(){
+function test_bigint_with_getBigIntOptional_2() {
     let res = bigint_new.getBigIntOptional(undefined);
     console.log("test_bigint_with_getBigIntOptional_2 have no Optional: ", res);
 }
 
-//function mapBigInt(a: @record Map<String, @bigint Array<u64>>): @record Map<String, @bigint Array<u64>>;
-function test_bigint_with_mapBigInt(){
+// function mapBigInt(a: @record Map<String, @bigint Array<u64>>): @record
+// Map<String, @bigint Array<u64>>;
+function test_bigint_with_mapBigInt() {
     let data: Record<string, BigInt> = {"key1": 123n};
     let res = bigint_new.mapBigInt(data);
     console.log("test_bigint_with_mapBigInt result: ", res);
 }
 
-//union @bigint Array<u64> @null string
-function test_bigint_with_union(){
-    //union bigInt
+// union @bigint Array<u64> @null string
+function test_bigint_with_union() {
+    // union bigInt
     let bigIntData = 1020847100762815390427017310442723737601n;
     bigint_new.showMyUnion(bigIntData);
-    let bigIntResult = bigint_new.makeMyUnion(1) ;
+    let bigIntResult = bigint_new.makeMyUnion(1);
     console.log("bigIntResult: ", bigIntResult);
-    assertEQ(bigIntData, bigIntResult);
+    arktest.assertEQ(bigIntData, bigIntResult);
 
-    //union string
+    // union string
     let strData = "this is string data";
     bigint_new.showMyUnion(strData);
-    let strResult = bigint_new.makeMyUnion(2) ;
+    let strResult = bigint_new.makeMyUnion(2);
     console.log("strResult: ", strResult);
-    assertEQ(strData, strResult);
+    arktest.assertEQ(strData, strResult);
 
-    //union null
+    // union null
     bigint_new.showMyUnion(null);
-    let nullResult = bigint_new.makeMyUnion(0) ;
-    assertEQ(nullResult, null);
+    let nullResult = bigint_new.makeMyUnion(0);
+    arktest.assertEQ(nullResult, null);
 }

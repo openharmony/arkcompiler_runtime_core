@@ -139,22 +139,86 @@ inline bool Class::IsSubClassOf(const Class *klass) const
     return false;
 }
 
+inline static bool IsAssignableFromUnion(const Class *sub, const Class *super);
+inline static bool IsAssignableFromRef(const Class *sub, const Class *super);
+
+template <bool IS_STRICT, bool IS_UNION_SUPER>
+// CC-OFFNXT(G.FUD.06, huge_method) perf critical, solid logic
+inline static bool IsAssignableFromUnionImpl(const Class *ref, const Class *unionCls)
+{
+    bool res = false;
+    auto isAssignable = [](const Class *super, const Class *sub) {
+        if (sub->IsUnionClass() || super->IsUnionClass()) {
+            return IsAssignableFromUnion(sub, super);
+        }
+        return IsAssignableFromRef(sub, super);
+    };
+    for (auto *consClass : unionCls->GetConstituentTypes()) {
+        bool isAssign;
+        if constexpr (IS_UNION_SUPER) {
+            isAssign = isAssignable(consClass, ref);
+        } else {
+            isAssign = isAssignable(ref, consClass);
+        }
+
+        res |= isAssign;
+        if constexpr (!IS_STRICT) {
+            continue;
+        }
+        if (!isAssign) {
+            return false;
+        }
+    }
+    return res;
+}
+
+// CC-OFFNXT(G.FUD.06) perf critical
+inline static bool IsAssignableFromUnion(const Class *sub, const Class *super)
+{
+    if (!super->IsUnionClass()) {
+        return IsAssignableFromUnionImpl<true, false>(super, sub);
+    }
+
+    if (!sub->IsUnionClass()) {
+        return IsAssignableFromUnionImpl<false, true>(sub, super);
+    }
+
+    for (auto *consClass : sub->GetConstituentTypes()) {
+        if (IsAssignableFromUnionImpl<true, true>(consClass, super)) {
+            return true;
+        }
+    }
+    return true;
+}
+
+// CC-OFFNXT(G.FUD.06) perf critical
+inline bool IsAssignableFromRef(const Class *sub, const Class *super)
+{
+    if (sub == super) {
+        return true;
+    }
+    if (super->IsObjectClass()) {
+        return !sub->IsPrimitive();
+    }
+    if (super->IsInterface()) {
+        return sub->Implements(super);
+    }
+    if (sub->IsArrayClass()) {
+        return super->IsArrayClass() && super->GetComponentType()->IsAssignableFrom(sub->GetComponentType());
+    }
+    return !sub->IsInterface() && sub->IsSubClassOf(super);
+}
+
 // CC-OFFNXT(G.FUD.06) perf critical
 inline bool Class::IsAssignableFrom(const Class *klass) const
 {
     if (klass == this) {
         return true;
     }
-    if (IsObjectClass()) {
-        return !klass->IsPrimitive();
+    if (IsUnionClass() || klass->IsUnionClass()) {
+        return IsAssignableFromUnion(klass, this);
     }
-    if (IsInterface()) {
-        return klass->Implements(this);
-    }
-    if (klass->IsArrayClass()) {
-        return IsArrayClass() && GetComponentType()->IsAssignableFrom(klass->GetComponentType());
-    }
-    return !klass->IsInterface() && klass->IsSubClassOf(this);
+    return IsAssignableFromRef(klass, this);
 }
 
 inline bool Class::Implements(const Class *klass) const

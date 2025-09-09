@@ -41,12 +41,31 @@ set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
-set(TH_STDLIB_DIR "${CMAKE_SOURCE_DIR}/stdlib")
+function(execute_and_set_variable OUTPUT_VAR_NAME)
+  execute_process(
+    COMMAND taihec ${ARGN}
+    OUTPUT_VARIABLE _output
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE _result
+  )
 
-# taihe runtime .c/.cpp path
-set(TH_RUNTIME_DIR "${CMAKE_SOURCE_DIR}/runtime")
-set(TH_RUNTIME_INCLUDE_DIR "${TH_RUNTIME_DIR}/include")
-set(TH_RUNTIME_SOURCE_DIR "${TH_RUNTIME_DIR}/src")
+  if(_result EQUAL 0)
+    set(${OUTPUT_VAR_NAME} "${_output}" PARENT_SCOPE)
+    message(STATUS "${OUTPUT_VAR_NAME} set to: ${_output}")
+  else()
+    message(FATAL_ERROR "Failed to execute 'taihec ${COMMAND_ARGS}'. Error code: ${_result}")
+  endif()
+endfunction()
+
+if(ENABLE_COVERAGE)
+  set(TAIHEC coverage run --parallel-mode -m taihe.cli.compiler)
+else()
+  set(TAIHEC taihec)
+endif()
+
+execute_and_set_variable(TAIHE_RUNTIME_INCLUDE_DIR "--print-runtime-header-path")
+execute_and_set_variable(TAIHE_RUNTIME_SRC_DIR "--print-runtime-source-path")
+set(TAIHE_RUNTIME_BUILD_DIR "${CMAKE_BINARY_DIR}/runtime")
 
 # 设置 Python
 set(Python3_EXECUTABLE "/usr/bin/python3")
@@ -56,106 +75,94 @@ find_package(Python3 REQUIRED COMPONENTS Interpreter)
 option(ENABLE_COVERAGE "Enable coverage run for the Python command" OFF)
 
 # 编译 taihe runtime 静态库
-set(TH_SOURCE
-  "${TH_RUNTIME_SOURCE_DIR}/string.cpp"
-  "${TH_RUNTIME_SOURCE_DIR}/object.cpp"
-  "${TH_RUNTIME_SOURCE_DIR}/runtime.cpp"
+set(TAIHE_RUNTIME_SOURCES
+  "${TAIHE_RUNTIME_SRC_DIR}/string.cpp"
+  "${TAIHE_RUNTIME_SRC_DIR}/object.cpp"
+  "${TAIHE_RUNTIME_SRC_DIR}/runtime.cpp"
 )
 
-add_library(th_runtime STATIC ${TH_SOURCE})
+add_library(taihe_runtime STATIC ${TAIHE_RUNTIME_SOURCES})
 
-set_target_properties(th_runtime PROPERTIES
-  ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+set_target_properties(taihe_runtime PROPERTIES
+  ARCHIVE_OUTPUT_DIRECTORY ${TAIHE_RUNTIME_BUILD_DIR}
 )
 
-target_include_directories(th_runtime PUBLIC ${TH_RUNTIME_INCLUDE_DIR})
+target_include_directories(taihe_runtime PUBLIC ${TAIHE_RUNTIME_INCLUDE_DIR})
 
+execute_and_set_variable(TAIHE_STDLIB_DIR "--print-stdlib-path")
+set(TAIHE_STDLIB_GEN_DIR "${CMAKE_BINARY_DIR}/stdlib/generated")
+set(TAIHE_STDLIB_GEN_INCLUDE_DIR "${TAIHE_STDLIB_GEN_DIR}/include")
+set(TAIHE_STDLIB_GEN_SRC_DIR "${TAIHE_STDLIB_GEN_DIR}/src")
+set(TAIHE_STDLIB_BUILD_DIR "${CMAKE_BINARY_DIR}/stdlib/build")
 
-function(update_grammar)
-  add_custom_command(
-    OUTPUT ${CMAKE_SOURCE_DIR}/compiler/taihe/parse/antlr/TaiheAST.py
-    COMMAND ./generate-grammar
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/compiler # 设置工作目录
-    COMMENT "Update grammar"
-    DEPENDS ${CMAKE_SOURCE_DIR}/compiler/Taihe.g4
-  )
+set(TAIHE_STDLIB_IDL_FILES
+  "${TAIHE_STDLIB_DIR}/taihe.platform.ani.taihe"
+)
 
-  add_custom_target(UPDATE_GRAMMAR ALL
-    DEPENDS ${CMAKE_SOURCE_DIR}/compiler/taihe/parse/antlr/TaiheAST.py
-  )
-endfunction()
+set(TAIHE_STDLIB_GEN_SOURCES
+  "${TAIHE_STDLIB_GEN_SRC_DIR}/taihe.platform.ani.abi.c"
+)
 
+add_custom_command(
+  OUTPUT ${TAIHE_STDLIB_GEN_SOURCES} ${TAIHE_STDLIB_GEN_INCLUDE_DIR}
+  COMMAND ${TAIHEC}
+  ${TAIHE_STDLIB_IDL_FILES}
+  -O${TAIHE_STDLIB_GEN_DIR}
+  -Gcpp-common -Gabi-source
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  DEPENDS ${TAIHE_STDLIB_IDL_FILES} ${CMAKE_SOURCE_DIR}/compiler/taihe/parse/antlr/TaiheAST.py
+  COMMENT "Generating Taihe standard library C++ header and source files..."
+  VERBATIM
+)
 
-function(generate_code_from_idl target_name idl_files gen_ets_files generated_dir taihe_configs)
-  set(IDL_FILES ${idl_files})
-  set(GEN_ETS_FILES ${gen_ets_files})
+add_library(taihe_stdlib STATIC ${TAIHE_STDLIB_GEN_SOURCES})
 
-  set(PROJ_HPP_FILES)
-  set(IMPL_HPP_FILES)
-  set(ABI_H_FILES)
-  set(ABI_C_FILES)
-  set(ANI_HPP_FILES)
-  set(ANI_CPP_FILES)
+set_target_properties(taihe_stdlib PROPERTIES
+  ARCHIVE_OUTPUT_DIRECTORY ${TAIHE_STDLIB_BUILD_DIR}
+)
 
-  foreach(TAIHE_FILE ${IDL_FILES})
+target_include_directories(taihe_stdlib PUBLIC ${TAIHE_STDLIB_GEN_INCLUDE_DIR} ${TAIHE_RUNTIME_INCLUDE_DIR})
+
+function(generate_code_from_idl demo_name idl_files gen_ets_names taihe_configs gen_include_dir gen_abi_c_files gen_ani_cpp_files gen_ets_files)
+  set(GEN_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
+
+  set(GEN_INCLUDE_DIR "${GEN_DIR}/include")
+
+  set(GEN_ABI_C_FILES)
+  set(GEN_ANI_CPP_FILES)
+  foreach(TAIHE_FILE ${idl_files})
     # 替换扩展名
     get_filename_component(TAIHE_FILE_NAME ${TAIHE_FILE} NAME)
-
-    string(REGEX REPLACE "\\.taihe$" ".proj.hpp" PROJ_HPP_FILE ${TAIHE_FILE_NAME})
-    string(REGEX REPLACE "\\.taihe$" ".impl.hpp" IMPL_HPP_FILE ${TAIHE_FILE_NAME})
-    string(REGEX REPLACE "\\.taihe$" ".abi.h" ABI_H_FILE ${TAIHE_FILE_NAME})
-    string(REGEX REPLACE "\\.taihe$" ".abi.c" ABI_C_FILE ${TAIHE_FILE_NAME})
-    string(REGEX REPLACE "\\.taihe$" ".ani.hpp" ANI_HPP_FILE ${TAIHE_FILE_NAME})
-    string(REGEX REPLACE "\\.taihe$" ".ani.cpp" ANI_CPP_FILE ${TAIHE_FILE_NAME})
-
     # 将修改后的文件名添加到新的列表中
-    list(APPEND PROJ_HPP_FILES "${generated_dir}/include/${PROJ_HPP_FILE}")
-    list(APPEND IMPL_HPP_FILES "${generated_dir}/include/${IMPL_HPP_FILE}")
-    list(APPEND ABI_H_FILES "${generated_dir}/include/${ABI_H_FILE}")
-    list(APPEND ABI_C_FILES "${generated_dir}/src/${ABI_C_FILE}")
-    list(APPEND ANI_HPP_FILES "${generated_dir}/include/${ANI_HPP_FILE}")
-    list(APPEND ANI_CPP_FILES "${generated_dir}/src/${ANI_CPP_FILE}")
+    string(REGEX REPLACE "\\.taihe$" ".abi.c" GEN_ABI_C_FILE ${TAIHE_FILE_NAME})
+    list(APPEND GEN_ABI_C_FILES "${GEN_DIR}/src/${GEN_ABI_C_FILE}")
+    string(REGEX REPLACE "\\.taihe$" ".ani.cpp" GEN_ANI_CPP_FILE ${TAIHE_FILE_NAME})
+    list(APPEND GEN_ANI_CPP_FILES "${GEN_DIR}/src/${GEN_ANI_CPP_FILE}")
   endforeach()
 
-  if(ENABLE_COVERAGE)
-    list(APPEND COMMAND_TO_RUN "coverage" "run" "--parallel-mode" "-m")
-  else()
-    list(APPEND COMMAND_TO_RUN "python3" "-m")
-  endif()
-
-  list(APPEND COMMAND_TO_RUN
-    "taihe.cli.compiler"
-    "${idl_files}"
-    "-O" "${generated_dir}"
-    "--generate" "ani-bridge" "cpp-author" "pretty-print"
-    "${taihe_configs}"
-  )
+  set(GEN_ETS_FILES)
+  foreach(ETS_NAME ${gen_ets_names})
+    set(ETS_FILE "${GEN_DIR}/${ETS_NAME}")
+    list(APPEND GEN_ETS_FILES "${ETS_FILE}")
+  endforeach()
 
   add_custom_command(
-    OUTPUT ${PROJ_HPP_FILES} ${IMPL_HPP_FILES} ${ABI_H_FILES} ${ABI_C_FILES} ${ANI_HPP_FILES} ${ANI_CPP_FILES} ${GEN_ETS_FILES}
-    COMMAND ${COMMAND_TO_RUN}
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/compiler
-    DEPENDS ${IDL_FILES} ${CMAKE_SOURCE_DIR}/compiler/taihe/parse/antlr/TaiheAST.py
-    COMMENT "Generating Taihe C++ header and source files..."
+    OUTPUT ${GEN_INCLUDE_DIR} ${GEN_ABI_C_FILES} ${GEN_ANI_CPP_FILES} ${GEN_ETS_FILES}
+    COMMAND ${TAIHEC}
+    ${idl_files}
+    -O${GEN_DIR}
+    -Gani-bridge -Gcpp-author -Gpretty-print
+    ${taihe_configs}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    DEPENDS ${idl_files} ${CMAKE_SOURCE_DIR}/compiler/taihe/parse/antlr/TaiheAST.py
+    COMMENT "Generating Taihe C++ header and source files... ${GEN_DIR}"
     VERBATIM
   )
 
-  add_custom_target(${target_name}_gen
-    DEPENDS ${PROJ_HPP_FILES}
-    ${IMPL_HPP_FILES}
-    ${ABI_H_FILES}
-    ${ABI_C_FILES}
-    ${ANI_HPP_FILES}
-    ${ANI_CPP_FILES}
-    ${GEN_ETS_FILES}
-  )
-
-  set(${target_name}_PROJ_HPP_FILES ${PROJ_HPP_FILES} PARENT_SCOPE)
-  set(${target_name}_IMPL_HPP_FILES ${IMPL_HPP_FILES} PARENT_SCOPE)
-  set(${target_name}_ABI_H_FILES ${ABI_H_FILES} PARENT_SCOPE)
-  set(${target_name}_ABI_C_FILES ${ABI_C_FILES} PARENT_SCOPE)
-  set(${target_name}_ANI_HPP_FILES ${ANI_HPP_FILES} PARENT_SCOPE)
-  set(${target_name}_ANI_CPP_FILES ${ANI_CPP_FILES} PARENT_SCOPE)
+  set(${gen_ets_files} ${GEN_ETS_FILES} PARENT_SCOPE)
+  set(${gen_abi_c_files} ${GEN_ABI_C_FILES} PARENT_SCOPE)
+  set(${gen_ani_cpp_files} ${GEN_ANI_CPP_FILES} PARENT_SCOPE)
+  set(${gen_include_dir} ${GEN_INCLUDE_DIR} PARENT_SCOPE)
 endfunction()
 
 # 准备 panda sdk
@@ -166,85 +173,11 @@ function(setup_panda_sdk)
     set(ENV{PANDA_HOME} "${PANDA_HOME}")
     # 自动下载模式
   else()
-    # 设置 PANDA 路径
-    set(PANDA_SDK_FILENAME "sdk-1.5.0-dev.36922.tgz")
-    set(PANDA_SDK_URL "https://nexus.bz-openlab.ru:10443/repository/koala-npm/%40panda/sdk/-/${PANDA_SDK_FILENAME}")
-    set(PANDA_EXTRACT_DIR "${CMAKE_SOURCE_DIR}/.panda_vm")
-    set(PANDA_SDK_PATH "${PANDA_EXTRACT_DIR}/${PANDA_SDK_FILENAME}")
-    set(PANDA_HOME "${PANDA_EXTRACT_DIR}/package/linux_host_tools")
-    set(PANDA_SDK_VERSION_FILE "${PANDA_EXTRACT_DIR}/package/version.txt")
-
-    file(MAKE_DIRECTORY "${PANDA_EXTRACT_DIR}")
-    string(REPLACE ".tgz" "" PANDA_SDK_VERSION "${PANDA_SDK_FILENAME}")
-
-    # 检查当前已提取版本
-    if(EXISTS "${PANDA_SDK_VERSION_FILE}")
-      file(READ "${PANDA_SDK_VERSION_FILE}" EXISTING_PANDA_SDK_VERSION)
-      string(STRIP "${EXISTING_PANDA_SDK_VERSION}" EXISTING_PANDA_SDK_VERSION)
-    else()
-      set(EXISTING_PANDA_SDK_VERSION "")
-    endif()
-
-    # 检查版本是否匹配
-    if(NOT "${EXISTING_PANDA_SDK_VERSION}" STREQUAL "${PANDA_SDK_VERSION}")
-      message(STATUS "Panda SDK version mismatch or not found. Expected: ${PANDA_SDK_VERSION}, Found: ${EXISTING_PANDA_SDK_VERSION}")
-      if(NOT "${PANDA_HOME}" STREQUAL "")
-        file(REMOVE_RECURSE "${PANDA_HOME}")
-      endif()
-      set(NEED_DOWNLOAD TRUE)
-    else()
-      set(NEED_DOWNLOAD FALSE)
-    endif()
-
-    # 如果需要重新准备 SDK
-    if(NEED_DOWNLOAD)
-      # 先检查本地是否已有对应的 SDK 包
-      set(LOCAL_SDK_PATH "${PANDA_EXTRACT_DIR}/${PANDA_SDK_VERSION}.tgz")
-      if(EXISTS "${LOCAL_SDK_PATH}")
-        message(STATUS "Found local Panda SDK package: ${LOCAL_SDK_PATH}")
-        set(PANDA_SDK_PATH "${LOCAL_SDK_PATH}")
-        set(NEED_ACTUAL_DOWNLOAD FALSE)
-      else()
-        message(STATUS "No local Panda SDK package found, will download: ${PANDA_SDK_FILENAME}")
-        set(NEED_ACTUAL_DOWNLOAD TRUE)
-      endif()
-
-      # 如果确实找不到，就去下载
-      if(NEED_ACTUAL_DOWNLOAD)
-        message(STATUS "Downloading Panda SDK: ${PANDA_SDK_FILENAME}")
-        execute_process(
-          COMMAND curl -u koala-pub:y3t!n0therP -L -o "${PANDA_EXTRACT_DIR}/${PANDA_SDK_FILENAME}" "${PANDA_SDK_URL}"
-          RESULT_VARIABLE DOWNLOAD_RESULT
-        )
-        if(NOT DOWNLOAD_RESULT EQUAL 0)
-          message(FATAL_ERROR "Failed to download Panda SDK!")
-        endif()
-        set(PANDA_SDK_PATH "${PANDA_EXTRACT_DIR}/${PANDA_SDK_FILENAME}")
-      endif()
-
-      # 删除原来的解压目录
-      file(REMOVE_RECURSE "${PANDA_HOME}")
-    endif()
-
-    # Extract Panda SDK if needed
-    if(NOT EXISTS "${PANDA_HOME}")
-      message(STATUS "Extracting Panda SDK from ${PANDA_SDK_PATH} ...")
-      execute_process(
-        COMMAND ${CMAKE_COMMAND} -E tar xzf "${PANDA_SDK_PATH}"
-        WORKING_DIRECTORY "${PANDA_EXTRACT_DIR}"
-        RESULT_VARIABLE EXTRACT_RESULT
-      )
-      if(NOT EXTRACT_RESULT EQUAL 0)
-        message(FATAL_ERROR "Failed to extract Panda SDK!")
-      endif()
-
-      # 保存当前版本信息
-      file(WRITE "${PANDA_SDK_VERSION_FILE}" "${PANDA_SDK_VERSION}")
-    endif()
-
-    # Set environment variable
+    execute_and_set_variable(PANDA_EXTRACT_DIR "--print-panda-vm-path")
+    set(PANDA_HOME "${PANDA_EXTRACT_DIR}/linux_host_tools")
     set(ENV{PANDA_HOME} "${PANDA_HOME}")
     set(PANDA_HOME "${PANDA_HOME}" PARENT_SCOPE)
+    message(STATUS "PANDA_HOME set to: ${PANDA_HOME}")
   endif()
 
   # Set ETS compiler path
@@ -264,45 +197,37 @@ endfunction()
 
 
 # 编译动态库
-function(compile_dylib target_name include_dirs user_cpp_files)
-  set(ALL_SRC_FILES ${${target_name}_ABI_C_FILES} ${${target_name}_ANI_CPP_FILES} ${user_cpp_files})
+function(compile_dylib demo_name user_include_dir user_cpp_files gen_include_dir gen_abi_c_files gen_ani_cpp_files)
+  add_library(${demo_name} SHARED ${gen_abi_c_files} ${gen_ani_cpp_files} ${user_cpp_files})
 
-  foreach(author_source_file ${user_cpp_files})
-    foreach(impl_hpp_file ${${target_name}_IMPL_HPP_FILES})
-      set_source_files_properties(${author_source_file} PROPERTIES OBJECT_DEPENDS ${impl_hpp_file})
-    endforeach()
-  endforeach()
-
-  add_library(${target_name} SHARED ${ALL_SRC_FILES})
-
-  add_dependencies(${target_name} th_runtime ${target_name}_gen)
-  target_compile_options(${target_name} PRIVATE "-Wno-attributes")
-  set_target_properties(${target_name} PROPERTIES LINKER_LANGUAGE CXX)
-  target_link_libraries(${target_name} PRIVATE th_runtime)
-  target_link_options(${target_name} PRIVATE "-Wl,--no-undefined")
-  target_include_directories(${target_name} PUBLIC ${include_dirs} TH_RUNTIME_INCLUDE_DIR)
+  target_compile_options(${demo_name} PRIVATE "-Wno-attributes")
+  set_target_properties(${demo_name} PROPERTIES LINKER_LANGUAGE CXX)
+  target_link_libraries(${demo_name} PRIVATE taihe_runtime taihe_stdlib)
+  target_link_options(${demo_name} PRIVATE "-Wl,--no-undefined")
+  target_include_directories(${demo_name} PUBLIC ${user_include_dir} ${gen_include_dir} ${TAIHE_RUNTIME_INCLUDE_DIR} ${TAIHE_STDLIB_GEN_INCLUDE_DIR})
 endfunction()
 
 
 # 生成 arktsconfig.json
-function(write_arkts_config config_path ets_files)
+function(write_arkts_config arktsconfig ets_files)
   foreach(file IN LISTS ets_files)
     get_filename_component(file_name ${file} NAME)
     string(REGEX REPLACE "\\.ets$" "" stripped_file "${file_name}")
     set(entry "      \"${stripped_file}\": [\"${file}\"]")
-    list(APPEND ETS_PATH_ENTRIES "${entry}")
+    list(APPEND ETS_PATAIHE_ENTRIES "${entry}")
   endforeach()
 
-  string(REPLACE ";" ",\n" ETS_PATH_ENTRIES_JOINED "${ETS_PATH_ENTRIES}")
+  string(REPLACE ";" ",\n" ETS_PATAIHE_ENTRIES_JOINED "${ETS_PATAIHE_ENTRIES}")
 
-  file(WRITE "${config_path}"
+  file(WRITE "${arktsconfig}"
     "{\n"
     "  \"compilerOptions\": {\n"
     "    \"baseUrl\": \"${PANDA_HOME}\",\n"
     "    \"paths\": {\n"
     "      \"std\": [\"${PANDA_HOME}/../ets/stdlib/std\"],\n"
     "      \"escompat\": [\"${PANDA_HOME}/../ets/stdlib/escompat\"],\n"
-    "${ETS_PATH_ENTRIES_JOINED}\n"
+    "      \"@ohos\": [\"${PANDA_HOME}/../ets/sdk/sdk/api/@ohos\"],\n"
+    "${ETS_PATAIHE_ENTRIES_JOINED}\n"
     "    }\n"
     "  }\n"
     "}\n"
@@ -311,7 +236,7 @@ endfunction()
 
 
 # 自定义 ETS 构建规则
-function(build_ets_target ets_file output_dir abc_file dump_file dep_ets_files dep_so_file build_demo_dir arktsconfig)
+function(build_ets_target ets_file output_dir abc_file dump_file ets_files arktsconfig)
   # 创建输出目录（如果不存在）
   file(MAKE_DIRECTORY ${output_dir})
 
@@ -322,19 +247,18 @@ function(build_ets_target ets_file output_dir abc_file dump_file dep_ets_files d
     --extension ets
     --arktsconfig ${arktsconfig} # 生成命令
     && ${ETS_DISASM} ${abc_file} ${dump_file}
-    DEPENDS ${ets_file} ${dep_ets_files} ${dep_so_file} ${arktsconfig} # 输入文件依赖
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} # 工作目录
+    DEPENDS ${ets_file} ${ets_files} ${arktsconfig} # 输入文件依赖
     COMMENT "Building ${ets_file} ETS target" # 注释
   )
 endfunction()
 
 
-function(abc_link target_name ets_files build_demo_dir arktsconfig main_abc)
-  write_arkts_config(${arktsconfig} "${ets_files}")
+function(abc_link demo_name main_abc ets_files)
+  set(ABC_FILES)
+  set(BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/build")
+  set(ARKTSCONFIG "${CMAKE_CURRENT_BINARY_DIR}/arktsconfig.json")
 
-  set(ABC_FILES "")
-
-  set(BUILD_DIR "${build_demo_dir}/build")
+  write_arkts_config(${ARKTSCONFIG} "${ets_files}")
 
   # 为每个 ETS 文件创建编译目标
   foreach(ETS_FILE ${ets_files})
@@ -344,7 +268,7 @@ function(abc_link target_name ets_files build_demo_dir arktsconfig main_abc)
     set(ABC_FILE "${BUILD_DIR}/${ETS_NAME}.ets.abc")
     set(DUMP_FILE "${BUILD_DIR}/${ETS_NAME}.ets.abc.dump")
 
-    build_ets_target(${ETS_FILE} ${BUILD_DIR} ${ABC_FILE} ${DUMP_FILE} "${ets_files}" ${target_name} ${build_demo_dir} ${arktsconfig})
+    build_ets_target(${ETS_FILE} ${BUILD_DIR} ${ABC_FILE} ${DUMP_FILE} "${ets_files}" ${ARKTSCONFIG})
     list(APPEND ABC_FILES "${ABC_FILE}")
   endforeach()
 
@@ -358,51 +282,39 @@ function(abc_link target_name ets_files build_demo_dir arktsconfig main_abc)
 endfunction()
 
 
-function(run_abc target_name build_demo_dir main_abc)
+function(run_abc demo_name main_abc)
   # 设置
-  file(MAKE_DIRECTORY ${build_demo_dir})
-  get_filename_component(target_name ${target_name} NAME_WE)
+  get_filename_component(demo_name ${demo_name} NAME_WE)
 
   # 创建运行目标，并明确依赖于链接目标
-  add_custom_target(${target_name}_run ALL
-    WORKING_DIRECTORY ${build_demo_dir}
+  add_custom_target(${demo_name}_run ALL
     COMMAND # LD_PRELOAD=/usr/lib/llvm-14/lib/clang/14.0.0/lib/linux/libclang_rt.asan-x86_64.so
-    LD_LIBRARY_PATH=${build_demo_dir} ${ETS_RUNTIME}
+    LD_LIBRARY_PATH=${CMAKE_CURRENT_BINARY_DIR} ${ETS_RUNTIME}
     --boot-panda-files=$ENV{PANDA_HOME}/../ets/etsstdlib.abc
-    --load-runtimes=ets ${build_demo_dir}/main.abc main.ETSGLOBAL::main
+    --boot-panda-files=$ENV{PANDA_HOME}/../ets/etssdk.abc
+    --load-runtimes=ets ${main_abc} main.ETSGLOBAL::main
     && echo "Run successful" || (echo "Run failed" && exit 1)
-    COMMENT "Running ${target_name}"
-    DEPENDS ${main_abc}
+    COMMENT "Running ${demo_name}"
+    DEPENDS ${main_abc} ${demo_name}
   )
 endfunction()
 
 
-function(add_ani_demo target_name idl_files taihe_configs gen_ets_names user_ets_files user_include_dir user_cpp_files run_dir)
-  set(DEMO_DIR "${CMAKE_SOURCE_DIR}/${run_dir}/${target_name}")
-  set(BUILD_DEMO_DIR "${CMAKE_BINARY_DIR}/${run_dir}/${target_name}")
-  set(GEN_DIR "${BUILD_DEMO_DIR}/generated")
-  set(GEN_INCLUDE_DIR "${GEN_DIR}/include")
-  set(AUTHOR_INCLUDE_DIRS ${GEN_INCLUDE_DIR} ${user_include_dir})
-  set(BUILD_DIR "${BUILD_DEMO_DIR}/build")
-  set(ARKTSCONFIG "${BUILD_DEMO_DIR}/arktsconfig.json")
-  set(IDL_FILES ${idl_files} "${TH_STDLIB_DIR}/taihe.platform.ani.taihe")
-  set(GEN_ETS_NAMES ${gen_ets_names} "taihe.platform.ani.ets")
-  set(GEN_ETS_FILES "")
-  foreach(ETS_NAME ${GEN_ETS_NAMES})
-    set(ETS_FILE "${GEN_DIR}/${ETS_NAME}")
-    list(APPEND GEN_ETS_FILES "${ETS_FILE}")
-  endforeach()
-  set(ALL_ETS_FILES ${user_ets_files} ${GEN_ETS_FILES})
-  set(MAIN_ABC "${BUILD_DEMO_DIR}/main.abc")
+function(add_ani_demo demo_name idl_files taihe_configs gen_ets_names user_ets_files user_include_dir user_cpp_files)
+  set(MAIN_ABC "${CMAKE_CURRENT_BINARY_DIR}/main.abc")
 
   # 生成代码
-  generate_code_from_idl(${target_name} "${IDL_FILES}" "${GEN_ETS_FILES}" ${GEN_DIR} "${taihe_configs}")
+  generate_code_from_idl(${demo_name} "${idl_files}" "${gen_ets_names}" "${taihe_configs}" GEN_INCLUDE_DIR GEN_ABI_C_FILES GEN_ANI_CPP_FILES GEN_ETS_FILES)
+
   # 动态库编译
-  compile_dylib(${target_name} "${AUTHOR_INCLUDE_DIRS}" "${user_cpp_files}")
+  compile_dylib(${demo_name} "${user_include_dir}" "${user_cpp_files}" "${GEN_INCLUDE_DIR}" "${GEN_ABI_C_FILES}" "${GEN_ANI_CPP_FILES}")
+
   # 链接为 main.abc
-  abc_link(${target_name} "${ALL_ETS_FILES}" ${BUILD_DEMO_DIR} ${ARKTSCONFIG} ${MAIN_ABC})
+  set(ALL_ETS_FILES ${user_ets_files} ${GEN_ETS_FILES})
+  abc_link(${demo_name} ${MAIN_ABC} "${ALL_ETS_FILES}")
+
   # 运行
-  run_abc(${target_name} ${BUILD_DEMO_DIR} ${MAIN_ABC})
+  run_abc(${demo_name} ${MAIN_ABC})
 endfunction()
 
 
@@ -416,8 +328,6 @@ if(EXISTS "${ANI_HEADER}")
 else()
   message(FATAL_ERROR "Cannot find the path: ${ANI_HEADER}")
 endif()
-
-update_grammar()
 
 add_subdirectory(test)
 #add_subdirectory(cookbook)

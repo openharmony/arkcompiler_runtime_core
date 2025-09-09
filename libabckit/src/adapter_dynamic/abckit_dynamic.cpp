@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "libabckit/include/c/metadata_core.h"
+#include "libabckit/c/metadata_core.h"
 #include "libabckit/src/adapter_dynamic/abckit_dynamic.h"
 #include "libabckit/src/adapter_dynamic/convert.h"
 #include "libabckit/src/adapter_dynamic/helpers_dynamic.h"
@@ -639,17 +639,18 @@ void AssignNamespacesToParent(std::vector<std::unique_ptr<AbckitCoreNamespace>> 
 {
     for (auto &n : namespaces) {
         ASSERT(n->owningModule->target == ABCKIT_TARGET_ARK_TS_V1);
+        auto &nName = GetDynFunction(n->GetArkTSImpl()->f.get())->name;
         panda::pandasm::Function *func = n->GetArkTSImpl()->f->GetArkTSImpl()->GetDynamicImpl();
         auto [kind, parentName] = GetParentKindAndName(func->name, GetScopeNamesArray(n->owningModule));
         switch (kind) {
             case ParentKind::MODULE:
-                n->owningModule->namespaces.emplace_back(std::move(n)).get();
+                n->owningModule->nt.emplace(nName, std::move(n));
                 break;
             case ParentKind::NAMESPACE: {
                 ASSERT(nameToNamespace.count(parentName) == 1);
                 auto *parentNamespace = nameToNamespace[parentName];
                 n->parentNamespace = nameToNamespace[parentName];
-                parentNamespace->namespaces.emplace_back(std::move(n)).get();
+                parentNamespace->nt.emplace(nName, std::move(n));
                 break;
             }
             default:
@@ -709,7 +710,7 @@ void AssignClassesToParent(std::vector<std::unique_ptr<AbckitCoreClass>> &klasse
                 ASSERT(nameToNamespace.count(parentName) != 0);
                 auto *n = nameToNamespace[parentName];
                 klass->parentNamespace = n;
-                n->classes.emplace_back(std::move(klass));
+                n->ct.emplace(name, std::move(klass));
                 break;
             }
             case ParentKind::FUNCTION: {
@@ -1013,10 +1014,10 @@ void DumpHierarchy(AbckitFile *file)
             ASSERT(n->owningModule->target == ABCKIT_TARGET_ARK_TS_V1);
             auto &nName = GetDynFunction(n->GetArkTSImpl()->f.get())->name;
             LIBABCKIT_LOG_NO_FUNC(DEBUG) << indent << nName << std::endl;
-            for (auto &n : n->namespaces) {
+            for (auto &[_, n] : n->nt) {
                 dumpNamespace(n.get(), indent + "  ");
             }
-            for (auto &c : n->classes) {
+            for (auto &[_, c] : n->ct) {
                 dumpClass(c.get(), indent + "  ");
             }
             for (auto &f : n->functions) {
@@ -1026,7 +1027,7 @@ void DumpHierarchy(AbckitFile *file)
 
     for (auto &[mName, m] : file->localModules) {
         LIBABCKIT_LOG_NO_FUNC(DEBUG) << mName << std::endl;
-        for (auto &n : m->namespaces) {
+        for (auto &[_, n] : m->nt) {
             dumpNamespace(n.get(), "");
         }
         for (auto &[cName, c] : m->ct) {

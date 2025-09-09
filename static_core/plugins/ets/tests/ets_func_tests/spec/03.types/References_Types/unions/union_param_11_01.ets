@@ -24,7 +24,7 @@ class A {}
 class B extends A {}
 
 function callB(b: B, text: string) {
-    assertTrue( b instanceof B, text)
+    arktest.assertTrue( b instanceof B, text)
 }
 
 function callA(a: B | string, name?: string) {

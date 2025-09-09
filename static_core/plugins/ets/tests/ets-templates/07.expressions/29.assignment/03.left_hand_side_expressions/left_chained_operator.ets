@@ -21,5 +21,5 @@ tags: [compile-only, negative]
 function main(): void {
   let nullableObject: {prop?: number} | null = null;
   nullableObject?.prop = 10;
-  assertEQ(nullableObject?.prop = 10, 10);
+  arktest.assertEQ(nullableObject?.prop = 10, 10);
 }

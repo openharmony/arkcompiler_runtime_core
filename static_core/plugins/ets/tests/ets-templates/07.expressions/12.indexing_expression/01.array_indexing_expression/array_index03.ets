@@ -25,6 +25,6 @@ function main(): void {
   const objects: RefType[] = [new RefType(), new RefType()];
   const obj = objects[1];
   obj.field = 110;
-  assertEQ(objects[0].field, 100);
-  assertEQ(objects[1].field, 110);
+  arktest.assertEQ(objects[0].field, 100);
+  arktest.assertEQ(objects[1].field, 110);
 }

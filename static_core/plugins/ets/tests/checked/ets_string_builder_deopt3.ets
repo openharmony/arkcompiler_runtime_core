@@ -78,12 +78,12 @@ function main(args: FixedArray<string>): void {
   if (args.length > 0 && args[0] == 'x') {
     // AOT profile collection
     for (let i = 0; i < 200; i++) {
-      assertEQ(__noinline__caller(new B(), `${i}`), `B${i}`);
+      arktest.assertEQ(__noinline__caller(new B(), `${i}`), `B${i}`);
     }
   } else {
     // otherwise
     for (let i = 0; i < 200; i++) {
-      assertEQ(__noinline__caller(i < 100 ? new B() : new A(), `${i}`), i < 100 ? `B${i}` : `A${i}`);
+      arktest.assertEQ(__noinline__caller(i < 100 ? new B() : new A(), `${i}`), i < 100 ? `B${i}` : `A${i}`);
     }
   }
 }

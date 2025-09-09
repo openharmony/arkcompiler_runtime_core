@@ -16,7 +16,7 @@
 import {util} from "@ohos.util";
 
 function main() {
-    const suite = new ArkTestsuite("CommonUtil RationalNumber IsFinite IsNaN IsZero ToString API tests");
+    const suite = new arktest.ArkTestsuite("CommonUtil RationalNumber IsFinite IsNaN IsZero ToString API tests");
 
     suite.addTest("Verifies that the RationalNumber object (-2/1) represents a finite value.", testIsFinite001)
     suite.addTest("Verifies that the RationalNumber object (0/3) represents a finite value.", testIsFinite002)
@@ -58,7 +58,7 @@ function main() {
 function testIsFinite001() {
     let pro = util.RationalNumber.parseRationalNumber(-2, 1);
     let res = pro.isFinite();
-    assertEQ(res, true, "The RationalNumber (-2/1) should represent a finite value");
+    arktest.assertEQ(res, true, "The RationalNumber (-2/1) should represent a finite value");
 }
 
 /**
@@ -72,7 +72,7 @@ function testIsFinite001() {
 function testIsFinite002() {
     let pro = util.RationalNumber.parseRationalNumber(0, 3);
     let res = pro.isFinite();
-    assertEQ(res, true, "The RationalNumber (0/3) should represent a finite value");
+    arktest.assertEQ(res, true, "The RationalNumber (0/3) should represent a finite value");
 }
 
 /**
@@ -86,7 +86,7 @@ function testIsFinite002() {
 function testIsFinite003() {
     let pro = util.RationalNumber.parseRationalNumber(2, 0);
     let res = pro.isFinite();
-    assertEQ(res, false, "The RationalNumber (2/0) should not represent a finite value");
+    arktest.assertEQ(res, false, "The RationalNumber (2/0) should not represent a finite value");
 }
 
 /**
@@ -100,7 +100,7 @@ function testIsFinite003() {
 function testIsFinite004() {
     let pro = util.RationalNumber.parseRationalNumber(1, 3);
     let res = pro.isFinite();
-    assertEQ(res, true, "The RationalNumber (1/3) should represent a finite value");
+    arktest.assertEQ(res, true, "The RationalNumber (1/3) should represent a finite value");
 }
 
 /**
@@ -114,7 +114,7 @@ function testIsFinite004() {
 function testIsFinite005() {
     let pro = util.RationalNumber.parseRationalNumber(10, 5);
     let res = pro.isFinite();
-    assertEQ(res, true, "The RationalNumber (10/5) should represent a finite value");
+    arktest.assertEQ(res, true, "The RationalNumber (10/5) should represent a finite value");
 }
 
 /**
@@ -128,7 +128,7 @@ function testIsFinite005() {
 function testIsNaN001() {
     let pro = util.RationalNumber.parseRationalNumber(-2, 1);
     let res = pro.isNaN();
-    assertEQ(res, false, "The RationalNumber (-2/1) should not be NaN");
+    arktest.assertEQ(res, false, "The RationalNumber (-2/1) should not be NaN");
 }
 
 /**
@@ -142,7 +142,7 @@ function testIsNaN001() {
 function testIsNaN002() {
     let pro = util.RationalNumber.parseRationalNumber(0, 3);
     let res = pro.isNaN();
-    assertEQ(res, false, "The RationalNumber (0/3) should not be NaN");
+    arktest.assertEQ(res, false, "The RationalNumber (0/3) should not be NaN");
 }
 
 /**
@@ -156,7 +156,7 @@ function testIsNaN002() {
 function testIsNaN003() {
     let pro = util.RationalNumber.parseRationalNumber(0, 0);
     let res = pro.isNaN();
-    assertEQ(res, true, "The RationalNumber (0/0) should be NaN");
+    arktest.assertEQ(res, true, "The RationalNumber (0/0) should be NaN");
 }
 
 /**
@@ -170,7 +170,7 @@ function testIsNaN003() {
 function testIsNaN004() {
     let pro = util.RationalNumber.parseRationalNumber(10, 0);
     let res = pro.isNaN();
-    assertEQ(res, false, "The RationalNumber (10/0) should not be NaN");
+    arktest.assertEQ(res, false, "The RationalNumber (10/0) should not be NaN");
 }
 
 /**
@@ -184,7 +184,7 @@ function testIsNaN004() {
 function testIsNaN005() {
     let pro = util.RationalNumber.parseRationalNumber(10, 1);
     let res = pro.isNaN();
-    assertEQ(res, false, "The RationalNumber (10/1) should not be NaN");
+    arktest.assertEQ(res, false, "The RationalNumber (10/1) should not be NaN");
 }
 
 /**
@@ -198,7 +198,7 @@ function testIsNaN005() {
 function testIsZero001() {
     let pro = util.RationalNumber.parseRationalNumber(-2, 1);
     let res = pro.isZero();
-    assertEQ(res, false, "The RationalNumber (-2/1) should not represent the value 0");
+    arktest.assertEQ(res, false, "The RationalNumber (-2/1) should not represent the value 0");
 }
 
 /**
@@ -212,7 +212,7 @@ function testIsZero001() {
 function testIsZero002() {
     let pro = util.RationalNumber.parseRationalNumber(0, 3);
     let res = pro.isZero();
-    assertEQ(res, true, "The RationalNumber (0/3) should represent the value 0");
+    arktest.assertEQ(res, true, "The RationalNumber (0/3) should represent the value 0");
 }
 
 /**
@@ -226,7 +226,7 @@ function testIsZero002() {
 function testIsZero003() {
     let pro = util.RationalNumber.parseRationalNumber(0, 0);
     let res = pro.isZero();
-    assertEQ(res, false, "The RationalNumber (0/0) should not represent the value 0");
+    arktest.assertEQ(res, false, "The RationalNumber (0/0) should not represent the value 0");
 }
 
 /**
@@ -240,7 +240,7 @@ function testIsZero003() {
 function testIsZero004() {
     let pro = util.RationalNumber.parseRationalNumber(10, 2);
     let res = pro.isZero();
-    assertEQ(res, false, "The RationalNumber (10/2) should not represent the value 0");
+    arktest.assertEQ(res, false, "The RationalNumber (10/2) should not represent the value 0");
 }
 
 /**
@@ -254,7 +254,7 @@ function testIsZero004() {
 function testIsZero005() {
     let pro = util.RationalNumber.parseRationalNumber(1, 1);
     let res = pro.isZero();
-    assertEQ(res, false, "The RationalNumber (1/1) should not represent the value 0");
+    arktest.assertEQ(res, false, "The RationalNumber (1/1) should not represent the value 0");
 }
 
 /**
@@ -268,7 +268,7 @@ function testIsZero005() {
 function testToString001() {
     let pro = util.RationalNumber.parseRationalNumber(-2, 1);
     let res = pro.toString();
-    assertEQ(res, "-2/1", "The string representation of the RationalNumber should be '-2/1'");
+    arktest.assertEQ(res, "-2/1", "The string representation of the RationalNumber should be '-2/1'");
 }
 
 /**
@@ -282,7 +282,7 @@ function testToString001() {
 function testToString002() {
     let pro = util.RationalNumber.parseRationalNumber(0, 0);
     let res = pro.toString();
-    assertEQ(res, "NaN", "The string representation of the RationalNumber should be 'NaN'");
+    arktest.assertEQ(res, "NaN", "The string representation of the RationalNumber should be 'NaN'");
 }
 
 /**
@@ -296,7 +296,7 @@ function testToString002() {
 function testToString003() {
     let pro = util.RationalNumber.parseRationalNumber(3, 0);
     let res = pro.toString();
-    assertEQ(res, "Infinity", "The string representation of the RationalNumber should be 'Infinity'");
+    arktest.assertEQ(res, "Infinity", "The string representation of the RationalNumber should be 'Infinity'");
 }
 
 /**
@@ -310,7 +310,7 @@ function testToString003() {
 function testToString004() {
     let pro = util.RationalNumber.parseRationalNumber(-3, 0);
     let res = pro.toString();
-    assertEQ(res, "-Infinity", "The string representation of the RationalNumber should be '-Infinity'");
+    arktest.assertEQ(res, "-Infinity", "The string representation of the RationalNumber should be '-Infinity'");
 }
 
 /**
@@ -324,5 +324,5 @@ function testToString004() {
 function testToString005() {
     let pro = util.RationalNumber.parseRationalNumber(2, 3);
     let res = pro.toString();
-    assertEQ(res, "2/3", "The string representation of the RationalNumber should be '2/3'");
+    arktest.assertEQ(res, "2/3", "The string representation of the RationalNumber should be '2/3'");
 }

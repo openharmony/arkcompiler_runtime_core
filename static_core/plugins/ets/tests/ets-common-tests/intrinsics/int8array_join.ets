@@ -24,7 +24,7 @@ const UTF16_JOINED_1 = '-128Ω-1Ω0Ω1Ω2Ω3Ω4Ω5Ω6Ω7Ω8Ω9Ω127';
 function joinEmpty(): void {
     let a: Int8Array = new Int8Array(0);
     let s = a.join();
-    assertTrue(s.isEmpty());
+    arktest.assertTrue(s.isEmpty());
 }
 
 function joinSingle(): void {
@@ -35,7 +35,7 @@ function joinSingle(): void {
 
 function joinDefaultDelim(): void {
     let a: Int8Array = new Int8Array(ARRAY);
-    assertEQ(a.join(), COMMA_JOINED);
+    arktest.assertEQ(a.join(), COMMA_JOINED);
 }
 
 function joinEmptyDelim(): void {

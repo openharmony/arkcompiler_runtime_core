@@ -27,5 +27,5 @@ function caller(val0: long, val1: long, val2: long, val3: long): number {
 }
 
 function main(): void {
-    assertEQ(-1, caller(-1, 2, 3, 4))
+    arktest.assertEQ(-1, caller(-1, 2, 3, 4))
 }

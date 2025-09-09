@@ -36,12 +36,12 @@ function main(): void {
             }
         }
         catch (ex){
-            is_active() { assertTrue( false,  "Not expected execution here") }
+            is_active() { arktest.assertTrue( false,  "Not expected execution here") }
         }
         finally {
             is_active() { count++ }
         }
     }
-    assertEQ( count, 2,  "Expected 2, actual " + count)
+    arktest.assertEQ( count, 2,  "Expected 2, actual " + count)
 }
 

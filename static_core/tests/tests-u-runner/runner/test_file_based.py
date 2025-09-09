@@ -18,7 +18,7 @@
 import logging
 import subprocess
 from copy import deepcopy
-from os import path, remove
+from os import path, remove, makedirs
 from typing import List, Callable, Tuple, Optional
 from unittest import TestCase
 from pathlib import Path
@@ -269,6 +269,12 @@ class TestFileBased(Test):
         )
 
         return *(self.run_one_step("ark_quick", params, result_validator)), dst_abc
+
+    def get_tests_abc(self) -> str:
+        bytecode_path = self.test_env.work_dir.intermediate
+        test_abc = path.join(bytecode_path, f"{self.test_id}.abc")
+        makedirs(path.dirname(test_abc), exist_ok=True)
+        return test_abc
 
     def __get_prof_files(
             self,

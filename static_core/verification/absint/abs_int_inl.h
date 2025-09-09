@@ -1828,7 +1828,13 @@ public:
 
         ScopedChangeThreadStatus st {ManagedThread::GetCurrent(), ThreadStatus::RUNNING};
         Job::ErrorHandler handler;
-        auto typeCls = field->ResolveTypeClass(&handler);
+        Class *typeCls {nullptr};
+        if (field->GetType().IsReference()) {
+            auto classId = panda_file::FieldDataAccessor::GetTypeId(*field->GetPandaFile(), field->GetFileId());
+            typeCls = job_->GetClass(classId, field->GetClass()->GetLoadContext(), field->GetPandaFile(), &handler);
+        } else {
+            typeCls = field->ResolveTypeClass(&handler);
+        }
         if (typeCls == nullptr) {
             return Type {};
         }
@@ -2734,7 +2740,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        SetAcc(objectType_);
+        SetAcc(GetCachedType());
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -2746,7 +2752,7 @@ public:
         DBGBRK();
         uint16_t vd = inst_.GetVReg<FORMAT>();
         Sync();
-        SetReg(vd, objectType_);
+        SetReg(vd, GetCachedType());
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -2845,6 +2851,23 @@ public:
             return false;
         }
         SetAcc(i32_);
+
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleEtsNullcheck()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+
+        if (!CheckType(GetAccType(), refType_)) {
+            SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
+            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+            return false;
+        }
 
         MoveToNextInst<FORMAT>();
         return true;
@@ -3409,6 +3432,101 @@ public:
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyCall0()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyCallRange()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyCallShort()
+    {
+        // NOTE: handle properly
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyCallThis0()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyCallThisRange()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyCallThisShort()
+    {
+        // NOTE: handle properly
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyCallNew0()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyCallNewRange()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyCallNewShort()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
     bool HandleThrow()
     {
         LOG_INST();
@@ -3501,6 +3619,103 @@ public:
             return capitalize ? "Accumulator" : "accumulator";
         }
         return PandaString {capitalize ? "Register v" : "register v"} + NumToStr(regIdx);
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyLdbyname()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyLdbynameV()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        uint16_t vOut = inst_.GetVReg<FORMAT, 0x0>();
+        SetReg(vOut, refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyStbyname()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyStbynameV()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyLdbyidx()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyStbyidx()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyLdbyval()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyStbyval()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyIsinstance()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        SetAcc(u1_);
+
+        MoveToNextInst<FORMAT>();
+        return true;
     }
 
 private:

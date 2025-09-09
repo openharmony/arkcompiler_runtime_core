@@ -38,8 +38,11 @@ static constexpr std::string_view MUTEX                                = "Lstd/c
 static constexpr std::string_view EVENT                                = "Lstd/core/Event;";
 static constexpr std::string_view COND_VAR                             = "Lstd/core/CondVar;";
 static constexpr std::string_view QUEUE_SPINLOCK                       = "Lstd/core/QueueSpinlock;";
-static constexpr std::string_view NULL_VALUE                           = "Lstd/core/__NullValue;";
+static constexpr std::string_view NULL_VALUE                           = "Lstd/core/Null;";
 static constexpr std::string_view STRING                               = "Lstd/core/String;";
+static constexpr std::string_view LINE_STRING                          = "Lstd/core/LineString;";
+static constexpr std::string_view SLICED_STRING                        = "Lstd/core/SlicedString;";
+static constexpr std::string_view TREE_STRING                          = "Lstd/core/TreeString;";
 static constexpr std::string_view WEAK_REF                             = "Lstd/core/WeakRef;";
 static constexpr std::string_view FINALIZABLE_WEAK_REF                 = "Lstd/core/FinalizableWeakRef;";
 static constexpr std::string_view FINALIZATION_REGISTRY                = "Lstd/core/FinalizationRegistry;";
@@ -48,6 +51,9 @@ static constexpr std::string_view FIELD                                = "Lstd/c
 static constexpr std::string_view METHOD                               = "Lstd/core/Method;";
 static constexpr std::string_view PARAMETER                            = "Lstd/core/Parameter;";
 static constexpr std::string_view STRING_BUILDER                       = "Lstd/core/StringBuilder;";
+
+// TypeAPI classes
+static constexpr std::string_view CLASS_TYPE                           = "Lstd/core/ClassType;";
 
 // Runtime classes
 static constexpr std::string_view STACK_TRACE_ELEMENT                  = "Lstd/core/StackTraceElement;";
@@ -146,10 +152,10 @@ static constexpr std::string_view EXCEPTION_IN_INITIALIZER_ERROR       = "Lstd/c
 static constexpr std::string_view FILE_NOT_FOUND_ERROR                 = "Lstd/core/FileNotFoundError;";
 static constexpr std::string_view ILLEGAL_ACCESS_ERROR                 = "Lstd/core/IllegalAccessError;";
 // remove or make an Error
-static constexpr std::string_view ILLEGAL_ARGUMENT_EXCEPTION           = "Lstd/core/IllegalArgumentException;";
+static constexpr std::string_view ILLEGAL_ARGUMENT_ERROR               = "Lstd/core/IllegalArgumentError;";
 static constexpr std::string_view ILLEGAL_MONITOR_STATE_ERROR          = "Lstd/core/IllegalMonitorStateError;";
 // remove or make an Error
-static constexpr std::string_view ILLEGAL_STATE_EXCEPTION              = "Lstd/core/IllegalStateException;";
+static constexpr std::string_view ILLEGAL_STATE_ERROR                  = "Lstd/core/IllegalStateError;";
 static constexpr std::string_view INDEX_OUT_OF_BOUNDS_ERROR            = "Lstd/core/IndexOutOfBoundsError;";
 static constexpr std::string_view INSTANTIATION_ERROR                  = "Lstd/core/InstantiationError;";
 // has no class defined
@@ -176,13 +182,13 @@ static constexpr std::string_view RUNTIME_EXCEPTION                    = "Lstd/c
 static constexpr std::string_view STACK_OVERFLOW_ERROR                 = "Lstd/core/StackOverflowError;";
 static constexpr std::string_view STRING_INDEX_OUT_OF_BOUNDS_ERROR     = "Lstd/core/StringIndexOutOfBoundsError;";
 // remove or make an Error
-static constexpr std::string_view UNSUPPORTED_OPERATION_EXCEPTION      = "Lstd/core/UnsupportedOperationException;";
+static constexpr std::string_view UNSUPPORTED_OPERATION_ERROR          = "Lstd/core/UnsupportedOperationError;";
 
 // coroutines
 static constexpr std::string_view INVALID_COROUTINE_OPERATION_ERROR    = "Lstd/core/InvalidCoroutineOperationError;";
 
 // stdlib Exception classes
-static constexpr std::string_view ARGUMENT_OUT_OF_RANGE_EXCEPTION      = "Lstd/core/ArgumentOutOfRangeException;";
+static constexpr std::string_view ARGUMENT_OUT_OF_RANGE_ERROR          = "Lstd/core/ArgumentOutOfRangeError;";
 
 // stdlib Error classes
 static constexpr std::string_view ERROR_OPTIONS                        = "Lescompat/ErrorOptions;";
@@ -199,8 +205,11 @@ static constexpr std::string_view JS_RUNTIME                           = "Lstd/i
 static constexpr std::string_view JS_VALUE                             = "Lstd/interop/js/JSValue;";
 static constexpr std::string_view ES_ERROR                             = "Lstd/interop/js/ESError;";
 
+// Interop function class for invoking dynamic functions
+static constexpr std::string_view INTEROP_DYNAMIC_FUNCTION             = "Lstd/interop/js/DynamicFunction;";
+
 static constexpr std::string_view ARRAY                                = "Lescompat/Array;";
-static constexpr std::string_view ARRAY_AS_LIST_INT                    = "Lstd/containers/ArrayAsListInt;";
+static constexpr std::string_view ARRAY_AS_LIST_INT                    = "Lstd/containers/containers/ArrayAsListInt;";
 static constexpr std::string_view REG_EXP_EXEC_ARRAY                   = "Lescompat/RegExpExecArray;";
 static constexpr std::string_view JSON_REPLACER                        = "Lescompat/JsonReplacer;";
 
@@ -228,6 +237,17 @@ static constexpr std::string_view EMPTYMAPITERATOR                     = "Lescom
 static constexpr std::string_view SET                                  = "Lescompat/Set;";
 static constexpr std::string_view RECORD                               = "Lescompat/Record;";
 static constexpr std::string_view PROCESS                              = "Lescompat/StdProcess;";
+static constexpr std::string_view INT8_ARRAY                           = "Lescompat/Int8Array;";
+static constexpr std::string_view UINT8_ARRAY                          = "Lescompat/Uint8Array;";
+static constexpr std::string_view UINT8_CLAMPED_ARRAY                  = "Lescompat/Uint8ClampedArray;";
+static constexpr std::string_view INT16_ARRAY                          = "Lescompat/Int16Array;";
+static constexpr std::string_view UINT16_ARRAY                         = "Lescompat/Uint16Array;";
+static constexpr std::string_view INT32_ARRAY                          = "Lescompat/Int32Array;";
+static constexpr std::string_view UINT32_ARRAY                         = "Lescompat/Uint32Array;";
+static constexpr std::string_view FLOAT32_ARRAY                        = "Lescompat/Float32Array;";
+static constexpr std::string_view FLOAT64_ARRAY                        = "Lescompat/Float64Array;";
+static constexpr std::string_view BIG_INT64_ARRAY                      = "Lescompat/BigInt64Array;";
+static constexpr std::string_view BIG_UINT64_ARRAY                     = "Lescompat/BigUint64Array;";
 
 // Json Annotations
 static constexpr std::string_view JSON_STRINGIFY_IGNORE                = "Lescompat/JSONStringifyIgnore;";
@@ -241,6 +261,10 @@ static constexpr std::string_view OPTIONAL_PARAMETERS_ANNOTATION       =
 // Annotation for function reference
 static constexpr std::string_view ANNOTATION_FUNCTIONAL_REFERENCE      =
     "Lets/annotation/FunctionalReference;";
+
+// Annotation for function overload
+static constexpr std::string_view ANNOTATION_FUNCTIONAL_OVERLOAD       =
+    "Lets/annotation/FunctionOverload;";
 
 }  // namespace class_descriptors
 

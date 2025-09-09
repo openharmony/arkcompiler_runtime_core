@@ -24,5 +24,5 @@ type NumberOrString = Number|RegularLambda|undefined;
 
 function main(): void {
     let x = new Array<NumberOrString>();
-    assertTrue( x != null)
+    arktest.assertTrue( x != null)
 }

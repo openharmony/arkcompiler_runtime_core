@@ -14,7 +14,9 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Superclass constructor calls (used to call a direct superclass constructor), called Unqualified superclass constructor calls that start with the keyword super
+desc: >-
+    Superclass constructor calls (used to call a direct superclass constructor),
+    called Unqualified superclass constructor calls that start with the keyword super
 ---*/
 
 class A {
@@ -34,5 +36,5 @@ class B extends A {
 function main(): void {
   let i1: B = new B();
 
-  assertEQ( i1.x, 5 );
+  arktest.assertEQ( i1.x, 5 );
 }

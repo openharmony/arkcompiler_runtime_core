@@ -13,23 +13,24 @@
  * limitations under the License.
  */
 
-function simpleTest(): void throws {
+function simpleTest(): void {
     GC.scheduleGcAfterNthAlloc(2, GC.Cause.YOUNG);
     new Object();
-    assertFalse(GC.isScheduledGCTriggered(), "GC was scheduled before 2nd allocation, current is 1st");
+    arktest.assertFalse(GC.isScheduledGCTriggered(), "GC was scheduled before 2nd allocation, current is 1st");
     new Object();
-    assertTrue(GC.isScheduledGCTriggered(), "2 allocation already done, but GC has not been trigger");
+    arktest.assertTrue(GC.isScheduledGCTriggered(), "2 allocation already done, but GC has not been trigger");
 }
 
 function incorrectCounterTest(): void {
     let detected = false;
     try {
         GC.scheduleGcAfterNthAlloc(-1, GC.Cause.YOUNG);
-    } catch (e: IllegalArgumentException) {
-        detected = true;
+    } catch (e) {
+        if (e instanceof IllegalArgumentError) {
+            detected = true;
+        }
     }
-    catch (e) {}
-    assertTrue(detected, "scheduleGcAfterNthAlloc must throw IllegalArgumentException for negative counter");
+    arktest.assertTrue(detected, "scheduleGcAfterNthAlloc must throw IllegalArgumentError for negative counter");
 }
 
 function main(): int {
@@ -37,7 +38,7 @@ function main(): int {
         simpleTest();
     }
     catch (e) {
-        assertTrue(false, "Simple test must not throw exceptions");
+        arktest.assertTrue(false, "Simple test must not throw exceptions");
     }
     incorrectCounterTest();
     return 0;

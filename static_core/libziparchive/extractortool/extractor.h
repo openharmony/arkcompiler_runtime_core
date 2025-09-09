@@ -36,6 +36,8 @@ public:
     virtual bool Init();
     // For abc file only, to mmap to safe region.
     std::shared_ptr<FileMapper> GetSafeData(const std::string &fileName);
+    // For hsp abc file, to mmap to safe region
+    std::shared_ptr<FileMapper> GetSafeDataForHsp(const std::string &fileName);
 
 private:
     ZipFile zipFile_;

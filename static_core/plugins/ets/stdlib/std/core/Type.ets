@@ -221,6 +221,7 @@ export abstract class Type extends Object {
      *
      * @returns instance of appropriate type or undefined if resolving is failed
      */
+    // NOTE(ekaterinazaytseva): unable to replace internal - used in TypeCreator.ets as public
     internal static resolve(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker): Type | undefined {
         let kind = (TypeAPI.getTypeKind(td, contextLinker) & TypeKindMask).toByte()
         switch (kind) {
@@ -530,6 +531,9 @@ export abstract class Type extends Object {
             return true
         }
         if (this instanceof BooleanType && other instanceof BooleanType) {
+            return true
+        }
+        if (this instanceof CharType && other instanceof CharType) {
             return true
         }
         return false
@@ -1744,6 +1748,16 @@ export final class ClassType extends Type {
         throw new TypeError("no field \"" + name + "\"")
     }
 
+    public getMethodByName(name: string): Method{
+        for (let methodIdx = 0; methodIdx < this.getMethodsNum(); ++methodIdx) {
+            const method = this.getMethod(methodIdx)
+            if (method.getName() == name && !method.isStatic()) {
+                return method
+            }
+        }
+        throw new TypeError("no instance method \"" + name + "\"")
+    }
+
     private getFieldImpl(fieldPtr: long): Field {
         const fieldDesc = TypeAPI.getFieldDescriptor(fieldPtr)
         const fieldType = Type.resolve(fieldDesc, this.getContextLinker())!
@@ -2675,7 +2689,7 @@ export final class StringType extends Type {
     public static readonly REF: StringType = new StringType()
 
     internal constructor() {
-        super(TypeAPI.getTypeDescriptor(""), getBootRuntimeLinker())
+        super(TypeAPI.convertTypeDescriptor("std.core.String"), getBootRuntimeLinker())
     }
 
     /**
@@ -2959,7 +2973,7 @@ export final class UnionType extends Type {
         throw new Error("not implemented")
     }
 
-    public make(defaultValue: Value): Object {
+    public make(defaultValue: reflect.Value): Object {
         // NOTE(shumilov-petr): not implemented
         throw new Error("not implemented")
     }

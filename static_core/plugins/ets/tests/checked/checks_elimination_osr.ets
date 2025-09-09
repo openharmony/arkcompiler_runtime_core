@@ -24,10 +24,10 @@
 function find(arr: FixedArray<byte>, indexes: FixedArray<byte>, elem: int): int {
   let x : int = 0;
   try {
-    __noinline__foo(arr.length, elem); // can throw exception
-    x = indexes[0];                    // NullCheck can be not executed
+    __noinline__foo(arr.length, elem); // can throw error
+    x = indexes[0]; // NullCheck can be not executed
   } catch (e) {
-    assertTrue(false, "exception, " + e.toString());
+    arktest.assertTrue(false, "error, " + e.toString());
   }
 
   for (let i: int = 0; i < arr.length; ++i) {
@@ -39,15 +39,14 @@ function find(arr: FixedArray<byte>, indexes: FixedArray<byte>, elem: int): int 
   return indexes[x]; // should not delete NullCheck
 }
 
-function __noinline__foo(length: int, elem: int) : void throws
-{
+function __noinline__foo(length: int, elem: int) : void {
   if (elem >= length) {
     throw new ArrayIndexOutOfBoundsError("find failed: out of range");
   }
 }
 
 function main(): int {
-  const byteArr: FixedArray<byte> = [10, 14, 7, 4, 0, 9, 6, 15, 3, 12,  2,  8,  5, 11, 13,  1];
-  const indArr: FixedArray<byte> =  [ 0,  1, 2, 3, 4, 5, 6,  7, 8,  9, 10, 11, 12, 13, 14, 15];
+  const byteArr: FixedArray<byte> = [10, 14, 7, 4, 0, 9, 6, 15, 3, 12, 2, 8, 5, 11, 13, 1];
+  const indArr: FixedArray<byte> =  [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
   return find(byteArr, indArr, 2) - 10;
 }

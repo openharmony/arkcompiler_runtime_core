@@ -81,8 +81,8 @@ function jsonParseUsingUndefinedReviver(): int {
 
     const parsedPoint: Point = JSON.parse<Point>(JSON.stringify(point), undefined, POINT_TYPE)!
 
-    Assertions.assertEquals(point.x, parsedPoint.x)
-    Assertions.assertEquals(point.y, parsedPoint.y)
+    arktest.assertEQ(point.x, parsedPoint.x)
+    arktest.assertEQ(point.y, parsedPoint.y)
     
     return RESULT_SUCCESS
 }
@@ -92,7 +92,7 @@ function jsonParseUsingRevivierWhichReturnsUndefined(): int {
 
     const parsedPoint = JSON.parse<Point>(JSON.stringify(point), newUndefiningReviver(""), POINT_TYPE)
 
-    Assertions.assertSame(undefined, parsedPoint)
+    arktest.assertEQ(undefined, parsedPoint)
 
     return RESULT_SUCCESS
 }
@@ -101,8 +101,7 @@ const STRING_ARRAY_TYPE = Type.of([] as FixedArray<string>)
 
 function jsonParseArrayUsingReviverWhichReturnsUndefined(): int {
     const parsedArray = JSON.parse<FixedArray<Nullish<string>>>(`["one","two"]`, newUndefiningReviver("0"), STRING_ARRAY_TYPE)
-
-    Assertions.assertArrayEquals([null, "two"] as FixedArray<Nullish<string>>, parsedArray)
+    arktest.assertEQ([null, "two"] as FixedArray<Nullish<string>>, parsedArray)
 
     return RESULT_SUCCESS
 }
@@ -117,8 +116,8 @@ function jsonParseUsingReplacingReviver(): int {
     const parsedPoint: Point = JSON.parse<Point>(JSON.stringify(point), newReplacingReviver(replacements), POINT_TYPE)!
 
     const replacedPoint = new Point(NEW_X, point.y)
-    Assertions.assertEquals(replacedPoint.x, parsedPoint.x)
-    Assertions.assertEquals(replacedPoint.y, parsedPoint.y)
+    arktest.assertEQ(replacedPoint.x, parsedPoint.x)
+    arktest.assertEQ(replacedPoint.y, parsedPoint.y)
 
     const trash = new Trash(new Point(10, 20))
     const trashJson = JSON.stringify(trash)
@@ -126,13 +125,13 @@ function jsonParseUsingReplacingReviver(): int {
 
     let parsedTrash = JSON.parse<Trash>(trashJson, newUndefiningReviver("point"), trashType)
 
-    Assertions.assertTrue(parsedTrash != null)
-    Assertions.assertSame(undefined, parsedTrash!.point)
+    arktest.assertTrue(parsedTrash != null)
+    arktest.assertEQ(undefined, parsedTrash!.point)
 
     parsedTrash = JSON.parse<Trash>(trashJson, newNullingReviver("point"), trashType)
 
-    Assertions.assertTrue(parsedTrash != null)
-    Assertions.assertSame(undefined, parsedTrash!.point)
+    arktest.assertTrue(parsedTrash != null)
+    arktest.assertEQ(undefined, parsedTrash!.point)
 
     return RESULT_SUCCESS
 }
@@ -146,7 +145,7 @@ function jsonParseArrayWithReplacingReviver(): int {
     replacements.set("", replacedRomans)
 
     const parsedRomans = JSON.parse<FixedArray<Nullish<string>>>(JSON.stringify(romans), newReplacingReviver(replacements), STRING_ARRAY_TYPE)
-    Assertions.assertArrayEquals(parsedRomans, replacedRomans)
+    arktest.assertEQ(parsedRomans, replacedRomans)
 
     return RESULT_SUCCESS
 }
@@ -164,14 +163,14 @@ function consolePrint(color: Color, text: string): void {
 }
 
 class BooleanTestClass {
-    public flag: boolean = false;
+    flag: boolean = false;
 }
 
 function jsonParseWithBoolean(): int {
     let str = '{"flag":true}'
     let type = Type.from<BooleanTestClass>()
     let ret = JSON.parse<BooleanTestClass>(str, type) as BooleanTestClass
-    Assertions.assertEquals(ret.flag, true)
+    arktest.assertEQ(ret.flag, true)
     return RESULT_SUCCESS
 }
 
@@ -182,7 +181,8 @@ function main(): int {
     failures += test(jsonParseUsingRevivierWhichReturnsUndefined, "JSON.parse() using 'reviver' which returns 'undefined'")
     // #21831: ArrayStoreError: nullvalue cannot be stored in an array of type [Lstd/core/String;
     //failures += test(jsonParseArrayUsingReviverWhichReturnsUndefined, "JSON.parse(array) using 'reviver' which returns 'undefined'")
-    failures += test(jsonParseUsingReplacingReviver, "JSON.parse() using replacing 'reviver'")
+    // #27136: Nullish field type is UnionType which is not supported yet
+    //failures += test(jsonParseUsingReplacingReviver, "JSON.parse() using replacing 'reviver'")
     failures += test(jsonParseArrayWithReplacingReviver, "JSON.parse(array) using replacing 'reviver'")
     failures += test(jsonParseWithBoolean, 'JSON.parse boolean in class')
 
@@ -218,7 +218,7 @@ function test(testAction: () => int, testName: string): int {
             const errorMessage = assertionError.message
             console.println(`"${testName}" failed with error: ${errorMessage}`)
         } else {
-            console.println(`"${testName}" failed with exception ${e}`)
+            console.println(`"${testName}" failed with error ${e}`)
         }
 
         return RESULT_FAILURE
@@ -227,42 +227,4 @@ function test(testAction: () => int, testName: string): int {
 
 function typeFor<T>(a: FixedArray<T>): Type {
     return (Type.of(a) as ArrayType).getElementType()
-}
-
-class Assertions {
-    static assertEquals(expected: NullishType, actual: NullishType): void {
-        assertTrue( __runtimeSameValueZero(expected, actual),  `expected ${expected} but was ${actual}`)
-    }
-
-    static assertSame(expected: NullishType, actual: NullishType): void {
-        assertTrue( expected === actual,  `expected "${expected}" but was "${actual}"`)
-    }
-
-    static assertTrue(actual: boolean): void {
-        assertTrue( actual,  "expected true but was false")
-    }
-
-    static assertArrayEquals<T>(expected: FixedArray<T> | undefined | null, actual: FixedArray<T> | undefined | null): void {
-        if (expected === null) {
-            assertTrue( actual === null,  `expected 'null' but was [${actual}]`)
-        } else if (expected === undefined) {
-            assertTrue( actual === undefined,  `expected 'undefined' but was [${actual}]`)
-        } else {
-            assertTrue( actual !== null,  `expected [${expected}] but was 'null'`)
-            assertTrue( actual !== undefined,  `expected [${expected}] but was 'udefined'`)
-
-            if (expected !== actual) {
-                // making compiler happy, avoiding explicit 'actual!'
-                if (actual != null) {
-                    assertEQ( expected.length,  actual.length,  `expected [${expected}] but was [${actual}]`)
-
-                    for (let i = 0; i < expected.length; i++) {
-                        if (!__runtimeSameValueZero(expected[i], actual[i])) {
-                            assertTrue( false,  `expected [${expected}] but was [${actual}]`)
-                        }
-                    }
-                }
-            }
-        }
-    }
 }

@@ -63,33 +63,11 @@ def conf_data_fixture():
             "build": "str"
         },
         "syntax": {
+            "keywords": [],
+            "typeKeywords": [],
+            "builtins": [],
             "tokenizer": {
-                "root": [
-                    [
-                        "/\\b(function|if|else|return|char|void)\\b/",
-                        "keyword"
-                    ],
-                    [
-                        "[{}[\\]()]",
-                        "@brackets"
-                    ],
-                    [
-                        "[a-zA-Z_$][\\w$]*",
-                        "identifier"
-                    ],
-                    [
-                        "\\d+",
-                        "number"
-                    ],
-                    [
-                        "/\".*?\"/",
-                        "string"
-                    ],
-                    [
-                        "[;,.]",
-                        "delimiter",
-                    ]
-                ]
+                "root": []
             }
         }
     }

@@ -15,23 +15,32 @@
 
 package getter.test;
 
-function checkClassGetter(classObjWithGetter: JSValue, targetValue: JSValue): boolean {
-    return classObjWithGetter.hello as string == targetValue as string;
+function checkClassGetter(classObjWithGetter: JSValue, targetValue: JSValue) {
+    let clsObj = ESValue.wrap(classObjWithGetter);
+    let tarObj = ESValue.wrap(targetValue);
+    return clsObj.getProperty('hello').toString() === tarObj.toString();
 }
 
-function checkLiteralObjGetter(literalObjWithGetter: JSValue, targetValue: JSValue): boolean {
-    return literalObjWithGetter.hello as string == targetValue as string;
+function checkLiteralObjGetter(literalObjWithGetter: JSValue, targetValue: JSValue) {
+    let literalObj = ESValue.wrap(literalObjWithGetter);
+    let tarObj = ESValue.wrap(targetValue);
+    return literalObj.getProperty('hello').toString() == tarObj.toString();
 }
 
-function checkDeleteLiteralObjGetter(literalObjWithGetter: JSValue): boolean {
-    return ESValue.wrap(literalObjWithGetter).getProperty('hello').isUndefined();
+function checkDeleteLiteralObjGetter(literalObjWithGetter: JSValue) {
+    let literalObj = ESValue.wrap(literalObjWithGetter);
+    return literalObj.getProperty('hello').toUndefined() == undefined;
 }
 
-function checkDefinePropertyGetter(literalObjWithGetter: JSValue, targetValue: JSValue): boolean {
-    return literalObjWithGetter.hello as string == targetValue as string;
+function checkDefinePropertyGetter(literalObjWithGetter: JSValue, targetValue: JSValue) {
+    let literalObj = ESValue.wrap(literalObjWithGetter);
+    let tarObj = ESValue.wrap(targetValue);
+    return literalObj.getProperty('hello').toString() == tarObj.toString();
 }
 
-function checkComputedPropertyGetter(literalObjWithGetter: JSValue, targetValue: JSValue): boolean {
-    return literalObjWithGetter.hello as string == targetValue as string;
+function checkComputedPropertyGetter(literalObjWithGetter: JSValue, targetValue: JSValue) {
+    let literalObj = ESValue.wrap(literalObjWithGetter);
+    let tarObj = ESValue.wrap(targetValue);
+    return literalObj.getProperty('hello').toString() == tarObj.toString();
 }
 

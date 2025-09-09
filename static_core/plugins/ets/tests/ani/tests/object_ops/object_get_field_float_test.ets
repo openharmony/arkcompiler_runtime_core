@@ -23,6 +23,6 @@ class Woman {
 }
 
 function newSarahObject() {
-    const age_: float = 24.0;
+    const age_: float = 24.0f;
     return new Woman("Sarah", age_);
 }

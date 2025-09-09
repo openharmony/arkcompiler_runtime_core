@@ -17,13 +17,15 @@
 /*---
 desc: 
     Constant expression with unary plus as enum initializer.
+tags: [{{c.neg}}]    
 ---*/
 
 const testValue: {{c.type}} = {{c.value}}
 
+enum TestEnum { One = +testValue }
+
 function main() {
-    enum TestEnum { One = +testValue {{c.conversion}} }
-    assertEQ(TestEnum.One.valueOf(), {{c.expected}})
+    arktest.assertEQ(TestEnum.One.valueOf(), {{c.expected}})
 }
 
 {% endfor %}

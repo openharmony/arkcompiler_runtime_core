@@ -21,4 +21,7 @@ desc: Callbacks and type inference from context, {{c.desc}}
 
 {{c.impl}}
 
+function main() {
+    {{c.call|indent}}
+}
 {% endfor %}

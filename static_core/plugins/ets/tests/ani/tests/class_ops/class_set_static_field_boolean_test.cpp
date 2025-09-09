@@ -38,7 +38,7 @@ public:
 TEST_F(ClassSetStaticFieldBooleanTest, set_boolean)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_boolean_test/TestSetBoolean;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_boolean_test.TestSetBoolean", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "bool_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -53,7 +53,7 @@ TEST_F(ClassSetStaticFieldBooleanTest, set_boolean)
 TEST_F(ClassSetStaticFieldBooleanTest, set_boolean_c_api)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_boolean_test/TestSetBoolean;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_boolean_test.TestSetBoolean", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "bool_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -68,7 +68,7 @@ TEST_F(ClassSetStaticFieldBooleanTest, set_boolean_c_api)
 TEST_F(ClassSetStaticFieldBooleanTest, set_invalid_field_type)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_boolean_test/TestSetBoolean;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_boolean_test.TestSetBoolean", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -78,7 +78,7 @@ TEST_F(ClassSetStaticFieldBooleanTest, set_invalid_field_type)
 TEST_F(ClassSetStaticFieldBooleanTest, invalid_argument2)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_boolean_test/TestSetBoolean;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_boolean_test.TestSetBoolean", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "bool_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -91,14 +91,14 @@ TEST_F(ClassSetStaticFieldBooleanTest, invalid_argument2)
 TEST_F(ClassSetStaticFieldBooleanTest, invalid_argument3)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_boolean_test/TestSetBoolean;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_boolean_test.TestSetBoolean", &cls), ANI_OK);
     ASSERT_EQ(env_->Class_SetStaticField_Boolean(cls, nullptr, ANI_TRUE), ANI_INVALID_ARGS);
 }
 
 TEST_F(ClassSetStaticFieldBooleanTest, invalid_argument4)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_boolean_test/TestSetBoolean;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_boolean_test.TestSetBoolean", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "bool_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -110,7 +110,7 @@ TEST_F(ClassSetStaticFieldBooleanTest, special_values)
     ani_class cls {};
     ani_static_field field {};
     ani_boolean single;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_boolean_test/TestSetBoolean;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_boolean_test.TestSetBoolean", &cls), ANI_OK);
     ASSERT_EQ(env_->Class_FindStaticField(cls, "bool_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
     ASSERT_EQ(env_->Class_SetStaticField_Boolean(cls, field, ani_boolean(0)), ANI_OK);
@@ -143,7 +143,7 @@ TEST_F(ClassSetStaticFieldBooleanTest, combination_test1)
     ani_class cls {};
     ani_static_field field {};
     ani_boolean single;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_boolean_test/TestSetBoolean;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_boolean_test.TestSetBoolean", &cls), ANI_OK);
     ASSERT_EQ(env_->Class_FindStaticField(cls, "bool_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
     const int32_t loopNum = 3;
@@ -159,17 +159,17 @@ TEST_F(ClassSetStaticFieldBooleanTest, combination_test1)
 
 TEST_F(ClassSetStaticFieldBooleanTest, combination_test2)
 {
-    CheckFieldValue("Lclass_set_static_field_boolean_test/TestSetBoolean;", "bool_value");
+    CheckFieldValue("class_set_static_field_boolean_test.TestSetBoolean", "bool_value");
 }
 
 TEST_F(ClassSetStaticFieldBooleanTest, combination_test3)
 {
-    CheckFieldValue("Lclass_set_static_field_boolean_test/TestSetBooleanA;", "bool_value");
+    CheckFieldValue("class_set_static_field_boolean_test.TestSetBooleanA", "bool_value");
 }
 
 TEST_F(ClassSetStaticFieldBooleanTest, combination_test4)
 {
-    CheckFieldValue("Lclass_set_static_field_boolean_test/TestSetBooleanFinal;", "bool_value");
+    CheckFieldValue("class_set_static_field_boolean_test.TestSetBooleanFinal", "bool_value");
 }
 
 TEST_F(ClassSetStaticFieldBooleanTest, check_initialization)

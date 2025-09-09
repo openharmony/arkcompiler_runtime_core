@@ -15,26 +15,12 @@
 
 #ifndef PANDA_PRODUCT_BUILD
 
-#include "runtime/compiler.h"
-#include "runtime/include/thread.h"
-#include "plugins/ets/runtime/ani/ani.h"
+#include <array>
+
 #include "plugins/ets/stdlib/native/core/stdlib_ani_helpers.h"
-#include "plugins/ets/runtime/ani/scoped_objects_fix.h"
+#include "plugins/ets/tests/checked/jitinterface/compile_method.h"
 
-extern "C" {
-namespace ark::ets::ani {
-// NOLINTNEXTLINE(readability-identifier-naming)
-ANI_EXPORT ani_int CompileMethodImpl([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_string name)
-{
-    if (!Runtime::GetCurrent()->IsJitEnabled()) {
-        return 1;
-    }
-    ScopedManagedCodeFix s(env);
-    auto str = s.ToInternalType(name);
-    return ark::CompileMethodImpl(str->GetCoreType(), panda_file::SourceLang::ETS);
-}
-
-ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
+extern "C" ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
     ani_env *env;
     if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
@@ -42,16 +28,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_ERROR;
     }
 
-    static const char *moduleName = "Lstring_tlab_allocations;";
+    static const char *moduleName = "string_tlab_allocations";
     ani_module md;
     if (ANI_OK != env->FindModule(moduleName, &md)) {
         auto msg = std::string("Cannot find \"") + moduleName + std::string("\" module!");
-        ark::ets::stdlib::ThrowNewError(env, "Lstd/core/RuntimeException;", msg.data(), "Lstd/core/String;:V");
+        ark::ets::stdlib::ThrowNewError(env, "std.core.RuntimeException", msg.data(), "C{std.core.String}:");
         return ANI_ERROR;
     }
 
-    const auto functions = std::array {
-        ani_native_function {"compileMethod", "Lstd/core/String;:I", reinterpret_cast<void *>(CompileMethodImpl)}};
+    const auto functions = std::array {ani_native_function {"compileMethod", "C{std.core.String}:i",
+                                                            reinterpret_cast<void *>(ark::ets::ani::CompileMethod)}};
 
     if (ANI_OK != env->Module_BindNativeFunctions(md, functions.data(), functions.size())) {
         std::cerr << "Cannot bind native functions to '" << moduleName << "'" << std::endl;
@@ -62,7 +48,4 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     return ANI_OK;
 }
 
-}  // namespace ark::ets::ani
-
-}  // extern "C"
-#endif
+#endif  // PANDA_PRODUCT_BUILD

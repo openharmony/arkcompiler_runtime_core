@@ -20,23 +20,23 @@ class StackTraceTest {
         } catch (e: Exception)  {
             console.println(e.toString());
         } catch (e) {
-            assertTrue(false, "Unexpected catch clause");
+            arktest.assertTrue(false, "Unexpected catch clause");
         }
     }
 
-    public static invokeUnhandledException(): void throws {
+    public static invokeUnhandledException(): void {
         StackTraceTest.nestedFunc1();
     }
 
-    static nestedFunc1(): void throws {
+    static nestedFunc1(): void {
         StackTraceTest.nestedFunc2();
     }
 
-    static nestedFunc2(): void throws {
+    static nestedFunc2(): void {
         StackTraceTest.throwing();
     }
 
-    static throwing(): void throws {
+    static throwing(): void {
         throw new Exception("Test message");
     }
 }

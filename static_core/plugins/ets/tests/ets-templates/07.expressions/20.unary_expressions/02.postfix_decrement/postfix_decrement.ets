@@ -19,10 +19,10 @@ desc: Postfix decrement operator
 
 function main(): void {
   let a = 5;
-  assertEQ(a--, 5);
-  assertEQ(a, 4);
+  arktest.assertEQ(a--, 5);
+  arktest.assertEQ(a, 4);
   a -= a--
-  assertEQ(a, 0)
+  arktest.assertEQ(a, 0)
   let c = 1.0
-  assertEQ(c--, 1.0)
+  arktest.assertEQ(c--, 1.0)
 }

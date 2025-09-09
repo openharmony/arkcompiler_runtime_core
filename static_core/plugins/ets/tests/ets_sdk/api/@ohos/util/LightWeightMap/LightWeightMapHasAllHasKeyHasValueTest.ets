@@ -15,11 +15,8 @@
 
 import LightWeightMap from "@ohos.util.LightWeightMap";
 
-const success = 0;
-const fail = 1;
-
 function main(): int {
-    const suite = new ArkTestsuite("LightWeightMap HasAll HasKey HasValue API tests")
+    const suite = new arktest.ArkTestsuite("LightWeightMap HasAll HasKey HasValue API tests")
 
     suite.addTest("LightWeightMap hasAll the map1 has all data of the map2",
         testHasAllWithAllData)
@@ -44,82 +41,82 @@ function main(): int {
 }
 
 function testHasAllWithAllData() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("squirrel", 123);
     lightWeightMap.set("sparrow", 356);
-    let newLightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let newLightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     newLightWeightMap.set("sparrow", 356);
     let result = lightWeightMap.hasAll(newLightWeightMap);
-    assertEQ(result, true, "The lightWeightMap should contain all data from another lightWeightMap");
-    assertEQ(lightWeightMap.length, 2, "The lightWeightMap length should be 2");
-    assertEQ(newLightWeightMap.length, 1, "The newLightWeightMap length should be 1");
+    arktest.assertEQ(result, true, "The lightWeightMap should contain all data from another lightWeightMap");
+    arktest.assertEQ(lightWeightMap.length, 2, "The lightWeightMap length should be 2");
+    arktest.assertEQ(newLightWeightMap.length, 1, "The newLightWeightMap length should be 1");
 }
 
 function testHasAllWithNotSetData() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("squirrel", 123);
     lightWeightMap.set("sparrow", 356);
-    let newLightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let newLightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     newLightWeightMap.set("test", 777);
     let result = lightWeightMap.hasAll(newLightWeightMap);
-    assertEQ(result, false, "The lightWeightMap should not contain data that are not set in another lightWeightMap");
-    assertEQ(lightWeightMap.length, 2, "The lightWeightMap length should be 2");
-    assertEQ(newLightWeightMap.length, 1, "The newLightWeightMap length should be 1");
+    arktest.assertEQ(result, false, "The lightWeightMap should not contain data that are not set in another lightWeightMap");
+    arktest.assertEQ(lightWeightMap.length, 2, "The lightWeightMap length should be 2");
+    arktest.assertEQ(newLightWeightMap.length, 1, "The newLightWeightMap length should be 1");
 }
 
 function testHasAllWithOutOfRangeData() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("squirrel", 123);
     lightWeightMap.set("sparrow", 356);
-    let newLightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let newLightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     newLightWeightMap.set("test", 777);
     newLightWeightMap.set("squirrel", 123);
     newLightWeightMap.set("sparrow", 356);
     let result = lightWeightMap.hasAll(newLightWeightMap);
-    assertEQ(result, false,
+    arktest.assertEQ(result, false,
         "The lightWeightMap should not contain data that are out of range in another lightWeightMap");
-    assertEQ(lightWeightMap.length, 2, "The lightWeightMap length should be 2");
-    assertEQ(newLightWeightMap.length, 3, "The newLightWeightMap length should be 3");
+    arktest.assertEQ(lightWeightMap.length, 2, "The lightWeightMap length should be 2");
+    arktest.assertEQ(newLightWeightMap.length, 3, "The newLightWeightMap length should be 3");
 }
 
 function testHasAllWithEmptyMap() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("squirrel", 123);
     lightWeightMap.set("sparrow", 356);
-    let newLightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let newLightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     let result = lightWeightMap.hasAll(newLightWeightMap);
-    assertEQ(result, true, "The lightWeightMap should contain all data from an empty lightWeightMap");
-    assertEQ(lightWeightMap.length, 2, "The lightWeightMap length should be 2");
-    assertEQ(newLightWeightMap.length, 0, "The newLightWeightMap length should be 0");
+    arktest.assertEQ(result, true, "The lightWeightMap should contain all data from an empty lightWeightMap");
+    arktest.assertEQ(lightWeightMap.length, 2, "The lightWeightMap length should be 2");
+    arktest.assertEQ(newLightWeightMap.length, 0, "The newLightWeightMap length should be 0");
 }
 
 function testHasKeyAndValueWithExisting() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("squirrel", 123);
     let result1 = lightWeightMap.hasKey("squirrel");
     let result2 = lightWeightMap.hasValue(123);
-    assertEQ(result1, true, "The lightWeightMap should contain the key");
-    assertEQ(result2, true, "The lightWeightMap should contain the value");
-    assertEQ(lightWeightMap.length, 1, "LightWeightMap length should be 1");
+    arktest.assertEQ(result1, true, "The lightWeightMap should contain the key");
+    arktest.assertEQ(result2, true, "The lightWeightMap should contain the value");
+    arktest.assertEQ(lightWeightMap.length, 1, "LightWeightMap length should be 1");
 }
 
 function testHasKeyAndValueWithNonExisting() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("squirrel", 123);
     let result1 = lightWeightMap.hasKey("sparrow");
     let result2 = lightWeightMap.hasValue(456);
-    assertEQ(result1, false, "The lightWeightMap should not contain the key that is not set");
-    assertEQ(result2, false, "The lightWeightMap should not contain the value that is not set");
-    assertEQ(lightWeightMap.length, 1, "The lightWeightMap length should be 1");
+    arktest.assertEQ(result1, false, "The lightWeightMap should not contain the key that is not set");
+    arktest.assertEQ(result2, false, "The lightWeightMap should not contain the value that is not set");
+    arktest.assertEQ(lightWeightMap.length, 1, "The lightWeightMap length should be 1");
 }
 
 function testHasKeyAndValueWithEmptyMap() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     let result1 = lightWeightMap.hasKey("squirrel");
     let result2 = lightWeightMap.hasValue(123);
-    assertEQ(result1, false, "The lightWeightMap should not contain any key when the lightWeightMap is empty");
-    assertEQ(result2, false, "The lightWeightMap should not contain any value when the lightWeightMap is empty");
-    assertEQ(lightWeightMap.length, 0, "The lightWeightMap length should be 0");
+    arktest.assertEQ(result1, false, "The lightWeightMap should not contain any key when the lightWeightMap is empty");
+    arktest.assertEQ(result2, false, "The lightWeightMap should not contain any value when the lightWeightMap is empty");
+    arktest.assertEQ(lightWeightMap.length, 0, "The lightWeightMap length should be 0");
 }
 
 function testHasKeyAndValueWithBlank() {
@@ -127,9 +124,9 @@ function testHasKeyAndValueWithBlank() {
     lightWeightMap.set('squirrel', 'sparrow');
     let result1 = lightWeightMap.hasKey(' squirrel ');
     let result2 = lightWeightMap.hasValue(' sparrow ');
-    assertEQ(result1, false, "The lightWeightMap should not contain the key");
-    assertEQ(result2, false, "The lightWeightMap should not contain the value");
-    assertEQ(lightWeightMap.length, 1, "The lightWeightMap length should be 1");
+    arktest.assertEQ(result1, false, "The lightWeightMap should not contain the key");
+    arktest.assertEQ(result2, false, "The lightWeightMap should not contain the value");
+    arktest.assertEQ(lightWeightMap.length, 1, "The lightWeightMap length should be 1");
 }
 
 interface ComplexValue {
@@ -154,7 +151,7 @@ function testHasKeyAndValueWithComplex() {
     lightWeightMap.set(key, value);
     let result1 = lightWeightMap.hasKey(key);
     let result2 = lightWeightMap.hasValue(value);
-    assertEQ(result1, true, "The lightWeightMap should contain the key");
-    assertEQ(result2, true, "The lightWeightMap should contain the value");
-    assertEQ(lightWeightMap.length, 1, "The lightWeightMap length should be 1");
+    arktest.assertEQ(result1, true, "The lightWeightMap should contain the key");
+    arktest.assertEQ(result2, true, "The lightWeightMap should contain the value");
+    arktest.assertEQ(lightWeightMap.length, 1, "The lightWeightMap length should be 1");
 }

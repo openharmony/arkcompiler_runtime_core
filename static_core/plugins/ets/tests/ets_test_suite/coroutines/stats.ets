@@ -18,14 +18,14 @@ import { launch } from "std/concurrency"
 // This test checks if the coroutine statistics engine works correctly.
 
 function sync_f(a: int): String {
-    return "Some dummy string:" + a
+    return 'Some dummy string:' + a
 }
 
 async function async_f(a: int): Promise<String> {
-    return "Some dummy string:" + a
+    return 'Some dummy string:' + a
 }
 
-export function main(): int {
+function testCoroStats(): void {
     for (let i = 0; i < 10; ++i) {
         launch<String, (i: int) => String>(sync_f, 5);
     }
@@ -38,5 +38,11 @@ export function main(): int {
     for (let i = 0; i < 10; ++i) {
         await async_f(5);
     }
-    return 0;
+}
+
+function main(): int {
+    let testSuite = new arktest.ArkTestsuite('coroutines.stats');
+    testSuite.addTest('testCoroStats', testCoroStats);
+    let res = testSuite.run();
+    return res;
 }

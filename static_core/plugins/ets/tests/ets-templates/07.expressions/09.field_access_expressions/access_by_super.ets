@@ -36,5 +36,5 @@ final class B extends A {
 function main(): void {
     let instance: B = new B();
 
-    assertEQ( instance.bar(), 0 );
+    arktest.assertEQ( instance.bar(), 0 );
 }

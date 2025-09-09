@@ -57,21 +57,21 @@ protected:
 
 using AbortFlagLaunchDeathTest = AbortFlagLaunchTest;
 
-/// Death test. Throws an exception from SetTimeout callback.
+/// Death test. Throws an error from SetTimeout callback.
 TEST_F(AbortFlagLaunchDeathTest, SetTimeoutDeath)
 {
     EXPECT_EXIT(RunTest("SetTimeout"), testing::ExitedWithCode(1), ".*");
 }
 
-/// Death test. Throws an exception from a Launch callback with `abortFlag = true`.
+/// Death test. Throws an error from a Launch callback with `abortFlag = true`.
 TEST_F(AbortFlagLaunchDeathTest, AbortDeath)
 {
     EXPECT_EXIT(RunTest("Abort"), testing::ExitedWithCode(1), ".*");
 }
 
 /**
- * Throws an exception from a Launch callback without `abortFlag = false`.
- * Awaiting such job should throw a catchable exception.
+ * Throws an error from a Launch callback without `abortFlag = false`.
+ * Awaiting such job should throw a catchable error.
  */
 TEST_F(AbortFlagLaunchTest, NoAbort)
 {

@@ -23,6 +23,6 @@ function main(): void {
   const id1: UserID = "user-001";
   const id2: UserID = 1001;
 
-  assertEQ(id1, "user-001");
-  assertEQ(id2, 1001);
+  arktest.assertEQ(id1, "user-001");
+  arktest.assertEQ(id2, 1001);
 }

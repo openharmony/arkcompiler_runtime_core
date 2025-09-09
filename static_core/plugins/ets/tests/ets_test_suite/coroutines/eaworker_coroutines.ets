@@ -122,40 +122,41 @@ function testAsyncThrow(): boolean {
 
 function testACoroutineEaworker(): void {
     let ew = new EAWorker();
-
+    ew.start();
     let job0 = ew.run<number>(testFooLaunch);
     let job1 = ew.run<void>(testAddSchedule);
     let job2 = ew.run<number>(testRecursiveLaunch);
     let job3 = ew.run<boolean>(testLaunchThrow);
 
-    assertEQ(EXPECTED_VALUE, job0.Await());
+    arktest.assertEQ(EXPECTED_VALUE, job0.Await());
     job1.Await();
-    assertEQ(counter, INCREMENT);
-    assertEQ(EXPECTED_VALUE, job2.Await());
-    assertTrue(job3.Await());
+    arktest.assertEQ(counter, INCREMENT);
+    arktest.assertEQ(EXPECTED_VALUE, job2.Await());
+    arktest.assertTrue(job3.Await());
 
     ew.join();
 }
 
 function testAJCoroutineEaworker(): void {
     let ew = new EAWorker();
-
+    ew.start();
     let job0 = ew.run<number>(testFooAsync);
     let job1 = ew.run<void>(testAddAsyncSchedule);
     let job2 = ew.run<number>(testRecursiveAsync);
     let job3 = ew.run<boolean>(testLaunchThrow);
 
-    assertEQ(EXPECTED_VALUE, job0.Await());
+    arktest.assertEQ(EXPECTED_VALUE, job0.Await());
     job1.Await();
-    assertEQ(counter, INCREMENT);
-    assertEQ(EXPECTED_VALUE, job2.Await());
-    assertTrue(job3.Await());
+    arktest.assertEQ(counter, INCREMENT);
+    arktest.assertEQ(EXPECTED_VALUE, job2.Await());
+    arktest.assertTrue(job3.Await());
 
     ew.join();
 }
 
 function testACAJcoroutine(): void {
     let ew = new EAWorker();
+    ew.start();
     let job1 = ew.run<number>(testFooLaunch);
     let job2 = ew.run<number>(testFooAsync);
     
@@ -164,11 +165,12 @@ function testACAJcoroutine(): void {
 
     ew.join();
 
-    assertEQ(res1, res2);
+    arktest.assertEQ(res1, res2);
 }
 
 function testACoroutineCallAJCoroutine(): void {
     let ew = new EAWorker();
+    ew.start();
     let job1 = ew.run<number>(() => {
         let job2: Job<Promise<number>> = launch<Promise<number>, ()=>Promise<number>>(fooAsync)
         let p = job2.Await();
@@ -179,7 +181,7 @@ function testACoroutineCallAJCoroutine(): void {
 
     ew.join();
 
-    assertEQ(EXPECTED_VALUE, job1.Await());
+    arktest.assertEQ(EXPECTED_VALUE, job1.Await());
 }
 
 async function AsyncCallLaunch(): Promise<Job<number>> {
@@ -190,21 +192,24 @@ async function AsyncCallLaunch(): Promise<Job<number>> {
 
 function testAJCoroutineCallACoroutine(): void {
     let ew = new EAWorker();
+    ew.start();
     let job1 = ew.run<Promise<Job<number>>>(AsyncCallLaunch);
     let p = job1.Await();
     let job2: Job<number> = await p;
     let result = job2.Await();
     ew.join();
 
-    assertEQ(EXPECTED_VALUE, result);
+    arktest.assertEQ(EXPECTED_VALUE, result);
 }
 
 function testNestedEAWorker(): void {
     clearCounter();
 
     let e1 = new EAWorker();
+    e1.start();
     let job1 = e1.run<number>(():number => {
         let e2 = new EAWorker();
+        e2.start();
         let job2 = e2.run<number>(():number => {
             return foo();
         });
@@ -216,11 +221,11 @@ function testNestedEAWorker(): void {
 
     e1.join();
 
-    assertEQ(EXPECTED_VALUE, result);
+    arktest.assertEQ(EXPECTED_VALUE, result);
 }
 
 function main(): int {
-    const suite = new ArkTestsuite('EAWorker Test Suite');
+    const suite = new arktest.ArkTestsuite('EAWorker Test Suite');
 
     suite.addTest('testACoroutineEaworker', testACoroutineEaworker);
     suite.addTest('testAJCoroutineEaworker', testAJCoroutineEaworker);

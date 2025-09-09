@@ -835,246 +835,6 @@
     - ark::ObjectHeader*       # src string
     - int32_t                  # count
 
-- name: Int8ArrayToReversed
-  entrypoint: Int8ArrayToReversedTlab
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-
-- name: Int8ArrayToReversedOddSaved
-  entrypoint: EtsEscompatInt8ArrayToReversed
-  bridge: odd_saved
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-
-- name: Int8ArrayToReversedSlowPath
-  entrypoint: EtsEscompatInt8ArrayToReversed
-  bridge: slow_path
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-
-- name: Int16ArrayToReversed
-  entrypoint: Int16ArrayToReversedTlab
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-
-- name: Int16ArrayToReversedOddSaved
-  entrypoint: EtsEscompatInt16ArrayToReversed
-  bridge: odd_saved
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-
-- name: Int16ArrayToReversedSlowPath
-  entrypoint: EtsEscompatInt16ArrayToReversed
-  bridge: slow_path
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-
-- name: Int32ArrayToReversed
-  entrypoint: Int32ArrayToReversedTlab
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-
-- name: Int32ArrayToReversedOddSaved
-  entrypoint: EtsEscompatInt32ArrayToReversed
-  bridge: odd_saved
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-
-- name: Int32ArrayToReversedSlowPath
-  entrypoint: EtsEscompatInt32ArrayToReversed
-  bridge: slow_path
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-
-- name: BigInt64ArrayToReversed
-  entrypoint: BigInt64ArrayToReversedTlab
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-
-- name: BigInt64ArrayToReversedOddSaved
-  entrypoint: EtsEscompatBigInt64ArrayToReversed
-  bridge: odd_saved
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-
-- name: BigInt64ArrayToReversedSlowPath
-  entrypoint: EtsEscompatBigInt64ArrayToReversed
-  bridge: slow_path
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-
-- name: Float32ArrayToReversed
-  entrypoint: Float32ArrayToReversedTlab
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-
-- name: Float32ArrayToReversedOddSaved
-  entrypoint: EtsEscompatFloat32ArrayToReversed
-  bridge: odd_saved
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-
-- name: Float32ArrayToReversedSlowPath
-  entrypoint: EtsEscompatFloat32ArrayToReversed
-  bridge: slow_path
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-
-- name: Float64ArrayToReversed
-  entrypoint: Float64ArrayToReversedTlab
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-
-- name: Float64ArrayToReversedOddSaved
-  entrypoint: EtsEscompatFloat64ArrayToReversed
-  bridge: odd_saved
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-
-- name: Float64ArrayToReversedSlowPath
-  entrypoint: EtsEscompatFloat64ArrayToReversed
-  bridge: slow_path
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-
-- name: Uint8ArrayToReversed
-  entrypoint: Uint8ArrayToReversedTlab
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-
-- name: Uint8ArrayToReversedOddSaved
-  entrypoint: EtsEscompatUInt8ArrayToReversed
-  bridge: odd_saved
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-
-- name: Uint8ArrayToReversedSlowPath
-  entrypoint: EtsEscompatUInt8ArrayToReversed
-  bridge: slow_path
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-
-- name: Uint16ArrayToReversed
-  entrypoint: Uint16ArrayToReversedTlab
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-
-- name: Uint16ArrayToReversedOddSaved
-  entrypoint: EtsEscompatUInt16ArrayToReversed
-  bridge: odd_saved
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-
-- name: Uint16ArrayToReversedSlowPath
-  entrypoint: EtsEscompatUInt16ArrayToReversed
-  bridge: slow_path
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-
-- name: Uint32ArrayToReversed
-  entrypoint: Uint32ArrayToReversedTlab
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-
-- name: Uint32ArrayToReversedOddSaved
-  entrypoint: EtsEscompatUInt32ArrayToReversed
-  bridge: odd_saved
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-
-- name: Uint32ArrayToReversedSlowPath
-  entrypoint: EtsEscompatUInt32ArrayToReversed
-  bridge: slow_path
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-
-- name: BigUint64ArrayToReversed
-  entrypoint: BigUint64ArrayToReversedTlab
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-
-- name: BigUint64ArrayToReversedOddSaved
-  entrypoint: EtsEscompatBigUInt64ArrayToReversed
-  bridge: odd_saved
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-
-- name: BigUint64ArrayToReversedSlowPath
-  entrypoint: EtsEscompatBigUInt64ArrayToReversed
-  bridge: slow_path
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*       # ret
-    - ark::ObjectHeader*       # obj
-
 - name: BeginGeneralNativeMethod
   entrypoint: BeginGeneralNativeMethod
   bridge: none
@@ -1095,7 +855,7 @@
   properties: []
   signature:
     - ark::ObjectHeader*
-    - ark::mem::Reference*
+    - ark::ets::EtsReference*
 
 - name: BeginQuickNativeMethod
   entrypoint: BeginQuickNativeMethod
@@ -1117,7 +877,7 @@
   properties: []
   signature:
     - ark::ObjectHeader*
-    - ark::mem::Reference*
+    - ark::ets::EtsReference*
 
 - name: ResolveCallByName
   entrypoint: ResolveCallByNameEntrypoint
@@ -1380,6 +1140,24 @@
       - int64_t             # serialization buffer
       - ark::ObjectHeader*  # string to serialize
 
+- name: WriteStringToMemSlowPath
+  entrypoint: UnsafeMemoryWriteString
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - int32_t             # bytes written
+    - int64_t             # serialization buffer
+    - ark::ObjectHeader*  # string to serialize
+
+- name: WriteStringToMemUsual
+  entrypoint: UnsafeMemoryWriteString
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - int32_t             # bytes written
+    - int64_t             # serialization buffer
+    - ark::ObjectHeader*  # string to serialize
+
 - name: CreateStringFromMem
   entrypoint: CreateStringFromMem
   bridge: none
@@ -1407,3 +1185,530 @@
       - ark::ObjectHeader*  # deserialized string
       - void*               # serialization buffer
       - int32_t             # buffer length
+
+- name: Int8ArraySetValuesFromArray
+  entrypoint: Int8ArraySetValuesFromArray
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Int8ArraySetValuesFromArrayUsual
+  entrypoint: EtsEscompatInt8ArraySetValuesFromArray
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Int8ArraySetValuesFromArraySlowPath
+  entrypoint: EtsEscompatInt8ArraySetValuesFromArray
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Int16ArraySetValuesFromArray
+  entrypoint: Int16ArraySetValuesFromArray
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Int16ArraySetValuesFromArrayUsual
+  entrypoint: EtsEscompatInt16ArraySetValuesFromArray
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Int16ArraySetValuesFromArraySlowPath
+  entrypoint: EtsEscompatInt16ArraySetValuesFromArray
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Int32ArraySetValuesFromArray
+  entrypoint: Int32ArraySetValuesFromArray
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Int32ArraySetValuesFromArrayUsual
+  entrypoint: EtsEscompatInt32ArraySetValuesFromArray
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Int32ArraySetValuesFromArraySlowPath
+  entrypoint: EtsEscompatInt32ArraySetValuesFromArray
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: BigInt64ArraySetValuesFromArray
+  entrypoint: BigInt64ArraySetValuesFromArray
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: BigInt64ArraySetValuesFromArrayUsual
+  entrypoint: EtsEscompatBigInt64ArraySetValuesFromArray
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: BigInt64ArraySetValuesFromArraySlowPath
+  entrypoint: EtsEscompatBigInt64ArraySetValuesFromArray
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Float32ArraySetValuesFromArray
+  entrypoint: Float32ArraySetValuesFromArray
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Float32ArraySetValuesFromArrayUsual
+  entrypoint: EtsEscompatFloat32ArraySetValuesFromArray
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Float32ArraySetValuesFromArraySlowPath
+  entrypoint: EtsEscompatFloat32ArraySetValuesFromArray
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Float64ArraySetValuesFromArray
+  entrypoint: Float64ArraySetValuesFromArray
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Float64ArraySetValuesFromArrayUsual
+  entrypoint: EtsEscompatFloat64ArraySetValuesFromArray
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Float64ArraySetValuesFromArraySlowPath
+  entrypoint: EtsEscompatFloat64ArraySetValuesFromArray
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Uint8ArraySetValuesFromArray
+  entrypoint: Uint8ArraySetValuesFromArray
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Uint8ArraySetValuesFromArrayUsual
+  entrypoint: EtsEscompatUint8ArraySetValuesFromArray
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Uint8ArraySetValuesFromArraySlowPath
+  entrypoint: EtsEscompatUint8ArraySetValuesFromArray
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Uint8ClampedArraySetValuesFromArray
+  entrypoint: Uint8ClampedArraySetValuesFromArray
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Uint8ClampedArraySetValuesFromArrayUsual
+  entrypoint: EtsEscompatUint8ClampedArraySetValuesFromArray
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Uint8ClampedArraySetValuesFromArraySlowPath
+  entrypoint: EtsEscompatUint8ClampedArraySetValuesFromArray
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Uint16ArraySetValuesFromArray
+  entrypoint: Uint16ArraySetValuesFromArray
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Uint16ArraySetValuesFromArrayUsual
+  entrypoint: EtsEscompatUint16ArraySetValuesFromArray
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Uint16ArraySetValuesFromArraySlowPath
+  entrypoint: EtsEscompatUint16ArraySetValuesFromArray
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Uint32ArraySetValuesFromArray
+  entrypoint: Uint32ArraySetValuesFromArray
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Uint32ArraySetValuesFromArrayUsual
+  entrypoint: EtsEscompatUint32ArraySetValuesFromArray
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Uint32ArraySetValuesFromArraySlowPath
+  entrypoint: EtsEscompatUint32ArraySetValuesFromArray
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: BigUint64ArraySetValuesFromArray
+  entrypoint: BigUint64ArraySetValuesFromArray
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: BigUint64ArraySetValuesFromArrayUsual
+  entrypoint: EtsEscompatBigUint64ArraySetValuesFromArray
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: BigUint64ArraySetValuesFromArraySlowPath
+  entrypoint: EtsEscompatBigUint64ArraySetValuesFromArray
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+# Map
+- name: MapGetFastPath
+  entrypoint: MapGetIrToc
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # object pointer
+    - ark::ObjectHeader*  # src map
+    - ark::ObjectHeader*  # key
+
+- name: MapGetUsual
+  entrypoint: EtsEscompatMapGet
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*  # object pointer
+    - ark::ObjectHeader*  # src map
+    - ark::ObjectHeader*  # key
+
+- name: MapHasFastPath
+  entrypoint: MapHasIrToc
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - uint8_t             # boolean
+    - ark::ObjectHeader*  # src map
+    - ark::ObjectHeader*  # key
+
+- name: MapHasUsual
+  entrypoint: EtsEscompatMapHas
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - uint8_t             # boolean
+    - ark::ObjectHeader*  # src map
+    - ark::ObjectHeader*  # key
+
+- name: MapDelete
+  entrypoint: MapDeleteIrToc
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - uint8_t             # boolean
+    - ark::ObjectHeader*  # src map
+    - ark::ObjectHeader*  # key
+
+- name: MapDeleteUsual
+  entrypoint: EtsEscompatMapDelete
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - uint8_t             # boolean
+    - ark::ObjectHeader*  # src map
+    - ark::ObjectHeader*  # key
+
+# Set
+- name: SetHas
+  entrypoint: SetHasIrToc
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - uint8_t             # boolean
+    - ark::ObjectHeader*  # src set
+    - ark::ObjectHeader*  # key
+
+- name: SetHasUsual
+  entrypoint: EtsEscompatSetHas
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - uint8_t             # boolean
+    - ark::ObjectHeader*  # src set
+    - ark::ObjectHeader*  # key
+
+- name: SetDelete
+  entrypoint: SetDeleteIrToc
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - uint8_t             # boolean
+    - ark::ObjectHeader*  # src set
+    - ark::ObjectHeader*  # key
+
+- name: SetDeleteUsual
+  entrypoint: EtsEscompatSetDelete
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - uint8_t             # boolean
+    - ark::ObjectHeader*  # src set
+    - ark::ObjectHeader*  # key
+
+- name: StringTrimSlowPath
+  entrypoint: StdCoreStringTrim
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # string (result)
+    - int32_t             # unused
+    - int32_t             # unused
+
+- name: StringTrim3Arg
+  entrypoint: StdCoreStringTrim
+  bridge: odd_saved3
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # string (result)
+    - int32_t             # unused
+    - int32_t             # unused
+
+- name: StringTrimLeftSlowPath
+  entrypoint: StdCoreStringTrimLeft
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # string (result)
+    - int32_t             # unused
+    - int32_t             # unused
+
+- name: StringTrimLeft3Arg
+  entrypoint: StdCoreStringTrimLeft
+  bridge: odd_saved3
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # string (result)
+    - int32_t             # unused
+    - int32_t             # unused
+
+- name: StringTrimRightSlowPath
+  entrypoint: StdCoreStringTrimRight
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # string (result)
+    - int32_t             # unused
+    - int32_t             # unused
+
+- name: StringTrimRight3Arg
+  entrypoint: StdCoreStringTrimRight
+  bridge: odd_saved3
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # string (result)
+    - int32_t             # unused
+    - int32_t             # unused
+
+- name: StringStartsWithSlowPath
+  entrypoint: StdCoreStringStartsWith
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - uint8_t             # boolean (result)
+    - ark::ObjectHeader*  # string to check
+    - ark::ObjectHeader*  # prefix to check
+    - int32_t             # index to start from
+
+- name: StringStartsWithOddSaved
+  entrypoint: StdCoreStringStartsWith
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - uint8_t             # boolean (result)
+    - ark::ObjectHeader*  # string to check
+    - ark::ObjectHeader*  # prefix to check
+    - int32_t             # index to start from
+
+- name: StringEndsWithSlowPath
+  entrypoint: StdCoreStringEndsWith
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - uint8_t             # boolean (result)
+    - ark::ObjectHeader*  # string to check
+    - ark::ObjectHeader*  # prefix to check
+    - int32_t             # index to start from
+
+- name: StringEndsWithOddSaved
+  entrypoint: StdCoreStringEndsWith
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - uint8_t             # boolean (result)
+    - ark::ObjectHeader*  # string to check
+    - ark::ObjectHeader*  # prefix to check
+    - int32_t             # index to start from
+
+- name: StringIndexOfSlowPath
+  entrypoint: StdCoreStringIndexOf
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - int32_t             # index of char in the string if any (result)
+    - ark::ObjectHeader*  # string
+    - uint16_t            # char to look up
+
+- name: StringIndexOf3Arg
+  entrypoint: StdCoreStringIndexOf
+  bridge: odd_saved3
+  properties: [intrinsic]
+  signature:
+    - int32_t             # index of char in the string if any (result)
+    - ark::ObjectHeader*  # string
+    - uint16_t            # char to look up
+
+- name: StringIndexOfAfterSlowPath
+  entrypoint: StdCoreStringIndexOfAfter
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - int32_t             # index of char in the string if any (result)
+    - ark::ObjectHeader*  # string
+    - uint16_t            # char to look up
+    - int32_t             # unused (always zero)
+
+- name: StringIndexOfAfterOddSaved
+  entrypoint: StdCoreStringIndexOfAfter
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - int32_t             # index of char in the string if any (result)
+    - ark::ObjectHeader*  # string
+    - uint16_t            # char to look up
+    - int32_t             # unused (always zero)

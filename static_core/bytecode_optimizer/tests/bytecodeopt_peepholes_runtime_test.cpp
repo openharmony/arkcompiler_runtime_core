@@ -70,17 +70,17 @@ TEST_F(BytecodeOptPeepholes, TryBlock)
         throw v0
     }
 
-    .function u8 try_catch() {
+    .function u64 try_catch() {
     try_begin:
-        movi v1, 0x1
+        movi.64 v1, 0x1
         newobj v0, R
-        movi v1, 0x2
+        movi.64 v1, 0x2
         call.short R.ctor, v0
     try_end:
-        ldai 0x0
+        ldai.64 0x0
         return
     catch_all:
-        lda v1
+        lda.64 v1
         return
     .catchall try_begin, try_end, catch_all
     }

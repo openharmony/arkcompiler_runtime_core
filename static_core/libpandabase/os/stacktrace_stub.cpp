@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,3 +28,17 @@ std::ostream &PrintStack([[maybe_unused]] const std::vector<uintptr_t> &stacktra
 }
 
 }  // namespace ark
+
+namespace panda {
+
+std::vector<uintptr_t> GetStacktrace()
+{
+    return ark::GetStacktrace();
+}
+
+std::ostream &PrintStack(const std::vector<uintptr_t> &stacktrace, std::ostream &out)
+{
+    return ark::PrintStack(stacktrace, out);
+}
+
+}  // namespace panda

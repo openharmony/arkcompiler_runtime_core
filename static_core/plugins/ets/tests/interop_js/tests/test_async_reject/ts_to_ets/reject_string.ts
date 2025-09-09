@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
+let helper = globalThis.gtest.helper;
 export async function AsyncFunctionRejectString(): Promise<string> {
     return new Promise<string>((resolve, reject) => {
-        setTimeout(() => reject('MyError'), 20)
+        helper.setTimeout(() => reject('MyError'), 20)
     });
 }

@@ -57,8 +57,8 @@ import {
 
 % @integral_primitives.each do |primitive|
 function jscall<%= primitive.getName.capitalize() %>(): int {
-    let v0: <%= primitive.getName %> = <%= primitive.getMin() %>;
-    let v1: <%= primitive.getName %> = <%= primitive.getMax() %>;
+    let v0: <%= primitive.getName %> = <%= primitive.getMin() %><%= primitive.getSuffix() %>;
+    let v1: <%= primitive.getName %> = <%= primitive.getMax() %><%= primitive.getSuffix() %>;
     let res = evaluateNumber(v0, v1) as double;
     if (res == <%= primitive.getSum() %>) {
         return 0;
@@ -68,8 +68,8 @@ function jscall<%= primitive.getName.capitalize() %>(): int {
 }
 
 function jsnewGetProperty<%= primitive.getName.capitalize() %>(): int {
-    let v0: <%= primitive.getName %> = <%= primitive.getMin() %>;
-    let v1: <%= primitive.getName %> = <%= primitive.getMax() %>;
+    let v0: <%= primitive.getName %> = <%= primitive.getMin() %><%= primitive.getSuffix() %>;
+    let v1: <%= primitive.getName %> = <%= primitive.getMax() %><%= primitive.getSuffix() %>;
     let res_obj = new ExampleClass(v0, v1);
     let res_get_v0 = res_obj.v0 as double;
     let res_get_v1 = res_obj.v1 as double;
@@ -82,8 +82,8 @@ function jsnewGetProperty<%= primitive.getName.capitalize() %>(): int {
 }
 
 function jsnewSetProperty<%= primitive.getName.capitalize() %>(): int {
-    let v0: <%= primitive.getName %> = <%= primitive.getMin() %>;
-    let v1: <%= primitive.getName %> = <%= primitive.getMax() %>;
+    let v0: <%= primitive.getName %> = <%= primitive.getMin() %><%= primitive.getSuffix() %>;
+    let v1: <%= primitive.getName %> = <%= primitive.getMax() %><%= primitive.getSuffix() %>;
     let res_obj = new ClassWithEmptyConstructor();
     res_obj.v0 = v0;
     res_obj.v1 = v1;
@@ -105,8 +105,8 @@ function jsnewSetProperty<%= primitive.getName.capitalize() %>(): int {
 }
 
 function jscallStaticMethod<%= primitive.getName.capitalize() %>(): int {
-    let v0: <%= primitive.getName %> = <%= primitive.getMin() %>;
-    let v1: <%= primitive.getName %> = <%= primitive.getMax() %>;
+    let v0: <%= primitive.getName %> = <%= primitive.getMin() %><%= primitive.getSuffix() %>;
+    let v1: <%= primitive.getName %> = <%= primitive.getMax() %><%= primitive.getSuffix() %>;
     let res = ExampleClass.evaluateNumber(v0, v1) as double;
     if (res == <%= primitive.getSum() %>) {
         return 0;
@@ -119,8 +119,8 @@ function jscallStaticMethod<%= primitive.getName.capitalize() %>(): int {
 
 % @float_primitives.each do |primitive|
 function jscall<%= primitive.getName.capitalize() %>(): int {
-    let v0: <%= primitive.getName %> = <%= primitive.getMin() %>;
-    let v1: <%= primitive.getName %> = <%= primitive.getMax() %>;
+    let v0: <%= primitive.getName %> = <%= primitive.getMin() %><%= primitive.getSuffix() %>;
+    let v1: <%= primitive.getName %> = <%= primitive.getMax() %><%= primitive.getSuffix() %>;
     let res = ExampleClass.evaluateNumber(v0, v1) as double;
     if (abs(res - <%= primitive.getSum() %>) < 0.000001) {
         return 0;
@@ -130,8 +130,8 @@ function jscall<%= primitive.getName.capitalize() %>(): int {
 }
 
 function jsnewGetProperty<%= primitive.getName.capitalize() %>(): int {
-    let v0: <%= primitive.getName %> = <%= primitive.getMin() %>;
-    let v1: <%= primitive.getName %> = <%= primitive.getMax() %>;
+    let v0: <%= primitive.getName %> = <%= primitive.getMin() %><%= primitive.getSuffix() %>;
+    let v1: <%= primitive.getName %> = <%= primitive.getMax() %><%= primitive.getSuffix() %>;
     let res_obj = new ExampleClass(v0, v1);
     let res_get_v0 = res_obj.v0 as double;
     let res_get_v1 = res_obj.v1 as double;
@@ -144,8 +144,8 @@ function jsnewGetProperty<%= primitive.getName.capitalize() %>(): int {
 }
 
 function jsnewSetProperty<%= primitive.getName.capitalize() %>(): int {
-    let v0: <%= primitive.getName %> = <%= primitive.getMin() %>;
-    let v1: <%= primitive.getName %> = <%= primitive.getMax() %>;
+    let v0: <%= primitive.getName %> = <%= primitive.getMin() %><%= primitive.getSuffix() %>;
+    let v1: <%= primitive.getName %> = <%= primitive.getMax() %><%= primitive.getSuffix() %>;
     let res_obj = new ClassWithEmptyConstructor();
     res_obj.v0 = v0;
     res_obj.v1 = v1;
@@ -160,8 +160,8 @@ function jsnewSetProperty<%= primitive.getName.capitalize() %>(): int {
 }
 
 function jscallStaticMethod<%= primitive.getName.capitalize() %>(): int {
-    let v0: <%= primitive.getName %> = <%= primitive.getMin() %>;
-    let v1: <%= primitive.getName %> = <%= primitive.getMax() %>;
+    let v0: <%= primitive.getName %> = <%= primitive.getMin() %><%= primitive.getSuffix() %>;
+    let v1: <%= primitive.getName %> = <%= primitive.getMax() %><%= primitive.getSuffix() %>;
     let res = ExampleClass.evaluateNumber(v0, v1) as double;
     if (abs(res - <%= primitive.getSum() %>) < 0.000001) {
         return 0;

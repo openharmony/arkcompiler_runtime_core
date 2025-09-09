@@ -13,25 +13,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from taihe.utils.resources import DeploymentMode, ResourceLocator
+from taihe.utils.resources import DeploymentMode, ResourceContext
 
 
 def test_dev():
-    p = "repo_root/compiler/taihe/utils/resources.py"
-    loc = ResourceLocator.detect(p)
+    p = "/tmp/repo_root/compiler/taihe/utils/resources.py"
+    loc = ResourceContext.from_path(p)
     pass
-    assert loc.root_dir.name == "repo_root"
+    assert loc.base_dir.name == "repo_root"
 
 
 def test_pkg():
     p = ".venv/lib/python3.12/site-packages/taihe/utils/resources.py"
-    loc = ResourceLocator.detect(p)
+    loc = ResourceContext.from_path(p)
     pass
-    assert loc.root_dir.name == "taihe"
+    assert loc.base_dir.name == "data"
 
 
 def test_bundle():
     p = "taihe-pkg/lib/pyrt/lib/python3.11/site-packages/taihe/utils/resources.py"
-    loc = ResourceLocator.detect(p)
+    loc = ResourceContext.from_path(p)
     pass
-    assert loc.root_dir.name == "taihe-pkg"
+    assert loc.base_dir.name == "taihe-pkg"

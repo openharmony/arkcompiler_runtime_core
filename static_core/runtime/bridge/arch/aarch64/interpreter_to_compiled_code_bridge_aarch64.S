@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,7 +45,7 @@
     bls 1f
     // it is an integer arg
 
-#ifdef PANDA_USE_32_BIT_POINTER
+#if defined(PANDA_32_BIT_MANAGED_POINTER) && defined(PANDA_TARGET_64)
     // if arg is a reference, zero out garbage in upper 32 bits
     and \tmp_reg, \arg_reg, #0xFFFFFFFF
     cmp w2, #(SHORTY_REFERENCE - SHORTY_FIRST_FLOAT)
@@ -249,8 +249,16 @@ InterpreterToCompiledCodeBridge:
 
     // store method (the first arg)
     str lr, [x10], #8
-    ldrb w5, [x6], #1 // read opcode and advance insn_ptr
 
+    ldrb w5, [x6] // read opcode
+    cmp w5, #MIN_PREFIX_OPCODE_INDEX
+    blt .Lnonprefixed
+    ldrh w5, [x6], #2 // read opcode and advance insn_ptr
+    b .Ldispatch
+.Lnonprefixed:
+    add x6, x6, #1 // advance insn_ptr
+
+.Ldispatch:
     // The file contains code which checks opcode and jumps
     // to the corresponding handler.
     // At the end each handler jumps to .Lload_reg_args label.

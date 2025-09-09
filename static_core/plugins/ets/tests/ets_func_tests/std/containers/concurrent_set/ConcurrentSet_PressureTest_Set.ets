@@ -16,15 +16,15 @@
 import { launch } from "std/concurrency"
 import { Job } from "std/core"
 
-let ConcurrentSetTestOne: ConcurrentSet<number> = new ConcurrentSet<number>();
+let ConcurrentSetTestOne: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>();
 
 function main(): int {
-    let ConcurrentSetTestsuite = new ArkTestsuite("ConcurrentSetPressureTest");
+    let ConcurrentSetTestsuite = new arktest.ArkTestsuite("ConcurrentSetPressureTest");
 
     ConcurrentSetTestsuite.addTest("setPressureTest001", () =>
     {
         ConcurrentSetTestOne.clear();
-        assertEQ(ConcurrentSetTestOne.size, 0);
+        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         let jobs = new Array<Job<void>>(100);
 
         for (let i: int = 0; i < 100; i++) {
@@ -33,7 +33,7 @@ function main(): int {
         for (let i: int = 0; i < 100; i++) {
             jobs[i].Await();
         }
-        assertEQ(ConcurrentSetTestOne.size, 100);
+        arktest.assertEQ(ConcurrentSetTestOne.size, 100);
     });
 
     return ConcurrentSetTestsuite.run();

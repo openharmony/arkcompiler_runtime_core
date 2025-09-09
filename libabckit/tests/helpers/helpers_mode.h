@@ -15,8 +15,8 @@
 #ifndef LIBABCKIT_TESTS_INVALID_HELPERS
 #define LIBABCKIT_TESTS_INVALID_HELPERS
 
-#include "libabckit/include/c/metadata_core.h"
-#include "libabckit/include/c/ir_core.h"
+#include "libabckit/c/metadata_core.h"
+#include "libabckit/c/ir_core.h"
 
 #include "helpers/helpers.h"
 

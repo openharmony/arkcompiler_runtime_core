@@ -28,7 +28,7 @@ function bar(): int {
     return 5;
   }
   catch (e) {
-    assertTrue( false, "Unexpected catch clause" );
+    arktest.assertTrue( false, "Unexpected catch clause" );
   }
 
   return 1;
@@ -37,5 +37,5 @@ function bar(): int {
 function main(): void {
   let y: int = 1;
   y = bar();
-  assertEQ( y, 5 );
+  arktest.assertEQ( y, 5 );
 }

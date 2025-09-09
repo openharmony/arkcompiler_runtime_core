@@ -25,6 +25,8 @@ parameters:
     stdlib: "${parameters.build}/plugins/ets/etsstdlib.abc"
     output-file: "${parameters.work-dir}/intermediate/${test-id}.abc"
     paoc-output-file: "${parameters.work-dir}/intermediate/${test-id}.an"
+    # adds --paoc-panda-files option to ark_aot with all dependent and the current abc files
+    is-panda: True
 steps:
     ark-aot:
         executable-path: ${parameters.build}/bin/ark_aot

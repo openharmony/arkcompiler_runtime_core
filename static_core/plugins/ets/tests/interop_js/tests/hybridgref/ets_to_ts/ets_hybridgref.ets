@@ -15,7 +15,7 @@
 
 package ets_functions;
 
-type refType = Object | ESValue;
+type refType = ESValue | Any;
 native function saveHybridGref(ref: refType):void;
 
 export function etsSaveNativeGrefChar(): void {
@@ -92,4 +92,47 @@ export function etsSaveNativeGrefSet(): void {
 
 export function etsSaveNativeGrefObjectFromTS(fn: (x: number) => number): void {
     saveHybridGref(fn);
+}
+
+export function etsSaveNativeGrefArrayBuffer(): void {
+    let staticArrayBuffer = new ArrayBuffer(8);
+    let uint32View = new Uint32Array(staticArrayBuffer);
+    uint32View[0] = 0xbabe;
+    uint32View[1] = 0xcafe;
+
+    let dynamicArrayBuffer = InteropTransferHelper.transferArrayBufferToDynamic(staticArrayBuffer);
+    saveHybridGref(dynamicArrayBuffer);
+}
+
+export function etsSaveNativeGrefTypedArray(): void {
+    let staticTypedArray = new Int8Array(2);
+    staticTypedArray[0] = 1;
+    staticTypedArray[1] = 2;
+
+    let dynamicTypedArray = InteropTransferHelper.transferInt8ArrayToDynamic(staticTypedArray);
+    saveHybridGref(dynamicTypedArray);
+}
+
+export function etsSaveNativeGrefDataView(): void {
+    let staticDynamicDataView = new DataView(new ArrayBuffer(8));
+    staticDynamicDataView.setUint32(0, 0xbabe, true);
+    staticDynamicDataView.setUint32(4, 0xcafe, true);
+
+    let dynamicDataView = InteropTransferHelper.transferDataViewToDynamic(staticDynamicDataView);
+    saveHybridGref(dynamicDataView);
+}
+
+export function etsSaveNativeGrefPromise(): void {
+    let promise = Promise.resolve(42);
+    saveHybridGref(promise);
+}
+
+export function etsSaveNativeGrefError(): void {
+    let error = new Error("Test error");
+    saveHybridGref(error);
+}
+
+export function etsSaveNativeGrefDate(): void {
+    let date = new Date("2025-05-27T12:34:56.789Z");
+    saveHybridGref(date);
 }

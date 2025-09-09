@@ -14,11 +14,11 @@
  */
 #include "bigint_new.impl.hpp"
 #include <cstdint>
+#include "bigint_new.MyUnion.proj.0.hpp"
+#include "bigint_new.MyUnion.proj.1.hpp"
 #include "bigint_new.proj.hpp"
 #include "stdexcept"
 #include "taihe/runtime.hpp"
-#include "bigint_new.MyUnion.proj.0.hpp"
-#include "bigint_new.MyUnion.proj.1.hpp"
 
 #include <iostream>
 
@@ -30,6 +30,7 @@ namespace {
 class WantImpl {
 public:
     array<uint64_t> a_ = {1, 2, 3};
+
     WantImpl() {}
 
     void SetBigInt(::taihe::array_view<uint64_t> a)
@@ -83,7 +84,7 @@ void PrintBigInt(::taihe::array_view<uint64_t> a)
 
 void SetupStructAndPrint(::bigint_new::BigInt1 const &v)
 {
-    for (const auto &value : v.a) {
+    for (auto const &value : v.a) {
         std::cout << "a bigint array<u64>: " << value << " ";
     }
     std::cout << std::endl;
@@ -94,7 +95,7 @@ void SetupStructAndPrint(::bigint_new::BigInt1 const &v)
     if (!a.has_value()) {
         return {0, 0};
     }
-    const auto &value = a.value();
+    auto const &value = a.value();
     array<uint64_t> result(value.size());
     for (int i = 0; i < value.size(); i++) {
         result[i] = value[i];
@@ -106,7 +107,7 @@ void SetupStructAndPrint(::bigint_new::BigInt1 const &v)
     ::taihe::map_view<::taihe::string, ::taihe::array<uint64_t>> a)
 {
     map<string, array<uint64_t>> result;
-    for (const auto &val : a) {
+    for (auto const &val : a) {
         result.emplace(val.first, val.second);
     }
     return result;
@@ -134,7 +135,7 @@ void ShowMyUnion(::bigint_new::MyUnion const &u)
 {
     if (auto ptr = u.get_bigIntValue_ptr()) {
         std::cout << "bigIntValue: [";
-        for (const auto &val : *ptr) {
+        for (auto const &val : *ptr) {
             std::cout << " " << val << " ";
         }
         std::cout << "]\n";

@@ -57,7 +57,7 @@ class B implements AA {
 function main() {
   let b = new B()
   b.bar()
-  assertEQ( b.getValue(), "bar(): AA")
+  arktest.assertEQ( b.getValue(), "bar(): AA")
 }
 
 

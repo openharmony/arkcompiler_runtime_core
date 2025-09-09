@@ -13,6 +13,15 @@
  * limitations under the License.
  */
 
+// NOLINTBEGIN(readability-identifier-naming, cppcoreguidelines-macro-usage,
+//             cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
+//             readability-else-after-return, readability-duplicate-include,
+//             misc-non-private-member-variables-in-classes, cppcoreguidelines-pro-type-member-init,
+//             google-explicit-constructor, cppcoreguidelines-pro-type-union-access,
+//             modernize-use-auto, llvm-namespace-comment,
+//             cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
+//             readability-implicit-bool-conversion)
+
 #ifndef COMMON_INTERFACES_THREAD_MUTATOR_BASE_H
 #define COMMON_INTERFACES_THREAD_MUTATOR_BASE_H
 
@@ -20,7 +29,6 @@
 #include <mutex>
 #include <pthread.h>
 #include "base/common.h"
-
 namespace common {
 class Mutator;
 class ThreadHolder;
@@ -69,7 +77,7 @@ public:
          * But this will make `DoLeaveSaferegion` cost more, so we just merge it into suspension request,
          * and do some extra process at the end of `HandleSuspensionRequest`
         */
-        SUSPENSION_FOR_FINALIZE = 1 << 31,
+        SUSPENSION_FOR_FINALIZE = 1U << 31,
         CALLBACKS_TO_PROCESS = SUSPENSION_FOR_FINALIZE,
     };
 
@@ -119,14 +127,26 @@ public:
         return inSaferegion_.load(std::memory_order_seq_cst) != SAFE_REGION_FALSE;
     }
 
-    inline void IncObserver() { observerCnt_.fetch_add(1); }
+    inline void IncObserver()
+    {
+        observerCnt_.fetch_add(1);
+    }
 
-    inline void DecObserver() { observerCnt_.fetch_sub(1); }
+    inline void DecObserver()
+    {
+        observerCnt_.fetch_sub(1);
+    }
 
     // Return true indicate there are some observer is visitting this mutator
-    inline bool HasObserver() { return observerCnt_.load() != 0; }
+    inline bool HasObserver()
+    {
+        return observerCnt_.load() != 0;
+    }
 
-    inline size_t GetObserverCount() const { return observerCnt_.load(); }
+    inline size_t GetObserverCount() const
+    {
+        return observerCnt_.load();
+    }
 
     // Force current mutator enter saferegion, internal use only.
     __attribute__((always_inline)) inline void DoEnterSaferegion();
@@ -148,12 +168,12 @@ public:
     __attribute__((always_inline)) inline bool LeaveSaferegion() noexcept;
 
     // Called if current mutator should do corresponding task by suspensionFlag value
-    void HandleSuspensionRequest();
+    __attribute__((visibility ("default"))) void HandleSuspensionRequest();
     // Called if current mutator should handle stw request
     void SuspendForStw();
 
     // temporary impl to clean GC callback, and need to refact to flip function
-    void HandleJSGCCallback();
+    __attribute__((visibility ("default"))) void HandleJSGCCallback();
 
     static uint32_t ConstructSuspensionFlag(uint32_t flag, uint32_t clearFlag, uint32_t setFlag)
     {
@@ -285,9 +305,14 @@ public:
         return safepointActive_;
     }
 
-    void MutatorBaseLock() { mutatorBaseLock_.lock(); }
+    void MutatorBaseLock()
+    {
+        mutatorBaseLock_.lock();
+    }
 
-    void MutatorBaseUnlock() { mutatorBaseLock_.unlock(); }
+    void MutatorBaseUnlock() {
+        mutatorBaseLock_.unlock();
+    }
 
     void RegisterJSThread(void *jsThread)
     {
@@ -337,3 +362,11 @@ private:
 };
 }  // namespace common
 #endif  // COMMON_INTERFACES_THREAD_MUTATOR_BASE_H
+// NOLINTEND(readability-identifier-naming, cppcoreguidelines-macro-usage,
+//           cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
+//           readability-else-after-return, readability-duplicate-include,
+//           misc-non-private-member-variables-in-classes, cppcoreguidelines-pro-type-member-init,
+//           google-explicit-constructor, cppcoreguidelines-pro-type-union-access,
+//           modernize-use-auto, llvm-namespace-comment,
+//           cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
+//           readability-implicit-bool-conversion)

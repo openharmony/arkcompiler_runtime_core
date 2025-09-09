@@ -20,3 +20,7 @@ cases:
   - desc: A formal parameter contains no type provided, and the type cannot be derived by type inference
     impl: |-
         let f = (a, b) => a + b
+
+  - desc: CTE. A required parameter cannot follow an optional parameter.
+    impl: |-
+      let f = (a?: String, b: String) => a + b

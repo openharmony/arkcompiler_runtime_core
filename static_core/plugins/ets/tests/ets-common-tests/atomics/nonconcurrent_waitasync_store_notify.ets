@@ -16,7 +16,7 @@
 let buf: ArrayBuffer;
 let arr: Int32Array;
 
-function main() {
+function testMain() {
     let c = new Console()
 
     buf = new ArrayBuffer(4);
@@ -27,4 +27,10 @@ function main() {
     let count = Atomics.notify(arr, 0);
     let res: string = await promise;
     arktest.assertTrue(res == 'ok' || res == 'not-equal')
+}
+
+function main() {
+    const suite = new arktest.ArkTestsuite('Function Atomics nonconcurrent_waitasync_store_notify tests')
+    suite.addTest('Function testMain', testMain)
+    return suite.run()
 }

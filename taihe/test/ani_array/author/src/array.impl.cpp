@@ -198,6 +198,7 @@ public:
 class ArrayUnionImpl {
 public:
     ::array_test::UnionA unionA;
+
     ArrayUnionImpl() : unionA({::array_test::UnionA::make_name("UnionA")}) {}
 
     ::taihe::array<::array_test::UnionA> ArrayValue(::taihe::string_view value)
@@ -493,6 +494,7 @@ array<array<::array_test::Data>> MakeStructArrayArray(string_view a, string_view
 {
     return taihe::make_holder<ArrayBoolImpl, ::array_test::ArrayBool>();
 }
+
 ::array_test::ArrayEnum GetArrayEnum()
 {
     return taihe::make_holder<ArrayEnumImpl, ::array_test::ArrayEnum>();

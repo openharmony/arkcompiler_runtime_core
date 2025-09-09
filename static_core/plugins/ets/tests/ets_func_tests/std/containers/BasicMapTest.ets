@@ -64,9 +64,9 @@ function createMapAddAndCheckEntriesOrder(): int {
     map.set(c'a', 3.0)
     let entries = map.entries()
 
-    if (entries.next().value![0] as Char as char == c'c' &&
-        entries.next().value![0] as Char as char == c'x' &&
-        entries.next().value![0] as Char as char == c'a') {
+    if (entries.next().value![0] == c'c' &&
+        entries.next().value![0] == c'x' &&
+        entries.next().value![0] == c'a') {
         return success
     }
 
@@ -100,7 +100,7 @@ function createMapAddAndCheckHasKey(): int {
 
 function createEmptyMap(): int {
     let map: Map<char, double> = new Map<char, double>()
-    return map.size as int
+    return map.size.toInt()
 }
 
 function createMapAddAndGet(): int {
@@ -253,7 +253,7 @@ function createMapAddAndClear(): int {
     map.set(c'c', 3.0)
     map.clear()
 
-    return map.size as int
+    return map.size.toInt()
 }
 
 function createMapAndAdd(): int {

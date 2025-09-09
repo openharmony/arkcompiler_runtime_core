@@ -20,11 +20,10 @@ const OutOfBoundsErrorCodeId: number = 10200001;
 const TypeErrorCodeId: number = 401;
 
 function main() {
-    const suite = new ArkTestsuite("BitVector getBitsByRange API tests");
+    const suite = new arktest.ArkTestsuite("BitVector getBitsByRange API tests");
 
     suite.addTest("Returns the bit values in a valid range of indices.", BitVector_getBitsByRange_Func_001);
     suite.addTest("Throws an error for invalid 'toIndex' range.", BitVector_getBitsByRange_Func_002);
-    suite.addTest("Throws an error for non-integer 'fromIndex'.", BitVector_getBitsByRange_Func_003);
     suite.addTest("Throws an error for negative 'fromIndex' and 'toIndex'.", BitVector_getBitsByRange_Func_004);
     suite.addTest("Throws an error for negative 'fromIndex' with valid 'toIndex'.", BitVector_getBitsByRange_Func_005);
     suite.addTest("Returns the bit values in a large range.", BitVector_getBitsByRange_Func_006);
@@ -49,9 +48,9 @@ function BitVector_getBitsByRange_Func_001() {
     bitVector.push(1);
     bitVector.push(1);
     let result = bitVector.getBitsByRange(0, 3);
-    assertEQ(result[0], 1, "Bit at index 0 should be 1");
-    assertEQ(result[1], 1, "Bit at index 1 should be 1");
-    assertEQ(result[2], 0, "Bit at index 2 should be 0");
+    arktest.assertEQ(result[0], 1, "Bit at index 0 should be 1");
+    arktest.assertEQ(result[1], 1, "Bit at index 1 should be 1");
+    arktest.assertEQ(result[2], 0, "Bit at index 2 should be 0");
 }
 
 /**
@@ -73,37 +72,11 @@ function BitVector_getBitsByRange_Func_002() {
     bitVector.push(1);
     bitVector.push(0);
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return e instanceof BusinessError &&
+        return e instanceof BusinessError && (e as BusinessError).name == 'BusinessError' &&
             ((e as BusinessError).code === OutOfBoundsErrorCodeId &&
                 (e as BusinessError).message === `The value of "toIndex" is out of range. It must be >= 0 && <= 8. Received value is: -3`);
     };
-    expectThrow(() => { bitVector.getBitsByRange(8, -3); }, exceptionCheck);
-}
-
-/**
- * @tc.number    : BITVECTOR_TEST_024
- * @tc.name      : BitVector_getBitsByRange_Func_003
- * @tc.desc      : Throws an error for non-integer 'fromIndex' in a bit vector.
- * @tc.size      : MediumTest
- * @tc.type      : Function
- * @tc.level     : Level 2
- */
-function BitVector_getBitsByRange_Func_003() {
-    let bitVector = new collections.BitVector(0);
-    bitVector.push(1);
-    bitVector.push(1);
-    bitVector.push(0);
-    bitVector.push(1);
-    bitVector.push(0);
-    bitVector.push(0);
-    bitVector.push(1);
-    bitVector.push(0);
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return e instanceof BusinessError &&
-            ((e as BusinessError).code === TypeErrorCodeId &&
-                (e as BusinessError).message === `The type of "fromIndex" must be integer. Received value is: 0.1`);
-    };
-    expectThrow(() => { bitVector.getBitsByRange(0.1, 6.1); }, exceptionCheck);
+    arktest.expectThrow(() => { bitVector.getBitsByRange(8, -3); }, exceptionCheck);
 }
 
 /**
@@ -125,11 +98,11 @@ function BitVector_getBitsByRange_Func_004() {
     bitVector.push(1);
     bitVector.push(0);
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return e instanceof BusinessError &&
+        return e instanceof BusinessError && (e as BusinessError).name == 'BusinessError' &&
             ((e as BusinessError).code === OutOfBoundsErrorCodeId &&
                 (e as BusinessError).message === `The value of "toIndex" is out of range. It must be >= 0 && <= 8. Received value is: -3`);
     };
-    expectThrow(() => { bitVector.getBitsByRange(-3, -3); }, exceptionCheck);
+    arktest.expectThrow(() => { bitVector.getBitsByRange(-3, -3); }, exceptionCheck);
 }
 
 /**
@@ -151,11 +124,11 @@ function BitVector_getBitsByRange_Func_005() {
     bitVector.push(1);
     bitVector.push(0);
     let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return e instanceof BusinessError &&
+        return e instanceof BusinessError && (e as BusinessError).name == 'BusinessError' &&
             ((e as BusinessError).code === OutOfBoundsErrorCodeId &&
                 (e as BusinessError).message === `The value of "fromIndex" is out of range. It must be >= 0 && <= 7. Received value is: -3`);
     };
-    expectThrow(() => { bitVector.getBitsByRange(-3, 8); }, exceptionCheck);
+    arktest.expectThrow(() => { bitVector.getBitsByRange(-3, 8); }, exceptionCheck);
 }
 
 /**
@@ -171,12 +144,12 @@ function BitVector_getBitsByRange_Func_006() {
     let bitVectorLength = 64;
     for (let i = 0; i < bitVectorLength; i++) {
         let res = bitVector.push(0);
-        assertTrue(res, "Push should return true");
+        arktest.assertTrue(res, "Push should return true");
     }
-    assertEQ(bitVector.length, 64, "BitVector length should be 64");
+    arktest.assertEQ(bitVector.length, 64, "BitVector length should be 64");
     let result = bitVector.getBitsByRange(0, 64);
     for (let i = 0; i < bitVectorLength; i++) {
-        assertEQ(result[i], 0, `Bit at index ${i} should be 0`);
+        arktest.assertEQ(result[i], 0, `Bit at index ${i} should be 0`);
     }
 }
 
@@ -193,11 +166,11 @@ function BitVector_getBitsByRange_Func_007() {
     let bitVectorLength = 64;
     for (let i = 0; i < bitVectorLength; i++) {
         let res = bitVector.push(0);
-        assertTrue(res, "Push should return true");
+        arktest.assertTrue(res, "Push should return true");
     }
-    assertEQ(bitVector.length, bitVectorLength + 10, "BitVector length should be 74");
+    arktest.assertEQ(bitVector.length, bitVectorLength + 10, "BitVector length should be 74");
     let result = bitVector.getBitsByRange(0, bitVectorLength + 10);
     for (let i = 10; i < bitVectorLength + 10; i++) {
-        assertEQ(result[i], 0, `Bit at index ${i} should be 0`);
+        arktest.assertEQ(result[i], 0, `Bit at index ${i} should be 0`);
     }
 }

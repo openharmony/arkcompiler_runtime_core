@@ -53,7 +53,7 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
 
     includes(searchElement: T, fromIndex?: number): boolean;
 
-    indexOf(searchElement: T, fromIndex?: number): number;
+    indexOf(searchElement: T, fromIndex?: int): int;
 
     keys(): IterableIterator<number>;
 

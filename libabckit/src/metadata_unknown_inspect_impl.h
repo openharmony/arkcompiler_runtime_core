@@ -16,7 +16,7 @@
 #ifndef LIBABCKIT_SRC_METADATA_UNKNOWN_INSPECT_IMPL_H
 #define LIBABCKIT_SRC_METADATA_UNKNOWN_INSPECT_IMPL_H
 
-#include "libabckit/include/c/metadata_core.h"
+#include "libabckit/c/metadata_core.h"
 
 namespace libabckit {
 

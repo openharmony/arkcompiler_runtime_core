@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,12 @@ class ClassConfig {
 public:
     using ClassWordSize = typename Config::Size;
 };
+
+class Class;
+class ClassLinker;
+class ClassLinkerContext;
+class ClassLinkerExtension;
+class ClassLinkerErrorHandler;
 
 class ClassHelper : private ClassConfig<MemoryModelConfig> {
 public:
@@ -85,6 +91,15 @@ public:
         }
         return dim;
     }
+
+    static bool IsPrimitive(const uint8_t *descriptor);
+    static bool IsReference(const uint8_t *descriptor);
+    static bool IsUnionDescriptor(const uint8_t *descriptor);
+    static bool IsUnionOrArrayUnionDescriptor(const uint8_t *descriptor);
+    static Span<const uint8_t> GetUnionComponent(const uint8_t *descriptor);
+    static Class *GetUnionLUBClass(const uint8_t *descriptor, ClassLinker *classLinker,
+                                   ClassLinkerContext *classLinkerCtx, ClassLinkerExtension *ext,
+                                   ClassLinkerErrorHandler *handler = nullptr);
 
 private:
     template <typename Str = std::string>

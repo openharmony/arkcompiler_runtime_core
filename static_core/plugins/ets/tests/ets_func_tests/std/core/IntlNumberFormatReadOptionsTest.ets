@@ -14,7 +14,7 @@
  */
 
 function main(): int {
-    const suite = new ArkTestsuite("Intl. NumberFormatOptions ResolvedNumberFormatOptions check possibility to read fields");
+    const suite = new arktest.ArkTestsuite("Intl. NumberFormatOptions ResolvedNumberFormatOptions check possibility to read fields");
     suite.addTest("testNumberFormatOptions", testNumberFormatOptions);
     suite.addTest("testResolvedNumberFormatOptions", testResolvedNumberFormatOptions);
     return suite.run();
@@ -22,22 +22,22 @@ function main(): int {
 
 function testNumberFormatOptions() {
     let x: Intl.NumberFormatOptions = {};
-    assertEQ(x.compactDisplay, undefined);
-    assertEQ(x.currency, undefined);
-    assertEQ(x.currencyDisplay, undefined);
-    assertEQ(x.currencySign, undefined);
-    assertEQ(x.localeMatcher, undefined);
-    assertEQ(x.maximumFractionDigits, undefined);
-    assertEQ(x.maximumSignificantDigits, undefined);
-    assertEQ(x.minimumFractionDigits, undefined);
-    assertEQ(x.minimumIntegerDigits, undefined);
-    assertEQ(x.minimumSignificantDigits, undefined);
-    assertEQ(x.notation, undefined);
-    assertEQ(x.signDisplay, undefined);
-    assertEQ(x.style, undefined);
-    assertEQ(x.unit, undefined);
-    assertEQ(x.unitDisplay, undefined);
-    assertEQ(x.useGrouping, undefined);
+    arktest.assertEQ(x.compactDisplay, undefined);
+    arktest.assertEQ(x.currency, undefined);
+    arktest.assertEQ(x.currencyDisplay, undefined);
+    arktest.assertEQ(x.currencySign, undefined);
+    arktest.assertEQ(x.localeMatcher, undefined);
+    arktest.assertEQ(x.maximumFractionDigits, undefined);
+    arktest.assertEQ(x.maximumSignificantDigits, undefined);
+    arktest.assertEQ(x.minimumFractionDigits, undefined);
+    arktest.assertEQ(x.minimumIntegerDigits, undefined);
+    arktest.assertEQ(x.minimumSignificantDigits, undefined);
+    arktest.assertEQ(x.notation, undefined);
+    arktest.assertEQ(x.signDisplay, undefined);
+    arktest.assertEQ(x.style, undefined);
+    arktest.assertEQ(x.unit, undefined);
+    arktest.assertEQ(x.unitDisplay, undefined);
+    arktest.assertEQ(x.useGrouping, undefined);
 }
 
 function testResolvedNumberFormatOptions() {
@@ -54,21 +54,21 @@ function testResolvedNumberFormatOptions() {
         maximumFractionDigits: 0,
         minimumFractionDigits: 0
     };
-    assertEQ(x.compactDisplay, undefined);
-    assertEQ(x.currencySign, undefined);
-    assertEQ(x.currency, undefined);
-    assertEQ(x.currencyDisplay, undefined);
-    assertEQ(x.locale, "");
-    assertEQ(x.maximumFractionDigits, 0);
-    assertEQ(x.maximumSignificantDigits, undefined);
-    assertEQ(x.minimumFractionDigits, 0);
-    assertEQ(x.minimumIntegerDigits, 1);
-    assertEQ(x.minimumSignificantDigits, undefined);
-    assertEQ(x.notation, "compact");
-    assertEQ(x.numberingSystem, "latn");
-    assertEQ(x.signDisplay, "auto");
-    assertEQ(x.style, "decimal");
-    assertEQ(x.unit, undefined);
-    assertEQ(x.unitDisplay, undefined);
-    assertEQ(x.useGrouping, false);
+    arktest.assertEQ(x.compactDisplay, undefined);
+    arktest.assertEQ(x.currencySign, undefined);
+    arktest.assertEQ(x.currency, undefined);
+    arktest.assertEQ(x.currencyDisplay, undefined);
+    arktest.assertEQ(x.locale, "");
+    arktest.assertEQ(x.maximumFractionDigits, 0);
+    arktest.assertEQ(x.maximumSignificantDigits, undefined);
+    arktest.assertEQ(x.minimumFractionDigits, 0);
+    arktest.assertEQ(x.minimumIntegerDigits, 1);
+    arktest.assertEQ(x.minimumSignificantDigits, undefined);
+    arktest.assertEQ(x.notation, "compact");
+    arktest.assertEQ(x.numberingSystem, "latn");
+    arktest.assertEQ(x.signDisplay, "auto");
+    arktest.assertEQ(x.style, "decimal");
+    arktest.assertEQ(x.unit, undefined);
+    arktest.assertEQ(x.unitDisplay, undefined);
+    arktest.assertEQ(x.useGrouping, false);
 }

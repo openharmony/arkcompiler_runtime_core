@@ -99,7 +99,7 @@ function main(): int {
     } catch (f: F) {
       return 0;
     } catch (def) {
-      assertTrue( false, "Unexpected catch clause" );
+      arktest.assertTrue( false, "Unexpected catch clause" );
     }
     return 1;
 }

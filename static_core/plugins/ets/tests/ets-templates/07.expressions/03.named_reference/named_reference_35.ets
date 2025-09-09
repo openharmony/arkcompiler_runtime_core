@@ -23,7 +23,7 @@ interface Lengthwise {
 
 function logLength<T extends Lengthwise>(obj: T): void {
   let x = obj.length;
-  assertEQ(x, 5);
+  arktest.assertEQ(x, 5);
 }
 
 function main(): void {

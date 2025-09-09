@@ -25,7 +25,7 @@ class Test {
 }
 
 function main(): int {
-    assertEQ(Test.a, -10)
-    assertEQ((new Test).a, 10)
+    arktest.assertEQ(Test.a, -10)
+    arktest.assertEQ((new Test).a, 10)
     return 0;
 }

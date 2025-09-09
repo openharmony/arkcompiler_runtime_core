@@ -55,38 +55,18 @@ class RunnerRecheck(RunnerFileBased):
         self.collect_excluded_test_lists()
         self.collect_ignored_test_lists()
 
+        flags = [
+            '--extension=ets',
+            '--plugins=e2p_test_plugin_recheck',
+            '--exit-after-phase',
+            'plugins-after-check',
+            f'--arktsconfig={self.arktsconfig}',
+        ]
         test_dirs: List[TestDirectory] = [
-            TestDirectory('compiler/ets', 'ets', flags=[
-                '--extension=ets',
-                '--plugins=e2p_test_plugin_recheck',
-                '--output=/dev/null',
-                '--exit-after-phase', 'plugins-after-check',
-                f'--arktsconfig={self.arktsconfig}'
-            ]),
-
-            TestDirectory('parser/ets', 'ets', flags=[
-                '--extension=ets',
-                '--plugins=e2p_test_plugin_recheck',
-                '--output=/dev/null',
-                '--exit-after-phase', 'plugins-after-check',
-                f'--arktsconfig={self.arktsconfig}'
-            ]),
-
-            TestDirectory('runtime/ets', 'ets', flags=[
-                '--extension=ets',
-                '--output=/dev/null',
-                '--plugins=e2p_test_plugin_recheck',
-                '--exit-after-phase', 'plugins-after-check',
-                f'--arktsconfig={self.arktsconfig}'
-            ]),
-
-            TestDirectory('ast', 'ets', flags=[
-                '--extension=ets',
-                '--plugins=e2p_test_plugin_recheck',
-                '--output=/dev/null',
-                '--exit-after-phase', 'plugins-after-check',
-                f'--arktsconfig={self.arktsconfig}'
-            ]),
+            TestDirectory('compiler/ets', 'ets', flags),
+            TestDirectory('parser/ets', 'ets', flags),
+            TestDirectory('runtime/ets', 'ets', flags),
+            TestDirectory('ast', 'ets', flags),
         ]
 
         self.add_directories(test_dirs)

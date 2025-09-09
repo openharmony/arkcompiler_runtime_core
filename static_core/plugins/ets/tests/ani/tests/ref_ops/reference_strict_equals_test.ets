@@ -14,13 +14,28 @@
  */
 
 function GetNull(): null {
-    return null;
+    return null
 }
 
 function GetUndefined(): undefined {
-    return undefined;
+    return undefined
 }
 
-function GetObject(): Object {
-    return new String("Hello World!");
+function getObject(): Object {
+    return "Hello World!"
+}
+
+native function areReferencesStrictEqual(lhs: Object | null | undefined, rhs: Object | null | undefined): boolean
+
+export function checkNullishValuesStrictEquality(): boolean {
+    return areReferencesStrictEqual(undefined, undefined) &&
+        areReferencesStrictEqual(null, null) &&
+        !areReferencesStrictEqual(undefined, null) &&
+        !areReferencesStrictEqual(undefined, "") &&
+        !areReferencesStrictEqual(null, "") &&
+        !areReferencesStrictEqual("abc", "") &&
+        areReferencesStrictEqual("", "") &&
+        !areReferencesStrictEqual(1, "") &&
+        !areReferencesStrictEqual(1, 2) &&
+        areReferencesStrictEqual(1, 1)
 }

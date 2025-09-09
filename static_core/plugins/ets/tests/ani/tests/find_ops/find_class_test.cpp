@@ -22,7 +22,7 @@ class FindClassTest : public AniTest {};
 TEST_F(FindClassTest, has_class)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("Lfind_class_test/Point;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("find_class_test.Point", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 }
 
@@ -33,9 +33,9 @@ TEST_F(FindClassTest, invalid_arguments)
     ASSERT_EQ(env_->FindClass("find_class_test/bla-bla-bla", &cls), ANI_NOT_FOUND);
     ASSERT_EQ(env_->FindClass(nullptr, &cls), ANI_INVALID_ARGS);
 
-    ASSERT_EQ(env_->FindClass("Lfind_class_test/Point;", nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->FindClass("find_class_test.Point", nullptr), ANI_INVALID_ARGS);
 
-    ASSERT_EQ(env_->c_api->FindClass(nullptr, "LPoint;", &cls), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->c_api->FindClass(nullptr, "Point", &cls), ANI_INVALID_ARGS);
 
     ASSERT_EQ(env_->FindClass("", &cls), ANI_NOT_FOUND);
     ASSERT_EQ(env_->FindClass("\t", &cls), ANI_NOT_FOUND);
@@ -44,13 +44,13 @@ TEST_F(FindClassTest, invalid_arguments)
 TEST_F(FindClassTest, class_is_not_namespace)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lfind_class_test/Point;", &ns), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->FindNamespace("find_class_test.Point", &ns), ANI_NOT_FOUND);
 }
 
 TEST_F(FindClassTest, class_is_not_module)
 {
     ani_module md {};
-    ASSERT_EQ(env_->FindModule("LPoint;", &md), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->FindModule("Point", &md), ANI_NOT_FOUND);
 }
 
 TEST_F(FindClassTest, check_initialization)

@@ -25,7 +25,7 @@ import {url} from "@ohos.url"
 function testParamsHas001() {
 	let params = new url.URLParams("key1=value1&key2=value2&key3=大")
 	let result = params.has("2")
-	assertEQ(result, false)
+ arktest.assertEQ(result, false)
 }
 
 /**
@@ -39,7 +39,7 @@ function testParamsHas001() {
 function testParamsHas002() {
 	let params = new url.URLParams("小=value1&key2=value2&key3=大")
 	let result = params.has("小")
-	assertEQ(result, true)
+ arktest.assertEQ(result, true)
 }
 
 /**
@@ -54,7 +54,7 @@ function testParamsHas003() {
 	let params = new url.URLParams("小=value1&￥=value2&key3=大")
 	params.append("￥", "ACA")
 	let result = params.has("￥")
-	assertEQ(result, true)
+ arktest.assertEQ(result, true)
 }
 
 /**
@@ -68,7 +68,7 @@ function testParamsHas003() {
 function testParamsHas004() {
 	let params = new url.URLParams("小=value1&key2=value2&key3=大")
 	let result = params.has("无")
-	assertEQ(result, false)
+ arktest.assertEQ(result, false)
 }
 
 /**
@@ -83,7 +83,7 @@ function testParamsHas005() {
 	let params = new url.URLParams("小=value1&￥=value2&key3=大")
 	params.append("￥", "ACA")
 	let result = params.has("￥11")
-	assertEQ(result, false)
+ arktest.assertEQ(result, false)
 }
 
 
@@ -103,7 +103,7 @@ function testParamsKeys001() {
 		arr.push(key);
 		i++
 	}
-	assertEQ(arr[0], "小");
+ arktest.assertEQ(arr[0], "小");
 }
 
 /**
@@ -122,7 +122,7 @@ function testParamsKeys002() {
 		arr.push(key);
 		i++
 	}
-	assertEQ(arr[1], "￥");
+ arktest.assertEQ(arr[1], "￥");
 }
 
 /**
@@ -141,7 +141,7 @@ function testParamsKeys003() {
 		arr.push(key);
 		i++
 	}
-	assertEQ(arr[2], "key3");
+ arktest.assertEQ(arr[2], "key3");
 }
 
 /**
@@ -160,7 +160,7 @@ function testParamsKeys004() {
 		arr.push(key);
 		i++
 	}
-	assertEQ(arr[3], "key4");
+ arktest.assertEQ(arr[3], "key4");
 }
 
 /**
@@ -179,7 +179,7 @@ function testParamsKeys005() {
 		arr.push(key);
 		i++
 	}
-	assertEQ(arr[4], "key5");
+ arktest.assertEQ(arr[4], "key5");
 }
  
 
@@ -196,7 +196,7 @@ function testParamsSort001() {
 	let params = new url.URLParams("1=value1&3=value3&2=key2");
 	params.sort();
 	let res = params.toString();
-	assertEQ(res, "1=value1&2=key2&3=value3");
+ arktest.assertEQ(res, "1=value1&2=key2&3=value3");
 }
 
 /**
@@ -211,7 +211,7 @@ function testParamsSort002() {
 	let params = new url.URLParams("a=value1&c=value2&b=key2");
 	params.sort();
 	let res = params.toString();
-	assertEQ(res, "a=value1&b=key2&c=value2");
+ arktest.assertEQ(res, "a=value1&b=key2&c=value2");
 }
 
 /**
@@ -227,7 +227,7 @@ function testParamsSort003() {
 	params.append("a", "ACA");
 	params.sort();
 	let res = params.toString();
-	assertEQ(res, "a=ACA&b=33&c=value2&d=value1");
+ arktest.assertEQ(res, "a=ACA&b=33&c=value2&d=value1");
 }
 
 /**
@@ -242,13 +242,13 @@ function testParamsSort004() {
 	let params = new url.URLParams("1=value1&3=value3&2=key2&4=key4");
 	params.sort();
 	let res = params.toString();
-	assertEQ(res, "1=value1&2=key2&3=value3&4=key4");
+ arktest.assertEQ(res, "1=value1&2=key2&3=value3&4=key4");
 }
  
 
 
 function main(): int {
-	let suite = new ArkTestsuite("URL UT tests");
+	let suite = new arktest.ArkTestsuite("URL UT tests");
 	suite.addTest("testParamsHas001", testParamsHas001);
 	suite.addTest("testParamsHas002", testParamsHas002);
 	suite.addTest("testParamsHas003", testParamsHas003);

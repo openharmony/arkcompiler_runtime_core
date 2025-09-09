@@ -15,7 +15,7 @@
 
 
 function main(): int {
-    const suite = new ArkTestsuite("Set API test for SDK");
+    const suite = new arktest.ArkTestsuite("Set API test for SDK");
     suite.addTest("Inheritance testing of the Set class", testSetInherit);
 
     return suite.run();
@@ -59,13 +59,13 @@ function testSetInherit() {
 
     let actual1 = a.has(2);
     let expected1 = TestData.expected1;
-    assertEQ(actual1, expected1, "failed: Expected" + actual1 + "got: " + expected1);
+    arktest.assertEQ(actual1, expected1, "failed: Expected" + actual1 + "got: " + expected1);
 
     let actual2 = a.toString();
     let expected2 = TestData.expected2;
-    assertEQ(actual2, expected2, "failed: Expected" + actual2 + "got: " + expected2);
+    arktest.assertEQ(actual2, expected2, "failed: Expected" + actual2 + "got: " + expected2);
 
     let actual3 = a.newFunc();
     let expected3 = TestData.expected3;
-    assertEQ(actual3, expected3, "failed: Expected" + actual3 + "got: " + expected3);
+    arktest.assertEQ(actual3, expected3, "failed: Expected" + actual3 + "got: " + expected3);
 }

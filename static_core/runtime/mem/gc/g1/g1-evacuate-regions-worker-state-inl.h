@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -114,7 +114,7 @@ template <typename LanguageConfig>
 void G1EvacuateRegionsWorkerState<LanguageConfig>::ProcessRef(Ref p)
 {
     auto o = ObjectAccessor::Load(p);
-    auto *obj = ObjectAccessor::DecodeNotNull(o);
+    auto *obj = ObjectAccessor::DecodeNotNull<LanguageConfig::LANG_TYPE>(o);
     if (!gc_->InGCSweepRange(obj)) {
         // reference has been already processed
         return;
@@ -128,7 +128,7 @@ void G1EvacuateRegionsWorkerState<LanguageConfig>::ProcessRef(Ref p)
         obj = Evacuate(obj, markWord);
     }
 
-    ObjectAccessor::Store(p, obj);
+    ObjectAccessor::Store<LanguageConfig::LANG_TYPE>(p, obj);
 
     if (!IsSameRegion(p, obj)) {
         EnqueueCard(p);

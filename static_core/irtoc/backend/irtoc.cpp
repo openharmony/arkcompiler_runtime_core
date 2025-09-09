@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 #include "compilation.h"
 #include "compiler_options.h"
 #include "irtoc_options.h"
-#include "generated/base_options.h"
+#include "generated/logger_options.h"
 
 namespace ark::irtoc {
 
@@ -24,8 +24,8 @@ int Run(int argc, const char **argv)
     ark::PandArgParser paParser;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     ark::irtoc::g_options.AddOptions(&paParser);
-    base_options::Options baseOptions("");
-    baseOptions.AddOptions(&paParser);
+    logger::Options loggerOptions("");
+    loggerOptions.AddOptions(&paParser);
     ark::compiler::g_options.AddOptions(&paParser);
 #ifdef PANDA_LLVM_IRTOC
     ark::llvmbackend::g_options.AddOptions(&paParser);
@@ -35,7 +35,7 @@ int Run(int argc, const char **argv)
         return -1;
     }
 
-    Logger::Initialize(baseOptions);
+    Logger::Initialize(loggerOptions);
 
     ark::compiler::CompilerLogger::SetComponents(ark::compiler::g_options.GetCompilerLog());
 

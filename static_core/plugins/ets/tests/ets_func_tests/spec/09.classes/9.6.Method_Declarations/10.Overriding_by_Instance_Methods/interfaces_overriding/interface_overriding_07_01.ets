@@ -31,5 +31,5 @@ class C implements A {
 
 function main() {
     const c: C = new C()
-    assertEQ( c.length, 0)
+    arktest.assertEQ( c.length, 0)
 }

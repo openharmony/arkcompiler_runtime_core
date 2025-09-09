@@ -25,27 +25,32 @@
 #include <node_api.h>
 
 #include <functional>
+#include <string_view>
 
 #if defined(PANDA_JS_ETS_HYBRID_MODE)
 #include "interfaces/inner_api/napi/native_node_hybrid_api.h"
 #else
-// NOLINTBEGIN(readability-identifier-naming)
+// NOLINTBEGIN(readability-identifier-naming, modernize-use-using)
+typedef napi_value (*proxy_object_attach_cb)(napi_env env, void *data);
 napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
 napi_wrap_with_xref(napi_env env, napi_value js_object, void *native_object, napi_finalize finalize_cb,
-                    napi_ref *result);
+                    proxy_object_attach_cb proxy_cb, napi_ref *result);
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
+napi_mark_attach_with_xref(napi_env env, napi_value js_object, void *attach_data, proxy_object_attach_cb attach_cb);
 napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
 napi_xref_unwrap(napi_env env, napi_value js_object, void **result);
 napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
 napi_create_xref(napi_env env, napi_value value, uint32_t initial_refcount, napi_ref *result);
 napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
 napi_register_appstate_callback(napi_env env, void (*f)(int a1, int64_t a2));
-// NOLINTEND(readability-identifier-naming)
+// NOLINTEND(readability-identifier-naming, modernize-use-using)
 #endif
 
 namespace ark::ets::interop::js {
 
 constexpr size_t BIGINT_BITS_NUM = 32;
 constexpr size_t BIT_64 = 64;
+constexpr std::string_view IS_STATIC_PROXY = "_isStaticProxy";
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
@@ -58,6 +63,8 @@ SmallVector<uint64_t, 4U> ConvertBigIntArrayFromEtsToJs(const std::vector<uint32
 std::vector<EtsInt> ConvertBigIntArrayFromJsToEts(SmallVector<uint64_t, 4U> &jsArray);
 
 PANDA_PUBLIC_API void ThrowNoInteropContextException();
+
+void ThrowJSErrorNotAssignable(napi_env env, const EtsClass *fromKlass, EtsClass *toKlass);
 
 bool NapiGetProperty(napi_env env, napi_value object, napi_value key, napi_value *result);
 bool NapiGetNamedProperty(napi_env env, napi_value object, const char *utf8name, napi_value *result);
@@ -199,6 +206,13 @@ inline napi_value GetUndefined(napi_env env)
     napi_value jsValueUndefined {};
     NAPI_CHECK_FATAL(napi_get_undefined(env, &jsValueUndefined));
     return jsValueUndefined;
+}
+
+inline napi_value GetBoolean(napi_env env, bool value)
+{
+    napi_value result;
+    NAPI_CHECK_FATAL(napi_get_boolean(env, value, &result));
+    return result;
 }
 
 inline napi_value GetNull(napi_env env)

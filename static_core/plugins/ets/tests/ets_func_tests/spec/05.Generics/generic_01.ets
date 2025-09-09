@@ -21,7 +21,7 @@ tags: []
 
 function foo<T>(arg1: T): void {
     const cb: (arg: T) => void = (arg: T) => {
-        assertTrue( arg instanceof string)
+        arktest.assertTrue( arg instanceof string)
     }
     cb(arg1);
 }

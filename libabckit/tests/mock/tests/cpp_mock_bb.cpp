@@ -16,7 +16,7 @@
 #include "../check_mock.h"
 #include "../../../src/mock/mock_values.h"
 #include "../cpp_helpers_mock.h"
-#include "include/cpp/headers/basic_block.h"
+#include "include/libabckit/cpp/headers/basic_block.h"
 
 #include <gtest/gtest.h>
 

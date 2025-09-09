@@ -20,5 +20,5 @@ desc: Reference local variables.
 function main(): void {
   let x: string = 'abc';
   let y: string = x;
-  assertEQ(y, 'abc');
+  arktest.assertEQ(y, 'abc');
 }

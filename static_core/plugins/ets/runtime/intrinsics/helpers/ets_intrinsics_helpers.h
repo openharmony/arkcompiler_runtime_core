@@ -46,6 +46,7 @@ inline constexpr double MAX_VALUE = std::numeric_limits<double>::max();
 inline constexpr double MIN_VALUE = std::numeric_limits<double>::min();
 inline constexpr double POSITIVE_INFINITY = coretypes::TaggedValue::VALUE_INFINITY;
 inline constexpr double NAN_VALUE = coretypes::TaggedValue::VALUE_NAN;
+inline constexpr double SCIENTIFIC_NOTATION_THRESHOLD = 1e21;
 
 inline constexpr int DOUBLE_MAX_PRECISION = 17;
 inline constexpr int FLOAT_MAX_PRECISION = 9;
@@ -104,7 +105,7 @@ inline uint8_t ToDigit(uint8_t c)
 }
 
 // CC-OFFNXT(G.FUD.06) perf critical
-inline double PowHelper(uint64_t number, int16_t exponent, uint8_t radix)
+inline double PowHelper(uint64_t number, int exponent, uint8_t radix)
 {
     const double log2Radix {std::log2(radix)};
 
@@ -381,8 +382,8 @@ EtsString *FpToString(FpType number, int radix)
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         snprintf_s(buf.data(), buf.size(), buf.size() - 1, "radix must be %.f to %.f", helpers::MIN_RADIX,
                    helpers::MAX_RADIX);
-        ThrowEtsException(EtsCoroutine::GetCurrent(),
-                          panda_file_items::class_descriptors::ARGUMENT_OUT_OF_RANGE_EXCEPTION, buf.data());
+        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::ARGUMENT_OUT_OF_RANGE_ERROR,
+                          buf.data());
         return nullptr;
     }
 

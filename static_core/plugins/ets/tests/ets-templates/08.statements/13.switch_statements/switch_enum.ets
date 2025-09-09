@@ -21,9 +21,9 @@ enum Color { Red, Yellow, Green }
 
 function f(i: Color): void {
   switch (i) {
-    case Color.Red:    assertEQ(i, Color.Red);    break;
-    case Color.Yellow: assertEQ(i, Color.Yellow); break;
-    case Color.Green:  assertEQ(i, Color.Green);  break;
+    case Color.Red:    arktest.assertEQ(i, Color.Red);    break;
+    case Color.Yellow: arktest.assertEQ(i, Color.Yellow); break;
+    case Color.Green:  arktest.assertEQ(i, Color.Green);  break;
   }
 }
 

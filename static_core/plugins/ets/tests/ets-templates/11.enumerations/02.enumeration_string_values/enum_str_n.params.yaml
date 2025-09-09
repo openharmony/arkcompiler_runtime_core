@@ -16,28 +16,28 @@ cases:
     - decl: |-
           enum Enum { first = "a", second, third }   // strings must be set explicitly
       use: |-
-          assertEQ(Enum.first.toString(), "a")
+          arktest.assertEQ(Enum.first.toString(), "a")
 
     - decl: |-
           enum Enum { first = 11, second = "12", third = 13 }  // cannot combine string and int values
       use: |-
-          assertEQ(Enum.second.toString(), "12")
+          arktest.assertEQ(Enum.second.toString(), "12")
 
     - decl: |-
           enum Enum { first = "11", second = null, third = "13" }  // cannot use null
       use: |-
-          assertEQ(Enum.first.toString(), "11")
+          arktest.assertEQ(Enum.first.toString(), "11")
 
     - decl: |-
           enum Enum { first = "11", second = undefined, third = "13" }  // cannot use undefined
       use: |-
-          assertEQ(Enum.first.toString(), "11")
+          arktest.assertEQ(Enum.first.toString(), "11")
 
     - decl: |-
           let a = "ABC"   // not a constant
           enum Enum { e1 = a, e2 = "DEF" }
       use: |-
-          assertEQ(Enum.e1.toString(), "ABC")
-          assertEQ(Enum.e2.toString(), "DEF")
+          arktest.assertEQ(Enum.e1.toString(), "ABC")
+          arktest.assertEQ(Enum.e2.toString(), "DEF")
 
 

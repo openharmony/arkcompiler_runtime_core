@@ -15,14 +15,14 @@
 import buffer from '@ohos.buffer';
 import { BusinessError } from "@ohos.base";
 
-const TypeErrorCodeId: number = 401;
-const BufferOverFlowErrorCodeId: number = 10200062;
-const IllegalPositionErrorCodeId: number = 10200063;
-const EmptyErrorCodeId: number = 10200064;
-const NoElementMatchErrorCodeId: number = 10200065;
-const EncodingErrorCodeId: number = 10200066;
+const TypeErrorCodeId: int = 401;
+const BufferOverFlowErrorCodeId: int = 10200062;
+const IllegalPositionErrorCodeId: int = 10200063;
+const EmptyErrorCodeId: int = 10200064;
+const NoElementMatchErrorCodeId: int = 10200065;
+const EncodingErrorCodeId: int = 10200066;
 
-function createBusinessError(code: number, message: string) {
+function createBusinessError(code: int, message: string) {
     let err = new BusinessError();
     err.code = code;
     err.name = 'BusinessError';
@@ -46,24 +46,24 @@ export namespace xml {
         WHITESPACE
     }
 
-    export class ParseInfoImpl implements ParseInfo {
-        depth: number
-        columnNumber: number
-        lineNumber: number
-        attributeCount: number
-        name: string
-        namespace_: string
-        prefix: string
-        text: string
-        emptyElementTag: boolean
-        whitespace: boolean
+    class ParseInfoImpl implements ParseInfo {
+        private depth: int
+        private columnNumber: int
+        private lineNumber: int
+        private attributeCount: int
+        private name: string
+        private namespace: string
+        private prefix: string
+        private text: string
+        private emptyElementTag: boolean
+        private whitespace: boolean
 
-        override getAttributeCount(): number { return this.attributeCount; }
-        override getColumnNumber(): number { return this.columnNumber; }
-        override getDepth(): number { return this.depth; }
-        override getLineNumber(): number { return this.lineNumber; }
+        override getAttributeCount(): int { return this.attributeCount; }
+        override getColumnNumber(): int { return this.columnNumber; }
+        override getDepth(): int { return this.depth; }
+        override getLineNumber(): int { return this.lineNumber; }
         override getName(): string { return this.name; }
-        override getNamespace(): string { return this.namespace_; }
+        override getNamespace(): string { return this.namespace; }
         override getPrefix(): string { return this.prefix; }
         override getText(): string { return this.text; }
         override isEmptyElementTag(): boolean { return this.emptyElementTag; }
@@ -71,10 +71,10 @@ export namespace xml {
     }
 
     export interface ParseInfo {
-        getAttributeCount(): number
-        getColumnNumber(): number
-        getDepth(): number
-        getLineNumber(): number
+        getAttributeCount(): int
+        getColumnNumber(): int
+        getDepth(): int
+        getLineNumber(): int
         getName(): string
         getNamespace(): string
         getPrefix(): string
@@ -102,31 +102,36 @@ export namespace xml {
             else {
                 b = buffer.from(bufferIn)
             }
-            strIn = (encoding != undefined) ? b.toString(encoding! as buffer.BufferEncoding) : b.toString()
+            if (encoding != undefined) {
+                encoding = encoding.toLowerCase()
+                if (encoding !== "utf-8") {
+                    throw createBusinessError(TypeErrorCodeId, 'Parameter error.Just support utf-8')
+                }
+                strIn = b.toString(encoding! as buffer.BufferEncoding)
+            } else {
+                strIn = b.toString()
+            }
             this.helper = new XmlParseHelper(strIn)
         }
 
         private helper: XmlParseHelper
         public parseXml(option: ParseOptions): void {
-            this.helper.supportDoctype = (option.supportDoctype != undefined) ? option.supportDoctype! : false
-            this.helper.ignoreNameSpace = (option.ignoreNameSpace != undefined) ? option.ignoreNameSpace! : false
-            this.helper.tagFunc_ = option.tagValueCallbackFunction
-            this.helper.attrFunc_ = option.attributeValueCallbackFunction
-            this.helper.tokenFunc_ = option.tokenValueCallbackFunction
-            this.helper.parseXml()
+            if (!this.helper.parseXml(option)) {
+                throw createBusinessError(TypeErrorCodeId, this.helper.xmlPullParserError());
+            }
         }
     }
-    
+
     type Attributes = Map<string, string>
 
     interface XmlNode {
         name?: string
         attributes?: Attributes
         content?: string
-        lineNumber?: number
-        columnNumber?: number
-        pos?: number
-        depth?: number
+        lineNumber?: int
+        columnNumber?: int
+        pos?: int
+        depth?: int
         prefix?: string
         namespace_?: string
         type?: EventType
@@ -164,7 +169,7 @@ export namespace xml {
          */
         constructor(encoding: string) {
             if (encoding !== 'utf-8') {
-                throw new BusinessError(EncodingErrorCodeId, new Error('Parameter error.Just support utf-8'));
+                throw createBusinessError(EncodingErrorCodeId, 'Parameter error.Just support utf-8');
             }
 
             this.buffer = new ArrayBuffer(MaxXmlLength);
@@ -193,11 +198,11 @@ export namespace xml {
                 this.checkPosition();
             }
 
-            let temp = new StringBuilder(` ${name}=\"`);
-            this.writeEscaped(temp, value);
-            temp.append(`\"`);
+            let stringBuilder = new StringBuilder(` ${name}=\"`);
+            this.writeEscaped(stringBuilder, value);
+            stringBuilder.append(`\"`);
             this.type = XmlDynamicType.START_AND_ATTRIBUTES;
-            this.writeToBuffer(temp);
+            this.writeToBuffer(stringBuilder);
         }
 
         /**
@@ -210,9 +215,9 @@ export namespace xml {
                 this.checkPosition();
             }
 
-            let temp = new StringBuilder(`<?xml version=\"1.0\" encoding=\"${this.encoding}\"?>`);
+            let stringBuilder = new StringBuilder(`<?xml version=\"1.0\" encoding=\"${this.encoding}\"?>`);
             this.type = XmlDynamicType.DECLARATION;
-            this.writeToBuffer(temp);
+            this.writeToBuffer(stringBuilder);
         }
 
         /**
@@ -222,32 +227,24 @@ export namespace xml {
          * @throws {BusinessError} Throws an error if the `name` parameter is an empty string.
          */
         public startElement(name: string): void {
-            this.checkEmptyParameter(name);
-            let temp = new StringBuilder();
-            if (this.type === XmlDynamicType.START_AND_ATTRIBUTES) {
-                this.spliceNamespace(temp);
-                temp.append('>');
-            }
-            if (this.type !== XmlDynamicType.NONE) {
-                this.nextItem(temp);
-            }
+            let stringBuilder = this.prepareBufferForNewItem(name);
 
             this.elementStack[this.depth].name = name;
-            temp.append('<');
+            stringBuilder.append('<');
             if (this.elementStack[this.depth].prefix !== '') {
-                temp.append(`${this.elementStack[this.depth].prefix}:`);
+                stringBuilder.append(`${this.elementStack[this.depth].prefix}:`);
             } else if (this.depth !== 0) {
                 if (this.elementStack[this.depth - OffsetDepth].prefix !== '') {
                     this.elementStack[this.depth].prefix = this.elementStack[this.depth - OffsetDepth].prefix;
-                    temp.append(`${this.elementStack[this.depth].prefix}:`);
+                    stringBuilder.append(`${this.elementStack[this.depth].prefix}:`);
                 }
             }
-            temp.append(`${this.elementStack[this.depth].name}`);
+            stringBuilder.append(`${this.elementStack[this.depth].name}`);
             this.type = XmlDynamicType.START_AND_ATTRIBUTES;
             this.depth++;
             this.elementNum++;
             this.increaseStackLength();
-            this.writeToBuffer(temp);
+            this.writeToBuffer(stringBuilder);
         }
 
         /**
@@ -257,35 +254,35 @@ export namespace xml {
          */
         public endElement(): void {
             if (this.elementNum < 1) {
-                throw new BusinessError(NoElementMatchErrorCodeId,
-                    new Error('There is no match between the startElement and the endElement'));
+                throw createBusinessError(NoElementMatchErrorCodeId,
+                    'There is no match between the startElement and the endElement');
             }
             this.elementNum--;
 
-            let temp = new StringBuilder();
+            let stringBuilder = new StringBuilder();
             if (this.type == XmlDynamicType.START_AND_ATTRIBUTES) {
-                this.spliceNamespace(temp);
-                temp.append('/>');
+                this.spliceNamespace(stringBuilder);
+                stringBuilder.append('/>');
                 this.type = XmlDynamicType.OTHERS;
                 this.depth--;
-                this.writeToBuffer(temp);
+                this.writeToBuffer(stringBuilder);
                 return;
             }
             this.depth--;
             if (this.type !== XmlDynamicType.TEXT) {
-                this.nextItem(temp);
+                this.nextItem(stringBuilder);
             }
 
-            temp.append('</');
+            stringBuilder.append('</');
             if (this.elementStack[this.depth].prefix !== '') {
-                temp.append(`${this.elementStack[this.depth].prefix}:`);
+                stringBuilder.append(`${this.elementStack[this.depth].prefix}:`);
             }
-            temp.append(`${this.elementStack[this.depth].name}`);
+            stringBuilder.append(`${this.elementStack[this.depth].name}`);
             this.elementStack[this.depth].prefix = '';
             this.elementStack[this.depth].namespace_ = '';
             this.type = XmlDynamicType.OTHERS;
-            temp.append('>');
-            this.writeToBuffer(temp);
+            stringBuilder.append('>');
+            this.writeToBuffer(stringBuilder);
         }
 
         /**
@@ -299,10 +296,10 @@ export namespace xml {
             this.checkEmptyParameter(prefix);
             this.checkEmptyParameter(namespace);
 
-            let temp = new StringBuilder();
+            let stringBuilder = new StringBuilder();
             if (this.type === XmlDynamicType.START_AND_ATTRIBUTES) {
-                this.spliceNamespace(temp);
-                temp.append('>');
+                this.spliceNamespace(stringBuilder);
+                stringBuilder.append('>');
             }
 
             this.elementStack[this.depth].prefix = prefix;
@@ -313,7 +310,83 @@ export namespace xml {
             }
             this.multNsp.set(this.depth, node);
             this.type = XmlDynamicType.OTHERS;
-            this.writeToBuffer(temp);
+            this.writeToBuffer(stringBuilder);
+        }
+
+        /**
+         * Adds an empty XML element with the specified name to the output buffer.
+         *
+         * @param {string} name - The name of the empty XML element to be added.
+         * @throws {BusinessError} Throws an error if the `name` parameter is an empty string.
+         */
+        public addEmptyElement(name: string): void {
+            let stringBuilder = this.prepareBufferForNewItem(name);
+
+            stringBuilder.append(`<${name}/>`);
+            this.type = XmlDynamicType.OTHERS;
+            this.writeToBuffer(stringBuilder);
+        }
+
+        /**
+         * Sets a comment in the XML output.
+         *
+         * @param {string} comment - The comment string to be added to the XML output.
+         * @throws {BusinessError} Throws an error if the `text` parameter is an empty string.
+         */
+        public setComment(text: string): void {
+            let stringBuilder = this.prepareBufferForNewItem(text);
+
+            stringBuilder.append(`<!--${text}-->`);
+            this.type = XmlDynamicType.OTHERS;
+            this.writeToBuffer(stringBuilder);
+        }
+
+        /**
+         * Sets the CDATA section for the XML content.
+         *
+         * @param {string} data - The string data to be wrapped in a Cdata section.
+         * @throws {BusinessError} Throws an error if the `text` parameter is an empty string.
+         */
+        public setCdata(text: string): void {
+            let stringBuilder = this.prepareBufferForNewItem(text);
+
+            text = text.replaceAll(']]>', ']]]]><![CDATA[>');
+            stringBuilder.append(`<![CDATA[${text}]]>`);
+            this.type = XmlDynamicType.OTHERS;
+            this.writeToBuffer(stringBuilder);
+        }
+
+        /**
+         * Sets the text content for the current XML element.
+         *
+         * @param {string} text - The text content to set for the current XML element.
+         * @throws {BusinessError} Throws an error if the `text` parameter is an empty string.
+         */
+        public setText(text: string): void {
+            this.checkEmptyParameter(text);
+            let stringBuilder = new StringBuilder();
+            if (this.type === XmlDynamicType.START_AND_ATTRIBUTES) {
+                this.spliceNamespace(stringBuilder);
+                stringBuilder.append('>');
+            }
+
+            this.writeEscaped(stringBuilder, text);
+            this.type = XmlDynamicType.TEXT;
+            this.writeToBuffer(stringBuilder);
+        }
+
+        /**
+         * Sets the document type (DOCTYPE) for the XML output.
+         *
+         * @param {string} text - The DOCTYPE declaration to be added to the XML output.
+         * @throws {BusinessError} Throws an error if the `text` parameter is an empty string.
+         */
+        public setDocType(text: string): void {
+            let stringBuilder = this.prepareBufferForNewItem(text);
+
+            stringBuilder.append(`<!DOCTYPE ${text}>`);
+            this.type = XmlDynamicType.OTHERS;
+            this.writeToBuffer(stringBuilder);
         }
 
         /**
@@ -366,11 +439,11 @@ export namespace xml {
             let iLenTemp = tempString.length;
             if (this.iPos + iLenTemp <= MaxXmlLength) {
                 for (let i = 0; i < iLenTemp; i++) {
-                    this.buffer.set((i + this.iPos) as int, tempString[i] as byte);
+                    this.buffer.set((i + this.iPos) as int, tempString.charAt(i).toByte());
                 }
                 this.iPos += iLenTemp;
             } else {
-                throw new BusinessError(BufferOverFlowErrorCodeId, new Error('The length has exceeded the upper limit'));
+                throw createBusinessError(BufferOverFlowErrorCodeId, 'The length has exceeded the upper limit');
             }
         }
 
@@ -420,7 +493,7 @@ export namespace xml {
          */
         private checkEmptyParameter(para: string): void {
             if (para.length === 0) {
-                throw new BusinessError(EmptyErrorCodeId, new Error('Parameter error. Parameter cannot be empty'));
+                throw createBusinessError(EmptyErrorCodeId, 'Parameter error. Parameter cannot be empty');
             }
         }
 
@@ -428,433 +501,66 @@ export namespace xml {
          * Checks the position of the XML serializer and throws an error if the position is illegal.
          */
         private checkPosition(): void {
-            throw new BusinessError(IllegalPositionErrorCodeId, new Error('Illegal position for xml'));
+            throw createBusinessError(IllegalPositionErrorCodeId, 'Illegal position for xml');
+        }
+
+        /**
+         * Prepares the buffer for adding a new item by handling namespace line break and indentation.
+         *
+         * @param {StringBuilder} stringBuilder - The StringBuilder instance to append content to.
+         */
+        private prepareBufferForNewItem(name: string): StringBuilder {
+            this.checkEmptyParameter(name);
+            let stringBuilder = new StringBuilder();
+            if (this.type === XmlDynamicType.START_AND_ATTRIBUTES) {
+                this.spliceNamespace(stringBuilder);
+                stringBuilder.append('>');
+            }
+            if (this.type !== XmlDynamicType.NONE) {
+                this.nextItem(stringBuilder);
+            }
+
+            return stringBuilder;
         }
     }
 
+
     export class XmlParseHelper {
+        private static finalizationRegistry = new FinalizationRegistry<long>(
+            (pointer: long) => { XmlParseHelper.releaseNative(pointer); }
+        );
+        private nativeBinding: long;
 
-        public supportDoctype: boolean = false
-        public ignoreNameSpace: boolean = false
-        public tagFunc_?: (name: string, value: string) => boolean
-        public attrFunc_?: (name: string, value: string) => boolean
-        public tokenFunc_?: (eventType: EventType, value: ParseInfo) => boolean
+        static { loadLibrary('ets_sdk_native'); }
 
-        private strXml_ : string = " "
-        private nodeMap = new Map<number, XmlNode>(); 
-
-        constructor(str: string) {
-            this.strXml_ = str
+        constructor(content: string) {
+            this.nativeBinding = XmlParseHelper.bindNative(content);
+            XmlParseHelper.finalizationRegistry.register(this, this.nativeBinding);
         }
 
-        private static readonly XML = "<?xml"
-        private static readonly SEMICOLON = ':'
-        private static readonly HTTP = 'http'
-        private static readonly HTTPS = 'https'
-        private static readonly UNDESCORE = '_'
-        private static readonly XMLNS = 'xmlns'
-        private static readonly XMLNS_PREFIX = 'xmlns:'
-        private static readonly lineEndRegExp = new RegExp("\n", "m")
-        private static readonly selfCloseTagRegExp = new RegExp("<([\\w:]+)([^<^>])*?/>", "m")
-        private static readonly startTagRegExp = new RegExp("<([\\w:]+)[\\s\\S]*?>", "m")
-        private static readonly closeTagRegExp = new RegExp("</([\\w:]+)([^<^>])*?>", "m")
-        private static readonly textTagRegExp = new RegExp(">[&|\\w:|\\s][^<>]+<", "m")
-        private static readonly attributeRegExp = new RegExp("([\\w:-]+)\\s*=\\s*(\"[^\"]*\"|'[^']*'|\\w+)\\s*", "m")
-        private static readonly stripRegExp = new RegExp("^['\"]|['\"]$","g")
-        private static readonly entityRegExp = new RegExp("<!ENTITY (?<name>\\w+) ('|\")(?<value>.*?)('|\")>", "gm")
-        private static readonly nodeNameRegExp = new RegExp("^[\\w:]+$", "gm")
-
-        private static readonly serviceTagRegExpMap = new Map<EventType, RegExp>([
-            [EventType.INSTRUCTION, new RegExp("<\\?[^>]+?>","g")],
-            [EventType.COMMENT, new RegExp("<!--[\\s\\S]*?-->","g")],
-            [EventType.ENTITY_REFERENCE, new RegExp("<!ENTITY[\\s\\S]*?>","g")],
-            [EventType.DOCDECL, new RegExp("<!DOCTYPE[\\s\\S]*?\[[\\s\\S]*?\]>","g")],
-            [EventType.CDSECT, new RegExp("<!\\[CDATA\\[[\\s\\S]*?\]\]>","gm")]
-        ])
-
-        private static readonly xmlEscapeChars = new Map<string, string>([
-            ["&quot;", "\""],
-            ["&amp;", "&"],
-            ["&lt;", "<"],
-            ["&gt;", ">"],
-            ["&apos;", "'"]
-        ])
-
-        private replaceEntities(node: XmlNode): XmlNode {
-            let str = (node.content != undefined) ? node.content! : ""
-            if (str == "") {
-                return node
-            }
-            if (this.supportDoctype && str.includes("&")) {
-                this.documentEntities.forEach((value: string, key: string) => {
-                    let entityRef = new StringBuilder().append("&").append(key).toString()
-                    if (str.includes(entityRef)) {
-                        str = str.replace(entityRef, value)
-                        node.type = EventType.ENTITY_REFERENCE
-                        node.name = key
-                        node.content = str
-                    }
-                })
-            }
-            return node
+        public parseXml(option: ParseOptions): boolean {
+            return XmlParseHelper.parseXmlInner(this.nativeBinding,
+                option.ignoreNameSpace ?? false,
+                option.supportDoctype ?? false,
+                option.attributeValueCallbackFunction,
+                option.tagValueCallbackFunction,
+                option.tokenValueCallbackFunction
+            );
         }
 
-        private replaceXmlSpecChars(str: string): string {
-            for (let key of XmlParseHelper.xmlEscapeChars.keys()) {
-                str = str.replace(key, XmlParseHelper.xmlEscapeChars.get(key!) as string)
-            }
+        private static native bindNative(content: string): long;
+        private static native releaseNative(pointer: long): boolean;
+        private static native parseXmlInner(pointer: long,
+            ignoreNameSpace: boolean,
+            supportDoctype: boolean,
+            attributeValueCallbackFunction?: (name: string, value: string) => boolean,
+            tagValueCallbackFunction?: (name: string, value: string) => boolean,
+            tokenValueCallbackFunction?: (eventType: EventType, value: ParseInfo) => boolean
+        ): boolean;
+        private static native parserErrorInfo(pointer: long): string;
 
-            return str
-        }
-
-        private removeSpecTags(str: string): string {
-            if (str.includes("CDATA")) {
-                str = str.replace("<![CDATA[", "").replace("]]>", "")
-            }
-            if (str.includes("<!--")) {
-                str = str.replace("<!--", "").replace("-->", "")
-            }
-            if (str.includes("<?")) {
-                str = str.replace("<?", "").replace("?>", "")
-            }
-            if (str.includes("<!ENTITY")) {
-                str = str.replace("<!ENTITY","").replace(">", "")
-            }
-            if (str.includes("<!DOCTYPE")) {
-                str = str.replace("<!DOCTYPE","").replace(">", "")
-            }
-            return str
-        }
-
-        public calcPosition(str: string, node: XmlNode) {
-            let lineEndMatch: NullishType
-            let pos: number = 1
-            let end = str.length > 1 ? str.length + 1 : 1
-            let lineChanged: boolean = false
-            node.lineNumber = 1
-            node.columnNumber = 1
-            node.pos = end
-            while ((pos < end) && (lineEndMatch = XmlParseHelper.lineEndRegExp.exec(str.substr(pos)))) {
-                node.lineNumber!++
-                pos += lineEndMatch!.index + 1
-                lineChanged = true
-            }
-
-            if (lineChanged) {
-                node.columnNumber = (abs(end - pos) + 1)
-            } else {
-                node.columnNumber = end
-            }
-        }
-
-        private parseToken(node: XmlNode): ParseInfo {
-
-            let info = new ParseInfoImpl()
-            info.depth = (node.depth != undefined) ? node.depth! : 0
-            info.columnNumber = (node.columnNumber != undefined) ? node.columnNumber! : 0
-            info.lineNumber = (node.lineNumber != undefined) ? node.lineNumber! : 0
-            info.attributeCount = (node.attributes != undefined) ? node.attributes!.size : 0
-            info.emptyElementTag = (node.isSelfClose != undefined) ? (node.isSelfClose!) : false
-            info.whitespace = (node.content != undefined) ? (node.content! == " " || node.content! == "") : true
-            info.namespace_ = (node.namespace_ != undefined) ? node.namespace_! : ""
-            info.name = (node.name != undefined) ? node.name! : ""
-            info.prefix = (node.prefix != undefined) ? node.prefix! : ""
-            info.text = (node.content != undefined) ? this.replaceXmlSpecChars(node.content!) : ""
-
-            return info
-        }
-        private startDocumentFound: boolean = false
-        private documentEntities = new Map<string,string>()
-        private processServiceTag(regexp: RegExp, type: EventType) {
-            let m : NullishType
-            let pos: number = 0
-            while (m = regexp.exec(this.strXml_.substr(pos))) {
-                pos = m!.index + 1
-                for (let item of m!.result) {
-                    let resType = type
-                    if (type == EventType.INSTRUCTION && item.substr(0, XmlParseHelper.XML.length) == XmlParseHelper.XML) {
-                        resType = EventType.START_DOCUMENT
-                        pos = 1
-                    } else if (type == EventType.INSTRUCTION) { 
-                        pos += item.length
-                    }
-                    if (this.supportDoctype && (type == EventType.ENTITY_REFERENCE)) {
-                        let match = XmlParseHelper.entityRegExp.exec(item)
-                        if (match && match.result.length > 3) {
-                            let entityName = match.result[1]
-                            let entityValue = match.result[3]
-                            this.documentEntities.set(entityName, entityValue)
-                        }
-                    }
-                    let node : XmlNode = {
-                        type: resType,
-                        content: this.removeSpecTags(item),
-                        isServiceTagNode: true,
-                        isSelfClose: false,
-                        pos: pos
-                    }
-                    this.calcPosition(this.strXml_.substr(0, pos), node)
-                    if (resType == EventType.START_DOCUMENT) {
-                        if (item != undefined) {
-                            node.attributes = this.getAttributes(item, node)
-                        }
-                        this.startDocumentFound = true
-                    }
-                    if ((type != EventType.DOCDECL) || this.supportDoctype) {
-                        this.nodeMap.set(node!.pos!, node!)
-                    }
-                }
-            }
-        }
-
-        private processAllStartTags() {
-            let pos: number = 0
-            let m : NullishType
-            while (m = XmlParseHelper.startTagRegExp.exec(this.strXml_.substr(pos))) {
-                pos += m!.index
-                let item = m!.result[0]
-                pos += item.length
-                if (item && !item.match(XmlParseHelper.selfCloseTagRegExp)) {
-                    let name = item.substr(1, item.length - 2).split(" ")[0]
-                    if (!this.isNodeNameValid(name)) {
-                        throw createBusinessError(TypeErrorCodeId,'The node name contains invalid characters');
-                    }
-                    let node = {
-                        pos: pos,
-                        type: EventType.START_TAG,
-                        name: name,
-                        isSelfClose: false
-                    } as XmlNode
-                    node.attributes = this.getAttributes(item, node)
-                    this.processNameSpace(node)
-                    this.calcPosition(this.strXml_.substr(0, pos), node!)
-                    this.nodeMap.set(node!.pos!, node!)
-                }
-            }
-        }
-
-        private isNodeNameValid(name: string): boolean {
-            let m = name.match(XmlParseHelper.nodeNameRegExp)
-            if (m && m.result) {
-                return m.result.length > 0
-            }
-            return false
-        }
-
-        private processAllEndTags() {
-            let pos: number = 0
-            let m : NullishType
-            while (m = XmlParseHelper.closeTagRegExp.exec(this.strXml_.substr(pos))) {
-                pos += m!.index
-                let item = m!.result[0]
-                pos += item.length
-                let name = item.substr(2, item.length - 3)
-                if (!this.isNodeNameValid(name)) {
-                    throw createBusinessError(TypeErrorCodeId,'The node name contains invalid characters');
-                }
-                if (item) {
-                    let node = {
-                        pos: pos,
-                        name: name,
-                        isSelfClose: false
-                    } as XmlNode
-                    node!.type = EventType.END_TAG 
-                    this.processNameSpace(node)
-                    this.calcPosition(this.strXml_.substr(0, pos), node!)
-                    this.nodeMap.set(node!.pos!, node!)
-                }
-            }
-        }
-
-        private processAllSelfCloseTags() {
-            let m : NullishType
-            let pos: number = 0
-            while (m = XmlParseHelper.selfCloseTagRegExp.exec(this.strXml_.substr(pos))) {
-                pos += m!.index
-                let item = m!.result[0]
-                if (item) {
-                    pos += item.length
-                    let name = item.substr(1, item.length - 3).split(" ")[0]
-                    if (!this.isNodeNameValid(name)) {
-                        throw createBusinessError(TypeErrorCodeId,'The node name contains invalid characters');
-                    }
-                    let node = {
-                        pos: pos,
-                        type: EventType.START_TAG,
-                        name: name,
-                        isSelfClose: true
-                    } as XmlNode
-                    node.attributes = this.getAttributes(item, node)
-                    this.processNameSpace(node) 
-                    this.calcPosition(this.strXml_.substr(0, pos), node!)
-                    this.nodeMap.set(pos - 1, node)
-                    let endNode = {
-                        pos: pos,
-                        type: EventType.END_TAG,
-                        name: name,
-                        isSelfClose: true,
-                        columnNumber: node.columnNumber,
-                        lineNumber: node.lineNumber,
-                        prefix: node.prefix,
-                        namespace_: node.namespace_
-                    } as XmlNode
-                    this.nodeMap.set(pos, endNode)
-                }
-            }
-        }
-
-        private processAllTextTags() {
-            let m : NullishType
-            let pos:number = 0
-            while (m = XmlParseHelper.textTagRegExp.exec(this.strXml_.substr(pos))) {
-                pos += m!.index
-                for (let item of m!.result) {
-                    pos += item.length
-                    let content = item.substr(1, item.length - 2)
-                    let node = {
-                        pos: pos,
-                        content: this.removeSpecTags(content)
-                    } as XmlNode
-                    node!.type = (node!.content!.replaceAll(" ", "") == "") ? EventType.WHITESPACE : EventType.TEXT 
-                    this.calcPosition(this.strXml_.substr(0, pos - 1), node!)
-                    this.nodeMap.set(node!.pos!, node!)
-                }
-            }
-        }
-
-        public parseXml(): void {
-            if (this.strXml_ == "") {
-                return
-            }
-
-            XmlParseHelper.serviceTagRegExpMap.forEach((value: RegExp, key: EventType) => {
-                this.processServiceTag(value, key)
-            })
-
-            this.processAllStartTags()
-            this.processAllSelfCloseTags()
-            this.processAllTextTags()
-            this.processAllEndTags()
-
-            let keys = Array.from(this.nodeMap.keys()).sort((a, b) => a - b)
-
-            let name = ""
-            let depth = 0
-            let res = true
-            keys.forEach((key: number) => {
-                let node = this.nodeMap.get(key)!
-                if (node.type == EventType.START_TAG) {
-                    name = node!.name!
-                    ++depth
-                }
-                if (node.type == EventType.END_TAG && (depth > 1)) {
-                    --depth
-                }
-                node.depth = depth
-                if (res) {
-                    node = this.replaceEntities(node)
-                    res = this.processNode(node)
-                }
-            })
-
-            let endNode: XmlNode = {
-                name: '',
-                type: EventType.END_DOCUMENT,
-                depth: 0
-            }
-            this.calcPosition(this.strXml_, endNode)
-            this.processNode(endNode)
-        }
-
-        private isNullish(obj: NullishType): boolean {
-            return (obj == undefined)
-        }
-
-        private getAttributes(str: string, node: XmlNode): Map<string, string> {
-            let attributes = new Map<string, string>()
-            let keyValueMatch : NullishType
-            while (!this.isNullish(keyValueMatch = str.match(XmlParseHelper.attributeRegExp))) {
-                if (node.attributes) {
-                    attributes = node.attributes!
-                }
-                attributes!.set(this.replaceXmlSpecChars(keyValueMatch!.result[1] as string),
-                    this.replaceXmlSpecChars(this.strip(keyValueMatch!.result[2] as string)))
-                str = str.replace(keyValueMatch!.result[0] as string,'')
-            }
-            return attributes
-        }
-
-        private strip(val: string): string {
-            return val.replace(XmlParseHelper.stripRegExp, "")
-        }
-
-        private nsMap = new Map<string,string>()
-        private processNameSpace(node: XmlNode): void {
-            if (this.ignoreNameSpace) { 
-                return
-            }
-
-            if (node.attributes) {
-                node.attributes!.forEach ((value: string, key: string) => {
-                    if (key! === XmlParseHelper.XMLNS) {
-                        this.nsMap.set(XmlParseHelper.UNDESCORE, value)
-                    } 
-                    if (key.indexOf(XmlParseHelper.XMLNS_PREFIX) === 0) {
-                        let prefix = key!.replace(XmlParseHelper.XMLNS_PREFIX,'')
-                        this.nsMap.set(prefix, value)
-                    }
-                })
-            }
-            if (node.name) {
-                let hasPrefix = (node.name!.indexOf(XmlParseHelper.SEMICOLON) > 0)
-                if (hasPrefix) {
-                    let prefix = node.name!.split(XmlParseHelper.SEMICOLON)[0]
-                    if ((prefix != XmlParseHelper.HTTP) && (prefix != XmlParseHelper.HTTPS) && this.nsMap.has(prefix)) {
-                        node.name = node.name!.replace(`${prefix}:`,"")
-                        node.prefix = prefix
-                        node.namespace_ = this.nsMap.get(prefix)
-                    }
-                } else {
-                    if (this.nsMap.get(XmlParseHelper.UNDESCORE)) {
-                        node.name = this.nsMap.get(XmlParseHelper.UNDESCORE) + node.name!
-                    }
-                }
-            }
-        }
-
-        private onlyStartTag(node: XmlNode): boolean {
-            return !(node.type == EventType.END_TAG || node.type == EventType.TEXT || node.type == EventType.WHITESPACE)
-        }
-
-        private isStartOrEndDocument(node: XmlNode): boolean {
-            return node.type == EventType.START_DOCUMENT || node.type == EventType.END_DOCUMENT
-        }
-
-        private processNode(node: XmlNode): boolean {
-
-            if (!this.isNullish(this.tagFunc_) && !(this.isNullish(node.name) && this.isNullish(node.content)) && !this.isStartOrEndDocument(node)) {
-                if (!this.tagFunc_!(node.name ? node.name! : "", node.content ? this.replaceXmlSpecChars(node.content!) : "")) {
-                    return false
-                }
-            }
-            if (!this.isNullish(this.tokenFunc_)) {
-                let info = this.parseToken(node)
-                if (!this.tokenFunc_!(node.type != undefined ? node.type! : ((node.content == " ") ? EventType.WHITESPACE : EventType.TEXT), info)) {
-                    return false
-                }
-            }
-            if (!this.isNullish(this.attrFunc_) && (!this.isNullish(node.attributes)) && (node.attributes!.size > 0)
-            && this.onlyStartTag(node) && !this.isStartOrEndDocument(node)) {
-                let res = true
-                node.attributes!.forEach((value: string, key: string) => { 
-                    if (res && !this.attrFunc_!(key, value)) {
-                        res = false
-                        return
-                    }
-                })
-                return res
-            }
-            return true
+        public xmlPullParserError(): string {
+            return XmlParseHelper.parserErrorInfo(this.nativeBinding);
         }
     }
 
@@ -889,7 +595,7 @@ export namespace xml {
          */
         constructor(buffer: ArrayBuffer | DataView, encoding: string) {
             if (encoding !== 'utf-8') {
-                throw new BusinessError(TypeErrorCodeId, new Error('Parameter error.Just support utf-8'));
+                throw createBusinessError(TypeErrorCodeId, 'Parameter error.Just support utf-8');
             }
 
             this.buffer = buffer;
@@ -916,14 +622,14 @@ export namespace xml {
         public setAttributes(name: string, value: string): void {
             this.checkEmptyParameter(name);
             if (this.type !== XmlType.START_AND_ATTRIBUTES) {
-                throw new BusinessError(TypeErrorCodeId, new Error('Illegal position for attribute'));
+                throw createBusinessError(TypeErrorCodeId, 'Illegal position for attribute');
             }
 
-            let temp = new StringBuilder(` ${name}=\"`);
-            this.writeEscaped(temp, value);
-            temp.append(`\"`);
+            let stringBuilder = new StringBuilder(` ${name}=\"`);
+            this.writeEscaped(stringBuilder, value);
+            stringBuilder.append(`\"`);
             this.type = XmlType.START_AND_ATTRIBUTES;
-            this.writeToBuffer(temp, 'SetAttributes');
+            this.writeToBuffer(stringBuilder, 'SetAttributes');
         }
 
         /**
@@ -933,60 +639,60 @@ export namespace xml {
          */
         public startElement(name: string): void {
             this.checkEmptyParameter(name);
-            let temp = new StringBuilder();
+            let stringBuilder = new StringBuilder();
             if (this.type === XmlType.START_AND_ATTRIBUTES) {
-                this.spliceNamespace(temp);
-                temp.append('>');
+                this.spliceNamespace(stringBuilder);
+                stringBuilder.append('>');
             }
             if (this.type !== XmlType.NONE && this.type !== XmlType.DECLARATION) {
-                this.nextItem(temp);
+                this.nextItem(stringBuilder);
             }
 
             this.elementStack[this.depth].name = name;
-            temp.append('<');
+            stringBuilder.append('<');
             if (this.elementStack[this.depth].prefix !== '') {
-                temp.append(`${this.elementStack[this.depth].prefix}:`);
+                stringBuilder.append(`${this.elementStack[this.depth].prefix}:`);
             } else if (this.depth !== 0) {
                 if (this.elementStack[this.depth - DepthOffset].prefix !== '') {
                     this.elementStack[this.depth].prefix = this.elementStack[this.depth - DepthOffset].prefix;
-                    temp.append(`${this.elementStack[this.depth].prefix}:`);
+                    stringBuilder.append(`${this.elementStack[this.depth].prefix}:`);
                 }
             }
-            temp.append(`${this.elementStack[this.depth].name}`);
+            stringBuilder.append(`${this.elementStack[this.depth].name}`);
             this.type = XmlType.START_AND_ATTRIBUTES;
             this.depth++;
             this.increaseStackLength();
-            this.writeToBuffer(temp, 'StartElement');
+            this.writeToBuffer(stringBuilder, 'StartElement');
         }
 
         /**
          * Handles the end of an XML element during parsing.
          */
         public endElement(): void {
-            let temp = new StringBuilder();
+            let stringBuilder = new StringBuilder();
             if (this.type == XmlType.START_AND_ATTRIBUTES) {
-                this.spliceNamespace(temp);
-                temp.append('/>');
+                this.spliceNamespace(stringBuilder);
+                stringBuilder.append('/>');
                 this.type = XmlType.OTHERS;
                 this.depth--;
-                this.writeToBuffer(temp, 'EndElement');
+                this.writeToBuffer(stringBuilder, 'EndElement');
                 return;
             }
             this.depth--;
             if (this.type !== XmlType.TEXT) {
-                this.nextItem(temp);
+                this.nextItem(stringBuilder);
             }
 
-            temp.append('</');
+            stringBuilder.append('</');
             if (this.elementStack[this.depth].prefix !== '') {
-                temp.append(`${this.elementStack[this.depth].prefix}:`);
+                stringBuilder.append(`${this.elementStack[this.depth].prefix}:`);
             }
-            temp.append(`${this.elementStack[this.depth].name}`);
+            stringBuilder.append(`${this.elementStack[this.depth].name}`);
             this.elementStack[this.depth].prefix = '';
             this.elementStack[this.depth].namespace_ = '';
             this.type = XmlType.OTHERS;
-            temp.append('>');
-            this.writeToBuffer(temp, 'EndElement');
+            stringBuilder.append('>');
+            this.writeToBuffer(stringBuilder, 'EndElement');
         }
 
         /**
@@ -998,13 +704,13 @@ export namespace xml {
         public setNamespace(prefix: string, namespace: string): void {
             this.checkEmptyParameter(prefix);
             if (namespace.length === 0) {
-                throw new BusinessError(TypeErrorCodeId,
-                    new Error(`Parameter error. The type of ${namespace} must be string`));
+                throw createBusinessError(TypeErrorCodeId,
+                    `Parameter error. The type of ${namespace} must be string`);
             }
-            let temp = new StringBuilder();
+            let stringBuilder = new StringBuilder();
             if (this.type === XmlType.START_AND_ATTRIBUTES) {
-                this.spliceNamespace(temp);
-                temp.append('>');
+                this.spliceNamespace(stringBuilder);
+                stringBuilder.append('>');
             }
 
             this.elementStack[this.depth].prefix = prefix;
@@ -1015,7 +721,94 @@ export namespace xml {
             }
             this.multNsp.set(this.depth, node);
             this.type = XmlType.OTHERS;
-            this.writeToBuffer(temp, 'SetNamespace');
+            this.writeToBuffer(stringBuilder, 'SetNamespace');
+        }
+
+        /**
+         * Adds an empty XML element with the specified name to the output buffer.
+         *
+         * @param {string} name - The name of the empty XML element to be added.
+         */
+        public addEmptyElement(name: string): void {
+            let stringBuilder = this.prepareBufferForNewItem(name);
+
+            stringBuilder.append(`<${name}/>`);
+            this.type = XmlType.OTHERS;
+            this.writeToBuffer(stringBuilder, 'AddEmptyElement');
+        }
+
+        /**
+         * Sets the XML declaration for the current document.
+         *
+         * @throws {BusinessError} Throws an error if the declaration is set in an illegal position.
+         */
+        public setDeclaration(): void {
+            if (this.isHasDecl) {
+                throw createBusinessError(TypeErrorCodeId, 'illegal position for declaration');
+            }
+
+            let stringBuilder = new StringBuilder();
+            stringBuilder.append(`<?xml version=\"1.0\" encoding=\"${this.encoding}\"?>`);
+            this.isHasDecl = true;
+            this.writeToBuffer(stringBuilder, 'SetDeclaration');
+        }
+
+        /**
+         * Sets a comment in the XML output.
+         *
+         * @param {string} comment - The comment string to be added to the XML output.
+         */
+        public setComment(text: string): void {
+            let stringBuilder = this.prepareBufferForNewItem(text);
+
+            stringBuilder.append(`<!--${text}-->`);
+            this.type = XmlType.OTHERS;
+            this.writeToBuffer(stringBuilder, 'SetComment');
+        }
+
+        /**
+         * Sets the CDATA section for the XML content.
+         *
+         * @param {string} data - The string data to be wrapped in a Cdata section.
+         */
+        public setCDATA(text: string): void {
+            let stringBuilder = this.prepareBufferForNewItem(text);
+
+            text = text.replaceAll(']]>', ']]]]><![CDATA[>');
+            stringBuilder.append(`<![CDATA[${text}]]>`);
+            this.type = XmlType.OTHERS;
+            this.writeToBuffer(stringBuilder, 'SetCdata');
+        }
+
+        /**
+         * Sets the text content for the current XML element.
+         *
+         * @param {string} text - The text content to set for the current XML element.
+         */
+        public setText(text: string): void {
+            this.checkEmptyParameter(text);
+            let stringBuilder = new StringBuilder();
+            if (this.type === XmlType.START_AND_ATTRIBUTES) {
+                this.spliceNamespace(stringBuilder);
+                stringBuilder.append('>');
+            }
+
+            this.writeEscaped(stringBuilder, text);
+            this.type = XmlType.TEXT;
+            this.writeToBuffer(stringBuilder, 'SetText');
+        }
+
+        /**
+         * Sets the document type (DOCTYPE) for the XML output.
+         *
+         * @param {string} text - The DOCTYPE declaration to be added to the XML output.
+         */
+        public setDocType(text: string): void {
+            let stringBuilder = this.prepareBufferForNewItem(text);
+
+            stringBuilder.append(`<!DOCTYPE ${text}>`);
+            this.type = XmlType.OTHERS;
+            this.writeToBuffer(stringBuilder, 'SetDocType');
         }
 
         /**
@@ -1060,15 +853,15 @@ export namespace xml {
             if (this.buffer.byteLength > this.iPos + iLenTemp - BufferIndexOffset) {
                 for (let i = 0; i < iLenTemp; i++) {
                     if (this.buffer instanceof ArrayBuffer) {
-                        (this.buffer as ArrayBuffer).set((i + this.iPos) as int, tempString[i] as byte);
+                        (this.buffer as ArrayBuffer).set((i + this.iPos) as int, tempString.charAt(i).toByte());
                     } else {
                         ((this.buffer as DataView).buffer as ArrayBuffer).set((i + this.iPos) as int,
-                            tempString[i] as byte);
+                            tempString.charAt(i).toByte());
                     }
                 }
                 this.iPos += iLenTemp;
             } else {
-                throw new BusinessError(TypeErrorCodeId, new Error(`XmlSerializer:: ${name} memcpy_s failed`));
+                throw createBusinessError(TypeErrorCodeId, `XmlSerializer:: ${name} memcpy_s failed`);
             }
         }
 
@@ -1119,8 +912,27 @@ export namespace xml {
          */
         private checkEmptyParameter(para: string): void {
             if (para.length === 0) {
-                throw new BusinessError(TypeErrorCodeId, new Error('Parameter error. Parameter cannot be empty'));
+                throw createBusinessError(TypeErrorCodeId, 'Parameter error. Parameter cannot be empty');
             }
+        }
+
+        /**
+         * Prepares the buffer for adding a new item by handling namespace line break and indentation.
+         *
+         * @param {StringBuilder} stringBuilder - The StringBuilder instance to append content to.
+         */
+        private prepareBufferForNewItem(name: string): StringBuilder {
+            this.checkEmptyParameter(name);
+            let stringBuilder = new StringBuilder();
+            if (this.type === XmlType.START_AND_ATTRIBUTES) {
+                this.spliceNamespace(stringBuilder);
+                stringBuilder.append('>');
+            }
+            if (this.type !== XmlType.NONE) {
+                this.nextItem(stringBuilder);
+            }
+
+            return stringBuilder;
         }
     }
 }

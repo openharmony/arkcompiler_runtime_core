@@ -31,8 +31,8 @@ class Bar<T, I> {
 function main() {
     let x : Bar<Int, string> = new Bar<Int, string>(1);
     console.log("1");
-    assertEQ(x["1"], 1)
+    arktest.assertEQ(x["1"], 1)
     x["1"] = 2;
-    assertEQ(x["1"], 2)
+    arktest.assertEQ(x["1"], 2)
     return 0;
 }

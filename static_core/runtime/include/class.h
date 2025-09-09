@@ -34,10 +34,18 @@ class ClassLinkerContext;
 class ManagedThread;
 class ObjectHeader;
 
+enum class StringType : uint64_t {
+    LINE_STRING_CLASS = 1,
+    SLICED_STRING_CLASS,
+    TREE_STRING_CLASS,
+    LAST_STRING_CLASS = TREE_STRING_CLASS,
+};
+
 // NOTE (Artem Udovichenko): move BaseClass to another file but still have Class.h
 class BaseClass {
 public:
     static constexpr uint32_t DYNAMIC_CLASS = 1U;
+    using HeaderType = uint64_t;
 
 public:
     explicit BaseClass(panda_file::SourceLang lang) : lang_(lang) {}
@@ -46,6 +54,11 @@ public:
 
     DEFAULT_COPY_SEMANTIC(BaseClass);
     DEFAULT_MOVE_SEMANTIC(BaseClass);
+
+    StringType GetBitField() const
+    {
+        return bitField_;
+    }
 
     uint32_t GetFlags() const
     {
@@ -87,6 +100,41 @@ public:
         lang_ = lang;
     }
 
+    void SetLineStringClass()
+    {
+        SetBitField(StringType::LINE_STRING_CLASS);
+    }
+
+    bool IsLineStringClass() const
+    {
+        return GetStringType() == StringType::LINE_STRING_CLASS;
+    }
+
+    void SetSlicedStringClass()
+    {
+        SetBitField(StringType::SLICED_STRING_CLASS);
+    }
+
+    bool IsSlicedStringClass() const
+    {
+        return GetStringType() == StringType::SLICED_STRING_CLASS;
+    }
+
+    void SetTreeStringClass()
+    {
+        SetBitField(StringType::TREE_STRING_CLASS);
+    }
+
+    bool IsTreeStringClass() const
+    {
+        return GetStringType() == StringType::TREE_STRING_CLASS;
+    }
+
+    inline StringType GetStringType() const
+    {
+        return GetBitField();
+    }
+
     static constexpr uint32_t GetFlagsOffset()
     {
         return MEMBER_OFFSET(BaseClass, flags_);
@@ -99,21 +147,32 @@ public:
     {
         return MEMBER_OFFSET(BaseClass, objectSize_);
     }
+    static constexpr uint64_t GetStringTypeOffset()
+    {
+        return MEMBER_OFFSET(BaseClass, bitField_);
+    }
 
 protected:
+    void SetBitField(StringType bitField)
+    {
+        bitField_ = bitField;
+    }
+
     void SetFlags(uint32_t flags)
     {
         flags_ = flags;
     }
 
 private:
+    FIELD_UNUSED HeaderType hclass_ {0};  // store ptr
+    StringType bitField_ {0};             // store StringType
     uint32_t flags_ {0};
     // Size of the object of this class. In case of static classes it is 0
     // for abstract classes, interfaces and classes whose objects
     // have variable size (for example strings).
     uint32_t objectSize_ {0};
     ObjectHeader *managedObject_ {nullptr};
-    panda_file::SourceLang lang_;
+    panda_file::SourceLang lang_ {0};
 };
 
 class Class : public BaseClass {
@@ -121,6 +180,7 @@ public:
     using UniqId = uint64_t;
     static constexpr uint32_t STRING_CLASS = DYNAMIC_CLASS << 1U;
     static constexpr uint32_t IS_CLONEABLE = STRING_CLASS << 1U;
+    static constexpr uint32_t XREF_CLASS = IS_CLONEABLE << 1U;
     static constexpr size_t IMTABLE_SIZE = 32;
 
     enum {
@@ -166,6 +226,11 @@ public:
     const uint8_t *GetDescriptor() const
     {
         return descriptor_;
+    }
+
+    void SetDescriptor(const uint8_t *descriptor)
+    {
+        descriptor_ = descriptor;
     }
 
     void SetMethods(Span<Method> methods, uint32_t numVmethods, uint32_t numSmethods)
@@ -280,6 +345,16 @@ public:
         accessFlags_ = accessFlags;
     }
 
+    void SetFinal()
+    {
+        accessFlags_ |= ACC_FINAL;
+    }
+
+    void RemoveFinal()
+    {
+        accessFlags_ &= (~ACC_FINAL);
+    }
+
     bool IsPublic() const
     {
         return (accessFlags_ & ACC_PUBLIC) != 0;
@@ -298,6 +373,11 @@ public:
     bool IsFinal() const
     {
         return (accessFlags_ & ACC_FINAL) != 0;
+    }
+
+    bool IsExtensible() const
+    {
+        return !IsFinal() && !IsStringClass();
     }
 
     bool IsAnnotation() const
@@ -327,7 +407,6 @@ public:
 
     uint32_t GetObjectSize() const
     {
-        ASSERT(!IsVariableSize());
         return BaseClass::GetObjectSize();
     }
 
@@ -350,9 +429,25 @@ public:
         componentType_ = type;
     }
 
+    Span<Class *> GetConstituentTypes() const
+    {
+        return {constituentTypes_, numConsTypes_};
+    }
+
+    void SetConstituentTypes(Span<Class *> types)
+    {
+        constituentTypes_ = types.data();
+        numConsTypes_ = types.size();
+    }
+
     bool IsArrayClass() const
     {
         return componentType_ != nullptr;
+    }
+
+    bool IsUnionClass() const
+    {
+        return constituentTypes_ != nullptr;
     }
 
     bool IsObjectArrayClass() const
@@ -365,6 +460,11 @@ public:
         return (GetFlags() & STRING_CLASS) != 0;
     }
 
+    bool IsXRefClass() const
+    {
+        return (GetFlags() & XREF_CLASS) != 0;
+    }
+
     void SetStringClass()
     {
         SetFlags(GetFlags() | STRING_CLASS);
@@ -373,6 +473,11 @@ public:
     void SetCloneable()
     {
         SetFlags(GetFlags() | IS_CLONEABLE);
+    }
+
+    void SetXRefClass()
+    {
+        SetFlags(GetFlags() | XREF_CLASS);
     }
 
     bool IsVariableSize() const
@@ -419,7 +524,7 @@ public:
 
     bool IsObjectClass() const
     {
-        return !IsPrimitive() && GetBase() == nullptr;
+        return !IsPrimitive() && GetBase() == nullptr && !IsUnionClass();
     }
 
     /**
@@ -924,12 +1029,16 @@ private:
     uint32_t numFields_ {0};
     uint32_t numSfields_ {0};
     uint32_t numIfaces_ {0};
+    uint32_t numConsTypes_ {0};
     uint32_t initTid_ {0};
 
     ITable itable_;
 
     // For array types this field contains array's element size, for non-array type it should be zero.
     Class *componentType_ {nullptr};
+
+    // For union types his field contains union's constituent types, for other types it should be nullptr.
+    Class **constituentTypes_ {nullptr};
 
     ClassLinkerContext *loadContext_ {nullptr};
 

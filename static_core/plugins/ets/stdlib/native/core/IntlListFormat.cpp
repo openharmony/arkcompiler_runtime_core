@@ -39,7 +39,7 @@ static void ThrowRangeError(ani_env *env, Args &&...args)
 {
     std::stringstream message;
     (message << ... << args);
-    ThrowNewError(env, "Lstd/core/RangeError;", message.str().c_str(), "Lstd/core/String;:V");
+    ThrowNewError(env, "std.core.RangeError", message.str().c_str(), "C{std.core.String}:");
 }
 
 static icu::Locale GetLocale(const std::string &tag)
@@ -76,7 +76,7 @@ static UListFormatterType ToIcuType(ani_env *env, ani_string aniType)
     return UListFormatterType::ULISTFMT_TYPE_AND;
 }
 
-static std::vector<icu::UnicodeString> ToIcuList(ani_env *env, ani_array_ref aniList)
+static std::vector<icu::UnicodeString> ToIcuList(ani_env *env, ani_array aniList)
 {
     ani_size len;
     ANI_FATAL_IF_ERROR(env->Array_GetLength(aniList, &len));
@@ -84,7 +84,7 @@ static std::vector<icu::UnicodeString> ToIcuList(ani_env *env, ani_array_ref ani
     std::vector<icu::UnicodeString> result;
     for (ani_size i = 0; i < len; i++) {
         ani_ref aniRef;
-        ANI_FATAL_IF_ERROR(env->Array_Get_Ref(aniList, i, &aniRef));
+        ANI_FATAL_IF_ERROR(env->Array_Get(aniList, i, &aniRef));
 
         auto item = AniToUnicodeStr(env, reinterpret_cast<ani_string>(aniRef));
         result.push_back(item);
@@ -92,16 +92,17 @@ static std::vector<icu::UnicodeString> ToIcuList(ani_env *env, ani_array_ref ani
     return result;
 }
 
-static ani_array_ref ToAniArray(ani_env *env, std::vector<ani_string> strings)
+static ani_array ToAniArray(ani_env *env, std::vector<ani_string> strings)
 {
-    auto first = strings[0];
+    ani_ref undefined {};
+    ANI_FATAL_IF_ERROR(env->GetUndefined(&undefined));
     ani_class stringClass;
-    ANI_FATAL_IF_ERROR(env->FindClass("Lstd/core/String;", &stringClass));
-    ani_array_ref array;
-    ANI_FATAL_IF_ERROR(env->Array_New_Ref(stringClass, strings.size(), first, &array));
-    for (size_t i = 1; i < strings.size(); ++i) {
+    ANI_FATAL_IF_ERROR(env->FindClass("std.core.String", &stringClass));
+    ani_array array;
+    ANI_FATAL_IF_ERROR(env->Array_New(strings.size(), undefined, &array));
+    for (size_t i = 0; i < strings.size(); ++i) {
         auto item = strings[i];
-        ANI_FATAL_IF_ERROR(env->Array_Set_Ref(array, i, item));
+        ANI_FATAL_IF_ERROR(env->Array_Set(array, i, item));
     }
     return array;
 }
@@ -165,18 +166,18 @@ ani_object FormatToParts(ani_env *env, [[maybe_unused]] ani_class klass, ani_arr
 
 ani_status RegisterIntlListFormat(ani_env *env)
 {
-    std::array methods = {
-        ani_native_function {"formatToPartsNative",
-                             "[Lstd/core/String;Lstd/core/String;Lstd/core/String;Lstd/core/String;:Lstd/core/Object;",
-                             reinterpret_cast<void *>(FormatToParts)}};
+    std::array methods = {ani_native_function {
+        "formatToPartsNative",
+        "C{escompat.Array}C{std.core.String}C{std.core.String}C{std.core.String}:C{std.core.Object}",
+        reinterpret_cast<void *>(FormatToParts)}};
 
     g_elementAniStr = StdStrToAni(env, "element");
     g_literalAniStr = StdStrToAni(env, "literal");
 
     ani_class listFormatClass;
-    ANI_FATAL_IF_ERROR(env->FindClass("Lstd/core/Intl/ListFormat;", &listFormatClass));
+    ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.ListFormat", &listFormatClass));
 
-    return env->Class_BindNativeMethods(listFormatClass, methods.data(), methods.size());
+    return env->Class_BindStaticNativeMethods(listFormatClass, methods.data(), methods.size());
 }
 
 }  // namespace ark::ets::stdlib::intl

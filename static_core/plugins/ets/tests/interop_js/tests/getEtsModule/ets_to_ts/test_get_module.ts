@@ -27,9 +27,9 @@ ASSERT_TRUE(mod.D === undefined);
 
 const entry = etsVm.getModule('entry_module');
 ASSERT_TRUE(entry !== undefined);
-ASSERT_TRUE(typeof entry.b === 'number' && entry.b === 100);
+ASSERT_TRUE(typeof entry.b === 'number' && entry.b === 100);       
 ASSERT_TRUE(typeof entry.c === 'function' && entry.c() === 'hello from c');
-ASSERT_TRUE(typeof entry.A === 'function');
+ASSERT_TRUE(typeof entry.A === 'function');                          
 const a2 = new entry.A();
 ASSERT_TRUE(typeof a2.value === 'function' && a2.value() === 42);
 ASSERT_TRUE(entry.D === undefined);
@@ -37,20 +37,20 @@ ASSERT_TRUE(entry.D === undefined);
 
 const entry2 = etsVm.getModule('entry_module2');
 ASSERT_TRUE(entry2 !== undefined);
-ASSERT_TRUE(typeof entry2.b === 'number' && entry2.b === 100);
+ASSERT_TRUE(typeof entry2.b === 'number' && entry2.b === 100);   
 ASSERT_TRUE(typeof entry2.c === 'function' && entry2.c() === 'hello from c');
-ASSERT_TRUE(typeof entry2.A === 'function');
+ASSERT_TRUE(typeof entry2.A === 'function');                          
 const a3 = new entry2.A();
 ASSERT_TRUE(typeof a3.value === 'function' && a3.value() === 42);
 ASSERT_TRUE(entry2.D === undefined);
 
-function testLoadNotFoundModule(): void {
+function testLoadNotFoundModule() {
     let result = false;
     try {
         etsVm.getModule('not_module');
-    } catch (e) {
-        result = e.toString().startsWith('LinkerClassNotFoundError') &&
-                 e.message.startsWith('Cannot find class Lnot_module/ETSGLOBAL;');
+    } catch(e) {
+        result = e.toString().startsWith('LinkerClassNotFoundError')
+                 && e.message.startsWith('Cannot find class Lnot_module/ETSGLOBAL;');
     }
     ASSERT_TRUE(result);
 }

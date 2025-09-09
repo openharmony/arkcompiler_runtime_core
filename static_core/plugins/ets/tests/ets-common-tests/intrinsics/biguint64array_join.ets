@@ -24,7 +24,7 @@ const UTF16_JOINED_1 = '0Ω1Ω2Ω3Ω4Ω5Ω6Ω7Ω8Ω9Ω18446744073709551615';
 function joinEmpty(): void {
     let a: BigUint64Array = new BigUint64Array(0);
     let s = a.join();
-    assertTrue(s.isEmpty());
+    arktest.assertTrue(s.isEmpty());
 }
 
 function joinSingle(): void {
@@ -35,7 +35,7 @@ function joinSingle(): void {
 
 function joinDefaultDelim(): void {
     let a: BigUint64Array = new BigUint64Array(ARRAY);
-    assertEQ(a.join(), COMMA_JOINED);
+    arktest.assertEQ(a.join(), COMMA_JOINED);
 }
 
 function joinEmptyDelim(): void {

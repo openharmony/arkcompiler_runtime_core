@@ -16,7 +16,7 @@
 import {util} from "@ohos.util";
 
 function main(): int {
-    const suite = new ArkTestsuite("CommonUtil types.isRegExp() API tests")
+    const suite = new arktest.ArkTestsuite("CommonUtil types.isRegExp() API tests")
 
     suite.addTest("Verify new RegExp() creates a RegExp object", testIsRegExp001)
     suite.addTest("Verify RegExp with a string pattern", testIsRegExp002)
@@ -38,7 +38,7 @@ function main(): int {
 function testIsRegExp001() {
     let proc = new util.types();
     let result = proc.isRegExp(new RegExp('abc'));
-    assertTrue(result, "The RegExp should be of the same type as the RegExp");
+    arktest.assertTrue(result, "The RegExp should be of the same type as the RegExp");
 }
 
 /**
@@ -52,7 +52,7 @@ function testIsRegExp001() {
 function testIsRegExp002() {
     let proc = new util.types();
     let result = proc.isRegExp(new RegExp("/abc/"));
-    assertTrue(result, "The Number should be of the same type as the Number");
+    arktest.assertTrue(result, "The Number should be of the same type as the Number");
 }
 
 /**
@@ -66,7 +66,7 @@ function testIsRegExp002() {
 function testIsRegExp003() {
     let proc = new util.types();
     let result = proc.isRegExp(new RegExp('fgd'));
-    assertTrue(result, "The RegExp should be of the same type as the RegExp");
+    arktest.assertTrue(result, "The RegExp should be of the same type as the RegExp");
 }
 
 /**
@@ -80,7 +80,7 @@ function testIsRegExp003() {
 function testIsRegExp004() {
     let proc = new util.types();
     let result = proc.isRegExp(new RegExp('123'));
-    assertTrue(result, "The RegExp should be of the same type as the RegExp");
+    arktest.assertTrue(result, "The RegExp should be of the same type as the RegExp");
 }
 
 /**
@@ -94,5 +94,5 @@ function testIsRegExp004() {
 function testIsRegExp005() {
     let proc = new util.types();
     let result = proc.isRegExp(new RegExp("/ab+c/", 'i'));
-    assertTrue(result, "The RegExp should be of the same type as the RegExp");
+    arktest.assertTrue(result, "The RegExp should be of the same type as the RegExp");
 }

@@ -16,7 +16,7 @@
 import {util} from "@ohos.util";
 
 function main() {
-    const suite = new ArkTestsuite("CommonUtil RationalNumber Equals ValueOf GetDenominator GetNumerator API tests");
+    const suite = new arktest.ArkTestsuite("CommonUtil RationalNumber Equals ValueOf GetDenominator GetNumerator API tests");
 
     suite.addTest("Verifies that two RationalNumber objects (2/1 and 3/4) are not equal.", testEquals001)
     suite.addTest("Verifies that two RationalNumber objects (2/1 and 4/2) are equal.", testEquals002)
@@ -61,7 +61,7 @@ function testEquals001() {
     let pro = util.RationalNumber.parseRationalNumber(2, 1);
     let proc = util.RationalNumber.parseRationalNumber(3, 4);
     let res = pro.equals(proc);
-    assertEQ(res, false, "The two RationalNumber objects (2/1 and 3/4) should not be equal");
+    arktest.assertEQ(res, false, "The two RationalNumber objects (2/1 and 3/4) should not be equal");
 }
 
 /**
@@ -76,7 +76,7 @@ function testEquals002() {
     let pro = util.RationalNumber.parseRationalNumber(2, 1);
     let proc = util.RationalNumber.parseRationalNumber(4, 2);
     let res = pro.equals(proc);
-    assertEQ(res, true, "The two RationalNumber objects (2/1 and 4/2) should be equal");
+    arktest.assertEQ(res, true, "The two RationalNumber objects (2/1 and 4/2) should be equal");
 }
 
 /**
@@ -91,7 +91,7 @@ function testEquals003() {
     let pro = util.RationalNumber.parseRationalNumber(0, 1);
     let proc = util.RationalNumber.parseRationalNumber(0, 2);
     let res = pro.equals(proc);
-    assertEQ(res, true, "The two RationalNumber objects (0/1 and 0/2) should be equal");
+    arktest.assertEQ(res, true, "The two RationalNumber objects (0/1 and 0/2) should be equal");
 }
 
 /**
@@ -106,7 +106,7 @@ function testEquals004() {
     let pro = util.RationalNumber.parseRationalNumber(0, 0);
     let proc = util.RationalNumber.parseRationalNumber(0, 2);
     let res = pro.equals(proc);
-    assertEQ(res, false, "The two RationalNumber objects (0/0 and 0/2) should not be equal");
+    arktest.assertEQ(res, false, "The two RationalNumber objects (0/0 and 0/2) should not be equal");
 }
 
 /**
@@ -121,7 +121,7 @@ function testEquals005() {
     let pro = util.RationalNumber.parseRationalNumber(-2, 0);
     let proc = util.RationalNumber.parseRationalNumber(2, 0);
     let res = pro.equals(proc);
-    assertEQ(res, false, "The two RationalNumber objects (-2/0 and 2/0) should not be equal");
+    arktest.assertEQ(res, false, "The two RationalNumber objects (-2/0 and 2/0) should not be equal");
 }
 
 /**
@@ -135,7 +135,7 @@ function testEquals005() {
 function testValueOf001() {
     let pro = util.RationalNumber.parseRationalNumber(2, 1);
     let res = pro.valueOf();
-    assertEQ(res, 2, "The value of the RationalNumber should be 2");
+    arktest.assertEQ(res, 2, "The value of the RationalNumber should be 2");
 }
 
 /**
@@ -149,7 +149,7 @@ function testValueOf001() {
 function testValueOf002() {
     let pro = util.RationalNumber.parseRationalNumber(2, 10);
     let res = pro.valueOf();
-    assertEQ(res, 0.2, "The value of the RationalNumber should be 0.2");
+    arktest.assertEQ(res, 0.2, "The value of the RationalNumber should be 0.2");
 }
 
 /**
@@ -163,7 +163,7 @@ function testValueOf002() {
 function testValueOf003() {
     let pro = util.RationalNumber.parseRationalNumber(1, 2);
     let res = pro.valueOf();
-    assertEQ(res, 0.5, "The value of the RationalNumber should be 0.5");
+    arktest.assertEQ(res, 0.5, "The value of the RationalNumber should be 0.5");
 }
 
 /**
@@ -177,7 +177,7 @@ function testValueOf003() {
 function testValueOf004() {
     let pro = util.RationalNumber.parseRationalNumber(4, 2);
     let res = pro.valueOf();
-    assertEQ(res, 2, "The value of the RationalNumber should be 2");
+    arktest.assertEQ(res, 2, "The value of the RationalNumber should be 2");
 }
 
 /**
@@ -191,7 +191,7 @@ function testValueOf004() {
 function testValueOf005() {
     let pro = util.RationalNumber.parseRationalNumber(4, 1)
     let res = pro.valueOf()
-    assertEQ(res, 4, "The value of the RationalNumber should be 4")
+    arktest.assertEQ(res, 4, "The value of the RationalNumber should be 4")
 }
 
 /**
@@ -205,7 +205,7 @@ function testValueOf005() {
 function testGetDenominator001() {
     let pro = util.RationalNumber.parseRationalNumber(2, 1);
     let res = pro.getDenominator();
-    assertEQ(res, 1, "The denominator of the RationalNumber (2/1) should be 1");
+    arktest.assertEQ(res, 1, "The denominator of the RationalNumber (2/1) should be 1");
 }
 
 /**
@@ -219,7 +219,7 @@ function testGetDenominator001() {
 function testGetDenominator002() {
     let pro = util.RationalNumber.parseRationalNumber(2, 3);
     let res = pro.getDenominator();
-    assertEQ(res, 3, "The denominator of the RationalNumber (2/3) should be 3");
+    arktest.assertEQ(res, 3, "The denominator of the RationalNumber (2/3) should be 3");
 }
 
 /**
@@ -233,7 +233,7 @@ function testGetDenominator002() {
 function testGetDenominator003() {
     let pro = util.RationalNumber.parseRationalNumber(2, 0);
     let res = pro.getDenominator();
-    assertEQ(res, 0, "The denominator of the RationalNumber (2/0) should be 0");
+    arktest.assertEQ(res, 0, "The denominator of the RationalNumber (2/0) should be 0");
 }
 
 /**
@@ -247,7 +247,7 @@ function testGetDenominator003() {
 function testGetDenominator004() {
     let pro = util.RationalNumber.parseRationalNumber(10, 5);
     let res = pro.getDenominator();
-    assertEQ(res, 1, "The denominator of the RationalNumber (10/5) after simplification should be 1");
+    arktest.assertEQ(res, 1, "The denominator of the RationalNumber (10/5) after simplification should be 1");
 }
 
 /**
@@ -261,7 +261,7 @@ function testGetDenominator004() {
 function testGetDenominator005() {
     let pro = util.RationalNumber.parseRationalNumber(6, 3);
     let res = pro.getDenominator();
-    assertEQ(res, 1, "The denominator of the RationalNumber (6/3) after simplification should be 1");
+    arktest.assertEQ(res, 1, "The denominator of the RationalNumber (6/3) after simplification should be 1");
 }
 
 /**
@@ -275,7 +275,7 @@ function testGetDenominator005() {
 function testGetDenominator006() {
     let pro = util.RationalNumber.parseRationalNumber(6, -3);
     let res = pro.getDenominator();
-    assertEQ(res, 1, "The denominator of the RationalNumber (6/-3) after simplification should be 1");
+    arktest.assertEQ(res, 1, "The denominator of the RationalNumber (6/-3) after simplification should be 1");
 }
 
 /**
@@ -289,7 +289,7 @@ function testGetDenominator006() {
 function testGetNumerator001() {
     let pro = util.RationalNumber.parseRationalNumber(-2, 1);
     let res = pro.getNumerator();
-    assertEQ(res, -2, "The numerator of the RationalNumber (-2/1) should be -2");
+    arktest.assertEQ(res, -2, "The numerator of the RationalNumber (-2/1) should be -2");
 }
 
 /**
@@ -303,7 +303,7 @@ function testGetNumerator001() {
 function testGetNumerator002() {
     let pro = util.RationalNumber.parseRationalNumber(0, 3);
     let res = pro.getNumerator();
-    assertEQ(res, 0, "The numerator of the RationalNumber (0/3) should be 0");
+    arktest.assertEQ(res, 0, "The numerator of the RationalNumber (0/3) should be 0");
 }
 
 /**
@@ -317,7 +317,7 @@ function testGetNumerator002() {
 function testGetNumerator003() {
     let pro = util.RationalNumber.parseRationalNumber(2, 4);
     let res = pro.getNumerator();
-    assertEQ(res, 1, "The numerator of the RationalNumber (2/4) after simplification should be 1");
+    arktest.assertEQ(res, 1, "The numerator of the RationalNumber (2/4) after simplification should be 1");
 }
 
 /**
@@ -331,7 +331,7 @@ function testGetNumerator003() {
 function testGetNumerator004() {
     let pro = util.RationalNumber.parseRationalNumber(3, 6);
     let res = pro.getNumerator();
-    assertEQ(res, 1, "The numerator of the RationalNumber (3/6) after simplification should be 1");
+    arktest.assertEQ(res, 1, "The numerator of the RationalNumber (3/6) after simplification should be 1");
 }
 
 /**
@@ -345,5 +345,5 @@ function testGetNumerator004() {
 function testGetNumerator005() {
     let pro = util.RationalNumber.parseRationalNumber(10, 5);
     let res = pro.getNumerator();
-    assertEQ(res, 2, "The numerator of the RationalNumber (10/5) after simplification should be 2");
+    arktest.assertEQ(res, 2, "The numerator of the RationalNumber (10/5) after simplification should be 2");
 }

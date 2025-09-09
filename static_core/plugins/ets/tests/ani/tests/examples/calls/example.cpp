@@ -23,7 +23,7 @@ public:
     // CC-OFFNXT(G.FMT.10-CPP) project code style
     static constexpr const char *MODULE_NAME = "example";
     // CC-OFFNXT(G.FMT.10-CPP) project code style
-    static constexpr const char *TEST_CLASS_DESCRIPTOR = "Lexample/Test;";
+    static constexpr const char *TEST_CLASS_DESCRIPTOR = "example.Test";
 };
 
 // NOLINTBEGIN(readability-magic-numbers)
@@ -83,14 +83,14 @@ TEST_F(ExampleTest, CallNativeQuickFunction)
     // CC-OFFNXT(G.FMT.10-CPP) project code style
     static constexpr const char *METHOD_NAME = "quickMethod";
     // CC-OFFNXT(G.FMT.10-CPP) project code style
-    static constexpr const char *SIGNATURE = "Lstd/core/String;J:Lstd/core/String;";
+    static constexpr const char *SIGNATURE = "C{std.core.String}l:C{std.core.String}";
     // CC-OFFNXT(G.FMT.10-CPP) project code style
     static constexpr std::string_view SAMPLE_STRING = "abcd";
 
     ani_class klass {};
     ASSERT_EQ(env_->FindClass(TEST_CLASS_DESCRIPTOR, &klass), ANI_OK);
     ani_native_function fn {METHOD_NAME, SIGNATURE, reinterpret_cast<void *>(QuickFunction)};
-    ASSERT_EQ(env_->Class_BindNativeMethods(klass, &fn, 1), ANI_OK);
+    ASSERT_EQ(env_->Class_BindStaticNativeMethods(klass, &fn, 1), ANI_OK);
 
     ani_string sample {};
     ASSERT_EQ(env_->String_NewUTF8(SAMPLE_STRING.data(), SAMPLE_STRING.size(), &sample), ANI_OK);
@@ -132,12 +132,12 @@ TEST_F(ExampleTest, CallNativeDirectFunction)
     // CC-OFFNXT(G.FMT.10-CPP) project code style
     static constexpr const char *METHOD_NAME = "directMethod";
     // CC-OFFNXT(G.FMT.10-CPP) project code style
-    static constexpr const char *SIGNATURE = "ZBCSIJFD:I";
+    static constexpr const char *SIGNATURE = "zbcsilfd:i";
 
     ani_class cls {};
     ASSERT_EQ(env_->FindClass(TEST_CLASS_DESCRIPTOR, &cls), ANI_OK);
     ani_native_function fn {METHOD_NAME, SIGNATURE, reinterpret_cast<void *>(DirectFunction)};
-    ASSERT_EQ(env_->Class_BindNativeMethods(cls, &fn, 1), ANI_OK);
+    ASSERT_EQ(env_->Class_BindStaticNativeMethods(cls, &fn, 1), ANI_OK);
 
     ani_int result = 0;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)

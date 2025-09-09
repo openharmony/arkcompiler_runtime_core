@@ -32,10 +32,10 @@ function main() {
     a.push((p) => p + 2 );
     a.push((p) => p + 3 );
     a.push((p) => p + 4 );
-    assertEQ(a[0](1), 2)
-    assertEQ(a[0](1), 3)
-    assertEQ(a[0](1), 4)
-    assertEQ(a[0](1), 5)
+    arktest.assertEQ(a[0](1), 2)
+    arktest.assertEQ(a[0](1), 3)
+    arktest.assertEQ(a[0](1), 4)
+    arktest.assertEQ(a[0](1), 5)
     return 0;
 }
 

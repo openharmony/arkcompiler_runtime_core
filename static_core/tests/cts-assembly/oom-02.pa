@@ -77,7 +77,9 @@ label_1end:
 label_1catch:
     jmp label_0
 label_0:
-    lda.str "abcdef"
+    lda.type A
+    sta.obj v4
+    call Object.createNonMovable, v4
     ldai 1
     return
 label_2:

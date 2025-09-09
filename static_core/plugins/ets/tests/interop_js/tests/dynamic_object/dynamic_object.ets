@@ -13,22 +13,22 @@
  * limitations under the License.
  */
 
-function double2jsvalue(v: double): JSValue {
+function double2jsvalue(v: double): Any {
     return v;
 }
 
-function jsvalue2double(v: JSValue): double {
-    return v;
+function jsvalue2double(v: Any): double {
+    return ESValue.wrap(v).toNumber();
 }
 
-function getPropertyFromJsvalue(obj: JSValue): double {
-    return obj.prop;
+function getPropertyFromJsvalue(obj: Any): double {
+    return ESValue.wrap(obj).getProperty('prop').toNumber();
 }
 
-function getPropertyFromJsvalue2(obj: JSValue): double {
-    return obj.prop_1.prop_2;
+function getPropertyFromJsvalue2(obj: Any): double {
+    return ESValue.wrap(obj).getProperty('prop_1').getProperty('prop_2').toNumber();
 }
 
-function setPropertyToJsvalue(obj: JSValue, v: double): void {
-    obj.prop = v;
+function setPropertyToJsvalue(obj: Any, v: double): void {
+    ESValue.wrap(obj).setProperty('prop', v);
 }

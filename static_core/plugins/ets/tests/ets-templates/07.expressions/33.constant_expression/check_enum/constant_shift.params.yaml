@@ -26,10 +26,6 @@ cases:
   - { type: short, value: -256, sign: '>>',  expected: -32 }
   - { type: short, value: -260, sign: '>>>', expected: 536870879 }
 
-  - { type: char, value: c'p', sign: '<<',  expected: 896 }
-  - { type: char, value: c'p', sign: '>>',  expected: 14  }
-  - { type: char, value: c'p', sign: '>>>', expected: 14  }
-
   - { type: int, value: 308,   sign: '<<',  expected: 2464  }
   - { type: int, value: 3008,  sign: '>>',  expected: 376   }
   - { type: int, value: 3008,  sign: '>>>', expected: 376   }
@@ -48,9 +44,9 @@ cases:
   - { type: float, value: -123.2f, sign: '<<',  expected: -984 }
   - { type: float, value: -123.2f, sign: '>>',  expected: -16  }
 
-  - { type: number, value: 5051.9,  sign: '<<',  expected: 40408,  conversion: as int }
-  - { type: number, value: 5051.9,  sign: '>>',  expected: 631,    conversion: as int }
-  - { type: number, value: 5051.9,  sign: '>>>', expected: 631,    conversion: as int }
-  - { type: number, value: -5051.9, sign: '<<',  expected: -40408, conversion: as int }
-  - { type: number, value: -5051.9, sign: '>>',  expected: -632,   conversion: as int }
+  - { type: number, value: 5051.9,  sign: '<<',  expected: 40408   }
+  - { type: number, value: 5051.9,  sign: '>>',  expected: 631     }
+  - { type: number, value: 5051.9,  sign: '>>>', expected: 631     }
+  - { type: number, value: -5051.9, sign: '<<',  expected: -40408  }
+  - { type: number, value: -5051.9, sign: '>>',  expected: -632    }
       

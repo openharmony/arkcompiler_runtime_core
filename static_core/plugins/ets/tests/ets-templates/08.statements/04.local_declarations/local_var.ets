@@ -19,5 +19,5 @@ desc: Local declaration in statement (var)
 
 function main(): void {
   let a: int = 0;
-  assertEQ(a, 0)
+  arktest.assertEQ(a, 0)
 }

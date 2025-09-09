@@ -17,19 +17,19 @@ cases:
   - { type: char,   value: c'p',   sign: '+'  }
   - { type: int,    value: 3000,   sign: '+'  }
   - { type: long,   value: 50000,  sign: '+'  }
-  - { type: float,  value: 120.2f, sign: '+', asInt: ' as int' }
-  - { type: number, value: 5050.9, sign: '+', asInt: ' as int' }
+  - { type: float,  value: 120.2f, sign: '+'  }
+  - { type: number, value: 5050.9, sign: '+' }
 
   - { type: byte,   value: 16,     sign: '-'  }
   - { type: short,  value: 300,    sign: '-'  }
   - { type: int,    value: 3000,   sign: '-'  }
   - { type: long,   value: 50000,  sign: '-'  }
-  - { type: float,  value: 120.2f, sign: '-', asInt: ' as int' }
-  - { type: number, value: 5050.9, sign: '-', asInt: ' as int' }
+  - { type: float,  value: 120.2f, sign: '-' }
+  - { type: number, value: 5050.9, sign: '-' }
 
   - { type: byte,   value: 16,     sign: '~'  }
   - { type: short,  value: 300,    sign: '~'  }
   - { type: int,    value: 3000,   sign: '~'  }
   - { type: long,   value: 50000,  sign: '~'  }
-  - { type: float,  value: 120.2f, sign: '~', asInt: ' as int' }
-  - { type: number, value: 5050.9, sign: '~', asInt: ' as int' }
+  - { type: float,  value: 120.2f, sign: '~' }
+  - { type: number, value: 5050.9, sign: '~' }

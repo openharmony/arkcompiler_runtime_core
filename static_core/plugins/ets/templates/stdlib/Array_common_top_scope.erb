@@ -35,7 +35,7 @@ class ArrayValuesIterator_<%= ctx.el_type %><%= ctx.this_iterator_generic || ctx
     }
 
     public __Iterator_getLength(): int {
-        return this.parent.length as int
+        return this.parent.length.toInt()
     }
 }
 
@@ -54,7 +54,7 @@ class ArrayEntriesIterator_<%= ctx.el_type %><%= ctx.this_iterator_generic || ct
             return new IteratorResult<[number, <%= ctx.el_type %>]>()
         }
         const i = this.idx++;
-        const vl: [number, <%= ctx.el_type %>] = [i as number, <%= ctx.get_unsafe.('this.parent', 'i') %>]
+        const vl: [number, <%= ctx.el_type %>] = [i.toDouble(), <%= ctx.get_unsafe.('this.parent', 'i') %>]
         return new IteratorResult<[number, <%= ctx.el_type %>]>(vl);
     }
 
@@ -63,6 +63,6 @@ class ArrayEntriesIterator_<%= ctx.el_type %><%= ctx.this_iterator_generic || ct
     }
 
     public __Iterator_getLength(): int {
-        return this.parent.length as int
+        return this.parent.length.toInt()
     }
 }

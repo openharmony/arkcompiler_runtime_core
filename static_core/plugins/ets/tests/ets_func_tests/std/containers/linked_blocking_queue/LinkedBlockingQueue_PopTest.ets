@@ -16,37 +16,37 @@
 const elementsNum: int = 10;
 const stressNum: int = 100;
 
-let sMTQueueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>(stressNum);
+let sMTQueueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>(stressNum);
 
 function main(): int {
-    let LinkedBlockingQueueTestsuite = new ArkTestsuite("LinkedBlockingQueuePopTest");
+    let LinkedBlockingQueueTestsuite = new arktest.ArkTestsuite("LinkedBlockingQueuePopTest");
 
     LinkedBlockingQueueTestsuite.addTest("PopTest001", () =>
     {
-        let queueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>();
+        let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>();
         for (let i = 0; i < elementsNum; i++) {
-            assertEQ(queueInt.add(i), true);
+            arktest.assertEQ(queueInt.add(i), true);
         }
         let res = queueInt.getFirst();
-        assertEQ(res, 0);
-        assertEQ(queueInt.isEmpty(), false);
-        assertEQ(queueInt.size, elementsNum);
+        arktest.assertEQ(res, 0);
+        arktest.assertEQ(queueInt.isEmpty(), false);
+        arktest.assertEQ(queueInt.size, elementsNum);
         for (let i = 0; i < elementsNum; i++) {
             queueInt.pop();
         }
-        assertEQ(queueInt.isEmpty(), true);
-        assertEQ(queueInt.size, 0);
+        arktest.assertEQ(queueInt.isEmpty(), true);
+        arktest.assertEQ(queueInt.size, 0);
     });
     LinkedBlockingQueueTestsuite.addTest("PopStressTest003", () =>
     {
-        let queueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>(stressNum);
+        let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>(stressNum);
         for (let i = 0; i < stressNum; i++) {
             queueInt.add(i);
         }
         for (let i = 0; i < stressNum; i++) {
             queueInt.pop();
         }
-        assertEQ(queueInt.size, 0);
+        arktest.assertEQ(queueInt.size, 0);
     });
 
     return LinkedBlockingQueueTestsuite.run();

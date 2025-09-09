@@ -234,11 +234,11 @@ export class Test {
         for (i = 0; i < n; i++) {
             vv6 += v[i];
         }
-        assertEQ(vv1, vv2)
-        assertEQ(vv2, vv3)
-        assertEQ(vv3, vv4)
-        assertEQ(vv4, vv5)
-        assertEQ(vv5, vv6)
+        arktest.assertEQ(vv1, vv2)
+        arktest.assertEQ(vv2, vv3)
+        arktest.assertEQ(vv3, vv4)
+        arktest.assertEQ(vv4, vv5)
+        arktest.assertEQ(vv5, vv6)
     }
 }
 

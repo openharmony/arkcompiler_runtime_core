@@ -20,7 +20,7 @@ export type UTF_16_CodePoint = int;
 /**
  * Represents boxed char value and related operations
  */
-export final class Char extends Object implements Comparable<Char>, JSONable<Char> {
+export final class Char extends Object implements Comparable<Char> {
     private value: char;
 
     /**
@@ -37,15 +37,6 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
      */
     public constructor(value: char) {
         this.value = value;
-    }
-
-    /**
-     * constructor(Char) creates a Char object from another Char object.
-     *
-     * @param value a Char object to copy from.
-     */
-    public constructor(value: Char) {
-        this.value = value.unboxed();
     }
 
     /**
@@ -127,31 +118,11 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
      * @returns result of the comparison
      */
     public override compareTo(other: Char): int {
-        return (this.value as int) - (other.unboxed() as int);
-    }
-
-    /**
-     * $_hashCode(char) returns a hashcode of the char.
-     *
-     * @param value the char to be hash coded.
-     *
-     * @returns the hash code.
-     */
-    public static $_hashCode(value: char): int {
-        return value as int;
-    }
-
-    /**
-     * $_hashCode() returns a hashcode of the underlying char.
-     *
-     * @returns the hash code.
-     */
-    public override $_hashCode(): int {
-        return Char.$_hashCode(this.value);
+        return Char.toInt(this.value) - Char.toInt(other);
     }
 
     public static readonly CHAR_BIT_SIZE = 16;
-    public static readonly MAX_CODE_POINT = 0x10FFFF;
+    public static readonly MAX_CODE_POINT = 0x10FFFF
     public static readonly HIGH_SURROGATE_MIN: char = c'\uD800';
     public static readonly HIGH_SURROGATE_MAX: char = c'\uDBFF';
     public static readonly LOW_SURROGATE_MIN: char = c'\uDC00';
@@ -293,6 +264,15 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
     public static native toDouble(value: char): double;
 
     /**
+     * Returns the primitive as string value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toString(value: char): string;
+
+    /**
      * Returns the primitive as char value
      *
      * @param value value to cast
@@ -328,7 +308,7 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
      */
     public static isInBasicMultilingualPlane(value: UTF_16_CodePoint): boolean {
         if (value < Char.BMP_BORDER) {
-            return Char.isInBasicMultilingualPlane(value as char);
+            return Char.isInBasicMultilingualPlane(UTF_16_CodePoint.toChar(value));
         }
         return false;
     }
@@ -351,7 +331,7 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
      */
     public static isValidCodePoint(codePoint: UTF_16_CodePoint): boolean {
         return (codePoint >= 0 && codePoint <= Char.MAX_CODE_POINT &&
-            !(codePoint >= (Char.HIGH_SURROGATE_MIN as int) && codePoint <= (Char.LOW_SURROGATE_MAX as int)));
+            !(codePoint >= (Char.HIGH_SURROGATE_MIN.toInt()) && codePoint <= (Char.LOW_SURROGATE_MAX.toInt())));
     }
 
     /**
@@ -402,7 +382,7 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
      * @returns the high surrogate, possibly malformed.
      */
     public static getHighSurrogate(value: UTF_16_CodePoint): char {
-        return (((value - 0x10000) >>> 10) + Char.HIGH_SURROGATE_MIN) as char
+        return Int.toChar(((value - 0x10000) >>> 10) + Char.HIGH_SURROGATE_MIN)
     }
 
     /**
@@ -414,7 +394,7 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
      * @returns the low surrogate, possibly malformed.
      */
     public static getLowSurrogate(value: UTF_16_CodePoint): char {
-        return (((value - 0x10000) & 0x3FF) + Char.LOW_SURROGATE_MIN) as char
+        return Int.toChar(((value - 0x10000) & 0x3FF) + Char.LOW_SURROGATE_MIN)
     }
 
     /**
@@ -580,8 +560,8 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
     /**
      * toUpperCase() converts the underlying char to upper case if it is in lower case, otherwise the char unchanged
      */
-    public toUpperCase(): void {
-        this.value = Char.toUpperCase(this.value);
+    public toUpperCase(): Char {
+        return Char.toUpperCase(this.value);
     }
 
     /**
@@ -596,8 +576,8 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
     /**
      * toLowerCase() converts the underlying char to a lower case if it is in upper case, otherwise the char unchanged.
      */
-    public toLowerCase(): void {
-        this.value = Char.toLowerCase(this.value);
+    public toLowerCase(): Char {
+        return Char.toLowerCase(this.value);
     }
 
     /**
@@ -616,24 +596,5 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
      */
      public isWhiteSpace(): boolean {
         return Char.isWhiteSpace(this.value);
-    }
-
-    /**
-     * Creates a Char instance based on JSONValue
-     *
-     * @param json: JSONValue - a JSON representation
-     *
-     * @throws JSONTypeError if json does not encode a valid char
-     *
-     * @returns char - char value decoded from JSON
-     */
-    public createFromJSONValue(json: JSONValue): Char {
-        if (json instanceof JSONString) {
-            let str = (json as JSONString).value
-            if (str.getLength() == 1) {
-                return Char.valueOf(str.charAt(0))
-            }
-        }
-        throw new JSONTypeError("Cannot create Char from JSON", new ErrorOptions(json as Object))
     }
 }

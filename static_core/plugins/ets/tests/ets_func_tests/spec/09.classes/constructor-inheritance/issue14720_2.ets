@@ -32,10 +32,10 @@ tags: []
 
  function main(): void {
     let b = new Derive2();
-    assertEQ( b.age, 42)
-    assertTrue( b.name = "Hello")
+    arktest.assertEQ( b.age, 42)
+    arktest.assertTrue( b.name = "Hello")
 
     b = new Derive("Greetings");
-    assertEQ( b.age, 42)
-    assertTrue( b.name = "Greetings")
+    arktest.assertEQ( b.age, 42)
+    arktest.assertTrue( b.name = "Greetings")
  }

@@ -12,3 +12,4 @@
 # limitations under the License.
 
 add_subdirectory(logger)
+add_subdirectory(options_parser)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -131,7 +131,8 @@ ark::llvmbackend::LLVMCompilerOptions LLVMCompiler::InitializeLLVMCompilerOption
     ark::llvmbackend::LLVMCompilerOptions llvmCompilerOptions {};
     llvmCompilerOptions.optimize = !ark::compiler::g_options.IsCompilerNonOptimizing();
     llvmCompilerOptions.optlevel = llvmCompilerOptions.optimize ? 2U : 0U;
-    llvmCompilerOptions.gcIntrusionChecks = g_options.IsLlvmGcCheck();
+    llvmCompilerOptions.gcIntrusion = g_options.IsLlvmGc();
+    llvmCompilerOptions.gcIntrusionChecks = g_options.IsLlvmGc() && g_options.IsLlvmGcCheck();
     llvmCompilerOptions.useSafepoint = ark::compiler::g_options.IsCompilerUseSafepoint();
     llvmCompilerOptions.dumpModuleAfterOptimizations = g_options.IsLlvmDumpAfter();
     llvmCompilerOptions.dumpModuleBeforeOptimizations = g_options.IsLlvmDumpBefore();

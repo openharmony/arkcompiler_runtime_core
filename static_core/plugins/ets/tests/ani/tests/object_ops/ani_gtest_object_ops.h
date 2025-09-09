@@ -43,7 +43,7 @@ public:
         ASSERT_NE(cls, nullptr);
 
         ani_method ctor {};
-        ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":V", &ctor), ANI_OK);
+        ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":", &ctor), ANI_OK);
 
         ASSERT_EQ(env_->Object_New(cls, ctor, object), ANI_OK);
         ASSERT_NE(object, nullptr);

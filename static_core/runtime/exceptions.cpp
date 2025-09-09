@@ -20,7 +20,7 @@
 #include "runtime/bridge/bridge.h"
 #include "runtime/deoptimization.h"
 #include "runtime/entrypoints/entrypoints.h"
-#include "runtime/include/coretypes/string.h"
+#include "runtime/include/coretypes/line_string.h"
 #include "runtime/include/object_header-inl.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/stack_walker.h"

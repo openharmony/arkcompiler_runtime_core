@@ -36,6 +36,6 @@ function handleBadValue(val: int): int {
 
 function main(): int {
     let cr = castIntToString(1)
-    assertEQ<String, String>(cr,"1");
+    arktest.assertEQ<String, String>(cr,"1");
     return handleBadValue(4)
 }

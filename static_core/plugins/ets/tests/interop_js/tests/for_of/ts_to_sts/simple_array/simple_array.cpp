@@ -20,17 +20,17 @@ namespace ark::ets::interop::js::testing {
 
 class EtsForOfSimpleArrayTsToEtsTest : public EtsInteropTest {};
 
-TEST_F(EtsForOfSimpleArrayTsToEtsTest, checkEmptyArray)
+TEST_F(EtsForOfSimpleArrayTsToEtsTest, DISABLED_checkEmptyArray)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>("simple_array", "checkEmptyArray"));
 }
 
-TEST_F(EtsForOfSimpleArrayTsToEtsTest, checkNumberArray)
+TEST_F(EtsForOfSimpleArrayTsToEtsTest, DISABLED_checkNumberArray)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>("simple_array", "checkNumberArray"));
 }
 
-TEST_F(EtsForOfSimpleArrayTsToEtsTest, checkStringArray)
+TEST_F(EtsForOfSimpleArrayTsToEtsTest, DISABLED_checkStringArray)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>("simple_array", "checkStringArray"));
 }

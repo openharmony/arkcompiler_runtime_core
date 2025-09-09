@@ -22,5 +22,5 @@ tags:
 
 function main(): void {
     let x = new Array<(Number|String)>();
-    assertTrue( x != null)
+    arktest.assertTrue( x != null)
 }

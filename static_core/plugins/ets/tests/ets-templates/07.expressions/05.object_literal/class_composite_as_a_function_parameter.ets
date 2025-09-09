@@ -29,10 +29,10 @@ function foo(person: Person): void {
   
 function main(): void {
   checkVar = 0;
-  assertEQ( checkVar, 0 );
+  arktest.assertEQ( checkVar, 0 );
   for (let i = 0; i < 20; i++) {
     foo({ age: i });
-    assertEQ( checkVar, i );
+    arktest.assertEQ( checkVar, i );
   }
 }
   

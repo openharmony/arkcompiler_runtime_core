@@ -13,6 +13,15 @@
  * limitations under the License.
  */
 
+// NOLINTBEGIN(readability-identifier-naming, cppcoreguidelines-macro-usage,
+//             cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
+//             readability-else-after-return, readability-duplicate-include,
+//             misc-non-private-member-variables-in-classes, cppcoreguidelines-pro-type-member-init,
+//             google-explicit-constructor, cppcoreguidelines-pro-type-union-access,
+//             modernize-use-auto, llvm-namespace-comment,
+//             cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
+//             readability-implicit-bool-conversion)
+
 #ifndef COMMON_INTERFACES_OBJECTS_BASE_OBJECT_H
 #define COMMON_INTERFACES_OBJECTS_BASE_OBJECT_H
 
@@ -21,9 +30,9 @@
 
 #include "objects/base_class.h"
 #include "base/common.h"
+#include "objects/base_class.h"
 #include "objects/base_object_operator.h"
 #include "objects/base_state_word.h"
-
 namespace common {
 class BaseObject {
 public:
@@ -49,9 +58,20 @@ public:
         return GetOperator()->IsValidObject(this);
     }
 
+    // Iterate object field, and skit the weak referent, ONLY used in interop.
+    void ForEachRefFieldSkipReferent(const RefFieldVisitor &visitor)
+    {
+        GetOperator()->ForEachRefFieldSkipReferent(this, visitor);
+    }
+
     void ForEachRefField(const RefFieldVisitor &visitor)
     {
         GetOperator()->ForEachRefField(this, visitor);
+    }
+
+    void IterateXRef(const RefFieldVisitor &visitor)
+    {
+        GetOperator()->IterateXRef(this, visitor);
     }
 
     inline BaseObject *GetForwardingPointer() const
@@ -191,13 +211,12 @@ public:
     {
         return sizeof(BaseObject);
     }
-protected:
-    static BaseObject *SetClassInfo(MAddress address, TypeInfo *klass)
-    {
-        auto ref = reinterpret_cast<BaseObject *>(address);
-        return ref;
-    }
 
+    bool IsString() const
+    {
+        return GetBaseClass()->IsString();
+    }
+protected:
     inline BaseObjectOperatorInterfaces *GetOperator() const
     {
         if (state_.IsStatic()) {
@@ -209,5 +228,15 @@ protected:
     static PUBLIC_API BaseObjectOperator operator_;
     BaseStateWord state_;
 };
+
+static_assert(sizeof(BaseObject) == sizeof(BaseClass::HeaderType));
 }  // namespace common
 #endif  // COMMON_INTERFACES_OBJECTS_BASE_OBJECT_H
+// NOLINTEND(readability-identifier-naming, cppcoreguidelines-macro-usage,
+//           cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
+//           readability-else-after-return, readability-duplicate-include,
+//           misc-non-private-member-variables-in-classes, cppcoreguidelines-pro-type-member-init,
+//           google-explicit-constructor, cppcoreguidelines-pro-type-union-access,
+//           modernize-use-auto, llvm-namespace-comment,
+//           cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
+//           readability-implicit-bool-conversion)

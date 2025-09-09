@@ -437,6 +437,23 @@ public:
         return argsStr;
     }
 
+    std::vector<std::string> GetNamesOfParsedArgs() const
+    {
+        std::vector<std::string> names;
+        for (auto arg : args_) {
+            names.emplace_back(arg->GetName());
+            if (arg->GetType() == PandArgType::COMPOUND) {
+                auto argCompound = static_cast<PandArgCompound *>(arg);
+                for (auto subArg : argCompound->GetSubArgs()) {
+                    std::stringstream ss;
+                    ss << arg->GetName() << ':' << subArg->GetName();
+                    names.emplace_back(ss.str());
+                }
+            }
+        }
+        return names;
+    }
+
 private:
     struct PandArgPtrComparator {
         // NOLINTNEXTLINE(readability-identifier-naming)

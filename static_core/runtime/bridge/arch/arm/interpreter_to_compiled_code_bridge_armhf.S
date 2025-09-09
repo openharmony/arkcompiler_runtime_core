@@ -350,11 +350,18 @@ InterpreterToCompiledCodeBridge:
     lsleq SHORTY_REG, SHORTY_REG, #4 // unshift shorty reg back
     orreq r1, r1, #SHORTY_REFERENCE
 
-    ldrb r10, [r8], #1 // read opcode and advance insn_ptr
-
     // set r9 - frame.vregs
     add r9, r9, #FRAME_VREGS_OFFSET
 
+    ldrb r10, [r8] // read opcode
+    cmp r10, #MIN_PREFIX_OPCODE_INDEX
+    blt .Lnonprefixed
+    ldrh r10, [r8], #2 // read opcode and advance insn_ptr
+    b .Ldispatch
+.Lnonprefixed:
+    add r8, r8, #1 // advance insn_ptr
+
+.Ldispatch:
     // The file contains code which checks opcode and jumps
     // to the corresponding handler.
     // At the end each handler jumps to .Linvoke_from_bridge label.

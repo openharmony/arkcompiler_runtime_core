@@ -14,28 +14,29 @@
  */
 
 #include <atomic>
+#include <thread>
 #include "libpandabase/os/time.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
+#include "plugins/ets/runtime/types/ets_taskpool.h"
 #include "runtime/include/runtime.h"
 
 namespace ark::ets::intrinsics::taskpool {
 
-static std::atomic<EtsLong> g_taskId = 1;
-static std::atomic<EtsLong> g_taskGroupId = 1;
-static std::atomic<EtsLong> g_seqRunnerId = 1;
-static constexpr const char *LAUNCH = "launch";
+static std::atomic<EtsInt> g_taskId = 1;
+static std::atomic<EtsInt> g_taskGroupId = 1;
+static std::atomic<EtsInt> g_seqRunnerId = 1;
 
-extern "C" EtsLong GenerateTaskId()
+extern "C" EtsInt GenerateTaskId()
 {
     return g_taskId++;
 }
 
-extern "C" EtsLong GenerateGroupId()
+extern "C" EtsInt GenerateGroupId()
 {
     return g_taskGroupId++;
 }
 
-extern "C" EtsLong GenerateSeqRunnerId()
+extern "C" EtsInt GenerateSeqRunnerId()
 {
     return g_seqRunnerId++;
 }
@@ -45,7 +46,7 @@ extern "C" EtsBoolean IsUsingLaunchMode()
     const auto &taskpoolMode =
         Runtime::GetOptions().GetTaskpoolMode(plugins::LangToRuntimeType(panda_file::SourceLang::ETS));
 
-    bool res = (taskpoolMode == LAUNCH);
+    bool res = (taskpoolMode == TASKPOOL_LAUNCH_MODE);
     return ark::ets::ToEtsBoolean(res);
 }
 
@@ -57,4 +58,11 @@ extern "C" EtsBoolean IsSupportingInterop()
 #endif /* PANDA_ETS_INTEROP_JS */
     return ark::ets::ToEtsBoolean(res);
 }
+
+extern "C" EtsInt GetTaskPoolWorkersLimit()
+{
+    int32_t cpuCount = std::thread::hardware_concurrency();
+    return cpuCount > 1 ? cpuCount - 1 : 1;  // 1: default number
+}
+
 }  // namespace ark::ets::intrinsics::taskpool

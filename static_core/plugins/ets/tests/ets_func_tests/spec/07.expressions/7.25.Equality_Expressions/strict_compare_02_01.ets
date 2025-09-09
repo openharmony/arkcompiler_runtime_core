@@ -31,5 +31,5 @@ class A {
 function main(): void {
   let a: A = new A()
   // compare a with itself
-  assertTrue( a.test(a))
+  arktest.assertTrue( a.test(a))
 }

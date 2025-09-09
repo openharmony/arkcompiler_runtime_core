@@ -12,19 +12,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@class
 interface Foo {
     @!sts_inject_into_interface("""name: string;""")
     @!sts_inject_into_class("""name: string = "default";""")
 
-    with_this(@sts_this thiz: Opaque): void;
+    CallWithThis(@sts_this thiz: Opaque): void;
 }
+
+@ctor("Foo")
+function MakeFooWithThis(@sts_this thiz: Opaque): Foo;
 
 struct RGB {
     @!sts_inject_into_interface("""color: string;""")
     @!sts_inject_into_class("""color: string = "red";""")
+
     r: i32;
     g: i32;
     b: i32;
 }
-
-function makeFoo(): Foo;

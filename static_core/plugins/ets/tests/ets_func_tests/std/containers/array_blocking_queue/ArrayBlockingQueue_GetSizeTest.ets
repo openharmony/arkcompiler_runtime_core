@@ -18,10 +18,10 @@ import { launch } from "std/concurrency"
 const elementsNum: int = 100;
 let sizeNum: int = 0;
 
-let queueInt: ArrayBlockingQueue<int> = new ArrayBlockingQueue<int>(200);
+let queueInt: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(200);
 
 function main(): int {
-    let ArrayBlockingQueueTestsuite = new ArkTestsuite("ArrayBlockingQueueGetSizeTest");
+    let ArrayBlockingQueueTestsuite = new arktest.ArkTestsuite("ArrayBlockingQueueGetSizeTest");
 
     ArrayBlockingQueueTestsuite.addTest("GetSizeTestInt003", () =>
     {
@@ -39,7 +39,7 @@ function main(): int {
         p2.Await(); 
         p3.Await(); 
         p4.Await(); 
-        assertEQ(queueInt.size, elementsNum);
+        arktest.assertEQ(queueInt.size, elementsNum);
     });
 
     return ArrayBlockingQueueTestsuite.run();

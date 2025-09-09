@@ -18,8 +18,8 @@ cases:
     call: |-
         let a: A = new A();
         let b: RA = new RA();
-        assertTrue(a instanceof RA);
-        assertTrue(b instanceof A);
+        arktest.assertTrue(a instanceof RA);
+        arktest.assertTrue(b instanceof A);
 
   - import: |-
         import {A} from "./modules/declarations.ets"  // Base class
@@ -29,8 +29,8 @@ cases:
     call: |-
         let a: B = new B();
         let b: RB = new RB();
-        assertTrue(a instanceof A);
-        assertTrue(b instanceof RA);
+        arktest.assertTrue(a instanceof A);
+        arktest.assertTrue(b instanceof RA);
 
   - import: |-
         import {AC} from "./modules/declarations.ets"  // Abstract class
@@ -40,8 +40,8 @@ cases:
     call: |-
         let a: AC = new C();
         let b: RAC = new RC();
-        assertTrue(a instanceof RAC);
-        assertTrue(b instanceof AC);
+        arktest.assertTrue(a instanceof RAC);
+        arktest.assertTrue(b instanceof AC);
 
   - import: |-
         import {I} from "./modules/declarations.ets"  // Base interface
@@ -56,15 +56,15 @@ cases:
     call: |-
         let a: I = new B();
         let b: RI = new RB();
-        assertTrue(a instanceof RI);
-        assertTrue(a instanceof RII);
-        assertTrue(b instanceof I);
-        assertTrue(b instanceof II);
+        arktest.assertTrue(a instanceof RI);
+        arktest.assertTrue(a instanceof RII);
+        arktest.assertTrue(b instanceof I);
+        arktest.assertTrue(b instanceof II);
 
         let c: A = new A();
         let d: RA = new RA();
-        assertTrue(c instanceof RI);
-        assertTrue(d instanceof I);
+        arktest.assertTrue(c instanceof RI);
+        arktest.assertTrue(d instanceof I);
 
   - import: |-
         import {I} from "./modules/declarations.ets"  // Base interface
@@ -76,19 +76,19 @@ cases:
     call: |-
         let a: I = new D();
         let b: RI = new RD();
-        assertTrue(a instanceof RD);
-        assertTrue(a instanceof RI);
-        assertTrue(a instanceof RII);
-        assertTrue(b instanceof D);
-        assertTrue(b instanceof I);
-        assertTrue(b instanceof II);
+        arktest.assertTrue(a instanceof RD);
+        arktest.assertTrue(a instanceof RI);
+        arktest.assertTrue(a instanceof RII);
+        arktest.assertTrue(b instanceof D);
+        arktest.assertTrue(b instanceof I);
+        arktest.assertTrue(b instanceof II);
 
   - import: |-
         import {ENUM} from "./modules/declarations.ets"  // Enum
         import {RENUM} from "./modules/reexported_directives.ets"  // Enum
     call: |-
-        assertEQ(ENUM.Red.valueOf(), RENUM.Red.valueOf());
-        assertEQ(ENUM.Blue.valueOf(), RENUM.Blue.valueOf());
+        arktest.assertEQ(ENUM.Red.valueOf(), RENUM.Red.valueOf());
+        arktest.assertEQ(ENUM.Blue.valueOf(), RENUM.Blue.valueOf());
 
   - import: |-
         import {A} from "./modules/declarations.ets"  // Base class
@@ -98,8 +98,8 @@ cases:
     call: |-
         let a: CLASS_A = new CLASS_A();
         let b: RCLASS_A = new RCLASS_A();
-        assertTrue(a instanceof RA);
-        assertTrue(b instanceof A);
+        arktest.assertTrue(a instanceof RA);
+        arktest.assertTrue(b instanceof A);
 
   - import: |-
         import {VAR_i} from "./modules/declarations.ets"  // variable of primitive type (int)
@@ -107,7 +107,7 @@ cases:
     call: |-
         let a: VAR_i = 3;
         let b: RVAR_i = 3;
-        assertEQ(a, b);
+        arktest.assertEQ(a, b);
 
   - import: |-
         import {TPL} from "./modules/declarations.ets"  // Tuple type
@@ -115,8 +115,8 @@ cases:
     call: |-
         let a: TPL = [new Number(), new String()];
         let b: RTPL = [new Number(), new String()];
-        assertTrue(a instanceof RTPL);
-        assertTrue(b instanceof TPL);
+        arktest.assertTrue(a instanceof RTPL);
+        arktest.assertTrue(b instanceof TPL);
 
   - import: |-
         import {NoArg} from "./modules/declarations.ets"  // Function without arguments
@@ -124,123 +124,123 @@ cases:
         import {RNoArg} from "./modules/reexported_directives.ets"  // Function without arguments
     call: |-
         NoArg();
-        assertEQ(res, 1);
+        arktest.assertEQ(res, 1);
         res = 0;
         RNoArg();
-        assertEQ(res, 1);
+        arktest.assertEQ(res, 1);
 
   - import: |-
         import {OneArg} from "./modules/declarations.ets"  // Function, argument of Number type
         import {ROneArg} from "./modules/reexported_directives.ets"  // Function, argument of Number type
     call: |-
-        assertEQ(OneArg(new Number()), ROneArg(new Number()));
+        arktest.assertEQ(OneArg(new Number()), ROneArg(new Number()));
 
   - import: |-
         import {TwoArgs} from "./modules/declarations.ets"  // Function, arguments of char and byte types
         import {RTwoArgs} from "./modules/reexported_directives.ets"  // Function, arguments of char and byte types
     call: |-
-        assertEQ(TwoArgs(c'A', 1 as byte), RTwoArgs(c'B', 2 as byte));
+        arktest.assertEQ(TwoArgs(c'A', 1 as byte), RTwoArgs(c'B', 2 as byte));
 
   - import: |-
         import {Gen} from "./modules/declarations.ets"  // Function, generic argument
         import {RGen} from "./modules/reexported_directives.ets"  // Function, generic argument
     call: |-
         let s = "knock-knock";
-        assertEQ(Gen(s), RGen(s));
-        assertEQ(Gen(new Number(1.45)), RGen(new Number(1.45)));
+        arktest.assertEQ(Gen(s), RGen(s));
+        arktest.assertEQ(Gen(new Number(1.45)), RGen(new Number(1.45)));
 
   - import: |-
         import {ArgFun} from "./modules/declarations.ets"  // Function, argument is of function type
         import {RArgFun} from "./modules/reexported_directives.ets"  // Function, argument is of function type
     call: |-
-        assertEQ(ArgFun( () => { return 3; } ), RArgFun( () => { return 3; } ));
-        assertEQ(RArgFun( () => { return 4; } ), 4 );
+        arktest.assertEQ(ArgFun( () => { return 3; } ), RArgFun( () => { return 3; } ));
+        arktest.assertEQ(RArgFun( () => { return 4; } ), 4 );
 
   - import: |-
         import {ArgFun2} from "./modules/declarations.ets"  // Function, arguments - function type + primitive
         import {RArgFun2} from "./modules/reexported_directives.ets"  // Function, arguments - function type + primitive
     call: |-
-        assertEQ(ArgFun2( (i) => { return i; }, 4), RArgFun2( (i) => { return i; }, 4));
-        assertEQ(RArgFun2( (i) => { return i; }, 5), 5);
+        arktest.assertEQ(ArgFun2( (i) => { return i; }, 4), RArgFun2( (i) => { return i; }, 4));
+        arktest.assertEQ(RArgFun2( (i) => { return i; }, 5), 5);
 
   - import: |-
         import {a} from "./modules/declarations.ets"  // Variable, primitive, implicit type
         import {ra} from "./modules/reexported_directives.ets"  // Variable, primitive, implicit type
     call: |-
-        assertEQ(ra, 1);
+        arktest.assertEQ(ra, 1);
         ra += 3;
-        assertEQ(a, 4);
-        assertEQ(ra, 4);
+        arktest.assertEQ(a, 4);
+        arktest.assertEQ(ra, 4);
         a = 1;
 
   - import: |-
         import {i} from "./modules/declarations.ets"  // Variable, int
         import {ri} from "./modules/reexported_directives.ets"  // Variable, int
     call: |-
-        assertEQ(ri, 2);
+        arktest.assertEQ(ri, 2);
         i += 3;
-        assertEQ(i, 5);
-        assertEQ(ri, 5);
+        arktest.assertEQ(i, 5);
+        arktest.assertEQ(ri, 5);
         i = 2;
 
   - import: |-
         import {n} from "./modules/declarations.ets"  // Variable, number
         import {rn} from "./modules/reexported_directives.ets"  // Variable, number
     call: |-
-        assertEQ(rn, 3);
+        arktest.assertEQ(rn, 3);
         rn += 0.2;
-        assertEQ(n, 3.2);
-        assertEQ(rn, 3.2);
+        arktest.assertEQ(n, 3.2);
+        arktest.assertEQ(rn, 3.2);
         n = 3;
 
   - import: |-
         import {s} from "./modules/declarations.ets"  // Variable, String
         import {rs} from "./modules/reexported_directives.ets"  // Variable, String
     call: |-
-        assertEQ(rs, "knock-knock");
+        arktest.assertEQ(rs, "knock-knock");
         s += " who`s there";
-        assertEQ(s, "knock-knock who`s there");
-        assertEQ(rs, "knock-knock who`s there");
+        arktest.assertEQ(s, "knock-knock who`s there");
+        arktest.assertEQ(rs, "knock-knock who`s there");
         s = "knock-knock";
 
   - import: |-
         import {c} from "./modules/declarations.ets"  // Variable, char
         import {rc} from "./modules/reexported_directives.ets"  // Variable, char
     call: |-
-        assertEQ(rc, c'A');
+        arktest.assertEQ(rc, c'A');
         rc = c'b';
-        assertEQ(c, c'b');
-        assertEQ(rc, c'b');
+        arktest.assertEQ(c, c'b');
+        arktest.assertEQ(rc, c'b');
         c = c'A';
 
   - import: |-
         import {u} from "./modules/declarations.ets"  // Variable, union
         import {ru} from "./modules/reexported_directives.ets"  // Variable, union
     call: |-
-        assertEQ(ru, undefined);
+        arktest.assertEQ(ru, undefined);
         u = new Number(1.2);
-        assertEQ(u, 1.2);
-        assertEQ(ru, 1.2);
+        arktest.assertEQ(u, 1.2);
+        arktest.assertEQ(ru, 1.2);
         ru = "str";
-        assertEQ(u, "str");
-        assertEQ(ru, "str");
+        arktest.assertEQ(u, "str");
+        arktest.assertEQ(ru, "str");
         u = undefined;
 
   - import: |-
         import {arr} from "./modules/declarations.ets"  // Variable, bytes[3]
         import {rarr} from "./modules/reexported_directives.ets"  // Variable, bytes[3]
     call: |-
-        assertEQ(rarr.length, 3);
+        arktest.assertEQ(rarr.length, 3);
         arr = new byte[2];
-        assertEQ(arr.length, 2);
-        assertEQ(rarr.length, 2);
+        arktest.assertEQ(arr.length, 2);
+        arktest.assertEQ(rarr.length, 2);
         arr = new byte[3];
 
   - import: |-
         import {ca} from "./modules/declarations.ets"  // Const implicit int
         import {rca} from "./modules/reexported_directives.ets"  // Const implicit int
     call: |-
-        assertEQ(rca, ca);
+        arktest.assertEQ(rca, ca);
 
   - import: |-
         import {ca} from "./modules/declarations.ets"  // Const implicit int
@@ -254,7 +254,7 @@ cases:
         import {ci} from "./modules/declarations.ets"  // Const int
         import {rci} from "./modules/reexported_directives.ets"  // Const int
     call: |-
-        assertEQ(rci, ci);
+        arktest.assertEQ(rci, ci);
 
   - import: |-
         import {ci} from "./modules/declarations.ets"  // Const int
@@ -268,7 +268,7 @@ cases:
         import {cs} from "./modules/declarations.ets"  // Const str
         import {rcs} from "./modules/reexported_directives.ets"  // Const str
     call: |-
-        assertEQ(rcs, cs);
+        arktest.assertEQ(rcs, cs);
 
   - import: |-
         import {cs} from "./modules/declarations.ets"  // Const str

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include <cstdlib>
 
 #include "libpandabase/macros.h"
+#include "runtime/include/coretypes/line_string.h"
 #include "runtime/include/coretypes/string.h"
 
 namespace ark {
@@ -85,16 +86,11 @@ PandaString ConvertToString(const std::string &str)
 PandaString ConvertToString(coretypes::String *s)
 {
     ASSERT(s != nullptr);
-    if (s->IsUtf16()) {
-        // Should convert utf-16 to utf-8, because uint16_t likely great than MAX_CHAR, will convert fail
-        size_t len = utf::Utf16ToMUtf8Size(s->GetDataUtf16(), s->GetUtf16Length()) - 1;
-        PandaVector<uint8_t> buf(len);
-        len = utf::ConvertRegionUtf16ToMUtf8(s->GetDataUtf16(), buf.data(), s->GetUtf16Length(), len, 0);
-        Span<const uint8_t> sp(buf.data(), len);
-        return ConvertToString(sp);
-    }
+    size_t len = s->GetUtf8Length();
+    PandaVector<uint8_t> buf(len);
+    s->CopyDataRegionUtf8(buf.data(), 0, len, len);
 
-    Span<const uint8_t> sp(s->GetDataMUtf8(), s->GetLength());
+    Span<const uint8_t> sp(buf.data(), len);
     return ConvertToString(sp);
 }
 

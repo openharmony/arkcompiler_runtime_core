@@ -76,9 +76,12 @@
     title: Multiline String Literal
     status: Finished
 2.9.8:
+    title: Regex Literal
+    status: ''
+2.9.9:
     title: Null Literal
     status: Finished
-2.9.9:
+2.9.10:
     title: Undefined Literal
     status: Finished
 '2.10':
@@ -301,76 +304,31 @@
     title: Contexts and Conversions
     status: No testable assertions
 '6.1':
-    title: Assignment-like Contexts
+    title: Type of Expressiom
     status: ''
 '6.2':
-    title: String Operator Contexts
+    title: Assignment-like Contexts
     status: ''
 '6.3':
-    title: Numeric Operator Contexts
+    title: String Operator Contexts
     status: ''
 '6.4':
-    title: Casting Contexts and Conversions
-    status: ''
-6.4.1:
-    title: Numeric Casting Conversions
-    status: ''
-6.4.2:
-    title: Class or Interface Casting Conversions
-    status: ''
-6.4.3:
-    title: Casting Conversions from Object
-    status: ''
-6.4.4:
-    title: Casting Conversions from Type Parameter
-    status: ''
-6.4.5:
-    title: Casting Conversions to Type Parameter
-    status: ''
-6.4.6:
-    title: Casting Conversions from Union
-    status: ''
-6.4.7:
-    title: Casting Conversions to Enumeration
+    title: Numeric Operator Contexts
     status: ''
 '6.5':
     title: Implicit Conversions
     status: No testable assertions
 6.5.1:
-    title: Primitive Types Conversions
-    status: No testable assertions
+    title: Widening Numeric Conversions
+    status: ''
 6.5.2:
-    title: Widening Primitive Conversions
-    status: Finished
-6.5.3:
-    title: Constant Narrowing Integer Conversions
-    status: Finished
-6.5.4:
-    title: Widening Union Conversions
-    status: Finished
-6.5.5:
-    title: Widening Reference Conversions
-    status: Finished
-6.5.6:
-    title: Character to String Conversions
-    status: Finished
-6.5.7:
-    title: Constant String to Character Conversions
-    status: Finished
-6.5.8:
-    title: Function Types Conversions
-    status: Finished
-6.5.9:
-    title: Tuple Types Conversions
-    status: Finished
-6.5.10:
     title: Enumeration to Constants Type Conversions
-    status: Finished
-6.5.11:
+    status: ''
+6.5.3:
     title: Constant to Enumeration Conversions
     status: ''
-6.5.12:
-    title: Literal Type to its Supertype Conversions
+'6.6':
+    title: Numeric Casting Conversions
     status: ''
 '7':
     title: Expressions
@@ -577,12 +535,15 @@
     title: Enumeration Equality Operators
     status: ''
 7.25.6:
+    title: Function Type Equality Operators
+    status: ''
+7.25.7:
     title: Reference Equality Based on Actual Type
     status: Finished
-7.25.7:
+7.25.8:
     title: Reference Equality
     status: ''
-7.25.8:
+7.25.9:
     title: Extended Equality with null or undefined
     status: ''
 '7.26':

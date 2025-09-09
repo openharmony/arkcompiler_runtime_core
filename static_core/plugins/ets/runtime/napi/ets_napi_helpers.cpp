@@ -17,6 +17,7 @@
 
 #include "libpandafile/shorty_iterator.h"
 #include "macros.h"
+#include "plugins/ets/runtime/ani/scoped_objects_fix.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/mem/ets_reference.h"
 #include "plugins/ets/runtime/napi/ets_napi.h"
@@ -55,8 +56,15 @@ public:
     template <class T>
     ALWAYS_INLINE typename std::enable_if_t<std::is_same<T, ObjectHeader **>::value, void> Write(T v)
     {
-        arch::ArgWriter<RUNTIME_ARCH>::Write<EtsReference *>(
-            EtsReferenceStorage::NewEtsStackRef(reinterpret_cast<EtsObject **>(v)));
+        EtsReference *ref = nullptr;
+        auto *objPtr = reinterpret_cast<EtsObject **>(v);
+        ASSERT(objPtr != nullptr);
+        if (EtsReferenceStorage::IsUndefinedEtsObject(*objPtr)) {
+            ref = EtsReference::GetUndefined();
+        } else {
+            ref = EtsReferenceStorage::NewEtsStackRef(objPtr);
+        }
+        arch::ArgWriter<RUNTIME_ARCH>::Write<EtsReference *>(ref);
     }
 
     template <class T>
@@ -365,7 +373,7 @@ extern "C" void EtsNapiEnd(Method *method, ManagedThread *thread, bool isFastNat
 
     auto coroutine = EtsCoroutine::CastFromThread(thread);
     auto storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
-    storage->PopLocalEtsFrame(nullptr);
+    storage->PopLocalEtsFrame(EtsReference::GetUndefined());
 }
 
 extern "C" EtsObject *EtsNapiObjEnd(Method *method, EtsReference *etsRef, ManagedThread *thread, bool isFastNative)
@@ -381,15 +389,14 @@ extern "C" EtsObject *EtsNapiObjEnd(Method *method, EtsReference *etsRef, Manage
 
     Runtime::GetCurrent()->GetNotificationManager()->MethodExitEvent(thread, method);
 
-    EtsObject *ret = nullptr;
-
     auto coroutine = EtsCoroutine::CastFromThread(thread);
     auto storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
-    if (etsRef != nullptr) {
+    EtsObject *ret = nullptr;
+    if (LIKELY(!coroutine->HasPendingException())) {
         ret = storage->GetEtsObject(etsRef);
     }
 
-    storage->PopLocalEtsFrame(nullptr);
+    storage->PopLocalEtsFrame(EtsReference::GetUndefined());
 
     return ret;
 }
@@ -440,15 +447,7 @@ extern "C" ObjectPointerType EtsAsyncCall(Method *method, EtsCoroutine *currentC
         ASSERT(classObj != nullptr);
         auto classPtr = reinterpret_cast<EtsObject **>(regArgs);
         *classPtr = classObj;
-    } else {
-        // Handle this arg
-        ASSERT(method->GetNumArgs() != 0);
-        ASSERT(!method->GetArgType(0).IsPrimitive());
-        args.push_back(Value(*const_cast<ObjectHeader **>(argReader.ReadPtr<ObjectHeader *>())));
     }
-
-    arch::ValueWriter writer(&args);
-    ARCH_COPY_METHOD_ARGS(method, argReader, writer);
 
     // Create object after arg fix ^^^.
     // Arg fix is needed for StackWalker. So if GC gets triggered in EtsPromise::Create
@@ -460,6 +459,16 @@ extern "C" ObjectPointerType EtsAsyncCall(Method *method, EtsCoroutine *currentC
     }
     auto promiseRef = vm->GetGlobalObjectStorage()->Add(promise, mem::Reference::ObjectType::GLOBAL);
     auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(promiseRef, coroManager);
+
+    // Read values from stack and keep in args values for Launch after possible GC in EtsPromise::Create
+    if (!method->IsStatic()) {
+        // Handle this arg
+        ASSERT(method->GetNumArgs() != 0);
+        ASSERT(!method->GetArgType(0).IsPrimitive());
+        args.push_back(Value(*const_cast<ObjectHeader **>(argReader.ReadPtr<ObjectHeader *>())));
+    }
+    arch::ValueWriter writer(&args);
+    ARCH_COPY_METHOD_ARGS(method, argReader, writer);
 
     [[maybe_unused]] EtsHandleScope scope(currentCoro);
     EtsHandle<EtsPromise> promiseHandle(currentCoro, promise);

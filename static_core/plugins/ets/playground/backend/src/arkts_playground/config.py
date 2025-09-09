@@ -16,17 +16,20 @@
 
 from argparse import ArgumentParser
 from functools import lru_cache
-from typing import List, Optional, Tuple, Dict
+from typing import List, Optional, Tuple, Dict, Union
 
 import yaml
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings
 
 from .models.options import OptionModel
 
 
 class SyntaxModel(BaseModel):
-    tokenizer: Dict[str, List[Tuple[str, str]]]
+    keywords: List[str]
+    type_keywords: List[str] = Field(alias="typeKeywords")
+    builtins: List[str]
+    tokenizer: Dict[str, List[Tuple[str, Union[str, dict]]]]
 
 
 class Server(BaseModel):

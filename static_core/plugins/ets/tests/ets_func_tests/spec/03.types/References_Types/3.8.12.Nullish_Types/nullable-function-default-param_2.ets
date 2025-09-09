@@ -16,11 +16,11 @@
 /*---
 desc: 2.9.7 Null Literal, 3.8.12 Nullish Types
 name: nullable-function-default-param_1.ets
-
+tags: [compile-only, negative]
 ---*/
 
 function test<NullableInt = int | null>(required: String, param: NullableInt = 100): void {
-    assertTrue( param === null)
+    arktest.assertTrue( param === null)
 }
 
 function main(): void {

@@ -178,22 +178,17 @@ public:
 
 class GCMarkWholeRegionTask : public GCWorkersTask {
 public:
-    explicit GCMarkWholeRegionTask(Region *region, PandaDeque<ObjectHeader *> *markedObjDeque)
-        : GCWorkersTask(GCWorkersTaskTypes::TASK_MARK_WHOLE_REGION), region_(region), markedObjDeque_(markedObjDeque)
-    {
-    }
+    using Info = std::pair<Region *, PandaDeque<ObjectHeader *> *>;
+
+    explicit GCMarkWholeRegionTask(Info *info) : GCWorkersTask(GCWorkersTaskTypes::TASK_MARK_WHOLE_REGION, info) {}
     DEFAULT_COPY_SEMANTIC(GCMarkWholeRegionTask);
     DEFAULT_MOVE_SEMANTIC(GCMarkWholeRegionTask);
     ~GCMarkWholeRegionTask() = default;
 
-    std::pair<Region *, PandaDeque<ObjectHeader *> *> GetInfo() const
+    Info GetInfo() const
     {
-        return std::make_pair(region_, markedObjDeque_);
+        return *static_cast<const Info *>(storage_);
     }
-
-private:
-    Region *region_;
-    PandaDeque<ObjectHeader *> *markedObjDeque_;
 };
 
 }  // namespace ark::mem

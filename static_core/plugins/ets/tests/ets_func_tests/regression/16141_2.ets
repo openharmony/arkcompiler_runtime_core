@@ -15,7 +15,7 @@
 
 /*---
 desc: Issue 16141. Functional type cannot be assigned to T|undefined
-tags: []
+tags: [compile-only, negative]
 ---*/
 
 function main(): void {

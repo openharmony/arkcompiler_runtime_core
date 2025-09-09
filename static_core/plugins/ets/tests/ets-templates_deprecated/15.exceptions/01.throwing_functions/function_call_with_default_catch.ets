@@ -15,11 +15,11 @@
 
 /*---
 desc: Throwing function call if a call of a throwing function is not enclosed in a try statement;.
-assert: Exception propagation occurs in two cases. If a call of a throwing function is not enclosed in a try statement; If the enclosed try statement does not contain a clause that catches the raised exception.
+assert: Error propagation occurs in two cases. If a call of a throwing function is not enclosed in a try statement; If the enclosed try statement does not contain a clause that catches the raised error.
 ---*/
 
 function bar(): void throws {
-  throw new Exception();
+  throw new Error();
 }
 
 function main(): void {
@@ -32,5 +32,5 @@ function main(): void {
     i = 5;
   }
 
-  assertEQ( i, 5 );
+  arktest.assertEQ( i, 5 );
 }

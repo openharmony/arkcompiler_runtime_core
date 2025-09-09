@@ -32,8 +32,8 @@ class MyHashable implements Hashable {
 class HasMap<K extends Hashable, V> {
     public set(k: K, v: V): void {
         let key: number = k.hash();
-        assertEQ(key, 6)
-        assertTrue( k instanceof MyHashable)
+        arktest.assertEQ(key, 6)
+        arktest.assertTrue( k instanceof MyHashable)
     }
 }
 

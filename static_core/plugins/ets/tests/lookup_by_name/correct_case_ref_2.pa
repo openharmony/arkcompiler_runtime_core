@@ -46,16 +46,16 @@
     return.void
 }
 
-.record $NamedAccessMeta-std-core-Exception {
+.record %%union_prop-std-core-Exception {
     std.core.Exception bar
 }
 
-.record $NamedAccessMeta-std-core-LinkerUnresolvedFieldError {
+.record %%union_prop-std-core-LinkerUnresolvedFieldError {
     std.core.LinkerUnresolvedFieldError baz
 }
 
 .function void test(std.core.Object a0, std.core.Object a1) {
-    ets.ldobj.name.obj a0, $NamedAccessMeta-std-core-LinkerUnresolvedFieldError.baz
+    ets.ldobj.name.obj a0, %%union_prop-std-core-LinkerUnresolvedFieldError.baz
     sta.obj v0
     ldobj.v.obj v1, v0, std.core.LinkerUnresolvedFieldError.message
     lda.str "42"
@@ -66,13 +66,13 @@
     lda.str "44"
     stobj.obj v0, std.core.LinkerUnresolvedFieldError.message
     lda.obj v0
-    ets.stobj.name.obj a1, $NamedAccessMeta-std-core-Exception.bar
+    ets.stobj.name.obj a1, %%union_prop-std-core-Exception.bar
     return.void
 fail_test:
     lda.str "88"
     stobj.obj v0, std.core.LinkerUnresolvedFieldError.message
     lda.obj v0
-    ets.stobj.name.obj a1, $NamedAccessMeta-std-core-Exception.bar
+    ets.stobj.name.obj a1, %%union_prop-std-core-Exception.bar
     return.void
 }
 

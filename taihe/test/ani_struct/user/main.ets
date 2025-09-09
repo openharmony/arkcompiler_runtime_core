@@ -36,7 +36,7 @@ function test_struct_dbase5() {
     let info = structD.structD;
 
     console.log("StructTest.StructD: " + str.param1);
-    assertEQ(str.param1, info.param1);
+    arktest.assertEQ(str.param1, info.param1);
 }
 
 function test_struct_ebigint() {
@@ -51,21 +51,21 @@ function test_struct_ebigint() {
     let info = structE.structE;
 
     console.log("StructTest.StructE: " + str.param1);
-    assertEQ(str.param1, info.param1);
+    arktest.assertEQ(str.param1, info.param1);
 }
 
 function test_struct_funion() {
     let str: StructTest.FUnion = {
         param1: "optionalStr",
         param2: "unionStr",
-        param3: {"today":"19"}
+        param3: {"today": "19"}
     };
     structF.structF = str;
 
     let info = structF.structF;
 
     console.log("StructTest.StructF: " + str.param1);
-    assertEQ(str.param1, info.param1);
+    arktest.assertEQ(str.param1, info.param1);
 }
 
 function test_struct_array() {
@@ -76,16 +76,13 @@ function test_struct_array() {
         arrayBuffer.set(i, numbersU8[i]);
     }
 
-    let str: StructTest.GArray = {
-        param1: i8Array,
-        param2: arrayBuffer
-    };
+    let str: StructTest.GArray = {param1: i8Array, param2: arrayBuffer};
     structG.gArray = str;
     let info = structG.gArray;
 
     console.log("StructTest.GArray: " + str.param1);
     console.log("StructTest.GArray: " + info.param1);
-    assertEQ(str.param1[0], info.param1[0]);
+    arktest.assertEQ(str.param1[0], info.param1[0]);
 }
 
 function test_struct_addNewCanvas() {
@@ -95,21 +92,22 @@ function test_struct_addNewCanvas() {
     canvas1.r += 255;
     canvas1.g += 0;
     canvas1.b += 0;
-    console.log("canvas1's color is " + canvas1.r + "," + canvas1.g + "," + canvas1.b);
+    console.log(
+        "canvas1's color is " + canvas1.r + "," + canvas1.g + "," + canvas1.b);
 }
 
 function test_struct_dbase5readonly() {
     let info = structDB5.dB5Readonly;
 
     console.log("StructTest.DB5Readonly: " + info.param1);
-    assertEQ(info.param1, 1 as byte);
+    arktest.assertEQ(info.param1, (1).toByte());
 }
 
 function test_struct_sebreadonly() {
     let info = structEB.sEBReadonly;
 
     console.log("StructTest.SEBReadonly: " + info.param1);
-    assertEQ(info.param1, true);
+    arktest.assertEQ(info.param1, true);
 }
 
 function test_struct_addNewDraw() {
@@ -133,7 +131,7 @@ function main() {
     let c: StructTest.C = new StructTest.C(4, 5, 6);
 
     console.log("############## ani_struct start #############");
-    const suite = new ArkTestsuite("BundleManager Tests");
+    const suite = new arktest.ArkTestsuite("BundleManager Tests");
 
     console.log("a:", a);
     console.log("b:", b);
@@ -148,5 +146,5 @@ function main() {
     suite.addTest("test_struct_sebreadonly", test_struct_sebreadonly);
     suite.addTest("test_struct_addNewDraw", test_struct_addNewDraw);
 
-    exit(suite.run());    
+    exit(suite.run());
 }

@@ -21,9 +21,9 @@ params: 1 => false
 
 function main(): void {
   let c: char | undefined = undefined
-  assertEQ(!c, true, "Undefined is false")
+  arktest.assertEQ(!c, true, "Undefined is false")
   c = c'\u0000'
-  assertEQ(!c, true, "Char '0' is false")
+  arktest.assertEQ(!c, true, "Char '0' is false")
   c = c'A'
-  assertEQ(!c, false, "Char not '0' is true")
+  arktest.assertEQ(!c, false, "Char not '0' is true")
 }

@@ -27,12 +27,22 @@ static ani_int Sum([[maybe_unused]] ani_env *env, ani_int a, ani_int b)
     return a + b;
 }
 
+static ani_int Foo([[maybe_unused]] ani_env *env, ani_int a, ani_int b)
+{
+    return a + b;
+}
+
 static ani_double Abs([[maybe_unused]] ani_env *env, ani_double a)
 {
     return a;
 }
 
 static ani_int SumA([[maybe_unused]] ani_env *env, ani_int a, ani_int b, ani_int c)
+{
+    return a + b + c;
+}
+
+static ani_int FooA([[maybe_unused]] ani_env *env, ani_int a, ani_int b, ani_int c)
 {
     return a + b + c;
 }
@@ -75,12 +85,11 @@ static ani_string Concat(ani_env *env, ani_string s0, ani_string s1)
     return result;
 }
 
-static const char *CONCAT_SIGNATURE = "Lstd/core/String;Lstd/core/String;:Lstd/core/String;";
-static const char *CONCAT_SIGNATURE_A = "Lstd/core/String;Lstd/core/String;Lstd/core/String;:Lstd/core/String;";
-static const char *MODULE_NAME = "L@defModule/module_bind_native_functions_test;";
-static const char *MODULE_DESCRIPTOR = "@defModule/module_bind_native_functions_test";
-static const ani_native_function NATIVE_FUNC_SUM = {"sum", "II:I", reinterpret_cast<void *>(Sum)};
-static const ani_native_function NATIVE_FUNC_SUM_A = {"sum", "III:I", reinterpret_cast<void *>(SumA)};
+static const char *CONCAT_SIGNATURE = "C{std.core.String}C{std.core.String}:C{std.core.String}";
+static const char *CONCAT_SIGNATURE_A = "C{std.core.String}C{std.core.String}C{std.core.String}:C{std.core.String}";
+static const char *MODULE_NAME = "@defModule.module_bind_native_functions_test";
+static const ani_native_function NATIVE_FUNC_SUM = {"sum", "ii:i", reinterpret_cast<void *>(Sum)};
+static const ani_native_function NATIVE_FUNC_SUM_A = {"sum", "iii:i", reinterpret_cast<void *>(SumA)};
 static const ani_native_function NATIVE_FUNC_CONCAT = {"concat", CONCAT_SIGNATURE, reinterpret_cast<void *>(Concat)};
 static const ani_native_function NATIVE_FUNC_CONCAT_A = {"concat", CONCAT_SIGNATURE_A,
                                                          reinterpret_cast<void *>(ConcatA)};
@@ -97,8 +106,8 @@ TEST_F(ModuleBindNativeFunctionsTest, bind_native_functions)
     };
     ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_OK);
 
-    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_DESCRIPTOR, "checkSum"), ANI_TRUE);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_DESCRIPTOR, "checkConcat"), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_NAME, "checkSum"), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_NAME, "checkConcat"), ANI_TRUE);
 }
 
 TEST_F(ModuleBindNativeFunctionsTest, already_binded_function)
@@ -114,8 +123,8 @@ TEST_F(ModuleBindNativeFunctionsTest, already_binded_function)
     ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_OK);
     ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_ALREADY_BINDED);
 
-    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_DESCRIPTOR, "checkSum"), ANI_TRUE);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_DESCRIPTOR, "checkConcat"), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_NAME, "checkSum"), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_NAME, "checkConcat"), ANI_TRUE);
 }
 
 TEST_F(ModuleBindNativeFunctionsTest, invalid_arg_module)
@@ -143,12 +152,41 @@ TEST_F(ModuleBindNativeFunctionsTest, function_not_found)
     ASSERT_NE(module, nullptr);
 
     std::array functions = {
-        ani_native_function {"sum", "II:I", reinterpret_cast<void *>(Sum)},
+        ani_native_function {"sum", "ii:i", reinterpret_cast<void *>(Sum)},
+        ani_native_function {"foo", "ii:i", reinterpret_cast<void *>(Foo)},
+        ani_native_function {"foo", "iii:i", reinterpret_cast<void *>(FooA)},
         ani_native_function {"concatX", CONCAT_SIGNATURE, reinterpret_cast<void *>(Concat)},
     };
     ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_NOT_FOUND);
 }
 
+TEST_F(ModuleBindNativeFunctionsTest, new_overload_bind)
+{
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
+    ASSERT_NE(module, nullptr);
+
+    std::array functions = {
+        ani_native_function {"sum", "ii:i", reinterpret_cast<void *>(Sum)},
+        ani_native_function {"foo", "ii:i", reinterpret_cast<void *>(Foo)},
+        ani_native_function {"foo", "iii:i", reinterpret_cast<void *>(FooA)},
+    };
+    ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_OK);
+}
+
+TEST_F(ModuleBindNativeFunctionsTest, new_overload_direct_bind)
+{
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
+    ASSERT_NE(module, nullptr);
+
+    std::array functions = {
+        ani_native_function {"sum", "ii:i", reinterpret_cast<void *>(Sum)},
+        ani_native_function {"foo1", "ii:i", reinterpret_cast<void *>(Foo)},
+        ani_native_function {"foo2", "iii:i", reinterpret_cast<void *>(FooA)},
+    };
+    ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_OK);
+}
 // NOLINTNEXTLINE(readability-named-parameter)
 static ani_int NativeMethodsFooNative(ani_env *, ani_class)
 {
@@ -170,16 +208,16 @@ TEST_F(ModuleBindNativeFunctionsTest, class_bindNativeMethods_combine_scenes_001
     ASSERT_NE(module, nullptr);
 
     ani_namespace ns {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "Ltest001A;", &ns), ANI_OK);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "test001A", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(ns, "LTestA001;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindClass(ns, "TestA001", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     std::array methods = {
-        ani_native_function {"foo", ":I", reinterpret_cast<void *>(NativeMethodsFooNative)},
-        ani_native_function {"long_foo", ":J", reinterpret_cast<void *>(NativeMethodsLongFooNative)},
+        ani_native_function {"foo", ":i", reinterpret_cast<void *>(NativeMethodsFooNative)},
+        ani_native_function {"long_foo", ":l", reinterpret_cast<void *>(NativeMethodsLongFooNative)},
     };
     ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), methods.size()), ANI_OK);
     ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), methods.size()), ANI_ALREADY_BINDED);
@@ -216,16 +254,16 @@ TEST_F(ModuleBindNativeFunctionsTest, class_bindNativeMethods_combine_scenes_001
     ASSERT_NE(module, nullptr);
 
     ani_namespace ns {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "Ltest001A;", &ns), ANI_OK);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "test001A", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(ns, "LTestA001;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindClass(ns, "TestA001", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     std::array methods = {
-        ani_native_function {"foo", ":I", reinterpret_cast<void *>(NativeMethodsFooNative)},
-        ani_native_function {"long_foo11", ":J", reinterpret_cast<void *>(NativeMethodsLongFooNative)},
+        ani_native_function {"foo", ":i", reinterpret_cast<void *>(NativeMethodsFooNative)},
+        ani_native_function {"long_foo11", ":i", reinterpret_cast<void *>(NativeMethodsLongFooNative)},
     };
     ani_size nrMethods = 2U;
     ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), nrMethods), ANI_NOT_FOUND);
@@ -238,16 +276,16 @@ TEST_F(ModuleBindNativeFunctionsTest, class_bindNativeMethods_combine_scenes_001
     ASSERT_NE(module, nullptr);
 
     ani_namespace ns {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "Ltest001A;", &ns), ANI_OK);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "test001A", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(ns, "LTestA001;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindClass(ns, "TestA001", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     std::array methods = {
-        ani_native_function {"foo", ":I", reinterpret_cast<void *>(NativeMethodsFooNative)},
-        ani_native_function {"long_foo", ":J", reinterpret_cast<void *>(NativeMethodsLongFooNative)},
+        ani_native_function {"foo", ":i", reinterpret_cast<void *>(NativeMethodsFooNative)},
+        ani_native_function {"long_foo", ":l", reinterpret_cast<void *>(NativeMethodsLongFooNative)},
     };
     ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), methods.size()), ANI_OK);
     ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), methods.size()), ANI_ALREADY_BINDED);
@@ -262,10 +300,10 @@ TEST_F(ModuleBindNativeFunctionsTest, module_bind_native_functions_001)
     std::array functions = {NATIVE_FUNC_SUM, NATIVE_FUNC_SUM_A, NATIVE_FUNC_CONCAT_A, NATIVE_FUNC_CONCAT};
     ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_OK);
 
-    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_DESCRIPTOR, "checkSum"), ANI_TRUE);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_DESCRIPTOR, "checkSumA"), ANI_TRUE);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_DESCRIPTOR, "checkConcatA"), ANI_TRUE);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_DESCRIPTOR, "checkConcat"), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_NAME, "checkSum"), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_NAME, "checkSumA"), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_NAME, "checkConcatA"), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_NAME, "checkConcat"), ANI_TRUE);
 }
 
 TEST_F(ModuleBindNativeFunctionsTest, module_bind_native_functions_002)
@@ -289,16 +327,16 @@ TEST_F(ModuleBindNativeFunctionsTest, module_bind_native_functions_003)
     ASSERT_NE(module, nullptr);
 
     ASSERT_EQ(env_->Module_BindNativeFunctions(module, &NATIVE_FUNC_SUM, 1), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_DESCRIPTOR, "checkSum"), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_NAME, "checkSum"), ANI_TRUE);
 
     ASSERT_EQ(env_->Module_BindNativeFunctions(module, &NATIVE_FUNC_SUM_A, 1), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_DESCRIPTOR, "checkSumA"), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_NAME, "checkSumA"), ANI_TRUE);
 
     ASSERT_EQ(env_->Module_BindNativeFunctions(module, &NATIVE_FUNC_CONCAT_A, 1), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_DESCRIPTOR, "checkConcatA"), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_NAME, "checkConcatA"), ANI_TRUE);
 
     ASSERT_EQ(env_->Module_BindNativeFunctions(module, &NATIVE_FUNC_CONCAT, 1), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_DESCRIPTOR, "checkConcat"), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_NAME, "checkConcat"), ANI_TRUE);
 }
 
 TEST_F(ModuleBindNativeFunctionsTest, module_bind_native_functions_004)
@@ -308,18 +346,18 @@ TEST_F(ModuleBindNativeFunctionsTest, module_bind_native_functions_004)
     ASSERT_NE(module, nullptr);
 
     std::array functions = {
-        ani_native_function {"undefined", "II:I", reinterpret_cast<void *>(Sum)},
+        ani_native_function {"undefined", "ii:i", reinterpret_cast<void *>(Sum)},
     };
     ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_NOT_FOUND);
 }
 TEST_F(ModuleBindNativeFunctionsTest, bind_intrinsic)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("Lstd/math;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("std.math", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     std::array functions = {
-        ani_native_function {"abs", "D:D", reinterpret_cast<void *>(Abs)},
+        ani_native_function {"abs", "d:d", reinterpret_cast<void *>(Abs)},
     };
 
     ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_ALREADY_BINDED);

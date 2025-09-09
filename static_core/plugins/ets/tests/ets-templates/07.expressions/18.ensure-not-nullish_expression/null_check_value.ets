@@ -23,5 +23,5 @@ function main(): void {
   let b: Int|null = (): Int|null => { return 4; }();
   let x: Int = a! + b!;
 
-  assertEQ( x, 9 )
+  arktest.assertEQ( x, 9 )
 }

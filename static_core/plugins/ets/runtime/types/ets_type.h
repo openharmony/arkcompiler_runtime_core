@@ -26,6 +26,7 @@ namespace ark::ets {
 // plugins/ecmascript/es2panda/compiler/scripts/signatures.yaml
 static constexpr char ARRAY_TYPE_PREFIX = '[';
 static constexpr char CLASS_TYPE_PREFIX = 'L';
+static constexpr char UNION_OR_ENUM_TYPE_PREFIX = '{';
 static constexpr char METHOD_PREFIX = 'M';
 static constexpr const char *TYPE_API_UNDEFINED_TYPE_DESC = "__TYPE_API_UNDEFINED";
 static constexpr const char *INVOKE_METHOD_NAME = "$_invoke";
@@ -43,7 +44,6 @@ static constexpr const uint8_t PROPERTY_PREFIX_LENGTH = 10;
 static constexpr const char *STD_CORE_FUNCTION_PREFIX = "std.core.Function";
 static constexpr const char *STD_CORE_FUNCTION_UNSAFECALL_METHOD = "unsafeCall";
 static constexpr const char *STD_CORE_FUNCTION_INVOKE_PREFIX = "invoke";
-static constexpr const size_t STD_CORE_FUNCTION_MAX_ARITY = 15;
 
 enum class EtsType { BOOLEAN, BYTE, CHAR, SHORT, INT, LONG, FLOAT, DOUBLE, OBJECT, UNKNOWN, VOID };
 

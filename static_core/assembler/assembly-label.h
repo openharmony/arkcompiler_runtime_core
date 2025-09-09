@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,17 +21,20 @@
 
 namespace ark::pandasm {
 
-struct Label {
-    std::string name;                          // NOLINT(misc-non-private-member-variables-in-classes)
-    std::optional<FileLocation> fileLocation;  // NOLINT(misc-non-private-member-variables-in-classes)
+class Label {
+public:
+    Label() = delete;
+    ~Label() = default;
 
-    // CC-OFFNXT(G.FUN.01-CPP) solid logic
-    Label(std::string s, size_t bL, size_t bR, std::string fC, bool d, size_t lN)
-        : name(std::move(s)), fileLocation({fC, bL, bR, lN, d})
-    {
-    }
+    DEFAULT_MOVE_SEMANTIC(Label);
+    NO_COPY_SEMANTIC(Label);
 
     explicit Label(std::string s) : name(std::move(s)) {}
+
+    explicit Label(std::string s, FileLocation &&fLoc) : name(std::move(s)), fileLocation {std::move(fLoc)} {}
+
+    std::string name;              // NOLINT(misc-non-private-member-variables-in-classes)
+    FileLocation fileLocation {};  // NOLINT(misc-non-private-member-variables-in-classes)
 };
 
 }  // namespace ark::pandasm

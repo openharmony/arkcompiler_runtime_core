@@ -68,7 +68,7 @@ function main(): int {
     const linker = new AbcRuntimeLinker(undefined, abcFiles);
     a += 1; // #BP{3}
     const cls1 = linker.loadClass("additional.AdditionalClass", true);
-    assertNE(cls1, undefined);
+    arktest.assertNE(cls1, undefined);
     const elem = cls1.createInstance() as AdditionalInterface;
     elem.foo();
     let b = 1;

@@ -27,7 +27,7 @@ function arraybuffer_input() {
     }
     let sumArrayu8 = arraybuffer.SumArrayU8(arrbuf1)
     console.log("sumArrayu8 is " + sumArrayu8)
-    assertEQ(sumArrayu8, 15)
+    arktest.assertEQ(sumArrayu8, 15)
 }
 
 function arraybuffer_return() {
@@ -35,11 +35,11 @@ function arraybuffer_return() {
     // parameter is ArrayBuffer
     let getArrayBuffer = arraybuffer.GetArrayBuffer(4 as byte)
     console.log("getArrayBuffer length: " + getArrayBuffer.getByteLength());
-    assertEQ(getArrayBuffer.getByteLength(), 4)
+    arktest.assertEQ(getArrayBuffer.getByteLength(), 4)
     for (let i = 0; i < getArrayBuffer.getByteLength(); i++) {
         console.log(
             `getArrayBuffer Byte at index ${i}: ${getArrayBuffer.at(i)}`);
-        assertEQ(getArrayBuffer.at(i), 4)
+        arktest.assertEQ(getArrayBuffer.at(i), 4)
     }
 }
 
@@ -54,12 +54,12 @@ function arraybuffer_inout() {
     let doubleArrayBuffer = arraybuffer.DoubleArrayBuffer(arrbuf3)
     console.log(
         "doubleArrayBuffer length: " + doubleArrayBuffer.getByteLength());
-    assertEQ(doubleArrayBuffer.getByteLength(), 5)
+    arktest.assertEQ(doubleArrayBuffer.getByteLength(), 5)
 
     for (let i = 0; i < doubleArrayBuffer.getByteLength(); i++) {
         console.log(
             `doubleArrayBuffer Byte at index ${i}: ${doubleArrayBuffer.at(i)}`);
-        assertEQ(doubleArrayBuffer.at(i), numbers2[i] * 2)
+        arktest.assertEQ(doubleArrayBuffer.at(i), numbers2[i] * 2)
     }
 }
 
@@ -70,16 +70,16 @@ function arraybuffer_uint8toarraybuffer() {
         uint8Array.buffer as ArrayBuffer;  // Convert Uint8Array to ArrayBuffer
     // Verify ArrayBuffer length
     console.log("arrbuf4 length: " + arrbuf4.getByteLength());
-    assertEQ(arrbuf4.getByteLength(), uint8Array.length);
+    arktest.assertEQ(arrbuf4.getByteLength(), uint8Array.length);
     // Verify ArrayBuffer content
     for (let i = 0; i < arrbuf4.getByteLength(); i++) {
         console.log(`arrbuf4 Byte at index ${i}: ${arrbuf4.at(i)}`);
-        assertEQ(arrbuf4.at(i), uint8Array[i]);
+        arktest.assertEQ(arrbuf4.at(i), uint8Array[i]);
     }
     // Optionally, pass the ArrayBuffer to a function for further validation
     let sumArrayu8FromUint8Array = arraybuffer.SumArrayU8(arrbuf4);
     console.log("sumArrayu8FromUint8Array is " + sumArrayu8FromUint8Array);
-    assertEQ(sumArrayu8FromUint8Array, 20);  // 2 + 3 + 4 + 5 + 6 = 20
+    arktest.assertEQ(sumArrayu8FromUint8Array, 20);  // 2 + 3 + 4 + 5 + 6 = 20
 }
 
 function arraybuffer_dataview() {
@@ -95,30 +95,30 @@ function arraybuffer_dataview() {
     for (let i = 0; i < uint8ArrayData.length; i++) {
         let value = view.getUint8(i);
         console.log(`Value at index ${i} in ArrayBuffer: ${value}`);
-        assertEQ(value, uint8ArrayData[i]);
+        arktest.assertEQ(value, uint8ArrayData[i]);
     }
     // Optionally, pass the ArrayBuffer to a function for further validation
     let sumArrayBufferFromUint8Array =
         arraybuffer.SumArrayU8(arrayBufferFromUint8Array);
     console.log(
         "sumArrayBufferFromUint8Array is " + sumArrayBufferFromUint8Array);
-    assertEQ(sumArrayBufferFromUint8Array, 27);  // 8 + 9 + 10 = 27
+    arktest.assertEQ(sumArrayBufferFromUint8Array, 27);  // 8 + 9 + 10 = 27
 }
 
 function arrayi8_input() {
     let int8Array: byte[] = [1, 2, 3, 4, 5];
     let sumArrayi8 = arraybuffer.SumArrayI8(int8Array)
     console.log("sumArrayi8 is " + sumArrayi8)
-    assertEQ(sumArrayi8, 15)
+    arktest.assertEQ(sumArrayi8, 15)
 }
 
 function arrayi8_return() {
     let arrayi8 = arraybuffer.GetArrayI8(4 as byte)
     console.log("getArrayi8 length: " + arrayi8.length);
-    assertEQ(arrayi8.length, 4)
+    arktest.assertEQ(arrayi8.length, 4)
     for (let i = 0; i < arrayi8.length; i++) {
         console.log(`getArrayi8 Byte at index ${i}: ${arrayi8[i]}`);
-        assertEQ(arrayi8[i], 4)
+        arktest.assertEQ(arrayi8[i], 4)
     }
 }
 
@@ -126,12 +126,12 @@ function arrayi8_inout() {
     let numbers2: byte[] = [3, 4, 5, 6, 7];
     let doubleArrayBuffer = arraybuffer.DoubleI8(numbers2)
     console.log("arrayi8_inout length: " + doubleArrayBuffer.length);
-    assertEQ(doubleArrayBuffer.length, 5)
+    arktest.assertEQ(doubleArrayBuffer.length, 5)
 
     for (let i = 0; i < doubleArrayBuffer.length; i++) {
         console.log(
             `arrayi8_inout Byte at index ${i}: ${doubleArrayBuffer[i]}`);
-        assertEQ(doubleArrayBuffer[i], numbers2[i] * 2)
+        arktest.assertEQ(doubleArrayBuffer[i], numbers2[i] * 2)
     }
 }
 
@@ -139,16 +139,16 @@ function arrayi16_input() {
     let int16Array: short[] = [1, 2, 3, 4, 5];
     let sumArrayi16 = arraybuffer.SumArrayI16(int16Array)
     console.log("sumArrayi16 is " + sumArrayi16)
-    assertEQ(sumArrayi16, 15)
+    arktest.assertEQ(sumArrayi16, 15)
 }
 
 function arrayi16_return() {
     let arrayi16 = arraybuffer.GetArrayI16(4 as short)
     console.log("arrayi16 length: " + arrayi16.length);
-    assertEQ(arrayi16.length, 4)
+    arktest.assertEQ(arrayi16.length, 4)
     for (let i = 0; i < arrayi16.length; i++) {
         console.log(`arrayi16 Short at index ${i}: ${arrayi16[i]}`);
-        assertEQ(arrayi16[i], 4)
+        arktest.assertEQ(arrayi16[i], 4)
     }
 }
 
@@ -156,12 +156,12 @@ function arrayi16_inout() {
     let numbers2: short[] = [3, 4, 5, 6, 7];
     let doubleArrayBuffer = arraybuffer.DoubleI16(numbers2)
     console.log("arrayi16_inout length: " + doubleArrayBuffer.length);
-    assertEQ(doubleArrayBuffer.length, 5)
+    arktest.assertEQ(doubleArrayBuffer.length, 5)
 
     for (let i = 0; i < doubleArrayBuffer.length; i++) {
         console.log(
             `arrayi16_inout Short at index ${i}: ${doubleArrayBuffer[i]}`);
-        assertEQ(doubleArrayBuffer[i], numbers2[i] * 2)
+        arktest.assertEQ(doubleArrayBuffer[i], numbers2[i] * 2)
     }
 }
 
@@ -169,16 +169,16 @@ function arrayi32_input() {
     let int32Array: int[] = [1, 2, 3, 4, 5];
     let sumArrayi32 = arraybuffer.SumArrayI32(int32Array)
     console.log("sumArrayi32 is " + sumArrayi32)
-    assertEQ(sumArrayi32, 15)
+    arktest.assertEQ(sumArrayi32, 15)
 }
 
 function arrayi32_return() {
     let arrayi32 = arraybuffer.GetArrayI32(4)
     console.log("arrayi32 length: " + arrayi32.length);
-    assertEQ(arrayi32.length, 4)
+    arktest.assertEQ(arrayi32.length, 4)
     for (let i = 0; i < arrayi32.length; i++) {
         console.log(`arrayi32 int at index ${i}: ${arrayi32[i]}`);
-        assertEQ(arrayi32[i], 4)
+        arktest.assertEQ(arrayi32[i], 4)
     }
 }
 
@@ -186,12 +186,12 @@ function arrayi32_inout() {
     let numbers2: int[] = [3, 4, 5, 6, 7];
     let doubleArrayBuffer = arraybuffer.DoubleI32(numbers2)
     console.log("arrayi16_inout length: " + doubleArrayBuffer.length);
-    assertEQ(doubleArrayBuffer.length, 5)
+    arktest.assertEQ(doubleArrayBuffer.length, 5)
 
     for (let i = 0; i < doubleArrayBuffer.length; i++) {
         console.log(
             `arrayi16_inout int at index ${i}: ${doubleArrayBuffer[i]}`);
-        assertEQ(doubleArrayBuffer[i], numbers2[i] * 2)
+        arktest.assertEQ(doubleArrayBuffer[i], numbers2[i] * 2)
     }
 }
 
@@ -199,16 +199,16 @@ function arrayi64_input() {
     let int64Array: long[] = [10, 20, 30, 40, 50];
     let sumArrayi64 = arraybuffer.SumArrayI64(int64Array)
     console.log("sumArrayi64 is " + sumArrayi64)
-    assertEQ(sumArrayi64, 150)
+    arktest.assertEQ(sumArrayi64, 150)
 }
 
 function arrayi64_return() {
     let arrayi64 = arraybuffer.GetArrayI64(4)
     console.log("arrayi64 length: " + arrayi64.length);
-    assertEQ(arrayi64.length, 4)
+    arktest.assertEQ(arrayi64.length, 4)
     for (let i = 0; i < arrayi64.length; i++) {
         console.log(`arrayi64 int at index ${i}: ${arrayi64[i]}`);
-        assertEQ(arrayi64[i], 4)
+        arktest.assertEQ(arrayi64[i], 4)
     }
 }
 
@@ -216,12 +216,12 @@ function arrayi64_inout() {
     let numbers2: long[] = [30, 40, 50, 60, 70];
     let doubleArrayBuffer = arraybuffer.DoubleI64(numbers2)
     console.log("arrayi16_inout length: " + doubleArrayBuffer.length);
-    assertEQ(doubleArrayBuffer.length, 5)
+    arktest.assertEQ(doubleArrayBuffer.length, 5)
 
     for (let i = 0; i < doubleArrayBuffer.length; i++) {
         console.log(
             `arrayi16_inout long at index ${i}: ${doubleArrayBuffer[i]}`);
-        assertEQ(doubleArrayBuffer[i], numbers2[i] * 2)
+        arktest.assertEQ(doubleArrayBuffer[i], numbers2[i] * 2)
     }
 }
 
@@ -229,16 +229,16 @@ function arrayf32_input() {
     let f32Array: float[] = [10, 20, 30, 40, 50];
     let sumArrayf32 = arraybuffer.SumArrayF32(f32Array)
     console.log("sumArrayf32 is " + sumArrayf32)
-    assertEQ(sumArrayf32, 150)
+    arktest.assertEQ(sumArrayf32, 150)
 }
 
 function arrayf32_return() {
     let arrayf32 = arraybuffer.GetArrayF32(4)
     console.log("arrayf32 length: " + arrayf32.length);
-    assertEQ(arrayf32.length, 4)
+    arktest.assertEQ(arrayf32.length, 4)
     for (let i = 0; i < arrayf32.length; i++) {
         console.log(`arrayf32 float at index ${i}: ${arrayf32[i]}`);
-        assertEQ(arrayf32[i], 4)
+        arktest.assertEQ(arrayf32[i], 4)
     }
 }
 
@@ -246,12 +246,12 @@ function arrayf32_inout() {
     let numbers2: float[] = [30, 40, 50, 60, 70];
     let doubleArrayBuffer = arraybuffer.DoubleF32(numbers2)
     console.log("arrayi16_inout length: " + doubleArrayBuffer.length);
-    assertEQ(doubleArrayBuffer.length, 5)
+    arktest.assertEQ(doubleArrayBuffer.length, 5)
 
     for (let i = 0; i < doubleArrayBuffer.length; i++) {
         console.log(
             `arrayi16_inout long at index ${i}: ${doubleArrayBuffer[i]}`);
-        assertEQ(doubleArrayBuffer[i], numbers2[i] * 2)
+        arktest.assertEQ(doubleArrayBuffer[i], numbers2[i] * 2)
     }
 }
 
@@ -259,16 +259,16 @@ function arrayf64_input() {
     let f64Array: double[] = [10, 20, 30, 40, 50];
     let sumArrayf64 = arraybuffer.SumArrayF64(f64Array)
     console.log("sumArrayf64 is " + sumArrayf64)
-    assertEQ(sumArrayf64, 150)
+    arktest.assertEQ(sumArrayf64, 150)
 }
 
 function arrayf64_return() {
     let arrayf64 = arraybuffer.GetArrayF64(4)
     console.log("arrayf64 length: " + arrayf64.length);
-    assertEQ(arrayf64.length, 4)
+    arktest.assertEQ(arrayf64.length, 4)
     for (let i = 0; i < arrayf64.length; i++) {
         console.log(`arrayf64 double at index ${i}: ${arrayf64[i]}`);
-        assertEQ(arrayf64[i], 4)
+        arktest.assertEQ(arrayf64[i], 4)
     }
 }
 
@@ -276,12 +276,12 @@ function arrayf64_inout() {
     let numbers2: double[] = [30, 40, 50, 60, 70];
     let doubleArrayBuffer = arraybuffer.DoubleF64(numbers2)
     console.log("arrayi16_inout length: " + doubleArrayBuffer.length);
-    assertEQ(doubleArrayBuffer.length, 5)
+    arktest.assertEQ(doubleArrayBuffer.length, 5)
 
     for (let i = 0; i < doubleArrayBuffer.length; i++) {
         console.log(
             `arrayi16_inout double at index ${i}: ${doubleArrayBuffer[i]}`);
-        assertEQ(doubleArrayBuffer[i], numbers2[i] * 2)
+        arktest.assertEQ(doubleArrayBuffer[i], numbers2[i] * 2)
     }
 }
 
@@ -290,7 +290,7 @@ function int8Array_inout() {
     let ret = arraybuffer.doubleInt8Array(buf);
     for (let i = 0; i < ret.length; i++) {
         console.log(`Int8Array_inout->  index ${i}: ${ret[i]}`);
-        assertEQ(ret[i], buf[i] * 2)
+        arktest.assertEQ(ret[i], buf[i] * 2)
     }
 }
 
@@ -299,7 +299,7 @@ function int16Array_inout() {
     let ret = arraybuffer.doubleInt16Array(buf);
     for (let i = 0; i < ret.length; i++) {
         console.log(`int16Array_inout->  index ${i}: ${ret[i]}`);
-        assertEQ(ret[i], buf[i] * 2)
+        arktest.assertEQ(ret[i], buf[i] * 2)
     }
 }
 
@@ -308,7 +308,7 @@ function int32Array_inout() {
     let ret = arraybuffer.doubleInt32Array(buf);
     for (let i = 0; i < ret.length; i++) {
         console.log(`Int32Array_inout->  index ${i}: ${ret[i]}`);
-        assertEQ(ret[i], buf[i] * 2)
+        arktest.assertEQ(ret[i], buf[i] * 2)
     }
 }
 
@@ -317,7 +317,7 @@ function uint8Array_inout() {
     let ret = arraybuffer.doubleUint8Array(buf);
     for (let i = 0; i < ret.length; i++) {
         console.log(`uint8Array_inout->  index ${i}: ${ret[i]}`);
-        assertEQ(ret[i], buf[i] * 2)
+        arktest.assertEQ(ret[i], buf[i] * 2)
     }
 }
 
@@ -326,7 +326,7 @@ function uint16Array_inout() {
     let ret = arraybuffer.doubleUint16Array(buf);
     for (let i = 0; i < ret.length; i++) {
         console.log(`uint16Array_inout->  index ${i}: ${ret[i]}`);
-        assertEQ(ret[i], buf[i] * 2)
+        arktest.assertEQ(ret[i], buf[i] * 2)
     }
 }
 
@@ -335,12 +335,12 @@ function uint32Array_inout() {
     let ret = arraybuffer.doubleUint32Array(buf);
     for (let i = 0; i < ret.length; i++) {
         console.log(`uint32Array_inout->  index ${i}: ${ret[i]}`);
-        assertEQ(ret[i], buf[i] * 2)
+        arktest.assertEQ(ret[i], buf[i] * 2)
     }
 }
 
 function main() {
-    const suite = new ArkTestsuite("arraybuffer testcase")
+    const suite = new arktest.ArkTestsuite("arraybuffer testcase")
 
     suite.addTest("arraybuffer_input", arraybuffer_input)
     suite.addTest("arraybuffer_return", arraybuffer_return)

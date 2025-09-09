@@ -44,10 +44,10 @@
 //! PASS_AFTER   "TryCatchResolving"
 //! INST_NOT     "Throw"
 
-class Exception0 extends Exception {}
+class Error0 extends Error {}
 
 class MultipleCatch {
-    multipleCatch(a: int, b: int, c: int) : int throws {
+    multipleCatch(a: int, b: int, c: int) : int {
     let res : int = 0;
 
     for (let i : int = 0; i < 16; i++) {
@@ -61,22 +61,24 @@ class MultipleCatch {
             a1 = a + i;
             b1 = b + i;
             c1 = c >> i;
-            throw new Exception0();
+            throw new Error0();
           case 1:
             a1 = a - i;
             b1 = b - i;
             c1 = c << i;
-            throw new Exception0();
+            throw new Error0();
           default:
             break;
         }
-      } catch (e: Exception0) {
-        res += a1 + b1 + c1;
+      } catch (e) {
+        if (e instanceof Error0) {
+          res += a1 + b1 + c1;
+        }
       }
     }
     return res;
   }
-  wrapper(a :int, b :int, c :int , d :int): int throws {
+  wrapper(a :int, b :int, c :int, d :int): int {
     return d + this.multipleCatch(a, b, c);
   }
 }

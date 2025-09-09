@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "../../../include/cpp/abckit_cpp.h"
+#include "../../../include/libabckit/cpp/abckit_cpp.h"
 
 /*
  * This a canary file to check that the public API conforms to:

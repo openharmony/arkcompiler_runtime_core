@@ -22,9 +22,9 @@ desc: >-
 
 function main() {
     let names: string[] = ["Alice", "Bob", "Carol"]
-    assertTrue( names[1] == "Bob" )
+    arktest.assertTrue( names[1] == "Bob" )
     // console.log(name[1]) // prints Bob
     names[1] = "Martin"
-    assertTrue( names[1] == "Martin" )
+    arktest.assertTrue( names[1] == "Martin" )
     // console.log(name[1]) // prints Martin
 }

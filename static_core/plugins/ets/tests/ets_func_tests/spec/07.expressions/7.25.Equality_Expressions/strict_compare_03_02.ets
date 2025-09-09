@@ -32,5 +32,5 @@ function main(): void {
   let a1: A = new A()
   let a2: A = new A()
   // compare different objects
-  assertTrue( !a1.test(a2))
+  arktest.assertTrue( !a1.test(a2))
 }

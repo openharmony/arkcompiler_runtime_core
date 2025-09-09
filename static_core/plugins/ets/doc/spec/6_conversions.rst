@@ -30,22 +30,22 @@ Type of Expression
 .. meta:
     frontend_status: Done
 
-Every expression written in the |LANG| programming language has a type that
+Every expression written in the |LANG| programming language has a type that 
 is evaluated at compile time.
 
 In most contexts, an expression must be *compatible* with a type expected in
 that context. This type is called the *target type*.
 
-If no target type is expected in the context, then the expression
-is called a *standalone expression*:
+If no target type is available in the context, then the expression is called a
+*standalone expression*:
 
 .. code-block:: typescript
    :linenos:
 
-    let a = expr // no target type is expected
+    let a = expr // no target type is available 
 
     function foo() {
-        expr // no target type is expected
+        expr // no target type is available 
     }
 
 Otherwise, the expression is *non-standalone*:
@@ -73,7 +73,15 @@ Otherwise, the expression is *non-standalone*:
 The type of some expressions cannot be inferred (see :ref:`Type Inference`)
 from the expression itself (see :ref:`Object Literal` as an example).
 A :index:`compile-time error` occurs if such an expression
-is used as a *standalone expression*.
+is used as a *standalone expression*:
+
+.. code-block:: typescript
+   :linenos:
+
+    class P { x: number, y: number }
+
+    let x = { x: 10, y: 10 } // standalone object literal - compile time error
+    let y: P = { x: 10, y: 10 } // OK, type of object literal is inferred
 
 There are two ways to facilitate the compatibility of a *non-standalone
 expression* with its surrounding context:
@@ -292,12 +300,12 @@ String Operator Contexts
    if values of enumeration are of type ``string``.
 
 -  The operand of a nullish type that has a nullish value is converted as
-   described below:
+   follows:
 
-     - The operand ``null`` is converted to string ``null``;
-     - The operand ``undefined`` is converted to string ``undefined``.
+     - Operand ``null`` is converted to string ``null``.
+     - Operand ``undefined`` is converted to string ``undefined``.
 
--  An operand of a reference type or ``enum`` type is converted by applying the
+-  An operand of a reference type or of ``enum`` type with non-*string* values is converted by applying the
    method call ``toString()``.
 
 If there is no applicable conversion, then a :index:`compile-time error` occurs.
@@ -334,8 +342,6 @@ The target type in this context is always ``string``:
     console.log(15 + " steps") // prints "15 steps"
     let x: string | null = null
     console.log("string is " + x) // prints "string is null"
-    let c = c'X'
-    console.log("char is " + c) // prints "char is X"
 
 |
 
@@ -353,7 +359,7 @@ Numeric contexts use numeric types conversions
 expression can be converted to target type ``T`` while the arithmetic
 operation for the values of type ``T`` is being defined.
 
-An operand of an enumeration type (see :ref:`Enumerations`) can be used in
+An operand of enumeration type (see :ref:`Enumerations`) can be used in
 the numeric context if values of this enumeration are of type ``int``.
 The type of this operand is assumed to be ``int``.
 
@@ -363,7 +369,6 @@ The type of this operand is assumed to be ``int``.
    predefined type
    numeric type
    conversion
-   primitive type
    argument expression
    target type
    string conversion
@@ -442,12 +447,12 @@ Widening Numeric Conversions
 - Values of a smaller numeric type to a larger type (see
   :ref:`Numeric Types`);
 
-- Values of an *enumeration* type (if enumeration constants of this type are
-  of numeric type) to the same or a wider numeric type.
+- Values of *enumeration* type (if enumeration constants of this type are
+  of a numeric type) to the same or a wider numeric type.
 
 .. index::
    widening
-   primitive conversion
+   numeric conversion
    conversion
    numeric type
    value
@@ -496,7 +501,7 @@ is properly rounded to the integer value.
    IEEE 754
    enumeration constant
    widening
-   primitive conversion
+   numeric conversion
    rounding
 
 |
@@ -509,9 +514,12 @@ Enumeration to Constants Type Conversions
 .. meta:
     frontend_status: Done
 
-A value of an *enumeration* type is converted to type ``int``
-if enumeration constants of this type are of type ``int``.
-This conversion never causes runtime errors.
+-  A value of *enumeration* type without explicit base type is converted to
+   the corresponding integer type (see :ref:`Enumerations`).
+-  A value of *enumeration* type with explicit numeric base type
+   (see :ref:`Enumeration with Explicit Type`) is converted to the base type.
+
+These conversions never cause a runtime error.
 
 .. code-block:: typescript
    :linenos:
@@ -530,10 +538,8 @@ This conversion never causes runtime errors.
    runtime error
    type int
 
-
-A value of ``enumeration`` type is converted to type ``string`` if enumeration
-constants of this type are of type ``string``.
-This conversion never causes runtime errors.
+A value of *enumeration* type with ``string`` constants is converted to type ``string``. This conversion never causes
+a runtime error.
 
 .. code-block:: typescript
    :linenos:
@@ -549,8 +555,8 @@ This conversion never causes runtime errors.
    constant
    runtime error
 
-A value of an *enumeration* type with explicitly declared type of its constants
-is converted to the declared type. This conversion never causes runtime errors.
+A value of *enumeration* type with an explicitly declared type of constants
+is converted to the declared type. This conversion never causes a runtime error.
 
 .. code-block:: typescript
    :linenos:
@@ -568,74 +574,6 @@ is converted to the declared type. This conversion never causes runtime errors.
 
 |
 
-.. _Constant to Enumeration Conversions:
-
-Constant to Enumeration Conversions
-===================================
-
-.. meta:
-    frontend_status: None
-
-A constant expression of some integer type is converted to *enumeration* type if:
-
--  Enumeration constants are of type ``int``;
--  Value of the constant expression is equal to the value of one of the
-   enumeration type constants.
-
-This conversion never causes runtime errors.
-
-.. code-block:: typescript
-   :linenos:
-
-    enum IntegerEnum {a, b, c}
-    let e: IntegerEnum = 1 // ok, e is set to IntegerEnum.b
-    e = 3 // compile-time error, there is no constant with this value
-
-    const one = 2
-    e = one // ok, e is set to IntegerEnum.c
-
-A similar conversion of a string type expression also works as follows:
-
-.. code-block:: typescript
-   :linenos:
-
-    enum StringEnum {A = "a", B = "b", C = "c"}
-    let e: StringEnum = "b" // OK, , e is set to StringEnum.B
-    e = "d" // compile-time error, there is no constant with this value
-    e = StringEnum.B // OK
-
-.. index::
-   constant expression
-   integer type
-   conversion
-   enumeration type
-   enumeration constant
-   type int
-   string type
-   expression
-
-A similar conversion is applcable for constants of the *enumeration* explicitly
-declared type. This conversion never causes runtime errors.
-
-.. code-block:: typescript
-   :linenos:
-
-    enum DoubleEnum: double {a = 1.0, b = 2.0, c = 3.141592653589}
-    let dbl_enum: DoubleEnum = DoubleEnum.a
-    dbl_enum = 1.0 // OK
-    dbl_enum = 5.0 // compile-time error, there is no constant with this value
-
-.. index::
-   constant expression
-   conversion
-   enumeration type
-   enumeration constant
-   expression
-
-
-
-|
-
 .. _Numeric Casting Conversions:
 
 Numeric Casting Conversions
@@ -645,17 +583,17 @@ Numeric Casting Conversions
     frontend_status: Done
 
 A *numeric casting conversion* occurs if the *target type* and the expression
-type are both ``numeric``. 
-There are two contexts when *numeric casting conversion* are applied:
+type are both ``numeric``.
+There are two contexts where *numeric casting conversion* is applied:
 
 -  Using conversion methods defined in the standard library
    (see :ref:`Standard Library`);
 
 -  Or, implicitly in the following arithmetic operations:
-   :ref:`Postfix Increment`, :ref:`Postfix Decrement`, 
+   :ref:`Postfix Increment`, :ref:`Postfix Decrement`,
    :ref:`Prefix Increment`, :ref:`Prefix Decrement`.
 
-The following example illustrates explicit use of 
+The following example illustrates explicit use of
 methods for *numeric cast conversions*:
 
 .. code-block-meta:

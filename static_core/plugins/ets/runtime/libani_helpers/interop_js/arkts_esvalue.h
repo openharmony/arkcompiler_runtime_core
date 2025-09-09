@@ -30,7 +30,8 @@ extern "C" {
  * @param esValue The previously wrapped ESValue.
  * @param result [out] Pointer to receive the unwrapped native pointer. Must not be null.
  * Notes:
- *  This API can be called only from ANI code
+ *  This API can be called only from ANI code.
+ *  Experimental API, only for internal usage.
  */
 __attribute__((visibility("default"))) bool arkts_esvalue_unwrap(ani_env *env, ani_object esValue, void **result);
 

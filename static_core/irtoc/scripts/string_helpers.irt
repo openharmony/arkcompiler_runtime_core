@@ -28,9 +28,20 @@ scoped_macro(:unpack_length) do |length, compression, length_shift|
     end
 end
 
+macro(:check_string_type) do |str|
+  baseClass := LoadI(str).ref
+  stringType := LoadI(baseClass).Imm(Constants::STRING_TYPE_OFFSET).u64
+  If(stringType, Constants::STRING_TYPE_SLICE).EQ {
+    Goto(:SlowPathEntrypoint)
+  }
+  If(stringType, Constants::STRING_TYPE_TREE).EQ {
+    Goto(:SlowPathEntrypoint)
+  }
+end
+
 def GenerateStringEquals(lang, dynamic, compression)
     suffix = (compression ? "Compressed" : "")
-    length_shift = (dynamic ? 2 : 1)
+    length_shift = Constants::STRING_LENGTH_SHIFT
     mode = [:FastPath]
     mode.push(:DynamicMethod, :DynamicStub) if dynamic
 
@@ -107,8 +118,7 @@ def GenerateStringEquals(lang, dynamic, compression)
             mode: mode,
             lang: lang.empty? ? 'PANDA_ASSEMBLY' : lang.upcase) {
         # Arm32 is not supported
-        # length shift should be from 0 to 2
-        if Options.arch == :arm32 || length_shift > 2
+        if Options.arch == :arm32
             Intrinsic(:UNREACHABLE).void.Terminator
             next
         end
@@ -120,6 +130,8 @@ def GenerateStringEquals(lang, dynamic, compression)
         If(str1, str2).EQ.Unlikely.b {
             Return(1).b
         }
+        check_string_type(str1)
+        check_string_type(str2)
         if dynamic
             length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
             length2 := LoadI(str2).Imm(Constants::STRING_LENGTH_OFFSET).u32
@@ -191,6 +203,10 @@ def GenerateStringEquals(lang, dynamic, compression)
         Goto(:Loop)
     Label(:NotEqual)
         Return(0).b
+    Label(:SlowPathEntrypoint)
+      entrypoint = get_entrypoint_offset("STRING_EQUALS_SLOW_PATH")
+      Intrinsic(:SLOW_PATH_ENTRY, str1, str2).AddImm(entrypoint).MethodAsImm("StringEqualsUsualBridge").Terminator.b
+      Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
     }
 end
 
@@ -223,7 +239,7 @@ macro(:allocate_string_tlab) do |string_klass, data_size|
   # Store class of the object
   store_class(_start, string_klass)
   # Update the TLAB state
-  StoreI(Add(_tlab, Constants::TLAB_CUR_FREE_POSITION_OFFSET).ptr, Add(_start, _size).ptr).Imm(0).Volatile.ptr
+  StoreI(Add(_tlab, Constants::TLAB_CUR_FREE_POSITION_OFFSET).ptr, Add(_start, _size).ptr).Imm(0).ptr
   # Return a pointer to the newly allocated string
   _allocated_string := _start
 end
@@ -333,7 +349,7 @@ macro(:allocate_array_of_chars_tlab) do |array_klass, char_count|
   # Store array length
   StoreI(_start, elements_num).Imm(Constants::ARRAY_LENGTH_OFFSET).word
   # Update the TLAB state
-  StoreI(Add(_tlab, Constants::TLAB_CUR_FREE_POSITION_OFFSET).ptr, Add(_start, _size).ptr).Imm(0).Volatile.ptr
+  StoreI(Add(_tlab, Constants::TLAB_CUR_FREE_POSITION_OFFSET).ptr, Add(_start, _size).ptr).Imm(0).ptr
   # Return a pointer to the newly allocated array
   _allocated_array := _start
 end
@@ -359,7 +375,7 @@ def GenerateCreateStringFromStringTlab(string_compression_enabled)
     klass := load_class(str)
     length := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
     hashcode := LoadI(str).Imm(Constants::STRING_HASHCODE_OFFSET).u32
-    data_size := unpack_length(Cast(length).u64, string_compression_enabled, 1)
+    data_size := unpack_length(Cast(length).u64, string_compression_enabled, Constants::STRING_LENGTH_SHIFT)
 
     new_str := allocate_string_tlab(klass, Cast(data_size).word)
     StoreI(new_str, length).Imm(Constants::STRING_LENGTH_OFFSET).u32
@@ -770,10 +786,10 @@ def GenerateCreateStringFromCharArrayTlab(string_compression_enabled)
     if string_compression_enabled
       If(compressable, 1).EQ.Likely.b {
         compress_u16_to_u8_chars(arr_data, str_data, Cast(char_count).u64)
-        StoreI(new_str, ShlI(char_count).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+        StoreI(new_str, ShlI(char_count).Imm(Constants::STRING_LENGTH_SHIFT).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
       } Else {
         copy_u16_chars(arr_data, str_data, Cast(char_count).u64)
-        StoreI(new_str, OrI(ShlI(char_count).Imm(1).u32).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+        StoreI(new_str, OrI(ShlI(char_count).Imm(Constants::STRING_LENGTH_SHIFT).u32).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
       }
     else
       copy_u16_chars(arr_data, str_data, Cast(char_count).u64)
@@ -830,10 +846,10 @@ def GenerateCreateStringFromZeroBasedCharArrayTlab(string_compression_enabled)
     if string_compression_enabled
       If(compressable, 1).EQ.Likely.b {
         compress_u16_to_u8_chars(arr_data, str_data, Cast(char_count).u64)
-        StoreI(new_str, ShlI(char_count).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+        StoreI(new_str, ShlI(char_count).Imm(Constants::STRING_LENGTH_SHIFT).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
       } Else {
         copy_u16_chars(arr_data, str_data, Cast(char_count).u64)
-        StoreI(new_str, OrI(ShlI(char_count).Imm(1).u32).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+        StoreI(new_str, OrI(ShlI(char_count).Imm(Constants::STRING_LENGTH_SHIFT).u32).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
       }
     else
       copy_u16_chars(arr_data, str_data, Cast(char_count).u64)
@@ -866,10 +882,12 @@ def GenerateSubstringFromStringTlab(string_compression_enabled)
       next
     end
 
+    check_string_type(str)
+
     # Note, 'str' is checked against nullptr in the InstBuilder (see AddArgNullcheckIfNeeded)
     length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
     if string_compression_enabled
-      length := ShrI(length_packed).Imm(1).u32
+      length := ShrI(length_packed).Imm(Constants::STRING_LENGTH_SHIFT).u32
     else
       length := length_packed
     end
@@ -935,10 +953,10 @@ def GenerateSubstringFromStringTlab(string_compression_enabled)
         new_str_data := Add(new_str, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
         If(compressable, 1).EQ.Likely.b {
           compress_u16_to_u8_chars(src_str_data, new_str_data, Cast(char_count).u64)
-          StoreI(new_str, ShlI(char_count).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+          StoreI(new_str, ShlI(char_count).Imm(Constants::STRING_LENGTH_SHIFT).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
         } Else {
           copy_u16_chars(src_str_data, new_str_data, Cast(char_count).u64)
-          StoreI(new_str, OrI(ShlI(char_count).Imm(1).u32).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+          StoreI(new_str, OrI(ShlI(char_count).Imm(Constants::STRING_LENGTH_SHIFT).u32).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
         }
         # String is supposed to be a constant object, so all its data should be visible by all threads
         Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
@@ -948,7 +966,7 @@ def GenerateSubstringFromStringTlab(string_compression_enabled)
         new_str := allocate_string_tlab(klass, Cast(char_count).word)
         new_str_data := Add(new_str, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
         copy_u8_chars(src_str_data, new_str_data, Cast(char_count).u64)
-        StoreI(new_str, ShlI(char_count).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+        StoreI(new_str, ShlI(char_count).Imm(Constants::STRING_LENGTH_SHIFT).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
         # String is supposed to be a constant object, so all its data should be visible by all threads
         Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
         Return(new_str).ptr
@@ -987,6 +1005,8 @@ def GenerateStringGetCharsTlab(string_compression_enabled)
       next
     end
 
+    check_string_type(str)
+
     If(begin_index, end_index).GT.Unlikely.b {
       Goto(:SlowPathEntrypoint)  # Out of range
     }
@@ -997,7 +1017,7 @@ def GenerateStringGetCharsTlab(string_compression_enabled)
     # Note, 'str' is checked against nullptr in the InstBuilder (see AddArgNullcheckIfNeeded)
     length := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32;
     if string_compression_enabled
-      If(Cast(end_index).u32, ShrI(length).Imm(1).u32).A.Unlikely.b {
+      If(Cast(end_index).u32, ShrI(length).Imm(Constants::STRING_LENGTH_SHIFT).u32).A.Unlikely.b {
         Goto(:SlowPathEntrypoint)  # Out of range
       }
       not_compressed := AndI(length).Imm(1).u32
@@ -1095,6 +1115,8 @@ end
       next
     end
 
+    check_string_type(str)
+
     # 1. There is no check of the argument against NullPointer as
     #    it's done in the InstBuilder (see AddArgNullcheckIfNeeded)
     # 2. Don't check if hashcode is equal to 0 as it's done in the codegen.
@@ -1102,7 +1124,7 @@ end
     str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
     length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
     if string_compression_enabled
-      length := ShrI(length_packed).Imm(1).u32
+      length := ShrI(length_packed).Imm(Constants::STRING_LENGTH_SHIFT).u32
       not_compressed := AndI(length_packed).Imm(1).u32
       If(not_compressed, 0).EQ.Likely.b {
         # String contains 8-bit chars
@@ -1123,3 +1145,79 @@ end
     end
   }
 end  # def GenerateStringHashCode
+
+scoped_macro(:macroStringCompareTo) do |str1, str2|
+  If(str1, str2).EQ.Unlikely.b {
+    result_1 := 0
+    Goto(:Done)
+  }
+
+  length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  length2 := LoadI(str2).Imm(Constants::STRING_LENGTH_OFFSET).u32
+
+  # cover the cases of length2 being zero and both lengths being zero
+  If(length2, 0).EQ.Unlikely.b {
+    result_2 := length1
+    Goto(:Done)
+  }
+
+  If(length1, 0).EQ.Unlikely.b {
+    result_3 := -1
+    Goto(:Done)
+  }
+
+  buf1 := AddI(str1).Imm(Constants::STRING_DATA_OFFSET).ptr
+  buf2 := AddI(str2).Imm(Constants::STRING_DATA_OFFSET).ptr
+
+  # get the least length in chars
+  length := ShrI(Cast(Min(length1, length2).i32).u64).Imm(Constants::STRING_LENGTH_SHIFT).u64
+
+  utf_1 := AndI(length1).Imm(1).u32
+  utf_2 := AndI(length2).Imm(1).u32
+
+  # in the unlikely case the strings are in different
+  # encodings the comparison gets more comlicated as
+  # we have to expand the latin string to u16 first
+  If(utf_1, utf_2).NE.Unlikely.b {
+    result_4 := compare_mixed_strings(buf1, buf2, length, utf_1).i32
+    Goto(:Done)
+  }
+  utf := Cast(utf_1).u64
+
+  # make length be in actual bytes now
+  length := Shl(length, utf).u64
+
+  # considering the data buffer to be allocated to
+  # 8-bytes alignment, we can safely read 8-bytes chunks
+  last_idx := SubI(length).Imm(8).i64
+  i1 := 0
+Label(:Loop)
+  i := Phi(i1, i2).i64
+  If(i, last_idx).GE.Unlikely.b {
+    # can safely read 8 bytes behind - length and hashcode
+    junk_bits := ShlI(Sub(i, last_idx).u64).Imm(3).u64
+    last_data1 := Shr(Load(buf1, last_idx).u64, junk_bits).u64
+    last_data2 := Shr(Load(buf2, last_idx).u64, junk_bits).u64
+    If(last_data1, last_data2).NE.b {
+      Goto(:NotEqual)
+    }
+    result_5 := Sub(length1, length2).i32
+    Goto(:Done)
+  }
+
+  data1 := Load(buf1, i).u64
+  data2 := Load(buf2, i).u64
+  If(data1, data2).NE.b {
+    Goto(:NotEqual)
+  }
+  i2 := AddI(i).Imm(8).i64
+  Goto(:Loop)
+
+Label(:NotEqual)
+  d1 := Phi(last_data1, data1).u64
+  d2 := Phi(last_data2, data2).u64
+  result_6 := calculate_chars_difference(d1, d2, utf).i32
+
+Label(:Done)
+  result := Phi(result_1, result_2, result_3, result_4, result_5, result_6).i32
+end

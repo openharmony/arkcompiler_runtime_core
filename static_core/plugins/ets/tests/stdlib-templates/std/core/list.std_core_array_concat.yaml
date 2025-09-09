@@ -148,19 +148,19 @@
     method_throws: "false",
     method_test_index_data:
       {
-        test1: { first: "[1.0]", second: "[2.0]" },
-        test2: { first: "[127.0, -128.0]",  second: "[-128.0, 127.0]", },
+        test1: { first: "[1.0f]", second: "[2.0f]" },
+        test2: { first: "[127.0f, -128.0f]",  second: "[-128.0f, 127.0f]", },
         test3: { first: "[]", second: "[]" },
-        test4: { first: "[111.0, 99.0]", second: "[]" },
-        test5: { first: "[]", second: "[33.0, 66.0, 33.0]",},
+        test4: { first: "[111.0f, 99.0f]", second: "[]" },
+        test5: { first: "[]", second: "[33.0f, 66.0f, 33.0f]",},
       },
     method_expected_data:
       {
-        test1: "[1.0, 2.0]",
-        test2: "[127.0, -128.0, -128.0, 127.0]",
+        test1: "[1.0f, 2.0f]",
+        test2: "[127.0f, -128.0f, -128.0f, 127.0f]",
         test3: "[]",
-        test4: "[111.0, 99.0]",
-        test5: "[33.0, 66.0, 33.0]",
+        test4: "[111.0f, 99.0f]",
+        test5: "[33.0f, 66.0f, 33.0f]",
       },
   }
 - {

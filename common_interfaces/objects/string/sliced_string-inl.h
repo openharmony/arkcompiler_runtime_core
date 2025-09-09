@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,23 @@
 #ifndef COMMON_INTERFACES_OBJECTS_STRING_SLICED_STRING_INL_H
 #define COMMON_INTERFACES_OBJECTS_STRING_SLICED_STRING_INL_H
 
-#include "common_interfaces/objects/string/base_string_declare.h"
-#include "common_interfaces/objects/string/sliced_string.h"
+#include "securec.h"
+#include "objects/string/base_string.h"
+#include "objects/string/sliced_string.h"
 
 namespace common {
+template <typename Allocator, typename WriteBarrier, objects_traits::enable_if_is_allocate<Allocator, BaseObject *>,
+          objects_traits::enable_if_is_write_barrier<WriteBarrier>>
+SlicedString *SlicedString::Create(Allocator &&allocator, WriteBarrier &&writeBarrier,
+                                   ReadOnlyHandle<BaseString> parent)
+{
+    SlicedString *slicedString = SlicedString::Cast(
+        std::invoke(std::forward<Allocator>(allocator), SlicedString::SIZE, ObjectType::SLICED_STRING));
+    slicedString->SetMixHashcode(0);
+    slicedString->SetParent(std::forward<WriteBarrier>(writeBarrier), parent.GetBaseObject());
+    return slicedString;
+}
+
 inline uint32_t SlicedString::GetStartIndex() const
 {
     uint32_t bits = GetStartIndexAndFlags();
@@ -48,23 +61,25 @@ inline void SlicedString::SetHasBackingStore(bool hasBackingStore)
 }
 
 // Minimum length for a sliced string
-template <bool verify, typename ReadBarrier>
+template <bool VERIFY, typename ReadBarrier>
 uint16_t SlicedString::Get(ReadBarrier &&readBarrier, int32_t index) const
 {
-    int32_t length = static_cast<int32_t>(GetLength());
-    if (verify) {
+    auto length = static_cast<int32_t>(GetLength());
+    if constexpr (VERIFY) {
         if ((index < 0) || (index >= length)) {
             return 0;
         }
     }
-    BaseString *parent = BaseString::Cast(GetParent<BaseObject *>(std::forward<ReadBarrier>(readBarrier)));
+    LineString *parent = LineString::Cast(GetParent<BaseObject *>(std::forward<ReadBarrier>(readBarrier)));
     DCHECK_CC(parent->IsLineString());
     if (parent->IsUtf8()) {
-        Span<const uint8_t> sp(parent->GetDataUtf8() + GetStartIndex(), length);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        common::Span<const uint8_t> sp(parent->GetDataUtf8() + GetStartIndex(), length);
         return sp[index];
     }
-    Span<const uint16_t> sp(parent->GetDataUtf16() + GetStartIndex(), length);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    common::Span<const uint16_t> sp(parent->GetDataUtf16() + GetStartIndex(), length);
     return sp[index];
 }
-}
-#endif //COMMON_INTERFACES_OBJECTS_STRING_SLICED_STRING_INL_H
+}  // namespace common
+#endif  // COMMON_INTERFACES_OBJECTS_STRING_SLICED_STRING_INL_H

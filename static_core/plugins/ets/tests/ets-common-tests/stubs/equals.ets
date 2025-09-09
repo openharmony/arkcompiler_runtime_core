@@ -43,54 +43,54 @@ enum ColorString {
 }
 
 function testNormal() {
-    assertTrue(isEqual(Color.RED, Color.RED));
-    assertTrue(isEqual(Color.GREEN, Color.GREEN));
-    assertTrue(isEqual(Color.BLUE, Color.BLUE));
-    assertTrue(isEqual(Color.YELLOW, Color.YELLOW));
+    arktest.assertTrue(isEqual(Color.RED, Color.RED));
+    arktest.assertTrue(isEqual(Color.GREEN, Color.GREEN));
+    arktest.assertTrue(isEqual(Color.BLUE, Color.BLUE));
+    arktest.assertTrue(isEqual(Color.YELLOW, Color.YELLOW));
 
-    assertTrue(isEqual(Color64.RED, Color64.RED));
-    assertTrue(isEqual(Color64.GREEN, Color64.GREEN));
-    assertTrue(isEqual(Color64.BLUE, Color64.BLUE));
-    assertTrue(isEqual(Color64.YELLOW, Color64.YELLOW));
-    assertTrue(isEqual(Color64.PURPLE, Color64.PURPLE));
-    assertTrue(isEqual(Color64.PINK, Color64.PINK));
+    arktest.assertTrue(isEqual(Color64.RED, Color64.RED));
+    arktest.assertTrue(isEqual(Color64.GREEN, Color64.GREEN));
+    arktest.assertTrue(isEqual(Color64.BLUE, Color64.BLUE));
+    arktest.assertTrue(isEqual(Color64.YELLOW, Color64.YELLOW));
+    arktest.assertTrue(isEqual(Color64.PURPLE, Color64.PURPLE));
+    arktest.assertTrue(isEqual(Color64.PINK, Color64.PINK));
 
-    assertTrue(isEqual(ColorString.RED, ColorString.RED));
-    assertTrue(isEqual(ColorString.GREEN, ColorString.GREEN));
+    arktest.assertTrue(isEqual(ColorString.RED, ColorString.RED));
+    arktest.assertTrue(isEqual(ColorString.GREEN, ColorString.GREEN));
     
-    assertTrue(!isEqual(Color.RED, Color.GREEN));
-    assertTrue(!isEqual(Color.RED, Color.BLUE));
-    assertTrue(!isEqual(Color.RED, Color.YELLOW));
-    assertTrue(!isEqual(ColorString.RED, ColorString.GREEN));
+    arktest.assertTrue(!isEqual(Color.RED, Color.GREEN));
+    arktest.assertTrue(!isEqual(Color.RED, Color.BLUE));
+    arktest.assertTrue(!isEqual(Color.RED, Color.YELLOW));
+    arktest.assertTrue(!isEqual(ColorString.RED, ColorString.GREEN));
 }
 
 function testErase() {
-    assertTrue(isEqual(erase(Color.RED), erase(Color.RED)));
-    assertTrue(isEqual(erase(Color.GREEN), erase(Color.GREEN)));
-    assertTrue(isEqual(erase(Color.BLUE), erase(Color.BLUE)));
-    assertTrue(isEqual(erase(Color.YELLOW), erase(Color.YELLOW)));
+    arktest.assertTrue(isEqual(erase(Color.RED), erase(Color.RED)));
+    arktest.assertTrue(isEqual(erase(Color.GREEN), erase(Color.GREEN)));
+    arktest.assertTrue(isEqual(erase(Color.BLUE), erase(Color.BLUE)));
+    arktest.assertTrue(isEqual(erase(Color.YELLOW), erase(Color.YELLOW)));
 
-    assertTrue(isEqual(erase(Color64.RED), erase(Color64.RED)));
-    assertTrue(isEqual(erase(Color64.GREEN), erase(Color64.GREEN)));
-    assertTrue(isEqual(erase(Color64.BLUE), erase(Color64.BLUE)));
-    assertTrue(isEqual(erase(Color64.YELLOW), erase(Color64.YELLOW)));
-    assertTrue(isEqual(erase(Color64.PURPLE), erase(Color64.PURPLE)));
-    assertTrue(isEqual(erase(Color64.PINK), erase(Color64.PINK)));
+    arktest.assertTrue(isEqual(erase(Color64.RED), erase(Color64.RED)));
+    arktest.assertTrue(isEqual(erase(Color64.GREEN), erase(Color64.GREEN)));
+    arktest.assertTrue(isEqual(erase(Color64.BLUE), erase(Color64.BLUE)));
+    arktest.assertTrue(isEqual(erase(Color64.YELLOW), erase(Color64.YELLOW)));
+    arktest.assertTrue(isEqual(erase(Color64.PURPLE), erase(Color64.PURPLE)));
+    arktest.assertTrue(isEqual(erase(Color64.PINK), erase(Color64.PINK)));
 
-    assertTrue(isEqual(erase(Color64.RED), erase(Color.RED)));
-    assertTrue(isEqual(erase(Color64.GREEN), erase(Color.GREEN)));
-    assertTrue(isEqual(erase(Color64.BLUE), erase(Color.BLUE)));
-    assertTrue(isEqual(erase(Color64.YELLOW), erase(Color.YELLOW)));
+    arktest.assertTrue(isEqual(erase(Color64.RED), erase(Color.RED)));
+    arktest.assertTrue(isEqual(erase(Color64.GREEN), erase(Color.GREEN)));
+    arktest.assertTrue(isEqual(erase(Color64.BLUE), erase(Color.BLUE)));
+    arktest.assertTrue(isEqual(erase(Color64.YELLOW), erase(Color.YELLOW)));
 
-    assertTrue(isEqual(erase(ColorString.RED), erase(ColorString.RED)));
-    assertTrue(isEqual(erase(ColorString.GREEN), erase(ColorString.GREEN)));
+    arktest.assertTrue(isEqual(erase(ColorString.RED), erase(ColorString.RED)));
+    arktest.assertTrue(isEqual(erase(ColorString.GREEN), erase(ColorString.GREEN)));
 
-    assertTrue(!isEqual(erase(Color.RED), erase(Color.GREEN)));
-    assertTrue(!isEqual(erase(Color.RED), erase(Color.BLUE)));
-    assertTrue(!isEqual(erase(Color.RED), erase(Color.YELLOW)));
-    assertTrue(!isEqual(erase(ColorString.RED), erase(ColorString.GREEN)));
-    assertTrue(!isEqual(erase(Color.BLUE), erase(Color64.PURPLE)));
-    assertTrue(!isEqual(erase(Color.YELLOW), erase(Color64.PINK)));
+    arktest.assertTrue(!isEqual(erase(Color.RED), erase(Color.GREEN)));
+    arktest.assertTrue(!isEqual(erase(Color.RED), erase(Color.BLUE)));
+    arktest.assertTrue(!isEqual(erase(Color.RED), erase(Color.YELLOW)));
+    arktest.assertTrue(!isEqual(erase(ColorString.RED), erase(ColorString.GREEN)));
+    arktest.assertTrue(!isEqual(erase(Color.BLUE), erase(Color64.PURPLE)));
+    arktest.assertTrue(!isEqual(erase(Color.YELLOW), erase(Color64.PINK)));
 }
 
 function main() {

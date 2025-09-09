@@ -28,10 +28,10 @@ function checkInstanceOf(o: Object): boolean {
 function main() {
     let c: Color = Color.Red;
     let o: Object = c;
-    assertTrue(checkInstanceOf(o));
+    arktest.assertTrue(checkInstanceOf(o));
 
     let c2: Color = Color.Green;
     let o2: object = c2;
-    assertTrue(checkInstanceOf(o2));
+    arktest.assertTrue(checkInstanceOf(o2));
 
 }

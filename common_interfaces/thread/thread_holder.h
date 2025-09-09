@@ -13,6 +13,15 @@
  * limitations under the License.
  */
 
+// NOLINTBEGIN(readability-identifier-naming, cppcoreguidelines-macro-usage,
+//             cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
+//             readability-else-after-return, readability-duplicate-include,
+//             misc-non-private-member-variables-in-classes, cppcoreguidelines-pro-type-member-init,
+//             google-explicit-constructor, cppcoreguidelines-pro-type-union-access,
+//             modernize-use-auto, llvm-namespace-comment,
+//             cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
+//             readability-implicit-bool-conversion)
+
 #ifndef COMMON_INTERFACES_THREAD_THREAD_HOLDER_H
 #define COMMON_INTERFACES_THREAD_THREAD_HOLDER_H
 
@@ -24,7 +33,6 @@
 #include "heap/heap_visitor.h"
 #include "thread/mutator_base.h"
 #include "thread/thread_state.h"
-
 namespace panda::ecmascript {
 class JSThread;
 }
@@ -32,6 +40,19 @@ class JSThread;
 namespace ark {
 class Coroutine;
 }
+
+namespace common {
+// This is a temporary impl to adapt interop to cmc, because some interop call napi
+// without transfering to NATIVE
+using InterOpCoroutineToNativeHookFunc = bool (*)(ThreadHolder *current);
+using InterOpCoroutineToRunningHookFunc = bool (*)(ThreadHolder *current);
+
+PUBLIC_API bool InterOpCoroutineToNative(ThreadHolder *current);
+PUBLIC_API bool InterOpCoroutineToRunning(ThreadHolder *current);
+
+PUBLIC_API void RegisterInterOpCoroutineToNativeHook(InterOpCoroutineToNativeHookFunc func);
+PUBLIC_API void RegisterInterOpCoroutineToRunningHook(InterOpCoroutineToRunningHookFunc func);
+}  // namespace common
 
 namespace common {
 class BaseThread;
@@ -47,12 +68,14 @@ class ThreadHolderManager;
  * ThreadHolder is a package of execution BaseThreads which must run in the same OS Thread and so could
  * share ThreadState.
  */
-class ThreadHolder {
+class PUBLIC_API ThreadHolder {
 public:
     using JSThread = panda::ecmascript::JSThread;
     using Coroutine = ark::Coroutine;
     using MutatorBase = common::MutatorBase;
 
+    // CC-OFFNXT(WordsTool.95 Google) sensitive word conflict
+    // NOLINTNEXTLINE(google-explicit-constructor)
     ThreadHolder(MutatorBase *mutatorBase) : mutatorBase_(mutatorBase)
     {
         SetCurrent(this);
@@ -144,9 +167,11 @@ public:
     }
 
     // Return if thread has already binded mutator.
+    // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions)
     class TryBindMutatorScope {
     public:
-        TryBindMutatorScope(ThreadHolder *holder);
+        // CC-OFFNXT(WordsTool.95 Google) sensitive word conflict
+        TryBindMutatorScope(ThreadHolder *holder);  // NOLINT(google-explicit-constructor)
         ~TryBindMutatorScope();
 
     private:
@@ -181,3 +206,11 @@ private:
 };
 }  // namespace common
 #endif  // COMMON_INTERFACES_THREAD_THREAD_HOLDER_H
+// NOLINTEND(readability-identifier-naming, cppcoreguidelines-macro-usage,
+//           cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
+//           readability-else-after-return, readability-duplicate-include,
+//           misc-non-private-member-variables-in-classes, cppcoreguidelines-pro-type-member-init,
+//           google-explicit-constructor, cppcoreguidelines-pro-type-union-access,
+//           modernize-use-auto, llvm-namespace-comment,
+//           cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
+//           readability-implicit-bool-conversion)

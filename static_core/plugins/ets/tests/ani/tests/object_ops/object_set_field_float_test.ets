@@ -12,11 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 class Pack {
     boolean_value: boolean = true;
     string_value: string = "";
-    float_value: float = 0.0;
+    float_value: float = 0.0f;
 }
 
 function newPackObject(): Pack {

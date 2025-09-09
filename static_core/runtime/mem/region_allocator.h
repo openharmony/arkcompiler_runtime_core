@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,11 @@ public:
 };
 
 using RegionsVisitor = std::function<void(PandaVector<Region *> &vector)>;
+
+struct RegionMem {
+    void *mem;
+    bool isZeroed;
+};
 
 /// Return the region which corresponds to the start of the object.
 static inline Region *ObjectToRegion(const ObjectHeader *object)
@@ -180,6 +185,8 @@ public:
 
     template <RegionFlag REGION_TYPE = RegionFlag::IS_EDEN, bool UPDATE_MEMSTATS = true>
     void *Alloc(size_t size, Alignment align = DEFAULT_ALIGNMENT, bool pinned = false);
+    template <RegionFlag REGION_TYPE = RegionFlag::IS_EDEN, bool UPDATE_MEMSTATS = true>
+    struct RegionMem AllocExt(size_t size, Alignment align = DEFAULT_ALIGNMENT, bool pinned = false);
 
     template <typename T>
     T *AllocArray(size_t arrLength)
@@ -506,7 +513,7 @@ private:
     }
 
     template <RegionFlag REGION_TYPE>
-    void *AllocRegular(size_t alignSize);
+    struct RegionMem AllocRegular(size_t alignSize);
     TLAB *CreateTLABInRegion(Region *region, size_t size);
 
     Region fullRegion_;

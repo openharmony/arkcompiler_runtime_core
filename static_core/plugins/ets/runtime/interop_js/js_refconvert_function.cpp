@@ -15,8 +15,40 @@
 #include "plugins/ets/runtime/interop_js/js_proxy/js_proxy.h"
 #include "plugins/ets/runtime/interop_js/js_refconvert_function.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
+#include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_type.h"
+
 namespace ark::ets::interop::js {
+
+JSRefConvertFunction::JSRefConvertFunction(Class *klass)
+    : JSRefConvert(this), klass_ {EtsClass::FromRuntimeClass(klass)}
+{
+    // Mark interop function dynamic class as XRef class
+    auto *classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
+
+    // Get and store interop dynamic function class
+    auto *interopDynamicFunction =
+        classLinker->GetClass(panda_file_items::class_descriptors::INTEROP_DYNAMIC_FUNCTION.data());
+    if (UNLIKELY(interopDynamicFunction == nullptr)) {
+        // just throw exception
+        auto coro = EtsCoroutine::GetCurrent();
+        InteropCtx::ThrowETSError(
+            coro, "Interop: Interop function dynamic class Lstd/interop/js/DynamicFunction; is not found.");
+        return;
+    }
+    interopDynamicFunction->GetRuntimeClass()->SetXRefClass();
+    this->interopDynamicFunctionClass_ = interopDynamicFunction;
+
+    // Get and store interop create dynamic function method
+    auto *createDynamicFunctionMethod = EtsClass::FromRuntimeClass(interopDynamicFunction->GetRuntimeClass())
+                                            ->GetStaticMethod("CreateDynamicFunction", nullptr);
+    if (UNLIKELY(createDynamicFunctionMethod == nullptr)) {
+        InteropCtx::ThrowETSError(EtsCoroutine::GetCurrent(),
+                                  "Interop: CreateDynamicFunction() of Lstd/interop/js/DynamicFunction; is not found.");
+        return;
+    }
+    this->interopCreateDynamicFunctionMethod_ = createDynamicFunctionMethod;
+}
 
 napi_value EtsLambdaProxyInvoke(napi_env env, napi_callback_info cbinfo)
 {
@@ -26,7 +58,7 @@ napi_value EtsLambdaProxyInvoke(napi_env env, napi_callback_info cbinfo)
         ThrowNoInteropContextException();
         return nullptr;
     }
-    INTEROP_CODE_SCOPE_JS(coro);
+    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
 
     size_t argc;
     napi_value athis;
@@ -90,46 +122,30 @@ napi_value JSRefConvertFunction::WrapImpl(InteropCtx *ctx, EtsObject *obj)
 EtsObject *JSRefConvertFunction::UnwrapImpl(InteropCtx *ctx, napi_value jsFun)
 {
     // Check if object has SharedReference
-    ets_proxy::SharedReference *sharedRef = ctx->GetSharedRefStorage()->GetReference(ctx->GetJSEnv(), jsFun);
+    // If it has, return it
+    auto storage = ctx->GetSharedRefStorage();
+    auto sharedRef = storage->GetReference(ctx->GetJSEnv(), jsFun);
     if (LIKELY(sharedRef != nullptr)) {
-        EtsObject *jsFunctionProxy = sharedRef->GetEtsObject();
-        return jsFunctionProxy;
+        EtsObject *functionDynamicObject = sharedRef->GetEtsObject();
+        return functionDynamicObject;
     }
 
-    return this->CreateJSFunctionProxy(ctx, jsFun);
+    auto *coro = EtsCoroutine::GetCurrent();
+    HandleScope<ObjectHeader *> scope(coro);
+
+    auto ret = interopCreateDynamicFunctionMethod_->GetPandaMethod()->Invoke(coro, {}).GetAs<ObjectHeader *>();
+    // storage->CreateJSObjectRefwithWrap will trigger XGC if needed
+    // after that, the ptr `ret` will be valid
+    // so a handle is created to keep the object valid
+    VMHandle<ObjectHeader> retHandle(coro, ret);
+    auto functionDynamicObject = EtsObject::FromCoreType(ret);
+
+    // Put it into SharedReferenceStorage
+    storage->CreateJSObjectRefwithWrap(ctx, functionDynamicObject, jsFun);
+
+    // ptr `ret` is valid now,
+    // so we must get the object from the handle
+    return EtsObject::FromCoreType(retHandle.GetPtr());
 }
 
-void JSRefConvertFunction::LazyInitJsFunctionProxyWrapper(InteropCtx *ctx)
-{
-    // register the function interface
-    auto etsClass = EtsClass::FromRuntimeClass(this->klass_->GetRuntimeClass());
-
-    // create a JSProxy wrapper for the function
-    this->jsFunctionProxyWrapper_ = js_proxy::JSProxy::CreateFunctionProxy(etsClass);
-    ctx->SetJsProxyInstance(etsClass, this->jsFunctionProxyWrapper_);
-}
-
-EtsObject *JSRefConvertFunction::CreateJSFunctionProxy(InteropCtx *ctx, napi_value jsFun)
-{
-    // lazy init the function proxy wrapper
-    this->LazyInitJsFunctionProxyWrapper(ctx);
-
-    // JS Function => ETS Function Object
-    ASSERT(this->jsFunctionProxyWrapper_ != nullptr);
-    auto *storage = ctx->GetSharedRefStorage();
-    ASSERT(storage->GetReference(ctx->GetJSEnv(), jsFun) == nullptr);
-
-    EtsObject *etsObject = EtsObject::Create(jsFunctionProxyWrapper_->GetProxyClass());
-    if (UNLIKELY(etsObject == nullptr)) {
-        ctx->ForwardEtsException(EtsCoroutine::GetCurrent());
-        return nullptr;
-    }
-
-    auto *sharedRef = storage->CreateJSObjectRefwithWrap(ctx, etsObject, jsFun);
-    if (UNLIKELY(sharedRef == nullptr)) {
-        ASSERT(InteropCtx::SanityJSExceptionPending());
-        return nullptr;
-    }
-    return sharedRef->GetEtsObject();  // fetch again after gc
-}
 }  // namespace ark::ets::interop::js

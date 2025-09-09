@@ -27,11 +27,11 @@ public:
     void GetMethodData(ani_class *clsResult, ani_static_method *methodResult)
     {
         ani_class cls {};
-        ASSERT_EQ(env_->FindClass("Lcall_static_method_long_test/Operations;", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("call_static_method_long_test.Operations", &cls), ANI_OK);
         ASSERT_NE(cls, nullptr);
 
         ani_static_method method;
-        ASSERT_EQ(env_->Class_FindStaticMethod(cls, "sum", "JJ:J", &method), ANI_OK);
+        ASSERT_EQ(env_->Class_FindStaticMethod(cls, "sum", "ll:l", &method), ANI_OK);
         ASSERT_NE(method, nullptr);
 
         *clsResult = cls;
@@ -43,7 +43,7 @@ public:
         ani_class cls {};
         ASSERT_EQ(env_->FindClass(className, &cls), ANI_OK);
         ani_static_method method {};
-        ASSERT_EQ(env_->Class_FindStaticMethod(cls, "funcA", "JJ:J", &method), ANI_OK);
+        ASSERT_EQ(env_->Class_FindStaticMethod(cls, "funcA", "ll:l", &method), ANI_OK);
 
         ani_long value = 0L;
         ASSERT_EQ(env_->Class_CallStaticMethod_Long(cls, method, &value, val1, val2), ANI_OK);
@@ -182,14 +182,14 @@ TEST_F(CallStaticMethodTest, call_static_method_long_A_null_args)
 TEST_F(CallStaticMethodTest, call_static_method_long_combine_scenes_1)
 {
     ani_class clsA {};
-    ASSERT_EQ(env_->FindClass("Lcall_static_method_long_test/A;", &clsA), ANI_OK);
+    ASSERT_EQ(env_->FindClass("call_static_method_long_test.A", &clsA), ANI_OK);
     ani_static_method methodA;
-    ASSERT_EQ(env_->Class_FindStaticMethod(clsA, "funcA", "JJ:J", &methodA), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(clsA, "funcA", "ll:l", &methodA), ANI_OK);
 
     ani_class clsB {};
-    ASSERT_EQ(env_->FindClass("Lcall_static_method_long_test/B;", &clsB), ANI_OK);
+    ASSERT_EQ(env_->FindClass("call_static_method_long_test.B", &clsB), ANI_OK);
     ani_static_method methodB;
-    ASSERT_EQ(env_->Class_FindStaticMethod(clsB, "funcB", "JJ:J", &methodB), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(clsB, "funcB", "ll:l", &methodB), ANI_OK);
 
     ani_long valueA = 0L;
     ASSERT_EQ(env_->Class_CallStaticMethod_Long(clsA, methodA, &valueA, VAL1, VAL2), ANI_OK);
@@ -214,11 +214,11 @@ TEST_F(CallStaticMethodTest, call_static_method_long_combine_scenes_1)
 TEST_F(CallStaticMethodTest, call_static_method_long_combine_scenes_2)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lcall_static_method_long_test/A;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("call_static_method_long_test.A", &cls), ANI_OK);
     ani_static_method methodA;
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "funcA", "JJ:J", &methodA), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "funcA", "ll:l", &methodA), ANI_OK);
     ani_static_method methodB;
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "funcA", "II:I", &methodB), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "funcA", "ii:i", &methodB), ANI_OK);
 
     ani_long value = 0L;
     ASSERT_EQ(env_->Class_CallStaticMethod_Long(cls, methodA, &value, VAL1, VAL2), ANI_OK);
@@ -239,9 +239,9 @@ TEST_F(CallStaticMethodTest, call_static_method_long_combine_scenes_2)
 TEST_F(CallStaticMethodTest, call_static_method_long_combine_scenes_3)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lcall_static_method_long_test/A;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("call_static_method_long_test.A", &cls), ANI_OK);
     ani_static_method method;
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "funcB", "JJ:J", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "funcB", "ll:l", &method), ANI_OK);
 
     ani_long value = 0L;
     ASSERT_EQ(env_->Class_CallStaticMethod_Long(cls, method, &value, VAL1, VAL2), ANI_OK);
@@ -271,23 +271,23 @@ TEST_F(CallStaticMethodTest, call_static_method_long_null_env)
 
 TEST_F(CallStaticMethodTest, call_static_method_long_combine_scenes_4)
 {
-    TestCombineScene("Lcall_static_method_long_test/C;", VAL1, VAL2, VAL1 + VAL2);
+    TestCombineScene("call_static_method_long_test.C", VAL1, VAL2, VAL1 + VAL2);
 }
 
 TEST_F(CallStaticMethodTest, call_static_method_long_combine_scenes_5)
 {
-    TestCombineScene("Lcall_static_method_long_test/D;", VAL1, VAL2, VAL2 - VAL1);
+    TestCombineScene("call_static_method_long_test.D", VAL1, VAL2, VAL2 - VAL1);
 }
 
 TEST_F(CallStaticMethodTest, call_static_method_long_combine_scenes_6)
 {
-    TestCombineScene("Lcall_static_method_long_test/E;", VAL1, VAL2, VAL1 + VAL2);
+    TestCombineScene("call_static_method_long_test.E", VAL1, VAL2, VAL1 + VAL2);
 }
 
 TEST_F(CallStaticMethodTest, call_static_method_long_combine_scenes_7)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lcall_static_method_long_test/F;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("call_static_method_long_test.F", &cls), ANI_OK);
     ani_static_method method1 {};
     ASSERT_EQ(env_->Class_FindStaticMethod(cls, "increment", nullptr, &method1), ANI_OK);
     ani_static_method method2 {};
@@ -308,11 +308,11 @@ TEST_F(CallStaticMethodTest, call_static_method_long_combine_scenes_7)
 TEST_F(CallStaticMethodTest, call_static_method_long_combine_scenes_8)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lcall_static_method_long_test/G;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("call_static_method_long_test.G", &cls), ANI_OK);
     ani_static_method method1 {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "publicMethod", "JJ:J", &method1), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "publicMethod", "ll:l", &method1), ANI_OK);
     ani_static_method method2 {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "callPrivateMethod", "JJ:J", &method2), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "callPrivateMethod", "ll:l", &method2), ANI_OK);
     ani_long value = 0L;
     ASSERT_EQ(env_->Class_CallStaticMethod_Long(cls, method1, &value, VAL1, VAL2), ANI_OK);
     ASSERT_EQ(value, VAL1 + VAL2);

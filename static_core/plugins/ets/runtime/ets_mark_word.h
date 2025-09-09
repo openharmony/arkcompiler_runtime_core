@@ -65,12 +65,12 @@ public:
 
         // Interop index state masks and shifts
         INTEROP_INDEX_SHIFT = 0U,
-        INTEROP_INDEX_MASK = (1UL << INTEROP_INDEX_SIZE) - 1UL,
+        INTEROP_INDEX_MASK = (static_cast<MarkWordSize>(1UL) << INTEROP_INDEX_SIZE) - 1UL,
         INTEROP_INDEX_MASK_IN_PLACE = INTEROP_INDEX_MASK << INTEROP_INDEX_SHIFT,
 
         // Ets Hash state
         HASH_SHIFT = 0U,
-        HASH_MASK = (1UL << HASH_SIZE) - 1UL,
+        HASH_MASK = (static_cast<MarkWordSize>(1UL) << HASH_SIZE) - 1UL,
         HASH_MASK_IN_PLACE = HASH_MASK << HASH_SHIFT,
 
         INFO_TABLE_POINTER_SHIFT = MONITOR_POINTER_SHIFT,

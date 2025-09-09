@@ -24,5 +24,5 @@ function getNumber(): number {
 
 function main(): void {
   getNumber() = 200；
-  assertEQ(getNumber(), 200);
+  arktest.assertEQ(getNumber(), 200);
 }

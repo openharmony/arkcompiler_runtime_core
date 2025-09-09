@@ -25,7 +25,7 @@ cases:
               fld: [number, string] = [8.0 + foo(4.0), ""] // CTE expected
           }
       use: |-
-          assertEQ( new A().fld[0], 16.0 )
+          arktest.assertEQ( new A().fld[0], 16.0 )
       tags: 'compile-only, negative'
 
     # positive, throws error
@@ -40,7 +40,7 @@ cases:
               fld: [number, string] = [8.0 + foo(4.0), ""]
           }
       use: |-
-          assertEQ( new A().fld[0], 16.0 )
+          arktest.assertEQ( new A().fld[0], 16.0 )
 
     # negative, exception throwing lambda
     - decl: |-
@@ -53,7 +53,7 @@ cases:
               })(4.0), ""]  // CTE expected
           }
       use: |-
-          assertEQ( new A().fld[0], 16.0 )
+          arktest.assertEQ( new A().fld[0], 16.0 )
       tags: 'compile-only, negative'
 
     # positive, error throwing lambda
@@ -67,7 +67,7 @@ cases:
               })(4.0), ""]
           }
       use: |-
-          assertEQ( new A().fld[0], 16.0 )
+          arktest.assertEQ( new A().fld[0], 16.0 )
 
     # negative, rethrows with non-throwing argument
     - decl: |-
@@ -81,7 +81,7 @@ cases:
               fld: [number, number] = [8.0 + bar(foo, 2.0), 0.0]  // CTE expected
           }
       use: |-
-          assertEQ( new A().fld[0], 18.0 )
+          arktest.assertEQ( new A().fld[0], 18.0 )
       tags: 'compile-only, negative'
 
     # negative, rethrows with throwing argument
@@ -99,7 +99,7 @@ cases:
               fld: [number, number] = [0.0, 8.0 + bar(foo, 2.0)]  // CTE expected
           }
       use: |-
-          assertEQ( new A().fld[1], 18.0 )
+          arktest.assertEQ( new A().fld[1], 18.0 )
       tags: 'compile-only, negative'
 
     # negative, rethrows with non-throwing lambda argument
@@ -111,7 +111,7 @@ cases:
               fld: [string, number] = ["", 8.0 + bar((p: number): number => p * 2, 2.0)]  // CTE expected
           }
       use: |-
-          assertEQ( new A().fld[1], 18.0 )
+          arktest.assertEQ( new A().fld[1], 18.0 )
       tags: 'compile-only, negative'
 
     # negative, rethrows with throwing lambda argument
@@ -128,5 +128,5 @@ cases:
               }, 2.0)]  // CTE expected
           }
       use: |-
-          assertEQ( new A().fld[1], 18.0 )
+          arktest.assertEQ( new A().fld[1], 18.0 )
       tags: 'compile-only, negative'

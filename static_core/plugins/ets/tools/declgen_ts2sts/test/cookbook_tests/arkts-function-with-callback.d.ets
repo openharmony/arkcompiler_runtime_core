@@ -1,3 +1,4 @@
+'use static'
 /*
  * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export type Callback = Any;
+export type Callback = (arg: number) => void;
 export declare function foo(cb: Callback): void;
-export type Callback1 = Any;
+export type Callback1 = (arg: X) => void;
 export declare let foo1: Callback1;
 export declare class X {
     data: number;

@@ -40,8 +40,8 @@ function main() {
     let resultA = a.methodOne(a);
     let resultB = b.methodOne(a);
 
-    assertEQ(resultA, "base");
-    assertEQ(resultB, "derived");
+    arktest.assertEQ(resultA, "base");
+    arktest.assertEQ(resultB, "derived");
 }
 
 main();

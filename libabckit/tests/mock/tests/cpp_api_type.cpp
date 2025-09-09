@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "include/cpp/abckit_cpp.h"
+#include "include/libabckit/cpp/abckit_cpp.h"
 #include "../check_mock.h"
 #include "src/mock/mock_values.h"
 #include "../cpp_helpers_mock.h"

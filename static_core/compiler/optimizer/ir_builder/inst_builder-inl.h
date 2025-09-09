@@ -17,7 +17,9 @@
 #define PANDA_INST_BUILDER_INL_H
 
 #include "inst_builder.h"
+#include "macros.h"
 #include "optimizer/code_generator/encode.h"
+#include "runtime/include/coretypes/string.h"
 
 namespace ark::compiler {
 
@@ -43,10 +45,8 @@ InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::BuildC
     pc_ = Builder()->GetPc(bcInst->GetAddress());
     hasImplicitArg_ = !GetRuntime()->IsMethodStatic(Builder()->GetMethod(), methodId_);
 
-    if (GetRuntime()->IsMethodIntrinsic(Builder()->GetMethod(), methodId_)) {
-        // Do not move "GetMethodId" ouside this if! Success of "IsMethodIntrinsic" guarantees that class and method are
-        // loaded. Thus value of "method_" is not nullptr and can be used in BuildIntrinsic.
-        method_ = GetRuntime()->GetMethodById(Builder()->GetMethod(), methodId_);
+    if (auto *intrinsic = GetRuntime()->GetMethodAsIntrinsic(Builder()->GetMethod(), methodId_)) {
+        method_ = intrinsic;
         if (TryBuildIntrinsic()) {
             return;
         }
@@ -374,8 +374,8 @@ void InstBuilder::BuildStringLengthIntrinsic(const BytecodeInstruction *bcInst, 
 
     Inst *stringLength;
     if (graph_->GetRuntime()->IsCompressedStringsEnabled()) {
-        auto constOneInst = graph_->FindOrCreateConstant(1);
-        stringLength = graph_->CreateInstShr(DataType::INT32, bcAddr, arrayLength, constOneInst);
+        auto constTwoInst = graph_->FindOrCreateConstant(ark::coretypes::String::STRING_LENGTH_SHIFT);
+        stringLength = graph_->CreateInstShr(DataType::INT32, bcAddr, arrayLength, constTwoInst);
         AddInstruction(stringLength);
     } else {
         stringLength = arrayLength;
@@ -550,8 +550,8 @@ bool InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::T
     auto runtime = GetRuntime();
     auto isMethodStatic = runtime->IsMethodStatic(method_);
     auto isMethodFinal = runtime->IsMethodFinal(method_);
-    auto isClassFinal = runtime->IsClassFinal(runtime->GetClass(method_));
-    if (isMethodStatic || isMethodFinal || isClassFinal) {
+    auto isClassFinalOrString = runtime->IsClassFinalOrString(runtime->GetClass(method_));
+    if (isMethodStatic || isMethodFinal || isClassFinalOrString) {
         BuildIntrinsic();
         return true;
     }
@@ -729,6 +729,9 @@ void InstBuilder::BuildLoadObject(const BytecodeInstruction *bcInst, DataType::T
         }
         inst = loadField;
     }
+    if (type == DataType::REFERENCE && GetRuntime()->NeedsPreReadBarrier()) {
+        static_cast<LoadInst *>(inst)->SetNeedBarrier(true);
+    }
 
     AddInstruction(inst);
     // NOLINTNEXTLINE(readability-braces-around-statements)
@@ -832,8 +835,9 @@ Inst *InstBuilder::BuildLoadStaticInst(size_t pc, DataType::Type type, uint32_t 
         }
         AddInstruction(resolveField);
         // 2. Create an instruction to load a value from the resolved static field address
-        auto loadField = graph_->CreateInstLoadResolvedObjectFieldStatic(type, pc, resolveField,
-                                                                         TypeIdMixin {typeId, GetGraph()->GetMethod()});
+        auto needsBarrier = (type == DataType::REFERENCE) && GetRuntime()->NeedsPreReadBarrier();
+        auto loadField = graph_->CreateInstLoadResolvedObjectFieldStatic(
+            type, pc, resolveField, TypeIdMixin {typeId, GetGraph()->GetMethod()}, false, needsBarrier);
         return loadField;
     }
 
@@ -842,8 +846,9 @@ Inst *InstBuilder::BuildLoadStaticInst(size_t pc, DataType::Type type, uint32_t 
     auto initClass = graph_->CreateInstLoadAndInitClass(DataType::REFERENCE, pc, saveState,
                                                         TypeIdMixin {classId, GetGraph()->GetMethod()},
                                                         GetRuntime()->GetClassForField(field));
+    auto needsBarrier = (type == DataType::REFERENCE) && GetRuntime()->NeedsPreReadBarrier();
     auto loadField = graph_->CreateInstLoadStatic(type, pc, initClass, TypeIdMixin {typeId, GetGraph()->GetMethod()},
-                                                  field, GetRuntime()->IsFieldVolatile(field));
+                                                  field, GetRuntime()->IsFieldVolatile(field), needsBarrier);
     // 'final' field can be reassigned e. g. with reflection, but 'readonly' cannot
     // `IsInConstructor` check should not be necessary, but need proper frontend support first
     constexpr bool IS_STATIC = true;
@@ -872,7 +877,10 @@ void InstBuilder::BuildLoadStatic(const BytecodeInstruction *bcInst, DataType::T
     }
     auto saveState = CreateSaveState(Opcode::SaveState, GetPc(bcInst->GetAddress()));
     AddInstruction(saveState);
-    Inst *inst = BuildLoadStaticInst(GetPc(bcInst->GetAddress()), type, fieldId, saveState);
+    auto *inst = BuildLoadStaticInst(GetPc(bcInst->GetAddress()), type, fieldId, saveState);
+    if (type == DataType::REFERENCE && GetRuntime()->NeedsPreReadBarrier()) {
+        static_cast<LoadStaticInst *>(inst)->SetNeedBarrier(true);
+    }
     AddInstruction(inst);
     UpdateDefinitionAcc(inst);
 }
@@ -976,6 +984,9 @@ void InstBuilder::BuildLoadArray(const BytecodeInstruction *bcInst, DataType::Ty
     // Create instruction
     auto inst = graph_->CreateInstLoadArray(type, pc, nullCheck, boundsCheck);
     boundsCheck->SetInput(1, GetDefinitionAcc());
+    if (type == DataType::REFERENCE && GetRuntime()->NeedsPreReadBarrier()) {
+        inst->SetNeedBarrier(true);
+    }
     AddInstruction(saveState, nullCheck, arrayLength, boundsCheck, inst);
     UpdateDefinitionAcc(inst);
 }
@@ -1075,7 +1086,7 @@ void InstBuilder::BuildUnfoldLoadConstArray(const BytecodeInstruction *bcInst, D
     }
 
     [[maybe_unused]] auto arrayClass = GetRuntime()->ResolveType(method, typeId);
-    ASSERT(GetRuntime()->CheckStoreArray(arrayClass, GetRuntime()->GetStringClass(method, nullptr)));
+    ASSERT(GetRuntime()->CheckStoreArray(arrayClass, GetRuntime()->GetLineStringClass(method, nullptr)));
     // Special case for string array
     BuildUnfoldLoadConstStringArray<T>(bcInst, type, litArray, arrayInst);
 }
@@ -1600,8 +1611,8 @@ bool InstBuilder::TryBuildStringCharAtIntrinsic(const BytecodeInstruction *bcIns
 
     Inst *stringLength = nullptr;
     if (compressionEnabled) {
-        auto constOneInst = graph_->FindOrCreateConstant(1);
-        stringLength = graph_->CreateInstShr(DataType::INT32, bcAddr, arrayLength, constOneInst);
+        auto constTwoInst = graph_->FindOrCreateConstant(ark::coretypes::String::STRING_LENGTH_SHIFT);
+        stringLength = graph_->CreateInstShr(DataType::INT32, bcAddr, arrayLength, constTwoInst);
         AddInstruction(stringLength);
     } else {
         stringLength = arrayLength;
@@ -1622,6 +1633,100 @@ bool InstBuilder::TryBuildStringCharAtIntrinsic(const BytecodeInstruction *bcIns
     AddInstruction(inst);
     UpdateDefinitionAcc(inst);
     return true;
+}
+
+void InstBuilder::BuildStringGetIntrinsic(const BytecodeInstruction *bcInst, bool accRead,
+                                          RuntimeInterface::IntrinsicId intrinsicId)
+{
+    auto bcAddr = GetPc(bcInst->GetAddress());
+    auto saveState = CreateSaveState(Opcode::SaveState, bcAddr);
+
+    auto stringGet = graph_->CreateInstIntrinsic(DataType::REFERENCE, bcAddr, intrinsicId);
+    stringGet->AllocateInputTypes(GetGraph()->GetAllocator(), 3);  // 3: number of inputs
+
+    stringGet->AppendInput(GetArgDefinition(bcInst, 0, accRead));
+    stringGet->AddInputType(DataType::REFERENCE);
+    stringGet->AppendInput(GetArgDefinition(bcInst, 1, accRead));
+    stringGet->AddInputType(DataType::INT32);
+    stringGet->AppendInput(saveState);
+    stringGet->AddInputType(DataType::NO_TYPE);
+
+    AddInstruction(saveState, stringGet);
+    UpdateDefinitionAcc(stringGet);
+}
+
+// NOLINTNEXTLINE(misc-definitions-in-headers)
+template <bool IS_ACC_WRITE>
+void InstBuilder::BuildLoadFromAnyByName([[maybe_unused]] const BytecodeInstruction *bcInst,
+                                         [[maybe_unused]] DataType::Type type)
+{
+    // NOTE(zhaoziming_hw, #ICFLYC) Support any bytecode in InstBuilder
+    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function";
+    failed_ = true;
+}
+
+// NOLINTNEXTLINE(misc-definitions-in-headers)
+template <bool IS_ACC_WRITE>
+void InstBuilder::BuildStoreFromAnyByName([[maybe_unused]] const BytecodeInstruction *bcInst,
+                                          [[maybe_unused]] DataType::Type type)
+{
+    // NOTE(zhaoziming_hw, #ICFLYC) Support any bytecode in InstBuilder
+    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function";
+    failed_ = true;
+}
+
+// NOLINTNEXTLINE(misc-definitions-in-headers)
+void InstBuilder::BuildLoadFromAnyByIdx([[maybe_unused]] const BytecodeInstruction *bcInst,
+                                        [[maybe_unused]] DataType::Type type)
+{
+    // NOTE(zhaoziming_hw, #ICFLYC) Support any bytecode in InstBuilder
+    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function";
+    failed_ = true;
+}
+
+// NOLINTNEXTLINE(misc-definitions-in-headers)
+void InstBuilder::BuildStoreFromAnyByIdx([[maybe_unused]] const BytecodeInstruction *bcInst,
+                                         [[maybe_unused]] DataType::Type type)
+{
+    // NOTE(zhaoziming_hw, #ICFLYC) Support any bytecode in InstBuilder
+    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function";
+    failed_ = true;
+}
+
+// NOLINTNEXTLINE(misc-definitions-in-headers)
+void InstBuilder::BuildLoadFromAnyByVal([[maybe_unused]] const BytecodeInstruction *bcInst,
+                                        [[maybe_unused]] DataType::Type type)
+{
+    // NOTE(zhaoziming_hw, #ICFLYC) Support any bytecode in InstBuilder
+    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function";
+    failed_ = true;
+}
+
+// NOLINTNEXTLINE(misc-definitions-in-headers)
+void InstBuilder::BuildStoreFromAnyByVal([[maybe_unused]] const BytecodeInstruction *bcInst,
+                                         [[maybe_unused]] DataType::Type type)
+{
+    // NOTE(zhaoziming_hw, #ICFLYC) Support any bytecode in InstBuilder
+    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function";
+    failed_ = true;
+}
+
+// NOLINTNEXTLINE(misc-definitions-in-headers)
+template <bool IS_ACC_WRITE>
+void InstBuilder::BuildAnyCall([[maybe_unused]] const BytecodeInstruction *bcInst)
+{
+    // NOTE(zhaoziming_hw, #ICFLYC) Support any bytecode in InstBuilder
+    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function";
+    failed_ = true;
+}
+
+// NOLINTNEXTLINE(misc-definitions-in-headers)
+void InstBuilder::BuildIsInstanceAny([[maybe_unused]] const BytecodeInstruction *bcInst,
+                                     [[maybe_unused]] DataType::Type type)
+{
+    // NOTE(zhaoziming_hw, #ICFLYC) Support any bytecode in InstBuilder
+    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function";
+    failed_ = true;
 }
 
 }  // namespace ark::compiler

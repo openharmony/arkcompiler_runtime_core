@@ -18,30 +18,30 @@
 #include "runtime/coroutines/stackful_coroutine_manager.h"
 #include "runtime/coroutines/stackful_coroutine.h"
 #include "runtime/coroutines/stackful_coroutine_worker.h"
+#include <algorithm>
 
 namespace ark {
 
 StackfulCoroutineWorker::StackfulCoroutineWorker(Runtime *runtime, PandaVM *vm, StackfulCoroutineManager *coroManager,
-                                                 ScheduleLoopType type, PandaString name, size_t id)
-    : CoroutineWorker(runtime, vm),
+                                                 ScheduleLoopType type, PandaString name, Id id, bool isMainWorker)
+    : CoroutineWorker(runtime, vm, name, id, isMainWorker),
       coroManager_(coroManager),
       threadId_(os::thread::GetCurrentThreadId()),
       workerCompletionEvent_(coroManager),
-      stats_(name),
-      name_(std::move(name)),
-      id_(id)
+      stats_(std::move(name))
 {
-    ASSERT(id <= stackful_coroutines::MAX_WORKER_ID);
-    LOG(DEBUG, COROUTINES) << "Created a coroutine worker instance: id=" << id_ << " name=" << name_;
+    LOG(DEBUG, COROUTINES) << "Created a coroutine worker instance: id=" << GetId() << " name=" << GetName();
     if (type == ScheduleLoopType::THREAD) {
         std::thread t(&StackfulCoroutineWorker::ThreadProc, this);
-        os::thread::SetThreadName(t.native_handle(), name_.c_str());
+        os::thread::SetThreadName(t.native_handle(), GetName().c_str());
         t.detach();
         // will create the schedule loop coroutine in the thread proc in order to set the stack protector correctly
     } else {
         scheduleLoopCtx_ = coroManager->CreateNativeCoroutine(GetRuntime(), GetPandaVM(), ScheduleLoopProxy, this,
                                                               "[fiber_sch] " + GetName(), Coroutine::Type::SCHEDULER,
                                                               CoroutinePriority::MEDIUM_PRIORITY);
+        ASSERT(scheduleLoopCtx_ != nullptr);
+        scheduleLoopCtx_->LinkToExternalHolder(true);
         AddRunnableCoroutine(scheduleLoopCtx_);
     }
 }
@@ -69,6 +69,7 @@ void StackfulCoroutineWorker::AddCreatedCoroutineAndSwitchToIt(Coroutine *newCor
     ScopedNativeCodeThread n(coro);
     coro->RequestSuspend(false);
 
+    newCoro->LinkToExternalHolder(IsMainWorker() || InExclusiveMode());
     auto *currentCtx = GetCurrentContext();
     auto *nextCtx = newCoro->GetContext<StackfulCoroutineContext>();
     nextCtx->RequestResume();
@@ -98,7 +99,10 @@ void StackfulCoroutineWorker::WaitForEvent(CoroutineEvent *awaitee)
     ASSERT(inserted);
 
     runnablesLock_.Lock();
-    ASSERT(RunnableCoroutinesExist());
+    if (!RunnableCoroutinesExist()) {
+        auto coroManager = static_cast<StackfulCoroutineManager *>(waiter->GetManager());
+        LOG(FATAL, COROUTINES) << coroManager->GetAllWorkerFullStatus()->OutputInfo();
+    }
     // will unlock waiters_lock_ and switch ctx.
     // NB! If migration on await is enabled, current coro can migrate to another worker, so
     // IsCrossWorkerCall() will become true after resume!
@@ -145,6 +149,9 @@ void StackfulCoroutineWorker::RequestFinalization(Coroutine *finalizee)
     ASSERT(finalizee->GetWorker() == this);
     ASSERT(GetCurrentContext()->GetWorker() == this);
 
+#ifdef ARK_HYBRID
+    finalizee->UnbindMutator();
+#endif
     finalizationQueue_.push(finalizee);
     // finalizee will never be scheduled again
     ScheduleNextCoroUnlockNone();
@@ -248,6 +255,8 @@ void StackfulCoroutineWorker::ThreadProc()
     scheduleLoopCtx_ =
         coroManager_->CreateEntrypointlessCoroutine(GetRuntime(), GetPandaVM(), false, "[thr_sch] " + GetName(),
                                                     Coroutine::Type::SCHEDULER, CoroutinePriority::MEDIUM_PRIORITY);
+    ASSERT(scheduleLoopCtx_ != nullptr);
+    scheduleLoopCtx_->LinkToExternalHolder(false);
     Coroutine::SetCurrent(scheduleLoopCtx_);
     scheduleLoopCtx_->RequestResume();
     AddRunningCoroutine(scheduleLoopCtx_);
@@ -328,7 +337,7 @@ void StackfulCoroutineWorker::RegisterIncomingActiveCoroutine(Coroutine *newCoro
     ASSERT(newCoro != nullptr);
     newCoro->SetWorker(this);
     auto canMigrate = newCoro->GetContext<StackfulCoroutineContext>()->IsMigrationAllowed();
-    newCoro->LinkToExternalHolder(IsMainWorker() && !canMigrate);
+    newCoro->LinkToExternalHolder((IsMainWorker() || InExclusiveMode()) && !canMigrate);
 }
 
 void StackfulCoroutineWorker::RequestScheduleImpl()
@@ -458,8 +467,9 @@ void StackfulCoroutineWorker::SwitchCoroutineContext(StackfulCoroutineContext *f
     LOG(DEBUG, COROUTINES) << "Ctx switch: " << from->GetCoroutine()->GetName() << " --> "
                            << to->GetCoroutine()->GetName();
     stats_.FinishInterval(CoroutineTimeStats::SCH_ALL);
-    OnContextSwitch();
+    OnBeforeContextSwitch(from, to);
     stats_.StartInterval(CoroutineTimeStats::CTX_SWITCH);
+    // performs the fiber switch!
     from->SwitchTo(to);
     if (IsCrossWorkerCall()) {
         ASSERT(Coroutine::GetCurrent()->GetType() == Coroutine::Type::MUTATOR);
@@ -469,6 +479,7 @@ void StackfulCoroutineWorker::SwitchCoroutineContext(StackfulCoroutineContext *f
     }
     stats_.FinishInterval(CoroutineTimeStats::CTX_SWITCH);
     stats_.StartInterval(CoroutineTimeStats::SCH_ALL);
+    OnAfterContextSwitch(from);
 }
 
 void StackfulCoroutineWorker::FinalizeTerminatedCoros()
@@ -536,9 +547,8 @@ void StackfulCoroutineWorker::MigrateCoroutinesImpl(StackfulCoroutineWorker *to,
             if ((*begin)->GetType() != Coroutine::Type::MUTATOR) {
                 continue;
             }
-            auto maskValue = (*begin)->template GetContext<StackfulCoroutineContext>()->GetAffinityMask();
-            std::bitset<stackful_coroutines::MAX_WORKERS_COUNT> affinityBits(maskValue);
-            if (affinityBits.test(to->GetId())) {
+            auto mask = (*begin)->template GetContext<StackfulCoroutineContext>()->GetAffinityMask();
+            if (mask.IsWorkerAllowed(to->GetId())) {
                 LOG(DEBUG, COROUTINES) << "migrate coro " << (*begin)->GetCoroutineId() << " from " << GetId() << " to "
                                        << to->GetId();
                 to->AddRunnableCoroutine(*(*begin));
@@ -569,16 +579,45 @@ bool StackfulCoroutineWorker::IsPotentiallyBlocked()
     if (runnables_.Empty() || lastCtxSwitchTimeMillis_ == 0) {
         return false;
     }
-    if ((ark::os::time::GetClockTimeInMilli() - lastCtxSwitchTimeMillis_) >= MAX_EXECUTION_DURATION) {
+    if ((ark::os::time::GetClockTimeInMilli() - lastCtxSwitchTimeMillis_) >= MAX_EXECUTION_DURATION_MS) {
         LOG(DEBUG, COROUTINES) << "The current coroutine has been executed more than 6s.";
         return true;
     }
     return false;
 }
 
-void StackfulCoroutineWorker::OnContextSwitch()
+void StackfulCoroutineWorker::OnBeforeContextSwitch([[maybe_unused]] StackfulCoroutineContext *from,
+                                                    [[maybe_unused]] StackfulCoroutineContext *to)
 {
+    /**
+     * "from" is aready suspended or blocked, "to" is already resumed.
+     * The context is NOT switched yet, so we are on the ctx of the "from" coroutine,
+     * so it is STRICTLY NOT RECOMMENDED to run managed code from this event handler and
+     * its callees.
+     */
     lastCtxSwitchTimeMillis_ = ark::os::time::GetClockTimeInMilli();
+}
+
+void StackfulCoroutineWorker::OnAfterContextSwitch(StackfulCoroutineContext *to)
+{
+    /**
+     * "to" is already resumed. There is no reliable way to determine the ctx switch source yet.
+     * The context is JUST SWITCHED, so we are on the ctx of the "to" coroutine.
+     */
+    Coroutine *coroTo = to->GetCoroutine();
+    coroTo->OnContextSwitchedTo();
+}
+
+void StackfulCoroutineWorker::GetFullWorkerStateInfo(StackfulCoroutineWorkerStateInfo *info) const
+{
+    os::memory::LockHolder lock(runnablesLock_);
+    runnables_.IterateOverCoroutines([&info](Coroutine *co) { info->AddCoroutine(co); });
+    {
+        os::memory::LockHolder lh(waitersLock_);
+        std::for_each(waiters_.begin(), waiters_.end(), [&info](const std::pair<CoroutineEvent *, Coroutine *> &pair) {
+            info->AddCoroutine(pair.second);
+        });
+    }
 }
 
 }  // namespace ark

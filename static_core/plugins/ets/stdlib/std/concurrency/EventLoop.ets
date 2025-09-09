@@ -14,7 +14,6 @@
  */
 package std.concurrency;
 
-type WorkerId = int;
 type TimerId = int;
 type Callback = () => void;
 

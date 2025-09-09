@@ -77,7 +77,7 @@ function(:AllocateObjectTlab,
     new_start := Add(start, size).ptr
     store_class(start, klass)
     addr := Add(tlab_ptr, Constants::TLAB_CUR_FREE_POSITION_OFFSET).ptr
-    StoreI(addr, new_start).Imm(0).Volatile.ptr
+    StoreI(addr, new_start).Imm(0).ptr
     Return(start).ptr
   }
 }
@@ -136,7 +136,7 @@ def AllocateArrayTlab(element_size)
       store_class(start, klass)
       StoreI(start, elements_num).Imm(Constants::ARRAY_LENGTH_OFFSET).word
       addr := Add(tlab_ptr, Constants::TLAB_CUR_FREE_POSITION_OFFSET).ptr
-      StoreI(addr, new_start).Imm(0).Volatile.ptr
+      StoreI(addr, new_start).Imm(0).ptr
       Return(start).ptr
     }
   }

@@ -17,10 +17,10 @@
 
 #include <gtest/gtest.h>
 
-#include "libabckit/include/c/abckit.h"
-#include "libabckit/include/c/isa/isa_dynamic.h"
-#include "libabckit/include/c/metadata_core.h"
-#include "libabckit/include/c/ir_core.h"
+#include "libabckit/c/abckit.h"
+#include "libabckit/c/isa/isa_dynamic.h"
+#include "libabckit/c/metadata_core.h"
+#include "libabckit/c/ir_core.h"
 #include "libabckit/src/logger.h"
 
 #ifndef ABCKIT_ABC_DIR

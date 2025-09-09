@@ -23,9 +23,7 @@ class JSCoroutine {
 async function add(a: int): Promise<Object> {
     addCoroutineId = JSCoroutine.getCoroutineId();
     counter += a;
-    return new Promise<Object>((resolve: (value: Object) => void): void => {
-        resolve(new Object());
-    });
+    return new Object();
 }
 
 export function main(): int {

@@ -29,8 +29,24 @@ enable_hilog =
     !ark_standalone_build && is_standard_system && current_os == "ohos" &&
     (current_cpu == "arm64" || current_cpu == "arm")
 
+enable_hitrace =
+    !ark_standalone_build && is_standard_system && current_os == "ohos" &&
+    (current_cpu == "arm64" || current_cpu == "arm")
+
+enable_qos =
+    !ark_standalone_build && is_standard_system && current_os == "ohos" &&
+    (current_cpu == "arm64" || current_cpu == "arm")
+
 if (enable_hilog) {
   hiviewdfx_ext_deps += [ "hilog:libhilog" ]
+}
+
+if (enable_hitrace) {
+  hiviewdfx_ext_deps += [ "hitrace:hitrace_meter" ]
+}
+
+if (enable_qos) {
+  hiviewdfx_ext_deps += [ "qos_manager:qos" ]
 }
 
 if (is_standard_system || ark_standalone_build) {
@@ -102,8 +118,10 @@ declare_args() {
 
 enable_irtoc = true
 enable_codegen = true
-if (!runtime_core_enable_codegen) {
+if (is_mingw || current_os == "win" || current_os == "mingw" ||
+    current_os == "winuwp" || !runtime_core_enable_codegen) {
   # Disable irtoc and codegen for:
+  # - mingw and similar configurations
   # - !runtime_core_enable_codegen in chipset
   enable_irtoc = false
   enable_codegen = false
@@ -113,9 +131,7 @@ if (ark_standalone_build ||
     ((!ark_static_standalone_build &&
       (target_cpu == "x64" || target_cpu == "x86_64")) ||
      (current_os == "win" || current_os == "mingw" ||
-      current_os == "winuwp"))) {
-  enable_irtoc = false
-  enable_codegen = false
+      current_os == "winuwp")) || ark_hybrid) {
   is_llvmbackend = false
   is_llvm_interpreter = false
   is_llvm_fastpath = false
@@ -182,6 +198,7 @@ is_mob = !is_ohos && !is_linux && !is_mingw && !is_mac &&
 
 if (is_ohos && is_standard_system) {
   hilog_root = "//base/hiviewdfx/hilog/interfaces/native/innerkits"
+  hitrace_root = "//base/hiviewdfx/hitrace/interfaces/native/innerkits"
 }
 
 ## TODO add other arch

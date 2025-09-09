@@ -74,7 +74,7 @@ export class Test {
         for (i = 0; i < n; i++) {
             vv += v1[i] + v2[i];
         }
-        assertEQ(vv, 7720)
+        arktest.assertEQ(vv, 7720)
     }
 }
 

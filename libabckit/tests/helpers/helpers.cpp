@@ -15,13 +15,13 @@
 
 #include "helpers/helpers.h"
 
-#include "libabckit/include/c/abckit.h"
-#include "libabckit/include/c/isa/isa_dynamic.h"
-#include "libabckit/include/c/metadata_core.h"
+#include "libabckit/c/abckit.h"
+#include "libabckit/c/isa/isa_dynamic.h"
+#include "libabckit/c/metadata_core.h"
 #include "src/metadata_inspect_impl.h"
 #include "libabckit/src/logger.h"
-#include "libabckit/include/c/ir_core.h"
-#include "libabckit/include/c/statuses.h"
+#include "libabckit/c/ir_core.h"
+#include "libabckit/c/statuses.h"
 
 #include <cassert>
 #include <regex>
@@ -794,6 +794,28 @@ std::string_view AbckitStringToString(AbckitString *str)
     EXPECT_TRUE(g_impl->getLastError() == ABCKIT_STATUS_NO_ERROR);
 
     return name;
+}
+
+std::optional<abckit::core::Class> GetClassByName(const abckit::core::Module &module, const std::string &name)
+{
+    for (const auto &klass : module.GetClasses()) {
+        if (klass.GetName() == name) {
+            return klass;
+        }
+    }
+    LIBABCKIT_LOG_TEST(DEBUG) << "Class Not Found: " << name << std::endl;
+    return std::nullopt;
+}
+
+std::optional<abckit::core::Interface> GetInterfaceByName(const abckit::core::Module &module, const std::string &name)
+{
+    for (const auto &iface : module.GetInterfaces()) {
+        if (iface.GetName() == name) {
+            return iface;
+        }
+    }
+    LIBABCKIT_LOG_TEST(DEBUG) << "Interface Not Found: " << name << std::endl;
+    return std::nullopt;
 }
 
 }  // namespace libabckit::test::helpers

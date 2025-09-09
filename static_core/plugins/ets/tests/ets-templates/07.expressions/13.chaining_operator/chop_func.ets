@@ -24,5 +24,5 @@ function greet(name?: string): string {
 function main(): void {
   let name: string | undefined = undefined;
   name = "Alice";
-  assertEQ(greet(name?.toUpperCase()), "Hello, ALICE");
+  arktest.assertEQ(greet(name?.toUpperCase()), "Hello, ALICE");
 }

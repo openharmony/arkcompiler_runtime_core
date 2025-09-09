@@ -22,5 +22,5 @@ function main(): void {
   let b: Int = 4;
   let x = a! + b;
 
-  assertEQ( x, 9 )
+  arktest.assertEQ( x, 9 )
 }

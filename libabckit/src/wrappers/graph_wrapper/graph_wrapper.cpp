@@ -14,7 +14,7 @@
  */
 
 #include "libabckit/src/wrappers/graph_wrapper/graph_wrapper.h"
-#include "libabckit/include/c/statuses.h"
+#include "libabckit/c/statuses.h"
 #include "libabckit/src/wrappers/abcfile_wrapper.h"
 #include "libabckit/src/macros.h"
 #include "libabckit/src/irbuilder_dynamic/ir_builder_dyn.h"

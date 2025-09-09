@@ -19,40 +19,41 @@
 //! METHOD        "test_iu8_array"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Int8ArrayReverse "
-//! INST          "Intrinsic.Int8ArrayToReversed "
+//! INST          /Call.* escompat.Int8Array::toReversed /
 //! INST          "Intrinsic.UInt8ArrayReverse "
-//! INST          "Intrinsic.UInt8ArrayToReversed "
+//! INST          /Call.* escompat.Uint8Array::toReversed /
 //!
 //! METHOD        "test_iu16_array"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Int16ArrayReverse "
-//! INST          "Intrinsic.Int16ArrayToReversed "
+//! INST          /Call.* escompat.Int16Array::toReversed /
 //! INST          "Intrinsic.UInt16ArrayReverse "
-//! INST          "Intrinsic.UInt16ArrayToReversed "
+//! INST          /Call.* escompat.Uint16Array::toReversed /
 //!
 //! METHOD        "test_iu32_array"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Int32ArrayReverse "
-//! INST          "Intrinsic.Int32ArrayToReversed "
+//! INST          /Call.* escompat.Int32Array::toReversed /
 //! INST          "Intrinsic.UInt32ArrayReverse "
-//! INST          "Intrinsic.UInt32ArrayToReversed "
+//! INST          /Call.* escompat.Uint32Array::toReversed /
 //!
 //! METHOD        "test_iu64_array"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.BigInt64ArrayReverse "
-//! INST          "Intrinsic.BigInt64ArrayToReversed "
+//! INST          /Call.* escompat.BigInt64Array::toReversed /
 //! INST          "Intrinsic.BigUInt64ArrayReverse "
-//! INST          "Intrinsic.BigUInt64ArrayToReversed "
+//! INST          /Call.* escompat.BigUint64Array::toReversed /
 //!
 //! METHOD        "test_f32_array"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Float32ArrayReverse "
-//! INST          "Intrinsic.Float32ArrayToReversed "
+//! INST          /Call.* escompat.Float32Array::toReversed /
 //!
 //! METHOD        "test_f64_array"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Float64ArrayReverse "
-//! INST          "Intrinsic.Float64ArrayToReversed "
+//! INST          /Call.* escompat.Float64Array::toReversed /
+
 
 //! CHECKER       AOT: reverse() and toReversed()
 //! SKIP_IF       @architecture == "arm32"
@@ -61,40 +62,40 @@
 //! METHOD        "test_iu8_array"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Int8ArrayReverse "
-//! INST          "Intrinsic.Int8ArrayToReversed "
+//! INST          /Call.* escompat.Int8Array::toReversed /
 //! INST          "Intrinsic.UInt8ArrayReverse "
-//! INST          "Intrinsic.UInt8ArrayToReversed "
+//! INST          /Call.* escompat.Uint8Array::toReversed /
 //!
 //! METHOD        "test_iu16_array"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Int16ArrayReverse "
-//! INST          "Intrinsic.Int16ArrayToReversed "
+//! INST          /Call.* escompat.Int16Array::toReversed /
 //! INST          "Intrinsic.UInt16ArrayReverse "
-//! INST          "Intrinsic.UInt16ArrayToReversed "
+//! INST          /Call.* escompat.Uint16Array::toReversed /
 //!
 //! METHOD        "test_iu32_array"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Int32ArrayReverse "
-//! INST          "Intrinsic.Int32ArrayToReversed "
+//! INST          /Call.* escompat.Int32Array::toReversed /
 //! INST          "Intrinsic.UInt32ArrayReverse "
-//! INST          "Intrinsic.UInt32ArrayToReversed "
+//! INST          /Call.* escompat.Uint32Array::toReversed /
 //!
 //! METHOD        "test_iu64_array"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.BigInt64ArrayReverse "
-//! INST          "Intrinsic.BigInt64ArrayToReversed "
+//! INST          /Call.* escompat.BigInt64Array::toReversed /
 //! INST          "Intrinsic.BigUInt64ArrayReverse "
-//! INST          "Intrinsic.BigUInt64ArrayToReversed "
+//! INST          /Call.* escompat.BigUint64Array::toReversed /
 //!
 //! METHOD        "test_f32_array"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Float32ArrayReverse "
-//! INST          "Intrinsic.Float32ArrayToReversed "
+//! INST          /Call.* escompat.Float32Array::toReversed /
 //!
 //! METHOD        "test_f64_array"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Float64ArrayReverse "
-//! INST          "Intrinsic.Float64ArrayToReversed "
+//! INST          /Call.* escompat.Float64Array::toReversed /
 
 function test_iu8_array() {
     let inp = Int8Array.of(-128, -42, -14, 0, 16, 48, 127)
@@ -149,11 +150,11 @@ function test_f64_array() {
 }
 
 function check_array<T extends Number | BigInt>(src: ArrayLike<T>, src2: ArrayLike<T>, exp: ArrayLike<T>) {
-    assertEQ(src.length, exp.length, "reverse(): bad array len")
-    assertEQ(src2.length, exp.length, "toReversed(): bad array len")
+    arktest.assertEQ(src.length, exp.length, "reverse(): bad array len")
+    arktest.assertEQ(src2.length, exp.length, "toReversed(): bad array len")
     for (let i = 0; i < exp.length; i++) {
-        assertEQ(src[i], exp[i], "reverse(): unexpected element: i: " + i)
-        assertEQ(src2[i], exp[i], "toReversed(): unexpected element: i: " + i)
+        arktest.assertEQ(src[i], exp[i], "reverse(): unexpected element: i: " + i)
+        arktest.assertEQ(src2[i], exp[i], "toReversed(): unexpected element: i: " + i)
     }
 }
 
@@ -165,4 +166,3 @@ function main(): void {
     test_f32_array()
     test_f64_array()
 }
-

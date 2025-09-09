@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -282,6 +282,16 @@ public:
         return fillFraction;
     }
 
+    void SetZeroedFlag(bool val)
+    {
+        zeroed_ = val;
+    }
+
+    bool IsZeroed() const
+    {
+        return zeroed_;
+    }
+
 private:
     TLAB *nextTlab_;
     TLAB *prevTlab_;
@@ -289,6 +299,7 @@ private:
     void *memoryStartAddr_ {nullptr};
     void *memoryEndAddr_ {nullptr};
     void *curFreePosition_ {nullptr};
+    bool zeroed_ = false;
 };
 
 #undef LOG_TLAB_ALLOCATOR

@@ -30,4 +30,4 @@ cases:
               return p.length
           }
       use: |-
-          assertEQ( foo([new B(), new C()] as A[]), 2 ) // A[] is super type of B[]
+          arktest.assertEQ( foo([new B(), new C()] as A[]), 2 ) // A[] is super type of B[]

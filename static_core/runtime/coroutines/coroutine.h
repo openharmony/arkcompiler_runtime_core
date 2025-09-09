@@ -318,6 +318,7 @@ public:
     /* event handlers */
     virtual void OnHostWorkerChanged() {};
     virtual void OnStatusChanged(Status oldStatus, Status newStatus);
+    virtual void OnContextSwitchedTo();
 
 #ifdef ARK_HYBRID
     void Visit(CommonRootVisitor visitor)
@@ -354,6 +355,8 @@ protected:
 private:
     /// a converter function that stores the data from EntrypointInfo in the member variables
     void SetEntrypointData(std::optional<EntrypointInfo> &&epInfo);
+    /// Method starts or ends tracing base on statuses
+    void IssueTracingEvents(Status oldStatus, Status newStatus);
 
     PandaString name_;
     uint32_t coroutineId_ = 0;
@@ -415,6 +418,7 @@ private:
 };
 
 std::ostream &operator<<(std::ostream &os, Coroutine::Status status);
+std::ostream &operator<<(std::ostream &os, Coroutine::Type type);
 
 }  // namespace ark
 

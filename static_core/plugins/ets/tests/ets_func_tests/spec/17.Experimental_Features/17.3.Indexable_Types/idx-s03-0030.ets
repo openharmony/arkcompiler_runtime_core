@@ -16,46 +16,46 @@
 /*---
  desc: 17.3 Indexable Types
  tags:
- ---*/
+---*/
 
-class Bar  {
+class Bar {
     private data1 : int;
 
-    $_get (index: int) : int throws {
-        switch(index) {
-        case 0:
+    $_get(index: int) : int {
+        switch (index) {
+          case 0:
             return this.data1;
-        default:
-            throw new Exception ("Hmm ...");
+          default:
+            throw new Error("Hmm ...");
         }
     }
 
-    $_set (index: int, value: int)  throws {
-        switch(index) {
-        case 0:
+    $_set(index: int, value: int) {
+        switch (index) {
+          case 0:
             this.data1 = value;
             break;
-        default:
-            throw new Exception ("Hmm ...");
+          default:
+            throw new Error("Hmm ...");
         }
     }
 
-    $_get (index: string) : int throws {
-        switch(index) {
-        case "hello":
+    $_get(index: string) : int {
+        switch (index) {
+          case "hello":
             return this.data1;
-        default:
-            throw new Exception ("Hmm ...");
+          default:
+            throw new Error("Hmm ...");
         }
     }
 
-    $_set (index: string, value: int)  throws {
-        switch(index) {
-        case "hello":
+    $_set(index: string, value: int) {
+        switch (index) {
+          case "hello":
             this.data1 = value;
             break;
-        default:
-            throw new Exception ("Hmm ...");
+          default:
+            throw new Error("Hmm ...");
         }
     }
 
@@ -71,45 +71,45 @@ function test1() : int {
     let x = new Bar(10);
 
     try {
-        assertEQ(x[0], 10)
-    } catch(e) {
+        arktest.assertEQ(x[0], 10)
+    } catch (e) {
         result++
-        console.log("Unexpexted exception 1");
+        console.log("Unexpexted error 1");
     }
 
     try {
-        assertEQ(x["hello"], 10)
-    } catch(e) {
+        arktest.assertEQ(x["hello"], 10)
+    } catch (e) {
         result++
-        console.log("Unexpexted exception 1");
+        console.log("Unexpexted error 1");
     }
 
     try {
         x[0] = 100
-    } catch(e) {
+    } catch (e) {
         result++
-        console.log("Unexpexted exception 3");
+        console.log("Unexpexted error 3");
     }
 
     try {
-        assertEQ(x[0], 100)
-    } catch(e) {
+        arktest.assertEQ(x[0], 100)
+    } catch (e) {
         result++
-        console.log("Unexpexted exception 4");
+        console.log("Unexpexted error 4");
     }
 
     try {
         x["hello"] = 100
-    } catch(e) {
+    } catch (e) {
         result++
-        console.log("Unexpexted exception 5");
+        console.log("Unexpexted error 5");
     }
 
     try {
-        assertEQ(x["hello"], 100)
-    } catch(e) {
+        arktest.assertEQ(x["hello"], 100)
+    } catch (e) {
         result++
-        console.log("Unexpexted exception 6");
+        console.log("Unexpexted error 6");
     }
 
     return result;
@@ -119,14 +119,14 @@ function test2() : int {
     let result = 0;
     let x = new Bar(10);
     try {
-        assertEQ(x[10], 1)
-    } catch(e) {
+        arktest.assertEQ(x[10], 1)
+    } catch (e) {
         result++
     }
 
     try {
-        assertEQ(x["bye"], 1)
-    } catch(e) {
+        arktest.assertEQ(x["bye"], 1)
+    } catch (e) {
         result++
     }
 
@@ -135,7 +135,7 @@ function test2() : int {
 }
 
 function main() {
-    assertEQ(test1(), 0)
-    assertEQ(test2(), 2)
+    arktest.assertEQ(test1(), 0)
+    arktest.assertEQ(test2(), 2)
 }
 

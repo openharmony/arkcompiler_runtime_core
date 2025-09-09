@@ -1,13 +1,13 @@
 /*
  * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the 'License');
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an 'AS IS' BASIS,
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -51,9 +51,9 @@ function launchImpl(func: () => NullishType): Promise<NullishType> {
 
 function testDelayFunc(): NullishType {
     let task = new taskpool.Task(sum, 100, 300);
-    let value = await taskpool.executeDelayed(100.0, task);
+    let value = await taskpool.executeDelayed(100, task);
     let g = new taskpool.TaskGroup();
-    expectError(() => {
+    arktest.expectError(() => {
         g.addTask(task);
     }, new Error('taskpool:: taskGroup cannot add seqRunnerTask or executedTask'));
     return value;
@@ -62,22 +62,22 @@ function testDelayFunc(): NullishType {
 function executeDelayedTest(): void {
     try {
         let res = await launchImpl(testDelayFunc);
-        assertEQ(res, 400);
+        arktest.assertEQ(res, 400);
     } catch(e: Error) {
         // NOTE(wangzhaoyong, #25035): del try catch when fix stackoverflow and invalid error message
-        assertEQ(e instanceof NullPointerError, true);
+        arktest.assertEQ(e instanceof NullPointerError, true);
     }
     let task = new taskpool.Task(max, 10, 15);
     let g = new taskpool.TaskGroup();
     g.addTask(task);
-    expectError(() => {
-        taskpool.executeDelayed(100.0, task);
+    arktest.expectError(() => {
+        taskpool.executeDelayed(100, task);
     }, new Error('taskpool:: groupTask cannot executeDelayed outside'));
 }
 
 function testPeriodFunc(): NullishType {
     let task = new taskpool.Task(sum, 100, 300);
-    taskpool.executePeriodically(200.0, task);
+    taskpool.executePeriodically(200, task);
     let isTaskCanceled: AtomicFlag = new AtomicFlag(false);
     setTimeout(() => {
         taskpool.cancel(task);
@@ -87,7 +87,7 @@ function testPeriodFunc(): NullishType {
         delayWithYield(50);
     }
     let g = new taskpool.TaskGroup();
-    expectError(() => {
+    arktest.expectError(() => {
         g.addTask(task);
     }, new Error('taskpool:: The interface does not support the periodicTask'));
     return 'success';
@@ -97,10 +97,10 @@ function executePeriodicallyTest(): void {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
     try {
         let res1 = await launchImpl(testPeriodFunc);
-        assertEQ(res1, 'success');
+        arktest.assertEQ(res1, 'success');
     } catch(e: Error) {
         // NOTE(wangzhaoyong, #25035): del try catch when fix stackoverflow and invalid error message
-        assertEQ(e instanceof NullPointerError, true);
+        arktest.assertEQ(e instanceof NullPointerError, true);
     }
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
 }
@@ -109,8 +109,8 @@ function grouptaskExecutePeriodicallyTest(): void {
     let task = new taskpool.Task(returnAbc);
     let g = new taskpool.TaskGroup();
     g.addTask(task);
-    expectError(() => {
-        taskpool.executePeriodically(10.0, task);
+    arktest.expectError(() => {
+        taskpool.executePeriodically(10, task);
     }, new Error('taskpool:: The concurrent task has been executed and cannot be executed periodically'));
 }
 
@@ -120,7 +120,7 @@ function groupTaskExecuteRepeat(): void {
     group.addTask(task);
 
     let a = await taskpool.execute(group);
-    assertEQ(a[0], 400);
+    arktest.assertEQ(a[0], 400);
     let res = await taskpool.execute(group);
     arktest.assertEQ(res[0], 400);
 }
@@ -131,7 +131,7 @@ function taskGroupNestedTaskTest(): void {
         taskpool.execute(group);
     })
     group.addTask(task);
-    expectError(() => {
+    arktest.expectError(() => {
         await taskpool.execute(task);
     }, new Error('taskpool:: groupTask cannot execute outside'));
 }

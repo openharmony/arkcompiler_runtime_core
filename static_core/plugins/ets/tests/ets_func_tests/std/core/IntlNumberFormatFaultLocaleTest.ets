@@ -14,7 +14,7 @@
  */
 
 function main(): int {
-    const suite = new ArkTestsuite("Intl. NumberFormat $_invoke call constructor with fault locales");
+    const suite = new arktest.ArkTestsuite("Intl. NumberFormat $_invoke call constructor with fault locales");
     // Tests from https://gitee.com/openharmony/xts_acts/tree/master/commonlibrary/ets_utils/codeparsingtest/builtinstest/entry/src/ohosTest/ets/test/Intl/Intl.test.ets
     suite.addTest("testNumberFormatConstructorNew0008", testNumberFormatConstructorNew0008);
     return suite.run();
@@ -22,7 +22,8 @@ function main(): int {
 
 function testNumberFormatConstructorNew0008() {
     // NOTE(igorlegalov): uncomment when the issue #25344 is fixed
-    expectError((): void throws => { let locales = ["zh", "en-US", "de", "test"];
+    arktest.expectError((): void => {
+        let locales = ["zh", "en-US", "de", "test"];
         Intl.NumberFormat.$_invoke(locales);
     });
 }

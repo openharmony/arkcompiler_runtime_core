@@ -41,7 +41,7 @@ public:
 TEST_F(ClassSetStaticFieldByteTest, set_byte)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_byte_test/TestSetByte;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_byte_test.TestSetByte", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "byte_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -58,7 +58,7 @@ TEST_F(ClassSetStaticFieldByteTest, set_byte)
 TEST_F(ClassSetStaticFieldByteTest, set_byte_c_api)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_byte_test/TestSetByte;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_byte_test.TestSetByte", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "byte_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -75,7 +75,7 @@ TEST_F(ClassSetStaticFieldByteTest, set_byte_c_api)
 TEST_F(ClassSetStaticFieldByteTest, set_invalid_field_type)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_byte_test/TestSetByte;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_byte_test.TestSetByte", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -86,7 +86,7 @@ TEST_F(ClassSetStaticFieldByteTest, set_invalid_field_type)
 TEST_F(ClassSetStaticFieldByteTest, invalid_argument2)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_byte_test/TestSetByte;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_byte_test.TestSetByte", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "byte_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -101,7 +101,7 @@ TEST_F(ClassSetStaticFieldByteTest, invalid_argument2)
 TEST_F(ClassSetStaticFieldByteTest, invalid_argument3)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_byte_test/TestSetByte;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_byte_test.TestSetByte", &cls), ANI_OK);
     const ani_byte setTar = 127;
     ASSERT_EQ(env_->Class_SetStaticField_Byte(cls, nullptr, setTar), ANI_INVALID_ARGS);
 }
@@ -109,7 +109,7 @@ TEST_F(ClassSetStaticFieldByteTest, invalid_argument3)
 TEST_F(ClassSetStaticFieldByteTest, invalid_argument4)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_byte_test/TestSetByte;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_byte_test.TestSetByte", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "byte_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -120,7 +120,7 @@ TEST_F(ClassSetStaticFieldByteTest, invalid_argument4)
 TEST_F(ClassSetStaticFieldByteTest, special_values)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_byte_test/TestSetByte;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_byte_test.TestSetByte", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "byte_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -143,7 +143,7 @@ TEST_F(ClassSetStaticFieldByteTest, combination_test1)
     const ani_byte setTarget = 127;
     const ani_byte setTarget2 = 125;
     ani_byte single = 0U;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_byte_test/TestSetByte;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_byte_test.TestSetByte", &cls), ANI_OK);
     ASSERT_EQ(env_->Class_FindStaticField(cls, "byte_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
     const int32_t loopNum = 3;
@@ -159,17 +159,17 @@ TEST_F(ClassSetStaticFieldByteTest, combination_test1)
 
 TEST_F(ClassSetStaticFieldByteTest, combination_test2)
 {
-    CheckFieldValue("Lclass_set_static_field_byte_test/TestSetByte;", "byte_value");
+    CheckFieldValue("class_set_static_field_byte_test.TestSetByte", "byte_value");
 }
 
 TEST_F(ClassSetStaticFieldByteTest, combination_test3)
 {
-    CheckFieldValue("Lclass_set_static_field_byte_test/TestSetByteA;", "byte_value");
+    CheckFieldValue("class_set_static_field_byte_test.TestSetByteA", "byte_value");
 }
 
 TEST_F(ClassSetStaticFieldByteTest, combination_test4)
 {
-    CheckFieldValue("Lclass_set_static_field_byte_test/TestSetByteFinal;", "byte_value");
+    CheckFieldValue("class_set_static_field_byte_test.TestSetByteFinal", "byte_value");
 }
 
 TEST_F(ClassSetStaticFieldByteTest, check_initialization)

@@ -23,7 +23,7 @@ let buf_2: ArrayBuffer = new ArrayBuffer(0);
 let arr: Int8Array = new Int8Array;
 let arr_2: Int32Array = new Int32Array;
 
-function main() {
+function testMain() {
     buf = new ArrayBuffer(1);
     buf_2 = new ArrayBuffer(4);
     arr = new Int8Array(buf, 0, 1);
@@ -54,4 +54,10 @@ function workerI32(i: int): Int {
     while (Atomics.compareExchange(arr_2, 0, i as int, (i + 1) as int) != i) {
     }
     return 1
+}
+
+function main() {
+    const suite = new arktest.ArkTestsuite('Function Atomics concurrent_compare_exchange tests')
+    suite.addTest('Function testMain', testMain)
+    return suite.run()
 }

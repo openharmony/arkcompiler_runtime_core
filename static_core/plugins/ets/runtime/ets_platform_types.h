@@ -23,6 +23,7 @@ namespace ark::ets {
 class EtsClass;
 class EtsMethod;
 class EtsCoroutine;
+class EtsClassLinker;
 template <typename T>
 class EtsTypedObjectArray;
 
@@ -30,73 +31,111 @@ class EtsTypedObjectArray;
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 class PANDA_PUBLIC_API EtsPlatformTypes {
 public:
+    // Classes should follow the common naming schema
+
+    // Arity threshold for functional types
+    static constexpr uint32_t CORE_FUNCTION_ARITY_THRESHOLD = 17U;
     static constexpr uint32_t ASCII_CHAR_TABLE_SIZE = 128;
-    EtsClass *coreString {};  // IsStringClass
-    EtsClass *coreBoolean;
-    EtsClass *coreByte;
-    EtsClass *coreChar;
-    EtsClass *coreShort;
-    EtsClass *coreInt;
-    EtsClass *coreLong;
-    EtsClass *coreFloat;
-    EtsClass *coreDouble;
 
-    EtsClass *coreObject;
+    /* Core runtime type system */
+    EtsClass *coreObject {};        // IsObjectClass
+    EtsClass *coreClass {};         // IsClassClass
+    EtsClass *coreString {};        // IsStringClass
+    EtsClass *coreLineString {};    // IsLineStringClass
+    EtsClass *coreSlicedString {};  // IsSlicedStringClass
+    EtsClass *coreTreeString {};    // IsTreeStringClass
 
-    EtsClass *escompatBigint;
-    EtsClass *coreFunction;
+    /* ets numeric classes */
+    EtsClass *coreBoolean {};
+    EtsClass *coreByte {};
+    EtsClass *coreChar {};
+    EtsClass *coreShort {};
+    EtsClass *coreInt {};
+    EtsClass *coreLong {};
+    EtsClass *coreFloat {};
+    EtsClass *coreDouble {};
 
-    EtsClass *escompatError;
-    EtsClass *coreOutOfMemoryError;
-    EtsClass *coreException;
+    /* ets base language classes */
+    EtsClass *escompatBigint {};
+    EtsClass *escompatError {};
+    EtsClass *coreFunction {};
+    std::array<EtsClass *, CORE_FUNCTION_ARITY_THRESHOLD> coreFunctions {};
+    std::array<EtsClass *, CORE_FUNCTION_ARITY_THRESHOLD> coreFunctionRs {};
+    EtsClass *coreTuple {};
+    EtsClass *coreTupleN {};
 
-    EtsClass *coreStringBuilder;
+    /* Runtime linkage classes */
+    EtsClass *coreRuntimeLinker {};
+    EtsClass *coreBootRuntimeLinker {};
+    EtsClass *coreAbcRuntimeLinker {};
+    EtsClass *coreMemoryRuntimeLinker {};
+    EtsClass *coreAbcFile {};
 
-    EtsClass *corePromise;
-    EtsClass *coreJob;
-    EtsMethod *corePromiseSubscribeOnAnotherPromise;
-    EtsClass *corePromiseRef;
-    EtsClass *coreWaitersList;
-    EtsClass *coreMutex;
-    EtsClass *coreEvent;
-    EtsClass *coreCondVar;
-    EtsClass *coreQueueSpinlock;
+    /* Error handling */
+    EtsClass *coreOutOfMemoryError {};
+    EtsClass *coreException {};
+    EtsClass *coreStackTraceElement {};
 
-    EtsClass *escompatArray;
-    EtsClass *escompatArrayBuffer;
-    EtsClass *containersArrayAsListInt;
+    /* StringBuilder */
+    EtsClass *coreStringBuilder {};
 
-    EtsClass *interopJSValue;
+    /* Concurrency classes */
+    EtsClass *corePromise {};
+    EtsClass *coreJob {};
+    EtsMethod *corePromiseSubscribeOnAnotherPromise {};
+    EtsClass *corePromiseRef {};
+    EtsClass *coreWaitersList {};
+    EtsClass *coreMutex {};
+    EtsClass *coreEvent {};
+    EtsClass *coreCondVar {};
+    EtsClass *coreQueueSpinlock {};
 
-    EtsClass *coreTupleN;
+    /* Finalization */
+    EtsClass *coreFinalizableWeakRef {};
+    EtsClass *coreFinalizationRegistry {};
+    EtsMethod *coreFinalizationRegistryExecCleanup {};
 
-    EtsClass *coreStackTraceElement;
+    /* Containers */
+    EtsClass *escompatArray {};
+    EtsMethod *escompatArrayPush {};
+    EtsMethod *escompatArrayPop {};
+    EtsClass *escompatArrayBuffer {};
+    EtsClass *escompatInt8Array {};
+    EtsClass *escompatUint8Array {};
+    EtsClass *escompatUint8ClampedArray {};
+    EtsClass *escompatInt16Array {};
+    EtsClass *escompatUint16Array {};
+    EtsClass *escompatInt32Array {};
+    EtsClass *escompatUint32Array {};
+    EtsClass *escompatFloat32Array {};
+    EtsClass *escompatFloat64Array {};
+    EtsClass *escompatBigInt64Array {};
+    EtsClass *escompatBigUint64Array {};
+    EtsClass *containersArrayAsListInt {};
+    EtsClass *escompatRecord {};
+    EtsMethod *escompatRecordGetter {};
+    EtsMethod *escompatRecordSetter {};
 
-    EtsClass *coreFinalizableWeakRef;
-    EtsClass *coreFinalizationRegistry;
-    EtsMethod *coreFinalizationRegistryExecCleanup;
+    /* InteropJS */
+    EtsClass *interopJSValue {};
 
-    EtsClass *coreRuntimeLinker;
-    EtsClass *coreBootRuntimeLinker;
-    EtsClass *coreAbcRuntimeLinker;
-    EtsClass *memoryRuntimeLinker;
-    EtsClass *coreAbcFile;
+    /* TypeAPI */
+    EtsClass *coreField {};
+    EtsClass *coreMethod {};
+    EtsClass *coreParameter {};
+    EtsClass *coreClassType {};
 
-    EtsClass *coreField;
-    EtsClass *coreMethod;
-    EtsClass *coreParameter;
+    /* escompat.Process */
+    EtsClass *escompatProcess {};
+    EtsMethod *escompatProcessListUnhandledJobs {};
+    EtsMethod *escompatProcessListUnhandledPromises {};
 
-    EtsClass *escompatRecord;
-    EtsMethod *escompatRecordGetter;
-    EtsMethod *escompatRecordSetter;
+    EtsClass *escompatRegExpExecArray {};
+    EtsClass *escompatJsonReplacer {};
 
-    EtsClass *escompatProcess;
-    EtsMethod *escompatProcessListUnhandledJobs;
-    EtsMethod *escompatProcessListUnhandledPromises;
-
-    EtsClass *coreTuple;
-    EtsClass *escompatRegExpExecArray;
-    EtsClass *escompatJsonReplacer;
+    struct Entry {
+        size_t slotIndex {};
+    };
 
     /* Internal Caches */
     void CreateAndInitializeCaches();
@@ -106,12 +145,40 @@ public:
     {
         return asciiCharCache_;
     }
+    Entry const *GetTypeEntry(const uint8_t *descriptor) const;
+
+    EtsClass *escompatMap {};
+    EtsClass *escompatMapEntry {};
+
+public:
+    static constexpr size_t GetCoreLongTypeOffset()
+    {
+        return MEMBER_OFFSET(EtsPlatformTypes, coreLong);
+    }
+    static constexpr size_t GetCoreFloatTypeOffset()
+    {
+        return MEMBER_OFFSET(EtsPlatformTypes, coreFloat);
+    }
+    static constexpr size_t GetCoreDoubleTypeOffset()
+    {
+        return MEMBER_OFFSET(EtsPlatformTypes, coreDouble);
+    }
 
 private:
     friend class EtsClassLinkerExtension;
     friend class mem::Allocator;
     mutable EtsTypedObjectArray<EtsString> *asciiCharCache_ {nullptr};
+    void PreloadType(EtsClassLinker *linker, EtsClass **slot, std::string_view descriptor);
+    PandaUnorderedMap<const uint8_t *, Entry, utf::Mutf8Hash, utf::Mutf8Equal> entryTable_;
+
     explicit EtsPlatformTypes(EtsCoroutine *coro);
+
+    /**
+     * @brief Initialize all classes.
+     * This method must be called after construction of `EtsPlatformTypes`
+     * to ensure correct initialization of all classes
+     */
+    void InitializeClasses(EtsCoroutine *coro);
 };
 // NOLINTEND(misc-non-private-member-variables-in-classes)
 

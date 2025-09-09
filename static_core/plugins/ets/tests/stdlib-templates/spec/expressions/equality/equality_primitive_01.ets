@@ -25,8 +25,8 @@ function main(): void {
   let right: {{.item.type2}} = {{.item.value2}} as {{.item.type2}}
   let result1: boolean = left == right
   let result2: boolean = left === right
-  assertEQ(result1, result2)
-  assertEQ(result1, {{.item.result}})
+  arktest.assertEQ(result1, result2)
+  arktest.assertEQ(result1, {{.item.result}})
 }
 
 {%- endfor %}

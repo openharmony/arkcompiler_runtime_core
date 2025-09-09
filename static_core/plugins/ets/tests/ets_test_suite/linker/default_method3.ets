@@ -25,6 +25,6 @@ abstract class A1 implements I1 {}
 class A2 extends A1 implements I2 {}
 
 function main() {
-    assertEQ(((x: I1) => x.foo())(new A2()), "I2");
-    assertEQ(((x: I2) => x.foo())(new A2()), "I2");
+    arktest.assertEQ(((x: I1) => x.foo())(new A2()), "I2");
+    arktest.assertEQ(((x: I2) => x.foo())(new A2()), "I2");
 }

@@ -1,3 +1,4 @@
+'use static'
 /*
  * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,6 +25,5 @@ export declare interface Calculator {
 }
 export declare interface I {
     foo(a: number): void;
-    foo(a?: number): void;
     setAge(age: number): void;
 }

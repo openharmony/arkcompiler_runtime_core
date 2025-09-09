@@ -12,12 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include "applicationInfo.proj.hpp"
 #include "applicationInfo.impl.hpp"
-#include "taihe/runtime.hpp"
-#include "stdexcept"
 #include <iostream>
+#include "applicationInfo.proj.hpp"
+#include "stdexcept"
+#include "taihe/runtime.hpp"
 
 using namespace taihe;
 using namespace applicationInfo;
@@ -28,6 +27,7 @@ namespace {
 class ApplicationInfoImpl {
 public:
     int32_t applicationInfoImpl = 102;
+
     ApplicationInfoImpl() {}
 
     string GetName()

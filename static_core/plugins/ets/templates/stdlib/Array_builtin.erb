@@ -43,7 +43,7 @@ class BuiltinArrayKeysIterator implements IterableIterator<number> {
             this.isDone = true
             return new IteratorResult<number>()
         }
-        return new IteratorResult<number>(this.idx++ as number)
+        return new IteratorResult<number>((this.idx++).toDouble())
     }
 
     override $_iterator(): IterableIterator<number> {
@@ -176,10 +176,10 @@ export function concat<%= ctx.this_generic %>(self: <%= ctx.this_type %>, fst: <
  *
  * @note Mutating method
  */
-export function sort<%= ctx.this_generic %>(<%= ctx.this_arg %>comparator: (a: <%= ctx.el_type %>, b: <%= ctx.el_type %>) => number): <%= ctx.this_return_type %> {
+export function sort<%= ctx.this_generic %>(<%= ctx.this_arg %>comparator: (a: <%= ctx.el_type %>, b: <%= ctx.el_type %>) => number, start?: int, end?: int): <%= ctx.this_return_type %> {
 %   sort_elem_type = ctx.el_type == 'T' ? 'NullishType' : ctx.el_type
 %   from_sort_elem_type = ctx.el_type == 'T' ? ' as T' : ''
-    sort_subarray(self<%= ctx.el_type == 'T' ? ' as FixedArray<NullishType>' : '' %>, 0, self.length, (l: <%= sort_elem_type %>, r: <%= sort_elem_type %>): boolean => {
+    sort_subarray(self<%= ctx.el_type == 'T' ? ' as FixedArray<NullishType>' : '' %>, (start == undefined) ? 0 : start!, (end == undefined) ? self.length : end!, (l: <%= sort_elem_type %>, r: <%= sort_elem_type %>): boolean => {
         return comparator(l<%= from_sort_elem_type %>, r <%= from_sort_elem_type %>) < 0;
     });
     return self;
@@ -215,14 +215,14 @@ export function keys<%= ctx.this_generic %>(self: <%= ctx.this_type %>): Iterabl
 function builtin_insertion_sort<T>(arr: FixedArray<T>, startIndex: int, endIndex: int, comp: (lhs: T, rhs: T) => number): void {
     for (let i = startIndex + 1; i < endIndex; i++) {
         const tmp = arr[i];
-        if (comp(tmp, arr[startIndex]) as int < 0) {
+        if ((comp(tmp, arr[startIndex]).toInt()) < 0) {
             for (let j = i; j > startIndex; j--) {
                 arr[j] = arr[j - 1]
             }
             arr[startIndex] = tmp
         } else {
             let j = i - 1;
-            while (comp(tmp, arr[j]) as int < 0) {
+            while ((comp(tmp, arr[j]).toInt()) < 0) {
                 arr[j + 1] = arr[j];
                 j--;
             }
@@ -246,7 +246,7 @@ function perform_merge<T>(arr: FixedArray<T>, startIndex: int, midIndex: int, en
     let j = 0;
     let k = startIndex;
     while (i < len1 && j < len2) {
-        if (comp(left[i]!, right[j]!) as int <= 0) {
+        if ((comp(left[i]!, right[j]!).toInt()) <= 0) {
             arr[k] = left[i]!;
             i++;
         } else {
@@ -326,9 +326,8 @@ function stringified_insertion_sort<T>(arr: FixedArray<T>, arrStr: FixedArray<bu
 function stringified_perform_merge<T>(arr: FixedArray<T>, arrStr: FixedArray<buffStr>, startIndex: int, midIndex: int, endIndex: int): void {
     const len1 = midIndex - startIndex + 1;
     const len2 = endIndex - midIndex;
-    type buffType = T | undefined
-    let left : FixedArray<buffType> = new buffType[len1]
-    let right : FixedArray<buffType> = new buffType[len2]
+    let left: (T | undefined)[] = new Array<T | undefined>(len1);
+    let right: (T | undefined)[] = new Array<T | undefined>(len2);
     let leftStr : FixedArray<buffStr> = new buffStr[len1]
     let rightStr : FixedArray<buffStr> = new buffStr[len2]
     for (let i = 0; i < len1; i++) {
@@ -407,7 +406,7 @@ export function sort_default<T>(arr: FixedArray<T>, arrStr: FixedArray<buffStr>,
 export function reduce<U, T>(self: Array<U>, callbackfn: (previousValue: T, currentValue: U, index: number, array: Array<U>) => T, initialValue: T): T {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = callbackfn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i.toDouble(), self)
     }
     return acc
 }

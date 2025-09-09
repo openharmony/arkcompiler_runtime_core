@@ -24,10 +24,10 @@ cases:
           try {
               a = [foo(cnt++), foo(cnt++), foo(cnt++), foo(cnt++), foo(cnt++)]
           } catch (e) {
-              assertTrue( a.length == 1 && a[0] == 42 )
+              arktest.assertTrue( a.length == 1 && a[0] == 42 )
               return
           }
-          assertTrue( false )
+          arktest.assertTrue( false )
 
     - decl: |-
           function foo(p: boolean): boolean {
@@ -41,7 +41,7 @@ cases:
           try {
               a = [foo(false), foo(false), foo(true), foo(false), foo(false)]
           } catch (e) {
-              assertTrue( a.length == 0 )
+              arktest.assertTrue( a.length == 0 )
               return
           }
-          assertTrue( false )
+          arktest.assertTrue( false )

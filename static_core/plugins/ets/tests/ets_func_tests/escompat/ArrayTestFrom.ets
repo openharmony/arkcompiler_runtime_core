@@ -18,7 +18,7 @@ const fail    : int = 1;
 
 
 function main(): int {
-    const suite = new ArkTestsuite("Array .from API tests ")
+    const suite = new arktest.ArkTestsuite("Array .from API tests ")
 
     suite.addTest("Test method from builtin array and () => U callback", testFromBuiltinArray0);
     suite.addTest("Test method from builtin array and (value: T) => U callback", testFromBuiltinArray1);
@@ -42,10 +42,10 @@ function testF(
     const expected = args[2]
     const a = fromCallFn(args[0], args[1])
     console.log(expected, a);
-    assertEQ(a.length, expected.length, "Source and final array length mismatch")
+    arktest.assertEQ(a.length, expected.length, "Source and final array length mismatch")
     let r = success
     for (let i = 0; i < a.length; ++i) {
-        assertEQ(
+        arktest.assertEQ(
             a[i], expected[i],
              `Array values mismatch at ${i} index. Expected "${expected[i]}", got "${a[i]}"`
         );

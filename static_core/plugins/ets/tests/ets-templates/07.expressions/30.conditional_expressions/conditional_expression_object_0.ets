@@ -25,5 +25,5 @@ function main(): void {
   let b: B = new B();
 
   let x = true ? a : b;
-  assertTrue(x instanceof Int|B)
+  arktest.assertTrue(x instanceof Int|B)
 }

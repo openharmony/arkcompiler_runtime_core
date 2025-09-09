@@ -31,5 +31,5 @@ function main(): void {
     let foo = new Foo((resolve: (value: int) => void): void => {
         resolve(5);
     });
-    assertEQ(foo.value, 5);
+    arktest.assertEQ(foo.value, 5);
 }

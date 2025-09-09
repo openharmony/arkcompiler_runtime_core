@@ -22,7 +22,7 @@ function checkConversionExponentialToInt(): boolean {
 }
 
 function checkConversionExponentialToNumber(): boolean {
-    const val = parseInt(tsExponential);
+    const val = parseInt(tsExponential).toDouble();
 
     return typeof val == 'number';
 }
@@ -52,7 +52,7 @@ function checkConversionExponentialToLong(): boolean {
 }
 
 function checkConversionExponentialToDouble(): boolean {
-    const val = parseInt(tsExponential);
+    const val = parseInt(tsExponential).toDouble();
 
     return typeof val == 'number';
 }

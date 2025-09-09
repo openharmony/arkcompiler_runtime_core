@@ -74,9 +74,16 @@ options:
     description: Output boot file path. CHA will not be validated. Incompatible with --paoc-output
 
   - name: paoc-methods-from-file
-    type: std::string
-    default: ""
-    description: Path to a file which contains methods to compile
+    description: Use white or black lists to filter methods to compile
+    sub_options:
+    - name: path
+      type: std::string
+      default: none
+      description: Path to the file which contains methods
+    - name: iswhite
+      type: bool
+      default: true
+      description: use the file as white or black list
 
   - name: paoc-generate-symbols
     type: bool

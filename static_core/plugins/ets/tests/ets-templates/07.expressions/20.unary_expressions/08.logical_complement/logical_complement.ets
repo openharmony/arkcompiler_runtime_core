@@ -21,7 +21,7 @@ params: {{lc.origin}} => {{lc.dest}}
 
 function main(): void {
   let a = {{lc.origin}};
-  assertEQ(!a, {{lc.dest}});
+  arktest.assertEQ(!a, {{lc.dest}});
 }
 
 {% endfor %}

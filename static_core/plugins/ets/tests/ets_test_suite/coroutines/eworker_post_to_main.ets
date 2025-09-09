@@ -15,22 +15,22 @@
 
  let mainId = CoroutineExtras.getWorkerId();
 
-function main() {
+function testEworkerPost2Main() {
     let job1 = EAWorker.postToMain<int>(():int => {
         let runId = CoroutineExtras.getWorkerId();
-        assertEQ(runId, mainId);
+        arktest.assertEQ(runId, mainId);
         return runId;
     });
 
     let job2 = EAWorker.postToMain<int>(():int => {
         let runId = CoroutineExtras.getWorkerId();
-        assertEQ(runId, mainId);
+        arktest.assertEQ(runId, mainId);
         return runId;
     });
 
     let job3 = launch<int, () => int>(():int => {
         let runId = CoroutineExtras.getWorkerId();
-        assertNE(runId, mainId);
+        arktest.assertNE(runId, mainId);
         return runId;
     });
 
@@ -38,8 +38,14 @@ function main() {
     let runId2 = job2.Await();
     let runId3 = job3.Await();
 
-    assertEQ(runId1, runId2);
-    assertNE(runId1, runId3);
+    arktest.assertEQ(runId1, runId2);
+    arktest.assertNE(runId1, runId3);
 }
 
+function main(): int {
+    let testSuite = new arktest.ArkTestsuite('coroutines.eworker_post_to_main');
+    testSuite.addTest('testEworkerPost2Main', testEworkerPost2Main);
+    let res = testSuite.run();
+    return res;
+}
 

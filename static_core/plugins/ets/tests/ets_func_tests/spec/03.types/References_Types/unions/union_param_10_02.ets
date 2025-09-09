@@ -29,5 +29,5 @@ function log(param: Margin | null ): Margin | null  {
 function main(): void {
     let a: Margin = "5 px"
     let b: Margin | null = log(a)
-    assertEQ( a, b)
+    arktest.assertEQ( a, b)
 }

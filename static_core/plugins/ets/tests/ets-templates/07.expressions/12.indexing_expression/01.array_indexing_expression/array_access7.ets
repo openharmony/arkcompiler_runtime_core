@@ -24,8 +24,8 @@ desc: >-
 let arr: int[] = [1, 2, 3];
 
 function main(): void {
-  let x: Float = new Float(1.0)
-  let y: Double = new Double(2.0)
+  let x: Int = new Int(1)
+  let y: Int = new Int(2)
 
-  assertTrue( arr[x] == 2 && arr[y] == 3 )
+  arktest.assertTrue( arr[x] == 2 && arr[y] == 3 )
 }

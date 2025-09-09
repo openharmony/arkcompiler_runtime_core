@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -314,7 +314,7 @@ void CodeGenStatic::EncodeSpillFillData(const compiler::SpillFillData &sf)
         default:
             move = pandasm::Create_MOV(sf.DstValue(), sf.SrcValue());
     }
-    result_.emplace_back(move);
+    result_.emplace_back(std::move(move));
 }
 
 void CodeGenStatic::VisitSpillFill(GraphVisitor *visitor, Inst *inst)
@@ -343,9 +343,7 @@ static void VisitConstant32(compiler::Inst *inst, std::vector<pandasm::Ins> &res
     auto type = inst->GetType();
     ASSERT(compiler::DataType::Is32Bits(type, Arch::NONE));
 
-    pandasm::Ins movi;
-    auto dstReg = inst->GetDstReg();
-    movi.regs.emplace_back(inst->GetDstReg());
+    auto const dstReg = inst->GetDstReg();
 
     switch (type) {
         case compiler::DataType::BOOL:
@@ -356,20 +354,16 @@ static void VisitConstant32(compiler::Inst *inst, std::vector<pandasm::Ins> &res
         case compiler::DataType::INT32:
         case compiler::DataType::UINT32:
             if (dstReg == compiler::GetAccReg()) {
-                pandasm::Ins ldai = pandasm::Create_LDAI(inst->CastToConstant()->GetInt32Value());
-                res.emplace_back(ldai);
+                res.emplace_back(pandasm::Create_LDAI(inst->CastToConstant()->GetInt32Value()));
             } else {
-                movi = pandasm::Create_MOVI(dstReg, inst->CastToConstant()->GetInt32Value());
-                res.emplace_back(movi);
+                res.emplace_back(pandasm::Create_MOVI(dstReg, inst->CastToConstant()->GetInt32Value()));
             }
             break;
         case compiler::DataType::FLOAT32:
             if (dstReg == compiler::GetAccReg()) {
-                pandasm::Ins ldai = pandasm::Create_FLDAI(inst->CastToConstant()->GetFloatValue());
-                res.emplace_back(ldai);
+                res.emplace_back(pandasm::Create_FLDAI(inst->CastToConstant()->GetFloatValue()));
             } else {
-                movi = pandasm::Create_FMOVI(dstReg, inst->CastToConstant()->GetFloatValue());
-                res.emplace_back(movi);
+                res.emplace_back(pandasm::Create_FMOVI(dstReg, inst->CastToConstant()->GetFloatValue()));
             }
             break;
         default:
@@ -382,28 +376,22 @@ static void VisitConstant64(compiler::Inst *inst, std::vector<pandasm::Ins> &res
     auto type = inst->GetType();
     ASSERT(compiler::DataType::Is64Bits(type, Arch::NONE));
 
-    pandasm::Ins movi;
-    auto dstReg = inst->GetDstReg();
-    movi.regs.emplace_back(inst->GetDstReg());
+    auto const dstReg = inst->GetDstReg();
 
     switch (type) {
         case compiler::DataType::INT64:
         case compiler::DataType::UINT64:
             if (dstReg == compiler::GetAccReg()) {
-                pandasm::Ins ldai = pandasm::Create_LDAI_64(inst->CastToConstant()->GetInt64Value());
-                res.emplace_back(ldai);
+                res.emplace_back(pandasm::Create_LDAI_64(inst->CastToConstant()->GetInt64Value()));
             } else {
-                movi = pandasm::Create_MOVI_64(dstReg, inst->CastToConstant()->GetInt64Value());
-                res.emplace_back(movi);
+                res.emplace_back(pandasm::Create_MOVI_64(dstReg, inst->CastToConstant()->GetInt64Value()));
             }
             break;
         case compiler::DataType::FLOAT64:
             if (dstReg == compiler::GetAccReg()) {
-                pandasm::Ins ldai = pandasm::Create_FLDAI_64(inst->CastToConstant()->GetDoubleValue());
-                res.emplace_back(ldai);
+                res.emplace_back(pandasm::Create_FLDAI_64(inst->CastToConstant()->GetDoubleValue()));
             } else {
-                movi = pandasm::Create_FMOVI_64(dstReg, inst->CastToConstant()->GetDoubleValue());
-                res.emplace_back(movi);
+                res.emplace_back(pandasm::Create_FMOVI_64(dstReg, inst->CastToConstant()->GetDoubleValue()));
             }
             break;
         default:
@@ -472,11 +460,11 @@ void CodeGenStatic::EncodeSta(compiler::Register reg, compiler::DataType::Type t
             std::cerr << "EncodeSta with unknown type" << type << std::endl;
             success_ = false;
     }
-    pandasm::Ins sta;
+    pandasm::Ins sta {};
     sta.opcode = opc;
-    sta.regs.emplace_back(reg);
+    sta.EmplaceReg(reg);
 
-    result_.emplace_back(sta);
+    result_.emplace_back(std::move(sta));
 }
 
 static pandasm::Opcode ChooseCallOpcode(compiler::Opcode op, size_t nargs)
@@ -568,22 +556,22 @@ void CodeGenStatic::CallHandler(GraphVisitor *visitor, Inst *inst, std::string m
             ASSERT(reg - startReg == static_cast<int>(i - start));  // check 'range-ness' of registers
         }
 #endif  // !NDEBUG
-        ins.regs.emplace_back(inst->GetSrcReg(start));
+        ins.EmplaceReg(inst->GetSrcReg(start));
     } else {
         for (size_t i = start; i < sfCount; ++i) {
             auto reg = inst->GetSrcReg(i);
             ASSERT(reg < NUM_COMPACTLY_ENCODED_REGS || reg == compiler::GetAccReg());
             if (reg == compiler::GetAccReg()) {
                 ASSERT(inst->IsCallOrIntrinsic());
-                ins.imms.emplace_back(static_cast<int64_t>(i));
+                ins.EmplaceImm(i);
                 ins.opcode = ChooseCallAccOpcode(ins.opcode);
             } else {
-                ins.regs.emplace_back(reg);
+                ins.EmplaceReg(reg);
             }
         }
     }
-    ins.ids.emplace_back(std::move(methodId));
-    enc->result_.emplace_back(ins);
+    ins.EmplaceID(std::move(methodId));
+    enc->result_.emplace_back(std::move(ins));
     if (inst->GetDstReg() != compiler::GetInvalidReg() && inst->GetDstReg() != compiler::GetAccReg()) {
         enc->EncodeSta(inst->GetDstReg(), inst->GetType());
     }

@@ -29,7 +29,7 @@ import(path)
 		try {
 			delete value.ClassA;
 		} catch (error) {
-			ASSERT_TRUE(error.toString() === 'TypeError: Cannot delete property');
+			ASSERT_TRUE(error.toString() == 'TypeError: Cannot delete property');
 			let ClassA = value.ClassA;
 			let a = new ClassA();
 			ASSERT_TRUE(typeof a.foo === 'function' && value.foo() === 'this is 1.2 foo ets');
@@ -39,7 +39,7 @@ import(path)
 		try {
 			delete value.a;
 		} catch (error) {
-			ASSERT_TRUE(error.toString() === 'TypeError: Cannot delete property');
+			ASSERT_TRUE(error.toString() == 'TypeError: Cannot delete property');
 			ASSERT_TRUE(value.a === 'this is 1.2 classA ets');
 		}
 
@@ -47,7 +47,7 @@ import(path)
 		try {
 			delete value.foo;
 		} catch (error) {
-			ASSERT_TRUE(error.toString() === 'TypeError: Cannot delete property');
+			ASSERT_TRUE(error.toString() == 'TypeError: Cannot delete property');
 			ASSERT_TRUE(typeof value.foo === 'function' && value.foo() === 'this is 1.2 foo ets');
 		}
 
@@ -63,13 +63,13 @@ import(path)
     _$init$_
    */
 		let keys = Reflect.ownKeys(value);
-		ASSERT_TRUE(keys.length === 8);
+		ASSERT_TRUE(keys.length == 8);
 
 		// SetProperty
 		try {
-			value["ClassA"] = {};
+			value.ClassA = {};
 		} catch (error) {
-			ASSERT_TRUE(error.toString() === 'TypeError: Cannot assign to read only property of Object Module');
+			ASSERT_TRUE(error.toString() == 'TypeError: Cannot assign to read only property of Object Module');
 			let ClassA = value.ClassA;
 			let a = new ClassA();
 			ASSERT_TRUE(typeof a.foo === 'function' && a.foo() === 'this is 1.2 classA ets');
@@ -77,17 +77,17 @@ import(path)
 
 		// SetProperty
 		try {
-			value["a"] = {};
+			value.a = {};
 		} catch (error) {
-			ASSERT_TRUE(error.toString() === 'TypeError: Cannot assign to read only property of Object Module');
+			ASSERT_TRUE(error.toString() == 'TypeError: Cannot assign to read only property of Object Module');
 			ASSERT_TRUE(value.a === 'this is 1.2 classA ets');
 		}
 
 		// SetProperty
 		try {
-			value["foo"] = {};
+			value.foo = {};
 		} catch (error) {
-			ASSERT_TRUE(error.toString() === 'TypeError: Cannot assign to read only property of Object Module');
+			ASSERT_TRUE(error.toString() == 'TypeError: Cannot assign to read only property of Object Module');
 			ASSERT_TRUE(typeof value.foo === 'function' && value.foo() === 'this is 1.2 foo ets');
 		}
 

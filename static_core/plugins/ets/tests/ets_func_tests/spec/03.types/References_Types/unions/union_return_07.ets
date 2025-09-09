@@ -31,5 +31,5 @@ function format_string(): Margin {
 
 function main(): void {
     let a: Object = format_string()
-    assertEQ( a, "5 px")
+    arktest.assertEQ( a, "5 px")
 }

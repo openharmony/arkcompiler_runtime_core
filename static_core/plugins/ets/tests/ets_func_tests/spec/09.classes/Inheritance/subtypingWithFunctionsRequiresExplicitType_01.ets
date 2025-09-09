@@ -36,5 +36,5 @@ function main(): void {
     };
     global_a = 0
     foo(fooLambdaA);
-    assertEQ( global_a, 1)
+    arktest.assertEQ( global_a, 1)
 }

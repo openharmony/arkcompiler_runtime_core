@@ -17,9 +17,10 @@
 
 /*---
 desc: {{stm.desc}}
-tags:
-- negative
+
 ---*/
+
+{{stm.decl}}
 
 function main(): void {
     {{stm.logic}}

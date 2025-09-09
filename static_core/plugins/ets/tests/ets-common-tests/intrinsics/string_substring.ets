@@ -15,9 +15,9 @@
 
 const DUMP: boolean = false;
 const HITS_EXPECTED: int = 40;
-let golden: String = 'abc\u03a3\u03a8\u03a90123456789!';
-let strlenPlus1: int = golden.getLength() + 1;
-let hits: int = 0;
+let Golden: String = 'abc\u03a3\u03a8\u03a90123456789!';
+let strlenPlus1: int = Golden.getLength() + 1;
+
 
 let stringTable1: String[] = [
     'abcΣΨΩ0123456789!',
@@ -61,9 +61,23 @@ let stringTable2: String[] = [
     'abcΣΨΩ0123456789!'
 ];
 
+let s_front: String = 'abc\u03a3\u03a8\u03a9';
+let s_end: String = '0123456789!';
+let Silver: String = s_front.concat(s_end);
+
+let MoreString: String = 'dabcΣΨΩ0123456789!?';
+let Copper: String = MoreString.substring(1, MoreString.length - 1);
 
 function main(): int {
+    let suite = new arktest.ArkTestsuite('StringSubstring');
+    suite.addTest('testString', () => { arktest.assertEQ(testString(Golden), 0, 'test LineString'); });
+    suite.addTest('testStringTable1', () => { arktest.assertEQ(testString(Silver), 0, 'test TreeString'); });
+    suite.addTest('testStringTable2', () => { arktest.assertEQ(testString(Copper), 0, 'test SlicedString'); });
+    return suite.run();
+}
 
+function testString(golden: String): int {
+    let hits: int = 0;
     for (let i: int = 0; i <= golden.getLength(); ++i) {
         let subs: String = golden.substring(i, golden.getLength());
         arktest.assertLT(i, stringTable1.length);
@@ -71,8 +85,8 @@ function main(): int {
             ++hits;
         }
         if (DUMP) {
-			console.println(subs);
-		}
+            console.println(subs);
+        }
     }
     for (let i: int = 0; i <= golden.getLength(); ++i) {
         arktest.assertLT(i, stringTable2.length);
@@ -81,8 +95,8 @@ function main(): int {
             ++hits;
         }
         if (DUMP) {
-			console.println(subs);
-		}
+            console.println(subs);
+        }
     }
 
     arktest.assertLT(golden.getLength(), strlenPlus1);

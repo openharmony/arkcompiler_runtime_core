@@ -248,7 +248,7 @@ def parseFile(filePath, cls)
 end
 
 parsed_functions = []
-parsed_functions += parseFile("../include/cpp/headers/core/annotation_interface.h", "Annotation")
+parsed_functions += parseFile("../include/libabckit/cpp/headers/core/annotation_interface.h", "Annotation")
 
 cpp_tests_erb = File.join(abckit_test, "cpp_api_test.cpp.erb")
 testfile_fullpath = File.join(abckit_test, "cpp_api_gtests_gen.cpp")

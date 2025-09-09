@@ -64,6 +64,8 @@ export enum FaultID {
   GeneratorFunction,
   FunctionContainsThis,
   NoOptionalMemberFunction,
+  ReservedFuncParameter,
+  RestParameterArray,
   PropertyAccessByIndex,
   JsxElement,
   EnumMemberNonConstInit,
@@ -87,6 +89,7 @@ export enum FaultID {
   Prototype,
   GlobalThis,
   UtilityType,
+  TemplateLiteralType,
   PropertyDeclOnFunction,
   FunctionApplyCall,
   FunctionBind,
@@ -134,7 +137,6 @@ export enum FaultID {
   InstanceType,
   NoEmptyImport,
   NoEmptyExport,
-  TypeGeneric,
   LimitExtends,
   PropertyAccessExpression,
   NoBuiltInType,
@@ -142,8 +144,10 @@ export enum FaultID {
   RemoveLimitDecorator,
   TupleTypeToArray,
   StructDeclaration,
+  FunctionType,
   NoVoidUnionType,
   ConstLiteralToType,
+  AddDeclareToClass,
   // this should always be last enum
   LAST_ID
 }

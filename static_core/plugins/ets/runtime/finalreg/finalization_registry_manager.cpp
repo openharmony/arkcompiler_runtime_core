@@ -115,10 +115,11 @@ void FinalizationRegistryManager::StartCleanupCoroIfNeeded(EtsCoroutine *coro)
         auto *event = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(nullptr, coroManager);
         Method *cleanup = PlatformTypes(vm_)->coreFinalizationRegistryExecCleanup->GetPandaMethod();
         auto launchMode =
-            coroManager->IsMainWorker(coro) ? CoroutineLaunchMode::MAIN_WORKER : CoroutineLaunchMode::DEFAULT;
+            coro->GetWorker()->IsMainWorker() ? CoroutineLaunchMode::MAIN_WORKER : CoroutineLaunchMode::DEFAULT;
         auto args = PandaVector<Value> {Value(objArray->GetCoreType()), Value(static_cast<uint32_t>(launchMode))};
-        [[maybe_unused]] bool launchResult = coroManager->Launch(event, cleanup, std::move(args), launchMode,
-                                                                 CoroutinePriority::DEFAULT_PRIORITY, false);
+        [[maybe_unused]] bool launchResult =
+            coroManager->Launch(event, cleanup, std::move(args), launchMode, CoroutinePriority::DEFAULT_PRIORITY, false,
+                                CoroutineWorkerGroup::ANY_ID);
         ASSERT(launchResult);
     }
 }

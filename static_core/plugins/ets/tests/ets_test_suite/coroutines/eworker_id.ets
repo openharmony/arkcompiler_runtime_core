@@ -15,20 +15,28 @@
 
 let mainId = CoroutineExtras.getWorkerId();
 
-function main() {
+function testEworkerId() {
     let w = new EAWorker();
+    w.start();
     let p1 = w.run<int>(():int => {
         let runId = CoroutineExtras.getWorkerId();
-        assertNE(runId, mainId);
+        arktest.assertNE(runId, mainId);
         return runId;
     });
     let p2 = w.run<int>(():int => {
         let runId = CoroutineExtras.getWorkerId();
-        assertNE(runId, mainId);
+        arktest.assertNE(runId, mainId);
         return runId;
     });
     w.join();
     let runId1 = p1.Await();
     let runId2 = p2.Await();
-    assertEQ(runId1, runId2);
+    arktest.assertEQ(runId1, runId2);
+}
+
+function main(): int {
+    let testSuite = new arktest.ArkTestsuite('coroutines.eworker_id');
+    testSuite.addTest('testEworkerId', testEworkerId);
+    let res = testSuite.run();
+    return res;
 }

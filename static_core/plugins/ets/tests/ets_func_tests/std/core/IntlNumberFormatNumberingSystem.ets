@@ -14,7 +14,7 @@
  */
 
 function main(): int {
-    let suite = new ArkTestsuite("Intl. NumberFormat numberingSystem ");
+    let suite = new arktest.ArkTestsuite("Intl. NumberFormat numberingSystem ");
     suite.addTest("testNumberingSystem ", testNumberingSystem);
     return suite.run();
 }
@@ -26,7 +26,7 @@ function testNumberingSystem() {
     for (const l of locales) {
         const nf = new Intl.NumberFormat(l);
         const result = nf.resolvedOptions().numberingSystem;
-        assertEQ(expected[i], result, "#" + i + " test-case for " + l);
+        arktest.assertEQ(expected[i], result, "#" + i + " test-case for " + l);
         i++
     }
 }

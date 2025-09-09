@@ -41,7 +41,6 @@ function init() {
 		'panda-files': gtestAbcPath,
 		'boot-panda-files': `${stdlibPath}:${gtestAbcPath}`,
 		'gc-trigger-type': 'heap-trigger',
-		'load-runtimes': 'ets',
 		'compiler-enable-jit': 'false',
 		'run-gc-in-place': 'true',
 		'coroutine-impl': 'stackful',
@@ -104,14 +103,14 @@ function runAwaitTest(name, promiseCreator, promiseResolver) {
 	let anotherRes = doAwait(res);
 	msg('Called doAwait OK, res: ', INFO);
 	msg(anotherRes, INFO);
-	setTimeout(() => {
+	helper.setTimeout(() => {
 		if (testSuccess) {
 			throw Error('Promise must not be resolved until JS resolves the passed one');
 		}
 		// resolve the passed promise if necessary
 		promiseResolver(PROMISE_RESOLVE_VALUE);
 		// after Q is processed, the test should pass
-		setTimeout(async () => {
+		helper.setTimeout(async () => {
 			msg('Starting await of doAwait() result, its state is:', INFO);
 			msg(anotherRes, INFO);
 			await anotherRes;

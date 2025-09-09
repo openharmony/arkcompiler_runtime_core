@@ -17,7 +17,12 @@ set(ANI_HELPERS_SOURCES
 )
 
 if (PANDA_ETS_INTEROP_JS)
-    set(ANI_HELPERS_SOURCES ${ANI_HELPERS_SOURCES} interop_js/arkts_esvalue.cpp interop_js/hybridgref_ani.cpp interop_js/hybridgref_napi.cpp)
+    list(APPEND ANI_HELPERS_SOURCES
+        interop_js/arkts_esvalue.cpp
+        interop_js/arkts_interop_js_api.cpp
+        interop_js/hybridgref_ani.cpp
+        interop_js/hybridgref_napi.cpp
+    )
 endif()
 
 panda_add_library(ani_helpers SHARED ${ANI_HELPERS_SOURCES})

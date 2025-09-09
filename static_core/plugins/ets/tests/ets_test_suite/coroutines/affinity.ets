@@ -60,53 +60,62 @@ function check_sync_id_nonmain(number_of_coros: int): int {
 }
 
 function check_default_policy(): int {
-    L.log("Testing the DEFAULT affinity type");
+    L.log('Testing the DEFAULT affinity type');
 
     if (check_async_id() != 0) {
-        L.logError("async function's worker ID is different from launcher function's worker ID");
+        L.logError('async function worker ID is different from launcher function worker ID');
         return 1;
     }
     return 0;
 }
 
 function check_nonmain_policy(): int {
-    L.log("Testing the NON_MAIN affinity type");
+    L.log('Testing the NON_MAIN affinity type');
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
 
     if (check_async_id() != 0) {
-        L.logError("async function's worker ID is different from launcher function's worker ID");
+        L.logError('async function worker ID is different from launcher function worker ID');
         return 1;
     }
     if (check_sync_id_nonmain(15) != 0) {
-        L.logError("regular coroutine's worker ID is the same as MAIN worker ID");
+        L.logError('regular coroutine worker ID is the same as MAIN worker ID');
         return 1;
     }
     return 0;
 }
 
-export function main(): int {
-    // Call L's enableLogging method to enable logs.
-
+function testAsyncDefaultPolicy(): void {
     // Test 1. Check that the async function will execute on the same worker
     if (check_default_policy() != 0) {
-        L.logError("test for the DEFAULT affinity type failed");
-        return 1;
+        arktest.assertTrue(false, 'test for the DEFAULT affinity type failed');
     }
+}
 
+function testAsyncNonMainPolicy(): void {
     /**
      * Test 2. Check that POLICY_NON_MAIN does not affect async functions,
      * while regular coroutines will execute on non-MAIN workers.
      */
     if (check_nonmain_policy() != 0) {
-        L.logError("test for the NON_MAIN affinity type failed");
-        return 1;
+        arktest.assertTrue(false, 'test for the NON_MAIN affinity type failed');
     }
+}
 
+// to be implemented, not add to ArkTestsuite currently
+function testExclusiveLaunchFlag(): void {
     /**
      * Test 3. Check that EXCLUSIVE launch flag works
      */
     // NOTE(konstanting): will be added later (see #14697)
+}
 
-    return 0;
+
+function main(): int {
+    // Call L's enableLogging method to enable logs.
+    let testSuite = new arktest.ArkTestsuite('coroutines.affinity');
+    testSuite.addTest('testAsyncDefaultPolicy', testAsyncDefaultPolicy);
+    testSuite.addTest('testAsyncNonMainPolicy', testAsyncNonMainPolicy);
+    let res = testSuite.run();
+    return res;
 }
 

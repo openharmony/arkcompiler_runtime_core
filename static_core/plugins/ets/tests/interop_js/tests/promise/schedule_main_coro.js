@@ -42,7 +42,7 @@ function runTest() {
         const isWasScheduled = etsVm.getFunction(globalName, 'wasScheduled');
         let wasSchedulded = isWasScheduled();
         if (wasSchedulded) {
-            clearInterval(tId);
+            helper.clearInterval(tId);
         }
     };
 
@@ -50,7 +50,7 @@ function runTest() {
     waitUntillJsIsReady();
     const jsIsReady = etsVm.getFunction(globalName, 'jsIsReady');
     jsIsReady();
-    tId = setInterval(waitForSchedule, 0);
+    tId = helper.setInterval(waitForSchedule, 0);
 }
 
 runTest();

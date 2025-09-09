@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 
-#include "libabckit/include/c/extensions/arkts/metadata_arkts.h"
+#include "libabckit/c/extensions/arkts/metadata_arkts.h"
 #include "helpers/helpers.h"
 #include "metadata_inspect_impl.h"
 

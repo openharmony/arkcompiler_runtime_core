@@ -31,12 +31,12 @@ function main(): void {
     let a = 5
     nested() {
         fa() {
-            assertEQ( a, 5)
+            arktest.assertEQ( a, 5)
             a = 4
         }
-        assertEQ( a, 4)
+        arktest.assertEQ( a, 4)
         a = 3
     }
-    assertEQ( a, 3)
+    arktest.assertEQ( a, 3)
 }
 

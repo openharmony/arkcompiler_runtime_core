@@ -20,16 +20,16 @@ function testBigIntToLocaleString(): void {
     const locale = new Intl.Locale(langTag)
     const num: bigint = 45678n
 
-    assertEQ(num.toLocaleString(langTag, options), "45678")
-    assertEQ(num.toLocaleString(locale, options), "45678")
+    arktest.assertEQ(num.toLocaleString(langTag, options), "45678")
+    arktest.assertEQ(num.toLocaleString(locale, options), "45678")
 
-    assertEQ(num.toLocaleString(langTag), "45,678")
-    assertEQ(num.toLocaleString(locale), "45,678")
-    assertEQ(num.toLocaleString(), num.toLocaleString(undefined))
+    arktest.assertEQ(num.toLocaleString(langTag), "45,678")
+    arktest.assertEQ(num.toLocaleString(locale), "45,678")
+    arktest.assertEQ(num.toLocaleString(), num.toLocaleString(undefined))
 }
 
 function main(): int {
-    const suite = new ArkTestsuite("BigInt")
+    const suite = new arktest.ArkTestsuite("BigInt")
     suite.addTest("toLocaleString", testBigIntToLocaleString)
     return suite.run()
 }

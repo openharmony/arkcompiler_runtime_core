@@ -18,4 +18,4 @@ console.println("Hello, World!");
 let x: int = 5;
 x+=2
 
-let z: float = 3.0;
+let z: float = 3.0f;

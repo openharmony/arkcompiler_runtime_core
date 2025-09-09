@@ -217,13 +217,17 @@ napi_value ConstStringStorage::InitBuffer(size_t length)
 CommonJSObjectCache::CommonJSObjectCache(InteropCtx *ctx) : ctx_(ctx)
 {
     InitializeCache();
+    InitializeRecordProto();
 }
 
 CommonJSObjectCache::~CommonJSObjectCache()
 {
+    napi_env env = ctx_->GetJSEnv();
     if (proxyRef_ != nullptr) {
-        napi_env env = ctx_->GetJSEnv();
         napi_delete_reference(env, proxyRef_);
+    }
+    if (recordProtoRef_ != nullptr) {
+        napi_delete_reference(env, recordProtoRef_);
     }
 }
 
@@ -233,6 +237,25 @@ napi_value CommonJSObjectCache::GetProxy() const
         const_cast<CommonJSObjectCache *>(this)->InitializeCache();
     }
     return GetReferenceValue(ctx_->GetJSEnv(), proxyRef_);
+}
+
+napi_value CommonJSObjectCache::GetRecordProto() const
+{
+    if (recordProtoRef_ == nullptr) {
+        const_cast<CommonJSObjectCache *>(this)->InitializeRecordProto();
+    }
+    return GetReferenceValue(ctx_->GetJSEnv(), recordProtoRef_);
+}
+
+void CommonJSObjectCache::InitializeRecordProto()
+{
+    napi_env env = ctx_->GetJSEnv();
+
+    napi_value protoObj;
+    NAPI_CHECK_FATAL(napi_create_object(env, &protoObj));
+    napi_value trueValue = GetBooleanValue(env, true);
+    NAPI_CHECK_FATAL(napi_set_named_property(env, protoObj, IS_STATIC_PROXY.data(), trueValue));
+    NAPI_CHECK_FATAL(napi_create_reference(env, protoObj, 1, &recordProtoRef_));
 }
 
 void CommonJSObjectCache::InitializeCache()
@@ -396,6 +419,10 @@ void InteropCtx::InitExternalInterfaces()
         // It's a hack and we should use INTEROP_CODE_SCOPE to allocate records.
         // Will be fixed in near future.
         InteropCtx::Current()->CallStack().AllocRecord(etsCoro->GetCurrentFrame(), nullptr);
+#if defined(PANDA_TARGET_OHOS) && defined(PANDA_ETS_INTEROP_JS)
+        // Here need to init interop in the given JSVM instance.
+        TryInitInteropInJsEnv(jsEnv);
+#endif
     });
 }
 
@@ -444,14 +471,14 @@ void InteropCtx::InitJsValueFinalizationRegistry(EtsCoroutine *coro)
     ASSERT(jsvalueFregistryRegister_ != nullptr);
 }
 
-EtsObject *InteropCtx::CreateETSCoreESError(EtsCoroutine *coro, JSValue *jsvalue)
+EtsObject *InteropCtx::CreateETSCoreESError(EtsCoroutine *coro, EtsObject *etsObject)
 {
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coro);
-    VMHandle<ObjectHeader> jsvalueHandle(coro, jsvalue->GetCoreType());
+    VMHandle<ObjectHeader> etsObjectHandle(coro, etsObject->GetCoreType());
 
     Method::Proto proto(Method::Proto::ShortyVector {panda_file::Type(panda_file::Type::TypeId::VOID),
                                                      panda_file::Type(panda_file::Type::TypeId::REFERENCE)},
-                        Method::Proto::RefTypeVector {utf::Mutf8AsCString(GetJSValueClass()->GetDescriptor())});
+                        Method::Proto::RefTypeVector {utf::Mutf8AsCString(GetObjectClass()->GetDescriptor())});
     auto ctorName = utf::CStringAsMutf8(panda_file_items::CTOR.data());
     auto ctor = GetESErrorClass()->GetDirectMethod(ctorName, proto);
     ASSERT(ctor != nullptr);
@@ -462,7 +489,7 @@ EtsObject *InteropCtx::CreateETSCoreESError(EtsCoroutine *coro, JSValue *jsvalue
     }
     VMHandle<ObjectHeader> excHandle(coro, excObj);
 
-    std::array<Value, 2U> args {Value(excHandle.GetPtr()), Value(jsvalueHandle.GetPtr())};
+    std::array<Value, 2U> args {Value(excHandle.GetPtr()), Value(etsObjectHandle.GetPtr())};
     ctor->InvokeVoid(coro, args.data());
     auto res = EtsObject::FromCoreType(excHandle.GetPtr());
     if (UNLIKELY(coro->HasPendingException())) {
@@ -482,8 +509,11 @@ void InteropCtx::ThrowETSError(EtsCoroutine *coro, napi_value val)
     }
     ASSERT(!coro->HasPendingException());
 
-    if (IsNullOrUndefined(ctx->GetJSEnv(), val)) {
-        ctx->ThrowETSError(coro, "interop/js throws undefined/null");
+    auto env = ctx->GetJSEnv();
+    if (IsUndefined(env, val)) {
+        auto etsObj = JSValue::CreateUndefined(coro, ctx)->AsObject();
+        EtsObject *esObj = ctx->CreateETSCoreESError(coro, etsObj);
+        coro->SetException(esObj->GetCoreType());
         return;
     }
 
@@ -492,7 +522,6 @@ void InteropCtx::ThrowETSError(EtsCoroutine *coro, napi_value val)
     //    Where js.UserError will be wrapped into compat/TypeError
     //    NOTE(vpukhov): compat: add intrinsic to obtain JSValue from compat/ instances
 
-    auto env = InteropCtx::Current(coro)->GetJSEnv();
     bool isInstanceof = false;
     NAPI_CHECK_FATAL(napi_is_error(env, val, &isInstanceof));
     auto objRefconv = JSRefConvertResolve(ctx, isInstanceof ? ctx->GetErrorClass() : ctx->GetESErrorClass());

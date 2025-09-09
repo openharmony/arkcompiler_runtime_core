@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -140,6 +140,7 @@ public:
 
     // added for VMDebug::countInstancesOfClass and countInstancesOfClasses
     void CountInstances(const PandaVector<Class *> &classes, bool assignable, uint64_t *counts);
+    uint64_t CountInstancesOfClass(Class *klass);
 
     using IsObjectFinalizebleFunc = bool (*)(BaseClass *);
     using RegisterFinalizeReferenceFunc = void (*)(ObjectHeader *, BaseClass *);
@@ -175,6 +176,8 @@ public:
     {
         GetObjectAllocator()->IterateOverObjects(objectVisitor);
     }
+
+    void IterateOverObjectsWithSuspendAllThread(const ObjectVisitor &objectVisitor);
 
     ALWAYS_INLINE void PinObject(ObjectHeader *object)
     {

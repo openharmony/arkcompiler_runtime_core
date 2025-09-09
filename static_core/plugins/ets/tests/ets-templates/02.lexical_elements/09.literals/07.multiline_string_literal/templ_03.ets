@@ -25,5 +25,5 @@ function main() {
   let t2 = `test2 ${t1}`
   let t3 = `test3 ${t2}`
 
-  assertEQ( t3, "test3 test2 test1" )
+  arktest.assertEQ( t3, "test3 test2 test1" )
 }

@@ -35,7 +35,7 @@ export final class ArrayBackedConstructor {
         this();
     }
 
-    public static readonly BYTES_PER_ELEMENT: number = 1;
+    public static readonly BYTES_PER_ELEMENT: int = 1;
 
     public constructor() {
         this(new TestArrayBuffer(0), 0, 0);
@@ -48,7 +48,7 @@ export final class ArrayBackedConstructor {
 
 function main(): void {
     let xx: ArrayBackedConstructor  = new ArrayBackedConstructor(new Array<{{.item.type}}>());
-    assertNE(xx, null);
+    arktest.assertNE(xx, null);
 }
 
 {%- endfor %}

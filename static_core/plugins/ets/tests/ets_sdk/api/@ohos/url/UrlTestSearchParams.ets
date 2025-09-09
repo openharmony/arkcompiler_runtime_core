@@ -25,7 +25,7 @@ import {url} from "@ohos.url"
 function testUrlSearchParamsToString001() {
 	let params = new url.URLParams("d=value1&c=value2&b=大")
 	let result = params.toString()
-	assertEQ(result, "d=value1&c=value2&b=%E5%A4%A7")
+ arktest.assertEQ(result, "d=value1&c=value2&b=%E5%A4%A7")
 }
 
 /**
@@ -40,7 +40,7 @@ function testUrlSearchParamsToString002() {
 	let params = new url.URLParams("d=value1&c=value2&b= 大")
 	params.append("1 12", "QQQ")
 	let result = params.toString()
-	assertEQ(result, "d=value1&c=value2&b=+%E5%A4%A7&1+12=QQQ")
+ arktest.assertEQ(result, "d=value1&c=value2&b=+%E5%A4%A7&1+12=QQQ")
 }
 
 /**
@@ -55,7 +55,7 @@ function testUrlSearchParamsToString003() {
 	let params = new url.URLParams("￥=)")
 	params.delete("5")
 	let result = params.toString()
-	assertEQ(result, "%EF%BF%A5=%29")
+ arktest.assertEQ(result, "%EF%BF%A5=%29")
 }
 
 /**
@@ -69,7 +69,7 @@ function testUrlSearchParamsToString003() {
 function testUrlSearchParamsToString004() {
 	let params = new url.URLParams("d=value1&c=value2&b=大&4=key4")
 	let result = params.toString()
-	assertEQ(result, "d=value1&c=value2&b=%E5%A4%A7&4=key4")
+ arktest.assertEQ(result, "d=value1&c=value2&b=%E5%A4%A7&4=key4")
 }
 
 /**
@@ -84,7 +84,7 @@ function testUrlSearchParamsToString005() {
 	let params = new url.URLParams("d=value1&c=value2&b= 大&4=key4&5=key5")
 	params.append("1 12", "QQQ")
 	let result = params.toString()
-	assertEQ(result, "d=value1&c=value2&b=+%E5%A4%A7&4=key4&5=key5&1+12=QQQ")
+ arktest.assertEQ(result, "d=value1&c=value2&b=+%E5%A4%A7&4=key4&5=key5&1+12=QQQ")
 }
 
 /**
@@ -98,7 +98,7 @@ function testUrlSearchParamsToString005() {
 function testUrlSearchParamsConstruction001() {
 	let params = new url.URLParams('?user=abc&query=xyz')
 	let result = params.toString()
-	assertEQ(result, "user=abc&query=xyz")
+ arktest.assertEQ(result, "user=abc&query=xyz")
 }
 
 
@@ -117,7 +117,7 @@ function testUrlSearchParamsConstruction003() {
 		['query', 'second'],
 	]);
 	let result = params.toString()
-	assertEQ(result, "user=abc&query=first&query=second")
+ arktest.assertEQ(result, "user=abc&query=first&query=second")
 }
 
 /**
@@ -132,7 +132,7 @@ function testUrlSearchParamsConstruction006() {
 	let params = new url.URLParams()
 	params.append('abcde', 'fghki')
 	let paramsResult = params.toString()
-	assertEQ(paramsResult, 'abcde=fghki')
+ arktest.assertEQ(paramsResult, 'abcde=fghki')
 }
 
 /**
@@ -148,7 +148,7 @@ function testUrlSearchParamsConstruction007() {
 	let params = new url.URLParams(param)
 	params.append('abcde', 'fghki')
 	let paramsResult = params.toString()
-	assertEQ(paramsResult, 'abcde=fghki')
+ arktest.assertEQ(paramsResult, 'abcde=fghki')
 }
 
 /**
@@ -163,11 +163,11 @@ function testUrlSearchParamsConstruction008() {
 	let params = new url.URLParams()
 	params.append('abcde', 'fghki')
 	let paramsResult = params.toString()
-	assertEQ(paramsResult, 'abcde=fghki')
+ arktest.assertEQ(paramsResult, 'abcde=fghki')
 }
 
 function main(): int {
-	let suite = new ArkTestsuite("URL UT tests");
+	let suite = new arktest.ArkTestsuite("URL UT tests");
 	suite.addTest("testUrlSearchParamsToString001", testUrlSearchParamsToString001);
 	suite.addTest("testUrlSearchParamsToString002", testUrlSearchParamsToString002);
 	suite.addTest("testUrlSearchParamsToString003", testUrlSearchParamsToString003);

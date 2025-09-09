@@ -142,12 +142,15 @@ public:
     ~CommonJSObjectCache();
 
     napi_value GetProxy() const;
+    napi_value GetRecordProto() const;
 
 private:
     void InitializeCache();
+    void InitializeRecordProto();
 
     InteropCtx *ctx_ = nullptr;
     napi_ref proxyRef_ {};
+    napi_ref recordProtoRef_ {nullptr};
 };
 
 class InteropCtx final {
@@ -416,7 +419,7 @@ public:
         sharedEtsVmState_->SetInterfaceProxyInstance(interfaceName, proxy);
     }
 
-    EtsObject *CreateETSCoreESError(EtsCoroutine *coro, JSValue *jsvalue);
+    EtsObject *CreateETSCoreESError(EtsCoroutine *coro, EtsObject *etsObject);
 
     static void ThrowETSError(EtsCoroutine *coro, napi_value val);
     static void ThrowETSError(EtsCoroutine *coro, const char *msg);
@@ -658,6 +661,7 @@ bool ConstStringStorage::EnumerateStrings(size_t startFrom, size_t count, Callba
     return true;
 }
 
+bool TryInitInteropInJsEnv(void *napiEnv);
 }  // namespace ark::ets::interop::js
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTEROP_CONTEXT_H_

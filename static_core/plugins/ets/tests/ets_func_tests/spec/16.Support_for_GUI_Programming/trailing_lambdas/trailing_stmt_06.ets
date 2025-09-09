@@ -34,11 +34,11 @@ function main(): void {
     with_param() {
         switch (switch_arg) {
             case is_active() { a = 4; return 5 }:
-                assertTrue( false,  "Not expected execution here")
+                arktest.assertTrue( false,  "Not expected execution here")
                 break
             case 2:
             default:
-                assertEQ( a, 4)
+                arktest.assertEQ( a, 4)
         }
     }
 }

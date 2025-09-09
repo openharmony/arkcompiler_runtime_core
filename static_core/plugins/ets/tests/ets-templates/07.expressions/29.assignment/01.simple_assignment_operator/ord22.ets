@@ -24,6 +24,7 @@ desc: >-
     If this evaluation completes abruptly, then the assignment expression completes
     abruptly for the same reason; the right-hand operand is not evaluated and no assignment occurs.
 params: abrupt completion, reference
+tags: [compile-only, negative]
 ---*/
 
 let result: string = ""

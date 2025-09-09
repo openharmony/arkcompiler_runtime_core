@@ -38,7 +38,7 @@ TEST_F(ClassSetStaticFieldByNameIntTest, set_static_field_by_name_int_capi)
 {
     ani_class cls {};
     const ani_short setTarget = 2U;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_int_test/Packstatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_int_test.Packstatic", &cls), ANI_OK);
 
     ASSERT_EQ(env_->c_api->Class_SetStaticFieldByName_Int(env_, cls, "int_value", setTarget), ANI_OK);
     ani_int resultValue = 0;
@@ -50,7 +50,7 @@ TEST_F(ClassSetStaticFieldByNameIntTest, set_static_field_by_name_int)
 {
     ani_class cls {};
     const ani_short setTarget = 2U;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_int_test/Packstatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_int_test.Packstatic", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Int(cls, "int_value", setTarget), ANI_OK);
     ani_int resultValue = 0;
@@ -61,7 +61,7 @@ TEST_F(ClassSetStaticFieldByNameIntTest, set_static_field_by_name_int)
 TEST_F(ClassSetStaticFieldByNameIntTest, set_static_field_by_name_int_invalid_field_type)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_int_test/Packstatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_int_test.Packstatic", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Int(cls, "string_value", 1), ANI_INVALID_TYPE);
 }
@@ -70,7 +70,7 @@ TEST_F(ClassSetStaticFieldByNameIntTest, set_static_field_by_name_int_invalid_ar
 {
     ani_class cls {};
     const ani_short setTarget = 2U;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_int_test/Packstatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_int_test.Packstatic", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Int(nullptr, "int_value", setTarget), ANI_INVALID_ARGS);
 }
@@ -79,7 +79,7 @@ TEST_F(ClassSetStaticFieldByNameIntTest, set_static_field_by_name_int_invalid_ar
 {
     ani_class cls {};
     const ani_short setTarget = 2U;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_int_test/Packstatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_int_test.Packstatic", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Int(cls, nullptr, setTarget), ANI_INVALID_ARGS);
 }
@@ -87,7 +87,7 @@ TEST_F(ClassSetStaticFieldByNameIntTest, set_static_field_by_name_int_invalid_ar
 TEST_F(ClassSetStaticFieldByNameIntTest, special_values)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_int_test/Packstatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_int_test.Packstatic", &cls), ANI_OK);
     ani_int single = 0;
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Int(cls, "int_value", static_cast<ani_int>(0)), ANI_OK);
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Int(cls, "int_value", &single), ANI_OK);
@@ -115,7 +115,7 @@ TEST_F(ClassSetStaticFieldByNameIntTest, combination_test1)
     const ani_short setTarget = 2U;
     const ani_short setTarget2 = 3U;
     ani_int single = 0;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_int_test/Packstatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_int_test.Packstatic", &cls), ANI_OK);
     const int32_t loopCount = 3;
     for (int32_t i = 0; i < loopCount; i++) {
         ASSERT_EQ(env_->Class_SetStaticFieldByName_Int(cls, "int_value", setTarget2), ANI_OK);
@@ -129,19 +129,19 @@ TEST_F(ClassSetStaticFieldByNameIntTest, combination_test1)
 
 TEST_F(ClassSetStaticFieldByNameIntTest, combination_test2)
 {
-    CheckFieldValue("Lclass_set_static_field_by_name_int_test/PackstaticA;", "int_value");
+    CheckFieldValue("class_set_static_field_by_name_int_test.PackstaticA", "int_value");
 }
 
 TEST_F(ClassSetStaticFieldByNameIntTest, combination_test3)
 {
-    CheckFieldValue("Lclass_set_static_field_by_name_int_test/PackstaticFinal;", "int_value");
+    CheckFieldValue("class_set_static_field_by_name_int_test.PackstaticFinal", "int_value");
 }
 
 TEST_F(ClassSetStaticFieldByNameIntTest, invalid_argument1)
 {
     ani_class cls {};
     const ani_short setTarget = 2U;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_int_test/Packstatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_int_test.Packstatic", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Int(cls, "", setTarget), ANI_NOT_FOUND);
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Int(cls, "\n", setTarget), ANI_NOT_FOUND);

@@ -69,7 +69,7 @@ void EtsCoroutine::Initialize()
         // NOTE (electronick, #15938): Refactor the managed class-related pseudo TLS fields
         // initialization in MT ManagedThread ctor and EtsCoroutine::Initialize
         auto *linkExt = GetPandaVM()->GetClassLinker()->GetEtsClassLinkerExtension();
-        SetStringClassPtr(linkExt->GetClassRoot(ClassRoot::STRING));
+        SetStringClassPtr(linkExt->GetClassRoot(ClassRoot::LINE_STRING));
         SetArrayU16ClassPtr(linkExt->GetClassRoot(ClassRoot::ARRAY_U16));
         SetArrayU8ClassPtr(linkExt->GetClassRoot(ClassRoot::ARRAY_U8));
     }
@@ -261,6 +261,13 @@ void EtsCoroutine::OnHostWorkerChanged()
     GetLocalStorage().Set<DataIdx::INTEROP_CTX_PTR>(ptr);
 }
 
+void EtsCoroutine::OnContextSwitchedTo()
+{
+    if ((GetPriority() == CoroutinePriority::MEDIUM_PRIORITY) && (GetType() == Coroutine::Type::MUTATOR)) {
+        ProcessUnhandledPromiseRejections();
+    }
+}
+
 [[noreturn]] void EtsCoroutine::HandleUncaughtException()
 {
     ASSERT(HasPendingException());
@@ -268,28 +275,51 @@ void EtsCoroutine::OnHostWorkerChanged()
     UNREACHABLE();
 }
 
-void EtsCoroutine::ListUnhandledJobs()
-{
-    auto *vm = GetPandaVM();
-    vm->ListUnhandledFailedJobs();
-}
-
-void EtsCoroutine::ListUnhandledPromises()
-{
-    auto *vm = GetPandaVM();
-    vm->ListUnhandledRejectedPromises();
-}
-
 void EtsCoroutine::ListUnhandledEventsOnProgramExit()
 {
     if (Runtime::GetOptions().IsArkAot()) {
         return;
     }
-    if (Runtime::GetOptions().IsListUnhandledOnExitJobs(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))) {
-        ListUnhandledJobs();
+    auto *umanager = GetPandaVM()->GetUnhandledObjectManager();
+    ASSERT(umanager != nullptr);
+    bool listJobs =
+        Runtime::GetOptions().IsListUnhandledOnExitJobs(plugins::LangToRuntimeType(panda_file::SourceLang::ETS));
+    if (listJobs) {
+        ASSERT_NATIVE_CODE();
+        while (umanager->HasFailedJobObjects()) {
+            {
+                [[maybe_unused]] ScopedManagedCodeThread sc(this);
+                umanager->ListFailedJobs(this);
+            }
+            if (HasPendingException()) {
+                HandleUncaughtException();
+                UNREACHABLE();
+            }
+        }
     }
-    if (Runtime::GetOptions().IsListUnhandledOnExitPromises(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))) {
-        ListUnhandledPromises();
+}
+
+void EtsCoroutine::ProcessUnhandledPromiseRejections()
+{
+    if (Runtime::GetOptions().IsArkAot()) {
+        return;
+    }
+    auto *umanager = GetPandaVM()->GetUnhandledObjectManager();
+    ASSERT(umanager != nullptr);
+    bool listPromises =
+        Runtime::GetOptions().IsListUnhandledOnExitPromises(plugins::LangToRuntimeType(panda_file::SourceLang::ETS));
+    if (listPromises) {
+        ASSERT_NATIVE_CODE();
+        while (umanager->HasRejectedPromiseObjects(this)) {
+            {
+                [[maybe_unused]] ScopedManagedCodeThread sc(this);
+                umanager->ListRejectedPromises(this);
+            }
+            if (HasPendingException()) {
+                HandleUncaughtException();
+                UNREACHABLE();
+            }
+        }
     }
 }
 

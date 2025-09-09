@@ -6189,3 +6189,90 @@ fixed implementation.
     }
 
 
+.. _R237:
+
+|CB_R| Implementation signature must have a predefiend form
+
+|CB_RULE| ``arkts-no-arbitrary-implementation-signature``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. meta:
+    :keywords: ImplementationSignatureForm
+
+|CB_ERROR|
+
+An implementation signature must have a predefiend form.
+
+|LANG| enforces any implementation signature to have the most general
+form: method_of_function_name (...parameter: Any[]): Any
+
+
+|CB_BAD|
+~~~~~~~~
+
+.. code-block:: typescript
+
+    interface I {
+        foo (p: number): void
+        foo (p: string): void
+    }
+
+    class C implements I {
+        foo (p: number|string): void {}
+    }
+
+|CB_OK|
+~~~~~~~
+
+.. code-block:: typescript
+
+    interface I {
+        foo (p: number): void
+        foo (p: string): void
+    }
+
+    class C implements I {
+        foo (...p: Any[]): Any {}
+    }
+
+.. _R238:
+
+|CB_R| No types based on type '``this``'
+----------------------------------------
+
+|CB_RULE| ``arkts-no-types-based-on-this-type``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. meta:
+    :keywords: NoThisBasedTypes
+
+|CB_ERROR|
+
+No this-based types allowed.
+
+|LANG| enforces that type 'this' can be used only as a function or method
+return type. No other types can use 'this'  as their parts.
+
+
+|CB_BAD|
+~~~~~~~~
+
+.. code-block:: typescript
+
+    class C {
+        f1: this | number = 5
+        f2?: this[]
+    }
+    const c = new C
+    c.f2 = [ new C, new C, new C]
+
+|CB_OK|
+~~~~~~~
+
+.. code-block:: typescript
+
+
+    class C {
+        foo (): this { return this }
+    }
+
