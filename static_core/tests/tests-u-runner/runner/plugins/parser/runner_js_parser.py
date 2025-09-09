@@ -61,25 +61,17 @@ class RunnerJSParser(RunnerJS):
         self.explicit_list = self.recalculate_explicit_list(config.test_lists.explicit_list)
 
         test_dirs: List[TestDirectory] = [
-            TestDirectory('compiler/ts', 'ts', flags=['--extension=ts']),
             TestDirectory('compiler/ets', 'ets', flags=[
                 '--extension=ets',
                 f'--arktsconfig={self.arktsconfig}',
                 f'--ets-path={es2panda_test}'
             ]),
-            TestDirectory('parser/ts', 'ts', flags=['--parse-only', '--extension=ts']),
-            TestDirectory('parser/as', 'ts', flags=['--parse-only', '--extension=as']),
             TestDirectory('parser/ets', 'ets', flags=[
                 '--extension=ets',
                 f'--arktsconfig={self.arktsconfig}',
                 f'--ets-path={es2panda_test}'
             ]),
         ]
-
-        if self.config.general.with_js:
-            test_dirs.append(TestDirectory('compiler/js', 'js', flags=['--extension=js']))
-            test_dirs.append(TestDirectory('ark_tests/parser/js', 'js', flags=['--parse-only', '--extension=js']))
-            test_dirs.append(TestDirectory('parser/js', 'js', flags=['--parse-only', '--extension=js']))
 
         self.add_directories(test_dirs)
 

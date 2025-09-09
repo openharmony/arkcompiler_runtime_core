@@ -64,18 +64,11 @@ class RunnerASTChecker(RunnerJS):
                 '--extension=ets',
                 f'--arktsconfig={self.arktsconfig}'
             ]),
-            TestDirectory('ast/parser/ts', 'ts', flags=['--parse-only', '--extension=ts']),
-            TestDirectory('ast/parser/as', 'ts', flags=['--parse-only', '--extension=as']),
             TestDirectory('ast/parser/ets', 'ets', flags=[
                 '--extension=ets',
                 f'--arktsconfig={self.arktsconfig}'
             ]),
         ]
-
-        if self.config.general.with_js:
-            test_dirs.append(TestDirectory('ast/compiler/js', 'js', flags=['--extension=js']))
-            test_dirs.append(TestDirectory('ast/parser/js', 'js', flags=['--parse-only', '--extension=js']))
-            test_dirs.append(TestDirectory('ark_tests/ast/parser/js', 'js', flags=['--parse-only', '--extension=js']))
 
         self.add_directories(test_dirs)
 
