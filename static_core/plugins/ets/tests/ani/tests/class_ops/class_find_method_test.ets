@@ -566,3 +566,7 @@ class FindOverloadedConstructor {
 class FindConstructorWithDefaultParams {
     public constructor(a?: int, b?: int) {}
 }
+
+class CheckWrongSignature {
+    public static method (a: String) {}
+}

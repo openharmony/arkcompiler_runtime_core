@@ -32,3 +32,7 @@ class SmallBox {
 class BigBox extends SmallBox {
     public static native bar(): int
 }
+
+class CheckSignature {
+    public static native method(a: String): void
+}

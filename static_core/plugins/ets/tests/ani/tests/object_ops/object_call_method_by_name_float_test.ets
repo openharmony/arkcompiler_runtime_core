@@ -115,3 +115,9 @@ final class C extends B {
         return this.data1 + value as float;
     }
 }
+
+class CheckWrongSignature {
+    public method(a: String): float {
+        return Double.toFloat(1.1);
+    }
+}

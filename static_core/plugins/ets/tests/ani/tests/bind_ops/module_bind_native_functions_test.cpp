@@ -329,6 +329,7 @@ TEST_F(ModuleBindNativeFunctionsTest, module_bind_native_functions_004)
     };
     ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_NOT_FOUND);
 }
+
 TEST_F(ModuleBindNativeFunctionsTest, bind_intrinsic)
 {
     ani_module module {};
@@ -340,6 +341,24 @@ TEST_F(ModuleBindNativeFunctionsTest, bind_intrinsic)
     };
 
     ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_ALREADY_BINDED);
+}
+
+TEST_F(ModuleBindNativeFunctionsTest, bind_wrong_signature)
+{
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
+    ASSERT_NE(module, nullptr);
+
+    std::array functions = {
+        ani_native_function {"checkSignature", "C{std.core.String}:", reinterpret_cast<void *>(Abs)},
+    };
+
+    ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_OK);
+
+    functions = {
+        ani_native_function {"checkSignature", "C{std/core/String}:", reinterpret_cast<void *>(Abs)},
+    };
+    ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_NOT_FOUND);
 }
 
 }  // namespace ark::ets::ani::testing

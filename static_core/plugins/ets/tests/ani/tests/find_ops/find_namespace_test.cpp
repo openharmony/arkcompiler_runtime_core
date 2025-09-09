@@ -97,6 +97,12 @@ TEST_F(FindNamespaceTest, check_initialization)
     ASSERT_FALSE(IsRuntimeClassInitialized("find_namespace_test.geometry"));
 }
 
+TEST_F(FindNamespaceTest, bad_descriptor)
+{
+    ani_namespace ns {};
+    ASSERT_EQ(env_->FindNamespace("find_namespace_test/geometry", &ns), ANI_NOT_FOUND);
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(modernize-avoid-c-arrays)

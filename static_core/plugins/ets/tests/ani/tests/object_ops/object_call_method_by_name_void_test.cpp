@@ -36,6 +36,22 @@ public:
         ASSERT_EQ(env_->Class_CallStaticMethod_Ref(cls, newMethod, &ref), ANI_OK);
         *objectResult = static_cast<ani_object>(ref);
     }
+
+    void TestFuncVCorrectSignature(ani_object obj, ...)
+    {
+        va_list args {};
+        va_start(args, obj);
+        ASSERT_EQ(env_->Object_CallMethodByName_Void_V(obj, "method", "C{std.core.String}:", args), ANI_OK);
+        va_end(args);
+    }
+
+    void TestFuncVWrongSignature(ani_object obj, ...)
+    {
+        va_list args {};
+        va_start(args, obj);
+        ASSERT_EQ(env_->Object_CallMethodByName_Void_V(obj, "method", "C{std/core/String}:", args), ANI_NOT_FOUND);
+        va_end(args);
+    }
 };
 
 TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_a_normal)
@@ -535,6 +551,37 @@ TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_013)
         ASSERT_EQ(env_->Object_CallMethodByName_Void_A(object, methodName.data(), "", args), ANI_NOT_FOUND);
     }
 }
+
+TEST_F(CallObjectMethodByNameVoidTest, check_wrong_signature)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_void_test.CheckWrongSignature", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    ani_method method {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":", &method), ANI_OK);
+
+    ani_object obj {};
+    ASSERT_EQ(env_->Object_New(cls, method, &obj), ANI_OK);
+
+    std::string input = "hello";
+
+    ani_string str;
+    ASSERT_EQ(env_->String_NewUTF8(input.c_str(), input.size(), &str), ANI_OK);
+
+    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Void(env_, obj, "method", "C{std.core.String}:", str), ANI_OK);
+    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Void(env_, obj, "method", "C{std/core/String}:", str),
+              ANI_NOT_FOUND);
+
+    ani_value arg;
+    arg.r = str;
+    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(obj, "method", "C{std.core.String}:", &arg), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(obj, "method", "C{std/core/String}:", &arg), ANI_NOT_FOUND);
+
+    TestFuncVCorrectSignature(obj, str);
+    TestFuncVWrongSignature(obj, str);
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)
