@@ -392,25 +392,10 @@ if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
     endif()
 endif()
 
-#Disabled as this test needs to reimplement.issue 28520
-#panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / escape_analysis_casted.ets)
-panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/escape_analysis_check_phi.ets)
-panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/load_array.ets)
-panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/optimize_negation.ets)
-#NOTE #28944
-#panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / llvm_infer_flags.ets)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ani/direct_native.ets NATIVE SUPPORT_RELEASE)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ani/quick_native.ets NATIVE SUPPORT_RELEASE)
-#panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / optimize_load_object_boxed.ets)
-panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/load_static_const_folding.ets)
-panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/lower_boxed_boolean.ets)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/optimize_doubled_xor.ets OPT_LEVEL 0)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ani/unsafe_memory.ets NATIVE BOOT_SELF SUPPORT_RELEASE)
-panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/optimize_istrue.ets)
-panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_cache_options.ets ETS_STRINGS_CONCAT "false")
-panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/interface_cache_intrinsic.ets)
-panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/lambda_with_capture_optimized.ets)
-panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/type_propagation_unknown_offset.ets)
 
 if (NOT ENABLE_UNIT_TESTS_FULL_COVERAGE)
 #NOTE #28944

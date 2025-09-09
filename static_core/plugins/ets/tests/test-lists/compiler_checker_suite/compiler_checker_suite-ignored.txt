@@ -1,0 +1,2 @@
+# NOTE #28944
+simple_run/llvm_infer_flags.ets
