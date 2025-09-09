@@ -77,8 +77,6 @@ bool Utf8ToUtf16LEByteCheck(const unsigned char *data, std::u16string &u16Str, s
     for (size_t i = 0; i < inputSizeBytes;) {
         // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         uint8_t c1 = data[i];
-        uint8_t c2 = data[i + 1];
-        uint8_t c3 = data[i + 2];
         // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         if (IsOneByte(c1)) {
             i += 1;  // 1 : Proceeds 1 byte
@@ -101,6 +99,10 @@ bool Utf8ToUtf16LEByteCheck(const unsigned char *data, std::u16string &u16Str, s
                 if (i + TWO_MORE_BYTES_TO_CONSUME >= inputSizeBytes) {
                     return false;
                 }
+                // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                uint8_t c2 = data[i + 1];
+                uint8_t c3 = data[i + 2];
+                // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                 i += TWO_MORE_BYTES_TO_CONSUME + 1;
                 // CC-OFFNXT(G.FMT.02-CPP) project code style
                 // NOLINTBEGIN(hicpp-signed-bitwise)
@@ -115,6 +117,8 @@ bool Utf8ToUtf16LEByteCheck(const unsigned char *data, std::u16string &u16Str, s
                 if (i + ONE_MORE_BYTE_TO_CONSUME >= inputSizeBytes) {
                     return false;
                 }
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                uint8_t c2 = data[i + 1];
                 i += ONE_MORE_BYTE_TO_CONSUME + 1;
                 // NOLINTNEXTLINE(hicpp-signed-bitwise)
                 uint32_t codePoint = ((c1 & LOWER_5_BITS_MASK) << UTF8_VALID_BITS) | (c2 & LOWER_6_BITS_MASK);
