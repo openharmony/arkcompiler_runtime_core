@@ -209,7 +209,7 @@ def iter_files(dirpath: Path | str, allowed_ext: list[str]) -> Iterator[tuple[st
             yield name, path_value
 
 
-def is_type_of(value: Any, type_: str) -> bool:     # type: ignore[explicit-any]
+def is_type_of(value: Any, type_: str) -> bool:  # type: ignore[explicit-any]
     return str(type(value)).find(type_) > 0
 
 
@@ -390,7 +390,7 @@ def load_config(config_path: str | Path | None) -> dict[str, str | dict]:
     return config_from_file
 
 
-def to_bool(value: Any) -> bool:    # type: ignore[explicit-any]
+def to_bool(value: Any) -> bool:  # type: ignore[explicit-any]
     if isinstance(value, bool):
         return value
     if isinstance(value, str) and str(value).lower() in ("true", "false"):

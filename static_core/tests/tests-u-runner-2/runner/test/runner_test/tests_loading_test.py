@@ -16,6 +16,7 @@
 
 import os
 import shutil
+from collections.abc import Callable
 from pathlib import Path
 from typing import ClassVar
 from unittest import TestCase
@@ -24,39 +25,26 @@ from unittest.mock import patch
 from runner.options.cli_options import get_args
 from runner.options.config import Config
 from runner.suites.runner_standard_flow import RunnerStandardFlow
-from runner.test.test_utils import random_suffix
+from runner.test import test_utils
 
 
 class TestsLoadingTest(TestCase):
-    current_folder: ClassVar[Path] = Path(__file__).parent
-    data_folder: ClassVar[Path] = Path(__file__).parent / "data"
-    test_environ: ClassVar[dict[str, str]] = {
-        'ARKCOMPILER_RUNTIME_CORE_PATH': Path.cwd().as_posix(),
-        'ARKCOMPILER_ETS_FRONTEND_PATH': Path.cwd().as_posix(),
-        'PANDA_BUILD': Path.cwd().as_posix(),
-        'WORK_DIR': (Path.cwd() / f"work-{random_suffix()}").as_posix(),
-        'TEST_ROOT': data_folder.as_posix()
-    }
-
-    @staticmethod
-    def cmake_cache() -> list[str]:
-        return [
-            'PANDA_ENABLE_UNDEFINED_BEHAVIOR_SANITIZER=false',
-            'PANDA_ENABLE_ADDRESS_SANITIZER=true',
-            'PANDA_ENABLE_THREAD_SANITIZER=false',
-            'CMAKE_BUILD_TYPE=fastverify'
-        ]
+    data_folder: ClassVar[Callable[[], Path]] = lambda: test_utils.data_folder(__file__)
+    test_environ: ClassVar[dict[str, str]] = test_utils.test_environ(
+        'TESTS_LOADING_TEST_ROOT', data_folder().as_posix())
+    get_instance_id: ClassVar[Callable[[], str]] = lambda: test_utils.create_runner_test_id(__file__)
 
     @staticmethod
     def get_config() -> Config:
         args = get_args()
         return Config(args)
 
-    @patch('runner.utils.get_config_workflow_folder', lambda: TestsLoadingTest.data_folder)
-    @patch('runner.utils.get_config_test_suite_folder', lambda: TestsLoadingTest.data_folder)
+    @patch('runner.utils.get_config_workflow_folder', data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', data_folder)
     @patch('sys.argv', ["runner.sh", "workflow", "test_suite"])
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_cache', cmake_cache)
+    @patch('runner.suites.test_lists.TestLists.cmake_cache', test_utils.test_cmake_cache)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     def test_default_run(self) -> None:
         """
         Expected: loaded all tests but test4 which excluded one
@@ -78,11 +66,12 @@ class TestsLoadingTest(TestCase):
         work_dir = Path(os.environ["WORK_DIR"])
         shutil.rmtree(work_dir, ignore_errors=True)
 
-    @patch('runner.utils.get_config_workflow_folder', lambda: TestsLoadingTest.data_folder)
-    @patch('runner.utils.get_config_test_suite_folder', lambda: TestsLoadingTest.data_folder)
+    @patch('runner.utils.get_config_workflow_folder', data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', data_folder)
     @patch('sys.argv', ["runner.sh", "workflow", "test_suite", "--skip-compile-only-neg"])
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_cache', cmake_cache)
+    @patch('runner.suites.test_lists.TestLists.cmake_cache', test_utils.test_cmake_cache)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     def test_skip_compile_only(self) -> None:
         """
         Expected: loaded all tests but test4 which excluded one and test3 which is compile-only
@@ -104,11 +93,12 @@ class TestsLoadingTest(TestCase):
         work_dir = Path(os.environ["WORK_DIR"])
         shutil.rmtree(work_dir, ignore_errors=True)
 
-    @patch('runner.utils.get_config_workflow_folder', lambda: TestsLoadingTest.data_folder)
-    @patch('runner.utils.get_config_test_suite_folder', lambda: TestsLoadingTest.data_folder)
+    @patch('runner.utils.get_config_workflow_folder', data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', data_folder)
     @patch('sys.argv', ["runner.sh", "workflow", "test_suite", "--exclude-ignored-tests"])
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_cache', cmake_cache)
+    @patch('runner.suites.test_lists.TestLists.cmake_cache', test_utils.test_cmake_cache)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     def test_exclude_ignored(self) -> None:
         """
         Expected: loaded only test2 (normal test) and test3 (compile-only test)
@@ -128,11 +118,12 @@ class TestsLoadingTest(TestCase):
         work_dir = Path(os.environ["WORK_DIR"])
         shutil.rmtree(work_dir, ignore_errors=True)
 
-    @patch('runner.utils.get_config_workflow_folder', lambda: TestsLoadingTest.data_folder)
-    @patch('runner.utils.get_config_test_suite_folder', lambda: TestsLoadingTest.data_folder)
+    @patch('runner.utils.get_config_workflow_folder', data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', data_folder)
     @patch('sys.argv', ["runner.sh", "workflow", "test_suite", "--exclude-ignored-tests", "--skip-compile-only-neg"])
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_cache', cmake_cache)
+    @patch('runner.suites.test_lists.TestLists.cmake_cache', test_utils.test_cmake_cache)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     def test_both_exclude_ignored_skip_compile_only(self) -> None:
         """
         Expected: loaded only test2
@@ -155,11 +146,12 @@ class TestsLoadingTest(TestCase):
         work_dir = Path(os.environ["WORK_DIR"])
         shutil.rmtree(work_dir, ignore_errors=True)
 
-    @patch('runner.utils.get_config_workflow_folder', lambda: TestsLoadingTest.data_folder)
-    @patch('runner.utils.get_config_test_suite_folder', lambda: TestsLoadingTest.data_folder)
+    @patch('runner.utils.get_config_workflow_folder', data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', data_folder)
     @patch('sys.argv', ["runner.sh", "workflow", "test_suite", "--skip-test-lists"])
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_cache', cmake_cache)
+    @patch('runner.suites.test_lists.TestLists.cmake_cache', test_utils.test_cmake_cache)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     def test_skip_test_lists(self) -> None:
         """
         Expected: loaded all tests, including test4 from excluded test list.

@@ -28,7 +28,7 @@ from runner.options.options_workflow import WorkflowOptions
 from runner.options.step import StepKind
 
 
-class WorkflowConfigTest(unittest.TestCase):
+class WorkflowImportConfigTest(unittest.TestCase):
     data_folder: ClassVar[Path] = Path(__file__).with_name("data")
     test_environ: ClassVar[dict[str, str]] = {
         'ARKCOMPILER_RUNTIME_CORE_PATH': Path.cwd().as_posix(),
@@ -36,7 +36,7 @@ class WorkflowConfigTest(unittest.TestCase):
         'PANDA_BUILD': Path.cwd().as_posix(),
         'WORK_DIR': Path.cwd().as_posix()
     }
-    sys_argv: ClassVar[list[str]] = ["runner.sh", "config-1", "test_suite1"]
+    sys_argv: ClassVar[list[str]] = ["runner.sh", "config-with-import", "test_suite1"]
 
     @staticmethod
     def prepare_test() -> tuple[TestSuiteOptions, WorkflowOptions]:
@@ -46,8 +46,8 @@ class WorkflowConfigTest(unittest.TestCase):
         workflow = WorkflowOptions(cfg_content=args, parent_test_suite=test_suite)
         return test_suite, workflow
 
-    @patch('runner.utils.get_config_workflow_folder', lambda: WorkflowConfigTest.data_folder)
-    @patch('runner.utils.get_config_test_suite_folder', lambda: WorkflowConfigTest.data_folder)
+    @patch('runner.utils.get_config_workflow_folder', lambda: WorkflowImportConfigTest.data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', lambda: WorkflowImportConfigTest.data_folder)
     @patch('sys.argv', sys_argv)
     @patch.dict(os.environ, test_environ, clear=True)
     def test_loaded_steps(self) -> None:
@@ -55,39 +55,25 @@ class WorkflowConfigTest(unittest.TestCase):
         self.assertEqual(len(workflow.steps), 1)
         self.assertSetEqual(
             {step.name for step in workflow.steps},
-            {'echo'}
+            {'imported.echo'}
         )
 
-    @patch('runner.utils.get_config_workflow_folder', lambda: WorkflowConfigTest.data_folder)
-    @patch('runner.utils.get_config_test_suite_folder', lambda: WorkflowConfigTest.data_folder)
+    @patch('runner.utils.get_config_workflow_folder', lambda: WorkflowImportConfigTest.data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', lambda: WorkflowImportConfigTest.data_folder)
     @patch('sys.argv', sys_argv)
     @patch.dict(os.environ, test_environ, clear=True)
     def test_echo_step(self) -> None:
         _, workflow = self.prepare_test()
-        echo = [step for step in workflow.steps if step.name == 'echo']
+        echo = [step for step in workflow.steps if step.name == 'imported.echo']
         self.assertEqual(len(echo), 1, "Step 'es2panda' not found")
         step = echo[0]
         self.assertEqual(str(step.executable_path), "/usr/bin/echo")
         self.assertEqual(step.step_kind, StepKind.OTHER)
-        self.assertEqual(step.timeout, 20)
-        self.assertTrue(step.can_be_instrumented)
+        self.assertEqual(step.timeout, 30)
+        self.assertFalse(step.can_be_instrumented)
         self.assertSetEqual(set(step.args), {
-            "--arktsconfig=hello",
-            "--gen-stdlib=false",
-            "--thread=0",
+            "--arktsconfig=world",
+            "--thread=3",
             "--extension=ets",
             "${test-id}"
         })
-
-    @patch('runner.utils.get_config_workflow_folder', lambda: WorkflowConfigTest.data_folder)
-    @patch('runner.utils.get_config_test_suite_folder', lambda: WorkflowConfigTest.data_folder)
-    @patch('sys.argv', sys_argv)
-    @patch.dict(os.environ, test_environ, clear=True)
-    def test_test_suite(self) -> None:
-        test_suite, _ = self.prepare_test()
-        self.assertEqual(test_suite.suite_name, "test_suite1")
-        self.assertEqual(test_suite.test_root, Path.cwd().resolve())
-        self.assertEqual(test_suite.list_root, Path.cwd().resolve())
-        self.assertEqual(test_suite.extension(), "sts")
-        self.assertEqual(test_suite.load_runtimes(), "ets")
-        self.assertEqual(test_suite.work_dir, ".")
