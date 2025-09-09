@@ -27,14 +27,15 @@ export class RegExpResultArray /*extends Array<String>*/ {
     protected result_: Array<String> = []
     private resultRaw_: String = ""
     /** The 0-based index of the match in the string */
-    protected index_: number = 0
+    protected index_: int = 0
     /** The original string that was matched against */
     protected input_: String = ""
 
-    private endIndex: number = 0
+    private endIndex: int = 0
+    private wasProcessed: boolean = false
 
     // NOTE(shumilov-petr): Make nullable when #14813 will be fixed
-    protected indices_: Array<Array<number>> = []
+    protected indices_: Array<Array<int>> = []
 
     /** named groups names and indeces */
     protected groupsRaw_: String = ""
@@ -44,7 +45,7 @@ export class RegExpResultArray /*extends Array<String>*/ {
 
     protected isUndefined: Array<boolean> = []
 
-    constructor(index: int, input: String, result: Array<String>, indices: Array<Array<number>>) {
+    constructor(index: int, input: String, result: Array<String>, indices: Array<Array<int>>) {
         this.isCorrect = true
         this.index_ = index
         this.input_ = input
@@ -52,7 +53,7 @@ export class RegExpResultArray /*extends Array<String>*/ {
         this.indices_ = indices
     }
 
-    constructor(index : int, input : String, result : Array<String>, indices : Array<Array<number>>,
+    constructor(index : int, input : String, result : Array<String>, indices : Array<Array<int>>,
                 isUndefined : Array<boolean>) {
         this.isCorrect = true
         this.index_ = index
@@ -66,7 +67,7 @@ export class RegExpResultArray /*extends Array<String>*/ {
 
     }
 
-    private setNumberedField(index: number, value: String): void {
+    private setNumberedField(index: int, value: String): void {
         if (index > 9 || index <= 0) {
             return
         }
@@ -81,8 +82,11 @@ export class RegExpResultArray /*extends Array<String>*/ {
         else if (index == 9) RegExp.$9_ = value
     }
 
-    // NOTE(ekaterinzaytseva): unable to replace internal - crash in analyzer
-    internal postExecProcessing(res: RegExpResultArray, input: String, index: number, hasIndices: boolean): void {
+    public postExecProcessing(res: RegExpResultArray, input: String, index: int, hasIndices: boolean): void {
+        // NOTE(ekaterinazaytseva): temp solution - will be fixed in #20259
+        if (this.wasProcessed) {
+            return
+        }
         if (!res.isCorrect) {
             return
         }
@@ -155,17 +159,6 @@ export class RegExpResultArray /*extends Array<String>*/ {
         this.result_[index] = val
     }
 
-    /**
-     * Sets value by index
-     *
-     * @param index
-     *
-     * @param val
-     */
-    public $_set(index: number, val: String) {
-        return this.$_set(index.toInt(), val);
-    }
-
     get length(): int {
         return Double.toInt(this.result_.length)
     }
@@ -174,7 +167,7 @@ export class RegExpResultArray /*extends Array<String>*/ {
         return this.result_
     }
 
-    public get indices(): Array<Array<number>> {
+    public get indices(): Array<Array<int>> {
         return this.indices_
     }
 
@@ -197,7 +190,7 @@ export class RegExpResultArray /*extends Array<String>*/ {
         throw new Error("not overridden")
     }
 
-    private processStaticFields(index: number, str: String): void {
+    private processStaticFields(index: int, str: String): void {
         if (index == 0) {
             RegExp.lastMatch_ = str
         }
@@ -212,10 +205,10 @@ export class RegExpResultArray /*extends Array<String>*/ {
         this.result_ = new Array<String>(data.length / 2)
         this.isUndefined = new Array<boolean>(data.length / 2)
         if (hasIndices) {
-            this.indices_ = new Array<Array<number>>(data.length / 2)
-            for (let i = 0; i < data.length; i+= 2) {
-                const index = Number.parseInt(data[i])
-                const endIndex = Number.parseInt(data[i + 1])
+            this.indices_ = new Array<Array<int>>(data.length / 2)
+            for (let i = 0; i < data.length; i += 2) {
+                const index: int = Number.parseInt(data[i]).toInt()
+                const endIndex: int = Number.parseInt(data[i + 1]).toInt()
                 if (index == -1 || endIndex == -1) {
                     this.indices_[i / 2] = [0, 0]
                     this.isUndefined[i / 2] = true
@@ -738,17 +731,17 @@ export class RegExpMatchArray extends RegExpResultArray {
     private hasIndex_: boolean = true
     private hasInput_: boolean = true
 
-    constructor(index : int, input : String, result : Array<String>, indices : Array<Array<number>>,
+    constructor(index : int, input : String, result: Array<String>, indices : Array<Array<int>>,
                 isUndefined : Array<boolean>) {
-        super(Double.toInt(index), input, result, indices, isUndefined)
+        super(index, input, result, indices, isUndefined)
     };
 
-    constructor(index: int, input: String, result: Array<String>, indices: Array<Array<number>>) {
-        super(Double.toInt(index), input, result, indices)
+    constructor(index: int, input: String, result: Array<String>, indices: Array<Array<int>>) {
+        super(index, input, result, indices)
     }
 
     constructor(index: int, input: String, result: Array<String>) {
-        super(Double.toInt(index), input, result, [])
+        super(index, input, result, [])
     }
 
     protected constructor() {
@@ -829,7 +822,7 @@ export class RegExpMatchArray extends RegExpResultArray {
 }
 
 export class RegExpExecArray extends RegExpResultArray {
-    constructor(index: int, input: String, result: Array<String>, indices: Array<Array<number>>) {
+    constructor(index: int, input: String, result: Array<String>, indices: Array<Array<int>>) {
         super(index, input, result, indices)
     }
 
@@ -1431,7 +1424,7 @@ export class RegExp extends Object {
         }
         this.lastIndex = 0;
         let matches = new containers.UndefinableStringArray();
-        let indices = new Array<Array<number>>();
+        let indices = new Array<Array<int>>();
         let isUndefined = new Array<boolean>();
         let n = 0
         while (true) {
