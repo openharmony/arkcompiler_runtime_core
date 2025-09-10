@@ -43,7 +43,7 @@ parameters:
     is-panda: True
 steps:
     ark-creates-profile-for-aot-pgo:
-        from: only-runtime
+        from: ark
         ark-timeout: ${parameters.ark-timeout}
         build: ${parameters.build}
         work-dir: ${parameters.work-dir}
