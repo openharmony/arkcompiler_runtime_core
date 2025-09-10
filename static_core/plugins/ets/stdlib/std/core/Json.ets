@@ -778,10 +778,10 @@ export namespace jsonx {
      */
     export interface JsonElementSerializable {
         /**
-         * Deserializes an object from a JsonElement.
-         * @param {JsonElement} jsonElem - The JSON element to deserialize from
+         * Serializes an object to a JsonElement.
+         * @returns {JsonElement} The JSON representation of the object
          */
-        fromJSON(jsonElem: JsonElement)
+        toJSON(): JsonElement
     }
 
     /**
@@ -790,10 +790,10 @@ export namespace jsonx {
      */
     export interface JsonElementDeserializable {
         /**
-         * Serializes an object to a JsonElement.
-         * @returns {JsonElement} The JSON representation of the object
+         * Deserializes an object from a JsonElement.
+         * @param {JsonElement} jsonElem - The JSON element to deserialize from
          */
-        toJSON(): JsonElement
+        fromJSON(jsonElem: JsonElement)
     }
 
 }

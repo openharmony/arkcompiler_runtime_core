@@ -568,22 +568,22 @@ export class JSON {
     }
 
     /**
-      * Converts a JsonElementDeserializable to a JSON string.
+      * Converts a JsonElementSerializable to a JSON string.
      * @param elem - The JsonElementDeserializable to stringify
      * @returns The JSON string representation
      */
-    public static stringifyJsonElement(elem: jsonx.JsonElementDeserializable): string {
+    public static stringifyJsonElement(elem: jsonx.JsonElementSerializable): string {
         return JSON.stringifyJsonElement(elem.toJSON())
     }
 
     /**
-      * Converts a JsonElementDeserializable to a JSON string with optional formatting.
+      * Converts a JsonElementSerializable to a JSON string with optional formatting.
      * @param elem - The JsonElementDeserializable to stringify
      * @param replacer - Array of keys to include (currently not implemented)
      * @param space - String or number of spaces for indentation
      * @returns The JSON string representation
      */
-    public static stringifyJsonElement(elem: jsonx.JsonElementDeserializable, replacer?: (double | string)[], space?: int | string): string {
+    public static stringifyJsonElement(elem: jsonx.JsonElementSerializable, replacer?: (double | string)[], space?: int | string): string {
         return JSON.stringifyJsonElement(elem.toJSON(), replacer, space)
     }
 
@@ -781,7 +781,7 @@ class JSONWriter {
             this.writeESCompatRecord(temp)
         } else if (obj instanceof ESValue) {
             this.writeInteropESValue(obj)
-        } else if (obj instanceof jsonx.JsonElementDeserializable) {
+        } else if (obj instanceof jsonx.JsonElementSerializable) {
             this.buffer.append(JSON.stringifyJsonElement(obj))
         } else if (obj instanceof ArrayBuffer) {
             this.buffer.append(JSONObject.EMPTY)
