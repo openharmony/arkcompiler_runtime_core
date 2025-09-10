@@ -2339,4 +2339,37 @@ AbckitInst *IcreateCmpStatic(AbckitGraph *graph, AbckitInst *input0, AbckitInst 
     return CreateInstFromImpl(graph, cmpImpl);
 }
 
+AbckitInst *IcreateStobjObjStatic(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1, AbckitString *keyString)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto intrImpl = graph->impl->CreateInstIntrinsic(
+        compiler::DataType::REFERENCE, 0, compiler::IntrinsicInst::IntrinsicId::INTRINSIC_ABCKIT_STORE_OBJECT_OBJECT);
+
+    size_t argsCount {2U};
+
+    intrImpl->ReserveInputs(argsCount);
+    intrImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);
+    intrImpl->AppendInput(input0->impl, input0->impl->GetType());
+    intrImpl->AppendInput(input1->impl, input1->impl->GetType());
+    intrImpl->AddImm(graph->impl->GetAllocator(), GetFieldOffset(graph, keyString));
+
+    return CreateInstFromImpl(graph, intrImpl);
+}
+
+AbckitInst *IcreateLdobjObjStatic(AbckitGraph *graph, AbckitInst *input0, AbckitString *keyString)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto intrImpl = graph->impl->CreateInstIntrinsic(
+        compiler::DataType::REFERENCE, 0, compiler::IntrinsicInst::IntrinsicId::INTRINSIC_ABCKIT_LOAD_OBJECT_OBJECT);
+
+    size_t argsCount {1U};
+
+    intrImpl->ReserveInputs(argsCount);
+    intrImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);
+    intrImpl->AppendInput(input0->impl, input0->impl->GetType());
+    intrImpl->AddImm(graph->impl->GetAllocator(), GetFieldOffset(graph, keyString));
+
+    return CreateInstFromImpl(graph, intrImpl);
+}
+
 }  // namespace libabckit

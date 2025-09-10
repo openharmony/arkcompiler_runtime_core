@@ -56,6 +56,9 @@ static auto g_implArkI = AbckitGetArktsInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0
 // NOLINTNEXTLINE(google-build-using-namespace)
 namespace libabckit {
 
+static constexpr std::string_view GET_FUNCTION_PATTERN = "<get>";
+static constexpr std::string_view SET_FUNCTION_PATTERN = "<set>";
+static constexpr std::string_view PROPERTY_FUNCTION_PATTERN = "<property>";
 // ========================================
 // Create / Update
 // ========================================
@@ -444,6 +447,411 @@ AbckitValue *FindOrCreateValueStringStatic(AbckitFile *file, const char *value, 
 {
     LIBABCKIT_LOG_FUNC;
     return FindOrCreateValueStringStaticImpl(file, std::string(value, len));
+}
+
+static std::unique_ptr<AbckitCoreAnnotation> CreateAnnotation(
+    AbckitArktsAnnotationInterface *ai,
+    std::variant<AbckitCoreClass *, AbckitCoreFunction *, AbckitCoreClassField *, AbckitCoreInterface *,
+                 AbckitCoreInterfaceField *>
+        owner,
+    AbckitString *annoName)
+{
+    auto anno = std::make_unique<AbckitCoreAnnotation>();
+    anno->ai = ai->core;
+    anno->name = annoName;
+    anno->owner = owner;
+    anno->impl = std::make_unique<AbckitArktsAnnotation>();
+    anno->GetArkTSImpl()->core = anno.get();
+    return anno;
+}
+
+// ========================================
+// ModuleField
+// ========================================
+bool ModuleFieldSetTypeStatic(AbckitArktsModuleField *field, AbckitType *type)
+{
+    field->core->type = type;
+    field->GetStaticImpl()->type = pandasm::Type(TypeToNameStatic(type), type->rank);
+
+    field->core->value = nullptr;
+    field->GetStaticImpl()->metadata->ResetValue();
+    return true;
+}
+
+bool ModuleFieldSetValueStatic(AbckitArktsModuleField *field, AbckitValue *value)
+{
+    if (field->core->type->id != ValueGetTypeStatic(value)->id) {
+        LIBABCKIT_LOG(ERROR) << "field type is not same value type\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        return false;
+    }
+    field->core->value = value;
+    field->GetStaticImpl()->metadata->SetValue(*reinterpret_cast<pandasm::ScalarValue *>(value->val.get()));
+    return true;
+}
+
+// ========================================
+// ClassField
+// ========================================
+bool ClassFieldAddAnnotationStatic(AbckitArktsClassField *field, const AbckitArktsAnnotationCreateParams *params)
+{
+    auto ai = params->ai;
+    auto progFunc = field->GetStaticImpl();
+    auto name = ai->GetStaticImpl()->name;
+    std::vector<pandasm::AnnotationData> vec;
+    vec.emplace_back(name);
+    progFunc->metadata->AddAnnotations(vec);
+
+    auto annoName = AnnotationInterfaceGetNameStatic(ai->core);
+    std::string annotationName(annoName->impl);
+
+    field->core->annotations.emplace_back(CreateAnnotation(ai, field->core->owner, annoName));
+    field->core->annotationTable.emplace(annotationName, CreateAnnotation(ai, field->core->owner, annoName));
+    return true;
+}
+
+bool ClassFieldRemoveAnnotationStatic(AbckitArktsClassField *field, AbckitArktsAnnotation *anno)
+{
+    auto name = anno->core->name->impl;
+    auto &annotations = field->core->annotations;
+    auto iter = std::find_if(annotations.begin(), annotations.end(),
+                             [&name](auto &annoIt) { return name == annoIt.get()->name->impl; });
+    if (iter == annotations.end()) {
+        LIBABCKIT_LOG(ERROR) << "Can not find the annotation in annotations to delete\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        return false;
+    }
+    annotations.erase(iter);
+
+    std::string annotationName(field->core->owner->owningModule->moduleName->impl.data());
+    annotationName += ".";
+    annotationName += name;
+    auto it = field->core->annotationTable.find(annotationName);
+    if (it == field->core->annotationTable.end()) {
+        LIBABCKIT_LOG(ERROR) << "Can not find the annotation in annotationTable to delete\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        return false;
+    }
+    field->core->annotationTable.erase(it);
+
+    auto progFunc = field->GetStaticImpl();
+    progFunc->metadata->DeleteAnnotationByName(name);
+    return true;
+}
+
+bool ClassFieldSetTypeStatic(AbckitArktsClassField *field, AbckitType *type)
+{
+    field->core->type = type;
+    field->GetStaticImpl()->type = pandasm::Type(TypeToNameStatic(type), type->rank);
+
+    field->core->value = nullptr;
+    field->GetStaticImpl()->metadata->ResetValue();
+    return true;
+}
+
+bool ClassFieldSetValueStatic(AbckitArktsClassField *field, AbckitValue *value)
+{
+    if (field->core->type->id != ValueGetTypeStatic(value)->id) {
+        LIBABCKIT_LOG(ERROR) << "field type is not same value type\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        return false;
+    }
+
+    field->core->value = value;
+    field->GetStaticImpl()->metadata->SetValue(*reinterpret_cast<pandasm::ScalarValue *>(value->val.get()));
+    return true;
+}
+
+// ========================================
+// Module
+// ========================================
+AbckitArktsAnnotationInterface *ModuleAddAnnotationInterfaceStatic(
+    AbckitCoreModule *m, const struct AbckitArktsAnnotationInterfaceCreateParams *params)
+{
+    std::string name = m->moduleName->impl.data();
+    name += ".";
+    name += params->name;
+    auto prog = m->file->GetStaticProgram();
+    auto progRecord = pandasm::Record {name, prog->lang};
+    progRecord.metadata->SetAccessFlags(ACC_ANNOTATION | ACC_ABSTRACT | ACC_PUBLIC);
+    prog->recordTable.emplace(name, std::move(progRecord));
+    pandasm::Record &record = prog->recordTable.find(name)->second;
+    auto ai = std::make_unique<AbckitCoreAnnotationInterface>();
+    ai->owningModule = m;
+    ai->impl = std::make_unique<AbckitArktsAnnotationInterface>();
+    ai->GetArkTSImpl()->impl = &record;
+    ai->GetArkTSImpl()->core = ai.get();
+    return m->at.emplace(name, std::move(ai)).first->second->GetArkTSImpl();
+}
+
+// ========================================
+// AnnotationInterface
+// ========================================
+AbckitArktsAnnotationInterfaceField *AnnotationInterfaceAddFieldStatic(
+    AbckitCoreAnnotationInterface *ai, const AbckitArktsAnnotationInterfaceFieldCreateParams *params)
+{
+    auto name = params->name;
+    auto type = params->type;
+    auto value = params->defaultValue;
+
+    auto field = std::make_unique<AbckitCoreAnnotationInterfaceField>();
+    field->ai = ai;
+    field->name = CreateStringStatic(ai->owningModule->file, name, strlen(name));
+    field->type = type;
+    field->value = value;
+
+    field->impl = std::make_unique<AbckitArktsAnnotationInterfaceField>();
+    field->GetArkTSImpl()->core = field.get();
+    ai->fields.emplace_back(std::move(field));
+
+    auto record = ai->GetArkTSImpl()->GetStaticImpl();
+
+    auto prog = ai->owningModule->file->GetStaticProgram();
+    auto progField = pandasm::Field(prog->lang);
+    progField.metadata->SetAccessFlags(ACC_PUBLIC);
+    progField.name = name;
+    std::string typeName;
+    progField.type = pandasm::Type(TypeToNameStatic(type), type->rank);
+    progField.metadata->SetValue(*reinterpret_cast<pandasm::ScalarValue *>(value->val.get()));
+    record->fieldList.emplace_back(std::move(progField));
+
+    return ai->fields.back()->GetArkTSImpl();
+}
+
+void AnnotationInterfaceRemoveFieldStatic(AbckitCoreAnnotationInterface *ai,
+                                          AbckitCoreAnnotationInterfaceField *aiField)
+{
+    if (aiField->ai != ai) {
+        statuses::SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return;
+    }
+    auto str = aiField->name;
+    if (str == nullptr) {
+        statuses::SetLastError(ABCKIT_STATUS_INTERNAL_ERROR);
+        return;
+    }
+    auto name = str->impl;
+    auto record = ai->GetArkTSImpl()->GetStaticImpl();
+    auto &fields = record->fieldList;
+    auto fieldsIter = std::find_if(fields.begin(), fields.end(), [&name](auto &field) { return name == field.name; });
+    if (fieldsIter == fields.end()) {
+        LIBABCKIT_LOG(DEBUG) << "Can not find the field to delete\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_BAD_ARGUMENT);
+        return;
+    }
+    fields.erase(fieldsIter);
+    auto &aiFields = ai->fields;
+    auto iter = std::find_if(aiFields.begin(), aiFields.end(),
+                             [&name](auto &field) { return name == field.get()->name->impl; });
+    if (iter == aiFields.end()) {
+        LIBABCKIT_LOG(DEBUG) << "Can not find the field to delete\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_BAD_ARGUMENT);
+        return;
+    }
+    aiFields.erase(iter);
+}
+
+// ========================================
+// InterfaceField
+// ========================================
+static std::string ReplacePropertyWithId(const std::string &input, const std::string &id)
+{
+    size_t pos = input.find(PROPERTY_FUNCTION_PATTERN.data());
+    if (pos != std::string::npos) {
+        std::string result = input;
+        result.replace(pos, std::string(PROPERTY_FUNCTION_PATTERN.data()).length(), id);
+        return result;
+    }
+
+    return input;
+}
+
+static bool InterfaceFieldSetTypeModifyFuncSig(AbckitCoreFunction *func, std::string &getMethodName,
+                                               std::string &setMethodName, AbckitType *type)
+{
+    std::string methodName = FunctionGetNameStatic(func)->impl.data();
+    if (methodName.compare(0, getMethodName.length(), getMethodName) == 0) {
+        if (!FunctionSetReturnTypeStatic(func->GetArkTSImpl(), type)) {
+            LIBABCKIT_LOG(DEBUG) << "Modify get func signature error\n";
+            return false;
+        }
+    } else if (methodName.compare(0, setMethodName.length(), setMethodName) == 0) {
+        auto newParam = std::make_unique<AbckitCoreFunctionParam>();
+        newParam->function = func;
+        newParam->type = type;
+        AddFunctionUserToAbckitType(type, func);
+        newParam->impl = std::make_unique<AbckitArktsFunctionParam>();
+        newParam->GetArkTSImpl()->core = newParam.get();
+
+        if (!FunctionRemoveParameterStatic(func->GetArkTSImpl(), 1)) {
+            LIBABCKIT_LOG(DEBUG) << "Modify set function Signature error, remove parameter error\n";
+            return false;
+        }
+
+        if (!FunctionAddParameterStatic(func->GetArkTSImpl(), newParam->GetArkTSImpl())) {
+            LIBABCKIT_LOG(DEBUG) << "Modify set function Signature error, add parameter error\n";
+            return false;
+        }
+    }
+    return true;
+}
+
+static bool ClassModifyTypeAndMethodSig(AbckitCoreClassField *field, std::string &getMethodName,
+                                        std::string &setMethodName, AbckitType *type)
+{
+    for (auto &method : field->owner->methods) {
+        if (!InterfaceFieldSetTypeModifyFuncSig(method.get(), getMethodName, setMethodName, type)) {
+            LIBABCKIT_LOG(DEBUG) << "Modify function Signature error\n";
+            return false;
+        }
+    }
+    if (!ClassFieldSetTypeStatic(field->GetArkTSImpl(), type)) {
+        LIBABCKIT_LOG(DEBUG) << "Modify field type error\n";
+        return false;
+    }
+    return true;
+}
+
+static bool InterfaceFieldSetTypeDealForObjectLiteral(AbckitCoreInterfaceField *field, AbckitType *type)
+{
+    for (auto &objectLiteral : field->owner->objectLiterals) {
+        for (auto &objectLiteralField : objectLiteral.get()->fields) {
+            if (ClassFieldGetNameStatic(objectLiteralField.get())->impl.data() == field->name->impl.data()) {
+                std::string objectLiteralFullName =
+                    std::string(objectLiteral.get()->owningModule->moduleName->impl.data()) + "." +
+                    ClassGetNameStatic(objectLiteral.get())->impl.data();
+                std::string objectLiteralGetMethodName =
+                    ReplacePropertyWithId(field->name->impl.data(), GET_FUNCTION_PATTERN.data()) + ":" +
+                    objectLiteralFullName;
+                std::string objectLiteralSetMethodName =
+                    ReplacePropertyWithId(field->name->impl.data(), SET_FUNCTION_PATTERN.data()) + ":" +
+                    objectLiteralFullName;
+                return ClassModifyTypeAndMethodSig(objectLiteralField.get(), objectLiteralGetMethodName,
+                                                   objectLiteralSetMethodName, type);
+            }
+        }
+    }
+    return true;
+}
+
+static bool InterfaceFieldSetTypeDealForInterface(AbckitCoreInterfaceField *field, AbckitType *type)
+{
+    std::string interfaceFullName(field->owner->GetArkTSImpl()->impl.GetStaticClass()->name);
+    std::string interfaceGetMethodName =
+        ReplacePropertyWithId(field->name->impl.data(), GET_FUNCTION_PATTERN.data()) + ":" + interfaceFullName;
+    std::string interfaceSetMethodName =
+        ReplacePropertyWithId(field->name->impl.data(), SET_FUNCTION_PATTERN.data()) + ":" + interfaceFullName;
+    for (auto &method : field->owner->methods) {
+        if (!InterfaceFieldSetTypeModifyFuncSig(method.get(), interfaceGetMethodName, interfaceSetMethodName, type)) {
+            LIBABCKIT_LOG(DEBUG) << "Modify function Signature error\n";
+            return false;
+        }
+    }
+    return true;
+}
+
+static bool InterfaceFieldSetTypeDealForClass(AbckitCoreInterfaceField *field, AbckitType *type)
+{
+    for (auto &cls : field->owner->classes) {
+        for (auto &clsField : cls->fields) {
+            if (ClassFieldGetNameStatic(clsField.get())->impl.data() == field->name->impl.data()) {
+                std::string classFullName = std::string(clsField->owner->owningModule->moduleName->impl.data()) + "." +
+                                            ClassGetNameStatic(clsField->owner)->impl.data();
+                std::string classGetMethodName =
+                    ReplacePropertyWithId(field->name->impl.data(), GET_FUNCTION_PATTERN.data()) + ":" + classFullName;
+                std::string classSetMethodName =
+                    ReplacePropertyWithId(field->name->impl.data(), SET_FUNCTION_PATTERN.data()) + ":" + classFullName;
+                return ClassModifyTypeAndMethodSig(clsField.get(), classGetMethodName, classSetMethodName, type);
+            }
+        }
+    }
+    return true;
+}
+
+bool InterfaceFieldSetTypeStatic(AbckitArktsInterfaceField *field, AbckitType *type)
+{
+    if (!InterfaceFieldSetTypeDealForObjectLiteral(field->core, type)) {
+        LIBABCKIT_LOG(DEBUG) << "InterfaceFieldSetNameDealForObjectLiteral error\n";
+        statuses::SetLastError(ABCKIT_STATUS_INTERNAL_ERROR);
+        return false;
+    }
+
+    if (!InterfaceFieldSetTypeDealForInterface(field->core, type)) {
+        LIBABCKIT_LOG(DEBUG) << "InterfaceFieldSetNameDealForInterface error\n";
+        statuses::SetLastError(ABCKIT_STATUS_INTERNAL_ERROR);
+        return false;
+    }
+
+    if (!InterfaceFieldSetTypeDealForClass(field->core, type)) {
+        LIBABCKIT_LOG(DEBUG) << "InterfaceFieldSetNameDealForClass error\n";
+        statuses::SetLastError(ABCKIT_STATUS_INTERNAL_ERROR);
+        return false;
+    }
+
+    field->core->type = type;
+    return true;
+}
+
+bool InterfaceFieldAddAnnotationStatic(AbckitArktsInterfaceField *field,
+                                       const AbckitArktsAnnotationCreateParams *params)
+{
+    auto ai = params->ai;
+    auto name = ai->GetStaticImpl()->name;
+    std::vector<pandasm::AnnotationData> vec;
+    vec.emplace_back(name);
+
+    std::string interfaceFullName(field->core->owner->GetArkTSImpl()->impl.GetStaticClass()->name);
+    std::string interfaceGetMethodName =
+        ReplacePropertyWithId(field->core->name->impl.data(), GET_FUNCTION_PATTERN.data()) + ":" + interfaceFullName;
+    std::string interfaceSetMethodName =
+        ReplacePropertyWithId(field->core->name->impl.data(), SET_FUNCTION_PATTERN.data()) + ":" + interfaceFullName;
+    for (auto &method : field->core->owner->methods) {
+        std::string methodName = FunctionGetNameStatic(method.get())->impl.data();
+        if (methodName.compare(0, interfaceGetMethodName.length(), interfaceGetMethodName) == 0) {
+            auto progFunc = method.get()->GetArkTSImpl()->GetStaticImpl();
+            progFunc->metadata->AddAnnotations(vec);
+        } else if (methodName.compare(0, interfaceSetMethodName.length(), interfaceSetMethodName) == 0) {
+            auto progFunc = method.get()->GetArkTSImpl()->GetStaticImpl();
+            progFunc->metadata->AddAnnotations(vec);
+        }
+    }
+
+    auto annoName = AnnotationInterfaceGetNameStatic(ai->core);
+
+    field->core->annotations.emplace_back(CreateAnnotation(ai, field->core->owner, annoName));
+    return true;
+}
+
+bool InterfaceFieldRemoveAnnotationStatic(AbckitArktsInterfaceField *field, AbckitArktsAnnotation *anno)
+{
+    auto name = anno->core->name->impl;
+    auto &annotations = field->core->annotations;
+    auto iter = std::find_if(annotations.begin(), annotations.end(),
+                             [&name](auto &annoIt) { return name == annoIt.get()->name->impl; });
+    if (iter == annotations.end()) {
+        LIBABCKIT_LOG(ERROR) << "Can not find the annotation to delete\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_BAD_ARGUMENT);
+        return false;
+    }
+    annotations.erase(iter);
+
+    std::string interfaceFullName(field->core->owner->GetArkTSImpl()->impl.GetStaticClass()->name);
+    std::string interfaceGetMethodName =
+        ReplacePropertyWithId(field->core->name->impl.data(), GET_FUNCTION_PATTERN.data()) + ":" + interfaceFullName;
+    std::string interfaceSetMethodName =
+        ReplacePropertyWithId(field->core->name->impl.data(), SET_FUNCTION_PATTERN.data()) + ":" + interfaceFullName;
+    for (auto &method : field->core->owner->methods) {
+        std::string methodName = FunctionGetNameStatic(method.get())->impl.data();
+        if (methodName.compare(0, interfaceGetMethodName.length(), interfaceGetMethodName) == 0) {
+            auto progFunc = method.get()->GetArkTSImpl()->GetStaticImpl();
+            progFunc->metadata->DeleteAnnotationByName(name);
+        } else if (methodName.compare(0, interfaceSetMethodName.length(), interfaceSetMethodName) == 0) {
+            auto progFunc = method.get()->GetArkTSImpl()->GetStaticImpl();
+            progFunc->metadata->DeleteAnnotationByName(name);
+        }
+    }
+
+    return true;
 }
 
 // ========================================

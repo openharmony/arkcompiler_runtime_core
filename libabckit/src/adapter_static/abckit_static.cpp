@@ -242,6 +242,8 @@ static std::unique_ptr<AbckitCoreFunctionParam> CreateFunctionParam(AbckitFile *
     param->function = function.get();
     param->type = PandasmTypeToAbckitType(file, parameter.type);
     AddFunctionUserToAbckitType(param->type, function.get());
+    param->impl = std::make_unique<AbckitArktsFunctionParam>();
+    param->GetArkTSImpl()->core = param.get();
 
     return param;
 }
@@ -320,8 +322,12 @@ static std::unique_ptr<AbckitCoreTypeField> CreateField(AbckitFile *file, Abckit
     field->value = optionalValue.has_value() ? FindOrCreateValueStatic(file, optionalValue.value()) : nullptr;
     AddFieldUserToAbckitType(field->type, field.get());
 
+    if (recordField.metadata->GetValue().has_value()) {
+        field->value = FindOrCreateValueStatic(file, recordField.metadata->GetValue().value());
+    }
     if constexpr (std::is_same_v<AbckitCoreType, AbckitCoreClass>) {
         for (const auto &anno : GetAnnotationNames(&recordField)) {
+            field->annotations.emplace_back(CreateAnnotation(file, field.get(), anno));
             field->annotationTable.emplace(anno, CreateAnnotation(file, field.get(), anno));
         }
     }

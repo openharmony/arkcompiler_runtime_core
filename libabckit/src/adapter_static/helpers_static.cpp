@@ -35,6 +35,7 @@
 #include "static_core/compiler/optimizer/analysis/rpo.h"
 
 #include "abckit_intrinsics_opcodes.inc"
+#include "name_util.h"
 
 static constexpr uint32_t IC_SLOT_VALUE = 0xF;
 
@@ -568,6 +569,31 @@ uint32_t GetStringOffset(AbckitGraph *graph, AbckitString *string)
 
     LIBABCKIT_LOG(DEBUG) << "stringOffset: " << stringOffset << "\n";
     return stringOffset;
+}
+
+uint32_t GetFieldOffset(AbckitGraph *graph, AbckitString *string)
+{
+    uint32_t fieldOffset = 0;
+    for (auto &[id, s] : graph->irInterface->fields) {
+        if (s == string->impl) {
+            fieldOffset = id;
+        }
+    }
+
+    if (fieldOffset == 0) {
+        // Newly created string
+        // NOLINTNEXTLINE(cert-msc51-cpp)
+        do {
+            LIBABCKIT_LOG(DEBUG) << "generating new fieldOffset\n";
+            // NOLINTNEXTLINE(cert-msc50-cpp)
+            fieldOffset++;
+        } while (graph->irInterface->fields.find(fieldOffset) != graph->irInterface->fields.end());
+        // insert new string id
+        graph->irInterface->fields.insert({fieldOffset, string->impl.data()});
+    }
+
+    LIBABCKIT_LOG(DEBUG) << "fieldOffset: " << fieldOffset << "\n";
+    return fieldOffset;
 }
 
 uint32_t GetLiteralArrayOffset(AbckitGraph *graph, AbckitLiteralArray *arr)
@@ -1137,6 +1163,48 @@ bool GraphDominatorsTreeAnalysisIsValid(ark::compiler::Graph *graph)
     return true;
 }
 
+std::string TypeToNameStatic(AbckitType *type)
+{
+    if (type->id == ABCKIT_TYPE_ID_REFERENCE) {
+        if (type->GetClass() == nullptr) {
+            return "";
+        }
+        return libabckit::NameUtil::GetFullName(type->GetClass());
+    }
+    switch (type->id) {
+        case ABCKIT_TYPE_ID_VOID:
+            return "void";
+        case ABCKIT_TYPE_ID_U1:
+            return "u1";
+        case ABCKIT_TYPE_ID_U8:
+            return "u8";
+        case ABCKIT_TYPE_ID_I8:
+            return "u8";
+        case ABCKIT_TYPE_ID_U16:
+            return "u16";
+        case ABCKIT_TYPE_ID_I16:
+            return "i16";
+        case ABCKIT_TYPE_ID_U32:
+            return "u32";
+        case ABCKIT_TYPE_ID_I32:
+            return "i32";
+        case ABCKIT_TYPE_ID_U64:
+            return "u64";
+        case ABCKIT_TYPE_ID_I64:
+            return "i64";
+        case ABCKIT_TYPE_ID_F32:
+            return "f32";
+        case ABCKIT_TYPE_ID_F64:
+            return "f64";
+        case ABCKIT_TYPE_ID_ANY:
+            return "any";
+        case ABCKIT_TYPE_ID_STRING:
+            return "std.core.String";
+        default:
+            return "invalid";
+    }
+}
+
 AbckitTypeId ArkPandasmTypeToAbckitTypeId(const ark::pandasm::Type &type)
 {
     switch (type.GetId()) {
@@ -1167,6 +1235,8 @@ AbckitTypeId ArkPandasmTypeToAbckitTypeId(const ark::pandasm::Type &type)
         case ark::panda_file::Type::TypeId::REFERENCE:
             if (type.IsArray()) {
                 return ArkPandasmTypeToAbckitTypeId(type.GetComponentType());
+            } else if (type.GetName() == "std.core.String") {
+                return ABCKIT_TYPE_ID_STRING;
             }
             return ABCKIT_TYPE_ID_REFERENCE;
         default:

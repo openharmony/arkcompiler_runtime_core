@@ -66,12 +66,18 @@ void SuperClassTransformCtorIr(AbckitFile *file)
     CaptureData capData;
     capData.graph = graph;
     capData.targetFunc = targetFuncFinder.method;
+
     g_implG->gVisitBlocksRpo(graph, &capData, [](AbckitBasicBlock *bb, void *data) -> bool {
         auto *capData = reinterpret_cast<CaptureData *>(data);
         for (auto inst = g_implG->bbGetFirstInst(bb); inst != nullptr; inst = g_implG->iGetNext(inst)) {
             if (g_statG->iGetOpcode(inst) == ABCKIT_ISA_API_STATIC_OPCODE_CALL_STATIC) {
+                auto del = g_implG->iGetNext(inst);
                 auto newInst = g_statG->iCreateCallStatic(capData->graph, capData->targetFunc, 0);
                 g_implG->iInsertBefore(newInst, inst);
+                g_implG->iRemove(inst);
+                g_implG->iRemove(del);
+            }
+            if (g_statG->iGetOpcode(inst) == ABCKIT_ISA_API_STATIC_OPCODE_NULLPTR) {
                 g_implG->iRemove(inst);
             }
         }

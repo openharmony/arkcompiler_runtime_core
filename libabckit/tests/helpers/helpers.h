@@ -194,6 +194,8 @@ void TransformMethod(const std::string &inputPath, const std::string &outputPath
 void TransformMethod(const std::string &inputPath, const std::string &outputPath, const std::string &methodSignature,
                      const std::function<void(AbckitFile *, AbckitCoreFunction *, AbckitGraph *)> &userTransformer,
                      const std::function<void(AbckitGraph *)> &validateResult);
+void TransformMethod(AbckitCoreFunction *method,
+                     const std::function<void(AbckitFile *, AbckitCoreFunction *, AbckitGraph *)> &userTransformer);
 
 void InspectMethod(AbckitFile *file, const std::string &methodSignature,
                    const std::function<void(AbckitFile *, AbckitCoreFunction *, AbckitGraph *)> &userInspector);
@@ -256,6 +258,11 @@ struct AnnotationInterfaceByNameContext {
     const char *name;
 };
 
+struct AnnotationInterfaceFieldByNameContext {
+    AbckitCoreAnnotationInterfaceField *aif;
+    const char *name;
+};
+
 struct AnnotationByNameContext {
     AbckitCoreAnnotation *anno;
     const char *name;
@@ -275,6 +282,26 @@ struct CoreClassField {
     const char *name;
 };
 
+struct ModuleFieldByNameContext {
+    AbckitCoreModuleField *cmf;
+    const char *name;
+};
+
+struct InterfaceFieldByNameContext {
+    AbckitCoreInterfaceField *cif;
+    const char *name;
+};
+
+struct EnumFieldByNameContext {
+    AbckitCoreEnumField *cef;
+    const char *name;
+};
+
+struct ClassFieldByNameContext {
+    AbckitCoreClassField *ccf;
+    const char *name;
+};
+
 AbckitCoreFunction *FindMethodByName(AbckitFile *file, const std::string &name);
 AbckitCoreNamespace *FindNamespaceByName(AbckitFile *file, const std::string &name);
 bool ModuleByNameFinder(AbckitCoreModule *module, void *data);
@@ -290,6 +317,12 @@ bool AnnotationByNameFinder(AbckitCoreAnnotation *anno, void *data);
 bool NameToModuleCollector(AbckitCoreModule *module, void *data);
 bool ModuleImportsCollector(AbckitCoreImportDescriptor *id, void *data);
 bool ModuleExportsCollector(AbckitCoreExportDescriptor *ed, void *data);
+bool ModuleFieldByNameFinder(AbckitCoreModuleField *mf, void *data);
+bool InterfaceFieldByNameFinder(AbckitCoreInterfaceField *cif, void *data);
+bool EnumByNameFinder(AbckitCoreEnum *ce, void *data);
+bool EnumFieldByNameFinder(AbckitCoreEnumField *cef, void *data);
+bool ClassFieldByNameFinder(AbckitCoreClassField *ccf, void *data);
+bool AnnotationInterfaceFieldByNameFinder(AbckitCoreAnnotationInterfaceField *aif, void *data);
 
 void AssertModuleVisitor(AbckitCoreModule *module, void *data);
 void AssertImportVisitor(AbckitCoreImportDescriptor *id, void *data);
@@ -298,6 +331,11 @@ void AssertClassVisitor(AbckitCoreClass *klass, void *data);
 void AssertEnumVisitor(AbckitCoreEnum *enm, void *data);
 void AssertMethodVisitor(AbckitCoreFunction *method, void *data);
 void AssertOpenAbc(const char *fname, AbckitFile **file);
+void AssertModuleFieldVisitor(AbckitCoreModuleField *cmf, void *data);
+void AssertInterfaceVisitor(AbckitCoreInterface *ci, void *data);
+void AssertInterfaceFieldVisitor(AbckitCoreInterfaceField *cif, void *data);
+void AssertEnumFieldVisitor(AbckitCoreEnumField *cef, void *data);
+void AssertClassFieldVisitor(AbckitCoreClassField *ccf, void *data);
 std::string_view AbckitStringToString(AbckitString *str);
 std::string GetCropFuncName(const std::string &fullSig);
 std::optional<abckit::core::Class> GetClassByName(const abckit::core::Module &module, const std::string &name);

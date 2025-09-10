@@ -73,6 +73,22 @@ void ClassAddIfaceTransformMainIr(AbckitCoreFunction *mainFunction, AbckitCoreFu
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
+AbckitCoreClass *GetAbckitCoreClass(AbckitFile *file, std::string moduleName, std::string className)
+{
+    helpers::ModuleByNameContext mdlFinder = {nullptr, moduleName.c_str()};
+    g_implI->fileEnumerateModules(file, &mdlFinder, helpers::ModuleByNameFinder);
+    EXPECT_TRUE(g_impl->getLastError() == ABCKIT_STATUS_NO_ERROR);
+    EXPECT_TRUE(mdlFinder.module != nullptr);
+    auto *module = mdlFinder.module;
+
+    helpers::ClassByNameContext classFinder = {nullptr, className.c_str()};
+    g_implI->moduleEnumerateClasses(module, &classFinder, helpers::ClassByNameFinder);
+    EXPECT_TRUE(g_impl->getLastError() == ABCKIT_STATUS_NO_ERROR);
+    EXPECT_TRUE(classFinder.klass != nullptr);
+
+    return classFinder.klass;
+}
+
 TEST_F(LibAbcKitModifyClassApiTests, ClassRemoveFieldTest0)
 {
     std::string input1 = ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/class/class_remove_field_static_delete.abc";
@@ -94,20 +110,21 @@ TEST_F(LibAbcKitModifyClassApiTests, ClassRemoveFieldTest0)
                                  ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
                              });
     helpers::TransformMethod(removeCallPath, removeCallPath1, "_ctor_:class_remove_field_static_delete.Student;void;",
-                             [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {});
+                             [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
+                                 auto *ret = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_RETURN_VOID);
+                                 auto preInst = g_implG->iGetPrev(ret);
+                                 g_implG->iRemove(preInst);
+                                 ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+                             });
+
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(removeCallPath1.c_str(), &file);
-
-    helpers::ModuleByNameContext ctxFinder = {nullptr, "class_remove_field_static_delete"};
-    g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);
-
-    helpers::ClassByNameContext ctxClassFinder = {nullptr, "Student"};
-    g_implI->moduleEnumerateClasses(ctxFinder.module, &ctxClassFinder, helpers::ClassByNameFinder);
+    auto klass = GetAbckitCoreClass(file, "class_remove_field_static_delete", "Student");
 
     helpers::CoreClassField ctxClassFieldFinder = {nullptr, "addr"};
-    g_implI->classEnumerateFields(ctxClassFinder.klass, &ctxClassFieldFinder, helpers::ClassFieldFinder);
+    g_implI->classEnumerateFields(klass, &ctxClassFieldFinder, helpers::ClassFieldFinder);
 
-    bool ret = g_implArkM->classRemoveField(g_implArkI->coreClassToArktsClass(ctxClassFinder.klass),
+    bool ret = g_implArkM->classRemoveField(g_implArkI->coreClassToArktsClass(klass),
                                             g_implArkI->coreClassFieldToArktsClassField(ctxClassFieldFinder.filed));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_TRUE(ret);
@@ -115,14 +132,7 @@ TEST_F(LibAbcKitModifyClassApiTests, ClassRemoveFieldTest0)
     g_impl->closeFile(file);
 
     helpers::AssertOpenAbc(output1.c_str(), &file);
-    ctxFinder = {nullptr, "class_remove_field_static_delete"};
-    g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);
-    ASSERT_NE(ctxFinder.module, nullptr);
-    auto module = ctxFinder.module;
-    ctxClassFinder = {nullptr, "Student"};
-    g_implI->moduleEnumerateClasses(module, &ctxClassFinder, helpers::ClassByNameFinder);
-    ASSERT_NE(ctxClassFinder.klass, nullptr);
-    auto klass = ctxClassFinder.klass;
+    klass = GetAbckitCoreClass(file, "class_remove_field_static_delete", "Student");
     ctxClassFieldFinder = {nullptr, "addr"};
     g_implI->classEnumerateFields(klass, &ctxClassFieldFinder, helpers::ClassFieldFinder);
     ASSERT_EQ(ctxClassFieldFinder.filed, nullptr);
