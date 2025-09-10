@@ -2816,3 +2816,10 @@
 
 #28095 runtime timeout
 05.generics/03.utility_types/01.awaited_utility_type/awaited_return_2.ets
+
+#29727
+10.interfaces/06.interface_inheritance/multi_layer_interface/complex_inheritance/complex_inheritance_12.ets
+10.interfaces/06.interface_inheritance/multi_layer_interface/complex_inheritance/complex_inheritance_22.ets
+
+#29866
+09.classes/07.method_declarations/method_declaration_with_existed_name_3.ets
