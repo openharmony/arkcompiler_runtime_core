@@ -119,10 +119,10 @@ function RunSetTimeoutTest(): void {
 
     let w = new EAWorker(true);
     w.start();
-    let p = w.run<NullishType>(()=>{
+    let p = w.run<Any>(()=>{
         let p1 = asyncCall(() => {});
 
-        let p2 = p1.then<NullishType, NullishType>((value: NullishType) => {
+        let p2 = p1.then<Any, Any>((value: Any) => {
             setTimeout(() => {
                 job.finish();
             }, 100);
@@ -139,10 +139,10 @@ function RunNewCoroInSetTimeoutTest(): void {
 
     let w = new EAWorker(true);
     w.start();
-    let p = w.run<NullishType>(()=>{
+    let p = w.run<Any>(()=>{
         let p1 = asyncCall(() => {
         });
-        let p2 = p1.then<NullishType, NullishType>((value: NullishType) => {
+        let p2 = p1.then<Any, Any>((value: Any) => {
             setTimeout(() => {
                 let p3 = asyncCall(()=>{
                     job.finish();
