@@ -71,8 +71,10 @@ if (!ark_static_standalone_build) {
       "$target_gen_dir/generated",
       "$target_gen_dir/include",
     ]
-    include_dirs += [get_label_info("$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})", "target_gen_dir")]
-    deps = ["$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})"]
+    include_dirs += [ get_label_info(
+            "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})",
+            "target_gen_dir") ]
+    deps = [ "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})" ]
 
     include_dirs += platform_include_dirs
 
@@ -89,7 +91,6 @@ config("arkruntime_config") {
   if (ark_standalone_build) {
     include_dirs += [ "//third_party/icu/icu4c/source" ]
   }
-
 
   cflags_cc = [
     "-Wno-invalid-offsetof",
@@ -119,11 +120,11 @@ group("arkruntime_header_deps") {
     ":arkruntime_gen_intrinsics_intrinsics_h",
     ":arkruntime_gen_intrinsics_unimplemented_intrinsics-inl_cpp",
     ":arkruntime_gen_intrinsics_yaml",
+    ":core_any_intrinsics_inc",
     ":intrinsics_inl_h",
     ":isa_gen_libarkruntime_interpreter-inl_gen_h",
     ":isa_gen_libarkruntime_isa_constants_gen_h",
     ":language_config_gen_inc",
-    ":core_any_intrinsics_inc",
     ":libarkruntime_options_gen_h",
     ":libarkruntime_shorty_values_h",
     ":plugin_clear_profile_h",
@@ -183,8 +184,8 @@ ohos_source_set("libarkruntime_set_static") {
     "coroutines/priority_queue.cpp",
     "coroutines/stackful_coroutine.cpp",
     "coroutines/stackful_coroutine_manager.cpp",
-    "coroutines/stackful_coroutine_worker.cpp",
     "coroutines/stackful_coroutine_state_info.cpp",
+    "coroutines/stackful_coroutine_worker.cpp",
     "coroutines/threaded_coroutine.cpp",
     "coroutines/threaded_coroutine_manager.cpp",
     "default_debugger_agent.cpp",
@@ -204,9 +205,9 @@ ohos_source_set("libarkruntime_set_static") {
     "interpreter/runtime_interface.cpp",
     "intrinsics.cpp",
     "jit/libprofile/pgo_file_builder.cpp",
+    "jit/profile_saver_worker.cpp",
     "jit/profiling_loader.cpp",
     "jit/profiling_saver.cpp",
-    "jit/profile_saver_worker.cpp",
     "language_context.cpp",
     "loadable_agent.cpp",
     "lock_order_graph.cpp",
@@ -544,7 +545,8 @@ ohos_shared_library("libarkruntime") {
   }
 
   if ((current_cpu == "amd64" || current_cpu == "x64" ||
-      current_cpu == "x86_64") && (ark_standalone_build || ark_static_standalone_build)) {
+       current_cpu == "x86_64") &&
+      (ark_standalone_build || ark_static_standalone_build)) {
     ldflags = [ "-latomic" ]
   }
 
@@ -688,7 +690,8 @@ config("profiling_gen_public_config") {
 
 if (!ark_static_standalone_build) {
   ohos_shared_headers("runtime_gen_headers") {
-    include_dirs = [ get_label_info(":profiling_gen_profiling_gen_h", "target_gen_dir") ]
+    include_dirs =
+        [ get_label_info(":profiling_gen_profiling_gen_h", "target_gen_dir") ]
     deps = [ ":profiling_gen_profiling_gen_h" ]
     part_name = ark_part_name
     subsystem_name = "$ark_subsystem_name"

@@ -146,10 +146,10 @@ abc2prog_include_dirs = [
 
 script_sources = [
   "cpp_sources/abc2program_test_utils.cpp",
+  "cpp_sources/etsImplements_test.cpp",
   "cpp_sources/hello_world_test.cpp",
   "cpp_sources/release_column_number.cpp",
   "cpp_sources/release_line_number.cpp",
-  "cpp_sources/etsImplements_test.cpp",
 ]
 
 host_unittest_action("Abc2ProgScriptTest") {

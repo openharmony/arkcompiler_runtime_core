@@ -88,9 +88,10 @@ foreach(file, disasm_ets_implements_test_ts_files) {
     test_abc = "$target_out_dir/${file}.abc"
     src_js = rebase_path(test_ts)
     dst_file = rebase_path(test_abc)
-    extra_args = [ "--module",
-                   "--enable-ets-implements",
-                 ]
+    extra_args = [
+      "--module",
+      "--enable-ets-implements",
+    ]
     in_puts = [ test_ts ]
     out_puts = [ test_abc ]
   }
@@ -233,12 +234,12 @@ disasm_include_dirs = [
 
 script_sources = [
   "disassembler_column_number_test.cpp",
+  "disassembler_etsImplements_literal_test.cpp",
   "disassembler_get_file_name_test.cpp",
   "disassembler_line_number_test.cpp",
   "disassembler_source_lang_test.cpp",
   "disassembler_string_test.cpp",
   "disassembler_system_annotations_test.cpp",
-  "disassembler_etsImplements_literal_test.cpp"
 ]
 
 module_sources = [

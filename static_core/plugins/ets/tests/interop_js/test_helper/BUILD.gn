@@ -42,9 +42,7 @@ config("interop_test_helper_config") {
 }
 
 ohos_shared_library("interop_test_helper") {
-  sources = [
-    "interop_test_helper.cpp",
-  ]
+  sources = [ "interop_test_helper.cpp" ]
 
   public_configs = [
     "$js_root:ark_jsruntime_common_config",

@@ -23,8 +23,6 @@ interop_test("serialize_interop_tests") {
 
 group("serialize_tests") {
   if (ark_ets_hybrid) {
-    deps = [
-      ":serialize_interop_tests",
-    ]
+    deps = [ ":serialize_interop_tests" ]
   }
 }

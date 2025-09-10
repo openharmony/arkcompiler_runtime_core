@@ -57,7 +57,8 @@ abckit_standalone_canary("abckit_canary_c_extensions_js_metadata_js") {
 
 abckit_standalone_canary("abckit_canary_c_extensions_arkts_metadata_arkts") {
   configs = [ ":abckit_canary_c_config" ]
-  input_file = "$abckit_root/include/libabckit/c/extensions/arkts/metadata_arkts.h"
+  input_file =
+      "$abckit_root/include/libabckit/c/extensions/arkts/metadata_arkts.h"
   extension = "c"
 }
 

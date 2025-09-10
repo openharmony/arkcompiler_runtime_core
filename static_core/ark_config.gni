@@ -113,7 +113,7 @@ ark_isa_yaml = "$isa_gen_dir/isa.yaml"
 
 # chipset will set runtime_core_enable_codegen as false, not need codegen for it
 declare_args() {
-    runtime_core_enable_codegen = true
+  runtime_core_enable_codegen = true
 }
 
 enable_irtoc = true

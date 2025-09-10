@@ -338,7 +338,7 @@ config("ark_config") {
   } else {
     defines += [ "PANDA_32_BIT_MANAGED_POINTER" ]
   }
-    
+
   if (current_cpu == "arm") {
     cflags_cc += [
       "-march=armv7-a",
