@@ -28,42 +28,45 @@ class A implements I {}
 
 class B extends A implements J {}
 
-function main(): int {
-    let a: A = new A();
-    if (!(a instanceof A)) return 1;
-    if (!(a instanceof I)) return 2;
-    if (a instanceof B) return 3;
-    if (a instanceof J) return 4;
+let a: A
+let b: B
+let i: I
+let j: J
 
-    a = new B();
-    if (!(a instanceof A)) return 5;
-    if (!(a instanceof I)) return 6;
-    if (!(a instanceof B)) return 7;
-    if (!(a instanceof J)) return 8;
+function main() {
+    a = new A()
+    arktest.assertTrue(a instanceof A)
+    arktest.assertTrue(a instanceof I)
+    arktest.assertFalse(a instanceof B)
+    arktest.assertFalse(a instanceof J)
 
-    let i: I = new A();
-    if (!(i instanceof A)) return 9;
-    if (!(i instanceof I)) return 10;
-    if (i instanceof B) return 11;
-    if (i instanceof J) return 12;
+    a = new B()
+    arktest.assertTrue(a instanceof A)
+    arktest.assertTrue(a instanceof I)
+    arktest.assertTrue(a instanceof B)
+    arktest.assertTrue(a instanceof J)
 
-    i = new B();
-    if (!(i instanceof A)) return 13;
-    if (!(i instanceof I)) return 14;
-    if (!(i instanceof B)) return 15;
-    if (!(i instanceof J)) return 16;
+    i = new A()
+    arktest.assertTrue(i instanceof A)
+    arktest.assertTrue(i instanceof I)
+    arktest.assertFalse(i instanceof B)
+    arktest.assertFalse(i instanceof J)
 
-    let b: B = new B();
-    if (!(b instanceof A)) return 17;
-    if (!(b instanceof I)) return 18;
-    if (!(b instanceof B)) return 19;
-    if (!(b instanceof J)) return 20;
+    i = new B()
+    arktest.assertTrue(i instanceof A)
+    arktest.assertTrue(i instanceof I)
+    arktest.assertTrue(i instanceof B)
+    arktest.assertTrue(i instanceof J)
 
-    let j: J = new B();
-    if (!(j instanceof A)) return 21;
-    if (!(j instanceof I)) return 22;
-    if (!(j instanceof B)) return 23;
-    if (!(j instanceof J)) return 24;
+    b = new B()
+    arktest.assertTrue(b instanceof A)
+    arktest.assertTrue(b instanceof I)
+    arktest.assertTrue(b instanceof B)
+    arktest.assertTrue(b instanceof J)
 
-    return 0;
+    j = new B()
+    arktest.assertTrue(j instanceof A)
+    arktest.assertTrue(j instanceof I)
+    arktest.assertTrue(j instanceof B)
+    arktest.assertTrue(j instanceof J)
 }

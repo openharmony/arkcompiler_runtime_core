@@ -246,7 +246,7 @@ cases:
       call: foo(Color.Blue)
 
     - decl: |-
-        type OptL = () => int 
+        type OptL = () => int
         function test(i: int, ov: OptL = () => 0): int {
             return ov()
         }
@@ -260,7 +260,7 @@ cases:
               return x + y;
           }
         }
-        class OptionalMethodOwner implements DefaultMethodDecl {    
+        class OptionalMethodOwner implements DefaultMethodDecl {
         }
       call: |-
         const test = new OptionalMethodOwner
@@ -271,7 +271,7 @@ cases:
         class OptionalMethodOwner {
           test(x: number, y: number = 7.0): number {
               return x + y;
-          }        
+          }
         }
       call: |-
         const test = new OptionalMethodOwner
@@ -282,7 +282,7 @@ cases:
         class OptionalStaticMethodOwner {
           static test(x: number, y: number = 7.0): number {
               return x + y;
-          }        
+          }
         }
 
       call: |-
@@ -294,7 +294,7 @@ cases:
         class OptionalMethodOwner {
           test(i: int, ov: OptL = () => 0): int {
               return ov()
-          }        
+          }
         }
 
       call: |-
@@ -307,7 +307,7 @@ cases:
         class OptionalMethodOwner {
           static test(i: int, ov: OptL = () => 0): int {
               return ov()
-          }        
+          }
         }
 
       call: |-
@@ -334,12 +334,12 @@ cases:
           let lc: (input: int | undefined) => int = (input: int = 42) => input
           arktest.assertEQ(12, lc(12))
           arktest.assertEQ(42, lc())
-        
+
     - decl: |-
         function foo(a?: number, ...rest: string[]): boolean {
           return a === undefined && rest.length === 0
         }
-      call: |-        
+      call: |-
         arktest.assertTrue(foo())
 
     - decl: |-
@@ -363,7 +363,7 @@ cases:
       call: |-
         const call: (...rest: Array<string>) => boolean = foo
         arktest.assertTrue(call())
-        
+
 
     - decl: |-
         class AFoo {
@@ -378,3 +378,15 @@ cases:
       call: |-
         let res = ((a?: number, ...rest:  string[]): boolean => { return true })()
         arktest.assertTrue(res)
+
+    - decl: |-
+        function foo(a: int[] = [1], b: string[] = ['1']): string {
+            return '' + a[0] + b[0]
+        }
+      call: |-
+        arktest.assertEQ(foo([5], ['6']), '56')
+        arktest.assertEQ(foo([5]), '51')
+        arktest.assertEQ(foo(), '11')
+        arktest.assertEQ(foo([5], undefined), '51')
+        arktest.assertEQ(foo(undefined, ['6']), '16')
+        arktest.assertEQ(foo(undefined, undefined), '11')
