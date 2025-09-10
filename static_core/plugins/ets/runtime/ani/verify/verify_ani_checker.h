@@ -32,6 +32,7 @@
     X(VERIFY_NR_REFS,                VerifyNrRefs)              \
     X(VERIFY_REF,                    VerifyRef)                 \
     X(VERIFY_CLASS,                  VerifyClass)               \
+    X(VERIFY_STRING,                 VerifyString)              \
     X(VERIFY_DEL_LOCAL_REF,          VerifyDelLocalRef)         \
     X(VERIFY_CTOR,                   VerifyCtor)                \
     X(VERIFY_METHOD,                 VerifyMethod)              \
@@ -41,7 +42,14 @@
     X(VERIFY_ENV_STORAGE,            VerifyEnvStorage)          \
     X(VERIFY_BOOLEAN_STORAGE,        VerifyBooleanStorage)      \
     X(VERIFY_REF_STORAGE,            VerifyRefStorage)          \
-    X(VERIFY_OBJECT_STORAGE,         VerifyObjectStorage)
+    X(VERIFY_OBJECT_STORAGE,         VerifyObjectStorage)       \
+    X(VERIFY_STRING_STORAGE,         VerifyStringStorage)       \
+    X(VERIFY_SIZE_STORAGE,           VerifySizeStorage)         \
+    X(VERIFY_UTF16_BUFFER,           VerifyUTF16Buffer)         \
+    X(VERIFY_UTF16_STRING,           VerifyUTF16String)         \
+    X(VERIFY_UTF8_BUFFER,            VerifyUTF8Buffer)          \
+    X(VERIFY_UTF8_STRING,            VerifyUTF8String)          \
+    X(VERIFY_SIZE,                   VerifySize)                \
 
 // CC-OFFNXT(G.PRE.02-CPP, G.PRE.06) solid logic
 #define ANI_ARG_TYPES_MAP                                                \
@@ -60,6 +68,7 @@
     X(ANI_REF,             Ref,                     VRef *)              \
     X(ANI_CLASS,           Class,                   VClass *)            \
     X(ANI_METHOD,          Method,                  ani_method)          \
+    X(ANI_STRING,          String,                  VString *)           \
     X(ANI_VALUE_ARGS,      ValueArgs,               const ani_value *)   \
     X(ANI_ENV_STORAGE,     EnvStorage,              VEnv **)             \
     X(ANI_VM_STORAGE,      VmStorage,               ani_vm **)           \
@@ -73,6 +82,12 @@
     X(ANI_DOUBLE_STORAGE,  DoubleStorage,  ani_double *)        \
     X(ANI_REF_STORAGE,     RefStorage,              VRef **)             \
     X(ANI_OBJECT_STORAGE,  ObjectStorage,           VObject **)          \
+    X(ANI_STRING_STORAGE,  StringStorage,           VString **)          \
+    X(ANI_SIZE_STORAGE,    SizeStorage,             ani_size *)          \
+    X(ANI_UTF8_BUFFER,     UTF8Buffer,              char *)              \
+    X(ANI_UTF16_BUFFER,    UTF16Buffer,             uint16_t *)          \
+    X(ANI_UTF8_STRING,     UTF8String,              const char *)        \
+    X(ANI_UTF16_STRING,    UTF16String,             const uint16_t *)    \
     X(UINT32,              U32,                     uint32_t)            \
     X(UINT32x,             U32x,                    uint32_t)            \
     X(METHOD_ARGS,         MethodArgs,              AniMethodArgs *)
@@ -91,6 +106,7 @@ class VEnv;
 class VRef;
 class VObject;
 class VClass;
+class VString;
 
 class ANIArg {
 public:
@@ -156,6 +172,36 @@ public:
         return ANIArg(ArgValueByClass(vclass), name, Action::VERIFY_CLASS);
     }
 
+    static ANIArg MakeForString(VString *str, std::string_view name)
+    {
+        return ANIArg(ArgValueByString(str), name, Action::VERIFY_STRING);
+    }
+
+    static ANIArg MakeForUTF8Buffer(char *utf8Buffer, std::string_view name)
+    {
+        return ANIArg(ArgValueByUTF8Buffer(utf8Buffer), name, Action::VERIFY_UTF8_BUFFER);
+    }
+
+    static ANIArg MakeForUTF8String(const char *ptr, std::string_view name)
+    {
+        return ANIArg(ArgValueByUTF8String(ptr), name, Action::VERIFY_UTF8_STRING);
+    }
+
+    static ANIArg MakeForUTF16Buffer(uint16_t *ptr, std::string_view name)
+    {
+        return ANIArg(ArgValueByUTF16Buffer(ptr), name, Action::VERIFY_UTF16_BUFFER);
+    }
+
+    static ANIArg MakeForUTF16String(const uint16_t *ptr, std::string_view name)
+    {
+        return ANIArg(ArgValueByUTF16String(ptr), name, Action::VERIFY_UTF16_STRING);
+    }
+
+    static ANIArg MakeForSize(ani_size size, std::string_view name)
+    {
+        return ANIArg(ArgValueBySize(size), name, Action::VERIFY_SIZE);
+    }
+
     static ANIArg MakeForDelLocalRef(VRef *vref, std::string_view name)
     {
         return ANIArg(ArgValueByRef(vref), name, Action::VERIFY_DEL_LOCAL_REF);
@@ -193,6 +239,16 @@ public:
     static ANIArg MakeForObjectStorage(VObject **valueStorage, std::string_view name)
     {
         return ANIArg(ArgValueByObjectStorage(valueStorage), name, Action::VERIFY_OBJECT_STORAGE);
+    }
+
+    static ANIArg MakeForStringStorage(VString **strStorage, std::string_view name)
+    {
+        return ANIArg(ArgValueByStringStorage(strStorage), name, Action::VERIFY_STRING_STORAGE);
+    }
+
+    static ANIArg MakeForSizeStorage(ani_size *sizeStorage, std::string_view name)
+    {
+        return ANIArg(ArgValueBySizeStorage(sizeStorage), name, Action::VERIFY_SIZE_STORAGE);
     }
 
     Action GetAction() const
