@@ -4293,7 +4293,7 @@ intrinsics:
 
   - name: TaskpoolGenerateGroupId
     space: ets
-    class_name: escompat.taskpool.TaskGroup
+    class_name: escompat.taskpool.GroupState
     method_name: generateGroupId
     static: true
     signature:
