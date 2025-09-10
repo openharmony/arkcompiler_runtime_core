@@ -39,7 +39,7 @@ function testFromJson() {
 	arktest.assertFalse(t1.t2.biz)
 }
 
-class T2 implements jsonx.JsonElementSerializable {
+class T2 implements jsonx.JsonElementDeserializable {
 	biz: boolean
 
 	fromJSON(jsonElem: jsonx.JsonElement) {
@@ -47,7 +47,7 @@ class T2 implements jsonx.JsonElementSerializable {
 	}
 }
 
-class T1 implements jsonx.JsonElementSerializable {
+class T1 implements jsonx.JsonElementDeserializable {
 	foo: int
 	bar: string
 	t2: T2
