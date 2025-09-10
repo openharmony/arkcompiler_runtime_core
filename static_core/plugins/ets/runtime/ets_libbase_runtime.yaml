@@ -1371,11 +1371,11 @@ intrinsics:
     codegen_arch: [arm64, amd64]
 
 #################
-# escompat.Math #
+# std.core.Math #
 #################
-  - name: EscompatMathMax
+  - name: StdCoreMathMax
     space: ets
-    class_name: escompat.Math
+    class_name: std.core.Math
     method_name: max
     static: true
     signature:
@@ -1384,9 +1384,9 @@ intrinsics:
     impl: ark::intrinsics::MaxF64
     safe_intrinsic: true
 
-  - name: EscompatMathMin
+  - name: StdCoreMathMin
     space: ets
-    class_name: escompat.Math
+    class_name: std.core.Math
     method_name: min
     static: true
     signature:
@@ -1394,6 +1394,16 @@ intrinsics:
       args: [f64, f64]
     impl: ark::intrinsics::MinF64
     safe_intrinsic: true
+
+  - name: StdCoreMathRandom
+    space: ets
+    class_name: std.core.Math
+    method_name: random
+    static: true
+    signature:
+      ret: f64
+      args: [ ]
+    impl: ark::ets::intrinsics::StdMathRandom
 
 #################
 # escompat.JSON #

@@ -13,51 +13,51 @@
  * limitations under the License.
  */
 
-{% for item in escompat_Math_trigonometry %}
+{% for item in std_core_Math_trigonometry %}
 
 /*---
 desc:  {function: {{.item.method_name}}_{{.item.method_signature.values()|join("_")}}}
 ---*/
 
-{% include 'utils/test_escompat_math_lib.j2' %}
+{% include 'utils/test_std_core_math_lib.j2' %}
 {% endfor %}
 
-{% for item in escompat_Math_arithmetic %}
+{% for item in std_core_Math_arithmetic %}
 /*---
 desc:  {function: {{.item.method_name}}_{{.item.method_signature.values()|join("_")}}}
 ---*/
 
-{% include 'utils/test_escompat_math_lib.j2' %}
+{% include 'utils/test_std_core_math_lib.j2' %}
 {% endfor %}
 
-{% for item in escompat_Math_bits %}
+{% for item in std_core_Math_bits %}
 /*---
 desc:  {function: {{.item.method_name}}_{{.item.method_signature.values()|join("_")}}}
 ---*/
 
-{% include 'utils/test_escompat_math_lib.j2' %}
+{% include 'utils/test_std_core_math_lib.j2' %}
 {% endfor %}
 
-{% for item in escompat_Math_h_trigonometry %}
+{% for item in std_core_Math_h_trigonometry %}
 /*---
 desc:  {function: {{.item.method_name}}_{{.item.method_signature.values()|join("_")}}}
 ---*/
 
-{% include 'utils/test_escompat_math_lib.j2' %}
+{% include 'utils/test_std_core_math_lib.j2' %}
 {% endfor %}
 
-{% for item in escompat_Math_log %}
+{% for item in std_core_Math_log %}
 /*---
 desc:  {function: {{.item.method_name}}_{{.item.method_signature.values()|join("_")}}}
 ---*/
 
-{% include 'utils/test_escompat_math_lib.j2' %}
+{% include 'utils/test_std_core_math_lib.j2' %}
 {% endfor %}
 
-{% for item in escompat_Math_exp %}
+{% for item in std_core_Math_exp %}
 /*---
 desc:  {function: {{.item.method_name}}_{{.item.method_signature.values()|join("_")}}}
 ---*/
 
-{% include 'utils/test_escompat_math_lib.j2' %}
+{% include 'utils/test_std_core_math_lib.j2' %}
 {% endfor %}
