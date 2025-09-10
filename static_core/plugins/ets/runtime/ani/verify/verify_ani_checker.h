@@ -33,6 +33,7 @@
     X(VERIFY_REF,                    VerifyRef)                 \
     X(VERIFY_CLASS,                  VerifyClass)               \
     X(VERIFY_STRING,                 VerifyString)              \
+    X(VERIFY_ERROR,                  VerifyError)               \
     X(VERIFY_DEL_LOCAL_REF,          VerifyDelLocalRef)         \
     X(VERIFY_CTOR,                   VerifyCtor)                \
     X(VERIFY_METHOD,                 VerifyMethod)              \
@@ -50,6 +51,7 @@
     X(VERIFY_UTF8_BUFFER,            VerifyUTF8Buffer)          \
     X(VERIFY_UTF8_STRING,            VerifyUTF8String)          \
     X(VERIFY_SIZE,                   VerifySize)                \
+    X(VERIFY_ERROR_STORAGE,          VerifyErrorStorage)        \
 
 // CC-OFFNXT(G.PRE.02-CPP, G.PRE.06) solid logic
 #define ANI_ARG_TYPES_MAP                                                \
@@ -69,6 +71,7 @@
     X(ANI_CLASS,           Class,                   VClass *)            \
     X(ANI_METHOD,          Method,                  ani_method)          \
     X(ANI_STRING,          String,                  VString *)           \
+    X(ANI_ERROR,           Error,                   VError *)            \
     X(ANI_VALUE_ARGS,      ValueArgs,               const ani_value *)   \
     X(ANI_ENV_STORAGE,     EnvStorage,              VEnv **)             \
     X(ANI_VM_STORAGE,      VmStorage,               ani_vm **)           \
@@ -88,6 +91,7 @@
     X(ANI_UTF16_BUFFER,    UTF16Buffer,             uint16_t *)          \
     X(ANI_UTF8_STRING,     UTF8String,              const char *)        \
     X(ANI_UTF16_STRING,    UTF16String,             const uint16_t *)    \
+    X(ANI_ERROR_STORAGE,   ErrorStorage,            VError **)           \
     X(UINT32,              U32,                     uint32_t)            \
     X(UINT32x,             U32x,                    uint32_t)            \
     X(METHOD_ARGS,         MethodArgs,              AniMethodArgs *)
@@ -107,6 +111,7 @@ class VRef;
 class VObject;
 class VClass;
 class VString;
+class VError;
 
 class ANIArg {
 public:
@@ -182,6 +187,11 @@ public:
         return ANIArg(ArgValueByUTF8Buffer(utf8Buffer), name, Action::VERIFY_UTF8_BUFFER);
     }
 
+    static ANIArg MakeForError(VError *verr, std::string_view name)
+    {
+        return ANIArg(ArgValueByError(verr), name, Action::VERIFY_ERROR);
+    }
+
     static ANIArg MakeForUTF8String(const char *ptr, std::string_view name)
     {
         return ANIArg(ArgValueByUTF8String(ptr), name, Action::VERIFY_UTF8_STRING);
@@ -249,6 +259,11 @@ public:
     static ANIArg MakeForSizeStorage(ani_size *sizeStorage, std::string_view name)
     {
         return ANIArg(ArgValueBySizeStorage(sizeStorage), name, Action::VERIFY_SIZE_STORAGE);
+    }
+
+    static ANIArg MakeForErrorStorage(VError **errStorage, std::string_view name)
+    {
+        return ANIArg(ArgValueByErrorStorage(errStorage), name, Action::VERIFY_ERROR_STORAGE);
     }
 
     Action GetAction() const

@@ -28,6 +28,7 @@ class VObject;
 class VClass;
 class VString;
 class VMethod;
+class VError;
 
 namespace internal {
 
@@ -100,6 +101,16 @@ struct TypeMapping<VString **> {
 template <>
 struct TypeMapping<VMethod *> {
     using Type = ani_method;
+};
+
+template <>
+struct TypeMapping<VError **> {
+    using Type = ani_error *;
+};
+
+template <>
+struct TypeMapping<VError *> {
+    using Type = ani_error;
 };
 
 template <typename X>

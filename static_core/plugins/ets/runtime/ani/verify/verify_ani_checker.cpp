@@ -144,6 +144,8 @@ PandaString ANIArg::GetStringType() const
         case ValueType::ANI_STRING_STORAGE:  return "ani_string *";
         case ValueType::ANI_SIZE_STORAGE:    return "ani_size *";
         case ValueType::UINT32:              return "uint32_t";
+        case ValueType::ANI_ERROR:           return "ani_error";
+        case ValueType::ANI_ERROR_STORAGE:   return "ani_error *";
         default:                             UNREACHABLE(); return "";
         case ValueType::METHOD_ARGS:
             if (action_ == Action::VERIFY_METHOD_A_ARGS) {
@@ -351,7 +353,21 @@ public:
             ss << "wrong reference type: " << ANIRefTypeToString(refType);
             return ss.str();
         }
+        return {};
+    }
 
+    std::optional<PandaString> VerifyError(VError *verr)
+    {
+        auto errMessage = VerifyRef(verr);
+        if (errMessage) {
+            return errMessage;
+        }
+        ANIRefType refType = verr->GetRefType();
+        if (refType != ANIRefType::ERROR) {
+            PandaStringStream ss;
+            ss << "wrong reference type: " << ANIRefTypeToString(refType);
+            return ss.str();
+        }
         return {};
     }
 
@@ -489,6 +505,12 @@ static std::optional<PandaString> VerifyUTF8Buffer(Verifier &v, const ANIArg &ar
     return v.VerifyTypePtr(arg.GetValueUTF8Buffer(), "char *");
 }
 
+static std::optional<PandaString> VerifyError(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_ERROR);
+    return v.VerifyError(arg.GetValueError());
+}
+
 static std::optional<PandaString> VerifyUTF8String(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_UTF8_STRING);
@@ -583,6 +605,12 @@ static std::optional<PandaString> VerifyObjectStorage(Verifier &v, const ANIArg 
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_OBJECT_STORAGE);
     return v.VerifyTypeStorage(arg.GetValueObjectStorage(), "ani_object");
+}
+
+static std::optional<PandaString> VerifyErrorStorage(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_ERROR_STORAGE);
+    return v.VerifyTypeStorage(arg.GetValueErrorStorage(), "ani_error");
 }
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
