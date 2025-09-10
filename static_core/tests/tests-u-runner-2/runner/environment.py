@@ -21,10 +21,13 @@ from typing import ClassVar, NamedTuple
 
 from dotenv import load_dotenv
 
+from runner.common_exceptions import InvalidInitialization
 from runner.init_runner import IsPath, MandatoryProp, MandatoryProps, PropName, RequireExist
 from runner.logger import Log
 
 _LOGGER = Log.get_logger(__file__)
+RED = '\033[31m'
+RESET = '\033[0m'
 
 
 class MandatoryPropDescription(NamedTuple):
@@ -54,16 +57,16 @@ class RunnerEnv:
     def expand_mandatory_prop(prop_desc: MandatoryPropDescription) -> None:
         var_value = os.getenv(prop_desc.name)
         if var_value is None:
-            raise OSError(f"Mandatory environment variable '{prop_desc.name}' is not set. "
-                          "Either specify it in the system environment or "
-                          "run the runner with only init command: "
-                          "./runner.sh init")
+            raise InvalidInitialization(
+                f"Mandatory environment variable '{prop_desc.name}' is not set. \n\n"
+                f"Run this command to initialize the runner: \n{RED}./runner.sh init{RESET} \n"
+                f"To see all available initialization options run:\n{RED}./runner.sh init --help{RESET}\n")
         if not prop_desc.is_path:
             return
         expanded = Path(var_value).expanduser().resolve()
         if prop_desc.require_exist and not expanded.exists():
-            raise OSError(f"Mandatory environment variable '{prop_desc.name}' is set "
-                          f"to value {var_value} which does not exist.")
+            raise InvalidInitialization(f"Mandatory environment variable '{prop_desc.name}' is set \n"
+                                        f"to value {var_value} which does not exist.")
         os.environ[prop_desc.name] = expanded.as_posix()
 
     @classmethod

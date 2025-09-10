@@ -36,6 +36,10 @@ class RunnerException(Exception):
         super().__init__(self.message)
 
 
+class InvalidInitialization(RunnerException):
+    pass
+
+
 class DownloadException(RunnerException):
     pass
 

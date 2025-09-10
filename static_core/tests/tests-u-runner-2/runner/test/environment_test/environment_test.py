@@ -21,6 +21,7 @@ from typing import cast
 from unittest import TestCase
 from unittest.mock import patch
 
+from runner.common_exceptions import InvalidInitialization
 from runner.environment import MandatoryPropDescription, RunnerEnv
 from runner.init_runner import InitRunner, MandatoryProp
 from runner.test.test_utils import assert_not_raise, random_suffix
@@ -78,7 +79,7 @@ class EnvironmentTest(TestCase):
     def test_check_mandatory_prop_absent(self) -> None:
         # test
         self.assertRaises(
-            OSError,
+            InvalidInitialization,
             RunnerEnv.expand_mandatory_prop,
             MandatoryPropDescription('ARKCOMPILER_RUNTIME_CORE_PATH', is_path=True, require_exist=True))
 
@@ -88,7 +89,7 @@ class EnvironmentTest(TestCase):
     def test_check_mandatory_prop_not_exist_but_must(self) -> None:
         # test
         self.assertRaises(
-            OSError,
+            InvalidInitialization,
             RunnerEnv.expand_mandatory_prop,
             MandatoryPropDescription('ARKCOMPILER_RUNTIME_CORE_PATH', is_path=True, require_exist=True))
 
@@ -99,7 +100,7 @@ class EnvironmentTest(TestCase):
         # test
         assert_not_raise(
             test_case=self,
-            cls=OSError,
+            cls=InvalidInitialization,
             function=RunnerEnv.expand_mandatory_prop,
             params=[MandatoryPropDescription('WORK_DIR', is_path=True, require_exist=False)])
 
@@ -112,7 +113,7 @@ class EnvironmentTest(TestCase):
         # test
         assert_not_raise(
             test_case=self,
-            cls=OSError,
+            cls=InvalidInitialization,
             function=RunnerEnv.expand_mandatory_prop,
             params=[MandatoryPropDescription('ARKCOMPILER_RUNTIME_CORE_PATH', is_path=True, require_exist=True)])
         # clear up
@@ -127,7 +128,7 @@ class EnvironmentTest(TestCase):
         # test
         assert_not_raise(
             test_case=self,
-            cls=OSError,
+            cls=InvalidInitialization,
             function=RunnerEnv.expand_mandatory_prop,
             params=[MandatoryPropDescription('WORK_DIR', is_path=True, require_exist=False)])
         # clear up

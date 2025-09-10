@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
+import logging
 import os
 import sys
 from datetime import datetime, timedelta
@@ -23,7 +23,7 @@ from typing import Any, cast
 
 import pytz
 
-from runner.common_exceptions import InvalidConfiguration, RunnerException
+from runner.common_exceptions import InvalidConfiguration, InvalidInitialization, RunnerException
 from runner.enum_types.verbose_format import VerboseKind
 from runner.environment import RunnerEnv
 from runner.init_runner import InitRunner
@@ -40,10 +40,14 @@ def main() -> None:
     if init_runner.should_runner_initialize(sys.argv):
         init_runner.initialize(RunnerEnv.get_mandatory_props())
         sys.exit(0)
-    RunnerEnv(
-        local_env=Path.cwd().with_name(".env"),
-        urunner_path=Path(__file__).parent,
-        global_env=init_runner.urunner_env_path).load_environment()
+    try:
+        RunnerEnv(
+            local_env=Path.cwd().with_name(".env"),
+            urunner_path=Path(__file__).parent,
+            global_env=init_runner.urunner_env_path).load_environment()
+    except InvalidInitialization as exc:
+        logging.critical(exc)
+        sys.exit(1)
 
     args = get_args()
     logger = load_config(args)
