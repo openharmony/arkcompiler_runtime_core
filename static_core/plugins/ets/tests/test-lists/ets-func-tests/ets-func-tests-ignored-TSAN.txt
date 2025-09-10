@@ -23,17 +23,3 @@ escompat/JsonStringifyTest.ets
 
 #28355
 escompat/escompat_regexp_match_String.ets
-
-#29408
-std/core/std_core_array_includes_byte_array_byte.ets
-std/core/std_core_array_indexOf_char_array_char.ets
-std/core/std_core_long_instance_Long_toFloat.ets
-std/core/SortStringsTest.ets
-std/containers/BasicSetTest.ets
-std/math/std_math_max_int_int.ets
-spec/03.types/References_Types/string/constructor_with_nullish_0090.ets
-spec/03.types/References_Types/Tuples_type/tuple_as_rest_param_6.ets
-spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_lm_param.ets
-spec/expressions/compound_assignment_01_double_mult_long.ets
-spec/expressions/compound_assignment_01_int_mult_double.ets
-regression/18012_enum_fromInt_error_at_cast.ets

@@ -57,11 +57,6 @@ function(ani_add_gtest TARGET)
         set(VERIFY_SOURCES false)
     endif()
 
-    # NOTE(@srokashevich, #29390): enable verifier with tsan after fix
-    if (PANDA_ENABLE_THREAD_SANITIZER)
-        set(VERIFY_SOURCES false)
-    endif()
-
     ets_native_test_helper(${TARGET}
         ETS_CONFIG ${ARG_ETS_CONFIG}
         ETS_SOURCES ${ARG_ETS_SOURCES}

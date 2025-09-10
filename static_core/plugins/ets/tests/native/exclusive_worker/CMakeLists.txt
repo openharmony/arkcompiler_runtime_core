@@ -11,8 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# NOTE(@srokashevich, #29164): enable with tsan after fix
-if (NOT PANDA_TARGET_ARM32 AND NOT PANDA_ENABLE_THREAD_SANITIZER)
+if (NOT PANDA_TARGET_ARM32)
     ets_native_test_helper(ets_native_exclusive_worker_tests
         CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/exclusive_worker_tests.cpp
         ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/exclusive_worker_tests.ets

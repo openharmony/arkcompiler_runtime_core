@@ -89,8 +89,6 @@ function(add_ets_coroutines_test)
     endforeach()
 endfunction()
 
-# NOTE(@srokashevich, #29320): enable with tsan after fix
-if (NOT PANDA_ENABLE_THREAD_SANITIZER)
 add_ets_coroutines_test(FILE allhandled_rejection.ets
                         SKIP_ARM32_COMPILER
                         LIST_UNHANDLED
@@ -99,7 +97,6 @@ add_ets_coroutines_test(FILE allhandled_rejection.ets
                         WORKERS "AUTO" "ONE"
                         MODE "INT" "JIT" "AOT"
 )
-endif()
 
 add_ets_coroutines_test(FILE unhandled_rejection.ets
                         SKIP_ARM32_COMPILER
