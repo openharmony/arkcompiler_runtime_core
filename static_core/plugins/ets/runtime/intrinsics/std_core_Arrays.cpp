@@ -148,7 +148,7 @@ static void MemAtomicCopyReadBarrier(mem::GCBarrierSet *barrierSet, const void *
 }
 
 template <typename T>
-static auto GetCopy([[maybe_unused]] void *srcAddr)
+static auto GetCopy([[maybe_unused]] const void *srcAddr)
 {
 #ifdef ARK_HYBRID
     auto *readBarrierSet = Thread::GetCurrent()->GetBarrierSet();
@@ -166,6 +166,30 @@ static auto GetCopy([[maybe_unused]] void *srcAddr)
 #endif
 }
 
+namespace {
+template <typename T>
+struct ObjectArrayHandle final {
+    EtsHandle<EtsCharArray> &array;
+    int32_t start;
+
+    void *GetBasePtr()
+    {
+        return array.GetPtr();
+    }
+
+    [[nodiscard]] static size_t GetElementOffset(size_t index)
+    {
+        constexpr uint32_t OFFSET = ark::coretypes::Array::GetDataOffset();
+        return OFFSET + index * sizeof(T);
+    }
+
+    T *GetStartPtr()
+    {
+        return static_cast<T *>(ToVoidPtr(ToUintPtr(array->GetCoreType()->GetData()) + start * sizeof(T)));
+    }
+};
+}  // namespace
+
 // Performance measurement on the device demonstrates that COPIED_BETWEEN_SAFEPOINT_THRESHOLD object pointers
 // are copied in 0.07-0.1 ms.
 static constexpr size_t COPIED_BETWEEN_SAFEPOINT_THRESHOLD = 100000UL;
@@ -177,13 +201,13 @@ static void CopyForward(T *src, T *dst, size_t length, Copy copy, PutSP putSafep
         for (size_t j = i * COPIED_BETWEEN_SAFEPOINT_THRESHOLD; j < (i + 1) * COPIED_BETWEEN_SAFEPOINT_THRESHOLD; ++j) {
             copy(&src[j], &dst[j]);  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         }
-        putSafepoint(i * COPIED_BETWEEN_SAFEPOINT_THRESHOLD, COPIED_BETWEEN_SAFEPOINT_THRESHOLD);
+        putSafepoint(src, dst, i * COPIED_BETWEEN_SAFEPOINT_THRESHOLD, COPIED_BETWEEN_SAFEPOINT_THRESHOLD);
     }
     size_t batchesFinalIdx = (length / COPIED_BETWEEN_SAFEPOINT_THRESHOLD) * COPIED_BETWEEN_SAFEPOINT_THRESHOLD;
     for (size_t i = batchesFinalIdx; i < length; ++i) {
         copy(&src[i], &dst[i]);  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     }
-    putSafepoint(batchesFinalIdx, length - batchesFinalIdx);
+    putSafepoint(src, dst, batchesFinalIdx, length - batchesFinalIdx);
 }
 
 template <typename T, typename Copy, typename PutSP>
@@ -193,33 +217,32 @@ static void CopyBackward(T *src, T *dst, size_t length, Copy copy, PutSP putSafe
     for (size_t i = length; i > batchesStartIdx; --i) {
         copy(&src[i - 1], &dst[i - 1]);  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     }
-    putSafepoint(batchesStartIdx, length - batchesStartIdx);
+    putSafepoint(src, dst, batchesStartIdx, length - batchesStartIdx);
     for (size_t i = length / COPIED_BETWEEN_SAFEPOINT_THRESHOLD; i > 0; --i) {
         for (size_t j = i * COPIED_BETWEEN_SAFEPOINT_THRESHOLD; j > (i - 1) * COPIED_BETWEEN_SAFEPOINT_THRESHOLD; --j) {
             copy(&src[j - 1], &dst[j - 1]);  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         }
-        putSafepoint((i - 1) * COPIED_BETWEEN_SAFEPOINT_THRESHOLD, COPIED_BETWEEN_SAFEPOINT_THRESHOLD);
+        putSafepoint(src, dst, (i - 1) * COPIED_BETWEEN_SAFEPOINT_THRESHOLD, COPIED_BETWEEN_SAFEPOINT_THRESHOLD);
     }
 }
 
-static void PostWrite(ManagedThread *thread, EtsHandle<EtsCharArray> dstArray, size_t dstStart, size_t length)
+template <typename T>
+static void PostWrite(ManagedThread *thread, ObjectArrayHandle<T> dstArray, size_t start, size_t length)
 {
     auto *barrierSet = thread->GetBarrierSet();
     if (barrierSet->GetPostType() != ark::mem::BarrierType::POST_WRB_NONE) {
-        constexpr uint32_t OFFSET = ark::coretypes::Array::GetDataOffset();
-        const uint32_t size = length * sizeof(ObjectPointerType);
-        barrierSet->PostBarrier(dstArray.GetPtr(), OFFSET + dstStart * sizeof(ObjectPointerType), size);
+        const uint32_t size = length * sizeof(T);
+        barrierSet->PostBarrier(dstArray.GetBasePtr(), ObjectArrayHandle<T>::GetElementOffset(start), size);
     }
 }
 
 template <typename T, bool NEED_PRE_WRITE_BARRIER = true>
-static void RefCopy(ManagedThread *thread, EtsHandle<EtsCharArray> dstArray, void *srcAddr, void *dstAddr,
-                    int32_t length)
+static void RefCopy(ManagedThread *thread, ObjectArrayHandle<T> srcArray, ObjectArrayHandle<T> dstArray, int32_t length)
 {
-    auto *src = static_cast<T *>(srcAddr);
-    auto *dst = static_cast<T *>(dstAddr);
-    bool backwards = reinterpret_cast<int64_t>(srcAddr) < reinterpret_cast<int64_t>(dstAddr);
-    auto copy = GetCopy<T>(srcAddr);
+    auto *src = srcArray.GetStartPtr();
+    auto *dst = dstArray.GetStartPtr();
+    bool backwards = reinterpret_cast<int64_t>(src) < reinterpret_cast<int64_t>(dst);
+    auto copy = GetCopy<T>(src);
 
     if constexpr (NEED_PRE_WRITE_BARRIER) {
         auto *barrierSet = thread->GetBarrierSet();
@@ -230,10 +253,15 @@ static void RefCopy(ManagedThread *thread, EtsHandle<EtsCharArray> dstArray, voi
             }
             copy(srcPtr, dstPtr);
         };
-        auto putSafepoint = [&usePreBarrier, barrierSet, dstArray, thread](size_t dstStart, size_t count) {
-            PostWrite(thread, dstArray, dstStart, count);
+        auto putSafepoint = [&usePreBarrier, barrierSet, srcArray, dstArray, thread](T *&src, T *&dst, size_t start,
+                                                                                     size_t count) mutable {
+            PostWrite<T>(thread, dstArray, start, count);
             ark::interpreter::RuntimeInterface::Safepoint(thread);
             usePreBarrier = barrierSet->IsPreBarrierEnabled();
+            // If GC suspends worker during RefCopy execution, it may move the arrays pointed by *srcPtr and *dstPtr
+            // to different memory locations; therefore, the new array addresses should be re-read.
+            src = srcArray.GetStartPtr();
+            dst = dstArray.GetStartPtr();
         };
         if (backwards) {
             CopyBackward(src, dst, length, copyWithBarriers, putSafepoint);
@@ -241,9 +269,13 @@ static void RefCopy(ManagedThread *thread, EtsHandle<EtsCharArray> dstArray, voi
             CopyForward(src, dst, length, copyWithBarriers, putSafepoint);
         }
     } else {
-        auto putSafepoint = [thread, dstArray](size_t dstStart, size_t count) {
-            PostWrite(thread, dstArray, dstStart, count);
+        auto putSafepoint = [srcArray, dstArray, thread](T *&src, T *&dst, size_t start, size_t count) mutable {
+            PostWrite<T>(thread, dstArray, start, count);
             ark::interpreter::RuntimeInterface::Safepoint(thread);
+            // If GC suspends worker during RefCopy execution, it may move the arrays pointed by *srcPtr and *dstPtr
+            // to different memory locations; therefore, the new array addresses should be re-read.
+            src = srcArray.GetStartPtr();
+            dst = dstArray.GetStartPtr();
         };
         if (backwards) {
             CopyBackward(src, dst, length, copy, putSafepoint);
@@ -277,12 +309,7 @@ void StdCoreCopyToForObjects(EtsCharArray *src, EtsCharArray *dst, int32_t dstSt
         return;
     }
 
-    auto srcAddr = ToVoidPtr(ToUintPtr(srcArray->GetCoreType()->GetData()) + srcStart * sizeof(ObjectPointerType));
-    auto dstAddr = ToVoidPtr(ToUintPtr(dstArray->GetCoreType()->GetData()) + dstStart * sizeof(ObjectPointerType));
-
-    TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
-    RefCopy<ObjectPointerType, NEED_PRE_WRITE_BARRIER>(coroutine, dstArray, srcAddr, dstAddr, length);
-    TSAN_ANNOTATE_IGNORE_WRITES_END();
+    RefCopy<ObjectPointerType, NEED_PRE_WRITE_BARRIER>(coroutine, {srcArray, srcStart}, {dstArray, dstStart}, length);
 }
 
 extern "C" void StdCoreObjectCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart, int32_t srcStart,
