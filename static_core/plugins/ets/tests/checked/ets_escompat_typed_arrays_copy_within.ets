@@ -15,81 +15,81 @@
 
 //! CHECKER       JIT: copyWithin()
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true,  options: "--compiler-regex=.*::test_.*array_.*", entry: "ets_escompat_typed_arrays_copy_within.ETSGLOBAL::main"
-//! METHOD        "test_int8array_copy_within"
+//! RUN           force_jit: true,  options: "--compiler-regex=escompat.*Array::copyWithin", entry: "ets_escompat_typed_arrays_copy_within.ETSGLOBAL::main"
+//! METHOD        "escompat.Int8Array::copyWithin"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Intrinsic.Int8ArrayCopyWithin/
-//! METHOD        "test_int16array_copy_within"
+//! INST          /Intrinsic.Int8ArrayCopyWithinImpl/
+//! METHOD        "escompat.Int16Array::copyWithin"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Intrinsic.Int16ArrayCopyWithin/
-//! METHOD        "test_int32array_copy_within"
+//! INST          /Intrinsic.Int16ArrayCopyWithinImpl/
+//! METHOD        "escompat.Int32Array::copyWithin"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Intrinsic.Int32ArrayCopyWithin/
-//! METHOD        "test_bigint64array_copy_within"
+//! INST          /Intrinsic.Int32ArrayCopyWithinImpl/
+//! METHOD        "escompat.BigInt64Array::copyWithin"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Intrinsic.BigInt64ArrayCopyWithin/
+//! INST          /Intrinsic.BigInt64ArrayCopyWithinImpl/
 //!
-//! METHOD        "test_float32array_copy_within"
+//! METHOD        "escompat.Float32Array::copyWithin"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Intrinsic.Float32ArrayCopyWithin/
-//! METHOD        "test_float64array_copy_within"
+//! INST          /Intrinsic.Float32ArrayCopyWithinImpl/
+//! METHOD        "escompat.Float64Array::copyWithin"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Intrinsic.Float64ArrayCopyWithin/
+//! INST          /Intrinsic.Float64ArrayCopyWithinImpl/
 //!
-//! METHOD        "test_uint8array_copy_within"
+//! METHOD        "escompat.Uint8Array::copyWithin"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Intrinsic.UInt8ArrayCopyWithin/
-//! METHOD        "test_uint8clampedarray_copy_within"
+//! INST          /Intrinsic.UInt8ArrayCopyWithinImpl/
+//! METHOD        "escompat.Uint8ClampedArray::copyWithin"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Intrinsic.UInt8ClampedArrayCopyWithin/
-//! METHOD        "test_uint16array_copy_within"
+//! INST          /Intrinsic.UInt8ClampedArrayCopyWithinImpl/
+//! METHOD        "escompat.Uint16Array::copyWithin"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Intrinsic.UInt16ArrayCopyWithin/
-//! METHOD        "test_uint32array_copy_within"
+//! INST          /Intrinsic.UInt16ArrayCopyWithinImpl/
+//! METHOD        "escompat.Uint32Array::copyWithin"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Intrinsic.UInt32ArrayCopyWithin/
-//! METHOD        "test_biguint64array_copy_within"
+//! INST          /Intrinsic.UInt32ArrayCopyWithinImpl/
+//! METHOD        "escompat.BigUint64Array::copyWithin"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Intrinsic.BigUInt64ArrayCopyWithin/
+//! INST          /Intrinsic.BigUInt64ArrayCopyWithinImpl/
 
 //! CHECKER       AOT: copyWithin()
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex=.*::test_.*array_.*", entry: "ets_escompat_typed_arrays_copy_within.ETSGLOBAL::main"
 //! METHOD        "test_int8array_copy_within"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Intrinsic.Int8ArrayCopyWithin/
+//! INST          /Call.* escompat.Int8Array::copyWithin/
 //! METHOD        "test_int16array_copy_within"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Intrinsic.Int16ArrayCopyWithin/
+//! INST          /Call.* escompat.Int16Array::copyWithin/
 //! METHOD        "test_int32array_copy_within"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Intrinsic.Int32ArrayCopyWithin/
+//! INST          /Call.* escompat.Int32Array::copyWithin/
 //! METHOD        "test_bigint64array_copy_within"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Intrinsic.BigInt64ArrayCopyWithin/
+//! INST          /Call.* escompat.BigInt64Array::copyWithin/
 //!
 //! METHOD        "test_float32array_copy_within"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Intrinsic.Float32ArrayCopyWithin/
+//! INST          /Call.* escompat.Float32Array::copyWithin/
 //! METHOD        "test_float64array_copy_within"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Intrinsic.Float64ArrayCopyWithin/
+//! INST          /Call.* escompat.Float64Array::copyWithin/
 //!
 //! METHOD        "test_uint8array_copy_within"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Intrinsic.UInt8ArrayCopyWithin/
+//! INST          /Call.* escompat.Uint8Array::copyWithin/
 //! METHOD        "test_uint8clampedarray_copy_within"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Intrinsic.UInt8ClampedArrayCopyWithin/
+//! INST          /Call.* escompat.Uint8ClampedArray::copyWithin/
 //! METHOD        "test_uint16array_copy_within"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Intrinsic.UInt16ArrayCopyWithin/
+//! INST          /Call.* escompat.Uint16Array::copyWithin/
 //! METHOD        "test_uint32array_copy_within"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Intrinsic.UInt32ArrayCopyWithin/
+//! INST          /Call.* escompat.Uint32Array::copyWithin/
 //! METHOD        "test_biguint64array_copy_within"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Intrinsic.BigUInt64ArrayCopyWithin/
+//! INST          /Call.* escompat.BigUint64Array::copyWithin/
 
 
 function check_array(arr: ArrayLike<number>, expected: ArrayLike<number>) {
