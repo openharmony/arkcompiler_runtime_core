@@ -242,6 +242,17 @@ public:
         annotations_.insert(annotations_.end(), annotations.begin(), annotations.end());
     }
 
+    void DeleteAnnotationByName(const std::string_view &annotation_name)
+    {
+        auto annotation_iter =
+            std::find_if(annotations_.begin(), annotations_.end(), [&](pandasm::AnnotationData &annotation) -> bool {
+                return annotation.GetName() == annotation_name;
+            });
+        if (annotation_iter != annotations_.end()) {
+            (void)annotations_.erase(annotation_iter);
+        }
+    }
+
     std::optional<Error> ValidateData() override;
 
 protected:
@@ -584,6 +595,11 @@ public:
     std::optional<ScalarValue> GetValue() const
     {
         return value_;
+    }
+
+    void ResetValue()
+    {
+        value_.reset();
     }
 
 protected:

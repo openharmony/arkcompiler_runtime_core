@@ -66,6 +66,42 @@ AbckitValue *FindOrCreateValueDoubleStatic(AbckitFile *file, double value);
 AbckitValue *FindOrCreateValueStringStatic(AbckitFile *file, const char *value, size_t len);
 
 // ========================================
+// ModuleField
+// ========================================
+bool ModuleFieldSetTypeStatic(AbckitArktsModuleField *field, AbckitType *type);
+bool ModuleFieldSetValueStatic(AbckitArktsModuleField *field, AbckitValue *value);
+
+// ========================================
+// ClassField
+// ========================================
+bool ClassFieldAddAnnotationStatic(AbckitArktsClassField *field, const AbckitArktsAnnotationCreateParams *params);
+bool ClassFieldRemoveAnnotationStatic(AbckitArktsClassField *field, AbckitArktsAnnotation *anno);
+bool ClassFieldSetTypeStatic(AbckitArktsClassField *field, AbckitType *type);
+bool ClassFieldSetValueStatic(AbckitArktsClassField *field, AbckitValue *value);
+
+// ========================================
+// Module
+// ========================================
+AbckitArktsAnnotationInterface *ModuleAddAnnotationInterfaceStatic(
+    AbckitCoreModule *m, const struct AbckitArktsAnnotationInterfaceCreateParams *params);
+
+// ========================================
+// AnnotationInterface
+// ========================================
+AbckitArktsAnnotationInterfaceField *AnnotationInterfaceAddFieldStatic(
+    AbckitCoreAnnotationInterface *ai, const AbckitArktsAnnotationInterfaceFieldCreateParams *params);
+void AnnotationInterfaceRemoveFieldStatic(AbckitCoreAnnotationInterface *ai,
+                                          AbckitCoreAnnotationInterfaceField *aiField);
+
+// ========================================
+// InterfaceField
+// ========================================
+bool InterfaceFieldSetTypeStatic(AbckitArktsInterfaceField *field, AbckitType *type);
+bool InterfaceFieldAddAnnotationStatic(AbckitArktsInterfaceField *field,
+                                       const AbckitArktsAnnotationCreateParams *params);
+bool InterfaceFieldRemoveAnnotationStatic(AbckitArktsInterfaceField *field, AbckitArktsAnnotation *anno);
+
+// ========================================
 // Function
 // ========================================
 bool FunctionSetNameStatic(AbckitArktsFunction *function, const char *name);

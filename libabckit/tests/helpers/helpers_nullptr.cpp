@@ -29,6 +29,7 @@ static auto g_implM = AbckitGetModifyApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
 namespace libabckit::test::helpers_nullptr {
 
+static constexpr uintptr_t ABCKIT_TEST_POINTER_TAG = 0x1;
 // NOLINTBEGIN(cppcoreguidelines-pro-type-cstyle-cast)
 [[maybe_unused]] static AbckitFile *g_abckitFile = reinterpret_cast<AbckitFile *>(0x1);
 [[maybe_unused]] static AbckitGraph *g_abckitGraph = reinterpret_cast<AbckitGraph *>(0x1);
@@ -110,6 +111,12 @@ namespace libabckit::test::helpers_nullptr {
     reinterpret_cast<AbckitJsImportDescriptor *>(0x1);
 [[maybe_unused]] static const AbckitJsExternalModuleCreateParams *g_constAbckitJsExternalmodulecreateparams =
     reinterpret_cast<const AbckitJsExternalModuleCreateParams *>(0x1);
+[[maybe_unused]] static AbckitArktsModuleField *g_abckitArktsModuleField =
+    reinterpret_cast<AbckitArktsModuleField *>(ABCKIT_TEST_POINTER_TAG);
+[[maybe_unused]] static AbckitArktsClassField *g_arktsClassField =
+    reinterpret_cast<AbckitArktsClassField *>(ABCKIT_TEST_POINTER_TAG);
+[[maybe_unused]] static AbckitArktsEnumField *g_abckitArktsEnumField =
+    reinterpret_cast<AbckitArktsEnumField *>(ABCKIT_TEST_POINTER_TAG);
 // NOLINTEND(cppcoreguidelines-pro-type-cstyle-cast)
 
 static const char *GetConstChar()
@@ -430,14 +437,6 @@ void TestNullptr(AbckitArktsAnnotationInterfaceField *(*apiToCheck)(
     ai->core = nullptr;
     ASSERT_EQ(apiToCheck(ai.get(), params.get()), nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_INTERNAL_ERROR);
-
-    auto core = std::make_unique<AbckitCoreAnnotationInterface>();
-    ai->core = core.get();
-    auto coreModule = std::make_unique<AbckitCoreModule>();
-    core->owningModule = coreModule.get();
-    coreModule->target = ABCKIT_TARGET_ARK_TS_V2;
-    ASSERT_EQ(apiToCheck(ai.get(), params.get()), nullptr);
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_UNSUPPORTED);
 }
 void TestNullptr(void (*apiToCheck)(AbckitArktsAnnotationInterface *, AbckitArktsAnnotationInterfaceField *))
 {
@@ -458,14 +457,6 @@ void TestNullptr(void (*apiToCheck)(AbckitArktsAnnotationInterface *, AbckitArkt
     field->core = nullptr;
     apiToCheck(ai.get(), field.get());
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_INTERNAL_ERROR);
-
-    auto fieldCore = std::make_unique<AbckitCoreAnnotationInterfaceField>();
-    field->core = fieldCore.get();
-    auto aiModule = std::make_unique<AbckitCoreModule>();
-    aiCore->owningModule = aiModule.get();
-    aiModule->target = ABCKIT_TARGET_ARK_TS_V2;
-    apiToCheck(ai.get(), field.get());
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_UNSUPPORTED);
 }
 void TestNullptr(void (*apiToCheck)(AbckitArktsAnnotation *, AbckitArktsAnnotationElement *))
 {
@@ -731,12 +722,6 @@ void TestNullptr(AbckitArktsAnnotationInterface *(*apiToCheck)(AbckitArktsModule
     arktsModule->core = nullptr;
     ASSERT_EQ(apiToCheck(arktsModule.get(), params.get()), nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_INTERNAL_ERROR);
-
-    auto core = std::make_unique<AbckitCoreModule>();
-    arktsModule->core = core.get();
-    core->target = ABCKIT_TARGET_ARK_TS_V2;
-    ASSERT_EQ(apiToCheck(arktsModule.get(), params.get()), nullptr);
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_UNSUPPORTED);
 }
 void TestNullptr(AbckitArktsExportDescriptor *(*apiToCheck)(AbckitArktsModule *, AbckitArktsModule *,
                                                             const AbckitArktsDynamicModuleExportCreateParams *))
@@ -1784,6 +1769,119 @@ void TestNullptr(bool (*apiToCheck)(AbckitCoreModule *, void *, bool (*cb)(Abcki
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
 
     apiToCheck(g_abckitModule, g_void, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(bool (*apiToCheck)(AbckitArktsModuleField *,
+                                    const struct AbckitArktsAnnotationInterfaceCreateParams *))
+{
+    apiToCheck(g_abckitArktsModuleField, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    apiToCheck(nullptr, g_constAbckitArktsAnnotationinterfacecreateparams);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(bool (*apiToCheck)(AbckitArktsModuleField *, const char *))
+{
+    apiToCheck(g_abckitArktsModuleField, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    apiToCheck(nullptr, GetConstChar());
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(bool (*apiToCheck)(AbckitArktsModuleField *, AbckitType *))
+{
+    apiToCheck(g_abckitArktsModuleField, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    apiToCheck(nullptr, g_abckitType);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(bool (*apiToCheck)(AbckitArktsModuleField *, AbckitValue *))
+{
+    apiToCheck(g_abckitArktsModuleField, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    apiToCheck(nullptr, g_abckitValue);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(bool (*apiToCheck)(AbckitArktsClassField *, const struct AbckitArktsAnnotationCreateParams *))
+{
+    apiToCheck(g_arktsClassField, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    apiToCheck(nullptr, g_constAbckitArktsAnnotationcreateparams);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(bool (*apiToCheck)(AbckitArktsClassField *, AbckitArktsAnnotation *))
+{
+    apiToCheck(g_arktsClassField, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    apiToCheck(nullptr, g_abckitArktsAnnotation);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(bool (*apiToCheck)(AbckitArktsClassField *, const char *))
+{
+    apiToCheck(g_arktsClassField, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    apiToCheck(nullptr, GetConstChar());
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(bool (*apiToCheck)(AbckitArktsClassField *, AbckitType *))
+{
+    apiToCheck(g_arktsClassField, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    apiToCheck(nullptr, g_abckitType);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(bool (*apiToCheck)(AbckitArktsClassField *, AbckitValue *))
+{
+    apiToCheck(g_arktsClassField, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    apiToCheck(nullptr, g_abckitValue);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(bool (*apiToCheck)(AbckitArktsInterfaceField *, const struct AbckitArktsAnnotationCreateParams *))
+{
+    apiToCheck(g_abckitArktsInterfaceField, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    apiToCheck(nullptr, g_constAbckitArktsAnnotationcreateparams);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(bool (*apiToCheck)(AbckitArktsInterfaceField *, AbckitArktsAnnotation *))
+{
+    apiToCheck(g_abckitArktsInterfaceField, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    apiToCheck(nullptr, g_abckitArktsAnnotation);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(bool (*apiToCheck)(AbckitArktsInterfaceField *, const char *))
+{
+    apiToCheck(g_abckitArktsInterfaceField, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    apiToCheck(nullptr, GetConstChar());
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(bool (*apiToCheck)(AbckitArktsInterfaceField *, AbckitType *))
+{
+    apiToCheck(g_abckitArktsInterfaceField, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    apiToCheck(nullptr, g_abckitType);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(bool (*apiToCheck)(AbckitArktsEnumField *, const char *))
+{
+    apiToCheck(g_abckitArktsEnumField, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    apiToCheck(nullptr, GetConstChar());
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
 }
 void TestNullptr(AbckitFile *(*apiToCheck)(AbckitCoreModule *))

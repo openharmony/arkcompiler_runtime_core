@@ -63,6 +63,15 @@ static void TransformMethodImpl(AbckitFile *file, AbckitCoreFunction *method, vo
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
+void TransformMethod(AbckitCoreFunction *method,
+                     const std::function<void(AbckitFile *, AbckitCoreFunction *, AbckitGraph *)> &userTransformer)
+{
+    UserTransformerData utd({method, userTransformer});
+
+    TransformMethodImpl(g_implI->functionGetFile(method), method, &utd);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
 void TransformMethod(AbckitFile *file, const std::string &methodSignature,
                      const std::function<void(AbckitFile *, AbckitCoreFunction *, AbckitGraph *)> &userTransformer)
 {
@@ -481,12 +490,42 @@ void AssertAnnotationInterfaceVisitor(AbckitCoreAnnotationInterface *ai, void *d
     ASSERT_TRUE(data != nullptr);
 }
 
+void AssertAnnotationInterfaceFieldVisitor(AbckitCoreAnnotationInterfaceField *aif, void *data)
+{
+    ASSERT_TRUE(aif != nullptr);
+    ASSERT_TRUE(data != nullptr);
+}
+
 void AssertAnnotationVisitor(AbckitCoreAnnotation *anno, void *data)
 {
     ASSERT_NE(anno, nullptr);
     auto ai = g_implI->annotationGetInterface(anno);
     ASSERT_NE(ai, nullptr);
     ASSERT_NE(data, nullptr);
+}
+
+void AssertModuleFieldVisitor(AbckitCoreModuleField *mf, void *data)
+{
+    ASSERT_TRUE(mf != nullptr);
+    ASSERT_TRUE(data != nullptr);
+}
+
+void AssertInterfaceFieldVisitor(AbckitCoreInterfaceField *cif, void *data)
+{
+    ASSERT_TRUE(cif != nullptr);
+    ASSERT_TRUE(data != nullptr);
+}
+
+void AssertEnumFieldVisitor(AbckitCoreEnumField *cef, void *data)
+{
+    ASSERT_TRUE(cef != nullptr);
+    ASSERT_TRUE(data != nullptr);
+}
+
+void AssertClassFieldVisitor(AbckitCoreClassField *ccf, void *data)
+{
+    ASSERT_TRUE(ccf != nullptr);
+    ASSERT_TRUE(data != nullptr);
 }
 
 void AssertOpenAbc(const char *fname, AbckitFile **file)
@@ -631,6 +670,80 @@ bool AnnotationInterfaceByNameFinder(AbckitCoreAnnotationInterface *ai, void *da
     auto name = helpers::AbckitStringToString(str);
     if (name == ctxFinder->name) {
         ctxFinder->ai = ai;
+        return false;
+    }
+
+    return true;
+}
+
+bool AnnotationInterfaceFieldByNameFinder(AbckitCoreAnnotationInterfaceField *aif, void *data)
+{
+    AssertAnnotationInterfaceFieldVisitor(aif, data);
+
+    auto ctxFinder = reinterpret_cast<AnnotationInterfaceFieldByNameContext *>(data);
+    auto str = g_implI->annotationInterfaceFieldGetName(aif);
+    auto name = helpers::AbckitStringToString(str);
+    if (name == ctxFinder->name) {
+        ctxFinder->aif = aif;
+        return false;
+    }
+    return true;
+}
+
+bool ModuleFieldByNameFinder(AbckitCoreModuleField *cmf, void *data)
+{
+    AssertModuleFieldVisitor(cmf, data);
+
+    auto ctxFinder = reinterpret_cast<ModuleFieldByNameContext *>(data);
+    auto str = g_implI->moduleFieldGetName(cmf);
+    auto name = helpers::AbckitStringToString(str);
+    if (name == ctxFinder->name) {
+        ctxFinder->cmf = cmf;
+        return false;
+    }
+
+    return true;
+}
+
+bool InterfaceFieldByNameFinder(AbckitCoreInterfaceField *cif, void *data)
+{
+    AssertInterfaceFieldVisitor(cif, data);
+
+    auto ctxFinder = reinterpret_cast<InterfaceFieldByNameContext *>(data);
+    auto str = g_implI->interfaceFieldGetName(cif);
+    auto name = helpers::AbckitStringToString(str);
+    if (name == ctxFinder->name) {
+        ctxFinder->cif = cif;
+        return false;
+    }
+
+    return true;
+}
+
+bool EnumFieldByNameFinder(AbckitCoreEnumField *cef, void *data)
+{
+    AssertEnumFieldVisitor(cef, data);
+
+    auto ctxFinder = reinterpret_cast<EnumFieldByNameContext *>(data);
+    auto str = g_implI->enumFieldGetName(cef);
+    auto name = helpers::AbckitStringToString(str);
+    if (name == ctxFinder->name) {
+        ctxFinder->cef = cef;
+        return false;
+    }
+
+    return true;
+}
+
+bool ClassFieldByNameFinder(AbckitCoreClassField *ccf, void *data)
+{
+    AssertClassFieldVisitor(ccf, data);
+
+    auto ctxFinder = reinterpret_cast<ClassFieldByNameContext *>(data);
+    auto str = g_implI->classFieldGetName(ccf);
+    auto name = helpers::AbckitStringToString(str);
+    if (name == ctxFinder->name) {
+        ctxFinder->ccf = ccf;
         return false;
     }
 

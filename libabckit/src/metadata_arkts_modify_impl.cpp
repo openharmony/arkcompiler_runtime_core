@@ -253,8 +253,7 @@ extern "C" AbckitArktsAnnotationInterface *ModuleAddAnnotationInterface(
         case ABCKIT_TARGET_ARK_TS_V1:
             return ModuleAddAnnotationInterfaceDynamic(m->core, params);
         case ABCKIT_TARGET_ARK_TS_V2:
-            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
-            return nullptr;
+            return ModuleAddAnnotationInterfaceStatic(m->core, params);
         default:
             LIBABCKIT_UNREACHABLE;
     }
@@ -929,18 +928,46 @@ extern "C" bool ModuleFieldSetName(AbckitArktsModuleField *field, const char *na
 
 extern "C" bool ModuleFieldSetType(AbckitArktsModuleField *field, AbckitType *type)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    (void)type;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+
+    LIBABCKIT_BAD_ARGUMENT(field, false);
+    LIBABCKIT_BAD_ARGUMENT(type, false);
+
+    LIBABCKIT_INTERNAL_ERROR(field->core, false);
+
+    auto fieldt = field->core->owner->target;
+    switch (fieldt) {
+        case ABCKIT_TARGET_ARK_TS_V1:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return ModuleFieldSetTypeStatic(field, type);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
 }
 
 extern "C" bool ModuleFieldSetValue(AbckitArktsModuleField *field, AbckitValue *value)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    (void)value;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+
+    LIBABCKIT_BAD_ARGUMENT(field, false);
+    LIBABCKIT_BAD_ARGUMENT(value, false);
+
+    LIBABCKIT_INTERNAL_ERROR(field->core, false);
+
+    auto fieldt = field->core->owner->target;
+    switch (fieldt) {
+        case ABCKIT_TARGET_ARK_TS_V1:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return ModuleFieldSetValueStatic(field, value);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
 }
 
 extern "C" AbckitArktsModuleField *CreateModuleField(AbckitArktsModule *module, const char *name, AbckitType *type,
@@ -979,20 +1006,70 @@ extern "C" bool NamespaceFieldSetName(AbckitArktsNamespaceField *field, const ch
 // Class Field
 // ========================================
 
-extern "C" bool ClassFieldAddAnnotation(AbckitArktsClassField *field, const AbckitArktsAnnotationCreateParams *params)
+extern "C" bool ClassFieldAddAnnotation(AbckitArktsClassField *field,
+                                        const struct AbckitArktsAnnotationCreateParams *params)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    (void)params;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+
+    LIBABCKIT_BAD_ARGUMENT(field, false);
+    LIBABCKIT_BAD_ARGUMENT(params, false);
+    LIBABCKIT_INTERNAL_ERROR(field->core, false);
+    LIBABCKIT_INTERNAL_ERROR(field->core->owner, false);
+    LIBABCKIT_INTERNAL_ERROR(field->core->owner->owningModule, false);
+
+    LIBABCKIT_INTERNAL_ERROR(params->ai, false);
+    LIBABCKIT_INTERNAL_ERROR(params->ai->core, false);
+
+    auto fieldt = field->core->owner->owningModule->target;
+    auto annot = params->ai->core->owningModule->target;
+    if (fieldt != annot) {
+        LIBABCKIT_LOG(ERROR) << "field target not equal anno target\n";
+        libabckit::statuses::SetLastError(ABCKIT_STATUS_WRONG_TARGET);
+        return false;
+    }
+    switch (fieldt) {
+        case ABCKIT_TARGET_ARK_TS_V1:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return ClassFieldAddAnnotationStatic(field, params);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
 }
 
 extern "C" bool ClassFieldRemoveAnnotation(AbckitArktsClassField *field, AbckitArktsAnnotation *anno)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    (void)anno;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+
+    LIBABCKIT_BAD_ARGUMENT(field, false);
+    LIBABCKIT_BAD_ARGUMENT(anno, false);
+    LIBABCKIT_INTERNAL_ERROR(field->core, false);
+    LIBABCKIT_INTERNAL_ERROR(field->core->owner, false);
+    LIBABCKIT_INTERNAL_ERROR(field->core->owner->owningModule, false);
+    LIBABCKIT_INTERNAL_ERROR(anno->core, false);
+    LIBABCKIT_INTERNAL_ERROR(anno->core->ai, false);
+    LIBABCKIT_INTERNAL_ERROR(anno->core->ai->owningModule, false);
+
+    auto fieldt = field->core->owner->owningModule->target;
+    auto annot = anno->core->ai->owningModule->target;
+    if (fieldt != annot) {
+        LIBABCKIT_LOG(ERROR) << "field target not equal anno target\n";
+        libabckit::statuses::SetLastError(ABCKIT_STATUS_WRONG_TARGET);
+        return false;
+    }
+
+    switch (fieldt) {
+        case ABCKIT_TARGET_ARK_TS_V1:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return ClassFieldRemoveAnnotationStatic(field, anno);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
 }
 
 extern "C" bool ClassFieldSetName(AbckitArktsClassField *field, const char *name)
@@ -1014,18 +1091,46 @@ extern "C" bool ClassFieldSetName(AbckitArktsClassField *field, const char *name
 
 extern "C" bool ClassFieldSetType(AbckitArktsClassField *field, AbckitType *type)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    (void)type;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+
+    LIBABCKIT_BAD_ARGUMENT(field, false);
+    LIBABCKIT_BAD_ARGUMENT(type, false);
+
+    LIBABCKIT_INTERNAL_ERROR(field->core, false);
+
+    auto fieldt = field->core->owner->owningModule->target;
+    switch (fieldt) {
+        case ABCKIT_TARGET_ARK_TS_V1:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return ClassFieldSetTypeStatic(field, type);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
 }
 
 extern "C" bool ClassFieldSetValue(AbckitArktsClassField *field, AbckitValue *value)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    (void)value;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+
+    LIBABCKIT_BAD_ARGUMENT(field, false);
+    LIBABCKIT_BAD_ARGUMENT(value, false);
+
+    LIBABCKIT_INTERNAL_ERROR(field->core, false);
+
+    auto fieldt = field->core->owner->owningModule->target;
+    switch (fieldt) {
+        case ABCKIT_TARGET_ARK_TS_V1:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return ClassFieldSetValueStatic(field, value);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
 }
 
 extern "C" AbckitArktsClassField *CreateClassField(AbckitArktsClass *klass, const char *name, AbckitType *type,
@@ -1044,20 +1149,69 @@ extern "C" AbckitArktsClassField *CreateClassField(AbckitArktsClass *klass, cons
 // ========================================
 
 extern "C" bool InterfaceFieldAddAnnotation(AbckitArktsInterfaceField *field,
-                                            const AbckitArktsAnnotationCreateParams *params)
+                                            const struct AbckitArktsAnnotationCreateParams *params)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    (void)params;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+
+    LIBABCKIT_BAD_ARGUMENT(field, false);
+    LIBABCKIT_BAD_ARGUMENT(params, false);
+    LIBABCKIT_INTERNAL_ERROR(field->core, false);
+    LIBABCKIT_INTERNAL_ERROR(field->core->owner, false);
+    LIBABCKIT_INTERNAL_ERROR(field->core->owner->owningModule, false);
+    LIBABCKIT_INTERNAL_ERROR(params->ai, false);
+    LIBABCKIT_INTERNAL_ERROR(params->ai->core, false);
+
+    auto fieldt = field->core->owner->owningModule->target;
+    auto annot = params->ai->core->owningModule->target;
+    if (fieldt != annot) {
+        LIBABCKIT_LOG(ERROR) << "field target not equal anno target\n";
+        libabckit::statuses::SetLastError(ABCKIT_STATUS_WRONG_TARGET);
+        return false;
+    }
+
+    switch (fieldt) {
+        case ABCKIT_TARGET_ARK_TS_V1:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return InterfaceFieldAddAnnotationStatic(field, params);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
 }
 
 extern "C" bool InterfaceFieldRemoveAnnotation(AbckitArktsInterfaceField *field, AbckitArktsAnnotation *anno)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    (void)anno;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+
+    LIBABCKIT_BAD_ARGUMENT(field, false);
+    LIBABCKIT_BAD_ARGUMENT(anno, false);
+    LIBABCKIT_INTERNAL_ERROR(field->core, false);
+    LIBABCKIT_INTERNAL_ERROR(field->core->owner, false);
+    LIBABCKIT_INTERNAL_ERROR(field->core->owner->owningModule, false);
+    LIBABCKIT_INTERNAL_ERROR(anno->core, false);
+    LIBABCKIT_INTERNAL_ERROR(anno->core->ai, false);
+    LIBABCKIT_INTERNAL_ERROR(anno->core->ai->owningModule, false);
+
+    auto fieldt = field->core->owner->owningModule->target;
+    auto annot = anno->core->ai->owningModule->target;
+    if (fieldt != annot) {
+        LIBABCKIT_LOG(ERROR) << "field target not equal anno target\n";
+        libabckit::statuses::SetLastError(ABCKIT_STATUS_WRONG_TARGET);
+        return false;
+    }
+
+    switch (fieldt) {
+        case ABCKIT_TARGET_ARK_TS_V1:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return InterfaceFieldRemoveAnnotationStatic(field, anno);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
 }
 
 extern "C" bool InterfaceFieldSetName(AbckitArktsInterfaceField *field, const char *name)
@@ -1080,10 +1234,26 @@ extern "C" bool InterfaceFieldSetName(AbckitArktsInterfaceField *field, const ch
 
 extern "C" bool InterfaceFieldSetType(AbckitArktsInterfaceField *field, AbckitType *type)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    (void)type;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+
+    LIBABCKIT_BAD_ARGUMENT(field, false);
+    LIBABCKIT_BAD_ARGUMENT(type, false);
+
+    LIBABCKIT_INTERNAL_ERROR(field->core, false);
+    LIBABCKIT_INTERNAL_ERROR(field->core->owner, false);
+    LIBABCKIT_INTERNAL_ERROR(field->core->owner->owningModule, false);
+
+    auto fieldt = field->core->owner->owningModule->target;
+    switch (fieldt) {
+        case ABCKIT_TARGET_ARK_TS_V1:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return InterfaceFieldSetTypeStatic(field, type);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
 }
 
 extern "C" AbckitArktsInterfaceField *CreateInterfaceField(AbckitArktsInterface *iface, const char *name,
@@ -1185,8 +1355,7 @@ extern "C" AbckitArktsAnnotationInterfaceField *AnnotationInterfaceAddField(
         case ABCKIT_TARGET_ARK_TS_V1:
             return AnnotationInterfaceAddFieldDynamic(ai->core, params);
         case ABCKIT_TARGET_ARK_TS_V2:
-            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
-            return nullptr;
+            return AnnotationInterfaceAddFieldStatic(ai->core, params);
         default:
             LIBABCKIT_UNREACHABLE;
     }
@@ -1209,8 +1378,7 @@ extern "C" void AnnotationInterfaceRemoveField(AbckitArktsAnnotationInterface *a
         case ABCKIT_TARGET_ARK_TS_V1:
             return AnnotationInterfaceRemoveFieldDynamic(ai->core, field->core);
         case ABCKIT_TARGET_ARK_TS_V2:
-            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
-            return;
+            return AnnotationInterfaceRemoveFieldStatic(ai->core, field->core);
         default:
             LIBABCKIT_UNREACHABLE;
     }
