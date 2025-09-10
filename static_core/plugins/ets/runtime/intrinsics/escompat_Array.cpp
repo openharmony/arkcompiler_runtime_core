@@ -550,10 +550,10 @@ static void RefReverse(void *arrAddr, int32_t length, mem::GCBarrierSet *barrier
         }
         swap(aPtr, bPtr);
     };
-    auto putSafepoint = [&usePreBarrier, barrierSet, arr](size_t dstStart, size_t dstEndMirror, size_t length) {
+    auto putSafepoint = [&usePreBarrier, barrierSet, arr](size_t dstStart, size_t dstEndMirror, size_t bLength) {
         if (barrierSet->GetPostType() != ark::mem::BarrierType::POST_WRB_NONE) {
             constexpr uint32_t OFFSET = ark::coretypes::Array::GetDataOffset();
-            const uint32_t size = length * sizeof(ObjectPointerType);
+            const uint32_t size = bLength * sizeof(ObjectPointerType);
             barrierSet->PostBarrier(arr, OFFSET + dstStart * sizeof(ObjectPointerType), size);
             barrierSet->PostBarrier(arr, OFFSET + dstEndMirror * sizeof(ObjectPointerType) - size, size);
         }

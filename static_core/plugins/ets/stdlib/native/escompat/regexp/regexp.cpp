@@ -67,7 +67,7 @@ RegExpExecResult EtsRegExp::Execute(const std::vector<uint8_t> &pattern, const s
     RegExpExecResult result;
     if (utf16_) {
         result = RegExp16::Execute(re_, reinterpret_cast<const uint16_t *>(str.data()), len, startOffset);
-        RegExp16::EraseExtraGroups(reinterpret_cast<const uint16_t *>(pattern.data()), pattern.size(), result);
+        RegExp16::EraseExtraGroups(reinterpret_cast<const uint16_t *>(pattern.data()), pattern.size() / 2U, result);
     } else {
         result = RegExp8::Execute(re_, str.data(), len, startOffset);
         RegExp8::EraseExtraGroups(pattern.data(), pattern.size(), result);
