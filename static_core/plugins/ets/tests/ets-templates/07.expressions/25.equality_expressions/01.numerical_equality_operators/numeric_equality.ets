@@ -16,14 +16,18 @@
 {% for eq in numeric_eq %}
 
 /*---
-desc: Integer equality
+desc: Integer and double infinity equality
 params: {{eq.left}} {{eq.op}} {{eq.right}} is {{eq.result}}
 ---*/
 
 function main(): void {
   let left = {{eq.left}}
   let right = {{eq.right}}
-  arktest.assertEQ( (left {{eq.op}} right), {{eq.result}} )
+  arktest.assertEQ( 
+    left {{eq.op}} right, 
+    {{eq.result}},
+    "Expected: {{eq.left}} {{eq.op}} {{eq.right}} is {{eq.result}}"
+  )
 }
 
 {% endfor %}
