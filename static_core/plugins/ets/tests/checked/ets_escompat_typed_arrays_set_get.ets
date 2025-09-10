@@ -1119,6 +1119,6 @@ function testBigUint64ArrayGetUnsafe(): void {
 }
 
 // Helpers
-const expectedRangeErrors = (e: Error): boolean => {
+const expectedRangeErrors = (e: Error | Exception): boolean | string => {
     return (e instanceof RangeError)
 }

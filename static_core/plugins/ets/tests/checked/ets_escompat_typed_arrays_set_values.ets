@@ -829,7 +829,7 @@ function test_set_biguint64array_with_offset_rangeerror() {
 }
 
 // Helpers
-const expectedRangeErrors = (e: Error): boolean => {
+const expectedRangeErrors = (e: Error | Exception): boolean | string => {
     return (e instanceof RangeError)
 }
 
