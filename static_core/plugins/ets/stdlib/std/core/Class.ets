@@ -206,6 +206,16 @@ export final class Class {
         return this.getUnionConstituentTypesInternal()
     }
 
+    /**
+     * Check the class is final
+     */
+    public native isFinal(): boolean
+
+    /**
+     * Check the class is abstract
+     */ 
+    public native isAbstract(): boolean
+
     private native getInstanceMethodsInternal(publicOnly: boolean): FixedArray<reflect.InstanceMethod>
     private native getInstanceMethodByNameInternal(name: string, publicOnly: boolean): reflect.InstanceMethod | undefined
     private native getInstanceFieldByNameInternal(name: string, publicOnly: boolean): reflect.InstanceField | undefined

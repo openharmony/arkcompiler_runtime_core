@@ -694,4 +694,16 @@ ObjectHeader *StdCoreClassGetUnionConstituentTypesInternal(EtsClass *cls)
     return typesArray->AsObject()->GetCoreType();
 }
 
+EtsBoolean StdCoreClassIsFinal(EtsClass *cls)
+{
+    ASSERT(cls != nullptr);
+    return cls->IsFinal() || cls->IsStringClass();
+}
+
+EtsBoolean StdCoreClassIsAbstract(EtsClass *cls)
+{
+    ASSERT(cls != nullptr);
+    return cls->IsAbstract();
+}
+
 }  // namespace ark::ets::intrinsics

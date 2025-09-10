@@ -13,23 +13,23 @@
  * limitations under the License.
  */
 
-namespace X {
-    export class A {
+namespace NameSpace {
+    export class NormalClass {
         x: int
 
     }
 
-    export interface B {
+    export interface NormalInterface {
 
     }
 
-    export class C implements B {
+    export class classImplingInterface implements NormalInterface {
         y: String
     }
 
-    export enum D {
-        aa,
-        bb
+    export enum NormalEnum {
+        enumValue1,
+        enumValue2
     }
 
     export function voidFunc(): void {}
@@ -43,8 +43,8 @@ namespace X {
         return x
     }
 
-    export function objectFunc(): A {
-        return new A()
+    export function objectFunc(): NormalClass {
+        return new NormalClass()
     }
 
     export class funcContainer {
@@ -59,48 +59,99 @@ namespace X {
             return x
         }
 
-        public objectFunc(): A {
-            return new A()
+        public objectFunc(): NormalClass {
+            return new NormalClass()
         }
     }
 
-    interface E {
+    interface HiddenInterface {
 
     }
 
-    class F implements E {
+    class HiddenClass implements HiddenInterface {
 
     }
 
-    export function returnHiddenClassObject(): F {
-        return new F()
+    export function returnHiddenClassObject(): HiddenClass {
+        return new HiddenClass()
     }
 
     enum G {
-        aa,
-        bb
+        enumValue1,
+        enumValue2
     }
 
     export function returnHiddenEnumValue(): G {
-        return G.aa
+        return G.enumValue1
+    }
+
+    export final class FinalClass {
+        
+    }
+
+    final class HiddenFinalClass {
+        
+    }
+
+    export function returnHiddenFinalClassObject(): HiddenFinalClass {
+        return new HiddenFinalClass()
+    }
+
+    export abstract class AbstractClass {}
+    export class ClassExtendingAbstract extends AbstractClass {
+
+    }
+
+    abstract class HiddenAbstractClass {}
+    class HiddenClassExtendingAbstractClass extends HiddenAbstractClass {
+
+    }
+
+    export function returnHiddenClassExtendingAbstractClassObject(): HiddenClassExtendingAbstractClass {
+        return new HiddenClassExtendingAbstractClass()
+    }
+
+    export interface InterfaceLiteral {
+        i: int,
+        str: String
+    }
+
+    export interface ObjectLiteral {
+        i: int,
+        str: String
+    }
+
+    export class Container {
+        i: int
+        str: String
+        hiddenAbstractClass: HiddenClassExtendingAbstractClass
+        hiddenFinalClass: HiddenFinalClass
+        normalClass: NormalClass
+
+        constructor() {
+            this.str = "abc"
+            this.hiddenAbstractClass = new HiddenClassExtendingAbstractClass()
+            this.hiddenFinalClass = new HiddenFinalClass()
+            this.normalClass = new NormalClass()
+        }
     }
 }
 
-export class A {
+export class NormalClass {
 
 }
 
-export interface B {
+export interface NormalInterface {
 
 }
 
-export class C implements B {
+export class classImplingInterface implements NormalInterface {
 
 }
 
-export enum D {
-    aa,
-    bb
+export enum NormalEnum {
+    enumValue1,
+    enumValue2
 }
 
 
@@ -115,8 +166,8 @@ export function faFunc(): FixedArray<int> {
     return x
 }
 
-export function objectFunc(): A {
-    return new A()
+export function objectFunc(): NormalClass {
+    return new NormalClass()
 }
 
 export class funcContainer {
@@ -131,33 +182,43 @@ export class funcContainer {
         return x
     }
 
-    public objectFunc(): A {
-        return new A()
+    public objectFunc(): NormalClass {
+        return new NormalClass()
     }
 }
 
+export final class FinalClass {
+
+}
+
+export abstract class AbstractClass {}
+export class ClassExtendingAbstract extends AbstractClass {
+
+}
+
+
 function checkClassIsNotEnumAndNotInterface() {
-    for (let obj of [new X.C(), new X.A(), new C(), new A(), X.returnHiddenClassObject()]) {
+    for (let obj of [new NameSpace.classImplingInterface(), new NameSpace.NormalClass(), new classImplingInterface(), new NormalClass(), NameSpace.returnHiddenClassObject()]) {
         arktest.assertFalse(Class.of(obj).isEnum())
         arktest.assertFalse(Class.of(obj).isInterface())
     }
 }
 
 function checkEnumIsEnumAndNotInterface() {
-    for (let obj of [X.D.aa, D.aa]) {
+    for (let obj of [NameSpace.NormalEnum.enumValue1, NormalEnum.enumValue1]) {
         arktest.assertTrue(Class.of(obj).isEnum())
         arktest.assertFalse(Class.of(obj).isInterface())
     }
-    arktest.assertTrue(Class.of(X.returnHiddenEnumValue()).isEnum())
-    arktest.assertFalse(Class.of(X.returnHiddenEnumValue()).isInterface())
+    arktest.assertTrue(Class.of(NameSpace.returnHiddenEnumValue()).isEnum())
+    arktest.assertFalse(Class.of(NameSpace.returnHiddenEnumValue()).isInterface())
 }
 
 function checkInterfaceIsInterfaceAndNotEnum() {
-    let cls1 = Class.of(new X.C())
+    let cls1 = Class.of(new NameSpace.classImplingInterface())
     let inf1 = cls1.getInterfaces()[0]
-    let cls2 = Class.of(new C())
+    let cls2 = Class.of(new classImplingInterface())
     let inf2 = cls2.getInterfaces()[0]
-    let cls3 = Class.of(X.returnHiddenClassObject())
+    let cls3 = Class.of(NameSpace.returnHiddenClassObject())
     let inf3 = cls3.getInterfaces()[0]
     for (let inf of [inf1, inf2, inf3]) {
         arktest.assertFalse(inf.isEnum())
@@ -169,10 +230,10 @@ function checkFixedArray() {
     let varInt = 5
     let varDouble = 5.5
     let varPrimitiveArray: Array<int> = [1, 2, 3]
-    let varObjectArray: Array<A> = [new A()]
+    let varObjectArray: Array<NormalClass> = [new NormalClass()]
     let varPrimitiveFixedArray: FixedArray<int> = [1, 2, 3]
-    let varObjectFixedArray: FixedArray<A> = [new A()]
-    let varObject = new A()
+    let varObjectFixedArray: FixedArray<NormalClass> = [new NormalClass()]
+    let varObject = new NormalClass()
     let varString = "abc"
     arktest.assertFalse(Class.of(varInt).isFixedArray())
     arktest.assertFalse(Class.of(varDouble).isFixedArray())
@@ -182,18 +243,18 @@ function checkFixedArray() {
     arktest.assertTrue(Class.of(varObjectFixedArray).isFixedArray())
     arktest.assertFalse(Class.of(varString).isFixedArray())
     arktest.assertFalse(Class.of(varObject).isFixedArray())
-    arktest.assertFalse(Class.of(D.aa).isFixedArray())
-    arktest.assertFalse(Class.of(new C()).getInterfaces()[0].isFixedArray())
+    arktest.assertFalse(Class.of(NormalEnum.enumValue1).isFixedArray())
+    arktest.assertFalse(Class.of(new classImplingInterface()).getInterfaces()[0].isFixedArray())
     arktest.assertFalse(Class.of(faFunc).isFixedArray())
     arktest.assertFalse(Class.of(new funcContainer().faFunc).isFixedArray())
 }
 
 function checkFunctions() {
     let gc = new funcContainer()
-    let nc = new X.funcContainer()
+    let nc = new NameSpace.funcContainer()
     let gList = [voidFunc, primFunc, faFunc, objectFunc]
     let gcList = [gc.voidFunc, gc.primFunc, gc.faFunc, gc.objectFunc]
-    let nList = [X.voidFunc, X.primFunc, X.faFunc, X.objectFunc]
+    let nList = [NameSpace.voidFunc, NameSpace.primFunc, NameSpace.faFunc, NameSpace.objectFunc]
     let ncList = [nc.voidFunc, nc.primFunc, nc.faFunc, nc.objectFunc]
     for (let funcList of [gList, gcList, nList, ncList]) {
         for (let func of funcList) {
@@ -298,6 +359,105 @@ function checkClassOfObject() {
     arktest.assertEQ(Class.of([1,23]), Class.of([1,2,3]))
 }
 
+function checkFinal() {
+    arktest.assertFalse(Class.of(new NormalClass()).isFinal())
+    arktest.assertTrue(Class.of(new FinalClass()).isFinal())
+    arktest.assertFalse(Class.of(new ClassExtendingAbstract()).getSuper()!.isFinal())
+    arktest.assertFalse(Class.of(new NameSpace.NormalClass()).isFinal())
+    arktest.assertTrue(Class.of(new NameSpace.FinalClass()).isFinal())
+    arktest.assertFalse(Class.of(new NameSpace.ClassExtendingAbstract()).getSuper()!.isFinal())
+    arktest.assertFalse(Class.of(NameSpace.returnHiddenClassObject()).isFinal())
+    arktest.assertTrue(Class.of(NameSpace.returnHiddenFinalClassObject()).isFinal())
+    arktest.assertFalse(Class.of(NameSpace.returnHiddenClassExtendingAbstractClassObject()).getSuper()!.isFinal())
+
+    let simpleString = "abc"
+    let utf16String = "\uCCCC"
+    let subString = "0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789"
+        .substring(0, 99)
+        .substring(0, 98)
+        .substring(0, 97)
+        .substring(0, 96)
+        .substring(0, 95)
+        .substring(0, 94)
+        .substring(0, 93)
+        .substring(0, 92)
+        .substring(0, 91)
+        .substring(0, 90)
+    let treeString = "9876543210"
+        .concat("9876543210")
+        .concat("9876543210")
+        .concat("9876543210")
+        .concat("9876543210")
+        .concat("9876543210")
+        .concat("9876543210")
+        .concat("9876543210")
+        .concat("9876543210")
+        .concat("9876543210")
+
+    arktest.assertTrue(Class.of(simpleString).isFinal())
+    arktest.assertTrue(Class.of(utf16String).isFinal())
+    arktest.assertTrue(Class.of(subString).isFinal())
+    arktest.assertTrue(Class.of(treeString).isFinal())
+
+    let il: NameSpace.InterfaceLiteral = {
+        i: 5,
+        str: "abc"
+    }
+    arktest.assertFalse(Class.of(il).isFinal())
+    arktest.assertTrue(Class.of(il.i).isFinal())
+    arktest.assertTrue(Class.of(il.str).isFinal())
+
+    let ol: NameSpace.ObjectLiteral = {
+        i: 5,
+        str: "abc"
+    }
+    arktest.assertFalse(Class.of(ol).isFinal())
+    arktest.assertTrue(Class.of(ol.i).isFinal())
+    arktest.assertTrue(Class.of(ol.str).isFinal())
+
+    let cont = new NameSpace.Container()
+    arktest.assertTrue(Class.of(cont.i).isFinal())
+    arktest.assertTrue(Class.of(cont.str).isFinal())
+    arktest.assertFalse(Class.of(cont.hiddenAbstractClass).getSuper()!.isFinal())
+    arktest.assertTrue(Class.of(cont.hiddenFinalClass).isFinal())
+    arktest.assertFalse(Class.of(cont.normalClass).isFinal())
+}
+
+function checkAbstract() {
+    arktest.assertFalse(Class.of(new NormalClass()).isAbstract())
+    arktest.assertFalse(Class.of(new FinalClass()).isAbstract())
+    arktest.assertTrue(Class.of(new ClassExtendingAbstract()).getSuper()!.isAbstract())
+    arktest.assertFalse(Class.of(new NameSpace.NormalClass()).isAbstract())
+    arktest.assertFalse(Class.of(new NameSpace.FinalClass()).isAbstract())
+    arktest.assertTrue(Class.of(new NameSpace.ClassExtendingAbstract()).getSuper()!.isAbstract())
+    arktest.assertFalse(Class.of(NameSpace.returnHiddenClassObject()).isAbstract())
+    arktest.assertFalse(Class.of(NameSpace.returnHiddenFinalClassObject()).isAbstract())
+    arktest.assertTrue(Class.of(NameSpace.returnHiddenClassExtendingAbstractClassObject()).getSuper()!.isAbstract())
+
+    let il: NameSpace.InterfaceLiteral = {
+        i: 5,
+        str: "abc"
+    }
+    arktest.assertFalse(Class.of(il).isAbstract())
+    arktest.assertFalse(Class.of(il.i).isAbstract())
+    arktest.assertFalse(Class.of(il.str).isAbstract())
+
+    let ol: NameSpace.ObjectLiteral = {
+        i: 5,
+        str: "abc"
+    }
+    arktest.assertFalse(Class.of(ol).isAbstract())
+    arktest.assertFalse(Class.of(ol.i).isAbstract())
+    arktest.assertFalse(Class.of(ol.str).isAbstract())
+
+    let cont = new NameSpace.Container()
+    arktest.assertFalse(Class.of(cont.i).isAbstract())
+    arktest.assertFalse(Class.of(cont.str).isAbstract())
+    arktest.assertTrue(Class.of(cont.hiddenAbstractClass).getSuper()!.isAbstract())
+    arktest.assertFalse(Class.of(cont.hiddenFinalClass).isAbstract())
+    arktest.assertFalse(Class.of(cont.normalClass).isAbstract())
+}
+
 function main(): void {
     let ts = new arktest.ArkTestsuite("Class API test")
     ts.addTest("checkClassIsNotEnumAndNotInterface", checkClassIsNotEnumAndNotInterface)
@@ -310,5 +470,7 @@ function main(): void {
     ts.addTest('Subtypeof interfaces', checkSubTypeOfInterfaces)
     ts.addTest("checkClassOfAny", checkClassOfAny)
     ts.addTest("checkClassOfObject", checkClassOfObject)
+    ts.addTest("checkFinal", checkFinal)
+    ts.addTest("checkAbstract", checkAbstract)
     ts.run();
 }
