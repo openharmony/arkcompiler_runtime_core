@@ -6070,12 +6070,22 @@ intrinsics:
   - name: StdCoreClassOf
     space: ets
     class_name: std.core.Class
-    method_name: of
+    method_name: ofObject
     static: true
     signature:
       ret: std.core.Class
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::StdCoreClassOf
+
+  - name: StdCoreClassOfNull
+    space: ets
+    class_name: std.core.Class
+    method_name: ofNull
+    static: true
+    signature:
+      ret: std.core.Class
+      args: []
+    impl: ark::ets::intrinsics::StdCoreClassOfNull
 
   - name: StdCoreClassCurrent
     space: ets

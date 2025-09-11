@@ -262,6 +262,42 @@ function checkSubTypeOfInterfaces() {
     arktest.assertFalse(i2.isSubtypeOf(i3), "I2 doesn't extends I3")
 }
 
+function checkClassOfAny() {
+    let clsObj: Class = Class.of(new Object)
+    let clsNull: Class = Class.of(null)
+
+    arktest.assertEQ(Class.ofAny(undefined), undefined)
+    arktest.assertEQ(Class.ofAny(new Object), clsObj)
+    arktest.assertEQ(Class.ofAny(null), clsNull)
+
+    arktest.assertEQ(Class.ofAny(1), Class.ofAny(2))
+    arktest.assertEQ(Class.ofAny(1.0f), Class.ofAny(2.0f))
+    arktest.assertEQ(Class.ofAny(true), Class.ofAny(false))
+    arktest.assertEQ(Class.ofAny(1.0), Class.ofAny(2.0))
+    arktest.assertEQ(Class.ofAny("foo"), Class.ofAny("bar"))
+    arktest.assertEQ(Class.ofAny(c'a'), Class.ofAny(c'b'))
+    arktest.assertEQ(Class.ofAny(() => {}), Class.ofAny(() => {}))
+    arktest.assertEQ(Class.ofAny([1,23]), Class.ofAny([1,2,3]))
+}
+
+function checkClassOfObject() {
+    let clsObj: Class = Class.of(new Object)
+    let clsNull: Class = Class.of(null)
+
+    arktest.assertNE(clsObj, clsNull)
+    arktest.assertEQ(clsObj.getName(), "std.core.Object")
+    arktest.assertEQ(clsNull.getName(), "std.core.Null")
+
+    arktest.assertEQ(Class.of(1), Class.of(2))
+    arktest.assertEQ(Class.of(1.0f), Class.of(2.0f))
+    arktest.assertEQ(Class.of(true), Class.of(false))
+    arktest.assertEQ(Class.of(1.0), Class.of(2.0))
+    arktest.assertEQ(Class.of("foo"), Class.of("bar"))
+    arktest.assertEQ(Class.of(c'a'), Class.of(c'b'))
+    arktest.assertEQ(Class.of(() => {} as Function), Class.of(() => {} as Function))
+    arktest.assertEQ(Class.of([1,23]), Class.of([1,2,3]))
+}
+
 function main(): void {
     let ts = new arktest.ArkTestsuite("Class API test")
     ts.addTest("checkClassIsNotEnumAndNotInterface", checkClassIsNotEnumAndNotInterface)
@@ -272,5 +308,7 @@ function main(): void {
     ts.addTest('SubtypeOf', checkSubTypeOf)
     ts.addTest('Subtypeof multiple interfaces', checkSubTypeOfMultipleInterfaces)
     ts.addTest('Subtypeof interfaces', checkSubTypeOfInterfaces)
+    ts.addTest("checkClassOfAny", checkClassOfAny)
+    ts.addTest("checkClassOfObject", checkClassOfObject)
     ts.run();
 }

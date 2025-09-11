@@ -55,7 +55,25 @@ export final class Class {
      */
     public native initialize(): void
 
-    public static native of(obj: Object): Class
+    private static native ofObject(obj: Object): Class
+
+    private static native ofNull(): Class
+
+    public static ofAny(obj: Any): Class | undefined {
+        if (obj instanceof ESValue || obj === undefined) {
+            return undefined
+        } else if (obj instanceof Object) {
+            return Class.of(obj as Object)
+        }
+        return Class.ofNull()
+    }
+
+    public static of(obj: Object | null): Class {
+        if (obj instanceof Object) {
+            return Class.ofObject(obj)
+        }
+        return Class.ofNull()
+    }
 
     /**
      * Get current class
