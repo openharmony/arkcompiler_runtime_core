@@ -25,14 +25,14 @@ sub:
         - "() => 1.0"
         - "(a: number) => a"
         - "(a: number, b: number) => a + b"
-        - "(a: number, b: number, i: number) => a + b + i"
-        - "(a: number, b: number, i: number, selfRef: Int32Array) => a + b + i"
+        - "(a: number, b: number, i) => a + b + i"
+        - "(a: number, b: number, i, selfRef: Int32Array) => a + b + i"
       reduce_u_lambdas:
         - "(): string => '*'"
         - "(a: string): string => '*' + a"
         - "(a: string, b: number): string => a + ',' + b"
-        - "(a: string, b: number, i: number): string => a + ',' + (b + i)"
-        - "(a: string, b: number, i: number, selfRef: Int32Array): string => a + ',' + (b + i)"
+        - "(a: string, b: number, i): string => a + ',' + (b + i)"
+        - "(a: string, b: number, i, selfRef: Int32Array): string => a + ',' + (b + i)"
     sub:
       - method: "at"
         params:

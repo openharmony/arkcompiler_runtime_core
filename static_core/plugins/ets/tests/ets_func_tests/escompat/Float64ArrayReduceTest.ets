@@ -86,13 +86,13 @@ function main(): int {
 
 function test_reduce_number_noInit_fullArgs(): void {
   const arr = new Float64Array([1, 2, 3, 4]);
-  const sum = arr.reduce((prev: number, cur: number, idx: number, a: Float64Array): number => prev + cur);
+  const sum = arr.reduce((prev: number, cur: number, idx: int, a: Float64Array): number => prev + cur);
   arktest.assertEQ(sum, 10);
 }
 
 function test_reduce_number_noInit_threeArgs(): void {
   const arr = new Float64Array([1, 2, 3]);
-  const sum = arr.reduce((prev: number, cur: number, idx: number): number => prev + cur);
+  const sum = arr.reduce((prev: number, cur: number, idx: int): number => prev + cur);
   arktest.assertEQ(sum, 6);
 }
 
@@ -118,7 +118,7 @@ function test_reduce_number_noInit_zeroArgs(): void {
 
 function test_reduce_number_withInit_fullArgs(): void {
   const arr = new Float64Array([1, 2, 3, 4]);
-  const sum = arr.reduce((prev: number, cur: number, idx: number, a: Float64Array): number => prev + cur, 10);
+  const sum = arr.reduce((prev: number, cur: number, idx: int, a: Float64Array): number => prev + cur, 10);
   arktest.assertEQ(sum, 20);
 }
 
@@ -127,7 +127,7 @@ function test_reduce_number_withInit_fullArgs(): void {
 function test_reduce_generic_string_fullArgs(): void {
   const arr = new Float64Array([1, 2, 3]);
   const joined = arr.reduce<string>(
-    (prev: string, cur: number, idx: number, a: Float64Array): string => prev + `-${cur}@${idx}`,
+    (prev: string, cur: number, idx: int, a: Float64Array): string => prev + `-${cur}@${idx}`,
     "start"
   );
   arktest.assertEQ(joined, "start-1@0-2@1-3@2");
@@ -135,7 +135,7 @@ function test_reduce_generic_string_fullArgs(): void {
 
 function test_reduce_generic_object_threeArgs(): void {
   const arr = new Float64Array([2, 4, 6]);
-  const acc = arr.reduce<AccSumCount>((prev: AccSumCount, cur: number, idx: number): AccSumCount => {
+  const acc = arr.reduce<AccSumCount>((prev: AccSumCount, cur: number, idx: int): AccSumCount => {
     prev.sum += cur;
     prev.count += 1;
     return prev;
@@ -168,7 +168,7 @@ function test_reduce_index_and_array_params(): void {
   const arr = new Float64Array([10, 20, 30]);
   let seenSameArray = true;
   const visited: number[] = [];
-  const sum = arr.reduce((prev: number, cur: number, idx: number, a: Float64Array): number => {
+  const sum = arr.reduce((prev: number, cur: number, idx: int, a: Float64Array): number => {
     if (a !== arr) seenSameArray = false;
     visited.push(idx);
     return prev + cur;
@@ -197,13 +197,13 @@ function test_reduce_throws_on_empty(): void {
 
 function test_reduceRight_number_noInit_fullArgs(): void {
   const arr = new Float64Array([1, 2, 3, 4]);
-  const diff = arr.reduceRight((prev: number, cur: number, idx: number, a: Float64Array): number => prev - cur);
+  const diff = arr.reduceRight((prev: number, cur: number, idx: int, a: Float64Array): number => prev - cur);
   arktest.assertEQ(diff, -2);
 }
 
 function test_reduceRight_number_noInit_threeArgs(): void {
   const arr = new Float64Array([1, 2, 3]);
-  const sum = arr.reduceRight((prev: number, cur: number, idx: number): number => prev + cur);
+  const sum = arr.reduceRight((prev: number, cur: number, idx: int): number => prev + cur);
   arktest.assertEQ(sum, 6);
 }
 
@@ -229,7 +229,7 @@ function test_reduceRight_number_noInit_zeroArgs(): void {
 
 function test_reduceRight_number_withInit_fullArgs(): void {
   const arr = new Float64Array([1, 2, 3, 4]);
-  const res = arr.reduceRight((prev: number, cur: number, idx: number, a: Float64Array): number => prev + cur, 10);
+  const res = arr.reduceRight((prev: number, cur: number, idx: int, a: Float64Array): number => prev + cur, 10);
   arktest.assertEQ(res, 20);
 }
 
@@ -238,7 +238,7 @@ function test_reduceRight_number_withInit_fullArgs(): void {
 function test_reduceRight_generic_string_fullArgs(): void {
   const arr = new Float64Array([1, 2, 3]);
   const joined = arr.reduceRight<string>(
-    (prev: string, cur: number, idx: number, a: Float64Array): string => prev + `(${cur}<${idx})`,
+    (prev: string, cur: number, idx: int, a: Float64Array): string => prev + `(${cur}<${idx})`,
     "R"
   );
   arktest.assertEQ(joined, "R(3<2)(2<1)(1<0)");
@@ -246,7 +246,7 @@ function test_reduceRight_generic_string_fullArgs(): void {
 
 function test_reduceRight_generic_object_threeArgs(): void {
   const arr = new Float64Array([2, 4, 6]);
-  const acc = arr.reduceRight<AccProdSteps>((prev: AccProdSteps, cur: number, idx: number): AccProdSteps => {
+  const acc = arr.reduceRight<AccProdSteps>((prev: AccProdSteps, cur: number, idx: int): AccProdSteps => {
     prev.prod *= cur;
     prev.steps += 1;
     return prev;
