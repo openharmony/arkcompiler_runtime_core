@@ -80,10 +80,10 @@ function main() {
         testFixedArrayString(test, ["hello", "world", "test"]);
     });
     suite.addTest("FixedArrayData", () => {
-        testFixedArrayData(test, [{}, {}, {}]);
+        testFixedArrayData(test, [{v: 0}, {v: 0}, {v: 0}]);
     });
     suite.addTest("OptionalFixedArrayData", () => {
-        testOptionalFixedArrayData(test, [{}, {}, {}]);
+        testOptionalFixedArrayData(test, [{v: 0}, {v: 0}, {v: 0}]);
     });
     suite.addTest("OptionalFixedArrayData", () => {
         testOptionalFixedArrayData(test, undefined);

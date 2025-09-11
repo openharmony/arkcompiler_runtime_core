@@ -20,6 +20,6 @@
 
 from mate.foo use FooType;
 
-struct BarType {}
+struct BarType { v: i32; }
 
 function testFoo(foo: FooType): void;

@@ -205,15 +205,15 @@ function func_getTest_setIntData() {
 
 function func_getTest_property() {
     let instance: OptTest.Test = OptTest.getTest();
-    instance.string = "this is string value";
-    let res = instance.string;
+    instance.memberStr = "this is string value";
+    let res = instance.memberStr;
     arktest.assertEQ(res, "this is string value");
 }
 
 function func_getTest_property_1() {
     let instance: OptTest.Test = OptTest.getTest();
-    instance.string = undefined;
-    let res = instance.string;
+    instance.memberStr = undefined;
+    let res = instance.memberStr;
     arktest.assertEQ(res, undefined);
 }
 

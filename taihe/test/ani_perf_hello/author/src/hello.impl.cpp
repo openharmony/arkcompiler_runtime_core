@@ -27,13 +27,13 @@ void setData(::hello::Data const &data) {}
 ::hello::Data getData()
 {
     return {
-        .a = {std::in_place, "name"},
-        .b = {std::in_place, 2.5},
-        .c = {std::in_place, 3},
-        .d = {std::in_place, true},
-        .e = {std::in_place, true},
-        .f = {std::in_place, false},
-        .g = {std::in_place, false},
+        .a = taihe::optional<taihe::string> {std::in_place, "name"},
+        .b = taihe::optional<double> {std::in_place, 2.5},
+        .c = taihe::optional<int> {std::in_place, 3},
+        .d = taihe::optional<bool> {std::in_place, true},
+        .e = taihe::optional<bool> {std::in_place, true},
+        .f = taihe::optional<bool> {std::in_place, false},
+        .g = taihe::optional<bool> {std::in_place, false},
     };
 }
 
