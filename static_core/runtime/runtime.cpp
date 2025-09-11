@@ -937,6 +937,12 @@ static inline void InitializeCompilerOptions()
         compiler::g_options.SetCompilerInlineExternalMethodsAot(false);
     }
 #endif
+
+#if defined(PANDA_COMPILER_DEBUG_INFO) && !defined(NDEBUG)
+    if (!compiler::g_options.WasSetCompilerEmitDebugInfo()) {
+        compiler::g_options.SetCompilerEmitDebugInfo(true);
+    }
+#endif
 }
 
 bool Runtime::Initialize()
@@ -953,15 +959,11 @@ bool Runtime::Initialize()
 
     CheckOptionsFromOs();
 
+    InitializeCompilerOptions();
+
     if (!CreatePandaVM(GetRuntimeType())) {
         return false;
     }
-
-#if defined(PANDA_COMPILER_DEBUG_INFO) && !defined(NDEBUG)
-    if (!compiler::g_options.WasSetCompilerEmitDebugInfo()) {
-        compiler::g_options.SetCompilerEmitDebugInfo(true);
-    }
-#endif
 
     // We must load AOT file before InitializePandaVM, because during initialization, code execution may be called.
     if (!HandleAotOptions()) {
@@ -992,8 +994,6 @@ bool Runtime::Initialize()
     if (options_.WasSetMemAllocDumpExec()) {
         StartMemAllocDumper(ConvertToString(options_.GetMemAllocDumpFile()));
     }
-
-    InitializeCompilerOptions();
 
 #ifdef PANDA_TARGET_MOBILE
     mem::GcHung::InitPreFork(true);
