@@ -45,3 +45,84 @@ break_statements:
             i--;
           }
         arktest.assertEQ(i, 2)
+
+  - use: |
+      let flowCounter: int = 0
+      outer: do {
+          do {
+            break
+          } while(true)
+          flowCounter++
+          do {
+            break outer
+          } while(true)
+          flowCounter++
+          break outer
+      } while(true)
+  
+      arktest.assertEQ(1, flowCounter)
+
+  - use: |
+      let flowCounter: int = 0
+      outer: do {
+          do {
+            break
+          } while(true)
+          flowCounter++
+          do {
+            break
+          } while(true)
+          flowCounter++
+          break outer
+      } while(true)
+      
+      arktest.assertEQ(2, flowCounter)
+
+  - use: |
+      let i = 0
+      for (let ch of "string") {
+        i++
+        if(ch == 'i' ) break
+      }
+      arktest.assertEQ(i, 4)
+
+
+  - use: |
+      let i = 0
+      breakToMe: for (let ch of "string") {
+        i++
+        if(ch == 'i' ) break breakToMe
+      }
+      arktest.assertEQ(i, 4)
+
+  - use: |
+      let flowCounter: int = 0
+      outer: do {
+          do {
+            break
+          } while(true)
+          flowCounter++
+          do {
+            break outer
+          } while(true)
+          flowCounter++
+          break outer
+      } while(true)
+  
+      arktest.assertEQ(1, flowCounter)
+
+  - use: |
+      let flowCounter: int = 0
+      outer: do {
+          do {
+            break
+          } while(true)
+          flowCounter++
+          do {
+            break
+          } while(true)
+          flowCounter++
+          break outer
+      } while(true)
+      
+      arktest.assertEQ(2, flowCounter)

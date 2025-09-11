@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,16 +13,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
 /*---
-desc: In a 'for-of' statement type 'expr' must be either array or string, or an instance of iterable class or interface.
+desc: Switch statement
 ---*/
 
-let res = ""
-{{c.decl}}
+
+let def: int = 0;
+let last: int = 0;
+
+function f(i: int): void {
+  switch (i) {
+    case 1: {  }
+    default: { def++;  }
+    case 2: { last++;  }
+    case 3: { last++;  }
+  }
+}
 
 function main(): void {
-    res = ""
-    {{c.use|indent}}
+  def = 0;
+  last = 0;
+  f(5);
+
+  arktest.assertEQ(0, def)
+  arktest.assertEQ(1, last)
 }
-{% endfor %}

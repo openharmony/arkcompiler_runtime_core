@@ -59,3 +59,15 @@ block_statements:
     use: |
       test()
 
+  - decl: |
+      type TL = () => void
+
+    use: |
+      let x: TL = () => { return }
+      x()
+
+  - decl: |
+      type TL = () => void
+
+    use: |
+      ((): void => { return })()

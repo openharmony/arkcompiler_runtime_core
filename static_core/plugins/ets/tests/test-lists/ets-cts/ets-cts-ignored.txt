@@ -1259,6 +1259,17 @@
 #25042 Ast verifier failure for for-of with labelled statement
 08.statements/11.continue_statements/continue_for_of5l.ets
 
+#29940
+08.statements/12.return_statements/return_negative_7.ets
+
+#29987
+08.statements/13.switch_statements/Any_Switch.ets
+08.statements/13.switch_statements/Object_Switch.ets
+08.statements/13.switch_statements/switch_double_branch.ets
+
+#30058
+08.statements/13.switch_statements/switch_default_order_2.ets
+
 #27010
 08.statements/15.try_statements/01.catch_clause/catch_2.ets
 

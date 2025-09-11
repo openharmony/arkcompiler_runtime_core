@@ -23,7 +23,7 @@ cases:
 
     - use: |-
           const v: int = 0;
-          for (v of [1,2,3,4]) res += v  // shouldn't be allowed
+          for (v of [1, 2, 3, 4]) res += v  // shouldn't be allowed  TypeError: Cannot assign a value to a constant variable v
           if (res == "1234") return 0;
 
     - use: |-
@@ -88,3 +88,15 @@ cases:
           let s: number[]|undefined = undefined
           // nullable array should not be allowed
           for (let v of s) res += v
+
+    - use: |-
+        let tuple: [number, number, string, boolean, Object] = [ 6, 7, "abc", true, 42]
+        // TypeError: 'For-of' statement source expression is not of iterable type.
+        for (let v of tuple) {}
+
+    - use: |-
+        const raa: Array<string> = ['a', 'b', 'c'];
+        let i: int
+        for (i of raa) {
+            res += x
+        }

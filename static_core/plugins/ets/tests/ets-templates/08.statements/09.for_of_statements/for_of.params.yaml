@@ -69,7 +69,7 @@ cases:
 
     - use: |-
           let v: number;
-          for (v of [1.1,2.2,3.3,4.4]) res += v
+          for (v of [1.1, 2.2, 3.3, 4.4]) res += v
           arktest.assertEQ( res, "1.12.23.34.4" )
 
     - use: |-
@@ -204,3 +204,70 @@ cases:
               }
           }
           arktest.assertEQ(res, 'abcdefghi')
+
+    - decl: |-        
+        type RT = Record<number, string>
+      use: |-
+        let sentence: String = ''
+        let ua: RT = {1: 'Once', 2: 'Upon', 3: 'A', 4: 'Time'}
+        for (let x of ua) {
+          sentence += (x[1] + ' ')  // x is a Tuple2
+        }
+        arktest.assertEQ(sentence, 'Once Upon A Time ')
+
+    - decl: |-
+
+      use: |-
+        let xa: readonly number [] = [1, 2, 3]
+        let sum = 0;
+        for (let x of xa) {
+          sum += x
+        }
+        arktest.assertEQ(6, sum)
+
+    - decl: |-
+
+      use: |-
+        let xa: number [] = [1, 2, 3]
+        let sum = 0;
+        for (let x of xa) {
+          x *= 2
+        }
+        for (let x of xa) {
+          sum += x
+        }
+        arktest.assertEQ(6, sum)
+        
+
+    - decl: |-
+
+      use: |-
+        const nums: FixedArray<number> = [1, 2, 3, 4, 5]
+        let sum = 0;
+        for (let x of nums) {
+          sum += x
+        }
+        arktest.assertEQ(15, sum)
+
+
+    - decl: |-
+
+      use: |-
+        const raa: ReadonlyArray<string> = ['a', 'b', 'c'];
+        let sum = 0;
+        for (let x of raa) {
+            res += x
+        }
+        arktest.assertEQ('abc', res)
+
+    - decl: |-
+
+      use: |-
+        let xa: number [] = [1, 2, 3]
+        let x: number = 0;
+        //  Scopes of two names can overlap (e.g., when statements are nested),
+        //  in this case access to the outer name is not accessible
+        for (let x of xa) {
+          x *= 2 // The innermost declaration takes precedence
+        }
+        arktest.assertEQ(0, x)
