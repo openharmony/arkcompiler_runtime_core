@@ -811,23 +811,6 @@ function testTypedArrayIncludesTwoParamWithAbnormalIndex(): number {
     console.log(`Includes ${searchElement} from index ${fromIndex}? false`);
     return fail;
   }
-  //index = Infinity, return false
-  result = typedArray.includes(searchElement, Infinity);
-  if (result) {
-    console.log(`Includes ${searchElement} from index Infinity? true`);
-    return fail;
-  } else {
-    console.log(`Includes ${searchElement} from index Infinity? false`);
-  }
-
-  //fromIndex = -Infinity, fromIndex = 0
-  result = typedArray.includes(searchElement, -Infinity);
-  if (result) {
-    console.log(`Includes ${searchElement} from index -Infinity? true`);
-  } else {
-    console.log(`Includes ${searchElement} from index -Infinity? false`);
-    return fail;
-  }
 
   return success;
 }

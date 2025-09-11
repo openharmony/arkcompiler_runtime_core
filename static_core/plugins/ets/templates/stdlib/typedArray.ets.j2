@@ -486,8 +486,8 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public copyWithin(target: number, start: number, end?: number): {{N}}Array {
-        return this.copyWithin(target.toInt(), start.toInt(), asIntOrDefault(end, this.lengthInt))
+    public copyWithin(target: int, start: int, end?: int): {{N}}Array {
+        return this.copyWithinImpl(target, start, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -501,64 +501,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public copyWithin(target: int, start: number, end?: number): {{N}}Array {
-        return this.copyWithin(target, start.toInt(), asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Makes a copy of internal elements to targetPos from startPos to endPos.
-     *
-     * @param target insert index to place copied elements
-     *
-     * @param start start index to begin copy from
-     *
-     * @param end last index to end copy from, excluded
-     *
-     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
-     */
-    public copyWithin(target: number, start: int, end?: number): {{N}}Array {
-        return this.copyWithin(target.toInt(), start, asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Makes a copy of internal elements to targetPos from startPos to endPos.
-     *
-     * @param target insert index to place copied elements
-     *
-     * @param start start index to begin copy from
-     *
-     * @param end last index to end copy from, excluded
-     *
-     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
-     */
-    public copyWithin(target: int, start: int, end?: number): {{N}}Array {
-        return this.copyWithin(target, start, asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Makes a copy of internal elements to targetPos from startPos to endPos.
-     *
-     * @param target insert index to place copied elements
-     *
-     * @param start start index to begin copy from
-     *
-     * @param end last index to end copy from, excluded
-     *
-     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
-     */
-    public native copyWithin(target: int, start: int, end: int): {{N}}Array
-
-    /**
-     * Makes a copy of internal elements to targetPos from begin to end of {{N}}Array.
-     *
-     * @param target insert index to place copied elements
-     *
-     * See rules of parameters normalization:
-     * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
-     */
-    public copyWithin(target: number): {{N}}Array {
-        return this.copyWithin(target.toInt())
-    }
+    public native copyWithinImpl(target: int, start: int, end: int): {{N}}Array
 
     /**
      * Makes a copy of internal elements to targetPos from begin to end of {{N}}Array.
@@ -569,7 +512,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
     public copyWithin(target: int): {{N}}Array {
-        return this.copyWithin(target, 0, this.lengthInt)
+        return this.copyWithinImpl(target, 0, this.lengthInt)
     }
 
     {% set TBoxed = T[0].upper() + T[1:] -%}
@@ -645,9 +588,11 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @param insertPos index to change
      */
-    public set(insertPos: number, val: {{elementCompat}}): void {
-        this.$_set(insertPos.toInt(), val)
+    public set(insertPos: int, val: {{elementCompat}}): void {
+        this.$_set(insertPos, val)
     }
+
+    {%- if N != 'Float64' %}
 
     /**
      * Assigns val as element on insertPos.
@@ -661,6 +606,8 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         this.$_set(insertPos, val)
     }
 
+    {%- endif %}
+
     /**
      * Copies all elements of arr to the current {{N}}Array starting from insertPos.
      *
@@ -670,8 +617,8 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
-    public set(arr: FixedArray<{{elementCompat}}>, insertPos: number): void {
-        const offset = insertPos.toInt()
+    public set(arr: FixedArray<{{elementCompat}}>, insertPos: int): void {
+        const offset = insertPos
         if (offset < 0 || offset + arr.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
@@ -687,6 +634,8 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         {%- endif %}
         }
     }
+
+    {%- if T != 'double' %}
 
     /**
      * Copies all elements of arr to the current {{N}}Array starting from insertPos.
@@ -711,7 +660,6 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         {%- endif %}
         }
     }
-    {%- if T != 'double' %}
 
     /**
      * Copies all elements of arr to the current {{N}}Array.
@@ -738,7 +686,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
     private native final set(array: {{U}}Array): void
     {%- endif %}
 
-    public native set(array: {{N}}Array, offset: number): void
+    public native set(array: {{N}}Array, offset: int): void
 
     /**
      * Copies elements from an ArrayLike object to the {{N}}Array.
@@ -747,8 +695,8 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @param offset Optional. The offset into the target array at which to begin writing values from the source array
      */
-    public set(array: ArrayLike<{% if N == 'BigInt64'%}BigInt{% else %}number{% endif %}>, offset: number = 0): void {
-        const insertPos = offset.toInt()
+    public set(array: ArrayLike<{% if N == 'BigInt64'%}BigInt{% else %}number{% endif %}>, offset: int = 0): void {
+        const insertPos = offset
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
@@ -1006,7 +954,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns true if searchElement is in {{N}}Array, false otherwise
      */
-    public includes(searchElement: {{elementCompat}}, fromIndex?: number): boolean {
+    public includes(searchElement: {{elementCompat}}, fromIndex?: int): boolean {
     {%- if (N != 'Float32') and (N != 'Float64') %}
         {%- if elementCompat == 'number' %}
         if (isNaN(searchElement)) {
@@ -1059,29 +1007,15 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(searchElement: {{elementCompat}}, fromIndex?: number): number {
-        return this.indexOf(searchElement, asIntOrDefault(fromIndex, 0))
-    }
-
-    /**
-     * Returns the index of the first occurrence of a value in {{N}}Array.
-     *
-     * @param searchElement The value to locate in the array.
-     *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     *  search starts at index 0.
-     *
-     * @returns index of element if it presents, -1 otherwise
-     */
-    public indexOf(searchElement: {{elementCompat}}, fromIndex: int): number {
+    public indexOf(searchElement: {{elementCompat}}, fromIndex?: int): int {
         {%- if elementCompat == 'BigInt' %}
-            return this.indexOfImpl(searchElement.getLong(), fromIndex)
+            return this.indexOfImpl(searchElement.getLong(), fromIndex ?? 0)
         {%- endif %}
         {%- if elementCompat == 'number' %}
-            return this.indexOfImpl(searchElement, fromIndex)
+            return this.indexOfImpl(searchElement, fromIndex ?? 0)
         {%- endif %}
         {%- if elementCompat == 'int' %}
-            return this.indexOfImpl(searchElement as long, fromIndex)
+            return this.indexOfImpl(searchElement as long, fromIndex ?? 0)
         {%- endif %}
     }
 
@@ -1095,7 +1029,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(searchElement: int, fromIndex: int): number {
+    public indexOf(searchElement: int, fromIndex: int): int {
         return this.indexOfImpl(searchElement.toLong(), fromIndex)
     }
 
@@ -1109,7 +1043,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    private final native indexOfImpl(searchElement: number, fromIndex: int): number
+    private final native indexOfImpl(searchElement: number, fromIndex: int): int
 
     /**
      * Returns the index of the first occurrence of a value in {{N}}Array.
@@ -1121,7 +1055,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    private final native indexOfImpl(searchElement: long, fromIndex: int): number
+    private final native indexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
      * Returns the index of the first occurrence of a value in {{N}}Array.
@@ -1133,7 +1067,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(searchElement: int): number {
+    public indexOf(searchElement: int): int {
         return this.indexOf(searchElement, 0)
     }
 
@@ -1180,21 +1114,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: {{elementCompat}}, fromIndex: number|undefined): number {
-        return this.lastIndexOf(searchElement, asIntOrDefault(fromIndex, 0))
-    }
-
-    /**
-     * Returns the index of the last occurrence of a value in {{N}}Array.
-     *
-     * @param searchElement The value to locate in the array.
-     *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
-     * search starts at index 0. If fromIndex is omitted, the search begins at index length-1
-     *
-     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
-     */
-    public lastIndexOf(searchElement: {{elementCompat}}): number {
+    public lastIndexOf(searchElement: {{elementCompat}}): int {
         return this.lastIndexOf(searchElement, this.lengthInt - 1)
     }
 
@@ -1208,15 +1128,15 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: {{elementCompat}}, fromIndex: int): number {
+    public lastIndexOf(searchElement: {{elementCompat}}, fromIndex: int | undefined): int {
         {%- if elementCompat == 'BigInt' %}
-            return this.lastIndexOfImpl(searchElement.getLong(), fromIndex)
+            return this.lastIndexOfImpl(searchElement.getLong(), fromIndex ?? 0)
         {%- endif %}
         {%- if elementCompat == 'number' %}
-            return this.lastIndexOfImpl(searchElement, fromIndex)
+            return this.lastIndexOfImpl(searchElement, fromIndex ?? 0)
         {%- endif %}
         {%- if elementCompat == 'int' %}
-            return this.lastIndexOfImpl(searchElement as long, fromIndex)
+            return this.lastIndexOfImpl(searchElement as long, fromIndex ?? 0)
         {%- endif %}
     }
 
@@ -1230,7 +1150,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: int, fromIndex: int): number {
+    public lastIndexOf(searchElement: int, fromIndex: int): int {
         return this.lastIndexOfImpl(searchElement.toLong(), fromIndex)
     }
 
@@ -1244,7 +1164,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    private final native lastIndexOfImpl(searchElement: number, fromIndex: int): number
+    private final native lastIndexOfImpl(searchElement: number, fromIndex: int): int
 
     /**
      * Returns the index of the last occurrence of a value in {{N}}Array.
@@ -1256,7 +1176,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    private final native lastIndexOfImpl(searchElement: long, fromIndex: int): number
+    private final native lastIndexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
      * Returns the index of the last occurrence of a value in {{N}}Array.
@@ -1268,7 +1188,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: int): number {
+    public lastIndexOf(searchElement: int): int {
         return this.lastIndexOf(searchElement, this.lengthInt - 1)
     }
 
@@ -1448,9 +1368,11 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns an {{N}}Array with replaced value on index
      */
-    public with(index: number, value: {{elementCompat}}): {{N}}Array {
-        return this.with(index.toInt(), value{{fromElementCompat}})
+    public with(index: int, value: {{elementCompat}}): {{N}}Array {
+        return this.with(index, value{{fromElementCompat}})
     }
+
+    {%- if N != 'Float64' %}
 
     /**
      * Creates a copy with replaced value on index
@@ -1466,6 +1388,8 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         res.set(index, value)
         return res
     }
+
+    {%- endif %}
 
     /// === with element lambda functions ===
     {#- NOTE: to add overloads with idxType == 'int' we need to enhance generics supports #}
