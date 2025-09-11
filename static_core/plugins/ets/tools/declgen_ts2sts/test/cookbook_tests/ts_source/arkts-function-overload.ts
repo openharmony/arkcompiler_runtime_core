@@ -13,65 +13,66 @@
  * limitations under the License.
  */
 
-export declare class Calculator1 {
-    add1(a: number, b: number): number;
-    add1(a: number, b: number, c: number): number;
-    add1(numbers: number[]): string; 
+export class Calculator1 {
+  add1(a: number, b: number): number;
+  add1(a: number, b: number, c: number): number;
+  add1(numbers: number[]): string; 
+  add1(a: number | number[], b?: number, c?: number): number | string { return 0; }
 }
 
-export declare class Calculator2 {
+export class Calculator2 {
   add2(a: number, b: number): number;
   add2(a: number, b: number, c: number): number;
   add2(numbers: number[]): number;
   add2(...args: any[]): any;
+  add2(a: number | number[], b?: number): number { return 0; }
 }
 
-export declare interface Formatter1 {
+export interface Formatter1 {
     format1(value: number): any;
     format1(value: Date): number;
     format1(value: string, prefix: string): string;
 }
 
-export declare interface Formatter2 {
+export interface Formatter2 {
     format2(value: string): string;
     format2(value: number, precision?: number): string;
     format2(value: Date, formatString?: string): string;
 }
 
-export declare interface Processor1 {
+export interface Processor1 {
   process1(input: string): string;
   process1(input: number): number;
   process1(input: boolean): boolean;
 }
 
-export declare interface DataProcessor1 {
+export interface DataProcessor1 {
   processData1(data: string[]): void;
   processData1(data: { key: string; value: number }[]): void;
   processData1(data: number[]): void;
 }
 
-export declare interface Logger1 {
+export interface Logger1 {
   log1(message: string): void;
 }
 
-export declare interface Validator1 {
+export interface Validator1 {
   validate1(input: string): boolean;
   validate1(input: number): boolean;
 }
 
-export declare interface Transformer1 {
+export interface Transformer1 {
   transform1<T>(input: T[]): T[];
   transform1<T>(input: T): T;
 }
 
-export declare interface Formatter3 {
+export interface Formatter3 {
     format1(value: string): any;
     format1(value: number, precision: number): string;
     format1(value: Date, formatString?: string): string;
 }
 
-export declare class Calculator3 {
-  add3(a: number, b: number): number;
-  subtract3(a: number, b: number): number;
+export class Calculator3 {
+  add3(a: number, b: number): number { return 0; }
+  subtract3(a: number, b: number): number { return 0; }
 }
-

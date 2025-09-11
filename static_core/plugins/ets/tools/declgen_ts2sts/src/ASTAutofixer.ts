@@ -1543,13 +1543,13 @@ export class Autofixer {
     if (ts.isInterfaceDeclaration(node)) {
       const hasOverloads = node.members.some((member) => {
         if ((ts.isMethodSignature(member) || ts.isMethodDeclaration(member)) && ts.isIdentifier(member.name)) {
-          const memberName = member.name.getText();
+          const memberName = member.name.escapedText;
           return (
             node.members.filter(
               (m: ts.TypeElement): m is typeof member =>
                 (ts.isMethodSignature(m) || ts.isMethodDeclaration(m)) &&
                 ts.isIdentifier(m.name) &&
-                m.name.getText() === memberName
+                m.name.escapedText === memberName
             ).length > 1
           );
         }
@@ -1572,13 +1572,13 @@ export class Autofixer {
     } else if (ts.isClassDeclaration(node)) {
       const hasOverloads = node.members.some((member) => {
         if ((ts.isMethodSignature(member) || ts.isMethodDeclaration(member)) && ts.isIdentifier(member.name)) {
-          const memberName = member.name.getText();
+          const memberName = member.name.escapedText;
           return (
             node.members.filter(
               (m: ts.ClassElement): m is typeof member =>
                 (ts.isMethodSignature(m) || ts.isMethodDeclaration(m)) &&
                 ts.isIdentifier(m.name) &&
-                m.name.getText() === memberName
+                m.name.escapedText === memberName
             ).length > 1
           );
         }
@@ -2842,12 +2842,26 @@ function mergeReturnTypes(
     : returnTypes[0];
 }
 
+function getTypeNameKey(type: ts.TypeNode): string {
+  if (ts.isTypeReferenceNode(type)) {
+    const getName = (name: ts.EntityName): string =>
+      ts.isIdentifier(name)
+        ? name.escapedText.toString()
+        : `${getName(name.left)}.${name.right.escapedText.toString()}`;
+    return getName(type.typeName);
+  }
+  if (ts.isArrayTypeNode(type)) {
+    return getTypeNameKey(type.elementType) + "[]";
+  }
+  return ts.SyntaxKind[type.kind];
+}
+
 function removeDuplicateTypes(types: ts.TypeNode[]): ts.TypeNode[] {
   const seenTypes = new Set<string>();
   const uniqueTypes: ts.TypeNode[] = [];
 
   for (const type of types) {
-    const typeText = type.getText();
+    const typeText = getTypeNameKey(type);
     if (!seenTypes.has(typeText)) {
       seenTypes.add(typeText);
       uniqueTypes.push(type);

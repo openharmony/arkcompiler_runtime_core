@@ -45,7 +45,5 @@ export declare interface Transformer1 {
     transform1<T>(param0: T[] | T): T[] | T;
 }
 export declare interface Formatter3 {
-    format1(value: string): string;
-    format2(value: number, precision: number): string;
-    format3(value: Date, formatString?: string): string;
+    format1(param0: string | number | Date, param1?: number | string): Any | string;
 }
