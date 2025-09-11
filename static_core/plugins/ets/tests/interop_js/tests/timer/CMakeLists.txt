@@ -11,80 +11,46 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-panda_ets_interop_js_test(ets_interop_js_test_settimeout
-    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/timer_tests.ets
-    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_timer_test.js
-    LAUNCHER_ARGS "testSetTimeout"
-)
+function(panda_ets_interop_js_test_timer)
+    list(GET ARGV 0 TEST_NAME)
+    list(GET ARGV 1 ENTRY_FUNC)
 
-panda_ets_interop_js_test(ets_interop_js_test_cleartimeout
-    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/timer_tests.ets
-    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_timer_test.js
-    LAUNCHER_ARGS "testClearTimeout"
-)
+    panda_ets_interop_js_test(${TEST_NAME}_internal_timer
+        ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/timer_tests.ets
+        JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_timer_test.js
+        LAUNCHER_ARGS ${ENTRY_FUNC} "false"
+    )
 
-panda_ets_interop_js_test(ets_interop_js_test_setinterval
-    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/timer_tests.ets
-    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_timer_test.js
-    LAUNCHER_ARGS "testSetInterval"
-)
+    panda_ets_interop_js_test(${TEST_NAME}_external_timer
+        ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/timer_tests.ets
+        JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_timer_test.js
+        LAUNCHER_ARGS ${ENTRY_FUNC} "true"
+    )
 
-panda_ets_interop_js_test(ets_interop_js_test_settimeout_execute_order
-    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/timer_tests.ets
-    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_timer_test.js
-    LAUNCHER_ARGS "testSetTimeoutExecuteOrder"
-)
+endfunction()
 
-panda_ets_interop_js_test(ets_interop_js_test_settimeout_invoke_callback_with_specified_parameter
-    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/timer_tests.ets
-    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_timer_test.js
-    LAUNCHER_ARGS "testSetTimeoutInvokeCallbackWithSpecifiedParameter"
-)
+panda_ets_interop_js_test_timer(ets_interop_js_test_settimeout "testSetTimeout")
 
-panda_ets_interop_js_test(ets_interop_js_test_settimeout_invoke_callback_with_4_specified_parameters
-    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/timer_tests.ets
-    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_timer_test.js
-    LAUNCHER_ARGS "testSetTimeoutInvokeCallbackWith4SpecifiedParameters"
-)
+panda_ets_interop_js_test_timer(ets_interop_js_test_cleartimeout "testClearTimeout")
 
-panda_ets_interop_js_test(ets_interop_js_test_setinterval_invoke_callback_with_specified_parameter
-    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/timer_tests.ets
-    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_timer_test.js
-    LAUNCHER_ARGS "testSetIntervalInvokeCallbacWithSpecifiedParameter"
-)
+panda_ets_interop_js_test_timer(ets_interop_js_test_setinterval "testSetInterval")
 
-panda_ets_interop_js_test(ets_interop_js_test_setinterval_invoke_callback_with_4_specified_parameters
-    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/timer_tests.ets
-    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_timer_test.js
-    LAUNCHER_ARGS "testSetIntervalInvokeCallbacWith4SpecifiedParameters"
-)
+panda_ets_interop_js_test_timer(ets_interop_js_test_settimeout_execute_order "testSetTimeoutExecuteOrder")
 
-panda_ets_interop_js_test(ets_interop_js_test_settimeout_with_negitive_delay
-    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/timer_tests.ets
-    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_timer_test.js
-    LAUNCHER_ARGS "testSetTimeoutWithNegitiveDelay"
-)
+panda_ets_interop_js_test_timer(ets_interop_js_test_settimeout_invoke_callback_with_specified_parameter "testSetTimeoutInvokeCallbackWithSpecifiedParameter")
 
-panda_ets_interop_js_test(ets_interop_js_test_setinterval_with_negitive_delay
-    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/timer_tests.ets
-    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_timer_test.js
-    LAUNCHER_ARGS "testSetIntervalWithNegitiveDelay"
-)
+panda_ets_interop_js_test_timer(ets_interop_js_test_settimeout_invoke_callback_with_4_specified_parameters "testSetTimeoutInvokeCallbackWith4SpecifiedParameters")
 
-panda_ets_interop_js_test(ets_interop_js_test_settimeout_with_string
-    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/timer_tests.ets
-    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_timer_test.js
-    LAUNCHER_ARGS "testSetTimeoutWithString"
-)
+panda_ets_interop_js_test_timer(ets_interop_js_test_setinterval_invoke_callback_with_specified_parameter "testSetIntervalInvokeCallbacWithSpecifiedParameter")
 
-panda_ets_interop_js_test(ets_interop_js_test_setinterval_with_string
-    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/timer_tests.ets
-    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_timer_test.js
-    LAUNCHER_ARGS "testSetIntervalWithString"
-)
+panda_ets_interop_js_test_timer(ets_interop_js_test_setinterval_invoke_callback_with_4_specified_parameters "testSetIntervalInvokeCallbacWith4SpecifiedParameters")
 
-panda_ets_interop_js_test(ets_interop_js_test_clear_timer_cross_worker
-    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/timer_tests.ets
-    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_timer_test.js
-    LAUNCHER_ARGS "testClearTimerCrossWorker"
-)
+panda_ets_interop_js_test_timer(ets_interop_js_test_settimeout_with_negitive_delay "testSetTimeoutWithNegitiveDelay")
+
+panda_ets_interop_js_test_timer(ets_interop_js_test_setinterval_with_negitive_delay "testSetIntervalWithNegitiveDelay")
+
+panda_ets_interop_js_test_timer(ets_interop_js_test_settimeout_with_string "testSetTimeoutWithString")
+
+panda_ets_interop_js_test_timer(ets_interop_js_test_setinterval_with_string "testSetIntervalWithString")
+
+panda_ets_interop_js_test_timer(ets_interop_js_test_clear_timer_cross_worker "testClearTimerCrossWorker")
