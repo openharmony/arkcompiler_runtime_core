@@ -23,9 +23,9 @@ function main(): int {
     suite.addTest("Duplex writableObjectMode property validation", testDuplexWritableObjectModeProperty);
     suite.addTest("Duplex writableHighWatermark property validation", testDuplexWritableHighWatermarkProperty);
     suite.addTest("Duplex readableHighWatermark property validation", testDuplexReadableHighWatermarkProperty);
-    suite.addTest("Duplex doWritev concatenates chunks correctly", testDuplexDoWritevConcatenatesChunks);
-    suite.addTest("Duplex doWritev error handling", testDuplexDoWritevErrorHandling);
-    suite.addTest("Duplex doWritev callback multiple calls handling", testDuplexDoWritevCallbackMultipleCalls);
+    suite.addAsyncTest("Duplex doWritev concatenates chunks correctly", testDuplexDoWritevConcatenatesChunks);
+    suite.addAsyncTest("Duplex doWritev error handling", testDuplexDoWritevErrorHandling);
+    suite.addAsyncTest("Duplex doWritev callback multiple calls handling", testDuplexDoWritevCallbackMultipleCalls);
     suite.addTest("Duplex write undefined", testDuplexWriteUndefined);
     suite.addTest("Duplex write empty string", testDuplexWriteEmptyString);
 
@@ -127,7 +127,7 @@ class CustomDuplex1 extends stream.Duplex {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamDuplexDoWritev001
-function testDuplexDoWritevConcatenatesChunks() {
+async function testDuplexDoWritevConcatenatesChunks() {
     let duplex = new CustomDuplex1();
     let func: Function = mustCallNoArgs((): void => {
         arktest.assertEQ(duplex.data, 'Hello World');
@@ -147,7 +147,7 @@ class CustomDuplex2 extends stream.Duplex {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamDuplexDoWritev002
-function testDuplexDoWritevErrorHandling() {
+async function testDuplexDoWritevErrorHandling() {
     let duplex = new CustomDuplex2();
     duplex.on('error', mustCall((err: Error): void => {
         arktest.assertEQ(err.message, 'dowritev error');
@@ -169,7 +169,7 @@ class CustomDuplex3 extends stream.Duplex {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamDuplexDoWritev003
-function testDuplexDoWritevCallbackMultipleCalls() {
+async function testDuplexDoWritevCallbackMultipleCalls() {
     mustChecks.push(() => {
         if (callCount_CustomDuplex3 !== 1) {
             throw new Error(`Function was expected to be called 1 times, `

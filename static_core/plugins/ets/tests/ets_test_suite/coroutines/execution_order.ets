@@ -53,7 +53,7 @@ async function bar() {
     executionOrder.checkpoint(5);
 }
 
-function executionOrderTest(isPending: boolean) {
+async function executionOrderTest(isPending: boolean) {
     executionOrder = new StepSequence(6);
     promiseIsPending = isPending;
     executionOrder.checkpoint(0);
@@ -63,15 +63,15 @@ function executionOrderTest(isPending: boolean) {
     executionOrder.checkOrder();
 }
 
-function testWithPendingPromise() {
+async function testWithPendingPromise() {
     executionOrderTest(true);
 }
 
-function testWithResolvedPromise() {
+async function testWithResolvedPromise() {
     executionOrderTest(false);
 }
 
-function testPromiseBeforeAsync() {
+async function testPromiseBeforeAsync() {
     executionOrder = new StepSequence(4);
     let af = async () => {
         executionOrder.checkpoint(0);
@@ -106,7 +106,7 @@ async function dealPromise(asyncThen: boolean) {
     executionOrder.checkpoint(1);
 }
 
-function testWithPromiseThen() {
+async function testWithPromiseThen() {
     executionOrder = new StepSequence(4);
     let af = async () => {
         await dealPromise(false);
@@ -116,7 +116,7 @@ function testWithPromiseThen() {
     executionOrder.checkOrder();
 }
 
-function testWithAsyncPromiseThen() {
+async function testWithAsyncPromiseThen() {
     executionOrder = new StepSequence(6);
     let af = async () => {
         await dealPromise(true);
@@ -130,11 +130,11 @@ function testWithAsyncPromiseThen() {
 
 function main(): int {
     let testSuite = new arktest.ArkTestsuite('coroutines.execution_order');
-    testSuite.addTest('testWithPendingPromise', testWithPendingPromise);
-    testSuite.addTest('testWithResolvedPromise', testWithResolvedPromise);
-    testSuite.addTest('testPromiseBeforeAsync', testPromiseBeforeAsync);
-    testSuite.addTest('testWithPromiseThen', testWithPromiseThen);
-    testSuite.addTest('testWithAsyncPromiseThen', testWithAsyncPromiseThen);
+    testSuite.addAsyncTest('testWithPendingPromise', testWithPendingPromise);
+    testSuite.addAsyncTest('testWithResolvedPromise', testWithResolvedPromise);
+    testSuite.addAsyncTest('testPromiseBeforeAsync', testPromiseBeforeAsync);
+    testSuite.addAsyncTest('testWithPromiseThen', testWithPromiseThen);
+    testSuite.addAsyncTest('testWithAsyncPromiseThen', testWithAsyncPromiseThen);
     let res = testSuite.run();
     return res;
 }

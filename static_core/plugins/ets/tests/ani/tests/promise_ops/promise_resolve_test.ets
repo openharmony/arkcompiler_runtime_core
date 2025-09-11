@@ -14,6 +14,10 @@
  */
 
 function checkResolve(promise: Promise<String>, resolution: String): boolean {
+    return waitForCompletion(() => checkResolveAsync(promise, resolution));
+}
+
+async function checkResolveAsync(promise: Promise<String>, resolution: String): Promise<boolean> {
     let value = await promise;
     return value == resolution;
 }

@@ -29,7 +29,7 @@ function main(): int {
     suite.addTest("Check writable length after doWritev", testWritableLengthAfterDoWritev);
     suite.addTest("Check writable length after async doWritev", testWritableLengthAfterAsyncDoWritev);
     suite.addTest("Verify callback after doWrite", testWritableAfterDoWriteCallback);
-    suite.addTest("Verify doWrite order", testWritableDoWriteOrder);
+    suite.addAsyncTest("Verify doWrite order", testWritableDoWriteOrder);
     suite.addTest("Verify doWritev order", testWritableDoWritevOrder);
     suite.addTest("Handle write after end error", testStreamWritableWriteAfterEnd);
     suite.addTest("Handle end after cork without uncork", testStreamWritableEndAfterCork);
@@ -38,7 +38,7 @@ function main(): int {
     suite.addTest("Verify drain event with high watermark", testWritableDrainEventHighWatermark);
     suite.addTest("Verify drain event with async high watermark", testWritableDrainEventHighWatermarkAsync);
     suite.addTest("Handle drain event after end", testStreamWritableDrainEventAfterEnd);
-    suite.addTest("Write uint array data to stream", testWritableWriteUintArrayData);
+    suite.addAsyncTest("Write uint array data to stream", testWritableWriteUintArrayData);
 
     return suite.run()
 }
@@ -269,7 +269,7 @@ class MyWritable9 extends stream.Writable {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamWritableEnd001
-function testWritableDoWriteOrder() {
+async function testWritableDoWriteOrder() {
     let ticked = false;
     let writableStream = new MyWritable9();
     writableStream.write('pretest');
@@ -491,7 +491,7 @@ class MyWritable18 extends stream.Writable {
         callback.unsafeCall();
     }
 }
-function testWritableWriteUintArrayData() {
+async function testWritableWriteUintArrayData() {
     let param: Object[] = [];
     let writableStream = new MyWritable18();
     let uint8Array = new Uint8Array([11, 22, 33, 44, 55, 66]);

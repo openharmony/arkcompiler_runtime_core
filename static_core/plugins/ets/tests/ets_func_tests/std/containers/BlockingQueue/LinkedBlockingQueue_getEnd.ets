@@ -107,5 +107,5 @@ function getEndConcurrent(testBQ: containers.LinkedBlockingQueue<int>, lock: Asy
             }
         })
     }
-    await Promise.all(arrPromise)
+    waitForCompletion(() => Promise.all(arrPromise))
 }

@@ -21,12 +21,12 @@ const mustChecks: Array<Function> = new Array<Function>();
 function main(): int {
     const suite = new arktest.ArkTestsuite("Stream API tests");
 
-    suite.addTest("Pipe error handling", testStreamWritablePipeErrorHandling);
-    suite.addTest("Write after finish error", testStreamWritableWriteAfterFinishError);
+    suite.addAsyncTest("Pipe error handling", testStreamWritablePipeErrorHandling);
+    suite.addAsyncTest("Write after finish error", testStreamWritableWriteAfterFinishError);
     suite.addTest("Write after finish error", testStreamWritableConstructorSetMethodsError);
-    suite.addTest("End event error", testWritableEndEventError);
+    suite.addAsyncTest("End event error", testWritableEndEventError);
     suite.addTest("Writable ended state", testWritableEndedState);
-    suite.addTest("Writable finished state", testWritableFinishedState);
+    suite.addAsyncTest("Writable finished state", testWritableFinishedState);
     suite.addTest("Writable finish event", testWritableFinishEvent);
     suite.addTest("Writable prefinish event", testWritablePrefinishEvent);
     suite.addTest("Writable finish sync state", testWritableFinishSyncState);
@@ -89,7 +89,7 @@ class MyWritable1 extends stream.Writable {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamWritableWritevFinish005
-function testStreamWritablePipeErrorHandling() {
+async function testStreamWritablePipeErrorHandling() {
     let readableStream = new MyRead1();
     readableStream.push('ok');
     readableStream.push(null);
@@ -118,7 +118,7 @@ class MyWritable2 extends stream.Writable {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamWritableWritevFinish006
-function testStreamWritableWriteAfterFinishError() {
+async function testStreamWritableWriteAfterFinishError() {
     let writableStream = new MyWritable2();
     writableStream.on('error', mustCall((error: Error): void => {
         arktest.assertEQ(error.message, 'Write after end.');
@@ -154,7 +154,7 @@ class MyWritable3 extends stream.Writable {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamWritableEndCbError001
-function testWritableEndEventError() {
+async function testWritableEndEventError() {
     const _error = new Error('new error');
     let writable = new MyWritable3();
     writable.on('error', mustCall((error: Error): void => {
@@ -206,7 +206,7 @@ class MyWritable5 extends stream.Writable {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamWritableFinished002
-function testWritableFinishedState() {
+async function testWritableFinishedState() {
     let writable = new MyWritable5();
     writable.on('finish', mustCall((): void => {
         arktest.assertEQ(writable.writableFinished, true);

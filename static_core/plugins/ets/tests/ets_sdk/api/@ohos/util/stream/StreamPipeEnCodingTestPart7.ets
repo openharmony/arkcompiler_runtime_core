@@ -20,7 +20,7 @@ const mustChecks: Array<Function> = new Array<Function>();
 function main(): int {
     const suite = new arktest.ArkTestsuite("Stream API tests");
 
-    suite.addTest("Transform stream encoding validation (gb2312).", testTransformStreamWriteEncodingGb2312);
+    suite.addAsyncTest("Transform stream encoding validation (gb2312).", testTransformStreamWriteEncodingGb2312);
     suite.addTest("Readable stream flowing state validation.", testReadableStreamReadableFlowingState);
     suite.addTest("Readable event triggers validation (3 events).", testReadableStreamOnReadableEventCount3);
     suite.addTest("Readable event triggers validation (4 events).", testReadableStreamOnReadableEventCount4);
@@ -30,11 +30,11 @@ function main(): int {
     suite.addTest("Pipe data validation with numeric data.", testPipeDataValidationNumericData);
     suite.addTest("Pipe data validation with multiple destinations.", testPipeDataValidationMultipleDestinations);
     suite.addTest("Pipe data validation with three destinations.", testPipeDataValidationThreeDestinations);
-    suite.addTest("Writable stream encoding validation for multiple encodings.",
+    suite.addAsyncTest("Writable stream encoding validation for multiple encodings.",
         testWritableStreamWriteMultipleEncodings);
-    suite.addTest("Writable stream end method validation for multiple encodings.",
+    suite.addAsyncTest("Writable stream end method validation for multiple encodings.",
         testWritableStreamEndMultipleEncodings);
-    suite.addTest("Set default encoding for writable stream with multiple encodings.",
+    suite.addAsyncTest("Set default encoding for writable stream with multiple encodings.",
         testWritableStreamSetDefaultEncodingMultipleEncodings);
 
     return suite.run();
@@ -134,7 +134,7 @@ class MyTransform1 extends stream.Transform {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamEncoding027
-function testTransformStreamWriteEncodingGb2312() {
+async function testTransformStreamWriteEncodingGb2312() {
     mustChecks.push(() => {
         if (callCount_MyTransform1 !== 1) {
             throw new Error(`Function was expected to be called 1 times, `
@@ -427,7 +427,7 @@ class MyWrite10 extends stream.Writable {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamExtraEncoding001
-function testWritableStreamWriteMultipleEncodings() {
+async function testWritableStreamWriteMultipleEncodings() {
     mustChecks.push(() => {
         if (callCount_MyWrite10 !== 43) {
             throw new Error(`Function was expected to be called 43 times, `
@@ -460,7 +460,7 @@ class MyWrite11 extends stream.Writable {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamExtraEncoding002
-function testWritableStreamEndMultipleEncodings() {
+async function testWritableStreamEndMultipleEncodings() {
     mustChecks.push(() => {
         if (callCount_MyWrite11 !== 43) {
             throw new Error(`Function was expected to be called 43 times, `
@@ -492,7 +492,7 @@ class MyWrite12 extends stream.Writable {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamExtraEncoding003
-function testWritableStreamSetDefaultEncodingMultipleEncodings() {
+async function testWritableStreamSetDefaultEncodingMultipleEncodings() {
     mustChecks.push(() => {
         if (callCount_MyWrite12 !== 43) {
             throw new Error(`Function was expected to be called 43 times, `

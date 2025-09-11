@@ -60,7 +60,7 @@ function check(test: String): void {
     }
 }
 
-function testByteFunc(): void {
+async function testByteFunc(): Promise<void> {
     reset();
     let byteP: Promise<Object> = byteFunc();
     let pThen = byteP.then<Object>((value: Object): Object => {
@@ -76,7 +76,7 @@ function testByteFunc(): void {
     check('byteFunc');
 }
 
-function testCharFunc(): void {
+async function testCharFunc(): Promise<void> {
     reset();
     let charP: Promise<Object> = charFunc();
     let pThen = charP.then<Object>((value: Object): Object => {
@@ -92,7 +92,7 @@ function testCharFunc(): void {
     check('charFunc');
 }
 
-function testShortFunc(): void {
+async function testShortFunc(): Promise<void> {
     reset();
     let shortP: Promise<Object> = shortFunc();
     let pThen = shortP.then<Object>((value: Object): Object => {
@@ -108,7 +108,7 @@ function testShortFunc(): void {
     check('shortFunc');
 }
 
-function testIntFunc(): void {
+async function testIntFunc(): Promise<void> {
     reset();
     let intP: Promise<Object> = intFunc();
     let pThen = intP.then<Object>((value: Object): Object => {
@@ -124,7 +124,7 @@ function testIntFunc(): void {
     check('intFunc');
 }
 
-function testLongFunc(): void {
+async function testLongFunc(): Promise<void> {
     reset();
     let longP: Promise<Object> = longFunc();
     let pThen = longP.then<Object>((value: Object): Object => {
@@ -141,7 +141,7 @@ function testLongFunc(): void {
     check('longFunc');
 }
 
-function testFloatFunc(): void {
+async function testFloatFunc(): Promise<void> {
     reset();
     let floatP: Promise<Object> = floatFunc();
     let pThen = floatP.then<Object>((value: Object): Object => {
@@ -158,7 +158,7 @@ function testFloatFunc(): void {
     check('floatFunc');
 }
 
-function testDoubleFunc(): void {
+async function testDoubleFunc(): Promise<void> {
     reset();
     let doubleP: Promise<Object> = doubleFunc();
     let pThen = doubleP.then<Object>((value: Object): Object => {
@@ -176,13 +176,13 @@ function testDoubleFunc(): void {
 
 function main(): int {
     let testSuite = new arktest.ArkTestsuite('coroutines.launch_return');
-    testSuite.addTest('testByteFunc', testByteFunc);
-    testSuite.addTest('testCharFunc', testCharFunc);
-    testSuite.addTest('testShortFunc', testShortFunc);
-    testSuite.addTest('testIntFunc', testIntFunc);
-    testSuite.addTest('testLongFunc', testLongFunc);
-    testSuite.addTest('testFloatFunc', testFloatFunc);
-    testSuite.addTest('testDoubleFunc', testDoubleFunc);
+    testSuite.addAsyncTest('testByteFunc', testByteFunc);
+    testSuite.addAsyncTest('testCharFunc', testCharFunc);
+    testSuite.addAsyncTest('testShortFunc', testShortFunc);
+    testSuite.addAsyncTest('testIntFunc', testIntFunc);
+    testSuite.addAsyncTest('testLongFunc', testLongFunc);
+    testSuite.addAsyncTest('testFloatFunc', testFloatFunc);
+    testSuite.addAsyncTest('testDoubleFunc', testDoubleFunc);
     let res = testSuite.run();
     return res;
 }

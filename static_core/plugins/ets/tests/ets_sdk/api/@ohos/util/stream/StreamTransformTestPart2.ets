@@ -23,8 +23,8 @@ function main(): int {
     const suite = new arktest.ArkTestsuite("Stream API tests");
 
     suite.addTest("Data event of Transform.", testTransformDataEvent);
-    suite.addTest("Cork and uncork of Transform.", testTransformCorkUncork);
-    suite.addTest("Error event of Transform.", testTransformErrorEvent);
+    suite.addAsyncTest("Cork and uncork of Transform.", testTransformCorkUncork);
+    suite.addAsyncTest("Error event of Transform.", testTransformErrorEvent);
     suite.addTest("Remove listener of Transform.", testTransformRemoveListener);
     suite.addTest("Multiple listeners of Transform.", testTransformMultipleListeners);
     suite.addTest("Flush operation of Transform.", testTransformFlushOperation);
@@ -120,7 +120,7 @@ class TestTransform2 extends stream.Transform {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamTransformEvent002
-function testTransformCorkUncork() {
+async function testTransformCorkUncork() {
     mustChecks.push(() => {
         if (callCount_TestTransform2 !== 1) {
             throw new Error(`Function was expected to be called 1 times, `
@@ -153,7 +153,7 @@ class TestTransform3 extends stream.Transform {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamTransformEvent003
-function testTransformErrorEvent() {
+async function testTransformErrorEvent() {
     mustChecks.push(() => {
         if (callCount_TestTransform3 !== 1) {
             throw new Error(`Function was expected to be called 1 times, `
