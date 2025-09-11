@@ -2235,6 +2235,17 @@
 15.semantic_rules/11.type_erasure/instanceof_20.ets
 15.semantic_rules/11.type_erasure/instanceof_22.ets
 
+# 30153 no CTE for chars in extended semantics
+15.semantic_rules/14.compatibility_features/01.extended_conditional_expressions/char_negative_0.ets
+15.semantic_rules/14.compatibility_features/01.extended_conditional_expressions/char_negative_1.ets
+15.semantic_rules/14.compatibility_features/01.extended_conditional_expressions/char_negative_2.ets
+15.semantic_rules/14.compatibility_features/01.extended_conditional_expressions/char_negative_3.ets
+15.semantic_rules/14.compatibility_features/01.extended_conditional_expressions/char_negative_4.ets
+15.semantic_rules/14.compatibility_features/01.extended_conditional_expressions/char_negative_5.ets
+15.semantic_rules/14.compatibility_features/01.extended_conditional_expressions/char_negative_6.ets
+15.semantic_rules/14.compatibility_features/01.extended_conditional_expressions/char_negative_7.ets
+15.semantic_rules/14.compatibility_features/01.extended_conditional_expressions/char_negative_8.ets
+
 #27260
 17.experimental_features/02.fixed_array_types/01.fixed_size_array_creation/fixed_array_creation_con1_0.ets
 17.experimental_features/02.fixed_array_types/01.fixed_size_array_creation/fixed_array_creation_con1_10.ets

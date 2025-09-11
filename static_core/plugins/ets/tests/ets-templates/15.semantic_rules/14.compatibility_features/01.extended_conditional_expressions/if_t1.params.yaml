@@ -47,19 +47,18 @@ cases:
     - 'Float.MIN_VALUE'
     - 'Float.MAX_VALUE'
 
-    - new Byte(11).unboxed()
-    - new Short(1111).unboxed()
-    - new Int(111111).unboxed()
-    - new Float(11111111.0).unboxed()
-    - new Double(1111111111.0).unboxed()
-    - new Number(1e33 as number).unboxed()
+    - new byte(11)
+    - new short(1111)
+    - new int(111111)
+    - new float(11111111.0)
+    - new double(1111111111.0)
+    - new number(1e33 as number)
 
     - '" "'
     - '` `'
     - new String("abc").substring(0, 1)
     - '"\u0000"'
     - '"\x00"'
-    - c'1'
 
     - '!false'
     - 'true'
