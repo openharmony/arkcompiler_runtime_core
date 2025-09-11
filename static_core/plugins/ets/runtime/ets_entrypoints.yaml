@@ -1223,58 +1223,29 @@
 
 - name: WriteStringToMem
   entrypoint: WriteStringToMem
-  bridge: none
-  properties: [irtoc]
+  bridge: entrypoint
+  properties: []
   signature:
       - int32_t             # bytes written
       - int64_t             # serialization buffer
       - ark::ObjectHeader*  # string to serialize
 
-- name: WriteStringToMemSlowPath
-  entrypoint: UnsafeMemoryWriteString
-  bridge: slow_path
-  properties: [intrinsic]
-  signature:
-    - int32_t             # bytes written
-    - int64_t             # serialization buffer
-    - ark::ObjectHeader*  # string to serialize
-
-- name: WriteStringToMemUsual
-  entrypoint: UnsafeMemoryWriteString
-  bridge: entrypoint
-  properties: [intrinsic]
-  signature:
-    - int32_t             # bytes written
-    - int64_t             # serialization buffer
-    - ark::ObjectHeader*  # string to serialize
-
 - name: CreateStringFromMem
   entrypoint: CreateStringFromMem
-  bridge: none
-  properties: [irtoc]
+  bridge: entrypoint
+  properties: []
   signature:
       - ark::ObjectHeader*  # deserialized string
       - int64_t             # serialization buffer
       - int32_t             # buffer length
-      - void*               # String class object
 
-- name: CreateStringFromMemSlowPath
-  entrypoint: UnsafeMemoryReadString
-  bridge: slow_path
-  properties: [intrinsic]
+- name: GetStringSizeInBytes
+  entrypoint: GetStringSizeInBytes
+  bridge: entrypoint
+  properties: []
   signature:
-      - ark::ObjectHeader*  # deserialized string
-      - void*               # serialization buffer
-      - int32_t             # buffer length
-
-- name: CreateStringFromMem3Arg
-  entrypoint: UnsafeMemoryReadString
-  bridge: odd_saved3
-  properties: [intrinsic]
-  signature:
-      - ark::ObjectHeader*  # deserialized string
-      - void*               # serialization buffer
-      - int32_t             # buffer length
+      - int32_t             # utf8 size
+      - ark::ObjectHeader*  # String class object
 
 - name: Int8ArraySetValuesFromArray
   entrypoint: Int8ArraySetValuesFromArray

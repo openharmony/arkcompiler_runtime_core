@@ -87,9 +87,6 @@ bool EmitBigUInt64ArrayFillInternal(Inst *inst)
     return EmitFastPath(inst, RuntimeInterface::EntrypointId::BIG_U_INT64_ARRAY_FILL_INTERNAL_FAST_PATH, 4U);
 }
 
-bool EmitReadString(Inst *inst);
-bool EmitWriteString(Inst *inst);
-
 bool EmitInt8ArraySetValuesFromArray(Inst *inst)
 {
     return EmitFastPath(inst, RuntimeInterface::EntrypointId::INT8_ARRAY_SET_VALUES_FROM_ARRAY, 2U);

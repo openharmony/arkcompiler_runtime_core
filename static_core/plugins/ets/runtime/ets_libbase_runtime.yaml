@@ -4939,11 +4939,8 @@ intrinsics:
          - i64
          - std.core.String
     impl: ark::ets::intrinsics::UnsafeMemoryWriteString
-    codegen_arch: [arm64, amd64]
-    codegen_func: CreateWriteString
-    llvm_codegen_func: EmitWriteString
     need_param_locations: true
-    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
+    clear_flags: [ can_throw, heap_inv ]
 
   - name: UnsafeMemoryReadBoolean
     space: ets
@@ -5052,9 +5049,6 @@ intrinsics:
          - i64
          - i32
     impl: ark::ets::intrinsics::UnsafeMemoryReadString
-    codegen_arch: [arm64, amd64]
-    codegen_func: CreateReadString
-    llvm_codegen_func: EmitReadString
     need_param_locations: true
 
   - name: UnsafeMemoryGetStringSizeInBytes
@@ -5067,7 +5061,7 @@ intrinsics:
       args:
          - std.core.String
     impl: ark::ets::intrinsics::UnsafeMemoryStringGetSizeInBytes
-    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
+    clear_flags: [ can_throw, heap_inv ]
 
 ############
 # std.core #
