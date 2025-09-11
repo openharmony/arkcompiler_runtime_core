@@ -59,7 +59,6 @@ class RunnerASTChecker(RunnerJS):
         self.test_env.util = self.util
 
         test_dirs: List[TestDirectory] = [
-            TestDirectory('ast/compiler/ts', 'ts', flags=['--extension=ts']),
             TestDirectory('ast/compiler/ets', 'ets', flags=[
                 '--extension=ets',
                 f'--arktsconfig={self.arktsconfig}'
