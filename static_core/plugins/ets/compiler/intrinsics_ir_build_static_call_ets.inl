@@ -113,10 +113,7 @@ case RuntimeInterface::IntrinsicId::INTRINSIC_UNSAFE_MEMORY_READ_NUMBER: {
     Builder()->BuildUnsafeLoadIntrinsic(bcInst_, ACC_READ);
     break;
 }
-case RuntimeInterface::IntrinsicId::INTRINSIC_UNSAFE_MEMORY_GET_STRING_SIZE_IN_BYTES: {
-    Builder()->BuildStringSizeInBytes(bcInst_, ACC_READ);
-    break;
-}
+case RuntimeInterface::IntrinsicId::INTRINSIC_UNSAFE_MEMORY_GET_STRING_SIZE_IN_BYTES:
 case RuntimeInterface::IntrinsicId::INTRINSIC_UNSAFE_MEMORY_READ_STRING:
 case RuntimeInterface::IntrinsicId::INTRINSIC_UNSAFE_MEMORY_WRITE_STRING: {
     if (Builder()->IsInBootContext()) {

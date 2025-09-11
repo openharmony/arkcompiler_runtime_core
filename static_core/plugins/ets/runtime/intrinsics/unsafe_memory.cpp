@@ -30,14 +30,17 @@ namespace {
 bool EnsureBootContext()
 {
     auto *coro = EtsCoroutine::GetCurrent();
-    auto ctx = StackWalker::Create(coro).GetMethod()->GetClass()->GetLoadContext();
-    if (!ctx->IsBootContext()) {
-        auto e = panda_file_items::class_descriptors::ILLEGAL_STATE_ERROR;
-        auto msg = "Unsafe intrinsics cannot be called outside of the boot context";
-        ThrowEtsException(coro, e, msg);
-        return false;
+    if (coro != nullptr) {
+        auto ctx = StackWalker::Create(coro).GetMethod()->GetClass()->GetLoadContext();
+        if (ctx != nullptr && ctx->IsBootContext()) {
+            return true;
+        }
     }
-    return true;
+
+    auto e = panda_file_items::class_descriptors::ILLEGAL_STATE_ERROR;
+    auto msg = "Unsafe intrinsics: cannot ensure the boot context!";
+    ThrowEtsException(coro, e, msg);
+    return false;
 }
 
 template <typename T>
@@ -187,9 +190,6 @@ extern "C" void UnsafeMemoryWriteNumber(EtsLong addr, EtsDouble val)
     UnsafeMemoryWrite<EtsDouble>(addr, val);
 }
 
-/* get the size of the buffer to hold the string content add additional
-   2 bytes for the leading byte-order mark which is used in the UTF-16
-   case */
 extern "C" int UnsafeMemoryStringGetSizeInBytes(EtsString *str)
 {
     auto coroutine = EtsCoroutine::GetCurrent();
@@ -200,16 +200,8 @@ extern "C" int UnsafeMemoryStringGetSizeInBytes(EtsString *str)
         return -1;
     }
 
-    str = handle.GetPtr();
-
-    uint32_t shift = str->IsUtf16() ? 1 : 0;
-    uint32_t addend = str->IsUtf16() ? 2 : 0;
-    auto length = static_cast<uint32_t>(str->GetLength());
-    int size = (length << shift) + addend;
-    return size;
+    return handle.GetPtr()->GetUtf8Length();
 }
-
-static constexpr uint16_t UTF16_BOM = 0xFEFF;
 
 extern "C" EtsString *UnsafeMemoryReadString(EtsLong buf, int len)
 {
@@ -217,27 +209,13 @@ extern "C" EtsString *UnsafeMemoryReadString(EtsLong buf, int len)
         return nullptr;
     }
 
-    ObjectHeader *res = nullptr;
-    auto vm = ManagedThread::GetCurrent()->GetVM();
-    auto ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-    auto mark = reinterpret_cast<uint16_t *>(buf);
-    auto size = static_cast<uint32_t>(len);
-
-    if (*mark == UTF16_BOM) {
-        auto addr = ++mark;
-        /* size is in bytes but CreateFromUtf16 takes it as chars, so,
-           we divide it by half and subtract the length of the BOM */
-        res = coretypes::String::CreateFromUtf16(addr, (size / 2U) - 1, false, ctx, vm);
-    } else {
-        auto addr = reinterpret_cast<const uint8_t *>(buf);
-        res = coretypes::String::CreateFromMUtf8(addr, size, size, true, ctx, vm);
-    }
-
-    return reinterpret_cast<EtsString *>(res);
+    return EtsString::CreateFromUtf8(reinterpret_cast<const char *>(buf), static_cast<uint32_t>(len));
 }
 
+extern "C" int32_t WriteStringToMem(int64_t buf, ObjectHeader *s);
 extern "C" int UnsafeMemoryWriteString(EtsLong addrEts, EtsString *str)
 {
+    /* we need the scope because EnsureBootContext() will most likely trigger GC */
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     EtsHandle<EtsString> handle(coroutine, str);
@@ -247,17 +225,7 @@ extern "C" int UnsafeMemoryWriteString(EtsLong addrEts, EtsString *str)
     }
 
     str = handle.GetPtr();
-
-    auto addr = reinterpret_cast<char *>(addrEts);
-    auto size = static_cast<uint32_t>(str->GetLength());
-    if (str->IsUtf16()) {
-        *reinterpret_cast<uint16_t *>(addr) = UTF16_BOM;
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        addr = reinterpret_cast<char *>(addr) + 2U;
-        size <<= 1U;
-        return memcpy_s(addr, size, str->GetDataUtf16(), size) == 0 ? size + 2U : -1;
-    }
-    return memcpy_s(addr, size, str->GetDataMUtf8(), size) == 0 ? size : -1;
+    return WriteStringToMem(addrEts, reinterpret_cast<ObjectHeader *>(str));
 }
 
 }  // namespace ark::ets::intrinsics
