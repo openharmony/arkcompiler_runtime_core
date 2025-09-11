@@ -75,6 +75,7 @@ group("abckit_packages") {
     deps = [
       "abckit:abckit(${host_toolchain})",
       "src:libabckit",
+      "src:libabckit_static",
     ]
   }
 }
