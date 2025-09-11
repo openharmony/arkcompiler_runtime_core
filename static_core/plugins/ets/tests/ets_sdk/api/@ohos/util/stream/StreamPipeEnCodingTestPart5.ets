@@ -20,10 +20,10 @@ const mustChecks: Array<Function> = new Array<Function>();
 function main(): int {
     const suite = new arktest.ArkTestsuite("Stream API tests");
 
-    suite.addTest("Duplex stream end method validation (gb18030).", testDuplexStreamEndEncodingGb18030);
-    suite.addTest("Duplex stream end method validation (gbk).", testDuplexStreamEndEncodingGbk);
-    suite.addTest("Duplex stream end method validation (gb2312).", testDuplexStreamEndEncodingGb2312);
-    suite.addTest("Set default encoding for duplex stream (gb18030).", testDuplexStreamSetDefaultEncodingGb18030);
+    suite.addAsyncTest("Duplex stream end method validation (gb18030).", testDuplexStreamEndEncodingGb18030);
+    suite.addAsyncTest("Duplex stream end method validation (gbk).", testDuplexStreamEndEncodingGbk);
+    suite.addAsyncTest("Duplex stream end method validation (gb2312).", testDuplexStreamEndEncodingGb2312);
+    suite.addAsyncTest("Set default encoding for duplex stream (gb18030).", testDuplexStreamSetDefaultEncodingGb18030);
 
     return suite.run();
 }
@@ -88,7 +88,7 @@ class MyDuplex1 extends stream.Duplex {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamEncoding019
-function testDuplexStreamEndEncodingGb18030() {
+async function testDuplexStreamEndEncodingGb18030() {
     mustChecks.push(() => {
         if (callCount_MyDuplex1 !== 1) {
             throw new Error(`Function was expected to be called 1 times, but was called ${callCount_MyDuplex1} times.`);
@@ -114,7 +114,7 @@ class MyDuplex2 extends stream.Duplex {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamEncoding020
-function testDuplexStreamEndEncodingGbk() {
+async function testDuplexStreamEndEncodingGbk() {
     mustChecks.push(() => {
         if (callCount_MyDuplex2 !== 1) {
             throw new Error(`Function was expected to be called 1 times, but was called ${callCount_MyDuplex2} times.`);
@@ -140,7 +140,7 @@ class MyDuplex3 extends stream.Duplex {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamEncoding021
-function testDuplexStreamEndEncodingGb2312() {
+async function testDuplexStreamEndEncodingGb2312() {
     mustChecks.push(() => {
         if (callCount_MyDuplex3 !== 1) {
             throw new Error(`Function was expected to be called 1 times, but was called ${callCount_MyDuplex3} times.`);
@@ -165,7 +165,7 @@ class MyDuplex4 extends stream.Duplex {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamEncoding022
-function testDuplexStreamSetDefaultEncodingGb18030() {
+async function testDuplexStreamSetDefaultEncodingGb18030() {
     mustChecks.push(() => {
         if (callCount_MyDuplex4 !== 1) {
             throw new Error(`Function was expected to be called 1 times, but was called ${callCount_MyDuplex4} times.`);

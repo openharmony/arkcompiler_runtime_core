@@ -22,15 +22,15 @@ const mustChecks: Array<Function> = new Array<Function>();
 function main(): int {
     const suite = new arktest.ArkTestsuite("Stream API tests");
 
-    suite.addTest("Readable resume and pause functionality", testReadableResumeAndPause);
+    suite.addAsyncTest("Readable resume and pause functionality", testReadableResumeAndPause);
     suite.addTest("Readable pause and read data", testReadablePauseAndRead);
-    suite.addTest("Readable resume triggers readable event", testReadableResumeTriggersEvent);
+    suite.addAsyncTest("Readable resume triggers readable event", testReadableResumeTriggersEvent);
     suite.addTest("Readable isPaused returns false initially", testReadableInitialIsPaused);
     suite.addTest("Readable isPaused returns true after pause", testReadablePauseUpdatesState);
     suite.addTest("Readable isPaused returns false after resume", testReadableResumeUpdatesState);
     suite.addTest("Readable object mode property validation", testReadableObjectModeProperty);
     suite.addTest("Readable property validation", testReadableDefaultProperty);
-    suite.addTest("Readable error handling and property update", testReadableErrorHandling);
+    suite.addAsyncTest("Readable error handling and property update", testReadableErrorHandling);
     suite.addTest("Readable high watermark property validation", testReadableHighWatermarkProperty);
     suite.addTest("Readable flowing state validation", testReadableFlowingState);
     suite.addTest("Readable flowing state after resume", testReadableResumeFlowingState);
@@ -43,7 +43,7 @@ function main(): int {
     suite.addTest("Readable property validation (default state)", testReadableDefaultState);
     suite.addTest("Readable flowing state validation (with data)", testReadableFlowingWithData);
     suite.addTest("Readable ended property validation (default state)", testReadableEndedDefaultState);
-    suite.addTest("Readable ended property validation (after finish)", testReadableEndedAfterFinish);
+    suite.addAsyncTest("Readable ended property validation (after finish)", testReadableEndedAfterFinish);
     suite.addTest("Readable property validation (pause and resume)", testReadablePauseAndResumeState);
 
     return suite.run();
@@ -97,7 +97,7 @@ function mustCallNoArgs(fn?: Function, times: number = 1) {
 }
 
 // Test cases ported from ArkTS 1.0:testStreamReadableResumePause001
-function testReadableResumeAndPause() {
+async function testReadableResumeAndPause() {
     let readable = new TestReadable();
     let dataEmittedAfterResume = false;
     let dataCalled = false;
@@ -132,7 +132,7 @@ function testReadablePauseAndRead() {
 }
 
 // Test cases ported from ArkTS 1.0:testStreamReadableResumePause003
-function testReadableResumeTriggersEvent() {
+async function testReadableResumeTriggersEvent() {
     let readable = new TestReadable();
     readable.pause();
     readable.on('readable', mustCall());
@@ -187,7 +187,7 @@ class MyRead1 extends stream.Readable {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamReadableProperties003
-function testReadableErrorHandling() {
+async function testReadableErrorHandling() {
     let readable = new MyRead1();
     readable.push('test');
     arktest.assertTrue(readable.readable, "readable should be true");
@@ -381,7 +381,7 @@ class MyRead11 extends stream.Readable {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamReadableProperties016
-function testReadableEndedAfterFinish() {
+async function testReadableEndedAfterFinish() {
     let readable = new MyRead11();
     readable.push('Some data');
     readable.push(null);

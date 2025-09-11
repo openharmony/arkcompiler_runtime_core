@@ -31,12 +31,12 @@ function main(): int {
     suite.addTest("Test encode and decode with no options", testNoOptionsEncodeDecode);
     suite.addTest("Test encodeSync and decodeSync with no options", testNoOptionsEncodeDecodeSync);
 
-    await testEncodeDecodeBasicAsync();
-    await testEncodeDecodeAsyncBytes();
-    await testUrlSafeAsync();
-    await testDecodeWithNoiseAsync();
-    suite.addTest("Test async encode and decode with no options", testNoOptionsEncodeDecodeAsync);
-    suite.addTest("Test async encode and decode Bytes with no options", testNoOptionsEncodeDecodeAsyncBytes);
+    waitForCompletion(testEncodeDecodeBasicAsync);
+    waitForCompletion(testEncodeDecodeAsyncBytes);
+    waitForCompletion(testUrlSafeAsync);
+    waitForCompletion(testDecodeWithNoiseAsync);
+    suite.addAsyncTest("Test async encode and decode with no options", testNoOptionsEncodeDecodeAsync);
+    suite.addAsyncTest("Test async encode and decode Bytes with no options", testNoOptionsEncodeDecodeAsyncBytes);
 
     return suite.run();
 }
@@ -226,7 +226,7 @@ async function testDecodeWithNoiseAsync(): Promise<void> {
     assertUint8ArraysEqual(decoded, input);
 }
 
-function testNoOptionsEncodeDecodeAsync(): void {
+async function testNoOptionsEncodeDecodeAsync(): Promise<void> {
     let helper = new util.Base64Helper();
     let input = new Uint8Array([72, 101, 108, 108, 111]); // "Hello"
     let encodedStr: string = await helper.encodeToString(input);
@@ -235,7 +235,7 @@ function testNoOptionsEncodeDecodeAsync(): void {
     assertUint8ArraysEqual(decoded, input);
 }
 
-function testNoOptionsEncodeDecodeAsyncBytes(): void {
+async function testNoOptionsEncodeDecodeAsyncBytes(): Promise<void> {
     let helper = new util.Base64Helper();
     let input = new Uint8Array([87, 111, 114, 108, 100]); // "World"
     let encodedBytes: Uint8Array = await helper.encode(input);

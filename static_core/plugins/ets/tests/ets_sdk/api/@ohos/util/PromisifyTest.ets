@@ -18,16 +18,16 @@ import {util} from "@ohos.util";
 function main(): int {
     const suite = new arktest.ArkTestsuite("Promisify API tests");
 
-    suite.addTest("Promisify resolves with string", testUtilPromisifyResolvesWithString);
-    suite.addTest("Promisify rejects with error", testUtilPromisifyRejectsWithError);
-    suite.addTest("Promisify resolves with number", testUtilPromisifyResolvesWithNumber);
-    suite.addTest("Promisify resolves with boolean", testUtilPromisifyResolvesWithBoolean);
-    suite.addTest("Promisify resolves with another number", testUtilPromisifyResolvesWithAnotherNumber);
+    suite.addAsyncTest("Promisify resolves with string", testUtilPromisifyResolvesWithString);
+    suite.addAsyncTest("Promisify rejects with error", testUtilPromisifyRejectsWithError);
+    suite.addAsyncTest("Promisify resolves with number", testUtilPromisifyResolvesWithNumber);
+    suite.addAsyncTest("Promisify resolves with boolean", testUtilPromisifyResolvesWithBoolean);
+    suite.addAsyncTest("Promisify resolves with another number", testUtilPromisifyResolvesWithAnotherNumber);
 
     return suite.run()
 }
 
-function testUtilPromisifyResolvesWithString() {
+async function testUtilPromisifyResolvesWithString() {
     let func: Function = (val: Any, callback: (err: Error | null, ...value: FixedArray<Any>) => void) => {
         callback(null, val);
     }
@@ -36,7 +36,7 @@ function testUtilPromisifyResolvesWithString() {
     arktest.assertEQ(new String(res), 'Hello');
 }
 
-function testUtilPromisifyRejectsWithError() {
+async function testUtilPromisifyRejectsWithError() {
     let func: Function = (val: Any, callback: (err: Error | null, ...value: FixedArray<Any>) => void) => {
         if (val instanceof String) {
             callback(null, val);
@@ -51,7 +51,7 @@ function testUtilPromisifyRejectsWithError() {
     arktest.expectThrow(() => { await value([1, 2]); }, exceptionCheck);
 }
 
-function testUtilPromisifyResolvesWithNumber() {
+async function testUtilPromisifyResolvesWithNumber() {
     let func: Function = (val: Any, callback: (err: Error | null, ...value: FixedArray<Any>) => void) => {
         callback(null, val);
     }
@@ -60,7 +60,7 @@ function testUtilPromisifyResolvesWithNumber() {
     arktest.assertEQ(new String(res), '42');
 }
 
-function testUtilPromisifyResolvesWithBoolean() {
+async function testUtilPromisifyResolvesWithBoolean() {
     let func: Function = (val: Any, callback: (err: Error | null, ...value: FixedArray<Any>) => void) => {
         callback(null, val);
     }
@@ -69,7 +69,7 @@ function testUtilPromisifyResolvesWithBoolean() {
     arktest.assertEQ(Boolean(res), true);
 }
 
-function testUtilPromisifyResolvesWithAnotherNumber() {
+async function testUtilPromisifyResolvesWithAnotherNumber() {
     let func: Function = (val: Any, callback: (err: Error | null, ...value: FixedArray<Any>) => void) => {
         callback(null, val);
     }

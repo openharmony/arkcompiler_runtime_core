@@ -22,7 +22,7 @@ function testProcessInput() {
         let res = (res1.toNumber() === 10) && (res2.toString() === 'HELLO') && (!res3.toBoolean());
         return res;
     };
-    let res = (await taskpool.execute(callback)) as boolean;
+    let res = (waitForCompletion(() => taskpool.execute(callback))) as boolean;
     arktest.assertEQ(res, true);
 }
 
@@ -40,7 +40,7 @@ function testCreateArray() {
                     (res2.getProperty(0).toString() === 'a') &&
                     (res3.getProperty(0).toBoolean() === true);
     };
-    let res = (await taskpool.execute(callback)) as boolean;
+    let res = (waitForCompletion(() => taskpool.execute(callback))) as boolean;
     arktest.assertEQ(res, true);
 }
 
@@ -55,7 +55,7 @@ function testGetUser() {
         return res1.getProperty('id').toNumber() === 123 &&
                     res2.getProperty('role').toString() === 'admin';
     };
-    let res = (await taskpool.execute(callback)) as boolean;
+    let res = (waitForCompletion(() => taskpool.execute(callback))) as boolean;
     arktest.assertEQ(res, true);
 }
 
@@ -84,7 +84,7 @@ function testUnion() {
         arktest.assertTrue(dynamicObj.getProperty('unionProp').getProperty('prop').toNumber() === 1);
         result = true;
     }
-    await taskpool.execute(callback);
+    waitForCompletion(() => taskpool.execute(callback));
   } catch (error) {
     console.error(error.toString());
     arktest.assertFalse(result);
@@ -99,7 +99,7 @@ function testBaseClass() {
         arktest.assertTrue(obj.typeOf() === 'object')
         arktest.assertTrue(obj.getProperty('baseVal').toNumber() === 1)
     }
-    await taskpool.execute(callback);
+    waitForCompletion(() => taskpool.execute(callback));
 }
 
 function testChildClass() {
@@ -110,7 +110,7 @@ function testChildClass() {
         arktest.assertTrue(obj.getProperty('baseVal').toNumber() === 1)
         arktest.assertTrue(obj.getProperty('childVal').toNumber() === 2)
     }
-    await taskpool.execute(callback);
+    waitForCompletion(() => taskpool.execute(callback));
 }
 
 function testBaseFunc() {
@@ -119,7 +119,7 @@ function testBaseFunc() {
         let obj = module.getProperty('baseFunc').invoke()
         arktest.assertTrue(ESValue.areStrictlyEqual(obj, ESValue.Undefined))
     }
-    await taskpool.execute(callback);
+    waitForCompletion(() => taskpool.execute(callback));
 }
 
 function testChildFunc() {
@@ -128,7 +128,7 @@ function testChildFunc() {
         let obj = module.getProperty('childFunc').invoke()
         arktest.assertTrue(ESValue.areStrictlyEqual(obj, ESValue.Undefined))
     }
-    await taskpool.execute(callback);
+    waitForCompletion(() => taskpool.execute(callback));
 }
 
 function testFooBaseObjInvoke() {
@@ -138,7 +138,7 @@ function testFooBaseObjInvoke() {
         let result = fooBaseObj.getProperty('foo').invoke()
         arktest.assertTrue(ESValue.areStrictlyEqual(result, ESValue.Undefined))
     }
-    await taskpool.execute(callback);
+    waitForCompletion(() => taskpool.execute(callback));
 }
 
 function testFooBaseObjInvokeMethod() {
@@ -148,7 +148,7 @@ function testFooBaseObjInvokeMethod() {
         let result = fooBaseObj.invokeMethod('fooFunc')
         arktest.assertTrue(ESValue.areStrictlyEqual(result, fooBaseObj))
     }
-    await taskpool.execute(callback);
+    waitForCompletion(() => taskpool.execute(callback));
 }
 
 function testFooChildObjInvoke() {
@@ -158,7 +158,7 @@ function testFooChildObjInvoke() {
         let result = fooChildObj.getProperty('foo').invoke()
         arktest.assertTrue(ESValue.areStrictlyEqual(result, ESValue.Undefined))
     }
-    await taskpool.execute(callback);
+    waitForCompletion(() => taskpool.execute(callback));
 }
 
 function testFooChildObjInvokeMethod() {
@@ -168,7 +168,7 @@ function testFooChildObjInvokeMethod() {
         let result = fooChildObj.invokeMethod('fooFunc')
         arktest.assertTrue(ESValue.areStrictlyEqual(result, fooChildObj))
     }
-    await taskpool.execute(callback);
+    waitForCompletion(() => taskpool.execute(callback));
 }
 
 function testArrowFuncInvoke() {
@@ -177,7 +177,7 @@ function testArrowFuncInvoke() {
         let result = module.getProperty('arrowFunc').invoke()
         arktest.assertTrue(ESValue.areStrictlyEqual(result, ESValue.Undefined))
     }
-    await taskpool.execute(callback);
+    waitForCompletion(() => taskpool.execute(callback));
 }
 
 function testOptionalParams() {
@@ -191,7 +191,7 @@ function testOptionalParams() {
         arktest.assertTrue(module.getProperty('fun2').invoke(ESValue.wrap(1), ESValue.wrap('str'), ESValue.wrap(false)).toBoolean());
         arktest.assertTrue(module.getProperty('fun3').invoke(ESValue.wrap(1), ESValue.wrap('str'), ESValue.wrap(false), ESValue.wrap(2)).toBoolean());
     }
-    await taskpool.execute(callback);
+    waitForCompletion(() => taskpool.execute(callback));
 }
 
 
@@ -208,7 +208,7 @@ function testError() {
         res = (err.getProperty('message').toString() == ErrMsg);
         return res;
     }
-    let res = (await taskpool.execute(callback)) as boolean;
+    let res = (waitForCompletion(() => taskpool.execute(callback))) as boolean;
     arktest.assertEQ(res, true);
 }
 
@@ -224,7 +224,7 @@ function testThrowError() {
         }
         return res;
     }
-    let res = (await taskpool.execute(callback)) as boolean;
+    let res = (waitForCompletion(() => taskpool.execute(callback))) as boolean;
     arktest.assertEQ(res, true);
 }
 
@@ -244,7 +244,7 @@ function testCustomThrowError() {
         }
         return res;
     }
-    let res = (await taskpool.execute(callback)) as boolean;
+    let res = (waitForCompletion(() => taskpool.execute(callback))) as boolean;
     arktest.assertEQ(res, true);
 }
 
@@ -265,11 +265,11 @@ function testTaskpoolNestedExecute() {
             let res3 = processInputDy.invoke(ESValue.wrapBoolean(true)); // false
             return res1.toNumber() === 10 && res2.toString() === 'HELLO' && !res3.toBoolean();
         }
-        let resInner = (await taskpool.execute(callbackInner)) as boolean;
+        let resInner = (waitForCompletion(() => taskpool.execute(callbackInner))) as boolean;
         arktest.assertTrue(resInner);
         return res && resInner;
     };
-    let res = (await taskpool.execute(callback)) as boolean;
+    let res = (waitForCompletion(() => taskpool.execute(callback))) as boolean;
     arktest.assertEQ(res, true);
 }
 
@@ -286,7 +286,7 @@ function testTaskpoolInteropLoop() {
             arktest.assertEQ(res3.toBoolean(), false);
         }
     }
-    await taskpool.execute(callback);
+    waitForCompletion(() => taskpool.execute(callback));
 }
 
 function testSerializeFunc(serializeTestObj: ESValue) {
@@ -302,7 +302,7 @@ function testSerializeFunc(serializeTestObj: ESValue) {
 function testTaskpoolSerialize() {
     let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
     let serializeTestObj = module.getProperty('serializeTestObj');
-    let res = (await taskpool.execute(testSerializeFunc, serializeTestObj)) as boolean;
+    let res = (waitForCompletion(() => taskpool.execute(testSerializeFunc, serializeTestObj))) as boolean;
     arktest.assertEQ(res, true);
 }
 
@@ -310,7 +310,7 @@ function testTaskpoolSerializeClassInstantiate() {
     let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
     let SerializeTest = module.getProperty('SerializeTest');
     let serializeTestObj = SerializeTest.instantiate('SerializeTest', 1, ['1', '2', '3']);
-    let res = (await taskpool.execute(testSerializeFunc, serializeTestObj)) as boolean;
+    let res = (waitForCompletion(() => taskpool.execute(testSerializeFunc, serializeTestObj))) as boolean;
     arktest.assertEQ(res, true);
 }
 
@@ -320,7 +320,7 @@ function testTaskpoolSerializeUndefined() {
     let callback = (value: ESValue) => {
         arktest.assertTrue(value.isUndefined());
     }
-    await taskpool.execute(callback, serializeObj);
+    waitForCompletion(() => taskpool.execute(callback, serializeObj));
 }
 
 function testTaskpoolSerializeNull() {
@@ -329,7 +329,7 @@ function testTaskpoolSerializeNull() {
     let callback = (value: ESValue) => {
         arktest.assertTrue(value.isNull());
     }
-    await taskpool.execute(callback, serializeObj);
+    waitForCompletion(() => taskpool.execute(callback, serializeObj));
 }
 
 function taskpoolInteropTest() {

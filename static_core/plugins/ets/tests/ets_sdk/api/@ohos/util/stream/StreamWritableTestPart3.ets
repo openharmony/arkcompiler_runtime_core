@@ -21,10 +21,10 @@ const mustChecks: Array<Function> = new Array<Function>();
 function main(): int {
     const suite = new arktest.ArkTestsuite("Stream API tests");
 
-    suite.addTest("Writev finish event", testWritableWritevFinish);
-    suite.addTest("Writev error", testWritableWritevError);
-    suite.addTest("Writev error scenario one", testWritableWritevErrorScenarioOne);
-    suite.addTest("Writev error scenario two", testWritableWritevErrorScenarioTwo);
+    suite.addAsyncTest("Writev finish event", testWritableWritevFinish);
+    suite.addAsyncTest("Writev error", testWritableWritevError);
+    suite.addAsyncTest("Writev error scenario one", testWritableWritevErrorScenarioOne);
+    suite.addAsyncTest("Writev error scenario two", testWritableWritevErrorScenarioTwo);
 
     return suite.run();
 }
@@ -76,7 +76,7 @@ class MyWritable1 extends stream.Writable {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamWritableWritevFinish001
-function testWritableWritevFinish() {
+async function testWritableWritevFinish() {
     let writableStream = new MyWritable1();
     writableStream.on('finish', mustNotCall());
     writableStream.on('prefinish', mustNotCall());
@@ -99,7 +99,7 @@ class MyWritable2 extends stream.Writable {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamWritableWritevFinish002
-function testWritableWritevError() {
+async function testWritableWritevError() {
     let writable = new MyWritable2();
     writable.on('finish', mustNotCall());
     writable.on('prefinish', mustNotCall());
@@ -124,7 +124,7 @@ class MyWritable3 extends stream.Writable {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamWritableWritevFinish003
-function testWritableWritevErrorScenarioOne() {
+async function testWritableWritevErrorScenarioOne() {
     let writable = new MyWritable3();
     writable.on('finish', mustNotCall());
     writable.on('prefinish', mustNotCall());
@@ -157,7 +157,7 @@ class MyWritable4 extends stream.Writable {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamWritableWritevFinish004
-function testWritableWritevErrorScenarioTwo() {
+async function testWritableWritevErrorScenarioTwo() {
     let writable = new MyWritable4();
     writable.on('finish', mustNotCall());
     writable.on('prefinish', mustNotCall());

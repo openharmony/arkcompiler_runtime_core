@@ -38,7 +38,7 @@ function asyncCall(): boolean {
     let l = async (): Promise<boolean> => {
         return Promise.resolve(call());
     }
-    return await l();
+    return waitForCompletion<boolean>(l);
 }
 
 // LaunchCallMethod
@@ -56,7 +56,7 @@ class Event {
     }
 
     public wait() {
-        await this.promise;
+        waitForCompletion(() => this.promise);
     }
 
     public fire() {
@@ -146,7 +146,7 @@ async function asyncCallWithoutAwait(): Promise<Promise<boolean>> {
 // recursive async functions
 function recursiveAsync(): boolean {
     let res : Promise<Promise<boolean>> = asyncCallWithoutAwait();
-    return await res;
+    return waitForCompletion<boolean>(async(): Promise<boolean> => await res);
 }
 
 function launchAsyncFunctions(): Promise<boolean> {
@@ -155,7 +155,7 @@ function launchAsyncFunctions(): Promise<boolean> {
 
 function ACoroutineCallAsyncFunctions(): boolean {
     let res : Job<Promise<boolean>> = launch<Promise<boolean>, ()=>Promise<boolean>>(launchAsyncFunctions) as Job<Promise<boolean>>
-    return await res.Await();
+    return waitForCompletion<boolean>(() => res.Await());
 }
 
 async function asyncFunctionLaunchCall() {
@@ -164,7 +164,7 @@ async function asyncFunctionLaunchCall() {
 
 function asyncFunctionLaunchACoroutine(): boolean {
     let res : Promise<Job<boolean>> = asyncFunctionLaunchCall();
-    return (await res).Await();
+    return waitForCompletion<Job<boolean>>(() => res).Await();
 }
 
 // oom

@@ -19,43 +19,43 @@ import buffer from "@ohos.buffer"
 function main(): int {
     const suite = new arktest.ArkTestsuite("Buffer Blob API tests")
 
-    suite.addTest("Test get Blob slice from empty String array", testEmptyStringSlice)
-    suite.addTest("Test get Blob slice from Chinese String array without options", testChineseStringSlice)
-    suite.addTest("Test get Blob slice from Chinese and English String array without options", testEnglishStringSlice)
-    suite.addTest("Test create Blob from String array without options", testBlobFromStringArray)
-    suite.addTest("Test create Blob from ArrayBuffer without options", testBlobFromArrayBuffer)
-    suite.addTest("Test create Blob from TypedArray without options", testBlobFromTypedArray)
-    suite.addTest("Test create Blob from DataView without options", testBlobFromDataView)
-    suite.addTest("Test create Blob from other Blob without options", testBlobFromBlob)
-    suite.addTest("Test create Blob from String array with options", testBlobWithOptions)
-    suite.addTest("Test get Blob slice from String array without options", testStringArraySlice)
-    suite.addTest("Test get Blob slice from ArrayBuffer without options", testArrayBufferSlice)
-    suite.addTest("Test get Blob slice from TypedArray without options", testTypedArraySlice)
-    suite.addTest("Test get Blob slice from DataView without options", testDataViewSlice)
-    suite.addTest("Test get Blob slice from other Blob without options", testBlobSlice)
-    suite.addTest("Test get Blob toArrayBuffer", testBlobToArrayBuffer)
-    suite.addTest("Test get Blob constructor ArrayString", testBlobToArrayString)
-    suite.addTest("Test get Blob constructor ArrayBuffer", testBlobToArrayArrayBuffer)
-    suite.addTest("Test get Blob constructor Int8Array", testBlobToArrayInt8Array)
-    suite.addTest("Test get Blob constructor Uint8Array", testBlobToArrayUint8Array)
-    suite.addTest("Test get Blob constructor Uint8ClampedArray", testBlobToArrayUint8ClampedArray)
+    suite.addAsyncTest("Test get Blob slice from empty String array", testEmptyStringSlice)
+    suite.addAsyncTest("Test get Blob slice from Chinese String array without options", testChineseStringSlice)
+    suite.addAsyncTest("Test get Blob slice from Chinese and English String array without options", testEnglishStringSlice)
+    suite.addAsyncTest("Test create Blob from String array without options", testBlobFromStringArray)
+    suite.addAsyncTest("Test create Blob from ArrayBuffer without options", testBlobFromArrayBuffer)
+    suite.addAsyncTest("Test create Blob from TypedArray without options", testBlobFromTypedArray)
+    suite.addAsyncTest("Test create Blob from DataView without options", testBlobFromDataView)
+    suite.addAsyncTest("Test create Blob from other Blob without options", testBlobFromBlob)
+    suite.addAsyncTest("Test create Blob from String array with options", testBlobWithOptions)
+    suite.addAsyncTest("Test get Blob slice from String array without options", testStringArraySlice)
+    suite.addAsyncTest("Test get Blob slice from ArrayBuffer without options", testArrayBufferSlice)
+    suite.addAsyncTest("Test get Blob slice from TypedArray without options", testTypedArraySlice)
+    suite.addAsyncTest("Test get Blob slice from DataView without options", testDataViewSlice)
+    suite.addAsyncTest("Test get Blob slice from other Blob without options", testBlobSlice)
+    suite.addAsyncTest("Test get Blob toArrayBuffer", testBlobToArrayBuffer)
+    suite.addAsyncTest("Test get Blob constructor ArrayString", testBlobToArrayString)
+    suite.addAsyncTest("Test get Blob constructor ArrayBuffer", testBlobToArrayArrayBuffer)
+    suite.addAsyncTest("Test get Blob constructor Int8Array", testBlobToArrayInt8Array)
+    suite.addAsyncTest("Test get Blob constructor Uint8Array", testBlobToArrayUint8Array)
+    suite.addAsyncTest("Test get Blob constructor Uint8ClampedArray", testBlobToArrayUint8ClampedArray)
     suite.addTest("Test get Blob constructor Int16Array", testBlobToArrayInt16Array)
     suite.addTest("Test get Blob constructor Uint16Array", testBlobToArrayUint16Array)
-    suite.addTest("Test get Blob constructor Uint8Array with options", testBlobToArrayUint8ArrayOptions)
+    suite.addAsyncTest("Test get Blob constructor Uint8Array with options", testBlobToArrayUint8ArrayOptions)
     suite.addTest("Test get Blob constructor Int32Array with options", testBlobToInt32Array)
     suite.addTest("Test get Blob constructor Uint32Array with options", testBlobToUint32Array)
     suite.addTest("Test get Blob constructor Float32Array with options", testBlobToFloat32Array)
     suite.addTest("Test get Blob constructor Float64Array with options", testBlobToFloat64Array)
     suite.addTest("Test get Blob constructor BigInt64Array with options", testBlobToBigInt64Array)
     suite.addTest("Test get Blob constructor BigUint64Array with options", testBlobToBigUint64Array)
-    suite.addTest("Test get Blob constructor for string[]", testBlobToBuiltInStringArray)
-    suite.addTest("Test get Blob constructor from empty", testBlobFromEmpty)
+    suite.addAsyncTest("Test get Blob constructor for string[]", testBlobToBuiltInStringArray)
+    suite.addAsyncTest("Test get Blob constructor from empty", testBlobFromEmpty)
     suite.addTest("Test get Blob constructor from arrays with negative values", testBlobNegative)
 
     return suite.run()
 }
 
-function testEmptyStringSlice() {
+async function testEmptyStringSlice() {
     let sourcesFixed: FixedArray<string>= [];
     let blobFixed = new buffer.Blob(sourcesFixed)
     let sizeFixed = blobFixed.size;
@@ -77,7 +77,7 @@ function testEmptyStringSlice() {
     arktest.assertEQ(value.byteLength, 0)
 }
 
-function testChineseStringSlice() {
+async function testChineseStringSlice() {
     let sources: FixedArray<string> = ['你好', '世界', '测试'];
     let blob = new buffer.Blob(sources);
     let size = blob.size;
@@ -87,7 +87,7 @@ function testChineseStringSlice() {
     arktest.assertEQ(text, '你好世界测试')
 }
 
-function testEnglishStringSlice() {
+async function testEnglishStringSlice() {
     let sources: FixedArray<string> = ['测试', '$#', 'c'];
     let blob = new buffer.Blob(sources)
     let size = blob.size;
@@ -97,7 +97,7 @@ function testEnglishStringSlice() {
     arktest.assertEQ(text, '测试$#c')
 }
 
-function testBlobFromStringArray() {
+async function testBlobFromStringArray() {
     let src: FixedArray<string> = ['1', '2', '3', '4', '5']
     let blob = new buffer.Blob(src)
     arktest.assertEQ(blob.type, '')
@@ -106,7 +106,7 @@ function testBlobFromStringArray() {
     arktest.assertEQ(text, '12345')
 }
 
-function testBlobFromArrayBuffer() {
+async function testBlobFromArrayBuffer() {
     const arr = new Uint8Array([72, 101, 108, 108, 111])
     const arrayBuffer = arr.buffer as ArrayBuffer
     let src: FixedArray<ArrayBuffer> = [arrayBuffer]
@@ -117,7 +117,7 @@ function testBlobFromArrayBuffer() {
     arktest.assertEQ(text, 'Hello')
 }
 
-function testBlobFromTypedArray() {
+async function testBlobFromTypedArray() {
     let src: FixedArray<Int8Array> = [new Int8Array([97, 98, 99, 97, 98])]
     let blob = new buffer.Blob(src)
     arktest.assertEQ(blob.size, 5)
@@ -126,7 +126,7 @@ function testBlobFromTypedArray() {
     arktest.assertEQ(text, 'abcab')
 }
 
-function testBlobFromDataView() {
+async function testBlobFromDataView() {
     const arr = new Uint8Array([72, 101, 108, 108, 111])
     const arrayBuffer = arr.buffer as ArrayBuffer
     const dataView = new DataView(arrayBuffer)
@@ -138,7 +138,7 @@ function testBlobFromDataView() {
     arktest.assertEQ(text, 'HelloHelloHello')
 }
 
-function testBlobFromBlob() {
+async function testBlobFromBlob() {
     let src = new buffer.Blob(['1', '2', '3', '4', '5'])
     let blob = new buffer.Blob([src] as FixedArray<buffer.Blob>)
     arktest.assertEQ(blob.type, '')
@@ -147,7 +147,7 @@ function testBlobFromBlob() {
     arktest.assertEQ(text, '12345')
 }
 
-function testBlobWithOptions() {
+async function testBlobWithOptions() {
     const blobParts: FixedArray<string> = ['<q id="a"><span id="b">hey!</span></q>'];
     const blob = new buffer.Blob(blobParts, { type: 'text/html' } as buffer.BlobOptions);
     arktest.assertEQ(blob.type, 'text/html')
@@ -155,7 +155,7 @@ function testBlobWithOptions() {
     arktest.assertEQ(text, '<q id="a"><span id="b">hey!</span></q>')
 }
 
-function testStringArraySlice() {
+async function testStringArraySlice() {
     let src: FixedArray<string> = ['1', '2', '3', '4', '5']
     let blob = new buffer.Blob(src).slice(0,3)
     arktest.assertEQ(blob.type, '')
@@ -164,7 +164,7 @@ function testStringArraySlice() {
     arktest.assertEQ(text, '123')
 }
 
-function testArrayBufferSlice() {
+async function testArrayBufferSlice() {
     let bufferArr = new ArrayBuffer(3);
     let uint8arr = new Uint8Array(bufferArr);
     uint8arr[0] = 97;
@@ -199,7 +199,7 @@ function testArrayBufferSlice() {
     arktest.assertEQ(text, 'e')
 }
 
-function testTypedArraySlice() {
+async function testTypedArraySlice() {
     let src: FixedArray<Int8Array> = [new Int8Array([97, 98, 99]),
                             new Int8Array([100, 101]),
                             new Int8Array([102, 103]),
@@ -212,7 +212,7 @@ function testTypedArraySlice() {
     arktest.assertEQ(text, 'a')
 }
 
-function testDataViewSlice() {
+async function testDataViewSlice() {
     const arr = new Uint8Array([72, 101, 108, 108, 111]);
     const arr1 = new Uint8Array([97, 98, 99, 100]);
     const arrayBuffer = arr.buffer as ArrayBuffer;
@@ -252,7 +252,7 @@ function testDataViewSlice() {
     arktest.assertEQ(arrayData[2], 108);
 }
 
-function testBlobSlice() {
+async function testBlobSlice() {
     let src1 = new buffer.Blob(['1', '2', '3', '4', '5'])
     let src2 = new buffer.Blob([new Int8Array([1, 2, 3, 4, 5])] as FixedArray<Int8Array>)
     let src3 = new buffer.Blob(['1', '2', '3', '4', '5'])
@@ -295,7 +295,7 @@ function testBlobSlice() {
     }
 }
 
-function testBlobToArrayBuffer() {
+async function testBlobToArrayBuffer() {
     const arr = new Uint8Array([72, 101, 108, 108, 111])
     const arrayBuffer = arr.buffer as ArrayBuffer
     let src: FixedArray<DataView> = [new DataView(arrayBuffer)]
@@ -306,7 +306,7 @@ function testBlobToArrayBuffer() {
     arktest.assertEQ(ArrayBuffer.stringify(arrayBufferFromBlob, 'utf8', 0, arrayBufferFromBlob.getByteLength()), text)
 }
 
-function testBlobToArrayString() {
+async function testBlobToArrayString() {
     let sources = ['测试', '$#', 'c'];
     let blob = new buffer.Blob(sources)
     let size = blob.size;
@@ -316,7 +316,7 @@ function testBlobToArrayString() {
     arktest.assertEQ(text, '测试$#c')
 }
 
-function testBlobToArrayArrayBuffer() {
+async function testBlobToArrayArrayBuffer() {
     let arr = new ArrayBuffer(3);
     let uint8arr = new Uint8Array(arr);
     uint8arr[0] = 97;
@@ -330,7 +330,7 @@ function testBlobToArrayArrayBuffer() {
     arktest.assertEQ(text, 'abc')
 }
 
-function testBlobToArrayInt8Array() {
+async function testBlobToArrayInt8Array() {
     {
         let src: FixedArray<Int8Array> = [new Int8Array([1, 2, 3]),
                             new Int8Array([4, 5]),
@@ -380,7 +380,7 @@ function testBlobToArrayInt8Array() {
     }
 }
 
-function testBlobToArrayUint8Array() {
+async function testBlobToArrayUint8Array() {
     let uint8arr1 = new Uint8Array(3);
     uint8arr1[0] = 97;
     uint8arr1[1] = 98;
@@ -393,7 +393,7 @@ function testBlobToArrayUint8Array() {
     arktest.assertEQ(text, 'abc')
 }
 
-function testBlobToArrayUint8ClampedArray() {
+async function testBlobToArrayUint8ClampedArray() {
     let uintc8 = new Uint8ClampedArray(3);
     uintc8 [0] = 100;
     uintc8 [1] = 101;
@@ -429,7 +429,7 @@ function testBlobToArrayUint16Array() {
     arktest.assertEQ(size, 10)
 }
 
-function testBlobToArrayUint8ArrayOptions() {
+async function testBlobToArrayUint8ArrayOptions() {
     let o1: buffer.BlobOptions = { type: 'new type', endings: 'transparent' };
     let uint8arr1 = new Uint8Array(3);
     uint8arr1[0] = 97;
@@ -540,14 +540,14 @@ function testBlobToBigUint64Array() {
 
 
 
-function testBlobToBuiltInStringArray() {
+async function testBlobToBuiltInStringArray() {
     let src: string[] = ['1', '2', '3', '4', '5']
     let blob = new buffer.Blob(src)
     let text = await blob.text()
     arktest.assertEQ(text, '12345')
 }
 
-function testBlobFromEmpty() {
+async function testBlobFromEmpty() {
     {
         let src: string[] = []
         let blob = new buffer.Blob(src)

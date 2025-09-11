@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-function testAwaitStandalonePromise(): void {
+async function testAwaitStandalonePromise(): Promise<void> {
     let value = await Promise.resolve(42);
     arktest.assertEQ(value, 42, 'Awaited value of resolved promise is different\
                           from the expected value. Actual value: ' + value);
@@ -27,7 +27,7 @@ function testAwaitStandalonePromise(): void {
 
 function main(): int {
     let testSuite = new arktest.ArkTestsuite('coroutines.await_standalone_promise');
-    testSuite.addTest('testAwaitStandalonePromise', testAwaitStandalonePromise);
+    testSuite.addAsyncTest('testAwaitStandalonePromise', testAwaitStandalonePromise);
     let res = testSuite.run();
     return res;
 }

@@ -20,9 +20,9 @@ const mustChecks: Array<Function> = new Array<Function>();
 function main(): int {
     const suite = new arktest.ArkTestsuite("Stream API tests");
 
-    suite.addTest("Pipe data transfer validation.", testPipeDataTransferValidation);
-    suite.addTest("Pipe with readable and writable streams.", testPipeReadableAndWritableStreams);
-    suite.addTest("Pipe large data transfer validation.", testPipeLargeDataTransferValidation);
+    suite.addAsyncTest("Pipe data transfer validation.", testPipeDataTransferValidation);
+    suite.addAsyncTest("Pipe with readable and writable streams.", testPipeReadableAndWritableStreams);
+    suite.addAsyncTest("Pipe large data transfer validation.", testPipeLargeDataTransferValidation);
 
     return suite.run();
 }
@@ -102,7 +102,7 @@ class MyWrite1 extends CustomWritable {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamPipe003
-function testPipeDataTransferValidation() {
+async function testPipeDataTransferValidation() {
     mustChecks.push(() => {
         if (callCount_MyWrite1 !== 1) {
             throw new Error(`Function was expected to be called 1 times, but was called ${callCount_MyWrite1} times.`);
@@ -141,7 +141,7 @@ class MyWrite2 extends CustomWritable {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamPipe004
-function testPipeReadableAndWritableStreams() {
+async function testPipeReadableAndWritableStreams() {
     mustChecks.push(() => {
         if (callCount_MyWrite2 !== 1) {
             throw new Error(`Function was expected to be called 1 times, but was called ${callCount_MyWrite2} times.`);
@@ -206,7 +206,7 @@ class MyWrite3 extends stream.Writable {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamPipe005
-function testPipeLargeDataTransferValidation() {
+async function testPipeLargeDataTransferValidation() {
     mustChecks.push(() => {
         if (callCount_MyWrite3 !== 6) {
             throw new Error(`Function was expected to be called 6 times, but was called ${callCount_MyWrite3} times.`);

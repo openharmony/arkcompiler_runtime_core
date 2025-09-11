@@ -16,13 +16,13 @@
 function main(): int {
     let BlockingQueueTestsuite = new arktest.ArkTestsuite("BlockingQueueAddAndPollStressTest")
 
-    BlockingQueueTestsuite.addTest("addAndPoll", addAndPoll)
+    BlockingQueueTestsuite.addAsyncTest("addAndPoll", addAndPoll)
     let res = BlockingQueueTestsuite.run()
     CoroutineExtras.stopTaskpool()
     return res
 }
 
-function addAndPoll() {
+async function addAndPoll() {
     let queueTestIntA = new containers.ArrayBlockingQueue<number>(10000)
     let queueTestIntL = new containers.LinkedBlockingQueue<number>(10000)
 
