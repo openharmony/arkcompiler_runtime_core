@@ -138,17 +138,18 @@ public:
 
     bool IsRuntimeClassInitialized(std::string_view classDescriptor, bool isClass = true)
     {
-        PandaString desc;
+        std::optional<PandaString> desc;
         if (isClass) {
             desc = Mangle::ConvertDescriptor(classDescriptor, true);
         } else {
             desc = Mangle::ConvertDescriptor(std::string(classDescriptor) + ".ETSGLOBAL", true);
         }
+        ASSERT(desc.has_value());
         PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env_);
         ScopedManagedCodeFix s(pandaEnv);
 
         EtsClassLinker *classLinker = pandaEnv->GetEtsVM()->GetClassLinker();
-        EtsClass *klass = classLinker->GetClass(desc.c_str(), true, GetClassLinkerContext(s.GetCoroutine()));
+        EtsClass *klass = classLinker->GetClass(desc.value().c_str(), true, GetClassLinkerContext(s.GetCoroutine()));
         ASSERT(klass);
 
         return klass->IsInitialized();

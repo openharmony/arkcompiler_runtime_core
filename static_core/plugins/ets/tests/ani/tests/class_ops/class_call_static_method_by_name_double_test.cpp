@@ -55,7 +55,7 @@ public:
         va_list args {};
         va_start(args, value);
         ASSERT_EQ(env_->Class_CallStaticMethodByName_Double_V(cls, "method", "C{std/core/String}:d", value, args),
-                  ANI_NOT_FOUND);
+                  ANI_INVALID_DESCRIPTOR);
         va_end(args);
     }
 
@@ -441,13 +441,13 @@ TEST_F(ClassCallStaticMethodByNameDoubleTest, check_wrong_signature)
         ANI_OK);
     ASSERT_EQ(
         env_->c_api->Class_CallStaticMethodByName_Double(env_, cls, "method", "C{std/core/String}:d", &value, str),
-        ANI_NOT_FOUND);
+        ANI_INVALID_DESCRIPTOR);
 
     ani_value arg;
     arg.r = str;
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Double_A(cls, "method", "C{std.core.String}:d", &value, &arg), ANI_OK);
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Double_A(cls, "method", "C{std/core/String}:d", &value, &arg),
-              ANI_NOT_FOUND);
+              ANI_INVALID_DESCRIPTOR);
 
     TestFuncVCorrectSignature(cls, &value, str);
     TestFuncVWrongSignature(cls, &value, str);

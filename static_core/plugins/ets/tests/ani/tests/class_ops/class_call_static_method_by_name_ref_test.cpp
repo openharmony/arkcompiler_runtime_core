@@ -55,7 +55,7 @@ public:
         va_start(args, value);
         ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_V(cls, "method", "C{std/core/String}:C{std.core.String}",
                                                            value, args),
-                  ANI_NOT_FOUND);
+                  ANI_INVALID_DESCRIPTOR);
         va_end(args);
     }
     void CheckRefUp(ani_ref ref)
@@ -585,7 +585,7 @@ TEST_F(ClassCallStaticMethodByNameRefTest, check_wrong_signature)
               ANI_OK);
     ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_Ref(env_, cls, "method",
                                                             "C{std/core/String}:C{std.core.String}", &value, str),
-              ANI_NOT_FOUND);
+              ANI_INVALID_DESCRIPTOR);
 
     ani_value arg;
     arg.r = str;
@@ -594,7 +594,7 @@ TEST_F(ClassCallStaticMethodByNameRefTest, check_wrong_signature)
         ANI_OK);
     ASSERT_EQ(
         env_->Class_CallStaticMethodByName_Ref_A(cls, "method", "C{std/core/String}:C{std.core.String}", &value, &arg),
-        ANI_NOT_FOUND);
+        ANI_INVALID_DESCRIPTOR);
 
     TestFuncVCorrectSignature(cls, &value, str);
     TestFuncVWrongSignature(cls, &value, str);

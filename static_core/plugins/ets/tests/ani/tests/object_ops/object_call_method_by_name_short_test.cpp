@@ -52,7 +52,7 @@ public:
         va_list args {};
         va_start(args, value);
         ASSERT_EQ(env_->Object_CallMethodByName_Short_V(obj, "method", "C{std/core/String}:s", value, args),
-                  ANI_NOT_FOUND);
+                  ANI_INVALID_DESCRIPTOR);
         va_end(args);
     }
 };
@@ -99,7 +99,7 @@ TEST_F(CallObjectMethodShortByNameTest, object_call_method_short_v_abnormal)
 
     ani_short res {};
     ASSERT_EQ(env_->Object_CallMethodByName_Short(object, "shortByNameMethod", "ss:x", &res, VAL1, VAL2),
-              ANI_NOT_FOUND);
+              ANI_INVALID_DESCRIPTOR);
     ASSERT_EQ(env_->Object_CallMethodByName_Short(object, "unknown_function", "ss:s", &res, VAL1, VAL2), ANI_NOT_FOUND);
 }
 
@@ -499,8 +499,10 @@ TEST_F(CallObjectMethodShortByNameTest, object_call_method_by_name_short_014)
     const std::array<std::string_view, 4U> invalidMethodNames = {{"", "测试emoji🙂🙂", "\n\r\t", "\x01\x02\x03"}};
 
     for (const auto &methodName : invalidMethodNames) {
-        ASSERT_EQ(env_->Object_CallMethodByName_Short(object, methodName.data(), "", &res, VAL1, VAL2), ANI_NOT_FOUND);
-        ASSERT_EQ(env_->Object_CallMethodByName_Short_A(object, methodName.data(), "", &res, args), ANI_NOT_FOUND);
+        ASSERT_EQ(env_->Object_CallMethodByName_Short(object, methodName.data(), "", &res, VAL1, VAL2),
+                  ANI_INVALID_DESCRIPTOR);
+        ASSERT_EQ(env_->Object_CallMethodByName_Short_A(object, methodName.data(), "", &res, args),
+                  ANI_INVALID_DESCRIPTOR);
     }
 }
 
@@ -525,12 +527,13 @@ TEST_F(CallObjectMethodShortByNameTest, check_wrong_signature)
     ASSERT_EQ(env_->c_api->Object_CallMethodByName_Short(env_, obj, "method", "C{std.core.String}:s", &res, str),
               ANI_OK);
     ASSERT_EQ(env_->c_api->Object_CallMethodByName_Short(env_, obj, "method", "C{std/core/String}:s", &res, str),
-              ANI_NOT_FOUND);
+              ANI_INVALID_DESCRIPTOR);
 
     ani_value arg;
     arg.r = str;
     ASSERT_EQ(env_->Object_CallMethodByName_Short_A(obj, "method", "C{std.core.String}:s", &res, &arg), ANI_OK);
-    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(obj, "method", "C{std/core/String}:s", &res, &arg), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(obj, "method", "C{std/core/String}:s", &res, &arg),
+              ANI_INVALID_DESCRIPTOR);
 
     TestFuncVCorrectSignature(obj, &res, str);
     TestFuncVWrongSignature(obj, &res, str);

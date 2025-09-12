@@ -106,12 +106,12 @@ uint32_t CastToBitMask(ani_env *env, ani_string checkStr)
                 flagsBitsTemp = FLAG_STICKY;
                 break;
             default: {
-                ThrowNewError(env, "Lstd/core/IllegalArgumentError;", "invalid regular expression flags");
+                ThrowNewError(env, "std.core.IllegalArgumentError", "invalid regular expression flags");
                 return 0;
             }
         }
         if ((flagsBits & flagsBitsTemp) != 0) {
-            ThrowNewError(env, "Lstd/core/IllegalArgumentError;", "invalid regular expression flags");
+            ThrowNewError(env, "std.core.IllegalArgumentError", "invalid regular expression flags");
             return 0;
         }
         flagsBits |= flagsBitsTemp;
@@ -138,7 +138,7 @@ std::vector<uint8_t> ExtractStringAsUtf16(ani_env *env, ani_string strANI, const
         }
         auto *buffer = new uint16_t[bufferSize];
         if (buffer == nullptr) {
-            ThrowNewError(env, "Lstd/core/OutOfMemoryError;", "Can't create buffer");
+            ThrowNewError(env, "std.core.OutOfMemoryError", "Can't create buffer");
             return result;
         }
         ani_size strSize;
@@ -160,7 +160,7 @@ std::vector<uint8_t> ExtractStringAsUtf16(ani_env *env, ani_string strANI, const
         }
         char *buffer = new char[bufferSize];
         if (buffer == nullptr) {
-            ThrowNewError(env, "Lstd/core/OutOfMemoryError;", "Can't create buffer");
+            ThrowNewError(env, "std.core.OutOfMemoryError", "Can't create buffer");
             return result;
         }
         ani_size strSize;

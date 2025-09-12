@@ -52,7 +52,7 @@ static ani_int NativeANISlowFunction(ani_env *env, ani_int iterations)
     ani_int res = 0;
 
     ani_module module;
-    static const char *moduleName = "LSamplerAniTest;";
+    static const char *moduleName = "SamplerAniTest";
     auto status = env->FindModule(moduleName, &module);
     if (status != ANI_OK) {
         std::cerr << "Not found '" << moduleName << "'" << std::endl;
@@ -60,7 +60,7 @@ static ani_int NativeANISlowFunction(ani_env *env, ani_int iterations)
     }
 
     ani_function fn;
-    status = env->Module_FindFunction(module, "SlowETSFunction", "I:I", &fn);
+    status = env->Module_FindFunction(module, "SlowETSFunction", "i:i", &fn);
     if (status != ANI_OK) {
         std::cerr << "Function 'SlowETSFunction' not found" << std::endl;
         return ANI_ERROR;
@@ -77,7 +77,7 @@ static ani_int NativeANISlowFunction(ani_env *env, ani_int iterations)
 static ani_int NativeANIFastFunction(ani_env *env, ani_int iterations)
 {
     ani_module module;
-    static const char *moduleName = "LSamplerAniTest;";
+    static const char *moduleName = "SamplerAniTest";
     auto status = env->FindModule(moduleName, &module);
     if (status != ANI_OK) {
         std::cerr << "Not found '" << moduleName << "'" << std::endl;
@@ -85,7 +85,7 @@ static ani_int NativeANIFastFunction(ani_env *env, ani_int iterations)
     }
 
     ani_function fn;
-    status = env->Module_FindFunction(module, "FastETSFunction", ":I", &fn);
+    status = env->Module_FindFunction(module, "FastETSFunction", ":i", &fn);
     if (status != ANI_OK) {
         std::cerr << "Function 'FastETSFunction' not found" << std::endl;
         return ANI_ERROR;
@@ -112,7 +112,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     }
 
     ani_module module;
-    static const char *moduleName = "LSamplerAniTest;";
+    static const char *moduleName = "SamplerAniTest";
     auto status = env->FindModule(moduleName, &module);
     if (status != ANI_OK) {
         std::cerr << "Not found '" << moduleName << "'" << std::endl;
@@ -120,10 +120,10 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     }
 
     std::array methods = {
-        ani_native_function {"NativeSlowFunction", "I:I", reinterpret_cast<void *>(NativeSlowFunction)},
-        ani_native_function {"NativeFastFunction", ":I", reinterpret_cast<void *>(NativeFastFunction)},
-        ani_native_function {"NativeANIFastFunction", "I:I", reinterpret_cast<void *>(NativeANIFastFunction)},
-        ani_native_function {"NativeANISlowFunction", "I:I", reinterpret_cast<void *>(NativeANISlowFunction)},
+        ani_native_function {"NativeSlowFunction", "i:i", reinterpret_cast<void *>(NativeSlowFunction)},
+        ani_native_function {"NativeFastFunction", ":i", reinterpret_cast<void *>(NativeFastFunction)},
+        ani_native_function {"NativeANIFastFunction", "i:i", reinterpret_cast<void *>(NativeANIFastFunction)},
+        ani_native_function {"NativeANISlowFunction", "i:i", reinterpret_cast<void *>(NativeANISlowFunction)},
     };
 
     if (ANI_OK != env->Module_BindNativeFunctions(module, methods.data(), methods.size())) {

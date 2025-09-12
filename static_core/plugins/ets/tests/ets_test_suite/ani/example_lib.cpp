@@ -90,7 +90,7 @@ static void TestCheck3()
     ASSERT_EQ(env->Class_CallStaticMethod_Ref(cls, newMethod, &ref), ANI_OK);
     ASSERT_NE(ref, nullptr);
 
-    // Retrieve a method named "boolean_method" with signature "II:Z"
+    // Retrieve a method named "boolean_method" with signature "ii:z"
     ani_method method;
     ASSERT_EQ(env->Class_FindMethod(cls, "boolean_method", "ii:z", &method), ANI_OK);
     ASSERT_NE(method, nullptr);

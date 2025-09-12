@@ -192,7 +192,7 @@ TEST_F(ClassBindNativeMethodsTest, BindNativesInheritanceBTest)
     method = {
         ani_native_function {"method1", ":Iface", reinterpret_cast<void *>(NativeMethodsFooNative)},
     };
-    ASSERT_EQ(env_->Class_BindNativeMethods(cls, method.data(), method.size()), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_BindNativeMethods(cls, method.data(), method.size()), ANI_INVALID_DESCRIPTOR);
 
     method = {
         ani_native_function {"method2", "C{@defModule.class_bind_native_methods_test.Impl}:",
@@ -344,7 +344,7 @@ TEST_F(ClassBindNativeMethodsTest, method_bind_bad_signature)
     std::array m = {
         ani_native_function {"method", "C{std/core/String}:", reinterpret_cast<void *>(CheckSignature)},
     };
-    ASSERT_EQ(env_->c_api->Class_BindNativeMethods(env_, cls, m.data(), m.size()), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->c_api->Class_BindNativeMethods(env_, cls, m.data(), m.size()), ANI_INVALID_DESCRIPTOR);
 
     m = {
         ani_native_function {"method", "C{std.core.String}:", reinterpret_cast<void *>(CheckSignature)},

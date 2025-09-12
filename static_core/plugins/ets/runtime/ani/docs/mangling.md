@@ -153,7 +153,7 @@ SignatureEncoding ::=
 function foo(a0: Integral, a1: double, arg2: float, arg3: SomeEnum): void
 
 // ANI mangled type
-"C{std.core.Integral}dfE{app.ns.SomeEnum}:V"
+"C{std.core.Integral}dfE{app.ns.SomeEnum}:"
 ```
 
 ### Function types in arguments

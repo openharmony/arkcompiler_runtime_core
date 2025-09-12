@@ -132,45 +132,41 @@ public:
     EtsField *GetStaticFieldIDByOffset(uint32_t fieldOffset);
 
     PANDA_PUBLIC_API EtsMethod *GetDirectMethod(const char *name);
-    PANDA_PUBLIC_API EtsMethod *GetDirectMethod(const uint8_t *name, const char *signature, bool isANIFormat = false);
-    PANDA_PUBLIC_API EtsMethod *GetDirectMethod(const char *name, const char *signature, bool isANIFormat = false);
+    PANDA_PUBLIC_API EtsMethod *GetDirectMethod(const uint8_t *name, const char *signature);
+    PANDA_PUBLIC_API EtsMethod *GetDirectMethod(const char *name, const char *signature);
 
     PANDA_PUBLIC_API EtsMethod *GetDirectMethod(bool isStatic, const char *name, const char *signature) const;
     PANDA_PUBLIC_API EtsMethod *GetDirectMethod(bool isStatic, const char *name, bool *outIsUnique) const;
 
-    PANDA_PUBLIC_API EtsMethod *GetStaticMethod(const char *name, const char *signature, bool isANIFormat = false) const
+    PANDA_PUBLIC_API EtsMethod *GetStaticMethod(const char *name, const char *signature) const
     {
         if (signature == nullptr) {
             return GetMethodInternal<FindFilter::STATIC>(name);
         }
-        return GetMethodInternal<FindFilter::STATIC>(name, signature, isANIFormat);
+        return GetMethodInternal<FindFilter::STATIC>(name, signature);
     }
 
-    PANDA_PUBLIC_API EtsMethod *GetInstanceMethod(const char *name, const char *signature,
-                                                  bool isANIFormat = false) const
+    PANDA_PUBLIC_API EtsMethod *GetInstanceMethod(const char *name, const char *signature) const
     {
         if (signature == nullptr) {
             return GetMethodInternal<FindFilter::INSTANCE>(name);
         }
-        return GetMethodInternal<FindFilter::INSTANCE>(name, signature, isANIFormat);
+        return GetMethodInternal<FindFilter::INSTANCE>(name, signature);
     }
 
-    PANDA_PUBLIC_API PandaVector<EtsMethod *> GetStaticMethodOverload(const char *name, const char *signature,
-                                                                      bool isANIFormat = false)
+    PANDA_PUBLIC_API PandaVector<EtsMethod *> GetStaticMethodOverload(const char *name, const char *signature)
     {
-        return GetMethodOverloadInternal<FindFilter::STATIC, false>(name, signature, isANIFormat);
+        return GetMethodOverloadInternal<FindFilter::STATIC, false>(name, signature);
     }
 
-    PANDA_PUBLIC_API PandaVector<EtsMethod *> GetInstanceMethodOverload(const char *name, const char *signature,
-                                                                        bool isANIFormat = false)
+    PANDA_PUBLIC_API PandaVector<EtsMethod *> GetInstanceMethodOverload(const char *name, const char *signature)
     {
-        return GetMethodOverloadInternal<FindFilter::INSTANCE, false>(name, signature, isANIFormat);
+        return GetMethodOverloadInternal<FindFilter::INSTANCE, false>(name, signature);
     }
 
-    PANDA_PUBLIC_API PandaVector<EtsMethod *> GetDirectMethodOverload(const char *name, const char *signature,
-                                                                      bool isANIFormat = false)
+    PANDA_PUBLIC_API PandaVector<EtsMethod *> GetDirectMethodOverload(const char *name, const char *signature)
     {
-        return GetMethodOverloadInternal<FindFilter::ALL, true>(name, signature, isANIFormat);
+        return GetMethodOverloadInternal<FindFilter::ALL, true>(name, signature);
     }
 
     PANDA_PUBLIC_API EtsMethod *GetDirectMethod(const PandaString &name, const PandaString &signature)
@@ -704,9 +700,9 @@ private:
     }
 
     template <FindFilter FILTER>
-    EtsMethod *GetMethodInternal(const char *name, const char *signature, bool isANIFormat) const
+    EtsMethod *GetMethodInternal(const char *name, const char *signature) const
     {
-        EtsMethodSignature methodSignature(signature, isANIFormat);
+        EtsMethodSignature methodSignature(signature);
         if (!methodSignature.IsValid()) {
             LOG(ERROR, ETS_NAPI) << "Wrong method signature:" << signature;
             return nullptr;
@@ -738,7 +734,7 @@ private:
                                    std::optional<EtsMethodSignature> &methodSignature);
 
     template <FindFilter FILTER, bool IS_DIRECT>
-    PandaVector<EtsMethod *> GetMethodOverloadInternal(const char *name, const char *signature, bool isANIFormat)
+    PandaVector<EtsMethod *> GetMethodOverloadInternal(const char *name, const char *signature)
     {
         PandaVector<EtsMethod *> etsMethods;
         auto overloadName = PandaString(name);
@@ -746,7 +742,7 @@ private:
         auto staticOverloadKey = OverloadKey(overloadName, true);
         auto instanceOverloadKey = OverloadKey(overloadName, false);
         if (signature) {
-            methodSignature.emplace(signature, isANIFormat);
+            methodSignature.emplace(signature);
         }
         for (auto curClass = this; curClass != nullptr; curClass = curClass->GetBase()) {
             if constexpr (FILTER == FindFilter::ALL || FILTER == FindFilter::STATIC) {

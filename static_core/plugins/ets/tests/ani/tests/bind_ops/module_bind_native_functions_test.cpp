@@ -358,7 +358,7 @@ TEST_F(ModuleBindNativeFunctionsTest, bind_wrong_signature)
     functions = {
         ani_native_function {"checkSignature", "C{std/core/String}:", reinterpret_cast<void *>(Abs)},
     };
-    ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_INVALID_DESCRIPTOR);
 }
 
 }  // namespace ark::ets::ani::testing

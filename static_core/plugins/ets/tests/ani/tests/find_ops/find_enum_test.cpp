@@ -60,7 +60,7 @@ TEST_F(EnumFindTest, invalid_arg_name)
 {
     ani_enum en {};
     ASSERT_EQ(env_->FindEnum("find_enum_test.NotFound", &en), ANI_NOT_FOUND);
-    ASSERT_EQ(env_->FindEnum("", &en), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->FindEnum("", &en), ANI_INVALID_DESCRIPTOR);
     ASSERT_EQ(env_->FindEnum("\t", &en), ANI_NOT_FOUND);
 }
 
@@ -249,7 +249,7 @@ TEST_F(EnumFindTest, check_initialization)
 TEST_F(EnumFindTest, wrong_signature)
 {
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->FindEnum("find_enum_test/EnumA001", &aniEnum), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->FindEnum("find_enum_test/EnumA001", &aniEnum), ANI_INVALID_DESCRIPTOR);
 }
 
 }  // namespace ark::ets::ani::testing
