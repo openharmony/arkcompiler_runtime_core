@@ -17,9 +17,4 @@
 tags: [not-a-test, compile-only]
 ---*/
 
-package pkg02a;
-
-export class ClassA {}
-export interface InterfaceA {}
-export function foo(): void {}
-export const BAR: int = 146
+export * as name from "./module_b";

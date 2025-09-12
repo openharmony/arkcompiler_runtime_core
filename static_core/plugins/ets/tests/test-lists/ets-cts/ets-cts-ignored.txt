@@ -1618,10 +1618,19 @@
 13.compilation_units/07.export_directives/02.single_export_directive/re_export_test_4.ets
 13.compilation_units/07.export_directives/02.single_export_directive/re_export_test_5.ets
 
+#29735
+13.compilation_units/07.export_directives/03.export_type_directive/type_binding_neg.ets
+13.compilation_units/07.export_directives/03.export_type_directive/type_binding_neg_2.ets
+
 #28243
 13.compilation_units/07.export_directives/04.re-export_directive/pkg01_re-export_all_by_old_names.ets
 13.compilation_units/07.export_directives/04.re-export_directive/pkg02_re-export_all_with_rename.ets
 13.compilation_units/07.export_directives/04.re-export_directive/pkg03_re-export_all.ets
+
+#29725
+13.compilation_units/07.export_directives/04.re-export_directive/reexported_default.ets
+13.compilation_units/07.export_directives/04.re-export_directive/reexported_default_2.ets
+13.compilation_units/07.export_directives/04.re-export_directive/reexported_default_3.ets
 
 #28847
 14.ambient_declarations/bad_ambient_declarations_18.ets

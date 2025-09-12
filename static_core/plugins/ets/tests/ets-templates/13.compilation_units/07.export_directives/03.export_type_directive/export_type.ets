@@ -14,10 +14,16 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Export type directive, ClassA is exported as ClassB, therefore is not available
-tags: [compile-only, negative]
-files:
-- ./class_a_as_b.ets
+desc: Export type with binding
+tags: [compile-only, not-a-test]
 ---*/
 
-import { ClassA } from './class_a_as_b'
+class C {
+  f: int = 8
+}
+
+class D {
+  f: int = 9
+}
+
+export type {C as D}

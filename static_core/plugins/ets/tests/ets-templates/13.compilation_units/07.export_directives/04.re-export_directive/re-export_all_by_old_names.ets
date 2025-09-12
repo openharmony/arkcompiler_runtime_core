@@ -15,10 +15,10 @@
 
 /*---
 desc: Re-export directive, old names should be available
-files: ['./module_a.ets']
+files: ['./modules/module_a.ets']
 ---*/
 
-import { ClassA, InterfaceA, foo, BAR } from './module_a'
+import { ClassA, InterfaceA, foo, BAR } from './modules/module_a'
 
 function main() {
     arktest.assertEQ(BAR, 146)

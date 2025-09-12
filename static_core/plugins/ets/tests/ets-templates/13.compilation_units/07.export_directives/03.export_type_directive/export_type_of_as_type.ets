@@ -14,11 +14,14 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Export type directive, type is applied to classes and interfaces
+desc: Export const variable type directive
+files:
+- ./const_as_type.ets
 ---*/
 
 import { FOO } from './const_as_type'
 
-function main(): int {
-    return 0
+function main() {
+    let i = FOO
+    arktest.assertEQ(i, 42)
 }

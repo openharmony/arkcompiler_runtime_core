@@ -17,9 +17,9 @@
 tags: [not-a-test, compile-only]
 ---*/
 
-package pkg03a;
-
-export class ClassA {}
+export class ClassA {
+  f: int = 1
+}
 export interface InterfaceA {}
 export function foo(): void {}
 export const BAR: int = 146

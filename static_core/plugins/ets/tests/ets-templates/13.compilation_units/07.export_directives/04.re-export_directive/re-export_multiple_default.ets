@@ -14,12 +14,11 @@
  */
 
 /*---
-desc: Re-export directive, old names should be available
-files: ['./pkg01a/a.ets', './pkg01b/a.ets']
+desc: Only single item per file could be exported as default
+tags: [compile-only, negative]
+files:
+- ./modules/default_module.ets
 ---*/
 
-import { ClassA, InterfaceA, foo, BAR } from './pkg01b'
-
-function main() {
-    arktest.assertEQ(BAR, 146)
-}
+export {default} from "./modules/default_module"
+export default class B {}

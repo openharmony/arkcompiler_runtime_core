@@ -14,12 +14,15 @@
  */
 
 /*---
-tags: [not-a-test, compile-only]
+desc: re-export default declaration from the other module under 'name'
+files:
+- ./modules/re-export_default_rename.ets
+- ./modules/default_module.ets
 ---*/
 
-package pkg01a;
+import {C} from "./modules/re-export_default_rename"
 
-export class ClassA {}
-export interface InterfaceA {}
-export function foo(): void {}
-export const BAR: int = 146
+function main() {
+  let i = new C()
+  arktest.assertEQ(i.f, 3)
+}

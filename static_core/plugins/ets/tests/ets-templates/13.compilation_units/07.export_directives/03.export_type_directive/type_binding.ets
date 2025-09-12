@@ -14,10 +14,16 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Export type directive, ClassA is exported as ClassB, therefore is not available
-tags: [compile-only, negative]
+desc: >-
+      An export directive can have a type modifier exclusively for a better syntactic compatibility with TypeScript
+      (also see Import Type Directive).
 files:
-- ./class_a_as_b.ets
+- ./export_type.ets
 ---*/
 
-import { ClassA } from './class_a_as_b'
+import type {D} from "./export_type"
+
+function main() {
+  let a: D = new D()
+  arktest.assertEQ(a.f, 8)
+}

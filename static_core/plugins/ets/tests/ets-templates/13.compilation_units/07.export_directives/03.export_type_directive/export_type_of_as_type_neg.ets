@@ -14,10 +14,15 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Export type directive, ClassA is exported as ClassB, therefore is not available
-tags: [compile-only, negative]
+desc: Edit value of the exported const variable type
 files:
-- ./class_a_as_b.ets
+- ./const_as_type.ets
+tags: [compile-only, negative]
 ---*/
 
-import { ClassA } from './class_a_as_b'
+import { FOO } from './const_as_type'
+
+function main() {
+    let i = FOO
+    i = 43
+}
