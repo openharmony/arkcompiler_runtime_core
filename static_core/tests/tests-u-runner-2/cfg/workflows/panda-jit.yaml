@@ -44,7 +44,7 @@ parameters:
     is-panda: True
 steps:
     compile:
-        from: only-es2panda
+        from: es2panda-verifier
         opt-level: ${parameters.opt-level}
         build: ${parameters.build}
         work-dir: ${parameters.work-dir}
@@ -55,7 +55,7 @@ steps:
         es2panda-timeout: ${parameters.es2panda-timeout}
         verifier-timeout: ${parameters.verifier-timeout}
     ark-with-jit:
-        from: only-runtime
+        from: ark
         ark-timeout: ${parameters.ark-timeout}
         build: ${parameters.build}
         work-dir: ${parameters.work-dir}

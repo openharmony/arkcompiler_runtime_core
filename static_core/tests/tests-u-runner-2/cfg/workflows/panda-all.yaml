@@ -53,7 +53,7 @@ parameters:
     ark-jit-args: [ ]
 steps:
     es2panda-verifier:
-        from: only-es2panda
+        from: es2panda-verifier
         opt-level: ${parameters.opt-level}
         build: ${parameters.build}
         work-dir: ${parameters.work-dir}
