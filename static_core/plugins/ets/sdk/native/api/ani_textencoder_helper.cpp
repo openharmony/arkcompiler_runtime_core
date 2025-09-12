@@ -96,13 +96,13 @@ bool Utf8ToUtf16LEByteCheck(const unsigned char *data, std::u16string &u16Str, s
                 break;
             }
             case THREE_BYTES_STYLE: {
+                if (i + TWO_MORE_BYTES_TO_CONSUME >= inputSizeBytes) {
+                    return false;
+                }
                 // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                 uint8_t c2 = data[i + 1];
                 uint8_t c3 = data[i + 2];
                 // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                if (i + TWO_MORE_BYTES_TO_CONSUME >= inputSizeBytes) {
-                    return false;
-                }
                 i += TWO_MORE_BYTES_TO_CONSUME + 1;
                 // CC-OFFNXT(G.FMT.02-CPP) project code style
                 // NOLINTBEGIN(hicpp-signed-bitwise)
@@ -114,11 +114,11 @@ bool Utf8ToUtf16LEByteCheck(const unsigned char *data, std::u16string &u16Str, s
             }
             case TWO_BYTES_STYLE1:
             case TWO_BYTES_STYLE2: {
-                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                uint8_t c2 = data[i + 1];
                 if (i + ONE_MORE_BYTE_TO_CONSUME >= inputSizeBytes) {
                     return false;
                 }
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                uint8_t c2 = data[i + 1];
                 i += ONE_MORE_BYTE_TO_CONSUME + 1;
                 // NOLINTNEXTLINE(hicpp-signed-bitwise)
                 uint32_t codePoint = ((c1 & LOWER_5_BITS_MASK) << UTF8_VALID_BITS) | (c2 & LOWER_6_BITS_MASK);
