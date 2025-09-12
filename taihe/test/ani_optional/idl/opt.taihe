@@ -29,8 +29,8 @@ struct MyStruct {
 }
 
 interface Test {
-    @set("string") Setstring(a: Optional<String>): void;
-    @get("string") Getstring(): Optional<String>;
+    @set("memberStr") SetMemberStr(a: Optional<String>): void;
+    @get("memberStr") GetMemberStr(): Optional<String>;
     SetIntData(a: String): void;
 
     ShowOptionalString(a: Optional<String>): Optional<String>;

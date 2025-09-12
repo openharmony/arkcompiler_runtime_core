@@ -116,7 +116,7 @@ public:
 
     int8_t geti8()
     {
-        std::cout << __func__ << " " << i8 << std::endl;
+        std::cout << __func__ << " " << (int)i8 << std::endl;
         return i8;
     }
 

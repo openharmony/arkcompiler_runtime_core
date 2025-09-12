@@ -30,4 +30,3 @@ function GetIBase(a: String, b: String): IBase;
 
 function GetFooIface(): Foo;
 function PrintFooName(foo: Foo): String;
-@!sts_keep_name

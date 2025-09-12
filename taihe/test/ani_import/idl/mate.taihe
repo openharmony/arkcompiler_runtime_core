@@ -17,7 +17,7 @@ from mate.bar use BarType as MyBar;
 union MateType {
     sValue: String;
     bValue: bool;
-    @undefined xValue;
+    xValue: @undefined unit;
 }
 
 function testBar(bar: MyBar): void;

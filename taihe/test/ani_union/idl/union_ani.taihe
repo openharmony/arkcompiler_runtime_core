@@ -18,9 +18,9 @@ struct Pair {
 }
 
 union InnerUnion {
+  undefinedValue: @undefined unit;
   stringValue: String;
   pairValue: Pair;
-  @undefined undefinedValue;
 }
 
 union MyUnion {
@@ -40,7 +40,7 @@ union BasicUnion {
   float64Value: f64;
   stringValue: String;
   boolValue: bool;
-  @null empty;
+  empty: unit;
 }
 
 function MakeAndShowBasicUnion(data: BasicUnion): BasicUnion;
@@ -61,7 +61,7 @@ union TypedArrayUnion {
   f32Value: @typedarray Array<f32>;
   f64Value: @typedarray Array<f64>;
 
-  @null empty;
+  empty: unit;
 }
 
 function MakeAndShowTypedArrayUnion(data: TypedArrayUnion): TypedArrayUnion;
@@ -73,7 +73,7 @@ struct ArrayStruct {
 
 union ArrayUnion {
   floatValue: ArrayStruct;
-  @null empty;
+  empty: unit;
 }
 
 function MakeAndShowArrayUnion(data: ArrayUnion): ArrayUnion;
@@ -92,7 +92,7 @@ struct IntStruct {
 union StructUnion {
   strValue: StrStruct;
   intValue: IntStruct;
-  @null empty;
+  empty: unit;
 }
 
 function MakeAndShowStructUnion(data: StructUnion): StructUnion;

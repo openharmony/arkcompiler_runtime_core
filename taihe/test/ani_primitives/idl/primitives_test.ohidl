@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 function Multiply(a: i32, b: i32): i32;
 function BaseCFunc(testBoolean : i32): bool;
 function BaseAFunc(testBoolean : bool): void;
