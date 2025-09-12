@@ -30,12 +30,12 @@ public:
 
     TestImpl() {}
 
-    void Setstring(::taihe::optional_view<::taihe::string> a)
+    void SetMemberStr(::taihe::optional_view<::taihe::string> a)
     {
         this->a_ = a;
     }
 
-    ::taihe::optional<::taihe::string> Getstring()
+    ::taihe::optional<::taihe::string> GetMemberStr()
     {
         return a_;
     }

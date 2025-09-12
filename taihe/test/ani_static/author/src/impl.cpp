@@ -110,9 +110,10 @@ void setName(::taihe::string_view a)
 // because these macros are auto-generate, lint will cause false positive.
 // NOLINTBEGIN
 TH_EXPORT_CPP_API_addSync(add_impl);
+TH_EXPORT_CPP_API_addWithCallback(add_impl);
+TH_EXPORT_CPP_API_addReturnsPromise(add_impl);
 TH_EXPORT_CPP_API_sumSync(sum_impl);
 TH_EXPORT_CPP_API_getIBase(getIBase_impl);
-TH_EXPORT_CPP_API_getIBase_test(getIBase_test_impl);
 TH_EXPORT_CPP_API_static_func(static_func);
 TH_EXPORT_CPP_API_ctor_func(ctor_func);
 TH_EXPORT_CPP_API_getName(getName);

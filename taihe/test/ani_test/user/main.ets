@@ -39,7 +39,7 @@ function test_union() {
     // Test showUnion with different types
     ani_test.showUnion(null);
     ani_test.showUnion((1).toInt());
-    ani_test.showUnion(2f);
+    ani_test.showUnion(2.0f);
     ani_test.showUnion("Hello from STS!");
 
     // Test makeUnion returns expected values

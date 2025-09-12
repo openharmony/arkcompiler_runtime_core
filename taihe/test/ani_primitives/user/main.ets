@@ -32,12 +32,14 @@ function testMultiply() {
 
 
 function testFunC1() {
-    let res = test_primitives.BaseCFunc(10)
+    let res = test_primitives.BaseCFunc(10);
+    console.log("BaseCFunc pass:", res);
     arktest.assertEQ(res, true)
 }
 
 function testFunC2() {
-    let res = test_primitives.BaseCFunc(5)
+    let res = test_primitives.BaseCFunc(5);
+    console.log("BaseCFunc fail", res);
     arktest.assertEQ(res, false)
 }
 
@@ -60,12 +62,14 @@ function testFunB2() {
 }
 
 function testFunD1() {
-    let res = test_primitives.BaseDFunc("test123")
+    let res = test_primitives.BaseDFunc("test123");
+    console.log("BaseDFunc pass:", res);
     arktest.assertEQ(res, true)
 }
 
 function testFunD2() {
-    let res = test_primitives.BaseDFunc("test1231")
+    let res = test_primitives.BaseDFunc("test1231");
+    console.log("BaseDFunc fail:", res);
     arktest.assertEQ(res, false)
 }
 
