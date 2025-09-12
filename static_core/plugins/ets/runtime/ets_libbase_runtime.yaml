@@ -6267,6 +6267,26 @@ intrinsics:
       args: [ std.core.Class ]
     impl: ark::ets::intrinsics::StdCoreClassIsSubtypeOf
 
+  - name: StdCoreClassIsUnion
+    space: ets
+    class_name: std.core.Class
+    method_name: isUnion
+    static: false
+    signature:
+      ret: u1
+      args: [ ]
+    impl: ark::ets::intrinsics::StdCoreClassIsUnion
+
+  - name: StdCoreClassGetUnionConstituentTypesInternal
+    space: ets
+    class_name: std.core.Class
+    method_name: getUnionConstituentTypesInternal
+    static: false
+    signature:
+      ret: std.core.Class[]
+      args: [ ]
+    impl: ark::ets::intrinsics::StdCoreClassGetUnionConstituentTypesInternal
+
 ##########################
 # std.core.RuntimeLinker #
 ##########################

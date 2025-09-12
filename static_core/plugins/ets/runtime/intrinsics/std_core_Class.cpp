@@ -659,4 +659,33 @@ EtsClass *StdCoreClassGetFixedArrayComponentType(EtsClass *cls)
     return compCls;
 }
 
+EtsBoolean StdCoreClassIsUnion(EtsClass *cls)
+{
+    ASSERT(cls != nullptr);
+    return cls->IsUnionClass();
+}
+
+ObjectHeader *StdCoreClassGetUnionConstituentTypesInternal(EtsClass *cls)
+{
+    ASSERT(cls != nullptr);
+    ASSERT(cls->IsUnionClass());
+
+    auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+
+    auto constituentTypes = cls->GetRuntimeClass()->GetConstituentTypes();
+    auto *typesArray = EtsObjectArray::Create(PlatformTypes(coro)->coreClass, constituentTypes.size());
+    if (UNLIKELY(typesArray == nullptr)) {
+        ASSERT(coro->HasPendingException());
+        return nullptr;
+    }
+    ASSERT(typesArray != nullptr);
+
+    for (size_t idx = 0; idx < constituentTypes.size(); ++idx) {
+        typesArray->Set(idx, reinterpret_cast<EtsObject *>(EtsClass::FromRuntimeClass(constituentTypes[idx])));
+    }
+
+    return typesArray->AsObject()->GetCoreType();
+}
+
 }  // namespace ark::ets::intrinsics

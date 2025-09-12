@@ -123,6 +123,30 @@ class CtorsTest {
     }
 }
 
+type testUnion = A | B | Number | String
+
+class C<T> {
+    fld: testUnion = new A()
+    fld1: String | FixedArray<A | FixedArray<Number | String >> = new String("help") // union
+    fld2: A | undefined // not union
+    fld3: int | long = 10 // union
+    fld4: String | String = 'hello' // not union
+    fld5: String | Number = 'world' // union
+    fld6: 'lit1' | 'lit2' | 'lit3' = 'lit2' // not union
+    fld7: T | undefined // not union
+    fld8: T | null // not union
+    fld9: FixedArray<String> | FixedArray<Number> = [ 1.0, 2.0, 3.0 ] // union
+    fld10: A | null = null // union
+    fld11: T | A // not union
+    fld12: String | 'table' = 'desk' // not union
+    fld13: Array<String> | Array <Int> = [ 'a' , 'b' ] // not union
+    fld14: null | undefined // not union
+    fld15: A | B = new A() // not union
+
+    foo(a: testUnion): testUnion { return a }
+    bar(a: FixedArray<int | string>): FixedArray<int | string> { return a }
+}
+
 function testGetName(type: Class, expected: string) {
     arktest.assertEQ(type.getName(), expected)
 }
@@ -294,6 +318,162 @@ function testStaticMethodEquals(): void {
     arktest.assertFalse(meth1.equals(meth))
 }
 
+function testIsUnion() {
+    let clsC = new C<B>()
+    let classType = Class.of(clsC)
+
+    let fldInfo1 = classType.getInstanceFieldByName('fld1')
+    let uniInfo1 = fldInfo1!.getType()
+    let constituentTypes1 = uniInfo1!.getUnionConstituentTypes()
+    arktest.assertTrue(uniInfo1!.isUnion())
+    arktest.assertNE(constituentTypes1, undefined)
+
+    let fldInfo2 = classType.getInstanceFieldByName('fld2')
+    let uniInfo2 = fldInfo2!.getType()
+    let constituentTypes2 = uniInfo2!.getUnionConstituentTypes()
+    arktest.assertFalse(uniInfo2!.isUnion())
+    arktest.assertEQ(constituentTypes2, undefined)
+
+    let fldInfo3 = classType.getInstanceFieldByName('fld3')
+    let uniInfo3 = fldInfo3!.getType()
+    let constituentTypes3 = uniInfo3!.getUnionConstituentTypes()
+    arktest.assertTrue(uniInfo3!.isUnion())
+    arktest.assertNE(constituentTypes3, undefined)
+
+    let fldInfo4 = classType.getInstanceFieldByName('fld4')
+    let uniInfo4 = fldInfo4!.getType()
+    let constituentTypes4 = uniInfo4!.getUnionConstituentTypes()
+    arktest.assertFalse(uniInfo4!.isUnion())
+    arktest.assertEQ(constituentTypes4, undefined)
+
+    let fldInfo5 = classType.getInstanceFieldByName('fld5')
+    let uniInfo5 = fldInfo5!.getType()
+    let constituentTypes5 = uniInfo5!.getUnionConstituentTypes()
+    arktest.assertTrue(uniInfo5!.isUnion())
+    arktest.assertNE(constituentTypes5, undefined)
+
+    let fldInfo6 = classType.getInstanceFieldByName('fld6')
+    let uniInfo6 = fldInfo6!.getType()
+    let constituentTypes6 = uniInfo6!.getUnionConstituentTypes()
+    arktest.assertFalse(uniInfo6!.isUnion())
+    arktest.assertEQ(constituentTypes6, undefined)
+
+    let fldInfo7 = classType.getInstanceFieldByName('fld7')
+    let uniInfo7 = fldInfo7!.getType()
+    let constituentTypes7 = uniInfo7!.getUnionConstituentTypes()
+    arktest.assertFalse(uniInfo7!.isUnion())
+    arktest.assertEQ(constituentTypes7, undefined)
+
+    let fldInfo8 = classType.getInstanceFieldByName('fld8')
+    let uniInfo8 = fldInfo8!.getType()
+    let constituentTypes8 = uniInfo8!.getUnionConstituentTypes()
+    arktest.assertFalse(uniInfo8!.isUnion())
+    arktest.assertEQ(constituentTypes8, undefined)
+
+    let fldInfo9 = classType.getInstanceFieldByName('fld9')
+    let uniInfo9 = fldInfo9!.getType()
+    let constituentTypes9 = uniInfo9!.getUnionConstituentTypes()
+    arktest.assertTrue(uniInfo9!.isUnion())
+    arktest.assertNE(constituentTypes9, undefined)
+
+    let fldInfo10 = classType.getInstanceFieldByName('fld10')
+    let uniInfo10 = fldInfo10!.getType()
+    let constituentTypes10 = uniInfo10!.getUnionConstituentTypes()
+    arktest.assertTrue(uniInfo10!.isUnion())
+    arktest.assertNE(constituentTypes10, undefined)
+    arktest.assertEQ(constituentTypes10!.length, 2)
+    arktest.assertEQ(constituentTypes10![0].getName(), 'ReflectTypeTest.A')
+    arktest.assertEQ(constituentTypes10![1].getName(), 'std.core.Null')
+
+    let fldInfo11 = classType.getInstanceFieldByName('fld11')
+    let uniInfo11 = fldInfo11!.getType()
+    let constituentTypes11 = uniInfo11!.getUnionConstituentTypes()
+    arktest.assertFalse(uniInfo11!.isUnion())
+    arktest.assertEQ(constituentTypes11, undefined)
+
+    let fldInfo12 = classType.getInstanceFieldByName('fld12')
+    let uniInfo12 = fldInfo12!.getType()
+    let constituentTypes12 = uniInfo12!.getUnionConstituentTypes()
+    arktest.assertFalse(uniInfo12!.isUnion())
+    arktest.assertEQ(constituentTypes12, undefined)
+
+    let fldInfo13 = classType.getInstanceFieldByName('fld13')
+    let uniInfo13 = fldInfo13!.getType()
+    let constituentTypes13 = uniInfo13!.getUnionConstituentTypes()
+    arktest.assertFalse(uniInfo13!.isUnion())
+    arktest.assertEQ(constituentTypes13, undefined)
+
+    let fldInfo14 = classType.getInstanceFieldByName('fld14')
+    let uniInfo14 = fldInfo14!.getType()
+    let constituentTypes14 = uniInfo14!.getUnionConstituentTypes()
+    arktest.assertFalse(uniInfo14!.isUnion())
+    arktest.assertEQ(constituentTypes14, undefined)
+
+    let fldInfo15 = classType.getInstanceFieldByName('fld15')
+    let uniInfo15 = fldInfo15!.getType()
+    let constituentTypes15 = uniInfo15!.getUnionConstituentTypes()
+    arktest.assertFalse(uniInfo15!.isUnion())
+    arktest.assertEQ(constituentTypes15, undefined)
+}
+
+function testUnionField() {
+    let clsC = new C<String>()
+    let classType = Class.of(clsC)
+    let fldInfo = classType.getInstanceFieldByName('fld')
+    let uniInfo = fldInfo!.getType()
+    arktest.assertTrue(uniInfo!.isUnion())
+    let uniTypes = uniInfo!.getUnionConstituentTypes()
+    let expectedTypeSet: Set<string> = new Set<string>([ 'ReflectTypeTest.A', 'std.core.Double', 'std.core.String' ]);
+
+    arktest.assertEQ(uniTypes!.length, expectedTypeSet.size)
+    for (let i = 0; i < uniTypes!.length; ++i) {
+        arktest.assertTrue(expectedTypeSet.has(uniTypes![i].getName()))
+    }
+}
+
+function testUnionParameter() {
+    let clsC = new C<String>()
+    let classType = Class.of(clsC)
+    let methodInfo1 = classType.getInstanceMethodByName('foo')
+    let paramType1 = methodInfo1!.getParameterType(0)
+    arktest.assertTrue(paramType1!.isUnion())
+    let uniTypes1 = paramType1!.getUnionConstituentTypes()
+    let expectedTypeSet1: Set<string> = new Set<string>([ 'ReflectTypeTest.A', 'std.core.Double', 'std.core.String' ]);
+
+    arktest.assertEQ(uniTypes1!.length, expectedTypeSet1.size)
+    for (let i = 0; i < uniTypes1!.length; ++i) {
+        arktest.assertTrue(expectedTypeSet1.has(uniTypes1![i].getName()))
+    }
+
+    let methodInfo2 = classType.getInstanceMethodByName('bar')
+    let paramType2 = methodInfo2!.getParameterType(0)
+    arktest.assertTrue(paramType2!.isFixedArray())
+    let componentType = paramType2!.getFixedArrayComponentType()
+    arktest.assertTrue(componentType!.isUnion())
+    let uniTypes2 = componentType!.getUnionConstituentTypes()
+    let expectedTypeSet2: Set<string> = new Set<string>([ 'std.core.Int', 'std.core.String' ]);
+
+    arktest.assertEQ(uniTypes2!.length, expectedTypeSet2.size)
+    for (let i = 0; i < uniTypes2!.length; ++i) {
+        arktest.assertTrue(expectedTypeSet2.has(uniTypes2![i].getName()))
+    }
+}
+
+function testUnionRet() {
+    let clsC = new C<String>()
+    let classType = Class.of(clsC)
+    let methodInfo = classType.getInstanceMethodByName('foo')
+    let retClass = methodInfo!.getReturnType()
+    arktest.assertTrue(retClass!.isUnion())
+    let uniTypes = retClass.getUnionConstituentTypes()
+    let expectedTypeSet: Set<string> = new Set<string>([ 'ReflectTypeTest.A', 'std.core.Double', 'std.core.String' ]);
+
+    arktest.assertEQ(uniTypes!.length, expectedTypeSet.size)
+    for (let i = 0; i < uniTypes!.length; ++i) {
+        arktest.assertTrue(expectedTypeSet.has(uniTypes![i].getName()))
+    }
+}
+
 function main(): int {
     let typeBaseObj = Class.of(new Object())
 
@@ -360,6 +540,11 @@ function main(): int {
     testInstanceFieldEquals()
     testStaticFieldEquals()
     testStaticMethodEquals()
+
+    testIsUnion()
+    testUnionField()
+    testUnionParameter()
+    testUnionRet()
 
     return 0
 }
