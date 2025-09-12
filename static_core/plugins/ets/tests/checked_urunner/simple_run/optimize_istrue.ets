@@ -1408,12 +1408,12 @@ function testByteTrue() {
 }
 
 function testCharFalse() {
-    let x: char = 0;
+    let x: char = Int.toChar(0);
     return !!((new Char(x)) as Object);
 }
 
 function testCharTrue() {
-    let x: char = 100;
+    let x: char = Int.toChar(100);
     return !!((new Char(x)) as Object);
 }
 

@@ -24,7 +24,7 @@ cases:
       - { type: byte, val: 0, val2: 0 }
       - { type: byte, val: 127, val2: 127 }
       - { type: byte, val: -128, val2: -128 }
-      - { type: char, val: 0, val2: 0 }
+      - { type: char, val: Int.toChar(0), val2: 0 }
       - { type: char, val: "c'\\uFFFF'", val2: 0x0000FFFF }
       - { type: short, val: 0, val2: 0 }
       - { type: short, val: 32_767, val2: 32_767 }
@@ -35,7 +35,7 @@ cases:
       - { type: byte, val: 0, val2: ((0).toLong())}
       - { type: byte, val: 127, val2: ((127).toLong()) }
       - { type: byte, val: -128, val2: ((-128).toLong()) }
-      - { type: char, val: 0, val2: ((0).toLong()) }
+      - { type: char, val: Int.toChar(0), val2: ((0).toLong()) }
       - { type: char, val: "c'\\uFFFF'", val2: ((0x000000000000FFFF).toLong()) }
       - { type: short, val: 0, val2: ((0).toLong()) }
       - { type: short, val: 32_767, val2: ((32_767).toLong()) }
@@ -49,7 +49,7 @@ cases:
       - { type: byte, val: 0, val2: (0.0f) }
       - { type: byte, val: 127, val2: (127.0f) }
       - { type: byte, val: -128, val2: (-128.0f) }
-      - { type: char, val: 0, val2: (0.0f) }
+      - { type: char, val: Int.toChar(0), val2: (0.0f) }
       - { type: char, val: "c'\\uFFFF'", val2: (65535.0f)}
       - { type: short, val: 0, val2: (0.0f) }
       - { type: short, val: 32_767, val2: (32_767.0f) }
@@ -66,7 +66,7 @@ cases:
       - { type: byte, val: 0, val2: 0.0 }
       - { type: byte, val: 127, val2: 127.0 }
       - { type: byte, val: -128, val2: -128.0 }
-      - { type: char, val: 0, val2: 0.0 }
+      - { type: char, val: Int.toChar(0), val2: 0.0 }
       - { type: char, val: "c'\\uFAFF'", val2: 64255.0 }
       - { type: short, val: 0, val2: 0.0 }
       - { type: short, val: 32_767, val2: 32_767.0 }
