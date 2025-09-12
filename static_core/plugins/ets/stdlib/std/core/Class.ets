@@ -104,6 +104,13 @@ export final class Class {
     public native isFixedArray(): boolean
 
     /**
+     * Check if class is union
+     *
+     * @returns true if class is union
+     */
+    public native isUnion(): boolean
+
+    /**
      * Gets only public instance methods of a class
      *
      * @returns Immutable array of instance {@link reflect.InstanceMethod} objects
@@ -170,6 +177,18 @@ export final class Class {
         return this.getConstructorsInternal(true)
     }
 
+    /**
+     * Gets all constituent types of a union class
+     *
+     * @returns Immutable array of Class objects or undefined if class is not union
+     */
+    public getUnionConstituentTypes(): FixedArray<Class> | undefined {
+        if (!this.isUnion()) {
+            return undefined
+        }
+        return this.getUnionConstituentTypesInternal()
+    }
+
     private native getInstanceMethodsInternal(publicOnly: boolean): FixedArray<reflect.InstanceMethod>
     private native getInstanceMethodByNameInternal(name: string, publicOnly: boolean): reflect.InstanceMethod | undefined
     private native getInstanceFieldByNameInternal(name: string, publicOnly: boolean): reflect.InstanceField | undefined
@@ -177,4 +196,5 @@ export final class Class {
     private native getStaticMethodsInternal(publicOnly: boolean): FixedArray<reflect.StaticMethod>
     private native getStaticFieldsInternal(publicOnly: boolean): FixedArray<reflect.StaticField>
     private native getConstructorsInternal(publicOnly: boolean): FixedArray<reflect.Constructor>
+    private native getUnionConstituentTypesInternal(): FixedArray<Class>
 }

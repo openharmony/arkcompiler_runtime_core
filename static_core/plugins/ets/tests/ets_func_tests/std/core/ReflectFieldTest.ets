@@ -41,6 +41,7 @@ class Point3D extends Point {
     state: int
     static ZERO: double = 0.0
     readonly r: int = 1
+    ability: String | Number = new Number(1)
 }
 
 function testField(): void {
@@ -52,6 +53,7 @@ function testField(): void {
     arktest.assertEQ(typePoint3D.getInstanceFieldByName("stateP"), undefined) // private
     let sf = typePoint3D.getInstanceFieldByName("state")!
     let rf = typePoint3D.getInstanceFieldByName("r")!
+    let abilityf = typePoint3D.getInstanceFieldByName("ability")!
 
     let isInherited = (f: reflect.InstanceField, type: Class): boolean => {
         return f.getOwner().getName() != type.getName()
@@ -100,6 +102,8 @@ function testField(): void {
     arktest.assertFalse(rf.isPrivate())
     arktest.assertFalse(isInherited(rf, typePoint3D))
     arktest.assertFalse(isOverrided(rf, typePoint3D))
+    arktest.assertEQ(abilityf.getName(), "ability")
+    arktest.assertEQ(abilityf.getOwner(), typePoint3D)
 }
 
 function main() {
