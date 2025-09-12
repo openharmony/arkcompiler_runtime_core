@@ -17,7 +17,8 @@
 desc: import multiple simple names with as
 ---*/
 
-import {sin as Sine, PI as PNumber} from "std/math";
+import {sin as Sine} from "std/math";
+import {PI as PNumber} from "std/math/consts";
 
 function main(): void {
     let x = Sine(PNumber);

@@ -18,7 +18,8 @@ desc: ‘sin’ is an stdlib method, it should be accessible.
 tags: [compile-only]
 ---*/
 
-import {sin as Sine, PI as PNumber} from "std/math";
+import {sin as Sine} from "std/math";
+import {PI as PNumber} from "std/math/consts";
 
 function main(): void {
     let x = sin(PNumber);

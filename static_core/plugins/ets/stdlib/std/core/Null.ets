@@ -15,7 +15,7 @@
 
 package std.core;
 
-final class Null {
+export final class Null {
     private constructor() { };
 
     public override toString(): String { return "null"; }

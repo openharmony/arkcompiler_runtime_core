@@ -36,7 +36,7 @@ panda_ets_add_gtest(
 )
 
 add_custom_target(es2panda_ets_stdlib_debug_info
-    COMMAND ${es2panda_bin} --opt-level=0 --debug-info --gen-stdlib=true
+    COMMAND ${es2panda_bin} --opt-level=0 --debug-info --gen-stdlib=true --arktsconfig=${STDLIB}/stdconfig.json
             --extension=ets --output ${CMAKE_CURRENT_BINARY_DIR}/etsstdlib.abc
     DEPENDS ${es2panda_target}
 )
