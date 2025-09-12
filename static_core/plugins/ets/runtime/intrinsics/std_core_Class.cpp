@@ -39,6 +39,11 @@ EtsString *StdCoreClassGetNameInternal(EtsClass *cls)
     return cls->GetName();
 }
 
+EtsBoolean StdCoreClassIsNamespace(EtsClass *cls)
+{
+    return cls->IsModule();
+}
+
 EtsRuntimeLinker *StdCoreClassGetLinker(EtsClass *cls)
 {
     return EtsClassLinkerExtension::GetOrCreateEtsRuntimeLinker(cls->GetLoadContext());
