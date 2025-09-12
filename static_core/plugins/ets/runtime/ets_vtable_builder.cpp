@@ -284,10 +284,7 @@ static inline bool RefIsAssignableTo(const ClassLinkerContext *ctx, RefTypeLink 
 static inline bool IsAssignableRefs(const ClassLinkerContext *ctx, const RefTypeLink &dervRef,
                                     const RefTypeLink &baseRef, size_t idx)
 {
-    if (!(idx == 0 ? RefIsAssignableTo(ctx, dervRef, baseRef) : RefIsAssignableTo(ctx, baseRef, dervRef))) {
-        return false;
-    }
-    return true;
+    return idx == 0 ? RefIsAssignableTo(ctx, dervRef, baseRef) : RefIsAssignableTo(ctx, baseRef, dervRef);
 }
 
 bool ETSProtoIsOverriddenBy(const ClassLinkerContext *ctx, Method::ProtoId const &base, Method::ProtoId const &derv)

@@ -1039,7 +1039,7 @@ extern "C" void EtsEscompatArrayUnshiftInternal(EtsEscompatArray *array, ObjectH
 extern "C" EtsBoolean EtsEscompatArrayIsPlatformArray(EtsObject *obj)
 {
     auto *escompatArray = PlatformTypes(EtsCoroutine::GetCurrent())->escompatArray;
-    return obj->GetClass() == escompatArray;
+    return obj->GetClass() == escompatArray;  // NOLINT (readability-implicit-bool-conversion)
 }
 
 extern "C" ObjectHeader *EtsEscompatArrayGetBuffer(EtsObject *obj)

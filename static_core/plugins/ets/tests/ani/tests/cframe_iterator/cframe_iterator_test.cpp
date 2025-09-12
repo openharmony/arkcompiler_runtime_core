@@ -23,9 +23,9 @@ namespace ark::ets::ani::testing {
 
 class CframeIteratorTest : public AniTest {
 public:
-    // CC-OFFNXT(G.FMT.10-CPP) project code style
+    // CC-OFFNXT(G.FMT.10-CPP) project code style // NOLINTNEXTLINE (readability-identifier-naming)
     static constexpr const char *moduleName = "cframe_iterator_test";
-    // CC-OFFNXT(G.FMT.10-CPP) project code style
+    // CC-OFFNXT(G.FMT.10-CPP) project code style // NOLINTNEXTLINE (readability-identifier-naming)
     static constexpr const char *testClassDescriptor = "cframe_iterator_test.Test";
 };
 
@@ -59,11 +59,11 @@ ani_boolean GenericMethod([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_ob
 
 TEST_F(CframeIteratorTest, genericMethodTest)
 {
-    // CC-OFFNXT(G.FMT.10-CPP) project code style
+    // CC-OFFNXT(G.FMT.10-CPP) project code style // NOLINTNEXTLINE (readability-identifier-naming)
     static constexpr const char *methodName = "genericMethod";
-    // CC-OFFNXT(G.FMT.10-CPP) project code style
+    // CC-OFFNXT(G.FMT.10-CPP) project code style // NOLINTNEXTLINE (readability-identifier-naming)
     static constexpr const char *signature = "ilz:z";
-    // CC-OFFNXT(G.FMT.10-CPP) project code style
+    // CC-OFFNXT(G.FMT.10-CPP) project code style // NOLINTNEXTLINE (readability-identifier-naming)
     static constexpr const char *etsFunctionName = "callGenericMethod";
 
     ani_class klass {};
@@ -89,11 +89,11 @@ ani_boolean StaticMethod([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_obj
 
 TEST_F(CframeIteratorTest, staticMethodTest)
 {
-    // CC-OFFNXT(G.FMT.10-CPP) project code style
+    // CC-OFFNXT(G.FMT.10-CPP) project code style // NOLINTNEXTLINE (readability-identifier-naming)
     static constexpr const char *methodName = "staticMethod";
-    // CC-OFFNXT(G.FMT.10-CPP) project code style
+    // CC-OFFNXT(G.FMT.10-CPP) project code style // NOLINTNEXTLINE (readability-identifier-naming)
     static constexpr const char *signature = "ilz:z";
-    // CC-OFFNXT(G.FMT.10-CPP) project code style
+    // CC-OFFNXT(G.FMT.10-CPP) project code style // NOLINTNEXTLINE (readability-identifier-naming)
     static constexpr const char *etsFunctionName = "callStaticMethod";
 
     ani_class klass {};
@@ -119,11 +119,11 @@ ani_boolean QuickMethod([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_obje
 
 TEST_F(CframeIteratorTest, quickMethodTest)
 {
-    // CC-OFFNXT(G.FMT.10-CPP) project code style
+    // CC-OFFNXT(G.FMT.10-CPP) project code style // NOLINTNEXTLINE (readability-identifier-naming)
     static constexpr const char *methodName = "quickMethod";
-    // CC-OFFNXT(G.FMT.10-CPP) project code style
+    // CC-OFFNXT(G.FMT.10-CPP) project code style // NOLINTNEXTLINE (readability-identifier-naming)
     static constexpr const char *signature = "ilz:z";
-    // CC-OFFNXT(G.FMT.10-CPP) project code style
+    // CC-OFFNXT(G.FMT.10-CPP) project code style // NOLINTNEXTLINE (readability-identifier-naming)
     static constexpr const char *etsFunctionName = "callQuickMethod";
 
     ani_class klass {};

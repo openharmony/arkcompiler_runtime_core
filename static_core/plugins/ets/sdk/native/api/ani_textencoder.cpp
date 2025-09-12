@@ -303,6 +303,7 @@ ani_array DoEncodeIntoUint8Array(ani_env *env, [[maybe_unused]] ani_object objec
     ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Ref(destObj, "buffer", &buffer));
     std::optional<ArrayBufferInfos> bufInfo = GetBufferInfo(env, static_cast<ani_arraybuffer>(buffer));
     if (!bufInfo) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         LOG_FATAL_SDK("TextEncoder:: Failure GetBufferInfo.");
         return nullptr;
     }
@@ -310,6 +311,7 @@ ani_array DoEncodeIntoUint8Array(ani_env *env, [[maybe_unused]] ani_object objec
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         WriteEncodedData(env, inputStringObj, encoding, static_cast<char *>(bufInfo->data) + byteOffset, byteLength);
     if (!writeRes) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         LOG_FATAL_SDK("TextEncoder:: Failure WriteEncodedData.");
         return nullptr;
     }
@@ -332,6 +334,7 @@ ani_array DoEncodeIntoUint8Array(ani_env *env, [[maybe_unused]] ani_object objec
                               static_cast<ani_int>(writeRes->resultSizeBytes)};
     for (size_t i = offset; i < 2U; ++i) {
         ani_object boxedInt {};
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         ANI_FATAL_IF_ERROR(env->Object_New(intClass, intCtor, &boxedInt, nativeParams[i - offset]));
         ANI_FATAL_IF_ERROR(env->Array_Set(pathsArray, i, boxedInt));
     }

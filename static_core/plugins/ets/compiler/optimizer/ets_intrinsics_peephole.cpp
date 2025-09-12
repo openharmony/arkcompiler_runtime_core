@@ -643,7 +643,7 @@ bool HandleIstrueBoxedClass(RuntimeInterface::ClassPtr klass, Inst *input, Intri
 
     // Build the PHI node: result if non-null, false if null.
     phiInst->AppendInput(result);
-    phiInst->AppendInput(graph->FindOrCreateConstant<bool>(0));
+    phiInst->AppendInput(graph->FindOrCreateConstant<bool>(false));
     intrinsic->ReplaceUsers(phiInst);
 
     graph->RunPass<DominatorsTree>();
@@ -672,16 +672,12 @@ bool Peepholes::PeepholeIstrue([[maybe_unused]] GraphVisitor *v, [[maybe_unused]
         return false;
     }
 
-    if (HandleIstrueFunctionReference(klass, intrinsic, graph, runtime) ||
-        HandleIstrueNonValueTypedClass(klass, input, intrinsic, graph, runtime) ||
-        HandleIstrueBigInt(klass, input, intrinsic, graph, runtime) ||
-        HandleIstrueEnumClass(klass, input, intrinsic, graph, runtime) ||
-        HandleIstrueStringClass(klass, input, intrinsic, graph, runtime) ||
-        HandleIstrueBoxedClass(klass, input, intrinsic, graph, runtime)) {
-        return true;
-    }
-
-    return false;
+    return (HandleIstrueFunctionReference(klass, intrinsic, graph, runtime) ||
+            HandleIstrueNonValueTypedClass(klass, input, intrinsic, graph, runtime) ||
+            HandleIstrueBigInt(klass, input, intrinsic, graph, runtime) ||
+            HandleIstrueEnumClass(klass, input, intrinsic, graph, runtime) ||
+            HandleIstrueStringClass(klass, input, intrinsic, graph, runtime) ||
+            HandleIstrueBoxedClass(klass, input, intrinsic, graph, runtime));
 }
 
 bool Peepholes::PeepholeDoubleToString([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)

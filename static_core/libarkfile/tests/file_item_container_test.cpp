@@ -1001,7 +1001,7 @@ TEST(ItemContainer, GettersTest)
     ASSERT_TRUE(it != classMap->end());
 
     std::map<std::string, panda_file::BaseClassItem *> *exportMap = container.GetExportMap();
-    ASSERT_TRUE(exportMap != nullptr && exportMap->size() == 0);
+    ASSERT_TRUE(exportMap != nullptr && exportMap->empty());
 
     std::unordered_map<std::string, StringItem *> *stringMap = container.GetStringMap();
     ASSERT_TRUE(stringMap != nullptr && stringMap->size() == 4);

@@ -59,7 +59,7 @@ inline std::string MangleFieldName(const std::string &name, const pandasm::Type 
     return result.str();
 }
 
-inline std::string GetFunctionSignatureFromName(std::string name,
+inline std::string GetFunctionSignatureFromName(const std::string &name,
                                                 const std::vector<pandasm::Function::Parameter> &params)
 {
     std::ostringstream result;
