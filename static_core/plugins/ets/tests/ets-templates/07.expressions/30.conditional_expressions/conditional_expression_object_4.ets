@@ -21,10 +21,13 @@ class A {}
 class B extends A {}
 class D extends B {}
 
+type BRF = (input: boolean ) => boolean
+const bo: BRF = (input: boolean) => { return input }
+
 function main(): void {
   let a: A = new A();
   let d: D = new D();
 
-  let x = false ? a : d;
+  let x = bo(false) ? a : d;
   arktest.assertTrue( x instanceof A )
 }

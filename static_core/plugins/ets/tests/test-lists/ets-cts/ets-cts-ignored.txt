@@ -2752,6 +2752,9 @@
 07.expressions/06.spread_expression/spex_lmbd_39.ets
 07.expressions/06.spread_expression/spex_lmbd_48.ets
 
+#29853. See also 28935
+07.expressions/30.conditional_expressions/MenuOrEmpty.ets
+
 #27465
 07.expressions/32.lambda_expression/01.lambda_signature/positive_0.ets
 07.expressions/32.lambda_expression/01.lambda_signature/positive_1.ets

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,20 +14,23 @@
  */
 
 /*---
-desc: Second operand is value type and third operand are reference type
+desc: Type of the conditional expression is determined as the union of types of the second and the third expressions
+tags: [compile-only, negative]
 ---*/
 
-final class A {}
-final class B {}
 
-type BRF = (input: boolean) => boolean
+function foo(): void {
+}
+
+final class C {
+    static foo(): String {
+        return 'Hello World'
+    }
+}
+
+type BRF = (input: boolean ) => boolean
+const bo: BRF = (input: boolean) => { return input }
 
 function main(): void {
-
-  const bf: BRF = (input: boolean) => { return input }
-
-  let a: int = 5;
-
-  let x = bf(true) ? a : new B;
-  arktest.assertTrue(x instanceof Int|B)
+  let x = bo(true) ? foo() : C.foo()
 }
