@@ -923,11 +923,6 @@
 #28998
 05.generics/03.utility_types/09.nesting_utility_type/PartialWithGeneric.ets
 
-#25175
-05.generics/generic_declarations/create_array_using_generic_types/create_array_using_generic_types_ext_13.ets
-05.generics/generic_declarations/create_array_using_generic_types/create_array_using_generic_types_ext_14.ets
-05.generics/generic_declarations/create_array_using_generic_types/create_array_using_generic_types_ext_15.ets
-
 #27058
 06.contexts_and_conversions/01.type_of_expression/standalone_expression_n_1.ets
 
