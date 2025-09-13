@@ -13,9 +13,6 @@
 02.lexical_elements/07.keywords/soft_9.ets
 02.lexical_elements/07.keywords/soft_10.ets
 
-#26687
-02.lexical_elements/09.literals/03.floating_point_literals/float_literal_too_large_0.ets
-
 #26476 bigint literals with hex, oct, bin
 02.lexical_elements/09.literals/04.bigint_literals/bigint_literals_10.ets
 02.lexical_elements/09.literals/04.bigint_literals/bigint_literals_11.ets
@@ -42,7 +39,6 @@
 #29471 Exponentiation doesn't work for BigInt
 03.types/06.value_types/01.numeric_types/conversions_with_bigint_10.ets
 03.types/06.value_types/01.numeric_types/conversions_with_bigint_100.ets
-03.types/06.value_types/01.numeric_types/conversions_with_bigint_118.ets
 03.types/06.value_types/01.numeric_types/conversions_with_bigint_28.ets
 03.types/06.value_types/01.numeric_types/conversions_with_bigint_46.ets
 03.types/06.value_types/01.numeric_types/conversions_with_bigint_64.ets
@@ -85,9 +81,6 @@
 #24420
 03.types/20.union_types/ut_34.ets
 
-#26072 expected equality failed: '0' === ' ''
-06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/assn_var/assn-var_1.ets
-
 #26102 Readonly array assignment does not throw CTE
 03.types/16.literal_types/function_literal_type_7.ets
 
@@ -117,9 +110,6 @@
 
 #26657
 04.names_declarations_and_scopes/07.function_declarations/04.optional_parameters/opt_param_23.ets
-
-#27046
-04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/generic_rest_tuple_negative.ets
 
 #26981
 04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/record_to_rest.ets
@@ -898,15 +888,11 @@
 05.generics/03.utility_types/07.return_type_utility_type/return_type_func_3.ets
 05.generics/03.utility_types/07.return_type_utility_type/return_type_func_4.ets
 05.generics/03.utility_types/07.return_type_utility_type/return_type_func_5.ets
-05.generics/03.utility_types/07.return_type_utility_type/return_type_func_6.ets
-05.generics/03.utility_types/07.return_type_utility_type/return_type_func_7.ets
-05.generics/03.utility_types/07.return_type_utility_type/return_type_func_8.ets
 
 #28998
 05.generics/03.utility_types/09.nesting_utility_type/PartialWithGeneric.ets
 
 #25175
-05.generics/generic_declarations/create_array_using_generic_types/create_array_using_generic_types_ext_12.ets
 05.generics/generic_declarations/create_array_using_generic_types/create_array_using_generic_types_ext_13.ets
 05.generics/generic_declarations/create_array_using_generic_types/create_array_using_generic_types_ext_14.ets
 05.generics/generic_declarations/create_array_using_generic_types/create_array_using_generic_types_ext_15.ets
@@ -914,7 +900,7 @@
 #27058
 06.contexts_and_conversions/01.type_of_expression/standalone_expression_n_1.ets
 
-#27123
+#29887
 06.contexts_and_conversions/04.numeric_operator_contexts/unary_numeric_promotion/unary_minus_14.ets
 06.contexts_and_conversions/04.numeric_operator_contexts/unary_numeric_promotion/unary_plus_14.ets
 06.contexts_and_conversions/04.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_72.ets
@@ -935,9 +921,6 @@
 
 # 24036
 07.expressions/01.evaluation_of_expressions/03.operator_precedence/typeof.ets
-
-# 28004
-07.expressions/01.evaluation_of_expressions/03.operator_precedence/exponentiation.ets
 
 # 28179
 07.expressions/03.named_reference/01.function_reference/function_reference_neg.ets
@@ -997,13 +980,8 @@
 #26981 Unable to spread Record
 07.expressions/06.spread_expression/spex_func_50.ets
 
-#24006 Array literal type inference needs to be improved
-07.expressions/06.spread_expression/spex_lmbd_36.ets
-07.expressions/06.spread_expression/spex_lmbd_38.ets
-
 #20371 Unexpected Type Error on string array
 07.expressions/06.spread_expression/spex_lmbd_32.ets
-07.expressions/06.spread_expression/spex_33.ets
 
 #25901
 07.expressions/06.spread_expression/spex_lmbd_47.ets
@@ -1045,9 +1023,6 @@
 #26730
 07.expressions/09.field_access_expressions/02.accessing_superclass_fields/access_by_super_from_method_3.ets
 
-#29053
-07.expressions/10.method_call_expression/01.step_1_selection_of_type_to_use/step1_7.ets
-
 #29019
 07.expressions/10.method_call_expression/01.step_1_selection_of_type_to_use/step1_8.ets
 
@@ -1067,7 +1042,7 @@
 
 #23062
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_23.ets
-07.expressions/09.field_access_expressions/field_access_to_override.ets
+
 #28526
 07.expressions/11.function_call_expression/fcall_20.ets
 
@@ -1099,9 +1074,6 @@
 07.expressions/16.cast_expressions/01.type_inference_in_cast_expression/type_inference_negative_0.ets
 07.expressions/16.cast_expressions/01.type_inference_in_cast_expression/type_inference_negative_1.ets
 07.expressions/16.cast_expressions/01.type_inference_in_cast_expression/type_inference_negative_2.ets
-
-#28003
-07.expressions/17.typeof_expression/tof_const_11.ets
 
 #19951
 07.expressions/18.ensure-not-nullish_expression/null_check.ets
@@ -1247,7 +1219,6 @@
 07.expressions/25.equality_expressions/reference_equality/type_conversion_of_one_operand_to_another_type.ets
 
 #25042 Ast verifier failure for for-of with labelled statement
-08.statements/11.continue_statements/continue_for_of3l.ets
 08.statements/11.continue_statements/continue_for_of5l.ets
 
 #27010
@@ -1555,22 +1526,6 @@
 10.interfaces/05.interface_method_declarations/overriding_by_instance_methods/overriding_public_method.ets
 
 #26730 implement override/overload
-10.interfaces/06.interface_inheritance/method_inheritance/inherited_abstract_method/inherited_abstract_method_26.ets
-10.interfaces/06.interface_inheritance/multiple_interface/abstract_method_conflict/conflict_07.ets
-10.interfaces/06.interface_inheritance/multiple_interface/abstract_method_same_name/abstract_method_02.ets
-10.interfaces/06.interface_inheritance/multiple_interface/abstract_method_same_name/abstract_method_11.ets
-10.interfaces/06.interface_inheritance/multiple_interface/abstract_method_same_name/abstract_method_12.ets
-10.interfaces/06.interface_inheritance/multiple_interface/abstract_method_same_name/abstract_method_20.ets
-10.interfaces/06.interface_inheritance/multiple_interface/child_specifies_parent_use_case/child_specifies_parent_use_case_17.ets
-10.interfaces/06.interface_inheritance/multiple_interface/child_specifies_parent_use_case/child_specifies_parent_use_case_18.ets
-10.interfaces/06.interface_inheritance/multi_layer_interface/type_system/type_system_23.ets
-10.interfaces/06.interface_inheritance/superinterfaces_and_subinterfaces/interface_inheritance_const/const_06.ets
-
-#27942
-10.interfaces/05.interface_method_declarations/01.interface_method_overload_signatures/implementation_body_3.ets
-10.interfaces/06.interface_inheritance/inheritance_method_with_declared_signature_any.export_string
-
-#26730 implement override/overload
 10.interfaces/05.interface_method_declarations/01.interface_method_overload_signatures/example.ets
 10.interfaces/05.interface_method_declarations/01.interface_method_overload_signatures/implementation_body_1.ets
 10.interfaces/05.interface_method_declarations/01.interface_method_overload_signatures/implementation_body_3.ets
@@ -1591,7 +1546,6 @@
 10.interfaces/06.interface_inheritance/multiple_interface/child_specifies_parent_use_case/child_specifies_parent_use_case_17.ets
 10.interfaces/06.interface_inheritance/multiple_interface/child_specifies_parent_use_case/child_specifies_parent_use_case_18.ets
 10.interfaces/06.interface_inheritance/multi_layer_interface/type_system/type_system_23.ets
-10.interfaces/06.interface_inheritance/superinterfaces_and_subinterfaces/interface_inheritance_const/const_06.ets
 
 #28994
 11.enumerations/01.enumeration_integer_values/enum_long_20.ets
@@ -1669,8 +1623,6 @@
 15.semantic_rules/02.subtyping/04.subtyping_for_function_types/positive_function_generic_1.ets
 
 #23537
-15.semantic_rules/10.overloading/overloading_for_functions/function_argument_equivalent_neg_n2_0.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/access_modifier_over_25.ets
 15.semantic_rules/10.overloading/single_class_over_generic_1.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/access_modifier_over_private_5.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/access_modifier_over_private_6.ets
@@ -1699,9 +1651,6 @@
 15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_27.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_28.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_29.ets
-
-#23477: Bad candidate function invoked
-15.semantic_rules/10.overloading/overload-equivalent_signatures/ex_6_1.ets
 
 #26730
 15.semantic_rules/09.overriding/02.overriding_and_overload_signatures_in_interfaces/im_overloading1_1.ets
@@ -2219,10 +2168,6 @@
 #28488
 17.experimental_features/03.resizable_array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_15.ets
 
-#29167
-17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_double_decl_12.ets
-17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_double_decl_13.ets
-
 #29161
 17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_integer_types_common_cte_20.ets
 17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_integer_types_common_cte_21.ets
@@ -2450,8 +2395,6 @@
 17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_integer_types_common_decl_269.ets
 17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_integer_types_common_decl_270.ets
 17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_integer_types_common_decl_271.ets
-17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_string_cte_0.ets
-17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_string_cte_1.ets
 17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_string_decl_0.ets
 17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_string_decl_1.ets
 17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_string_decl_2.ets
@@ -2490,13 +2433,6 @@
 #18767 Cannot use $_iterator from superclass
 17.experimental_features/06.iterable_types/it_4.ets
 
-#26554 overloads for static methods span the inheritance
-17.experimental_features/07.callable_types/01.callable_types_with_invoke_method/ct_invoke_10.ets
-17.experimental_features/07.callable_types/01.callable_types_with_invoke_method/ct_invoke_11.ets
-17.experimental_features/07.callable_types/02.callable_types_with_instantiate_method/ct_inst_12.ets
-17.experimental_features/07.callable_types/02.callable_types_with_instantiate_method/ct_inst_13.ets
-17.experimental_features/07.callable_types/02.callable_types_with_instantiate_method/ct_inst_access_4.ets
-
 #27999
 17.experimental_features/09.overload_declarations/01.function_overload_declarations/legacy_negative/fn_legacy_overload_1.ets
 17.experimental_features/09.overload_declarations/01.function_overload_declarations/legacy_negative/fn_legacy_overload_5_0.ets
@@ -2511,7 +2447,6 @@
 17.experimental_features/09.overload_declarations/01.function_overload_declarations/overload_export_11.ets
 
 #28823
-17.experimental_features/09.overload_declarations/01.function_overload_declarations/overload_location_1.ets
 17.experimental_features/09.overload_declarations/01.function_overload_declarations/overload_location_2.ets
 17.experimental_features/09.overload_declarations/01.function_overload_declarations/overload_location_6.ets
 17.experimental_features/09.overload_declarations/01.function_overload_declarations/overload_location_8.ets
@@ -2550,9 +2485,6 @@
 
 #28120
 17.experimental_features/09.overload_declarations/03.interface_method_overload_declarations/multiple_interfaces_inheritance_1.ets
-
-#28115
-17.experimental_features/09.overload_declarations/03.interface_method_overload_declarations/two_interfaces_17.ets
 
 #24112
 17.experimental_features/09.overload_declarations/04.constructor_overload_declarations/co1_over_10.ets
@@ -2613,7 +2545,6 @@
 
 #21834 overloads for |undefined are not available
 17.experimental_features/16.packages/import_and_overloading_of_function_names/pkgs_0_22.ets
-17.experimental_features/16.packages/import_and_overloading_of_function_names/pkgs_a_14.ets
 17.experimental_features/16.packages/import_and_overloading_of_function_names/pkgs_a_22.ets
 
 #24118
@@ -2679,12 +2610,6 @@
 # return type '[Object|null|undefined, Object|null|undefined]' [x.ets:1:21]
 05.generics/generic_declarations/generic_classes/test_bridge_methods_in_generic_overrides/bridge_methods_generic_5.ets
 
-# 40
-# FailKind.ES2PANDA_NEG_FAIL - 24 tests:
-05.generics/03.utility_types/04.required_utility_type/method_excluded_from_required_0.ets
-05.generics/03.utility_types/04.required_utility_type/required_getter_and_setter_neg_1.ets
-05.generics/03.utility_types/04.required_utility_type/required_getter_and_setter_neg_2.ets
-
 # 46
 # Since floating point numbers no longer generate an error and floating point calculations are unstable
 # on certain platforms at the moment, these tests remain here.
@@ -2701,7 +2626,6 @@
 07.expressions/33.constant_expression/check_enum/constant_number_conversion_6.ets
 07.expressions/33.constant_expression/check_enum/constant_unary_minus_10.ets
 07.expressions/33.constant_expression/check_enum/constant_unary_minus_11.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_minus_14.ets
 07.expressions/33.constant_expression/check_enum/constant_unary_minus_4.ets
 07.expressions/33.constant_expression/check_enum/constant_unary_plus_10.ets
 07.expressions/33.constant_expression/check_enum/constant_unary_plus_11.ets
@@ -2720,15 +2644,7 @@
 07.expressions/33.constant_expression/check_annotation/constant_number_conversion_2.ets
 07.expressions/33.constant_expression/check_annotation/constant_unary_operation_2.ets
 
-# TypeError: Type '[String, Double]' is not compatible with the enclosing method's return type '[Object|null|undefined, Object|null|undefined]'
-05.generics/generic_declarations/generic_classes/test_bridge_methods_in_generic_overrides/bridge_methods_generic_5.ets
-
 # Negative tests passed successfully (narrowing conversion from int, function oveload and enum comparision...)
-03.types/16.literal_types/function_literal_type_7.ets
-06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/call_cons/call-cons-n3_7.ets
-06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/call_func/call-func-n3_7.ets
-06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/call_lmbd/call-lmbd-n3_7.ets
-06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/call_meth/call-meth-n3_7.ets
 07.expressions/25.equality_expressions/eq_neg_101.ets
 07.expressions/25.equality_expressions/eq_neg_146.ets
 07.expressions/25.equality_expressions/eq_neg_148.ets
@@ -2739,22 +2655,6 @@
 07.expressions/25.equality_expressions/eq_neg_99.ets
 
 # end of 41
-
-# 56 ES2PANDA_NEG_FAIL A value of type Function can not be called directly. A developer must use the unsafeCall method instead.
-03.types/19.function_types/01.type_function/negative_1.ets
-
-# 57 ES2PANDA_NEG_FAIL Literal type does not match, have to be CTE
-03.types/20.union_types/union_type_narrowing_attribute_n.ets
-
-#58: flaky, do not delete if it passed
-07.expressions/33.constant_expression/check_array/constant_bitwise_complement_4.ets
-07.expressions/33.constant_expression/check_array/constant_bitwise_complement_5.ets
-15.semantic_rules/08.smart_casts_and_smart_types/01.type_expression/un_bool_ops_8.ets
-15.semantic_rules/08.smart_casts_and_smart_types/01.type_expression/un_bool_ops_10.ets
-08.statements/15.try_statements/02.finally_clause/finally_0.ets
-08.statements/15.try_statements/02.finally_clause/finally_2.ets
-08.statements/15.try_statements/02.finally_clause/finally_3.ets
-08.statements/15.try_statements/try_2.ets
 
 #59 verifier in lambda
 07.expressions/06.spread_expression/spex_lmbd_37.ets
@@ -2791,10 +2691,6 @@
 
 # 27390
 15.semantic_rules/01.semantic_essentials/01.type_of_standalone_expression/union_types.ets
-
-# 28436
-15.semantic_rules/08.overriding/01.overriding_in_classes/access_modifier_over_private_5.ets
-15.semantic_rules/08.overriding/01.overriding_in_classes/access_modifier_over_private_6.ets
 
 # 27886 Issues with default values
 09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_3.ets

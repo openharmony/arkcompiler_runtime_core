@@ -1,15 +1,6 @@
 #24352
 algorithms/SampleAppTest.ets
 
-#28355
-escompat/escompat_regexp_match_String.ets
-
-#28354
-escompat/escompat_regexp_match_String_001.ets
-
-#28357
-escompat/escompat_regexp_test_StringWithUnicodeFlag.ets
-
 #24357 Koala related issues
 koala-related-benchmarks/benchmark-lambda-no-lambda-original.ets
 
