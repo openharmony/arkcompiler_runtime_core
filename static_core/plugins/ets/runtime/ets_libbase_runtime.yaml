@@ -6919,6 +6919,16 @@ intrinsics:
       args: [ ]
     impl: ark::ets::intrinsics::StdCoreClassIsFixedArray
 
+  - name: StdCoreClassIsSubtypeOf
+    space: ets
+    class_name: std.core.Class
+    method_name: isSubtypeOf
+    static: false
+    signature:
+      ret: u1
+      args: [ std.core.Class ]
+    impl: ark::ets::intrinsics::StdCoreClassIsSubtypeOf
+
 ##########################
 # std.core.RuntimeLinker #
 ##########################
