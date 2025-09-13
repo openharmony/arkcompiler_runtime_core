@@ -577,3 +577,292 @@ cases:
                   super(super) // CTE, cannot use super in args
               }
           }
+
+    - decl: |-
+          class A {
+              p: string|undefined
+              constructor(p?: string) {
+                  this.p = p
+              }
+          }
+          class B extends A {
+              s: string[]
+              constructor(...s: string[]) {
+                  super()
+                  this.s = s
+              }
+          }
+      use: |-
+          let b = new B()
+          arktest.assertEQ(b.p, undefined)
+          arktest.assertEQ(b.s.length, 0)
+
+          b = new B('a')
+          arktest.assertEQ(b.p, undefined)
+          arktest.assertEQ(b.s.length, 1)
+          arktest.assertEQ(b.s[0], 'a')
+
+          b = new B('a', 'b', 'c')
+          arktest.assertEQ(b.p, undefined)
+          arktest.assertEQ(b.s.length, 3)
+          arktest.assertEQ(b.s[0], 'a')
+          arktest.assertEQ(b.s[1], 'b')
+          arktest.assertEQ(b.s[2], 'c')
+
+    - decl: |-
+          class A {
+              p: string|undefined
+              constructor(p?: string) {
+                  this.p = p
+              }
+          }
+          class B extends A {
+              s: string[]
+              constructor(...s: string[]) {
+                  super(undefined)
+                  this.s = s
+              }
+          }
+      use: |-
+          let b = new B()
+          arktest.assertEQ(b.p, undefined)
+          arktest.assertEQ(b.s.length, 0)
+
+          b = new B('a')
+          arktest.assertEQ(b.p, undefined)
+          arktest.assertEQ(b.s.length, 1)
+          arktest.assertEQ(b.s[0], 'a')
+
+          b = new B('a', 'b', 'c')
+          arktest.assertEQ(b.p, undefined)
+          arktest.assertEQ(b.s.length, 3)
+          arktest.assertEQ(b.s[0], 'a')
+          arktest.assertEQ(b.s[1], 'b')
+          arktest.assertEQ(b.s[2], 'c')
+
+    - decl: |-
+          class A {
+              p: string|undefined
+              constructor(p?: string) {
+                  this.p = p
+              }
+          }
+          class B extends A {
+              s: string[]
+              constructor(...s: string[]) {
+                  super('super')
+                  this.s = s
+              }
+          }
+      use: |-
+          let b = new B()
+          arktest.assertEQ(b.p, 'super')
+          arktest.assertEQ(b.s.length, 0)
+
+          b = new B('a')
+          arktest.assertEQ(b.p, 'super')
+          arktest.assertEQ(b.s.length, 1)
+          arktest.assertEQ(b.s[0], 'a')
+
+          b = new B('a', 'b', 'c')
+          arktest.assertEQ(b.p, 'super')
+          arktest.assertEQ(b.s.length, 3)
+          arktest.assertEQ(b.s[0], 'a')
+          arktest.assertEQ(b.s[1], 'b')
+          arktest.assertEQ(b.s[2], 'c')
+
+    - decl: |-
+          class A {
+              s: string[]
+              constructor(...s: string[]) {
+                  this.s = s
+              }
+          }
+          class B extends A {
+              constructor(p1: string, p2: string) {
+                  super(p1, p2)
+              }
+          }
+      use: |-
+          let b = new B('a', 'b')
+          arktest.assertEQ(b.s.length, 2)
+          arktest.assertEQ(b.s[0], 'a')
+          arktest.assertEQ(b.s[1], 'b')
+
+    - decl: |-
+          class A {
+              s: string[]
+              constructor(...s: string[]) {
+                  this.s = s
+              }
+          }
+          class B extends A {
+              constructor(p1: string, p2?: string) {
+                  super(p1, p2 ?? 'b')
+              }
+          }
+      use: |-
+          let b = new B('a')
+          arktest.assertEQ(b.s.length, 2)
+          arktest.assertEQ(b.s[0], 'a')
+          arktest.assertEQ(b.s[1], 'b')
+
+          b = new B('a', undefined)
+          arktest.assertEQ(b.s.length, 2)
+          arktest.assertEQ(b.s[0], 'a')
+          arktest.assertEQ(b.s[1], 'b')
+
+          b = new B('a', 'c')
+          arktest.assertEQ(b.s.length, 2)
+          arktest.assertEQ(b.s[0], 'a')
+          arktest.assertEQ(b.s[1], 'c')
+
+    - decl: |-
+          class A {
+              s: string[]
+              constructor(...s: string[]) {
+                  this.s = s
+              }
+          }
+          class B extends A {
+              constructor(p1: string, p2: string) {
+                  super(...[p1, p2])
+              }
+          }
+      use: |-
+          let b = new B('a', 'b')
+          arktest.assertEQ(b.s.length, 2)
+          arktest.assertEQ(b.s[0], 'a')
+          arktest.assertEQ(b.s[1], 'b')
+
+    - decl: |-
+          class A {
+              s: string[]
+              constructor(...s: string[]) {
+                  this.s = s
+              }
+          }
+          class B extends A {
+              constructor(p1?: string, p2: string = 'b') {
+                  super(p1 ?? 'x', p2)
+              }
+          }
+      use: |-
+          let b = new B()
+          arktest.assertEQ(b.s.length, 2)
+          arktest.assertEQ(b.s[0], 'x')
+          arktest.assertEQ(b.s[1], 'b')
+
+          b = new B('y')
+          arktest.assertEQ(b.s.length, 2)
+          arktest.assertEQ(b.s[0], 'y')
+          arktest.assertEQ(b.s[1], 'b')
+
+          b = new B('y', 'z')
+          arktest.assertEQ(b.s.length, 2)
+          arktest.assertEQ(b.s[0], 'y')
+          arktest.assertEQ(b.s[1], 'z')
+
+    - decl: |-
+          class A {
+              s: string[]
+              constructor(...s: string[]) {
+                  this.s = s
+              }
+          }
+          class B extends A {
+              constructor(...p: string[]) {
+                  super(...p)
+              }
+          }
+      use: |-
+          let b = new B()
+          arktest.assertEQ(b.s.length, 0)
+
+          b = new B('a', 'b', 'c')
+          arktest.assertEQ(b.s[0], 'a')
+          arktest.assertEQ(b.s[1], 'b')
+          arktest.assertEQ(b.s[2], 'c')
+
+    - tags: compile-only, negative
+      decl: |-
+          class A {
+              s: string[]
+              constructor(...s: string[]) {
+                  this.s = s
+              }
+          }
+          class B extends A {
+              constructor(p1: string, ...p2: string[]) {
+                  super(p1 + p1, ...p2)
+              }
+          }
+
+    - decl: |-
+          class A {
+              p1: string[]
+              p2: string[]
+              constructor(p1: string[] = [], p2: string[] = []) {
+                  this.p1 = p1
+                  this.p2 = p2
+              }
+          }
+          class B extends A {
+              constructor(...p: string[]) {
+                  super(p)
+              }
+          }
+      use: |-
+          let b = new B('a', 'b', 'c')
+          arktest.assertEQ(b.p1.length, 3)
+          arktest.assertEQ(b.p2.length, 0)
+
+          b = new B()
+          arktest.assertEQ(b.p1.length, 0)
+          arktest.assertEQ(b.p2.length, 0)
+
+    - decl: |-
+          class A {
+              p1: string[]
+              p2: string[]
+              constructor(p1: string[] = [], p2: string[] = []) {
+                  this.p1 = p1
+                  this.p2 = p2
+              }
+          }
+          class B extends A {
+              constructor(...p: string[]) {
+                  super(p, undefined)
+              }
+          }
+      use: |-
+          let b = new B('a', 'b', 'c')
+          arktest.assertEQ(b.p1.length, 3)
+          arktest.assertEQ(b.p2.length, 0)
+
+          b = new B()
+          arktest.assertEQ(b.p1.length, 0)
+          arktest.assertEQ(b.p2.length, 0)
+
+    - decl: |-
+          class A {
+              p1: string[]
+              p2: string[]
+              constructor(p1: string[] = [], p2: string[] = []) {
+                  this.p1 = p1
+                  this.p2 = p2
+              }
+          }
+          class B extends A {
+              constructor(...p: string[]) {
+                  super(undefined, p)
+              }
+          }
+      use: |-
+          let b = new B('a', 'b', 'c')
+          arktest.assertEQ(b.p1.length, 0)
+          arktest.assertEQ(b.p2.length, 3)
+
+          b = new B()
+          arktest.assertEQ(b.p1.length, 0)
+          arktest.assertEQ(b.p2.length, 0)
