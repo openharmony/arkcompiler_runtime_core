@@ -160,7 +160,7 @@ class TestETS(TestFileBased):
 
     @staticmethod
     def _remove_file_info_from_error(error_message: str) -> str:
-        pattern = r'\s*\[\s*[^]]+\.ets:\d+:\d+\s*]|\s*\[\s*[^]]+\.abc\s*]'
+        pattern = r'\s*[\[\(]\s*[^]\()]+\.ets:\d+:\d+\s*[\]\)]|\s*[\[\(]\s*[^]\()]+\.abc\s*[\]\)]'
         return re.sub(pattern, '', error_message)
 
     def get_all_abc_dependent_files(self) -> List[str]:
@@ -211,9 +211,6 @@ class TestETS(TestFileBased):
     # pylint: disable=too-many-return-statements
     def do_run(self) -> TestETS:
         if not self.continue_after_process_dependent_files():
-            return self
-
-        if not self.is_valid_test and not self.is_compile_only:
             return self
 
         if not self.is_valid_test and self.is_compile_only:
@@ -291,18 +288,22 @@ class TestETS(TestFileBased):
         if self.expected and not self.expected_err and output:
             # Compare with output from std.OUT
             report_output = self._remove_file_info_from_error(self._normalize_error_report(output))
-            passed = compare(self._normalize_error_report(self.expected), report_output) and not err_output
+            passed = compare(self._remove_file_info_from_error(self._normalize_error_report(self.expected)),
+                             report_output) and not err_output
         elif self.expected_err and not self.expected and err_output:
             # Compare with output from std.ERR
             report_error = self._remove_file_info_from_error(self._normalize_error_report(err_output))
-            passed = compare(self._normalize_error_report(self.expected_err), report_error)
+            passed = compare(self._remove_file_info_from_error(self._normalize_error_report(self.expected_err)),
+                             report_error)
         elif self.expected and self.expected_err and output and err_output:
             # Compare .expected file with std.OUT and .expected.err with std.ERR
             report_output = self._remove_file_info_from_error(self._normalize_error_report(output))
-            passed_stdout = compare(self._normalize_error_report(self.expected), report_output)
+            passed_stdout = compare(self._remove_file_info_from_error(self._normalize_error_report(self.expected)),
+                                    report_output)
 
             report_error = self._remove_file_info_from_error(self._normalize_error_report(err_output))
-            passed_stderr = compare(self._normalize_error_report(self.expected_err), report_error)
+            passed_stderr = compare(self._remove_file_info_from_error(self._normalize_error_report(self.expected_err)),
+                                    report_error)
             passed = passed_stdout and passed_stderr
 
         return bool(passed)

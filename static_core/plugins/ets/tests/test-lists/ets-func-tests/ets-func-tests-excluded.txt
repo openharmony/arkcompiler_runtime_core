@@ -1,9 +1,3 @@
-spec/nullables/nullable-lambda-default-param_0.ets
-spec/nullables/nullable-lambda-default-param_1.ets
-spec/nullables/nullable-lambda-default-param_3.ets
-spec/nullables/nullable-lambda-default-param_4.ets
-spec/nullables/nullable-lambda-default-param_5.ets
-spec/nullables/nullable-lambda-default-param_6.ets
 
 #24986 (16 tests)
 std/core/Object.ets

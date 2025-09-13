@@ -17,7 +17,7 @@ limitations under the License.
 desc: >-
     If such module is not available or any other runtime issue occurs 
     then a proper exception is thrown.
-tags: [not-a-test, compile-only]
+tags: [not-a-test, compile-only, negative]
 ---*/
 
 initModule("./not_exist_module.ets")

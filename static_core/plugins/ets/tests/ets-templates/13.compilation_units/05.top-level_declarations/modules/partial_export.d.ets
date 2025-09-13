@@ -15,7 +15,7 @@
 
 /*---
 desc: The declarations not marked as exported can be used only inside the compilation unit they are declared in.
-tags: [compile-only, not-a-test]
+tags: [compile-only, not-a-test, negative]
 ---*/
 
 declare function boo(): int

@@ -16,7 +16,7 @@ limitations under the License.
 {% for c in cases %}
 /*---
 desc: Ambient Constant declarations implementations
-files: ['./constant_declarations.d.ets']
+files: ['./constant_declarations.ets']
 ---*/
 
 import { {{c.decl}} } from './constant_declarations.d'

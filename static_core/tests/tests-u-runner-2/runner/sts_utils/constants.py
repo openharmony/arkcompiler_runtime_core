@@ -28,8 +28,8 @@ META_COPYRIGHT = "Copyright (c)"
 
 # Extensions
 YAML_EXTENSIONS = [".yaml", ".yml"]
-TEMPLATE_EXTENSION = ".sts"
-OUT_EXTENSION = ".sts"
+TEMPLATE_EXTENSION = ".ets"
+OUT_EXTENSION = ".ets"
 JAR_EXTENSION = ".jar"
 
 # Prefixes

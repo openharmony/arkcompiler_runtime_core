@@ -17,7 +17,7 @@ limitations under the License.
 desc: Import class type without 'type' key specified in the module.
 files:
 - ../../05.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_class_2.ets
-tags: [compile-only, negative]
+tags: [compile-only]
 ---*/
 
 import type {C} from "../../05.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_class_2"

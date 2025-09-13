@@ -257,9 +257,20 @@ class Runner(ABC):
     # Read excluded_lists and load list of excluded tests
     def load_excluded_tests(self) -> None:
         excluded_tests = self.load_tests_from_lists(self.excluded_lists)
-        self.excluded_tests.update(excluded_tests)
+
+        if self.config.test_lists.groups.quantity > 1:
+            groups = self.config.test_lists.groups.quantity
+            n_group = self.config.test_lists.groups.number
+            n_group = n_group if n_group <= groups else groups
+            excluded_tests_in_group = {
+                test for test in excluded_tests
+                if get_group_number(Path(test).relative_to(self.test_root).as_posix(), groups) == n_group}
+            self.excluded_tests.update(excluded_tests_in_group)
+        else:
+            self._search_duplicates(excluded_tests, "excluded")
+            self.excluded_tests.update(excluded_tests)
+
         self.excluded = len(self.excluded_tests)
-        self._search_duplicates(excluded_tests, "excluded")
 
     # Read ignored_lists and load list of ignored tests
     def load_ignored_tests(self) -> None:
@@ -314,7 +325,7 @@ class Runner(ABC):
             valid_tests = {test for test in valid_tests if get_group_number(test.test_id, groups) == n_group}
 
         self.tests.update(valid_tests)
-        Log.default(_LOGGER, f"Loaded {len(valid_tests)} tests from directory '{directory}'. "
+        Log.default(_LOGGER, f"Loaded {len(valid_tests)} valid tests from the folder '{directory}'. "
                              f"Excluded {len(self.excluded_tests)} tests are not loaded.")
 
     def _search_both_excluded_and_ignored_tests(self) -> None:

@@ -18,6 +18,7 @@ desc: Test file.
 tags:
 - compile-only
 - not-a-test
+- negative
 ---*/
 
 import { Parent } from "./parentModule.ets";

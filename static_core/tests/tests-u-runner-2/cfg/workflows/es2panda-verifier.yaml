@@ -23,7 +23,6 @@ parameters:
     es2panda-full-args:
         - "--arktsconfig=${parameters.arktsconfig}"
         - "--gen-stdlib=false"
-        - "--ets-module"
         - "--extension=${parameters.extension}"
         - "--opt-level=${parameters.opt-level}"
         - "--output=${parameters.output-file}"

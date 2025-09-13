@@ -15,7 +15,7 @@
 
 /*---
  desc: 18.01.declaring_annotations export
- tags: [not-a-test]
+ tags: [not-a-test, compile-only, negative]
  files: ['./to_export.ets']
  ---*/
 

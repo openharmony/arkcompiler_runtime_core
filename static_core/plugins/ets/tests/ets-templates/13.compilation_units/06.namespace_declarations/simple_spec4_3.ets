@@ -15,6 +15,7 @@ limitations under the License.
 
 /*---
 desc: First simple sample from spec
+tags: [not-a-test, compile-only]
 files:
 - ./namespace_storage.ets
 ---*/

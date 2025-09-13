@@ -15,7 +15,6 @@ limitations under the License.
 
 /*---
 desc: Ambient declarations
-files: ['./declarations.ets']
 tags: [not-a-test, compile-only]
 ---*/
 

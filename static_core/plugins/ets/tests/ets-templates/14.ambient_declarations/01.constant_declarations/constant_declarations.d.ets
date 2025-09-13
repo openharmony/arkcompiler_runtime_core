@@ -16,7 +16,7 @@ limitations under the License.
 
 /*---
 desc: Ambient Constant declarations
-files: ['./constant_declarations.ets']
+files: ['./constant_declarations.d.ets']
 tags: [compile-only, not-a-test]
 ---*/
 

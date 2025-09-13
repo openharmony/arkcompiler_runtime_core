@@ -15,7 +15,7 @@ limitations under the License.
 
 /*---
 desc: First simple sample from spec
-tags: [not-a-test, compile-only]
+tags: [not-a-test, compile-only, negative]
 ---*/
 
 export namespace A {

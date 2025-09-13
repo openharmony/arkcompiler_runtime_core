@@ -11,13 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-[TID 002146] E/verifier: Cannot link class: Cannot find field 'x' in class 'namespace_declarations_n_10.Ambient.NestedAmbientExp'
-[TID 002146] E/verifier: Cannot link class: Cannot find field 'y' in class 'namespace_declarations_n_10.Ambient.NestedAmbientExp'
-[TID 002146] E/verifier: Cannot link class: Cannot find method 'foo ()I' in class 'namespace_declarations_n_10.Ambient.NestedAmbientExp'
-[TID 002146] E/verifier: Cannot link class: Cannot find field 'a' in class 'namespace_declarations_n_10.Ambient.NestedAmbientExp.A'
-[TID 002146] E/verifier: Cannot link class: Cannot find method '<set>a (Lstd/core/String;)V' in class 'namespace_declarations_n_10.namespace_declarations_n_10$Ambient$NestedAmbientExp$I$ObjectLiteral'
-[TID 002146] E/verifier: Cannot link class: Cannot find method '<get>a ()Lstd/core/String;' in class 'namespace_declarations_n_10.Ambient.NestedAmbientExp.I'
-[TID 002146] E/verifier: Cannot link class: Cannot find method 'valueOf ()I' in class 'namespace_declarations_n_10.Ambient.NestedAmbientExp.Color'
-[TID 002146] E/verifier: Cannot link class: Cannot find method 'valueOf ()Lstd/core/String;' in class 'namespace_declarations_n_10.Ambient.NestedAmbientExp.Season'
+E/verifier: Cannot link class: Cannot find field 'x' in class 'namespace_declarations_n_10.Ambient.NestedAmbientExp'
+E/verifier: Cannot link class: Cannot find field 'y' in class 'namespace_declarations_n_10.Ambient.NestedAmbientExp'
+E/verifier: Cannot link class: Cannot find method 'foo ()I' in class 'namespace_declarations_n_10.Ambient.NestedAmbientExp'
+E/verifier: Cannot link class: Cannot find field 'a' in class 'namespace_declarations_n_10.Ambient.NestedAmbientExp.A'
+E/verifier: Cannot link class: Cannot find method 'valueOf ()I' in class 'namespace_declarations_n_10.Ambient.NestedAmbientExp.Color'
+E/verifier: Cannot link class: Cannot find method 'valueOf ()Lstd/core/String;' in class 'namespace_declarations_n_10.Ambient.NestedAmbientExp.Season'
 Unhandled exception: std.core.LinkerVerificationError
 LinkerVerificationError: Lnamespace_usage_n_10/ETSGLOBAL;

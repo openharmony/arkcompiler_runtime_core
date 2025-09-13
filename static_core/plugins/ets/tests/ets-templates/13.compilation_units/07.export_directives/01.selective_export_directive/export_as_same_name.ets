@@ -14,7 +14,7 @@ limitations under the License.
 ---*/
 
 /*---
-tags: [not-a-test, compile-only]
+tags: [not-a-test, compile-only, negative]
 ---*/
 
 function foo(): void {}

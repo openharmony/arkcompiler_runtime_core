@@ -26,7 +26,6 @@ regression/23659_1.ets
 #19666  (Feature: Null safety tests)
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-function-result_2.ets
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-method-result_2.ets
-spec/nullables/nullable-member_2.ets
 
 #19663 (Feature: Null safety tests)
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-lambda-default-param_0.ets
@@ -169,6 +168,12 @@ spec/09.classes/constructor-inheritance/issue14720_6.ets
 spec/09.classes/constructor-inheritance/issue14720_4.ets
 spec/09.classes/constructor-inheritance/issue14720_5.ets
 
+#21176
+spec/09.classes/9.5.Field_Declaration/class_with_optional_attributes_0006.ets
+
+#19725
+spec/09.classes/9.6.Method_Declarations/Issue-14273_3.ets
+
 ### Negative tests (Interfaces overriding issues)
 spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interface_overriding_02.ets
 spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interface_overriding_03.ets
@@ -250,7 +255,6 @@ spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/n
 
 #19953
 spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/numeric/expr/numeric-double-object-zero-expression.ets
-spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/numeric/expr/numeric-short-nonzero-expres
 
 #14040 Annotations not yet implemented
 spec/16.Support_for_GUI_Programming/annotations/annotation_@Builder.ets
@@ -303,9 +307,6 @@ spec/17.Experimental_Features/17.3.Indexable_Types/idx-s01-0080.ets
 #19716
 spec/17.Experimental_Features/17.3.Indexable_Types/idx-s03-0000.ets
 
-#17149
-spec/17.Experimental_Features/17.9.Default_and_Static_Interface_Methods/17.9.2.Static_Method_Declarations/static_method_0003.ets
-
 ### for of is not implemented
 spec/17.Experimental_Features/Iterable_Types/for_of_08.ets
 spec/17.Experimental_Features/Iterable_Types/for_of_09.ets
@@ -348,6 +349,9 @@ std/core/std_core_typedarrays_bignum__BigInt64Array.ets
 #23989
 std/core/std_core_typedarrays_bignum__BigUint64Array.ets
 
+#22948 TypeApi produces invalid bytecode
+std/core/TypeCreatePrimitiveNameTest.ets
+
 ### Negative tests (Import-export)
 spec/import_export/07.export_directives/02.export_type_directives/to_export_negative.ets
 
@@ -365,9 +369,6 @@ spec/import_export/07.export_directives/02.export_type_directives/to_export_for_
 
 #10874
 std/math/std_math_clz64_long.ets
-
-#18766
-spec/partial_type/partialType_main.ets
 
 #25752
 float32array_newFloat32Array_newArrayBuffer_2_Float32Array_BYTES_PER_ELEMENT___1_0_pars_0.ets
@@ -491,3 +492,9 @@ escompat/JsonStringifyRegExpExecArrayTest.ets
 std/core/std_core_typeduarrays_methods__BigUint64Array.ets
 regression/15278_0.ets
 spec/07.expressions/7.32.Lambda_Expressions/callMethodFromAsyncLambda2.ets
+
+#28648
+std/core/TypeClassInfoTest.ets
+
+#29513
+std/core/std_core_typedarrays_function2__Float64Array_001.ets

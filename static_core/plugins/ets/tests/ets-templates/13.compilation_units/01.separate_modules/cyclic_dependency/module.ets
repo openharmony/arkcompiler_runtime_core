@@ -14,7 +14,7 @@
  */
 
 /*---
-tags: [compile-only, not-a-test]
+tags: [compile-only, negative, not-a-test]
 ---*/
 
 import {a} from "./test.ets"
