@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,21 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
+{% for eq in numeric_eq %}
+
 /*---
-desc: >-
-    The operation is a character equality if: both operands of a value equality operator are of type char;
-    or one operand is of type char and the other is of type Char.
-    The character equality operators are associative.
+desc: Integer equality
+params: {{eq.left}} {{eq.op}} {{eq.right}} is {{eq.result}}
 ---*/
 
 function main(): void {
-  let c1 = {{c.c1}}
-  let c2 = {{c.c2}}
-  arktest.assertTrue( c1 {{c.op}} c2 && c2 {{c.op}} c1 ) // test associativity
+  let left: {{eq.left_type}} = {{eq.left}}
+  let right: {{eq.right_type}} = {{eq.right}}
+  arktest.assertEQ( 
+    left {{eq.op}} right, 
+    {{eq.result}},
+    "Expected: {{eq.left}} {{eq.op}} {{eq.right}} is {{eq.result}}"
+  )
 }
+
 {% endfor %}
