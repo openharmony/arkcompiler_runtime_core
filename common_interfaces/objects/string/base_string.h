@@ -77,7 +77,7 @@ public:
     static constexpr uint32_t IS_INTEGER_MASK = 1U << RAW_HASH_LENGTH;
     static constexpr uint32_t MAX_INTEGER_HASH_NUMBER = 0x3B9AC9FF;
     static constexpr uint32_t MAX_CACHED_INTEGER_SIZE = 9;
-    static constexpr size_t MAX_STRING_LENGTH = 0x40000000U; // 30 bits for string length, 2 bits for special meaning
+    static constexpr size_t MAX_STRING_LENGTH = 0x40000000U;  // 30 bits for string length, 2 bits for special meaning
     static constexpr uint32_t MAX_ELEMENT_INDEX_LEN = 10;
     static constexpr size_t HASH_SHIFT = 5;
 #if defined(ARK_HYBRID) || defined(USE_CMC_GC)
@@ -111,9 +111,9 @@ public:
         INVALID_STRING_ADD,
     };
 
-    using CompressedStatusBit = BitField<CompressedStatus, 0>;                   // 1
-    using IsInternBit = CompressedStatusBit::NextFlag;                           // 1
-    using LengthBits = IsInternBit::NextField<uint32_t, STRING_LENGTH_BITS_NUM>; // 30
+    using CompressedStatusBit = BitField<CompressedStatus, 0>;                    // 1
+    using IsInternBit = CompressedStatusBit::NextFlag;                            // 1
+    using LengthBits = IsInternBit::NextField<uint32_t, STRING_LENGTH_BITS_NUM>;  // 30
     static_assert(LengthBits::START_BIT + LengthBits::SIZE == sizeof(uint32_t) * BITS_PER_BYTE,
                   "LengthBits does not match the field size");
 
@@ -123,8 +123,8 @@ public:
 #endif
     PRIMITIVE_FIELD(LengthAndFlags, uint32_t, LENGTH_AND_FLAGS_OFFSET, MIX_HASHCODE_OFFSET)
 
-    using RawHashcode = BitField<uint32_t, 0, RAW_HASH_LENGTH>;                   // 31
-    using IsIntegerBit = RawHashcode::NextField<IsIntegerStatus, 1>;              // 1
+    using RawHashcode = BitField<uint32_t, 0, RAW_HASH_LENGTH>;       // 31
+    using IsIntegerBit = RawHashcode::NextField<IsIntegerStatus, 1>;  // 1
     // In last bit of mix_hash we store if this string is small-integer number or not.
     PRIMITIVE_FIELD(MixHashcode, uint32_t, MIX_HASHCODE_OFFSET, SIZE)
 
@@ -241,8 +241,11 @@ public:
     template <typename ReadBarrier>
     uint32_t PUBLIC_API GetHashcode(ReadBarrier &&readBarrier);
 
-    template<class ReadBarrier>
+    template <class ReadBarrier>
     uint32_t ComputeHashcode(ReadBarrier &&readBarrier) const;
+
+    template <typename ReadBarrier>
+    uint32_t ComputeRawHashcode32bits(ReadBarrier &&readBarrier) const;
 
     /**
      * @brief Compute the raw hashcode based on content.
@@ -390,7 +393,7 @@ public:
      * @return A span of UTF-8 bytes.
      */
     template <typename ReadBarrier, typename Vec,
-              std::enable_if_t<objects_traits::is_std_vector_of_v<std::decay_t<Vec>, uint8_t>, int>  = 0>
+              std::enable_if_t<objects_traits::is_std_vector_of_v<std::decay_t<Vec>, uint8_t>, int> = 0>
     Span<const uint8_t> ToUtf8Span(ReadBarrier &&readBarrier, Vec &buf, bool modify = true, bool cesu8 = false);
 
     /**
@@ -403,7 +406,7 @@ public:
      * @return A span of UTF-8 bytes.
      */
     template <typename ReadBarrier, typename Vec,
-              std::enable_if_t<objects_traits::is_std_vector_of_v<std::decay_t<Vec>, uint8_t>, int>  = 0>
+              std::enable_if_t<objects_traits::is_std_vector_of_v<std::decay_t<Vec>, uint8_t>, int> = 0>
     Span<const uint8_t> DebuggerToUtf8Span(ReadBarrier &&readBarrier, Vec &buf, bool modify = true);
 
     /**
@@ -684,7 +687,7 @@ public:
      * @param maxLength Maximum number of characters to write.
      */
     template <typename Char, typename ReadBarrier>
-    static void WriteToFlat(ReadBarrier &&readBarrier, const BaseString* src, Char *buf, uint32_t maxLength);
+    static void WriteToFlat(ReadBarrier &&readBarrier, const BaseString *src, Char *buf, uint32_t maxLength);
 
     /**
      * @brief Write characters from a BaseString into a buffer at a given offset.
@@ -754,6 +757,7 @@ public:
      */
     template <typename ReadBarrier>
     static const uint16_t *GetNonTreeUtf16Data(ReadBarrier &&readBarrier, const BaseString *src);
+
 private:
     static constexpr bool IsStringType(ObjectType type);
 };
@@ -855,7 +859,7 @@ inline uint32_t BaseString::MixHashcode(uint32_t hashcode, bool isInteger)
 {
     return isInteger ? (hashcode | IS_INTEGER_MASK) : (hashcode & (~IS_INTEGER_MASK));
 }
-} // namespace common
+}  // namespace common
 #endif  // COMMON_INTERFACES_OBJECTS_STRING_BASE_STRING_DECLARE_H
 
 // NOLINTEND(readability-identifier-naming, cppcoreguidelines-macro-usage,
