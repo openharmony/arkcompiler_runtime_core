@@ -170,9 +170,9 @@ export namespace uri {
     * Searches the query string for parameter values with the given key.
     *
     * @param { string } key - The key it will be encoded with.
-    * @returns { Array<string> } Return a set of decoded values.
+    * @returns { string[] } Return a set of decoded values.
     */
-    getQueryValues(key: string): Array<string> {
+    getQueryValues(key: string): string[] {
       return this.uriEntry.getQueryValues(key);
     }
 

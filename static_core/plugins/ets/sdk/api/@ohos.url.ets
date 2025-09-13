@@ -722,8 +722,10 @@ export namespace url {
 
         private analysizeFile(input: string) {
             let special: boolean = true;
-            if ((input.charAt(0) == c'/' || input.charAt(0) == c'\\') &&
-                (input.charAt(1) == c'/' || input.charAt(1) == c'\\'))
+            const firstChar = input.length > 0 ? input.charAt(0) : '';
+            const secondChar = input.length > 1 ? input.charAt(1) : '';
+            if ((firstChar == c'/' || firstChar == c'\\') &&
+                (secondChar == c'/' || secondChar == c'\\'))
             {
                 let temp: string = input.substring(2);
                 let pos: number = 0;
@@ -741,7 +743,7 @@ export namespace url {
                     }
                 }
             } else {
-                if (input.charAt(0) == c'/' || input.charAt(0) == c'\\') {
+                if (firstChar == c'/' || firstChar == c'\\') {
                     input = input.substring(1);
                 }
                 this.analysizeFilePath(input);
@@ -1945,11 +1947,9 @@ export namespace url {
                 result.urlInner = resUrl;
                 return result;
             }
-            if ((input.charAt(0) == c'/') && (input.charAt(1) == c'/' || (input.charAt(1) == c'\\' && possibleBaseURL.flags[INDEX_SPECIAL]))) {
-                let newInput: string = possibleBaseURL.cScheme + input;
-                resUrl.flags[INDEX_INVALID] = false
-                resUrl.parseSingleUrl(newInput);
-                result.urlInner = resUrl;
+            let needReturn = false;
+            const firstChar = URL.parseBaseInner(input, possibleBaseURL, resUrl, result, needReturn);
+            if (needReturn) {
                 return result;
             }
             if (!possibleBaseURL.flags[INDEX_INFOPATH]) {
@@ -1988,24 +1988,20 @@ export namespace url {
                 result.urlInner = resUrl;
                 return result;
             }
-            if (input.length != 0) {
-                if ((input.charAt(0) == c'/') && (input.charAt(1) == c'/' || (input.charAt(1) == c'\\' && base.flags[INDEX_SPECIAL]))) {
-                    let newInput: string = base.cScheme + input;
-                    resUrl.flags[INDEX_INVALID] = false
-                    resUrl.initOnlyInput(newInput);
-                    result.urlInner = resUrl;
-                    return result;
-                }
+            let needReturn = false;
+            const firstChar = URL.parseBaseInner(input, base, resUrl, result, needReturn);
+            if (needReturn) {
+                return result;
             }
             if (!base.flags[INDEX_INFOPATH]) {
                 resUrl.flags[INDEX_INVALID] = false
                 baseIntoUrl(base, resUrl, input.length == 0);
                 strInput = resUrl.toolHasBase(input, strInput);
-                if (input.length != 0 && input.charAt(0) != c'/' && resUrl.cPath.length == 0) {
+                if ((input.length > 0) && firstChar != c'/' && resUrl.cPath.length == 0) {
                     resUrl.cPath = base.cPath;
                     resUrl.flags[INDEX_PATH] = base.flags[INDEX_PATH];
                 }
-                if (input.length != 0 && input.charAt(0) != c'/' && resUrl.cPath.length != 0) {
+                if ((input.length > 0) && firstChar != c'/' && resUrl.cPath.length != 0) {
                     let isFile: boolean = resUrl.cScheme == "file:";
                     shorteningPath(resUrl, base, isFile);
                     let basePathStr: string = basePathToString(base);
@@ -2021,6 +2017,19 @@ export namespace url {
             }
             result.urlInner = resUrl;
             return result;
+        }
+
+        private static parseBaseInner(input: string, base: InnerURL, resUrl: InnerURL, result: URL, needReturn: Boolean): Char | '' {
+            const firstChar = input.length > 0 ? input.charAt(0) : '';
+            const secondChar = input.length > 1 ? input.charAt(1) : '';
+            if ((input.length > 0) && (firstChar == c'/') && (secondChar == c'/' || (secondChar == c'\\' && base.flags[INDEX_SPECIAL]))) {
+                let newInput: string = base.cScheme + input;
+                resUrl.flags[INDEX_INVALID] = false;
+                resUrl.initOnlyInput(newInput);
+                result.urlInner = resUrl;
+                needReturn = true;
+            }
+            return firstChar;
         }
     }
 

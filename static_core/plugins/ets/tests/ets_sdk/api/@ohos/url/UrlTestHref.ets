@@ -386,6 +386,12 @@ function testUrlGetHost001() {
     arktest.assertEQ(params.toString(), 'http://usme@www.test.com:77/directory/file?query#fragment');
 }
 
+function testUrlConstruction013() {
+	let urlStr = 'htt1p://www.0902zy.cn/path?abc=123&def=456#yyyy';
+	let murl = url.URL.parseURL('', urlStr);
+	arktest.assertEQ(murl.href, urlStr);
+}
+
 function main(): int {
 	let suite = new arktest.ArkTestsuite("URL UT tests");
 	suite.addTest("testUrlHref001", testUrlHref001);
@@ -413,6 +419,7 @@ function main(): int {
     suite.addTest("testUrlHost001", testUrlHost001);
     suite.addTest("testUrlPort001", testUrlPort001);
     suite.addTest("testUrlGetHost001", testUrlGetHost001);
+    suite.addTest("testUrlConstruction013", testUrlConstruction013);
 
 	//passed
 	return suite.run();
