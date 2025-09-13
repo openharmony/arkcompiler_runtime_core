@@ -22,7 +22,7 @@
 #include "static_core/compiler/optimizer/ir/basicblock.h"
 #include "static_core/compiler/optimizer/ir/graph.h"
 #include "static_core/compiler/optimizer/ir/graph_visitor.h"
-#include "static_core/libpandabase/utils/logger.h"
+#include "libarkbase/utils/logger.h"
 
 #include "ins_create_api.h"
 #include "libabckit/src/ir_impl.h"

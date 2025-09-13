@@ -17,7 +17,7 @@
 #define PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_JOB_H_
 
 #include "runtime/include/object_header.h"
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_sync_primitives.h"

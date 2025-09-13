@@ -26,7 +26,7 @@
 #include "libarkfile/method_data_accessor-inl.h"
 #include "libarkfile/modifiers.h"
 #include "libarkfile/proto_data_accessor-inl.h"
-#include "libpandabase/utils/utils.h"
+#include "libarkbase/utils/utils.h"
 
 #include <cstdio>
 

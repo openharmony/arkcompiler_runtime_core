@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 #ifndef PANDA_COMPILER_CODE_INFO_VREG_INFO_H
 #define PANDA_COMPILER_CODE_INFO_VREG_INFO_H
 
-#include "utils/bit_field.h"
+#include "libarkbase/utils/bit_field.h"
 
 namespace ark::compiler {
 

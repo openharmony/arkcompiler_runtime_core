@@ -27,7 +27,7 @@
 #include <unicode/dtitvfmt.h>
 #include <unicode/numsys.h>
 
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include "plugins/ets/stdlib/native/core/IntlDateTimeFormat.h"
 
 #include "stdlib_ani_helpers.h"

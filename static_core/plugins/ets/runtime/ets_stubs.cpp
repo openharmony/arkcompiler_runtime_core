@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "libpandabase/utils/utf.h"
+#include "libarkbase/utils/utf.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/ets_utils.h"

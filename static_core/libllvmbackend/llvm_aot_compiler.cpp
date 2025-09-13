@@ -16,7 +16,7 @@
 #include "compiler/aot/compiled_method.h"
 #include "compiler/code_info/code_info.h"
 #include "compiler/generated/pipeline_includes.h"
-#include "events/events.h"
+#include "libarkbase/events/events.h"
 #include "optimizer/ir/graph.h"
 #include "optimizer/ir/graph_checker.h"
 #include "optimizer/ir_builder/ir_builder.h"

@@ -16,7 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_MEM_ETS_REFERENCE_H
 #define PANDA_PLUGINS_ETS_RUNTIME_MEM_ETS_REFERENCE_H
 
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include "runtime/mem/refstorage/reference.h"
 #include "runtime/mem/refstorage/reference_storage.h"
 #include "plugins/ets/runtime/types/ets_class.h"

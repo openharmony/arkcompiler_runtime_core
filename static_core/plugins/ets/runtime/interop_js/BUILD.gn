@@ -54,7 +54,7 @@ ohos_source_set("ets_interop_js_napi_static") {
   deps = [
     ":interop_intrinsic_kinds_h",
     "$ark_root/compiler:libarktscompiler",
-    "$ark_root/libpandabase:libarktsbase",
+    "$ark_root/libarkbase:libarktsbase",
     "$ark_root/runtime:libarkruntime",
   ]
 

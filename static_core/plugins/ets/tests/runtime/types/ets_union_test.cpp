@@ -21,7 +21,7 @@
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "verification/type/type_system.h"
-#include "utils/utf.h"
+#include "libarkbase/utils/utf.h"
 
 namespace ark::ets::test {
 

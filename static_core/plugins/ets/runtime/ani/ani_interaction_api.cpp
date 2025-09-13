@@ -22,8 +22,8 @@
 #include <regex>
 
 #include "ani.h"
-#include "libpandabase/macros.h"
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/utils/logger.h"
 #include "plugins/ets/runtime/ani/ani_checkers.h"
 #include "plugins/ets/runtime/ani/ani_converters.h"
 #include "plugins/ets/runtime/ani/ani_interaction_api.h"

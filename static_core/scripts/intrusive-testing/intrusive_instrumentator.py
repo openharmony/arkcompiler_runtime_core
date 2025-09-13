@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -424,7 +424,7 @@ class Instrumentator:
         # Instrumentator includes all headers from runtime/tests/intrusive-tests directory
         # in all places where code is needed to be synced (according to bindings.yml).
         # That is why it includes intrusive_test_option.h file, which contains RuntimeOptions,
-        # so framework cannot be used in libpandabase, compiler and etc, but actually
+        # so framework cannot be used in libarkbase, compiler and etc, but actually
         # intrusive_test_option.h is only needed to initialize testsuite (see Runtime::Create)
         for header in framework_header_file_set:
             if "intrusive_test_option.h" in header:

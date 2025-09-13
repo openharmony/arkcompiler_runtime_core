@@ -1,6 +1,6 @@
 compiler/generated
-libpandabase/generated
-libpandabase/panda_gen_options
+libarkbase/generated
+libarkbase/panda_gen_options
 libarkfile/include
 panda_gen_options
 plugins/ets

@@ -21,7 +21,7 @@
 #include "libarkfile/file_items.h"
 #include "libarkfile/method_data_accessor-inl.h"
 #include "libarkfile/line_number_program.h"
-#include "libpandabase/utils/span.h"
+#include "libarkbase/utils/span.h"
 
 namespace ark::panda_file::debug_helpers {
 

@@ -19,7 +19,7 @@
 
 #include "runtime/mem/object_helpers-inl.h"
 
-#include "libpandabase/utils/utf.h"
+#include "libarkbase/utils/utf.h"
 #include "runtime/include/thread.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/coretypes/string.h"

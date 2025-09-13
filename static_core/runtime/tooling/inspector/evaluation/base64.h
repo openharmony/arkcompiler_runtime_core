@@ -20,8 +20,8 @@
 #include <optional>
 #include <string>
 
-#include "libpandabase/macros.h"
-#include "libpandabase/utils/span.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/utils/span.h"
 
 namespace ark::tooling::inspector {
 class Base64Decoder final {

@@ -99,7 +99,7 @@ panda_gen(DATA ${PANDA_BINARY_ROOT}/runtime/intrinsics.yaml
         SOURCE ${COMPILER_TEMPLATES_DIR}/intrinsics
         DESTINATION ${GENERATED_DIR}
         API ${COMPILER_TEMPLATES_DIR}/intrinsics/compiler_intrinsics.rb
-        REQUIRES ${PANDA_ROOT}/libpandabase/utils.rb
+        REQUIRES ${PANDA_ROOT}/libarkbase/utils.rb
         EXTRA_DEPENDENCIES arkruntime_gen_intrinsics_yaml
         )
 

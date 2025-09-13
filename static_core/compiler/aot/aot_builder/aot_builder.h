@@ -19,9 +19,9 @@
 #include "aot/compiled_method.h"
 #include "aot/aot_file.h"
 #include "elf_builder.h"
-#include "utils/arch.h"
-#include "utils/arena_containers.h"
-#include "utils/bit_vector.h"
+#include "libarkbase/utils/arch.h"
+#include "libarkbase/utils/arena_containers.h"
+#include "libarkbase/utils/bit_vector.h"
 #include "optimizer/ir/runtime_interface.h"
 #include <string>
 #include <vector>

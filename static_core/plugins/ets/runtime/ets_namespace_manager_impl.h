@@ -16,10 +16,10 @@
 #define PLUGINS_ETS_RUNTIME_NAMESPACE_MANAGER_IMPL_H
 
 #include <map>
-#include "libpandabase/os/mutex.h"
+#include "libarkbase/os/mutex.h"
 #include <string>
 #include <cstddef>
-#include <libpandabase/macros.h>
+#include <libarkbase/macros.h>
 #include <functional>
 
 #if defined(PANDA_TARGET_OHOS)
@@ -32,7 +32,7 @@ extern "C" __attribute__((weak)) void *dlopen_ns(Dl_namespace *, const char *, i
 #endif
 #endif
 
-#include "os/library_loader.h"
+#include "libarkbase/os/library_loader.h"
 #include "plugins/ets/runtime/ets_native_library.h"
 using CreateNamespaceCallback = std::function<bool(const std::string &bundleModuleName, std::string &namespaceName)>;
 using ExtensionApiCheckCallback = std::function<bool(const std::string &className, const std::string &fileName)>;

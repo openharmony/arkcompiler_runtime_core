@@ -26,7 +26,7 @@
 #include "runtime/include/field.h"
 #include "runtime/include/itable.h"
 #include "runtime/include/method.h"
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 
 namespace ark {
 

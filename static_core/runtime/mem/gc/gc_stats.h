@@ -15,7 +15,7 @@
 #ifndef PANDA_RUNTIME_MEM_GC_GC_STATS_H
 #define PANDA_RUNTIME_MEM_GC_GC_STATS_H
 
-#include "libpandabase/os/mutex.h"
+#include "libarkbase/os/mutex.h"
 #include "runtime/include/histogram-inl.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_string.h"

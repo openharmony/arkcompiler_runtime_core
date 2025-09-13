@@ -18,8 +18,8 @@
 #include "compiler/compile_method.h"
 #include "compiler/compiler_task_runner.h"
 #include "compiler/optimizer/ir/runtime_interface.h"
-#include "libpandabase/mem/code_allocator.h"
-#include "libpandabase/os/mutex.h"
+#include "libarkbase/mem/code_allocator.h"
+#include "libarkbase/os/mutex.h"
 #include "runtime/entrypoints/entrypoints.h"
 #include "runtime/include/hclass.h"
 #include "runtime/include/compiler_interface.h"
@@ -37,7 +37,7 @@
 #include "runtime/include/thread.h"
 
 #include "runtime/osr.h"
-#include "source_language.h"
+#include "libarkbase/generated/source_language.h"
 
 namespace ark {
 

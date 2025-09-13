@@ -23,7 +23,7 @@
 #include "libarkfile/panda_cache.h"
 
 #include "runtime/hotreload/hotreload.h"
-#include "utils/utils.h"
+#include "libarkbase/utils/utils.h"
 
 namespace ark::hotreload {
 

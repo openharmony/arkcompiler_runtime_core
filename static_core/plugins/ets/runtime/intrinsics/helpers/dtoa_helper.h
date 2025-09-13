@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,8 +19,8 @@
 #include <cstdint>
 #include <cstddef>
 #include <array>
-#include "globals.h"
-#include "macros.h"
+#include "libarkbase/globals.h"
+#include "libarkbase/macros.h"
 #include "include/coretypes/tagged_value.h"
 
 // Almost copy of ets_runtime/ecmascript/base/dtoa_helper.h

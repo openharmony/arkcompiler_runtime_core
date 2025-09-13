@@ -15,18 +15,18 @@
 
 #include <libarkfile/include/file_format_version.h>
 #include "libarkfile/file-inl.h"
-#include "os/file.h"
-#include "os/mem.h"
-#include "os/filesystem.h"
-#include "mem/mem.h"
+#include "libarkbase/os/file.h"
+#include "libarkbase/os/mem.h"
+#include "libarkbase/os/filesystem.h"
+#include "libarkbase/mem/mem.h"
 #include "libarkfile/panda_cache.h"
 
-#include "utils/hash.h"
-#include "utils/logger.h"
-#include "utils/utf.h"
-#include "utils/span.h"
+#include "libarkbase/utils/hash.h"
+#include "libarkbase/utils/logger.h"
+#include "libarkbase/utils/utf.h"
+#include "libarkbase/utils/span.h"
 #include "zip_archive.h"
-#include "trace/trace.h"
+#include "libarkbase/trace/trace.h"
 #include "securec.h"
 
 #include <cerrno>

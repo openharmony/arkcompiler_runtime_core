@@ -14,7 +14,7 @@
  */
 
 #include "codegen_boundary.h"
-#include "utils/cframe_layout.h"
+#include "libarkbase/utils/cframe_layout.h"
 
 namespace ark::compiler {
 

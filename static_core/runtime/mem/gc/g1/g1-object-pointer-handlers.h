@@ -15,7 +15,7 @@
 #ifndef PANDA_RUNTIME_MEM_GC_G1_G1_OBJECT_POINTER_HANDLER_H
 #define PANDA_RUNTIME_MEM_GC_G1_G1_OBJECT_POINTER_HANDLER_H
 
-#include "libpandabase/mem/mem.h"
+#include "libarkbase/mem/mem.h"
 #include "runtime/include/coretypes/tagged_value.h"
 #include "runtime/include/object_accessor.h"
 #include "runtime/mem/region_allocator.h"

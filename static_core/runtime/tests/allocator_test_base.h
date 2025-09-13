@@ -25,14 +25,14 @@
 #include <tuple>
 #include <unordered_set>
 
-#include "libpandabase/mem/mem.h"
-#include "libpandabase/os/thread.h"
-#include "libpandabase/utils/utils.h"
+#include "libarkbase/mem/mem.h"
+#include "libarkbase/os/thread.h"
+#include "libarkbase/utils/utils.h"
 #include "runtime/mem/bump-allocator.h"
 #include "runtime/mem/mem_stats_additional_info.h"
 #include "runtime/mem/mem_stats_default.h"
 #include "runtime/include/object_header.h"
-#include "utils/utils.h"
+#include "libarkbase/utils/utils.h"
 
 namespace ark::mem {
 

@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -157,7 +157,7 @@ group("libabckit_all") {
     "$ark_root_static/abc2program:arkts_abc2program_static",
     "$ark_root_static/assembler:libarktsassembler_frontend_static",
     "$ark_root_static/bytecode_optimizer:libarktsbytecodeopt_frontend_static",
-    "$ark_root_static/libpandabase:libarktsbase_frontend_static",
+    "$ark_root_static/libarkbase:libarktsbase_frontend_static",
     "$ark_root_static/libarkfile:libarktsfile_frontend_static",
   ]
 }

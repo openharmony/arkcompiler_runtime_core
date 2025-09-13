@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,8 +21,7 @@ panda_add_library(arkfileExt SHARED ${SOURCES})
 
 panda_target_link_libraries(arkfileExt arkfile arkbase)
 panda_target_include_directories(arkfileExt
-                          PUBLIC ${PANDA_ROOT}
-                          PUBLIC ${PANDA_ROOT}/libpandabase)
+                          PUBLIC ${PANDA_ROOT})
 
 panda_add_sanitizers(TARGET arkfileExt SANITIZERS ${PANDA_SANITIZERS_LIST})
 
@@ -35,7 +34,6 @@ set_property(TARGET arksupport PROPERTY POSITION_INDEPENDENT_CODE ON)
 panda_target_link_libraries(arksupport arkfile arkbase)
 
 panda_target_include_directories(arksupport
-                          PUBLIC ${PANDA_ROOT}
-                          PUBLIC ${PANDA_ROOT}/libpandabase)
+                          PUBLIC ${PANDA_ROOT})
 
 panda_add_sanitizers(TARGET arksupport SANITIZERS ${PANDA_SANITIZERS_LIST})

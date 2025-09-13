@@ -20,7 +20,7 @@
 #include "include/mem/panda_smart_pointers.h"
 #include "include/mem/panda_string.h"
 #include "jit/profile_saver_worker.h"
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include "plugins/ets/runtime/ani/ani_vm_api.h"
 #include "plugins/ets/runtime/ani/verify/verify_ani_vm_api.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
@@ -54,7 +54,7 @@
 #include "plugins/ets/runtime/hybrid/mem/static_object_operator.h"
 
 #include "plugins/ets/runtime/ets_object_state_table.h"
-#include "libpandabase/taskmanager/task_manager.h"
+#include "libarkbase/taskmanager/task_manager.h"
 
 namespace ark::ets {
 

@@ -16,7 +16,7 @@
 #include <limits>
 #include "ani.h"
 #include "array_gtest_helper.h"
-#include "macros.h"
+#include "libarkbase/macros.h"
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {

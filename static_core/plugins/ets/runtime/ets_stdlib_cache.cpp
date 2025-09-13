@@ -14,7 +14,7 @@
  */
 
 #include "plugins/ets/runtime/ets_stdlib_cache.h"
-#include "utils/logger.h"
+#include "libarkbase/utils/logger.h"
 
 namespace ark::ets {
 

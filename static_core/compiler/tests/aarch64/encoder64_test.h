@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,7 @@
 #define COMPILER_TESTS_AARCH64_ENCODER64_TEST_H
 
 #include "compiler_options.h"
-#include "cpu_features.h"
+#include "libarkbase/cpu_features.h"
 #include "target/aarch64/target.h"
 #include "tests/encoder_test_common.h"
 

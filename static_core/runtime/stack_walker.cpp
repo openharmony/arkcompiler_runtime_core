@@ -18,7 +18,7 @@
 #include "runtime/include/runtime.h"
 #include "runtime/include/thread.h"
 #include "runtime/include/panda_vm.h"
-#include "libpandabase/mem/mem.h"
+#include "libarkbase/mem/mem.h"
 #include "libarkfile/bytecode_instruction.h"
 #include "runtime/interpreter/runtime_interface.h"
 

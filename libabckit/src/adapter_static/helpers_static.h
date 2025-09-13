@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,7 @@
 #include "libabckit/src/adapter_static/runtime_adapter_static.h"
 
 #include "static_core/compiler/optimizer/ir/inst.h"
-#include "static_core/libpandabase/mem/arena_allocator.h"
+#include "libarkbase/mem/arena_allocator.h"
 #include "static_core/assembler/annotation.h"
 
 #include <string>

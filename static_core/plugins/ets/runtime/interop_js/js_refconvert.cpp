@@ -15,7 +15,7 @@
 
 #include "plugins/ets/runtime/interop_js/js_refconvert.h"
 
-#include "libpandabase/utils/utf.h"
+#include "libarkbase/utils/utf.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_class_wrapper.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/js_refconvert_array.h"

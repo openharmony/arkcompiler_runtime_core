@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "events/events.h"
+#include "libarkbase/events/events.h"
 #include "runtime/bridge/bridge.h"
 #include "runtime/entrypoints/entrypoints.h"
 #include "runtime/jit/profiling_data.h"
@@ -28,10 +28,10 @@
 #include "runtime/include/value-inl.h"
 #include "runtime/interpreter/frame.h"
 #include "runtime/interpreter/interpreter.h"
-#include "libpandabase/utils/hash.h"
-#include "libpandabase/utils/span.h"
-#include "libpandabase/utils/utf.h"
-#include "libpandabase/os/mutex.h"
+#include "libarkbase/utils/hash.h"
+#include "libarkbase/utils/span.h"
+#include "libarkbase/utils/utf.h"
+#include "libarkbase/os/mutex.h"
 #include "libarkfile/code_data_accessor-inl.h"
 #include "libarkfile/debug_data_accessor-inl.h"
 #include "libarkfile/debug_helpers.h"

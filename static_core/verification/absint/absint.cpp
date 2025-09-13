@@ -30,7 +30,7 @@
 #include "runtime/include/method.h"
 #include "runtime/include/method-inl.h"
 
-#include "macros.h"
+#include "libarkbase/macros.h"
 
 #include <locale>
 #include <optional>

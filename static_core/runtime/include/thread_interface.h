@@ -17,7 +17,7 @@
 
 #include "runtime/include/locks.h"
 #include "runtime/include/thread_status.h"
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 
 namespace ark {
 

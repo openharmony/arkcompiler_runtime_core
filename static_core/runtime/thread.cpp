@@ -18,7 +18,7 @@
 #endif
 
 #include "runtime/include/thread-inl.h"
-#include "libpandabase/os/stacktrace.h"
+#include "libarkbase/os/stacktrace.h"
 #include "runtime/handle_base-inl.h"
 #include "runtime/include/locks.h"
 #include "runtime/include/object_header-inl.h"

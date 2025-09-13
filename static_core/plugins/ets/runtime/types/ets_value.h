@@ -18,7 +18,7 @@
 #include "runtime/include/runtime.h"
 #include "ets_type.h"
 #include "plugins/ets/runtime/ani/ani.h"
-#include "utils/utils.h"
+#include "libarkbase/utils/utils.h"
 
 namespace ark::ets {
 

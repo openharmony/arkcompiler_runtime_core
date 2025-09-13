@@ -21,7 +21,7 @@
 #include <cstring>
 
 #include "objects/string/base_string-inl.h"
-#include "libpandabase/utils/utf.h"
+#include "libarkbase/utils/utf.h"
 #include "runtime/include/language_context.h"
 #include "runtime/include/object_header.h"
 #include "runtime/include/exceptions.h"

@@ -15,7 +15,7 @@
 #ifndef PANDA_RUNTIME_LOCKS_H_
 #define PANDA_RUNTIME_LOCKS_H_
 
-#include "libpandabase/os/mutex.h"
+#include "libarkbase/os/mutex.h"
 
 #include <memory>
 

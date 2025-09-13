@@ -23,15 +23,15 @@
 #include <atomic>
 #include <csignal>
 
-#include "libpandabase/mem/gc_barrier.h"
-#include "libpandabase/mem/ringbuf/lock_free_ring_buffer.h"
-#include "libpandabase/mem/weighted_adaptive_tlab_average.h"
-#include "libpandabase/os/mutex.h"
-#include "libpandabase/os/thread.h"
-#include "libpandabase/utils/arch.h"
-#include "libpandabase/utils/list.h"
-#include "libpandabase/utils/logger.h"
-#include "libpandabase/utils/tsan_interface.h"
+#include "libarkbase/mem/gc_barrier.h"
+#include "libarkbase/mem/ringbuf/lock_free_ring_buffer.h"
+#include "libarkbase/mem/weighted_adaptive_tlab_average.h"
+#include "libarkbase/os/mutex.h"
+#include "libarkbase/os/thread.h"
+#include "libarkbase/utils/arch.h"
+#include "libarkbase/utils/list.h"
+#include "libarkbase/utils/logger.h"
+#include "libarkbase/utils/tsan_interface.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
 #include "runtime/include/object_header-inl.h"
@@ -47,7 +47,7 @@
 #include "runtime/mem/tlab.h"
 #include "runtime/mem/refstorage/reference_storage.h"
 #include "runtime/entrypoints/entrypoints.h"
-#include "events/events.h"
+#include "libarkbase/events/events.h"
 #ifdef PANDA_USE_QOS
 #include "qos.h"
 #endif

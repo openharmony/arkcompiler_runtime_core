@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "libpandabase/os/time.h"
+#include "libarkbase/os/time.h"
 #include "runtime/include/thread_scopes.h"
 #include "runtime/coroutines/stackful_coroutine_manager.h"
 #include "runtime/coroutines/stackful_coroutine.h"

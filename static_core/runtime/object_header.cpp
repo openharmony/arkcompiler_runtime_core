@@ -15,7 +15,7 @@
 
 #include "runtime/include/object_header.h"
 
-#include "libpandabase/mem/mem.h"
+#include "libarkbase/mem/mem.h"
 #include "runtime/include/class.h"
 #include "runtime/include/coretypes/array.h"
 #include "runtime/include/coretypes/class.h"

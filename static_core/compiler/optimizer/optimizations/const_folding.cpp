@@ -17,7 +17,7 @@
 #include "optimizer/ir/graph.h"
 #include "optimizer/ir/datatype.h"
 #include "optimizer/optimizations/const_folding.h"
-#include "utils/math_helpers.h"
+#include "libarkbase/utils/math_helpers.h"
 
 #include <cmath>
 #include <map>

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -27,7 +27,7 @@ if(ENABLE_BYTECODE_OPTIMIZER_COVERAGE)
     collect_coverage_for_target(
         TARGET_NAME bytecode_optimizer_coverage
         INCLUDE_DIR_PATTERN \"*/bytecode_optimizer/*\"
-        EXCLUDE_DIR_PATTERN \"/usr*\" \"*/third_party/*\" \"*/build/*\" \"*/plugins/*\" \"*/runtime/*\" \"*/compiler/*\" \"*/libpandabase/*\" 
+        EXCLUDE_DIR_PATTERN \"/usr*\" \"*/third_party/*\" \"*/build/*\" \"*/plugins/*\" \"*/runtime/*\" \"*/compiler/*\" \"*/libarkbase/*\"
     )
 else()
     message(STATUS "Coverage will not be calculated (may be enabled by -DENABLE_BYTECODE_OPTIMIZER_COVERAGE=true ).")

@@ -16,7 +16,7 @@
 #ifndef ABCKIT_WRAPPER_LOGGER_H
 #define ABCKIT_WRAPPER_LOGGER_H
 
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/utils/logger.h"
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_D LOG(DEBUG, ABCKIT_WRAPPER)

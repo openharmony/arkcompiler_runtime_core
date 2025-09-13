@@ -16,7 +16,7 @@
 #ifndef COMPILER_OPTIMIZER_ANALYSIS_VN_H
 #define COMPILER_OPTIMIZER_ANALYSIS_VN_H
 
-#include "utils/hash.h"
+#include "libarkbase/utils/hash.h"
 #include "optimizer/pass.h"
 #include <unordered_map>
 #include <array>

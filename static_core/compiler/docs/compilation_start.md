@@ -5,7 +5,7 @@ At the moment we have two compilation modes (in-place and in the background):
 - background mode starts compilation in worker thread of `taskmanager::TaskScheduler` (asynchronously) and the compilation process is divided into parts to make `taskmanager::Task` shorter
 
 
-On successful completion of compilation, `ark::TaskRunner` calls callbacks on successful completion, otherwise, callbacks on failure. It also calls finalize functions in both cases (see details in `libpandabase/task_runner.h`)
+On successful completion of compilation, `ark::TaskRunner` calls callbacks on successful completion, otherwise, callbacks on failure. It also calls finalize functions in both cases (see details in `libarkbase/task_runner.h`)
 
 Since we have a background (asynchronous) mode, we cannot get the compilation result directly (by the return value). Therefore, if we want to know the result of compilation or get a modified graph, we create a callback.
 

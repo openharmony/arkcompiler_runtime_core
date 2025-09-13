@@ -15,9 +15,9 @@
 
 #include "disassembler.h"
 
-#include "utils/logger.h"
-#include "utils/pandargs.h"
-#include "ark_version.h"
+#include "libarkbase/utils/logger.h"
+#include "libarkbase/utils/pandargs.h"
+#include "libarkbase/generated/ark_version.h"
 #include <libarkfile/include/file_format_version.h>
 
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)

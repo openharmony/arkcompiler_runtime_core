@@ -54,7 +54,7 @@ config("arkruntime_public_config") {
   }
 
   configs = [
-    "$ark_root/libpandabase:arkbase_public_config",
+    "$ark_root/libarkbase:arkbase_public_config",
     "$ark_root/libarkfile:arkfile_public_config",
     "$ark_root/verification/gen:verification_public_config",
     "$ark_root/compiler:arkcompiler_public_config",
@@ -140,7 +140,7 @@ group("arkruntime_header_deps") {
     ":plugins_interpreters_inl_h",
     ":profiling_gen_profiling_gen_h",
     ":substitute_icu_path",
-    "$ark_root/libpandabase:gen_logger_options_h",
+    "$ark_root/libarkbase:gen_logger_options_h",
     "$ark_root/verification/gen:isa_gen_verification_gen_abs_int_inl_gen_h",
     "$ark_root/verification/gen:isa_gen_verification_gen_cflow_iterate_inl_gen_h",
     "$ark_root/verification/gen:isa_gen_verification_gen_handle_gen_h",
@@ -419,7 +419,7 @@ template("libarkruntime_set_static_template") {
 
     public_configs = [
       "$ark_root/assembler:arkassembler_public_config",
-      "$ark_root/libpandabase:arkbase_public_config",
+      "$ark_root/libarkbase:arkbase_public_config",
       "$ark_root/libarkfile:arkfile_public_config",
       "$ark_root/compiler:arkcompiler_public_config",
       "$ark_root/verification/gen:verification_public_config",
@@ -437,7 +437,7 @@ template("libarkruntime_set_static_template") {
       "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_intrinsics_enum_inl",
       "$ark_root/compiler/aot:libarkaotmanager",
       "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})",
-      "$ark_root/libpandabase:libarktsbase",
+      "$ark_root/libarkbase:libarktsbase",
       "$ark_root/libarkfile:libarkfile_type_gen_h",
       "$ark_root/libarkfile:libarktsfile",
       "$ark_root/libziparchive:libarktsziparchive",
@@ -610,7 +610,6 @@ ohos_shared_library("libarkruntime_host") {
 config("arkruntime_interpreter_impl_config") {
   include_dirs = [
     "$ark_root/compiler",
-    "$ark_root/libpandabase",
     "$ark_root/runtime",
     "$ark_root/dprof/libdprof",
     get_label_info(
@@ -656,7 +655,7 @@ template("arkruntime_interpreter_impl_static_template"){
     sources = [ "interpreter/interpreter_impl.cpp" ]
 
     public_configs = [
-      "$ark_root/libpandabase:arkbase_public_config",
+      "$ark_root/libarkbase:arkbase_public_config",
       "$ark_root/libarkfile:arkfile_public_config",
       "$ark_root/runtime:arkruntime_public_config",
       "$ark_root/compiler:arkcompiler_public_config",
@@ -673,7 +672,7 @@ template("arkruntime_interpreter_impl_static_template"){
     deps = [
       ":arkruntime_header_deps",
       "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})",
-      "$ark_root/libpandabase:libarktsbase",
+      "$ark_root/libarkbase:libarktsbase",
       "$ark_root/libarkfile:libarktsfile",
     ]
 
@@ -704,7 +703,7 @@ template("gen_intrinsics_yaml") {
   requires = string_join(",",
                          [
                            rebase_path("templates/runtime.rb", root_build_dir),
-                           rebase_path("$ark_root/libpandabase/utils.rb",
+                           rebase_path("$ark_root/libarkbase/utils.rb",
                                        root_build_dir),
                          ])
 
@@ -869,7 +868,7 @@ ark_gen("arkruntime_gen_intrinsics") {
     "unimplemented_intrinsics-inl.cpp.erb",
   ]
   api = [ "templates/intrinsics.rb" ]
-  requires = [ "$ark_root/libpandabase/utils.rb" ]
+  requires = [ "$ark_root/libarkbase/utils.rb" ]
   sources = "templates"
   destination = "$target_gen_dir"
   extra_dependencies = [ ":arkruntime_gen_intrinsics_yaml" ]

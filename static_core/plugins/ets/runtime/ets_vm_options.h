@@ -16,7 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_VM_OPTIONS_H_
 #define PANDA_PLUGINS_ETS_RUNTIME_ETS_VM_OPTIONS_H_
 
-#include "macros.h"
+#include "libarkbase/macros.h"
 #include "include/runtime_options.h"
 
 namespace ark::ets {

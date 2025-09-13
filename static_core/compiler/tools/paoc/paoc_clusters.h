@@ -20,9 +20,9 @@
 #include <string_view>
 #include <string>
 
-#include "utils/json_parser.h"
-#include "utils/pandargs.h"
-#include "utils/logger.h"
+#include "libarkbase/utils/json_parser.h"
+#include "libarkbase/utils/pandargs.h"
+#include "libarkbase/utils/logger.h"
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_PAOC_CLUSTERS(level) LOG(level, COMPILER) << "PAOC_CLUSTERS: "

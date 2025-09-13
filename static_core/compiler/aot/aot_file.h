@@ -18,8 +18,8 @@
 
 #include "aot_headers.h"
 #include "compiler/code_info/code_info.h"
-#include "os/library_loader.h"
-#include "utils/span.h"
+#include "libarkbase/os/library_loader.h"
+#include "libarkbase/utils/span.h"
 #include "libarkfile/file.h"
 
 #include <string>

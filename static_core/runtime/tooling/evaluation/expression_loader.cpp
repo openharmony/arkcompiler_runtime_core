@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 
 #include "runtime/tooling/evaluation/expression_loader.h"
 
-#include "libpandabase/utils/span.h"
+#include "libarkbase/utils/span.h"
 #include "libarkfile/class_data_accessor.h"
 #include "runtime/include/runtime.h"
 

@@ -20,7 +20,7 @@
 #include "libarkfile/field_data_accessor.h"
 #include "libarkfile/helpers.h"
 
-#include "utils/span.h"
+#include "libarkbase/utils/span.h"
 
 namespace ark::panda_file {
 using StringData = File::StringData;

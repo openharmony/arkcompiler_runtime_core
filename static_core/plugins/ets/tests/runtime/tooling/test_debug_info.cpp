@@ -16,7 +16,7 @@
 #include "libarkfile/debug_info_extractor.h"
 #include "libarkfile/file.h"
 #include "gtest/gtest.h"
-#include "os/filesystem.h"
+#include "libarkbase/os/filesystem.h"
 
 namespace ark::test {
 

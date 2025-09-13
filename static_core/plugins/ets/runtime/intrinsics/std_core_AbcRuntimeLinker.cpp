@@ -17,7 +17,7 @@
 #include "libarkfile/file.h"
 #include "include/object_header.h"
 #include "intrinsics.h"
-#include "os/mutex.h"
+#include "libarkbase/os/mutex.h"
 #include "plugins/ets/runtime/ets_class_linker_context.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_coroutine.h"

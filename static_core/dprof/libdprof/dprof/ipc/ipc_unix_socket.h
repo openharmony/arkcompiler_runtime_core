@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 #ifndef DPROF_LIBDPROF_DPROF_IPC_IPC_UNIX_SOCKET_H
 #define DPROF_LIBDPROF_DPROF_IPC_IPC_UNIX_SOCKET_H
 
-#include "os/unique_fd.h"
+#include "libarkbase/os/unique_fd.h"
 
 namespace ark::dprof::ipc {
 os::unique_fd::UniqueFd CreateUnixServerSocket(int backlog);

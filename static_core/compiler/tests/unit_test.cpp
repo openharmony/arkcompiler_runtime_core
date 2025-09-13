@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "macros.h"
+#include "libarkbase/macros.h"
 #if defined(PANDA_TARGET_MOBILE)
 #elif defined(USE_STD_FILESYSTEM)
 #include <filesystem>
@@ -28,10 +28,10 @@
 #include "assembly-parser.h"
 #include "include/runtime.h"
 #include "compiler.h"
-#include "utils/expected.h"
+#include "libarkbase/utils/expected.h"
 #include "compiler_options.h"
 
-#include "utils/utf.h"
+#include "libarkbase/utils/utf.h"
 
 namespace ark::compiler {
 void PandaRuntimeTest::Initialize([[maybe_unused]] int argc, char **argv)

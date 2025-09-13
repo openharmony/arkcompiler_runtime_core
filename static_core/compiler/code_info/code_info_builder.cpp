@@ -14,7 +14,7 @@
  */
 
 #include "code_info_builder.h"
-#include "utils/bit_memory_region-inl.h"
+#include "libarkbase/utils/bit_memory_region-inl.h"
 #include "optimizer/ir/inst.h"
 
 namespace ark::compiler {

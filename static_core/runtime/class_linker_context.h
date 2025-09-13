@@ -16,10 +16,10 @@
 #define PANDA_RUNTIME_CLASS_LINKER_CONTEXT_H_
 
 #include <atomic>
-#include "libpandabase/macros.h"
-#include "libpandabase/mem/object_pointer.h"
-#include "libpandabase/os/mutex.h"
-#include "libpandabase/utils/bit_utils.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/mem/object_pointer.h"
+#include "libarkbase/os/mutex.h"
+#include "libarkbase/utils/bit_utils.h"
 #include "mem/refstorage/reference.h"
 #include "runtime/include/class.h"
 #include "runtime/include/mem/panda_containers.h"

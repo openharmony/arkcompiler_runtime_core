@@ -594,7 +594,7 @@ It is critical to make compiler to encode barriers very optimally. At least fast
 There are several approaches for that:
  1. To describe barrier use some meta-language or IR which can be interpreted/encoded by all compilers compatible with runtime (it is currently not applicable for the runtime)
  1. (a lot of open questions here, so consider this as an idea) One compiler knows how to encode barrier using runtime interfaces (see next item) and could provide some more compiler-friendly interface to the other compilers to encode GC barriers.
- 1. The compiler knows for each barrier type how it should be encoded (see pseudocode in `libpandabase/mem/gc_barrier.h`). And could use the runtime to get all required operands to do this.
+ 1. The compiler knows for each barrier type how it should be encoded (see pseudocode in `libarkbase/mem/gc_barrier.h`). And could use the runtime to get all required operands to do this.
 Let's consider below encoding of PRE_ barrier:
    - get barrier type via RuntimeInterface: `BarrierType GetPreType() const`
    - for this barrier type get all needed operands provided by Runtime via

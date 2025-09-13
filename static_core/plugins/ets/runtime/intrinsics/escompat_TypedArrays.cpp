@@ -18,8 +18,8 @@
 #include <type_traits>
 #include <cmath>
 #include "ets_handle.h"
-#include "libpandabase/utils/utf.h"
-#include "libpandabase/utils/utils.h"
+#include "libarkbase/utils/utf.h"
+#include "libarkbase/utils/utils.h"
 #include "plugins/ets/runtime/types/ets_typed_arrays.h"
 #include "plugins/ets/runtime/types/ets_typed_unsigned_arrays.h"
 #include "plugins/ets/runtime/intrinsics/helpers/ets_intrinsics_helpers.h"

@@ -16,9 +16,9 @@
 #ifndef PANDA_RUNTIME_MEM_HEAP_SPACE_H
 #define PANDA_RUNTIME_MEM_HEAP_SPACE_H
 
-#include "libpandabase/mem/mem_pool.h"
-#include "libpandabase/os/mutex.h"
-#include "libpandabase/macros.h"
+#include "libarkbase/mem/mem_pool.h"
+#include "libarkbase/os/mutex.h"
+#include "libarkbase/macros.h"
 
 #include <optional>
 

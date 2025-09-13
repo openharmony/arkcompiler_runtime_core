@@ -19,8 +19,8 @@
 #include <cstdint>
 #include <string_view>
 
-#include "libpandabase/macros.h"
-#include "libpandabase/utils/ring_buffer.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/utils/ring_buffer.h"
 #include "runtime/mem/gc/gc.h"
 
 namespace ark {

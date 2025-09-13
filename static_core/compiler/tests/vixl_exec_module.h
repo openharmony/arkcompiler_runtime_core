@@ -29,7 +29,7 @@
 
 #include <cstring>
 #include <cstdlib>
-#include "utils/utils.h"
+#include "libarkbase/utils/utils.h"
 
 namespace ark::compiler {
 using namespace vixl::aarch64;  // NOLINT(*-build-using-namespace)

@@ -19,10 +19,10 @@
 #include <array>
 #include <cstddef>
 
-#include "libpandabase/macros.h"
-#include "libpandabase/mem/mem.h"
-#include "libpandabase/mem/space.h"
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/mem/mem.h"
+#include "libarkbase/mem/space.h"
+#include "libarkbase/utils/logger.h"
 #include "runtime/mem/runslots.h"
 #include "runtime/mem/gc/bitmap.h"
 #include "runtime/mem/lock_config_helper.h"

@@ -19,7 +19,7 @@
 #include <memory>
 #include <sys/stat.h>
 
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/utils/logger.h"
 #include "zip_file_reader_io.h"
 
 namespace ark::extractor {

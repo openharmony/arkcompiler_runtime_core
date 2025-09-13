@@ -16,7 +16,7 @@
 #define PANDA_RUNTIME_THREAD_PROXY_STATIC_H
 
 #include "runtime/include/thread_interface.h"
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 
 #include <atomic>
 

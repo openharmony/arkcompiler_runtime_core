@@ -27,10 +27,10 @@
 #include "optimizer/analysis/live_in_analysis.h"
 #include "optimizer/analysis/loop_analyzer.h"
 #include "optimizer/ir/runtime_interface.h"
-#include "mem/arena_allocator.h"
-#include "utils/bit_vector.h"
+#include "libarkbase/mem/arena_allocator.h"
+#include "libarkbase/utils/bit_vector.h"
 #include "compiler_logger.h"
-#include "utils/logger.h"
+#include "libarkbase/utils/logger.h"
 
 namespace ark::compiler {
 using FieldId = uint64_t;

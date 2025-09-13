@@ -26,7 +26,7 @@
 #include "libarkfile/method_data_accessor-inl.h"
 #include "libarkfile/method_handle_data_accessor.h"
 #include "libarkfile/modifiers.h"
-#include "os/file.h"
+#include "libarkbase/os/file.h"
 #include "libarkfile/proto_data_accessor-inl.h"
 #include "libarkfile/pgo.h"
 #include "libarkfile/value.h"

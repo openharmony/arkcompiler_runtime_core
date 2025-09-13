@@ -19,8 +19,8 @@
 
 #include <string>
 
-#include "libpandabase/mem/mmap_mem_pool-inl.h"
-#include "libpandabase/mem/pool_manager.h"
+#include "libarkbase/mem/mmap_mem_pool-inl.h"
+#include "libarkbase/mem/pool_manager.h"
 #include "runtime/handle_base-inl.h"
 #include "runtime/include/locks.h"
 #include "runtime/include/runtime_notification.h"

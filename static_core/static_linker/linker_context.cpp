@@ -20,7 +20,7 @@
 #include "libarkfile/file_items.h"
 #include "libarkfile/file_reader.h"
 #include "libarkfile/proto_data_accessor-inl.h"
-#include "libpandabase/utils/utf.h"
+#include "libarkbase/utils/utf.h"
 
 #include "linker_context.h"
 

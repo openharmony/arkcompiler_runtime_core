@@ -17,9 +17,9 @@
 
 #include "libarkfile/debug_info_extractor.h"
 #include "include/tooling/pt_location.h"
-#include "libpandabase/utils/bit_utils.h"
+#include "libarkbase/utils/bit_utils.h"
 #include "libarkfile/method_data_accessor.h"
-#include "os/mutex.h"
+#include "libarkbase/os/mutex.h"
 
 namespace ark::tooling::inspector {
 void DebugInfoCache::AddPandaFile(const panda_file::File &file, bool isUserPandafile)

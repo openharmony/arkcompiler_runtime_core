@@ -14,14 +14,14 @@
  */
 
 #include "intrinsics.h"
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/utils/logger.h"
 #include "runtime/include/class.h"
 #include "runtime/include/exceptions.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/types/ets_string_builder.h"
 #include "plugins/ets/runtime/types/ets_array.h"
-#include "libpandabase/utils/utf.h"
+#include "libarkbase/utils/utf.h"
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "runtime/arch/memory_helpers.h"

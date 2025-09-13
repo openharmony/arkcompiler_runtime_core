@@ -16,7 +16,7 @@
 #ifndef COMPILER_OPTIMIZER_ANALYSIS_TYPED_REF_SET_H
 #define COMPILER_OPTIMIZER_ANALYSIS_TYPED_REF_SET_H
 
-#include "libpandabase/utils/bit_vector.h"
+#include "libarkbase/utils/bit_vector.h"
 #include "optimizer/ir/inst.h"
 
 namespace ark::compiler {

@@ -21,8 +21,8 @@
 #include "libarkfile/method_data_accessor-inl.h"
 #include "libarkfile/code_data_accessor-inl.h"
 #include "libarkfile/debug_helpers.h"
-#include "libpandabase/utils/logger.h"
-#include "libpandabase/os/native_stack.h"
+#include "libarkbase/utils/logger.h"
+#include "libarkbase/os/native_stack.h"
 #include <map>
 
 namespace ark::panda_file::ext {

@@ -22,11 +22,11 @@
 #include <string>
 #include <vector>
 
-#include "libpandabase/mem/arena_allocator.h"
-#include "libpandabase/os/mutex.h"
-#include "libpandabase/taskmanager/task_scheduler.h"
-#include "libpandabase/utils/expected.h"
-#include "libpandabase/utils/dfx.h"
+#include "libarkbase/mem/arena_allocator.h"
+#include "libarkbase/os/mutex.h"
+#include "libarkbase/taskmanager/task_scheduler.h"
+#include "libarkbase/utils/expected.h"
+#include "libarkbase/utils/dfx.h"
 #include "../libarkfile/file_items.h"
 #include "../libarkfile/literal_data_accessor.h"
 #include "runtime/include/class_linker.h"
@@ -47,8 +47,8 @@
 #include "runtime/string_table.h"
 #include "runtime/thread_manager.h"
 #include "verification/public.h"
-#include "libpandabase/os/native_stack.h"
-#include "libpandabase/os/library_loader.h"
+#include "libarkbase/os/native_stack.h"
+#include "libarkbase/os/library_loader.h"
 #include "runtime/include/loadable_agent.h"
 #include "runtime/tooling/tools.h"
 

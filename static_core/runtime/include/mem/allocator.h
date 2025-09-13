@@ -17,11 +17,11 @@
 
 #include <functional>
 
-#include "libpandabase/mem/code_allocator.h"
-#include "libpandabase/mem/mem.h"
-#include "libpandabase/mem/pool_map.h"
-#include "libpandabase/utils/logger.h"
-#include "libpandabase/macros.h"
+#include "libarkbase/mem/code_allocator.h"
+#include "libarkbase/mem/mem.h"
+#include "libarkbase/mem/pool_map.h"
+#include "libarkbase/utils/logger.h"
+#include "libarkbase/macros.h"
 #include "runtime/mem/bump-allocator.h"
 #include "runtime/mem/freelist_allocator.h"
 #include "runtime/mem/gc/bitmap.h"

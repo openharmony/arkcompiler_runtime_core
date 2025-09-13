@@ -15,7 +15,7 @@
 
 #include "compilation.h"
 #include "function.h"
-#include "mem/pool_manager.h"
+#include "libarkbase/mem/pool_manager.h"
 #include "elfio.hpp"
 #include "irtoc_runtime.h"
 #ifdef LLVM_INTERPRETER_CHECK_REGS_MASK

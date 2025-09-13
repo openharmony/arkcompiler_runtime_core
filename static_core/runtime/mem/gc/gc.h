@@ -20,12 +20,12 @@
 #include <string_view>
 #include <vector>
 
-#include "libpandabase/os/cpu_affinity.h"
-#include "libpandabase/os/mutex.h"
-#include "libpandabase/os/thread.h"
-#include "libpandabase/taskmanager/task_queue.h"
-#include "libpandabase/trace/trace.h"
-#include "libpandabase/utils/expected.h"
+#include "libarkbase/os/cpu_affinity.h"
+#include "libarkbase/os/mutex.h"
+#include "libarkbase/os/thread.h"
+#include "libarkbase/taskmanager/task_queue.h"
+#include "libarkbase/trace/trace.h"
+#include "libarkbase/utils/expected.h"
 #include "runtime/include/gc_task.h"
 #include "runtime/include/object_header.h"
 #include "runtime/include/language_config.h"

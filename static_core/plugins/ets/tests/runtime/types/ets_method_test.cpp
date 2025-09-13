@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 
-#include "libpandabase/utils/utils.h"
+#include "libarkbase/utils/utils.h"
 #include "get_test_class.h"
 #include "ets_coroutine.h"
 

@@ -16,7 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_TYPEAPI_METHOD_H_
 #define PANDA_PLUGINS_ETS_TYPEAPI_METHOD_H_
 
-#include "mem/object_pointer.h"
+#include "libarkbase/mem/object_pointer.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 #include "plugins/ets/runtime/types/ets_string.h"

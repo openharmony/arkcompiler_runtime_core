@@ -17,7 +17,7 @@
 #include "plugins/ets/stdlib/native/core/IntlLocaleMatch.h"
 #include "plugins/ets/stdlib/native/core/IntlCommon.h"
 #include "stdlib_ani_helpers.h"
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include "unicode/unistr.h"
 #include "unicode/brkiter.h"
 #include "unicode/ubrk.h"

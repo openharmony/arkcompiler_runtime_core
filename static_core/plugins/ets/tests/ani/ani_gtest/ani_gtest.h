@@ -21,7 +21,7 @@
 #include <optional>
 #include <vector>
 
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include "plugins/ets/runtime/ani/ani.h"
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"
 

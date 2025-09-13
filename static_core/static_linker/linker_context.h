@@ -25,7 +25,7 @@
 #include "libarkfile/file_item_container.h"
 
 #include "linker.h"
-#include "macros.h"
+#include "libarkbase/macros.h"
 
 namespace ark::static_linker {
 

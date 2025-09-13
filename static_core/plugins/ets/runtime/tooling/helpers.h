@@ -20,7 +20,7 @@
 
 #include "include/tooling/pt_thread.h"
 #include "include/tooling/vreg_value.h"
-#include "libpandabase/utils/bit_utils.h"
+#include "libarkbase/utils/bit_utils.h"
 #include <libarkfile/include/type.h>
 #include "types/ets_primitives.h"
 

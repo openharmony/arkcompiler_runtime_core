@@ -17,8 +17,8 @@
 #include "runtime/regexp/ecmascript/regexp_opcode.h"
 #include "runtime/include/coretypes/line_string.h"
 
-#include "libpandabase/utils/utils.h"
-#include "libpandabase/utils/utf.h"
+#include "libarkbase/utils/utils.h"
+#include "libarkbase/utils/utf.h"
 
 #include "securec.h"
 #include "unicode/uchar.h"

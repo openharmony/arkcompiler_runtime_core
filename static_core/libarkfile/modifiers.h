@@ -16,7 +16,7 @@
 #ifndef LIBPANDAFILE_MODIFIERS_H_
 #define LIBPANDAFILE_MODIFIERS_H_
 
-#include "utils/bit_utils.h"
+#include "libarkbase/utils/bit_utils.h"
 
 #include <cstdint>
 

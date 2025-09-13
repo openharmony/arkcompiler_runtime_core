@@ -21,7 +21,7 @@
 #include <string>
 #include <vector>
 
-#include "ark_version.h"
+#include "libarkbase/generated/ark_version.h"
 
 #include "assembly-emitter.h"
 #include "assembly-parser.h"
@@ -32,9 +32,9 @@
 #include "error.h"
 #include "lexer.h"
 #include "pandasm.h"
-#include "utils/expected.h"
-#include "utils/logger.h"
-#include "utils/pandargs.h"
+#include "libarkbase/utils/expected.h"
+#include "libarkbase/utils/logger.h"
+#include "libarkbase/utils/pandargs.h"
 
 namespace ark::pandasm {
 

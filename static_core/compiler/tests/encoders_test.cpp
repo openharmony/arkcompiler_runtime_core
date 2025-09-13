@@ -14,13 +14,13 @@
  */
 
 #include <gtest/gtest.h>
-#include "macros.h"
-#include "mem/code_allocator.h"
-#include "mem/pool_manager.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/mem/code_allocator.h"
+#include "libarkbase/mem/pool_manager.h"
 #include "target/aarch64/target.h"
 
 #include "vixl_exec_module.h"
-#include "utils/utils.h"
+#include "libarkbase/utils/utils.h"
 
 namespace ark::compiler::tests {
 

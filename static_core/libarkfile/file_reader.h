@@ -27,13 +27,13 @@
 #include "libarkfile/literal_data_accessor.h"
 #include "libarkfile/method_data_accessor.h"
 #include "libarkfile/method_handle_data_accessor.h"
-#include "os/file.h"
+#include "libarkbase/os/file.h"
 #include "libarkfile/param_annotations_data_accessor.h"
 #include "libarkfile/proto_data_accessor.h"
-#include "utils/pandargs.h"
-#include "utils/span.h"
-#include "utils/type_helpers.h"
-#include "utils/leb128.h"
+#include "libarkbase/utils/pandargs.h"
+#include "libarkbase/utils/span.h"
+#include "libarkbase/utils/type_helpers.h"
+#include "libarkbase/utils/leb128.h"
 #if !PANDA_TARGET_WINDOWS
 #include "securec.h"
 #endif

@@ -18,7 +18,7 @@
 
 #include "json_serialization/serializable.h"
 #include "runtime/tooling/sampler/samples_record.h"
-#include "utils/json_builder.h"
+#include "libarkbase/utils/json_builder.h"
 
 namespace ark::tooling::inspector {
 class Profile final : public JsonSerializable {

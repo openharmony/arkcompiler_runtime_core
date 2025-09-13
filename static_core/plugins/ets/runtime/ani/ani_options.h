@@ -15,9 +15,9 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_ANI_OPTIONS_H
 #define PANDA_PLUGINS_ETS_RUNTIME_ANI_OPTIONS_H
 
-#include "libpandabase/macros.h"
-#include "libpandabase/utils/expected.h"
-#include "utils/type_helpers.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/utils/expected.h"
+#include "libarkbase/utils/type_helpers.h"
 
 #include <array>
 #include <map>

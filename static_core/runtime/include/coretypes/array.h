@@ -19,10 +19,10 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "libpandabase/macros.h"
-#include "libpandabase/mem/mem.h"
-#include "libpandabase/mem/space.h"
-#include "libpandabase/utils/span.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/mem/mem.h"
+#include "libarkbase/mem/space.h"
+#include "libarkbase/utils/span.h"
 #include "libarkfile/bytecode_instruction-inl.h"
 #include "runtime/include/class-inl.h"
 #include "runtime/include/language_context.h"

@@ -21,8 +21,8 @@
 // arkplatform
 #include "hybrid/sts_vm_interface.h"
 
-#include "libpandabase/macros.h"
-#include "libpandabase/os/mutex.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/os/mutex.h"
 
 namespace ark::ets::interop::js {
 

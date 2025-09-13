@@ -18,7 +18,7 @@
 #include "libarkfile/method_data_accessor-inl.h"
 #include "abc2program_log.h"
 #include "abc_file_utils.h"
-#include "source_language.h"
+#include "libarkbase/generated/source_language.h"
 
 namespace ark::abc2program {
 

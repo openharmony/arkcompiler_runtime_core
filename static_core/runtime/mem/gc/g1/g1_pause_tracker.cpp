@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,9 +14,9 @@
  */
 #include <algorithm>
 #include "g1_pause_tracker.h"
-#include "utils/logger.h"
-#include "utils/type_converter.h"
-#include "libpandabase/os/time.h"
+#include "libarkbase/utils/logger.h"
+#include "libarkbase/utils/type_converter.h"
+#include "libarkbase/os/time.h"
 
 namespace ark::mem {
 G1PauseTracker::G1PauseTracker(int64_t gcPauseIntervalMs, int64_t maxGcTimeMs)

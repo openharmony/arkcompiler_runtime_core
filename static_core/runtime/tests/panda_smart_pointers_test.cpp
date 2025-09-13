@@ -14,7 +14,7 @@
  */
 
 #include "gtest/gtest.h"
-#include "libpandabase/utils/utils.h"
+#include "libarkbase/utils/utils.h"
 #include "runtime/include/coretypes/line_string.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
 #include "runtime/include/runtime.h"

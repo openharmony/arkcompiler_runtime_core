@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -31,7 +31,7 @@ ohos_source_set("arktarget_options_static") {
     sources = [ "$ark_root/platforms/common/default_target_options.cpp" ]
   }
 
-  deps = [ "$ark_root/libpandabase:libarktsbase" ]
+  deps = [ "$ark_root/libarkbase:libarktsbase" ]
 
   part_name = ark_part_name
   subsystem_name = "$ark_subsystem_name"

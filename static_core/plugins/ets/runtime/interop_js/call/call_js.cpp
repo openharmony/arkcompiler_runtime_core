@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "macros.h"
+#include "libarkbase/macros.h"
 #include "runtime/mem/local_object_handle.h"
 #include "plugins/ets/runtime/interop_js/call/call.h"
 #include "plugins/ets/runtime/interop_js/call/arg_convertors.h"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,7 @@
 #define LIBLLVMBACKEND_OBJECT_CODE_CODE_INFO_PRODUCER_H
 
 #include "compiler/optimizer/ir/runtime_interface.h"
-#include "libpandabase/utils/bit_vector.h"
+#include "libarkbase/utils/bit_vector.h"
 
 #include "created_object_file.h"
 

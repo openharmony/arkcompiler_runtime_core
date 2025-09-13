@@ -15,7 +15,7 @@
 
 #include "types/custom_url_breakpoint_response.h"
 
-#include "utils/json_builder.h"
+#include "libarkbase/utils/json_builder.h"
 
 namespace ark::tooling::inspector {
 

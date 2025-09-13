@@ -20,7 +20,7 @@
 #include "runtime/mem/refstorage/global_object_storage.h"
 #include "plugins/ets/runtime/interop_js/logger.h"
 #include "plugins/ets/runtime/types/ets_bigint.h"
-#include "utils/small_vector.h"
+#include "libarkbase/utils/small_vector.h"
 
 #include <node_api.h>
 

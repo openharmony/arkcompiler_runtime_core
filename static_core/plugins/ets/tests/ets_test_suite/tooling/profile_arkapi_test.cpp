@@ -24,8 +24,8 @@
 #include "ets_vm.h"
 #include "include/runtime.h"
 #include "include/runtime_options.h"
-#include "libpandabase/test_utilities.h"
-#include "os/filesystem.h"
+#include "libarkbase/test_utilities.h"
+#include "libarkbase/os/filesystem.h"
 #include "inspector/debugger_arkapi.h"
 
 namespace ark::test {

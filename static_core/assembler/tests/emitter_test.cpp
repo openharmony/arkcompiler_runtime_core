@@ -32,9 +32,9 @@
 #include "libarkfile/method_data_accessor-inl.h"
 #include "libarkfile/param_annotations_data_accessor.h"
 #include "libarkfile/proto_data_accessor-inl.h"
-#include "utils/span.h"
-#include "utils/leb128.h"
-#include "utils/utf.h"
+#include "libarkbase/utils/span.h"
+#include "libarkbase/utils/leb128.h"
+#include "libarkbase/utils/utf.h"
 #include "libarkfile/bytecode_instruction-inl.h"
 
 namespace ark::test {

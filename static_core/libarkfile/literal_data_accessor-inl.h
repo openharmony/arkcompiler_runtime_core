@@ -19,7 +19,7 @@
 #include <string>
 #include "libarkfile/file_items.h"
 #include "libarkfile/literal_data_accessor.h"
-#include "utils/utf.h"
+#include "libarkbase/utils/utf.h"
 
 namespace ark::panda_file {
 

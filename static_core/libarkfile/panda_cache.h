@@ -17,8 +17,8 @@
 #define LIBPANDAFILE_PANDA_CACHE_H_
 
 #include "libarkfile/file.h"
-#include "os/mutex.h"
-#include "libpandabase/utils/math_helpers.h"
+#include "libarkbase/os/mutex.h"
+#include "libarkbase/utils/math_helpers.h"
 
 #include <atomic>
 #include <vector>

@@ -16,7 +16,7 @@
 #define PANDA_RUNTIME_MEM_RUNSLOTS_ALLOCATOR_INL_H
 
 #include <securec.h>
-#include "libpandabase/utils/asan_interface.h"
+#include "libarkbase/utils/asan_interface.h"
 #include "runtime/mem/alloc_config.h"
 #include "runtime/mem/object_helpers.h"
 #include "runtime/mem/runslots_allocator.h"

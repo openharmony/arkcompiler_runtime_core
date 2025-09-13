@@ -21,12 +21,12 @@
 #include <gtest/gtest.h>
 #include <node_api.h>
 
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include "interop_test_helper.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/call/call.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
-#include "utils/span.h"
+#include "libarkbase/utils/span.h"
 
 // NOLINTBEGIN(readability-identifier-naming)
 // CC-OFFNXT(G.FMT.10) project code style

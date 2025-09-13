@@ -18,7 +18,7 @@
 #include <cfloat>
 #include <cmath>
 
-#include "utils/json_parser.h"
+#include "libarkbase/utils/json_parser.h"
 
 #include "types/numeric_id.h"
 

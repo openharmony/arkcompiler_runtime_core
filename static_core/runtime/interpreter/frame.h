@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,10 +18,10 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "libpandabase/macros.h"
-#include "libpandabase/utils/bit_helpers.h"
-#include "libpandabase/utils/bit_utils.h"
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/utils/bit_helpers.h"
+#include "libarkbase/utils/bit_utils.h"
+#include "libarkbase/utils/logger.h"
 #include "runtime/interpreter/acc_vregister.h"
 #include "runtime/mem/frame_allocator-inl.h"
 #include "libarkfile/bytecode_instruction-inl.h"

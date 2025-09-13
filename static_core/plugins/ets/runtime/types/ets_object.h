@@ -19,7 +19,7 @@
 #include <cstdint>
 #include "plugins/ets/runtime/ets_mark_word.h"
 #include "mark_word.h"
-#include "mem/mem.h"
+#include "libarkbase/mem/mem.h"
 #include "runtime/include/object_header-inl.h"
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "plugins/ets/runtime/types/ets_field.h"

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,9 +18,9 @@
 
 #include <cstddef>
 
-#include "utils/bit_utils.h"
+#include "libarkbase/utils/bit_utils.h"
 
-#include "macros.h"
+#include "libarkbase/macros.h"
 
 namespace ark::verifier {
 

@@ -17,7 +17,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_OHOS_STACK_INFO_H
 
 #include <memory>
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 
 struct NapiStackInfo;
 

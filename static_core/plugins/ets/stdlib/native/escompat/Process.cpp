@@ -18,13 +18,13 @@
 #include <thread>
 #include <set>
 
-#include "libpandabase/macros.h"
-#include "libpandabase/os/exec.h"
-#include "libpandabase/os/filesystem.h"
-#include "libpandabase/os/kill.h"
-#include "libpandabase/os/pipe.h"
-#include "libpandabase/os/system_environment.h"
-#include "libpandabase/os/time.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/os/exec.h"
+#include "libarkbase/os/filesystem.h"
+#include "libarkbase/os/kill.h"
+#include "libarkbase/os/pipe.h"
+#include "libarkbase/os/system_environment.h"
+#include "libarkbase/os/time.h"
 #include "plugins/ets/stdlib/native/escompat/Process.h"
 #include "plugins/ets/stdlib/native/core/stdlib_ani_helpers.h"
 

@@ -16,7 +16,7 @@
 #include "encode_visitor.h"
 #include "optimizer/code_generator/operands.h"
 #include "optimizer/ir/datatype.h"
-#include "utils/regmask.h"
+#include "libarkbase/utils/regmask.h"
 
 namespace ark::compiler {
 

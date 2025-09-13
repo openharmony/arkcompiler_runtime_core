@@ -20,7 +20,7 @@
 #include "runtime/tooling/backtrace/backtrace.h"
 #include "runtime/include/managed_thread.h"
 #include "runtime/include/thread.h"
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/utils/logger.h"
 
 static bool ReadMemTestFunc([[maybe_unused]] void *ctx, uintptr_t addr, uintptr_t *value, bool isRead32)
 {

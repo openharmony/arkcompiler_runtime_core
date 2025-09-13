@@ -16,7 +16,7 @@
 #define PANDA_INTERPRETER_CACHE_H_
 
 #include <array>
-#include "libpandabase/utils/math_helpers.h"
+#include "libarkbase/utils/math_helpers.h"
 #include "runtime/include/method.h"
 
 namespace ark {

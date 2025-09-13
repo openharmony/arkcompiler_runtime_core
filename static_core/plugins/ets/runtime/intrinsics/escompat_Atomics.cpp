@@ -18,8 +18,8 @@
 #include <sstream>
 #include <string>
 #include <utility>
-#include "libpandabase/macros.h"
-#include "libpandabase/os/mutex.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/os/mutex.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/object_header.h"

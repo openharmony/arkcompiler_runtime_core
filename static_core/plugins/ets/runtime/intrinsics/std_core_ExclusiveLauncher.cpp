@@ -14,7 +14,7 @@
  */
 
 #include "intrinsics.h"
-#include "libpandabase/os/mutex.h"
+#include "libarkbase/os/mutex.h"
 #include "runtime/include/exceptions.h"
 #include "runtime/include/thread.h"
 #include "runtime/include/thread_scopes.h"

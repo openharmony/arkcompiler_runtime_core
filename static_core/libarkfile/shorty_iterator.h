@@ -18,7 +18,7 @@
 
 #include <cstdint>
 #include "libarkfile/file_items.h"
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 
 namespace ark::panda_file {
 class ShortyIterator {

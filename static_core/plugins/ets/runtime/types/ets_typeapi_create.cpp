@@ -28,7 +28,7 @@
 #include "ets_typeapi_create.h"
 #include "ets_object.h"
 #include "ets_array.h"
-#include "utils/utf.h"
+#include "libarkbase/utils/utf.h"
 
 namespace ark::ets {
 

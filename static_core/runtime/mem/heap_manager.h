@@ -18,8 +18,8 @@
 #include <cstddef>
 #include <memory>
 
-#include "libpandabase/utils/logger.h"
-#include "libpandabase/macros.h"
+#include "libarkbase/utils/logger.h"
+#include "libarkbase/macros.h"
 #include "runtime/include/class.h"
 #include "runtime/include/mem/allocator.h"
 #include "runtime/include/mem/panda_containers.h"

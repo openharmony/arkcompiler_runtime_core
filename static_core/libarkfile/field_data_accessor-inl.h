@@ -19,7 +19,7 @@
 #include "libarkfile/field_data_accessor.h"
 #include "libarkfile/helpers.h"
 
-#include "utils/bit_utils.h"
+#include "libarkbase/utils/bit_utils.h"
 
 #include <type_traits>
 

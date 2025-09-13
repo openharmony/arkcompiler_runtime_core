@@ -18,7 +18,7 @@
 
 #include "libarkfile/helpers.h"
 #include "libarkfile/file.h"
-#include "utils/leb128.h"
+#include "libarkbase/utils/leb128.h"
 
 namespace ark::panda_file {
 

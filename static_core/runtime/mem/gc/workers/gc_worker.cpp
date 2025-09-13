@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "libpandabase/taskmanager/task_scheduler.h"
+#include "libarkbase/taskmanager/task_scheduler.h"
 #include "runtime/include/thread.h"
 #include "runtime/mem/gc/gc.h"
 #include "runtime/mem/gc/workers/gc_worker.h"

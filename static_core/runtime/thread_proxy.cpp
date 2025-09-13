@@ -17,7 +17,7 @@
 #include "runtime/include/thread_proxy.h"
 #include "runtime/interpreter/runtime_interface.h"
 
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 
 namespace ark {
 

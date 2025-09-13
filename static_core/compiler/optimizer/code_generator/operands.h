@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,14 +24,14 @@ Arch-feature definitions
 #include <type_traits>
 
 #include "type_info.h"
-#include "utils/arch.h"
-#include "utils/arena_containers.h"
-#include "utils/bit_field.h"
-#include "utils/bit_utils.h"
-#include "utils/regmask.h"
+#include "libarkbase/utils/arch.h"
+#include "libarkbase/utils/arena_containers.h"
+#include "libarkbase/utils/bit_field.h"
+#include "libarkbase/utils/bit_utils.h"
+#include "libarkbase/utils/regmask.h"
 #include "compiler/optimizer/ir/constants.h"
 #include "compiler/optimizer/ir/datatype.h"
-#include "utils/type_helpers.h"
+#include "libarkbase/utils/type_helpers.h"
 
 namespace ark::compiler {
 // Mapping model for registers:

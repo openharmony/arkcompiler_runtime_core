@@ -16,7 +16,7 @@
 #include "plugins/ets/runtime/ani/verify/verify_ani_vm_api.h"
 
 #include "ani.h"
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include "plugins/ets/runtime/ani/ani_checkers.h"
 #include "plugins/ets/runtime/ani/ani_vm_api.h"
 #include "plugins/ets/runtime/ani/verify/types/vvm.h"

@@ -17,9 +17,9 @@
 #include <cstring>
 #include <limits>
 
-#include "libpandabase/utils/utf.h"
-#include "libpandabase/utils/hash.h"
-#include "libpandabase/utils/span.h"
+#include "libarkbase/utils/utf.h"
+#include "libarkbase/utils/hash.h"
+#include "libarkbase/utils/span.h"
 #include "runtime/arch/memory_helpers.h"
 #include "runtime/include/coretypes/array.h"
 #include "runtime/include/coretypes/line_string.h"

@@ -20,14 +20,14 @@
 #include "cross_values.h"
 #include "datatype.h"
 #include "ir-dyn-base-types.h"
-#include "mem/gc_barrier.h"
+#include "libarkbase/mem/gc_barrier.h"
 #include "runtime/include/coretypes/tagged_value.h"
 #include "runtime/profiling/profiling.h"
 #include "source_languages.h"
-#include "utils/arch.h"
-#include "utils/span.h"
-#include "utils/arena_containers.h"
-#include "libpandabase/mem/mem.h"
+#include "libarkbase/utils/arch.h"
+#include "libarkbase/utils/span.h"
+#include "libarkbase/utils/arena_containers.h"
+#include "libarkbase/mem/mem.h"
 
 namespace ark {
 class Thread;

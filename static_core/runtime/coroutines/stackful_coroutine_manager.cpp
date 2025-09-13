@@ -15,8 +15,8 @@
 
 #include <algorithm>
 #include <limits>
-#include "libpandabase/macros.h"
-#include "libpandabase/os/time.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/os/time.h"
 #include "runtime/coroutines/coroutine_worker_group.h"
 #include "runtime/coroutines/stackful_common.h"
 #include "runtime/coroutines/coroutine.h"

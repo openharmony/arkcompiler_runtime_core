@@ -22,7 +22,7 @@
 
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "runtime/include/class_linker.h"
-#include "libpandabase/utils/utf.h"
+#include "libarkbase/utils/utf.h"
 
 #include "ets_coroutine.h"
 #include "ets_vm.h"

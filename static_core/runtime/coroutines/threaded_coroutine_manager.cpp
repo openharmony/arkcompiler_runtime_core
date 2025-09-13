@@ -16,7 +16,7 @@
 #include <thread>
 #include "runtime/coroutines/coroutine.h"
 #include "runtime/include/thread_scopes.h"
-#include "libpandabase/os/mutex.h"
+#include "libarkbase/os/mutex.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/runtime_notification.h"
 #include "runtime/include/panda_vm.h"

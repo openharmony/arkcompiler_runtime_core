@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 #define PANDA_RUNTIME_INCLUDE_TOOLING_PT_THREAD_H
 
 #include <cstdint>
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include "runtime/include/managed_thread.h"
 
 namespace ark::tooling {

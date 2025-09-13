@@ -16,13 +16,13 @@
 #include "debugger_arkapi.h"
 #include <fstream>
 #include <string_view>
-#include "os/mutex.h"
+#include "libarkbase/os/mutex.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/runtime.h"
 #include "runtime/tooling/sampler/samples_record.h"
 #include "runtime/tooling/sampler/sampling_profiler.h"
 #include "types/profile_result.h"
-#include "utils/json_builder.h"
+#include "libarkbase/utils/json_builder.h"
 
 namespace ark {
 constexpr std::string_view ARK_DEBUGGER_LIB_PATH = "libark_inspector.z.so";

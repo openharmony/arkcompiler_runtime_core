@@ -17,7 +17,7 @@
 
 #include <securec.h>
 
-#include "libpandabase/mem/mem.h"
+#include "libarkbase/mem/mem.h"
 #include "runtime/include/class.h"
 #include "runtime/include/field.h"
 #include "runtime/include/object_accessor.h"

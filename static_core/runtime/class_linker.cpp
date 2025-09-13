@@ -25,11 +25,11 @@
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/runtime_notification.h"
-#include "libpandabase/macros.h"
-#include "libpandabase/mem/mem.h"
-#include "libpandabase/utils/bit_utils.h"
-#include "libpandabase/utils/span.h"
-#include "libpandabase/utils/utf.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/mem/mem.h"
+#include "libarkbase/utils/bit_utils.h"
+#include "libarkbase/utils/span.h"
+#include "libarkbase/utils/utf.h"
 #include "libarkfile/class_data_accessor-inl.h"
 #include "libarkfile/code_data_accessor-inl.h"
 #include "libarkfile/field_data_accessor-inl.h"
@@ -38,8 +38,8 @@
 #include "libarkfile/panda_cache.h"
 #include "libarkfile/proto_data_accessor-inl.h"
 #include "runtime/include/tooling/debug_inf.h"
-#include "trace/trace.h"
-#include "utils/utils.h"
+#include "libarkbase/trace/trace.h"
+#include "libarkbase/utils/utils.h"
 
 namespace ark {
 

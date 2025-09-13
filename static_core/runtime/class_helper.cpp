@@ -18,8 +18,8 @@
 #include <algorithm>
 
 #include "include/class_linker_extension.h"
-#include "libpandabase/mem/mem.h"
-#include "libpandabase/utils/bit_utils.h"
+#include "libarkbase/mem/mem.h"
+#include "libarkbase/utils/bit_utils.h"
 #include "runtime/include/mem/panda_string.h"
 #include "runtime/include/class_linker.h"
 

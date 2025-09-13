@@ -16,11 +16,11 @@
 #ifndef COMPILER_TESTS_UNIT_TEST_H
 #define COMPILER_TESTS_UNIT_TEST_H
 
-#include "macros.h"
+#include "libarkbase/macros.h"
 #include "optimizer/ir/ir_constructor.h"
 #include "gtest/gtest.h"
-#include "mem/arena_allocator.h"
-#include "mem/pool_manager.h"
+#include "libarkbase/mem/arena_allocator.h"
+#include "libarkbase/mem/pool_manager.h"
 #include <numeric>
 #include <unordered_map>
 #include "compiler.h"

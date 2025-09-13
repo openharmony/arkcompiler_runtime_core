@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -74,7 +74,6 @@ set_target_properties(arkassembler_obj PROPERTIES
 panda_target_include_directories(arkassembler_obj PUBLIC
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_BINARY_DIR}/libpandabase
     ${PANDA_ROOT}
     ${CMAKE_BINARY_DIR}
 )
@@ -84,8 +83,6 @@ panda_target_link_libraries(ark_asm arkassembler arkbase)
 if(PANDA_WITH_BYTECODE_OPTIMIZER)
     panda_target_link_libraries(ark_asm arkbytecodeopt)
 endif()
-
-include_directories(${PANDA_ROOT}/libpandabase/)
 
 panda_add_library(arkassembler_static STATIC $<TARGET_OBJECTS:arkassembler_obj>)
 panda_target_link_libraries(arkassembler_static arkassembler_obj)

@@ -22,7 +22,7 @@
 #include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "runtime/include/coretypes/class.h"
-#include "utils/small_vector.h"
+#include "libarkbase/utils/small_vector.h"
 #include <node_api.h>
 
 namespace ark::ets::interop::js {

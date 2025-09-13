@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "libpandabase/os/thread.h"
+#include "libarkbase/os/thread.h"
 #include "hybridgref_napi.h"
 
 namespace ark::ets::hygref {

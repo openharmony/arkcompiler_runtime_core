@@ -17,8 +17,8 @@
 #include "compiler/aot/aot_manager.h"
 #include "include/mem/panda_string.h"
 #include "zlib.h"
-#include "utils/expected.h"
-#include "utils/logger.h"
+#include "libarkbase/utils/expected.h"
+#include "libarkbase/utils/logger.h"
 
 #include <iostream>
 #include <iomanip>

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,7 +21,7 @@ if (ark_standalone_build) {
 config("arkziparchive_config") {
   include_dirs = [
     "$ark_root/libziparchive",
-    "$ark_root/libpandabase",
+    "$ark_root/libarkbase",
   ]
 
   if (ark_standalone_build) {
@@ -42,10 +42,10 @@ ohos_source_set("libarktsziparchive_static") {
   public_configs = [
     ":arkziparchive_config",
     "$ark_root:ark_config",
-    "$ark_root/libpandabase:arkbase_public_config",
+    "$ark_root/libarkbase:arkbase_public_config",
   ]
 
-  deps = [ "$ark_root/libpandabase:libarktsbase" ]
+  deps = [ "$ark_root/libarkbase:libarktsbase" ]
 
   if (ark_static_standalone_build) {
     public_configs += [ zlib_public_config ]
@@ -79,10 +79,10 @@ ohos_source_set("libarktsziparchive_frontend_set_static") {
   public_configs = [
     ":arkziparchive_config",
     "$ark_root:ark_config",
-    "$ark_root/libpandabase:arkbase_public_config",
+    "$ark_root/libarkbase:arkbase_public_config",
   ]
 
-  deps = [ "$ark_root/libpandabase:logger_enum_gen_h" ]
+  deps = [ "$ark_root/libarkbase:logger_enum_gen_h" ]
 
   if (ark_static_standalone_build || ark_standalone_build) {
     public_configs += [ zlib_public_config ]

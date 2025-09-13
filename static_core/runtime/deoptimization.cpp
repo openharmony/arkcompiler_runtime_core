@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,9 +18,9 @@
 #include "include/cframe.h"
 #include "include/managed_thread.h"
 #include "include/stack_walker.h"
-#include "libpandabase/events/events.h"
+#include "libarkbase/events/events.h"
 #include "libarkfile/file_items.h"
-#include "macros.h"
+#include "libarkbase/macros.h"
 #include "runtime/include/locks.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"

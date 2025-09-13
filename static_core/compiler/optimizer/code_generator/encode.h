@@ -31,7 +31,7 @@
 #include "operands.h"
 #include "optimizer/select_transform_type.h"
 #include "registers_description.h"
-#include "utils/cframe_layout.h"
+#include "libarkbase/utils/cframe_layout.h"
 #include "target_info.h"
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)

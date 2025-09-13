@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -134,7 +134,7 @@ panda_gen(DATA ${PANDA_BINARY_ROOT}/runtime/intrinsics.yaml
     SOURCE ${CMAKE_CURRENT_LIST_DIR}/templates
     DESTINATION ${GENERATED_DIR}
     API ${CMAKE_CURRENT_LIST_DIR}/templates/intrinsics.rb
-    REQUIRES ${PANDA_ROOT}/libpandabase/utils.rb
+    REQUIRES ${PANDA_ROOT}/libarkbase/utils.rb
     EXTRA_DEPENDENCIES arkruntime_gen_intrinsics_yaml
 )
 
@@ -143,7 +143,7 @@ panda_gen(DATA ${PANDA_BINARY_ROOT}/runtime/intrinsics.yaml
     SOURCE ${CMAKE_CURRENT_LIST_DIR}/templates
     DESTINATION ${GENERATED_DIR}
     API ${CMAKE_CURRENT_LIST_DIR}/templates/intrinsics.rb
-    REQUIRES ${PANDA_ROOT}/libpandabase/utils.rb
+    REQUIRES ${PANDA_ROOT}/libarkbase/utils.rb
     EXTRA_DEPENDENCIES arkruntime_gen_intrinsics_yaml
     TARGET_NAME can_compile_intrinsics_gen_llvmbackend
 )
@@ -153,7 +153,7 @@ panda_gen(DATA ${PANDA_BINARY_ROOT}/runtime/intrinsics.yaml
     SOURCE ${CMAKE_CURRENT_LIST_DIR}/templates
     DESTINATION ${GENERATED_DIR}
     API ${CMAKE_CURRENT_LIST_DIR}/templates/intrinsics.rb
-    REQUIRES ${PANDA_ROOT}/libpandabase/utils.rb
+    REQUIRES ${PANDA_ROOT}/libarkbase/utils.rb
     EXTRA_DEPENDENCIES arkruntime_gen_intrinsics_yaml
     TARGET_NAME intrinsic_names_gen_llvmbackend
 )
@@ -163,7 +163,7 @@ panda_gen(DATA ${PANDA_BINARY_ROOT}/runtime/intrinsics.yaml
     SOURCE ${CMAKE_CURRENT_LIST_DIR}/templates
     DESTINATION ${GENERATED_DIR}
     API ${CMAKE_CURRENT_LIST_DIR}/templates/intrinsics.rb
-    REQUIRES ${PANDA_ROOT}/libpandabase/utils.rb
+    REQUIRES ${PANDA_ROOT}/libarkbase/utils.rb
     EXTRA_DEPENDENCIES arkruntime_gen_intrinsics_yaml
     TARGET_NAME intrinsic_llvm_codegen_llvmbackend
 )

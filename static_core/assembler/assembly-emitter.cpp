@@ -18,7 +18,7 @@
 #include "libarkfile/file_writer.h"
 #include "libarkfile/literal_data_accessor.h"
 #include "mangling.h"
-#include "os/file.h"
+#include "libarkbase/os/file.h"
 #include "runtime/include/profiling_gen.h"
 #include "libarkfile/type_helper.h"
 

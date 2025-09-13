@@ -16,7 +16,7 @@
 #define PANDA_RUNTIME_OPTIONS_H_
 
 #include "generated/runtime_options_gen.h"
-#include "utils/logger.h"
+#include "libarkbase/utils/logger.h"
 #include "runtime/plugins.h"
 
 namespace ark {

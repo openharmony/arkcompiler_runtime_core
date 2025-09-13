@@ -50,8 +50,6 @@ panda_target_include_directories(asm_defines
     PUBLIC ${CMAKE_BINARY_DIR}/runtime/include
     PUBLIC ${PANDA_BINARY_ROOT}/panda_gen_options
     PUBLIC ${PANDA_BINARY_ROOT}/verification/gen/include
-    PUBLIC ${PANDA_ROOT}/libpandabase
-    PUBLIC ${PANDA_BINARY_ROOT}/libpandabase/generated
     PUBLIC ${PANDA_ROOT}/../common_interfaces
 )
 

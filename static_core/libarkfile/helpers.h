@@ -16,11 +16,11 @@
 #ifndef LIBPANDAFILE_HELPERS_H_
 #define LIBPANDAFILE_HELPERS_H_
 
-#include "macros.h"
-#include "utils/bit_helpers.h"
-#include "utils/leb128.h"
-#include "utils/logger.h"
-#include "utils/span.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/utils/bit_helpers.h"
+#include "libarkbase/utils/leb128.h"
+#include "libarkbase/utils/logger.h"
+#include "libarkbase/utils/span.h"
 
 #include <cstdint>
 
