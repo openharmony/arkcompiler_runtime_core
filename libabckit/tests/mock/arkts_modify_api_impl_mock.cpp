@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -152,7 +152,7 @@ bool ClassSetName(AbckitArktsClass *klass, const char *name)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(klass == DEFAULT_ARKTS_CLASS);
-    EXPECT_TRUE(name == DEFAULT_CONST_CHAR);
+    EXPECT_TRUE(strncmp(name, DEFAULT_CONST_CHAR, DEFAULT_CONST_CHAR_SIZE) == 0);
     return DEFAULT_BOOL;
 }
 
@@ -188,10 +188,11 @@ bool ClassRemoveMethod(AbckitArktsClass *klass, AbckitArktsFunction *method)
     return DEFAULT_BOOL;
 }
 
-AbckitArktsClass *CreateClass(const char *name)
+AbckitArktsClass *CreateClass(AbckitArktsModule *m, const char *name)
 {
     g_calledFuncs.push(__func__);
-    EXPECT_TRUE(name == DEFAULT_CONST_CHAR);
+    EXPECT_TRUE(m == DEFAULT_ARKTS_MODULE);
+    EXPECT_TRUE(strcmp(name, DEFAULT_CONST_CHAR) == 0);
     return DEFAULT_ARKTS_CLASS;
 }
 
@@ -231,7 +232,7 @@ bool InterfaceSetName(AbckitArktsInterface *iface, const char *name)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(iface == DEFAULT_ARKTS_INTERFACE);
-    EXPECT_TRUE(name == DEFAULT_CONST_CHAR);
+    EXPECT_TRUE(strcmp(name, DEFAULT_CONST_CHAR) == 0);
     return DEFAULT_BOOL;
 }
 
@@ -283,10 +284,11 @@ bool InterfaceSetParentFunction(AbckitArktsInterface *iface, AbckitArktsFunction
     return DEFAULT_BOOL;
 }
 
-AbckitArktsInterface *CreateInterface(const char *name)
+AbckitArktsInterface *CreateInterface(AbckitArktsModule *md, const char *name)
 {
     g_calledFuncs.push(__func__);
-    EXPECT_TRUE(name == DEFAULT_CONST_CHAR);
+    EXPECT_TRUE(md == DEFAULT_ARKTS_MODULE);
+    EXPECT_TRUE(strcmp(name, DEFAULT_CONST_CHAR) == 0);
     return DEFAULT_ARKTS_INTERFACE;
 }
 

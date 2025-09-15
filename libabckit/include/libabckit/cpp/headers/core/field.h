@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -228,7 +228,7 @@ public:
      * @brief Construct a new ClassField object
      * @param other
      */
-    ClassField(const ClassField &other) = default;
+    ClassField(const ClassField &other) = default;  // CC-OFF(G.CLS.07): design decision, detail: base_concepts.h
 
     /**
      * @brief Constructor
@@ -241,7 +241,7 @@ public:
      * @brief Construct a new Field object
      * @param other
      */
-    ClassField(ClassField &&other) = default;
+    ClassField(ClassField &&other) = default;  // CC-OFF(G.CLS.07): design decision, detail: base_concepts.h
 
     /**
      * @brief Constructor
@@ -370,7 +370,8 @@ public:
      * @brief Construct a new InterfaceField object
      * @param other
      */
-    InterfaceField(const InterfaceField &other) = default;
+    InterfaceField(const InterfaceField &other) =
+        default;  // CC-OFF(G.CLS.07): design decision, detail: base_concepts.h
 
     /**
      * @brief Constructor
@@ -383,7 +384,7 @@ public:
      * @brief Construct a new InterfaceField object
      * @param other
      */
-    InterfaceField(InterfaceField &&other) = default;
+    InterfaceField(InterfaceField &&other) = default;  // CC-OFF(G.CLS.07): design decision, detail: base_concepts.h
 
     /**
      * @brief Constructor

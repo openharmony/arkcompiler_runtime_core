@@ -204,6 +204,7 @@ extern "C" AbckitArktsInterface *CoreInterfaceToArktsInterface(AbckitCoreInterfa
     LIBABCKIT_IMPLEMENTED;
     LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(iface, nullptr);
+    LIBABCKIT_CHECK_ARKTS_TARGET(iface->owningModule);
     return iface->GetArkTSImpl();
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,10 @@ class Module final : public core::Module {
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
     /// @brief to access private constructor
     friend class abckit::File;
+    /// @brief to access private constructor
+    friend class Class;
+    /// @brief to access private constructor
+    friend class Interface;
     /// @brief abckit::DefaultHash<Module>
     friend class abckit::DefaultHash<Module>;
     /// @brief to access private TargetCast

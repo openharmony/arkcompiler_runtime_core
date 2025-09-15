@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -885,7 +885,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] name - Name of the class to be created.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
      */
-    AbckitArktsClass *(*createClass)(const char *name);
+    AbckitArktsClass *(*createClass)(AbckitArktsModule *m, const char *name);
 
     /**
      * @brief Sets owning module for class `klass`.
@@ -1010,7 +1010,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] name - Name of the interface to be created.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
      */
-    AbckitArktsInterface *(*createInterface)(const char *name);
+    AbckitArktsInterface *(*createInterface)(AbckitArktsModule *m, const char *name);
 
     /* ========================================
      * Enum

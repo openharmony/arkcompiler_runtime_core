@@ -222,7 +222,7 @@ TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceGetFile)
     helpers::InterfaceByNameContext ifaceCtxFinder = {nullptr, "Animal"};
     g_implI->moduleEnumerateInterfaces(ctx.module, &ifaceCtxFinder, helpers::InterfaceByNameFinder);
 
-    auto abcFile = g_implI->interfaceGetFile(ifaceCtxFinder.face);
+    auto abcFile = g_implI->interfaceGetFile(ifaceCtxFinder.iface);
 
     ASSERT_NE(abcFile, nullptr);
     g_impl->closeFile(file);
@@ -243,7 +243,7 @@ TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceGetModule)
     helpers::InterfaceByNameContext ifaceCtxFinder = {nullptr, "Animal"};
     g_implI->moduleEnumerateInterfaces(ctx.module, &ifaceCtxFinder, helpers::InterfaceByNameFinder);
 
-    auto module = g_implI->interfaceGetModule(ifaceCtxFinder.face);
+    auto module = g_implI->interfaceGetModule(ifaceCtxFinder.iface);
 
     ASSERT_NE(module, nullptr);
     g_impl->closeFile(file);
@@ -264,8 +264,8 @@ TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceGetName)
     helpers::InterfaceByNameContext ifaceCtxFinder = {nullptr, "Animal"};
     g_implI->moduleEnumerateInterfaces(ctx.module, &ifaceCtxFinder, helpers::InterfaceByNameFinder);
 
-    ifaceCtxFinder.face->owningModule->target = ABCKIT_TARGET_ARK_TS_V1;
-    auto name = g_implI->interfaceGetName(ifaceCtxFinder.face);
+    ifaceCtxFinder.iface->owningModule->target = ABCKIT_TARGET_ARK_TS_V1;
+    auto name = g_implI->interfaceGetName(ifaceCtxFinder.iface);
 
     ASSERT_EQ(name, nullptr);
     g_impl->closeFile(file);
@@ -289,7 +289,7 @@ TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceGetParentNamespace)
     helpers::InterfaceByNameContext ifaceCtxFinder = {nullptr, "MyInterface"};
     g_implI->namespaceEnumerateInterfaces(nameSapceCtx.n, &ifaceCtxFinder, helpers::InterfaceByNameFinder);
 
-    auto petNamespace = g_implI->interfaceGetParentNamespace(ifaceCtxFinder.face);
+    auto petNamespace = g_implI->interfaceGetParentNamespace(ifaceCtxFinder.iface);
 
     ASSERT_NE(petNamespace, nullptr);
     g_impl->closeFile(file);
@@ -310,10 +310,10 @@ TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceEnumerateSuperInterfaces)
     helpers::InterfaceByNameContext ifaceCtxFinder = {nullptr, "ChildInterface"};
     g_implI->moduleEnumerateInterfaces(ctx.module, &ifaceCtxFinder, helpers::InterfaceByNameFinder);
 
-    ifaceCtxFinder.face->owningModule->target = ABCKIT_TARGET_UNKNOWN;
+    ifaceCtxFinder.iface->owningModule->target = ABCKIT_TARGET_UNKNOWN;
 
     void *data = nullptr;
-    auto ret = g_implI->interfaceEnumerateSuperInterfaces(ifaceCtxFinder.face, data, helpers::InterfaceByNameFinder);
+    auto ret = g_implI->interfaceEnumerateSuperInterfaces(ifaceCtxFinder.iface, data, helpers::InterfaceByNameFinder);
 
     ASSERT_FALSE(ret);
     g_impl->closeFile(file);
@@ -334,9 +334,9 @@ TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceEnumerateSubInterfaces)
     helpers::InterfaceByNameContext ifaceCtxFinder = {nullptr, "Animal"};
     g_implI->moduleEnumerateInterfaces(ctx.module, &ifaceCtxFinder, helpers::InterfaceByNameFinder);
 
-    ifaceCtxFinder.face->owningModule->target = ABCKIT_TARGET_UNKNOWN;
+    ifaceCtxFinder.iface->owningModule->target = ABCKIT_TARGET_UNKNOWN;
     void *data = nullptr;
-    auto ret = g_implI->interfaceEnumerateSubInterfaces(ifaceCtxFinder.face, data, helpers::InterfaceByNameFinder);
+    auto ret = g_implI->interfaceEnumerateSubInterfaces(ifaceCtxFinder.iface, data, helpers::InterfaceByNameFinder);
 
     ASSERT_FALSE(ret);
     g_impl->closeFile(file);
@@ -357,9 +357,9 @@ TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceEnumerateClasses)
     helpers::InterfaceByNameContext ifaceCtx = {nullptr, "Clickable"};
     g_implI->moduleEnumerateInterfaces(ctx.module, &ifaceCtx, helpers::InterfaceByNameFinder);
 
-    ifaceCtx.face->owningModule->target = ABCKIT_TARGET_UNKNOWN;
+    ifaceCtx.iface->owningModule->target = ABCKIT_TARGET_UNKNOWN;
     helpers::ClassByNameContext classCtx = {nullptr, "MyButton"};
-    auto ret = g_implI->interfaceEnumerateClasses(ifaceCtx.face, &classCtx, helpers::ClassByNameFinder);
+    auto ret = g_implI->interfaceEnumerateClasses(ifaceCtx.iface, &classCtx, helpers::ClassByNameFinder);
     ASSERT_FALSE(ret);
     g_impl->closeFile(file);
     EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -379,10 +379,10 @@ TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceEnumerateMethods)
     helpers::InterfaceByNameContext ifaceCtxFinder = {nullptr, "Animal"};
     g_implI->moduleEnumerateInterfaces(ctx.module, &ifaceCtxFinder, helpers::InterfaceByNameFinder);
 
-    ifaceCtxFinder.face->owningModule->target = ABCKIT_TARGET_UNKNOWN;
+    ifaceCtxFinder.iface->owningModule->target = ABCKIT_TARGET_UNKNOWN;
 
     helpers::MethodByNameContext methodCtx = {nullptr, ""};
-    auto ret = g_implI->interfaceEnumerateMethods(ifaceCtxFinder.face, &methodCtx, helpers::MethodByNameFinder);
+    auto ret = g_implI->interfaceEnumerateMethods(ifaceCtxFinder.iface, &methodCtx, helpers::MethodByNameFinder);
 
     ASSERT_FALSE(ret);
     g_impl->closeFile(file);
@@ -403,11 +403,11 @@ TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceEnumerateAnnotations)
     helpers::InterfaceByNameContext ifaceCtxFinder = {nullptr, "Animal"};
     g_implI->moduleEnumerateInterfaces(ctx.module, &ifaceCtxFinder, helpers::InterfaceByNameFinder);
 
-    ifaceCtxFinder.face->owningModule->target = ABCKIT_TARGET_UNKNOWN;
+    ifaceCtxFinder.iface->owningModule->target = ABCKIT_TARGET_UNKNOWN;
 
     helpers::AnnotationByNameContext annotationCtx = {nullptr, ""};
     auto ret =
-        g_implI->interfaceEnumerateAnnotations(ifaceCtxFinder.face, &annotationCtx, helpers::AnnotationByNameFinder);
+        g_implI->interfaceEnumerateAnnotations(ifaceCtxFinder.iface, &annotationCtx, helpers::AnnotationByNameFinder);
 
     ASSERT_FALSE(ret);
     g_impl->closeFile(file);
@@ -428,9 +428,9 @@ TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceEnumerateFields)
     helpers::InterfaceByNameContext ifaceCtx = {nullptr, "Animal"};
     g_implI->moduleEnumerateInterfaces(ctx.module, &ifaceCtx, helpers::InterfaceByNameFinder);
 
-    ifaceCtx.face->owningModule->target = ABCKIT_TARGET_UNKNOWN;
+    ifaceCtx.iface->owningModule->target = ABCKIT_TARGET_UNKNOWN;
     helpers::FieldByNameContext fieldCtx = {nullptr, ""};
-    auto ret = g_implI->interfaceEnumerateFields(ifaceCtx.face, &fieldCtx, helpers::FiledByNameFinder);
+    auto ret = g_implI->interfaceEnumerateFields(ifaceCtx.iface, &fieldCtx, helpers::FieldByNameFinder);
 
     ASSERT_FALSE(ret);
     g_impl->closeFile(file);
@@ -450,7 +450,7 @@ TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceGetFile02)
 
     helpers::InterfaceByNameContext ifaceCtxFinder = {nullptr, ""};
 
-    auto abcFile = g_implI->interfaceGetFile(ifaceCtxFinder.face);
+    auto abcFile = g_implI->interfaceGetFile(ifaceCtxFinder.iface);
 
     ASSERT_EQ(abcFile, nullptr);
     g_impl->closeFile(file);
@@ -470,7 +470,7 @@ TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceGetModule02)
 
     helpers::InterfaceByNameContext ifaceCtxFinder = {nullptr, ""};
 
-    auto module = g_implI->interfaceGetModule(ifaceCtxFinder.face);
+    auto module = g_implI->interfaceGetModule(ifaceCtxFinder.iface);
 
     ASSERT_EQ(module, nullptr);
     g_impl->closeFile(file);
@@ -493,7 +493,7 @@ TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceGetParentNamespace02)
 
     helpers::InterfaceByNameContext ifaceCtxFinder = {nullptr, ""};
 
-    auto petNamespace = g_implI->interfaceGetParentNamespace(ifaceCtxFinder.face);
+    auto petNamespace = g_implI->interfaceGetParentNamespace(ifaceCtxFinder.iface);
 
     ASSERT_EQ(petNamespace, nullptr);
     g_impl->closeFile(file);

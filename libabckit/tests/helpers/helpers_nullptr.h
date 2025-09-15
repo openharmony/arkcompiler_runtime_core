@@ -55,8 +55,17 @@ void TestNullptr(void (*apiToCheck)(AbckitArktsAnnotationInterface *, AbckitArkt
 void TestNullptr(void (*apiToCheck)(AbckitArktsAnnotation *, AbckitArktsAnnotationElement *));
 void TestNullptr(AbckitArktsAnnotation *(*apiToCheck)(AbckitArktsClass *, const AbckitArktsAnnotationCreateParams *));
 void TestNullptr(void (*apiToCheck)(AbckitArktsClass *, AbckitArktsAnnotation *));
+void TestNullptr(bool (*apiToCheck)(AbckitArktsClass *, const char *));
+void TestNullptr(bool (*apiToCheck)(AbckitArktsClass *, AbckitArktsClassField *));
+void TestNullptr(bool (*apiToCheck)(AbckitArktsClass *, AbckitArktsModule *));
+void TestNullptr(bool (*apiToCheck)(AbckitArktsInterface *, AbckitArktsInterface *));
+void TestNullptr(bool (*apiToCheck)(AbckitArktsInterface *, AbckitArktsFunction *));
+void TestNullptr(bool (*apiToCheck)(AbckitArktsInterface *, AbckitArktsModule *));
 void TestNullptr(AbckitArktsAnnotation *(*apiToCheck)(AbckitArktsFunction *,
                                                       const AbckitArktsAnnotationCreateParams *));
+void TestNullptr(bool (*apiToCheck)(AbckitArktsClass *, AbckitArktsFunction *));
+void TestNullptr(bool (*apiToCheck)(AbckitArktsInterface *, const char *));
+void TestNullptr(bool (*apiToCheck)(AbckitArktsInterface *, AbckitArktsInterfaceField *));
 void TestNullptr(void (*apiToCheck)(AbckitArktsFunction *, AbckitArktsAnnotation *));
 void TestNullptr(AbckitArktsAnnotationInterface *(*apiToCheck)(AbckitArktsModule *,
                                                                const AbckitArktsAnnotationInterfaceCreateParams *));
@@ -362,6 +371,10 @@ void TestNullptr(AbckitType *(*apiToCheck)(AbckitCoreNamespaceField *));
 void TestNullptr(const AbckitInspectApi *(*apiToCheck)(AbckitApiVersion version));
 void TestNullptr(const AbckitApi *(*apiToCheck)(AbckitApiVersion version));
 void TestNullptr(const AbckitIsaApiDynamic *(*apiToCheck)(AbckitApiVersion version));
+void TestNullptr(AbckitArktsClass *(*apiToCheck)(AbckitArktsModule *, const char *));
+void TestNullptr(bool (*apiToCheck)(AbckitArktsClass *, AbckitArktsInterface *));
+void TestNullptr(bool (*apiToCheck)(AbckitArktsClass *, AbckitArktsClass *));
+void TestNullptr(AbckitArktsInterface *(*apiToCheck)(AbckitArktsModule *, const char *));
 
 }  // namespace libabckit::test::helpers_nullptr
 
