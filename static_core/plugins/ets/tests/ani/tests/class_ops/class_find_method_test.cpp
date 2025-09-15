@@ -860,7 +860,7 @@ TEST_F(ClassFindMethodTest, find_method_combine_scenes_005)
 TEST_F(ClassFindMethodTest, find_method_combine_scenes_006)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("test.Child", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("test.Teen", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method constructorMethod {};
@@ -1161,6 +1161,73 @@ TEST_F(ClassFindMethodTest, wrong_signature)
     ASSERT_EQ(env_->FindClass("test.CheckWrongSignature", &cls), ANI_OK);
     ASSERT_EQ(env_->Class_FindStaticMethod(cls, "method", "C{std/core/String}:", &sm), ANI_NOT_FOUND);
     ASSERT_EQ(env_->Class_FindStaticMethod(cls, "method", "C{std.core.String}:", &sm), ANI_OK);
+}
+
+TEST_F(ClassFindMethodTest, check_hierarchy)
+{
+    ani_class clsParent {};
+    ASSERT_EQ(env_->FindClass("test.Parent", &clsParent), ANI_OK);
+    ani_class clsChild {};
+    ASSERT_EQ(env_->FindClass("test.Child", &clsChild), ANI_OK);
+
+    // |-------------------------------------------------------------------------------------------|
+    // |                  |    Parent class   |     Child class   |    The same method is found    |
+    // |------------------|-------------------|-------------------|--------------------------------|
+    // |  Parent method   |       ANI_OK      |       ANI_OK      |              Yes               |
+    // |   Child method   |   ANI_NOT_FOUND   |       ANI_OK      |               No               |
+    // | Overrided method |       ANI_OK      |       ANI_OK      |          No specified          |
+    // |------------------|-------------------|-------------------|--------------------------------|
+
+    ani_method parentMethodInParent {};
+    ASSERT_EQ(env_->Class_FindMethod(clsParent, "parentMethod", ":", &parentMethodInParent), ANI_OK);
+    ani_method childMethodInParent {};
+    ASSERT_EQ(env_->Class_FindMethod(clsParent, "childMethod", ":", &childMethodInParent), ANI_NOT_FOUND);
+    ani_method overridedMethodInParent {};
+    ASSERT_EQ(env_->Class_FindMethod(clsParent, "overridedMethod", ":", &overridedMethodInParent), ANI_OK);
+
+    ani_method parentMethodInChild {};
+    ASSERT_EQ(env_->Class_FindMethod(clsChild, "parentMethod", ":", &parentMethodInChild), ANI_OK);
+    ani_method childMethodInChild {};
+    ASSERT_EQ(env_->Class_FindMethod(clsChild, "childMethod", ":", &childMethodInChild), ANI_OK);
+    ani_method overridedMethodInChild {};
+    ASSERT_EQ(env_->Class_FindMethod(clsChild, "overridedMethod", ":", &overridedMethodInChild), ANI_OK);
+
+    ASSERT_EQ(parentMethodInParent, parentMethodInChild);
+    ASSERT_NE(childMethodInParent, childMethodInChild);
+}
+
+TEST_F(ClassFindMethodTest, check_hierarchy_static)
+{
+    ani_class clsParent {};
+    ASSERT_EQ(env_->FindClass("test.Parent", &clsParent), ANI_OK);
+    ani_class clsChild {};
+    ASSERT_EQ(env_->FindClass("test.Child", &clsChild), ANI_OK);
+
+    // |--------------------------------------------------------------------------------------------------|
+    // |                         |    Parent class   |     Child class   |    The same method is found    |
+    // |-------------------------|-------------------|-------------------|--------------------------------|
+    // |  Parent static method   |       ANI_OK      |       ANI_OK      |              Yes               |
+    // |   Child static method   |   ANI_NOT_FOUND   |       ANI_OK      |               No               |
+    // | Overrided static method |       ANI_OK      |       ANI_OK      |               No               |
+    // |-------------------------|-------------------|-------------------|--------------------------------|
+
+    ani_static_method parentMethodInParent {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(clsParent, "parentStaticMethod", ":", &parentMethodInParent), ANI_OK);
+    ani_static_method childMethodInParent {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(clsParent, "childStaticMethod", ":", &childMethodInParent), ANI_NOT_FOUND);
+    ani_static_method overridedMethodInParent {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(clsParent, "overridedStaticMethod", ":", &overridedMethodInParent), ANI_OK);
+
+    ani_static_method parentMethodInChild {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(clsChild, "parentStaticMethod", ":", &parentMethodInChild), ANI_OK);
+    ani_static_method childMethodInChild {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(clsChild, "childStaticMethod", ":", &childMethodInChild), ANI_OK);
+    ani_static_method overridedMethodInChild {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(clsChild, "overridedStaticMethod", ":", &overridedMethodInChild), ANI_OK);
+
+    ASSERT_EQ(parentMethodInParent, parentMethodInChild);
+    ASSERT_NE(childMethodInParent, childMethodInChild);
+    ASSERT_NE(overridedMethodInParent, overridedMethodInChild);
 }
 
 }  // namespace ark::ets::ani::testing
