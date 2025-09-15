@@ -14,8 +14,3 @@
 Unhandled exception: std.core.AssertionError
 AssertionError: expected equality failed: 'undefined' === '[object Object]'
 	at std.core.AssertionError.<ctor> (Errors.ets:23:0)
-	at std.core.AssertionError.<ctor> (Errors.ets:22:0)
-	at std.testing.arktest.failingAssertion (arktest.ets:39:0)
-	at std.testing.arktest.assertCommon (arktest.ets:28:0)
-	at std.testing.arktest.assertEQ (arktest.ets:70:0)
-	at infer2_12.ETSGLOBAL.main (infer2_12.ets:41:0)
