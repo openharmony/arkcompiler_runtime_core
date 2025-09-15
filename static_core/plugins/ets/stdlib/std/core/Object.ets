@@ -229,6 +229,15 @@ export class Object {
         }
         const t = Type.of(o)
         if (t instanceof ClassType) {
+            if (Class.of(o) === Class.of(new Array<Any>)) {
+                let arr = o as Array<Any>
+                let len = arr.length
+                let res: Any[] = new Any[len]
+                for (let i = 0;i < len; i++) {
+                    res[i] = arr[i]
+                }
+                return res
+            }
             const cv = reflect.Value.of(o) as ClassValue
             if (cv.getFieldsNum() == 0) {
                 return new Any[0]
@@ -318,6 +327,15 @@ export class Object {
         }
         const t = Type.of(o)
         if (t instanceof ClassType) {
+            if (Class.of(o) === Class.of(new Array<Any>)) {
+                let arr = o as Array<Any>
+                let len = arr.length
+                let res: NullishEntryType[] = new NullishEntryType[len]
+                for (let i = 0;i < len; i++) {
+                    res[i] = [new Int(i).toString(), arr[i]] as EntryType
+                }
+                return res
+            }
             const cv = reflect.Value.of(o) as ClassValue
             if (cv.getFieldsNum() == 0) {
                 return new NullishEntryType[0]

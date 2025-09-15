@@ -108,7 +108,7 @@ function mapAreEqual(a: Map<PropertyKey, Any>, b: Map<PropertyKey, Any>): boolea
     let areEqual: boolean = true
     a.forEach((av: Any, k: PropertyKey) => {
         const bv = b.get(k)
-        if (bv == undefined || av !== bv)) {
+        if (bv == undefined || av !== bv) {
             areEqual = false
             return
         }
@@ -178,6 +178,7 @@ function objectValues(): int {
     let dou: double = 60.0
 
     let arr: FixedArray<number> = [10, 20, 30]
+    let arr2: Array<string> = ["a", "b", "c"]
     let str: string = "abc"
 
     let cl: Point2D = new Point3D(10, 20, undefined)
@@ -199,6 +200,9 @@ function objectValues(): int {
 
     let arrVal: Any[] = [new Number(10), new Number(20), new Number(30)]
     result += objArraysAreEqual(Object.values(arr), arrVal) ? 0 : 1
+
+    let arr2Val: Any[] = ["a" as string, "b" as string, "c" as string]
+    result += objArraysAreEqual(Object.values(arr2), arr2Val) ? 0 : 1
 
     let strVal: Any[] = ["a" as string, "b" as string, "c" as string]
     result += objArraysAreEqual(Object.values(str), strVal) ? 0 : 1
@@ -224,6 +228,7 @@ function objectEntries(): int {
     let dou: double = 60.0
 
     let arr: FixedArray<number> = [10, 20, 30]
+    let arr2: Array<string> = ["a", "b", "c"]
     let str: string = "abc"
 
     let cl: Point2D = new Point3D(10, null, 30)
@@ -248,6 +253,12 @@ function objectEntries(): int {
     arrVal[1] = ["1", new Number(20)] as TupleT
     arrVal[2] = ["2", new Number(30)] as TupleT
     result += tupleAreEqual(Object.entries(arr) as Object as NullishTuple[], arrVal) ? 0 : 1
+
+    let arr2Val: NullishTuple[] = new NullishTuple[3]
+    arr2Val[0] = ["0", "a"] as TupleT
+    arr2Val[1] = ["1", "b"] as TupleT
+    arr2Val[2] = ["2", "c"] as TupleT
+    result += tupleAreEqual(Object.entries(arr2) as Object as NullishTuple[], arr2Val) ? 0 : 1
 
     let strVal: NullishTuple[] = new NullishTuple[3]
     strVal[0] = ["0", "a"] as TupleT

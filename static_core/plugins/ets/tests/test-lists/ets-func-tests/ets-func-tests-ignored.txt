@@ -391,7 +391,6 @@ std/core/std_core_typedarrays_function2_Int8Array.ets
 std/core/std_core_char_instance_Char_toUpperCase.ets
 
 #24986 (16 tests)
-std/core/Object.ets
 std/math/std_math_sign_double.ets
 std/core/IntlPluralRulesTest.ets
 std/core/TypeAssignableFromTest.ets
