@@ -59,11 +59,11 @@ function testPlainArrayBasicOperations() {
     }
 
     const removeRes = plainArray.remove(3);
-    testArray.splice(3.0, 1.0);
+    testArray.splice(3, 1);
     arktest.assertEQ(removeRes, "3");
 
     plainArray.removeAt(2);
-    testArray.splice(2.0, 1.0);
+    testArray.splice(2, 1);
 
     for (let i: int = 0; i < testArray.length; i++) {
         arktest.assertEQ(plainArray.getValueAt(i), testArray[i]);

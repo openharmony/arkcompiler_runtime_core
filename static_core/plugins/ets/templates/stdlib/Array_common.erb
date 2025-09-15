@@ -196,7 +196,7 @@
     if (res == -1) {
         return undefined
     }
-    return <%= get_unsafe.(this, 'res.toInt()') %>;
+    return <%= get_unsafe.(this, 'res') %>;
 }
 
 /**
@@ -209,7 +209,7 @@
  *
  * @returns found element index or -1 otherwise
  */
-<%= access_public %> <%= override %> findIndex<%= this_generic %>(<%= this_arg %>predicate: (value: <%= el_type %><%= lambda_params %>) => boolean): number {
+<%= access_public %> <%= override %> findIndex<%= this_generic %>(<%= this_arg %>predicate: (value: <%= el_type %><%= lambda_params %>) => boolean): int {
     for (let i = 0; i < <%= this_len_int %>; i++) {
         if (predicate(<%= get_unsafe.(this, 'i') %><%= lambda_args %>)) {
             return i;
@@ -283,7 +283,7 @@
  *
  * @returns index of first element satisfying to predicate, -1 if no such element
  */
-<%= access_public %> <%= override %> findLastIndex<%= this_generic %>(<%= this_arg %>predicate: (element: <%= el_type %><%= lambda_params %>) => boolean): number {
+<%= access_public %> <%= override %> findLastIndex<%= this_generic %>(<%= this_arg %>predicate: (element: <%= el_type %><%= lambda_params %>) => boolean): int {
     for (let i = <%= this_len_int %> - 1; i >= 0; i--) {
         if (predicate(<%= get_unsafe.(this, 'i') %><%= lambda_args %>)) {
             return i

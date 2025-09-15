@@ -212,11 +212,9 @@ private:
             {utf::CStringAsMutf8("indexOf"), {"Lstd/core/Object;Lstd/core/Int;:I", 3, "indexOf"}},
             {utf::CStringAsMutf8("lastIndexOf"), {"Lstd/core/Object;Lstd/core/Int;:I", 3, "lastIndexOf"}},
             {utf::CStringAsMutf8("slice"), {"II:Lescompat/Array;", 3, "slice"}},
-            {utf::CStringAsMutf8("splice"), {"I:Lescompat/Array;", 2, "splice"}},
-            {utf::CStringAsMutf8("splice"), {"IILescompat/Array;:Lescompat/Array;", 3, "splice"}},
             {utf::CStringAsMutf8("toSpliced"), {"II[Lstd/core/Object;:Lescompat/Array;", 3, "toSpliced"}},
             {utf::CStringAsMutf8("with"), {"DLstd/core/Object;:Lescompat/Array;", 3, "with"}},
-            {utf::CStringAsMutf8("push"), {"Lescompat/Array;:D", 1, "pushArray"}}};
+            {utf::CStringAsMutf8("push"), {"Lescompat/Array;:I", 1, "pushArray"}}};
 
         wArray_ = RegisterClass(descriptors::ARRAY, "Array", &W_ARRAY_OVERLOADS);
         wArray_->GetOverloadNameMapping()["pushOne"] = "push";
