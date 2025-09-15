@@ -45,7 +45,7 @@ class Sphere extends Circle {}
 
 class Space {
     objects: [Circle, Sphere, Vector, ExtendedPoint, Point];
-    internal dimension: int;
+    private dimension: int;
     constructor(objects: [Circle, Sphere, Vector, ExtendedPoint, Point]) {
         this.objects = objects
     }

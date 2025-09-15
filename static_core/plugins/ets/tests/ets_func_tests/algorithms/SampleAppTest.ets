@@ -20,8 +20,8 @@
 */
 
 class Point {
-    internal x: double;
-    internal y: double;
+    public x: double;
+    public y: double;
     constructor() {
         this.x = Double.NaN;
         this.y = Double.NaN;

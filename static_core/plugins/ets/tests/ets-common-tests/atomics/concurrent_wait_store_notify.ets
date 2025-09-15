@@ -24,7 +24,7 @@ let arr: Int32Array = new Int32Array;
 let bytearr: Int8Array = new Int8Array;
 
 function testMain() {
-    let c = new Console()
+    let c = Console.getInstance()
 
     buf = new ArrayBuffer(4);
     arr = new Int32Array(buf, 0, 1);
@@ -38,7 +38,7 @@ function testMain() {
 }
 
 function writer(): Int {
-    let c = new Console()
+    let c = Console.getInstance()
 
     wait()
     Atomics.store(bytearr, 0, 5 as byte)

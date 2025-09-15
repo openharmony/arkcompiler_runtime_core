@@ -17,7 +17,7 @@ let buf: ArrayBuffer;
 let arr: Int32Array;
 
 async function testMain() {
-    let c = new Console()
+    let c = Console.getInstance()
 
     buf = new ArrayBuffer(4);
     arr = new Int32Array(buf, 0, 1);
