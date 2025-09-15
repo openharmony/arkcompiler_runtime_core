@@ -81,10 +81,13 @@ static void AssertCompoundClassRoot(EtsClassLinker *classLinker, EtsClassRoot ro
     if (root == EtsClassRoot::OBJECT) {
         ASSERT_TRUE(coreClass->IsObjectClass());
         ASSERT_EQ(klass->GetBase(), nullptr);
+        ASSERT_EQ(klass->GetSuperClass(), nullptr);
     } else {
         ASSERT_FALSE(coreClass->IsObjectClass());
         ASSERT_NE(klass->GetBase(), nullptr);
         ASSERT_EQ(klass->GetBase(), classLinker->GetClassRoot(EtsClassRoot::OBJECT));
+        ASSERT_NE(klass->GetSuperClass(), nullptr);
+        ASSERT_EQ(klass->GetSuperClass(), classLinker->GetClassRoot(EtsClassRoot::OBJECT));
     }
 }
 
@@ -108,6 +111,8 @@ static void AssertStringClassRoot(EtsClassLinker *classLinker, EtsClassRoot root
     ASSERT_FALSE(coreClass->IsObjectClass());
     ASSERT_NE(klass->GetBase(), nullptr);
     ASSERT_EQ(klass->GetBase(), classLinker->GetClassRoot(EtsClassRoot::STRING));
+    ASSERT_NE(klass->GetSuperClass(), nullptr);
+    ASSERT_EQ(klass->GetSuperClass(), classLinker->GetClassRoot(EtsClassRoot::STRING));
 
     switch (root) {
         case EtsClassRoot::LINE_STRING:
@@ -142,6 +147,8 @@ static void AssertCompoundContainerClassRoot(EtsClassLinker *classLinker, EtsCla
     ASSERT_FALSE(coreClass->IsObjectClass());
     ASSERT_NE(klass->GetBase(), nullptr);
     ASSERT_EQ(klass->GetBase(), classLinker->GetClassRoot(EtsClassRoot::OBJECT));
+    ASSERT_NE(klass->GetSuperClass(), nullptr);
+    ASSERT_EQ(klass->GetSuperClass(), classLinker->GetClassRoot(EtsClassRoot::OBJECT));
 }
 
 static void AssertPrimitiveClassRoot(EtsClassLinker *classLinker, EtsClassRoot root)
@@ -162,6 +169,7 @@ static void AssertPrimitiveClassRoot(EtsClassLinker *classLinker, EtsClassRoot r
     ASSERT_FALSE(coreClass->IsProxy());
     ASSERT_EQ(coreClass->GetLoadContext(), classLinker->GetEtsClassLinkerExtension()->GetBootContext());
     ASSERT_EQ(klass->GetBase(), nullptr);
+    ASSERT_EQ(klass->GetSuperClass(), nullptr);
 }
 
 static void AssertPrimitiveContainerClassRoot(EtsClassLinker *classLinker, EtsClassRoot root)
@@ -183,6 +191,8 @@ static void AssertPrimitiveContainerClassRoot(EtsClassLinker *classLinker, EtsCl
     ASSERT_EQ(coreClass->GetLoadContext(), classLinker->GetEtsClassLinkerExtension()->GetBootContext());
     ASSERT_NE(klass->GetBase(), nullptr);
     ASSERT_EQ(klass->GetBase(), classLinker->GetClassRoot(EtsClassRoot::OBJECT));
+    ASSERT_NE(klass->GetSuperClass(), nullptr);
+    ASSERT_EQ(klass->GetSuperClass(), classLinker->GetClassRoot(EtsClassRoot::OBJECT));
 }
 
 static void AssertPrimitiveClassRoots(EtsClassLinker *classLinker)

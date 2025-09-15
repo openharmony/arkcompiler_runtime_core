@@ -13,6 +13,53 @@
  * limitations under the License.
  */
 
+interface BaseIface {
+    foo()
+}
+
+interface DerivedIface extends BaseIface {
+    boo()
+    defaultMethod(): int {
+        return 0
+    }
+}
+
+interface DerivedDerivedIface extends DerivedIface {
+    foo()
+    goo()
+}
+
+interface OverridedIface extends DerivedDerivedIface {
+    foo()
+    boo()
+    goo()
+    defaultMethod(): int {
+        return 1
+    }
+}
+
+interface ABase1 {
+    abase1method()
+}
+interface ABase2 {
+    abase2method()
+}
+interface BBase1 {
+    bbase1method()
+}
+interface BBase2 {
+    bbase2method()
+}
+interface AIface extends ABase1, ABase2 {
+    amethod()
+}
+interface BIface extends BBase1, BBase2 {
+    bmethod()
+}
+
+interface MultiExtendIface extends AIface, BIface {
+}
+
 interface Iface {
     someDefaultMethod(): string {
         return "111"
@@ -87,7 +134,7 @@ function testGetInstanceMethods(classType: Class, expectedMethodsArr: string[]) 
     arktest.assertEQ(methods.length, expectedMethodsArr.length)
 
     for (let i = 0; i < methods.length; ++i) {
-        arktest.assertTrue(expectedMtdsSet.has(methods[i].getName()))
+        arktest.assertTrue(expectedMtdsSet.has(methods[i].getName()), `failed on method: ${methods[i].getName()}`)
     }
 }
 
@@ -109,6 +156,23 @@ function tryGetPrivateInstanceMethodByName(classType: Class, methods: string[]) 
         if (obtainedMethod != undefined) {
             throw new Error(`Given method '${methods[i]}' in tryGetPrivateInstanceMethodByName should be undefined`)
         }
+    }
+}
+
+function testGetInterfaces(intfs: FixedArray<Class>, expectedIntfs: string[]) {
+    arktest.assertEQ(intfs.length, expectedIntfs.length)
+
+    let expectedIntfsSet = new Set<string>(expectedIntfs)
+
+    for (let i = 0; i < intfs.length; ++i) {
+        arktest.assertTrue(expectedIntfsSet.has(intfs[i].getName()), `failed on interface: ${intfs[i].getName()}`)
+    }
+}
+
+function testOverridenInstanceMethodInInterface(intf: Class) {
+    let methods = intf.getInstanceMethods()
+    for (let i = 0; i < methods.length; ++i) {
+        arktest.assertEQ(methods[i].getOwner().getName(), intf.getName())
     }
 }
 
@@ -243,10 +307,20 @@ function main(): int {
 
     testGetName(typeB, "ReflectTypeTest.B")
 
-    // Test getting base
+    // Test getSuper()
     arktest.assertEQ(typeBaseObj.getSuper(), undefined)
     arktest.assertEQ(typeA.getSuper(), typeBaseObj)
     arktest.assertEQ(typeB.getSuper(), typeA)
+
+    arktest.assertEQ((Type.from<BaseIface>() as InterfaceType).getClass().getSuper(), undefined)
+    arktest.assertEQ((Type.from<DerivedIface>() as InterfaceType).getClass().getSuper(), undefined)
+    arktest.assertEQ((Type.from<DerivedDerivedIface>() as InterfaceType).getClass().getSuper(), undefined)
+
+    // GetInterfaces()
+    let emptyClass: Class[] = []
+    arktest.assertEQ((Type.from<BaseIface>() as InterfaceType).getClass().getInterfaces().length, 0)
+    testGetInterfaces((Type.from<DerivedIface>() as InterfaceType).getClass().getInterfaces(), ["ReflectTypeTest.BaseIface"])
+    testGetInterfaces((Type.from<DerivedDerivedIface>() as InterfaceType).getClass().getInterfaces(), ["ReflectTypeTest.DerivedIface"])
 
     // Test methods getters
     let baseObjInstanceMethodsExpected =
@@ -259,6 +333,18 @@ function main(): int {
     testGetInstanceMethods(typeBaseObj, baseObjInstanceMethodsExpected)
     testGetInstanceMethods(typeA, baseObjInstanceMethodsExpected.concat(["someDefaultMethod", "foo1", "foo2"]))
     testGetInstanceMethods(typeB, baseObjInstanceMethodsExpected.concat(["someDefaultMethod", "foo1", "foo2", "boo1", "boo2"]))
+
+    // Test instanceMethods for interfaces
+    testGetInstanceMethods((Type.from<BaseIface>() as InterfaceType).getClass(), ["foo"])
+    testGetInstanceMethods((Type.from<DerivedIface>() as InterfaceType).getClass(), ["foo", "boo", "defaultMethod"])
+    testGetInstanceMethods((Type.from<DerivedDerivedIface>() as InterfaceType).getClass(), ["foo", "goo", "boo", "defaultMethod"])
+
+    testGetInstanceMethods((Type.from<AIface>() as InterfaceType).getClass(), ["amethod", "abase1method", "abase2method"])
+    testGetInstanceMethods((Type.from<BIface>() as InterfaceType).getClass(), ["bmethod", "bbase1method", "bbase2method"])
+    testGetInstanceMethods((Type.from<MultiExtendIface>() as InterfaceType).getClass(), ["amethod", "bmethod",
+        "abase1method", "abase2method", "bbase1method", "bbase2method"])
+
+    testOverridenInstanceMethodInInterface((Type.from<OverridedIface>() as InterfaceType).getClass())
 
     testGetInstanceMethodByName(typeBaseObj, baseObjInstanceMethodsExpected)
     testGetInstanceMethodByName(typeA, baseObjInstanceMethodsExpected.concat(["someDefaultMethod", "foo1", "foo2"]))
