@@ -45,6 +45,7 @@
 #include "runtime/coroutines/stackful_coroutine_manager.h"
 #include "runtime/coroutines/threaded_coroutine_manager.h"
 #include "runtime/mem/lock_config_helper.h"
+#include "runtime/class_lock.h"
 #include "plugins/ets/stdlib/native/init_native_methods.h"
 #include "plugins/ets/runtime/types/ets_error.h"
 #include "plugins/ets/runtime/types/ets_abc_runtime_linker.h"

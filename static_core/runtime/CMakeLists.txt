@@ -110,6 +110,7 @@ set(SOURCES
     monitor_object_lock.cpp
     monitor_pool.cpp
     global_object_lock.cpp
+    class_lock.cpp
     object_header.cpp
     regexp/ecmascript/regexp_parser.cpp
     regexp/ecmascript/regexp_executor.cpp
