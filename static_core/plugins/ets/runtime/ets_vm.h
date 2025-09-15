@@ -338,8 +338,10 @@ public:
         return MEMBER_OFFSET(PandaEtsVM, doubleToStringCache_);
     }
 
-    void RegisterFinalizerForObject(EtsCoroutine *coro, const EtsHandle<EtsObject> &object, void (*finalizer)(void *),
-                                    void *finalizerArg);
+    EtsFinalizableWeakRef *RegisterFinalizerForObject(EtsCoroutine *coro, const EtsHandle<EtsObject> &object,
+                                                      void (*finalizer)(void *), void *finalizerArg);
+
+    bool UnregisterFinalizerForObject(EtsCoroutine *coro, EtsFinalizableWeakRef *object);
 
     void CleanFinalizableReferenceList();
 
