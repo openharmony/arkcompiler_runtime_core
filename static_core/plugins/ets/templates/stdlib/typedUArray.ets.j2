@@ -685,9 +685,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
         {%- elif argType == 'long' %}
         res.ofLong(items)
         {%- elif argType == 'bigint' %}
-        for (let i: int = 0; i < items.length; i++) {
-            res.setUnsafeClamp(i, items[i].getULong())
-        }
+        res.ofBigInt(items)
         {%- else %}
         {%- if element.get('name') == 'BigUint64' %}
         for (let i: int = 0; i < items.length; i++) {
@@ -712,6 +710,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
     private final native ofLong(items: FixedArray<long>): void
     {%- elif element.get('name') == 'BigUint64' %}
     private final native ofLong(items: FixedArray<long>): void
+    private final native ofBigInt(items: FixedArray<Object>): void
     {%- endif %}
 
     /**
@@ -829,6 +828,23 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
     }
     {%- endif %}
 
+    /**
+     * Creates an array from an object of FixedArray<{{updatedSubsetType}}>.
+     *
+     * @param arr An instance of the FixedArray type to convert to an array.
+     *
+     * @returns new {{element['name']}}Array
+     */
+    public static fromFixedArray{{updatedSubsetType}}(arr: FixedArray<{{updatedSubsetType}}>): {{element['name']}}Array {
+        let result = new {{element['name']}}Array(arr.length)
+        {%- if updatedSubsetType == 'BigInt' %}
+        result.ofBigInt(arr)
+        {%- else %}
+        result.ofInt(arr)
+        {%- endif %}
+        return result
+    }
+
     private native final set(array: Array<{{updatedSubsetType}}>): void;
 
     /**
@@ -841,7 +857,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
     public static fromArray{{updatedSubsetType}}(arr: Array<{{updatedSubsetType}}>): {{element['name']}}Array {
         let result = new {{element['name']}}Array(arr.length)
         result.set(arr)
-        return result;
+        return result
     }
 
     /**
@@ -940,7 +956,8 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
     public static overload from {
         fromSet{{updatedSubsetType}}, from{{element['name']}}Array
         {%- if element['signed'] is defined and element['signed']|length %} ,from{{element['signed']}}Array{%- endif %}
-        ,fromArray{{updatedSubsetType}}, fromArrayLike{{element['subsetType']}}, fromArrayLike, fromIterable
+        ,fromFixedArray{{updatedSubsetType}}, fromArray{{updatedSubsetType}}, fromArrayLike{{element['subsetType']}},
+        fromArrayLike, fromIterable
     };
 
     /**

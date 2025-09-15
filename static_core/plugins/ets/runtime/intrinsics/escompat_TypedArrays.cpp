@@ -223,6 +223,26 @@ namespace {
 
 namespace unbox {
 
+constexpr uint64_t LONG_SHIFT = 32U;
+constexpr uint64_t LONG_MASK = (uint64_t {1} << LONG_SHIFT) - uint64_t {1U};
+
+[[nodiscard]] EtsLong GetLong(const EtsBigInt *bigint)
+{
+    const auto *bytes = bigint->GetBytes();
+    ASSERT(bytes != nullptr);
+    auto buff = EtsLong {0};
+    const auto len = std::min(uint32_t {2U}, static_cast<uint32_t>(bytes->GetLength()));
+    for (uint32_t i = 0; i < len; ++i) {
+        buff += static_cast<EtsLong>((static_cast<uint32_t>(bytes->Get(i)) & LONG_MASK) << i * LONG_SHIFT);
+    }
+    return bigint->GetSign() * buff;
+}
+
+[[nodiscard]] EtsUlong GetULong(const EtsBigInt *bigint)
+{
+    return static_cast<EtsUlong>(GetLong(bigint));
+}
+
 template <typename Cond>
 bool CheckCastedClass(Cond cond, const EtsClass *expectedClass, const EtsClass *objectClass)
 {
@@ -339,26 +359,6 @@ public:
     }
 
 private:
-    static constexpr uint64_t LONG_SHIFT = 32U;
-    static constexpr uint64_t LONG_MASK = (uint64_t {1} << LONG_SHIFT) - uint64_t {1U};
-
-    [[nodiscard]] static EtsLong GetLong(const EtsBigInt *bigint)
-    {
-        const auto *bytes = bigint->GetBytes();
-        ASSERT(bytes != nullptr);
-        auto buff = EtsLong {0};
-        const auto len = std::min(uint32_t {2U}, static_cast<uint32_t>(bytes->GetLength()));
-        for (uint32_t i = 0; i < len; ++i) {
-            buff += static_cast<EtsLong>((static_cast<uint32_t>(bytes->Get(i)) & LONG_MASK) << i * LONG_SHIFT);
-        }
-        return bigint->GetSign() * buff;
-    }
-
-    [[nodiscard]] static EtsUlong GetULong(const EtsBigInt *bigint)
-    {
-        return static_cast<EtsUlong>(GetLong(bigint));
-    }
-
     const EtsBigInt *Cast(EtsObject *object) const
     {
         if (CheckCastedClass([](const EtsClass *klass) { return klass->IsBigInt(); }, escompatBigIntClass_,
@@ -2176,6 +2176,29 @@ extern "C" void EtsEscompatBigInt64ArrayOfInt(ark::ets::EtsEscompatBigInt64Array
     EtsEscompatArrayOfImpl(thisArray, srcAddress);
 }
 
+template <typename T, typename ToLong>
+void EtsEscompatArrayOfBigIntImpl(T *thisArray, EtsTypedObjectArray<EtsBigInt> *src, ToLong toLong)
+{
+    auto *arrayPtr = GetNativeData(thisArray);
+    if (UNLIKELY(arrayPtr == nullptr)) {
+        return;
+    }
+
+    using ElementType = typename T::ElementType;
+    auto *dst = reinterpret_cast<ElementType *>(ToUintPtr(arrayPtr) + static_cast<int>(thisArray->GetByteOffset()));
+    ASSERT(thisArray->GetLengthInt() >= 0 && static_cast<size_t>(thisArray->GetLengthInt()) >= src->GetLength());
+    std::generate_n(dst, src->GetLength(), [idx = 0, src, toLong]() mutable { return toLong(src->Get(idx++)); });
+}
+
+extern "C" void EtsEscompatBigInt64ArrayOfBigInt(ark::ets::EtsEscompatBigInt64Array *thisArray, ark::ObjectHeader *src)
+{
+    // The method fills the typed array from a FixedArray<bigint> and in contrast to
+    // EtsEscompatBigInt64ArraySetValuesFromArray, which fills a typed array from escompat.Array<bigint>, we can be
+    // sure that `src` is an instance of the EtsTypedObjectArray<EtsBigInt> class.
+    EtsEscompatArrayOfBigIntImpl(thisArray, EtsTypedObjectArray<EtsBigInt>::FromCoreType(src),
+                                 [](EtsBigInt *bigint) { return unbox::GetLong(bigint); });
+}
+
 extern "C" void EtsEscompatBigInt64ArrayOfLong(ark::ets::EtsEscompatBigInt64Array *thisArray, EtsCharArray *src)
 {
     auto *srcAddress = reinterpret_cast<EtsLong *>(ToUintPtr(src->GetCoreType()->GetData()));
@@ -2296,5 +2319,15 @@ extern "C" void EtsEscompatBigUint64ArrayOfLong(ark::ets::EtsEscompatBigUInt64Ar
 {
     auto *srcAddress = reinterpret_cast<EtsLong *>(ToUintPtr(src->GetCoreType()->GetData()));
     EtsEscompatArrayOfImpl(thisArray, srcAddress);
+}
+
+extern "C" void EtsEscompatBigUint64ArrayOfBigInt(ark::ets::EtsEscompatBigUInt64Array *thisArray,
+                                                  ark::ObjectHeader *src)
+{
+    // The method fills the typed array from a FixedArray<bigint> and in contrast to
+    // EtsEscompatBigUint64ArraySetValuesFromArray, which fills a typed array from escompat.Array<bigint>, we can be
+    // sure that `src` is an instance of the EtsTypedObjectArray<EtsBigInt> class.
+    EtsEscompatArrayOfBigIntImpl(thisArray, EtsTypedObjectArray<EtsBigInt>::FromCoreType(src),
+                                 [](EtsBigInt *bigint) { return unbox::GetULong(bigint); });
 }
 }  // namespace ark::ets::intrinsics

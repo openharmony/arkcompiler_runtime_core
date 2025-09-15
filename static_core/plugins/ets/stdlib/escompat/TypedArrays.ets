@@ -662,6 +662,19 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         return result
     }
 
+    /**
+     * Creates an array from an object of FixedArray<int>.
+     *
+     * @param arr An instance of the FixedArray type to convert to an array.
+     *
+     * @returns new Int8Array
+     */
+    public static fromFixedArrayint(arr: FixedArray<int>): Int8Array {
+        let result = new Int8Array(arr.length)
+        result.ofInt(arr)
+        return result
+    }
+
     private native final set(array: Array<int>): void;
 
     /**
@@ -674,7 +687,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     public static fromArrayint(arr: Array<int>): Int8Array {
         let result = new Int8Array(arr.length)
         result.set(arr)
-        return result;
+        return result
     }
 
     /**
@@ -757,7 +770,8 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
 
     public static overload from {
         fromSetint, fromInt8Array ,fromUint8Array,
-        fromArrayint, fromArrayLikeNumber, fromArrayLike, fromIterable
+        fromFixedArrayint, fromArrayint, fromArrayLikeNumber,
+        fromArrayLike, fromIterable
     };
 
     /**
@@ -2163,6 +2177,19 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         return result
     }
 
+    /**
+     * Creates an array from an object of FixedArray<int>.
+     *
+     * @param arr An instance of the FixedArray type to convert to an array.
+     *
+     * @returns new Int16Array
+     */
+    public static fromFixedArrayint(arr: FixedArray<int>): Int16Array {
+        let result = new Int16Array(arr.length)
+        result.ofInt(arr)
+        return result
+    }
+
     private native final set(array: Array<int>): void;
 
     /**
@@ -2175,7 +2202,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     public static fromArrayint(arr: Array<int>): Int16Array {
         let result = new Int16Array(arr.length)
         result.set(arr)
-        return result;
+        return result
     }
 
     /**
@@ -2258,7 +2285,8 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
 
     public static overload from {
         fromSetint, fromInt16Array ,fromUint16Array,
-        fromArrayint, fromArrayLikeNumber, fromArrayLike, fromIterable
+        fromFixedArrayint, fromArrayint, fromArrayLikeNumber,
+        fromArrayLike, fromIterable
     };
 
     /**
@@ -3641,6 +3669,19 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         return result
     }
 
+    /**
+     * Creates an array from an object of FixedArray<int>.
+     *
+     * @param arr An instance of the FixedArray type to convert to an array.
+     *
+     * @returns new Int32Array
+     */
+    public static fromFixedArrayint(arr: FixedArray<int>): Int32Array {
+        let result = new Int32Array(arr.length)
+        result.ofInt(arr)
+        return result
+    }
+
     private native final set(array: Array<int>): void;
 
     /**
@@ -3653,7 +3694,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     public static fromArrayint(arr: Array<int>): Int32Array {
         let result = new Int32Array(arr.length)
         result.set(arr)
-        return result;
+        return result
     }
 
     /**
@@ -3736,7 +3777,8 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
 
     public static overload from {
         fromSetint, fromInt32Array,
-        fromArrayint, fromArrayLikeNumber, fromArrayLike, fromIterable
+        fromFixedArrayint, fromArrayint, fromArrayLikeNumber,
+        fromArrayLike, fromIterable
     };
 
     /**
@@ -5073,15 +5115,14 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      */
     public static of(...items: FixedArray<bigint>): BigInt64Array {
         let res = new BigInt64Array(items.length.toInt())
-        for (let i: int = 0; i < items.length; i++) {
-            res.setUnsafe(i, items[i].getLong())
-        }
+        res.ofBigInt(items)
         return res
     }
 
     private final native ofInt(items: FixedArray<int>): void
     private final native ofNumber(items: FixedArray<number>): void
     private final native ofLong(items: FixedArray<long>): void
+    private final native ofBigInt(items: FixedArray<Object>): void
 
     /**
      * Returns a new array from a set of elements.
@@ -5139,6 +5180,19 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         return result
     }
 
+    /**
+     * Creates an array from an object of FixedArray<BigInt>.
+     *
+     * @param arr An instance of the FixedArray type to convert to an array.
+     *
+     * @returns new BigInt64Array
+     */
+    public static fromFixedArrayBigInt(arr: FixedArray<BigInt>): BigInt64Array {
+        let result = new BigInt64Array(arr.length)
+        result.ofBigInt(arr)
+        return result
+    }
+
     private native final set(array: Array<BigInt>): void;
 
     /**
@@ -5151,7 +5205,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     public static fromArrayBigInt(arr: Array<BigInt>): BigInt64Array {
         let result = new BigInt64Array(arr.length)
         result.set(arr)
-        return result;
+        return result
     }
 
     /**
@@ -5233,7 +5287,8 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
 
     public static overload from {
         fromSetBigInt, fromBigInt64Array,
-        fromArrayBigInt, fromArrayLikeNumber, fromArrayLike, fromIterable
+        fromFixedArrayBigInt, fromArrayBigInt, fromArrayLikeNumber,
+        fromArrayLike, fromIterable
     };
 
     /**
@@ -6606,6 +6661,19 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
         return result
     }
 
+    /**
+     * Creates an array from an object of FixedArray<number>.
+     *
+     * @param arr An instance of the FixedArray type to convert to an array.
+     *
+     * @returns new Float32Array
+     */
+    public static fromFixedArraynumber(arr: FixedArray<number>): Float32Array {
+        let result = new Float32Array(arr.length)
+        result.ofNumber(arr)
+        return result
+    }
+
     private native final set(array: Array<number>): void;
 
     /**
@@ -6618,7 +6686,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     public static fromArraynumber(arr: Array<number>): Float32Array {
         let result = new Float32Array(arr.length)
         result.set(arr)
-        return result;
+        return result
     }
 
     /**
@@ -6700,7 +6768,8 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
 
     public static overload from {
         fromSetnumber, fromFloat32Array,
-        fromArraynumber, fromArrayLikeNumber, fromArrayLike, fromIterable
+        fromFixedArraynumber, fromArraynumber, fromArrayLikeNumber,
+        fromArrayLike, fromIterable
     };
     private final native containsNaN(fromIndex: int): boolean;
 
@@ -8013,6 +8082,19 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
         return result
     }
 
+    /**
+     * Creates an array from an object of FixedArray<number>.
+     *
+     * @param arr An instance of the FixedArray type to convert to an array.
+     *
+     * @returns new Float64Array
+     */
+    public static fromFixedArraynumber(arr: FixedArray<number>): Float64Array {
+        let result = new Float64Array(arr.length)
+        result.ofNumber(arr)
+        return result
+    }
+
     private native final set(array: Array<number>): void;
 
     /**
@@ -8025,7 +8107,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     public static fromArraynumber(arr: Array<number>): Float64Array {
         let result = new Float64Array(arr.length)
         result.set(arr)
-        return result;
+        return result
     }
 
     /**
@@ -8107,7 +8189,8 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
 
     public static overload from {
         fromSetnumber, fromFloat64Array,
-        fromArraynumber, fromArrayLikeNumber, fromArrayLike, fromIterable
+        fromFixedArraynumber, fromArraynumber, fromArrayLikeNumber,
+        fromArrayLike, fromIterable
     };
     private final native containsNaN(fromIndex: int): boolean;
 
