@@ -11,10 +11,67 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
- # List of valid class members
-members:
-  - "x: int;"
-  - "x(): int { return 1 }"
-  - "inner class x { static x: int = 1; }"
-  - "enum x {Red, Green}"
-  - "interface x { fee(): int }"
+cases:
+  - desc: |-
+      >-
+        A compile-time error occurs if name of a field declared
+        in the body of a class declaration is also used for a method
+        of this class with the same static or non-static status.
+    check_variants:
+      - {member1: "x: int", member2: "x(): int { return 1 }"}
+      - {member1: "static x: int", member2: "static x(): int { return 1 }"}
+    decl_variants:
+      - |-
+        class A {
+          [member1]
+          [member2]
+        }
+      - |-
+        class A {
+          [member2]
+          [member1]
+        }
+
+  - desc: |-
+      >-
+        A compile-time error occurs if name of a field declared
+        in the body of a class declaration is also used for a method
+        of this class with the same static or non-static status.
+    check_variants:
+      - {member1: "x: int", member2: "x(): int { return 1 }"}
+      - {member1: "static x: int", member2: "static x(): int { return 1 }"}
+    decl_variants:
+      - |-
+        class A {
+          [member1]
+        }
+        class B extends A {
+          [member2]
+        }
+      - |-
+        class A {
+          [member2]
+        }
+        class B extends A {
+          [member1]
+        }
+
+  - desc: |-
+      >-
+        A compile-time error occurs if name of a field declared
+        in the body of a class declaration is also used for another field
+        in the same declaration with the same static or non-static status.
+    check_variants:
+      - {member1: "x: int", member2: "x: number"}
+      - {member1: "static x: int", member2: "static x: number"}
+    decl_variants:
+      - |-
+        class A {
+          [member1]
+          [member2]
+        }
+      - |-
+        class A {
+          [member2]
+          [member1]
+        }

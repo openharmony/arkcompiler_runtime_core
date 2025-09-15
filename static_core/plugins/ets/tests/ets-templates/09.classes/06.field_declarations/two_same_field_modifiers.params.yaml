@@ -11,9 +11,45 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # List of access modifiers
-modifiers:
-  - "private private"
-  - "internal internal"
-  - "protected protected"
-  - "public public"
+cases:
+  - desc: |-
+      >-
+        A compile-time error occurs if some field modifier
+        is used more than once in a field declaration.
+    check_variants:
+      - {field_modifiers: "static static"}
+      - {field_modifiers: "static readonly static"}
+      - {field_modifiers: "readonly readonly"}
+      - {field_modifiers: "readonly static readonly"}
+    decl_variants:
+      - |-
+        class A {
+          [field_modifiers] field: int
+        }
+
+  - desc: |-
+      >-
+        A compile-time error occurs if some field modifier
+        is used more than once in a field declaration.
+    decl_variants:
+      - |-
+        class B {
+          field: int
+        }
+        class A extends B {
+          override override field: int
+        }
+      - |-
+        class B {
+          static field: int
+        }
+        class A extends B {
+          static override override field: int
+        }
+      - |-
+        class B {
+          static field: int
+        }
+        class A extends B {
+          override static override field: int
+        }

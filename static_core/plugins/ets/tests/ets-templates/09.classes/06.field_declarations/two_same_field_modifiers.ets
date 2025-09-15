@@ -13,17 +13,35 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for mod in modifiers %}
+{% for c in cases %}
+
+{% for decl in c.decl_variants %}
+
+{% if 'check_variants' in c %}
+  {% set check_variants=c.check_variants %}
+{% else %}
+  {% set check_variants=[{}] %}
+{% endif %}
+{% for cv in check_variants %}
+
+{% set ns = namespace() %}
+
+{% set ns.decl = decl %}
+{% for k, v in cv.items() %}
+  {% set ns.decl = ns.decl|replace("[" ~ k ~ "]", v) %}
+{% endfor %}
+{% set decl=ns.decl %}
 
 /*---
-desc: The same field modifier appears more than once in a field declaration.
-assert: It is a compile-time error if the same field modifier appears more than once in a field declaration.
-params: mod
+desc: {{c.desc}}
 tags: [compile-only, negative]
 ---*/
 
-class A {
-  {{mod}} i: int;
+{{decl}}
+
+function main(): void {
 }
 
+{% endfor %}
+{% endfor %}
 {% endfor %}
