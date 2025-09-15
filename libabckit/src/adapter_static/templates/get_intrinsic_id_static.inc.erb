@@ -20,14 +20,16 @@ ark::compiler::RuntimeInterface::IntrinsicId AbckitRuntimeAdapterStatic::GetIntr
         [[maybe_unused]] std::string_view methodName, [[maybe_unused]] panda_file::MethodDataAccessor mda) {
 % Runtime::intrinsics.select{ |i| i.static && !i.signature.stackrange && !i.is_stub && !i.compiler_only && i.has_impl? && i.need_nullcheck.empty? }.group_by(&:class_name).each do |clazz, intrinsics|
     if (className == "<%= clazz %>") {
-%   intrinsics.each do |intrinsic|
-        if (methodName == "<%= intrinsic.method_name %>") {
+%       intrinsics.group_by(&:method_name).each do |method_name, method_intrinsics|
+        if (methodName == "<%= method_name %>") {
+%           method_intrinsics.each do |intrinsic|
 %           types = [intrinsic.signature.ret] + intrinsic.signature.args
 %           shorty = types.map { |t| "panda_file::Type::TypeId::" + get_shorty_type(t) }.join(", ")
 %           refTypes = types.select { |t|  object_type?(t) }.map { |t| get_object_descriptor(t).inspect }.join(", ")
             if (IsEqual(mda, {<%= shorty %>}, {<%= refTypes %>})) {
                 return ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_<%= intrinsic.enum_name %>;
             }
+%           end
             return ark::compiler::RuntimeInterface::IntrinsicId::INVALID;
         }
 %       end
