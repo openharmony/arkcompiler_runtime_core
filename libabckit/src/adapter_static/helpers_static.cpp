@@ -1143,7 +1143,7 @@ AbckitTypeId ArkPandasmTypeToAbckitTypeId(const ark::pandasm::Type &type)
         case ark::panda_file::Type::TypeId::U8:
             return ABCKIT_TYPE_ID_U8;
         case ark::panda_file::Type::TypeId::I16:
-            return ABCKIT_TYPE_ID_U16;
+            return ABCKIT_TYPE_ID_I16;
         case ark::panda_file::Type::TypeId::U16:
             return ABCKIT_TYPE_ID_U16;
         case ark::panda_file::Type::TypeId::F32:

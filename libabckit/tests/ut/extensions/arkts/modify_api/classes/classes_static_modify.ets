@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,26 @@
  * limitations under the License.
  */
 
-const field1 = 'Module';
+class Class1 {
+    public field1 = 1;
 
-function main(){};
+    public m1() {
+    };
 
-class Class1 {}
+    public static create(): Class1 {
+        return new Class1();
+    }
+}
 
-interface Interface1 {}
+abstract class Class2 {
+    public abstract m2();
+}
 
-namespace Ns1 {}
+class Class3 extends Class1 {
+    public create(): Class3 {
+        return new Class3();
+    }
+}
+
+function foo(c: Class1){}
+

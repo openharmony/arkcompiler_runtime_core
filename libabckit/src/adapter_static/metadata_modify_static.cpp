@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "libabckit/src/adapter_static/metadata_modify_static.h"
+
 #include "inst.h"
 #include "libabckit/src/metadata_inspect_impl.h"
 #include "libabckit/src/ir_impl.h"
@@ -22,20 +23,21 @@
 
 #include "libabckit/src/codegen/codegen_static.h"
 
-#include "optimizer/analysis/liveness_analyzer.h"
 #include "optimizer/analysis/rpo.h"
 #include "src/adapter_static/metadata_inspect_static.h"
-#include "src/adapter_static/abckit_static.h"
 #include "src/adapter_static/helpers_static.h"
 #include "static_core/assembler/assembly-program.h"
+#include "static_core/assembler/mangling.h"
 
 #include "static_core/compiler/optimizer/ir/graph_checker.h"
 #include "static_core/compiler/optimizer/ir/graph_cloner.h"
-#include "static_core/compiler/optimizer/analysis/loop_analyzer.h"
 #include "static_core/compiler/optimizer/optimizations/cleanup.h"
 #include "static_core/compiler/optimizer/optimizations/move_constants.h"
 #include "static_core/compiler/optimizer/optimizations/lowering.h"
 #include "static_core/bytecode_optimizer/reg_encoder.h"
+
+#include "modify_name_helper.h"
+#include "inst_modifier.h"
 #include "utils/function_util.h"
 
 #include <cstdint>
@@ -50,7 +52,6 @@ namespace libabckit {
 // ========================================
 AbckitString *CreateStringStatic(AbckitFile *file, const char *value, size_t len)
 {
-    LIBABCKIT_LOG_FUNC;
     LIBABCKIT_LOG(DEBUG) << "\"" << value << "\"" << '\n';
     auto *prog = file->GetStaticProgram();
     const auto &[progValueIter, _] = prog->strings.insert(std::string(value, len));
@@ -67,9 +68,162 @@ AbckitString *CreateStringStatic(AbckitFile *file, const char *value, size_t len
     return strings[progValue].get();
 }
 
-void FunctionSetGraphStatic(AbckitCoreFunction *function, AbckitGraph *graph)
+bool ModuleSetNameStatic(AbckitCoreModule *m, const char *newName)
 {
     LIBABCKIT_LOG_FUNC;
+
+    if (!ModifyNameHelper::ModuleRefreshName(m, newName)) {
+        return false;
+    }
+
+    InstModifier modifier(m->file);
+    modifier.Modify();
+
+    return true;
+}
+
+bool ModuleFieldSetNameStatic(AbckitCoreModuleField *field, const char *newName)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    if (!ModifyNameHelper::FieldRefreshName(field, newName)) {
+        return false;
+    }
+
+    InstModifier modifier(field->owner->file);
+    modifier.Modify();
+
+    return true;
+}
+
+bool NamespaceSetNameStatic(AbckitCoreNamespace *ns, const char *newName)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    if (!ModifyNameHelper::NamespaceRefreshName(ns, newName)) {
+        return false;
+    }
+
+    InstModifier modifier(ns->owningModule->file);
+    modifier.Modify();
+
+    return true;
+}
+
+bool NamespaceFieldSetNameStatic(AbckitCoreNamespaceField *field, const char *newName)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    if (!ModifyNameHelper::FieldRefreshName(field, newName)) {
+        return false;
+    }
+
+    InstModifier modifier(field->owner->owningModule->file);
+    modifier.Modify();
+
+    return true;
+}
+
+bool AnnotationInterfaceSetNameStatic(AbckitCoreAnnotationInterface *ai, const char *newName)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    return ModifyNameHelper::AnnotationInterfaceRefreshName(ai, newName);
+}
+
+bool AnnotationSetNameStatic(AbckitCoreAnnotation *anno, const char *newName)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    return ModifyNameHelper::AnnotationRefreshName(anno, newName);
+}
+
+bool ClassSetNameStatic(AbckitCoreClass *klass, const char *newName)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    if (!ModifyNameHelper::ClassRefreshName(klass, newName)) {
+        return false;
+    }
+
+    InstModifier modifier(klass->owningModule->file);
+    modifier.Modify();
+
+    return true;
+}
+
+bool ClassFieldSetNameStatic(AbckitCoreClassField *field, const char *newName)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    if (!ModifyNameHelper::FieldRefreshName(field, newName)) {
+        return false;
+    }
+
+    InstModifier modifier(field->owner->owningModule->file);
+    modifier.Modify();
+
+    return true;
+}
+
+bool InterfaceSetNameStatic(AbckitCoreInterface *iface, const char *newName)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    if (!ModifyNameHelper::InterfaceRefreshName(iface, newName)) {
+        return false;
+    }
+
+    InstModifier modifier(iface->owningModule->file);
+    modifier.Modify();
+
+    return true;
+}
+
+bool InterfaceFieldSetNameStatic(AbckitCoreInterfaceField *field, const char *newName)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    if (!ModifyNameHelper::InterfaceFieldRefreshName(field, newName)) {
+        return false;
+    }
+
+    InstModifier modifier(field->owner->owningModule->file);
+    modifier.Modify();
+
+    return true;
+}
+
+bool EnumSetNameStatic(AbckitCoreEnum *enm, const char *newName)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    if (!ModifyNameHelper::EnumRefreshName(enm, newName)) {
+        return false;
+    }
+
+    InstModifier modifier(enm->owningModule->file);
+    modifier.Modify();
+
+    return true;
+}
+
+bool EnumFieldSetNameStatic(AbckitCoreEnumField *field, const char *newName)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    if (!ModifyNameHelper::FieldRefreshName(field, newName)) {
+        return false;
+    }
+
+    InstModifier modifier(field->owner->owningModule->file);
+    modifier.Modify();
+
+    return true;
+}
+
+void FunctionSetGraphStatic(AbckitCoreFunction *function, AbckitGraph *graph)
+{
     LIBABCKIT_LOG_FUNC;
 
     auto *func = function->GetArkTSImpl()->GetStaticImpl();

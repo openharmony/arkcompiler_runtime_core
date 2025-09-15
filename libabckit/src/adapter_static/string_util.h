@@ -1,0 +1,55 @@
+/**
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef LIBABCKIT_SRC_ADAPTER_STATIC_STRING_UTIL_H
+#define LIBABCKIT_SRC_ADAPTER_STATIC_STRING_UTIL_H
+
+#include <string>
+#include <vector>
+
+#include "libabckit/src/metadata_inspect_impl.h"
+
+namespace libabckit {
+
+/**
+ * @brief StringUtil
+ */
+class StringUtil {
+public:
+    /**
+     * @brief Check if the string matches the substring starting from end position
+     * @param str main string
+     * @param subStr sub string
+     * @return true: match, false: not match
+     */
+    static bool IsEndWith(const std::string &str, const std::string &subStr);
+
+    /**
+     * @brief Traverse types and assemble their names
+     * @param type AbckitType *
+     * @return std::string assembled types name
+     */
+    static std::string GetTypeNameStr(const AbckitType *type);
+
+    /**
+     * @brief Get function name with square brackets
+     * @param name function name
+     * @return std::string transformed function name
+     */
+    static std::string GetFuncNameWithSquareBrackets(const char *name);
+};
+}  // namespace libabckit
+
+#endif  // LIBABCKIT_SRC_ADAPTER_STATIC_STRING_UTIL_H

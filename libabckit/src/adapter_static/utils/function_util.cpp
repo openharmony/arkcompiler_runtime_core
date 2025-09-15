@@ -109,7 +109,7 @@ void ReplaceInstructionIds(ark::pandasm::Program *prog, ark::pandasm::Function *
 
 static std::string GetReferenceTypeName(AbckitCoreFunction *coreFunc, const AbckitType *type)
 {
-    AbckitString *classNameStr = libabckit::ClassGetNameStatic(type->klass);
+    AbckitString *classNameStr = libabckit::ClassGetNameStatic(type->GetClass());
     if (classNameStr == nullptr) {
         LIBABCKIT_LOG(ERROR) << "[Error] Class name is null" << std::endl;
         return {};

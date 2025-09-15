@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,18 @@
  * limitations under the License.
  */
 
-const field1 = 'Module';
+interface Interface1 {
+    field1: string;
 
-function main(){};
+    m1()
+}
 
-class Class1 {}
+interface Interface2 extends Interface1 {}
 
-interface Interface1 {}
+class Class1 implements Interface1 {
+    public field1 = 'hello';
 
-namespace Ns1 {}
+    public m1(){}
+}
+
+function foo(i: Interface1) {}

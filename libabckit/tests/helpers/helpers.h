@@ -235,6 +235,11 @@ struct ClassByNameContext {
     const char *name;
 };
 
+struct EnumByNameContext {
+    AbckitCoreEnum *enm;
+    const char *name;
+};
+
 struct MethodByNameContext {
     AbckitCoreFunction *method = nullptr;
     const char *name = "";
@@ -271,6 +276,7 @@ bool ModuleByNameFinder(AbckitCoreModule *module, void *data);
 bool ImportByAliasFinder(AbckitCoreImportDescriptor *id, void *data);
 bool ExportByAliasFinder(AbckitCoreExportDescriptor *ed, void *data);
 bool ClassByNameFinder(AbckitCoreClass *klass, void *data);
+bool EnumByNameFinder(AbckitCoreEnum *enm, void *data);
 bool NamespaceByNameFinder(AbckitCoreNamespace *n, void *data);
 bool MethodByNameFinder(AbckitCoreFunction *method, void *data);
 bool AnnotationInterfaceByNameFinder(AbckitCoreAnnotationInterface *ai, void *data);
@@ -283,6 +289,7 @@ void AssertModuleVisitor(AbckitCoreModule *module, void *data);
 void AssertImportVisitor(AbckitCoreImportDescriptor *id, void *data);
 void AssertExportVisitor(AbckitCoreExportDescriptor *ed, void *data);
 void AssertClassVisitor(AbckitCoreClass *klass, void *data);
+void AssertEnumVisitor(AbckitCoreEnum *enm, void *data);
 void AssertMethodVisitor(AbckitCoreFunction *method, void *data);
 void AssertOpenAbc(const char *fname, AbckitFile **file);
 std::string_view AbckitStringToString(AbckitString *str);

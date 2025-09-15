@@ -1956,7 +1956,7 @@ AbckitInst *IcreateCheckCastStatic(AbckitGraph *graph, AbckitInst *inputObj, Abc
 {
     LIBABCKIT_LOG_FUNC;
 
-    if (targetType->id != AbckitTypeId::ABCKIT_TYPE_ID_REFERENCE || targetType->klass == nullptr) {
+    if (targetType->id != AbckitTypeId::ABCKIT_TYPE_ID_REFERENCE || targetType->GetClass() == nullptr) {
         SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
         return nullptr;
     }
@@ -1967,7 +1967,7 @@ AbckitInst *IcreateCheckCastStatic(AbckitGraph *graph, AbckitInst *inputObj, Abc
     intrImpl->ReserveInputs(argsCount);
     intrImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);
     intrImpl->AppendInput(inputObj->impl, inputObj->impl->GetType());
-    intrImpl->AddImm(graph->impl->GetAllocator(), GetClassOffset(graph, targetType->klass));
+    intrImpl->AddImm(graph->impl->GetAllocator(), GetClassOffset(graph, targetType->GetClass()));
 
     return CreateInstFromImpl(graph, intrImpl);
 }
@@ -1976,7 +1976,7 @@ AbckitInst *IcreateIsInstanceStatic(AbckitGraph *graph, AbckitInst *inputObj, Ab
 {
     LIBABCKIT_LOG_FUNC;
 
-    if (targetType->id != AbckitTypeId::ABCKIT_TYPE_ID_REFERENCE || targetType->klass == nullptr) {
+    if (targetType->id != AbckitTypeId::ABCKIT_TYPE_ID_REFERENCE || targetType->GetClass() == nullptr) {
         SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
         return nullptr;
     }
@@ -1986,7 +1986,7 @@ AbckitInst *IcreateIsInstanceStatic(AbckitGraph *graph, AbckitInst *inputObj, Ab
     intrImpl->ReserveInputs(argsCount);
     intrImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);
     intrImpl->AppendInput(inputObj->impl, inputObj->impl->GetType());
-    intrImpl->AddImm(graph->impl->GetAllocator(), GetClassOffset(graph, targetType->klass));
+    intrImpl->AddImm(graph->impl->GetAllocator(), GetClassOffset(graph, targetType->GetClass()));
     return CreateInstFromImpl(graph, intrImpl);
 }
 
