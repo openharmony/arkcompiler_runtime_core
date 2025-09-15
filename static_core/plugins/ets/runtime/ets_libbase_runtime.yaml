@@ -1652,12 +1652,15 @@ intrinsics:
   - name: EscompatArrayReverse
     space: ets
     class_name: escompat.Array
-    method_name: reverse
+    method_name: reverseImpl
     static: false
     signature:
-      ret: escompat.Array
+      ret: void
       args: []
     impl: ark::ets::intrinsics::EtsEscompatArrayReverse
+    codegen_arch: [ arm64, amd64 ]
+    codegen_func: CreateEscompatArrayReverse
+    llvm_codegen_func: EmitEscompatArrayReverse
 
   - name: EscompatArrayIsPlatformArray
     space: ets

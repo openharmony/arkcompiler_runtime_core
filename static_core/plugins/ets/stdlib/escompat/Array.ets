@@ -1667,7 +1667,14 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @note Mutating method
      */
-    public native reverse(): this;
+    public reverse(): this {
+        if (this.actualLength > 1) {
+            this.reverseImpl();
+        }
+        return this;
+    }
+
+    private final native reverseImpl(): void;
 
     /**
      * Copying version of the reverse() method.

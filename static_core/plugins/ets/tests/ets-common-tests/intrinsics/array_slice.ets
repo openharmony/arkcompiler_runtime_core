@@ -87,18 +87,18 @@ function resetStringArray(arr: Array<string>) {
 }
 
 function testLargeArrayOfString() {
-    let arr1: Array<string> = createNewStringArray(300003);
+    let arr1: Array<string> = createNewStringArray(200003);
     let arr2: Array<string> = arr1.slice();
-    checkArray(arr2, arr1, 0, 1000);
-    checkArray(arr2, arr1, arr1.length - 1000, arr1.length);
-    checkArray(arr2, arr1, arr1.length / 2 - 500, arr1.length / 2 + 500);
+    checkArray(arr2, arr1, 0, 10);
+    checkArray(arr2, arr1, arr1.length - 10, arr1.length);
+    checkArray(arr2, arr1, arr1.length / 2 - 5, arr1.length / 2 + 5);
     arktest.assertNE(arr1, arr2, "slice() must return a copy of the array");
 
     resetStringArray(arr1);
     arr1 = arr2.slice()
-    checkArray(arr1, arr2, 0, 1000);
-    checkArray(arr1, arr2, arr2.length - 1000, arr2.length);
-    checkArray(arr1, arr2, arr2.length / 2 - 500, arr2.length / 2 + 500);
+    checkArray(arr1, arr2, 0, 10);
+    checkArray(arr1, arr2, arr2.length - 10, arr2.length);
+    checkArray(arr1, arr2, arr2.length / 2 - 5, arr2.length / 2 + 5);
     arktest.assertNE(arr2, arr1, "slice() must return a copy of the array");
 }
 

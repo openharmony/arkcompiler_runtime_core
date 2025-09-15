@@ -581,14 +581,14 @@ static void RefReverse(ManagedThread *thread, EtsHandle<EtsEscompatArray> &array
     putSafepoint(finalIdx, length - 1 - finalIdx, halfLength - finalIdx);
 }
 
-extern "C" EtsEscompatArray *EtsEscompatArrayReverse(EtsEscompatArray *array)
+extern "C" void EtsEscompatArrayReverse(EtsEscompatArray *array)
 {
     ASSERT(array != nullptr);
     auto actualLength = static_cast<EtsInt>(array->GetActualLength());
     /* the result will be exactly the same as it is */
     const EtsInt minLength = 2;
     if (actualLength < minLength) {
-        return array;
+        return;
     }
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     [[maybe_unused]] EtsHandleScope scope(coro);
@@ -596,7 +596,7 @@ extern "C" EtsEscompatArray *EtsEscompatArrayReverse(EtsEscompatArray *array)
 
     RefReverse<ObjectPointerType>(coro, arrayHandle, actualLength);
 
-    return arrayHandle.GetPtr();
+    return;
 }
 
 struct ElementComputeResult {

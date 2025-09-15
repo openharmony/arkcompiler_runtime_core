@@ -850,7 +850,14 @@ private joinObject(sep?: String): string {
     return <%= this %>;
 }
 % else
-<%= access_public %> native reverse<%= this_generic %>(): <%= this_return_type %>;
+<%= access_public %> reverse<%= this_generic %>(): <%= this_return_type %> {
+    if (<%= this_len_int %> > 1) {
+        this.reverseImpl();
+    }
+    return <%= this %>;
+}
+
+<%= access_private %> final native reverseImpl<%= this_generic %>(): void;
 % end
 
 /**

@@ -40,3 +40,67 @@ function(:EscompatArrayIsPlatformArrayFast,
   }
   Return(Phi(result1, result2).i32).b
 }
+
+def GenerateArrayFastReverse(sync_type)
+  function("EscompatArrayReverse#{sync_type}".to_sym,
+          params: {obj: 'ref'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [:FastPath]) {
+
+    if sync_type == :Hybrid && !defines.ARK_HYBRID
+      ReturnVoid().void
+      next
+    end
+
+    if Options.arch == :arm32
+      Intrinsic(:UNREACHABLE).Terminator.void
+      next
+    end
+
+    len := LoadI(obj).Imm(EtsConstants::ESCOMPAT_ARRAY_ACTUAL_LENGTH_OFFSET).u32
+    # if len <= 1 then do nothing
+    If(len, 1).BE.Unlikely.b {
+      Goto(:Done)
+    }
+
+    buf := LoadI(obj).Imm(EtsConstants::ESCOMPAT_ARRAY_DATA_OFFSET).ref
+    data := AddI(buf).Imm(Constants::ARRAY_DATA_OFFSET).ptr    
+
+    # start reverting
+    len_bytes := ShlI(len).Imm(EtsConstants::OBJ_PTR_LOG2_SIZE).u32
+    half_len_bytes := ShlI(ShrI(len).Imm(1).u32).Imm(EtsConstants::OBJ_PTR_LOG2_SIZE).u32
+
+    offset1_a := Cast(0).u32
+    offset1_b := SubI(len_bytes).Imm(EtsConstants::OBJ_PTR_SIZE).u32
+  Label(:Loop)
+    offset_a := Phi(offset1_a, offset2_a).u32
+    offset_b := Phi(offset1_b, offset2_b).u32
+    If(offset_a, half_len_bytes).AE.Unlikely {
+      Goto(:LoopDone)
+    }
+
+    elem_a := Load(data, offset_a).ref
+    elem_b := Load(data, offset_b).ref
+    Store(data, offset_a, elem_b).SetNeedBarrier(sync_type == :Hybrid).ref
+    Store(data, offset_b, elem_a).SetNeedBarrier(sync_type == :Hybrid).ref
+
+    offset2_a := AddI(offset_a).Imm(EtsConstants::OBJ_PTR_SIZE).u32
+    offset2_b := SubI(offset_b).Imm(EtsConstants::OBJ_PTR_SIZE).u32
+    Goto(:Loop)
+  Label(:LoopDone)
+    if sync_type == :Async
+      post_inter_region_barrier(data, len_bytes)
+    elsif sync_type == :AsyncManual
+      obj_ptr := Cast(obj).ptr
+      post_inter_generational_barrier(obj_ptr)
+    end
+  Label(:Done)
+    ReturnVoid().void
+  }
+end
+
+GenerateArrayFastReverse(:Sync)
+GenerateArrayFastReverse(:Async)
+GenerateArrayFastReverse(:AsyncManual)
+GenerateArrayFastReverse(:Hybrid)
