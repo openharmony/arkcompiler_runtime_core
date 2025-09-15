@@ -331,5 +331,158 @@ TEST(PandaCache, TestManyThreadsClassCache)
     CleanClassMocks(&cache);
 }
 
+TEST(PandaCache, TestLazyInitialization)
+{
+    PandaCache cache;
+
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    EntityId methodId(100);
+    ASSERT_EQ(cache.GetMethodFromCache(methodId), nullptr);
+
+    auto *method1 = reinterpret_cast<Method *>(GetNewMockPointer());
+    cache.SetMethodCache(methodId, method1);
+    ASSERT_EQ(cache.GetMethodFromCache(methodId), method1);
+
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    EntityId fieldId(200);
+    EntityId newFieldId(fieldId.GetOffset() << 2U);
+    ASSERT_EQ(cache.GetFieldFromCache(newFieldId), nullptr);
+
+    auto *field1 = reinterpret_cast<Field *>(GetNewMockPointer());
+    cache.SetFieldCache(newFieldId, field1);
+    ASSERT_EQ(cache.GetFieldFromCache(newFieldId), field1);
+
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    EntityId classId(300);
+    ASSERT_EQ(cache.GetClassFromCache(classId), nullptr);
+
+    auto *class1 = reinterpret_cast<Class *>(GetNewMockPointer());
+    cache.SetClassCache(classId, class1);
+    ASSERT_EQ(cache.GetClassFromCache(classId), class1);
+}
+
+TEST(PandaCache, TestLazyInitializationThreadSafety)
+{
+    PandaCache cache;
+
+    static constexpr int numberOfInitThreads = 10;
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
+    std::thread threads[numberOfInitThreads];
+
+    auto initAndSet = [&cache](int threadId) {
+        EntityId id(threadId);
+        auto *method = reinterpret_cast<Method *>(GetNewMockElement(threadId));
+        cache.SetMethodCache(id, method);
+        ASSERT_EQ(cache.GetMethodFromCache(id), method);
+    };
+
+    for (int i = 0; i < numberOfInitThreads; i++) {
+        threads[i] = std::thread(initAndSet, i);
+    }
+
+    for (int i = 0; i < numberOfInitThreads; i++) {
+        threads[i].join();
+    }
+
+    for (int i = 0; i < numberOfInitThreads; i++) {
+        EntityId id(i);
+        auto *m = reinterpret_cast<ElementMock *>(cache.GetMethodFromCache(id));
+        delete m;
+    }
+}
+
+TEST(PandaCache, TestClearResetsLazyInitialization)
+{
+    PandaCache cache;
+
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    EntityId id1(100);
+    auto *method1 = reinterpret_cast<Method *>(GetNewMockPointer());
+    cache.SetMethodCache(id1, method1);
+    ASSERT_EQ(cache.GetMethodFromCache(id1), method1);
+
+    cache.Clear();
+
+    ASSERT_EQ(cache.GetMethodFromCache(id1), nullptr);
+
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    EntityId id2(200);
+    auto *method2 = reinterpret_cast<Method *>(GetNewMockPointer());
+    cache.SetMethodCache(id2, method2);
+    ASSERT_EQ(cache.GetMethodFromCache(id2), method2);
+}
+
+TEST(PandaCache, TestEnumerateOnUninitializedCache)
+{
+    PandaCache cache;
+
+    int count = 0;
+    bool result = cache.EnumerateCachedClasses([&count](Class *) {
+        count++;
+        return true;
+    });
+
+    ASSERT_TRUE(result);
+    ASSERT_EQ(count, 0);
+}
+
+TEST(PandaCache, TestPartialCacheInitialization)
+{
+    PandaCache cache;
+
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    EntityId methodId(100);
+    auto *method = reinterpret_cast<Method *>(GetNewMockPointer());
+    cache.SetMethodCache(methodId, method);
+    ASSERT_EQ(cache.GetMethodFromCache(methodId), method);
+
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    EntityId fieldId(200);
+    EntityId newFieldId(fieldId.GetOffset() << 2U);
+    ASSERT_EQ(cache.GetFieldFromCache(newFieldId), nullptr);
+
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    EntityId classId(300);
+    ASSERT_EQ(cache.GetClassFromCache(classId), nullptr);
+
+    auto *field = reinterpret_cast<Field *>(GetNewMockPointer());
+    cache.SetFieldCache(newFieldId, field);
+    ASSERT_EQ(cache.GetFieldFromCache(newFieldId), field);
+
+    ASSERT_EQ(cache.GetMethodFromCache(methodId), method);
+    ASSERT_EQ(cache.GetClassFromCache(classId), nullptr);
+}
+
+TEST(PandaCache, TestMixedCacheOperations)
+{
+    PandaCache cache;
+
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    EntityId methodId(100);
+    auto *method = reinterpret_cast<Method *>(GetNewMockPointer());
+    cache.SetMethodCache(methodId, method);
+
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    EntityId fieldId(200);
+    EntityId newFieldId(fieldId.GetOffset() << 2U);
+    auto *field = reinterpret_cast<Field *>(GetNewMockPointer());
+    cache.SetFieldCache(newFieldId, field);
+
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    EntityId classId(300);
+    auto *cls = reinterpret_cast<Class *>(GetNewMockPointer());
+    cache.SetClassCache(classId, cls);
+
+    ASSERT_EQ(cache.GetMethodFromCache(methodId), method);
+    ASSERT_EQ(cache.GetFieldFromCache(newFieldId), field);
+    ASSERT_EQ(cache.GetClassFromCache(classId), cls);
+
+    cache.Clear();
+
+    ASSERT_EQ(cache.GetMethodFromCache(methodId), nullptr);
+    ASSERT_EQ(cache.GetFieldFromCache(newFieldId), nullptr);
+    ASSERT_EQ(cache.GetClassFromCache(classId), nullptr);
+}
+
 }  // namespace panda_file::test
 }  // namespace ark
