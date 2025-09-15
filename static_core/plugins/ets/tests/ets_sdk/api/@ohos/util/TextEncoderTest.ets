@@ -42,6 +42,7 @@ function main() {
     suite.addTest("test_encoding_gb2312", test_encoding_gb2312);
     suite.addTest("test_encoding_utf16le", test_encoding_utf16le);
     suite.addTest("test_encoding_iso88593", test_encoding_iso88593);
+    suite.addTest("test_encoding_u16le_h", test_encoding_u16le_h);
     return suite.run()
 }
 
@@ -248,4 +249,11 @@ function test_encoding_iso88593()
     enc = new util.TextEncoder('IBM866');
     str = enc.encoding;
     assertEQ(str, 'IBM866');
+}
+
+function test_encoding_u16le_h() {
+    let enc = new util.TextEncoder('utf-16le');
+    const bytes = enc.encodeInto('H');
+    arktest.assertEQ(bytes[0], 72);
+    arktest.assertEQ(bytes[1], 0);
 }
