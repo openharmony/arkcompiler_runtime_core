@@ -32,6 +32,11 @@ export final class Class {
         return this.name ?? this.getNameInternal()
     }
 
+    /**
+     * Gets the super class of a class
+     *
+     * @returns The superclass of a class, or `undefined` if this is either Object or interface class
+     */
     public getSuper(): Class | undefined {
         return this.superClass
     }

@@ -142,7 +142,7 @@ TEST_F(EtsClassTest, GetBase)
 
         ASSERT_NE(klassItest, nullptr);
         ASSERT_TRUE(klassItest->IsInterface());
-        ASSERT_EQ(klassItest->GetBase(), nullptr);
+        ASSERT_TRUE(klassItest->GetBase()->IsEtsObject());
     }
 }
 

@@ -41,6 +41,22 @@
 
 namespace ark::ets::intrinsics {
 
+template <class Callback>
+static void EnumerateBaseClassesReverseOrder(EtsClass *cls, const Callback &callback)
+{
+    auto currentClass = cls;
+    bool finished = false;
+    while (currentClass && !finished) {
+        if constexpr (std::is_same_v<std::invoke_result_t<Callback, decltype(cls)>, void>) {
+            callback(currentClass);
+            finished = false;
+        } else {
+            finished = callback(currentClass);
+        }
+        currentClass = currentClass->GetSuperClass();
+    }
+}
+
 EtsString *StdCoreClassGetNameInternal(EtsClass *cls)
 {
     return cls->GetName();
@@ -224,7 +240,49 @@ static EtsReflectMethod *CreateEtsReflectMethodUnderHandleScope(EtsCoroutine *co
     return reflectMethod.GetPtr();
 }
 
-static PandaVector<EtsMethod *> GetInstanceMethods(EtsClass *cls, bool onlyPublic)
+template <typename Func>
+static void GetInterfaceMethodsRecursive(Class *currIntf, Func &&collectDirectMethods)
+{
+    ASSERT(currIntf != nullptr);
+
+    collectDirectMethods(currIntf);
+
+    for (auto *intf : currIntf->GetInterfaces()) {
+        ASSERT(intf != nullptr);
+        GetInterfaceMethodsRecursive(intf, std::forward<Func>(collectDirectMethods));
+    }
+}
+
+static PandaVector<EtsMethod *> GetInstanceMethodsForInterface(EtsClass *cls, bool onlyPublic)
+{
+    ASSERT(cls->IsInterface());
+
+    PandaUnorderedMap<PandaString, EtsMethod *> uniqNames;
+    PandaVector<EtsMethod *> instanceMethods;
+
+    auto collectDirectMethods = [&uniqNames, &onlyPublic](Class *intfClass) {
+        for (auto &method : intfClass->GetMethods()) {
+            if ((onlyPublic && !method.IsPublic())) {
+                continue;
+            }
+            // Must be fixed: #30139
+            PandaString methodName = utf::Mutf8AsCString(method.GetName().data);
+            if (auto methodIt = uniqNames.find(methodName); methodIt == uniqNames.end()) {
+                uniqNames.emplace(methodName, EtsMethod::FromRuntimeMethod(&method));
+            }
+        }
+    };
+
+    GetInterfaceMethodsRecursive(cls->GetRuntimeClass(), std::move(collectDirectMethods));
+
+    instanceMethods.reserve(uniqNames.size());
+    for (auto &[name, method] : uniqNames) {
+        instanceMethods.push_back(method);
+    }
+    return instanceMethods;
+}
+
+static PandaVector<EtsMethod *> GetInstanceMethodsForClass(EtsClass *cls, bool onlyPublic)
 {
     PandaVector<EtsMethod *> instanceMethods;
     instanceMethods.reserve(cls->GetRuntimeClass()->GetVTableSize());
@@ -237,6 +295,14 @@ static PandaVector<EtsMethod *> GetInstanceMethods(EtsClass *cls, bool onlyPubli
     });
 
     return instanceMethods;
+}
+
+static PandaVector<EtsMethod *> GetInstanceMethods(EtsClass *cls, bool onlyPublic)
+{
+    if (cls->IsInterface()) {
+        return GetInstanceMethodsForInterface(cls, onlyPublic);
+    }
+    return GetInstanceMethodsForClass(cls, onlyPublic);
 }
 
 static ObjectHeader *CreateEtsReflectMethodArray(EtsCoroutine *coro, const PandaVector<EtsMethod *> &methods,
@@ -381,7 +447,7 @@ static PandaVector<EtsMethod *> GetStaticMethods(EtsClass *cls, bool onlyPublic)
     PandaVector<EtsMethod *> staticMethods;
     PandaUnorderedSet<PandaString> uniqNames;
 
-    cls->EnumerateBaseClasses([&](EtsClass *c) {
+    EnumerateBaseClassesReverseOrder(cls, [&](EtsClass *c) {
         auto methods = c->GetRuntimeClass()->GetStaticMethods();
         auto mnum = methods.Size();
         for (uint32_t i = 0; i < mnum; i++) {
@@ -416,7 +482,7 @@ static PandaVector<EtsField *> GetInstanceFields(EtsClass *cls, bool onlyPublic)
     PandaVector<EtsField *> instanceFields;
     PandaUnorderedSet<PandaString> uniqNames;
 
-    cls->EnumerateBaseClasses([&](EtsClass *c) {
+    EnumerateBaseClassesReverseOrder(cls, [&](EtsClass *c) {
         auto fields = c->GetRuntimeClass()->GetInstanceFields();
         auto fnum = fields.Size();
         for (uint32_t i = 0; i < fnum; i++) {
@@ -439,7 +505,7 @@ static PandaVector<EtsField *> GetStaticFields(EtsClass *cls, bool onlyPublic)
     PandaVector<EtsField *> staticFields;
     PandaUnorderedSet<PandaString> uniqNames;
 
-    cls->EnumerateBaseClasses([&](EtsClass *c) {
+    EnumerateBaseClassesReverseOrder(cls, [&](EtsClass *c) {
         auto fields = c->GetRuntimeClass()->GetStaticFields();
         auto fnum = fields.Size();
         for (uint32_t i = 0; i < fnum; i++) {

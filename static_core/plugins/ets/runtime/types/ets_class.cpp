@@ -734,7 +734,8 @@ void EtsClass::Initialize(EtsClass *superClass, uint16_t accessFlags, bool isPri
 {
     ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
     SetName(nullptr);
-    SetSuperClass(superClass);
+    // Class of interface extends Object, but we should not expose this information to user.
+    IsInterface() ? SetSuperClass(nullptr) : SetSuperClass(superClass);
 
     uint32_t flags = accessFlags;
     if (isPrimitiveType) {
@@ -890,9 +891,6 @@ EtsField *EtsClass::GetStaticFieldIDByOffset(uint32_t fieldOffset)
 
 EtsClass *EtsClass::GetBase()
 {
-    if (IsInterface()) {
-        return nullptr;
-    }
     auto *base = GetRuntimeClass()->GetBase();
     if (base == nullptr) {
         return nullptr;
