@@ -172,8 +172,14 @@ TEST_F(EtsFinalizableWeakRefTest, RegisterFinalizerTest)
         std::array<EtsHandle<EtsObject>, EVENT_COUNT> arrayHandles;
         for (auto &handle : arrayHandles) {
             handle = EtsHandle<EtsObject>(coro, EtsObjectArray::Create(objectClass, ARRAY_SIZE)->AsObject());
-            vm_->RegisterFinalizerForObject(coro, handle, TestEvent<EVENT_COUNT>::Finalize, &event);
+            ASSERT_NE(vm_->RegisterFinalizerForObject(coro, handle, TestEvent<EVENT_COUNT>::Finalize, &event), nullptr);
         }
+
+        auto handle = EtsHandle<EtsObject>(coro, EtsObject::Create(objectClass));
+        auto finWeakRef = vm_->RegisterFinalizerForObject(
+            coro, handle, [](void *) { ASSERT_TRUE(false); }, nullptr);
+        ASSERT_NE(finWeakRef, nullptr);
+        ASSERT_EQ(vm_->UnregisterFinalizerForObject(coro, finWeakRef), true);
 
         // Trigger GC
         TriggerGC();
@@ -189,6 +195,21 @@ TEST_F(EtsFinalizableWeakRefTest, RegisterFinalizerTest)
     // Check that finalizer was called
     event.Wait();
     ASSERT(event.IsHappened());
+}
+
+TEST_F(EtsFinalizableWeakRefTest, UnregisterFinalizerTwiceTest)
+{
+    auto *coro = EtsCoroutine::GetCurrent();
+    ScopedManagedCodeThread managedScope(coro);
+    EtsHandleScope handleScope(coro);
+
+    auto *objectClass = vm_->GetClassLinker()->GetClassRoot(EtsClassRoot::OBJECT);
+    auto handle = EtsHandle<EtsObject>(coro, EtsObject::Create(objectClass));
+    auto finWeakRef = vm_->RegisterFinalizerForObject(
+        coro, handle, [](void *) {}, nullptr);
+    ASSERT_NE(finWeakRef, nullptr);
+    ASSERT_EQ(vm_->UnregisterFinalizerForObject(coro, finWeakRef), true);
+    ASSERT_EQ(vm_->UnregisterFinalizerForObject(coro, finWeakRef), false);
 }
 
 }  // namespace ark::ets::test
