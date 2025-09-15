@@ -325,6 +325,38 @@ std::string BuildLinkerCommand(const std::string &path, const std::vector<std::s
     return linkerCommand;
 }
 
+void VerifyDeletedDependencies(const std::string &abcFilePath, const std::unordered_set<std::string> &allowedClasses,
+                               const std::unordered_set<std::string> &notAllowedClasses = {})
+{
+    auto file = ark::panda_file::File::Open(abcFilePath.c_str(), ark::panda_file::File::READ_ONLY);
+    ASSERT_TRUE(file != nullptr);
+    const auto &classIdx = file->GetClasses();
+    std::unordered_map<std::string, bool> allowedFound;
+
+    for (const auto &cls : allowedClasses) {
+        allowedFound[cls] = false;
+    }
+    for (uint32_t idx : classIdx) {
+        auto entityId = ark::panda_file::File::EntityId(idx);
+        auto strData = file->GetStringData(entityId);
+        if (strData.data == nullptr) {
+            continue;
+        }
+        std::string className(reinterpret_cast<const char *>(strData.data));
+
+        if (!notAllowedClasses.empty()) {
+            EXPECT_TRUE(notAllowedClasses.find(className) == notAllowedClasses.end());
+        }
+
+        if (allowedClasses.find(className) != allowedClasses.end()) {
+            allowedFound[className] = true;
+        }
+    }
+    for (const auto &cls : allowedClasses) {
+        EXPECT_TRUE(allowedFound[cls]);
+    }
+}
+
 void TestSts(const std::string &path, const std::vector<std::string> &files, bool isGood = true,
              const StripOptions &deleteOptions = {}, const TestStsConfig &config = {})
 {
@@ -572,6 +604,28 @@ TEST(linkertests, ClassCallDeleteDependency)
     TestStsConfig config;
     config.entryPoint = "dependency/ETSGLOBAL::main";
     TestSts("classcall_doublefile", {"dependency.ets.abc", "bedependent.ets.abc"}, true, opts, config);
+    std::unordered_set<std::string> allowedClasses = {
+        "Ldependency/ETSGLOBAL;",        "Lbedependent/ETSGLOBAL;",    "Ldependency/AnotherClass;", "Ldependency/User;",
+        "Lbedependent/DependencyClass;", "Lbedependent/UnusedClass1;", "Lbedependent/UnusedClass2;"};
+    const std::string abcFilePathPrefix = "data/output/classcall_doublefile/";
+    VerifyDeletedDependencies(abcFilePathPrefix + "linked.abc", allowedClasses);
+#endif
+}
+
+TEST(linkertests, ClassCallDeleteDependencyFromEntry)
+{
+#ifdef TEST_STATIC_LINKER_WITH_STS
+    StripOptions opts;
+    opts.stripUnused = true;
+    opts.stripUnusedSkiplist = "\"dependency/ETSGLOBAL\"";
+    TestStsConfig config;
+    config.entryPoint = "dependency/ETSGLOBAL::main";
+    TestSts("classcall_doublefile", {"dependency.ets.abc", "bedependent.ets.abc"}, true, opts, config);
+    std::unordered_set<std::string> allowedClasses = {"Ldependency/ETSGLOBAL;", "Ldependency/User;"};
+    std::unordered_set<std::string> notAllowedClasses = {"Lbedependent/ETSGLOBAL;", "Lbedependent/UnusedClass1;",
+                                                         "Lbedependent/UnusedClass2;"};
+    const std::string abcFilePathPrefix = "data/output/classcall_doublefile/";
+    VerifyDeletedDependencies(abcFilePathPrefix + "linked.abc", allowedClasses, notAllowedClasses);
 #endif
 }
 
@@ -585,6 +639,40 @@ TEST(linkertests, ClassCallDeleteDependencyFromEntryInputError)
 #endif
 }
 
+TEST(linkertests, ClassCallDeleteDependencyFromConfig)
+{
+#ifdef TEST_STATIC_LINKER_WITH_STS
+    StripOptions opts;
+    opts.stripUnused = true;
+    opts.stripUnusedSkiplist = "@data/ets/classcall_doublefile/configfile.txt";
+    TestStsConfig config;
+    config.entryPoint = "dependency/ETSGLOBAL::main";
+    TestSts("classcall_doublefile", {"dependency.ets.abc", "bedependent.ets.abc"}, true, opts, config);
+    std::unordered_set<std::string> allowedClasses = {"Ldependency/ETSGLOBAL;", "Ldependency/User;"};
+    std::unordered_set<std::string> notAllowedClasses = {"Lbedependent/ETSGLOBAL;", "bedependent/UnusedClass1;",
+                                                         "Lbedependent/UnusedClass2;"};
+    const std::string abcFilePathPrefix = "data/output/classcall_doublefile/";
+    VerifyDeletedDependencies(abcFilePathPrefix + "linked.abc", allowedClasses, notAllowedClasses);
+#endif
+}
+
+TEST(linkertests, MethodCallDeleteDependencyFromEntry)
+{
+#ifdef TEST_STATIC_LINKER_WITH_STS
+    StripOptions opts;
+    opts.stripUnused = true;
+    opts.stripUnusedSkiplist = "\"dependency/ETSGLOBAL/main\"";
+    TestStsConfig config;
+    config.entryPoint = "dependency/ETSGLOBAL::main";
+    TestSts("classcall_doublefile", {"dependency.ets.abc", "bedependent.ets.abc"}, true, opts, config);
+    std::unordered_set<std::string> allowedClasses = {"Ldependency/ETSGLOBAL;", "Ldependency/User;"};
+    std::unordered_set<std::string> notAllowedClasses = {"Lbedependent/ETSGLOBAL;", "Lbedependent/UnusedClass1;",
+                                                         "Lbedependent/UnusedClass2;"};
+    const std::string abcFilePathPrefix = "data/output/classcall_doublefile/";
+    VerifyDeletedDependencies(abcFilePathPrefix + "linked.abc", allowedClasses, notAllowedClasses);
+#endif
+}
+
 TEST(linkertests, MethodCallDeleteDependencyFromEntryInputError)
 {
 #ifdef TEST_STATIC_LINKER_WITH_STS
@@ -592,6 +680,23 @@ TEST(linkertests, MethodCallDeleteDependencyFromEntryInputError)
     opts.stripUnused = true;
     opts.stripUnusedSkiplist = "\"1/ETSGLOBAL/main\"";
     TestSts("classcall_doublefile", {"dependency.ets.abc", "bedependent.ets.abc"}, false, opts);
+#endif
+}
+
+TEST(linkertests, MethodCallDeleteDependencyFromConfig)
+{
+#ifdef TEST_STATIC_LINKER_WITH_STS
+    StripOptions opts;
+    opts.stripUnused = true;
+    opts.stripUnusedSkiplist = "@data/ets/classcall_doublefile/methodconfig.txt";
+    TestStsConfig config;
+    config.entryPoint = "dependency/ETSGLOBAL::main";
+    TestSts("classcall_doublefile", {"dependency.ets.abc", "bedependent.ets.abc"}, true, opts, config);
+    std::unordered_set<std::string> allowedClasses = {"Ldependency/ETSGLOBAL;", "Ldependency/User;"};
+    std::unordered_set<std::string> notAllowedClasses = {"Lbedependent/ETSGLOBAL;", "Lbedependent/UnusedClass1;",
+                                                         "Lbedependent/UnusedClass2;"};
+    const std::string abcFilePathPrefix = "data/output/classcall_doublefile/";
+    VerifyDeletedDependencies(abcFilePathPrefix + "linked.abc", allowedClasses, notAllowedClasses);
 #endif
 }
 
@@ -605,6 +710,24 @@ TEST(linkertests, CallDeleteDependencyFromConfigFileNotExist)
 #endif
 }
 
+TEST(linkertests, CallDeleteDependencyFromEntryFile)
+{
+#ifdef TEST_STATIC_LINKER_WITH_STS
+    StripOptions opts;
+    opts.stripUnused = true;
+    opts.stripUnusedSkiplist = "\"dependency.ets\"";
+    TestStsConfig config;
+    config.entryPoint = "dependency/ETSGLOBAL::main";
+    TestSts("classcall_doublefile", {"dependency.ets.abc", "bedependent.ets.abc"}, true, opts, config);
+    std::unordered_set<std::string> allowedClasses = {"Ldependency/ETSGLOBAL;", "Ldependency/AnotherClass;",
+                                                      "Lbedependent/DependencyClass;", "Ldependency/User;"};
+    std::unordered_set<std::string> notAllowedClasses = {"Lbedependent/ETSGLOBAL;", "Lbedependent/UnusedClass1;",
+                                                         "Lbedependent/UnusedClass2;"};
+    const std::string abcFilePathPrefix = "data/output/classcall_doublefile/";
+    VerifyDeletedDependencies(abcFilePathPrefix + "linked.abc", allowedClasses, notAllowedClasses);
+#endif
+}
+
 TEST(linkertests, CallDeleteDependencyFromEntryFileNotExist)
 {
 #ifdef TEST_STATIC_LINKER_WITH_STS
@@ -612,6 +735,123 @@ TEST(linkertests, CallDeleteDependencyFromEntryFileNotExist)
     opts.stripUnused = true;
     opts.stripUnusedSkiplist = "\"1.ets\"";
     TestSts("classcall_doublefile", {"dependency.ets.abc", "bedependent.ets.abc"}, false, opts);
+#endif
+}
+
+TEST(linkertests, MethodAnnotationDeleteDependency)
+{
+#ifdef TEST_STATIC_LINKER_WITH_STS
+    StripOptions opts;
+    opts.stripUnused = true;
+    opts.stripUnusedSkiplist = "\"method/ETSGLOBAL/main\"";
+    TestStsConfig config;
+    config.entryPoint = "method/ETSGLOBAL::main";
+    TestSts("annotation", {"method.ets.abc"}, true, opts, config);
+    std::unordered_set<std::string> allowedClasses = {"Lmethod/ETSGLOBAL;", "Lmethod/ClassAuthor;"};
+    std::unordered_set<std::string> notAllowedClasses = {"Lmethod/C3;", "Lmethod/ClassPreamble;"};
+    const std::string abcFilePathPrefix = "data/output/annotation/";
+    VerifyDeletedDependencies(abcFilePathPrefix + "linked.abc", allowedClasses, notAllowedClasses);
+#endif
+}
+
+TEST(linkertests, FieldAnnotationDeleteDependency)
+{
+#ifdef TEST_STATIC_LINKER_WITH_STS
+    StripOptions opts;
+    opts.stripUnused = true;
+    opts.stripUnusedSkiplist = "\"field/ETSGLOBAL/main\"";
+    TestStsConfig config;
+    config.entryPoint = "field/ETSGLOBAL::main";
+    TestSts("annotation", {"field.ets.abc"}, true, opts, config);
+    std::unordered_set<std::string> allowedClasses = {"Lfield/ETSGLOBAL;", "Lfield/PropertyAuthor;"};
+    std::unordered_set<std::string> notAllowedClasses = {"Lfield/C3;", "Lfield/ClassPreamble;",
+                                                         "Lfield/DeprecatedProperty;"};
+    const std::string abcFilePathPrefix = "data/output/annotation/";
+    VerifyDeletedDependencies(abcFilePathPrefix + "linked.abc", allowedClasses, notAllowedClasses);
+#endif
+}
+
+TEST(linkertests, ClassExtensionDeleteDependency)
+{
+#ifdef TEST_STATIC_LINKER_WITH_STS
+    StripOptions opts;
+    opts.stripUnused = true;
+    opts.stripUnusedSkiplist = "\"classExtension/ETSGLOBAL/main\"";
+    TestStsConfig config;
+    config.entryPoint = "classExtension/ETSGLOBAL::main";
+    config.outputFileName = "classExtension.gold";
+    TestSts("singlefile", {"classExtension.ets.abc"}, true, opts, config);
+    std::unordered_set<std::string> allowedClasses = {"LclassExtension/ETSGLOBAL;", "LclassExtension/Animal;",
+                                                      "LclassExtension/Dog;"};
+    const std::string abcFilePathPrefix = "data/output/singlefile/";
+    VerifyDeletedDependencies(abcFilePathPrefix + "linked.abc", allowedClasses);
+#endif
+}
+
+TEST(linkertests, InterImplDeleteDependency)
+{
+#ifdef TEST_STATIC_LINKER_WITH_STS
+    StripOptions opts;
+    opts.stripUnused = true;
+    opts.stripUnusedSkiplist = "\"interImpl/ETSGLOBAL/main\"";
+    TestStsConfig config;
+    config.entryPoint = "interImpl/ETSGLOBAL::main";
+    config.outputFileName = "interImpl.gold";
+    TestSts("singlefile", {"interImpl.ets.abc"}, true, opts, config);
+    std::unordered_set<std::string> allowedClasses = {"LinterImpl/ETSGLOBAL;", "LinterImpl/Circle;",
+                                                      "LinterImpl/Rectangle;", "LinterImpl/Shape;"};
+    const std::string abcFilePathPrefix = "data/output/singlefile/";
+    VerifyDeletedDependencies(abcFilePathPrefix + "linked.abc", allowedClasses);
+#endif
+}
+
+TEST(linkertests, ObjectLiteralDeleteDependency)
+{
+#ifdef TEST_STATIC_LINKER_WITH_STS
+    StripOptions opts;
+    opts.stripUnused = true;
+    opts.stripUnusedSkiplist = "\"ObjectLiteral/ETSGLOBAL/main\"";
+    TestStsConfig config;
+    config.entryPoint = "ObjectLiteral/ETSGLOBAL::main";
+    config.outputFileName = "ObjectLiteral.gold";
+    TestSts("singlefile", {"ObjectLiteral.ets.abc"}, true, opts, config);
+    std::unordered_set<std::string> allowedClasses = {"LObjectLiteral/ETSGLOBAL;", "LObjectLiteral/Person;"};
+    const std::string abcFilePathPrefix = "data/output/singlefile/";
+    VerifyDeletedDependencies(abcFilePathPrefix + "linked.abc", allowedClasses);
+#endif
+}
+
+TEST(linkertests, TesErrorDeleteDependency)
+{
+#ifdef TEST_STATIC_LINKER_WITH_STS
+    StripOptions opts;
+    opts.stripUnused = true;
+    opts.stripUnusedSkiplist = "\"teserror/ETSGLOBAL/main\"";
+    TestStsConfig config;
+    config.entryPoint = "teserror/ETSGLOBAL::main";
+    config.outputFileName = "teserror.gold";
+    TestSts("singlefile", {"teserror.ets.abc"}, true, opts, config);
+    std::unordered_set<std::string> allowedClasses = {"Lteserror/ETSGLOBAL;", "Lteserror/TestA;"};
+    const std::string abcFilePathPrefix = "data/output/singlefile/";
+    VerifyDeletedDependencies(abcFilePathPrefix + "linked.abc", allowedClasses);
+#endif
+}
+
+TEST(linkertests, DebugInfoClassCallDeleteDependency)
+{
+#ifdef TEST_STATIC_LINKER_WITH_STS
+    StripOptions opts;
+    opts.stripUnused = true;
+    opts.stripUnusedSkiplist = "dependency_debug/ETSGLOBAL/main";
+    TestStsConfig config;
+    config.entryPoint = "dependency_debug/ETSGLOBAL::main";
+    config.outputFileName = "outDebug.gold";
+    TestSts("classcall_doublefile", {"dependency_debug.abc"}, true, opts, config);
+    std::unordered_set<std::string> allowedClasses = {"Ldependency_debug/ETSGLOBAL;",
+                                                      "Ldependency_debug/DependencyClass;"};
+    std::unordered_set<std::string> notAllowedClasses = {};
+    const std::string abcFilePathPrefix = "data/output/classcall_doublefile/";
+    VerifyDeletedDependencies(abcFilePathPrefix + "linked.abc", allowedClasses, notAllowedClasses);
 #endif
 }
 
@@ -636,6 +876,61 @@ TEST(linkertests, MultiClassCallDeleteDependency)
     TestSts("classcall_multifile",
             {"main_dependencyUser.ets.abc", "dependency.ets.abc", "user_dependency.ets.abc", "product_user.ets.abc"},
             true, opts, config);
+    std::unordered_set<std::string> allowedClasses = {"Lmain_dependencyUser/ETSGLOBAL;",
+                                                      "Lmain_dependencyUser/MainApplication;",
+                                                      "Ldependency/ETSGLOBAL;",
+                                                      "Ldependency/DependencyClass;",
+                                                      "Luser_dependency/User;",
+                                                      "Ldependency/UnusedDependencyClass;",
+                                                      "Luser_dependency/UnusedUserClass;",
+                                                      "Lproduct_user/Product;",
+                                                      "Lproduct_user/UnusedProductClass;",
+                                                      "Lproduct_user/ETSGLOBAL;",
+                                                      "Luser_dependency/ETSGLOBAL;"};
+    const std::string abcFilePathPrefix = "data/output/classcall_multifile/";
+    VerifyDeletedDependencies(abcFilePathPrefix + "linked.abc", allowedClasses);
+#endif
+}
+TEST(linkertests, MultiClassCallDeleteDependencyFromEntry)
+{
+#ifdef TEST_STATIC_LINKER_WITH_STS
+    StripOptions opts;
+    opts.stripUnused = true;
+    opts.stripUnusedSkiplist = "\"main_dependencyUser/ETSGLOBAL\"";
+    TestStsConfig config;
+    config.entryPoint = "main_dependencyUser/ETSGLOBAL::main";
+    TestSts("classcall_multifile",
+            {"main_dependencyUser.ets.abc", "dependency.ets.abc", "user_dependency.ets.abc", "product_user.ets.abc"},
+            true, opts, config);
+    std::unordered_set<std::string> allowedClasses = {"Lmain_dependencyUser/ETSGLOBAL;",
+                                                      "Lmain_dependencyUser/MainApplication;",
+                                                      "Ldependency/DependencyClass;", "Luser_dependency/User;"};
+    std::unordered_set<std::string> notAllowedClasses = {
+        "Ldependency/UnusedDependencyClass;", "Luser_dependency/UnusedUserClass;", "Lproduct_user/Product;",
+        "Lproduct_user/UnusedProductClass;", "Lproduct_user/ETSGLOBAL;"};
+    const std::string abcFilePathPrefix = "data/output/classcall_multifile/";
+    VerifyDeletedDependencies(abcFilePathPrefix + "linked.abc", allowedClasses, notAllowedClasses);
+#endif
+}
+
+TEST(linkertests, MultiClassCallDeleteDependencyFromConfig)
+{
+#ifdef TEST_STATIC_LINKER_WITH_STS
+    StripOptions opts;
+    opts.stripUnused = true;
+    opts.stripUnusedSkiplist = "@data/ets/classcall_multifile/configfile.txt";
+    TestStsConfig config;
+    config.entryPoint = "main_dependencyUser/ETSGLOBAL::main";
+    TestSts("classcall_multifile",
+            {"main_dependencyUser.ets.abc", "dependency.ets.abc", "user_dependency.ets.abc", "product_user.ets.abc"},
+            true, opts, config);
+    std::unordered_set<std::string> allowedClasses = {
+        "Lmain_dependencyUser/ETSGLOBAL;", "Lmain_dependencyUser/MainApplication;", "Ldependency/DependencyClass;",
+        "Luser_dependency/User;", "Lproduct_user/Product;"};
+    std::unordered_set<std::string> notAllowedClasses = {"Luser_dependency/UnusedUserClass;",
+                                                         "Lproduct_user/ETSGLOBAL;", "Luser_dependency/ETSGLOBAL;"};
+    const std::string abcFilePathPrefix = "data/output/classcall_multifile/";
+    VerifyDeletedDependencies(abcFilePathPrefix + "linked.abc", allowedClasses, notAllowedClasses);
 #endif
 }
 
@@ -648,6 +943,11 @@ TEST(linkertests, ClassCallDeleteDependencyAll)
     TestStsConfig config;
     config.entryPoint = "dependency/ETSGLOBAL::main";
     TestSts("classcall_doublefile", {"dependency.ets.abc", "bedependent.ets.abc"}, true, opts, config);
+    std::unordered_set<std::string> allowedClasses = {
+        "Ldependency/ETSGLOBAL;",        "Lbedependent/ETSGLOBAL;",    "Ldependency/AnotherClass;", "Ldependency/User;",
+        "Lbedependent/DependencyClass;", "Lbedependent/UnusedClass1;", "Lbedependent/UnusedClass2;"};
+    const std::string abcFilePathPrefix = "data/output/classcall_doublefile/";
+    VerifyDeletedDependencies(abcFilePathPrefix + "linked.abc", allowedClasses);
 #endif
 }
 

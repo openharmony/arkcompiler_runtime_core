@@ -1769,6 +1769,17 @@ public:
 
     bool WriteAsUleb128(Writer *writer);
 
+    void SetDependencyMark() override
+    {
+        if (GetType() == Type::ID) {
+            if (!GetIdItem()->GetDependencyMark()) {
+                GetIdItem()->SetDependencyMark();
+            }
+        } else {
+            ValueItem::SetDependencyMark();
+        }
+    }
+
 private:
     std::variant<uint32_t, uint64_t, float, double, BaseItem *> value_;
 };
@@ -1805,6 +1816,8 @@ public:
     {
         return &items_;
     }
+
+    void SetDependencyMark() override;
 
 private:
     size_t GetComponentSize() const;
@@ -1959,7 +1972,11 @@ public:
                 name_->SetDependencyMark();
             }
             if (value_ != nullptr) {
-                value_->SetDependencyMark();
+                if (value_->IsArray()) {
+                    value_->GetAsArray()->SetDependencyMark();
+                } else {
+                    value_->SetDependencyMark();
+                }
             }
         }
 
