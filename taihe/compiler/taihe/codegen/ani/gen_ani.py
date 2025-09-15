@@ -301,10 +301,10 @@ class AniCodeGenerator:
                 for ancestor in iface_abi_info.ancestor_dict:
                     for method in ancestor.methods:
                         self.gen_native_method(
-                            iface,
                             method,
-                            pkg_ani_source_target,
+                            iface,
                             ancestor,
+                            pkg_ani_source_target,
                             method.name,
                         )
                         method_ani_info = IfaceMethodAniInfo.get(self.am, method)
@@ -427,10 +427,10 @@ class AniCodeGenerator:
 
     def gen_native_method(
         self,
-        iface: IfaceDecl,
         method: IfaceMethodDecl,
-        pkg_ani_source_target: CSourceWriter,
+        iface: IfaceDecl,
         ancestor: IfaceDecl,
+        pkg_ani_source_target: CSourceWriter,
         name: str,
     ):
         method_cpp_info = IfaceMethodCppInfo.get(self.am, method)
@@ -656,12 +656,7 @@ class AniCodeGenerator:
                 )
                 for ancestor in iface_abi_info.ancestor_dict:
                     for method in ancestor.methods:
-                        self.gen_iface_method(
-                            iface,
-                            method,
-                            iface_ani_info,
-                            iface_ani_impl_target,
-                        )
+                        self.gen_iface_method(method, iface_ani_impl_target)
                 with iface_ani_impl_target.indented(
                     f"uintptr_t getGlobalReference() const {{",
                     f"}}",
@@ -675,9 +670,7 @@ class AniCodeGenerator:
 
     def gen_iface_method(
         self,
-        iface: IfaceDecl,
         method: IfaceMethodDecl,
-        iface_ani_info: IfaceAniInfo,
         iface_ani_impl_target: CHeaderWriter,
     ):
         method_cpp_info = IfaceMethodCppInfo.get(self.am, method)
@@ -717,7 +710,7 @@ class AniCodeGenerator:
                     arg_ani,
                 )
             args_ani_sss = "".join(", " + arg_ani for arg_ani in args_ani)
-            ns = iface_ani_info.parent_ns
+            ns = IfaceAniInfo.get(self.am, method.parent_iface).parent_ns
             if isinstance(return_ty := method.return_ty, NonVoidType):
                 result_ani = "ani_result"
                 result_cpp = "cpp_result"

@@ -625,13 +625,6 @@ class CppHeadersGenerator:
                             f"new (&m_data.{field.name}) decltype(m_data.{field.name})(other.m_data.{field.name});",
                             f"break;",
                         )
-                with union_cpp_defn_target.indented(
-                    f"default: {{",
-                    f"}}",
-                ):
-                    union_cpp_defn_target.writelns(
-                        f"break;",
-                    )
         # move constructor
         with union_cpp_defn_target.indented(
             f"{union_cpp_info.name}({union_cpp_info.name}&& other) : m_tag(other.m_tag) {{",
@@ -651,13 +644,25 @@ class CppHeadersGenerator:
                             f"new (&m_data.{field.name}) decltype(m_data.{field.name})(::std::move(other.m_data.{field.name}));",
                             f"break;",
                         )
-                with union_cpp_defn_target.indented(
-                    f"default: {{",
-                    f"}}",
-                ):
-                    union_cpp_defn_target.writelns(
-                        f"break;",
-                    )
+        # destructor
+        with union_cpp_defn_target.indented(
+            f"~{union_cpp_info.name}() {{",
+            f"}}",
+        ):
+            with union_cpp_defn_target.indented(
+                f"switch (m_tag) {{",
+                f"}}",
+                indent="",
+            ):
+                for field in union.fields:
+                    with union_cpp_defn_target.indented(
+                        f"case tag_t::{field.name}: {{",
+                        f"}}",
+                    ):
+                        union_cpp_defn_target.writelns(
+                            f"::std::destroy_at(&m_data.{field.name});",
+                            f"break;",
+                        )
         # copy assignment
         with union_cpp_defn_target.indented(
             f"{union_cpp_info.name}& operator=({union_cpp_info.name} const& other) {{",
@@ -690,32 +695,6 @@ class CppHeadersGenerator:
             union_cpp_defn_target.writelns(
                 f"return *this;",
             )
-        # destructor
-        with union_cpp_defn_target.indented(
-            f"~{union_cpp_info.name}() {{",
-            f"}}",
-        ):
-            with union_cpp_defn_target.indented(
-                f"switch (m_tag) {{",
-                f"}}",
-                indent="",
-            ):
-                for field in union.fields:
-                    with union_cpp_defn_target.indented(
-                        f"case tag_t::{field.name}: {{",
-                        f"}}",
-                    ):
-                        union_cpp_defn_target.writelns(
-                            f"::std::destroy_at(&m_data.{field.name});",
-                            f"break;",
-                        )
-                with union_cpp_defn_target.indented(
-                    f"default: {{",
-                    f"}}",
-                ):
-                    union_cpp_defn_target.writelns(
-                        f"break;",
-                    )
 
     def gen_union_utils(
         self,
@@ -725,17 +704,21 @@ class CppHeadersGenerator:
         union_cpp_defn_target: CHeaderWriter,
     ):
         # in place constructor
-        for field in union.fields:
-            union_cpp_defn_target.writelns(
-                f"template<typename... Args>",
-            )
-            with union_cpp_defn_target.indented(
-                f"{union_cpp_info.name}(::taihe::static_tag_t<tag_t::{field.name}>, Args&&... args) : m_tag(tag_t::{field.name}) {{",
-                f"}}",
-            ):
-                union_cpp_defn_target.writelns(
-                    f"new (&m_data.{field.name}) decltype(m_data.{field.name})(::std::forward<Args>(args)...);",
-                )
+        union_cpp_defn_target.writelns(
+            f"template<tag_t tag, typename... Args>",
+        )
+        with union_cpp_defn_target.indented(
+            f"{union_cpp_info.name}(::taihe::static_tag_t<tag>, Args&&... args) : m_tag(tag) {{",
+            f"}}",
+        ):
+            for field in union.fields:
+                with union_cpp_defn_target.indented(
+                    f"if constexpr (tag == tag_t::{field.name}) {{",
+                    f"}}",
+                ):
+                    union_cpp_defn_target.writelns(
+                        f"new (&m_data.{field.name}) decltype(m_data.{field.name})(::std::forward<Args>(args)...);",
+                    )
         # creator
         union_cpp_defn_target.writelns(
             f"template<tag_t tag, typename... Args>",
@@ -752,13 +735,13 @@ class CppHeadersGenerator:
             f"template<tag_t tag, typename... Args>",
         )
         with union_cpp_defn_target.indented(
-            f"{union_cpp_info.name} const& emplace(Args&&... args) {{",
+            f"auto& emplace(Args&&... args) & {{",
             f"}}",
         ):
             union_cpp_defn_target.writelns(
                 f"::std::destroy_at(this);",
                 f"new (this) {union_cpp_info.name}(::taihe::static_tag<tag>, ::std::forward<Args>(args)...);",
-                f"return *this;",
+                f"return get_ref<tag>();",
             )
         # tag getter
         with union_cpp_defn_target.indented(
@@ -780,12 +763,28 @@ class CppHeadersGenerator:
                 f"return m_tag == tag;",
             )
         for constness in ["", " const"]:
-            # reference getter
+            # pointer getter
             union_cpp_defn_target.writelns(
                 f"template<tag_t tag>",
             )
             with union_cpp_defn_target.indented(
-                f"auto{constness}& get_ref(){constness} {{",
+                f"auto{constness}* get_ptr(){constness} {{",
+                f"}}",
+            ):
+                for field in union.fields:
+                    with union_cpp_defn_target.indented(
+                        f"if constexpr (tag == tag_t::{field.name}) {{",
+                        f"}}",
+                    ):
+                        union_cpp_defn_target.writelns(
+                            f"return m_tag == tag_t::{field.name} ? &m_data.{field.name} : nullptr;",
+                        )
+            # lvalue reference getter
+            union_cpp_defn_target.writelns(
+                f"template<tag_t tag>",
+            )
+            with union_cpp_defn_target.indented(
+                f"auto{constness}& get_ref(){constness}& {{",
                 f"}}",
             ):
                 for field in union.fields:
@@ -796,23 +795,28 @@ class CppHeadersGenerator:
                         union_cpp_defn_target.writelns(
                             f"return m_data.{field.name};",
                         )
-            # pointer getter
+            # rvalue reference getter
             union_cpp_defn_target.writelns(
                 f"template<tag_t tag>",
             )
             with union_cpp_defn_target.indented(
-                f"auto{constness}* get_ptr(){constness} {{",
+                f"auto{constness}&& get_ref(){constness}&& {{",
                 f"}}",
             ):
-                union_cpp_defn_target.writelns(
-                    f"return m_tag == tag ? &get_ref<tag>() : nullptr;",
-                )
-            # implicit return type visitor
+                for field in union.fields:
+                    with union_cpp_defn_target.indented(
+                        f"if constexpr (tag == tag_t::{field.name}) {{",
+                        f"}}",
+                    ):
+                        union_cpp_defn_target.writelns(
+                            f"return std::move(m_data).{field.name};",
+                        )
+            # lvalue reference visitor
             union_cpp_defn_target.writelns(
-                f"template<typename Visitor>",
+                f"template<typename ReturnType, typename Visitor>",
             )
             with union_cpp_defn_target.indented(
-                f"decltype(auto) match_function(Visitor&& visitor){constness} {{",
+                f"ReturnType visit(Visitor&& visitor){constness}& {{",
                 f"}}",
             ):
                 with union_cpp_defn_target.indented(
@@ -828,12 +832,12 @@ class CppHeadersGenerator:
                             union_cpp_defn_target.writelns(
                                 f"return visitor(::taihe::static_tag<tag_t::{field.name}>, m_data.{field.name});",
                             )
-            # explicit return type visitor
+            # rvalue reference visitor
             union_cpp_defn_target.writelns(
                 f"template<typename ReturnType, typename Visitor>",
             )
             with union_cpp_defn_target.indented(
-                f"ReturnType match_function(Visitor&& visitor){constness} {{",
+                f"ReturnType visit(Visitor&& visitor){constness}&& {{",
                 f"}}",
             ):
                 with union_cpp_defn_target.indented(
@@ -847,7 +851,7 @@ class CppHeadersGenerator:
                             f"}}",
                         ):
                             union_cpp_defn_target.writelns(
-                                f"return visitor(::taihe::static_tag<tag_t::{field.name}>, m_data.{field.name});",
+                                f"return visitor(::taihe::static_tag<tag_t::{field.name}>, std::move(m_data).{field.name});",
                             )
 
     def gen_union_named_utils(
@@ -875,7 +879,7 @@ class CppHeadersGenerator:
                 f"template<typename... Args>",
             )
             with union_cpp_defn_target.indented(
-                f"{union_cpp_info.name} const& emplace_{field.name}(Args&&... args) {{",
+                f"auto& emplace_{field.name}(Args&&... args) {{",
                 f"}}",
             ):
                 union_cpp_defn_target.writelns(
@@ -898,23 +902,32 @@ class CppHeadersGenerator:
                     f"}}",
                 ):
                     union_cpp_defn_target.writelns(
-                        f"return get_ptr<tag_t::{field.name}>();",
+                        f"return m_tag == tag_t::{field.name} ? &m_data.{field.name} : nullptr;",
                     )
-            # reference getter
+            # lvalue reference getter
             for field in union.fields:
                 with union_cpp_defn_target.indented(
-                    f"auto{constness}& get_{field.name}_ref(){constness} {{",
+                    f"auto{constness}& get_{field.name}_ref(){constness}& {{",
                     f"}}",
                 ):
                     union_cpp_defn_target.writelns(
-                        f"return get_ref<tag_t::{field.name}>();",
+                        f"return m_data.{field.name};",
                     )
-            # implicit return type visitor
+            # rvalue reference getter
+            for field in union.fields:
+                with union_cpp_defn_target.indented(
+                    f"auto{constness}&& get_{field.name}_ref(){constness}&& {{",
+                    f"}}",
+                ):
+                    union_cpp_defn_target.writelns(
+                        f"return std::move(m_data).{field.name};",
+                    )
+            # lvalue reference matcher
             union_cpp_defn_target.writelns(
-                f"template<typename Visitor>",
+                f"template<typename ReturnType, typename Matcher>",
             )
             with union_cpp_defn_target.indented(
-                f"decltype(auto) match(Visitor&& visitor){constness} {{",
+                f"ReturnType match(Matcher&& matcher){constness}& {{",
                 f"}}",
             ):
                 with union_cpp_defn_target.indented(
@@ -928,14 +941,14 @@ class CppHeadersGenerator:
                             f"}}",
                         ):
                             union_cpp_defn_target.writelns(
-                                f"return visitor.case_{field.name}(m_data.{field.name});",
+                                f"return matcher.case_{field.name}(m_data.{field.name});",
                             )
-            # explicit return type visitor
+            # rvalue reference matcher
             union_cpp_defn_target.writelns(
-                f"template<typename ReturnType, typename Visitor>",
+                f"template<typename ReturnType, typename Matcher>",
             )
             with union_cpp_defn_target.indented(
-                f"ReturnType match(Visitor&& visitor){constness} {{",
+                f"ReturnType match(Matcher&& matcher){constness}&& {{",
                 f"}}",
             ):
                 with union_cpp_defn_target.indented(
@@ -949,7 +962,7 @@ class CppHeadersGenerator:
                             f"}}",
                         ):
                             union_cpp_defn_target.writelns(
-                                f"return visitor.case_{field.name}(m_data.{field.name});",
+                                f"return matcher.case_{field.name}(std::move(m_data).{field.name});",
                             )
 
     def gen_union_same(
