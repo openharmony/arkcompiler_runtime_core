@@ -47,13 +47,14 @@ public:
     void Finalize() override;
     void RegisterCoroutine(Coroutine *co) override;
     bool TerminateCoroutine(Coroutine *co) override;
-    bool Launch(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority, bool abortFlag) override;
-    bool LaunchImmediately(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                           const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority,
-                           bool abortFlag) override;
-    bool LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName,
-                      const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority, bool abortFlag) override;
+    LaunchResult Launch(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
+                        const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority, bool abortFlag) override;
+    LaunchResult LaunchImmediately(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
+                                   const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority,
+                                   bool abortFlag) override;
+    LaunchResult LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName,
+                              const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority,
+                              bool abortFlag) override;
     void Schedule() override;
     void Await(CoroutineEvent *awaitee) RELEASE(awaitee) override;
     void UnblockWaiters(CoroutineEvent *blocker) override;
@@ -97,8 +98,8 @@ protected:
     CoroutineWorker *ChooseWorkerForCoroutine([[maybe_unused]] Coroutine *co);
 
 private:
-    bool LaunchImpl(EntrypointInfo &&epInfo, PandaString &&coroName, CoroutinePriority priority,
-                    bool startSuspended = true);
+    LaunchResult LaunchImpl(EntrypointInfo &&epInfo, PandaString &&coroName, CoroutinePriority priority,
+                            bool startSuspended = true);
     void ScheduleImpl();
     void UnblockWaitersImpl(CoroutineEvent *blocker) REQUIRES(coroSwitchLock_);
 

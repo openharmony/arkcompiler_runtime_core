@@ -483,3 +483,4 @@ add_ets_coroutines_test(FILE sync_primitives.ets
 )
 
 add_subdirectory(dfx)
+add_subdirectory(no_suitable_worker)

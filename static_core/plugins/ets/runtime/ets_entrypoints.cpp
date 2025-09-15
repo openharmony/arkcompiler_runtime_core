@@ -59,13 +59,15 @@ static inline bool Launch(EtsCoroutine *currentCoro, Method *method, const EtsHa
     auto promiseRef = etsVm->GetGlobalObjectStorage()->Add(promiseHandle.GetPtr(), mem::Reference::ObjectType::GLOBAL);
     auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(promiseRef, coroManager);
     // create the coro and put it to the ready queue
-    bool launchResult = currentCoro->GetCoroutineManager()->Launch(
+    LaunchResult launchResult = currentCoro->GetCoroutineManager()->Launch(
         evt, method, std::move(args), CoroutineWorkerGroup::AnyId(), EtsCoroutine::LAUNCH, false);
-    if (UNLIKELY(!launchResult)) {
+    if (UNLIKELY(launchResult != LaunchResult::OK)) {
         // OOM
-        Runtime::GetCurrent()->GetInternalAllocator()->Delete(evt);
+        if (launchResult == LaunchResult::COROUTINES_LIMIT_EXCEED) {
+            Runtime::GetCurrent()->GetInternalAllocator()->Delete(evt);
+        }
     }
-    return launchResult;
+    return launchResult == LaunchResult::OK;
 }
 
 void LaunchCoroutine(Method *method, ObjectHeader *obj, uint64_t *args, ObjectHeader *thisObj)

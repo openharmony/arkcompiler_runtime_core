@@ -76,9 +76,9 @@ void EtsPromise::LaunchCallback(EtsCoroutine *coro, EtsObject *callback, const C
     auto *method = EtsMethod::ToRuntimeMethod(etsmethod);
     ASSERT(method != nullptr);
     auto args = PandaVector<Value> {Value(callback->GetCoreType())};
-    [[maybe_unused]] bool launchResult =
+    [[maybe_unused]] LaunchResult launchResult =
         coroManager->Launch(event, method, std::move(args), groupId, EtsCoroutine::PROMISE_CALLBACK, false);
-    ASSERT(launchResult);
+    ASSERT(launchResult == LaunchResult::OK);
 }
 
 }  // namespace ark::ets
