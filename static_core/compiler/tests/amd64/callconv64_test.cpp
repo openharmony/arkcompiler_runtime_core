@@ -172,6 +172,30 @@ TEST_F(Callconv64Test, NativeParamsEight)
         }
     }
 }
+
+class Callconv64ParamTypedTest : public Callconv64Test, public testing::WithParamInterface<TypeInfo> {};
+
+TEST_P(Callconv64ParamTypedTest, NativeParamsAndTmpRegs)
+{
+    // no tmp registers in param registers
+    auto param_info = GetCallconv()->GetParameterInfo(0);
+    const auto &target = GetEncoder()->GetTarget();
+    auto getTempRegsMaskByType = [&target](Reg &reg) {
+        return reg.IsFloat() ? target.GetTempVRegsMask() : target.GetTempRegsMask();
+    };
+
+    while (true) {
+        auto ret = param_info->GetNativeParam(GetParam());
+        if (!std::holds_alternative<Reg>(ret)) {
+            break;
+        }
+        auto &reg = std::get<Reg>(ret);
+        EXPECT_FALSE(getTempRegsMaskByType(reg).Test(reg.GetId()));
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(AllTypes, Callconv64ParamTypedTest,
+                         testing::Values(INT8_TYPE, INT16_TYPE, INT32_TYPE, INT64_TYPE, FLOAT32_TYPE, FLOAT64_TYPE));
 // NOLINTEND(readability-magic-numbers)
 
 }  // namespace ark::compiler

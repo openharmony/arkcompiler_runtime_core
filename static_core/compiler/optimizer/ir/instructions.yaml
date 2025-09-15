@@ -1344,7 +1344,7 @@ arch_info:
   regs_count: 16
   temp_regs: [8, 9, 12]
   fp_regs_count: 32
-  fp_temp_regs: [14, 15]
+  fp_temp_regs: [30, 31]
 
 - name: x86_64
   regs_count: 16
