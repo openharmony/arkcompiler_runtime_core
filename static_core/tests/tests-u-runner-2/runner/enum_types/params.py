@@ -45,6 +45,10 @@ class BinaryParams:
     flags: list[str]
     env: dict[str, str]
 
+    @property
+    def component_name(self) -> str:
+        return self.executor.stem
+
 
 @dataclass
 class TestReport:
