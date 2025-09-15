@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,6 +49,20 @@ class Type : public ViewInResource<AbckitType *, const File *> {
     friend class abckit::core::FunctionParam;
     /// @brief core::Function
     friend class abckit::core::Function;
+    /// @brief arkts::ModuleField
+    friend class arkts::ModuleField;
+    /// @brief arkts::ClassField
+    friend class arkts::ClassField;
+    /// @brief arkts::Class
+    friend class arkts::Class;
+    /// @brief arkts::Module
+    friend class arkts::Module;
+    /// @brief arkts::InterfaceField
+    friend class arkts::InterfaceField;
+    /// @brief arkts::Interface
+    friend class arkts::Interface;
+    /// @brief arkts::Enum
+    friend class arkts::Enum;
 
 public:
     /**

@@ -16,6 +16,8 @@
 #ifndef CPP_ABCKIT_ARKTS_FIELD_IMPL_H
 #define CPP_ABCKIT_ARKTS_FIELD_IMPL_H
 
+#include "annotation.h"
+#include "annotation_interface.h"
 #include "field.h"
 
 namespace abckit::arkts {
@@ -34,6 +36,37 @@ inline AbckitArktsModuleField *ModuleField::TargetCast() const
 inline bool ModuleField::SetName(const std::string &name) const
 {
     const auto ret = GetApiConfig()->cArktsMapi_->moduleFieldSetName(TargetCast(), name.c_str());
+    CheckError(GetApiConfig());
+    return ret;
+}
+
+inline bool ModuleField::SetType(const Type &type) const
+{
+    const auto ret = GetApiConfig()->cArktsMapi_->moduleFieldSetType(TargetCast(), type.GetView());
+    CheckError(GetApiConfig());
+    return ret;
+}
+
+inline bool ModuleField::SetValue(const Value &value) const
+{
+    const auto ret = GetApiConfig()->cArktsMapi_->moduleFieldSetValue(TargetCast(), value.GetView());
+    CheckError(GetApiConfig());
+    return ret;
+}
+
+inline bool ModuleField::AddAnnotation(const AnnotationInterface &ai) const
+{
+    const struct AbckitArktsAnnotationCreateParams params {
+        ai.TargetCast()
+    };
+    auto ret = GetApiConfig()->cArktsMapi_->moduleFieldAddAnnotation(TargetCast(), &params);
+    CheckError(GetApiConfig());
+    return ret;
+}
+
+inline bool ModuleField::RemoveAnnotation(const arkts::Annotation &anno) const
+{
+    auto ret = GetApiConfig()->cArktsMapi_->moduleFieldRemoveAnnotation(TargetCast(), anno.TargetCast());
     CheckError(GetApiConfig());
     return ret;
 }
@@ -73,6 +106,37 @@ inline bool ClassField::SetName(const std::string &name) const
     return ret;
 }
 
+inline bool ClassField::SetType(const Type &type) const
+{
+    const auto ret = GetApiConfig()->cArktsMapi_->classFieldSetType(TargetCast(), type.GetView());
+    CheckError(GetApiConfig());
+    return ret;
+}
+
+inline bool ClassField::SetValue(const Value &value) const
+{
+    const auto ret = GetApiConfig()->cArktsMapi_->classFieldSetValue(TargetCast(), value.GetView());
+    CheckError(GetApiConfig());
+    return ret;
+}
+
+inline bool ClassField::AddAnnotation(const AnnotationInterface &ai) const
+{
+    const struct AbckitArktsAnnotationCreateParams params {
+        ai.TargetCast()
+    };
+    auto ret = GetApiConfig()->cArktsMapi_->classFieldAddAnnotation(TargetCast(), &params);
+    CheckError(GetApiConfig());
+    return ret;
+}
+
+inline bool ClassField::RemoveAnnotation(const arkts::Annotation &anno) const
+{
+    auto ret = GetApiConfig()->cArktsMapi_->classFieldRemoveAnnotation(TargetCast(), anno.TargetCast());
+    CheckError(GetApiConfig());
+    return ret;
+}
+
 inline InterfaceField::InterfaceField(const core::InterfaceField &coreOther)
     : core::InterfaceField(coreOther), targetChecker_(this)
 {
@@ -88,6 +152,30 @@ inline AbckitArktsInterfaceField *InterfaceField::TargetCast() const
 inline bool InterfaceField::SetName(const std::string &name) const
 {
     const auto ret = GetApiConfig()->cArktsMapi_->interfaceFieldSetName(TargetCast(), name.c_str());
+    CheckError(GetApiConfig());
+    return ret;
+}
+
+inline bool InterfaceField::SetType(const Type &type) const
+{
+    const auto ret = GetApiConfig()->cArktsMapi_->interfaceFieldSetType(TargetCast(), type.GetView());
+    CheckError(GetApiConfig());
+    return ret;
+}
+
+inline bool InterfaceField::AddAnnotation(const AnnotationInterface &ai) const
+{
+    const struct AbckitArktsAnnotationCreateParams params {
+        ai.TargetCast()
+    };
+    auto ret = GetApiConfig()->cArktsMapi_->interfaceFieldAddAnnotation(TargetCast(), &params);
+    CheckError(GetApiConfig());
+    return ret;
+}
+
+inline bool InterfaceField::RemoveAnnotation(const arkts::Annotation &anno) const
+{
+    auto ret = GetApiConfig()->cArktsMapi_->interfaceFieldRemoveAnnotation(TargetCast(), anno.TargetCast());
     CheckError(GetApiConfig());
     return ret;
 }
