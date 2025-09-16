@@ -36,26 +36,26 @@ sub:
         - |
           (x: number): boolean => Math.abs(x) == 1
         - |
-          (x: number, i: number): boolean => (x + i) > 0
+          (x: number, i): boolean => (x + i) > 0
         - |
-          (x: number, i: number, s: Uint8ClampedArray): boolean => (x + i) > 0
+          (x: number, i, s: Uint8ClampedArray): boolean => (x + i) > 0
         - |
-          (x: number, i: number, s: Uint8ClampedArray): boolean => (x + i) % 2 == 0
+          (x: number, i, s: Uint8ClampedArray): boolean => (x + i) % 2 == 0
         - |
-          (x: number, i: number, s: Uint8ClampedArray): boolean => i % 2 == 0
+          (x: number, i, s: Uint8ClampedArray): boolean => i % 2 == 0
         - |
-          (x: number, i: number, s: Uint8ClampedArray): boolean => (x + i) < 0
+          (x: number, i, s: Uint8ClampedArray): boolean => (x + i) < 0
         - |
-          (x: number, i: number, s: Uint8ClampedArray): boolean => (x + i) == 1
+          (x: number, i, s: Uint8ClampedArray): boolean => (x + i) == 1
       void_lambdas:
         - |
           (): void => {}
         - |
           (x: number): void => { x = x*2 }
         - |
-          (x: number, i: number): void => { x = x*2 }
+          (x: number, i): void => { x = x*2 }
         - |
-          (x: number, i: number, s: Uint8ClampedArray): void => { x = x + 1000 }
+          (x: number, i, s: Uint8ClampedArray): void => { x = x + 1000 }
     sub:
       - method: find
         params:

@@ -181,7 +181,7 @@ function createFilteredArrayFromGiven(): int {
 
     let target: {{.item.objectType}};
     try {
-        target = origin.filter((val: {{.item.type}}, index: number): boolean => { return val{{.item.cast2primitive}} > 0});
+        target = origin.filter((val: {{.item.type}}, index: int): boolean => { return val{{.item.cast2primitive}} > 0});
     } catch(e) {
         return fail;
     }
@@ -288,7 +288,7 @@ function testMap(): int {
 
     let target: {{.item.objectType}};
     try {
-        target = origin.map((val: {{.item.type}}, index: number): {{.item.type}} => { return val + {{.item.create}}(1) });
+        target = origin.map((val: {{.item.type}}, index: int): {{.item.type}} => { return val + {{.item.create}}(1) });
     } catch(e) {
         console.println(e);
         return fail;

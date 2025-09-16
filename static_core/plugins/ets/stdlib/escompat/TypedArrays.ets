@@ -1185,8 +1185,8 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: number, array: Int8Array) => boolean =
-            (val: number, index: number, array: Int8Array): boolean => { return fn(val) }
+        let newF: (val: number, index: int, array: Int8Array) => boolean =
+            (val: number, index: int, array: Int8Array): boolean => { return fn(val) }
         return (this.findLast(newF)).toDouble()
     }
 
@@ -1256,9 +1256,9 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns false unless predicate function returns true for an array element,
      * in which case true is immediately returned.
      */
-    public some(predicate: (element: number, index: number, array: Int8Array) => boolean): boolean {
+    public some(predicate: (element: number, index: int, array: Int8Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; ++i) {
-            if (predicate((this.getUnsafe(i)).toDouble(), i.toDouble(), this)) {
+            if (predicate((this.getUnsafe(i)).toDouble(), i, this)) {
                 return true
             }
         }
@@ -1279,11 +1279,11 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduce<U = number>(
-                callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Int8Array) => U,
+                callbackfn: (previousValue: U, currentValue: number, currentIndex: int, array: Int8Array) => U,
                 initialValue: U): U {
         let accumulatedValue = initialValue
         for (let i = 0; i < this.lengthInt; ++i) {
-            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i, this)
         }
         return accumulatedValue
     }
@@ -1300,14 +1300,14 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      * calling reduce method on an empty array without an initial value creates a TypeError
      */
-    public reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: Int8Array) => number): number {
+    public reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: int, array: Int8Array) => number): number {
         if (this.lengthInt == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
 
         let accumulatedValue = (this.getUnsafe(0)).toDouble()
         for (let i = 1; i < this.lengthInt; ++i) {
-            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i, this)
         }
         return accumulatedValue
     }
@@ -1326,11 +1326,11 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduceRight<U = number>(
-                callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Int8Array) => U,
+                callbackfn: (previousValue: U, currentValue: number, currentIndex: int, array: Int8Array) => U,
                 initialValue: U): U {
         let accumulatedValue = initialValue
         for (let i = this.lengthInt - 1; i >= 0; --i) {
-            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i, this)
         }
         return accumulatedValue
     }
@@ -1348,14 +1348,14 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      * calling reduceRight method on an empty array without an initial value creates a TypeError
      */
-    public reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: Int8Array) => number): number {
+    public reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: int, array: Int8Array) => number): number {
         if (this.lengthInt == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
 
         let accumulatedValue: number = (this.getUnsafe(this.lengthInt - 1)).toDouble()
         for (let i = this.lengthInt - 2; i >= 0; --i) {
-            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i, this)
         }
         return accumulatedValue
     }
@@ -1367,11 +1367,11 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     *
     * @returns a new Int8Array where for each element from current Int8Array fn was applied
     */
-    public map(fn: (val: number, index: number, array: Int8Array) => number): Int8Array {
+    public map(fn: (val: number, index: int, array: Int8Array) => number): Int8Array {
         let resBuf = new ArrayBuffer(this.lengthInt * Int8Array.BYTES_PER_ELEMENT)
         let res = new Int8Array(resBuf, 0, (resBuf.getByteLength() / Int8Array.BYTES_PER_ELEMENT).toInt())
         for (let i = 0; i < this.lengthInt; ++i) {
-            res.set(i, fn((this.getUnsafe(i)).toDouble(), i.toDouble(), this).toByte())
+            res.set(i, fn((this.getUnsafe(i)).toDouble(), i, this).toByte())
         }
         return res
     }
@@ -1386,9 +1386,9 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns true unless predicate function returns a false for an array element,
      * in which case false is immediately returned.
      */
-    public every(predicate: (element: number, index: number, array: Int8Array) => boolean): boolean {
+    public every(predicate: (element: number, index: int, array: Int8Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; ++i) {
-            if (!predicate((this.getUnsafe(i)).toDouble(), i.toDouble(), this)) {
+            if (!predicate((this.getUnsafe(i)).toDouble(), i, this)) {
                 return false
             }
         }
@@ -1402,11 +1402,11 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns a new Int8Array with elements from current Int8Array that satisfy condition fn
      */
-    public filter(fn: (val: number, index: number, array: Int8Array) => boolean): Int8Array {
+    public filter(fn: (val: number, index: int, array: Int8Array) => boolean): Int8Array {
         let markers : FixedArray<boolean> = new boolean[this.lengthInt]
         let resLen = 0
         for (let i = 0; i < this.lengthInt; ++i) {
-            markers[i] = fn((this.getUnsafe(i)).toDouble(), i.toDouble(), this)
+            markers[i] = fn((this.getUnsafe(i)).toDouble(), i, this)
             if (markers[i]) {
                 ++resLen
             }
@@ -1432,10 +1432,10 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns number | undefined
      */
-    public find(predicate: (value: number, index: number, obj: Int8Array) => boolean): number | undefined {
+    public find(predicate: (value: number, index: int, obj: Int8Array) => boolean): number | undefined {
         for (let i = 0; i < this.lengthInt; ++i) {
             let val = this.getUnsafe(i)
-            if (predicate((val).toDouble(), i.toDouble(), this)) {
+            if (predicate((val).toDouble(), i, this)) {
                 return (val).toDouble()
             }
         }
@@ -1450,15 +1450,15 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * order, until it finds one where predicate returns true. If such an element is found,
      * findIndex immediately returns that element index. Otherwise, findIndex returns -1
      *
-     * @returns number
+     * @returns int
      */
-    public findIndex(predicate: (value: number, index: number, obj: Int8Array) => boolean): number {
+    public findIndex(predicate: (value: number, index: int, obj: Int8Array) => boolean): int {
         for (let i = 0; i < this.lengthInt; ++i) {
-            if (predicate((this.getUnsafe(i)).toDouble(), i.toDouble(), this)) {
-                return i.toDouble()
+            if (predicate((this.getUnsafe(i)).toDouble(), i, this)) {
+                return i
             }
         }
-        return (-1).toDouble()
+        return -1
     }
 
     /**
@@ -1468,10 +1468,10 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns the last element that satisfies fn
      */
-    public findLast(fn: (val: number, index: number, array: Int8Array) => boolean): byte {
+    public findLast(fn: (val: number, index: int, array: Int8Array) => boolean): byte {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
             let val = this.getUnsafe(i)
-            if (fn((val).toDouble(), i.toDouble(), this)) {
+            if (fn((val).toDouble(), i, this)) {
                 return val
             }
         }
@@ -1485,14 +1485,14 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
-    public findLastIndex(fn: (val: number, index: number, array: Int8Array) => boolean): number {
+    public findLastIndex(fn: (val: number, index: int, array: Int8Array) => boolean): int {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
             let val = this.getUnsafe(i)
-            if (fn((val).toDouble(), i.toDouble(), this)) {
+            if (fn((val).toDouble(), i, this)) {
                 return i
             }
         }
-        return (-1).toDouble()
+        return -1
     }
 
     /**
@@ -1503,9 +1503,9 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns None
      */
-    public forEach(callbackfn: (value: number, index: number, array: Int8Array) => void): void {
+    public forEach(callbackfn: (value: number, index: int, array: Int8Array) => void): void {
         for (let i = 0; i < this.lengthInt; ++i) {
-            callbackfn((this.getUnsafe(i)).toDouble(), i.toDouble(), this)
+            callbackfn((this.getUnsafe(i)).toDouble(), i, this)
         }
     }
 
@@ -2712,8 +2712,8 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: number, array: Int16Array) => boolean =
-            (val: number, index: number, array: Int16Array): boolean => { return fn(val) }
+        let newF: (val: number, index: int, array: Int16Array) => boolean =
+            (val: number, index: int, array: Int16Array): boolean => { return fn(val) }
         return (this.findLast(newF)).toDouble()
     }
 
@@ -2783,9 +2783,9 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns false unless predicate function returns true for an array element,
      * in which case true is immediately returned.
      */
-    public some(predicate: (element: number, index: number, array: Int16Array) => boolean): boolean {
+    public some(predicate: (element: number, index: int, array: Int16Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; ++i) {
-            if (predicate((this.getUnsafe(i)).toDouble(), i.toDouble(), this)) {
+            if (predicate((this.getUnsafe(i)).toDouble(), i, this)) {
                 return true
             }
         }
@@ -2806,11 +2806,11 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduce<U = number>(
-                callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Int16Array) => U,
+                callbackfn: (previousValue: U, currentValue: number, currentIndex: int, array: Int16Array) => U,
                 initialValue: U): U {
         let accumulatedValue = initialValue
         for (let i = 0; i < this.lengthInt; ++i) {
-            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i, this)
         }
         return accumulatedValue
     }
@@ -2827,14 +2827,14 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      * calling reduce method on an empty array without an initial value creates a TypeError
      */
-    public reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: Int16Array) => number): number {
+    public reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: int, array: Int16Array) => number): number {
         if (this.lengthInt == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
 
         let accumulatedValue = (this.getUnsafe(0)).toDouble()
         for (let i = 1; i < this.lengthInt; ++i) {
-            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i, this)
         }
         return accumulatedValue
     }
@@ -2853,11 +2853,11 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduceRight<U = number>(
-                callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Int16Array) => U,
+                callbackfn: (previousValue: U, currentValue: number, currentIndex: int, array: Int16Array) => U,
                 initialValue: U): U {
         let accumulatedValue = initialValue
         for (let i = this.lengthInt - 1; i >= 0; --i) {
-            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i, this)
         }
         return accumulatedValue
     }
@@ -2875,14 +2875,14 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      * calling reduceRight method on an empty array without an initial value creates a TypeError
      */
-    public reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: Int16Array) => number): number {
+    public reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: int, array: Int16Array) => number): number {
         if (this.lengthInt == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
 
         let accumulatedValue: number = (this.getUnsafe(this.lengthInt - 1)).toDouble()
         for (let i = this.lengthInt - 2; i >= 0; --i) {
-            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i, this)
         }
         return accumulatedValue
     }
@@ -2894,11 +2894,11 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     *
     * @returns a new Int16Array where for each element from current Int16Array fn was applied
     */
-    public map(fn: (val: number, index: number, array: Int16Array) => number): Int16Array {
+    public map(fn: (val: number, index: int, array: Int16Array) => number): Int16Array {
         let resBuf = new ArrayBuffer(this.lengthInt * Int16Array.BYTES_PER_ELEMENT)
         let res = new Int16Array(resBuf, 0, (resBuf.getByteLength() / Int16Array.BYTES_PER_ELEMENT).toInt())
         for (let i = 0; i < this.lengthInt; ++i) {
-            res.set(i, fn((this.getUnsafe(i)).toDouble(), i.toDouble(), this).toShort())
+            res.set(i, fn((this.getUnsafe(i)).toDouble(), i, this).toShort())
         }
         return res
     }
@@ -2913,9 +2913,9 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns true unless predicate function returns a false for an array element,
      * in which case false is immediately returned.
      */
-    public every(predicate: (element: number, index: number, array: Int16Array) => boolean): boolean {
+    public every(predicate: (element: number, index: int, array: Int16Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; ++i) {
-            if (!predicate((this.getUnsafe(i)).toDouble(), i.toDouble(), this)) {
+            if (!predicate((this.getUnsafe(i)).toDouble(), i, this)) {
                 return false
             }
         }
@@ -2929,11 +2929,11 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns a new Int16Array with elements from current Int16Array that satisfy condition fn
      */
-    public filter(fn: (val: number, index: number, array: Int16Array) => boolean): Int16Array {
+    public filter(fn: (val: number, index: int, array: Int16Array) => boolean): Int16Array {
         let markers : FixedArray<boolean> = new boolean[this.lengthInt]
         let resLen = 0
         for (let i = 0; i < this.lengthInt; ++i) {
-            markers[i] = fn((this.getUnsafe(i)).toDouble(), i.toDouble(), this)
+            markers[i] = fn((this.getUnsafe(i)).toDouble(), i, this)
             if (markers[i]) {
                 ++resLen
             }
@@ -2959,10 +2959,10 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns number | undefined
      */
-    public find(predicate: (value: number, index: number, obj: Int16Array) => boolean): number | undefined {
+    public find(predicate: (value: number, index: int, obj: Int16Array) => boolean): number | undefined {
         for (let i = 0; i < this.lengthInt; ++i) {
             let val = this.getUnsafe(i)
-            if (predicate((val).toDouble(), i.toDouble(), this)) {
+            if (predicate((val).toDouble(), i, this)) {
                 return (val).toDouble()
             }
         }
@@ -2977,15 +2977,15 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * order, until it finds one where predicate returns true. If such an element is found,
      * findIndex immediately returns that element index. Otherwise, findIndex returns -1
      *
-     * @returns number
+     * @returns int
      */
-    public findIndex(predicate: (value: number, index: number, obj: Int16Array) => boolean): number {
+    public findIndex(predicate: (value: number, index: int, obj: Int16Array) => boolean): int {
         for (let i = 0; i < this.lengthInt; ++i) {
-            if (predicate((this.getUnsafe(i)).toDouble(), i.toDouble(), this)) {
-                return i.toDouble()
+            if (predicate((this.getUnsafe(i)).toDouble(), i, this)) {
+                return i
             }
         }
-        return (-1).toDouble()
+        return -1
     }
 
     /**
@@ -2995,10 +2995,10 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns the last element that satisfies fn
      */
-    public findLast(fn: (val: number, index: number, array: Int16Array) => boolean): short {
+    public findLast(fn: (val: number, index: int, array: Int16Array) => boolean): short {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
             let val = this.getUnsafe(i)
-            if (fn((val).toDouble(), i.toDouble(), this)) {
+            if (fn((val).toDouble(), i, this)) {
                 return val
             }
         }
@@ -3012,14 +3012,14 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
-    public findLastIndex(fn: (val: number, index: number, array: Int16Array) => boolean): number {
+    public findLastIndex(fn: (val: number, index: int, array: Int16Array) => boolean): int {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
             let val = this.getUnsafe(i)
-            if (fn((val).toDouble(), i.toDouble(), this)) {
+            if (fn((val).toDouble(), i, this)) {
                 return i
             }
         }
-        return (-1).toDouble()
+        return -1
     }
 
     /**
@@ -3030,9 +3030,9 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns None
      */
-    public forEach(callbackfn: (value: number, index: number, array: Int16Array) => void): void {
+    public forEach(callbackfn: (value: number, index: int, array: Int16Array) => void): void {
         for (let i = 0; i < this.lengthInt; ++i) {
-            callbackfn((this.getUnsafe(i)).toDouble(), i.toDouble(), this)
+            callbackfn((this.getUnsafe(i)).toDouble(), i, this)
         }
     }
 
@@ -4215,8 +4215,8 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: number, array: Int32Array) => boolean =
-            (val: number, index: number, array: Int32Array): boolean => { return fn(val) }
+        let newF: (val: number, index: int, array: Int32Array) => boolean =
+            (val: number, index: int, array: Int32Array): boolean => { return fn(val) }
         return (this.findLast(newF)).toDouble()
     }
 
@@ -4286,9 +4286,9 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns false unless predicate function returns true for an array element,
      * in which case true is immediately returned.
      */
-    public some(predicate: (element: number, index: number, array: Int32Array) => boolean): boolean {
+    public some(predicate: (element: number, index: int, array: Int32Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; ++i) {
-            if (predicate((this.getUnsafe(i)).toDouble(), i.toDouble(), this)) {
+            if (predicate((this.getUnsafe(i)).toDouble(), i, this)) {
                 return true
             }
         }
@@ -4309,11 +4309,11 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduce<U = number>(
-                callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Int32Array) => U,
+                callbackfn: (previousValue: U, currentValue: number, currentIndex: int, array: Int32Array) => U,
                 initialValue: U): U {
         let accumulatedValue = initialValue
         for (let i = 0; i < this.lengthInt; ++i) {
-            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i, this)
         }
         return accumulatedValue
     }
@@ -4330,14 +4330,14 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      * calling reduce method on an empty array without an initial value creates a TypeError
      */
-    public reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: Int32Array) => number): number {
+    public reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: int, array: Int32Array) => number): number {
         if (this.lengthInt == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
 
         let accumulatedValue = (this.getUnsafe(0)).toDouble()
         for (let i = 1; i < this.lengthInt; ++i) {
-            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i, this)
         }
         return accumulatedValue
     }
@@ -4356,11 +4356,11 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduceRight<U = number>(
-                callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Int32Array) => U,
+                callbackfn: (previousValue: U, currentValue: number, currentIndex: int, array: Int32Array) => U,
                 initialValue: U): U {
         let accumulatedValue = initialValue
         for (let i = this.lengthInt - 1; i >= 0; --i) {
-            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i, this)
         }
         return accumulatedValue
     }
@@ -4378,14 +4378,14 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      * calling reduceRight method on an empty array without an initial value creates a TypeError
      */
-    public reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: Int32Array) => number): number {
+    public reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: int, array: Int32Array) => number): number {
         if (this.lengthInt == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
 
         let accumulatedValue: number = (this.getUnsafe(this.lengthInt - 1)).toDouble()
         for (let i = this.lengthInt - 2; i >= 0; --i) {
-            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i, this)
         }
         return accumulatedValue
     }
@@ -4397,11 +4397,11 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     *
     * @returns a new Int32Array where for each element from current Int32Array fn was applied
     */
-    public map(fn: (val: number, index: number, array: Int32Array) => number): Int32Array {
+    public map(fn: (val: number, index: int, array: Int32Array) => number): Int32Array {
         let resBuf = new ArrayBuffer(this.lengthInt * Int32Array.BYTES_PER_ELEMENT)
         let res = new Int32Array(resBuf, 0, (resBuf.getByteLength() / Int32Array.BYTES_PER_ELEMENT).toInt())
         for (let i = 0; i < this.lengthInt; ++i) {
-            res.set(i, fn((this.getUnsafe(i)).toDouble(), i.toDouble(), this).toInt())
+            res.set(i, fn((this.getUnsafe(i)).toDouble(), i, this).toInt())
         }
         return res
     }
@@ -4416,9 +4416,9 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns true unless predicate function returns a false for an array element,
      * in which case false is immediately returned.
      */
-    public every(predicate: (element: number, index: number, array: Int32Array) => boolean): boolean {
+    public every(predicate: (element: number, index: int, array: Int32Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; ++i) {
-            if (!predicate((this.getUnsafe(i)).toDouble(), i.toDouble(), this)) {
+            if (!predicate((this.getUnsafe(i)).toDouble(), i, this)) {
                 return false
             }
         }
@@ -4432,11 +4432,11 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns a new Int32Array with elements from current Int32Array that satisfy condition fn
      */
-    public filter(fn: (val: number, index: number, array: Int32Array) => boolean): Int32Array {
+    public filter(fn: (val: number, index: int, array: Int32Array) => boolean): Int32Array {
         let markers : FixedArray<boolean> = new boolean[this.lengthInt]
         let resLen = 0
         for (let i = 0; i < this.lengthInt; ++i) {
-            markers[i] = fn((this.getUnsafe(i)).toDouble(), i.toDouble(), this)
+            markers[i] = fn((this.getUnsafe(i)).toDouble(), i, this)
             if (markers[i]) {
                 ++resLen
             }
@@ -4462,10 +4462,10 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns number | undefined
      */
-    public find(predicate: (value: number, index: number, obj: Int32Array) => boolean): number | undefined {
+    public find(predicate: (value: number, index: int, obj: Int32Array) => boolean): number | undefined {
         for (let i = 0; i < this.lengthInt; ++i) {
             let val = this.getUnsafe(i)
-            if (predicate((val).toDouble(), i.toDouble(), this)) {
+            if (predicate((val).toDouble(), i, this)) {
                 return (val).toDouble()
             }
         }
@@ -4480,15 +4480,15 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * order, until it finds one where predicate returns true. If such an element is found,
      * findIndex immediately returns that element index. Otherwise, findIndex returns -1
      *
-     * @returns number
+     * @returns int
      */
-    public findIndex(predicate: (value: number, index: number, obj: Int32Array) => boolean): number {
+    public findIndex(predicate: (value: number, index: int, obj: Int32Array) => boolean): int {
         for (let i = 0; i < this.lengthInt; ++i) {
-            if (predicate((this.getUnsafe(i)).toDouble(), i.toDouble(), this)) {
-                return i.toDouble()
+            if (predicate((this.getUnsafe(i)).toDouble(), i, this)) {
+                return i
             }
         }
-        return (-1).toDouble()
+        return -1
     }
 
     /**
@@ -4498,10 +4498,10 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns the last element that satisfies fn
      */
-    public findLast(fn: (val: number, index: number, array: Int32Array) => boolean): int {
+    public findLast(fn: (val: number, index: int, array: Int32Array) => boolean): int {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
             let val = this.getUnsafe(i)
-            if (fn((val).toDouble(), i.toDouble(), this)) {
+            if (fn((val).toDouble(), i, this)) {
                 return val
             }
         }
@@ -4515,14 +4515,14 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
-    public findLastIndex(fn: (val: number, index: number, array: Int32Array) => boolean): number {
+    public findLastIndex(fn: (val: number, index: int, array: Int32Array) => boolean): int {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
             let val = this.getUnsafe(i)
-            if (fn((val).toDouble(), i.toDouble(), this)) {
+            if (fn((val).toDouble(), i, this)) {
                 return i
             }
         }
-        return (-1).toDouble()
+        return -1
     }
 
     /**
@@ -4533,9 +4533,9 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns None
      */
-    public forEach(callbackfn: (value: number, index: number, array: Int32Array) => void): void {
+    public forEach(callbackfn: (value: number, index: int, array: Int32Array) => void): void {
         for (let i = 0; i < this.lengthInt; ++i) {
-            callbackfn((this.getUnsafe(i)).toDouble(), i.toDouble(), this)
+            callbackfn((this.getUnsafe(i)).toDouble(), i, this)
         }
     }
 
@@ -5730,8 +5730,8 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: BigInt) => boolean): BigInt {
-        let newF: (val: BigInt, index: number, array: BigInt64Array) => boolean =
-            (val: BigInt, index: number, array: BigInt64Array): boolean => { return fn(val) }
+        let newF: (val: BigInt, index: int, array: BigInt64Array) => boolean =
+            (val: BigInt, index: int, array: BigInt64Array): boolean => { return fn(val) }
         return new BigInt(this.findLast(newF))
     }
 
@@ -5805,9 +5805,9 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns false unless predicate function returns true for an array element,
      * in which case true is immediately returned.
      */
-    public some(predicate: (element: BigInt, index: number, array: BigInt64Array) => boolean): boolean {
+    public some(predicate: (element: BigInt, index: int, array: BigInt64Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; ++i) {
-            if (predicate(new BigInt(this.getUnsafe(i)), i.toDouble(), this)) {
+            if (predicate(new BigInt(this.getUnsafe(i)), i, this)) {
                 return true
             }
         }
@@ -5828,11 +5828,11 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduce<U = BigInt>(
-                callbackfn: (previousValue: U, currentValue: BigInt, currentIndex: number, array: BigInt64Array) => U,
+                callbackfn: (previousValue: U, currentValue: BigInt, currentIndex: int, array: BigInt64Array) => U,
                 initialValue: U): U {
         let accumulatedValue = initialValue
         for (let i = 0; i < this.lengthInt; ++i) {
-            accumulatedValue = callbackfn(accumulatedValue, new BigInt(this.getUnsafe(i)), i.toDouble(), this)
+            accumulatedValue = callbackfn(accumulatedValue, new BigInt(this.getUnsafe(i)), i, this)
         }
         return accumulatedValue
     }
@@ -5849,14 +5849,14 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns The value that results from running the callback function to completion over the entire typed array.
      * calling reduce method on an empty array without an initial value creates a TypeError
      */
-    public reduce(callbackfn: (previousValue: BigInt, currentValue: BigInt, currentIndex: number, array: BigInt64Array) => BigInt): BigInt {
+    public reduce(callbackfn: (previousValue: BigInt, currentValue: BigInt, currentIndex: int, array: BigInt64Array) => BigInt): BigInt {
         if (this.lengthInt == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
 
         let accumulatedValue = new BigInt(this.getUnsafe(0))
         for (let i = 1; i < this.lengthInt; ++i) {
-            accumulatedValue = callbackfn(accumulatedValue, new BigInt(this.getUnsafe(i)), i.toDouble(), this)
+            accumulatedValue = callbackfn(accumulatedValue, new BigInt(this.getUnsafe(i)), i, this)
         }
         return accumulatedValue
     }
@@ -5875,11 +5875,11 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduceRight<U = BigInt>(
-                callbackfn: (previousValue: U, currentValue: BigInt, currentIndex: number, array: BigInt64Array) => U,
+                callbackfn: (previousValue: U, currentValue: BigInt, currentIndex: int, array: BigInt64Array) => U,
                 initialValue: U): U {
         let accumulatedValue = initialValue
         for (let i = this.lengthInt - 1; i >= 0; --i) {
-            accumulatedValue = callbackfn(accumulatedValue, new BigInt(this.getUnsafe(i)), i.toDouble(), this)
+            accumulatedValue = callbackfn(accumulatedValue, new BigInt(this.getUnsafe(i)), i, this)
         }
         return accumulatedValue
     }
@@ -5897,14 +5897,14 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns The value that results from running the callback function to completion over the entire typed array.
      * calling reduceRight method on an empty array without an initial value creates a TypeError
      */
-    public reduceRight(callbackfn: (previousValue: BigInt, currentValue: BigInt, currentIndex: number, array: BigInt64Array) => BigInt): BigInt {
+    public reduceRight(callbackfn: (previousValue: BigInt, currentValue: BigInt, currentIndex: int, array: BigInt64Array) => BigInt): BigInt {
         if (this.lengthInt == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
 
         let accumulatedValue: BigInt = new BigInt(this.getUnsafe(this.lengthInt - 1))
         for (let i = this.lengthInt - 2; i >= 0; --i) {
-            accumulatedValue = callbackfn(accumulatedValue, new BigInt(this.getUnsafe(i)), i.toDouble(), this)
+            accumulatedValue = callbackfn(accumulatedValue, new BigInt(this.getUnsafe(i)), i, this)
         }
         return accumulatedValue
     }
@@ -5916,11 +5916,11 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     *
     * @returns a new BigInt64Array where for each element from current BigInt64Array fn was applied
     */
-    public map(fn: (val: BigInt, index: number, array: BigInt64Array) => BigInt): BigInt64Array {
+    public map(fn: (val: BigInt, index: int, array: BigInt64Array) => BigInt): BigInt64Array {
         let resBuf = new ArrayBuffer(this.lengthInt * BigInt64Array.BYTES_PER_ELEMENT)
         let res = new BigInt64Array(resBuf, 0, (resBuf.getByteLength() / BigInt64Array.BYTES_PER_ELEMENT).toInt())
         for (let i = 0; i < this.lengthInt; ++i) {
-            res.set(i, fn(new BigInt(this.getUnsafe(i)), i.toDouble(), this).getLong())
+            res.set(i, fn(new BigInt(this.getUnsafe(i)), i, this).getLong())
         }
         return res
     }
@@ -5935,9 +5935,9 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns true unless predicate function returns a false for an array element,
      * in which case false is immediately returned.
      */
-    public every(predicate: (element: BigInt, index: number, array: BigInt64Array) => boolean): boolean {
+    public every(predicate: (element: BigInt, index: int, array: BigInt64Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; ++i) {
-            if (!predicate(new BigInt(this.getUnsafe(i)), i.toDouble(), this)) {
+            if (!predicate(new BigInt(this.getUnsafe(i)), i, this)) {
                 return false
             }
         }
@@ -5951,11 +5951,11 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @returns a new BigInt64Array with elements from current BigInt64Array that satisfy condition fn
      */
-    public filter(fn: (val: BigInt, index: number, array: BigInt64Array) => boolean): BigInt64Array {
+    public filter(fn: (val: BigInt, index: int, array: BigInt64Array) => boolean): BigInt64Array {
         let markers : FixedArray<boolean> = new boolean[this.lengthInt]
         let resLen = 0
         for (let i = 0; i < this.lengthInt; ++i) {
-            markers[i] = fn(new BigInt(this.getUnsafe(i)), i.toDouble(), this)
+            markers[i] = fn(new BigInt(this.getUnsafe(i)), i, this)
             if (markers[i]) {
                 ++resLen
             }
@@ -5981,10 +5981,10 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @returns BigInt | undefined
      */
-    public find(predicate: (value: BigInt, index: number, obj: BigInt64Array) => boolean): BigInt | undefined {
+    public find(predicate: (value: BigInt, index: int, obj: BigInt64Array) => boolean): BigInt | undefined {
         for (let i = 0; i < this.lengthInt; ++i) {
             let val = this.getUnsafe(i)
-            if (predicate(new BigInt(val), i.toDouble(), this)) {
+            if (predicate(new BigInt(val), i, this)) {
                 return new BigInt(val)
             }
         }
@@ -5999,15 +5999,15 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * order, until it finds one where predicate returns true. If such an element is found,
      * findIndex immediately returns that element index. Otherwise, findIndex returns -1
      *
-     * @returns number
+     * @returns int
      */
-    public findIndex(predicate: (value: BigInt, index: number, obj: BigInt64Array) => boolean): number {
+    public findIndex(predicate: (value: BigInt, index: int, obj: BigInt64Array) => boolean): int {
         for (let i = 0; i < this.lengthInt; ++i) {
-            if (predicate(new BigInt(this.getUnsafe(i)), i.toDouble(), this)) {
-                return i.toDouble()
+            if (predicate(new BigInt(this.getUnsafe(i)), i, this)) {
+                return i
             }
         }
-        return (-1).toDouble()
+        return -1
     }
 
     /**
@@ -6017,10 +6017,10 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @returns the last element that satisfies fn
      */
-    public findLast(fn: (val: BigInt, index: number, array: BigInt64Array) => boolean): long {
+    public findLast(fn: (val: BigInt, index: int, array: BigInt64Array) => boolean): long {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
             let val = this.getUnsafe(i)
-            if (fn(new BigInt(val), i.toDouble(), this)) {
+            if (fn(new BigInt(val), i, this)) {
                 return val
             }
         }
@@ -6034,14 +6034,14 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
-    public findLastIndex(fn: (val: BigInt, index: number, array: BigInt64Array) => boolean): number {
+    public findLastIndex(fn: (val: BigInt, index: int, array: BigInt64Array) => boolean): int {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
             let val = this.getUnsafe(i)
-            if (fn(new BigInt(val), i.toDouble(), this)) {
+            if (fn(new BigInt(val), i, this)) {
                 return i
             }
         }
-        return (-1).toDouble()
+        return -1
     }
 
     /**
@@ -6052,9 +6052,9 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @returns None
      */
-    public forEach(callbackfn: (value: BigInt, index: number, array: BigInt64Array) => void): void {
+    public forEach(callbackfn: (value: BigInt, index: int, array: BigInt64Array) => void): void {
         for (let i = 0; i < this.lengthInt; ++i) {
-            callbackfn(new BigInt(this.getUnsafe(i)), i.toDouble(), this)
+            callbackfn(new BigInt(this.getUnsafe(i)), i, this)
         }
     }
 
@@ -7222,8 +7222,8 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: number, array: Float32Array) => boolean =
-            (val: number, index: number, array: Float32Array): boolean => { return fn(val) }
+        let newF: (val: number, index: int, array: Float32Array) => boolean =
+            (val: number, index: int, array: Float32Array): boolean => { return fn(val) }
         return (this.findLast(newF)).toDouble()
     }
 
@@ -7310,9 +7310,9 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns false unless predicate function returns true for an array element,
      * in which case true is immediately returned.
      */
-    public some(predicate: (element: number, index: number, array: Float32Array) => boolean): boolean {
+    public some(predicate: (element: number, index: int, array: Float32Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; ++i) {
-            if (predicate((this.getUnsafe(i)).toDouble(), i.toDouble(), this)) {
+            if (predicate((this.getUnsafe(i)).toDouble(), i, this)) {
                 return true
             }
         }
@@ -7333,11 +7333,11 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduce<U = number>(
-                callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Float32Array) => U,
+                callbackfn: (previousValue: U, currentValue: number, currentIndex: int, array: Float32Array) => U,
                 initialValue: U): U {
         let accumulatedValue = initialValue
         for (let i = 0; i < this.lengthInt; ++i) {
-            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i, this)
         }
         return accumulatedValue
     }
@@ -7354,14 +7354,14 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      * calling reduce method on an empty array without an initial value creates a TypeError
      */
-    public reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: Float32Array) => number): number {
+    public reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: int, array: Float32Array) => number): number {
         if (this.lengthInt == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
 
         let accumulatedValue = (this.getUnsafe(0)).toDouble()
         for (let i = 1; i < this.lengthInt; ++i) {
-            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i, this)
         }
         return accumulatedValue
     }
@@ -7380,11 +7380,11 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduceRight<U = number>(
-                callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Float32Array) => U,
+                callbackfn: (previousValue: U, currentValue: number, currentIndex: int, array: Float32Array) => U,
                 initialValue: U): U {
         let accumulatedValue = initialValue
         for (let i = this.lengthInt - 1; i >= 0; --i) {
-            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i, this)
         }
         return accumulatedValue
     }
@@ -7402,14 +7402,14 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      * calling reduceRight method on an empty array without an initial value creates a TypeError
      */
-    public reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: Float32Array) => number): number {
+    public reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: int, array: Float32Array) => number): number {
         if (this.lengthInt == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
 
         let accumulatedValue: number = (this.getUnsafe(this.lengthInt - 1)).toDouble()
         for (let i = this.lengthInt - 2; i >= 0; --i) {
-            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i, this)
         }
         return accumulatedValue
     }
@@ -7421,11 +7421,11 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     *
     * @returns a new Float32Array where for each element from current Float32Array fn was applied
     */
-    public map(fn: (val: number, index: number, array: Float32Array) => number): Float32Array {
+    public map(fn: (val: number, index: int, array: Float32Array) => number): Float32Array {
         let resBuf = new ArrayBuffer(this.lengthInt * Float32Array.BYTES_PER_ELEMENT)
         let res = new Float32Array(resBuf, 0, (resBuf.getByteLength() / Float32Array.BYTES_PER_ELEMENT).toInt())
         for (let i = 0; i < this.lengthInt; ++i) {
-            res.set(i, fn((this.getUnsafe(i)).toDouble(), i.toDouble(), this).toFloat())
+            res.set(i, fn((this.getUnsafe(i)).toDouble(), i, this).toFloat())
         }
         return res
     }
@@ -7440,9 +7440,9 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns true unless predicate function returns a false for an array element,
      * in which case false is immediately returned.
      */
-    public every(predicate: (element: number, index: number, array: Float32Array) => boolean): boolean {
+    public every(predicate: (element: number, index: int, array: Float32Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; ++i) {
-            if (!predicate((this.getUnsafe(i)).toDouble(), i.toDouble(), this)) {
+            if (!predicate((this.getUnsafe(i)).toDouble(), i, this)) {
                 return false
             }
         }
@@ -7456,11 +7456,11 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns a new Float32Array with elements from current Float32Array that satisfy condition fn
      */
-    public filter(fn: (val: number, index: number, array: Float32Array) => boolean): Float32Array {
+    public filter(fn: (val: number, index: int, array: Float32Array) => boolean): Float32Array {
         let markers : FixedArray<boolean> = new boolean[this.lengthInt]
         let resLen = 0
         for (let i = 0; i < this.lengthInt; ++i) {
-            markers[i] = fn((this.getUnsafe(i)).toDouble(), i.toDouble(), this)
+            markers[i] = fn((this.getUnsafe(i)).toDouble(), i, this)
             if (markers[i]) {
                 ++resLen
             }
@@ -7486,10 +7486,10 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns number | undefined
      */
-    public find(predicate: (value: number, index: number, obj: Float32Array) => boolean): number | undefined {
+    public find(predicate: (value: number, index: int, obj: Float32Array) => boolean): number | undefined {
         for (let i = 0; i < this.lengthInt; ++i) {
             let val = this.getUnsafe(i)
-            if (predicate((val).toDouble(), i.toDouble(), this)) {
+            if (predicate((val).toDouble(), i, this)) {
                 return (val).toDouble()
             }
         }
@@ -7504,15 +7504,15 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * order, until it finds one where predicate returns true. If such an element is found,
      * findIndex immediately returns that element index. Otherwise, findIndex returns -1
      *
-     * @returns number
+     * @returns int
      */
-    public findIndex(predicate: (value: number, index: number, obj: Float32Array) => boolean): number {
+    public findIndex(predicate: (value: number, index: int, obj: Float32Array) => boolean): int {
         for (let i = 0; i < this.lengthInt; ++i) {
-            if (predicate((this.getUnsafe(i)).toDouble(), i.toDouble(), this)) {
-                return i.toDouble()
+            if (predicate((this.getUnsafe(i)).toDouble(), i, this)) {
+                return i
             }
         }
-        return (-1).toDouble()
+        return -1
     }
 
     /**
@@ -7522,10 +7522,10 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns the last element that satisfies fn
      */
-    public findLast(fn: (val: number, index: number, array: Float32Array) => boolean): float {
+    public findLast(fn: (val: number, index: int, array: Float32Array) => boolean): float {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
             let val = this.getUnsafe(i)
-            if (fn((val).toDouble(), i.toDouble(), this)) {
+            if (fn((val).toDouble(), i, this)) {
                 return val
             }
         }
@@ -7539,14 +7539,14 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
-    public findLastIndex(fn: (val: number, index: number, array: Float32Array) => boolean): number {
+    public findLastIndex(fn: (val: number, index: int, array: Float32Array) => boolean): int {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
             let val = this.getUnsafe(i)
-            if (fn((val).toDouble(), i.toDouble(), this)) {
+            if (fn((val).toDouble(), i, this)) {
                 return i
             }
         }
-        return (-1).toDouble()
+        return -1
     }
 
     /**
@@ -7557,9 +7557,9 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns None
      */
-    public forEach(callbackfn: (value: number, index: number, array: Float32Array) => void): void {
+    public forEach(callbackfn: (value: number, index: int, array: Float32Array) => void): void {
         for (let i = 0; i < this.lengthInt; ++i) {
-            callbackfn((this.getUnsafe(i)).toDouble(), i.toDouble(), this)
+            callbackfn((this.getUnsafe(i)).toDouble(), i, this)
         }
     }
 
@@ -8608,8 +8608,8 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: number, array: Float64Array) => boolean =
-            (val: number, index: number, array: Float64Array): boolean => { return fn(val) }
+        let newF: (val: number, index: int, array: Float64Array) => boolean =
+            (val: number, index: int, array: Float64Array): boolean => { return fn(val) }
         return (this.findLast(newF)).toDouble()
     }
 
@@ -8696,9 +8696,9 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns false unless predicate function returns true for an array element,
      * in which case true is immediately returned.
      */
-    public some(predicate: (element: number, index: number, array: Float64Array) => boolean): boolean {
+    public some(predicate: (element: number, index: int, array: Float64Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; ++i) {
-            if (predicate((this.getUnsafe(i)).toDouble(), i.toDouble(), this)) {
+            if (predicate((this.getUnsafe(i)).toDouble(), i, this)) {
                 return true
             }
         }
@@ -8719,11 +8719,11 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduce<U = number>(
-                callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Float64Array) => U,
+                callbackfn: (previousValue: U, currentValue: number, currentIndex: int, array: Float64Array) => U,
                 initialValue: U): U {
         let accumulatedValue = initialValue
         for (let i = 0; i < this.lengthInt; ++i) {
-            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i, this)
         }
         return accumulatedValue
     }
@@ -8740,14 +8740,14 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      * calling reduce method on an empty array without an initial value creates a TypeError
      */
-    public reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: Float64Array) => number): number {
+    public reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: int, array: Float64Array) => number): number {
         if (this.lengthInt == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
 
         let accumulatedValue = (this.getUnsafe(0)).toDouble()
         for (let i = 1; i < this.lengthInt; ++i) {
-            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i, this)
         }
         return accumulatedValue
     }
@@ -8766,11 +8766,11 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduceRight<U = number>(
-                callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Float64Array) => U,
+                callbackfn: (previousValue: U, currentValue: number, currentIndex: int, array: Float64Array) => U,
                 initialValue: U): U {
         let accumulatedValue = initialValue
         for (let i = this.lengthInt - 1; i >= 0; --i) {
-            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i, this)
         }
         return accumulatedValue
     }
@@ -8788,14 +8788,14 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      * calling reduceRight method on an empty array without an initial value creates a TypeError
      */
-    public reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: Float64Array) => number): number {
+    public reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: int, array: Float64Array) => number): number {
         if (this.lengthInt == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
 
         let accumulatedValue: number = (this.getUnsafe(this.lengthInt - 1)).toDouble()
         for (let i = this.lengthInt - 2; i >= 0; --i) {
-            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i, this)
         }
         return accumulatedValue
     }
@@ -8807,11 +8807,11 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     *
     * @returns a new Float64Array where for each element from current Float64Array fn was applied
     */
-    public map(fn: (val: number, index: number, array: Float64Array) => number): Float64Array {
+    public map(fn: (val: number, index: int, array: Float64Array) => number): Float64Array {
         let resBuf = new ArrayBuffer(this.lengthInt * Float64Array.BYTES_PER_ELEMENT)
         let res = new Float64Array(resBuf, 0, (resBuf.getByteLength() / Float64Array.BYTES_PER_ELEMENT).toInt())
         for (let i = 0; i < this.lengthInt; ++i) {
-            res.set(i, fn((this.getUnsafe(i)).toDouble(), i.toDouble(), this).toDouble())
+            res.set(i, fn((this.getUnsafe(i)).toDouble(), i, this).toDouble())
         }
         return res
     }
@@ -8826,9 +8826,9 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns true unless predicate function returns a false for an array element,
      * in which case false is immediately returned.
      */
-    public every(predicate: (element: number, index: number, array: Float64Array) => boolean): boolean {
+    public every(predicate: (element: number, index: int, array: Float64Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; ++i) {
-            if (!predicate((this.getUnsafe(i)).toDouble(), i.toDouble(), this)) {
+            if (!predicate((this.getUnsafe(i)).toDouble(), i, this)) {
                 return false
             }
         }
@@ -8842,11 +8842,11 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns a new Float64Array with elements from current Float64Array that satisfy condition fn
      */
-    public filter(fn: (val: number, index: number, array: Float64Array) => boolean): Float64Array {
+    public filter(fn: (val: number, index: int, array: Float64Array) => boolean): Float64Array {
         let markers : FixedArray<boolean> = new boolean[this.lengthInt]
         let resLen = 0
         for (let i = 0; i < this.lengthInt; ++i) {
-            markers[i] = fn((this.getUnsafe(i)).toDouble(), i.toDouble(), this)
+            markers[i] = fn((this.getUnsafe(i)).toDouble(), i, this)
             if (markers[i]) {
                 ++resLen
             }
@@ -8872,10 +8872,10 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns number | undefined
      */
-    public find(predicate: (value: number, index: number, obj: Float64Array) => boolean): number | undefined {
+    public find(predicate: (value: number, index: int, obj: Float64Array) => boolean): number | undefined {
         for (let i = 0; i < this.lengthInt; ++i) {
             let val = this.getUnsafe(i)
-            if (predicate((val).toDouble(), i.toDouble(), this)) {
+            if (predicate((val).toDouble(), i, this)) {
                 return (val).toDouble()
             }
         }
@@ -8890,15 +8890,15 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * order, until it finds one where predicate returns true. If such an element is found,
      * findIndex immediately returns that element index. Otherwise, findIndex returns -1
      *
-     * @returns number
+     * @returns int
      */
-    public findIndex(predicate: (value: number, index: number, obj: Float64Array) => boolean): number {
+    public findIndex(predicate: (value: number, index: int, obj: Float64Array) => boolean): int {
         for (let i = 0; i < this.lengthInt; ++i) {
-            if (predicate((this.getUnsafe(i)).toDouble(), i.toDouble(), this)) {
-                return i.toDouble()
+            if (predicate((this.getUnsafe(i)).toDouble(), i, this)) {
+                return i
             }
         }
-        return (-1).toDouble()
+        return -1
     }
 
     /**
@@ -8908,10 +8908,10 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns the last element that satisfies fn
      */
-    public findLast(fn: (val: number, index: number, array: Float64Array) => boolean): double {
+    public findLast(fn: (val: number, index: int, array: Float64Array) => boolean): double {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
             let val = this.getUnsafe(i)
-            if (fn((val).toDouble(), i.toDouble(), this)) {
+            if (fn((val).toDouble(), i, this)) {
                 return val
             }
         }
@@ -8925,14 +8925,14 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
-    public findLastIndex(fn: (val: number, index: number, array: Float64Array) => boolean): number {
+    public findLastIndex(fn: (val: number, index: int, array: Float64Array) => boolean): int {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
             let val = this.getUnsafe(i)
-            if (fn((val).toDouble(), i.toDouble(), this)) {
+            if (fn((val).toDouble(), i, this)) {
                 return i
             }
         }
-        return (-1).toDouble()
+        return -1
     }
 
     /**
@@ -8943,9 +8943,9 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns None
      */
-    public forEach(callbackfn: (value: number, index: number, array: Float64Array) => void): void {
+    public forEach(callbackfn: (value: number, index: int, array: Float64Array) => void): void {
         for (let i = 0; i < this.lengthInt; ++i) {
-            callbackfn((this.getUnsafe(i)).toDouble(), i.toDouble(), this)
+            callbackfn((this.getUnsafe(i)).toDouble(), i, this)
         }
     }
 

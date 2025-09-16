@@ -1393,7 +1393,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
 
     /// === with element lambda functions ===
     {#- NOTE: to add overloads with idxType == 'int' we need to enhance generics supports #}
-    {%- for idxType, castToIdx in [('number', '.toDouble()')] %}
+    {%- for idxType, castToIdx in [('int', '')] %}
         {%- set skip = False %}
         {%- set elType, castToEl, castFromEl = elementCompat, asElementCompat, fromElementCompat %}
         {%- set retType = 'number | undefined'  if elementCompat == 'number' else 'BigInt | undefined' %}
@@ -1407,8 +1407,8 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: {{elType}}) => boolean): {{elType}} {
-        let newF: (val: {{elType}}, index: number, array: {{N}}Array) => boolean =
-            (val: {{elType}}, index: number, array: {{N}}Array): boolean => { return fn(val) }
+        let newF: (val: {{elType}}, index: int, array: {{N}}Array) => boolean =
+            (val: {{elType}}, index: int, array: {{N}}Array): boolean => { return fn(val) }
         return {{castToEl % 'this.findLast(newF)'}}
     }
 
@@ -1730,7 +1730,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
                 return i{{castToIdx}}
             }
         }
-        return (-1){{castToIdx}}
+        return -1
     }
 
     /**
@@ -1764,7 +1764,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
                 return i
             }
         }
-        return (-1){{castToIdx}}
+        return -1
     }
 
     /**
@@ -1775,7 +1775,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns None
      */
-    public forEach(callbackfn: (value: {{elType}}, index: number, array: {{N}}Array) => void): void {
+    public forEach(callbackfn: (value: {{elType}}, index: {{idxType}}, array: {{N}}Array) => void): void {
         for (let i = 0; i < this.lengthInt; ++i) {
             callbackfn({{castToEl % 'this.getUnsafe(i)'}}, i{{castToIdx}}, this)
         }
