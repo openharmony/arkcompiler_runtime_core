@@ -100,9 +100,9 @@ ObjectHeader *Launch(EtsObject *func, EtsArray *arr, bool abortFlag,
     static_assert(std::is_same<CoroResult, EtsJob>::value || std::is_same<CoroResult, EtsPromise>::value);
 
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
     ASSERT(coro != nullptr);
     if (func == nullptr) {
-        LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
         ThrowNullPointerException(ctx, coro);
         return nullptr;
     }
@@ -112,7 +112,6 @@ ObjectHeader *Launch(EtsObject *func, EtsArray *arr, bool abortFlag,
         return nullptr;
     }
     if (arr == nullptr) {
-        LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
         ThrowNullPointerException(ctx, coro);
         return nullptr;
     }
@@ -129,11 +128,10 @@ ObjectHeader *Launch(EtsObject *func, EtsArray *arr, bool abortFlag,
     }
 
     // create the coro and put it to the ready queue
-    CoroResult *coroResult = CoroResult::Create(coro);
-    if (UNLIKELY(coroResult == nullptr)) {
+    EtsHandle<CoroResult> coroResultHandle(coro, CoroResult::Create(coro));
+    if (UNLIKELY(coroResultHandle.GetPtr() == nullptr)) {
         return nullptr;
     }
-    EtsHandle<CoroResult> coroResultHandle(coro, coroResult);
 
     PandaEtsVM *etsVm = coro->GetPandaVM();
     auto *coroManager = coro->GetCoroutineManager();
@@ -146,13 +144,15 @@ ObjectHeader *Launch(EtsObject *func, EtsArray *arr, bool abortFlag,
     PandaVector<Value> realArgs = CreateArgsVector(function, method, array);
     groupId = postToMain ? CoroutineWorkerGroup::FromDomain(coroManager, CoroutineWorkerDomain::MAIN) : groupId;
 
-    bool launchResult = coro->GetCoroutineManager()->Launch(evt, method->GetPandaMethod(), std::move(realArgs), groupId,
-                                                            EtsCoroutine::LAUNCH, abortFlag);
-    if (UNLIKELY(!launchResult)) {
+    LaunchResult launchResult = coro->GetCoroutineManager()->Launch(evt, method->GetPandaMethod(), std::move(realArgs),
+                                                                    groupId, EtsCoroutine::LAUNCH, abortFlag);
+    if (UNLIKELY(launchResult != LaunchResult::OK)) {
         // Launch failed. The exception in the current coro should be already set by Launch(),
         // just return null as the result and clean up the allocated resources.
         ASSERT(coro->HasPendingException());
-        Runtime::GetCurrent()->GetInternalAllocator()->Delete(evt);
+        if (launchResult == LaunchResult::COROUTINES_LIMIT_EXCEED) {
+            Runtime::GetCurrent()->GetInternalAllocator()->Delete(evt);
+        }
         return nullptr;
     }
 
@@ -182,11 +182,11 @@ void EtsLaunchSameWorker(EtsObject *callback)
     auto *method = ResolveInvokeMethod(coro, hCallback);
     auto *coroMan = coro->GetCoroutineManager();
     auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(nullptr, coroMan);
-    [[maybe_unused]] auto launched = coroMan->Launch(
+    [[maybe_unused]] LaunchResult launched = coroMan->Launch(
         evt, method->GetPandaMethod(), std::move(args),
         ark::CoroutineWorkerGroup::GenerateExactWorkerId(ark::ets::EtsCoroutine::GetCurrent()->GetWorker()->GetId()),
         EtsCoroutine::TIMER_CALLBACK, true);
-    ASSERT(launched);
+    ASSERT(launched == LaunchResult::OK);
 }
 
 static PandaVector<CoroutineWorker::Id> ConvertEtsHintToNativeHint(EtsObject *compatArray)

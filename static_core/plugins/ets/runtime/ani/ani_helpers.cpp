@@ -467,11 +467,11 @@ extern "C" ObjectPointerType EtsAsyncCall(Method *method, EtsCoroutine *currentC
 
     [[maybe_unused]] EtsHandleScope scope(currentCoro);
     EtsHandle<EtsPromise> promiseHandle(currentCoro, promise);
-    bool launchResult = coroManager->LaunchImmediately(
+    LaunchResult launchResult = coroManager->LaunchImmediately(
         evt, impl, std::move(args),
         ark::CoroutineWorkerGroup::GenerateExactWorkerId(ark::ets::EtsCoroutine::GetCurrent()->GetWorker()->GetId()),
         EtsCoroutine::ASYNC_CALL, false);
-    if (UNLIKELY(!launchResult)) {
+    if (UNLIKELY(launchResult != LaunchResult::OK)) {
         ASSERT(currentCoro->HasPendingException());
         // OOM is thrown by Launch
         Runtime::GetCurrent()->GetInternalAllocator()->Delete(evt);

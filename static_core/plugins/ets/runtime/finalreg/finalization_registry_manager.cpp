@@ -121,9 +121,9 @@ void FinalizationRegistryManager::StartCleanupCoroIfNeeded(EtsCoroutine *coro)
                            ? CoroutineWorkerGroup::FromDomain(coroManager, CoroutineWorkerDomain::MAIN)
                            : CoroutineWorkerGroup::AnyId();
         auto args = PandaVector<Value> {Value(objArray->GetCoreType()), Value(static_cast<uint32_t>(workerDomain))};
-        [[maybe_unused]] bool launchResult =
+        [[maybe_unused]] LaunchResult launchResult =
             coroManager->Launch(event, cleanup, std::move(args), groupId, CoroutinePriority::DEFAULT_PRIORITY, false);
-        ASSERT(launchResult);
+        ASSERT(launchResult == LaunchResult::OK);
     }
 }
 

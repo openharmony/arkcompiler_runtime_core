@@ -152,12 +152,13 @@ static void ListObjectsFromEtsArray(EtsClassLinker *etsClassLinker, EtsCoroutine
     auto *coroManager = coro->GetCoroutineManager();
     auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(nullptr, coroManager);
     PandaVector<Value> args = {Value(hobjects->GetCoreType())};
-    bool launchRes = coroManager->LaunchImmediately(
+    LaunchResult launchRes = coroManager->LaunchImmediately(
         evt, method, std::move(args), ark::CoroutineWorkerGroup::GenerateExactWorkerId(coro->GetWorker()->GetId()),
         EtsCoroutine::ASYNC_CALL, true);
 
-    if UNLIKELY (!launchRes) {
+    if UNLIKELY (launchRes != LaunchResult::OK) {
         LOG(DEBUG, COROUTINES) << "Failed to list unhandled rejections";
+        ASSERT(launchRes == LaunchResult::COROUTINES_LIMIT_EXCEED);
         Runtime::GetCurrent()->GetInternalAllocator()->Delete(evt);
         return;
     }

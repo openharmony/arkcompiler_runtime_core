@@ -74,6 +74,24 @@ enum class WorkerSelectionPolicy {
     MOST_LOADED
 };
 
+/// @brief defines result of launch
+enum class LaunchResult : uint8_t {
+    /// coroutine was created and scheduled successfully
+    OK,
+    /**
+     * coroutine was not created because of coroutines limit was exceeded
+     * NOTE: in case of this error coroutine was not created and "completionEvent" should be removed externally
+     */
+    COROUTINES_LIMIT_EXCEED,
+    /// coroutine was not scheduled because no suitable worker was found
+    NO_SUITABLE_WORKER,
+    /**
+     * coroutine was not created because it's launch method is not supported, for example take a look at
+     * ThreadedCoroutineManager::LaunchImmediately
+     */
+    NOT_SUPPORTED
+};
+
 /**
  * @brief The interface of all coroutine manager implementations.
  *
@@ -146,8 +164,9 @@ public:
      * @param abortFlag if true, finishing with an exception will abort the program
      * @param groupId target worker group for the coroutine (see CoroutineWorkerGroup)
      */
-    virtual bool Launch(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                        const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority, bool abortFlag) = 0;
+    virtual LaunchResult Launch(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
+                                const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority,
+                                bool abortFlag) = 0;
     /**
      * @brief The public coroutine creation and execution interface. Switching to the newly created coroutine occurs
      * immediately. Coroutine launch mode should correspond to the use of parent's worker.
@@ -157,9 +176,9 @@ public:
      * @param entrypoint the coroutine entrypoint method
      * @param arguments array of coroutine's entrypoint arguments
      */
-    virtual bool LaunchImmediately(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                                   const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority,
-                                   bool abortFlag) = 0;
+    virtual LaunchResult LaunchImmediately(CompletionEvent *completionEvent, Method *entrypoint,
+                                           PandaVector<Value> &&arguments, const CoroutineWorkerGroup::Id &groupId,
+                                           CoroutinePriority priority, bool abortFlag) = 0;
 
     /**
      * @brief The public coroutine creation and execution interface with native entrypoint.
@@ -170,8 +189,9 @@ public:
      * @param groupId target worker group for the coroutine (see CoroutineWorkerGroup)
      * NOTE: native function can have Managed scopes
      */
-    virtual bool LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName,
-                              const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority, bool abortFlag) = 0;
+    virtual LaunchResult LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName,
+                                      const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority,
+                                      bool abortFlag) = 0;
     /// Suspend the current coroutine and schedule the next ready one for execution
     virtual void Schedule() = 0;
     /**

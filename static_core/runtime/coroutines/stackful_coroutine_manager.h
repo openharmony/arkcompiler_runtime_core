@@ -48,13 +48,14 @@ public:
     void Finalize() override;
     void RegisterCoroutine(Coroutine *co) override;
     bool TerminateCoroutine(Coroutine *co) override;
-    bool Launch(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority, bool abortFlag) override;
-    bool LaunchImmediately(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                           const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority,
-                           bool abortFlag) override;
-    bool LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName,
-                      const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority, bool abortFlag) override;
+    LaunchResult Launch(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
+                        const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority, bool abortFlag) override;
+    LaunchResult LaunchImmediately(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
+                                   const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority,
+                                   bool abortFlag) override;
+    LaunchResult LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName,
+                              const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority,
+                              bool abortFlag) override;
     void Schedule() override;
     void Await(CoroutineEvent *awaitee) RELEASE(awaitee) override;
     void UnblockWaiters(CoroutineEvent *blocker) override;
@@ -167,12 +168,13 @@ private:
 
     Coroutine *GetCoroutineInstanceForLaunch(EntrypointInfo &&epInfo, PandaString &&coroName,
                                              CoroutinePriority priority, AffinityMask affinityMask, bool abortFlag);
-    bool LaunchImpl(EntrypointInfo &&epInfo, PandaString &&coroName, const CoroutineWorkerGroup::Id &groupId,
-                    CoroutinePriority priority, bool abortFlag);
-    bool LaunchImmediatelyImpl(EntrypointInfo &&epInfo, PandaString &&coroName, const CoroutineWorkerGroup::Id &groupId,
-                               CoroutinePriority priority, bool abortFlag);
-    bool LaunchWithGroupId(EntrypointInfo &&epInfo, PandaString &&coroName, CoroutineWorkerGroup::Id groupId,
-                           CoroutinePriority priority, bool launchImmediately, bool abortFlag);
+    LaunchResult LaunchImpl(EntrypointInfo &&epInfo, PandaString &&coroName, const CoroutineWorkerGroup::Id &groupId,
+                            CoroutinePriority priority, bool abortFlag);
+    LaunchResult LaunchImmediatelyImpl(EntrypointInfo &&epInfo, PandaString &&coroName,
+                                       const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority,
+                                       bool abortFlag);
+    LaunchResult LaunchWithGroupId(EntrypointInfo &&epInfo, PandaString &&coroName, CoroutineWorkerGroup::Id groupId,
+                                   CoroutinePriority priority, bool launchImmediately, bool abortFlag);
     /**
      * Tries to extract a coroutine instance from the pool for further reuse, returns nullptr in case when it is not
      * possible.
