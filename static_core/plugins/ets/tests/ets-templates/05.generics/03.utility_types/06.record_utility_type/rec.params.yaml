@@ -314,3 +314,59 @@ cases:
       use: |-
         let r: Record<SA, String>  // CTE: CTE: TypeError: Type argument should be a subtype of 'Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>'-constraint
       tags: 'compile-only, negative'
+
+    - decl: |-
+        let r: Record<string, int>|null = {
+            'a': 1,
+            'b': 2,
+        } as Record<string, int>
+      use: |-
+        arktest.assertEQ(r!['a'], 1)
+        arktest.assertEQ(r!['b'], 2)
+
+    - decl: |-
+        let r: Record<string, int>|undefined = {
+            'a': 1,
+            'b': 2,
+        } as Record<string, int>
+      use: |-
+        arktest.assertEQ(r!['a'], 1)
+        arktest.assertEQ(r!['b'], 2)
+
+    - decl: |-
+        let r: Record<string, int|null>|null = {
+            'a': 1,
+            'b': null,
+        } as Record<string, int|null>
+      use: |-
+        arktest.assertEQ(r!['a'], 1)
+        arktest.assertEQ(r!['b'], null)
+
+    - decl: |-
+        let r: Record<string, int|undefined>|undefined = {
+            'a': 1,
+            'b': undefined,
+        } as Record<string, int|undefined>
+      use: |-
+        arktest.assertEQ(r!['a'], 1)
+        arktest.assertEQ(r!['b'], undefined)
+
+    - decl: |-
+        let r: Record<string, Record<string, int|null>|null>|null = {
+            'a': null,
+            'b': { 'bb1': null, 'bb2': 42 } as Record<string, int|null>,
+        } as Record<string, Record<string, int|null>|null>
+      use: |-
+        arktest.assertEQ(r!['a'], null)
+        arktest.assertEQ(r!['b']!['bb1'], null)
+        arktest.assertEQ(r!['b']!['bb2'], 42)
+
+    - decl: |-
+        let r: Record<string, Record<string, int|undefined>|undefined>|undefined = {
+            'a': undefined,
+            'b': { 'bb1': undefined, 'bb2': 42 } as Record<string, int|undefined>,
+        } as Record<string, Record<string, int|undefined>|undefined>
+      use: |-
+        arktest.assertEQ(r!['a'], undefined)
+        arktest.assertEQ(r!['b']!['bb1'], undefined)
+        arktest.assertEQ(r!['b']!['bb2'], 42)

@@ -1126,9 +1126,6 @@
 07.expressions/17.typeof_expression/comptime_8.ets
 07.expressions/17.typeof_expression/comptime_9.ets
 
-#19951
-07.expressions/18.ensure-not-nullish_expression/null_check.ets
-
 #28958 Unary inc for BigInt
 07.expressions/20.unary_expressions/01.postfix_increment/bigint.ets
 07.expressions/20.unary_expressions/02.postfix_decrement/bigint.ets

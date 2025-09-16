@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,12 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+{%- for c in cases %}
 /*---
-desc: If the result of the evaluation of e is not equal to null or undefined, then the result of e! is the outcome of the evaluation of e.
+desc: >-
+    if the expression 'e' is not a nullable type, then the operator '!' has no effect.
+    If the result of the evaluation of e is not equal to null or undefined, then the
+    result of e! is the outcome of the evaluation of e. If the result of the evaluation
+    of e is equal to null or undefined, then NullPointerError is thrown.
+tags: [{{c.tags}}]
 ---*/
+{{c.decl}}
 
-function main(): void {
-  let a: Int|undefined = (): Int|undefined => { return 5; }();
-  arktest.assertEQ( a!, 5 )
+function main() {
+    {{c.use|indent}}
 }
+{%- endfor %}
