@@ -26,6 +26,18 @@ class CheckCtorTypes {
         this.r = r
     }
 
+    constructor(z: boolean, r1: string, s: short, r2: string, l: long, f: float, d: double, r3: string) {
+        this.z = z
+        this.c = c'a'
+        this.b = 1
+        this.s = s
+        this.i = 1
+        this.l = l
+        this.f = f
+        this.d = d
+        this.r = r1
+    }
+
     private z: boolean
     private c: char
     private b: byte
@@ -35,4 +47,21 @@ class CheckCtorTypes {
     private f: float
     private d: double
     private r: string
+}
+
+class A {
+    constructor() {}
+}
+
+class B extends A {}
+
+class C {
+    constructor(v: A) {
+    }
+    constructor(v: B) {
+    }
+}
+
+class CheckUnionType {
+    constructor(a: A | C | string) {}
 }
