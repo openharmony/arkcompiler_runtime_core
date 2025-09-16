@@ -1422,7 +1422,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             {%- set elType, castToEl, castFromEl = element['primitiveType'], '%s', '%s' %}
         {%- else %}
             {#- NOTE: castToIdx as toDouble() is not neccessary, widening should be applied implicitly #}
-            {%- set idxType, castToIdx = 'number', '' %}
+            {%- set idxType, castToIdx = 'int', '' %}
             {%- set elType, castToEl, castFromEl = element['subsetType'], asElementCompat, fromElementCompat %}
         {%- endif %}
 
@@ -1686,9 +1686,9 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *
      * @returns None
      */
-    public forEach(callbackfn: (value: {{elType}}, index: number, array: {{element['name']}}Array) => void): void {
+    public forEach(callbackfn: (value: {{elType}}, index: {{idxType}}, array: {{element['name']}}Array) => void): void {
         for (let i = 0; i < this.lengthInt; i++) {
-            callbackfn({{castToEl % 'this.getUnsafe(i)'}}, i.toDouble(), this)
+            callbackfn({{castToEl % 'this.getUnsafe(i)'}}, i{{castToIdx}}, this)
         }
     }
 

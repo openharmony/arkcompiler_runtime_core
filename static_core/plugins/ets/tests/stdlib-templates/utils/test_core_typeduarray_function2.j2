@@ -1063,7 +1063,7 @@ function testTypedUArrayForEach(): number {
   }
 
   let resultArray = new {{.item.objectType}}(typedUArray.length);
-  typedUArray.forEach((value: {{.item.type}}, index: number, array: {{.item.objectType}}) => {
+  typedUArray.forEach((value: {{.item.type}}, index: int, array: {{.item.objectType}}) => {
     resultArray[index.toInt()] = value * {{.item.create}}(2);
   });
 
@@ -1078,7 +1078,7 @@ function testTypedUArrayForEach(): number {
   return success;
 }
 
-// Test case for forEach(callbackFn: (value: number, index: number) => void)
+// Test case for forEach(callbackFn: (value: number, index: int) => void)
 function testTypedUArrayForEachValueIndexCallback(): number {
     let source: FixedArray<{{.item.type}}> = [
         {{.item.create}}(1),
@@ -1099,7 +1099,7 @@ function testTypedUArrayForEachValueIndexCallback(): number {
     }
 
     let resultArray = new {{.item.objectType}}(typedUArray.length);
-    typedUArray.forEach((value: {{.item.type}}, index: number) => {
+    typedUArray.forEach((value: {{.item.type}}, index: int) => {
       resultArray[index.toInt()] = value * {{.item.create}}(2);
     });
 
