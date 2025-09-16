@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,22 @@
  * limitations under the License.
  */
 
-const field1 = 'Module';
+@interface Anno1 {}
 
-function main(){};
+@interface Anno2 {}
 
-class Class1 {}
+@Anno1()
+@Anno2()
+class Class1 {
+    @Anno1()
+    @Anno2()
+    public field1 = 1;
+}
 
-interface Interface1 {}
-
-namespace Ns1 {}
+@Anno1()
+@Anno2()
+interface Interface1 {
+    @Anno1()
+    @Anno2()
+    field2: int;
+}

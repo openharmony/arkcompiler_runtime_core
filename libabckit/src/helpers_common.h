@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,7 +75,17 @@ bool InterfaceFieldEnumerateAnnotationsHelper(AbckitCoreInterfaceField *field, v
 
 bool IsDynamic(AbckitTarget target);
 
-AbckitType *GetOrCreateType(AbckitFile *file, AbckitTypeId id, size_t rank, AbckitCoreClass *klass, AbckitString *name);
+AbckitType *GetOrCreateType(
+    AbckitFile *file, AbckitTypeId id, size_t rank,
+    std::variant<AbckitCoreClass *, AbckitCoreInterface *, AbckitCoreEnum *, std::nullptr_t> reference,
+    AbckitString *name);
+
+void AddFunctionUserToAbckitType(AbckitType *abckitType, AbckitCoreFunction *function);
+
+void AddFieldUserToAbckitType(AbckitType *abckitType,
+                              std::variant<AbckitCoreModuleField *, AbckitCoreNamespaceField *, AbckitCoreClassField *,
+                                           AbckitCoreEnumField *, AbckitCoreAnnotationInterfaceField *>
+                                  field);
 
 }  // namespace libabckit
 

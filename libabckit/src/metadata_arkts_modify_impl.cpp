@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,8 @@
 #include "libabckit/src/metadata_inspect_impl.h"
 #include "libabckit/src/adapter_dynamic/metadata_modify_dynamic.h"
 #include "libabckit/src/adapter_static/metadata_modify_static.h"
+
+#include "helpers_common.h"
 
 // CC-OFFNXT(G.PRE.02) code readability
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -76,10 +78,19 @@ extern "C" AbckitArktsModule *FileAddExternalModuleArktsV1(AbckitFile *file,
 
 extern "C" bool ModuleSetName(AbckitArktsModule *m, const char *name)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)m;
-    (void)name;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(m, false);
+    LIBABCKIT_BAD_ARGUMENT(name, false);
+
+    if (IsDynamic(m->core->target)) {
+        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+        return false;
+    }
+
+    return ModuleSetNameStatic(m->core, name);
 }
 
 extern "C" AbckitArktsImportDescriptor *ModuleAddImportFromArktsV1ToArktsV1(
@@ -246,10 +257,19 @@ extern "C" AbckitArktsAnnotationInterface *ModuleAddAnnotationInterface(
 
 extern "C" bool NamespaceSetName(AbckitArktsNamespace *ns, const char *name)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)ns;
-    (void)name;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(ns, false);
+    LIBABCKIT_BAD_ARGUMENT(name, false);
+
+    if (IsDynamic(ns->core->owningModule->target)) {
+        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+        return false;
+    }
+
+    return NamespaceSetNameStatic(ns->core, name);
 }
 
 // ========================================
@@ -340,10 +360,19 @@ extern "C" bool ClassSetSuperClass(AbckitArktsClass *klass, AbckitArktsClass *su
 
 extern "C" bool ClassSetName(AbckitArktsClass *klass, const char *name)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)klass;
-    (void)name;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(klass, false)
+    LIBABCKIT_BAD_ARGUMENT(name, false)
+
+    if (IsDynamic(klass->core->owningModule->target)) {
+        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+        return false;
+    }
+
+    return ClassSetNameStatic(klass->core, name);
 }
 
 extern "C" bool ClassAddField(AbckitArktsClass *klass, AbckitArktsClassField *field)
@@ -423,10 +452,19 @@ extern "C" bool InterfaceRemoveSuperInterface(AbckitArktsInterface *iface, Abcki
 
 extern "C" bool InterfaceSetName(AbckitArktsInterface *iface, const char *name)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)iface;
-    (void)name;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(iface, false)
+    LIBABCKIT_BAD_ARGUMENT(name, false)
+
+    if (IsDynamic(iface->core->owningModule->target)) {
+        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+        return false;
+    }
+
+    return InterfaceSetNameStatic(iface->core, name);
 }
 
 extern "C" bool InterfaceAddField(AbckitArktsInterface *iface, AbckitArktsInterfaceField *field)
@@ -490,10 +528,19 @@ extern "C" AbckitArktsInterface *CreateInterface(const char *name)
 
 extern "C" bool EnumSetName(AbckitArktsEnum *enm, const char *name)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)enm;
-    (void)name;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(enm, false);
+    LIBABCKIT_BAD_ARGUMENT(name, false);
+
+    if (IsDynamic(enm->core->owningModule->target)) {
+        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+        return false;
+    }
+
+    return EnumSetNameStatic(enm->core, name);
 }
 
 // ========================================
@@ -518,10 +565,19 @@ extern "C" bool ModuleFieldRemoveAnnotation(AbckitArktsModuleField *field, Abcki
 
 extern "C" bool ModuleFieldSetName(AbckitArktsModuleField *field, const char *name)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    (void)name;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(field, false)
+    LIBABCKIT_BAD_ARGUMENT(name, false)
+
+    if (IsDynamic(field->core->owner->target)) {
+        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+        return false;
+    }
+
+    return ModuleFieldSetNameStatic(field->core, name);
 }
 
 extern "C" bool ModuleFieldSetType(AbckitArktsModuleField *field, AbckitType *type)
@@ -557,10 +613,19 @@ extern "C" AbckitArktsModuleField *CreateModuleField(AbckitArktsModule *module, 
 
 extern "C" bool NamespaceFieldSetName(AbckitArktsNamespaceField *field, const char *name)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    (void)name;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(field, false);
+    LIBABCKIT_BAD_ARGUMENT(name, false);
+
+    if (IsDynamic(field->core->owner->owningModule->target)) {
+        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+        return false;
+    }
+
+    return NamespaceFieldSetNameStatic(field->core, name);
 }
 
 // ========================================
@@ -585,10 +650,19 @@ extern "C" bool ClassFieldRemoveAnnotation(AbckitArktsClassField *field, AbckitA
 
 extern "C" bool ClassFieldSetName(AbckitArktsClassField *field, const char *name)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    (void)name;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(field, false);
+    LIBABCKIT_BAD_ARGUMENT(name, false);
+
+    if (IsDynamic(field->core->owner->owningModule->target)) {
+        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+        return false;
+    }
+
+    return ClassFieldSetNameStatic(field->core, name);
 }
 
 extern "C" bool ClassFieldSetType(AbckitArktsClassField *field, AbckitType *type)
@@ -640,10 +714,20 @@ extern "C" bool InterfaceFieldRemoveAnnotation(AbckitArktsInterfaceField *field,
 
 extern "C" bool InterfaceFieldSetName(AbckitArktsInterfaceField *field, const char *name)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    (void)name;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(field, false)
+    LIBABCKIT_BAD_ARGUMENT(name, false)
+
+    if (IsDynamic(field->core->owner->owningModule->target)) {
+        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+    } else {
+        InterfaceFieldSetNameStatic(field->core, name);
+    }
+
+    return true;
 }
 
 extern "C" bool InterfaceFieldSetType(AbckitArktsInterfaceField *field, AbckitType *type)
@@ -671,10 +755,19 @@ extern "C" AbckitArktsInterfaceField *CreateInterfaceField(AbckitArktsInterface 
 
 extern "C" bool EnumFieldSetName(AbckitArktsEnumField *field, const char *name)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    (void)name;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(field, false)
+    LIBABCKIT_BAD_ARGUMENT(name, false)
+
+    if (IsDynamic(field->core->owner->owningModule->target)) {
+        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+        return false;
+    }
+
+    return EnumFieldSetNameStatic(field->core, name);
 }
 
 extern "C" bool EnumFieldSetType(AbckitArktsEnumField *field, AbckitType *type)
@@ -710,10 +803,19 @@ extern "C" AbckitArktsEnumField *CreateEnumField(AbckitArktsEnum *enm, const cha
 
 extern "C" bool AnnotationInterfaceSetName(AbckitArktsAnnotationInterface *ai, const char *name)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)ai;
-    (void)name;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(ai, false);
+    LIBABCKIT_BAD_ARGUMENT(name, false);
+
+    if (IsDynamic(ai->core->owningModule->target)) {
+        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+        return false;
+    }
+
+    return AnnotationInterfaceSetNameStatic(ai->core, name);
 }
 
 extern "C" AbckitArktsAnnotationInterfaceField *AnnotationInterfaceAddField(
@@ -919,10 +1021,19 @@ extern "C" AbckitArktsFunction *CreateFunction(const char *name, AbckitType *ret
 
 extern "C" bool AnnotationSetName(AbckitArktsAnnotation *anno, const char *name)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)anno;
-    (void)name;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(anno, false)
+    LIBABCKIT_BAD_ARGUMENT(name, false)
+
+    if (IsDynamic(anno->core->ai->owningModule->target)) {
+        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+        return false;
+    }
+
+    return AnnotationSetNameStatic(anno->core, name);
 }
 
 extern "C" AbckitArktsAnnotationElement *AnnotationAddAnnotationElement(

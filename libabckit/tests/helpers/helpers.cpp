@@ -444,6 +444,14 @@ void AssertClassVisitor([[maybe_unused]] AbckitCoreClass *klass, [[maybe_unused]
     EXPECT_TRUE(data != nullptr);
 }
 
+void AssertEnumVisitor([[maybe_unused]] AbckitCoreEnum *enm, [[maybe_unused]] void *data)
+{
+    EXPECT_TRUE(enm != nullptr);
+    [[maybe_unused]] AbckitFile *file = g_implI->enumGetFile(enm);
+    EXPECT_TRUE(file != nullptr);
+    EXPECT_TRUE(data != nullptr);
+}
+
 void AssertNamespaceVisitor([[maybe_unused]] AbckitCoreNamespace *n, [[maybe_unused]] void *data)
 {
     EXPECT_TRUE(n != nullptr);
@@ -489,6 +497,20 @@ bool ClassByNameFinder(AbckitCoreClass *klass, void *data)
     auto name = helpers::AbckitStringToString(g_implI->classGetName(klass));
     if (name == ctxFinder->name) {
         ctxFinder->klass = klass;
+        return false;
+    }
+
+    return true;
+}
+
+bool EnumByNameFinder(AbckitCoreEnum *enm, void *data)
+{
+    AssertEnumVisitor(enm, data);
+
+    auto ctxFinder = reinterpret_cast<EnumByNameContext *>(data);
+    auto name = helpers::AbckitStringToString(g_implI->enumGetName(enm));
+    if (name == ctxFinder->name) {
+        ctxFinder->enm = enm;
         return false;
     }
 

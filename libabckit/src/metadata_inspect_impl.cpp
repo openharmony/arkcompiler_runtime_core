@@ -1101,7 +1101,11 @@ extern "C" AbckitString *ModuleFieldGetName(AbckitCoreModuleField *field)
     LIBABCKIT_IMPLEMENTED;
     LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(field, nullptr);
-    return field->name;
+    if (IsDynamic(field->owner->target)) {
+        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+        return nullptr;
+    }
+    return ModuleFieldGetNameStatic(field);
 }
 
 extern "C" AbckitType *ModuleFieldGetType(AbckitCoreModuleField *field)
@@ -1163,7 +1167,11 @@ extern "C" AbckitString *NamespaceFieldGetName(AbckitCoreNamespaceField *field)
     LIBABCKIT_IMPLEMENTED;
     LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(field, nullptr);
-    return field->name;
+    if (IsDynamic(field->owner->owningModule->target)) {
+        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+        return nullptr;
+    }
+    return NamespaceFieldGetNameStatic(field);
 }
 
 extern "C" AbckitType *NamespaceFieldGetType(AbckitCoreNamespaceField *field)
@@ -1194,7 +1202,11 @@ extern "C" AbckitString *ClassFieldGetName(AbckitCoreClassField *field)
     LIBABCKIT_IMPLEMENTED;
     LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(field, nullptr);
-    return field->name;
+    if (IsDynamic(field->owner->owningModule->target)) {
+        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+        return nullptr;
+    }
+    return ClassFieldGetNameStatic(field);
 }
 
 extern "C" AbckitType *ClassFieldGetType(AbckitCoreClassField *field)
@@ -1396,7 +1408,11 @@ extern "C" AbckitString *EnumFieldGetName(AbckitCoreEnumField *field)
     LIBABCKIT_IMPLEMENTED;
     LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(field, nullptr);
-    return field->name;
+    if (IsDynamic(field->owner->owningModule->target)) {
+        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+        return nullptr;
+    }
+    return EnumFieldGetNameStatic(field);
 }
 
 extern "C" AbckitType *EnumFieldGetType(AbckitCoreEnumField *field)
@@ -1597,7 +1613,14 @@ extern "C" AbckitCoreClass *FunctionGetParentClass(AbckitCoreFunction *function)
 
     LIBABCKIT_BAD_ARGUMENT(function, nullptr);
 
-    return function->parentClass;
+    if (IsDynamic(function->owningModule->target)) {
+        return function->parentClass;
+    }
+    if (std::holds_alternative<AbckitCoreClass *>(function->parent)) {
+        return std::get<AbckitCoreClass *>(function->parent);
+    } else {
+        return nullptr;
+    }
 }
 
 extern "C" AbckitCoreNamespace *FunctionGetParentNamespace(AbckitCoreFunction *function)
@@ -1606,7 +1629,14 @@ extern "C" AbckitCoreNamespace *FunctionGetParentNamespace(AbckitCoreFunction *f
     LIBABCKIT_IMPLEMENTED;
     LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(function, nullptr);
-    return function->parentNamespace;
+    if (IsDynamic(function->owningModule->target)) {
+        return function->parentNamespace;
+    }
+    if (std::holds_alternative<AbckitCoreNamespace *>(function->parent)) {
+        return std::get<AbckitCoreNamespace *>(function->parent);
+    } else {
+        return nullptr;
+    }
 }
 
 extern "C" bool FunctionEnumerateNestedFunctions(AbckitCoreFunction *function, void *data,
@@ -1996,7 +2026,7 @@ extern "C" AbckitCoreClass *TypeGetReferenceClass(AbckitType *type)
         return nullptr;
     }
 
-    return type->klass;
+    return type->GetClass();
 }
 
 extern "C" AbckitString *TypeGetName(AbckitType *type)

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,24 @@ namespace libabckit {
 // ========================================
 
 AbckitString *CreateStringStatic(AbckitFile *file, const char *value, size_t len);
+
+bool ModuleSetNameStatic(AbckitCoreModule *m, const char *newName);
+bool ModuleFieldSetNameStatic(AbckitCoreModuleField *field, const char *newName);
+
+bool NamespaceSetNameStatic(AbckitCoreNamespace *ns, const char *newName);
+bool NamespaceFieldSetNameStatic(AbckitCoreNamespaceField *field, const char *newName);
+
+bool AnnotationInterfaceSetNameStatic(AbckitCoreAnnotationInterface *ai, const char *newName);
+bool AnnotationSetNameStatic(AbckitCoreAnnotation *anno, const char *newName);
+
+bool ClassSetNameStatic(AbckitCoreClass *klass, const char *newName);
+bool ClassFieldSetNameStatic(AbckitCoreClassField *field, const char *newName);
+
+bool InterfaceSetNameStatic(AbckitCoreInterface *iface, const char *newName);
+bool InterfaceFieldSetNameStatic(AbckitCoreInterfaceField *field, const char *newName);
+
+bool EnumSetNameStatic(AbckitCoreEnum *enm, const char *newName);
+bool EnumFieldSetNameStatic(AbckitCoreEnumField *field, const char *newName);
 
 void FunctionSetGraphStatic(AbckitCoreFunction *function, AbckitGraph *graph);
 

@@ -525,7 +525,7 @@ TEST_F(LibAbcKitModifyApiFunctionsTest, StaticFunctionAddParamString)
             auto paramTypeObj = std::make_unique<AbckitType>();
             paramTypeObj->id = ABCKIT_TYPE_ID_STRING;
             paramTypeObj->rank = 0;
-            paramTypeObj->klass = nullptr;
+            paramTypeObj->reference = nullptr;
             param->type = paramTypeObj.get();
 
             auto arktsParam = std::make_unique<AbckitArktsFunctionParam>();

@@ -156,6 +156,34 @@ bool EnumIsExternalStatic(AbckitCoreEnum *enm)
 // Field
 // ========================================
 
+AbckitString *ModuleFieldGetNameStatic(AbckitCoreModuleField *field)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto fieldName = field->GetArkTSImpl()->GetStaticImpl()->name;
+    return CreateStringStatic(field->owner->file, fieldName.data(), fieldName.size());
+}
+
+AbckitString *NamespaceFieldGetNameStatic(AbckitCoreNamespaceField *field)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto fieldName = field->GetArkTSImpl()->GetStaticImpl()->name;
+    return CreateStringStatic(field->owner->owningModule->file, fieldName.data(), fieldName.size());
+}
+
+AbckitString *ClassFieldGetNameStatic(AbckitCoreClassField *field)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto fieldName = field->GetArkTSImpl()->GetStaticImpl()->name;
+    return CreateStringStatic(field->owner->owningModule->file, fieldName.data(), fieldName.size());
+}
+
+AbckitString *EnumFieldGetNameStatic(AbckitCoreEnumField *field)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto fieldName = field->GetArkTSImpl()->GetStaticImpl()->name;
+    return CreateStringStatic(field->owner->owningModule->file, fieldName.data(), fieldName.size());
+}
+
 bool ClassFieldIsPublicStatic(AbckitCoreClassField *field)
 {
     LIBABCKIT_LOG_FUNC;

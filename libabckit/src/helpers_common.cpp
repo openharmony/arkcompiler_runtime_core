@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -102,7 +102,7 @@ bool ModuleEnumerateAnnotationInterfacesHelper(AbckitCoreModule *m, void *data,
     LIBABCKIT_BAD_ARGUMENT(m, false)
     LIBABCKIT_BAD_ARGUMENT(cb, false)
     for (auto &[atName, at] : m->at) {
-        if (at.get() != nullptr && !cb(at.get(), data)) {
+        if (!cb(at.get(), data)) {
             return false;
         }
     }
@@ -373,7 +373,7 @@ bool InterfaceFieldEnumerateAnnotationsHelper(AbckitCoreInterfaceField *field, v
     LIBABCKIT_LOG_FUNC;
     LIBABCKIT_BAD_ARGUMENT(field, false)
     LIBABCKIT_BAD_ARGUMENT(cb, false)
-    for (auto &[_, anno] : field->annotationTable) {
+    for (auto &anno : field->annotations) {
         if (!cb(anno.get(), data)) {
             return false;
         }
@@ -400,12 +400,16 @@ static size_t HashCombine(size_t seed, size_t value)
     return seed;
 }
 
-AbckitType *GetOrCreateType(AbckitFile *file, AbckitTypeId id, size_t rank, AbckitCoreClass *klass, AbckitString *name)
+AbckitType *GetOrCreateType(
+    AbckitFile *file, AbckitTypeId id, size_t rank,
+    std::variant<AbckitCoreClass *, AbckitCoreInterface *, AbckitCoreEnum *, std::nullptr_t> reference,
+    AbckitString *name)
 {
     size_t hash = 0;
     hash = HashCombine(hash, (size_t)id);
     hash = HashCombine(hash, rank);
-    hash = HashCombine(hash, reinterpret_cast<size_t>(klass));
+    hash =
+        HashCombine(hash, std::visit([](const auto &object) { return reinterpret_cast<size_t>(object); }, reference));
     hash = HashCombine(hash, reinterpret_cast<size_t>(name));
 
     auto &cache = file->types;
@@ -416,10 +420,53 @@ AbckitType *GetOrCreateType(AbckitFile *file, AbckitTypeId id, size_t rank, Abck
     auto type = std::make_unique<AbckitType>();
     type->id = id;
     type->rank = rank;
-    type->klass = klass;
     type->name = name;
+    type->reference = reference;
+
+    if (const auto klass = std::get_if<AbckitCoreClass *>(&reference)) {
+        if (*klass) {
+            (*klass)->typeUsers.emplace_back(type.get());
+        }
+    }
+
+    if (const auto iface = std::get_if<AbckitCoreInterface *>(&reference)) {
+        if (*iface) {
+            (*iface)->typeUsers.emplace_back(type.get());
+        }
+    }
+
+    if (const auto enm = std::get_if<AbckitCoreEnum *>(&reference)) {
+        if (*enm) {
+            (*enm)->typeUsers.emplace_back(type.get());
+        }
+    }
+
     cache.insert({hash, std::move(type)});
     return cache[hash].get();
 }
 
+void AddFunctionUserToAbckitType(AbckitType *abckitType, AbckitCoreFunction *function)
+{
+    if (abckitType->types.empty()) {
+        abckitType->functionUsers.emplace(function);
+    } else {
+        for (auto &type : abckitType->types) {
+            type->functionUsers.emplace(function);
+        }
+    }
+}
+
+void AddFieldUserToAbckitType(AbckitType *abckitType,
+                              std::variant<AbckitCoreModuleField *, AbckitCoreNamespaceField *, AbckitCoreClassField *,
+                                           AbckitCoreEnumField *, AbckitCoreAnnotationInterfaceField *>
+                                  field)
+{
+    if (abckitType->types.empty()) {
+        abckitType->fieldTypeUsers.emplace(field);
+    } else {
+        for (auto &type : abckitType->types) {
+            type->fieldTypeUsers.emplace(field);
+        }
+    }
+}
 }  // namespace libabckit

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -200,9 +200,11 @@ extern "C" AbckitCoreInterface *ArktsInterfaceToCoreInterface(AbckitArktsInterfa
 
 extern "C" AbckitArktsInterface *CoreInterfaceToArktsInterface(AbckitCoreInterface *iface)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)iface;
-    return nullptr;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(iface, nullptr);
+    return iface->GetArkTSImpl();
 }
 
 /* ========================================
@@ -218,9 +220,11 @@ extern "C" AbckitCoreEnum *ArktsEnumToCoreEnum(AbckitArktsEnum *enm)
 
 extern "C" AbckitArktsEnum *CoreEnumToArktsEnum(AbckitCoreEnum *enm)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)enm;
-    return nullptr;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(enm, nullptr);
+    return enm->GetArkTSImpl();
 }
 
 /* ========================================
@@ -236,9 +240,11 @@ extern "C" AbckitCoreModuleField *ArktsModuleFieldToCoreModuleField(AbckitArktsM
 
 extern "C" AbckitArktsModuleField *CoreModuleFieldToArktsModuleField(AbckitCoreModuleField *field)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    return nullptr;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(field, nullptr);
+    return field->GetArkTSImpl();
 }
 
 extern "C" bool ArktsModuleFieldIsReadonly(AbckitArktsModuleField *field)
@@ -254,9 +260,11 @@ extern "C" bool ArktsModuleFieldIsReadonly(AbckitArktsModuleField *field)
 
 extern "C" AbckitArktsNamespaceField *CoreNamespaceFieldToArktsNamespaceField(AbckitCoreNamespaceField *field)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    return nullptr;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(field, nullptr);
+    return field->GetArkTSImpl();
 }
 
 /* ========================================
@@ -272,9 +280,11 @@ extern "C" AbckitCoreClassField *ArktsClassFieldToCoreClassField(AbckitArktsClas
 
 extern "C" AbckitArktsClassField *CoreClassFieldToArktsClassField(AbckitCoreClassField *field)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    return nullptr;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(field, nullptr);
+    return field->GetArkTSImpl();
 }
 
 extern "C" bool ArktsClassFieldIsReadonly(AbckitArktsClassField *field)
@@ -297,9 +307,11 @@ extern "C" AbckitCoreInterfaceField *ArktsInterfaceFieldToCoreInterfaceField(Abc
 
 extern "C" AbckitArktsInterfaceField *CoreInterfaceFieldToArktsInterfaceField(AbckitCoreInterfaceField *field)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    return nullptr;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(field, nullptr);
+    return field->GetArkTSImpl();
 }
 
 extern "C" bool ArktsInterfaceFieldIsReadonly(AbckitArktsInterfaceField *field)
@@ -322,9 +334,11 @@ extern "C" AbckitCoreEnumField *ArktsEnumFieldToCoreEnumField(AbckitArktsEnumFie
 
 extern "C" AbckitArktsEnumField *CoreEnumFieldToArktsEnumField(AbckitCoreEnumField *field)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    return nullptr;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(field, nullptr);
+    return field->GetArkTSImpl();
 }
 
 // ========================================

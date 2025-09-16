@@ -105,6 +105,16 @@ public:
         return StoreValue(attribute, value);
     }
 
+    void SetAttributeValues(const std::string &attribute, const std::vector<std::string> &values)
+    {
+        auto it = attributes_.find(attribute);
+        if (it == attributes_.cend()) {
+            return;
+        }
+
+        it->second = values;
+    }
+
     std::vector<std::string> GetAttributeValues(const std::string &attribute) const
     {
         auto it = attributes_.find(attribute);

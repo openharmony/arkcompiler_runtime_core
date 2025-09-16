@@ -31,7 +31,8 @@ bool UpdateFileMap(AbckitFile *file, const std::string &oldMangleName, const std
 void ReplaceInstructionIds(ark::pandasm::Program *prog, ark::pandasm::Function *impl, const std::string &oldId,
                            const std::string &newId);
 std::string GenerateFunctionMangleName(const std::string &moduleName, const ark::pandasm::Function &func);
-std::string GetTypeName(AbckitCoreFunction *coreFunc, const AbckitType *type, bool useComponentFormat = false);
+std::string GetTypeName([[maybe_unused]] AbckitCoreFunction *coreFunc, const AbckitType *type,
+                        bool useComponentFormat = false);
 void AddFunctionParameterImpl(AbckitCoreFunction *coreFunc, ark::pandasm::Function *impl,
                               const AbckitCoreFunctionParam *paramCore, const std::string &componentName);
 
