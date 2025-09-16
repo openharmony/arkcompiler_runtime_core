@@ -2734,9 +2734,6 @@
 # temporary place for the tests related to primitive types refactoring
 ############
 
-# 1.
-# verifier error - not supported cast array literal to union of fixedarrays
-
 # 2.
 # TypeError: Type '[String, Double]' is not compatible with the enclosing method's
 # return type '[Object|null|undefined, Object|null|undefined]' [x.ets:1:21]
@@ -2749,25 +2746,10 @@
 07.expressions/33.constant_expression/check_enum/constant_calculation_22.ets
 07.expressions/33.constant_expression/check_enum/constant_calculation_23.ets
 07.expressions/33.constant_expression/check_enum/constant_calculation_24.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_25.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_26.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_27.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_28.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_29.ets
-07.expressions/33.constant_expression/check_enum/constant_number_conversion_5.ets
-07.expressions/33.constant_expression/check_enum/constant_number_conversion_6.ets
 07.expressions/33.constant_expression/check_enum/constant_unary_minus_10.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_minus_11.ets
 07.expressions/33.constant_expression/check_enum/constant_unary_minus_4.ets
 07.expressions/33.constant_expression/check_enum/constant_unary_plus_10.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_plus_11.ets
 07.expressions/33.constant_expression/check_enum/constant_unary_plus_4.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_plus_5.ets
-
-# 47 'VERIFIER_FAIL: [TID 000c96] E/verifier: Verifier error 8: Bad array element type3
-17.experimental_features/02.fixed_array_types/far3_6.ets
-
-# 41 (divided into groups)
 
 # Runtime Fail Ignore list (looks like should work)
 05.generics/03.utility_types/03.partial_utility_type/partial_inherit3.ets
@@ -2785,8 +2767,6 @@
 07.expressions/25.equality_expressions/eq_neg_54.ets
 07.expressions/25.equality_expressions/eq_neg_7.ets
 07.expressions/25.equality_expressions/eq_neg_99.ets
-
-# end of 41
 
 #59 verifier in lambda
 07.expressions/06.spread_expression/spex_lmbd_37.ets
