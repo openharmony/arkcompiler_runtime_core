@@ -25,6 +25,7 @@
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 #include "plugins/ets/runtime/types/ets_type.h"
+#include "plugins/ets/runtime/ets_utils.h"
 
 namespace ark::ets {
 
@@ -168,6 +169,33 @@ uint32_t EtsMethod::GetNumMandatoryArgs()
     return numMandatoryArgs;
 }
 
+static EtsClass *ResolveTypePrimitive(panda_file::Type type, EtsClassLinker *classLinker)
+{
+    switch (type.GetId()) {
+        case panda_file::Type::TypeId::U1:
+            return classLinker->GetClassRoot(EtsClassRoot::BOOLEAN);
+        case panda_file::Type::TypeId::I8:
+            return classLinker->GetClassRoot(EtsClassRoot::BYTE);
+        case panda_file::Type::TypeId::I16:
+            return classLinker->GetClassRoot(EtsClassRoot::SHORT);
+        case panda_file::Type::TypeId::U16:
+            return classLinker->GetClassRoot(EtsClassRoot::CHAR);
+        case panda_file::Type::TypeId::I32:
+            return classLinker->GetClassRoot(EtsClassRoot::INT);
+        case panda_file::Type::TypeId::I64:
+            return classLinker->GetClassRoot(EtsClassRoot::LONG);
+        case panda_file::Type::TypeId::F32:
+            return classLinker->GetClassRoot(EtsClassRoot::FLOAT);
+        case panda_file::Type::TypeId::F64:
+            return classLinker->GetClassRoot(EtsClassRoot::DOUBLE);
+        case panda_file::Type::TypeId::VOID:
+            return classLinker->GetClassRoot(EtsClassRoot::VOID);
+        default:
+            LOG(FATAL, RUNTIME) << "ResolveArgType: not a valid ets type for " << type;
+            return nullptr;
+    };
+}
+
 EtsClass *EtsMethod::ResolveArgType(uint32_t idx)
 {
     if (!IsStatic()) {
@@ -192,31 +220,25 @@ EtsClass *EtsMethod::ResolveArgType(uint32_t idx)
             }
         }
         ASSERT(refIdx <= proto.GetRefTypes().size());
-        return classLinker->GetClass(proto.GetRefTypes()[refIdx].data(), false, GetClass()->GetLoadContext());
+        auto *resCls = classLinker->GetClass(proto.GetRefTypes()[refIdx].data(), false, GetClass()->GetLoadContext());
+        return resCls->ResolvePublicClass();
     }
 
     // get primitive type
-    switch (type.GetId()) {
-        case panda_file::Type::TypeId::U1:
-            return classLinker->GetClassRoot(EtsClassRoot::BOOLEAN);
-        case panda_file::Type::TypeId::I8:
-            return classLinker->GetClassRoot(EtsClassRoot::BYTE);
-        case panda_file::Type::TypeId::I16:
-            return classLinker->GetClassRoot(EtsClassRoot::SHORT);
-        case panda_file::Type::TypeId::U16:
-            return classLinker->GetClassRoot(EtsClassRoot::CHAR);
-        case panda_file::Type::TypeId::I32:
-            return classLinker->GetClassRoot(EtsClassRoot::INT);
-        case panda_file::Type::TypeId::I64:
-            return classLinker->GetClassRoot(EtsClassRoot::LONG);
-        case panda_file::Type::TypeId::F32:
-            return classLinker->GetClassRoot(EtsClassRoot::FLOAT);
-        case panda_file::Type::TypeId::F64:
-            return classLinker->GetClassRoot(EtsClassRoot::DOUBLE);
-        default:
-            LOG(FATAL, RUNTIME) << "ResolveArgType: not a valid ets type for " << type;
-            return nullptr;
-    };
+    return ResolveTypePrimitive(type, classLinker);
+}
+
+EtsClass *EtsMethod::ResolveReturnType()
+{
+    panda_file::Type retType = GetPandaMethod()->GetReturnType();
+    auto *classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
+    if (!retType.IsPrimitive()) {
+        auto proto = GetPandaMethod()->GetProto();
+        const char *descriptor = proto.GetReturnTypeDescriptor().data();
+        auto *resCls = classLinker->GetClass(descriptor, false, GetClass()->GetLoadContext());
+        return resCls->ResolvePublicClass();
+    }
+    return ResolveTypePrimitive(retType, classLinker);
 }
 
 PandaString EtsMethod::GetMethodSignature(bool includeReturnType) const

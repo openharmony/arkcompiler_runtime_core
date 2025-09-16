@@ -138,14 +138,7 @@ public:
 
     PANDA_PUBLIC_API EtsClass *ResolveArgType(uint32_t idx);
 
-    EtsClass *ResolveReturnType()
-    {
-        Method::Proto proto = GetPandaMethod()->GetProto();
-        const char *descriptor = proto.GetReturnTypeDescriptor().data();
-        Runtime::GetCurrent()->GetClassLinker();
-        return EtsClass::FromRuntimeClass(Runtime::GetCurrent()->GetClassLinker()->GetClass(
-            utf::CStringAsMutf8(descriptor), false, GetClass()->GetLoadContext()));
-    }
+    EtsClass *ResolveReturnType();
 
     size_t GetVTableID() const
     {
