@@ -100,6 +100,7 @@ srcs_runtime = [
   "runtime/ani/verify/ani_verifier.cpp",
   "runtime/ani/verify/env_ani_verifier.cpp",
   "runtime/ani/verify/types/venv.cpp",
+  "runtime/ani/verify/types/vmethod.cpp",
   "runtime/ani/verify/verify_ani_checker.cpp",
   "runtime/ani/verify/verify_ani_interaction_api.cpp",
   "runtime/ani/verify/verify_ani_vm_api.cpp",
