@@ -717,7 +717,7 @@ abstract class ArrayProxy<T> extends Array<T> {
     public static readonly ARRAY_TYPE_METHODS: ReadonlyArray<Method> = ArrayProxy.getArrayMethods()
 
     public static readonly ARRAY_PROXY_DEFINED_METHODS: ReadonlySet<string> = new Set<string>(Array.of<string>(
-            "$_get", "$_set", "pop", "concat", "push", "pushECMA", "splice", "toSpliced", "shift",  "unshift"))
+            "$_get", "$_set", "pop", "concat", "push", "splice", "toSpliced", "shift",  "unshift"))
 
     private static getArrayMethods(): Array<Method> {
         const arrayType = ArrayProxy.ARRAY_TYPE
@@ -880,10 +880,6 @@ abstract class ArrayProxy<T> extends Array<T> {
         }
 
         throw new AssertionError("Array.push() single push unexpected result type: " + Type.of(result))
-    }
-
-    override pushECMA(...items: Array<T>): int {
-        return this.target.pushECMA(...items)
     }
 
     override splice(start: int, deleteCount: int | undefined, ...items: T[]): Array<T> {
