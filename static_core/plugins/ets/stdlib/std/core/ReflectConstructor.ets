@@ -24,7 +24,7 @@ export final class Constructor extends Method {
     private constructor() { throw new Error("Constructor constructor called") }
 
     public equals(other: Constructor): boolean {
-        throw new Error("Not implemeted yet")
+        return this.methodPtr == other.methodPtr
     }
 
     public invoke(args?: FixedArray<Any>): Any {

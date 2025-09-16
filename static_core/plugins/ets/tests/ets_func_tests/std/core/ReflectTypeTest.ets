@@ -160,6 +160,76 @@ function testGetInstanceFields() {
     }
 }
 
+function testInstanceFieldEquals(): void {
+    const aCls = Class.of(new A())
+
+    const fld1 = aCls.getInstanceFieldByName("fooFld1")!
+    const fld2 = aCls.getInstanceFieldByName("fooFld1")!
+
+    arktest.assertFalse(fld1 == fld2)
+    arktest.assertTrue(fld1.equals(fld2))
+
+    const fld3 = aCls.getInstanceFieldByName("fooFld2")!
+
+    arktest.assertFalse(fld1 == fld3)
+    arktest.assertFalse(fld1.equals(fld3))
+}
+
+function classGetStaticFieldByName(cls: Class, name: string): reflect.StaticField | undefined {
+    const fields = cls.getStaticFields()
+    for (let i = 0; i < fields.length; i++) {
+        const field = fields[i]
+        if (field.getName() == name) {
+            return field
+        }
+
+    }
+
+    return undefined
+}
+
+function testStaticFieldEquals(): void {
+    const aCls = Class.of(new A())
+
+    const fld1 = classGetStaticFieldByName(aCls, "stfooFld1")!
+    const fld2 = classGetStaticFieldByName(aCls, "stfooFld1")!
+
+    arktest.assertFalse(fld1 == fld2)
+    arktest.assertTrue(fld1.equals(fld2))
+
+    const fld3 = classGetStaticFieldByName(aCls, "stfooFld2")!
+
+    arktest.assertFalse(fld1 == fld3)
+    arktest.assertFalse(fld1.equals(fld3))
+}
+
+function classGetStaticMethodByName(cls: Class, name: string): reflect.StaticMethod | undefined {
+    const methods = cls.getStaticMethods()
+    for (let i = 0; i < methods.length; i++) {
+        const method = methods[i]
+        if (method.getName() == name) {
+            return method
+        }
+    }
+
+    return undefined
+}
+
+function testStaticMethodEquals(): void {
+    const aCls = Class.of(new A())
+
+    const meth1 = classGetStaticMethodByName(aCls, 'stfoo1')!
+    const meth2 = classGetStaticMethodByName(aCls, 'stfoo1')!
+
+    arktest.assertFalse(meth1 == meth2)
+    arktest.assertTrue(meth1.equals(meth2))
+
+    const meth = classGetStaticMethodByName(aCls, 'stfoo2')!
+
+    arktest.assertFalse(meth1 == meth)
+    arktest.assertFalse(meth1.equals(meth))
+}
+
 function main(): int {
     let typeBaseObj = Class.of(new Object())
 
@@ -200,6 +270,10 @@ function main(): int {
     testGetStaticMethods()
     testGetStaticFields()
     testGetInstanceFields()
+
+    testInstanceFieldEquals()
+    testStaticFieldEquals()
+    testStaticMethodEquals()
 
     return 0
 }

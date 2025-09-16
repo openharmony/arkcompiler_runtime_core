@@ -25,7 +25,7 @@ export final class StaticField extends Field {
     private constructor() { throw new Error("StaticField constructor called") }
 
     public equals(other: StaticField): boolean {
-        throw new Error("Not implemeted yet")
+        return this.fieldPtr == other.fieldPtr
     }
 
     public getValue(): Any {

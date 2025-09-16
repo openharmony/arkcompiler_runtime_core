@@ -44,7 +44,7 @@ export final class InstanceMethod extends Method {
     }
 
     public equals(other: InstanceMethod): boolean {
-        throw new Error("Not implemeted yet")
+        return this.methodPtr == other.methodPtr
     }
 
     public invoke(thisObj: Object, args?: FixedArray<Any>): Any {
