@@ -33,9 +33,6 @@
 02.lexical_elements/09.literals/08.regex_literal/regex_lookaround_literal.ets
 02.lexical_elements/09.literals/08.regex_literal/regex_quantifier_literal.ets
 
-#27986 Indexing doesn't work for arrays in union
-03.types/03.using_types/types_declaration_spec.ets
-
 #29471 Exponentiation doesn't work for BigInt
 03.types/06.value_types/01.numeric_types/conversions_with_bigint_10.ets
 03.types/06.value_types/01.numeric_types/conversions_with_bigint_100.ets
