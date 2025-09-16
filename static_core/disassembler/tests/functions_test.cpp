@@ -239,6 +239,175 @@ TEST(DisassemblerTest, FullRecordNameEmptyNameDeathTest)
                                       ark::Logger::ComponentMask().set(ark::Logger::Component::DISASSEMBLER));
     EXPECT_DEATH({ d.Disassemble(*pandaFile); }, ".*Record name is empty.*|.*");
 }
+
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP, G.FUD.05) solid test logic
+TEST(FunctionsTest, AnyTypeTest)
+{
+    auto program = ark::pandasm::Parser().Parse(R"(
+        .record Y <external>
+        .record N <external>
+
+        .function i32 Any(Y a0) <static, access.function=public> {}
+        .function i32 never(Y a0) <static, access.function=public> {}
+        .function i32 foo(Y a0) <static, access.function=public> {}
+        .function Y foo1() <static, access.function=public> {}
+        .function Y foo2(Y a0) <static, access.function=public> {}
+        .function Y foo7(Y a0, Y a1, Y a2, Y a3, Y a4) <static, access.function=public> {}
+        .function Y foo8(Y a0, f32 a1, Y a2, Y a3, Y a4) <static, access.function=public> {}
+        .function i32 foo6(Y a0, Y a1, Y a2, Y a3, Y a4) <static, access.function=public> {}
+        .function i32 foo5(Y a0, f32 a1, i32 a2) <static, access.function=public> {}
+        .function Y[] foo(Y a0, Y a1, Y a2, Y a3, Y a4) <static, access.function=public> {}
+        .function Y[] foo(Y a0, f32 a1, Y a2, Y[] a3, Y a4) <static, access.function=public> {}
+
+        .function i32 foo(N a0) <static, access.function=public> {}
+        .function N foo9() <static, access.function=public> {}
+        .function N foo2(N a0) <static, access.function=public> {}
+        .function N foo7(N a0, N a1, N a2, N a3, N a4) <static, access.function=public> {}
+        .function N foo8(N a0, f32 a1, N a2, N a3, N a4) <static, access.function=public> {}
+        .function i32 foo6(N a0, N a1, N a2, N a3, N a4) <static, access.function=public> {}
+        .function i32 foo5(N a0, f32 a1, i32 a2) <static, access.function=public> {}
+    )");
+    ASSERT(program);
+    auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
+    ASSERT(pf);
+
+    ark::disasm::Disassembler d {};
+    std::stringstream ss {};
+
+    d.Disassemble(pf);
+    d.Serialize(ss);
+
+    EXPECT_TRUE(ss.str().find(".function i32 Any(Y a0) <static, access.function=public> {") != std::string::npos);
+    EXPECT_TRUE(ss.str().find(".function i32 never(Y a0) <static, access.function=public> {") != std::string::npos);
+    EXPECT_TRUE(ss.str().find(".function i32 foo(Y a0) <static, access.function=public> {") != std::string::npos);
+    EXPECT_TRUE(ss.str().find(".function Y foo1() <static, access.function=public> {") != std::string::npos);
+    EXPECT_TRUE(ss.str().find(".function Y foo2(Y a0) <static, access.function=public> {") != std::string::npos);
+    EXPECT_TRUE(ss.str().find(".function Y foo7(Y a0, Y a1, Y a2, Y a3, Y a4) <static, access.function=public> {") !=
+                std::string::npos);
+    EXPECT_TRUE(ss.str().find(".function Y foo8(Y a0, f32 a1, Y a2, Y a3, Y a4) <static, access.function=public> {") !=
+                std::string::npos);
+    EXPECT_TRUE(ss.str().find(".function i32 foo6(Y a0, Y a1, Y a2, Y a3, Y a4) <static, access.function=public> {") !=
+                std::string::npos);
+    EXPECT_TRUE(
+        ss.str().find(".function Y[] foo(Y a0, f32 a1, Y a2, Y[] a3, Y a4) <static, access.function=public> {") !=
+        std::string::npos);
+    EXPECT_TRUE(ss.str().find(".function Y[] foo(Y a0, Y a1, Y a2, Y a3, Y a4) <static, access.function=public> {") !=
+                std::string::npos);
+    EXPECT_TRUE(ss.str().find(".function i32 foo5(Y a0, f32 a1, i32 a2) <static, access.function=public> {") !=
+                std::string::npos);
+
+    EXPECT_TRUE(ss.str().find(".function i32 foo(N a0) <static, access.function=public> {") != std::string::npos);
+    EXPECT_TRUE(ss.str().find(".function N foo9() <static, access.function=public> {") != std::string::npos);
+    EXPECT_TRUE(ss.str().find(".function N foo2(N a0) <static, access.function=public> {") != std::string::npos);
+    EXPECT_TRUE(ss.str().find(".function N foo7(N a0, N a1, N a2, N a3, N a4) <static, access.function=public> {") !=
+                std::string::npos);
+    EXPECT_TRUE(ss.str().find(".function N foo8(N a0, f32 a1, N a2, N a3, N a4) <static, access.function=public> {") !=
+                std::string::npos);
+    EXPECT_TRUE(ss.str().find(".function i32 foo6(N a0, N a1, N a2, N a3, N a4) <static, access.function=public> {") !=
+                std::string::npos);
+    EXPECT_TRUE(ss.str().find(".function i32 foo5(N a0, f32 a1, i32 a2) <static, access.function=public> {") !=
+                std::string::npos);
+}
+
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP, G.FUD.05) solid test logic
+TEST(FunctionsTest, AnyInInstructionsTest)
+{
+    auto program = ark::pandasm::Parser().Parse(R"(
+        .record Y <external>
+        .record N <external>
+
+        .function void foo1(Y a0) <static, access.function=public> {
+            lda.type Y
+            return.void
+        }
+
+        .function void foo2(N a0) <static, access.function=public> {
+            lda.type N
+            return.void
+        }
+
+        .function void foo3(Y a0) <static, access.function=public> {
+            lda.type Y[]
+            return.void
+        }
+
+       .function void foo4(Y a0) <static, access.function=public> {
+            lda.type Y[][]
+            return.void
+        }
+
+        .function i32 foo5(N a0) <static, access.function=public> {
+            lda.obj a0
+            isinstance Y
+            return
+        }
+
+        .function i32 foo6(N a0) <static, access.function=public> {
+            lda.obj a0
+            isinstance N
+            return
+        }
+
+        .function i32 foo7(N a0) <static, access.function=public> {
+            lda.obj a0
+            isinstance Y[]
+            return
+        }
+
+        .function i32 foo8(N a0) <static, access.function=public> {
+            lda.obj a0
+            isinstance Y[][]
+            return
+        }
+
+        .function void foo9(Y a0) <static, access.function=public> {
+            lda.obj a0
+            checkcast Y
+            return.void
+        }
+
+        .function void foo10(N a0) <static, access.function=public> {
+            lda.obj a0
+            checkcast N
+            return.void
+        }
+
+        .function void foo11(Y a0) <static, access.function=public> {
+            lda.obj a0
+            checkcast Y[]
+            return.void
+        }
+
+        .function void foo12(Y a0) <static, access.function=public> {
+            lda.obj a0
+            checkcast Y[][]
+            return.void
+        }
+    )");
+    ASSERT(program);
+    auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
+    ASSERT(pf);
+
+    ark::disasm::Disassembler d {};
+    std::stringstream ss {};
+
+    d.Disassemble(pf);
+    d.Serialize(ss);
+
+    EXPECT_TRUE(ss.str().find(".function void foo1(Y a0) <static, access.function=public> {") != std::string::npos);
+    EXPECT_TRUE(ss.str().find(".function void foo2(N a0) <static, access.function=public> {") != std::string::npos);
+    EXPECT_TRUE(ss.str().find(".function void foo3(Y a0) <static, access.function=public> {") != std::string::npos);
+    EXPECT_TRUE(ss.str().find(".function void foo4(Y a0) <static, access.function=public> {") != std::string::npos);
+    EXPECT_TRUE(ss.str().find(".function i32 foo5(N a0) <static, access.function=public> {") != std::string::npos);
+    EXPECT_TRUE(ss.str().find(".function i32 foo6(N a0) <static, access.function=public> {") != std::string::npos);
+
+    EXPECT_TRUE(ss.str().find(".function i32 foo7(N a0) <static, access.function=public> {") != std::string::npos);
+    EXPECT_TRUE(ss.str().find(".function i32 foo8(N a0) <static, access.function=public> {") != std::string::npos);
+    EXPECT_TRUE(ss.str().find(".function void foo9(Y a0) <static, access.function=public> {") != std::string::npos);
+    EXPECT_TRUE(ss.str().find(".function void foo10(N a0) <static, access.function=public> {") != std::string::npos);
+    EXPECT_TRUE(ss.str().find(".function void foo11(Y a0) <static, access.function=public> {") != std::string::npos);
+    EXPECT_TRUE(ss.str().find(".function void foo12(Y a0) <static, access.function=public> {") != std::string::npos);
+}
 #undef DISASM_BIN_DIR
 
 }  // namespace ark::disasm::test

@@ -532,7 +532,7 @@ TEST_F(EtsClassTest, GetMethodByIndex)
 {
     const char *source = R"(
         .language eTS
-        .record N {}
+        .record NN {}
         .record A {}
         .record B <ets.extends = A> {}
         .record TestObject {}
@@ -561,7 +561,7 @@ TEST_F(EtsClassTest, GetMethodByIndex)
     ASSERT_EQ(klassAMethodSize, klassA->GetMethodsNum());
     ASSERT_EQ(klassBMethodSize, klassB->GetMethodsNum());
 
-    EtsClass *klassN = GetTestClass(source, "LN;");
+    EtsClass *klassN = GetTestClass(source, "LNN;");
     ASSERT_NE(klassN, nullptr);
     ASSERT_FALSE(klassN->GetMethodsNum());
 
@@ -582,7 +582,7 @@ TEST_F(EtsClassTest, GetMethods)
 {
     const char *source = R"(
         .language eTS
-        .record N {}
+        .record NN {}
         .record A {}
         .record B <ets.extends = A> {}
         .record TestObject {}
@@ -623,7 +623,7 @@ TEST_F(EtsClassTest, GetMethods)
         descSetB.erase(etsMethodsB.at(i)->GetName());
     }
 
-    EtsClass *klassN = GetTestClass(source, "LN;");
+    EtsClass *klassN = GetTestClass(source, "LNN;");
     ASSERT_NE(klassN, nullptr);
     auto etsMethodsC = PandaVector<EtsMethod *>();
     etsMethodsC = klassN->GetMethods();

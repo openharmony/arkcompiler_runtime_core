@@ -53,6 +53,8 @@ public:
 
     void InitializePrimitiveClass(Class *primitiveClass) override;
 
+    void InitializeSyntheticClass(Class *synClass) override;
+
     size_t GetClassVTableSize(ClassRoot root) override;
 
     size_t GetClassIMTSize(ClassRoot root) override;

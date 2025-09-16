@@ -252,7 +252,7 @@ void Parser::ParseAsArray(const std::vector<Token> &tokens)
 
         if (iterNumber < 1) {
             context_.err =
-                GetError("Сonstant array must contain at least one element.", Error::ErrorType::ERR_BAD_ARRAY_SIZE);
+                GetError("Constant array must contain at least one element.", Error::ErrorType::ERR_BAD_ARRAY_SIZE);
             return;
         }
 
@@ -545,7 +545,7 @@ bool Parser::ParseFunctionCode()
 
     ParseFunctionInstruction();
 
-    if (open_ && *context_ == Token::Type::DEL_BRACE_R) {
+    if (open_ && *context_ == Token::Type::DEL_BRACE_R && !context_.Mask()) {
         currFunc_->bodyLocation.end = GetCurrentPosition(true);
         ++context_;
         open_ = false;
@@ -852,13 +852,15 @@ void Parser::ParseResetRecords(const ark::pandasm::Record &record)
 
 void Parser::ParseResetRecordTable()
 {
-    for (const auto &[unusedKey, record] : program_.recordTable) {
-        (void)unusedKey;
-        if (!record.fileLocation.isDefined) {
-            context_.err = Error("This record does not exist.", record.fileLocation.lineNumber,
-                                 Error::ErrorType::ERR_BAD_ID_RECORD, "", record.fileLocation.boundLeft,
-                                 record.fileLocation.boundRight, record.fileLocation.WholeLine());
+    for (const auto &[recordName, record] : program_.recordTable) {
+        if (!record.fileLocation.isDefined && !ark::pandasm::Type::IsPandaPrimitiveType(recordName) &&
+            !Type::FromName(recordName).IsUnion()) {
+            std::string errorStr = "Record '" + recordName + "' does not exist.";
+            context_.err =
+                Error(errorStr, record.fileLocation.lineNumber, Error::ErrorType::ERR_BAD_ID_RECORD, "",
+                      record.fileLocation.boundLeft, record.fileLocation.boundRight, record.fileLocation.WholeLine());
             SetError();
+            return;
         } else {
             ParseResetRecords(record);
         }
@@ -1268,13 +1270,15 @@ bool Parser::PrefixedValidName(BracketOptions options)
         return false;
     }
     context_++;
-    if (*context_ == Token::Type::DEL_SQUARE_BRACKET_L) {
-        // process '[' and ']'
-        if (!PrefixedValidNameToken(options)) {
-            return false;
+    if (!context_.Mask()) {
+        if (*context_ == Token::Type::DEL_SQUARE_BRACKET_L) {
+            // process '[' and ']'
+            if (!PrefixedValidNameToken(options)) {
+                return false;
+            }
+        } else {
+            context_--;
         }
-    } else {
-        context_--;
     }
 
     // move to the start of union name
@@ -1885,13 +1889,36 @@ bool Parser::ParseOperandId()
     return true;
 }
 
+void Parser::ParseComponentOperandTypeIfNeeded(Type type)
+{
+    if (type.IsArray()) {
+        auto componentType = Type::FromName(type.GetComponentName());
+        if (ark::pandasm::Type::IsPandaPrimitiveType(componentType.GetName()) ||
+            program_.recordTable.find(componentType.GetName()) != program_.recordTable.end()) {
+            return;
+        }
+        ParseComponentOperandTypeIfNeeded(componentType);
+        return;
+    }
+    if (!type.IsUnion()) {
+        AddObjectInTable(false, program_.recordTable, type.GetName());
+        return;
+    }
+
+    for (const auto &constituentType : type.GetComponentNames()) {
+        ParseComponentOperandTypeIfNeeded(Type::FromName(constituentType));
+    }
+    auto res = TryEmplaceInTable(false, program_.recordTable, type.GetName(), type.GetName());
+    res.first->second.metadata->SetAttribute("external");
+}
+
 bool Parser::ParseOperandType(Type::VerificationType verType)
 {
     if (context_.err.err != Error::ErrorType::ERR_NONE) {
         return false;
     }
 
-    if (*context_ != Token::Type::ID) {
+    if (*context_ != Token::Type::ID && *context_ != Token::Type::DEL_BRACE_L) {
         context_.err = GetError("Expected type.", Error::ErrorType::ERR_BAD_OPERAND);
         return false;
     }
@@ -1905,27 +1932,18 @@ bool Parser::ParseOperandType(Type::VerificationType verType)
         return false;
     }
 
-    bool isObject = context_.GiveToken() != "]";
-    if (isObject) {
-        AddObjectInTable(false, program_.recordTable);
-
-        if (verType == Type::VerificationType::TYPE_ID_ARRAY) {
-            GetWarning("Unexpected type_id recieved! Expected array, but object given",
-                       Error::ErrorType::WAR_UNEXPECTED_TYPE_ID);
-        }
-    } else {
-        if (!type.IsArrayContainsPrimTypes() &&
-            program_.recordTable.find(type.GetComponentName()) == program_.recordTable.end()) {
-            std::string componentName = type.GetComponentName();
-            context_.token = componentName;
-            AddObjectInTable(false, program_.recordTable);
-        }
-
+    if (type.IsArray()) {
         if (verType == Type::VerificationType::TYPE_ID_OBJECT) {
             GetWarning("Unexpected type_id recieved! Expected object, but array given",
                        Error::ErrorType::WAR_UNEXPECTED_TYPE_ID);
         }
+    } else {
+        if (verType == Type::VerificationType::TYPE_ID_ARRAY) {
+            GetWarning("Unexpected type_id recieved! Expected array, but object given",
+                       Error::ErrorType::WAR_UNEXPECTED_TYPE_ID);
+        }
     }
+    ParseComponentOperandTypeIfNeeded(type);
 
     currIns_->EmplaceID(type.GetName());
 
@@ -2022,6 +2040,9 @@ bool Parser::ParseOperandNone()
     }
 
     if (open_ && *context_ == Token::Type::DEL_BRACE_R) {
+        if (context_.Mask()) {
+            return true;
+        }
         return false;
     }
 

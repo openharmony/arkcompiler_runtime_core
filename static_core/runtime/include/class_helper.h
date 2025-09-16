@@ -142,6 +142,10 @@ Str ClassHelper::GetName(const uint8_t *descriptor)
             return "f64";
         case 'A':
             return "any";
+        case 'Y':
+            return "Y";
+        case 'N':
+            return "N";
         default: {
             break;
         }

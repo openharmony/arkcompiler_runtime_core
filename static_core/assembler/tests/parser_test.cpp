@@ -2168,7 +2168,7 @@ TEST(parsertests, parse_undefined_record_field)
         ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_ID_RECORD);
         ASSERT_EQ(e.lineNumber, 3);
         ASSERT_EQ(e.pos, 27);
-        ASSERT_EQ(e.message, "This record does not exist.");
+        ASSERT_EQ(e.message, "Record 'ObjWrongType' does not exist.");
     }
 
     {
@@ -2210,7 +2210,7 @@ TEST(parsertests, parse_undefined_record_field)
         ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_ID_RECORD);
         ASSERT_EQ(e.lineNumber, 3);
         ASSERT_EQ(e.pos, 26);
-        ASSERT_EQ(e.message, "This record does not exist.");
+        ASSERT_EQ(e.message, "Record 'ObjWrongType' does not exist.");
     }
 
     {
@@ -2341,7 +2341,7 @@ TEST(parsertests, parse_undefined_record_field)
         ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_ID_RECORD);
         ASSERT_EQ(e.lineNumber, 3);
         ASSERT_EQ(e.pos, 44);
-        ASSERT_EQ(e.message, "This record does not exist.");
+        ASSERT_EQ(e.message, "Record 'ObjWrongType' does not exist.");
     }
 
     {

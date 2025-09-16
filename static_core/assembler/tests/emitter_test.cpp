@@ -1172,4 +1172,224 @@ TEST(emittertests, test_union_canonicalization_arrays)
     }
 }
 
+TEST(emittertests, test_union_in_function)
+{
+    Parser p;
+
+    std::string source =
+        ".record A <external>\n"
+        ".record Y <external>\n"
+        ".record N <external>\n"
+        ".function i32 fooWithBody(Y a0) {\n"
+        "    lda.obj a0\n"
+        "    isinstance {Ui32[],A}\n"
+        "    isinstance {Ui32[],Y}\n"
+        "    isinstance {Ui32[],Y[][]}\n"
+        "    isinstance {Ui32[],N}\n"
+        "    checkcast {Ui32[],A}\n"
+        "    checkcast {Ui32[],Y}\n"
+        "    checkcast {Ui32[],Y[][]}\n"
+        "    checkcast {Ui32[],N}\n"
+        "    lda.type {Ui32[],A}\n"
+        "    lda.type {Ui32[],Y}\n"
+        "    lda.type {Ui32[],Y[][]}\n"
+        "    lda.type {Ui32[],N}\n"
+        "}";
+    std::string sourceFilename = "source.pa";
+    auto res = p.Parse(source, sourceFilename);
+    std::cout << p.ShowError().message << std::endl;
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
+
+    auto pf = AsmEmitter::Emit(res.Value());
+    ASSERT_NE(pf, nullptr);
+
+    std::string descriptor;
+    auto classId = pf->GetClassId(GetTypeDescriptor("_GLOBAL", &descriptor));
+
+    panda_file::ClassDataAccessor cda(*pf, classId);
+    ASSERT_TRUE(cda.GetMethodsNumber() == 1U);
+}
+
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP, G.FUD.05) solid test logic
+TEST(emittertests, test_any_in_instructions)
+{
+    Parser p;
+
+    auto source = R"(
+        .record Y <external>
+        .record N <external>
+
+        .function void foo1(Y a0) <static, access.function=public> {
+            lda.type Y
+            return.void
+        }
+
+        .function void foo2(N a0) <static, access.function=public> {
+            lda.type N
+            return.void
+        }
+
+        .function void foo3(Y a0) <static, access.function=public> {
+            lda.type Y[]
+            return.void
+        }
+
+       .function void foo4(Y a0) <static, access.function=public> {
+            lda.type Y[][]
+            return.void
+        }
+
+        .function i32 foo5(N a0) <static, access.function=public> {
+            lda.obj a0
+            isinstance Y
+            return
+        }
+
+        .function i32 foo6(N a0) <static, access.function=public> {
+            lda.obj a0
+            isinstance N
+            return
+        }
+
+        .function i32 foo7(N a0) <static, access.function=public> {
+            lda.obj a0
+            isinstance Y[]
+            return
+        }
+
+        .function i32 foo8(N a0) <static, access.function=public> {
+            lda.obj a0
+            isinstance Y[][]
+            return
+        }
+
+        .function void foo9(Y a0) <static, access.function=public> {
+            lda.obj a0
+            checkcast Y
+            return.void
+        }
+
+        .function void foo10(N a0) <static, access.function=public> {
+            lda.obj a0
+            checkcast N
+            return.void
+        }
+
+        .function void foo11(Y a0) <static, access.function=public> {
+            lda.obj a0
+            checkcast Y[]
+            return.void
+        }
+
+        .function void foo12(Y a0) <static, access.function=public> {
+            lda.obj a0
+            checkcast Y[][]
+            return.void
+        }
+    )";
+    std::string sourceFilename = "source.pa";
+    auto res = p.Parse(source, sourceFilename);
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
+
+    auto pf = AsmEmitter::Emit(res.Value());
+    ASSERT_NE(pf, nullptr);
+
+    std::string descriptor;
+    auto classId = pf->GetClassId(GetTypeDescriptor("_GLOBAL", &descriptor));
+
+    panda_file::ClassDataAccessor cda(*pf, classId);
+    ASSERT_TRUE(cda.GetMethodsNumber() == 12U);
+}
+
+TEST(emittertests, test_any_function)
+{
+    Parser p;
+
+    auto source = R"(
+        .record Y <external>
+        .record N <external>
+
+        .function i32 Any(Y a0) <static, access.function=public> {}
+        .function i32 never(Y a0) <static, access.function=public> {}
+        .function i32 foo(Y a0) <static, access.function=public> {}
+        .function Y foo1() <static, access.function=public> {}
+        .function Y foo2(Y a0) <static, access.function=public> {}
+        .function Y foo7(Y a0, Y a1, Y a2, Y a3, Y a4) <static, access.function=public> {}
+        .function Y foo8(Y a0, f32 a1, Y a2, Y a3, Y a4) <static, access.function=public> {}
+        .function i32 foo6(Y a0, Y a1, Y a2, Y a3, Y a4) <static, access.function=public> {}
+        .function i32 foo5(Y a0, f32 a1, i32 a2) <static, access.function=public> {}
+        .function Y[] foo(Y a0, Y a1, Y a2, Y a3, Y a4) <static, access.function=public> {}
+        .function Y[] foo(Y a0, f32 a1, Y a2, Y[] a3, Y a4) <static, access.function=public> {}
+
+        .function i32 foo(N a0) <static, access.function=public> {}
+        .function N foo9() <static, access.function=public> {}
+        .function N foo2(N a0) <static, access.function=public> {}
+        .function N foo7(N a0, N a1, N a2, N a3, N a4) <static, access.function=public> {}
+        .function N foo8(N a0, f32 a1, N a2, N a3, N a4) <static, access.function=public> {}
+        .function i32 foo6(N a0, N a1, N a2, N a3, N a4) <static, access.function=public> {}
+        .function i32 foo5(N a0, f32 a1, i32 a2) <static, access.function=public> {}
+        .function i32 fooWithBody(Y a0) {
+            lda.obj a0
+            isinstance Y
+            checkcast Y
+            isinstance Y[]
+            checkcast Y[][]
+            isinstance N
+            checkcast N
+            return
+        }
+    )";
+    std::string sourceFilename = "source.pa";
+    auto res = p.Parse(source, sourceFilename);
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
+
+    auto pf = AsmEmitter::Emit(res.Value());
+    ASSERT_NE(pf, nullptr);
+
+    std::string descriptor;
+    auto classId = pf->GetClassId(GetTypeDescriptor("_GLOBAL", &descriptor));
+
+    panda_file::ClassDataAccessor cda(*pf, classId);
+    ASSERT_TRUE(cda.GetMethodsNumber() == 19U);
+}
+
+TEST(emittertests, records_with_any_and_never)
+{
+    Parser p;
+
+    auto source = R"(
+        .record Y <external>
+        .record N <external>
+
+        .record A {
+            Y field <access.field=public>
+        }
+
+        .record B {
+            Y field <access.field=public>
+            Y field2 <access.field=public>
+        }
+
+        .record C {
+            Y[] field <access.field=public>
+        }
+
+        .record F {
+            N field <access.field=public>
+        }
+
+        .record D {
+            N field <access.field=public>
+            N field2 <access.field=public>
+        }
+    )";
+
+    std::string sourceFilename = "source.pa";
+    auto res = p.Parse(source, sourceFilename);
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
+
+    auto pf = AsmEmitter::Emit(res.Value());
+    ASSERT_NE(pf, nullptr);
+}
+
 }  // namespace ark::test
