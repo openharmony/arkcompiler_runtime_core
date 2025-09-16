@@ -21,6 +21,6 @@ desc: >-
 
 function main() {
     let x: bigint = {{f.func}};
-    assertEQ(x, {{f.res}})
+    arktest.assertEQ(x, {{f.res}})
 }
 {% endfor %}

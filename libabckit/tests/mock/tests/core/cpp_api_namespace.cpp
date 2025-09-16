@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "include/cpp/abckit_cpp.h"
-#include "include/cpp/headers/core/namespace.h"
+#include "include/libabckit/cpp/abckit_cpp.h"
+#include "include/libabckit/cpp/headers/core/namespace.h"
 #include "tests/mock/check_mock.h"
 #include "src/mock/mock_values.h"
 #include "tests/mock/cpp_helpers_mock.h"
@@ -48,6 +48,90 @@ TEST_F(LibAbcKitCppMockCoreTestNamespace, Namespace_GetParentNamespace)
         ASSERT_TRUE(CheckMockedApi("OpenAbc"));
         abckit::mock::helpers::GetMockCoreNamespace(f).GetParentNamespace();
         ASSERT_TRUE(CheckMockedApi("NamespaceGetParentNamespace"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
+
+// Test: test-kind=mock, api=Namespace::GetNamespaces, abc-kind=ArkTS2, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockCoreTestNamespace, Namespace_GetNamespaces)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File f(DEFAULT_PATH);
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        abckit::mock::helpers::GetMockCoreNamespace(f).GetNamespaces();
+        ASSERT_TRUE(CheckMockedApi("NamespaceEnumerateNamespaces"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
+
+// Test: test-kind=mock, api=Namespace::GetClasses, abc-kind=ArkTS2, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockCoreTestNamespace, Namespace_GetClasses)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File f(DEFAULT_PATH);
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        abckit::mock::helpers::GetMockCoreNamespace(f).GetClasses();
+        ASSERT_TRUE(CheckMockedApi("NamespaceEnumerateClasses"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
+
+// Test: test-kind=mock, api=Namespace::GetInterfaces, abc-kind=ArkTS2, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockCoreTestNamespace, Namespace_GetInterfaces)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File f(DEFAULT_PATH);
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        abckit::mock::helpers::GetMockCoreNamespace(f).GetInterfaces();
+        ASSERT_TRUE(CheckMockedApi("NamespaceEnumerateInterfaces"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
+
+// Test: test-kind=mock, api=Namespace::GetEnums, abc-kind=ArkTS2, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockCoreTestNamespace, Namespace_GetEnums)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File f(DEFAULT_PATH);
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        abckit::mock::helpers::GetMockCoreNamespace(f).GetEnums();
+        ASSERT_TRUE(CheckMockedApi("NamespaceEnumerateEnums"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
+
+// Test: test-kind=mock, api=Namespace::GetTopLevelFunctions, abc-kind=ArkTS2, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockCoreTestNamespace, Namespace_GetTopLevelFunctions)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File f(DEFAULT_PATH);
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        abckit::mock::helpers::GetMockCoreNamespace(f).GetTopLevelFunctions();
+        ASSERT_TRUE(CheckMockedApi("NamespaceEnumerateTopLevelFunctions"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
+
+// Test: test-kind=mock, api=Namespace::GetFields, abc-kind=ArkTS2, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockCoreTestNamespace, Namespace_GetFields)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File f(DEFAULT_PATH);
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        abckit::mock::helpers::GetMockCoreNamespace(f).GetFields();
+        ASSERT_TRUE(CheckMockedApi("NamespaceEnumerateFields"));
     }
     ASSERT_TRUE(CheckMockedApi("CloseFile"));
     ASSERT_TRUE(CheckMockedStackEmpty());

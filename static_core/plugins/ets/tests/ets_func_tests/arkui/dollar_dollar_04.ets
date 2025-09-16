@@ -29,5 +29,5 @@ class A {
 function main(): void {
   let a = new A(1)
   let b = $$a 
-  assertEQ(b.n,  1)
+  arktest.assertEQ(b.n,  1)
 }

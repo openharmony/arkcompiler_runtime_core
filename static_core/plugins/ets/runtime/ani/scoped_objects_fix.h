@@ -25,10 +25,14 @@
 #include "plugins/ets/runtime/types/ets_module.h"
 #include "plugins/ets/runtime/types/ets_namespace.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
+#include "plugins/ets/runtime/types/ets_escompat_array.h"
 
 namespace ark::ets::ani {
 
 class ManagedCodeAccessor {
+    // We use 'long' type for the magic number to support both 32-bit and 64-bit architectures at the same time.
+    static constexpr long WREF_UNDEFINED_VALUE = -2UL;  // NOLINT(google-runtime-int)
+
 public:
     explicit ManagedCodeAccessor(PandaEnv *env) : env_(env) {}
     ~ManagedCodeAccessor() = default;
@@ -45,33 +49,23 @@ public:
 
     static bool IsUndefined(ani_ref ref)
     {
-        return ref == nullptr;
+        return EtsReference::IsUndefined(reinterpret_cast<EtsReference *>(ref));
     }
 
     static bool IsUndefined(ani_wref ref)
     {
-        return ref == nullptr;
-    }
-
-    static bool IsUndefined(EtsObject *object)
-    {
-        return object == nullptr;
-    }
-
-    static EtsObject *GetUndefinedObject()
-    {
-        return nullptr;
+        return ref == ToNativePtr<__ani_wref>(WREF_UNDEFINED_VALUE);
     }
 
     static ani_status GetUndefinedWRef(ani_wref *result)
     {
-        *result = nullptr;
+        *result = ToNativePtr<__ani_wref>(WREF_UNDEFINED_VALUE);
         return ANI_OK;
     }
 
     static ani_status GetUndefinedRef(ani_ref *result)
     {
-        *result = nullptr;
+        *result = reinterpret_cast<ani_ref>(EtsReference::GetUndefined());
         return ANI_OK;
     }
 
@@ -92,16 +86,22 @@ public:
         return AddLocalRef(nullObject, result);
     }
 
-    EtsArray *ToInternalType(ani_array array)
+    EtsArray *ToInternalType(ani_fixedarray array)
     {
         ASSERT(!IsNullishValue(array));
         return reinterpret_cast<EtsArray *>(GetInternalType(array));
     }
 
-    EtsObjectArray *ToInternalType(ani_array_ref array)
+    EtsObjectArray *ToInternalType(ani_fixedarray_ref array)
     {
         ASSERT(!IsNullishValue(array));
         return reinterpret_cast<EtsObjectArray *>(GetInternalType(array));
+    }
+
+    EtsEscompatArray *ToInternalType(ani_array array)
+    {
+        ASSERT(!IsNullishValue(array));
+        return reinterpret_cast<EtsEscompatArray *>(GetInternalType(array));
     }
 
     EtsEscompatArrayBuffer *ToInternalType(ani_arraybuffer arraybuffer)
@@ -113,7 +113,7 @@ public:
     EtsObject *ToInternalType(ani_ref ref)
     {
         if (IsUndefined(ref)) {
-            return GetUndefinedObject();
+            return EtsReferenceStorage::GetUndefinedEtsObject();
         }
         return GetInternalType(ref);
     }
@@ -157,7 +157,8 @@ public:
     EtsPromise *ToInternalType(ani_resolver resolver)
     {
         auto resolverRef = reinterpret_cast<ani_ref>(resolver);
-        EtsObject *obj = IsUndefined(resolverRef) ? GetUndefinedObject() : GetInternalType(resolverRef);
+        EtsObject *obj =
+            IsUndefined(resolverRef) ? EtsReferenceStorage::GetUndefinedEtsObject() : GetInternalType(resolverRef);
         return reinterpret_cast<EtsPromise *>(obj);
     }
 
@@ -227,7 +228,7 @@ public:
 
     ani_status AddGlobalRef(EtsObject *obj, ani_ref *result)
     {
-        if (IsUndefined(obj)) {
+        if (EtsReferenceStorage::IsUndefinedEtsObject(obj)) {
             return GetUndefinedRef(result);
         }
         EtsReference *gref = GetRefStorage()->NewEtsRef(obj, EtsReference::EtsObjectType::GLOBAL);
@@ -238,7 +239,7 @@ public:
 
     ani_status AddLocalRef(EtsObject *obj, ani_ref *result)
     {
-        if (IsUndefined(obj)) {
+        if (EtsReferenceStorage::IsUndefinedEtsObject(obj)) {
             return GetUndefinedRef(result);
         }
         EtsReference *etsRef = GetRefStorage()->NewEtsRef(obj, EtsReference::EtsObjectType::LOCAL);
@@ -283,7 +284,7 @@ public:
 
     ani_status DestroyLocalScope()
     {
-        GetRefStorage()->PopLocalEtsFrame(nullptr);
+        GetRefStorage()->PopLocalEtsFrame(EtsReference::GetUndefined());
         return ANI_OK;
     }
 
@@ -301,7 +302,7 @@ public:
     ani_status DestroyEscapeLocalScope(ani_ref ref, ani_ref *result)
     {
         if (IsUndefined(ref)) {
-            GetRefStorage()->PopLocalEtsFrame(nullptr);
+            GetRefStorage()->PopLocalEtsFrame(EtsReference::GetUndefined());
             return GetUndefinedRef(result);
         }
         EtsReference *resultEtsRef = AniRefToEtsRef(ref);

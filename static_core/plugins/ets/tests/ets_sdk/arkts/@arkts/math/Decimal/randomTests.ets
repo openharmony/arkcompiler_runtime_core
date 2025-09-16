@@ -16,8 +16,8 @@
 import { Decimal } from "@arkts.math.Decimal";
 
 let r: Decimal;
-let sd: number;
-let maxDigits: number = 100;
+let sd: double;
+let maxDigits: int = 100;
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("Decimal random API tests");

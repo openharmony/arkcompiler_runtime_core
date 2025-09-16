@@ -75,10 +75,10 @@ function applyFunctionGenericArray<T>(values: FixedArray<T>, func: (accumulator:
     return result;
 }
 
-function applyFunctionGenericArrayCallFromSts(array: FixedArray<Int>): int {
-
-    return applyFunctionGenericArray(array, add);
-}
+// See #25111. FixedArray<Int> to FixedArray<T> assignability.
+// function applyFunctionGenericArrayCallFromSts(array: FixedArray<Int>): int {
+//     return applyFunctionGenericArray(array, add);
+// }
 
 // NOTE: issue (18007) primitive constrain
 // type GNumber<T extends int> = T;

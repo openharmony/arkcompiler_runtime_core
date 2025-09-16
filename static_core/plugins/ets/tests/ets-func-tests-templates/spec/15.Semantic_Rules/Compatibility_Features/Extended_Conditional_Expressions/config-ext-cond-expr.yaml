@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -22,7 +22,7 @@ expression_list:
   - 'string:"Hello World":short:1024'
   - 'string:"Hello World":int:28'
   - 'string:"Hello World":long:28'
-  - 'string:"Hello World":float:1.0'
+  - 'string:"Hello World":float:1.0f'
   - 'string:"Hello World":double:28'
   - 'string:"Hello World":Boolean:true'
   - 'string:"Hello World":Byte:16'
@@ -30,7 +30,7 @@ expression_list:
   - 'string:"Hello World":Short:1024'
   - 'string:"Hello World":Int:28'
   - 'string:"Hello World":Long:28'
-  - 'string:"Hello World":Float:1.0'
+  - 'string:"Hello World":Float:1.0f'
   - 'string:"Hello World":Double:28'
   - 'string:"Hello World":Colors:Colors.Yellow'
   - 'string:"Hello World":Object:new Object()'

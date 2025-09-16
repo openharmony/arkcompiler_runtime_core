@@ -32,6 +32,7 @@ set(SOURCES
     tooling/debugger.cpp
     tooling/evaluation/expression_loader.cpp
     tooling/inspector/debugger_arkapi.cpp
+    tooling/inspector/types/profile_result.cpp
     tooling/pt_default_lang_extension.cpp
     tooling/pt_thread.cpp
     tooling/debug_inf.cpp
@@ -49,6 +50,7 @@ set(SOURCES
     interpreter/interpreter.cpp
     interpreter/runtime_interface.cpp
     intrinsics.cpp
+    coretypes/line_string.cpp
     coretypes/string.cpp
     coretypes/array.cpp
     class.cpp
@@ -138,6 +140,7 @@ set(SOURCES
     jit/libprofile/pgo_file_builder.cpp
     jit/profiling_loader.cpp
     jit/profiling_saver.cpp
+    jit/profile_saver_worker.cpp
     cha.cpp
     runtime_helpers.cpp
     handle_scope.cpp
@@ -164,6 +167,7 @@ set(SOURCES
     coroutines/threaded_coroutine_manager.cpp
     coroutines/stackful_coroutine_manager.cpp
     coroutines/stackful_coroutine_worker.cpp
+    coroutines/stackful_coroutine_state_info.cpp
     coroutines/coroutine_events.cpp
     coroutines/coroutine_stats.cpp
     coroutines/priority_queue.cpp
@@ -276,6 +280,16 @@ panda_isa_gen(
     DESTINATION ${GEN_INCLUDE_DIR}
 )
 
+panda_gen_file(
+        DATA ${CMAKE_BINARY_DIR}/plugin_options.yaml
+        TEMPLATE ${CMAKE_CURRENT_LIST_DIR}/interpreter/templates/core_any_intrinsics.inc.erb
+        API ${PANDA_ROOT}/templates/plugin_options.rb
+        EXTRA_DEPENDENCIES plugin_options_merge
+        OUTPUTFILE ${GEN_INCLUDE_DIR}/core_any_intrinsics.inc
+)
+add_custom_target(core_any_intrinsics_inc DEPENDS ${GEN_INCLUDE_DIR}/core_any_intrinsics.inc)
+add_dependencies(arkruntime_interpreter_impl core_any_intrinsics_inc)
+
 set(ISA "${CMAKE_BINARY_DIR}/isa/isa.yaml")
 set(ISA_API "${PANDA_ROOT}/isa/isapi.rb")
 set(BRIDGE_DISPATCH_TEMPLATE "${CMAKE_CURRENT_LIST_DIR}/templates/bridge_dispatch.S.erb")
@@ -349,6 +363,7 @@ panda_target_include_directories(arkruntime_interpreter_impl
     PUBLIC ${PANDA_BINARY_ROOT}/libpandabase/generated
     PUBLIC ${VERIFIER_INCLUDE_DIR}
     PUBLIC ${PANDA_BINARY_ROOT}
+    PUBLIC ${PANDA_ROOT}/../common_interfaces
 )
 
 panda_target_include_directories(arkruntime_interpreter_impl
@@ -591,9 +606,11 @@ panda_target_include_directories(arkruntime_obj
     PUBLIC ${PANDA_BINARY_ROOT}/runtime/asm_defines
     PUBLIC ${GEN_INCLUDE_DIR}
     PUBLIC ${VERIFIER_INCLUDE_DIR}
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/tooling/inspector
+    PUBLIC ${PANDA_ROOT}/../common_interfaces
 )
 
-panda_target_link_libraries(arkruntime_obj arkbase arkfile arkcompiler dprof arkaotmanager arktarget_options)
+panda_target_link_libraries(arkruntime_obj arkbase arkfile arkcompiler dprof arkaotmanager arktarget_options arkassembler)
 if (NOT PANDA_TARGET_OHOS)
   panda_target_link_libraries(arkruntime_obj atomic)
 endif()
@@ -607,6 +624,7 @@ panda_target_include_directories(csa_tests_arkruntime_interpreter_impl
     PUBLIC ${PANDA_ROOT}/compiler
     PUBLIC ${PANDA_ROOT}/libpandabase
     PUBLIC ${PANDA_ROOT}/libpandafile
+    PUBLIC ${PANDA_ROOT}/../common_interfaces
     PUBLIC ${PANDA_BINARY_ROOT}/panda_gen_options
     PUBLIC ${PANDA_BINARY_ROOT}
     PUBLIC ${PANDA_BINARY_ROOT}/compiler/generated
@@ -665,6 +683,7 @@ if(PANDA_WITH_TESTS)
     PUBLIC ${PANDA_BINARY_ROOT}
     PUBLIC ${PANDA_BINARY_ROOT}/libpandabase/generated
     PUBLIC ${VERIFIER_INCLUDE_DIR}
+    PUBLIC ${PANDA_ROOT}/../common_interfaces
     )
 
   panda_target_include_directories(arkruntime_test_interpreter_impl
@@ -839,10 +858,12 @@ add_gtests(
     tests/mem_stats_test.cpp
 )
 
-add_gtests(
-    arkruntime_memory_management_bump_allocator_test
-    tests/bump_allocator_test.cpp
-)
+if (NOT ENABLE_UNIT_TESTS_FULL_COVERAGE)
+    add_gtests(
+        arkruntime_memory_management_bump_allocator_test
+        tests/bump_allocator_test.cpp
+    )
+endif()
 
 add_gtests(
     arkruntime_memory_management_frame_allocators_test
@@ -926,11 +947,20 @@ add_gtests(
     tests/heap_space_test.cpp
 )
 
-add_gtests(
-    arkruntime_multithreading_test
+set(MULTITHREADING_TESTS_SRC
     tests/compiler_queue_test.cpp
     tests/monitor_test.cpp
-    tests/thread_test.cpp
+)
+
+if (NOT ENABLE_UNIT_TESTS_FULL_COVERAGE)
+    list(APPEND MULTITHREADING_TESTS_SRC
+        tests/thread_test.cpp
+    )
+endif()
+
+add_gtests(
+    arkruntime_multithreading_test
+    ${MULTITHREADING_TESTS_SRC}
 )
 
 add_gtests(

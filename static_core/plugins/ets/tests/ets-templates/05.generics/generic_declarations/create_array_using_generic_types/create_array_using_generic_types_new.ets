@@ -21,15 +21,16 @@ desc: {{c.desc}}
 
 {{c.decl}}
 
+type MyArray<T> = Array<T>;
+type Direction = {{c.type}};
+
 function main(): void {
-  type MyArray<T> = Array<T>;
-  type Direction = {{c.type}};
   let tmpArray: MyArray<Direction> = new Array<Direction>{{c['init_values']}};
 
   {{c.expected}}
 
   {% for value in c['expected_values'] %}
-  assertEQ(tmpArray[{{loop.index0}}], {{value}});
+  arktest.assertEQ(tmpArray[{{loop.index0}}], {{value}});
   {% endfor %}
 }
 

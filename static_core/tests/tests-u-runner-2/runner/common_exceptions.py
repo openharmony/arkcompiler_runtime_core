@@ -17,9 +17,23 @@
 
 from pathlib import Path
 
+ExceptionName = str
+ExceptionMessage = str
+ExceptionInfo = tuple[ExceptionName, ExceptionMessage]
+
+
+def parse_exception_args(args: tuple) -> tuple[str, str]:
+    first = str(args[0])
+    colon_pos = first.find(":")
+    name = first[:colon_pos].strip()
+    error = first[colon_pos + 1:].strip()
+    return name, error
+
 
 class RunnerException(Exception):
-    pass
+    def __init__(self, message: str) -> None:
+        self.message = message
+        super().__init__(self.message)
 
 
 class DownloadException(RunnerException):
@@ -56,8 +70,8 @@ class StepUtilsException(RunnerException):
 
 class MalformedStepConfigurationException(RunnerException):
     def __init__(self, message: str) -> None:
-        self.full_message = f"Malformed configuration file: {message}"
-        super().__init__(self, self.full_message)
+        message = f"Malformed configuration file: {message}"
+        super().__init__(message)
 
 
 class IncorrectEnumValue(RunnerException):
@@ -67,13 +81,13 @@ class IncorrectEnumValue(RunnerException):
 class IncorrectFileFormatChapterException(RunnerException):
     def __init__(self, chapters_name: str | Path) -> None:
         message = f"Incorrect file format: {chapters_name}"
-        super().__init__(self, message)
+        super().__init__(message)
 
 
 class CyclicDependencyChapterException(RunnerException):
     def __init__(self, item: str) -> None:
         message = f"Cyclic dependency: {item}"
-        super().__init__(self, message)
+        super().__init__(message)
 
 
 class UnknownException(RunnerException):
@@ -94,3 +108,13 @@ class YamlException(RunnerException):
 
 class TimeoutException(RunnerException):
     pass
+
+
+class TestGenerationException(RunnerException):
+    def __init__(self, args: tuple) -> None:
+        if len(args) > 0:
+            name, error = parse_exception_args(args)
+            message = f"Error \"{error}\" during test \"{name}\" generation"
+        else:
+            message = ""
+        super().__init__(message)

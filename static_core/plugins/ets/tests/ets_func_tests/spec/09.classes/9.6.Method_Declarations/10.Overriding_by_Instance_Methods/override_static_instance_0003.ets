@@ -42,8 +42,8 @@ function main() {
     let x2 : X2 = new X2();
     let x3 : X3 = new X3();
 
-    assertEQ( X0.foo(), 0)
-    assertEQ( x1.foo(), 1)
-    assertEQ( X2.foo(), 2)
-    assertEQ( x3.foo(), 3)
+    arktest.assertEQ( X0.foo(), 0)
+    arktest.assertEQ( x1.foo(), 1)
+    arktest.assertEQ( X2.foo(), 2)
+    arktest.assertEQ( x3.foo(), 3)
 }

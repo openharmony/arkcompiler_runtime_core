@@ -18,9 +18,10 @@ desc: Test the array index using an enumeration type as an index.
 tags: [compile-only, positive]
 ---*/
 
+enum Color { Red, Green, Blue }
+
 function main(): void {
-  enum Color { Red, Green, Blue }
   let colorValues: Array <number> = new Array <number>(10, 20, 30);
   colorValues[Color.Green];
-  assertEQ(colorValues[Color.Green], 20);
+  arktest.assertEQ(colorValues[Color.Green], 20);
 }

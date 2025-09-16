@@ -16,10 +16,10 @@
 /*---
 desc: 03.8.10 Tuple Types
 name: simple3.ets
-tags: []
+tags: [compile-only, negative]
 ---*/
 
 function main(): void {
-    let t0 = [];
+    let t0 = []; //CTE: type cannot be infered
     let t1 = t0;
 }

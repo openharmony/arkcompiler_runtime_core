@@ -23,5 +23,5 @@ type TStrMayBeNull =  String | null | undefined
 function main() {
   let obj: TStrMayBeNull = "abracadabra";
   let testStr = new string(obj);
-  assertEQ( testStr, "abracadabra")
+  arktest.assertEQ( testStr, "abracadabra")
 }

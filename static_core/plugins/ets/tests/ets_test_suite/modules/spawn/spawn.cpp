@@ -38,19 +38,19 @@ std::vector<ani_string> SplitString(ani_env *env, std::string_view from, char de
 
 extern "C" {
 // NOLINTNEXTLINE(readability-identifier-naming)
-ANI_EXPORT ani_array getAppAbcFiles(ani_env *env, [[maybe_unused]] ani_class /* unused */)
+ANI_EXPORT ani_array getAppAbcFiles(ani_env *env, [[maybe_unused]] ani_class)
 {
     auto appAbcFiles = ark::os::system_environment::GetEnvironmentVar("APP_ABC_FILES");
     const auto paths = SplitString(env, appAbcFiles, ':');
     ASSERT(!paths.empty());
 
     ani_class stringClass;
-    env->FindClass("Lstd/core/String;", &stringClass);
+    env->FindClass("std.core.String", &stringClass);
     ASSERT(stringClass != nullptr);
-    ani_array_ref pathsArray;
-    env->Array_New_Ref(stringClass, paths.size(), paths[0], &pathsArray);
-    for (size_t i = 1; i < paths.size(); ++i) {
-        env->Array_Set_Ref(pathsArray, i, paths[i]);
+    ani_array pathsArray;
+    env->Array_New(paths.size(), paths[0], &pathsArray);
+    for (size_t i = 0; i < paths.size(); ++i) {
+        env->Array_Set(pathsArray, i, paths[i]);
     }
     return pathsArray;
 }
@@ -65,9 +65,9 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *version)
         return ANI_ERROR;
     }
 
-    ani_native_function function {"getAppAbcFiles", ":[Lstd/core/String;", reinterpret_cast<void *>(getAppAbcFiles)};
+    ani_native_function function {"getAppAbcFiles", ":C{escompat.Array}", reinterpret_cast<void *>(getAppAbcFiles)};
 
-    std::string_view mdl = "L@spawn/spawn;";
+    std::string_view mdl = "@spawn.spawn";
     ani_module spawnModule;
     if (ANI_OK != env->FindModule(mdl.data(), &spawnModule)) {
         std::cerr << "Not found '" << mdl << "'" << std::endl;

@@ -40,7 +40,7 @@ TEST_F(ReferenceIsNullishValueTest, check_undefined)
 
 TEST_F(ReferenceIsNullishValueTest, check_object)
 {
-    auto ref = CallEtsFunction<ani_ref>("reference_is_nullish_value_test", "GetObject");
+    auto ref = CallEtsFunction<ani_ref>("reference_is_nullish_value_test", "getObject");
     ani_boolean isUndefined = ANI_TRUE;
     ASSERT_EQ(env_->Reference_IsNullishValue(ref, &isUndefined), ANI_OK);
     ASSERT_EQ(isUndefined, ANI_FALSE);
@@ -75,11 +75,9 @@ TEST_F(ReferenceIsNullishValueTest, mix_test)
     ASSERT_EQ(env_->Reference_IsNullishValue(undefineRef, &isUndefined), ANI_OK);
     ASSERT_EQ(isUndefined, ANI_TRUE);
 
-    auto objectRef = CallEtsFunction<ani_ref>("reference_is_nullish_value_test", "GetObject");
+    auto objectRef = CallEtsFunction<ani_ref>("reference_is_nullish_value_test", "getObject");
     ASSERT_EQ(env_->Reference_IsNullishValue(objectRef, &isUndefined), ANI_OK);
     ASSERT_EQ(isUndefined, ANI_FALSE);
-
-    ani_ref nullRef = nullptr;
 
     ani_boolean isEquals = ANI_FALSE;
     ASSERT_EQ(env_->Reference_Equals(ref, undefineRef, &isEquals), ANI_OK);
@@ -91,6 +89,8 @@ TEST_F(ReferenceIsNullishValueTest, mix_test)
     ASSERT_EQ(env_->Reference_Equals(ref, objectRef, &isEquals), ANI_OK);
     ASSERT_EQ(isEquals, ANI_FALSE);
 
+    ani_ref nullRef {};
+    ASSERT_EQ(env_->GetNull(&nullRef), ANI_OK);
     ASSERT_EQ(env_->Reference_Equals(ref, nullRef, &isEquals), ANI_OK);
     ASSERT_EQ(isEquals, ANI_TRUE);
 }

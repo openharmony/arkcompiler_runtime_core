@@ -15,11 +15,8 @@
 
 import LightWeightMap from "@ohos.util.LightWeightMap";
 
-const success = 0;
-const fail = 1;
-
 function main(): int {
-    const suite = new ArkTestsuite("LightWeightMap Iterator GetIndexOfKey GetIndexOfValue API tests")
+    const suite = new arktest.ArkTestsuite("LightWeightMap Iterator GetIndexOfKey GetIndexOfValue API tests")
 
     suite.addTest("LightWeightMap $_iteraor return iterator",
         testIteratorReturnsIterator)
@@ -42,7 +39,7 @@ function main(): int {
 }
 
 function testIteratorReturnsIterator() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 357);
     lightWeightMap.set("test", 111);
@@ -56,56 +53,56 @@ function testIteratorReturnsIterator() {
         }
     }
     let strAll = "gull,357,test,111,apply,222,sparrow,123";
-    assertEQ(str, strAll, "The lightWeightMap $_iterator should return the correct key-value pairs");
+    arktest.assertEQ(str, strAll, "The lightWeightMap $_iterator should return the correct key-value pairs");
 }
 
 function testIteratorWithEmptyMap() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     let iteratorSetValues = lightWeightMap.$_iterator();
-    assertEQ(iteratorSetValues.next().value, undefined,
-        "The lightWeightMap $_iterator should return undefined for an empty map");
+    arktest.assertTrue(iteratorSetValues.next().done,
+        "The lightWeightMap iterator.done should true for an empty map");
 }
 
 function testGetIndexOfKeyAndValue() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 357);
     let result1 = lightWeightMap.getIndexOfKey("sparrow");
     let result2 = lightWeightMap.getIndexOfValue(357);
-    assertEQ(result1, 1, "The lightWeightMap should return the correct index for the key");
-    assertEQ(result2, 0, "The lightWeightMap should return the correct index for the value");
+    arktest.assertEQ(result1, 1, "The lightWeightMap should return the correct index for the key");
+    arktest.assertEQ(result2, 0, "The lightWeightMap should return the correct index for the value");
 }
 
 function testGetIndexOfKeyAndValueNonExisting() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 357);
     let result1 = lightWeightMap.getIndexOfKey("test");
     let result2 = lightWeightMap.getIndexOfValue(111);
-    assertEQ(result1, -1, "The lightWeightMap should return -1 for a key that is not set");
-    assertEQ(result2, -1, "The lightWeightMap should return -1 for a value that is not set");
+    arktest.assertEQ(result1, -1, "The lightWeightMap should return -1 for a key that is not set");
+    arktest.assertEQ(result2, -1, "The lightWeightMap should return -1 for a value that is not set");
 }
 
 function testGetIndexOfKeyAndValueEmptyMap() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     let result1 = lightWeightMap.getIndexOfKey("test");
     let result2 = lightWeightMap.getIndexOfValue(111);
-    assertEQ(result1, -1, "The lightWeightMap should return -1 for a key in an empty map");
-    assertEQ(result2, -1, "The lightWeightMap should return -1 for a value in an empty map");
+    arktest.assertEQ(result1, -1, "The lightWeightMap should return -1 for a key in an empty map");
+    arktest.assertEQ(result2, -1, "The lightWeightMap should return -1 for a value in an empty map");
 }
 
 function testGetIndexOfKeyAndValueRepeated() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 123);
     let result1 = lightWeightMap.getIndexOfKey("sparrow");
     let result2 = lightWeightMap.getIndexOfValue(123);
-    assertEQ(result1, 1, "The lightWeightMap should return the correct index for the key");
-    assertEQ(result2, 0, "The lightWeightMap should return the first index for the repeated value");
+    arktest.assertEQ(result1, 1, "The lightWeightMap should return the correct index for the key");
+    arktest.assertEQ(result2, 0, "The lightWeightMap should return the first index for the repeated value");
 }
 
 function testGetIndexOfKeyAndValueDifferentLength() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("a", 123);
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 357);
@@ -113,8 +110,8 @@ function testGetIndexOfKeyAndValueDifferentLength() {
     lightWeightMap.set("g", 4356);
     let result1 = lightWeightMap.getIndexOfKey("sparrow");
     let result2 = lightWeightMap.getIndexOfValue(35);
-    assertNE(result1, -1, "The lightWeightMap should return the correct index for the key");
-    assertNE(result2, -1, "The lightWeightMap should return the correct index for the value");
+    arktest.assertNE(result1, -1, "The lightWeightMap should return the correct index for the key");
+    arktest.assertNE(result2, -1, "The lightWeightMap should return the correct index for the value");
 }
 
 interface Complex {
@@ -139,6 +136,6 @@ function testGetIndexOfKeyAndValueComplex() {
     lightWeightMap.set(key, value);
     let result1 = lightWeightMap.getIndexOfKey(key);
     let result2 = lightWeightMap.getIndexOfValue(value);
-    assertNE(result1, -1, "The lightWeightMap should return the correct index for the key");
-    assertNE(result2, -1, "The lightWeightMap should return the correct index for the value");
+    arktest.assertNE(result1, -1, "The lightWeightMap should return the correct index for the key");
+    arktest.assertNE(result2, -1, "The lightWeightMap should return the correct index for the value");
 }

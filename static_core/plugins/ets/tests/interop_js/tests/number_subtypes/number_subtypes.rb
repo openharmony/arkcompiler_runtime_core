@@ -13,8 +13,8 @@
 # limitations under the License.
 
 class NumberTypeDescription
-    def initialize(name, min, max, sum)
-        @name, @min, @max, @sum = name, min, max, sum
+    def initialize(name, min, max, sum, suffix)
+        @name, @min, @max, @sum, @suffix = name, min, max, sum, suffix
     end
 
     def getName
@@ -32,20 +32,24 @@ class NumberTypeDescription
     def getSum
         @sum
     end
+
+    def getSuffix
+      @suffix
+    end
 end
 
 @integral_primitives = [
-    NumberTypeDescription.new("byte", -128, 127, -128 + 127),
-    NumberTypeDescription.new("short", -32768, 32767, -32768 + 32767),
-    NumberTypeDescription.new("int", -2147483648, 2147483647, -2147483648 + 2147483647),
+    NumberTypeDescription.new("byte", -128, 127, -128 + 127, ""),
+    NumberTypeDescription.new("short", -32768, 32767, -32768 + 32767, ""),
+    NumberTypeDescription.new("int", -2147483648, 2147483647, -2147483648 + 2147483647, ""),
     # double-long precision loss
     # NumberTypeDescription.new("long", -9223372036854775808, 9223372036854775, 0),
-    NumberTypeDescription.new("long", -9223372036854775, 9223372036854775, -9223372036854775 + 9223372036854775),
+    NumberTypeDescription.new("long", -9223372036854775, 9223372036854775, -9223372036854775 + 9223372036854775, ""),
     # char will map to string when pass to dynamic world
     # NumberTypeDescription.new("char", 0, 65535, 0 + 65535),
 ]
 
 @float_primitives = [
-    NumberTypeDescription.new("float", 0.111, 2.71, 0.111 + 2.71),
-    NumberTypeDescription.new("double", 0.01, 3.14, 0.01 + 3.14),
+    NumberTypeDescription.new("float", 0.111, 2.71, 0.111 + 2.71, "f"),
+    NumberTypeDescription.new("double", 0.01, 3.14, 0.01 + 3.14, ""),
 ]

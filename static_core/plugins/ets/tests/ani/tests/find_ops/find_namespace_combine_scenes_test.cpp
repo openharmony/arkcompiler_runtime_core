@@ -23,15 +23,15 @@ class FindNamespaceCombineScenesTest : public AniTest {};
 TEST_F(FindNamespaceCombineScenesTest, find_namespace_combine_scenes_001)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/find_namespace_combine_scenes_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.find_namespace_combine_scenes_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_namespace ns {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "LspaceB;", &ns), ANI_OK);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "spaceB", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_function fn {};
-    ASSERT_EQ(env_->Namespace_FindFunction(ns, "sum", "II:I", &fn), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(ns, "sum", "ii:i", &fn), ANI_OK);
     ASSERT_NE(fn, nullptr);
 
     ani_value args[2U];

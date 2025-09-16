@@ -15,11 +15,8 @@
 
 import LightWeightMap from "@ohos.util.LightWeightMap";
 
-const success = 0;
-const fail = 1;
-
 function main(): int {
-    const suite = new ArkTestsuite("LightWeightMap Constructor IsEmpty API tests")
+    const suite = new arktest.ArkTestsuite("LightWeightMap Constructor IsEmpty API tests")
 
     suite.addTest("LightWeightMap construct create default empty lightWeightMap",
         testConstructorCreatesEmptyLightWeightMap)
@@ -36,42 +33,42 @@ function main(): int {
 }
 
 function testConstructorCreatesEmptyLightWeightMap() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("squirrel", 123);
-    assertTrue(lightWeightMap instanceof LightWeightMap,
+    arktest.assertTrue(lightWeightMap instanceof LightWeightMap,
         "The lightWeightMap should be of the same type as the LightWeightMap");
-    assertEQ(lightWeightMap.length, 1, "The lightWeightMap length should be 1");
+    arktest.assertEQ(lightWeightMap.length, 1, "The lightWeightMap length should be 1");
 }
 
 function testIsEmptyTrue() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     let result = lightWeightMap.isEmpty();
-    assertEQ(result, true, "The lightWeightMap should be empty");
-    assertEQ(lightWeightMap.length, 0, "The lightWeightMap length should be 0");
+    arktest.assertEQ(result, true, "The lightWeightMap should be empty");
+    arktest.assertEQ(lightWeightMap.length, 0, "The lightWeightMap length should be 0");
 }
 
 function testIsEmptyFalse() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("squirrel", 123);
     let result = lightWeightMap.isEmpty();
-    assertEQ(result, false, "The lightWeightMap should not be empty");
-    assertEQ(lightWeightMap.length, 1, "The lightWeightMap length should be 1");
+    arktest.assertEQ(result, false, "The lightWeightMap should not be empty");
+    arktest.assertEQ(lightWeightMap.length, 1, "The lightWeightMap length should be 1");
 }
 
 function testIsEmptyTrueAfterRemove() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("squirrel", 123);
     lightWeightMap.remove("squirrel");
     let result = lightWeightMap.isEmpty();
-    assertEQ(result, true, "The lightWeightMap should be empty");
-    assertEQ(lightWeightMap.length, 0, "The lightWeightMap length should be 0");
+    arktest.assertEQ(result, true, "The lightWeightMap should be empty");
+    arktest.assertEQ(lightWeightMap.length, 0, "The lightWeightMap length should be 0");
 }
 
 function testIsEmptyTrueAfterClear() {
-    let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
+    let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     lightWeightMap.set("squirrel", 123);
     lightWeightMap.clear();
     let result = lightWeightMap.isEmpty();
-    assertEQ(result, true, "The lightWeightMap should be empty");
-    assertEQ(lightWeightMap.length, 0, "The lightWeightMap length should be 0");
+    arktest.assertEQ(result, true, "The lightWeightMap should be empty");
+    arktest.assertEQ(lightWeightMap.length, 0, "The lightWeightMap length should be 0");
 }

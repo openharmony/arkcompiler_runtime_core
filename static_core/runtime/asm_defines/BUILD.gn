@@ -22,7 +22,7 @@ config("asmdefines_public_config") {
   include_dirs = [ "$target_gen_dir/generated/" ]
 
   if (ark_standalone_build || ark_static_standalone_build) {
-    include_dirs += [ 
+    include_dirs += [
       "//third_party/icu/icu4c/source/common",
       "//third_party/icu/icu4c/source/i18n",
       "//third_party/icu/icu4c/source",

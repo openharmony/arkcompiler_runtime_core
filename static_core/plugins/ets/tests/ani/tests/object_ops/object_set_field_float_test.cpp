@@ -24,7 +24,7 @@ public:
         auto packRef = CallEtsFunction<ani_ref>("object_set_field_float_test", "newPackObject");
 
         ani_class cls {};
-        ASSERT_EQ(env_->FindClass("Lobject_set_field_float_test/Pack;", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("object_set_field_float_test.Pack", &cls), ANI_OK);
 
         ani_field fieldFloat {};
         ASSERT_EQ(env_->Class_FindField(cls, "float_value", &fieldFloat), ANI_OK);

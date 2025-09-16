@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include "include/cpp/abckit_cpp.h"
+#include "include/libabckit/cpp/abckit_cpp.h"
 #include "../check_mock.h"
-#include "include/cpp/headers/core/module.h"
+#include "include/libabckit/cpp/headers/core/module.h"
 #include "src/mock/mock_values.h"
 #include "../cpp_helpers_mock.h"
 #include <gtest/gtest.h>

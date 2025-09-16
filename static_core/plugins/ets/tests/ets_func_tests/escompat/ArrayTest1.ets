@@ -22,19 +22,21 @@ let testPhase       : int = withoutProxy;
 
 function runTestPhase(): int {
     let failures: int = 0;
-    failures += check((): int => { return createDefault() }, "Create default empty Array");
-    failures += check((): int => { return createWithGivenZeroSize() }, "Create Array with given zero size");
-    failures += check((): int => { return createWithGivenSize() }, "Create Array with given size");
-    failures += check((): int => { return createWithNegativeInitialCapacity() }, "Create Array with negative capacity");
-    failures += check((): int => { return isArrayRawArrayNumber() }, "isArrayRawArrayNumber");
-    failures += check((): int => { return isArrayArrayNumber() }, "isArrayArrayNumber");
-    failures += check((): int => { return isArrayNullUndefined() }, "isArrayNullUndefined");
-    failures += check((): int => { return push() }, "push");
-    failures += check((): int => { return pushECMA() }, "pushECMA");
-    failures += check((): int => { return setNull() }, "setNull");
-    failures += check((): int => { return setCustomClass() }, "setCustomClass");
-    failures += check((): int => { return toSplicedArg2() }, "toSplicedArg2");
-    failures += check((): int => { return toSplicedArg1() }, "toSplicedArg1");
+    failures += check((): int => { return createDefault() }, 'Create default empty Array');
+    failures += check((): int => { return createWithGivenZeroSize() }, 'Create Array with given zero size');
+    failures += check((): int => { return createWithGivenSize() }, 'Create Array with given size');
+    failures += check((): int => { return createWithNegativeInitialCapacity() }, 'Create Array with negative capacity');
+    failures += check((): int => { return isArrayRawArrayNumber() }, 'isArrayRawArrayNumber');
+    failures += check((): int => { return isArrayArrayNumber() }, 'isArrayArrayNumber');
+    failures += check((): int => { return isArrayNullUndefined() }, 'isArrayNullUndefined');
+    failures += check((): int => { return push() }, 'push');
+    failures += check((): int => { return pushECMA() }, 'pushECMA');
+    failures += check((): int => { return setNull() }, 'setNull');
+    failures += check((): int => { return setCustomClass() }, 'setCustomClass');
+    failures += check((): int => { return toSplicedArg2() }, 'toSplicedArg2');
+    failures += check((): int => { return toSplicedArg1() }, 'toSplicedArg1');
+    failures += check((): int => { return testForEachDuringDelete() }, 'test forEach doesn\'t call for deleted items');
+    failures += check((): int => { return testEmptyArrayForEach() }, 'test forEach for empty array');
     return failures;
 }
 
@@ -55,10 +57,10 @@ function main(): int {
 const d: Array<Number> = [10, -1, 237, -5, 148, 65, 3, 34, 0, 12];
 const dd: FixedArray<Number> = [1, 0, 3, 4, 0, 6];
 
-class Handler<T> extends DefaultArrayProxyHandler<T> {}
 function newProxy<T>(a: Array<T>): Array<T> {
+    class Handler<T> extends proxy.DefaultArrayProxyHandler<T> {}
 
-    return Proxy.create<T>(a, new Handler<T>())
+    return proxy.Proxy.create<T>(a, new Handler<T>())
 }
 
 function check<T>(newArrayFn: () => Array<T>, testFn: (a: Array<T>) => int): int {
@@ -78,7 +80,7 @@ function createDefault(): int {
         if (!(arr instanceof Array)) {
             throw new Error("arr is not instance of Array.");
         }
-        assertEQ(arr.length, 0);
+        arktest.assertEQ(arr.length, 0);
         return success;
     })
 }
@@ -90,14 +92,14 @@ function createWithNegativeInitialCapacity(): int {
         if (e instanceof NegativeArraySizeError) {
             return success;
         }
-        throw new Error(`Expects NegativeArraySizeError to be thrown, but actual exception: '${e}'`);
+        throw new Error(`Expects NegativeArraySizeError to be thrown, but actual error: '${e}'`);
     }
-    throw new Error("Expects NegativeArraySizeError to be thrown, but no exception in actual.");
+    throw new Error("Expects NegativeArraySizeError to be thrown, but no error in actual.");
 }
 
 function createWithGivenZeroSize(): int {
     return check(() => new Array<Number>(0), (arr: Array<Number>) => {
-        assertEQ(arr.length, 0);
+        arktest.assertEQ(arr.length, 0);
         return success;
     })
 }
@@ -105,27 +107,27 @@ function createWithGivenZeroSize(): int {
 function createWithGivenSize(): int {
     const ARRAY_SIZE = 10;
     return check(() => new Array<Number>(ARRAY_SIZE), (arr: Array<Number>) => {
-        assertEQ(arr.length, ARRAY_SIZE);
+        arktest.assertEQ(arr.length, ARRAY_SIZE);
         return success;
     })
 }
 
 function isArrayRawArrayNumber(): int {
     let n: FixedArray<Number> = [];
-    assertTrue(Array.isArray(n));
+    arktest.assertTrue(Array.isArray(n));
     return success;
 }
 
 function isArrayArrayNumber(): int {
     return check(() => new Array<Number>, (arr: Array<Number>) => {
-        assertTrue(Array.isArray(arr));
+        arktest.assertTrue(Array.isArray(arr));
         return success;
     })
 }
 
 function isArrayNullUndefined(): int {
-    assertFalse(Array.isArray(null));
-    assertFalse(Array.isArray(undefined));
+    arktest.assertFalse(Array.isArray(null));
+    arktest.assertFalse(Array.isArray(undefined));
     return success;
 }
 
@@ -133,9 +135,9 @@ function push(): int {
     return check(() => new Array<Number>, (arr: Array<Number>) => {
         for (let i: int = 0; i < d.length; ++i) {
             arr.push(d[i])
-            assertEQ(arr.at(i), d[i]);
+            arktest.assertEQ(arr.at(i), d[i]);
         }
-        assertEQ(arr.length, d.length);
+        arktest.assertEQ(arr.length, d.length);
         return success;
     })
 }
@@ -143,9 +145,9 @@ function push(): int {
 function pushECMA(): int {
     return check(() => new Array<Number>, (arr: Array<Number>) => {
         arr.pushECMA(...d);
-        assertEQ(arr.length, d.length);
+        arktest.assertEQ(arr.length, d.length);
         for (let i: int = 0; i < d.length; ++i) {
-            assertEQ(arr.at(i), d[i]);
+            arktest.assertEQ(arr.at(i), d[i]);
         }
         return success;
     })
@@ -155,7 +157,7 @@ function setNull(): int {
     return check(() => new Array<string | null>(3), (arr: Array<string | null>) => {
         arr[1] = "abc"
         arr[2] = null;
-        assertEQ(arr[2], null);
+        arktest.assertEQ(arr[2], null);
         return success;
     })
 }
@@ -169,17 +171,69 @@ function setCustomClass() : int {
     })
 }
 
+function testEmptyArrayForEach() : int {
+    arktest.expectNoThrow({
+        let a: int[] = []
+        a.forEach((i: int) => {
+            a.pop()
+        })
+    })
+    arktest.expectNoThrow({
+        let a = new Array<int>()
+        a.forEach((i: int) => {
+            a.pop()
+        })
+    })
+}
+
+function testForEachDuringDelete() : int {
+    {
+        let a = new Array<int>()
+        a.push(5)
+        a.push(6)
+
+        let res = ''
+        a.forEach((i: int) => {
+            res += i
+            a.splice(0)
+        })
+        arktest.assertEQ(res, '5')
+    }
+    {
+        let a = new Array<int>()
+        a.push(5)
+        a.push(6)
+
+        let res = ''
+        a.forEach((i: int) => {
+            res += i
+            a.pop()
+        })
+        arktest.assertEQ(res, '5')
+    }
+    {
+        let a = new Array<int>(5, 6, 7, 9, -1)
+
+        let res = ''
+        a.forEach((i: int) => {
+            res += i
+            a.splice(3)
+        })
+        arktest.assertEQ(res, '567')
+    }
+}
+
 function toSplicedArg1(): int {
     return check(() => new Array<Number>, (arr: Array<Number>) => {
         for (let i: int = 0; i < dd.length; ++i) {
             arr.push(dd[i]);
         }
         let newArr = arr.toSpliced(1);
-        assertEQ(newArr.at(0), 1);
-        assertEQ(newArr.length, 1);
-        assertEQ(arr.length, dd.length);
+        arktest.assertEQ(newArr.at(0), 1);
+        arktest.assertEQ(newArr.length, 1);
+        arktest.assertEQ(arr.length, dd.length);
         for (let i = 0; i < dd.length; i++) {
-            assertEQ(arr[i], dd[i]);
+            arktest.assertEQ(arr[i], dd[i]);
         }
         return success;
     })
@@ -191,14 +245,14 @@ function toSplicedArg2(): int {
             arr.push(dd[i]);
         }
         let newArr = arr.toSpliced(1, 2);
-        assertEQ(newArr.length, 4);
-        assertEQ(newArr[0], 1);
-        assertEQ(newArr[1], 4);
-        assertEQ(newArr[2], 0);
-        assertEQ(newArr[3], 6);
-        assertEQ(arr.length, dd.length);
+        arktest.assertEQ(newArr.length, 4);
+        arktest.assertEQ(newArr[0], 1);
+        arktest.assertEQ(newArr[1], 4);
+        arktest.assertEQ(newArr[2], 0);
+        arktest.assertEQ(newArr[3], 6);
+        arktest.assertEQ(arr.length, dd.length);
         for (let i = 0; i < dd.length; i++) {
-            assertEQ(arr[i], dd[i]);
+            arktest.assertEQ(arr[i], dd[i]);
         }
         return success;
     })
@@ -209,7 +263,7 @@ function check(fn: () => int, message: String): int {
     // try {
         result = fn();
     // } catch(e) {
-    //     console.println("FAILED: " + message + " => Exception catched: " + e);
+    //     console.println("FAILED: " + message + " => Error catched: " + e);
     //     return fail;
     // }
     if (result == success) {

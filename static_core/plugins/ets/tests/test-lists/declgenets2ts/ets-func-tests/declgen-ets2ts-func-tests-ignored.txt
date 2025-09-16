@@ -5,8 +5,6 @@ regression/26215_1.ets
 regression/25423/25423.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/02.export_type_directives/export_type_directive_01.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/re_export_directive_04.ets
-#FailKind.ABORT_FAIL - 5 tests:
-spec/03.types/References_Types/Tuples_type/tuple_write_3.ets
 #FailKind.ABORT_FAIL - 6 tests:
 spec/10.Interfaces/Interface_Methods_Declarations/method_overload6.ets
 spec/10.Interfaces/method_overload6.ets
@@ -90,6 +88,7 @@ std/containers/array_blocking_queue/ArrayBlockingQueue_PollTest.ets
 std/containers/array_blocking_queue/ArrayBlockingQueue_PopTest.ets
 std/containers/array_blocking_queue/ArrayBlockingQueue_PushTest.ets
 std/containers/blocking_queue.ets
+std/containers/BlockingQueue/AddAndPollStress.ets
 std/containers/concurrent_hash_map/ConcurrentHashMap_ClearTest.ets
 std/containers/concurrent_hash_map/ConcurrentHashMap_DeleteTest.ets
 std/containers/concurrent_hash_map/ConcurrentHashMap_EntriesTest.ets
@@ -132,6 +131,20 @@ std/containers/linked_blocking_queue/LinkedBlockingQueue_PollTest_Stress.ets
 std/containers/linked_blocking_queue/LinkedBlockingQueue_PopTest.ets
 std/containers/linked_blocking_queue/LinkedBlockingQueue_PopTest_Stress.ets
 std/containers/linked_blocking_queue/LinkedBlockingQueue_PushTest_Stress.ets
+#28370
+std/core/ArrayTypeAllTests.ets
+std/core/ClassTypeAllTests.ets
+std/core/FunctionTypeAllTests.ets
+std/core/InterfaceTypeAllTests.ets
+std/core/NullTypeAllTests.ets
+std/core/NumericTypeAllTests.ets
+std/core/StringTypeAllTests.ets
+std/core/TypeAssignableTests.ets
+std/core/TypeEqualsTests.ets
+std/core/TypeOfTests.ets
+std/core/TypeToStringTests.ets
+std/core/UndefinedTypeAllTests.ets
+std/core/VoidTypeAllTests.ets
 std/core/IntlListFormatTest.ets
 std/core/IntlNumberFormatToParts.ets
 std/core/IntlPluralRulesTest.ets
@@ -190,3 +203,6 @@ escompat/ArrayTest3.ets
 escompat/ArrayTest4.ets
 escompat/ArrayTest5.ets
 escompat/ArrayTest6.ets
+spec/16.Support_for_GUI_Programming/struct-type/anno/test-builder-func_0.ets
+spec/16.Support_for_GUI_Programming/struct-type/anno/test-struct-builder-param.ets
+spec/16.Support_for_GUI_Programming/struct-type/builder/test-struct-call-function-in-build_2.ets

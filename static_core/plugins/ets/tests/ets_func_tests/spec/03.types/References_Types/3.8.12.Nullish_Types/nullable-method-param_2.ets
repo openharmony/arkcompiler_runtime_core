@@ -21,7 +21,7 @@ name: nullable-method-param_2.ets
 
 class TestC {
     test<NullableInt = int | null>(param: NullableInt): void {
-        assertTrue( param === null)
+        arktest.assertTrue( param === null)
     }
 }
 

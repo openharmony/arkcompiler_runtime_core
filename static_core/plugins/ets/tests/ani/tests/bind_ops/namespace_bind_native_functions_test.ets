@@ -13,7 +13,13 @@
  * limitations under the License.
  */
 
+
+
 namespace ops {
+// Note: cannot define native foo in new overload until FE #ICIITH solved
+// export native function foo1(a: int, b: int): int;
+// export native function foo2(a: int, b: int, c: int): int;
+// export overload foo {foo1, foo2}
 export native function sum(a: int, b: int): int;
 export native function sum(a: int, b: int, c: int): int;
 export native function concat(s0: String, s1: String): String;

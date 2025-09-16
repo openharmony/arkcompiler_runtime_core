@@ -20,7 +20,7 @@
 //! METHOD      "ets_string_builder_hoist.ETSGLOBAL::will_hoist1"
 //! PASS_AFTER  "SimplifyStringBuilder"
 //! IN_BLOCK    "prehead"
-//! INST        /LoadAndInitClass 'std\.core\.StringBuilder'/
+//! INST        /Load.*std\.core\.StringBuilder/
 //! INST_NEXT   /NewObject/
 //! INST_NEXT   /CallStatic \d+ std\.core\.StringBuilder::<ctor>/
 //! INST_NEXT   /Intrinsic\.StdCoreSbAppendString/
@@ -32,7 +32,7 @@
 //! METHOD      "ets_string_builder_hoist.ETSGLOBAL::will_hoist1"
 //! PASS_AFTER  "SimplifyStringBuilder"
 //! IN_BLOCK    "prehead"
-//! INST        /LoadAndInitClass 'std\.core\.StringBuilder'/
+//! INST        /LoadImmediate/
 //! INST_NEXT   /NewObject/
 //! INST_NEXT   /CallStatic \d+ std\.core\.StringBuilder::<ctor>/
 //! INST_NEXT   /Intrinsic\.StdCoreSbAppendString/
@@ -93,7 +93,7 @@ function will_not_hoist2() {
 }
 
 function main() {
-    assertEQ(will_hoist1(), "test:0123456789")
-    assertEQ(will_not_hoist1(), "test:123456789")
-    assertEQ(will_not_hoist2(), "test:012345678")
+    arktest.assertEQ(will_hoist1(), "test:0123456789")
+    arktest.assertEQ(will_not_hoist1(), "test:123456789")
+    arktest.assertEQ(will_not_hoist2(), "test:012345678")
 }

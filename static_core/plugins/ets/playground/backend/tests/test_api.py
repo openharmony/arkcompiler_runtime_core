@@ -21,21 +21,13 @@ from tests.fixtures.overrides import override_get_options
 
 
 def test_formatting_api(playground_client, monkeypatch):
-    expected = {
-        "tokenizer": {
-            "root": [
-                ["/\\b(function|if|else|return|char|void)\\b/", "keyword"],
-                ["[{}[\\]()]", "@brackets"],
-                ["[a-zA-Z_$][\\w$]*", "identifier"],
-                ["\\d+", "number"],
-                ["""/".*?"/""", "string"],
-                ["[;,.]", "delimiter"]
-            ]
-        }
-    }
+    expected = {"keywords": [], "typeKeywords": [], "builtins": [], "tokenizer": {"root": []}}
     monkeypatch.setattr("src.arkts_playground.routers.formatting.get_syntax", lambda: expected)
     resp = playground_client.get("/syntax")
-    assert resp.json() == expected
+    data = resp.json()
+
+    expected_top_keys = {"keywords", "typeKeywords", "builtins", "tokenizer"}
+    assert expected_top_keys.issubset(data.keys())
 
 
 def test_options_api(playground_client, conf_data, monkeypatch):

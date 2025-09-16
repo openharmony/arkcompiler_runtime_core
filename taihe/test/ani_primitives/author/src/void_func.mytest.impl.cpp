@@ -17,7 +17,7 @@
 #include "stdexcept"
 #include "taihe/optional.hpp"
 #include "taihe/string.hpp"
-#include "void_func.mytest.BarTest.proj.0.hpp"
+#include "void_func.mytest.BarTest.proj.1.hpp"
 // Please delete <stdexcept> include when you implement
 using namespace taihe;
 

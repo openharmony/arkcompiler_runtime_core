@@ -39,7 +39,7 @@ function main () : int {
     }
 
     for (let i = 0; i < 6; i++) {
-        assertEQ( array[i](new C(i), new C(i)), i*2)
+        arktest.assertEQ( array[i](new C(i), new C(i)), i*2)
     }
 
     return 0;

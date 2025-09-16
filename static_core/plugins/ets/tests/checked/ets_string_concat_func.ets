@@ -198,13 +198,13 @@ function concat8(...args: string[]): string {
 }
 
 function main() {
-    assertEQ(concat0("abcde"), "abcde", "Wrong result at concat0")
-    assertEQ(concat1("abcd", "e"), "abcde", "Wrong result at concat1")
-    assertEQ(concat2("abc", "d", "e"), "abcde", "Wrong result at concat2")
-    assertEQ(concat3("ab", "c", "d", "e"), "abcde", "Wrong result at concat3")
-    assertEQ(concat4("a", "b", "c", "d", "e"), "abcde", "Wrong result at concat4")
-    assertEQ(concat5("", "a", "b", "c", "d", "e"), "abcde", "Wrong result at concat5")
-    assertEQ(concat6(), "abcde", "Wrong result at concat6")
-    assertEQ(concat7(), "abcde", "Wrong result at concat7")
-    assertEQ(concat8("ab", "c", "d", "e"), "abcde", "Wrong result at concat8")
+    arktest.assertEQ(concat0("abcde"), "abcde", "Wrong result at concat0")
+    arktest.assertEQ(concat1("abcd", "e"), "abcde", "Wrong result at concat1")
+    arktest.assertEQ(concat2("abc", "d", "e"), "abcde", "Wrong result at concat2")
+    arktest.assertEQ(concat3("ab", "c", "d", "e"), "abcde", "Wrong result at concat3")
+    arktest.assertEQ(concat4("a", "b", "c", "d", "e"), "abcde", "Wrong result at concat4")
+    arktest.assertEQ(concat5("", "a", "b", "c", "d", "e"), "abcde", "Wrong result at concat5")
+    arktest.assertEQ(concat6(), "abcde", "Wrong result at concat6")
+    arktest.assertEQ(concat7(), "abcde", "Wrong result at concat7")
+    arktest.assertEQ(concat8("ab", "c", "d", "e"), "abcde", "Wrong result at concat8")
 }

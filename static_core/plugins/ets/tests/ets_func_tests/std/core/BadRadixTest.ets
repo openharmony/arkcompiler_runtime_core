@@ -57,10 +57,12 @@ function checkBadRadix(val: Double, radix: int):int {
     let sv: String = "";
     try {
         sv = val.toString(radix);
-    } catch(aoe: ArgumentOutOfRangeException) {
-        return 0;
-    } catch(ue: Exception) {
-        console.println("Unknown exeption catched" + ue)
+    } catch(e) {
+        if (e instanceof ArgumentOutOfRangeError) {
+            return 0;
+        } else {
+            console.println("Unknown exeption catched " + e)
+        }
     }
 
     console.print("String: ");

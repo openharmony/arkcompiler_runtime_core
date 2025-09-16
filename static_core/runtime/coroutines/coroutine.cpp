@@ -19,6 +19,8 @@
 #include "runtime/coroutines/coroutine_events.h"
 #include "runtime/include/panda_vm.h"
 
+#include "runtime/trace.h"
+
 namespace ark {
 #ifdef ARK_HYBRID
 extern "C" void VisitCoroutine(void *coroutine, CommonRootVisitor visitor)
@@ -128,6 +130,7 @@ void Coroutine::OnStatusChanged(Status oldStatus, Status newStatus)
     bool hasWorker = (GetWorker() != nullptr);
     bool wasActive = hasWorker && (oldStatus == Coroutine::Status::RUNNABLE || oldStatus == Coroutine::Status::RUNNING);
     bool isActive = hasWorker && (newStatus == Coroutine::Status::RUNNABLE || newStatus == Coroutine::Status::RUNNING);
+    IssueTracingEvents(oldStatus, newStatus);
     if (UNLIKELY(wasActive != isActive)) {
         if (wasActive && !isActive) {
             GetManager()->OnCoroBecameNonActive(this);
@@ -137,12 +140,29 @@ void Coroutine::OnStatusChanged(Status oldStatus, Status newStatus)
     }
 }
 
+void Coroutine::OnContextSwitchedTo() {}
+
+void Coroutine::IssueTracingEvents(Status oldStatus, Status newStatus)
+{
+    bool isMutator = this->GetType() == Coroutine::Type::MUTATOR;
+    if (isMutator && newStatus == Coroutine::Status::RUNNING && oldStatus != Coroutine::Status::RUNNING) {
+        Tracer::StartAsync(Tracer::COROUTINE_EXECUTION, this->GetCoroutineId(), this->GetName().c_str());
+    }
+    if (isMutator && newStatus != Coroutine::Status::RUNNING && oldStatus == Coroutine::Status::RUNNING) {
+        Tracer::FinishAsync(Tracer::COROUTINE_EXECUTION, this->GetCoroutineId());
+    }
+}
+
 void Coroutine::LinkToExternalHolder([[maybe_unused]] bool useSharedHolder)
 {
 #ifdef ARK_HYBRID
     auto wasCreated = CreateExternalHolderIfNeeded(useSharedHolder);
     if (wasCreated) {
+        auto wasInRunning = GetThreadHolder()->TransferToNativeIfInRunning();
         GetThreadHolder()->RegisterCoroutine(this);
+        if (wasInRunning) {
+            GetThreadHolder()->TransferToRunningIfInNative();
+        }
     }
 #endif
 }
@@ -241,6 +261,24 @@ std::ostream &operator<<(std::ostream &os, Coroutine::Status status)
             break;
         case Coroutine::Status::AWAIT_LOOP:
             os << "AWAIT_LOOP";
+            break;
+        default:
+            break;
+    }
+    return os;
+}
+
+std::ostream &operator<<(std::ostream &os, Coroutine::Type type)
+{
+    switch (type) {
+        case Coroutine::Type::FINALIZER:
+            os << "FINALIZER";
+            break;
+        case Coroutine::Type::MUTATOR:
+            os << "MUTATOR";
+            break;
+        case Coroutine::Type::SCHEDULER:
+            os << "SCHEDULER";
             break;
         default:
             break;

@@ -24,7 +24,7 @@ public:
         auto boxRef = CallEtsFunction<ani_ref>("object_set_field_ref_test", "newBoxObject");
 
         ani_class cls {};
-        ASSERT_EQ(env_->FindClass("Lobject_set_field_ref_test/Boxx;", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("object_set_field_ref_test.Boxx", &cls), ANI_OK);
 
         ani_field fieldInt {};
         ASSERT_EQ(env_->Class_FindField(cls, "int_value", &fieldInt), ANI_OK);
@@ -87,7 +87,7 @@ TEST_F(ObjectSetFieldRefTest, set_field_ref2)
     auto boxc = static_cast<ani_object>(CallEtsFunction<ani_ref>("object_set_field_ref_test", "newBoxcObject"));
 
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_set_field_ref_test/Boxc;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_set_field_ref_test.Boxc", &cls), ANI_OK);
 
     ani_field fieldInt {};
     ASSERT_EQ(env_->Class_FindField(cls, "int_value", &fieldInt), ANI_OK);

@@ -15,7 +15,7 @@
 
 #include "runtime/regexp/ecmascript/regexp_parser.h"
 #include "runtime/regexp/ecmascript/regexp_opcode.h"
-#include "runtime/include/coretypes/string-inl.h"
+#include "runtime/include/coretypes/line_string.h"
 
 #include "libpandabase/utils/utils.h"
 #include "libpandabase/utils/utf.h"

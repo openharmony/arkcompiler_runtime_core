@@ -15,7 +15,9 @@
 
 import { BusinessError } from "@ohos.base";
 
-const TypeErrorCodeId: number = 401;
+const typeErrorCodeId: int = 401;
+
+export type HashMapCbFn<K, V> = (value: V, key: K, map: HashMap<K, V>) => void;
 
 interface ReadonlyHashMap<K, V> extends Iterable<[K, V]> {
     /**
@@ -23,7 +25,7 @@ interface ReadonlyHashMap<K, V> extends Iterable<[K, V]> {
      *
      * @returns number of Entries with unique keys in the HashMap
      */
-    get length(): number;
+    get length(): int;
 
     /**
      * Returns a value associated with key if present
@@ -70,13 +72,17 @@ export default class HashMap<K, V> implements ReadonlyHashMap<K, V> {
         this.buckets = new Map<K, V>();
     }
 
+    public toString(): string {
+        return '[object HashMap]';
+    }
+
     /**
      * Returns number of Entries with unique keys in the HashMap
      *
      * @returns number of Entries with unique keys in the HashMap
      */
-    get length(): number {
-        return this.buckets.size;
+    get length(): int {
+        return this.buckets.size.toInt();
     }
 
     /**
@@ -98,7 +104,7 @@ export default class HashMap<K, V> implements ReadonlyHashMap<K, V> {
      *
      * @param callbackFn to apply
      */
-    forEach(callbackFn: (value: V, key: K, map: HashMap<K, V>) => void): void {
+    forEach(callbackFn: HashMapCbFn<K, V>): void {
         this.buckets.forEach((value: V, key: K) => {
             callbackFn(value, key, this);
         });
@@ -150,7 +156,7 @@ export default class HashMap<K, V> implements ReadonlyHashMap<K, V> {
      */
     set(key: K, value: V): Object {
         if (key === undefined) {
-            throw new BusinessError(TypeErrorCodeId, new Error('BusinessError',
+            throw new BusinessError(typeErrorCodeId, new Error('BusinessError',
                 `The type of \"key\" must be Key of JS. Received value is: ${key}`, undefined))
         }
         this.buckets.set(key, value);

@@ -28,4 +28,15 @@ void AsyncWorkNativeInvoke(int64_t nativeCbPtr, int64_t dataPtr, uint8_t needNat
     nativeCb(reinterpret_cast<void *>(dataPtr));
 }
 
+void EventNativeInvoke(int64_t nativeCbPtr, int64_t dataPtr, uint8_t needNativeScope)
+{
+    auto *nativeCb = reinterpret_cast<void (*)(void *)>(nativeCbPtr);
+    if (static_cast<bool>(needNativeScope)) {
+        ScopedNativeCodeThread sn(ManagedThread::GetCurrent());
+        nativeCb(reinterpret_cast<void *>(dataPtr));
+        return;
+    }
+    nativeCb(reinterpret_cast<void *>(dataPtr));
+}
+
 }  // namespace ark::ets::intrinsics

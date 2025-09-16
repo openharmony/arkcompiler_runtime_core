@@ -51,7 +51,7 @@ export final class WeakMap<K extends Object, V> {
 
         if (entries != null) {
             for (const entry of entries) {
-                this.set(entry[WeakMap.KEY], entry[WeakMap.VAL])
+                this.set(entry[0] as K, entry[1] as V)
             }
         }
     }
@@ -185,7 +185,7 @@ export final class WeakMap<K extends Object, V> {
         if (keyRefs.length == 1) {
             keyRefs.pop()
         } else {
-            const keyRefPos = keyRefs.indexOf(keyRef)
+            const keyRefPos = keyRefs.indexOf(keyRef).toInt()
             if (keyRefPos == -1) {
                 return
             }

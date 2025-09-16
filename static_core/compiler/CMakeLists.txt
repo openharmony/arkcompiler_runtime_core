@@ -25,6 +25,7 @@ include(cmake/target.cmake)
 include_directories(
     .
     ${PANDA_ROOT}
+    ${PANDA_ROOT}/../common_interfaces
 )
 
 include_directories(AFTER ${PANDA_BINARY_ROOT}/cross_values)
@@ -371,6 +372,7 @@ set(PANDA_COMPILER_TESTS_SOURCES
     tests/linear_order_test.cpp
     tests/profiling_merger_test.cpp
     tests/profiling_runner_test.cpp
+    tests/lower_boxed_boolean.cpp
 )
 set_source_files_properties(tests/loop_unroll_test.cpp PROPERTIES COMPILE_FLAGS "-Wno-shadow -Wno-deprecated-declarations")
 

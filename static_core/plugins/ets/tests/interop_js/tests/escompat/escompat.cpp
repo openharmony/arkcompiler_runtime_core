@@ -33,10 +33,7 @@ TEST_F(ESCompatTest, DISABLED_compat_array_length)
     ASSERT_EQ(true, RunJsTestSuite("array_js_suites/test_length.js"));
 }
 
-TEST_F(ESCompatTest, compat_array_pop)
-{
-    ASSERT_EQ(true, RunJsTestSuite("array_js_suites/test_pop.js"));
-}
+// #26303 TEST_F(ESCompatTest, compat_array_pop) array_js_suites/test_pop.js
 
 // #22991
 TEST_F(ESCompatTest, DISABLED_compat_array_fill)

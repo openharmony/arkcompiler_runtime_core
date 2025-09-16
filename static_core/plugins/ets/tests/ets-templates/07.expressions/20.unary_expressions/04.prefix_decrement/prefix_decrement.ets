@@ -19,10 +19,10 @@ desc: Prefix decrement operator.
 
 function main(): void {
   let a = 5;
-  assertEQ(--a, 4);
-  assertEQ(a, 4);
+  arktest.assertEQ(--a, 4);
+  arktest.assertEQ(a, 4);
   a -= --a
-  assertEQ(a, 1);
+  arktest.assertEQ(a, 1);
   let c = 1.0
-  assertEQ(--c, 0.0)
+  arktest.assertEQ(--c, 0.0)
 }

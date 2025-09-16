@@ -15,7 +15,7 @@
 
 namespace anyns {
     export let longValue: long = 3;
-    export let floatValue: float = 3.14;
+    export let floatValue: float = 3.14f;
     export let sum: long;
     class A {
         static val1: long = 1;

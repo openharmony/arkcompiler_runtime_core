@@ -14,14 +14,14 @@
  */
 
 class ArrayClass {
-    public static array: boolean[] = [true, true, true, true, true];
+    public static array: boolean[] = [true, true, true, true, true]
 
-    public static ChangeStaticArray() {
-        ArrayClass.array[2] = false;
-        ArrayClass.array[4] = false;
+    public static changeStaticArray() {
+        ArrayClass.array[2] = false
+        ArrayClass.array[4] = false
     }
 
-    public static CheckStaticArray(): boolean {
+    public static checkStaticArray(): boolean {
         return (
             ArrayClass.array[0] == true &&
             ArrayClass.array[1] == true &&
@@ -32,13 +32,13 @@ class ArrayClass {
     }
 }
 
-function GetArray(): boolean[] {
-    let a : boolean[] = [true, true, true, true, true]
+function getArray(): boolean[] {
+    let a: boolean[] = [true, true, true, true, true]
     return a
 }
 
-function GetEscompatArray(): Array<boolean> {
-    let a : Array<boolean> = new Array<boolean>(5)
+function getEscompatArray(): Array<boolean> {
+    let a: Array<boolean> = new Array<boolean>(5)
     a[0] = true
     a[1] = true
     a[2] = true
@@ -47,11 +47,11 @@ function GetEscompatArray(): Array<boolean> {
     return a
 }
 
-function CheckArray(a: boolean[]): boolean {
+function checkArray(a: boolean[]): boolean {
     return a[0] == true && a[1] == true && a[2] == true && a[3] == false && a[4] == true
 }
 
-function CheckEscompatArray(a: Array<boolean>): boolean {
+function checkEscompatArray(a: Array<boolean>): boolean {
     return a[0] == true &&
            a[1] == true &&
            a[2] == true &&

@@ -46,5 +46,5 @@ class Interface2Impl<T> implements Interface2<T> {
 
 function main(): void {
     let a = new Interface1Impl();
-    assertEQ( a.method1(), true)
+    arktest.assertEQ( a.method1(), true)
 }

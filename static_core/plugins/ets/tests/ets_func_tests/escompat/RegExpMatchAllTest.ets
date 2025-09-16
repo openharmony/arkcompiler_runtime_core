@@ -31,14 +31,14 @@ function main(): int {
     let regexp = new RegExp(".", "g")
     let s = "abc"
     regexp.exec(s)
-    failure += checkTestResult(regexp.lastIndex as int, 1)
+    failure += checkTestResult(regexp.lastIndex.toInt(), 1)
     let iter = s.matchAll(regexp)
     regexp.exec(s)
-    failure += checkTestResult(regexp.lastIndex as int, 2)
+    failure += checkTestResult(regexp.lastIndex.toInt(), 2)
     let next_result = iter.next()
     failure += checkTestResult(next_result.value!, new RegExpMatchArray(1, "abc", ["b"]))
     failure += checkTestResult(next_result.done, false)
-    failure += checkTestResult(regexp.lastIndex as int, 2)
+    failure += checkTestResult(regexp.lastIndex.toInt(), 2)
 
     let regexplastIndextest = new RegExp("(?:ab|cd)\\d?","g");
     regexplastIndextest.lastIndex = -1;
@@ -71,7 +71,7 @@ function checkTestResult(actual: int, expected: int) : int {
 
 
 
-function checkTestResult(actual : RegExpExecArray | null, expected : RegExpExecArray | null) : int {
+function checkTestResult(actual : RegExpMatchArray | null, expected : RegExpMatchArray | null) : int {
     if (actual == null && expected == null) {
         return 0;
     }
@@ -111,7 +111,7 @@ function checkTestResult(actual : RegExpExecArray | null, expected : RegExpExecA
     }
 
     for (let i = 0; i < actual.length; i++ ) {
-        if (!actual[i].equals(expected[i])) {
+        if (!actual[i]!.equals(expected[i])) {
             console.println ("check index : " + i);
             console.println("content of result array from actual is not equals to expected");
             console.println("actual  : " + actual[i]);
@@ -121,8 +121,8 @@ function checkTestResult(actual : RegExpExecArray | null, expected : RegExpExecA
     }
 
     for (let i = 0; i < actual.indices.length; i++) {
-        let actInd = (Value.of(actual.indices) as ArrayValue).getElement(i).getData() as FixedArray<number>
-        let expInd = (Value.of(expected.indices) as ArrayValue).getElement(i).getData() as FixedArray<number>
+        let actInd = actual.indices[i]
+        let expInd = expected.indices[i]
         for (let j = 0; j < actInd.length; j++) {
             if (actInd[j] != expInd[j]) {
             console.println("check index: " + i);

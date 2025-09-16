@@ -22,6 +22,6 @@ params: {{ni.x}} * {{ni.y}} == {{ni.result}}
 
 function main(): void {
   let res = {{ni.x}} * {{ni.y}};
-  assertEQ( res, {{ni.result}} )
+  arktest.assertEQ( res, {{ni.result}} )
 }
 {% endfor %}

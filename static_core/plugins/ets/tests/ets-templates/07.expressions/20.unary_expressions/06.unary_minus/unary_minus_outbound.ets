@@ -24,7 +24,7 @@ tags: [negative, compile-only]
 function main(): void {
   let a: {{onb.type}} = {{onb.origin}};
   let b: {{onb.type}} = -a
-  assertEQ(b, -a);
+  arktest.assertEQ(b, -a);
 }
 
 {% endfor %}

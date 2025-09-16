@@ -3,6 +3,7 @@
 	"arkplatform": "*",
 	"assembler": "*",
 	"bytecode_optimizer": "*",
+	"common_interfaces": "*",
 	"cmake": "*",
 	"compiler": "*",
 	"disassembler": "*",

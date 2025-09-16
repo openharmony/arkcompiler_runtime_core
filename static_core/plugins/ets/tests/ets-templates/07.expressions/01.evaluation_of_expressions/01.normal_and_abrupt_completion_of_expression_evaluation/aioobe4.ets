@@ -25,7 +25,7 @@ function main(): int {
   let b = 1;
 
   try {
-    let i: int = (a = 2) + v[0].length as int + (v[0][0] = new byte[10]).length as int + (b = 2);
+    let i: int = (a = 2) + v[0].length.toInt() + (v[0][0] = new byte[10]).length.toInt() + (b = 2);
     if (a != 2 || b != 2) return 1;
     return 0;
   } catch (e: RangeError) {

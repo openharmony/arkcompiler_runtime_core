@@ -18,7 +18,7 @@ package std.core;
 /**
  * Represents boxed short value and related operations
  */
-export final class Short extends Integral implements Comparable<Short>, JSONable<Short> {
+export final class Short extends Integral implements Comparable<Short> {
     private value: short;
 
     /**
@@ -90,10 +90,32 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
     /**
      * Returns value of this instance
      *
+     * Supportive interface
+     *
+     * @returns value as byte
+     */
+    public override byteValue(): byte {
+        return this.toByte();
+    }
+
+    /**
+     * Returns value of this instance
+     *
      * @returns value as short
      */
     public override toShort(): short {
         return this.value;
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * Supportive interface
+     *
+     * @returns value as short
+     */
+    public override shortValue(): short {
+        return this.toShort();
     }
 
     /**
@@ -108,6 +130,17 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
     /**
      * Returns value of this instance
      *
+     * Supportive interface
+     *
+     * @returns value as int
+     */
+    public override intValue(): int {
+        return this.toInt();
+    }
+
+    /**
+     * Returns value of this instance
+     *
      * @returns value as long
      */
     public override toLong(): long {
@@ -117,10 +150,32 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
     /**
      * Returns value of this instance
      *
+     * Supportive interface
+     *
+     * @returns value as long
+     */
+    public override longValue(): long {
+        return this.toLong();
+    }
+
+    /**
+     * Returns value of this instance
+     *
      * @returns value as float
      */
     public override toFloat(): float {
-        return Short.toFloat(this.value);
+        return this.value.toFloat();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * Supportive interface
+     *
+     * @returns value as float
+     */
+    public override floatValue(): float {
+        return this.toFloat();
     }
 
     /**
@@ -130,6 +185,17 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
      */
     public override toDouble(): double {
         return Short.toDouble(this.value);
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * Supportive interface
+     *
+     * @returns value as double
+     */
+    public override doubleValue(): double {
+        return this.toDouble();
     }
 
     /**
@@ -239,15 +305,6 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
     }
 
     /**
-     * Returns a hash code (shorteger representation) for this instance
-     *
-     * @returns representation of this instance
-     */
-    public override $_hashCode(): int {
-        return this.toInt();
-    }
-
-    /**
     * Checks for equality this instance with provided object, treated as a Short
     *
     * @param other object to be checked against
@@ -353,24 +410,5 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
      */
     public isGreaterEqualThan(other: Short): boolean {
         return this.value >= other.toShort();
-    }
-
-    /**
-     * Creates a Short instance based on JSONValue
-     *
-     * @param json: JSONValue - a JSON representation
-     *
-     * @throws JSONTypeError if json does not encode a valid short
-     *
-     * @returns Short - short value decoded from JSON
-     */
-    public createFromJSONValue(json: JSONValue): Short {
-        if (json instanceof JSONNumber) {
-            let num = (json as JSONNumber).value
-            if (Double.isInteger(num) && Short.MIN_VALUE <= num && num <= Short.MAX_VALUE) {
-                return Short.valueOf(num.toShort())
-            }
-        }
-        throw new JSONTypeError("Cannot create Short from JSON", new ErrorOptions(json as Object))
     }
 }

@@ -34,7 +34,7 @@ class LateRejector implements PromiseLike<number> {
 }
 
 let thenable: PromiseLike<number>[] = [new Resolver(), new LateRejector()];
-Promise.allSettled(thenable).then<void, void>((values:PromiseSettledResult<number>[]): void => {
+Promise.allSettled<number>(thenable).then<void, void>((values): void => {
     let v = (values[0] as PromiseFulfilledResult<number>).value;
     if(v != 42) {
         console.log('Test failed. Expected 42, but got ' + v + '.');

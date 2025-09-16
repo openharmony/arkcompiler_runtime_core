@@ -23,6 +23,7 @@ export final class Class {
     private superClass: Class | undefined
     private flags: int
     private typeMetaData: long
+    private overloadMap: long
 
     private constructor() { throw new Error("Class constructor called") }
     private native getNameInternal(): string;
@@ -59,5 +60,6 @@ export final class Class {
     /**
      * Get internal string descriptor
      */
-    public native getDescriptor(): string
+    // NOTE(ekaterinazaytseva): unable to replace internal - used in RuntimeLinker.ets as public
+    internal native getDescriptor(): string
 }

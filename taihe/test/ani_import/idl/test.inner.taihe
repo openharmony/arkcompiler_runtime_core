@@ -14,4 +14,4 @@
  */
 @!namespace("@ohos.test", "inner")
 
-struct MyStruct {}
+struct MyStruct { v: i32; }

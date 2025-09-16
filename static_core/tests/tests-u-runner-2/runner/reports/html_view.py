@@ -64,13 +64,13 @@ class HtmlView:
         write_2_file(report_path, report)
 
     def __get_failed_tests_report(self, fail_lists: dict[str, list[Test]]) -> str:
-        _new = "new"
+        new = "new"
         failed_tests: list[tuple[str, str]] = []
         for kind in fail_lists:
             for test in fail_lists[kind]:
                 report_path = test.reports[ReportFormat.HTML][len(str(self.__report_root)) + 1:]
                 failed_tests.append((test.test_id, report_path))
-        failed_tests.sort(key=lambda x: "1" + x[1] if x[1].startswith(_new) else x[1])
+        failed_tests.sort(key=lambda x: "1" + x[1] if x[1].startswith(new) else x[1])
 
         line_template_new = '<li class="link-container">' \
                             '<b>NEW</b> ' \
@@ -83,7 +83,7 @@ class HtmlView:
         failed_tests_report = []
         for failed in failed_tests:
             failed_id, failed_path = failed
-            template = line_template_new if failed_path.startswith(_new) else line_template_known
+            template = line_template_new if failed_path.startswith(new) else line_template_known
             replaced = template.replace(INDEX_TEST_NAME, failed_path).replace(INDEX_TEST_ID, failed_id)
             failed_tests_report.append(replaced)
         return "\n".join(failed_tests_report)

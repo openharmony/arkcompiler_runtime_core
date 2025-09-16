@@ -201,10 +201,10 @@ The syntax of *ambient class declaration* is presented below:
     ambientClassDeclaration:
         'class'|'struct' identifier typeParameters?
         classExtendsClause? implementsClause?
-        '{' ambientClassBodyDeclaration* '}'
+        '{' ambientClassMember* '}'
         ;
 
-    ambientClassBodyDeclaration:
+    ambientClassMember:
         ambientAccessModifier?
         ( ambientFieldDeclaration
         | ambientConstructorDeclaration
@@ -287,12 +287,8 @@ The syntax of *ambient indexer declaration* is presented below:
 .. code-block:: abnf
 
     ambientIndexerDeclaration:
-        'readonly'? '[' identifier ':' indexType ']' returnType
+        'readonly'? '[' identifier ':' type ']' returnType
         ;
-
-The following restriction applies: Only one *ambient indexer declaration* is
-allowed in an ambient class declaration.
-
 .. index::
    ambient indexer declaration
    indexing
@@ -302,16 +298,28 @@ allowed in an ambient class declaration.
    restriction
    ambient class declaration
 
+The use of *ambient indexer declarations* is represented by the example below:
+
 .. code-block:: typescript
    :linenos:
 
     declare class C {
         [index: number]: number
     }
+    declare class D {
+        [index: int]: C
+    }
+    declare class E {
+        [index: string]: string
+    }
 
-**Note**. *Ambient indexer declaration* is supported in ambient contexts only.
-If written in |LANG|, ambient class implementation must conform to
-:ref:`Indexable Types`.
+The following restrictions applies: 
+
+- Only one *ambient indexer declaration* is allowed in an ambient class declaration.
+
+- *Ambient indexer declaration* is supported in ambient contexts only.
+  If written in |LANG|, ambient class implementation must conform to
+  :ref:`Indexable Types`.
 
 .. index::
    ambient indexer declaration
@@ -435,18 +443,50 @@ The syntax of *ambient interface declaration* is presented below:
 
     ambientInterfaceMember
         : interfaceProperty
-        | interfaceMethodDeclaration
+        | ambientInterfaceMethodDeclaration
         | ambientIndexerDeclaration
         | ambientIterableDeclaration
+        ;
+
+    ambientInterfaceMethodDeclaration:
+        'default'? identifier signature
         ;
 
 *Ambient interface* can contain additional members in the same manner as
 an ambient class (see :ref:`Ambient Indexer`, and :ref:`Ambient Iterable`).
 
+
+If an interface method declaration is marked with the keyword ``default``, then
+a non-ambient interface must contain the default implementation for the method
+as follows:
+
+.. code-block:: typescript
+   :linenos:
+
+    declare interface I1 {
+        default foo (): void // method foo will have the default implementation
+    }
+    class C1 implements I1 {} // Class C1 is valid as foo() has the default implemenation
+
+    interface I1 {
+        // If such interface is used as I1 it will be runtime error as there is
+        // no default implementation for foo()
+        foo (): void 
+    }
+
+    declare interface I2 {
+        foo (): void // method foo has no default implementation
+    }
+    class C2 implements I2 {} // Class C2 is invalid as foo() has no implemenation
+    class C3 implements I2 { foo() {} } // Class C3 is valid as foo() has implemenation
+
+
+
 .. index::
    ambient interface
    ambient interface declaration
    ambient class
+   default method implementation
 
 |
 

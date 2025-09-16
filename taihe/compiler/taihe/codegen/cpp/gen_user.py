@@ -14,8 +14,8 @@
 # limitations under the License.
 
 from taihe.codegen.abi.analyses import (
-    GlobFuncABIInfo,
-    PackageABIInfo,
+    GlobFuncAbiInfo,
+    PackageAbiInfo,
 )
 from taihe.codegen.abi.writer import CHeaderWriter
 from taihe.codegen.cpp.analyses import (
@@ -43,7 +43,7 @@ class CppUserHeadersGenerator:
             self.gen_package_file(pkg)
 
     def gen_package_file(self, pkg: PackageDecl):
-        pkg_abi_info = PackageABIInfo.get(self.am, pkg)
+        pkg_abi_info = PackageAbiInfo.get(self.am, pkg)
         pkg_cpp_info = PackageCppInfo.get(self.am, pkg)
         pkg_cpp_user_info = PackageCppUserInfo.get(self.am, pkg)
         with CHeaderWriter(
@@ -70,7 +70,7 @@ class CppUserHeadersGenerator:
         func: GlobFuncDecl,
         pkg_cpp_target: CHeaderWriter,
     ):
-        func_abi_info = GlobFuncABIInfo.get(self.am, func)
+        func_abi_info = GlobFuncAbiInfo.get(self.am, func)
         func_cpp_user_info = GlobFuncCppUserInfo.get(self.am, func)
         params_cpp = []
         args_into_abi = []

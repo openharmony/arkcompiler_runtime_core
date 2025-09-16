@@ -56,11 +56,11 @@ class Point3D extends Point {
     constructor(x: double, y: double, z: double) {
         super(x, y)
         this.z = z
-        this.state = 0.0
+        this.state = 0
     }
     constructor(state: int) {
         this(0, 0, 0)
-        this.state = 1.0
+        this.state = 1
     }
 }
 
@@ -85,7 +85,7 @@ final class HTMLWriter extends Writer {
 
 function findMethodsByName(type: ClassType, names: Array<string>): Array<Method | null> {
     const methods = new Array<Method | null>()
-    const namesLength = names.length as int
+    const namesLength = names.length.toInt()
 
     const foundMethods = new Map<string, Method>()
     const methodsNum = type.getMethodsNum()

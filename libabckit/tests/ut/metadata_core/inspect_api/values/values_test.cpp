@@ -17,9 +17,9 @@
 #include <cstddef>
 #include <cstring>
 
-#include "libabckit/include/c/abckit.h"
+#include "libabckit/c/abckit.h"
 #include "helpers/helpers.h"
-#include "libabckit/include/c/metadata_core.h"
+#include "libabckit/c/metadata_core.h"
 #include "libabckit/src/metadata_inspect_impl.h"  // NOTE(mredkin)
 #include "libabckit/src/adapter_dynamic/metadata_inspect_dynamic.h"
 #include "libabckit/src/adapter_static/metadata_inspect_static.h"

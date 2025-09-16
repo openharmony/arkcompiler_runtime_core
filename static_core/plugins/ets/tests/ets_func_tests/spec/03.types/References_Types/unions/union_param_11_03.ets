@@ -26,7 +26,7 @@ class B extends A {}
 type Margin = B | string
 
 function callB(b: B, text: string) {
-    assertTrue( b instanceof B, text)
+    arktest.assertTrue( b instanceof B, text)
 }
 
 function callA(a: Margin, name?: string) {

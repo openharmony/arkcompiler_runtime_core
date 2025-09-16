@@ -17,6 +17,22 @@ package std.core;
 
 export namespace jsonx {
     /**
+     * Enumration of BigIntMode
+     */
+    export enum BigIntMode {
+        DEFAULT = 0,
+        PARSE_AS_BIGINT = 1,
+        ALWAYS_PARSE_AS_BIGINT = 2
+    }
+
+    /**
+     * ParseOptions for JSON.parse to pass BigIntMode
+     */
+    export interface ParseOptions {
+        bigIntMode: BigIntMode
+    }
+
+    /**
      * Enumeration of possible JSON value types.
      * Used to identify the type of a JsonElement at runtime.
      */
@@ -411,7 +427,8 @@ export namespace jsonx {
          */
         setElement(key: string, value: JsonElement) {
             if (this.jsonType != JsonType.JsonObject) {
-                throw new JsonTypeError("This value's ValueKind is not Object.")
+                this.setUndefined();
+                this.maybeObjectValues = new Map<string, JsonElement>();
             }
             this.maybeObjectValues!.set(key, value)
         }
@@ -512,13 +529,11 @@ export namespace jsonx {
          * @throws {RangeError} If the key is not found
          */
         asDouble(): double {
-            if (this.jsonType != JsonType.JsonNumber) {
+            let result = this.getNumberMaybeCast()
+            if (result == undefined) {
                 throw new JsonTypeError("This value's ValueKind is not Number.")
             }
-            if (this.maybeDoubleValue == undefined) {
-                throw new JsonTypeError("This value's ValueKind is Number, but the value contains no double value.")
-            }
-            return this.maybeDoubleValue!
+            return result!
         }
 
         /**
@@ -528,9 +543,7 @@ export namespace jsonx {
          * @returns {double} The double value if found, undefined otherwise
          */
         tryAsDouble(): double | undefined {
-            return this.jsonType == JsonType.JsonNumber
-                ? this.maybeDoubleValue
-                : undefined
+            return this.getNumberMaybeCast()
         }
 
         /**
@@ -544,8 +557,8 @@ export namespace jsonx {
             if (this.jsonType != JsonType.JsonNumber) {
                 throw new JsonTypeError("This value's ValueKind is not Number.")
             }
-            if (this.maybeIntegerValue == undefined) {
-                throw new JsonTypeError("This value's ValueKind is Number, but the value contains no integer value.")
+            if (this.maybeDoubleValue != undefined) {
+                throw new JsonTypeError("Expected integer, but elementcontains a double value.")
             }
             return this.maybeIntegerValue!
         }
@@ -706,24 +719,19 @@ export namespace jsonx {
             this.maybeNullValue    = undefined
         }
 
-        private _ensureInvariants(): void {
-            const typeMap = new Map<string, boolean>([
-                ["Null",    this.jsonType == JsonType.JsonNull],
-                ["Object",  this.jsonType == JsonType.JsonObject],
-                ["Array",   this.jsonType == JsonType.JsonArray],
-                ["Number",  this.jsonType == JsonType.JsonNumber],
-                ["String",  this.jsonType == JsonType.JsonString],
-                ["Boolean", this.jsonType == JsonType.JsonTrue || this.jsonType == JsonType.JsonFalse]
-            ])
-            const activeTypes = Array.from(typeMap.entries())
-                .filter((entry: [string, boolean]): boolean => entry[1])
-                .map((entry: [string, boolean]): string => entry[0])
-            if (activeTypes.length == 0 && this.jsonType != JsonType.JsonUndefined) {
-                throw new JsonTypeError(`Invalid JsonElement type. No valid type detected.`)
+        private getNumberMaybeCast(): double | undefined {
+            if (this.jsonType != JsonType.JsonNumber) {
+                return undefined
             }
-            if (activeTypes.length > 1) {
-                throw new JsonTypeError(`Invalid JsonElement type. Multiple types detected: ${activeTypes.join(", ")}`)
+            let doubleValue = this.maybeDoubleValue
+            if (doubleValue != undefined) {
+                return doubleValue
             }
+            let integerValue = this.maybeIntegerValue
+            if (integerValue != undefined) {
+                return integerValue.toDouble()
+            }
+            throw new JsonError("UNREACHABLE: Illegal state.JsonElement is a number, but has no double or integer value")
         }
 
         /**
@@ -761,8 +769,6 @@ export namespace jsonx {
             } else {
                 this.maybeArrayValues = undefined
             }
-
-            this._ensureInvariants()
         }
     }
 
@@ -789,4 +795,5 @@ export namespace jsonx {
          */
         toJson(): JsonElement
     }
+
 }

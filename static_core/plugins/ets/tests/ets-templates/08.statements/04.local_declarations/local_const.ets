@@ -19,5 +19,5 @@ desc: Local declaration in statement (const)
 
 function main(): void {
   const a: int = 0;
-  assertEQ(a, 0)
+  arktest.assertEQ(a, 0)
 }

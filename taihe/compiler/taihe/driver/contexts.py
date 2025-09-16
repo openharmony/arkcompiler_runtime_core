@@ -32,8 +32,11 @@ from dataclasses import dataclass, field
 from itertools import chain
 from pathlib import Path
 
+from typing_extensions import Self
+
 from taihe.driver.backend import Backend, BackendConfig
 from taihe.semantics.analysis import analyze_semantics
+from taihe.semantics.attributes import AttributeRegistry
 from taihe.semantics.declarations import PackageGroup
 from taihe.utils.analyses import AnalysisManager
 from taihe.utils.diagnostics import ConsoleDiagnosticsManager, DiagnosticsManager
@@ -42,19 +45,16 @@ from taihe.utils.outputs import OutputConfig
 from taihe.utils.sources import SourceFile, SourceLocation, SourceManager
 
 
-def validate_source_file(source: SourceFile) -> IgnoredFileWarn | None:
+def validate_source_file(path: Path) -> IgnoredFileReason | None:
+    # not exist
+    if not path.exists():
+        return IgnoredFileReason.NOT_EXIST
     # subdirectories are ignored
-    if not source.path.is_file():
-        return IgnoredFileWarn(
-            IgnoredFileReason.IS_DIRECTORY,
-            loc=SourceLocation(source),
-        )
+    if not path.is_file():
+        return IgnoredFileReason.IS_DIRECTORY
     # unexpected file extension
-    if source.path.suffix != ".taihe":
-        return IgnoredFileWarn(
-            IgnoredFileReason.EXTENSION_MISMATCH,
-            loc=SourceLocation(source),
-        )
+    if path.suffix != ".taihe":
+        return IgnoredFileReason.EXTENSION_MISMATCH
     return None
 
 
@@ -76,10 +76,30 @@ class CompilerInvocation:
     output_config: OutputConfig = field(default_factory=OutputConfig)
     backends: list[BackendConfig] = field(default_factory=lambda: [])
 
-    # TODO: refactor this to a more structured way
+    extra: dict[str, str | None] = field(default_factory=lambda: {})
+
+
+# TODO: refactor this
+@dataclass
+class CompilerConfig:
     sts_keep_name: bool = False
     arkts_module_prefix: str | None = None
     arkts_path_prefix: str | None = None
+
+    @classmethod
+    def construct(cls, configure: dict[str, str | None]) -> Self:
+        res = cls()
+        for config in configure:
+            k, *v = config.split("=", 1)
+            if k == "sts:keep-name":
+                res.sts_keep_name = True
+            elif k == "arkts:module-prefix":
+                res.arkts_module_prefix = v[0] if v else None
+            elif k == "arkts:path-prefix":
+                res.arkts_path_prefix = v[0] if v else None
+            else:
+                raise ValueError(f"unknown codegen config {k!r}")
+        return res
 
 
 class CompilerInstance:
@@ -93,13 +113,12 @@ class CompilerInstance:
 
     invocation: CompilerInvocation
     backends: list[Backend]
-
     diagnostics_manager: DiagnosticsManager
-
     source_manager: SourceManager
     package_group: PackageGroup
-
     analysis_manager: AnalysisManager
+    attribute_registry: AttributeRegistry
+    config: CompilerConfig
 
     def __init__(
         self,
@@ -109,11 +128,13 @@ class CompilerInstance:
     ):
         self.invocation = invocation
         self.diagnostics_manager = dm()
-        self.analysis_manager = AnalysisManager(invocation, self.diagnostics_manager)
         self.source_manager = SourceManager()
         self.package_group = PackageGroup()
         self.output_manager = invocation.output_config.construct(self)
-        self.backends = [conf.construct(self) for conf in invocation.backends]
+        self.attribute_registry = AttributeRegistry()
+        self.backends = [backend.construct(self) for backend in invocation.backends]
+        self.config = CompilerConfig.construct(invocation.extra)
+        self.analysis_manager = AnalysisManager(self.config)
 
     ##########################
     # The compilation phases #
@@ -121,13 +142,17 @@ class CompilerInstance:
 
     def collect(self):
         """Adds all `.taihe` files inside a directory. Subdirectories are ignored."""
-        scanned = chain.from_iterable(p.iterdir() for p in self.invocation.src_dirs)
         direct = self.invocation.src_files
+        scanned = chain.from_iterable(p.iterdir() for p in self.invocation.src_dirs)
 
         for file in chain(direct, scanned):
             source = SourceFile(file)
-            if warning := validate_source_file(source):
-                self.diagnostics_manager.emit(warning)
+            if warning := validate_source_file(file):
+                warn = IgnoredFileWarn(
+                    reason=warning,
+                    loc=SourceLocation(source),
+                )
+                self.diagnostics_manager.emit(warn)
             else:
                 self.source_manager.add_source(source)
 
@@ -135,8 +160,8 @@ class CompilerInstance:
         from taihe.parse.convert import AstConverter
 
         for src in self.source_manager.sources:
+            conv = AstConverter(src, self.diagnostics_manager)
             with self.diagnostics_manager.capture_error():
-                conv = AstConverter(src, self.diagnostics_manager)
                 pkg = conv.convert()
                 self.package_group.add(pkg)
 
@@ -144,7 +169,11 @@ class CompilerInstance:
             b.post_process()
 
     def validate(self):
-        analyze_semantics(self.package_group, self.diagnostics_manager)
+        analyze_semantics(
+            self.package_group,
+            self.diagnostics_manager,
+            self.attribute_registry,
+        )
 
         for b in self.backends:
             b.validate()

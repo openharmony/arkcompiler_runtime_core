@@ -15,7 +15,8 @@
 
 package escompat;
 
-import {launch} from "std/concurrency"
+import {launch, CoroutineId, WorkerId} from "std/concurrency"
+import { InteropSerializeHelper } from "std/interop";
 
 export namespace taskpool {
     const TASKPOOL_ERROR_NOT_IN_TASKPOOL: number = 10200022;
@@ -61,7 +62,8 @@ export namespace taskpool {
 
     class TaskPoolWorker extends EAWorker {
         constructor(supportInterop: boolean = false) {
-            super(supportInterop);
+            super("taskpool", supportInterop);
+            this.start();
             this.run<void>((): void => {
                 this.workerId = CoroutineExtras.getWorkerId();
             }).Await();
@@ -69,48 +71,155 @@ export namespace taskpool {
 
         internal performTask(): boolean {
             let task: Task | undefined = getTask();
-            if (task == undefined) {
+            if (task === undefined) {
                 return false;
             }
+            removeFromIdleWorkers(this);
             workerPendingTasksCount.set(this.workerId, workerPendingTasksCount.get(this.workerId)! + 1);
             this.currentPriority = task.priority;
             let job = this.run<NullishType>((): NullishType => {
+                ConcurrencyHelpers.lockGuard(taskCountMutex, () => {
+                    waitingTasksNum--;
+                });
                 let res = task?.execute();
                 return res;
             });
             const taskRunner = (value: NullishType): NullishType => {
                 let res = job.Await();
                 return res;
-            }
+            };
             let p = Promise.resolve<NullishType>(new Object()).then<NullishType, NullishType>(taskRunner, taskRunner);
             p.then((res: NullishType) => {
 				task?.resolve(res);
-                this.notifyTaskFinished(task);
             }).catch((e) => {
                 task?.reject(e);
-                this.notifyTaskFinished(task);
             }).finally(() => {
                 this.currentPriority = undefined;
+                ConcurrencyHelpers.lockGuard(workersMutex, () => {
+                    workerPendingTasksCount.set(this.workerId, workerPendingTasksCount.get(this.workerId)! - 1);
+                });
+                this.notifyTaskFinished(task);
                 setTimeout(() => {
                     task?.notifyDependencies();
                     this.notifyTaskFinished(task);
-                });
-                ConcurrencyHelpers.lockGuard(workersMutex, () => {
-                    workerPendingTasksCount.set(this.workerId, workerPendingTasksCount.get(this.workerId)! - 1);
                 })
-            })
+            });
             return true;
         }
 
         internal notifyTaskFinished(task: Task): void {
+            // When the task is a sequenceRunner task.
             task?.tryTriggerRunner();
+
             if (getTaskNum()) {
-                notifyExecuteTask();
+                triggerExecuteNextTask();
+            } else {
+                ConcurrencyHelpers.lockGuard(workersMutex, () => {
+                    if (isIdleWorker(this) && this.idleTime == 0) {
+                        idleWorkers.add(this);
+                        this.idleTime = Chrono.nanoNow();
+                    }
+                })
             }
+        }
+
+        // For managerWorker to expand.
+        internal triggerExpand(): void {
+            let expandJob = this.run<NullishType>((): NullishType => {
+                let targetNum: int = 0;
+                ConcurrencyHelpers.lockGuard(taskCountMutex, () => {
+                    if (totalExecCount) {
+                        let averageDuration: number = totalExecTime / totalExecCount;
+                        let result: number = (averageDuration * waitingTasksNum) / TASK_DURATION;
+                        targetNum = (min(result, waitingTasksNum)).toInt();
+                    } else {
+                        let waitingNum: int = waitingTasksNum;
+                        targetNum = (min(waitingNum, STEP_SIZE)).toInt();
+                    }
+                });
+                if (targetNum == 0) {
+                    return 0;
+                }
+                ConcurrencyHelpers.lockGuard(workersMutex, () => {
+                    let idleWorkersNum: int = 0;
+                    for (let w : TaskPoolWorker of workers) {
+                        let currentWorkerTaskCount = workerPendingTasksCount.get(w.workerId);
+                        if(!currentWorkerTaskCount) {
+                            idleWorkersNum++;
+                        }
+                    }
+                    if (workers.size < workersLimit && idleWorkersNum < targetNum) {
+                        let step: int = (Math.ceil(min(workersLimit - workers.size,
+                                                   min(workersLimit, targetNum) - idleWorkersNum))).toInt();
+                        for (let i = 0; i < step; ++i) {
+                            let w: TaskPoolWorker = new TaskPoolWorker(isTaskpoolSupportInterop);
+                            workers.add(w);
+                        }
+                    }
+                });
+                return 1;
+            });
+        }
+
+        // For managerWorker to shrink.
+        private triggerShrink(): void {
+            let shrinkJob = this.run<NullishType>((): NullishType => {
+                this.timerId = setInterval(() => {
+                    let runningWorkersNum: int = 0;
+                    ConcurrencyHelpers.lockGuard(workersMutex, () => {
+                        for (let w: TaskPoolWorker of workers) {
+                            let currentWorkerTaskCount = workerPendingTasksCount.get(w.workerId);
+                            if(currentWorkerTaskCount) {
+                                runningWorkersNum++;
+                            }
+                        }
+                    });
+                    let targetNum: int = runningWorkersNum;
+                    ConcurrencyHelpers.lockGuard(taskCountMutex, () => {
+                        if (totalExecCount) {
+                            let averageDuration: number = totalExecTime / totalExecCount;
+                            let result: number = (averageDuration * waitingTasksNum) / TASK_DURATION;
+                            targetNum += (min(waitingTasksNum, result)).toInt();
+                        } else {
+                            targetNum += min(2, waitingTasksNum);
+                        }
+                    });
+                    ConcurrencyHelpers.lockGuard(workersMutex, () => {
+                        if (workers.size > WORKERS_MINIMUM && workers.size > targetNum) {
+                            targetNum = max(WORKERS_MINIMUM, targetNum);
+                        } else {
+                            return;
+                        }
+                        let step = min(SHRINK_STEP, workers.size - targetNum);
+                        for (let i = 0; i < step && i < idleWorkers.size; ++i) {
+                            let idleWorker = Array.from(idleWorkers)[i];
+                            if (idleWorker.idleTime != 0 && (Chrono.nanoNow() - idleWorker.idleTime) > idleThreshold) {
+                                idleWorker.join();
+                                workers.delete(idleWorker);
+                                idleWorkers.delete(idleWorker);
+                            }
+                        }
+                    })
+                }, triggerInterval);
+            });
+        }
+
+        // For managerWorker to retrigger shrink.
+        internal retriggerShrink(): void {
+            clearInterval(this.timerId);
+            this.triggerShrink();
+        }
+
+        // For managerWorker to stop and release.
+        internal stopManagerWorker(): void {
+            clearInterval(this.timerId);
+            this.join();
         }
 
         internal workerId: int;
         internal currentPriority?: Priority;
+        internal timerId: int;
+        internal idleTime: long;
     }
 
     /**
@@ -163,29 +272,39 @@ export namespace taskpool {
         /**
          * Create a Task instance
          *
-         * @param name The name of task
-         * @param func Concurrent function to execute in the taskpool
+         * @param { string } name The name of task
+         * @param { Function } func Concurrent function to execute in the taskpool
+         * @param { ...NullishType } args arguments for function to execute with
          */
         constructor(name: string, func: Function, ...args: FixedArray<NullishType>) {
             this.name = name;
             this.arguments = Array.from(args);
-            this.taskFunction = (): NullishType => {
-                return func.unsafeCall(...args);
-            };
+            if (isSupportingInterop()) {
+                let serializeHelper = new InteropSerializeHelper(args);
+                this.taskFunction = (): NullishType => {
+                    let deserializedArgs = serializeHelper.deserialize();
+                    return func.unsafeCall(...deserializedArgs);
+                };
+            } else {
+                this.taskFunction = (): NullishType => {
+                    return func.unsafeCall(...args);
+                };
+            }
             this.totalDuration = 0;
             this.ioDuration = 0;
             this.cpuDuration = 0;
             this.taskMutex = ConcurrencyHelpers.mutexCreate();
             this.condVar = ConcurrencyHelpers.condVarCreate();
-            this.dependentTasks = new Set<Task>();
+            this.dependentTasks = new containers.ConcurrentSet<Task>();
             // Each task has unique identifier
-            this.id = Task.generateId();
+            this.taskId = Task.generateId();
         }
 
         /**
          * Create a Task instance
          *
-         * @param func Concurrent function to execute in the taskpool
+         * @param { Function } func Concurrent function to execute in the taskpool
+         * @param { ...NullishType } args arguments for function to execute with
          */
         constructor(func: Function, ...args: FixedArray<NullishType>) {
             this(func.name, func, ...args);
@@ -194,7 +313,7 @@ export namespace taskpool {
         /**
          * Check current running task is canceled or not
          *
-         * @returns true if current running task is canceled, false - otherwise
+         * @returns { boolean } true if current running task is canceled, false - otherwise
          */
         static isCanceled(): boolean {
             return isCancel();
@@ -202,8 +321,8 @@ export namespace taskpool {
 
         /**
          * Register a callback and call it when the task is enqueued
-         * 
-         * @param callback Callback to be registered and executed when the task is enqueued
+         *
+         * @param { CallbackFunction } callback Callback to be registered and executed when the task is enqueued
          * @throws Error if task is executed. It does not support the registration of listeners
          */
         onEnqueued(callback: CallbackFunction): void {
@@ -213,8 +332,8 @@ export namespace taskpool {
 
         /**
          * Register a callback and call it before the task execution
-         * 
-         * @param callback Callback to be registered and executed before the task execution
+         *
+         * @param { CallbackFunction } callback Callback to be registered and executed before the task execution
          * @throws Error if task is executed. It does not support the registration of listeners
          */
         onStartExecution(callback: CallbackFunction): void {
@@ -224,8 +343,8 @@ export namespace taskpool {
 
         /**
          * Register a callback and call it when the task fails to execute
-         * 
-         * @param callback Callback to be registered and executed when the task fails to execute
+         *
+         * @param { CallbackFunctionWithError } callback Callback to be registered and executed when the task fails to execute
          * @throws Error if task is executed. It does not support the registration of listeners
          */
         onExecutionFailed(callback: CallbackFunctionWithError): void {
@@ -235,8 +354,8 @@ export namespace taskpool {
 
         /**
          * Register a callback and call it when the task successfully executed
-         * 
-         * @param callback Callback to be registered and executed when the task successfully executed
+         *
+         * @param { CallbackFunction } callback Callback to be registered and executed when the task successfully executed
          * @throws Error if task is executed. It does not support the registration of listeners
          */
         onExecutionSucceeded(callback: CallbackFunction): void {
@@ -246,7 +365,7 @@ export namespace taskpool {
 
         /**
          * Add dependencies on the task array for this task
-         * @param tasks An array of dependent tasks
+         * @param { Task[] } tasks An array of dependent tasks
          * @throws Error if
          *     - no parameters
          *     - this task or argument tasks executed (as common or via SequenceRunner)
@@ -270,7 +389,7 @@ export namespace taskpool {
                 if (task.groupId != 0) {
                     throw new Error(TASKPOOL_ERROR_GROUP_TASK_RELIED_ON, "taskpool:: groupTask cannot be relied on");
                 }
-                if (this.id == task.id || Task.hasTaskDFS(this, task)) {
+                if (this.taskId == task.taskId || Task.hasTaskDFS(this, task)) {
                     throw new Error(TASKPOOL_ERROR_CIRCULAR_DEPENDENCY, "taskpool:: There is a circular dependency");
                 }
             }
@@ -291,7 +410,7 @@ export namespace taskpool {
          *     - no parameters
          *     - this task or argument tasks executed
          *     - this task or argument tasks have not dependencies
-         *     - this task does not depend on an argument task 
+         *     - this task does not depend on an argument task
          */
         removeDependency(...tasks: Task[]): void {
             if (tasks.length == 0) {
@@ -299,7 +418,7 @@ export namespace taskpool {
             }
             if (!this.isDependent) {
                 throw new Error(TASKPOOL_ERROR_NO_DEPENDENCY, "taskpool:: task has no dependency");
-            } 
+            }
             if (this.isSubmitted) {
                 throw new Error(TASKPOOL_ERROR_EXECUTED_TASK_REMOVE_DEPENDENCY, "taskpool:: executedTask cannot removeDependency");
             }
@@ -330,7 +449,7 @@ export namespace taskpool {
 
         /**
          * Send data to host side and trigger the registered callback
-         * @param args arguments for the registered callback
+         * @param { ...NullishType } args arguments for the registered callback
          * @throws Error if the function is not called from a taskpool task
          * @throws Error if the callback is not registered
          */
@@ -349,7 +468,7 @@ export namespace taskpool {
         }
 
         /**
-         * Register a callback for this task to receive and handle data from the taskpool task 
+         * Register a callback for this task to receive and handle data from the taskpool task
          */
         onReceiveData(callback?: Function): void {
             this.onReceiveCallback = callback;
@@ -364,20 +483,23 @@ export namespace taskpool {
         /// Task name
         name: string;
 
+        /// Task identity
+        taskId: int;
+
         /// Total duration of task execution
-        totalDuration: number;
+        totalDuration: int;
 
         /// IO duration of task execution
-        ioDuration: number;
+        ioDuration: int;
 
         /// CPU duration of task execution
-        cpuDuration: number;
+        cpuDuration: int;
 
         /// ----- Internal implementation part -----
 
         /**
          * Check that the task can be executed as common task
-         * @throws Error if the task can not be executed as common task 
+         * @throws Error if the task can not be executed as common task
          * @see taskpool.execute
          */
         internal checkExecution(): void {
@@ -395,7 +517,7 @@ export namespace taskpool {
          * @throws Error if the task can not be executed as delayed task
          * @see taskpool.executeDelayed
          */
-        internal checkExecutionForDelayedTask(delayTime: number): void {
+        internal checkExecutionForDelayedTask(delayTime: int): void {
             if (delayTime < 0) {
                 throw new Error(TASKPOOL_ERROR_DELAY_TIME_NEGATIVE, "taskpool:: The delayTime is less than zero");
             }
@@ -421,7 +543,7 @@ export namespace taskpool {
          * @throws Error if the task can not be executed as period task
          * @see taskpool.executeDelayed
          */
-        internal checkExecutionForPeriodTask(period: number): void {
+        internal checkExecutionForPeriodTask(period: int): void {
             if (period < 0) {
                 throw new Error(TASKPOOL_ERROR_PERIOD_NEGATIVE, "taskpool:: The period value is less than zero");
             }
@@ -459,8 +581,8 @@ export namespace taskpool {
             ConcurrencyHelpers.mutexUnlock(this.taskMutex);
         }
 
-        internal getDuration(): number {
-            return (Chrono.nanoNow() - this.startTime) / Chrono.NS_PER_MS;
+        internal getDuration(): int {
+            return ((Chrono.nanoNow() - this.startTime) / Chrono.NS_PER_MS).toInt();
         }
 
         internal execute(): NullishType {
@@ -485,16 +607,30 @@ export namespace taskpool {
             } finally {
                 // We cannot reliably calculate ioDuration in 1.2 due to possible coroutine switches.
                 // And we should set ioDuration = 0, totalDuration = cpuDuration here
-                this.cpuDuration = (Chrono.getCpuTime() - startCpuTime) / Chrono.NS_PER_MS;
+                this.cpuDuration = ((Chrono.getCpuTime() - startCpuTime) / Chrono.NS_PER_MS).toInt();
                 this.totalDuration = this.cpuDuration;
                 this.ioDuration = 0;
                 // Process the task finishing
-                const notCanceled: boolean = taskFinished(this);
-                if(isTaskPoolUseLaunch) {
-                    this.notifyDependencies();
-                }
-                if (!notCanceled) {
-                    this.throwCancelTaskError();
+                let taskFinishedhandle = () : void => {
+                    const notCanceled: boolean = taskFinished(this);
+                    if (isTaskPoolUseLaunch) {
+                        this.notifyDependencies();
+                    } else {
+                        ConcurrencyHelpers.lockGuard(taskCountMutex, () => {
+                            totalExecTime += this.getDuration();
+                            totalExecCount++;
+                        });
+                    }
+                    if (!notCanceled) {
+                        this.throwCancelTaskError();
+                    }
+                };
+                if (result instanceof Promise) {
+                    result.then(() => {
+                        taskFinishedhandle();
+                    });
+                } else {
+                    taskFinishedhandle();
                 }
             }
             return result;
@@ -525,7 +661,7 @@ export namespace taskpool {
 
         /// The task is added to taskpool for execution
         internal enqueue(priority?: Priority): void {
-            priority = priority == undefined ? Priority.MEDIUM : priority;
+            priority = priority === undefined ? Priority.MEDIUM : priority;
             this.priority = priority;
             if (!isTaskPoolUseLaunch) {
                 ConcurrencyHelpers.mutexLock(taskQueuesMutex);
@@ -560,14 +696,14 @@ export namespace taskpool {
          * Generate new unique identifier for a new task
          * @see Task.constructor
          */
-        private static native generateId(): long;
+        private static native generateId(): int;
 
         /**
          * @see taskpool.Task.addDependency
          */
         internal static hasTaskDFS(startTask: Task, targetTask: Task): boolean {
             for (const dependentTask: Task of startTask.dependentTasks) {
-                if (dependentTask.id == targetTask.id) {
+                if (dependentTask.taskId == targetTask.taskId) {
                     return true;
                 }
                 if (Task.hasTaskDFS(dependentTask, targetTask)) {
@@ -599,12 +735,10 @@ export namespace taskpool {
             }
         }
 
-        /// Unique identifier of the task
-        internal readonly id: long;
         /// id of group which contains the task, 0 means the task is not part of any group
-        internal groupId: long = 0;
+        internal groupId: int = 0;
         /// id of sequence runner which ran the task, 0 means task was not ran via any sequence runner
-        internal seqId: long = 0;
+        internal seqId: int = 0;
         /// the task has been submitted into taskpool
         internal isSubmitted: boolean = false;
         /// the task depends on another task
@@ -612,7 +746,7 @@ export namespace taskpool {
         /// Count of tasks which should be executed before this task
         internal taskDependenciesCount: int = 0;
         /// Set of tasks which can be executed after this task
-        internal dependentTasks: Set<Task>;
+        internal dependentTasks: containers.ConcurrentSet<Task>;
         /// identifier of worker which starts to execute the task
         internal workerId: int = -1;
         /// an instance of the task is running
@@ -622,7 +756,7 @@ export namespace taskpool {
         /// the task has been executed periodically
         internal isPeriodicTask: boolean = false;
         /// identifier of task which is executeDelayed or executePeriodically
-        internal timerId: number = -1.0;
+        internal timerId: int = -1;
 
         // NOTE(ipetrov, #19949): Change to private when bug in frontend will be fixed
         internal taskMutex: Object;
@@ -653,8 +787,8 @@ export namespace taskpool {
     export class LongTask extends Task {
         /**
          * Create a LongTask instance
-         * @param name The name of long task
-         * @param func Concurrent function to execute in the taskpool
+         * @param { string } name The name of long task
+         * @param { Function } func Concurrent function to execute in the taskpool
          */
         constructor(name: string, func: Function, ...args: FixedArray<NullishType>) {
             super(name, func, ...args);
@@ -662,7 +796,8 @@ export namespace taskpool {
 
         /**
          * Create a LongTask instance
-         * @param func Concurrent function to execute in the taskpool
+         * @param { Function } func Concurrent function to execute in the taskpool
+         * @param { ...NullishType } args arguments for func to execute with
          */
         constructor(func: Function, ...args: FixedArray<NullishType>) {
             super("", func, ...args);
@@ -696,7 +831,7 @@ export namespace taskpool {
 
         /**
          * Create a TaskGroup instance
-         * @param name The name of TaskGroup
+         * @param { string } name The name of TaskGroup
          */
         constructor(name: string) {
             this.name = name;
@@ -707,7 +842,8 @@ export namespace taskpool {
         /**
          * Add a concurrent function into task group
          *
-         * @param func the concurrent function to add to the task group
+         * @param { Function } func the concurrent function to add to the task group
+         * @param { ...NullishType } args arguments for func to execute with
          */
         addTask(func: Function, ...args: FixedArray<NullishType>): void {
             this.addTask(new Task(func, ...args));
@@ -716,7 +852,7 @@ export namespace taskpool {
         /**
          * Add a task into task group
          *
-         * @param task the task to add to the task group
+         * @param { Task } task the task to add to the task group
          * @throws Error if
          *     - task was already added to any group
          *     - task is LongTask
@@ -746,26 +882,26 @@ export namespace taskpool {
         /**
          * Generate unique identifier for the group
          * @see TaskGroup.constructor
-         * @return unique group identifier for a new Taskgroup instance 
+         * @return unique group identifier for a new Taskgroup instance
          */
-        private static native generateGroupId(): long;
+        private static native generateGroupId(): int;
 
         /**
          * TaskGroup name
          */
         name: string;
 
-        internal readonly id: long;
+        internal readonly id: int;
         internal tasks: Array<Task>;
         internal isTaskAlreadySubmitted: boolean = false;
     }
 
     class SeqRunnerImpl {
-        constructor(id: long) {
+        constructor(id: int) {
             this.id = id;
             this.seqPromise = Promise.resolve<NullishType>(new Object());
         }
-        readonly id: long;
+        readonly id: int;
         seqPromise: Promise<NullishType>;
     }
 
@@ -782,7 +918,7 @@ export namespace taskpool {
 
         constructor(name: string, priority?: Priority) {
             this.impl = SequenceRunner.getOrCreateSeqRunnerImpl(name);
-            this.priority = priority == undefined ? Priority.MEDIUM : priority;
+            this.priority = priority === undefined ? Priority.MEDIUM : priority;
             this.tasks = new Array<Task>();
         }
 
@@ -819,7 +955,7 @@ export namespace taskpool {
             return task.getOnReceivePromise(promise);
         }
 
-        private static native generateSeqRunnerId(): long;
+        private static native generateSeqRunnerId(): int;
 
         private static getOrCreateSeqRunnerImpl(name: string): SeqRunnerImpl {
             if (name == "") {
@@ -864,13 +1000,13 @@ export namespace taskpool {
      */
     export class TaskInfo {
         /// Unique identifier of task
-        taskId: number = 0;
+        taskId: int = 0;
 
         /// Task state in taskpool
         state: State = State.WAITING;
 
         /// Duration of task exeuction
-        duration?: number;
+        duration?: int;
 
         /// Task name
         name: string = "";
@@ -881,10 +1017,10 @@ export namespace taskpool {
      */
     export class ThreadInfo {
         /// Worker thread id
-        tid: number = -1.0;
+        tid: int = -1;
 
         /// Running task identifiers list on current worker thread
-        taskIds?: number[];
+        taskIds?: int[];
 
         /// Thread priority
         priority?: Priority;
@@ -901,11 +1037,13 @@ export namespace taskpool {
         taskInfos: TaskInfo[] = new TaskInfo[0];
     }
 
-    type CoroutineId = int;
-    type WorkerId = int;
-
-    // NOTE(ipetrov, #16281): Temporary solution, make as namespace when namespaces will be supported
-
+    /**
+     * Create task and execute
+     *
+     * @param { Function } func a concurrent function to create task from
+     * @param { ...NullishType } args arguments for func to execute with
+     * @returns { Promise<NullishType> } Promise for result of executed task
+     */
     export function execute(func: Function, ...args: FixedArray<NullishType>): Promise<NullishType> {
         initWorkerPool();
         if (isTaskPoolUseLaunch) {
@@ -917,9 +1055,10 @@ export namespace taskpool {
 
     /**
      * Execute a concurrent task
-     * 
-     * @param task The task for executing
-     * @returns Promise for result of executed task
+     *
+     * @param task The task to execute
+     * @param { Priority } [priority] priority for the task
+     * @returns { Promise<NullishType> } Promise for result of executed task
      */
     export function execute(task: Task, priority?: Priority): Promise<NullishType> {
         initWorkerPool();
@@ -943,8 +1082,9 @@ export namespace taskpool {
     /**
      * Execute a concurrent task group
      *
-     * @param group The task group for execution
-     * @returns Promise for array of results of executed tasks from the group
+     * @param { TaskGroup } group The task group for execution
+     * @param { Priority } [priority] priority for tasks in the group
+     * @returns { Promise<Array<NullishType>> } Promise for array of results of executed tasks from the group
      */
     export function execute(group: TaskGroup, priority?: Priority): Promise<Array<NullishType>> {
         initWorkerPool();
@@ -973,7 +1113,15 @@ export namespace taskpool {
         return Promise.all<NullishType>(promises);
     }
 
-    export function executeDelayed(delayTime: number, task: Task, priority?: Priority): Promise<NullishType> {
+    /**
+     * Delayed execution of a concurrent task
+     *
+     * @param { int } delayTime timeout in ms to execute task after
+     * @param { Task } task The task to execute
+     * @param { Priority } [priority] priority for task
+     * @returns { Promise<NullishType> } Promise for result of executed task
+     */
+    export function executeDelayed(delayTime: int, task: Task, priority?: Priority): Promise<NullishType> {
         initWorkerPool();
         task.checkExecutionForDelayedTask(delayTime);
         task.isSubmitted = true;
@@ -985,7 +1133,7 @@ export namespace taskpool {
                 ConcurrencyHelpers.lockGuard(mutex, () => {
                     pendingDelayed.delete(task);
                 });
-                if (task.timerId == -1.0 || isCanceled(task)) {
+                if (task.timerId == -1 || isCanceled(task)) {
                     ConcurrencyHelpers.lockGuard(mutex, () => {
                         pendingDelayedCanceled.delete(task);
                     });
@@ -1015,13 +1163,20 @@ export namespace taskpool {
         });
     }
 
-    export function executePeriodically(period: number, task: Task, priority?: Priority): void {
+    /**
+     * Delayed execution of a concurrent task
+     *
+     * @param { int } period period in ms to execute task
+     * @param { Task } task The task to execute
+     * @param { Priority } [priority] priority for task
+     */
+    export function executePeriodically(period: int, task: Task, priority?: Priority): void {
         initWorkerPool();
         task.checkExecutionForPeriodTask(period);
         task.isSubmitted = true;
         task.isPeriodicTask = true;
         task.timerId = setInterval(() => {
-            if (task.timerId == -1.0) {
+            if (task.timerId == -1) {
                 return;
             }
             taskSubmitted(task);
@@ -1047,13 +1202,13 @@ export namespace taskpool {
      */
     export function cancel(task: Task): void {
         ConcurrencyHelpers.lockGuard(mutex, () => {
-            let timerId = -1.0;
-            if (task.timerId !== -1.0) {
+            let timerId = -1;
+            if (task.timerId !== -1) {
                 timerId = task.timerId;
                 if (task.isPeriodicTask) {
                     clearInterval(task.timerId);
                 }
-                task.timerId = -1.0;
+                task.timerId = -1;
             }
             if (pendingDelayed.has(task)) {
                 pendingDelayedCanceled.add(task);
@@ -1063,7 +1218,7 @@ export namespace taskpool {
                 tasksToBeCanceled.add(task);
                 return;
             }
-            if (timerId != -1.0) {
+            if (timerId != -1) {
                 return;
             }
             if (task.seqId != 0) {
@@ -1072,6 +1227,7 @@ export namespace taskpool {
                 throw new Error(TASKPOOL_ERROR_TASK_NOT_EXECUTED_TASK, "taskpool:: task is not executed or has been executed");
             }
         });
+        tryCancelDependentTasks(task);
     }
 
     /**
@@ -1094,12 +1250,12 @@ export namespace taskpool {
      * Terminate a long task.
      *
      * @param longTask The long task for terminating
-     * @note This method is needed for compatibilty with OHOS API. For coroutines in static ArkTS it is not required 
+     * @note This method is needed for compatibilty with OHOS API. For coroutines in static ArkTS it is not required
      */
     export function terminateTask(longTask: LongTask): void {}
 
     /**
-     * @returns taskpool internal information about tasks and threads
+     * @returns { TaskPoolInfo } taskpool internal information about tasks and threads
      */
     export function getTaskPoolInfo(): TaskPoolInfo {
         initWorkerPool();
@@ -1109,7 +1265,7 @@ export namespace taskpool {
         // Collect running and canceled tasks info
         runningTasks.forEach((count: int, task: Task) => {
             const taskInfo: TaskInfo = new TaskInfo();
-            taskInfo.taskId = task.id;
+            taskInfo.taskId = task.taskId;
             taskInfo.name = task.name;
             taskInfo.state =  (isCanceled(task)) ? State.CANCELED : State.RUNNING;
             taskInfo.duration = task.getDuration();
@@ -1123,7 +1279,7 @@ export namespace taskpool {
                 return;
             }
             const taskInfo: TaskInfo = new TaskInfo();
-            taskInfo.taskId = task.id;
+            taskInfo.taskId = task.taskId;
             taskInfo.name = task.name;
             taskInfo.state =  (isCanceled(task)) ? State.CANCELED : State.WAITING;
             taskInfos.push(taskInfo);
@@ -1131,7 +1287,7 @@ export namespace taskpool {
         // Collect delay and canceled tasks info
         pendingDelayed.forEach((task: Task) => {
             const taskInfo: TaskInfo = new TaskInfo();
-            taskInfo.taskId = task.id;
+            taskInfo.taskId = task.taskId;
             taskInfo.name = task.name;
             taskInfo.state =  (isCanceled(task)) ? State.CANCELED : State.DELAYED;
             taskInfos.push(taskInfo);
@@ -1145,10 +1301,10 @@ export namespace taskpool {
                 let tasks = workerToTasks.get(worker.workerId);
                 if (tasks != undefined) {
                     let tasksCount : int = tasks.size.toInt();
-                    const taskIds: number[] = new number[tasksCount];
+                    const taskIds: int[] = new int[tasksCount];
                     let currentIndex: int = 0;
                     tasks.forEach((task: Task) => {
-                        taskIds[currentIndex] = task.id;
+                        taskIds[currentIndex] = task.taskId;
                         currentIndex++;
                     });
                     threadInfo.taskIds = taskIds;
@@ -1164,14 +1320,14 @@ export namespace taskpool {
                     threadInfos.push(threadInfo);
                     return;
                 }
-                const taskIds: number[] = new number[tasksCount];
+                const taskIds: int[] = new int[tasksCount];
                 let currentIndex: int = 0;
                 tasks.forEach((task: Task) => {
-                    taskIds[currentIndex] = task.id;
+                    taskIds[currentIndex] = task.taskId;
                     currentIndex++;
                     // priority of running tasks can be regard as the priority of current thread's priority
                     // current only when task has been executed the worker can execute other task
-                    if (runningTasks.has(task) && threadInfo.priority == undefined) {
+                    if (runningTasks.has(task) && threadInfo.priority === undefined) {
                         threadInfo.priority = task.priority;
                     }
                 });
@@ -1213,9 +1369,9 @@ export namespace taskpool {
      * @brief Submit group of tasks to the taskpool on the execute method
      * @see taskpool.execute
      * @param groupId identifier of the submitted group
-     * @param tasksCount count of tasks in the passed group 
+     * @param tasksCount count of tasks in the passed group
      */
-    function taskGroupSubmitted(groupId: long, tasksCount: int): void {
+    function taskGroupSubmitted(groupId: int, tasksCount: int): void {
         ConcurrencyHelpers.mutexLock(mutex);
         const count: int = waitingGroupTasks.get(groupId, /* default */ 0);
         waitingGroupTasks.set(groupId, count + tasksCount);
@@ -1345,6 +1501,16 @@ export namespace taskpool {
         return pendingDelayedCanceled.has(task) || tasksToBeCanceled.has(task) || groupsToBeCanceled.has(task.groupId);
     }
 
+    function tryCancelDependentTasks(task: Task): void {
+        for(const dependentTask: Task of task.dependentTasks) {
+            try {
+                cancel(dependentTask);
+            } catch (e) {
+                // The error can be ignored.
+            }
+        }
+    }
+
     function hasTask(task: Task): boolean {
         ConcurrencyHelpers.mutexLock(mutex);
         const result: boolean = waitingTasks.has(task) || runningTasks.has(task);
@@ -1360,10 +1526,56 @@ export namespace taskpool {
         for (let w : TaskPoolWorker of workers) {
             w.join();
         }
+        managerWorker?.stopManagerWorker();
         ConcurrencyHelpers.lockGuard(workersMutex, () => {
-            isWorkersInitialized.set(false);
             workers.clear();
         })
+    }
+
+    /**
+     * @brief Set taskpool trigger shrink interval in taskpool test suite for debug.
+     * @param interval The trigger shrink interval value.
+     */
+    function setTaskPoolTriggerShrinkInterval(interval: int): void {
+        triggerInterval = interval;
+    }
+
+    /**
+     * @brief Set taskpool idle threshold in taskpool test suite for debug.
+     * @param threshold The idle threshold value.
+     */
+    function setTaskPoolIdleThreshold(threshold: int): void {
+        idleThreshold = threshold;
+    }
+
+    /**
+     * @brief Get current taskpool workers num for debug.
+     * @returns TaskPool workers num.
+     */
+    function getTaskPoolWorkersNum(): int {
+        let num = 0;
+        ConcurrencyHelpers.lockGuard(workersMutex, () => {
+            num = workers.size;
+        });
+        return num;
+    }
+
+    /**
+     * @brief Set taskpool workers limit in taskpool test suite for debug.
+     * @param limit TaskPool workers limit.
+     */
+    function setTaskPoolWorkersLimit(limit: int): void {
+        if (limit <= 0) {
+            return;
+        }
+        workersLimit = limit;
+    }
+
+    /**
+     * @brief Retrigger taskpool shrink in taskpool test suite for debug.
+     */
+    function retriggerTaskPoolShrink(): void {
+        managerWorker?.retriggerShrink();
     }
 
     /**
@@ -1397,16 +1609,33 @@ export namespace taskpool {
         if (isWorkersInitialized.get() || isTaskPoolUseLaunch) {
                 return;
         }
+
         ConcurrencyHelpers.lockGuard(workersMutex, () => {
             if (isWorkersInitialized.get() || isTaskPoolUseLaunch) {
                 return;
             }
+
+            if (managerWorker === undefined) {
+                // Create managerWorker, and start to trigger shrink.
+                managerWorker = new TaskPoolWorker(isTaskpoolSupportInterop);
+                managerWorker.retriggerShrink();
+            }
+
+            // Init taskpool worker pool.
             for (let i = 0; i < initialWorkersNumber; ++i) {
                 let w = new TaskPoolWorker(isTaskpoolSupportInterop);
                 workers.add(w);
             }
             isWorkersInitialized.set(true);
         })
+    }
+
+    /**
+     * @brief Try to trigger expand.
+     * @see taskpool.notifyExecuteTask
+     */
+    function tryTriggerExpand(): void {
+        managerWorker?.triggerExpand();
     }
 
     /**
@@ -1417,15 +1646,57 @@ export namespace taskpool {
      * @see taskpool.SequenceRunner.execute
      */
     function notifyExecuteTask(): void {
-        initWorkerPool();
+        ConcurrencyHelpers.lockGuard(taskCountMutex, () => {
+            waitingTasksNum++;
+        });
+        triggerExecuteNextTask();
+        tryTriggerExpand();
+    }
+
+    /**
+     * @brief Trigger execute task.
+     * @see taskpool.notifyExecuteTask
+     * @see taskpool.TaskPoolWorker.notifyTaskFinished
+     */
+    function triggerExecuteNextTask(): void {
         ConcurrencyHelpers.lockGuard(workersMutex, () => {
             let w = chooseWorkerForTask();
             if (!w.performTask() && getTaskNum() > 0) {
                 // Current getTask may get an undefined task when higher priority task hit the continueCount
                 // So here we try to performTask again to avoid task cannot be executed
                 w.performTask();
+            } else if (isIdleWorker(w) && w.idleTime == 0) {
+                idleWorkers.add(w);
+                w.idleTime = Chrono.nanoNow();
             }
         })
+    }
+
+    /**
+     * @brief Check the taskpool worker is idle or not.
+     * @see taskpool.TaskPoolWorker.notifyTaskFinished
+     * @see taskpool.triggerExecuteNextTask
+     */
+    function isIdleWorker(w: TaskPoolWorker): boolean {
+        let currentWorkerTaskCount = workerPendingTasksCount.get(w.workerId);
+        if(currentWorkerTaskCount) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * @brief Update taskpool worker state.
+     * @see taskpool.TaskPoolWorker.performTask
+     */
+    function removeFromIdleWorkers(worker: TaskPoolWorker): void {
+        for (let w: TaskPoolWorker of idleWorkers) {
+            if (worker == w) {
+                idleWorkers.delete(w);
+                w.idleTime = 0;
+                return;
+            }
+        }
     }
 
     /**
@@ -1433,7 +1704,7 @@ export namespace taskpool {
      * @see taskpool.notifyExecuteTask
      */
     function chooseWorkerForTask(): TaskPoolWorker {
-        let minTaskCount  = Int.MAX_VALUE;
+        let minTaskCount = Int.MAX_VALUE;
         let selectedWorker = Array.from(workers)[0];
         for (let w : TaskPoolWorker of workers) {
             let currentWorkerTaskCount = workerPendingTasksCount.get(w.workerId);
@@ -1441,8 +1712,8 @@ export namespace taskpool {
                 workerPendingTasksCount.set(w.workerId, 0);
                 return w;
             }
-            if(currentWorkerTaskCount < minTaskCount ) {
-                minTaskCount  = currentWorkerTaskCount;
+            if(currentWorkerTaskCount < minTaskCount) {
+                minTaskCount = currentWorkerTaskCount;
                 selectedWorker = w;
             }
         }
@@ -1557,6 +1828,7 @@ export namespace taskpool {
 
     native function isUsingLaunch(): boolean;
     native function isSupportingInterop(): boolean;
+    native function getTaskPoolWorkersLimit(): int;
 
     // managed mutex for taskpool containers below
     const mutex = ConcurrencyHelpers.mutexCreate();
@@ -1567,9 +1839,9 @@ export namespace taskpool {
     const pendingDelayedCanceled: Set<Task> = new Set<Task>();
     const tasksToBeCanceled: Set<Task> = new Set<Task>();
     // key is group id, value is count of associated tasks with this group
-    const waitingGroupTasks: Map<long, int> = new Map<long, int>();
-    const runningGroupTasks: Map<long, int> = new Map<long, int>();
-    const groupsToBeCanceled: Set<long> = new Set<long>();
+    const waitingGroupTasks: Map<int, int> = new Map<int, int>();
+    const runningGroupTasks: Map<int, int> = new Map<int, int>();
+    const groupsToBeCanceled: Set<int> = new Set<int>();
     // value is executing task on the associated coroutine
     const executingTasks: Map<CoroutineId, Task> = new Map<CoroutineId, Task>();
     // value is current executing task on the associated worker
@@ -1580,7 +1852,8 @@ export namespace taskpool {
     const workerPendingTasksCount: Map<WorkerId, Int> = new Map<WorkerId, Int>();
 
     const workersMutex = ConcurrencyHelpers.mutexCreate();
-    const workers: Set<TaskPoolWorker> = new Set<TaskPoolWorker>();
+    let workers: Set<TaskPoolWorker> = new Set<TaskPoolWorker>();
+    let idleWorkers: Set<TaskPoolWorker> = new Set<TaskPoolWorker>();
     let isWorkersInitialized: AtomicFlag = new AtomicFlag(false);
 
     const taskQueuesMutex = ConcurrencyHelpers.mutexCreate();
@@ -1598,6 +1871,19 @@ export namespace taskpool {
 
     const initialWorkersNumber: int = 2;
     const continuousExecutionCount: int = 5;
+
+    const taskCountMutex = ConcurrencyHelpers.mutexCreate();
+    let waitingTasksNum: int = 0;
+    let totalExecCount: int = 0;
+    let totalExecTime: int = 0;
+    let managerWorker: TaskPoolWorker | undefined = undefined;
+    let triggerInterval: int = 30000; // 30s is the default shrink interval.
+    let idleThreshold: int = 60000; // If the worker is idle for more than 60s, it will be released.
+    let workersLimit: int = max(4, getTaskPoolWorkersLimit()); // 4 is the minimum of workers limit.
+    const STEP_SIZE: int = 2;
+    const SHRINK_STEP: int = 4; // 4: try to release 4 threads every time.
+    const TASK_DURATION: int = 100; // 100: 100ms.
+    const WORKERS_MINIMUM: int = 1; // 1: minimum thread num when idle.
 }
 
 function launchPromise(f: Function, ...args: FixedArray<NullishType>): Promise<NullishType> {

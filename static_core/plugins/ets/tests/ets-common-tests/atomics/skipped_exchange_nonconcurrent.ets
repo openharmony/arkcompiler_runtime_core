@@ -16,16 +16,22 @@
 let buf: ArrayBuffer;
 let arr: Int32Array; 
 
-function main() {
+function testMain() {
     try {
         buf = new ArrayBuffer(4);
         arr = new Int32Array(buf, 0, 1);
 
         for (let i = 1; i < 100; i++) {
             let old = Atomics.exchange(arr, 0, i)
-            assertEQ(old, i - 1)
+            arktest.assertEQ(old, i - 1)
         }
     } catch (e) {
-        assertTrue(false)
+        arktest.assertTrue(false)
     }
+}
+
+function main() {
+    const suite = new arktest.ArkTestsuite('Function Atomics skipped_exchange_nonconcurrent tests')
+    suite.addTest('Function testMain', testMain)
+    return suite.run()
 }

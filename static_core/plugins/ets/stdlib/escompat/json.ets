@@ -15,6 +15,8 @@
 
 package escompat
 
+import { jsonx } from "std/core"
+
 // initialized in _initializerBlock_.ets
 const BigIntType: Type;
 
@@ -178,7 +180,7 @@ export class JSON {
      * @returns String - JSON representation of byte
      */
     public static stringify(d: String): String {
-        let sb = new StringBuilder([c'\"'])
+        let sb = new StringBuilder([c'\"'] as FixedArray<char>)
         let len = d.getLength()
 
         let prevChar: char = 0
@@ -275,13 +277,13 @@ export class JSON {
     public static stringify(
                 obj: NullishType,
                 replacer: ((key: string, value: NullishType) => NullishType) | undefined | null,
-                space?: string | number): string {
+                space?: string | int): string {
         const replacerOpt: ((key: string, value: NullishType) => NullishType) | undefined = (replacer === null) ? undefined : replacer
 
         if (space instanceof String || space === undefined) {
             return new JSONWriter(replacerOpt, space).write(obj)
         } else {
-            return new JSONWriter(replacerOpt, JSON.spaceFromNumber(space as number)).write(obj)
+            return new JSONWriter(replacerOpt, JSON.spaceFromNumber(space as int)).write(obj)
         }
     }
 
@@ -298,7 +300,7 @@ export class JSON {
      *
      * @returns String - JSON representation of Object
      */
-    public static stringify(obj: NullishType, replacer: FixedArray<string | number>, space?: string | number): string {
+    public static stringify(obj: NullishType, replacer: FixedArray<double | string>, space?: int | string): string {
         const filter : FixedArray<string> = new string[replacer.length]
         for (let i = 0; i < replacer.length; i++) {
             filter[i] = `${replacer[i]}`
@@ -307,11 +309,11 @@ export class JSON {
         if (space instanceof String || space === undefined) {
             return new JSONWriter(filter, space).write(obj)
         } else {
-            return new JSONWriter(filter, JSON.spaceFromNumber(space as number)).write(obj)
+            return new JSONWriter(filter, JSON.spaceFromNumber(space! as int)).write(obj)
         }
     }
 
-    public static stringify(obj: NullishType, replacer: Array<string | number>, space?: string | number): string {
+    public static stringify(obj: NullishType, replacer: Array<double | string>, space?: int | string): string {
         const filter : FixedArray<string> = new string[replacer.length]
         for (let i = 0; i < replacer.length; i++) {
             filter[i] = `${replacer[i]}`
@@ -320,18 +322,14 @@ export class JSON {
         if (space instanceof String || space === undefined) {
             return new JSONWriter(filter, space).write(obj)
         } else {
-            return new JSONWriter(filter, JSON.spaceFromNumber(space as number)).write(obj)
+            return new JSONWriter(filter, JSON.spaceFromNumber(space! as int)).write(obj)
         }
     }
 
-    private static spaceFromNumber(space: number): String {
+    private static spaceFromNumber(space: int): String {
         let spacesCount = 0
-        if (space > 0) {
-            if (space > JSON.JSON_SPACE_INDENT_LIMIT) {
-                spacesCount = JSON.JSON_SPACE_INDENT_LIMIT
-            } else {
-                spacesCount = space as int
-            }
+        if (space > 0)  {
+            spacesCount = (space > JSON.JSON_SPACE_INDENT_LIMIT) ? JSON.JSON_SPACE_INDENT_LIMIT : space
         }
 
         return " ".repeat(spacesCount)
@@ -546,6 +544,26 @@ export class JSON {
         return s.toString()
     }
 
+    /**
+      * Converts a JsonElement to a JSON string.
+     * @param elem - The JsonElement to stringify
+     * @returns The JSON string representation
+     */
+    public static stringifyJsonElement(elem: jsonx.JsonElement): string {
+        return stringifyElementRecursively(elem, undefined, undefined, 0)
+    }
+
+    /**
+      * Converts a JsonElement to a JSON string with optional formatting.
+     * @param elem - The JsonElement to stringify
+     * @param replacer - Array of keys to include (currently not implemented)
+     * @param space - String or number of spaces for indentation
+     * @returns The JSON string representation
+     */
+    public static stringifyJsonElement(elem: jsonx.JsonElement, replacer?: (double | string)[], space?: int | string): string {
+        return stringifyElementRecursively(elem, replacer, space, 0)
+    }
+
     private static IsBoxedType(typ : Type) : boolean {
         return typ instanceof BooleanType
                 || typ instanceof ByteType
@@ -576,6 +594,9 @@ export class JSON {
         } else if (typ instanceof ArrayType) {
             let et = (typ as ArrayType).getElementType()
             ok = JSON.checkType(et, used)
+        } else if (typ instanceof UnionType) {
+            // NOTE(lyupaanastasia) parse union #27136
+            throw new Error("UnionType is not supported yet")
         } else if (typ instanceof StringType
                     || typ instanceof DoubleType
                     || typ instanceof BooleanType
@@ -602,19 +623,18 @@ export class JSON {
         return JSON.parse<T>(text, undefined, type)
     }
 
-    public static parse<T>(text: string, reviver: ((key: string, value: NullishType) => NullishType) | undefined, type: Type, bigIntMode?: int): Nullish<T> {
+    public static parse<T>(text: string, reviver: ((key: string, value: NullishType) => NullishType) | undefined, type: Type, options?: jsonx.ParseOptions): Nullish<T> {
         if (!JSON.checkType(type, new Array<TypeColor>())) {
             throw new Error("Incorrect type: " + type.toString())
         }
 
-        if (bigIntMode == undefined) {
-            bigIntMode = 0
-        } else if (bigIntMode > 2 || bigIntMode < 0) {
-            throw new Error("bigIntMode value should be from 0 to 2, current value is" + bigIntMode)
+        let bigIntOpt: int = options ? options.bigIntMode as int : 0
+        if (bigIntOpt > 2 || bigIntOpt < 0) {
+            throw new Error("bigIntMode value should be from 0 to 2, current value is" + bigIntOpt)
         }
 
         let jsonValue = JSONParser.parse(text)
-        const parsingResult = new JSONValueParser(reviver, bigIntMode).parse(jsonValue, type) as T
+        const parsingResult = new JSONValueParser(reviver, bigIntOpt).parse(jsonValue, type) as T
 
         if (reviver !== undefined) {
             return reviver("", parsingResult) as T
@@ -622,6 +642,35 @@ export class JSON {
             return parsingResult
         }
     }
+
+    /**
+      * Parses a JSON string and returns a JsonElement.
+      * @param {string} text - The JSON string to parse
+      * @returns {JsonElement} The parsed JSON element
+      * @throws {JsonParseError} If the JSON string is invalid
+      */
+    static parseJsonElement(text: string): jsonx.JsonElement {
+        return new JsonElementParser(text).parse()
+    }
+
+    /**
+      * Parses a JSON string with a reviver function and returns a JsonElement.
+      * @param {string} text - The JSON string to parse
+      * @param {(key: string, value: JsonElement) => JsonElement} reviver - Function to transform values
+      * @returns {JsonElement} The parsed JSON element
+      * @throws {JsonParseError} If the JSON string is invalid
+      */
+    static parseJsonElement(text: string, reviver: (key: string, value: jsonx.JsonElement) => jsonx.JsonElement): jsonx.JsonElement {
+        return new JsonElementParser(text, reviver).parse()
+    }
+}
+
+export interface JsonElementDeserializable {
+    /**
+        * Serializes an object to a JsonElement.
+        * @returns {JsonElement} The JSON representation of the object
+        */
+    toJSON(): jsonx.JsonElement
 }
 
 class JSONWriter {
@@ -683,8 +732,8 @@ class JSONWriter {
             this.buffer.append("undefined")
         } else if (obj instanceof String) {
             this.buffer.append(JSON.stringify(obj as String))
-        } else if (obj instanceof RegExpExecArray) {
-            this.buffer.append(JSON.stringify((obj as RegExpExecArray).result))
+        } else if (obj instanceof RegExpResultArray) {
+            this.buffer.append(JSON.stringify((obj as RegExpResultArray).result))
         } else if(obj instanceof Tuple) {
             this.writeTupleValue(obj);
         } else if (obj instanceof Record) {
@@ -692,17 +741,24 @@ class JSONWriter {
         } else if (obj instanceof JsonReplacer) {
             let temp: Record<String, NullishType> = obj.jsonReplacer()
             this.writeESCompatRecord(temp)
+        } else if (obj instanceof ESValue) {
+            this.writeInteropESValue(obj)
+        } else if (obj instanceof JsonElementDeserializable) {
+            this.buffer.append(JSON.stringifyJsonElement((obj as JsonElementDeserializable).toJSON()))
+        } else if (obj instanceof ArrayBuffer) {
+            this.buffer.append(JSONObject.EMPTY)
         } else if (this.writeValueTypeWrapper(obj)) {
             // nothing to do - write completed successfully
         } else {
             const objType = Type.of(obj)
             if (objType.getName() == "escompat.Date") {
                 this.buffer.append("\"").append((obj as Date).toISOString()).append("\"")
-            }
-            else if (objType.getName() == JSONWriter.STD_CORE_INTEROP_JSVALUE_TYPE.getName()) {
+            // } else if (objType.getName() == "@ohos.buffer.buffer.Buffer") {
+            //     this.buffer.append(JSON.stringifyJsonElement((obj as JsonElementDeserializable).toJSON()))
+            } else if (objType.getName() == JSONWriter.STD_CORE_INTEROP_JSVALUE_TYPE.getName()) {
                 this.buffer.append(JSON.stringify(obj as JSValue))
             } else if (objType instanceof ArrayType) {
-                this.writeArrayValue(Value.of(obj) as ArrayValue, objType as ArrayType)
+                this.writeArrayValue(reflect.Value.of(obj) as ArrayValue, objType as ArrayType)
             } else if (objType.getName() == JSONWriter.ESCOMPAT_ARRAY_TYPE.getName()) {
                 this.writeEscompatArray(obj as Array<Object>)
             } else if (objType.getName() == JSONWriter.ESCOMPAT_SET_TYPE.getName() ||
@@ -730,7 +786,7 @@ class JSONWriter {
 
         const objType = Type.of(obj) as ClassType
 
-        const writableFields = this.getWritableFields(objType, Value.of(obj) as ClassValue)
+        const writableFields = this.getWritableFields(objType, reflect.Value.of(obj) as ClassValue)
 
         let fieldDumped = false
         if (writableFields.length > 0) {
@@ -756,7 +812,7 @@ class JSONWriter {
         this.buffer = currentBuffer
     }
 
-    private writeTupleElements(tupleFields: Array<[Field, Value]>): boolean {
+    private writeTupleElements(tupleFields: Array<[Field, reflect.Value]>): boolean {
         const FIELD_VALUE = 1
 
         let fieldDumped = false
@@ -823,7 +879,7 @@ class JSONWriter {
         this.writePadding()
         this.buffer.append("}")
 
-        currentBuffer.append(entryDumped ? this.buffer.toString() : "{}")
+        currentBuffer.append(entryDumped ? this.buffer.toString() : JSONObject.EMPTY)
 
         this.buffer = currentBuffer
     }
@@ -872,14 +928,18 @@ class JSONWriter {
     }
 
     private writeRecordEntry<K extends Number | string, V>(entryKey: K, entryVal: V, entryDumped: boolean): boolean {
-        const entryValType = Type.of(entryVal)
-        if (entryValType instanceof LambdaType) {
-            return entryDumped
-        }
-
         const entryName = (entryKey as object).toString()
         const replacedVal = this.useReplacer ? this.replacer!(entryName, entryVal) : entryVal
         return this.writeField(entryName, replacedVal, entryDumped)
+    }
+
+    private writeInteropESValue(obj: ESValue): void {
+        try {
+            const json = JSON.stringify(obj.unwrap())
+            this.buffer.append(json.toString())
+        } catch (e: TypeError) {
+            throw new TypeError("cyclic object value")
+        }
     }
 
     private writeClassValue(obj: Object, objType: ClassType): void {
@@ -892,7 +952,7 @@ class JSONWriter {
             this.indentLevel += 1
         }
 
-        const writableFields = this.getWritableFields(objType, Value.of(obj) as ClassValue)
+        const writableFields = this.getWritableFields(objType, reflect.Value.of(obj) as ClassValue)
 
         let fieldDumped = false
         if (writableFields.length > 0) {
@@ -909,13 +969,18 @@ class JSONWriter {
         this.writePadding()
         this.buffer.append("}")
 
-        currentBuffer.append(fieldDumped ? this.buffer.toString() : "{}")
+        currentBuffer.append(fieldDumped ? this.buffer.toString() : JSONObject.EMPTY)
 
         this.buffer = currentBuffer
     }
 
     private writeField(fieldName: string, fieldVal: NullishType, fieldDumped: boolean): boolean {
         if (fieldVal === undefined) {
+            return fieldDumped
+        }
+
+        const fieldValType = Type.of(fieldVal)
+        if (fieldValType instanceof LambdaType) {
             return fieldDumped
         }
 
@@ -944,7 +1009,7 @@ class JSONWriter {
         return fieldDumped
     }
 
-    private writeClassFields(writableFields: Array<[Field, Value]>): boolean {
+    private writeClassFields(writableFields: Array<[Field, reflect.Value]>): boolean {
         const FIELD_TYPE = 0
         const FIELD_VALUE = 1
 
@@ -952,8 +1017,8 @@ class JSONWriter {
         for (let fieldIdx = 0; fieldIdx < writableFields.length; fieldIdx++) {
             const fieldTypeValuePair = writableFields[fieldIdx]
 
-            const objField = fieldTypeValuePair[FIELD_TYPE]
-            const objFieldValue = fieldTypeValuePair[FIELD_VALUE]
+            const objField = fieldTypeValuePair[0] as Field
+            const objFieldValue = fieldTypeValuePair[1] as reflect.Value
 
             const objToDump = this.useReplacer ? this.replacer!(objField.getName(), objFieldValue.getData()) : objFieldValue.getData()
             fieldDumped = this.writeField(objField.getName(), objToDump, fieldDumped)
@@ -962,18 +1027,18 @@ class JSONWriter {
         return fieldDumped
     }
 
-    private checkSameRename(field: Field, fields: Array<[Field, Value]>): boolean {
-        return fields.some((value: [Field, Value], index: number, array:Array<[Field, Value]>)
+    private checkSameRename(field: Field, fields: Array<[Field, reflect.Value]>): boolean {
+        return fields.some((value: [Field, reflect.Value], index: number, array:Array<[Field, reflect.Value]>)
             => {return value[0].getName() == field.getName()});
     }
 
-    private findKeyIndex(field: Field, fields: Array<[Field, Value]>): number {
-        return fields.findIndex((value: [Field, Value], index: number, array:Array<[Field, Value]>)
+    private findKeyIndex(field: Field, fields: Array<[Field, reflect.Value]>): number {
+        return fields.findIndex((value: [Field, reflect.Value], index: number, array:Array<[Field, reflect.Value]>)
             => {return value[0].getName() == field.getName()});
     }
 
-    private getWritableFields(classType: ClassType, classValue: ClassValue): Array<[Field, Value]> {
-        const writableFields = new Array<[Field, Value]>()
+    private getWritableFields(classType: ClassType, classValue: ClassValue): Array<[Field, reflect.Value]> {
+        const writableFields = new Array<[Field, reflect.Value]>()
         let hasJsonIgnore: boolean = false
         let fieldRename : string | undefined = undefined
 
@@ -984,52 +1049,52 @@ class JSONWriter {
                     continue
                 }
 
-                const fieldType = classType.getFieldByName(fieldName)
+                const field = classType.getFieldByName(fieldName)
                 hasJsonIgnore = JSONAPI.getJSONStringifyIgnoreByName(classType.cls, fieldName);
-                if (hasJsonIgnore || !this.isWritableFieldType(fieldType)) {
+                if (hasJsonIgnore || field.isStatic()) {
                     continue
                 }
-
                 fieldRename = JSONAPI.getJSONRenameByName(classType.cls, fieldName);
                 if (fieldRename != undefined) {
                     if (classType.hasField(fieldRename)) {
                         throw new Error("Cannot rename " + fieldRename + " in keys of " + classType.getName())
                     } else {
-                        fieldType.name = fieldRename
+                        field.name = fieldRename
                     }
-                    if (this.checkSameRename(fieldType, writableFields)) {
-                        throw new Error("Cannot double rename " + fieldType.getName() + " in keys of " + classType.getName())
+                    if (this.checkSameRename(field, writableFields)) {
+                        throw new Error("Cannot double rename " + field.getName() + " in keys of " + classType.getName())
                     }
                 }
+
                 const fieldValue = classValue.getFieldByName(fieldName)
 
-                const fieldTypeValuePair: [Field, Value] = [fieldType, fieldValue]
+                const fieldTypeValuePair: [Field, reflect.Value] = [field, fieldValue]
                 writableFields.push(fieldTypeValuePair)
             }
         } else {
             const fieldsCount = classValue.getFieldsNum()
             for (let fieldIdx = 0; fieldIdx < fieldsCount; fieldIdx++) {
-                const fieldType = classType.getField(fieldIdx)
-                hasJsonIgnore = JSONAPI.getJSONStringifyIgnoreByIdx(classType.cls, fieldIdx)
-                if (hasJsonIgnore || !this.isWritableFieldType(fieldType)) {
+                const field = classType.getField(fieldIdx)
+                hasJsonIgnore = JSONAPI.getJSONStringifyIgnoreByIdx(classType.cls, fieldIdx);
+                if (hasJsonIgnore || field.isStatic()) {
                     continue
                 }
-
-                const index: number = this.findKeyIndex(fieldType, writableFields)
+                const index: int = this.findKeyIndex(field, writableFields).toInt()
                 fieldRename = JSONAPI.getJSONRenameByIdx(classType.cls, fieldIdx);
                 if (fieldRename != undefined) {
                     if (classType.hasField(fieldRename)) {
                         throw new Error("Cannot rename " + fieldRename + " in keys of " + classType.getName())
                     } else {
-                        fieldType.name = fieldRename
+                        field.name = fieldRename
                     }
-                    if (this.checkSameRename(fieldType, writableFields)) {
-                        throw new Error("Cannot double rename " + fieldType.getName() + " in keys of " + classType.getName())
+                    if (this.checkSameRename(field, writableFields)) {
+                        throw new Error("Cannot double rename " + field.getName() + " in keys of " + classType.getName())
                     }
                 }
+
                 const fieldValue = classValue.getField(fieldIdx)
 
-                const fieldTypeValuePair: [Field, Value] = [fieldType, fieldValue]
+                const fieldTypeValuePair: [Field, reflect.Value] = [field, fieldValue]
                 if (fieldRename != undefined || index == -1) {
                     writableFields.push(fieldTypeValuePair)
                 } else {
@@ -1041,16 +1106,6 @@ class JSONWriter {
         return writableFields
     }
 
-    private isWritableFieldType(field: Field): boolean {
-        const fieldType = field.getType()
-
-        if (field.isStatic() || fieldType instanceof LambdaType) {
-            return false
-        }
-
-        return true
-    }
-
     private writeArrayValue(arrayValue: ArrayValue, arrayType: ArrayType): void {
         this.buffer.append("[")
 
@@ -1059,7 +1114,7 @@ class JSONWriter {
             this.indentLevel += 1
         }
 
-        const arrayLength = arrayValue.getLength() as int
+        const arrayLength = arrayValue.getLength().toInt()
         if (arrayLength > 0) {
             const array: Object = __narrowAny(arrayValue.getData())!
 
@@ -1091,7 +1146,7 @@ class JSONWriter {
         this.buffer.append("]")
     }
 
-    private writeArrayElementValue(elemValue: Value, elemIndex: int): void {
+    private writeArrayElementValue(elemValue: reflect.Value, elemIndex: int): void {
         this.writeObjectsArrayElement(elemValue.getData(), elemIndex)
     }
 
@@ -1139,7 +1194,7 @@ class JSONWriter {
         if (array.length > 0) {
             this.path.add(array)
 
-            const lastElementIndex = (array.length as int) - 1
+            const lastElementIndex = array.length.toInt() - 1
 
             for (let idx = 0; idx < lastElementIndex; idx++) {
                 this.writeObjectsArrayElement(array[idx], idx)
@@ -1184,10 +1239,6 @@ class JSONWriter {
             return
         }
 
-        if (Type.of(obj).isPrimitive()) {
-            return
-        }
-
         const cycleDetected = this.path.has(__narrowAny<object>(obj))
         if (cycleDetected) {
             throw new TypeError("cyclic object value")
@@ -1201,6 +1252,174 @@ class JSONWriter {
         }
     }
 }
+
+/**
+* Internal method to stringify a JsonElement recursively.
+* @param {JsonElement} elem - The JsonElement to stringify
+* @param {(double | string)[] | undefined} replacer - Array of keys to include (currently not implemented)
+* @param {int | string | undefined} space - String or number of spaces for indentation
+* @param {number} depth - Current nesting depth for indentation
+* @returns {string} The JSON string representation
+* @private
+*/
+function stringifyElementRecursively(elem: jsonx.JsonElement, replacer?: (double | string)[], space?: int | string, depth: int = 0): string {
+    const indentStr = getIndentation(space, depth)
+    const nextIndentStr = getIndentation(space, depth + 1)
+    const hasIndentation = space != undefined && nextIndentStr.length > 0
+
+    switch (elem.jsonType) {
+        case jsonx.JsonType.JsonNull:
+            return "null"
+
+        case jsonx.JsonType.JsonUndefined:
+            return "undefined"
+
+        case jsonx.JsonType.JsonTrue:
+            return "true"
+
+        case jsonx.JsonType.JsonFalse:
+            return "false"
+
+        case jsonx.JsonType.JsonString:
+            return escapeString(elem.asString())
+
+        case jsonx.JsonType.JsonNumber:
+            const intValue = elem.tryAsInteger()
+            if (intValue != undefined) {
+                return intValue.toString()
+            }
+            const doubleValue = elem.tryAsDouble()
+            if (doubleValue != undefined) {
+                return doubleValue.toString()
+            }
+            return "null"
+
+        case jsonx.JsonType.JsonArray:
+            const array = elem.asArray()
+            if (array.length == 0) {
+                return "[]"
+            }
+            let arrayResult = "["
+            if (hasIndentation) {
+                arrayResult += "\n"
+            }
+            for (let i = 0; i < array.length; i++) {
+                if (hasIndentation) {
+                    arrayResult += nextIndentStr
+                }
+                arrayResult += stringifyElementRecursively(array[i], replacer, space, depth + 1)
+                if (i < array.length - 1) {
+                    arrayResult += ","
+                }
+                if (hasIndentation) {
+                    arrayResult += "\n"
+                }
+            }
+            if (hasIndentation) {
+                arrayResult += indentStr
+            }
+            arrayResult += "]"
+            return arrayResult
+
+        case jsonx.JsonType.JsonObject:
+            const it = elem.$_iterator()
+            const entries = Array.from(it)
+            if (entries.length == 0) {
+                return "{}"
+            }
+            let objectResult = "{"
+            if (hasIndentation) {
+                objectResult += "\n"
+            }
+            for (let i = 0; i < entries.length; i++) {
+                const key = entries[i][0]
+                const value = entries[i][1]
+                if (hasIndentation) {
+                    objectResult += nextIndentStr
+                }
+                objectResult += escapeString(key)
+                objectResult += ":"
+                if (hasIndentation) {
+                    objectResult += " "
+                }
+                objectResult += stringifyElementRecursively(value, replacer, space, depth + 1)
+                if (i < entries.length - 1) {
+                    objectResult += ","
+                }
+                if (hasIndentation) {
+                    objectResult += "\n"
+                }
+            }
+            if (hasIndentation) {
+                objectResult += indentStr
+            }
+            objectResult += "}"
+            return objectResult
+
+        default:
+            return "null"
+    }
+}
+
+function escapeString(str: string): string {
+    let result = "\""
+    for (let i = 0; i < str.length; i++) {
+        const ch = str.charAt(i)
+        switch (ch) {
+            case c'\"':
+                result += "\\\""
+                break
+            case c'\\':
+                result += "\\\\"
+                break
+            case c'\b':
+                result += "\\b"
+                break
+            case c'\f':
+                result += "\\f"
+                break
+            case c'\n':
+                result += "\\n"
+                break
+            case c'\r':
+                result += "\\r"
+                break
+            case c'\t':
+                result += "\\t"
+                break
+            default:
+                if (ch < 32) {
+                    let int_value = new Int(ch.toInt());
+                    result += "\\u" + int_value.toString(16).padStart(4, "0")
+                } else {
+                    result += ch
+                }
+                break
+        }
+    }
+    result += "\""
+    return result
+}
+
+
+function getIndentation(space?: int | string, depth: int = 0): string {
+    if (space == undefined) {
+        return ""
+    }
+    if (space! instanceof string)
+    {
+        let unit = (space! as string).substring(0, 10)
+        return unit.repeat(depth)
+    }
+    let lower = (space! as int) > 0
+        ? (space! as int)
+        : 0
+    let aligned = lower > 10
+        ? 10
+        : lower
+    return " ".repeat(aligned).repeat(depth)
+}
+
 
 class TypeColor {
     readonly static VISITED : int = 1
@@ -1492,6 +1711,9 @@ class JSONValueParser {
     parse(value: JSONValue, typ: Type): NullishType {
         if (value instanceof JSONObject && typ instanceof ClassType) {
             return this.parseObject(value as JSONObject, typ as ClassType)
+        } else if (value instanceof JSONObject && typ instanceof UnionType) {
+            // NOTE(lyupaanastasia) parse union #27136
+            throw new Error("UnionType is not supported yet")
         } else if (value instanceof JSONArray && typ instanceof ArrayType) {
             return this.parseArray(value as JSONArray, typ as ArrayType)
         } else if (value instanceof JSONNumber && (typ instanceof DoubleType || typ.equals(BigIntType) || typ instanceof IntType || typ instanceof LongType || typ instanceof ByteType || typ instanceof ShortType || typ instanceof FloatType)) {
@@ -1510,11 +1732,11 @@ class JSONValueParser {
     }
 
     private classFieldSetter(classVal: ClassValue, fieldName: string, fieldVal: NullishType): void {
-        classVal.setFieldByName(fieldName, Value.of(fieldVal))
+        classVal.setFieldByName(fieldName, reflect.Value.of(fieldVal))
     }
 
     private parseObject(jsonObj: JSONObject, classType: ClassType): Object {
-        let setClassFieldFn = (cv: ClassValue, fn: string, fv: NullishType) => { cv.setFieldByName(fn, Value.of(fv)) }
+        let setClassFieldFn = (cv: ClassValue, fn: string, fv: NullishType) => { cv.setFieldByName(fn, reflect.Value.of(fv)) }
 
         if (this.reviver != undefined) {
             setClassFieldFn = (classVal: ClassValue, fieldName: string, fieldVal: NullishType): void => {
@@ -1522,13 +1744,13 @@ class JSONValueParser {
 
                 // setFieldByName doesn't allow null/undefined values
                 if (revivedVal != null) {
-                    classVal.setFieldByName(fieldName, Value.of(revivedVal))
+                    classVal.setFieldByName(fieldName, reflect.Value.of(revivedVal))
                 }
             }
         }
 
         let obj = classType.make()
-        let classVal = Value.of(obj) as ClassValue
+        let classVal = reflect.Value.of(obj) as ClassValue
         let hasJsonParseIgnore: boolean = false
         let hasJsonStringifyIgnore: boolean = false
         const jsonObjFields = jsonObj.getFields()
@@ -1564,7 +1786,7 @@ class JSONValueParser {
 
     private parseArray(jVal: JSONArray, aType: ArrayType): Object | null {
         let len = jVal.values.length
-        let arr = aType.make(len as int) as FixedArray<NullishType>
+        let arr = aType.make(len.toInt()) as FixedArray<NullishType>
 
         let setArrayElementFn = (a: FixedArray<NullishType>, i: int, v: NullishType) => { a[i] = v }
 
@@ -1580,6 +1802,530 @@ class JSONValueParser {
             setArrayElementFn(arr, i, elem)
         }
         return arr
+    }
+}
+
+export enum JsonTokenKind
+{
+    CurlyOpen    = 0,
+    CurlyClose   = 1,
+    SquareOpen   = 2,
+    SquareClose  = 3,
+    Colon        = 4,
+    Comma        = 5,
+    String       = 6,
+    Number       = 7,
+    True         = 8,
+    False        = 9,
+    Null         = 10
+}
+
+export class JsonTokenSpan
+{
+    start: int
+    end: int
+}
+
+export class JsonToken
+{
+    kind: JsonTokenKind
+    span: JsonTokenSpan
+    value: string
+    constructor(kind: JsonTokenKind, span: JsonTokenSpan, value: string) {
+        this.kind = kind
+        this.span = span
+        this.value = value
+    }
+}
+
+// Grammar:
+// =============================================================
+// start  ::= value
+// value  ::= object | array | double | string | true | false | null
+// object ::= "{" [pair ("," pair)*] "}"
+// array  ::= "[" [value ("," value)*] "]"
+// pair   ::= string ":" value
+// string ::= ESCAPED_STRING
+// number ::= SIGNED_NUMBER
+// true   ::= "true"
+// false  ::= "false"
+// null   ::= "null"
+
+/**
+ * Error thrown when parsing JSON fails.
+ */
+export class JsonParseError extends Error {
+    public constructor(msg: string, start_offset?: int, end_offset?: int) {
+        super(`${msg} at ${start_offset}..${end_offset}`)
+    }
+}
+
+class JsonElementParser
+{
+    source: string
+    tokens: Array<JsonToken>
+    position: int
+    reviver?: (key: string, value: jsonx.JsonElement) => jsonx.JsonElement
+
+    constructor(source: string) {
+        this.source = source
+        this.tokens = JsonLexer.fromString(source).tokenize()
+        this.position = 0
+    }
+
+    constructor(source: string, reviver: (key: string, value: jsonx.JsonElement) => jsonx.JsonElement) {
+        this.source = source
+        this.tokens = JsonLexer.fromString(source).tokenize()
+        this.position = 0
+        this.reviver = reviver
+    }
+
+    public lookahead(offset: int): JsonToken | undefined
+    {
+        if (this.position + offset >= this.tokens.length) {
+            return undefined
+        }
+        return this.tokens[this.position + offset]
+    }
+
+    public expect(kind: JsonTokenKind): JsonToken
+    {
+        let token = this.lookahead(0)
+        if (token == undefined || token.kind != kind) {
+            let start = token?.span.start ?? 0;
+            let end = token?.span.end ?? 0;
+            throw new JsonParseError(`Expected ${kind} but got ${token?.kind}`, start, end)
+        }
+        this.position++
+        return token
+    }
+
+    public parse(): jsonx.JsonElement
+    {
+        let result = this.parseValue()
+        if (this.reviver != undefined) {
+            return this.reviver!("", result)
+        }
+        return result
+    }
+
+    private parseValue(): jsonx.JsonElement
+    {
+        let maybe_token = this.lookahead(0)
+        if (maybe_token == undefined) {
+            throw new JsonParseError("Unexpected end of input", 0, 0)
+        }
+        if (maybe_token.kind == JsonTokenKind.String) {
+            return this.parseString()
+        }
+        if (maybe_token.kind == JsonTokenKind.Number) {
+            return this.parseNumber()
+        }
+        if (maybe_token.kind == JsonTokenKind.True) {
+            return this.parseBool()
+        }
+        if (maybe_token.kind == JsonTokenKind.False) {
+            return this.parseBool()
+        }
+        if (maybe_token.kind == JsonTokenKind.Null) {
+            return this.parseNull()
+        }
+        if (maybe_token.kind == JsonTokenKind.CurlyOpen) {
+            return this.parseObject()
+        }
+        if (maybe_token.kind == JsonTokenKind.SquareOpen) {
+            return this.parseArray()
+        }
+        throw new JsonParseError("Expected string, number, true, false, null, object, or array", maybe_token.span.start, maybe_token.span.end)
+    }
+
+    private parseArray(): jsonx.JsonElement
+    {
+        this.expect(JsonTokenKind.SquareOpen)
+        let array = new Array<jsonx.JsonElement>()
+        let index = 0
+        while (this.lookahead(0)?.kind != JsonTokenKind.SquareClose) {
+            let value = this.parseValue()
+            if (this.reviver != undefined) {
+                value = this.reviver!(`${index}`, value)
+            }
+            array.push(value)
+            index++
+            if (this.lookahead(0)?.kind == JsonTokenKind.Comma) {
+                this.expect(JsonTokenKind.Comma)
+            }
+        }
+        this.expect(JsonTokenKind.SquareClose)
+        return jsonx.JsonElement.createArray(array)
+    }
+
+    private parseObject(): jsonx.JsonElement
+    {
+        this.expect(JsonTokenKind.CurlyOpen)
+        let object = new Map<string, jsonx.JsonElement>()
+        while (this.lookahead(0)?.kind != JsonTokenKind.CurlyClose) {
+            let pair = this.parsePair()
+            let key = pair[0]
+            let value = pair[1]
+            if (this.reviver != undefined) {
+                value = this.reviver!(key, value)
+            }
+            object.set(key, value)
+            if (this.lookahead(0)?.kind == JsonTokenKind.Comma) {
+                this.expect(JsonTokenKind.Comma)
+            }
+        }
+        this.expect(JsonTokenKind.CurlyClose)
+        return jsonx.JsonElement.createObject(object)
+    }
+
+    private parsePair(): [string, jsonx.JsonElement]
+    {
+        let key = this.parseString().asString()
+        this.expect(JsonTokenKind.Colon)
+        let value = this.parseValue()
+        return [key, value] as [string, jsonx.JsonElement]
+    }
+
+    private parseString(): jsonx.JsonElement
+    {
+        let token = this.expect(JsonTokenKind.String)
+        return jsonx.JsonElement.createString(token.value)
+    }
+
+    private parseNumber(): jsonx.JsonElement
+    {
+        // can be extended with bigints later
+        let token = this.expect(JsonTokenKind.Number)
+        if (token.value.includes(".")) {
+            return jsonx.JsonElement.createDouble(Double.parseFloat(token.value))
+        }
+        return jsonx.JsonElement.createInteger(Double.parseInt(token.value).toInt())
+    }
+
+    private parseBool(): jsonx.JsonElement
+    {
+        let maybe_token = this.lookahead(0)
+        if (maybe_token == undefined) {
+            throw new JsonParseError("Unexpected end of input", 0, 0)
+        }
+        if (maybe_token.kind == JsonTokenKind.True) {
+            this.expect(JsonTokenKind.True)
+            return jsonx.JsonElement.createBoolean(true)
+        }
+        if (maybe_token.kind == JsonTokenKind.False) {
+            this.expect(JsonTokenKind.False)
+            return jsonx.JsonElement.createBoolean(false)
+        }
+        throw new JsonParseError("Expected true or false", maybe_token.span.start, maybe_token.span.end)
+    }
+
+    private parseNull(): jsonx.JsonElement
+    {
+        this.expect(JsonTokenKind.Null)
+        return jsonx.JsonElement.createNull()
+    }
+}
+
+export class JsonLexer
+{
+    chars: char[]
+    index: int
+    constructor(chars: char[]) {
+        this.chars = chars
+        this.index = 0
+    }
+    public static fromString(json: string): JsonLexer {
+        return new JsonLexer(json.getChars())
+    }
+
+    /**
+     * Tokenizes the JSON input and returns an array of tokens.
+     * @returns Array of JsonToken objects representing the tokenized input
+     * @throws JsonError if invalid JSON syntax is encountered
+     */
+    public tokenize(): JsonToken[] {
+        let tokens = new Array<JsonToken>()
+
+        while (!this.isAtEnd()) {
+            this.skipWhitespace()
+            if (this.isAtEnd()) break
+
+            let token = this.nextToken()
+            if (token != null) {
+                tokens.push(token)
+            }
+        }
+
+        return tokens
+    }
+
+    /**
+     * Reads the next token from the input
+     * @returns JsonToken or null if no valid token found
+     * @throws JsonError if invalid syntax is encountered
+     */
+    private nextToken(): JsonToken | null {
+        let start = this.index
+        let ch = this.advance()
+
+        switch (ch) {
+            case c'{':
+                return this.makeToken(JsonTokenKind.CurlyOpen, start, "{")
+            case c'}':
+                return this.makeToken(JsonTokenKind.CurlyClose, start, "}")
+            case c'[':
+                return this.makeToken(JsonTokenKind.SquareOpen, start, "[")
+            case c']':
+                return this.makeToken(JsonTokenKind.SquareClose, start, "]")
+            case c':':
+                return this.makeToken(JsonTokenKind.Colon, start, ":")
+            case c',':
+                return this.makeToken(JsonTokenKind.Comma, start, ",")
+            case c'"':
+                return this.readString(start)
+            case c't':
+                return this.readKeyword(start, "true", JsonTokenKind.True)
+            case c'f':
+                return this.readKeyword(start, "false", JsonTokenKind.False)
+            case c'n':
+                return this.readKeyword(start, "null", JsonTokenKind.Null)
+            default:
+                if (this.isDigit(ch) || ch == c'-') {
+                    this.index-- // Back up to re-read the character
+                    return this.readNumber(start)
+                }
+                throw new JsonParseError(`Unexpected character '${ch}' at position ${start}`, start, start)
+        }
+    }
+
+    /**
+     * Reads a JSON string token, handling escape sequences
+     * @param start Starting position of the string
+     * @returns JsonToken representing the string
+     * @throws JsonError if string is malformed
+     */
+    private readString(start: int): JsonToken {
+        let value = ""
+
+        while (!this.isAtEnd() && this.peek() != c'"') {
+            let ch = this.advance()
+            if (ch == c'\\') {
+                if (this.isAtEnd()) {
+                    throw new JsonParseError("Unterminated string escape at end of input", start, this.index)
+                }
+                let escaped = this.advance()
+                switch (escaped) {
+                    case c'"':
+                        value += "\""
+                        break
+                    case c'\\':
+                        value += "\\"
+                        break
+                    case c'/':
+                        value += "/"
+                        break
+                    case c'b':
+                        value += "\b"
+                        break
+                    case c'f':
+                        value += "\f"
+                        break
+                    case c'n':
+                        value += "\n"
+                        break
+                    case c'r':
+                        value += "\r"
+                        break
+                    case c't':
+                        value += "\t"
+                        break
+                    case c'u':
+                        value += this.readUnicodeEscape()
+                        break
+                    default:
+                        throw new JsonParseError(`Invalid escape sequence '\\${escaped}' in string`, start, this.index)
+                }
+            } else {
+                value += ch
+            }
+        }
+
+        if (this.isAtEnd()) {
+            throw new JsonParseError("Unterminated string", start, this.index)
+        }
+
+        this.advance() // Consume closing quote
+        return this.makeToken(JsonTokenKind.String, start, value)
+    }
+
+    /**
+     * Reads a Unicode escape sequence (\uXXXX)
+     * @returns The Unicode character as a string
+     * @throws JsonError if escape sequence is malformed
+     */
+    private readUnicodeEscape(): string {
+        let codeStr = ""
+        for (let i = 0; i < 4; i++) {
+            if (this.isAtEnd()) {
+                throw new JsonParseError("Incomplete Unicode escape sequence")
+            }
+            let ch = this.advance()
+            if (!this.isHexDigit(ch)) {
+                throw new JsonParseError(`Invalid hexadecimal digit '${ch}' in Unicode escape`, this.index)
+            }
+            codeStr += ch
+        }
+
+        let codePoint = Double.parseInt(codeStr, 16).toInt()
+        return String.fromCharCode(codePoint.toDouble())
+    }
+
+    /**
+     * Reads a JSON number token
+     * @param start Starting position of the number
+     * @returns JsonToken representing the number
+     * @throws JsonError if number format is invalid
+     */
+    private readNumber(start: int): JsonToken {
+        let value = ""
+
+        // Handle optional minus sign
+        if (this.peek() == c'-') {
+            value += this.advance()
+        }
+
+        // Read integer part
+        if (this.peek() == c'0') {
+            value += this.advance()
+        } else if (this.isDigit(this.peek())) {
+            while (!this.isAtEnd() && this.isDigit(this.peek())) {
+                value += this.advance()
+            }
+        } else {
+            throw new JsonParseError("Invalid number format", start, this.index)
+        }
+
+        // Read decimal part if present
+        if (!this.isAtEnd() && this.peek() == c'.') {
+            value += this.advance()
+            if (this.isAtEnd() || !this.isDigit(this.peek())) {
+                throw new JsonParseError("Invalid number format: decimal point must be followed by digits", start, this.index)
+            }
+            while (!this.isAtEnd() && this.isDigit(this.peek())) {
+                value += this.advance()
+            }
+        }
+
+        // Read exponent part if present
+        if (!this.isAtEnd() && (this.peek() == c'e' || this.peek() == c'E')) {
+            value += this.advance()
+            if (!this.isAtEnd() && (this.peek() == c'+' || this.peek() == c'-')) {
+                value += this.advance()
+            }
+            if (this.isAtEnd() || !this.isDigit(this.peek())) {
+                throw new JsonParseError("Invalid number format: exponent must contain digits", start, this.index)
+            }
+            while (!this.isAtEnd() && this.isDigit(this.peek())) {
+                value += this.advance()
+            }
+        }
+
+        return this.makeToken(JsonTokenKind.Number, start, value)
+    }
+
+    /**
+     * Reads a JSON keyword (true, false, null)
+     * @param start Starting position of the keyword
+     * @param expected The expected keyword string
+     * @param kind The token kind for this keyword
+     * @returns JsonToken representing the keyword
+     * @throws JsonError if keyword doesn't match
+     */
+    private readKeyword(start: int, expected: string, kind: JsonTokenKind): JsonToken {
+        this.index-- // Back up to re-read first character
+
+        for (let i = 0; i < expected.length; i++) {
+            if (this.isAtEnd() || this.advance() != expected.charAt(i)) {
+                throw new JsonParseError(`Invalid keyword at position ${start}`, start, this.index)
+            }
+        }
+
+        return this.makeToken(kind, start, expected)
+    }
+
+    /**
+     * Creates a JsonToken with the given parameters
+     * @param kind The token kind
+     * @param start Starting position
+     * @param value String value of the token
+     * @returns New JsonToken instance
+     */
+    private makeToken(kind: JsonTokenKind, start: int, value: string): JsonToken {
+        let span = new JsonTokenSpan()
+        span.start = start
+        span.end = this.index
+        return new JsonToken(kind, span, value)
+    }
+
+    /**
+     * Skips whitespace characters
+     */
+    private skipWhitespace(): void {
+        while (!this.isAtEnd()) {
+            let ch = this.peek()
+            if (ch == c' ' || ch == c'\t' || ch == c'\n' || ch == c'\r') {
+                this.advance()
+            } else {
+                break
+            }
+        }
+    }
+
+    /**
+     * Advances to the next character and returns it
+     * @returns The current character before advancing
+     */
+    private advance(): char {
+        if (this.isAtEnd()) return c'\0'
+        return this.chars[this.index++]
+    }
+
+    /**
+     * Returns the current character without advancing
+     * @returns The current character
+     */
+    private peek(): char {
+        if (this.isAtEnd()) return c'\0'
+        return this.chars[this.index]
+    }
+
+    /**
+     * Checks if we've reached the end of input
+     * @returns true if at end of input
+     */
+    private isAtEnd(): boolean {
+        return this.index >= this.chars.length
+    }
+
+    /**
+     * Checks if a character is a decimal digit
+     * @param ch Character to check
+     * @returns true if character is a digit
+     */
+    private isDigit(ch: char): boolean {
+        return ch >= c'0' && ch <= c'9'
+    }
+
+    /**
+     * Checks if a character is a hexadecimal digit
+     * @param ch Character to check
+     * @returns true if character is a hex digit
+     */
+    private isHexDigit(ch: char): boolean {
+        return (ch >= c'0' && ch <= c'9') ||
+                (ch >= c'A' && ch <= c'F') ||
+                (ch >= c'a' && ch <= c'f')
     }
 }
 
@@ -1610,7 +2356,7 @@ export class JSONObject extends JSONValue {
     }
 
     public override toString(): String {
-        let res = new StringBuilder([JSONObject.START_CHAR])
+        let res = new StringBuilder([JSONObject.START_CHAR] as FixedArray<char>)
         for (let i = 0; i < this.keys_.length - 1; ++i) {
             res.append("" + this.keys_.at(i) + JSONObject.SEPARATOR + this.values.at(i) + JSONObject.DELIMETER)
         }
@@ -1629,7 +2375,7 @@ export class JSONArray extends JSONValue {
     readonly static SEPARATOR = c','
 
     public override toString(): String {
-        let res = new StringBuilder([JSONArray.START_CHAR])
+        let res = new StringBuilder([JSONArray.START_CHAR] as FixedArray<char>)
         for (let i = 0; i < this.values.length - 1; ++i) {
             res.append("" + this.values.at(i) + JSONArray.SEPARATOR)
         }
@@ -1684,11 +2430,5 @@ export class JSONNull extends JSONValue {
 
     public override toString(): String {
         return JSONNull.value
-    }
-}
-
-export interface JSONable<T> {
-    createFromJSONValue(json: JSONValue): T {
-        throw new JSONTypeError("createFromJSONValue was not overrided")
     }
 }

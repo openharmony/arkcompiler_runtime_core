@@ -20,7 +20,6 @@ libstdc++6=13.1.0-*
 g++-8=8.4.0-*
 ninja-build=1.8.*
 
-lcov=1.13-*                                          # For coverage calculation
 libc++-dev:arm64=6.0-*                               # For clang-tidy to find standard header
 python3-pip
 python3-setuptools

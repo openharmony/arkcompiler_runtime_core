@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 #include "enum_test.ani.hpp"
-#include "taihe.platform.ani.ani.hpp"
+
 #if __has_include(<ani.h>)
 #include <ani.h>
 #elif __has_include(<ani/ani.h>)
@@ -21,17 +21,15 @@
 #else
 #error "ani.h not found. Please ensure the Ani SDK is correctly installed."
 #endif
-ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result) {
+
+ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
+{
     ani_env *env;
     if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
         return ANI_ERROR;
     }
     if (ANI_OK != enum_test::ANIRegister(env)) {
         std::cerr << "Error from enum_test::ANIRegister" << std::endl;
-        return ANI_ERROR;
-    }
-    if (ANI_OK != taihe::platform::ani::ANIRegister(env)) {
-        std::cerr << "Error from taihe::platform::ani::ANIRegister" << std::endl;
         return ANI_ERROR;
     }
     *result = ANI_VERSION_1;

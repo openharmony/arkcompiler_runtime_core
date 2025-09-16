@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-//! CHECKER      Try Catch Resolving JIT Optimize with partial and default catches
+// These tests were disabled because of catch block no longer accepting specific error type
+//! DISABLED_CHECKER      Try Catch Resolving JIT Optimize with partial and default catches
 //! RUN          force_jit: true, options: "--compiler-hotness-threshold=20 --compiler-profiling-threshold=0 --compiler-enable-osr=false --compiler-regex=ets_try_catch2.MultipleCatch::__noinline__multipleCatch", entry: "ets_try_catch2.ETSGLOBAL::main"
 //! EVENT        /Compilation,ets_try_catch2.MultipleCatch::__noinline__multipleCatch,.*,COMPILED/
 //! METHOD       "ets_try_catch2.MultipleCatch::__noinline__multipleCatch"
@@ -22,7 +23,7 @@
 //! PASS_AFTER   "TryCatchResolving"
 //! INST_NOT     "Throw"
 
-//! CHECKER      Try Catch Resolving AOT Optimize with partial and default catches
+//! DISABLED_CHECKER      Try Catch Resolving AOT Optimize with partial and default catches
 //! SKIP_IF      @architecture == "arm32"
 //! RUN_PAOC     options: "--compiler-regex=ets_try_catch2.MultipleCatch::__noinline__multipleCatch"
 //! METHOD       "ets_try_catch2.MultipleCatch::__noinline__multipleCatch"
@@ -31,7 +32,7 @@
 //! PASS_AFTER   "TryCatchResolving"
 //! INST_COUNT   "Throw",2
 
-//! CHECKER      Try Catch Resolving AOT+PGO Optimize with partial and default catches
+//! DISABLED_CHECKER      Try Catch Resolving AOT+PGO Optimize with partial and default catches
 //! SKIP_IF      @architecture == "arm32"
 //! RUN_PGO_PROF entry: "ets_try_catch2.ETSGLOBAL::main"
 //! RUN_PGO_PAOC options: "--compiler-regex=ets_try_catch2.MultipleCatch::__noinline__multipleCatch"
@@ -41,8 +42,8 @@
 //! PASS_AFTER   "TryCatchResolving"
 //! INST_NOT     "Throw"
 
-class Exception0 extends Exception {}
-class Exception1 extends Exception {}
+class Error0 extends Error {}
+class Error1 extends Error {}
 
 class MultipleCatch {
   __noinline__multipleCatch() : int {
@@ -53,12 +54,16 @@ class MultipleCatch {
                 switch (i) {
                 case 0: case 1: case 2: case 3: case 4:
                 case 5: case 6: case 7: case 8: case 9:
-                    throw new Exception0();
+                    throw new Error0();
                 case 10:
-                    throw new Exception1();
+                    throw new Error1();
                 }
-            } catch (e: Exception0) {
-                res += 1;
+            } catch (e) {
+                if (e instanceof Error0) {
+                    res += 1;
+                } else {
+                    throw e;
+                }
             }
         }
     } catch (e) {

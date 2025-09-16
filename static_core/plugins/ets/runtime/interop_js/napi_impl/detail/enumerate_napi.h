@@ -71,6 +71,7 @@
     FN_MACRO(napi_strict_equals, napi_env, env, napi_value, lhs, napi_value, rhs, bool *, result)                      \
     FN_MACRO(napi_has_property, napi_env, env, napi_value, property, napi_value, name, bool *, result)                 \
     FN_MACRO(napi_has_element, napi_env, env, napi_value, property, uint32_t, index, bool *, result)                   \
+    FN_MACRO(napi_has_named_property, napi_env, env, napi_value, object, const char *, utf8name, bool *, result)       \
     FN_MACRO(napi_has_own_property, napi_env, env, napi_value, property, napi_value, name, bool *, result)             \
     FN_MACRO(napi_throw_error, napi_env, env, const char *, code, const char *, msg)                                   \
     FN_MACRO(napi_instanceof, napi_env, env, napi_value, object, napi_value, constructor, bool *, result)              \
@@ -97,6 +98,7 @@
     FN_MACRO(napi_get_named_property, napi_env, env, napi_value, object, const char *, utf8name, napi_value *, result) \
     FN_MACRO(napi_create_error, napi_env, env, napi_value, code, napi_value, msg, napi_value *, result)                \
     FN_MACRO(napi_create_type_error, napi_env, env, napi_value, code, napi_value, msg, napi_value *, result)           \
+    FN_MACRO(napi_coerce_to_bool, napi_env, env, napi_value, value, napi_value *, result)                              \
     FN_MACRO(napi_coerce_to_string, napi_env, env, napi_value, value, napi_value *, result)                            \
     FN_MACRO(napi_create_int64, napi_env, env, int64_t, value, napi_value *, result)                                   \
     FN_MACRO(napi_reference_ref, napi_env, env, napi_ref, ref, uint32_t *, result)                                     \

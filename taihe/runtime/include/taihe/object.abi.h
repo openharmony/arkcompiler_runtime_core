@@ -32,6 +32,10 @@ struct IdMapItem {
     void const *vtbl_ptr;
 };
 
+typedef void free_func_t(struct DataBlockHead *);
+typedef size_t hash_func_t(struct DataBlockHead *);
+typedef bool same_func_t(struct DataBlockHead *, struct DataBlockHead *);
+
 // TypeInfo
 // Represents metadata information for a type, including version, length, and
 // function pointers.
@@ -46,9 +50,9 @@ struct IdMapItem {
 //   mapping.
 struct TypeInfo {
     uint64_t version;
-    void (*free_fptr)(struct DataBlockHead *);
-    size_t (*hash_fptr)(struct DataBlockHead *);
-    bool (*same_fptr)(struct DataBlockHead *, struct DataBlockHead *);
+    free_func_t *free_fptr;
+    hash_func_t *hash_fptr;
+    same_func_t *same_fptr;
     uint64_t len;
     struct IdMapItem idmap[];
 };

@@ -82,6 +82,9 @@ class Platform(PlatformBase):
         self.nark(bu)
         if self.dry_run_stop(bu):
             return
+        if OptFlags.AOTPGO in self.flags:
+            self.ark.do_exec(bu, profile=True)
+            self.paoc.do_exec(bu, profdata=True)
         if OptFlags.AOT in self.flags:
             self.paoc(bu)
         self.ark(bu)

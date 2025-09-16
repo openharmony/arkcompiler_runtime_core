@@ -16,10 +16,10 @@ switch_statements:
   - decl: |
         function f(i: int): void {
           switch (i) {
-            case 0: , assertEQ( i, 0 ); break;
-            case 0: , assertEQ( i, 1 ); break;
-            case 0: , assertEQ( i, 2 ); break;
-            default: assertTrue( false )
+            case 0: , arktest.assertEQ( i, 0 ); break;
+            case 0: , arktest.assertEQ( i, 1 ); break;
+            case 0: , arktest.assertEQ( i, 2 ); break;
+            default: arktest.assertTrue( false )
           }
         }
     use: |
@@ -29,8 +29,8 @@ switch_statements:
   - decl: |
         function f(i: int): void {
           switch (i) {
-            case 0: , assertEQ( i, 0 ) break;
-            default: assertTrue( false )
+            case 0: , arktest.assertEQ( i, 0 ) break;
+            default: arktest.assertTrue( false )
           }
         }
     use: |
@@ -40,7 +40,7 @@ switch_statements:
           switch (i) {
             case 0: break;
             case "string": break;
-            default: assertTrue( false )
+            default: arktest.assertTrue( false )
           }
         }
     use: |

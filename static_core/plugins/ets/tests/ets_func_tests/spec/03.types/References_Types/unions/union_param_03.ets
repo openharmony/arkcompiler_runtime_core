@@ -22,8 +22,8 @@ tags: []
 type Margin = number | string
 
 function format(margin: Margin){
-    assertTrue( margin instanceof string)
-    assertEQ( margin as string, "5 px")
+    arktest.assertTrue( margin instanceof string)
+    arktest.assertEQ( margin as string, "5 px")
 }
 
 function main(): void {

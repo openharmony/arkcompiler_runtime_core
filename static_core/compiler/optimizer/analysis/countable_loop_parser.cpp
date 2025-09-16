@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,7 +46,7 @@ std::optional<CountableLoopInfo> CountableLoopParser::Parse()
         return std::nullopt;
     }
 
-    if (!IsInstIncOrDec(loopInfo_.update)) {
+    if ((!IsInstIncOrDec(loopInfo_.update)) && (!IsInstShlShrAshr(loopInfo_.update))) {
         return std::nullopt;
     }
     SetIndexAndConstStep();
@@ -149,6 +149,25 @@ bool CountableLoopParser::HasPreHeaderCompare(Loop *loop, const CountableLoopInf
 // if its index does not overflow
 std::optional<uint64_t> CountableLoopParser::GetLoopIterations(const CountableLoopInfo &loopInfo)
 {
+    if ((loopInfo.walkType == WalkType::INC) || (loopInfo.walkType == WalkType::DEC)) {
+        return GetLoopIterationsForIncAndDec(loopInfo);
+    }
+
+    if (loopInfo.walkType == WalkType::SHL) {
+        return GetLoopIterationsForShl(loopInfo);
+    }
+
+    if ((loopInfo.walkType == WalkType::SHR) || (loopInfo.walkType == WalkType::ASHR)) {
+        return GetLoopIterationsForShrAndAshr(loopInfo);
+    }
+
+    UNREACHABLE();
+}
+
+// Returns interations for inc and dec type
+std::optional<uint64_t> CountableLoopParser::GetLoopIterationsForIncAndDec(const CountableLoopInfo &loopInfo)
+{
+    ASSERT((loopInfo.walkType == WalkType::INC) || (loopInfo.walkType == WalkType::DEC));
     if (!loopInfo.init->IsConst() || !loopInfo.test->IsConst() || loopInfo.constStep == 0) {
         return std::nullopt;
     }
@@ -156,7 +175,7 @@ std::optional<uint64_t> CountableLoopParser::GetLoopIterations(const CountableLo
     uint64_t testValue = loopInfo.test->CastToConstant()->GetInt64Value();
     auto type = loopInfo.index->GetType();
 
-    if (loopInfo.isInc) {
+    if (loopInfo.walkType == WalkType::INC) {
         int64_t maxTest = BoundsRange::GetMax(type) - static_cast<int64_t>(loopInfo.constStep);
         if (loopInfo.normalizedCc == CC_LE) {
             maxTest--;
@@ -165,7 +184,7 @@ std::optional<uint64_t> CountableLoopParser::GetLoopIterations(const CountableLo
             // index may overflow
             return std::nullopt;
         }
-    } else {
+    } else if (loopInfo.walkType == WalkType::DEC) {
         int64_t minTest = BoundsRange::GetMin(type) + static_cast<int64_t>(loopInfo.constStep);
         if (loopInfo.normalizedCc == CC_GE) {
             minTest++;
@@ -175,7 +194,10 @@ std::optional<uint64_t> CountableLoopParser::GetLoopIterations(const CountableLo
             return std::nullopt;
         }
         std::swap(initValue, testValue);
+    } else {
+        UNREACHABLE();
     }
+
     if (static_cast<int64_t>(initValue) > static_cast<int64_t>(testValue)) {
         return 0;
     }
@@ -189,6 +211,77 @@ std::optional<uint64_t> CountableLoopParser::GetLoopIterations(const CountableLo
         count--;
     }
     return count / loopInfo.constStep;
+}
+
+// Returns interations for shl type
+std::optional<uint64_t> CountableLoopParser::GetLoopIterationsForShl(const CountableLoopInfo &loopInfo)
+{
+    ASSERT(loopInfo.walkType == WalkType::SHL);
+    if (!loopInfo.init->IsConst() || !loopInfo.test->IsConst() || loopInfo.constStep != 1ULL) {
+        return std::nullopt;
+    }
+    uint64_t initValue = loopInfo.init->CastToConstant()->GetInt64Value();
+    uint64_t testValue = loopInfo.test->CastToConstant()->GetInt64Value();
+    uint64_t maxValue = BoundsRange::GetMax(loopInfo.index->GetType());
+    const uint64_t mask = (1ULL << 63U);
+
+    // skip non-negative shift
+    if (DataType::IsTypeSigned(loopInfo.update->GetType()) && ((initValue & mask) != 0 || (testValue & mask) != 0)) {
+        return std::nullopt;
+    }
+    if (initValue == 0 || testValue == 0) {
+        return std::nullopt;
+    }
+    // make sure initValue <= testValue <= maxValue
+    if (initValue > testValue || testValue > maxValue) {
+        return std::nullopt;
+    }
+    if (loopInfo.normalizedCc == CC_LT) {
+        testValue--;
+    }
+    uint64_t count = 0;
+    do {
+        count++;
+        testValue >>= loopInfo.constStep;
+        maxValue >>= loopInfo.constStep;
+        if (initValue > maxValue) {
+            // overflow
+            return std::nullopt;
+        }
+    } while (initValue <= testValue);
+    return count;
+}
+
+// Returns interations for shr and ashr type
+std::optional<uint64_t> CountableLoopParser::GetLoopIterationsForShrAndAshr(const CountableLoopInfo &loopInfo)
+{
+    ASSERT((loopInfo.walkType == WalkType::SHR) || (loopInfo.walkType == WalkType::ASHR));
+    if (!loopInfo.init->IsConst() || !loopInfo.test->IsConst() || loopInfo.constStep != 1ULL) {
+        return std::nullopt;
+    }
+    uint64_t initValue = loopInfo.init->CastToConstant()->GetInt64Value();
+    uint64_t testValue = loopInfo.test->CastToConstant()->GetInt64Value();
+    const uint64_t mask = (1ULL << 63U);
+
+    // skip non-negative shift
+    if (DataType::IsTypeSigned(loopInfo.update->GetType()) && ((initValue & mask) != 0 || (testValue & mask) != 0)) {
+        return std::nullopt;
+    }
+    uint64_t count = 0;
+    if (loopInfo.normalizedCc == CC_GE) {
+        do {
+            count++;
+            initValue >>= loopInfo.constStep;
+        } while (initValue >= testValue);
+    } else if (loopInfo.normalizedCc == CC_GT) {
+        do {
+            count++;
+            initValue >>= loopInfo.constStep;
+        } while (initValue > testValue);
+    } else {
+        UNREACHABLE();
+    }
+    return count;
 }
 
 /*
@@ -206,6 +299,26 @@ bool CountableLoopParser::IsInstIncOrDec(Inst *inst)
         cnst = inst->GetInput(1).GetInst()->CastToConstant();
     }
     return cnst != nullptr;
+}
+
+/*
+ * Check if instruction is Shift with phi and non-negative constant inputs
+ */
+bool CountableLoopParser::IsInstShlShrAshr(Inst *inst)
+{
+    if (!inst->IsShift()) {
+        return false;
+    }
+    ConstantInst *cnst = nullptr;
+    if (inst->GetInput(0).GetInst()->IsPhi() && inst->GetInput(1).GetInst()->IsConst()) {
+        cnst = inst->GetInput(1).GetInst()->CastToConstant();
+    }
+    if (cnst == nullptr) {
+        return false;
+    }
+    // only consider shift by one
+    auto cnstVal = cnst->GetIntValue();
+    return cnstVal == 1ULL;
 }
 
 // NOTE(a.popov) Suppot 'GetLoopExit()' method in the 'Loop' class
@@ -245,7 +358,7 @@ bool CountableLoopParser::SetUpdateAndTestInputs()
         auto backEdge {loop_.GetBackEdges()[0]};
         loopInfo_.update = loopInfo_.update->CastToPhi()->GetPhiInput(backEdge);
     } else {
-        if (!IsInstIncOrDec(loopInfo_.update)) {
+        if ((!IsInstIncOrDec(loopInfo_.update)) && (!IsInstShlShrAshr(loopInfo_.update))) {
             std::swap(loopInfo_.update, loopInfo_.test);
         }
     }
@@ -254,6 +367,15 @@ bool CountableLoopParser::SetUpdateAndTestInputs()
 }
 
 void CountableLoopParser::SetIndexAndConstStep()
+{
+    if (IsInstIncOrDec(loopInfo_.update)) {
+        SetIndexAndConstStepForIncAndDec();
+    } else if (IsInstShlShrAshr(loopInfo_.update)) {
+        SetIndexAndConstStepForShlAndShrAndAshr();
+    }
+}
+
+void CountableLoopParser::SetIndexAndConstStepForIncAndDec()
 {
     loopInfo_.index = loopInfo_.update->GetInput(0).GetInst();
     auto constInst = loopInfo_.update->GetInput(1).GetInst();
@@ -270,6 +392,38 @@ void CountableLoopParser::SetIndexAndConstStep()
     if (isNeg) {
         cnst = ~cnst + 1;
         loopInfo_.isInc = !loopInfo_.isInc;
+    }
+    loopInfo_.constStep = cnst;
+    loopInfo_.walkType = loopInfo_.isInc ? WalkType::INC : WalkType::DEC;
+}
+
+void CountableLoopParser::SetIndexAndConstStepForShlAndShrAndAshr()
+{
+    loopInfo_.index = loopInfo_.update->GetInput(0).GetInst();
+    auto constInst = loopInfo_.update->GetInput(1).GetInst();
+    if (loopInfo_.index->IsConst()) {
+        loopInfo_.index = loopInfo_.update->GetInput(1).GetInst();
+        constInst = loopInfo_.update->GetInput(0).GetInst();
+    }
+
+    ASSERT(constInst->GetType() == DataType::INT64);
+    auto cnst = constInst->CastToConstant()->GetIntValue();
+    auto op = loopInfo_.update->GetOpcode();
+    switch (op) {
+        case Opcode::Shl:
+            loopInfo_.walkType = WalkType::SHL;
+            loopInfo_.isInc = true;
+            break;
+        case Opcode::Shr:
+            loopInfo_.walkType = WalkType::SHR;
+            loopInfo_.isInc = false;
+            break;
+        case Opcode::AShr:
+            loopInfo_.walkType = WalkType::ASHR;
+            loopInfo_.isInc = false;
+            break;
+        default:
+            UNREACHABLE();
     }
     loopInfo_.constStep = cnst;
 }

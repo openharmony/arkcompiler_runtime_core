@@ -15,16 +15,16 @@
 
 const o = { a: 1, b: '2', c: {} };
 
-export let GetObject = function () {
+export let getObject = function () {
     return o;
 };
 
-export let GetNumber = function () {
+export let getNumber = function () {
     return 24;
 };
 
-export let GetString = function () {
+export let getString = function () {
     return 'abc';
 };
 
-export let Nop = function () {};
+export let nop = function () {};

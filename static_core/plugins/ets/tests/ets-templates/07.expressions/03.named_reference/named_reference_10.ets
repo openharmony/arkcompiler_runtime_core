@@ -22,5 +22,5 @@ files:
 import {add} from "./named_reference_export1.ets"
 
 function main(): void {
-  assertEQ(add(1, 2), 3);
+  arktest.assertEQ(add(1, 2), 3);
 }

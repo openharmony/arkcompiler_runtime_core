@@ -16,7 +16,9 @@
 #include "ani.h"
 #include "ani_options_parser.h"
 #include "ani_options.h"
-#include "generated/base_options.h"
+#include "compiler/compiler_logger.h"
+#include "compiler/compiler_options.h"
+#include "generated/logger_options.h"
 #include "plugins/ets/runtime/ani/ani_checkers.h"
 #include "plugins/ets/runtime/ani/ani_interaction_api.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
@@ -28,51 +30,22 @@
 // CC-OFFNXT(huge_method[C++]) solid logic
 extern "C" ani_status ANI_CreateVM(const ani_options *options, uint32_t version, ani_vm **result)
 {
-    ANI_DEBUG_TRACE(env);
     ANI_CHECK_RETURN_IF_EQ(result, nullptr, ANI_INVALID_ARGS);
-    ANI_CHECK_RETURN_IF_EQ(options, nullptr, ANI_INVALID_ARGS);
     if (!ark::ets::ani::IsVersionSupported(version)) {
         return ANI_INVALID_VERSION;
     }
 
-    size_t optionsSize = options->nr_options;
-    const ani_option *optionsArr = options->options;
-
-    ark::ets::ani::ANIOptionsParser aniParser(optionsSize, optionsArr);
-
-    // NOTE(konstanting, #23205): please note that compiler options are not supported by ANI_CreateVM.
-    // Compiler logging is not supported too. Please look at e.g. ets_vm_api.cpp:CreateRuntime
-    // and ets_vm_plugin.cpp:AddOptions for reference if you would like to support the mentioned
-    // features.
-    ark::ets::ani::ANIOptions aniOptions;
-    ark::base_options::Options baseOptions("");
-    ark::PandArgParser paParser;
-
-    // NOTE(konstanting, #23205): consider adding options validation (Validate() method)
-    // Add runtime options
-    baseOptions.AddOptions(&paParser);
-    aniOptions.AddOptions(&paParser);
-
-    if (!paParser.Parse(aniParser.GetRuntimeOptions())) {
-        std::string errorMessage = paParser.GetErrorString();
-        if (!errorMessage.empty() && errorMessage.back() == '\n') {
-            // Trim new line
-            errorMessage = std::string(errorMessage.c_str(), errorMessage.length() - 1);
-        }
-        ark::Logger::Initialize(baseOptions, aniParser.GetLoggerCallback());
-        LOG(ERROR, ANI) << errorMessage;
+    ark::ets::ani::OptionsParser parser;
+    auto errMsg = parser.Parse(options);
+    auto &aniOptions = parser.GetANIOptions();
+    ark::Logger::Initialize(parser.GetLoggerOptions(), aniOptions.GetLoggerCallback());
+    if (errMsg) {
+        LOG(ERROR, ANI) << errMsg.value();
         return ANI_ERROR;
     }
-    ark::Logger::Initialize(baseOptions, aniParser.GetLoggerCallback());
+    ark::compiler::CompilerLogger::SetComponents(ark::compiler::g_options.GetCompilerLog());
 
-#ifndef PANDA_ETS_INTEROP_JS
-    if (aniParser.IsInteropMode()) {
-        // no interop options allowed in the interop-free build!
-        return ANI_INVALID_ARGS;
-    }
-#endif /* PANDA_ETS_INTEROP_JS */
-
-    if (!ark::Runtime::Create(aniOptions)) {
+    if (!ark::Runtime::Create(parser.GetRuntimeOptions())) {
         LOG(ERROR, ANI) << "Cannot create runtime";
         return ANI_ERROR;
     }
@@ -80,8 +53,8 @@ extern "C" ani_status ANI_CreateVM(const ani_options *options, uint32_t version,
     auto coroutine = ark::ets::EtsCoroutine::GetCurrent();
     ASSERT(coroutine != nullptr);
 #ifdef PANDA_ETS_INTEROP_JS
-    if (aniParser.IsInteropMode()) {
-        bool created = ark::ets::interop::js::CreateMainInteropContext(coroutine, aniParser.GetInteropEnv());
+    if (aniOptions.IsInteropMode()) {
+        bool created = ark::ets::interop::js::CreateMainInteropContext(coroutine, aniOptions.GetInteropEnv());
         if (!created) {
             LOG(ERROR, ANI) << "Cannot create interop context";
             ark::Runtime::Destroy();
@@ -103,7 +76,6 @@ extern "C" ani_status ANI_CreateVM(const ani_options *options, uint32_t version,
 // CC-OFFNXT(G.FUN.02-CPP) project code stytle
 extern "C" ani_status ANI_GetCreatedVMs(ani_vm **vmsBuffer, ani_size vmsBufferLength, ani_size *result)
 {
-    ANI_DEBUG_TRACE(env);
     ANI_CHECK_RETURN_IF_EQ(vmsBuffer, nullptr, ANI_INVALID_ARGS);
     ANI_CHECK_RETURN_IF_EQ(result, nullptr, ANI_INVALID_ARGS);
 
@@ -112,7 +84,8 @@ extern "C" ani_status ANI_GetCreatedVMs(ani_vm **vmsBuffer, ani_size vmsBufferLe
         *result = 0;
         return ANI_OK;
     }
-    auto *coroutine = ark::ets::EtsCoroutine::CastFromThread(thread);
+    // After verifying that the current thread is attached to VM, it is valid to get current EtsCoroutine
+    auto *coroutine = ark::ets::EtsCoroutine::GetCurrent();
     if (coroutine != nullptr) {
         if (vmsBufferLength < 1) {
             return ANI_INVALID_ARGS;
@@ -130,7 +103,7 @@ namespace ark::ets::ani {
 
 static ani_status DestroyVM(ani_vm *vm)
 {
-    ANI_DEBUG_TRACE(env);
+    ANI_DEBUG_TRACE(vm);
     ANI_CHECK_RETURN_IF_EQ(vm, nullptr, ANI_INVALID_ARGS);
 
     auto runtime = Runtime::GetCurrent();
@@ -152,21 +125,29 @@ static ani_status DestroyVM(ani_vm *vm)
 
 NO_UB_SANITIZE static ani_status GetEnv(ani_vm *vm, uint32_t version, ani_env **result)
 {
-    ANI_DEBUG_TRACE(env);
+    ANI_DEBUG_TRACE(vm);
     ANI_CHECK_RETURN_IF_EQ(vm, nullptr, ANI_INVALID_ARGS);
     ANI_CHECK_RETURN_IF_EQ(result, nullptr, ANI_INVALID_ARGS);
 
     if (!IsVersionSupported(version)) {
-        return ANI_ERROR;  // NOTE: Unsupported version?
+        return ANI_INVALID_VERSION;
     }
 
-    PandaEtsVM *pandaVM = PandaEtsVM::FromAniVM(vm);
-    EtsCoroutine *coroutine = EtsCoroutine::CastFromThread(pandaVM->GetAssociatedThread());
-    if (coroutine == nullptr) {
-        LOG(ERROR, ANI) << "Cannot get environment";
+    Thread *thread = Thread::GetCurrent();
+    if (thread == nullptr) {
+        LOG(ERROR, ANI) << "Cannot get environment, thread is not attached to VM";
         return ANI_ERROR;
     }
-    *result = coroutine->GetEtsNapiEnv();
+    // After verifying that the current thread is attached to VM, it is valid to get current EtsCoroutine
+    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    if (UNLIKELY(coro == nullptr)) {
+        LOG(ERROR, ANI) << "Cannot get environment, no current coroutine exists";
+        return ANI_ERROR;
+    }
+    ani_env *env = coro->GetEtsNapiEnv();
+    // Each EtsCoroutine must have a valid ani_env
+    ASSERT(env != nullptr);
+    *result = env;
     return ANI_OK;
 }
 
@@ -183,12 +164,13 @@ static ani_status AttachCurrentThread(ani_vm *vm, const ani_options *options, ui
     }
 
     bool interopEnabled = false;
+    void *jsEnv = nullptr;
     if (options != nullptr) {
-        for (size_t i = 0; i < options->nr_options; ++i) {
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            PandaString opt(options->options[i].option);
+        for (auto option : Span(options->options, options->nr_options)) {
+            PandaString opt(option.option);
             if (opt == "--interop=enable") {
                 interopEnabled = true;
+                jsEnv = option.extra;
             } else if (opt == "--interop=disable") {
                 interopEnabled = false;
             }
@@ -208,8 +190,10 @@ static ani_status AttachCurrentThread(ani_vm *vm, const ani_options *options, ui
 
     if (interopEnabled) {
         auto *ifaceTable = EtsCoroutine::CastFromThread(coroMan->GetMainThread())->GetExternalIfaceTable();
-        auto *jsEnv = ifaceTable->CreateJSRuntime();
-        ASSERT(jsEnv != nullptr);
+        if (jsEnv == nullptr) {
+            jsEnv = ifaceTable->CreateJSRuntime();
+            ASSERT(jsEnv != nullptr);
+        }
         ifaceTable->CreateInteropCtx(exclusiveCoro, jsEnv);
     }
     *result = PandaEtsNapiEnv::GetCurrent();

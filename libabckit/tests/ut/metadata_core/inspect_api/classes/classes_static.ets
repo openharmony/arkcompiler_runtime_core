@@ -20,3 +20,15 @@ class C1 {
 function main() {
   console.log("hello from classes_static.ets")
 }
+
+interface I1 {
+  I1F1: string
+}
+
+class C3 {}
+
+class C2 extends C1 implements I1 {
+  public F1: string = 'Hello';
+  public F2: number = 1;
+  public I1F1: string = 'World';
+}

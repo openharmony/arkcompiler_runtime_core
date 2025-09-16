@@ -20,7 +20,7 @@ desc: Test the array index expression to modify array elements.
 function main(): void {
   let names: string[] = ["Alice", "Bob", "Carol"];
   names[1] = "Martin";
-  assertEQ(names[0], "Alice");
-  assertEQ(names[1], "Martin");
-  assertEQ(names[2], "Carol");
+  arktest.assertEQ(names[0], "Alice");
+  arktest.assertEQ(names[1], "Martin");
+  arktest.assertEQ(names[2], "Carol");
 }

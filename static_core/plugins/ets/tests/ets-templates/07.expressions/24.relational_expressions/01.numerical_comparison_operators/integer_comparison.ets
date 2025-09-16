@@ -21,12 +21,12 @@ desc: Integer comparison {{ic.xvalue}} {{ic.op}} {{ic.yvalue}}
 
 function main(): void {
   let x: {{ic.xtype}} = {{ic.xvalue}};
-  let bx: {{ic.xboxed}} = new {{ic.xboxed}}({{ic.xvalue}} as {{ic.xtype}});
+  let bx: {{ic.xalias}} = new {{ic.xalias}}({{ic.xvalue}});
   let y: {{ic.ytype}} = {{ic.yvalue}};
-  let by: {{ic.yboxed}} = new {{ic.yboxed}}({{ic.yvalue}} as {{ic.ytype}});
-  assertEQ( (x {{ic.op}} y), {{ic.result}} )
-  assertEQ( (bx {{ic.op}} by), {{ic.result}} )
-  assertEQ( (x {{ic.op}} by), {{ic.result}} )
+  let by: {{ic.yalias}} = new {{ic.yalias}}({{ic.yvalue}});
+  arktest.assertEQ( (x {{ic.op}} y), {{ic.result}} )
+  arktest.assertEQ( (bx {{ic.op}} by), {{ic.result}} )
+  arktest.assertEQ( (x {{ic.op}} by), {{ic.result}} )
 }
 
 {% endfor %}

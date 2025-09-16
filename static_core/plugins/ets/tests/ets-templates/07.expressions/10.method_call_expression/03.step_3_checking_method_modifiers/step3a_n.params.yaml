@@ -20,7 +20,7 @@ cases:
               }
           }
       use: |-
-          assertEQ( A.met(), "S" )
+          arktest.assertEQ( A.met(), "S" )
 
     - decl: |-
             interface I {
@@ -29,7 +29,7 @@ cases:
                 }
             }
       use: |-
-          assertEQ( I.met(), "I" )
+          arktest.assertEQ( I.met(), "I" )
 
     - decl: |-
           class A {
@@ -40,7 +40,7 @@ cases:
           type TA = A
       use: |-
           // class name alias
-          assertEQ( TA.met(), "S" )
+          arktest.assertEQ( TA.met(), "S" )
 
     - decl: |-
           interface I {
@@ -51,7 +51,7 @@ cases:
           type TI = I
       use: |-
           // interface name alias
-          assertEQ( TI.met(), "I" )
+          arktest.assertEQ( TI.met(), "I" )
 
     - decl: |-
           class A {
@@ -67,7 +67,7 @@ cases:
           type UT = A | B
       use: |-
           // class name
-          assertEQ( UT.met(), "S" )
+          arktest.assertEQ( UT.met(), "S" )
 
     - decl: |-
           interface I {
@@ -83,4 +83,4 @@ cases:
           type UT = I | J
       use: |-
           // interface name
-          assertEQ( UT.met(), "I" )
+          arktest.assertEQ( UT.met(), "I" )

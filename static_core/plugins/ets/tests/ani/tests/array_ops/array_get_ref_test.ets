@@ -13,6 +13,6 @@
  * limitations under the License.
  */
 
-function GetArray(): (Object | null)[] {
-    return [null, null , new String("Hello World!")];
+function getArray(): (Object | null)[] {
+    return [null, null, 'Hello World!']
 }

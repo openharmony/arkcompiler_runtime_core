@@ -29,5 +29,5 @@ class A {
 function main(): void {
     let a = new A()
     a.regularLambda = (arg: string) => string = arg
-    assertEQ( a.foo(), "A")
+    arktest.assertEQ( a.foo(), "A")
 }

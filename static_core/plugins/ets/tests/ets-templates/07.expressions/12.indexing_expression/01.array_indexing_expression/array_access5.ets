@@ -28,13 +28,13 @@ function main(): void {
   arr[1] = 2
   arr[2] = undefined
 
-  assertTrue( arr[0] instanceof Int )
-  assertTrue( arr[0] instanceof Object )
-  assertTrue( arr[0] == 1 )
+  arktest.assertTrue( arr[0] instanceof Int )
+  arktest.assertTrue( arr[0] instanceof Object )
+  arktest.assertTrue( arr[0] == 1 )
 
-  assertTrue( arr[1] instanceof Int )
-  assertTrue( arr[1] instanceof Object )
-  assertTrue( arr[1] == 2 )
+  arktest.assertTrue( arr[1] instanceof Int )
+  arktest.assertTrue( arr[1] instanceof Object )
+  arktest.assertTrue( arr[1] == 2 )
 
-  assertTrue( arr[2] == undefined )
+  arktest.assertTrue( arr[2] == undefined )
 }

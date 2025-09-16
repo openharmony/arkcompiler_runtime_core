@@ -18,7 +18,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-from runner.code_coverage.coverage import LlvmCov
+from runner.code_coverage.coverage_manager import CoverageManager
 from runner.options.config import Config
 from runner.reports.report_format import ReportFormat
 from runner.suites.work_dir import WorkDir
@@ -35,7 +35,7 @@ class TestEnv:
     report_formats: set[ReportFormat]
     work_dir: WorkDir
 
-    coverage: LlvmCov | None = None
+    coverage: CoverageManager
 
 
 @dataclass(frozen=True)

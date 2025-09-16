@@ -32,9 +32,9 @@ needs to use them.
 
 There are three kinds of compilation units:
 
-- *Separate modules* (discussed below),
-- *Declaration modules* (discussed in detail in :ref:`Declaration Modules`), and
-- *Packages* (discussed in detail in :ref:`Packages`).
+- *Modules* (discussed below),
+- *Declaration modules* (discussed in detail in :ref:`Declaration Modules`),
+- *Libraries* (discussed in detail in :ref:`Libraries`).
 
 
 The syntax of *compilation units* is presented below:
@@ -42,17 +42,14 @@ The syntax of *compilation units* is presented below:
 .. code-block:: abnf
 
     compilationUnit:
-        separateModuleDeclaration
-        | packageDeclaration
+        moduleDeclaration
         | declarationModule
+        | libraryDescription
         ;
 
-    packageDeclaration:
-        packageModule+
-        ;
 
-All modules (both separate modules and packages) are stored in a file
-system or a database (see :ref:`Compilation Units in Host System`).
+All *compilation units* are stored in a file system or a database (see
+:ref:`Compilation Units in Host System`).
 
 .. index::
    compilation unit
@@ -66,8 +63,7 @@ system or a database (see :ref:`Compilation Units in Host System`).
    access
    accessibility
    export
-   separate module
-   package
+   module
    declaration module
    storage
    file system
@@ -75,16 +71,15 @@ system or a database (see :ref:`Compilation Units in Host System`).
 
 |
 
-.. _Separate Modules:
+.. _Modules:
 
-Separate Modules
-****************
+Modules
+*******
 
 .. meta:
     frontend_status: Done
 
-*Separate module* is a module without a package header. A *separate module*
-can optionally consist of the following four parts:
+A *module* can optionally consist of the following four parts:
 
 #. Import directives that enable referring imported declarations in a module;
 
@@ -95,16 +90,16 @@ can optionally consist of the following four parts:
 #. Re-export directives.
 
 
-The syntax of *separate module* is presented below:
+The syntax of *module* is presented below:
 
 .. code-block:: abnf
 
-    separateModuleDeclaration:
+    moduleDeclaration:
         importDirective* (topDeclaration | topLevelStatements | exportDirective)*
         ;
 
-Every module can directly use all exported entities from the core packages of
-the standard library (see :ref:`Standard Library Usage`).
+Every module can directly use all exported entities from the standard library
+(see :ref:`Standard Library Usage`).
 
 .. code-block:: typescript
    :linenos:
@@ -115,20 +110,17 @@ the standard library (see :ref:`Standard Library Usage`).
     }
 
 .. index::
-   separate module
-   package header
+   module
    import directive
    imported declaration
    module
    entity
-   package
    top-level declaration
    top-level statement
    re-export directive
    import
    console
    standard library
-   core package
 
 |
 
@@ -206,47 +198,25 @@ The syntax of *import directives* is presented below:
         ;
 
 Each binding adds a declaration or declarations to the scope of a module
-or a package (see :ref:`Scopes`). Any declaration added so must be
-distinguishable in the declaration scope (see
-:ref:`Distinguishable Declarations`).
+(see :ref:`Scopes`). Any declaration added so must be distinguishable in the
+declaration scope (see :ref:`Declarations`).
 
 Import with ``type`` modifier is discussed in :ref:`Import Type Directive`.
 
 A :index:`compile-time error` occurs if:
 
--  Declaration added to the scope of a module or a package by a binding is
-   not distinguishable;
+-  Declaration added to the scope of a module by a binding is not
+   distinguishable;
 -  Compilation unit imports itself directly: ``importPath`` refers to the
-   file in which the current module is stored;
--  Import in a package module refers to a file which contains a package
-   module.
-
-
-.. code-block:: typescript
-   :linenos:
-
-    // File1
-    package X
-    import * as XX from "File2" /* This is in fact import of the same
-                                   compilation unit. Compile-time error! */
-    import * as YY from "File3" /* This is import of one package module but not
-                                   the entire package. Compile-time error! */
-
-    // File2
-    package X
-    import * as ZZ fromn "File2" // Import the same file. Compile-time error!
-
-    // File3
-    package Y
+   file in which the current module is stored.
 
 
 .. index::
    binding
    declaration
    module
-   package
    scope
-   distinguishable declaration
+   declaration
    declaration scope
    import directive
 
@@ -364,10 +334,33 @@ the original name. Otherwise, the identifier specified in *binding alias*
 is used. In the latter case, the bounded entity is no longer accessible (see
 :ref:`Accessible`) under the original name.
 
-If the *identifier* denotes several exported overloaded functions (see
-:ref:`Function, Method and Constructor Overloading`), then all these functions
-are added to the declaration scope. This situation is represented in the
-examples below:
+If an *identifier* denotes an *overload alias* (see
+:ref:`Function Overload Declarations`), then all its accessible overloaded
+functions, either imported or not, are considered in the process of
+:ref:`Overload Resolution for Overload Declarations` for call validity.
+
+.. code-block:: typescript
+   :linenos:
+
+    // File1
+    export function f1(p: number) {}
+    export function f2(p: string) {}
+    export overload foo {f1, f2}
+
+    // File2
+    import {foo} from "File1"  // Note: f1 and f2 are not mandatory imported
+    foo(5)                     // f1() is called
+    foo("a string")            // f2() is called
+
+    // File3
+    import {foo, f1} from "File1"  // Note: f1 is accessible as well
+    f1(5)                          // f1() is called
+    foo(6)                         // f1() is called
+    foo("a string")                // f2() is called
+
+
+*Selective binding* that uses exported entities is represented in the examples
+below:
 
 .. index::
    import binding
@@ -381,6 +374,8 @@ examples below:
    access
    accessibility
    bound entity
+   selective binding
+   overload alias
    binding
 
 .. code-block:: typescript
@@ -389,7 +384,8 @@ examples below:
     export const PI = 3.14
     export function sin(d: number): number {}
 
-The import path of the module is now irrelevant:
+**Note**. The import path of the module is irrelevant and replaced for '``...``'
+in the examples below:
 
 +---------------------------------+--+--------------------------------------+
 |   Import                        |  |   Usage                              |
@@ -410,7 +406,7 @@ The import path of the module is now irrelevant:
 |                                 |  |        is not accessible */          |
 +---------------------------------+--+--------------------------------------+
 
-A single import statement can list several names:
+A single import statement can list several names as follows:
 
 +-------------------------------------+--+---------------------------------+
 |   Import                            |  |   Usage                         |
@@ -448,13 +444,13 @@ Import Type Directive
     frontend_status: Partly
     todo: no CTE for type import
 
-An import directive can have ``type`` modifier exclusively to be more
-compatibile with |TS| syntactically, see also :ref:`Export Type Directive`.
-|LANG| does not support any additional semantic checks for entities
-imported using *import type* directives.
+An import directive can have a ``type`` modifier exclusively for a better
+syntactic compatibility with |TS| (also see :ref:`Export Type Directive`).
+|LANG| supports no additional semantic checks for entities imported by using
+*import type* directives.
 
-The following code illustrates semantic checks done by |TS|
-but not by |LANG| compiler:
+The semantic checks performed by the compiler in |TS| but not in |LANG|
+are represented by the following code:
 
 .. code-block:: typescript
    :linenos:
@@ -491,9 +487,17 @@ Import Path
 .. meta:
     frontend_status: Done
 
-*Import path* is a string literal---represented as a combination of the
-slash character '``/``' and a sequence alpha-numeric characters---that
-determines how an imported compilation unit must be placed.
+*Import path* is a string literal that determines how an imported
+compilation unit must be placed.
+
+*Import path*
+
+- can contain preceding dot  '``.``' or two dots '``..``' followed by a
+  slash character '``/``',
+- a number of slash characters separating path components,
+- one or more path components. A subset of characters and case
+  sensitivity of path components follow rules for paths on host
+  filesystem.
 
 The slash character '``/``' is used in import paths irrespective of the host
 system. The backslash character is not used in this context.
@@ -518,19 +522,27 @@ the import path to a file path of the host system.
 The compiler uses the following rule to define the kind of imported
 compilation units, and the exact placement of the source code:
 
--  If *import path* refers to a folder denoted by the last name in the resolved
-   file path, then the compiler imports the package that resides in the
-   folder. The source code of the package is comprised of all the |LANG| source
-   files in the folder.
+-  If *import path* refers to a file that contains a library description, then
+   the import directive is resolved by using all exported declarations of that
+   library.
 
-   Otherwise, the compiler imports the module the *import path* refers to.
-   The source code of the module is the file with the extension provided
-   within the import path, or---if none is so provided---appended by the
-   compiler.
+-  If *import path* refers to the file that stores a declaration module or a
+   module, then the import directive is resolved by using all exported
+   declarations of that module.
 
--  If *import path* refers to both a declaration module and a separate module or
-   package with the same name, then the reference to the separate module or
-   package prevails.
+-  If *import path* refers to both a declaration module and a module
+   with the same name, then reference to the module prevails.
+
+-  Otherwise (i.e., if the *import path* resolution fails to match any of the
+   above cases), a :index:`compile-time error` occurs.
+
+
+   **Note**. Any reference to a file can be in a form of a filename with its
+   extension specified explicitly, or simply a filename. In the latter case
+   the compiler uses its own algorithm and appends different extensions in a
+   certain order to find the file to process. The order and set of extensions
+   to append is defined by the compiler implementation.
+
 
 .. index::
    compilation unit
@@ -540,16 +552,15 @@ compilation units, and the exact placement of the source code:
    resolution
    host system
    source code
-   package
    module
    folder
    extension
    resolving
    filename
-   separate module
+   module
 
-A *relative import path* starts with '``./``' or '``../``' as in the following
-examples:
+A *relative import path* starts with '``./``' or '``../``'.
+Here is an example of relative paths:
 
 .. code-block:: typescript
    :linenos:
@@ -565,18 +576,7 @@ import* is used on compilation units to maintain their relative location.
 
     import * as Utils from "./mytreeutils"
 
-Other import paths are *non-relative* as in the examples below:
-
-.. code-block:: typescript
-   :linenos:
-
-    "/net/http"
-    "std/components/treemap"
-
-.. index::
-   relative import path
-   relative import
-   non-relative import
+Other import paths are *non-relative*.
 
 Resolving a *non-relative path* depends on the compilation environment. The
 definition of the compiler environment can be particularly provided in a
@@ -599,6 +599,17 @@ In the example above, ``/net/http`` is resolved to ``/home/project/net/http``,
 and ``std/components/treemap`` to ``/arkts/stdlib/components/treemap``.
 
 File name, placement, and format are implementation-specific.
+
+Here are an examples of non-relative path. With configuration above in
+effect, the first one directly maps to filesystem (after applying
+``baseUrl``) while in the second one the ``std`` will be replaced with
+``/arkts/stdlib``
+
+.. code-block:: typescript
+   :linenos:
+
+    "/net/http"
+    "std/components/treemap"
 
 .. index::
    relative import path
@@ -730,11 +741,10 @@ Standard Library Usage
     todo: fix stdlib and tests, then import only core by default
     todo: add escompat to spec and default
 
-All entities exported from the core packages of the standard library (see
-:ref:`Standard Library`) are accessible as simple names (see :ref:`Accessible`)
-in any compilation unit across all its scopes. Using these names as
-programmer-defined entities causes to a :index:`compile-time error` in
-accordance to :ref:`Distinguishable Declarations`.
+All entities exported from the standard library (see :ref:`Standard Library`)
+are accessible as simple names (see :ref:`Accessible`) in any compilation unit
+across all its scopes. Using these names as programmer-defined entities causes
+to a :index:`compile-time error` in accordance to :ref:`Declarations`.
 
 .. code-block:: typescript
    :linenos:
@@ -747,12 +757,11 @@ accordance to :ref:`Distinguishable Declarations`.
    entity
    export
    accessibility
-   package
    access
    simple name
    standard library
    access
-   distinguishable declaration
+   declaration
 
 |
 
@@ -870,6 +879,7 @@ The syntax of *top-level declarations* is presented below:
         | variableDeclarations
         | constantDeclarations
         | functionDeclaration
+        | overloadFunctionDeclaration
         | functionWithReceiverDeclaration
         | accessorWithReceiverDeclaration
         | namespaceDeclaration
@@ -1018,7 +1028,11 @@ The syntax of *namespace declarations* is presented below:
 
     namespaceDeclaration:
         'namespace' qualifiedName
-        '{' topDeclaration* initializerBlock? topDeclaration* '}'
+        '{' namespaceMember* staticBlock? namespaceMember* '}'
+        ;
+
+    namespaceMember:
+        topDeclaration | exportDirective
         ;
 
 Namespace can have an initializer block (see :ref:`Static Initialization`).
@@ -1029,22 +1043,23 @@ An usage example is presented below:
    :linenos:
 
     namespace NS1 {
-        export function foo() { ... }
+        export function foo() {  }
         export let variable = 1234
         export const constant = 1234
-        export let someVar: SomeType
+        export let someVar: string
         static {
-            someVar = new SomeType
+            someVar = "some string"
         }
-        export bar
+        export function bar() {}
     }
 
-    function bar() {}
+    export function bar() {}  // That is a different bar()
 
     if (NS1.variable == NS1.constant) {
         NS1.variable = 4321
     }
-    NS1.bar()
+    NS1.bar()  // namespace bar() is called
+    bar()      // top-level bar() is called
 
 .. index::
    namespace
@@ -1158,15 +1173,12 @@ Only one of the merging namespaces can have an initializer. Otherwise, a
 
     A.goo()
 
-    // File1
-    package P
+    // File
     namespace A {
         export function foo() { ... }
         export function bar() { ... }
     }
 
-    // File2
-    package P
     namespace A {
         function goo() { bar() }  // exported bar() is accessible in the same namespace
         export function foo() { ... }  // Compile-time error as foo() was already defined
@@ -1216,10 +1228,10 @@ This code illustrates the usage of declarations in the following case:
 
     A.B.C.foo() // Valid function call, as 'B' and 'C' are implicitly exported
 
-If an ambient namespace (see :ref:`Ambient Namespace Declarations`) belongs to
-a separate module (see :ref:`Separate Modules`), then all ambient namespace
+If an ambient namespace (see :ref:`Ambient Namespace Declarations`) defined in
+a module (see :ref:`Modules`), then all ambient namespace
 declarations are accessible across all declarations and top-level statements of
-the separate module.
+the module.
 
 .. code-block:: typescript
    :linenos:
@@ -1242,7 +1254,7 @@ the separate module.
 
 .. index::
    namespace
-   separate module
+   module
    ambient namespace
    declaration
    accessible declaration
@@ -1434,10 +1446,10 @@ Export Type Directive
 .. meta:
     frontend_status: Done
 
-An export directive can have ``type`` modifier exclusively to be more
-compatibile with |TS| syntactically, see also :ref:`Import Type Directive`.
+An export directive can have a ``type`` modifier exclusively for a better
+syntactic compatibility with |TS| (also see :ref:`Import Type Directive`).
 
-The syntax of *export type directive* is presented below:
+The *export type directive* syntax is presented below:
 
 .. code-block:: abnf
 
@@ -1445,16 +1457,16 @@ The syntax of *export type directive* is presented below:
         'export' 'type' selectiveBindings
         ;
 
-
-|LANG| does not support any additional semantic checks for entities
-exported using *export type* directive.
-
 .. index::
    export
    declaration
    export type
    export directive
    syntax
+
+|LANG| supports no additional semantic checks for entities exported by using
+*export type* directives.
+
 
 |
 
@@ -1528,7 +1540,7 @@ Top-Level Statements
 .. meta:
     frontend_status: Done
 
-A separate module can contain sequences of statements that logically
+A module can contain sequences of statements that logically
 comprise one sequence of statements.
 
 The syntax of *top-level statements* is presented below:
@@ -1541,7 +1553,7 @@ The syntax of *top-level statements* is presented below:
 
 .. index::
    top-level statement
-   separate module
+   module
    module
    statement
 
@@ -1595,22 +1607,21 @@ This situation is represented by the example below:
 .. index::
    top-level statement
    declaration
-   separate module
+   module
    statement
 
-- If a separate module is imported by some other module, then the semantics of
+- If a module is imported by some other module, then the semantics of
   top-level statements is to initialize the imported module. It means that all
   top-level statements are executed only once before a call to any other
-  function, or before the access to any top-level variable of the separate
-  module.
-- If a separate module is used as a program, then top-level statements are used
+  function, or before the access to any top-level variable of the module.
+- If a module is used as a program, then top-level statements are used
   as a program entry point (see :ref:`Program Entry Point`). The set of
   top-level statements being empty implies that the program entry point is also
-  empty and does nothing. If a separate module has the ``main`` function, then
+  empty and does nothing. If a module has the ``main`` function, then
   it is executed after the execution of the top-level statements.
 
 .. index::
-   separate module
+   module
    semantics
    top-level statement
    initialization
@@ -1676,22 +1687,21 @@ Program Entry Point
 .. meta:
     frontend_status: Done
 
-Separate modules or packages can act as programs (applications). Program
-execution starts from the execution of a *program entry point* which can
-be of the following two kinds:
+Modules can act as programs (applications). Program execution starts
+from the execution of a *program entry point* which can be of the following two
+kinds:
 
-- Top-level statements for separate modules (see :ref:`Top-Level Statements`); or
+- Top-level statements for modules (see :ref:`Top-Level Statements`); or
 - Entry point function (see below).
 
 .. index::
-   separate module
-   package
+   module
    top-level statement
    return statement
    execution
    entry point
 
-A separate module can have the following forms of entry point:
+A module can have the following forms of entry point:
 
 - Sole entry point function (``main`` or other as described below);
 - Sole top-level statement (the first statement in the top-level statements
@@ -1700,11 +1710,8 @@ A separate module can have the following forms of entry point:
   function called after the top-level statement execution is completed).
 
 .. index::
-   separate module
+   module
    entry point
-
-A package can have a sole entry point function (``main`` or other as
-described below).
 
 Entry point functions have the following features:
 
@@ -1719,7 +1726,6 @@ Entry point functions have the following features:
 - Entry point function is called ``main`` by default.
 
 .. index::
-   package
    entry point
    function
    parameter
@@ -1771,10 +1777,6 @@ The example below represents different forms of valid and invalid entry points:
     // Option 5: top-level exported function with command-line arguments
     export function entry(cmdLine: string[]) {}
 
-    // Package example - outputs "Package init" then "Package main"
-    package P
-    function main () { console.log ("Package main")}
-    static { console.log ("Package init") }
 
 |
 

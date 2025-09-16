@@ -26,6 +26,6 @@ type TString = string;
 
 function main() : int {
     let s: TString | undefined = undefined
-    assertEQ( s, undefined)
+    arktest.assertEQ( s, undefined)
     return 0;
 }

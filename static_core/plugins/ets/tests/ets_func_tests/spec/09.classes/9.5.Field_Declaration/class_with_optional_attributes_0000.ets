@@ -37,8 +37,8 @@ function main() : void {
   let s = new Student("Klara", 18);
   let s1 = new Student("Karl");
 
-  assertEQ( s.name, "Klara")
-  assertEQ( s.age, 18)
-  assertEQ( s1.name, "Karl")
-  assertEQ( s1.age, undefined)
+  arktest.assertEQ( s.name, "Klara")
+  arktest.assertEQ( s.age, 18)
+  arktest.assertEQ( s1.name, "Karl")
+  arktest.assertEQ( s1.age, undefined)
 }

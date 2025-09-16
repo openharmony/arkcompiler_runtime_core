@@ -18,7 +18,7 @@ desc: Issue 15114
 tags: [compile-only]
 ---*/
 
-type FunctionValue = () => Value
+type FunctionValue = () => reflect.Value
 
 export function functionOverValue1<Value>(value: Value|(() => Value)): boolean {
     return Type.of(value) instanceof FunctionType;

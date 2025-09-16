@@ -23,25 +23,25 @@ function main() {
 
 
 `
-  assertTrue( t1 instanceof string && t1 == "\n\n\n" )
+  arktest.assertTrue( t1 instanceof string && t1 == "\n\n\n" )
 
   // empty string
   let t2 = ``
-  assertTrue( t2 instanceof string && t2 == "" )
+  arktest.assertTrue( t2 instanceof string && t2 == "" )
 
   // escape back-tick
   let t3 = `\``
-  assertTrue( t3 instanceof string && t3 == "`" )
+  arktest.assertTrue( t3 instanceof string && t3 == "`" )
 
   // escape dollar sign
   let t4 = `\${2*2}`
-  assertTrue( t4 instanceof string && t4 == "${2*2}" )
+  arktest.assertTrue( t4 instanceof string && t4 == "${2*2}" )
 
   // escape opening curly brace
   let t5 = `$\{2*2}`
-  assertTrue( t5 instanceof string && t5 == "${2*2}" )
+  arktest.assertTrue( t5 instanceof string && t5 == "${2*2}" )
 
   // escape back-slash
   let t6 = `test \\node`
-  assertTrue( t6 instanceof string && t6 == "test \\node" )
+  arktest.assertTrue( t6 instanceof string && t6 == "test \\node" )
 }

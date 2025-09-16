@@ -69,7 +69,7 @@ if (NOT "${CMAKE_BUILD_TYPE}" MATCHES "Release" AND NOT PANDA_TARGET_WINDOWS)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -rdynamic")
 endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic -Wall -Wextra -Werror -Wshadow")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic -Wall -Wextra -Werror -Wshadow -Wunused-parameter")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti -fno-exceptions")
 
 if(UNIT_TESTS_COVERAGE)
@@ -83,14 +83,7 @@ endif()
 include(cmake/toolchain/coverage/unit_tests_lcov.cmake)
 
 if(ENABLE_UNIT_TESTS_FULL_COVERAGE)
-    add_custom_target(build_for_coverage
-        COMMAND ${CMAKE_COMMAND} --build ${PANDA_BINARY_ROOT} --target cts-assembly tests benchmarks || echo "Build failed, but coverage will still be generated."
-        WORKING_DIRECTORY ${PANDA_BINARY_ROOT}
-        COMMENT "Building targets for coverage (errors ignored)"
-    )
-    add_custom_target(coverage_full
-        DEPENDS build_for_coverage
-    )
+    add_custom_target(coverage_full DEPENDS cts-assembly tests benchmarks)
     collect_coverage_for_target(
         TARGET_NAME coverage_full
         EXCLUDE_DIR_PATTERN \"/usr*\";\"*/third_party/*\";\"*/build/*\";

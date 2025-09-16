@@ -40,7 +40,10 @@ TEST_F(EtsNativePromiseTest, PromiseResolve)
     ASSERT_EQ(result, true);
 }
 
-TEST_F(EtsNativePromiseTest, PromiseReject)
+// Disabled because the correct usage of Promise reject requires an Error object,
+// but this test rejects with a string. Since ets_napi is being deprecated,
+// this test is disabled instead of updated.
+TEST_F(EtsNativePromiseTest, DISABLED_PromiseReject)
 {
     ets_object promise;
     ets_deferred deferred;

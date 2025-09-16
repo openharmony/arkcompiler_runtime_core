@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,6 @@
 #define PANDA_RUNTIME_ENTRYPOINTS_ENTRYPOINTS_H_
 
 #include "entrypoints_gen.h"
-#include "plugins_entrypoints_gen.h"
 #include "runtime/include/thread.h"
 
 namespace ark {

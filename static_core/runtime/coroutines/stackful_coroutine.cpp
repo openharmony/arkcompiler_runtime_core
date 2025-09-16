@@ -122,7 +122,7 @@ void StackfulCoroutineContext::CleanUp()
     RetrieveStackInfo(contextStackP, contextStackSize, contextGuardSize);
     ASAN_UNPOISON_MEMORY_REGION(contextStackP, contextStackSize);
 #endif  // PANDA_ASAN_ON
-    affinityMask_ = stackful_coroutines::AFFINITY_MASK_NONE;
+    affinityMask_ = AffinityMask::Empty();
 }
 
 /*static*/
@@ -173,11 +173,17 @@ bool StackfulCoroutineContext::SwitchTo(StackfulCoroutineContext *target)
 
 void StackfulCoroutineContext::RequestSuspend(bool getsBlocked)
 {
+#ifdef ARK_HYBRID
+    GetCoroutine()->UnbindMutator();
+#endif
     SetStatus(getsBlocked ? Coroutine::Status::BLOCKED : Coroutine::Status::RUNNABLE);
 }
 
 void StackfulCoroutineContext::RequestResume()
 {
+#ifdef ARK_HYBRID
+    GetCoroutine()->BindMutator();
+#endif
     UpdateId(os::thread::GetCurrentThreadId(), GetCoroutine());
     SetStatus(Coroutine::Status::RUNNING);
 }

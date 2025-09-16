@@ -127,8 +127,8 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_ERROR;
     }
     std::array methods = {
-        ani_native_function {"nativeExampleFunction", "JJ:J", reinterpret_cast<void *>(NativeFuncExample)},
-        ani_native_function {"nativeTestFunction", "J:J", reinterpret_cast<void *>(NativeTestFunc)},
+        ani_native_function {"nativeExampleFunction", "ll:l", reinterpret_cast<void *>(NativeFuncExample)},
+        ani_native_function {"nativeTestFunction", "l:l", reinterpret_cast<void *>(NativeTestFunc)},
     };
 
     ani_module module;

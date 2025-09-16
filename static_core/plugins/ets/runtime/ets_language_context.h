@@ -75,6 +75,11 @@ public:
         return utf::CStringAsMutf8(panda_file_items::class_descriptors::CLASS.data());
     }
 
+    const uint8_t *GetUniqueObjectClassDescriptor() const override
+    {
+        return utf::CStringAsMutf8(panda_file_items::class_descriptors::NULL_VALUE.data());
+    }
+
     const uint8_t *GetClassArrayClassDescriptor() const override
     {
         return utf::CStringAsMutf8(panda_file_items::class_descriptors::CLASS_ARRAY.data());
@@ -117,7 +122,7 @@ public:
 
     const uint8_t *GetIllegalStateExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::ILLEGAL_STATE_EXCEPTION.data());
+        return utf::CStringAsMutf8(panda_file_items::class_descriptors::ILLEGAL_STATE_ERROR.data());
     }
     const uint8_t *GetNegativeArraySizeExceptionClassDescriptor() const override
     {
@@ -171,7 +176,7 @@ public:
 
     const uint8_t *GetIllegalArgumentExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::ILLEGAL_ARGUMENT_EXCEPTION.data());
+        return utf::CStringAsMutf8(panda_file_items::class_descriptors::ILLEGAL_ARGUMENT_ERROR.data());
     }
 
     const uint8_t *GetIllegalAccessExceptionClassDescriptor() const override
@@ -226,7 +231,7 @@ public:
 
     const uint8_t *GetUnsupportedOperationExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::UNSUPPORTED_OPERATION_EXCEPTION.data());
+        return utf::CStringAsMutf8(panda_file_items::class_descriptors::UNSUPPORTED_OPERATION_ERROR.data());
     }
 
     const uint8_t *GetVerifyErrorClassDescriptor() const override

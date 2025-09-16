@@ -231,7 +231,7 @@ void PandasmProgramDumper::DumpInstructions(std::ostream &os, const pandasm::Fun
 {
     for (const auto &instr : function.ins) {
         std::string ins = instr.ToString("", function.GetParamsNum() != 0, function.regsNum);
-        if (instr.setLabel) {
+        if (instr.HasLabel()) {
             std::string delim = ": ";
             size_t pos = ins.find(delim);
             std::string label = ins.substr(0, pos);

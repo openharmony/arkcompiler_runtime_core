@@ -31,6 +31,6 @@ class TestC <T = NullableSub> {
 
 
 function main(): void {
-    assertTrue( new TestC().member === undefined)
+    arktest.assertTrue( new TestC().member === undefined)
 
 }

@@ -24,3 +24,9 @@ default_value:
   - "(): string|null => { return null }"
   - "(() => string) | null"
   - "(): string => { return 'abc' }"
+  - ([number, number])
+  - (number|string)
+  - (keyof (A))
+  - (() => string|null)
+  - () => (string|null)
+  - () => (string)|null

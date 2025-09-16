@@ -192,6 +192,7 @@ private:
 };
 
 /// Coroutine conditional variable
+// NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
 class EtsCondVar : public EtsSyncPrimitive<EtsCondVar> {
 public:
     /**

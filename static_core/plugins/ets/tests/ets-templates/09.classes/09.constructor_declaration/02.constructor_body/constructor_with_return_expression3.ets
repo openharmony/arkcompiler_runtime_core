@@ -38,6 +38,6 @@ class X {
 }
 
 function main() {
-    assertTrue(new X().res == 0)
-    assertTrue(new X(new A()).res == 4)
+    arktest.assertTrue(new X().res == 0)
+    arktest.assertTrue(new X(new A()).res == 4)
 }

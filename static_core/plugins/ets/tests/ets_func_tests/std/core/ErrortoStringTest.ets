@@ -16,44 +16,44 @@
 function testMessageValidValue() {
     let errObj1 = new Error("ErrorMessage");
     errObj1.name = "Tag";
-    assertEQ(errObj1.toString(), "Tag: ErrorMessage", 'errObj1.toString()');
+    arktest.assertEQ(errObj1.toString(), "Tag: ErrorMessage", 'errObj1.toString()');
 
     let errObj2 = new Error("ErrorMessage");
     errObj2.name = "";
-    assertEQ(errObj2.toString(), "ErrorMessage", 'errObj2.toString()');
+    arktest.assertEQ(errObj2.toString(), "ErrorMessage", 'errObj2.toString()');
 
     let errObj3 = new Error("ErrorMessage");
-    assertEQ(errObj3.toString(), "Error: ErrorMessage", 'errObj3.toString()');
+    arktest.assertEQ(errObj3.toString(), "Error: ErrorMessage", 'errObj3.toString()');
 }
 
 function testMessageEmptyValue() {
     let errObj4 = new Error("");
     errObj4.name = "Tag";
-    assertEQ(errObj4.toString(), "Tag", 'errObj4.toString()');
+    arktest.assertEQ(errObj4.toString(), "Tag", 'errObj4.toString()');
 
     let errObj5 = new Error("");
     errObj5.name = "";
-    assertEQ(errObj5.toString(), "", 'errObj5.toString()');
+    arktest.assertEQ(errObj5.toString(), "", 'errObj5.toString()');
 
     let errObj6 = new Error("");
-    assertEQ(errObj6.toString(), "Error", 'errObj6.toString()');
+    arktest.assertEQ(errObj6.toString(), "Error", 'errObj6.toString()');
 }
 
 function testMessageNullValue() {
     let errObj7 = new Error();
     errObj7.name = "Tag";
-    assertEQ(errObj7.toString(), "Tag", 'errObj7.toString()');
+    arktest.assertEQ(errObj7.toString(), "Tag", 'errObj7.toString()');
 
     let errObj8 = new Error();
     errObj8.name = "";
-    assertEQ(errObj8.toString(), "", 'errObj8.toString()');
+    arktest.assertEQ(errObj8.toString(), "", 'errObj8.toString()');
 
     let errObj9 = new Error();
-    assertEQ(errObj9.toString(), "Error", 'errObj9.toString()');
+    arktest.assertEQ(errObj9.toString(), "Error", 'errObj9.toString()');
 }
 
 function main(): int {
-    const suite = new ArkTestsuite("Error.toString");
+    const suite = new arktest.ArkTestsuite("Error.toString");
     suite.addTest("Test MessageValidValue", testMessageValidValue);
     suite.addTest("Test MessageEmptyValue", testMessageEmptyValue);
     suite.addTest("Test MessageNullValue", testMessageNullValue);

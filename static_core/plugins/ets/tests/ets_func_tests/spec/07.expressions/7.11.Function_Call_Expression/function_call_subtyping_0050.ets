@@ -55,6 +55,6 @@ function f(): B<Int> {
 function main() {
   let x : A<Int> = f()
   
-  assertEQ(x.foo(),  6)
+  arktest.assertEQ(x.foo(),  6)
 }
 

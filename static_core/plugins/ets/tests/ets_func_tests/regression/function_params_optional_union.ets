@@ -21,5 +21,5 @@ class A {
 
 function main () : void {
     let a = new A()
-    assertEQ( a.split("123", 1)[0], "")
+    arktest.assertEQ( a.split("123", 1)[0], "")
 }

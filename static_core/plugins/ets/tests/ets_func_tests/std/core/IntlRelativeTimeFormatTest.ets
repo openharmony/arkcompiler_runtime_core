@@ -15,7 +15,7 @@
 
 const fakeLocale = "er-or"
 
-function main() throws {
+function main() {
     testFormat()
     testFormatToParts()
     testResolvedOptions()
@@ -23,10 +23,14 @@ function main() throws {
     testSupportedLocalesOf()
 }
 
-function runFormatTest(locale: Intl.UnicodeBCP47LocaleIdentifier, value: number, unit: Intl.RelativeTimeFormatUnit, expected: string, options?: Intl.RelativeTimeFormatOptions) {
+function runFormatTest(locale: Intl.UnicodeBCP47LocaleIdentifier,
+                       value: number,
+                       unit: Intl.RelativeTimeFormatUnit,
+                       expected: string,
+                       options?: Intl.RelativeTimeFormatOptions) {
     const format = new Intl.RelativeTimeFormat(locale, options)
     const result = format.format(value, unit)
-    assertEQ(result, expected)
+    arktest.assertEQ(result, expected)
 }
 
 function testFormat() {
@@ -112,7 +116,7 @@ function formatToPartsForDayTest() {
         let expected: FixedArray<string> = ['今天', '明天', '后天', '3天后', '昨天', '前天', '3天前'];
         runFormatToPartsTest('zh', values, units[i], expected, options);
 
-        expected = ['сегодня', 'завтра', 'послезавтра', 'через 3 дня', 'вчера', 'позавчера',  '3 дня назад'];
+        expected = ['сегодня', 'завтра', 'послезавтра', 'через 3 дня', 'вчера', 'позавчера', '3 дня назад'];
         runFormatToPartsTest('ru', values, units[i], expected, options);
 
         expected = ['today', 'tomorrow', 'in 2 days', 'in 3 days', 'yesterday', '2 days ago', '3 days ago'];
@@ -215,26 +219,30 @@ function testResolvedOptions() {
         const format = new Intl.RelativeTimeFormat("en")
         const result = format.resolvedOptions()
         console.log(result)
-        assertEQ(result.style, "long")
-        assertEQ(result.numeric, "always")
-        assertEQ(result.numberingSystem, "latn")
+        arktest.assertEQ(result.style, "long")
+        arktest.assertEQ(result.numeric, "always")
+        arktest.assertEQ(result.numberingSystem, "latn")
     }
     {
         const format = new Intl.RelativeTimeFormat("en", { style: "short" } as Intl.RelativeTimeFormatOptions)
         const result = format.resolvedOptions()
-        assertEQ(result.style, "short")
+        arktest.assertEQ(result.style, "short")
     }
     {
         const format = new Intl.RelativeTimeFormat("en", { numeric: "always" } as Intl.RelativeTimeFormatOptions)
         const result = format.resolvedOptions()
-        assertEQ(result.numeric, "always")
+        arktest.assertEQ(result.numeric, "always")
     }
 }
 
-function runTestWithOptions(locale: Intl.UnicodeBCP47LocaleIdentifier, value: number, unit: Intl.RelativeTimeFormatUnit, options: Intl.RelativeTimeFormatOptions, expected: string) {
+function runTestWithOptions(locale: Intl.UnicodeBCP47LocaleIdentifier,
+                            value: number,
+                            unit: Intl.RelativeTimeFormatUnit,
+                            options: Intl.RelativeTimeFormatOptions,
+                            expected: string) {
     const format = new Intl.RelativeTimeFormat(locale, options)
     const result = format.format(value, unit)
-    assertEQ(result, expected)
+    arktest.assertEQ(result, expected)
 }
 
 function testSelectWithOptions() {
@@ -246,21 +254,25 @@ function testSelectWithOptions() {
     runTestWithOptions("zh", -7, "day", { style: "short" }, "7天前")
 }
 
-function runSupportedLocalesStringTest(locales: string, options: Intl.RelativeTimeFormatOptions | undefined, expected: string[]) {
+function runSupportedLocalesStringTest(locales: string,
+                                       options: Intl.RelativeTimeFormatOptions | undefined,
+                                       expected: string[]) {
     const result = Intl.RelativeTimeFormat.supportedLocalesOf(locales, options)
-    assertEQ(result.length, expected.length)
+    arktest.assertEQ(result.length, expected.length)
     for (let i: int = 0; i < result.length; i++) {
         const isEq = result[i].includes(expected[i])
-        assertTrue(isEq);
+        arktest.assertTrue(isEq);
     }
 }
 
-function runSupportedLocalesArrayTest(locales: string[], options: Intl.RelativeTimeFormatOptions | undefined, expected: string[]) {
+function runSupportedLocalesArrayTest(locales: string[],
+                                      options: Intl.RelativeTimeFormatOptions | undefined,
+                                      expected: string[]) {
     const result = Intl.RelativeTimeFormat.supportedLocalesOf(locales, options)
-    assertEQ(result.length, expected.length)
+    arktest.assertEQ(result.length, expected.length)
     for (let i: int = 0; i < result.length; i++) {
         const isEq = result[i].includes(expected[i])
-        assertTrue(isEq);
+        arktest.assertTrue(isEq);
     }
 }
 

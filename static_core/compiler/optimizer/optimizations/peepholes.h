@@ -229,7 +229,11 @@ private:
     bool TrySimplifyCompareNegation(Inst *inst);
     bool IsNegationPattern(Inst *inst);
     bool TrySimplifyNegationPattern(Inst *inst);
+    static CallInst *FindTypeArrayCtorCall(Inst *newObject);
+    static Inst *GetTypedArraySize(Inst *newInst);
+    static bool CheckGetLengthLoad(Inst *inst);
     static bool TryOptimizeBoxedLoadStoreObject(Inst *inst);
+    static bool TryOptimizeGetLengthLoadObject(Inst *inst);
     static bool TryOptimizeXorChain(Inst *inst);
 
 private:

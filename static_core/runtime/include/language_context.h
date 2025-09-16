@@ -73,6 +73,12 @@ public:
 
     virtual const uint8_t *GetClassClassDescriptor() const = 0;
 
+    virtual const uint8_t *GetUniqueObjectClassDescriptor() const
+    {
+        UNREACHABLE();
+        return nullptr;
+    }
+
     virtual const uint8_t *GetClassArrayClassDescriptor() const = 0;
 
     virtual const uint8_t *GetStringArrayClassDescriptor() const = 0;
@@ -364,6 +370,11 @@ public:
     const uint8_t *GetClassClassDescriptor() const
     {
         return base_->GetClassClassDescriptor();
+    }
+
+    const uint8_t *GetUniqueObjectClassDescriptor() const
+    {
+        return base_->GetUniqueObjectClassDescriptor();
     }
 
     const uint8_t *GetClassArrayClassDescriptor() const

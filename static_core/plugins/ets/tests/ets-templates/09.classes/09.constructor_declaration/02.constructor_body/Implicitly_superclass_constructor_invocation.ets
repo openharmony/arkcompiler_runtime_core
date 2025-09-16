@@ -15,7 +15,11 @@ limitations under the License.
 
 /*---
 desc: Check that superclass construct implicitly invoked.
-assert: If a constructor body does not begin with an explicit constructor call and the constructor being declared is not part of the primordial class Object, then the constructor body implicitly begins with a superclass constructor call "super();", a call of the constructor of its direct superclass that takes no arguments.
+assert: >-
+    If a constructor body does not begin with an explicit constructor call and the constructor being declared
+    is not part of the primordial class Object, then the constructor body implicitly begins
+    with a superclass constructor call "super();",
+    a call of the constructor of its direct superclass that takes no arguments.
 ---*/
 
 class A {
@@ -34,5 +38,5 @@ class B extends A {
 
 function main(): void {
   let instance: B = new B();
-  assertEQ( instance.x, 5 );
+  arktest.assertEQ( instance.x, 5 );
 }

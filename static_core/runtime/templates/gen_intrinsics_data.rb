@@ -18,6 +18,7 @@ require 'optparse'
 require 'yaml'
 require 'json'
 require 'erb'
+require 'ostruct'
 
 module Gen
   def self.on_require(data); end

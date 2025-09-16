@@ -23,7 +23,7 @@ class ModuleFindVariableTest : public AniTest {};
 TEST_F(ModuleFindVariableTest, get_int_variable)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_variable_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_variable_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_variable variable {};
@@ -41,7 +41,7 @@ TEST_F(ModuleFindVariableTest, get_int_variable)
 TEST_F(ModuleFindVariableTest, get_ref_variable)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_variable_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_variable_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_variable variable {};
@@ -52,7 +52,7 @@ TEST_F(ModuleFindVariableTest, get_ref_variable)
 TEST_F(ModuleFindVariableTest, get_invalid_variable_name)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_variable_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_variable_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
     ani_variable variable {};
     ASSERT_EQ(env_->Module_FindVariable(module, "sss", &variable), ANI_NOT_FOUND);
@@ -63,7 +63,7 @@ TEST_F(ModuleFindVariableTest, get_invalid_variable_name)
 TEST_F(ModuleFindVariableTest, invalid_args_result)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_variable_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_variable_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
     ASSERT_EQ(env_->Module_FindVariable(module, "moduleXS", nullptr), ANI_INVALID_ARGS);
 }
@@ -71,7 +71,7 @@ TEST_F(ModuleFindVariableTest, invalid_args_result)
 TEST_F(ModuleFindVariableTest, invalid_env)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_variable_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_variable_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
     ani_variable variable {};
     ASSERT_EQ(env_->c_api->Module_FindVariable(nullptr, module, "moduleXS", &variable), ANI_INVALID_ARGS);
@@ -86,7 +86,7 @@ TEST_F(ModuleFindVariableTest, invalid_module)
 TEST_F(ModuleFindVariableTest, find_int_variable)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_variable_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_variable_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_variable variable {};
@@ -101,7 +101,7 @@ TEST_F(ModuleFindVariableTest, find_int_variable)
 TEST_F(ModuleFindVariableTest, many_descriptor)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_variable_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_variable_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
     ani_variable variable {};
     char end = 'J';
@@ -116,14 +116,14 @@ TEST_F(ModuleFindVariableTest, many_descriptor)
 TEST_F(ModuleFindVariableTest, find_variable_B_in_namespace_A)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_variable_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_variable_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_variable variable {};
     ASSERT_EQ(env_->Module_FindVariable(module, "moduleT", &variable), ANI_NOT_FOUND);
 
     ani_namespace ns {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "Lops;", &ns), ANI_OK);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "ops", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
     ASSERT_EQ(env_->Namespace_FindVariable(ns, "moduleT", &variable), ANI_OK);
     ASSERT_NE(variable, nullptr);
@@ -132,7 +132,7 @@ TEST_F(ModuleFindVariableTest, find_variable_B_in_namespace_A)
 TEST_F(ModuleFindVariableTest, find_const_variable)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_variable_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_variable_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_variable variable {};
@@ -149,7 +149,7 @@ TEST_F(ModuleFindVariableTest, find_const_variable)
 TEST_F(ModuleFindVariableTest, combine_test_boolean)
 {
     ani_module module;
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_variable_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_variable_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_variable variable {};
@@ -167,7 +167,7 @@ TEST_F(ModuleFindVariableTest, combine_test_boolean)
 TEST_F(ModuleFindVariableTest, combine_test_char)
 {
     ani_module module;
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_variable_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_variable_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_variable variable {};
@@ -185,7 +185,7 @@ TEST_F(ModuleFindVariableTest, combine_test_char)
 TEST_F(ModuleFindVariableTest, combine_test_byte)
 {
     ani_module module;
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_variable_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_variable_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_variable variable {};
@@ -203,7 +203,7 @@ TEST_F(ModuleFindVariableTest, combine_test_byte)
 TEST_F(ModuleFindVariableTest, combine_test_short)
 {
     ani_module module;
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_variable_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_variable_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_variable variable {};
@@ -221,7 +221,7 @@ TEST_F(ModuleFindVariableTest, combine_test_short)
 TEST_F(ModuleFindVariableTest, combine_test_long)
 {
     ani_module module;
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_variable_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_variable_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_variable variable {};
@@ -239,7 +239,7 @@ TEST_F(ModuleFindVariableTest, combine_test_long)
 TEST_F(ModuleFindVariableTest, combine_test_float)
 {
     ani_module module;
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_variable_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_variable_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_variable variable {};
@@ -257,7 +257,7 @@ TEST_F(ModuleFindVariableTest, combine_test_float)
 TEST_F(ModuleFindVariableTest, combine_test_double)
 {
     ani_module module;
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_variable_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_variable_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_variable variable {};
@@ -276,7 +276,7 @@ TEST_F(ModuleFindVariableTest, combine_test_double)
 TEST_F(ModuleFindVariableTest, combine_test_int)
 {
     ani_module module;
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_variable_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_variable_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_variable variable {};
@@ -294,7 +294,7 @@ TEST_F(ModuleFindVariableTest, combine_test_int)
 TEST_F(ModuleFindVariableTest, combine_test_ref)
 {
     ani_module module;
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_variable_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_variable_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_variable variable {};

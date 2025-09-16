@@ -43,6 +43,12 @@ static EtsAbcFile *CreateAbcFile(EtsCoroutine *coro, ClassLinkerContext *ctx,
     return abcFile;
 }
 
+static bool IsHspPath(const std::string &path)
+{
+    std::string suffix = ".hsp";
+    return std::equal(suffix.rbegin(), suffix.rend(), path.rbegin());
+}
+
 EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *filePath)
 {
     ASSERT(filePath != nullptr);
@@ -59,9 +65,21 @@ EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *fi
         pf = panda_file::OpenPandaFileOrZip(path);
     }
 
+    auto pathStr = std::string(path.begin(), path.end());
+    if (pf == nullptr && IsHspPath(pathStr)) {
+        // get hsp path
+        std::string hspPath = pathStr;
+        std::shared_ptr<ark::extractor::Extractor> extractor = std::make_shared<ark::extractor::Extractor>(hspPath);
+        if (!extractor || !extractor->Init()) {
+            return nullptr;
+        }
+        std::string abcPath = hspPath.substr(0, hspPath.length() - 4).append("/ets/modules_static.abc");
+        auto safeData = extractor->GetSafeDataForHsp(abcPath);
+        pf = panda_file::OpenPandaFileFromSecureMemory(safeData->GetDataPtr(), safeData->GetDataLen(), pathStr);
+    }
+
     if (pf == nullptr) {
         // get hap path
-        auto pathStr = std::string(path.begin(), path.end());
         size_t pos = pathStr.rfind("/ets/");
         if (pos == std::string::npos) {
             ets::ThrowEtsException(coro, panda_file_items::class_descriptors::ABC_FILE_NOT_FOUND_ERROR,
@@ -78,7 +96,9 @@ EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *fi
             return nullptr;
         }
         auto safeData = extractor->GetSafeData(pathStr);
-        ASSERT(safeData != nullptr);
+        if (safeData == nullptr) {
+            return nullptr;
+        }
         pf = panda_file::OpenPandaFileFromSecureMemory(safeData->GetDataPtr(), safeData->GetDataLen(), pathStr);
     }
 

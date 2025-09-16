@@ -33,12 +33,12 @@ class LateReject implements PromiseLike<string> {
 }
 
 let thenable: PromiseLike<string>[] = [new Resolve(), new LateReject()];
-Promise.any(thenable).then<void, void>((value: string): void => {
+Promise.any<string>(thenable).then<void, void>((value): void => {
     if (value != 'abc') {
         console.log('Test failed. The promise should be resolve by the specified value.');
         return;
     }
     console.log('Test passed.');
-}, (err: AggregateError): void => {
+}, (err): void => {
     console.log('Test failed. The promise should not be rejected.');
 });

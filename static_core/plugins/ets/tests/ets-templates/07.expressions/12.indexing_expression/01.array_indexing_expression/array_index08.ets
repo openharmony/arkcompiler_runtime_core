@@ -24,5 +24,5 @@ function main(): void {
     [7, 8, 9]
   ];
   matrix[1][2] = 10;
-  assertEQ(matrix[1][2], 10);
+  arktest.assertEQ(matrix[1][2], 10);
 }

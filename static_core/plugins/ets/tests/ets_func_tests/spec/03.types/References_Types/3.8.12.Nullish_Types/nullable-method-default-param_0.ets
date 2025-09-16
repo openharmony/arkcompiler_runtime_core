@@ -21,7 +21,7 @@ name: nullable-method-default-param_0.ets
 
 class TestC {
     testMethod(required: String, param: (Int | null) = 100): void {
-        assertTrue( param === null)
+        arktest.assertTrue( param === null)
     }
 }
 

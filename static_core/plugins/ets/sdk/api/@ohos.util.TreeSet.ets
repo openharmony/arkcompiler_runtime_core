@@ -15,13 +15,16 @@
 
 import TreeMap from '@ohos.util.TreeMap';
 
+export type TreeSetForEachCb<T> = (value: T, key: T, set: TreeSet<T>) => void;
+export type TreeSetComparator<T> = (firstValue: T, secondValue: T) => double;
+
 export interface ReadonlyTreeSet<T> extends Iterable<T> {
     /**
      * Return the number of elements in the TreeSet
      *
      * @returns the number of elements in the TreeSet
      */
-    get length(): number;
+    get length(): int;
 
     /**
      * Check whether the given value is in the TreeSet
@@ -62,8 +65,12 @@ export class TreeSet<T> implements ReadonlyTreeSet<T> {
      *
      * @param comparator: the comparator of the TreeSet
      */
-    constructor(comparator?: (firstValue: T, secondValue: T) => number) {
+    constructor(comparator?: TreeSetComparator<T>) {
         this.treeMap = new TreeMap<T, T>(comparator);
+    }
+
+    public toString(): string {
+        return "[object TreeSet]";
     }
 
     /**
@@ -71,8 +78,8 @@ export class TreeSet<T> implements ReadonlyTreeSet<T> {
      *
      * @returns the number of elements in the TreeSet
      */
-    override get length(): number {
-        return this.treeMap.length;
+    override get length(): int {
+        return this.treeMap.length.toInt();
     }
 
     /**
@@ -91,7 +98,7 @@ export class TreeSet<T> implements ReadonlyTreeSet<T> {
      *
      * @param callbackfn: the function to apply, the key is always same as the value
      */
-    forEach(callbackfn: (value: T, key: T, set: TreeSet<T>) => void): void {
+    forEach(callbackfn: TreeSetForEachCb<T>): void {
         this.treeMap.forEach((value: T, key: T) => {
             callbackfn(value, key, this);
         })

@@ -36,8 +36,8 @@ tags: []
 
  function main(): void {
     let b = new Derive2();
-    assertEQ( b.field, 42)
+    arktest.assertEQ( b.field, 42)
 
     b = new Derive2(100);
-    assertEQ( b.age, 42)
+    arktest.assertEQ( b.age, 42)
  }

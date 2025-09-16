@@ -17,7 +17,7 @@
   tags: [not-a-test]
 ---*/
 
-export const flt: float = 2.345;
+export const flt: float = 2.345f;
 
 export let c: int = 3;
 

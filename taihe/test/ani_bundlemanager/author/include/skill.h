@@ -15,8 +15,8 @@
 #ifndef SKILL_H
 #define SKILL_H
 
-#include "stdexcept"
 #include <string>
+#include "stdexcept"
 
 using namespace taihe;
 

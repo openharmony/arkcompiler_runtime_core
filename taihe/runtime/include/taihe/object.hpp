@@ -80,8 +80,9 @@ struct data_block_full : DataBlockHead {
     Impl impl;
 
     template <typename... Args>
-    data_block_full(Args &&...args) : impl(std::forward<Args>(args)...)
+    data_block_full(TypeInfo const *rtti, Args &&...args) : impl(std::forward<Args>(args)...)
     {
+        tobj_init(this, rtti);
     }
 };
 
@@ -114,9 +115,9 @@ inline Impl *cast_data_ptr(struct DataBlockHead *data_ptr)
 }
 
 template <typename Impl, typename... Args>
-inline DataBlockHead *make_data_ptr(Args &&...args)
+inline DataBlockHead *make_data_ptr(TypeInfo const *rtti, Args &&...args)
 {
-    return new data_block_full<Impl>(std::forward<Args>(args)...);
+    return new data_block_full<Impl>(rtti, std::forward<Args>(args)...);
 }
 
 template <typename Impl>
@@ -190,19 +191,14 @@ public:
 
 public:
     static constexpr struct typeinfo_t {
-        uint64_t version;
-        void (*free_fptr)(struct DataBlockHead *);
-        std::size_t (*hash_fptr)(struct DataBlockHead *);
-        bool (*same_fptr)(struct DataBlockHead *, struct DataBlockHead *);
+        uint64_t version = 0;
+        free_func_t *free_fptr = &free_data_ptr<Impl>;
+        hash_func_t *hash_fptr = &hash_data_ptr<Impl>;
+        same_func_t *same_fptr = &same_data_ptr<Impl>;
         uint64_t len = 0;
         struct IdMapItem idmap[((sizeof(InterfaceTypes::template idmap_impl<Impl>) / sizeof(IdMapItem)) + ...)] = {};
     } rtti = [] {
-        struct typeinfo_t info = {
-            .version = 0,
-            .free_fptr = &free_data_ptr<Impl>,
-            .hash_fptr = &hash_data_ptr<Impl>,
-            .same_fptr = &same_data_ptr<Impl>,
-        };
+        struct typeinfo_t info;
         (
             [&] {
                 using InterfaceType = InterfaceTypes;
@@ -221,7 +217,7 @@ public:
                   int> = 0>
     static inline typename InterfaceDest::vtable_type const *get_vtbl_ptr()
     {
-        typename InterfaceDest::vtable_type const *vtbl_ptr;
+        typename InterfaceDest::vtable_type const *vtbl_ptr = nullptr;
         (
             [&] {
                 using InterfaceType = InterfaceTypes;
@@ -248,8 +244,8 @@ struct impl_holder : public impl_view<Impl, InterfaceTypes...> {
     template <typename... Args>
     static impl_holder make(Args &&...args)
     {
-        DataBlockHead *data_ptr = make_data_ptr<Impl>(std::forward<Args>(args)...);
-        tobj_init(data_ptr, reinterpret_cast<TypeInfo const *>(&rtti));
+        DataBlockHead *data_ptr =
+            make_data_ptr<Impl>(reinterpret_cast<TypeInfo const *>(&rtti), std::forward<Args>(args)...);
         return impl_holder(data_ptr);
     }
 

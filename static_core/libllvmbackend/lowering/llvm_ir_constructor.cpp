@@ -4901,6 +4901,7 @@ void LLVMIrConstructor::VisitFillConstArray(GraphVisitor *v, Inst *inst)
     builder.CreateMemCpyInline(arrayPtr, align, constArrPtr, align, builder.getInt64(arraySize));
 }
 
+// CC-OFFNXT(huge_method) solid logic
 void LLVMIrConstructor::VisitIsInstance(GraphVisitor *v, Inst *inst)
 {
     auto ctor = static_cast<LLVMIrConstructor *>(v);
@@ -4908,7 +4909,9 @@ void LLVMIrConstructor::VisitIsInstance(GraphVisitor *v, Inst *inst)
     auto klassType = isInstance->GetClassType();
     auto object = ctor->GetInputValue(inst, 0);
     llvm::Value *result;
-    if (klassType == ClassType::UNRESOLVED_CLASS) {
+
+    // Note(#27161): implement FastPath for unions
+    if (klassType == ClassType::UNRESOLVED_CLASS || klassType == ClassType::UNION_CLASS) {
         result = ctor->CreateIsInstanceEntrypointCall(inst);
     } else {
         auto &ctx = ctor->func_->getContext();
@@ -4973,7 +4976,8 @@ void LLVMIrConstructor::VisitCheckCast(GraphVisitor *v, Inst *inst)
         ctor->SetCurrentBasicBlock(contBb);
     }
 
-    if (klassType == ClassType::UNRESOLVED_CLASS ||
+    // Note(#27161): implement FastPath for unions
+    if (klassType == ClassType::UNRESOLVED_CLASS || klassType == ClassType::UNION_CLASS ||
         (klassType == ClassType::INTERFACE_CLASS && inst->CanDeoptimize())) {
         ctor->CreateCheckCastEntrypointCall(inst);
     } else if (klassType == ClassType::INTERFACE_CLASS) {

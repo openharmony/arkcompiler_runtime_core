@@ -14,9 +14,10 @@
  */
 import {xml} from "@ohos.xml"
 import { BusinessError } from "@ohos.base";
+import { util } from "@ohos.util";
 
 function main(): int {
-    const suite = new ArkTestsuite("XmlPullParser API tests, part10");
+    const suite = new arktest.ArkTestsuite("XmlPullParser API tests, part10");
 
     suite.addTest("Testing the XML PullParser without <>.", testXmlPullParserConstructor0020)
     suite.addTest("Testing the XML PullParser with special characters in content. Verifies that it can handle such cases correctly.", testXmlPullParserConstructor0019)
@@ -26,21 +27,22 @@ function main(): int {
     suite.addTest("Testing the XML PullParser with content containing ']]>' within CDATA. Verifies that it handles the input correctly without error.", testXmlPullParserConstructor0015)
     suite.addTest("Testing the XML PullParser with nested CDATA sections.Verifies that it handles nested CDATA sections correctly.", testXmlPullParserConstructor0014)
     suite.addTest("Testing the XML PullParser with a malformed CDATA section. Verifies that it throws a meaningful error for invalid CDATA.", testXmlPullParserConstructor0013)
+    suite.addTest("Testing the XML PullParser with a CDATA section without end. Verifies that it throws a meaningful error for invalid CDATA.", testXmlMethod018)
     suite.addTest("Testing the XML PullParser with names containing special characters.", testXmlPullParserConstructor0008)
     suite.addTest("Testing the XML PullParser with tag names that contain spaces.", testXmlPullParserConstructor0007)
+    suite.addTest("Testing the XML PullParser with UTF-8", testXmlPullParserConstructor0021)
 
     return suite.run()
 }
 
 function rawStringToBuffer( str: string ) : ArrayBuffer {
-    let idx = 0
-    let len = str.length
-    let arr = new Uint8Array( len )
-    for ( idx = 0 ; idx < len ; ++idx ) {
-        arr[ idx ] = str.charCodeAt(idx) & 0xFF;
-    }
+    return new util.TextEncoder().encodeInto(str).buffer;
+}
 
-    return arr.buffer as ArrayBuffer
+let testString = "";
+function func21(name: string, value: string): boolean {
+    testString += name + ':' + value;
+    return true;
 }
 
 function testXmlPullParserConstructor0007() {
@@ -62,7 +64,7 @@ function testXmlPullParserConstructor0007() {
         parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
+        arktest.assertTrue(false)
     }
 }
 
@@ -84,10 +86,10 @@ function testXmlPullParserConstructor0008() {
             tagValueCallbackFunction: (name: string, value: string) => true
         };
         parser.parseXml(options);
-        assertTrue(false)
+        arktest.assertTrue(false)
     } catch (err: BusinessError) {
         console.error(`${TAG} failed, error: ${err}`);
-        assertEQ((err as BusinessError).code, 401);
+        arktest.assertEQ((err as BusinessError).code, 401);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
     }
@@ -109,8 +111,8 @@ function testXmlPullParserConstructor0013() {
             '    </student>' +
             '    <body>I was parsed!</body>' +
             '</students>'
-        
-        
+
+
         let parser = new xml.XmlPullParser(rawStringToBuffer(testXml), "utf-8");
         let options: xml.ParseOptions = {
             supportDoctype: true,
@@ -118,10 +120,10 @@ function testXmlPullParserConstructor0013() {
             tagValueCallbackFunction: (name: string, value: string) => true
         };
         parser.parseXml(options);
-        assertTrue(false)
+        arktest.assertTrue(false)
     } catch (err: BusinessError) {
         console.error(`${TAG} failed, error: ${err}`);
-        assertEQ((err as BusinessError).code, 401);
+        arktest.assertEQ((err as BusinessError).code, 401);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
     }
@@ -151,10 +153,10 @@ function testXmlPullParserConstructor0014() {
             tagValueCallbackFunction: (name: string, value: string) => true
         };
         parser.parseXml(options);
-        assertTrue(false)
+        arktest.assertTrue(false)
     } catch (err: BusinessError) {
         console.error(`${TAG} failed, error: ${err}`);
-        assertEQ((err as BusinessError).code, 401);
+        arktest.assertEQ((err as BusinessError).code, 401);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
     }
@@ -184,10 +186,10 @@ function testXmlPullParserConstructor0015() {
             tagValueCallbackFunction: (name: string, value: string) => true
         };
         parser.parseXml(options);
-        assertTrue(false)
+        arktest.assertTrue(false)
     } catch (err: BusinessError) {
         console.error(`${TAG} failed, error: ${err}`);
-        assertEQ((err as BusinessError).code, 401);
+        arktest.assertEQ((err as BusinessError).code, 401);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
     }
@@ -219,7 +221,7 @@ function testXmlPullParserConstructor0016() {
         parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
+        arktest.assertTrue(false)
     }
 }
 
@@ -249,7 +251,7 @@ function testXmlPullParserConstructor0017() {
         parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
+        arktest.assertTrue(false)
     }
 }
 
@@ -271,10 +273,10 @@ function testXmlPullParserConstructor0018() {
             tagValueCallbackFunction: (name: string, value: string) => true
         };
         parser.parseXml(options);
-        assertTrue(false)
+        arktest.assertTrue(false)
     } catch (err: BusinessError) {
         console.error(`${TAG} failed, error: ${err}`);
-        assertEQ((err as BusinessError).code, 401);
+        arktest.assertEQ((err as BusinessError).code, 401);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
     }
@@ -295,10 +297,10 @@ function testXmlPullParserConstructor0019() {
             tagValueCallbackFunction: (name: string, value: string) => true
         };
         parser.parseXml(options);
-        assertTrue(false)
+        arktest.assertTrue(false)
     } catch (err: BusinessError) {
         console.error(`${TAG} failed, error: ${err}`);
-        assertEQ((err as BusinessError).code, 401);
+        arktest.assertEQ((err as BusinessError).code, 401);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
     }
@@ -322,12 +324,75 @@ function testXmlPullParserConstructor0020() {
             tagValueCallbackFunction: (name: string, value: string) => true
         };
         parser.parseXml(options);
-        assertTrue(false)
+        arktest.assertTrue(false)
     } catch (err: BusinessError) {
         console.error(`${TAG} failed, error: ${err}`);
-        assertEQ((err as BusinessError).code, 401);
+        arktest.assertEQ((err as BusinessError).code, 401);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
     }
 }
 
+function testXmlPullParserConstructor0021() {
+    let strXml =
+        '<?xml version="1.0" encoding="utf-8"?>' +
+          '<!DOCTYPE note [\n<!ENTITY foo "baa">]>' +
+          '<note importance="high" logged="true">' +
+          '     <![CDATA[\r\nfunccrion matchwo(a,6)\r\n{\r\nreturn 1;\r\n}\r\n]]>' +
+          '     <!--Hello, World!-->' +
+          '     <company>John &amp; Hans</company>' +
+          '     <title>Happy</title>' +
+          '     <title>Happy</title>' +
+          '     <lens>Work</lens>' +
+          '     <lens>Play</lens>' +
+          '     <?go there?>' +
+          '     <a><b/></a>' +
+          '     <h:table xmlns:h="http://www.w3.org/TR/html4/">' +
+          '         <h:tr>' +
+          '             <h:td>Apples</h:td>' +
+          '             <h:td>Bananas</h:td>' +
+          '         </h:tr>' +
+          '     </h:table>' +
+          '</note>'
+    let textEncoder = new util.TextEncoder();
+    let arrbuffer = textEncoder.encodeInto(strXml);
+    let that = new xml.XmlPullParser(arrbuffer.buffer as object as ArrayBuffer, 'UTF-8');
+    testString = '';
+    let options: xml.ParseOptions = {
+        supportDoctype: true,
+        ignoreNameSpace: true,
+        attributeValueCallbackFunction: func21
+    }
+    that.parseXml(options);
+    let str1 = 'importance:highlogged:truexmlns:h:http://www.w3.org/TR/html4/';
+    arktest.assertEQ(testString, str1);
+}
+
+function func18(name: string, value: string): boolean {
+    testString += name + value;
+    return true;
+}
+
+function testXmlMethod018() {
+    const TAG = 'testXmlMethod018';
+    try {
+        let strXml =
+            '<?xml version="1.0" encoding="UTF-8"?>' +
+            '<note importance="high" logged="true">' +
+            '<company><![CDATA[';
+        let textEncoder = new util.TextEncoder();
+        let uint8 = textEncoder.encodeInto(strXml);
+        let that = new xml.XmlPullParser(uint8.buffer as object as ArrayBuffer);
+        testString = '';
+        let options: xml.ParseOptions = {
+            supportDoctype: true,
+            ignoreNameSpace: true,
+            tagValueCallbackFunction: func18
+        };
+        that.parseXml(options);
+        arktest.assertTrue(false);
+    } catch (err: BusinessError) {
+        arktest.assertEQ(err.toString(), "BusinessError: Cannot find the ']]>' in xml string.");
+        arktest.assertEQ(err.code, 401);
+    }
+}

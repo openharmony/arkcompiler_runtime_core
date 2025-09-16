@@ -100,9 +100,4 @@ EtsDouble StdCoreFloatToDouble(EtsFloat val)
     return static_cast<double>(val);
 }
 
-EtsChar StdCoreFloatToChar(EtsFloat val)
-{
-    return CastFloatToInt<EtsFloat, EtsChar>(val);
-}
-
 }  // namespace ark::ets::intrinsics

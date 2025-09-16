@@ -42,6 +42,7 @@ enum class ClassType {
     INTERFACE_CLASS,
     OTHER_CLASS,
     FINAL_CLASS,
+    UNION_CLASS,
     COUNT
 };
 
@@ -94,8 +95,6 @@ public:
     };
 
     enum class InteropCallKind { UNKNOWN = 0, CALL, CALL_BY_VALUE, NEW_INSTANCE, COUNT };
-
-    enum class ArrayField { UNKNOWN = 0, ACTUAL_LENGTH, BUFFER };
 
     RuntimeInterface() = default;
     virtual ~RuntimeInterface() = default;
@@ -306,12 +305,12 @@ public:
         return true;
     }
 
-    virtual bool IsMethodIntrinsic([[maybe_unused]] MethodPtr method) const
+    virtual bool IsMethodAbstract([[maybe_unused]] MethodPtr method) const
     {
         return false;
     }
 
-    virtual bool IsMethodAbstract([[maybe_unused]] MethodPtr method) const
+    virtual bool IsMethodIntrinsic([[maybe_unused]] MethodPtr method) const
     {
         return false;
     }
@@ -319,6 +318,11 @@ public:
     virtual bool IsMethodIntrinsic([[maybe_unused]] MethodPtr parentMethod, [[maybe_unused]] MethodId id) const
     {
         return false;
+    }
+
+    virtual MethodPtr GetMethodAsIntrinsic([[maybe_unused]] MethodPtr parentMethod, [[maybe_unused]] MethodId id) const
+    {
+        return nullptr;
     }
 
     // return true if the method is Native with exception
@@ -442,12 +446,92 @@ public:
         return false;
     }
 
+    virtual bool IsMethodEscompatMapCtor([[maybe_unused]] MethodPtr method) const
+    {
+        return false;
+    }
+
     virtual bool IsClassEscompatArray([[maybe_unused]] ClassPtr klass) const
     {
         return false;
     }
 
     virtual bool IsClassStringBuilder([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsClassEscompatMap([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsClassEscompatInt8Array([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsClassEscompatUint8Array([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsClassEscompatUint8ClampedArray([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsClassEscompatInt16Array([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsClassEscompatUint16Array([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsClassEscompatInt32Array([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsClassEscompatUint32Array([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsClassEscompatFloat32Array([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsClassEscompatFloat64Array([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsClassEscompatBigInt64Array([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsClassEscompatBigUint64Array([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsClassEscompatTypedArray([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsFieldTypedArrayLengthInt([[maybe_unused]] FieldPtr field) const
+    {
+        return false;
+    }
+
+    virtual bool IsMethodTypedArrayCtor([[maybe_unused]] MethodPtr method) const
     {
         return false;
     }
@@ -483,21 +567,6 @@ public:
     }
 
     virtual bool IsFieldStringBuilderIndex([[maybe_unused]] FieldPtr field) const
-    {
-        return false;
-    }
-
-    virtual bool IsFieldArrayActualLength([[maybe_unused]] FieldPtr field) const
-    {
-        return false;
-    }
-
-    virtual bool IsFieldArrayBuffer([[maybe_unused]] FieldPtr field) const
-    {
-        return false;
-    }
-
-    virtual bool IsFieldArray([[maybe_unused]] ArrayField kind, [[maybe_unused]] FieldPtr field) const
     {
         return false;
     }
@@ -754,6 +823,12 @@ public:
     {
         return 0;
     }
+
+    virtual ::ark::mem::BarrierType GetPreReadType() const
+    {
+        return ::ark::mem::BarrierType::PRE_RB_NONE;
+    }
+
     virtual ::ark::mem::BarrierType GetPreType() const
     {
         return ::ark::mem::BarrierType::PRE_WRB_NONE;
@@ -762,6 +837,26 @@ public:
     virtual ::ark::mem::BarrierType GetPostType() const
     {
         return ::ark::mem::BarrierType::POST_WRB_NONE;
+    }
+
+    bool NeedsPreReadBarrier() const
+    {
+        auto type = GetPreReadType();
+        return type == ::ark::mem::BarrierType::PRE_CMC_READ_BARRIER;
+    }
+
+    bool NeedsPreWriteBarrier() const
+    {
+        auto type = GetPreType();
+        return type == ::ark::mem::BarrierType::PRE_SATB_BARRIER;
+    }
+
+    bool NeedsPostWriteBarrier() const
+    {
+        auto type = GetPostType();
+        return type == ::ark::mem::BarrierType::POST_CMC_WRITE_BARRIER ||
+               type == ::ark::mem::BarrierType::POST_INTERGENERATIONAL_BARRIER ||
+               type == ::ark::mem::BarrierType::POST_INTERREGION_BARRIER;
     }
 
     virtual ::ark::mem::BarrierOperand GetBarrierOperand([[maybe_unused]] ::ark::mem::BarrierPosition barrierPosition,
@@ -853,6 +948,11 @@ public:
     }
 
     virtual ClassPtr GetStringClass([[maybe_unused]] MethodPtr method, [[maybe_unused]] uint32_t *typeId) const
+    {
+        return nullptr;
+    }
+
+    virtual ClassPtr GetLineStringClass([[maybe_unused]] MethodPtr method, [[maybe_unused]] uint32_t *typeId) const
     {
         return nullptr;
     }
@@ -1321,6 +1421,11 @@ public:
     }
 
     virtual bool IsClassFinal([[maybe_unused]] ClassPtr unused) const
+    {
+        return false;
+    }
+
+    virtual bool IsClassFinalOrString([[maybe_unused]] ClassPtr unused) const
     {
         return false;
     }

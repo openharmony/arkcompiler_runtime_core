@@ -34,5 +34,5 @@ class Derived implements Base {
 function main(): void {
     callRef = 0;
     let t: Base = new Derived();
-    assertEQ( t.is(), 1)
+    arktest.assertEQ( t.is(), 1)
 }

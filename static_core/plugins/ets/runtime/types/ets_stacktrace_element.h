@@ -24,6 +24,10 @@
 
 namespace ark::ets {
 
+namespace test {
+class EtsStackTraceElementTest;
+}  // namespace test
+
 class EtsStackTraceElement : public ObjectHeader {
 public:
     EtsStackTraceElement() = delete;
@@ -81,7 +85,11 @@ private:
     ObjectPointer<EtsString> methodName_;
     ObjectPointer<EtsString> sourceFileName_;
     FIELD_UNUSED EtsInt lineNumber_;  // note alignment
+    FIELD_UNUSED EtsInt colNumber_;
+
+    friend class test::EtsStackTraceElementTest;
 };
 
 }  // namespace ark::ets
-#endif
+
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_TYPES_STACKTRACE_ELEMENT_H

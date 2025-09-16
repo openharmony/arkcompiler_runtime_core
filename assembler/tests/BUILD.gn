@@ -11,8 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/config/components/ets_frontend/es2abc_config.gni")
 import("//arkcompiler/runtime_core/ark_config.gni")
+import("//build/config/components/ets_frontend/es2abc_config.gni")
 import("$ark_root/tests/test_helper.gni")
 
 #module_out_path = "$ark_root/assembler"

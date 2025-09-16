@@ -26,5 +26,5 @@ class A {
 
 function main(): void {
     let instance: A|null = (): A|null => { return new A(); }();
-    assertTrue( instance?.foo(3) == 6 )
+    arktest.assertTrue( instance?.foo(3) == 6 )
 }

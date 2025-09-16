@@ -16,17 +16,21 @@ def get_insn_type(insn)
 end
 
 def get_format_for(insn)
-  fmt = insn.format.pretty
+  fmt = insn.format.pretty.sub("pref_", "")
   if fmt == "v4_v4_v4_v4_id16"
     # Merge v4_v4_v4_v4_id16 and v4_v4_id16 since they have the same handling code
     fmt = "v4_v4_id16"
+  end
+  if fmt == "v8_id32"
+    # Have the same handling code
+    fmt = "v8_id16"
   end
   return "#{get_insn_type(insn)}_#{fmt}"
 end
 
 def get_call_insns()
-  Panda::instructions.reject(&:prefix).select do |insn|
-    ((insn.properties.include?("call") || insn.stripped_mnemonic == "initobj") && !(insn.properties.include? "dynamic"))
+  Panda::instructions.select do |insn|
+     ((insn.properties.include?("call") || insn.stripped_mnemonic == "initobj" || insn.mnemonic.include?("ldobj.name")) && !(insn.properties.include? "dynamic"))
   end
 end
 

@@ -150,13 +150,25 @@ def read_file(file_path: Path | str) -> str:
     return text
 
 
-def write_2_file(file_path: Path | str, content: str) -> None:
+def get_opener(mode: int) -> Callable[[str | Path, int], int]:
+    def opener(path_name: str | Path, flags: int) -> int:
+        return os.open(path_name, os.O_RDWR | os.O_APPEND | os.O_CREAT | flags, mode)
+    return opener
+
+
+def write_2_file(file_path: Path | str, content: str | list, mode: int = 0o644) -> None:
     """
     write content to file if file exists it will be truncated. if file does not exist it wil be created
     """
     makedirs(path.dirname(file_path), exist_ok=True)
-    with open(file_path, mode='w+', encoding="utf-8") as f_handle:
-        f_handle.write(content)
+
+    processed_content = content
+    if isinstance(content, list):
+        processed_content = '\n'.join(str(entity) for entity in content)
+
+    custom_opener = get_opener(mode)
+    with open(file_path, mode='w+', encoding='utf-8', opener=custom_opener) as f_handle:
+        f_handle.write(str(processed_content))
 
 
 def purify(line: str) -> str:
@@ -296,11 +308,10 @@ class UiUpdater:
         self.__in_progress(self.__timer, future)
 
 
-def make_dir_if_not_exist(arg: str) -> str:
-    if not path.isdir(path.abspath(arg)):
-        makedirs(arg)
-
-    return str(path.abspath(arg))
+def make_dir_if_not_exist(dir_path: str) -> Path:
+    path_obj = Path(dir_path).absolute()
+    path_obj.mkdir(parents=True, exist_ok=True)
+    return path_obj
 
 
 def is_file(arg: str) -> str:
@@ -358,8 +369,8 @@ def get_config_test_suite_folder() -> Path:
     return get_config_folder().joinpath("test-suites")
 
 
-def load_config(config_path: str | None) -> dict[str, str | dict]:
-    __cfg_type = "type"
+def load_config(config_path: str | Path | None) -> dict[str, str | dict]:
+    cfg_type = "type"
     config_from_file = {}
     if config_path is not None:
         with open(config_path, encoding="utf-8") as stream:
@@ -368,8 +379,8 @@ def load_config(config_path: str | None) -> dict[str, str | dict]:
             except yaml.YAMLError as exc:
                 message = f"{exc}, {yaml.YAMLError}"
                 raise YamlException(message) from exc
-        if __cfg_type not in config_from_file:
-            error = f"Cannot detect type of config '{config_path}'. Have you specified key '{__cfg_type}'?"
+        if cfg_type not in config_from_file:
+            error = f"Cannot detect type of config '{config_path}'. Have you specified key '{cfg_type}'?"
             raise YamlException(error)
     return config_from_file
 
@@ -423,3 +434,55 @@ def detect_operating_system() -> OSKind:
     if system == "windows":
         return OSKind.WIN
     return OSKind.MAC
+
+
+def delete_filtering_options_nested_keys(params: dict) -> dict:
+    filtering_options = ["--filter", "--groups", "--group-number", "--chapters", "--test-list"]
+    nested_keys = ["--es2panda-args", "--ark-args"]
+    for option in filtering_options + nested_keys:
+        params.pop(option, None)
+    return params
+
+
+def convert_dict_params_into_list(params: dict) -> list:
+    output_list = []
+
+    for key, val in params.items():
+        if not isinstance(val, list):
+            output_list.extend([f'{key}', val])
+            continue
+
+        for item in val:
+            if item and not check_item_in_params(params, item):
+                output_list.append(f"{key}={item}")
+
+    output_list = replace_special_keys(output_list)
+    return [str(item) for item in output_list]
+
+
+def check_item_in_params(params: dict, item: str | list[str]) -> bool:
+    items = [item] if isinstance(item, str) else item
+
+    for sub_item in items:
+        if '=' in sub_item:
+            key, _ = sub_item.split('=', 1)
+        else:
+            key = sub_item
+
+        if key in params:
+            return True
+
+    return False
+
+
+def replace_special_keys(params_list: list) -> list:
+    keys_to_replace = {'--es2panda-full-args': '--es2panda-args',
+                       '--ark-full-args': '--ark-args',
+                       '--ark-extra-args': '--ark-args'}
+
+    for i, param in enumerate(params_list):
+        if isinstance(param, str):
+            for key, val in keys_to_replace.items():
+                params_list[i] = param.replace(key, val) if key in param else param
+
+    return params_list

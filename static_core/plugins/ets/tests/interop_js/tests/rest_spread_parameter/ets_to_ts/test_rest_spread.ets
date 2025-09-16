@@ -47,7 +47,7 @@ function checkRestOfTuple(obj: FixedArray<FixedArray<number | string>>, ...tuple
     return true;
 }
 
-function checkRestofUnion(obj: FixedArray<int | string | boolean>, ...unionArr: FixedArray<int | string | boolean>) {
+function checkRestofUnion(obj: FixedArray<number | string | boolean>, ...unionArr: FixedArray<number | string | boolean>) {
     if(obj.length != unionArr.length)
         return false;
     for(let i = 0; i < obj.length; i++) {

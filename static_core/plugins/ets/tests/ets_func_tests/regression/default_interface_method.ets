@@ -41,6 +41,6 @@ class C implements I {
 function main(): void {
     let c: C = new C();
 
-    assertEQ( c.foo(2), 6)
-    assertEQ( c.bar(2), 8)
+    arktest.assertEQ( c.foo(2), 6)
+    arktest.assertEQ( c.bar(2), 8)
 }

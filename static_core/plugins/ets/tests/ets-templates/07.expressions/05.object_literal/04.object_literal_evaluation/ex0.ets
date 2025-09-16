@@ -34,7 +34,7 @@ function main(): int {
   try {
       a = { name: "Bob", age: 42 } as A
   } catch (e: ArithmeticError) {
-      assertEQ(a, null);
+      arktest.assertEQ(a, null);
       return 0;
   }
   return 1;

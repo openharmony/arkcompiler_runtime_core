@@ -14,12 +14,13 @@
  */
 
 import { BusinessError } from "@ohos.base";
+import { jsonx } from "std/core"
 
-const TypeErrorCodeId: number = 401;
-const OutOfBoundsErrorCodeId: number = 10200001;
-const IncorrectBufferSizeId: number = 10200009;
+const TypeErrorCodeId: int = 401;
+const OutOfBoundsErrorCodeId: int = 10200001;
+const IncorrectBufferSizeId: int = 10200009;
 
-function createBusinessError(code: number, message: string) {
+function createBusinessError(code: int, message: string) {
     let err = new BusinessError();
     err.code = code;
     err.name = 'BusinessError';
@@ -47,11 +48,79 @@ function sanitizeBase64(str: string, urlSafe: boolean = false): string {
     return str.replace(new RegExp(allowedPattern, "g"), "");
 }
 
+function getLength(value: buffer.Buffer | Uint8Array): number {
+    if (value instanceof Uint8Array) {
+        return value.length;
+    }
+    return value.buffer.byteLength;
+}
+
+function stringify(buffer: ArrayBuffer, encoding: string, resolvedStart: int, resolvedEnd: int): string {
+    let val  = '';
+    if (encoding == "utf8" || encoding == "utf-8" || encoding == "ascii") {
+        return ArrayBuffer.stringify(buffer, encoding, resolvedStart, resolvedEnd);
+    } else if (encoding == "utf16le" || encoding == "utf-16le" || encoding == "ucs2" || encoding == "ucs-2") {
+        for (let i = resolvedStart; i + 1 < resolvedEnd; i += 2) { // 2 is array->NextIndex
+            const a: Int = (buffer.at(i) & 0xff);
+            const b: Int = (buffer.at(i + 1) & 0xff);
+            val += String.fromCharCode((b << 8) + a);
+        }
+    } else if (encoding === "binary" || encoding === "latin1") {
+        for (let i = resolvedStart; i < resolvedEnd; i++) {
+            val += String.fromCharCode(+(buffer.at(i) & 0xff));
+        }
+    } else if (encoding == "base64" || encoding == "base64url") {
+        let base64 = '';
+        let encodings = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+        if (encoding == "base64url") {
+            encodings = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
+        }
+        for (let i = resolvedStart; i < resolvedEnd; i += 3) {
+            const byte1 = buffer.at(i) & 0xff;
+            const byte2 = i + 1 < resolvedEnd ? (buffer.at(i + 1) & 0xff) : NaN;
+            const byte3 = i + 2 < resolvedEnd ? (buffer.at(i + 2) & 0xff) : NaN;
+
+            const enc1 = byte1 >> 2;
+            const enc2 = ((byte1 & 3) << 4) | (byte2 >> 4);
+            const enc3 = ((byte2 & 15) << 2) | (byte3 >> 6);
+            const enc4 = byte3 & 63;
+
+            if (isNaN(byte2)) {
+                base64 += encodings.charAt(enc1) + encodings.charAt(enc2) + '==';
+            } else if (isNaN(byte3)) {
+                base64 += encodings.charAt(enc1) + encodings.charAt(enc2) + encodings.charAt(enc3) + '=';
+            } else {
+                base64 += encodings.charAt(enc1) + encodings.charAt(enc2) + encodings.charAt(enc3) + encodings.charAt(enc4);
+            }
+        }
+        if (encoding == "base64url") {
+            let lastNonEqualPos = base64.length - 1;
+            while (lastNonEqualPos >= 0 && base64.charAt(lastNonEqualPos) == c'=') {
+                lastNonEqualPos--;
+            }
+            if (lastNonEqualPos >= 0) {
+                base64 = base64.substring(0, lastNonEqualPos + 1);
+            }
+        }
+        return base64;
+    } else if (encoding == "hex") {
+        for (let i = resolvedStart, len = resolvedEnd; i < len; i++) {
+            let tmpstr = Number(buffer.at(i) & 0xff).toString(16); // 16 : 16 decimal
+            tmpstr = (tmpstr.length === 1) ? `0${tmpstr}` : tmpstr;
+            val += tmpstr;
+        }
+    }
+    return val;
+}
+
 function fillInPaddingBase64(str: string): string {
     const base64Divisible: int = 4;
     const normalized: String = normalizeBase64Url(str);
     const clean: String = sanitizeBase64(normalized);
-    const remainder: int = Double.toInt(clean.length % base64Divisible);
+    const remainder: int = clean.length.toInt() % base64Divisible;
+    if (remainder === 1) {
+        return clean.slice(0, -1);
+    }
     const paddingCount: int = remainder != 0 ? base64Divisible - remainder : 0;
     return clean.padRight(c'=', clean.length.toInt() + paddingCount);
 }
@@ -81,9 +150,9 @@ function sanitizeAscii(str: string): string {
 function sanitizeUtf8(str: string): string {
     const sb = new StringBuilder();
     for (let i = 0; i < str.length; i++) {
-        const cu = str.charCodeAt(i) as char;
+        const cu = str.charCodeAt(i).toInt().toChar();
         if (Char.isHighSurrogate(cu) && i + 1 < str.length) {
-            const cu2 = str.charCodeAt(i + 1) as char;
+            const cu2 = str.charCodeAt(i + 1).toInt().toChar();
             if (Char.isLowSurrogate(cu2)) {
                 sb.append(str.charAt(i));
                 sb.append(str.charAt(i + 1));
@@ -143,45 +212,50 @@ export default namespace buffer {
         | BigInt64Array
         | BigUint64Array;
 
-    const U32_MAX: long = 4294967295 as long;
-
     /**
      * Allocates a new Buffer using an array of bytes in the range 0 – 255.
      * Array entries outside that range will be truncated to fit into it.
      *
-     * @param {number[]} array - An array of bytes in the range 0 – 255
+     * @param {double[]} array - An array of bytes in the range 0 – 255
      * @returns {Buffer} A new allocated Buffer containing the array data
      */
-    export function from(array: number[]): Buffer {
-        return new Buffer(ArrayBuffer.from(array))
+    export function fromWithArray(array: double[]): Buffer {
+        let arr: FixedArray<byte> = new Byte[array.length]
+        for (let i = 0; i < array.length; ++i) {
+            arr[i] = array[i].toByte()
+        }
+        return new Buffer(ArrayBuffer.from(arr))
     }
 
     /**
      * Creates a view of the ArrayBuffer without copying the underlying memory.
      *
      * @param {ArrayBuffer} arrayBuffer - The source ArrayBuffer to create a view from
-     * @param {number} [byteOffset=0] - Index of first byte to expose
-     * @param {number} [length=arrayBuffer.byteLength - byteOffset] - Number of bytes to expose
+     * @param {int} [byteOffset=0] - Index of first byte to expose
+     * @param {int} [length=arrayBuffer.byteLength - byteOffset] - Number of bytes to expose
      * @returns {Buffer} A view of the ArrayBuffer
      * @throws {Error} If byteOffset or length are out of valid range
      */
-    export function from(arrayBuffer: ArrayBuffer, byteOffset?: number, length?: number): Buffer {
-        const resolvedByteOffset: number = byteOffset ?? 0;
-        const resolvedLength: number = length ?? arrayBuffer.byteLength - resolvedByteOffset;
-        return new Buffer(ArrayBuffer.from(arrayBuffer, resolvedByteOffset, resolvedLength));
-    }
-
-    /**
-    * For the object whose value returned by valueof() function is strictly equal to object
-    * or supports symbol To primitive object, a new buffer instance is created.
-    *
-    * @param { Object } object - object object An object supporting Symbol.toPrimitive or valueOf()
-    * @param { number | string } offsetOrEncoding - offsetOrEncoding offsetOrEncoding A byte-offset or encoding
-    * @param { number } length - length length A length
-    * @returns { Buffer } Return a new allocated Buffer
-    */
-    function from(object: Object, offsetOrEncoding: number | string, length: number): Buffer {
-        return new Buffer(ArrayBuffer.fromObject(object, offsetOrEncoding, length))
+    export function fromWithArrayBufferByteOffsetLength(arrayBuffer: ArrayBuffer, byteOffset?: int, length?: int): Buffer {
+        const resolvedByteOffset: int = byteOffset ?? 0;
+        const resolvedLength: int = length ?? arrayBuffer.byteLength.toInt() - resolvedByteOffset;
+        if (byteOffset != undefined) {
+            if (byteOffset < 0 || byteOffset > arrayBuffer.byteLength) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "byteOffset" is out of range. `+
+                    `It must be >= 0 and <= ${arrayBuffer.byteLength}. Received value is: ${byteOffset}`)
+            }
+        }
+        if (length != undefined) {
+            if (length < 0 || length > arrayBuffer.byteLength) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "length" is out of range. `+
+                    `It must be >= 0 and <= ${arrayBuffer.byteLength}. Received value is: ${length}`)
+            }
+        }
+        if ((byteOffset != undefined) || (length != undefined)) {
+            return new Buffer(ArrayBuffer.from(arrayBuffer, resolvedByteOffset, resolvedLength));
+        }
+        let buffer = new Buffer(arrayBuffer, resolvedByteOffset)
+        return buffer
     }
 
     /**
@@ -190,30 +264,58 @@ export default namespace buffer {
      * @param {Buffer | Uint8Array} buffer - An existing Buffer or Uint8Array from which to copy data
      * @returns {Buffer} A new Buffer containing a copy of the provided buffer's data
      */
-    export function from(buff: Buffer | Uint8Array): Buffer {
+    export function fromWithBuffer(buff: Buffer | Uint8Array): Buffer {
         if (buff instanceof Buffer) {
             const arrBuff: ArrayBuffer = (buff as Buffer).buffer;
             return new Buffer(ArrayBuffer.from(arrBuff));
         }
-        return new Buffer(ArrayBuffer.from(buff as Uint8Array));
+        const u8arr = buff as Uint8Array;
+        return new Buffer(u8arr.buffer as ArrayBuffer);
+    }
+
+    /**
+    * For the object whose value returned by valueof() function is strictly equal to object
+    * or supports symbol To primitive object, a new buffer instance is created.
+    *
+    * @param { Object } input - object object An object supporting Symbol.toPrimitive or valueOf()
+    * @param { int | string } offsetOrEncoding - offsetOrEncoding offsetOrEncoding A byte-offset or encoding
+    * @param { int } length - length length A length
+    * @returns { Buffer } Return a new allocated Buffer
+    */
+    export function fromWithObjectTypedInputOffsetOrEncodingLength(input: Object, offsetOrEncoding: int | string, length: int): Buffer {
+        if (offsetOrEncoding instanceof string && (!isEncoding(offsetOrEncoding))) {
+            throw createBusinessError(TypeErrorCodeId, `Parameter error. The type of "encoding" must be BufferEncoding. ` +
+                `the encoding ${offsetOrEncoding} is unknown`);
+        }
+        if (input instanceof string || input instanceof ArrayBuffer) {
+            const resolvedByteOffset: int = (offsetOrEncoding instanceof string) ? 0 : offsetOrEncoding;
+            return new Buffer(ArrayBuffer.fromObject(input, offsetOrEncoding, length), resolvedByteOffset);
+        }
+        if (!(input instanceof Uint8Array)) {
+            throw createBusinessError(TypeErrorCodeId, 'Parameter error. The type of "input" must be Buffer or ArrayBuffer, Array, Array-like');
+        }
+        if (offsetOrEncoding instanceof string) {
+            const resolvedByteOffset: int = 0;
+            return new Buffer(ArrayBuffer.fromObject(input.buffer, offsetOrEncoding, length), resolvedByteOffset);
+        }
+        return new Buffer(ArrayBuffer.from(input as Uint8Array));
     }
 
     /**
      * Creates a new Buffer containing the provided string encoded using the specified encoding.
      *
-     * @param {String} string - The string to encode into the buffer
+     * @param {string} input - The string to encode into the buffer
      * @param {BufferEncoding} [encoding='utf8'] - The character encoding to use
      * @returns {Buffer} A new Buffer containing the encoded string
      */
-    export function from(string: String, encoding?: BufferEncoding): Buffer {
+    export function fromWithStringTypedInputEncoding(input: string, encoding?: BufferEncoding): Buffer {
         const resolvedEncoding: string = (encoding ?? "utf8");
-        let resolvedString = string;
+        let resolvedString = input;
         if (resolvedEncoding == 'ascii') {
             resolvedString = sanitizeAscii(resolvedString);
         } else if (resolvedEncoding == 'utf8' || resolvedEncoding == 'utf-8') {
             resolvedString = sanitizeUtf8(resolvedString);
-        }
-         else if (resolvedEncoding == 'latin1' || resolvedEncoding == 'binary') {
+        } else if (resolvedEncoding == 'latin1' || resolvedEncoding == 'binary') {
             resolvedString = sanitizeLatin1(resolvedString);
         } else if (resolvedEncoding == 'hex') {
             resolvedString = takeValidHexPrefix(resolvedString);
@@ -221,26 +323,39 @@ export default namespace buffer {
                 return new Buffer(new ArrayBuffer(0));
             }
         } else if (encoding == 'base64' || encoding == 'base64url') {
-            resolvedString = fillInPaddingBase64(string);
+            resolvedString = fillInPaddingBase64(input);
+        } else if (resolvedEncoding == 'utf16le' || resolvedEncoding == 'ucs2' || resolvedEncoding == 'ucs-2') {
+            return new Buffer(ArrayBuffer.from(resolvedString, resolvedEncoding));
+        } else {
+            throw createBusinessError(TypeErrorCodeId, 'Parameter error. The type of "encoding" must be BufferEncoding. the encoding test is unknown');
         }
         return new Buffer(ArrayBuffer.from(resolvedString, resolvedEncoding));
     }
+
+    /**
+     * Creates a Buffer instance based on a string in the given encoding format.
+     *
+     * @overload { fromWithArray, fromWithArrayBufferByteOffsetLength, fromWithBuffer,
+                    fromWithObjectTypedInputOffsetOrEncodingLength, fromWithStringTypedInputEncoding }
+     */
+    export overload from { fromWithArray, fromWithArrayBufferByteOffsetLength, fromWithBuffer,
+        fromWithObjectTypedInputOffsetOrEncodingLength, fromWithStringTypedInputEncoding }
 
     /**
      * Returns the byte length of a string when encoded using `encoding`.
      * This is not the same as String.prototype.length, which does not account
      * for the encoding that is used to convert the string into bytes.
      *
-     * @param {string | Buffer | TypedArray | DataView | ArrayBuffer} string - A value to calculate the length of
+     * @param {string | Buffer | TypedArray | DataView | ArrayBuffer} doc - A value to calculate the length of
      * @param {BufferEncoding} [encoding='utf8'] - If `string` is a string, this is its encoding
-     * @returns {number} The number of bytes contained within `string`
+     * @returns {int} The number of bytes contained within `string`
      * @throws {BusinessError} 401 - Parameter error. Possible causes:
      * 1. Mandatory parameters are left unspecified;
      */
     export function byteLength(
         doc: string | Buffer | TypedArray | DataView | ArrayBuffer,
         encoding?: BufferEncoding
-    ): number {
+    ): int {
         if (doc instanceof string) {
             let resolvedEncoding: string = encoding ?? "utf8";
             return ArrayBuffer.bytesLength(doc, resolvedEncoding);
@@ -254,29 +369,29 @@ export default namespace buffer {
             case "Buffer":
                 return (doc as Buffer).length;
             case "Int8Array":
-                return (doc as Int8Array).byteLength;
+                return (doc as Int8Array).byteLength.toInt();
             case "Uint8Array":
-                return (doc as Uint8Array).byteLength;
+                return (doc as Uint8Array).byteLength.toInt();
             case "Uint8ClampedArray":
-                return (doc as Uint8ClampedArray).byteLength;
+                return (doc as Uint8ClampedArray).byteLength.toInt();
             case "Int16Array":
-                return (doc as Int16Array).byteLength;
+                return (doc as Int16Array).byteLength.toInt();
             case "Uint16Array":
-                return (doc as Uint16Array).byteLength;
+                return (doc as Uint16Array).byteLength.toInt();
             case "Int32Array":
-                return (doc as Int32Array).byteLength;
+                return (doc as Int32Array).byteLength.toInt();
             case "Uint32Array":
-                return (doc as Uint32Array).byteLength;
+                return (doc as Uint32Array).byteLength.toInt();
             case "Float32Array":
-                return (doc as Float32Array).byteLength;
+                return (doc as Float32Array).byteLength.toInt();
             case "Float64Array":
-                return (doc as Float64Array).byteLength;
+                return (doc as Float64Array).byteLength.toInt();
             case "BigInt64Array":
-                return (doc as BigInt64Array).byteLength;
+                return (doc as BigInt64Array).byteLength.toInt();
             case "BigUint64Array":
-                return (doc as BigUint64Array).byteLength;
+                return (doc as BigUint64Array).byteLength.toInt();
             case "DataView":
-                return (doc as DataView).byteLength;
+                return (doc as DataView).byteLength.toInt();
             case "ArrayBuffer":
                 return (doc as ArrayBuffer).getByteLength();
         }
@@ -286,8 +401,8 @@ export default namespace buffer {
     /**
      * Allocates a new Buffer for a fixed size bytes. If fill is undefined, the Buffer will be zero-filled.
      *
-     * @param { number } size - The desired length of the new Buffer
-     * @param { string | Buffer | number } [fill] - A value to pre-fill the new Buffer with
+     * @param { int } size - The desired length of the new Buffer
+     * @param { string | Buffer | Uint8Array | int | double | long } [fill] - A value to pre-fill the new Buffer with
      * @param { BufferEncoding } [encoding] - If `fill` is a string, this is its encoding
      * @returns { Buffer } Return a new allocated Buffer
      * @throws { BusinessError } 401 - Parameter error. Possible causes:
@@ -295,20 +410,21 @@ export default namespace buffer {
      * 2. Parameter verification failed.
      */
     export function alloc(
-        size: number,
-        fill?: string | Buffer | number,
+        size: int,
+        fill?: string | Buffer | Uint8Array | int | double | long,
         encoding?: BufferEncoding
     ): Buffer
     {
         if (size < 0) {
-            throw createBusinessError(TypeErrorCodeId, 'Parameter error: size must be a non-negative number.')
+            throw createBusinessError(TypeErrorCodeId, `Parameter error. The type of "size" must be number and ` +
+                `the value cannot be negative. Received value is: ${size}`);
         }
         const buffer = new Buffer(new ArrayBuffer(size));
         const resolvedEncoding = encoding ?? "utf-8";
         if (fill != undefined) {
-            buffer.fill(fill, 0, size, resolvedEncoding);
+            buffer.fill(fill!, 0, size, resolvedEncoding);
         } else {
-            buffer.fill(0, 0);
+            buffer.fill(0 as long, 0);
         }
         return buffer;
     }
@@ -316,15 +432,16 @@ export default namespace buffer {
     /**
      * Allocates a new Buffer for a fixed size bytes. The Buffer will not be initially filled.
      *
-     * @param { number } size - The desired length of the new Buffer
+     * @param { int } size - The desired length of the new Buffer
      * @returns { Buffer } Return a new allocated Buffer
      * @throws { BusinessError } 401 - Parameter error. Possible causes:
      * 1. Mandatory parameters are left unspecified;
      * 2. Parameter verification failed.
      */
-    export function allocUninitializedFromPool(size: number): Buffer {
+    export function allocUninitializedFromPool(size: int): Buffer {
         if (size < 0) {
-            throw createBusinessError(TypeErrorCodeId, 'Parameter error: size must be a non-negative number.')
+            throw createBusinessError(TypeErrorCodeId, `Parameter error. The type of "size" must be number and ` +
+                `the value cannot be negative. Received value is: ${size}`);
         }
         return new Buffer(new ArrayBuffer(size));
     }
@@ -332,15 +449,16 @@ export default namespace buffer {
     /**
      * Allocates a new un-pooled Buffer for a fixed size bytes. The Buffer will not be initially filled.
      *
-     * @param { number } size - The desired length of the new Buffer
+     * @param { int } size - The desired length of the new Buffer
      * @returns { Buffer } Return a new allocated Buffer
      * @throws { BusinessError } 401 - Parameter error. Possible causes:
      * 1. Mandatory parameters are left unspecified;
      * 2. Parameter verification failed.
      */
-    export function allocUninitialized(size: number): Buffer {
+    export function allocUninitialized(size: int): Buffer {
         if (size < 0) {
-            throw createBusinessError(TypeErrorCodeId, 'Parameter error: size must be a non-negative number.')
+            throw createBusinessError(TypeErrorCodeId, `Parameter error. The type of "size" must be number and ` +
+                `the value cannot be negative. Received value is: ${size}`);
         }
         return new Buffer(new ArrayBuffer(size));
     }
@@ -350,23 +468,27 @@ export default namespace buffer {
      *
      * @param { Buffer | Uint8Array } buf1 - A Buffer or Uint8Array instance.
      * @param { Buffer | Uint8Array } buf2 - A Buffer or Uint8Array instance.
-     * @returns { number } 0 is returned if target is the same as buf
+     * @returns { int } 0 is returned if target is the same as buf
      *         1 is returned if target should come before buf when sorted.
      *        -1 is returned if target should come after buf when sorted.
      * @throws { BusinessError } 401 - Parameter error. Possible causes:
      * 1. Mandatory parameters are left unspecified;
      * 2. Parameter verification failed.
      */
-    export function compare(buf1: Buffer | Uint8Array, buf2: Buffer | Uint8Array): number {
+    export function compare(buf1: Buffer | Uint8Array, buf2: Buffer | Uint8Array): int {
         const resolvedBuf1 = getArrayBufferFrom(buf1);
         const resolvedBuf2 = getArrayBufferFrom(buf2);
-        const len1 = resolvedBuf1.byteLength;
-        const len2 = resolvedBuf2.byteLength;
+        const len1 = getLength(buf1);
+        const len2 = getLength(buf2);
         const minLength = Math.min(len1, len2);
+        let i1 = (buf1 instanceof Buffer) ? (buf1 as Buffer).byteOffset : (buf1 as Uint8Array).byteOffset.toInt()
+        let i2 = (buf2 instanceof Buffer) ? (buf2 as Buffer).byteOffset : (buf2 as Uint8Array).byteOffset.toInt()
         for (let i = 0; i < minLength; i++) {
-            if (resolvedBuf1.at(i) != resolvedBuf2.at(i)) {
-                return resolvedBuf1.at(i) < resolvedBuf2.at(i) ? -1 : 1;
+            if (resolvedBuf1.at(i1) != resolvedBuf2.at(i2)) {
+                return resolvedBuf1.at(i1) < resolvedBuf2.at(i2) ? -1 : 1;
             }
+            i1++;
+            i2++;
         }
         return len1 == len2 ? 0 : (len1 < len2 ? -1 : 1);
     }
@@ -375,23 +497,23 @@ export default namespace buffer {
      * Returns a new `Buffer` which is the result of concatenating all the `Buffer`instances in the `list` together.
      *
      * @param { Buffer[] | Uint8Array[] } list - List of `Buffer` or Uint8Array instances to concatenate
-     * @param { number } [totalLength] - Total length of the `Buffer` instances in `list` when concatenated
+     * @param { int } [totalLength] - Total length of the `Buffer` instances in `list` when concatenated
      * @returns { Buffer } Return a new allocated Buffer
      * @throws { BusinessError } 401 - Parameter error. Possible causes:
      * 1. Mandatory parameters are left unspecified;
      * 2. Parameter verification failed.
-     * @throws { BusinessError } 10200001 - The value of "length" is out of range. It must be >= 0 and <= uint32 max. Received value is: [length]
+     * @throws { BusinessError } 10200001 - The value of "length" is out of range. It must be >= 0 and <= 4294967296. Received value is: [length]
      */
-    export function concat(list: Buffer[] | Uint8Array[], totalLength?: number): Buffer {
+    export function concat(list: Buffer[] | Uint8Array[], totalLength?: int): Buffer {
         const resolvedList = new Array<ArrayBuffer>();
         for (const item of list) {
             resolvedList.push(getArrayBufferFrom(item));
         }
-        const length = totalLength ?? resolvedList.reduce(
-            (acc: number, item: ArrayBuffer): number => acc + item.byteLength, 0);
-        if (length < 0 || length > U32_MAX) {
-            throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "length" is out of range.
-It must be >= 0 and <= uint32 max. Received value is: ${length}`)
+        const length: int = totalLength ?? resolvedList.reduce(
+            (acc: number, item: ArrayBuffer): number => acc + item.byteLength.toInt(), 0).toInt()
+        if (length < 0) {
+            throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "totalLength" is out of range. ` +
+                `It must be >= 0 and <= 2147483647. Received value is: ${length}`)
         }
         const listOfBytes = new Array<byte>();
         for (const item of resolvedList) {
@@ -455,31 +577,57 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
      * 2. Parameter verification failed.
      */
     export function transcode(source: Buffer | Uint8Array, fromEnc: string, toEnc: string): Buffer {
-        const resolvedSource = getArrayBufferFrom(source);
-        const sourceBytesLength = resolvedSource.byteLength.toInt();
-        const str = ArrayBuffer.stringify(resolvedSource, toEnc, 0, sourceBytesLength);
+        if (!isEncoding(fromEnc)) {
+            throw createBusinessError(TypeErrorCodeId, `Parameter error. The type of "fromEnc" must be BufferEncoding. ` +
+                `the fromEnc ${fromEnc} is unknown`);
+        }
+        if (!isEncoding(toEnc)) {
+            throw createBusinessError(TypeErrorCodeId, `Parameter error. The type of "toEnc" must be BufferEncoding. ` +
+                `the toEnc ${toEnc} is unknown`);
+        }
+        let resolvedSource = getArrayBufferFrom(source);
+        let sourceBytesLength = resolvedSource.byteLength.toInt();
+        let str = '';
+        if (source instanceof Uint8Array) {
+            str = source.toString();
+        } else if (source instanceof Buffer) {
+            str = stringify(resolvedSource, fromEnc, 0, sourceBytesLength);
+        }
+        if (toEnc == 'ascii') {
+            let newStr = "";
+            for (let i = 0; i < str.length; ++i) {
+                if (str.charAt(i).toInt() <= 128) {
+                    newStr += str.charAt(i);
+                } else {
+                    newStr += '?';
+                }
+            }
+            str = newStr;
+        } else if (toEnc == 'base64') {
+            str = str.replace("/[\r\n]/g", '');
+        }
         const newBytes = ArrayBuffer.from(str, toEnc);
         return new Buffer(newBytes);
     }
 
-    class BufferIteratorKeys implements IterableIterator<number> {
+    class BufferIteratorKeys implements IterableIterator<int> {
         private length: int
         private idx: int = 0
         constructor(parent: Buffer) {
             this.length = parent.length.toInt()
         }
-        public override $_iterator(): IterableIterator<number> {
+        public override $_iterator(): IterableIterator<int> {
             return this
         }
-        override next(): IteratorResult<number> {
+        override next(): IteratorResult<int> {
             if (this.idx < 0 || this.idx >= this.length) {
-                return new IteratorResult<number>()
+                return new IteratorResult<int>()
             }
-            return new IteratorResult<number>(false, (this.idx++).toDouble())
+            return new IteratorResult<int>(false, (this.idx++))
         }
     }
 
-    class BufferIteratorValues implements IterableIterator<number> {
+    class BufferIteratorValues implements IterableIterator<long> {
         private length: int
         private parent: Buffer
         private idx: int = 0
@@ -487,18 +635,18 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
             this.length = parent.length.toInt()
             this.parent = parent
         }
-        public override $_iterator(): IterableIterator<number> {
+        public override $_iterator(): IterableIterator<long> {
             return this
         }
-        override next(): IteratorResult<number> {
+        override next(): IteratorResult<long> {
             if (this.idx < 0 || this.idx >= this.length) {
-                return new IteratorResult<number>()
+                return new IteratorResult<long>()
             }
-            return new IteratorResult<number>(false, this.parent.at(this.idx++))
+            return new IteratorResult<long>(false, this.parent.at(this.idx++))
         }
     }
 
-    class BufferEntriesIterator implements IterableIterator<[number, number]> {
+    class BufferEntriesIterator implements IterableIterator<[int, long]> {
         private length: int
         private parent: Buffer
         private idx: int = 0
@@ -506,14 +654,14 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
             this.length = parent.length.toInt()
             this.parent = parent
         }
-        public override $_iterator(): IterableIterator<[number, number]> {
+        public override $_iterator(): IterableIterator<[int, long]> {
             return this
         }
-        override next(): IteratorResult<[number, number]> {
+        override next(): IteratorResult<[int, long]> {
             if (this.idx < 0 || this.idx >= this.length) {
-                return new IteratorResult<[number, number]>()
+                return new IteratorResult<[int, long]>()
             }
-            return new IteratorResult<[number, number]>(false, [this.idx, this.parent.at(this.idx++)])
+            return new IteratorResult<[int, long]>(false, [this.idx, this.parent.at(this.idx++)])
         }
     }
 
@@ -521,28 +669,36 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
      * A class representing a fixed-length sequence of bytes.
      * Provides methods for reading and manipulating binary data with various encodings.
      */
-    export class Buffer {
+    export class Buffer implements JsonElementDeserializable {
         /** The underlying ArrayBuffer storing the binary data */
-        public buffer: ArrayBuffer;
+        private bufferData: ArrayBuffer;
         /** The offset into the buffer where this Buffer instance starts */
-        internal readonly byteOffsetNumber: number;
+        private readonly byteOffsetNumber: int;
 
         /**
          * Gets the length of the buffer in bytes
-         * @returns {number} The number of bytes in the buffer
+         * @returns {int} The number of bytes in the buffer
          */
-        get length(): number { return this.buffer.getByteLength() }
+        get length(): int { return this.buffer.getByteLength() }
 
-        get byteOffset(): number { return this.byteOffsetNumber }
+        get byteOffset(): int { return this.byteOffsetNumber }
+
+        get buffer(): ArrayBuffer { return this.bufferData }
         /**
          * Creates a new Buffer instance
          * @param {ArrayBuffer} buffer - The underlying ArrayBuffer to use
-         * @param {number} [byteOffset=0] - The starting offset into the ArrayBuffer
+         * @param {int} [byteOffset=0] - The starting offset into the ArrayBuffer
          */
-        public constructor(buffer: ArrayBuffer, byteOffset: number = 0)
+        public constructor(buffer: ArrayBuffer, byteOffset: int = 0)
         {
-            this.buffer = buffer;
-            this.byteOffsetNumber = 0;
+            this.bufferData = buffer;
+            this.byteOffsetNumber = byteOffset;
+            if (byteOffset >= this.buffer.getByteLength() && this.buffer.getByteLength() > 0) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "byteOffset" is out of range. Received value is: ${byteOffset}`)
+            }
+            if (byteOffset < 0) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "byteOffset" is out of range. It must be >= 0. Received value is: ${byteOffset}`)
+            }
         }
 
         /**
@@ -561,68 +717,68 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
          * Returns a string decoded from the buffer's contents.
          *
          * @param {BufferEncoding} [encoding='utf8'] - Character encoding to use for decoding
-         * @param {number} [start=0] - Where to start decoding
-         * @param {number} [end=buffer.length] - Where to stop decoding
+         * @param {int} [start=0] - Where to start decoding
+         * @param {int} [end=buffer.length] - Where to stop decoding
          * @returns {string} The decoded string
          */
-        public toString(encoding?: BufferEncoding, start?: number, end?: number): string {
+        public toString(encoding?: BufferEncoding, start?: double, end?: double): string {
             let resolvedEncoding: string = encoding ?? "utf8";
             let resolvedStart: int = 0;
             let resolvedEnd: int = (this.length).toInt();
-            if (start && !isNaN(start!) && start! > 0) {
-                resolvedStart = start.toInt();
+            if (start !== undefined && !isNaN(start!) && start! > 0) {
+                resolvedStart = start!.toInt();
             }
-            if (end && !isNaN(end!)) {
-                resolvedEnd = end.toInt();
+            if (end !== undefined && !isNaN(end!)) {
+                resolvedEnd = end!.toInt();
             }
             let bufLength = this.length;
             if (resolvedStart >= bufLength || resolvedStart > resolvedEnd) {
                  return '';
             }
-            resolvedEnd = resolvedEnd > bufLength ? bufLength.toInt() : resolvedEnd
-            return ArrayBuffer.stringify(this.buffer, resolvedEncoding, resolvedStart, resolvedEnd);
+            resolvedEnd = resolvedEnd > bufLength ? bufLength.toInt() : resolvedEnd;
+            return stringify(this.buffer, resolvedEncoding, resolvedStart, resolvedEnd);
         }
 
         /**
          * Returns the byte at the specified index
          *
          * @param {int} index - Index of the byte to return
-         * @returns {byte} The byte at the specified position
+         * @returns {long} The byte at the specified position
          */
-        public at(index: int): byte {
+        public at(index: int): long {
             return this.buffer.at(index);
         }
 
         /**
          * Checks if the buffer includes the given value.
          *
-         * @param {string | number | Buffer | Uint8Array} value - The value to search for
-         * @param {number} [byteOffset=0] - The byte position to start searching from
+         * @param {string | int | double | long | Buffer | Uint8Array} value - The value to search for
+         * @param {int} [byteOffset=0] - The byte position to start searching from
          * @param {BufferEncoding} [encoding='utf8'] - Encoding to use if `value` is a string
          * @returns {boolean} `true` if the value is found, otherwise `false`
          */
-        public includes(value: string | number | Buffer | Uint8Array, byteOffset?: number, encoding?: BufferEncoding): boolean {
+        public includes(value: string | int | double | long | Buffer | Uint8Array, byteOffset?: int, encoding?: BufferEncoding): boolean {
             return this.indexOf(value, byteOffset ?? 0, encoding ?? "utf8") != -1;
         }
 
         /**
          * Returns the first index where `value` is found in the buffer.
          *
-         * @param {string | number | Buffer | Uint8Array} value - The value to search for
-         * @param {number} [byteOffset=0] - The byte position to start searching from.
+         * @param {string | int | double | long | Buffer | Uint8Array} value - The value to search for
+         * @param {int} [byteOffset=0] - The byte position to start searching from.
          *   - If negative, it is counted from the end of the buffer (`len + byteOffset`).
          *   - If out of bounds (`>= buffer length`), returns `-1`.
          * @param {BufferEncoding} [encoding='utf8'] - Encoding to use if `value` is a string
-         * @returns {number} The index of the first occurrence of `value`, or -1 if not found
+         * @returns {int} The index of the first occurrence of `value`, or -1 if not found
          */
-        public indexOf(value: string | number | Buffer | Uint8Array, byteOffset?: number, encoding?: BufferEncoding): number {
+        public indexOf(value: string | int | double | long | Buffer | Uint8Array, byteOffset?: int, encoding?: BufferEncoding): int {
             const searchBuffer = this.normalizeValueToBuffer(value, encoding ?? "utf8");
-            const len = this.length;
+            const len: int = this.length;
             const searchLen = searchBuffer.length;
-            let startIndex = byteOffset ?? 0;
+            let startIndex: int = byteOffset ?? 0;
 
             if (startIndex < 0) {
-                startIndex = Math.max(0, len + startIndex);
+                startIndex = Math.max(0, len + startIndex).toInt()
             } else if (startIndex >= len) {
                 return -1;
             }
@@ -635,14 +791,14 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
         /**
          * Returns the last index where `value` is found in the buffer.
          *
-         * @param {string | number | Buffer | Uint8Array} value - The value to search for
-         * @param {number} [byteOffset=buffer length] - The byte position to start searching from (backwards).
+         * @param {string | int | double | long | Buffer | Uint8Array} value - The value to search for
+         * @param {int} [byteOffset=buffer length] - The byte position to start searching from (backwards).
          *   - If negative, it is counted from the end of the buffer (`len + byteOffset`).
          *   - If out of bounds (`>= buffer length`), it is clamped to `buffer length - searchLen`.
          * @param {BufferEncoding} [encoding='utf8'] - Encoding to use if `value` is a string
-         * @returns {number} The index of the last occurrence of `value`, or -1 if not found
+         * @returns {int} The index of the last occurrence of `value`, or -1 if not found
          */
-        public lastIndexOf(value: string | number | Buffer | Uint8Array, byteOffset?: number , encoding?: BufferEncoding): number {
+        public lastIndexOf(value: string | int | double | long | Buffer | Uint8Array, byteOffset?: int , encoding?: BufferEncoding): int {
             const searchBuffer = this.normalizeValueToBuffer(value, encoding ?? "utf8");
             const searchLen = searchBuffer.length;
             const len = this.length;
@@ -650,9 +806,9 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
             if (searchLen == 0 || len < searchLen) {
                 return -1;
             }
-            let endIndex = byteOffset ?? len;
+            let endIndex: int = byteOffset ?? len;
             if (endIndex < 0) {
-                endIndex = Math.max(0, len + endIndex);
+                endIndex = Math.max(0, len + endIndex).toInt()
             } else if (endIndex >= len) {
                 endIndex = len - searchLen;
             }
@@ -664,11 +820,17 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
             return -1;
         }
 
-        private normalizeValueToBuffer(value: string | number | Buffer | Uint8Array, encoding: BufferEncoding): Buffer {
+        private normalizeValueToBuffer(value: string | int | double | long | Buffer | Uint8Array, encoding: BufferEncoding): Buffer {
             if (value instanceof string) {
                 return buffer.from(value, encoding ?? "utf8");
-            } else if (value instanceof Number) {
-                const arr: number[] = [value];
+            } else if (value instanceof Double) {
+                const arr: double[] = [value];
+                return buffer.from(arr);
+            } else if (value instanceof int) {
+                const arr: double[] = [value.toDouble()];
+                return buffer.from(arr);
+            } else if (value instanceof Long) {
+                const arr: double[] = [value.toDouble()];
                 return buffer.from(arr);
             } else if (value instanceof Buffer) {
                 return value;
@@ -677,7 +839,7 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
             }
         }
 
-        private compareSubarray(startIndex: number, searchBuffer: Buffer): boolean {
+        private compareSubarray(startIndex: int, searchBuffer: Buffer): boolean {
             if (startIndex + searchBuffer.length > this.length){
                 return false;
             }
@@ -694,11 +856,11 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
          * or is the same as target in sort order. Comparison is based on the actual sequence of bytes in each Buffer.
          *
          * @param { Buffer | Uint8Array } target - A Buffer or Uint8Array with which to compare buf
-         * @param { number } [targetStart] - The offset within target at which to begin comparison
-         * @param { number } [targetEnd] - The offset within target at which to end comparison (not inclusive)
-         * @param { number } [sourceStart] - The offset within buf at which to begin comparison
-         * @param { number } [sourceEnd] - The offset within buf at which to end comparison (not inclusive)
-         * @returns { number } 0 is returned if target is the same as buf
+         * @param { int } [targetStart] - The offset within target at which to begin comparison
+         * @param { int } [targetEnd] - The offset within target at which to end comparison (not inclusive)
+         * @param { int } [sourceStart] - The offset within buf at which to begin comparison
+         * @param { int } [sourceEnd] - The offset within buf at which to end comparison (not inclusive)
+         * @returns { int } 0 is returned if target is the same as buf
          *         1 is returned if target should come before buf when sorted.
          *        -1 is returned if target should come after buf when sorted.
          * @throws { BusinessError } 401 - Parameter error. Possible causes:
@@ -709,15 +871,36 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
          */
         public compare(
             target: Buffer | Uint8Array,
-            targetStart?: number,
-            targetEnd?: number,
-            sourceStart?: number,
-            sourceEnd?: number): number
+            targetStart?: int,
+            targetEnd?: int,
+            sourceStart?: int,
+            sourceEnd?: int): int
         {
             const resolvedSource: ArrayBuffer = this.buffer;
             const resolvedTarget: ArrayBuffer = getArrayBufferFrom(target);
-            const targetSlice = resolvedTarget.slice(targetStart ?? 0, targetEnd ?? resolvedTarget.byteLength);
-            const sourceSlice = resolvedSource.slice(sourceStart ?? 0, sourceEnd ?? resolvedSource.byteLength);
+
+            const resolvedTargetStart = targetStart ?? 0;
+            const resolveTargetEnd = targetEnd ?? resolvedTarget.byteLength.toInt();
+            const resolvedSourceStart = sourceStart ?? 0;
+            const resolvedSourceEnd = sourceEnd ?? resolvedSource.byteLength.toInt();
+            if (resolvedTargetStart < 0) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "targetStart" is out of range. ` +
+                    `It must be >= 0 and <= 2147483647. Received value is: ${targetStart}`);
+            }
+            if (resolveTargetEnd < 0 || resolveTargetEnd > resolvedTarget.byteLength.toInt()) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "targetEnd" is out of range. ` +
+                    `It must be >= 0 and <= ${resolvedTarget.byteLength.toInt()}. Received value is: ${targetEnd}`);
+            }
+            if (resolvedSourceStart < 0) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "sourceEnd" is out of range. ` +
+                    `It must be >= 0 and <= 2147483647. Received value is: ${sourceStart}`);
+            }
+            if (resolvedSourceEnd < 0 || resolvedSourceEnd > this.length) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "sourceEnd" is out of range. ` +
+                    `It must be >= 0 and <= ${this.length}. Received value is: ${sourceEnd}`);
+            }
+            const targetSlice = resolvedTarget.slice(resolvedTargetStart, resolveTargetEnd);
+            const sourceSlice = resolvedSource.slice(resolvedSourceStart, resolvedSourceEnd);
             return compare(new Buffer(sourceSlice), new Buffer(targetSlice));
         }
 
@@ -726,10 +909,10 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
          * If sourceEnd is greater than the length of the target, the length of the target shall prevail, and the extra part will not be overwritten.
          *
          * @param { Buffer | Uint8Array } target - A Buffer or Uint8Array to copy into
-         * @param { number } [targetStart] - The offset within target at which to begin writing
-         * @param { number } [sourceStart] - The offset within buf from which to begin copying
-         * @param { number } [sourceEnd] - The offset within buf at which to stop copying (not inclusive)
-         * @returns { number } The number of bytes copied
+         * @param { int } [targetStart] - The offset within target at which to begin writing
+         * @param { int } [sourceStart] - The offset within buf from which to begin copying
+         * @param { int } [sourceEnd] - The offset within buf at which to stop copying (not inclusive)
+         * @returns { int } The number of bytes copied
          * @throws { BusinessError } 401 - Parameter error. Possible causes:
          * 1. Mandatory parameters are left unspecified;
          * 2. Parameter verification failed.
@@ -738,43 +921,51 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
          */
         public copy(
             target: Buffer | Uint8Array,
-            targetStart?: number,
-            sourceStart?: number,
-            sourceEnd?: number): number
+            targetStart?: int,
+            sourceStart?: int,
+            sourceEnd?: int): int
         {
-            const resolvedTarget = getArrayBufferFrom(target);
-            const resolvedSource = this.buffer;
+            const resolvedTarget = target.buffer;
+            const resolvedSource: ArrayBuffer = this.buffer;
             const resolvedTargetStart = (targetStart ?? 0).toInt();
             const resolvedSourceStart = (sourceStart ?? 0).toInt();
             const resolvedSourceEnd = (sourceEnd ?? this.length).toInt();
 
             if (resolvedTargetStart < 0) {
-                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "targetStart" is out of range. It must be >= 0.
-Received value is: ${resolvedTargetStart}`)
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "targetStart" is out of range. ` +
+                    `It must be >= 0. Received value is: ${targetStart}`);
             }
             if (resolvedSourceStart < 0) {
-                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "sourceStart" is out of range. It must be >= 0.
-Received value is: ${resolvedSourceStart}`)
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "sourceStart" is out of range. ` +
+                    `It must be >= 0. Received value is: ${sourceStart}`);
             }
             if (resolvedSourceEnd < 0) {
-                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "sourceEnd" is out of range. It must be >= 0.
-Received value is: ${resolvedSourceEnd}`)
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "sourceEnd" is out of range. ` +
+                    `It must be >= 0. Received value is: ${sourceEnd}`);
             }
-
-            const sourceSlice = resolvedSource.slice(resolvedSourceStart,
-                                                     resolvedSourceEnd);
-            for (let i = 0; i < sourceSlice.byteLength; i++) {
-                resolvedTarget.set(resolvedTargetStart + i, sourceSlice.at(i));
+            if (resolvedTargetStart >= resolvedTarget.byteLength.toInt()) {
+                return 0;
             }
-            return sourceSlice.byteLength;
+            if (resolvedSourceEnd <= resolvedSourceStart || resolvedSourceStart >= this.length) {
+                return 0;
+            }
+            const sourceSlice: ArrayBuffer = resolvedSource.slice(resolvedSourceStart,
+                resolvedSourceEnd);
+            let copyLen = 0;
+            for (; copyLen < sourceSlice.byteLength
+                && resolvedTargetStart + copyLen < resolvedTarget.byteLength;
+                copyLen++) {
+                resolvedTarget.set(resolvedTargetStart + copyLen, sourceSlice.at(copyLen));
+            }
+            return copyLen;
         }
 
         /**
          * Creates and returns an iterator of [index, byte] pairs from the contents of buf.
          *
-         * @returns { IterableIterator<[number, number]> }
+         * @returns { IterableIterator<[int, long]> }
          */
-        public entries(): IterableIterator<[number, number]> {
+        public entries(): IterableIterator<[int, long]> {
             return new BufferEntriesIterator(this);
         }
 
@@ -794,9 +985,9 @@ Received value is: ${resolvedSourceEnd}`)
         /**
          * Fills buf with the specified value. If the offset and end are not given, the entire buf will be filled.
          *
-         * @param { string | Buffer | Uint8Array | number } value - The value with which to fill buf
-         * @param { number } [offset] - Number of bytes to skip before starting to fill buf
-         * @param { number } [end] - Where to stop filling buf (not inclusive)
+         * @param { string | Buffer | Uint8Array | int | double | long } value - The value with which to fill buf
+         * @param { int } [offset] - Number of bytes to skip before starting to fill buf
+         * @param { int } [end] - Where to stop filling buf (not inclusive)
          * @param { BufferEncoding } [encoding] - The encoding for value if value is a string
          * @returns { Buffer } A reference to buf
          * @throws { BusinessError } 10200001 - The value of "[offset/end]" is out of range. It must be >= 0 and <= [right range]. Received value is: [offset/end]
@@ -805,27 +996,34 @@ Received value is: ${resolvedSourceEnd}`)
          * 2. Parameter verification failed.
          */
         public fill(
-            value: string | Buffer | Uint8Array | number,
-            offset: number = 0,
-            end?: number,
+            value: string | Buffer | Uint8Array | int | double | long,
+            offset: int = 0,
+            end?: int,
             encoding?: BufferEncoding
         ): Buffer {
             const resolvedEnd = end ?? this.length;
 
             if (offset < 0) {
-                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. It must be >= 0.
-Received value is: ${offset}`)
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= 2147483647. Received value is: ${offset}`)
             }
             if (resolvedEnd < 0 || resolvedEnd > this.length) {
-                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "end" is out of range. It must be >= 0 and <= ${this.length}.
-Received value is: ${resolvedEnd}`)
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "end" is out of range. ` +
+                    `It must be >= 0 and <= ${this.length}. Received value is: ${resolvedEnd}`)
             }
 
             let klass: string = "string";
             if (value instanceof string) {
+                if (value as string == "") {
+                    return this.fill(0 as long, offset, end, encoding);
+                }
                 klass = "string";
-            } else if (value instanceof Number) {
-                klass = "number";
+            } else if (value instanceof int) {
+                klass = "int";
+            } else if (value instanceof long) {
+                klass = "long";
+            } else if (value instanceof double) {
+                klass = "double";
             } else {
                 // NOTE (templin.konstantin): Can't completely use smart casts due internal issue #21021
                 //  now is used temporarily solution with reflection
@@ -844,6 +1042,9 @@ Received value is: ${resolvedEnd}`)
                     if (resolvedEncoding == 'ascii') {
                         strValue = sanitizeAscii(strValue);
                     } else if (resolvedEncoding == 'utf8' || resolvedEncoding == 'utf-8') {
+                        if (strValue.length == 0) {
+                            return this;
+                        }
                         strValue = sanitizeUtf8(strValue);
                     } else if (resolvedEncoding == 'latin1' || resolvedEncoding == 'binary') {
                         strValue = sanitizeLatin1(strValue);
@@ -855,21 +1056,51 @@ Received value is: ${resolvedEnd}`)
                     } else if (resolvedEncoding == 'base64' || resolvedEncoding == 'base64url') {
                         strValue = fillInPaddingBase64(strValue);
                     }
-                    let buff = ArrayBuffer.from(strValue, resolvedEncoding as string);
-                    for (let i: int = offsetInt; i < resolvedEndInt; i++) {
-                        this.buffer.set(i, buff.at((i % buff.byteLength).toInt()).toByte());
+                    let buff: Uint8Array;
+
+                    if (resolvedEncoding === 'ucs2' || resolvedEncoding === 'ucs-2' || resolvedEncoding === 'utf16le') {
+                        const u16 = new Uint16Array(strValue.length);
+                        for (let i = 0; i < strValue.length; i++) {
+                            u16[i] = strValue.charCodeAt(i);
+                        }
+                        buff = new Uint8Array(u16.buffer);
+                    } else {
+                        buff = new Uint8Array(ArrayBuffer.from(strValue, resolvedEncoding as string));
+                    }
+
+                    let pos = offsetInt;
+                    while (buff.byteLength > 0 && pos + buff.byteLength <= resolvedEndInt) {
+                        for (let j: int = 0; j < buff.byteLength; j++) {
+                            this.buffer.set(pos++, buff[j].toByte());
+                        }
+                    }
+
+                    for (let j: int = 0; pos < resolvedEndInt && buff.byteLength > 0; j++, pos++) {
+                        this.buffer.set(pos, buff[j].toByte());
                     }
                     return this;
-                case "number":
-                    let asNum = value as number;
+                case "int":
+                    let asInt: int = value as int;
                     for (let i: int = offsetInt; i < resolvedEndInt; i++) {
-                        this.buffer.set(i, asNum.toByte());
+                        this.buffer.set(i, asInt.toByte());
+                    }
+                    return this;
+                case "long":
+                    let asLong: long = value as long;
+                    for (let i: int = offsetInt; i < resolvedEndInt; i++) {
+                        this.buffer.set(i, asLong.toByte());
+                    }
+                    return this;
+                case "double":
+                    let asDouble: double = value as double;
+                    for (let i: int = offsetInt; i < resolvedEndInt; i++) {
+                        this.buffer.set(i, asDouble.toByte());
                     }
                     return this;
                 case "Buffer":
                     let asBuf = value as Buffer;
                     for (let i: int = offsetInt; i < resolvedEndInt; i++) {
-                        this.buffer.set(i, asBuf.at((i % asBuf.length).toInt()));
+                        this.buffer.set(i, asBuf.at((i % asBuf.length)).toByte());
                     }
                     return this;
                 case "Uint8Array":
@@ -879,7 +1110,7 @@ Received value is: ${resolvedEnd}`)
                     }
                     return this;
                 default:
-                    throw createBusinessError(TypeErrorCodeId, `Parameter error: value must be a string, Buffer, Uint8Array, or number.
+                    throw createBusinessError(TypeErrorCodeId, `Parameter error: value must be a string, Buffer, Uint8Array, or int. \
 Received value is: ${value}`)
             }
         }
@@ -888,60 +1119,75 @@ Received value is: ${value}`)
         * Throws an error when a parameter value is outside allowed range bounds
         *
         * @param {string} param_name - Name of the parameter that caused the error
-        * @param {number} param_value - The value that is out of range
+        * @param {double} param_value - The value that is out of range
         * @param {int} left_bound - Minimum allowed value (inclusive)
         * @param {int} right_bound - Maximum allowed value (inclusive)
         * @returns {void}
         * @throws {Error} With a message indicating the parameter name, its value, and valid range
         * @private
         */
-        private static throwOutOfRangeError(param_name: string, param_value: number, left_bound: int, right_bound: int) {
+        private static throwOutOfRangeError(param_name: string, param_value: double, left_bound: int, right_bound: int) {
             let message = `The value of "${param_name}" is out of range.`;
             message += `It must be >= ${left_bound} and <= ${right_bound}. Received value is: ${param_value}`;
             // NOTE (templin.konstantin): must be changed to BusinessError later
-            throw new Error(message);
+            throw createBusinessError(OutOfBoundsErrorCodeId, message);
         }
 
         /**
         * Checks if the byteLength parameter is within valid range
         *
-        * @param {number} byteLength - Number of bytes to read or write
+        * @param {int} byteLength - Number of bytes to read or write
         * @returns {void}
         * @throws {Error} If byteLength is less than 1 or greater than 6
         * @private
         */
-        private static checkByteLengthConstraint(byteLength: number) {
+        private static checkByteLengthConstraint(byteLength: int) {
             if (byteLength < 1 || byteLength > 6) {
                 Buffer.throwOutOfRangeError("byteLength", byteLength, 1, 6);
             }
         }
 
         /**
+        * Checks if the offset parameter is within valid range
+        *
+        * @param {int} offset - Number of bytes to skip before reading
+        * @param {int} lengthOffset - Maximum allowed value (inclusive)
+        * @returns {void}
+        * @throws {Error} If byteLength is less than 0 or greater than lengthOffset
+        * @private
+        */
+        private static checkOffsetConstraint(offset: int, lengthOffset: int) {
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+        }
+        /**
          * Creates and returns an iterator of buf keys (indices).
          *
-         * @returns { IterableIterator<number> }
+         * @returns { IterableIterator<int> }
          */
-        public keys(): IterableIterator<number> {
+        public keys(): IterableIterator<int> {
             return new BufferIteratorKeys(this);
         }
 
         /**
          * Creates and returns an iterator for buf values (bytes).
          *
-         * @returns { IterableIterator<number> }
+         * @returns { IterableIterator<long> }
          */
-        public values(): IterableIterator<number> {
+        public values(): IterableIterator<long> {
             return new BufferIteratorValues(this);
         }
 
         /**
          * Returns a new Buffer that references the same memory as the original, but offset and cropped by the start and end indices.
          *
-         * @param { number } [start] - Where the new Buffer will start
-         * @param { number } [end] - Where the new Buffer will end (not inclusive)
+         * @param { int } [start] - Where the new Buffer will start
+         * @param { int } [end] - Where the new Buffer will end (not inclusive)
          * @returns { Buffer } Returns a new Buffer that references the same memory as the original
          */
-        public subarray(start?: number, end?: number): Buffer {
+        public subarray(start?: int, end?: int): Buffer {
             if (start == undefined || isNaN(start!)) {
                 start = 0
             }
@@ -1032,69 +1278,93 @@ Received value is: ${value}`)
         * @private
         */
         private getDataView(): DataView {
-            return new DataView(this.buffer, 0, this.length);
+            return new DataView(this.buffer, 0, this.length.toInt());
         }
 
         /**
         * Writes a signed integer to the buffer at the specified offset using big-endian format
         *
-        * @param {number} value - Value to write
-        * @param {number} offset - Number of bytes to skip before writing
-        * @param {number} byteLength - Number of bytes to write (maximum 6)
-        * @returns {number} Offset plus the number of bytes written
+        * @param {long} value - Value to write
+        * @param {int} offset - Number of bytes to skip before writing
+        * @param {int} byteLength - Number of bytes to write (maximum 6)
+        * @returns {int} Offset plus the number of bytes written
         * @throws {Error} If byteLength is greater than 6
         */
-        public writeIntBE(value: number, offset: number, byteLength: number): number {
+        public writeIntBE(value: long, offset: int, byteLength: int): int {
             Buffer.checkByteLengthConstraint(byteLength);
             const view = this.getDataView();
             let remaining = value;
             for (let i = byteLength - 1; i >= 0; i--) {
-                view.setUint8(offset + i, remaining & 0xff);
+                view.setUint8((offset + i).toInt(), remaining & 0xff);
                 remaining >>= 8;
             }
             return offset + byteLength;
         }
 
+        private getMultiplier(i: int): long {
+            return Math.pow(2, i * 8).toLong()
+        }
+
+        private toUByte(b: byte): int {
+            if (b < 0) {
+                return b + 256;
+            }
+            return b;
+        }
+
+        private readBytes(view: DataView, offset: int, byteLength: int, LE: boolean = false): long {
+            let val: long = 0;
+            for (let i = 0; i < byteLength; i++) {
+                let idx = LE ? i : byteLength - i - 1
+                const byt: int = this.toUByte(this.$_get(offset + idx)!.toByte())
+                val += byt * this.getMultiplier(i);
+            }
+            return val
+        }
+
+        private toSigned(val: long, byteLength: int)
+        {
+            const unsignedMax = this.getMultiplier(byteLength)
+            const half = unsignedMax / 2
+            const max = half - 1
+
+            if (val > max) {
+                return val - unsignedMax
+            }
+            return val
+        }
+
         /**
         * Reads a signed integer from the buffer at the specified offset using big-endian format
         *
-        * @param {number} offset - Number of bytes to skip before reading
-        * @param {number} byteLength - Number of bytes to read (maximum 6)
-        * @returns {number} The read value
+        * @param {int} offset - Number of bytes to skip before reading
+        * @param {int} byteLength - Number of bytes to read (maximum 6)
+        * @returns {int} The read value
         * @throws {Error} If byteLength is greater than 6
         */
-        public readIntBE(offset: number, byteLength: number): number {
+        public readIntBE(offset: int, byteLength: int): long {
+            let lengthOffset: int = this.length - byteLength;
+            Buffer.checkOffsetConstraint(offset, lengthOffset);
             Buffer.checkByteLengthConstraint(byteLength);
-            const view = this.getDataView();
-            let val: number = 0;
-            let multiplier = 1 << (8 * (byteLength - 1));
-            for (let i = 0; i < byteLength; i++) {
-                const byt = view.getUint8(offset + i);
-                val += byt * multiplier;
-                multiplier >>= 8;
-            }
-            const signBit = 1 << (8 * byteLength - 1);
-            if (val >= signBit) {
-                val -= (signBit * 2);
-            }
-            return val;
+            let val = this.readBytes(this.getDataView(), offset, byteLength)
+            return this.toSigned(val, byteLength)
         }
 
         /**
         * Writes a signed integer to the buffer at the specified offset using little-endian format
         *
-        * @param {number} value - Value to write
-        * @param {number} offset - Number of bytes to skip before writing
-        * @param {number} byteLength - Number of bytes to write (maximum 6)
-        * @returns {number} Offset plus the number of bytes written
+        * @param {long} value - Value to write
+        * @param {int} offset - Number of bytes to skip before writing
+        * @param {int} byteLength - Number of bytes to write (maximum 6)
+        * @returns {int} Offset plus the number of bytes written
         * @throws {Error} If byteLength is greater than 6
         */
-        public writeIntLE(value: number, offset: number, byteLength: number): number {
+        public writeIntLE(value: long, offset: int, byteLength: int): int {
             Buffer.checkByteLengthConstraint(byteLength);
             const view = this.getDataView();
             let remaining = value;
             for (let i = 0; i < byteLength; i++) {
-                view.setUint8(offset + i, remaining & 0xff);
+                view.setUint8((offset + i).toInt(), remaining & 0xff);
                 remaining >>= 8;
             }
             return offset + byteLength;
@@ -1103,42 +1373,34 @@ Received value is: ${value}`)
         /**
         * Reads a signed integer from the buffer at the specified offset using little-endian format
         *
-        * @param {number} offset - Number of bytes to skip before reading
-        * @param {number} byteLength - Number of bytes to read (maximum 6)
-        * @returns {number} The read value
+        * @param {int} offset - Number of bytes to skip before reading
+        * @param {int} byteLength - Number of bytes to read (maximum 6)
+        * @returns {long} The read value
         * @throws {Error} If byteLength is greater than 6
         */
-        public readIntLE(offset: number, byteLength: number): number {
+        public readIntLE(offset: int, byteLength: int): long {
+            let lengthOffset: int = this.length - byteLength;
+            Buffer.checkOffsetConstraint(offset, lengthOffset);
             Buffer.checkByteLengthConstraint(byteLength);
-            const view = this.getDataView();
-            let val: number = 0;
-            let multiplier = 1;
-            for (let i = 0; i < byteLength; i++) {
-                const byt = view.getUint8(offset + i);
-                val += byt * multiplier;
-                multiplier <<= 8;
-            }
-            if (val >= (1 << (8 * byteLength - 1))) {
-                val -= (1 << (8 * byteLength));
-            }
-            return val;
+            let val = this.readBytes(this.getDataView(), offset, byteLength, true)
+            return this.toSigned(val, byteLength)
         }
 
         /**
         * Writes an unsigned integer to the buffer at the specified offset using big-endian format
         *
-        * @param {number} value - Value to write
-        * @param {number} offset - Number of bytes to skip before writing
-        * @param {number} byteLength - Number of bytes to write (maximum 6)
-        * @returns {number} Offset plus the number of bytes written
+        * @param {long} value - Value to write
+        * @param {int} offset - Number of bytes to skip before writing
+        * @param {int} byteLength - Number of bytes to write (maximum 6)
+        * @returns {int} Offset plus the number of bytes written
         * @throws {Error} If byteLength is greater than 6
         */
-        public writeUIntBE(value: number, offset: number, byteLength: number): number {
+        public writeUIntBE(value: long, offset: int, byteLength: int): int {
             Buffer.checkByteLengthConstraint(byteLength);
             const view = this.getDataView();
             let remaining = value;
             for (let i = byteLength - 1; i >= 0; i--) {
-                view.setUint8(offset + i, remaining & 0xFF);
+                view.setUint8((offset + i).toInt(), remaining & 0xFF);
                 remaining >>= 8;
             }
             return offset + byteLength;
@@ -1147,36 +1409,33 @@ Received value is: ${value}`)
         /**
         * Reads an unsigned integer from the buffer at the specified offset using big-endian format
         *
-        * @param {number} offset - Number of bytes to skip before reading
-        * @param {number} byteLength - Number of bytes to read (maximum 6)
-        * @returns {number} The read value
+        * @param {int} offset - Number of bytes to skip before reading
+        * @param {int} byteLength - Number of bytes to read (maximum 6)
+        * @returns {long} The read value
         * @throws {Error} If byteLength is greater than 6
         */
-        public readUIntBE(offset: number, byteLength: number): number {
+        public readUIntBE(offset: int, byteLength: int): long {
+            let lengthOffset: int = this.length - byteLength;
+            Buffer.checkOffsetConstraint(offset, lengthOffset);
             Buffer.checkByteLengthConstraint(byteLength);
-            let val: number = 0;
-            const view = this.getDataView();
-            for (let i = 0; i < byteLength; i++) {
-                val = (val * 256) + view.getUint8(offset + i);
-            }
-            return val;
+            return this.readBytes(this.getDataView(), offset, byteLength)
         }
 
         /**
         * Writes an unsigned integer to the buffer at the specified offset using little-endian format
         *
-        * @param {number} value - Value to write
-        * @param {number} offset - Number of bytes to skip before writing
-        * @param {number} byteLength - Number of bytes to write (maximum 6)
-        * @returns {number} Offset plus the number of bytes written
+        * @param {long} value - Value to write
+        * @param {int} offset - Number of bytes to skip before writing
+        * @param {int} byteLength - Number of bytes to write (maximum 6)
+        * @returns {int} Offset plus the number of bytes written
         * @throws {Error} If byteLength is greater than 6
         */
-        public writeUIntLE(value: number, offset: number, byteLength: number): number {
+        public writeUIntLE(value: long, offset: int, byteLength: int): int {
             Buffer.checkByteLengthConstraint(byteLength);
             const view = this.getDataView();
             let remaining = value;
             for (let i = 0; i < byteLength; i++) {
-                view.setUint8(offset + i, remaining & 0xFF);
+                view.setUint8((offset + i).toInt(), remaining & 0xFF);
                 remaining >>= 8;
             }
             return offset + byteLength;
@@ -1185,45 +1444,47 @@ Received value is: ${value}`)
         /**
         * Reads an unsigned integer from the buffer at the specified offset using little-endian format
         *
-        * @param {number} offset - Number of bytes to skip before reading
-        * @param {number} byteLength - Number of bytes to read (maximum 6)
-        * @returns {number} The read value
+        * @param {int} offset - Number of bytes to skip before reading
+        * @param {int} byteLength - Number of bytes to read (maximum 6)
+        * @returns {long} The read value
         * @throws {Error} If byteLength is greater than 6
         */
-        public readUIntLE(offset: number, byteLength: number): number {
+        public readUIntLE(offset: int, byteLength: int): long {
+            let lengthOffset: int = this.length - byteLength;
+            Buffer.checkOffsetConstraint(offset, lengthOffset);
             Buffer.checkByteLengthConstraint(byteLength);
-            const view = this.getDataView();
-            let val: number = 0;
-            let multiplier = 1;
-            for (let i = 0; i < byteLength; i++) {
-                val += view.getUint8(offset + i) * multiplier;
-                multiplier <<= 8;
-            }
-            return val;
+            return this.readBytes(this.getDataView(), offset, byteLength, true)
         }
 
         /**
         * Writes a string to the buffer at the specified offset
         *
         * @param {string} str - String to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @param {number} [length] - Maximum number of bytes to write
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @param {int} [length] - Maximum number of bytes to write
         * @param {string} [encoding='utf8'] - Character encoding of the string
-        * @returns {number} Number of bytes written
+        * @returns {int} Number of bytes written
         * @throws { BusinessError } 10200001 - The value of "[offset/length]" is out of range. It mast be >= 0 and
             <= buf.length. Received value is: [offset/length]
         */
-        public write(str: string, offset: number = 0, length?: number, encoding: string = 'utf8'): number {
-            if (offset < 0 || offset > this.length - 1) {
-                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. \
-It must be >= 0 and <= ${this.length}. Received value is: ${offset}`)
+        public write(str: string, offset: int = 0, length?: int, encoding: string = 'utf8'): int {
+            if (this.length === 0 ) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, 'The buffer length is 0, and writing data is not allowed');
             }
-
+            if (offset != 0) {
+                if (offset < 0 || offset > this.length - 1) {
+                    throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                        `It must be >= 0 and <= ${this.length - 1}. Received value is: ${offset}`);
+                }
+            }
+            if (!isEncoding(encoding)) {
+                throw createBusinessError(TypeErrorCodeId, 'Parameter error. The type of "encoding" must be BufferEncoding. the encoding invalid_encoding is unknown')
+            }
             const resolvedEncoding = encoding as buffer.BufferEncoding;
             const tmpLength = length ?? this.length - offset
             if (tmpLength < 0 || tmpLength > this.length) {
-                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "length" is out of range. \
-It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "length" is out of range. `+
+                    `It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
             }
             const resolvedLength = Math.min(tmpLength, this.length - offset)
             let resolvedString = str
@@ -1233,29 +1494,41 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
             const byteLen = buffer.byteLength(resolvedString, resolvedEncoding);
             const strBuffer = buffer.from(resolvedString, resolvedEncoding);
             for (let i = 0; i < resolvedLength && i < byteLen; i++) {
-                this.buffer.set((offset + i).toInt(), strBuffer.at(i));
+                this.buffer.set((offset + i).toInt(), strBuffer.at(i).toByte());
             }
-            return Math.min(resolvedLength, byteLen);
+            return Math.min(resolvedLength, byteLen).toInt();
         }
 
         /**
         * Reads a signed 64-bit integer from the buffer at the specified offset using big-endian format
         *
-        * @param {number} [offset=0] - Number of bytes to skip before reading
+        * @param {int} [offset=0] - Number of bytes to skip before reading
         * @returns {bigint} The read value
+        * @throws { BusinessError } 10200001 - The value of "[offset]" is out of range. It mast be >= 0 and
+            <= buf.length - 8. Received value is: [offset]
         */
-        public readBigInt64BE(offset: number = 0): bigint {
-            return this.getDataView().getBigInt64(offset, false);
+        public readBigInt64BE(offset: int = 0): bigint {
+            let lengthOffset: int = this.length - 8;
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+            return this.getDataView().getBigInt64(offset.toInt(), false);
         }
 
         /**
         * Reads a signed 64-bit integer from the buffer at the specified offset using little-endian format
         *
-        * @param {number} [offset=0] - Number of bytes to skip before reading
+        * @param {int} [offset=0] - Number of bytes to skip before reading
         * @returns {bigint} The read value
         */
-        public readBigInt64LE(offset: number = 0): bigint {
-            return this.getDataView().getBigInt64(offset, true);
+        public readBigInt64LE(offset: int = 0): bigint {
+            let lengthOffset: int = this.length - 8;
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+            return this.getDataView().getBigInt64(offset.toInt(), true);
         }
 
         /**
@@ -1264,169 +1537,318 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * @param {number} [offset=0] - Number of bytes to skip before reading
         * @returns {bigint} The read value
         */
-        public readBigUInt64BE(offset: number = 0): bigint {
-            return this.getDataView().getBigUint64(offset, false);
+        public readBigUInt64BE(offset: int = 0): bigint {
+            let lengthOffset: int = this.length - 8;
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+            return this.getDataView().getBigUint64(offset.toInt(), false);
         }
 
         /**
         * Reads an unsigned 64-bit integer from the buffer at the specified offset using little-endian format
         *
-        * @param {number} [offset=0] - Number of bytes to skip before reading
+        * @param {int} [offset=0] - Number of bytes to skip before reading
         * @returns {bigint} The read value
         */
-        public readBigUInt64LE(offset: number = 0): bigint {
-            return this.getDataView().getBigUint64(offset, true);
+        public readBigUInt64LE(offset: int = 0): bigint {
+            let lengthOffset: int = this.length - 8;
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+            return this.getDataView().getBigUint64(offset.toInt(), true);
         }
 
         /**
         * Reads a 64-bit double from the buffer at the specified offset using big-endian format
         *
-        * @param {number} [offset=0] - Number of bytes to skip before reading
-        * @returns {number} The read value
+        * @param {int} [offset=0] - Number of bytes to skip before reading
+        * @returns {double} The read value
         */
-        public readDoubleBE(offset: number = 0): number {
-            return this.getDataView().getFloat64(offset, false);
+        public readDoubleBE(offset: int = 0): double {
+            let lengthOffset: int = this.length - 8;
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+            return this.getDataView().getFloat64(offset.toInt(), false);
         }
 
         /**
         * Reads a 64-bit double from the buffer at the specified offset using little-endian format
         *
-        * @param {number} [offset=0] - Number of bytes to skip before reading
-        * @returns {number} The read value
+        * @param {int} [offset=0] - Number of bytes to skip before reading
+        * @returns {double} The read value
         */
-        public readDoubleLE(offset: number = 0): number {
-            return this.getDataView().getFloat64(offset, true);
+        public readDoubleLE(offset: int = 0): double {
+            let lengthOffset: int = this.length - 8;
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+            return this.getDataView().getFloat64(offset.toInt(), true);
         }
 
         /**
         * Reads a 32-bit float from the buffer at the specified offset using big-endian format
         *
-        * @param {number} [offset=0] - Number of bytes to skip before reading
-        * @returns {number} The read value
+        * @param {int} [offset=0] - Number of bytes to skip before reading
+        * @returns {double} The read value
         */
-        public readFloatBE(offset: number = 0): number {
-            return this.getDataView().getFloat32(offset, false);
+        public readFloatBE(offset: int = 0): double {
+            let lengthOffset: int = this.length - 4;
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+            return this.getDataView().getFloat32(offset.toInt(), false);
         }
 
         /**
         * Reads a 32-bit float from the buffer at the specified offset using little-endian format
         *
-        * @param {number} [offset=0] - Number of bytes to skip before reading
-        * @returns {number} The read value
+        * @param {int} [offset=0] - Number of bytes to skip before reading
+        * @returns {double} The read value
         */
-        public readFloatLE(offset: number = 0): number {
-            return this.getDataView().getFloat32(offset, true);
+        public readFloatLE(offset: int = 0): double {
+            let lengthOffset: int = this.length - 4;
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+            return this.getDataView().getFloat32(offset.toInt(), true);
         }
 
         /**
         * Reads a signed 8-bit integer from the buffer at the specified offset
         *
-        * @param {number} [offset=0] - Number of bytes to skip before reading
-        * @returns {number} The read value
+        * @param {long} [offset=0] - Number of bytes to skip before reading
+        * @returns {long} The read value
         */
-        public readInt8(offset: number = 0): number {
-            return this.getDataView().getInt8(offset);
+        public readInt8(offset: int = 0): long {
+            let lengthOffset: int = this.length - 1;
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+            return this.getDataView().getInt8(offset.toInt()).toLong()
         }
 
         /**
         * Reads a signed 16-bit integer from the buffer at the specified offset using big-endian format
         *
-        * @param {number} [offset=0] - Number of bytes to skip before reading
-        * @returns {number} The read value
+        * @param {int} [offset=0] - Number of bytes to skip before reading
+        * @returns {long} The read value
         */
-        public readInt16BE(offset: number = 0): number {
-            return this.getDataView().getInt16(offset, false);
+        public readInt16BE(offset: int = 0): long {
+            let lengthOffset: int = this.length - 2;
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+            return this.getDataView().getInt16(offset.toInt(), false).toLong()
         }
 
         /**
         * Reads a signed 16-bit integer from the buffer at the specified offset using little-endian format
         *
-        * @param {number} [offset=0] - Number of bytes to skip before reading
-        * @returns {number} The read value
+        * @param {int} [offset=0] - Number of bytes to skip before reading
+        * @returns {long} The read value
         */
-        public readInt16LE(offset: number = 0): number {
-            return this.getDataView().getInt16(offset, true);
+        public readInt16LE(offset: int = 0): long {
+            let lengthOffset: int = this.length - 2;
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+            return this.getDataView().getInt16(offset.toInt(), true).toLong()
         }
 
         /**
         * Reads a signed 32-bit integer from the buffer at the specified offset using big-endian format
         *
-        * @param {number} [offset=0] - Number of bytes to skip before reading
-        * @returns {number} The read value
+        * @param {int} [offset=0] - Number of bytes to skip before reading
+        * @returns {long} The read value
         */
-        public readInt32BE(offset: number = 0): number {
-            return this.getDataView().getInt32(offset, false);
+        public readInt32BE(offset: int = 0): long {
+            let lengthOffset: int = this.length - 4;
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+            return this.read32Big(offset);
+        }
+
+        private read32Big(byteOffset: int): int {
+            let len = this.length;
+            if (byteOffset < 0 || byteOffset + 4 > len) {
+                throw new RangeError("wrong index");
+            }
+            let res: int = 0;
+            const startByte = byteOffset;
+            for (let i = 0; i < 4; i++) {
+                let byteVal: int = (this.bufferData.at(startByte + 3 - i));
+                byteVal &= 0xff;
+                res = (res | byteVal << (8 * i));
+            }
+            return res;
         }
 
         /**
         * Reads a signed 32-bit integer from the buffer at the specified offset using little-endian format
         *
-        * @param {number} [offset=0] - Number of bytes to skip before reading
-        * @returns {number} The read value
+        * @param {int} [offset=0] - Number of bytes to skip before reading
+        * @returns {long} The read value
         */
-        public readInt32LE(offset: number = 0): number {
-            return this.getDataView().getInt32(offset, true);
+        public readInt32LE(offset: int = 0): long {
+            let lengthOffset: int = this.length - 4;
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+            return this.read32Little(offset);
+        }
+
+        private read32Little(byteOffset: int): int {
+            let len = this.length;
+            if (byteOffset < 0 || byteOffset + 4 > len) {
+                throw new RangeError("wrong index");
+            }
+            let res: int = 0;
+            const startByte = byteOffset;
+            for (let i = 0; i < 4; i++) {
+                let byteVal: int = (this.buffer.at(startByte + i));
+                byteVal &= 0xff;
+                res = (res | byteVal << (8 * i));
+            }
+            return res;
         }
 
         /**
         * Reads an unsigned 8-bit integer from the buffer at the specified offset
         *
-        * @param {number} [offset=0] - Number of bytes to skip before reading
-        * @returns {number} The read value
+        * @param {int} [offset=0] - Number of bytes to skip before reading
+        * @returns {long} The read value
         */
-        public readUInt8(offset: number = 0): number {
-            return this.getDataView().getUint8(offset);
+        public readUInt8(offset: int = 0): long {
+            let lengthOffset: int = this.length - 1;
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+            return this.getDataView().getUint8(offset.toInt()).toLong()
         }
 
         /**
         * Reads an unsigned 16-bit integer from the buffer at the specified offset using big-endian format
         *
-        * @param {number} [offset=0] - Number of bytes to skip before reading
-        * @returns {number} The read value
+        * @param {int} [offset=0] - Number of bytes to skip before reading
+        * @returns {long} The read value
         */
-        public readUInt16BE(offset: number = 0): number {
-            return this.getDataView().getUint16(offset, false);
+        public readUInt16BE(offset: int = 0): long {
+            let lengthOffset: int = this.length - 2;
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+            return this.getDataView().getUint16(offset.toInt(), false).toLong()
         }
 
         /**
         * Reads an unsigned 16-bit integer from the buffer at the specified offset using little-endian format
         *
-        * @param {number} [offset=0] - Number of bytes to skip before reading
-        * @returns {number} The read value
+        * @param {int} [offset=0] - Number of bytes to skip before reading
+        * @returns {long} The read value
         */
-        public readUInt16LE(offset: number = 0): number {
-            return this.getDataView().getUint16(offset, true);
+        public readUInt16LE(offset: int = 0): long {
+            let lengthOffset: int = this.length - 2;
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+            return this.getDataView().getUint16(offset.toInt(), true).toLong()
         }
 
         /**
         * Reads an unsigned 32-bit integer from the buffer at the specified offset using big-endian format
         *
-        * @param {number} [offset=0] - Number of bytes to skip before reading
-        * @returns {number} The read value
+        * @param {int} [offset=0] - Number of bytes to skip before reading
+        * @returns {long} The read value
         */
-        public readUInt32BE(offset: number = 0): number {
-            return this.getDataView().getUint32(offset, false);
+        public readUInt32BE(offset: int = 0): long {
+            let lengthOffset: int = this.length - 4;
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+            return this.readUInt32Big(offset).toLong();
+        }
+
+        private readUInt32Big(byteOffset: int): long {
+            let len = this.length;
+            if (byteOffset < 0 || byteOffset + 4 > len) {
+                throw new RangeError("wrong index");
+            }
+            let res: long = 0;
+            const startByte = byteOffset;
+            for (let i = 0; i < 4; i++) {
+                let byteVal: long = (this.buffer.at(startByte + 3 - i));
+                byteVal &= 0xff;
+                res = (res | byteVal << (8 * i));
+            }
+            return res;
         }
 
         /**
         * Reads an unsigned 32-bit integer from the buffer at the specified offset using little-endian format
         *
-        * @param {number} [offset=0] - Number of bytes to skip before reading
-        * @returns {number} The read value
+        * @param {int} [offset=0] - Number of bytes to skip before reading
+        * @returns {long} The read value
         */
-        public readUInt32LE(offset: number = 0): number {
-            return this.getDataView().getUint32(offset, true);
+        public readUInt32LE(offset: int = 0): long {
+            let lengthOffset: int = this.length - 4;
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+            return this.readUInt32Little(offset);
+        }
+
+        private readUInt32Little(offset: int): long {
+            let len = this.length;
+            if (offset < 0 || offset + 4 > len) {
+                throw new RangeError("wrong index");
+            }
+            let res: long = 0;
+            const startByte = offset;
+            for (let i = 0; i < 4; i++) {
+                let byteVal: long = (this.bufferData.at(startByte + i));
+                byteVal &= 0xff;
+                res = (res | byteVal << (8 * i));
+            }
+            return res;
         }
 
         /**
         * Writes a signed 64-bit integer to the buffer at the specified offset using big-endian format
         *
         * @param {bigint} value - Value to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @returns {number} Offset plus the number of bytes written
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @returns {int} Offset plus the number of bytes written
         */
-        public writeBigInt64BE(value: bigint, offset: number = 0): number {
-            this.getDataView().setBigInt64(offset, value, false);
+        public writeBigInt64BE(value: bigint, offset: int = 0): int {
+            if (value < Long.MIN_VALUE || value > Long.MAX_VALUE) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "value" is out of range. ` +
+                    `It must be >= -(2n ** 63n) and <= 2n ** 63n. Received value is: ${value}`)
+            }
+            let lengthOffset: int = this.length - 8;
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+            this.getDataView().setBigInt64(offset.toInt(), value, false);
             return offset + 8;
         }
 
@@ -1434,11 +1856,20 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * Writes a signed 64-bit integer to the buffer at the specified offset using little-endian format
         *
         * @param {bigint} value - Value to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @returns {number} Offset plus the number of bytes written
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @returns {int} Offset plus the number of bytes written
         */
-        public writeBigInt64LE(value: bigint, offset: number = 0): number {
-            this.getDataView().setBigInt64(offset, value, true);
+        public writeBigInt64LE(value: bigint, offset: int = 0): int {
+            if (value < Long.MIN_VALUE || value > Long.MAX_VALUE) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "value" is out of range. ` +
+                    `It must be >= -(2n ** 63n) and <= 2n ** 63n. Received value is: ${value}`)
+            }
+            let lengthOffset: int = this.length - 8;
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+            this.getDataView().setBigInt64(offset.toInt(), value, true);
             return offset + 8;
         }
 
@@ -1446,11 +1877,20 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * Writes an unsigned 64-bit integer to the buffer at the specified offset using big-endian format
         *
         * @param {bigint} value - Value to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @returns {number} Offset plus the number of bytes written
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @returns {int} Offset plus the number of bytes written
         */
-        public writeBigUInt64BE(value: bigint, offset: number = 0): number {
-            this.getDataView().setBigUint64(offset, value, false);
+        public writeBigUInt64BE(value: bigint, offset: int = 0): int {
+            if (value < 0 || value > ((1n << 64n) - 1n)) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "value" is out of range. ` +
+                    `It must be >= 0 and <= 2n ** 64n - 1n. Received value is: ${value}`)
+            }
+            let lengthOffset: int = this.length - 8;
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+            this.getDataView().setBigUint64(offset.toInt(), value, false);
             return offset + 8;
         }
 
@@ -1458,214 +1898,363 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         * Writes an unsigned 64-bit integer to the buffer at the specified offset using little-endian format
         *
         * @param {bigint} value - Value to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @returns {number} Offset plus the number of bytes written
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @returns {int} Offset plus the number of bytes written
         */
-        public writeBigUInt64LE(value: bigint, offset: number = 0): number {
-            this.getDataView().setBigUint64(offset, value, true);
+        public writeBigUInt64LE(value: bigint, offset: int = 0): int {
+            if (value < 0 || value > ((1n << 64n) - 1n)) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "value" is out of range. ` +
+                    `It must be >= 0 and <= 2n ** 64n - 1n. Received value is: ${value}`)
+            }
+            let lengthOffset: int = this.length - 8;
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+            this.getDataView().setBigUint64(offset.toInt(), value, true);
             return offset + 8;
         }
 
         /**
         * Writes a 64-bit double to the buffer at the specified offset using big-endian format
         *
-        * @param {number} value - Value to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @returns {number} Offset plus the number of bytes written
+        * @param {double} value - Value to write
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @returns {int} Offset plus the number of bytes written
         */
-        public writeDoubleBE(value: number, offset: number = 0): number {
-            this.getDataView().setFloat64(offset, value, false);
+        public writeDoubleBE(value: double, offset: int = 0): int {
+            let lengthOffset: int = this.length - 8;
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+            this.getDataView().setFloat64(offset.toInt(), value, false);
             return offset + 8;
         }
 
         /**
         * Writes a 64-bit double to the buffer at the specified offset using little-endian format
         *
-        * @param {number} value - Value to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @returns {number} Offset plus the number of bytes written
+        * @param {double} value - Value to write
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @returns {int} Offset plus the number of bytes written
         */
-        public writeDoubleLE(value: number, offset: number = 0): number {
-            this.getDataView().setFloat64(offset, value, true);
+        public writeDoubleLE(value: double, offset: int = 0): int {
+            let lengthOffset: int = this.length - 8;
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+            this.getDataView().setFloat64(offset.toInt(), value, true);
             return offset + 8;
         }
 
         /**
         * Writes a 32-bit float to the buffer at the specified offset using big-endian format
         *
-        * @param {number} value - Value to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @returns {number} Offset plus the number of bytes written
+        * @param {double} value - Value to write
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @returns {int} Offset plus the number of bytes written
         */
-        public writeFloatBE(value: number, offset: number = 0): number {
-            this.getDataView().setFloat32(offset, value, false);
+        public writeFloatBE(value: double, offset: int = 0): int {
+            let lengthOffset: int = this.length - 4;
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+            this.getDataView().setFloat32(offset.toInt(), value, false);
             return offset + 4;
         }
 
         /**
         * Writes a 32-bit float to the buffer at the specified offset using little-endian format
         *
-        * @param {number} value - Value to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @returns {number} Offset plus the number of bytes written
+        * @param {double} value - Value to write
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @returns {int} Offset plus the number of bytes written
         */
-        public writeFloatLE(value: number, offset: number = 0): number {
-            this.getDataView().setFloat32(offset, value, true);
+        public writeFloatLE(value: double, offset: int = 0): int {
+            let lengthOffset: int = this.length - 4;
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+            this.getDataView().setFloat32(offset.toInt(), value, true);
             return offset + 4;
         }
 
         /**
         * Writes a signed 8-bit integer to the buffer at the specified offset
         *
-        * @param {number} value - Value to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @returns {number} Offset plus the number of bytes written
+        * @param {long} value - Value to write
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @returns {int} Offset plus the number of bytes written
         */
-        public writeInt8(value: number, offset: number = 0): number {
-            this.getDataView().setInt8(offset, value);
+        public writeInt8(value: long, offset: int = 0): int {
+            if (value < (-Math.pow(2, 7)) || value > (Math.pow(2, 7) - 1)) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "value" is out of range. ` +
+                    `It must be >= ${-Math.pow(2, 7)} and <= ${Math.pow(2, 7) - 1}. Received value is: ${value}`)
+            }
+            let lengthOffset: int = this.length - 1;
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+            this.getDataView().setInt8(offset.toInt(), value);
             return offset + 1;
         }
 
         /**
         * Writes a signed 16-bit integer to the buffer at the specified offset using big-endian format
         *
-        * @param {number} value - Value to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @returns {number} Offset plus the number of bytes written
+        * @param {long} value - Value to write
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @returns {int} Offset plus the number of bytes written
         */
-        public writeInt16BE(value: number, offset: number = 0): number {
-            this.getDataView().setInt16(offset, value, false);
+        public writeInt16BE(value: long, offset: int = 0): int {
+            if (value < (-Math.pow(2, 15)) || value > (Math.pow(2, 15) - 1)) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "value" is out of range. ` +
+                    `It must be >= ${-Math.pow(2, 15)} and <= ${Math.pow(2, 15) - 1}. Received value is: ${value}`)
+            }
+            let lengthOffset: int = this.length - 2;
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+            this.getDataView().setInt16(offset.toInt(), value, false);
             return offset + 2;
         }
 
         /**
         * Writes a signed 16-bit integer to the buffer at the specified offset using little-endian format
         *
-        * @param {number} value - Value to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @returns {number} Offset plus the number of bytes written
+        * @param {long} value - Value to write
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @returns {int} Offset plus the number of bytes written
         */
-        public writeInt16LE(value: number, offset: number = 0): number {
-            this.getDataView().setInt16(offset, value, true);
+        public writeInt16LE(value: long, offset: int = 0): int {
+            if (value < (-Math.pow(2, 15)) || value > (Math.pow(2, 15) - 1)) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "value" is out of range. ` +
+                    `It must be >= ${-Math.pow(2, 15)} and <= ${Math.pow(2, 15) - 1}. Received value is: ${value}`)
+            }
+            let lengthOffset: int = this.length - 2;
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+            this.getDataView().setInt16(offset.toInt(), value, true);
             return offset + 2;
         }
 
         /**
         * Writes a signed 32-bit integer to the buffer at the specified offset using big-endian format
         *
-        * @param {number} value - Value to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @returns {number} Offset plus the number of bytes written
+        * @param {long} value - Value to write
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @returns {int} Offset plus the number of bytes written
         */
-        public writeInt32BE(value: number, offset: number = 0): number {
-            this.getDataView().setInt32(offset, value, false);
+        public writeInt32BE(value: long, offset: int = 0): int {
+            if (value < (-Math.pow(2, 31)) || value > (Math.pow(2, 31) - 1)) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "value" is out of range. ` +
+                    `It must be >= ${-Math.pow(2, 31)} and <= ${Math.pow(2, 31) - 1}. Received value is: ${value}`)
+            }
+            let lengthOffset: int = this.length - 4;
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+            this.getDataView().setInt32(offset.toInt(), value, false);
             return offset + 4;
         }
 
         /**
         * Writes a signed 32-bit integer to the buffer at the specified offset using little-endian format
         *
-        * @param {number} value - Value to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @returns {number} Offset plus the number of bytes written
+        * @param {long} value - Value to write
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @returns {int} Offset plus the number of bytes written
         */
-        public writeInt32LE(value: number, offset: number = 0): number {
-            this.getDataView().setInt32(offset, value, true);
+        public writeInt32LE(value: long, offset: int = 0): int {
+            if (value < -(Math.pow(2, 31)) || value > (Math.pow(2, 31) - 1)) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "value" is out of range. ` +
+                    `It must be >= ${-Math.pow(2, 31)} and <= ${Math.pow(2, 31) - 1}. Received value is: ${value}`)
+            }
+            let lengthOffset: int = this.length - 4;
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+            this.getDataView().setInt32(offset.toInt(), value, true);
             return offset + 4;
         }
 
         /**
         * Writes an unsigned 8-bit integer to the buffer at the specified offset
         *
-        * @param {number} value - Value to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @returns {number} Offset plus the number of bytes written
+        * @param {long} value - Value to write
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @returns {int} Offset plus the number of bytes written
         */
-        public writeUInt8(value: number, offset: number = 0): number {
-            this.getDataView().setUint8(offset, value);
+        public writeUInt8(value: long, offset: int = 0): int {
+            if (value < 0 || value > 255) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "value" is out of range. ` +
+                    `It must be >= 0 and <= 255. Received value is: ${value}`)
+            }
+            let lengthOffset: int = this.length - 1;
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+            this.getDataView().setUint8(offset.toInt(), value);
             return offset + 1;
         }
 
         /**
         * Writes an unsigned 16-bit integer to the buffer at the specified offset using big-endian format
         *
-        * @param {number} value - Value to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @returns {number} Offset plus the number of bytes written
+        * @param {long} value - Value to write
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @returns {int} Offset plus the number of bytes written
         */
-        public writeUInt16BE(value: number, offset: number = 0): number {
-            this.getDataView().setUint16(offset, value, false);
+        public writeUInt16BE(value: long, offset: int = 0): int {
+            if (value < 0 || value > (Math.pow(2, 16) - 1)) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "value" is out of range. ` +
+                    `It must be >= 0 and <= ${Math.pow(2, 16) - 1}. Received value is: ${value}`)
+            }
+            let lengthOffset: int = this.length - 2;
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+            this.getDataView().setUint16(offset.toInt(), value, false);
             return offset + 2;
         }
 
         /**
         * Writes an unsigned 16-bit integer to the buffer at the specified offset using little-endian format
         *
-        * @param {number} value - Value to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @returns {number} Offset plus the number of bytes written
+        * @param {long} value - Value to write
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @returns {int} Offset plus the number of bytes written
         */
-        public writeUInt16LE(value: number, offset: number = 0): number {
-            this.getDataView().setUint16(offset, value, true);
+        public writeUInt16LE(value: long, offset: int = 0): int {
+            if (value < 0 || value > (Math.pow(2, 16) - 1)) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "value" is out of range. ` +
+                    `It must be >= 0 and <= ${Math.pow(2, 16) - 1}. Received value is: ${value}`)
+            }
+            let lengthOffset: int = this.length - 2;
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+            this.getDataView().setUint16(offset.toInt(), value, true);
             return offset + 2;
         }
 
         /**
         * Writes an unsigned 32-bit integer to the buffer at the specified offset using big-endian format
         *
-        * @param {number} value - Value to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @returns {number} Offset plus the number of bytes written
+        * @param {long} value - Value to write
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @returns {int} Offset plus the number of bytes written
         */
-        public writeUInt32BE(value: number, offset: number = 0): number {
-            this.getDataView().setUint32(offset, value, false);
+        public writeUInt32BE(value: long, offset: int = 0): int {
+            if (value < 0 || value > (Math.pow(2, 32) - 1)) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "value" is out of range. ` +
+                    `It must be >= 0 and <= ${Math.pow(2, 32) - 1}. Received value is: ${value}`)
+            }
+            let lengthOffset: int = this.length - 4;
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+            this.getDataView().setUint32(offset.toInt(), value, false);
             return offset + 4;
         }
 
         /**
         * Writes an unsigned 32-bit integer to the buffer at the specified offset using little-endian format
         *
-        * @param {number} value - Value to write
-        * @param {number} [offset=0] - Number of bytes to skip before writing
-        * @returns {number} Offset plus the number of bytes written
+        * @param {long} value - Value to write
+        * @param {int} [offset=0] - Number of bytes to skip before writing
+        * @returns {int} Offset plus the number of bytes written
         */
-        public writeUInt32LE(value: number, offset: number = 0): number {
-            this.getDataView().setUint32(offset, value, true);
+        public writeUInt32LE(value: long, offset: int = 0): int {
+            if (value < 0 || value > (Math.pow(2, 32) - 1)) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "value" is out of range. ` +
+                    `It must be >= 0 and <= ${Math.pow(2, 32) - 1}. Received value is: ${value}`)
+            }
+            let lengthOffset: int = this.length - 4;
+            if (offset < 0 || offset > lengthOffset) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. ` +
+                    `It must be >= 0 and <= ${lengthOffset}. Received value is: ${offset}`);
+            }
+            this.set32Litter(offset, value);
             return offset + 4;
         }
 
-        /**
-         * Returns the byte at the specified index.
-         * @param {number} index – byte index to read
-         * @returns {number} the byte value at `index`
-         */
-        $_get(index: number): number | undefined {
-            if (index < 0 || index >= this.length) {
-                return undefined;
+        private set32Litter(byteOffset: int, value: long): void {
+            let len = this.length;
+            if (byteOffset < 0 || byteOffset + 4.0 > len) {
+                throw new RangeError("wrong index");
             }
-            return this.getDataView().getUint8(index);
+            let bits = value;
+            if (bits == Long.MAX_VALUE || bits == Long.MIN_VALUE) {
+                bits = 0;
+            }
+            const startByte = byteOffset;
+            for (let i = 0; i < 4; i++) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff).toByte();
+                this.buffer.set(startByte + i, byteVal);
+            }
+        }
+
+        /**
+        * Returns the item at that index.
+        *
+        * @param { int } index - The zero-based index of the desired code unit.
+        *     Throws error if index < 0 or index >= buffer.length.
+        * @returns { int } The element in the buffer matching the given index.
+        * @throws { BusinessError } 10200001 - The value of index is out of range.
+        */
+        $_get(index: int): long {
+            if (index < 0 || index >= this.length) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "length" is out of range. \
+It must be >= 0 and <= ${this.length}. Received value is: ${index}`)
+            }
+            return this.getDataView().getUint8(index.toInt()).toLong()
         }
 
         /**
          * Sets the byte at the specified index.
          *
-         * @param {number} index – byte index to write
-         * @param {number} value – byte value (0–255)
+         * @param {int} index – byte index to write
+         * @param {long} value – byte value (0–255)
          */
-        $_set(index: number, value: number): void {
+        $_set(index: int, value: long): void {
             if (index < 0 || index >= this.length) {
                 return;
             }
-            this.getDataView().setUint8(index, value);
+            this.getDataView().setUint8(index.toInt(), value);
         }
-    }
 
-    enum TypeParameters {
-        StringType = "string",
-        ArrayBufferType = "ArrayBuffer",
-        DataViewType = "DataView",
-        TypedArrayType = "TypedArray",
-        BlobType = "Blob"
+        /**
+         * Converts this Buffer instance into a JsonElement.
+         *
+         * @returns {JsonElement} A new JsonElement containing the Buffer
+         */
+        public toJSON(): jsonx.JsonElement {
+            const arr = new Array<jsonx.JsonElement>;
+            for (let i: int = 0; i < this.length; ++i) {
+                const intElement = new jsonx.JsonElement();
+                intElement.setInteger(this.at(i).toInt());
+                arr.push(intElement);
+            }
+            const objectElem = new jsonx.JsonElement({} as Record<string, jsonx.JsonElement>);
+            objectElem.setElement("type", jsonx.JsonElement.createString("Buffer"));
+            objectElem.setElement("data", jsonx.JsonElement.createArray(arr));
+            return objectElem;
+        }
     }
 
     export interface BlobOptions {
@@ -1675,177 +2264,226 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         endings: 'transparent'|'native'
     };
 
-    type SrcType = FixedArray<string> | FixedArray<ArrayBuffer> | FixedArray<TypedArray> | FixedArray<DataView> | FixedArray<Blob>;
-    type SrcItemType = string | ArrayBuffer | TypedArray | DataView | Blob;
-    type ArrSrcType =  Array<TypedArray> | Array<string> | Array<ArrayBuffer> | Array<DataView> | Array<Blob>;
-    function toString(src: SrcItemType): string {
-        if (src instanceof string) {
-            return src
-        } else if (src instanceof ArrayBuffer) {
-            return buffer.from(src as ArrayBuffer).toString()
-        } else if (src instanceof TypedArray) {
-            return buffer.from(src.buffer as ArrayBuffer).toString()
-        } else if (src instanceof DataView) {
-            return buffer.from((src as DataView).buffer as ArrayBuffer).toString()
-        }
-        return ""
-    }
+    type FixedArrayUnionType = FixedArray<string>
+        | FixedArray<ArrayBuffer>
+        | FixedArray<Int8Array>
+        | FixedArray<Uint8Array>
+        | FixedArray<Uint8ClampedArray>
+        | FixedArray<Int16Array>
+        | FixedArray<Uint16Array>
+        | FixedArray<Int32Array>
+        | FixedArray<Uint32Array>
+        | FixedArray<Float32Array>
+        | FixedArray<Float64Array>
+        | FixedArray<BigInt64Array>
+        | FixedArray<BigUint64Array>
+        | FixedArray<DataView>
+        | FixedArray<Blob>;
+
+    type ArrayItemType = string
+        | ArrayBuffer
+        | Int8Array
+        | Uint8Array
+        | Uint8ClampedArray
+        | Int16Array
+        | Uint16Array
+        | Int32Array
+        | Uint32Array
+        | Float32Array
+        | Float64Array
+        | BigInt64Array
+        | BigUint64Array
+        | DataView
+        | Blob;
+
+    type ArrayUnionType =  Array<Int8Array>
+         | Array<Uint8Array>
+         | Array<Uint8ClampedArray>
+         | Array<Int16Array>
+         | Array<Uint16Array>
+         | Array<Int32Array>
+         | Array<Uint32Array>
+         | Array<Float32Array>
+         | Array<Float64Array>
+         | Array<BigInt64Array>
+         | Array<BigUint64Array>
+         | Array<string>
+         | Array<ArrayBuffer>
+         | Array<DataView>
+         | Array<Blob>;
+
     /**
     * A Blob encapsulates immutable, raw data that can be safely shared across multiple worker threads.
     */
     export class Blob {
         /**
+         * The content-size of the Blob.
+         */
+        get size(): int { return this.blobSize }
+
+        /**
+         * The content-type of the Blob.
+         */
+        get type(): string { return this.blobType }
+
+        /**
+         * The buffer of the Blob.
+         */
+        private arrBuffer: ArrayBuffer
+
+        /**
+         * Get the array of buffer.
+         */
+        private arr: ArrayUnionType
+
+        /**
+         * The size of the Blob.
+         */
+        private blobSize: int;
+
+        /**
+         * The type of the Blob.
+         */
+        private blobType: string;
+        /**
          * Creates a new Blob object containing a concatenation of the given sources.
          * <ArrayBuffer>, <TypedArray>, <DataView>, and <Buffer> sources are copied into the 'Blob' and can therefore be safely modified after the 'Blob' is created.
          * String sources are encoded as UTF-8 byte sequences and copied into the Blob. Unmatched surrogate pairs within each string part will be replaced by Unicode U+FFFD replacement characters.
-         * @param {FixedArray<string> | FixedArray<ArrayBuffer> | FixedArray<TypedArray> | FixedArray<DataView> | FixedArray<Blob>} [sources] - An array of string, <ArrayBuffer>, <TypedArray>, <DataView>, or <Blob> objects, or any mix of such objects, that will be stored within the Blob.
-         * @param {BlobOptions} [options] - options
+         * @param { FixedArray<string> | FixedArray<ArrayBuffer> | FixedArray<TypedArray> | FixedArray<DataView> | FixedArray<Blob> } [sources] - An array of string, <ArrayBuffer>, <TypedArray>, <DataView>, or <Blob> objects, or any mix of such objects, that will be stored within the Blob.
+         * @param { BlobOptions } [options] - options
          */
-        constructor(sources: SrcType, options?: BlobOptions) {
-            this.checkParameters(sources)
-            this.createArray(sources)
+        constructor(sources: FixedArrayUnionType, options?: BlobOptions) {
+            this.handleParameters(sources)
+            this.arrBuffer = this.flattenData(this.arr)
+            this.blobSize = this.arrBuffer.byteLength;
             if (options != undefined) {
-                this.type = options!.type ? options!.type! : ''
+                this.blobType = options!.type ? options!.type! : ''
             } else {
-                this.type = ''
+                this.blobType = ''
             }
-            this.calcSize()
         }
 
-        constructor(sources: ArrSrcType, options?: BlobOptions) {
-            this.checkParameters(sources)
-            this.arr = sources
+        /**
+         * Creates a new Blob object containing a concatenation of the given sources.
+         * <ArrayBuffer>, <TypedArray>, <DataView>, and <Buffer> sources are copied into the 'Blob' and can therefore be safely modified after the 'Blob' is created.
+         * String sources are encoded as UTF-8 byte sequences and copied into the Blob. Unmatched surrogate pairs within each string part will be replaced by Unicode U+FFFD replacement characters.
+         * @param { Array<TypedArray> | Array<string> | Array<ArrayBuffer> | Array<DataView> | Array<Blob> } [sources] - An array of string, <ArrayBuffer>, <TypedArray>, <DataView>, or <Blob> objects, or any mix of such objects, that will be stored within the Blob.
+         * @param { BlobOptions } [options] - options
+         */
+        constructor(sources: ArrayUnionType, options?: BlobOptions) {
+            this.arrBuffer = this.flattenData(sources);
+            this.blobSize = this.arrBuffer.byteLength;
             if (options != undefined) {
-                this.type = options!.type ? options!.type! : ''
+                this.blobType = options!.type ? options!.type! : ''
             } else {
-                this.type = ''
+                this.blobType = ''
             }
-            this.calcSize()
         }
 
-        private constructor(sources: ArrSrcType, typeKey: string, type?: string) {
-            this.arr = sources
-            this.typeKey = typeKey
-            this.calcSize()
+        private constructor(sources: Array<ArrayBuffer>, typeKey: string, type?: string) {
+            this.arrBuffer = this.flattenData(sources)
+            this.blobSize = this.arrBuffer.byteLength;
             if (type != undefined) {
-                this.type = type
+                this.blobType = type
             } else {
-                this.type = ''
+                this.blobType = ''
             }
         }
 
-        private constructor(blob: Blob) {
-            this.arr = blob.arr
-            this.size = blob.size
-            this.type = blob.type
-            this.typeKey = blob.typeKey
+        /**
+         * handle Parameters, and retrun ArrSrcType.
+         */
+        private handleParameters(sources: FixedArrayUnionType) {
+            if (sources instanceof FixedArray<string>) {
+                this.arr = Array.from(sources as FixedArray<string>)
+            } else if (sources instanceof FixedArray<ArrayBuffer>) {
+                this.arr = Array.from(sources as FixedArray<ArrayBuffer>);
+            } else if (sources instanceof FixedArray<DataView>) {
+                this.arr = Array.from(sources as FixedArray<DataView>);
+            } else if (sources instanceof FixedArray<Int8Array>) {
+                this.arr = Array.from(sources as FixedArray<Int8Array>);
+            } else if (sources instanceof FixedArray<Uint8Array>) {
+                this.arr = Array.from(sources as FixedArray<Uint8Array>);
+            } else if (sources instanceof FixedArray<Uint8ClampedArray>) {
+                this.arr = Array.from(sources as FixedArray<Uint8ClampedArray>);
+            } else if (sources instanceof FixedArray<Int16Array>) {
+                this.arr = Array.from(sources as FixedArray<Int16Array>);
+            } else if (sources instanceof FixedArray<Uint16Array>) {
+                this.arr = Array.from(sources as FixedArray<Uint16Array>);
+            } else if (sources instanceof FixedArray<Int32Array>) {
+                this.arr = Array.from(sources as FixedArray<Int32Array>);
+            } else if (sources instanceof FixedArray<Uint32Array>) {
+                this.arr = Array.from(sources as FixedArray<Uint32Array>);
+            } else if (sources instanceof FixedArray<Float32Array>) {
+                this.arr = Array.from(sources as FixedArray<Float32Array>);
+            } else if (sources instanceof FixedArray<Float64Array>) {
+                this.arr = Array.from(sources as FixedArray<Float64Array>);
+            } else if (sources instanceof FixedArray<BigInt64Array>) {
+                this.arr = Array.from(sources as FixedArray<BigInt64Array>);
+            } else if (sources instanceof FixedArray<BigUint64Array>) {
+                this.arr = Array.from(sources as FixedArray<BigUint64Array>);
+            } else {
+                this.arr = Array.from(sources as FixedArray<Blob>);
+            }
         }
 
-        private checkParameters(sources: ArrSrcType | SrcType) {
-            for (const element of sources) {
-                if (element instanceof string) {
-                    this.typeKey = TypeParameters.StringType
-                   break;
-                } else if (element instanceof ArrayBuffer) {
-                    this.typeKey = TypeParameters.ArrayBufferType
-                    break;
-                } else if (element instanceof DataView) {
-                    this.typeKey = TypeParameters.DataViewType
-                    break;
-                } else if (element instanceof TypedArray) {
-                    this.typeKey = TypeParameters.TypedArrayType
-                    break;
-                } else if (element instanceof Blob) {
-                    this.typeKey = TypeParameters.BlobType
-                    break;
+        private transformToArrayBuffer(value: ArrayItemType): ArrayBuffer {
+            if (value instanceof String) {
+                return ArrayBuffer.from(value, "utf-8");
+            } else if (value instanceof ArrayBuffer) {
+                return value;
+            } else if (value instanceof DataView) {
+                return value.buffer;
+            }  else if (value instanceof Blob) {
+                return value.getArrayBuffer() as ArrayBuffer;
+            } else {
+                return value.buffer as ArrayBuffer;
+            }
+        }
+
+        private flattenData(value: ArrayUnionType): ArrayBuffer {
+            const resolvedList = new Array<ArrayBuffer>();
+            for (const item of value) {
+                resolvedList.push(this.transformToArrayBuffer(item));
+            }
+            const bufferLength = resolvedList.reduce(
+                (acc: number, item: ArrayBuffer): number => acc + item.byteLength, 0);
+            const listOfBytes = new Array<byte>();
+            for (const item of resolvedList) {
+                for (let i = 0; i < item.byteLength; i++) {
+                    listOfBytes.push(item.at(i));
                 }
             }
+            const buffer = new ArrayBuffer(bufferLength);
+            let offset = 0;
+            for (let i = 0; i < listOfBytes.length; i++) {
+                buffer.set(offset, listOfBytes[i]);
+                offset += 1;
+            }
+            return buffer;
         }
 
-        private calcSize(): number {
-            this.size = 0
-            switch (this.typeKey) {
-                case "string": {
-                    for (const item of this.arr as Array<string>) {
-                        this.size += ArrayBuffer.bytesLength(item, "utf8")
-                    }
-                } break
-                case "ArrayBuffer": {
-                    for (const item of this.arr as Array<ArrayBuffer>) {
-                        this.size += item.getByteLength()
-                    }
-                } break
-                case "TypedArray": {
-                    for (const item of this.arr as Array<TypedArray>) {
-                        this.size += item.byteLength
-                    }
-                } break
-                case "DataView": {
-                    for (const item of this.arr as Array<DataView>) {
-                        this.size += item.byteLength
-                    }
-                } break
-                case "Blob": {
-                    for (const item of this.arr as Array<Blob>) {
-                        this.size += item.calcSize()
-                    }
-                } break
-            }
-            return this.size
-        }
-
-        private createArray(sources: SrcType) {
-            switch (this.typeKey) {
-                case "string": {
-                    this.arr = Array.from(sources as FixedArray<string>)
-                } break
-                case "ArrayBuffer": {
-                    this.arr = Array.from(sources as FixedArray<ArrayBuffer>)
-                } break
-                case "TypedArray": {
-                    this.arr = Array.from(sources as FixedArray<TypedArray>)
-                } break
-                case "DataView": {
-                    this.arr = Array.from(sources as FixedArray<DataView>)
-                } break
-                case "Blob": {
-                    this.arr = Array.from(sources as FixedArray<Blob>)
-                } break
-            }
+        /**
+         * Get flattened ArrayBuffer through sync interface.
+         */
+        getArrayBuffer(): ArrayBuffer {
+            return ArrayBuffer.from(this.arrBuffer as ArrayBuffer);
         }
 
         /**
          * Creates and returns a new Blob containing a subset of this Blob objects data. The original Blob is not altered.
          *
-         * @param {number} [start=0] - The starting index.
-         * @param {number} [end=buffer.length] -  The ending index.
+         * @param {int} [start=0] - The starting index.
+         * @param {int} [end=buffer.length] -  The ending index.
          * @param {string} [type] - The content-type for the new Blob
          * @returns {Blob}
          */
-        slice(start?: number, end?: number, type?: string): Blob {
-            switch (this.typeKey) {
-                case "string": {
-                    let arr: Array<string> = (this.arr as Array<string>).slice(start, end)
-                    return new Blob(arr, this.typeKey, type)
-                }
-                case "ArrayBuffer": {
-                    let arr: Array<ArrayBuffer> = (this.arr as Array<ArrayBuffer>).slice(start, end)
-                    return new Blob(arr, this.typeKey, type)
-                }
-                case "TypedArray": {
-                    let arr: Array<TypedArray> = (this.arr as Array<TypedArray>).slice(start, end)
-                    return new Blob(arr, this.typeKey, type)
-                }
-                case "DataView": {
-                    let arr: Array<DataView> = (this.arr as Array<DataView>).slice(start, end)
-                    return new Blob(arr, this.typeKey, type)
-                }
-                case "Blob": {
-                    let arr: Array<Blob> = (this.arr as Array<Blob>).slice(start, end)
-                    return new Blob(arr, this.typeKey, type)
-                }
+        slice(start?: int, end?: int, type?: string): Blob {
+            if (start == undefined) {
+                start = 0;
             }
-            return new Blob(this)
+            const slicedArrayBuffer = this.arrBuffer.slice(start, end) as ArrayBuffer;
+            return new Blob([slicedArrayBuffer], "ArrayBuffer", type)
         }
 
         /**
@@ -1854,7 +2492,11 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
          * @returns {Promise}
          */
         text(): Promise<string> {
-            return Promise.resolve(this.getString())
+            let Encoding: string = "utf8";
+            let resolvedStart: int = 0;
+            let resolvedEnd: int = this.arrBuffer.byteLength as int;
+            let decodeData: string = ArrayBuffer.stringify(this.arrBuffer, Encoding, resolvedStart, resolvedEnd);
+            return Promise.resolve(decodeData);
         }
 
         /**
@@ -1863,45 +2505,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
          * @returns {Promise}
          */
         arrayBuffer(): Promise<ArrayBuffer> {
-            return Promise.resolve(this.toArrayBuffer())
-        }
-
-        size: number
-
-        /**
-         * The content-type of the Blob.
-         */
-        type: string
-
-        private arr: ArrSrcType
-        private typeKey: string = 'string'
-
-        private toArrayBuffer(): ArrayBuffer {
-            const str = this.getString()
-            return ArrayBuffer.from(str, "utf-8");
-        }
-
-        private getString(): string {
-            let str = ''
-            let b = new StringBuilder()
-            switch (this.typeKey) {
-                case "string": {
-                    (this.arr as Array<string>).forEach((value: string) => { b.append(toString(value as SrcItemType)) })
-                } break
-                case "ArrayBuffer": {
-                    (this.arr as Array<ArrayBuffer>).forEach((value: ArrayBuffer) => { b.append(toString(value)) })
-                } break
-                case "TypedArray": {
-                    (this.arr as Array<TypedArray>).forEach((value: TypedArray) => { b.append(toString(value)) })
-                } break
-                case "DataView": {
-                    (this.arr as Array<DataView>).forEach((value: DataView) => { b.append(toString(value)) })
-                } break
-                case "Blob": {
-                    (this.arr as Array<Blob>).forEach((value: Blob) => { b.append(value.getString()) })
-                } break
-            }
-            return b.toString()
+            return Promise.resolve(ArrayBuffer.from(this.arrBuffer as ArrayBuffer))
         }
     }
 }

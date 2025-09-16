@@ -30,10 +30,10 @@ class ThisDiff {
 }
 
 function main() : void {
-    assertEQ(A.BothInt.a, 24);
+    arktest.assertEQ(A.BothInt.a, 24);
     let bothInst = new A.BothInt;
-    assertEQ(bothInst.a, 42);
-    assertEQ(A.IntAndString.a, 23);
+    arktest.assertEQ(bothInst.a, 42);
+    arktest.assertEQ(A.IntAndString.a, 23);
     let inst = new A.IntAndString;
     arktest.assertEQ(inst.a, '42');
     arktest.assertEQ(ThisFile.b, 56);
@@ -41,5 +41,5 @@ function main() : void {
     arktest.assertEQ(fileInst.b, 32);
     arktest.assertEQ(ThisDiff.c, 's');
     let diffInst = new ThisDiff;
-    assertEQ(diffInst.c, 6);
+    arktest.assertEQ(diffInst.c, 6);
 }

@@ -20,5 +20,5 @@ desc: Left-hand expression testing - named variable testing.
 function main(): void {
   let namedVariable: number;
   namedVariable = 10;
-  assertEQ(namedVariable , 10);
+  arktest.assertEQ(namedVariable , 10);
 }

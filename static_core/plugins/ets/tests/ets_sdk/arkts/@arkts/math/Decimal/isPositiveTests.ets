@@ -16,7 +16,7 @@
 import { Decimal } from "@arkts.math.Decimal";
 
 function main(): int {
-    const suite = new ArkTestsuite("Decimal isPositive API tests");
+    const suite = new arktest.ArkTestsuite("Decimal isPositive API tests");
     suite.addTest("Decimal isPositive with default config", testIsPositiveWithDefaultConfig);
     suite.addTest("Decimal isPositive with random number", testIsPositiveWithRandomNumber);
     return suite.run();

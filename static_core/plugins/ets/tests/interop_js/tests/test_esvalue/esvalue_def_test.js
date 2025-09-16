@@ -20,9 +20,6 @@ export let bi = 9007199254740991n;
 export let jsUndefined = undefined;
 export let jsNull = null;
 export let jsFunc = function () { return 6; };
-export let jsFuncNoReturn = function () {};
-export let jsFuncReturnNull = function () { return null; };
-export let jsFuncReturnUndefined = function () { return undefined; };
 export let jsFuncWithParam = function (a, b) { return a + b; };
 export let A = {
     'property1': 1,
@@ -56,3 +53,17 @@ export class User {
 export let doubledObj = {
     3.2: 'aaa'
 };
+
+export let propObj = {
+    'property1': 'aaaaa',
+    'property2': 'bbbbb',
+    123: 456,
+};
+
+export function throwNull() {
+    throw null;
+}
+
+export function throwUndefined() {
+    throw undefined;
+}

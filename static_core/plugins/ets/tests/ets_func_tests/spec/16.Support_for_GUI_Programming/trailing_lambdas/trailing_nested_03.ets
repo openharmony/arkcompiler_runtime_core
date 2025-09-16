@@ -24,7 +24,7 @@ function fa(fn: () => int): int {
 }
 
 function nested(fn: () => int): void {
-    assertEQ( fn(), 15)
+    arktest.assertEQ( fn(), 15)
 }
 
 function main(): void {

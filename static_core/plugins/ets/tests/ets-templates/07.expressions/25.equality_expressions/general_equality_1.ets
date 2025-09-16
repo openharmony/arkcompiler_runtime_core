@@ -22,5 +22,5 @@ function main(): void {
     let b = 0;
     let c = 1;
 
-    assertTrue( a < c == b < c )
+    arktest.assertTrue( a < c == b < c )
 }

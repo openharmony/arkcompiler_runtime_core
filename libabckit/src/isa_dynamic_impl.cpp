@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,9 +15,9 @@
 
 #include <cassert>
 
-#include "libabckit/include/c/abckit.h"
-#include "libabckit/include/c/ir_core.h"
-#include "libabckit/include/c/isa/isa_dynamic.h"
+#include "libabckit/c/abckit.h"
+#include "libabckit/c/ir_core.h"
+#include "libabckit/c/isa/isa_dynamic.h"
 
 #include "libabckit/src/metadata_inspect_impl.h"
 #include "libabckit/src/helpers_common.h"

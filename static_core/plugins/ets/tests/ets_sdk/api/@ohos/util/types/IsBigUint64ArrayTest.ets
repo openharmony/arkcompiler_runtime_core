@@ -16,7 +16,7 @@
 import {util} from "@ohos.util";
 
 function main(): int {
-    const suite = new ArkTestsuite("CommonUtil types.isBigUint64Array() API tests")
+    const suite = new arktest.ArkTestsuite("CommonUtil types.isBigUint64Array() API tests")
 
     suite.addTest("Verify BigUint64Array is identified as BigUint64Array", testIsBigUint64Array001)
     suite.addTest("Verify Int8Array is not identified as BigUint64Array", testIsBigUint64Array002)
@@ -39,7 +39,7 @@ function main(): int {
 function testIsBigUint64Array001() {
   let proc = new util.types();
   let result = proc.isBigUint64Array(new BigUint64Array());
-  assertTrue(result, "The BigUint64Array should be of the same type as the BigUint64Array");
+  arktest.assertTrue(result, "The BigUint64Array should be of the same type as the BigUint64Array");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0031
@@ -52,7 +52,7 @@ function testIsBigUint64Array001() {
 function testIsBigUint64Array002() {
   let proc = new util.types();
   let result = proc.isBigUint64Array(new Int8Array());
-  assertTrue(result == false, "The Int8Array should not be of the same type as the BigUint64Array");
+  arktest.assertTrue(result == false, "The Int8Array should not be of the same type as the BigUint64Array");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0032
@@ -65,7 +65,7 @@ function testIsBigUint64Array002() {
 function testIsBigUint64Array003() {
   let proc = new util.types();
   let result = proc.isBigUint64Array(new Float64Array());
-  assertTrue(result == false, "The Float64Array should not be of the same type as the BigUint64Array");
+  arktest.assertTrue(result == false, "The Float64Array should not be of the same type as the BigUint64Array");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0033
@@ -78,7 +78,7 @@ function testIsBigUint64Array003() {
 function testIsBigUint64Array004() {
   let proc = new util.types();
   let result = proc.isBigUint64Array(new Uint8Array());
-  assertTrue(result == false, "The Uint8Array should not be of the same type as the BigUint64Array");
+  arktest.assertTrue(result == false, "The Uint8Array should not be of the same type as the BigUint64Array");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0034
@@ -91,7 +91,7 @@ function testIsBigUint64Array004() {
 function testIsBigUint64Array005() {
   let proc = new util.types();
   let result = proc.isBigUint64Array(new BigInt64Array());
-  assertTrue(result == false, "The BigInt64Array should not be of the same type as the BigUint64Array");
+  arktest.assertTrue(result == false, "The BigInt64Array should not be of the same type as the BigUint64Array");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0035
@@ -104,5 +104,5 @@ function testIsBigUint64Array005() {
 function testIsBigUint64Array006() {
   let proc = new util.types();
   let result = proc.isBigUint64Array(new Int8Array());
-  assertTrue(result == false, "The Int8Array should not be of the same type as the BigUint64Array");
+  arktest.assertTrue(result == false, "The Int8Array should not be of the same type as the BigUint64Array");
 }

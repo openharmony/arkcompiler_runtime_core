@@ -213,6 +213,32 @@ public:
     bool Action(int sig, siginfo_t *siginfo, void *context) override;
 };
 
+class AotEscapeSignalHandler final : public SignalHandler {
+public:
+    AotEscapeSignalHandler() = default;
+    ~AotEscapeSignalHandler() override = default;
+
+    NO_COPY_SEMANTIC(AotEscapeSignalHandler);
+    NO_MOVE_SEMANTIC(AotEscapeSignalHandler);
+
+    bool Action(int sig, siginfo_t *siginfo, void *context) override;
+
+    static bool HandleAction(int sig, siginfo_t *siginfo, void *context);
+
+    static bool IsEscapeSignalFlagExists();
+
+    static void SetEscaped(bool isEscape);
+
+    static void SetEscapedFlagFilePath(std::string &escapeFlagPath);
+
+private:
+    static bool NotTheTargetSignal(int sig);
+
+    static std::string escapeSignalFlagFilePath_;
+    static bool isEscaped_;
+    static constexpr int CRASH_SIGNAL_THREASHOLD = 3;
+};
+
 }  // namespace ark
 
 #endif  // PANDA_RUNTIME_SIGNAL_HANDLER_H

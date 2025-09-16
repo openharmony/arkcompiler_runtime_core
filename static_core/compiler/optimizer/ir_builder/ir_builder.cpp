@@ -331,7 +331,7 @@ bool IrBuilder::BuildInstructionsForBB(BasicBlock *bb, const uint8_t *instructio
         }
         // Break if we meet terminator instruction. If instruction in the middle of basic block we don't create
         // further dead instructions.
-        if (inst.IsTerminator() && !inst.IsSuspend()) {
+        if (inst.IsTerminator()) {
             break;
         }
     }
@@ -565,8 +565,7 @@ void IrBuilder::TrackTryBoundaries(size_t pc, const BytecodeInstruction &inst, B
 
 BasicBlock *IrBuilder::GetBlockToJump(BytecodeInstruction *inst, size_t pc)
 {
-    if ((inst->HasFlag(BytecodeInstruction::RETURN) && !inst->HasFlag(BytecodeInstruction::SUSPEND)) ||
-        inst->IsThrow(BytecodeInstruction::Exceptions::X_THROW)) {
+    if (inst->HasFlag(BytecodeInstruction::RETURN) || inst->IsThrow(BytecodeInstruction::Exceptions::X_THROW)) {
         return GetGraph()->GetEndBlock();
     }
 

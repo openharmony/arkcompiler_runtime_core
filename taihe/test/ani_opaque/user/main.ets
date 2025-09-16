@@ -24,34 +24,34 @@ class A {
 function test_is_string_with_object() {
     const a = new A();
     const result = test.is_string(a);
-    assertEQ(result, false)
+    arktest.assertEQ(result, false)
 }
 
 function test_is_string_with_string() {
     const result = test.is_string("hello");
-    assertEQ(result, true)
+    arktest.assertEQ(result, true)
 }
 
 function test_get_object() {
     const obj = test.get_object();
-    assertEQ(obj, "BBB")
+    arktest.assertEQ(obj, "BBB")
 }
 
 function test_is_object_with_union() {
     const a: test.Person = {name: "aaa"};
-    assertEQ(test.is_opaque(a), true);
-    assertEQ(test.is_opaque("bbb"), false);
+    arktest.assertEQ(test.is_opaque(a), true);
+    arktest.assertEQ(test.is_opaque("bbb"), false);
 }
 
 function test_get_objects() {
     const objs = test.get_objects();
-    assertEQ(objs[0], "AAA");
-    assertEQ(objs[1], undefined);
+    arktest.assertEQ(objs[0], "AAA");
+    arktest.assertEQ(objs[1], undefined);
 }
 
 function main() {
     console.log("##############start#############");
-    const suite = new ArkTestsuite("Test Suite");
+    const suite = new arktest.ArkTestsuite("Test Suite");
     const objs = test.get_objects();
     console.log(objs);
 

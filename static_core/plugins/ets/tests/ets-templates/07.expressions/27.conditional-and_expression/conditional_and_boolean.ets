@@ -19,7 +19,7 @@ desc: {{c.doc}}
 ---*/
 
 function fail(): boolean {
-  assertTrue(false);
+  arktest.assertTrue(false);
   return true;
 }
 

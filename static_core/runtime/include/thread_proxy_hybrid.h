@@ -64,6 +64,10 @@ public:
 
     static void InitializeInitThreadFlag() {};
 
+    void BindMutator();
+
+    void UnbindMutator();
+
     /// @returns true if holder was created
     bool CreateExternalHolderIfNeeded(bool useSharedHolder);
 
@@ -74,6 +78,9 @@ public:
     }
 
 private:
+    static void SetSharedExternalHolder(panda::ThreadHolder *externalHolder);
+    static panda::ThreadHolder *GetSharedExternalHolder();
+
     panda::ThreadHolder *threadHolder_ = nullptr;
 };
 

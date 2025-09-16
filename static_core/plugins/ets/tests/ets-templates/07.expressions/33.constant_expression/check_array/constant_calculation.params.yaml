@@ -24,12 +24,6 @@ cases:
   - { type: short, value: 260, sign: '+', expected: 270 }
   - { type: short, value: 260, sign: '-', expected: 250 }
 
-  - { type: char, value: c'p', sign: '*', expected: 1120 }
-  - { type: char, value: c'p', sign: '/', expected: 11   }
-  - { type: char, value: c'p', sign: '%', expected: 2    }
-  - { type: char, value: c'p', sign: '+', expected: 122  }
-  - { type: char, value: c'p', sign: '-', expected: 102  }
-
   - { type: int, value: 38,  sign: '*', expected: 380 }
   - { type: int, value: 308, sign: '/', expected: 30  }
   - { type: int, value: 308, sign: '%', expected: 8   }

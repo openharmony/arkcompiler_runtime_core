@@ -18,17 +18,17 @@ interface TestInterface {
 
 function syntheicClassDemanglingTest() {
     let o: TestInterface = {property: 1}
-    assertEQ(JSON.stringify(o), '{"property":1}')
+    arktest.assertEQ(JSON.stringify(o), '{"property":1}')
 }
 
 function syntheicClassManglingTest() {
     let o: TestInterface = {property: 1}
     let o2 = JSON.parse<TestInterface>('{"property":2}', Type.of(o));
-    assertEQ(JSON.stringify(o2), '{"property":2}')
+    arktest.assertEQ(JSON.stringify(o2), '{"property":2}')
 }
 
 function main(): int {
-    const suite = new ArkTestsuite("DeMangling test for interface")
+    const suite = new arktest.ArkTestsuite("DeMangling test for interface")
     suite.addTest("Demangling for object literal implements interface", syntheicClassDemanglingTest)
     suite.addTest("Mangling for object literal implements interface", syntheicClassManglingTest)
     return suite.run()

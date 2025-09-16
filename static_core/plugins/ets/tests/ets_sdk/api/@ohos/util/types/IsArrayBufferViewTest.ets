@@ -16,7 +16,7 @@
 import {util} from "@ohos.util";
 
 function main(): int {
-    const suite = new ArkTestsuite("CommonUtil types.isArrayBufferView() API tests")
+    const suite = new arktest.ArkTestsuite("CommonUtil types.isArrayBufferView() API tests")
 
     suite.addTest("Verify Int8Array is identified as ArrayBufferView", testIsArrayBufferView001)
     suite.addTest("Verify Int32Array is identified as ArrayBufferView", testIsArrayBufferView002)
@@ -38,7 +38,7 @@ function main(): int {
 function testIsArrayBufferView001() {
   let proc = new util.types();
   let result = proc.isArrayBufferView(new Int8Array());
-  assertTrue(result, "The Int8Array should be of the same type as the ArrayBufferView");
+  arktest.assertTrue(result, "The Int8Array should be of the same type as the ArrayBufferView");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0007
@@ -51,7 +51,7 @@ function testIsArrayBufferView001() {
 function testIsArrayBufferView002() {
   let proc = new util.types();
   let result = proc.isArrayBufferView(new Int32Array());
-  assertTrue(result, "The Int32Array should be of the same type as the ArrayBufferView");
+  arktest.assertTrue(result, "The Int32Array should be of the same type as the ArrayBufferView");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0008
@@ -64,7 +64,7 @@ function testIsArrayBufferView002() {
 function testIsArrayBufferView003() {
   let proc = new util.types();
   let result = proc.isArrayBufferView(new DataView(new ArrayBuffer(16)));
-  assertTrue(result, "The DataView should be of the same type as the ArrayBufferView");
+  arktest.assertTrue(result, "The DataView should be of the same type as the ArrayBufferView");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0009
@@ -77,7 +77,7 @@ function testIsArrayBufferView003() {
 function testIsArrayBufferView004() {
   let proc = new util.types();
   let result = proc.isArrayBufferView(false);
-  assertTrue(result == false, "The Boolean should not be of the same type as the ArrayBufferView");
+  arktest.assertTrue(result == false, "The Boolean should not be of the same type as the ArrayBufferView");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0010
@@ -90,5 +90,5 @@ function testIsArrayBufferView004() {
 function testIsArrayBufferView005() {
   let proc = new util.types();
   let result = proc.isArrayBufferView(new Int16Array());
-  assertTrue(result, "The Int16Array should be of the same type as the ArrayBufferView");
+  arktest.assertTrue(result, "The Int16Array should be of the same type as the ArrayBufferView");
 }

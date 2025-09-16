@@ -51,12 +51,12 @@ class OverrideNumberMethodParamClass extends OptionalNumberMethodParamClass {
 
 function main(): void {
     let nm = new NumberMethodParamClass();
-    assertEQ(nm, nm.foo(42).foo(1).foo(-5))
+    arktest.assertEQ(nm, nm.foo(42).foo(1).foo(-5))
 
     let onm = new OptionalNumberMethodParamClass();
-    assertEQ(onm, onm.foo())
-    assertEQ(onm, onm.foo(42).bar().foo(1).bar(-5).baz("name", 42).boo())
+    arktest.assertEQ(onm, onm.foo())
+    arktest.assertEQ(onm, onm.foo(42).bar().foo(1).bar(-5).baz("name", 42).boo())
 
     let oom = new OverrideNumberMethodParamClass();
-    assertEQ(oom, oom.foo(42).bar().foo(1).bar(-5).baz("name", 42).boo())
+    arktest.assertEQ(oom, oom.foo(42).bar().foo(1).bar(-5).baz("name", 42).boo())
 }

@@ -93,7 +93,7 @@
     return.void
 }
 
-.record $NamedAccessMeta-i32 {
+.record %%union_prop-i32 {
     i32 bar
     i32 baz
 }
@@ -102,11 +102,11 @@
     newobj v1, B
     ldai 6
     stobj v1, B.baz
-    ets.ldobj.name v1, $NamedAccessMeta-i32.baz
+    ets.ldobj.name v1, %%union_prop-i32.baz
     movi v2, 6
     jne v2, error1
     ldai 7
-    ets.stobj.name v1, $NamedAccessMeta-i32.bar
+    ets.stobj.name v1, %%union_prop-i32.bar
     ldobj v1, B.bar
     movi v2, 7
     jne v2, error2
@@ -123,11 +123,11 @@ error2:
 .function i32 main1() {
     newobj v1, A
     newobj v0, C
-    ets.ldobj.name v1, $NamedAccessMeta-i32.baz
+    ets.ldobj.name v1, %%union_prop-i32.baz
     movi v2, 42
     jne v2, error1
     ldai 7
-    ets.stobj.name v0, $NamedAccessMeta-i32.bar
+    ets.stobj.name v0, %%union_prop-i32.bar
     ldobj v0, C.foo
     movi v2, 7
     jne v2, error2

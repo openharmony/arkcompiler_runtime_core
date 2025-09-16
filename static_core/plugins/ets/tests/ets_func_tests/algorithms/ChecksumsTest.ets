@@ -27,7 +27,7 @@ function crc32(s: String): int {
     let crc: int = 0xFFFFFFFF;
     let poly: int = 0xEDB88320;
     for (let i: int = 0; i < s.length; i++) {
-        let c: int = s.charAt(i) as int;
+        let c: int = s.charAt(i).toInt();
         let tmp: int = (crc ^ c) & 0xFF;
         for (let j: int = 0; j < 8; j++) {
             if ((tmp & 1) == 1) {

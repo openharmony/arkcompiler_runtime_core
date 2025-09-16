@@ -52,10 +52,11 @@ private:
 
 class Task {
 public:
-    using OnDestructionCallback = void (*)(TaskQueueInterface *);
-    using Ptr = std::unique_ptr<Task>;
+    using OnDestructionCallback = void (*)(TaskQueueInterface *, void *);
+    using Ptr = Task *;
 
-    PANDA_PUBLIC_API ~Task();
+    PANDA_PUBLIC_API Task() = default;
+    PANDA_PUBLIC_API ~Task() = default;
     NO_COPY_SEMANTIC(Task);
     DEFAULT_MOVE_SEMANTIC(Task);
 
@@ -64,8 +65,11 @@ public:
      * @param properties - properties of task, it contains TaskType, VMType and ExecutionMote.
      * @param runner - body of task, that will be executed.
      */
-    [[nodiscard]] PANDA_PUBLIC_API static Ptr Create(RunnerCallback runner, TaskQueueInterface *queue,
-                                                     OnDestructionCallback callback);
+    [[nodiscard]] PANDA_PUBLIC_API static Ptr Create(void *buf, void *node, RunnerCallback runner,
+                                                     TaskQueueInterface *queue, OnDestructionCallback callback);
+
+    PANDA_PUBLIC_API static void Delete(Ptr task);
+
     /// @brief Executes body of task
     PANDA_PUBLIC_API void RunTask();
     /// @brief Makes task invalid, it should not be executed anymore.
@@ -74,8 +78,8 @@ public:
     PANDA_PUBLIC_API bool IsInvalid() const;
 
 private:
-    Task(RunnerCallback runner, TaskQueueInterface *queue, OnDestructionCallback callback)
-        : runner_(std::move(runner)), parentQueue_(queue), onDestructionCallback_(callback)
+    Task(RunnerCallback runner, TaskQueueInterface *queue, OnDestructionCallback callback, void *node)
+        : runner_(std::move(runner)), parentQueue_(queue), onDestructionCallback_(callback), nodePtr_(node)
     {
         ASSERT(queue != nullptr);
         ASSERT(callback != nullptr);
@@ -90,6 +94,7 @@ private:
     TaskQueueInterface *parentQueue_ {nullptr};
     TaskLifeTimeAggregator lifeTimeStorage_;
     OnDestructionCallback onDestructionCallback_ {nullptr};
+    void *nodePtr_ = nullptr;
 };
 
 using TaskPtr = Task::Ptr;

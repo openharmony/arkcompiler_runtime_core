@@ -1460,26 +1460,26 @@ void GraphChecker::VisitSubOverflow(GraphVisitor *v, Inst *inst)
 }
 void GraphChecker::VisitLoadArray(GraphVisitor *v, Inst *inst)
 {
-    CheckMemoryInstruction(v, inst);
+    CheckMemoryInstruction(v, inst, inst->CastToLoadArray()->GetNeedBarrier());
 }
 void GraphChecker::VisitLoadArrayI(GraphVisitor *v, Inst *inst)
 {
-    CheckMemoryInstruction(v, inst);
+    CheckMemoryInstruction(v, inst, inst->CastToLoadArrayI()->GetNeedBarrier());
 }
 void GraphChecker::VisitLoadArrayPair(GraphVisitor *v, Inst *inst)
 {
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
         v, MemoryCoalescing::AcceptedType(inst->GetType()) || DataType::IsReference(inst->GetType()),
         (std::cerr << "Unallowed type of coalesced load\n", inst->Dump(&std::cerr)));
-    CheckMemoryInstruction(v, inst);
+    CheckMemoryInstruction(v, inst, inst->CastToLoadArrayPair()->GetNeedBarrier());
 }
 void GraphChecker::VisitLoadObjectPair(GraphVisitor *v, Inst *inst)
 {
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
         v, MemoryCoalescing::AcceptedType(inst->GetType()) || DataType::IsReference(inst->GetType()),
         (std::cerr << "Unallowed type of coalesced load\n", inst->Dump(&std::cerr)));
-    CheckMemoryInstruction(v, inst);
     auto loadObj = inst->CastToLoadObjectPair();
+    CheckMemoryInstruction(v, inst, loadObj->GetNeedBarrier());
     ASSERT(loadObj->GetObjectType() == MEM_OBJECT || loadObj->GetObjectType() == MEM_STATIC);
     ASSERT(loadObj->GetVolatile() == false);
     auto field0 = loadObj->GetObjField0();
@@ -1495,7 +1495,7 @@ void GraphChecker::VisitLoadArrayPairI(GraphVisitor *v, Inst *inst)
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
         v, MemoryCoalescing::AcceptedType(inst->GetType()) || DataType::IsReference(inst->GetType()),
         (std::cerr << "Unallowed type of coalesced load\n", inst->Dump(&std::cerr)));
-    CheckMemoryInstruction(v, inst);
+    CheckMemoryInstruction(v, inst, inst->CastToLoadArrayPairI()->GetNeedBarrier());
 }
 
 void GraphChecker::VisitLoadPairPart(GraphVisitor *v, Inst *inst)
@@ -1722,7 +1722,7 @@ void GraphChecker::VisitStoreResolvedObjectFieldStatic(GraphVisitor *v, Inst *in
 
 void GraphChecker::VisitLoadStatic(GraphVisitor *v, Inst *inst)
 {
-    CheckMemoryInstruction(v, inst);
+    CheckMemoryInstruction(v, inst, inst->CastToLoadStatic()->GetNeedBarrier());
     auto graph = static_cast<GraphChecker *>(v)->GetGraph();
     [[maybe_unused]] auto initInst = inst->GetInputs()[0].GetInst();
     if (initInst->IsPhi()) {
@@ -1757,7 +1757,8 @@ void GraphChecker::VisitLoadClass([[maybe_unused]] GraphVisitor *v, Inst *inst)
                 userInst->GetOpcode() == Opcode::DeoptimizeCompare ||
                 userInst->GetOpcode() == Opcode::DeoptimizeCompareImm ||
                 userInst->GetOpcode() == Opcode::DeoptimizeIf || userInst->GetOpcode() == Opcode::Load ||
-                userInst->GetOpcode() == Opcode::If || userInst->GetOpcode() == Opcode::IfImm,
+                userInst->GetOpcode() == Opcode::If || userInst->GetOpcode() == Opcode::IfImm ||
+                userInst->GetOpcode() == Opcode::Compare || userInst->GetOpcode() == Opcode::Cmp,
             (std::cerr << "Incorrect user of the LoadClass", inst->Dump(&std::cerr), userInst->Dump(&std::cerr)));
     }
 }
@@ -1781,7 +1782,11 @@ void GraphChecker::VisitLoadAndInitClass([[maybe_unused]] GraphVisitor *v, Inst 
                 userInst->GetOpcode() == Opcode::MultiArray || userInst->GetOpcode() == Opcode::InitObject ||
                 userInst->GetOpcode() == Opcode::UnresolvedStoreStatic || userInst->GetOpcode() == Opcode::Intrinsic ||
                 userInst->GetOpcode() == Opcode::NewArray || userInst->GetOpcode() == Opcode::IsInstance ||
-                userInst->GetOpcode() == Opcode::CheckCast,
+                userInst->GetOpcode() == Opcode::CheckCast || userInst->GetOpcode() == Opcode::DeoptimizeCompare ||
+                userInst->GetOpcode() == Opcode::DeoptimizeCompareImm ||
+                userInst->GetOpcode() == Opcode::DeoptimizeIf || userInst->GetOpcode() == Opcode::Load ||
+                userInst->GetOpcode() == Opcode::If || userInst->GetOpcode() == Opcode::IfImm ||
+                userInst->GetOpcode() == Opcode::Compare || userInst->GetOpcode() == Opcode::Cmp,
             (std::cerr << "Incorrect user of the LoadAndInitClass", inst->Dump(&std::cerr),
              userInst->Dump(&std::cerr)));
     }
@@ -1807,7 +1812,12 @@ void GraphChecker::VisitUnresolvedLoadAndInitClass([[maybe_unused]] GraphVisitor
             userInst->GetOpcode() == Opcode::LoadStatic || userInst->GetOpcode() == Opcode::StoreStatic ||
                 userInst->GetOpcode() == Opcode::NewObject || userInst->GetOpcode() == Opcode::NewArray ||
                 userInst->GetOpcode() == Opcode::Phi || userInst->GetOpcode() == Opcode::MultiArray ||
-                userInst->GetOpcode() == Opcode::UnresolvedStoreStatic,
+                userInst->GetOpcode() == Opcode::UnresolvedStoreStatic ||
+                userInst->GetOpcode() == Opcode::DeoptimizeCompare ||
+                userInst->GetOpcode() == Opcode::DeoptimizeCompareImm ||
+                userInst->GetOpcode() == Opcode::DeoptimizeIf || userInst->GetOpcode() == Opcode::Load ||
+                userInst->GetOpcode() == Opcode::If || userInst->GetOpcode() == Opcode::IfImm ||
+                userInst->GetOpcode() == Opcode::Compare || userInst->GetOpcode() == Opcode::Cmp,
             (std::cerr << "Incorrect user of the UnresolvedLoadAndInitClass", inst->Dump(&std::cerr),
              userInst->Dump(&std::cerr)));
     }
@@ -1901,7 +1911,7 @@ void GraphChecker::VisitIntrinsic([[maybe_unused]] GraphVisitor *v, Inst *inst)
 
 void GraphChecker::VisitLoadObject(GraphVisitor *v, Inst *inst)
 {
-    CheckMemoryInstruction(v, inst);
+    CheckMemoryInstruction(v, inst, inst->CastToLoadObject()->GetNeedBarrier());
     CheckObjectType(v, inst, inst->CastToLoadObject()->GetObjectType(), inst->CastToLoadObject()->GetTypeId());
 }
 

@@ -1131,7 +1131,7 @@ void Aarch32Encoder::EncodeIsInf(Reg dst, Reg src)
     GetMasm()->Mov(Convert(Condition::EQ), VixlReg(dst), VixlImm(1));
 }
 
-void Aarch32Encoder::EncodeCmpFracWithDelta(Reg src)
+void Aarch32Encoder::EncodeCmpFracWithZero(Reg src)
 {
     ASSERT(src.IsFloat());
     ASSERT(src.GetSize() == WORD_SIZE || src.GetSize() == DOUBLE_WORD_SIZE);
@@ -1143,7 +1143,7 @@ void Aarch32Encoder::EncodeCmpFracWithDelta(Reg src)
         GetMasm()->Vrintz(VixlVReg(tmp).S(), VixlVReg(src).S());
         EncodeSub(tmp, src, tmp);
         EncodeAbs(tmp, tmp);
-        GetMasm()->Vmov(tmp1, std::numeric_limits<float>::epsilon());
+        GetMasm()->Vmov(tmp1, 0.0);
         GetMasm()->Vcmp(VixlVReg(tmp).S(), tmp1);
     } else {
         ScopedTmpRegF64 tmp(this);
@@ -1151,7 +1151,7 @@ void Aarch32Encoder::EncodeCmpFracWithDelta(Reg src)
         GetMasm()->Vrintz(VixlVReg(tmp).D(), VixlVReg(src).D());
         EncodeSub(tmp, src, tmp);
         EncodeAbs(tmp, tmp);
-        GetMasm()->Vmov(tmp1, std::numeric_limits<double>::epsilon());
+        GetMasm()->Vmov(tmp1, 0.0);
         GetMasm()->Vcmp(VixlVReg(tmp).D(), tmp1);
     }
     GetMasm()->Vmrs(vixl::aarch32::RegisterOrAPSR_nzcv(vixl::aarch32::kPcCode), vixl::aarch32::FPSCR);
@@ -1165,7 +1165,7 @@ void Aarch32Encoder::EncodeIsInteger(Reg dst, Reg src)
     auto labelExit = static_cast<Aarch32LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
     auto labelInfOrNan = static_cast<Aarch32LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
 
-    EncodeCmpFracWithDelta(src);
+    EncodeCmpFracWithZero(src);
     GetMasm()->B(vixl::aarch32::vs, labelInfOrNan);  // Inf or NaN
     GetMasm()->Mov(vixl::aarch32::le, VixlReg(dst), 0x1);
     GetMasm()->Mov(vixl::aarch32::gt, VixlReg(dst), 0x0);
@@ -1187,7 +1187,7 @@ void Aarch32Encoder::EncodeIsSafeInteger(Reg dst, Reg src)
     auto labelFalse = static_cast<Aarch32LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
 
     // Check if IsInteger
-    EncodeCmpFracWithDelta(src);
+    EncodeCmpFracWithZero(src);
     GetMasm()->B(vixl::aarch32::vs, labelFalse);  // Inf or NaN
     GetMasm()->B(vixl::aarch32::gt, labelFalse);
 

@@ -94,7 +94,6 @@ public:
 
     // NOLINTBEGIN(readability-function-size)
     void AddOptions(PandArgParser *parser) {
-        parser->Add(&version_);
 % Common::options.each do |op|
 %   next if op.sub_option?
 %   next if op.deprecated?
@@ -102,18 +101,6 @@ public:
 % end
     }
     // NOLINTEND(readability-function-size)
-
-    bool IsVersion() const {
-        return version_.GetValue();
-    }
-
-    void SetVersion(bool value) {
-        version_.SetValue(value);
-    }
-
-    bool WasSetVersion() {
-        return version_.WasSet();
-    }
 
 % Common::options.each do |op|
 %   if !op.lang_specific? && !op.has_lang_suboptions?
@@ -226,7 +213,6 @@ private:
 
 % end
     std::string exe_dir_;
-    PandArg<bool> version_{"version", false, R"(Ark version, file format version and minimum supported file format version)"};
 % Common::options.each do |op|
 % if op.default_target_specific?
     PandArg<<%= op.type %>> <%= op.field_name %>;

@@ -16,9 +16,6 @@
 #ifndef PANDA_ASSEMBLER_FIELD_H
 #define PANDA_ASSEMBLER_FIELD_H
 
-#include <memory>
-#include <string>
-
 #include "assembly-type.h"
 #include "extensions/extensions.h"
 #include "meta.h"
@@ -29,10 +26,9 @@ namespace ark::pandasm {
 struct Field {
     Type type;
     std::string name;
-    std::unique_ptr<FieldMetadata> metadata;
-    size_t lineOfDef = 0;
     std::string wholeLine; /* The line in which the field is defined */
-                           /*  Or line in which the field met, if the field is not defined */
+    std::unique_ptr<FieldMetadata> metadata;
+    size_t lineOfDef = 0; /*  Or line in which the field met, if the field is not defined */
     size_t boundLeft = 0;
     size_t boundRight = 0;
     bool isDefined = true;

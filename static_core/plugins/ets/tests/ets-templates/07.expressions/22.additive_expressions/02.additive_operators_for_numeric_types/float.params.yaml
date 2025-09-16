@@ -13,13 +13,13 @@
 
 --- # List of addition tests where float
 float:
-  - {x:  0.0, y: -0.0, type: "float", result:  0.0}
-  - {x: -0.0, y:  0.0, type: "float", result:  0.0}
-  - {x: -0.0, y: -0.0, type: "float", result: -0.0}
-  - {x:  0.0, y:  0.0, type: "float", result:  0.0}
-  - {x:  0.0, y:  1.0, type: "float", result:  1.0}
-  - {x:  1.0, y:  0.0, type: "float", result:  1.0}
-  - {x:  1.0, y: -1.0, type: "float", result:  0.0}
+  - {x:  0.0f, y: -0.0f, type: "float", result:  0.0f}
+  - {x: -0.0f, y:  0.0f, type: "float", result:  0.0f}
+  - {x: -0.0f, y: -0.0f, type: "float", result: -0.0f}
+  - {x:  0.0f, y:  0.0f, type: "float", result:  0.0f}
+  - {x:  0.0f, y:  1.0f, type: "float", result:  1.0f}
+  - {x:  1.0f, y:  0.0f, type: "float", result:  1.0f}
+  - {x:  1.0f, y: -1.0f, type: "float", result:  0.0f}
 
   - {x:  0.0, y: -0.0, type: "double", result:  0.0}
   - {x: -0.0, y:  0.0, type: "double", result:  0.0}

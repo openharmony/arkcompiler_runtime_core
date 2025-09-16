@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env python3
 # Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,67 +13,232 @@
 # limitations under the License.
 
 
-_tryit() {
-    coverage run --parallel-mode --module taihe.cli.tryit "$@"
+import argparse
+import os
+import subprocess
+import sys
+from collections.abc import Sequence
+from pathlib import Path
+
+
+class Color:
+    """ANSI escape codes used to colorize log output in the terminal.
+
+    RST  : Reset all attributes.
+    INV  : Invert foreground and background colors.
+    RED  : Red foreground (used for errors).
+    GREEN: Green foreground (used for success or stages).
+    BLUE : Blue foreground (used for actions).
+    GREY : Grey foreground (used for verbose/debug logs).
+    """
+
+    RST = "\033[0m"
+    INV = "\033[7m"
+    RED = "\033[31m"
+    GREEN = "\033[32m"
+    BLUE = "\033[34m"
+    GREY = "\033[90m"
+
+
+def log_error(msg: str):
+    print(f"{Color.INV}{Color.RED}[!]{Color.RST}", msg, file=sys.stderr)
+
+
+def log_stage(msg: str):
+    print(f"{Color.INV}{Color.GREEN}[*]{Color.RST}", msg, file=sys.stderr)
+
+
+def log_action(msg: str):
+    print(f"{Color.INV}{Color.BLUE}[-]{Color.RST}", msg, file=sys.stderr)
+
+
+def log_verbose(msg: str):
+    print(
+        f"{Color.INV}{Color.GREY}[.]{Color.RST}",
+        f"{Color.GREY}{msg}{Color.RST}",
+        file=sys.stderr,
+    )
+
+
+def _log_command(command: Sequence[Path | str], cwd: Path | str):
+    log_action(" ".join(str(c) for c in command))
+    log_verbose(f"working directory: {cwd}")
+
+
+def run_command(
+    command: Sequence[Path | str],
+    cwd: Path | str,
+    check: bool = True,
+):
+    _log_command(command, cwd)
+    subprocess.run(command, cwd=cwd, check=check)
+
+
+def run_command_with_output(
+    command: Sequence[Path | str],
+    cwd: Path | str,
+    check: bool = True,
+) -> str:
+    _log_command(command, cwd)
+    result = subprocess.run(
+        command,
+        cwd=cwd,
+        check=check,
+        capture_output=True,
+        text=True,
+    )
+    return result.stdout.strip()
+
+
+def get_project_root() -> Path:
+    return Path(__file__).parent.parent.resolve()
+
+
+def init_py_env(project_root: Path):
+    compiler_path = project_root / "compiler"
+    venv_bin = project_root / ".venv/bin"
+
+    if not venv_bin.exists():
+        log_error(f"virtual environment directory not found: {venv_bin}")
+        sys.exit(1)
+
+    # enable virtual environment
+    os.environ["PYTHONPATH"] = str(compiler_path)
+    os.environ["PATH"] = str(venv_bin) + os.pathsep + os.environ["PATH"]
+
+
+def run_module(module_name: str, args: Sequence[Path | str], project_root: Path):
+    coverage_run = [
+        "coverage",
+        "run",
+        "--parallel-mode",
+        "--module",
+        module_name,
+        *args,
+    ]
+    run_command(coverage_run, cwd=project_root)
+
+
+def run_taihe_tryit(args: Sequence[Path | str], project_root: Path):
+    run_module("taihe.cli.tryit", args, project_root)
+
+
+def run_pytest(project_root: Path, **config: Path | str):
+    log_stage("Run PyTest...")
+    run_module("pytest", [project_root / "compiler/tests"], project_root)
+
+
+def run_core_tests(project_root: Path, **config: Path | str):
+    log_stage("Run core tests...")
+    for test_dir in [project_root / "test/rgb", project_root / "test/object"]:
+        log_stage(f"Testing: {test_dir}")
+        run_taihe_tryit(["test", "-u", "cpp", test_dir], project_root)
+
+
+def run_ani_tests(project_root: Path, **config: Path | str):
+    log_stage("Run ANI tests...")
+    build_dir = project_root / "build"
+
+    if not build_dir.exists():
+        log_verbose("Build directory not found. Running CMake configuration.")
+        ninja_cmd = ["cmake", "-B", "build", "-GNinja", "-DENABLE_COVERAGE=ON"]
+        if panda_home := config.get("panda_home"):
+            ninja_cmd.append(f"-DPANDA_HOME={str(panda_home)}")
+        run_command(ninja_cmd, cwd=project_root)
+    else:
+        log_verbose("Build directory exists. Skipping configuration.")
+
+    build_cmd = ["cmake", "--build", "build", "--verbose"]
+    run_command(build_cmd, cwd=project_root)
+
+
+def run_cmake_test(project_root: Path, **config: Path | str):
+    log_stage("Run CMake test...")
+
+    test_dir = project_root / "test/cmake_test"
+    run_taihe_tryit(["generate", "-u", "sts", test_dir, "-Bcmake"], project_root)
+
+    try:
+        taihec_cmd = ["taihec", "--print-panda-vm-path"]
+        panda_vm_path = run_command_with_output(taihec_cmd, cwd=project_root)
+        ani_path = Path(panda_vm_path) / "ohos_arm64/include/plugins/ets/runtime/ani"
+    except (subprocess.CalledProcessError, FileNotFoundError) as e:
+        log_error(f"Unable to get panda-vm-path: {e}")
+        return
+
+    ninja_cmd = [
+        "cmake",
+        "-B",
+        "build/generated",
+        f"-DEXTERNAL_INCLUDE={ani_path}",
+    ]
+    run_command(ninja_cmd, cwd=test_dir)
+    build_cmd = ["cmake", "--build", "build/generated"]
+    run_command(build_cmd, cwd=test_dir)
+
+
+def generate_coverage_report(project_root: Path):
+    log_stage("Generate coverage report...")
+    try:
+        run_command(["coverage", "combine"], cwd=project_root)
+        run_command(["coverage", "report"], cwd=project_root)
+    except subprocess.CalledProcessError as e:
+        log_error(f"Failed to generate coverage report: {e}")
+
+
+TESTS = {
+    "pytest": run_pytest,
+    "core": run_core_tests,
+    "ani": run_ani_tests,
+    "cmake": run_cmake_test,
 }
 
-run-core-tests() {
-    for test_dir in ../test/rgb ../test/object; do
-        echo "Testing: $test_dir"
-        _tryit test -u cpp $test_dir
-    done
+MODE_TO_TESTS = {
+    "github-push-ci": list(TESTS.keys()),
+    "github-pr-ci": list(TESTS.keys()),
+    "ggw-ci": ["pytest", "ani"],
 }
 
-run-ani-tests() {
-    echo "Running ANI tests..."
 
-    cd ..
-    if [ -d "build" ]; then
-        echo "Build directory found. Skipping CMake configuration."
-    else
-        echo "Build directory not found. Configuring with CMake."
-        if [ -n "$1" ]; then
-            echo "Using custom PANDA_HOME: $1"
-            cmake -B build -GNinja -DENABLE_COVERAGE=ON -DPANDA_HOME="$1"
-        else
-            echo "No PANDA_HOME provided"
-            cmake -B build -GNinja -DENABLE_COVERAGE=ON
-        fi
-    fi
-    cmake --build build --verbose
-    cd compiler
-}
+def main():
+    parser = argparse.ArgumentParser(
+        description="Taihe integration test",
+        formatter_class=argparse.RawTextHelpFormatter,
+    )
+    parser.add_argument("--panda-home", type=str, help="Specify PANDA_HOME path")
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument(
+        "--run",
+        nargs="*",
+        choices=TESTS.keys(),
+        help="Specify which test(s) to run",
+    )
+    modes = ", ".join(MODE_TO_TESTS.keys())
+    group.add_argument(
+        "--mode",
+        type=str,
+        choices=MODE_TO_TESTS.keys(),
+        help=f"Run tests under mode ({modes})",
+    )
+    args = parser.parse_args()
 
-run-cmake-test() {
-    test_dir=../test/cmake_test
-    echo "Testing: $test_dir"
-    _tryit generate -u sts $test_dir --cmake
-    cd ../test/cmake_test/
-    cmake -B build/generated \
-        -D EXTERNAL_INCLUDE=$(realpath ../../.panda_vm/package/ohos_arm64/include/plugins/ets/runtime/ani)
-    cmake --build build/generated
-    cd ../..
-    cd compiler
-}
+    project_root = get_project_root()
+    init_py_env(project_root)
 
-run-pytest() {
-    echo "Running pytest..."
-    coverage run --parallel-mode --module pytest
-}
+    if args.mode:
+        selected_tests = MODE_TO_TESTS[args.mode]
+    elif args.run:
+        selected_tests = args.run
+    else:
+        selected_tests = list(TESTS.keys())
 
-source "$(dirname "$0")/common_lib.sh"
-init_py_env
+    try:
+        for name in selected_tests:
+            log_stage(f"=== Running test: {name} ===")
+            TESTS[name](project_root, panda_home=args.panda_home)
+    finally:
+        generate_coverage_report(project_root)
 
-# Add trap to ensure coverage is reported even if script exits early
-trap "coverage combine && coverage report" EXIT
 
-run-pytest
-if [ $# -eq 0 ]; then
-    echo "No PANDA_HOME provided, running without -DPANDA_HOME"
-    run-ani-tests ""
-else
-    run-ani-tests $1
-fi
-
-# The coverage report will be generated by the EXIT trap
-echo "Generating coverage report..."
+if __name__ == "__main__":
+    main()

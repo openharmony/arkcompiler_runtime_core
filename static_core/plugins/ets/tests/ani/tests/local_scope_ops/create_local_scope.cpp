@@ -304,7 +304,7 @@ TEST_F(CreateLocalScopeTest, destroy_escape_local_scope_test3)
     ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), &objectRefA), ANI_OK);
 
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lcreate_local_scope/Operations;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("create_local_scope.Operations", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_ref result {};
@@ -312,7 +312,7 @@ TEST_F(CreateLocalScopeTest, destroy_escape_local_scope_test3)
 
     ani_static_method method {};
     auto classA = reinterpret_cast<ani_class>(result);
-    ASSERT_EQ(env_->Class_FindStaticMethod(classA, "or", "ZZ:Z", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(classA, "or", "zz:z", &method), ANI_OK);
     ASSERT_NE(method, nullptr);
 
     ani_boolean res = ANI_FALSE;
@@ -395,11 +395,11 @@ TEST_F(CreateLocalScopeTest, scope_test5)
     ASSERT_EQ(env_->CreateEscapeLocalScope(REF_NUM), ANI_OK);
 
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lcreate_local_scope/Student;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("create_local_scope.Student", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method ctor {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "I:V", &ctor), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "i:", &ctor), ANI_OK);
     ASSERT_NE(ctor, nullptr);
 
     ani_object objectA {};

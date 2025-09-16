@@ -22,5 +22,5 @@ files:
 import {sum} from "./pkg6/pkg6.ets"
 
 function main(): void {
-    assertEQ(sum(1, 2), 3);
+    arktest.assertEQ(sum(1, 2), 3);
 }

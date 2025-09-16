@@ -18,6 +18,8 @@
 
 #include "js_convert_base.h"
 #include "js_convert_stdlib.h"
+#include "napi_impl/ark_napi_helper.h"
+#include "objects/dynamic_object_accessor_util.h"
 
 namespace ark::ets::interop::js {
 
@@ -225,9 +227,13 @@ JSCONVERT_UNWRAP(BigInt)
         etsIntArray->Set(i, array[i]);
     }
 
+    auto coro = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(coro);
+    EtsHandle etsIntArrayHandle(coro, etsIntArray);
+
     auto bigintKlass = EtsClass::FromRuntimeClass(ctx->GetBigIntClass());
     auto bigInt = EtsBigInt::FromEtsObject(EtsObject::Create(bigintKlass));
-    bigInt->SetFieldObject(EtsBigInt::GetBytesOffset(), reinterpret_cast<EtsObject *>(etsIntArray));
+    bigInt->SetFieldObject(EtsBigInt::GetBytesOffset(), reinterpret_cast<EtsObject *>(etsIntArrayHandle.GetPtr()));
     bigInt->SetFieldPrimitive(EtsBigInt::GetSignOffset(), array.empty() ? 0 : signBit == 0 ? 1 : -1);
 
     return bigInt;
@@ -246,10 +252,19 @@ JSCONVERT_UNWRAP(JSValue)
 JSCONVERT_DEFINE_TYPE(EtsObject, EtsObject *);
 JSCONVERT_WRAP(EtsObject)
 {
-    InteropFatal("Wrap of EtsObject should be done with relevant converter");
-    UNREACHABLE();
+    auto coro = EtsCoroutine::GetCurrent();
+    auto ctx = InteropCtx::Current(coro);
+    if (ctx == nullptr) {
+        ThrowNoInteropContextException();
+        return {};
+    }
+    auto objConv = JSRefConvertResolve(ctx, etsVal->GetClass()->GetRuntimeClass());
+    if (objConv == nullptr) {
+        ctx->ForwardEtsException(coro);
+        return nullptr;
+    }
+    return objConv->Wrap(ctx, etsVal);
 }
-
 JSCONVERT_UNWRAP(EtsObject)
 {
     auto objectConverter = ctx->GetEtsClassWrappersCache()->Lookup(PlatformTypes()->coreObject);
@@ -270,22 +285,42 @@ JSCONVERT_WRAP(ESError)
     auto klass = etsVal->GetClass();
     INTEROP_FATAL_IF(klass->GetRuntimeClass() != ctx->GetESErrorClass());
 
-    auto method = klass->GetInstanceMethod("getJsError", nullptr);
-    ASSERT(method != nullptr);
-    std::array args = {Value(etsVal->GetCoreType())};
-    auto val = JSValue::FromCoreType(method->GetPandaMethod()->Invoke(coro, args.data()).GetAs<ObjectHeader *>());
-    INTEROP_FATAL_IF(val == nullptr);
-    return val->GetNapiValue(env);
+    auto fieldIdx = etsVal->GetClass()->GetFieldIndexByName("err_");
+    auto field = etsVal->GetClass()->GetFieldByIndex(fieldIdx);
+    auto etsObject = etsVal->GetFieldObject(field);
+    ASSERT(etsObject != nullptr);
+
+    auto method = etsObject->GetClass()->GetInstanceMethod("unwrap", nullptr);
+    std::array args {ark::Value(etsObject->GetCoreType())};
+    Value res = method->GetPandaMethod()->Invoke(coro, args.data());
+    EtsObject *errObject = EtsObject::FromCoreType(res.GetAs<ObjectHeader *>());
+
+    interop::js::ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
+    if (LIKELY(storage->HasReference(errObject, env))) {
+        auto jsThis = storage->GetJsObject(errObject, env);
+        return jsThis;
+    }
+    return JSConvertEtsObject::WrapWithNullCheck(env, errObject);
+
+    UNREACHABLE();
 }
 JSCONVERT_UNWRAP(ESError)
 {
     auto coro = EtsCoroutine::GetCurrent();
-    JSValue *value = nullptr;
-    value = JSValue::Create(coro, ctx, jsVal);
-    if (UNLIKELY(value == nullptr)) {
+    EtsObject *etsObject = nullptr;
+    bool isError = false;
+    NAPI_CHECK_FATAL(napi_is_error(env, jsVal, &isError));
+    if (isError) {
+        auto jsValueObj = JSValue::Create(coro, ctx, jsVal);
+        etsObject = jsValueObj->AsObject();
+    } else {
+        etsObject = JSConvertEtsObject::UnwrapWithNullCheck(ctx, env, jsVal).value();
+    }
+
+    if (UNLIKELY(etsObject == nullptr)) {
         return {};
     }
-    auto res = ctx->CreateETSCoreESError(coro, value);
+    auto res = ctx->CreateETSCoreESError(coro, etsObject);
     if (UNLIKELY(res == nullptr)) {
         return {};
     }
@@ -332,6 +367,7 @@ JSCONVERT_WRAP(Promise)
             auto refconv = JSRefConvertResolve(ctx, value->GetClass()->GetRuntimeClass());
             completionValue = refconv->Wrap(ctx, value.GetPtr());
         }
+        ScopedNativeCodeThread nativeScope(coro);
         if (hpromise->IsResolved()) {
             NAPI_CHECK_FATAL(napi_resolve_deferred(env, deferred, completionValue));
         } else {
@@ -404,21 +440,18 @@ JSCONVERT_UNWRAP(EtsNull)
 #undef JSCONVERT_UNWRAP
 
 template <typename T>
-static ALWAYS_INLINE inline std::optional<typename T::cpptype> JSValueGetByName(InteropCtx *ctx, JSValue *jsvalue,
-                                                                                const char *name)
+ALWAYS_INLINE inline std::optional<typename T::cpptype> JSValueGetByName(InteropCtx *ctx, JSValue *jsvalue,
+                                                                         const char *name)
 {
     auto env = ctx->GetJSEnv();
-    napi_value jsVal = jsvalue->GetNapiValue(env);
-    napi_status jsStatus;
     auto coro = EtsCoroutine::GetCurrent();
-    {
-        ScopedNativeCodeThread nativeScope(coro);
-        jsStatus = napi_get_named_property(env, jsVal, name, &jsVal);
-    }
-    if (jsStatus != napi_ok) {
+    napi_value jsVal = jsvalue->GetNapiValue(env);
+    auto result = common::DynamicObjectAccessorUtil::GetProperty(ArkNapiHelper::ToBaseObject(jsVal), name);
+    if (NapiIsExceptionPending(env)) {
+        ctx->ForwardJSException(coro);
         return {};
     }
-    return T::UnwrapWithNullCheck(ctx, env, jsVal);
+    return T::UnwrapWithNullCheck(ctx, env, ArkNapiHelper::ToNapiValue(result));
 }
 
 template <typename T>

@@ -138,8 +138,7 @@ EtsString *StdCoreDoubleToExponential(ObjectHeader *obj, double d)
     digit = (digit >= 0) ? std::floor(digit) : std::ceil(digit);
     // Check range
     if (UNLIKELY(digit > helpers::MAX_FRACTION || digit < helpers::MIN_FRACTION)) {
-        ThrowEtsException(EtsCoroutine::GetCurrent(),
-                          panda_file_items::class_descriptors::ARGUMENT_OUT_OF_RANGE_EXCEPTION,
+        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::ARGUMENT_OUT_OF_RANGE_ERROR,
                           "toExponential argument must be between 0 and 100");
         return nullptr;
     }
@@ -215,8 +214,7 @@ EtsString *StdCoreDoubleToPrecision(ObjectHeader *obj, double d)
     digitAbs = std::abs((digitAbs >= 0) ? std::floor(digitAbs) : std::ceil(digitAbs));
     // Check range
     if (UNLIKELY(digitAbs > helpers::MAX_FRACTION || digitAbs < helpers::MIN_FRACTION + 1)) {
-        ThrowEtsException(EtsCoroutine::GetCurrent(),
-                          panda_file_items::class_descriptors::ARGUMENT_OUT_OF_RANGE_EXCEPTION,
+        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::ARGUMENT_OUT_OF_RANGE_ERROR,
                           "toPrecision argument must be between 1 and 100");
         return nullptr;
     }
@@ -253,6 +251,9 @@ EtsString *StdCoreDoubleToFixed(ObjectHeader *obj, double d)
         return EtsString::CreateFromMUtf8("Infinity");
     }
 
+    if (std::fabs(objValue) >= helpers::SCIENTIFIC_NOTATION_THRESHOLD) {
+        return StdCoreDoubleToString(objValue, static_cast<int>(helpers::DECIMAL));
+    }
     return helpers::DoubleToFixed(objValue, static_cast<int>(digitAbs));
 }
 
@@ -281,7 +282,7 @@ extern "C" EtsLong StdCoreDoubleBitCastToLong(EtsDouble f)
 
 static inline bool IsInteger(double v)
 {
-    return std::isfinite(v) && (std::fabs(v - std::trunc(v)) <= std::numeric_limits<double>::epsilon());
+    return std::isfinite(v) && (std::fabs(v - std::trunc(v)) == 0.0);
 }
 
 extern "C" EtsBoolean StdCoreDoubleIsInteger(double v)
@@ -336,11 +337,6 @@ EtsLong StdCoreDoubleToLong(EtsDouble val)
 EtsFloat StdCoreDoubleToFloat(EtsDouble val)
 {
     return static_cast<float>(val);
-}
-
-EtsChar StdCoreDoubleToChar(EtsDouble val)
-{
-    return CastFloatToInt<EtsDouble, EtsChar>(val);
 }
 
 }  // namespace ark::ets::intrinsics

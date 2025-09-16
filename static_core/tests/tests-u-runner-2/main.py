@@ -17,7 +17,6 @@
 
 import os
 import sys
-import traceback
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, cast
@@ -41,9 +40,10 @@ def main() -> None:
     if init_runner.should_runner_initialize(sys.argv):
         init_runner.initialize(RunnerEnv.get_mandatory_props())
         sys.exit(0)
-    local_env = Path(__file__).with_name(".env")
-    urunner_path = Path(__file__).parent
-    RunnerEnv(local_env=local_env, urunner_path=urunner_path).load_environment()
+    RunnerEnv(
+        local_env=Path.cwd().with_name(".env"),
+        urunner_path=Path(__file__).parent,
+        global_env=init_runner.urunner_env_path).load_environment()
 
     args = get_args()
     logger = load_config(args)
@@ -60,8 +60,8 @@ def main() -> None:
     failed_tests = 0
     try:
         failed_tests = main_cycle(config, logger)
-    except RunnerException:
-        logger.logger.critical(traceback.format_exc())
+    except RunnerException as exc:
+        logger.logger.critical(exc.message)
     finally:
         sys.exit(0 if failed_tests == 0 else 1)
 
@@ -71,6 +71,9 @@ def main_cycle(config: Config, logger: Log) -> int:
     runner = RunnerStandardFlow(config)
 
     failed_tests = 0
+
+    if config.general.coverage.use_lcov and config.general.coverage.clean_gcda_before_run:
+        runner.test_env.coverage.lcov_tool.clear_gcda_files()
 
     if config.test_suite.repeats_by_time == 0:
         for repeat in range(1, config.test_suite.repeats + 1):
@@ -107,12 +110,12 @@ def launch_runners(runner: Runner, logger: Log, config: Config, repeat: int, rep
     Log.all(logger, pretty_divider())
     failed_tests += runner.summarize()
     Log.default(logger, f"{repeat_str}: Runner {runner.name}: {failed_tests} failed tests")
-    if config.general.coverage.use_llvm_cov:
+    if config.general.coverage.use_llvm_cov or config.general.coverage.use_lcov:
         runner.create_coverage_html()
     return failed_tests
 
 
-def load_config(args: dict[str, Any]) -> Log: # type: ignore[explicit-any]
+def load_config(args: dict[str, Any]) -> Log:  # type: ignore[explicit-any]
     runner_verbose = "runner.verbose"
     test_suite_const = "test-suite"
 

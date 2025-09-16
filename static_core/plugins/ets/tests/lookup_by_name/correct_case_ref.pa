@@ -36,13 +36,13 @@
     return.void
 }
 
-.record $NamedAccessMeta-std.core.String {
+.record %%union_prop-std.core.String {
     std.core.String bar
     std.core.String baz
 }
 
 .function void test(std.core.Object a0, std.core.Object a1) {
-    ets.ldobj.name.obj a0, $NamedAccessMeta-std.core.String.baz
+    ets.ldobj.name.obj a0, %%union_prop-std.core.String.baz
     sta.obj v0
     lda.str "42"
     sta.obj v1
@@ -50,11 +50,11 @@
     movi v0, 1
     jne v0, fail_test
     lda.str "44"
-    ets.stobj.name.obj a1, $NamedAccessMeta-std.core.String.bar
+    ets.stobj.name.obj a1, %%union_prop-std.core.String.bar
     return.void
 fail_test:
     lda.str "88"
-    ets.stobj.name.obj a1, $NamedAccessMeta-std.core.String.bar
+    ets.stobj.name.obj a1, %%union_prop-std.core.String.bar
     return.void
 }
 

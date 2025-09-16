@@ -13,6 +13,15 @@
  * limitations under the License.
  */
 
+// NOLINTBEGIN(readability-identifier-naming, cppcoreguidelines-macro-usage,
+//             cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
+//             readability-else-after-return, readability-duplicate-include,
+//             misc-non-private-member-variables-in-classes, cppcoreguidelines-pro-type-member-init,
+//             google-explicit-constructor, cppcoreguidelines-pro-type-union-access,
+//             modernize-use-auto, llvm-namespace-comment,
+//             cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
+//             readability-implicit-bool-conversion)
+
 #ifndef COMMON_INTERFACES_OBJECTS_BASE_OBJECT_OPERATOR_H
 #define COMMON_INTERFACES_OBJECTS_BASE_OBJECT_OPERATOR_H
 
@@ -23,7 +32,6 @@
 #include "objects/field.h"
 #include "objects/ref_field.h"
 #include "objects/base_state_word.h"
-
 namespace common {
 class BaseObject;
 
@@ -33,8 +41,12 @@ public:
     virtual size_t GetSize(const BaseObject *object) const = 0;
     // Check is valid object.
     virtual bool IsValidObject(const BaseObject *object) const = 0;
+    // Iterate object field, and skit the weak referent, ONLY used in interop.
+    virtual void ForEachRefFieldSkipReferent(const BaseObject *object, const RefFieldVisitor &visitor) const = 0;
     // Iterate object field.
     virtual void ForEachRefField(const BaseObject *object, const RefFieldVisitor &visitor) const = 0;
+    // Iterate XRef.
+    virtual void IterateXRef(const BaseObject *object, const RefFieldVisitor &visitor) const = 0;
     // Iterate object field And Get Object Size.
     virtual size_t ForEachRefFieldAndGetSize(const BaseObject *object, const RefFieldVisitor &visitor) const = 0;
     // Get forwarding pointer.
@@ -53,3 +65,11 @@ private:
 };
 }  // namespace common
 #endif  // COMMON_INTERFACES_OBJECTS_BASE_OBJECT_OPERATOR_H
+// NOLINTEND(readability-identifier-naming, cppcoreguidelines-macro-usage,
+//           cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
+//           readability-else-after-return, readability-duplicate-include,
+//           misc-non-private-member-variables-in-classes, cppcoreguidelines-pro-type-member-init,
+//           google-explicit-constructor, cppcoreguidelines-pro-type-union-access,
+//           modernize-use-auto, llvm-namespace-comment,
+//           cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
+//           readability-implicit-bool-conversion)

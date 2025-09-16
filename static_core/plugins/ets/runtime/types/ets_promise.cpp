@@ -47,7 +47,7 @@ void EtsPromise::OnPromiseCompletion(EtsCoroutine *coro)
 
     if (Runtime::GetOptions().IsListUnhandledOnExitPromises(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)) &&
         state_ == STATE_REJECTED && queueSize == 0) {
-        coro->GetPandaVM()->AddUnhandledRejectedPromise(this);
+        coro->GetPandaVM()->GetUnhandledObjectManager()->AddRejectedPromise(this, coro);
     }
 
     // Unblock awaitee coros
@@ -73,7 +73,8 @@ void EtsPromise::LaunchCallback(EtsCoroutine *coro, EtsObject *callback, Corouti
     ASSERT(method != nullptr);
     auto args = PandaVector<Value> {Value(callback->GetCoreType())};
     [[maybe_unused]] bool launchResult =
-        coroManager->Launch(event, method, std::move(args), launchMode, EtsCoroutine::PROMISE_CALLBACK, false);
+        coroManager->Launch(event, method, std::move(args), launchMode, EtsCoroutine::PROMISE_CALLBACK, false,
+                            CoroutineWorkerGroup::ANY_ID);
     ASSERT(launchResult);
 }
 

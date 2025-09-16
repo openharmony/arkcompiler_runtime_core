@@ -17,10 +17,11 @@
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
 #include "plugins/ets/runtime/interop_js/js_refconvert.h"
-#include "plugins/ets/runtime/interop_js/js_convert.h"
-#include "runtime/mem/local_object_handle.h"
-
 #include "plugins/ets/runtime/interop_js/js_refconvert_array.h"
+#include "plugins/ets/runtime/interop_js/js_refconvert_function.h"
+#include "plugins/ets/runtime/interop_js/js_convert.h"
+#include "plugins/ets/runtime/types/ets_object.h"
+#include "runtime/mem/local_object_handle.h"
 
 // NOLINTBEGIN(readability-identifier-naming)
 // CC-OFF(G.FMT.07) project code style
@@ -134,10 +135,10 @@ private:
 
     void RegisterExceptions()
     {
-        static const ets_proxy::EtsClassWrapper::OverloadsMap W_ERROR_OVERLOADS {
-            {utf::CStringAsMutf8("<ctor>"), std::make_pair("Lstd/core/String;Lescompat/ErrorOptions;:V", 2)}};
-        static const ets_proxy::EtsClassWrapper::OverloadsMap W_EXCEPTION_OVERLOADS {
-            {utf::CStringAsMutf8("<ctor>"), std::make_pair("Lstd/core/String;:V", 1)}};
+        static const ets_proxy::EtsClassWrapper::OverloadsMap W_ERROR_OVERLOADS = {
+            {utf::CStringAsMutf8("<ctor>"), {"Lstd/core/String;Lescompat/ErrorOptions;:V", 2, "<ctor>"}}};
+        static const ets_proxy::EtsClassWrapper::OverloadsMap W_EXCEPTION_OVERLOADS = {
+            {utf::CStringAsMutf8("<ctor>"), {"Lstd/core/String;:V", 1, "<ctor>"}}};
         wError_ = RegisterClass(descriptors::ERROR, "Error", &W_ERROR_OVERLOADS);
         RegisterClass(descriptors::EXCEPTION, nullptr, &W_EXCEPTION_OVERLOADS);
 
@@ -145,22 +146,22 @@ private:
             // Errors
             std::make_tuple("Lstd/core/AssertionError;", NO_MIRROR, &W_ERROR_OVERLOADS),
             std::make_tuple("Lstd/core/DivideByZeroError;", NO_MIRROR, &W_ERROR_OVERLOADS),
+            std::make_tuple("Lstd/core/IllegalStateError;", NO_MIRROR, &W_ERROR_OVERLOADS),
             std::make_tuple("Lstd/core/NullPointerError;", NO_MIRROR, &W_ERROR_OVERLOADS),
             std::make_tuple("Lstd/core/UncaughtExceptionError;", NO_MIRROR, &W_ERROR_OVERLOADS),
             std::make_tuple("Lstd/core/ArithmeticError;", NO_MIRROR, &W_ERROR_OVERLOADS),
             std::make_tuple("Lstd/core/ClassCastError;", NO_MIRROR, &W_ERROR_OVERLOADS),
+            std::make_tuple("Lstd/core/IllegalArgumentError;", NO_MIRROR, &W_ERROR_OVERLOADS),
             std::make_tuple("Lstd/core/IndexOutOfBoundsError;", NO_MIRROR, &W_ERROR_OVERLOADS),
             std::make_tuple("Lstd/core/ArrayStoreError;", NO_MIRROR, &W_ERROR_OVERLOADS),
             std::make_tuple("Lstd/core/NegativeArraySizeError;", NO_MIRROR, &W_ERROR_OVERLOADS),
             std::make_tuple("Lstd/core/LinkerError;", NO_MIRROR, &W_ERROR_OVERLOADS),
             std::make_tuple("Lstd/core/LinkerClassNotFoundError;", NO_MIRROR, &W_ERROR_OVERLOADS),
+            std::make_tuple("Lstd/core/ArgumentOutOfRangeError;", NO_MIRROR, &W_ERROR_OVERLOADS),
+            std::make_tuple("Lstd/core/UnsupportedOperationError;", NO_MIRROR, &W_ERROR_OVERLOADS),
             // Exceptions
             std::make_tuple("Lstd/core/NoDataException;", NO_MIRROR, &W_EXCEPTION_OVERLOADS),
-            std::make_tuple("Lstd/core/ArgumentOutOfRangeException;", NO_MIRROR, &W_EXCEPTION_OVERLOADS),
-            std::make_tuple("Lstd/core/IllegalStateException;", NO_MIRROR, &W_EXCEPTION_OVERLOADS),
-            std::make_tuple("Lstd/core/UnsupportedOperationException;", NO_MIRROR, &W_EXCEPTION_OVERLOADS),
             std::make_tuple("Lstd/core/IllegalMonitorStateError;", NO_MIRROR, &W_EXCEPTION_OVERLOADS),
-            std::make_tuple("Lstd/core/IllegalArgumentException;", NO_MIRROR, &W_EXCEPTION_OVERLOADS),
             std::make_tuple("Lstd/core/RuntimeException;", NO_MIRROR, &W_EXCEPTION_OVERLOADS),
         };
         for (const auto &[descr, mirror, ovl] : STD_EXCEPTIONS_LIST) {
@@ -206,22 +207,25 @@ private:
     void RegisterArray()
     {
         static const ets_proxy::EtsClassWrapper::OverloadsMap W_ARRAY_OVERLOADS = {
-            {utf::CStringAsMutf8("<ctor>"), std::make_pair(":V", 1)},
-            {utf::CStringAsMutf8("$_get"), std::make_pair("I:Lstd/core/Object;", 2)},
-            {utf::CStringAsMutf8("$_set"), std::make_pair("ILstd/core/Object;:V", 3)},
-            {utf::CStringAsMutf8("at"), std::make_pair("I:Lstd/core/Object;", 2)},
-            {utf::CStringAsMutf8("copyWithin"), std::make_pair("III:Lescompat/Array;", 4)},
+            {utf::CStringAsMutf8("<ctor>"), {":V", 1, "<ctor>"}},
+            {utf::CStringAsMutf8("$_get"), {"I:Lstd/core/Object;", 2, "$_get"}},
+            {utf::CStringAsMutf8("$_set"), {"ILstd/core/Object;:V", 3, "$_set"}},
+            {utf::CStringAsMutf8("at"), {"I:Lstd/core/Object;", 2, "at"}},
+            {utf::CStringAsMutf8("copyWithin"), {"III:Lescompat/Array;", 4, "copyWithin"}},
             {utf::CStringAsMutf8("fill"),
-             std::make_pair("Lstd/core/Object;Lstd/core/Double;Lstd/core/Double;:Lescompat/Array;", 4)},
-            {utf::CStringAsMutf8("indexOf"), std::make_pair("Lstd/core/Object;Lstd/core/Double;:D", 3)},
-            {utf::CStringAsMutf8("lastIndexOf"), std::make_pair("Lstd/core/Object;I:I", 3)},
-            {utf::CStringAsMutf8("slice"), std::make_pair("II:Lescompat/Array;", 3)},
-            {utf::CStringAsMutf8("splice"), std::make_pair("I:Lescompat/Array;", 2)},
-            {utf::CStringAsMutf8("splice"), std::make_pair("IILescompat/Array;:Lescompat/Array;", 3)},
-            {utf::CStringAsMutf8("toSpliced"), std::make_pair("II[Lstd/core/Object;:Lescompat/Array;", 3)},
-            {utf::CStringAsMutf8("with"), std::make_pair("DLstd/core/Object;:Lescompat/Array;", 3)},
-        };
+             {"Lstd/core/Object;Lstd/core/Double;Lstd/core/Double;:Lescompat/Array;", 4, "fill"}},
+            {utf::CStringAsMutf8("indexOf"), {"Lstd/core/Object;Lstd/core/Int;:I", 3, "indexOf"}},
+            {utf::CStringAsMutf8("lastIndexOf"), {"Lstd/core/Object;I:I", 3, "lastIndexOf"}},
+            {utf::CStringAsMutf8("slice"), {"II:Lescompat/Array;", 3, "slice"}},
+            {utf::CStringAsMutf8("splice"), {"I:Lescompat/Array;", 2, "splice"}},
+            {utf::CStringAsMutf8("splice"), {"IILescompat/Array;:Lescompat/Array;", 3, "splice"}},
+            {utf::CStringAsMutf8("toSpliced"), {"II[Lstd/core/Object;:Lescompat/Array;", 3, "toSpliced"}},
+            {utf::CStringAsMutf8("with"), {"DLstd/core/Object;:Lescompat/Array;", 3, "with"}},
+            {utf::CStringAsMutf8("push"), {"Lescompat/Array;:D", 1, "pushArray"}}};
+
         wArray_ = RegisterClass(descriptors::ARRAY, "Array", &W_ARRAY_OVERLOADS);
+        wArray_->GetOverloadNameMapping()["pushOne"] = "push";
+        wArray_->GetOverloadNameMapping()["pushArray"] = "push";
         NAPI_CHECK_FATAL(napi_object_seal(ctx_->GetJSEnv(), jsGlobalEts_));
     }
 
@@ -253,25 +257,27 @@ private:
     void RegisterMap()
     {
         static const ets_proxy::EtsClassWrapper::OverloadsMap W_MAP_OVERLOADS = {
-            {utf::CStringAsMutf8("<ctor>"), std::make_pair("Lstd/core/Object;:V", 2)}};
+            {utf::CStringAsMutf8("<ctor>"),
+             {"{ULescompat/Iterable;Lescompat/ReadonlyArray;Lstd/core/Null;}:V", 2, "<ctor>"}}};
         wMap_ = RegisterClassWithLeafMatcher(descriptors::MAP, "Map", &W_MAP_OVERLOADS);
     }
 
     void RegisterSet()
     {
         static const ets_proxy::EtsClassWrapper::OverloadsMap W_SET_OVERLOADS = {
-            {utf::CStringAsMutf8("<ctor>"), std::make_pair("Lstd/core/Object;:V", 2)}};
+            {utf::CStringAsMutf8("<ctor>"),
+             {"{ULescompat/Iterable;Lstd/core/Null;[Lstd/core/Object;}:V", 2, "<ctor>"}}};
         wSet_ = RegisterClassWithLeafMatcher(descriptors::SET, "Set", &W_SET_OVERLOADS);
     }
 
     void RegisterDate()
     {
-        static const ets_proxy::EtsClassWrapper::OverloadsMap W_DATE_OVERLOADS {
-            {utf::CStringAsMutf8("setDate"), std::make_pair("D:D", 2)},
-            {utf::CStringAsMutf8("setUTCDate"), std::make_pair("D:D", 2)},
-            {utf::CStringAsMutf8("setMilliseconds"), std::make_pair("D:D", 2)},
-            {utf::CStringAsMutf8("setUTCMilliseconds"), std::make_pair("D:D", 2)},
-            {utf::CStringAsMutf8("setTime"), std::make_pair("J:V", 2)},
+        static const ets_proxy::EtsClassWrapper::OverloadsMap W_DATE_OVERLOADS = {
+            {utf::CStringAsMutf8("setDate"), {"D:D", 2, "setDate"}},
+            {utf::CStringAsMutf8("setUTCDate"), {"D:D", 2, "setUTCDate"}},
+            {utf::CStringAsMutf8("setMilliseconds"), {"D:D", 2, "setMilliseconds"}},
+            {utf::CStringAsMutf8("setUTCMilliseconds"), {"D:D", 2, "setUTCMilliseconds"}},
+            {utf::CStringAsMutf8("setTime"), {"J:V", 2, "setTime"}},
         };
         wDate_ = RegisterClassWithLeafMatcher(descriptors::DATE, "Date", &W_DATE_OVERLOADS);
     }
@@ -361,8 +367,7 @@ private:
             return wTypeError_->CreateJSBuiltinProxy(ctxx, jsValue);
         }
 
-        // NOTE(vpukhov): compat: remove when compat/Error is implemented
-        return BuiltinConvert<JSConvertESError>(ctxx, env, jsValue);
+        return wError_->CreateJSBuiltinProxy(ctxx, jsValue);
     }
 
     EtsObject *MObjectObject(InteropCtx *ctxx, napi_value jsValue)
@@ -422,14 +427,17 @@ private:
                 return MObjectObject(ctx_, jsValue);
             case napi_null:
                 return ctx_->GetNullValue();
+            case napi_bigint:
+                return BuiltinConvert<JSConvertBigInt>(ctxx, env, jsValue);
             case napi_symbol:
                 [[fallthrough]];
-            case napi_function:
-                [[fallthrough]];
             case napi_external:
-                [[fallthrough]];
-            case napi_bigint:
                 return BuiltinConvert<JSConvertJSValue>(ctxx, env, jsValue);
+            case napi_function: {
+                auto refconv = JSRefConvertResolve<true>(ctxx, PlatformTypes()->coreFunction->GetRuntimeClass());
+                ASSERT(refconv != nullptr);
+                return EtsObject::FromCoreType(refconv->Unwrap(ctxx, jsValue)->GetCoreType());
+            }
             default:
                 ASSERT(!IsNullOrUndefined(env, jsValue));
                 InteropCtx::Fatal("Bad jsType in Object value matcher");
@@ -539,6 +547,10 @@ void RegisterBuiltinJSRefConvertors(InteropCtx *ctx)
     RegisterBuiltinRefConvertor<JSConvertJSValue>(cache, ctx->GetJSValueClass());
     RegisterBuiltinRefConvertor<JSConvertESError>(cache, ctx->GetESErrorClass());
     RegisterBuiltinRefConvertor<JSConvertString>(cache, ctx->GetStringClass());
+    RegisterBuiltinRefConvertor<JSConvertString>(cache, ptypes->coreLineString->GetRuntimeClass());
+    RegisterBuiltinRefConvertor<JSConvertString>(cache, ptypes->coreSlicedString->GetRuntimeClass());
+    RegisterBuiltinRefConvertor<JSConvertString>(cache, ptypes->coreTreeString->GetRuntimeClass());
+
     RegisterBuiltinRefConvertor<JSConvertBigInt>(cache, ctx->GetBigIntClass());
     RegisterBuiltinRefConvertor<JSConvertPromise>(cache, ctx->GetPromiseClass());
     RegisterBuiltinRefConvertor<JSConvertEtsNull>(cache, ctx->GetNullValueClass());

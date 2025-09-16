@@ -18,7 +18,7 @@ package std.core;
 /**
  * Represents boxed double value and related operations
  */
-export final class Double extends Floating implements Comparable<Double>, JSONable<Double> {
+export final class Double extends Floating implements Comparable<Double> {
     private value: double;
 
     /**
@@ -204,11 +204,35 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
     /**
      * Returns value of this instance
      *
+     * Supportive interface
+     *
+     * @returns value as byte
+     * @tag arkts
+     */
+    public override byteValue(): byte {
+        return this.toByte();
+    }
+
+    /**
+     * Returns value of this instance
+     *
      * @returns value as short
      * @tag arkts
      */
     public override toShort(): short {
         return this.value.toShort();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * Supportive interface
+     *
+     * @returns value as short
+     * @tag arkts
+     */
+    public override shortValue(): short {
+        return this.toShort();
     }
 
     /**
@@ -224,11 +248,35 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
     /**
      * Returns value of this instance
      *
+     * Supportive interface
+     *
+     * @returns value as int
+     * @tag arkts
+     */
+    public override intValue(): int {
+        return this.toInt();
+    }
+
+    /**
+     * Returns value of this instance
+     *
      * @returns value as long
      * @tag arkts
      */
     public override toLong(): long {
         return this.value.toLong();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * Supportive interface
+     *
+     * @returns value as long
+     * @tag arkts
+     */
+    public override longValue(): long {
+        return this.toLong();
     }
 
     /**
@@ -244,6 +292,18 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
     /**
      * Returns value of this instance
      *
+     * Supportive interface
+     *
+     * @returns value as float
+     * @tag arkts
+     */
+    public override floatValue(): float {
+        return this.toFloat();
+    }
+
+    /**
+     * Returns value of this instance
+     *
      * @returns value as double
      * @tag arkts
      */
@@ -254,11 +314,13 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
     /**
      * Returns value of this instance
      *
-     * @returns value as char
+     * Supportive interface
+     *
+     * @returns value as double
      * @tag arkts
      */
-    public toChar(): char {
-        return this.value.toChar();
+    public override doubleValue(): double {
+        return this.toDouble();
     }
 
     /**
@@ -271,16 +333,6 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
     public static toDouble(value: double): double {
         return value;
     }
-
-    /**
-     * Returns the primitive as char value
-     *
-     * @param value value to cast
-     *
-     * @returns casted value
-     */
-    public static native toChar(value: double): char;
-
 
     /**
      * Returns the primitive as byte value
@@ -392,16 +444,6 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
     }
 
     /**
-     * Returns a hash code (integer representation) for this instance
-     *
-     * @returns representation of this instance
-     * @tag arkts
-     */
-    public override $_hashCode(): int {
-        return this.toInt();
-    }
-
-    /**
      * compare(double, double) checks if two doubles are differs no more than by Double.DELTA
      *
      * @param lhs left-hand side double for comparison
@@ -491,7 +533,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      */
     public static isInteger(v: double): boolean {
         // In the language % works as C fmod that differs with IEEE-754 % definition
-        return Double.compare(v % (1.0 as double), 0.0 as double);
+        return (abs(v % (1.0 as double)) == 0.0);
     }
 
     /**
@@ -631,11 +673,11 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @returns the result of conversion
      *
      * @note
-     * If arg is "+Infinity", "Infinity" or "-Infinity", return value is `inf` or `-inf` respectively.
-     * If arg is "+0" or "-0", return value is 0 or -0.
-     * If arg has leading zeroes, it's ignored: "0001.5" -> 1.5, "-0001.5" -> -1.5
-     * If arg starts from ".", leading zero is implied: ".5" -> 0.5, "-.5" -> -0.5
-     * If arg successfully parsed, trailing non-digits ignored: "-.6ffg" -> -0.6
+     * If arg is '+Infinity', 'Infinity' or '-Infinity', return value is `inf` or `-inf` respectively.
+     * If arg is '+0' or '-0', return value is 0 or -0.
+     * If arg has leading zeroes, it's ignored: '0001.5' -> 1.5, '-0001.5' -> -1.5
+     * If arg starts from '.', leading zero is implied: '.5' -> 0.5, '-.5' -> -0.5
+     * If arg successfully parsed, trailing non-digits ignored: '-.6ffg' -> -0.6
      * If arg can not be parsed into a number, NaN is returned
      *
      * @remark
@@ -655,10 +697,10 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @returns the result of parsing
      *
      * @note
-     * If args ("10", 1) -> thrown ArgumentOutOfRangeException, ("10", 37) -> thrown ArgumentOutOfRangeException
-     * If args ("10", 2) -> 2
-     * If args ("10", 10) -> 10, ("10", 0) -> 10
-     * If args ("ff", 16) -> 255
+     * If args ('10', 1) -> thrown ArgumentOutOfRangeError, ('10', 37) -> thrown ArgumentOutOfRangeError
+     * If args ('10', 2) -> 2
+     * If args ('10', 10) -> 10, ('10', 0) -> 10
+     * If args ('ff', 16) -> 255
      * etc.
      *
      * @remark
@@ -678,10 +720,10 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @returns the result of parsing
      *
      * @note
-     * If args ("10", 1) -> thrown ArgumentOutOfRangeException, ("10", 37) -> thrown ArgumentOutOfRangeException
-     * If args ("10", 2) -> 2
-     * If args ("10", 10) -> 10, ("10", 0) -> 10
-     * If args ("ff", 16) -> 255
+     * If args ('10', 1) -> thrown ArgumentOutOfRangeError, ('10', 37) -> thrown ArgumentOutOfRangeError
+     * If args ('10', 2) -> 2
+     * If args ('10', 10) -> 10, ('10', 0) -> 10
+     * If args ('ff', 16) -> 255
      * etc.
      *
      * @remark
@@ -710,10 +752,10 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @returns the result of parsing
      *
      * @note
-     * If args ("10", 1) -> thrown ArgumentOutOfRangeException, ("10", 37) -> thrown ArgumentOutOfRangeException
-     * If args ("10", 2) -> 2
-     * If args ("10", 10) -> 10, ("10", 0) -> 10
-     * If args ("ff", 16) -> 255
+     * If args ('10', 1) -> thrown ArgumentOutOfRangeError, ('10', 37) -> thrown ArgumentOutOfRangeError
+     * If args ('10', 2) -> 2
+     * If args ('10', 10) -> 10, ('10', 0) -> 10
+     * If args ('ff', 16) -> 255
      * etc.
      *
      * @remark
@@ -750,13 +792,13 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @returns the result of conversion
      *
      * @note
-     * If d = new Double(0.25); d.toExponential(2) -> "2.50e-1"
-     * If d = new Double(0.25); d.toExponential(2.5) -> "2.50e-1"
-     * If d = new Double(0.25); d.toExponential(1) -> "2.5e-1"
-     * If d = new Double(12345.01); d.toExponential(10) -> "1.2345010000e+4"
-     * If d = new Double(NaN); d.toExponential(10) -> "NaN";
-     * If d = new Double(Double.POSITIVE_INFINITY); d.toExponential(10) -> "Infinity";
-     *                                                                     "-Infinity" for negative
+     * If d = new Double(0.25); d.toExponential(2) -> '2.50e-1'
+     * If d = new Double(0.25); d.toExponential(2.5) -> '2.50e-1'
+     * If d = new Double(0.25); d.toExponential(1) -> '2.5e-1'
+     * If d = new Double(12345.01); d.toExponential(10) -> '1.2345010000e+4'
+     * If d = new Double(NaN); d.toExponential(10) -> 'NaN';
+     * If d = new Double(Double.POSITIVE_INFINITY); d.toExponential(10) -> 'Infinity';
+     *                                                                     '-Infinity' for negative
      *
      * @remark
      * Implemented as native function,  @see `toExponential()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#673).
@@ -764,7 +806,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * ECMA reference: https://tc39.es/ecma262/multipage/doubles-and-dates.html#sec-double.prototype.toexponential
      *
     */
-    public native toExponential(d: double): String;
+    private native toExponentialImpl(d: double): String;
     public native toExponentialWithNoDigit(): String;
 
     /**
@@ -778,6 +820,19 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
     }
 
     /**
+     * toExponential() returns std.core.String representing the underlying double in exponential notation
+     *
+     * @returns the result of conversion
+     *
+    */
+    public toExponential(d?: double): String {
+        if (d == undefined) {
+            return this.toExponentialWithNoDigit()
+        }
+        return this.toExponentialImpl(d)
+    }
+
+    /**
      * toPrecision(double) returns std.core.String representing the underlying double on the specified precision
      *
      * @param d precision (rounded to nearest integer); must be in [1, 100]
@@ -785,10 +840,10 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @returns the result of conversion
      *
      * @note
-     * If d = new Double(0.25); d.toPrecision(4) -> "0.2500"
-     * If d = new Double(1.01); d.toPrecision(4.7) -> "1.010"
-     * If d = new Double(0.25); d.toPrecision(0) -> thrown ArgumentOutOfRangeException
-     * If d = new Double(12345.123455); d.toPrecision(10) -> "12345.12346"
+     * If d = new Double(0.25); d.toPrecision(4) -> '0.2500'
+     * If d = new Double(1.01); d.toPrecision(4.7) -> '1.010'
+     * If d = new Double(0.25); d.toPrecision(0) -> thrown ArgumentOutOfRangeError
+     * If d = new Double(12345.123455); d.toPrecision(10) -> '12345.12346'
      *
      * @remark
      * Implemented as native function,  @see `toPrecision()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#683).
@@ -818,13 +873,13 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @returns the result of conversion
      *
      * @note
-     * If d = new Double(0.1); d.toFixed(0) -> "0"
-     * If d = new Double(0.7); d.toFixed(0) -> "1"
-     * If d = new Double(0.12345); d.toFixed(1) -> "0.1"
-     * If d = new Double(0.12345); d.toFixed(3) -> "0.123"
-     * If d = new Double(Double.POSITIVE_INFINITY); d.toFixed(3) -> "Infinity"
-     * If d = new Double(Double.NaN); d.toFixed(3) -> "NaN"
-     * If d = new Double(0.25); d.toFixed(200) -> thrown ArgumentOutOfRangeException
+     * If d = new Double(0.1); d.toFixed(0) -> '0'
+     * If d = new Double(0.7); d.toFixed(0) -> '1'
+     * If d = new Double(0.12345); d.toFixed(1) -> '0.1'
+     * If d = new Double(0.12345); d.toFixed(3) -> '0.123'
+     * If d = new Double(Double.POSITIVE_INFINITY); d.toFixed(3) -> 'Infinity'
+     * If d = new Double(Double.NaN); d.toFixed(3) -> 'NaN'
+     * If d = new Double(0.25); d.toFixed(200) -> thrown ArgumentOutOfRangeError
      *
      * @remark
      * Implemented as native function,  @see `toFixed()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#693).
@@ -832,7 +887,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * ECMA reference: https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-number.prototype.tofixed
      *
     */
-    public native toFixed(d: double): String;
+    public native toFixedImpl(d: double): String;
 
     /**
      * toFixed(double) returns std.core.String representing the underlying double using fixed-point notation
@@ -842,6 +897,19 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
     */
     public toFixed(): String {
         return this.toFixed(0);
+    }
+
+    /**
+     * toFixed(double) returns std.core.String representing the underlying double using fixed-point notation
+     *
+     * @returns the result of conversion
+     *
+    */
+    public toFixed(d?: double): String {
+        if (d == undefined) {
+            return this.toFixedImpl(0)
+        }
+        return this.toFixedImpl(d)
     }
 
     /**
@@ -863,24 +931,6 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
     public static native bitCastToLong(val: double): long
 
     /**
-     * Creates a Double instance based on JSONValue
-     *
-     * @param json: JSONValue - a JSON representation
-     *
-     * @throws JSONTypeError if json does not encode a valid double
-     *
-     * @returns Double - double value decoded from JSON
-     * @tag arkts
-     */
-    public createFromJSONValue(json: JSONValue): Double {
-        if (json instanceof JSONNumber) {
-            return Double.valueOf((json as JSONNumber).value)
-        }
-        throw new JSONTypeError("Cannot create Double from JSON", new ErrorOptions(json as Object))
-    }
-
-
-    /**
      * numberFromString(String) converts std.core.String to double
      *
      * @param s the string to convert
@@ -888,11 +938,11 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @returns the result of conversion
      *
      * @note
-     * If arg is "+Infinity", "Infinity" or "-Infinity", return value is `inf` or `-inf` respectively.
-     * If arg is "+0" or "-0", return value is 0 or -0.
-     * If arg has leading zeroes, it's ignored: "0001.5" -> 1.5, "-0001.5" -> -1.5
-     * If arg starts from ".", leading zero is implied: ".5" -> 0.5, "-.5" -> -0.5
-     * If arg successfully parsed, trailing non-digits cause return value is NaN: "-.6ffg" -> -NaN
+     * If arg is '+Infinity', 'Infinity' or '-Infinity', return value is `inf` or `-inf` respectively.
+     * If arg is '+0' or '-0', return value is 0 or -0.
+     * If arg has leading zeroes, it's ignored: '0001.5' -> 1.5, '-0001.5' -> -1.5
+     * If arg starts from '.', leading zero is implied: '.5' -> 0.5, '-.5' -> -0.5
+     * If arg successfully parsed, trailing non-digits cause return value is NaN: '-.6ffg' -> -NaN
      * If arg can not be parsed into a number, NaN is returned
      *
      *

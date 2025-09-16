@@ -35,7 +35,7 @@ cases:
     logic: |-
       const childInstance = new ChildClass(5);
       const result = typeof childInstance.getData();
-      assertEQ(result, "number");
+      arktest.assertEQ(result, "number");
 
   - desc: Indirect inheritance-validates that subclasses of subclasses also follow generic constraints.
     decl: |-
@@ -64,7 +64,7 @@ cases:
     logic: |-
       const grandChildInstance = new GrandChildClass(10);
       const result = typeof grandChildInstance.getData();
-      assertEQ(result, "number");
+      arktest.assertEQ(result, "number");
 
   - desc: Use different types of generic parameters for testing.
     decl: |-
@@ -87,7 +87,7 @@ cases:
     logic: |-
       const grandChildInstance = new AnotherChildClass("data");
       const result = typeof grandChildInstance.getData();
-      assertEQ(result, "string");
+      arktest.assertEQ(result, "string");
 
   - desc: Generic methods combined with generic classes.
     decl: |-
@@ -111,8 +111,8 @@ cases:
     logic: |-
       const instance = new ChildWithGenericMethod(10);
       const result = instance.process<string>("test");
-      assertEQ(result[0], 10);
-      assertEQ(result[1], "test");
+      arktest.assertEQ(result[0], 10);
+      arktest.assertEQ(result[1], "test");
 
   - desc: Generic class with complex type parameters.
     decl: |-
@@ -139,7 +139,7 @@ cases:
       }
     logic: |-
       const childInstance = new ComplexChildClass({ name: "Alice", age: 30 });
-      assertEQ(childInstance.getDataName(), "Alice");
+      arktest.assertEQ(childInstance.getDataName(), "Alice");
 
   - desc: Method rewriting and generic constraints.
     decl: |-
@@ -167,7 +167,7 @@ cases:
       }
     logic: |-
       const instance = new MethodOverrideChild<number>(10);
-      assertEQ(instance.processData(), false);
+      arktest.assertEQ(instance.processData(), false);
 
   - desc: Generic interface and implementation.
     decl: |-
@@ -194,7 +194,7 @@ cases:
     logic: |-
       const instance = new ChildInterfaceImplementer<string>("test");
       const result = instance.process("aa");
-      assertEQ(result, "test");
+      arktest.assertEQ(result, "test");
 
   - desc: Generic constraints and default values.
     decl: |-
@@ -217,7 +217,7 @@ cases:
     logic: |-
       const instance = new WithDefaultChild<number>(20);
       const result = instance.getData(1);
-      assertEQ(result, 20)
+      arktest.assertEQ(result, 20)
 
   - desc: Multi-generic parameters.
     decl: |-
@@ -246,7 +246,7 @@ cases:
     logic: |-
       const instance = new MultiGenericChild<number,string>(100, "hundred");
       const result = instance.getSecond("aa")
-      assertEQ(result, "hundred")
+      arktest.assertEQ(result, "hundred")
 
   - desc: Use generics of union types.
     decl: |-
@@ -271,8 +271,8 @@ cases:
       const stringInstance = new UnionChildClass<string>("ten");
       const result = numberInstance.getData();
       const result1 = stringInstance.getData();
-      assertEQ(result, 10);
-      assertEQ(result1, 'ten');
+      arktest.assertEQ(result, 10);
+      arktest.assertEQ(result1, 'ten');
 
   - desc: Direct inheritance-verifies that the subclass correctly specifies generic parameters(string type).
     decl: |-
@@ -295,7 +295,7 @@ cases:
     logic: |-
       const childInstance = new ChildClass("str");
       const result = typeof childInstance.getData();
-      assertEQ(result, "string");
+      arktest.assertEQ(result, "string");
 
   - desc: Direct inheritance-verifies that the subclass correctly specifies generic parameters(boolean type).
     decl: |-
@@ -318,7 +318,7 @@ cases:
     logic: |-
       const childInstance = new ChildClass(true);
       const result = typeof childInstance.getData();
-      assertEQ(result, "boolean");
+      arktest.assertEQ(result, "boolean");
 
   - desc: Indirect inheritance-validates that subclasses of subclasses also follow generic constraints(boolean type).
     decl: |-
@@ -347,7 +347,7 @@ cases:
     logic: |-
       const grandChildInstance = new GrandChildClass(true);
       const result = typeof grandChildInstance.getData();
-      assertEQ(result, "boolean");
+      arktest.assertEQ(result, "boolean");
 
   - desc: Generic class with complex type parameters.
     decl: |-
@@ -374,7 +374,7 @@ cases:
       }
     logic: |-
       const childInstance = new ComplexChildClass({ name: "Alice", age: 30 });
-      assertEQ(childInstance.getDataAge(), 30);
+      arktest.assertEQ(childInstance.getDataAge(), 30);
 
   - desc: Generic class with complex type parameters.
     decl: |-
@@ -405,8 +405,8 @@ cases:
       }
     logic: |-
       const childInstance = new ComplexChildClass({ name: "Alice", age: 30 });
-      assertEQ(childInstance.getDataName(), "Alice");
-      assertEQ(childInstance.getDataAge(), 30);
+      arktest.assertEQ(childInstance.getDataName(), "Alice");
+      arktest.assertEQ(childInstance.getDataAge(), 30);
 
   - desc: Generic class with complex type parameters.
     decl: |-
@@ -442,9 +442,9 @@ cases:
       }
     logic: |-
       const childInstance = new ComplexChildClass({ name: "Alice", age: 30, marriedNo: false});
-      assertEQ(childInstance.getDataName(), "Alice");
-      assertEQ(childInstance.getDataAge(), 30);
-      assertEQ(childInstance.getDataMarriedNo(), false);
+      arktest.assertEQ(childInstance.getDataName(), "Alice");
+      arktest.assertEQ(childInstance.getDataAge(), 30);
+      arktest.assertEQ(childInstance.getDataMarriedNo(), false);
 
   - desc: Generic interface and implementation(number type).
     decl: |-
@@ -471,7 +471,7 @@ cases:
     logic: |-
       const instance = new ChildInterfaceImplementer<number>(10);
       const result = instance.process(1);
-      assertEQ(result, 10);
+      arktest.assertEQ(result, 10);
 
   - desc: Generic interface and implementation(boolean type).
     decl: |-
@@ -498,7 +498,7 @@ cases:
     logic: |-
       const instance = new ChildInterfaceImplementer<boolean>(true);
       const result = instance.process(false);
-      assertEQ(result, true);
+      arktest.assertEQ(result, true);
 
   - desc: Generic constraints and default values(string type).
     decl: |-
@@ -521,7 +521,7 @@ cases:
     logic: |-
       const instance = new WithDefaultChild<string>("str");
       const result = instance.getData("aa");
-      assertEQ(result, "str");
+      arktest.assertEQ(result, "str");
 
   - desc: Generic constraints and default values(boolean type).
     decl: |-
@@ -544,7 +544,7 @@ cases:
     logic: |-
       const instance = new WithDefaultChild<boolean>(true);
       const result = instance.getData(false);
-      assertEQ(result, true);
+      arktest.assertEQ(result, true);
 
   - desc: Multi-generic parameters-string.
     decl: |-
@@ -573,7 +573,7 @@ cases:
     logic: |-
       const instance = new MultiGenericChild<number,string>(100, "hundred");
       const result = instance.getFirst();
-      assertEQ(result, 100);
+      arktest.assertEQ(result, 100);
 
   - desc: Multi-generic parameters-string.
     decl: |-
@@ -602,4 +602,4 @@ cases:
     logic: |-
       const instance = new MultiGenericChild<number, string>("100", "hundred");
       const result = instance.getFirst();
-      assertEQ(result, "100");
+      arktest.assertEQ(result, "100");

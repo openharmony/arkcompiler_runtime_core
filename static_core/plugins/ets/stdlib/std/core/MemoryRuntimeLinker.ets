@@ -19,7 +19,7 @@ package std.core;
  * @class RuntimeLinker backed by in-memory ABC files.
  */
 export class MemoryRuntimeLinker extends AbcRuntimeLinker {
-    public constructor(parentLinker: RuntimeLinker | undefined, rawAbcFiles: byte[][]) {
+    public constructor(parentLinker: RuntimeLinker | undefined, rawAbcFiles: Array<FixedArray<byte>>) {
         super(parentLinker, []);
         const abcFiles : FixedArray<AbcFile | undefined> = new (AbcFile | undefined)[Double.toInt(rawAbcFiles.length)];
         for (let i = 0; i < rawAbcFiles.length; i++) {

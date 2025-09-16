@@ -24,9 +24,14 @@ function test(byteToChange: int) {
     arktest.assertEQ(x, 'not-equal')
 }
 
-function main() {
+function testMain() {
     for (let i = 0; i < 4; i++) {
         test(i)
     }
 }
 
+function main() {
+    const suite = new arktest.ArkTestsuite('Function Atomics nonconcurrent_wait_i64_not_equal tests')
+    suite.addTest('Function testMain', testMain)
+    return suite.run()
+}

@@ -31,7 +31,7 @@ function main(): void {
   let a: Object|null = new Object();
   let b: Object|null = null;
 
-  assertEQ( foo(a), 2 )
-  assertEQ( foo(a!), 1 )
-  assertEQ( foo(b), 2 )
+  arktest.assertEQ( foo(a), 2 )
+  arktest.assertEQ( foo(a!), 1 )
+  arktest.assertEQ( foo(b), 2 )
 }

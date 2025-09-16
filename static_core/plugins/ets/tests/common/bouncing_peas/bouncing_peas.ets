@@ -82,14 +82,14 @@ function encodeFPS(input: int): FixedArray<byte>/*Uint8Array*/ {
     let result : FixedArray<byte> = new byte[resultLength];/*Uint8Array(resultLength);*/
     let index: int = HEADER_LEN;
     for (let digitNumber: int = 0; digitNumber < digitsQuantity; digitNumber++) {
-        let cp = input / power(10., (digitsQuantity - digitNumber - 1) as double) as int % 10 + 48;
-        result[index++] = cp as byte;
+        let cp = input / power(10., (digitsQuantity - digitNumber - 1).toDouble()).toInt() % 10 + 48;
+        result[index++] = cp.toByte();
     }
     result[index] = 0;
-    result[0] = ((resultLength - HEADER_LEN) & 0xff) as byte;
-    result[0 + 1] = (((resultLength - HEADER_LEN) as int >> 8) & 0xff) as byte;
-    result[0 + 2] = (((resultLength - HEADER_LEN) as int >> 16) & 0xff) as byte;
-    result[0 + 3] = (((resultLength - HEADER_LEN) as int >> 24) & 0xff) as byte;
+    result[0] = ((resultLength - HEADER_LEN) & 0xff).toByte();
+    result[0 + 1] = (((resultLength - HEADER_LEN) as int >> 8) & 0xff).toByte();
+    result[0 + 2] = (((resultLength - HEADER_LEN) as int >> 16) & 0xff).toByte();
+    result[0 + 3] = (((resultLength - HEADER_LEN) as int >> 24) & 0xff).toByte();
     return result;
 }
 
@@ -100,8 +100,8 @@ class Ball {
 
         this.x = x;
         this.y = y;
-        this.vx = sqrt(2) as float * speed;
-        this.vy = sqrt(2) as float * speed;
+        this.vx = sqrt(2).toFloat() * speed;
+        this.vy = sqrt(2).toFloat() * speed;
     }
     draw(canvasPtr: long/*KNativePointer*/): void {
         let shapePaintPtr = _skoala_Paint__1nMake();
@@ -143,14 +143,14 @@ class Drawer {
         const scale : float = 1;
         this.redrawerDataPtr = _skoala_initRedrawer(this.frameWidth, this.frameHeight, scale, this.redrawerPeer, this.frameHandle);
 
-        this.startTime = Date.now() as long;
+        this.startTime = Date.now().toLong();
     }
 
     draw(balls: Ball[]): void {
-        let canvasPtr = _skoala_PictureRecorder__1nBeginRecording(this.pictureRecorderPtr, 0, 0, this.frameWidth as float, this.frameHeight as float);
+        let canvasPtr = _skoala_PictureRecorder__1nBeginRecording(this.pictureRecorderPtr, 0, 0, this.frameWidth.toFloat(), this.frameHeight.toFloat());
 
         _skoala_Canvas__1nSave(canvasPtr);
-        let canvas2Ptr = _skoala_PictureRecorder__1nBeginRecording(this.pictureRecorder2Ptr, 0, 0, this.frameWidth as float, this.frameHeight as float);
+        let canvas2Ptr = _skoala_PictureRecorder__1nBeginRecording(this.pictureRecorder2Ptr, 0, 0, this.frameWidth.toFloat(), this.frameHeight.toFloat());
 
         for (let i = 0; i < balls.length; i++) {
             balls[i].draw(canvas2Ptr);
@@ -166,7 +166,7 @@ class Drawer {
 
         _skoala_Canvas__1nRestore(canvasPtr);
 
-        let picturePtr = _skoala_PictureRecorder__1nFinishRecordingAsPictureWithCull(this.pictureRecorderPtr, 0, 0, this.frameWidth as float, this.frameHeight as float);
+        let picturePtr = _skoala_PictureRecorder__1nFinishRecordingAsPictureWithCull(this.pictureRecorderPtr, 0, 0, this.frameWidth.toFloat(), this.frameHeight.toFloat());
         let pictureFinalizer = _skoala_impl_RefCnt__getFinalizer();
 
         _skoala_drawPicture(picturePtr, this.redrawerDataPtr, new Object(), true);
@@ -176,11 +176,11 @@ class Drawer {
 
         // Update FPS
         this.drawCounter++;
-        const currentTime: long = Date.now() as long;
+        const currentTime: long = Date.now().toLong();
         if (currentTime - this.startTime >= 1000) {
-            this.fps = ((this.drawCounter * 1000) as long / (currentTime - this.startTime) as long) as int;
+            this.fps = ((this.drawCounter * 1000) as long / (currentTime - this.startTime) as long).toInt();
             this.drawCounter = 0;
-            this.startTime = Date.now() as long;
+            this.startTime = Date.now().toLong();
         }
     }
 
@@ -251,7 +251,7 @@ class Scene {
         for (let i = 0; i < ballsQuantity; i++) {
             offset += ballRadius * 3;
             let x: float = offset % this.drawer.frameWidth;
-            let y: float = ((offset / this.drawer.frameWidth) as int + 1) as float * ballRadius * 3;
+            let y: float = ((offset / this.drawer.frameWidth).toInt() + 1).toFloat() * ballRadius * 3;
             this.balls[i] = new Ball(x, y, BALL_SPEED, ballRadius);
         }
     }
@@ -271,7 +271,7 @@ class Scene {
                 let nx: float = b2.x - b1.x;
                 let ny: float = b2.y - b1.y;
 
-                let dist: float = sqrt(nx * nx + ny * ny) as float;
+                let dist: float = sqrt(nx * nx + ny * ny).toFloat();
                 if (dist > (b1.radius + b2.radius)) continue;
 
                 nx = nx / dist;
@@ -281,7 +281,7 @@ class Scene {
                 b1.vx -= nx * 2 * dot;
                 b1.vy -= ny * 2 * dot;
 
-                let d: float = b1.radius + b2.radius - dist - 0.1 as float;
+                let d: float = b1.radius + b2.radius - dist - 0.1.toFloat();
                 b1.x -= nx * d;
                 b1.y -= ny * d;
             }
@@ -331,7 +331,7 @@ function startApplication(): void {
 
 function main(): int {
     startApplication();
-    if (result_hash as int != 7936)
+    if (result_hash.toInt() != 7936)
     {
         console.print("Wrong result hash");
         console.println();

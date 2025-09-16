@@ -19,5 +19,5 @@ desc: Test the array index expression to Dynamic array length.
 
 function main(): void {
   let dynamicArray: Array<number> = new Array<number>(10, 20, 30);
-  assertEQ(dynamicArray.length, 3);
+  arktest.assertEQ(dynamicArray.length, 3);
 }

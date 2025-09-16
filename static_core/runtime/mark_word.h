@@ -110,7 +110,7 @@ public:
 
         // Unlocked state masks and shifts
         UNLOCKED_STATE_SHIFT = 0U,
-        UNLOCKED_STATE_MASK = (1UL << MONITOR_POINTER_SIZE) - 1UL,
+        UNLOCKED_STATE_MASK = (static_cast<MarkWordSize>(1UL) << MONITOR_POINTER_SIZE) - 1UL,
         UNLOCKED_STATE_MASK_IN_PLACE = UNLOCKED_STATE_MASK << UNLOCKED_STATE_SHIFT,
 
         // Lightweight Lock state masks and shifts
@@ -129,18 +129,18 @@ public:
 
         // Heavyweight Lock state masks and shifts
         MONITOR_POINTER_SHIFT = 0U,
-        MONITOR_POINTER_MASK = (1UL << MONITOR_POINTER_SIZE) - 1UL,
+        MONITOR_POINTER_MASK = (static_cast<MarkWordSize>(1UL) << MONITOR_POINTER_SIZE) - 1UL,
         MONITOR_POINTER_MASK_IN_PLACE = MONITOR_POINTER_MASK << MONITOR_POINTER_SHIFT,
         MONITOR_POINTER_MAX_COUNT = MONITOR_POINTER_MASK,
 
         // Hash state masks and shifts
         HASH_SHIFT = 0U,
-        HASH_MASK = (1UL << HASH_SIZE) - 1UL,
+        HASH_MASK = (static_cast<MarkWordSize>(1UL) << HASH_SIZE) - 1UL,
         HASH_MASK_IN_PLACE = HASH_MASK << HASH_SHIFT,
 
         // Forwarding state masks and shifts
         FORWARDING_ADDRESS_SHIFT = 0U,
-        FORWARDING_ADDRESS_MASK = (1UL << FORWARDING_ADDRESS_SIZE) - 1UL,
+        FORWARDING_ADDRESS_MASK = (static_cast<MarkWordSize>(1UL) << FORWARDING_ADDRESS_SIZE) - 1UL,
         FORWARDING_ADDRESS_MASK_IN_PLACE = FORWARDING_ADDRESS_MASK << FORWARDING_ADDRESS_SHIFT,
 
         // Status bits masks and shifts

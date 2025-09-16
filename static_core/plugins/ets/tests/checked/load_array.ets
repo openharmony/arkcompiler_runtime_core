@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-//! CHECKER         Load with negative index is correct
+//! CHECKER         Load with negative index is correct with 32 bit offset
 //! RUN             force_jit: true, options: "--compiler-regex='.*func.*'", entry: "load_array.ETSGLOBAL::main", return: 0
 //! METHOD          "load_array.ETSGLOBAL::func"
 //! PASS_BEFORE     "AdjustRefs"
@@ -24,7 +24,7 @@
 //! PASS_AFTER      "AdjustRefs"
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST            "LoadArrayI"
-//! INST_NEXT       /AddI.*0x210/
+//! INST_NEXT       is_hybrid_config? ? /AddI.*0x218/ : /AddI.*0x210/
 //! INST_NEXT       "Load 8"
 //!
 //! ASM_METHOD      "load_array.ETSGLOBAL::func"

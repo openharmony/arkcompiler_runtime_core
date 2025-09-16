@@ -21,6 +21,7 @@
 #include "helpers.h"
 
 #include "utils/span.h"
+#include "panda_visibility.h"
 
 namespace panda::panda_file {
 using StringData = File::StringData;
@@ -66,7 +67,7 @@ enum class LiteralTag : uint8_t {
 
 class LiteralDataAccessor {
 public:
-    LiteralDataAccessor(const File &panda_file, File::EntityId literal_data_id);
+    PANDA_PUBLIC_API LiteralDataAccessor(const File &panda_file, File::EntityId literal_data_id);
 
     template <class Callback>
     void EnumerateObjectLiterals(size_t index, const Callback &cb);

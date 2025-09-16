@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-assertEQ(boolean_foo(true), true);
-assertEQ(byte_foo(127 as byte), 127);
-assertEQ(short_foo(32767 as short), 32767);
-assertEQ(int_foo(50000 as int), 50000);
-assertEQ(long_foo(50000000 as long), 50000000);
-assertEQ(double_foo(12345.54321 as double), 12345.54321);
-assertEQ(float_foo(12345.5 as float), 12345.5 as float);
+arktest.assertEQ(boolean_foo(true), true);
+arktest.assertEQ(byte_foo(127 as byte), 127);
+arktest.assertEQ(short_foo(32767 as short), 32767);
+arktest.assertEQ(int_foo(50000 as int), 50000);
+arktest.assertEQ(long_foo(50000000 as long), 50000000);
+arktest.assertEQ(double_foo(12345.54321 as double), 12345.54321);
+arktest.assertEQ(float_foo(12345.5 as float), 12345.5 as float);

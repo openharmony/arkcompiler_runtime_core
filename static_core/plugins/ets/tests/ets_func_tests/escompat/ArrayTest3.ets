@@ -39,11 +39,10 @@ function main(): int {
 const d: Number[] = [10, -1, 237, -5, 148, 65, 3, 34, 0, 12];
 const dd: Number[] = [1, 0, 3, 4, 0, 6];
 
-
-class Handler<T> extends DefaultArrayProxyHandler<T> {}
 function newProxy<T>(a: Array<T>): Array<T> {
+    class Handler<T> extends proxy.DefaultArrayProxyHandler<T> {}
 
-    return Proxy.create<T>(a, new Handler<T>())
+    return proxy.Proxy.create<T>(a, new Handler<T>())
 }
 
 function check<T>(newArrayFn: () => Array<T>, testFn: (a: Array<T>) => int): int {
@@ -236,14 +235,14 @@ function reduceFuncArg4ArrayNumber(): int {
     }
 
     return check(() => new Array<Number>, (arr: Array<Number>) => {
-        let hasException: boolean = false;
+        let hasError: boolean = false;
         try {
             let res = arr.reduce(fn);
             return fail;
         } catch(e) {
-            hasException = true;
+            hasError = true;
         }
-        if (hasException == false) { return fail; }
+        if (hasError == false) { return fail; }
 
         for (let i: int = 0; i < d.length; ++i) {
             arr.push(d[i]);
@@ -264,14 +263,14 @@ function reduceFuncArg3(): int {
     }
 
     return check(() => new Array<Number>, (arr: Array<Number>) => {
-        let hasException: boolean = false;
+        let hasError: boolean = false;
         try {
             let res = arr.reduce(fn);
             return fail;
         } catch(e) {
-            hasException = true;
+            hasError = true;
         }
-        if (hasException == false) { return fail; }
+        if (hasError == false) { return fail; }
 
         for (let i: int = 0; i < d.length; ++i) {
             arr.push(d[i]);
@@ -289,14 +288,14 @@ function reduceFuncArg2(): int {
     }
 
     return check(() => new Array<Number>, (arr: Array<Number>) => {
-        let hasException: boolean = false;
+        let hasError: boolean = false;
         try {
             let res = arr.reduce(fn);
             return fail;
         } catch(e) {
-            hasException = true;
+            hasError = true;
         }
-        if (hasException == false) { return fail; }
+        if (hasError == false) { return fail; }
 
         for (let i: int = 0; i < d.length; ++i) {
             arr.push(d[i]);
@@ -388,7 +387,7 @@ function check(fn: () => int, message: String): int {
     try {
         result = fn();
     } catch(e) {
-        console.println("FAILED: " + message + " => Exception catched: " + e);
+        console.println("FAILED: " + message + " => Error catched: " + e);
         return 1;
     }
     if (result == success) {

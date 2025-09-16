@@ -643,7 +643,7 @@ void Aarch64Encoder::EncodeIsInf(Reg dst, Reg src)
     GetMasm()->Cset(VixlReg(dst), vixl::aarch64::Condition::eq);
 }
 
-void Aarch64Encoder::EncodeCmpFracWithDelta(Reg src)
+void Aarch64Encoder::EncodeCmpFracWithZero(Reg src)
 {
     ASSERT(src.IsFloat());
     ASSERT(src.GetSize() == WORD_SIZE || src.GetSize() == DOUBLE_WORD_SIZE);
@@ -654,13 +654,13 @@ void Aarch64Encoder::EncodeCmpFracWithDelta(Reg src)
         GetMasm()->Frintz(VixlVReg(tmp), VixlVReg(src));
         EncodeSub(tmp, src, tmp);
         EncodeAbs(tmp, tmp);
-        GetMasm()->Fcmp(VixlVReg(tmp), std::numeric_limits<float>::epsilon());
+        GetMasm()->Fcmp(VixlVReg(tmp), 0.0);
     } else {
         ScopedTmpRegF64 tmp(this);
         GetMasm()->Frintz(VixlVReg(tmp), VixlVReg(src));
         EncodeSub(tmp, src, tmp);
         EncodeAbs(tmp, tmp);
-        GetMasm()->Fcmp(VixlVReg(tmp), std::numeric_limits<double>::epsilon());
+        GetMasm()->Fcmp(VixlVReg(tmp), 0.0);
     }
 }
 
@@ -672,7 +672,7 @@ void Aarch64Encoder::EncodeIsInteger(Reg dst, Reg src)
     auto labelExit = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
     auto labelInfOrNan = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
 
-    EncodeCmpFracWithDelta(src);
+    EncodeCmpFracWithZero(src);
     GetMasm()->B(labelInfOrNan, vixl::aarch64::Condition::vs);  // Inf or NaN
     GetMasm()->Cset(VixlReg(dst), vixl::aarch64::Condition::le);
     GetMasm()->B(labelExit);
@@ -693,7 +693,7 @@ void Aarch64Encoder::EncodeIsSafeInteger(Reg dst, Reg src)
     auto labelFalse = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
 
     // Check if IsInteger
-    EncodeCmpFracWithDelta(src);
+    EncodeCmpFracWithZero(src);
     GetMasm()->B(labelFalse, vixl::aarch64::Condition::vs);  // Inf or NaN
     GetMasm()->B(labelFalse, vixl::aarch64::Condition::gt);
 
@@ -3024,9 +3024,13 @@ void Aarch64Encoder::EncodeOrNot(Reg dst, Reg src0, Shift src1)
     GetMasm()->Orn(VixlReg(dst), VixlReg(src0), VixlShift(src1));
 }
 
-void Aarch64Encoder::EncodeExtractBits(Reg dst, Reg src0, Imm imm1, Imm imm2)
+void Aarch64Encoder::EncodeExtractBits(Reg dst, Reg src0, Imm imm1, Imm imm2, bool signExt)
 {
-    GetMasm()->Ubfx(VixlReg(dst), VixlReg(src0), imm1.GetAsInt(), imm2.GetAsInt());
+    if (signExt) {
+        GetMasm()->Sbfx(VixlReg(dst), VixlReg(src0), imm1.GetAsInt(), imm2.GetAsInt());
+    } else {
+        GetMasm()->Ubfx(VixlReg(dst), VixlReg(src0), imm1.GetAsInt(), imm2.GetAsInt());
+    }
 }
 
 void Aarch64Encoder::EncodeAndNot(Reg dst, Reg src0, Reg src1)

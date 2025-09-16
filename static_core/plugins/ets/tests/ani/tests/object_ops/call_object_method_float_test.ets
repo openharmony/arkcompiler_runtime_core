@@ -54,7 +54,7 @@ class A {
         if (a0 > 100) {
             return a0;
         } else {
-            return this.recursionMethod((a0 + 10.0) as float);
+            return this.recursionMethod((a0 + 10.0).toFloat());
         }
     }
 }

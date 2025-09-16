@@ -24,14 +24,14 @@ function main() : int {
         x.push("Good")
     }
 
-    assertEQ( x.length, 10)
+    arktest.assertEQ( x.length, 10)
     for (let i = 0; i < 10; i++) {
         x[i] = "Bad"
     }
 
     for (let i = 0; i < 10; i++) {
         console
-        assertEQ( x[i], "Bad")
+        arktest.assertEQ( x[i], "Bad")
     }
 
     return 0;

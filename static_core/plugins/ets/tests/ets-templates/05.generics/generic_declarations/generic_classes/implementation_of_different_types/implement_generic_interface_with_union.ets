@@ -33,5 +33,5 @@ function main(): void {
   let arrImplementation: GenericInterface<(Int8Array | Uint16Array | number)[]> = new GenericImplementation<(Int8Array | Uint16Array | number)[]>();
   let inputArray: (Int8Array | Uint16Array | number)[] = [int8Array, 10, uint16Array, 20];
   let result = arrImplementation.process(inputArray);
-  assertEQ(result, inputArray);
+  arktest.assertEQ(result, inputArray);
 }

@@ -22,7 +22,7 @@
 import { bar } from "./bar";
 
 export function foo(): void {
-    assertEQ(bar(), 1235.1234);
+    arktest.assertEQ(bar(), 1235.1234);
 }
 
 class A {

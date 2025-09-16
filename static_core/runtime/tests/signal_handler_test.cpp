@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include <csignal>
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -29,6 +30,7 @@
 #include <sys/syscall.h>
 #include "assembly-parser.h"
 #include "assembly-emitter.h"
+#include "runtime/signal_handler.h"
 
 namespace ark::test {
 
@@ -216,5 +218,165 @@ TEST_F(SignalHandlerTest, CallTest)
     sp.Stop();
     ASSERT_NE(g_counter, 0);
 }
+
+class AotEscapeSignalHandlerTest : public testing::Test {
+public:
+    AotEscapeSignalHandlerTest()
+    {
+        execPath_ = ark::os::file::File::GetExecutablePath().Value();
+        std::string pandaStdLib =
+            execPath_ + Separator() + ".." + Separator() + "pandastdlib" + Separator() + "arkstdlib.abc";
+        options_.SetLoadRuntimes({"core"});
+        options_.SetBootPandaFiles({pandaStdLib});
+        options_.SetGcType("g1-gc");
+        options_.SetCompilerEnableJit(false);
+        options_.SetCompilerEnableOsr(false);
+        options_.SetArkAot(true);
+    }
+
+    ~AotEscapeSignalHandlerTest() override = default;
+
+    NO_COPY_SEMANTIC(AotEscapeSignalHandlerTest);
+    NO_MOVE_SEMANTIC(AotEscapeSignalHandlerTest);
+
+    bool CompileAbc(std::string &abcPath)
+    {
+        std::string srcPath = "AotEscapeSignalHandlerTestSrc.ets";
+        std::ofstream file(srcPath);
+        if (file.is_open()) {
+            file << TEST_SOURCE;
+            file.close();
+        }
+        std::string es2panda = execPath_ + "/../bin/es2panda";
+        std::string runArkAot = es2panda + " " + srcPath + " --output " + abcPath;
+        // NOLINTNEXTLINE(cert-env33-c)
+        int ret = std::system(runArkAot.c_str());
+        return ret == 0;
+    }
+
+    std::string FindEtsStdlibRecursive(const std::filesystem::path &rootDir)
+    {
+        auto iter = std::filesystem::recursive_directory_iterator(
+            rootDir, std::filesystem::directory_options::skip_permission_denied);
+        for (const auto &entry : iter) {
+            if (entry.is_regular_file() && entry.path().filename() == "etsstdlib.abc") {
+                return std::filesystem::absolute(entry.path()).string();
+            }
+        }
+        return "";
+    }
+
+    bool CompileInvalidAot(const std::string &abcPath, const std::string &anPath)
+    {
+        std::string pandaStdLib = FindEtsStdlibRecursive(execPath_ + Separator() + ".." + Separator());
+        if (pandaStdLib.length() == 0) {
+            return false;
+        }
+        const char *stdlib = pandaStdLib.c_str();
+        std::string aotArgs = "--load-runtimes=ets";
+        aotArgs += " --boot-panda-files=" + std::string(stdlib);
+        aotArgs += " --paoc-panda-files=" + abcPath;
+        aotArgs += " --paoc-output=" + anPath;
+        std::string arkAot = execPath_ + "/../bin/ark_aot";
+        std::string runArkAot = arkAot + " " + aotArgs;
+        // NOLINTNEXTLINE(cert-env33-c)
+        int ret = std::system(runArkAot.c_str());
+        return ret == 0;
+    }
+
+    RuntimeOptions &GetOptions()
+    {
+        return options_;
+    }
+
+    void SetPandaFile(std::string &abcPath)
+    {
+        options_.SetPandaFiles({abcPath});
+    }
+
+    void SetAotFile(std::string &aotPath)
+    {
+        options_.SetAotFile(aotPath);
+    }
+
+private:
+    std::string execPath_;
+    RuntimeOptions options_;
+    // NOLINTNEXTLINE
+    static constexpr char TEST_SOURCE[] =
+        "\
+    class B {\n\
+    }\n\
+    function test_func(): B {\n\
+        let a = new B();\n\
+        return a;\n\
+    }\n\
+    function main() {\n\
+        test_func();\n\
+    }\n";
+};
+
+TEST_F(AotEscapeSignalHandlerTest, AotEscapeTestSetDirectly)
+{
+    std::string abcPath = "AotEscapeTest1Tmp.abc";
+    std::string anPath = "AotEscapeTest1Tmp.an";
+    bool hasAbc = CompileAbc(abcPath);
+    bool hasAn = CompileInvalidAot(abcPath, anPath);
+
+    if (hasAbc) {
+        SetPandaFile(abcPath);
+    }
+    if (hasAn) {
+        SetAotFile(anPath);
+    }
+    AotEscapeSignalHandler::SetEscaped(false);
+    std::string aotEscapePath = "AotEscapeTestSetDirectlyPath.txt";
+    AotEscapeSignalHandler::SetEscapedFlagFilePath(aotEscapePath);
+    Runtime::Create(GetOptions());
+    auto hasAot = Runtime::GetCurrent()->GetClassLinker()->GetAotManager()->HasAotFiles();
+    ASSERT_EQ(hasAot, hasAn);
+    Runtime::Destroy();
+    // Then set escaped, resart vm, will not load an file
+    AotEscapeSignalHandler::SetEscaped(true);
+    Runtime::Create(GetOptions());
+    hasAot = Runtime::GetCurrent()->GetClassLinker()->GetAotManager()->HasAotFiles();
+    ASSERT_EQ(hasAot, false);
+    Runtime::Destroy();
+}
+
+#if defined(PANDA_TARGET_AMD64)
+TEST_F(AotEscapeSignalHandlerTest, AotEscapeTestCallAction)
+{
+    std::string abcPath = "AotEscapeTest2Tmp.abc";
+    std::string anPath = "AotEscapeTest2Tmp.an";
+    bool hasAbc = CompileAbc(abcPath);
+    bool hasAn = CompileInvalidAot(abcPath, anPath);
+
+    if (hasAbc) {
+        SetPandaFile(abcPath);
+    }
+    if (hasAn) {
+        SetAotFile(anPath);
+    }
+    AotEscapeSignalHandler::SetEscaped(false);
+    Runtime::Create(GetOptions());
+    auto hasAot = Runtime::GetCurrent()->GetClassLinker()->GetAotManager()->HasAotFiles();
+    ASSERT_EQ(hasAot, hasAn);
+    std::string aotEscapePath = "AotEscapeTest2EscapeFlagPath.txt";
+    AotEscapeSignalHandler::SetEscapedFlagFilePath(aotEscapePath);
+    ucontext_t uc;
+    mcontext_t ucMcontext = {};
+    uc.uc_mcontext = ucMcontext;
+    AotEscapeSignalHandler::HandleAction(SIGSEGV, nullptr, &uc);
+    AotEscapeSignalHandler::HandleAction(SIGABRT, nullptr, &uc);
+    AotEscapeSignalHandler::HandleAction(SIGBUS, nullptr, &uc);
+    Runtime::Destroy();
+
+    Runtime::Create(GetOptions());
+    hasAot = Runtime::GetCurrent()->GetClassLinker()->GetAotManager()->HasAotFiles();
+    ASSERT_EQ(hasAot, false);
+    Runtime::Destroy();
+}
+#endif
 
 }  // namespace ark::test

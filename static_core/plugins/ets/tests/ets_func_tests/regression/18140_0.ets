@@ -23,6 +23,6 @@ enum OnEdge {
 }
 
 function main() {
-    let localOnEdge?: OnEdge = OnEdge.Restart
+    let localOnEdge: OnEdge = OnEdge.Restart
     let onEdge = localOnEdge ?? OnEdge.Nothing
 }

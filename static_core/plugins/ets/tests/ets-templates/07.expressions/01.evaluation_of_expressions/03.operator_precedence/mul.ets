@@ -37,10 +37,10 @@ function main(): int {
     if (res != -10) return 1;
 
     // cast
-    res = t2 * t255 as byte
+    res = t2 * t255.toByte()
     if (res != -2) return 1;
 
-    res = t255 as byte * t3
+    res = t255.toByte() * t3
     if (res != -3) return 1;
 
     // shifts

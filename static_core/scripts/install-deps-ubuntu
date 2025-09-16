@@ -16,6 +16,9 @@
 # Aux functions
 #
 
+LCOV_VERSION="2.3.1"
+LCOV_TAR_GZ_LINK="https://github.com/linux-test-project/lcov/releases/download/v${LCOV_VERSION}/lcov-${LCOV_VERSION}.tar.gz"
+
 function build_and_install_vmb
 {
     make -C "${SCRIPT_DIR}/../tests/vm-benchmarks/" vmb
@@ -113,6 +116,8 @@ function print_help
     --install=llvm-prebuilts     | -i=llvm-prebuilts      Install deps for use llvm prebuilts.
 
     --install=ohos-sdk           | -i=ohos-sdk            Install ohos SDK.
+
+    --install=coverage-tools     | -i=coverage-tools      Install utils for covergage (Lcov=${LCOV_VERSION})
     "
 
     if [[ -n "${EXTRA_OPTIONS}" ]]
@@ -344,6 +349,7 @@ INSTALL_VMB=no
 ADD_TOOLCHAIN_REPOS=no
 INSTALL_LLVM_PREBUILTS=no
 INSTALL_OHOS_SDK=no
+INSTALL_COVERAGE_TOOLS=no
 SRC_LIST_STR='# This file is generated automatically by Panda install-deps-ubuntu script. DO NOT EDIT!!!\n'
 
 for i in "$@"
@@ -396,6 +402,9 @@ do
         fi
         if [[ $FLAG_ARG == "vmb" ]] ; then
             INSTALL_VMB=yes
+        fi
+        if [[ $FLAG_ARG == "coverage-tools" ]] ; then
+            INSTALL_COVERAGE_TOOLS=yes
         fi
       ;;
     *)
@@ -563,4 +572,9 @@ if [[ "x$INSTALL_VMB" == "xyes" ]]; then
     install_python_dependencies
     install_pip_dep "${SCRIPT_DIR}/dep-lists/requirements-vmb"
     build_and_install_vmb
+fi
+
+if [[ "x$INSTALL_COVERAGE_TOOLS" == "xyes" ]]; then
+    source ${SCRIPT_DIR}/install_lcov
+    install_lcov ${LCOV_TAR_GZ_LINK} ${LCOV_VERSION}
 fi

@@ -25,7 +25,7 @@ function main(): int {
     failure += ((new Boolean(false)).valueOf() == false) ? 0 : 1
     failure += ((new Boolean(true)).valueOf() == true) ? 0 : 1
 
-    const suite = new ArkTestsuite("Boolean API test for SDK");
+    const suite = new arktest.ArkTestsuite("Boolean API test for SDK");
     suite.addTest("Boolean constructor", testBooleanConstructor);
     failure += suite.run();
 
@@ -39,5 +39,5 @@ class TestData {
 
 function testBooleanConstructor() {
     let a = TestData.a;
-    assertEQ(TestData.expected, a);
+    arktest.assertEQ(TestData.expected, a);
 }

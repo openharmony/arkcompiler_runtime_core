@@ -23,7 +23,7 @@ type EmptyFn = () => void
 
 function no_param(fn: EmptyFn | number) {
     if (fn instanceof number) {
-        assertEQ( fn, 6)
+        arktest.assertEQ( fn, 6)
     } else {
         fn()
     }

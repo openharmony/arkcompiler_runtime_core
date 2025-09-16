@@ -23,5 +23,5 @@ class Dog extends Animal { name: string }
 
 function main(): void {
   let animalArr: Animal[] = [new Dog(), new Dog()];
-  assertEQ(animalArr[0].name, "Buddy");
+  arktest.assertEQ(animalArr[0].name, "Buddy");
 }

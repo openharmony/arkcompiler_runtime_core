@@ -37,11 +37,11 @@ ark_gen_file("events_gen") {
   output_file = "$target_gen_dir/events_gen.h"
 }
 
-ark_gen_file("base_options_h") {
+ark_gen_file("gen_logger_options_h") {
   template_file = "../templates/options/options.h.erb"
-  data = [ "options.yaml" ]
+  data = [ "utils/logger_options.yaml" ]
   api = [ "../templates/common.rb" ]
-  output_file = "$target_gen_dir/generated/base_options.h"
+  output_file = "$target_gen_dir/generated/logger_options.h"
 }
 
 action("generate_version_file") {
@@ -183,6 +183,8 @@ if (is_mob) {
 }
 
 config("arkbase_public_config") {
+  configs = [ sdk_libc_secshared_config ]
+
   include_dirs = [
     "$ark_root_gen_dir/libpandabase",
     "$ark_root/libpandabase",
@@ -221,9 +223,9 @@ libarkbase_configs = [
 
 group("arktsbase_header_deps") {
   deps = [
-    ":base_options_h",
     ":coherency_line_size_h",
     ":events_gen",
+    ":gen_logger_options_h",
     ":generate_version_file",
     ":logger_enum_gen_h",
     ":logger_impl_gen_h",

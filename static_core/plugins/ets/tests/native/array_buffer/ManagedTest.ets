@@ -24,11 +24,11 @@ export function createSlicedArrayBuffer(buff: ArrayBuffer, begin: int, end: int)
 }
 
 export function getLength(buff: ArrayBuffer): int {
-    return buff.byteLength as int;
+    return buff.byteLength.toInt();
 }
 
 export function getByte(buff: ArrayBuffer, idx: int): int {
-    return buff.at(idx) as int;
+    return buff.at(idx).toInt();
 }
 
 export function setByte(buff: ArrayBuffer, idx: int, val: byte): int {

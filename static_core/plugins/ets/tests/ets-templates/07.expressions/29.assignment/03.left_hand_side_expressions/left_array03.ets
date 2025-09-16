@@ -20,5 +20,5 @@ desc: Left-hand expression testing - nested array access testing.
 function main(): void {
   let matrix: number[][] = [[0, 0], [0, 0]];
   matrix[0][1] = 80;
-  assertEQ(matrix[0][1], 80);
+  arktest.assertEQ(matrix[0][1], 80);
 }

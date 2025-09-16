@@ -33,22 +33,22 @@ const doubleMinutes: double[] = [0.0, 4.4, 8.8, 12.12, 16.16, 20.20, 24.24, 28.2
 function tests_long(): void {
 
     for(let i: int = 0; i < intYears.length; i++) {
-        let cd = new Date(intYears[i] as long);
+        let cd = new Date(intYears[i].toLong());
         let cd1 = new Date(intYears[i]);
     }
 
     for(let i: int = 0; i < intMonths.length; i++) {
-        let cd = new Date(intMonths[i] as long);
+        let cd = new Date(intMonths[i].toLong());
         let cd1 = new Date(intMonths[i]);
     }
 
     for(let i: int = 0; i < intHours.length; i++) {
-        let cd = new Date(intHours[i] as long);
+        let cd = new Date(intHours[i].toLong());
         let cd1 = new Date(intHours[i]);
     }
 
     for(let i: int = 0; i < intMinutes.length; i++) {
-        let cd = new Date(intMinutes[i] as long);
+        let cd = new Date(intMinutes[i].toLong());
         let cd1 = new Date(intMinutes[i]);
     }
 }
@@ -56,22 +56,22 @@ function tests_long(): void {
 function tests_double(): void {
 
     for(let i: int = 0; i < doubleYears.length; i++) {
-        let cd = new Date(doubleYears[i] as double);
+        let cd = new Date(doubleYears[i].toDouble());
         let cd1 = new Date(doubleYears[i]);
     }
 
     for(let i: int = 0; i < doubleMonths.length; i++) {
-        let cd = new Date(doubleMonths[i] as double);
+        let cd = new Date(doubleMonths[i].toDouble());
         let cd1 = new Date(doubleMonths[i]);
     }
 
     for(let i: int = 0; i < doubleHours.length; i++) {
-        let cd = new Date(doubleHours[i] as double);
+        let cd = new Date(doubleHours[i].toDouble());
         let cd1 = new Date(doubleHours[i]);
     }
 
     for(let i: int = 0; i < doubleMinutes.length; i++) {
-        let cd = new Date(doubleMinutes[i] as double);
+        let cd = new Date(doubleMinutes[i].toDouble());
         let cd1 = new Date(doubleMinutes[i]);
     }
 }

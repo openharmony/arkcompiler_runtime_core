@@ -42,21 +42,6 @@
     verify_test_result_function: comparePrimitiveValue
   }
 - {
-    method_name: $_hashCode,
-    object_type: String,
-    init_object_data_type: "FixedArray<String>",
-    init_object_type: String,
-    init_object_type_nature: object,
-    param_init_data_types: {},
-    param_types: {},
-    param_list: {},
-    method_return_type: int,
-    init_object_data: '["", "abcd", "фуфу", "abcdфуфу"]',
-    expected_data_type: "FixedArray<int>",
-    expected_test_data: "[0, 0x2d9442, 0x200ed3e, 0x4ce69080]",
-    verify_test_result_function: comparePrimitiveValue
-  }
-- {
     method_name: toLowerCase,
     object_type: String,
     init_object_data_type: "FixedArray<String>",
@@ -151,7 +136,6 @@
 - {
     method_name: repeat,
     object_type: String,
-    method_throws: true,
     init_object_data_type: "FixedArray<String>",
     init_object_type: String,
     init_object_init_value: '""',
@@ -171,7 +155,6 @@
 - {
     method_name: repeat,
     object_type: String,
-    method_throws: true,
     init_object_data_type: "FixedArray<String>",
     init_object_type: String,
     init_object_init_value: '""',
@@ -306,7 +289,7 @@
     param_types: {"param1": String},
     param_nature: {"param1": primitive},
     param_list: {"param1": '["abcd", "hjkl", "abcd", "hjkl"]'},
-    method_return_type: int,
+    method_return_type: Int,
     expected_data_item_type: int,
     expected_data_type: "FixedArray<int>",
 
@@ -402,7 +385,7 @@
     param_nature: {"param1": primitive},
     param_list: {"param1": "[c'a', c'к', c'世', c'世', c'a', c'к']"},
 
-    method_return_type: double,
+    method_return_type: Double,
     expected_data_item_type: double,
     expected_data_type: "FixedArray<double>",
 
@@ -433,7 +416,6 @@
 
 - {
     method_name: codePointCount,
-    method_throws: true,
     object_type: String,
     init_object_data_type: "FixedArray<String>",
     init_object_type: String,
@@ -484,7 +466,7 @@
     param_nature: {"param1": primitive},
     param_list: {"param1": '["bcd", "xyz", "", "", "a"]'},
 
-    method_return_type: double,
+    method_return_type: Double,
     expected_data_item_type: double,
     expected_data_type: "FixedArray<double>",
 
@@ -504,7 +486,7 @@
     param_nature: {"param1": primitive},
     param_list: {"param1": "[c'g', c'к', c'界', c'界', c'g', c'к']"},
 
-    method_return_type: double,
+    method_return_type: Double,
     expected_data_item_type: double,
     expected_data_type: "FixedArray<double>",
 
@@ -524,7 +506,7 @@
     param_nature: {"param1": primitive},
     param_list: {"param1": '["bcd", "xyz"]'},
 
-    method_return_type: double,
+    method_return_type: Double,
     expected_data_item_type: double,
     expected_data_type: "FixedArray<double>",
 
@@ -1237,9 +1219,9 @@
     param_init_data_types: {inputs: "FixedArray<int>"},
     param_list: {inputs: '[0, 0]'},
 
-    method_return_type: int,
-    expected_test_data_item_type: int,
-    expected_data_type: "FixedArray<int>",
+    method_return_type: number,
+    expected_test_data_item_type: number,
+    expected_data_type: "FixedArray<number>",
     expected_test_data: '[67, 1050]',
     verify_test_result_function: comparePrimitiveValue
   }

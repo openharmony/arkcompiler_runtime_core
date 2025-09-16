@@ -19,8 +19,9 @@ sub:
       - Array.of<number>()
     self_type: Array<number>
     vars:
-      default_inds: ["self.length", "-self.length", "self.length - 1", "-self.length + 1", 1.1, 5.0, 100.0, -1.1, 2.0, "Infinity", "-Infinity", "NaN", "0x8 as number", "-0o4 as number"]
-      default_inds_undef: ["self.length", "-self.length", "self.length - 1", "-self.length + 1", 1.1, 5.0, 100.0, -1.1, 2.0, "Infinity", "-Infinity", "NaN", "0x8 as number", "-0o4 as number", "undefined"]
+      default_inds: ["self.length", "-self.length", "self.length - 1", "-self.length + 1", 1, 5, 100, -1, 2, "0x8", "-0o4"]
+      default_inds_number: ["self.length", "-self.length", "self.length - 1", "-self.length + 1", 1.1, 5.0, 100.0, -1.1, 2.0, "Infinity", "-Infinity", "NaN", "0x8 as number", "-0o4 as number"]
+      default_inds_undef: ["self.length", "-self.length", "self.length - 1", "-self.length + 1", 1, 5, 100, -1, 2, "0x8", "-0o4", "undefined"]
       default_search: ["NaN", "-NaN", "Infinity", "-Infinity", 0.0, "-0.0", 100, 1]
       reduce_lamdbas:
         - |
@@ -32,7 +33,7 @@ sub:
         - |
           (x: number, y: number, i: number): number => x - y + i
         - |
-          (x: number, y: number, i: number, array: Array<number>): number => y - x + i + array[i]
+          (x: number, y: number, i: number, array: Array<number>): number => y - x + i
       reduce_u_lamdbas:
         - |
           (): string => "1234.0"
@@ -43,7 +44,7 @@ sub:
         - |
           (x: string, y: number, i: number): string => x + y + i
         - |
-          (x: string, y: number, i: number, array: Array<number>): string => y + x + i + array[i]
+          (x: string, y: number, i: number, array: Array<number>): string => y + x + i
     sub:
       - method: "concat"
         rest:
@@ -58,7 +59,7 @@ sub:
         setup: |
           ((): void => { self.length = pars })()
         params:
-          - paramOf '0.0', '-1.0'
+          - paramOf '0', '-1'
       - method: at
         params:
           - paramOf(*default_inds)
@@ -85,8 +86,8 @@ sub:
           - method: "splice"
             ret_type: Array<number>
             params:
-              - paramOf(*default_inds)
-              - paramOf(*default_inds)
+              - paramOf(*default_inds_number)
+              - paramOf(*default_inds_number)
             mandatory: 1
             rest:
               - combinationRest 31, 34, 45
@@ -202,7 +203,7 @@ sub:
           - method: indexOf
             params:
               - paramOf("null", "undefined", '""', '"123"', "NaN")
-              - paramOf(0.0, 1.0, 2.0, 3.0)
+              - paramOf(0, 1, 2, 3)
             mandatory: 1
           - method: values
             ret_type: Iterable<Object | null | undefined>

@@ -189,6 +189,10 @@ core runtime side.
         abcFiles: ABCFile[] // formed from the `paths` list and define the load order
     }
 
+    // platform API
+    export class MemoryRuntimeLinker extends AbcRuntimeLinker {
+        constructor(parentLinker: RuntimeLinker | undefined, rawAbcFiles: Array<FixedArray<byte>>)
+    }
 
 .. code-block:: typescript
     :linenos:
@@ -210,6 +214,12 @@ core runtime side.
 
     /* load an isolated resource */
     let isolated = new AbcRuntimeLinker(boot, ["dynamics.abc"])
+
+    /* native function to read binary files */
+    native function loadRawFiles() : Array<FixedArray<byte>>
+
+    /* load abc file from binary */
+    let memLinker = new MemoryRuntimeLinker(boot, loadRawFiles());
 
 Resolution request from runtime has two inputs:
 

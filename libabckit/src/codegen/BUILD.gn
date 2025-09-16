@@ -167,6 +167,7 @@ ohos_source_set("abckit_codegen_static_source_set") {
 
     # so static_core must be listed first
     "$ark_root_static/..",
+    "$ark_root_static/../libabckit/include",
     "$bco_gen_dir",
   ]
 
@@ -238,6 +239,7 @@ ohos_source_set("abckit_codegen_dynamic_source_set") {
     "$intrinsics_compiler_gen_dir/generated",
     "$ark_root_static",
     "$ark_root_static/..",
+    "$ark_root_static/../libabckit/include",
   ]
 
   part_name = "runtime_core"

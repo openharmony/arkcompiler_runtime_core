@@ -199,6 +199,65 @@ public:
         relaxClassRestrictions_ = true;
     }
 
+    class DecomposeAnalysis {
+    public:
+        explicit DecomposeAnalysis(Graph *graph)
+            : graph_(graph),
+              decomposeBbs_(graph->GetLocalAllocator()->Adapter()),
+              deoptUsers_(graph->GetLocalAllocator()->Adapter())
+        {
+            hasDecomposed_ = Decompose();
+        }
+
+        ~DecomposeAnalysis()
+        {
+            Compose();
+            graph_->InvalidateAnalysis<DominatorsTree>();
+            graph_->InvalidateAnalysis<LoopAnalyzer>();
+        }
+
+        NO_COPY_SEMANTIC(DecomposeAnalysis);
+        NO_MOVE_SEMANTIC(DecomposeAnalysis);
+
+        bool HasDecomposed()
+        {
+            return hasDecomposed_;
+        }
+
+    private:
+        // indicates NewDeoptBb OldSaveState NewDeopt DeoptOpcode BitField
+        using DeoptInfo = std::tuple<BasicBlock *, Inst *, Inst *, Opcode, uint64_t>;
+
+        Graph *graph_;
+        ArenaMap<BasicBlock *, DeoptInfo> decomposeBbs_;
+        ArenaMap<BasicBlock *, ArenaVector<Inst *>> deoptUsers_;
+        bool hasDecomposed_ {false};
+
+        bool IsDecomposableInst(Inst *inst)
+        {
+            return inst->GetFlag(inst_flags::CAN_DEOPTIMIZE) && IsDeoptSupported(inst);
+        }
+
+        bool IsDeoptSupported(Inst *deopt)
+        {
+            switch (deopt->GetOpcode()) {
+                case Opcode::NullCheck:
+                case Opcode::DeoptimizeIf:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        bool Decompose();
+        void Compose();
+        bool SplitOneBlock(BasicBlock *&deoptBb);
+        void ReplaceDeopt(BasicBlock *deoptBb, BasicBlock *succBb, Inst *deopt, Inst *newDeopt);
+        void RecoverDeopt(BasicBlock *deoptBb, DeoptInfo &deoptInfo, Inst *deoptInput);
+        void IdentifyDeoptInput(BasicBlock *deoptBb, Opcode opcode, Inst *&deoptInput);
+        void CloneSaveStatesToSucc(BasicBlock *bb, BasicBlock *succBb);
+    };
+
 #include "optimizer/ir/visitor.inc"
 private:
     static constexpr InstId ZERO_INST_ID = std::numeric_limits<InstId>::max() - 1U;

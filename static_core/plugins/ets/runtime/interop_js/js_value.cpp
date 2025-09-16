@@ -77,14 +77,12 @@ JSValue *JSValue::CreateByType(InteropCtx *ctx, napi_env env, napi_value nvalue,
                                JSValue *jsvalue)
 {
     switch (jsType) {
-        case napi_undefined: {
+        case napi_undefined:
             jsvalue->SetUndefined();
             return jsvalue;
-        }
-        case napi_null: {
+        case napi_null:
             jsvalue->SetNull();
             return jsvalue;
-        }
         case napi_boolean: {
             bool v;
             NAPI_ASSERT_OK(napi_get_value_bool(env, nvalue, &v));
@@ -98,13 +96,17 @@ JSValue *JSValue::CreateByType(InteropCtx *ctx, napi_env env, napi_value nvalue,
             return jsvalue;
         }
         case napi_string: {
+            auto coro = EtsCoroutine::GetCurrent();
+            LocalObjectHandle<JSValue> handle(coro, jsvalue);
             auto cachedStr = ctx->GetStringStor()->Get(interop::js::GetString(env, nvalue));
-            jsvalue->SetString(cachedStr);
-            return JSValue::AttachFinalizer(EtsCoroutine::GetCurrent(), jsvalue);
+            handle->SetString(cachedStr);
+            return JSValue::AttachFinalizer(coro, handle.GetPtr());
         }
         case napi_bigint: {
-            jsvalue->SetBigInt(interop::js::GetBigInt(env, nvalue));
-            return JSValue::AttachFinalizer(EtsCoroutine::GetCurrent(), jsvalue);
+            auto coro = EtsCoroutine::GetCurrent();
+            LocalObjectHandle<JSValue> handle(coro, jsvalue);
+            handle->SetBigInt(interop::js::GetBigInt(env, nvalue));
+            return JSValue::AttachFinalizer(coro, handle.GetPtr());
         }
         case napi_symbol:
             [[fallthrough]];
@@ -113,12 +115,12 @@ JSValue *JSValue::CreateByType(InteropCtx *ctx, napi_env env, napi_value nvalue,
         case napi_function:
             [[fallthrough]];
         case napi_external: {
-            jsvalue->SetRefValue(ctx, nvalue, jsType);
-            return jsvalue;
+            LocalObjectHandle<JSValue> handle(EtsCoroutine::GetCurrent(), jsvalue);
+            handle->SetRefValue(ctx, nvalue, jsType);
+            return handle.GetPtr();
         }
-        default: {
+        default:
             InteropCtx::Fatal("Unsupported JSValue.Type: " + std::to_string(jsType));
-        }
     }
     UNREACHABLE();
 }

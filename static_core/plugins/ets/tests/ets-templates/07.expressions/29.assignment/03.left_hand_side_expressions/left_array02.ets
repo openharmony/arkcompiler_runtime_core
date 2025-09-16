@@ -17,13 +17,14 @@
 desc: Left-hand expression testing - record element access testing.
 ---*/
 
+type Keys = 'key1' | 'key2' | 'key3'
+
 function main(): void {
-  type Keys = 'key1' | 'key2' | 'key3'
   let myRecord: Record<Keys, number> = {
     'key1': 1,
     'key2': 2,
     'key3': 4,
   }
   myRecord['key2'] = 6;
-  assertEQ(myRecord['key2'], 6);
+  arktest.assertEQ(myRecord['key2'], 6);
 }

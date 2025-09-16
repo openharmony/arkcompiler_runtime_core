@@ -31,5 +31,5 @@ function main(): void {
     }
 
     is();
-    assertEQ( callRef, 1)
+    arktest.assertEQ( callRef, 1)
 }

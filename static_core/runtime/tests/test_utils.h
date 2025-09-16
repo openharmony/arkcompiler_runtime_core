@@ -19,7 +19,7 @@
 #include "libpandabase/test_utilities.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/coretypes/array.h"
-#include "runtime/include/coretypes/string.h"
+#include "runtime/include/coretypes/line_string.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/class_linker.h"
 #include "runtime/include/class_root.h"
@@ -34,7 +34,7 @@ constexpr std::initializer_list<const char *> TESTED_GC = {"stw", "g1-gc"};
     auto *stringClass = Runtime::GetCurrent()
                             ->GetClassLinker()
                             ->GetExtension(vm->GetLanguageContext())
-                            ->GetClassRoot(ClassRoot::STRING);
+                            ->GetClassRoot(ClassRoot::LINE_STRING);
     ASSERT(stringClass != nullptr);
     mem::HeapManager *heapManager = vm->GetHeapManager();
     ASSERT(heapManager != nullptr);

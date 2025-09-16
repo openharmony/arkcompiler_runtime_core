@@ -23,5 +23,5 @@ type NumberOrString = Number|String|undefined;
 
 function main(): void {
     let x = new Array<(NumberOrString)>();
-    assertTrue( x != null)
+    arktest.assertTrue( x != null)
 }

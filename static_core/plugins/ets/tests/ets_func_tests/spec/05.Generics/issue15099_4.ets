@@ -23,5 +23,5 @@ type RegularLambda = (arg:string) => string
 
 function main(): void {
     let x = new Array<(Number|RegularLambda)>();
-    assertTrue( x != null)
+    arktest.assertTrue( x != null)
 }

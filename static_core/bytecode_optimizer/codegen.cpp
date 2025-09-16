@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -94,7 +94,7 @@ void BytecodeGen::AppendCatchBlock(uint32_t typeId, const compiler::BasicBlock *
     cb.tryEndLabel = "end_" + BytecodeGen::LabelName(tryEnd->GetId());
     cb.catchBeginLabel = BytecodeGen::LabelName(catchBegin->GetId());
     cb.catchEndLabel = catchEnd == nullptr ? cb.catchBeginLabel : "end_" + BytecodeGen::LabelName(catchEnd->GetId());
-    catchBlocks_.emplace_back(cb);
+    catchBlocks_.emplace_back(std::move(cb));
 }
 
 void BytecodeGen::VisitTryBegin(const compiler::BasicBlock *bb)
@@ -125,7 +125,7 @@ bool BytecodeGen::RunImpl()
         EmitLabel(BytecodeGen::LabelName(bb->GetId()));
         if (bb->IsTryEnd()) {
             auto label = "end_" + BytecodeGen::LabelName(bb->GetId());
-            EmitLabel(label);
+            EmitLabel(std::move(label));
         }
         for (const auto &inst : bb->AllInsts()) {
             auto start = GetResult().size();
@@ -151,7 +151,7 @@ bool BytecodeGen::RunImpl()
         VisitTryBegin(bb);
     }
     function_->ins = std::move(GetResult());
-    function_->catchBlocks = catchBlocks_;
+    function_->catchBlocks = std::move(catchBlocks_);
     return true;
 }
 
@@ -214,7 +214,7 @@ void BytecodeGen::EncodeSpillFillData(const compiler::SpillFillData &sf)
         return;
     }
 
-    pandasm::Ins move;
+    pandasm::Ins move {};
     if (GetGraph()->IsDynamicMethod()) {
         result_.emplace_back(pandasm::Create_MOV_DYN(sf.DstValue(), sf.SrcValue()));
         return;
@@ -231,7 +231,7 @@ void BytecodeGen::EncodeSpillFillData(const compiler::SpillFillData &sf)
         default:
             move = pandasm::Create_MOV(sf.DstValue(), sf.SrcValue());
     }
-    result_.emplace_back(move);
+    result_.emplace_back(std::move(move));
 }
 
 void BytecodeGen::VisitSpillFill(GraphVisitor *visitor, Inst *inst)
@@ -260,9 +260,9 @@ static void VisitConstant32(BytecodeGen *enc, compiler::Inst *inst, std::vector<
     auto type = inst->GetType();
     ASSERT(compiler::DataType::Is32Bits(type, Arch::NONE));
 
-    pandasm::Ins movi;
+    pandasm::Ins movi {};
     auto dstReg = inst->GetDstReg();
-    movi.regs.emplace_back(inst->GetDstReg());
+    movi.EmplaceReg(inst->GetDstReg());
 
     switch (type) {
         case compiler::DataType::BOOL:
@@ -278,10 +278,10 @@ static void VisitConstant32(BytecodeGen *enc, compiler::Inst *inst, std::vector<
             } else {
                 if (dstReg == compiler::GetAccReg()) {
                     pandasm::Ins ldai = pandasm::Create_LDAI(inst->CastToConstant()->GetInt32Value());
-                    res.emplace_back(ldai);
+                    res.emplace_back(std::move(ldai));
                 } else {
                     movi = pandasm::Create_MOVI(dstReg, inst->CastToConstant()->GetInt32Value());
-                    res.emplace_back(movi);
+                    res.emplace_back(std::move(movi));
                 }
             }
             break;
@@ -292,10 +292,10 @@ static void VisitConstant32(BytecodeGen *enc, compiler::Inst *inst, std::vector<
             } else {
                 if (dstReg == compiler::GetAccReg()) {
                     pandasm::Ins ldai = pandasm::Create_FLDAI(inst->CastToConstant()->GetFloatValue());
-                    res.emplace_back(ldai);
+                    res.emplace_back(std::move(ldai));
                 } else {
                     movi = pandasm::Create_FMOVI(dstReg, inst->CastToConstant()->GetFloatValue());
-                    res.emplace_back(movi);
+                    res.emplace_back(std::move(movi));
                 }
             }
             break;
@@ -309,9 +309,9 @@ static void VisitConstant64(BytecodeGen *enc, compiler::Inst *inst, std::vector<
     auto type = inst->GetType();
     ASSERT(compiler::DataType::Is64Bits(type, Arch::NONE));
 
-    pandasm::Ins movi;
+    pandasm::Ins movi {};
     auto dstReg = inst->GetDstReg();
-    movi.regs.emplace_back(inst->GetDstReg());
+    movi.EmplaceReg(inst->GetDstReg());
 
     switch (type) {
         case compiler::DataType::INT64:
@@ -322,10 +322,10 @@ static void VisitConstant64(BytecodeGen *enc, compiler::Inst *inst, std::vector<
             } else {
                 if (dstReg == compiler::GetAccReg()) {
                     pandasm::Ins ldai = pandasm::Create_LDAI_64(inst->CastToConstant()->GetInt64Value());
-                    res.emplace_back(ldai);
+                    res.emplace_back(std::move(ldai));
                 } else {
                     movi = pandasm::Create_MOVI_64(dstReg, inst->CastToConstant()->GetInt64Value());
-                    res.emplace_back(movi);
+                    res.emplace_back(std::move(movi));
                 }
             }
             break;
@@ -336,10 +336,10 @@ static void VisitConstant64(BytecodeGen *enc, compiler::Inst *inst, std::vector<
             } else {
                 if (dstReg == compiler::GetAccReg()) {
                     pandasm::Ins ldai = pandasm::Create_FLDAI_64(inst->CastToConstant()->GetDoubleValue());
-                    res.emplace_back(ldai);
+                    res.emplace_back(std::move(ldai));
                 } else {
                     movi = pandasm::Create_FMOVI_64(dstReg, inst->CastToConstant()->GetDoubleValue());
-                    res.emplace_back(movi);
+                    res.emplace_back(std::move(movi));
                 }
             }
             break;
@@ -417,11 +417,11 @@ void BytecodeGen::EncodeSta(compiler::Register reg, compiler::DataType::Type typ
             LOG(ERROR, BYTECODE_OPTIMIZER) << "EncodeSta with unknown type" << type;
             success_ = false;
     }
-    pandasm::Ins sta;
+    pandasm::Ins sta {};
     sta.opcode = opc;
-    sta.regs.emplace_back(reg);
+    sta.EmplaceReg(reg);
 
-    result_.emplace_back(sta);
+    result_.emplace_back(std::move(sta));
 }
 
 static pandasm::Opcode ChooseCallOpcode(compiler::Opcode op, size_t nargs)
@@ -506,7 +506,7 @@ void BytecodeGen::CallHandler(GraphVisitor *visitor, Inst *inst, std::string met
     auto sfCount = inst->GetInputsCount() - (inst->RequireState() ? 1U : 0U);
     size_t start = op == compiler::Opcode::InitObject ? 1U : 0U;  // exclude LoadAndInitClass
     auto nargs = sfCount - start;                                 // exclude LoadAndInitClass
-    pandasm::Ins ins;
+    pandasm::Ins ins {};
 
     ins.opcode = ChooseCallOpcode(op, nargs);
 
@@ -519,22 +519,22 @@ void BytecodeGen::CallHandler(GraphVisitor *visitor, Inst *inst, std::string met
             ASSERT(reg - startReg == static_cast<int>(i - start));  // check 'range-ness' of registers
         }
 #endif  // !NDEBUG
-        ins.regs.emplace_back(inst->GetSrcReg(start));
+        ins.EmplaceReg(inst->GetSrcReg(start));
     } else {
         for (size_t i = start; i < sfCount; ++i) {
             auto reg = inst->GetSrcReg(i);
             ASSERT(reg < NUM_COMPACTLY_ENCODED_REGS || reg == compiler::GetAccReg());
             if (reg == compiler::GetAccReg()) {
                 ASSERT(inst->IsCallOrIntrinsic());
-                ins.imms.emplace_back(static_cast<int64_t>(i));
+                ins.EmplaceImm(static_cast<int64_t>(i));
                 ins.opcode = ChooseCallAccOpcode(ins.opcode);
             } else {
-                ins.regs.emplace_back(reg);
+                ins.EmplaceReg(reg);
             }
         }
     }
-    ins.ids.emplace_back(std::move(methodId));
-    enc->result_.emplace_back(ins);
+    ins.EmplaceID(std::move(methodId));
+    enc->result_.emplace_back(std::move(ins));
     if (inst->GetDstReg() != compiler::GetInvalidReg() && inst->GetDstReg() != compiler::GetAccReg()) {
         enc->EncodeSta(inst->GetDstReg(), inst->GetType());
     }

@@ -22,7 +22,7 @@ class Thenable implements PromiseLike<string> {
 
 function executor(resolve: (value: string | PromiseLike<string>) => void): void {
   resolve(new Thenable());
-  throw new Error('ignored exception');
+  throw new Error('ignored error');
 }
 
 new Promise<string>(executor).then<void, void>((value: string): void => {

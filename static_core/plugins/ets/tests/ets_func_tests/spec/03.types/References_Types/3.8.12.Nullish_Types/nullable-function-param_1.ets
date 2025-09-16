@@ -22,7 +22,7 @@ name: nullable-function-param_1.ets
 type NullableInt = int | null;
 
 function test(param: NullableInt): void {
-    assertTrue( param === null)
+    arktest.assertTrue( param === null)
 }
 
 function main(): void {

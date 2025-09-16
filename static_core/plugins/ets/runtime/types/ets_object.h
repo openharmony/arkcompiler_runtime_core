@@ -65,7 +65,7 @@ public:
     }
 
     template <class T>
-    T GetFieldPrimitive(EtsField *field)
+    T GetFieldPrimitive(EtsField *field) const
     {
         ASSERT(field != nullptr);
         ASSERT(field->GetEtsType() == GetEtsTypeByPrimitive<T>());
@@ -74,13 +74,13 @@ public:
     }
 
     template <class T, bool IS_VOLATILE = false>
-    T GetFieldPrimitive(size_t offset)
+    T GetFieldPrimitive(size_t offset) const
     {
         return GetCoreType()->GetFieldPrimitive<T, IS_VOLATILE>(offset);
     }
 
     template <class T>
-    T GetFieldPrimitive(int32_t fieldOffset, bool isVolatile)
+    T GetFieldPrimitive(int32_t fieldOffset, bool isVolatile) const
     {
         if (isVolatile) {
             return GetCoreType()->GetFieldPrimitive<T, true>(fieldOffset);

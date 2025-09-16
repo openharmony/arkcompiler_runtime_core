@@ -39,6 +39,10 @@ function main(): int {
     failures += check(testTypedArrayEvery(), "Test .every method")
     failures += check(testTypedArraySome(), "Test .some method")
     failures += check(testTypedArraySort(), "Test .sort method")
+    {%- if (item.objectType == 'Float32Array') or (item.objectType == 'Float64Array') %}
+    failures += check(testTypedArraySortWithNaN(), "Test .sort with NaN method")
+    failures += check(testTypedArraySortWithNaNReversed(), "Test .sort in reversed order with NaN method")
+    {%- endif%}
     failures += check(testTypedArrayFindAndFindIndex(), "Test .find and .findIndex method")
     failures += check(testTypedArrayMap(), "Test .map method")
     failures += check(testTypedArrayOf(), "Test .of method")
@@ -88,7 +92,7 @@ const source: FixedArray<{{.item.primitiveType}}> = {{.item.data}};
 const abnormalSource: FixedArray<{{.item.primitiveType}}> = {{.item.abnormalData}};
 
 function testBytePerElement(): number {
-    if ({{.item.objectType}}.BYTES_PER_ELEMENT as int == {{.item.primitiveSizeBytes}}) return success;
+    if ({{.item.objectType}}.BYTES_PER_ELEMENT == {{.item.primitiveSizeBytes}}) return success;
     return fail;
 }
 
@@ -220,14 +224,14 @@ function testNonEmptyTypedArrayAt(): number {
     atResult = typedArray.at(index);
     console.log("testNonEmptyTypedArrayAt [2/3] result: " + atResult);
     // Assertion
-    if (atResult == {{.item.create}}(source[index + length as int])) {
+    if (atResult == {{.item.create}}(source[index + length.toInt()])) {
         console.log("testNonEmptyTypedArrayAt [2/3] test passed.");
     } else {
         console.log("testNonEmptyTypedArrayAt [2/3] test failed.");
         return fail;
     }
 
-    index = typedArray.length as int;
+    index = typedArray.length.toInt();
     atResult = typedArray.at(index);
     console.log("testNonEmptyTypedArrayAt result [3/3]: " + atResult);
     // Assertion
@@ -500,17 +504,17 @@ const testTypedArrayEvery = parametrize<ObjectTypeAndExpectations<boolean[]>>(
             `[${array}].every((x, index, arr) => x + index == sum(arr))`
         )
 
-        const eqByInd = (x: {{.item.type}}, index: number, arr: {{.item.objectType}}) => x == arr[index]
+        const eqByInd = (x: {{.item.type}}, index: number, arr: {{.item.objectType}}) => x == arr[index.toInt()]
         const isValueEqualToArrayByIndex = array.every(eqByInd)
         failures += check(
             boolToResult(isValueEqualToArrayByIndex == expected[7]),
-            `[${array}].every((x, index, arr) => x == arr[index])`
+            `[${array}].every((x, index, arr) => x == arr[index.toInt()])`
         )
         
         const isNoEvenNumbers = array.every(
             (x: {{.item.type}}, index: number, arr: {{.item.objectType}}) => {
                 if (x{{.item.cast2primitive}} % 2 == 0) {
-                    arr[index] = {{.item.create}}(0)
+                    arr[index.toInt()] = {{.item.create}}(0)
                     return false
                 }
                 return true
@@ -554,7 +558,7 @@ const testTypedArraySome = parametrize<ObjectTypeAndExpectations<boolean[]>>(
         const hasPositivesSome = array.some((x: {{.item.type}}) => x > {{.item.create}}(0))
         const hasElementsWithValueEqIndex = array.some((x: {{.item.type}}, index: number) => x == {{.item.create}}(index))
 
-        const neByInd = (x: {{.item.type}}, index: number, arr: {{.item.objectType}}) => x != arr[index]
+        const neByInd = (x: {{.item.type}}, index: number, arr: {{.item.objectType}}) => x != arr[index.toInt()]
         const isValueNotEqualToArrayByIndex = array.some(neByInd)
 
         let failures = 0
@@ -599,7 +603,7 @@ const testTypedArraySort = parametrize<ObjectTypeAndExpectations<number[]>>(
         array.sort()
 
         const isEqualToGold =
-            array.every((x: {{.item.type}}, index: number) => x == expected[index as int])
+            array.every((x: {{.item.type}}, index: number) => x == expected[index.toInt()])
 
         // descending
         array.sort(
@@ -609,7 +613,7 @@ const testTypedArraySort = parametrize<ObjectTypeAndExpectations<number[]>>(
         )
 
         const isEqualToGoldReversed =
-            array.every((x: {{.item.type}}, index: number) => x == expected[expected.length - index - 1])
+            array.every((x: {{.item.type}}, index: number) => x == expected[expected.length - index.toInt() - 1])
 
         let failures = 0
 
@@ -619,6 +623,109 @@ const testTypedArraySort = parametrize<ObjectTypeAndExpectations<number[]>>(
         return failures == 0 ? success: fail
     }
 )
+
+{%- if (item.objectType == 'Float32Array') or (item.objectType == 'Float64Array') %}
+
+function isEqualOrNaN(x: {{.item.type}}, y: {{.item.type}}) {
+    return ((x == y) || (isNaN(x) && isNaN(y)))
+}
+
+const testTypedArraySortWithNaN = parametrize<ObjectTypeAndExpectations<number[]>>(
+    "testTypedArraySortWithNaN",
+    [
+        [
+            {{.item.objectType}}.of(
+                {{.item.create}}(-1),
+                {{.item.create}}(-100),
+                {{.item.create}}(NaN),
+                {{.item.create}}(0),
+                {{.item.create}}(111),
+                {{.item.create}}(-50)
+            ),
+            [-100, -50, -1, 0, 111, NaN] as number[]
+        ] as ObjectTypeAndExpectations<number[]>,
+        [
+            {{.item.objectType}}.of(
+                {{.item.create}}(NaN),
+                {{.item.create}}(-1),
+                {{.item.create}}(-1),
+                {{.item.create}}(0),
+                {{.item.create}}(-1),
+                {{.item.create}}(2)
+            ),
+            [-1, -1, -1, 0, 2, NaN] as number[]
+        ] as ObjectTypeAndExpectations<number[]>,
+    ],
+    (args: ObjectTypeAndExpectations<number[]>): number => {
+        const array = new {{.item.objectType}}(args[0])
+        const expected = new {{.item.objectType}}(args[1])
+
+        array.sort()
+
+        const isEqualToGold =
+            array.every((x: {{.item.type}}, index: number) => isEqualOrNaN(x, expected[index]))
+
+        // asc
+        array.sort((x: {{.item.type}}, y: {{.item.type}}) => {
+                return new Number(x - y)
+        })
+
+        const isEqualToGoldAsc =
+            array.every((x: {{.item.type}}, index: number) => isEqualOrNaN(x, expected[index.toInt()]))
+
+
+        let failures = 0
+        failures += check(boolToResult(isEqualToGold), "is equal to gold result")
+        failures += check(boolToResult(isEqualToGoldAsc), "is equal to gold asc result")
+        return failures == 0 ? success: fail
+    }
+)
+
+const testTypedArraySortWithNaNReversed = parametrize<ObjectTypeAndExpectations<number[]>>(
+    "testTypedArraySortWithNaNReversed",
+    [
+        [
+            {{.item.objectType}}.of(
+                {{.item.create}}(-1),
+                {{.item.create}}(-100),
+                {{.item.create}}(NaN),
+                {{.item.create}}(0),
+                {{.item.create}}(111),
+                {{.item.create}}(-50)
+            ),
+            [111, 0, -1, -50, -100, NaN] as number[]
+        ] as ObjectTypeAndExpectations<number[]>,
+        [
+            {{.item.objectType}}.of(
+                {{.item.create}}(NaN),
+                {{.item.create}}(-1),
+                {{.item.create}}(-1),
+                {{.item.create}}(0),
+                {{.item.create}}(-1),
+                {{.item.create}}(2)
+            ),
+            [2, 0, -1, -1, -1, NaN] as number[],
+        ] as ObjectTypeAndExpectations<number[]>,
+    ],
+    (args: ObjectTypeAndExpectations<number[]>): number => {
+        const array = new {{.item.objectType}}(args[0])
+        const expected = new {{.item.objectType}}(args[1])
+
+        // desc
+        array.sort((x: {{.item.type}}, y: {{.item.type}}) => {
+            return new Number(y - x)
+        })
+
+        const isEqualToGold =
+            array.every((x: {{.item.type}}, index: number) => isEqualOrNaN(x, expected[index.toInt()]))
+
+        let failures = 0
+        failures += check(boolToResult(isEqualToGold), "is equal to gold result")
+        return failures == 0 ? success: fail
+    }
+)
+
+{%- endif %}
 
 type ApplyFunction<T> =
     (element: {{.item.type}}, index: number, array: {{.item.objectType}}) => T
@@ -643,7 +750,7 @@ const testTypedArrayFindAndFindIndex = parametrize<ObjectTypeAndExpectations<FCA
            ),
            [
                (element: {{.item.type}}, index: number, array: {{.item.objectType}}) => element < {{.item.create}}(0),
-               [{{.item.create}}(-5), 2 as number] as ExpectationsOptIN
+               [{{.item.create}}(-5), 2. as double] as ExpectationsOptIN
            ]
        ] as ObjectTypeAndExpectations<FCAndExpectations>,
    ],
@@ -684,17 +791,17 @@ function testTypedArrayMap(): number {
 
     let squared = ta.map((num: {{.item.type}}) => num * num)
     const isSquared = squared.every(
-       (num: {{.item.type}}, index: number) => num == ta[index] * ta[index]
+       (num: {{.item.type}}, index: number) => num == ta[index.toInt()] * ta[index.toInt()]
     )
 
     let mapWithIndex = ta.map((num: {{.item.type}}, index: number) => num + {{.item.create}}(index))
     const isMappedWithIndex = mapWithIndex.every(
-       (num: {{.item.type}}, index: number) => num == ta[index] + {{.item.create}}(index)
+       (num: {{.item.type}}, index: number) => num == ta[index.toInt()] + {{.item.create}}(index)
     )
 
     let mapWithIndexAndThis = ta.map((num: {{.item.type}}, index: number, array: {{.item.objectType}}) => num)
     const isMappedWithIndexAndThis = mapWithIndexAndThis.every(
-       (num: {{.item.type}}, index: number, array: {{.item.objectType}}) => num == array[index]
+       (num: {{.item.type}}, index: number, array: {{.item.objectType}}) => num == array[index.toInt()]
     )
 
     let failures = 0
@@ -722,7 +829,7 @@ const testTypedArrayOf = parametrize<FixedArray<{{.item.type}}>>(
        const viaCtor = new {{.item.objectType}}(args)
        const viaOf = {{.item.objectType}}.of(...args)
 
-       const isEqual = viaCtor.every((x: {{.item.type}}, index: number) => x == viaOf[index as int])
+       const isEqual = viaCtor.every((x: {{.item.type}}, index: number) => x == viaOf[index.toInt()])
 
        let failures = 0
        failures += check(boolToResult(isEqual), "result of .of method call is equal to ctor invoke")
@@ -841,8 +948,8 @@ const testTypedArrayReduce = parametrize<ObjectTypeAndExpectations<[{{.item.type
         const isCorrectPrevCurIndex = testPrevCurIndex == {{.item.create}}(expectedWithIndices)
 
         // (prev: {{.item.type}}, cur: {{.item.type}}, curIndex: number, array: {{.item.objectType}}) => {{.item.type}} (Using prev, current element, index, and array)
-        const testPrevCurIndexArray = array.reduce((prev: {{.item.type}}, cur: {{.item.type}}, curIndex: number, arr: {{.item.objectType}}): {{.item.type}} => prev + cur + arr[curIndex], initialValue)
-        const expectedResultFull = array.reduce((sum: {{.item.type}}, val: {{.item.type}}, idx: number, arr: {{.item.objectType}}) => sum + val + arr[idx], initialValue)
+        const testPrevCurIndexArray = array.reduce((prev: {{.item.type}}, cur: {{.item.type}}, curIndex: number, arr: {{.item.objectType}}): {{.item.type}} => prev + cur + arr[curIndex.toInt()], initialValue)
+        const expectedResultFull = array.reduce((sum: {{.item.type}}, val: {{.item.type}}, idx: number, arr: {{.item.objectType}}) => sum + val + arr[idx.toInt()], initialValue)
         const isCorrectPrevCurIndexArray = testPrevCurIndexArray == {{.item.create}}(expectedResultFull)
 
         // Validating all results
@@ -912,8 +1019,8 @@ const testTypedArrayReduceRight = parametrize<ObjectTypeAndExpectations<[{{.item
         const isCorrectPrevCurIndex = testPrevCurIndex == {{.item.create}}(expectedWithIndices)
 
         // (prev: {{.item.type}}, cur: {{.item.type}}, curIndex: number, array: {{.item.objectType}}) => {{.item.type}} (Using prev, current element, index, and array)
-        const testPrevCurIndexArray = array.reduceRight((prev: {{.item.type}}, cur: {{.item.type}}, curIndex: number, arr: {{.item.objectType}}): {{.item.type}} => prev + cur + arr[curIndex], initialValue)
-        const expectedResultFull = array.reduceRight((sum: {{.item.type}}, val: {{.item.type}}, idx: number, arr: {{.item.objectType}}) => sum + val + arr[idx], initialValue)
+        const testPrevCurIndexArray = array.reduceRight((prev: {{.item.type}}, cur: {{.item.type}}, curIndex: number, arr: {{.item.objectType}}): {{.item.type}} => prev + cur + arr[curIndex.toInt()], initialValue)
+        const expectedResultFull = array.reduceRight((sum: {{.item.type}}, val: {{.item.type}}, idx: number, arr: {{.item.objectType}}) => sum + val + arr[idx.toInt()], initialValue)
         const isCorrectPrevCurIndexArray = testPrevCurIndexArray == {{.item.create}}(expectedResultFull)
 
         // Validating all results
@@ -1012,11 +1119,11 @@ const testTypedArrayFill2Args = parametrize<ObjectTypeAndExpectations<boolean[]>
                 failures += check(boolToResult(isAllChangedExceptFirst == expected[1]), `.fill(value, 1) = ${fill1}`)
                 
                 const fillLen = copy().fill(value, array.length)
-                const isNothingChanged = fillLen.every((x, i) => x == array[i])
+                const isNothingChanged = fillLen.every((x, i) => x == array[i.toInt()])
                 failures += check(boolToResult(isNothingChanged == expected[2]), `.fill(value, array.length) = ${fillLen}`)
                 
                 const fillM1 = copy().fill(value, -1)
-                const isOnlyLastChanged = fillM1[last] == value && fillM1.slice(0, last - 1).every((x, i) => x == array[i])
+                const isOnlyLastChanged = fillM1[last] == value && fillM1.slice(0, last - 1).every((x, i) => x == array[i.toInt()])
                 failures += check(boolToResult(isOnlyLastChanged == expected[3]), `.fill(value, -1) = ${fillM1}`)
                 
                 const fillMLen = copy().fill(value, -array.length);
@@ -1056,11 +1163,11 @@ const testTypedArrayFill3Args = parametrize<ObjectTypeAndExpectations<boolean[]>
                 const value = {{.item.create}}(val)
 
                 const fill00 = copy().fill(value, 0, 0)
-                const isNothingChanged = fill00.every((x, i) => x == array[i])
+                const isNothingChanged = fill00.every((x, i) => x == array[i.toInt()])
                 failures += check(boolToResult(isNothingChanged == expected[0]), `.fill(value, 0, 0) = ${fill00}`)
     
                 const fill01 = copy().fill(value, 0, 1)
-                const isOnlyFirstChanged = fill01[0] == value && fill01.slice(1).every((x, i) => x == array[i + 1])
+                const isOnlyFirstChanged = fill01[0] == value && fill01.slice(1).every((x, i) => x == array[i.toInt() + 1])
                 failures += check(boolToResult(isOnlyFirstChanged == expected[1]), `.fill(value, 0, 1) = ${fill01}`)
       
                 const fill0Len = copy().fill(value, 0, array.length)
@@ -1072,7 +1179,7 @@ const testTypedArrayFill3Args = parametrize<ObjectTypeAndExpectations<boolean[]>
                 failures += check(boolToResult(isAllChangedExceptLast == expected[3]), `.fill(value, 0, -1) = ${fill0M1}`)
           
                 const fill0MLen = copy().fill(value, 0, -array.length)
-                const isNothingChangedNeg = fill0MLen.every((x, i) => x == array[i])
+                const isNothingChangedNeg = fill0MLen.every((x, i) => x == array[i.toInt()])
                 failures += check(boolToResult(isNothingChangedNeg == expected[4]), `.fill(value, 0, -array.length) = ${fill0MLen}`)
 
                 const fill1Last = copy().fill(value, 1, last)
@@ -1086,11 +1193,11 @@ const testTypedArrayFill3Args = parametrize<ObjectTypeAndExpectations<boolean[]>
                 failures += check(boolToResult(isOnlyCenterChangedNeg == expected[6]), `.fill(value, 0, -1) = ${fill1M1}`)
       
                 const fillLast1 = copy().fill(value, last, 1)
-                const isNothingChangedReverse = fillLast1.every((x, i) => x == array[i])
+                const isNothingChangedReverse = fillLast1.every((x, i) => x == array[i.toInt()])
                 failures += check(boolToResult(isNothingChangedReverse == expected[7]), `.fill(value, last, 1) = ${fillLast1}`)
 
                 const fillM11 = copy().fill(value, -1, 1)
-                const isNothingChangedReverseNeg = fillM11.every((x, i) => x == array[i])
+                const isNothingChangedReverseNeg = fillM11.every((x, i) => x == array[i.toInt()])
                 failures += check(boolToResult(isNothingChangedReverseNeg == expected[8]), `.fill(value, -1, 1) = ${fillM11}`)
             }
         }
@@ -1205,7 +1312,7 @@ const testTypedArrayFind = parametrize<ObjectTypeAndExpectations<({{.item.type}}
         const mutable = new {{.item.objectType}}(array)
         const changesArray = mutable.find((value, index, obj) => {
             if (index === 1) {
-                obj[index] = {{.item.create}}(10)
+                obj[index.toInt()] = {{.item.create}}(10)
             }
             return value > {{.item.create}}(4)
         })
@@ -1325,7 +1432,7 @@ const testTypedArrayFindIndex = parametrize<ObjectTypeAndExpectations<number[]>>
         const mutableIndexArray = new {{.item.objectType}}(array)
         const changesArrayIndex = mutableIndexArray.findIndex((value, index, obj) => {
             if (index === 1) {
-                obj[index] = {{.item.create}}(10)
+                obj[index.toInt()] = {{.item.create}}(10)
             }
             return value > {{.item.create}}(4)
         })

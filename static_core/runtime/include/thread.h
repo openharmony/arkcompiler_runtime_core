@@ -15,6 +15,7 @@
 #ifndef PANDA_RUNTIME_THREAD_H_
 #define PANDA_RUNTIME_THREAD_H_
 
+#include <cstdint>
 #include <memory>
 #include <chrono>
 #include <limits>
@@ -29,6 +30,7 @@
 #include "libpandabase/os/thread.h"
 #include "libpandabase/utils/arch.h"
 #include "libpandabase/utils/list.h"
+#include "libpandabase/utils/logger.h"
 #include "libpandabase/utils/tsan_interface.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
@@ -46,6 +48,16 @@
 #include "runtime/mem/refstorage/reference_storage.h"
 #include "runtime/entrypoints/entrypoints.h"
 #include "events/events.h"
+#ifdef PANDA_USE_QOS
+#include "qos.h"
+#endif
+
+enum Priority {
+    PRIORITY_IDLE = 0,
+    PRIORITY_LOW = 1,
+    PRIORITY_DEFAULT = 2,
+    PRIORITY_HIGH = 3,
+};
 
 #define ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS()
 
@@ -316,8 +328,14 @@ public:
         return MEMBER_OFFSET(Thread, vm_);
     }
 
+    uint64_t *GetThreadRandomState()
+    {
+        return &threadRandomState_;
+    }
+
 private:
     void InitCardTableData(mem::GCBarrierSet *barrier);
+    void InitThreadRandomState();
 
 protected:
     // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
@@ -338,7 +356,7 @@ protected:
     void *postWrbOneObject_ {nullptr};
     // keeps IRtoC GC PostWrb impl for storing two objects
     void *postWrbTwoObjects_ {nullptr};
-    void *stringClassPtr_ {nullptr};    // ClassRoot::STRING
+    void *stringClassPtr_ {nullptr};    // ClassRoot::LINE_STRING
     void *arrayU16ClassPtr_ {nullptr};  // ClassRoot::ARRAY_U16
     void *arrayU8ClassPtr_ {nullptr};   // ClassRoot::ARRAY_U8
     PandaVector<ObjectHeader *> *preBuff_ {nullptr};
@@ -346,6 +364,7 @@ protected:
 #ifndef NDEBUG
     uintptr_t runtimeCallEnabled_ {1};
 #endif
+    uint64_t threadRandomState_ {0};
     // NOLINTEND(misc-non-private-member-variables-in-classes)
 
 private:
@@ -379,6 +398,19 @@ public:
 
 private:
     ThreadT *thread_;
+};
+
+class QosHelper {
+public:
+    static int SetCurrentWorkerPriority([[maybe_unused]] Priority priority)
+    {
+#ifdef PANDA_USE_QOS
+        return SetThreadQos(static_cast<OHOS::QOS::QosLevel>(priority));
+#else
+        LOG(INFO, RUNTIME) << "QosHelper::SetWorkerPriority is not supported";
+        return 0;
+#endif
+    }
 };
 
 }  // namespace ark

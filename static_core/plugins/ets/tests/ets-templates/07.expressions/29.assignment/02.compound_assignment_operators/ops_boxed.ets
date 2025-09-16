@@ -24,7 +24,7 @@ params: {{c.type}}, "{{c.op|safe}}="
 function main(): int {
     let v:{{c.type}} = {{c.v}}
     let q:{{c.type}} = {{c.q}}
-    if ((v {{c.op}} q) as {{c.type.lower()}} != (v {{c.op}}= q)) {
+    if ((v {{c.op}} q).to{{c.type}}() != (v {{c.op}}= q)) {
         return 1
     }
     return 0

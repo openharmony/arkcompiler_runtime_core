@@ -90,7 +90,7 @@ function dateFormatWithFormattingStyle(): void {
         const actualResult = formatter.format(TEST_DATE)
 
         if (actualResult !== expectedResult) {
-            assertEQ(actualResult, expectedResult, `unexpected date format result for locale: ${locale}, options: ${options}`)
+            arktest.assertEQ(actualResult, expectedResult, `unexpected date format result for locale: ${locale}, options: ${options}`)
         }
     })
 }
@@ -98,7 +98,7 @@ function dateFormatWithFormattingStyle(): void {
 function main(): int {
     initFormatResults()
 
-    const suite = new ArkTestsuite("Intl.DateTimeFormat formatting style tests") 
+    const suite = new arktest.ArkTestsuite("Intl.DateTimeFormat formatting style tests") 
     suite.addTest("date style", dateFormatWithFormattingStyle)
     return suite.run()
 }

@@ -23,13 +23,11 @@ module Constants
   LOG2_BITS_PER_U8 = "3"
   LOG2_BITS_PER_U16 = "4"
   LOG2_BYTES_PER_U16 = "1"
-  LOG2_BYTES_PER_OBJ_PTR = "2" # object pointer has a size of 4 bytes on each supported platform
   XOR_SUB_U8_MASK = "0x0101010101010101ULL"
   XOR_AND_U8_MASK = "0x8080808080808080ULL"
   MAX_U8_VALUE = "255"
   U8_SIZE = "1"
   U16_SIZE = "2"
-  OBJ_PTR_SIZE = "ark::OBJECT_POINTER_SIZE"
   WRONG_CHAR_FLAG_MASK = "0x10000UL"
 end
 
@@ -69,18 +67,18 @@ Label(:_L1)
     _new_str_data := Add(_new_str1, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
     If(_compressable, 1).EQ.Likely.b {
       compress_u16_to_u8_chars(_src_str_data, _new_str_data, Cast(_char_count).u64)
-      StoreI(_new_str1, ShlI(_char_count).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+      StoreI(_new_str1, ShlI(_char_count).Imm(Constants::STRING_LENGTH_SHIFT).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
       Goto(:_Fast_Substring_Result)
     }
     copy_u16_chars(_src_str_data, _new_str_data, Cast(_char_count).u64)
-    StoreI(_new_str1, OrI(ShlI(_char_count).Imm(1).u32).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+    StoreI(_new_str1, OrI(ShlI(_char_count).Imm(Constants::STRING_LENGTH_SHIFT).u32).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
     Goto(:_Fast_Substring_Result)
   }
   # Source string is already compressed
   _new_str2 := allocate_string_tlab(_klass, Cast(_char_count).word)
   _new_str_data2 := Add(_new_str2, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
   copy_u8_chars(_src_str_data, _new_str_data2, Cast(_char_count).u64)
-  StoreI(_new_str2, ShlI(_char_count).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  StoreI(_new_str2, ShlI(_char_count).Imm(Constants::STRING_LENGTH_SHIFT).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
 Label(:_Fast_Substring_Result)
   # String is supposed to be a constant object, so all its data should be visible by all threads
   Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
@@ -273,7 +271,7 @@ function(:StringTrimLeftBase,
   length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
   str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
   not_compressed := AndI(length_packed).Imm(1).i32
-  length := ShrI(length_packed).Imm(1).i32
+  length := ShrI(length_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32
   start_index := Cast(1).i32
   If(not_compressed, 0).EQ.Likely.b {
     # String contains 8-bit chars
@@ -322,6 +320,8 @@ function(:StringTrimLeft,
     ReturnVoid().void
     next
   end
+  
+  check_string_type(str)
 
   length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
   If(length_packed, 1).LE.Unlikely.b {
@@ -339,7 +339,7 @@ Label(:L1)
   If(ws, 0).EQ.Likely.b {
     Return(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr).ptr
   }
-  If(ShrI(length_packed).Imm(1).i32, 1).EQ.Unlikely.b {
+  If(ShrI(length_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32, 1).EQ.Unlikely.b {
     LiveOut(str).DstReg(regmap[:arg0]).ref
     entrypoint1 = get_entrypoint_offset("STRING_EMPTY")
     Intrinsic(:TAIL_CALL).AddImm(entrypoint1).MethodAsImm("StringEmpty").Terminator.ptr
@@ -349,6 +349,10 @@ Label(:L1)
   LiveOut(unused2).DstReg(regmap[:arg2]).i32
   entrypoint2 = get_entrypoint_offset("STRING_TRIM_LEFT_BASE")
   Intrinsic(:TAIL_CALL).AddImm(entrypoint2).MethodAsImm("StringTrimLeftBase").Terminator.ptr
+Label(:SlowPathEntrypoint)
+  entrypoint = get_entrypoint_offset("STRING_TRIM_LEFT_SLOW_PATH")
+  Intrinsic(:SLOW_PATH_ENTRY, str).AddImm(entrypoint).MethodAsImm("StringTrimLeft3ArgBridge").Terminator.ptr
+  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 
 
@@ -365,7 +369,7 @@ function(:StringTrimRightBase,
   end
 
   length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
-  length := ShrI(length_packed).Imm(1).i32
+  length := ShrI(length_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32
   start_index := SubI(length).Imm(2).i32
   str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
   not_compressed := AndI(length_packed).Imm(1).i32
@@ -417,6 +421,8 @@ function(:StringTrimRight,
     ReturnVoid().void
     next
   end
+  
+  check_string_type(str)
 
   length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
   If(length_packed, 1).LE.Unlikely.b {
@@ -424,7 +430,7 @@ function(:StringTrimRight,
   }
   str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
   not_compressed := AndI(length_packed).Imm(1).i32
-  length := ShrI(length_packed).Imm(1).i32
+  length := ShrI(length_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32
   last_char_index :=  SubI(length).Imm(1).i32
   If(not_compressed, 0).EQ.Likely.b {
     ws1 := is_white_space_u8(Load(str_data, last_char_index).u8)
@@ -446,6 +452,10 @@ Label(:L1)
   LiveOut(unused2).DstReg(regmap[:arg2]).i32
   entrypoint2 = get_entrypoint_offset("STRING_TRIM_RIGHT_BASE")
   Intrinsic(:TAIL_CALL).AddImm(entrypoint2).MethodAsImm("StringTrimRightBase").Terminator.ptr
+Label(:SlowPathEntrypoint)
+  entrypoint = get_entrypoint_offset("STRING_TRIM_RIGHT_SLOW_PATH")
+  Intrinsic(:SLOW_PATH_ENTRY, str).AddImm(entrypoint).MethodAsImm("StringTrimRight3ArgBridge").Terminator.ptr
+  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 
 
@@ -462,7 +472,7 @@ function(:StringTrimBase,
   end
 
   length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
-  length := ShrI(length_packed).Imm(1).i32
+  length := ShrI(length_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32
   left := 0
   right := SubI(length).Imm(2).i32
   str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
@@ -532,6 +542,8 @@ function(:StringTrim,
     next
   end
 
+  check_string_type(str)
+
   length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
   # length == 0
   If(length_packed, 1).LE.Unlikely.b {
@@ -539,7 +551,7 @@ function(:StringTrim,
   }
   str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
   not_compressed := AndI(length_packed).Imm(1).i32
-  length := ShrI(length_packed).Imm(1).i32
+  length := ShrI(length_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32
   # length == 1
   If(length, 1).EQ.b {
     If(not_compressed, 0).EQ.Likely.b {
@@ -592,6 +604,10 @@ Label(:FirstCharWhitespace)
   LiveOut(unused2).DstReg(regmap[:arg2]).i32
   entrypoint3 = get_entrypoint_offset("STRING_TRIM_LEFT_BASE")
   Intrinsic(:TAIL_CALL).AddImm(entrypoint3).MethodAsImm("StringTrimLeftBase").Terminator.ptr
+Label(:SlowPathEntrypoint)
+  entrypoint = get_entrypoint_offset("STRING_TRIM_SLOW_PATH")
+  Intrinsic(:SLOW_PATH_ENTRY, str).AddImm(entrypoint).MethodAsImm("StringTrim3ArgBridge").Terminator.ptr
+  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 
 
@@ -624,7 +640,7 @@ function(:StringStartsWithBase,
   str_not_compressed := AndI(str_len_packed).Imm(1).i32
   str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
   pfx_len_packed := LoadI(pfx).Imm(Constants::STRING_LENGTH_OFFSET).u32
-  pfx_len := ShrI(pfx_len_packed).Imm(1).i32
+  pfx_len := ShrI(pfx_len_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32
   pfx_not_compressed := AndI(pfx_len_packed).Imm(1).i32
   pfx_data := Add(Cast(pfx).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
 
@@ -660,6 +676,9 @@ function(:StringStartsWith,
     next
   end
 
+  check_string_type(str)
+  check_string_type(pfx)
+
   pfx_len_packed := LoadI(pfx).Imm(Constants::STRING_LENGTH_OFFSET).u32
   # Return 'true' if prefix is empty
   # The least significant bit indicates COMPRESSED/UNCOMPRESSED,
@@ -680,8 +699,8 @@ function(:StringStartsWith,
   }
   from_index2 := Phi(from_index, from_index1).i32
 
-  str_len := ShrI(str_len_packed).Imm(1).i32
-  pfx_len := ShrI(pfx_len_packed).Imm(1).i32
+  str_len := ShrI(str_len_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32
+  pfx_len := ShrI(pfx_len_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32
 
   If(from_index2, Sub(str_len, pfx_len).i32).GT.Unlikely.b {
     # Return 'false' in this case, as we know that 'pfx' is not empty
@@ -694,6 +713,10 @@ function(:StringStartsWith,
   LiveOut(from_index2).DstReg(regmap[:arg2]).i32
   entrypoint = get_entrypoint_offset("STRING_STARTS_WITH_BASE")
   Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringStartsWithBase").Terminator.b
+Label(:SlowPathEntrypoint)
+  entrypoint = get_entrypoint_offset("STRING_STARTS_WITH_SLOW_PATH")
+  Intrinsic(:SLOW_PATH_ENTRY, str, pfx, from_index).AddImm(entrypoint).MethodAsImm("StringStartsWithOddSavedBridge").Terminator.b
+  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 
 
@@ -715,7 +738,7 @@ function(:StringEndsWithBase,
   sfx_len_packed := LoadI(sfx).Imm(Constants::STRING_LENGTH_OFFSET).u32
   sfx_not_compressed := AndI(sfx_len_packed).Imm(1).i32
   sfx_data := Add(Cast(sfx).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
-  sfx_len := ShrI(sfx_len_packed).Imm(1).i32
+  sfx_len := ShrI(sfx_len_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32
   from_index := Sub(end_index, sfx_len).i32;
 
   sfx_i1 := 0
@@ -751,6 +774,9 @@ function(:StringEndsWith,
     next
   end
 
+  check_string_type(str)
+  check_string_type(sfx)
+
   sfx_len_packed := LoadI(sfx).Imm(Constants::STRING_LENGTH_OFFSET).u32
   # Return 'true' if suffix is empty
   # The least significant bit indicates COMPRESSED/UNCOMPRESSED,
@@ -769,14 +795,14 @@ function(:StringEndsWith,
     Return(0).b
   }
 
-  str_len := ShrI(str_len_packed).Imm(1).i32
+  str_len := ShrI(str_len_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32
   # If 'end_index' is greater than length of 'str' make it equal to length of 'str'.
   If(end_index, str_len).GT.Unlikely.b {
     end_index1 := str_len
   }
   end_index2 := Phi(end_index, end_index1).i32
 
-  sfx_len := ShrI(sfx_len_packed).Imm(1).i32
+  sfx_len := ShrI(sfx_len_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32
   from_index := Sub(end_index2, sfx_len).i32;
   IfImm(Compare(from_index, 0).LT.b).Imm(0).NE.Unlikely.b {
     # Return 'false' in this case, as 'sfx' length is greater than 'end_index'.
@@ -788,6 +814,10 @@ function(:StringEndsWith,
   LiveOut(end_index2).DstReg(regmap[:arg2]).i32
   entrypoint = get_entrypoint_offset("STRING_ENDS_WITH_BASE")
   Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringEndsWithBase").Terminator.b
+Label(:SlowPathEntrypoint)
+  entrypoint = get_entrypoint_offset("STRING_ENDS_WITH_SLOW_PATH")
+  Intrinsic(:SLOW_PATH_ENTRY, str, sfx, end_index).AddImm(entrypoint).MethodAsImm("StringEndsWithOddSavedBridge").Terminator.b
+  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 
 function(:StringGetBytesTlab,
@@ -802,6 +832,8 @@ function(:StringGetBytesTlab,
     next
   end
 
+  check_string_type(str)
+
   If(begin_index, end_index).GT.Unlikely.b {
     Goto(:SlowPathEntrypoint)  # Out of range
   }
@@ -810,10 +842,12 @@ function(:StringGetBytesTlab,
     Goto(:SlowPathEntrypoint)  # Out of range
   }
 
+  check_string_type(str)
+
   # Note, 'str' is checked against nullptr in the InstBuilder (see AddArgNullcheckIfNeeded)
   length := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32;
   uncompressed := AndI(length).Imm(1).u32;
-  length := ShrI(length).Imm(1).u32;
+  length := ShrI(length).Imm(Constants::STRING_LENGTH_SHIFT).u32;
 
   If(Cast(end_index).u32, length).A.Unlikely.b {
     Goto(:SlowPathEntrypoint)  # Out of range
@@ -851,7 +885,7 @@ function(:StringGetBytesTlab,
 #
 scoped_macro(:load_char_code) do |char_codes, offset|
   _boxed_ptr := get_object_pointer(char_codes, offset)
-  _char_core := LoadI(_boxed_ptr).Imm(EtsConstants::BOX_PRIMITIVE_VALUE_OFFSET).f64
+  _char_code := LoadI(_boxed_ptr).Imm(EtsConstants::BOX_PRIMITIVE_VALUE_OFFSET).f64
 end  # load_char_code
 
 ###
@@ -887,7 +921,7 @@ scoped_macro(:is_array_of_convertible_char_codes) do |codes_data, codes_count|
     _convertible := Cast(1).b
   else
     _offset1 := Cast(0).u64
-    _codes_len := ShlI(codes_count).Imm(Constants::LOG2_BYTES_PER_OBJ_PTR).u64
+    _codes_len := ShlI(codes_count).Imm(EtsConstants::LOG2_BYTES_PER_OBJ_PTR).u64
     _convertible1 := Cast(1).b
 Label(:Loop)
     _offset := Phi(_offset1, _offset2).u64
@@ -898,7 +932,7 @@ Label(:Loop)
     If(_convertible2, 0).EQ.Unlikely.b {
       Goto(:LoopDone)
     }
-    _offset2 := AddI(_offset).Imm(Constants::OBJ_PTR_SIZE).u64
+    _offset2 := AddI(_offset).Imm(EtsConstants::OBJ_PTR_SIZE).u64
     Goto(:Loop)
 Label(:LoopDone)
     _convertible := Phi(_convertible1, _convertible2).b
@@ -938,7 +972,7 @@ end  # get_char_from_code
 #
 scoped_macro(:is_array_of_compressible_char_codes) do |codes_data, codes_count|
   _offset1 := Cast(0).u64
-  _codes_len := ShlI(codes_count).Imm(Constants::LOG2_BYTES_PER_OBJ_PTR).u64
+  _codes_len := ShlI(codes_count).Imm(EtsConstants::LOG2_BYTES_PER_OBJ_PTR).u64
   _compressible1 := Cast(1).b
 Label(:Loop)
   _offset := Phi(_offset1, _offset2).u64
@@ -950,7 +984,7 @@ Label(:Loop)
     _compressible2 := Cast(0).b
     Goto(:LoopDone)
   }
-  _offset2 := AddI(_offset).Imm(Constants::OBJ_PTR_SIZE).u64
+  _offset2 := AddI(_offset).Imm(EtsConstants::OBJ_PTR_SIZE).u64
   Goto(:Loop)
 
 Label(:LoopDone)
@@ -970,7 +1004,7 @@ Label(:Loop)
     If(_i, count).AE.Unlikely {
       Goto(:LoopDone)
     }
-    _code_offset := ShlI(_i).Imm(Constants::LOG2_BYTES_PER_OBJ_PTR).u64
+    _code_offset := ShlI(_i).Imm(EtsConstants::LOG2_BYTES_PER_OBJ_PTR).u64
     _char := get_char_from_code(load_char_code(src, _code_offset).f64)
     if compressed_string
       _char_offset := Cast(_i).u64
@@ -1012,7 +1046,7 @@ def GenerateCreateStringFromCharCodeTlab(string_compression_enabled)
 
     char_codes_array := get_object_pointer_imm(char_codes, EtsConstants::ESCOMPAT_ARRAY_DATA_OFFSET)
     codes_data := AddI(char_codes_array).Imm(Constants::ARRAY_DATA_OFFSET).ptr
-    codes_count := LoadI(char_codes_array).Imm(Constants::ARRAY_LENGTH_OFFSET).u32
+    codes_count := LoadI(char_codes).Imm(EtsConstants::ESCOMPAT_ARRAY_ACTUAL_LENGTH_OFFSET).u32
 
     # Validate if all the char codes are convertible: whenever an overflow or underflow takes place during the
     # conversion of a denormalized number we have to go to the slow path. The validation must take place before
@@ -1042,10 +1076,10 @@ def GenerateCreateStringFromCharCodeTlab(string_compression_enabled)
     if string_compression_enabled
       If(compressible, 1).EQ.Likely {
         convert_char_codes_to_u8_chars(codes_data, str_data, Cast(codes_count).u64)
-        StoreI(new_str, ShlI(codes_count).Imm(Constants::LOG2_BYTES_PER_U16).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+        StoreI(new_str, ShlI(codes_count).Imm(Constants::STRING_LENGTH_SHIFT).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
       } Else {
         convert_char_codes_to_u16_chars(codes_data, str_data, Cast(codes_count).u64)
-        StoreI(new_str, OrI(ShlI(codes_count).Imm(Constants::LOG2_BYTES_PER_U16).u32).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+        StoreI(new_str, OrI(ShlI(codes_count).Imm(Constants::STRING_LENGTH_SHIFT).u32).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
       }
     else
       convert_char_codes_to_u16_chars(codes_data, str_data, Cast(codes_count).u64)
@@ -1116,10 +1150,10 @@ def GenerateCreateStringFromCharCodeSingleTlab(string_compression_enabled)
     if string_compression_enabled
       If(compressible, 1).EQ.Likely {
         Store(str_data, Cast(0).u64, char).u8
-        StoreI(new_str, Cast(2).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+        StoreI(new_str, Cast(4).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
       } Else {
         Store(str_data, Cast(0).u64, char).u16
-        StoreI(new_str, OrI(Cast(2).u32).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+        StoreI(new_str, OrI(Cast(4).u32).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
       }
     else
       Store(str_data, Cast(0).u64, char).u16  
@@ -1421,6 +1455,8 @@ function(:StringIndexOf,
     next
   end
 
+  check_string_type(str)
+
   str_len_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
 
   # Return '-1' if 'str' is empty.
@@ -1431,7 +1467,7 @@ function(:StringIndexOf,
   str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
 
   IfImm(Compare(AndI(str_len_packed).Imm(1).i32, 1).EQ.b).Imm(0).NE.Unlikely.b {
-    str_data_size_u16 := AndI(str_len_packed).Imm(0xFFFFFFFE).u32
+    str_data_size_u16 := AndI(str_len_packed).Imm(0xFFFFFFFC).u32
     # 0 < data size < 16
     If(str_data_size_u16, 16).LT.Unlikely.b {
         LiveOut(str_data).DstReg(regmap[:arg0]).ptr
@@ -1460,7 +1496,7 @@ function(:StringIndexOf,
     Return(-1).i32
   }
 
-  str_data_size_u8 := ShrI(str_len_packed).Imm(1).u32
+  str_data_size_u8 := ShrI(str_len_packed).Imm(Constants::STRING_LENGTH_SHIFT).u32
   # 0 < data size < 8
   If(str_data_size_u8, 8).LT.Unlikely.b {
     LiveOut(str_data).DstReg(regmap[:arg0]).ptr
@@ -1491,6 +1527,10 @@ function(:StringIndexOf,
   LiveOut(ch).DstReg(regmap[:arg2]).u8
   entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED")
   Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressed").Terminator.i32
+Label(:SlowPathEntrypoint)
+  entrypoint = get_entrypoint_offset("STRING_INDEX_OF_SLOW_PATH")
+  Intrinsic(:SLOW_PATH_ENTRY, str, ch).AddImm(entrypoint).MethodAsImm("StringIndexOf3ArgBridge").Terminator.i32
+  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 
 
@@ -1512,13 +1552,15 @@ function(:StringIndexOfAfter,
     next
   end
 
+  check_string_type(str)
+
   str_len_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
   # Return '-1' if 'str' is empty.
   IfImm(Compare(str_len_packed, 1).LE.b).Imm(0).NE.Unlikely.b {
     Return(-1).i32
   }
 
-  str_len := ShrI(str_len_packed).Imm(1).i32
+  str_len := ShrI(str_len_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32
 
   # Return '-1' if 'start_index' is out of range
   If(start_index, str_len).GE.Unlikely.b {
@@ -1593,6 +1635,10 @@ function(:StringIndexOfAfter,
   LiveOut(ch).DstReg(regmap[:arg2]).u8
   entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED")
   Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressed").Terminator.i32
+Label(:SlowPathEntrypoint)
+  entrypoint = get_entrypoint_offset("STRING_INDEX_OF_AFTER_SLOW_PATH")
+  Intrinsic(:SLOW_PATH_ENTRY, str, ch, start_index).AddImm(entrypoint).MethodAsImm("StringIndexOfAfterOddSavedBridge").Terminator.i32
+  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 
 function(:StringRepeatTlab,
@@ -1611,6 +1657,8 @@ function(:StringRepeatTlab,
     Goto(:SlowPathEntrypoint)
   }
 
+  check_string_type(str)
+
   IfImm(Compare(count, 0).EQ.b).Imm(0).NE {
     klass := load_class(str)
     new_str := allocate_string_tlab(klass, Cast(0).u64);
@@ -1625,8 +1673,10 @@ function(:StringRepeatTlab,
   klass := load_class(str)
   old_buf := AddI(str).Imm(Constants::STRING_DATA_OFFSET).ptr
   uncompressed := AndI(length).Imm(1).u32
-  length := Shl(ShrI(length).Imm(1).u32, uncompressed).u32
+  codes_count := ShrI(length).Imm(Constants::STRING_LENGTH_SHIFT).u32
+  length := Shl(ShrI(length).Imm(Constants::STRING_LENGTH_SHIFT).u32, uncompressed).u32
   size := Mul(length, count).u32
+  codes_count := Mul(codes_count, count).u32
   new_str := allocate_string_tlab(klass, Cast(size).u64);
   new_buf := AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr
 
@@ -1656,11 +1706,11 @@ Label(:outer)
   Goto(:outer)
 
 Label(:End)
-  # shift left if it was a compressed string
-  # mark the (unset) lowest bit with uncompressed
-  compress := Neg(SubI(uncompressed).Imm(1).u32).u32
-  length := Or(Shl(size, compress).u32, uncompressed).u32
-  StoreI(new_str, length).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  If(uncompressed, 0).EQ.Likely {
+    StoreI(new_str, ShlI(codes_count).Imm(Constants::STRING_LENGTH_SHIFT).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  } Else {
+    StoreI(new_str, OrI(ShlI(codes_count).Imm(Constants::STRING_LENGTH_SHIFT).u32).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  }
   Return(new_str).ptr
 
 Label(:SlowPathEntrypoint)
@@ -1680,10 +1730,12 @@ function(:WriteStringToMem,
     next
   end
 
+  check_string_type(str)
+
   buf := Bitcast(mem).ptr
   len := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
   utf16 := AndI(len).Imm(1).u32
-  len_0 := ShrI(len).Imm(1).u32
+  len_0 := ShrI(len).Imm(Constants::STRING_LENGTH_SHIFT).u32
   len := len_0
 
   If(len, 0).EQ.Unlikely.b {
@@ -1709,6 +1761,10 @@ function(:WriteStringToMem,
 Label(:End)
   len := Phi(len_0, len, len_1).u32
   Return(len).u32
+Label(:SlowPathEntrypoint)
+  entrypoint = get_entrypoint_offset("WRITE_STRING_TO_MEM_SLOW_PATH")
+  Intrinsic(:SLOW_PATH_ENTRY, mem, str).AddImm(entrypoint).MethodAsImm("WriteStringToMemUsualBridge").Terminator.u32
+  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 
 function(:CreateStringFromMem,
@@ -1736,7 +1792,7 @@ function(:CreateStringFromMem,
   str := allocate_string_tlab_no_debug(klass, size)
   str_data := AddI(str).Imm(Constants::STRING_DATA_OFFSET).ptr
   copy_u8_chars(addr, str_data, size);
-  size_0 := ShlI(size).Imm(1).u32
+  size_0 := ShlI(size).Imm(Constants::STRING_LENGTH_SHIFT).u32
 
   If(mark, Cast(0xFEFF).u16).EQ.Unlikely.b {  # UTF-16 string
     size_1 := OrI(ShrI(size_0).Imm(1).u32).Imm(1).u32
@@ -1754,4 +1810,3 @@ function(:CreateStringFromMem,
   Intrinsic(:SLOW_PATH_ENTRY, buf, len).AddImm(eid).MethodAsImm("CreateStringFromMem3ArgBridge").Terminator.ptr
   Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
-

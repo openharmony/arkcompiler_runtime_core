@@ -24,6 +24,6 @@ function identity<T>(arg: T): T {
 function main(): void {
   let result1 = identity<string>("hello");
   let result2 = identity<number>(42);
-  assertEQ(result1, 'hello');
-  assertEQ(result2, 42);
+  arktest.assertEQ(result1, 'hello');
+  arktest.assertEQ(result2, 42);
 }

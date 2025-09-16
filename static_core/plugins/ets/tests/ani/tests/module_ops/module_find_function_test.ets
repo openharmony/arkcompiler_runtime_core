@@ -23,26 +23,30 @@ export namespace ops {
     }
 }
 
-function getIntValue(i: int): int {
+function getIntValue1(i: int): int {
     return 0;
 }
-function getIntValue(i: String): int {
+function getIntValue2(i: String): int {
     return 1;
 }
-function getIntValue(): int {
+function getIntValue3(): int {
     return 2;
 }
 
+overload getIntValue {getIntValue1, getIntValue2, getIntValue3}
 export function getInitialStringValue(): String {
     return "a";
 }
 
-function overloaded(i: int): int {
+function overloaded1(i: int): int {
     return 0
 }
-function overloaded(): int {
+function overloaded2(): int {
     return 1
 }
+
+overload overloaded {overloaded1, overloaded2}
+
 function getIntValueA(i: int): void {}
 function getIntValueB(i: int): void {}
 function getIntValueC(i: int): void {}

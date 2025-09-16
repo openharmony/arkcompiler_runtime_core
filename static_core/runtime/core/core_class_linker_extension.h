@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,8 @@ public:
 
     bool InitializeArrayClass(Class *arrayClass, Class *componentClass) override;
 
+    bool InitializeUnionClass(Class *unionClass, Span<Class *> constituentClasses) override;
+
     void InitializePrimitiveClass(Class *primitiveClass) override;
 
     size_t GetClassVTableSize(ClassRoot root) override;
@@ -45,6 +47,12 @@ public:
     Class *CreateClass(const uint8_t *descriptor, size_t vtableSize, size_t imtSize, size_t size) override;
 
     void FreeClass(Class *klass) override;
+
+    void FillStringClass(Class *strCls, ClassRoot flag);
+
+    const uint8_t *GetStringClassDescriptor(ClassRoot flag);
+
+    bool InitializeStringClass();
 
     bool InitializeClass([[maybe_unused]] Class *klass) override
     {

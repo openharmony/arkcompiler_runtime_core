@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+//! CHECKER       Unsafe memory access, INT
+//! RUN           options: "--compiler-enable-jit=false", entry: 'unsafe_memory.ETSGLOBAL::main'
+
 //! CHECKER       Unsafe memory access, JIT
 //! SKIP_IF       @architecture == "arm32"
 //! RUN           force_jit: true, options: "--compiler-regex='.*test.*' --compiler-hotness-threshold=0", entry: 'unsafe_memory.ETSGLOBAL::main'
@@ -33,7 +36,7 @@ native function freeMem(addr: long) : void;
 
 function testBoolean() : int {
     let vals: boolean[] = [true, false, false, false, true, true, false, true];
-    let size: int = vals.length as int * Byte.BYTE_SIZE;
+    let size: int = vals.length.toInt() * Byte.BYTE_SIZE;
     let addr: long = allocMem(size);
     let ptr: long = addr
     for (let i: int  = 0; i < vals.length; ++i) {
@@ -56,7 +59,7 @@ function testBoolean() : int {
 
 function testInt8() : int {
     let vals: byte[] = [1, -1, 0, 2, -2, 127, -128];
-    let size: int = vals.length as int * Byte.BYTE_SIZE;
+    let size: int = vals.length.toInt() * Byte.BYTE_SIZE;
     let addr: long = allocMem(size);
     let ptr: long = addr
     for (let i: int  = 0; i < vals.length; ++i) {
@@ -78,8 +81,8 @@ function testInt8() : int {
 }
 
 function testInt16() : int {
-    let vals: short[] = [1, -1, 0, 2, -2, 0x7fff as short, 0x8000 as short ];
-    let size: int = vals.length as int * Short.BYTE_SIZE;
+    let vals: short[] = [1, -1, 0, 2, -2, 0x7fff.toShort(), 0x8000.toShort() ];
+    let size: int = vals.length.toInt() * Short.BYTE_SIZE;
     let addend = Short.BYTE_SIZE - 1
     let addr: long = allocMem(size + addend);
     for (let l: int = 0; l <= addend; ++l) {
@@ -105,7 +108,7 @@ function testInt16() : int {
 
 function testInt32() : int {
     let vals: int[] = [1, -1, 0, 2, -2, 0x7fffffff, 0x80000000];
-    let size: int = vals.length as int * Int.BYTE_SIZE;
+    let size: int = vals.length.toInt() * Int.BYTE_SIZE;
     let addend = Int.BYTE_SIZE - 1
     let addr: long = allocMem(size + addend);
     for (let l: int = 0; l <= addend; ++l) {
@@ -131,7 +134,7 @@ function testInt32() : int {
 
 function testInt64() : int {
     let vals: long[] = [1, -1, 0, 2, -2, 0x7fffffffffffffff as long, 0x8000000000000000 as long];
-    let size: int = vals.length as int * Long.BYTE_SIZE;
+    let size: int = vals.length.toInt() * Long.BYTE_SIZE;
     let addend = Long.BYTE_SIZE - 1
     let addr: long = allocMem(size + addend);
     for (let l: int = 0; l <= addend; ++l) {
@@ -156,8 +159,8 @@ function testInt64() : int {
 }
 
 function testFloat32() : int {
-    let vals: float[] = [1.123456, -1.234567, 1.2E-50, -1.2E+50 as float, 1.23456E+50 as float, -1.23456E-50];
-    let size: int = vals.length as int * Float.BYTE_SIZE;
+    let vals: float[] = [1.123456f, -1.234567f, 1.2E-50f, -1.2E+50f, 1.23456E+50f, -1.23456E-50f];
+    let size: int = vals.length.toInt() * Float.BYTE_SIZE;
     let addend = Float.BYTE_SIZE - 1
     let addr: long = allocMem(size + addend);
     for (let l: int = 0; l <= addend; ++l) {
@@ -184,7 +187,7 @@ function testFloat32() : int {
 function testFloat64() : int {
     let vals: double[] = [1.23456789, -1.23456789, 1.2E-300, 1.2E+300,
                           1.23456789E+300, -1.23456789E-300];
-    let size: int = vals.length as int * Double.BYTE_SIZE;
+    let size: int = vals.length.toInt() * Double.BYTE_SIZE;
     let addend = Double.BYTE_SIZE - 1
     let addr: long = allocMem(size + addend);
     for (let l: int = 0; l <= addend; ++l) {
@@ -247,14 +250,14 @@ function testString() : int {
 function main(): int {
     loadLibrary("checked_test_unsafe_memory");
 
-    assertEQ(testBoolean(), 0, "boolean test failed");
-    assertEQ(testInt8(), 0, "int8 test failed");
-    assertEQ(testInt16(), 0, "int16 test failed");
-    assertEQ(testInt32(), 0, "int32 test failed");
-    assertEQ(testInt64(), 0, "int64 test failed");
-    assertEQ(testFloat64(), 0, "float64 test failed");
-    assertEQ(testFloat32(), 0, "float32 test failed");
-    assertEQ(testString(), 0, "string test failed");
+    arktest.assertEQ(testBoolean(), 0, "boolean test failed");
+    arktest.assertEQ(testInt8(), 0, "int8 test failed");
+    arktest.assertEQ(testInt16(), 0, "int16 test failed");
+    arktest.assertEQ(testInt32(), 0, "int32 test failed");
+    arktest.assertEQ(testInt64(), 0, "int64 test failed");
+    arktest.assertEQ(testFloat64(), 0, "float64 test failed");
+    arktest.assertEQ(testFloat32(), 0, "float32 test failed");
+    arktest.assertEQ(testString(), 0, "string test failed");
 
     return 0;
 }

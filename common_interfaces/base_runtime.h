@@ -13,6 +13,15 @@
  * limitations under the License.
  */
 
+// NOLINTBEGIN(readability-identifier-naming, cppcoreguidelines-macro-usage,
+//             cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
+//             readability-else-after-return, readability-duplicate-include,
+//             misc-non-private-member-variables-in-classes, cppcoreguidelines-pro-type-member-init,
+//             google-explicit-constructor, cppcoreguidelines-pro-type-union-access,
+//             modernize-use-auto, llvm-namespace-comment,
+//             cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
+//             readability-implicit-bool-conversion)
+
 #ifndef COMMON_INTERFACES_BASE_RUNTIME_H
 #define COMMON_INTERFACES_BASE_RUNTIME_H
 
@@ -21,7 +30,6 @@
 #include <mutex>
 
 #include "base/runtime_param.h"
-
 namespace common {
 class BaseStringTableImpl;
 template <typename Impl>
@@ -51,6 +59,7 @@ enum GCReason : uint32_t {
     GC_REASON_NATIVE_SYNC,             // Just wait one gc request to reduce native heap consumption.
     GC_REASON_FORCE,                   // force gc is triggered when runtime triggers gc actively.
     GC_REASON_APPSPAWN,                // appspawn gc is triggered when prefork.
+    GC_REASON_XREF,                    // force gc the whole heap include XRef.
     GC_REASON_BACKGROUND,              // trigger gc caused by switching to background.
     GC_REASON_HINT,                    // trigger gc caused by hint gc.
     GC_REASON_IDLE,                    // When in a low activity state, trigger gc to reduce resicdent memory.
@@ -122,9 +131,13 @@ public:
     void PreFork(ThreadHolder *holder);
     void PostFork(bool enableWarmStartup);
 
+    bool HasBeenInitialized();
     void Init(const RuntimeParam &param);   // Support setting custom parameters
     void Init();                            // Use default parameters
+    void InitFromDynamic();
+    void InitFromDynamic(const RuntimeParam &param);
     void Fini();
+    void FiniFromDynamic();
 
     // Need refactor, move to other file
     static void WriteRoot(void* obj);
@@ -145,6 +158,7 @@ public:
     static bool CheckAndTriggerHintGC(MemoryReduceDegree degree);
     static void NotifyHighSensitive(bool isStart);
     static void NotifyWarmStart();
+    static void FillFreeObject(void *object, size_t size);
 
     HeapParam &GetHeapParam()
     {
@@ -194,3 +208,11 @@ private:
 };
 }  // namespace common
 #endif // COMMON_INTERFACES_BASE_RUNTIME_H
+// NOLINTEND(readability-identifier-naming, cppcoreguidelines-macro-usage,
+//           cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
+//           readability-else-after-return, readability-duplicate-include,
+//           misc-non-private-member-variables-in-classes, cppcoreguidelines-pro-type-member-init,
+//           google-explicit-constructor, cppcoreguidelines-pro-type-union-access,
+//           modernize-use-auto, llvm-namespace-comment,
+//           cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
+//           readability-implicit-bool-conversion)

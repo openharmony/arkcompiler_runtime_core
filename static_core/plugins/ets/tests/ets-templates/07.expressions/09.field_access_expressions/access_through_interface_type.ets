@@ -24,5 +24,5 @@ interface A {
 }
 
 function main(): void {
-    assertTrue( A.x == 1 )
+    arktest.assertTrue( A.x == 1 )
 }

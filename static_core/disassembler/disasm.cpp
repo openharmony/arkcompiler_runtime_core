@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,7 +36,6 @@ struct Options {
                                          "(--debug-file FILENAME) set debug file name. default is std::cout"};
     ark::PandArg<std::string> inputFile {"input_file", "", "Path to the source binary code"};
     ark::PandArg<std::string> outputFile {"output_file", "", "Path to the generated assembly code"};
-    ark::PandArg<std::string> profile {"profile", "", "Path to the profile"};
     ark::PandArg<bool> version {"version", false,
                                 "Ark version, file format version and minimum supported file format version"};
 
@@ -51,7 +50,6 @@ struct Options {
         paParser.Add(&version);
         paParser.PushBackTail(&inputFile);
         paParser.PushBackTail(&outputFile);
-        paParser.Add(&profile);
         paParser.EnableTail();
     }
 };
@@ -74,13 +72,8 @@ static void Disassemble(const Options &options)
     disasm.Disassemble(inputFile, options.quiet.GetValue(), options.skipStrings.GetValue());
     auto verbose = options.verbose.GetValue();
     if (verbose) {
-        auto profile = options.profile.GetValue();
-        if (!profile.empty()) {
-            disasm.SetProfile(profile);
-        }
         disasm.CollectInfo();
     }
-
     LOG(DEBUG, DISASSEMBLER) << "[serializing results]\n";
 
     std::ofstream resPa;

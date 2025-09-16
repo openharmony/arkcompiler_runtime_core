@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 
-#include "libabckit/include/c/abckit.h"
+#include "libabckit/c/abckit.h"
 #include "helpers/helpers.h"
 
 namespace libabckit::test {
@@ -47,6 +47,9 @@ TEST_F(LibAbcKitGraphStuff, FunctionSetGraphStatic)
     std::vector<struct ClassData> userData = {{"ClassA", {"foo", "bar"}}, {"ClassB", {"baz", "func"}}};
 
     g_implI->fileEnumerateModules(file, &userData, [](AbckitCoreModule *m, void *data) {
+        if (g_implI->moduleIsExternal(m)) {
+            return false;
+        }
         auto *userData = reinterpret_cast<std::vector<struct ClassData> *>(data);
 
         for (const auto &classData : *userData) {
@@ -88,6 +91,9 @@ TEST_F(LibAbcKitGraphStuff, CreateGraphFromFunctionStatic)
     std::vector<struct ClassData> userData = {{"ClassA", {"foo", "bar"}}, {"ClassB", {"baz", "func"}}};
 
     g_implI->fileEnumerateModules(file, &userData, [](AbckitCoreModule *m, void *data) {
+        if (g_implI->moduleIsExternal(m)) {
+            return false;
+        }
         auto *userData = reinterpret_cast<std::vector<struct ClassData> *>(data);
 
         for (const auto &classData : *userData) {
@@ -129,6 +135,9 @@ TEST_F(LibAbcKitGraphStuff, DestroyGraphStatic)
     std::vector<struct ClassData> userData = {{"ClassA", {"foo", "bar"}}, {"ClassB", {"baz", "func"}}};
 
     g_implI->fileEnumerateModules(file, &userData, [](AbckitCoreModule *m, void *data) {
+        if (g_implI->moduleIsExternal(m)) {
+            return false;
+        }
         auto *userData = reinterpret_cast<std::vector<struct ClassData> *>(data);
 
         for (const auto &classData : *userData) {

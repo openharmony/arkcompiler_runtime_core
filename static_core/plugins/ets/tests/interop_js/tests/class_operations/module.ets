@@ -65,6 +65,7 @@ export declare class Kitten {
     constructor(id: int, name: string);
     id: int;
     name: string;
+    male: boolean;
 }
 
 export declare class MyNamespace {

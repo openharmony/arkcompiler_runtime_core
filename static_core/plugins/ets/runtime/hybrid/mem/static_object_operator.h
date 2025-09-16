@@ -20,33 +20,46 @@
 #include "objects/base_object.h"
 #include "objects/base_object_operator.h"
 #include "runtime/include/object_header.h"
+#endif
+
+namespace ark::ets {
+class PandaEtsVM;
+}  // namespace ark::ets
+
+#if defined(ARK_HYBRID)
 
 namespace ark::mem {
 
-class StaticObjectOperator : public panda::BaseObjectOperatorInterfaces {
+class StaticObjectOperator : public common::BaseObjectOperatorInterfaces {
 public:
-    static void Initialize();
+    static void Initialize(ark::ets::PandaEtsVM *vm);
 
-    bool IsValidObject([[maybe_unused]] const panda::BaseObject *object) const override
+    bool IsValidObject([[maybe_unused]] const common::BaseObject *object) const override
     {
         return true;
     }
 
-    void ForEachRefField(const panda::BaseObject *object, const panda::RefFieldVisitor &visitor) const override;
+    void ForEachRefFieldSkipReferent(const common::BaseObject *object,
+                                     const common::RefFieldVisitor &visitor) const override;
 
-    size_t GetSize(const panda::BaseObject *object) const override
+    void ForEachRefField(const common::BaseObject *object, const common::RefFieldVisitor &visitor) const override;
+
+    void IterateXRef(const common::BaseObject *object, const common::RefFieldVisitor &visitor) const override;
+
+    size_t GetSize(const common::BaseObject *object) const override
     {
         // ObjectHeader must be binary compatible with BaseObject
         auto *hdr = reinterpret_cast<const ObjectHeader *>(object);
         return hdr->ObjectSize();
     }
 
-    panda::BaseObject *GetForwardingPointer(const panda::BaseObject *object) const override;
+    common::BaseObject *GetForwardingPointer(const common::BaseObject *object) const override;
 
-    void SetForwardingPointerAfterExclusive(panda::BaseObject *object, panda::BaseObject *fwdPtr) override;
+    void SetForwardingPointerAfterExclusive(common::BaseObject *object, common::BaseObject *fwdPtr) override;
 
 private:
     static StaticObjectOperator instance_;
+    ark::ets::PandaEtsVM *vm_ {nullptr};
 };
 
 }  // namespace ark::mem
@@ -56,7 +69,7 @@ private:
 namespace ark::mem {
 class StaticObjectOperator {
 public:
-    static void Initialize() {}
+    static void Initialize([[maybe_unused]] ark::ets::PandaEtsVM *vm) {}
 };
 }  // namespace ark::mem
 

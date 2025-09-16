@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-function main() {
+function testMain() {
     let ab = new ArrayBuffer(1024);
     let ta = new Uint8Array(ab);
     
@@ -22,4 +22,10 @@ function main() {
 
     arktest.assertEQ(Atomics.store(ta, 1, 6), 6);
     arktest.assertEQ(Atomics.load(ta, 1), 6);
+}
+
+function main() {
+    const suite = new arktest.ArkTestsuite('Function Atomics nonconcurrent_store_return_check tests')
+    suite.addTest('Function testMain', testMain)
+    return suite.run()
 }

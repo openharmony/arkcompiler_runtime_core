@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include "libabckit/include/c/metadata_core.h"
-#include "libabckit/include/c/extensions/arkts/metadata_arkts.h"
-#include "libabckit/include/c/extensions/js/metadata_js.h"
+#include "libabckit/c/metadata_core.h"
+#include "libabckit/c/extensions/arkts/metadata_arkts.h"
+#include "libabckit/c/extensions/js/metadata_js.h"
 
 #include "libabckit/src/adapter_dynamic/metadata_modify_dynamic.h"
 #include "libabckit/src/adapter_dynamic/metadata_inspect_dynamic.h"

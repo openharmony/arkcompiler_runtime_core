@@ -22,7 +22,7 @@ cases:
           // package module, negative case with internal accessor
           let a = new A
           a.foo = 42
-          assertEQ( a.foo, 42 )
+          arktest.assertEQ( a.foo, 42 )
 
     - files: './pkg_int_A1/file_A.ets'
       decl: |-
@@ -31,7 +31,7 @@ cases:
           // package module, positive case with internal accessor, from same-package subclass
           let c = new C
           c.foo = 42
-          assertEQ( c.foo, 44 )
+          arktest.assertEQ( c.foo, 44 )
 
     - files: './pkg_int_A1/file_A.ets'
       tags: 'compile-only, negative'
@@ -41,7 +41,7 @@ cases:
           // package module, negative case with internal accessor, from same-package subclass
           let d = new D
           d.foo = 42
-          assertEQ( d.foo, 42 )
+          arktest.assertEQ( d.foo, 42 )
 
     - files: './pkg_int_A2/file_A.ets, ./pkg_int_A2/file_B.ets'
       decl: |-
@@ -50,7 +50,7 @@ cases:
           // package module, positive case with internal accessor, from same-package subclass
           let b = new B
           b.foo = 42
-          assertEQ( b.foo, 62 )
+          arktest.assertEQ( b.foo, 62 )
 
     - files: './pkg_int_A2/file_A.ets, ./pkg_int_A2/file_B.ets'
       tags: 'compile-only, negative'
@@ -60,7 +60,7 @@ cases:
           // package module, negative case with internal accessor, from same-package subclass
           let f = new F
           f.foo = 42
-          assertEQ( f.foo, 42 )
+          arktest.assertEQ( f.foo, 42 )
 
     # internal access modifier, other-package cases
     - files: './pkg_int_A1/file_A.ets, ./pkg_int_B1/file.ets'
@@ -71,7 +71,7 @@ cases:
           // package module, negative case with internal accessor, from other-package subclass
           let k = new K
           k.foo = 42
-          assertEQ( k.foo, 42 )
+          arktest.assertEQ( k.foo, 42 )
 
     - files: './pkg_int_A1/file_A.ets, ./pkg_int_B2/file.ets'
       tags: 'compile-only, negative'
@@ -81,7 +81,7 @@ cases:
           // package module, negative case with internal accessor, from other-package subclass
           let l = new L
           l.foo = 42
-          assertEQ( l.foo, 42 )
+          arktest.assertEQ( l.foo, 42 )
 
     - files: './pkg_int_A1/file_A.ets, ./pkg_int_B3/file.ets'
       decl: |-
@@ -90,7 +90,7 @@ cases:
           // package module, positive case with internal accessor, from other-package subclass
           let m = new M
           m.foo = 42
-          assertEQ( m.foo, 62 )
+          arktest.assertEQ( m.foo, 62 )
 
     - files: './pkg_int_A1/file_A.ets, ./pkg_int_B4/file.ets'
       decl: |-
@@ -99,4 +99,4 @@ cases:
           // package module, positive case with internal accessor, from other-package subclass
           let n = new N
           n.foo = 42
-          assertEQ( n.foo, 44 )
+          arktest.assertEQ( n.foo, 44 )

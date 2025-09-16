@@ -31,7 +31,7 @@ function main() {
     let x : X = new X();
     let y : Y = new Y();
 
-    assertEQ( y.foo(), 1)
-    assertEQ( Y.foo(), 0)
-    assertEQ( X.foo(), 0)
+    arktest.assertEQ( y.foo(), 1)
+    arktest.assertEQ( Y.foo(), 0)
+    arktest.assertEQ( X.foo(), 0)
 }

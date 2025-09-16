@@ -32,9 +32,7 @@ ohos_fuzztest("AniTextEncoderFuzzTest") {
   ]
 
   configs = [ "$ark_root:ark_config" ]
-  deps = [
-    "$ark_root:ark_packages",
-  ]
+  deps = [ "$ark_root:ark_packages" ]
 
   cflags = [
     "-g",

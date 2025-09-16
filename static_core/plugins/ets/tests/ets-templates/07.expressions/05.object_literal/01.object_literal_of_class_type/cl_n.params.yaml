@@ -73,3 +73,11 @@ cases:
           }
       use: |-
           let a: A = { name: "John", age: 42, name: "James" } // CTE, duplicate field
+
+    - decl: |-
+          class A {
+              name: string|null;
+              age: number = 0
+          }
+      use: |-
+          let a = { name: "John", age: 42 } // CTE, type cannot be inferred

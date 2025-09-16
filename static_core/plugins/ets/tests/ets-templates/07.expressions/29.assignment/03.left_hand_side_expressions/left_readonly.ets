@@ -25,5 +25,5 @@ class MyClass {
 function main(): void {
   let obj: MyClass = new MyClass();
   obj.readOnlyProp = 200;
-  assertEQ(obj.readOnlyProp, 200);
+  arktest.assertEQ(obj.readOnlyProp, 200);
 }

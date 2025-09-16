@@ -20,10 +20,10 @@ class Base {
     constructor(x: int) {
         this.x = x * 2
         __noinline__doSomething(this)
-        assertEQ(getBaseX(this), x * 2)
+        arktest.assertEQ(getBaseX(this), x * 2)
         this.x = x * 3
         __noinline__doSomething(this)
-        assertEQ(getBaseX(this), x * 3)
+        arktest.assertEQ(getBaseX(this), x * 3)
         this.y = -10
     }
 }
@@ -33,12 +33,12 @@ class NotReadonly {
 
     constructor(x: int) {
         this.x = x * 2
-        assertEQ(getNotReadonlyX(this), x * 2)
+        arktest.assertEQ(getNotReadonlyX(this), x * 2)
         __noinline__changeX(this)
-        assertEQ(getNotReadonlyX(this), x * 2 + 1)
+        arktest.assertEQ(getNotReadonlyX(this), x * 2 + 1)
         this.x = x * 3
         __noinline__doSomething(this)
-        assertEQ(getNotReadonlyX(this), x * 3)
+        arktest.assertEQ(getNotReadonlyX(this), x * 3)
     }
 }
 
@@ -107,11 +107,11 @@ function getNotReadonlyX(b: NotReadonly): int {
 function checkGetBaseX(): int {
     let b = new Base(10)
     __noinline__doSomething(b)
-    assertEQ(getBaseX(b), 30)
+    arktest.assertEQ(getBaseX(b), 30)
     for (let i = 0; i < 5; i++) {
         __noinline__doSomething(b)
-        assertEQ(getBaseX(b), 30)
-        assertEQ(b.y, -10)
+        arktest.assertEQ(getBaseX(b), 30)
+        arktest.assertEQ(b.y, -10)
     }
     return 0
 }
@@ -157,10 +157,10 @@ function checkGetBaseX(): int {
 function checkGetNotReadonlyX(): int {
     let b = new NotReadonly(10)
     __noinline__doSomething(b)
-    assertEQ(getNotReadonlyX(b), 30)
+    arktest.assertEQ(getNotReadonlyX(b), 30)
     for (let i = 0; i < 5; i++) {
         __noinline__doSomething(b)
-        assertEQ(getNotReadonlyX(b), 30)
+        arktest.assertEQ(getNotReadonlyX(b), 30)
     }
     return 0
 }

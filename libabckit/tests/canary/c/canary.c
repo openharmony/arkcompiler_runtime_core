@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#include "../../../include/c/abckit.h"
-#include "../../../include/c/statuses.h"
-#include "../../../include/c/ir_core.h"
-#include "../../../include/c/metadata_core.h"
-#include "../../../include/c/isa/isa_dynamic.h"
-#include "../../../include/c/extensions/arkts/metadata_arkts.h"
-#include "../../../include/c/extensions/js/metadata_js.h"
+#include "../../../include/libabckit/c/abckit.h"
+#include "../../../include/libabckit/c/statuses.h"
+#include "../../../include/libabckit/c/ir_core.h"
+#include "../../../include/libabckit/c/metadata_core.h"
+#include "../../../include/libabckit/c/isa/isa_dynamic.h"
+#include "../../../include/libabckit/c/extensions/arkts/metadata_arkts.h"
+#include "../../../include/libabckit/c/extensions/js/metadata_js.h"
 
 /*
  * This a canary file to check that the public API conforms to:

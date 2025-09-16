@@ -35,6 +35,12 @@ inline void *ToVoidPtr(uintptr_t val)
 {
     return reinterpret_cast<void *>(val);
 }
+
+template<class T>
+constexpr T AlignmentUp(T size, T alignment)
+{
+    return ((size + alignment - 1) & ~static_cast<T>(alignment - 1));
+}
 } // namespace common
 
 

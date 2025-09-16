@@ -26,6 +26,6 @@ class X implements Y {}
 
 function main() : int {
     let y: Y | undefined = undefined
-    assertEQ( y, undefined)
+    arktest.assertEQ( y, undefined)
     return 0;
 }

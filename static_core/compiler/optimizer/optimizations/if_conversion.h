@@ -60,6 +60,7 @@ private:
     bool IsPhisAllowed(BasicBlock *bb, BasicBlock *pred1, BasicBlock *pred2, uint32_t *phiCount);
     static bool IsConditionChainPhi(Inst *phi);
     uint32_t GetIfcLimit(BasicBlock *bb);
+    bool TryReplaceSelectImmVariablesWithConstants();
 };
 }  // namespace ark::compiler
 

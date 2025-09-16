@@ -88,8 +88,10 @@ static EtsByte GetRefTypeKind(const EtsClass *refType)
         result = static_cast<EtsByte>(EtsTypeAPIKind::STRING);
     } else if (refType->IsNullValue()) {
         result = static_cast<EtsByte>(EtsTypeAPIKind::NUL);
+    } else if (refType->IsUnionClass()) {
+        result = static_cast<EtsByte>(EtsTypeAPIKind::UNION);
     } else {
-        // NOTE(vpukhov): EtsTypeAPIKind:: UNION, TUPLE are not implemented
+        // NOTE(vpukhov): EtsTypeAPIKind:: TUPLE are not implemented
         ASSERT(refType->IsClass());
         result = static_cast<EtsByte>(EtsTypeAPIKind::CLASS);
     }
@@ -164,7 +166,8 @@ EtsByte TypeAPIGetTypeKind(EtsString *td, EtsRuntimeLinker *contextLinker)
         return static_cast<EtsByte>(EtsTypeAPIKind::VOID);
     }
     // Is RefType?
-    if (typeDesc[0] == CLASS_TYPE_PREFIX || typeDesc[0] == ARRAY_TYPE_PREFIX) {
+    if (typeDesc[0] == CLASS_TYPE_PREFIX || typeDesc[0] == ARRAY_TYPE_PREFIX ||
+        typeDesc[0] == UNION_OR_ENUM_TYPE_PREFIX) {
         auto *refType = TypeAPIGetClass(td, contextLinker);
         if (refType == nullptr) {
             return static_cast<EtsByte>(EtsTypeAPIKind::NONE);
@@ -198,7 +201,7 @@ EtsString *TypeAPIGetUndefinedTypeDescriptor()
 EtsInt TypeAPIGetClassAttributes(EtsClass *cls)
 {
     uint32_t attrs = 0;
-    attrs |= (cls->IsFinal()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::FINAL) : 0U;
+    attrs |= (cls->IsExtensible()) ? 0U : static_cast<uint32_t>(EtsTypeAPIAttributes::FINAL);
 
     return static_cast<EtsInt>(attrs);
 }
@@ -477,7 +480,7 @@ EtsLong TypeAPIGetInterfacesNum(EtsClass *cls)
 EtsClass *TypeAPIGetInterface(EtsClass *cls, EtsLong i)
 {
     auto interfaces = cls->GetRuntimeClass()->GetInterfaces();
-    if (0 <= i && i <= static_cast<EtsLong>(interfaces.size())) {
+    if (0 <= i && i < static_cast<EtsLong>(interfaces.size())) {
         return EtsClass::FromRuntimeClass(interfaces[i]);
     }
     return nullptr;

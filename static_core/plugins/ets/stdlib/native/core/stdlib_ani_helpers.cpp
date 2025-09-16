@@ -79,7 +79,7 @@ ANI_EXPORT std::string ConvertFromAniString(ani_env *env, ani_string aniStr)
 
 ANI_EXPORT std::string StatusToString(ani_status status)
 {
-    constexpr size_t STATUS_NUM = static_cast<size_t>(ANI_INVALID_VERSION) + 1U;
+    constexpr size_t STATUS_NUM = static_cast<size_t>(ANI_AMBIGUOUS) + 1U;
 
     static std::array<std::string, STATUS_NUM> statusToStringTable {
         "ANI_OK",
@@ -96,6 +96,7 @@ ANI_EXPORT std::string StatusToString(ani_status status)
         "ANI_OUT_OF_RANGE",
         "ANI_BUFFER_TO_SMALL",
         "ANI_INVALID_VERSION",
+        "ANI_AMBIGUOUS",
     };
 
     auto idx = static_cast<size_t>(status);
@@ -108,7 +109,7 @@ ANI_EXPORT std::string StatusToString(ani_status status)
 
 ANI_EXPORT ani_string CreateUtf8String(ani_env *env, const char *data, ani_size size)
 {
-    ani_string result;
+    ani_string result {};
 
     auto status = env->String_NewUTF8(data, size, &result);
     if (status != ANI_OK) {

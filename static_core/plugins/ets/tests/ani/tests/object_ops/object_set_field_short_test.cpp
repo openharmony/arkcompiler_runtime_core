@@ -29,7 +29,7 @@ public:
         auto packRef = CallEtsFunction<ani_ref>("object_set_field_short_test", "newPackObject");
 
         ani_class cls {};
-        ASSERT_EQ(env_->FindClass("Lobject_set_field_short_test/Pack;", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("object_set_field_short_test.Pack", &cls), ANI_OK);
 
         ani_field fieldShort {};
         ASSERT_EQ(env_->Class_FindField(cls, "short_value", &fieldShort), ANI_OK);

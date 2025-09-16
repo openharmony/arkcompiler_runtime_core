@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#include "libabckit/include/c/metadata_core.h"
-#include "libabckit/include/c/ir_core.h"
+#include "libabckit/c/metadata_core.h"
+#include "libabckit/c/ir_core.h"
 #include "helpers/helpers.h"
 #include "helpers/helpers_runtime.h"
-#include "libabckit/include/c/abckit.h"
+#include "libabckit/c/abckit.h"
 #include "logger.h"
 
 #include <gtest/gtest.h>

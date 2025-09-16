@@ -22,7 +22,7 @@ function checkConversionHexadecimalToInt(): boolean {
 }
 
 function checkConversionHexadecimalToNumber(): boolean {
-    const val = parseInt(tsHexadecimal, systemHexadecimal as int);
+    const val = parseInt(tsHexadecimal, systemHexadecimal as int).toDouble();
 
     return typeof val == 'number';
 }
@@ -52,7 +52,7 @@ function checkConversionHexadecimalToLong(): boolean {
 }
 
 function checkConversionHexadecimalToDouble(): boolean {
-    const val = parseInt(tsHexadecimal, systemHexadecimal as int);
+    const val = parseInt(tsHexadecimal, systemHexadecimal as int).toDouble();
 
     return typeof val == 'number';
 }

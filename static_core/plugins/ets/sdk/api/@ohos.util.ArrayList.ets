@@ -15,16 +15,32 @@
 
 import { BusinessError } from "@ohos.base";
 
-const TypeErrorCodeId: number = 401;
-const OutOfBoundsErrorCodeId: number = 10200001;
-const IncorrectBufferSizeId: number = 10200009;
-const CapacityErrorCodeId: number = 10200062;
-const INT_MAX_VALUE_OFFSET: number = 4294967296;
+const TypeErrorCodeId: int = 401;
+const OutOfBoundsErrorCodeId: int = 10200001;
+const IncorrectBufferSizeId: int = 10200009;
+const CapacityErrorCodeId: int = 10200062;
+const INT_MAX_VALUE_OFFSET: int = 2147483647;
+
+export type ArrayListComparatorFn<T> = (firstValue: T, secondValue: T) => double;
+export type ArrayListForEachCb<T> =  (value: T, index: int, arrlist: ArrayList<T>) => void;
+export type ArrayListReplaceCb<T> =  (value: T, index: int, arrlist: ArrayList<T>) => T;
+
+function createBusinessError(code: int, message: string) {
+    let err = new BusinessError();
+    err.code = code;
+    err.name = 'BusinessError';
+    err.message = message;
+    return err;
+}
 
 export class ArrayList<T> implements Iterable<T>, JsonReplacer {
     private readonly DEFAULT_CAPACITY = 10;
     private capacity: int = this.DEFAULT_CAPACITY;
     private buffer: Array<T>;
+
+    public toString(): string {
+        return "[object ArrayList]";
+    }
 
     public jsonReplacer(): Record<String, NullishType> {
         const buf = this.buffer;
@@ -39,8 +55,8 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
     /**
      * property: The number of elements in the ArrayList.
      */
-    get length(): number {
-        return this.buffer.length;
+    get length(): int {
+        return this.buffer.length.toInt();
     }
 
     /**
@@ -66,7 +82,7 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
      */
     public add(element: T): boolean {
         if (this.length >= Int.MAX_VALUE) {
-            throw new BusinessError(CapacityErrorCodeId, new Error(`The current capacity has reached the maximum limit.`));
+            throw createBusinessError(CapacityErrorCodeId, `The current capacity has reached the maximum limit.`);
         }
 
         if (this.length == this.capacity) {
@@ -83,8 +99,7 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
      *
      * @param index - the index.
      */
-    public insert(element: T, index: number): void {
-        this.checkIndexType(index);
+    public insert(element: T, index: int): void {
         this.checkIndex(index, this.length);
 
         if (this.length + 1 <= this.capacity) {
@@ -128,10 +143,10 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
      *
      * @returns the index if the specified element is included, otherwise, -1.
      */
-    public getIndexOf(element: T): number {
+    public getIndexOf(element: T): int {
         return this.buffer.findIndex((item: T): boolean => {
             return item == element;
-        });
+        }).toInt();
     }
 
     /**
@@ -141,10 +156,10 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
      *
      * @returns the index if the specified element is included, otherwise, -1.
      */
-    public getLastIndexOf(element: T): number {
+    public getLastIndexOf(element: T): int {
         return this.buffer.findLastIndex((item: T): boolean => {
             return item == element;
-        });
+        }).toInt();
     }
 
     /**
@@ -154,8 +169,7 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
      *
      * @returns the deleted element.
      */
-    public removeByIndex(index: number): T {
-        this.checkIndexType(index);
+    public removeByIndex(index: int): T {
         this.checkEmptyContainer();
         this.checkIndex(index, this.length - 1);
 
@@ -177,7 +191,7 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
      * @returns true if the specified element is included, otherwise, false.
      */
     public remove(element: T): boolean {
-        let index: number = this.getIndexOf(element);
+        let index: int = this.getIndexOf(element);
         if (index != -1) {
             this.removeByIndex(index);
             return true;
@@ -192,7 +206,7 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
      *
      * @param toIndex - the end index.
      */
-    public removeByRange(fromIndex: number, toIndex: number): void {
+    public removeByRange(fromIndex: int, toIndex: int): void {
         this.checkEmptyContainer();
         this.checkRange(fromIndex, toIndex);
 
@@ -209,9 +223,9 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
      * @param callbackfn - The callback function taking the value, index, and the ArrayList as arguments.
      *
      */
-    public replaceAllElements(callbackfn: (value: T, index: number, arrList: ArrayList<T>) => T): void {
+    public replaceAllElements(callbackfn: ArrayListReplaceCb<T>): void {
         for (let i: int = 0; i < this.length; i++) {
-            this.buffer[i] = callbackfn(this.buffer[i], i.toDouble(), this);
+            this.buffer[i] = callbackfn(this.buffer[i], i, this);
         }
     }
 
@@ -221,9 +235,9 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
      * @param callbackfn - The function to execute on each element, taking the value, index, and ArrayList as arguments.
      *
      */
-    public forEach(callbackfn: (value: T, index: number, arrList: ArrayList<T>) => void): void {
+    public forEach(callbackfn: ArrayListForEachCb<T>): void {
        for (let i: int = 0; i < this.length; i++) {
-            callbackfn(this.buffer[i], i.toDouble(), this);
+            callbackfn(this.buffer[i], i, this);
         }
     }
 
@@ -233,7 +247,7 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
      * @param comparator - Optional. A function that defines the sort order.
      */
 
-    public sort(comparator?: (firstValue: T, secondValue: T) => number): void {
+    public sort(comparator?: ArrayListComparatorFn<T>): void {
         this.buffer.sort(comparator);
     }
 
@@ -246,7 +260,7 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
      *
      * @returns A new ArrayList containing the specified portion of the original ArrayList.
      */
-    public subArrayList(fromIndex: number, toIndex: number): ArrayList<T> {
+    public subArrayList(fromIndex: int, toIndex: int): ArrayList<T> {
         this.checkEmptyContainer();
         this.checkRange(fromIndex, toIndex);
 
@@ -287,7 +301,7 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
      *
      * @returns The capacity of the ArrayList.
      */
-    public getCapacity(): number {
+    public getCapacity(): int {
         return this.capacity;
     }
 
@@ -316,10 +330,7 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
      *
      * @returns The element at the specified index.
      */
-    public $_get(index: number): T {
-        if (index > Int.MAX_VALUE) {
-            throw new BusinessError(TypeErrorCodeId, new Error(`The type of \"index\" must be small integer.`));
-        }
+    public $_get(index: int): T {
         this.checkEmptyContainer();
         this.checkIndex(index, this.length - 1);
 
@@ -333,11 +344,8 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
      *
      * @param val - The value to set at the specified index.
      */
-    public $_set(index: number, val: T): void {
+    public $_set(index: int, val: T): void {
         this.checkEmptyContainer();
-        if (index < 0 || index > Int.MAX_VALUE) {
-            return;
-        }
         this.checkIndex(index, this.length - 1);
 
         this.buffer[index] = val;
@@ -348,12 +356,12 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
      *
      * @param newCapacity - The minimum new capacity for the ArrayList.
      */
-    public increaseCapacityTo(newCapacity: number): void {
+    public increaseCapacityTo(newCapacity: int): void {
         if (newCapacity > Int.MAX_VALUE) {
-            throw new BusinessError(CapacityErrorCodeId, new Error(`The current capacity has reached the maximum limit.`));
+            throw createBusinessError(CapacityErrorCodeId, `The current capacity has reached the maximum limit.`);
         }
 
-        if (newCapacity > this.capacity) {
+        if (newCapacity > this.length) {
             this.increaseCap(newCapacity.toInt());
         }
     }
@@ -394,38 +402,38 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
 
     private checkEmptyContainer(): void {
         if (this.isEmpty()) {
-            throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`Container is empty`));
+            throw createBusinessError(OutOfBoundsErrorCodeId, `Container is empty`);
         }
     }
 
-    private checkIndexType(index: number): void {
+    private checkIndex(index: int, length: int): void {
         if (index > Int.MAX_VALUE) {
-            throw new BusinessError(TypeErrorCodeId, new Error(`The type of "index" must be small integer. Received value is: ${index}`));
+            throw createBusinessError(TypeErrorCodeId, `The type of "index" must be small integer. Received value is: ${index}`);
         }
-    }
-
-    private checkIndex(index: number, length: number): void {
         if (index > length || index < 0) {
-            this.createBusinessError('index', length, index);
+            this.createRangeBusinessError('index', length, index);
+        }
+        if (!isInteger(index)) {
+            throw createBusinessError(TypeErrorCodeId, `Index must be an integer. Received value is: ${index}`);
         }
     }
 
-    private checkRange(fromIndex: number, toIndex: number): void {
+    private checkRange(fromIndex: int, toIndex: int): void {
         if (fromIndex > Int.MAX_VALUE) {
-            this.createBusinessError('fromIndex', min(this.length - 1, toIndex - 1), fromIndex - INT_MAX_VALUE_OFFSET);
+            this.createRangeBusinessError('fromIndex', min(this.length - 1, toIndex - 1), fromIndex - INT_MAX_VALUE_OFFSET);
         }
         if (fromIndex < 0 || fromIndex >= toIndex || fromIndex >= this.length) {
-            this.createBusinessError('fromIndex', min(this.length - 1, toIndex - 1), fromIndex);
+            this.createRangeBusinessError('fromIndex', min(this.length - 1, toIndex - 1), fromIndex);
         }
         if (toIndex > Int.MAX_VALUE) {
-            this.createBusinessError('toIndex', this.length, toIndex - INT_MAX_VALUE_OFFSET);
+            this.createRangeBusinessError('toIndex', this.length, toIndex - INT_MAX_VALUE_OFFSET);
         }
         if (toIndex > this.length) {
-            this.createBusinessError('toIndex', this.length, toIndex);
+            this.createRangeBusinessError('toIndex', this.length, toIndex);
         }
     }
 
-    private createBusinessError(index: string, upperLimit: number, currentValue: number): void {
-        throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"${index}\" is out of range. It must be >= 0 && <= ${upperLimit}. Received value is: ${currentValue}`));
+    private createRangeBusinessError(index: string, upperLimit: int, currentValue: int): void {
+        throw createBusinessError(OutOfBoundsErrorCodeId, `The value of \"${index}\" is out of range. It must be >= 0 && <= ${upperLimit}. Received value is: ${currentValue}`);
     }
 }

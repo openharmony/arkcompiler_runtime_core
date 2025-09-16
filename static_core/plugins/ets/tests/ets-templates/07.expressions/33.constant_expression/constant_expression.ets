@@ -26,7 +26,5 @@ desc:
 {{ c.decl }}
 {% endif %}
 
-function main() {
-    {{c.use|indent}}
-}
+{{c.use|indent}}
 {%- endfor %}

@@ -18,5 +18,5 @@ desc: Conditional expression order
 ---*/
 
 function main(): void {
-  assertTrue( 2 == (false ? 1 : 2) )
+  arktest.assertTrue( 2 == (false ? 1 : 2) )
 }

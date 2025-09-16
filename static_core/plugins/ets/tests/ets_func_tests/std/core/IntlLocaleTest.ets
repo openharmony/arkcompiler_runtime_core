@@ -43,12 +43,12 @@ function processCreateLocaleError(createLocaleFunction : () => Intl.Locale, msg 
         createLocaleFunction()
     }
     catch (e) {
-        assertTrue(e instanceof RangeError)
-        assertEQ((e as RangeError).message, (msg != undefined ? msg : errMsg))
+        arktest.assertTrue(e instanceof RangeError)
+        arktest.assertEQ((e as RangeError).message, (msg != undefined ? msg : errMsg))
         assertOccurred = true
     }
     finally {
-        assertTrue(assertOccurred)
+        arktest.assertTrue(assertOccurred)
     }
 }
 
@@ -62,81 +62,81 @@ function processInvalidValues(createLocaleFunction : ((arg : string) => Intl.Loc
 function testLocaleDefault() : int {
     const l = new Intl.Locale("ru")
     if (l.language != null && l.language != undefined) {
-        assertEQ(l.language!, "ru")
+        arktest.assertEQ(l.language!, "ru")
     }
-    assertEQ(l.baseName, "ru")
-    assertEQ(l.calendar, undefined)
-    assertEQ(l.caseFirst, undefined)
-    assertEQ(l.numeric, false)
-    assertEQ(l.collation, undefined)
-    assertEQ(l.hourCycle, undefined)
-    assertEQ(l.numberingSystem, undefined)
-    assertEQ(l.region, undefined)
-    assertEQ(l.script, undefined)
-    assertEQ(l.minimize().toString(), "ru")
-    assertEQ(l.maximize().toString(), "ru-Cyrl-RU")
+    arktest.assertEQ(l.baseName, "ru")
+    arktest.assertEQ(l.calendar, undefined)
+    arktest.assertEQ(l.caseFirst, undefined)
+    arktest.assertEQ(l.numeric, false)
+    arktest.assertEQ(l.collation, undefined)
+    arktest.assertEQ(l.hourCycle, undefined)
+    arktest.assertEQ(l.numberingSystem, undefined)
+    arktest.assertEQ(l.region, undefined)
+    arktest.assertEQ(l.script, undefined)
+    arktest.assertEQ(l.minimize().toString(), "ru")
+    arktest.assertEQ(l.maximize().toString(), "ru-Cyrl-RU")
     return success
 }
 
 function testParseTag() : int {
     {
         const l = new Intl.Locale("ru-Cyrl")
-        assertEQ(l.language, "ru")
-        assertEQ(l.script, "Cyrl")
-        assertEQ(l.region, undefined)
+        arktest.assertEQ(l.language, "ru")
+        arktest.assertEQ(l.script, "Cyrl")
+        arktest.assertEQ(l.region, undefined)
     }
     {
         const l = new Intl.Locale("ru-Ru")
-        assertEQ(l.language, "ru")
-        assertEQ(l.script, undefined)
-        assertEQ(l.region, "RU")
+        arktest.assertEQ(l.language, "ru")
+        arktest.assertEQ(l.script, undefined)
+        arktest.assertEQ(l.region, "RU")
     }
     {
         const ruRu = new Intl.Locale("ru-Ru-u-kn-false")
-        assertEQ(ruRu.numeric, false)
+        arktest.assertEQ(ruRu.numeric, false)
     }
     {
         const ruRu = new Intl.Locale("ru-Ru-u-kn-true")
-        assertEQ(ruRu.numeric, true)
+        arktest.assertEQ(ruRu.numeric, true)
     }
     {
         const ruRu = new Intl.Locale("ru-Ru-u-kn")
-        assertEQ(ruRu.numeric, true)
+        arktest.assertEQ(ruRu.numeric, true)
     }
     {
         processCreateLocaleError(() => new Intl.Locale("ru-u-kn-fggkhjkjg", {"numeric" : false} as Intl.LocaleOptions))
     }
     {
         const ruRu = new Intl.Locale("ru-Ru-u-co-emoji")
-        assertEQ(ruRu.collation, "emoji")
+        arktest.assertEQ(ruRu.collation, "emoji")
     }
     {
         const l = new Intl.Locale("ru-u-ca-gregory")
-        assertEQ(l.calendar, "gregory")
+        arktest.assertEQ(l.calendar, "gregory")
     }
     {
         const l = new Intl.Locale("ru-u-hc-12h")
-        assertEQ(l.hourCycle, "12h")
+        arktest.assertEQ(l.hourCycle, "12h")
     }
     {
         const l = new Intl.Locale("ru-u-hc-invalid")
-        assertEQ(l.hourCycle, "invalid")
+        arktest.assertEQ(l.hourCycle, "invalid")
     }
     {
         const l = new Intl.Locale("ru-u-kf-invalid")
-        assertEQ(l.caseFirst, "invalid")
+        arktest.assertEQ(l.caseFirst, "invalid")
     }
     {
         const l = new Intl.Locale("ru-u-kf-lower")
-        assertEQ(l.caseFirst, "lower")
+        arktest.assertEQ(l.caseFirst, "lower")
     }
     {
         const l = new Intl.Locale("ru-u-nu-invalid")
-        assertEQ(l.numberingSystem, "invalid")
+        arktest.assertEQ(l.numberingSystem, "invalid")
     }
     {
         const l = new Intl.Locale("ru-u-nu-arab")
-        assertEQ(l.numberingSystem, "arab")
+        arktest.assertEQ(l.numberingSystem, "arab")
     }
     return success
 }
@@ -144,7 +144,7 @@ function testParseTag() : int {
 function testHourCycle() : int {
     {
         const us12hour = new Intl.Locale("en-US", { hourCycle: "h12" } as Intl.LocaleOptions)
-        assertEQ(us12hour.hourCycle, "h12")
+        arktest.assertEQ(us12hour.hourCycle, "h12")
     }
     {
         processInvalidValues((invalidValue : string) => new Intl.Locale("en-US", { hourCycle: invalidValue } as Intl.LocaleOptions))
@@ -155,11 +155,11 @@ function testHourCycle() : int {
 function testCalendar() : int {
     {
         const loc = new Intl.Locale("en-US")
-        assertEQ(loc.calendar, undefined)
+        arktest.assertEQ(loc.calendar, undefined)
     }
     {
         const loc = new Intl.Locale("en-US", {"calendar": "gregory"} as Intl.LocaleOptions)
-        assertEQ(loc.calendar, "gregory")
+        arktest.assertEQ(loc.calendar, "gregory")
     }
     {
         processInvalidValues((invalidValue : string) => new Intl.Locale("en-US", { calendar: invalidValue } as Intl.LocaleOptions))
@@ -170,11 +170,11 @@ function testCalendar() : int {
 function testCaseFirst() : int {
     {
         const loc = new Intl.Locale("en-US")
-        assertEQ(loc.caseFirst, undefined)
+        arktest.assertEQ(loc.caseFirst, undefined)
     }
     {
         const loc = new Intl.Locale("en-US", {"caseFirst": "upper"} as Intl.LocaleOptions)
-        assertEQ(loc.caseFirst, "upper")
+        arktest.assertEQ(loc.caseFirst, "upper")
     }
     {
         processInvalidValues((invalidValue : string) => new Intl.Locale("ru-u-cf-invalid", {"caseFirst" : invalidValue} as Intl.LocaleOptions))
@@ -185,15 +185,15 @@ function testCaseFirst() : int {
 function testNumeric() : int {
     {
         const l = new Intl.Locale("en-US", { numeric: true } as Intl.LocaleOptions)
-        assertEQ(l.numeric as boolean, true)
+        arktest.assertEQ(l.numeric as boolean, true)
     }
     {
         const l = new Intl.Locale("en-US", { numeric: false } as Intl.LocaleOptions)
-        assertEQ(l.numeric as boolean, false)
+        arktest.assertEQ(l.numeric as boolean, false)
     }
     {
         const l = new Intl.Locale("en-US")
-        assertEQ(l.numeric as boolean, false)
+        arktest.assertEQ(l.numeric as boolean, false)
     }
 
     return success
@@ -205,11 +205,11 @@ function testNumberingSystem() : int {
     }
     {
         const l = new Intl.Locale("en-US", { numberingSystem: "arab" } as Intl.LocaleOptions)
-        assertEQ(l.numberingSystem as string, "arab")
+        arktest.assertEQ(l.numberingSystem as string, "arab")
     }
     {
         const l = new Intl.Locale("en-US")
-        assertEQ(l.numberingSystem, undefined)
+        arktest.assertEQ(l.numberingSystem, undefined)
     }
     return success
 }
@@ -217,14 +217,14 @@ function testNumberingSystem() : int {
 function testCollation() : int {
     {
         const l = new Intl.Locale("en-US")
-        assertEQ(l.collation, undefined)
+        arktest.assertEQ(l.collation, undefined)
     }
     {
         processInvalidValues((invalidValue : string) => new Intl.Locale("en-US", { collation: invalidValue } as Intl.LocaleOptions))
     }
     {
         const l = new Intl.Locale("ru", { collation: "emoji" } as Intl.LocaleOptions)
-        assertEQ(l.collation, "emoji")
+        arktest.assertEQ(l.collation, "emoji")
     }
     return success
 }

@@ -291,11 +291,9 @@ export class Segmenter {
     {
         const matchingStrategy = options?.localeMatcher ?? 'best fit';
         try {
-            return [
-                matchingStrategy == 'lookup'
-                ? intlLookUpLocale(locales)
-                : intlBestFitLocale(locales)
-            ]
+            return matchingStrategy == 'lookup'
+                ? intlLookUpLocales(locales) 
+                : intlBestFitLocales(locales)
         }
         catch(e) {
             if (e instanceof Error) throw e

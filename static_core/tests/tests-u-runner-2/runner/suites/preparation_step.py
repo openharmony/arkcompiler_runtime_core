@@ -24,7 +24,7 @@ from concurrent.futures import ThreadPoolExecutor
 from glob import glob
 from pathlib import Path
 
-from runner.common_exceptions import InvalidConfiguration, TimeoutException, UnknownException
+from runner.common_exceptions import InvalidConfiguration, TestGenerationException, TimeoutException, UnknownException
 from runner.extensions.generators.igenerator import IGenerator
 from runner.logger import Log
 from runner.options.config import Config
@@ -103,6 +103,8 @@ class CustomGeneratorTestPreparationStep(TestPreparationStep):
             future = executor.submit(ets_templates_generator.generate)
             if self.config.general.show_progress:
                 UiUpdater("Tests are generating").start(future)
+            if exception := future.exception():
+                raise TestGenerationException(exception.args) from exception
 
     def __generate_by_script(self, script: str) -> None:
         cmd: list[str | Path] = [

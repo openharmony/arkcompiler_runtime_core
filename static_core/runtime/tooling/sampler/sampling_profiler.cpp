@@ -547,7 +547,7 @@ void Sampler::SamplerThreadEntry()
             for (const auto &threadId : managedThreads_) {
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
                 if (syscall(SYS_tgkill, pid, threadId, SIGPROF) != 0) {
-                    LOG(ERROR, PROFILER) << "Can't send signal to thread";
+                    LOG(DEBUG, PROFILER) << "Can't send signal to thread";
                 }
             }
         }

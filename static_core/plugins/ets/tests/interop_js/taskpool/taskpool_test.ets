@@ -17,9 +17,10 @@ function RunTasksWithJsCallTest(): void {
     let mainId = CoroutineExtras.getWorkerId();
     let callback = ():int => {
         let module = JSRuntime.loadModule("./taskpool_interop_tests_helpers_js");
-        let val = JSRuntime.getPropertyJSValue(module, 'returnTwo')();
+        let method = JSRuntime.getPropertyJSValue(module, 'returnTwo');
+        let val = JSRuntime.invoke(module, method);
         try {
-            assertEQ(val as int, 2);
+            arktest.assertEQ(val, 2);
         }
         catch(e: Error) {
             console.log("RunTasksWithJsCallTest failed");
@@ -32,15 +33,19 @@ function RunTasksWithJsCallTest(): void {
     let p2 = taskpool.execute(callback);
     let result1 = await p1;
     let result2 = await p2;
-    assertEQ(result1, 0);
-    assertEQ(result2, 0);
+    arktest.assertEQ(result1, 0);
+    arktest.assertEQ(result2, 0);
 }
 
 function RunTasksWithJsAsyncCallTest(): void {
     let callback = ():int => {
         let module = JSRuntime.loadModule("./taskpool_interop_tests_helpers_js");
         let modified = false;
-        let promise = JSRuntime.getPropertyJSValue(module, 'asyncWithAwait')() as Promise<Object>;
+        let method = JSRuntime.getPropertyJSValue(module, 'asyncWithAwait');
+        let callRes = JSRuntime.invoke(module, method);
+        let linker = Class.ofCaller()!.getLinker();
+        let clsName = 'std.core.Promise';
+        let promise = JSRuntime.getValueObject(callRes, linker.loadClass(clsName, false)) as Promise<Object>;
         let promise1 = promise.then((x:Object): void => {
             modified = true;
         });
@@ -48,9 +53,9 @@ function RunTasksWithJsAsyncCallTest(): void {
         await promise1;
 
         try {
-            let value = JSRuntime.getPropertyJSValue(JSRuntime.getGlobal(), 'value') as int;
-            assertEQ(value, 7);
-            assertEQ(modified, true);
+            let value = JSRuntime.getPropertyInt(JSRuntime.getGlobal(), 'value');
+            arktest.assertEQ(value, 7);
+            arktest.assertEQ(modified, true);
         }
         catch(error) {
             console.log("Value modifications failed");
@@ -62,8 +67,8 @@ function RunTasksWithJsAsyncCallTest(): void {
 
     let p = taskpool.execute(callback);
     let result = await p;
-    assertEQ(result, 0);
-    assertEQ(CoroutineExtras.isTaskpoolSupportingInterop(), true);
+    arktest.assertEQ(result, 0);
+    arktest.assertEQ(CoroutineExtras.isTaskpoolSupportingInterop(), true);
     CoroutineExtras.stopTaskpool();
 }
 

@@ -22,6 +22,6 @@ files:
 import {PI, CONFIG} from './named_reference_export8.ets';
 
 function main(): void {
-  assertEQ(PI, 3.1415);
-  assertEQ(CONFIG.env, "production");
+  arktest.assertEQ(PI, 3.1415);
+  arktest.assertEQ(CONFIG.env, "production");
 }

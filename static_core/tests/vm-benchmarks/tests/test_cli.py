@@ -22,10 +22,10 @@ import sys
 import pytest  # type: ignore
 
 from unittest import TestCase
+from unittest.mock import patch
 from vmb.cli import Args, Command
 from vmb.tool import OptFlags, ToolBase
 from vmb.unit import BenchUnit
-from unittest.mock import patch
 
 
 def cmdline(line):

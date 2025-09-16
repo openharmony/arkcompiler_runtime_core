@@ -31,7 +31,7 @@ export interface ReadonlySet<T> extends Iterable<T> {
      *
      * @returns number of unique elements in the Set
      */
-    get size(): number;
+    get size(): int;
 
     /**
      * Executes a provided function once per each value in the Set object, in insertion order
@@ -103,6 +103,11 @@ export class Set<K> implements ReadonlySet<K> {
         }
     }
 
+    // NOTE: This API may be removed someday due #28030 internal issue
+    constructor(bucketsCount: int) {
+        this.elements = new Map<K, K>(bucketsCount);
+    }
+
     private toStringVals(): String {
         const strBuf = new StringBuilder()
 
@@ -142,16 +147,14 @@ export class Set<K> implements ReadonlySet<K> {
      *
      * @returns true if the value is in the Set
      */
-    override has(val: K): boolean {
-        return this.elements.has(val)
-    }
+    override native has(val: K): boolean;
 
     /**
      * Returns number of unique elements in the Set
      *
      * @returns number of unique elements in the Set
      */
-    override get size(): number {
+    override get size(): int {
         return this.elements.size;
     }
 
@@ -160,9 +163,7 @@ export class Set<K> implements ReadonlySet<K> {
      *
      * @param val the value to remove
      */
-    delete(val: K): boolean {
-        return this.elements.delete(val)
-    }
+    native delete(val: K): boolean;
 
     /**
      * Deletes all elements from the Set

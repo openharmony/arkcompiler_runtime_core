@@ -21,9 +21,10 @@ desc:
 
 const testValue: {{c.type}} = {{c.value}}
 
+enum TestEnum { One = ~testValue }
+
 function main() {
-    enum TestEnum { One = ~testValue }
-    assertEQ(TestEnum.One.valueOf(), {{c.expected}})
+    arktest.assertEQ(TestEnum.One.valueOf(), {{c.expected}})
 }
 
 {% endfor %}

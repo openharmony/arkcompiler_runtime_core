@@ -28,7 +28,7 @@ function main() {
     let b2: Array<Number> = [1, 2, 3]
     let b3: FixedArray<number> = [1, 2]
 
-    assertTrue(b1[0] instanceof aClass)
-    assertEQ(b2[2], 3)
-    assertEQ(b3[1], 2)
+    arktest.assertTrue(b1[0] instanceof aClass)
+    arktest.assertEQ(b2[2], 3)
+    arktest.assertEQ(b3[1], 2)
 }

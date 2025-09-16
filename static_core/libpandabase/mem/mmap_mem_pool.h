@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -273,10 +273,10 @@ private:
     void FreeArenaImpl(ArenaT *arena);
 
     template <OSPagesAllocPolicy OS_ALLOC_POLICY>
-    void *AllocRawMemImpl(size_t size, SpaceType type);
+    std::pair<void *, bool> AllocRawMemImpl(size_t size, SpaceType type);
     void *AllocRawMemNonObjectImpl(size_t size, SpaceType spaceType);
     template <OSPagesAllocPolicy OS_ALLOC_POLICY>
-    void *AllocRawMemObjectImpl(size_t size, SpaceType type);
+    std::pair<void *, bool> AllocRawMemObjectImpl(size_t size, SpaceType type);
     void FreeRawMemImpl(void *mem, size_t size);
 
     template <OSPagesAllocPolicy OS_ALLOC_POLICY>
@@ -341,10 +341,10 @@ private:
         }
 
         template <OSPagesAllocPolicy OS_ALLOC_POLICY>
-        void *AllocRawMem(size_t size, MmapPoolMap *poolMap)
+        std::pair<void *, bool> AllocRawMem(size_t size, MmapPoolMap *poolMap)
         {
             if (UNLIKELY(GetFreeSpace() < size)) {
-                return nullptr;
+                return {nullptr, false};
             }
             void *mem = ToVoidPtr(minAddress_ + curAllocOffset_);
             curAllocOffset_ += size;
@@ -356,12 +356,14 @@ private:
                 memoryToClear = unreturnedToOsSize_;
                 unreturnedToOsSize_ = 0;
             }
+            bool isZero = !memoryToClear;
             if (OS_ALLOC_POLICY == OSPagesAllocPolicy::ZEROED_MEMORY && memoryToClear != 0) {
                 uintptr_t poolStart = ToUintPtr(mem);
                 os::mem::ReleasePages(poolStart, poolStart + memoryToClear);
+                isZero = true;
             }
-            poolMap->AddNewPool(Pool(size, mem));
-            return mem;
+            poolMap->AddNewPool(Pool(size, mem, isZero));
+            return {mem, isZero};
         }
 
         void FreeMem(size_t size, OSPagesPolicy pagesPolicy)

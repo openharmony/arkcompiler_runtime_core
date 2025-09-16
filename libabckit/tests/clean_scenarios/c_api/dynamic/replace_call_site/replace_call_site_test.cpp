@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,10 +17,10 @@
 
 #include "helpers/helpers.h"
 #include "helpers/helpers_runtime.h"
-#include "libabckit/include/c/ir_core.h"
-#include "libabckit/include/c/isa/isa_dynamic.h"
-#include "libabckit/include/c/metadata_core.h"
-#include "libabckit/include/c/extensions/arkts/metadata_arkts.h"
+#include "libabckit/c/ir_core.h"
+#include "libabckit/c/isa/isa_dynamic.h"
+#include "libabckit/c/metadata_core.h"
+#include "libabckit/c/extensions/arkts/metadata_arkts.h"
 #include "metadata_inspect_impl.h"
 #include "libabckit/src/logger.h"
 

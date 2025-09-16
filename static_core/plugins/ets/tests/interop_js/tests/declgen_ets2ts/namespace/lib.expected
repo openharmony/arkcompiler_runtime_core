@@ -45,25 +45,23 @@ export declare namespace myNamespace {
 }
 export declare namespace BarNameSpace {
     namespace FooNameSpace {
-        type Callback2 = (arg: string) => void;
+        export type Callback2 = (arg: string) => void;
     }
-    type Callback = (arg: string) => void;
+    export type Callback = (arg: string) => void;
 }
 export declare namespace MySpace {
     let count: number;
     let message: string;
     function resetMessage(): void;
     function resetState(): void;
-    interface IShape {
-        area(): number;
-    }
+    export interface IShape {
+    area(): number;
+}
     class Rectangle implements IShape {
-        public get width(): number;
-        public set width(value: number);
-        public get height(): number;
-        public set height(value: number);
-        public constructor(width: number, height: number);
-        public area(): number;
+        width: number;
+        height: number;
+        constructor(width: number, height: number);
+        area(): number;
     }
     enum Color {
         RED = 0,
@@ -85,5 +83,5 @@ export declare namespace N {
     class NA {
         constructor();
     }
-    type NB = (arg: string) => void;
+    export type NB = (arg: string) => void;
 }

@@ -30,5 +30,5 @@ function main(): void {
   const bob = new Person("Bob");
   bob.fetchData = async (): Promise<string> => "Data fetched";
   const a: string = await bob.fetchData!();
-  assertEQ(a, "Data fetched");
+  arktest.assertEQ(a, "Data fetched");
 }

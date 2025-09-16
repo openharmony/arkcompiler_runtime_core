@@ -45,34 +45,9 @@ TEST_F(EtsESValueJsToEtsTest, test_esvalue_wrap_number)
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkWrapNumber"));
 }
 
-TEST_F(EtsESValueJsToEtsTest, test_esvalue_wrap_byte)
-{
-    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkWrapByte"));
-}
-
 TEST_F(EtsESValueJsToEtsTest, test_esvalue_wrap_bigint)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkWrapBigInt"));
-}
-
-TEST_F(EtsESValueJsToEtsTest, test_esvalue_wrap_short)
-{
-    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkWrapShort"));
-}
-
-TEST_F(EtsESValueJsToEtsTest, test_esvalue_wrap_int)
-{
-    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkWrapInt"));
-}
-
-TEST_F(EtsESValueJsToEtsTest, test_esvalue_wrap_long)
-{
-    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkWrapLong"));
-}
-
-TEST_F(EtsESValueJsToEtsTest, test_esvalue_wrap_float)
-{
-    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkWrapFloat"));
 }
 
 TEST_F(EtsESValueJsToEtsTest, test_esvalue_wrap_Double)
@@ -166,9 +141,10 @@ TEST_F(EtsESValueJsToEtsTest, test_esvalue_get_property_by_name_safe)
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkGetPropertyByNameSafe"));
 }
 
-TEST_F(EtsESValueJsToEtsTest, test_esvalue_get_property_by_index)
+TEST_F(EtsESValueJsToEtsTest, DISABLED_test_esvalue_get_property_by_index)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkGetPropertyByIndex"));
+    // NOTE(www): #ICMNGF, need to handle when key is doubel.
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkGetPropertyByIndexDouble"));
 }
 
@@ -244,6 +220,16 @@ TEST_F(EtsESValueJsToEtsTest, test_esvalue_check_instanceOf)
 TEST_F(EtsESValueJsToEtsTest, test_esvalue_check_instaniate)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstaniate"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_test_undefined)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testUndefined"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, checkThrowNullOrUndefined)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkThrowNullOrUndefined"));
 }
 
 }  // namespace ark::ets::interop::js::testing

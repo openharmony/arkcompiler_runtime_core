@@ -182,8 +182,9 @@ function getRefValue(): ISuperInterface {
     return new TestClass();
 }
 
-class UnionLocalClass extends ReturnsUnion implements IReturnUnion{
-};
 function getUnion(): IReturnUnion {
+    class UnionLocalClass extends ReturnsUnion implements IReturnUnion{
+
+    };
     return (new UnionLocalClass())
 }

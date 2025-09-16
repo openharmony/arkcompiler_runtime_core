@@ -16,30 +16,30 @@
 import {ArrayList} from "@ohos.util.ArrayList";
 
 class Temp {
-    age: number = 0;
+    age: double = 0;
     name: string = "";
 }
 
 class Dog {
-    age: number = 0;
+    age: double = 0;
     name: string = "";
-    constructor(age: number, name: string) {
+    constructor(age: double, name: string) {
         this.age = age;
         this.name = name;
     }
 }
 
 class Cat {
-    age1: number = 0;
+    age1: double = 0;
     name1: string = "";
-    constructor(age: number, name: string) {
+    constructor(age: double, name: string) {
         this.age1 = age;
         this.name1 = name;
     }
 }
 
 function main() {
-    const suite = new ArkTestsuite("ArrayList API tests");
+    const suite = new arktest.ArkTestsuite("ArrayList API tests");
 
     suite.addTest("Testing ArrayList insert->add->remove->subArrayList->getCapacity", testArrayListGetCapacity0001);
     suite.addTest("Testing ArrayList insert->add->remove->subArrayList->clear->getCapacity",
@@ -56,7 +56,7 @@ function main() {
 }
 
 function testArrayListGetCapacity0001() {
-    let arrayList = new ArrayList<number | string>();
+    let arrayList = new ArrayList<double | string>();
     arrayList.insert(2, 0);
     arrayList.add(1);
     arrayList.add(22);
@@ -65,11 +65,11 @@ function testArrayListGetCapacity0001() {
     arrayList.subArrayList(1, 2);
     arrayList.trimToCurrentLength();
     let result = arrayList.getCapacity();
-    assertEQ(result, arrayList.length, "The capacity of the ArrayList should match its length after trimming");
+    arktest.assertEQ(result, arrayList.length, "The capacity of the ArrayList should match its length after trimming");
 }
 
 function testArrayListGetCapacity0002() {
-    let arrayList = new ArrayList<number | string>();
+    let arrayList = new ArrayList<double | string>();
     arrayList.insert(2, 0);
     arrayList.add(1);
     arrayList.add(22);
@@ -77,9 +77,9 @@ function testArrayListGetCapacity0002() {
     arrayList.subArrayList(1, 2);
     arrayList.clear();
     arrayList.trimToCurrentLength();
-    assertEQ(arrayList.getCapacity(), 0, "The capacity of the ArrayList should be 0 after clearing and trimming");
+    arktest.assertEQ(arrayList.getCapacity(), 0, "The capacity of the ArrayList should be 0 after clearing and trimming");
     arrayList.increaseCapacityTo(1);
-    assertEQ(arrayList.getCapacity(), 1, "The capacity of the ArrayList should be 1 after increasing capacity");
+    arktest.assertEQ(arrayList.getCapacity(), 1, "The capacity of the ArrayList should be 1 after increasing capacity");
 }
 
 function testArrayListConvertToArray0001() {
@@ -88,7 +88,7 @@ function testArrayListConvertToArray0001() {
     arrayList.add(dog);
     let array = arrayList.convertToArray();
     array.filter((value) => {
-        assertTrue(value instanceof Dog, "Each element in the array should be an instance of Dog");
+        arktest.assertTrue(value instanceof Dog, "Each element in the array should be an instance of Dog");
         return (value instanceof Dog);
     });
 }
@@ -100,43 +100,43 @@ function testArrayListConvertToArray0002() {
     let array = arrayList.convertToArray();
     let cat = new Cat(2, "li li");
     array.fill(cat);
-    assertFalse(array[0] instanceof Dog, "The first element in the array should no longer be an instance of Dog after filling with Cat");
+    arktest.assertFalse(array[0] instanceof Dog, "The first element in the array should no longer be an instance of Dog after filling with Cat");
 }
 
 function testArrayListIsEmpty0001() {
-    let arrayList = new ArrayList<number>();
-    assertTrue(arrayList.isEmpty(), "The ArrayList should be empty initially");
+    let arrayList = new ArrayList<double>();
+    arktest.assertTrue(arrayList.isEmpty(), "The ArrayList should be empty initially");
 }
 
 function testArrayListIsEmpty0002() {
-    let arrayList = new ArrayList<number | string | Array<number | string | boolean> | boolean | undefined | null |
+    let arrayList = new ArrayList<double | string | Array<double | string | boolean> | boolean | undefined | null |
     Object>();
     addTestElements(arrayList);
-    assertFalse(arrayList.isEmpty(), "The ArrayList should not be empty after adding elements");
+    arktest.assertFalse(arrayList.isEmpty(), "The ArrayList should not be empty after adding elements");
 }
 
 function testArrayListIsEmpty0003() {
-    let arrayList = new ArrayList<number | string | Array<number | string | boolean> | boolean | undefined | null |
+    let arrayList = new ArrayList<double | string | Array<double | string | boolean> | boolean | undefined | null |
     Object>();
     addTestElements(arrayList);
     arrayList.clear();
-    assertTrue(arrayList.isEmpty(), "The ArrayList should be empty after clearing all elements");
+    arktest.assertTrue(arrayList.isEmpty(), "The ArrayList should be empty after clearing all elements");
 }
 
 function testArrayListSymbolIterator0001() {
-    let arrayList = new ArrayList<number | string | Array<number | string | boolean> | boolean | undefined | null |
+    let arrayList = new ArrayList<double | string | Array<double | string | boolean> | boolean | undefined | null |
     Object>();
     addTestElements(arrayList);
     let iter = arrayList.$_iterator();
     let tem = iter.next();
     while (!tem.done) {
-        assertTrue(arrayList.has(tem.value), `The ArrayList should contain the value '${tem.value}'`);
+        arktest.assertTrue(arrayList.has(tem.value), `The ArrayList should contain the value '${tem.value}'`);
         tem = iter.next();
     }
 }
 
 function testArrayListSymbolIterator0002() {
-    let arrayList = new ArrayList<number>();
+    let arrayList = new ArrayList<double>();
     arrayList.add(2);
     arrayList.add(4);
     arrayList.add(5);
@@ -145,12 +145,12 @@ function testArrayListSymbolIterator0002() {
     let expectedValues = [2, 4, 5, 4];
     let index = 0;
     for (let item of arrayList) {
-        assertEQ(item, expectedValues[index], `The element at index ${index} should be ${expectedValues[index]}`);
+        arktest.assertEQ(item, expectedValues[index], `The element at index ${index} should be ${expectedValues[index]}`);
         index++;
     }
 }
 
-function addTestElements(arrayList: ArrayList<number | string | Array<number | string | boolean> | boolean | undefined |
+function addTestElements(arrayList: ArrayList<double | string | Array<double | string | boolean> | boolean | undefined |
     null | Object>) {
     arrayList.add("zhang san");
     arrayList.add(1);

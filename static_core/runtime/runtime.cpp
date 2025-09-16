@@ -74,6 +74,9 @@
 #include "trace/trace.h"
 #include "runtime/tests/intrusive-tests/intrusive_test_option.h"
 #include "runtime/jit/profiling_saver.h"
+#ifdef ARK_HYBRID
+#include "base_runtime.h"
+#endif
 
 namespace ark {
 
@@ -348,6 +351,8 @@ bool Runtime::Create(const RuntimeOptions &options)
         return false;
     }
 
+    InitBaseRuntime();
+
     if (!instance_->Initialize()) {
         LOG(ERROR, RUNTIME) << "Failed to initialize runtime";
         if (instance_->GetPandaVM() != nullptr) {
@@ -425,8 +430,8 @@ bool Runtime::Destroy()
     trace::ScopedTrace scopedTrace("Runtime shutdown");
     if (instance_->SaveProfileInfo() && instance_->GetClassLinker()->GetAotManager()->HasProfiledMethods()) {
         ProfilingSaver profileSaver;
-        auto isAotVerifyAbsPath = instance_->GetOptions().IsAotVerifyAbsPath();
-        auto classCtxStr = instance_->GetClassLinker()->GetClassContextForAot(isAotVerifyAbsPath);
+        auto classCtxStr = instance_->GetClassLinker()->GetAotManager()->GetBootClassContext() + ":" +
+                           instance_->GetClassLinker()->GetAotManager()->GetAppClassContext();
         auto &profiledMethods = instance_->GetClassLinker()->GetAotManager()->GetProfiledMethods();
         auto profiledMethodsFinal = instance_->GetClassLinker()->GetAotManager()->GetProfiledMethodsFinal();
         auto savingPath = PandaString(instance_->GetOptions().GetProfileOutput());
@@ -465,6 +470,8 @@ bool Runtime::Destroy()
     // Stop debugger first to correctly remove it as listener.
     instance_->UnloadDebugger();
 
+    PreFiniBaseRuntime();
+
     // Note JIT thread (compiler) may access to thread data,
     // so, it should be stopped before thread destroy
     /* @sync 1
@@ -489,6 +496,8 @@ bool Runtime::Destroy()
     RuntimeInternalAllocator::Destroy();
 
     os::CpuAffinityManager::Finalize();
+
+    FiniBaseRuntime();
 
     return true;
 }
@@ -560,6 +569,16 @@ Runtime::Runtime(const RuntimeOptions &options, mem::InternalAllocatorPtr intern
         ark::os::mem_hooks::PandaHooks::Enable();
     }
 
+#ifdef PANDA_TARGET_OHOS
+    if (!options_.WasSetProfileOutput()) {
+        options_.SetProfileOutput("/data/storage/ark-profile/profile.ap");
+    }
+
+    if (!options_.WasSetIncrementalProfilesaverEnabled()) {
+        options_.SetIncrementalProfilesaverEnabled(true);
+    }
+#endif
+
 #ifdef PANDA_COMPILER_ENABLE
     // NOTE(maksenov): Enable JIT for debug mode
     isJitEnabled_ = !this->IsDebugMode() && Runtime::GetOptions().IsCompilerEnableJit();
@@ -568,6 +587,7 @@ Runtime::Runtime(const RuntimeOptions &options, mem::InternalAllocatorPtr intern
 #endif
     isProfilerEnabled_ = Runtime::GetOptions().IsProfilerEnabled();
     saveProfilingInfo_ = Runtime::GetOptions().IsProfilesaverEnabled();
+    incrementalSaveProfilingInfo_ = Runtime::GetOptions().IsIncrementalProfilesaverEnabled();
     verifierConfig_ = ark::verifier::NewConfig();
     InitializeVerifierRuntime();
 
@@ -590,6 +610,7 @@ Runtime::~Runtime()
     signalManager_->DeleteHandlersArray();
     delete signalManager_;
 #endif
+
     delete cha_;
     delete classLinker_;
     if (dprofiler_ != nullptr) {
@@ -695,6 +716,12 @@ void Runtime::SetDaemonThreadsCount(uint32_t daemonThreadsCnt)
 
 mem::GCType Runtime::GetGCType(const RuntimeOptions &options, panda_file::SourceLang lang)
 {
+#ifdef ARK_HYBRID
+    if (!options.WasSetGcType(plugins::LangToRuntimeType(lang))) {
+        const_cast<RuntimeOptions &>(options).SetGcType("cmc-gc");
+        LOG(INFO, RUNTIME) << "Not set the GC type, and use cmc-gc by default when Ark hybrid mode is enable";
+    }
+#endif
     auto gcType = ark::mem::GCTypeFromString(options.GetGcType(plugins::LangToRuntimeType(lang)));
     if (options.IsNoAsyncJit()) {
         // With no-async-jit we can force compilation inside of c2i bridge (we have DecrementHotnessCounter there)
@@ -784,6 +811,10 @@ bool Runtime::InitializePandaVM()
 
 bool Runtime::HandleAotOptions()
 {
+    if (AotEscapeSignalHandler::IsEscapeSignalFlagExists()) {
+        LOG(WARNING, AOT) << "HandleAotOptions: AOT mode has escaped and roll back to interpreter mode";
+        return true;
+    }
     auto aotFiles = options_.GetAotFiles();
     const auto &name = options_.GetAotFile();
     if (!name.empty()) {
@@ -848,6 +879,7 @@ void Runtime::HandleJitOptions()
     }
     RegisterSignalHandler<StackOverflowHandler>(signalManager_, true);
     RegisterSignalHandler<CrashFallbackDumpHandler>(signalManager_, false);
+    RegisterSignalHandler<AotEscapeSignalHandler>(signalManager_, false);
 #endif
 }
 
@@ -884,7 +916,7 @@ void Runtime::SetThreadClassPointers()
     classLinker_->InitializeRoots(thread);
     auto ext = GetClassLinker()->GetExtension(GetLanguageContext(GetRuntimeType()));
     if (ext != nullptr) {
-        thread->SetStringClassPtr(ext->GetClassRoot(ClassRoot::STRING));
+        thread->SetStringClassPtr(ext->GetClassRoot(ClassRoot::LINE_STRING));
         thread->SetArrayU16ClassPtr(ext->GetClassRoot(ClassRoot::ARRAY_U16));
         thread->SetArrayU8ClassPtr(ext->GetClassRoot(ClassRoot::ARRAY_U8));
     }
@@ -942,6 +974,12 @@ bool Runtime::Initialize()
 
     if (options_.WasSetMemAllocDumpExec()) {
         StartMemAllocDumper(ConvertToString(options_.GetMemAllocDumpFile()));
+    }
+
+    // NOTE(compiler team): #27075 Remove this after full support of LineString, TreeString and SliceString
+    // Disable String Concat optimizations for new types of string, due to expected performance degradation
+    if (!compiler::g_options.WasSetCompilerOptimizeStringConcat()) {
+        compiler::g_options.SetCompilerOptimizeStringConcat(!Runtime::GetOptions().IsUseAllStrings());
     }
 
 #ifdef PANDA_TARGET_MOBILE
@@ -1526,12 +1564,58 @@ bool Runtime::SaveProfileInfo() const
     return IsProfilerEnabled() && saveProfilingInfo_;
 }
 
+bool Runtime::IncrementalSaveProfileInfo() const
+{
+    return IsProfilerEnabled() && incrementalSaveProfilingInfo_;
+}
+
+bool Runtime::TryCreateSaverTask()
+{
+    if (!IncrementalSaveProfileInfo()) {
+        LOG(DEBUG, RUNTIME) << "[profile_saver] Incremental profile save disabled.";
+        return false;
+    }
+    auto saverWorker = GetPandaVM()->GetProfileSaverWorker();
+    if (saverWorker == nullptr) {
+        LOG(DEBUG, RUNTIME) << "[profile_saver] Profile saver worker doesn't exists.";
+        return false;
+    }
+    return saverWorker->TryAddTask();
+}
+
 void Runtime::CheckOptionsFromOs() const
 {
 #if !defined(PANDA_QEMU_BUILD) && !defined(PANDA_TARGET_MOBILE)
     // for qemu-aarch64 we will get 32 from GetCacheLineSize()
     // for native arm and qemu-arm we will get 0 from GetCacheLineSize()
     ASSERT(ark::CACHE_LINE_SIZE == os::mem::GetCacheLineSize());
+#endif
+}
+
+void Runtime::InitBaseRuntime()
+{
+#ifdef ARK_HYBRID
+    auto *baseRuntime = common::BaseRuntime::GetInstance();
+    ASSERT(baseRuntime != nullptr);
+    baseRuntime->Init();
+#endif
+}
+
+void Runtime::PreFiniBaseRuntime()
+{
+#ifdef ARK_HYBRID
+    // Stop the current GC before all threads unregister
+    // Change to a more accurate function, when the function was provided (see #26240).
+    common::BaseRuntime::RequestGC(common::GcType::FULL);
+#endif
+}
+
+void Runtime::FiniBaseRuntime()
+{
+#ifdef ARK_HYBRID
+    auto *baseRuntime = common::BaseRuntime::GetInstance();
+    ASSERT(baseRuntime != nullptr);
+    baseRuntime->Fini();
 #endif
 }
 

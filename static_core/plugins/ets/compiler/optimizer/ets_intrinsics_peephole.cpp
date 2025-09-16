@@ -17,6 +17,7 @@
 #include "compiler/optimizer/ir/analysis.h"
 #include "compiler/optimizer/ir/runtime_interface.h"
 #include "compiler/optimizer/optimizations/const_folding.h"
+#include "runtime/include/coretypes/string.h"
 
 namespace ark::compiler {
 
@@ -77,7 +78,7 @@ static bool ReplaceTypeofWithIsInstance(IntrinsicInst *intrinsic)
     auto *bb = saveState->GetBasicBlock();
     bb->InsertAfter(loadClass, saveState);
     auto isInstance = graph->CreateInstIsInstance(DataType::BOOL, pc, typeOf->GetInput(0).GetInst(), loadClass,
-                                                  saveState, TypeIdMixin {typeId, method}, ClassType::FINAL_CLASS);
+                                                  saveState, TypeIdMixin {typeId, method}, ClassType::OTHER_CLASS);
     intrinsic->ReplaceUsers(isInstance);
     bb->InsertAfter(isInstance, loadClass);
     return true;
@@ -108,7 +109,8 @@ Inst *GetStringFromLength(Inst *inst)
             return nullptr;
         }
         auto input1 = inst->GetInput(1).GetInst();
-        if (!input1->IsConst() || input1->CastToConstant()->GetRawValue() != 1) {
+        if (!input1->IsConst() ||
+            input1->CastToConstant()->GetRawValue() != ark::coretypes::String::STRING_LENGTH_SHIFT) {
             return nullptr;
         }
         lenArray = inst->GetInput(0).GetInst();
@@ -180,6 +182,9 @@ bool TryInsertFieldInst(IntrinsicInst *intrinsic, RuntimeInterface::ClassPtr kla
         loadField->SetObjField(field);
         if (runtime->IsFieldVolatile(field)) {
             loadField->SetVolatile(true);
+        }
+        if (type == DataType::REFERENCE && runtime->NeedsPreReadBarrier()) {
+            loadField->SetNeedBarrier(true);
         }
         memObj = loadField;
         intrinsic->ReplaceUsers(loadField);
@@ -407,7 +412,11 @@ bool Peepholes::PeepholeGetTypeInfo([[maybe_unused]] GraphVisitor *v, IntrinsicI
 #endif  // COMPILER_DEBUG_CHECKS
     auto obj = intrinsic->GetInput(0).GetInst();
     auto typeInfo = obj->GetObjectTypeInfo();
-    if (typeInfo) {
+    // When encoding LoadType, we call resolveType from the method and id,
+    // but the union class has no methods -- no vtable/itable is built for it,
+    // so there cannot be an instance of the union class.
+    // #27093
+    if (typeInfo && (graph->GetRuntime()->GetClassType(typeInfo.GetClass()) != ClassType::UNION_CLASS)) {
         auto loadType = graph->CreateInstLoadType(DataType::REFERENCE, intrinsic->GetPc());
         loadType->SetMethod(graph->GetMethod());
         loadType->SetTypeId(graph->GetRuntime()->GetClassIdWithinFile(graph->GetMethod(), typeInfo.GetClass()));
@@ -418,6 +427,17 @@ bool Peepholes::PeepholeGetTypeInfo([[maybe_unused]] GraphVisitor *v, IntrinsicI
         intrinsic->ReplaceUsers(graph->GetOrCreateNullPtr());
     }
     return true;
+}
+
+bool Peepholes::PeepholeNullcheck([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
+{
+    auto input = intrinsic->GetInput(0).GetInst();
+    if (IsInstNotNull(input)) {
+        intrinsic->ReplaceUsers(input);
+        intrinsic->ClearFlag(inst_flags::NO_DCE);
+        return true;
+    }
+    return false;
 }
 
 bool Peepholes::PeepholeStringFromCharCodeSingle([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)

@@ -15,9 +15,10 @@
 
 import { BusinessError } from "@ohos.base";
 
-const OutOfBoundsErrorCodeId: number = 10200001;
+const TypeErrorCodeId: int = 401;
+const OutOfBoundsErrorCodeId: int = 10200001;
 
-function createBusinessError(code: number, message: string) {
+function createBusinessError(code: int, message: string) {
     let err = new BusinessError();
     err.code = code;
     err.name = 'BusinessError';
@@ -25,12 +26,18 @@ function createBusinessError(code: number, message: string) {
     return err;
 }
 
+export type DequeforEachCb<T> = (value: T, index: int, deque: Deque<T>) => void;
+
 export default class Deque<T> implements Iterable<T>, JsonReplacer {
     private readonly DEFAULT_CAPACITY = 8;
-    internal capacity: int = this.DEFAULT_CAPACITY;
-    internal buffer: Array<T>;
-    internal front: int = 0;
-    internal rear: int = 0;
+    private capacity: int = this.DEFAULT_CAPACITY;
+    private buffer: Array<T>;
+    private front: int = 0;
+    private rear: int = 0;
+
+    public toString(): string {
+        return "[object Deque]";
+    }
 
     public jsonReplacer(): Record<String, NullishType> {
         const buf = this.buffer;
@@ -45,7 +52,7 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
     /**
      * property: The number of elements in the ArrayList.
      */
-    get length(): number {
+    get length(): int {
         return (this.rear - this.front + this.capacity) % this.capacity;
     }
 
@@ -138,7 +145,7 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
      * @param callbackfn - The function to execute on each element, taking the value, index, and Deque as arguments.
      *
      */
-    public forEach(callbackfn: (value: T, index: number, deque: Deque<T>) => void): void {
+    public forEach(callbackfn: DequeforEachCb<T>): void {
         let i: int = this.front, k = 0;
         while (i != this.rear) {
             callbackfn(this.buffer[i], k++, this);
@@ -180,7 +187,7 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
      * @returns {IterableIterator<T>} An iterator for the deque.
      */
     public override $_iterator(): IterableIterator<T> {
-        return new DequeValuesIterator_T<T>(this);
+        return new DequeValuesIterator_T<T>(this, this.front, this.rear, this.capacity, this.buffer);
     }
 
     /**
@@ -204,13 +211,9 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
     /**
      * Increases the capacity of the deque.
      *
-     * @throws {RangeError} If the current capacity has reached the maximum limit.
+     * @throws {BusinessError} If the current capacity has reached the maximum limit.
      */
     private increaseCapacity(): void {
-        if (this.capacity == Int.MAX_VALUE) {
-            throw new RangeError("The current capacity has reached the maximum limit.");
-        }
-
         let newCap: int = min(this.capacity * 2, Int.MAX_VALUE);
 
         let newBuffer = new Array<T>(newCap);
@@ -233,12 +236,16 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
      * @param index - The index of the element to retrieve.
      *
      * @returns The element at the specified index.
-     * @throws { BusinessError } 10200001 - The value of "index" is out of range. It must be >= 0 && <= 2147483647.
+     * @throws { BusinessError } 401 - The type of "index" must be small integer.
+     * @throws { BusinessError } 10200001 - The value of "index" is out of range. It must be >= 0 && <= ${length - 1}.
+     *  Received value is: ${index}
      */
-    public $_get(index: number): T {
-        if (index >= this.length || index < 0) {
-            throw createBusinessError(OutOfBoundsErrorCodeId, `The value of \"index\" is out of range. It must be >= 0 && <= ${Int.MAX_VALUE}. Received value is: ${index}`);
+    public $_get(index: int): T {
+        this.checkEmptyContainer();
+        if (index > Int.MAX_VALUE) {
+            throw createBusinessError(TypeErrorCodeId, `The type of \"index\" must be small integer.`);
         }
+        this.checkIndex(index);
 
         return this.buffer[this.getRealIndex(index)];
     }
@@ -249,37 +256,54 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
      * @param index - The index of the element to set.
      *
      * @param val - The value to set at the specified index.
-     * @throws { BusinessError } 10200001 - The value of "index" is out of range. It must be >= 0 && <= 2147483647.
+     * @throws { BusinessError } 10200001 - The value of "index" is out of range. It must be >= 0 && <= ${length - 1}.
+     *  Received value is: ${index}
      */
-    public $_set(index: number, val: T): void {
-        if (index >= this.length || index < 0) {
-            throw createBusinessError(OutOfBoundsErrorCodeId, `The value of \"index\" is out of range. It must be >= 0 && <= ${Int.MAX_VALUE}. Received value is: ${index}`);
-        }
+    public $_set(index: int, val: T): void {
+        this.checkIndex(index);
 
         this.buffer[this.getRealIndex(index)] = val;
     }
 
-    private getRealIndex(index: number): number {
+    private getRealIndex(index: int): int {
         return (this.front + index) % this.capacity;
+    }
+
+    private checkEmptyContainer(): void {
+        if (this.isEmpty()) {
+            throw createBusinessError(OutOfBoundsErrorCodeId, `Container is empty`);
+        }
+    }
+
+    private checkIndex(index: int): void {
+        if (index < 0) {
+            throw createBusinessError(OutOfBoundsErrorCodeId, `The value of \"index\" is out of range. It must be >= 0 && <= ${this.length - 1}. Received value is: ${index}`);
+        }
     }
 }
 
 class DequeValuesIterator_T<T> implements IterableIterator<T> {
     private parent: Deque<T>
     private idx: int = 0;
+    private capacity: int
+    private buffer: Array<T>;
+    private rear: int = 0;
 
-    constructor(parent: Deque<T>) {
+    constructor(parent: Deque<T>, front: int, rear: int, capacity: int, buffer: Array<T>) {
         this.parent = parent
-        this.idx = parent.front;
+        this.idx = front;
+        this.rear = rear
+        this.capacity = capacity
+        this.buffer = buffer
     }
 
     override next(): IteratorResult<T> {
-        if (this.parent.length == 0 || this.parent.rear == this.idx) {
+        if (this.parent.length == 0 || this.rear == this.idx) {
             return new IteratorResult<T>()
         }
 
-        let val = new IteratorResult<T>(this.parent.buffer[this.idx]);
-        this.idx = (this.idx + 1) % this.parent.capacity;
+        let val = new IteratorResult<T>(this.buffer[this.idx]);
+        this.idx = (this.idx + 1) % this.capacity;
 
         return val;
     }

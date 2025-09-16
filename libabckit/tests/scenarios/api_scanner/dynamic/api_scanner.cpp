@@ -16,7 +16,7 @@
 #include <algorithm>
 #include <cassert>
 #include <sstream>
-#include "libabckit/include/c/abckit.h"
+#include "libabckit/c/abckit.h"
 #include "api_scanner.h"
 #include "helpers/helpers.h"
 

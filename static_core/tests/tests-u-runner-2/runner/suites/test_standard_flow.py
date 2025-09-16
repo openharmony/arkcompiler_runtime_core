@@ -33,9 +33,11 @@ from runner.options.step import Step, StepKind
 from runner.suites.one_test_runner import OneTestRunner
 from runner.suites.test_metadata import TestMetadata
 from runner.test_base import Test
-from runner.utils import get_class_by_name
+from runner.utils import get_class_by_name, to_bool
 
 _LOGGER = Log.get_logger(__file__)
+
+IS_PANDA = "is-panda"
 
 
 class TestStandardFlow(Test):
@@ -59,6 +61,8 @@ class TestStandardFlow(Test):
         }
 
         self.parent_test_id = parent_test_id
+
+        self.is_panda = to_bool(test_env.config.workflow.parameters.get(IS_PANDA, False))
 
         # If test fails it contains reason of first failed step
         # It's supposed if the first step is failed then no step is executed further
@@ -210,19 +214,60 @@ class TestStandardFlow(Test):
     def dependent_abc_files(self) -> list[str]:
         return [df.test_abc.as_posix() for df in self.dependent_tests]
 
+    def prepare_compiler_step(self, step: Step) -> Step:
+        new_step = copy.copy(step)
+        new_step.args = step.args[:]
+        if self.__is_dependent:
+            new_step.args = self.__change_output_arg(step.args, new_step.args)
+            new_step.args = self.__change_arktsconfig_arg(step.args, new_step.args)
+            return new_step
+        new_step.args = self.__change_arktsconfig_arg(step.args, new_step.args)
+        return new_step
+
+    def prepare_verifier_step(self, step: Step) -> Step:
+        if self.dependent_tests and self.is_panda:
+            new_step = copy.copy(step)
+            new_step.args = step.args[:]
+            new_step.args = self.__add_boot_panda_files(new_step.args)
+            return new_step
+        return step
+
+    def prepare_aot_step(self, step: Step) -> Step:
+        if not self.is_panda:
+            return step
+        new_step = copy.copy(step)
+        new_step.args = step.args[:]
+        if self.dependent_tests:
+            for abc_file in list(self.dependent_abc_files()):
+                new_step.args.extend([f'--paoc-panda-files={abc_file}'])
+        new_step.args.extend([f'--paoc-panda-files={self.test_abc}'])
+        return new_step
+
+    def prepare_runtime_step(self, step: Step) -> Step:
+        if not self.is_panda:
+            return step
+        new_step = copy.copy(step)
+        new_step.args = step.args[:]
+        if self.dependent_tests:
+            new_step.args = self.__add_boot_panda_files(new_step.args)
+            return new_step
+
+        new_step.args.insert(-2, self.__add_panda_files())
+        return new_step
+
     def __do_run_one_step(self, step: Step) -> tuple[bool, TestReport | None, str | None]:
         if not step.enabled:
             passed, report, fail_kind = True, None, None
         elif step.step_kind == StepKind.COMPILER:
-            passed, report, fail_kind = self.__run_compiler(step)
+            passed, report, fail_kind = self.__run_step(self.prepare_compiler_step(step))
             if self.is_negative_compile:
                 passed = not passed
         elif step.step_kind == StepKind.VERIFIER:
-            passed, report, fail_kind = self.__run_verifier(step)
+            passed, report, fail_kind = self.__run_step(self.prepare_verifier_step(step))
         elif step.step_kind == StepKind.AOT:
-            passed, report, fail_kind = self.__run_aot(step)
+            passed, report, fail_kind = self.__run_step(self.prepare_aot_step(step))
         elif step.step_kind == StepKind.RUNTIME:
-            passed, report, fail_kind = self.__run_runtime(step)
+            passed, report, fail_kind = self.__run_step(self.prepare_runtime_step(step))
             if self.is_negative_runtime:
                 passed = not passed
         else:
@@ -251,43 +296,6 @@ class TestStandardFlow(Test):
                 new_args.insert(0, f"--stdlib={stdlib_path.as_posix()}")
                 break
         return new_args
-
-    def __run_compiler(self, step: Step) -> tuple[bool, TestReport, str | None]:
-        new_step = copy.copy(step)
-        new_step.args = step.args[:]
-        if self.__is_dependent:
-            new_step.args = self.__change_output_arg(step.args, new_step.args)
-            new_step.args = self.__change_arktsconfig_arg(step.args, new_step.args)
-            return self.__run_step(new_step)
-        new_step.args = self.__change_arktsconfig_arg(step.args, new_step.args)
-        return self.__run_step(new_step)
-
-    def __run_verifier(self, step: Step) -> tuple[bool, TestReport, str | None]:
-        if self.dependent_tests:
-            new_step = copy.copy(step)
-            new_step.args = step.args[:]
-            new_step.args = self.__add_boot_panda_files(new_step.args)
-            return self.__run_step(new_step)
-        return self.__run_step(step)
-
-    def __run_aot(self, step: Step) -> tuple[bool, TestReport, str | None]:
-        new_step = copy.copy(step)
-        new_step.args = step.args[:]
-        if self.dependent_tests:
-            for abc_file in list(self.dependent_abc_files()):
-                new_step.args.extend([f'--paoc-panda-files={abc_file}'])
-        new_step.args.extend([f'--paoc-panda-files={self.test_abc}'])
-        return self.__run_step(new_step)
-
-    def __run_runtime(self, step: Step) -> tuple[bool, TestReport, str | None]:
-        new_step = copy.copy(step)
-        new_step.args = step.args[:]
-        if self.dependent_tests:
-            new_step.args = self.__add_boot_panda_files(new_step.args)
-            return self.__run_step(new_step)
-
-        new_step.args.insert(-2, self.__add_panda_files())
-        return self.__run_step(new_step)
 
     def __run_step(self, step: Step) -> tuple[bool, TestReport, str | None]:
         cmd_env = self.test_env.cmd_env

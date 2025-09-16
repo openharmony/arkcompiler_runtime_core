@@ -16,7 +16,7 @@
 import {util} from "@ohos.util";
 
 function main(): int {
-    const suite = new ArkTestsuite("CommonUtil types.isMap() API tests")
+    const suite = new arktest.ArkTestsuite("CommonUtil types.isMap() API tests")
 
     suite.addTest("Verify Map is identified as Map", testIsMap001)
     suite.addTest("Verify Set is not identified as Map", testIsMap002)
@@ -38,7 +38,7 @@ function main(): int {
 function testIsMap001() {
   let proc = new util.types();
   let result = proc.isMap(new Map<int, int>());
-  assertTrue(result, "The Map should be of the same type as the Map");
+  arktest.assertTrue(result, "The Map should be of the same type as the Map");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0095
@@ -51,7 +51,7 @@ function testIsMap001() {
 function testIsMap002() {
   let proc = new util.types();
   let result = proc.isMap(new Set<int>());
-  assertTrue(result == false, "The Set should not be of the same type as the Map");
+  arktest.assertTrue(result == false, "The Set should not be of the same type as the Map");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0096
@@ -64,7 +64,7 @@ function testIsMap002() {
 function testIsMap003() {
   let proc = new util.types();
   let result = proc.isMap(new String());
-  assertTrue(result == false, "The String should not be of the same type as the Map");
+  arktest.assertTrue(result == false, "The String should not be of the same type as the Map");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0097
@@ -77,7 +77,7 @@ function testIsMap003() {
 function testIsMap004() {
   let proc = new util.types();
   let result = proc.isMap(new Object());
-  assertTrue(result == false, "The Object should not be of the same type as the Map");
+  arktest.assertTrue(result == false, "The Object should not be of the same type as the Map");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0098
@@ -90,5 +90,5 @@ function testIsMap004() {
 function testIsMap005() {
   let proc = new util.types();
   let result = proc.isMap(new Boolean());
-  assertTrue(result == false, "The Boolean should not be of the same type as the Map");
+  arktest.assertTrue(result == false, "The Boolean should not be of the same type as the Map");
 }

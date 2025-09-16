@@ -13,16 +13,13 @@
  * limitations under the License.
  */
 
-package error.test;
-
-import {
-    foo0,
-    foo1
-} from "org_error_js"
+let module = ESObject.load('../../plugins/ets/tests/interop_js/tests/error/ets_to_js/org_error');
+let foo0 = module.getProperty('foo0');
+let foo1 = module.getProperty('foo1');
 
 export function bar0(): void {
     try {
-        foo0()
+        foo0.invoke();
     } catch (e: Error) {
         let errObj: ESValue = (e as ESError).getValue()
         console.log("e ets: " + errObj.toNumber())
@@ -31,12 +28,12 @@ export function bar0(): void {
 }
 
 export function bar1(): void {
-    foo0()
+    foo0.invoke();
 }
 
 export function bar2(): void {
     try {
-        foo1()
+        foo1.invoke();
     } catch (originalError) {
         throw new Error('current error', { cause: originalError })
     }

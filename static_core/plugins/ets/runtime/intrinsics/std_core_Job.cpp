@@ -54,7 +54,7 @@ EtsObject *EtsAwaitJob(EtsJob *job)
     LOG(DEBUG, COROUTINES) << "Job::await: job is failed!";
 
     if (Runtime::GetOptions().IsListUnhandledOnExitJobs(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))) {
-        currentCoro->GetPandaVM()->RemoveUnhandledFailedJob(jobHandle.GetPtr());
+        currentCoro->GetPandaVM()->GetUnhandledObjectManager()->RemoveFailedJob(jobHandle.GetPtr());
     }
 
     auto *exc = jobHandle->GetValue(currentCoro);

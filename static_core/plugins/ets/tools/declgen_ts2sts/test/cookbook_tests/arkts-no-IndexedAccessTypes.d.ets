@@ -1,3 +1,4 @@
+'use static'
 /*
  * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,5 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-type Person = Any;
-type Age = number;
+export type NonNull<T, K extends Any = Any> = Any;
+export declare function Get<Type extends Any, Key extends Any = Any, Value extends Any = Any>(key: Key, value: Type): Any;
+export type Person = Any;
+export type Age = number;

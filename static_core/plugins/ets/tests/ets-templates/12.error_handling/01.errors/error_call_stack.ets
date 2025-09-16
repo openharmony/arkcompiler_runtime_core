@@ -23,7 +23,7 @@ function main(): void {
         throw new Error('error call stack test');
     } catch (e) {
         let err = e as Error;
-        assertEQ(typeof err.stack, 'string');
+        arktest.assertEQ(typeof err.stack, 'string');
         const stackLines = (err.stack as string).split('\n');
         const stackPattern = new RegExp("\\s*at .*(\\d+):(\\d+)");
 
@@ -32,7 +32,7 @@ function main(): void {
             if (line.trim() === '') {
                 continue;
             }
-            assertEQ(stackPattern.test(line), true);
+            arktest.assertEQ(stackPattern.test(line), true);
         }
     }
 }

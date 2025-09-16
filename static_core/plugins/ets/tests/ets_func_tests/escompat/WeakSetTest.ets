@@ -27,12 +27,12 @@ function weakSetOperations(): void {
     const id3 = new Key(3)
 
     weakSet.add(id3)
-    assertTrue(weakSet.has(id3))
+    arktest.assertTrue(weakSet.has(id3))
 
-    assertTrue(weakSet.delete(id3))
-    assertFalse(weakSet.delete(id3))
+    arktest.assertTrue(weakSet.delete(id3))
+    arktest.assertFalse(weakSet.delete(id3))
 
-    assertFalse(weakSet.has(id3))
+    arktest.assertFalse(weakSet.has(id3))
 }
 
 function newWeakSetUsingElementsArray(): void {
@@ -41,8 +41,8 @@ function newWeakSetUsingElementsArray(): void {
 
     const weakSet = new WeakSet<Key>([elem1, elem2])
 
-    assertTrue(weakSet.has(elem1))
-    assertTrue(weakSet.has(elem2))
+    arktest.assertTrue(weakSet.has(elem1))
+    arktest.assertTrue(weakSet.has(elem2))
 }
 
 function newWeakSetUsingElementsIterable(): void {
@@ -52,7 +52,7 @@ function newWeakSetUsingElementsIterable(): void {
     const elems: Iterable<Object> = Array.of<Object>(elem1, elem2)
     const weakSet = new WeakSet<Object>(elems)
 
-    assertTrue(weakSet.has(elem1))
+    arktest.assertTrue(weakSet.has(elem1))
 }
 
 function newWeakSetUsingNullElements(): void {
@@ -61,7 +61,7 @@ function newWeakSetUsingNullElements(): void {
     const elem1 = new Key(31)
     weakSet.add(elem1)
 
-    assertTrue(weakSet.has(elem1))
+    arktest.assertTrue(weakSet.has(elem1))
 }
 
 function  newWeakSetUsingUndefinedElements(): void {
@@ -69,7 +69,7 @@ function  newWeakSetUsingUndefinedElements(): void {
 }
 
 function main(): int {
-    const suite = new ArkTestsuite("WeakSet API tests")
+    const suite = new arktest.ArkTestsuite("WeakSet API tests")
     suite.addTest("new WeakSet using elements array", newWeakSetUsingElementsArray)
     suite.addTest("new WeakSet using elements iterable", newWeakSetUsingElementsIterable)
     suite.addTest("WeakSet operations", weakSetOperations)

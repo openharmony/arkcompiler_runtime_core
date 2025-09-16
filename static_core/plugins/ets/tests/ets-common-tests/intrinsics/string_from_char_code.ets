@@ -193,10 +193,10 @@ function stringFromCpsSeqTest() {
     let cpsActual = '';
     for (let i = 12; i < 0x10FFFF; i += 30009) {
         if (Char.codeUnitsToEncode(i) == 1) {
-            cpsActual += String.fromCharCode(i as number);
+            cpsActual += String.fromCharCode(Int.toDouble(i));
         } else {
-            cpsActual += String.fromCharCode(Char.getHighSurrogate(i) as number);
-            cpsActual += String.fromCharCode(Char.getLowSurrogate(i) as number);
+            cpsActual += String.fromCharCode(Char.toDouble(Char.getHighSurrogate(i)));
+            cpsActual += String.fromCharCode(Char.toDouble(Char.getLowSurrogate(i)));
         }
     }
     arktest.assertEQ(cpsActual, cpsGolden, 'cpsActual must be equal to cpsGolden');

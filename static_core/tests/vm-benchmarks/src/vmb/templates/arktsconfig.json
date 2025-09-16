@@ -9,7 +9,7 @@
               "import_tests": [
                   "$ROOT/tools/es2panda/test/parser/ets/import_tests"]
         },
-        "dynamicPaths": {
+        "dependencies": {
           "dynamic_import_tests": {"language": "js", "ohmUrl": "dynamic_import_tests"}
         }
     }

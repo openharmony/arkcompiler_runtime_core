@@ -13,33 +13,35 @@
  * limitations under the License.
  */
 
+type L = StdDebug.Logger
+
 async function AsyncFailing(): Promise<string> {
-    throw Error("AsyncFailing");
+    throw Error('AsyncFailing');
 }
 
 function Failing(): string {
-    throw Error("Failing");
+    throw Error('Failing');
 }
 
 function SingleRejectedJob(): null {
-    throw Error("I'm your single rejected job");
+    throw Error('This is a single rejected job');
 }
 
-function main(): void {
-    StdProcess.on("unhandledJobRejection", (obj: Object): void => {
-        assertTrue(false, "Job handler didn't switch");
-    });
-    StdProcess.on("unhandledPromiseRejection", (obj: Object): void => {
-        assertTrue(false, "All promises should be handled");
+function testAllhandledRejection(): void {
+    StdProcess.on('unhandledJobRejection', (reason: Error, obj: Object): void => {
+        arktest.assertTrue(obj instanceof Job, 'The object should be of type Job');
     });
 
-    StdProcess.on("unhandledJobRejection", (obj: Object): void => {
-        assertTrue(obj instanceof Error, "not Erorr is not expected")
+    StdProcess.on('unhandledPromiseRejection', (reason: Error, obj: Object): void => {
+        arktest.assertTrue(obj instanceof Promise, 'The object should be of type Promise');
+    });
 
-        assertEQ((obj as Error).message, "I'm your single rejected job");
+    StdProcess.on('unhandledJobRejection', (reason: Error, obj: Object): void => {
+        arktest.assertTrue(obj instanceof Job, 'The object should be of type Job');
+        arktest.assertEQ(reason.message, 'This is a single rejected job');
 
-        StdProcess.on("unhandledJobRejection", (obj: Object): void => {
-            assertTrue(false, "All jobs should be handled");
+        StdProcess.on('unhandledJobRejection', (reason: Error, obj: Object): void => {
+            arktest.assertTrue(obj instanceof Job, 'The object should be of type Job');
         });
     });
 
@@ -52,9 +54,9 @@ function main(): void {
 
     AsyncFailing().catch((e: NullishType) => {});
 
-    let p = Promise.reject(new Error("promise1"));
+    let p = Promise.reject(new Error('promise1'));
     let q = p.then(() => {
-        console.println("Test failed: unreachable code");
+        L.log('Test failed: unreachable code');
         let procManager = new StdProcess.ProcessManager();
         procManager.exit(1);
     });
@@ -62,7 +64,7 @@ function main(): void {
 
     let f = async (): Promise<void> => {
         try {
-            await Promise.reject(new Error("promise2"));
+            await Promise.reject(new Error('promise2'));
         } catch (e) {
         }
     };
@@ -75,4 +77,11 @@ function main(): void {
     }
 
     launch<null, () => null>(SingleRejectedJob);
+}
+
+function main(): int {
+    let testSuite = new arktest.ArkTestsuite('coroutines.allhandled_rejection');
+    testSuite.addTest('testAllhandledRejection', testAllhandledRejection);
+    let res = testSuite.run();
+    return res;
 }

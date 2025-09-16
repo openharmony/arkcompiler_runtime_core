@@ -56,6 +56,7 @@ class Platform(InteropPlatformBase):
     def template(self) -> Optional[GenSettings]:
         return None
 
+    # pylint: disable=duplicate-code
     def run_unit(self, bu: BenchUnit) -> None:
         libs = bu.libs('.ts', '.mjs', '.js')
         if not libs:

@@ -11,6 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+include(../../cmake/TaiheWorkflows.cmake)
+setup_taihe_cmake_test_env()
+cmake_minimum_required(VERSION 3.18)
+project(ani_graphics3d)
+
 set(IDL_FILES
     "${CMAKE_CURRENT_LIST_DIR}/idl/scene.taihe"
     "${CMAKE_CURRENT_LIST_DIR}/idl/sceneNodeParameters.taihe"
@@ -18,7 +23,6 @@ set(IDL_FILES
 )
 
 set(GEN_ETS_FILES
-    "@ohos.base.ets"
     "scene.ets"
     "sceneNodeParameters.ets"
 )
@@ -33,4 +37,4 @@ set(AUTHOR_INCLUDE
     "${CMAKE_CURRENT_LIST_DIR}/author/include"
 )
 
-add_ani_demo(ani_graphics3d "${IDL_FILES}" "" "${GEN_ETS_FILES}" "${USER_ETS_FILES}" "${AUTHOR_INCLUDE}" "${AUTHOR_CPP_FILES}" "test")
+add_ani_demo(ani_graphics3d "${IDL_FILES}" "" "${GEN_ETS_FILES}" "${USER_ETS_FILES}" "${AUTHOR_INCLUDE}" "${AUTHOR_CPP_FILES}")

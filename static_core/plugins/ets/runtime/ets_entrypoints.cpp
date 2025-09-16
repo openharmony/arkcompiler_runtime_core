@@ -15,6 +15,7 @@
 
 #include "plugins/ets/runtime/ets_entrypoints.h"
 
+#include "include/coretypes/string.h"
 #include "include/object_header.h"
 #include "libpandafile/shorty_iterator.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
@@ -57,8 +58,9 @@ static inline bool Launch(EtsCoroutine *currentCoro, Method *method, const EtsHa
     auto promiseRef = etsVm->GetGlobalObjectStorage()->Add(promiseHandle.GetPtr(), mem::Reference::ObjectType::GLOBAL);
     auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(promiseRef, coroManager);
     // create the coro and put it to the ready queue
-    bool launchResult = currentCoro->GetCoroutineManager()->Launch(
-        evt, method, std::move(args), CoroutineLaunchMode::DEFAULT, EtsCoroutine::LAUNCH, false);
+    bool launchResult =
+        currentCoro->GetCoroutineManager()->Launch(evt, method, std::move(args), CoroutineLaunchMode::DEFAULT,
+                                                   EtsCoroutine::LAUNCH, false, CoroutineWorkerGroup::ANY_ID);
     if (UNLIKELY(!launchResult)) {
         // OOM
         Runtime::GetCurrent()->GetInternalAllocator()->Delete(evt);
@@ -407,24 +409,21 @@ extern "C" void EndGeneralNativeMethodPrim()
     auto *storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
 
     coroutine->NativeCodeEnd();
-    storage->PopLocalEtsFrame(nullptr);
+    storage->PopLocalEtsFrame(EtsReference::GetUndefined());
 }
 
-extern "C" ObjectHeader *EndGeneralNativeMethodObj(ark::mem::Reference *ref)
+extern "C" ObjectHeader *EndGeneralNativeMethodObj(ark::ets::EtsReference *etsRef)
 {
     auto *coroutine = EtsCoroutine::GetCurrent();
     ASSERT(coroutine != nullptr);
     auto *storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
-
     coroutine->NativeCodeEnd();
-
     ObjectHeader *ret = nullptr;
-    auto *etsRef = EtsReference::CastFromReference(ref);
-    if (etsRef != nullptr) {
+    if (LIKELY(!coroutine->HasPendingException())) {
         ret = storage->GetEtsObject(etsRef)->GetCoreType();
     }
 
-    storage->PopLocalEtsFrame(nullptr);
+    storage->PopLocalEtsFrame(EtsReference::GetUndefined());
     return ret;
 }
 
@@ -446,22 +445,20 @@ extern "C" void EndQuickNativeMethodPrim()
     ASSERT(coroutine != nullptr);
     auto *storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
 
-    storage->PopLocalEtsFrame(nullptr);
+    storage->PopLocalEtsFrame(EtsReference::GetUndefined());
 }
 
-extern "C" ObjectHeader *EndQuickNativeMethodObj(ark::mem::Reference *ref)
+extern "C" ObjectHeader *EndQuickNativeMethodObj(ark::ets::EtsReference *etsRef)
 {
     auto *coroutine = EtsCoroutine::GetCurrent();
     ASSERT(coroutine != nullptr);
     auto *storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
-
     ObjectHeader *ret = nullptr;
-    auto *etsRef = EtsReference::CastFromReference(ref);
-    if (etsRef != nullptr) {
+    if (LIKELY(!coroutine->HasPendingException())) {
         ret = storage->GetEtsObject(etsRef)->GetCoreType();
     }
 
-    storage->PopLocalEtsFrame(nullptr);
+    storage->PopLocalEtsFrame(EtsReference::GetUndefined());
     return ret;
 }
 
@@ -485,8 +482,8 @@ extern "C" uintptr_t NO_ADDRESS_SANITIZE ResolveCallByNameEntrypoint(const Metho
 
 extern "C" coretypes::String *CreateStringFromCharCodeEntrypoint(ObjectHeader *array)
 {
-    auto *charCodes = EtsBoxedDoubleArray::FromEtsObject(EtsObject::FromCoreType(array));
-    return EtsString::CreateNewStringFromCharCode(charCodes->GetData())->GetCoreType();
+    auto *charCodes = EtsEscompatArray::FromEtsObject(EtsObject::FromCoreType(array));
+    return EtsString::CreateNewStringFromCharCode(charCodes->GetData(), charCodes->GetActualLength())->GetCoreType();
 }
 
 extern "C" coretypes::String *CreateStringFromCharCodeSingleEntrypoint(uint64_t charCode)

@@ -20,5 +20,5 @@ desc: Left-hand expression testing - array element access testing.
 function main(): void {
   let myArray: number[] = [1, 2, 3];
   myArray[0] = 4;
-  assertEQ(myArray[0] , 4);
+  arktest.assertEQ(myArray[0] , 4);
 }

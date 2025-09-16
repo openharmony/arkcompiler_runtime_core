@@ -16,7 +16,7 @@
 import {util} from "@ohos.util";
 
 function main(): int {
-    const suite = new ArkTestsuite("CommonUtil types.isNativeError() API tests")
+    const suite = new arktest.ArkTestsuite("CommonUtil types.isNativeError() API tests")
 
     suite.addTest("Verify TypeError is identified as NativeError", testIsNativeError001)
     suite.addTest("Verify Error is identified as NativeError", testIsNativeError002)
@@ -38,7 +38,7 @@ function main(): int {
 function testIsNativeError001() {
   let proc = new util.types();
   let result = proc.isNativeError(new TypeError());
-  assertTrue(result, "The TypeError should be of the same type as the NativeError");
+  arktest.assertTrue(result, "The TypeError should be of the same type as the NativeError");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0109
@@ -51,7 +51,7 @@ function testIsNativeError001() {
 function testIsNativeError002() {
   let proc = new util.types();
   let result = proc.isNativeError(new Error());
-  assertTrue(result, "The Error should be of the same type as the NativeError");
+  arktest.assertTrue(result, "The Error should be of the same type as the NativeError");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0110
@@ -64,7 +64,7 @@ function testIsNativeError002() {
 function testIsNativeError003() {
   let proc = new util.types();
   let result = proc.isNativeError(new RangeError());
-  assertTrue(result, "The RangeError should be of the same type as the NativeError");
+  arktest.assertTrue(result, "The RangeError should be of the same type as the NativeError");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0111
@@ -77,7 +77,7 @@ function testIsNativeError003() {
 function testIsNativeError004() {
   let proc = new util.types();
   let result = proc.isNativeError(true);
-  assertTrue(result == false, "The primitive Boolean should not be of the same type as the NativeError");
+  arktest.assertTrue(result == false, "The primitive Boolean should not be of the same type as the NativeError");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0112
@@ -90,5 +90,5 @@ function testIsNativeError004() {
 function testIsNativeError005() {
   let proc = new util.types();
   let result = proc.isNativeError(false);
-  assertTrue(result == false, "The primitive Boolean should not be of the same type as the NativeError");
+  arktest.assertTrue(result == false, "The primitive Boolean should not be of the same type as the NativeError");
 }

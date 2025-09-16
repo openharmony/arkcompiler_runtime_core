@@ -18,8 +18,7 @@ Lexical Elements
 .. meta:
     frontend_status: Done
 
-This chapter discusses the lexical structure of the |LANG| programming language,
-and the analytical conventions.
+This chapter discusses the lexical structure of the |LANG| programming language.
 
 |
 
@@ -144,6 +143,9 @@ separators is considered a single separator.
    line separator character
    paragraph separator character
 
+Line separators are often treated as white spaces, except where line
+separators have special meanings. See :ref:`Semicolons` for more details.
+
 |
 
 .. _Tokens:
@@ -168,9 +170,6 @@ form a valid token. Tokens are separated by white spaces (see
 :ref:`White spaces`), operators, or punctuators (see
 :ref:`Operators and Punctuators`). White spaces are ignored by the syntactic
 grammar (see :ref:`Grammar Summary`).
-
-Line separators are often treated as white spaces, except where line
-separators have special meanings. See :ref:`Semicolons` for more details.
 
 .. index::
    line separator
@@ -289,12 +288,11 @@ Keywords
 .. meta:
     frontend_status: Done
 
-*Keywords* are reserved words with permanently predefined meanings
-in |LANG|. Keywords are case-sensitive, 
-see the exact spelling in the tables below.
-Kinds of keywords are discussed below.
+*Keywords* are reserved words with meanings permanently predefined in |LANG|.
+Keywords are case-sensitive, and their exact spelling is presented in the
+following four tables. The kinds of keywords are discussed below.
 
-1. The following keywords are reserved in any context (*hard keywords*), and
+1. The following *hard keywords* are reserved in any context, and
 cannot be used as identifiers:
 
 .. index::
@@ -308,20 +306,22 @@ cannot be used as identifiers:
 +--------------------+-------------------+------------------+------------------+
 |                    |                   |                  |                  |
 +====================+===================+==================+==================+
-|   ``abstract``     |   ``else``        |   ``internal``   |   ``switch``     |
+|   ``abstract``     |   ``else``        |   ``instanceof`` |   ``switch``     |
 +--------------------+-------------------+------------------+------------------+
-|   ``as``           |   ``enum``        |   ``let``        |   ``super``      |
+|   ``as``           |   ``enum``        |   ``interface``  |   ``super``      |
 +--------------------+-------------------+------------------+------------------+
-|   ``async``        |   ``export``      |   ``native``     |   ``this``       |
+|   ``async``        |   ``export``      |   ``let``        |   ``this``       |
 +--------------------+-------------------+------------------+------------------+
-|   ``await``        |   ``extends``     |   ``new``        |   ``throw``      |
+|   ``await``        |   ``extends``     |   ``native``     |   ``throw``      |
 +--------------------+-------------------+------------------+------------------+
-|   ``break``        |   ``false``       |   ``null``       |   ``true``       |
+|   ``break``        |   ``false``       |   ``new``        |   ``true``       |
 +--------------------+-------------------+------------------+------------------+
-|   ``case``         |   ``final``       |   ``override``   |   ``try``        |
+|   ``case``         |   ``final``       |   ``null``       |   ``try``        |
 +--------------------+-------------------+------------------+------------------+
-|   ``class``        |   ``for``         |   ``package``    |   ``undefined``  |
+|   ``catch``        |   ``finally``     |   ``overload``   |   ``typeof``     |
 +--------------------+-------------------+------------------+------------------+
+|   ``class``        |   ``for``         |   ``override``   |   ``undefined``  |
++--------------------+----+--------------+------------------+------------------+
 |   ``const``        |   ``function``    |   ``private``    |   ``while``      |
 +--------------------+-------------------+------------------+------------------+
 |   ``constructor``  |   ``if``          |   ``protected``  |                  |
@@ -330,8 +330,11 @@ cannot be used as identifiers:
 +--------------------+-------------------+------------------+------------------+
 |   ``default``      |   ``import``      |   ``return``     |                  |
 +--------------------+-------------------+------------------+------------------+
-|   ``do``           |   ``interface``   |   ``static``     |                  |
+|   ``do``           |   ``in``          |   ``static``     |                  |
 +--------------------+-------------------+------------------+------------------+
+
+
+|
 
 2. Names and aliases of predefined types are *hard keywords*, and cannot be
 used as identifiers:
@@ -368,40 +371,40 @@ used as identifiers:
 | ``void``      |               |
 +---------------+---------------+
 
-3. The following words have special meaning in certain contexts (*soft
-keywords*) but are valid identifiers elsewhere:
+3. The following *soft keywords* have special meaning in certain contexts but
+are valid identifiers elsewhere:
 
 .. index::
    keyword
    soft keyword
    identifier
 
-+--------------------+--------------------+--------------------+
-|                    |                    |                    |
-+====================+====================+====================+
-|      ``catch``     |     ``in``         |      ``readonly``  |
-+--------------------+--------------------+--------------------+
-|      ``declare``   |     ``instanceof`` |      ``set``       |
-+--------------------+--------------------+--------------------+
-|      ``finally``   |     ``namespace``  |      ``type``      |
-+--------------------+--------------------+--------------------+
-|      ``from``      |     ``of``         |      ``typeof``    |
-+--------------------+--------------------+--------------------+
-|      ``get``       |     ``out``        |                    |
-+--------------------+--------------------+--------------------+
++--------------------+--------------------+
+|                    |                    |
++====================+====================+
+|      ``declare``   |     ``of``         |
++--------------------+--------------------+
+|      ``from``      |     ``out``        |
++--------------------+--------------------+
+|      ``get``       |    ``readonly``    |
++--------------------+--------+-----------+
+|      ``keyof``     |    ``set``         |
++--------------------+--------------------+
+|      ``namespace`` |    ``type``        |
++--------------------+--------------------+
 
 4. The following identifiers are also treated as *soft keywords* reserved for
-the future use (or used in |TS|):
+the future use, or currently used in |TS|:
 
 .. index::
    identifier
    soft keyword
 
-+---------------+---------------+---------------+---------------+----------------+
-|               |               |               |               |                |
-+===============+===============+===============+===============+================+
-|   ``keyof``   |    ``is``     |   ``struct``  |    ``var``    |  ``yield``     |
-+---------------+---------------+---------------+---------------+----------------+
++---------------+---------------+---------------+----------------+
+|               |               |               |                |
++===============+===============+===============+================+
+|    ``is``     |   ``struct``  |    ``var``    |  ``yield``     |
++---------------+---------------+---------------+----------------+
 
 |
 
@@ -501,7 +504,7 @@ Numeric Literals
 .. meta:
     frontend_status: Done
 
-Integer and floating-point literals are numeric literals.
+*Numeric literals* include integer and floating-point literals.
 
 |
 
@@ -601,22 +604,13 @@ last symbol of an integer literal.
    integer
    underscore character
 
-Integer literals are of integer types that match literals as follows:
+Integer literals are of ``int`` or ``long`` types as follows:
 
-- For *decimal* integer literals
+- ``int`` if the literal value can be represented
+  by a non-negative 32-bit number, i.e., the value is in the
+  range 0..max(int); or
 
-  + ``int`` if the literal value can be represented
-    by a non-negative 32-bit number, i.e., the value is in the
-    range 0..max(int); or
-
-  + ``long`` otherwise.
-
-- For *hex*, *octal*, and *binary* integer literals
-
-  + ``int`` if bit representation of the value fits in 32-bits, i.e., the value 
-    is in the range 0..max(unsigned 32-bit integer); or
-
-  + ``long`` otherwise.
+- ``long`` otherwise.
 
 A :index:`compile-time error` occurs if an integer literal value is too
 large for the values of type ``long``. The concept is represented by the
@@ -626,12 +620,13 @@ examples below:
    :linenos:
 
     // literals of type int:
+    0
     1
     0x7F
-    0x7FFFFFFF // max(int)
-    0x80000000 // min(int)
+    0x7FFF_FFFF // max(int)
 
     // literals of type long:
+    0x8000_0000
     0x7FFF_FFFF_1
     9223372036854775807 // max(long)
 
@@ -643,7 +638,6 @@ examples below:
    integer literal
    int
    long
-   char
 
 |
 
@@ -731,9 +725,9 @@ Bigint Literals
     frontend_status: Partly
     todo: hex, octal, binary literals
 
-*Bigint literals* represent integer numbers with unlimited number of digits.
+*Bigint literals* represent integer numbers with an unlimited number of digits.
 
-*Bigint literals* are always of the ``bigint`` type (see :ref:`Type bigint`).
+*Bigint literals* are always of type ``bigint`` (see :ref:`Type bigint`).
 
 A ``bigint`` literal is an *integer literal* followed by the symbol '``n``':
 
@@ -741,7 +735,7 @@ A ``bigint`` literal is an *integer literal* followed by the symbol '``n``':
 
     BigIntLiteral: IntegerLiteral 'n';
 
-The concept is presented by the examples below:
+The concept is represented by the examples below:
 
 .. code-block:: typescript
 
@@ -757,7 +751,7 @@ character must be neither the very first nor the very last symbol of a ``bigint`
 literal.
 
 Strings that represent numbers or any integer value can be converted to
-``bigint`` by using built-in functions:
+``bigint`` by using built-in functions as follows:
 
 .. code-block-meta:
     skip
@@ -776,9 +770,9 @@ Strings that represent numbers or any integer value can be converted to
    number
    integer value
 
-Two methods allow taking *bitsCount* lower bits of a
-``bigint`` number and return them as a result. Signed and unsigned versions
-are both possible as seen below:
+Two methods allow taking *bitsCount* lower bits of a ``bigint`` number and
+return them as a result. Signed and unsigned versions are both possible as
+follows:
 
 .. code-block:: typescript
 
@@ -910,7 +904,7 @@ some others. An escape sequence always starts with the backslash character
    a bounded Unicode escape sequence like ``\u{5c}``), and
 
 -  any single character except digits from '1' to '9', and characters '``x``',
-   '``u``', '``CR``' and '``LF``'.
+   '``u``', '``CR``', and '``LF``'.
 
 .. index::
    string literal
@@ -988,9 +982,9 @@ An example of a multiline string is provided below:
                     which should be enclosed in
                     backticks`
 
-*MultilineString* literals are of the literal type that corresponds to the literal.
-If an operator is applied to the literal, then the literal type is replaced
-for ``string`` (see :ref:`Type String`).
+*MultilineString* literals are of the literal type that corresponds to a literal.
+If an operator is applied to a literal, then the literal type is replaced for
+``string`` (see :ref:`Type String`).
 
 .. index::
    multiline string
@@ -1008,10 +1002,11 @@ Regex Literal
 .. meta:
     frontend_status: None
 
-*Regex literals* can contain mandatory regex part and optional flags:
+*Regex literals* can contain the mandatory regex part and optional flags:
 
 .. index::
    regex literal
+   optional flag
 
 .. code-block:: abnf
 
@@ -1057,8 +1052,8 @@ Regex Literal
         'g'? 'i'? 'm'? 's'? 'u'? 'v'? 'y'? 
         ;
 
-Regex flags may be put in any order, but duplication leads to a
-:index:`compile-time error`.
+Regex flags can be put in any order. However, a duplication of the regex flag
+causes a :index:`compile-time error`.
 
 An example of regex literals is provided below:
 
@@ -1068,9 +1063,8 @@ An example of regex literals is provided below:
     let regex1 = /abc/ 
     let regex2 = /ab+c/gi
 
-
-Semantically *regex literal* is equivalant to creation of an object of *RegExp*
-type which is a part of the standard library (see :ref:`Standard Library`)
+*Regex literal* is semantically equivalent to the creation of an object of
+*RegExp* type that is a part of the :ref:`Standard Library`.
 
 .. code-block:: typescript
    :linenos:
@@ -1078,8 +1072,8 @@ type which is a part of the standard library (see :ref:`Standard Library`)
     let regex1 = /abc/ 
     let regex2 = new RegExp ("abc")
 
-The |LANG| supports the same semantics of *regex literals* as 
-semantics of |JS| regular expresions.
+The semantics of *regex literals* supported by |LANG| and the semantics of
+regular expressions in |JS| are the same.
 
 |
 
@@ -1149,8 +1143,8 @@ Comments
 the source code. Comments are insignificant for the syntactic grammar (see
 :ref:`Grammar Summary`).
 
-*Line comments* begin with the sequence of characters '``//``' (as seen in the
-example below) and end with the line separator character. Any character
+*Line comments* begin with the sequence of characters '``//``' as in the
+example below, and end with the line separator character. Any character
 or sequence of characters between them is allowed but ignored.
 
 .. code-block:: typescript
@@ -1158,8 +1152,8 @@ or sequence of characters between them is allowed but ignored.
 
     // This is a line comment
 
-*Multiline comments* begin with the sequence of characters '``\*``' (as seen
-in the example below) and end with the first subsequent sequence of characters
+*Multiline comments* begin with the sequence of characters '``\*``' as
+in the example below, and end with the first subsequent sequence of characters
 '``*/``'. Any character or sequence of characters between them is allowed but
 ignored.
 
@@ -1188,8 +1182,8 @@ Semicolons
     frontend_status: Done
 
 Declarations and statements are usually terminated by a line separator (see
-:ref:`Line Separators`). In some cases, a semicolon must be used to separate
-syntax productions written in one line, or to avoid ambiguity.
+:ref:`Line Separators`). A semicolon must be used in some cases to separate
+syntax productions written in one line or to avoid ambiguity.
 
 .. index::
    declaration

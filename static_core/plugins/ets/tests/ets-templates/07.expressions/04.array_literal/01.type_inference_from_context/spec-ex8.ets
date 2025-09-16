@@ -22,6 +22,6 @@ desc: >-
 
 function main() {
     let farray: FixedArray<number> = [1, 2]
-    assertEQ(farray[0], 1.0)
-    assertEQ(farray[1], 2.0)
+    arktest.assertEQ(farray[0], 1.0)
+    arktest.assertEQ(farray[1], 2.0)
 }

@@ -22,7 +22,7 @@ import { Job } from "std/core"
 const NUMBER_OF_FREE_REGIONS = 2;
 
 function cor(numObjToCreate: int, humongousSize: int): Object|null {
-    let localGarbage = new ArrayAsListObject();
+    let localGarbage = new containers.ArrayAsListObject();
     try {
         for (let i = 0; i < numObjToCreate; i++) {
             localGarbage.pushBack(new byte[humongousSize] as Object);
@@ -35,13 +35,13 @@ function cor(numObjToCreate: int, humongousSize: int): Object|null {
         return null;
     }
     catch(e) {
-        assertTrue( false, "Some other error: " + e.toString());
+        arktest.assertTrue( false, "Some other error: " + e.toString());
     }
     return localGarbage as Object;
 };
 
 class TestHumongousStress {
-    private static GARBAGE = new ArrayAsListObject();
+    private static GARBAGE = new containers.ArrayAsListObject();
 
     regionSize: int;
     humongousSize: int;
@@ -62,10 +62,10 @@ class TestHumongousStress {
             }
         }
         catch(e: OutOfMemoryError) {
-            TestHumongousStress.GARBAGE = new ArrayAsListObject();
+            TestHumongousStress.GARBAGE = new containers.ArrayAsListObject();
         }
         catch(e) {
-            assertTrue( false, "Some other error: " + e.toString());
+            arktest.assertTrue( false, "Some other error: " + e.toString());
         }
         return maxNumberOfObjects;
     }
@@ -74,7 +74,7 @@ class TestHumongousStress {
         let maxObjects = this.getHeapSizeInObjects() - NUMBER_OF_FREE_REGIONS;
         let objPerCoroutine = (maxObjects / this.threadsCount) as int;
         let lastCoroutuneNumObjects = maxObjects - objPerCoroutine * (this.threadsCount - 1);
-        assertTrue(this.threadsCount > 0 && objPerCoroutine > 0);
+        arktest.assertTrue(this.threadsCount > 0 && objPerCoroutine > 0);
 
         let corArrayTmp = new Array<Job<Object|null>>();
         for(let i = 0; i < this.threadsCount - 1; i++) {
@@ -90,16 +90,16 @@ class TestHumongousStress {
                 // Null is returned. Not enough memory. Finish current test.
                 continue;
             }
-            let numOfReturnedObjects = (tmp as ArrayAsListObject).size();
+            let numOfReturnedObjects = (tmp as containers.ArrayAsListObject).size();
             for(let j = 0; j < numOfReturnedObjects; j++) {
                 try {
-                    TestHumongousStress.GARBAGE.pushBack((tmp as ArrayAsListObject).popFront());
+                    TestHumongousStress.GARBAGE.pushBack((tmp as containers.ArrayAsListObject).popFront());
                 }
                 catch(e: OutOfMemoryError) {
                     continue;
                 }
                 catch(e) {
-                    assertTrue( false : "Some other error: " + e.toString());
+                    arktest.assertTrue( false : "Some other error: " + e.toString());
                 }
             }
         }
@@ -108,27 +108,27 @@ class TestHumongousStress {
                 // Null is returned. Not enough memory. Finish current test.
                 return;
             }
-        let numOfReturnedObjects = (tmp as ArrayAsListObject).size();
+        let numOfReturnedObjects = (tmp as containers.ArrayAsListObject).size();
         for(let j = 0; j < numOfReturnedObjects; j++) {
             try {
-                TestHumongousStress.GARBAGE.pushBack((tmp as ArrayAsListObject).popFront());
+                TestHumongousStress.GARBAGE.pushBack((tmp as containers.ArrayAsListObject).popFront());
             }
             catch(e: OutOfMemoryError) {
                 continue;
             }
             catch(e) {
-                assertTrue( false, "Some other error: " + e.toString());
+                arktest.assertTrue( false, "Some other error: " + e.toString());
             }
         }
     }
 
     public clear(): void {
-        TestHumongousStress.GARBAGE = new ArrayAsListObject();
+        TestHumongousStress.GARBAGE = new containers.ArrayAsListObject();
     }
 }
 
 function main(): void {
-    let tests = new ArrayAsListObject();
+    let tests = new containers.ArrayAsListObject();
 
     tests.pushBack(new TestHumongousStress(4, 3, 1.1));
     tests.pushBack(new TestHumongousStress(16, 5, 2.1));

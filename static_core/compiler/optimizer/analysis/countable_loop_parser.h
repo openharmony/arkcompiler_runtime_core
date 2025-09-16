@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,14 @@ class Loop;
  *  ---------------
  * for (init(a); if_imm(compare(a,test)); update(a)) {...}
  */
+enum WalkType {
+    INC,
+    DEC,
+    SHL,
+    SHR,
+    ASHR,
+};
+
 struct CountableLoopInfo {
     Inst *ifImm;
     Inst *init;
@@ -34,6 +42,7 @@ struct CountableLoopInfo {
     uint64_t constStep;
     ConditionCode normalizedCc;  // cc between `update` and `test`
     bool isInc;
+    WalkType walkType;
 };
 
 /// Helper class to check if loop is countable and to get its parameters
@@ -49,11 +58,17 @@ public:
     bool ParseLoopExit();
     static bool HasPreHeaderCompare(Loop *loop, const CountableLoopInfo &loopInfo);
     static std::optional<uint64_t> GetLoopIterations(const CountableLoopInfo &loopInfo);
+    static std::optional<uint64_t> GetLoopIterationsForIncAndDec(const CountableLoopInfo &loopInfo);
+    static std::optional<uint64_t> GetLoopIterationsForShl(const CountableLoopInfo &loopInfo);
+    static std::optional<uint64_t> GetLoopIterationsForShrAndAshr(const CountableLoopInfo &loopInfo);
 
 private:
     bool IsInstIncOrDec(Inst *inst);
+    bool IsInstShlShrAshr(Inst *inst);
     bool SetUpdateAndTestInputs();
     void SetIndexAndConstStep();
+    void SetIndexAndConstStepForIncAndDec();
+    void SetIndexAndConstStepForShlAndShrAndAshr();
     void SetNormalizedConditionCode();
     bool IsConditionCodeAcceptable();
     BasicBlock *FindLoopExitBlock();

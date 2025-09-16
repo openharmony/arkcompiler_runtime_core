@@ -21,7 +21,7 @@
 #include "libpandabase/utils/utils.h"
 #include "runtime/include/class_linker_extension.h"
 #include "runtime/include/coretypes/array-inl.h"
-#include "runtime/include/coretypes/string-inl.h"
+#include "runtime/include/coretypes/line_string.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/thread.h"
 
@@ -507,7 +507,7 @@ TEST_F(StringTest, SameLengthStringCompareTest)
 
     ASSERT_EQ(String::StringsAreEqual(firstUtf16String, secondUtf16String), strcmp(fString, sString) == 0);
     ASSERT_EQ(String::StringsAreEqual(firstUtf16String, secondUtf8String),
-              firstUtf16String->IsUtf16() == secondUtf8String->IsUtf16());
+              firstUtf16String->IsUtf16() != secondUtf8String->IsUtf16());
     ASSERT_EQ(String::StringsAreEqual(firstUtf8String, secondUtf8String), true);
     ASSERT_TRUE(firstUtf16String->IsUtf16());
     ASSERT_TRUE(String::StringsAreEqualUtf16(firstUtf16String, firstUtf16String->GetDataUtf16(),
@@ -581,17 +581,17 @@ TEST_F(StringTest, IndexOfTest)
     String *string4 = String::CreateFromUtf16(data4.data(), data4.size() - 1, GetLanguageContext(),
                                               Runtime::GetCurrent()->GetPandaVM());
 
-    auto index = string1->IndexOf(string2, 1);
-    auto index1 = string1->IndexOf(string4, 1);
-    auto index2 = string3->IndexOf(string2, 1);
-    auto index3 = string3->IndexOf(string4, 1);
+    auto index = string1->IndexOf(string2, GetLanguageContext(), 1);
+    auto index1 = string1->IndexOf(string4, GetLanguageContext(), 1);
+    auto index2 = string3->IndexOf(string2, GetLanguageContext(), 1);
+    auto index3 = string3->IndexOf(string4, GetLanguageContext(), 1);
     std::cout << index << std::endl;
     ASSERT_EQ(index, index2);
     ASSERT_EQ(index1, index3);
-    index = string1->IndexOf(string2, 2_I);
-    index1 = string1->IndexOf(string4, 2_I);
-    index2 = string3->IndexOf(string2, 2_I);
-    index3 = string3->IndexOf(string4, 2_I);
+    index = string1->IndexOf(string2, GetLanguageContext(), 2_I);
+    index1 = string1->IndexOf(string4, GetLanguageContext(), 2_I);
+    index2 = string3->IndexOf(string2, GetLanguageContext(), 2_I);
+    index3 = string3->IndexOf(string4, GetLanguageContext(), 2_I);
     std::cout << index << std::endl;
     ASSERT_EQ(index, index2);
     ASSERT_EQ(index1, index3);
@@ -606,18 +606,18 @@ TEST_F(StringTest, IndexOfTest2)
                                                  Runtime::GetCurrent()->GetPandaVM());
         String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
                                                   Runtime::GetCurrent()->GetPandaVM());
-        ASSERT_EQ(0, string->IndexOf(pattern, -1));
-        ASSERT_EQ(0, string->IndexOf(pattern, 0));
-        ASSERT_EQ(4_I, string->IndexOf(pattern, 1));
-        ASSERT_EQ(4_I, string->IndexOf(pattern, 4_I));
-        ASSERT_EQ(-1, string->IndexOf(pattern, 5_I));
-        ASSERT_EQ(-1, string->IndexOf(pattern, 6_I));
+        ASSERT_EQ(0, string->IndexOf(pattern, GetLanguageContext(), -1));
+        ASSERT_EQ(0, string->IndexOf(pattern, GetLanguageContext(), 0));
+        ASSERT_EQ(4_I, string->IndexOf(pattern, GetLanguageContext(), 1));
+        ASSERT_EQ(4_I, string->IndexOf(pattern, GetLanguageContext(), 4_I));
+        ASSERT_EQ(-1, string->IndexOf(pattern, GetLanguageContext(), 5_I));
+        ASSERT_EQ(-1, string->IndexOf(pattern, GetLanguageContext(), 6_I));
 
         String *emptyString = String::CreateEmptyString(GetLanguageContext(), Runtime::GetCurrent()->GetPandaVM());
-        ASSERT_EQ(-1, emptyString->IndexOf(string, 0));
-        ASSERT_EQ(0, string->IndexOf(emptyString, -3_I));
-        ASSERT_EQ(2_I, string->IndexOf(emptyString, 2_I));
-        ASSERT_EQ(7_I, string->IndexOf(emptyString, 10_I));
+        ASSERT_EQ(-1, emptyString->IndexOf(string, GetLanguageContext(), 0));
+        ASSERT_EQ(0, string->IndexOf(emptyString, GetLanguageContext(), -3_I));
+        ASSERT_EQ(2_I, string->IndexOf(emptyString, GetLanguageContext(), 2_I));
+        ASSERT_EQ(7_I, string->IndexOf(emptyString, GetLanguageContext(), 10_I));
     }
     {
         std::vector<uint8_t> stringData {'a', 'b', 'c', 'd', 'e', 'f', 'g', 0};
@@ -626,7 +626,7 @@ TEST_F(StringTest, IndexOfTest2)
                                                  Runtime::GetCurrent()->GetPandaVM());
         String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
                                                   Runtime::GetCurrent()->GetPandaVM());
-        ASSERT_EQ(3_I, string->IndexOf(pattern, 0));
+        ASSERT_EQ(3_I, string->IndexOf(pattern, GetLanguageContext(), 0));
     }
     {
         std::vector<uint8_t> stringData {'a', 'b', 'a', 'a', 'a', 'a', 'a', 0};
@@ -635,11 +635,11 @@ TEST_F(StringTest, IndexOfTest2)
                                                  Runtime::GetCurrent()->GetPandaVM());
         String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
                                                   Runtime::GetCurrent()->GetPandaVM());
-        ASSERT_EQ(2_I, string->IndexOf(pattern, 0));
-        ASSERT_EQ(2_I, string->IndexOf(pattern, 2_I));
-        ASSERT_EQ(3_I, string->IndexOf(pattern, 3_I));
-        ASSERT_EQ(4_I, string->IndexOf(pattern, 4_I));
-        ASSERT_EQ(-1, string->IndexOf(pattern, 5_I));
+        ASSERT_EQ(2_I, string->IndexOf(pattern, GetLanguageContext(), 0));
+        ASSERT_EQ(2_I, string->IndexOf(pattern, GetLanguageContext(), 2_I));
+        ASSERT_EQ(3_I, string->IndexOf(pattern, GetLanguageContext(), 3_I));
+        ASSERT_EQ(4_I, string->IndexOf(pattern, GetLanguageContext(), 4_I));
+        ASSERT_EQ(-1, string->IndexOf(pattern, GetLanguageContext(), 5_I));
     }
 }
 
@@ -662,29 +662,29 @@ TEST_F(StringTest, CompareTestUtf8)
     ASSERT_EQ(false, string2->IsUtf16());
     ASSERT_EQ(false, string3->IsUtf16());
     ASSERT_EQ(false, string4->IsUtf16());
-    ASSERT_LT(string1->Compare(string2), 0);
-    ASSERT_GT(string2->Compare(string1), 0);
-    ASSERT_EQ(string1->Compare(string3), 0);
-    ASSERT_EQ(string3->Compare(string1), 0);
-    ASSERT_LT(string2->Compare(string4), 0);
-    ASSERT_GT(string4->Compare(string2), 0);
+    ASSERT_LT(string1->Compare(string2, GetLanguageContext()), 0);
+    ASSERT_GT(string2->Compare(string1, GetLanguageContext()), 0);
+    ASSERT_EQ(string1->Compare(string3, GetLanguageContext()), 0);
+    ASSERT_EQ(string3->Compare(string1, GetLanguageContext()), 0);
+    ASSERT_LT(string2->Compare(string4, GetLanguageContext()), 0);
+    ASSERT_GT(string4->Compare(string2, GetLanguageContext()), 0);
 
     // utf8 vs utf16
     std::vector<uint16_t> data5 {'a', 'b', 0xab, 0xdc, 'z', 0};
     String *string5 = String::CreateFromUtf16(data5.data(), data5.size() - 1, GetLanguageContext(),
                                               Runtime::GetCurrent()->GetPandaVM());
     ASSERT_EQ(true, string5->IsUtf16());
-    ASSERT_LT(string2->Compare(string5), 0);
-    ASSERT_GT(string5->Compare(string2), 0);
-    ASSERT_LT(string4->Compare(string5), 0);
-    ASSERT_GT(string5->Compare(string4), 0);
+    ASSERT_LT(string2->Compare(string5, GetLanguageContext()), 0);
+    ASSERT_GT(string5->Compare(string2, GetLanguageContext()), 0);
+    ASSERT_LT(string4->Compare(string5, GetLanguageContext()), 0);
+    ASSERT_GT(string5->Compare(string4, GetLanguageContext()), 0);
 
     // compare with self
-    ASSERT_EQ(string1->Compare(string1), 0);
-    ASSERT_EQ(string2->Compare(string2), 0);
-    ASSERT_EQ(string3->Compare(string3), 0);
-    ASSERT_EQ(string4->Compare(string4), 0);
-    ASSERT_EQ(string5->Compare(string5), 0);
+    ASSERT_EQ(string1->Compare(string1, GetLanguageContext()), 0);
+    ASSERT_EQ(string2->Compare(string2, GetLanguageContext()), 0);
+    ASSERT_EQ(string3->Compare(string3, GetLanguageContext()), 0);
+    ASSERT_EQ(string4->Compare(string4, GetLanguageContext()), 0);
+    ASSERT_EQ(string5->Compare(string5, GetLanguageContext()), 0);
 }
 
 TEST_F(StringTest, CompareTestUtf16)
@@ -701,15 +701,15 @@ TEST_F(StringTest, CompareTestUtf16)
     ASSERT_EQ(true, string6->IsUtf16());
     ASSERT_EQ(true, string7->IsUtf16());
 
-    ASSERT_LT(string5->Compare(string6), 0);
-    ASSERT_GT(string6->Compare(string5), 0);
-    ASSERT_EQ(string6->Compare(string7), 0);
-    ASSERT_EQ(string7->Compare(string6), 0);
+    ASSERT_LT(string5->Compare(string6, GetLanguageContext()), 0);
+    ASSERT_GT(string6->Compare(string5, GetLanguageContext()), 0);
+    ASSERT_EQ(string6->Compare(string7, GetLanguageContext()), 0);
+    ASSERT_EQ(string7->Compare(string6, GetLanguageContext()), 0);
 
     // compare with self
-    ASSERT_EQ(string5->Compare(string5), 0);
-    ASSERT_EQ(string6->Compare(string6), 0);
-    ASSERT_EQ(string7->Compare(string7), 0);
+    ASSERT_EQ(string5->Compare(string5, GetLanguageContext()), 0);
+    ASSERT_EQ(string6->Compare(string6, GetLanguageContext()), 0);
+    ASSERT_EQ(string7->Compare(string7, GetLanguageContext()), 0);
 }
 
 TEST_F(StringTest, CompareTestLongUtf8)
@@ -750,14 +750,14 @@ TEST_F(StringTest, CompareTestLongUtf8)
                                                Runtime::GetCurrent()->GetPandaVM());
 
     // utf8 vs utf8
-    ASSERT_EQ(string8->Compare(string12), 0);
-    ASSERT_EQ(string12->Compare(string8), 0);
-    ASSERT_EQ(string9->Compare(string13), 0);
-    ASSERT_EQ(string13->Compare(string9), 0);
-    ASSERT_LT(string10->Compare(string11), 0);
-    ASSERT_GT(string11->Compare(string10), 0);
-    ASSERT_LT(string10->Compare(string9), 0);
-    ASSERT_GT(string9->Compare(string10), 0);
+    ASSERT_EQ(string8->Compare(string12, GetLanguageContext()), 0);
+    ASSERT_EQ(string12->Compare(string8, GetLanguageContext()), 0);
+    ASSERT_EQ(string9->Compare(string13, GetLanguageContext()), 0);
+    ASSERT_EQ(string13->Compare(string9, GetLanguageContext()), 0);
+    ASSERT_LT(string10->Compare(string11, GetLanguageContext()), 0);
+    ASSERT_GT(string11->Compare(string10, GetLanguageContext()), 0);
+    ASSERT_LT(string10->Compare(string9, GetLanguageContext()), 0);
+    ASSERT_GT(string9->Compare(string10, GetLanguageContext()), 0);
 }
 
 TEST_F(StringTest, CompareTestLongUtf16)
@@ -798,14 +798,14 @@ TEST_F(StringTest, CompareTestLongUtf16)
                                                Runtime::GetCurrent()->GetPandaVM());
 
     // utf16 vs utf16
-    ASSERT_EQ(string14->Compare(string18), 0);
-    ASSERT_EQ(string18->Compare(string14), 0);
-    ASSERT_EQ(string15->Compare(string19), 0);
-    ASSERT_EQ(string19->Compare(string15), 0);
-    ASSERT_LT(string16->Compare(string17), 0);
-    ASSERT_GT(string17->Compare(string16), 0);
-    ASSERT_LT(string16->Compare(string15), 0);
-    ASSERT_GT(string15->Compare(string16), 0);
+    ASSERT_EQ(string14->Compare(string18, GetLanguageContext()), 0);
+    ASSERT_EQ(string18->Compare(string14, GetLanguageContext()), 0);
+    ASSERT_EQ(string15->Compare(string19, GetLanguageContext()), 0);
+    ASSERT_EQ(string19->Compare(string15, GetLanguageContext()), 0);
+    ASSERT_LT(string16->Compare(string17, GetLanguageContext()), 0);
+    ASSERT_GT(string17->Compare(string16, GetLanguageContext()), 0);
+    ASSERT_LT(string16->Compare(string15, GetLanguageContext()), 0);
+    ASSERT_GT(string15->Compare(string16, GetLanguageContext()), 0);
 }
 
 TEST_F(StringTest, ConcatTest)
@@ -826,8 +826,8 @@ TEST_F(StringTest, ConcatTest)
     ASSERT_EQ(false, string1->IsUtf16());
     ASSERT_EQ(false, string2->IsUtf16());
     String *string31 = String::Concat(string1, string2, GetLanguageContext(), Runtime::GetCurrent()->GetPandaVM());
-    ASSERT_EQ(string30->Compare(string31), 0);
-    ASSERT_EQ(string31->Compare(string30), 0);
+    ASSERT_EQ(string30->Compare(string31, GetLanguageContext()), 0);
+    ASSERT_EQ(string31->Compare(string30, GetLanguageContext()), 0);
 
     // utf8 + utf16
     std::vector<uint16_t> data4 {'a', 'b', 0xab, 0xdc, 'z', 0};
@@ -838,8 +838,8 @@ TEST_F(StringTest, ConcatTest)
                                                Runtime::GetCurrent()->GetPandaVM());
     String *string51 = String::Concat(string1, string4, GetLanguageContext(), Runtime::GetCurrent()->GetPandaVM());
     ASSERT_EQ(string50->GetLength(), string51->GetLength());
-    ASSERT_EQ(string50->Compare(string51), 0);
-    ASSERT_EQ(string51->Compare(string50), 0);
+    ASSERT_EQ(string50->Compare(string51, GetLanguageContext()), 0);
+    ASSERT_EQ(string51->Compare(string50, GetLanguageContext()), 0);
 
     // utf16 + utf16
     std::vector<uint16_t> data6;
@@ -848,8 +848,8 @@ TEST_F(StringTest, ConcatTest)
     String *string60 = String::CreateFromUtf16(data6.data(), data6.size() - 1, GetLanguageContext(),
                                                Runtime::GetCurrent()->GetPandaVM());
     String *string61 = String::Concat(string4, string50, GetLanguageContext(), Runtime::GetCurrent()->GetPandaVM());
-    ASSERT_EQ(string60->Compare(string61), 0);
-    ASSERT_EQ(string61->Compare(string60), 0);
+    ASSERT_EQ(string60->Compare(string61, GetLanguageContext()), 0);
+    ASSERT_EQ(string61->Compare(string60, GetLanguageContext()), 0);
 }
 
 TEST_F(StringTest, DoReplaceTest0)

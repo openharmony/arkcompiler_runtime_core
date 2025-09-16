@@ -20,6 +20,7 @@
 #include <ostream>
 #include <vector>
 
+#include "plugins/ets/runtime/ets_coroutine.h"
 #include "include/mem/panda_containers.h"
 #include "interop_js/interop_common.h"
 #include "interop_js/js_proxy/js_proxy.h"
@@ -66,11 +67,23 @@ napi_value EtsClassWrapper::Wrap(InteropCtx *ctx, EtsObject *etsObject)
 
     napi_env env = ctx->GetJSEnv();
 
+    /**
+     * False-positive static-analyzer report:
+     * CheckClassInitialized is marked as GC trigger function
+     * but with <false> template (which is default) GC won't be triggered
+     */
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     ASSERT(etsObject != nullptr);
+    // See (CheckClassInitialized) reason
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     ASSERT(etsClass_ == etsObject->GetClass());
 
     SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
+    // See (CheckClassInitialized) reason
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     if (LIKELY(storage->HasReference(etsObject, env))) {
+        // See (CheckClassInitialized) reason
+        // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
         return storage->GetJsObject(etsObject, env);
     }
 
@@ -78,6 +91,8 @@ napi_value EtsClassWrapper::Wrap(InteropCtx *ctx, EtsObject *etsObject)
     // etsObject will be wrapped in jsValue in responce to jsCtor call
     auto *coro = EtsCoroutine::GetCurrent();
     [[maybe_unused]] EtsHandleScope scope(coro);
+    // See (CheckClassInitialized) reason
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     EtsHandle<EtsObject> handle(coro, etsObject);
     ctx->SetPendingNewInstance(handle);
     {
@@ -87,8 +102,8 @@ napi_value EtsClassWrapper::Wrap(InteropCtx *ctx, EtsObject *etsObject)
 
     // NOTE(MockMockBlack, #IC59ZS): put proxy to SharedReferenceStorage more prettily
     if (this->needProxy_) {
-        ASSERT(storage->HasReference(etsObject, env));
-        return storage->GetJsObject(etsObject, env);
+        ASSERT(storage->HasReference(handle.GetPtr(), env));
+        return storage->GetJsObject(handle.GetPtr(), env);
     }
     return jsValue;
 }
@@ -152,13 +167,6 @@ EtsObject *EtsClassWrapper::UnwrapEtsProxy(InteropCtx *ctx, napi_value jsValue)
     return nullptr;
 }
 
-void EtsClassWrapper::ThrowJSErrorNotAssignable(napi_env env, EtsClass *fromKlass, EtsClass *toKlass)
-{
-    const char *from = fromKlass->GetDescriptor();
-    const char *to = toKlass->GetDescriptor();
-    InteropCtx::ThrowJSTypeError(env, std::string(from) + " is not assignable to " + to);
-}
-
 EtsObject *EtsClassWrapper::CreateJSBuiltinProxy(InteropCtx *ctx, napi_value jsValue)
 {
     ASSERT(jsproxyWrapper_ != nullptr);
@@ -192,30 +200,47 @@ std::unique_ptr<JSRefConvert> EtsClassWrapper::CreateJSRefConvertEtsProxy(Intero
     return std::make_unique<JSRefConvertEtsProxy>(wrapper);
 }
 
-class JSRefConvertJSProxy : public JSRefConvert {
-public:
-    explicit JSRefConvertJSProxy() : JSRefConvert(this) {}
-
-    napi_value WrapImpl(InteropCtx *ctx, EtsObject *etsObject)
-    {
-        SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
-        INTEROP_FATAL_IF(!storage->HasReference(etsObject, ctx->GetJSEnv()));
-        return storage->GetJsObject(etsObject, ctx->GetJSEnv());
-    }
-
-    EtsObject *UnwrapImpl(InteropCtx *ctx, [[maybe_unused]] napi_value jsValue)
-    {
-        ctx->Fatal("Unwrap called on JSProxy class");
-        return nullptr;
-    }
-};
-
 /*static*/
 std::unique_ptr<JSRefConvert> EtsClassWrapper::CreateJSRefConvertJSProxy([[maybe_unused]] InteropCtx *ctx,
                                                                          [[maybe_unused]] Class *klass)
 {
     ASSERT(js_proxy::JSProxy::IsProxyClass(klass));
-    return std::make_unique<JSRefConvertJSProxy>();
+    Class *base = klass->GetBase();
+    auto *etsClass = EtsClass::FromRuntimeClass(base);
+    auto *wrapper = ctx->GetEtsClassWrappersCache()->Lookup(etsClass);
+    if (wrapper == nullptr) {
+        return nullptr;
+    }
+    return std::make_unique<JSRefConvertJSProxy>(wrapper);
+}
+
+JSRefConvertJSProxy::JSRefConvertJSProxy(EtsClassWrapper *wrapper)
+    : JSRefConvert(this), overloadNameMapping_(&wrapper->GetOverloadNameMapping())
+{
+}
+
+napi_value JSRefConvertJSProxy::WrapImpl(InteropCtx *ctx, EtsObject *etsObject)
+{
+    SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
+    INTEROP_FATAL_IF(!storage->HasReference(etsObject, ctx->GetJSEnv()));
+    return storage->GetJsObject(etsObject, ctx->GetJSEnv());
+}
+
+EtsObject *JSRefConvertJSProxy::UnwrapImpl(InteropCtx *ctx, [[maybe_unused]] napi_value jsValue)
+{
+    ctx->Fatal("Unwrap called on JSProxy class");
+    return nullptr;
+}
+
+std::string JSRefConvertJSProxy::GetJSMethodName(Method *method)
+{
+    ASSERT(overloadNameMapping_ != nullptr);
+    std::string implName = utf::Mutf8AsCString(method->GetName().data);
+    auto iter = overloadNameMapping_->find(implName);
+    if (iter != overloadNameMapping_->end()) {
+        return iter->second;
+    }
+    return implName;
 }
 
 class JSRefConvertInterface : public JSRefConvert {
@@ -433,9 +458,8 @@ void EtsClassWrapper::SetBaseWrapperMethods(napi_env env, const EtsClassWrapper:
 std::pair<EtsClassWrapper::FieldsVec, EtsClassWrapper::MethodsVec> EtsClassWrapper::CalculateProperties(
     const OverloadsMap *overloads)
 {
-    auto fatalNoMethod = [](Class *klass, const uint8_t *name, const char *signature) {
-        InteropCtx::Fatal(std::string("No method ") + utf::Mutf8AsCString(name) + " " + signature + " in " +
-                          klass->GetName());
+    auto fatalNoMethod = [](Class *klass, const char *methodName, const char *signature) {
+        InteropCtx::Fatal(std::string("No method ") + methodName + " " + signature + " in " + klass->GetName());
     };
 
     auto klass = etsClass_->GetRuntimeClass();
@@ -449,12 +473,17 @@ std::pair<EtsClassWrapper::FieldsVec, EtsClassWrapper::MethodsVec> EtsClassWrapp
     }
     // Select preferred overloads
     if (overloads != nullptr) {
-        for (auto &[name, signaturePair] : *overloads) {
-            Method *method = etsClass_->GetDirectMethod(name, signaturePair.first)->GetPandaMethod();
+        for (const auto &[jsMethodName, entry] : *overloads) {
+            const char *implName = entry.implMethodName;
+            const char *signature = entry.signature;
+
+            Method *method = etsClass_->GetDirectMethod(utf::CStringAsMutf8(implName), signature)->GetPandaMethod();
             if (UNLIKELY(method == nullptr)) {
-                fatalNoMethod(klass, name, signaturePair.first);
+                fatalNoMethod(klass, implName, signature);
             }
-            auto etsMethodSet = std::make_unique<EtsMethodSet>(EtsMethodSet::Create(method));
+            auto jsNameStr = utf::Mutf8AsCString(jsMethodName);
+            auto etsMethodSet =
+                std::make_unique<EtsMethodSet>(EtsMethodSet::Create(EtsMethod::FromRuntimeMethod(method), jsNameStr));
             auto it = props.insert({method->GetName().data, etsMethodSet.get()});
             if (!it.second && std::holds_alternative<EtsMethodSet *>(it.first->second)) {
                 // Possible correct method overloading: merge to existing entry
@@ -525,12 +554,12 @@ void EtsClassWrapper::CollectClassMethods(EtsClassWrapper::PropsMap *props, cons
 
 bool EtsClassWrapper::HasOverloadsMethod(const OverloadsMap *overloads, Method *m)
 {
-    auto name = m->GetName().data;
-    auto range = overloads->equal_range(name);
     EtsMethod *etsMethod = EtsMethod::FromRuntimeMethod(m);
-    for (auto iter = range.first; iter != range.second; ++iter) {
-        if (iter->second.second ==
-            etsMethod->GetNumArgs() - static_cast<unsigned int>(etsMethod->GetPandaMethod()->HasVarArgs())) {
+    const char *methodName = utf::Mutf8AsCString(m->GetName().data);
+    uint32_t argCount = etsMethod->GetNumArgs() - static_cast<unsigned int>(etsMethod->GetPandaMethod()->HasVarArgs());
+
+    for (const auto &[jsMethodName, entry] : *overloads) {
+        if (strcmp(entry.implMethodName, methodName) == 0 && entry.argCount == argCount) {
             return true;
         }
     }
@@ -699,7 +728,7 @@ EtsClassWrapper *EtsClassWrapper::LookupBaseWrapper(EtsClass *klass)
     return nullptr;
 }
 
-static void DoSetPrototype(napi_env env, napi_value obj, napi_value proto)
+void DoSetPrototype(napi_env env, napi_value obj, napi_value proto)
 {
     napi_value builtinObject;
     napi_value setprotoFn;
@@ -715,6 +744,10 @@ static void SetNullPrototype(napi_env env, napi_value jsCtor)
     napi_value prot;
     NAPI_CHECK_FATAL(napi_get_named_property(env, jsCtor, "prototype", &prot));
 
+    napi_value trueValue = GetBooleanValue(env, true);
+    NAPI_CHECK_FATAL(napi_set_named_property(env, jsCtor, IS_STATIC_PROXY.data(), trueValue));
+    NAPI_CHECK_FATAL(napi_set_named_property(env, prot, IS_STATIC_PROXY.data(), trueValue));
+
     auto nullProto = GetNull(env);
     DoSetPrototype(env, jsCtor, nullProto);
     DoSetPrototype(env, prot, nullProto);
@@ -729,6 +762,53 @@ static void SimulateJSInheritance(napi_env env, napi_value jsCtor, napi_value js
 
     DoSetPrototype(env, jsCtor, jsBaseCtor);
     DoSetPrototype(env, cprototype, baseCprototype);
+
+    napi_value trueValue = GetBooleanValue(env, true);
+    NAPI_CHECK_FATAL(napi_set_named_property(env, jsCtor, IS_STATIC_PROXY.data(), trueValue));
+    NAPI_CHECK_FATAL(napi_set_named_property(env, cprototype, IS_STATIC_PROXY.data(), trueValue));
+}
+
+static napi_value AttachCBForClass([[maybe_unused]] napi_env env, void *data)
+{
+    auto ctx = InteropCtx::Current();
+    auto *etsClass = reinterpret_cast<EtsClass *>(data);
+    EtsClassWrapper *wrapper = EtsClassWrapper::Get(ctx, etsClass);
+    return wrapper->GetJsCtor(ctx->GetJSEnv());
+}
+
+static napi_value AttachCBForFunc([[maybe_unused]] napi_env env, void *data)
+{
+    auto ctx = InteropCtx::Current();
+    auto curEnv = ctx->GetJSEnv();
+    auto *method = reinterpret_cast<EtsMethodSet *>(data);
+    EtsClassWrapper *wrapper = EtsClassWrapper::Get(ctx, method->GetEnclosingClass());
+    napi_value methodFunc;
+    NAPI_CHECK_FATAL(napi_get_named_property(curEnv, wrapper->GetJsCtor(curEnv), method->GetName(), &methodFunc));
+    return methodFunc;
+}
+
+static void SetAttachCallbackForClass(napi_env env, napi_value jsCtor, std::vector<EtsMethodSet *> &methods,
+                                      EtsClass *etsClass)
+{
+    for (auto method : methods) {
+        if (method->IsStatic()) {
+            napi_value func;
+            NAPI_CHECK_FATAL(napi_get_named_property(env, jsCtor, method->GetName(), &func));
+            NAPI_CHECK_FATAL(napi_mark_attach_with_xref(env, func, static_cast<void *>(method), AttachCBForFunc));
+        }
+    }
+    NAPI_CHECK_FATAL(napi_mark_attach_with_xref(env, jsCtor, static_cast<void *>(etsClass), AttachCBForClass));
+}
+
+static void SortMethodByName(PandaVector<Method *> &methods)
+{
+    std::sort(methods.begin(), methods.end(), [](const Method *lhs, const Method *rhs) {
+        panda_file::File::StringData lhsName = {static_cast<uint32_t>(utf::MUtf8ToUtf16Size(lhs->GetName().data)),
+                                                lhs->GetName().data};
+        panda_file::File::StringData rhsName = {static_cast<uint32_t>(utf::MUtf8ToUtf16Size(rhs->GetName().data)),
+                                                rhs->GetName().data};
+        return lhsName < rhsName;
+    });
 }
 
 /*static*/
@@ -745,6 +825,7 @@ std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsCla
     }
 
     auto [fields, methods] = _this->CalculateProperties(overloads);
+
     _this->SetBaseWrapperMethods(env, methods);
 
     auto jsProps = _this->BuildJSProperties(env, {fields.data(), fields.size()}, {methods.data(), methods.size()});
@@ -758,7 +839,10 @@ std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsCla
     }
     // NOTE(vpukhov): forbid "true" ets-field overriding in js-derived class, as it cannot be proxied back
     if (!etsClass->IsFinal()) {
-        auto ungroupedMethods = CollectAllPandaMethods(methods.begin(), methods.end());
+        auto allEtsMethod = etsClass->GetMethods();
+        auto ungroupedMethods = CollectAllPandaMethods(allEtsMethod.begin(), allEtsMethod.end());
+        SortMethodByName(ungroupedMethods);
+
         _this->jsproxyWrapper_ = ctx->GetJsProxyInstance(etsClass);
         if (_this->jsproxyWrapper_ == nullptr) {
             // NOTE(konstanting): we assume that the method list stays the same for every proxied class
@@ -781,6 +865,8 @@ std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsCla
 
         return _this;
     }
+
+    SetAttachCallbackForClass(env, jsCtor, methods, etsClass);
 
     auto base = _this->baseWrapper_;
     napi_value fakeSuper = _this->HasBuiltin() ? _this->GetBuiltin(env)
@@ -840,7 +926,7 @@ napi_value EtsClassWrapper::MimicGetHandler(napi_env env, napi_callback_info inf
     ASSERT_SCOPED_NATIVE_CODE();
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_JS(coro);
+    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
 
     size_t argc;
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr));
@@ -881,7 +967,7 @@ napi_value EtsClassWrapper::MimicSetHandler(napi_env env, napi_callback_info inf
     ASSERT_SCOPED_NATIVE_CODE();
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_JS(coro);
+    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
 
     size_t argc;
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr));
@@ -917,7 +1003,7 @@ napi_value EtsClassWrapper::JSCtorCallback(napi_env env, napi_callback_info cinf
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     InteropCtx *ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_JS(coro);
+    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
 
     napi_value jsThis;
     size_t argc;

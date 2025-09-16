@@ -21,7 +21,7 @@ namespace anyns {
         static val1: byte = 5;
         static val2: byte = 1;
         public static add(): byte {
-            sum = (A.val1 + A.val2) as byte;
+            sum = (A.val1 + A.val2).toByte();
             return sum;
         }
     }

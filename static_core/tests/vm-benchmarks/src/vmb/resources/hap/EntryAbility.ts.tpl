@@ -38,8 +38,8 @@ export default class ${BENCH_NAME}_Ability extends UIAbility {
                 hilog.info(0, "VMB", "%{public}s", "PAGE LOADED");
             }
         });
-        let vmbMain = globalThis.Panda.getFunction("L$BENCH_NAME/ETSGLOBAL;", "main");
-        vmbMain();
+        const launcher = globalThis.Panda.getClass("L$BENCH_NAME/VmbLauncher;");
+        launcher.main();
         hilog.info(0, "VMB", "%{public}s", "VMB MAIN FINISHED");
     }
 

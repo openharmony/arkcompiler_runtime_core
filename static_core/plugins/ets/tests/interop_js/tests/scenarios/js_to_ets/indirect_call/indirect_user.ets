@@ -18,7 +18,7 @@ import { UserClass } from "indirect_js"
 function Test_indirect_call_type_user_class_call(): boolean {
     let obj = new UserClass();
     let result = obj.method.call(null, 1) as int;
-    assertTrue(result == 1);
+    arktest.assertTrue(result == 1);
 
     return true;
 }
@@ -26,7 +26,7 @@ function Test_indirect_call_type_user_class_call(): boolean {
 function Test_indirect_call_type_user_class_apply(): boolean {
     let obj = new UserClass();
     let result = obj.method.apply(null, [1] as FixedArray<int>) as int;
-    assertTrue(result == 1);
+    arktest.assertTrue(result == 1);
 
     return true;
 }
@@ -36,7 +36,7 @@ function Test_indirect_call_type_user_class_bind_with_arg(): boolean {
 
     let boundWithArg = obj.method.bind(null, 1);
     let result = boundWithArg() as int;
-    assertTrue(result == 1);
+    arktest.assertTrue(result == 1);
 
     return true;
 }
@@ -46,21 +46,21 @@ function Test_indirect_call_type_user_class_bind_without_arg(): boolean {
 
     let boundWithoutArg = obj.method.bind(null);
     let result = boundWithoutArg(1) as int;
-    assertTrue(result == 1);
+    arktest.assertTrue(result == 1);
 
     return true;
 }
 
 function Test_indirect_call_type_user_interface_call(): boolean {
     let result = js.interfaceFunc().interfaceMethod.call(null, 1) as int;
-    assertTrue(result == 1);
+    arktest.assertTrue(result == 1);
 
     return true;
 }
 
 function Test_indirect_call_type_user_interface_apply(): boolean {
     let result = js.interfaceFunc().interfaceMethod.apply(null, [1] as FixedArray<int>) as int;
-    assertTrue(result == 1);
+    arktest.assertTrue(result == 1);
 
     return true;
 }
@@ -69,7 +69,7 @@ function Test_indirect_call_type_user_interface_bind_with_arg(): boolean {
 
     let boundWithArg = js.interfaceFunc().interfaceMethod.bind(null, 1);
     let result = boundWithArg() as int;
-    assertTrue(result == 1);
+    arktest.assertTrue(result == 1);
 
     return true;
 }
@@ -77,7 +77,7 @@ function Test_indirect_call_type_user_interface_bind_with_arg(): boolean {
 function Test_indirect_call_type_user_interface_bind_without_arg(): boolean {
     let boundWithoutArg = js.interfaceFunc().interfaceMethod.bind(null);
     let result = boundWithoutArg(1) as int;
-    assertTrue(result == 1);
+    arktest.assertTrue(result == 1);
 
     return true;
 }

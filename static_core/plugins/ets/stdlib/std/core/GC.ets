@@ -67,7 +67,7 @@ export namespace GC {
      * @param callback callback is called in concurrent phase
      * @param inPlaceMode run GC in place mode
      *
-     * @throws IllegalArgumentException if current GC does not support requested cause
+     * @throws IllegalArgumentError if current GC does not support requested cause
      *
      * @returns id of started GC.
      * - The id can be passed to waitForFinishGC to ensure the GC is finished.
@@ -75,7 +75,7 @@ export namespace GC {
      * - -1 in case the task is canceled
      */
     export function startGC(cause: Cause, callback: () => void, inPlaceMode: boolean = GC.NOT_IN_PLACE_MODE): long {
-        return startGCImpl(cause as int, callback as Object, inPlaceMode);
+        return startGCImpl(cause, callback as Object, inPlaceMode);
     }
 
     /**
@@ -84,9 +84,9 @@ export namespace GC {
      * @param cause cause of requested GC
      * @param inPlaceMode run GC in place mode
      *
-     * @throws IllegalArgumentException if current GC does not support requested cause
-     * @throws UnsupportedOperationException if current GC does not support requested cause
-     * @throws IllegalStateException if try to run threshold GC collection not in place after calling postponeGCStart
+     * @throws IllegalArgumentError if current GC does not support requested cause
+     * @throws UnsupportedOperationError if current GC does not support requested cause
+     * @throws IllegalStateError if try to run threshold GC collection not in place after calling postponeGCStart
      *
      * @returns id of started GC.
      * - The id can be passed to waitForFinishGC to ensure the GC is finished.
@@ -94,10 +94,10 @@ export namespace GC {
      * - -1 in case the task is canceled.
      */
     export function startGC(cause: Cause, inPlaceMode: boolean = GC.NOT_IN_PLACE_MODE): long {
-        return startGCImpl(cause as int, undefined, inPlaceMode);
+        return startGCImpl(cause, undefined, inPlaceMode);
     }
     
-    native function startGCImpl(cause: int, callback: Object | undefined, runInPlace: boolean): long throws;
+    native function startGCImpl(cause: int, callback: Object | undefined, runInPlace: boolean): long;
 
     /**
     * The function returns when the specified GC gets finished
@@ -114,13 +114,13 @@ export namespace GC {
      * @param counter number of allocation for trigger GC
      * @param cause cause of requested GC
      *
-     * @throws IllegalArgumentException if current GC does not support requested cause
-     * @throws UnsupportedOperationException if VM is running with incorrect GC trigger
+     * @throws IllegalArgumentError if current GC does not support requested cause
+     * @throws UnsupportedOperationError if VM is running with incorrect GC trigger
      */
-    native function scheduleGcAfterNthAllocImpl(counter: int, cause: int): void throws;
+    native function scheduleGcAfterNthAllocImpl(counter: int, cause: int): void;
 
     export function scheduleGcAfterNthAlloc(counter: int, cause: Cause) {
-        scheduleGcAfterNthAllocImpl(counter, cause as int);
+        scheduleGcAfterNthAllocImpl(counter, cause);
     }
 
     /**
@@ -139,8 +139,8 @@ export namespace GC {
      *
      * @see postponeGCEnd
      *
-     * @throws UnsupportedOperationException if GC doesn't support postponing
-     * @throws IllegalStateException if it called after calling postponeGCStart
+     * @throws UnsupportedOperationError if GC doesn't support postponing
+     * @throws IllegalStateError if it called after calling postponeGCStart
      *         without calling postponeGCEnd
      */
     export native function postponeGCStart(): void;
@@ -151,8 +151,8 @@ export namespace GC {
      *
      * @see postponeGCStart
      *
-     * @throws UnsupportedOperationException if GC doesn't support postponing
-     * @throws IllegalStateException if it called without calling postponeGCStart
+     * @throws UnsupportedOperationError if GC doesn't support postponing
+     * @throws IllegalStateError if it called without calling postponeGCStart
      */
     export native function postponeGCEnd(): void;
 
@@ -163,9 +163,9 @@ export namespace GC {
      *
      * @see unpinObject
      *
-     * @throws UnsupportedOperationException if used GC does not support pinning
+     * @throws UnsupportedOperationError if used GC does not support pinning
      */
-    export native function pinObject(obj: Object): void throws;
+    export native function pinObject(obj: Object): void;
 
     /**
      * Unpin pinned object - now GC can move such object if it need
@@ -187,12 +187,12 @@ export namespace GC {
      * @see unpinObject
      *
      * @throws NegativeArraySizeError if length is negative
-     * @throws UnsupportedOperationException if used GC does not support pinning
+     * @throws UnsupportedOperationError if used GC does not support pinning
      * @throws OutOfMemoryError if VM has not enough heap space for array allocation
      *
      * @returns pinned array of boolean
      */
-    export native function allocatePinnedBooleanArray(length: long): FixedArray<boolean> throws;
+    export native function allocatePinnedBooleanArray(length: long): FixedArray<boolean>;
 
     /**
      * Allocate array of byte and pin (GC will not move pinned array)
@@ -202,12 +202,12 @@ export namespace GC {
      * @see unpinObject
      *
      * @throws NegativeArraySizeError if length is negative
-     * @throws UnsupportedOperationException if used GC does not support pinning
+     * @throws UnsupportedOperationError if used GC does not support pinning
      * @throws OutOfMemoryError if VM has not enough heap space for array allocation
      *
      * @returns pinned array of byte
      */
-    export native function allocatePinnedByteArray(length: long): FixedArray<byte> throws;
+    export native function allocatePinnedByteArray(length: long): FixedArray<byte>;
 
     /**
      * Allocate array of char and pin (GC will not move pinned array)
@@ -217,12 +217,12 @@ export namespace GC {
      * @see unpinObject
      *
      * @throws NegativeArraySizeError if length is negative
-     * @throws UnsupportedOperationException if used GC does not support pinning
+     * @throws UnsupportedOperationError if used GC does not support pinning
      * @throws OutOfMemoryError if VM has not enough heap space for array allocation
      *
      * @returns pinned array of char
      */
-    export native function allocatePinnedCharArray(length: long): FixedArray<char> throws;
+    export native function allocatePinnedCharArray(length: long): FixedArray<char>;
 
     /**
      * Allocate array of short and pin (GC will not move pinned array)
@@ -232,12 +232,12 @@ export namespace GC {
      * @see unpinObject
      *
      * @throws NegativeArraySizeError if length is negative
-     * @throws UnsupportedOperationException if used GC does not support pinning
+     * @throws UnsupportedOperationError if used GC does not support pinning
      * @throws OutOfMemoryError if VM has not enough heap space for array allocation
      *
      * @returns pinned array of short
      */
-    export native function allocatePinnedShortArray(length: long): FixedArray<short> throws;
+    export native function allocatePinnedShortArray(length: long): FixedArray<short>;
 
     /**
      * Allocate array of int and pin (GC will not move pinned array)
@@ -247,12 +247,12 @@ export namespace GC {
      * @see unpinObject
      *
      * @throws NegativeArraySizeError if length is negative
-     * @throws UnsupportedOperationException if used GC does not support pinning
+     * @throws UnsupportedOperationError if used GC does not support pinning
      * @throws OutOfMemoryError if VM has not enough heap space for array allocation
      *
      * @returns pinned array of int
      */
-    export native function allocatePinnedIntArray(length: long): FixedArray<int> throws;
+    export native function allocatePinnedIntArray(length: long): FixedArray<int>;
 
     /**
      * Allocate array of long and pin (GC will not move pinned array)
@@ -262,12 +262,12 @@ export namespace GC {
      * @see unpinObject
      *
      * @throws NegativeArraySizeError if length is negative
-     * @throws UnsupportedOperationException if used GC does not support pinning
+     * @throws UnsupportedOperationError if used GC does not support pinning
      * @throws OutOfMemoryError if VM has not enough heap space for array allocation
      *
      * @returns pinned array of long
      */
-    export native function allocatePinnedLongArray(length: long): FixedArray<long> throws;
+    export native function allocatePinnedLongArray(length: long): FixedArray<long>;
 
     /**
      * Allocate array of float and pin (GC will not move pinned array)
@@ -277,12 +277,12 @@ export namespace GC {
      * @see unpinObject
      *
      * @throws NegativeArraySizeError if length is negative
-     * @throws UnsupportedOperationException if used GC does not support pinning
+     * @throws UnsupportedOperationError if used GC does not support pinning
      * @throws OutOfMemoryError if VM has not enough heap space for array allocation
      *
      * @returns pinned array of float
      */
-    export native function allocatePinnedFloatArray(length: long): FixedArray<float> throws;
+    export native function allocatePinnedFloatArray(length: long): FixedArray<float>;
 
     /**
      * Allocate array of double and pin (GC will not move pinned array)
@@ -292,12 +292,12 @@ export namespace GC {
      * @see unpinObject
      *
      * @throws NegativeArraySizeError if length is negative
-     * @throws UnsupportedOperationException if used GC does not support pinning
+     * @throws UnsupportedOperationError if used GC does not support pinning
      * @throws OutOfMemoryError if VM has not enough heap space for array allocation
      *
      * @returns pinned array of double
      */
-    export native function allocatePinnedDoubleArray(length: long): FixedArray<double> throws;
+    export native function allocatePinnedDoubleArray(length: long): FixedArray<double>;
 
     /**
      * Returns encoded space type
@@ -310,7 +310,7 @@ export namespace GC {
 
     export function getObjectSpaceType(obj: Object): ObjectSpaceType {
         let spaceType: int = getObjectSpaceTypeImpl(obj);
-        return spaceType as ObjectSpaceType;
+        return ObjectSpaceType.fromValue(spaceType);
     }
 
     /**

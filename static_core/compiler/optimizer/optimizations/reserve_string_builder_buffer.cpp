@@ -14,17 +14,15 @@
  */
 
 #include "reserve_string_builder_buffer.h"
-
 #include "compiler_logger.h"
-
 #include "optimizer/analysis/alias_analysis.h"
 #include "optimizer/analysis/bounds_analysis.h"
 #include "optimizer/analysis/dominators_tree.h"
 #include "optimizer/ir/analysis.h"
 #include "optimizer/ir/inst.h"
-
 #include "optimizer/optimizations/cleanup.h"
 #include "optimizer/optimizations/string_builder_utils.h"
+#include "runtime/include/coretypes/string.h"
 
 namespace ark::compiler {
 
@@ -224,6 +222,10 @@ Inst *CreateInstructionNewObjectsArray(Graph *graph, Inst *ctorCall, uint64_t si
 
     // Create LoadAndInitClass instruction for Object[] type
     auto objectsArrayClassId = runtime->GetClassOffsetObjectsArray(method);
+    if (objectsArrayClassId == 0U) {
+        return nullptr;
+    }
+
     auto loadClassObjectsArray = graph->CreateInstLoadAndInitClass(
         DataType::REFERENCE, ctorCall->GetPc(), CopySaveState(graph, ctorCall->GetSaveState()),
         TypeIdMixin {objectsArrayClassId, method}, runtime->ResolveType(method, objectsArrayClassId));
@@ -258,7 +260,7 @@ Inst *CreateStringBuilderConstructorArgumentLength(Graph *graph, Inst *arg, Inst
 
     auto argLength = graph->CreateInstShr(DataType::INT32, ctorCall->GetPc());
     argLength->SetInput(ARG_IDX_0, lenArray);
-    argLength->SetInput(ARG_IDX_1, graph->FindOrCreateConstant(1));
+    argLength->SetInput(ARG_IDX_1, graph->FindOrCreateConstant(ark::coretypes::String::STRING_LENGTH_SHIFT));
     InsertBeforeWithSaveState(argLength, ctorCall->GetSaveState());
 
     return argLength;
@@ -325,10 +327,11 @@ void ReserveStringBuilderBuffer::ReplaceInitialBufferSizeConstantNotInlined(Inst
     Inst *ctorArg = nullptr;
     StringBuilderConstructorSignature ctorSignature = GetStringBuilderConstructorSignature(instance, ctorCall, ctorArg);
 
-    ASSERT(ctorCall != nullptr);
-
     // Create NewArray instruction for Object[] type and new array size
     auto newObjectsArray = CreateInstructionNewObjectsArray(GetGraph(), ctorCall, appendCallsCount);
+    if (newObjectsArray == nullptr) {
+        return;
+    }
 
     // Create StoreArray instruction to store constructor argument
     Inst *argLength = nullptr;

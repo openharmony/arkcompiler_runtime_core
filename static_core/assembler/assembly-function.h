@@ -16,13 +16,6 @@
 #ifndef PANDA_ASSEMBLER_ASSEMBLY_FUNCTION_H
 #define PANDA_ASSEMBLER_ASSEMBLY_FUNCTION_H
 
-#include <memory>
-#include <optional>
-#include <string>
-#include <string_view>
-#include <unordered_map>
-#include <vector>
-
 #include "assembly-ins.h"
 #include "assembly-label.h"
 #include "assembly-type.h"
@@ -38,8 +31,19 @@
 namespace ark::pandasm {
 
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
-struct Function {
+class Function {
+public:
+    Function() = delete;
+    ~Function() = default;
+    NO_COPY_SEMANTIC(Function);
+    DEFAULT_MOVE_SEMANTIC(Function);
+
     struct CatchBlock {
+        CatchBlock() = default;
+        ~CatchBlock() = default;
+        DEFAULT_COPY_SEMANTIC(CatchBlock);
+        DEFAULT_MOVE_SEMANTIC(CatchBlock);
+
         std::string wholeLine;
         std::string exceptionRecord;
         std::string tryBeginLabel;
@@ -49,26 +53,39 @@ struct Function {
     };
 
     struct TryCatchInfo {
+        TryCatchInfo() = delete;
+        ~TryCatchInfo() = default;
+        NO_COPY_SEMANTIC(TryCatchInfo);
+        NO_MOVE_SEMANTIC(TryCatchInfo);
+
         std::unordered_map<std::string_view, size_t> tryCatchLabels;
         std::unordered_map<std::string, std::vector<const CatchBlock *>> tryCatchMap;
         std::vector<std::string> tryCatchOrder;
-        TryCatchInfo(std::unordered_map<std::string_view, size_t> &labels,
-                     std::unordered_map<std::string, std::vector<const CatchBlock *>> &map,
-                     std::vector<std::string> &paramTryCatchOrder)
-            : tryCatchLabels(labels), tryCatchMap(map), tryCatchOrder(paramTryCatchOrder)
+
+        explicit TryCatchInfo(std::unordered_map<std::string_view, size_t> &&labels,
+                              std::unordered_map<std::string, std::vector<const CatchBlock *>> &&map,
+                              std::vector<std::string> &&paramTryCatchOrder)
+            : tryCatchLabels(std::move(labels)),
+              tryCatchMap(std::move(map)),
+              tryCatchOrder(std::move(paramTryCatchOrder))
         {
         }
     };
 
     struct Parameter {
-        Parameter(Type t, ark::panda_file::SourceLang sourceLang) : type(std::move(t)), lang(sourceLang) {}
+        Parameter() = delete;
+        ~Parameter() = default;
+        NO_COPY_SEMANTIC(Parameter);
+        DEFAULT_MOVE_SEMANTIC(Parameter);
 
-        ParamMetadata &GetOrCreateMetadata() const
+        explicit Parameter(Type t, ark::panda_file::SourceLang sourceLang) : type(std::move(t)), lang(sourceLang) {}
+
+        ParamMetadata *GetOrCreateMetadata() const
         {
             if (!metadata_) {
                 metadata_ = extensions::MetadataExtension::CreateParamMetadata(lang);
             }
-            return *metadata_;
+            return metadata_.get();
         }
 
         Type type;
@@ -78,49 +95,61 @@ struct Function {
         mutable std::unique_ptr<ParamMetadata> metadata_;
     };
 
-    std::string name;
-    ark::panda_file::SourceLang language;
-    std::unique_ptr<FunctionMetadata> metadata;
+    Type returnType;
+    FileLocation fileLocation {};
 
     std::unordered_map<std::string, ark::pandasm::Label> labelTable;
-    std::vector<ark::pandasm::Ins> ins; /* function instruction list */
-    std::vector<ark::pandasm::debuginfo::LocalVariable> localVariableDebug;
+
+    std::string name;
     std::string sourceFile; /* The file in which the function is defined or empty */
     std::string sourceCode;
+
+    std::vector<ark::pandasm::Ins> ins; /* function instruction list */
+    std::vector<ark::pandasm::debuginfo::LocalVariable> localVariableDebug;
     std::vector<CatchBlock> catchBlocks;
-    int64_t valueOfFirstParam = -1;
-    size_t regsNum = 0;
-    size_t profileSize {0};
     std::vector<Parameter> params;
-    bool bodyPresence = false;
-    Type returnType;
+
     SourceLocation bodyLocation;
-    std::optional<FileLocation> fileLocation;
+
+    std::unique_ptr<FunctionMetadata> metadata;
+
+    int64_t valueOfFirstParam = -1;
+    size_t profileSize {0};
+    std::uint32_t regsNum = 0U;
+
+    ark::panda_file::SourceLang language;
+    bool bodyPresence = false;
 
     void SetInsDebug(const std::vector<debuginfo::Ins> &insDebug)
     {
         ASSERT(insDebug.size() == ins.size());
-        for (std::size_t i = 0; i < ins.size(); i++) {
-            ins[i].insDebug = insDebug[i];
+        for (std::size_t i = 0U; i < ins.size(); ++i) {
+            ins[i].insDebug = insDebug[i].Clone();
         }
     }
 
-    void AddInstruction(const ark::pandasm::Ins &instruction)
+    void AddInstruction(ark::pandasm::Ins &&instruction)
+    {
+        ins.emplace_back(std::move(instruction));
+    }
+
+#if defined(NOT_OPTIMIZE_PERFORMANCE)
+    void AddInstruction(ark::pandasm::Ins const &instruction)
     {
         ins.emplace_back(instruction);
     }
+#endif
 
-    // CC-OFFNXT(G.FUN.01-CPP) solid logic
-    Function(std::string s, ark::panda_file::SourceLang lang, size_t bL, size_t bR, std::string fC, bool d, size_t lN)
-        : name(std::move(s)),
-          language(lang),
+    explicit Function(std::string s, ark::panda_file::SourceLang lang, FileLocation &&fLoc)
+        : fileLocation {std::move(fLoc)},
+          name(std::move(s)),
           metadata(extensions::MetadataExtension::CreateFunctionMetadata(lang)),
-          fileLocation({fC, bL, bR, lN, d})
+          language(lang)
     {
     }
 
-    Function(std::string s, ark::panda_file::SourceLang lang)
-        : name(std::move(s)), language(lang), metadata(extensions::MetadataExtension::CreateFunctionMetadata(lang))
+    explicit Function(std::string s, ark::panda_file::SourceLang lang)
+        : name(std::move(s)), metadata(extensions::MetadataExtension::CreateFunctionMetadata(lang)), language(lang)
     {
     }
 
@@ -131,7 +160,7 @@ struct Function {
 
     std::size_t GetTotalRegs() const
     {
-        return regsNum;
+        return static_cast<std::size_t>(regsNum);
     }
 
     bool IsStatic() const

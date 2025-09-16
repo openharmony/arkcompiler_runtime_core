@@ -14,9 +14,30 @@
  */
 
 import { LinkedList, ListNode } from './@ohos.util.LinkedList';
+import { BusinessError } from "@ohos.base";
 
-export class List<T> implements Iterable<T> {
+const TypeErrorCodeId: int = 401;
+const OutOfBoundsErrorCodeId: int = 10200001;
+
+function createBusinessError(code: int, message: string) {
+    let err = new BusinessError();
+    err.code = code;
+    err.name = 'BusinessError';
+    err.message = message;
+    return err;
+}
+
+export type ListComparatorFn<T> = (firstValue: T, secondValue: T) => double;
+export type ListForEachCb<T> = (value: T, index: int, list: List<T>) => void;
+export type ListReplaceCb<T> = (value: T, index: int, list: List<T>) => T;
+export type RecordData = undefined | null | Object | Record<string, RecordData> | Array<RecordData>;
+
+export class List<T> implements Iterable<T>, JsonReplacer {
     private buffer: LinkedList<T>;
+
+    public jsonReplacer(): Record<String, NullishType> {
+        return this.buffer.jsonReplacer();
+    }
 
     /**
      * Constructs an empty list.
@@ -25,12 +46,16 @@ export class List<T> implements Iterable<T> {
         this.buffer = new LinkedList<T>();
     }
 
+    public toString(): string {
+        return "[object List]";
+    }
+
     /**
      * Gets the number of elements in the list.
      *
      * @returns The number of elements in the list.
      */
-    public get length(): number {
+    public get length(): int {
         return this.buffer.length;
     }
 
@@ -66,12 +91,12 @@ export class List<T> implements Iterable<T> {
      * @param obj The object to compare with.
      * @returns True if the list is equal to the object.
      */
-    public equal(obj: Object): boolean {
+    public equal(obj: RecordData): boolean {
         if (!(obj instanceof Iterable)) {
             return false;
         }
 
-        let iterator = obj.$_iterator();
+        let iterator = (obj as Iterable<Any>).$_iterator();
         let element = iterator.next();
         let currentNode: ListNode<T> | undefined = this.buffer.head
         while (!element.done && currentNode !== undefined) {
@@ -96,8 +121,8 @@ export class List<T> implements Iterable<T> {
      * @param callbackfn - The function to execute on each element, taking the value, index, and List as arguments.
      *
      */
-    public forEach(callbackfn: (value: T, index: number, list: List<T>) => void): void {
-        this.buffer.forEach((value: T, index: number) => {
+    public forEach(callbackfn: ListForEachCb<T>): void {
+        this.buffer.forEach((value: T, index: int) => {
             callbackfn(value, index, this);
         })
     }
@@ -108,7 +133,9 @@ export class List<T> implements Iterable<T> {
      * @param index The index of the element to get.
      * @returns The element at the specified index, or undefined if the index is out of range.
      */
-    public get(index: number): T | undefined {
+    public get(index: int): T | undefined {
+        this.checkIndexType(index);
+
         return this.buffer.get(index);
     }
 
@@ -116,7 +143,6 @@ export class List<T> implements Iterable<T> {
      * Gets the first element of the list.
      *
      * @returns The first element of the list.
-     * @throws RangeError if the list is empty.
      */
     public getFirst(): T | undefined {
         return this.buffer.getFirst();
@@ -128,7 +154,7 @@ export class List<T> implements Iterable<T> {
      * @param element The element to search for.
      * @returns The index of the first occurrence of the element, or -1 if not found.
      */
-    public getIndexOf(element: T): number {
+    public getIndexOf(element: T): int {
         return this.buffer.getIndexOf(element);
     }
 
@@ -148,7 +174,7 @@ export class List<T> implements Iterable<T> {
      * @param element The element to search for.
      * @returns The index of the last occurrence of the element, or -1 if not found.
      */
-    public getLastIndexOf(element: T): number {
+    public getLastIndexOf(element: T): int {
         return this.buffer.getLastIndexOf(element);
     }
 
@@ -158,14 +184,20 @@ export class List<T> implements Iterable<T> {
      * @param fromIndex The starting index of the sub list.
      * @param toIndex The ending index of the sub list.
      * @returns A new list containing the elements from the specified range.
-     * @throws RangeError if the indices are out of range.
+     * @throws BusinessError if the indices are out of range.
      */
-    public getSubList(fromIndex: number, toIndex: number): List<T> {
-        if (fromIndex > toIndex || fromIndex < 0 || toIndex > this.length - 1) {
-            throw new RangeError('The value of fromIndex or toIndex is out of range.')
+    public getSubList(fromIndex: int, toIndex: int): List<T> {
+        this.checkEmptyContainer();
+
+        if (fromIndex < 0 || fromIndex >= toIndex || fromIndex >= this.length) {
+            throw createBusinessError(OutOfBoundsErrorCodeId, `The value of \"fromIndex\" is out of range. It must be >= 0 && <= ${min(this.length - 1, toIndex - 1)}. Received value is: ${fromIndex}`);
         }
+        if (toIndex > this.length) {
+            throw createBusinessError(OutOfBoundsErrorCodeId, `The value of \"toIndex\" is out of range. It must be > 0 && <= ${this.length}. Received value is: ${toIndex}`);
+        }
+
         let subList: List<T> = new List<T>()
-        let i: number = 0
+        let i: int = 0
         let currentNode: ListNode<T> | undefined = this.buffer.head
         while (currentNode !== undefined) {
             if (i >= fromIndex && i < toIndex) {
@@ -192,9 +224,10 @@ export class List<T> implements Iterable<T> {
      *
      * @param element The element to insert.
      * @param index The index at which to insert the element.
-     * @throws RangeError if the index is out of range.
+     * @throws BusinessError if the index is out of range.
      */
-    public insert(element: T, index: number): void {
+    public insert(element: T, index: int): void {
+        this.checkIndex(index, this.length);
         this.buffer.insert(index, element);
     }
 
@@ -222,9 +255,13 @@ export class List<T> implements Iterable<T> {
      *
      * @param index The index of the element to remove.
      * @returns The removed element, or undefined if the index is out of range.
-     * @throws RangeError if the index is out of range.
+     * @throws BusinessError if the index is out of range.
      */
-    public removeByIndex(index: number): T | undefined {
+    public removeByIndex(index: int): T | undefined {
+        this.checkIndexType(index);
+        this.checkEmptyContainer();
+        this.checkIndex(index, this.length -1);
+
         return this.buffer.removeByIndex(index);
     }
 
@@ -234,9 +271,9 @@ export class List<T> implements Iterable<T> {
      * @param callbackfn - The callback function taking the value, index, and the List as arguments.
      *
      */
-    public replaceAllElements(callbackfn: (value: T, index: number, list: List<T>) => T): void {
+    public replaceAllElements(callbackfn: ListReplaceCb<T>): void {
         let currentNode: ListNode<T> | undefined = this.buffer.head
-        let index: number = 0;
+        let index: int = 0;
         while (currentNode !== undefined) {
             currentNode!.element = callbackfn(currentNode!.element, index++, this)
             currentNode = currentNode!.next
@@ -249,9 +286,13 @@ export class List<T> implements Iterable<T> {
      * @param index The index of the element to set.
      * @param element The new element.
      * @returns The previous element at the specified index, or undefined if the index is out of range.
-     * @throws RangeError if the index is out of range.
+     * @throws BusinessError if the index is out of range.
      */
-    public set(index: number, element: T): T | undefined {
+    public set(index: int, element: T): T | undefined {
+        this.checkIndexType(index);
+        this.checkEmptyContainer();
+        this.checkIndex(index, this.length - 1);
+
         return this.buffer.set(index, element);
     }
 
@@ -260,11 +301,11 @@ export class List<T> implements Iterable<T> {
      *
      * @param comparator The function to compare elements.
      */
-    public sort(comparator: (firstValue: T, secondValue: T) => number): void {
+    public sort(comparator: ListComparatorFn<T>): void {
         if (this.length == 0) {
-            return
+            return;
         } else {
-            this.quickSort(0, this.length - 1, comparator)
+            this.quickSort(0, this.length - 1, comparator);
         }
     }
 
@@ -276,7 +317,7 @@ export class List<T> implements Iterable<T> {
      * @param high The ending index of the sort.
      * @param comparator The function to compare elements.
      */
-    private quickSort(low: number, high: number, comparator: (firstValue: T, secondValue: T) => number): void {
+    private quickSort(low: int, high: int, comparator: (firstValue: T, secondValue: T) => double): void {
         if (low < high) {
             let pivot = this.partition(low, high, comparator);
             this.quickSort(low, pivot - 1, comparator);
@@ -293,11 +334,11 @@ export class List<T> implements Iterable<T> {
      * @param comparator The function to compare elements.
      * @returns The index of the pivot element.
      */
-    private partition(low: number, high: number, comparator: (firstValue: T, secondValue: T) => number): number {
+    private partition(low: int, high: int, comparator: (firstValue: T, secondValue: T) => double): int {
         let compareNode: ListNode<T> = this.getNode(low)!
         let currentNode: ListNode<T> | undefined = compareNode.next!
         let pivotNode: ListNode<T> = compareNode
-        let pivotNum: number = low
+        let pivotNum: int = low
         let compareElement: T = compareNode.element;
 
         for (let j = low + 1; j <= high; j++) {
@@ -338,7 +379,7 @@ export class List<T> implements Iterable<T> {
      * @param index The index of the node to get.
      * @returns The node at the specified index, or undefined if the index is out of range.
      */
-    private getNode(index: number): ListNode<T> | undefined {
+    private getNode(index: int): ListNode<T> | undefined {
         if (index >= 0 && index < this.length) {
             let currentNode: ListNode<T> = this.buffer.head!
             for (let i = 0; i < index; i++) {
@@ -349,15 +390,38 @@ export class List<T> implements Iterable<T> {
         return undefined;
     }
 
+    private checkIndexType(index: int): void {
+        if (index > Int.MAX_VALUE) {
+            throw createBusinessError(TypeErrorCodeId, `The type of \"index\" must be small integer. Received value is: ${index}`);
+        }
+    }
+    private checkEmptyContainer(): void {
+        if (this.isEmpty()) {
+            throw createBusinessError(OutOfBoundsErrorCodeId, `Container is empty`);
+        }
+    }
+
+    private checkIndex(index: int, length: int): void {
+        if (index > length || index < 0) {
+            throw createBusinessError(OutOfBoundsErrorCodeId, `The value of \"index\" is out of range. It must be >= 0 && <= ${length}. Received value is: ${index}`);
+        }
+    }
+
     /**
      * Gets the element at the specified index.
      *
      * @param index - The index of the element to retrieve.
-     *
-     * @returns The element at the specified index. If the index is out of range, returns undefined.
+     * @returns { T } The element in the buffer matching the given index. 
+     * @throws { BusinessError } 10200001 - The value of index is out of range.
      */
-    public $_get(index: number): T | undefined {
-        return this.buffer.get(index);
+    public $_get(index: int): T {
+        if (index > Int.MAX_VALUE) {
+            throw createBusinessError(TypeErrorCodeId, `The type of \"index\" must be small integer.`);
+        }
+
+        this.checkIndex(index, this.length - 1);
+
+        return this.buffer.get(index)!;
     }
 
     /**
@@ -367,7 +431,15 @@ export class List<T> implements Iterable<T> {
      *
      * @param val - The value to set at the specified index.
      */
-    public $_set(index: number, val: T): void {
+    public $_set(index: int, val: T): void {
+        if (index > Int.MAX_VALUE || index < 0) {
+            return;
+        }
+
+        this.checkEmptyContainer();
+
+        this.checkIndex(index, this.length - 1);
+
         this.buffer.set(index, val);
     }
 }

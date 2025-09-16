@@ -12,9 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "void_func.mytest.ani.hpp"
-#include "taihe.platform.ani.ani.hpp"
 #include "primitives_test.ani.hpp"
+#include "void_func.mytest.ani.hpp"
+
 #if __has_include(<ani.h>)
 #include <ani.h>
 #elif __has_include(<ani/ani.h>)
@@ -22,17 +22,15 @@
 #else
 #error "ani.h not found. Please ensure the Ani SDK is correctly installed."
 #endif
-ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result) {
+
+ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
+{
     ani_env *env;
     if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
         return ANI_ERROR;
     }
     if (ANI_OK != void_func::mytest::ANIRegister(env)) {
         std::cerr << "Error from void_func::mytest::ANIRegister" << std::endl;
-        return ANI_ERROR;
-    }
-    if (ANI_OK != taihe::platform::ani::ANIRegister(env)) {
-        std::cerr << "Error from taihe::platform::ani::ANIRegister" << std::endl;
         return ANI_ERROR;
     }
     if (ANI_OK != primitives_test::ANIRegister(env)) {

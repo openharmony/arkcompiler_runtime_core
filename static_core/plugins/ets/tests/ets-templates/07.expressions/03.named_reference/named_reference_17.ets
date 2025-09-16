@@ -25,6 +25,6 @@ function testParamShadow(shadowVar: string): string {
 
 function main(): void {
   let x = testParamShadow("local");
-  assertEQ(x, "local");
-  assertEQ(shadowVar, "global");
+  arktest.assertEQ(x, "local");
+  arktest.assertEQ(shadowVar, "global");
 }

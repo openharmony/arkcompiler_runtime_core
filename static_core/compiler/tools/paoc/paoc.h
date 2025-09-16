@@ -96,7 +96,7 @@ private:
     bool FinalizeCompileAot(CompilingContext *ctx, [[maybe_unused]] uintptr_t codeAddress);
     void PrintError(const std::string &error);
     void PrintUsage(const ark::PandArgParser &paParser);
-    bool IsMethodInList(const std::string &methodFullName);
+    bool IsMethodShouldBeCompiled(const std::string &methodFullName);
     bool Skip(Method *method);
     static std::string GetFileLocation(const panda_file::File &pfileRef, std::string location);
     static bool CompareBootFiles(std::string filename, std::string paocLocation);

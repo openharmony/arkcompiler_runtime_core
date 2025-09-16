@@ -60,6 +60,10 @@ public:
     {
         static_assert(std::is_integral_v<T>, "T must be integral type");
         ASSERT(IsPrimitive());
+        if constexpr (std::is_same_v<T, bool>) {
+            // Discard the top 32 bit which may contain garbage
+            return static_cast<bool>(static_cast<int32_t>(std::get<0>(value_)));
+        }
         return static_cast<T>(std::get<0>(value_));
     }
 

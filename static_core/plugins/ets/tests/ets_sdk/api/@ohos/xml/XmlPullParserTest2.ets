@@ -15,7 +15,7 @@
 import {xml} from "@ohos.xml"
 
 function main(): int {
-    const suite = new ArkTestsuite("XmlPullParser API tests, part2");
+    const suite = new arktest.ArkTestsuite("XmlPullParser API tests, part2");
     suite.addTest("Testing XML PullParser with tokenValueCallbackFunction as undefined.", testXmlPullParserParseOptions0009)
     suite.addTest("Testing XML PullParser with tokenValueCallbackFunction as function.", testXmlPullParserParseOptions0008)
     suite.addTest("Testing XML PullParser with tagValueCallbackFunction as function.", testXmlPullParserParseOptions0006)
@@ -31,7 +31,7 @@ function main(): int {
 function testXmlPullParserDefault(){
     let buffer = new ArrayBuffer(0)
     let parser = new xml.XmlPullParser(buffer)
-    assertNE(parser, null)
+    arktest.assertNE(parser, null)
     parser.parseXml({} as xml.ParseOptions)
 }
 
@@ -99,7 +99,7 @@ function testWithTagValueCb() {
         "{  :  }"
 )
     let result = res.join("; ") + "; "
-    assertEQ(processStr(g_testStr), processStr(result))
+    arktest.assertEQ(processStr(g_testStr), processStr(result))
 }
 
 function testWithTagValueCbWithIgnoreNS() {
@@ -147,7 +147,7 @@ function testWithTagValueCbWithIgnoreNS() {
         "{ note : <![CDATA[function matchwo(a,6){return 1;}]]><!--Hello, World!--> <company>John &amp; Han</company> <title>Happy</title><title>Happy</title> <todo>Work</todo> <todo>Play</todo> <?go there?><a><b/></a> <h:table xmln:h=\"http://www.w3.org/TR/html4/\"> <h:tr><h:td>Apple</h:td> <h:td>Banana</h:td> </h:tr></h:table> }",
         "{  :  }")
     let result = res.join("; ") + "; "
-    assertEQ(processStr(g_testStr), processStr(result))
+    arktest.assertEQ(processStr(g_testStr), processStr(result))
 }
 
 function testWithTagValueCbWithSupportDocTypeAndIgnoreNS() {
@@ -199,7 +199,7 @@ function testWithTagValueCbWithSupportDocTypeAndIgnoreNS() {
 <h:table xmln:h=\"http://www.w3.org/TR/html4/\"> <h:tr><h:td>Apple</h:td> <h:td>Banana</h:td> </h:tr></h:table> }",
         "{  :  }")
     let result = res.join("; ") + "; "
-    assertEQ(processStr(g_testStr), processStr(result))
+    arktest.assertEQ(processStr(g_testStr), processStr(result))
 }
 
 function testWithAttributeValueCb() {
@@ -229,7 +229,7 @@ function testWithAttributeValueCb() {
     parser.parseXml(options)
 
     const expected = "{ xmlns:h : http://www.w3.org/TR/html4/ }; { importance : high }; { logged : true }; "
-    assertEQ(processStr(g_testStr), processStr(expected))
+    arktest.assertEQ(processStr(g_testStr), processStr(expected))
 }
 
 function testWithAttributeValueCbWithSupportDocTypeAndIgnoreNS() {
@@ -259,7 +259,7 @@ function testWithAttributeValueCbWithSupportDocTypeAndIgnoreNS() {
     parser.parseXml(options)
 
     const expected = "{ xmlns:h : http://www.w3.org/TR/html4/ }; { importance : high }; { logged : true }; "
-    assertEQ(processStr(g_testStr), processStr(expected));
+    arktest.assertEQ(processStr(g_testStr), processStr(expected));
 }
 
 function parseInfo2Str(info: xml.ParseInfo): string {
@@ -317,7 +317,7 @@ function testXmlPullParserParseOptions0001() {
         parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
+        arktest.assertTrue(false)
     }
 }
 
@@ -339,7 +339,7 @@ function testXmlPullParserParseOptions0002() {
         parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
+        arktest.assertTrue(false)
     }
 }
 
@@ -361,7 +361,7 @@ function testXmlPullParserParseOptions0003() {
         parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
+        arktest.assertTrue(false)
     }
 }
 
@@ -383,7 +383,7 @@ function testXmlPullParserParseOptions0004() {
         parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
+        arktest.assertTrue(false)
     }
 }
 
@@ -405,7 +405,7 @@ function testXmlPullParserParseOptions0005() {
         parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
+        arktest.assertTrue(false)
     }
 }
 
@@ -427,7 +427,7 @@ function testXmlPullParserParseOptions0006() {
         parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
+        arktest.assertTrue(false)
     }
 }
 
@@ -451,7 +451,7 @@ function testXmlPullParserParseOptions0008() {
         parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
+        arktest.assertTrue(false)
     }
 }
 
@@ -474,7 +474,7 @@ function testXmlPullParserParseOptions0009() {
         parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
+        arktest.assertTrue(false)
     }
 }
 

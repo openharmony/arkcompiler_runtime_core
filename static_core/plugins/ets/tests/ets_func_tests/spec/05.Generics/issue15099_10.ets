@@ -22,5 +22,5 @@ tags:
 
 function main(): void {
     let x = new Array<((arg:string) => string)|undefined|byte[]>();
-    assertTrue( x != null)
+    arktest.assertTrue( x != null)
 }

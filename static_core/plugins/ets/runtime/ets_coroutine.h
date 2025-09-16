@@ -115,6 +115,11 @@ public:
         return MEMBER_OFFSET(EtsCoroutine, etsNapiEnv_);
     }
 
+    static constexpr uint32_t GetLocalStorageOffset()
+    {
+        return MEMBER_OFFSET(EtsCoroutine, localStorage_);
+    }
+
     PANDA_PUBLIC_API PandaEtsVM *GetPandaVM() const;
     PANDA_PUBLIC_API CoroutineManager *GetCoroutineManager() const;
 
@@ -137,6 +142,7 @@ public:
 
     // event handlers
     void OnHostWorkerChanged() override;
+    void OnContextSwitchedTo() override;
 
     /// @brief print stack and exit the program
     [[noreturn]] void HandleUncaughtException() override;
@@ -160,8 +166,7 @@ private:
     void RequestPromiseCompletion(mem::Reference *promiseRef, Value returnValue);
     void RequestJobCompletion(mem::Reference *jobRef, Value returnValue);
 
-    void ListUnhandledJobs();
-    void ListUnhandledPromises();
+    void ProcessUnhandledPromiseRejections();
 
     PandaEtsNapiEnv *etsNapiEnv_ {nullptr};
     void *promiseClassPtr_ {nullptr};

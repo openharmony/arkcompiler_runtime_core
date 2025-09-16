@@ -14,20 +14,32 @@
  */
 
 //! CHECKER      Check escape analysis create cast in different sign types char
+//! SKIP_IF      @architecture == "arm32"
 //! RUN          force_jit: true, options: "--compiler-regex=.*main_char.*", entry: "escape_analysis_casted.ETSGLOBAL::main_char"
 //! EVENT        /Compilation,escape_analysis_casted.ETSGLOBAL::main_char,.*,COMPILED/
 //! METHOD       "escape_analysis_casted.ETSGLOBAL::main_char"
 //! PASS_BEFORE  "EscapeAnalysis"
-//! INST_COUNT   "Cast", 0
+//! INST_COUNT   "Cast", 14
 //! PASS_AFTER   "EscapeAnalysis"
-//! INST_COUNT   "Cast", 1
-//! INST_COUNT   ".u16  Cast i8", 1
+//! INST_COUNT   "Cast", 14
+//! INST_COUNT   ".u16  Cast i8", 0
 
+//! CHECKER      Check escape analysis create cast in different sign types char (ARM32)
+//! SKIP_IF      @architecture != "arm32"
+//! RUN          force_jit: true, options: "--compiler-regex=.*main_char.*", entry: "escape_analysis_casted.ETSGLOBAL::main_char"
+//! EVENT        /Compilation,escape_analysis_casted.ETSGLOBAL::main_char,.*,COMPILED/
+//! METHOD       "escape_analysis_casted.ETSGLOBAL::main_char"
+//! PASS_BEFORE  "EscapeAnalysis"
+//! INST_COUNT   "Cast", 14
+//! PASS_AFTER   "EscapeAnalysis"
+//! INST_COUNT   "Cast", 14
+//! INST_COUNT   ".u16  Cast i8", 0
 
 class A {
     fld: Char
     constructor(p: byte) {
-        this.fld = new Char(p as char);
+        this.fld = new Char(p.toChar());
+        console.log("a side-effect to break LSE")
     }
 }
 
@@ -44,20 +56,34 @@ function main_char(): int {
 // -----------------------------------
 
 //! CHECKER      Check escape analysis create cast in different sign types cutted char
+//! SKIP_IF      @architecture == "arm32"
 //! RUN          force_jit: true, options: "--compiler-regex=.*main_long.*", entry: "escape_analysis_casted.ETSGLOBAL::main_long"
 //! EVENT        /Compilation,escape_analysis_casted.ETSGLOBAL::main_long,.*,COMPILED/
 //! METHOD       "escape_analysis_casted.ETSGLOBAL::main_long"
 //! PASS_BEFORE  "EscapeAnalysis"
-//! INST_COUNT   "Cast", 1
+//! INST_COUNT   "Cast", 15
 //! INST_COUNT   ".u16  Cast i8", 0
 //! PASS_AFTER   "EscapeAnalysis"
-//! INST_COUNT   "Cast", 2
-//! INST_COUNT   ".u16  Cast i8", 1
+//! INST_COUNT   "Cast", 15
+//! INST_COUNT   ".u16  Cast i8", 0
+
+//! CHECKER      Check escape analysis create cast in different sign types cutted char (ARM32)
+//! SKIP_IF      @architecture != "arm32"
+//! RUN          force_jit: true, options: "--compiler-regex=.*main_long.*", entry: "escape_analysis_casted.ETSGLOBAL::main_long"
+//! EVENT        /Compilation,escape_analysis_casted.ETSGLOBAL::main_long,.*,COMPILED/
+//! METHOD       "escape_analysis_casted.ETSGLOBAL::main_long"
+//! PASS_BEFORE  "EscapeAnalysis"
+//! INST_COUNT   "Cast", 15
+//! INST_COUNT   ".u16  Cast i8", 0
+//! PASS_AFTER   "EscapeAnalysis"
+//! INST_COUNT   "Cast", 15
+//! INST_COUNT   ".u16  Cast i8", 0
 
 class B {
     fld: Char
     constructor(p: int) {
-        this.fld = new Char(p as byte);
+        this.fld = new Char(p.toByte());
+        console.log("a side-effect to break LSE")
     }
 }
 //           |will cut|  |will cut|

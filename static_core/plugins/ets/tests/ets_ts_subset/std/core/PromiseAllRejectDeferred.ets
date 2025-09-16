@@ -19,7 +19,7 @@ let p1 = Promise.resolve<number>(3);
 let p2 = new Promise<number>((_: (value:number)=>void, _reject: (err: Error)=>void) => {
     reject = _reject;
 });
-Promise.all([p1, p2]).then<void, void>((values: Array<number>): void => {
+Promise.all([p1, p2]).then<void, void>((values): void => {
     console.log('Test failed. The promise should not be resolved.');
 }, (err: Error): void => {
     if (err != error) {

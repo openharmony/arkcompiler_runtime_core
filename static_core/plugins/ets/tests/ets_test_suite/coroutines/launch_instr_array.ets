@@ -36,7 +36,14 @@ class TestCoroutine {
     }
 }
 
-function main(): void {
+function testLaunchInstrArray(): void {
     let a = new TestCoroutine();
     a.run();
+}
+
+function main(): int {
+    let testSuite = new arktest.ArkTestsuite('coroutines.launch_instr_array');
+    testSuite.addTest('testLaunchInstrArray', testLaunchInstrArray);
+    let res = testSuite.run();
+    return res;
 }

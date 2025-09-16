@@ -101,6 +101,7 @@ export class Kitten {
     constructor(id, name) {
       this.id = id;
       this.name = name;
+      this.male = false;
     }
   }
 

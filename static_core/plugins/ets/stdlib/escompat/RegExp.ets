@@ -20,24 +20,87 @@ type RegExpGroupsContainer = Record<String, String | undefined>
 /**
  * Regular expression result descriptor
  */
-export class RegExpExecArray /*extends Array<String>*/ {
+export class RegExpResultArray /*extends Array<String>*/ {
     /** true if match present */
     readonly isCorrect: boolean
     /** result itself */
-    private result_: FixedArray<String>
+    protected result_: Array<String> = []
+    private resultRaw_: String = ""
     /** The 0-based index of the match in the string */
-    public index: number
+    protected index_: number = 0
     /** The original string that was matched against */
-    public input: String
+    protected input_: String = ""
+
+    private endIndex: number = 0
 
     // NOTE(shumilov-petr): Make nullable when #14813 will be fixed
-    readonly indices: FixedArray<FixedArray<number>>;
+    protected indices_: Array<Array<number>> = []
 
-    /** named groups names and indeces as JSON */
-    private groupsRaw_: String = ""
+    /** named groups names and indeces */
+    protected groupsRaw_: String = ""
 
     /** named groups names and indeces */
     public groups: RegExpGroupsContainer | undefined = undefined
+
+    protected isUndefined: Array<boolean> = []
+
+    constructor(index: int, input: String, result: Array<String>, indices: Array<Array<number>>) {
+        this.isCorrect = true
+        this.index_ = index
+        this.input_ = input
+        this.result_ = result
+        this.indices_ = indices
+    }
+
+    constructor(index : int, input : String, result : Array<String>, indices : Array<Array<number>>,
+                isUndefined : Array<boolean>) {
+        this.isCorrect = true
+        this.index_ = index
+        this.input_ = input
+        this.result_ = result
+        this.indices_ = indices
+        this.isUndefined = isUndefined
+    }
+
+    protected constructor() {
+
+    }
+
+    private setNumberedField(index: number, value: String): void {
+        if (index > 9 || index <= 0) {
+            return
+        }
+        if (index == 1) RegExp.$1_ = value
+        else if (index == 2) RegExp.$2_ = value
+        else if (index == 3) RegExp.$3_ = value
+        else if (index == 4) RegExp.$4_ = value
+        else if (index == 5) RegExp.$5_ = value
+        else if (index == 6) RegExp.$6_ = value
+        else if (index == 7) RegExp.$7_ = value
+        else if (index == 8) RegExp.$8_ = value
+        else if (index == 9) RegExp.$9_ = value
+    }
+
+    // NOTE(ekaterinzaytseva): unable to replace internal - crash in analyzer
+    internal postExecProcessing(res: RegExpResultArray, input: String, index: number, hasIndices: boolean): void {
+        if (!res.isCorrect) {
+            return
+        }
+        RegExp.$1_ = ""
+        RegExp.$2_ = ""
+        RegExp.$3_ = ""
+        RegExp.$4_ = ""
+        RegExp.$5_ = ""
+        RegExp.$6_ = ""
+        RegExp.$7_ = ""
+        RegExp.$8_ = ""
+        RegExp.$9_ = ""
+        this.updateGroups()
+        this.updateIndicesAndResult(hasIndices)
+        RegExp.input_ = input
+        RegExp.leftContext_ = input.substring(0, index)
+        RegExp.rightContext_ = input.substring(index + res.result[0].length)
+    }
 
     /**
      * Returns the first match if "0" is given and the first match exists
@@ -63,8 +126,11 @@ export class RegExpExecArray /*extends Array<String>*/ {
      *
      * @returns resulting string
      */
-    public $_get(index: int): String {
-        return this.result_[index]
+    public $_get(index: int): String | undefined {
+        if (index < this.isUndefined.length && this.isUndefined[index]) {
+            return undefined
+        }
+        return this.result_[index];
     }
 
     /**
@@ -74,8 +140,8 @@ export class RegExpExecArray /*extends Array<String>*/ {
      *
      * @returns resulting string
      */
-    public $_get(index: number): String {
-        return this.$_get(Double.toInt(index));
+    public $_get(index: number): String | undefined {
+        return this.$_get(index.toInt());
     }
 
     /**
@@ -97,21 +163,719 @@ export class RegExpExecArray /*extends Array<String>*/ {
      * @param val
      */
     public $_set(index: number, val: String) {
-        return this.$_set(Double.toInt(index), val);
+        return this.$_set(index.toInt(), val);
     }
 
     get length(): int {
-        return this.result_.length as int;
+        return Double.toInt(this.result_.length)
     }
 
-    public get result(): String[] {
-        return Array.from<String>(this.result_)
+    public get result(): Array<String> {
+        return this.result_
+    }
+
+    public get indices(): Array<Array<number>> {
+        return this.indices_
+    }
+
+    /**
+     * Returns a string representing the match result
+     *
+     * @returns a string representing the match result
+     */
+    public toString(): String {
+        if (this.result_.length > 0) {
+            return this.result_.toString();
+        }
+        throw new Error("result is empty")
     }
 
     /**
      * Parses groupsRaw_ to groups
      */
-    internal updateGroups(): void {
+    protected updateGroups(): void {
+        throw new Error("not overridden")
+    }
+
+    private processStaticFields(index: number, str: String): void {
+        if (index == 0) {
+            RegExp.lastMatch_ = str
+        }
+        if (index == this.result_.length - 1) {
+            RegExp.lastParen_ = str
+        }
+        this.setNumberedField(index, str)
+    }
+
+    private updateIndicesAndResult(hasIndices: boolean): void {
+        let data = this.resultRaw_.split(',')
+        this.result_ = new Array<String>(data.length / 2)
+        this.isUndefined = new Array<boolean>(data.length / 2)
+        if (hasIndices) {
+            this.indices_ = new Array<Array<number>>(data.length / 2)
+            for (let i = 0; i < data.length; i+= 2) {
+                const index = Number.parseInt(data[i])
+                const endIndex = Number.parseInt(data[i + 1])
+                if (index == -1 || endIndex == -1) {
+                    this.indices_[i / 2] = [0, 0]
+                    this.isUndefined[i / 2] = true
+                } else {
+                    this.indices_[i / 2] = [index, endIndex]
+                    this.result_[i / 2] = this.input_.substring(index, endIndex)
+                    this.processStaticFields(i / 2, this.result_[i / 2])
+                    this.isUndefined[i / 2] = false
+                }
+            }
+        } else {
+            this.indices_ = []
+            for (let i = 0; i < data.length; i+= 2) {
+                const index = Number.parseInt(data[i])
+                const endIndex = Number.parseInt(data[i + 1])
+                if (index != -1 && endIndex != -1) {
+                    this.result_[i / 2] = this.input_.substring(index, endIndex)
+                    this.processStaticFields(i / 2, this.result_[i / 2])
+                    this.isUndefined[i / 2] = false
+                } else {
+                    this.isUndefined[i / 2] = true
+                }
+            }
+        }
+    }
+
+    /**
+     * Removes and returns the last match result in the array.
+     * Simulates the behavior of Array.prototype.pop().
+     *
+     * @returns The last matched string if present; otherwise, undefined.
+     */
+    public pop(): String | undefined {
+        return this.result_.pop()
+    }
+
+    /**
+     * Takes an integer value and returns the item at that index,
+     * allowing for positive and negative integers.
+     */
+    public at(index: number): String | undefined {
+        return this.result_.at(index)
+    }
+
+    /**
+     * Takes an integer value and returns the item at that index,
+     * allowing for positive and negative integers.
+     */
+    public at(index: int): String | undefined {
+        return this.result_.at(index)
+    }
+
+    /**
+     * Creates a new array with all elements concatenated.
+     */
+    public concat(...items: FixedArray<ConcatArray<String>>): Array<String> {
+        return this.result_.concat(...items)
+    }
+
+    /**
+     * Makes a shallow copy of part to another location in the same array.
+     */
+    public copyWithin(target: number, start: number, end?: Number): RegExpResultArray {
+        this.result_.copyWithin(target, start, end)
+        return this
+    }
+
+    /**
+     * Makes a shallow copy of part to another location in the same array.
+     */
+    public copyWithin(target: int, start: int, end: int): RegExpResultArray {
+        this.result_.copyWithin(target, start, end)
+        return this
+    }
+
+    /**
+     * Makes a shallow copy of part to another location in the same array.
+     */
+    public copyWithin(target: int, start: int): RegExpResultArray {
+        this.result_.copyWithin(target, start)
+        return this
+    }
+
+    /**
+     * Makes a shallow copy of part to another location in the same array.
+     */
+    public copyWithin(target: int): RegExpResultArray {
+        this.result_.copyWithin(target)
+        return this
+    }
+
+    /**
+     * Changes all elements to a static value.
+     */
+    public fill(value: String, start?: Number, end?: Number): RegExpResultArray {
+        this.result_.fill(value, start, end)
+        return this
+    }
+
+    /**
+     * Changes all elements to a static value.
+     */
+    public fill(value: String, start: int, end: int): RegExpResultArray {
+        this.result_.fill(value, start, end)
+        return this
+    }
+
+    /**
+     * Returns elements that meet the condition specified in a callback function.
+     */
+    public filter(predicate: (value: String, index: number, array: RegExpResultArray) => boolean): Array<String> {
+        return this.result_.filter((value: String, index: number, array: Array<String>) => {
+            return predicate(value, index, this)
+        })
+    }
+
+    /**
+     * Returns the value of the first element where predicate is true.
+     */
+    public find(predicate: (value: String, index: number, array: RegExpResultArray) => boolean): String | undefined {
+        return this.result_.find((value: String, index: number, array: Array<String>) => {
+            return predicate(value, index, this)
+        })
+    }
+
+    /**
+     * Returns the index of the first element where predicate is true.
+     */
+    public findIndex(predicate: (value: String, index: number, array: RegExpResultArray) => boolean): number {
+        return this.result_.findIndex((value: String, index: number, array: Array<String>) => {
+            return predicate(value, index, this)
+        })
+    }
+
+    /**
+     * Returns the value of the last element that satisfies the testing function.
+     */
+    public findLast(predicate: (elem: String, index: number, array: RegExpResultArray) => boolean): String | undefined {
+        return this.result_.findLast((elem: String, index: number, array: Array<String>) => {
+            return predicate(elem, index, this)
+        })
+    }
+
+    /**
+     * Returns the index of the last element that satisfies the testing function.
+     */
+    public findLastIndex(predicate: (element: String, index: number, array: RegExpResultArray) => boolean): number {
+        return this.result_.findLastIndex((element: String, index: number, array: Array<String>) => {
+            return predicate(element, index, this)
+        })
+    }
+
+    /**
+     * Creates a new array with all sub-array elements concatenated.
+     */
+    public flat<U>(depth: number): Array<U> {
+        return this.result_.flat<U>(depth)
+    }
+
+    /**
+     * Creates a new array with all sub-array elements concatenated.
+     */
+    public flat<U>(depth: int): Array<U> {
+        return this.result_.flat<U>(depth)
+    }
+
+    /**
+     * Creates a new array with all sub-array elements concatenated.
+     */
+    public flat<U>(): Array<U> {
+        return this.result_.flat<U>()
+    }
+
+    /**
+     * Applies flat and then map.
+     */
+    public flatMap<U>(fn: (v: String, k: number, arr: RegExpResultArray) => U): Array<U> {
+        return this.result_.flatMap<U>((v: String, k: number, arr: Array<String>) => {
+            return fn(v, k, this)
+        })
+    }
+
+    /**
+     * Determines whether all members satisfy the specified test.
+     */
+    public every(predicate: (value: String, index: number, array: RegExpResultArray) => boolean): boolean {
+        return this.result_.every((value: String, index: number, array: Array<String>) => {
+            return predicate(value, index, this)
+        })
+    }
+
+    /**
+     * Determines whether any element satisfies the specified test.
+     */
+    public some(predicate: (value: String, index: number, array: RegExpResultArray) => boolean): boolean {
+        return this.result_.some((value: String, index: number, array: Array<String>) => {
+            return predicate(value, index, this)
+        })
+    }
+
+    /**
+     * Calls the callback function for all elements and accumulates the result.
+     */
+    public reduce(callbackfn: (previousValue: String, currentValue: String, index: number, array: RegExpResultArray) => String): String {
+        return this.result_.reduce((previousValue: String, currentValue: String, index: number, array: Array<String>) => {
+            return callbackfn(previousValue, currentValue, index, this)
+        })
+    }
+
+    /**
+     * Calls the callback function for all elements and accumulates the result.
+     */
+    public reduce<U = String>(callbackfn: (previousValue: U, currentValue: String, index: number, array: RegExpResultArray) => U, initialValue: U): U {
+        return this.result_.reduce<U>((previousValue: U, currentValue: String, index: number, array: Array<String>) => {
+            return callbackfn(previousValue, currentValue, index, this)
+        }, initialValue)
+    }
+
+    /**
+     * Calls the callback function for all elements in descending order and accumulates the result.
+     */
+    public reduceRight<U>(callbackfn: (previousValue: U, currentValue: String, index: number, array: RegExpResultArray) => U, initialValue: U): U {
+        return this.result_.reduceRight<U>((previousValue: U, currentValue: String, index: number, array: Array<String>) => {
+            return callbackfn(previousValue, currentValue, index, this)
+        }, initialValue)
+    }
+
+    /**
+     * Calls the callback function for all elements in descending order and accumulates the result.
+     */
+    public reduceRight(callbackfn: (previousValue: String, currentValue: String, index: number, array: RegExpResultArray) => String): String {
+        return this.result_.reduceRight((previousValue: String, currentValue: String, index: number, array: Array<String>) => {
+            return callbackfn(previousValue, currentValue, index, this)
+        })
+    }
+
+    /**
+     * Performs the specified action for each element.
+     */
+    public forEach(callbackfn: (value: String, index: number, array: RegExpResultArray) => void): void {
+        this.result_.forEach((value: String, index: number, array: Array<String>) => {
+            callbackfn(value, index, this)
+        })
+    }
+
+    /**
+     * Creates a new array with elements selected from start to end.
+     */
+    public slice(start?: Number, end?: Number): Array<String> {
+        return this.result_.slice(start, end)
+    }
+
+    /**
+     * Creates a new array with elements selected from start to end.
+     */
+    public slice(start: int, end: int): Array<String> {
+        return this.result_.slice(start, end)
+    }
+
+    /**
+     * Creates a new array with elements selected from start to end.
+     */
+    public slice(start: int): Array<String> {
+        return this.result_.slice(start)
+    }
+
+    /**
+     * Returns the last index of the specified element.
+     */
+    public lastIndexOf(searchElement: String, fromIndex: int): int {
+        return this.result_.lastIndexOf(searchElement, fromIndex)
+    }
+
+    /**
+     * Returns the last index of the specified element.
+     */
+    public lastIndexOf(searchElement: String, fromIndex: number|undefined): number {
+        return this.result_.lastIndexOf(searchElement, fromIndex)
+    }
+
+    /**
+     * Returns the last index of the specified element.
+     */
+    public lastIndexOf(searchElement: String): number {
+        return this.result_.lastIndexOf(searchElement)
+    }
+
+    /**
+     * Creates a string by concatenating all elements, separated by a separator.
+     */
+    public join(sep?: String): string {
+        return this.result_.join(sep)
+    }
+
+    /**
+     * Returns a locale string representing the array.
+     */
+    public toLocaleString(locales: Object, options: Object): string {
+        return this.result_.toLocaleString(locales, options)
+    }
+
+    /**
+     * Returns a locale string representing the array.
+     */
+    public toLocaleString(locales: Object): string {
+        return this.result_.toLocaleString(locales)
+    }
+
+    /**
+     * Returns a locale string representing the array.
+     */
+    public toLocaleString(): string {
+        return this.result_.toLocaleString()
+    }
+
+    /**
+     * Copying version of the splice method.
+     */
+    public toSpliced(start?: Number, delete?: Number): Array<String> {
+        return this.result_.toSpliced(start, delete)
+    }
+
+    /**
+     * Copying version of the splice method.
+     */
+    public toSpliced(start: number, delete: number, ...items: FixedArray<String>): Array<String> {
+        return this.result_.toSpliced(start, delete, ...items)
+    }
+
+    /**
+     * Copying version of the splice method.
+     */
+    public toSpliced(start: int, delete: int, ...items: FixedArray<String>): Array<String> {
+        return this.result_.toSpliced(start, delete, ...items)
+    }
+
+    /**
+     * Copying version of the splice method.
+     */
+    public toSpliced(start: int): Array<String> {
+        return this.result_.toSpliced(start)
+    }
+
+    /**
+     * Checks whether an array includes a certain value.
+     */
+    public includes(val: String, fromIndex?: Number): boolean {
+        return this.result_.includes(val, fromIndex)
+    }
+
+    /**
+     * Returns the first index of the specified element.
+     */
+    public indexOf(val: String, fromIndex: int): int {
+        return this.result_.indexOf(val, fromIndex)
+    }
+
+    /**
+     * Returns the first index of the specified element.
+     */
+    public indexOf(val: String, fromIndex?: Number): number {
+        // NOTE(cheezzario) workaround for #23963
+        return this.result_.indexOf(val, fromIndex === undefined ? undefined : Int.valueOf(fromIndex.toInt()))
+    }
+
+    /**
+     * Returns the first index of the specified element.
+     */
+    public indexOf(val: String): number {
+        return this.result_.indexOf(val)
+    }
+
+    /**
+     * Copying version of the sort method using default comparator.
+     */
+    public toSorted(): Array<String> {
+        return this.result_.toSorted()
+    }
+
+    /**
+     * Copying version of the sort method.
+     */
+    public toSorted(comparator: (a: String, b: String) => number): Array<String> {
+        return this.result_.toSorted(comparator)
+    }
+
+    /**
+     * Reverses the elements in place.
+     */
+    public reverse(): RegExpResultArray {
+        this.result_.reverse()
+        return this
+    }
+
+    /**
+     * Copying version of the reverse method.
+     */
+    public toReversed(): Array<String> {
+        return this.result_.toReversed()
+    }
+
+    /**
+     * Copying version of setting a value at an index.
+     */
+    public with(index: number, value: String): Array<String> {
+        return this.result_.with(index, value)
+    }
+
+    /**
+     * Copying version of setting a value at an index.
+     */
+    public with(index: int, value: String): Array<String> {
+        return this.result_.with(index, value)
+    }
+
+    /**
+     * Removes the first element and returns it.
+     */
+    public shift(): String | undefined {
+        return this.result_.shift()
+    }
+
+    /**
+     * Adds elements to the end and returns the new length.
+     */
+    public push(...val: String[]): number {
+        return this.result_.push(...val)
+    }
+
+    /**
+     * Adds elements to the end and returns the new length.
+     */
+    public pushECMA(...val: String[]): number {
+        return this.result_.pushECMA(...val)
+    }
+
+    /**
+     * Changes contents by removing/replacing existing elements and/or adding new elements.
+     */
+    public splice(start: number, delete: Number | undefined, ...items: String[]): Array<String> {
+        return this.result_.splice(start, delete, ...items)
+    }
+
+    /**
+     * Changes contents by removing/replacing existing elements and/or adding new elements.
+     */
+    public splice(start: int, delete: int, ...items: String[]): Array<String> {
+        return this.result_.splice(start, delete, ...items)
+    }
+
+    /**
+     * Changes contents by removing elements from start to end.
+     */
+    public splice(start: number): Array<String> {
+        return this.result_.splice(start)
+    }
+
+    /**
+     * Changes contents by removing elements from start to end.
+     */
+    public splice(start: int): Array<String> {
+        return this.result_.splice(start)
+    }
+
+    /**
+     * Adds elements to the beginning and returns the new length.
+     */
+    public unshift(...values: String[]): number {
+        return this.result_.unshift(...values)
+    }
+
+    /**
+     * Returns an iterator over all indices.
+     */
+    public keys(): IterableIterator<Number> {
+        return this.result_.keys()
+    }
+
+    /**
+     * Returns an iterator over all values.
+     */
+    public $_iterator(): IterableIterator<String> {
+        return this.result_.$_iterator()
+    }
+
+    /**
+     * Returns an iterator over all values.
+     */
+    public values(): IterableIterator<String> {
+        return this.result_.values()
+    }
+
+    /**
+     * Returns an iterable of key, value pairs.
+     */
+    public entries(): IterableIterator<[number, String]> {
+        return this.result_.entries()
+    }
+
+    /**
+     * Calls a callback function on each element and returns an array with the results.
+     */
+    public map<U>(callbackfn: (value: String, index: number, array: RegExpResultArray) => U): Array<U> {
+        return this.result_.map<U>((value: String, index: number, array: Array<String>) => {
+            return callbackfn(value, index, this)
+        })
+    }
+
+    /**
+     * Reorders elements using comparator function.
+     */
+    public sort(comparator?: (a: String, b: String) => number): RegExpResultArray {
+        this.result_.sort(comparator)
+        return this
+    }
+}
+
+export class RegExpMatchArray extends RegExpResultArray {
+    private hasIndex_: boolean = true
+    private hasInput_: boolean = true
+
+    constructor(index : int, input : String, result : Array<String>, indices : Array<Array<number>>,
+                isUndefined : Array<boolean>) {
+        super(Double.toInt(index), input, result, indices, isUndefined)
+    };
+
+    constructor(index: int, input: String, result: Array<String>, indices: Array<Array<number>>) {
+        super(Double.toInt(index), input, result, indices)
+    }
+
+    constructor(index: int, input: String, result: Array<String>) {
+        this(Double.toInt(index), input, result, [])
+    }
+
+    constructor(index: number, input: String, result: Array<String>, indices: Array<Array<number>>) {
+        this(Double.toInt(index), input, result, indices)
+    }
+
+    constructor(index: number, input: String, result: Array<String>) {
+        this(Double.toInt(index), input, result)
+    }
+
+    protected constructor() {
+        super()
+    }
+
+    public get index(): number | undefined {
+        if (this.hasIndex_) {
+            return this.index_
+        }
+        return undefined
+    }
+
+    public get input(): String | undefined {
+        if (this.hasInput_) {
+            return this.input_
+        }
+        return undefined
+    }
+
+    public set index(val: number | undefined) {
+        if (val == undefined) {
+            this.hasIndex_ = false
+            return
+        }
+        this.hasIndex_ = true
+        this.index_ = val
+    }
+
+    public set input(val: String | undefined) {
+        if (val == undefined) {
+            this.hasInput_ = false
+            return
+        }
+        this.hasInput_ = true
+        this.input_ = val
+    }
+
+    /**
+     * Parses groupsRaw_ to groups
+     */
+    protected override updateGroups(): void {
+        if (this.groupsRaw_ == "") {
+            this.groups = undefined
+            return
+        }
+        let result = new RegExpGroupsContainer()
+
+        if (!this.hasInput_) {
+            return
+        }
+
+        for (let groupData of this.groupsRaw_.split(";")) {
+            if (groupData.length == 0) {
+                continue
+            }
+            let unitData = groupData.split(",")
+            if (unitData.length != 3) {
+                throw new Error("internal error: invalid group data")
+            }
+            let index = Double.parseInt(unitData[1])
+            let endIndex = Double.parseInt(unitData[2])
+            if (index >= 0 && endIndex >= 0) {
+                if (endIndex > this.input_.length || index >= endIndex) {
+                    throw new Error("internal error: incorrect substring indexes")
+                }
+                result.set(unitData[0], this.input!.substring(index, endIndex))
+            } else {
+                result.set(unitData[0], undefined)
+            }
+        }
+        if (result.size == 0) {
+            this.groups = undefined
+            return
+        }
+        this.groups = result
+    }
+}
+
+export class RegExpExecArray extends RegExpResultArray {
+    constructor(index: int, input: String, result: Array<String>, indices: Array<Array<number>>) {
+        super(Double.toInt(index), input, result, indices)
+    }
+
+    constructor(index: int, input: String, result: Array<String>) {
+        this(Double.toInt(index), input, result, [])
+    }
+
+    constructor(index: number, input: String, result: Array<String>, indices: Array<Array<number>>) {
+        this(Double.toInt(index), input, result, indices)
+    }
+
+    constructor(index: number, input: String, result: Array<String>) {
+        this(Double.toInt(index), input, result)
+    }
+
+    protected constructor() {
+        super()
+    }
+
+    public get index(): int {
+        return this.index_.toInt()
+    }
+
+    public get input(): String {
+        return this.input_
+    }
+
+    public set index(val: int) {
+        this.index_ = val
+    }
+
+    public set input(val: String) {
+        this.input_ = val
+    }
+
+    /**
+     * Parses groupsRaw_ to groups
+     */
+    protected override updateGroups(): void {
         if (this.groupsRaw_ == "") {
             this.groups = undefined
             return
@@ -129,7 +893,7 @@ export class RegExpExecArray /*extends Array<String>*/ {
             let index = Double.parseInt(unitData[1])
             let endIndex = Double.parseInt(unitData[2])
             if (index >= 0 && endIndex >= 0) {
-                if (endIndex > this.input.length || index >= endIndex) {
+                if (endIndex > this.input_.length || index >= endIndex) {
                     throw new Error("internal error: incorrect substring indexes")
                 }
                 result.set(unitData[0], this.input.substring(index, endIndex))
@@ -143,69 +907,7 @@ export class RegExpExecArray /*extends Array<String>*/ {
         }
         this.groups = result
     }
-
-    /**
-     * Appends one element to result
-     *
-     * @param string to add
-     */
-    public push(newElem: string): void {
-        // NOTE(kparshukov): improve speed when T[] <=> Arrat<T>
-        const copy : FixedArray<String> = new String[this.result_.length + 1]
-        for (let i = 0; i < this.result_.length; i++) {
-            copy[i] = this.result_[i]
-        }
-        this.result_ = copy
-        this.result_[this.result_.length as int - 1] = newElem
-    }
-
-    /**
-     * Removes and returns the last match result in the array.
-     * Simulates the behavior of Array.prototype.pop().
-     *
-     * @returns The last matched string if present; otherwise, undefined.
-     */
-    public pop(): String | undefined {
-        if (this.result_.length === 0) {
-            return undefined;
-        }
-
-        const lastIndex = this.result_.length - 1;
-        const last = this.result_[lastIndex];
-
-        let newResult: FixedArray<String> = new String[lastIndex];
-        for (let i = 0; i < lastIndex; i++) {
-            newResult[i] = this.result_[i];
-        }
-
-        this.result_ = newResult;
-
-        return last;
-    }
-
-    constructor(index: int, input: String, result: FixedArray<String>, indices: FixedArray<FixedArray<number>>) {
-        this.isCorrect = true
-        this.index = index
-        this.input = input
-        this.result_ = result
-        this.indices = indices
-    }
-
-    constructor(index: number, input: String, result: FixedArray<String>) {
-        this.isCorrect = true
-        this.index = index
-        this.input = input
-        this.result_ = result
-        this.indices = []
-    }
-
-    constructor(index: number, input: String, result: FixedArray<String>, indices: FixedArray<FixedArray<number>>) {
-        this(index.toInt(), input, result, indices)
-    }
 }
-
-// NOTE(kparshukov): should be splitted in #24868
-export type RegExpMatchArray = RegExpExecArray
 
 class GlobalRegExpStringIterator implements IterableIterator<RegExpMatchArray> {
     private regexp: RegExp
@@ -217,13 +919,13 @@ class GlobalRegExpStringIterator implements IterableIterator<RegExpMatchArray> {
     }
 
     override next(): IteratorResult<RegExpMatchArray> {
-        let match = this.regexp.exec(this.string)
+        let match = this.regexp.matchInternal(this.string)
         if (match == null) {
             return new IteratorResult<RegExpMatchArray>()
         }
         let matchStr = match.$_get(0)
         if (matchStr == "") {
-            let nextIndex = RegExp.advanceStringIndex(this.string, this.regexp.lastIndex, this.regexp.unicode)
+            let nextIndex = RegExp.advanceStringIndex(this.string, this.regexp.lastIndex.toInt(), this.regexp.unicode)
             this.regexp.lastIndex = nextIndex
         }
         return new IteratorResult<RegExpMatchArray>(match)
@@ -246,7 +948,7 @@ class RegExpStringIterator implements IterableIterator<RegExpMatchArray> {
     }
 
     override next(): IteratorResult<RegExpMatchArray> {
-        let match = this.regexp.exec(this.string)
+        let match = this.regexp.matchInternal(this.string)
         if (match == null || this.returned) {
             return new IteratorResult<RegExpMatchArray>()
         }
@@ -264,7 +966,7 @@ class RegExpStringIterator implements IterableIterator<RegExpMatchArray> {
  */
 export class RegExp extends Object {
     private pattern_: String = ""
-    public lastIndex: number
+    public lastIndex: number = 0
     private source_: String = ""
     private flags_: String = ""
 
@@ -282,9 +984,6 @@ export class RegExp extends Object {
     private static $7_: String = ""
     private static $8_: String = ""
     private static $9_: String = ""
-
-    private groupNames: String[] = []
-    private buffer: int[] = new Array<int>()
 
     // NOTE(shumilov-petr): Removing the following setter leads to unspecified behaviour of es2panda
     // The negative test '02.lexical_elements/07.keywords/types_n_12.ets' gets failed if remove this setter
@@ -526,7 +1225,24 @@ export class RegExp extends Object {
         return this.compile()
     }
 
-    private native execImpl(pattern: String, flags: String, str: String, hasSlashU: boolean): RegExpExecArray;
+    private native execImpl(pattern: String, flags: String, str: String, patternLength: int, strLength: int, lastIndex: int, hasSlashU: boolean): RegExpExecArray;
+
+    private native matchImpl(pattern: String, flags: String, str: String, patternLength: int, strLength: int, lastIndex: int, hasSlashU: boolean): RegExpMatchArray;
+
+    // NOTE(ekaterinazaytseva): unable to replace internal - used as public
+    internal exec(str: String, index: number): RegExpExecArray | null {
+        const hasSlashU = str.contains("\\u", 0) || this.pattern_.contains("\\u", 0)
+        const res = this.execImpl(this.pattern_, this.flags_, str, this.pattern_.length, str.length, index.toInt(), hasSlashU)
+        if (res.isCorrect) {
+            res.input = str
+            RegExp.lastMatch_ = ""
+            RegExp.lastParen_ = ""
+            res.postExecProcessing(res, str, res.index, this.hasIndices)
+            return res
+        } else {
+            return null
+        }
+    }
 
     /**
      * Executes a search for a match in a specified string and returns a result array
@@ -538,17 +1254,28 @@ export class RegExp extends Object {
      * @see RegExpExecArray
      */
     public exec(str: String): RegExpExecArray | null {
-        let hasSlashU = str.contains("\\u", 0) || this.pattern_.contains("\\u", 0)
-        const res = this.execImpl(this.pattern_, this.flags_, str, hasSlashU)
+        return this.exec(str, this.lastIndex.toInt())
+    }
+
+    // NOTE(ekaterinazaytseva): unable to replace internal - used as public
+    internal matchInternal(str: String, index: int): RegExpMatchArray | null {
+        const hasSlashU = str.contains("\\u", 0) || this.pattern_.contains("\\u", 0)
+        const res = this.matchImpl(this.pattern_, this.flags_, str, this.pattern_.length, str.length, index, hasSlashU)
         if (res.isCorrect) {
-            res.updateGroups()
+            res.input = str
+            res.postExecProcessing(res, str, res.index!, this.hasIndices)
             return res
         } else {
             return null
         }
     }
 
-    public search(str: String): number {
+    // NOTE(ekaterinazaytseva): unable to replace internal - used in friend class 
+    internal matchInternal(str: String): RegExpMatchArray | null {
+        return this.matchInternal(str, this.lastIndex.toInt())
+    }
+
+    public search(str: String): int {
         let previousLastIndex = this.lastIndex
         this.lastIndex = 0
         let result = this.exec(str)
@@ -556,7 +1283,7 @@ export class RegExp extends Object {
         if (result == null) {
             return -1
         } else {
-            return result.index
+            return result.index.toInt()
         }
     }
 
@@ -577,7 +1304,7 @@ export class RegExp extends Object {
             }
             let matchStr = result.$_get(0)
             if (matchStr == "") {
-                let thisIndex = this.lastIndex
+                let thisIndex: int = this.lastIndex.toInt()
                 let nextIndex = RegExp.advanceStringIndex(str, thisIndex, this.unicode)
                 this.lastIndex = nextIndex
             }
@@ -588,16 +1315,15 @@ export class RegExp extends Object {
         for (let i = 0; i < results.length; ++i) {
             let result = results.at(i)!;
             let nCaptures = result.length;
-            let matched = result.$_get(0);
+            let matched = result.$_get(0)!;
             let matchLength = matched.getLength();
             let position = max(min(result.index, lengthS), 0).toInt();
-            let captures = new UndefinableStringArray(nCaptures);
+            let captures = new containers.UndefinableStringArray(nCaptures);
             for (let n = 1; n < nCaptures; n++) {
                 let capN = result.$_get(n);
                 captures.pushBack(capN)
             }
-            let namedCaptures: Object | undefined = result.groups;
-            let replacement = String.getSubstitution(matched, str, position as int, captures.toArray(), namedCaptures, replaceValue)
+            let replacement = String.getSubstitution(matched, str, position as int, captures.toArray(), result.groups, replaceValue)
             if (position >= nextSourcePosition) {
                 accumulatedResult += str.substring(nextSourcePosition, position) + replacement
                 nextSourcePosition = position + matchLength
@@ -626,7 +1352,7 @@ export class RegExp extends Object {
             }
             let matchStr = result.$_get(0)
             if (matchStr == "") {
-                let thisIndex = this.lastIndex
+                let thisIndex: int = this.lastIndex.toInt()
                 let nextIndex = RegExp.advanceStringIndex(str, thisIndex, this.unicode)
                 this.lastIndex = nextIndex
             }
@@ -637,10 +1363,10 @@ export class RegExp extends Object {
         for (let i = 0; i < results.length; ++i) {
             let result = results.at(i)!;
             let nCaptures = result.length;
-            let matched = result.$_get(0);
+            let matched = result.$_get(0)!;
             let matchLength = matched.getLength();
             let position = (max(min(result.index, lengthS), 0)).toInt();
-            let args = new UndefinableObjectArray(nCaptures);
+            let args = new containers.UndefinableObjectArray(nCaptures);
             for (let n = 1; n < nCaptures; n++) {
                 let capN = result.$_get(n);
                 args.pushBack(capN)
@@ -684,9 +1410,9 @@ export class RegExp extends Object {
             }
             return [str]
         }
-        let splittedStrings = new UndefinableStringArray()
+        let splittedStrings = new containers.UndefinableStringArray()
         let lastStart = 0
-        for (let lastEnd = 0; lastEnd < size;) {
+        for (let lastEnd: int = 0; lastEnd < size;) {
             splitter.lastIndex = lastEnd
             let z = splitter.exec(str)
             if (z == null) {
@@ -704,7 +1430,7 @@ export class RegExp extends Object {
                     lastStart = separatorRight
                     let numberOfCaptures = z.length;
                     for (let i = 1; i < numberOfCaptures; ++i) {
-                        let nextCapture = z.$_get(i);
+                        let nextCapture = z.$_get(i)
                         splittedStrings.pushBack(nextCapture)
                         if (splittedStrings.size() == lim) {
                             return splittedStrings.toArray() as String[]
@@ -721,24 +1447,28 @@ export class RegExp extends Object {
 
     public match(str: String): RegExpMatchArray | null {
         if (!this.global) {
-            return this.exec(str)
+            return this.matchInternal(str)
         }
         this.lastIndex = 0;
-        let matches = new UndefinableStringArray();
+        let matches = new containers.UndefinableStringArray();
+        let indices = new Array<Array<number>>();
+        let isUndefined = new Array<boolean>();
         let n = 0
         while (true) {
-            let result = this.exec(str)
+            let result = this.matchInternal(str)
             if (result == null) {
                 if (n == 0) {
                     return null
                 }
-                return new RegExpMatchArray(-1, "", matches.toFixedArray())
+                return new RegExpMatchArray(-1, "", matches.toArray(), indices, isUndefined)
             }
             else {
                 let matchStr = result.$_get(0)
                 matches.pushBack(matchStr)
+                indices = indices.concat(result.indices)
+                isUndefined = isUndefined.concat(result.isUndefined)
                 if (matchStr == "") {
-                    this.lastIndex = RegExp.advanceStringIndex(str, this.lastIndex, this.unicode)
+                    this.lastIndex = RegExp.advanceStringIndex(str, this.lastIndex.toInt(), this.unicode)
                 }
                 n++
             }
@@ -763,8 +1493,11 @@ export class RegExp extends Object {
      * @returns true if match was found
      */
     public test(str: String): boolean {
-        let hasSlashU = str.contains("\\u", 0) || this.pattern_.contains("\\u", 0)
-        return this.execImpl(this.pattern_, this.flags_, str, hasSlashU).isCorrect
+        let res = this.exec(str)
+        if (!res) {
+            return false
+        }
+        return res.isCorrect
     }
 
     /**
@@ -796,21 +1529,6 @@ export class RegExp extends Object {
             return index + 1
         }
         return index + s.codePointCount(index, index + 1);
-    }
-
-    /**
-     * Returns next index from a passed one
-     *
-     * @param s
-     *
-     * @param index start position
-     *
-     * @param unicode true if unicode is used
-     *
-     * @returns new index
-     */
-    public static advanceStringIndex(s: String, index: number, unicode: boolean): number {
-        return RegExp.advanceStringIndex(s, index.toInt(), unicode)
     }
 
     public static $_invoke(pattern: RegExp | String, flags?: String) : RegExp {
@@ -859,7 +1577,7 @@ export class RegExp extends Object {
         this.init(regexp.pattern_, flags === undefined ? regexp.flags : flags!)
     }
 
-    internal regexp_parser(pattern: String): void {
+    private regexp_parser(pattern: String): void {
         let err: String | undefined = RegExp.parse(pattern)
         if (err != undefined) {
             throw new SyntaxError(err as String)

@@ -33,10 +33,10 @@ function main(): void {
     with_param() {
         switch (is_active() { return 1 }) {
             case 1:
-                assertEQ( a, 5)
+                arktest.assertEQ( a, 5)
                 break
             case 2:
-            default: assertTrue(false, "Not expected execution here")
+            default: arktest.assertTrue(false, "Not expected execution here")
         }
     }
 }

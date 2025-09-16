@@ -147,7 +147,7 @@ public:
     static bool RegisterETSGetter(ani_env *env)
     {
         ani_module mod {};
-        if (env->FindModule("Lets_functions;", &mod) != ANI_OK) {
+        if (env->FindModule("ets_functions", &mod) != ANI_OK) {
             return false;
         }
 
@@ -169,5 +169,18 @@ TEST_F(NativeArktsESvalueTsToEtsTest, check_js_to_ets_arkts_value)
     ASSERT_TRUE(RegisterNativeWrapRef(napiEnv));
     ASSERT_TRUE(RegisterETSGetter(aniEnv));
     ASSERT_TRUE(RunJsTestSuite("ts_arkts_esvalue.ts"));
+}
+
+TEST_F(NativeArktsESvalueTsToEtsTest, UnwrapESValue_InvalidArgs)
+{
+    ani_env *aniEnv {};
+    ASSERT_TRUE(GetAniEnv(&aniEnv));
+
+    ani_ref dummyObj = nullptr;
+    void *resultPtr = nullptr;
+    ASSERT_EQ(aniEnv->GetUndefined(&dummyObj), ANI_OK);
+    ASSERT_FALSE(arkts_esvalue_unwrap(nullptr, static_cast<ani_object>(dummyObj), &resultPtr));
+    ASSERT_FALSE(arkts_esvalue_unwrap(aniEnv, nullptr, &resultPtr));
+    ASSERT_FALSE(arkts_esvalue_unwrap(aniEnv, static_cast<ani_object>(dummyObj), nullptr));
 }
 }  // namespace ark::ets::interop::js::testing

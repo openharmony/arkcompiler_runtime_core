@@ -76,6 +76,7 @@ private:
     bool SerializeJSONRecord(EtsHandle<EtsObject> &value);
 
     bool PushValue(EtsHandle<EtsObject> &value);
+    void PopValue(EtsHandle<EtsObject> &value);
 
     PandaString ResolveDisplayName(const EtsField *field);
 

@@ -50,9 +50,9 @@
  }
 
  function main(): void {
-    assertEQ(U.returnPI_A0(), "->3.141592653589793")
-    assertEQ(U.returnPI_A0_as_Const(), "->3.141592653589793")
-    assertEQ(U.returnPI_A1(), "Hello->3.141592653589793")
-    assertEQ(U.returnPI_A1_as_Const(), "Hello->3.141592653589793")
-    assertEQ(U.returnPO_AO_Inline(), "Hello->3.141592653589793")
+    arktest.assertEQ(U.returnPI_A0(), "->3.141592653589793")
+    arktest.assertEQ(U.returnPI_A0_as_Const(), "->3.141592653589793")
+    arktest.assertEQ(U.returnPI_A1(), "Hello->3.141592653589793")
+    arktest.assertEQ(U.returnPI_A1_as_Const(), "Hello->3.141592653589793")
+    arktest.assertEQ(U.returnPO_AO_Inline(), "Hello->3.141592653589793")
  }

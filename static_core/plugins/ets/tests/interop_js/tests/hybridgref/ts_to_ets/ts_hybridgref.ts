@@ -29,71 +29,97 @@ class MyObject {
     }
 }
 
-(globalThis as any).wrapobjTS = new MyObject(55);
-
-function main(): void {
-    let etsVm = globalThis.gtest.etsVm;
-
-    nativeSaveRef("NativeGref String");
-    ASSERT_TRUE(etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsCheckNativeGrefString")());
+function testPrimitiveValues(etsVm: any): void {
+    nativeSaveRef('NativeGref String');
+    ASSERT_TRUE(etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsCheckNativeGrefString')());
 
     nativeSaveRef(123.456);
-    ASSERT_TRUE(etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsCheckNativeGrefNumber")());
-
-    nativeSaveRef({ name: "ArkTS", version: 1 });
-    ASSERT_TRUE(etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsCheckNativeGrefObjectField")());
-
-    nativeSaveRef([10, 20, 30]);
-    ASSERT_TRUE(etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsCheckNativeGrefArray")());
-
-    nativeSaveRef(multiply);
-    ASSERT_TRUE(etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsCheckNativeGrefCallback")());
+    ASSERT_TRUE(etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsCheckNativeGrefNumber')());
 
     nativeSaveRef(null);
-    ASSERT_TRUE(etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsCheckNativeGrefNullSafety")());
+    ASSERT_TRUE(etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsCheckNativeGrefNullSafety')());
+}
 
+function testObjectValues(etsVm: any): void {
+    nativeSaveRef({ name: 'ArkTS', version: 1 });
+    ASSERT_TRUE(etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsCheckNativeGrefObjectField')());
 
     nativeSaveRef({
         meta: {
-        id: 123,
-        tag: "nested",
-        inner: { active: true }
+            id: 123,
+            tag: 'nested',
+            inner: { active: true }
         }
     });
-    ASSERT_TRUE(etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsCheckNestedObject")());
+    ASSERT_TRUE(etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsCheckNestedObject')());
+
+    const sym = Symbol('secret');
+    nativeSaveRef({
+        sym: 'hidden',
+        visible: 'shown'
+    });
+    ASSERT_TRUE(etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsCheckSymbolFieldIgnored')());
+
+    nativeSaveRef({ a: 1, b: undefined });
+    ASSERT_TRUE(etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsCheckUndefinedField')());
+}
+
+function testArrayValues(etsVm: any): void {
+    nativeSaveRef([10, 20, 30]);
+    ASSERT_TRUE(etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsCheckNativeGrefArray')());
 
     nativeSaveRef([
         [1, 2],
         [3, 4],
         [5, 6]
     ]);
-    ASSERT_TRUE(etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsCheckNestedArray")());
+    ASSERT_TRUE(etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsCheckNestedArray')());
+
+    nativeSaveRef([]);
+    ASSERT_TRUE(etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsCheckEmptyArray')());
+}
+
+function testFunctionValues(etsVm: any): void {
+    nativeSaveRef(multiply);
+    ASSERT_TRUE(etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsCheckNativeGrefCallback')());
 
     const obj = new MyObject(42);
     nativeSaveRef(obj);
-    ASSERT_TRUE(etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsCheckObjectWithMethod")());
-
-    const sym = Symbol("secret");
-    const objWithSymbol = {
-        sym: "hidden",
-        visible: "shown"
-    };
-    nativeSaveRef(objWithSymbol);
-    ASSERT_TRUE(etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsCheckSymbolFieldIgnored")());
-
-    nativeSaveRef({ a: 1, b: undefined });
-    ASSERT_TRUE(etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsCheckUndefinedField")());
-
-    nativeSaveRef([]);
-    ASSERT_TRUE(etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsCheckEmptyArray")());
-
-    nativeSaveRef(new Date("2025-01-01T12:00:00Z"));
-    ASSERT_TRUE(etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsCheckDateObject")());
+    ASSERT_TRUE(etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsCheckObjectWithMethod')());
 }
 
-(globalThis as any).nativeSaveRef("temp");
+function testBuiltInObjects(etsVm: any): void {
+    nativeSaveRef(new Date('2025-01-01T12:00:00Z'));
+    ASSERT_TRUE(etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsCheckDateObject')());
 
-const obj = {};
+    nativeSaveRef(new ArrayBuffer(8));
+    ASSERT_TRUE(etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsCheckArrayBuffer')());
 
-(globalThis as any).nativeWrapRef(obj);
+    nativeSaveRef(new Uint8Array([1, 2, 3]));
+    ASSERT_TRUE(etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsCheckTypedArray')());
+
+    nativeSaveRef(Promise.resolve(42));
+    ASSERT_TRUE(etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsCheckPromiseResolved')());
+
+    let mySet: Set<number> = new Set<number>([1, 2, 3]);
+    nativeSaveRef(mySet);
+    ASSERT_TRUE(etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsCheckSetObject')());
+
+    nativeSaveRef(new Error('hybridgref error test'));
+    ASSERT_TRUE(etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsCheckErrorObject')());
+}
+
+function main(): void {
+    let etsVm = globalThis.gtest.etsVm;
+
+    testPrimitiveValues(etsVm);
+    testObjectValues(etsVm);
+    testArrayValues(etsVm);
+    testFunctionValues(etsVm);
+    // NOTE(www): #ICMNFA, Currently unable to get method object in 1.2.
+    // should add testBuiltInObjects(etsVm);
+}
+
+(globalThis as any).nativeSaveRef('temp');
+
 main();

@@ -32,6 +32,6 @@ interface B<T, U> extends A<T>{
 
 function main() {
     let i: I<number, string> = {a: 1, b: "abc"}
-    assertEQ(typeof i.a, 'number')
-    assertEQ(typeof i.b, 'string')
+    arktest.assertEQ(typeof i.a, 'number')
+    arktest.assertEQ(typeof i.b, 'string')
 }

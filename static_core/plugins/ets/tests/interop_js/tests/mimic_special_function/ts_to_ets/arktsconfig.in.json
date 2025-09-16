@@ -9,7 +9,7 @@
                 "${PANDA_ROOT}/plugins/ets/stdlib/std"
             ]
         },
-        "dynamicPaths": {
+        "dependencies": {
             "special_function_ts": {
                 "language": "js",
                 "ohmUrl": "${CMAKE_CURRENT_BINARY_DIR}/special_function"

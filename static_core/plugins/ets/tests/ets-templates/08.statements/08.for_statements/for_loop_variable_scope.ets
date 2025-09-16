@@ -22,5 +22,5 @@ function main(): void {
   for (let i: int = 1; i < 4; i++) {
     i++;
   }
-  assertEQ( i, 5 );
+  arktest.assertEQ( i, 5 );
 }

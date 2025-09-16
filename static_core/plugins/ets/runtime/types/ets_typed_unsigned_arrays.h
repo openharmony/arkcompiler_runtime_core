@@ -20,6 +20,11 @@
 #include "plugins/ets/runtime/types/ets_string.h"
 
 namespace ark::ets {
+
+namespace test {
+class EtsEscompatTypedUArrayBaseTest;
+}  // namespace test
+
 class EtsEscompatTypedUArrayBase : public EtsObject {
 public:
     EtsEscompatTypedUArrayBase() = delete;
@@ -88,7 +93,7 @@ public:
         byteLength_ = byteLength;
     }
 
-    EtsDouble GetBytesPerElement() const
+    EtsInt GetBytesPerElement() const
     {
         return bytesPerElement_;
     }
@@ -109,13 +114,28 @@ public:
             ObjectAccessor::GetObject(this, MEMBER_OFFSET(EtsEscompatTypedUArrayBase, name_)));
     }
 
+    void Initialize(EtsCoroutine *coro, EtsInt lengthInt, EtsInt bytesPerElement, EtsInt byteOffset, EtsObject *buffer,
+                    EtsString *name)
+    {
+        ASSERT(buffer != nullptr);
+        ObjectAccessor::SetObject(coro, this, GetBufferOffset(), buffer->GetCoreType());
+        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsEscompatTypedUArrayBase, name_),
+                                  name != nullptr ? name->GetCoreType() : nullptr);
+        bytesPerElement_ = bytesPerElement;
+        byteOffset_ = byteOffset;
+        byteLength_ = lengthInt * bytesPerElement;
+        lengthInt_ = lengthInt;
+    }
+
 private:
     ObjectPointer<EtsObject> buffer_;
     ObjectPointer<EtsString> name_;
-    EtsDouble bytesPerElement_;
+    EtsInt bytesPerElement_;
     EtsInt byteOffset_;
     EtsInt byteLength_;
     EtsInt lengthInt_;
+
+    friend class test::EtsEscompatTypedUArrayBaseTest;
 };
 
 template <typename T>

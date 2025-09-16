@@ -490,7 +490,7 @@ TEST(linkertests, ForeignBase)
         derv->fieldList.push_back(std::move(fld));
 
         auto func = ark::pandasm::Function("main", LANG);
-        func.regsNum = 1;
+        func.regsNum = 1U;
         func.returnType = ark::pandasm::Type("void", 0);
         func.AddInstruction(ark::pandasm::Create_NEWOBJ(0, "Derv"));
         func.AddInstruction(ark::pandasm::Create_LDOBJ(0, "Derv.fld"));
@@ -702,7 +702,7 @@ TEST(linkertests, TestForCoverage)
     linkRes = std::system(cmd.c_str());
     ASSERT_EQ(linkRes, 0);
 
-    std::string opt = " --show-stats --version --log-level info";
+    std::string opt = " --show-stats --log-level info";
     std::string dst = " --output data/ets/sys/target.abc -- data/ets/sys/1.ets.abc data/ets/sys/2.ets.abc";
     cmd = GenLinkCmd(opt + dst);
     // NOLINTNEXTLINE(cert-env33-c)

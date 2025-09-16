@@ -44,8 +44,8 @@
 //! INST_NOT     "Throw"
 //! INST         "DeoptimizeIf"
 
-class Exception0 extends Exception {}
-class Exception1 extends Exception {}
+class Error0 extends Error {}
+class Error1 extends Error {}
 
 class IfCatch {
 
@@ -54,14 +54,16 @@ class IfCatch {
     for (let i : int = 0; i < 16; i++) {
       try {
         if (k == 0) {
-          throw new Exception0();
+          throw new Error0();
         } else {
-          throw new Exception1();
+          throw new Error1();
         }
-      } catch (e: Exception0) {
-        res += 1;
       } catch (e) {
-        res += 2;
+        if (e instanceof Error0) {
+          res += 1;
+        } else {
+          res += 2;
+        }
       }
     }
     return res;

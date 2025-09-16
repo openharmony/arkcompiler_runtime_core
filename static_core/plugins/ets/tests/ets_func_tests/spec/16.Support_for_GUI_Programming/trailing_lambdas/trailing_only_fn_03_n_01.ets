@@ -25,14 +25,14 @@ function no_param(fn: () => void | null) {
     if (fn) {
         fn()
     } else {
-        assertEQ( a, 5)
+        arktest.assertEQ( a, 5)
     }
 }
 
 function main(): void {
     // Function no_param expects only 1 param, but here 2 provided
     no_param(null) {
-        assertEQ( a, 5)
+        arktest.assertEQ( a, 5)
     }
 }
 

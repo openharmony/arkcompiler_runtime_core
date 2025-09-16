@@ -20,5 +20,5 @@ desc: Verify whether the -- operators can be used for left-hand side expressions
 function main(): void {
   let y: number = 10;
   y--;
-  assertEQ(y, 9);
+  arktest.assertEQ(y, 9);
 }

@@ -16,7 +16,7 @@
 import {ArrayList} from "@ohos.util.ArrayList";
 
 function main() {
-    const suite = new ArkTestsuite("ArrayList API tests");
+    const suite = new arktest.ArkTestsuite("ArrayList API tests");
 
     suite.addTest("Testing ArrayList sort by Ascending Order", testArrayListSort0001);
     suite.addTest("Testing ArrayList sort by Descending Order", testArrayListSort0002);
@@ -31,7 +31,7 @@ function main() {
 }
 
 function testArrayListSort0001() {
-    let arrayList = new ArrayList<number>();
+    let arrayList = new ArrayList<double>();
     arrayList.add(1);
     arrayList.add(22);
     arrayList.add(3);
@@ -43,13 +43,13 @@ function testArrayListSort0001() {
     arrayList.sort((firstValue, secondValue) => firstValue - secondValue);
 
     const expectedValues = [0, 1, 3, 5, 8, 22, 24, 51];
-    for (let i = 0; i < expectedValues.length; i++) {
-        assertEQ(arrayList[i], expectedValues[i], `The element at index ${i} should be ${expectedValues[i]}`);
+    for (let i: int = 0; i < expectedValues.length; i++) {
+        arktest.assertEQ(arrayList[i], expectedValues[i], `The element at index ${i} should be ${expectedValues[i]}`);
     }
 }
 
 function testArrayListSort0002() {
-    let arrayList = new ArrayList<number>();
+    let arrayList = new ArrayList<double>();
     arrayList.add(1);
     arrayList.add(22);
     arrayList.add(3);
@@ -61,13 +61,13 @@ function testArrayListSort0002() {
     arrayList.sort((firstValue, secondValue) => secondValue - firstValue);
 
     const expectedValues = [51, 24, 22, 8, 5, 3, 1, 0];
-    for (let i = 0; i < expectedValues.length; i++) {
-        assertEQ(arrayList[i], expectedValues[i], `The element at index ${i} should be ${expectedValues[i]}`);
+    for (let i: int = 0; i < expectedValues.length; i++) {
+        arktest.assertEQ(arrayList[i], expectedValues[i], `The element at index ${i} should be ${expectedValues[i]}`);
     }
 }
 
 function testArrayListSort0003() {
-    let arrayList = new ArrayList<number | string>();
+    let arrayList = new ArrayList<double | string>();
     arrayList.add(1);
     arrayList.add(22);
     arrayList.add(3);
@@ -80,13 +80,13 @@ function testArrayListSort0003() {
     arrayList.sort();
 
     const expectedValues = [0, 1, 22, 24, 3, 5, 51, 8, "zhang san"];
-    for (let i = 0; i < expectedValues.length; i++) {
-        assertEQ(arrayList[i], expectedValues[i], `The element at index ${i} should be ${expectedValues[i]}`);
+    for (let i: int = 0; i < expectedValues.length; i++) {
+        arktest.assertEQ(arrayList[i], expectedValues[i], `The element at index ${i} should be ${expectedValues[i]}`);
     }
 }
 
 function testArrayListSort0004() {
-    let arrayList = new ArrayList<number | string>();
+    let arrayList = new ArrayList<double | string>();
     arrayList.add(1);
     arrayList.add(22);
     arrayList.add(3);
@@ -99,13 +99,13 @@ function testArrayListSort0004() {
     arrayList.sort();
 
     const expectedValues = [0, 1, 22, 24, 3, 5, 51, 8, "A"];
-    for (let i = 0; i < expectedValues.length; i++) {
-        assertEQ(arrayList[i], expectedValues[i], `The element at index ${i} should be ${expectedValues[i]}`);
+    for (let i: int = 0; i < expectedValues.length; i++) {
+        arktest.assertEQ(arrayList[i], expectedValues[i], `The element at index ${i} should be ${expectedValues[i]}`);
     }
 }
 
 function testArrayListSubArrayList0001() {
-    let arrayList = new ArrayList<number | string>();
+    let arrayList = new ArrayList<double | string>();
     arrayList.add(1);
     arrayList.add(22);
     arrayList.add(3);
@@ -117,39 +117,39 @@ function testArrayListSubArrayList0001() {
     let subArrayList = arrayList.subArrayList(1, 5);
 
     const expectedValues = [22, 3, 24, 5];
-    for (let i = 0; i < expectedValues.length; i++) {
-        assertEQ(subArrayList[i], expectedValues[i],
+    for (let i: int = 0; i < expectedValues.length; i++) {
+        arktest.assertEQ(subArrayList[i], expectedValues[i],
             `The element at index ${i} in the subArrayList should be ${expectedValues[i]}`);
     }
 }
 
 function testArrayListClear0001() {
-    let arrayList = new ArrayList<number | string>();
+    let arrayList = new ArrayList<double | string>();
     arrayList.insert(2, 0);
     arrayList.add(1);
     arrayList.add(22);
     arrayList.subArrayList(1, 2);
     arrayList.clear();
-    assertEQ(arrayList.length, 0, "The length of the ArrayList should be 0 after clearing all elements");
+    arktest.assertEQ(arrayList.length, 0, "The length of the ArrayList should be 0 after clearing all elements");
 }
 
 function testArrayListClone0001() {
-    let arrayList = new ArrayList<number | string>();
+    let arrayList = new ArrayList<double | string>();
     arrayList.insert(2, 0);
     arrayList.add(1);
     arrayList.add(22);
     arrayList.subArrayList(1, 2);
     let result = arrayList.clone();
-    assertEQ(arrayList.length, result.length, "The length of the cloned ArrayList should match the original ArrayList");
+    arktest.assertEQ(arrayList.length, result.length, "The length of the cloned ArrayList should match the original ArrayList");
 }
 
 function testArrayListClone0002() {
-    let arrayList = new ArrayList<number | string>();
+    let arrayList = new ArrayList<double | string>();
     arrayList.insert(2, 0);
     arrayList.add(1);
     arrayList.add(22);
     arrayList.subArrayList(1, 2);
     arrayList.clear();
     let result = arrayList.clone();
-    assertEQ(result.length, 0, "The length of the cloned ArrayList should be 0 after clearing the original ArrayList");
+    arktest.assertEQ(result.length, 0, "The length of the cloned ArrayList should be 0 after clearing the original ArrayList");
 }

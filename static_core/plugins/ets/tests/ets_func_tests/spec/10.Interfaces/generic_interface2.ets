@@ -34,6 +34,6 @@ class Interface1Impl<T> implements Interface1<T> {
 function main(): void {
     let a: commonLambda = () => {
         let b = new Interface1Impl<void>();
-        assertEQ( b.method1(), true)
+        arktest.assertEQ( b.method1(), true)
     }
 }

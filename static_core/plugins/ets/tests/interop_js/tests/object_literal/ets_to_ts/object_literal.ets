@@ -33,3 +33,23 @@ function isDataModel(obj: DataModel) {
 function hasValidRecordProperty(record: Record<string, number>) {
     return record['prop'] === 1;
 }
+
+interface IDataInterface {
+    value: number;
+}
+
+function isValidDataInterface(data: IDataInterface): boolean {
+    return typeof data === 'object' &&
+           typeof data.value === 'number';
+}
+
+interface IUserProfile {
+    name: string;
+    age: number;
+}
+
+function isValidUserProfile(profile: IUserProfile): boolean {
+    return typeof profile === 'object' && 
+           typeof profile.name === 'string' && 
+           typeof profile.age === 'number';
+}

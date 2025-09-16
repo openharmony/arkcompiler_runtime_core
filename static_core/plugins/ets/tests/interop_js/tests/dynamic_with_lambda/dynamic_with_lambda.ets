@@ -13,49 +13,50 @@
  * limitations under the License.
  */
 
-import { A } from "js_code"
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/dynamic_with_lambda/index')
+let etsA = module.getProperty('A');
 
 function TestArgs0(): int {
-    let a = new A();
+    let a = etsA.instantiate();
     let f: () => int = (): int => { return 25 as int; }
-    let res = a.bar(f) as int;
+    let res = a.getProperty('bar').invoke(f).toNumber().toInt();
     return res;
 }
 
 function TestArgs1(): int {
-    let a = new A();
+    let a = etsA.instantiate();
     let f: (x: int) => int = (x: int): int => { return x * x; }
-    let res = a.bar(f, 5) as int;
+    let res = a.getProperty('bar').invoke(f, 5).toNumber().toInt();
     return res;
 }
 
 function TestArgs2(): int {
-    let a = new A();
+    let a = etsA.instantiate();
     let f: (x: int, y: int) => int = (x: int, y: int): int => { return x * x + y * y; }
-    let res = a.bar(f, 3, 4) as int;
+    let res = a.getProperty('bar').invoke(f, 3, 4).toNumber().toInt();
     return res;
 }
 
 function TestLambdaJSValue(): int {
-    let a = new A();
-    let f: JSValue = (x: int, y: int): int => { return x * x + y * y; }
-    let res = a.bar(f, 3, 4) as int;
+    let a = etsA.instantiate();
+    let f = (x: int, y: int): int => { return x * x + y * y; }
+    let res = a.getProperty('bar').invoke(f, 3, 4).toNumber().toInt();
     return res;
 }
 
 function TestLambdaJSValueCast(): int {
-    let f: JSValue = (x: int): int => { return x * x; }
+    let f = (x: int): int => { return x * x; }
     let f1: (x: int) => int = f as (x: int) => int;
-    let res = f1(5) as int
+    let res = f1(5) as int;
     return res;
 }
 
 function TestLambdaJSValueCache(): int {
-    let f: JSValue = (x: int): int => { return x * x; }
+    let f = (x: int): int => { return x * x; }
     let f1: (x: int) => int = f as (x: int) => int;
     let f2: (x: int) => int = f as (x: int) => int;
-    let res1 = f1(5) as int
-    let res2 = f2(5) as int
+    let res1 = f1(5) as int;
+    let res2 = f2(5) as int;
     if (res1 == 25 && res2 == 25) {
         return 25;
     }

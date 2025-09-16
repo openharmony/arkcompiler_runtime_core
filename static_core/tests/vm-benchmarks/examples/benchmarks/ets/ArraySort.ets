@@ -63,7 +63,7 @@ export class ArraySort {
    * @Bugs sortbug
    * @Tags sorttag
    */
-  public sort(): void throws {
+  public sort(): void {
     copyTo(this.intsInitial, this.ints, 0, 0, this.size);
     sort(this.ints);
   }
@@ -71,7 +71,7 @@ export class ArraySort {
   /**
    * @Benchmark -wi 0 -mi 1
    */
-  public baseline(): void throws {
+  public baseline(): void {
     copyTo(this.intsInitial, this.ints, 0, 0, this.size);
   }
 }

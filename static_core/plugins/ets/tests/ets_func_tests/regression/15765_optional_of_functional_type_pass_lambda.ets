@@ -26,8 +26,8 @@ class LambdaEvaluator<T> {
 function main(): void {
 
     let evaluator = new LambdaEvaluator<number>();
-    assertEQ(evaluator, evaluator.evaluate((a: number, b: number) => a + b).evaluate());
+    arktest.assertEQ(evaluator, evaluator.evaluate((a: number, b: number) => a + b).evaluate());
 
     let evaluator2 = new LambdaEvaluator<string>();
-    assertEQ(evaluator2, evaluator2.evaluate((a: string, b: string) => (a + b).length).evaluate());
+    arktest.assertEQ(evaluator2, evaluator2.evaluate((a: string, b: string) => (a + b).length).evaluate());
 }

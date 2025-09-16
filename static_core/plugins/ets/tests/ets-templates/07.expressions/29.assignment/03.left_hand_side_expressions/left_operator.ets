@@ -32,5 +32,5 @@ function main(): void {
   const objNormal = new MyClass();
   objNormal.prop = new PropClass(0);
   const resultNormal = objNormal?.prop?.value;
-  assertEQ(resultNormal, 0);
+  arktest.assertEQ(resultNormal, 0);
 }

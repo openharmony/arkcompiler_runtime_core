@@ -35,26 +35,26 @@ function checkLength(a: Object, expected: number): boolean {
 
 function main(): void {
     let a1 = Array.of(...([1, 2, 3] as Int[]));
-    assertTrue(checkLength(a1, 3));
+    arktest.assertTrue(checkLength(a1, 3));
 
     let a1_1 = Array.of<Int>(...([1, 2, 3] as Int[]));
-    assertTrue(checkLength(a1_1, 3));
+    arktest.assertTrue(checkLength(a1_1, 3));
 
     let a2 = Array.of(...(["1", "2", "3"] as String[]));
-    assertTrue(checkLength(a2, 3));
+    arktest.assertTrue(checkLength(a2, 3));
 
     let a2_1 = Array.of<String>(...(["1", "2", "3"] as String[]));
-    assertTrue(checkLength(a2_1, 3));
+    arktest.assertTrue(checkLength(a2_1, 3));
 
     let a3 = Array.of(...([new MyObj(), new MyObj(), new MyObj()] as MyObj[]));
-    assertTrue(checkLength(a3, 3));
+    arktest.assertTrue(checkLength(a3, 3));
 
     let a3_1 = Array.of<MyObj>(...([new MyObj(), new MyObj(), new MyObj()] as MyObj[]));
-    assertTrue(checkLength(a3_1, 3));
+    arktest.assertTrue(checkLength(a3_1, 3));
 
     let a4 = Array.of(...([new Leaf(), new Leaf(), new Leaf()] as Branch[]));
-    assertTrue(checkLength(a4, 3));
+    arktest.assertTrue(checkLength(a4, 3));
 
     let a4_1 = Array.of<Branch>(...([new Leaf(), new Leaf(), new Leaf()] as Branch[]));
-    assertTrue(checkLength(a4_1, 3));
+    arktest.assertTrue(checkLength(a4_1, 3));
 }

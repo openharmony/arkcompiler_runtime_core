@@ -18,8 +18,10 @@
 #include "runtime/coroutines/coroutine_context.h"
 #include "runtime/thread_manager.h"
 #include "runtime/include/runtime.h"
+#include "runtime/coroutines/stackful_common.h"
 #include "runtime/coroutines/coroutine.h"
 #include "runtime/coroutines/coroutine_events.h"
+#include "runtime/coroutines/coroutine_worker_group.h"
 
 namespace ark {
 
@@ -39,6 +41,8 @@ struct CoroutineManagerConfig {
     uint32_t exclusiveWorkersLimit = 0;
     /// Collection of performance statistics
     bool enablePerfStats = false;
+    // number of exclusive workers created for runtime needs
+    uint32_t preallocatedExclusiveWorkersCount = 0;
 };
 
 /// @brief defines the requested launch mode for a coroutine
@@ -142,9 +146,11 @@ public:
      * @param entrypoint the coroutine entrypoint method
      * @param arguments array of coroutine's entrypoint arguments
      * @param abortFlag if true, finishing with an exception will abort the program
+     * @param groupId target worker group for the coroutine (see CoroutineWorkerGroup)
      */
     virtual bool Launch(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                        CoroutineLaunchMode mode, CoroutinePriority priority, bool abortFlag) = 0;
+                        CoroutineLaunchMode mode, CoroutinePriority priority, bool abortFlag,
+                        CoroutineWorkerGroup::Id groupId) = 0;
     /**
      * @brief The public coroutine creation and execution interface. Switching to the newly created coroutine occurs
      * immediately. Coroutine launch mode should correspond to the use of parent's worker.
@@ -163,10 +169,11 @@ public:
      * @param epFunc the native function of coroutine entrypoint
      * @param param the argument of coroutine entrypoint
      * @param coroName the name of launching coroutine
+     * @param groupId target worker group for the coroutine (see CoroutineWorkerGroup)
      * NOTE: native function can have Managed scopes
      */
     virtual bool LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName, CoroutineLaunchMode mode,
-                              CoroutinePriority priority, bool abortFlag) = 0;
+                              CoroutinePriority priority, bool abortFlag, CoroutineWorkerGroup::Id groupId) = 0;
     /// Suspend the current coroutine and schedule the next ready one for execution
     virtual void Schedule() = 0;
     /**
@@ -214,8 +221,6 @@ public:
     void SetSchedulingPolicy(CoroutineSchedulingPolicy policy);
     CoroutineSchedulingPolicy GetSchedulingPolicy() const;
 
-    virtual bool IsMainWorker(Coroutine *coro) const = 0;
-
     virtual Coroutine *CreateExclusiveWorkerForThread([[maybe_unused]] Runtime *runtime, [[maybe_unused]] PandaVM *vm)
     {
         return nullptr;
@@ -248,6 +253,37 @@ public:
     virtual bool IsExclusiveWorkersLimitReached() const
     {
         return false;
+    }
+
+    virtual bool IsUserCoroutineLimitReached() const
+    {
+        return false;
+    }
+
+    /*
+     * @brief Checks if a coroutine is a system, i.e. coro creation fails is fatal
+     * Coroutine is system if it is:
+     *   SCHEDULER (represents the CoroutineWorker's scheduler loop) ──┬── UTILITY CORO
+     *   FINALIZER (used to shut down coroutine workers)             ──╯
+     *   EP-less MUTATOR (represents the defult manged execution context for MAIN and Exclusive workers)
+     */
+    static bool IsSystemCoroutine(Coroutine::Type type, bool hasEntryPoint)
+    {
+        return type == Coroutine::Type::SCHEDULER || (type == Coroutine::Type::FINALIZER) ||
+               (type == Coroutine::Type::MUTATOR && !hasEntryPoint);
+    }
+
+    /*
+     * @brief Checks if a coroutine is a system, i.e. coro creation fails is fatal
+     * Coroutine is system if it is:
+     *   SCHEDULER (represents the CoroutineWorker's scheduler loop) ──┬── UTILITY CORO
+     *   FINALIZER (used to shut down coroutine workers)             ──╯
+     *   EP-less MUTATOR (represents the defult manged execution context for MAIN and Exclusive workers)
+     */
+    static bool IsSystemCoroutine(Coroutine *co)
+    {
+        return CoroutineManager::IsSystemCoroutine(co->GetType(),
+                                                   co->HasNativeEntrypoint() || co->HasManagedEntrypoint());
     }
 
     /* events */

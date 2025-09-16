@@ -30,7 +30,7 @@ async function test(): Promise<void> {
   const bob = new Person("Bob");
   const resultPromise = bob.fetchData?.() ?? Promise.resolve(undefined);
   const result = await resultPromise;
-  assertEQ(result, undefined);
+  arktest.assertEQ(result, undefined);
 }
 
 function main(): void {

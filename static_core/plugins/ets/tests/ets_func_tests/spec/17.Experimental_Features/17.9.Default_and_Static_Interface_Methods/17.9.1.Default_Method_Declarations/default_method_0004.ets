@@ -31,6 +31,6 @@ class C implements I1, I2 {
 
 function main() {
     let c: C = new C();
-    assertEQ( c.foo1(), 1)
-    assertEQ( c.foo2(), 2)
+    arktest.assertEQ( c.foo1(), 1)
+    arktest.assertEQ( c.foo2(), 2)
 }

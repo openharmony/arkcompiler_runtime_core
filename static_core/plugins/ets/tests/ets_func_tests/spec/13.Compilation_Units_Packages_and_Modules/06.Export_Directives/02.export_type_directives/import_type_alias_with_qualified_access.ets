@@ -31,7 +31,7 @@ function f2(): types.int16 {
 }
 
 function f3(): types.float_n {
-  return 0.0;
+  return 0.0f;
 }
 
 function f4(): types.text {
@@ -43,9 +43,9 @@ function f5(): types.flag {
 }
 
 function main(): void {
-  assertEQ(f1(), 0)
-  assertEQ(f2(), 0)
-  assertEQ(f3(), 0.0)
-  assertEQ(f4(), "test")
-  assertEQ(f5(), true)
+  arktest.assertEQ(f1(), 0)
+  arktest.assertEQ(f2(), 0)
+  arktest.assertEQ(f3(), 0.0)
+  arktest.assertEQ(f4(), "test")
+  arktest.assertEQ(f5(), true)
 }

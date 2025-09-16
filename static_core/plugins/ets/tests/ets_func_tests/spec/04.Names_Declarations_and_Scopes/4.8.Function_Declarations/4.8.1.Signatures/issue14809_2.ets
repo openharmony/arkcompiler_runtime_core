@@ -31,5 +31,5 @@ class Clazz {
 function main(): void {
     callRef = 0;
     Clazz.is();
-    assertEQ( callRef, 1)
+    arktest.assertEQ( callRef, 1)
 }

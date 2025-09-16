@@ -21,5 +21,5 @@ tags: [compile-only, negative]
 function main(): void {
   let obj: {a?: {b?: number} } = {};
   obj.a.b = 100;
-  assertEQ(obj.a.b , 100);
+  arktest.assertEQ(obj.a.b , 100);
 }

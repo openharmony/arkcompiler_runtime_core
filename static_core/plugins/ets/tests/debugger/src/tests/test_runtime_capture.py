@@ -32,7 +32,7 @@ async def test_assert_in_capture(
     code = """\
 function main(): int {
     console.log("START")
-    assertTrue(false)
+    arktest.assertTrue(false)
     console.log("TEST_END")
     return 0
 }\

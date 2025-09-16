@@ -17,6 +17,7 @@
 #include "compiler/optimizer/ir/analysis.h"
 #include "runtime/include/coretypes/string.h"
 #include "runtime/include/coretypes/array.h"
+#include "utils/regmask.h"
 
 namespace ark::compiler {
 
@@ -206,7 +207,12 @@ static void EncodeSbAppendString(Codegen *cg, IntrinsicInst *inst, const SbAppen
     auto labelFastPathDone = enc->CreateLabel();
     auto labelIncIndex = enc->CreateLabel();
     // Jump to slowPath if buffer is full and needs to be reallocated
-    enc->EncodeLdr(reg0, false, args.SbBufferAddr());
+    if (cg->GetRuntime()->NeedsPreReadBarrier()) {
+        cg->CreateReadViaBarrier(inst, args.SbBufferAddr(), reg0, false,
+                                 MakeMask(args.SbBufferAddr().GetBase().GetId(), args.Value().GetId()));
+    } else {
+        enc->EncodeLdr(reg0, false, args.SbBufferAddr());
+    }
     enc->EncodeLdr(reg1, false, MemRef(reg0, coretypes::Array::GetLengthOffset()));
     enc->EncodeLdr(reg2, false, args.SbIndexAddr());
     enc->EncodeJump(labelSlowPath, reg2, reg1, Condition::HS);
@@ -229,7 +235,7 @@ static void EncodeSbAppendString(Codegen *cg, IntrinsicInst *inst, const SbAppen
     enc->EncodeAdd(reg2, reg2, Imm(1));
     enc->EncodeStr(reg2, args.SbIndexAddr());
     // Unpack length of string
-    enc->EncodeShr(reg1, reg1, Imm(1));
+    enc->EncodeShr(reg1, reg1, Imm(ark::coretypes::String::STRING_LENGTH_SHIFT));
     // Add length of string to the current length of StringBuilder
     enc->EncodeLdr(reg2, false, args.SbLengthAddr());
     enc->EncodeAdd(reg2, reg2, reg1);
@@ -402,7 +408,7 @@ void Codegen::CreateStringBuilderToString(IntrinsicInst *inst, Reg dst, SRCREGS 
         CallFastPath(inst, entrypoint, dst, {}, sb, klass);
     } else {
         auto klass =
-            TypedImm(reinterpret_cast<uintptr_t>(GetRuntime()->GetStringClass(GetGraph()->GetMethod(), nullptr)));
+            TypedImm(reinterpret_cast<uintptr_t>(GetRuntime()->GetLineStringClass(GetGraph()->GetMethod(), nullptr)));
         CallFastPath(inst, entrypoint, dst, {}, sb, klass);
     }
 }
@@ -561,7 +567,7 @@ void Codegen::CreateStringFromCharCode(IntrinsicInst *inst, Reg dst, SRCREGS src
         CallFastPath(inst, getEntryId(), dst, RegMask::GetZeroMask(), array, klassReg);
     } else {
         auto klassImm =
-            TypedImm(reinterpret_cast<uintptr_t>(GetRuntime()->GetStringClass(GetGraph()->GetMethod(), nullptr)));
+            TypedImm(reinterpret_cast<uintptr_t>(GetRuntime()->GetLineStringClass(GetGraph()->GetMethod(), nullptr)));
         CallFastPath(inst, getEntryId(), dst, RegMask::GetZeroMask(), array, klassImm);
     }
 }
@@ -670,29 +676,29 @@ void Codegen::CreateBigUInt64ArrayFillInternal(IntrinsicInst *inst, Reg dst, SRC
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define CODEGEN_TYPED_ARRAY_TO_REVERSED(Name, MacroType)                                   \
-    /* CC-OFFNXT(G.PRE.02) name part */                                                    \
-    void Codegen::Create##Name##ArrayToReversed(IntrinsicInst *inst, Reg dst, SRCREGS src) \
-    {                                                                                      \
-        ASSERT(GetArch() != Arch::AARCH32);                                                \
-        auto array = src[FIRST_OPERAND];                                                   \
-        auto eid = RuntimeInterface::EntrypointId::MacroType##_ARRAY_TO_REVERSED;          \
-        /* CC-OFFNXT(G.PRE.05) function gen */                                             \
-        CallFastPath(inst, eid, dst, {}, array);                                           \
+#define CODEGEN_TYPED_ARRAY_SET_VALUES_FROM_ARRAY(defName, defType)                                   \
+    /* CC-OFFNXT(G.PRE.02) name part */                                                               \
+    void Codegen::Create##defName##ArraySetValuesFromArray(IntrinsicInst *inst, Reg dst, SRCREGS src) \
+    {                                                                                                 \
+        ASSERT(inst->GetInputsCount() == 3U);                                                         \
+        auto eid = EntrypointId::defType##_ARRAY_SET_VALUES_FROM_ARRAY;                               \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                        \
+        CallFastPath(inst, eid, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND]);                    \
     }
 
-CODEGEN_TYPED_ARRAY_TO_REVERSED(Int8, INT8)
-CODEGEN_TYPED_ARRAY_TO_REVERSED(Int16, INT16)
-CODEGEN_TYPED_ARRAY_TO_REVERSED(Int32, INT32)
-CODEGEN_TYPED_ARRAY_TO_REVERSED(BigInt64, BIG_INT64)
-CODEGEN_TYPED_ARRAY_TO_REVERSED(Float32, FLOAT32)
-CODEGEN_TYPED_ARRAY_TO_REVERSED(Float64, FLOAT64)
-CODEGEN_TYPED_ARRAY_TO_REVERSED(Uint8, UINT8)
-CODEGEN_TYPED_ARRAY_TO_REVERSED(Uint16, UINT16)
-CODEGEN_TYPED_ARRAY_TO_REVERSED(Uint32, UINT32)
-CODEGEN_TYPED_ARRAY_TO_REVERSED(BigUint64, BIG_UINT64)
+CODEGEN_TYPED_ARRAY_SET_VALUES_FROM_ARRAY(Int8, INT8)
+CODEGEN_TYPED_ARRAY_SET_VALUES_FROM_ARRAY(Int16, INT16)
+CODEGEN_TYPED_ARRAY_SET_VALUES_FROM_ARRAY(Int32, INT32)
+CODEGEN_TYPED_ARRAY_SET_VALUES_FROM_ARRAY(BigInt64, BIG_INT64)
+CODEGEN_TYPED_ARRAY_SET_VALUES_FROM_ARRAY(Float32, FLOAT32)
+CODEGEN_TYPED_ARRAY_SET_VALUES_FROM_ARRAY(Float64, FLOAT64)
+CODEGEN_TYPED_ARRAY_SET_VALUES_FROM_ARRAY(Uint8, UINT8)
+CODEGEN_TYPED_ARRAY_SET_VALUES_FROM_ARRAY(Uint8Clamped, UINT8_CLAMPED)
+CODEGEN_TYPED_ARRAY_SET_VALUES_FROM_ARRAY(Uint16, UINT16)
+CODEGEN_TYPED_ARRAY_SET_VALUES_FROM_ARRAY(Uint32, UINT32)
+CODEGEN_TYPED_ARRAY_SET_VALUES_FROM_ARRAY(BigUint64, BIG_UINT64)
 
-#undef CODEGEN_TYPED_ARRAY_TO_REVERSED
+#undef CODEGEN_TYPED_ARRAY_SET_VALUES_FROM_ARRAY
 
 void Codegen::CreateWriteString(IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
@@ -714,10 +720,45 @@ void Codegen::CreateReadString(IntrinsicInst *inst, Reg dst, SRCREGS src)
         enc->EncodeLdr(klass, false, MemRef(ThreadReg(), offset));
         CallFastPath(inst, entrypointId, dst, {}, buf, len, klass);
     } else {
-        auto klass = GetRuntime()->GetStringClass(GetGraph()->GetMethod(), nullptr);
+        auto klass = GetRuntime()->GetLineStringClass(GetGraph()->GetMethod(), nullptr);
         auto klassImm = TypedImm(reinterpret_cast<uintptr_t>(klass));
         CallFastPath(inst, entrypointId, dst, {}, buf, len, klassImm);
     }
+}
+
+void Codegen::CreateMapGet([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(GetArch() != Arch::AARCH32);
+    auto entrypointId = EntrypointId::MAP_GET_FAST_PATH;
+    CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND]);
+}
+
+void Codegen::CreateMapHas([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(GetArch() != Arch::AARCH32);
+    auto entrypointId = EntrypointId::MAP_HAS_FAST_PATH;
+    CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND]);
+}
+
+void Codegen::CreateMapDelete([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(GetArch() != Arch::AARCH32);
+    auto entrypointId = EntrypointId::MAP_DELETE;
+    CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND]);
+}
+
+void Codegen::CreateSetHas([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(GetArch() != Arch::AARCH32);
+    auto entrypointId = EntrypointId::SET_HAS;
+    CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND]);
+}
+
+void Codegen::CreateSetDelete([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(GetArch() != Arch::AARCH32);
+    auto entrypointId = EntrypointId::SET_DELETE;
+    CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND]);
 }
 
 }  // namespace ark::compiler

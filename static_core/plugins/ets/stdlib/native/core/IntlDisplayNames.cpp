@@ -277,7 +277,7 @@ static std::string ValidateAndCanonicalizeCode(ani_env *env, CodeType codeType, 
         if (fallbackStr == "code") {
             return codeStr;
         }
-        ThrowNewError(env, "Lstd/core/RangeError;", ("Invalid code: " + codeStr).c_str(), "Lstd/core/String;:V");
+        ThrowNewError(env, "std.core.RangeError", ("Invalid code: " + codeStr).c_str(), "C{std.core.String}:");
     }
 
     return canonicalizedCode;
@@ -356,13 +356,16 @@ static ani_string StdCoreIntlDisplayNamesOf(ani_env *env, [[maybe_unused]] ani_c
     auto codeStr = ConvertFromAniString(env, code);
     auto styleStr = ConvertFromAniString(env, style);
     auto fallbackStr = ConvertFromAniString(env, fallback);
-    auto languageDisplayStr = (languageDisplay != nullptr) ? ConvertFromAniString(env, languageDisplay) : "dialect";
+    ani_boolean isUndefined = ANI_FALSE;
+    [[maybe_unused]] auto aniStatus = env->Reference_IsUndefined(languageDisplay, &isUndefined);
+    ASSERT(aniStatus == ANI_OK);
+    auto languageDisplayStr = (isUndefined == ANI_FALSE) ? ConvertFromAniString(env, languageDisplay) : "dialect";
 
     bool isValidCodeType = true;
     auto codeType = StringToCodeType(typeStr, isValidCodeType);
 
     if (!isValidCodeType) {
-        ThrowNewError(env, "Lstd/core/RangeError;", ("Invalid type: " + typeStr).c_str(), "Lstd/core/String;:V");
+        ThrowNewError(env, "std.core.RangeError", ("Invalid type: " + typeStr).c_str(), "C{std.core.String}:");
         return nullptr;
     }
 
@@ -376,8 +379,7 @@ static ani_string StdCoreIntlDisplayNamesOf(ani_env *env, [[maybe_unused]] ani_c
     UErrorCode status = U_ZERO_ERROR;
     auto icuLocale = icu::Locale::forLanguageTag(localeStr, status);
     if ((U_FAILURE(status) != 0)) {
-        ThrowNewError(env, "Lstd/core/RangeError;", ("Invalid locale tag: " + localeStr).c_str(),
-                      "Lstd/core/String;:V");
+        ThrowNewError(env, "std.core.RangeError", ("Invalid locale tag: " + localeStr).c_str(), "C{std.core.String}:");
         return nullptr;
     }
 
@@ -400,7 +402,7 @@ static ani_string StdCoreIntlDisplayNamesOf(ani_env *env, [[maybe_unused]] ani_c
     } else if (fallbackStr == "code") {
         retVal = StdStrToAni(env, codeStr);
     } else {
-        ThrowNewError(env, "Lstd/core/RangeError;", ("Invalid code: " + codeStr).c_str(), "Lstd/core/String;:V");
+        ThrowNewError(env, "std.core.RangeError", ("Invalid code: " + codeStr).c_str(), "C{std.core.String}:");
     }
 
     SafeCloseDisplayNames(displayNames);
@@ -419,15 +421,15 @@ ani_status RegisterIntlDisplayNames(ani_env *env)
 {
     const auto methods = std::array {
         ani_native_function {"ofNative",
-                             "Lstd/core/String;Lstd/core/String;Lstd/core/String;Lstd/core/String;Lstd/core/"
-                             "String;Lstd/core/String;:Lstd/core/String;",
+                             "C{std.core.String}C{std.core.String}C{std.core.String}C{std.core.String}C{std.core."
+                             "String}C{std.core.String}:C{std.core.String}",
                              reinterpret_cast<void *>(StdCoreIntlDisplayNamesOf)},
     };
 
     ani_class displayNamesClass;
-    ANI_FATAL_IF_ERROR(env->FindClass("Lstd/core/Intl/DisplayNames;", &displayNamesClass));
+    ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.DisplayNames", &displayNamesClass));
 
-    return env->Class_BindNativeMethods(displayNamesClass, methods.data(), methods.size());
+    return env->Class_BindStaticNativeMethods(displayNamesClass, methods.data(), methods.size());
 }
 
 }  // namespace ark::ets::stdlib::intl

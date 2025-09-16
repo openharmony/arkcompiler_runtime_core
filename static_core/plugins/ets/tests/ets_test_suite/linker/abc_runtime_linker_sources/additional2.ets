@@ -24,7 +24,7 @@ export class AdditionalClass2 {
         const map = new Map<AdditionalClass1, string>();
         map.set(new AdditionalClass1(), "AdditionalClass1");
         const size = additionalFunction3(map);
-        assertEQ(size, 1);
+        arktest.assertEQ(size, 1);
         return 1;
     }
 }

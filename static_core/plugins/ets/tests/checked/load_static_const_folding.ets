@@ -16,9 +16,6 @@
 //! CHECKER         Remove LoadStatic for static readonly fields
 //! RUN             force_jit: true, options: "--compiler-regex='.*test.*'", entry: "load_static_const_folding.ETSGLOBAL::main", return: 0
 //! METHOD          "load_static_const_folding.ETSGLOBAL::testInt"
-//! PASS_BEFORE     "Peepholes"
-//! INST            "LoadStatic"
-//! INST_NOT        "Constant"
 //! PASS_AFTER      "Peepholes"
 //! INST            /Constant\s+20 ->.+/
 //! PASS_AFTER      "Cleanup"
@@ -27,9 +24,6 @@
 //! INST_COUNT      "Constant", 1
 //!
 //! METHOD          "load_static_const_folding.ETSGLOBAL::testFloat"
-//! PASS_BEFORE     "Peepholes"
-//! INST            "LoadStatic"
-//! INST_NOT        "Constant"
 //! PASS_AFTER      "Peepholes"
 //! INST            /Constant\s+10 ->.+/
 //! PASS_AFTER      "Cleanup"

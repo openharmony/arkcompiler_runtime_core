@@ -251,7 +251,7 @@
     suffix: constructor,
     buffer_size: 8,
     object_type: DataView,
-    constructor_params: {"byteOffset": 1.1},
+    constructor_params: {"byteOffset": 1},
     method_name: {"m1": "setUint16",},
     method_params:
       {

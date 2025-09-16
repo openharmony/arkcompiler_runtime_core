@@ -23,9 +23,9 @@ function testInt8ArrayCopyCtor(): void {
 	const bytesFromBuf = new Int8Array(bytes.buffer, 1, 7)
 	const bytesFromBufCopy = new Int8Array(bytesFromBuf)
 
-	assertEQ(bytesFromBuf.byteLength, bytesFromBufCopy.byteLength)
-	assertEQ(0, bytesFromBufCopy.byteOffset)
-	assertEQ(bytesFromBuf.toString(), bytesFromBufCopy.toString())
+ arktest.assertEQ(bytesFromBuf.byteLength, bytesFromBufCopy.byteLength)
+ arktest.assertEQ(0, bytesFromBufCopy.byteOffset)
+ arktest.assertEQ(bytesFromBuf.toString(), bytesFromBufCopy.toString())
 }
 
 function testInt32ArrayCopyCtor(): void {
@@ -34,13 +34,13 @@ function testInt32ArrayCopyCtor(): void {
 	const intsFromBuf = new Int32Array(ints.buffer, 4, 4)
 	const intsFromBufCopy = new Int32Array(intsFromBuf)
 
-	assertEQ(intsFromBuf.byteLength, intsFromBufCopy.byteLength)
-	assertEQ(0, intsFromBufCopy.byteOffset)
-	assertEQ(intsFromBuf.toString(), intsFromBufCopy.toString())
+ arktest.assertEQ(intsFromBuf.byteLength, intsFromBufCopy.byteLength)
+ arktest.assertEQ(0, intsFromBufCopy.byteOffset)
+ arktest.assertEQ(intsFromBuf.toString(), intsFromBufCopy.toString())
 }
 
 function main(): int {
-	const suite = new ArkTestsuite("TypedArray")
+	const suite = new arktest.ArkTestsuite("TypedArray")
 
 	suite.addTest(getTestName("Int8Array"), testInt8ArrayCopyCtor)
 	suite.addTest(getTestName("Int32Array"), testInt32ArrayCopyCtor)

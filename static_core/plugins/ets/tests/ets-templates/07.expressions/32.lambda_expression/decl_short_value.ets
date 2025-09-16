@@ -18,6 +18,8 @@
 desc: Short declaration with value arguments, {{c.desc}}
 ---*/
 
-{{c.impl}}
+function main() {
+    {{c.impl|indent}}
+}
 
 {% endfor %}

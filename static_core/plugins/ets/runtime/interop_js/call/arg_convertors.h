@@ -31,6 +31,7 @@ static ALWAYS_INLINE bool UnwrapVal(InteropCtx *ctx, napi_env env, napi_value js
         return false;
     }
     if constexpr (std::is_pointer_v<cpptype>) {
+        ASSERT(res.value() != nullptr);
         storeRes(AsEtsObject(res.value())->GetCoreType());
     } else {
         storeRes(Value(res.value()).GetAsLong());
@@ -58,7 +59,7 @@ template <typename FStore>
     if (klass == ctx->GetJSValueClass()) {
         return UnwrapVal<JSConvertJSValue>(ctx, env, jsVal, storeRes);
     }
-    if (klass == ctx->GetStringClass()) {
+    if (klass->IsStringClass()) {
         return UnwrapVal<JSConvertString>(ctx, env, jsVal, storeRes);
     }
     // start slowpath
@@ -190,8 +191,9 @@ static ObjectHeader **DoPackRestParameters(EtsCoroutine *coro, InteropCtx *ctx, 
         ASSERT(protoReader.GetClass() == ctx->GetArrayClass());
         const size_t numRestParams = jsargv.size();
 
-        EtsArrayObject<EtsObject> *objArr = EtsArrayObject<EtsObject>::Create(numRestParams);
-        VMHandle<EtsArrayObject<EtsObject>> restArgsArray(coro, objArr->GetCoreType());
+        EtsEscompatArray *objArr = EtsEscompatArray::Create(numRestParams);
+        ASSERT(objArr != nullptr);
+        VMHandle<EtsEscompatArray> restArgsArray(coro, objArr->GetCoreType());
         for (uint32_t restArgIdx = 0; restArgIdx < numRestParams; ++restArgIdx) {
             auto jsVal = jsargv[restArgIdx];
             auto store = [restArgIdx, &restArgsArray](ObjectHeader *val) {
@@ -264,7 +266,7 @@ template <typename FRead>
     if (klass == ctx->GetJSValueClass()) {
         return wrapRef(helpers::TypeIdentity<JSConvertJSValue>(), ref);
     }
-    if (klass == ctx->GetStringClass()) {
+    if (klass->IsStringClass()) {
         return wrapRef(helpers::TypeIdentity<JSConvertString>(), ref);
     }
     // start slowpath

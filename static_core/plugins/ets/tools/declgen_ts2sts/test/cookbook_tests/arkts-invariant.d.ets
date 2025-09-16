@@ -1,3 +1,4 @@
+'use static'
 /*
  * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-type Contravariant<T> = Any;
+type Contravariant<T> = (arg: T) => void;
 export declare let Invbariant: Contravariant<Base>;
 export declare let InvariantChild: Contravariant<Child>;
 declare class Base {

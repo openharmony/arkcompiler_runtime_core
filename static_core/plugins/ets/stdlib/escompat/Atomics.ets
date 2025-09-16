@@ -24,7 +24,6 @@ class Waiter {
     public wait(val: long, getCurrentValue: () => long, timeout?: number): string {
         ConcurrencyHelpers.mutexLock(this.mutex);
         let check = getCurrentValue();
-        console.log(check, val);
         if (val != check) {
             ConcurrencyHelpers.mutexUnlock(this.mutex);
             return Waiter.notEqualStatus;
@@ -32,7 +31,7 @@ class Waiter {
         if(!(timeout instanceof undefined) && (timeout as number) > 0) {
             setTimeout((waiter: Waiter) => {
                 waiter.notify(Waiter.timeOutStatus);
-            }, timeout as number, this);
+            }, (timeout as number).toInt(), this);
         }
         let job = new CompletableJob<string>();
         this.promiseQueue.push(job);
@@ -43,7 +42,7 @@ class Waiter {
     public notify(val: string): boolean {
         ConcurrencyHelpers.mutexLock(this.mutex);
         let res = this.promiseQueue.poll();
-        if(res instanceof null) {
+        if(res == undefined) {
             ConcurrencyHelpers.mutexUnlock(this.mutex);
             return false;
         }
@@ -69,17 +68,23 @@ class Waiter {
 
 
     private mutex: Object = ConcurrencyHelpers.mutexCreate();
-    private promiseQueue: BlockingQueue<CompletableJob<string>> = new LinkedBlockingQueue<CompletableJob<string>>();
+    private promiseQueue: containers.BlockingQueue<CompletableJob<string>> = new containers.LinkedBlockingQueue<CompletableJob<string>>();
 }
 
+/**
+ * This class implements basic atomic operations
+ */
 export class Atomics {
 
     /**
-     * isLockFree(n) returns true if Atomic operations for typed arrays where "BYTER_PER_ELEMENT == n"
-     * use hardware atomics instructions instead of locks.
+     * Checks if atomics implementation uses hardware atomic instructions instead of locks
      *
      * Warning: currently, all Atomic operations use locks,
      * but isLockFree(1), isLockFree(2), isLockFree(4), isLockFree(8) following the ECMA specification return true.
+     *
+     * @param { int } byteSize size of memory localion
+     * @returns { boolean } true if Atomic operations for typed arrays where "BYTER_PER_ELEMENT == byteSize"
+     *     use hardware atomics instructions instead of locks.
      */
     public static isLockFree(byteSize: int): boolean {
         return byteSize == 1 || byteSize == 2 || byteSize == 4 || byteSize == 8
@@ -95,20 +100,20 @@ export class Atomics {
      */
     public static add(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: number, value: number): number {
         let buffer = typedArray.buffer
-        let iindex = index as int;
-        let byteOffset = typedArray.byteOffset as int;
+        let iindex = index.toInt();
+        let byteOffset = typedArray.byteOffset.toInt();
         if (typedArray instanceof Int8Array) {
-            return buffer.atomicAddI8(iindex, byteOffset, value as byte)
+            return buffer.atomicAddI8(iindex, byteOffset, value.toByte())
         } else if (typedArray instanceof Int16Array) {
-            return buffer.atomicAddI16(iindex, byteOffset, value as short)
+            return buffer.atomicAddI16(iindex, byteOffset, value.toShort())
         } else if (typedArray instanceof Int32Array) {
-            return buffer.atomicAddI32(iindex, byteOffset, value as int)
+            return buffer.atomicAddI32(iindex, byteOffset, value.toInt())
         } else if (typedArray instanceof Uint8Array) {
-            return buffer.atomicAddU8(iindex, byteOffset, value as byte)
+            return buffer.atomicAddU8(iindex, byteOffset, value.toByte())
         } else if (typedArray instanceof Uint16Array) {
-            return buffer.atomicAddU16(iindex, byteOffset, value as short)
+            return buffer.atomicAddU16(iindex, byteOffset, value.toShort())
         } else if (typedArray instanceof Uint32Array) {
-            return buffer.atomicAddU32(iindex, byteOffset, value as int)
+            return buffer.atomicAddU32(iindex, byteOffset, value.toInt())
         } else {
             throw new Error("Unhandled array type!")
         }
@@ -124,8 +129,8 @@ export class Atomics {
      */
     public static add(typedArray: BigInt64Array | BigUint64Array, index: number, value: bigint): bigint {
         let buffer = typedArray.buffer
-        let iindex = index as int;
-        let byteOffset = typedArray.byteOffset as int;
+        let iindex = index.toInt();
+        let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigUint64Array) {
             return new BigInt(buffer.atomicAddU64(iindex, byteOffset, value.getULong()))
         } else if (typedArray instanceof BigInt64Array) {
@@ -145,20 +150,20 @@ export class Atomics {
      */
     public static and(typedArray: Int8Array | Int16Array | Int32Array| Uint8Array | Uint16Array | Uint32Array, index: number, value: number): number {
         let buffer = typedArray.buffer
-        let iindex = index as int;
-        let byteOffset = typedArray.byteOffset as int;
+        let iindex = index.toInt();
+        let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof Int8Array) {
-            return buffer.atomicAndI8(iindex, byteOffset, value as byte)
+            return buffer.atomicAndI8(iindex, byteOffset, value.toByte())
         } else if (typedArray instanceof Int16Array) {
-            return buffer.atomicAndI16(iindex, byteOffset, value as short)
+            return buffer.atomicAndI16(iindex, byteOffset, value.toShort())
         } else if (typedArray instanceof Int32Array) {
-            return buffer.atomicAndI32(iindex, byteOffset, value as int)
+            return buffer.atomicAndI32(iindex, byteOffset, value.toInt())
         } else if (typedArray instanceof Uint8Array) {
-            return buffer.atomicAndU8(iindex, byteOffset, value as byte)
+            return buffer.atomicAndU8(iindex, byteOffset, value.toByte())
         } else if (typedArray instanceof Uint16Array) {
-            return buffer.atomicAndU16(iindex, byteOffset, value as short)
+            return buffer.atomicAndU16(iindex, byteOffset, value.toShort())
         } else if (typedArray instanceof Uint32Array) {
-            return buffer.atomicAndU32(iindex, byteOffset, value as int)
+            return buffer.atomicAndU32(iindex, byteOffset, value.toInt())
         } else {
             throw new Error("Unhandled array type!")
         }
@@ -174,12 +179,12 @@ export class Atomics {
      */
     public static and(typedArray: BigInt64Array | BigUint64Array, index: number, value: bigint): bigint {
         let buffer = typedArray.buffer
-        let iindex = index as int;
-        let byteOffset = typedArray.byteOffset as int;
+        let iindex = index.toInt();
+        let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigUint64Array) {
-            return new BigInt(buffer.atomicAndI64(iindex, byteOffset, value.getULong()))
-        } else if (typedArray instanceof BigInt64Array) {
             return new BigInt(buffer.atomicAndU64(iindex, byteOffset, value.getLong()))
+        } else if (typedArray instanceof BigInt64Array) {
+            return new BigInt(buffer.atomicAndI64(iindex, byteOffset, value.getULong()))
         } else {
             throw new Error("Unhandled array type!")
         }
@@ -198,20 +203,20 @@ export class Atomics {
      */
     public static compareExchange(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: number, expectedValue: number, replacementValue: number): number {
         let buffer = typedArray.buffer
-        let iindex = index as int;
-        let byteOffset = typedArray.byteOffset as int;
+        let iindex = index.toInt();
+        let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof Int8Array) {
-            return buffer.atomicCompareExchangeI8(iindex, byteOffset, expectedValue as byte, replacementValue as byte)
+            return buffer.atomicCompareExchangeI8(iindex, byteOffset, expectedValue.toByte(), replacementValue.toByte())
         } else if (typedArray instanceof Int16Array) {
-            return buffer.atomicCompareExchangeI16(iindex, byteOffset, expectedValue as short, replacementValue as short)
+            return buffer.atomicCompareExchangeI16(iindex, byteOffset, expectedValue.toShort(), replacementValue.toShort())
         } else if (typedArray instanceof Int32Array) {
-            return buffer.atomicCompareExchangeI32(iindex, byteOffset, expectedValue as int, replacementValue as int)
+            return buffer.atomicCompareExchangeI32(iindex, byteOffset, expectedValue.toInt(), replacementValue.toInt())
         } else if (typedArray instanceof Uint8Array) {
-            return buffer.atomicCompareExchangeU8(iindex, byteOffset, expectedValue as byte, replacementValue as byte)
+            return buffer.atomicCompareExchangeU8(iindex, byteOffset, expectedValue.toByte(), replacementValue.toByte())
         } else if (typedArray instanceof Uint16Array) {
-            return buffer.atomicCompareExchangeU16(iindex, byteOffset, expectedValue as short, replacementValue as short)
+            return buffer.atomicCompareExchangeU16(iindex, byteOffset, expectedValue.toShort(), replacementValue.toShort())
         } else if (typedArray instanceof Uint32Array) {
-            return buffer.atomicCompareExchangeU32(iindex, byteOffset, expectedValue as int, replacementValue as int)
+            return buffer.atomicCompareExchangeU32(iindex, byteOffset, expectedValue.toInt(), replacementValue.toInt())
         } else {
             throw new Error("Unhandled array type!")
         }
@@ -230,12 +235,12 @@ export class Atomics {
      */
     public static compareExchange(typedArray: BigInt64Array | BigUint64Array, index: number, expectedValue: bigint, replacementValue: bigint): bigint {
         let buffer = typedArray.buffer
-        let iindex = index as int;
-        let byteOffset = typedArray.byteOffset as int;
+        let iindex = index.toInt();
+        let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigUint64Array) {
-            return new BigInt(buffer.atomicCompareExchangeI64(iindex, byteOffset, expectedValue.getULong(), replacementValue.getULong()))
-        } else if (typedArray instanceof BigInt64Array) {
             return new BigInt(buffer.atomicCompareExchangeU64(iindex, byteOffset, expectedValue.getLong(), replacementValue.getLong()))
+        } else if (typedArray instanceof BigInt64Array) {
+            return new BigInt(buffer.atomicCompareExchangeI64(iindex, byteOffset, expectedValue.getULong(), replacementValue.getULong()))
         } else {
             throw new Error("Unhandled array type!")
         }
@@ -253,20 +258,20 @@ export class Atomics {
      */
     public static exchange(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: number, value: number): number {
         let buffer = typedArray.buffer
-        let iindex = index as int;
-        let byteOffset = typedArray.byteOffset as int;
+        let iindex = index.toInt();
+        let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof Int8Array) {
-            return buffer.atomicExchangeI8(iindex, byteOffset, value as byte)
+            return buffer.atomicExchangeI8(iindex, byteOffset, value.toByte())
         } else if (typedArray instanceof Int16Array) {
-            return buffer.atomicExchangeI16(iindex, byteOffset, value as short)
+            return buffer.atomicExchangeI16(iindex, byteOffset, value.toShort())
         } else if (typedArray instanceof Int32Array) {
-            return buffer.atomicExchangeI32(iindex, byteOffset, value as int)
+            return buffer.atomicExchangeI32(iindex, byteOffset, value.toInt())
         } else if (typedArray instanceof Uint8Array) {
-            return buffer.atomicExchangeU8(iindex, byteOffset, value as byte)
+            return buffer.atomicExchangeU8(iindex, byteOffset, value.toByte())
         } else if (typedArray instanceof Uint16Array) {
-            return buffer.atomicExchangeU16(iindex, byteOffset, value as short)
+            return buffer.atomicExchangeU16(iindex, byteOffset, value.toShort())
         } else if (typedArray instanceof Uint32Array) {
-            return buffer.atomicExchangeU32(iindex, byteOffset, value as int)
+            return buffer.atomicExchangeU32(iindex, byteOffset, value.toInt())
         } else {
             throw new Error("Unhandled array type!")
         }
@@ -283,8 +288,8 @@ export class Atomics {
      */
     public static exchange(typedArray: BigInt64Array | BigUint64Array, index: number, value: bigint): bigint {
         let buffer = typedArray.buffer
-        let iindex = index as int;
-        let byteOffset = typedArray.byteOffset as int;
+        let iindex = index.toInt();
+        let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigInt64Array) {
             return new BigInt(buffer.atomicExchangeI64(iindex, byteOffset, value.getLong()))
         } else if (typedArray instanceof BigUint64Array) {
@@ -303,8 +308,8 @@ export class Atomics {
      */
     public static load(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: number): number {
         let buffer = typedArray.buffer
-        let iindex = index as int;
-        let byteOffset = typedArray.byteOffset as int;
+        let iindex = index.toInt();
+        let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof Int8Array) {
             return buffer.atomicLoadI8(iindex, byteOffset)
         } else if (typedArray instanceof Int16Array) {
@@ -331,8 +336,8 @@ export class Atomics {
      */
     public static load(typedArray: BigInt64Array, index: number): bigint {
         let buffer = typedArray.buffer
-        let iindex = index as int;
-        let byteOffset = typedArray.byteOffset as int;
+        let iindex = index.toInt();
+        let byteOffset = typedArray.byteOffset.toInt()
         return new BigInt(buffer.atomicLoadI64(iindex, byteOffset))
     }
 
@@ -345,8 +350,8 @@ export class Atomics {
      */
     public static load(typedArray: BigUint64Array, index: number): bigint {
         let buffer = typedArray.buffer
-        let iindex = index as int;
-        let byteOffset = typedArray.byteOffset as int;
+        let iindex = index.toInt();
+        let byteOffset = typedArray.byteOffset.toInt()
         return new BigInt(buffer.atomicLoadU64(iindex, byteOffset))
     }
 
@@ -360,20 +365,20 @@ export class Atomics {
      */
     public static or(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: number, value: number): number {
         let buffer = typedArray.buffer
-        let iindex = index as int;
-        let byteOffset = typedArray.byteOffset as int;
+        let iindex = index.toInt();
+        let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof Int8Array) {
-            return buffer.atomicOrI8(iindex, byteOffset, value as byte)
+            return buffer.atomicOrI8(iindex, byteOffset, value.toByte())
         } else if (typedArray instanceof Int16Array) {
-            return buffer.atomicOrI16(iindex, byteOffset, value as short)
+            return buffer.atomicOrI16(iindex, byteOffset, value.toShort())
         } else if (typedArray instanceof Int32Array) {
-            return buffer.atomicOrI32(iindex, byteOffset, value as int)
+            return buffer.atomicOrI32(iindex, byteOffset, value.toInt())
         } else if (typedArray instanceof Uint8Array) {
-            return buffer.atomicOrU8(iindex, byteOffset, value as byte)
+            return buffer.atomicOrU8(iindex, byteOffset, value.toByte())
         } else if (typedArray instanceof Uint16Array) {
-            return buffer.atomicOrU16(iindex, byteOffset, value as short)
+            return buffer.atomicOrU16(iindex, byteOffset, value.toShort())
         } else if (typedArray instanceof Uint32Array) {
-            return buffer.atomicOrU32(iindex, byteOffset, value as int)
+            return buffer.atomicOrU32(iindex, byteOffset, value.toInt())
         } else {
             throw new Error("Unhandled array type!")
         }
@@ -389,8 +394,8 @@ export class Atomics {
      */
     public static or(typedArray: BigInt64Array | BigUint64Array, index: number, value: bigint): bigint {
         let buffer = typedArray.buffer
-        let iindex = index as int;
-        let byteOffset = typedArray.byteOffset as int;
+        let iindex = index.toInt();
+        let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigInt64Array) {
             return new BigInt(buffer.atomicOrI64(iindex, byteOffset, value.getLong()))
         } else if (typedArray instanceof BigUint64Array) {
@@ -410,20 +415,20 @@ export class Atomics {
      */
     public static store(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: number, value: number): number {
         let buffer = typedArray.buffer
-        let iindex = index as int;
-        let byteOffset = typedArray.byteOffset as int;
+        let iindex = index.toInt();
+        let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof Int8Array) {
-            return buffer.atomicStoreI8(iindex, byteOffset, value as byte)
+            return buffer.atomicStoreI8(iindex, byteOffset, value.toByte())
         } else if (typedArray instanceof Int16Array) {
-            return buffer.atomicStoreI16(iindex, byteOffset, value as short)
+            return buffer.atomicStoreI16(iindex, byteOffset, value.toShort())
         } else if (typedArray instanceof Int32Array) {
-            return buffer.atomicStoreI32(iindex, byteOffset, value as int)
+            return buffer.atomicStoreI32(iindex, byteOffset, value.toInt())
         } else if (typedArray instanceof Uint8Array) {
-            return buffer.atomicStoreU8(iindex, byteOffset, value as byte)
+            return buffer.atomicStoreU8(iindex, byteOffset, value.toByte())
         } else if (typedArray instanceof Uint16Array) {
-            return buffer.atomicStoreU16(iindex, byteOffset, value as short)
+            return buffer.atomicStoreU16(iindex, byteOffset, value.toShort())
         } else if (typedArray instanceof Uint32Array) {
-            return buffer.atomicStoreU32(iindex, byteOffset, value as int)
+            return buffer.atomicStoreU32(iindex, byteOffset, value.toInt())
         } else {
             throw new Error("Unhandled array type!")
         }
@@ -439,8 +444,8 @@ export class Atomics {
      */
     public static store(typedArray: BigInt64Array | BigUint64Array, index: number, value: bigint): bigint {
         let buffer = typedArray.buffer
-        let iindex = index as int;
-        let byteOffset = typedArray.byteOffset as int;
+        let iindex = index.toInt();
+        let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigInt64Array) {
             return new BigInt(buffer.atomicStoreI64(iindex, byteOffset, value.getLong()))
         } else if (typedArray instanceof BigUint64Array) {
@@ -460,20 +465,20 @@ export class Atomics {
      */
     public static sub(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: number, value: number): number {
         let buffer = typedArray.buffer
-        let iindex = index as int;
-        let byteOffset = typedArray.byteOffset as int;
+        let iindex = index.toInt();
+        let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof Int8Array) {
-            return buffer.atomicSubI8(iindex, byteOffset, value as byte)
+            return buffer.atomicSubI8(iindex, byteOffset, value.toByte())
         } else if (typedArray instanceof Int16Array) {
-            return buffer.atomicSubI16(iindex, byteOffset, value as short)
+            return buffer.atomicSubI16(iindex, byteOffset, value.toShort())
         } else if (typedArray instanceof Int32Array) {
-            return buffer.atomicSubI32(iindex, byteOffset, value as int)
+            return buffer.atomicSubI32(iindex, byteOffset, value.toInt())
         } else if (typedArray instanceof Uint8Array) {
-            return buffer.atomicSubU8(iindex, byteOffset, value as byte)
+            return buffer.atomicSubU8(iindex, byteOffset, value.toByte())
         } else if (typedArray instanceof Uint16Array) {
-            return buffer.atomicSubU16(iindex, byteOffset, value as short)
+            return buffer.atomicSubU16(iindex, byteOffset, value.toShort())
         } else if (typedArray instanceof Uint32Array) {
-            return buffer.atomicSubU32(iindex, byteOffset, value as int)
+            return buffer.atomicSubU32(iindex, byteOffset, value.toInt())
         } else {
             throw new Error("Unhandled array type!")
         }
@@ -489,8 +494,8 @@ export class Atomics {
      */
     public static sub(typedArray: BigInt64Array | BigUint64Array, index: number, value: bigint): bigint {
         let buffer = typedArray.buffer
-        let iindex = index as int;
-        let byteOffset = typedArray.byteOffset as int;
+        let iindex = index.toInt();
+        let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigInt64Array) {
             return new BigInt(buffer.atomicSubI64(iindex, byteOffset, value.getLong()))
         } else if (typedArray instanceof BigUint64Array) {
@@ -510,20 +515,20 @@ export class Atomics {
      */
     public static xor(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: number, value: number): number {
         let buffer = typedArray.buffer
-        let iindex = index as int;
-        let byteOffset = typedArray.byteOffset as int;
+        let iindex = index.toInt();
+        let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof Int8Array) {
-            return buffer.atomicXorI8(iindex, byteOffset, value as byte)
+            return buffer.atomicXorI8(iindex, byteOffset, value.toByte())
         } else if (typedArray instanceof Int16Array) {
-            return buffer.atomicXorI16(iindex, byteOffset, value as short)
+            return buffer.atomicXorI16(iindex, byteOffset, value.toShort())
         } else if (typedArray instanceof Int32Array) {
-            return buffer.atomicXorI32(iindex, byteOffset, value as int)
+            return buffer.atomicXorI32(iindex, byteOffset, value.toInt())
         } else if (typedArray instanceof Uint8Array) {
-            return buffer.atomicXorU8(iindex, byteOffset, value as byte)
+            return buffer.atomicXorU8(iindex, byteOffset, value.toByte())
         } else if (typedArray instanceof Uint16Array) {
-            return buffer.atomicXorU16(iindex, byteOffset, value as short)
+            return buffer.atomicXorU16(iindex, byteOffset, value.toShort())
         } else if (typedArray instanceof Uint32Array) {
-            return buffer.atomicXorU32(iindex, byteOffset, value as int)
+            return buffer.atomicXorU32(iindex, byteOffset, value.toInt())
         } else {
             throw new Error("Unhandled array type!")
         }
@@ -539,8 +544,8 @@ export class Atomics {
      */
     public static xor(typedArray: BigInt64Array | BigUint64Array, index: number, value: bigint): bigint {
         let buffer = typedArray.buffer
-        let iindex = index as int;
-        let byteOffset = typedArray.byteOffset as int;
+        let iindex = index.toInt();
+        let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigInt64Array) {
             return new BigInt(buffer.atomicXorI64(iindex, byteOffset, value.getLong()))
         } else if (typedArray instanceof BigUint64Array) {
@@ -551,36 +556,93 @@ export class Atomics {
     }
 
     /**
-     * If "typedArray[offset] != value" suspends the current thread until it is notified by Atomics.notify.
+     * If "typedArray[offset] == value" suspends the current thread until it is notified by Atomics.notify.
      *
      * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".
+     *
+     * @param typedArray typed array of values
+     * @param { number } index index of current value in the typedArray
+     * @param { number } value value to compare current value with
+     * @returns { string } status "ok", "not-equal" or "timed-out"
      */
     public static wait(typedArray: Int32Array, index: number, value: number): string {
-        return Atomics.waitImpl(typedArray, index, value as long);
+        return Atomics.waitImpl(typedArray, index, value.toLong());
     }
 
+    /**
+     * If "typedArray[offset] == value" suspends the current thread until it is notified by Atomics.notify
+     * or until the given timeout passes.
+     *
+     * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".
+     *
+     * @param typedArray typed array of values
+     * @param { number } index index of current value in the typedArray
+     * @param { number } value value to compare current value with
+     * @param { number } timeout timeout in ms
+     * @returns { string } status "ok", "not-equal" or "timed-out"
+     */
     public static wait(typedArray: Int32Array, index: number, value: number, timeout: number): string {
-        return Atomics.waitImpl(typedArray, index, value as long, timeout);
+        return Atomics.waitImpl(typedArray, index, value.toLong(), timeout);
     }
 
+    /**
+     * If "typedArray[offset] == value" suspends the current thread until it is notified by Atomics.notify.
+     *
+     * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".
+     *
+     * @param typedArray typed array of values
+     * @param { number } index index of current value in the typedArray
+     * @param { bigint } value value to compare current value with
+     * @returns { string } status "ok", "not-equal" or "timed-out"
+     */
     public static wait(typedArray: BigInt64Array, index: number, value: bigint): string {
         return Atomics.waitImpl(typedArray, index, value.getLong());
     }
 
+    /**
+     * If "typedArray[offset] == value" suspends the current thread until it is notified by Atomics.notify.
+     * or until the given timeout passes.
+     *
+     * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".
+     *
+     * @param typedArray typed array of values
+     * @param { number } index index of current value in the typedArray
+     * @param { bigint } value value to compare current value with
+     * @param { number } timeout timeout in ms
+     * @returns { string } status "ok", "not-equal" or "timed-out"
+     */
     public static wait(typedArray: BigInt64Array, index: number, value: bigint, timeout: number): string {
         return Atomics.waitImpl(typedArray, index, value.getLong(), timeout);
     }
 
     /**
-     * If "typedArray[offset] != value" suspends the current thread until it is notified by Atomics.notify
-     * or until the given timeout passes.
+     * Creates a coroutine that will sleep if "typedArray[offset] == value" until it is notified by Atomics.notify
      *
      * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".
+     *
+     * @param typedArray typed array of values
+     * @param { number } index index of current value in the typedArray
+     * @param { bigint } value value to compare current value with
+     * @returns { Promise<string> } that will be resolved after the coroutine get notified
+     *    or rejected if exception were thrown
      */
     public async static waitAsync(typedArray: Int32Array | BigInt64Array, index: number, value: bigint): Promise<string> {
         return Atomics.asyncWaitImpl(typedArray, index, value.getLong()) as Promise<string>;
     }
 
+    /**
+     * Creates a coroutine that will sleep if "typedArray[offset] == value" until it is notified by Atomics.notify
+     * or until the given timeout passes.
+     *
+     * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".
+     *
+     * @param typedArray typed array of values
+     * @param { number } index index of current value in the typedArray
+     * @param { bigint } value value to compare current value with
+     * @param { number } timeout timeout in ms
+     * @returns { Promise<string> } that will be resolved after the coroutine get notified
+     *    or rejected if exception were thrown
+     */
     public async static waitAsync(typedArray: Int32Array | BigInt64Array, index: number, value: bigint, timeout: number): Promise<string> {
         return Atomics.asyncWaitImpl(typedArray, index, value.getLong(), timeout) as Promise<string>;
     }
@@ -588,6 +650,10 @@ export class Atomics {
     /**
      * Notifies (wakes up) threads that are suspended by the Atomics.wait() calls at the given index.
      * (index = typedArray.byteOffset + offset * sizeof(arrayElement))
+     *
+     * @param typedArray typed array of values
+     * @param { number } index index in the typed array to read current value from
+     * @returns { number } number of notified threads
      */
     public static notify(typedArray: Int32Array | BigInt64Array, index: number): number {
         return Atomics.notifyImpl(typedArray, index)
@@ -595,6 +661,11 @@ export class Atomics {
 
     /**
      * Operates exactly like Atomics.notify(Int32Array | BigInt64Array, int) but specifies the maximum number of threads to notify using 'count'.
+     *
+     * @param typedArray typed array of values
+     * @param { number } index index in the typed array to read current value from
+     * @param { number } count maximum number of threads to notify
+     * @returns { number } number of notified threads
      */
     public static notify(typedArray: Int32Array | BigInt64Array, index: number, count: number): number {
         return Atomics.notifyImpl(typedArray, index, count)
@@ -603,18 +674,18 @@ export class Atomics {
     public static waitImpl(typedArray: Int32Array | BigInt64Array, index: number, value: long, timeout?: number): string {
         // Getting correct waiter
         let buffer = typedArray.buffer
-        let byteOffset = typedArray.byteOffset as int;
+        let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof Int32Array) {
-            let offset = Atomics.index2byteOffset(byteOffset, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let offset = Atomics.index2byteOffset(byteOffset, Int32Array.BYTES_PER_ELEMENT.toInt(), typedArray.length.toInt(), index)
             let waiter = Atomics.getWaiter(buffer, offset);
-            return waiter!.wait(value, () => { return buffer.atomicLoadI32(index as int, typedArray.byteOffset as int) as long; }, timeout)
+            return waiter!.wait(value, () => { return buffer.atomicLoadI32(index.toInt(), typedArray.byteOffset.toInt()).toLong(); }, timeout)
         } else {
-            let offset = Atomics.index2byteOffset(byteOffset, BigInt64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let offset = Atomics.index2byteOffset(byteOffset, BigInt64Array.BYTES_PER_ELEMENT.toInt(), typedArray.length.toInt(), index)
             let waiter = Atomics.getWaiter(buffer, offset);
             return waiter!.wait(value, () => { return buffer.atomicLoadI64(index.toInt(), typedArray.byteOffset.toInt()).toLong(); }, timeout)
         }
     }
-    
+
     private static asyncWaitImpl(typedArray: Int32Array | BigInt64Array, index: number, value: long, timeout?: number): Promise<string> {
         let resolver: (((v: String) => void) | undefined) = undefined;
         let rejecter: (((error: Error) => void) | undefined) = undefined;
@@ -624,7 +695,7 @@ export class Atomics {
         })
         let cb = () => {
             try {
-                let v = Atomics.waitImpl(typedArray, index, value, number)
+                let v = Atomics.waitImpl(typedArray, index, value, timeout)
                 resolver!(v)
             } catch (e: Error) {
                 rejecter!(e)
@@ -637,11 +708,11 @@ export class Atomics {
     private static notifyImpl(typedArray: Int32Array | BigInt64Array, index: number, count?: number): int {
         let buffer = typedArray.buffer
         let offset = 0;
-        let byteOffset = typedArray.byteOffset as int;
+        let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof Int32Array) {
-            offset = Atomics.index2byteOffset(byteOffset, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            offset = Atomics.index2byteOffset(byteOffset, Int32Array.BYTES_PER_ELEMENT.toInt(), typedArray.length.toInt(), index)
         } else {
-            offset = Atomics.index2byteOffset(byteOffset, BigInt64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            offset = Atomics.index2byteOffset(byteOffset, BigInt64Array.BYTES_PER_ELEMENT.toInt(), typedArray.length.toInt(), index)
         }
         let waiter = Atomics.getWaiter(buffer, offset);
         let notified = 0;
@@ -657,7 +728,7 @@ export class Atomics {
         return notified;
     }
 
-    private static globalWaitingTable: ConcurrentHashMap<ArrayBuffer, ConcurrentHashMap<int, Waiter>> = new ConcurrentHashMap<ArrayBuffer, ConcurrentHashMap<int, Waiter>>();
+    private static globalWaitingTable: containers.ConcurrentHashMap<ArrayBuffer, containers.ConcurrentHashMap<int, Waiter>> = new containers.ConcurrentHashMap<ArrayBuffer, containers.ConcurrentHashMap<int, Waiter>>();
     private static globalWaitingTableMutex = ConcurrencyHelpers.mutexCreate();
 
     private static getWaiter(buffer: ArrayBuffer, byteOffset: int): Waiter {
@@ -666,7 +737,7 @@ export class Atomics {
             ConcurrencyHelpers.mutexLock(Atomics.globalWaitingTableMutex)
             waiterTable = Atomics.globalWaitingTable.get(buffer)
             if (waiterTable instanceof undefined) {
-                waiterTable = new ConcurrentHashMap<int, Waiter>()
+                waiterTable = new containers.ConcurrentHashMap<int, Waiter>()
                 Atomics.globalWaitingTable.set(buffer, waiterTable!)
             }
             ConcurrencyHelpers.mutexUnlock(Atomics.globalWaitingTableMutex)
@@ -690,7 +761,7 @@ export class Atomics {
         if (index < 0 || index >= length) {
             throw new RangeError("Index out of bounds")
         }
-        return startByteOffset + (index as int * elementSize)
+        return startByteOffset + (index.toInt() * elementSize)
     }
 
 }

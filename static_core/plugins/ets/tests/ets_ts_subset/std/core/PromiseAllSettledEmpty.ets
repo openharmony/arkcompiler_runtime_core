@@ -14,7 +14,7 @@
  */
 
 let array: Promise<string>[] = [];
-Promise.allSettled(array).then<void, void>((values: PromiseSettledResult<string>[]): void => {
+Promise.allSettled(array).then<void, void>((values): void => {
     if (values.length != 0) {
         console.log('Test failed. Expected an empty string array but got length ' + values.length + '.');
         return;

@@ -15,13 +15,15 @@
 
 import HashMap from '@ohos.util.HashMap';
 
+export type HashSetCbFn<T> = (value: T, key: T, set: HashSet<T>) => void;
+
 interface ReadonlyHashSet<T> extends Iterable<T> {
     /**
      * Returns number of unique elements in the HashSet
      *
      * @returns number of unique elements in the HashSet
      */
-    get length(): number;
+    get length(): int;
 
     /**
      * Checks if a value is in the HashSet
@@ -61,13 +63,17 @@ export class HashSet<T> implements ReadonlyHashSet<T> {
         this.buckets = new HashMap<T, T>();
     }
 
+    public toString(): string {
+        return '[object HashSet]';
+    }
+
     /**
      * Returns number of unique elements in the HashSet
      *
      * @returns number of unique elements in the HashSet
      */
-    get length(): number {
-        return this.buckets.length;
+    get length(): int {
+        return this.buckets.length.toInt();
     }
 
     /**
@@ -86,7 +92,7 @@ export class HashSet<T> implements ReadonlyHashSet<T> {
      *
      * @param callbackFn to apply; key is always same as value
      */
-    forEach(callbackFn: (value: T, key: T, set: HashSet<T>) => void): void {
+    forEach(callbackFn: HashSetCbFn<T>): void {
         this.buckets.forEach((value: T, key: T) => {
             callbackFn(value, key, this);
         });

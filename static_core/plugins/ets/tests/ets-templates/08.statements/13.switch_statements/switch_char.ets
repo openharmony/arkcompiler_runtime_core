@@ -20,16 +20,16 @@ desc: Switch statement with char
 function f(i: char): void {
   switch (i) {
     case c'0':
-      assertEQ( i, c'0' )
+      arktest.assertEQ( i, c'0' )
       break;
     case c'1':
-      assertEQ( i, c'1' )
+      arktest.assertEQ( i, c'1' )
       break;
     case c'2':
-      assertEQ( i, c'2' )
+      arktest.assertEQ( i, c'2' )
       break;
     default:
-      assertTrue( false )
+      arktest.assertTrue( false )
   }
 }
 

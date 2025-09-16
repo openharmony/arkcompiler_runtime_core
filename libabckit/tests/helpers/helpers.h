@@ -15,17 +15,19 @@
 #ifndef LIBABCKIT_TESTS_HELPERS
 #define LIBABCKIT_TESTS_HELPERS
 
-#include "libabckit/include/c/isa/isa_dynamic.h"
-#include "libabckit/include/c/isa/isa_static.h"
-#include "libabckit/include/c/abckit.h"
-#include "libabckit/include/c/metadata_core.h"
-#include "libabckit/include/c/ir_core.h"
+#include "libabckit/c/isa/isa_dynamic.h"
+#include "libabckit/c/isa/isa_static.h"
+#include "libabckit/c/abckit.h"
+#include "libabckit/cpp/abckit_cpp.h"
+#include "libabckit/c/metadata_core.h"
+#include "libabckit/c/ir_core.h"
 #include "libabckit/src/logger.h"
 
 #include <string>
 #include <type_traits>
 #include <vector>
 #include <functional>
+#include <optional>
 
 #include <gtest/gtest.h>
 
@@ -276,6 +278,8 @@ void AssertMethodVisitor(AbckitCoreFunction *method, void *data);
 void AssertOpenAbc(const char *fname, AbckitFile **file);
 std::string_view AbckitStringToString(AbckitString *str);
 std::string GetCropFuncName(const std::string &fullSig);
+std::optional<abckit::core::Class> GetClassByName(const abckit::core::Module &module, const std::string &name);
+std::optional<abckit::core::Interface> GetInterfaceByName(const abckit::core::Module &module, const std::string &name);
 
 }  // namespace libabckit::test::helpers
 

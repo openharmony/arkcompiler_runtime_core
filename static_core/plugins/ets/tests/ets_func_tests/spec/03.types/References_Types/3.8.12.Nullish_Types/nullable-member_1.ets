@@ -32,6 +32,6 @@ class TestC {
 
 
 function main(): void {
-    assertTrue( new TestC().member === undefined)
+    arktest.assertTrue( new TestC().member === undefined)
 
 }

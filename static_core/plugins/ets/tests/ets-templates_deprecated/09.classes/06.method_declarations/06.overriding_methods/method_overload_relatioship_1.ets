@@ -38,6 +38,6 @@ function main(): void {
       a = 2;
   }
 
-  assertEQ( a, 1 );
-  assertEQ( instance.foo(2), true );
+  arktest.assertEQ( a, 1 );
+  arktest.assertEQ( instance.foo(2), true );
 }

@@ -27,7 +27,7 @@ struct C {
     @readonly param3: i32;
 }
 
-//struct命名按字母排序后面加数据类型
+//struct 命名按字母排序后面加数据类型
 struct DBase5 {
     param1: i8;
     param2: i16;
@@ -46,7 +46,7 @@ struct EBigint {
     param1: bool;
     param2: f32;
     param3: f64;
-    param4: @bigint u64;
+    param4: u64;
 }
 
 interface StructE {
@@ -119,7 +119,7 @@ struct EBigintReadonly {
     @readonly param1: bool;
     @readonly param2: f32;
     @readonly param3: f64;
-    @readonly param4: @bigint u64;
+    @readonly param4: u64;
 }
 
 interface SEBReadonly {
@@ -144,3 +144,37 @@ struct Draw {
     name: String;
 }
 function AddNewDraw(drawName: String): Draw;
+
+struct Student {
+    @readonly name: String;
+    age: i32;
+}
+function create_student(): Student;
+function process_student(a: Student): Student;
+
+@class
+struct Teacher {
+    @readonly name: String;
+    age: i32;
+}
+
+function create_teacher(): Teacher;
+function process_teacher(a: Teacher): Teacher;
+
+struct F {
+    f: i32;
+}
+
+struct G {
+    @extends f: F;
+    g: i32;
+}
+
+@class
+struct H {
+    @extends g: G;
+    h: i32;
+}
+
+function process_g(a: G): G;
+function process_h(a: H): H;

@@ -28,5 +28,5 @@ function main(): void {
   let a : A = new A();
   let b : A = new A();
   let c = a ?? b;
-  assertEQ(foo(c), 2);
+  arktest.assertEQ(foo(c), 2);
 }

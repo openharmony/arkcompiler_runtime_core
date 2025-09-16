@@ -26,7 +26,7 @@ function main() {
     let ue0: OnPause | undefined = undefined
     let ue1: OnPause | undefined = OnPause.Nothing
 
-    assertEQ(undefined, ue0)
-    assertEQ(OnPause.Nothing, ue1)
+    arktest.assertEQ(undefined, ue0)
+    arktest.assertEQ(OnPause.Nothing, ue1)
 
 }

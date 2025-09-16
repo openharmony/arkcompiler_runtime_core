@@ -13,61 +13,64 @@
  * limitations under the License.
  */
 
-import { makeEnum, jsEnum, isEq } from "js_code"
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/dynamic_enum/index')
+let makeEnum = module.getProperty('makeEnum');
+let jsEnum = module.getProperty('jsEnum');
+let isEq = module.getProperty('isEq');
 
 function Test1(): boolean {
-    let a = makeEnum(['red', 'green', 'blue'])
-    if(a == null) {
-      return false
+    let a = makeEnum.invoke(['red', 'green', 'blue']);
+    if (a.isNull()) {
+        return false;
     } else {
-      return true
+        return true;
     }
 }
 
 function Test2(): boolean {
-    let a = makeEnum(['red', 'green', 'blue'])
-    if(a.red == null || a.green == null || a.blue == null) {
-      return false
+    let a = makeEnum.invoke(['red', 'green', 'blue']);
+    if (a.getProperty('red').isNull() || a.getProperty('green').isNull() || a.getProperty('blue').isNull()) {
+        return false;
     } else {
-      return true
+        return true;
     }
 }
 
 function Test3(): boolean {
-    let d = jsEnum()
-    if(d == null) {
-      return false
+    let d = jsEnum.invoke();
+    if (d.isNull()) {
+        return false;
     } else {
-      return true
+        return true;
     }
 }
 
 
 function Test4(): boolean {
-    let d = jsEnum()
-    if(d.Up as string == 'Up' && d.Down as string == 'Down') {
-      return true
+    let d = jsEnum.invoke();
+    if (d.getProperty('Up').toString() === 'Up' && d.getProperty('Down').toString() === 'Down') {
+        return true;
     } else {
-      return false
+        return false;
     }
 }
 
 function Test5(): boolean {
-    let d = jsEnum()
-    let u = d.Up
-    if(isEq(u, d.Up) as boolean) {
-      return true
+    let d = jsEnum.invoke();
+    let u = d.getProperty('Up');
+    if (isEq.invoke(u, d.getProperty('Up')).toBoolean()) {
+        return true;
     } else {
-      return false
+        return false;
     }
 }
 
 function Test6(): boolean {
-    let d = jsEnum()
-    let u = d.Up
-    if(isEq('Up', u  as string) as boolean) {
-      return true
+    let d = jsEnum.invoke();
+    let u = d.getProperty('Up');
+    if (isEq.invoke('Up', u.toString()).toBoolean()) {
+        return true;
     } else {
-      return false
+        return false;
     }
 }

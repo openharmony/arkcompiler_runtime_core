@@ -19,12 +19,12 @@ desc: Unary plus operator
 
 function main(): void {
   let a = 5;
-  assertEQ(+a, a);
+  arktest.assertEQ(+a, a);
   a += +a
-  assertEQ(+a, 10)
-  assertEQ(a, +10)
+  arktest.assertEQ(+a, 10)
+  arktest.assertEQ(a, +10)
   let b = -6
-  assertEQ(+b, -6)
+  arktest.assertEQ(+b, -6)
   let c = 1.0
-  assertEQ(+c, 1.0)
+  arktest.assertEQ(+c, 1.0)
 }

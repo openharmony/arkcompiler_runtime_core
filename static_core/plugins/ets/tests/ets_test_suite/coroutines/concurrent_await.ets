@@ -14,7 +14,6 @@
  */
 
 import {AtomicFlag} from "std/debug/concurrency"
-
 import { launch } from "std/concurrency"
 import { Job } from "std/core"
 
@@ -43,7 +42,7 @@ function bar(p: Job<int>) : int {
     return p.Await();
 }
 
-function main() {
+function testConcurrentAwait(): void {
     let p1 = launch<int, () => int>(foo);
     for (let i = 0; i < 2; ++i) {
         let p2 = launch<int, (p: Job<int>) => int>(bar, p1);
@@ -52,5 +51,12 @@ function main() {
     // that bar coroutines are waiting for its awakening
     event.Fire();
     let result = p1.Await();
-    assertEQ(result, 42);
+    arktest.assertEQ(result, 42);
+}
+
+function main(): int {
+    let testSuite = new arktest.ArkTestsuite('coroutines.concurrent_await');
+    testSuite.addTest('testConcurrentAwait', testConcurrentAwait);
+    let res = testSuite.run();
+    return res;
 }

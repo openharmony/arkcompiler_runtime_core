@@ -17,7 +17,9 @@
 #include "runtime/mem/gc/cmc-gc-adapter/cmc-allocator-adapter.h"
 #include "runtime/mem/runslots_allocator-inl.h"
 #if defined(ARK_HYBRID)
+#include "base_runtime.h"
 #include "heap/heap_allocator.h"
+#include "objects/base_object.h"
 #include "objects/base_state_word.h"
 #endif
 
@@ -36,7 +38,7 @@ void *CMCObjectAllocatorAdapter<MT_MODE>::Allocate([[maybe_unused]] size_t size,
                                                    [[maybe_unused]] bool pinned)
 {
 #if defined(ARK_HYBRID)
-    return reinterpret_cast<void *>(panda::HeapAllocator::Allocate(size, panda::Language::STATIC));
+    return reinterpret_cast<void *>(common::HeapAllocator::Allocate(size, common::Language::STATIC));
 #else
     return nullptr;
 #endif
@@ -49,9 +51,22 @@ void *CMCObjectAllocatorAdapter<MT_MODE>::AllocateNonMovable(
     [[maybe_unused]] ObjectAllocatorBase::ObjMemInitPolicy objInit)  // CC-OFF(G.FMT.06) project code style
 {
 #if defined(ARK_HYBRID)
-    return reinterpret_cast<ObjectHeader *>(panda::HeapAllocator::AllocateInNonmove(size, panda::Language::STATIC));
+    return reinterpret_cast<ObjectHeader *>(common::HeapAllocator::AllocateInNonmove(size, common::Language::STATIC));
 #else
     return nullptr;
+#endif
+}
+
+template <MTModeT MT_MODE>
+void CMCObjectAllocatorAdapter<MT_MODE>::IterateOverObjectsSafe([[maybe_unused]] const ObjectVisitor &objectVisitor)
+{
+#if defined(ARK_HYBRID)
+    auto visitor = [&](common::BaseObject *obj) {
+        if (obj->IsStatic()) {
+            objectVisitor(reinterpret_cast<ObjectHeader *>(obj));
+        }
+    };
+    common::BaseRuntime::ForEachObj(visitor, true);
 #endif
 }
 

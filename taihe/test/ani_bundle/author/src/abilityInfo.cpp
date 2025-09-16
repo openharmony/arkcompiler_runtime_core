@@ -12,12 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include <iostream>
-#include "taihe/runtime.hpp"
-#include "stdexcept"
-#include "abilityInfo.proj.hpp"
 #include "abilityInfo.impl.hpp"
+#include "abilityInfo.proj.hpp"
+#include "stdexcept"
 #include "taihe/runtime.hpp"
 using namespace taihe;
 using namespace abilityInfo;
@@ -28,6 +26,7 @@ namespace {
 class AbilityInfoImpl {
 public:
     int32_t abilityInfoImpl = 100;
+
     AbilityInfoImpl() {}
 
     std::string GetBundleName()

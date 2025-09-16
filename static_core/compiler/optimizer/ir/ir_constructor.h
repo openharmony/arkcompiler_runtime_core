@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -922,6 +922,39 @@ public:
                 break;
             case Opcode::StoreArrayPairI:
                 inst->CastToStoreArrayPairI()->SetNeedBarrier(needBarrier);
+                break;
+            case Opcode::Load:
+                inst->CastToLoad()->SetNeedBarrier(needBarrier);
+                break;
+            case Opcode::LoadI:
+                inst->CastToLoadI()->SetNeedBarrier(needBarrier);
+                break;
+            case Opcode::LoadObject:
+                inst->CastToLoadObject()->SetNeedBarrier(needBarrier);
+                break;
+            case Opcode::LoadObjectPair:
+                inst->CastToLoadObjectPair()->SetNeedBarrier(needBarrier);
+                break;
+            case Opcode::LoadResolvedObjectField:
+                inst->CastToLoadResolvedObjectField()->SetNeedBarrier(needBarrier);
+                break;
+            case Opcode::LoadResolvedObjectFieldStatic:
+                inst->CastToLoadResolvedObjectFieldStatic()->SetNeedBarrier(needBarrier);
+                break;
+            case Opcode::LoadArray:
+                inst->CastToLoadArray()->SetNeedBarrier(needBarrier);
+                break;
+            case Opcode::LoadArrayI:
+                inst->CastToLoadArrayI()->SetNeedBarrier(needBarrier);
+                break;
+            case Opcode::LoadArrayPair:
+                inst->CastToLoadArrayPair()->SetNeedBarrier(needBarrier);
+                break;
+            case Opcode::LoadArrayPairI:
+                inst->CastToLoadArrayPairI()->SetNeedBarrier(needBarrier);
+                break;
+            case Opcode::LoadStatic:
+                inst->CastToLoadStatic()->SetNeedBarrier(needBarrier);
                 break;
             default:
                 UNREACHABLE();

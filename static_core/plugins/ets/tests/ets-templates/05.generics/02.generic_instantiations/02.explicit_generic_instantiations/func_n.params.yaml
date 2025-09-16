@@ -14,7 +14,7 @@
 ---
 cases:
     - use: |-
-          assertTrue(foo<number>(null, 1) === 1)
+          arktest.assertTrue(foo<number>(null, 1) === 1)
     - use: |-
           let a = 42
-          assertTrue(foo<number>(a, new Object()) == 42)
+          arktest.assertTrue(foo<number>(a, new Object()) == 42)

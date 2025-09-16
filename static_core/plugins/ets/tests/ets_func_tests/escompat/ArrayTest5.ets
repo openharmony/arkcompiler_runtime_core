@@ -24,10 +24,10 @@ function main(): int {
     return check(failures, "All tests run");
 }
 
-class Handler<T> extends DefaultArrayProxyHandler<T> {}
 function newProxy<T>(a: Array<T>): Array<T> {
+    class Handler<T> extends proxy.DefaultArrayProxyHandler<T> {}
 
-    return Proxy.create<T>(a, new Handler<T>())
+    return proxy.Proxy.create<T>(a, new Handler<T>())
 }
 
 function check<T>(newArrayFn: () => Array<T>, testFn: (a: Array<T>) => int): int {
@@ -140,7 +140,7 @@ function check(fn: () => int, message: String): int {
     try {
         result = fn();
     } catch(e) {
-        console.println("FAILED: " + message + " => Exception catched: " + e);
+        console.println("FAILED: " + message + " => Error catched: " + e);
         return fail;
     }
     if (result == success) {

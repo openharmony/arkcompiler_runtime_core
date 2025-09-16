@@ -19,7 +19,6 @@ function runTest() {
     let test = requireNapiPreview('attach_thread_test_module', true);
 
     const etsVmRes = etsVm.createRuntime({
-        'load-runtimes': 'ets',
         'boot-panda-files': 'etsstdlib.abc:' + 'attach_test.abc',
         'gc-trigger-type': 'heap-trigger',
         'compiler-enable-jit': 'false',
@@ -32,7 +31,8 @@ function runTest() {
         print('ETS runtime created');
     }
 
-    test.callJsBuiltinTest();
+    // NOTE(www): #ICMNFA, Currently unable to get method object in 1.2.
+    // Should call test.callJSBuiltinTest
     test.loadJsModuleTest();
     test.callJsFunctionTest();
     test.callJsAsyncFunctionTest();

@@ -61,21 +61,21 @@ function abilityExpectFailure(cb: (e: Error) => void) {
 
 function abilityExpectVerificationError(expectedMessage: string) {
     abilityExpectFailure((e: Error) => {
-        assertTrue(e instanceof LinkerVerificationError)
-        assertEQ(e.message, expectedMessage);
+        arktest.assertTrue(e instanceof LinkerVerificationError)
+        arktest.assertEQ(e.message, expectedMessage);
     })
 }
 
 function mainCatchLinkerUnresolvedClassError() {
     abilityExpectFailure((e: Error) => {
-        assertTrue(e instanceof LinkerVerificationError)
+        arktest.assertTrue(e instanceof LinkerVerificationError)
         console.log(e.message);
     })
 }
 
 function mainCatchLinkerBadSupertypeError() {
     abilityExpectFailure((e: Error) => {
-        assertTrue(e instanceof LinkerBadSupertypeError)
+        arktest.assertTrue(e instanceof LinkerBadSupertypeError)
         console.log(e.message);
     })
 }

@@ -503,9 +503,88 @@ void Lowering::ReplaceUnsignedModPowerOfTwo([[maybe_unused]] GraphVisitor *v, In
     InsertInstruction(inst, andInst);
 }
 
+// Base rationale: for x = a % c and y = (a + b) % c, if b <= c, we can use z = (x + b > c) ? (x + b - c) : (x + b)
+// replacing y.
+bool Lowering::TryReplaceModIfModInputIsAdd([[maybe_unused]] GraphVisitor *v, Inst *inst)
+{
+    // It is optimized for repeated mods in loop.
+    // 1.i32  Phi
+    // 2.i32  Mod v1, 0x5
+    // 3.i32  Add v1, 0x1
+    // 4.i32  Mod v3, 0x5
+    // 5.i32  Add v1, 0x2
+    // 6.i32  Mod v5, 0x5
+    // ====>
+    // 1.i32  Phi
+    // 2.i32  Mod v1, 0x5
+    // 3.i32  Add v2, 0x1
+    // 4.i32  Sub v3, 0x5
+    // 5.i32  SelectImm v4, v3, v3, 0x5, CC_GE
+    // 6.i32  Add v2, 0x2
+    // 7.i32  Sub v6, 0x5
+    // 8.i32  SelectImm v7, v6, v6, 0x5, CC_GE
+
+    if (!SatisfyReplaceDivMovConditions(inst)) {
+        return false;
+    }
+
+    auto add = inst->GetInput(0).GetInst();
+    if (add->GetOpcode() != Opcode::AddI) {
+        return false;
+    }
+    // not support non-positive mod number
+    auto modVal = static_cast<ConstantInst *>(inst->GetInput(1).GetInst())->GetIntValue();
+    if (static_cast<int64_t>(modVal) < static_cast<int64_t>(1)) {
+        return false;
+    }
+
+    auto addInput0 = add->GetInput(0).GetInst();
+    auto baseMod = IdentifyBaseModIfModInputIsAdd(addInput0, inst, modVal);
+    if (baseMod == nullptr) {
+        return false;
+    }
+
+    auto addImm = add->CastToAddI()->GetImm();
+    // our optimization principle is that the sum of the two operands in the addition must be less than twice the modVal
+    if (addImm > modVal) {
+        return false;
+    }
+    if (addImm == modVal) {
+        ReplaceInstruction(inst, baseMod);
+        return true;
+    }
+    auto graph = inst->GetBasicBlock()->GetGraph();
+    auto newAddInst = graph->CreateInstAddI(inst, baseMod, addImm);
+    auto newSubInst = graph->CreateInstSubI(inst, newAddInst, modVal);
+    auto selectInst = graph->CreateInstSelectImm(inst, std::array<Inst *, 3U> {newSubInst, newAddInst, newAddInst},
+                                                 modVal, inst->GetType(), ConditionCode::CC_GE);
+    inst->InsertBefore(newAddInst);
+    inst->InsertBefore(newSubInst);
+    InsertInstruction(inst, selectInst);
+    return true;
+}
+
+Inst *Lowering::IdentifyBaseModIfModInputIsAdd(Inst *inst, const Inst *modInst, uint64_t modVal)
+{
+    for (auto &user : inst->GetUsers()) {
+        auto userInst = user.GetInst();
+        auto opcode = userInst->GetOpcode();
+        if (opcode == Opcode::ModI) {
+            auto imm = userInst->CastToModI()->GetImm();
+            if (imm == modVal && userInst->IsDominate(modInst)) {
+                return userInst;
+            }
+        }
+    }
+    return nullptr;
+}
+
 void Lowering::VisitMod([[maybe_unused]] GraphVisitor *v, Inst *inst)
 {
     if (TryReplaceModPowerOfTwo(v, inst)) {
+        return;
+    }
+    if (TryReplaceModIfModInputIsAdd(v, inst)) {
         return;
     }
     if (TryReplaceDivModNonPowerOfTwo(v, inst)) {

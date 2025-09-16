@@ -362,38 +362,38 @@ function testStringifyFunction(): int {
 
 type Option<T> = T | undefined
 
-class WithOption {
-    opt: Option<string> = "hello"
-}
-
 function testStringifyUnion(): int {
     const option: Option<string> = "hello"
 
     let testResult = test('"hello"' == JSON.stringify(option), "standalone union")
     testResult += test('["hello"]' == JSON.stringify([option]), "array of unions")
 
+    class WithOption {
+        opt: Option<string> = "hello"
+    }
+
     testResult += test('{"opt":"hello"}' == JSON.stringify(new WithOption()), "class with union typed field")
 
     return testResult
 }
 
-interface Fn<A, R> {
-    apply(a: A): R 
-}
-
-class IdentityFn<A> implements Fn<A, A> {
-    apply(a: A): A {
-        return a
-    }
-}
-
-class WithFn {
-    fn: Fn<number, number> = new IdentityFn<number>()
-}
-
 function testStringifyInterface(): int {
+    interface Fn<A, R> {
+        apply(a: A): R 
+    }
+
+    class IdentityFn<A> implements Fn<A, A> {
+        apply(a: A): A {
+            return a
+        }
+    }
+
     const identityNumber: Fn<number, number> = new IdentityFn<number>()
     let testResult = test("{}" == JSON.stringify(identityNumber), "standalone interface")
+
+    class WithFn {
+        fn: Fn<number, number> = new IdentityFn<number>()
+    }
 
     testResult += test('{"fn":{}}' == JSON.stringify(new WithFn()), "class with interface typed field")
 
@@ -451,7 +451,7 @@ class A {
     integerValue: int = 0;
     longValue: long = 1;
     shortValue: short = 1;
-    floatValue: float = 1.2;
+    floatValue: float = 1.2f;
     byteValue: byte = 1;
 }
 
@@ -460,11 +460,11 @@ function testJSONParse(): int {
     let text:string = `{\"integerValue\":12, \"longValue\": 2, \"appname\": \"test\", \"shortValue\":3, \"floatValue\":1.5, \"byteValue\": 7}`
     let classType = Type.of(new A())
     let parsingResult = JSON.parse<A>(text, classType) as A
-    assertEQ(parsingResult.integerValue, 12)
-    assertEQ(parsingResult.longValue, 2)
-    assertEQ(parsingResult.shortValue, 3)
-    assertEQ(parsingResult.floatValue, 1.5)
-    assertEQ(parsingResult.byteValue, 7)
+    arktest.assertEQ(parsingResult.integerValue, 12)
+    arktest.assertEQ(parsingResult.longValue, 2)
+    arktest.assertEQ(parsingResult.shortValue, 3)
+    arktest.assertEQ(parsingResult.floatValue, 1.5f)
+    arktest.assertEQ(parsingResult.byteValue, 7)
     return testResult
 }
 

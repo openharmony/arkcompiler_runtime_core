@@ -16,7 +16,7 @@
 import {util} from "@ohos.util";
 
 function main(): int {
-    const suite = new ArkTestsuite("CommonUtil types.isSet() API tests")
+    const suite = new arktest.ArkTestsuite("CommonUtil types.isSet() API tests")
 
     suite.addTest("Verify new Set() creates a Set object", testIsSet001)
     suite.addTest("Verify Map is not identified as Set", testIsSet002)
@@ -38,7 +38,7 @@ function main(): int {
 function testIsSet001() {
     let proc = new util.types();
     let result = proc.isSet(new Set<int>());
-    assertTrue(result, "The Set should be of the same type as the Set");
+    arktest.assertTrue(result, "The Set should be of the same type as the Set");
 }
 
 /**
@@ -52,7 +52,7 @@ function testIsSet001() {
 function testIsSet002() {
     let proc = new util.types();
     let result = proc.isSet(new Map<int, int>());
-    assertTrue(result == false, "The Number should be of the same type as the Number");
+    arktest.assertTrue(result == false, "The Number should be of the same type as the Number");
 }
 
 /**
@@ -66,7 +66,7 @@ function testIsSet002() {
 function testIsSet003() {
     let proc = new util.types();
     let result = proc.isSet(new String());
-    assertTrue(result == false, "The String should be of the same type as the String");
+    arktest.assertTrue(result == false, "The String should be of the same type as the String");
 }
 
 /**
@@ -80,7 +80,7 @@ function testIsSet003() {
 function testIsSet004() {
     let proc = new util.types();
     let result = proc.isSet(new Boolean());
-    assertTrue(result == false, "The Boolean should be of the same type as the Boolean");
+    arktest.assertTrue(result == false, "The Boolean should be of the same type as the Boolean");
 }
 
 /**
@@ -94,5 +94,5 @@ function testIsSet004() {
 function testIsSet005() {
     let proc = new util.types();
     let result = proc.isSet(new WeakSet<int>());
-    assertTrue(result == false, "The WeakSet should be of the same type as the WeakSet");
+    arktest.assertTrue(result == false, "The WeakSet should be of the same type as the WeakSet");
 }

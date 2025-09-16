@@ -21,7 +21,7 @@ cases:
           }
       use: |-
           // class name
-          assertTrue( A.met() == "S" )
+          arktest.assertTrue( A.met() == "S" )
 
     - decl: |-
           class A {
@@ -32,5 +32,5 @@ cases:
           type TA = A
       use: |-
           // class name alias
-          assertTrue( TA.met() == "S" )
+          arktest.assertTrue( TA.met() == "S" )
 

@@ -23,8 +23,8 @@ std::string ark::pandasm::Ins::ToString(const std::string &endline, bool printAr
                                           size_t firstArgIdx /* = 0*/) const {
     std::string fullOperation {};
     std::string regCase {};
-    if (this->setLabel) {
-        fullOperation += this->label +": ";
+    if (this->HasLabel()) {
+        fullOperation += this->Label() +": ";
     }
     switch(this->opcode) {
 

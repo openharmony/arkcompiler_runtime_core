@@ -37,6 +37,9 @@ let jsIterable = module.getProperty('jsIterable');
 let jsIterableObject = module.getProperty('testItetatorObject');
 let jsUser = module.getProperty('User');
 let jsDoubledObj = module.getProperty('doubledObj');
+let propObj = module.getProperty('propObj');
+let throwNull = module.getProperty('throwNull');
+let throwUndefined = module.getProperty('throwUndefined');
 
 function checkGetUndefined(): boolean {
     let obj = ESValue.Undefined;
@@ -70,36 +73,6 @@ function checkWrapNumber(): boolean {
     let val = 111;
     let obj = ESValue.wrapNumber(val);
     return obj.toNumber() === val;
-}
-
-function checkWrapByte(): boolean {
-    let val: byte = 111;
-    let obj = ESValue.wrapByte(val);
-    return Double.toByte(obj.toNumber()) === val;
-}
-
-function checkWrapShort(): boolean {
-    let val: short = 111;
-    let obj = ESValue.wrapShort(val);
-    return Double.toShort(obj.toNumber()) === val;
-}
-
-function checkWrapInt(): boolean {
-    let val: int = 111;
-    let obj = ESValue.wrapInt(val);
-    return Double.toInt(obj.toNumber()) === val;
-}
-
-function checkWrapLong(): boolean {
-    let val: long = 111;
-    let obj = ESValue.wrapLong(val);
-    return Double.toLong(obj.toNumber()) === val;
-}
-
-function checkWrapFloat(): boolean {
-    let val: float = 111;
-    let obj = ESValue.wrapFloat(val);
-    return Double.toFloat(obj.toNumber()) === val;
 }
 
 function checkWrapDouble(): boolean {
@@ -354,7 +327,7 @@ function checkEntries(): boolean {
     return true;
 }
 
-class testObj {}
+class testObj { }
 function checkInstanceOfStaticObj(): boolean {
     let staticObj = new testObj();
     let obj = ESValue.wrap(staticObj);
@@ -383,4 +356,30 @@ function checkInstaniate(): boolean {
     let num = ESValue.wrapInt(123);
     let user = jsUser.instantiate(num);
     return user.getProperty('ID').toNumber() === 123;
+}
+
+function testUndefined(): boolean {
+    propObj.setProperty('property1', undefined);
+    propObj.setProperty('property2', ESValue.wrap(undefined));
+    propObj.setProperty(123, undefined);
+    return propObj.getProperty('property1').isUndefined() &&
+           propObj.getProperty('property2').isUndefined() &&
+           propObj.getProperty(123).isUndefined();
+}
+
+function checkThrowNullOrUndefined(): boolean {
+    let res = false;
+    try {
+        throwNull.invoke();
+        res = false;
+    } catch (e: ESError) {
+        res = e.getValue().toNull() === null;
+    }
+    try {
+        throwUndefined.invoke();
+        res = false;
+    } catch (e: ESError) {
+        res = e.getValue().toUndefined() === undefined;
+    }
+    return res;
 }

@@ -109,6 +109,8 @@ public:
         : Optimization(graph),
           hoistLoads_(hoistLoads),
           beAlive_(GetGraph()->GetLocalAllocator()->Adapter()),
+          instOrder_(GetGraph()->GetLocalAllocator()->Adapter()),
+          orderedAlive_(GetGraph()->GetLocalAllocator()->Adapter()),
           rpoLoops_(GetGraph()->GetLocalAllocator()->Adapter())
     {
         rpoLoops_.reserve(graph->GetRootLoop()->GetInnerLoops().size());
@@ -152,12 +154,15 @@ private:
     void ProcessAllBBs(HeapEqClasses *heaps, Marker phiFixupMrk);
     void DeleteInstruction(Inst *inst, Inst *value);
     void DeleteInstructions(const BasicBlockHeap &eliminated);
+    void RecordInstOrder();
 
 private:
     bool applied_ {false};
     bool hoistLoads_;
     SaveStateBridgesBuilder ssb_;
     ArenaUnorderedSet<Inst *> beAlive_;
+    ArenaUnorderedMap<uint32_t, uint32_t> instOrder_;
+    ArenaSet<std::pair<uint32_t, Inst *>> orderedAlive_;
     ArenaVector<Loop *> rpoLoops_;
     LseVisitor *visitor_ {nullptr};
 };

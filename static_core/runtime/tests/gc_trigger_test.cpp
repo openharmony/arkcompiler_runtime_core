@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 #include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"
-#include "runtime/include/coretypes/string.h"
+#include "runtime/include/coretypes/line_string.h"
 #include "runtime/include/thread_scopes.h"
 #include "runtime/mem/gc/gc.h"
 #include "runtime/mem/gc/gc_trigger.h"

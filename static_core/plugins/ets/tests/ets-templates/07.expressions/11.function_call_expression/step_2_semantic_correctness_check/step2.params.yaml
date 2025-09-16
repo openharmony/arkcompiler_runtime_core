@@ -19,7 +19,7 @@ cases:
           }
       use: |-
           let na: number[] = []
-          assertEQ( foo(...na), 0 )
+          arktest.assertEQ( foo(...na), 0 )
 
     - decl: |-
           function foo(a: number, ...b: Boolean[]): string {
@@ -27,7 +27,7 @@ cases:
           }
       use: |-
           let ba: Boolean[] = [new Boolean(true), new Boolean(false)]
-          assertEQ( foo(1.0, ...ba), "A" )
+          arktest.assertEQ( foo(1.0, ...ba), "A" )
 
     - decl: |-
           class A {}
@@ -36,7 +36,7 @@ cases:
           }
       use: |-
           let v: A[] = [new A()]
-          assertEQ( foo(...v), "A" )
+          arktest.assertEQ( foo(...v), "A" )
 
     - decl: |-
           class A {}
@@ -47,7 +47,7 @@ cases:
           }
       use: |-
           let v: A[] = [new A(), new B(), new C()]
-          assertEQ( foo(...v), "A" )
+          arktest.assertEQ( foo(...v), "A" )
 
     - decl: |-
           class A {}
@@ -64,7 +64,7 @@ cases:
           }
       use: |-
           let v: B[] = [new B(), new C()]
-          assertEQ( foo(...v), "B" )
+          arktest.assertEQ( foo(...v), "B" )
 
     - decl: |-
           class A {}
@@ -81,4 +81,4 @@ cases:
           }
       use: |-
           let v: C[] = [new C()]
-          assertEQ( foo(...v), "C" )
+          arktest.assertEQ( foo(...v), "C" )

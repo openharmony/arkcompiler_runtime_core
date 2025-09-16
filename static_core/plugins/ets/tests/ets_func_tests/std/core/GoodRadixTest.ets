@@ -48,11 +48,16 @@ function checkGoodRadix(val: Double, radix: int, expected: String):int {
     let sv: String;
     try {
         sv = val.toString(radix);
-    } catch(aoe: ArgumentOutOfRangeException) {
-        return 1;
+    } catch(e) {
+        if (e instanceof ArgumentOutOfRangeError) {
+            return 1;
+        }
+        sv = "ERROR"
     }
     
-    if(sv == expected) return 0;
+    if (sv == expected) {
+        return 0;
+    }
 
     return 1;
 }

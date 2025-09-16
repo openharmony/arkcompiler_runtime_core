@@ -49,7 +49,7 @@ TEST_F(DetachThreadTest, detach_interop_disabled)
         EXPECT_EQ(vm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &etsEnv), ANI_OK);
         EXPECT_NE(etsEnv, nullptr);
         ani_class kclass {};
-        EXPECT_EQ(etsEnv->FindClass("Ldetach_thread_test/A;", &kclass), ANI_OK);
+        EXPECT_EQ(etsEnv->FindClass("detach_thread_test.A", &kclass), ANI_OK);
         EXPECT_NE(kclass, nullptr);
         EXPECT_EQ(vm_->c_api->DetachCurrentThread(nullptr), ANI_INVALID_ARGS);
         EXPECT_EQ(vm_->DetachCurrentThread(), ANI_OK);
@@ -67,7 +67,7 @@ TEST_F(DetachThreadTest, detach_three_times_disable)
         EXPECT_EQ(vm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &etsEnv), ANI_OK);
         EXPECT_NE(etsEnv, nullptr);
         ani_class kclass {};
-        EXPECT_EQ(etsEnv->FindClass("Ldetach_thread_test/A;", &kclass), ANI_OK);
+        EXPECT_EQ(etsEnv->FindClass("detach_thread_test.A", &kclass), ANI_OK);
         EXPECT_NE(kclass, nullptr);
         EXPECT_EQ(vm_->DetachCurrentThread(), ANI_OK);
         EXPECT_EQ(vm_->DetachCurrentThread(), ANI_ERROR);

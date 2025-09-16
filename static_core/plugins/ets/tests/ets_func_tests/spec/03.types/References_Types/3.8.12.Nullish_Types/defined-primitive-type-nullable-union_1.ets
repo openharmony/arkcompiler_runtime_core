@@ -23,6 +23,6 @@ type MyNumber = LevelOne;
 
 function main(): void {
     let t: MyNumber | undefined;
-    assertTrue( t === undefined)
+    arktest.assertTrue( t === undefined)
 
 }

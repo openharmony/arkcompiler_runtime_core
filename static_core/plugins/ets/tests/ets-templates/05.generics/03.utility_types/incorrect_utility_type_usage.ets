@@ -16,7 +16,7 @@ limitations under the License.
 {% for c in cases %}
 
 /*---
-desc: Cannot use Required, Readonly or Partial as class type name.
+desc: Cannot use Required, Readonly, Partial, Awaited and NonNullable as class type name.
 tags: [compile-only, negative]
 ---*/
 

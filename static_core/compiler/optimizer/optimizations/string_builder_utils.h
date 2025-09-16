@@ -31,6 +31,9 @@ bool IsMethodStringBuilderConstructorWithStringArg(const Inst *inst);
 bool IsMethodStringBuilderConstructorWithCharArrayArg(const Inst *inst);
 bool IsStringBuilderToString(const Inst *inst);
 bool IsMethodStringBuilderDefaultConstructor(const Inst *inst);
+bool IsStringLengthAccessor(const Inst *inst);
+bool IsStringLengthAccessorChain(const Inst *inst);
+Inst *GetStringLengthCompressedShr(Inst *lenArrayCall);
 
 bool IsStringBuilderCtorCall(const Inst *inst, const Inst *self = nullptr);
 bool IsStringBuilderMethod(const Inst *inst, const Inst *self = nullptr);
@@ -51,6 +54,7 @@ bool HasUserRecursively(Inst *inst, Marker visited, const FindUserPredicate &pre
 size_t CountUsers(Inst *inst, const FindUserPredicate &predicate);
 void ResetUserMarkersRecursively(Inst *inst, Marker visited);
 Inst *SkipSingleUserCheckInstruction(Inst *inst);
+const Inst *SkipSingleUserCheckInstruction(const Inst *inst);
 bool IsUsedOutsideBasicBlock(Inst *inst, BasicBlock *bb);
 SaveStateInst *FindFirstSaveState(BasicBlock *block);
 

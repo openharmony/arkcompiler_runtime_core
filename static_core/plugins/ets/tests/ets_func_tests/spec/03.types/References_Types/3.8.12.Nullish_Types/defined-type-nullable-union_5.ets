@@ -25,6 +25,6 @@ type NullableSupplier = () => IntOrNull;
 function main(): void {
     let ss: NullableSupplier = (): IntOrNull => { return 42; }
 
-    assertEQ( ss(), 42)
+    arktest.assertEQ( ss(), 42)
 
 }

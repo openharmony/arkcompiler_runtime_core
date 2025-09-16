@@ -80,23 +80,23 @@ const RESULT_SUCCESS: int = 0;
 const RESULT_FAILURE: int = 1;
 
 function filterPositiveElement(elem: Number, index: number, arr: ReadonlyArray<Number>): boolean {
-    return arr[index] == elem && elem.valueOf() == 12 && index > 0;
+    return arr[index.toInt()] == elem && elem.valueOf() == 12 && index > 0;
 }
 
 function filterNegativeElement(elem: Number, index: number, arr: ReadonlyArray<Number>): boolean {
-     return arr[index] == elem && elem.valueOf() < 0 && index > 0;
+     return arr[index.toInt()] == elem && elem.valueOf() < 0 && index > 0;
 }
 
 function filterUndefinedElement(elem: Number, index: number, arr: ReadonlyArray<Number>): boolean {
-    return arr[index] == elem && elem == undefined && index < 0;
+    return arr[index.toInt()] == elem && elem == undefined && index < 0;
 }
 
 function filterNullElement(elem: Number, index: number, arr: ReadonlyArray<Number>) {
-    return arr[index] == elem && elem == null && index > 0;
+    return arr[index.toInt()] == elem && elem == null && index > 0;
 }
 
 function findWithFuncArg3ReadonlyArray(): int {
-    const fnNull = (elem: Number, index: number, obj: ReadonlyArray<Number>): boolean => { return obj[index] == elem && elem == null && index > 0; };
+    const fnNull = (elem: Number, index: number, obj: ReadonlyArray<Number>): boolean => { return obj[index.toInt()] == elem && elem == null && index > 0; };
 
     const arr: ReadonlyArray<Number> = Arrays.copy(TEST_ARRAY);
     if (arr.find(filterPositiveElement) != 12) return RESULT_FAILURE;
@@ -108,9 +108,9 @@ function findWithFuncArg3ReadonlyArray(): int {
 }
 
 function findIndexFuncArg3ReadonlyArray(): int {
-    let fnNegative = (elem: Number, index: number, obj: ReadonlyArray<Number>): boolean => { return obj[index] == elem && elem.valueOf() < 0 && index > 0; };
-    let fnUndefined = (elem: Number, index: number, obj: ReadonlyArray<Number>): boolean => { return obj[index] == elem && elem == undefined && index < 0; };
-    let fnNull = (elem: Number, index: number, obj: ReadonlyArray<Number>): boolean => { return obj[index] == elem && elem == null && index > 0; };
+    let fnNegative = (elem: Number, index: number, obj: ReadonlyArray<Number>): boolean => { return obj[index.toInt()] == elem && elem.valueOf() < 0 && index > 0; };
+    let fnUndefined = (elem: Number, index: number, obj: ReadonlyArray<Number>): boolean => { return obj[index.toInt()] == elem && elem == undefined && index < 0; };
+    let fnNull = (elem: Number, index: number, obj: ReadonlyArray<Number>): boolean => { return obj[index.toInt()] == elem && elem == null && index > 0; };
 
     const arr: ReadonlyArray<Number> = Arrays.copy(TEST_ARRAY);
     if (arr.findIndex(filterPositiveElement) != 9) return RESULT_FAILURE;
@@ -123,7 +123,7 @@ function findIndexFuncArg3ReadonlyArray(): int {
 
 function mapFuncArg3ReadonlyArray(): int {
     let mappingFunc = (v: Number, index: number, arr: ReadonlyArray<Number>): Number =>
-        (index < 4) && (index < arr.length) ? Number.valueOf(arr[index] * arr[index]) : Number.valueOf(0);
+        (index < 4) && (index < arr.length) ? Number.valueOf(arr[index.toInt()] * arr[index.toInt()]) : Number.valueOf(0);
 
     let arrEmpty: ReadonlyArray<Number> = new Array<Number>;
     let res0 = arrEmpty.map<Number>(mappingFunc);
@@ -155,7 +155,7 @@ function everyFuncArg3ReadonlyArray(): int {
 
 function filterFuncArg3ReadonlyArray(): int {
     let fnTrue = (v: Number, index: number, arr: ReadonlyArray<Number>): boolean => {
-        return arr[index].valueOf() == v.valueOf() && v.valueOf() > -1000;
+        return arr[index.toInt()].valueOf() == v.valueOf() && v.valueOf() > -1000;
     }
     let arrEmpty = new Array<Number>;
     if (arrEmpty.filter(fnTrue).length != 0) return RESULT_FAILURE;
@@ -176,19 +176,19 @@ function reduceFunc(a: Number, b: Number, index: number, arr: ReadonlyArray<Numb
     if (index < 0 || index >= arr.length) {
         return Number.valueOf(-1);
     }
-    return new Number(a + b + arr[index]);
+    return new Number(a + b + arr[index.toInt()]);
 }
 
 function reduceFuncArg4ReadonlyArray(): int {
     let arrEmpty: ReadonlyArray<Number> = new Array<Number>;
-    let hasException: boolean = false;
+    let hasError: boolean = false;
     try {
         let res = arrEmpty.reduce(reduceFunc);
         return RESULT_FAILURE;
     } catch(e) {
-        hasException = true;
+        hasError = true;
     }
-    if (!hasException) return RESULT_FAILURE;
+    if (!hasError) return RESULT_FAILURE;
 
     const arr: ReadonlyArray<Number> = Arrays.copy(TEST_ARRAY);
     let res = arr.reduce(reduceFunc);
@@ -214,14 +214,14 @@ function reduceFuncArg4ReadonlyArrayWithInitialValue(): int {
 
 function reduceRightFuncArg4ReadonlyArray(): int {
     let arrEmpty: ReadonlyArray<Number> = new Array<Number>;
-    let hasException: boolean = false;
+    let hasError: boolean = false;
     try {
         let res = arrEmpty.reduceRight(reduceFunc);
         return RESULT_FAILURE;
     } catch(e) {
-        hasException = true;
+        hasError = true;
     }
-    if (!hasException) return RESULT_FAILURE;
+    if (!hasError) return RESULT_FAILURE;
 
     const arr: ReadonlyArray<Number> = Arrays.copy(TEST_ARRAY);
     let res = arr.reduceRight(reduceFunc);
@@ -250,7 +250,7 @@ function forEachFuncArg3ReadonlyArray(): int {
         if (index < 0 && index >= arr.length) {
             s = "";
         } else {
-            let tmp = new Number(arr[index].valueOf() + a.valueOf());
+            let tmp = new Number(arr[index.toInt()].valueOf() + a.valueOf());
             s += tmp.toString() + ",";
         }
     }
@@ -272,7 +272,7 @@ function runTest(testName: string, testBody: () => int): int {
 
         return RESULT_SUCCESS;
     } catch(e) {
-        console.println("FAILED: " + testName + " => Exception catched: " + e);
+        console.println("FAILED: " + testName + " => Error catched: " + e);
         return RESULT_FAILURE;
     }
 }

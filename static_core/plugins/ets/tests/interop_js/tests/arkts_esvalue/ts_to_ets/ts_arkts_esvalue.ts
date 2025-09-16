@@ -27,6 +27,7 @@ class MyObject {
 
 (globalThis as any).wrapobjTS = new MyObject(55);
 
+(globalThis as any).unwrapobjTS = new MyObject(50);
 function main(): void {
     let etsVm = globalThis.gtest.etsVm;
 
@@ -37,6 +38,8 @@ function main(): void {
 
     nativeWrapRef(wrapobjTS);
     ASSERT_TRUE(etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsCheckWrappedPtrFromTS")());
+
+    ASSERT_TRUE(etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsCheckUnWrappedPtrFromTS")());
 }
 
 (globalThis as any).nativeSaveRef("temp");

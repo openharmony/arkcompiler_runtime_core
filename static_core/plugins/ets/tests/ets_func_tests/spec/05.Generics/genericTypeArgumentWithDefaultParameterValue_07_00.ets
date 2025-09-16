@@ -30,7 +30,7 @@ class A<T=string> {
 function main(): void {
     let a = new A("hello");
     let a1 = new A<string>("world")
-    assertTrue( a.data instanceof string)
-    assertTrue( a1.data instanceof string)
+    arktest.assertTrue( a.data instanceof string)
+    arktest.assertTrue( a1.data instanceof string)
 }
 

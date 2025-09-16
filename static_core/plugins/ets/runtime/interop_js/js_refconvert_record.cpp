@@ -14,6 +14,7 @@
  */
 
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
+#include "plugins/ets/runtime/interop_js/ets_proxy/ets_class_wrapper.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference_storage.h"
 #include "plugins/ets/runtime/interop_js/js_refconvert_record.h"
 #include "plugins/ets/runtime/types/ets_type.h"
@@ -34,6 +35,9 @@ napi_value JSRefConvertRecord::WrapImpl(InteropCtx *ctx, EtsObject *obj)
     napi_value targetObj;
     NAPI_CHECK_FATAL(napi_create_object(env, &targetObj));
 
+    napi_value recordProto = ctx->GetCommonJSObjectCache()->GetRecordProto();
+    ets_proxy::DoSetPrototype(env, targetObj, recordProto);
+
     std::array<napi_value, 2U> args = {targetObj, handlerObj};
     napi_value proxy = ctx->GetCommonJSObjectCache()->GetProxy();
     napi_value proxyObj;
@@ -48,7 +52,7 @@ napi_value JSRefConvertRecord::RecordGetHandler(napi_env env, napi_callback_info
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_JS(coro);
+    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
 
     size_t argc;
     NAPI_CHECK_FATAL(napi_get_cb_info(env, cbinfo, &argc, nullptr, nullptr, nullptr));
@@ -87,7 +91,7 @@ napi_value JSRefConvertRecord::RecordSetHandler(napi_env env, napi_callback_info
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_JS(coro);
+    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
     ScopedManagedCodeThread managedScope(coro);
 
     size_t argc;

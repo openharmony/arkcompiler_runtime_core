@@ -37,9 +37,9 @@ class C {
 function main() {
     let c  = new C[10]
     for (let i: int = 0; i < 10; i++) {
-        assertEQ( c[i].getE(), undefined)
-        assertEQ( c[i].getF(), undefined)
-        assertEQ( c[i].getG(), 10)
+        arktest.assertEQ( c[i].getE(), undefined)
+        arktest.assertEQ( c[i].getF(), undefined)
+        arktest.assertEQ( c[i].getG(), 10)
     }
 }
 

@@ -29,5 +29,5 @@ class Person {
 
 function main(): void {
   let person1 = new Person("John");
-  assertEQ(person1.age?.toString(), undefined);
+  arktest.assertEQ(person1.age?.toString(), undefined);
 }

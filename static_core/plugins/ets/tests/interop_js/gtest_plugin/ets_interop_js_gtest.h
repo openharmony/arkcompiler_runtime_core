@@ -353,7 +353,7 @@ private:
 
         auto coro = EtsCoroutine::GetCurrent();
         auto ctx = InteropCtx::Current(coro);
-        INTEROP_CODE_SCOPE_JS(coro);
+        INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
         ScopedManagedCodeThread managedCode(coro);
 
         auto methodRes = ResolveEntryPoint(ctx, qualifiedName);

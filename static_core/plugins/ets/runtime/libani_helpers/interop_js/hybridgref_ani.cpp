@@ -85,10 +85,12 @@ static bool InitializeGlobal(ani_env *env)
     status = env->Class_FindMethod(esobjectClass, "getPropertySafe", "d:C{std.interop.ESValue}",
                                    &g_methodGetPropertyByIndex);
     ASSERT(status == ANI_OK);
-    status = env->Class_FindMethod(esobjectClass, "setProperty",
-                                   "C{std.core.String}C{std.core.Object}:", &g_methodSetPropertyByName);
+    status =
+        env->Class_FindMethod(esobjectClass, "setProperty",
+                              "C{std.core.String}X{C{std.core.Null}C{std.core.Object}}:", &g_methodSetPropertyByName);
     ASSERT(status == ANI_OK);
-    status = env->Class_FindMethod(esobjectClass, "setProperty", "dC{std.core.Object}:", &g_methodSetPropertyByIndex);
+    status = env->Class_FindMethod(esobjectClass, "setProperty",
+                                   "dX{C{std.core.Null}C{std.core.Object}}:", &g_methodSetPropertyByIndex);
     ASSERT(status == ANI_OK);
     status =
         env->Class_FindStaticMethod(esobjectClass, "<get>Undefined", ":C{std.interop.ESValue}", &g_methodGetUndefined);
@@ -237,6 +239,9 @@ static bool IsValidStorage(ani_env *env, ani_object storage, ani_size *outLength
 
 bool HybridGrefGetESValue(ani_env *env, hybridgref ref, ani_object *result)
 {
+    if (env == nullptr || result == nullptr) {
+        return false;
+    }
     ani_object storage {};
     if (!GetStorage(env, &storage)) {
         return false;
@@ -251,6 +256,9 @@ bool HybridGrefGetESValue(ani_env *env, hybridgref ref, ani_object *result)
     }
 
     SharedRefIndex refIndex = reinterpret_cast<uintptr_t>(ref);
+    if (refIndex == 0 || refIndex >= arrayLength) {
+        return false;
+    }
     ani_ref refHolder {};
     auto status =
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
@@ -269,6 +277,9 @@ bool HybridGrefGetESValue(ani_env *env, hybridgref ref, ani_object *result)
 
 bool HybridGrefCreateRefFromAni(ani_env *env, ani_ref value, hybridgref *result)
 {
+    if (env == nullptr || result == nullptr) {
+        return false;
+    }
     ani_object storage {};
     if (!GetStorage(env, &storage)) {
         return false;
@@ -289,6 +300,9 @@ bool HybridGrefCreateRefFromAni(ani_env *env, ani_ref value, hybridgref *result)
 
 bool HybridGrefDeleteRefFromAni(ani_env *env, hybridgref ref)
 {
+    if (env == nullptr) {
+        return false;
+    }
     ani_object storage {};
     if (!GetStorage(env, &storage)) {
         return false;

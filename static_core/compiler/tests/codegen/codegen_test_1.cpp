@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -609,12 +609,12 @@ SRC_GRAPH(StoreArray, Graph *graph)
 {
     GRAPH(graph)
     {
-        PARAMETER(0U, 0U).ref();  // array
-        PARAMETER(1U, 1U).u32();  // index
-        PARAMETER(2U, 2U).u32();  // store value
+        PARAMETER(0U, 0U).ref();       // array
+        PARAMETER(1U, 1U).u32();       // index
+        PARAMETER(2U, 2U).ref_uint();  // store value
         BASIC_BLOCK(2U, -1L)
         {
-            INST(3U, Opcode::StoreArray).u32().Inputs(0U, 1U, 2U);
+            INST(3U, Opcode::StoreArray).ref_uint().Inputs(0U, 1U, 2U);
             INST(4U, Opcode::ReturnVoid);
         }
     }
@@ -1384,8 +1384,8 @@ SRC_GRAPH(LoadArray, Graph *graph)
         PARAMETER(1U, 1U).u32();  // index
         BASIC_BLOCK(2U, -1L)
         {
-            INST(2U, Opcode::LoadArray).u32().Inputs(0U, 1U);
-            INST(3U, Opcode::Return).u32().Inputs(2U);
+            INST(2U, Opcode::LoadArray).ref_uint().Inputs(0U, 1U);
+            INST(3U, Opcode::Return).ref_uint().Inputs(2U);
         }
     }
 }

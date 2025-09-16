@@ -78,20 +78,12 @@ public:
     }
 
 private:
-    static bool IsASCIICharacter(uint16_t data)
-    {
-        // NOLINTNEXTLINE(readability-magic-numbers)
-        return data > 0 && data <= 0x7F;
-    }
-    static bool CanBeCompressed(Span<const uint16_t> utf16Data);
-    std::vector<char> ConvertToChar(Span<const UChar> uchar, size_t length);
-    ani_string GetResultStr(ani_env *env, UChar *arrDat, size_t length);
+    ani_string GetResultStr(ani_env *env, const UChar *arrDat, size_t length);
     void SetIgnoreBOM(const UChar *arr, size_t resultLen, bool &bomFlag);
     void FreedMemory(UChar *&pData);
     uint32_t label_ {};
     std::string encStr_ {};
     TransformToolPointer tranTool_;
-    ani_object CreateThrowErrorObject(ani_env *env, const std::string &message);
 };
 }  // namespace ark::ets::sdk::util
 #endif  // ANI_TEXTDECODER_H

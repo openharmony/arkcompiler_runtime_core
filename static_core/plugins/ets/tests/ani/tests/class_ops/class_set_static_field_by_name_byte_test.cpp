@@ -37,7 +37,7 @@ TEST_F(ClassSetStaticFieldByNameByteTest, set_static_field_by_name_byte_capi)
 {
     ani_class cls {};
     const ani_short setTarget = 2U;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_byte_test/ByteStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_byte_test.ByteStatic", &cls), ANI_OK);
 
     ASSERT_EQ(env_->c_api->Class_SetStaticFieldByName_Byte(env_, cls, "byte_value", setTarget), ANI_OK);
     ani_byte resultValue;
@@ -49,7 +49,7 @@ TEST_F(ClassSetStaticFieldByNameByteTest, set_static_field_by_name_byte)
 {
     ani_class cls {};
     const ani_short setTarget = 2U;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_byte_test/ByteStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_byte_test.ByteStatic", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Byte(cls, "byte_value", setTarget), ANI_OK);
     ani_byte resultValue;
@@ -61,7 +61,7 @@ TEST_F(ClassSetStaticFieldByNameByteTest, set_static_field_by_name_byte_invalid_
 {
     ani_class cls {};
     const ani_short setTarget = 2U;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_byte_test/ByteStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_byte_test.ByteStatic", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Byte(cls, "string_value", setTarget), ANI_INVALID_TYPE);
 }
@@ -70,7 +70,7 @@ TEST_F(ClassSetStaticFieldByNameByteTest, set_static_field_by_name_byte_invalid_
 {
     ani_class cls {};
     const ani_short setTarget = 2U;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_byte_test/ByteStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_byte_test.ByteStatic", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Byte(nullptr, "byte_value", setTarget), ANI_INVALID_ARGS);
 }
@@ -79,7 +79,7 @@ TEST_F(ClassSetStaticFieldByNameByteTest, set_static_field_by_name_byte_invalid_
 {
     ani_class cls {};
     const ani_short setTarget = 2U;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_byte_test/ByteStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_byte_test.ByteStatic", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Byte(cls, nullptr, setTarget), ANI_INVALID_ARGS);
 }
@@ -87,7 +87,7 @@ TEST_F(ClassSetStaticFieldByNameByteTest, set_static_field_by_name_byte_invalid_
 TEST_F(ClassSetStaticFieldByNameByteTest, special_values)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_byte_test/ByteStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_byte_test.ByteStatic", &cls), ANI_OK);
     ani_byte single = 1U;
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Byte(cls, "byte_value", static_cast<ani_byte>(NULL)), ANI_OK);
@@ -143,7 +143,7 @@ TEST_F(ClassSetStaticFieldByNameByteTest, combination_test1)
     const ani_short setTarget = 3U;
     const ani_short setTarget2 = 2U;
     ani_byte single = 1U;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_byte_test/ByteStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_byte_test.ByteStatic", &cls), ANI_OK);
     const int32_t loopCount = 3;
     for (int32_t i = 0; i < loopCount; i++) {
         ASSERT_EQ(env_->Class_SetStaticFieldByName_Byte(cls, "byte_value", setTarget), ANI_OK);
@@ -157,19 +157,19 @@ TEST_F(ClassSetStaticFieldByNameByteTest, combination_test1)
 
 TEST_F(ClassSetStaticFieldByNameByteTest, combination_test2)
 {
-    CheckFieldValue("Lclass_set_static_field_by_name_byte_test/ByteStaticA;", "byte_value");
+    CheckFieldValue("class_set_static_field_by_name_byte_test.ByteStaticA", "byte_value");
 }
 
 TEST_F(ClassSetStaticFieldByNameByteTest, combination_test3)
 {
-    CheckFieldValue("Lclass_set_static_field_by_name_byte_test/ByteStaticFinal;", "byte_value");
+    CheckFieldValue("class_set_static_field_by_name_byte_test.ByteStaticFinal", "byte_value");
 }
 
 TEST_F(ClassSetStaticFieldByNameByteTest, invalid_argument)
 {
     ani_class cls {};
     const ani_short setTarget = 2U;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_byte_test/ByteStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_byte_test.ByteStatic", &cls), ANI_OK);
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Byte(cls, "", setTarget), ANI_NOT_FOUND);
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Byte(cls, "\n", setTarget), ANI_NOT_FOUND);
     ASSERT_EQ(env_->c_api->Class_SetStaticFieldByName_Byte(nullptr, cls, "byte_value", setTarget), ANI_INVALID_ARGS);

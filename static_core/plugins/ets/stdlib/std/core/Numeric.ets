@@ -61,6 +61,60 @@ export abstract class Numeric extends Object {
      * @returns object's value
      */
     public abstract toDouble(): double;
+
+    /**
+     * Returns the value of an object as a byte
+     *
+     * Supportive interface
+     *
+     * @returns object's value
+     */
+    public abstract byteValue(): byte;
+
+    /**
+     * Returns the value of an object as an int
+     *
+     * Supportive interface
+     *
+     * @returns object's value
+     */
+    public abstract intValue(): int;
+
+    /**
+     * Returns the value of an object as a short
+     *
+     * Supportive interface
+     *
+     * @returns object's value
+     */
+    public abstract shortValue(): short;
+
+    /**
+     * Returns the value of an object as a long
+     *
+     * Supportive interface
+     *
+     * @returns object's value
+     */
+    public abstract longValue(): long;
+
+    /**
+     * Returns the value of an object as a float
+     *
+     * Supportive interface
+     *
+     * @returns object's value
+     */
+    public abstract floatValue(): float;
+
+    /**
+     * Returns the value of an object as a double
+     *
+     * Supportive interface
+     *
+     * @returns object's value
+     */
+    public abstract doubleValue(): double;
 }
 
 /**

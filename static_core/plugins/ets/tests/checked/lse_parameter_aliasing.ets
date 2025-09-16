@@ -45,13 +45,13 @@ function main(): void
         let c: FixedArray<FixedArray<String>> = new String[2][2]
         let d: FixedArray<FixedArray<String>> = new String[2][2]
         c[0][0] = "b"
-        assertEQ(test(c, d), "a")
-        assertEQ(c[0][0], "a")
+        arktest.assertEQ(test(c, d), "a")
+        arktest.assertEQ(c[0][0], "a")
     }
     {
         let c: FixedArray<FixedArray<String>> = new String[2][2]
         c[0][0] = "b"
-        assertEQ(test(c, c), "")
-        assertEQ(c[0][0], "")
+        arktest.assertEQ(test(c, c), "")
+        arktest.assertEQ(c[0][0], "")
     }
 }

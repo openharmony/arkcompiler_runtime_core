@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -176,6 +176,11 @@ bool LoopUnroll::TransformLoop(Loop *loop)
         GetGraph()->GetEventWriter().EventLoopUnroll(loop->GetId(), loop->GetHeader()->GetGuestPc(), iterations,
                                                      unrollParams.cloneableInsts, "without branching");
         return true;
+    }
+
+    if (loopInfo.has_value() && loopInfo->update->IsShift()) {
+        // loop info for shl|shr|ashr update inst only used for no branching unroll.
+        loopInfo.reset();
     }
 
     return UnrollWithBranching(unrollFactor, loop, loopInfo, optIterations);

@@ -31,9 +31,12 @@ collections = {
         'parameters': {
             'arktsconfig': '${parameters.build}/tools/es2panda/generated/arktsconfig.json',
             'extension': 'sts',
-            'es2panda-full-args': [
-                '--dump-ast', '--extension=${parameters.extension}', '--thread=0',
-                '--output=/dev/null', '--arktsconfig=${parameters.arktsconfig}']
+            "es2panda-full-args": [
+                "--dump-ast",
+                "--extension=${parameters.extension}",
+                "--thread=0",
+                "--arktsconfig=${parameters.arktsconfig}",
+            ],
         }
     }
 }

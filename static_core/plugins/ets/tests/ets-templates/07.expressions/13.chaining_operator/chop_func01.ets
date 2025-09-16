@@ -26,5 +26,5 @@ class Calculator {
 function main(): void {
   let calc: Calculator | null = null;
   calc = new Calculator();
-  assertEQ(calc?.add(2, 3), 5);
+  arktest.assertEQ(calc?.add(2, 3), 5);
 }

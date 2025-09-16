@@ -32,7 +32,6 @@ namespace ark::ets {
 
 namespace test {
 class EtsArrayBufferTest;
-class EtsEscompatArrayBufferMembers;
 }  // namespace test
 
 class EtsEscompatArrayBuffer : public EtsObject {
@@ -204,6 +203,18 @@ public:
         return MEMBER_OFFSET(EtsEscompatArrayBuffer, isResizable_);
     }
 
+    /// Initializes ArrayBuffer with its own array.
+    void Initialize(EtsCoroutine *coro, size_t length, EtsByteArray *array)
+    {
+        ASSERT(array != nullptr);
+        ObjectAccessor::SetObject(coro, this, GetManagedDataOffset(), array->GetCoreType());
+        byteLength_ = length;
+        nativeData_ =
+            GetAddress(EtsByteArray::FromCoreType(ObjectAccessor::GetObject(coro, this, GetManagedDataOffset())));
+        ASSERT(nativeData_ != 0);
+        isResizable_ = ToEtsBoolean(false);
+    }
+
     template <typename T>
     T GetElement(uint32_t index, uint32_t offset);
     template <typename T>
@@ -331,7 +342,7 @@ private:
 
 private:
     // ClassLinker reorders fileds based on them size. Object pointer size can be different for different configs
-#if defined(PANDA_TARGET_64) && !defined(PANDA_USE_32_BIT_POINTER)
+#if !defined(PANDA_32_BIT_MANAGED_POINTER)
     // Managed array used in this `ArrayBuffer`, null if buffer is external
     ObjectPointer<EtsByteArray> managedData_;
     // Contains pointer to either managed non-movable data or external data.
@@ -350,7 +361,6 @@ private:
 #endif
 
     friend class test::EtsArrayBufferTest;
-    friend class test::EtsEscompatArrayBufferMembers;
 };
 
 }  // namespace ark::ets

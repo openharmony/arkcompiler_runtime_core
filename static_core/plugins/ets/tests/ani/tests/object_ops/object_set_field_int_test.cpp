@@ -24,7 +24,7 @@ public:
         auto packRef = CallEtsFunction<ani_ref>("object_set_field_int_test", "newPackObject");
 
         ani_class cls {};
-        ASSERT_EQ(env_->FindClass("Lobject_set_field_int_test/Pack;", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("object_set_field_int_test.Pack", &cls), ANI_OK);
 
         ani_field fieldInt {};
         ASSERT_EQ(env_->Class_FindField(cls, "int_value", &fieldInt), ANI_OK);

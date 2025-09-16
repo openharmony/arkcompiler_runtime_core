@@ -17,13 +17,15 @@
 /*---
 desc: 
     Constant expression with number conversion as enum initializer.
+tags: [{{c.neg}}]
 ---*/
 
 const testValue: {{c.type}} = {{c.value}}
 
+enum TestEnum { One = testValue }
+
 function main() {
-    enum TestEnum { One = testValue as int }
-    assertEQ(TestEnum.One.valueOf(), {{c.expected}})
+    arktest.assertEQ(TestEnum.One.valueOf(), {{c.expected}})
 }
 
 {% endfor %}

@@ -26,14 +26,14 @@ public:
 TEST_F(ClassFindMethodInModuleTest, find_func_in_module)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("L@abcModule/class_find_method_in_module_test/nsa/A;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("@abcModule.class_find_method_in_module_test.nsa.A", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "func", "II:I", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "func", "ii:i", &method), ANI_OK);
     ASSERT_NE(method, nullptr);
 
     ani_method ctor {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":V", &ctor), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":", &ctor), ANI_OK);
 
     ani_object object {};
     ASSERT_EQ(env_->Object_New(cls, ctor, &object), ANI_OK);
@@ -50,15 +50,15 @@ TEST_F(ClassFindMethodInModuleTest, find_func_in_module)
 TEST_F(ClassFindMethodInModuleTest, find_method_combine_scenes_001)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/class_find_method_in_module_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.class_find_method_in_module_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_namespace ns {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "Ltest001;", &ns), ANI_OK);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "test001", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(ns, "LTestA001;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindClass(ns, "TestA001", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method constructorMethod {};
@@ -66,7 +66,7 @@ TEST_F(ClassFindMethodInModuleTest, find_method_combine_scenes_001)
     ASSERT_NE(constructorMethod, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "sum", "II:I", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "sum", "ii:i", &method), ANI_OK);
     ASSERT_NE(method, nullptr);
 
     ani_object object {};

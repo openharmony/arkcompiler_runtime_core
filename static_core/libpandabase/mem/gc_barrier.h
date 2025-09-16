@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -120,6 +120,34 @@ enum BarrierType : uint8_t {
     POST_INTERREGION_BARRIER =
         EncodeBarrierType(4U, BarrierPosition::BARRIER_POSITION_POST, BarrierActionType::WRITE_BARRIER),
     /* Note: cosider two-level card table for pre-barrier */
+
+    /**
+     * Post write barrier for CMC-GC. Will call the WriteBarrier func provided by CMC-GC.
+     * add more details about pseudocode (issue #26247)
+     * Pseudocode:
+     * store obj.field <- new_val // STORE for which barrier generated
+     * // Call Write Barrier
+     * call CMC_WRITE_BARRIER(obj, field, new_val);
+     *
+     * Runtime should provide these parameters:
+     * CMC_WRITE_BARRIER - CMC-GC Write Barrier function
+     */
+    POST_CMC_WRITE_BARRIER =
+        EncodeBarrierType(5U, BarrierPosition::BARRIER_POSITION_POST, BarrierActionType::WRITE_BARRIER),
+
+    /**
+     * Pre read barrier for CMC-GC. Will call the ReadBarrier func provided by CMC-GC.
+     * add more details about pseudocode (issue #26247)
+     * Pseudocode:
+     * // Call Read Barrier
+     * call CMC_READ_BARRIER(obj, field);
+     * load obj.field // LOAD for which barrier generated
+     *
+     * Runtime should provide these parameters:
+     * CMC_READ_BARRIER - CMC-GC Read Barrier function
+     */
+    PRE_CMC_READ_BARRIER =
+        EncodeBarrierType(2U, BarrierPosition::BARRIER_POSITION_PRE, BarrierActionType::READ_BARRIER),
 };
 
 constexpr bool IsPreBarrier(BarrierType barrierType)

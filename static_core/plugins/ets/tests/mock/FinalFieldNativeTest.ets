@@ -20,7 +20,7 @@ class FinalFieldNativeTest {
     public static char_value_final: char = 32767;
     public static int_value_final: int = 65536;
     public static long_value_final: long = 4294967296;
-    public static float_value_final: float = 1.0;
+    public static float_value_final: float = 1.0f;
     public static double_value_final: double = 2.0;
     public static string_value_final: String = "abc";
 }

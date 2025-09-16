@@ -87,28 +87,75 @@ bool EmitBigUInt64ArrayFillInternal(Inst *inst)
     return EmitFastPath(inst, RuntimeInterface::EntrypointId::BIG_U_INT64_ARRAY_FILL_INTERNAL_FAST_PATH, 4U);
 }
 
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define EMIT_TYPED_ARRAY_TO_REVERSED(Name, MacroType)                             \
-    /* CC-OFFNXT(G.PRE.02) name part */                                           \
-    bool Emit##Name##ArrayToReversed(Inst *inst)                                  \
-    {                                                                             \
-        auto eid = RuntimeInterface::EntrypointId::MacroType##_ARRAY_TO_REVERSED; \
-        /* CC-OFFNXT(G.PRE.05) function gen */                                    \
-        return EmitFastPath(inst, eid, 1U);                                       \
-    }
-
-EMIT_TYPED_ARRAY_TO_REVERSED(Int8, INT8)
-EMIT_TYPED_ARRAY_TO_REVERSED(Int16, INT16)
-EMIT_TYPED_ARRAY_TO_REVERSED(Int32, INT32)
-EMIT_TYPED_ARRAY_TO_REVERSED(BigInt64, BIG_INT64)
-EMIT_TYPED_ARRAY_TO_REVERSED(Float32, FLOAT32)
-EMIT_TYPED_ARRAY_TO_REVERSED(Float64, FLOAT64)
-EMIT_TYPED_ARRAY_TO_REVERSED(Uint8, UINT8)
-EMIT_TYPED_ARRAY_TO_REVERSED(Uint16, UINT16)
-EMIT_TYPED_ARRAY_TO_REVERSED(Uint32, UINT32)
-EMIT_TYPED_ARRAY_TO_REVERSED(BigUint64, BIG_UINT64)
-
-#undef EMIT_TYPED_ARRAY_TO_REVERSED
-
 bool EmitReadString(Inst *inst);
 bool EmitWriteString(Inst *inst);
+
+bool EmitInt8ArraySetValuesFromArray(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::INT8_ARRAY_SET_VALUES_FROM_ARRAY, 2U);
+}
+bool EmitInt16ArraySetValuesFromArray(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::INT16_ARRAY_SET_VALUES_FROM_ARRAY, 2U);
+}
+bool EmitInt32ArraySetValuesFromArray(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::INT32_ARRAY_SET_VALUES_FROM_ARRAY, 2U);
+}
+bool EmitBigInt64ArraySetValuesFromArray(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::BIG_INT64_ARRAY_SET_VALUES_FROM_ARRAY, 2U);
+}
+bool EmitFloat32ArraySetValuesFromArray(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::FLOAT32_ARRAY_SET_VALUES_FROM_ARRAY, 2U);
+}
+bool EmitFloat64ArraySetValuesFromArray(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::FLOAT64_ARRAY_SET_VALUES_FROM_ARRAY, 2U);
+}
+bool EmitUint8ArraySetValuesFromArray(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::UINT8_ARRAY_SET_VALUES_FROM_ARRAY, 2U);
+}
+bool EmitUint8ClampedArraySetValuesFromArray(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::UINT8_CLAMPED_ARRAY_SET_VALUES_FROM_ARRAY, 2U);
+}
+bool EmitUint16ArraySetValuesFromArray(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::UINT16_ARRAY_SET_VALUES_FROM_ARRAY, 2U);
+}
+bool EmitUint32ArraySetValuesFromArray(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::UINT32_ARRAY_SET_VALUES_FROM_ARRAY, 2U);
+}
+bool EmitBigUint64ArraySetValuesFromArray(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::BIG_UINT64_ARRAY_SET_VALUES_FROM_ARRAY, 2U);
+}
+
+bool EmitMapGet(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::MAP_GET_FAST_PATH, 2U);
+}
+
+bool EmitMapHas(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::MAP_HAS_FAST_PATH, 2U);
+}
+
+bool EmitMapDelete(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::MAP_DELETE, 2U);
+}
+
+bool EmitSetHas(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::SET_HAS, 2U);
+}
+
+bool EmitSetDelete(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::SET_DELETE, 2U);
+}

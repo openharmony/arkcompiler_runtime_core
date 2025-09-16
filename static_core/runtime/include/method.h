@@ -185,7 +185,8 @@ public:
           pandaFile_(method->pandaFile_),
           fileId_(method->fileId_),
           codeId_(method->codeId_),
-          shorty_(method->shorty_)
+          shorty_(method->shorty_),
+          saverTryCounter_(method->saverTryCounter_)
     {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
         pointer_.nativePointer.store(
@@ -335,6 +336,26 @@ public:
     {
         --stor16Pair_.hotnessCounter;
     }
+
+    inline int16_t GetSaverTryCounter() const
+    {
+        return saverTryCounter_;
+    }
+
+    inline NO_THREAD_SANITIZE void DecrementSaverTryCounter()
+    {
+        --saverTryCounter_;
+    }
+
+    inline NO_THREAD_SANITIZE void ResetSaverTryCounter()
+    {
+        // To induce call of Runtime::TryCreateSaverTask since it may cost 70% of execution time
+        // change 70% to (70 / 4096) / 30 * 100% = 0.05%
+        const int16_t initialCounter = 4096;
+        saverTryCounter_ = initialCounter;
+    }
+
+    void TryCreateSaverTask();
 
     // CC-OFFNXT(G.INC.10) false positive: static method
     static NO_THREAD_SANITIZE int16_t GetInitialHotnessCounter();
@@ -963,6 +984,7 @@ private:
     panda_file::File::EntityId fileId_;
     panda_file::File::EntityId codeId_;
     const uint16_t *shorty_;
+    int16_t saverTryCounter_ {0};
 
     std::atomic<IntrinsicIdType> intrinsicId_ {0U};
 };

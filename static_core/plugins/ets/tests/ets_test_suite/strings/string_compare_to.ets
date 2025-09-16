@@ -159,7 +159,7 @@ function main(): int {
         let str1: String = checks[i][0]
         let str2: String = checks[i][1]
         let expected: int = checks[i][2]
-        let actual: int = math.sign(str1.compareTo(str2) as double) as int;
+        let actual: int = math.sign(str1.compareTo(str2).toDouble());
 
         if (expected != actual) {
             console.println("'" + str1 + "' compared to '" + str2 + "' expected: " +

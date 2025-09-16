@@ -100,9 +100,7 @@ tokens), *N* can name the following:
    static member
    qualified name
    identifier
-   package member
    reference type
-   package
    variable
    field
    method
@@ -121,39 +119,35 @@ Declarations
     frontend_status: Done
 
 A declaration introduces a named entity in an appropriate *declaration scope*
-(see :ref:`Scopes`).
+(see :ref:`Scopes`), see
 
 .. index::
    named entity
    declared entity
    declaration scope
 
-|
-
-.. _Distinguishable Declarations:
-
-Distinguishable Declarations
-****************************
-
-.. meta:
-    frontend_status: Done
+- :ref:`Type Declarations`;
+- :ref:`Variable and Constant Declarations`;
+- :ref:`Function Declarations`;
+- :ref:`Declarations with Overload Signatures`;
+- :ref:`Classes`;
+- :ref:`Interfaces`;
+- :ref:`Enumerations`;
+- :ref:`Local Declarations`;
+- :ref:`Top-Level Declarations`;
+- :ref:`Overload Declarations`;
+- :ref:`Annotations`;
+- :ref:`Ambient Declarations`.
 
 Each declaration in the declaration scope must be *distinguishable*.
-
-A :index:`compile-time error` occurs otherwise.
-
-Declarations are *distinguishable* if they have:
-
--  Different names,
--  Different signatures (see :ref:`Declaration Distinguishable by Signatures`).
+Declarations are *distinguishable* if they have different names.
 
 .. index::
-   distinguishable declaration
    declaration scope
    name
    signature
 
-The examples below represent declarations distinguishable by names:
+Distinguishable declarations are represented by the examples below:
 
 .. code-block:: typescript
    :linenos:
@@ -169,10 +163,7 @@ The examples below represent declarations distinguishable by names:
         static field: number = PI + pi
     }
 
-If a declaration is not distinguishable by name (except a valid overloading as
-in :ref:`Function, Method and Constructor Overloading` and
-:ref:`Declaration Distinguishable by Signatures`), then a
-:index:`compile-time error` occurs:
+A :index:`compile-time error` occurs if a declaration is not distinguishable:
 
 .. code-block:: typescript
    :linenos:
@@ -201,12 +192,11 @@ in :ref:`Function, Method and Constructor Overloading` and
     interface Object {}
     let Array = 42
 
-    // Functions have the same name but are distinguishable by signatures
-    function foo() {}
-    function foo(p: number) {}
+**Note**. :ref:`Declarations with Overload Signatures` declares a single entity
+with an unique name and several signatures, but not several entities.
 
 .. index::
-   distinguishable declaration
+   declaration
    overloading
    distinguishable functions
 
@@ -259,24 +249,12 @@ Entities within the scope are accessible (see :ref:`Accessible`).
 
 The scope of an entity depends on the context the entity is declared in:
 
-.. _package-access:
-
--  Name declared on the package level (*package level scope*) is accessible
-   (see :ref:`Accessible`) throughout the entire package. The name can be
-   accessed (see :ref:`Accessible`) in other packages or modules if exported.
-
-.. index::
-   name declaration
-   package level scope
-   module level scope
-   access
-   module
-   package
-   module
-
 .. _module-access:
 
--  *Module level scope* is applicable to separate modules only. A name
+.. meta:
+    frontend_status: Done
+
+-  *Module level scope* is applicable to modules only. A name
    declared on the module level is accessible (see :ref:`Accessible`)
    throughout the entire module. If exported, a name can be accessed in other
    compilation units.
@@ -304,6 +282,9 @@ The scope of an entity depends on the context the entity is declared in:
 
 .. _class-access:
 
+.. meta:
+    frontend_status: Done
+
 -  A name declared inside a class (*class level scope*) is accessible (see
    :ref:`Accessible`) in the class and sometimes, depending on the access
    modifier (see :ref:`Access Modifiers`), outside the class, or by means of a
@@ -320,6 +301,11 @@ The scope of an entity depends on the context the entity is declared in:
    -  The expression the value stores;
    -  A reference to the class instance for the names of instance entities; or
    -  Name of the class for static entities.
+
+   |LANG| supports using the same identifier as names of a static entity and
+   of an instance entity. The two names are *distinguishable* by the context,
+   which is either a name of a class for static entities or an expression
+   that denotes an instance.
 
 .. index::
    class level scope
@@ -341,6 +327,9 @@ The scope of an entity depends on the context the entity is declared in:
 
 .. _interface-access:
 
+.. meta:
+    frontend_status: Done
+
 -  A name declared inside an interface (*interface level scope*) is accessible
    (see :ref:`Accessible`) inside and outside that interface (default
    ``public``).
@@ -355,6 +344,9 @@ The scope of an entity depends on the context the entity is declared in:
 
 .. _class-or-interface-type-parameter-access:
 
+.. meta:
+    frontend_status: Done
+
 -  *The scope of a type parameter* name in a class or interface declaration
    is that entire declaration, excluding static member declarations.
 
@@ -368,16 +360,22 @@ The scope of an entity depends on the context the entity is declared in:
 
 .. _function-type-parameter-access:
 
+.. meta:
+    frontend_status: Done
+
 -  The scope of a type parameter name in a function declaration is that
-   entire declaration (*function parameter scope*).
+   entire declaration (*function type parameter scope*).
 
 .. index::
    parameter name
    function declaration
-   function parameter scope
+   function type parameter scope
    scope
 
 .. _function-access:
+
+.. meta:
+    frontend_status: Done
 
 -  The scope of a name declared immediately inside the body of a function
    or a method declaration is the body of that declaration from the point of
@@ -393,6 +391,9 @@ The scope of an entity depends on the context the entity is declared in:
    method parameter name
 
 .. _block-access:
+
+.. meta:
+    frontend_status: Done
 
 -  The scope of a name declared inside a statement block is the body of
    the statement block from the point of declaration and up to the end
@@ -486,7 +487,7 @@ An interface declaration (see :ref:`Interfaces`), a class declaration (see
 :ref:`Classes`), an enum declaration (see :ref:`Enumerations`), or a type alias
 (see :ref:`Type Alias Declaration`) are type declarations.
 
-The syntax of *type declration* is presented below:
+The syntax of *type declaration* is presented below:
 
 .. code-block:: abnf
 
@@ -522,15 +523,15 @@ following:
 -  Names for anonymous types (array, function, and union types); or
 -  Alternative names for existing types.
 
-Scopes of type aliases are package, module, or namespace level scopes. Names of
-all type aliases must follow the uniqueness rules of
-:ref:`Distinguishable Declarations` in the current context.
+Scopes of type aliases are module or namespace level scopes. Names of all type
+aliases must follow the uniqueness rules of :ref:`Declarations` in the current
+context.
 
 .. index::
    type alias
    anonymous type
    array
-   distinguishable declaration
+   declaration
    function
    union type
    scope
@@ -575,14 +576,12 @@ meaning nor introduces a new type.
     function max(x: Vector): number {
         let m = x[0]
         for (let v of x)
-            if (v > m) v = m
+            if (v > m) m = v
         return m
     }
 
-    function main() {
-        let x: Vector = [3, 2, 1]
-        console.log(max(x)) // ok
-    }
+    let x: Vector = [2, 3, 1]
+    console.log(max(x)) // output: 3
 
 .. index::
    alias
@@ -688,7 +687,7 @@ Variable Declarations
 
 .. meta:
     frontend_status: Partly
-    todo: arrays never have default values 
+    todo: arrays never have default values
     todo: raise error for non initialized arrays: let x: number[];console.log(x)
     todo: fix grammar change - ident '?' is not allowed, readonly is not here
 
@@ -790,19 +789,17 @@ Every variable in a program must have an initial value before it can be used:
    initializer expression
    non-initialized variable
 
+
+The example below illustrates invalid initialization:
+
 .. code-block-meta:
    expect-cte:
 
 .. code-block:: typescript
    :linenos:
 
-   let a = b // a uses b for its initialization
-   let b = a // b uses a for its initialization
-
-   class A {
-     a = this.b // a uses b for its initialization
-     b = this.a // b uses a for its initialization
-   }
+   let a = b // compile-time error: circular dependency
+   let b = a
 
 |
 
@@ -834,9 +831,6 @@ The syntax of *constant declarations* is presented below:
     constantDeclaration:
         identifier (':' type)? initializer
         ;
-
-If a constant declaration belongs to the package (see :ref:`Packages`), then its
-syntax and semantics can be slightly extended (see :ref:`Constants in packages`).
 
 The type ``T`` of a constant declaration is determined as follows:
 
@@ -931,7 +925,6 @@ If the type of the initializer expression cannot be inferred, then a
    initializer
    subtyping
    supertype
-   normalization
    type inference
    inferred type
    type annotation
@@ -1043,9 +1036,8 @@ The syntax of *signature* is presented below:
         '(' parameterList? ')' returnType?
         ;
 
-Overloading (see :ref:`Function, Method and Constructor Overloading`) is supported for
-functions, methods and constructors. The signatures of overloaded entities are important
-for their unique identification.
+A function, method, or constructor can have several *overload signatures* (see
+:ref:`Declarations with Overload Signatures`).
 
 .. index::
    signature
@@ -1109,7 +1101,7 @@ Several parameters can be *optional*, allowing to omit
 corresponding arguments in a call (see :ref:`Optional Parameters`).
 
 A :index:`compile-time error` occurs if an *optional parameter* precedes a
-*required parameter* in the parameter list.
+*required parameter*.
 
 The last parameter of a function or a method can be a single *rest parameter*
 (see :ref:`Rest Parameter`).
@@ -1143,7 +1135,7 @@ Readonly Parameters
 .. meta:
     frontend_status: Done
 
-If the parameter type is ``readonly`` array or tuple type, then 
+If the parameter type is ``readonly`` array or tuple type, then
 no assignment and no function or method call can modify
 elements of this array or tuple.
 Otherwise, a :index:`compile-time error` occurs:
@@ -1271,7 +1263,8 @@ The syntax of *rest parameter* is presented below:
 A :index:`compile-time error` occurs if a rest parameter:
 
 -  Is not the last parameter in a parameter list;
--  Has a type that is neither an array type nor a tuple type.
+-  Has a type that is not an array type, a tuple type, nor a type
+   parameter constrained by an array or a tuple type.
 
 A call of entity with a rest parameter of array type ``T[]``
 (or ``FixedArray<T>``) can accept any number of arguments
@@ -1281,17 +1274,17 @@ of types that are assignable (see :ref:`Assignability`) to ``T``:
    rest parameter
    function
    method
+   constructor
+   lambda
+   spread operator
+   prefix
    parameter name
-   rest parameter
-   array type
+   syntax
    parameter list
    array type
    tuple type
    assignability
-   lambda
-   constructor
    argument
-   prefix
 
 .. code-block:: typescript
    :linenos:
@@ -1332,12 +1325,10 @@ as a prefix before the array argument:
    argument
    prefix
    spread operator
+   spread expression
    function
-   method
    array argument
    array type
-   entity
-   spread expression
 
 A call of entity with a rest parameter of tuple type
 [``T``:sub:`1` ``, ..., T``:sub:`n`] can accept only ``n`` arguments of types
@@ -1345,16 +1336,12 @@ that are assignable (see :ref:`Assignability`) to the corresponding
 ``T``:sub:`i`:
 
 .. index::
+   call
    rest parameter
-   function
-   lambda
-   assignability
-   method
-   parameter name
    tuple type
-   parameter list
    type
    argument
+   assignability
 
 .. code-block:: typescript
    :linenos:
@@ -1367,6 +1354,23 @@ that are assignable (see :ref:`Assignability`) to the corresponding
     sum(1)         // compile-time error: wrong number of arguments, 1 instead of 3
     sum(1, 2, "a") // compile-time error: wrong type of the 3rd argument
     sum(1, 2, 3)   // returns 6
+
+It is legal though meaningless to declare a function with an optional
+parameter followed by a rest parameter of a tuple type.
+However, use of such function without explicitly set optional and
+rest parameters will cause compile-time error:
+
+.. code-block:: typescript
+   :linenos:
+
+    // optional tuple + rest tuple
+    function g(opt?: [number, string], ...tail: [number,string]) { // OK
+       // ...
+    }
+
+    g() // CTE - no rest tuple
+    g([1, "str"]) // CTE - no rest tuple
+    g([ 1, "str"], 1, "str") // OK
 
 If an argument of tuple type [``T``:sub:`1` ``, ..., T``:sub:`n`]
 is to be passed to a call of entity with the rest parameter,
@@ -1388,6 +1392,9 @@ prefix before the tuple argument:
        // returns 6
 
 .. index::
+   optional parameter
+   tuple type
+   entity
    argument
    prefix
    spread expression
@@ -1416,6 +1423,21 @@ as a prefix before the fixed-size array argument:
     let x: FixedArray<number> = [1, 2, 3]
     sum(...x) // spread an fixed-size array 'x'
        // returns 6
+
+
+If constrained by an array or a tuple type, a type parameter can be used with
+generics as a *rest parameter*.
+
+.. code-block:: typescript
+   :linenos:
+
+    function sum<T extends Array<number>>(...numbers: T): number {
+      let res = 0
+      for (let n of numbers)
+        res += n
+      return res
+    }
+
 
 .. index::
    argument
@@ -1447,24 +1469,22 @@ top-level variable within the body of that function or method:
 .. code-block:: typescript
    :linenos:
 
-    class T1 {}
-    class T2 {}
-    class T3 {}
-
-    let variable: T1
-    function foo (variable: T2) {
-        // 'variable' has type T2 and refers to the function parameter
+    let x: number = 1
+    function foo (x: string) {
+        // 'x' refers to the parameter and has type string
     }
     class SomeClass {
-      method (variable: T3) {
-        // 'variable' has type T3 and refers to the method parameter
+      method (x: boolean) {
+        // 'x' refers to the method parameter and has type boolean
       }
     }
+    x++ // 'x' refers to the global variable
 
 .. index::
    shadowing
    parameter
    accessibility
+   access
    top-level variable
    access
    function body
@@ -1474,6 +1494,7 @@ top-level variable within the body of that function or method:
    method
    function parameter
    method parameter
+   boolean type
 
 |
 
@@ -1485,11 +1506,11 @@ Return Type
 .. meta:
     frontend_status: Done
 
-Function or method return type defines the static type of the result of the
-function or method execution (see :ref:`Function Call Expression` and
-:ref:`Method Call Expression`). During the execution, the function or method
-can produce a value of a type assignable (see :ref:`Assignability`) to the
-return type.
+Function, method, or lambda return type defines the resultant type of the
+function, method, or lambda execution (see :ref:`Function Call Expression`,
+:ref:`Method Call Expression`, and :ref:`Lambda Expressions`). During the
+execution, the function, method, or lambda can produce a value of a type
+that is assignable to the return type (see :ref:`Assignability`).
 
 The syntax of *return type* is presented below:
 
@@ -1503,27 +1524,43 @@ If function or method return type is not ``void`` (see :ref:`Type void`), and
 the execution path of the function or method body has no return statement (see
 :ref:`Return Statements`), then a :index:`compile-time error` occurs.
 
+A :index:`compile-time error` occurs if lambda return type is not ``never``
+(see :ref:`Type never`), and the execution path of a function, method, or
+lambda body has no return statement (see :ref:`Return Statements`).
+
 A special form of return type with the keyword ``this`` as type annotation can
 be used in class instance methods only (see :ref:`Methods Returning this`).
 
-If function or method return type is not specified, then it is inferred from
-its body (see :ref:`Return Type Inference`). If there is no body, then the
-function or method return type is ``void`` (see :ref:`Type void`).
+If function, method, or lambda return type is not specified, then it is
+inferred from its body (see :ref:`Return Type Inference`). If there is no body,
+then the function, method, or lambda return type is ``void`` (see
+:ref:`Type void`).
 
 .. index::
    return type
    function
    method
+   lambda
+   function call
+   function call expression
+   method call expression
+   lambda expression
    static type
    assignable type
    assignability
    return statement
+   syntax
    method body
    type void
    execution path
    return statement
    inferred type
    type inference
+   void type
+   never type
+   this keyword
+   type annotation
+   class instance method
 
 |
 
@@ -1535,9 +1572,9 @@ Return Type Inference
 .. meta:
     frontend_status: Done
 
-An omitted function or method return type can be inferred from the function,
-or the method body. If the return type is omitted in a native function (see
-:ref:`Native Functions`), then a :index:`compile-time error` occurs.
+A missing function, method, or lambda return type can be inferred from the
+function, method, or lambda body. A :index:`compile-time error` occurs if
+return type is missing from a native function (see :ref:`Native Functions`).
 
 The current version of |LANG| allows inferring return types at least under
 the following conditions:
@@ -1550,33 +1587,41 @@ the following conditions:
    expressions of types ``T``:sub:`1`, ``...``, ``T``:sub:`k`, then ``R`` is the
    *union type* (see :ref:`Union Types`) of these types (``T``:sub:`1` | ... |
    ``T``:sub:`k`), and its normalized version (see :ref:`Union Types Normalization`)
-   is the return type.
--  If a function or a method is ``async`` (see :ref:`Async Functions and Methods`), 
-   the return type is inferred by using the rules above, and the return type ``T``
-   is not ``Promise``, then the return type is assumed to be ``Promise<T>``.
+   is the return type. If at least one of return statements has no expression, then
+   type ``undefined`` is added to the return type union.
+-  If a lambda body contains no return statement but at least one throw statement
+   (see :ref:`Throw Statements`), then the lambda return type is ``never`` (see
+   :ref:`Type never`).
+-  If a function, a method, or a lambda is ``async`` (see
+   :ref:`Async Functions and Methods`), a return type is inferred by applying
+   the above rules, and the return type ``T`` is not ``Promise``, then the return
+   type is assumed to be ``Promise<T>``.
 
 Future compiler implementations are to infer the return type in more cases.
-The example below represents type inference:
+Type inference is represented in the example below:
 
 .. index::
    return type
    function
    method
+   lambda
    function return type
    method return type
    native function
+   void type
    type inference
    inferred type
    method body
    return statement
    normalization
-   type expression
-   normalization
+   expression type
    expression
    function
    implementation
    compiler
    union type
+   never type
+   async type
 
 .. code-block:: typescript
 
@@ -1608,16 +1653,20 @@ a corresponding :index:`compile-time error` occurs.
 
 .. index::
    inference
+   boolean
+   string
+   union type
    compiler
    type inference
    inferred type
+   compiler
 
 |
 
-.. _Overload Signatures:
+.. _Declarations with Overload Signatures:
 
-Overload Signatures
-*******************
+Declarations with Overload Signatures
+*************************************
 
 .. meta:
     frontend_status: None
@@ -1626,41 +1675,24 @@ Overload Signatures
 have several *overload signatures* followed by one implementation body.
 
 A call of an entity with overload signatures is always a call of the
-implementation body. If the implementation body is missing, or does
-not immediately follow the declaration, then a :index:`compile-time error`
-occurs.
-
-The example below has two overload signatures defined for a function:
+implementation body. If the implementation body is missing, then a
+:index:`compile-time error` occurs.
 
 .. index::
-   function
    overload signature
-   function header
-   implementation function
-   implementation
+   declaration
+   function
+   method
+   constructor
+   implementation body
+   call
 
-.. code-block:: typescript
-   :linenos:
+|
 
-    function foo(): void           // 1st signature
-    function foo(x: string): void  // 2nd signature
-    function foo(x: Object|null|undefined): void // 3rd - implementation signature
-    {
-        console.log(x)
-    }
+.. _Function with Overload Signatures:
 
-    foo()          // ok, call fits 1st and 3rd signatures
-    foo("aa")      // ok, call fits 2nd and 3rd signatures
-    foo(undefined) // ok, call fits the 3rd signature
-
-The call of ``foo()`` is executed as a call of the implementation function
-with the ``undefined`` argument. The call of ``foo(x)`` is executed as a call
-of the implementation function with the ``x`` argument.
-
-.. _Function Overload Signatures:
-
-Function Overload Signatures
-============================
+Function with Overload Signatures
+=================================
 
 .. meta:
     frontend_status: None
@@ -1678,30 +1710,64 @@ is presented below (see also :ref:`Function Declarations`):
       'async'? 'function' identifier typeParameters? signature
       ;
 
-The semantic rules for *overload signatures* and its implementation body
-are described in :ref:`Overload Signatures Correctness Check`.
+*Function with overload signatures* declared in a non-ambient context must have
+an *implementation body* (it is then called *function with a body*).
+Otherwise, a  :index:`compile-time error` occurs.
 
-If not all overload signatures are either exported or non-exported, then a
-:index:`compile-time error` occurs.
+The semantic rules for *implementation bodies* are discussed in
+:ref:`Overload Signatures Implementation Body`.
+
+A :index:`compile-time error` occurs if not all overload signatures and
+implementation bodies (if any) are either exported or non-exported.
+
+The example below shows two overload signatures defined for a function:
+
+.. index::
+   function with overload signature
+   overload signature
+   non-ambient context
+   implementation body
+   function with a body
+   function declaration
+   devlaration
+   syntax
+   call
+   implementation function
+   export
+   function
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo(): void           // 1st signature
+    function foo(x: string): void  // 2nd signature
+    function foo(...args: Any[]): Any // implementation signature
+    {
+        console.log(args)
+    }
+
+    foo()          // ok, call fits the 1st signature
+    foo("aa")      // ok, call fits the 2nd signature
+    foo(undefined) // compile-time error, implementation signature is not accessible
+
+The call of ``foo()`` is executed as a call of an implementation function
+with an empty array argument. The call of ``foo(x)`` is executed as a call
+of an implementation function with an argument in the form of an array with
+the sole element ``x``.
 
 .. index::
    call
    implementation function
-   argument null
-   argument undefined
-   execution
-   signature
-   function
-   implementation
-   overload signature
-   compatibility
+   array argument
+   argument
+   array
 
 |
 
-.. _Class Method Overload Signatures:
+.. _Class Method with Overload Signatures:
 
-Class Method Overload Signatures
-================================
+Class Method with Overload Signatures
+=====================================
 
 .. meta:
     frontend_status: None
@@ -1719,17 +1785,103 @@ is presented below (see also :ref:`Method Declarations`):
         methodModifier* identifier signature
         ;
 
-A :index:`compile-time error` occurs if the method implementation is not
-present, or does not immediately follow the declaration.
+*Method with overload signatures* declared in a non-ambient context must have
+an *implementation body* (it is then called *method with a body*). Otherwise,
+a :index:`compile-time error` occurs.
 
-The semantic rules for *overload signatures* and its implementation body
-are described in :ref:`Overload Signatures Correctness Check`.
+.. index::
+   class method
+   overload signature
+   method declaration
+   method with overload signature
+   syntax
+   non-ambient context
+   implementation body
+   method with a body
 
+The semantic rules for *implementation bodies* are discussed in
+:ref:`Overload Signatures Implementation Body`.
 
-.. _Constructor Overload Signatures:
+A :index:`compile-time error` also occurs if not **all** of the following
+requirements are met:
 
-Constructor Overload Signature
-================================
+- Access modifiers of an overload signature and an implementation method are
+  the same;
+- All overload signatures and an implementation method are either static or
+  non-static;
+- All overload signatures and an implementation method are either final or
+  non-final;
+- Overload signatures are not native (however, a native implementation method
+  is allowed);
+- Overload signatures are not abstract.
+
+Two overload signatures defined for a method are represented in the example
+below:
+
+.. index::
+   method
+   implementation body
+   overload signature
+   implementation method
+   access modifier
+   implementation method
+   static implementation method
+   non-static implementation method
+   final implementation method
+   non-final implementation method
+
+.. code-block:: typescript
+   :linenos:
+
+    class A {
+      foo(): void           // 1st signature
+      foo(x: string): void  // 2nd signature
+      foo(...args: Any[]): Any // implementation signature
+      {
+        console.log(args)
+        return new Object
+      }
+    }
+
+    const a = new A
+    a.foo()          // ok, call fits the 1st signature
+    a.foo("aa")      // ok, call fits the 2nd signature
+    a.foo(undefined) // compile-time error, implementation signature is not accessible
+
+The call of ``a.foo()`` is executed as a call of the implementation method
+with an empty array argument. The call of ``a.foo(x)`` is executed as a call
+of an implementation method with an argument in the form of an array with the
+sole element ``x``.
+
+.. code-block:: typescript
+   :linenos:
+
+    // compile-time errors: mix of different accessibility statuses,
+    // mix of static and non-static
+    class Incorrect {
+      foo(): void                    // 1st signature
+      private foo(x: string): void   // 2nd signature
+      protected foo(x: string): void // 3rd signature
+      static foo(x: Object): void    // 4th signature
+      foo(...args: Any[]): Any       // implementation signature
+      { return new Object }
+    }
+
+.. index::
+   signature
+   implementation signature
+   access
+   call
+   implementation method
+   array argument
+   array element
+
+|
+
+.. _Constructor with Overload Signatures:
+
+Constructor with Overload Signatures
+====================================
 
 .. meta:
     frontend_status: None
@@ -1748,18 +1900,92 @@ is presented below (see also :ref:`Constructor Declaration`):
         accessModifier? 'constructor' signature
         ;
 
-A :index:`compile-time error` occurs if at least two different overload
-signatures or implementation signatures have different *access modifiers*.
+*Constructor with overload signatures* declared in a non-ambient context must
+have an *implementation body* (it is then called *constructor with a body*).
+A :index:`compile-time error` occurs in the following situations:
 
-The semantic rules for *overload signatures* and its implementation body
-are described in :ref:`Overload Signatures Correctness Check`.
+- Implementation body is missing;
+- Implementation body fails to follow a signature immediately; or
+- Two or more signatures of an implementation body have different access
+  modifiers.
 
-.. _Overload Signatures Correctness Check:
+The semantic rules for *implementation bodies* are discussed in
+:ref:`Overload Signatures Implementation Body`.
 
-Overload Signatures Correctness Check
-=====================================
+The example below shows two overload signatures defined for a constructor:
 
-TBD
+.. index::
+   constructor
+   overload signature
+   constructor with overload signature
+   implementation constructor
+   syntax
+   non-ambient context
+   implementation body
+   signature
+   access modifier
+   access
+   implementation body
+
+.. code-block:: typescript
+   :linenos:
+
+    class A {
+      constructor ()           // 1st signature
+      constructor(x: string)  // 2nd signature
+      constructor(...args: Any[]) // implementation signature
+      {}
+    }
+
+    new A()          // ok, call fits the 1st signature
+    new A("aa")      // ok, call fits the 2nd signature
+    new A(undefined) // compile-time error, implementation signature is not accessible
+
+
+The call of ``A()`` is executed as a call of an implementation constructor with
+an empty array argument. The call of ``A(x)`` is executed as a call of an
+implementation constructor with an argument in the form of an array with the
+sole element ``x``.
+
+.. index::
+   call
+   implementation constructor
+   array argument
+   array element
+
+|
+
+.. _Overload Signatures Implementation Body:
+
+Overload Signatures Implementation Body
+=======================================
+
+*Implementation body* must have a signature as follows:
+
+- For functions or methods (see :index:`Type Any`):
+
+.. code-block:: typescript
+   :linenos:
+
+    (...args: Any[]): Any
+
+- For constructors:
+
+.. code-block:: typescript
+   :linenos:
+
+    (...args: Any[])
+
+
+Otherwise, a :index:`compile-time error` occurs.
+
+.. index::
+   implementation body
+   signature
+   any type
+   function
+   method
+   constructor
 
 |
 

@@ -52,6 +52,7 @@ public:
         return numVregs + numDeclaredArgs;
     }
 
+    // NOLINTNEXTLINE(misc-unused-parameters)
     ALWAYS_INLINE inline static void InitActualArgs(Frame *frame, Span<Value> argsSpan, uint32_t numVregs,
                                                     [[maybe_unused]] uint32_t numDeclaredArgs)
     {
@@ -89,8 +90,10 @@ public:
         return numVregs + std::max(numDeclaredArgs, numActualArgs);
     }
 
+    // NOLINTNEXTLINE(misc-unused-parameters)
     ALWAYS_INLINE inline static void InitActualArgs(Frame *frame, Span<coretypes::TaggedValue> argsSpan,
-                                                    uint32_t numVregs, [[maybe_unused]] uint32_t numDeclaredArgs)
+                                                    [[maybe_unused]] uint32_t numVregs,
+                                                    [[maybe_unused]] uint32_t numDeclaredArgs)
     {
         frame->SetDynamic();
 
@@ -461,6 +464,9 @@ inline bool Method::DecrementHotnessCounter(ManagedThread *thread, uintptr_t bcO
     ASSERT(thread != nullptr);
     // The compilation process will start performing
     // once the counter value decreases to a value that is or less than 0
+
+    TryCreateSaverTask();
+
     if (GetHotnessCounter() > 0) {
         if (TryVerify<IS_CALL>()) {
             DecrementHotnessCounter();

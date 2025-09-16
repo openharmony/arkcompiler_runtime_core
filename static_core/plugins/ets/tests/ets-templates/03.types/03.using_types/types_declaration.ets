@@ -27,6 +27,8 @@ class A {
 let x = {{i}};
 function main(): void {
   let y = {{i}};
+  arktest.assertTrue(x instanceof Function)
+  arktest.assertTrue(y instanceof Function)
 }
 {% else %}
 let x: {{i}};

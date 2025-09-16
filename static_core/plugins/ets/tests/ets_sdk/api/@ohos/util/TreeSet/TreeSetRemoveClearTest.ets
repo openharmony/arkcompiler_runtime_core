@@ -14,9 +14,10 @@
  */
 
 import {TreeSet} from "@ohos.util.TreeSet";
+import {TreeSetComparator} from "@ohos.util.TreeSet";
 
 function main(): int {
-    const suite = new ArkTestsuite("TreeSet Remove Clear API tests")
+    const suite = new arktest.ArkTestsuite("TreeSet Remove Clear API tests")
 
     suite.addTest("TreeSet remove value", testRemoveExistingValue)
     suite.addTest("TreeSet remove not set value", testRemoveNonExistingValue)
@@ -32,36 +33,37 @@ function main(): int {
 
 function testRemoveExistingValue() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): number => { return secondValue.compareTo(firstValue) });
+        secondValue: string): double => { return secondValue.compareTo(firstValue) });
     treeSet.add("aa");
     let result1 = treeSet.remove("aa");
     let result2 = treeSet.has("aa");
-    assertEQ(result1, true, "The treeSet should remove the value");
-    assertEQ(result2, false, "The treeSet should not has the value");
-    assertEQ(treeSet.length, 0, "The treeSet length should be 0");
+    arktest.assertEQ(result1, true, "The treeSet should remove the value");
+    arktest.assertEQ(result2, false, "The treeSet should not has the value");
+    arktest.assertEQ(treeSet.length, 0, "The treeSet length should be 0");
 }
 
 function testRemoveNonExistingValue() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): number => { return secondValue.compareTo(firstValue) });
+        secondValue: string): double => { return secondValue.compareTo(firstValue) });
     treeSet.add("aa");
     let result = treeSet.remove("bb");
-    assertEQ(result, false, "The treeSet should return false for the value that is not set");
-    assertEQ(treeSet.length, 1, "The treeSet length should be 1");
+    arktest.assertEQ(result, false, "The treeSet should return false for the value that is not set");
+    arktest.assertEQ(treeSet.length, 1, "The treeSet length should be 1");
 }
 
-function removeItem(treeSet: TreeSet<number>){
+function removeItem(treeSet: TreeSet<double>){
     const first = treeSet.getFirstValue()
     console.log(first)
     treeSet.remove(first!)
 }
 
 function testAddValueBetweenRemoveValue() {
-    let treeSet = new TreeSet<number>((first: number, second: number) =>{
+    let treeSetCb: TreeSetComparator<double> = (first: double, second: double) =>{
         return second - first;
-    });
+    };
+    let treeSet = new TreeSet<double>(treeSetCb);
     const insertArr = [643, 811, 807, 378, 226, 195, 599, 641, 494, 964, 156, 419, 977, 20, 788, 596]
-    for(let i = 0;i < insertArr.length;i++) {
+    for(let i: int = 0;i < insertArr.length;i++) {
         treeSet.add(insertArr[i]);
     }
     removeItem(treeSet);
@@ -82,57 +84,57 @@ function testAddValueBetweenRemoveValue() {
     let index = 0;
     treeSet.forEach((element) => {
         console.log(element);
-        assertEQ(element, resArr[index], "The result should be match");
+        arktest.assertEQ(element, resArr[index], "The result should be match");
         index++;
     });
 }
 
 function testRemoveValueFromEmptyTreeSet() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): number => { return secondValue.compareTo(firstValue) });
+        secondValue: string): double => { return secondValue.compareTo(firstValue) });
     let result = treeSet.remove("aa");
-    assertEQ(result, false, "The treeSet should return undefined for a value in an empty set");
-    assertEQ(treeSet.length, 0, "The treeSet length should be 0");
+    arktest.assertEQ(result, false, "The treeSet should return undefined for a value in an empty set");
+    arktest.assertEQ(treeSet.length, 0, "The treeSet length should be 0");
 }
 
 function testRemoveEmptyStringValueFromEmptyTreeSet() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): number => { return secondValue.compareTo(firstValue) });
+        secondValue: string): double => { return secondValue.compareTo(firstValue) });
     let result = treeSet.remove("");
-    assertEQ(result, false, "The treeSet should return undefined for a value in an empty set");
-    assertEQ(treeSet.length, 0, "The treeSet length should be 0");
+    arktest.assertEQ(result, false, "The treeSet should return undefined for a value in an empty set");
+    arktest.assertEQ(treeSet.length, 0, "The treeSet length should be 0");
 }
 
 function testClearData() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): number => { return secondValue.compareTo(firstValue) });
+        secondValue: string): double => { return secondValue.compareTo(firstValue) });
     treeSet.add("aa");
     treeSet.clear();
     let result1 = treeSet.has("aa");
     let result2 = treeSet.isEmpty();
-    assertEQ(result1, false, "The treeSet should not has the value");
-    assertEQ(result2, true, "The treeSet should be empty");
-    assertEQ(treeSet.length, 0, "The treeSet length should be 0");
+    arktest.assertEQ(result1, false, "The treeSet should not has the value");
+    arktest.assertEQ(result2, true, "The treeSet should be empty");
+    arktest.assertEQ(treeSet.length, 0, "The treeSet length should be 0");
 }
 
 function testClearEmptyTreeSet() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): number => { return secondValue.compareTo(firstValue) });
+        secondValue: string): double => { return secondValue.compareTo(firstValue) });
     treeSet.clear();
-    assertEQ(treeSet.length, 0, "The treeSet length should be 0");
+    arktest.assertEQ(treeSet.length, 0, "The treeSet length should be 0");
 }
 
 function testAddDataAfterClearTreeSet() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): number => { return firstValue.compareTo(secondValue) });
+        secondValue: string): double => { return firstValue.compareTo(secondValue) });
     treeSet.add("aa");
     treeSet.add("bb");
     treeSet.clear();
-    assertEQ(treeSet.length, 0, "The treeSet length should be 0");
+    arktest.assertEQ(treeSet.length, 0, "The treeSet length should be 0");
     treeSet.add("cc");
     treeSet.add("dd");
     treeSet.add("ee");
-    assertEQ(treeSet.length, 3, "The treeSet length should be 3");
-    assertEQ(treeSet.getFirstValue(), "ee", "The treeMap first value should be ee");
-    assertEQ(treeSet.getLastValue(), "cc", "The treeMap last value should be cc");
+    arktest.assertEQ(treeSet.length, 3, "The treeSet length should be 3");
+    arktest.assertEQ(treeSet.getFirstValue(), "ee", "The treeMap first value should be ee");
+    arktest.assertEQ(treeSet.getLastValue(), "cc", "The treeMap last value should be cc");
 }

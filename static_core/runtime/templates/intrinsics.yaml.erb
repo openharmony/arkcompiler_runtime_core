@@ -24,7 +24,8 @@
   compiler_only: <%= compiler_only %>
   signature:
 % stackrange = intrinsic.signature.respond_to?(:stackrange) && intrinsic.signature.stackrange
-% full_args = intrinsic.signature.args + (stackrange ? ['ptr'] : [])
+% raw_args = intrinsic.signature.args + (stackrange ? ['ptr'] : [])
+% full_args = raw_args.map { |arg| yaml_union_type?(arg) ? '{U' + arg[2..-1] : arg }
     ret: "<%= intrinsic.signature.ret %>"
     stackrange: <%= stackrange %>
     args: <%= full_args %>
@@ -34,7 +35,9 @@
   impl: <%= intrinsic.wrapper_impl %>
   impl_signature:
     ret: "<%= get_ret_effective_type(intrinsic.signature.ret) %>"
-    args: <%= ((!static && !compiler_only)? [get_effective_type(intrinsic.class_name)] : []) + full_args.map { |t| get_effective_type(t) }.flatten %>
+%   impl_args = intrinsic.signature.impl_args
+%   impl_args_str = full_args.each_with_index.map { |t, i| get_effective_type(t, impl_args ? impl_args[i] : nil ) }.flatten
+    args: <%= ((!static && !compiler_only)? [get_effective_type(intrinsic.class_name)] : []) + impl_args_str %>
 %   if intrinsic.need_abi_wrapper?
   orig_impl: <%= intrinsic.impl %>
   orig_impl_signature:

@@ -27,6 +27,6 @@ function main(): void {
     let a = with_return() {
         return (): number => { return 5 }
     }
-    assertEQ( a, 5)
+    arktest.assertEQ( a, 5)
 }
 

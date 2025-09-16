@@ -24,6 +24,6 @@ class X {}
 
 function main() : int {
     let x: X | null | undefined = null
-    assertEQ( x, null)
+    arktest.assertEQ( x, null)
     return 0;
 }

@@ -32,7 +32,15 @@ Coroutine *CoroutineManager::CreateMainCoroutine(Runtime *runtime, PandaVM *vm)
 
     Coroutine::SetCurrent(main);
     main->InitBuffers();
+#ifdef ARK_HYBRID
+    auto hasJsRuntime = panda::ThreadHolder::GetCurrent() != nullptr;
     main->LinkToExternalHolder(true);
+    // We need to unbind mutator before binding in the RequestResume,
+    // as it was bound during JS runtime creation/execution
+    if (hasJsRuntime) {
+        main->UnbindMutator();
+    }
+#endif
     main->RequestResume();
     main->NativeCodeBegin();
 
@@ -58,6 +66,8 @@ Coroutine *CoroutineManager::CreateEntrypointlessCoroutine(Runtime *runtime, Pan
         // resource limit reached
         return nullptr;
     }
+    // In current design user (not system) coroutine is EP-ful mutator
+    ASSERT(CoroutineManager::IsSystemCoroutine(type, false));
     CoroutineContext *ctx = CreateCoroutineContext(false);
     if (ctx == nullptr) {
         // do not proceed if we cannot create a context for the new coroutine
@@ -68,7 +78,7 @@ Coroutine *CoroutineManager::CreateEntrypointlessCoroutine(Runtime *runtime, Pan
     co->InitBuffers();
     if (makeCurrent) {
         Coroutine::SetCurrent(co);
-        co->LinkToExternalHolder(false);
+        co->LinkToExternalHolder(true);
         co->RequestResume();
         co->NativeCodeBegin();
     }
@@ -91,6 +101,10 @@ Coroutine *CoroutineManager::CreateCoroutineInstance(EntrypointInfo &&epInfo, Pa
 {
     if (GetCoroutineCount() >= GetCoroutineCountLimit()) {
         // resource limit reached
+        return nullptr;
+    }
+    if (!IsSystemCoroutine(type, true) && IsUserCoroutineLimitReached()) {
+        // user coro limit reached
         return nullptr;
     }
     CoroutineContext *ctx = CreateCoroutineContext(true);

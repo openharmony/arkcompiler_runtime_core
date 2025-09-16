@@ -55,6 +55,7 @@ panda_target_sources(arkcompiler PRIVATE ${COMPILER_SOURCES})
 
 panda_target_include_directories(arkcompiler PUBLIC
   ${GENERATED_DIR}
+  ${PANDA_ROOT}/../common_interfaces
 )
 
 add_inst_templates(${CMAKE_CURRENT_SOURCE_DIR}/optimizer/ir_builder/ets_inst_templates.yaml)

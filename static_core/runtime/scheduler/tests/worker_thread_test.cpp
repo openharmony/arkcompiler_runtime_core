@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "libpandabase/utils/utf.h"
-#include "libpandabase/panda_gen_options/generated/base_options.h"
+#include "generated/logger_options.h"
 #include "runtime/include/class_linker.h"
 #include "runtime/include/runtime.h"
 #include "runtime/scheduler/worker_thread.h"
@@ -29,7 +29,7 @@ class WorkerThreadTest : public testing::Test {
 public:
     WorkerThreadTest()
     {
-        Logger::Initialize(base_options::Options(""));
+        Logger::Initialize(logger::Options(""));
 
         RuntimeOptions options;
         auto execPath = ark::os::file::File::GetExecutablePath();

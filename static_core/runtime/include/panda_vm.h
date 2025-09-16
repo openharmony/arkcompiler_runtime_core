@@ -15,8 +15,9 @@
 #ifndef PANDA_RUNTIME_PANDA_VM_H
 #define PANDA_RUNTIME_PANDA_VM_H
 
-#include "include/coretypes/string.h"
+#include "include/coretypes/line_string.h"
 #include "include/runtime_options.h"
+#include "jit/profile_saver_worker.h"
 #include "runtime/include/locks.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_string.h"
@@ -147,6 +148,11 @@ public:
 
     virtual LanguageContext GetLanguageContext() const = 0;
     virtual CompilerInterface *GetCompiler() const = 0;
+
+    virtual ProfileSaverWorker *GetProfileSaverWorker() const
+    {
+        return nullptr;
+    }
 
     virtual ark::mem::ReferenceProcessor *GetReferenceProcessor() const = 0;
 

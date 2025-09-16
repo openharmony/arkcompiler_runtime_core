@@ -25,6 +25,7 @@
 #include <libpandafile/include/source_lang_enum.h>
 
 #include "include/mem/panda_smart_pointers.h"
+#include "jit/profile_saver_worker.h"
 #include "libpandabase/macros.h"
 #include "libpandabase/mem/mem.h"
 #include "libpandabase/utils/expected.h"
@@ -55,6 +56,7 @@
 #include "runtime/thread_manager.h"
 #include "plugins/ets/runtime/ets_class_linker.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/mem/ets_gc_stat.h"
 #include "runtime/coroutines/coroutine_manager.h"
 #include "plugins/ets/runtime/ani/ani.h"
 #include "plugins/ets/runtime/ets_native_library_provider.h"
@@ -65,6 +67,7 @@
 #include "plugins/ets/runtime/mem/root_provider.h"
 #include "plugins/ets/runtime/ets_object_state_table.h"
 #include "plugins/ets/runtime/finalreg/finalization_registry_manager.h"
+#include "plugins/ets/runtime/unhandled_manager/unhandled_object_manager.h"
 
 namespace ark::ets {
 class DoubleToStringCache;
@@ -241,6 +244,16 @@ public:
         return compiler_;
     }
 
+    UnhandledObjectManager *GetUnhandledObjectManager() const
+    {
+        return unhandledObjectManager_;
+    }
+
+    ProfileSaverWorker *GetProfileSaverWorker() const override
+    {
+        return saverWorker_;
+    }
+
     PANDA_PUBLIC_API ObjectHeader *GetOOMErrorObject() override;
 
     PANDA_PUBLIC_API ObjectHeader *GetNullValue() const;
@@ -390,23 +403,11 @@ public:
         objStateTable_->DeflateInfo();
     }
 
-    /// @brief Adds failed job to an internal storage
-    void AddUnhandledFailedJob(EtsJob *job);
-
-    /// @brief Removes failed job from internal storage
-    void RemoveUnhandledFailedJob(EtsJob *job);
-
-    /// @brief Invokes managed method to apply custom handler on stored failed jobs
-    void ListUnhandledFailedJobs();
-
-    /// @brief Adds rejected promise to an internal storage
-    void AddUnhandledRejectedPromise(EtsPromise *promise);
-
-    /// @brief Removes rejected promise from internal storage
-    void RemoveUnhandledRejectedPromise(EtsPromise *promise);
-
-    /// @brief Invokes managed method to apply custom handler on stored rejected promises
-    void ListUnhandledRejectedPromises();
+    uint64_t GetFullGCLongTimeCount() const
+    {
+        ASSERT(fullGCLongTimeListener_);
+        return fullGCLongTimeListener_->GetFullGCLongTimeCount();
+    }
 
     PANDA_PUBLIC_API void AddRootProvider(mem::RootProvider *provider);
     PANDA_PUBLIC_API void RemoveRootProvider(mem::RootProvider *provider);
@@ -442,15 +443,13 @@ private:
 
     explicit PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::MemoryManager *mm);
 
-    void AddUnhandledObjectImpl(PandaUnorderedSet<EtsObject *> &unhandledObjects, EtsObject *object);
-    void RemoveUnhandledObjectImpl(PandaUnorderedSet<EtsObject *> &unhandledObjects, EtsObject *object);
-
     Runtime *runtime_ {nullptr};
     mem::MemoryManager *mm_ {nullptr};
     PandaUniquePtr<EtsClassLinker> classLinker_;
     mem::ReferenceProcessor *referenceProcessor_ {nullptr};
     PandaVector<ObjectHeader *> gcRoots_;
     Rendezvous *rendezvous_ {nullptr};
+    ProfileSaverWorker *saverWorker_ {nullptr};
     CompilerInterface *compiler_ {nullptr};
     StringTable *stringTable_ {nullptr};
     MonitorPool *monitorPool_ {nullptr};
@@ -473,9 +472,8 @@ private:
     DoubleToStringCache *doubleToStringCache_ {nullptr};
     FloatToStringCache *floatToStringCache_ {nullptr};
     LongToStringCache *longToStringCache_ {nullptr};
-    os::memory::Mutex unhandledMutex_;
-    PandaUnorderedSet<EtsObject *> unhandledFailedJobs_;
-    PandaUnorderedSet<EtsObject *> unhandledRejectedPromises_;
+    UnhandledObjectManager *unhandledObjectManager_ {nullptr};
+    FullGCLongTimeListener *fullGCLongTimeListener_ {nullptr};
 
     PandaUniquePtr<EtsObjectStateTable> objStateTable_ {nullptr};
     RunEventLoopFunction runEventLoop_ = nullptr;

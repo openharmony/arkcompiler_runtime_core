@@ -189,6 +189,7 @@ public:
             return Type(panda_file::Type::TypeId::TAGGED);
         case 'L':
         case '[':
+        case '{':
             return Type(panda_file::Type::TypeId::REFERENCE);
         default:
             UNREACHABLE();

@@ -58,7 +58,7 @@ sub:
         - |
           (x: number, i: number): number => x + i
         - |
-          (x: number, i: number, s: Array<number>): number => x + i + s[i]
+          (x: number, i: number, s: Array<number>): number => x + i
     sub:
       - method: filter
         params:

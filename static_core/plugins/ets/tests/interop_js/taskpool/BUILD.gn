@@ -22,8 +22,6 @@ interop_test("taskpool_interop_tests") {
 
 group("taskpool_tests") {
   if (ark_ets_hybrid) {
-    deps = [
-      ":taskpool_interop_tests"
-    ]
+    deps = [ ":taskpool_interop_tests" ]
   }
 }

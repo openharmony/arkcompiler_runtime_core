@@ -14,7 +14,7 @@
 cases:
   - { type: byte,   value: 101,   expected: 'value = 101'   }
   - { type: short,  value: 101,   expected: 'value = 101'   }
-  - { type: char,   value: 101,   expected: 'value = e'     }
+  - { type: char,   value: 101,   expected: 'value = 101'   }
   - { type: int,    value: 101,   expected: 'value = 101'   }
   - { type: long,   value: 101,   expected: 'value = 101'   }
   - { type: float,  value: 10.1f, expected: 'value = 10.1'  }

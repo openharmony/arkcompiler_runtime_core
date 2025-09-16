@@ -28,7 +28,7 @@ function main(): void {
   let arg: {{c.type}} = {{c.value}}
   let a: A<{{c.type}}> = new A<{{c.type}}>()
   a.f(arg)
-  assertEQ(a.f1(arg), {{c.value1}})
+  arktest.assertEQ(a.f1(arg), {{c.value1}})
 }
 
 {% endfor %}

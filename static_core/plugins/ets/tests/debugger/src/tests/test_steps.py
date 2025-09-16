@@ -110,11 +110,11 @@ async def _pause_and_get_vars(client: DebuggerClient, log: RichLogger, script_fi
     paused = await client.continue_to_location(script_id=runtime.ScriptId("0"), line_number=line_number)
     script_file.log(log, highlight_lines=[paused.call_frames[0].location.line_number + 1])
     log.info("paused: %s", paused)
+    # NOTE(dslynko, #22497): do not omit global objects when tests' applications are loaded into application context
     object_ids = [
-        scope.object_.object_id
+        frame.scope_chain[0].object_.object_id
         for frame in paused.call_frames
-        for scope in frame.scope_chain
-        if scope.object_.object_id is not None
+        if len(frame.scope_chain) > 0 and frame.scope_chain[0].object_.object_id is not None
     ]
     # fmt: off
     props = [

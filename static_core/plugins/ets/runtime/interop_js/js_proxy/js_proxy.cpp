@@ -222,6 +222,9 @@ JSProxy *JSProxy::CreateProxy(const uint8_t *descriptor, Class *baseClass, Span<
     proxyCls->SetState(Class::State::INITIALIZING);
     proxyCls->SetState(Class::State::INITIALIZED);
 
+    // make the proxy class a xref class
+    proxyCls->SetXRefClass();
+
     ASSERT(IsProxyClass(proxyCls));
 
     auto jsProxy = Runtime::GetCurrent()->GetInternalAllocator()->New<JSProxy>(EtsClass::FromRuntimeClass(proxyCls));

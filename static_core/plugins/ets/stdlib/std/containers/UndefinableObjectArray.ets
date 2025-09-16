@@ -15,145 +15,148 @@
 
 package std.containers
 
-type UndefinableObject = Object | undefined
+export namespace containers {
+    
+    type UndefinableObject = Object | undefined
 
-export class UndefinableObjectArray {
-    /* const */ static ArrayInitSize : int = 16
+    export class UndefinableObjectArray {
+        /* const */ static ArrayInitSize : int = 16
 
-    private init(capacity: int, val: UndefinableObject): void {
-        this.data = new UndefinableObject[capacity]
-        for (let i = 0; i < this.data.length; ++i) {
-            this.data[i] = val
-        }
-        this.curSize = capacity
-    }
-
-    /**
-     * Constructs new UndefinableObjectArray with respect to capacity and initial value
-     *
-     * @param capacity
-     *
-     * @param val
-     */
-    constructor(capacity: int, val: UndefinableObject) {
-        this.init(capacity, val)
-    }
-
-    /**
-     * Constructs new UndefinableObjectArray with required capacity
-     *
-     * @param capacity
-     */
-    constructor(capacity: int) {
-        this.data = new UndefinableObject[capacity]
-        this.curSize = 0
-    }
-
-    /**
-     * Constructs new empty UndefinableObjectArray
-     */
-    constructor() {
-        this(UndefinableObjectArray.ArrayInitSize)
-    }
-
-    /**
-     * Increases capacity if passed argument is greater than current capacity
-     *
-     * @param capacity
-     */
-    public reserve(capacity: int): void {
-        if (this.data.length < capacity) {
-            let newData : FixedArray<UndefinableObject> = new UndefinableObject[capacity]
-            for (let i = 0; i < this.curSize; ++i) {
-               newData[i] = this.data[i]
+        private init(capacity: int, val: UndefinableObject): void {
+            this.data = new UndefinableObject[capacity]
+            for (let i = 0; i < this.data.length; ++i) {
+                this.data[i] = val
             }
-            this.data = newData
+            this.curSize = capacity
         }
-    }
 
-    /**
-     * Gets the underlying array
-     *
-     * @returns the underlying array
-     */
-    public toArray(): Object[] {
-        let newData = new Object[this.curSize]
-        for (let i = 0; i < this.curSize; ++i) {
-            newData[i] = this.data[i]!
+        /**
+        * Constructs new UndefinableObjectArray with respect to capacity and initial value
+        *
+        * @param capacity
+        *
+        * @param val
+        */
+        constructor(capacity: int, val: UndefinableObject) {
+            this.init(capacity, val)
         }
-        return newData
-    }
 
-    private static getNewCapacity(currentCapacity: int): int {
-        const fastGrowThreshold = 8192
-        const multiplier = 2
-        if (currentCapacity < fastGrowThreshold) {
-            // Adding 4 to jump over 0
-            return (currentCapacity + 4) * multiplier * 2
-        } else {
-            return currentCapacity * multiplier
+        /**
+        * Constructs new UndefinableObjectArray with required capacity
+        *
+        * @param capacity
+        */
+        constructor(capacity: int) {
+            this.data = new UndefinableObject[capacity]
+            this.curSize = 0
         }
-    }
 
-    /**
-     * Pushes a value to the end of the array
-     *
-     * @param e value to push
-     */
-    public pushBack(e: UndefinableObject): void {
-        if (this.curSize == this.data.length) {
-            let newData : FixedArray<UndefinableObject> = new UndefinableObject[UndefinableObjectArray.getNewCapacity(this.data.length)]
-            for (let i = 0; i < this.curSize; ++i) {
+        /**
+        * Constructs new empty UndefinableObjectArray
+        */
+        constructor() {
+            this(UndefinableObjectArray.ArrayInitSize)
+        }
+
+        /**
+        * Increases capacity if passed argument is greater than current capacity
+        *
+        * @param capacity
+        */
+        public reserve(capacity: int): void {
+            if (this.data.length < capacity) {
+                let newData : FixedArray<UndefinableObject> = new UndefinableObject[capacity]
+                for (let i = 0; i < this.curSize; ++i) {
                 newData[i] = this.data[i]
+                }
+                this.data = newData
             }
-            this.data = newData
         }
-        this.data[this.curSize] = e
-        ++this.curSize
-    }
 
-    /**
-     * Pops a value from the end of the List
-     *
-     * @returns popped value
-     */
-    public popBack(): UndefinableObject {
-        if (this.curSize === 0) {
-            throw new AssertionError("No data to popBack from UndefinableObjectArray!")
+        /**
+        * Gets the underlying array
+        *
+        * @returns the underlying array
+        */
+        public toArray(): Object[] {
+            let newData = new Object[this.curSize]
+            for (let i = 0; i < this.curSize; ++i) {
+                newData[i] = this.data[i]!
+            }
+            return newData
         }
-        --this.curSize
-        return this.data[this.curSize]
-    }
 
-    /**
-     * Returns number of elements in the List
-     */
-    public size(): int {
-        return this.curSize
-    }
+        private static getNewCapacity(currentCapacity: int): int {
+            const fastGrowThreshold = 8192
+            const multiplier = 2
+            if (currentCapacity < fastGrowThreshold) {
+                // Adding 4 to jump over 0
+                return (currentCapacity + 4) * multiplier * 2
+            } else {
+                return currentCapacity * multiplier
+            }
+        }
 
-    /**
-     * Returns an element at the specified index
-     *
-     * @param index element position
-     *
-     * @returns an element
-     */
-    public at(index: int): UndefinableObject {
-        return this.data[index]
-    }
+        /**
+        * Pushes a value to the end of the array
+        *
+        * @param e value to push
+        */
+        public pushBack(e: UndefinableObject): void {
+            if (this.curSize == this.data.length) {
+                let newData : FixedArray<UndefinableObject> = new UndefinableObject[UndefinableObjectArray.getNewCapacity(this.data.length)]
+                for (let i = 0; i < this.curSize; ++i) {
+                    newData[i] = this.data[i]
+                }
+                this.data = newData
+            }
+            this.data[this.curSize] = e
+            ++this.curSize
+        }
 
-    /**
-     * Sets an element at the specified index
-     *
-     * @param index element position
-     *
-     * @param e new value
-     */
-    public set(index: int, e: UndefinableObject): void {
-        this.data[index] = e
-    }
+        /**
+        * Pops a value from the end of the List
+        *
+        * @returns popped value
+        */
+        public popBack(): UndefinableObject {
+            if (this.curSize === 0) {
+                throw new AssertionError("No data to popBack from UndefinableObjectArray!")
+            }
+            --this.curSize
+            return this.data[this.curSize]
+        }
 
-    private data: FixedArray<UndefinableObject> = []
-    private curSize: int
+        /**
+        * Returns number of elements in the List
+        */
+        public size(): int {
+            return this.curSize
+        }
+
+        /**
+        * Returns an element at the specified index
+        *
+        * @param index element position
+        *
+        * @returns an element
+        */
+        public at(index: int): UndefinableObject {
+            return this.data[index]
+        }
+
+        /**
+        * Sets an element at the specified index
+        *
+        * @param index element position
+        *
+        * @param e new value
+        */
+        public set(index: int, e: UndefinableObject): void {
+            this.data[index] = e
+        }
+
+        private data: FixedArray<UndefinableObject> = []
+        private curSize: int
+    }
 }

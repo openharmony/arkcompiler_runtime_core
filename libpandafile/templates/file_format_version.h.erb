@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,8 +41,8 @@ const std::set<std::array<uint8_t, File::VERSION_SIZE>> incompatibleVersion {
 
 std::string GetVersion(const std::array<uint8_t, File::VERSION_SIZE> &version);
 
-bool IsVersionLessOrEqual(const std::array<uint8_t, File::VERSION_SIZE> &currrent_version,
-                          const std::array<uint8_t, File::VERSION_SIZE> &target_version);
+PANDA_PUBLIC_API bool IsVersionLessOrEqual(const std::array<uint8_t, File::VERSION_SIZE> &currrent_version,
+                                           const std::array<uint8_t, File::VERSION_SIZE> &target_version);
 
 inline void PrintBytecodeVersion()
 {

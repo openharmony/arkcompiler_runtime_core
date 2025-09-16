@@ -346,46 +346,46 @@ function LongModByM7(num: long): long {
 
 // Int Div/Mod by Int.MIN_VALUE
 function IntDivByMin(num: int): int {
-    assertEQ(Int.MIN_VALUE, -2147483648)
+    arktest.assertEQ(Int.MIN_VALUE, -2147483648)
     return num / (-2147483648 as int);
 }
 
 function IntModByMin(num: int): int {
-    assertEQ(Int.MIN_VALUE, -2147483648)
+    arktest.assertEQ(Int.MIN_VALUE, -2147483648)
     return num % (-2147483648 as int);
 }
 
 // Long Div/Mod by Long.MIN_VALUE
 function LongDivByMin(num: long): long {
-    assertEQ(Long.MIN_VALUE, -9223372036854775808)
+    arktest.assertEQ(Long.MIN_VALUE, -9223372036854775808)
     return num / (-9223372036854775808 as long);
 }
 
 function LongModByMin(num: long): long {
-    assertEQ(Long.MIN_VALUE, -9223372036854775808)
+    arktest.assertEQ(Long.MIN_VALUE, -9223372036854775808)
     return num % (-9223372036854775808 as long);
 }
 
 function main(): int {
-    assertEQ(IntDivBy7(1405), 200)
-    assertEQ(IntModBy7(1405), 5)
-    assertEQ(LongDivBy7(1405), 200)
-    assertEQ(LongModBy7(1405), 5)
+    arktest.assertEQ(IntDivBy7(1405), 200)
+    arktest.assertEQ(IntModBy7(1405), 5)
+    arktest.assertEQ(LongDivBy7(1405), 200)
+    arktest.assertEQ(LongModBy7(1405), 5)
 
-    assertEQ(IntDivByM7(1405), -200)
-    assertEQ(IntModByM7(1405), 5)
-    assertEQ(LongDivByM7(1405), -200)
-    assertEQ(LongModByM7(1405), 5)
+    arktest.assertEQ(IntDivByM7(1405), -200)
+    arktest.assertEQ(IntModByM7(1405), 5)
+    arktest.assertEQ(LongDivByM7(1405), -200)
+    arktest.assertEQ(LongModByM7(1405), 5)
 
-    assertEQ(IntDivByMin(1405), 0)
-    assertEQ(IntModByMin(1405), 1405)
-    assertEQ(LongDivByMin(1405), 0)
-    assertEQ(LongModByMin(1405), 1405)
+    arktest.assertEQ(IntDivByMin(1405), 0)
+    arktest.assertEQ(IntModByMin(1405), 1405)
+    arktest.assertEQ(LongDivByMin(1405), 0)
+    arktest.assertEQ(LongModByMin(1405), 1405)
 
-    assertEQ(IntDivByMin(Int.MIN_VALUE), 1)
-    assertEQ(IntModByMin(Int.MIN_VALUE), 0)
-    assertEQ(LongDivByMin(Long.MIN_VALUE), 1)
-    assertEQ(LongModByMin(Long.MIN_VALUE), 0)
+    arktest.assertEQ(IntDivByMin(Int.MIN_VALUE), 1)
+    arktest.assertEQ(IntModByMin(Int.MIN_VALUE), 0)
+    arktest.assertEQ(LongDivByMin(Long.MIN_VALUE), 1)
+    arktest.assertEQ(LongModByMin(Long.MIN_VALUE), 0)
 
     return 0;
 }

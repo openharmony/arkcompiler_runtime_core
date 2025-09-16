@@ -22,7 +22,7 @@ let myRecord: Record<KeyType, number | string> = {
 };
 
 function testNewRecordValueFromDynamic() {
-    assertTrue(myRecord['day'] === 'one');
-    assertTrue(myRecord['month'] === 2);
-    assertTrue(myRecord['year'] === 'three');
+    arktest.assertTrue(myRecord['day'] === 'one');
+    arktest.assertTrue(myRecord['month'] === 2);
+    arktest.assertTrue(myRecord['year'] === 'three');
 }

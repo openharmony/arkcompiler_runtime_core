@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "include/cpp/abckit_cpp.h"
+#include "include/libabckit/cpp/abckit_cpp.h"
 #include "tests/mock/check_mock.h"
 #include "src/mock/mock_values.h"
 #include "tests/mock/cpp_helpers_mock.h"
@@ -79,6 +79,20 @@ TEST_F(LibAbcKitCppMockCoreTestClass, Class_GetAllMethods)
     ASSERT_TRUE(CheckMockedStackEmpty());
 }
 
+// Test: test-kind=mock, api=Class::GetFields, abc-kind=ArkTS2, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockCoreTestClass, Class_GetFields)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File f(DEFAULT_PATH);
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        abckit::mock::helpers::GetMockCoreClass(f).GetFields();
+        ASSERT_TRUE(CheckMockedApi("ClassEnumerateFields"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
+
 // Test: test-kind=mock, api=Class::GetAnnotations, abc-kind=ArkTS1, category=internal, extension=cpp
 TEST_F(LibAbcKitCppMockCoreTestClass, Class_GetAnnotations)
 {
@@ -88,6 +102,48 @@ TEST_F(LibAbcKitCppMockCoreTestClass, Class_GetAnnotations)
         ASSERT_TRUE(CheckMockedApi("OpenAbc"));
         abckit::mock::helpers::GetMockCoreClass(f).GetAnnotations();
         ASSERT_TRUE(CheckMockedApi("ClassEnumerateAnnotations"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
+
+// Test: test-kind=mock, api=Class::GetSuperClass, abc-kind=ArkTS2, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockCoreTestClass, Class_GetSuperClass)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File f(DEFAULT_PATH);
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        abckit::mock::helpers::GetMockCoreClass(f).GetSuperClass();
+        ASSERT_TRUE(CheckMockedApi("ClassGetSuperClass"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
+
+// Test: test-kind=mock, api=Class::GetSubClasses, abc-kind=ArkTS2, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockCoreTestClass, Class_GetSubClasses)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File f(DEFAULT_PATH);
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        abckit::mock::helpers::GetMockCoreClass(f).GetSubClasses();
+        ASSERT_TRUE(CheckMockedApi("ClassEnumerateSubClasses"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
+
+// Test: test-kind=mock, api=Class::GetInterfaces, abc-kind=ArkTS2, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockCoreTestClass, Class_GetInterfaces)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File f(DEFAULT_PATH);
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        abckit::mock::helpers::GetMockCoreClass(f).GetInterfaces();
+        ASSERT_TRUE(CheckMockedApi("ClassEnumerateInterfaces"));
     }
     ASSERT_TRUE(CheckMockedApi("CloseFile"));
     ASSERT_TRUE(CheckMockedStackEmpty());

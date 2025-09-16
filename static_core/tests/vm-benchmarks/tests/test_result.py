@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -252,25 +252,35 @@ REPORT2 = '''
 def test_load_report():
     obj = json.loads(REPORT)
     rep = RunReport.from_obj(**obj)
-    test = TestCase()
-    test.assertTrue(2 == len(rep.tests))
-    test.assertTrue(6 == len(rep.tests[0].execution_forks[0].iterations))
+    assert_eq = TestCase().assertEqual
+    assert_eq(2, len(rep.tests))
+    assert_eq(6, len(rep.tests[0].execution_forks[0].iterations))
+    assert_eq(94783.751799, rep.tests[0].execution_forks[0].avg_time)
 
 
 def test_vmb_report():
     f = io.StringIO()
-    lines = []
-    test = TestCase()
+    assert_in = TestCase().assertIn
     with contextlib.redirect_stdout(f):
         vmb_rep = VMBReport.parse(REPORT)
         vmb_rep.text_report(full=True)
-        lines = [line.strip() for line in
-                 f.getvalue().split("\n") if line]
-    test.assertTrue('Test_One_Blah | 9.48e+04 | 9.74e+04 | 8.93e+04 | Passed  |' \
-        in lines)
-    test.assertTrue('2 tests; 0 failed; 0 excluded; ' \
-           'Time(GM): 94783.8 Size(GM): 97384.0 ' \
-           'RSS(GM): 89336.0' in lines)
+        lines = [line.strip() for line in f.getvalue().split("\n") if line]
+        assert_in('Test_One_Blah |      95µ |      97K |      89K | Passed  |', lines)
+        assert_in('2 tests; 0 failed; 0 excluded; '
+                  'Time(GM): 94783.8 Size(GM): 97384.0 RSS(GM): 89336.0', lines)
+    f1 = io.StringIO()
+    with contextlib.redirect_stdout(f1):
+        vmb_rep = VMBReport.parse(REPORT)
+        vmb_rep.text_report(full=True, fmt='expo')
+        lines = [line.strip() for line in f1.getvalue().split("\n") if line]
+        assert_in('Test_One_Blah | 9.48e-05 | 9.74e+04 | 8.93e+04 | Passed  |', lines)
+        assert_in('Test_Two      | 9.48e-05 | 9.74e+04 | 8.93e+04 | Passed  |', lines)
+    f2 = io.StringIO()
+    with contextlib.redirect_stdout(f2):
+        vmb_rep = VMBReport.parse(REPORT)
+        vmb_rep.text_report(full=True, fmt='nano')
+        lines = [line.strip() for line in f2.getvalue().split("\n") if line]
+        assert_in('Test_One_Blah |       94784n |      97K |      89K | Passed  |', lines)
 
 
 def test_vmb_compare():
@@ -282,9 +292,9 @@ def test_vmb_compare():
         cmp.print(full=True)
         lines = [line.strip() for line in
                  f.getvalue().split("\n") if line]
-    TestCase().assertTrue('Test_Two     ; Time: 9.49e+04->9.49e+04(same); ' \
-           'Size: n/a; RSS: 8.93e+04->8.93e+04(same); new fail' \
-        in lines)
+    TestCase().assertIn('Test_Two     ; Time: 9.49e+04->9.49e+04(same); '
+                        'Size: n/a; RSS: 8.93e+04->8.93e+04(same); new fail',
+                        lines)
 
 
 def create_report(**iterations) -> VMBReport:
@@ -298,20 +308,18 @@ def create_report(**iterations) -> VMBReport:
 
 
 def test_vmb_report_sanity():
+    assert_eq = TestCase().assertEqual
     vmb_rep = create_report(test1=[1.0, 3.0])
-    test = TestCase()
-    test.assertTrue(vmb_rep.total_cnt == 1)
-    test.assertTrue(vmb_rep.fail_cnt == 0)
-    test.assertTrue(vmb_rep.rss_gm == 0)
-    test.assertTrue(vmb_rep.time_gm == 2.0)
-    test.assertTrue(vmb_rep.summary == '1 tests; 0 failed; 0 excluded; ' \
-                              'Time(GM): 2.0 Size(GM): 0.0 RSS(GM): 0.0')
-    vmb_rep.text_report(full=True)
+    assert_eq(vmb_rep.total_cnt, 1)
+    assert_eq(vmb_rep.fail_cnt, 0)
+    assert_eq(vmb_rep.rss_gm, 0)
+    assert_eq(vmb_rep.time_gm, 2.0)
+    assert_eq(vmb_rep.summary,
+              '1 tests; 0 failed; 0 excluded; Time(GM): 2.0 Size(GM): 0.0 RSS(GM): 0.0')
 
 
 def test_vmb_compare_flaky():
     f = io.StringIO()
-    lines = []
     r1 = create_report(testA=[4.0], testB=[5.0], bad=[6.0])
     r2 = create_report(testA=[4.0], testB=[5.0], bad=[7.0])
     with contextlib.redirect_stdout(f):
@@ -319,5 +327,47 @@ def test_vmb_compare_flaky():
         cmp.print(full=True)
         lines = [line.strip() for line in
                  f.getvalue().split("\n") if line]
-    TestCase().assertTrue('Time: 4.93e+00->5.19e+00(worse +5.3%); Size: n/a; RSS: n/a' \
-        in lines)
+    TestCase().assertIn('Time: 4.93e+00->5.19e+00(worse +5.3%); Size: n/a; RSS: n/a', lines)
+
+
+def test_perf_degredation_status():
+    r1 = create_report(testA=[4.0], degradant=[100.0])
+    r2 = create_report(testA=[4.0], degradant=[100.4])
+    r3 = create_report(testA=[4.0], degradant=[100.6])
+    f = io.StringIO()
+    with contextlib.redirect_stdout(f):
+        cmp = VMBReport.compare_vmb(r1, r2)
+        cmp.process_perf_regressions()
+        lines = [line.strip() for line in
+                 f.getvalue().split("\n") if line]
+    TestCase().assertEqual('', ''.join(lines),
+                           'Compare should NOT signal degradation below 0.5%')
+    f1 = io.StringIO()
+    with contextlib.redirect_stdout(f1):
+        cmp = VMBReport.compare_vmb(r1, r3)
+        cmp.process_perf_regressions()
+        lines = [line.strip() for line in
+                 f1.getvalue().split("\n") if line]
+    TestCase().assertIn('degradant 1.00e+02->1.01e+02(worse +0.6%)', lines,
+                        'Compare should signal degradation above 0.5%')
+
+
+def test_vmb_report_exclude():
+    f = io.StringIO()
+    tc = TestCase()
+    assert_in = tc.assertIn
+    with contextlib.redirect_stdout(f):
+        vmb_rep = VMBReport.parse(REPORT)
+        vmb_rep.text_report(full=True, exclude=['Test_Two'], fmt='expo')
+        lines = [line.strip() for line in f.getvalue().split("\n") if line]
+        assert_in('Test_One_Blah | 9.48e-05 | 9.74e+04 | 8.93e+04 | Passed  |', lines)
+        assert_in('1 tests; 0 failed; 1 excluded; Time(GM): 94783.8 Size(GM): '
+                  '97384.0 RSS(GM): 89336.0', lines)
+
+
+def test_ret_code():
+    assert_eq = TestCase().assertEqual
+    assert_eq(0, VMBReport.parse(REPORT).get_exit_code())
+    assert_eq(1, VMBReport.parse(REPORT2).get_exit_code())
+    assert_eq(1, create_report().get_exit_code())  # empty report
+    assert_eq(0, create_report(x=[1.0]).get_exit_code())

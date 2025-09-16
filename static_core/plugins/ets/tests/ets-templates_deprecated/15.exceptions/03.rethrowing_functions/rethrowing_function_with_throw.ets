@@ -22,5 +22,5 @@ tags: [compile-only, negative]
 type func = (): void;
 
 function foo(bar: func throws): void rethrows {
-  throw new Exception();
+  throw new Error();
 }

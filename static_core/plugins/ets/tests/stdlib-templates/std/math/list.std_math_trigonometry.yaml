@@ -13,7 +13,7 @@
 
 - {
     method_name: sin,
-    method_nature: function, 
+    method_nature: function,
     result_type: double,
     method_signature:  {v: "double"},
 
@@ -46,7 +46,7 @@
   }
 - {
     method_name: cos,
-    method_nature: function, 
+    method_nature: function,
     result_type: double,
     method_signature:  {v: "double"},
 
@@ -62,7 +62,7 @@
         test8: {v: doubleNaN,},
         test9: {v: doubleInf, },
         test10: { v: doubleNegInf,},
-          
+
       },
     method_expected_data:
       {
@@ -80,7 +80,7 @@
   }
 - {
     method_name: tan,
-    method_nature: function, 
+    method_nature: function,
     result_type: double,
     method_signature:  {v: "double"},
 
@@ -101,10 +101,10 @@
       {
         test1: 0.0,
         test2: 0.0,
-        test3: doubleInf,
+        test3: 16331239353195370,
         test4: 1.0,
         test5: 0.0,
-        test6: doubleInf,
+        test6: -16331239353195370,
         test7: -1.0,
         test8: -doubleNaN,
         test9:  doubleNaN,
@@ -113,7 +113,7 @@
   }
 - {
     method_name: asin,
-    method_nature: function, 
+    method_nature: function,
     result_type: double,
     method_signature:  {v: "double"},
 
@@ -144,13 +144,13 @@
         test8: PI/3,
         test9:  PI/2,
         test10: -doubleNaN,
-        test11: doubleInf,
-        test12: doubleNegInf
+        test11: doubleNaN,
+        test12: doubleNaN
       },
   }
 - {
     method_name: acos,
-    method_nature: function, 
+    method_nature: function,
     result_type: double,
     method_signature:  {v: "double"},
 
@@ -187,7 +187,7 @@
   }
 - {
     method_name: atan,
-    method_nature: function, 
+    method_nature: function,
     result_type: double,
     method_signature:  {v: "double"},
 
@@ -224,7 +224,7 @@
   }
 - {
     method_name: atan2,
-    method_nature: function, 
+    method_nature: function,
     result_type: double,
     method_signature:  {y: "double", x: "double"},
 
@@ -242,13 +242,13 @@
         test1: 1.40564764,
         test2: 0.165148677,
         test3: -doubleNaN,
-        test4: -doubleNaN,
-        test5: -doubleNaN,
+        test4: 0.7853981633974483,
+        test5: -0.7853981633974483,
       },
   }
 - {
     method_name: hypot,
-    method_nature: function, 
+    method_nature: function,
     result_type: double,
     method_signature:  {u: "double", v: "double"},
 
@@ -272,7 +272,7 @@
         test4: 4.0,
         test5: 0.0,
         test6: -doubleNaN,
-        test7: -doubleNaN,
-        test8: -doubleNaN,
+        test7: doubleInf,
+        test8: doubleInf,
       },
   }

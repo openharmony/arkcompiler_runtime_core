@@ -13,46 +13,47 @@
  * limitations under the License.
  */
 
+import * as ts from 'typescript';
 export const JSValue: string = 'Any';
 export const ESObject: string = 'ESObject';
+export const ArrayType: string = 'Array';
 export const KitPrefix: string[] = [];
-export const BuiltInType: string[] = ['Symbol'];
+export const BuiltInType: string[] = ['Symbol', 'PropertyDecorator', 'SharedArrayBuffer'];
 export const ETSKeyword: string[] = ['Class', 'ESObject', 'MethodType'];
-export const UtilityTypes = [
-    'Capitalize',
-    'ConstructorParameters',
-    'Exclude',
-    'Extract',
-    'InstanceType',
-    'Lowercase',
-    'NonNullable',
-    'NoInfer',
-    'Omit',
-    'OmitThisParameter',
-    'Parameters',
-    'Pick',
-    'ReturnType',
-    'ThisParameterType',
-    'ThisType',
-    'Uncapitalize',
-    'Uppercase'
-];
+export const UtilityTypes = new Map<string, string>([
+    ['Capitalize', JSValue],
+    ['Uncapitalize', JSValue],
+    ['Uppercase', JSValue],
+    ['Lowercase', JSValue],
+    ['ConstructorParameters', ArrayType],
+    ['Exclude', JSValue],
+    ['Extract', JSValue],
+    ['NonNullable', JSValue],
+    ['InstanceType', JSValue],
+    ['NoInfer', JSValue],
+    ['Omit', JSValue],
+    ['OmitThisParameter', JSValue],
+    ['Parameters', ArrayType],
+    ['Pick', JSValue],
+    ['ReturnType', JSValue],
+    ['ThisParameterType', JSValue],
+    ['ThisType', JSValue],
+]);
 export const SpecificTypes = [
-    'AnyKeyword',
-    'ConditionalType',
-    'ConstructorType',
-    'FunctionType',
-    'IndexedAccessType',
-    'IndexSignature',
-    'IntersectionType',
-    'MappedType',
-    'ObjectLiteralExpression',
-    'SymbolKeyword',
-    'TemplateLiteralType',
-    'UnknownKeyword'
+    ts.SyntaxKind.AnyKeyword,
+    ts.SyntaxKind.ConditionalType,
+    ts.SyntaxKind.ConstructorType,
+    ts.SyntaxKind.IndexedAccessType,
+    ts.SyntaxKind.IndexSignature,
+    ts.SyntaxKind.IntersectionType,
+    ts.SyntaxKind.MappedType,
+    ts.SyntaxKind.ObjectLiteralExpression,
+    ts.SyntaxKind.SymbolKeyword,
+    ts.SyntaxKind.TemplateLiteralType,
+    ts.SyntaxKind.UnknownKeyword
 ];
 export const FINAL_CLASS: string[] = [
-    'ArgumentOutOfRangeException',
+    'ArgumentOutOfRangeError',
     'ArrayIndexOutOfBoundsError',
     'ArrayStoreError',
     'ArrayType',
@@ -94,7 +95,7 @@ export const FINAL_CLASS: string[] = [
     'FloatType',
     'FloatValue',
     'GC',
-    'IllegalArgumentException',
+    'IllegalArgumentError',
     'InterfaceType',
     'Int',
     'IntIntValue',
@@ -132,7 +133,7 @@ export const FINAL_CLASS: string[] = [
     'Types',
     'UnionCase',
     'UnionType',
-    'UnsupportedOperationException',
+    'UnsupportedOperationError',
     'UndefinedType',
     'UndefinedValue',
     'Void',
@@ -140,4 +141,18 @@ export const FINAL_CLASS: string[] = [
     'VoidValue',
     'WeakRef'
 ];
+export const InvalidFuncParaNames: Set<string> = new Set([
+    'this',
+    'short',
+    'long',
+    'int',
+    'char',
+    'byte',
+    'float',
+    'double',
+    'boolean',
+    'abstract',
+    'async',
+    'object'
+]);
 export const LIMIT_DECORATOR: string[] = ['Sendable', 'Concurrent'];

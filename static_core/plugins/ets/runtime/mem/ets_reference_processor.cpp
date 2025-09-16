@@ -90,6 +90,45 @@ void EtsReferenceProcessor::HandleReference([[maybe_unused]] GC *gc, const BaseC
     HandleOtherFields<true>(cls, object, processor);
 }
 
+#if defined(ARK_HYBRID) && defined(PANDA_JS_ETS_HYBRID_MODE)
+bool EtsReferenceProcessor::IsReference(const BaseClass *baseCls) const
+{
+    ASSERT(baseCls != nullptr);
+    ASSERT(baseCls->GetSourceLang() == panda_file::SourceLang::ETS);
+
+    const auto *objEtsClass = ark::ets::EtsClass::FromRuntimeClass(static_cast<const Class *>(baseCls));
+
+    return objEtsClass->IsReference();
+}
+
+void EtsReferenceProcessor::HandleReference(ObjectHeader *object, ObjectPointerType *&referentPointer)
+{
+    LOG(DEBUG, REF_PROC) << GetDebugInfoAboutObject(object) << " is added to weak references set for processing";
+    weakReferences_.Insert(object);
+    auto *weakRef = static_cast<ark::ets::EtsWeakReference *>(ark::ets::EtsObject::FromCoreType(object));
+    referentPointer = weakRef->GetReferentAddress();
+}
+
+void EtsReferenceProcessor::ClearDeadReference(GCObjectVisitor &visitor)
+{
+    weakReferences_.FlushSets();
+    while (!weakReferences_.IsEmpty()) {
+        auto *weakRefObj = weakReferences_.Extract();
+        ASSERT(ark::ets::EtsClass::FromRuntimeClass(weakRefObj->ClassAddr<Class>())->IsWeakReference());
+        auto *weakRef = static_cast<ark::ets::EtsWeakReference *>(ark::ets::EtsObject::FromCoreType(weakRefObj));
+        auto *referent = weakRef->GetReferentFromGCThread();  // Skip read-barrier in GC thread.
+        if (referent == nullptr || referent == nullValue_) {
+            LOG(DEBUG, REF_PROC) << "Don't process reference " << GetDebugInfoAboutObject(weakRefObj)
+                                 << " because referent is nullish";
+            continue;
+        }
+        if (visitor(referent->GetCoreType()) == ObjectStatus::DEAD_OBJECT) {
+            weakRef->ClearReferentFromGCCthread();
+        }
+    }
+}
+#endif
+
 template <bool USE_OBJECT_REF>
 void EtsReferenceProcessor::HandleOtherFields(const BaseClass *cls, const ObjectHeader *object,
                                               const ReferenceProcessorT &processor)

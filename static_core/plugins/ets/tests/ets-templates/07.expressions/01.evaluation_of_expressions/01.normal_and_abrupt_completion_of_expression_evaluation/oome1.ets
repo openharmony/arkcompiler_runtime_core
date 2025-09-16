@@ -18,28 +18,28 @@ desc: OutOfMemoryError is thrown by an assignment to an array component of
     reference type, a method call expression, or a prefix / postfix
     increment / decrement operator as a result of boxing conversion.
 ark_options: ['--heap-size-limit=8388608', '--init-heap-size-limit=8388608', '--gc-type=stw']
+tags: [no-warmup]
 timeout: 60
 ---*/
 
 const ARRAY_SIZE = 1_000_000;
 
-function main(): int {
+function main() {
   try {
-    let v: FixedArray<Object> = new Object[ARRAY_SIZE];
+    let v: Array<Object> = new Array<Object>(ARRAY_SIZE);
 
     for (let i: int = 0; i < ARRAY_SIZE; i++) {
-        let w = new Double[ARRAY_SIZE];
+        let w = new Array<Object>(ARRAY_SIZE);
 
         for (let j: int = 0; j < ARRAY_SIZE; j++) {
-          w[j] = new Double();
+          w[j] = new Object();
         }
 
-        v[i] = w as Object;
+        v[i] = w;
     }
-    return 1;
-  } catch (e: OutOfMemoryError) {
-    return 0;
   } catch (e) {
-    return 1;
+    arktest.assertTrue(e instanceof OutOfMemoryError)
+    return
   }
+  arktest.assertTrue(false, 'OutOfMemoryError expected')
 }

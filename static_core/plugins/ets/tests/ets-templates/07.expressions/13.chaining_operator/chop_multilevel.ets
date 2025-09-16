@@ -31,5 +31,5 @@ function main(): void {
   const bob = new Person("Bob");
   bob.spouse = new Person("Alice");
   bob.spouse.spouse = new Person("Charlie");
-  assertEQ(bob.spouse?.spouse?.name, "Charlie");
+  arktest.assertEQ(bob.spouse?.spouse?.name, "Charlie");
 }

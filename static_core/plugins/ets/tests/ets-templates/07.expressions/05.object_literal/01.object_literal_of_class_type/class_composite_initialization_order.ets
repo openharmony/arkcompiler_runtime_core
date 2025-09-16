@@ -27,9 +27,9 @@ class Ordered {
  function main(): void {
     let a: Ordered = { four: "four",  three: "three", two: "two", one: "one"}
 
-    assertEQ<String, String>(a.one, "one")
-    assertEQ<String, String>(a.two, "two")
-    assertEQ<String, String>(a.three, "three")
-    assertEQ<String, String>(a.four, "four")
+    arktest.assertEQ<String, String>(a.one, "one")
+    arktest.assertEQ<String, String>(a.two, "two")
+    arktest.assertEQ<String, String>(a.three, "three")
+    arktest.assertEQ<String, String>(a.four, "four")
  }
 

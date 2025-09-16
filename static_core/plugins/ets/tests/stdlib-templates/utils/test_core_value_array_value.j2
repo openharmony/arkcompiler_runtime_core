@@ -16,7 +16,7 @@
 function main(): int {
     let failCounter: int = 0;
     let testResult: int = 0;
-    let arrayValue : ArrayValue = Value.of([{{.item.init_values | first}}] as FixedArray<{{.item.name}}>) as ArrayValue;
+    let arrayValue : ArrayValue = reflect.Value.of([{{.item.init_values | first}}] as FixedArray<{{.item.name}}>) as ArrayValue;
     let actualValue : {{.item.value_name}}Value;
     let storedValue : {{.item.value_name}}Value;
     if (arrayValue.getLength() == 1) {
@@ -26,7 +26,7 @@ function main(): int {
     }
     printTestVerdict(testResult, "Length of array is 1");
     {% for init_value in item.init_values %}
-      actualValue = Value.of({{.init_value}}) as {{.item.value_name}}Value;
+      actualValue = reflect.Value.of({{.init_value}}) as {{.item.value_name}}Value;
       arrayValue.setElement(0, actualValue);
       storedValue = arrayValue.getElement(0) as {{.item.value_name}}Value;
       {% if item.primitive %}

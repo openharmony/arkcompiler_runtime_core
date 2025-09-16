@@ -32,3 +32,15 @@ export function HasMapElement(key: string): boolean {
 export function GetMapSize(): number {
   return myMap.size;
 }
+
+export let WeekDays: Map<string, number>;
+static {
+  WeekDays = new Map<string, number>();
+  WeekDays.set('Monday', 1);
+  WeekDays.set('Tuesday', 2);
+  WeekDays.set('Wednesday', 3);
+  WeekDays.set('Thursday', 4);
+  WeekDays.set('Friday', 5);
+  WeekDays.set('Saturday', 6);
+  WeekDays.set('Sunday', 7);
+}

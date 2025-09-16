@@ -22,7 +22,7 @@ cases:
           // separate module, negative case with internal accessor
           let a = new A
           a.foo = 42
-          assertEQ( a.foo, 42 )
+          arktest.assertEQ( a.foo, 42 )
 
     - files: './dir_int_1/file_A.ets'
       decl: |-
@@ -31,7 +31,7 @@ cases:
           // separate module, positive case with internal accessor, from same-module public subclass
           let c = new C
           c.foo = 42
-          assertEQ( c.foo, 44 )
+          arktest.assertEQ( c.foo, 44 )
 
     - files: './dir_int_1/file_A.ets'
       tags: 'negative, compile-only'
@@ -41,7 +41,7 @@ cases:
           // separate module, negative case with internal accessor, from same-module subclass
           let d = new D
           d.foo = 42
-          assertEQ( d.foo, 42 )
+          arktest.assertEQ( d.foo, 42 )
 
     - files: './dir_int_2/file_A.ets, ./dir_int_2/file_B.ets'
       tags: 'negative, compile-only'
@@ -51,7 +51,7 @@ cases:
           // separate module, negative case with internal accessor, from other-module subclass
           let b = new B
           b.foo = 42
-          assertEQ( b.foo, 184 )
+          arktest.assertEQ( b.foo, 184 )
 
     - files: './dir_int_3/file_A.ets, ./dir_int_3/file_B.ets'
       tags: 'negative, compile-only'
@@ -61,4 +61,4 @@ cases:
           // separate module, negative case with internal accessor, from other-module subclass
           let f = new F
           f.foo = 42
-          assertEQ( f.foo, 42 )
+          arktest.assertEQ( f.foo, 42 )

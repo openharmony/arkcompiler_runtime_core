@@ -257,6 +257,8 @@ IntrinsicInst *SimplifyStringBuilder::CreateConcatIntrinsic(
     concatIntrinsic->AppendInput(saveStateClone);
     concatIntrinsic->AddInputType(saveStateClone->GetType());
 
+    concatIntrinsic->SetPc(saveState->GetPc());
+
     return concatIntrinsic;
 }
 
@@ -481,11 +483,12 @@ void SimplifyStringBuilder::ConcatenationLoopMatch::Clear()
     preheader.appendAccValue = nullptr;
 
     loop.appendInstructions.clear();
+    loop.toStringLengthChains.clear();
     temp.clear();
     exit.toStringCall = nullptr;
 }
 
-bool SimplifyStringBuilder::HasAppendUsersOnly(Inst *inst) const
+bool SimplifyStringBuilder::HasAppendOrLengthUsersOnly(Inst *inst) const
 {
     MarkerHolder visited {inst->GetBasicBlock()->GetGraph()};
     bool found = HasUserPhiRecursively(inst, visited.GetMarker(), [inst](auto &user) {
@@ -493,7 +496,8 @@ bool SimplifyStringBuilder::HasAppendUsersOnly(Inst *inst) const
         bool isSaveState = user.GetInst()->IsSaveState();
         bool isPhi = user.GetInst()->IsPhi();
         bool isAppendInstruction = IsStringBuilderAppend(user.GetInst());
-        return sameLoop && !isSaveState && !isPhi && !isAppendInstruction;
+        bool isStringLength = IsStringLengthAccessorChain(user.GetInst());
+        return sameLoop && !isSaveState && !isPhi && !isAppendInstruction && !isStringLength;
     });
     ResetUserMarkersRecursively(inst, visited.GetMarker());
     return !found;
@@ -504,19 +508,23 @@ bool IsCheckCastWithoutUsers(Inst *inst)
     return inst->GetOpcode() == Opcode::CheckCast && !inst->HasUsers();
 }
 
-bool SimplifyStringBuilder::HasPhiOrAppendUsersOnly(Inst *inst, Marker appendInstructionVisited) const
+bool SimplifyStringBuilder::HasPhiOrAppendOrLengthUsersOnly(Inst *inst, Marker appendInstructionVisited) const
 {
     MarkerHolder phiVisited {GetGraph()};
-    bool found = HasUserPhiRecursively(
-        inst, phiVisited.GetMarker(), [loop = inst->GetBasicBlock()->GetLoop(), appendInstructionVisited](auto &user) {
-            bool sameLoop = user.GetInst()->GetBasicBlock()->GetLoop() == loop;
-            bool isSaveState = user.GetInst()->IsSaveState();
-            bool isCheckCast = IsCheckCastWithoutUsers(user.GetInst());
-            bool isPhi = user.GetInst()->IsPhi();
-            bool isVisited = user.GetInst()->IsMarked(appendInstructionVisited);
-            bool isAppendInstruction = IsStringBuilderAppend(user.GetInst());
-            return sameLoop && !isSaveState && !isCheckCast && !isPhi && !(isAppendInstruction && isVisited);
-        });
+    // Release clang-tidy-14 claims match.exit.toStringCall as nullable ignorring IsInstanceHoistable checks
+    // NOLINTNEXTLINE(clang-analyzer-core.CallAndMessage)
+    auto fnCheckUser = [loop = inst->GetBasicBlock()->GetLoop(), appendInstructionVisited](auto &user) {
+        bool sameLoop = user.GetInst()->GetBasicBlock()->GetLoop() == loop;
+        bool isSaveState = user.GetInst()->IsSaveState();
+        bool isCheckCast = IsCheckCastWithoutUsers(user.GetInst());
+        bool isPhi = user.GetInst()->IsPhi();
+        bool isVisited = user.GetInst()->IsMarked(appendInstructionVisited);
+        bool isAppendInstruction = IsStringBuilderAppend(user.GetInst());
+        bool isStringLength = IsStringLengthAccessorChain(user.GetInst());
+        return sameLoop && !isSaveState && !isCheckCast && !isStringLength && !isPhi &&
+               !(isAppendInstruction && isVisited);
+    };
+    bool found = HasUserPhiRecursively(inst, phiVisited.GetMarker(), fnCheckUser);
     return !found;
 }
 
@@ -552,13 +560,14 @@ bool SimplifyStringBuilder::ConcatenationLoopMatch::IsInstanceHoistable() const
 
 bool SimplifyStringBuilder::IsInstanceHoistable(const ConcatenationLoopMatch &match) const
 {
-    return match.IsInstanceHoistable() && HasAppendUsersOnly(match.accValue);
+    return match.IsInstanceHoistable() && HasAppendOrLengthUsersOnly(match.accValue);
 }
 
 bool SimplifyStringBuilder::IsToStringHoistable(const ConcatenationLoopMatch &match,
                                                 Marker appendInstructionVisited) const
 {
-    return HasPhiOrAppendUsersOnly(match.exit.toStringCall, appendInstructionVisited);
+    ASSERT(match.exit.toStringCall != nullptr);
+    return HasPhiOrAppendOrLengthUsersOnly(match.exit.toStringCall, appendInstructionVisited);
 }
 
 SaveStateInst *FindPreHeaderSaveState(Loop *loop)
@@ -836,6 +845,48 @@ void SimplifyStringBuilder::ReconnectStringBuilderCascades(const ConcatenationLo
     }
 }
 
+void SimplifyStringBuilder::ReconnectToStringLengthChains(const ConcatenationLoopMatch &match)
+{
+    if (match.loop.toStringLengthChains.empty()) {
+        return;
+    }
+
+    auto *runtime = GetGraph()->GetRuntime();
+    auto sbClass = runtime->GetStringBuilderClass();
+    auto lengthField = runtime->GetFieldStringBuilderLength(sbClass);
+    auto loop = match.block->GetLoop();
+
+    MarkerHolder chainsVisited {GetGraph()};
+    for (auto &chain : match.loop.toStringLengthChains) {
+        ASSERT(chain.toStringCallOrPhi == match.accValue);
+        ASSERT(chain.nullCheckCall != nullptr);
+
+        if (chain.nullCheckCall->SetMarker(chainsVisited.GetMarker())) {
+            continue;
+        }
+
+        auto checkLoop = chain.nullCheckCall->GetBasicBlock()->GetLoop();
+        if (checkLoop != loop && !checkLoop->IsInside(loop)) {
+            continue;
+        }
+
+        chain.nullCheckCall->ReplaceInput(match.accValue, match.preheader.instance);
+        Inst *lengthInst =
+            GetGraph()->CreateInstLoadObject(DataType::INT32, chain.lenArrayCall->GetPc(), chain.nullCheckCall,
+                                             TypeIdMixin {runtime->GetFieldId(lengthField), GetGraph()->GetMethod()},
+                                             lengthField, runtime->IsFieldVolatile(lengthField));
+
+        COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "[.length] Replace string.length call (id=" << chain.lenArrayCall->GetId()
+                                         << ") to sb.length (id=" << lengthInst->GetId() << ")";
+
+        Inst *chainTail = (chain.shrLengthShift != nullptr) ? chain.shrLengthShift : chain.lenArrayCall;
+        chain.nullCheckCall->InsertAfter(lengthInst);
+        chainTail->ReplaceUsers(lengthInst);
+        chain.lenArrayCall->ClearFlag(inst_flags::NO_DCE);
+        chainTail->ClearFlag(inst_flags::NO_DCE);
+    }
+}
+
 void SimplifyStringBuilder::ReconnectInstructions(const ConcatenationLoopMatch &match)
 {
     // Make StringBuilder append-call hoisted point to an instance hoisted and initialize it with string initial value
@@ -863,6 +914,8 @@ void SimplifyStringBuilder::ReconnectInstructions(const ConcatenationLoopMatch &
                 << GetOpcodeString(match.preheader.instance->GetOpcode()) << ")";
         }
     }
+
+    ReconnectToStringLengthChains(match);
 
     // Replace users of accumulated value outside the loop by toString-call hoisted to post exit block
     instructionsVector_.clear();
@@ -1254,6 +1307,7 @@ void SimplifyStringBuilder::MatchStringBuilderUsage(Inst *instance, StringBuilde
     // i.e instance itself, constructor-call, all append-calls, all toString-calls
 
     usage.instance = instance;
+    auto loop = instance->GetBasicBlock()->GetLoop();
 
     for (auto &user : instance->GetUsers()) {
         auto userInst = SkipSingleUserCheckInstruction(user.GetInst());
@@ -1277,6 +1331,39 @@ void SimplifyStringBuilder::MatchStringBuilderUsage(Inst *instance, StringBuilde
             usage.toStringCalls.push_back(userInst);
         }
     }
+
+    for (auto &toStringCall : usage.toStringCalls) {
+        MarkerHolder phiVisited {GetGraph()};
+        MarkerHolder lenArrayVisited {GetGraph()};
+        auto fnVisitStringCallPhiUser = [&usage, &loop, &lenArrayVisited](auto &user) {
+            Inst *userInst = user.GetInst();
+            if (!IsStringLengthAccessorChain(userInst)) {
+                return false;
+            }
+
+            auto userLoop = userInst->GetBasicBlock()->GetLoop();
+            if (userLoop != loop && !userLoop->IsInside(loop)) {
+                return false;
+            }
+
+            ToStringLengthChain chain;
+            chain.toStringCallOrPhi = user.GetInput();
+            chain.nullCheckCall = userInst->IsNullCheck() ? userInst : nullptr;
+            chain.lenArrayCall = SkipSingleUserCheckInstruction(userInst);
+            chain.shrLengthShift = GetStringLengthCompressedShr(chain.lenArrayCall);
+
+            if (chain.lenArrayCall->SetMarker(lenArrayVisited.GetMarker())) {
+                return false;
+            }
+
+            usage.toStringLengthChains.push_back(chain);
+            COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "[.length] Chain has been added"
+                                             << " lenArrayCall=v" << chain.lenArrayCall->GetId();
+            return false;
+        };
+
+        HasUserPhiRecursively(toStringCall, phiVisited.GetMarker(), fnVisitStringCallPhiUser);
+    }
 }
 
 bool SimplifyStringBuilder::HasInputFromPreHeader(PhiInst *phi) const
@@ -1294,7 +1381,9 @@ bool SimplifyStringBuilder::HasToStringCallInput(PhiInst *phi) const
 {
     // Returns true if
     //  (1) 'phi' has StringBuilder.toString call as one of its inputs, and
-    //  (2) StringBuilder.toString call has no effective usages except this 'phi' itself.
+    //  (2) StringBuilder.toString call has no effective usages except:
+    //      (2.a) this 'phi' itself
+    //      (2.b) access to .length property (NullCheck->LenArray chain)
     //     Users being save states, check casts, and not used users are skipped.
 
     MarkerHolder visited {GetGraph()};
@@ -1304,18 +1393,19 @@ bool SimplifyStringBuilder::HasToStringCallInput(PhiInst *phi) const
         phi, visited.GetMarker(), [](auto &input) { return IsStringBuilderToString(input.GetInst()); });
 
     // (2)
-    bool toStringCallInputUsedAnywhereExceptPhi = HasInput(phi, [phi](auto &input) {
+    bool toStringCallInputUsedAnywhereExceptPhiOrLength = HasInput(phi, [phi](auto &input) {
         return IsStringBuilderToString(input.GetInst()) && HasUser(input.GetInst(), [phi](auto &user) {
                    auto userInst = user.GetInst();
                    bool isPhi = userInst == phi;
                    bool isSaveState = userInst->IsSaveState();
                    bool isCheckCast = IsCheckCastWithoutUsers(userInst);
+                   bool isStringLength = IsStringLengthAccessorChain(userInst);
                    bool hasUsers = userInst->HasUsers();
-                   return !isPhi && !isSaveState && !isCheckCast && hasUsers;
+                   return !isPhi && !isSaveState && !isCheckCast && !isStringLength && hasUsers;
                });
     });
     ResetInputMarkersRecursively(phi, visited.GetMarker());
-    return hasToStringCallInput && !toStringCallInputUsedAnywhereExceptPhi;
+    return hasToStringCallInput && !toStringCallInputUsedAnywhereExceptPhiOrLength;
 }
 
 static bool UsedByPhiInstInSameBB(const PhiInst *phi)
@@ -1378,6 +1468,9 @@ bool SimplifyStringBuilder::IsPhiAccumulatedValue(PhiInst *phi) const
     //      10p Phi v0(bb_preheader), v20(bb_back_edge)
     //      ...
     //  bb_back_edge:
+    //      ...
+    //      12.ref NullCheck v10p, save_state
+    //      13.i32 LenArray v12
     //      ...
     //      15 Intrinsic.StdCoreSbAppendString sb, v10p, ss
     //      ...
@@ -1576,6 +1669,27 @@ bool SimplifyStringBuilder::MatchTemporaryInstruction(ConcatenationLoopMatch &ma
     return true;
 }
 
+bool SimplifyStringBuilder::ValidateTemporaryStringLengthPhis(const ConcatenationLoopMatch &match,
+                                                              const StringBuilderUsage &usage)
+{
+    /// This avoids the pattern
+    //    s += s1 + s2
+    //    print(s.length) // from temporary
+    //    s += s3 + s4
+
+    for (const auto &chain : usage.toStringLengthChains) {
+        if (chain.toStringCallOrPhi != match.accValue) {
+            COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "[.length][reject] Hostment to non-acc is not supported";
+            return false;
+        }
+        if (chain.nullCheckCall == nullptr) {
+            COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "[.length][reject] LenArray w/o NullCheck is not supported";
+            return false;
+        }
+    }
+    return true;
+}
+
 void SimplifyStringBuilder::MatchTemporaryInstructions(const StringBuilderUsage &usage, ConcatenationLoopMatch &match,
                                                        Inst *accValue, Inst *intermediateValue,
                                                        Marker appendInstructionVisited)
@@ -1589,6 +1703,15 @@ void SimplifyStringBuilder::MatchTemporaryInstructions(const StringBuilderUsage 
     temp.toStringCall = usage.toStringCalls[0];
     temp.instance = usage.instance;
     temp.ctorCall = usage.ctorCall;
+
+    if (!usage.toStringLengthChains.empty()) {
+        if (!ValidateTemporaryStringLengthPhis(match, usage)) {
+            match.Clear();
+            return;
+        }
+        std::copy(usage.toStringLengthChains.begin(), usage.toStringLengthChains.end(),
+                  std::back_inserter(match.loop.toStringLengthChains));
+    }
 
     for (auto appendInstruction : usage.appendInstructions) {
         bool isMatchStillValid =
@@ -1621,6 +1744,8 @@ Inst *SimplifyStringBuilder::MatchHoistableInstructions(const StringBuilderUsage
     match.preheader.ctorCall = usage.ctorCall;
     ASSERT(usage.toStringCalls.size() == 1);
     match.exit.toStringCall = usage.toStringCalls[0];
+    ASSERT(match.loop.toStringLengthChains.empty());
+    match.loop.toStringLengthChains = usage.toStringLengthChains;
 
     for (auto &user : usage.instance->GetUsers()) {
         auto userInst = SkipSingleUserCheckInstruction(user.GetInst());
@@ -1671,6 +1796,7 @@ const ArenaVector<SimplifyStringBuilder::ConcatenationLoopMatch> &SimplifyString
     //   >  for (...) {
     //   >      str += a0 + b0 + ...
     //   >      str += a1 + b2 + ...
+    //   >      str += str.length
     //   >      ...
     //   >  }
     // And fill ConcatenationLoopMatch structure with instructions from the pattern found
@@ -1704,6 +1830,12 @@ const ArenaVector<SimplifyStringBuilder::ConcatenationLoopMatch> &SimplifyString
                 // All other StringBuilder instances are set to be removed as temporary
                 MatchTemporaryInstructions(*usage, match, accValue, intermediateValue, appendInstructionVisited);
                 intermediateValue = UpdateIntermediateValue(*usage, intermediateValue, appendInstructionVisited);
+            }
+
+            // MVP<.length>: ignore non-exit induces phis
+            if (!ValidateTemporaryStringLengthPhis(match, *usage)) {
+                match.Clear();
+                break;
             }
         }
 

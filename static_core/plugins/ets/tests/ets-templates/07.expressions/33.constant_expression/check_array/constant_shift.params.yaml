@@ -20,10 +20,6 @@ cases:
   - { type: short, value: 20, sign: '>>',  expected: 2    }
   - { type: short, value: 20, sign: '>>>', expected: 2    }
 
-  - { type: char, value: c'p', sign: '<<',  expected: 896 }
-  - { type: char, value: c'p', sign: '>>',  expected: 14  }
-  - { type: char, value: c'p', sign: '>>>', expected: 14  }
-
   - { type: int, value: 38, sign: '<<',  expected: 304  }
   - { type: int, value: 38, sign: '>>',  expected: 4    }
   - { type: int, value: 38, sign: '>>>', expected: 4    }

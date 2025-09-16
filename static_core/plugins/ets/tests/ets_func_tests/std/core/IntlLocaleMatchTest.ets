@@ -20,7 +20,7 @@ const er_ER = "er-OR" // Fake locale
 const badLocale = "test"
 const localeList: string[] = [er_ER, ru_RU, zh_CN, en_US]
 
-function main() throws {
+function main() {
     testBestFitLocaleMatchList()
     testLookupLocaleMatchSingle()
     testLookupLocaleMatchList()
@@ -56,10 +56,10 @@ function testLookupLocaleMatchList() {
 }
 
 function negativeTestLanguageTag() {
-    expectError((): void => { intlBestFitLocale(badLocale) })
-    expectError((): void => { intlBestFitLocales(badLocale) })
-    expectError((): void => { intlBestFitLocales([badLocale]) })
-    expectError((): void => { intlLookUpLocale(badLocale) })
-    expectError((): void => { intlLookUpLocales(badLocale) })
-    expectError((): void => { intlLookUpLocales([badLocale]) })
+    arktest.expectError((): void => { intlBestFitLocale(badLocale) })
+    arktest.expectError((): void => { intlBestFitLocales(badLocale) })
+    arktest.expectError((): void => { intlBestFitLocales([badLocale]) })
+    arktest.expectError((): void => { intlLookUpLocale(badLocale) })
+    arktest.expectError((): void => { intlLookUpLocales(badLocale) })
+    arktest.expectError((): void => { intlLookUpLocales([badLocale]) })
 }

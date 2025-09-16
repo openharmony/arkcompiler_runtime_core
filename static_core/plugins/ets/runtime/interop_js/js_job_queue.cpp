@@ -37,7 +37,7 @@ namespace ark::ets::interop::js {
 static napi_value ThenCallback(napi_env env, napi_callback_info info)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    INTEROP_CODE_SCOPE_JS(coro);
+    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
 
     JsJobQueue::JsCallback *jsCallback = nullptr;
     [[maybe_unused]] napi_status status =
@@ -62,7 +62,7 @@ static napi_value ThenCallback(napi_env env, napi_callback_info info)
 void JsJobQueue::Post(EtsObject *callback)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
 
     auto *ctx = InteropCtx::Current(coro);
     if (ctx == nullptr) {
@@ -105,7 +105,7 @@ static napi_value OnJsPromiseCompleted(napi_env env, [[maybe_unused]] napi_callb
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     PandaEtsVM *vm = coro->GetPandaVM();
     auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_JS(coro);
+    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
 
     mem::Reference *promiseRef = nullptr;
     size_t argc = 1;
@@ -124,10 +124,8 @@ static napi_value OnJsPromiseCompleted(napi_env env, [[maybe_unused]] napi_callb
         vm->GetGlobalObjectStorage()->Remove(promiseRef);
 
         if (isResolved) {
-            auto *jsval = JSValue::Create(coro, ctx, value);
-            ASSERT(jsval != nullptr);
-            ark::ets::intrinsics::EtsPromiseResolve(promiseHandle.GetPtr(), jsval->AsObject(),
-                                                    ark::ets::ToEtsBoolean(false));
+            auto etsVal = JSConvertEtsObject::UnwrapWithNullCheck(ctx, env, value).value();
+            ark::ets::intrinsics::EtsPromiseResolve(promiseHandle.GetPtr(), etsVal, ark::ets::ToEtsBoolean(false));
         } else {
             auto refconv = JSRefConvertResolve<true>(ctx, ctx->GetErrorClass());
             ASSERT(refconv != nullptr);
@@ -206,7 +204,7 @@ void JsJobQueue::CreatePromiseLink(EtsObject *jsObject, EtsPromise *etsPromise)
 void JsJobQueue::CreateLink(EtsObject *source, EtsObject *target)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     CreatePromiseLink(source, EtsPromise::FromEtsObject(target));
 }
 

@@ -32,7 +32,7 @@ class A {
 
 function main(): void {
   let i: A = new A();
-  assertTrue( A.a == 1 )
+  arktest.assertTrue( A.a == 1 )
   A.a = 3;
-  assertTrue( A.a == 3 )
+  arktest.assertTrue( A.a == 3 )
 }

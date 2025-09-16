@@ -25,7 +25,7 @@ public:
         auto bob = static_cast<ani_object>(bobRef);
 
         ani_class cls;
-        ASSERT_EQ(env_->FindClass("Lobject_get_field_ref_test/Man;", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("object_get_field_ref_test.Man", &cls), ANI_OK);
 
         ani_field fieldName;
         ASSERT_EQ(env_->Class_FindField(cls, "name", &fieldName), ANI_OK);

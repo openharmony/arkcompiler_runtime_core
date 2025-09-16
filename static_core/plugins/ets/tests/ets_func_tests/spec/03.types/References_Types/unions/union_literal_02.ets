@@ -44,9 +44,9 @@ function main(): void {
     let t1: T = "hello"
     let t2: T = "goodbye"
     t1 = t2
-    assertEQ( t1, "goodbye")
-    assertEQ( say(t1, "blue sky"), "goodbye blue sky")
-    assertEQ( tToString01(t1), "goodbye")
-    assertEQ( tToString02(t1), "goodbye")
-    assertEQ( tToString03(t1), "goodbye+")
+    arktest.assertEQ( t1, "goodbye")
+    arktest.assertEQ( say(t1, "blue sky"), "goodbye blue sky")
+    arktest.assertEQ( tToString01(t1), "goodbye")
+    arktest.assertEQ( tToString02(t1), "goodbye")
+    arktest.assertEQ( tToString03(t1), "goodbye+")
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 
 #include "libabckit/src/adapter_dynamic/convert.h"
 
-#include "libabckit/include/c/metadata_core.h"
+#include "libabckit/c/metadata_core.h"
 #include "libabckit/src/logger.h"
 
 #include "abc2program/abc2program_driver.h"

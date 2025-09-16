@@ -249,16 +249,16 @@ function loop_if_reserve10(cond: boolean) : string {
 }
 
 function main() : int {
-    assertEQ(reserve1(), "0", "Wrong result at reserve1")
-    assertEQ(reserve2(), "01", "Wrong result at reserve2")
-    assertEQ(loop_reserve3(), "012", "Wrong result at loop_reserve3")
-    assertEQ(loop_reserve4(), "0123", "Wrong result at loop_reserve4")
-    assertEQ(loop_reserve5(), "01234", "Wrong result at loop_reserve5")
-    assertEQ(nested_loop_reserve6(), "012345678910111213", "Wrong result at nested_loop_reserve6")
-    assertEQ(if_reserve7(true), "0", "Wrong result at if_reserve7")
-    assertEQ(if_reserve8(true), "0123", "Wrong result at if_reserve8")
-    assertEQ(if_loop_reserve9(true), "012345", "Wrong result at if_loop_reserve9")
-    assertEQ(loop_if_reserve10(true), "012345678", "Wrong result at loop_if_reserve10")
+    arktest.assertEQ(reserve1(), "0", "Wrong result at reserve1")
+    arktest.assertEQ(reserve2(), "01", "Wrong result at reserve2")
+    arktest.assertEQ(loop_reserve3(), "012", "Wrong result at loop_reserve3")
+    arktest.assertEQ(loop_reserve4(), "0123", "Wrong result at loop_reserve4")
+    arktest.assertEQ(loop_reserve5(), "01234", "Wrong result at loop_reserve5")
+    arktest.assertEQ(nested_loop_reserve6(), "012345678910111213", "Wrong result at nested_loop_reserve6")
+    arktest.assertEQ(if_reserve7(true), "0", "Wrong result at if_reserve7")
+    arktest.assertEQ(if_reserve8(true), "0123", "Wrong result at if_reserve8")
+    arktest.assertEQ(if_loop_reserve9(true), "012345", "Wrong result at if_loop_reserve9")
+    arktest.assertEQ(loop_if_reserve10(true), "012345678", "Wrong result at loop_if_reserve10")
 
     return 0
 }

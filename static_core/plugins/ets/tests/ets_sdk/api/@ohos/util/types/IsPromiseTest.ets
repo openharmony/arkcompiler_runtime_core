@@ -16,7 +16,7 @@
 import {util} from "@ohos.util";
 
 function main(): int {
-    const suite = new ArkTestsuite("CommonUtil types.isPromise() API tests")
+    const suite = new arktest.ArkTestsuite("CommonUtil types.isPromise() API tests")
 
     suite.addTest("Verify Promise.resolve() returns a Promise", testIsPromise001)
     suite.addTest("Verify Promise.resolve() with a different value", testIsPromise002)
@@ -38,7 +38,7 @@ function main(): int {
 function testIsPromise001() {
     let proc = new util.types();
     let result = proc.isPromise(Promise.resolve(42));
-    assertTrue(result, "The Promise should be of the same type as the Promise");
+    arktest.assertTrue(result, "The Promise should be of the same type as the Promise");
 }
 
 /**
@@ -52,7 +52,7 @@ function testIsPromise001() {
 function testIsPromise002() {
     let proc = new util.types();
     let result = proc.isPromise(Promise.resolve(33));
-    assertTrue(result, "The Promise should be of the same type as the Promise");
+    arktest.assertTrue(result, "The Promise should be of the same type as the Promise");
 }
 
 /**
@@ -66,7 +66,7 @@ function testIsPromise002() {
 function testIsPromise003() {
     let proc = new util.types();
     let result = proc.isPromise(Promise.resolve(44));
-    assertTrue(result, "The Promise should be of the same type as the Promise");
+    arktest.assertTrue(result, "The Promise should be of the same type as the Promise");
 }
 
 /**
@@ -81,7 +81,7 @@ function testIsPromise004() {
     let proc = new util.types();
     let err = Error("33");
     let result = proc.isPromise(Promise.reject(err));
-    assertTrue(result, "The Promise should be of the same type as the Promise");
+    arktest.assertTrue(result, "The Promise should be of the same type as the Promise");
 }
 
 /**
@@ -96,5 +96,5 @@ function testIsPromise005() {
     let proc = new util.types();
     let err = Error("23");
     let result = proc.isPromise(Promise.reject(err));
-    assertTrue(result, "The Promise should be of the same type as the Promise");
+    arktest.assertTrue(result, "The Promise should be of the same type as the Promise");
 }

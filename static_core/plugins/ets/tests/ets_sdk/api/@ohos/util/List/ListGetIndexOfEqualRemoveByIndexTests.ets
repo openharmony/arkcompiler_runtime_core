@@ -14,9 +14,12 @@
  */
 
 import {List} from '@ohos.util.List';
+import {BusinessError} from "@ohos.base";
+
+const OutOfBoundsErrorCodeId: int = 10200001;
 
 function main() {
-    const suite = new ArkTestsuite("List API tests");
+    const suite = new arktest.ArkTestsuite("List API tests");
 
     suite.addTest("List getIndexOf an unique element", testGetIndexOfUniqueElement);
     suite.addTest("List getIndexOf an inexistent element", testGetIndexOfInexistentElement);
@@ -34,137 +37,130 @@ function main() {
     return suite.run();
 }
 
-function initializeList(list: List<number>, sourceArray: Array<number>) {
-    for (let i = 0; i < sourceArray.length; i++) {
+function initializeList(list: List<double>, sourceArray: Array<double>) {
+    for (let i: int = 0; i < sourceArray.length; i++) {
         list.add(sourceArray[i]);
     }
 }
 
 class TestData {
-    static readonly testNumber1: number = 1;
-    static readonly testNumber2: number = 2;
-    static readonly testNumber3: number = 3;
-    static readonly testNumber4: number = 4;
-    static readonly testNumber6: number = 6;
-    static readonly testNumber20: number = 20;
-    static readonly testNumber1w: number = 10000;
+    static readonly testNumber1: double | int = 1;
+    static readonly testNumber2: double | int = 2;
+    static readonly testNumber3: double | int = 3;
+    static readonly testNumber4: double | int = 4;
+    static readonly testNumber6: double | int = 6;
+    static readonly testNumber20: double | int = 20;
+    static readonly testNumber1w: double | int = 10000;
     static readonly forNumber1: Number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
-    static readonly arrayForNumber1 = Array.from<number>(TestData.forNumber1);
+    static readonly arrayForNumber1 = Array.from<double>(TestData.forNumber1);
     static readonly forNumber2: Number[] = [1, 2, 3, 4, 5];
-    static readonly arrayForNumber2 = Array.from<number>(TestData.forNumber2);
+    static readonly arrayForNumber2 = Array.from<double>(TestData.forNumber2);
     static readonly forNumber4: Number[] = [1, 2, 2, 3, 3];
-    static readonly arrayForNumber4 = Array.from<number>(TestData.forNumber4);
+    static readonly arrayForNumber4 = Array.from<double>(TestData.forNumber4);
 }
 
 function testGetIndexOfUniqueElement() {
-    let list = new List<number>();
+    let list = new List<double>();
     list.add(TestData.testNumber1);
     list.add(TestData.testNumber2);
     list.add(TestData.testNumber2);
     list.add(TestData.testNumber3);
-    assertEQ(list.getIndexOf(TestData.testNumber1), 0, "First index of 1 should be 0");
-    assertEQ(list.getIndexOf(TestData.testNumber3), TestData.testNumber3, "First index of 3 should be 3");
+    arktest.assertEQ(list.getIndexOf(TestData.testNumber1), 0, "First index of 1 should be 0");
+    arktest.assertEQ(list.getIndexOf(TestData.testNumber3), TestData.testNumber3, "First index of 3 should be 3");
 }
 
 function testGetIndexOfInexistentElement() {
-    let list = new List<number>();
+    let list = new List<double>();
     initializeList(list, TestData.arrayForNumber4);
-    assertEQ(list.getIndexOf(TestData.testNumber4), -TestData.testNumber1, "First index of 4 should be -1");
+    arktest.assertEQ(list.getIndexOf(TestData.testNumber4), -TestData.testNumber1, "First index of 4 should be -1");
 }
 
 function testGetIndexOfAddRemoveByIndex() {
-    let list = new List<number>();
+    let list = new List<double>();
     initializeList(list, TestData.arrayForNumber4);
     let result1 = list.removeByIndex(list.getIndexOf(TestData.testNumber2));
     let result2 = list.removeByIndex(list.getIndexOf(TestData.testNumber2));
-    assertEQ(result1, result2, "The two result should be equal");
+    arktest.assertEQ(result1, result2, "The two result should be equal");
     let result3 = list.removeByIndex(list.getIndexOf(TestData.testNumber3));
     let result4 = list.removeByIndex(list.getIndexOf(TestData.testNumber3));
-    assertEQ(result3, result4, "The two result should be equal");
+    arktest.assertEQ(result3, result4, "The two result should be equal");
 }
 
 function testGetIndexOfRepeatedElement() {
-    let list = new List<number>();
+    let list = new List<double>();
     list.add(TestData.testNumber1);
     list.add(TestData.testNumber2);
     list.add(TestData.testNumber2);
     list.add(TestData.testNumber3);
-    assertEQ(list.getIndexOf(TestData.testNumber2), TestData.testNumber1, "First index of 2 should be 1");
+    arktest.assertEQ(list.getIndexOf(TestData.testNumber2), TestData.testNumber1, "First index of 2 should be 1");
 }
 
 function testEqualSameElement(){
-    let list = new List<number>();
+    let list = new List<double>();
     initializeList(list, TestData.arrayForNumber2);
-    let list1= new List<number>();
+    let list1= new List<double>();
     initializeList(list1, TestData.arrayForNumber2);
-    assertTrue(list.equal(list1), "Lists should be equal");
+    arktest.assertTrue(list.equal(list1), "Lists should be equal");
 }
 
 function testEqualDifferentElement(){
-    let list = new List<number>();
+    let list = new List<double>();
     initializeList(list, TestData.arrayForNumber2);
-    let list1 = new List<number>();
+    let list1 = new List<double>();
     initializeList(list1, TestData.arrayForNumber4);
-    assertFalse(list.equal(list1), "Lists should not be equal");
+    arktest.assertFalse(list.equal(list1), "Lists should not be equal");
 }
 
 function testEqualSameContainer(){
-    let list = new List<number>();
+    let list = new List<double>();
     initializeList(list, TestData.arrayForNumber2);
-    assertTrue(list.equal(list), "List should be equal to itself");
+    arktest.assertTrue(list.equal(list), "List should be equal to itself");
 }
 
 function testRemoveByIndexWithinRange() {
-    let list = new List<number>();
+    let list = new List<double>();
     initializeList(list, TestData.arrayForNumber1);
-    assertEQ(list.removeByIndex(TestData.testNumber1), TestData.testNumber1, "Removed element should be 1");
-    assertEQ(list.get(0), 0, "Element at index 0 should be 0");
-    for (let i: number = TestData.testNumber1; i < list.length; i++) {
-        assertEQ(list.get(i), TestData.arrayForNumber1[i + TestData.testNumber1], "Element should match");
+    arktest.assertEQ(list.removeByIndex(TestData.testNumber1), TestData.testNumber1, "Removed element should be 1");
+    arktest.assertEQ(list.get(0), 0, "Element at index 0 should be 0");
+    for (let i: int = TestData.testNumber1; i < list.length; i++) {
+        arktest.assertEQ(list.get(i), TestData.arrayForNumber1[i + TestData.testNumber1], "Element should match");
     }
-    assertEQ(list.length, TestData.arrayForNumber1.length - TestData.testNumber1, "List length should be - 1");
+    arktest.assertEQ(list.length, TestData.arrayForNumber1.length.toInt() - TestData.testNumber1, "List length should be - 1");
 }
 
 function testRemoveByIndexOutsideRange() {
-    let list = new List<number>();
+    let list = new List<double>();
     initializeList(list, TestData.arrayForNumber1);
-    let errorCount = 0;
-    try {
-        list.removeByIndex(TestData.testNumber1w);
-    } catch (e) {
-        if (e instanceof RangeError) {
-            assertEQ((e as RangeError).message, "The value of index is out of range.",
-                "The result should be 'Index out of range'");
-            errorCount++;
-        }
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
+            "The value of \"index\" is out of range. It must be >= 0 && <= 20. Received value is: 10000") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    try {
-        list.removeByIndex(-TestData.testNumber6);
-    } catch (e) {
-        if (e instanceof RangeError) {
-            assertEQ((e as RangeError).message, "The value of index is out of range.",
-                "The result should be 'Index out of range'");
-            errorCount++;
-        }
+    let exceptionCheckTwo = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
+            "The value of \"index\" is out of range. It must be >= 0 && <= 20. Received value is: -6") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    assertEQ(errorCount, TestData.testNumber2, "The result should be 'RangeError'");
+
+    arktest.expectThrow(() => {list.removeByIndex(TestData.testNumber1w)}, exceptionCheck);
+    arktest.expectThrow(() => {list.removeByIndex(-TestData.testNumber6)}, exceptionCheckTwo);
 }
 
 function testRemoveByIndexUndefined() {
-    let list = new List<number | string | boolean | null | object | undefined>();
+    let list = new List<double | string | boolean | null | object | undefined>();
     list.add(undefined);
     list.add(TestData.arrayForNumber1);
-    assertEQ(list.removeByIndex(0), undefined, "The result should be undefined");
+    arktest.assertEQ(list.removeByIndex(0), undefined, "The result should be undefined");
 }
 
 function testRemoveByIndexAtBoundary() {
-    let list = new List<number>();
+    let list = new List<double>();
     initializeList(list, TestData.arrayForNumber1);
-    assertEQ(list.removeByIndex(TestData.arrayForNumber1.length - TestData.testNumber1), TestData.testNumber20,
+    arktest.assertEQ(list.removeByIndex(TestData.arrayForNumber1.length.toInt() - TestData.testNumber1), TestData.testNumber20,
         "Removed element should - 1");
-    assertEQ(list.removeByIndex(0), 0, "Removed element should be 0");
-    for (let i: number = 0; i < list.length; i++) {
-        assertEQ(list.get(i), TestData.arrayForNumber1[i + TestData.testNumber1], "Element should match");
+    arktest.assertEQ(list.removeByIndex(0), 0, "Removed element should be 0");
+    for (let i: int = 0; i < list.length; i++) {
+        arktest.assertEQ(list.get(i), TestData.arrayForNumber1[i + TestData.testNumber1], "Element should match");
     }
-    assertEQ(list.length, TestData.arrayForNumber1.length - TestData.testNumber2, "List length should be - 2");
+    arktest.assertEQ(list.length, TestData.arrayForNumber1.length.toInt() - TestData.testNumber2, "List length should be - 2");
 }

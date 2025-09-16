@@ -35,5 +35,5 @@ function main(): void {
   person1.address.street = "123";
   person1.address.city = "xian";
   person1.name = "Alice";
-  assertEQ(person1?.address.city, "xian");
+  arktest.assertEQ(person1?.address.city, "xian");
 }

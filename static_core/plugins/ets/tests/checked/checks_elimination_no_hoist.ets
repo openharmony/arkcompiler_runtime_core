@@ -23,8 +23,8 @@ let C1:int = 2;
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Div/; div1Id = /([0-9]+)\./.match(@ir_scope.lines[@ir_scope.current_index - 1])[1]
 //! INST_NEXT    /Div/; div2Id = /([0-9]+)\./.match(@ir_scope.lines[@ir_scope.current_index - 1])[1]
-//! EVENT        /licm,inst_id:#{div1Id}/
-//! EVENT_NOT    /licm,inst_id:#{div2Id}/
+//! EVENT        /checks_elimination_no_hoist.ETSGLOBAL::HoistableInput,licm,inst_id:#{div1Id}/
+//! EVENT_NOT    /checks_elimination_no_hoist.ETSGLOBAL::HoistableInput,licm,inst_id:#{div2Id}/
 function HoistableInput(): int {
     let u:int = 0;
     let v:int = 2;
@@ -55,8 +55,8 @@ function HoistableInput(): int {
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Div/; div1Id = /([0-9]+)\./.match(@ir_scope.lines[@ir_scope.current_index - 1])[1]
 //! INST_NEXT    /Div/; div2Id = /([0-9]+)\./.match(@ir_scope.lines[@ir_scope.current_index - 1])[1]
-//! EVENT        /licm,inst_id:#{div2Id}/
-//! EVENT_NEXT   /licm,inst_id:#{div2Id}/
+//! EVENT        /checks_elimination_no_hoist.ETSGLOBAL::DomCheckOutside,licm,inst_id:#{div2Id}/
+//! EVENT_NEXT   /checks_elimination_no_hoist.ETSGLOBAL::DomCheckOutside,licm,inst_id:#{div2Id}/
 function DomCheckOutside(): int {
     let u:int = 0;
     let v:int = 1;
@@ -86,7 +86,7 @@ function DomCheckOutside(): int {
 //! METHOD       "checks_elimination_no_hoist.ETSGLOBAL::InvalidBoundsOutside"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Div/; div1Id = /([0-9]+)\./.match(@ir_scope.lines[@ir_scope.current_index - 1])[1]
-//! EVENT_NOT    /licm,inst_id:#{div1Id}/
+//! EVENT_NOT    /checks_elimination_no_hoist.ETSGLOBAL::InvalidBoundsOutside,licm,inst_id:#{div1Id}/
 function InvalidBoundsOutside(): int {
     let u:int = 0;
     let v:int = 1;
@@ -113,8 +113,8 @@ function InvalidBoundsOutside(): int {
 //! METHOD       "checks_elimination_no_hoist.ETSGLOBAL::ValidBoundsOutside"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Div/; div1Id = /([0-9]+)\./.match(@ir_scope.lines[@ir_scope.current_index - 1])[1]
-//! EVENT        /licm,inst_id:#{div1Id}/
-//! EVENT_NEXT   /licm,inst_id:#{div1Id}/
+//! EVENT        /checks_elimination_no_hoist.ETSGLOBAL::ValidBoundsOutside,licm,inst_id:#{div1Id}/
+//! EVENT_NEXT   /checks_elimination_no_hoist.ETSGLOBAL::ValidBoundsOutside,licm,inst_id:#{div1Id}/
 function ValidBoundsOutside(): int {
     let u:int = 0;
     let v:int = 1;
@@ -165,8 +165,8 @@ function NullCheck(): int {
 //! RUN_PAOC     options: "--compiler-cross-arch=arm64 --compiler-regex=.*BoundsCheck --compiler-enable-events --compiler-events-path=./events.csv"
 //! METHOD       "checks_elimination_no_hoist.ETSGLOBAL::BoundsCheck"
 //! PASS_AFTER   "IrBuilder"
-//! INST         "LoadCompressedStringChar"; lcscId = /([0-9]+)\./.match(@ir_scope.lines[@ir_scope.current_index - 1])[1]
-//! EVENT        /licm,inst_id:#{lcscId}/
+//! INST         "LenArray"; lcscId = /([0-9]+)\./.match(@ir_scope.lines[@ir_scope.current_index - 1])[1]
+//! EVENT        /checks_elimination_no_hoist.ETSGLOBAL::BoundsCheck,licm,inst_id:#{lcscId}/
 function __noinline__getstr(): string {
     return "x";
 }
@@ -177,7 +177,7 @@ function BoundsCheck(): int {
         if (str1char.length <= 100000) {
             RES += 1;
         } else {
-            RES += str1char.charAt(10000) as int;
+            RES += Char.toInt(str1char.charAt(10000));
         }
     }
     return RES;

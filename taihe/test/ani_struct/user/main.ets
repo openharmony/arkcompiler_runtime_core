@@ -36,7 +36,7 @@ function test_struct_dbase5() {
     let info = structD.structD;
 
     console.log("StructTest.StructD: " + str.param1);
-    assertEQ(str.param1, info.param1);
+    arktest.assertEQ(str.param1, info.param1);
 }
 
 function test_struct_ebigint() {
@@ -51,21 +51,21 @@ function test_struct_ebigint() {
     let info = structE.structE;
 
     console.log("StructTest.StructE: " + str.param1);
-    assertEQ(str.param1, info.param1);
+    arktest.assertEQ(str.param1, info.param1);
 }
 
 function test_struct_funion() {
     let str: StructTest.FUnion = {
         param1: "optionalStr",
         param2: "unionStr",
-        param3: {"today":"19"}
+        param3: {"today": "19"}
     };
     structF.structF = str;
 
     let info = structF.structF;
 
     console.log("StructTest.StructF: " + str.param1);
-    assertEQ(str.param1, info.param1);
+    arktest.assertEQ(str.param1, info.param1);
 }
 
 function test_struct_array() {
@@ -76,16 +76,13 @@ function test_struct_array() {
         arrayBuffer.set(i, numbersU8[i]);
     }
 
-    let str: StructTest.GArray = {
-        param1: i8Array,
-        param2: arrayBuffer
-    };
+    let str: StructTest.GArray = {param1: i8Array, param2: arrayBuffer};
     structG.gArray = str;
     let info = structG.gArray;
 
     console.log("StructTest.GArray: " + str.param1);
     console.log("StructTest.GArray: " + info.param1);
-    assertEQ(str.param1[0], info.param1[0]);
+    arktest.assertEQ(str.param1[0], info.param1[0]);
 }
 
 function test_struct_addNewCanvas() {
@@ -95,21 +92,22 @@ function test_struct_addNewCanvas() {
     canvas1.r += 255;
     canvas1.g += 0;
     canvas1.b += 0;
-    console.log("canvas1's color is " + canvas1.r + "," + canvas1.g + "," + canvas1.b);
+    console.log(
+        "canvas1's color is " + canvas1.r + "," + canvas1.g + "," + canvas1.b);
 }
 
 function test_struct_dbase5readonly() {
     let info = structDB5.dB5Readonly;
 
     console.log("StructTest.DB5Readonly: " + info.param1);
-    assertEQ(info.param1, 1 as byte);
+    arktest.assertEQ(info.param1, (1).toByte());
 }
 
 function test_struct_sebreadonly() {
     let info = structEB.sEBReadonly;
 
     console.log("StructTest.SEBReadonly: " + info.param1);
-    assertEQ(info.param1, true);
+    arktest.assertEQ(info.param1, true);
 }
 
 function test_struct_addNewDraw() {
@@ -120,6 +118,39 @@ function test_struct_addNewDraw() {
     draw.g += 255;
     draw.b += 255;
     console.log("draw's color is " + draw.r + "," + draw.g + "," + draw.b);
+}
+
+function test_struct_process_student() {
+    let student: StructTest.Student = {name: "Jack", age: 10};
+    let pro_student = StructTest.process_student(student);
+    console.log("process student: ", pro_student.name, pro_student.age);
+    arktest.assertEQ(pro_student.name, "Jack student");
+    arktest.assertEQ(pro_student.age, 20);
+}
+
+function test_struct_process_teacher() {
+    let teacher: StructTest.Teacher = new StructTest.Teacher("Jony", 30);
+    let pro_teacher = StructTest.process_teacher(teacher);
+    console.log("process teacher:", pro_teacher.name, pro_teacher.age);
+    arktest.assertEQ(pro_teacher.name, "Jony teacher");
+    arktest.assertEQ(pro_teacher.age, 45);
+}
+
+function test_struct_process_g() {
+    let g: StructTest.G = {f: 0, g: 0};
+    let new_g = StructTest.process_g(g);
+    console.log("process g:", new_g.f, new_g.g);
+    arktest.assertEQ(new_g.f, 1);
+    arktest.assertEQ(new_g.g, 2);
+}
+
+function test_struct_process_h() {
+    let h = new StructTest.H(0, 0, 0);
+    let new_h = StructTest.process_h(h);
+    console.log("process h:", new_h.f, new_h.g, new_h.h);
+    arktest.assertEQ(new_h.f, 1);
+    arktest.assertEQ(new_h.g, 2);
+    arktest.assertEQ(new_h.h, 3);
 }
 
 function main() {
@@ -133,7 +164,7 @@ function main() {
     let c: StructTest.C = new StructTest.C(4, 5, 6);
 
     console.log("############## ani_struct start #############");
-    const suite = new ArkTestsuite("BundleManager Tests");
+    const suite = new arktest.ArkTestsuite("BundleManager Tests");
 
     console.log("a:", a);
     console.log("b:", b);
@@ -147,6 +178,10 @@ function main() {
     suite.addTest("test_struct_dbase5readonly", test_struct_dbase5readonly);
     suite.addTest("test_struct_sebreadonly", test_struct_sebreadonly);
     suite.addTest("test_struct_addNewDraw", test_struct_addNewDraw);
+    suite.addTest("test_struct_process_student", test_struct_process_student);
+    suite.addTest("test_struct_process_teacher", test_struct_process_teacher);
+    suite.addTest("test_struct_process_g", test_struct_process_g);
+    suite.addTest("test_struct_process_h", test_struct_process_h);
 
-    exit(suite.run());    
+    exit(suite.run());
 }

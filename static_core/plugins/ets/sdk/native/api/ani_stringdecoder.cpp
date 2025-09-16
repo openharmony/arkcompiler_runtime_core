@@ -13,25 +13,32 @@
  * limitations under the License.
  */
 
-#include "ani_stringdecoder.h"
 #include <codecvt>
 #include <locale>
+#include <memory>
+
+#include "plugins/ets/stdlib/native/core/stdlib_ani_helpers.h"
 #include "tools/format_logger.h"
 #include "unicode/unistr.h"
+#include "Util.h"
+
+#include "ani_stringdecoder.h"
 
 namespace ark::ets::sdk::util {
+constexpr int ERROR_CODE = 401;
+
 UConverter *UtilHelper::CreateConverter(const std::string &encStr, UErrorCode &codeflag)
 {
     UConverter *conv = ucnv_open(encStr.c_str(), &codeflag);
     if (U_FAILURE(codeflag) != 0) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        LOG_ERROR_SDK("Unable to create a UConverter object: %s\n", u_errorName(codeflag));
+        LOG_FATAL_SDK("Unable to create a UConverter object: %s\n", u_errorName(codeflag));
         return nullptr;
     }
     ucnv_setFromUCallBack(conv, UCNV_FROM_U_CALLBACK_SUBSTITUTE, nullptr, nullptr, nullptr, &codeflag);
     if (U_FAILURE(codeflag) != 0) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        LOG_ERROR_SDK("Unable to set the from Unicode callback function");
+        LOG_FATAL_SDK("Unable to set the from Unicode callback function");
         ucnv_close(conv);
         return nullptr;
     }
@@ -39,18 +46,11 @@ UConverter *UtilHelper::CreateConverter(const std::string &encStr, UErrorCode &c
     ucnv_setToUCallBack(conv, UCNV_TO_U_CALLBACK_SUBSTITUTE, nullptr, nullptr, nullptr, &codeflag);
     if (U_FAILURE(codeflag) != 0) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        LOG_ERROR_SDK("Unable to set the to Unicode callback function");
+        LOG_FATAL_SDK("Unable to set the to Unicode callback function");
         ucnv_close(conv);
         return nullptr;
     }
     return conv;
-}
-
-std::string UtilHelper::ConvertToString(UChar *uchar)
-{
-    std::u16string tempStr16(uchar);
-    std::string tepStr = std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> {}.to_bytes(tempStr16);
-    return tepStr;
 }
 
 StringDecoder::StringDecoder(const std::string &encoding)
@@ -62,40 +62,34 @@ StringDecoder::StringDecoder(const std::string &encoding)
 ani_string StringDecoder::Write(ani_env *env, const char *source, int32_t byteOffset, uint32_t length, UBool flush)
 {
     size_t limit = static_cast<size_t>(ucnv_getMinCharSize(conv_)) * length;
-    size_t len = limit * sizeof(UChar);
-    UChar *arr = nullptr;
-    if (limit > 0) {
-        arr = new UChar[limit + 1] {0};
-    } else {
-        ThrowError(env, "Error obtaining minimum number of input bytes");
+    if (limit <= 0) {
+        ThrowBusinessError(env, ERROR_CODE, "Error obtaining minimum number of input bytes");
         return nullptr;
     }
-    UChar *target = arr;
+    std::vector<UChar> arr(limit + 1, 0);
+    UChar *target = arr.data();
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    UChar *targetEnd = target + limit;
     UErrorCode codeFlag = U_ZERO_ERROR;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     source += byteOffset;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    ucnv_toUnicode(conv_, &target, target + len, &source, source + length, nullptr, flush, &codeFlag);
-    if (U_FAILURE(codeFlag) != 0) {
-        FreedMemory(arr);
+    const char *sourceEnd = source + length;
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    ucnv_toUnicode(conv_, &target, targetEnd, &source, sourceEnd, nullptr, flush, &codeFlag);
+    // NOLINTNEXTLINE(readability-implicit-bool-conversion)
+    if (U_FAILURE(codeFlag)) {
         std::string err = "decoder error, ";
         err += u_errorName(codeFlag);
-        ThrowError(env, err);
+        ThrowBusinessError(env, ERROR_CODE, err);
         return nullptr;
     }
     pendingLen_ = ucnv_toUCountPending(conv_, &codeFlag);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     pend_ = source + length - pendingLen_;
-
     ani_string resultStr {};
-    size_t resultLen = target - arr;
-    if (env->String_NewUTF16(reinterpret_cast<uint16_t *>(arr), resultLen, &resultStr) != ANI_OK) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        LOG_ERROR_SDK("StringDecoder:: create string error!");
-        FreedMemory(arr);
-        return nullptr;
-    }
-    FreedMemory(arr);
+    size_t resultLen = target - arr.data();
+    ANI_FATAL_IF_ERROR(env->String_NewUTF16(reinterpret_cast<uint16_t *>(arr.data()), resultLen, &resultStr));
     return resultStr;
 }
 
@@ -112,60 +106,28 @@ ani_string StringDecoder::End(ani_env *env)
         return resultStr;
     }
     UErrorCode errorCode = U_ZERO_ERROR;
-    auto *outputBuffer = new UChar[pendingLen_];
+    std::vector<UChar> outputBuffer(pendingLen_);
+    UChar *target = outputBuffer.data();
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    UChar *targetEnd = outputBuffer + pendingLen_;
-    UChar *target = outputBuffer;
+    UChar *const targetEnd = target + pendingLen_;
     const char *src = pend_;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    const char *sourceEnd = pend_ + pendingLen_;
+    const char *const sourceEnd = src + pendingLen_;
     UBool flush = 1;
     ucnv_toUnicode(conv_, &target, targetEnd, &src, sourceEnd, nullptr, flush, &errorCode);
-    if (U_FAILURE(errorCode) != 0) {
+    // NOLINTNEXTLINE(readability-implicit-bool-conversion)
+    if (U_FAILURE(errorCode)) {
         std::string err = "decoder error, ";
         err += u_errorName(errorCode);
-        ThrowError(env, err);
+        ThrowBusinessError(env, ERROR_CODE, err);
         return nullptr;
     }
-    std::string tepStr = UtilHelper::ConvertToString(target);
-    env->String_NewUTF8(tepStr.c_str(), tepStr.size(), &resultStr);
-    delete[] outputBuffer;
+    const size_t convertedChars = target - outputBuffer.data();
+    if (convertedChars < outputBuffer.size()) {
+        outputBuffer[convertedChars] = 0;
+    }
+    ANI_FATAL_IF_ERROR(
+        env->String_NewUTF16(reinterpret_cast<uint16_t *>(outputBuffer.data()), convertedChars, &resultStr));
     return resultStr;
-}
-
-void StringDecoder::FreedMemory(UChar *&pData)
-{
-    if (pData != nullptr) {
-        delete[] pData;
-        pData = nullptr;
-    }
-}
-
-ani_object StringDecoder::ThrowError(ani_env *env, const std::string &message)
-{
-    ani_string errString;
-    env->String_NewUTF8(message.c_str(), message.size(), &errString);
-    static const char *className = "L@ohos/util/util/BusinessError;";
-    ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        LOG_ERROR_SDK("StringDecoder:: Not found %{public}s", className);
-        return nullptr;
-    }
-
-    ani_method errorCtor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "Lstd/core/String;:V", &errorCtor)) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        LOG_ERROR_SDK("StringDecoder:: Class_FindMethod <ctor> Failed");
-        return nullptr;
-    }
-
-    ani_object errorObj;
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    if (ANI_OK != env->Object_New(cls, errorCtor, &errorObj, errString)) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        LOG_ERROR_SDK("StringDecoder:: Object_New Error Faild");
-    }
-    return errorObj;
 }
 }  // namespace ark::ets::sdk::util

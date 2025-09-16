@@ -92,6 +92,14 @@ private:
     void OptimizeStringConcatenation(BasicBlock *block);
 
     // 3. Optimizes String Builder concatenation loops
+
+    struct ToStringLengthChain {
+        Inst *toStringCallOrPhi {nullptr};  // NOLINT(misc-non-private-member-variables-in-classes)
+        Inst *nullCheckCall {nullptr};      // NOLINT(misc-non-private-member-variables-in-classes)
+        Inst *lenArrayCall {nullptr};       // NOLINT(misc-non-private-member-variables-in-classes)
+        Inst *shrLengthShift {nullptr};     // NOLINT(misc-non-private-member-variables-in-classes)
+    };
+
     struct ConcatenationLoopMatch {
         /*
             This structure reflects the following string concatenation pattern:
@@ -153,9 +161,14 @@ private:
         } preheader;                         // NOLINT(misc-non-private-member-variables-in-classes)
 
         struct Loop {
-            explicit Loop(ArenaAllocator *allocator) : appendInstructions {allocator->Adapter()} {}
+            explicit Loop(ArenaAllocator *allocator)
+                : appendInstructions {allocator->Adapter()}, toStringLengthChains {allocator->Adapter()}
+            {
+            }
             ArenaVector<Inst *> appendInstructions;  // NOLINT(misc-non-private-member-variables-in-classes)
-        } loop;                                      // NOLINT(misc-non-private-member-variables-in-classes)
+            ArenaVector<ToStringLengthChain>
+                toStringLengthChains;  // NOLINT(misc-non-private-member-variables-in-classes)
+        } loop;                        // NOLINT(misc-non-private-member-variables-in-classes)
 
         struct TemporaryInstructions {
             Inst *intermediateValue {nullptr};  // NOLINT(misc-non-private-member-variables-in-classes)
@@ -183,13 +196,15 @@ private:
             : instance {pInstance},
               ctorCall {pCtorCall},
               appendInstructions {allocator->Adapter()},
-              toStringCalls {allocator->Adapter()}
+              toStringCalls {allocator->Adapter()},
+              toStringLengthChains {allocator->Adapter()}
         {
         }
-        Inst *instance {nullptr};                // NOLINT(misc-non-private-member-variables-in-classes)
-        Inst *ctorCall {nullptr};                // NOLINT(misc-non-private-member-variables-in-classes)
-        ArenaVector<Inst *> appendInstructions;  // NOLINT(misc-non-private-member-variables-in-classes)
-        ArenaVector<Inst *> toStringCalls;       // NOLINT(misc-non-private-member-variables-in-classes)
+        Inst *instance {nullptr};                               // NOLINT(misc-non-private-member-variables-in-classes)
+        Inst *ctorCall {nullptr};                               // NOLINT(misc-non-private-member-variables-in-classes)
+        ArenaVector<Inst *> appendInstructions;                 // NOLINT(misc-non-private-member-variables-in-classes)
+        ArenaVector<Inst *> toStringCalls;                      // NOLINT(misc-non-private-member-variables-in-classes)
+        ArenaVector<ToStringLengthChain> toStringLengthChains;  // NOLINT(misc-non-private-member-variables-in-classes)
     };
 
     IntrinsicInst *CreateIntrinsicStringBuilderAppendString(Inst *instance, Inst *arg, SaveStateInst *saveState);
@@ -201,6 +216,7 @@ private:
     void ReconnectStringBuilderCascade(Inst *instance, Inst *inputInst, Inst *appendInstruction,
                                        SaveStateInst *saveState);
     void ReconnectStringBuilderCascades(const ConcatenationLoopMatch &match);
+    void ReconnectToStringLengthChains(const ConcatenationLoopMatch &match);
     void ReconnectInstructions(const ConcatenationLoopMatch &match);
 
     Inst *HoistInstructionToPreHeaderRecursively(BasicBlock *preHeader, Inst *lastInst, Inst *inst,
@@ -227,6 +243,7 @@ private:
                                   Marker appendInstructionVisited);
     bool MatchTemporaryInstruction(ConcatenationLoopMatch &match, ConcatenationLoopMatch::TemporaryInstructions &temp,
                                    Inst *appendInstruction, const Inst *accValue, Marker appendInstructionVisited);
+    bool ValidateTemporaryStringLengthPhis(const ConcatenationLoopMatch &match, const StringBuilderUsage &usage);
     void MatchTemporaryInstructions(const StringBuilderUsage &usage, ConcatenationLoopMatch &match, Inst *accValue,
                                     Inst *intermediateValue, Marker appendInstructionVisited);
     Inst *MatchHoistableInstructions(const StringBuilderUsage &usage, ConcatenationLoopMatch &match,
@@ -237,8 +254,8 @@ private:
     bool HasInputFromPreHeader(PhiInst *phi) const;
     bool HasToStringCallInput(PhiInst *phi) const;
     bool HasAppendInstructionUser(Inst *inst) const;
-    bool HasPhiOrAppendUsersOnly(Inst *inst, Marker visited) const;
-    bool HasAppendUsersOnly(Inst *inst) const;
+    bool HasPhiOrAppendOrLengthUsersOnly(Inst *inst, Marker visited) const;
+    bool HasAppendOrLengthUsersOnly(Inst *inst) const;
     bool HasInputInst(Inst *inputInst, Inst *inst) const;
 
     bool IsInstanceHoistable(const ConcatenationLoopMatch &match) const;

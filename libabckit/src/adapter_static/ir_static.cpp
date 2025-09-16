@@ -16,11 +16,11 @@
 #include "ir_static.h"
 
 #include "datatype.h"
-#include "libabckit/include/c/ir_core.h"
-#include "libabckit/include/c/statuses.h"
+#include "libabckit/c/ir_core.h"
+#include "libabckit/c/statuses.h"
 #include "libabckit/src/adapter_static/helpers_static.h"
 
-#include "libabckit/include/c/metadata_core.h"
+#include "libabckit/c/metadata_core.h"
 #include "libabckit/src/statuses_impl.h"
 #include "libabckit/src/macros.h"
 #include "libabckit/src/metadata_inspect_impl.h"

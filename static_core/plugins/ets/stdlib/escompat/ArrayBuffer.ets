@@ -36,12 +36,12 @@ export interface ArrayBufferView {
     /**
      * The length in bytes of the array.
      */
-    readonly byteLength: number
+    readonly byteLength: int
 
     /**
      * The offset in bytes of the array.
      */
-    readonly byteOffset: number
+    readonly byteOffset: int
 }
 
 /**
@@ -49,12 +49,14 @@ export interface ArrayBufferView {
  */
 export class ArrayBuffer extends Buffer
 {
+    public overload constructor { fromInt, fromNumber }
+
     /**
      * Creates ArrayBuffer with size equal to length parameter
      *
      * @param length size of ArrayBuffer
      */
-    public constructor(length: int, maxByteLength?: int)
+    public constructor fromInt(length: int, maxByteLength?: int)
     {
         super()
         if (length < 0) {
@@ -79,9 +81,9 @@ export class ArrayBuffer extends Buffer
      *
      * @param length size of ArrayBuffer
      */
-    public constructor(length: number, maxByteLength?: number)
+    public constructor fromNumber(length: number, maxByteLength?: number)
     {
-        this(length as int, (maxByteLength !== undefined) ? maxByteLength as int : undefined)
+        this(length.toInt(), (maxByteLength !== undefined) ? maxByteLength.toInt() : undefined)
     }
 
     /**
@@ -136,8 +138,8 @@ export class ArrayBuffer extends Buffer
      * @returns data taken from current ArrayBuffer with respect to begin and end parameters
      */
     public slice(begin: number, end?: number): ArrayBuffer {
-        if (end == undefined) return this.slice(begin as int)
-        else return this.slice(begin as int, end as int)
+        if (end == undefined) return this.slice(begin.toInt())
+        else return this.slice(begin.toInt(), end.toInt())
     }
 
     /**
@@ -202,7 +204,7 @@ export class ArrayBuffer extends Buffer
         return this._byteLength
     }
 
-    get byteLength(): number {
+    get byteLength(): int {
         return this._byteLength
     }
 
@@ -276,13 +278,13 @@ export class ArrayBuffer extends Buffer
     * The numbers in the provided array are converted to bytes, and then a new ArrayBuffer is constructed
     * using these bytes.
     *
-    * @param {number[]} array - An array of numbers representing byte values.
+    * @param {double[]} array - An array of numbers representing byte values.
     * @returns {ArrayBuffer} A new ArrayBuffer containing the data from the array.
     */
-    public static from(array: number[]): ArrayBuffer {
+    public static from(array: double[]): ArrayBuffer {
         const buf = new ArrayBuffer(array.length)
         for (let i = 0; i < array.length; ++i) {
-            buf.set(i, array[i] as byte)
+            buf.set(i, array[i].toByte())
         }
         return buf
     }
@@ -315,7 +317,6 @@ export class ArrayBuffer extends Buffer
     *
     * @param {string} str - The string to be converted.
     * @param {string} encoding - The encoding to use for converting the string.
-    * @param {int} length - The desired length of the resulting ArrayBuffer.
     * @returns {ArrayBuffer} A new ArrayBuffer containing the encoded string data.
     */
     public static native from(str: string, encoding: string): ArrayBuffer;
@@ -334,21 +335,6 @@ export class ArrayBuffer extends Buffer
     public static native from(buff: ArrayBuffer, byteOffset: int, length: int): ArrayBuffer;
 
     /**
-    * Creates a new ArrayBuffer from a segment of an existing ArrayBuffer.
-    *
-    * This overload accepts numeric values for the byte offset and length parameters,
-    * converts them to the native integer type, and then copies the specified range from the source ArrayBuffer.
-    *
-    * @param {ArrayBuffer} buff - The source ArrayBuffer.
-    * @param {number} byteOffset - The starting byte index to copy from.
-    * @param {number} length - The number of bytes to copy.
-    * @returns {ArrayBuffer} A new ArrayBuffer containing the specified segment.
-    */
-    public static from(buff: ArrayBuffer, byteOffset: number, length: number): ArrayBuffer {
-        return ArrayBuffer.from(buff, byteOffset as int, length as int);
-    }
-
-    /**
     * Creates a new ArrayBuffer by slicing a segment from an existing ArrayBuffer.
     *
     * If the byte offset or length parameters are omitted, they default to 0 and the full length of the
@@ -361,8 +347,8 @@ export class ArrayBuffer extends Buffer
     */
     public static from(buffer: ArrayBuffer, byteOffset?: number, length?: number): ArrayBuffer {
         const resolvedByteOffset = byteOffset ?? 0;
-        const resolvedLength = length ?? buffer.byteLength;
-        return ArrayBuffer.from(buffer, resolvedByteOffset as int, resolvedLength as int);
+        const resolvedLength = length ?? buffer.byteLength.toDouble();
+        return ArrayBuffer.from(buffer, resolvedByteOffset.toInt(), resolvedLength.toInt());
     }
 
     /**
@@ -373,20 +359,20 @@ export class ArrayBuffer extends Buffer
     * it copies a segment starting from the provided byte offset for the specified length.
     *
     * @param {Object} obj - The source object, which should be either a string or an ArrayBuffer.
-    * @param {number | string} byteOffsetOrEncoding - If `obj` is an ArrayBuffer, this is the starting byte offset;
+    * @param {int | string} byteOffsetOrEncoding - If `obj` is an ArrayBuffer, this is the starting byte offset;
     *                                                 if `obj` is a string, this is the encoding to use.
-    * @param {number} length - The number of bytes to copy or the desired length of the encoded string data.
+    * @param {int} length - The number of bytes to copy or the desired length of the encoded string data.
     * @returns {ArrayBuffer} A new ArrayBuffer created from the provided object.
     * @throws {Error} If the input object type is unsupported or the arguments are incorrect.
     */
-    public static fromObject(obj: Object, byteOffsetOrEncoding: number | string, length: number): ArrayBuffer {
+    public static fromObject(obj: Object, byteOffsetOrEncoding: int | string, length: int): ArrayBuffer {
         if (obj instanceof string && byteOffsetOrEncoding instanceof string) {
             return ArrayBuffer.from(obj, byteOffsetOrEncoding as string);
         }
         if (!(obj instanceof ArrayBuffer)) {
             throw Error("Incorrect args");
         }
-        return ArrayBuffer.from(obj as ArrayBuffer, byteOffsetOrEncoding as int, length as int);
+        return ArrayBuffer.from(obj, byteOffsetOrEncoding as int, length);
     }
 
 
@@ -426,6 +412,7 @@ export class ArrayBuffer extends Buffer
     */
     public static native stringify(buffer: ArrayBuffer, encoding: string, start: int, end: int): string;
 
+    //NOTE(ekaterinazaytseva): unable to replace internal - used in frined class Atomics
     internal native atomicAddI8(index: int, byteOffset: int, value: byte): double;
 
     internal native atomicAndI8(index: int, byteOffset: int, value: byte): double;

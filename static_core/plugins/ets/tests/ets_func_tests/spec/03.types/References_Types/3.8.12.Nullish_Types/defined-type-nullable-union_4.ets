@@ -23,8 +23,8 @@ type NullString = String | null;
 
 function main(): void {
     let ss: NullString = null;
-    assertTrue( ss === null)
+    arktest.assertTrue( ss === null)
     ss = "Hello World";
-    assertTrue( ss === "Hello World")
+    arktest.assertTrue( ss === "Hello World")
 
 }

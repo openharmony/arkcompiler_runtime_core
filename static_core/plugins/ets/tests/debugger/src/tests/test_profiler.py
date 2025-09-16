@@ -79,6 +79,7 @@ async def test_profiler(
     async with ark_runtime.run(nursery, module=script_file, profile=True) as process:
         async with debug_locator.connect(nursery) as client:
             await client.configure(nursery)
+            await client.resume()
             await client.profiler_enable()
             await client.profiler_set_sampling_interval(200)
             await client.profiler_start()

@@ -24,10 +24,9 @@
 
 namespace ark::ets::test {
 
-template <class ElementType>
-class EtsArrayObjectMembers : public testing::Test {
+class EtsEscompatArrayMembers : public testing::Test {
 public:
-    EtsArrayObjectMembers()
+    EtsEscompatArrayMembers()
     {
         RuntimeOptions options;
         options.SetShouldLoadBootPandaFiles(true);
@@ -48,77 +47,25 @@ public:
         vm_ = coroutine->GetPandaVM();
     }
 
-    ~EtsArrayObjectMembers() override
+    ~EtsEscompatArrayMembers() override
     {
         Runtime::Destroy();
     }
 
-    NO_COPY_SEMANTIC(EtsArrayObjectMembers);
-    NO_MOVE_SEMANTIC(EtsArrayObjectMembers);
+    NO_COPY_SEMANTIC(EtsEscompatArrayMembers);
+    NO_MOVE_SEMANTIC(EtsEscompatArrayMembers);
 
     static std::vector<MirrorFieldInfo> GetMembers()
     {
-        return std::vector<MirrorFieldInfo> {
-            MIRROR_FIELD_INFO(EtsArrayObject<ElementType>, actualLength_, "actualLength"),
-            MIRROR_FIELD_INFO(EtsArrayObject<ElementType>, buffer_, "buffer")};
+        return std::vector<MirrorFieldInfo> {MIRROR_FIELD_INFO(EtsEscompatArray, actualLength_, "actualLength"),
+                                             MIRROR_FIELD_INFO(EtsEscompatArray, buffer_, "buffer")};
     }
 
 protected:
     PandaEtsVM *vm_ = nullptr;  // NOLINT(misc-non-private-member-variables-in-classes)
 };
 
-using EtsArrayBoxedBooleanTest = EtsArrayObjectMembers<EtsBoxPrimitive<EtsBoolean>>;
-using EtsArrayBoxedByteTest = EtsArrayObjectMembers<EtsBoxPrimitive<EtsByte>>;
-using EtsArrayBoxedCharTest = EtsArrayObjectMembers<EtsBoxPrimitive<EtsChar>>;
-using EtsArrayBoxedShortTest = EtsArrayObjectMembers<EtsBoxPrimitive<EtsShort>>;
-using EtsArrayBoxedIntTest = EtsArrayObjectMembers<EtsBoxPrimitive<EtsInt>>;
-using EtsArrayBoxedLongTest = EtsArrayObjectMembers<EtsBoxPrimitive<EtsLong>>;
-using EtsArrayBoxedFloatTest = EtsArrayObjectMembers<EtsBoxPrimitive<EtsFloat>>;
-using EtsArrayBoxedDoubleTest = EtsArrayObjectMembers<EtsBoxPrimitive<EtsDouble>>;
-
-TEST_F(EtsArrayBoxedBooleanTest, MemoryLayout)
-{
-    EtsClass *klass = PlatformTypes(vm_)->escompatArray;
-    MirrorFieldInfo::CompareMemberOffsets(klass, GetMembers());
-}
-
-TEST_F(EtsArrayBoxedByteTest, MemoryLayout)
-{
-    EtsClass *klass = PlatformTypes(vm_)->escompatArray;
-    MirrorFieldInfo::CompareMemberOffsets(klass, GetMembers());
-}
-
-TEST_F(EtsArrayBoxedCharTest, MemoryLayout)
-{
-    EtsClass *klass = PlatformTypes(vm_)->escompatArray;
-    MirrorFieldInfo::CompareMemberOffsets(klass, GetMembers());
-}
-
-TEST_F(EtsArrayBoxedShortTest, MemoryLayout)
-{
-    EtsClass *klass = PlatformTypes(vm_)->escompatArray;
-    MirrorFieldInfo::CompareMemberOffsets(klass, GetMembers());
-}
-
-TEST_F(EtsArrayBoxedIntTest, MemoryLayout)
-{
-    EtsClass *klass = PlatformTypes(vm_)->escompatArray;
-    MirrorFieldInfo::CompareMemberOffsets(klass, GetMembers());
-}
-
-TEST_F(EtsArrayBoxedLongTest, MemoryLayout)
-{
-    EtsClass *klass = PlatformTypes(vm_)->escompatArray;
-    MirrorFieldInfo::CompareMemberOffsets(klass, GetMembers());
-}
-
-TEST_F(EtsArrayBoxedFloatTest, MemoryLayout)
-{
-    EtsClass *klass = PlatformTypes(vm_)->escompatArray;
-    MirrorFieldInfo::CompareMemberOffsets(klass, GetMembers());
-}
-
-TEST_F(EtsArrayBoxedDoubleTest, MemoryLayout)
+TEST_F(EtsEscompatArrayMembers, MemoryLayout)
 {
     EtsClass *klass = PlatformTypes(vm_)->escompatArray;
     MirrorFieldInfo::CompareMemberOffsets(klass, GetMembers());

@@ -128,6 +128,11 @@ public:
             return l.offset_ == r.offset_;
         }
 
+        friend bool operator!=(const EntityId &l, const EntityId &r)
+        {
+            return l.offset_ != r.offset_;
+        }
+
         friend std::ostream &operator<<(std::ostream &stream, const EntityId &id)
         {
             return stream << id.offset_;
@@ -140,7 +145,7 @@ public:
     enum OpenMode { READ_ONLY, READ_WRITE, WRITE_ONLY };
 
     StringData GetStringData(EntityId id) const;
-    EntityId GetLiteralArraysId() const;
+    PANDA_PUBLIC_API EntityId GetLiteralArraysId() const;
 
     PANDA_PUBLIC_API EntityId GetClassId(const uint8_t *mutf8Name) const;
 

@@ -103,12 +103,12 @@ function main(): int {
     t4 = 4
 
     // casting
-    res = t255-- as byte - t4++ as byte
+    res = (t255--).toByte() - (t4++).toByte()
     if (res != -5 || t255 != 254 || t4 != 5) return 1;
     t255 = 255
     t4 = 4
 
-    res = t255++ as byte - t4-- as byte
+    res = (t255++).toByte() - (t4--).toByte()
     if (res != -5 || t255 != 256 || t4 != 3) return 1;
     t255 = 255
     t4 = 4

@@ -20,9 +20,9 @@ desc: Test to use array built-in function map to create new array.
 function main(): void {
   let numbers: Array<number> = new Array<number>(1, 2, 3, 4, 5);
   let doubledNumbers = numbers.map((value: number) => value * 2);
-  assertEQ(doubledNumbers[0], 2);
-  assertEQ(doubledNumbers[1], 4);
-  assertEQ(doubledNumbers[2], 6);
-  assertEQ(doubledNumbers[3], 8);
-  assertEQ(doubledNumbers[4], 10);
+  arktest.assertEQ(doubledNumbers[0], 2);
+  arktest.assertEQ(doubledNumbers[1], 4);
+  arktest.assertEQ(doubledNumbers[2], 6);
+  arktest.assertEQ(doubledNumbers[3], 8);
+  arktest.assertEQ(doubledNumbers[4], 10);
 }

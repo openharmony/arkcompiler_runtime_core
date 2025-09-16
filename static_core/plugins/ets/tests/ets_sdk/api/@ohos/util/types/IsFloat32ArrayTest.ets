@@ -16,7 +16,7 @@
 import {util} from "@ohos.util";
 
 function main(): int {
-    const suite = new ArkTestsuite("CommonUtil types.isFloat32Array() API tests")
+    const suite = new arktest.ArkTestsuite("CommonUtil types.isFloat32Array() API tests")
 
     suite.addTest("Verify Float32Array is identified as Float32Array", testIsFloat32Array001)
     suite.addTest("Verify Int8Array is not identified as Float32Array", testIsFloat32Array002)
@@ -38,7 +38,7 @@ function main(): int {
 function testIsFloat32Array001() {
   let proc = new util.types();
   let result = proc.isFloat32Array(new Float32Array());
-  assertTrue(result, "The Float32Array should be of the same type as the Float32Array");
+  arktest.assertTrue(result, "The Float32Array should be of the same type as the Float32Array");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0062
@@ -51,7 +51,7 @@ function testIsFloat32Array001() {
 function testIsFloat32Array002() {
   let proc = new util.types();
   let result = proc.isFloat32Array(new Int8Array());
-  assertTrue(result == false, "The Int8Array should not be of the same type as the Float32Array");
+  arktest.assertTrue(result == false, "The Int8Array should not be of the same type as the Float32Array");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0063
@@ -64,7 +64,7 @@ function testIsFloat32Array002() {
 function testIsFloat32Array003() {
   let proc = new util.types();
   let result = proc.isFloat32Array(new Int16Array());
-  assertTrue(result == false, "The Int16Array should not be of the same type as the Float32Array");
+  arktest.assertTrue(result == false, "The Int16Array should not be of the same type as the Float32Array");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0064
@@ -77,7 +77,7 @@ function testIsFloat32Array003() {
 function testIsFloat32Array004() {
   let proc = new util.types();
   let result = proc.isFloat32Array(new Float64Array());
-  assertTrue(result == false, "The Float64Array should not be of the same type as the Float32Array");
+  arktest.assertTrue(result == false, "The Float64Array should not be of the same type as the Float32Array");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0065
@@ -90,5 +90,5 @@ function testIsFloat32Array004() {
 function testIsFloat32Array005() {
   let proc = new util.types();
   let result = proc.isFloat32Array(new Uint8Array());
-  assertTrue(result == false, "The Uint8Array should not be of the same type as the Float32Array");
+  arktest.assertTrue(result == false, "The Uint8Array should not be of the same type as the Float32Array");
 }

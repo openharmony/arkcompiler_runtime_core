@@ -29,5 +29,5 @@ function main(): void {
   let timeoutValue = config?.timeout ?? 3000;
   config.timeout = 5000;
   timeoutValue = config.timeout ?? 3000;
-  assertEQ(timeoutValue, 5000);
+  arktest.assertEQ(timeoutValue, 5000);
 }

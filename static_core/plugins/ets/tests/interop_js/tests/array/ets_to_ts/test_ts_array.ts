@@ -69,6 +69,8 @@ ASSERT_TRUE(etsArrayIndex.lastIndexOf(2) === 3 && etsArrayIndex.lastIndexOf(2, 2
 ASSERT_TRUE(etsArrayPop.pop() === 4);
 etsArrayPush.push(5);
 ASSERT_TRUE(etsArrayPush.pop() === 5);
+etsArrayPush.push(1,2,3,4);
+ASSERT_TRUE(etsArrayPush.pop() === 4);
 ASSERT_TRUE(etsArrayReverse.reverse().toString() === '4,3,2,1');
 ASSERT_TRUE(etsArrayShift.shift() === 1);
 ASSERT_TRUE(etsArraySlice.slice(2).toString() === '3,4' && etsArraySlice.slice(1, 3).toString() === '2,3');

@@ -13,6 +13,7 @@
 
 --- # List of keywords, denoting data types
 keywords:
+    - Any
     - bigint
     - BigInt
     - boolean

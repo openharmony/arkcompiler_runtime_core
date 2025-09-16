@@ -90,7 +90,7 @@ function testNormal() {
     arktest.assertTrue(!istrue(ColorString.Red));
     arktest.assertTrue(istrue(ColorString.Green));
     let a: bigint | null = 0n;
-    assertTrue(istrue(!a));
+    arktest.assertTrue(istrue(!a));
 }
 
 function testErase() {
@@ -130,29 +130,29 @@ function testErase() {
     arktest.assertTrue(!istrue(erase(ColorString.Red)));
     arktest.assertTrue(istrue(erase(ColorString.Green)));
     let a: bigint | null = 0n;
-    assertTrue(istrue(erase(!a)));
+    arktest.assertTrue(istrue(erase(!a)));
 }
 
 function testConditions() {
     if (istrue(0)) {
-        assertTrue(false);
+        arktest.assertTrue(false);
     } else {
-        assertTrue(true);
+        arktest.assertTrue(true);
     }
 
     if (istrue(1)) {
-        assertTrue(true);
+        arktest.assertTrue(true);
     } else {
-        assertTrue(false);
+        arktest.assertTrue(false);
     }
 }
 
 
 function testFunction() {
     if (istrue((() => { let x: number = 0; return x })())) {
-        assertTrue(false);
+        arktest.assertTrue(false);
     } else {
-        assertTrue(true);
+        arktest.assertTrue(true);
     }
 }
 
@@ -167,7 +167,7 @@ function testMemoryAllocationsWithIsTrue() {
             count++
         }
     }
-    assertEQ(count, totalAllocations);
+    arktest.assertEQ(count, totalAllocations);
 }
 
 function main() {

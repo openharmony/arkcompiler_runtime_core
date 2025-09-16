@@ -19,81 +19,81 @@ import * as optionalTest from "optional";
 loadLibrary("ani_optional");
 
 function showOptionalInt() {
-    OptTest.showOptionalInt(100 as int)
+    OptTest.showOptionalInt((100).toInt())
 }
 
 function showOptionalInt_1() {
-    OptTest.showOptionalInt(undefined)
+    OptTest.showOptionalInt()
 }
 
 function makeOptionalInt() {
     let res = OptTest.makeOptionalInt(true);
     console.log(res)
-    assertTrue(res != undefined);
+    arktest.assertTrue(res != undefined);
 }
 
 function makeOptionalInt_1() {
     let res = OptTest.makeOptionalInt(false);
     console.log(res)
-    assertTrue(res == undefined);
+    arktest.assertTrue(res == undefined);
 }
 
 function makeOptionalArray() {
     let res = OptTest.makeOptionalArray(true, 5, 3);
     console.log(res)
-    assertTrue(res != undefined);
+    arktest.assertTrue(res != undefined);
 }
 
 function makeOptionalArray_1() {
     let res = OptTest.makeOptionalArray(false, 5, 3);
     console.log(res)
-    assertTrue(res == undefined);
+    arktest.assertTrue(res == undefined);
 }
 
 function sendReturnResult() {
     let result: OptTest.ReturnResult = {results: ["ab", "cd", "ef"]};
     let res = OptTest.sendReturnResult(result);
     console.log(res)
-    assertTrue(res != undefined);
+    arktest.assertTrue(res != undefined);
 }
 
 function sendReturnResult_1() {
-    let result: OptTest.ReturnResult = {results: undefined};
+    let result: OptTest.ReturnResult = {};
     let res = OptTest.sendReturnResult(result);
     console.log(res)
-    assertTrue(res == undefined);
+    arktest.assertTrue(res == undefined);
 }
 
 // 数值类型测试函数
 function func_primitive_i8() {
     let instance: optionalTest.ExampleInterface = optionalTest.getInterface();
-    instance.funcPrimitiveI8(5 as byte)  // byte对应i8
+    instance.funcPrimitiveI8((5).toByte())  // byte 对应 i8
 }
 
 function func_primitive_i16() {
     let instance: optionalTest.ExampleInterface = optionalTest.getInterface();
-    instance.funcPrimitiveI16(42 as short)  // short对应i16
+    instance.funcPrimitiveI16((42).toShort())  // short 对应 i16
 }
 
 function func_primitive_i32() {
     let instance: optionalTest.ExampleInterface = optionalTest.getInterface();
-    instance.funcPrimitiveI32(1000 as int)  // int对应i32
+    instance.funcPrimitiveI32((1000).toInt())  // int 对应 i32
 }
 
 function func_primitive_i64() {
     let instance: optionalTest.ExampleInterface = optionalTest.getInterface();
-    instance.funcPrimitiveI64(1000000 as long)  // long对应i64
+    instance.funcPrimitiveI64((1000000).toLong())  // long 对应 i64
 }
 
 // 浮点类型测试函数
 function func_primitive_f32() {
     let instance: optionalTest.ExampleInterface = optionalTest.getInterface();
-    instance.funcPrimitiveF32(3.14 as float)  // float对应f32
+    instance.funcPrimitiveF32(3.14f)  // float 对应 f32
 }
 
 function func_primitive_f64() {
     let instance: optionalTest.ExampleInterface = optionalTest.getInterface();
-    instance.funcPrimitiveF64(2.71828 as double)  // double对应f64
+    instance.funcPrimitiveF64((2.71828).toDouble())  // double 对应 f64
 }
 
 // 布尔类型测试函数
@@ -130,7 +130,7 @@ function func_buffer() {
 function func_Union() {
     let instance: optionalTest.ExampleInterface = optionalTest.getInterface();
     instance.funcUnion("hello")
-    instance.funcUnion(1024 as int)
+    instance.funcUnion((1024).toInt())
 }
 
 function func_Map() {
@@ -185,93 +185,108 @@ function func_PrintTestInterfaceArraybuffer() {
     optionalTest.printTestInterfaceArraybuffer(instance);
 }
 
-function func_showOptionalString(){
+function func_showOptionalString() {
     let instance: OptTest.Test = OptTest.getTest();
     let str = "this is string data";
     let result = instance.showOptionalString(str);
-    assertEQ(result, "this is string data");
+    arktest.assertEQ(result, "this is string data");
 }
 
-function func_showOptionalString_1(){
+function func_showOptionalString_1() {
     let instance: OptTest.Test = OptTest.getTest();
     let result = instance.showOptionalString(undefined);
-    assertTrue(result == undefined);
+    arktest.assertTrue(result == undefined);
 }
 
-function func_getTest_setIntData(){
+function func_getTest_setIntData() {
     let instance: OptTest.Test = OptTest.getTest();
     instance.setIntData("this is str");
 }
 
-function func_getTest_property(){
+function func_getTest_property() {
     let instance: OptTest.Test = OptTest.getTest();
-    instance.string = "this is string value";
-    let res = instance.string;
-    assertEQ(res, "this is string value");
+    instance.memberStr = "this is string value";
+    let res = instance.memberStr;
+    arktest.assertEQ(res, "this is string value");
 }
 
-function func_getTest_property_1(){
+function func_getTest_property_1() {
     let instance: OptTest.Test = OptTest.getTest();
-    instance.string = undefined;
-    let res = instance.string;
-    assertEQ(res, undefined);
+    instance.memberStr = undefined;
+    let res = instance.memberStr;
+    arktest.assertEQ(res, undefined);
 }
 
-function func_showOptionalInt32(){
+function func_showOptionalInt32() {
     let instance: OptTest.Test = OptTest.getTest();
     let intValue = 12;
     let res = instance.showOptionalInt32(intValue);
-    assertEQ(res, 12);
+    arktest.assertEQ(res, 12);
 }
 
-function func_showOptionalInt32_1(){
+function func_showOptionalInt32_1() {
     let instance: OptTest.Test = OptTest.getTest();
     let res = instance.showOptionalInt32(undefined);
-    assertEQ(res, undefined);
+    arktest.assertEQ(res, undefined);
 }
 
-function func_showOptionalBool(){
+function func_showOptionalBool() {
     let instance: OptTest.Test = OptTest.getTest();
     let res = instance.showOptionalBool(true);
-    assertEQ(res, true);
+    arktest.assertEQ(res, true);
 }
 
-function func_showOptionalBool_1(){
+function func_showOptionalBool_1() {
     let instance: OptTest.Test = OptTest.getTest();
     let res = instance.showOptionalBool(undefined);
-    assertEQ(res, undefined);
+    arktest.assertEQ(res, undefined);
 }
 
-function func_showOptionalRecord(){
+function func_showOptionalRecord() {
     let instance: OptTest.Test = OptTest.getTest();
     let data: Record<string, boolean> = {"key1": false};
     let res = instance.showOptionalRecord(data) as Record<string, boolean>;
-    assertEQ(res.toString(), data.toString());
+    arktest.assertEQ(res.toString(), data.toString());
 }
 
-function func_showOptionalRecord_1(){
+function func_showOptionalRecord_1() {
     let instance: OptTest.Test = OptTest.getTest();
     let res = instance.showOptionalRecord(undefined);
-    assertEQ(res, undefined);
+    arktest.assertEQ(res, undefined);
 }
 
-function func_showOptionalStruct(){
+function func_showOptionalStruct() {
     let instance: OptTest.Test = OptTest.getTest();
-    let data: OptTest.MyStruct = {param1: 12, param2: "string data"} ;
+    let data: OptTest.MyStruct = {param1: 12, param2: "string data"};
     let res = instance.showOptionalStruct(data) as OptTest.MyStruct;
-    assertEQ(res.toString(), data.toString());
+    arktest.assertEQ(res.toString(), data.toString());
 }
 
-function func_showOptionalStruct_1(){
+function func_showOptionalStruct_1() {
     let instance: OptTest.Test = OptTest.getTest();
     let res = instance.showOptionalStruct(undefined);
-    assertEQ(res, undefined);
+    arktest.assertEQ(res, undefined);
+}
+
+function test_callCallback() {
+    OptTest.callCallback(true, (a: string, b?: string) => {
+        console.log(`a should be "Hello": ${a}`);
+        console.log(`b should be "World": ${b}`);
+        arktest.assertEQ(a, "Hello");
+        arktest.assertEQ(b, "World");
+    });
+    OptTest.callCallback(false, (a: string, b?: string) => {
+        console.log(`a should be "Hello": ${a}`);
+        console.log(`b should be undefined: ${b}`);
+        arktest.assertEQ(a, "Hello");
+        arktest.assertTrue(b === undefined);
+    });
 }
 
 function main() {
     console.log("run main ... OptTest ...")
 
-    const suite = new ArkTestsuite("OptTest")
+    const suite = new arktest.ArkTestsuite("OptTest")
     suite.addTest("showOptionalInt", showOptionalInt)
     suite.addTest("showOptionalInt_1", showOptionalInt_1)
     suite.addTest("makeOptionalInt", makeOptionalInt)
@@ -295,13 +310,21 @@ function main() {
 
     suite.addTest("func_InterfaceName test", func_InterfaceName)
     suite.addTest("func_Interfacei8 test", func_Interfacei8)
-    suite.addTest("func_PrintTestInterfacei16 test", func_PrintTestInterfacei16);
-    suite.addTest("func_PrintTestInterfacei32 test", func_PrintTestInterfacei32);
-    suite.addTest("func_PrintTestInterfacei64 test", func_PrintTestInterfacei64);
-    suite.addTest("func_PrintTestInterfacef32 test", func_PrintTestInterfacef32);
-    suite.addTest("func_PrintTestInterfacef64 test", func_PrintTestInterfacef64);
-    suite.addTest("func_PrintTestInterfacebool test", func_PrintTestInterfacebool);
-    suite.addTest("func_PrintTestInterfaceArraybuffer test",func_PrintTestInterfaceArraybuffer);
+    suite.addTest(
+        "func_PrintTestInterfacei16 test", func_PrintTestInterfacei16);
+    suite.addTest(
+        "func_PrintTestInterfacei32 test", func_PrintTestInterfacei32);
+    suite.addTest(
+        "func_PrintTestInterfacei64 test", func_PrintTestInterfacei64);
+    suite.addTest(
+        "func_PrintTestInterfacef32 test", func_PrintTestInterfacef32);
+    suite.addTest(
+        "func_PrintTestInterfacef64 test", func_PrintTestInterfacef64);
+    suite.addTest(
+        "func_PrintTestInterfacebool test", func_PrintTestInterfacebool);
+    suite.addTest(
+        "func_PrintTestInterfaceArraybuffer test",
+        func_PrintTestInterfaceArraybuffer);
 
     suite.addTest("func_showOptionalString", func_showOptionalString)
     suite.addTest("func_showOptionalString_1", func_showOptionalString_1)
@@ -316,5 +339,8 @@ function main() {
     suite.addTest("func_showOptionalRecord_1", func_showOptionalRecord_1)
     suite.addTest("func_showOptionalStruct", func_showOptionalStruct)
     suite.addTest("func_showOptionalStruct_1", func_showOptionalStruct_1)
+
+    suite.addTest("test_callCallback", test_callCallback)
+
     exit(suite.run());
 }

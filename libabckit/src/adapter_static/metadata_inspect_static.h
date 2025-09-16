@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 #ifndef LIBABCKIT_SRC_ADAPTER_STATIC_METADATA_INSPECT_STATIC_H
 #define LIBABCKIT_SRC_ADAPTER_STATIC_METADATA_INSPECT_STATIC_H
 
-#include "libabckit/include/c/metadata_core.h"
+#include "libabckit/c/metadata_core.h"
 
 #include <iostream>
 
@@ -33,11 +33,35 @@ bool ModuleEnumerateAnonymousFunctionsStatic(AbckitCoreModule *m, void *data,
 // Namespace
 // ========================================
 
+AbckitString *NamespaceGetNameStatic(AbckitCoreNamespace *ns);
+
 // ========================================
 // Class
 // ========================================
 
 AbckitString *ClassGetNameStatic(AbckitCoreClass *klass);
+
+// ========================================
+// Interface
+// ========================================
+
+AbckitString *InterfaceGetNameStatic(AbckitCoreInterface *iface);
+
+// ========================================
+// Enum
+// ========================================
+
+AbckitString *EnumGetNameStatic(AbckitCoreEnum *enm);
+
+// ========================================
+// Field
+// ========================================
+
+bool ClassFieldIsPublicStatic(AbckitCoreClassField *field);
+bool ClassFieldIsProtectedStatic(AbckitCoreClassField *field);
+bool ClassFieldIsPrivateStatic(AbckitCoreClassField *field);
+bool ClassFieldIsStaticStatic(AbckitCoreClassField *field);
+bool InterfaceFieldIsReadonlyStatic(AbckitCoreInterfaceField *field);
 
 // ========================================
 // Function

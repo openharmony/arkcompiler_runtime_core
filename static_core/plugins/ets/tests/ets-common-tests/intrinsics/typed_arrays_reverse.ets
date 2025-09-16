@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-function test_iu8_array(): void throws {
+function test_iu8_array(): void {
     let data = Int8Array.of(-128, -42, -14, 0, 16, 48, 127)
     let data_rev = new Int8Array(data).reverse()
     let data_rev2 = data.toReversed()
@@ -25,7 +25,7 @@ function test_iu8_array(): void throws {
     check_array(udata, udata_rev, udata_rev2)
 }
 
-function test_iu16_array(): void throws {
+function test_iu16_array(): void {
     let data = Int16Array.of(-32768, -2731, -227, 0, 128, 2564, 32767)
     let data_rev = new Int16Array(data).reverse()
     let data_rev2 = data.toReversed()
@@ -37,7 +37,7 @@ function test_iu16_array(): void throws {
     check_array(udata, udata_rev, udata_rev2)
 }
 
-function test_iu32_array(): void throws {
+function test_iu32_array(): void {
     let data = Int32Array.of(-2147483648, -1398, 0, 11184, 89478, 536872, 2147483647)
     let data_rev = new Int32Array(data).reverse()
     let data_rev2 = data.toReversed()
@@ -50,7 +50,7 @@ function test_iu32_array(): void throws {
     
 }
 
-function test_iu64_array(): void throws {
+function test_iu64_array(): void {
     let data = BigInt64Array.of(-9.223e+18, -8589934588, 0, 4294967294, 2.3058e+16, 9.223e+18)
     let data_rev = new BigInt64Array(data).reverse()
     let data_rev2 = data.toReversed()
@@ -62,14 +62,14 @@ function test_iu64_array(): void throws {
     check_array(udata, udata_rev, udata_rev2)
 }
 
-function test_f32_array(): void throws {
-    let data = Float32Array.of(-3.4e+38, -2.02e+16, 1.06e+12, 2.8e+24,  3.4e+38)
+function test_f32_array(): void {
+    let data = Float32Array.of(-3.4e+38, -2.02e+16, 1.06e+12, 2.8e+24, 3.4e+38)
     let data_rev = new Float32Array(data).reverse()
     let data_rev2 = data.toReversed()
     check_array(data, data_rev, data_rev2)
 }
 
-function test_f64_array(): void throws {
+function test_f64_array(): void {
     let data = Float64Array.of(-1.7e+308, -3.6e+42, -0.6e+16, 0.4e+105, 1.7e+308)
     let data_rev = new Float64Array(data).reverse()
     let data_rev2 = data.toReversed()
@@ -77,19 +77,19 @@ function test_f64_array(): void throws {
 }
 
 
-function check_array<T extends Number | BigInt>(data: ArrayLike<T>, data_rev: ArrayLike<T>, data_rev2: ArrayLike<T>): void {
+function check_array<T extends Number | BigInt>(data: ArrayLike<T>, dat_r: ArrayLike<T>, dat_r2: ArrayLike<T>): void {
     let size = data.length - 1
-    assertEQ(data.length, data_rev.length, "reverse(): bad array len")
-    assertEQ(data.length, data_rev2.length, "toReversed(): bad array len")
+    arktest.assertEQ(data.length, dat_r.length, "reverse(): bad array len")
+    arktest.assertEQ(data.length, dat_r2.length, "toReversed(): bad array len")
 
     for (let i: int = 0; i <= size; i++) {
-        assertEQ(data[i], data_rev[size - i], "reverse(): unexpected element: i: " + i)
-        assertEQ(data[i], data_rev2[size - i], "toReversed(): unexpected element: i: " + i)
+        arktest.assertEQ(data[i], dat_r[size - i], "reverse(): unexpected element: i: " + i)
+        arktest.assertEQ(data[i], dat_r2[size - i], "toReversed(): unexpected element: i: " + i)
     }
 }
 
 function main(): int {
-    let testSuite = new ArkTestsuite("typedArrays.reverse");
+    let testSuite = new arktest.ArkTestsuite("typedArrays.reverse");
     testSuite.addTest("Int8,Uint8 Arrays: reverse test", test_iu8_array);
     testSuite.addTest("Int16,Uint16 Arrays: reverse test", test_iu16_array)
     testSuite.addTest("Int32,Uint32 Arrays: reverse test", test_iu32_array)

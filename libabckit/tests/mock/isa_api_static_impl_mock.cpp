@@ -16,8 +16,8 @@
 #include "../../src/mock/abckit_mock.h"
 #include "../../src/mock/mock_values.h"
 
-#include "../../include/c/metadata_core.h"
-#include "../../include/c/isa/isa_static.h"
+#include "../../include/libabckit/c/metadata_core.h"
+#include "../../include/libabckit/c/isa/isa_static.h"
 
 #include <cstdint>
 #include <cstring>

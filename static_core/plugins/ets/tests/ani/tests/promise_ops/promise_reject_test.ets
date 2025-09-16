@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-function checkReject(promise: Promise<String>, rejection: String): boolean {
-  try {
-    await promise;
-    return false;
-  } catch (exception) {
-    return exception == rejection;
-  }
+function checkReject(promise: Promise<String>, rejection: Error): boolean {
+    try {
+        await promise;
+        return false;
+    } catch (exception: Error) {
+        return exception == rejection;
+    }
 }

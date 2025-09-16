@@ -27,5 +27,5 @@ function caller(val0: byte, val1: short, val2: int, val3: long): number {
 }
 
 function main(): void {
-    assertEQ(-1, caller(-1 as byte, 2 as short, 3, 4))
+    arktest.assertEQ(-1, caller(-1 as byte, 2 as short, 3, 4))
 }

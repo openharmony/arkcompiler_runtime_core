@@ -30,20 +30,20 @@ static {
 }
 
 
-function xgc(): void throws {
+function xgc(): void {
     GC.waitForFinishGC(JSRuntime.xgc());
 }
 
-function runFullGC(): void throws {
+function runFullGC(): void {
     GC.waitForFinishGC(GC.startGC(GC.Cause.FULL));
 }
 
 // If cross reference is not existed then create it: JS object -> ETS object
-function getSharedObject(index: int): SharedClass|undefined throws {
+function getSharedObject(index: int): SharedClass|undefined {
     return sharedObjects[index]!.deref();
 }
 
 // Create refs: ETS object -> JSValue (ETS object) -> JS object
-function setRefToSharedObject(index: int, jsRef: JSValue): void throws {
+function setRefToSharedObject(index: int, jsRef: JSValue): void {
     sharedObjects[index]!.deref()!.jsRef = jsRef;
 }

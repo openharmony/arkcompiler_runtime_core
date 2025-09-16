@@ -68,8 +68,8 @@ function main() {
   let c11: C11 = new C11("c11", 100);
   let c21: C21 = new C21("c21", 200);
 
-  assertEQ( c11.getString(), "c11")
-  assertEQ( c21.getString(), "c21")
-  assertEQ( c11.getNumber(), 100)
-  assertEQ( c21.getNumber(), 200)
+  arktest.assertEQ( c11.getString(), "c11")
+  arktest.assertEQ( c21.getString(), "c21")
+  arktest.assertEQ( c11.getNumber(), 100)
+  arktest.assertEQ( c21.getNumber(), 200)
 }

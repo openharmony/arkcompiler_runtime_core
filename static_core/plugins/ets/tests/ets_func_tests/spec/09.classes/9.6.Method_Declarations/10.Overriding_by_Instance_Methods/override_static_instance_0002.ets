@@ -31,7 +31,7 @@ class Y extends X {
 function main() {
     let y : Y = new Y();
 
-    assertEQ( X.foo(), 0)
-    assertEQ( Y.foo(), 0)
-    assertEQ( y.foo(), 2)
+    arktest.assertEQ( X.foo(), 0)
+    arktest.assertEQ( Y.foo(), 0)
+    arktest.assertEQ( y.foo(), 2)
 }

@@ -24,7 +24,7 @@ const size = value1 {{c.sign}} 3
 
 function main() {
     const data = new int[size as int]
-    assertEQ(data.length, {{c.expected}})
+    arktest.assertEQ(data.length, {{c.expected}})
 }
 
 {% endfor %}

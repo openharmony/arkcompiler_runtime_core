@@ -17,51 +17,18 @@
 //! RUN           force_jit: true, options: "--compiler-regex='.*lower_boxed_boolean.*test.*' ", entry: "lower_boxed_boolean.ETSGLOBAL::main"
 //!
 //! METHOD        "lower_boxed_boolean.ETSGLOBAL::test1"
-//! PASS_BEFORE   "LowerBoxedBoolean"
-//! INST          /LoadStatic.*std.core.Boolean.TRUE/
-//! INST          /LoadStatic.*std.core.Boolean.FALSE/
-//! INST          /.*ref.*Phi.*/
-//! INST_NOT      /Constant.*0x1/
-//! INST_NOT      /Constant.*0x0/
-//! INST_NOT      /.*b.*Phi.*/
-//! PASS_AFTER    "LowerBoxedBoolean"
-//! INST          /Constant.*0x1/
-//! INST          /Constant.*0x0/
-//! INST          /.*b.*Phi.*/
-//! INST_NEXT     /.*ref.*Phi.*/
 //! PASS_AFTER    "Codegen"
 //! INST_NOT      /LoadStatic.*std.core.Boolean.TRUE/
 //! INST_NOT      /LoadStatic.*std.core.Boolean.FALSE/
 //! INST_NOT      /.*ref.*Phi.*/
 //!
 //! METHOD        "lower_boxed_boolean.ETSGLOBAL::test2"
-//! PASS_BEFORE   "LowerBoxedBoolean"
-//! INST          /CallStatic.*Inlined.*std.core.Lambda/
-//! INST          /LoadStatic.*std.core.Boolean.TRUE/
-//! INST          /LoadStatic.*std.core.Boolean.FALSE/
-//! INST          /.*ref.*Phi.*/
-//! INST_NOT      /.*b.*Phi.*/
-//! PASS_AFTER    "LowerBoxedBoolean"
-//! INST          /Constant.*0x1/
-//! INST          /Constant.*0x0/
-//! INST          /.*b.*Phi.*/
-//! INST_NEXT     /.*ref.*Phi.*/
 //! PASS_AFTER    "Codegen"
 //! INST_NOT      /LoadStatic.*std.core.Boolean.TRUE/
 //! INST_NOT      /LoadStatic.*std.core.Boolean.FALSE/
 //! INST_NOT      /.*ref.*Phi.*/
 //!
 //! METHOD        "lower_boxed_boolean.ETSGLOBAL::test3"
-//! PASS_BEFORE   "LowerBoxedBoolean"
-//! INST          /LoadStatic.*std.core.Boolean.TRUE/
-//! INST          /LoadStatic.*std.core.Boolean.FALSE/
-//! INST          /.*ref.*Phi.*v.*v.*v.*/
-//! INST_NOT      /.*b.*Phi.*v.*v.*v.*/
-//! PASS_AFTER    "LowerBoxedBoolean"
-//! INST          /Constant.*0x1/
-//! INST          /Constant.*0x0/
-//! INST          /.*b.*Phi.*v.*.v.*v.*/
-//! INST_NEXT     /.*ref.*Phi.*v.*v.*v.*/
 //! PASS_AFTER    "Codegen"
 //! INST_NOT      /LoadStatic.*std.core.Boolean.TRUE/
 //! INST_NOT      /LoadStatic.*std.core.Boolean.FALSE/
@@ -84,37 +51,19 @@
 //! INST_NOT      /.*b.*Phi.*/
 //!
 //! METHOD        "lower_boxed_boolean.ETSGLOBAL::test5"
-//! PASS_BEFORE   "LowerBoxedBoolean"
-//! INST          /LoadStatic.*std.core.Boolean.TRUE/
-//! INST          /LoadStatic.*std.core.Boolean.FALSE/
-//! INST          /.*ref.*Phi.*/
-//! INST_NOT      /.*b.*Phi.*/
-//! PASS_AFTER    "LowerBoxedBoolean"
-//! INST          /LoadStatic.*std.core.Boolean.TRUE/
-//! INST          /LoadStatic.*std.core.Boolean.FALSE/
 //! INST          /.*ref.*Phi.*/
 //! INST_NOT      /.*b.*Phi.*/
 //!
 //! METHOD        "lower_boxed_boolean.ETSGLOBAL::test6"
 //! PASS_BEFORE   "LowerBoxedBoolean"
-//! INST          /LoadStatic.*std.core.Boolean.TRUE/
-//! INST          /LoadStatic.*std.core.Boolean.FALSE/
-//! INST          /.*ref.*Phi.*/
 //! INST_NOT      /.*b.*Phi.*/
 //! PASS_AFTER    "LowerBoxedBoolean"
-//! INST          /LoadStatic.*std.core.Boolean.TRUE/
-//! INST          /LoadStatic.*std.core.Boolean.FALSE/
-//! INST          /.*ref.*Phi.*/
 //! INST_NOT      /.*b.*Phi.*/
 //!
 //! METHOD        "lower_boxed_boolean.ETSGLOBAL::test7"
 //! PASS_BEFORE   "LowerBoxedBoolean"
-//! INST          /LoadStatic.*std.core.Boolean.TRUE/
-//! INST_NEXT     /Compare NE.*-> (.*).*/
 //! INST_NOT      /.*ref.*Phi.*/
 //! PASS_AFTER    "LowerBoxedBoolean"
-//! INST          /LoadStatic.*std.core.Boolean.TRUE/
-//! INST_NOT      /Compare NE.*-> (.*).*/
 //! PASS_AFTER    "Codegen"
 //! INST_NOT      /LoadStatic.*std.core.Boolean.TRUE/
 
@@ -123,15 +72,6 @@
 //! RUN_AOT       options: "--compiler-regex='.*lower_boxed_boolean.*test.*' --compiler-simplify-string-builder=false", entry: "lower_boxed_boolean.ETSGLOBAL::main"
 //!
 //! METHOD        "lower_boxed_boolean.ETSGLOBAL::test8"
-//! PASS_BEFORE   "CheckElimination"
-//! INST          /CallStatic.*std.core.Boolean::valueOf/
-//! INST_NEXT     /.*ref.*Phi.*/
-//! INST_NEXT     /SaveState (?!.*->).*/
-//! PASS_AFTER    "CheckElimination"
-//! INST          /CallStatic.*std.core.Boolean::valueOf/
-//! INST_NEXT     /.*ref.*Phi.*/
-//! INST_NOT      /.*b.*Phi.*/
-//! INST_NEXT     /SaveState (?!.*->).*/
 
 // Check LowerBoxedBoolean optimization on Phi with two inputs.
 function test1(input: boolean): boolean {

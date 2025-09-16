@@ -130,7 +130,7 @@ function dateFormatToPartsWithOptions(): void {
         if (!resultIsValid) {
             const range = `${RANGE_START}, ${RANGE_END}`
             const failMsg = `Unexpected DateTimeFormat(${locale}, ${options}).formatRangeToParts(${range}) result`
-            assertTrue(false, failMsg)
+            arktest.assertTrue(false, failMsg)
         }
     })
 }
@@ -138,7 +138,7 @@ function dateFormatToPartsWithOptions(): void {
 function main(): int {
     initFormatResults()
 
-    const suite = new ArkTestsuite("Intl.DateTimeFormat.formatToParts()")
+    const suite = new arktest.ArkTestsuite("Intl.DateTimeFormat.formatToParts()")
     suite.addTest("with formatting options", dateFormatToPartsWithOptions)
     return suite.run()
 }

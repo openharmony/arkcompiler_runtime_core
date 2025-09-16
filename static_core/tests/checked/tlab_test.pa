@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,24 +19,24 @@
 #! EVENT        /Compilation,.*tlab_array_u8.*/
 #! EVENT        /Compilation,.*tlab_asm_16.*/
 #! EVENT        /Compilation,.*tlab_asm_24.*/
-#! EVENT_NEXT   /TlabAlloc,.*,24/
-#! EVENT_NEXT   /TlabAlloc,.*,32/
-#! EVENT_NEXT   /TlabAlloc,.*,40/
-#! EVENT_NEXT   /TlabAlloc,.*,56/
-#! EVENT_NEXT   /TlabAlloc,.*,16/
-#! EVENT_NEXT   /TlabAlloc,.*,24/
+#! EVENT_NEXT   is_hybrid_config? ? /TlabAlloc,.*,32/ : /TlabAlloc,.*,24/
+#! EVENT_NEXT   is_hybrid_config? ? /TlabAlloc,.*,40/ : /TlabAlloc,.*,32/
+#! EVENT_NEXT   is_hybrid_config? ? /TlabAlloc,.*,48/ : /TlabAlloc,.*,40/
+#! EVENT_NEXT   is_hybrid_config? ? /TlabAlloc,.*,64/ : /TlabAlloc,.*,56/
+#! EVENT_NEXT   is_hybrid_config? ? /TlabAlloc,.*,24/ : /TlabAlloc,.*,16/
+#! EVENT_NEXT   is_hybrid_config? ? /TlabAlloc,.*,40/ : /TlabAlloc,.*,24/
 #! TRUE         EVENT_COUNT(/SlowpathAlloc,.*/) <= 2
 
 #! CHECKER      Use TLAB for array and object in AOT
 #! RUN_PAOC     options: "--compiler-enable-tlab-events=true --compiler-regex=.*tlab.* --young-shared-space-size=0"
 #! RUN          options: "--compiler-enable-tlab-events=true", entry: "_GLOBAL::main"
 #! TRUE         EVENT_COUNT(/SlowpathAlloc,.*/) <= 2
-#! EVENT        /TlabAlloc,.*,24/
-#! EVENT_NEXT   /TlabAlloc,.*,32/
-#! EVENT_NEXT   /TlabAlloc,.*,40/
-#! EVENT_NEXT   /TlabAlloc,.*,56/
-#! EVENT_NEXT   /TlabAlloc,.*,16/
-#! EVENT_NEXT   /TlabAlloc,.*,24/
+#! EVENT        is_hybrid_config? ? /TlabAlloc,.*,32/ : /TlabAlloc,.*,24/
+#! EVENT_NEXT   is_hybrid_config? ? /TlabAlloc,.*,40/ : /TlabAlloc,.*,32/
+#! EVENT_NEXT   is_hybrid_config? ? /TlabAlloc,.*,48/ : /TlabAlloc,.*,40/
+#! EVENT_NEXT   is_hybrid_config? ? /TlabAlloc,.*,64/ : /TlabAlloc,.*,56/
+#! EVENT_NEXT   is_hybrid_config? ? /TlabAlloc,.*,24/ : /TlabAlloc,.*,16/
+#! EVENT_NEXT   is_hybrid_config? ? /TlabAlloc,.*,40/ : /TlabAlloc,.*,24/
 
 #! CHECKER      Don't Use TLAB for array and object for STW
 #! RUN          options: "--compiler-hotness-threshold=0 --no-async-jit=false --compiler-enable-jit=true --compiler-enable-tlab-events=true --compiler-check-final=true --gc-type=stw --compiler-regex=.*tlab.* --young-shared-space-size=0", entry: "_GLOBAL::main"

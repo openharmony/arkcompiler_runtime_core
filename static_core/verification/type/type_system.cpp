@@ -15,6 +15,7 @@
 
 #include "verification/type/type_system.h"
 
+#include "assembler/assembly-type.h"
 #include "runtime/include/thread_scopes.h"
 #include "verification/jobs/job.h"
 #include "verification/jobs/service.h"
@@ -35,10 +36,22 @@ static PandaString ClassNameToDescriptorString(char const *name)
     return str;
 }
 
-static Type DescriptorToType(ClassLinker *linker, ClassLinkerContext *ctx, uint8_t const *descr)
+static Type DescriptorToType(ClassLinker *linker, ClassLinkerContext *ctx, const LanguageContext &langCtx,
+                             uint8_t const *descr)
 {
+    PandaString strDesc = utf::Mutf8AsCString(descr);
+    ark::Class *klass {nullptr};
     Job::ErrorHandler handler;
-    auto klass = linker->GetClass(descr, true, ctx, &handler);
+    if (ClassHelper::IsUnionOrArrayUnionDescriptor(descr)) {
+        auto canonDesc = pandasm::Type::FromDescriptor(strDesc).GetDescriptor();
+        if (canonDesc != std::string(strDesc)) {
+            LOG_VERIFIER_NOT_CANONICALIZED_UNION_TYPE(strDesc, canonDesc);
+        }
+        klass = ClassHelper::GetUnionLUBClass(descr, linker, ctx, linker->GetExtension(langCtx), &handler);
+    } else {
+        klass = linker->GetClass(descr, true, ctx, &handler);
+    }
+
     if (klass != nullptr) {
         return Type {klass};
     }
@@ -72,7 +85,7 @@ TypeSystem::TypeSystem(VerifierService *service, panda_file::SourceLang lang)
 
 Type TypeSystem::BootDescriptorToType(uint8_t const *descr)
 {
-    return DescriptorToType(service_->GetClassLinker(), bootLinkerCtx_, descr);
+    return DescriptorToType(service_->GetClassLinker(), bootLinkerCtx_, langCtx_, descr);
 }
 
 void TypeSystem::ExtendBySupers(PandaUnorderedSet<Type> *set, Class const *klass)
@@ -121,7 +134,7 @@ MethodSignature const *TypeSystem::GetMethodSignature(Method const *method)
     methodOfId_[methodId] = method;
 
     auto const resolveType = [this, method](const uint8_t *descr) {
-        return DescriptorToType(service_->GetClassLinker(), method->GetClass()->GetLoadContext(), descr);
+        return DescriptorToType(service_->GetClassLinker(), method->GetClass()->GetLoadContext(), langCtx_, descr);
     };
 
     MethodSignature sig;

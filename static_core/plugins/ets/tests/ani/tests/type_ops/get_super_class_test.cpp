@@ -44,7 +44,7 @@ public:
         ASSERT_NE(ns, nullptr);
 
         ani_class resultChild {};
-        ASSERT_EQ(env_->Namespace_FindClass(ns, "LChild;", &resultChild), ANI_OK);
+        ASSERT_EQ(env_->Namespace_FindClass(ns, "Child", &resultChild), ANI_OK);
         ASSERT_NE(resultChild, nullptr);
 
         ani_type typeRefChild = resultChild;
@@ -56,22 +56,22 @@ public:
 
 TEST_F(GetSuperClassTest, get_super_class_A)
 {
-    CheckGetSuperClass<true>("Lget_super_class_test/A;");
+    CheckGetSuperClass<true>("get_super_class_test.A");
 }
 
 TEST_F(GetSuperClassTest, get_super_class_B)
 {
-    CheckGetSuperClass<true>("Lget_super_class_test/B;");
+    CheckGetSuperClass<true>("get_super_class_test.B");
 }
 
 TEST_F(GetSuperClassTest, get_super_class_C)
 {
-    CheckGetSuperClass<true>("Lget_super_class_test/C;");
+    CheckGetSuperClass<true>("get_super_class_test.C");
 }
 
 TEST_F(GetSuperClassTest, try_get_object_superclass)
 {
-    CheckGetSuperClass<false>("Lstd/core/Object;");
+    CheckGetSuperClass<false>("std.core.Object");
 }
 
 TEST_F(GetSuperClassTest, ani_invalid_args)
@@ -83,7 +83,7 @@ TEST_F(GetSuperClassTest, ani_invalid_args)
 TEST_F(GetSuperClassTest, ani_invalid_args_2)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lget_super_class_test/Student;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("get_super_class_test.Student", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_type typeRef = cls;
@@ -97,7 +97,7 @@ TEST_F(GetSuperClassTest, ani_invalid_args_2)
 TEST_F(GetSuperClassTest, get_super_class_combine_scenes_001)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lget_super_class_test/Student;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("get_super_class_test.Student", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_type typeRef = cls;
@@ -129,12 +129,12 @@ TEST_F(GetSuperClassTest, get_super_class_combine_scenes_001)
 
 TEST_F(GetSuperClassTest, get_super_class_combine_scenes_002)
 {
-    TestGetSuperClass("Lget_super_class_test/test001;");
+    TestGetSuperClass("get_super_class_test.test001");
 }
 
 TEST_F(GetSuperClassTest, get_super_class_combine_scenes_003)
 {
-    TestGetSuperClass("Lget_super_class_test/test002/test003;");
+    TestGetSuperClass("get_super_class_test.test002.test003");
 }
 
 TEST_F(GetSuperClassTest, check_initialization)

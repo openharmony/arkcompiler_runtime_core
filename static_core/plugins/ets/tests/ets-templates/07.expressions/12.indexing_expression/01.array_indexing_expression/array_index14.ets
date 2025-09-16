@@ -20,6 +20,6 @@ desc: Test to use array built-in function filter to create new array.
 function main(): void {
   let numbers: Array<number> = new Array<number>(1, 2, 3, 4, 5);
   let evenNumbers = numbers.filter((value: number) => value % 2 === 0);
-  assertEQ(evenNumbers[0], 2);
-  assertEQ(evenNumbers[1], 4);
+  arktest.assertEQ(evenNumbers[0], 2);
+  arktest.assertEQ(evenNumbers[1], 4);
 }

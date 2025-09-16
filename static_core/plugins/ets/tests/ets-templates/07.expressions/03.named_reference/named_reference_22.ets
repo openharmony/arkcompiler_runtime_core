@@ -21,10 +21,10 @@ let callback = "I am a string";
 
 function testNameConflict(callback: () => void): void {
   callback();
-  assertEQ(typeof callback, "function");
+  arktest.assertEQ(typeof callback, "function");
 }
 
 function main(): void {
   testNameConflict(() => {});
-  assertEQ(callback, "I am a string");
+  arktest.assertEQ(callback, "I am a string");
 }

@@ -26,6 +26,6 @@ import {_bar} from './issue_15173_01'
 function main(): void {
   let foo = new _foo();
   let bar = new _bar();
-  assertEQ( foo.test(), "inside a method")
-  assertEQ( bar.test(), "inside a method")
+  arktest.assertEQ( foo.test(), "inside a method")
+  arktest.assertEQ( bar.test(), "inside a method")
 }

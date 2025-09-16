@@ -32,7 +32,7 @@ namespace ark::pandasm {
 
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 struct Token {
-    enum class Type {
+    enum class Type : std::uint32_t {
         ID_BAD = 0,
         /* delimiters */
         DEL_COMMA,            /* , */
@@ -65,13 +65,13 @@ struct Token {
     };
 
     std::string wholeLine;
-    size_t boundLeft; /* right and left bounds of tokens */
-    size_t boundRight;
+    std::uint16_t boundLeft; /* right and left bounds of tokens */
+    std::uint16_t boundRight;
     Type type;
 
-    Token() : Token(0, 0, Type::ID_BAD, "") {}
+    Token() : Token(0U, 0U, Type::ID_BAD, "") {}
 
-    Token(size_t bL, size_t bR, Type t, std::string begOfLine)
+    Token(std::uint16_t bL, size_t bR, Type t, std::string begOfLine)
         : wholeLine(std::move(begOfLine)), boundLeft(bL), boundRight(bR), type(t)
     {
     }

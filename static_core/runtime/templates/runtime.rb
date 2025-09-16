@@ -17,6 +17,10 @@ def array_type?(type)
   type[-1] == '['
 end
 
+def yaml_union_type?(type)
+  type[0,2] == 'U{'
+end
+
 def get_object_type(type)
   if array_type?(type)
     type = "Array"
@@ -75,8 +79,8 @@ def get_ret_type(type)
   @ret_type_map[type] || get_object_type(type)
 end
 
-def get_effective_type(type)
-  get_type(type)
+def get_effective_type(type, impl_type = nil)
+  impl_type ? get_effective_type(impl_type) : get_type(type)
 end
 
 def get_ret_effective_type(type)

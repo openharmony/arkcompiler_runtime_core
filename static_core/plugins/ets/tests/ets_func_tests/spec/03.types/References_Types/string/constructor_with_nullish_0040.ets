@@ -41,5 +41,5 @@ function main() {
   let obj: ANullish = new A();
   let obj1: ANullish1 = new A1();
   let testStr = new string(new string(obj) + new string(obj1));
-  assertEQ( testStr, "{str: \"hello\"}{str: \"world\"}");
+  arktest.assertEQ( testStr, "{str: \"hello\"}{str: \"world\"}");
 }

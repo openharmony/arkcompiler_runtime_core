@@ -76,7 +76,7 @@ function main(): int {
        console.println();
     }
 
-    assertEQ(passed_counter, max_test)
+    arktest.assertEQ(passed_counter, max_test)
     return 0;
 }
 

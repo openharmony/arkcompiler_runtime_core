@@ -23,45 +23,45 @@ let string_number: Record<String, Number> = {
   "world": 20,
 };
 
-assertEQ( string_number.size, 2)
-assertEQ( string_number.get("hello"), 10)
-assertEQ( string_number.get("world"), 20)
+arktest.assertEQ( string_number.size, 2)
+arktest.assertEQ( string_number.get("hello"), 10)
+arktest.assertEQ( string_number.get("world"), 20)
 
 let string_double: Record<String, Double> = {
   "hello": 10,
   "world": 20,
 };
 
-assertEQ( string_double.size, 2)
-assertEQ( string_double.get("hello"), 10)
-assertEQ( string_double.get("world"), 20)
+arktest.assertEQ( string_double.size, 2)
+arktest.assertEQ( string_double.get("hello"), 10)
+arktest.assertEQ( string_double.get("world"), 20)
 
 let string_float: Record<String, Float> = {
   "hello": 10,
   "world": 20,
 };
 
-assertEQ( string_float.size, 2)
-assertEQ( string_float.get("hello"), 10)
-assertEQ( string_float.get("world"), 20)
+arktest.assertEQ( string_float.size, 2)
+arktest.assertEQ( string_float.get("hello"), 10)
+arktest.assertEQ( string_float.get("world"), 20)
 
 let string_long: Record<String, Long> = {
   "hello": 10,
   "world": 20,
 };
 
-assertEQ( string_long.size, 2)
-assertEQ( string_long.get("hello"), 10)
-assertEQ( string_long.get("world"), 20)
+arktest.assertEQ( string_long.size, 2)
+arktest.assertEQ( string_long.get("hello"), 10)
+arktest.assertEQ( string_long.get("world"), 20)
 
 let string_int: Record<String, Int> = {
   "hello": 10,
   "world": 20,
 };
 
-assertEQ( string_int.size, 2)
-assertEQ( string_int.get("hello"), 10)
-assertEQ( string_int.get("world"), 20)
+arktest.assertEQ( string_int.size, 2)
+arktest.assertEQ( string_int.get("hello"), 10)
+arktest.assertEQ( string_int.get("world"), 20)
 
 function main() {
 }

@@ -52,14 +52,12 @@ export namespace StdProcess {
 
     const MAX_BUFFER_SIZE: int = 1024 * 1024;
 
-    const DEFAULT_JOB_HANDLER_CALLBACK = (error: Object) => { console.log("Unhandled Job fail:", error) };
-    const DEFAULT_PROMISE_HANDLER_CALLBACK = (error: Object) => { console.log("Unhandled Promise rejection: ", error) };
 
     /**
      * @class Represents child process created by executing process.runCmd()
      */
     export final class ChildProcess {
-
+        //NOTE(ekaterinazaytseva): unable to replace internal - used outside in runCmd as public
         internal constructor(bufferSize: int) {
             this.outBuffer = new ArrayBuffer(bufferSize);
             this.errBuffer = new ArrayBuffer(bufferSize);
@@ -76,17 +74,17 @@ export namespace StdProcess {
         /**
          * Wait for child process to terminate
          *
-         * @returns Promise containing child process's exit code value
+         * @returns { Promise<int> } Promise containing child process's exit code value
          */
-        wait(): Promise<number> {
+        wait(): Promise<int> {
             this.waitImpl();
-            return Promise.resolve < number > (this.exitCode);
+            return Promise.resolve <int> (this.exitCode);
         }
 
         /**
          * Get child process's output to stdout
          *
-         * @returns Promise containing bytes read from child process's stdout in Uint8Array
+         * @returns { Promise<Uint8Array> } Promise containing bytes read from child process's stdout in Uint8Array
          */
         getOutput(): Promise<Uint8Array> {
             this.readOutput();
@@ -96,7 +94,7 @@ export namespace StdProcess {
         /**
          * Get child process's output to stderr
          *
-         * @returns Promise containing bytes read from child process's stderr in Uint8Array
+         * @returns { Promise<Uint8Array> } Promise containing bytes read from child process's stderr in Uint8Array
          */
         getErrorOutput(): Promise<Uint8Array> {
             this.readErrorOutput();
@@ -111,10 +109,10 @@ export namespace StdProcess {
         /**
          * Send a signal to the child process
          *
-         * @param signal number or string indicating a kill signal
+         * @param { int | string } signal int or string indicating a kill signal
          *
          */
-        kill(signal: number | string): void {
+        kill(signal: int | string): void {
             let killSignal: int;
             if (signal instanceof string) {
                 if (SIGNAL_MAP.has(signal as string)) {
@@ -123,14 +121,15 @@ export namespace StdProcess {
                     killSignal = SIGNAL_MAP.get("SIGTERM")! as int;
                 }
             } else {
-                if (!isInteger(signal as number) || (signal as number) < 1 || (signal as number) > 31) {
+                if ((signal as int) < 1 || (signal as int) > 31) {
                     throw new RangeError("Invalid signal value");
                 }
-                killSignal = signal.toInt();
+                killSignal = signal;
             }
             this.killImpl(killSignal);
         }
 
+        // NOTE(ekaterinazaytseva): unable to replace internal - called outside as public from runCmd
         internal native spawn(command: string, timeout: int, killSignal: int): void;
 
         private native killImpl(signal: int): void;
@@ -151,17 +150,17 @@ export namespace StdProcess {
         /**
          * Child process's pid as double value
          */
-        readonly pid: number;
+        readonly pid: int;
 
         /**
          * Child process's ppid as double value
          */
-        readonly ppid: number;
+        readonly ppid: int;
 
         /**
          * Child process's exit code as double value
          */
-        readonly exitCode: number;
+        readonly exitCode: int;
 
         private outBytesRead: int;
 
@@ -185,17 +184,17 @@ export namespace StdProcess {
         /**
         * Time after which a kill signal will be send to child process
         */
-        timeout?: number;
+        timeout?: int;
 
         /**
         * Kill signal that is sent to child process after timeout
         */
-        killSignal?: number | string;
+        killSignal?: int | string;
 
         /**
         * Maximum buffer size for both sdout and stderr of child process
         */
-        maxBuffer?: number;
+        maxBuffer?: int;
     }
 
     /**
@@ -205,126 +204,129 @@ export namespace StdProcess {
         /**
          * Determine if a given uid belongs to an app
          *
-         * @param uid
+         * @param { int } uid
          *
-         * @returns resulting boolean
+         * @returns { boolean } resulting boolean
          */
-        native isAppUid(uid: number): boolean;
+        native isAppUid(uid: int): boolean;
 
         /**
          * Determine the uid corresponding to a user name string
          *
-         * @param v user name string
+         * @param { string } v user name string
          *
-         * @returns user id as number
+         * @returns { int } user id as int
          */
-        native getUidForName(v: string): number;
+        native getUidForName(v: string): int;
 
         /**
          * Determine the priority for a given pid or tid
          *
-         * @param v
+         * @param { int } v pid or tid
          *
-         * @returns priority value as number
+         * @returns { int } priority value as int
          */
-        native getThreadPriority(v: number): number;
+        native getThreadPriority(v: int): int;
 
         /**
         * Get configuration information
         *
-        * @param name constant corresponding to a configuration parameter
+        * @param { int } name constant corresponding to a configuration parameter
         *
-        * @returns value of the configuration parameter
+        * @returns { long } value of the configuration parameter
         */
-        native getSystemConfig(name: number): number;
+        native getSystemConfig(name: int): long;
 
         /**
          * Get value of an environment variable
          *
-         * @param name environment variable
+         * @param { string } name environment variable
          *
-         * @returns value of the environment variable
+         * @returns { string } value of the environment variable
          */
         native getEnvironmentVar(name: string): string;
 
         /**
          * Exit the program
          *
-         * @param code exit code
+         * @param { int } code exit code
          *
          */
-        native exit(code: number): void;
+        native exit(code: int): void;
 
         /**
          * Send a kill singnal to a process with a given pid
          *
-         * @param signal signal to send
+         * @param { int } signal signal to send
          *
-         * @param pid pid of receiving process
+         * @param { int } pid pid of receiving process
          *
-         * @returns bloolen value indicating if the signal was sent succesfully
+         * @returns { boolean } value indicating if the signal was sent succesfully
          *
          */
-        native kill(signal: number, pid: number): boolean;
+        native kill(signal: int, pid: int): boolean;
     }
 
-    export type EventListener = (evt: Object) => void;
+    export type RejectedObjectListener = (reason: Error, obj: Object) => void;
+    export type UncaughtErrorListener = (error: Object) => void;
+
+    export type EventListener = RejectedObjectListener | UncaughtErrorListener;
 
     /**
     * Get effective group id of the current process
     *
-    * @returns { number } egid as number
+    * @returns { int } egid as int
     */
-    export native function egid(): number;
+    export native function egid(): int;
 
     /**
     * Get effective user id of the current process
     *
-    * @returns { number } euid as number
+    * @returns { int } euid as int
     */
-    export native function euid(): number;
+    export native function euid(): int;
 
     /**
     * Get group id of the current process
     *
-    * @returns { number } gid as number
+    * @returns { int } gid as int
     */
-    export native function gid(): number;
+    export native function gid(): int;
 
     /**
     * Get user id of the current process
     *
-    * @returns { number } uid as number
+    * @returns { int } uid as int
     */
-    export native function uid(): number;
+    export native function uid(): int;
 
     /**
     * Get groups to which the current process belongs
     *
-    * @returns { number[] } groups as number array
+    * @returns { int[] } groups as int array
     */
-    export native function groups(): number[];
+    export native function groups(): int[];
 
     /**
     * Get process id of the current process
     *
-    * @returns { number } pid as number
+    * @returns { int } pid as int
     */
-    export native function pid(): number;
+    export native function pid(): int;
 
     /**
     * Get parent process id of the current process
     *
-    * @returns { number } ppid as number
+    * @returns { int } ppid as int
     */
-    export native function ppid(): number;
+    export native function ppid(): int;
 
     /**
     * Get thread id of the current process
     *
-    * @returns { number } tid as number
+    * @returns { int } tid as int
     */
-    export native function tid(): number;
+    export native function tid(): int;
 
     /**
     * Determine if the current process is isolated
@@ -343,16 +345,16 @@ export namespace StdProcess {
     /**
     * Get start time of the current process
     *
-    * @returns { number } current process's start time milliseconds as number
+    * @returns { long } current process's start time milliseconds as int
     */
-    export native function getStartRealtime(): number;
+    export native function getStartRealtime(): long;
 
     /**
     * Get past cpu time of the current process
     *
-    * @returns { number } current process's past cpu time in milliseconds as number
+    * @returns { long } current process's past cpu time in milliseconds as long
     */
-    export native function getPastCpuTime(): number;
+    export native function getPastCpuTime(): long;
 
 
     /**
@@ -388,10 +390,12 @@ export namespace StdProcess {
     */
     export function on(type: string, listener: EventListener): void {
         if (type == "unhandledJobRejection") {
+            listener = listener as RejectedObjectListener;
             setFailedJobHandler(listener);
             return;
         }
         if (type == "unhandledPromiseRejection") {
+            listener = listener as RejectedObjectListener;
             setRejectedPromiseHandler(listener);
             return;
         }
@@ -406,13 +410,21 @@ export namespace StdProcess {
     * @returns { boolean } indicating if the event has been removed successfully
     *
     */
-    export function off(type: string): boolean {
+    export function off(type: string, listener?: RejectedObjectListener): boolean {
         if (type == "unhandledJobRejection") {
-            setFailedJobHandler(DEFAULT_JOB_HANDLER_CALLBACK);
+            if (listener) {
+                failedJobHandler.unregister(listener);
+            } else {
+                failedJobHandler.reset();
+            }
             return true;
         }
         if (type == "unhandledPromiseRejection") {
-            setRejectedPromiseHandler(DEFAULT_PROMISE_HANDLER_CALLBACK);
+            if (listener) {
+                rejectedPromiseHandler.unregister(listener);
+            } else {
+                rejectedPromiseHandler.reset();
+            }
             return true;
         }
         throw new Error("not implemented");
@@ -437,68 +449,72 @@ export namespace StdProcess {
     /**
     * Get the system uptime
     *
-    * @returns { number } uptime in milliseconds as number
+    * @returns { long } uptime in milliseconds as long
     *
     */
-    export native function uptime(): number;
+    export native function uptime(): long;
 
     function getCmdOptions(options?: ConditionType): int[] {
         let timeout: int = 0;
         let killSignal: int = SIGNAL_MAP.get("SIGTERM")! as int;
         let maxBuffer: int = MAX_BUFFER_SIZE;
 
-        if (options == undefined) {
-            return [timeout, killSignal, maxBuffer];
+            if (options == undefined) {
+                return [timeout, killSignal, maxBuffer];
+            }
+
+        if (options.timeout != undefined && options.timeout as int > 0) {
+            timeout = options.timeout as int;
         }
 
-            if (options.timeout != undefined && options.timeout as number > 0) {
-                timeout = (options.timeout as number).toInt();
-            }
-
-            if (options.killSignal != undefined) {
-                if (options.killSignal instanceof string) {
-                    let key: string = options.killSignal as string;
-                    if (SIGNAL_MAP.has(key)) {
-                        killSignal = SIGNAL_MAP.get(options.killSignal as string)! as int;
-                    }
-                } else {
-                    if (!isInteger(options.killSignal as number) || (options.killSignal as number) < 1 || (options.killSignal as number) > 31) {
-                        throw new RangeError("Invalid signal value");
-                    }
-                    killSignal = (options.killSignal as number).toInt();
+        if (options.killSignal != undefined) {
+            if (options.killSignal instanceof string) {
+                let key: string = options.killSignal as string;
+                if (SIGNAL_MAP.has(key)) {
+                    killSignal = SIGNAL_MAP.get(options.killSignal as string)! as int;
                 }
-            }
-
-            if (options.maxBuffer != undefined) {
-                if ((options.maxBuffer as number).toInt() < 0) {
-                    throw new RangeError("Invalid buffer size value");
+            } else {
+                if ((options.killSignal as int) < 1 || (options.killSignal as int) > 31) {
+                    throw new RangeError("Invalid signal value");
                 }
-                maxBuffer = min((options.maxBuffer as number).toInt(), MAX_BUFFER_SIZE);
+                killSignal = options.killSignal as int;
             }
+        }
 
-        return [timeout, killSignal, maxBuffer];
+        if (options.maxBuffer != undefined) {
+            if ((options.maxBuffer as int) < 0) {
+                throw new RangeError("Invalid buffer size value");
+            }
+            maxBuffer = min(options.maxBuffer as int, MAX_BUFFER_SIZE);
+        }
+
+        let ret: Array<int> = new Array<int>(3);
+        ret[0] = timeout
+        ret[1] = killSignal
+        ret[2] = maxBuffer
+        return ret;
     }
 
     /**
     * This method updates handler that is applied to
     * unhandled failed jobs at the program exit
     *
-    * @param { EventListener } listener user-provided handler
+    * @param { RejectedObjectListener } listener user-provided handler
     *
     */
-    function setFailedJobHandler(listener: EventListener): void {
-        failedJobHandler.reset(listener);
+    function setFailedJobHandler(listener: RejectedObjectListener): void {
+        failedJobHandler.register(listener);
     }
 
     /**
     * This method updates handler that is applied to
     * unhandled rejected promises at the program exit
     *
-    * @param { EventListener } listener user-provided handler
+    * @param { RejectedObjectListener } listener user-provided handler
     *
     */
-    function setRejectedPromiseHandler(listener: EventListener): void {
-        rejectedPromiseHandler.reset(listener);
+    function setRejectedPromiseHandler(listener: RejectedObjectListener): void {
+        rejectedPromiseHandler.register(listener);
     }
 
 
@@ -506,12 +522,14 @@ export namespace StdProcess {
     * This method applies default or user-provided handler to
     * all unhandled failed job results
     *
-    * @param { Object[] } errors results of failed jobs
+    * @param { Object[][] } objs array of pairs of fail results and failed jobs
     *
     */
-    function listUnhandledJobs(errors: Object[]): void {
-        for (let error of errors) {
-            failedJobHandler.apply(error);
+    function listUnhandledJobs(objs: Object[][]): void {
+        for (let objAndReason of objs) {
+            let reason = objAndReason[0] as Error;
+            let obj = objAndReason[1];
+            failedJobHandler.apply(reason, obj);
         }
     }
 
@@ -519,19 +537,17 @@ export namespace StdProcess {
     * This method applies default or user-provided handler to
     * all unhandled rejected promise results
     *
-    * @param { Object[] } errors results of rejected promises
+    * @param { Object[][] } objs array of pairs of rejection results and rejected promises
     *
     */
-    export function listUnhandledPromises(errors: NullishType[]): void {
-        for (let error of errors) {
-            if (error instanceof Object) {
-                rejectedPromiseHandler.apply(error);
-            } else {
-                rejectedPromiseHandler.apply(new Error());
-            }
+    function listUnhandledPromises(objs: Object[][]): void {
+        for (let objAndReason of objs) {
+            let reason = objAndReason[0] as Error;
+            let obj = objAndReason[1];
+            rejectedPromiseHandler.apply(reason, obj);
         }
     }
 
-    let failedJobHandler: RejectedHandler = new RejectedHandler(DEFAULT_JOB_HANDLER_CALLBACK);
-    let rejectedPromiseHandler: RejectedHandler = new RejectedHandler(DEFAULT_PROMISE_HANDLER_CALLBACK);
+    let failedJobHandler: RejectedHandler = new RejectedHandler();
+    let rejectedPromiseHandler: RejectedHandler = new RejectedHandler();
 }

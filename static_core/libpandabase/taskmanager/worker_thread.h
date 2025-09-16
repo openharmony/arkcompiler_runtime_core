@@ -79,7 +79,7 @@ private:
      */
     void WaitForStart();
 
-    using SelfTaskQueue = TwoLockQueue<TaskPtr, std::allocator<TaskPtr>>;
+    using SelfTaskQueue = TwoLockQueue<Task, std::allocator<Task>, QueueElemAllocationType::OUTSIDE>;
     SelfTaskQueue foregroundTaskQueue_;
     SelfTaskQueue backgroundTaskQueue_;
     std::thread *thread_ = nullptr;

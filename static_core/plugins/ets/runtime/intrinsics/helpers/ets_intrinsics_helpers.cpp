@@ -373,8 +373,7 @@ EtsString *DoubleToExponential(double number, int digit)
 EtsString *DoubleToFixed(double number, int digit)
 {
     PandaStringStream ss;
-    const double scientificNotationThreshold = 1e21;
-    if (std::fabs(number) < scientificNotationThreshold) {
+    if (std::fabs(number) < SCIENTIFIC_NOTATION_THRESHOLD) {
         ss << std::setiosflags(std::ios::fixed) << std::setprecision(digit) << number;
         return EtsString::CreateFromMUtf8(ss.str().c_str());
     }

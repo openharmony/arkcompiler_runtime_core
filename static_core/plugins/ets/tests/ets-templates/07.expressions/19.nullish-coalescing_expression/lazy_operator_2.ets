@@ -15,7 +15,6 @@
 
 /*---
 desc: null safety -> Null-Coalescing Operator.
-tags: [negative, compile-only]
 ---*/
 
 function main(): void {

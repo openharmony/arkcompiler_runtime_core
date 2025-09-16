@@ -30,7 +30,7 @@ function changeArrValueByIndex():boolean{
 
 function checkLengthArr():boolean{
     const jsArray:FixedArray<string> = getArray(arr) as FixedArray<string>;
-    return jsArray.length as number == arr.length
+    return jsArray.length as number == arr.length.toDouble()
 }
 function checkAllArrValue():boolean{
     const jsArray:FixedArray<string> = getArray(arr) as FixedArray<string>;
@@ -50,7 +50,7 @@ function changeCustomArrValueByIndex():boolean{
 }
 function checkLengthCustomArr():boolean{
     const jsArray:FixedArray<string> = returnCustomArray(arr);
-    return jsArray.length as number == arr.length;
+    return jsArray.length as number == arr.length.toDouble();
 }
 
 function checkAllCustomArrValue():boolean{

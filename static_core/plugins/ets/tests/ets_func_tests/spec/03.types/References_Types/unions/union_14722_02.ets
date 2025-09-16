@@ -25,7 +25,7 @@ const flag = false
 class A {
   private static readonly map = flag ? new Map<int, Set<Object>>() : undefined;
   check() {
-    assertEQ( A.map, undefined)
+    arktest.assertEQ( A.map, undefined)
   }
 }
 

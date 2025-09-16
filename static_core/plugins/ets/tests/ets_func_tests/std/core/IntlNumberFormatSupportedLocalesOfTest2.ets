@@ -14,7 +14,7 @@
  */
 
 function main(): int {
-    let suite = new ArkTestsuite("Intl. NumberFormat supportedLocalesOf");
+    let suite = new arktest.ArkTestsuite("Intl. NumberFormat supportedLocalesOf");
     // Tests are from https://gitee.com/openharmony/xts_acts/tree/master/commonlibrary/ets_utils/codeparsingtest/builtinstest/entry/src/ohosTest/ets/test/Intl/Intl.test.ets
     suite.addTest("testSupportedLocalesOf0007", testSupportedLocalesOf0007);
     suite.addTest("testSupportedLocalesOf0010", testSupportedLocalesOf0010);
@@ -24,7 +24,7 @@ function main(): int {
 
 function testSupportedLocalesOf0007() {
     let locales: string[] = ['test', 'id-u-co-pinyin', 'de-ID', 'en-US'];
-    expectError((): void throws => { Intl.NumberFormat.supportedLocalesOf(locales) });
+    arktest.expectError((): void => { Intl.NumberFormat.supportedLocalesOf(locales) });
 }
 
 function testSupportedLocalesOf0010() {
@@ -32,5 +32,5 @@ function testSupportedLocalesOf0010() {
     let options: Intl.NumberFormatOptions = {
         localeMatcher: 'best fit'
     }
-    expectError((): void throws => { Intl.NumberFormat.supportedLocalesOf(locales) });
+    arktest.expectError((): void => { Intl.NumberFormat.supportedLocalesOf(locales) });
 }

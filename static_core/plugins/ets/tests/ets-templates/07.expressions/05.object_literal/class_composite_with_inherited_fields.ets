@@ -29,6 +29,6 @@ class Child extends Parent {
 function main(): void {
   let child: Child = { name: "Ben", age: 3, weight: 20 };
 
-  assertEQ( child.weight, 20 )
+  arktest.assertEQ( child.weight, 20 )
 } 
   

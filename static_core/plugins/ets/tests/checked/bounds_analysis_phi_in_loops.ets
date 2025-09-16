@@ -346,15 +346,15 @@ function not_countable_nested_loop() : number
 }
 
 function main(): void {
-    assertEQ(switch_case_loop(), 1);
-    assertEQ(simple_loop(), 15000001);
-    assertEQ(two_vars_loop(), 2);
-    assertEQ(nested_loops(), 1);
-    assertEQ(triple_nested_loops(), 1);
-    assertEQ(loop_init_without_update(), 21);
-    assertEQ(different_operations(), 9999997);
-    assertEQ(operations_chain(), 9999998);
-    assertEQ(linked_vars(), 2);
-    assertEQ(not_countable_nested_loop(), 1);
+    arktest.assertEQ(switch_case_loop(), 1);
+    arktest.assertEQ(simple_loop(), 15000001);
+    arktest.assertEQ(two_vars_loop(), 2);
+    arktest.assertEQ(nested_loops(), 1);
+    arktest.assertEQ(triple_nested_loops(), 1);
+    arktest.assertEQ(loop_init_without_update(), 21);
+    arktest.assertEQ(different_operations(), 9999997);
+    arktest.assertEQ(operations_chain(), 9999998);
+    arktest.assertEQ(linked_vars(), 2);
+    arktest.assertEQ(not_countable_nested_loop(), 1);
 }
 

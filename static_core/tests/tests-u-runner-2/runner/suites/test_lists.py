@@ -49,7 +49,7 @@ class TestLists:
         self.excluded_lists: list[Path] = []
         self.ignored_lists: list[Path] = []
 
-        self.cache: list[str] = self.__cmake_cache()
+        self.cache: list[str] = self.__gn_cache() if self.config.general.gn_build else self.__cmake_cache()
         self.sanitizer = self.search_sanitizer()
         self.architecture = detect_architecture()
         self.operating_system = detect_operating_system()
@@ -125,7 +125,8 @@ class TestLists:
         return [Path(test_list) for test_list in test_lists]
 
     def search_build_type(self) -> BuildTypeKind:
-        value = cast(str, self.__search("CMAKE_BUILD_TYPE"))
+        search_option = "x64" if self.config.general.gn_build else "CMAKE_BUILD_TYPE"
+        value = cast(str, self.__search(search_option))
         if value == "fastverify":
             value = "fast-verify"
         return BuildTypeKind.is_value(value, option_name="from cmake CMAKE_BUILD_TYPE")
@@ -202,6 +203,14 @@ class TestLists:
                      if line.strip() and not line.strip().startswith("#") and not line.strip().startswith("//")]
             return sorted(cache)
 
+    def __gn_cache(self) -> list[str]:
+        return self.config.general.build.name.split(".")
+
     def __search(self, variable: str) -> str | None:
-        found: list[str] = [var for var in self.cache if var.startswith(variable)]
-        return str(found[0].split("=")[-1].lower()) if found else None
+        if self.config.general.gn_build:
+            if variable in self.cache:
+                return str(self.cache[-1].lower())
+        else:
+            found: list[str] = [var for var in self.cache if var.startswith(variable)]
+            return str(found[0].split("=")[-1].lower()) if found else None
+        return None

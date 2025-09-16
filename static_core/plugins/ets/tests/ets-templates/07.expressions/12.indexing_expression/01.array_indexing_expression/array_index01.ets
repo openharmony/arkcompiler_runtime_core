@@ -19,7 +19,7 @@ desc: Test the array index expression to access array elements normally.
 
 function main(): void {
   let names: string[] = ["Alice", "Bob", "Carol"];
-  assertEQ(names[0], "Alice");
-  assertEQ(names[1], "Bob");
-  assertEQ(names[2], "Carol");
+  arktest.assertEQ(names[0], "Alice");
+  arktest.assertEQ(names[1], "Bob");
+  arktest.assertEQ(names[2], "Carol");
 }

@@ -22,5 +22,5 @@ files:
 import {a} from './test_file_01.ets';
 
 function main(): void {
-  assertTrue(a === 10);
+  arktest.assertTrue(a === 10);
 }

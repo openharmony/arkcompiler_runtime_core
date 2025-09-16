@@ -27,18 +27,20 @@ let primitivesIntergerTest: test_primitives.PrimitivesInteger =
 
 function testMultiply() {
     let res = test_primitives.Multiply(2, 4)
-    assertEQ(res, 8)
+    arktest.assertEQ(res, 8)
 }
 
 
 function testFunC1() {
-    let res = test_primitives.BaseCFunc(10)
-    assertEQ(res, true)
+    let res = test_primitives.BaseCFunc(10);
+    console.log("BaseCFunc pass:", res);
+    arktest.assertEQ(res, true)
 }
 
 function testFunC2() {
-    let res = test_primitives.BaseCFunc(5)
-    assertEQ(res, false)
+    let res = test_primitives.BaseCFunc(5);
+    console.log("BaseCFunc fail", res);
+    arktest.assertEQ(res, false)
 }
 
 function testFunA1() {
@@ -51,22 +53,24 @@ function testFunA2() {
 
 function testFunB1() {
     let res = test_primitives.BaseBFunc(true)
-    assertEQ(res, false)
+    arktest.assertEQ(res, false)
 }
 
 function testFunB2() {
     let res = test_primitives.BaseBFunc(false)
-    assertEQ(res, true)
+    arktest.assertEQ(res, true)
 }
 
 function testFunD1() {
-    let res = test_primitives.BaseDFunc("test123")
-    assertEQ(res, true)
+    let res = test_primitives.BaseDFunc("test123");
+    console.log("BaseDFunc pass:", res);
+    arktest.assertEQ(res, true)
 }
 
 function testFunD2() {
-    let res = test_primitives.BaseDFunc("test1231")
-    assertEQ(res, false)
+    let res = test_primitives.BaseDFunc("test1231");
+    console.log("BaseDFunc fail:", res);
+    arktest.assertEQ(res, false)
 }
 
 function testFunE() {
@@ -74,7 +78,7 @@ function testFunE() {
         test_primitives.Foo = {testNum: 2147483647, testStr: "path/to/source"};
     try {
         let res = test_primitives.BaseEFunc(option)
-        assertEQ(res, "success")
+        arktest.assertEQ(res, "success")
     } catch (error) {
         console.error("Failed to parse res:", error);
     }
@@ -82,36 +86,36 @@ function testFunE() {
 
 function testFunH1() {
     let res = test_primitives.BaseHFunc(2147483647, 9223372036854775807)
-    assertEQ(res, "-9223372034707292162")
+    arktest.assertEQ(res, "-9223372034707292162")
 }
 
 function testFunH2() {
     let res = test_primitives.BaseHFunc(-2147483648, -9223372036854775808)
-    assertEQ(res, "9223372034707292160")
+    arktest.assertEQ(res, "9223372034707292160")
 }
 
 function baseFunc1() {
-    let res = test_primitives.BaseFunc1(3.0 as float)
-    assertEQ(res, 4.0)
+    let res = test_primitives.BaseFunc1(3.0f)
+    arktest.assertEQ(res, 4.0)
 }
 
 function baseFunc2() {
-    test_primitives.BaseFunc2(3.0 as float)
+    test_primitives.BaseFunc2(3.0f)
 }
 
 
 function baseFunc3() {
-    let res = test_primitives.BaseFunc3(3.0 as float, 3.14159265 as double)
+    let res = test_primitives.BaseFunc3(3.0f, (3.14159265).toDouble())
     console.log("tests baseFunc3" + res)
 }
 
 function baseFunc4() {
-    let res = test_primitives.BaseFunc4(3.0 as double)
+    let res = test_primitives.BaseFunc4((3.0).toDouble())
     console.log("tests baseFunc3" + res)
 }
 
 function baseFunc5() {
-    test_primitives.BaseFunc5(3.14159 as double)
+    test_primitives.BaseFunc5((3.14159).toDouble())
 }
 
 function baseFunc6() {
@@ -124,40 +128,40 @@ function baseFunc6_1() {
 
 function baseFunc7() {
     let res = test_primitives.BaseFunc7("TestbaseFunc7")
-    assertEQ(res, "TestbaseFunc7")
+    arktest.assertEQ(res, "TestbaseFunc7")
 }
 
 function baseFunc7_1() {
     let res = test_primitives.BaseFunc7("testbaseFunc77")
-    assertEQ(res, "testbaseFunc77false")
+    arktest.assertEQ(res, "testbaseFunc77false")
 }
 
 function baseFunc8() {
     let res = test_primitives.BaseFunc8("TestBaseFunc8", 32)
-    assertEQ(res, "TestBaseFunc832")
+    arktest.assertEQ(res, "TestBaseFunc832")
 }
 
 function baseFunc8_1() {
     let res = test_primitives.BaseFunc8("testbaseFunc88", 32)
-    assertEQ(res, "testbaseFunc88")
+    arktest.assertEQ(res, "testbaseFunc88")
 }
 
 function baseFunc9() {
     test_primitives.BaseFunc9(
-        "testbaseFunc9", 32, 9223372036854775807, true, 3.1 as float)
+        "testbaseFunc9", 32, 9223372036854775807, true, 3.1f)
 }
 
 function testFunI1() {
-    let res =
-        test_primitives.BaseIFunc(3.1415926535897931 as double, 4.3 as float)
+    let res = test_primitives.BaseIFunc((3.1415926535897931).toDouble(), 4.3f)
     console.log("testFunI1 ", res)
-    assertEQ(res, "7.441593")
+    arktest.assertEQ(res, "7.441593")
 }
 
 // function testFunI2(){
-//     let res = test_primitives.BaseIFunc(-1234567890.1234567 as double,-123.4
-//     as float) console.log("testFunI2 ",res)
-//     assertEQ(res,"-1234568013.523457")
+//     let res =
+//     test_primitives.BaseIFunc((-1234567890.1234567).toDouble(),-123.4f)
+//     console.log("testFunI2 ",res)
+//     arktest.assertEQ(res,"-1234568013.523457")
 // }
 
 
@@ -191,7 +195,7 @@ function baseFunc14_1() {
 }
 
 function baseFunc15() {
-    test_primitives.BaseFunc15(32, 3.15 as float)
+    test_primitives.BaseFunc15(32, 3.15f)
 }
 
 function baseFunc16() {
@@ -204,19 +208,19 @@ function baseFunc16_1() {
 
 
 function baseFunc17() {
-    test_primitives.BaseFunc17(123.456 as float, true)
+    test_primitives.BaseFunc17(123.456f, true)
 }
 
 function baseFunc17_1() {
-    test_primitives.BaseFunc17(3.14159 as float, false)
+    test_primitives.BaseFunc17(3.14159f, false)
 }
 
 function baseFunc18() {
-    test_primitives.BaseFunc18(123.456 as float, "testbaseFunc18")
+    test_primitives.BaseFunc18(123.456f, "testbaseFunc18")
 }
 
 function baseFunc18_1() {
-    test_primitives.BaseFunc18(3.14159 as float, "testbaseFunc18")
+    test_primitives.BaseFunc18(3.14159f, "testbaseFunc18")
 }
 
 function baseFunc19() {
@@ -232,11 +236,11 @@ function baseFunc20_1() {
 }
 
 function baseFunc21() {
-    test_primitives.BaseFunc21(32 as int, 65535 as long)
+    test_primitives.BaseFunc21((32).toInt(), (65535).toLong())
 }
 
 function baseFunc21_1() {
-    test_primitives.BaseFunc21(undefined, 65535 as long)
+    test_primitives.BaseFunc21(undefined, (65535).toLong())
 }
 
 function baseFunc21_2() {
@@ -244,11 +248,11 @@ function baseFunc21_2() {
 }
 
 function baseFunc21_3() {
-    test_primitives.BaseFunc21(32 as int, undefined)
+    test_primitives.BaseFunc21((32).toInt(), undefined)
 }
 
 function baseFunc22() {
-    test_primitives.BaseFunc22(3.14159 as float, 3.141592653589793)
+    test_primitives.BaseFunc22(3.14159f, 3.141592653589793)
 }
 
 function baseFunc22_1() {
@@ -260,7 +264,7 @@ function baseFunc22_2() {
 }
 
 function baseFunc22_3() {
-    test_primitives.BaseFunc22(3.14159 as float, undefined)
+    test_primitives.BaseFunc22(3.14159f, undefined)
 }
 
 function baseFunc23() {
@@ -280,7 +284,7 @@ function baseFunc23_3() {
 }
 
 function baseFunc24() {
-    test_primitives.BaseFunc24(32767 as short, 92233720368547758)
+    test_primitives.BaseFunc24((32767).toShort(), 92233720368547758)
 }
 
 function baseFunc24_1() {
@@ -292,7 +296,7 @@ function baseFunc24_2() {
 }
 
 function baseFunc24_3() {
-    test_primitives.BaseFunc24(32767 as short, undefined)
+    test_primitives.BaseFunc24((32767).toShort(), undefined)
 }
 
 function testCaseBaseFunc1() {
@@ -325,7 +329,7 @@ function testCaseBaseFunc5_1() {
 }
 
 function testCaseBaseFunc6() {
-    primitivesTest.TestBaseFunc6(32, 3.15 as float)
+    primitivesTest.TestBaseFunc6(32, 3.15f)
 }
 
 function testCaseBaseFunc7() {
@@ -338,19 +342,19 @@ function testCaseBaseFunc7_1() {
 
 
 function testCaseBaseFunc8() {
-    primitivesTest.TestBaseFunc8(123.456789 as float, true)
+    primitivesTest.TestBaseFunc8(123.456789f, true)
 }
 
 function testCaseBaseFunc8_1() {
-    primitivesTest.TestBaseFunc8(3.1415978 as float, false)
+    primitivesTest.TestBaseFunc8(3.1415978f, false)
 }
 
 function testCaseBaseFunc9() {
-    primitivesTest.TestBaseFunc9(123.456789 as float, "testBaseFunc9")
+    primitivesTest.TestBaseFunc9(123.456789f, "testBaseFunc9")
 }
 
 function testCaseBaseFunc9_1() {
-    primitivesTest.TestBaseFunc9(3.1415978 as float, "testBaseFunc9")
+    primitivesTest.TestBaseFunc9(3.1415978f, "testBaseFunc9")
 }
 
 function testCaseBaseFunc10() {
@@ -366,11 +370,11 @@ function testCaseBaseFunc11_1() {
 }
 
 function testCaseBaseFunc12() {
-    primitivesTest.TestBaseFunc12(256, 6553565536 as long)
+    primitivesTest.TestBaseFunc12(256, (6553565536).toLong())
 }
 
 function testCaseBaseFunc12_1() {
-    primitivesTest.TestBaseFunc12(undefined, 65535 as long)
+    primitivesTest.TestBaseFunc12(undefined, (65535).toLong())
 }
 
 function testCaseBaseFunc12_2() {
@@ -382,7 +386,7 @@ function testCaseBaseFunc12_3() {
 }
 
 function testCaseBaseFunc13() {
-    primitivesTest.TestBaseFunc13(-3.1415952 as float, 3.141592653589793)
+    primitivesTest.TestBaseFunc13(-3.1415952f, 3.141592653589793)
 }
 
 function testCaseBaseFunc13_1() {
@@ -394,7 +398,7 @@ function testCaseBaseFunc13_2() {
 }
 
 function testCaseBaseFunc13_3() {
-    primitivesTest.TestBaseFunc13(-3.1415952 as float, undefined)
+    primitivesTest.TestBaseFunc13(-3.1415952f, undefined)
 }
 
 function testCaseBaseFunc14() {
@@ -414,7 +418,7 @@ function testCaseBaseFunc14_3() {
 }
 
 function testCaseBaseFunc15() {
-    primitivesTest.TestBaseFunc15(32767 as short, 92233720368547758)
+    primitivesTest.TestBaseFunc15((32767).toShort(), 92233720368547758)
 }
 
 function testCaseBaseFunc15_1() {
@@ -426,15 +430,15 @@ function testCaseBaseFunc15_2() {
 }
 
 function testCaseBaseFunc15_3() {
-    primitivesTest.TestBaseFunc15(-32768 as short, undefined)
+    primitivesTest.TestBaseFunc15((-32768).toShort(), undefined)
 }
 
 function testCaseBaseFunc16() {
-    primitivesTest.TestBaseFunc16(127 as byte, 32765 as short)
+    primitivesTest.TestBaseFunc16((127).toByte(), (32765).toShort())
 }
 
 function testCaseBaseFunc16_1() {
-    primitivesTest.TestBaseFunc16(-128 as byte, -32765 as short)
+    primitivesTest.TestBaseFunc16((-128).toByte(), (-32765).toShort())
 }
 
 
@@ -471,48 +475,49 @@ function testCaseBaseFunc20() {
 
 function testCaseBaseIntegerFunc1() {
     try {
-        let temp = 255 as byte;
+        let temp = (255).toByte();
         console.log("test error 1 ", temp)
         let res = primitivesIntergerTest.TestBaseIntegerFunc1(temp)
     } catch (e) {
-        assertEQ(
+        arktest.assertEQ(
             e.toString(),
             "Error: out of range The i8 maximum value is 127 and minnum values is -128")
     }
 }
 
 function testCaseBaseIntegerFunc1_1() {
-    let res = primitivesIntergerTest.TestBaseIntegerFunc1(100 as byte)
-    assertEQ(res, 101)
+    let res = primitivesIntergerTest.TestBaseIntegerFunc1((100).toByte())
+    arktest.assertEQ(res, 101)
 }
 
 function testCaseBaseIntegerFunc2() {
     try {
-        let temp = 255 as byte;
+        let temp = (255).toByte();
         console.log("test error 2 ", temp)
         let res =
-            primitivesIntergerTest.TestBaseIntegerFunc2(temp, 100 as short)
+            primitivesIntergerTest.TestBaseIntegerFunc2(temp, (100).toShort())
     } catch (e) {
-        assertEQ(
+        arktest.assertEQ(
             e.toString(),
             "Error: out of range The i8 maximum value is 127 and minnum values is -128")
     }
 }
 
 function testCaseBaseIntegerFunc2_1() {
-    let res =
-        primitivesIntergerTest.TestBaseIntegerFunc2(100 as byte, 27 as short)
-    assertEQ(res, 127)
+    let res = primitivesIntergerTest.TestBaseIntegerFunc2(
+        (100).toByte(), (27).toShort())
+    arktest.assertEQ(res, 127)
 }
 
 function testCaseBaseIntegerFunc2_2() {
     try {
-        let temp = -1 as short;
+        let temp = (-1).toShort();
         console.log("test error 2_2 ", temp)
-        let res = primitivesIntergerTest.TestBaseIntegerFunc2(100 as byte, temp)
+        let res =
+            primitivesIntergerTest.TestBaseIntegerFunc2((100).toByte(), temp)
     } catch (e) {
         console.log("testCaseBaseIntegerFunc2_2 error ", e.toString())
-        assertEQ(
+        arktest.assertEQ(
             e.toString(),
             "Error: out of range The i16 maximum value is 32767 and minnum values is -32768")
     }
@@ -520,76 +525,77 @@ function testCaseBaseIntegerFunc2_2() {
 
 
 function testCaseBaseIntegerFunc2_3() {
-    let res =
-        primitivesIntergerTest.TestBaseIntegerFunc2(100 as byte, 32667 as short)
-    assertEQ(res, -1)
+    let res = primitivesIntergerTest.TestBaseIntegerFunc2(
+        (100).toByte(), (32667).toShort())
+    arktest.assertEQ(res, -1)
 }
 
 function testCaseBaseIntegerFunc3() {
-    primitivesIntergerTest.TestBaseIntegerFunc3(100 as byte, 27 as short)
+    primitivesIntergerTest.TestBaseIntegerFunc3((100).toByte(), (27).toShort())
 }
 
 function testCaseBaseIntegerFunc4() {
-    let res =
-        primitivesIntergerTest.TestBaseIntegerFunc4(100 as byte, 32667 as short)
-    assertEQ(res, 32767)
+    let res = primitivesIntergerTest.TestBaseIntegerFunc4(
+        (100).toByte(), (32667).toShort())
+    arktest.assertEQ(res, 32767)
 }
 
 function testCaseBaseIntegerFunc4_1() {
     let res = primitivesIntergerTest.TestBaseIntegerFunc4(
-        127 as byte, -32768 as short)
-    assertEQ(res, -32641)
+        (127).toByte(), (-32768).toShort())
+    arktest.assertEQ(res, -32641)
 }
 
 function testCaseBaseIntegerFunc4_2() {
-    let res = primitivesIntergerTest.TestBaseIntegerFunc4(0 as byte, 0 as short)
-    assertEQ(res, 0)
+    let res =
+        primitivesIntergerTest.TestBaseIntegerFunc4((0).toByte(), (0).toShort())
+    arktest.assertEQ(res, 0)
 }
 
 function testCaseBaseIntegerFunc5() {
     let res =
-        primitivesIntergerTest.TestBaseIntegerFunc5(100 as byte, 2147483547)
-    assertEQ(res, -1)
+        primitivesIntergerTest.TestBaseIntegerFunc5((100).toByte(), 2147483547)
+    arktest.assertEQ(res, -1)
 }
 
 function testCaseBaseIntegerFunc5_1() {
-    let res =
-        primitivesIntergerTest.TestBaseIntegerFunc5(-127 as byte, -2147483648)
-    assertEQ(res, -127)
+    let res = primitivesIntergerTest.TestBaseIntegerFunc5(
+        (-127).toByte(), -2147483648)
+    arktest.assertEQ(res, -127)
 }
 
 function testCaseBaseIntegerFunc5_2() {
-    let res = primitivesIntergerTest.TestBaseIntegerFunc5(0 as byte, 100)
-    assertEQ(res, 100)
+    let res = primitivesIntergerTest.TestBaseIntegerFunc5((0).toByte(), 100)
+    arktest.assertEQ(res, 100)
 }
 
 function testCaseBaseIntegerFunc6() {
     let res =
-        primitivesIntergerTest.TestBaseIntegerFunc6(100 as byte, 2147483547)
-    assertEQ(res, 2147483647)
+        primitivesIntergerTest.TestBaseIntegerFunc6((100).toByte(), 2147483547)
+    arktest.assertEQ(res, 2147483647)
 }
 
 function testCaseBaseIntegerFunc6_1() {
-    let res =
-        primitivesIntergerTest.TestBaseIntegerFunc6(-127 as byte, -2147483648)
-    assertEQ(res, 2147483521)
+    let res = primitivesIntergerTest.TestBaseIntegerFunc6(
+        (-127).toByte(), -2147483648)
+    arktest.assertEQ(res, 2147483521)
 }
 
 function testCaseBaseIntegerFunc6_2() {
-    let res = primitivesIntergerTest.TestBaseIntegerFunc6(0 as byte, 0)
-    assertEQ(res, 0)
+    let res = primitivesIntergerTest.TestBaseIntegerFunc6((0).toByte(), 0)
+    arktest.assertEQ(res, 0)
 }
 
 function testCaseBaseIntegerFunc7() {
-    primitivesIntergerTest.TestBaseIntegerFunc7(100 as byte, 2147483647)
+    primitivesIntergerTest.TestBaseIntegerFunc7((100).toByte(), 2147483647)
 }
 
 function testCaseBaseIntegerFunc7_1() {
     try {
-        primitivesIntergerTest.TestBaseIntegerFunc7(100 as byte, -1)
+        primitivesIntergerTest.TestBaseIntegerFunc7((100).toByte(), -1)
     } catch (e) {
         console.log("testCaseBaseIntegerFunc7_1 error ", e.toString())
-        assertEQ(
+        arktest.assertEQ(
             e.toString(),
             "Error: out of range The i32 maximum value is 2147483647 and minnum values is -2147483648")
     }
@@ -597,16 +603,16 @@ function testCaseBaseIntegerFunc7_1() {
 
 function testCaseBaseIntegerFunc8() {
     let res = primitivesIntergerTest.TestBaseIntegerFunc8(
-        100 as byte, 9223372036854775807)
-    assertEQ(res, 9223372036854775707)
+        (100).toByte(), 9223372036854775807)
+    arktest.assertEQ(res, 9223372036854775707)
 }
 
 function testCaseBaseIntegerFunc8_1() {
     try {
-        primitivesIntergerTest.TestBaseIntegerFunc8(100 as byte, -1)
+        primitivesIntergerTest.TestBaseIntegerFunc8((100).toByte(), -1)
     } catch (e) {
         console.log("testCaseBaseIntegerFunc8_1 error ", e.toString())
-        assertEQ(
+        arktest.assertEQ(
             e.toString(),
             "Error: out of range The i64 maximum value is 9223372036854775807 and minnum values is -9223372036854775808")
     }
@@ -614,154 +620,158 @@ function testCaseBaseIntegerFunc8_1() {
 
 function testCaseBaseIntegerFunc8_2() {
     let res = primitivesIntergerTest.TestBaseIntegerFunc8(
-        100 as byte, -9223372036854775808)
-    assertEQ(res, 9223372036854775708)
+        (100).toByte(), -9223372036854775808)
+    arktest.assertEQ(res, 9223372036854775708)
 }
 
 function testCaseBaseIntegerFunc9() {
-    let res = primitivesIntergerTest.TestBaseIntegerFunc9(100 as byte, 227)
-    assertEQ(res, 127)
+    let res = primitivesIntergerTest.TestBaseIntegerFunc9((100).toByte(), 227)
+    arktest.assertEQ(res, 127)
 }
 
 function testCaseBaseIntegerFunc9_1() {
-    let res = primitivesIntergerTest.TestBaseIntegerFunc9(-7 as byte, -120)
-    assertEQ(res, -113)
+    let res = primitivesIntergerTest.TestBaseIntegerFunc9((-7).toByte(), -120)
+    arktest.assertEQ(res, -113)
 }
 
 function testCaseBaseIntegerFunc10() {
     let res =
-        primitivesIntergerTest.TestBaseIntegerFunc10(100 as byte, 3.14 as float)
-    assertEQ(res, 103.14 as float)
+        primitivesIntergerTest.TestBaseIntegerFunc10((100).toByte(), 3.14f)
+    arktest.assertEQ(res, 103.14f)
 }
 
 function testCaseBaseIntegerFunc10_1() {
-    let res = primitivesIntergerTest.TestBaseIntegerFunc10(
-        -7 as byte, -0.0005 as float)
-    assertEQ(res, -7.0005 as float)
+    let res =
+        primitivesIntergerTest.TestBaseIntegerFunc10((-7).toByte(), -0.0005f)
+    arktest.assertEQ(res, -7.0005f)
 }
 
 function testCaseBaseIntegerFunc11() {
     let res =
-        primitivesIntergerTest.TestBaseIntegerFunc11(100 as byte, 3.14 as float)
-    assertEQ(res, 103)
+        primitivesIntergerTest.TestBaseIntegerFunc11((100).toByte(), 3.14f)
+    arktest.assertEQ(res, 103)
 }
 
 function testCaseBaseIntegerFunc11_1() {
-    let res = primitivesIntergerTest.TestBaseIntegerFunc11(
-        -7 as byte, -0.0005 as float)
-    assertEQ(res, -7)
+    let res =
+        primitivesIntergerTest.TestBaseIntegerFunc11((-7).toByte(), -0.0005f)
+    arktest.assertEQ(res, -7)
 }
 
 function testCaseBaseIntegerFunc12() {
     let res =
-        primitivesIntergerTest.TestBaseIntegerFunc12(100 as byte, 3.1415926)
-    assertEQ(res, 103.1415926)
+        primitivesIntergerTest.TestBaseIntegerFunc12((100).toByte(), 3.1415926)
+    arktest.assertEQ(res, 103.1415926)
 }
 
 function testCaseBaseIntegerFunc12_1() {
-    let res = primitivesIntergerTest.TestBaseIntegerFunc12(-7 as byte, -0.0005)
-    assertEQ(res, -7.0005)
+    let res =
+        primitivesIntergerTest.TestBaseIntegerFunc12((-7).toByte(), -0.0005)
+    arktest.assertEQ(res, -7.0005)
 }
 
 function testCaseBaseIntegerFunc13() {
-    let res = primitivesIntergerTest.TestBaseIntegerFunc13(100 as byte, 27)
-    assertEQ(res, 127)
+    let res = primitivesIntergerTest.TestBaseIntegerFunc13((100).toByte(), 27)
+    arktest.assertEQ(res, 127)
 }
 
 function testCaseBaseIntegerFunc13_1() {
-    let res = primitivesIntergerTest.TestBaseIntegerFunc13(-7 as byte, -121)
-    assertEQ(res, -128)
+    let res = primitivesIntergerTest.TestBaseIntegerFunc13((-7).toByte(), -121)
+    arktest.assertEQ(res, -128)
 }
 
 function testCaseBaseIntegerFunc14() {
     let res = primitivesIntergerTest.TestBaseIntegerFunc14(
-        100 as byte, "TestBaseIntegerFunc14")
-    assertEQ(res, "TestBaseIntegerFunc14100")
+        (100).toByte(), "TestBaseIntegerFunc14")
+    arktest.assertEQ(res, "TestBaseIntegerFunc14100")
 }
 
 function testCaseBaseIntegerFunc14_1() {
     let res = primitivesIntergerTest.TestBaseIntegerFunc14(
-        -7 as byte, "testBaseIntegerFunc14_1")
-    assertEQ(res, "testBaseIntegerFunc14_1")
+        (-7).toByte(), "testBaseIntegerFunc14_1")
+    arktest.assertEQ(res, "testBaseIntegerFunc14_1")
 }
 
 function testCaseBaseIntegerFunc15() {
     let res = primitivesIntergerTest.TestBaseIntegerFunc15(
-        100 as byte, "TestBaseIntegerFunc15")
-    assertEQ(res, 110)
+        (100).toByte(), "TestBaseIntegerFunc15")
+    arktest.assertEQ(res, 110)
 }
 
 function testCaseBaseIntegerFunc15_1() {
     let res = primitivesIntergerTest.TestBaseIntegerFunc15(
-        -7 as byte, "testBaseIntegerFunc15_1")
-    assertEQ(res, -7)
+        (-7).toByte(), "testBaseIntegerFunc15_1")
+    arktest.assertEQ(res, -7)
 }
 
 function testCaseBaseIntegerFunc16() {
-    let res = primitivesIntergerTest.TestBaseIntegerFunc16(100 as byte, true)
-    assertEQ(res, true)
+    let res = primitivesIntergerTest.TestBaseIntegerFunc16((100).toByte(), true)
+    arktest.assertEQ(res, true)
 }
 
 function testCaseBaseIntegerFunc16_1() {
-    let res = primitivesIntergerTest.TestBaseIntegerFunc16(-7 as byte, false)
-    assertEQ(res, false)
+    let res = primitivesIntergerTest.TestBaseIntegerFunc16((-7).toByte(), false)
+    arktest.assertEQ(res, false)
 }
 
 function testCaseBaseIntegerFunc17() {
-    let res = primitivesIntergerTest.TestBaseIntegerFunc17(126 as byte, true)
-    assertEQ(res, 127)
+    let res = primitivesIntergerTest.TestBaseIntegerFunc17((126).toByte(), true)
+    arktest.assertEQ(res, 127)
 }
 
 function testCaseBaseIntegerFunc17_1() {
-    let res = primitivesIntergerTest.TestBaseIntegerFunc17(-126 as byte, false)
-    assertEQ(res, -126)
+    let res =
+        primitivesIntergerTest.TestBaseIntegerFunc17((-126).toByte(), false)
+    arktest.assertEQ(res, -126)
 }
 
 function testCaseBaseIntegerFunc18() {
     try {
-        let res = primitivesIntergerTest.TestBaseIntegerFunc18(32767 as short)
+        let res =
+            primitivesIntergerTest.TestBaseIntegerFunc18((32767).toShort())
     } catch (e) {
-        assertEQ(
+        arktest.assertEQ(
             e.toString(),
             "Error: TestBaseIntegerFunc18: result exceeds int16_t range")
     }
 }
 
 function testCaseBaseIntegerFunc18_1() {
-    let res = primitivesIntergerTest.TestBaseIntegerFunc18(327 as short)
-    assertEQ(res, 3270)
+    let res = primitivesIntergerTest.TestBaseIntegerFunc18((327).toShort())
+    arktest.assertEQ(res, 3270)
 }
 
 function testCaseBaseIntegerFunc19() {
-    primitivesIntergerTest.TestBaseIntegerFunc19(32767 as short)
+    primitivesIntergerTest.TestBaseIntegerFunc19((32767).toShort())
 }
 
 function testCaseBaseIntegerFunc19_1() {
-    primitivesIntergerTest.TestBaseIntegerFunc19(-32768 as short)
+    primitivesIntergerTest.TestBaseIntegerFunc19((-32768).toShort())
 }
 
 function testCaseBaseIntegerFunc20() {
     try {
         let res =
-            primitivesIntergerTest.TestBaseIntegerFunc20(32767 as short, 100)
+            primitivesIntergerTest.TestBaseIntegerFunc20((32767).toShort(), 100)
     } catch (e) {
-        assertEQ(
+        arktest.assertEQ(
             e.toString(),
             "Error: TestBaseIntegerFunc20: result exceeds int16_t range")
     }
 }
 
 function testCaseBaseIntegerFunc20_1() {
-    let res = primitivesIntergerTest.TestBaseIntegerFunc20(30000 as short, 2767)
-    assertEQ(res, 32767)
+    let res =
+        primitivesIntergerTest.TestBaseIntegerFunc20((30000).toShort(), 2767)
+    arktest.assertEQ(res, 32767)
 }
 
 function testCaseBaseIntegerFunc21() {
     try {
         let res = primitivesIntergerTest.TestBaseIntegerFunc21(
-            100 as short, 9223372036854775807)
+            (100).toShort(), 9223372036854775807)
     } catch (e) {
-        assertEQ(
+        arktest.assertEQ(
             e.toString(),
             "Error: TestBaseIntegerFunc21: result exceeds int16_t range")
     }
@@ -769,15 +779,15 @@ function testCaseBaseIntegerFunc21() {
 
 function testCaseBaseIntegerFunc21_1() {
     let res =
-        primitivesIntergerTest.TestBaseIntegerFunc21(-30000 as short, -2768)
-    assertEQ(res, -32768)
+        primitivesIntergerTest.TestBaseIntegerFunc21((-30000).toShort(), -2768)
+    arktest.assertEQ(res, -32768)
 }
 
 function testCaseBaseIntegerFunc22() {
     try {
         let res = primitivesIntergerTest.TestBaseIntegerFunc22(2147483647)
     } catch (e) {
-        assertEQ(
+        arktest.assertEQ(
             e.toString(),
             "Error: TestBaseIntegerFunc22: result exceeds int32_t range")
     }
@@ -785,7 +795,7 @@ function testCaseBaseIntegerFunc22() {
 
 function testCaseBaseIntegerFunc22_1() {
     let res = primitivesIntergerTest.TestBaseIntegerFunc22(-21474836)
-    assertEQ(res, -2147483600)
+    arktest.assertEQ(res, -2147483600)
 }
 
 function testCaseBaseIntegerFunc23() {
@@ -796,7 +806,7 @@ function testCaseBaseIntegerFunc23_1() {
     try {
         primitivesIntergerTest.TestBaseIntegerFunc23(922337203)
     } catch (e) {
-        assertEQ(
+        arktest.assertEQ(
             e.toString(),
             "Error: TestBaseIntegerFunc22: result exceeds int32_t range")
     }
@@ -804,14 +814,14 @@ function testCaseBaseIntegerFunc23_1() {
 
 function testCaseBaseIntegerFunc24() {
     let res = primitivesIntergerTest.TestBaseIntegerFunc24(2147483646, 1)
-    assertEQ(res, 2147483647)
+    arktest.assertEQ(res, 2147483647)
 }
 
 function testCaseBaseIntegerFunc24_1() {
     try {
         primitivesIntergerTest.TestBaseIntegerFunc24(32767, 9223372036854775807)
     } catch (e) {
-        assertEQ(
+        arktest.assertEQ(
             e.toString(),
             "Error: TestBaseIntegerFunc24: result exceeds int32_t range")
     }
@@ -819,15 +829,15 @@ function testCaseBaseIntegerFunc24_1() {
 
 function testCaseBaseIntegerFunc25() {
     let res =
-        primitivesIntergerTest.TestBaseIntegerFunc25(-2147483646, -2 as byte)
-    assertEQ(res, -2147483648)
+        primitivesIntergerTest.TestBaseIntegerFunc25(-2147483646, (-2).toByte())
+    arktest.assertEQ(res, -2147483648)
 }
 
 function testCaseBaseIntegerFunc25_1() {
     try {
-        primitivesIntergerTest.TestBaseIntegerFunc25(2147483647, 127 as byte)
+        primitivesIntergerTest.TestBaseIntegerFunc25(2147483647, (127).toByte())
     } catch (e) {
-        assertEQ(
+        arktest.assertEQ(
             e.toString(),
             "Error: TestBaseIntegerFunc24: result exceeds int32_t range")
     }
@@ -835,7 +845,7 @@ function testCaseBaseIntegerFunc25_1() {
 
 function testCaseBaseIntegerFunc26() {
     let res = primitivesIntergerTest.TestBaseIntegerFunc26(9223372036854775)
-    assertEQ(res, 922337203685477500)
+    arktest.assertEQ(res, 922337203685477500)
 }
 
 function testCaseBaseIntegerFunc26_1() {
@@ -843,7 +853,7 @@ function testCaseBaseIntegerFunc26_1() {
         let res =
             primitivesIntergerTest.TestBaseIntegerFunc26(9223372036854775807)
     } catch (e) {
-        assertEQ(
+        arktest.assertEQ(
             e.toString(),
             "Error: TestBaseIntegerFunc24: result exceeds int64_t range")
     }
@@ -856,20 +866,20 @@ function testCaseBaseIntegerFunc27() {
 function testCaseBaseIntegerFunc28() {
     let res = primitivesIntergerTest.TestBaseIntegerFunc28(
         9223372036854775, "TestBaseIntegerFunc28")
-    assertEQ(res, "TestBaseIntegerFunc289223372036854775")
+    arktest.assertEQ(res, "TestBaseIntegerFunc289223372036854775")
 }
 
 function testCaseBaseIntegerFunc28_1() {
     let res = primitivesIntergerTest.TestBaseIntegerFunc28(
         9223372036854775, "testCaseBaseIntegerFunc28_1")
-    assertEQ(res, "testCaseBaseIntegerFunc28_1")
+    arktest.assertEQ(res, "testCaseBaseIntegerFunc28_1")
 }
 
 
 function testCaseBaseIntegerFunc29() {
     let res = primitivesIntergerTest.TestBaseIntegerFunc29(
         9223372036854, "TestBaseIntegerFunc29")
-    assertEQ(res, 92233720368540)
+    arktest.assertEQ(res, 92233720368540)
 }
 
 function testCaseBaseIntegerFunc29_1() {
@@ -877,78 +887,75 @@ function testCaseBaseIntegerFunc29_1() {
         let res = primitivesIntergerTest.TestBaseIntegerFunc29(
             9223372036854775807, "testBaseIntegerFunc29_1")
     } catch (e) {
-        assertEQ(
+        arktest.assertEQ(
             e.toString(),
             "Error: TestBaseIntegerFunc24: result exceeds int64_t range")
     }
 }
 
 function testCaseBaseIntegerFunc30() {
-    let res: float =
-        primitivesIntergerTest.TestBaseIntegerFunc30(3.1415 as float)
-    assertEQ(res, 4.1415 as float)
+    let res: float = primitivesIntergerTest.TestBaseIntegerFunc30(3.1415f)
+    arktest.assertEQ(res, 4.1415f)
 }
 
 function testCaseBaseIntegerFunc30_1() {
-    let res: float =
-        primitivesIntergerTest.TestBaseIntegerFunc30(-0.015 as float)
-    assertEQ(res, 0.985 as float)
+    let res: float = primitivesIntergerTest.TestBaseIntegerFunc30(-0.015f)
+    arktest.assertEQ(res, 0.985f)
 }
 
 function testCaseBaseIntegerFunc31() {
-    primitivesIntergerTest.TestBaseIntegerFunc31(-0.0151456 as float)
+    primitivesIntergerTest.TestBaseIntegerFunc31(-0.0151456f)
 }
 
 function testCaseBaseIntegerFunc31_1() {
-    primitivesIntergerTest.TestBaseIntegerFunc31(1.000123456789 as float)
+    primitivesIntergerTest.TestBaseIntegerFunc31(1.000123456789f)
 }
 
 function testCaseBaseIntegerFunc32() {
-    let res: float =
-        primitivesIntergerTest.TestBaseIntegerFunc32(-0.015 as float, 1.0)
-    assertEQ(res, 0.985 as float)
+    let res: float = primitivesIntergerTest.TestBaseIntegerFunc32(-0.015f, 1.0)
+    arktest.assertEQ(res, 0.985f)
 }
 
 function testCaseBaseIntegerFunc32_1() {
     let res: float =
-        primitivesIntergerTest.TestBaseIntegerFunc32(0.0001 as float, 100.12)
-    assertEQ(res, 100.1201 as float)
+        primitivesIntergerTest.TestBaseIntegerFunc32(0.0001f, 100.12)
+    arktest.assertEQ(res, 100.1201f)
 }
 
 function testCaseBaseIntegerFunc33() {
-    let res: double = primitivesIntergerTest.TestBaseIntegerFunc33(
-        123.456 as float, 1000.11101)
+    let res: double =
+        primitivesIntergerTest.TestBaseIntegerFunc33(123.456f, 1000.11101)
     console.log("testCaseBaseIntegerFunc33 res ", res)
     let temp: double = Math.abs(res - 1123.56701);
     console.log("testCaseBaseIntegerFunc33 temp ", temp)
     const epsilon = Math.pow(10, -5);
     console.log("testCaseBaseIntegerFunc33 epsilon ", epsilon)
     let dif: boolean = temp < epsilon
-    assertEQ(dif, true)
+    arktest.assertEQ(dif, true)
 }
 
 function testCaseBaseIntegerFunc33_1() {
     let res: double =
-        primitivesIntergerTest.TestBaseIntegerFunc33(-100.1111111 as float, 100)
+        primitivesIntergerTest.TestBaseIntegerFunc33(-100.1111111f, 100)
     console.log("testCaseBaseIntegerFunc33_1 res ", res)
     let temp: double = Math.abs(res + 0.1111111);
     console.log("testCaseBaseIntegerFunc33_1 temp ", temp)
     const epsilon = Math.pow(10, -5);
     console.log("testCaseBaseIntegerFunc33_1 epsilon ", epsilon)
     let dif: boolean = temp < epsilon
-    assertEQ(dif, true)
+    arktest.assertEQ(dif, true)
 }
 
 function testCaseBaseIntegerFunc34() {
     let res: double =
         primitivesIntergerTest.TestBaseIntegerFunc34(3.141592653589793)
-    assertEQ(res, 4.141592653589793)
+    arktest.assertEQ(res, 4.141592653589793)
 }
 
 function testCaseBaseIntegerFunc34_1() {
     let res: double =
         primitivesIntergerTest.TestBaseIntegerFunc34(-0.000123456789)
-    assertEQ(res, 0.999876543211)
+    arktest.assertEQ(res, 0.999876543211)
 }
 
 function testCaseBaseIntegerFunc35() {
@@ -962,32 +969,32 @@ function testCaseBaseIntegerFunc35_1() {
 
 function testCaseBaseIntegerFunc36() {
     let res: byte = primitivesIntergerTest.i8testattribute;
-    assertEQ(res, 127);
+    arktest.assertEQ(res, 127);
 }
 
 function testCaseBaseIntegerFunc37() {
     let res: short = primitivesIntergerTest.i16testattribute;
-    assertEQ(res, -32768);
+    arktest.assertEQ(res, -32768);
 }
 
 function testCaseBaseIntegerFunc38() {
     let res: int = primitivesIntergerTest.i32testattribute;
-    assertEQ(res, 2147483647);
+    arktest.assertEQ(res, 2147483647);
 }
 
 function testCaseBaseIntegerFunc39() {
     let res: long = primitivesIntergerTest.i64testattribute;
-    assertEQ(res, 9223372036854775807);
+    arktest.assertEQ(res, 9223372036854775807);
 }
 
 function testCaseBaseIntegerFunc40() {
     let res: float = primitivesIntergerTest.f32testattribute;
-    assertEQ(res, 3.14 as float);
+    arktest.assertEQ(res, 3.14f);
 }
 
 function testCaseBaseIntegerFunc41() {
     let res: double = primitivesIntergerTest.f64testattribute;
-    assertEQ(res, 123.45678);
+    arktest.assertEQ(res, 123.45678);
 }
 
 
@@ -1001,47 +1008,47 @@ function testCasetestBaseBoolFunc1_1() {
 
 function testCasetestBaseBoolFunc2() {
     let res = primitivesBoolTest.TestBaseBoolFunc2(true)
-    assertEQ(res, 65535)
+    arktest.assertEQ(res, 65535)
 }
 
 function testCasetestBaseBoolFunc2_1() {
     let res = primitivesBoolTest.TestBaseBoolFunc2(false)
-    assertEQ(res, 0)
+    arktest.assertEQ(res, 0)
 }
 
 function testCasetestBaseBoolFunc3() {
     let res = primitivesBoolTest.TestBaseBoolFunc3(true)
-    assertEQ(res, false)
+    arktest.assertEQ(res, false)
 }
 
 function testCasetestBaseBoolFunc3_1() {
     let res = primitivesBoolTest.TestBaseBoolFunc3(false)
-    assertEQ(res, true)
+    arktest.assertEQ(res, true)
 }
 
 function testCasetestBaseBoolFunc4() {
     let res = primitivesBoolTest.TestBaseBoolFunc4(true)
-    assertEQ(res, false)
+    arktest.assertEQ(res, false)
 }
 
 function testCasetestBaseBoolFunc4_1() {
     let res = primitivesBoolTest.TestBaseBoolFunc4(false)
-    assertEQ(res, false)
+    arktest.assertEQ(res, false)
 }
 
 function testCasetestBaseBoolFunc4_2() {
     let res = primitivesBoolTest.TestBaseBoolFunc4(undefined)
-    assertEQ(res, true)
+    arktest.assertEQ(res, true)
 }
 
 function testCasetestBaseBoolFunc5() {
     let p = new Promise<boolean>((resolve, reject) => {
         primitivesBoolTest.TestBaseBoolFunc5Async(
-            true, (err: BusinessError, data: boolean) => {
-                if (err.code !== 0) {
+            true, (err: BusinessError|null, data?: boolean) => {
+                if (err !== null && err.code !== 0) {
                     reject(err);
                 } else {
-                    resolve(data);
+                    resolve(data!);
                 }
             });
     });
@@ -1052,17 +1059,17 @@ function testCasetestBaseBoolFunc5() {
     } catch (e) {
         err = e as BusinessError;
     }
-    assertEQ(res, true);
+    arktest.assertEQ(res, true);
 }
 
 function testCasetestBaseBoolFunc5_1() {
     let p = new Promise<boolean>((resolve, reject) => {
         primitivesBoolTest.TestBaseBoolFunc5Async(
-            false, (err: BusinessError, data: boolean) => {
-                if (err.code !== 0) {
+            false, (err: BusinessError|null, data?: boolean) => {
+                if (err !== null && err.code !== 0) {
                     reject(err);
                 } else {
-                    resolve(data);
+                    resolve(data!);
                 }
             });
     });
@@ -1073,14 +1080,14 @@ function testCasetestBaseBoolFunc5_1() {
     } catch (e) {
         err = e as BusinessError;
     }
-    assertEQ(res, false);
+    arktest.assertEQ(res, false);
 }
 
 function testCasetestBaseBoolFunc5_2() {
     try {
         let result: boolean =
             await primitivesBoolTest.TestBaseBoolFunc5Promise(true);
-        assertEQ(result, true);
+        arktest.assertEQ(result, true);
         console.log("testCasetestBaseBoolFunc5_2 result: " + result);
     } catch (error) {
         console.error("testCasetestBaseBoolFunc5_2 failed: " + error);
@@ -1089,18 +1096,18 @@ function testCasetestBaseBoolFunc5_2() {
 
 function testCasetestBaseBoolFunc5_3() {
     let result: boolean = primitivesBoolTest.TestBaseBoolFunc5(true);
-    assertEQ(result, true);
+    arktest.assertEQ(result, true);
 }
 
 function testCasetestBaseBoolFunc6() {
     let result: boolean =
         test_primitives.PrimitivesBooleanClass.TestBaseBoolFunc6();
-    assertEQ(result, false);
+    arktest.assertEQ(result, false);
 }
 
 function testCasetestBaseBoolFunc7() {
     let result: boolean = primitivesBoolTest.boolTest;
-    assertEQ(result, true);
+    arktest.assertEQ(result, true);
 }
 
 function testCasetestBaseBoolFunc8() {
@@ -1111,7 +1118,7 @@ function testCasetestBaseBoolFunc8() {
         "test4": true,
     };
     let result: boolean = primitivesBoolTest.TestBaseBoolFunc7(testRecord);
-    assertEQ(result, false);
+    arktest.assertEQ(result, false);
 }
 
 function testCasetestBaseBoolFunc8_1() {
@@ -1122,7 +1129,7 @@ function testCasetestBaseBoolFunc8_1() {
         "test4": true,
     };
     let result: boolean = primitivesBoolTest.TestBaseBoolFunc7(testRecord);
-    assertEQ(result, false);
+    arktest.assertEQ(result, false);
 }
 
 function testCasetestBaseBoolFunc8_2() {
@@ -1133,7 +1140,7 @@ function testCasetestBaseBoolFunc8_2() {
         "test4": false,
     };
     let result: boolean = primitivesBoolTest.TestBaseBoolFunc7(testRecord);
-    assertEQ(result, true);
+    arktest.assertEQ(result, true);
 }
 
 function testNsMyfunc1() {
@@ -1141,7 +1148,7 @@ function testNsMyfunc1() {
 }
 
 function testNsMyfunc2() {
-    test_void_ns.mytest.Myfunc2(120 as byte, 255 as short);
+    test_void_ns.mytest.Myfunc2((120).toByte(), (255).toShort());
 }
 
 function testNsMyfunc3() {
@@ -1169,7 +1176,7 @@ function testNsMyfunc6_1() {
 }
 
 function testNsMyfunc7() {
-    test_void_ns.mytest.Myfunc7(-2147483647, 3.12 as float);
+    test_void_ns.mytest.Myfunc7(-2147483647, 3.12f);
 }
 
 function testNsMyfunc8() {
@@ -1178,11 +1185,11 @@ function testNsMyfunc8() {
 
 
 function testNsMyfunc9() {
-    test_void_ns.mytest.Myfunc9(0.000123 as float, true);
+    test_void_ns.mytest.Myfunc9(0.000123f, true);
 }
 
 function testNsMyfunc10() {
-    test_void_ns.mytest.Myfunc10(0.000123 as float, "testNsMyfunc10");
+    test_void_ns.mytest.Myfunc10(0.000123f, "testNsMyfunc10");
 }
 
 function testNsMyfunc11() {
@@ -1202,11 +1209,11 @@ function testNsMyfunc12_2() {
 }
 
 function testNsMyfunc13() {
-    test_void_ns.mytest.Myfunc13(3.11111 as float, 1.1245645);
+    test_void_ns.mytest.Myfunc13(3.11111f, 1.1245645);
 }
 
 function testNsMyfunc13_1() {
-    test_void_ns.mytest.Myfunc13(-3.11111 as float, undefined);
+    test_void_ns.mytest.Myfunc13(-3.11111f, undefined);
 }
 
 function testNsMyfunc13_2() {
@@ -1226,11 +1233,11 @@ function testNsMyfunc14_2() {
 }
 
 function testNsMyfunc15() {
-    test_void_ns.mytest.Myfunc15(32767 as short, 92233720368547758);
+    test_void_ns.mytest.Myfunc15((32767).toShort(), 92233720368547758);
 }
 
 function testNsMyfunc15_1() {
-    test_void_ns.mytest.Myfunc15(-214748364 as short, undefined);
+    test_void_ns.mytest.Myfunc15((-214748364).toShort(), undefined);
 }
 
 function testNsMyfunc15_2() {
@@ -1238,41 +1245,42 @@ function testNsMyfunc15_2() {
 }
 
 function testNsMyfunc16() {
-    test_void_ns.mytest.Myfunc16(255 as short, test_void_ns.mytest.BarTest.B)
+    test_void_ns.mytest.Myfunc16((255).toShort(), test_void_ns.mytest.BarTest.B)
 }
 
 function testNsMyfunc16_1() {
-    test_void_ns.mytest.Myfunc16(-32768 as short, test_void_ns.mytest.BarTest.A)
+    test_void_ns.mytest.Myfunc16(
+        (-32768).toShort(), test_void_ns.mytest.BarTest.A)
 }
 
 function testNsMyfunc16_2() {
-    test_void_ns.mytest.Myfunc16(0 as short, test_void_ns.mytest.BarTest.C)
+    test_void_ns.mytest.Myfunc16((0).toShort(), test_void_ns.mytest.BarTest.C)
 }
 
 function testCaseConstant1() {
     let res: boolean = test_primitives.CONSTANT_BOOL_TRUE;
-    assertEQ(res, true)
+    arktest.assertEQ(res, true)
 }
 
 function testCaseConstant2() {
     let res: boolean = test_primitives.CONSTANT_BOOL_FALSE;
-    assertEQ(res, false)
+    arktest.assertEQ(res, false)
 }
 
 function testCaseConstant3() {
     let res: int = test_primitives.CONSTANT_I32_001;
-    assertEQ(res, 10000)
+    arktest.assertEQ(res, 10000)
 }
 
 function testCaseConstant4() {
     let res: int = test_primitives.CONSTANT_I32_002;
-    assertEQ(res, 10001)
+    arktest.assertEQ(res, 10001)
 }
 
 
 function main() {
     console.log("run main ... test_primitives ...")
-    const suite = new ArkTestsuite("test function primitives")
+    const suite = new arktest.ArkTestsuite("test function primitives")
 
     suite.addTest("check funcMultiply", testMultiply);
     suite.addTest("check testFunC1", testFunC1);

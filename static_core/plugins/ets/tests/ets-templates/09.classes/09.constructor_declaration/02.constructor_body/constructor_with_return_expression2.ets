@@ -33,6 +33,6 @@ class A {
 }
 
 function main() {
-    assertTrue(new A(42).x == 43)
-    assertTrue(new A(0).x == 0)
+    arktest.assertTrue(new A(42).x == 43)
+    arktest.assertTrue(new A(0).x == 0)
 }

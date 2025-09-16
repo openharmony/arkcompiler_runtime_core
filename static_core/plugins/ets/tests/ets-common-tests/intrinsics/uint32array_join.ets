@@ -14,7 +14,7 @@
  */
 
 const SINGLE = [1];
-const ARRAY = [0,1,2,3,4,5,6,7,8,9,4294967295 as long];
+const ARRAY: Array<Double> = [0,1,2,3,4,5,6,7,8,9,4294967295 as long];
 const EMPTY_JOINED = "01234567894294967295";
 const COMMA_JOINED = "0,1,2,3,4,5,6,7,8,9,4294967295";
 const NSIGN_JOINED = "0###1###2###3###4###5###6###7###8###9###4294967295";
@@ -24,47 +24,47 @@ const UTF16_JOINED_1 = "0Ω1Ω2Ω3Ω4Ω5Ω6Ω7Ω8Ω9Ω4294967295";
 function joinEmpty(): void {
     let a: Uint32Array = new Uint32Array(0);
     let s = a.join();
-    assertTrue(s.isEmpty());
+    arktest.assertTrue(s.isEmpty());
 }
 
 function joinSingle(): void {
     let a: Uint32Array = new Uint32Array(SINGLE);
-    assertEQ(a.join(), "1");
-    assertEQ(a.join(","), "1");
+    arktest.assertEQ(a.join(), "1");
+    arktest.assertEQ(a.join(","), "1");
 }
 
 function joinDefaultDelim(): void {
     let a: Uint32Array = new Uint32Array(ARRAY);
-    assertEQ(a.join(), COMMA_JOINED);
+    arktest.assertEQ(a.join(), COMMA_JOINED);
 }
 
 function joinEmptyDelim(): void {
     let a: Uint32Array = new Uint32Array(ARRAY);
-    assertEQ(a.join(""), EMPTY_JOINED);
+    arktest.assertEQ(a.join(""), EMPTY_JOINED);
 }
 
 function joinCommaDelim(): void {
     let a: Uint32Array = new Uint32Array(ARRAY);
-    assertEQ(a.join(","), COMMA_JOINED);
+    arktest.assertEQ(a.join(","), COMMA_JOINED);
 }
 
 function joinNsignDelim(): void {
     let a: Uint32Array = new Uint32Array(ARRAY);
-    assertEQ(a.join("###"), NSIGN_JOINED);
+    arktest.assertEQ(a.join("###"), NSIGN_JOINED);
 }
 
 function joinUtf16Delim(): void {
     let a: Uint32Array = new Uint32Array(ARRAY);
-    assertEQ(a.join(" ΔΘΩ "), UTF16_JOINED);
+    arktest.assertEQ(a.join(" ΔΘΩ "), UTF16_JOINED);
 }
 
 function joinUtf16Delim1(): void {
     let a: Uint32Array = new Uint32Array(ARRAY);
-    assertEQ(a.join("Ω"), UTF16_JOINED_1);
+    arktest.assertEQ(a.join("Ω"), UTF16_JOINED_1);
 }
 
 function main(): int {
-    const suite = new ArkTestsuite("Uint32Array.join() tests")
+    const suite = new arktest.ArkTestsuite("Uint32Array.join() tests")
     suite.addTest("join an empty Uint32Array", joinEmpty)
     suite.addTest("join a single-element Uint32Array", joinSingle)
     suite.addTest("join a normal Uint32Array using default delimiter", joinDefaultDelim)

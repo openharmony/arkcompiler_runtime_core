@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 #include "helpers_static.h"
 #include "libabckit/src/adapter_static/metadata_inspect_static.h"
 #include "assembler/annotation.h"
-#include "libabckit/include/c/statuses.h"
+#include "libabckit/c/statuses.h"
 #include "libabckit/src/helpers_common.h"
 #include "libabckit/src/macros.h"
 #include "libabckit/src/metadata_inspect_impl.h"
@@ -74,6 +74,15 @@ bool ModuleEnumerateAnonymousFunctionsStatic(AbckitCoreModule *m, void *data,
 // Namespace
 // ========================================
 
+AbckitString *NamespaceGetNameStatic(AbckitCoreNamespace *ns)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto *record = ns->GetArkTSImpl()->impl.GetStaticClass();
+    auto [_, namespaceName] = ClassGetNames(record->name);
+
+    return CreateStringStatic(ns->owningModule->file, namespaceName.data(), namespaceName.size());
+}
+
 // ========================================
 // Class
 // ========================================
@@ -85,6 +94,66 @@ AbckitString *ClassGetNameStatic(AbckitCoreClass *klass)
     auto [moduleName, className] = ClassGetNames(record->name);
 
     return CreateStringStatic(klass->owningModule->file, className.data(), className.size());
+}
+
+// ========================================
+// Interface
+// ========================================
+
+AbckitString *InterfaceGetNameStatic(AbckitCoreInterface *iface)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto *record = iface->GetArkTSImpl()->impl.GetStaticClass();
+    auto [_, interfaceName] = ClassGetNames(record->name);
+
+    return CreateStringStatic(iface->owningModule->file, interfaceName.data(), interfaceName.size());
+}
+
+// ========================================
+// Enum
+// ========================================
+
+AbckitString *EnumGetNameStatic(AbckitCoreEnum *enm)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto *record = enm->GetArkTSImpl()->impl.GetStaticClass();
+    auto [_, enumName] = ClassGetNames(record->name);
+
+    return CreateStringStatic(enm->owningModule->file, enumName.data(), enumName.size());
+}
+
+// ========================================
+// Field
+// ========================================
+
+bool ClassFieldIsPublicStatic(AbckitCoreClassField *field)
+{
+    LIBABCKIT_LOG_FUNC;
+    return (field->GetArkTSImpl()->GetStaticImpl()->metadata->GetAccessFlags() & ACC_PUBLIC) != 0x0;
+}
+
+bool ClassFieldIsProtectedStatic(AbckitCoreClassField *field)
+{
+    LIBABCKIT_LOG_FUNC;
+    return (field->GetArkTSImpl()->GetStaticImpl()->metadata->GetAccessFlags() & ACC_PROTECTED) != 0x0;
+}
+
+bool ClassFieldIsPrivateStatic(AbckitCoreClassField *field)
+{
+    LIBABCKIT_LOG_FUNC;
+    return (field->GetArkTSImpl()->GetStaticImpl()->metadata->GetAccessFlags() & ACC_PRIVATE) != 0x0;
+}
+
+bool ClassFieldIsStaticStatic(AbckitCoreClassField *field)
+{
+    LIBABCKIT_LOG_FUNC;
+    return (field->GetArkTSImpl()->GetStaticImpl()->metadata->GetAccessFlags() & ACC_STATIC) != 0x0;
+}
+
+bool InterfaceFieldIsReadonlyStatic(AbckitCoreInterfaceField *field)
+{
+    LIBABCKIT_LOG_FUNC;
+    return (field->flag & ACC_READONLY) != 0x0;
 }
 
 // ========================================
@@ -252,7 +321,7 @@ bool FunctionIsAnonymousStatic(AbckitCoreFunction *function)
     size_t pos = func->name.rfind('.');
     ASSERT(pos != std::string::npos);
     std::string name = func->name.substr(pos + 1);
-    return name.find("lambda$invoke$") == 0;
+    return name.find("lambda_invoke-") == 0;
 }
 
 bool FunctionIsNativeStatic(AbckitCoreFunction *function)

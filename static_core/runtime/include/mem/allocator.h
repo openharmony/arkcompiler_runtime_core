@@ -205,6 +205,8 @@ public:
 
     virtual void IterateOverObjects(const ObjectVisitor &objectVisitor) = 0;
 
+    virtual void IterateOverObjectsSafe([[maybe_unused]] const ObjectVisitor &objectVisitor) = 0;
+
     template <AllocScope ALLOC_SCOPE_T = AllocScope::GLOBAL>
     AllocatorAdapter<void, ALLOC_SCOPE_T> Adapter();
 
@@ -462,6 +464,8 @@ public:
 
     bool HaveEnoughPoolsInObjectSpace(size_t poolsNum) const;
 
+    void IterateOverObjectsSafe([[maybe_unused]] const ObjectVisitor &objectVisitor) override;
+
 protected:
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
     PygoteAllocator *pygoteSpaceAllocator_ = nullptr;
@@ -525,6 +529,11 @@ public:
     void IterateOverObjects([[maybe_unused]] const ObjectVisitor &objectVisitor) final
     {
         LOG(FATAL, ALLOC) << "IterateOverObjects not implemented for AllocatorSinglet";
+    }
+
+    void IterateOverObjectsSafe([[maybe_unused]] const ObjectVisitor &objectVisitor) final
+    {
+        LOG(FATAL, ALLOC) << "IterateOverObjectsSafe not implemented for AllocatorSinglet";
     }
 
 #if defined(TRACK_INTERNAL_ALLOCATIONS)

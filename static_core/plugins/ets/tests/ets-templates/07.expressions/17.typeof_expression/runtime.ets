@@ -23,6 +23,6 @@ desc: |-
 
 {{c.decl}}
 
-assertEQ(t, "{{c.name}}")
+arktest.assertEQ(t, "{{c.name}}")
 
 {%- endfor %}

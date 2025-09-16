@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 
-#include "libabckit/include/cpp/abckit_cpp.h"
+#include "libabckit/cpp/abckit_cpp.h"
 
 namespace {
 class ErrorHandler final : public abckit::IErrorHandler {

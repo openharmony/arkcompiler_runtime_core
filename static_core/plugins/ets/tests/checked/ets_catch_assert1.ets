@@ -32,7 +32,7 @@ function main(): int {
     try {
         if (a >= b) {
             foo();
-            assertTrue(false);
+            arktest.assertTrue(false);
         }
     } catch(e) {
         // expected

@@ -27,7 +27,7 @@ function main() : int {
         index++;
     }
 
-    assertEQ(index, 0)
+    arktest.assertEQ(index, 0)
     return 0;
 }
 

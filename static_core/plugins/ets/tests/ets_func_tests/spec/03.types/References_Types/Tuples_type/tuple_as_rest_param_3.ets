@@ -20,7 +20,7 @@ tags: []
 ---*/
 
 function receiver(...values: [number, number][]): void {
-    assertEQ( values.length, 1)
+    arktest.assertEQ( values.length, 1)
 }
 
 function main(): void {

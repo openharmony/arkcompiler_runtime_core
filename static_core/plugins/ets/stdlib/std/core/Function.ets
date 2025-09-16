@@ -32,12 +32,13 @@ export interface Function {
 }
 
 export interface FunctionN<R> extends Function {
-    invokeN(...r: FixedArray<Any>): R;
 }
 
-export interface __FunctionN extends FunctionN<Any> {}
-
-export abstract class LambdaN implements __FunctionN {}
+export abstract class LambdaN implements FunctionN<Any> {
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object);
+    }
+}
 
 
 export interface FunctionR0<in PR, out R>
@@ -2039,7 +2040,7 @@ export abstract class Lambda15 implements __Function15 {
 }
 
 export interface FunctionR16<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, in P15, in P16, in PR, out R>
-    extends Function
+    extends Function, FunctionN<Any>
 {
     invokeR16(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13, p14: P14, p15: P15, p16: P16, ...r: FixedArray<PR>): R;
 }

@@ -78,6 +78,9 @@ coretypes:
 - managed_class: std.core.QueueSpinlock
   mirror_class: ark::ets::EtsQueueSpinlock
 
+- managed_class: escompat.Array
+  mirror_class: ark::ets::EtsEscompatArray
+
 - managed_class: escompat.ArrayBuffer
   mirror_class: ark::ets::EtsEscompatArrayBuffer
 
@@ -125,6 +128,15 @@ coretypes:
 
 - managed_class: escompat.BigUint64Array
   mirror_class: ark::ets::EtsEscompatBigUInt64Array
+
+- managed_class: escompat.Map
+  mirror_class: ark::ets::EtsEscompatMap
+
+- managed_class: escompat.MapEntry
+  mirror_class: ark::ets::EtsEscompatMapEntry
+
+- managed_class: escompat.Set
+  mirror_class: ark::ets::EtsEscompatSet
 
 intrinsics_namespace: ark::ets::intrinsics
 
@@ -730,7 +742,7 @@ intrinsics:
     method_name: <get>length
     static: false
     signature:
-      ret: f64
+      ret: i32
       args: [ ]
     impl: ark::ets::intrinsics::StdCoreStringLength
 
@@ -936,20 +948,6 @@ intrinsics:
       args: [ i32 ]
     impl: ark::ets::intrinsics::StdCoreStringCodePointToChar
 
-  - name: StdCoreStringHashCode
-    space: ets
-    class_name: std.core.String
-    method_name: $_hashCode
-    static: false
-    signature:
-      ret: i32
-      args: [ ]
-    impl: ark::ets::intrinsics::StdCoreStringHashCode
-    codegen_func: CreateStringHashCode
-    codegen_arch: [arm64, amd64]
-    llvm_codegen_func: EmitStringHashCode
-    safe_intrinsic: true
-
   - name: StdCoreStringIsCompressed
     space: ets
     class_name: std.core.String
@@ -1128,7 +1126,7 @@ intrinsics:
     method_name: $_get
     static: false
     signature:
-      ret: u16
+      ret: std.core.String
       args: [ i32 ]
     impl: ark::ets::intrinsics::StdCoreStringGet
 ##########################
@@ -1507,20 +1505,30 @@ intrinsics:
       args: [ i32, std.core.Object ]
     impl: ark::ets::intrinsics::EtsEscompatArraySet
 
+  - name: EscompatArrayJoin
+    space: ets
+    class_name: escompat.Array
+    method_name: joinInternal
+    static: false
+    signature:
+      ret: std.core.String
+      args: [ std.core.String ]
+    impl: ark::ets::intrinsics::EtsEscompatArrayJoinInternal
+
   - name: EscompatArrayIndexOf
     space: ets
     class_name: escompat.Array
     method_name: indexOf
     static: false
     signature:
-      ret: f64
+      ret: i32
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::EtsEscompatArrayIndexOf
 
   - name: EscompatInternalArrayIndexOf
     space: ets
     class_name: escompat.Array
-    method_name: indexOf
+    method_name: indexOfImpl
     static: false
     signature:
       ret: i32
@@ -1556,6 +1564,26 @@ intrinsics:
       ret: escompat.Array
       args: [ std.core.Object, i32, i32 ]
     impl: ark::ets::intrinsics::EtsEscompatArrayFill
+
+  - name: EscompatArrayGetUnsafe
+    space: ets
+    class_name: escompat.Array
+    method_name: $_get_unsafe
+    static: false
+    signature:
+      ret: std.core.Object
+      args: [ i32 ]
+    impl: ark::ets::intrinsics::EtsEscompatArrayGetUnsafe
+
+  - name: EscompatArraySetUnsafe
+    space: ets
+    class_name: escompat.Array
+    method_name: $_set_unsafe
+    static: false
+    signature:
+      ret: void
+      args: [ i32, std.core.Object ]
+    impl: ark::ets::intrinsics::EtsEscompatArraySetUnsafe
 
 ########################
 # escompat.ArrayBuffer #
@@ -1701,6 +1729,16 @@ intrinsics:
       args: [escompat.Int8Array]
     impl: ark::ets::intrinsics::EtsEscompatInt8ArraySetValues
 
+  - name: Int8ArraySetValuesFromUnsigned
+    space: ets
+    class_name: escompat.Int8Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Uint8Array]
+    impl: ark::ets::intrinsics::EtsEscompatInt8ArraySetValuesFromUnsigned
+
   - name: Int8ArraySetValuesWithOffset
     space: ets
     class_name: escompat.Int8Array
@@ -1710,6 +1748,19 @@ intrinsics:
       ret: void
       args: [escompat.Int8Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatInt8ArraySetValuesWithOffset
+
+  - name: Int8ArraySetValuesFromArray
+    space: ets
+    class_name: escompat.Int8Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Array]
+    impl: ark::ets::intrinsics::EtsEscompatInt8ArraySetValuesFromArray
+    codegen_arch: [ arm64, amd64 ]
+    codegen_func: CreateInt8ArraySetValuesFromArray
+    llvm_codegen_func: EmitInt8ArraySetValuesFromArray
 
   - name: Int8ArraySort
     space: ets
@@ -1794,6 +1845,16 @@ intrinsics:
       args: [escompat.Int16Array]
     impl: ark::ets::intrinsics::EtsEscompatInt16ArraySetValues
 
+  - name: Int16ArraySetValuesFromUnsigned
+    space: ets
+    class_name: escompat.Int16Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Uint16Array]
+    impl: ark::ets::intrinsics::EtsEscompatInt16ArraySetValuesFromUnsigned
+
   - name: Int16ArraySetValuesWithOffset
     space: ets
     class_name: escompat.Int16Array
@@ -1803,6 +1864,19 @@ intrinsics:
       ret: void
       args: [escompat.Int16Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatInt16ArraySetValuesWithOffset
+
+  - name: Int16ArraySetValuesFromArray
+    space: ets
+    class_name: escompat.Int16Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Array]
+    impl: ark::ets::intrinsics::EtsEscompatInt16ArraySetValuesFromArray
+    codegen_arch: [ arm64, amd64 ]
+    codegen_func: CreateInt16ArraySetValuesFromArray
+    llvm_codegen_func: EmitInt16ArraySetValuesFromArray
 
   - name: Int16ArraySort
     space: ets
@@ -1887,6 +1961,19 @@ intrinsics:
       args: [escompat.Int32Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatInt32ArraySetValuesWithOffset
 
+  - name: Int32ArraySetValuesFromArray
+    space: ets
+    class_name: escompat.Int32Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Array]
+    impl: ark::ets::intrinsics::EtsEscompatInt32ArraySetValuesFromArray
+    codegen_arch: [ arm64, amd64 ]
+    codegen_func: CreateInt32ArraySetValuesFromArray
+    llvm_codegen_func: EmitInt32ArraySetValuesFromArray
+
   - name: Int32ArraySort
     space: ets
     class_name: escompat.Int32Array
@@ -1969,6 +2056,19 @@ intrinsics:
       ret: void
       args: [escompat.BigInt64Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatBigInt64ArraySetValuesWithOffset
+
+  - name: BigInt64ArraySetValuesFromArray
+    space: ets
+    class_name: escompat.BigInt64Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Array]
+    impl: ark::ets::intrinsics::EtsEscompatBigInt64ArraySetValuesFromArray
+    codegen_arch: [ arm64, amd64 ]
+    codegen_func: CreateBigInt64ArraySetValuesFromArray
+    llvm_codegen_func: EmitBigInt64ArraySetValuesFromArray
 
   - name: BigInt64ArraySort
     space: ets
@@ -2053,6 +2153,19 @@ intrinsics:
       args: [escompat.Float32Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatFloat32ArraySetValuesWithOffset
 
+  - name: Float32ArraySetValuesFromArray
+    space: ets
+    class_name: escompat.Float32Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Array]
+    impl: ark::ets::intrinsics::EtsEscompatFloat32ArraySetValuesFromArray
+    codegen_arch: [ arm64, amd64 ]
+    codegen_func: CreateFloat32ArraySetValuesFromArray
+    llvm_codegen_func: EmitFloat32ArraySetValuesFromArray
+
   - name: Float32ArraySort
     space: ets
     class_name: escompat.Float32Array
@@ -2085,6 +2198,16 @@ intrinsics:
       ret: std.core.String
       args: [std.core.String]
     impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayJoin
+
+  - name: Float32ArrayContainsNaN
+    space: ets
+    class_name: escompat.Float32Array
+    method_name: containsNaN
+    static: false
+    signature:
+      ret: u1
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayContainsNaN
 
   - name: Float64ArraySetDouble
     space: ets
@@ -2136,6 +2259,19 @@ intrinsics:
       args: [escompat.Float64Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatFloat64ArraySetValuesWithOffset
 
+  - name: Float64ArraySetValuesFromArray
+    space: ets
+    class_name: escompat.Float64Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Array]
+    impl: ark::ets::intrinsics::EtsEscompatFloat64ArraySetValuesFromArray
+    codegen_arch: [ arm64, amd64 ]
+    codegen_func: CreateFloat64ArraySetValuesFromArray
+    llvm_codegen_func: EmitFloat64ArraySetValuesFromArray
+
   - name: Float64ArraySort
     space: ets
     class_name: escompat.Float64Array
@@ -2168,6 +2304,16 @@ intrinsics:
       ret: std.core.String
       args: [std.core.String]
     impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayJoin
+
+  - name: Float64ArrayContainsNaN
+    space: ets
+    class_name: escompat.Float64Array
+    method_name: containsNaN
+    static: false
+    signature:
+      ret: u1
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayContainsNaN
 
   - name: UInt8ClampedArraySetInt
     space: ets
@@ -2218,6 +2364,19 @@ intrinsics:
       ret: void
       args: [escompat.Uint8ClampedArray, f64]
     impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArraySetValuesWithOffset
+
+  - name: Uint8ClampedArraySetValuesFromArray
+    space: ets
+    class_name: escompat.Uint8ClampedArray
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Array]
+    impl: ark::ets::intrinsics::EtsEscompatUint8ClampedArraySetValuesFromArray
+    codegen_arch: [ arm64, amd64 ]
+    codegen_func: CreateUint8ClampedArraySetValuesFromArray
+    llvm_codegen_func: EmitUint8ClampedArraySetValuesFromArray
 
   - name: Uint8ClampedArraySort
     space: ets
@@ -2292,6 +2451,16 @@ intrinsics:
       args: [escompat.Uint8Array]
     impl: ark::ets::intrinsics::EtsEscompatUInt8ArraySetValues
 
+  - name: Uint8ArraySetValuesFromSinged
+    space: ets
+    class_name: escompat.Uint8Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Int8Array]
+    impl: ark::ets::intrinsics::EtsEscompatUint8ArraySetValuesFromSigned
+
   - name: UInt8ArraySetValuesWithOffset
     space: ets
     class_name: escompat.Uint8Array
@@ -2301,6 +2470,19 @@ intrinsics:
       ret: void
       args: [escompat.Uint8Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatUInt8ArraySetValuesWithOffset
+
+  - name: Uint8ArraySetValuesFromArray
+    space: ets
+    class_name: escompat.Uint8Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Array]
+    impl: ark::ets::intrinsics::EtsEscompatUint8ArraySetValuesFromArray
+    codegen_arch: [ arm64, amd64 ]
+    codegen_func: CreateUint8ArraySetValuesFromArray
+    llvm_codegen_func: EmitUint8ArraySetValuesFromArray
 
   - name: Uint8ArraySort
     space: ets
@@ -2375,6 +2557,16 @@ intrinsics:
       args: [escompat.Uint16Array]
     impl: ark::ets::intrinsics::EtsEscompatUInt16ArraySetValues
 
+  - name: Uint16ArraySetValuesFromSigned
+    space: ets
+    class_name: escompat.Uint16Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Int16Array]
+    impl: ark::ets::intrinsics::EtsEscompatUint16ArraySetValuesFromSigned
+
   - name: UInt16ArraySetValuesWithOffset
     space: ets
     class_name: escompat.Uint16Array
@@ -2384,6 +2576,19 @@ intrinsics:
       ret: void
       args: [escompat.Uint16Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatUInt16ArraySetValuesWithOffset
+
+  - name: Uint16ArraySetValuesFromArray
+    space: ets
+    class_name: escompat.Uint16Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Array]
+    impl: ark::ets::intrinsics::EtsEscompatUint16ArraySetValuesFromArray
+    codegen_arch: [ arm64, amd64 ]
+    codegen_func: CreateUint16ArraySetValuesFromArray
+    llvm_codegen_func: EmitUint16ArraySetValuesFromArray
 
   - name: UInt16ArrayFillInternal
     space: ets
@@ -2468,6 +2673,16 @@ intrinsics:
       args: [escompat.Uint32Array]
     impl: ark::ets::intrinsics::EtsEscompatUInt32ArraySetValues
 
+  - name: Uint32ArraySetValuesFromSigned
+    space: ets
+    class_name: escompat.Uint32Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Int32Array]
+    impl: ark::ets::intrinsics::EtsEscompatUint32ArraySetValuesFromSigned
+
   - name: UInt32ArraySetValuesWithOffset
     space: ets
     class_name: escompat.Uint32Array
@@ -2477,6 +2692,19 @@ intrinsics:
       ret: void
       args: [escompat.Uint32Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatUInt32ArraySetValuesWithOffset
+
+  - name: Uint32ArraySetValuesFromArray
+    space: ets
+    class_name: escompat.Uint32Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Array]
+    impl: ark::ets::intrinsics::EtsEscompatUint32ArraySetValuesFromArray
+    codegen_arch: [ arm64, amd64 ]
+    codegen_func: CreateUint32ArraySetValuesFromArray
+    llvm_codegen_func: EmitUint32ArraySetValuesFromArray
 
   - name: UInt32ArrayFillInternal
     space: ets
@@ -2570,6 +2798,19 @@ intrinsics:
       ret: void
       args: [escompat.BigUint64Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArraySetValuesWithOffset
+
+  - name: BigUint64ArraySetValuesFromArray
+    space: ets
+    class_name: escompat.BigUint64Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Array]
+    impl: ark::ets::intrinsics::EtsEscompatBigUint64ArraySetValuesFromArray
+    codegen_arch: [ arm64, amd64 ]
+    codegen_func: CreateBigUint64ArraySetValuesFromArray
+    llvm_codegen_func: EmitBigUint64ArraySetValuesFromArray
 
   - name: BigUInt64ArrayFillInternal
     space: ets
@@ -2713,150 +2954,6 @@ intrinsics:
       ret: escompat.BigUint64Array
       args: []
     impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArrayReverse
-
-  - name: Int8ArrayToReversed
-    space: ets
-    class_name: escompat.Int8Array
-    method_name: toReversed
-    static: false
-    signature:
-      ret: escompat.Int8Array
-      args: []
-    impl: ark::ets::intrinsics::EtsEscompatInt8ArrayToReversed
-    codegen_arch: [arm64, amd64]
-    codegen_func: CreateInt8ArrayToReversed
-    llvm_codegen_func: EmitInt8ArrayToReversed
-
-  - name: Int16ArrayToReversed
-    space: ets
-    class_name: escompat.Int16Array
-    method_name: toReversed
-    static: false
-    signature:
-      ret: escompat.Int16Array
-      args: []
-    impl: ark::ets::intrinsics::EtsEscompatInt16ArrayToReversed
-    codegen_arch: [arm64, amd64]
-    codegen_func: CreateInt16ArrayToReversed
-    llvm_codegen_func: EmitInt16ArrayToReversed
-
-  - name: Int32ArrayToReversed
-    space: ets
-    class_name: escompat.Int32Array
-    method_name: toReversed
-    static: false
-    signature:
-      ret: escompat.Int32Array
-      args: []
-    impl: ark::ets::intrinsics::EtsEscompatInt32ArrayToReversed
-    codegen_arch: [arm64, amd64]
-    codegen_func: CreateInt32ArrayToReversed
-    llvm_codegen_func: EmitInt32ArrayToReversed
-
-  - name: BigInt64ArrayToReversed
-    space: ets
-    class_name: escompat.BigInt64Array
-    method_name: toReversed
-    static: false
-    signature:
-      ret: escompat.BigInt64Array
-      args: []
-    impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayToReversed
-    codegen_arch: [arm64, amd64]
-    codegen_func: CreateBigInt64ArrayToReversed
-    llvm_codegen_func: EmitBigInt64ArrayToReversed
-
-  - name: Float32ArrayToReversed
-    space: ets
-    class_name: escompat.Float32Array
-    method_name: toReversed
-    static: false
-    signature:
-      ret: escompat.Float32Array
-      args: []
-    impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayToReversed
-    codegen_arch: [arm64, amd64]
-    codegen_func: CreateFloat32ArrayToReversed
-    llvm_codegen_func: EmitFloat32ArrayToReversed
-
-  - name: Float64ArrayToReversed
-    space: ets
-    class_name: escompat.Float64Array
-    method_name: toReversed
-    static: false
-    signature:
-      ret: escompat.Float64Array
-      args: []
-    impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayToReversed
-    codegen_arch: [arm64, amd64]
-    codegen_func: CreateFloat64ArrayToReversed
-    llvm_codegen_func: EmitFloat64ArrayToReversed
-
-  - name: UInt8ArrayToReversed
-    space: ets
-    class_name: escompat.Uint8Array
-    method_name: toReversed
-    static: false
-    signature:
-      ret: escompat.Uint8Array
-      args: []
-    impl: ark::ets::intrinsics::EtsEscompatUInt8ArrayToReversed
-    codegen_arch: [arm64, amd64]
-    codegen_func: CreateUint8ArrayToReversed
-    llvm_codegen_func: EmitUint8ArrayToReversed
-
-  - name: UInt8ClampedArrayToReversed
-    space: ets
-    class_name: escompat.Uint8ClampedArray
-    method_name: toReversed
-    static: false
-    signature:
-      ret: escompat.Uint8ClampedArray
-      args: []
-    impl: ark::ets::intrinsics::EtsEscompatUInt8ArrayToReversed
-    codegen_arch: [arm64, amd64]
-    codegen_func: CreateUint8ArrayToReversed
-    llvm_codegen_func: EmitUint8ArrayToReversed
-
-  - name: UInt16ArrayToReversed
-    space: ets
-    class_name: escompat.Uint16Array
-    method_name: toReversed
-    static: false
-    signature:
-      ret: escompat.Uint16Array
-      args: []
-    impl: ark::ets::intrinsics::EtsEscompatUInt16ArrayToReversed
-    codegen_arch: [arm64, amd64]
-    codegen_func: CreateUint16ArrayToReversed
-    llvm_codegen_func: EmitUint16ArrayToReversed
-
-  - name: UInt32ArrayToReversed
-    space: ets
-    class_name: escompat.Uint32Array
-    method_name: toReversed
-    static: false
-    signature:
-      ret: escompat.Uint32Array
-      args: []
-    impl: ark::ets::intrinsics::EtsEscompatUInt32ArrayToReversed
-    codegen_arch: [arm64, amd64]
-    codegen_func: CreateUint32ArrayToReversed
-    llvm_codegen_func: EmitUint32ArrayToReversed
-
-
-  - name: BigUInt64ArrayToReversed
-    space: ets
-    class_name: escompat.BigUint64Array
-    method_name: toReversed
-    static: false
-    signature:
-      ret: escompat.BigUint64Array
-      args: []
-    impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArrayToReversed
-    codegen_arch: [arm64, amd64]
-    codegen_func: CreateBigUint64ArrayToReversed
-    llvm_codegen_func: EmitBigUint64ArrayToReversed
 
   - name: Int8ArrayCopyWithin
     space: ets
@@ -3408,6 +3505,16 @@ intrinsics:
       args: [i64, i32]
     impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArrayLastIndexOfLong
 
+  - name: Uint8ClampedArrayToUint8Clamped
+    space: ets
+    class_name: escompat.Uint8ClampedArray
+    method_name: toUint8Clamped
+    static: true
+    signature:
+      ret: i32
+      args: [f64]
+    impl: ark::ets::intrinsics::EtsEscompatUint8ClampedArrayToUint8Clamped
+
 ########################
 # escompat.taskpool #
 ########################
@@ -3417,7 +3524,7 @@ intrinsics:
     method_name: generateId
     static: true
     signature:
-      ret: i64
+      ret: i32
       args: []
     impl: ark::ets::intrinsics::taskpool::GenerateTaskId
 
@@ -3427,7 +3534,7 @@ intrinsics:
     method_name: generateGroupId
     static: true
     signature:
-      ret: i64
+      ret: i32
       args: []
     impl: ark::ets::intrinsics::taskpool::GenerateGroupId
 
@@ -3457,9 +3564,19 @@ intrinsics:
     method_name: generateSeqRunnerId
     static: true
     signature:
-      ret: i64
+      ret: i32
       args: []
     impl: ark::ets::intrinsics::taskpool::GenerateSeqRunnerId
+
+  - name: TaskpoolGetTaskPoolWorkersLimit
+    space: ets
+    class_name: escompat.taskpool
+    method_name: getTaskPoolWorkersLimit
+    static: true
+    signature:
+      ret: i32
+      args: []
+    impl: ark::ets::intrinsics::taskpool::GetTaskPoolWorkersLimit
 
 ###################
 # std.time.Chrono #
@@ -3627,17 +3744,6 @@ intrinsics:
     impl: ark::ets::intrinsics::StdCoreFloatToDouble
     safe_intrinsic: true
 
-  - name: StdCoreFloatToChar
-    space: ets
-    class_name: std.core.Float
-    method_name: toChar
-    static: true
-    signature:
-      ret: u16
-      args: [ f32 ]
-    impl: ark::ets::intrinsics::StdCoreFloatToChar
-    safe_intrinsic: true
-
 ###################
 # std.core.Double #
 ###################
@@ -3675,7 +3781,7 @@ intrinsics:
   - name: StdCoreDoubleToExponential
     space: ets
     class_name: std.core.Double
-    method_name: toExponential
+    method_name: toExponentialImpl
     static: false
     signature:
       ret: std.core.String
@@ -3705,7 +3811,7 @@ intrinsics:
   - name: StdCoreDoubleToFixed
     space: ets
     class_name: std.core.Double
-    method_name: toFixed
+    method_name: toFixedImpl
     static: false
     signature:
       ret: std.core.String
@@ -3827,6 +3933,72 @@ intrinsics:
     impl: ark::ets::intrinsics::StdCoreDoubleToInt
     safe_intrinsic: true
 
+  - name: Int32ArrayDoubleToInt
+    space: ets
+    class_name: escompat.Int32Array
+    method_name: doubleToInt
+    static: true
+    signature:
+      ret: i32
+      args: [ f64 ]
+    impl: ark::ets::intrinsics::TypedArrayDoubleToInt32
+    safe_intrinsic: true
+
+  - name: Int16ArrayDoubleToInt
+    space: ets
+    class_name: escompat.Int16Array
+    method_name: doubleToInt
+    static: true
+    signature:
+      ret: i16
+      args: [ f64 ]
+    impl: ark::ets::intrinsics::TypedArrayDoubleToInt16
+    safe_intrinsic: true
+
+  - name: Int8ArrayDoubleToInt
+    space: ets
+    class_name: escompat.Int8Array
+    method_name: doubleToInt
+    static: true
+    signature:
+      ret: i8
+      args: [ f64 ]
+    impl: ark::ets::intrinsics::TypedArrayDoubleToInt8
+    safe_intrinsic: true
+
+  - name: Uint32ArrayDoubleToInt
+    space: ets
+    class_name: escompat.Uint32Array
+    method_name: doubleToInt
+    static: true
+    signature:
+      ret: i64
+      args: [ f64 ]
+    impl: ark::ets::intrinsics::TypedArrayDoubleToUint32
+    safe_intrinsic: true
+
+  - name: Uint16ArrayDoubleToInt
+    space: ets
+    class_name: escompat.Uint16Array
+    method_name: doubleToInt
+    static: true
+    signature:
+      ret: i32
+      args: [ f64 ]
+    impl: ark::ets::intrinsics::TypedArrayDoubleToUint16
+    safe_intrinsic: true
+
+  - name: Uint8ArrayDoubleToInt
+    space: ets
+    class_name: escompat.Uint8Array
+    method_name: doubleToInt
+    static: true
+    signature:
+      ret: i32
+      args: [ f64 ]
+    impl: ark::ets::intrinsics::TypedArrayDoubleToUint8
+    safe_intrinsic: true
+
   - name: StdCoreDoubleToLong
     space: ets
     class_name: std.core.Double
@@ -3847,17 +4019,6 @@ intrinsics:
       ret: f32
       args: [ f64 ]
     impl: ark::ets::intrinsics::StdCoreDoubleToFloat
-    safe_intrinsic: true
-
-  - name: StdCoreDoubleToChar
-    space: ets
-    class_name: std.core.Double
-    method_name: toChar
-    static: true
-    signature:
-      ret: u16
-      args: [ f64 ]
-    impl: ark::ets::intrinsics::StdCoreDoubleToChar
     safe_intrinsic: true
 
 ##############
@@ -4120,6 +4281,9 @@ intrinsics:
       ret: std.core.Object[]
       args:
         - i32
+        - U{std.core.Null,std.core.Object}
+      impl_args:
+        - i32
         - std.core.Object
     impl: ark::ets::intrinsics::StdCoreAllocGenericArray
 
@@ -4274,7 +4438,6 @@ intrinsics:
     codegen_func: CreateArrayCopyTo
     llvm_codegen_func: EmitArrayCopyTo
     need_param_locations: true
-
 
 ############
 # std.core #
@@ -5493,6 +5656,10 @@ intrinsics:
       args: [ i32, i32, i64 ]
     impl: ark::ets::intrinsics::ArrayBufferXorU64
 
+############################################
+#   std.debug.concurrency.CoroutineExtras  #
+############################################
+
   - name: StdCoroutineGetWorkerId
     space: ets
     class_name: std.debug.concurrency.CoroutineExtras
@@ -5593,6 +5760,70 @@ intrinsics:
       args: [i32]
     impl: ark::ets::intrinsics::StdSystemIncreaseTaskpoolWorkersToN
 
+  - name: StdCoroutineSetTaskPoolTriggerShrinkInterval
+    space: ets
+    class_name: std.debug.concurrency.CoroutineExtras
+    method_name: setTaskPoolTriggerShrinkInterval
+    static: true
+    signature:
+      ret: void
+      args: [i32]
+    impl: ark::ets::intrinsics::StdSystemSetTaskPoolTriggerShrinkInterval
+
+  - name: StdCoroutineSetTaskPoolIdleThreshold
+    space: ets
+    class_name: std.debug.concurrency.CoroutineExtras
+    method_name: setTaskPoolIdleThreshold
+    static: true
+    signature:
+      ret: void
+      args: [i32]
+    impl: ark::ets::intrinsics::StdSystemSetTaskPoolIdleThreshold
+
+  - name: StdCoroutineGetTaskPoolWorkersNum
+    space: ets
+    class_name: std.debug.concurrency.CoroutineExtras
+    method_name: getTaskPoolWorkersNum
+    static: true
+    signature:
+      ret: i32
+      args: []
+    impl: ark::ets::intrinsics::StdSystemGetTaskPoolWorkersNum
+
+  - name: StdCoroutineSetTaskPoolWorkersLimit
+    space: ets
+    class_name: std.debug.concurrency.CoroutineExtras
+    method_name: setTaskPoolWorkersLimit
+    static: true
+    signature:
+      ret: void
+      args: [i32]
+    impl: ark::ets::intrinsics::StdSystemSetTaskPoolWorkersLimit
+
+  - name: StdCoroutineRetriggerTaskPoolShrink
+    space: ets
+    class_name: std.debug.concurrency.CoroutineExtras
+    method_name: retriggerTaskPoolShrink
+    static: true
+    signature:
+      ret: void
+      args: []
+    impl: ark::ets::intrinsics::StdSystemRetriggerTaskPoolShrink
+
+  - name: StdCoroutineGetTaskPoolWorkersLimit
+    space: ets
+    class_name: std.debug.concurrency.CoroutineExtras
+    method_name: getTaskPoolWorkersLimit
+    static: true
+    signature:
+      ret: i32
+      args: []
+    impl: ark::ets::intrinsics::taskpool::GetTaskPoolWorkersLimit
+
+####################################
+# std.debug.concurrency.AtomicFlag #
+####################################
+
   - name: StdAtomicFlagSet
     space: ets
     class_name: std.debug.concurrency.AtomicFlag
@@ -5612,6 +5843,7 @@ intrinsics:
       ret: u1
       args: []
     impl: ark::ets::intrinsics::StdSystemAtomicFlagGet
+
 ####################
 # std.core.Runtime #
 ####################
@@ -5647,6 +5879,16 @@ intrinsics:
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::StdCoreRuntimeGetHashCode
 
+  - name: StdRuntimeGetHashCodeByValue
+    space: ets
+    class_name: std.core.Runtime
+    method_name: getHashCodeByValue
+    static: true
+    signature:
+      ret: i64
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::StdRuntimeGetHashCodeByValue
+
   - name: StdCoreRuntimeFailedTypeCastException
     space: ets
     class_name: std.core.Runtime
@@ -5654,7 +5896,7 @@ intrinsics:
     static: true
     signature:
       ret: std.core.ClassCastError
-      args: [ std.core.Object, std.core.String ]
+      args: [ std.core.Object, std.core.String, u1 ]
     impl: ark::ets::intrinsics::StdCoreRuntimeFailedTypeCastException
     clear_flags: [ ]
 
@@ -5826,7 +6068,7 @@ intrinsics:
   - name: StdCoreAbcFileLoadFromMemory
     space: ets
     class_name: std.core.AbcFile
-    method_name: loadFromMemoryImpl
+    method_name: loadFromMemory
     static: true
     signature:
       ret: std.core.AbcFile
@@ -5882,26 +6124,6 @@ intrinsics:
 ###################
 # std.core.RegExp #
 ###################
-  - name: EscompatRegExpCompile
-    space: ets
-    class_name: escompat.RegExp
-    method_name: compile
-    static: false
-    signature:
-      ret: escompat.RegExp
-      args: []
-    impl: ark::ets::intrinsics::EscompatRegExpCompile
-
-  - name: EscompatRegExpExec
-    space: ets
-    class_name: escompat.RegExp
-    method_name: execImpl
-    static: false
-    signature:
-      ret: escompat.RegExpExecArray
-      args: [ std.core.String, std.core.String, std.core.String, u1]
-    impl: ark::ets::intrinsics::EscompatRegExpExec
-
   - name: EscompatRegExpParse
     space: ets
     class_name: escompat.RegExp
@@ -6352,6 +6574,16 @@ intrinsics:
       ret: f64
       args: [ u16 ]
     impl: ark::ets::intrinsics::StdCoreCharToDouble
+
+  - name: StdCoreCharToString
+    space: ets
+    class_name: std.core.Char
+    method_name: toString
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ u16 ]
+    impl: ark::ets::intrinsics::StdCoreCharToString
 
   - name: StdCoreCharIsUpperCase
     space: ets
@@ -7373,6 +7605,42 @@ intrinsics:
       args: [ std.core.Object, std.core.Object ]
     impl: ark::ets::intrinsics::EtsCondVarNotifyAll
 
+  - name: ConcurrencyHelpersSpinlockCreate
+    space: ets
+    class_name: std.containers.ConcurrencyHelpers
+    method_name: spinlockCreate
+    static: true
+    signature:
+      ret: std.core.Object
+      args: []
+    impl: ark::ets::intrinsics::EtsQueueSpinlockCreate
+
+  - name: ConcurrencyHelpersSpinlockGuard
+    space: ets
+    class_name: std.containers.ConcurrencyHelpers
+    method_name: spinlockGuard
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object, std.core.Object ]
+    impl: ark::ets::intrinsics::EtsQueueSpinlockGuard
+
+###############################
+# std.core.RuntimeDebug #
+###############################
+
+####################
+
+  - name: StdDebugCountInstancesOfClass
+    space: ets
+    class_name: std.debug.RuntimeDebug
+    method_name: countInstancesOfClass
+    static: true
+    signature:
+      ret: i32
+      args: [ std.core.ClassType ]
+    impl: ark::ets::intrinsics::CountInstancesOfClass
+
 ###############################
 # std.core.Debugger #
 ###############################
@@ -7702,16 +7970,6 @@ intrinsics:
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::IsLiteralInitializedInterfaceImpl
 
-  - name: StdCoreDoubleNumberFromStringForReflect
-    space: ets
-    class_name: escompat.Reflect
-    method_name: numberFromString
-    static: true
-    signature:
-      ret: f64
-      args: [ std.core.String ]
-    impl: ark::ets::intrinsics::StdCoreDoubleNumberFromString
-
 ######################################
 # std.concurrency.ConcurrencyHelpers #
 ######################################
@@ -7796,6 +8054,10 @@ intrinsics:
       args: [ std.core.Object, std.core.Object ]
     impl: ark::ets::intrinsics::EtsQueueSpinlockGuard
 
+#########################################
+# std.concurrency.NativeAsyncWorkHelper #
+#########################################
+
   - name: stdConcurrencyNativeAsyncWorkHelperAsyncWorkNativeInvoke
     space: ets
     class_name: std.concurrency.NativeAsyncWorkHelper
@@ -7805,6 +8067,30 @@ intrinsics:
       ret: void
       args: [ i64, i64, u1 ]
     impl: ark::ets::intrinsics::AsyncWorkNativeInvoke
+
+  - name: stdConcurrencyNativeAsyncWorkHelperEventNativeInvoke
+    space: ets
+    class_name: std.concurrency.NativeAsyncWorkHelper
+    method_name: eventNativeInvoke
+    static: true
+    signature:
+      ret: void
+      args: [ i64, i64, u1 ]
+    impl: ark::ets::intrinsics::EventNativeInvoke
+
+######################################
+# std.concurrency.WorkerGroup        #
+######################################
+
+  - name: StdConcurrencyWorkerGroupGenerateGroupIdImpl
+    space: ets
+    class_name: std.concurrency.WorkerGroup
+    method_name: generateGroupIdImpl
+    static: true
+    signature:
+      ret: i64
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::WorkerGroupGenerateGroupIdImpl
 
 ###############################
 # std.core.ExclusiveLauncher #
@@ -7816,8 +8102,8 @@ intrinsics:
     method_name: elaunch
     static: true
     signature:
-      ret: void
-      args: [std.core.Object, u1]
+      ret: i32
+      args: [std.core.Object, u1, std.core.String, i32]
     impl: ark::ets::intrinsics::ExclusiveLaunch
 
 ###################
@@ -7837,8 +8123,46 @@ intrinsics:
         - u1
     impl: ark::ets::intrinsics::PostToMainThread
 
+  - name: EtsEAWorkerCalculateEAWorkerCount
+    space: ets
+    class_name: std.core.EAWorker
+    method_name: calculateEAWorkerCount
+    static: true
+    signature:
+      ret: i32
+      args: []
+    impl: ark::ets::intrinsics::CalculateEAworkerCount
+
+  - name: EtsEAWorkerGetEAWorkerCount
+    space: ets
+    class_name: std.core.EAWorker
+    method_name: getEAWorkerNumFromThread
+    static: true
+    signature:
+      ret: i32
+      args: []
+    impl: ark::ets::intrinsics::GetEAWorkerNumFromThread
+
+  - name: EtsEAWorkerCreateMainWorker
+    space: ets
+    class_name: std.core.EAWorker
+    method_name: createMainWorker
+    static: true
+    signature:
+      ret: std.core.Object
+      args: []
+    impl: ark::ets::intrinsics::CreateMainWorker
 
 
+  - name: EtsEAWorkerSetPriority
+    space: ets
+    class_name: std.core.EAWorker
+    method_name: setCurrentWorkerPriority
+    static: true
+    signature:
+      ret: void
+      args: [i32]
+    impl: ark::ets::intrinsics::SetCurrentWorkerPriority
 ###############################
 # std.core.TaskPoster #
 ###############################
@@ -7888,6 +8212,7 @@ intrinsics:
         - std.core.Object
         - std.core.Object[]
         - u1
+        - i64
     impl: ark::ets::intrinsics::EtsLaunchInternalJobNative
 
   - name: EtsLaunchOnTheSameWorker
@@ -8180,3 +8505,74 @@ intrinsics:
       args: [ i64 ]
     impl: ark::ets::intrinsics::StdCoreLongToChar
     safe_intrinsic: true
+
+########################
+# escompat.Map #
+########################
+  - name: MapGet
+    space: ets
+    class_name: escompat.Map
+    method_name: get
+    static: false
+    signature:
+      ret: std.core.Object
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsEscompatMapGet
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateMapGet
+    llvm_codegen_func: EmitMapGet
+
+  - name: MapHas
+    space: ets
+    class_name: escompat.Map
+    method_name: has
+    static: false
+    signature:
+      ret: u1
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsEscompatMapHas
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateMapHas
+    llvm_codegen_func: EmitMapHas
+
+  - name: MapDelete
+    space: ets
+    class_name: escompat.Map
+    method_name: delete
+    static: false
+    signature:
+      ret: u1
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsEscompatMapDelete
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateMapDelete
+    llvm_codegen_func: EmitMapDelete
+
+########################
+# escompat.Set #
+########################
+  - name: SetHas
+    space: ets
+    class_name: escompat.Set
+    method_name: has
+    static: false
+    signature:
+      ret: u1
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsEscompatSetHas
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateSetHas
+    llvm_codegen_func: EmitSetHas
+
+  - name: SetDelete
+    space: ets
+    class_name: escompat.Set
+    method_name: delete
+    static: false
+    signature:
+      ret: u1
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsEscompatSetDelete
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateSetDelete
+    llvm_codegen_func: EmitSetDelete

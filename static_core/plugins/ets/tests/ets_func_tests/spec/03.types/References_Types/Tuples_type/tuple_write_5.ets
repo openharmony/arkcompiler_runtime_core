@@ -24,5 +24,5 @@
      tuple[0] = 12;
      tuple[1] = 24;
      tuple["-2"] = 36; //CTE: Type 'string' cannot be used as index type...
-     assertTrue( tuple["-2"] = 36)
+     arktest.assertTrue( tuple["-2"] = 36)
   }

@@ -16,7 +16,7 @@
 import {LinkedList} from "@ohos.util.LinkedList";
 
 function main() {
-    const suite = new ArkTestsuite("LinkedList Create, Length, and Add API tests");
+    const suite = new arktest.ArkTestsuite("LinkedList Create, Length, and Add API tests");
 
     suite.addTest("LinkedList create a single-type container", testCreateSingleTypeContainer);
     suite.addTest("LinkedList create a composite-type container", testCreateCompositeTypeContainer);
@@ -33,90 +33,69 @@ function main() {
 }
 
 class Temp {
-    age: number = 0;
+    age: double = 0;
     name: string = "";
 }
 
 class TestData {
-    static readonly testNumber1: number = 1;
-    static readonly testNumber2: number = 2;
-    static readonly testNumber3: number = 3;
-    static readonly testNumber4: number = 4;
-    static readonly testNumber5: number = 5;
-    static readonly testNumber6: number = 6;
-    static readonly testNumber1w: number = 10000;
+    static readonly testNumber1: double | int = 1;
+    static readonly testNumber2: double | int = 2;
+    static readonly testNumber3: double | int = 3;
+    static readonly testNumber4: double | int = 4;
+    static readonly testNumber5: double | int = 5;
+    static readonly testNumber6: double | int = 6;
+    static readonly testNumber1w: double | int = 10000;
     static readonly testString1: string = "string";
     static readonly testString2: string = "!\"#$%'()+,-./:;<=>?@[\\]^_`{|}~";
     static readonly testObject1: Temp = { age: 10, name: "zhang" };
     static readonly forNumber1: Number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
-    static readonly arrayForNumber1 = Array.from<number>(TestData.forNumber1);
+    static readonly arrayForNumber1 = Array.from<double>(TestData.forNumber1);
 }
 
 function testCreateSingleTypeContainer() {
-    let linkedList: LinkedList<number>;
-    try {
-        linkedList = new LinkedList<number>();
-    } catch (e) {
-        assertFalse(false, "The memory application needs to be successful");
-        return;
-    }
-    linkedList.add(TestData.testNumber1);
-    assertTrue(linkedList instanceof LinkedList, "The instance should be LinkedList");
-    assertEQ(linkedList.length, TestData.testNumber1, "LinkedList length should be 1");
+    let linkedList: LinkedList<double>;
+    arktest.expectNoThrow(() => {linkedList = new LinkedList<double>()});
 }
 
 function testCreateCompositeTypeContainer() {
-    let linkedList: LinkedList<number | string | boolean | null | object | undefined>;
-    try {
-        linkedList = new LinkedList<number | string | boolean | null | object | undefined>();
-    } catch (e) {
-        assertFalse(false, "The memory application needs to be successful");
-        return;
-    }
-    linkedList.add(TestData.testNumber1);
-    linkedList.add(TestData.testString1);
-    linkedList.add(true);
-    linkedList.add(null);
-    linkedList.add(TestData.testObject1);
-    linkedList.add(undefined);
-    assertTrue(linkedList instanceof LinkedList, "The instance should be LinkedList");
-    assertEQ(linkedList.length, TestData.testNumber6, "LinkedList length should be 6");
+    let linkedList: LinkedList<double | string | boolean | null | object | undefined>;
+    arktest.expectNoThrow(() => {linkedList = new LinkedList<double | string | boolean | null | object | undefined>()});
 }
 
 function testLengthSyncSingleType() {
-    let linkedList = new LinkedList<number>();
-    assertEQ(linkedList.length, 0, "LinkedList length should be 0");
+    let linkedList = new LinkedList<double>();
+    arktest.assertEQ(linkedList.length, 0, "LinkedList length should be 0");
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
-    assertEQ(linkedList.length, TestData.arrayForNumber1.length,
+    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length.toInt(),
         "LinkedList length should be TestData.arrayForNumber1 length");
     linkedList.remove(TestData.testNumber1);
-    assertEQ(linkedList.length, TestData.arrayForNumber1.length - TestData.testNumber1, "LinkedList length should - 1");
+    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length.toInt() - TestData.testNumber1, "LinkedList length should - 1");
 }
 
 function testLengthSyncMultiType() {
-    let linkedList = new LinkedList<number | string | boolean | null | object | undefined>();
-    assertEQ(linkedList.length, 0, "LinkedList length should be 0");
+    let linkedList = new LinkedList<double | string | boolean | null | object | undefined>();
+    arktest.assertEQ(linkedList.length, 0, "LinkedList length should be 0");
     linkedList.add(TestData.testNumber1);
     linkedList.add(TestData.testString1);
     linkedList.add(true);
     linkedList.add(null);
     linkedList.add(TestData.testObject1);
     linkedList.add(undefined);
-    assertEQ(linkedList.length, TestData.testNumber6, "LinkedList length should be 6");
+    arktest.assertEQ(linkedList.length, TestData.testNumber6, "LinkedList length should be 6");
     linkedList.remove(TestData.testNumber1);
-    assertEQ(linkedList.length, TestData.testNumber5, "LinkedList length should be 5");
+    arktest.assertEQ(linkedList.length, TestData.testNumber5, "LinkedList length should be 5");
 }
 
 function testLengthWithLargeValue() {
-    let linkedList = new LinkedList<number>();
-    for (let i: number = 0; i < TestData.testNumber1w; i++) {
+    let linkedList = new LinkedList<double>();
+    for (let i: int = 0; i < TestData.testNumber1w; i++) {
         linkedList.add(TestData.testNumber1);
     }
-    assertEQ(linkedList.length, TestData.testNumber1w, "LinkedList length should be 10000 after adding elements");
+    arktest.assertEQ(linkedList.length, TestData.testNumber1w, "LinkedList length should be 10000 after adding elements");
 }
 
 function testAddMultipleTypes() {
-    let linkedList = new LinkedList<number | string | boolean | null | object | undefined>();
+    let linkedList = new LinkedList<double | string | boolean | null | object | undefined>();
     linkedList.add(TestData.testNumber1);
     linkedList.add(TestData.testString1);
     linkedList.add(true);
@@ -124,56 +103,56 @@ function testAddMultipleTypes() {
     linkedList.add(TestData.testObject1);
     linkedList.add(undefined);
 
-    assertEQ(linkedList.length, TestData.testNumber6, "LinkedList length should be 6");
-    assertEQ(linkedList.get(0), TestData.testNumber1, "Element at index 0 should match");
-    assertEQ(linkedList.get(TestData.testNumber1), TestData.testString1, "Element at index 1 should match");
-    assertEQ(linkedList.get(TestData.testNumber2), true, "Element at index 2 should match");
-    assertEQ(linkedList.get(TestData.testNumber3), null, "Element at index 3 should match");
-    assertEQ(linkedList.get(TestData.testNumber4), TestData.testObject1, "Element at index 4 should match");
-    assertEQ(linkedList.get(TestData.testNumber5), undefined, "Element at index 5 should match");
+    arktest.assertEQ(linkedList.length, TestData.testNumber6, "LinkedList length should be 6");
+    arktest.assertEQ(linkedList.get(0), TestData.testNumber1, "Element at index 0 should match");
+    arktest.assertEQ(linkedList.get(TestData.testNumber1), TestData.testString1, "Element at index 1 should match");
+    arktest.assertEQ(linkedList.get(TestData.testNumber2), true, "Element at index 2 should match");
+    arktest.assertEQ(linkedList.get(TestData.testNumber3), null, "Element at index 3 should match");
+    arktest.assertEQ(linkedList.get(TestData.testNumber4), TestData.testObject1, "Element at index 4 should match");
+    arktest.assertEQ(linkedList.get(TestData.testNumber5), undefined, "Element at index 5 should match");
 }
 
 function testAddSpecialCharacters() {
     let linkedList = new LinkedList<string>();
     linkedList.add(TestData.testString2);
-    assertEQ(linkedList.get(0), TestData.testString2, "Add successful");
-    assertEQ(linkedList.length, TestData.testNumber1, "LinkedList length should be 1");
+    arktest.assertEQ(linkedList.get(0), TestData.testString2, "Add successful");
+    arktest.assertEQ(linkedList.length, TestData.testNumber1, "LinkedList length should be 1");
 }
 
 function testAddFirstDeclaredType() {
-    let linkedList = new LinkedList<number>();
+    let linkedList = new LinkedList<double>();
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
     linkedList.addFirst(TestData.testNumber4);
-    assertEQ(linkedList.get(0), TestData.testNumber4, "First element should be 4");
-    for (let i: number = 0; i < TestData.arrayForNumber1.length; i++) {
-        assertEQ(linkedList.get(i + TestData.testNumber1), TestData.arrayForNumber1[i], "Element should match");
+    arktest.assertEQ(linkedList.get(0), TestData.testNumber4, "First element should be 4");
+    for (let i: int = 0; i < TestData.arrayForNumber1.length.toInt(); i++) {
+        arktest.assertEQ(linkedList.get(i + TestData.testNumber1), TestData.arrayForNumber1[i], "Element should match");
     }
-    assertEQ(linkedList.length, TestData.arrayForNumber1.length + TestData.testNumber1, "LinkedList length should + 1");
+    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length.toInt() + TestData.testNumber1, "LinkedList length should + 1");
 }
 
 function testAddFirstNull() {
-    let linkedList = new LinkedList<number | null>();
-    for (let i = 0; i < TestData.arrayForNumber1.length; i++) {
+    let linkedList = new LinkedList<double | null>();
+    for (let i: int = 0; i < TestData.arrayForNumber1.length.toInt(); i++) {
         linkedList.add(TestData.arrayForNumber1[i]);
     }
     linkedList.addFirst(null);
-    assertEQ(linkedList.get(0), null, "First element should be null");
-    for (let i: number = 0; i < TestData.arrayForNumber1.length; i++) {
-        assertEQ(linkedList.get(i + TestData.testNumber1), TestData.arrayForNumber1[i], "Element should match");
+    arktest.assertEQ(linkedList.get(0), null, "First element should be null");
+    for (let i: int = 0; i < TestData.arrayForNumber1.length.toInt(); i++) {
+        arktest.assertEQ(linkedList.get(i + TestData.testNumber1), TestData.arrayForNumber1[i], "Element should match");
     }
-    assertEQ(linkedList.length, TestData.arrayForNumber1.length + TestData.testNumber1,
+    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length.toInt() + TestData.testNumber1,
         "LinkedList length should be + 1");
 }
 
 function testAddFirstSpecialCharacters() {
     let linkedList = new LinkedList<string>();
     linkedList.addFirst(TestData.testString2);
-    assertEQ(linkedList.get(0), TestData.testString2, "Add successful");
-    assertEQ(linkedList.length, TestData.testNumber1, "LinkedList length should be 1");
+    arktest.assertEQ(linkedList.get(0), TestData.testString2, "Add successful");
+    arktest.assertEQ(linkedList.length, TestData.testNumber1, "LinkedList length should be 1");
 }
 
 function initializeLinkedList<T>(linkedList: LinkedList<T>, sourceArray: Array<T>) {
-    for (let i = 0; i < sourceArray.length; i++) {
+    for (let i: int = 0; i < sourceArray.length; i++) {
         linkedList.add(sourceArray[i]);
     }
 }

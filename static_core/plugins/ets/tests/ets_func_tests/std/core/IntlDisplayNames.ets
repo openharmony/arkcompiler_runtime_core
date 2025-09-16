@@ -23,7 +23,7 @@ const fr_FR: string = intlBestFitLocale("fr-FR");
 const es_ES: string = intlBestFitLocale("es-ES");
 
 function main(): int {
-    const suite = new ArkTestsuite("Intl.DisplayNames Tests");
+    const suite = new arktest.ArkTestsuite("Intl.DisplayNames Tests");
 
     suite.addTest("Display names creation", testDisplayNamesCreation);
     suite.addTest("Language display names", testLanguageDisplayNames);
@@ -41,30 +41,27 @@ function main(): int {
 }
 
 function testDisplayNamesCreation(): void {
-    const typeErrorCheck = (e: Error | Exception) => { return (e instanceof TypeError) }
-
     // DisplayNames constructor should throw when type is not specified
-    expectThrow(
-        (): void throws => {
+    arktest.expectError(
+        (): void => {
             new Intl.DisplayNames("en");
         },
-        typeErrorCheck
+        new TypeError("Options parameter is required")
     );
 
     // DisplayNames constructor should throw when type is not specified
-    expectThrow(
-        (): void throws => {
+    arktest.expectError(
+        (): void => {
             new Intl.DisplayNames("en", {});
         },
-        typeErrorCheck
+        new TypeError("Option 'type' is required")
     );
 
     const displayNames = new Intl.DisplayNames("en", { type: "language" });
-    assertTrue(displayNames instanceof Intl.DisplayNames);
+    arktest.assertTrue(displayNames instanceof Intl.DisplayNames);
 
-    // NOTE(igorlegalov): uncomment when the issue #25344 is fixed
-    // const displayNamesWithLocaleArray = new Intl.DisplayNames(["en", "fr"], { type: "language" });
-    // assertTrue(displayNamesWithLocaleArray instanceof Intl.DisplayNames);
+    const displayNamesWithLocaleArray = new Intl.DisplayNames(["en", "fr"], { type: "language" });
+    arktest.assertTrue(displayNamesWithLocaleArray instanceof Intl.DisplayNames);
 
     new Intl.DisplayNames("en", { type: "language" });
     new Intl.DisplayNames("en", { type: "region" });
@@ -72,8 +69,7 @@ function testDisplayNamesCreation(): void {
     new Intl.DisplayNames("en", { type: "currency" });
 }
 
-class DisplayNamesOptionsBuilder
-{
+class DisplayNamesOptionsBuilder {
     public type?: "language" | "region" | "script" | "currency";
     public style?: "long" | "short";
     public languageDisplay?: "standard" | "dialect";
@@ -126,9 +122,9 @@ function testDisplayName(
     const displayNames = new Intl.DisplayNames(locale, options);
     const result = displayNames.of(code);
     if (expected === undefined) {
-        assertEQ(result, undefined, `DisplayNames.of("${code}") with locale ${locale} and type ${options.type} should return undefined`);
+        arktest.assertEQ(result, undefined, `DisplayNames.of("${code}") with locale ${locale} and type ${options.type} should return undefined`);
     } else {
-        assertEQ(result, expected, `DisplayNames.of("${code}") with locale ${locale} and type ${options.type} should return "${expected}" but got "${result}"`);
+        arktest.assertEQ(result, expected, `DisplayNames.of("${code}") with locale ${locale} and type ${options.type} should return "${expected}" but got "${result}"`);
     }
 }
 
@@ -196,9 +192,9 @@ function testScriptDisplayNames(): void {
         .with_fallback("code")
         .build();
 
-    testDisplayName(en_US, "LaT", "LaT", codeFallbackOptions);    // Invalid script format
-    testDisplayName(en_US, "LATN", "LATN", codeFallbackOptions);  // Invalid script format
-    testDisplayName(en_US, "Wxyz", "Wxyz", codeFallbackOptions);  // Non-existent script
+    testDisplayName(en_US, "LaT", "LaT", codeFallbackOptions); // Invalid script format
+    testDisplayName(en_US, "LATN", "LATN", codeFallbackOptions); // Invalid script format
+    testDisplayName(en_US, "Wxyz", "Wxyz", codeFallbackOptions); // Non-existent script
 }
 
 function testRegionDisplayNames(): void {
@@ -224,9 +220,9 @@ function testRegionDisplayNames(): void {
         .with_fallback("code")
         .build();
 
-    testDisplayName(en_US, "XX", "XX", codeFallbackOptions);      // Non-existent region
-    testDisplayName(en_US, "usa", "usa", codeFallbackOptions);    // Invalid region format
-    testDisplayName(en_US, "1234", "1234", codeFallbackOptions);  // Invalid region format
+    testDisplayName(en_US, "XX", "XX", codeFallbackOptions); // Non-existent region
+    testDisplayName(en_US, "usa", "usa", codeFallbackOptions); // Invalid region format
+    testDisplayName(en_US, "1234", "1234", codeFallbackOptions); // Invalid region format
 }
 
 function testCurrencyDisplayNames(): void {
@@ -246,19 +242,19 @@ function testCurrencyDisplayNames(): void {
         .with_fallback("code")
         .build();
 
-    testDisplayName(en_US, "XYZ", "XYZ", codeFallbackOptions);  // Non-existent currency
+    testDisplayName(en_US, "XYZ", "XYZ", codeFallbackOptions); // Non-existent currency
 }
 
 function testDisplayNamesStyles(): void {
     const longNames = new Intl.DisplayNames(en_US, { type: "region", style: "long" });
-    assertEQ(longNames.of("US"), "United States");
+    arktest.assertEQ(longNames.of("US"), "United States");
 
     const shortNames = new Intl.DisplayNames(en_US, { type: "region", style: "short" });
     const shortResult = shortNames.of("US");
-    assertTrue(shortResult == "US" || shortResult == "United States");
+    arktest.assertTrue(shortResult == "US" || shortResult == "United States");
 
     const options = shortNames.resolvedOptions();
-    assertEQ(options.style, "short");
+    arktest.assertEQ(options.style, "short");
 
     const regionLongOptions = new DisplayNamesOptionsBuilder()
         .with_type("region")
@@ -281,18 +277,18 @@ function testDisplayNamesStyles(): void {
 
 function testDisplayNamesFallback(): void {
     const defaultFallback = new Intl.DisplayNames(en_US, { type: "region" });
-    assertEQ(defaultFallback.of("XX"), "XX", "Default fallback should return the code itself");
+    arktest.assertEQ(defaultFallback.of("XX"), "XX", "Default fallback should return the code itself");
 
     const codeFallback = new Intl.DisplayNames(en_US, { type: "region", fallback: "code" });
-    assertEQ(codeFallback.of("XX"), "XX", "Code fallback should return the code itself");
+    arktest.assertEQ(codeFallback.of("XX"), "XX", "Code fallback should return the code itself");
 
     const noneFallback = new Intl.DisplayNames(en_US, { type: "region", fallback: "none" });
     const noneFallbackResult = noneFallback.of("XX");
-    assertTrue(noneFallbackResult === undefined || noneFallbackResult === "XX",
+    arktest.assertTrue(noneFallbackResult === undefined || noneFallbackResult === "XX",
         "None fallback should return undefined or the code itself");
 
     const options = noneFallback.resolvedOptions();
-    assertEQ(options.fallback, "none");
+    arktest.assertEQ(options.fallback, "none");
 
     const languageCodeFallbackOptions = new DisplayNamesOptionsBuilder()
         .with_type("language")
@@ -305,7 +301,7 @@ function testDisplayNamesFallback(): void {
         .with_fallback("none")
         .build();
     const languageNoneResult = new Intl.DisplayNames(en_US, languageNoneFallbackOptions).of("xyz");
-    assertTrue(languageNoneResult === undefined || languageNoneResult === "xyz",
+    arktest.assertTrue(languageNoneResult === undefined || languageNoneResult === "xyz",
         "None fallback should return undefined or the code itself");
 
     const scriptCodeFallbackOptions = new DisplayNamesOptionsBuilder()
@@ -319,7 +315,7 @@ function testDisplayNamesFallback(): void {
         .with_fallback("none")
         .build();
     const scriptNoneResult = new Intl.DisplayNames(en_US, scriptNoneFallbackOptions).of("Wxyz");
-    assertTrue(scriptNoneResult === undefined || scriptNoneResult === "Wxyz",
+    arktest.assertTrue(scriptNoneResult === undefined || scriptNoneResult === "Wxyz",
         "None fallback should return undefined or the code itself");
 
     const currencyCodeFallbackOptions = new DisplayNamesOptionsBuilder()
@@ -334,7 +330,7 @@ function testDisplayNamesFallback(): void {
         .build();
     // Implementation may return code or undefined for none fallback
     const currencyNoneResult = new Intl.DisplayNames(en_US, currencyNoneFallbackOptions).of("XYZ");
-    assertTrue(currencyNoneResult === undefined || currencyNoneResult === "XYZ",
+    arktest.assertTrue(currencyNoneResult === undefined || currencyNoneResult === "XYZ",
         "None fallback should return undefined or the code itself");
 }
 
@@ -368,35 +364,35 @@ function testLanguageDisplayOptions(): void {
 
     // The implementation may not differentiate between dialect and standard for some locales
     // So we'll just check that they both return something valid
-    assertTrue(dialectResult != null && standardResult != null,
+    arktest.assertTrue(dialectResult != null && standardResult != null,
         "Both dialect and standard display should return a valid result");
 
     // Test that languageDisplay is reflected in resolvedOptions
     const options = standardDisplay.resolvedOptions();
-    assertEQ(options.languageDisplay, "standard");
+    arktest.assertEQ(options.languageDisplay, "standard");
 }
 
 function testInvalidCodes(): void {
     const displayNames = new Intl.DisplayNames(en_US, { type: "language" });
 
     // DisplayNames.of should throw when given an empty code
-    expectThrow(
-        (): void throws => {
+    arktest.expectError(
+        (): void => {
             displayNames.of("");
         },
-        (e: Error | Exception) => { return (e instanceof RangeError) }
+        new RangeError("Code cannot be empty")
     );
 
     const result = displayNames.of("not-a-language-code");
-    assertTrue(result instanceof String, "DisplayNames.of with invalid code should return a string value");
+    arktest.assertTrue(result instanceof String, "DisplayNames.of with invalid code should return a string value");
 
     const scriptFallbackOptions = new DisplayNamesOptionsBuilder()
         .with_type("script")
         .with_fallback("code")
         .build();
 
-    testDisplayName(en_US, "LaT", "LaT", scriptFallbackOptions);    // Wrong format (lowercase T)
-    testDisplayName(en_US, "LATN", "LATN", scriptFallbackOptions);  // Wrong format (all uppercase)
+    testDisplayName(en_US, "LaT", "LaT", scriptFallbackOptions); // Wrong format (lowercase T)
+    testDisplayName(en_US, "LATN", "LATN", scriptFallbackOptions); // Wrong format (all uppercase)
 
     // Test malformed region codes
     const regionFallbackOptions = new DisplayNamesOptionsBuilder()
@@ -404,25 +400,25 @@ function testInvalidCodes(): void {
         .with_fallback("code")
         .build();
 
-    testDisplayName(en_US, "usa", "usa", regionFallbackOptions);    // Wrong format (lowercase)
-    testDisplayName(en_US, "1234", "1234", regionFallbackOptions);  // Wrong format (4 digits)
+    testDisplayName(en_US, "usa", "usa", regionFallbackOptions); // Wrong format (lowercase)
+    testDisplayName(en_US, "1234", "1234", regionFallbackOptions); // Wrong format (4 digits)
 }
 
 function testSupportedLocalesOf(): void {
     const validLocales = [en_US, fr_FR, zh_CN] as FixedArray<string>;
     const supported = Intl.DisplayNames.supportedLocalesOf(validLocales);
     let supportedArray = Array.from<String>(supported);
-    assertTrue(supportedArray.length > 0, "At least one locale should be supported");
+    arktest.assertTrue(supportedArray.length > 0, "At least one locale should be supported");
 }
 
 function testResolvedOptions(): void {
     const displayNames = new Intl.DisplayNames(en_US, { type: "language" });
     const options = displayNames.resolvedOptions();
 
-    assertEQ(options.locale instanceof String, true, "resolvedOptions should have a locale property");
-    assertEQ(options.type, "language", "resolvedOptions should reflect the type option");
-    assertEQ(options.style, "long", "resolvedOptions should have default style");
-    assertEQ(options.fallback, "code", "resolvedOptions should have default fallback");
+    arktest.assertEQ(options.locale instanceof String, true, "resolvedOptions should have a locale property");
+    arktest.assertEQ(options.type, "language", "resolvedOptions should reflect the type option");
+    arktest.assertEQ(options.style, "long", "resolvedOptions should have default style");
+    arktest.assertEQ(options.fallback, "code", "resolvedOptions should have default fallback");
 
     const customDisplayNames = new Intl.DisplayNames(fr_FR, {
         type: "region",
@@ -431,10 +427,10 @@ function testResolvedOptions(): void {
     });
     const customOptions = customDisplayNames.resolvedOptions();
 
-    assertTrue(customOptions.locale.startsWith("fr"), "resolvedOptions should reflect the locale");
-    assertEQ(customOptions.type, "region", "resolvedOptions should reflect the type option");
-    assertEQ(customOptions.style, "short", "resolvedOptions should reflect the style option");
-    assertEQ(customOptions.fallback, "none", "resolvedOptions should reflect the fallback option");
+    arktest.assertTrue(customOptions.locale.startsWith("fr"), "resolvedOptions should reflect the locale");
+    arktest.assertEQ(customOptions.type, "region", "resolvedOptions should reflect the type option");
+    arktest.assertEQ(customOptions.style, "short", "resolvedOptions should reflect the style option");
+    arktest.assertEQ(customOptions.fallback, "none", "resolvedOptions should reflect the fallback option");
 
     const languageDisplayNames = new Intl.DisplayNames(en_US, {
         type: "language",
@@ -442,5 +438,5 @@ function testResolvedOptions(): void {
     });
     const languageOptions = languageDisplayNames.resolvedOptions();
 
-    assertEQ(languageOptions.languageDisplay, "standard", "resolvedOptions should reflect the languageDisplay option");
+    arktest.assertEQ(languageOptions.languageDisplay, "standard", "resolvedOptions should reflect the languageDisplay option");
 }

@@ -675,7 +675,8 @@ TEST_F(CodegenTest, CallVirtual)
     EXPECT_TRUE(RegAlloc(graph));
     EXPECT_TRUE(graph->RunPass<Codegen>());
     // exclude offset from verification to avoid test modifications
-    const char *expectedCode[] = {"ldr w0, [x1]", "ldr x0, [x0, #", "ldr x30, [x0, #",
+    const char *expectedCode[] = {(OBJECT_POINTER_SIZE == sizeof(uint32_t)) ? "ldr w0, [x1]" : "ldr x0, [x1]",
+                                  "ldr x0, [x0, #", "ldr x30, [x0, #",
                                   "blr x30"};  // CallVirtual is encoded without tmp reg
     AssertCode(expectedCode);
 }

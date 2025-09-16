@@ -145,13 +145,13 @@ function __noinline__testWithRandomBranch(branch: int): void {
         arr = new MyArray<int>(16);
     }
     arraySet(arr);
-    assertEQ(arrayGet(arr), 20);
+    arktest.assertEQ(arrayGet(arr), 20);
     if (branch == BASE_ARRAY_BRANCH) {
-        assertEQ(myArrayGetCounter, 0);
-        assertEQ(myArraySetCounter, 0);
+        arktest.assertEQ(myArrayGetCounter, 0);
+        arktest.assertEQ(myArraySetCounter, 0);
     } else {
-        assertEQ(myArrayGetCounter, 3);
-        assertEQ(myArraySetCounter, 3);
+        arktest.assertEQ(myArrayGetCounter, 3);
+        arktest.assertEQ(myArraySetCounter, 3);
     }
 }
 
@@ -169,15 +169,15 @@ function test1(): void {
 function test2(): void {
     const arr = new Array<int>(16);
     arraySet(arr);
-    assertEQ(arrayGet(arr), 20);
-    assertEQ(myArrayGetCounter, 0);
-    assertEQ(myArraySetCounter, 0);
+    arktest.assertEQ(arrayGet(arr), 20);
+    arktest.assertEQ(myArrayGetCounter, 0);
+    arktest.assertEQ(myArraySetCounter, 0);
 }
 
 function test3(): void {
     const arr = new MyArray<int>(16);
     arraySet(arr);
-    assertEQ(arrayGet(arr), 20);
-    assertEQ(myArrayGetCounter, 3);
-    assertEQ(myArraySetCounter, 3);
+    arktest.assertEQ(arrayGet(arr), 20);
+    arktest.assertEQ(myArrayGetCounter, 3);
+    arktest.assertEQ(myArraySetCounter, 3);
 }

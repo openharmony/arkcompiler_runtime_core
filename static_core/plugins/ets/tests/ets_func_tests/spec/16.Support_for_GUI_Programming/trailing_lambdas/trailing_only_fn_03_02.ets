@@ -25,9 +25,9 @@ let a: int = 5
 
 function no_param(fn: EmptyFn | null) {
     if (fn) {
-        assertTrue( false,  "Not expected execution here")
+        arktest.assertTrue( false,  "Not expected execution here")
     } else {
-        assertEQ( a, 5)
+        arktest.assertEQ( a, 5)
     }
 }
 

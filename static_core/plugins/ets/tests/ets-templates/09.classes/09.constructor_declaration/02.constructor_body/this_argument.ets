@@ -31,4 +31,4 @@ class A {
   }
 }
 
-assertEQ(new A().n, 4)
+arktest.assertEQ(new A().n, 4)

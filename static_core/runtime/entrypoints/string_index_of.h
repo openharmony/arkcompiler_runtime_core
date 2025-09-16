@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,10 @@
 #include <cstdint>
 #include <type_traits>
 #include "utils/bit_utils.h"
+#include "runtime/include/coretypes/line_string.h"
 #include "runtime/include/coretypes/string.h"
+#include "runtime/handle_scope-inl.h"
+#include "runtime/mem/vm_handle.h"
 
 namespace ark::intrinsics {
 
@@ -190,6 +193,35 @@ inline int32_t StringIndexOfU16(void *str, uint16_t character, int32_t offset)
 {
     auto string = reinterpret_cast<ark::coretypes::String *>(str);
     ASSERT(string != nullptr);
+    ASSERT(string->IsLineString());
+    ark::coretypes::LineString *lineString = ark::coretypes::String::Cast(string);
+
+    bool isUtf8 = lineString->IsMUtf8();
+    auto length = lineString->GetLength();
+    if (offset < 0) {
+        offset = 0;
+    }
+
+    if (static_cast<uint32_t>(offset) >= length) {
+        return -1;
+    }
+
+    if (isUtf8) {
+        if (character > std::numeric_limits<uint8_t>::max()) {
+            return -1;
+        }
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        return impl::Utf8StringIndexOfChar(lineString->GetDataMUtf8(), offset, length, character);
+    }
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    return impl::Utf16StringIndexOfChar(lineString->GetDataUtf16(), offset, length, character);
+}
+
+// CC-OFFNXT(G.FUD.06) perf critical
+inline int32_t StringIndexOfU16(void *str, uint16_t character, int32_t offset, const LanguageContext &ctx)
+{
+    auto string = reinterpret_cast<ark::coretypes::String *>(str);
+    ASSERT(string != nullptr);
     bool isUtf8 = string->IsMUtf8();
     auto length = string->GetLength();
     if (offset < 0) {
@@ -199,17 +231,21 @@ inline int32_t StringIndexOfU16(void *str, uint16_t character, int32_t offset)
     if (static_cast<uint32_t>(offset) >= length) {
         return -1;
     }
+    auto thread = ark::ManagedThread::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+    VMHandle<coretypes::String> stringHandle(thread, string);
+    ark::coretypes::FlatStringInfo flatStr = ark::coretypes::FlatStringInfo::FlattenAllString(stringHandle, ctx);
+
     if (isUtf8) {
         if (character > std::numeric_limits<uint8_t>::max()) {
             return -1;
         }
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        return impl::Utf8StringIndexOfChar(string->GetDataMUtf8(), offset, length, character);
+        return impl::Utf8StringIndexOfChar(flatStr.GetDataUtf8Writable(), offset, length, character);
     }
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    return impl::Utf16StringIndexOfChar(string->GetDataUtf16(), offset, length, character);
+    return impl::Utf16StringIndexOfChar(flatStr.GetDataUtf16Writable(), offset, length, character);
 }
-
 }  // namespace ark::intrinsics
 
 #endif

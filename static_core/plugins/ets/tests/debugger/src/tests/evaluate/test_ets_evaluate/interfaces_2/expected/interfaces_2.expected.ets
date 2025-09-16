@@ -20,9 +20,9 @@ import { E } from "../interfaces_2.base"
 class evalPatchFunction {
     private static evalPatchFunction() {
         let e = new E();
-        assertEQ(e.a_foo(42) ,42);
-        assertEQ(e.b_foo(12345.54321), 12345.54321);
-        assertEQ(e.c_foo(c'a'), c'a');
-        assertEQ(e.d_foo(123.321 as float), 123.321 as float);
+        arktest.assertEQ(e.a_foo(42) ,42);
+        arktest.assertEQ(e.b_foo(12345.54321), 12345.54321);
+        arktest.assertEQ(e.c_foo(c'a'), c'a');
+        arktest.assertEQ(e.d_foo(123.321 as float), 123.321 as float);
     }
 }

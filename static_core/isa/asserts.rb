@@ -154,8 +154,8 @@ assert('Conversions should correspond to source and destination type') do
   end.all?
 end
 
-assert('Operand type should be one of none, ref, u1, u2, i8, u8, i16, u16, i32, u32, b32, i64, u64, b64, f64, top, any') do
-  types = %w[none ref u1 u2 i8 u8 i16 u16 i32 u32 b32 f32 i64 u64 b64 f64 top any]
+assert('Operand type should be one of none, ref, u1, u2, u4, i8, u8, i16, u16, i32, u32, b32, i64, u64, b64, f64, top, any') do
+  types = %w[none ref u1 u2 u4 i8 u8 i16 u16 i32 u32 b32 f32 i64 u64 b64 f64 top any]
   Panda.instructions.map do |i|
     i.acc_and_operands.all? { |op| types.include?(op.type.sub('[]', '')) }
   end.all?
@@ -183,11 +183,11 @@ assert('Register encoding width should be the same in instruction') do
   end.all?
 end
 
-assert('Calls should have call property and x_call exception tag') do
+assert('Calls should have call or call_any property and x_call exception tag') do
   Panda.instructions.map do |i|
     next true unless i.mnemonic.start_with?('call')
 
-    i.properties.include?('call') && i.exceptions.include?('x_call')
+    (i.properties.include?('call') || i.properties.include?('call_any')) && i.exceptions.include?('x_call')
   end.all?
 end
 
