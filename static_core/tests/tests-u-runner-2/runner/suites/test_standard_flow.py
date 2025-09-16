@@ -149,7 +149,11 @@ class TestStandardFlow(Test):
             if test.dependent_packages:
                 for dep_key, dep_item in test.dependent_packages.items():
                     self.dependent_packages[dep_key] = self.dependent_packages.get(dep_key, False) or dep_item
-
+            if len(self.invalid_tags) > 0:
+                Log.default(
+                    _LOGGER,
+                    f"\n{utils.FontColor.RED_BOLD.value}Invalid tags:{utils.FontColor.RESET.value} `"
+                    f"{' '.join(self.invalid_tags)}` in test file {test.test_id}:")
         return self._dependent_tests
 
     @property
@@ -159,6 +163,10 @@ class TestStandardFlow(Test):
         for abc_files_list in abc_files_lists:
             result += abc_files_list
         return list(result)
+
+    @property
+    def invalid_tags(self) -> list:
+        return self.metadata.tags.invalid_tags
 
     @staticmethod
     def __add_options(options: list[str]) -> list[str]:
@@ -231,7 +239,6 @@ class TestStandardFlow(Test):
         steps = [step for step in self.test_env.config.workflow.steps
                  if step.executable_path is not None and
                  ((compile_only_test and step.step_kind in allowed_steps) or not compile_only_test)]
-
         for step in steps:
             self.passed, self.report, self.fail_kind = self.__do_run_one_step(step)
             if step.step_kind in allowed_steps:

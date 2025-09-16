@@ -48,6 +48,7 @@ class Tags:
             Tags.EtsTag.NOT_A_TEST: Tags.__contains(Tags.EtsTag.NOT_A_TEST.value, tags),
             Tags.EtsTag.NO_WARMUP: Tags.__contains(Tags.EtsTag.NO_WARMUP.value, tags),
         }
+        self.invalid_tags = Tags.get_invalid_tags(tags)
 
     def __repr__(self) -> str:
         values = [tag.name for (tag, value) in self.__values.items() if value]
@@ -68,6 +69,12 @@ class Tags:
     @property
     def no_warmup(self) -> bool:
         return self.__values.get(Tags.EtsTag.NO_WARMUP, False)
+
+    @staticmethod
+    def get_invalid_tags(tags: list[str] | None) -> list[str]:
+        if tags:
+            return [tag for tag in tags if tag not in Tags.EtsTag.values()]
+        return []
 
     @staticmethod
     def __contains(tag: str, tags: list[str] | None) -> bool:

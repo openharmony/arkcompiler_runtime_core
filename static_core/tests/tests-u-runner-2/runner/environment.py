@@ -24,10 +24,9 @@ from dotenv import load_dotenv
 from runner.common_exceptions import InvalidInitialization
 from runner.init_runner import IsPath, MandatoryProp, MandatoryProps, PropName, RequireExist
 from runner.logger import Log
+from runner.utils import FontColor
 
 _LOGGER = Log.get_logger(__file__)
-RED = '\033[31m'
-RESET = '\033[0m'
 
 
 class MandatoryPropDescription(NamedTuple):
@@ -59,8 +58,10 @@ class RunnerEnv:
         if var_value is None:
             raise InvalidInitialization(
                 f"Mandatory environment variable '{prop_desc.name}' is not set. \n\n"
-                f"Run this command to initialize the runner: \n{RED}./runner.sh init{RESET} \n"
-                f"To see all available initialization options run:\n{RED}./runner.sh init --help{RESET}\n")
+                f"Run this command to initialize the runner: \n{FontColor.RED.value}./runner.sh "
+                f"init{FontColor.RESET.value} \n"
+                f"To see all available initialization options run:\n{FontColor.RED.value}./runner.sh "
+                f"init --help{FontColor.RESET.value}\n")
         if not prop_desc.is_path:
             return
         expanded = Path(var_value).expanduser().resolve()

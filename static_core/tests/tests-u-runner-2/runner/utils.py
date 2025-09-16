@@ -45,11 +45,17 @@ from runner.common_exceptions import (
     UnzipException,
     YamlException,
 )
-from runner.enum_types.base_enum import EnumT
+from runner.enum_types.base_enum import BaseEnum, EnumT
 from runner.enum_types.configuration_kind import ArchitectureKind, OSKind
 from runner.logger import Log
 
 _LOGGER = Log.get_logger(__file__)
+
+
+class FontColor(BaseEnum):
+    RED_BOLD = "\033[31;1m"
+    RED = '\033[31m'
+    RESET = "\033[0m"
 
 
 def progress(block_num: int, block_size: int, total_size: int) -> None:
