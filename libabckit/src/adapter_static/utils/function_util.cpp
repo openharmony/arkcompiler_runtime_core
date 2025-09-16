@@ -172,16 +172,17 @@ void AddFunctionParameterImpl(AbckitCoreFunction *coreFunc, ark::pandasm::Functi
     coreFunc->parameters.emplace_back(std::move(paramHolder));
 }
 
-bool RemoveFunctionParameterByIndexImpl([[maybe_unused]] AbckitCoreFunction *coreFunc, ark::pandasm::Function *impl,
-                                        size_t index)
+bool RemoveFunctionParameterByIndexImpl(AbckitCoreFunction *coreFunc, ark::pandasm::Function *funcImpl, size_t index)
 {
-    if (index >= impl->params.size()) {
-        LIBABCKIT_LOG(ERROR) << "Index " << index << " exceeds impl->params.size(): " << impl->params.size()
+    if (index >= funcImpl->params.size()) {
+        LIBABCKIT_LOG(ERROR) << "Index " << index << " exceeds impl->params.size(): " << funcImpl->params.size()
                              << std::endl;
+        libabckit::statuses::SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
         return false;
     }
 
-    impl->params.erase(impl->params.begin() + index);
+    funcImpl->params.erase(funcImpl->params.begin() + index);
+    coreFunc->parameters.erase(coreFunc->parameters.begin() + index);
     return true;
 }
 
