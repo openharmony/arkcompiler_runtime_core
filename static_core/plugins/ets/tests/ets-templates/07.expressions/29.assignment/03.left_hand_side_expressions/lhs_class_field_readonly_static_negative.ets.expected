@@ -11,4 +11,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-TypeError: Cannot assign to a readonly field readOnlyStaticProp
+Semantic error ESE4002: Cannot assign to a readonly field readOnlyStaticProp

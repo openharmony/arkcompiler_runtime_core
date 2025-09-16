@@ -12,4 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-SyntaxError: export default is not allowed to export multiple specifiers.
+Syntax error ESY0005: export default is not allowed to export multiple specifiers.

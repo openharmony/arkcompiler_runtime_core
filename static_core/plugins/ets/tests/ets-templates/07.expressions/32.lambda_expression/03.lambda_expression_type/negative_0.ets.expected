@@ -11,4 +11,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-TypeError: Type 'Int' cannot be assigned to type 'String'
+Semantic error ESE0318: Type 'Int' cannot be assigned to type 'String'

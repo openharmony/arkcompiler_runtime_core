@@ -69,6 +69,7 @@ class EtsTestSuite(ABC):
     def default_list_root_suite_name(self) -> Path:
         return Path(self.__default_list_root, self.__suite_name)
 
+    # NOTE(pronai) can this return `type[EtsTestSuite]`?
     @staticmethod
     def get_class(ets_suite_name: str) -> Any:
         name_to_class = {
@@ -112,6 +113,7 @@ class EtsTestSuite(ABC):
         tests: List[str] = []
         start = datetime.now(pytz.UTC)
         for step in self._preparation_steps:
+            # NOTE(pronai) is tests reinitialized?  are we assuming there is only one step?
             tests = step.transform(force_generate)
 
         util.create_report(self.test_root, tests)

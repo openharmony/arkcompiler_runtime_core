@@ -11,4 +11,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-TypeError: Invalid left-hand side of assignment expression
+Semantic error ESE0025: Invalid left-hand side of assignment expression
+Syntax error ESY0072: Invalid left-hand side in assignment expression.

@@ -12,4 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-TypeError: Cannot modify an array or tuple content that has the readonly parameter
+Semantic error ESE0250: Object type doesn't have proper index access method.

@@ -11,4 +11,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-TypeError: Type 'undefined' cannot be assigned to type 'Object'
+Semantic error ESE0318: Type 'undefined' cannot be assigned to type 'Object'

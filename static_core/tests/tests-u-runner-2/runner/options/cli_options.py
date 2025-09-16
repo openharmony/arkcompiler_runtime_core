@@ -200,6 +200,7 @@ class CliOptions:
         GeneralOptions.add_cli_args(parser)
         try:
             runner_args = parser.parse_args(runner_cli)
+        # NOTE(pronai): is it necessary to capture *all* exceptions?
         except BaseException as exc:
             raise IncorrectEnumValue(str(exc.args)) from exc
         return runner_args

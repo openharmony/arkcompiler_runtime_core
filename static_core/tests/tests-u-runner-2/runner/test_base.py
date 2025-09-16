@@ -60,7 +60,7 @@ class Test:
         self.test_extra_params: IOptions = params
         self.test_id = test_id
         self.update_expected = self.test_env.config.test_suite.test_lists.update_expected
-        # Expected output. Used only in the Parser test suite
+        # Expected output. Used in the Parser and CTS test suites
         self.expected = ""
         self.expected_err = ""
         # Contains fields output, error, and return_code of the last executed step

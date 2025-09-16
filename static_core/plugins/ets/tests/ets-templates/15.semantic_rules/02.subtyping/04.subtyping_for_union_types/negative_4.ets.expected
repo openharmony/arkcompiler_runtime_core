@@ -11,4 +11,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-TypeError: Type 'Array<B|C>' cannot be assigned to type '[A, C]|[A, B]'
+Semantic error ESE0318: Type 'Array<B|C>' cannot be assigned to type '[A, C]|[A, B]'
+Semantic error ESE0318: Type '[B, C]' cannot be assigned to type '[A, C]|[A, B]'

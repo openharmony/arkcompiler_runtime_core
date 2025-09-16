@@ -11,4 +11,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-SyntaxError: Generic lambda expressions are not supported.
+Syntax error ESY12842: Generic lambda expressions are not supported.

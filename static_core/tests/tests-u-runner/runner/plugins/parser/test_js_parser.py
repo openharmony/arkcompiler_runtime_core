@@ -15,9 +15,11 @@
 # limitations under the License.
 #
 
+import difflib
 import logging
 from os import path
-from typing import List, Any
+import re
+from typing import List
 
 from runner.descriptor import Descriptor
 from runner.utils import write_2_file
@@ -48,21 +50,41 @@ class TestJSParser(TestFileBased):
             test_abc=self.get_tests_abc(),
             result_validator=self.es2panda_result_validator
         )
-
         if self.update_expected and self.report:
-            self.update_expected_files(self.report.output)
+            expected_contents = self.report.output
+            # NOTE(pronaip) this is needed because run_es2panda uses .strip() on all outputs
+            if expected_contents != "":
+                expected_contents += "\n"
+
+            self.update_expected_files(expected_contents)
 
         return self
 
     def update_expected_files(self, output: str) -> None:
         write_2_file(self.expected_path, output)
 
-    def es2panda_result_validator(self, actual_output: str, _: Any, actual_return_code: int) -> bool:
+    def es2panda_result_validator(self, actual_stdout: str, actual_stderr: str, actual_return_code: int) -> bool:
+        # NOTE(pronai) merge implementations with runner.plugins.ets.test_ets #30090
+        def remove_tid(line: str) -> str:
+            tid = re.compile(r"\[TID \w+\](.*)", re.DOTALL)
+            m = tid.match(line)
+            if m:
+                return "[TID <omitted>]"+m.group(1)
+            return line
+        def normalized_lines(s: str) -> List[str]:
+            return [remove_tid(line) for line in s.splitlines(keepends=True)]
         try:
             with open(self.expected_path, 'r', encoding="utf-8") as file_pointer:
                 self.expected = file_pointer.read()
-            passed = self.expected == actual_output and actual_return_code in [0, 1]
-        except OSError:
-            passed = False
+            summary_output = actual_stdout + actual_stderr
+            output_lines = normalized_lines(summary_output)
+            expected_lines = normalized_lines(self.expected)
+            passed = expected_lines == output_lines and actual_return_code in (0, 1)
+            if not passed:
+                print("DIFF expected - got")
+                for line in difflib.unified_diff(expected_lines, output_lines):
+                    print(line, end='')
+            return passed
 
-        return passed
+        except OSError:
+            return False

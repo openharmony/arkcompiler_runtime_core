@@ -19,6 +19,7 @@ import logging
 import subprocess
 from copy import deepcopy
 from os import path, remove, makedirs
+from traceback import format_exc
 from typing import List, Callable, Tuple, Optional
 from unittest import TestCase
 from pathlib import Path
@@ -133,7 +134,6 @@ class TestFileBased(Test):
                                  if self.fail_kind != FailKind.COMPARE_OUTPUT_FAIL
                                  else self.fail_kind)
                     error = error.strip()
-                    error = f"{fail_kind.name}{f': {error}' if error else ''}"
             except subprocess.TimeoutExpired:
                 timeout_info = self.get_processes(process.pid, params.gdb_timeout)
                 self.log_cmd(f"Failed by timeout after {params.timeout} sec\n{timeout_info}")
@@ -141,8 +141,8 @@ class TestFileBased(Test):
                 error = fail_kind.name
                 return_code = process.returncode
                 process.kill()
-            except Exception as ex:  # pylint: disable=broad-except
-                self.log_cmd(f"Failed with {ex}")
+            except Exception:  # pylint: disable=broad-except
+                self.log_cmd(f"Failed with {format_exc()}")
                 fail_kind = params.fail_kind_other
                 error = fail_kind.name
                 return_code = -1

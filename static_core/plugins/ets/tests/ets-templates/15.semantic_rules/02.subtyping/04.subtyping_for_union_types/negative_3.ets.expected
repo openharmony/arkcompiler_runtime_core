@@ -11,4 +11,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-TypeError: Type 'Array<"a">' cannot be assigned to type 'Array<String>|Array<"b">'
+Semantic error ESE0318: Type 'Array<"a">' cannot be assigned to type 'Array<String>|Array<"b">'

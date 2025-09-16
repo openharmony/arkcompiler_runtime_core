@@ -11,4 +11,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-TypeError: Property myField is not visible here.
+Semantic error ESE0293: Property myField is not visible here.
+Semantic error ESE0293: Property myField is not visible here.
