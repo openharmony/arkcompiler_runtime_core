@@ -47,6 +47,42 @@ function testBigIntToString5() {
     arktest.assertEQ(result, "a")
 }
 
+function testBigIntToString6() {
+    let n = -106233993686329866388788451887415352037722042843148312087371682210961017881854n;
+    let result = n.toString(16);
+    arktest.assertEQ(result, "-eade4f43ef29faba54e2276cd2fb250b9cfe381912e4cb7b4d98ca527fa544fe")
+}
+
+function testBigIntToString7() {
+    let n = -24734529127909305130315118443084729844173892131808286553102471449170n;
+    let result = n.toString(2);
+    arktest.assertEQ(result, "-11101010110111100100111101000011111011110010100111111010101110100101010011100010001001110110110011010010111110110010010100001011100111001111111000111000000110010001001011100100110010110111101101001101100110001100101001010010")
+}
+
+function testBigIntToString8() {
+    let n = 17994542461121645181648364671329822175764606026173143432826568886866n;
+    let result = n.toString(4);
+    arktest.assertEQ(result, "2222313210331003323302213322232211103202021312303102332302110023213033320320012101023210302313231031212030221102")
+}
+
+function testBigIntToString9() {
+    let n = 4581999761941507497992146088338584893584933027760574876539n;
+    let result = n.toString(8);
+    arktest.assertEQ(result, "5655711720767451765351247042355464575445027163761601442271145573")
+}
+
+function testBigIntToString10() {
+    let n = 4581999761941507497992146088338584893584933027760574876539n;
+    let result = n.toString(32);
+    arktest.assertEQ(result, "2tdsjq3tskvleiks8jmpknr4k5ppvho349e9irr")
+}
+
+function testBigIntToString11() {
+    let n = 4581999761941507497992146088338584893584933027760574876539n;
+    let result = n.toString(10);
+    arktest.assertEQ(result, "4581999761941507497992146088338584893584933027760574876539")
+}
+
 function testBigIntConstructor1() {
     let n = BigInt(0x0102030405060708)
     arktest.assertEQ(n, BigInt("72623859790382848"))
@@ -86,6 +122,12 @@ function main(): int {
     suite.addTest("convert 0b10 to toString(undefined)", testBigIntToString3)
     suite.addTest("convert 0x10 to toString(undefined)", testBigIntToString4)
     suite.addTest("test union number|undefined as params for toString", testBigIntToString5)
+    suite.addTest("convert -106233993686329866388788451887415352037722042843148312087371682210961017881854 to toString(16)",testBigIntToString6)
+    suite.addTest("convert -24734529127909305130315118443084729844173892131808286553102471449170 to toString(2)",testBigIntToString7)
+    suite.addTest("convert 17994542461121645181648364671329822175764606026173143432826568886866 to toString(4)",testBigIntToString8)
+    suite.addTest("convert 4581999761941507497992146088338584893584933027760574876539 to toString(8)",testBigIntToString9)
+    suite.addTest("convert 4581999761941507497992146088338584893584933027760574876539 to toString(32)",testBigIntToString10)
+    suite.addTest("convert 4581999761941507497992146088338584893584933027760574876539 to toString(10)",testBigIntToString11)
     suite.addTest("test large numbers and decimals", testBigIntConstructor1)
     suite.addTest("test ordinary numbers", testBigIntConstructor2)
     suite.addTest("test strings", testBigIntConstructor3)
