@@ -60,7 +60,7 @@ cases:
   - desc: How to get Set<string> via reflection.
     logic: |-
       let type_of_set: Type = Type.from<Set<string>>();
-      arktest.assertEQ(type_of_set.toString(), "escompat.Set");
+      arktest.assertEQ(type_of_set.toString(), "std.core.Set");
   - desc: How to get Map<string, string> via reflection.
     logic: |-
       let type_of_map: Type = Type.from<Map<string, string>>();
@@ -101,7 +101,7 @@ cases:
   - desc: How to get Set via reflection.
     logic: |-
       let type_of_Set: Type = Type.from<Set<number>>();
-      arktest.assertEQ(type_of_Set.toString(), "escompat.Set");
+      arktest.assertEQ(type_of_Set.toString(), "std.core.Set");
   - desc: How to get string via reflection.
     logic: |-
       let type_of_string: Type = Type.from<string>();
@@ -138,7 +138,7 @@ cases:
   - desc: How to get Set<Boolean> via reflection.
     logic: |-
       let type_of_Array_set: Type = Type.from<Set<Boolean>>();
-      arktest.assertEQ(type_of_Array_set.toString(), "escompat.Set");
+      arktest.assertEQ(type_of_Array_set.toString(), "std.core.Set");
   - desc: How to get int[] via reflection.
     logic: |-
       let type_of_Array_int: Type = Type.from<int[]>();

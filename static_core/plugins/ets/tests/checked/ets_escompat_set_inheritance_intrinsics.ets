@@ -44,11 +44,11 @@ class MySet<K> extends Set<K> {
 //! METHOD        "ets_escompat_set_inheritance_intrinsics.ETSGLOBAL::__noinline__SetHas_bool"
 //! PASS_AFTER    "Inline"
 //! INST_NOT      "Intrinsic.SetHas"
-//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::has/
 //! METHOD        "ets_escompat_set_inheritance_intrinsics.ETSGLOBAL::__noinline__SetDelete_bool"
 //! PASS_AFTER    "Inline"
 //! INST_NOT      "Intrinsic.SetDelete"
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 
 //! CHECKER       AOT PGO: MySet<boolean> overrided intrinsics
 //! SKIP_IF       @architecture == "arm32"
@@ -68,11 +68,11 @@ class MySet<K> extends Set<K> {
 //! METHOD        "ets_escompat_set_inheritance_intrinsics.ETSGLOBAL::__noinline__SetHas_bool"
 //! PASS_AFTER    "Inline"
 //! INST_NOT      "Intrinsic.SetHas"
-//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::has/
 //! METHOD        "ets_escompat_set_inheritance_intrinsics.ETSGLOBAL::__noinline__SetDelete_bool"
 //! PASS_AFTER    "Inline"
 //! INST_NOT      "Intrinsic.SetDelete"
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 
 function test_set_bool_double_overrided2() {
     let set: MySet<boolean> = new MySet<boolean>()
