@@ -310,7 +310,7 @@ export final class BigInt {
     internal toStringAsBinary(): string {
         let reversedInts = BigInt.reverse(this.bytes)
         let intToBinaryString = (value: Long) => { return value.toString(2) }
-        let result = new StringBuilder(intToBinaryString((reversedInts[0]!).toLong()))
+        let result = new StringBuilder(intToBinaryString((reversedInts[0]!).toLong() & BigInt.maskSys))
         for (let i = 1; i < reversedInts.length; ++i) {
             result = result.append(intToBinaryString((reversedInts[i]).toLong() & BigInt.maskSys).padStart(BigInt.shiftSys, '0'))
         }
