@@ -25,7 +25,7 @@ export final class InstanceField extends Field {
     private constructor() { throw new Error("InstanceField constructor called") }
 
     public equals(other: InstanceField): boolean {
-        throw new Error("Not implemeted yet")
+        return this.fieldPtr == other.fieldPtr
     }
 
     public getValue(ownerInstance: Object): Any {

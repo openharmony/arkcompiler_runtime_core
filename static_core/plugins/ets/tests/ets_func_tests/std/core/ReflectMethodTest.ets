@@ -79,6 +79,15 @@ class HTMLWriter extends Writer {
     async asyncMethod() {}
 }
 
+class Base {
+    foo() {}
+    bar() {}
+}
+
+class Derived extends Base {
+    foo() {}
+}
+
 function testReflectMethod(): void {
     let typePoint = Class.of(new Point())
     let typeHWriter = Class.of(new HTMLWriter(10))
@@ -251,10 +260,59 @@ function testParameters() {
     arktest.assertEQ(optReadonlyRestParamsMethod.getParametersNum(), 4)
 }
 
+function testInstanceMethodEquals(): void {
+    const pointCls = Class.of(new Point())
+
+    const addMeth1 = pointCls.getInstanceMethodByName('add')!
+    const addMeth2 = pointCls.getInstanceMethodByName('add')!
+
+    arktest.assertFalse(addMeth1 == addMeth2)
+    arktest.assertTrue(addMeth1.equals(addMeth2))
+
+    const meth = pointCls.getInstanceMethodByName('serialize')!
+
+    arktest.assertFalse(addMeth1 == meth)
+    arktest.assertFalse(addMeth1.equals(meth))
+}
+
+function testOverriddenInstanceMethodEquals(): void {
+    const baseCls = Class.of(new Base())
+    const derivedCls = Class.of(new Derived())
+
+    const baseFoo = baseCls.getInstanceMethodByName('foo')!
+    const derivedFoo = derivedCls.getInstanceMethodByName('foo')!
+
+    arktest.assertTrue(baseFoo.equals(baseFoo))
+    arktest.assertTrue(derivedFoo.equals(derivedFoo))
+    arktest.assertFalse(baseFoo.equals(derivedFoo))
+    arktest.assertFalse(derivedFoo.equals(baseFoo))
+
+    const baseBar = baseCls.getInstanceMethodByName('bar')!
+    const derivedBar = baseCls.getInstanceMethodByName('bar')!
+
+    arktest.assertTrue(baseBar.equals(baseBar))
+    arktest.assertTrue(derivedBar.equals(derivedBar))
+    arktest.assertTrue(baseBar.equals(derivedBar))
+    arktest.assertTrue(derivedBar.equals(baseBar))
+}
+
+function testConstructorEquals(): void {
+    const writerCls = Class.of(new HTMLWriter(0))
+
+    const ctor1 = writerCls.getConstructors()[0]
+    const ctor2 = writerCls.getConstructors()[0]
+
+    arktest.assertFalse(ctor1 == ctor2)
+    arktest.assertTrue(ctor1.equals(ctor2))
+}
+
 function main() {
     const suite = new arktest.ArkTestsuite('Reflect Method tests')
     suite.addTest('Test Reflect Method base APIs', testReflectMethod)
     suite.addTest('Test Reflect Method attributes APIs', testReflectMethod)
     suite.addTest('Test Reflect Method Parameters APIs', testParameters)
+    suite.addTest('Test Reflect InstanceMethod.equals()', testInstanceMethodEquals)
+    suite.addTest('Test Reflect Constructor.equals()', testConstructorEquals)
+    suite.addTest('Test Reflect overridden InstanceMethod.equals()', testOverriddenInstanceMethodEquals)
     return suite.run()
 }

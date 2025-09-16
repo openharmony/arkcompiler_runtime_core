@@ -35,8 +35,8 @@ export final class StaticMethod extends Method {
         return (this.attributes & Attributes.SETTER) != 0
     }
 
-    public equals(other: InstanceMethod): boolean {
-        throw new Error("Not implemeted yet")
+    public equals(other: StaticMethod): boolean {
+        return this.methodPtr == other.methodPtr
     }
 
     public invoke(args?: FixedArray<Any>): Any {
