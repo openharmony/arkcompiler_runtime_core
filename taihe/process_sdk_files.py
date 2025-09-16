@@ -23,7 +23,7 @@ from pathlib import Path
 
 def should_skip_file(file_path, patterns) -> bool:
     for pattern in patterns:
-        if pattern.startswith("*.") and file_path.endswith(pattern[1:]):
+        if pattern.startswith("*") and file_path.endswith(pattern[1:]):
             return True
         if file_path.endswith(pattern):
             return True
@@ -31,9 +31,12 @@ def should_skip_file(file_path, patterns) -> bool:
 
 
 def copy_with_permissions(src, dst):
-    shutil.copy2(src, dst)
-    src_stat = os.stat(src)
-    os.chmod(dst, src_stat.st_mode)
+    try:
+        src_stat = os.stat(src)
+        shutil.copy2(src, dst)
+        os.chmod(dst, src_stat.st_mode)
+    except FileNotFoundError:
+        return
 
 
 def copy_directory_excluding_files(base_dir, output_dir):
@@ -50,7 +53,7 @@ def copy_directory_excluding_files(base_dir, output_dir):
     
     excluded_patterns = [
         "*.taihe.mark",
-        "lib/taihe/compiler/taihe/cli/tryit.py",
+        "lib/pyrt/lib/python3.11/site-packages/taihe/cli/tryit.py",
         "bin/taihe-tryit"
     ]
     
