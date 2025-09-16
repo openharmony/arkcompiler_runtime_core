@@ -19,6 +19,10 @@ import { BusinessError } from "@ohos.base";
 const success = 0
 const fail = 1
 
+const expectedRangeErrors = (e: Error): boolean => {
+    return (e instanceof BusinessError);
+}
+
 function main(): int {
     const suite = new arktest.ArkTestsuite("LRUCache API Error tests")
 
@@ -138,4 +142,40 @@ function testLRUCacheUpdateGetCapacity_NumberMin() {
         return
     }
     arktest.assertTrue(false, "LRUCache should throw an error when capacity is not int");
+}
+
+function testInvalidInputKeyAtPut() {
+    let that = new util.LRUCache<number | undefined | null, number>();
+    arktest.expectThrowError(() => { that.put(undefined, 1) }, expectedRangeErrors)
+    arktest.expectThrowError(() => { that.put(null, 1) }, expectedRangeErrors)
+}
+
+function testInvalidInputValueAtPut() {
+    let that = new util.LRUCache<number, number | undefined | null>();
+    arktest.expectThrowError(() => { that.put(1, undefined) }, expectedRangeErrors)
+    arktest.expectThrowError(() => { that.put(1, null) }, expectedRangeErrors)
+}
+
+function testInvalidInputKeyAtGet() {
+    let that = new util.LRUCache<number | undefined | null, number>();
+    that.put(1, 1);
+    that.put(2, 2);
+    arktest.expectThrowError(() => { that.get(undefined) }, expectedRangeErrors)
+    arktest.expectThrowError(() => { that.get(null) }, expectedRangeErrors)
+}
+
+function testInvalidInputKeyAtContains() {
+    let that = new util.LRUCache<number | undefined | null, number>();
+    that.put(1, 1);
+    that.put(2, 2);
+    arktest.expectThrowError(() => { that.contains(undefined) }, expectedRangeErrors)
+    arktest.expectThrowError(() => { that.contains(null) }, expectedRangeErrors)
+}
+
+function testInvalidInputKeyAtRemove() {
+    let that = new util.LRUCache<number | undefined | null, number>();
+    that.put(1, 1);
+    that.put(2, 2);
+    arktest.expectThrowError(() => { that.remove(undefined) }, expectedRangeErrors)
+    arktest.expectThrowError(() => { that.remove(null) }, expectedRangeErrors)
 }
