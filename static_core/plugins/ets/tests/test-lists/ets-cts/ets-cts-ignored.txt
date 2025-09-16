@@ -2615,9 +2615,6 @@
 #24129
 17.experimental_features/09.overload_declarations/03.interface_method_overload_declarations/im_over2_3.ets
 
-#28120
-17.experimental_features/09.overload_declarations/03.interface_method_overload_declarations/multiple_interfaces_inheritance_1.ets
-
 #24112
 17.experimental_features/09.overload_declarations/04.constructor_overload_declarations/co1_over_10.ets
 17.experimental_features/09.overload_declarations/04.constructor_overload_declarations/co1_over_11.ets

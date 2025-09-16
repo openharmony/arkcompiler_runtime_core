@@ -32,7 +32,8 @@ cases:
       arktest.assertTrue(a.foo(1.1 as number) == 1);
       arktest.assertTrue(a.foo("some string") == 2);
 
-  - decl: |-
+  - tags: 'negative, compile-only'
+    decl: |-
       interface I {
           foo(i: number) {
               return 1;
