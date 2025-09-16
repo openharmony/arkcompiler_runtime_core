@@ -13,12 +13,11 @@
  * limitations under the License.
  */
 
-import { BusinessError } from "@ohos.base";
+import { BusinessError, RecordData } from "@ohos.base";
 
 const TypeErrorCodeId: int = 401;
 const percentRate = 100;
 const syntaxErrorCode: int = 10200002;
-export type RecordData = undefined | null | Object | Record<string, RecordData> | Array<RecordData>;
 export type PromisifiedFunc = (...args: FixedArray<Any>) => Promise<Any>;
 
 function createBusinessError(code: int, message: string) {

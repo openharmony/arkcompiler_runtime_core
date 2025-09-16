@@ -14,7 +14,7 @@
  */
 
 import { LinkedList, ListNode } from './@ohos.util.LinkedList';
-import { BusinessError } from "@ohos.base";
+import { BusinessError, RecordData } from "@ohos.base";
 
 const TypeErrorCodeId: int = 401;
 const OutOfBoundsErrorCodeId: int = 10200001;
@@ -30,7 +30,6 @@ function createBusinessError(code: int, message: string) {
 export type ListComparatorFn<T> = (firstValue: T, secondValue: T) => double;
 export type ListForEachCb<T> = (value: T, index: int, list: List<T>) => void;
 export type ListReplaceCb<T> = (value: T, index: int, list: List<T>) => T;
-export type RecordData = undefined | null | Object | Record<string, RecordData> | Array<RecordData>;
 
 export class List<T> implements Iterable<T>, JsonReplacer {
     private buffer: LinkedList<T>;
