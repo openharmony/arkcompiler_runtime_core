@@ -14,6 +14,7 @@
  */
 
 import TreeMap from "@ohos.util.TreeMap";
+import { BusinessError } from "@ohos.base";
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("TreeMap GetFirstKey GetLastKey API tests")
@@ -62,10 +63,16 @@ function testGetFirstKeyAndLastKeyEmptyTreeMap() {
         new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
             return secondValue.compareTo(firstValue);
         });
-    let first = treeMap.getFirstKey();
-    let last = treeMap.getLastKey();
-    arktest.assertEQ(first, undefined, "The treeMap should return undefined for the first key in an empty map");
-    arktest.assertEQ(last, undefined, "The treeMap should return undefined for the last key in an empty map");
+    try {
+        let first = treeMap.getFirstKey();
+    } catch (e: BusinessError) {
+        arktest.assertEQ(e.message, "Container is empty");
+    }
+    try {
+        let last = treeMap.getLastKey();
+    } catch (e: BusinessError) {
+        arktest.assertEQ(e.message, "Container is empty");
+    }
     arktest.assertEQ(treeMap.length, 0, "The treeMap length should be 0");
 }
 

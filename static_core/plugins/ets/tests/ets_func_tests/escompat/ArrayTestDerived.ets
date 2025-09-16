@@ -24,9 +24,9 @@ class Derived extends Array<Number> {
         return super.$_get(index) + DERIVED_ACCESS_OFFSET;
     }
 
-    public override at(index: int): Number | undefined {
+    public override at(index: int): Number {
         let superRes = super.at(index);
-        return superRes === undefined ? superRes : superRes + DERIVED_ACCESS_OFFSET;
+        return superRes + DERIVED_ACCESS_OFFSET;
     }
 }
 

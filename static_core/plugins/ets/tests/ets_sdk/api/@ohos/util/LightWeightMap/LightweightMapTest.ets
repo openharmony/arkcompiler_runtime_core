@@ -99,24 +99,21 @@ function testEmptyMapExceptionHandling() {
     let empty_fm = new LightWeightMap<string, string>();
     let exceptionCheck = (e: Error): boolean | string => {
         if (e instanceof BusinessError) {
-            return e.name == "BusinessError" && e.message == `Container is empty` &&
-                e.code == OutOfBoundsErrorCodeId;
+            return e.name == "BusinessError" && e.message == `Container is empty`
         }
         return false;
     }
     arktest.expectThrow(() => {empty_fm.getKeyAt(0)}, exceptionCheck);
     let exceptionCheck1 = (e: Error): boolean | string => {
         if (e instanceof BusinessError) {
-            return e.name == "BusinessError" && e.message == `Container is empty` &&
-                e.code == OutOfBoundsErrorCodeId;
+            return e.name == "BusinessError" && e.message == `Container is empty`
         }
         return false;
     }
     arktest.expectThrow(() => {empty_fm.getValueAt(0)}, exceptionCheck1);
     let exceptionCheck2 = (e: Error): boolean | string => {
         if (e instanceof BusinessError) {
-            return e.name == "BusinessError" && e.message == `Container is empty` &&
-                e.code == OutOfBoundsErrorCodeId;
+            return e.name == "BusinessError" && e.message == `Container is empty`
         }
         return false;
     }

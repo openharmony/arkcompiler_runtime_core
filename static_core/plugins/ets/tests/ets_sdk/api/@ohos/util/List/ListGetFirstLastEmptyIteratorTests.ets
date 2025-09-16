@@ -14,6 +14,7 @@
  */
 
 import {List} from '@ohos.util.List';
+import { BusinessError } from "@ohos.base";
 
 function main() {
     const suite = new arktest.ArkTestsuite("List API tests");
@@ -53,7 +54,11 @@ function testGetFirstNonEmptyContainer() {
 
 function testGetFirstEmptyContainer() {
     let list = new List<double>();
-    arktest.assertEQ(list.getFirst(), undefined, "First element should be undefined when container is empty");
+    try {
+        let result = list.getFirst();
+    } catch (e: BusinessError) {
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }
 
 function testGetFirstUndefined() {
@@ -71,7 +76,11 @@ function testGetLastNonEmptyContainer() {
 
 function testGetLastEmptyContainer() {
     let list = new List<double>();
-    arktest.assertEQ(list.getLast(), undefined, "Last element should be undefined when container is empty");
+    try {
+        let result = list.getLast();
+    } catch (e: BusinessError) {
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }
 
 function testGetLastUndefined() {

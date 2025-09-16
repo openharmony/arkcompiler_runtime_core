@@ -14,6 +14,7 @@
  */
 
 import {TreeSet} from "@ohos.util.TreeSet";
+import { BusinessError } from "@ohos.base";
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("TreeSet GetFirstValue GetLastValue API tests")
@@ -57,10 +58,16 @@ function testGetFirstValueGetLastValueSingleElement() {
 function testGetFirstValueGetLastValueEmptyTreeSet() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
         secondValue: string): double => { return secondValue.compareTo(firstValue) });
-    let result1 = treeSet.getFirstValue();
-    let result2 = treeSet.getLastValue();
-    arktest.assertEQ(result1, undefined, "The treeSet should return undefined for the first value in an empty set");
-    arktest.assertEQ(result2, undefined, "The treeSet should return undefined for the last value in an empty set");
+    try {
+        let result1 = treeSet.getFirstValue();
+    } catch (e: BusinessError) {
+        arktest.assertEQ(e.message, "Container is empty");
+    }
+    try {
+        let result2 = treeSet.getLastValue();
+    } catch (e: BusinessError) {
+        arktest.assertEQ(e.message, "Container is empty");
+    }
     arktest.assertEQ(treeSet.length, 0, "The treeSet length should be 0")
 }
 

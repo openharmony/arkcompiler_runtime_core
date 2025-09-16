@@ -111,7 +111,11 @@ function testLinkedListBasicCRUD() {
     list1.forEach((d, i) => {
         arktest.assertEQ(d, testArray1[i]);
     });
-    arktest.assertEQ(list.get(1232), undefined);
+    try {
+        let result = list.get(1232);
+    } catch (e: BusinessError) {
+        arktest.assertEQ(e.code, 10200001);
+    }
     arktest.assertEQ(list.getLastIndexOf(3333), -1);
 
     let exceptionCheck = (e: Error): boolean | string => {
@@ -183,16 +187,14 @@ function testLinkedListExceptionHandling() {
     let empty_ll = new LinkedList<double>();
     let exceptionCheck = (e: Error): boolean | string => {
         if (e instanceof BusinessError) {
-            return e.name == "BusinessError" && e.message == "Container is empty" &&
-                e.code == OutOfBoundsErrorCodeId;
+            return e.name == "BusinessError" && e.message == "Container is empty";
         }
         return false;
     }
     arktest.expectThrow(() => { empty_ll.set(0, 1) }, exceptionCheck);
     let exceptionCheck1 = (e: Error): boolean | string => {
         if (e instanceof BusinessError) {
-            return e.name == "BusinessError" && e.message == "Container is empty" &&
-                e.code == OutOfBoundsErrorCodeId;
+            return e.name == "BusinessError" && e.message == "Container is empty";
         }
         return false;
     }

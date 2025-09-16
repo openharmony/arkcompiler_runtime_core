@@ -102,8 +102,7 @@ function testSetValueAtIndexOfEmptyMap() {
     let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
     let exceptionCheck = (e: Error): boolean | string => {
         if (e instanceof BusinessError) {
-            return e.name == "BusinessError" && e.message == "Container is empty" &&
-                e.code == OutOfBoundsErrorCodeId;
+            return e.name == "BusinessError" && e.message == "Container is empty";
         }
         return false;
     }

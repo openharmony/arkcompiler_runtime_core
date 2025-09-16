@@ -89,9 +89,9 @@ function cloneArray(self: FixedArray<boolean>): FixedArray<boolean> {
  * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
  *
  * @returns The element in the array matching the given index.
- * Returns undefined if `index` < `-length()` or `index` >= `length()`.
+ * Throw range error if `index` < `-length()` or `index` >= `length()`.
  */
-export function at(self: FixedArray<boolean>, index: number): Boolean | undefined {
+export function at(self: FixedArray<boolean>, index: number): Boolean {
     return at(self, index.toInt())
 }
 
@@ -104,9 +104,9 @@ export function at(self: FixedArray<boolean>, index: number): Boolean | undefine
  * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
  *
  * @returns The element in the array matching the given index.
- * Returns undefined if `index` < `-length()` or `index` >= `length()`.
+ * Throw range error if `index` < `-length()` or `index` >= `length()`.
  */
-export function at(self: FixedArray<boolean>, index: int): Boolean | undefined {
+export function at(self: FixedArray<boolean>, index: int): Boolean {
     let len = self.length;
     let k: int;
     if (index >= 0) {
@@ -116,7 +116,7 @@ export function at(self: FixedArray<boolean>, index: int): Boolean | undefined {
     }
 
     if (k < 0 || k >= len) {
-        return undefined;
+        throw new RangeError("Invalid index");
     }
 
     return self[k];
@@ -1015,9 +1015,9 @@ function cloneArray(self: FixedArray<byte>): FixedArray<byte> {
  * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
  *
  * @returns The element in the array matching the given index.
- * Returns undefined if `index` < `-length()` or `index` >= `length()`.
+ * Throw range error if `index` < `-length()` or `index` >= `length()`.
  */
-export function at(self: FixedArray<byte>, index: number): Byte | undefined {
+export function at(self: FixedArray<byte>, index: number): Byte {
     return at(self, index.toInt())
 }
 
@@ -1030,9 +1030,9 @@ export function at(self: FixedArray<byte>, index: number): Byte | undefined {
  * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
  *
  * @returns The element in the array matching the given index.
- * Returns undefined if `index` < `-length()` or `index` >= `length()`.
+ * Throw range error if `index` < `-length()` or `index` >= `length()`.
  */
-export function at(self: FixedArray<byte>, index: int): Byte | undefined {
+export function at(self: FixedArray<byte>, index: int): Byte {
     let len = self.length;
     let k: int;
     if (index >= 0) {
@@ -1042,7 +1042,7 @@ export function at(self: FixedArray<byte>, index: int): Byte | undefined {
     }
 
     if (k < 0 || k >= len) {
-        return undefined;
+        throw new RangeError("Invalid index");
     }
 
     return self[k];
@@ -1941,9 +1941,9 @@ function cloneArray(self: FixedArray<short>): FixedArray<short> {
  * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
  *
  * @returns The element in the array matching the given index.
- * Returns undefined if `index` < `-length()` or `index` >= `length()`.
+ * Throw range error if `index` < `-length()` or `index` >= `length()`.
  */
-export function at(self: FixedArray<short>, index: number): Short | undefined {
+export function at(self: FixedArray<short>, index: number): Short {
     return at(self, index.toInt())
 }
 
@@ -1956,9 +1956,9 @@ export function at(self: FixedArray<short>, index: number): Short | undefined {
  * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
  *
  * @returns The element in the array matching the given index.
- * Returns undefined if `index` < `-length()` or `index` >= `length()`.
+ * Throw range error if `index` < `-length()` or `index` >= `length()`.
  */
-export function at(self: FixedArray<short>, index: int): Short | undefined {
+export function at(self: FixedArray<short>, index: int): Short {
     let len = self.length;
     let k: int;
     if (index >= 0) {
@@ -1968,7 +1968,7 @@ export function at(self: FixedArray<short>, index: int): Short | undefined {
     }
 
     if (k < 0 || k >= len) {
-        return undefined;
+        throw new RangeError("Invalid index");
     }
 
     return self[k];
@@ -2867,9 +2867,9 @@ function cloneArray(self: FixedArray<int>): FixedArray<int> {
  * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
  *
  * @returns The element in the array matching the given index.
- * Returns undefined if `index` < `-length()` or `index` >= `length()`.
+ * Throw range error if `index` < `-length()` or `index` >= `length()`.
  */
-export function at(self: FixedArray<int>, index: number): Int | undefined {
+export function at(self: FixedArray<int>, index: number): Int {
     return at(self, index.toInt())
 }
 
@@ -2882,9 +2882,9 @@ export function at(self: FixedArray<int>, index: number): Int | undefined {
  * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
  *
  * @returns The element in the array matching the given index.
- * Returns undefined if `index` < `-length()` or `index` >= `length()`.
+ * Throw range error if `index` < `-length()` or `index` >= `length()`.
  */
-export function at(self: FixedArray<int>, index: int): Int | undefined {
+export function at(self: FixedArray<int>, index: int): Int {
     let len = self.length;
     let k: int;
     if (index >= 0) {
@@ -2894,7 +2894,7 @@ export function at(self: FixedArray<int>, index: int): Int | undefined {
     }
 
     if (k < 0 || k >= len) {
-        return undefined;
+        throw new RangeError("Invalid index");
     }
 
     return self[k];
@@ -3793,9 +3793,9 @@ function cloneArray(self: FixedArray<long>): FixedArray<long> {
  * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
  *
  * @returns The element in the array matching the given index.
- * Returns undefined if `index` < `-length()` or `index` >= `length()`.
+ * Throw range error if `index` < `-length()` or `index` >= `length()`.
  */
-export function at(self: FixedArray<long>, index: number): Long | undefined {
+export function at(self: FixedArray<long>, index: number): Long {
     return at(self, index.toInt())
 }
 
@@ -3808,9 +3808,9 @@ export function at(self: FixedArray<long>, index: number): Long | undefined {
  * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
  *
  * @returns The element in the array matching the given index.
- * Returns undefined if `index` < `-length()` or `index` >= `length()`.
+ * Throw range error if `index` < `-length()` or `index` >= `length()`.
  */
-export function at(self: FixedArray<long>, index: int): Long | undefined {
+export function at(self: FixedArray<long>, index: int): Long {
     let len = self.length;
     let k: int;
     if (index >= 0) {
@@ -3820,7 +3820,7 @@ export function at(self: FixedArray<long>, index: int): Long | undefined {
     }
 
     if (k < 0 || k >= len) {
-        return undefined;
+        throw new RangeError("Invalid index");
     }
 
     return self[k];
@@ -4719,9 +4719,9 @@ function cloneArray(self: FixedArray<float>): FixedArray<float> {
  * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
  *
  * @returns The element in the array matching the given index.
- * Returns undefined if `index` < `-length()` or `index` >= `length()`.
+ * Throw range error if `index` < `-length()` or `index` >= `length()`.
  */
-export function at(self: FixedArray<float>, index: number): Float | undefined {
+export function at(self: FixedArray<float>, index: number): Float {
     return at(self, index.toInt())
 }
 
@@ -4734,9 +4734,9 @@ export function at(self: FixedArray<float>, index: number): Float | undefined {
  * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
  *
  * @returns The element in the array matching the given index.
- * Returns undefined if `index` < `-length()` or `index` >= `length()`.
+ * Throw range error if `index` < `-length()` or `index` >= `length()`.
  */
-export function at(self: FixedArray<float>, index: int): Float | undefined {
+export function at(self: FixedArray<float>, index: int): Float {
     let len = self.length;
     let k: int;
     if (index >= 0) {
@@ -4746,7 +4746,7 @@ export function at(self: FixedArray<float>, index: int): Float | undefined {
     }
 
     if (k < 0 || k >= len) {
-        return undefined;
+        throw new RangeError("Invalid index");
     }
 
     return self[k];
@@ -5653,9 +5653,9 @@ function cloneArray(self: FixedArray<double>): FixedArray<double> {
  * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
  *
  * @returns The element in the array matching the given index.
- * Returns undefined if `index` < `-length()` or `index` >= `length()`.
+ * Throw range error if `index` < `-length()` or `index` >= `length()`.
  */
-export function at(self: FixedArray<double>, index: number): Double | undefined {
+export function at(self: FixedArray<double>, index: number): Double {
     return at(self, index.toInt())
 }
 
@@ -5668,9 +5668,9 @@ export function at(self: FixedArray<double>, index: number): Double | undefined 
  * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
  *
  * @returns The element in the array matching the given index.
- * Returns undefined if `index` < `-length()` or `index` >= `length()`.
+ * Throw range error if `index` < `-length()` or `index` >= `length()`.
  */
-export function at(self: FixedArray<double>, index: int): Double | undefined {
+export function at(self: FixedArray<double>, index: int): Double {
     let len = self.length;
     let k: int;
     if (index >= 0) {
@@ -5680,7 +5680,7 @@ export function at(self: FixedArray<double>, index: int): Double | undefined {
     }
 
     if (k < 0 || k >= len) {
-        return undefined;
+        throw new RangeError("Invalid index");
     }
 
     return self[k];
@@ -6587,9 +6587,9 @@ function cloneArray(self: FixedArray<char>): FixedArray<char> {
  * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
  *
  * @returns The element in the array matching the given index.
- * Returns undefined if `index` < `-length()` or `index` >= `length()`.
+ * Throw range error if `index` < `-length()` or `index` >= `length()`.
  */
-export function at(self: FixedArray<char>, index: number): Char | undefined {
+export function at(self: FixedArray<char>, index: number): Char {
     return at(self, index.toInt())
 }
 
@@ -6602,9 +6602,9 @@ export function at(self: FixedArray<char>, index: number): Char | undefined {
  * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
  *
  * @returns The element in the array matching the given index.
- * Returns undefined if `index` < `-length()` or `index` >= `length()`.
+ * Throw range error if `index` < `-length()` or `index` >= `length()`.
  */
-export function at(self: FixedArray<char>, index: int): Char | undefined {
+export function at(self: FixedArray<char>, index: int): Char {
     let len = self.length;
     let k: int;
     if (index >= 0) {
@@ -6614,7 +6614,7 @@ export function at(self: FixedArray<char>, index: int): Char | undefined {
     }
 
     if (k < 0 || k >= len) {
-        return undefined;
+        throw new RangeError("Invalid index");
     }
 
     return self[k];

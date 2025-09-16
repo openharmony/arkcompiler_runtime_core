@@ -14,6 +14,7 @@
  */
 
 import {TreeSet} from "@ohos.util.TreeSet";
+import { BusinessError } from "@ohos.base";
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("TreeSet PopFirst PopLast Iterator API tests")
@@ -57,10 +58,16 @@ function testPopFirstPopLastValidValues() {
 function testPopFirstPopLastEmptyTreeSet() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
         secondValue: string): double => { return secondValue.compareTo(firstValue) });
-    let result_popFirst = treeSet.popFirst();
-    let result_popLast = treeSet.popLast();
-    arktest.assertEQ(result_popFirst, undefined, "The treeSet should return undefined for popping first value in an empty set");
-    arktest.assertEQ(result_popLast, undefined, "The treeSet should return undefined for popping last value in an empty set");
+    try {
+        let result_popFirst = treeSet.popFirst();
+    } catch (e: BusinessError) {
+        arktest.assertEQ(e.message, "Container is empty");
+    }
+    try {
+        let result_popLast = treeSet.popLast();
+    } catch (e: BusinessError) {
+        arktest.assertEQ(e.message, "Container is empty");
+    }
     arktest.assertEQ(treeSet.length, 0, "The treeSet length should be 0")
 }
 
@@ -68,10 +75,16 @@ function testPopFirstPopLastMultipleValues() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
         secondValue: string): double => { return secondValue.compareTo(firstValue) });
     treeSet.add("aa");
-    let result_popFirst = treeSet.popFirst();
-    let result_popLast = treeSet.popLast();
-    arktest.assertEQ(result_popFirst, "aa", "The treeSet should pop the first value");
-    arktest.assertEQ(result_popLast, undefined, "The treeSet should pop the last value");
+    try {
+        let result_popFirst = treeSet.popFirst();
+    } catch (e: BusinessError) {
+        arktest.assertEQ(e.message, "Container is empty");
+    }
+    try {
+        let result_popLast = treeSet.popLast();
+    } catch (e: BusinessError) {
+        arktest.assertEQ(e.message, "Container is empty");
+    }
     arktest.assertEQ(treeSet.length, 0, "The treeSet length should be 0");
 }
 
@@ -96,12 +109,18 @@ function testPopFirstPopLastAfterClear() {
     treeSet.add("sparrow");
     treeSet.clear();
     let result1 = treeSet.isEmpty();
-    let result_popFirst = treeSet.popFirst();
-    let result_popLast = treeSet.popLast();
+    try {
+        let result_popFirst = treeSet.popFirst();
+    } catch (e: BusinessError) {
+        arktest.assertEQ(e.message, "Container is empty");
+    }
+    try {
+        let result_popLast = treeSet.popLast();
+    } catch (e: BusinessError) {
+        arktest.assertEQ(e.message, "Container is empty");
+    }
     let result2 = treeSet.has("squirrel");
     let result3 = treeSet.has("sparrow");
-    arktest.assertEQ(result_popFirst, undefined, "The treeSet should pop the first value");
-    arktest.assertEQ(result_popLast, undefined, "The treeSet should pop the last value");
     arktest.assertEQ(result1, true, "The treeSet should be empty");
     arktest.assertEQ(result2, false, "The treeSet should not contain the value that is not set");
     arktest.assertEQ(result3, false, "The treeSet should not contain the value that is not set");

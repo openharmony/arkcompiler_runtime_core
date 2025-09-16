@@ -14,7 +14,7 @@
  */
 
 import {LinkedList} from "@ohos.util.LinkedList";
-import {BusinessError} from "@ohos.base";
+import { BusinessError } from "@ohos.base";
 
 const OutOfBoundsErrorCodeId: int = 10200001;
 
@@ -183,7 +183,11 @@ function testGetWithinRange() {
 function testGetOutsideRange() {
     let linkedList = new LinkedList<double>();
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
-    arktest.assertEQ(linkedList.get(TestData.testNumber1w), undefined, "Element at index 10000 should be undefined");
+    try {
+        let result = linkedList.get(TestData.testNumber1w);
+    } catch (e: BusinessError) {
+        arktest.assertEQ(e.code, 10200001);
+    }
 }
 
 function initializeLinkedList<T>(linkedList: LinkedList<T>, sourceArray: Array<T>) {

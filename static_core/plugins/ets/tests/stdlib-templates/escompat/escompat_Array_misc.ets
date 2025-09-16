@@ -242,19 +242,28 @@ function testGoodNegIndex(): int {
 
 function testBadNegIndex(): int {
     const array = Array.from<object>(source)
-    let exp = array.at(-100)
-    if (exp == null) return SUCCESS
-    console.println("Unexpected result on bad negative index")
-    return FAILURE
+    try {
+        let exp = array.at(-100)
+        console.println("Unexpected result on bad negative index")
+        return FAILURE
+    } catch(e) {
+
+    }
+    return SUCCESS
 }
 
 function testBadPosIndex(): int {
     const array = Array.from<object>(source)
-    let exp = array.at(100)
-    if (exp == null) return SUCCESS
-    console.println("Unexpected result on bad positive index")
-    return FAILURE
+    try {
+        let exp = array.at(100)
+        console.println("Unexpected result on bad positive index")
+        return FAILURE
+    } catch(e) {
+
+    }
+    return SUCCESS
 }
+
 
 
 // currently not used tests *Flat*

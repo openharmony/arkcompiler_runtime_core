@@ -21,6 +21,7 @@ function main(): int {
     failures += check((): int => { return length() }, "length");
     failures += check((): int => { return shiftUnshift() }, "shiftUnshift");
     failures += check((): int => { return pushPop() }, "pushPop");
+    failures += check((): int => { return at() }, "at");
     return check(failures, "All tests run");
 }
 
@@ -121,6 +122,42 @@ function pushPop(): int {
             if (a.length != i) {
                 return fail;
             }
+        }
+        return success;
+    })
+}
+
+function at(): int {
+    return check(() => new Array<number>, (a: Array<number>) => {
+        try {
+            arr.at(50)
+            return fail;
+        } catch (e: Error) {
+            arktest.assertEQ(e.message, "Invalid index");
+        }
+        a.pushECMA(1, 2, 3, 4, 5)
+        if (a.length != 5) {
+            return fail;
+        }
+        for (let i = 5; i >= 0; i--) {
+            if (a.at(i)! != i) {
+                return fail
+            }
+        }
+        try {
+            arr.at(arr.length);
+            return fail;
+        } catch (e: Error) {
+            arktest.assertEQ(e.message, "Invalid index");
+        }
+        try {
+            arr.at(-arr.length - 1);
+            return fail;
+        } catch (e: Error) {
+            arktest.assertEQ(e.message, "Invalid index");
+        }
+        if (arr.at(-arr.length)! != arr[0] || arr.at(-arr.length + 1)! != arr[1]) {
+            return fail;
         }
         return success;
     })

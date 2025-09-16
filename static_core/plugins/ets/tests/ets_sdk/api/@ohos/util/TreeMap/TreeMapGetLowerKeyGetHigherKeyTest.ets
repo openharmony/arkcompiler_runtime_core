@@ -14,6 +14,7 @@
  */
 
 import TreeMap from "@ohos.util.TreeMap";
+import { BusinessError } from "@ohos.base";
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("TreeMap GetLowerKey GetHigherKey API tests")
@@ -74,10 +75,16 @@ function testGetLowerKeyAndHigherKeyEmptyTreeMap() {
         new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
             return secondValue.compareTo(firstValue)
         });
-    let lower = treeMap.getLowerKey("bb");
-    let higher = treeMap.getHigherKey("aa");
-    arktest.assertEQ(lower, undefined, "The treeMap should return undefined for the lower key in an empty map");
-    arktest.assertEQ(higher, undefined, "The treeMap should return undefined for the higher key in an empty map");
+    try {
+        let lower = treeMap.getLowerKey("bb");
+    } catch (e: BusinessError) {
+        arktest.assertEQ(e.message, "Container is empty");
+    }
+    try {
+        let higher = treeMap.getHigherKey("aa");
+    } catch (e: BusinessError) {
+        arktest.assertEQ(e.message, "Container is empty");
+    }
     arktest.assertEQ(treeMap.length, 0, "The treeMap length should be 0");
 }
 
@@ -125,10 +132,16 @@ function testGetLowerKeyAndHigherKeyEmptyStringKey() {
         new TreeMap<string, string>((firstValue: string, secondValue: string): double => {
             return secondValue.compareTo(firstValue)
         });
-    let lower = treeMap.getLowerKey("");
-    let higher = treeMap.getHigherKey("");
-    arktest.assertEQ(lower, undefined, "The treeMap should return undefined for the lower key at the boundary value");
-    arktest.assertEQ(higher, undefined, "The treeMap should return undefined for the higher key at the boundary value");
+    try {
+        let lower = treeMap.getLowerKey("");
+    } catch (e: BusinessError) {
+        arktest.assertEQ(e.message, "Container is empty");
+    }
+    try {
+        let higher = treeMap.getHigherKey("");
+    } catch (e: BusinessError) {
+        arktest.assertEQ(e.message, "Container is empty");
+    }
     arktest.assertEQ(treeMap.length, 0, "The treeMap length should be 0");
 }
 

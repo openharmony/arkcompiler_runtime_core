@@ -17,6 +17,7 @@ import { BusinessError } from "@ohos.base";
 
 const TypeErrorCodeId: int = 401;
 const OutOfBoundsErrorCodeId: int = 10200001;
+const EmptyContainerId: int = 10200010;
 
 function createBusinessError(code: int, message: string) {
     let err = new BusinessError();
@@ -563,7 +564,7 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
 
     private checkEmptyContainer(): void {
         if(this.isEmpty()) {
-            throw createBusinessError(OutOfBoundsErrorCodeId, `Container is empty`);
+            throw createBusinessError(EmptyContainerId, `Container is empty`);
         }
     }
 }

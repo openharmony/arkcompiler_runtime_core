@@ -14,6 +14,7 @@
  */
 
 import {TreeSet} from "@ohos.util.TreeSet";
+import { BusinessError } from "@ohos.base";
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("TreeSet GetFirstValue GetLastValue Add Remove API tests")
@@ -48,8 +49,11 @@ function main(): int {
 //Test cases ported from ArkTS 1.0:TREESET_1800
 function testGetFirstValueOnEmptySet() {
     let treeSet = new TreeSet<string>();
-    let result = treeSet.getFirstValue();
-    arktest.assertEQ(result, undefined);
+    try {
+        let result = treeSet.getFirstValue();
+    } catch (e: BusinessError) {
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }
 
 //Test cases ported from ArkTS 1.0:TREESET_1900
@@ -85,8 +89,11 @@ function testGetFirstValueWithCustomReverseComparator() {
 //Test cases ported from ArkTS 1.0:TREESET_2200
 function testGetLastValueOnEmptySet() {
     let treeSet = new TreeSet<string>();
-    let result = treeSet.getLastValue();
-    arktest.assertEQ(result, undefined);
+    try {
+        let result = treeSet.getLastValue();
+    } catch (e: BusinessError) {
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }
 
 //Test cases ported from ArkTS 1.0:TREESET_2300

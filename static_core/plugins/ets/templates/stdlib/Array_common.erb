@@ -22,9 +22,9 @@
  * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
  *
  * @returns The element in the array matching the given index.
- * Returns undefined if `index` < `-length()` or `index` >= `length()`.
+ * Throw range error if `index` < `-length()` or `index` >= `length()`.
  */
-<%= access_public %> <%= override %> at<%= this_generic %>(<%= this_arg %>index: number): <%= el_type_boxed %> | undefined {
+<%= access_public %> <%= override %> at<%= this_generic %>(<%= this_arg %>index: number): <%= el_type_boxed %> {
     return <%= this_call.('at') %>index.toInt())
 }
 
@@ -37,9 +37,9 @@
  * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
  *
  * @returns The element in the array matching the given index.
- * Returns undefined if `index` < `-length()` or `index` >= `length()`.
+ * Throw range error if `index` < `-length()` or `index` >= `length()`.
  */
-<%= access_public %> at<%= this_generic %>(<%= this_arg %>index: int): <%= el_type_boxed %> | undefined {
+<%= access_public %> at<%= this_generic %>(<%= this_arg %>index: int): <%= el_type_boxed %> {
     let len = <%= this_len_int %>;
     let k: int;
     if (index >= 0) {
@@ -49,7 +49,7 @@
     }
 
     if (k < 0 || k >= len) {
-        return undefined;
+        throw new RangeError("Invalid index");
     }
 
     return <%= get_unsafe.(this, 'k') %>;

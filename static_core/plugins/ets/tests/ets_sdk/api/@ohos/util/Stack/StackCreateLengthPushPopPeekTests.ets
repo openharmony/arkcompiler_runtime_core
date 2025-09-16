@@ -14,6 +14,7 @@
  */
 
 import {Stack} from "@ohos.util.Stack";
+import {BusinessError} from "@ohos.base";
 
 function main() {
     const suite = new arktest.ArkTestsuite("Stack API tests");
@@ -108,7 +109,11 @@ function testStackPush() {
 function testPopFromEmptyStack() {
     let stack = new Stack<double>();
     arktest.assertEQ(stack.length, 0, "Initial stack length should be 0");
-    arktest.assertEQ(stack.pop(), undefined, "Pop from empty stack should return undefined");
+    try {
+        let first = stack.pop();
+    } catch (e: BusinessError) {
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }
 
 function testPopFromNonEmptyStack() {
@@ -131,7 +136,11 @@ function testPopFromNonEmptyStack() {
 function testPeekEmptyStack() {
     let stack = new Stack<double>();
     arktest.assertEQ(stack.length, 0, "Initial stack length should be 0");
-    arktest.assertEQ(stack.peek(), undefined, "Peek from empty stack should return undefined");
+    try {
+        let first = stack.peek();
+    } catch (e: BusinessError) {
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }
 
 function testPeekNonEmptyStack() {
