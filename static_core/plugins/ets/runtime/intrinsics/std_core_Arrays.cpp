@@ -253,15 +253,15 @@ static void RefCopy(ManagedThread *thread, ObjectArrayHandle<T> srcArray, Object
             }
             copy(srcPtr, dstPtr);
         };
-        auto putSafepoint = [&usePreBarrier, barrierSet, srcArray, dstArray, thread](T *&src, T *&dst, size_t start,
-                                                                                     size_t count) mutable {
+        auto putSafepoint = [&usePreBarrier, barrierSet, srcArray, dstArray,
+                             thread](T *&srcPtr, T *&dstPtr, size_t start, size_t count) mutable {
             PostWrite<T>(thread, dstArray, start, count);
             ark::interpreter::RuntimeInterface::Safepoint(thread);
             usePreBarrier = barrierSet->IsPreBarrierEnabled();
-            // If GC suspends worker during RefCopy execution, it may move the arrays pointed by *srcPtr and *dstPtr
+            // If GC suspends worker during RefCopy execution, it may move the arrays pointed by srcPtr and dstPtr
             // to different memory locations; therefore, the new array addresses should be re-read.
-            src = srcArray.GetStartPtr();
-            dst = dstArray.GetStartPtr();
+            srcPtr = srcArray.GetStartPtr();
+            dstPtr = dstArray.GetStartPtr();
         };
         if (backwards) {
             CopyBackward(src, dst, length, copyWithBarriers, putSafepoint);
@@ -269,13 +269,13 @@ static void RefCopy(ManagedThread *thread, ObjectArrayHandle<T> srcArray, Object
             CopyForward(src, dst, length, copyWithBarriers, putSafepoint);
         }
     } else {
-        auto putSafepoint = [srcArray, dstArray, thread](T *&src, T *&dst, size_t start, size_t count) mutable {
+        auto putSafepoint = [srcArray, dstArray, thread](T *&srcPtr, T *&dstPtr, size_t start, size_t count) mutable {
             PostWrite<T>(thread, dstArray, start, count);
             ark::interpreter::RuntimeInterface::Safepoint(thread);
-            // If GC suspends worker during RefCopy execution, it may move the arrays pointed by *srcPtr and *dstPtr
+            // If GC suspends worker during RefCopy execution, it may move the arrays pointed by srcPtr and dstPtr
             // to different memory locations; therefore, the new array addresses should be re-read.
-            src = srcArray.GetStartPtr();
-            dst = dstArray.GetStartPtr();
+            srcPtr = srcArray.GetStartPtr();
+            dstPtr = dstArray.GetStartPtr();
         };
         if (backwards) {
             CopyBackward(src, dst, length, copy, putSafepoint);
