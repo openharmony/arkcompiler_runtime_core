@@ -44,6 +44,7 @@ class Tool(ToolBase):
         aot = f'--aot-file={name} ' if OptFlags.AOT in self.flags else ''
         res = self.x_run(
             f'{self.ark_js_vm} --entry-point={name} '
+            f'--open-ark-tools=true '
             f'{aot}{self.custom} {name}.abc',
             cwd=str(bu_path))
         bu.parse_run_output(res)
@@ -57,6 +58,7 @@ class Tool(ToolBase):
             '--enable-pgo-profiler=true --asm-interpreter=true '
             f'--compiler-pgo-profiler-path={name}.ap '
             f'--entry-point={name} '
+            f'--open-ark-tools=true '
             f'{self.custom} {aot}'
             f'{name}.abc'
         )
