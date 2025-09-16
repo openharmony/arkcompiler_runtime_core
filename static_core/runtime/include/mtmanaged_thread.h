@@ -20,8 +20,6 @@
 namespace ark {
 class MTManagedThread : public ManagedThread {
 public:
-    ThreadId GetInternalId();
-
     PANDA_PUBLIC_API static MTManagedThread *Create(
         Runtime *runtime, PandaVM *vm,
         ark::panda_file::SourceLang threadLang = ark::panda_file::SourceLang::PANDA_ASSEMBLY);

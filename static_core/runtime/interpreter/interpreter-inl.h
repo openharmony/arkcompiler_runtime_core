@@ -3524,6 +3524,7 @@ public:
         } else {
             LOG(DEBUG, INTERPRETER) << "Entry: " << method->GetFullName();
         }
+        SAFEPOINT_TIME_CHECKER(SafepointTimerTable::ResetTimers(this->GetThread()->GetInternalId(), true));
         if (this->GetThread()->TestAllFlags()) {
             this->GetFrame()->SetAcc(this->GetAcc());
             RuntimeIfaceT::Safepoint();

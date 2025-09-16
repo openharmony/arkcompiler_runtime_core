@@ -44,6 +44,7 @@
 #include "intrinsics.h"
 #include "runtime/interpreter/vregister_iterator.h"
 #include "runtime/include/coretypes/string.h"
+#include "runtime/include/safepoint_timer.h"
 
 #ifdef ARK_HYBRID
 #include "base_runtime.h"
@@ -1344,6 +1345,28 @@ extern "C" void SafepointEntrypointInterp(ManagedThread *thread)
 {
     BEGIN_ENTRYPOINT();
     interpreter::RuntimeInterface::Safepoint(thread);
+}
+
+extern "C" void RegisterSafepointTimerEntrypoint(uint32_t entryId)
+{
+    BEGIN_ENTRYPOINT();
+    auto id = static_cast<compiler::RuntimeInterface::EntrypointId>(entryId);
+    [[maybe_unused]] std::string_view entryName(compiler::RuntimeInterface::GetEntrypointName(id));
+    SAFEPOINT_TIME_CHECKER(SafepointTimerTable::RegisterTimer(ManagedThread::GetCurrent()->GetInternalId(), entryName));
+}
+
+extern "C" void DisarmSafepointTimerEntrypoint(uint32_t entryId)
+{
+    BEGIN_ENTRYPOINT();
+    auto id = static_cast<compiler::RuntimeInterface::EntrypointId>(entryId);
+    [[maybe_unused]] std::string_view entryName(compiler::RuntimeInterface::GetEntrypointName(id));
+    SAFEPOINT_TIME_CHECKER(SafepointTimerTable::DisarmTimer(ManagedThread::GetCurrent()->GetInternalId(), entryName));
+}
+
+extern "C" void SafepointCheckerEntrypoint([[maybe_unused]] ManagedThread *thread)
+{
+    BEGIN_ENTRYPOINT();
+    SAFEPOINT_TIME_CHECKER(SafepointTimerTable::ResetTimers(thread->GetInternalId(), true));
 }
 
 extern "C" int IsCompiled(const void *entrypoint)

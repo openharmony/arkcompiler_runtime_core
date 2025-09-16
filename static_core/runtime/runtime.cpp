@@ -53,6 +53,7 @@
 #include "runtime/include/language_context.h"
 #include "runtime/include/locks.h"
 #include "runtime/include/runtime_notification.h"
+#include "runtime/include/safepoint_timer.h"
 #include "runtime/include/thread.h"
 #include "runtime/include/thread_scopes.h"
 #include "runtime/include/tooling/debug_inf.h"
@@ -961,6 +962,8 @@ bool Runtime::Initialize()
 
     InitializeCompilerOptions();
 
+    SAFEPOINT_TIME_CHECKER(SafepointTimerTable::Initialize(options_.GetSafepointCheckersRecordingTime()));
+
     if (!CreatePandaVM(GetRuntimeType())) {
         return false;
     }
@@ -1306,6 +1309,7 @@ bool Runtime::Shutdown()
     if (memAllocDumper_ != nullptr) {
         internalAllocator_->Delete(memAllocDumper_);
     }
+    SAFEPOINT_TIME_CHECKER(SafepointTimerTable::Destroy());
     ManagedThread::Shutdown();
     return true;
 }

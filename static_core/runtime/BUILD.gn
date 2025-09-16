@@ -539,6 +539,14 @@ template("libarkruntime_set_static_template") {
       ]
     }
 
+    if (is_safepoint_checkers_build) {
+      defines += [ "SAFEPOINT_TIME_CHECKER_ENABLED" ]
+      sources += [
+        "safepoint_timer.cpp",
+        "timer_table.cpp"
+      ]
+    }
+
     part_name = ark_part_name
     subsystem_name = ark_subsystem_name
   }

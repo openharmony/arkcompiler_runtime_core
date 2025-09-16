@@ -57,6 +57,7 @@ Coroutine::Coroutine(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *
     ASSERT(manager_ != nullptr);
     SetEntrypointData(std::move(epInfo));
     coroutineId_ = GetManager()->AllocateCoroutineId();
+    internalId_ = coroutineId_;
 }
 
 Coroutine::~Coroutine()

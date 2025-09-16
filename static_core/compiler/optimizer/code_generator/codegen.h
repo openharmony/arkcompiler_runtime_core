@@ -250,6 +250,9 @@ public:
 #if defined(EVENT_METHOD_ENTER_ENABLED) && EVENT_METHOD_ENTER_ENABLED != 0
     void MakeTrace();
 #endif
+
+    void InsertCallChecker(EntrypointId checkerId, TypedImm entryId);
+
     void CallIntrinsic(Inst *inst, RuntimeInterface::IntrinsicId id);
 
     template <bool IS_FASTPATH, typename... Args>

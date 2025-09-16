@@ -1151,6 +1151,21 @@ bool Codegen::EmitCallRuntimeCode(Inst *inst, std::variant<EntrypointId, Reg> en
     return true;
 }
 
+void Codegen::InsertCallChecker(EntrypointId checkerId, TypedImm entryId)
+{
+    SCOPED_DISASM_STR(this, "CallChecker");
+    auto regfile = GetRegfile();
+    auto saveRegs = regfile->GetCallerSavedRegMask();
+    saveRegs.set(GetTarget().GetReturnRegId());
+    auto saveVregs = regfile->GetCallerSavedVRegMask();
+    saveVregs.set(GetTarget().GetReturnFpRegId());
+
+    SaveCallerRegisters(saveRegs, saveVregs, false);
+    FillCallParams(entryId);
+    EmitCallRuntimeCode(nullptr, checkerId);
+    LoadCallerRegisters(saveRegs, saveVregs, false);
+}
+
 void Codegen::SaveRegistersForImplicitRuntime(Inst *inst, RegMask *paramsMask, RegMask *mask)
 {
     ASSERT(inst->GetSaveState() != nullptr);

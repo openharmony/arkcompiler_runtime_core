@@ -558,6 +558,9 @@ end
 
 # make a stop at Safepoint if the flag is set
 macro(:safepoint) do |acc_type, is_save_acc|
+  if defines.SAFEPOINT_TIME_CHECKER_ENABLED
+    call_runtime("SafepointCheckerEntrypoint", %tr).void
+  end
   flags := LoadI(%tr).Imm(Constants::THREAD_FLAG_OFFSET).u16
   If(flags, 0).NE.Unlikely {
     save_acc_var(acc, acc_tag) if is_save_acc

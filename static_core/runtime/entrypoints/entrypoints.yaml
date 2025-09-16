@@ -308,6 +308,22 @@ entrypoints:
   signature:
   - void
 
+- name: RegisterSafepointTimer
+  entrypoint: RegisterSafepointTimerEntrypoint
+  bridge: entrypoint
+  properties: []
+  signature:
+  - void
+  - uint32_t
+
+- name: DisarmSafepointTimer
+  entrypoint: DisarmSafepointTimerEntrypoint
+  bridge: entrypoint
+  properties: []
+  signature:
+  - void
+  - uint32_t
+
 - name: GetCalleeMethod
   entrypoint: GetCalleeMethodEntrypoint
   bridge: entrypoint

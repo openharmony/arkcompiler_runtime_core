@@ -27,6 +27,7 @@
 #include "runtime/include/runtime.h"
 #include "runtime/include/runtime_notification.h"
 #include "runtime/include/stack_walker-inl.h"
+#include "runtime/include/safepoint_timer.h"
 #include "runtime/mem/gc/epsilon/epsilon.h"
 #include "runtime/mem/gc/epsilon-g1/epsilon-g1.h"
 #include "runtime/mem/gc/gc.h"
@@ -652,6 +653,11 @@ void GC::PreStartup()
 // NOLINTNEXTLINE(performance-unnecessary-value-param)
 bool GC::AddGCTask(bool isManaged, PandaUniquePtr<GCTask> task)
 {
+#ifdef SAFEPOINT_TIME_CHECKER_ENABLED
+    if (isManaged) {
+        SafepointTimerTable::ResetTimers(ManagedThread::GetCurrent()->GetInternalId(), true);
+    }
+#endif
     bool triggeredByThreshold = (task->reason == GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE);
     if (gcSettings_.RunGCInPlace()) {
         auto *gcTask = task.get();
@@ -799,10 +805,12 @@ bool GC::WaitForGCInManaged(const GCTask &task)
         [[maybe_unused]] bool isDaemon = MTManagedThread::ThreadIsMTManagedThread(baseThread) &&
                                          MTManagedThread::CastFromThread(baseThread)->IsDaemon();
         ASSERT(!isDaemon || thread->GetStatus() == ThreadStatus::RUNNING);
+        SAFEPOINT_TIME_CHECKER(SafepointTimerTable::ResetTimers(thread->GetInternalId(), true));
         vm_->GetMutatorLock()->Unlock();
         thread->PrintSuspensionStackIfNeeded();
         WaitForGC(task);
         vm_->GetMutatorLock()->ReadLock();
+        SAFEPOINT_TIME_CHECKER(SafepointTimerTable::ResetTimers(thread->GetInternalId(), false));
         ASSERT(vm_->GetMutatorLock()->HasLock());
         this->GetPandaVm()->HandleGCRoutineInMutator();
         return true;
