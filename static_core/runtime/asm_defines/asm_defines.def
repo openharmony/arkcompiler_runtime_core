@@ -155,6 +155,9 @@ DEFINE_VALUE(FIELD_ACCESS_FLAGS_OFFSET, Field::GetAccessFlagsOffset())
 // NativePointer offsets
 DEFINE_VALUE(CORETYPES_NATIVE_POINTER_EXTERNAL_POINTER_OFFSET, coretypes::NativePointer::GetExternalPointerOffset())
 
+// ProfilingData offsets and constants
+DEFINE_VALUE(PROFILING_DATA_BRANCH_PROFILING_ENABLED_OFFSET, ark::ProfilingData::GetBranchProfilingEnabledOffset())
+
 DEFINE_VALUE(ACCESS_STATIC, ACC_STATIC)
 DEFINE_VALUE(CALLEE_SAVED_SIZE, (GetCalleeRegsCount(RUNTIME_ARCH, false) + GetCalleeRegsCount(RUNTIME_ARCH, true)) *
                                        PointerSize(RUNTIME_ARCH))

@@ -21,6 +21,10 @@
 namespace ark::test {
 class ProfilingRunnerTest : public testing::Test {};
 
+// Test constants
+static constexpr const char *INTERPRETER_TYPE_CPP = "cpp";
+static constexpr const char *METHOD_NAME_FOO = "foo";
+
 static constexpr auto SOURCE = R"(
 .function void main() <static> {
     movi v0, 0x2
@@ -74,10 +78,11 @@ TEST_F(ProfilingRunnerTest, BranchStatisticsCpp)
 {
     PandaRunner runner;
     runner.GetRuntimeOptions().SetCompilerProfilingThreshold(1U);
-    runner.GetRuntimeOptions().SetInterpreterType("cpp");
+    runner.GetRuntimeOptions().SetInterpreterType(INTERPRETER_TYPE_CPP);
+    runner.GetRuntimeOptions().SetProfileBranches(true);  // Enable branch profiling
     auto runtime = runner.CreateRuntime();
     runner.Run(runtime, SOURCE, std::vector<std::string> {});
-    auto method = runner.GetMethod("foo");
+    auto method = runner.GetMethod(METHOD_NAME_FOO);
     auto profilingData = method->GetProfilingData();
     ASSERT_EQ(132U, profilingData->GetBranchTakenCounter(0x10U));
     ASSERT_EQ(199U, profilingData->GetBranchNotTakenCounter(0x09U));
@@ -89,10 +94,10 @@ TEST_F(ProfilingRunnerTest, BranchStatisticsCpp)
 TEST_F(ProfilingRunnerTest, ProfilingDataNullptTestCpp)
 {
     PandaRunner runner;
-    runner.GetRuntimeOptions().SetInterpreterType("cpp");
+    runner.GetRuntimeOptions().SetInterpreterType(INTERPRETER_TYPE_CPP);
     auto runtime = runner.CreateRuntime();
     runner.Run(runtime, SOURCE, std::vector<std::string> {});
-    auto method = runner.GetMethod("foo");
+    auto method = runner.GetMethod(METHOD_NAME_FOO);
     auto profilingData = method->GetProfilingData();
     ASSERT_EQ(nullptr, profilingData);
     ProfilingSaver saver;
@@ -106,9 +111,10 @@ TEST_F(ProfilingRunnerTest, BranchStatistics)
 {
     PandaRunner runner;
     runner.GetRuntimeOptions().SetCompilerProfilingThreshold(1U);
+    runner.GetRuntimeOptions().SetProfileBranches(true);  // Enable branch profiling
     auto runtime = runner.CreateRuntime();
     runner.Run(runtime, SOURCE, std::vector<std::string> {});
-    auto method = runner.GetMethod("foo");
+    auto method = runner.GetMethod(METHOD_NAME_FOO);
     auto profilingData = method->GetProfilingData();
     ASSERT_EQ(132U, profilingData->GetBranchTakenCounter(0x10U));
     ASSERT_EQ(199U, profilingData->GetBranchNotTakenCounter(0x09U));
@@ -122,7 +128,7 @@ TEST_F(ProfilingRunnerTest, ProfilingDataNullptTest)
     PandaRunner runner;
     auto runtime = runner.CreateRuntime();
     runner.Run(runtime, SOURCE, std::vector<std::string> {});
-    auto method = runner.GetMethod("foo");
+    auto method = runner.GetMethod(METHOD_NAME_FOO);
     auto profilingData = method->GetProfilingData();
     ASSERT_EQ(nullptr, profilingData);
     ProfilingSaver saver;
@@ -130,5 +136,148 @@ TEST_F(ProfilingRunnerTest, ProfilingDataNullptTest)
     saver.AddMethod(&profData, method, 0);
     Runtime::Destroy();
 }
+
+// Tests for branch profiling flag functionality - Assembly Interpreter
+TEST_F(ProfilingRunnerTest, BranchProfilingDisabled)
+{
+    PandaRunner runner;
+    runner.GetRuntimeOptions().SetCompilerProfilingThreshold(1U);
+    runner.GetRuntimeOptions().SetProfileBranches(false);  // Disable branch profiling
+    // Use assembly interpreter (default)
+    auto runtime = runner.CreateRuntime();
+    runner.Run(runtime, SOURCE, std::vector<std::string> {});
+    auto method = runner.GetMethod(METHOD_NAME_FOO);
+    auto profilingData = method->GetProfilingData();
+
+    // Verify ProfilingData exists but branch profiling is disabled
+    ASSERT_NE(nullptr, profilingData);
+    ASSERT_FALSE(profilingData->IsBranchProfilingEnabled());
+
+    // Branch counters should be zero since profiling is disabled
+    ASSERT_EQ(0U, profilingData->GetBranchTakenCounter(0x10U));
+    ASSERT_EQ(0U, profilingData->GetBranchNotTakenCounter(0x09U));
+    ASSERT_EQ(0U, profilingData->GetBranchNotTakenCounter(0x10U));
+
+    Runtime::Destroy();
+}
+
+TEST_F(ProfilingRunnerTest, BranchProfilingEnabled)
+{
+    PandaRunner runner;
+    runner.GetRuntimeOptions().SetCompilerProfilingThreshold(1U);
+    runner.GetRuntimeOptions().SetProfileBranches(true);  // Enable branch profiling
+    // Use assembly interpreter (default)
+    auto runtime = runner.CreateRuntime();
+    runner.Run(runtime, SOURCE, std::vector<std::string> {});
+    auto method = runner.GetMethod(METHOD_NAME_FOO);
+    auto profilingData = method->GetProfilingData();
+
+    // Verify ProfilingData exists and branch profiling is enabled
+    ASSERT_NE(nullptr, profilingData);
+    ASSERT_TRUE(profilingData->IsBranchProfilingEnabled());
+
+    // Branch counters should have expected values when profiling is enabled
+    ASSERT_EQ(132U, profilingData->GetBranchTakenCounter(0x10U));
+    ASSERT_EQ(199U, profilingData->GetBranchNotTakenCounter(0x09U));
+    ASSERT_EQ(67U, profilingData->GetBranchNotTakenCounter(0x10U));
+
+    CheckSaverCounter(method);
+    Runtime::Destroy();
+}
+
+// Tests for branch profiling flag functionality - C++ Interpreter
+TEST_F(ProfilingRunnerTest, BranchProfilingDisabledCpp)
+{
+    PandaRunner runner;
+    runner.GetRuntimeOptions().SetInterpreterType(INTERPRETER_TYPE_CPP);
+    runner.GetRuntimeOptions().SetCompilerProfilingThreshold(1U);
+    // Disable branch profiling
+    runner.GetRuntimeOptions().SetProfileBranches(false);
+    auto runtime = runner.CreateRuntime();
+    runner.Run(runtime, SOURCE, std::vector<std::string> {});
+    auto method = runner.GetMethod(METHOD_NAME_FOO);
+    auto profilingData = method->GetProfilingData();
+
+    // Verify ProfilingData exists but branch profiling is disabled
+    ASSERT_NE(nullptr, profilingData);
+    ASSERT_FALSE(profilingData->IsBranchProfilingEnabled());
+
+    // Branch counters should be zero since profiling is disabled
+    ASSERT_EQ(0U, profilingData->GetBranchTakenCounter(0x10U));
+    ASSERT_EQ(0U, profilingData->GetBranchNotTakenCounter(0x09U));
+    ASSERT_EQ(0U, profilingData->GetBranchNotTakenCounter(0x10U));
+
+    Runtime::Destroy();
+}
+
+TEST_F(ProfilingRunnerTest, BranchProfilingEnabledCpp)
+{
+    PandaRunner runner;
+    runner.GetRuntimeOptions().SetInterpreterType(INTERPRETER_TYPE_CPP);
+    runner.GetRuntimeOptions().SetCompilerProfilingThreshold(1U);
+    // Enable branch profiling
+    runner.GetRuntimeOptions().SetProfileBranches(true);
+    auto runtime = runner.CreateRuntime();
+    runner.Run(runtime, SOURCE, std::vector<std::string> {});
+    auto method = runner.GetMethod(METHOD_NAME_FOO);
+    auto profilingData = method->GetProfilingData();
+
+    // Verify ProfilingData exists and branch profiling is enabled
+    ASSERT_NE(nullptr, profilingData);
+    ASSERT_TRUE(profilingData->IsBranchProfilingEnabled());
+
+    // Branch counters should have expected values when profiling is enabled
+    ASSERT_EQ(132U, profilingData->GetBranchTakenCounter(0x10U));
+    ASSERT_EQ(199U, profilingData->GetBranchNotTakenCounter(0x09U));
+    ASSERT_EQ(67U, profilingData->GetBranchNotTakenCounter(0x10U));
+
+    CheckSaverCounter(method);
+    Runtime::Destroy();
+}
+
+TEST_F(ProfilingRunnerTest, ProfilingDataFlagsConstruction)
+{
+    // Test ProfilingData construction with different flags
+    PandaRunner runner;
+    [[maybe_unused]] auto runtime = runner.CreateRuntime();
+    auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
+
+    // Test with branch profiling enabled
+    auto profilingDataEnabled = ProfilingData::Make(
+        allocator, 0, 0, 0,
+        [&](void *data, [[maybe_unused]] void *vcallsMem, [[maybe_unused]] void *branchesMem,
+            [[maybe_unused]] void *throwsMem) { return new (data) ProfilingData({}, {}, {}, true); });
+
+    ASSERT_NE(nullptr, profilingDataEnabled);
+    ASSERT_TRUE(profilingDataEnabled->IsBranchProfilingEnabled());
+
+    // Test with branch profiling disabled
+    auto profilingDataDisabled = ProfilingData::Make(
+        allocator, 0, 0, 0,
+        [&](void *data, [[maybe_unused]] void *vcallsMem, [[maybe_unused]] void *branchesMem,
+            [[maybe_unused]] void *throwsMem) { return new (data) ProfilingData({}, {}, {}, false); });
+
+    ASSERT_NE(nullptr, profilingDataDisabled);
+    ASSERT_FALSE(profilingDataDisabled->IsBranchProfilingEnabled());
+
+    // Test with default flags (should be disabled)
+    auto profilingDataDefault =
+        ProfilingData::Make(allocator, 0, 0, 0,
+                            [&](void *data, [[maybe_unused]] void *vcallsMem, [[maybe_unused]] void *branchesMem,
+                                [[maybe_unused]] void *throwsMem) {
+                                return new (data) ProfilingData({}, {}, {});  // No flags parameter - use default
+                            });
+
+    ASSERT_NE(nullptr, profilingDataDefault);
+    ASSERT_FALSE(profilingDataDefault->IsBranchProfilingEnabled());  // Default should be disabled
+
+    // Cleanup
+    allocator->Free(profilingDataEnabled);
+    allocator->Free(profilingDataDisabled);
+    allocator->Free(profilingDataDefault);
+
+    Runtime::Destroy();
+}
+
 #endif
 }  // namespace ark::test
