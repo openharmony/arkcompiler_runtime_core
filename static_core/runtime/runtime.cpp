@@ -589,6 +589,10 @@ Runtime::Runtime(const RuntimeOptions &options, mem::InternalAllocatorPtr intern
     saveProfilingInfo_ = Runtime::GetOptions().IsProfilesaverEnabled();
     incrementalSaveProfilingInfo_ = Runtime::GetOptions().IsIncrementalProfilesaverEnabled();
     verifierConfig_ = ark::verifier::NewConfig();
+    isProfileBranches_ = Runtime::GetOptions().IsProfileBranches();
+    if (!Runtime::GetOptions().WasSetProfileBranches() && isJitEnabled_) {
+        isProfileBranches_ = true;
+    }
     InitializeVerifierRuntime();
 
     isZygote_ = options_.IsStartAsZygote();

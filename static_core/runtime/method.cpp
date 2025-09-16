@@ -557,13 +557,16 @@ void Method::StartProfiling()
     }
     ASSERT(std::is_sorted(vcalls.begin(), vcalls.end()));
 
-    auto profilingData =
-        ProfilingData::Make(allocator, vcalls.size(), branches.size(), throws.size(),
-                            [&](void *data, void *vcallsMem, void *branchesMem, void *throwsMem) {
-                                return new (data) ProfilingData(CallSiteInlineCache::From(vcallsMem, vcalls),
-                                                                BranchData::From(branchesMem, branches),
-                                                                ThrowData::From(throwsMem, throws));
-                            });
+    // Set branch profiling enabled based on runtime options (auto-enabled when JIT is active)
+    bool branchProfilingEnabled = Runtime::GetCurrent()->IsProfileBranches();
+
+    auto profilingData = ProfilingData::Make(
+        allocator, vcalls.size(), branches.size(), throws.size(),
+        [&](void *data, void *vcallsMem, void *branchesMem, void *throwsMem) {
+            return new (data)
+                ProfilingData(CallSiteInlineCache::From(vcallsMem, vcalls), BranchData::From(branchesMem, branches),
+                              ThrowData::From(throwsMem, throws), branchProfilingEnabled);
+        });
     if (!InitProfilingData(profilingData)) {
         allocator->Free(profilingData);
         return;

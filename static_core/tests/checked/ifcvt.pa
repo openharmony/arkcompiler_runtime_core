@@ -98,7 +98,7 @@ done:
 
 #! CHECKER      Check hotness and increase limit IfConversion in PGO AOT
 #! SKIP_IF      @architecture == "arm32"
-#! RUN_PGO_PROF entry: "_GLOBAL::main1"
+#! RUN_PGO_PROF options: "--profile-branches", entry: "_GLOBAL::main1"
 #! RUN_PGO_PAOC options: ""
 #! EVENT        /Compilation,_GLOBAL::ifconv__noinline__,.*COMPILED/
 #! METHOD       "_GLOBAL::main"
