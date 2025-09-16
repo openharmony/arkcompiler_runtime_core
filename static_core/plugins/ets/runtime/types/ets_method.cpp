@@ -47,6 +47,14 @@ static EtsMethod *FindInvokeMethodInFunctionalType(EtsClass *type)
         if (method != nullptr) {
             return method;
         }
+        PandaStringStream ssR;
+        ssR << STD_CORE_FUNCTION_INVOKE_R_PREFIX << arity;
+        PandaString strR = ssR.str();
+
+        EtsMethod *methodR = type->GetInstanceMethod(strR.c_str(), nullptr);
+        if (methodR != nullptr) {
+            return methodR;
+        }
     }
     UNREACHABLE();
 }
