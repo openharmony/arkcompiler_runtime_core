@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,149 +11,149 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # List of shift operator operands test cases
+--- # List of shift operator on long operands test cases
 cases:
   - {
       desc: "Left shift operator",
-      lo_type: "int",
+      lo_type: "long",
       lo_value: "0b101",
       shift_op: "<<", 
-      ro_type: "int",
+      ro_type: "long",
       ro_value: "0b1",
       result_value: "0b1010"
     }
   - {
       desc: "Signed right shift operator",
-      lo_type: "int",
+      lo_type: "long",
       lo_value: "0b101",
       shift_op: ">>", 
-      ro_type: "int",
+      ro_type: "long",
       ro_value: "0b1",
       result_value: "0b10"
     }
   - {
       desc: "Unsigned right shift operator",
-      lo_type: "int",
+      lo_type: "long",
       lo_value: "0b101",
       shift_op: ">>>", 
-      ro_type: "int",
+      ro_type: "long",
       ro_value: "0b1",
       result_value: "0b10"
     }
   - {
       desc: "Left shift operator by 0 positions",
-      lo_type: "int",
+      lo_type: "long",
       lo_value: "0b101",
       shift_op: "<<", 
-      ro_type: "int",
+      ro_type: "long",
       ro_value: "0b0",
       result_value: "0b101"
     }
   - {
       desc: "Signed right shift operator by 0 positions",
-      lo_type: "int",
+      lo_type: "long",
       lo_value: "0b101",
       shift_op: ">>", 
-      ro_type: "int",
+      ro_type: "long",
       ro_value: "0b0",
       result_value: "0b101"
     }
   - {
       desc: "Unsigned right shift operator by 0 positions",
-      lo_type: "int",
+      lo_type: "long",
       lo_value: "0b101",
       shift_op: ">>>", 
-      ro_type: "int",
+      ro_type: "long",
       ro_value: "0b0",
       result_value: "0b101"
     }
   - {
-      desc: "5 bits left shift operator",
-      lo_type: "int",
-      lo_value: "0b101",
-      shift_op: "<<", 
-      ro_type: "int",
-      ro_value: "0b1_0011",
-      result_value: "0b0010_1000_0000_0000_0000_0000"
-    }
-  - {
-      desc: "5 bits signed right shift operator",
-      lo_type: "int",
-      lo_value: "0b0010_1000_0000_0000_0000_0000",
-      shift_op: ">>", 
-      ro_type: "int",
-      ro_value: "0b1_0011",
-      result_value: "0b101"
-    }
-  - {
-      desc: "5 bits unsigned right shift operator",
-      lo_type: "int",
-      lo_value: "0b0010_1000_0000_0000_0000_0000",
-      shift_op: ">>>", 
-      ro_type: "int",
-      ro_value: "0b1_0011",
-      result_value: "0b101"
-    }
-  - {
       desc: "6 bits left shift operator",
-      lo_type: "int",
+      lo_type: "long",
       lo_value: "0b101",
       shift_op: "<<", 
-      ro_type: "int",
-      ro_value: "0b11_0011",
-      result_value: "0b0010_1000_0000_0000_0000_0000"
+      ro_type: "long",
+      ro_value: "0b10_0011",
+      result_value: "0b0010_1000_0000_0000_0000_0000_0000_0000_0000_0000"
     }
   - {
       desc: "6 bits signed right shift operator",
-      lo_type: "int",
-      lo_value: "0b0010_1000_0000_0000_0000_0000",
+      lo_type: "long",
+      lo_value: "0b0010_1000_0000_0000_0000_0000_0000_0000_0000_0000",
       shift_op: ">>", 
-      ro_type: "int",
-      ro_value: "0b11_0011",
+      ro_type: "long",
+      ro_value: "0b10_0011",
       result_value: "0b101"
     }
   - {
       desc: "6 bits unsigned right shift operator",
-      lo_type: "int",
-      lo_value: "0b0010_1000_0000_0000_0000_0000",
+      lo_type: "long",
+      lo_value: "0b0010_1000_0000_0000_0000_0000_0000_0000_0000_0000",
       shift_op: ">>>", 
-      ro_type: "int",
-      ro_value: "0b11_0011",
+      ro_type: "long",
+      ro_value: "0b10_0011",
       result_value: "0b101"
     }
   - {
-      desc: "6 bits left shift operator, 0 in 5 lower bits",
-      lo_type: "int",
+      desc: "7 bits left shift operator",
+      lo_type: "long",
       lo_value: "0b101",
       shift_op: "<<", 
-      ro_type: "int",
-      ro_value: "0b10_0000",
+      ro_type: "long",
+      ro_value: "0b100_0011",
+      result_value: "0b0010_1000"
+    }
+  - {
+      desc: "7 bits signed right shift operator",
+      lo_type: "long",
+      lo_value: "0b0010_1000",
+      shift_op: ">>", 
+      ro_type: "long",
+      ro_value: "0b100_0011",
+      result_value: "0b101"
+    }
+  - {
+      desc: "7 bits unsigned right shift operator",
+      lo_type: "long",
+      lo_value: "0b0010_1000",
+      shift_op: ">>>", 
+      ro_type: "long",
+      ro_value: "0b100_0011",
+      result_value: "0b101"
+    }
+  - {
+      desc: "7 bits left shift operator, 0 in 6 lower bits",
+      lo_type: "long",
+      lo_value: "0b101",
+      shift_op: "<<", 
+      ro_type: "long",
+      ro_value: "0b100_0000",
       result_value: "0b101"
     }
   - {
       desc: "Left shift operator, negative left operand",
-      lo_type: "int",
+      lo_type: "long",
       lo_value: "-0b101",
       shift_op: "<<", 
-      ro_type: "int",
+      ro_type: "long",
       ro_value: "0b1",
       result_value: "-0b1010"
     }
   - {
       desc: "Signed right shift operator, negative left operand",
-      lo_type: "int",
-      lo_value: "-0b10",
+      lo_type: "long",
+      lo_value: "-0b101",
       shift_op: ">>", 
-      ro_type: "int",
+      ro_type: "long",
       ro_value: "0b1",
-      result_value: "-0b1"
+      result_value: "-0b11"
     }
   - {
       desc: "Unsigned right shift operator, negative left operand",
-      lo_type: "int",
+      lo_type: "long",
       lo_value: "-0b1001",
       shift_op: ">>>", 
-      ro_type: "int",
+      ro_type: "long",
       ro_value: "0b10",
-      result_value: "0b0011_1111_1111_1111_1111_1111_1111_1101"
+      result_value: "0b0011_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1101"
     }
