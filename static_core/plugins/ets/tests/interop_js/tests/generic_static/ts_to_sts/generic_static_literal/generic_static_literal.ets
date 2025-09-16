@@ -13,25 +13,67 @@
  * limitations under the License.
  */
 
-import {
-    tsLiteralStart,
-    tsLiteralStop,
-    LiteralStatic,
-    genericLiteralCallFromTs,
-} from "main_js"
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/generic_static/ts_to_sts/main');
+let LiteralStatic = module.getProperty('LiteralStatic');
+let genericLiteralCallFromTs = module.getProperty('genericLiteralCallFromTs');
+
 
 function checkGenericLiteralStart(): boolean {
-    return LiteralStatic.get(tsLiteralStart) as string == tsLiteralStart as string;
+    try {
+        const tsLiteralStart = ESValue.wrapString("start");
+        const res = LiteralStatic.invokeMethod('get', tsLiteralStart);
+        
+        if (res == null) {
+            return false;
+        }
+        
+        return res.toString() === "start";
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkGenericLiteralStop(): boolean {
-    return LiteralStatic.get(tsLiteralStop) as string == tsLiteralStop as string;
+    try {
+        const tsLiteralStop = ESValue.wrapString("stop");
+        const res = LiteralStatic.invokeMethod('get', tsLiteralStop);
+        
+        if (res == null) {
+            return false;
+        }
+        
+        return res.toString() === "stop";
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkGenericLiteralCallFromTsStart(): boolean {
-    return genericLiteralCallFromTs(tsLiteralStart) as string == tsLiteralStart as string;
+    try {
+        const tsLiteralStart = ESValue.wrapString("start");
+        const res = genericLiteralCallFromTs.invoke(tsLiteralStart);
+        
+        if (res == null) {
+            return false;
+        }
+        
+        return res.toString() === "start";
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkGenericLiteralCallFromTsStop(): boolean {
-    return genericLiteralCallFromTs(tsLiteralStop) as string == tsLiteralStop as string;
+    try {
+        const tsLiteralStop = ESValue.wrapString("stop");
+        const res = genericLiteralCallFromTs.invoke(tsLiteralStop);
+        
+        if (res == null) {
+            return false;
+        }
+        
+        return res.toString() === "stop";
+    } catch (e) {
+        return false;
+    }
 }

@@ -15,32 +15,31 @@
 
 package getter.test;
 
-function checkClassGetter(classObjWithGetter: JSValue, targetValue: JSValue) {
+function checkClassGetter(classObjWithGetter: Any, targetValue: Any) {
     let clsObj = ESValue.wrap(classObjWithGetter);
     let tarObj = ESValue.wrap(targetValue);
     return clsObj.getProperty('hello').toString() === tarObj.toString();
 }
 
-function checkLiteralObjGetter(literalObjWithGetter: JSValue, targetValue: JSValue) {
+function checkLiteralObjGetter(literalObjWithGetter: Any, targetValue: Any) {
     let literalObj = ESValue.wrap(literalObjWithGetter);
     let tarObj = ESValue.wrap(targetValue);
     return literalObj.getProperty('hello').toString() == tarObj.toString();
 }
 
-function checkDeleteLiteralObjGetter(literalObjWithGetter: JSValue) {
+function checkDeleteLiteralObjGetter(literalObjWithGetter: Any) {
     let literalObj = ESValue.wrap(literalObjWithGetter);
     return literalObj.getProperty('hello').toUndefined() == undefined;
 }
 
-function checkDefinePropertyGetter(literalObjWithGetter: JSValue, targetValue: JSValue) {
+function checkDefinePropertyGetter(literalObjWithGetter: Any, targetValue: Any) {
     let literalObj = ESValue.wrap(literalObjWithGetter);
     let tarObj = ESValue.wrap(targetValue);
     return literalObj.getProperty('hello').toString() == tarObj.toString();
 }
 
-function checkComputedPropertyGetter(literalObjWithGetter: JSValue, targetValue: JSValue) {
+function checkComputedPropertyGetter(literalObjWithGetter: Any, targetValue: Any) {
     let literalObj = ESValue.wrap(literalObjWithGetter);
     let tarObj = ESValue.wrap(targetValue);
     return literalObj.getProperty('hello').toString() == tarObj.toString();
 }
-

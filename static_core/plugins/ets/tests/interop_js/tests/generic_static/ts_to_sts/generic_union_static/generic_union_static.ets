@@ -13,25 +13,66 @@
  * limitations under the License.
  */
 
-import {
-    tsInt,
-    tsString,
-    UnionStatic,
-    genericUnionStaticCallFromTs,
-} from "main_js"
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/generic_static/ts_to_sts/main');
+let UnionStatic = module.getProperty('UnionStatic');
+let genericUnionStaticCallFromTs = module.getProperty('genericUnionStaticCallFromTs');
 
 function checkGenericUnionInt(): boolean {
-    return UnionStatic.get(tsInt) as int == tsInt as int;
+    try {
+        const tsInt = ESValue.wrapInt(1);
+        const res = UnionStatic.invokeMethod('get', tsInt);
+        
+        if (res == null) {
+            return false;
+        }
+        
+        return res.toNumber() === 1;
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkGenericUnionString(): boolean {
-    return UnionStatic.get(tsString) as string == tsString as string;
+    try {
+        const tsString = ESValue.wrapString("test");
+        const res = UnionStatic.invokeMethod('get', tsString);
+        
+        if (res == null) {
+            return false;
+        }
+        
+        return res.toString() === "test";
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkGenericUnionCallFromTsInt(): boolean {
-    return genericUnionStaticCallFromTs(tsInt) as int == tsInt as int;
+    try {
+        const tsInt = ESValue.wrapInt(1);
+        const res = genericUnionStaticCallFromTs.invoke(tsInt);
+        
+        if (res == null) {
+            return false;
+        }
+        
+        return res.toNumber() === 1;
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkGenericUnionCallFromTsString(): boolean {
-    return genericUnionStaticCallFromTs(tsString) as string == tsString as string;
+    try {
+        const tsString = ESValue.wrapString("test");
+        const res = genericUnionStaticCallFromTs.invoke(tsString);
+        
+        if (res == null) {
+            return false;
+        }
+        
+        return res.toString() === "test";
+    } catch (e) {
+        return false;
+    }
 }

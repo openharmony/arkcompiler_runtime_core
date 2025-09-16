@@ -13,11 +13,6 @@
 
 set(DISABLES_TESTS
     checked
-    generic_as_parameter
-    generic_call_params
-    generic_static
-    getter
-    getter_arkjs
     number_subtypes
     perf
     standalone_function

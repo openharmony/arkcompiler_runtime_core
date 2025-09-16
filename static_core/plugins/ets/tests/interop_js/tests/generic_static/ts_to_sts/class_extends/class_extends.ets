@@ -13,45 +13,90 @@
  * limitations under the License.
  */
 
-import {
-    tsInt,
-    tsString,
-    tsBool,
-    tsArr,
-    GenericExtends,
-    genericClassExtendsCallFromTs,
-} from "main_js"
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/generic_static/ts_to_sts/main');
+let GenericExtends = module.getProperty('GenericExtends');
+let genericClassExtendsCallFromTs = module.getProperty('genericClassExtendsCallFromTs');
 
 function checkClassExtendsInt(): boolean {
-    return GenericExtends.get(tsInt) as int == tsInt as int;
+    try {
+        const tsInt = ESValue.wrapInt(1);
+        const res = GenericExtends.invokeMethod('get', tsInt);
+        return res.toNumber() === 1;
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkClassExtendsString(): boolean {
-    return GenericExtends.get(tsString) as string == tsString as string;
+    try {
+        const tsString = ESValue.wrapString('test');
+        const res = GenericExtends.invokeMethod('get', tsString);
+        return res.toString() === 'test';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkClassExtendsBool(): boolean {
-    return GenericExtends.get(tsBool) as boolean == tsBool as boolean;
+    try {
+        const tsBool = ESValue.wrapBoolean(true);
+        const res = GenericExtends.invokeMethod('get', tsBool);
+        return res.toBoolean() === true;
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkClassExtendsArr(): boolean {
-    const res = GenericExtends.get(tsArr);
-    return res as Array<int> instanceof Array && res[0] as int == tsArr[0] as int;
+    try {
+        const jsArray = [1, 2, 3];
+        const tsArr = ESValue.wrap(jsArray);
+        const res = GenericExtends.invokeMethod('get', tsArr);
+        const firstElement = res.getProperty(0);
+        return firstElement.toNumber() === 1;
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkClassExtendsMethodCallFromTsInt(): boolean {
-    return genericClassExtendsCallFromTs(tsInt) as int == tsInt as int;
+    try {
+        const tsInt = ESValue.wrapInt(1);
+        const res = genericClassExtendsCallFromTs.invoke(tsInt);
+        return res.toNumber() === 1;
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkClassExtendsMethodCallFromTsString(): boolean {
-    return genericClassExtendsCallFromTs(tsString) as string == tsString as string;
+    try {
+        const tsString = ESValue.wrapString('test');
+        const res = genericClassExtendsCallFromTs.invoke(tsString);
+        return res.toString() === 'test';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkClassExtendsMethodCallFromTsBool(): boolean {
-    return genericClassExtendsCallFromTs(tsBool) as boolean == tsBool as boolean;
+    try {
+        const tsBool = ESValue.wrapBoolean(true);
+        const res = genericClassExtendsCallFromTs.invoke(tsBool);
+        return res.toBoolean() === true;
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkClassExtendsMethodCallFromTsArr(): boolean {
-    const res = genericClassExtendsCallFromTs(tsArr);
-    return res as Array<int> instanceof Array && res[0] as int == tsArr[0] as int;
+    try {
+        const jsArray = [1, 2, 3];
+        const tsArr = ESValue.wrap(jsArray);
+        const res = genericClassExtendsCallFromTs.invoke(tsArr);     
+        const firstElement = res.getProperty(0);
+        return firstElement.toNumber() === 1;
+    } catch (e) {
+        return false;
+    }
 }
