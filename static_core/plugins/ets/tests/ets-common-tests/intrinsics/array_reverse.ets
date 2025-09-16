@@ -59,6 +59,21 @@ function test_union_array(): void {
     check_array_reverse(data)
 }
 
+function test_long_len_array_reverse() {
+    let inp = new Array<number>();
+    let orig_exp = new Array<number>();
+    let rev_exp = new Array<number>();
+    // SWAPPED_BETWEEN_SAFEPOINT_THRESHOLD = 50000UL;
+    let len = 100001;
+    for (let i: number = 0; i < len; i++) {
+      inp.push(i);
+      orig_exp.push(i);
+      rev_exp.push(len - 1 - i);
+    }
+    check_array<number>(inp.reverse(), orig_exp);
+    check_array<number>(inp.reverse(), rev_exp);
+}
+
 function check_array_reverse<T>(data: Array<T>): void {
     let data_rev = Array.from(data).reverse()
     check_array(data, data_rev)
@@ -84,5 +99,6 @@ function main(): int {
     testSuite.addTest("Arrays of char: reverse test", test_char_array);
     testSuite.addTest("Arrays of string: reverse test", test_string_array);
     testSuite.addTest("Arrays of union: reverse test", test_union_array);
+    testSuite.addTest("Long len arrays: reverse test with safepoints", test_long_len_array_reverse);
     return testSuite.run()
 }

@@ -537,10 +537,11 @@ static auto GetSwap([[maybe_unused]] void *arrAddr, [[maybe_unused]] mem::GCBarr
 static constexpr size_t SWAPPED_BETWEEN_SAFEPOINT_THRESHOLD = 50000UL;
 
 template <typename T>
-static void RefReverse(void *arrAddr, int32_t length, mem::GCBarrierSet *barrierSet)
+static void RefReverse(ManagedThread *thread, EtsHandle<EtsEscompatArray> &arrayHandle, int32_t length)
 {
-    auto *arr = static_cast<T *>(arrAddr);
-    auto swap = GetSwap<T>(arrAddr, barrierSet);
+    auto *arr = arrayHandle->GetData()->GetData<T>();
+    auto *barrierSet = thread->GetBarrierSet();
+    auto swap = GetSwap<T>(arr, barrierSet);
     bool usePreBarrier = barrierSet->IsPreBarrierEnabled();
 
     auto swapWithBarriers = [&swap, &usePreBarrier, barrierSet](T *aPtr, T *bPtr) {
@@ -550,14 +551,14 @@ static void RefReverse(void *arrAddr, int32_t length, mem::GCBarrierSet *barrier
         }
         swap(aPtr, bPtr);
     };
-    auto putSafepoint = [&usePreBarrier, barrierSet, arr](size_t dstStart, size_t dstEndMirror, size_t bLength) {
+    auto putSafepoint = [&usePreBarrier, barrierSet, &arr, thread](size_t dstStart, size_t dstEndMirror, size_t count) {
         if (barrierSet->GetPostType() != ark::mem::BarrierType::POST_WRB_NONE) {
             constexpr uint32_t OFFSET = ark::coretypes::Array::GetDataOffset();
-            const uint32_t size = bLength * sizeof(ObjectPointerType);
-            barrierSet->PostBarrier(arr, OFFSET + dstStart * sizeof(ObjectPointerType), size);
-            barrierSet->PostBarrier(arr, OFFSET + dstEndMirror * sizeof(ObjectPointerType) - size, size);
+            const uint32_t size = count * sizeof(T);
+            barrierSet->PostBarrier(arr, OFFSET + dstStart * sizeof(T), size);
+            barrierSet->PostBarrier(arr, OFFSET + dstEndMirror * sizeof(T) - size, size);
         }
-        ark::interpreter::RuntimeInterface::Safepoint();
+        ark::interpreter::RuntimeInterface::Safepoint(thread);
         usePreBarrier = barrierSet->IsPreBarrierEnabled();
     };
     auto halfLength = static_cast<size_t>(length) / 2;
@@ -568,6 +569,9 @@ static void RefReverse(void *arrAddr, int32_t length, mem::GCBarrierSet *barrier
             swapWithBarriers(&arr[j], &arr[length - 1 - j]);  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         }
         putSafepoint(groupIdx, length - 1 - groupIdx, SWAPPED_BETWEEN_SAFEPOINT_THRESHOLD);
+        // If GC suspend worker during RefReverse execution then it may move array pointed by arr to a different memory
+        // location - should re-read a new array address
+        arr = arrayHandle->GetData()->GetData<T>();
     }
     // Reverse possible remaining part with length less than SWAPPED_BETWEEN_SAFEPOINT_THRESHOLD
     size_t finalIdx = (halfLength / SWAPPED_BETWEEN_SAFEPOINT_THRESHOLD) * SWAPPED_BETWEEN_SAFEPOINT_THRESHOLD;
@@ -590,10 +594,7 @@ extern "C" EtsEscompatArray *EtsEscompatArrayReverse(EtsEscompatArray *array)
     [[maybe_unused]] EtsHandleScope scope(coro);
     EtsHandle<EtsEscompatArray> arrayHandle(coro, array);
 
-    auto arrAddr = ToVoidPtr(ToUintPtr(arrayHandle->GetData()->GetData<ObjectPointerType>()));
-    auto *barrierSet = Thread::GetCurrent()->GetBarrierSet();
-
-    RefReverse<ObjectPointerType>(arrAddr, actualLength, barrierSet);
+    RefReverse<ObjectPointerType>(coro, arrayHandle, actualLength);
 
     return arrayHandle.GetPtr();
 }
