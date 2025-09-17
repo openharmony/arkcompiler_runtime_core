@@ -16,7 +16,7 @@ cases:
     - desc: numeric type
       name: number
       decl: |-
-          const n = Math.random()
+          const n = 53
           let t = typeof (n / 2)
 
     - desc: Object

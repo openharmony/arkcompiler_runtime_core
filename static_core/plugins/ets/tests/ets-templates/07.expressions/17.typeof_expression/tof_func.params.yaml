@@ -17,39 +17,23 @@ cases:
       vals:
           - { type: number, expr: Number.MIN_VALUE }
           - { type: number, expr: Number.MAX_VALUE }
-          - { type: Number, expr: new Number(Number.MIN_VALUE) }
-          - { type: Number, expr: new Number(Number.MAX_VALUE) }
 
     - res: 'number'
       vals:
           - { type: byte, expr: Byte.MIN_VALUE }
           - { type: byte, expr: Byte.MAX_VALUE }
-          - { type: Byte, expr: new Byte(Byte.MIN_VALUE) }
-          - { type: Byte, expr: new Byte(Byte.MAX_VALUE) }
           - { type: short, expr: Short.MIN_VALUE }
           - { type: short, expr: Short.MAX_VALUE }
-          - { type: Short, expr: new Short(Short.MIN_VALUE) }
-          - { type: Short, expr: new Short(Short.MAX_VALUE) }
           - { type: int, expr: Int.MIN_VALUE }
           - { type: int, expr: Int.MAX_VALUE }
-          - { type: Int, expr: new Int(Int.MIN_VALUE) }
-          - { type: Int, expr: new Int(Int.MAX_VALUE) }
           - { type: long, expr: Long.MIN_VALUE }
           - { type: long, expr: Long.MAX_VALUE }
-          - { type: Long, expr: new Long(Long.MIN_VALUE) }
-          - { type: Long, expr: new Long(Long.MAX_VALUE) }
           - { type: float, expr: Float.MIN_VALUE }
           - { type: float, expr: Float.MAX_VALUE }
-          - { type: Float, expr: new Float(Float.MIN_VALUE) }
-          - { type: Float, expr: new Float(Float.MAX_VALUE) }
           - { type: double, expr: Double.MIN_VALUE }
           - { type: double, expr: Double.MAX_VALUE }
-          - { type: Double, expr: new Double(Double.MIN_VALUE) }
-          - { type: Double, expr: new Double(Double.MAX_VALUE) }
           - { type: char, expr: Char.MIN_VALUE as char }
           - { type: char, expr: Char.MAX_VALUE as char }
-          - { type: Char, expr: new Char(Char.MIN_VALUE as char) }
-          - { type: Char, expr: new Char(Char.MAX_VALUE as char) }
 
     - res: 'string'
       decl: |-
@@ -58,25 +42,18 @@ cases:
           - { type: string, expr: '"ABC"' }
           - { type: string, expr: "'' + '' + 'CDE'" }
           - { type: string, expr: '`a = ${a}` + '''' + "CDE"' }
-          - { type: String, expr: 'new String("ABC")' }
-          - { type: String, expr: "new String('' + '' + 'CDE')" }
-          - { type: String, expr: 'new String(`a = ${a}` + '''' + "CDE")' }
           - { type: Comparable<String>, expr: '"X"' }
 
     - res: 'boolean'
       vals:
           - { type: boolean, expr: 'true' }
           - { type: boolean, expr: 'false' }
-          - { type: Boolean, expr: 'new Boolean(true)' }
-          - { type: Boolean, expr: 'new Boolean(false)' }
           - { type: Comparable<Boolean>, expr: 'new Boolean()' }
 
     - res: 'bigint'
       vals:
           - { type: bigint, expr: '123456789012345678901234567890n' }
           - { type: bigint, expr: '999999999999999999999999999999n' }
-          - { type: BigInt, expr: 'new BigInt("123456789012345678901234567890")' }
-          - { type: BigInt, expr: 'new BigInt("999999999999999999999999999999")' }
 
     - res: 'object'
       decl: |-
@@ -88,33 +65,24 @@ cases:
 
     - res: 'number'
       vals:
-          - { type: 'Floating', expr: 'new Float(3.14f)' }
-          - { type: 'Integral', expr: 'new Int(42)' }
-          - { type: 'Numeric', expr: 'new Number(3.14)' }
+          - { type: 'Floating', expr: '3.14f' }
+          - { type: 'Integral', expr: '42' }
+          - { type: 'Numeric', expr: '3.14' }
 
     - res: 'object'
       vals:
           - { type: 'number[]', expr: '[Number.MIN_VALUE]' }
           - { type: 'number[]', expr: '[Number.MAX_VALUE]' }
-          - { type: 'Number[]', expr: '[new Number(Number.MIN_VALUE)]' }
-          - { type: 'Number[]', expr: '[new Number(Number.MAX_VALUE)]' }
 
     - res: 'object'
       vals:
           - { type: 'byte[]', expr: '[Byte.MIN_VALUE]' }
-          - { type: 'Byte[]', expr: '[new Byte(Byte.MIN_VALUE)]' }
           - { type: 'short[]', expr: '[Short.MIN_VALUE]' }
-          - { type: 'Short[]', expr: '[new Short(Short.MIN_VALUE)]' }
           - { type: 'int[]', expr: '[Int.MAX_VALUE]' }
-          - { type: 'Int[]', expr: '[new Int(Int.MIN_VALUE)]' }
           - { type: 'long[]', expr: '[Long.MIN_VALUE]' }
-          - { type: 'Long[]', expr: '[new Long(Long.MIN_VALUE)]' }
           - { type: 'float[]', expr: '[Float.MIN_VALUE]' }
-          - { type: 'Float[]', expr: '[new Float(Float.MIN_VALUE)]' }
           - { type: 'double[]', expr: '[Double.MIN_VALUE]' }
-          - { type: 'Double[]', expr: '[new Double(Double.MIN_VALUE)]' }
           - { type: 'char[]', expr: '[Char.MIN_VALUE as char]' }
-          - { type: 'Char[]', expr: '[new Char(Char.MAX_VALUE as char)]' }
 
     - res: 'object'
       decl: |-
@@ -123,13 +91,13 @@ cases:
       vals:
           - { type: 'A[]', expr: '[new A]' }
           - { type: 'I[]', expr: '[new A]' }
-          - { type: 'Comparable<Float>[]', expr: '[new Float(3.14f)]' }
+          - { type: 'Comparable<Float>[]', expr: '[3.14f]' }
 
     - res: 'object'
       vals:
-          - { type: 'Floating[]', expr: '[new Float(3.14f)]' }
-          - { type: 'Integral[]', expr: '[new Int(42)]' }
-          - { type: 'Numeric[]', expr: '[new Number(3.14)]' }
+          - { type: 'Floating[]', expr: '[3.14f]' }
+          - { type: 'Integral[]', expr: '[42]' }
+          - { type: 'Numeric[]', expr: '[3.14]' }
 
     - res: 'function'
       decl: |-

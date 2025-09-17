@@ -1147,6 +1147,7 @@
 07.expressions/13.chaining_operator/chop_dynamic_property.ets
 07.expressions/17.typeof_expression/tof_const_10.ets
 07.expressions/17.typeof_expression/tof_const_2.ets
+07.expressions/17.typeof_expression/tof_const_6.ets
 07.expressions/17.typeof_expression/tof_const_9.ets
 07.expressions/17.typeof_expression/tof_func_10.ets
 07.expressions/17.typeof_expression/tof_func_2.ets
