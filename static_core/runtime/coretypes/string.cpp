@@ -34,6 +34,7 @@
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/coretypes/string.h"
 #include "runtime/include/coretypes/line_string.h"
+#include "runtime/include/flattened_string_cache.h"
 
 namespace ark::coretypes {
 
@@ -888,7 +889,17 @@ FlatStringInfo FlatStringInfo::FlattenTreeString(VMHandle<String> &treeStr, cons
         return FlatStringInfo(String::Cast(first), 0, treeString->GetLength());
     }
 
+    auto *thread = ManagedThread::GetCurrent();
+    VMHandle<coretypes::Array> cache(thread, coretypes::Array::Cast(thread->GetFlattenedStringCache()));
+
+    auto *cachedFlatStr = FlattenedStringCache::Get(cache.GetPtr(), treeStr.GetPtr());
+
+    if (cachedFlatStr != nullptr) {
+        return FlatStringInfo(cachedFlatStr, 0, cachedFlatStr->GetLength());
+    }
+
     String *s = SlowFlatten(treeStr, ctx);
+    FlattenedStringCache::Update(cache.GetPtr(), treeStr.GetPtr(), s);
     return FlatStringInfo(s, 0, treeString->GetLength());
 }
 

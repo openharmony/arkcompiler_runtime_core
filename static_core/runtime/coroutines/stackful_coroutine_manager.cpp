@@ -192,6 +192,7 @@ void StackfulCoroutineManager::OnWorkerStartup(StackfulCoroutineWorker *worker)
 
 void StackfulCoroutineManager::OnWorkerStartupImpl(StackfulCoroutineWorker *worker)
 {
+    worker->OnWorkerStartup();
     workers_.push_back(worker);
     ++activeWorkersCount_;
     workersCv_.Signal();
@@ -247,7 +248,7 @@ bool StackfulCoroutineManager::IsCoroutineSwitchDisabled()
     return GetCurrentWorker()->IsCoroutineSwitchDisabled();
 }
 
-void StackfulCoroutineManager::Initialize(Runtime *runtime, PandaVM *vm)
+void StackfulCoroutineManager::InitializeScheduler(Runtime *runtime, PandaVM *vm)
 {
     // enable stats collection if needed
     if (GetConfig().enablePerfStats) {
@@ -537,6 +538,17 @@ bool StackfulCoroutineManager::EnumerateThreadsImpl(const ThreadManager::Callbac
     os::memory::LockHolder lock(coroListLock_);
     for (auto *t : coroutines_) {
         if (!ApplyCallbackToThread(cb, t, incMask, xorMask)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool StackfulCoroutineManager::EnumerateWorkersImpl(const EnumerateWorkerCallback &cb) const
+{
+    os::memory::LockHolder lock(workersLock_);
+    for (auto *w : workers_) {
+        if (!cb(w)) {
             return false;
         }
     }

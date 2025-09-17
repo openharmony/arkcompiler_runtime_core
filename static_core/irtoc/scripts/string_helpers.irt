@@ -39,6 +39,41 @@ macro(:check_string_type) do |str|
   }
 end
 
+module FlattenedStringCacheConstants
+  ADDRESS_SHIFT = "cross_values::GetFlattenedStringCacheAddressShift(GetArch())"
+  ADDRESS_MASK = "cross_values::GetFlattenedStringCacheAddressMask(GetArch())"
+  ENTRY_SIZE = "cross_values::GetFlattenedStringCacheEntrySize(GetArch())"
+  VALUE_OFFSET = "cross_values::GetFlattenedStringCacheValueOffset(GetArch())"
+end
+
+macro(:try_use_cached_flat_str) do |str|
+  baseClass := LoadI(str).ref
+  stringType := LoadI(baseClass).Imm(Constants::STRING_TYPE_OFFSET).u64
+  If(stringType, Constants::STRING_TYPE_SLICE).EQ {
+    Goto(:SlowPathEntrypoint)
+  }
+  If(stringType, Constants::STRING_TYPE_TREE).EQ {
+    stringCache := LoadI(%tr).Imm(Constants::THREAD_FLATTENED_STRING_CACHE_OFFSET).ref
+    If(stringCache, 0).EQ {
+      Goto(:SlowPathEntrypoint)
+    }
+
+    # cannot cast directly from ref to uint
+    strPtr := Cast(str).ptr
+    strUint := Bitcast(strPtr).word
+    strShifted := ShrI(strUint).Imm(FlattenedStringCacheConstants::ADDRESS_SHIFT).word
+    strMasked := AndI(strShifted).Imm(FlattenedStringCacheConstants::ADDRESS_MASK).word
+    strIndex := Mul(strMasked, FlattenedStringCacheConstants::ENTRY_SIZE).word
+    key := LoadArray(stringCache, strIndex).ref
+    If(key, str).NE {
+      Goto(:SlowPathEntrypoint)
+    }
+    strIndex := AddI(strIndex).Imm(FlattenedStringCacheConstants::VALUE_OFFSET).ref_uint
+    strCached := LoadArray(stringCache, strIndex).ref
+  }
+  result := Phi(str, strCached).ref
+end
+
 def GenerateStringEquals(lang, dynamic, compression, cgmode = :FastPath)
     suffix = (compression ? 'Compressed' : '') + (cgmode == :NativePlus ? 'NativePlus': '')
     length_shift = Constants::STRING_LENGTH_SHIFT
@@ -111,7 +146,7 @@ def GenerateStringEquals(lang, dynamic, compression, cgmode = :FastPath)
         RegMask.new($full_regmap, :arg0, :arg1, :tmp0, :tmp1, :callee0, :caller1)
 
     function("#{lang}StringEquals#{suffix}".to_sym,
-            params: {str1: 'ref', str2: 'ref'},
+            params: {str1_orig: 'ref', str2_orig: 'ref'},
             regmap: $full_regmap,
             regalloc_set: reg_mask,
             mode: mode,
@@ -122,15 +157,15 @@ def GenerateStringEquals(lang, dynamic, compression, cgmode = :FastPath)
             next
         end
         unless dynamic
-            If(str2, 0).EQ.Unlikely.b {
+            If(str2_orig, 0).EQ.Unlikely.b {
                 Goto(:NotEqual)
             }
         end
-        If(str1, str2).EQ.Unlikely.b {
+        If(str1_orig, str2_orig).EQ.Unlikely.b {
             Return(1).b
         }
-        check_string_type(str1)
-        check_string_type(str2)
+        str1 := try_use_cached_flat_str(str1_orig)
+        str2 := try_use_cached_flat_str(str2_orig)
         if dynamic
             length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
             length2 := LoadI(str2).Imm(Constants::STRING_LENGTH_OFFSET).u32
@@ -210,10 +245,10 @@ def GenerateStringEquals(lang, dynamic, compression, cgmode = :FastPath)
         Return(0).b
     Label(:SlowPathEntrypoint)
       if cgmode == :NativePlus
-        Return(Call(str1, str2).Method("CoreStringEquals").b).b
+        Return(Call(str1_orig, str2_orig).Method("CoreStringEquals").b).b
       else
         entrypoint = get_entrypoint_offset("STRING_EQUALS_SLOW_PATH")
-        Intrinsic(:SLOW_PATH_ENTRY, str1, str2).AddImm(entrypoint).MethodAsImm("StringEqualsUsualBridge").Terminator.b
+        Intrinsic(:SLOW_PATH_ENTRY, str1_orig, str2_orig).AddImm(entrypoint).MethodAsImm("StringEqualsUsualBridge").Terminator.b
         Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
       end
     }
@@ -880,7 +915,7 @@ def GenerateSubstringFromStringTlab(string_compression_enabled)
   suffix = (string_compression_enabled ? "Compressed" : "")
   available_regs = $panda_mask
   function("SubStringFromStringTlab#{suffix}".to_sym,
-           params: {str: 'ref', begin_index: 'i32', end_index: 'i32'},
+           params: {str_orig: 'ref', begin_index: 'i32', end_index: 'i32'},
            regmap: $full_regmap,
            regalloc_set: available_regs,
            mode: [:FastPath]) {
@@ -891,7 +926,7 @@ def GenerateSubstringFromStringTlab(string_compression_enabled)
       next
     end
 
-    check_string_type(str)
+    str := try_use_cached_flat_str(str_orig)
 
     # Note, 'str' is checked against nullptr in the InstBuilder (see AddArgNullcheckIfNeeded)
     length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
@@ -993,7 +1028,7 @@ def GenerateSubstringFromStringTlab(string_compression_enabled)
 
   Label(:SlowPathEntrypoint)
     entrypoint = get_entrypoint_offset("SUB_STRING_FROM_STRING_SLOW_PATH")
-    Intrinsic(:SLOW_PATH_ENTRY, str, begin_index, end_index).AddImm(entrypoint).MethodAsImm("SubStringFromStringOddSavedBridge").Terminator.ptr
+    Intrinsic(:SLOW_PATH_ENTRY, str_orig, begin_index, end_index).AddImm(entrypoint).MethodAsImm("SubStringFromStringOddSavedBridge").Terminator.ptr
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
   }
 end  # def GenerateSubstringFromStringTlab
@@ -1003,7 +1038,7 @@ def GenerateStringGetCharsTlab(string_compression_enabled)
   suffix = (string_compression_enabled ? "Compressed" : "")
   available_regs = $panda_mask
   function("StringGetCharsTlab#{suffix}".to_sym,
-           params: {str: 'ref', begin_index: 'i32', end_index: 'i32', array_klass: 'ref'},
+           params: {str_orig: 'ref', begin_index: 'i32', end_index: 'i32', array_klass: 'ref'},
            regmap: $full_regmap,
            regalloc_set: available_regs,
            mode: [:FastPath]) {
@@ -1014,7 +1049,7 @@ def GenerateStringGetCharsTlab(string_compression_enabled)
       next
     end
 
-    check_string_type(str)
+    str := try_use_cached_flat_str(str_orig)
 
     If(begin_index, end_index).GT.Unlikely.b {
       Goto(:SlowPathEntrypoint)  # Out of range
@@ -1058,7 +1093,7 @@ def GenerateStringGetCharsTlab(string_compression_enabled)
 
   Label(:SlowPathEntrypoint)
     entrypoint = get_entrypoint_offset("STRING_GET_CHARS_SLOW_PATH")
-    Intrinsic(:SLOW_PATH_ENTRY, str, begin_index, end_index).AddImm(entrypoint).MethodAsImm("StringGetChars4ArgBridge").Terminator.ptr
+    Intrinsic(:SLOW_PATH_ENTRY, str_orig, begin_index, end_index).AddImm(entrypoint).MethodAsImm("StringGetChars4ArgBridge").Terminator.ptr
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
   }
 end  # def GenerateStringGetCharsTlab

@@ -35,7 +35,7 @@ GenerateStringHashCode(string_compression_enabled=false, :FastPath)
 
 available_regs = $panda_mask
 function(:StringConcat2Tlab,
-          params: {str1: 'ref', str2: 'ref'},
+          params: {str1_orig: 'ref', str2_orig: 'ref'},
           regmap: $full_regmap,
           regalloc_set: available_regs,
           mode: [:FastPath]) {
@@ -45,8 +45,8 @@ function(:StringConcat2Tlab,
       next
     end
     
-    check_string_type(str1)
-    check_string_type(str2)
+    str1 := try_use_cached_flat_str(str1_orig)
+    str2 := try_use_cached_flat_str(str2_orig)
 
     klass := load_class(str1)
     length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
@@ -105,13 +105,13 @@ function(:StringConcat2Tlab,
 
 Label(:SlowPathEntrypoint)
     ep_offset = get_entrypoint_offset("STRING_CONCAT2_SLOW_PATH")
-    Intrinsic(:SLOW_PATH_ENTRY, str1, str2).AddImm(ep_offset).MethodAsImm("StringConcat2UsualBridge").Terminator.ptr
+    Intrinsic(:SLOW_PATH_ENTRY, str1_orig, str2_orig).AddImm(ep_offset).MethodAsImm("StringConcat2UsualBridge").Terminator.ptr
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 
 available_regs = $panda_mask
 function(:StringConcat3Tlab,
-         params: {str1: 'ref', str2: 'ref', str3: 'ref'},
+         params: {str1_orig: 'ref', str2_orig: 'ref', str3_orig: 'ref'},
          regmap: $full_regmap,
          regalloc_set: available_regs,
          mode: [:FastPath]) {
@@ -121,9 +121,9 @@ function(:StringConcat3Tlab,
       next
     end
 
-    check_string_type(str1)
-    check_string_type(str2)
-    check_string_type(str3)
+    str1 := try_use_cached_flat_str(str1_orig)
+    str2 := try_use_cached_flat_str(str2_orig)
+    str3 := try_use_cached_flat_str(str3_orig)
 
     klass := load_class(str1)
     length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
@@ -199,13 +199,13 @@ Label(:EndCopy)
 
 Label(:SlowPathEntrypoint)
     ep_offset = get_entrypoint_offset("STRING_CONCAT3_SLOW_PATH")
-    Intrinsic(:SLOW_PATH_ENTRY, str1, str2, str3).AddImm(ep_offset).MethodAsImm("StringConcat3OddSavedBridge").Terminator.ptr
+    Intrinsic(:SLOW_PATH_ENTRY, str1_orig, str2_orig, str3_orig).AddImm(ep_offset).MethodAsImm("StringConcat3OddSavedBridge").Terminator.ptr
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 
 available_regs = $panda_mask
 function(:StringConcat4Tlab,
-         params: {str1: 'ref', str2: 'ref', str3: 'ref', str4: 'ref'},
+         params: {str1_orig: 'ref', str2_orig: 'ref', str3_orig: 'ref', str4_orig: 'ref'},
          regmap: $full_regmap,
          regalloc_set: available_regs,
          mode: [:FastPath]) {
@@ -214,10 +214,10 @@ function(:StringConcat4Tlab,
       next
     end
 
-    check_string_type(str1)
-    check_string_type(str2)
-    check_string_type(str3)
-    check_string_type(str4)
+    str1 := try_use_cached_flat_str(str1_orig)
+    str2 := try_use_cached_flat_str(str2_orig)
+    str3 := try_use_cached_flat_str(str3_orig)
+    str4 := try_use_cached_flat_str(str4_orig)
 
     klass := load_class(str1)
     length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
@@ -312,14 +312,14 @@ Label(:EndCopy)
 
 Label(:SlowPathEntrypoint)
     ep_offset = get_entrypoint_offset("STRING_CONCAT4_SLOW_PATH")
-    Intrinsic(:SLOW_PATH_ENTRY, str1, str2, str3, str4).AddImm(ep_offset).MethodAsImm("StringConcat4UsualBridge").Terminator.ptr
+    Intrinsic(:SLOW_PATH_ENTRY, str1_orig, str2_orig, str3_orig, str4_orig).AddImm(ep_offset).MethodAsImm("StringConcat4UsualBridge").Terminator.ptr
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 
 def GenerateStringCompareTo(cgmode)
   suffix = (cgmode == :NativePlus ? 'NativePlus': '')
   function("StringCompareTo#{suffix}",
-           params: {str1: 'ref', str2: 'ref'},
+           params: {str1_orig: 'ref', str2_orig: 'ref'},
            regmap: $full_regmap,
            regalloc_set: $panda_mask,
            mode: [cgmode]) {
@@ -330,17 +330,17 @@ def GenerateStringCompareTo(cgmode)
       next
     end
 
-    check_string_type(str1)
-    check_string_type(str2)
+    str1 := try_use_cached_flat_str(str1_orig)
+    str2 := try_use_cached_flat_str(str2_orig)
 
     Return(macroStringCompareTo(str1, str2)).i32
 
 Label(:SlowPathEntrypoint)
     if cgmode == :NativePlus
-        Return(Call(str1, str2).Method('CoreStringCompareTo').i32).i32
+        Return(Call(str1_orig, str2_orig).Method('CoreStringCompareTo').i32).i32
     else
       entrypoint = get_entrypoint_offset("STRING_COMPARE_TO_SLOW_PATH")
-      Intrinsic(:SLOW_PATH_ENTRY, str1, str2).AddImm(entrypoint).MethodAsImm("StringCompareToUsualBridge").Terminator.i32
+      Intrinsic(:SLOW_PATH_ENTRY, str1_orig, str2_orig).AddImm(entrypoint).MethodAsImm("StringCompareToUsualBridge").Terminator.i32
       Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
     end
   }

@@ -64,17 +64,17 @@ void StackfulCoroutineWorker::AddCreatedCoroutineAndSwitchToIt(Coroutine *newCor
 {
     // precondition: called within the current worker, no cross-worker calls allowed
     ASSERT(GetCurrentContext()->GetWorker() == this);
+    RegisterIncomingActiveCoroutine(newCoro);
 
+    // suspend current coro...
     auto *coro = Coroutine::GetCurrent();
     ScopedNativeCodeThread n(coro);
     coro->RequestSuspend(false);
-
-    newCoro->LinkToExternalHolder(IsMainWorker() || InExclusiveMode());
+    // ..and resume the new one
     auto *currentCtx = GetCurrentContext();
     auto *nextCtx = newCoro->GetContext<StackfulCoroutineContext>();
     nextCtx->RequestResume();
     Coroutine::SetCurrent(newCoro);
-    RegisterIncomingActiveCoroutine(newCoro);
 
     SwitchCoroutineContext(currentCtx, nextCtx);
 
@@ -282,6 +282,7 @@ void StackfulCoroutineWorker::ScheduleLoop()
 
 void StackfulCoroutineWorker::ScheduleLoopBody()
 {
+    // run the loop
     while (IsActive()) {
         RequestScheduleImpl();
         os::memory::LockHolder lkRunnables(runnablesLock_);
@@ -608,6 +609,18 @@ void StackfulCoroutineWorker::OnAfterContextSwitch(StackfulCoroutineContext *to)
      */
     Coroutine *coroTo = to->GetCoroutine();
     coroTo->OnContextSwitchedTo();
+}
+
+void StackfulCoroutineWorker::CacheLocalObjectsInCoroutines()
+{
+    os::memory::LockHolder lock(runnablesLock_);
+    runnables_.IterateOverCoroutines([](Coroutine *co) { co->UpdateCachedObjects(); });
+    {
+        os::memory::LockHolder lh(waitersLock_);
+        for (auto &[_, co] : waiters_) {
+            co->UpdateCachedObjects();
+        }
+    }
 }
 
 void StackfulCoroutineWorker::GetFullWorkerStateInfo(StackfulCoroutineWorkerStateInfo *info) const

@@ -44,7 +44,7 @@ public:
     ~StackfulCoroutineManager() override = default;
 
     /* CoroutineManager interfaces, see CoroutineManager class for the details */
-    void Initialize(Runtime *runtime, PandaVM *vm) override;
+    void InitializeScheduler(Runtime *runtime, PandaVM *vm) override;
     void Finalize() override;
     void RegisterCoroutine(Coroutine *co) override;
     bool TerminateCoroutine(Coroutine *co) override;
@@ -146,6 +146,8 @@ protected:
 
     bool EnumerateThreadsImpl(const ThreadManager::Callback &cb, unsigned int incMask,
                               unsigned int xorMask) const override;
+    bool EnumerateWorkersImpl(const EnumerateWorkerCallback &cb) const override;
+
     CoroutineContext *CreateCoroutineContext(bool coroHasEntrypoint) override;
     void DeleteCoroutineContext(CoroutineContext *ctx) override;
 

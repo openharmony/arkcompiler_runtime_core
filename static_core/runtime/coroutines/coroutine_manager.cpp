@@ -169,4 +169,14 @@ CoroutineSchedulingPolicy CoroutineManager::GetSchedulingPolicy() const
     return schedulingPolicy_;
 }
 
+void CoroutineManager::InitializeManagedStructures()
+{
+    ASSERT(Coroutine::GetCurrent() == GetMainThread());
+    EnumerateWorkers([](CoroutineWorker *worker) {
+        worker->InitializeManagedStructures();
+        return true;
+    });
+    Coroutine::GetCurrent()->UpdateCachedObjects();
+}
+
 }  // namespace ark

@@ -25,7 +25,7 @@
 
 namespace ark {
 
-void ThreadedCoroutineManager::Initialize(Runtime *runtime, PandaVM *vm)
+void ThreadedCoroutineManager::InitializeScheduler(Runtime *runtime, PandaVM *vm)
 {
     // create and activate workers
     size_t numberOfAvailableCores = std::max(std::thread::hardware_concurrency() / 4ULL, 2ULL);
@@ -318,6 +318,17 @@ bool ThreadedCoroutineManager::EnumerateThreadsImpl(const ThreadManager::Callbac
     os::memory::LockHolder lock(coroListLock_);
     for (auto *t : coroutines_) {
         if (!ApplyCallbackToThread(cb, t, incMask, xorMask)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool ThreadedCoroutineManager::EnumerateWorkersImpl(const EnumerateWorkerCallback &cb) const
+{
+    os::memory::LockHolder lock(workersLock_);
+    for (auto *w : workers_) {
+        if (!cb(w)) {
             return false;
         }
     }

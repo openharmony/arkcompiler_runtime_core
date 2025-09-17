@@ -132,7 +132,7 @@ public:
     void CleanUp() override;
     void RequestCompletion(Value returnValue) override;
     void FreeInternalMemory() override;
-
+    void UpdateCachedObjects() override;
     void ListUnhandledEventsOnProgramExit() override;
 
     LocalStorage &GetLocalStorage()

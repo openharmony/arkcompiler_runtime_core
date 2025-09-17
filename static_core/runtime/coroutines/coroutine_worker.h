@@ -39,7 +39,7 @@ enum class CoroutinePriority {
 /// Represents a coroutine worker, which can host multiple coroutines and schedule them.
 class CoroutineWorker {
 public:
-    enum class DataIdx { INTEROP_CTX_PTR, EXTERNAL_IFACES, LAST_ID };
+    enum class DataIdx { INTEROP_CTX_PTR, EXTERNAL_IFACES, FLATTENED_STRING_CACHE, LAST_ID };
     using LocalStorage = StaticLocalStorage<DataIdx>;
     using Id = int32_t;
 
@@ -110,6 +110,16 @@ public:
     void OnCoroBecameActive(Coroutine *co);
 
     void TriggerSchedulerExternally(Coroutine *requester);
+
+    /// should be called once the VM is ready to create managed objects in the managed heap
+    void InitializeManagedStructures();
+
+    /// should be called from CoroutineManager after worker creation from the coroutine assigned to the worker
+    void OnWorkerStartup();
+
+private:
+    void CreateWorkerLocalObjects();
+    virtual void CacheLocalObjectsInCoroutines() {}
 
 private:
     Runtime *runtime_ = nullptr;
