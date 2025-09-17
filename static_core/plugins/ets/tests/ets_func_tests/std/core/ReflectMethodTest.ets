@@ -129,7 +129,7 @@ function testMethodAttributes(): void {
         if (m.getOwner().getName() != type.getName()) {
             return false
         }
-        let baseType = Class.of(type.getSuper()!)
+        let baseType = type.getSuper()!
         return baseType.getInstanceMethodByName(m.getName()) != undefined
     }
 
@@ -254,7 +254,7 @@ function testParameters() {
 function main() {
     const suite = new arktest.ArkTestsuite('Reflect Method tests')
     suite.addTest('Test Reflect Method base APIs', testReflectMethod)
-    suite.addTest('Test Reflect Method attributes APIs', testReflectMethod)
+    suite.addTest('Test Reflect Method attributes APIs', testMethodAttributes)
     suite.addTest('Test Reflect Method Parameters APIs', testParameters)
     return suite.run()
 }
