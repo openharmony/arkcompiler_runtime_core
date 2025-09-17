@@ -1296,6 +1296,9 @@
 #30058
 08.statements/13.switch_statements/switch_default_order_2.ets
 
+#30145
+08.statements/14.throw_statements/throw_7.ets
+
 #27010
 08.statements/15.try_statements/01.catch_clause/catch_2.ets
 
