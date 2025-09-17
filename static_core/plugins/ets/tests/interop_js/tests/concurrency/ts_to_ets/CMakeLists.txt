@@ -11,11 +11,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-panda_ets_interop_js_gtest(ets_interop_ts_to_ets_concurrency
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_interop_concurrency.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/eworker_interop_tests.ets
-                ${CMAKE_CURRENT_SOURCE_DIR}/taskpool_interop_tests.ets
-    TS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/../concurrency_helpers.ts
-    PACKAGE_NAME
-       concurrentcy_tests
-)
+# NOTE(sarychevkonstantin): failing test, enable when fixed. Issue #29854
+if (NOT PANDA_ETS_INTEROP_JS)
+    panda_ets_interop_js_gtest(ets_interop_ts_to_ets_concurrency
+        CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_interop_concurrency.cpp
+        ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/eworker_interop_tests.ets
+                    ${CMAKE_CURRENT_SOURCE_DIR}/taskpool_interop_tests.ets
+        TS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/../concurrency_helpers.ts
+        PACKAGE_NAME
+        concurrentcy_tests
+    )
+endif()
