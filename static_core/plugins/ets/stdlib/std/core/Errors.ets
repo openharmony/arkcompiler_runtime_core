@@ -229,3 +229,9 @@ export class ArgumentsUnderapplicationError extends Error {
         super("ArgumentsUnderapplicationError", message, options)
     }
 }
+
+export class InvalidStoreAccessError extends Error {
+    constructor(message?: String, options?: ErrorOptions) {
+        super("InvalidStoreAccessError", message, options)
+    }
+}

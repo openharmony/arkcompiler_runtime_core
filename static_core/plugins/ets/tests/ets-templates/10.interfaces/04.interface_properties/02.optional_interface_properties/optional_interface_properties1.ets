@@ -26,6 +26,8 @@ class A implements I {
   get a(): int | undefined { return this.a }
 }
 
-let i: I = {}
-i.a = 1
-arktest.assertEQ(i.a, undefined)
+function main() {
+  let i: I = {}
+  i.a = 1
+  arktest.assertEQ(i.a, 1)
+}
