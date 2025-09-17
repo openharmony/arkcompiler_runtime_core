@@ -24,7 +24,7 @@ export function getBootRuntimeLinker(): BootRuntimeLinker {
 
 export native function getNearestNonBootRuntimeLinker(): RuntimeLinker | undefined
 
-final class BootRuntimeLinker extends RuntimeLinker {
+export final class BootRuntimeLinker extends RuntimeLinker {
     public static final instance: BootRuntimeLinker = new BootRuntimeLinker()
 
     private constructor() {

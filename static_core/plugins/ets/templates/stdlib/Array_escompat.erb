@@ -85,7 +85,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         this.actualLength = arrayLen
     }
 
-    protected constructor(_tag: FromBuffer, buf: FixedArray<Any>) {
+    private constructor(_tag: FromBuffer, buf: FixedArray<Any>) {
         this.buffer = buf
         this.actualLength = buf.length
     }
@@ -837,7 +837,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @return a reference to the (obj as Array<T>).buffer field.
      */
-    private static native getBuffer(obj: Object): FixedArray<Any>;  
+    private static native getBuffer(obj: Object): FixedArray<Any>;
 
     /**
      * Creates a new `Array` from this `Array` instance and given `Array` instance.

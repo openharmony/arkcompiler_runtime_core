@@ -34,7 +34,7 @@ cases:
   - decl: |-
       interface I {
         i?: number
-        foo() {}
+        foo()
       }
     check: |-
       let a: Required<I> = { i: 1.1 }

@@ -604,5 +604,5 @@ export namespace StdProcess {
 
     let failedJobHandler: RejectedHandler = new RejectedHandler();
     let rejectedPromiseHandler: RejectedHandler = new RejectedHandler();
-    let errorHandler: ErrorHandler = new ErrorHandler(DEFAULT_ERROR_HANDLER_CALLBACK);
+    let errorHandler: ProcessErrorHandler = new ProcessErrorHandler(DEFAULT_ERROR_HANDLER_CALLBACK);
 }

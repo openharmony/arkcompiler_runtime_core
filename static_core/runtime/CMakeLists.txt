@@ -298,6 +298,7 @@ panda_gen_file(
 )
 add_custom_target(core_any_intrinsics_inc DEPENDS ${GEN_INCLUDE_DIR}/core_any_intrinsics.inc)
 add_dependencies(arkruntime_interpreter_impl core_any_intrinsics_inc)
+add_dependencies(panda_gen_files core_any_intrinsics_inc)
 
 set(ISA "${CMAKE_BINARY_DIR}/isa/isa.yaml")
 set(ISA_API "${PANDA_ROOT}/isa/isapi.rb")
@@ -1046,7 +1047,7 @@ if (TARGET arkruntime_test_interpreter_impl)
         # Issue: #29519
         list(APPEND INTERPRETER_TESTS_SOURCES tests/exception_test.cpp)
     endif()
-        
+
     add_gtests(
         ${INTERPRETER_TESTS_SOURCES}
         $<TARGET_OBJECTS:arkruntime_test_interpreter_impl>

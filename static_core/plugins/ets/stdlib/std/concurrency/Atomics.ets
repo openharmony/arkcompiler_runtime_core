@@ -14,7 +14,7 @@
  */
 package std.concurrency;
 
-class Waiter {
+export class Waiter {
     public static okStatus: string = "ok";
     public static notEqualStatus: string = "not-equal";
     public static timeOutStatus: string = "timed-out";

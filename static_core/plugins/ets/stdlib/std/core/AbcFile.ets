@@ -19,7 +19,7 @@ package std.core;
  * @class Represents ABC file.
  * Intended to be used by AbcRuntimeLinker and other platform extensions.
  */
-final class AbcFile {
+export final class AbcFile {
     private fileHandlePtr: long
 
     private constructor() {

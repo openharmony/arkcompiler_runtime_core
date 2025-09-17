@@ -118,8 +118,8 @@ export class EAWorker {
     /**
      * Get all registered EAWorker instances.
      *
-     * @returns { containers.ConcurrentHashMap<int, EAWorker> } 
-     *   A concurrent hash map containing all EAWorker instances, 
+     * @returns { containers.ConcurrentHashMap<int, EAWorker> }
+     *   A concurrent hash map containing all EAWorker instances,
      *   keyed by their integer identifiers.
      */
     private static getWorkers(): containers.ConcurrentHashMap<int, EAWorker> {
@@ -431,7 +431,7 @@ class MainEAWorker extends EAWorker {
     }
 }
 
-class MainWorker extends InternalWorker {
+export class MainWorker extends InternalWorker {
     constructor() {
         super("main", MAIN_WORKER_ID);
     }

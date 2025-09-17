@@ -15,13 +15,13 @@
 
 package std.interop;
 
-enum InteropArgType {
+export enum InteropArgType {
     DIRECT = 0,
     UNWRAP = 1,
     JSVALUE = 2
 }
 
-class InteropArgRecord {
+export class InteropArgRecord {
     constructor() {
         this.type = InteropArgType.DIRECT;
         this.value = undefined;
