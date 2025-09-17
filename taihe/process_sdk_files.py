@@ -31,9 +31,12 @@ def should_skip_file(file_path, patterns) -> bool:
 
 
 def copy_with_permissions(src, dst):
-    shutil.copy2(src, dst)
-    src_stat = os.stat(src)
-    os.chmod(dst, src_stat.st_mode)
+    try:
+        shutil.copy2(src, dst)
+        src_stat = os.stat(src)
+        os.chmod(dst, src_stat.st_mode)
+    except FileNotFoundError:
+        return
 
 
 def copy_directory_excluding_files(base_dir, output_dir):
