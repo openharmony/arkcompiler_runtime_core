@@ -11,3 +11,9 @@ api/@ohos.util.ArrayList.ets
 api/@ohos.util.Deque.ets
 api/@ohos.xml.ets
 api/UtilHelper.ets
+api/@ohos.util.PlainArray.ets
+arkts/@arkts.math.Decimal.ets
+arkts/@arkts.collections.ets
+api/@ohos.url.ets
+api/@ohos.util.LightWeightMap.ets
+api/@ohos.base.ets
