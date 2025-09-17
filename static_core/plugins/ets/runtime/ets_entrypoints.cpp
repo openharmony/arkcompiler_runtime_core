@@ -493,4 +493,33 @@ extern "C" coretypes::String *CreateStringFromCharCodeSingleEntrypoint(uint64_t 
     return EtsString::CreateNewStringFromCharCode(bit_cast<double>(charCode))->GetCoreType();
 }
 
+extern "C" int32_t WriteStringToMem(int64_t buf, ObjectHeader *s)
+{
+    auto str = reinterpret_cast<EtsString *>(s);
+    auto addr = reinterpret_cast<void *>(buf);
+    auto size = static_cast<uint32_t>(str->GetUtf8Length());
+
+    if (str->IsUtf16()) {
+        if (size != str->CopyDataRegionUtf8(addr, 0, size, size)) {
+            return -1;
+        }
+    } else {
+        if (memcpy_s(addr, size, str->GetDataMUtf8(), size) != 0) {
+            return -1;
+        }
+    }
+    return size;
+}
+
+extern "C" ObjectHeader *CreateStringFromMem(int64_t buf, int32_t len)
+{
+    auto str = EtsString::CreateFromUtf8(reinterpret_cast<const char *>(buf), static_cast<uint32_t>(len));
+    return reinterpret_cast<ObjectHeader *>(str);
+}
+
+extern "C" int32_t GetStringSizeInBytes(ObjectHeader *str)
+{
+    return reinterpret_cast<EtsString *>(str)->GetUtf8Length();
+}
+
 }  // namespace ark::ets

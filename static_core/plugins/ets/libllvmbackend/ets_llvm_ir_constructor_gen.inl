@@ -465,27 +465,6 @@ bool LLVMIrConstructor::EmitFloatArrayFillInternal(Inst *inst, RuntimeInterface:
     return true;
 }
 
-bool LLVMIrConstructor::EmitReadString(Inst *inst)
-{
-    auto entryId = RuntimeInterface::EntrypointId::CREATE_STRING_FROM_MEM;
-    auto buf = GetInputValue(inst, 0);
-    auto len = GetInputValue(inst, 1);
-    auto klassOffset = GetGraph()->GetRuntime()->GetStringClassPointerTlsOffset(GetGraph()->GetArch());
-    auto klass = llvmbackend::runtime_calls::LoadTLSValue(&builder_, arkInterface_, klassOffset, builder_.getPtrTy());
-
-    auto result = CreateFastPathCall(inst, entryId, {buf, len, klass});
-
-    MarkAsAllocation(result);
-    ValueMapAdd(inst, result);
-
-    return true;
-}
-
-bool LLVMIrConstructor::EmitWriteString(Inst *inst)
-{
-    return EmitFastPath(inst, RuntimeInterface::EntrypointId::WRITE_STRING_TO_MEM, 2U);
-}
-
 static RuntimeInterface::EntrypointId GetArrayFastCopyToRefEntrypointId(mem::BarrierType barrierType)
 {
     using EntrypointId = RuntimeInterface::EntrypointId;
@@ -500,7 +479,6 @@ static RuntimeInterface::EntrypointId GetArrayFastCopyToRefEntrypointId(mem::Bar
             return EntrypointId::ARRAY_FAST_COPY_TO_REF_SYNC;
     }
 }
-
 bool LLVMIrConstructor::EmitArrayFastCopyToRef(Inst *inst)
 {
     if (GetGraph()->GetArch() == Arch::AARCH32) {
