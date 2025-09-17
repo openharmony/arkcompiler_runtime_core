@@ -17,3 +17,10 @@ break_statements:
       let i = 2;
       break;
       arktest.assertEQ(i, 2)
+  - use: |
+      outerbreaklabel: { break outerbreaklabel }
+
+  - use: |
+      break: for(;;) { break break }
+  - use: |
+      outerbreaklabel: { break outerbreaklabel }

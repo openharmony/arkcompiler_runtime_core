@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,16 +13,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
 /*---
-desc: In a 'for-of' statement type 'expr' must be either array or string, or an instance of iterable class or interface.
+desc: Switch statement
 ---*/
 
-let res = ""
-{{c.decl}}
+type Switcher = Any
 
-function main(): void {
-    res = ""
-    {{c.use|indent}}
+function foo(test: Switcher) {
+    switch(test) {
+        case 'Test' : { arktest.assertTrue(true); break }
+        case 5: { break }
+        default: { arktest.assertTrue(false, "Not expected to execute default branch")}
+    }
 }
-{% endfor %}
+
+function main() {
+    foo("Test")
+}

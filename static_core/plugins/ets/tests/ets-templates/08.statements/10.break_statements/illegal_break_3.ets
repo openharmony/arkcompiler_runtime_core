@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,16 +13,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
 /*---
-desc: In a 'for-of' statement type 'expr' must be either array or string, or an instance of iterable class or interface.
+desc: Break statements. If a break statement is used outside a loopStatement or a switchStatement, then a compile-time error occurs.
+tags: [negative, compile-only]
 ---*/
 
-let res = ""
-{{c.decl}}
-
-function main(): void {
-    res = ""
-    {{c.use|indent}}
+class MyClassWithStaticBlock {
+    static {
+        break
+    }
 }
-{% endfor %}
+
+function main() {
+}

@@ -43,4 +43,10 @@ block_statements:
       class A {
         foo(): int { return }
       }
+  - decl: |
+      return
 
+  - decl: |
+      {
+        return
+      }
