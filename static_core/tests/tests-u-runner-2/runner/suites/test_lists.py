@@ -49,7 +49,7 @@ class TestLists:
         self.excluded_lists: list[Path] = []
         self.ignored_lists: list[Path] = []
 
-        self.cache: list[str] = self.__gn_cache() if self.config.general.gn_build else self.__cmake_cache()
+        self.cache: list[str] = self.__gn_cache() if self.config.general.gn_build else self.cmake_cache()
         self.sanitizer = self.search_sanitizer()
         self.architecture = detect_architecture()
         self.operating_system = detect_operating_system()
@@ -74,7 +74,10 @@ class TestLists:
 
     def collect_ignored_test_lists(self, extra_list: list[str] | None = None,
                                    test_name: str | None = None) -> None:
-        self.ignored_lists.extend(self.collect_test_lists("ignored", extra_list, test_name))
+        if self.config.test_suite.test_lists.exclude_ignored_tests:
+            self.excluded_lists.extend(self.collect_test_lists("ignored", extra_list, test_name))
+        else:
+            self.ignored_lists.extend(self.collect_test_lists("ignored", extra_list, test_name))
 
     def collect_test_lists(
             self,
@@ -191,7 +194,7 @@ class TestLists:
         args = self.config.workflow.get_parameter("es2panda-extra-args")
         return len(self.__search_option_in_list("--verifier-all-checks", args)) > 0
 
-    def __cmake_cache(self) -> list[str]:
+    def cmake_cache(self) -> list[str]:
         cmake_cache_txt = "CMakeCache.txt"
         cmake_cache: Path = self.config.general.build / cmake_cache_txt
         if not cmake_cache.exists():
