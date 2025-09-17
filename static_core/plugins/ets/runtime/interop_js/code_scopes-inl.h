@@ -32,7 +32,7 @@ inline bool OpenInteropCodeScope(EtsCoroutine *coro, char const *descr)
     if constexpr (ETS_TO_JS) {
         ctx->UpdateInteropStackInfoIfNeeded();
     }
-    ctx->CallStack().AllocRecord(coro->GetCurrentFrame(), descr);
+    ctx->GetOrCreateCallStack().AllocRecord(coro->GetCurrentFrame(), descr);
     return true;
 }
 
@@ -48,7 +48,7 @@ inline bool CloseInteropCodeScope(EtsCoroutine *coro)
         coro->GetWorker()->TriggerSchedulerExternally(coro);
         ctx->UpdateInteropStackInfoIfNeeded();
     }
-    ctx->CallStack().PopRecord();
+    ctx->GetOrCreateCallStack().PopRecord();
     return true;
 }
 

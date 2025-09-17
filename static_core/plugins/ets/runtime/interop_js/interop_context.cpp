@@ -14,6 +14,7 @@
  */
 
 #include "plugins/ets/runtime/interop_js/interop_context.h"
+#include "plugins/ets/runtime/ets_call_stack.h"
 #include "plugins/ets/runtime/interop_js/interop_context_api.h"
 
 #include "plugins/ets/runtime/ets_exceptions.h"
@@ -436,10 +437,8 @@ void InteropCtx::InitExternalInterfaces()
         auto env = static_cast<napi_env>(jsEnv);
         auto *etsCoro = static_cast<EtsCoroutine *>(coro);
         InteropCtx::Init(etsCoro, env);
-        // It's a hack and we should use INTEROP_CODE_SCOPE to allocate records.
-        // Will be fixed in near future.
-        InteropCtx::Current()->CallStack().AllocRecord(etsCoro->GetCurrentFrame(), nullptr);
 #if defined(PANDA_TARGET_OHOS) && defined(PANDA_ETS_INTEROP_JS)
+        INTEROP_CODE_SCOPE_ETS_TO_JS(etsCoro);
         // Here need to init interop in the given JSVM instance.
         TryInitInteropInJsEnv(jsEnv);
 #endif
@@ -760,7 +759,7 @@ static std::optional<std::string> NapiTryDumpStack(napi_env env)
     auto ctx = InteropCtx::Current(coro);
 
     INTEROP_LOG(ERROR) << "======================== ETS stack ============================";
-    auto istk = ctx->interopStk_.GetRecords();
+    auto istk = ctx->GetOrCreateCallStack().GetRecords();
     auto istkIt = istk.rbegin();
 
     auto printIstkFrames = [&istkIt, &istk](void *fp) {
@@ -927,6 +926,19 @@ bool CreateMainInteropContext(ark::ets::EtsCoroutine *mainCoro, void *napiEnv)
 #else
     return true;
 #endif
+}
+
+/* static */
+InteropCallStack &InteropCtx::GetOrCreateCallStack()
+{
+    auto &coroStorage = EtsCoroutine::GetCurrent()->GetLocalStorage();
+    auto *callStk = coroStorage.Get<EtsCoroutine::DataIdx::INTEROP_CALL_STACK_PTR, InteropCallStack *>();
+    if (callStk == nullptr) {
+        callStk = Runtime::GetCurrent()->GetInternalAllocator()->New<InteropCallStack>();
+        coroStorage.Set<EtsCoroutine::DataIdx::INTEROP_CALL_STACK_PTR>(
+            callStk, [](void *param) { Runtime::GetCurrent()->GetInternalAllocator()->Delete(param); });
+    }
+    return *callStk;
 }
 
 }  // namespace ark::ets::interop::js

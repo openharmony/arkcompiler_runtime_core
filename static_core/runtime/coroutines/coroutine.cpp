@@ -242,6 +242,16 @@ void Coroutine::SetWorker(CoroutineWorker *w)
     }
 }
 
+void Coroutine::PrintCallStack() const
+{
+    for (auto stack = StackWalker::Create(this); stack.HasFrame(); stack.NextFrame()) {
+        Method *method = stack.GetMethod();
+        ASSERT(method != nullptr);
+        LOG(ERROR, COROUTINES) << method->GetClass()->GetName() << "." << method->GetName().data << " at "
+                               << method->GetLineNumberAndSourceFile(stack.GetBytecodePc());
+    }
+}
+
 std::ostream &operator<<(std::ostream &os, Coroutine::Status status)
 {
     switch (status) {

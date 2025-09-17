@@ -15,6 +15,7 @@
 
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "mem/refstorage/global_object_storage.h"
+#include "plugins/ets/runtime/ets_call_stack.h"
 #include "runtime/include/value.h"
 #include "libarkbase/macros.h"
 #include "mem/refstorage/reference.h"
@@ -355,6 +356,44 @@ void EtsCoroutine::ProcessUnhandledRejectedPromises(bool listAllObjects)
             }
         }
     }
+}
+
+bool EtsCoroutine::IsContextSwitchRisky() const
+{
+    auto *callStk = GetLocalStorage().Get<DataIdx::INTEROP_CALL_STACK_PTR, EtsCallStack *>();
+    if (callStk != nullptr && callStk->Current() != nullptr) {
+        return true;
+    }
+    return false;
+}
+
+void EtsCoroutine::PrintCallStack() const
+{
+    ASSERT(this == EtsCoroutine::GetCurrent());
+    auto *callStk = GetLocalStorage().Get<DataIdx::INTEROP_CALL_STACK_PTR, EtsCallStack *>();
+    if (callStk == nullptr) {
+        Coroutine::PrintCallStack();
+        return;
+    }
+    auto istk = callStk->GetRecords();
+    auto istkIt = istk.rbegin();
+
+    auto printIstkFrames = [&istkIt, &istk](void *fp) {
+        while (istkIt != istk.rend() && fp == istkIt->etsFrame) {
+            LOG(ERROR, COROUTINES) << "<interop> " << (istkIt->descr != nullptr ? istkIt->descr : "unknown");
+            istkIt++;
+        }
+    };
+
+    for (auto stack = StackWalker::Create(this); stack.HasFrame(); stack.NextFrame()) {
+        printIstkFrames((istkIt != istk.rend()) ? istkIt->etsFrame : nullptr);
+        Method *method = stack.GetMethod();
+        ASSERT(method != nullptr);
+        LOG(ERROR, COROUTINES) << method->GetClass()->GetName() << "." << method->GetName().data << " at "
+                               << method->GetLineNumberAndSourceFile(stack.GetBytecodePc());
+    }
+    ASSERT(istkIt == istk.rend() || istkIt->etsFrame == nullptr);
+    printIstkFrames(nullptr);
 }
 
 }  // namespace ark::ets
