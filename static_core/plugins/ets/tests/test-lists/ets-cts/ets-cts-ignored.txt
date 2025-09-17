@@ -2854,9 +2854,6 @@
 15.semantic_rules/07.type_inference/01.numeric_constant_expressions/narrowing_neg_22.ets
 15.semantic_rules/07.type_inference/01.numeric_constant_expressions/narrowing_neg_23.ets
 
-#28095 runtime timeout
-05.generics/03.utility_types/01.awaited_utility_type/awaited_return_2.ets
-
 #29729
 07.expressions/17.typeof_expression/tof_meth_8.ets
 
