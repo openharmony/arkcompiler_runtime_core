@@ -201,7 +201,12 @@ void Logger::InitializeFileLogging(const std::string &logFile, Level level, Comp
 
     FILE *file = nullptr;
     if (!logFile.empty()) {
-        file = fopen(logFile.c_str(), "we");
+#ifdef PANDA_TARGET_WINDOWS
+        constexpr char const *MODE = "w";
+#else
+        constexpr char const *MODE = "we";
+#endif
+        file = fopen(logFile.c_str(), MODE);
     }
     if (file != nullptr) {
         if (isFastLogging) {
