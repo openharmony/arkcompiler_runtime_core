@@ -82,6 +82,11 @@ public:
         return reinterpret_cast<EtsArray *>(object);
     }
 
+    static coretypes::Array *GetCoreType(EtsArray *array)
+    {
+        return reinterpret_cast<coretypes::Array *>(array);
+    }
+
     EtsObject *AsObject()
     {
         return reinterpret_cast<EtsObject *>(this);

@@ -39,8 +39,19 @@ export final class StaticMethod extends Method {
         return this.methodPtr == other.methodPtr
     }
 
+    /**
+     * Invokes a method
+     *
+     * @param args method parameters
+     *
+     * @returns method return value. `undefined` for `void`.
+     *
+     * @throws OutofMemoryError if there is no memory to allocate return value.
+     *
+     * @throws TypeError if there is mismatch in arguments number or types
+     */
     public invoke(args?: FixedArray<Any>): Any {
-        throw new Error("Not implemeted yet")
+        return super.invoke(undefined, args)
     }
 }
 
