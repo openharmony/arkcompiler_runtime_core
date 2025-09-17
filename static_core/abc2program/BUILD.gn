@@ -129,6 +129,7 @@ ohos_static_library("arkts_abc2program_static") {
   } else {
     output_extension = "so"
   }
+  external_deps = [ "bounds_checking_function:libsec_static" ]
 
   deps = [
     ":abc2program_plugins_inc",

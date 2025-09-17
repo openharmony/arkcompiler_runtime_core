@@ -106,9 +106,6 @@ config("arkruntime_config") {
     "$build_root/config/compiler:no_exceptions",
     "$build_root/config/compiler:no_rtti",
   ]
-  if (is_ohos && is_standard_system) {
-    configs += [ "$hitrace_root:libhitrace_pub_config" ]
-  }
 }
 
 group("arkruntime_header_deps") {

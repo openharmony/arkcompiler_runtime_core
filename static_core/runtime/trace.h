@@ -17,7 +17,7 @@
 #define RUNTIME_TRACE_H
 
 #ifdef PANDA_USE_HITRACE
-#include "hitrace_meter/hitrace_meter.h"
+#include "hitrace_meter.h"
 constexpr uint64_t TRACER_TAG = HITRACE_TAG_ARK;
 #else
 #include <cstdint>
