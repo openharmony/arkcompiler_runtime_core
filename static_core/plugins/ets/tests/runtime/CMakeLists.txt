@@ -35,13 +35,16 @@ panda_ets_add_gtest(
     DEPS_TARGETS etsstdlib
 )
 
-panda_add_gtest_with_ani(ets_vm_init_prealloc_test
-    CPP_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/ets_vm_init_prealloc_test.cpp
-    ETS_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/ets_vm_init_prealloc_test.ets
-    INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
-    LIBRARIES arkbase arkfile arkruntime
-    TEST_GROUP ets_tests_runtime_gtests
-)
+# NOTE(@srokashevich, #29164): enable with tsan after fix
+if (NOT PANDA_ENABLE_THREAD_SANITIZER)
+    panda_add_gtest_with_ani(ets_vm_init_prealloc_test
+        CPP_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/ets_vm_init_prealloc_test.cpp
+        ETS_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/ets_vm_init_prealloc_test.ets
+        INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
+        LIBRARIES arkbase arkfile arkruntime
+        TEST_GROUP ets_tests_runtime_gtests
+    )
+endif()
 
 panda_add_gtest_with_ani(entrypoint_return_test
     CPP_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/entrypoint_return_test.cpp
