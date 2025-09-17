@@ -16,7 +16,7 @@
 import { xml } from "@ohos.xml"
 import { BusinessError } from "@ohos.base"
 
-const TypeErrorCodeId: number = 401;
+const TypeErrorCodeId: int = 401;
 const MaxBufferLength = 1024;
 
 function main(): int {
