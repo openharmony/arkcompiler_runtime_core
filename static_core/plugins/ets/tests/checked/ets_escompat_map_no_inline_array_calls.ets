@@ -33,7 +33,7 @@
 class MyArray<T> extends Array<T> {
     public myArrayGetCounter: number = 0
     public constructor(len: number) {
-        super(len);
+        super(len.toInt());
     }
 
     override $_get(index: int): T {
