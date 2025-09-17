@@ -55,6 +55,8 @@ bool ArkTSNamespaceEnumerateFields(AbckitCoreNamespace *n, void *data,
                                    bool (*cb)(AbckitCoreNamespaceField *field, void *data));
 bool ArkTSNamespaceEnumerateTopLevelFunctions(AbckitCoreNamespace *n, void *data,
                                               bool (*cb)(AbckitCoreFunction *func, void *data));
+bool ArkTSNamespaceEnumerateAnnotationInterfaces(AbckitCoreNamespace *n, void *data,
+                                                 bool (*cb)(AbckitCoreAnnotationInterface *ai, void *data));
 
 // ========================================
 // Class

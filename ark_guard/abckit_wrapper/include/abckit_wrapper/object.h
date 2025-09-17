@@ -29,9 +29,12 @@ namespace abckit_wrapper {
 
 class Module;
 class Namespace;
+class Method;
+class Field;
 class Class;
+class AnnotationInterface;
 
-using Child = std::variant<Namespace *, Class *>;
+using Child = std::variant<Namespace *, Method *, Field *, Class *, AnnotationInterface *>;
 
 /**
  * @brief Object
@@ -63,6 +66,13 @@ public:
      * @return object raw name
      */
     virtual std::string GetName() const = 0;
+
+    /**
+     * @brief Set object name
+     * @param name object name
+     * @return `true` for success
+     */
+    virtual bool SetName(const std::string &name) = 0;
 
     /**
      * @brief Get object package name

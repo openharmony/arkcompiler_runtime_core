@@ -238,4 +238,28 @@ TEST_F(LibAbcKitInspectApiAnnotationsTest, AnnotationInterfaceGetAnnotationInter
     ASSERT_EQ(gotFieldNames, expectFieldNames);
 }
 
+// Test: test-kind=api, api=InspectApiImpl::annotationGetParentNamespace, abc-kind=ArkTS2, category=positive,
+// extension=c
+TEST_F(LibAbcKitInspectApiAnnotationsTest, AnnotationInterfaceGetParentNamespaceStatic)
+{
+    abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/annotations/annotations_static.abc");
+
+    std::set<std::string> gotAINames;
+    std::set<std::string> expectAINames = {"Ns1"};
+
+    for (const auto &module : file.GetModules()) {
+        if (module.IsExternal()) {
+            continue;
+        }
+        auto result = helpers::GetNamespaceByName(module, "Ns1");
+        ASSERT_NE(result, std::nullopt);
+        const auto &ns = result.value();
+        for (const auto &ai : ns.GetAnnotationInterfaces()) {
+            gotAINames.emplace(ai.GetParentNamespace().GetName());
+        }
+    }
+
+    ASSERT_EQ(gotAINames, expectAINames);
+}
+
 }  // namespace libabckit::test

@@ -14,6 +14,16 @@
  */
 #include "abckit_wrapper/namespace.h"
 
+bool abckit_wrapper::Namespace::SetName(const std::string &name)
+{
+    const auto ns = this->GetArkTsImpl<abckit::core::Namespace, abckit::arkts::Namespace>();
+    if (!ns.has_value()) {
+        return false;
+    }
+
+    return ns->SetName(name);
+}
+
 void abckit_wrapper::Namespace::InitForObject(Object *object)
 {
     object->owningModule_ = this->owningModule_;

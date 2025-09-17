@@ -26,6 +26,18 @@ AbckitWrapperErrorCode abckit_wrapper::BaseModule::Init()
         return rc;
     }
 
+    rc = this->InitFunctions();
+    if (ABCKIT_WRAPPER_ERROR(rc)) {
+        LOG_E << "Failed to init Functions:" << rc;
+        return rc;
+    }
+
+    rc = this->InitModuleFields();
+    if (ABCKIT_WRAPPER_ERROR(rc)) {
+        LOG_E << "Failed to init ModuleFields:" << rc;
+        return rc;
+    }
+
     rc = this->InitClasses();
     if (ABCKIT_WRAPPER_ERROR(rc)) {
         LOG_E << "Failed to init Classes:" << rc;
@@ -41,6 +53,12 @@ AbckitWrapperErrorCode abckit_wrapper::BaseModule::Init()
     rc = this->InitEnums();
     if (ABCKIT_WRAPPER_ERROR(rc)) {
         LOG_E << "Failed to init Enums:" << rc;
+        return rc;
+    }
+
+    rc = this->InitAnnotationInterfaces();
+    if (ABCKIT_WRAPPER_ERROR(rc)) {
+        LOG_E << "Failed to init AnnotationInterfaces:" << rc;
         return rc;
     }
 
@@ -62,6 +80,50 @@ AbckitWrapperErrorCode abckit_wrapper::BaseModule::InitNamespaces()
                 }
                 this->children_.emplace(ns->GetFullyQualifiedName(), ns.get());
                 ns->owningModule_.value()->Add(std::move(ns));
+            }
+
+            return ERR_SUCCESS;
+        },
+        this->impl_);
+}
+
+AbckitWrapperErrorCode abckit_wrapper::BaseModule::InitFunctions()
+{
+    return std::visit(
+        [&](const auto &object) {
+            for (auto &function : object.GetTopLevelFunctions()) {
+                auto method = std::make_unique<Method>(function);
+                this->InitForObject(method.get());
+                LOG_I << "Found Function:" << method->GetFullyQualifiedName();
+                auto rc = method->Init();
+                if (ABCKIT_WRAPPER_ERROR(rc)) {
+                    LOG_E << "Failed to init Function:" << function.GetName() << " errCode:" << rc;
+                    return rc;
+                }
+                this->children_.emplace(method->GetFullyQualifiedName(), method.get());
+                method->owningModule_.value()->Add(std::move(method));
+            }
+
+            return ERR_SUCCESS;
+        },
+        this->impl_);
+}
+
+AbckitWrapperErrorCode abckit_wrapper::BaseModule::InitModuleFields()
+{
+    return std::visit(
+        [&](const auto &object) {
+            for (auto &coreField : object.GetFields()) {
+                auto field = std::make_unique<Field>(coreField);
+                this->InitForObject(field.get());
+                LOG_I << "Found ModuleField:" << field->GetFullyQualifiedName();
+                auto rc = field->Init();
+                if (ABCKIT_WRAPPER_ERROR(rc)) {
+                    LOG_E << "Failed to init ModuleField:" << coreField.GetName() << " errCode:" << rc;
+                    return rc;
+                }
+                this->children_.emplace(field->GetFullyQualifiedName(), field.get());
+                field->owningModule_.value()->Add(std::move(field));
             }
 
             return ERR_SUCCESS;
@@ -128,6 +190,29 @@ AbckitWrapperErrorCode abckit_wrapper::BaseModule::InitEnums()
                 }
                 this->children_.emplace(clazz->GetFullyQualifiedName(), clazz.get());
                 clazz->owningModule_.value()->Add(std::move(clazz));
+            }
+
+            return ERR_SUCCESS;
+        },
+        this->impl_);
+}
+
+AbckitWrapperErrorCode abckit_wrapper::BaseModule::InitAnnotationInterfaces()
+{
+    return std::visit(
+        [&](const auto &object) {
+            for (auto &annotationInterface : object.GetAnnotationInterfaces()) {
+                auto ai = std::make_unique<AnnotationInterface>(annotationInterface);
+                this->InitForObject(ai.get());
+                LOG_I << "Found AnnotationInterface:" << ai->GetFullyQualifiedName();
+                auto rc = ai->Init();
+                if (ABCKIT_WRAPPER_ERROR(rc)) {
+                    LOG_E << "Failed to init AnnotationInterface:" << annotationInterface.GetName()
+                          << " errCode:" << rc;
+                    return rc;
+                }
+                this->children_.emplace(ai->GetFullyQualifiedName(), ai.get());
+                ai->owningModule_.value()->Add(std::move(ai));
             }
 
             return ERR_SUCCESS;

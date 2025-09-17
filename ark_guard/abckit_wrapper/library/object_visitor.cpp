@@ -20,7 +20,22 @@ bool abckit_wrapper::ObjectVisitor::operator()(Namespace *ns) const
     return this->Accept<Namespace, NamespaceVisitor>(ns);
 }
 
+bool abckit_wrapper::ObjectVisitor::operator()(Method *method) const
+{
+    return this->Accept<Method, MethodVisitor>(method);
+}
+
+bool abckit_wrapper::ObjectVisitor::operator()(Field *field) const
+{
+    return this->Accept<Field, FieldVisitor>(field);
+}
+
 bool abckit_wrapper::ObjectVisitor::operator()(Class *clazz) const
 {
     return this->Accept<Class, ClassVisitor>(clazz);
+}
+
+bool abckit_wrapper::ObjectVisitor::operator()(AnnotationInterface *ai) const
+{
+    return this->Accept<AnnotationInterface, AnnotationInterfaceVisitor>(ai);
 }

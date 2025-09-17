@@ -138,4 +138,46 @@ TEST_F(LibAbcKitInspectApiNamespacesTest, NamespaceGetNamespacesStatic)
     ASSERT_EQ(gotNamespaceNames, expectedNamespaceNames);
 }
 
+// Test: test-kind=api, api=InspectApiImpl::namespaceEnumerateAnnotationInterfaces, abc-kind=ArkTS2, category=positive,
+// extension=c
+TEST_F(LibAbcKitInspectApiNamespacesTest, NamespaceGetAnnotationInterfacesStatic)
+{
+    abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/namespaces/namespaces_static.abc");
+
+    std::set<std::string> gotAIs;
+    std::set<std::string> expectedAIs = {"Anno"};
+
+    for (const auto &module : file.GetModules()) {
+        if (module.IsExternal()) {
+            continue;
+        }
+        for (const auto &ns : module.GetNamespaces()) {
+            for (const auto &ai : ns.GetAnnotationInterfaces()) {
+                gotAIs.emplace(ai.GetName());
+            }
+        }
+    }
+
+    ASSERT_EQ(gotAIs, expectedAIs);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::namespaceIsExternal, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitInspectApiNamespacesTest, NamespaceIsExternalStatic)
+{
+    abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/namespaces/namespaces_static.abc");
+
+    std::set<std::string> gotNamespaceNames;
+    std::set<std::string> expectedNamespaceNames = {"N1"};
+
+    for (const auto &module : file.GetModules()) {
+        for (const auto &ns : module.GetNamespaces()) {
+            if (!ns.IsExternal()) {
+                gotNamespaceNames.emplace(ns.GetName());
+            }
+        }
+    }
+
+    ASSERT_EQ(gotNamespaceNames, expectedNamespaceNames);
+}
+
 }  // namespace libabckit::test

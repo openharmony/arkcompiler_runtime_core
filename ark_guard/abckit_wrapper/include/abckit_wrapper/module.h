@@ -17,6 +17,7 @@
 #define ABCKIT_WRAPPER_MODULE_H
 
 #include "base_module.h"
+#include "annotation_interface.h"
 #include "namespace.h"
 #include "class.h"
 #include "visitor.h"
@@ -36,6 +37,8 @@ public:
         : BaseModule(std::move(module)), objectPool_(objectPool)
     {
     }
+
+    bool SetName(const std::string &name) override;
 
     /**
      * Add object to object pool
@@ -86,11 +89,39 @@ public:
     bool NamespacesAccept(NamespaceVisitor &visitor);
 
     /**
+     * @brief Module methods(functions & methods) accept visit
+     * @param visitor MethodVisitor
+     * @return `false` if was early exited. Otherwise - `true`.
+     */
+    bool MethodsAccept(MethodVisitor &visitor);
+
+    /**
+     * @brief Module fields accept visit
+     * @param visitor FieldVisitor
+     * @return `false` if was early exited. Otherwise - `true`.
+     */
+    bool FieldsAccept(FieldVisitor &visitor);
+
+    /**
      * @brief Module classes accept visit
      * @param visitor ClassVisitor
      * @return `false` if was early exited. Otherwise - `true`.
      */
     bool ClassesAccept(ClassVisitor &visitor);
+
+    /**
+     * @brief Module annotationInterfaces accept visit
+     * @param visitor AnnotationInterfaceVisitor
+     * @return `false` if was early exited. Otherwise - `true`.
+     */
+    bool AnnotationInterfacesAccept(AnnotationInterfaceVisitor &visitor);
+
+    /**
+     * @brief Module annotations accept visit
+     * @param visitor AnnotationVisitor
+     * @return `false` if was early exited. Otherwise - `true`.
+     */
+    bool AnnotationsAccept(AnnotationVisitor &visitor);
 
 private:
     template <typename T>

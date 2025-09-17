@@ -18,17 +18,28 @@ config("abckit_wrapper_public_config") {
 }
 
 abckit_wrapper_sources = [
+  "library/annotation.cpp",
+  "library/annotation_interface.cpp",
+  "library/annotation_linker.cpp",
+  "library/annotation_target_visitor.cpp",
   "library/base_module.cpp",
   "library/child_visitor.cpp",
   "library/class.cpp",
   "library/class_hierarchy_builder.cpp",
   "library/class_visitor.cpp",
+  "library/field.cpp",
   "library/file_view.cpp",
+  "library/hierarchy_dumper.cpp",
+  "library/member.cpp",
+  "library/member_visitor.cpp",
+  "library/method.cpp",
+  "library/modifiers.cpp",
   "library/module.cpp",
   "library/module_visitor.cpp",
   "library/namespace.cpp",
   "library/object.cpp",
   "library/object_visitor.cpp",
+  "library/string_util.cpp",
 ]
 
 ohos_static_library("abckit_wrapper_static") {

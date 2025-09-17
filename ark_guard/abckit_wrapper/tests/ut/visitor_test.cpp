@@ -124,18 +124,147 @@ HWTEST_F(TestVisitor, namespace_visitor_001, TestSize.Level1)
     ASSERT_TRUE(fileView.ModulesAccept(visitor_->Wrap<abckit_wrapper::LocalModuleFilter>()));
 }
 
+class TestMethodVisitor final : public BaseTestVisitor, public abckit_wrapper::MethodVisitor {
+public:
+    void InitTargetObjectNames() override
+    {
+        AddTargetObjectName("module_static.Color1.valueOf:module_static.Color1;i32;");
+        AddTargetObjectName("module_static.Ns1.Color2.getName:module_static.Ns1.Color2;std.core.String;");
+        AddTargetObjectName("module_static.Color1.$_get:module_static.Color1;std.core.String;");
+        AddTargetObjectName("module_static.Ns1.ClassB._ctor_:module_static.Ns1.ClassB;void;");
+        AddTargetObjectName("module_static.Ns1.Color2.toString:module_static.Ns1.Color2;std.core.String;");
+        AddTargetObjectName("module_static.Ns1.Color2._cctor_:void;");
+        AddTargetObjectName("module_static.Ns1.Color2.valueOf:module_static.Ns1.Color2;i32;");
+        AddTargetObjectName("module_static.Ns1.Color2._ctor_:module_static.Ns1.Color2;i32;i32;void;");
+        AddTargetObjectName("module_static.Ns1.Interface2.iMethod2:module_static.Ns1.Interface2;void;");
+        AddTargetObjectName("module_static.Color1._ctor_:module_static.Color1;i32;i32;void;");
+        AddTargetObjectName("module_static.Ns1.Ns2._cctor_:void;");
+        AddTargetObjectName("module_static.Ns1._cctor_:void;");
+        AddTargetObjectName("module_static._cctor_:void;");
+        AddTargetObjectName("module_static.Ns1.Color2.$_get:module_static.Ns1.Color2;std.core.String;");
+        AddTargetObjectName("module_static.Ns1.ClassB._cctor_:void;");
+        AddTargetObjectName("module_static.Ns1.ClassB.sMethod2:i32;void;");
+        AddTargetObjectName("module_static.Ns1.ClassB.<set>iField2:module_static.Ns1.ClassB;std.core.String;void;");
+        AddTargetObjectName("module_static.Ns1.ClassB.<get>iField2:module_static.Ns1.ClassB;std.core.String;");
+        AddTargetObjectName("module_static.Ns1.ClassB.iMethod2:module_static.Ns1.ClassB;void;");
+        AddTargetObjectName("module_static.ClassA._ctor_:module_static.ClassA;void;");
+        AddTargetObjectName("module_static.ClassA.sMethod1:i32;void;");
+        AddTargetObjectName("module_static.ClassA.<set>iField1:module_static.ClassA;i32;void;");
+        AddTargetObjectName("module_static.ClassA.<get>iField1:module_static.ClassA;i32;");
+        AddTargetObjectName("module_static.Color1.values:module_static.Color1[];");
+        AddTargetObjectName("module_static.Color1.fromValue:i32;module_static.Color1;");
+        AddTargetObjectName("module_static.Ns1.Color2.fromValue:i32;module_static.Ns1.Color2;");
+        AddTargetObjectName("module_static.Ns1.foo2:i32;i32;void;");
+        AddTargetObjectName("module_static.Ns1.Interface2.<get>iField2:module_static.Ns1.Interface2;std.core.String;");
+        AddTargetObjectName("module_static.Interface1.iMethod1:module_static.Interface1;void;");
+        AddTargetObjectName("module_static.Color1.getValueOf:std.core.String;module_static.Color1;");
+        AddTargetObjectName(
+            "module_static.Ns1.Interface2.<set>iField2:module_static.Ns1.Interface2;std.core.String;void;");
+        AddTargetObjectName("module_static.foo1:i32;i32;void;");
+        AddTargetObjectName("module_static.main:void;");
+        AddTargetObjectName("module_static.Ns1.ClassB.method2:module_static.Ns1.ClassB;void;");
+        AddTargetObjectName("module_static.ClassA._cctor_:void;");
+        AddTargetObjectName("module_static.ClassA.iMethod1:module_static.ClassA;void;");
+        AddTargetObjectName("module_static.Ns1.Color2.getOrdinal:module_static.Ns1.Color2;i32;");
+        AddTargetObjectName("module_static.ClassA.method1:module_static.ClassA;void;");
+        AddTargetObjectName("module_static.Ns1.Color2.getValueOf:std.core.String;module_static.Ns1.Color2;");
+        AddTargetObjectName("module_static.Color1.getOrdinal:module_static.Color1;i32;");
+        AddTargetObjectName("module_static.Ns1.Color2.values:module_static.Ns1.Color2[];");
+        AddTargetObjectName("module_static.Color1.toString:module_static.Color1;std.core.String;");
+        AddTargetObjectName("module_static.Interface1.<get>iField1:module_static.Interface1;i32;");
+        AddTargetObjectName("module_static.Interface1.<set>iField1:module_static.Interface1;i32;void;");
+        AddTargetObjectName("module_static.Color1._cctor_:void;");
+        AddTargetObjectName("module_static.Color1.getName:module_static.Color1;std.core.String;");
+    }
+
+    bool Visit(abckit_wrapper::Module *module) override
+    {
+        return module->MethodsAccept(*this);
+    }
+
+    bool Visit(abckit_wrapper::Method *method) override
+    {
+        LOG_I << "MethodName:" << method->GetFullyQualifiedName();
+        objects_.push_back(method);
+        return true;
+    }
+};
+
+/**
+ * @tc.name: method_visitor_001
+ * @tc.desc: test visit all methods(functions & methods) of the fileView
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TestVisitor, method_visitor_001, TestSize.Level1)
+{
+    visitor_ = std::make_unique<TestMethodVisitor>();
+    ASSERT_TRUE(fileView.ModulesAccept(*visitor_));
+}
+
+class TestFieldVisitor final : public BaseTestVisitor, public abckit_wrapper::FieldVisitor {
+public:
+    void InitTargetObjectNames() override
+    {
+        AddTargetObjectName("module_static.Color1._StringValuesArray");
+        AddTargetObjectName("module_static.Color1._ValuesArray");
+        AddTargetObjectName("module_static.Color1.RED");
+        AddTargetObjectName("module_static.Ns1.Color2.YELLOW");
+        AddTargetObjectName("module_static.Color1._NamesArray");
+        AddTargetObjectName("module_static.Ns1.m2");
+        AddTargetObjectName("module_static.Ns1.Color2._ordinal");
+        AddTargetObjectName("module_static.Ns1.Color2._StringValuesArray");
+        AddTargetObjectName("module_static.Ns1.ClassB.sField2");
+        AddTargetObjectName("module_static.Ns1.ClassB.<property>iField2");
+        AddTargetObjectName("module_static.Interface1.<property>iField1");
+        AddTargetObjectName("module_static.Color1._ordinal");
+        AddTargetObjectName("module_static.Ns1.Color2._NamesArray");
+        AddTargetObjectName("module_static.Ns1.ClassB.field2");
+        AddTargetObjectName("module_static.Ns1.Color2._ItemsArray");
+        AddTargetObjectName("module_static.Color1._ItemsArray");
+        AddTargetObjectName("module_static.m1");
+        AddTargetObjectName("module_static.ClassA.field1");
+        AddTargetObjectName("module_static.ClassA.<property>iField1");
+        AddTargetObjectName("module_static.Ns1.Interface2.<property>iField2");
+        AddTargetObjectName("module_static.ClassA.sField1");
+        AddTargetObjectName("module_static.Ns1.Color2._ValuesArray");
+    }
+
+    bool Visit(abckit_wrapper::Module *module) override
+    {
+        return module->FieldsAccept(*this);
+    }
+
+    bool Visit(abckit_wrapper::Field *field) override
+    {
+        LOG_I << "FieldName:" << field->GetFullyQualifiedName();
+        objects_.push_back(field);
+        return true;
+    }
+};
+
+/**
+ * @tc.name: field_visitor_001
+ * @tc.desc: test visit all fields of the fileView
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TestVisitor, field_visitor_001, TestSize.Level1)
+{
+    visitor_ = std::make_unique<TestFieldVisitor>();
+    ASSERT_TRUE(fileView.ModulesAccept(*visitor_));
+}
+
 class TestLocalClassVisitor final : public BaseTestVisitor, public abckit_wrapper::ClassVisitor {
 public:
     void InitTargetObjectNames() override
     {
         AddTargetObjectName("module_static.Ns1.Interface2");
         AddTargetObjectName("module_static.Ns1.Color2");
-        AddTargetObjectName("module_static.Ns1.Color2[]");
         AddTargetObjectName("module_static.Ns1.ClassB");
         AddTargetObjectName("module_static.ClassA");
         AddTargetObjectName("module_static.Interface1");
         AddTargetObjectName("module_static.Color1");
-        AddTargetObjectName("module_static.Color1[]");
     }
 
     bool Visit(abckit_wrapper::Module *module) override
@@ -168,11 +297,9 @@ public:
     void InitTargetObjectNames() override
     {
         AddTargetObjectName("module_static.Ns1.Color2");
-        AddTargetObjectName("module_static.Ns1.Color2[]");
         AddTargetObjectName("module_static.Ns1.ClassB");
         AddTargetObjectName("module_static.ClassA");
         AddTargetObjectName("module_static.Color1");
-        AddTargetObjectName("module_static.Color1[]");
     }
 
     bool Visit(abckit_wrapper::Module *module) override
@@ -204,17 +331,58 @@ HWTEST_F(TestVisitor, class_visitor_002, TestSize.Level1)
     visitor_ = std::move(testVisitor);
 }
 
+class TestLocalAnnotationInterfaceVisitor final : public BaseTestVisitor,
+                                                  public abckit_wrapper::AnnotationInterfaceVisitor {
+public:
+    void InitTargetObjectNames() override
+    {
+        AddTargetObjectName("module_static.MyAnno1");
+        AddTargetObjectName("module_static.Ns1.MyAnno2");
+    }
+
+    bool Visit(abckit_wrapper::Module *module) override
+    {
+        return module->AnnotationInterfacesAccept(*this);
+    }
+
+    bool Visit(abckit_wrapper::AnnotationInterface *ai) override
+    {
+        LOG_I << "AnnotationInterfaceName:" << ai->GetFullyQualifiedName();
+        objects_.push_back(ai);
+        return true;
+    }
+};
+
+/**
+ * @tc.name: annotation_interface_visitor_001
+ * @tc.desc: test visit all local annotationInterface of the fileView
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TestVisitor, annotation_interface_visitor_001, TestSize.Level1)
+{
+    visitor_ = std::make_unique<TestLocalAnnotationInterfaceVisitor>();
+    ASSERT_TRUE(fileView.ModulesAccept(visitor_->Wrap<abckit_wrapper::LocalModuleFilter>()));
+}
+
 class TestLocalModuleChildVisitor final : public BaseTestVisitor, public abckit_wrapper::ChildVisitor {
 public:
     void InitTargetObjectNames() override
     {
         // Namespaces
         AddTargetObjectName("module_static.Ns1");
+        // Functions
+        AddTargetObjectName("module_static.main:void;");
+        AddTargetObjectName("module_static.foo1:i32;i32;void;");
+        AddTargetObjectName("module_static._cctor_:void;");
+        // Fields
+        AddTargetObjectName("module_static.m1");
         // Classes
         AddTargetObjectName("module_static.ClassA");
         AddTargetObjectName("module_static.Color1");
-        AddTargetObjectName("module_static.Color1[]");
         AddTargetObjectName("module_static.Interface1");
+        // AnnotationInterfaces
+        AddTargetObjectName("module_static.MyAnno1");
     }
 
     bool Visit(abckit_wrapper::Module *module) override
@@ -229,10 +397,31 @@ public:
         return true;
     }
 
+    bool VisitMethod(abckit_wrapper::Method *method) override
+    {
+        LOG_I << "MethodName:" << method->GetFullyQualifiedName();
+        objects_.push_back(method);
+        return true;
+    }
+
+    bool VisitField(abckit_wrapper::Field *field) override
+    {
+        LOG_I << "FieldName:" << field->GetFullyQualifiedName();
+        objects_.push_back(field);
+        return true;
+    }
+
     bool VisitClass(abckit_wrapper::Class *clazz) override
     {
         LOG_I << "ClassName:" << clazz->GetFullyQualifiedName();
         objects_.push_back(clazz);
+        return true;
+    }
+
+    bool VisitAnnotationInterface(abckit_wrapper::AnnotationInterface *ai) override
+    {
+        LOG_I << "AnnotationInterfaceName:" << ai->GetFullyQualifiedName();
+        objects_.push_back(ai);
         return true;
     }
 };
@@ -255,11 +444,17 @@ public:
     {
         // Namespaces
         AddTargetObjectName("module_static.Ns1.Ns2");
+        // Functions
+        AddTargetObjectName("module_static.Ns1._cctor_:void;");
+        AddTargetObjectName("module_static.Ns1.foo2:i32;i32;void;");
+        // Fields
+        AddTargetObjectName("module_static.Ns1.m2");
         // Classes
         AddTargetObjectName("module_static.Ns1.ClassB");
         AddTargetObjectName("module_static.Ns1.Color2");
-        AddTargetObjectName("module_static.Ns1.Color2[]");
         AddTargetObjectName("module_static.Ns1.Interface2");
+        // AnnotationInterfaces
+        AddTargetObjectName("module_static.Ns1.MyAnno2");
     }
 
     bool Visit(abckit_wrapper::Module *module) override
@@ -274,10 +469,31 @@ public:
         return true;
     }
 
+    bool VisitMethod(abckit_wrapper::Method *method) override
+    {
+        LOG_I << "MethodName:" << method->GetFullyQualifiedName();
+        objects_.push_back(method);
+        return true;
+    }
+
+    bool VisitField(abckit_wrapper::Field *field) override
+    {
+        LOG_I << "FieldName:" << field->GetFullyQualifiedName();
+        objects_.push_back(field);
+        return true;
+    }
+
     bool VisitClass(abckit_wrapper::Class *clazz) override
     {
         LOG_I << "ClassName:" << clazz->GetFullyQualifiedName();
         objects_.push_back(clazz);
+        return true;
+    }
+
+    bool VisitAnnotationInterface(abckit_wrapper::AnnotationInterface *ai) override
+    {
+        LOG_I << "AnnotationInterfaceName:" << ai->GetFullyQualifiedName();
+        objects_.push_back(ai);
         return true;
     }
 };
@@ -297,6 +513,90 @@ HWTEST_F(TestVisitor, child_visitor_002, TestSize.Level1)
     visitor_ = std::move(testVisitor);
 }
 
+class TestLocalClassChildVisitor final : public BaseTestVisitor, public abckit_wrapper::ChildVisitor {
+public:
+    void InitTargetObjectNames() override
+    {
+        // Methods
+        AddTargetObjectName("module_static.ClassA.sMethod1:i32;void;");
+        AddTargetObjectName("module_static.ClassA.method1:module_static.ClassA;void;");
+        AddTargetObjectName("module_static.ClassA._ctor_:module_static.ClassA;void;");
+        AddTargetObjectName("module_static.ClassA._cctor_:void;");
+        AddTargetObjectName("module_static.ClassA.<set>iField1:module_static.ClassA;i32;void;");
+        AddTargetObjectName("module_static.ClassA.<get>iField1:module_static.ClassA;i32;");
+        AddTargetObjectName("module_static.ClassA.iMethod1:module_static.ClassA;void;");
+        // Fields
+        AddTargetObjectName("module_static.ClassA.field1");
+        AddTargetObjectName("module_static.ClassA.sField1");
+        AddTargetObjectName("module_static.ClassA.<property>iField1");
+    }
+
+    bool Visit(abckit_wrapper::Module *module) override
+    {
+        return true;
+    }
+
+    bool VisitMethod(abckit_wrapper::Method *method) override
+    {
+        LOG_I << "MethodName:" << method->GetFullyQualifiedName();
+        objects_.push_back(method);
+        return true;
+    }
+
+    bool VisitField(abckit_wrapper::Field *field) override
+    {
+        LOG_I << "FieldName:" << field->GetFullyQualifiedName();
+        objects_.push_back(field);
+        return true;
+    }
+};
+
+/**
+ * @tc.name: child_visitor_003
+ * @tc.desc: test visit all directly child of the local class
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TestVisitor, child_visitor_003, TestSize.Level1)
+{
+    auto testVisitor = std::make_unique<TestLocalClassChildVisitor>();
+    const auto clazz = fileView.Get<abckit_wrapper::Class>("module_static.ClassA");
+    ASSERT_TRUE(clazz.has_value());
+    ASSERT_TRUE(clazz.value()->ChildrenAccept(*testVisitor));
+    visitor_ = std::move(testVisitor);
+}
+
+class TestClassAMemberVisitor final : public BaseTestVisitor, public abckit_wrapper::MemberVisitor {
+public:
+    void InitTargetObjectNames() override
+    {
+        // Methods
+        AddTargetObjectName("module_static.ClassA.sMethod1:i32;void;");
+        AddTargetObjectName("module_static.ClassA.method1:module_static.ClassA;void;");
+        AddTargetObjectName("module_static.ClassA._ctor_:module_static.ClassA;void;");
+        AddTargetObjectName("module_static.ClassA._cctor_:void;");
+        AddTargetObjectName("module_static.ClassA.<set>iField1:module_static.ClassA;i32;void;");
+        AddTargetObjectName("module_static.ClassA.<get>iField1:module_static.ClassA;i32;");
+        AddTargetObjectName("module_static.ClassA.iMethod1:module_static.ClassA;void;");
+        // Fields
+        AddTargetObjectName("module_static.ClassA.field1");
+        AddTargetObjectName("module_static.ClassA.sField1");
+        AddTargetObjectName("module_static.ClassA.<property>iField1");
+    }
+
+    bool Visit(abckit_wrapper::Module *module) override
+    {
+        return true;
+    }
+
+    bool Visit(abckit_wrapper::Member *member) override
+    {
+        LOG_I << "MemberName:" << member->GetFullyQualifiedName();
+        objects_.emplace_back(member);
+        return true;
+    }
+};
+
 class TestClassAFilter final : public abckit_wrapper::ClassFilter {
 public:
     explicit TestClassAFilter(ClassVisitor &visitor) : ClassFilter(visitor) {}
@@ -306,3 +606,19 @@ public:
         return clazz->GetFullyQualifiedName() == "module_static.ClassA";
     }
 };
+
+/**
+ * @tc.name: member_visitor_001
+ * @tc.desc: test visit all directly child of the local class
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TestVisitor, member_visitor_001, TestSize.Level1)
+{
+    auto testVisitor = std::make_unique<TestClassAMemberVisitor>();
+    abckit_wrapper::MemberVisitor *memberVisitor = testVisitor.get();
+    fileView.ModulesAccept(memberVisitor->Wrap<abckit_wrapper::ClassMemberVisitor>()
+                               .Wrap<TestClassAFilter>()
+                               .Wrap<abckit_wrapper::ModuleClassVisitor>());
+    visitor_ = std::move(testVisitor);
+}

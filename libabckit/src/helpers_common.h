@@ -42,6 +42,8 @@ bool NamespaceEnumerateTopLevelFunctionsHelper(AbckitCoreNamespace *n, void *dat
                                                bool (*cb)(AbckitCoreFunction *function, void *data));
 bool NamespaceEnumerateFieldsHelper(AbckitCoreNamespace *n, void *data,
                                     bool (*cb)(AbckitCoreNamespaceField *field, void *data));
+bool NamespaceEnumerateAnnotationInterfacesHelper(AbckitCoreNamespace *n, void *data,
+                                                  bool (*cb)(AbckitCoreAnnotationInterface *ai, void *data));
 
 bool ClassEnumerateMethodsHelper(AbckitCoreClass *klass, void *data,
                                  bool (*cb)(AbckitCoreFunction *method, void *data));

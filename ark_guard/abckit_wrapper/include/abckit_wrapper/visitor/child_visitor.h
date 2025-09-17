@@ -19,7 +19,10 @@
 namespace abckit_wrapper {
 
 class Namespace;
+class Method;
+class Field;
 class Class;
+class AnnotationInterface;
 
 /**
  * @brief ChildVisitor
@@ -39,11 +42,32 @@ public:
     virtual bool VisitNamespace(Namespace *ns);
 
     /**
+     * @brief Visit method
+     * @param method visited method
+     * @return `false` if was early exited. Otherwise - `true`.
+     */
+    virtual bool VisitMethod(Method *method);
+
+    /**
+     * @brief Visit field
+     * @param field visited field
+     * @return `false` if was early exited. Otherwise - `true`.
+     */
+    virtual bool VisitField(Field *field);
+
+    /**
      * @brief Visit class
      * @param clazz visited class
      * @return `false` if was early exited. Otherwise - `true`.
      */
     virtual bool VisitClass(Class *clazz);
+
+    /**
+     * @brief Visit annotationInterface
+     * @param ai visited annotationInterface
+     * @return `false` if was early exited. Otherwise - `true`.
+     */
+    virtual bool VisitAnnotationInterface(AnnotationInterface *ai);
 };
 }  // namespace abckit_wrapper
 

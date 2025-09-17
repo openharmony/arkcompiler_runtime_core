@@ -35,9 +35,27 @@ public:
 
     /**
      * @brief ObjectVisitor Constructor
+     * @param visitor MethodVisitor
+     */
+    explicit ObjectVisitor(MethodVisitor *visitor) : visitor_(visitor) {}
+
+    /**
+     * @brief ObjectVisitor Constructor
+     * @param visitor FieldVisitor
+     */
+    explicit ObjectVisitor(FieldVisitor *visitor) : visitor_(visitor) {}
+
+    /**
+     * @brief ObjectVisitor Constructor
      * @param visitor ClassVisitor
      */
     explicit ObjectVisitor(ClassVisitor *visitor) : visitor_(visitor) {}
+
+    /**
+     * @brief ObjectVisitor Constructor
+     * @param visitor ClassVisitor
+     */
+    explicit ObjectVisitor(AnnotationInterfaceVisitor *visitor) : visitor_(visitor) {}
 
     /**
      * @brief ObjectVisitor Constructor
@@ -53,11 +71,32 @@ public:
     bool operator()(Namespace *ns) const;
 
     /**
+     * @brief Visit method
+     * @param method visited method
+     * @return `false` if was early exited. Otherwise - `true`.
+     */
+    bool operator()(Method *method) const;
+
+    /**
+     * @brief Visit field
+     * @param field visited field
+     * @return `false` if was early exited. Otherwise - `true`.
+     */
+    bool operator()(Field *field) const;
+
+    /**
      * @brief Visit class
      * @param clazz visited class
      * @return `false` if was early exited. Otherwise - `true`.
      */
     bool operator()(Class *clazz) const;
+
+    /**
+     * @brief Visit annotationInterface
+     * @param ai annotationInterface
+     * @return `false` if was early exited. Otherwise - `true`.
+     */
+    bool operator()(AnnotationInterface *ai) const;
 
     /**
      * Accept instance accept with instance visitor
@@ -81,7 +120,8 @@ public:
     }
 
 private:
-    std::variant<NamespaceVisitor *, ClassVisitor *> visitor_;
+    std::variant<NamespaceVisitor *, MethodVisitor *, FieldVisitor *, ClassVisitor *, AnnotationInterfaceVisitor *>
+        visitor_;
     ChildVisitor *childVisitor_ = nullptr;
 };
 }  // namespace abckit_wrapper

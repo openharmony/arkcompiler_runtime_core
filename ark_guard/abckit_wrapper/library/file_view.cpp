@@ -14,6 +14,7 @@
  */
 #include "abckit_wrapper/file_view.h"
 #include "class_hierarchy_builder.h"
+#include "annotation_linker.h"
 #include "logger.h"
 
 AbckitWrapperErrorCode abckit_wrapper::FileView::Init(const std::string_view &path)
@@ -39,16 +40,24 @@ AbckitWrapperErrorCode abckit_wrapper::FileView::Init(const std::string_view &pa
         return rc;
     }
 
+    AnnotationLinker annotationLinker(*this);
+    rc = annotationLinker.Link();
+    if (ABCKIT_WRAPPER_ERROR(rc)) {
+        LOG_E << "Failed to link annotation's interface:" << rc;
+        return rc;
+    }
+
     return ERR_SUCCESS;
 }
 
 std::optional<abckit_wrapper::Module *> abckit_wrapper::FileView::GetModule(const std::string &moduleName) const
 {
-    if (this->moduleTable_.find(moduleName) == this->moduleTable_.end()) {
+    const auto it = this->moduleTable_.find(moduleName);
+    if (it == this->moduleTable_.end()) {
         return std::nullopt;
     }
 
-    return this->moduleTable_.at(moduleName);
+    return it->second;
 }
 
 std::optional<abckit_wrapper::Object *> abckit_wrapper::FileView::GetObject(const std::string &objectName) const

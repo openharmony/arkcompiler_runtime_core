@@ -18,7 +18,11 @@
 
 #include "visitor/module_visitor.h"
 #include "visitor/namespace_visitor.h"
+#include "visitor/member_visitor.h"
+#include "visitor/method_visitor.h"
+#include "visitor/field_visitor.h"
 #include "visitor/class_visitor.h"
+#include "visitor/annotation_visitor.h"
 #include "visitor/child_visitor.h"
 
 #endif  // ABCKIT_WRAPPER_VISITOR_H

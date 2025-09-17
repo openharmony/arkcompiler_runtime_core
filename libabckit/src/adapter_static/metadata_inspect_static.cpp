@@ -83,6 +83,12 @@ AbckitString *NamespaceGetNameStatic(AbckitCoreNamespace *ns)
     return CreateStringStatic(ns->owningModule->file, namespaceName.data(), namespaceName.size());
 }
 
+bool NamespaceIsExternalStatic(AbckitCoreNamespace *ns)
+{
+    LIBABCKIT_LOG_FUNC;
+    return ns->GetArkTSImpl()->impl.GetStaticClass()->metadata->IsForeign();
+}
+
 // ========================================
 // Class
 // ========================================

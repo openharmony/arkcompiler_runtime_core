@@ -18,7 +18,13 @@ import("$ark_root/tests/test_helper.gni")
 test_ets_path = "$ark_root/ark_guard/abckit_wrapper/tests/"
 
 test_ets_files = [
+  "ut/access_flag_test",
+  "ut/annotation_test",
+  "ut/class_hierarchy",
+  "ut/field_test",
+  "ut/method_param_test",
   "ut/module_static",
+  "ut/set_name_test",
 ]
 
 foreach(file, test_ets_files) {
@@ -40,7 +46,15 @@ host_unittest_action("AbckitWrapperUnitTest") {
   module_out_path = "$ark_root"
 
   sources = [
+    "ut/access_flag_test.cpp",
+    "ut/annotation_test.cpp",
+    "ut/class_hierarchy_test.cpp",
+    "ut/field_test.cpp",
     "ut/file_view_test.cpp",
+    "ut/hierarchy_dumper_test.cpp",
+    "ut/logger_test.cpp",
+    "ut/method_param_test.cpp",
+    "ut/set_name_test.cpp",
     "ut/visitor_test.cpp",
   ]
 

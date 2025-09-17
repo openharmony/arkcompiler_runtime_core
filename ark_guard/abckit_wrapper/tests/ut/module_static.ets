@@ -23,19 +23,25 @@ interface Interface1 {
     iMethod1();
 }
 
+@interface MyAnno1 {}
+
+@MyAnno1()
 class ClassA implements Interface1{
-    public static sField1 = 0;
+    @MyAnno1()
+    static sField1 = 0;
 
-    public field1 = '';
-    public iField1 = 0;
+    @MyAnno1()
+    field1 = '';
+    iField1 = 0;
 
-    public static sMethod1(a: int){
+    static sMethod1(a: int){
     }
 
-    public method1() {
+    @MyAnno1()
+    method1() {
     }
 
-    public iMethod1() {
+    iMethod1() {
     }
 }
 
@@ -58,19 +64,26 @@ namespace Ns1 {
         iMethod2();
     }
 
+    @interface MyAnno2 {}
+
+    @MyAnno1()
+    @MyAnno2()
     class ClassB implements Interface2{
-        public static sField2 = 0;
+        @MyAnno2()
+        static sField2 = 0;
 
-        public field2 = '';
-        public iField2 = '';
+        @MyAnno2()
+        field2 = '';
+        iField2 = '';
 
-        public static sMethod2(a: int){
+        static sMethod2(a: int){
         }
 
-        public method2() {
+        @MyAnno2()
+        method2() {
         }
 
-        public iMethod2() {
+        iMethod2() {
         }
     }
 
