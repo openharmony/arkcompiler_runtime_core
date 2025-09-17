@@ -39,4 +39,46 @@ std::string AbcFileUtils::GetFileNameByAbsolutePath(const std::string &absoluteP
     return fileName;
 }
 
+// Helper function to determine EntityId type
+EntityType AbcFileUtils::GetEntityType(const panda_file::File &file, panda_file::File::EntityId entityId)
+{
+    // Check if it's external first
+    if (file.IsExternal(entityId)) {
+        return EntityType::EXTERNAL;
+    }
+
+    // Get the region header for this entity
+    auto *regionHeader = file.GetRegionHeader(entityId);
+    if (regionHeader == nullptr) {
+        return EntityType::UNKNOWN;
+    }
+
+    // Check if it's a class
+    auto classIndex = file.GetClassIndex(regionHeader);
+    for (const auto &classId : classIndex) {
+        if (classId == entityId) {
+            return EntityType::CLASS;
+        }
+    }
+
+    // Check if it's a method
+    auto methodIndex = file.GetMethodIndex(regionHeader);
+    for (const auto &methodId : methodIndex) {
+        if (methodId == entityId) {
+            return EntityType::METHOD;
+        }
+    }
+
+    // Check if it's a field
+    auto fieldIndex = file.GetFieldIndex(regionHeader);
+    for (const auto &fieldId : fieldIndex) {
+        if (fieldId == entityId) {
+            return EntityType::FIELD;
+        }
+    }
+
+    // If none of the above, it might be a string or other type
+    return EntityType::STRING;
+}
+
 }  // namespace ark::abc2program

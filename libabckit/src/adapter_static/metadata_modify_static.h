@@ -136,6 +136,19 @@ bool InterfaceAddSuperInterfaceStatic(AbckitCoreInterface *iface, AbckitCoreInte
 bool InterfaceRemoveSuperInterfaceStatic(AbckitCoreInterface *iface, AbckitCoreInterface *superIface);
 bool InterfaceRemoveMethodStatic(AbckitCoreInterface *iface, AbckitCoreFunction *method);
 bool InterfaceSetOwningModuleStatic(AbckitCoreInterface *iface, AbckitCoreModule *module);
+
+// ========================================
+// Annotation
+// ========================================
+AbckitArktsAnnotationElement *AnnotationAddAnnotationElementStatic(AbckitCoreAnnotation *anno,
+                                                                   AbckitArktsAnnotationElementCreateParams *params);
+void AnnotationRemoveAnnotationElementStatic(AbckitCoreAnnotation *anno, AbckitCoreAnnotationElement *elem);
+AbckitArktsAnnotation *FunctionAddAnnotationStatic(AbckitCoreFunction *function,
+                                                   const AbckitArktsAnnotationCreateParams *params);
+void FunctionRemoveAnnotationStatic(AbckitCoreFunction *function, AbckitCoreAnnotation *anno);
+AbckitArktsAnnotation *ClassAddAnnotationStatic(AbckitCoreClass *klass,
+                                                const AbckitArktsAnnotationCreateParams *params);
+void ClassRemoveAnnotationStatic(AbckitCoreClass *klass, AbckitCoreAnnotation *anno);
 }  // namespace libabckit
 
 #endif

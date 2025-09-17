@@ -25,6 +25,8 @@
 
 #include "libabckit/src/codegen/codegen_static.h"
 
+#include "name_util.h"
+
 #include "optimizer/analysis/rpo.h"
 #include "src/adapter_static/metadata_inspect_static.h"
 #include "src/adapter_static/helpers_static.h"
@@ -683,27 +685,14 @@ bool ClassFieldAddAnnotationStatic(AbckitArktsClassField *field, const AbckitArk
     auto annoName = AnnotationInterfaceGetNameStatic(ai->core);
     std::string annotationName(annoName->impl);
 
-    field->core->annotations.emplace_back(CreateAnnotation(ai, field->core->owner, annoName));
     field->core->annotationTable.emplace(annotationName, CreateAnnotation(ai, field->core->owner, annoName));
     return true;
 }
 
 bool ClassFieldRemoveAnnotationStatic(AbckitArktsClassField *field, AbckitArktsAnnotation *anno)
 {
-    auto name = anno->core->name->impl;
-    auto &annotations = field->core->annotations;
-    auto iter = std::find_if(annotations.begin(), annotations.end(),
-                             [&name](auto &annoIt) { return name == annoIt.get()->name->impl; });
-    if (iter == annotations.end()) {
-        LIBABCKIT_LOG(ERROR) << "Can not find the annotation in annotations to delete\n";
-        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
-        return false;
-    }
-    annotations.erase(iter);
-
-    std::string annotationName(field->core->owner->owningModule->moduleName->impl.data());
-    annotationName += ".";
-    annotationName += name;
+    auto name = anno->core->name->impl.data();
+    auto annotationName = NameUtil::GetFullName(anno->core->ai, name);
     auto it = field->core->annotationTable.find(annotationName);
     if (it == field->core->annotationTable.end()) {
         LIBABCKIT_LOG(ERROR) << "Can not find the annotation in annotationTable to delete\n";
@@ -713,7 +702,7 @@ bool ClassFieldRemoveAnnotationStatic(AbckitArktsClassField *field, AbckitArktsA
     field->core->annotationTable.erase(it);
 
     auto progFunc = field->GetStaticImpl();
-    progFunc->metadata->DeleteAnnotationByName(name);
+    progFunc->metadata->DeleteAnnotationByName(annotationName);
     return true;
 }
 
@@ -1001,7 +990,8 @@ bool InterfaceFieldAddAnnotationStatic(AbckitArktsInterfaceField *field,
 
 bool InterfaceFieldRemoveAnnotationStatic(AbckitArktsInterfaceField *field, AbckitArktsAnnotation *anno)
 {
-    auto name = anno->core->name->impl;
+    auto name = anno->core->name->impl.data();
+    auto annotationName = NameUtil::GetFullName(anno->core->ai, name);
     auto &annotations = field->core->annotations;
     auto iter = std::find_if(annotations.begin(), annotations.end(),
                              [&name](auto &annoIt) { return name == annoIt.get()->name->impl; });
@@ -2148,5 +2138,157 @@ AbckitArktsFunction *ClassAddMethodStatic(AbckitArktsClass *klass, struct ArktsM
     return CreateFunctionImpl(file, klass->core->owningModule, fullMethodName, params->returnType, params->params,
                               paramsCount, params->isStatic, visibility);
 }
+// ========================================
+// Annotation
+// ========================================
+AbckitArktsAnnotationElement *AnnotationAddAnnotationElementStatic(AbckitCoreAnnotation *anno,
+                                                                   AbckitArktsAnnotationElementCreateParams *params)
+{
+    auto valuePtr = params->value;
+    auto name = params->name;
 
+    auto progAnnoElemValue = std::make_unique<pandasm::Value>(*reinterpret_cast<pandasm::Value *>(valuePtr->val.get()));
+    pandasm::AnnotationElement progAnnoElem(params->name, std::move(progAnnoElemValue));
+
+    auto annoElem = std::make_unique<AbckitCoreAnnotationElement>();
+    annoElem->ann = anno;
+    auto annoElemName = progAnnoElem.GetName();
+    annoElem->name = CreateStringStatic(anno->ai->owningModule->file, annoElemName.data(), annoElemName.size());
+    annoElem->value = valuePtr;
+
+    if (std::holds_alternative<AbckitCoreFunction *>(anno->owner)) {
+        auto *func = std::get<AbckitCoreFunction *>(anno->owner);
+        auto progOwner = func->GetArkTSImpl()->GetStaticImpl();
+        progOwner->metadata->AddAnnotationElementByName(name, std::move(progAnnoElem));
+        annoElem->value->file = func->owningModule->file;
+    } else if (std::holds_alternative<AbckitCoreClass *>(anno->owner)) {
+        auto *klass = std::get<AbckitCoreClass *>(anno->owner);
+        auto progOwner = klass->GetArkTSImpl()->impl.GetStaticClass();
+        progOwner->metadata->AddAnnotationElementByName(name, std::move(progAnnoElem));
+        annoElem->value->file = klass->owningModule->file;
+    }
+
+    annoElem->impl = std::make_unique<AbckitArktsAnnotationElement>();
+    annoElem->GetArkTSImpl()->core = annoElem.get();
+
+    return anno->elements.emplace_back(std::move(annoElem))->GetArkTSImpl();
+}
+
+void AnnotationRemoveAnnotationElementStatic(AbckitCoreAnnotation *anno, AbckitCoreAnnotationElement *elem)
+{
+    if (elem->ann != anno) {
+        statuses::SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return;
+    }
+
+    auto name = elem->name;
+
+    if (std::holds_alternative<AbckitCoreFunction *>(anno->owner)) {
+        auto progOwner = std::get<AbckitCoreFunction *>(anno->owner)->GetArkTSImpl()->GetStaticImpl();
+        progOwner->metadata->DeleteAnnotationElementByName(anno->name->impl, name->impl);
+    } else if (std::holds_alternative<AbckitCoreClass *>(anno->owner)) {
+        auto progOwner = std::get<AbckitCoreClass *>(anno->owner)->GetArkTSImpl()->impl.GetStaticClass();
+        progOwner->metadata->DeleteAnnotationElementByName(anno->name->impl, name->impl);
+    }
+
+    auto &annotationElements = anno->elements;
+    auto iter = std::find_if(annotationElements.begin(), annotationElements.end(),
+                             [&name](auto &annoElemIt) { return name->impl == annoElemIt.get()->name->impl; });
+    if (iter == annotationElements.end()) {
+        LIBABCKIT_LOG(DEBUG) << "Can not find the annotation element to delete\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_BAD_ARGUMENT);
+        return;
+    }
+    annotationElements.erase(iter);
+}
+
+AbckitArktsAnnotation *FunctionAddAnnotationStatic(AbckitCoreFunction *function,
+                                                   const AbckitArktsAnnotationCreateParams *params)
+{
+    auto ai = params->ai;
+
+    auto progFunc = function->GetArkTSImpl()->GetStaticImpl();
+    auto name = ai->GetStaticImpl()->name;
+
+    std::vector<pandasm::AnnotationData> vec;
+    vec.emplace_back(name);
+
+    progFunc->metadata->AddAnnotations(vec);
+
+    auto anno = std::make_unique<AbckitCoreAnnotation>();
+    anno->owner = function;
+    anno->name = AnnotationInterfaceGetNameStatic(ai->core);
+    anno->ai = ai->core;
+    anno->impl = std::make_unique<AbckitArktsAnnotation>();
+    anno->GetArkTSImpl()->core = anno.get();
+    function->annotations.emplace_back(std::move(anno));
+    function->annotationTable.emplace(name, function->annotations.back().get());
+    return function->annotations.back()->GetArkTSImpl();
+}
+
+void FunctionRemoveAnnotationStatic(AbckitCoreFunction *function, AbckitCoreAnnotation *anno)
+{
+    auto progFunc = function->GetArkTSImpl()->GetStaticImpl();
+
+    auto name = anno->name->impl.data();
+    auto fullName = NameUtil::GetFullName(anno->ai, name);
+
+    progFunc->metadata->DeleteAnnotationByName(fullName);
+    auto &annotations = function->annotations;
+    auto iter = std::find_if(annotations.begin(), annotations.end(),
+                             [&name](auto &annoIt) { return name == annoIt.get()->name->impl; });
+    if (iter == annotations.end()) {
+        LIBABCKIT_LOG(DEBUG) << "Can not find the annotation to delete\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_BAD_ARGUMENT);
+        return;
+    }
+    annotations.erase(iter);
+    function->annotationTable.erase(fullName);
+    anno = nullptr;
+}
+
+AbckitArktsAnnotation *ClassAddAnnotationStatic(AbckitCoreClass *klass, const AbckitArktsAnnotationCreateParams *params)
+{
+    auto ai = params->ai;
+
+    auto progFunc = klass->GetArkTSImpl()->impl.GetStaticClass();
+    auto name = ai->GetStaticImpl()->name;
+
+    std::vector<pandasm::AnnotationData> vec;
+    vec.emplace_back(name);
+
+    progFunc->metadata->AddAnnotations(vec);
+
+    auto anno = std::make_unique<AbckitCoreAnnotation>();
+    anno->owner = klass;
+    anno->name = AnnotationInterfaceGetNameStatic(ai->core);
+    anno->ai = ai->core;
+    anno->impl = std::make_unique<AbckitArktsAnnotation>();
+    anno->GetArkTSImpl()->core = anno.get();
+    klass->annotations.emplace_back(std::move(anno));
+    klass->annotationTable.emplace(name, klass->annotations.back().get());
+    return klass->annotations.back()->GetArkTSImpl();
+}
+
+void ClassRemoveAnnotationStatic(AbckitCoreClass *klass, AbckitCoreAnnotation *anno)
+{
+    auto progClass = klass->GetArkTSImpl()->impl.GetStaticClass();
+
+    auto name = anno->name->impl.data();
+    auto fullName = NameUtil::GetFullName(anno->ai, name);
+
+    progClass->metadata->DeleteAnnotationByName(fullName);
+    auto &annotations = klass->annotations;
+    auto iter = std::find_if(annotations.begin(), annotations.end(),
+                             [&name](auto &annoIt) { return name == annoIt.get()->name->impl; });
+    if (iter == annotations.end()) {
+        LIBABCKIT_LOG(DEBUG) << "Can not find the annotation to delete\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_BAD_ARGUMENT);
+        return;
+    }
+
+    annotations.erase(iter);
+    klass->annotationTable.erase(fullName);
+    anno = nullptr;
+}
 }  // namespace libabckit

@@ -280,7 +280,12 @@ private:
 
     // NOTE(mgonopolsky): Refactor to introduce a single error-processing mechanism for parser and emitter
     // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
+#if defined(__clang__)
+    // Avoid destructor at exit to prevent potential double-free in global dtors with ASan
+    PANDA_PUBLIC_API static std::string lastError_ __attribute__((no_destroy));
+#else
     PANDA_PUBLIC_API static std::string lastError_;
+#endif
 };
 
 std::string GetOwnerName(std::string name);

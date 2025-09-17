@@ -307,8 +307,7 @@ extern "C" AbckitArktsAnnotation *ClassAddAnnotation(AbckitArktsClass *klass,
         case ABCKIT_TARGET_ARK_TS_V1:
             return ClassAddAnnotationDynamic(klass->core, params);
         case ABCKIT_TARGET_ARK_TS_V2:
-            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
-            return nullptr;
+            return ClassAddAnnotationStatic(klass->core, params);
         default:
             LIBABCKIT_UNREACHABLE;
     }
@@ -335,8 +334,7 @@ extern "C" void ClassRemoveAnnotation(AbckitArktsClass *klass, AbckitArktsAnnota
         case ABCKIT_TARGET_ARK_TS_V1:
             return ClassRemoveAnnotationDynamic(klass->core, anno->core);
         case ABCKIT_TARGET_ARK_TS_V2:
-            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
-            return;
+            return ClassRemoveAnnotationStatic(klass->core, anno->core);
         default:
             LIBABCKIT_UNREACHABLE;
     }
@@ -1308,8 +1306,7 @@ extern "C" AbckitArktsAnnotation *FunctionAddAnnotation(AbckitArktsFunction *fun
         case ABCKIT_TARGET_ARK_TS_V1:
             return FunctionAddAnnotationDynamic(function->core, params);
         case ABCKIT_TARGET_ARK_TS_V2:
-            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
-            return nullptr;
+            return FunctionAddAnnotationStatic(function->core, params);
         default:
             LIBABCKIT_UNREACHABLE;
     }
@@ -1336,8 +1333,7 @@ extern "C" void FunctionRemoveAnnotation(AbckitArktsFunction *function, AbckitAr
         case ABCKIT_TARGET_ARK_TS_V1:
             return FunctionRemoveAnnotationDynamic(function->core, anno->core);
         case ABCKIT_TARGET_ARK_TS_V2:
-            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
-            return;
+            return FunctionRemoveAnnotationStatic(function->core, anno->core);
         default:
             LIBABCKIT_UNREACHABLE;
     }
@@ -1483,8 +1479,7 @@ extern "C" AbckitArktsAnnotationElement *AnnotationAddAnnotationElement(
         case ABCKIT_TARGET_ARK_TS_V1:
             return AnnotationAddAnnotationElementDynamic(anno->core, params);
         case ABCKIT_TARGET_ARK_TS_V2:
-            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
-            return nullptr;
+            return AnnotationAddAnnotationElementStatic(anno->core, params);
         default:
             LIBABCKIT_UNREACHABLE;
     }
@@ -1510,8 +1505,7 @@ extern "C" void AnnotationRemoveAnnotationElement(AbckitArktsAnnotation *anno, A
         case ABCKIT_TARGET_ARK_TS_V1:
             return AnnotationRemoveAnnotationElementDynamic(anno->core, elem->core);
         case ABCKIT_TARGET_ARK_TS_V2:
-            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
-            return;
+            return AnnotationRemoveAnnotationElementStatic(anno->core, elem->core);
         default:
             LIBABCKIT_UNREACHABLE;
     }

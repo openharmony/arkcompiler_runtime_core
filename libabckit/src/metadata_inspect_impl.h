@@ -903,10 +903,16 @@ struct AbckitFile {
     };
     struct AbcKitValues {
         std::unordered_map<int, std::unique_ptr<AbckitValue>> intVals;
+        std::unordered_map<int64_t, std::unique_ptr<AbckitValue>> longVals;
         std::unordered_map<bool, std::unique_ptr<AbckitValue>> boolVals;
         std::unordered_map<double, std::unique_ptr<AbckitValue>> doubleVals;
         std::unordered_map<std::string, std::unique_ptr<AbckitValue>> stringVals;
+        std::unordered_map<int32_t, std::unique_ptr<AbckitValue>> stringNullptrVals;
         std::unordered_map<std::string, std::unique_ptr<AbckitValue>> litarrVals;
+        std::unordered_map<std::string, std::unique_ptr<AbckitValue>> recordVals;
+        std::unordered_map<std::string, std::unique_ptr<AbckitValue>> methodVals;
+        std::unordered_map<std::string, std::unique_ptr<AbckitValue>> enumVals;
+        std::unordered_map<std::string, std::unique_ptr<AbckitValue>> annotationVals;
     };
 
     libabckit::Mode frontend = libabckit::Mode::DYNAMIC;

@@ -52,15 +52,24 @@ public:
         return recordName_;
     }
 
+    void SetName(std::string_view recordName)
+    {
+        recordName_ = recordName;
+    }
+
     const std::vector<AnnotationElement> &GetElements() const
     {
         return elements_;
     }
 
+    void EnumerateAnnotationElements(const std::function<void(AnnotationElement &)> &callback);
+
     void AddElement(AnnotationElement &&element)
     {
         elements_.push_back(std::forward<AnnotationElement>(element));
     }
+
+    PANDA_PUBLIC_API void DeleteAnnotationElementByName(const std::string_view &annotation_elem_name);
 
 private:
     std::string recordName_;

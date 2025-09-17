@@ -1458,7 +1458,6 @@ extern "C" AbckitString *AnnotationInterfaceGetName(AbckitCoreAnnotationInterfac
     LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(ai, nullptr);
-
     if (IsDynamic(ai->owningModule->target)) {
         return AnnotationInterfaceGetNameDynamic(ai);
     }

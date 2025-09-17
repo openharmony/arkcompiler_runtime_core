@@ -15,6 +15,7 @@
 
 #include "abc_field_processor.h"
 #include "abc2program_log.h"
+#include "abc_annotation_processor.h"
 
 namespace ark::abc2program {
 
@@ -51,6 +52,10 @@ void AbcFieldProcessor::FillFieldData(pandasm::Field &field)
     FillFieldName(field);
     FillFieldType(field);
     FillFieldMetaData(field);
+    fieldDataAccessor_->EnumerateAnnotations([&](panda_file::File::EntityId annotationId) {
+        AbcAnnotationProcessor annotationProcessor(annotationId, keyData_, field);
+        annotationProcessor.FillProgramData();
+    });
 }
 
 void AbcFieldProcessor::FillFieldName(pandasm::Field &field)

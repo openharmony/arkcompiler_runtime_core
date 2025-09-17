@@ -1076,6 +1076,17 @@ AbckitValue *FindOrCreateValueIntStaticImpl(AbckitFile *file, int value)
     return FindOrCreateScalarValue<int, ark::pandasm::Value::Type::I32>(file, file->values.intVals, value);
 }
 
+AbckitValue *FindOrCreateValueLongStaticImpl(AbckitFile *file, int64_t value)
+{
+    return FindOrCreateScalarValue<int64_t, ark::pandasm::Value::Type::I64>(file, file->values.longVals, value);
+}
+
+AbckitValue *FindOrCreateValueStringNullptrStaticImpl(AbckitFile *file, int32_t value)
+{
+    return FindOrCreateScalarValue<int32_t, ark::pandasm::Value::Type::STRING_NULLPTR>(
+        file, file->values.stringNullptrVals, value);
+}
+
 AbckitValue *FindOrCreateValueStringStaticImpl(AbckitFile *file, const std::string &value)
 {
     return FindOrCreateScalarValue<std::string, ark::pandasm::Value::Type::STRING>(file, file->values.stringVals,
@@ -1088,32 +1099,83 @@ AbckitValue *FindOrCreateLiteralArrayValueStaticImpl(AbckitFile *file, const std
                                                                                          value);
 }
 
+AbckitValue *FindOrCreateRecordValueStaticImpl(AbckitFile *file, const ark::pandasm::Type &value)
+{
+    std::string key = value.GetName();
+    if (file->values.recordVals.count(key) == 1) {
+        return file->values.recordVals[key].get();
+    }
+
+    auto valueDeleter = [](pandasm_Value *val) -> void { delete reinterpret_cast<ark::pandasm::ScalarValue *>(val); };
+
+    auto *pval =
+        new ark::pandasm::ScalarValue(ark::pandasm::ScalarValue::Create<ark::pandasm::Value::Type::RECORD>(value));
+    auto abcVal =
+        std::make_unique<AbckitValue>(file, AbckitValueImplT(reinterpret_cast<pandasm_Value *>(pval), valueDeleter));
+    file->values.recordVals.insert({key, std::move(abcVal)});
+    return file->values.recordVals[key].get();
+}
+
+AbckitValue *FindOrCreateValueMethodStaticImpl(AbckitFile *file, const std::string &value)
+{
+    return FindOrCreateScalarValue<std::string, ark::pandasm::Value::Type::METHOD>(file, file->values.methodVals,
+                                                                                   value);
+}
+
+AbckitValue *FindOrCreateValueEnumStaticImpl(AbckitFile *file, const std::string &value)
+{
+    return FindOrCreateScalarValue<std::string, ark::pandasm::Value::Type::ENUM>(file, file->values.enumVals, value);
+}
+
+AbckitValue *FindOrCreateAnnotationValueStaticImpl(AbckitFile *file, const ark::pandasm::AnnotationData &value)
+{
+    const std::string key = value.GetName();
+    if (file->values.annotationVals.find(key) != file->values.annotationVals.end()) {
+        return file->values.annotationVals[key].get();
+    }
+
+    auto valueDeleter = [](pandasm_Value *val) -> void { delete reinterpret_cast<ark::pandasm::ScalarValue *>(val); };
+    auto *pval =
+        new ark::pandasm::ScalarValue(ark::pandasm::ScalarValue::Create<ark::pandasm::Value::Type::ANNOTATION>(value));
+    auto abcVal =
+        std::make_unique<AbckitValue>(file, AbckitValueImplT(reinterpret_cast<pandasm_Value *>(pval), valueDeleter));
+    file->values.annotationVals.insert({key, std::move(abcVal)});
+    return file->values.annotationVals[key].get();
+}
+
 AbckitValue *FindOrCreateValueStatic(AbckitFile *file, const ark::pandasm::Value &value)
 {
     switch (value.GetType()) {
         case ark::pandasm::Value::Type::U1:
             return FindOrCreateValueU1StaticImpl(file, value.GetAsScalar()->GetValue<bool>());
-        case ark::pandasm::Value::Type::F64:
-            return FindOrCreateValueDoubleStaticImpl(file, value.GetAsScalar()->GetValue<double>());
-        case ark::pandasm::Value::Type::STRING:
-            return FindOrCreateValueStringStaticImpl(file, value.GetAsScalar()->GetValue<std::string>());
-        case ark::pandasm::Value::Type::LITERALARRAY:
-            return FindOrCreateLiteralArrayValueStaticImpl(file, value.GetAsScalar()->GetValue<std::string>());
         case ark::pandasm::Value::Type::I8:
         case ark::pandasm::Value::Type::U8:
         case ark::pandasm::Value::Type::I16:
         case ark::pandasm::Value::Type::U16:
         case ark::pandasm::Value::Type::I32:
-            return FindOrCreateValueIntStaticImpl(file, value.GetAsScalar()->GetValue<int>());
         case ark::pandasm::Value::Type::U32:
+            return FindOrCreateValueIntStaticImpl(file, value.GetAsScalar()->GetValue<int32_t>());
         case ark::pandasm::Value::Type::I64:
         case ark::pandasm::Value::Type::U64:
+            return FindOrCreateValueLongStaticImpl(file, value.GetAsScalar()->GetValue<int64_t>());
         case ark::pandasm::Value::Type::F32:
-        case ark::pandasm::Value::Type::STRING_NULLPTR:
-        case ark::pandasm::Value::Type::RECORD:
+        case ark::pandasm::Value::Type::F64:
+            return FindOrCreateValueDoubleStaticImpl(file, value.GetAsScalar()->GetValue<double>());
+        case ark::pandasm::Value::Type::STRING:
+            return FindOrCreateValueStringStaticImpl(file, value.GetAsScalar()->GetValue<std::string>());
         case ark::pandasm::Value::Type::METHOD:
+            return FindOrCreateValueMethodStaticImpl(file, value.GetAsScalar()->GetValue<std::string>());
         case ark::pandasm::Value::Type::ENUM:
+            return FindOrCreateValueEnumStaticImpl(file, value.GetAsScalar()->GetValue<std::string>());
+        case ark::pandasm::Value::Type::STRING_NULLPTR:
+            return FindOrCreateValueStringNullptrStaticImpl(file, value.GetAsScalar()->GetValue<int32_t>());
+        case ark::pandasm::Value::Type::LITERALARRAY:
+            return FindOrCreateLiteralArrayValueStaticImpl(file, value.GetAsScalar()->GetValue<std::string>());
+        case ark::pandasm::Value::Type::RECORD:
+            return FindOrCreateRecordValueStaticImpl(file, value.GetAsScalar()->GetValue<ark::pandasm::Type>());
         case ark::pandasm::Value::Type::ANNOTATION:
+            return FindOrCreateAnnotationValueStaticImpl(file,
+                                                         value.GetAsScalar()->GetValue<ark::pandasm::AnnotationData>());
         case ark::pandasm::Value::Type::ARRAY:
         case ark::pandasm::Value::Type::VOID:
         case ark::pandasm::Value::Type::METHOD_HANDLE:

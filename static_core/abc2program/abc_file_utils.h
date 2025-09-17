@@ -44,10 +44,13 @@ constexpr std::string_view DUMP_CONTENT_PANDA_ASSEMBLY = "PandaAssembly";
 constexpr std::string_view DUMP_CONTENT_SINGLE_ENDL = "\n";
 constexpr std::string_view DUMP_CONTENT_DOUBLE_ENDL = "\n\n";
 
+enum class EntityType { CLASS, METHOD, FIELD, STRING, EXTERNAL, UNKNOWN };
+
 class AbcFileUtils {
 public:
     static bool IsSystemTypeName(const std::string &typeName);
     static std::string GetFileNameByAbsolutePath(const std::string &absolutePath);
+    static EntityType GetEntityType(const panda_file::File &file, panda_file::File::EntityId entityId);
 };  // class AbcFileUtils
 
 }  // namespace ark::abc2program

@@ -19,12 +19,16 @@
 #include "abc_file_entity_processor.h"
 #include "annotation_data_accessor.h"
 #include "abc_file_utils.h"
+#include <variant>
 
 namespace ark::abc2program {
 
 class AbcAnnotationProcessor : public AbcFileEntityProcessor {
 public:
     AbcAnnotationProcessor(panda_file::File::EntityId entityId, Abc2ProgramKeyData &keyData, pandasm::Record &record);
+    AbcAnnotationProcessor(panda_file::File::EntityId entityId, Abc2ProgramKeyData &keyData,
+                           pandasm::Function &function);
+    AbcAnnotationProcessor(panda_file::File::EntityId entityId, Abc2ProgramKeyData &keyData, pandasm::Field &field);
     void FillProgramData();
 
 private:
@@ -37,7 +41,7 @@ private:
         const panda_file::AnnotationDataAccessor::Elem &annotationDataAccessorElem, std::string &annotationElemName,
         pandasm::Value::Type valueType);
     std::unique_ptr<panda_file::AnnotationDataAccessor> annotationDataAccessor_;
-    pandasm::Record &record_;
+    std::variant<pandasm::Record *, pandasm::Function *, pandasm::Field *> target_;
     std::string annotationName_;
 };  // class AbcAnnotationProcessor
 

@@ -60,10 +60,7 @@ void AbcClassProcessor::FillRecordData(pandasm::Record &record)
     FillFields(record);
     FillFunctions();
     FillRecordSourceFile(record);
-#ifndef ENABLE_LIBABCKIT
-    // annotations are not supported in abckit
     FillRecordAnnotations(record);
-#endif
 }
 
 void AbcClassProcessor::FillRecordMetaData(pandasm::Record &record)

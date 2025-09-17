@@ -270,9 +270,24 @@ std::unique_ptr<AbckitCoreFunction> CollectFunction(AbckitFile *file, const std:
     ASSERT(nameToFunction.count(name) == 0);
     nameToFunction.insert({name, function.get()});
 
-    for (const auto &anno : GetAnnotationNames(&functionImpl)) {
-        function->annotations.emplace_back(CreateAnnotation(file, function.get(), anno));
-        function->annotationTable.emplace(anno, function->annotations.back().get());
+    for (auto &annoImpl : functionImpl.metadata->GetAnnotations()) {
+        LIBABCKIT_LOG(DEBUG) << "Found annotation. func: '" << name << "', anno: '" << annoImpl.GetName() << "'\n";
+        auto anno = CreateAnnotation(file, function.get(), annoImpl.GetName());
+        for (auto &annoElemImpl : annoImpl.GetElements()) {
+            LIBABCKIT_LOG(DEBUG) << "Found annotation element. func: '" << name << "', anno: '" << annoImpl.GetName()
+                                 << "', annoElem: '" << annoElemImpl.GetName() << "'\n";
+            auto annoElem = std::make_unique<AbckitCoreAnnotationElement>();
+            annoElem->ann = anno.get();
+            annoElem->name = CreateStringStatic(file, annoElemImpl.GetName().data(), annoElemImpl.GetName().size());
+            annoElem->impl = std::make_unique<AbckitArktsAnnotationElement>();
+            annoElem->GetArkTSImpl()->core = annoElem.get();
+            auto value = FindOrCreateValueStatic(file, *annoElemImpl.GetValue());
+            annoElem->value = value;
+
+            anno->elements.emplace_back(std::move(annoElem));
+        }
+        function->annotations.emplace_back(std::move(anno));
+        function->annotationTable.emplace(annoImpl.GetName(), function->annotations.back().get());
     }
 
     for (auto &functionParam : functionImpl.params) {
@@ -326,9 +341,24 @@ static std::unique_ptr<AbckitCoreTypeField> CreateField(AbckitFile *file, Abckit
         field->value = FindOrCreateValueStatic(file, recordField.metadata->GetValue().value());
     }
     if constexpr (std::is_same_v<AbckitCoreType, AbckitCoreClass>) {
-        for (const auto &anno : GetAnnotationNames(&recordField)) {
-            field->annotations.emplace_back(CreateAnnotation(file, field.get(), anno));
-            field->annotationTable.emplace(anno, CreateAnnotation(file, field.get(), anno));
+        for (auto &annoImpl : recordField.metadata->GetAnnotations()) {
+            LIBABCKIT_LOG(DEBUG) << "Found annotation. field: '" << recordField.name << "', anno: '"
+                                 << annoImpl.GetName() << "'\n";
+            auto anno = CreateAnnotation(file, field.get(), annoImpl.GetName());
+            for (auto &annoElemImpl : annoImpl.GetElements()) {
+                LIBABCKIT_LOG(DEBUG) << "Found annotation element. field: '" << recordField.name << "', anno: '"
+                                     << annoImpl.GetName() << "', annoElem: '" << annoElemImpl.GetName() << "'\n";
+                auto annoElem = std::make_unique<AbckitCoreAnnotationElement>();
+                annoElem->ann = anno.get();
+                annoElem->name = CreateStringStatic(file, annoElemImpl.GetName().data(), annoElemImpl.GetName().size());
+                annoElem->impl = std::make_unique<AbckitArktsAnnotationElement>();
+                annoElem->GetArkTSImpl()->core = annoElem.get();
+                auto value = FindOrCreateValueStatic(file, *annoElemImpl.GetValue());
+                annoElem->value = value;
+
+                anno->elements.emplace_back(std::move(annoElem));
+            }
+            field->annotationTable.emplace(annoImpl.GetName(), std::move(anno));
         }
     }
     return field;
@@ -789,6 +819,12 @@ static void CollectExternalModules(pandasm::Program *prog, AbckitFile *file)
             continue;
         }
 
+        pandasm::Type type = pandasm::Type::FromName(recordName);
+        if (type.IsUnion()) {
+            LIBABCKIT_LOG(DEBUG) << "Record:" << recordName << " is a union\n";
+            continue;
+        }
+
         auto [moduleName, _] = ClassGetNames(recordName);
         if (container->nameToModule.find(moduleName) != container->nameToModule.end()) {
             continue;
@@ -906,19 +942,108 @@ static void CollectExternalFunctions(pandasm::Program *prog, AbckitFile *file)
     }
 }
 
+static std::set<std::string> CollectAnnotationNames(pandasm::Program *prog)
+{
+    std::set<std::string> annotationNames;
+    for (auto &[recordName, record] : prog->recordTable) {
+        for (auto &annotationName : record.metadata->GetAttributeValues(ETS_ANNOTATION_CLASS.data())) {
+            annotationNames.insert(annotationName);
+        }
+        for (auto &recordField : record.fieldList) {
+            for (auto &annotationName : recordField.metadata->GetAttributeValues(ETS_ANNOTATION_CLASS.data())) {
+                annotationNames.insert(annotationName);
+            }
+        }
+    }
+    for (auto &[functionName, function] : prog->functionStaticTable) {
+        for (auto &annotationName : function.metadata->GetAttributeValues(ETS_ANNOTATION_CLASS.data())) {
+            annotationNames.insert(annotationName);
+        }
+        for (auto &functionParam : function.params) {
+            for (auto &annotationName :
+                 functionParam.GetOrCreateMetadata()->GetAttributeValues(ETS_ANNOTATION_CLASS.data())) {
+                annotationNames.insert(annotationName);
+            }
+        }
+    }
+    for (auto &[functionName, function] : prog->functionInstanceTable) {
+        for (auto &annotationName : function.metadata->GetAttributeValues(ETS_ANNOTATION_CLASS.data())) {
+            annotationNames.insert(annotationName);
+        }
+        for (auto &functionParam : function.params) {
+            for (auto &annotationName :
+                 functionParam.GetOrCreateMetadata()->GetAttributeValues(ETS_ANNOTATION_CLASS.data())) {
+                annotationNames.insert(annotationName);
+            }
+        }
+    }
+    return annotationNames;
+}
+
+// NOTE: external records don't have accessflags in abc
+static void UpdateAnnotationRecords(pandasm::Program *prog)
+{
+    auto annotationNames = CollectAnnotationNames(prog);
+    for (auto &[recordName, record] : prog->recordTable) {
+        if (!record.metadata->IsForeign()) {
+            continue;
+        }
+        if (annotationNames.find(recordName) != annotationNames.end()) {
+            pandasm::Record recordCopy(recordName, panda_file::SourceLang::ETS);
+            recordCopy.metadata->SetAttribute("external");
+            recordCopy.metadata->SetAccessFlags(record.metadata->GetAccessFlags() | ACC_ANNOTATION);
+            prog->recordTable.insert_or_assign(recordName, std::move(recordCopy));
+        }
+    }
+}
+
 static void CollectAnnotations(AbckitFile *file)
 {
     LIBABCKIT_LOG_FUNC;
     const auto container = static_cast<Container *>(file->data);
     for (const auto &klass : container->classes) {
-        for (auto &annotationName : GetAnnotationNames(GetStaticImplRecord(klass.get()))) {
-            klass->annotations.emplace_back(CreateAnnotation(file, klass.get(), annotationName));
-            klass->annotationTable.emplace(annotationName, klass->annotations.back().get());
+        for (auto &annoImpl : GetStaticImplRecord(klass.get())->metadata->GetAnnotations()) {
+            LIBABCKIT_LOG(DEBUG) << "Found annotation. class: '" << GetStaticImplRecord(klass.get())->name
+                                 << "', anno: '" << annoImpl.GetName() << "'\n";
+            auto anno = CreateAnnotation(file, klass.get(), annoImpl.GetName());
+            for (auto &annoElemImpl : annoImpl.GetElements()) {
+                LIBABCKIT_LOG(DEBUG) << "Found annotation element. class: '" << GetStaticImplRecord(klass.get())->name
+                                     << "', anno: '" << annoImpl.GetName() << "', annoElem: '" << annoElemImpl.GetName()
+                                     << "'\n";
+                auto annoElem = std::make_unique<AbckitCoreAnnotationElement>();
+                annoElem->ann = anno.get();
+                annoElem->name = CreateStringStatic(file, annoElemImpl.GetName().data(), annoElemImpl.GetName().size());
+                annoElem->impl = std::make_unique<AbckitArktsAnnotationElement>();
+                annoElem->GetArkTSImpl()->core = annoElem.get();
+                auto value = FindOrCreateValueStatic(file, *annoElemImpl.GetValue());
+                annoElem->value = value;
+
+                anno->elements.emplace_back(std::move(annoElem));
+            }
+            klass->annotations.emplace_back(std::move(anno));
+            klass->annotationTable.emplace(annoImpl.GetName(), klass->annotations.back().get());
         }
     }
     for (const auto &iface : container->interfaces) {
-        for (auto &annotationName : GetAnnotationNames(GetStaticImplRecord(iface.get()))) {
-            iface->annotationTable.emplace(annotationName, CreateAnnotation(file, iface.get(), annotationName));
+        for (auto &annoImpl : GetStaticImplRecord(iface.get())->metadata->GetAnnotations()) {
+            LIBABCKIT_LOG(DEBUG) << "Found annotation. interface: '" << GetStaticImplRecord(iface.get())->name
+                                 << "', anno: '" << annoImpl.GetName() << "'\n";
+            auto anno = CreateAnnotation(file, iface.get(), annoImpl.GetName());
+            for (auto &annoElemImpl : annoImpl.GetElements()) {
+                LIBABCKIT_LOG(DEBUG) << "Found annotation element. interface: '"
+                                     << GetStaticImplRecord(iface.get())->name << "', anno: '" << annoImpl.GetName()
+                                     << "', annoElem: '" << annoElemImpl.GetName() << "'\n";
+                auto annoElem = std::make_unique<AbckitCoreAnnotationElement>();
+                annoElem->ann = anno.get();
+                annoElem->name = CreateStringStatic(file, annoElemImpl.GetName().data(), annoElemImpl.GetName().size());
+                annoElem->impl = std::make_unique<AbckitArktsAnnotationElement>();
+                annoElem->GetArkTSImpl()->core = annoElem.get();
+                auto value = FindOrCreateValueStatic(file, *annoElemImpl.GetValue());
+                annoElem->value = value;
+
+                anno->elements.emplace_back(std::move(annoElem));
+            }
+            iface->annotationTable.emplace(annoImpl.GetName(), std::move(anno));
         }
     }
 }
@@ -977,6 +1102,12 @@ static void CollectAllInstances(AbckitFile *file, pandasm::Program *prog)
         if (IsModuleName(className) ||
             container->nameToNamespace.find(recordName) != container->nameToNamespace.end()) {
             // NOTE: find and fill AbckitCoreImportDescriptor
+            continue;
+        }
+
+        pandasm::Type type = pandasm::Type::FromName(recordName);
+        if (type.IsUnion()) {
+            LIBABCKIT_LOG(DEBUG) << "Record:" << recordName << " is a union\n";
             continue;
         }
 
@@ -1062,6 +1193,8 @@ static void CreateWrappers(pandasm::Program *prog, AbckitFile *file)
 
     // Functions
     CollectAllFunctions(prog, file);
+
+    UpdateAnnotationRecords(prog);
 
     // Assign
     AssignAsyncFunction(file);

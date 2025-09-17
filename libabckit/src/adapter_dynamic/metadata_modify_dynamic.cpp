@@ -963,7 +963,7 @@ void AnnotationRemoveAnnotationElementDynamic(AbckitCoreAnnotation *anno, Abckit
     annotationElements.erase(iter);
 }
 
-std::string TypeToName(AbckitType *type)
+static std::string TypeToName(AbckitType *type)
 {
     if (type->id == ABCKIT_TYPE_ID_REFERENCE) {
         auto str = ClassGetNameDynamic(type->GetClass());
@@ -980,7 +980,7 @@ std::string TypeToName(AbckitType *type)
         case ABCKIT_TYPE_ID_U8:
             return "u8";
         case ABCKIT_TYPE_ID_I8:
-            return "u8";
+            return "i8";
         case ABCKIT_TYPE_ID_U16:
             return "u16";
         case ABCKIT_TYPE_ID_I16:

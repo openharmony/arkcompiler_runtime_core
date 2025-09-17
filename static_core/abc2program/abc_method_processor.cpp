@@ -15,6 +15,7 @@
 
 #include "abc_method_processor.h"
 #include "abc_code_processor.h"
+#include "abc_annotation_processor.h"
 #include "assembly-function.h"
 #include "mangling.h"
 #include "source_lang_enum.h"
@@ -58,6 +59,10 @@ void AbcMethodProcessor::GetMethodName()
 
     GetParams(methodDataAccessor_->GetProtoId());
     GetMetaData();
+    methodDataAccessor_->EnumerateAnnotations([&](panda_file::File::EntityId annotationId) {
+        AbcAnnotationProcessor annotationProcessor(annotationId, keyData_, function_);
+        annotationProcessor.FillProgramData();
+    });
 }
 
 void AbcMethodProcessor::GetMethodCode()

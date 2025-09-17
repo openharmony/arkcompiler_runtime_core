@@ -404,12 +404,6 @@ void TestNullptr(AbckitArktsAnnotationElement *(*apiToCheck)(AbckitArktsAnnotati
     module->file = nullptr;
     ASSERT_EQ(apiToCheck(anno.get(), params.get()), nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_INTERNAL_ERROR);
-
-    auto file = std::make_unique<AbckitFile>();
-    module->file = file.get();
-    module->target = ABCKIT_TARGET_ARK_TS_V2;
-    ASSERT_EQ(apiToCheck(anno.get(), params.get()), nullptr);
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_UNSUPPORTED);
 }
 void TestNullptr(AbckitArktsAnnotationInterfaceField *(*apiToCheck)(
     AbckitArktsAnnotationInterface *, const AbckitArktsAnnotationInterfaceFieldCreateParams *))
@@ -457,6 +451,14 @@ void TestNullptr(void (*apiToCheck)(AbckitArktsAnnotationInterface *, AbckitArkt
     field->core = nullptr;
     apiToCheck(ai.get(), field.get());
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_INTERNAL_ERROR);
+
+    auto fieldCore = std::make_unique<AbckitCoreAnnotationInterfaceField>();
+    field->core = fieldCore.get();
+    auto aiModule = std::make_unique<AbckitCoreModule>();
+    aiCore->owningModule = aiModule.get();
+    aiModule->target = ABCKIT_TARGET_ARK_TS_V2;
+    apiToCheck(ai.get(), field.get());
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
 }
 void TestNullptr(void (*apiToCheck)(AbckitArktsAnnotation *, AbckitArktsAnnotationElement *))
 {
@@ -485,12 +487,6 @@ void TestNullptr(void (*apiToCheck)(AbckitArktsAnnotation *, AbckitArktsAnnotati
     module->file = nullptr;
     apiToCheck(anno.get(), elem.get());
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_INTERNAL_ERROR);
-
-    auto file = std::make_unique<AbckitFile>();
-    module->file = file.get();
-    module->target = ABCKIT_TARGET_ARK_TS_V2;
-    apiToCheck(anno.get(), elem.get());
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_UNSUPPORTED);
 }
 void TestNullptr(AbckitArktsAnnotation *(*apiToCheck)(AbckitArktsClass *, const AbckitArktsAnnotationCreateParams *))
 {
@@ -525,10 +521,14 @@ void TestNullptr(AbckitArktsAnnotation *(*apiToCheck)(AbckitArktsClass *, const 
     classCore->owningModule = classModule.get();
     auto paramsModule = std::make_unique<AbckitCoreModule>();
     paramsCore->owningModule = paramsModule.get();
-    classModule->target = ABCKIT_TARGET_ARK_TS_V2;
+    classModule->target = ABCKIT_TARGET_ARK_TS_V1;
     paramsModule->target = ABCKIT_TARGET_ARK_TS_V2;
     ASSERT_EQ(apiToCheck(klass.get(), params.get()), nullptr);
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_UNSUPPORTED);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_TARGET);
+    classModule->target = ABCKIT_TARGET_ARK_TS_V2;
+    paramsModule->target = ABCKIT_TARGET_ARK_TS_V1;
+    ASSERT_EQ(apiToCheck(klass.get(), params.get()), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_TARGET);
 }
 void TestNullptr(void (*apiToCheck)(AbckitArktsClass *, AbckitArktsAnnotation *))
 {
@@ -561,6 +561,10 @@ void TestNullptr(void (*apiToCheck)(AbckitArktsClass *, AbckitArktsAnnotation *)
     ai->owningModule = annoModule.get();
     classModule->target = ABCKIT_TARGET_ARK_TS_V1;
     annoModule->target = ABCKIT_TARGET_ARK_TS_V2;
+    apiToCheck(klass.get(), anno.get());
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_TARGET);
+    classModule->target = ABCKIT_TARGET_ARK_TS_V2;
+    annoModule->target = ABCKIT_TARGET_ARK_TS_V1;
     apiToCheck(klass.get(), anno.get());
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_TARGET);
 }
@@ -664,10 +668,14 @@ void TestNullptr(AbckitArktsAnnotation *(*apiToCheck)(AbckitArktsFunction *, con
     functionCore->owningModule = functionModule.get();
     auto paramsModule = std::make_unique<AbckitCoreModule>();
     paramsCore->owningModule = paramsModule.get();
-    functionModule->target = ABCKIT_TARGET_ARK_TS_V2;
+    functionModule->target = ABCKIT_TARGET_ARK_TS_V1;
     paramsModule->target = ABCKIT_TARGET_ARK_TS_V2;
     ASSERT_EQ(apiToCheck(function.get(), params.get()), nullptr);
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_UNSUPPORTED);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_TARGET);
+    functionModule->target = ABCKIT_TARGET_ARK_TS_V2;
+    paramsModule->target = ABCKIT_TARGET_ARK_TS_V1;
+    ASSERT_EQ(apiToCheck(function.get(), params.get()), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_TARGET);
 }
 void TestNullptr(void (*apiToCheck)(AbckitArktsFunction *, AbckitArktsAnnotation *))
 {
@@ -699,6 +707,10 @@ void TestNullptr(void (*apiToCheck)(AbckitArktsFunction *, AbckitArktsAnnotation
     ai->owningModule = annoModule.get();
     functionModule->target = ABCKIT_TARGET_ARK_TS_V1;
     annoModule->target = ABCKIT_TARGET_ARK_TS_V2;
+    apiToCheck(function.get(), anno.get());
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_TARGET);
+    functionModule->target = ABCKIT_TARGET_ARK_TS_V2;
+    annoModule->target = ABCKIT_TARGET_ARK_TS_V1;
     apiToCheck(function.get(), anno.get());
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_TARGET);
 }
