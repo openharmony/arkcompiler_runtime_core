@@ -60,7 +60,7 @@ class OneTestRunner:
         profraw_file, profdata_file, params = self.__get_prof_files(name, params)
 
         if self.coverage_config.use_lcov and coverage_per_binary:
-            gcov_prefix, gcov_prefix_strip = self.coverage_manager.lcov_tool.get_gcov_prefix(name)
+            gcov_prefix, gcov_prefix_strip = self.coverage_manager.lcov_tool.get_gcov_prefix(params.component_name)
             params = deepcopy(params)
             params.env['GCOV_PREFIX'] = gcov_prefix
             params.env['GCOV_PREFIX_STRIP'] = gcov_prefix_strip
