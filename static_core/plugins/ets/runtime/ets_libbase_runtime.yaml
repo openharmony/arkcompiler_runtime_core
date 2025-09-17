@@ -6898,6 +6898,29 @@ intrinsics:
       args: [ i64 ]
     impl: ark::ets::intrinsics::ReflectMethodGetNameInternal
 
+  - name: StdCoreReflectMethodInvokeInternal
+    space: ets
+    class_name: std.core.reflect.Method
+    method_name: invokeInternal
+    static: false
+    signature:
+      ret: std.core.Object
+      args:
+        - std.core.Object
+        - std.core.Object[]
+    impl: ark::ets::intrinsics::ReflectMethodInvokeInternal
+
+  - name: StdCoreReflectMethodCreateInstanceInternal
+    space: ets
+    class_name: std.core.reflect.Constructor
+    method_name: createInstanceInternal
+    static: false
+    signature:
+      ret: std.core.Object
+      args:
+        - std.core.Object[]
+    impl: ark::ets::intrinsics::ReflectMethodCreateInstanceInternal
+
 ##########################
 # std.core.reflect.Field #
 ##########################

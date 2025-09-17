@@ -27,9 +27,22 @@ export final class Constructor extends Method {
         return this.methodPtr == other.methodPtr
     }
 
-    public invoke(args?: FixedArray<Any>): Any {
-        throw new Error("Not implemeted yet")
+    /**
+     * Creates an instance of owner class
+     *
+     * @param args consructor parameters
+     *
+     * @returns Created instance.
+     *
+     * @throws OutofMemoryError if there is no memory to allocate new instance.
+     *
+     * @throws TypeError if there is mismatch in arguments number or types
+     */
+    public createInstance(args?: FixedArray<Any>): Any {
+        return this.createInstanceInternal(args);
     }
+
+    private native createInstanceInternal(args?: FixedArray<Any>): Any
 }
 
 } // namespace reflect
