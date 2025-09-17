@@ -200,14 +200,19 @@ Label(:ValueFloatDone)
   } 
 
   isCharShort := Or(isChar(btype), isShort(btype)).b
-  If(isCharShort, 1).EQ.b {
-    hash_code_short := Cast(LoadI(obj).Imm(EtsConstants::BOX_PRIMITIVE_VALUE_OFFSET).u16).u32
-  } Else {
-    hash_code_byte := Cast(LoadI(obj).Imm(EtsConstants::BOX_PRIMITIVE_VALUE_OFFSET).u8).u32
+  If(isChar(btype), 1).EQ.b{
+    hash_code_char := Cast(LoadI(obj).Imm(EtsConstants::BOX_PRIMITIVE_VALUE_OFFSET).u16).u32
+  } Else{
+    If(isShort(btype), 1).EQ.b {
+      hash_code_short := Cast(LoadI(obj).Imm(EtsConstants::BOX_PRIMITIVE_VALUE_OFFSET).i16).u32
+    } Else {
+      hash_code_byte := Cast(LoadI(obj).Imm(EtsConstants::BOX_PRIMITIVE_VALUE_OFFSET).i8).u32
+    }
   }
 
+
 Label(:Done)
-  hash_code := Phi(hash_code_double, hash_code_float, hash_code_int, hash_code_short, hash_code_byte).u32
+  hash_code := Phi(hash_code_double, hash_code_float, hash_code_int, hash_code_char, hash_code_short, hash_code_byte).u32
 end
 
 ################################################################
@@ -232,12 +237,12 @@ def GenerateGetHashCodeByValue(cgmode)
       If(hash, 0).EQ.Unlikely {
         Goto(:SlowPathEntrypointString)
       }
-      Return(Cast(hash).u64).i64
+      Return(Cast(Cast(hash).i32).i64).i64
     }
 
     flags := LoadI(klass).Imm(EtsConstants::ETS_CLASS_FLAGS_FROM_RUNTIME_CLASS_OFFSET).u32
     If(isBoxedType(flags), 0).NE.Likely {
-      Return(Cast(calcHashCode(obj, flags)).u64).i64
+      Return(Cast(Cast(calcHashCode(obj, flags)).i32).i64).i64
     }
     If(isBigintType(flags), 0).NE.Unlikely {
       Goto(:SlowPathEntrypointBigint)
@@ -247,7 +252,7 @@ def GenerateGetHashCodeByValue(cgmode)
       Goto(:SlowPathEntrypointObject)
     }
 
-    Return(Cast(fetchHashCodeObject(obj)).u64).i64
+    Return(Cast(Cast(fetchHashCodeObject(obj)).i32).i64).i64
 
 Label(:SlowPathEntrypoint)  # jump here from try_use_cached_flat_str macro
 Label(:SlowPathEntrypointString)

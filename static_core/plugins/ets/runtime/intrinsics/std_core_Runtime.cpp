@@ -47,7 +47,7 @@ EtsInt StdCoreRuntimeGetHashCode(EtsObject *source)
 
 EtsLong StdRuntimeGetHashCodeByValue(EtsObject *source)
 {
-    return static_cast<EtsLong>(EtsEscompatMap::GetHashCode(source));
+    return static_cast<EtsInt>(EtsEscompatMap::GetHashCode(source));
 }
 
 EtsBoolean StdRuntimeSameValueZero(EtsObject *a, EtsObject *b)
