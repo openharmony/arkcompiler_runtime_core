@@ -51,41 +51,40 @@ std::vector<ValueType> EtsArrToVec(ValueType *buf, ani_size sizeArr)
     return vec;
 }
 
-{% if type != "string" -%}
-void print{{ Type }}Arr(ani_env *env, ani_array_{{ type }} arr)
+void print{{ Type }}Arr(ani_env *env, ani_array arr)
 {
-    const uint32_t bufferSize = 5U;
-    ani_size len, offset {0};
+    ani_size len;
     LOG_IF(env->Array_GetLength(arr, &len) != ANI_OK, FATAL, ANI) << "Failed to get array's length";
-    ani_{{ type }} buff[bufferSize] = {};
-
-    LOG_IF(env->Array_GetRegion_{{ Type }}(arr, offset, len, buff) != ANI_OK, FATAL, ANI) << "Failed to get array";
-    auto vec = EtsArrToVec<ani_{{ type }}>(buff, len);
-    for (size_t i = 0; i < bufferSize; ++i) {
-    {% if type == "double" or type == "float" -%}
-        LOG_IF(!Equal(buff[i], 1.1 * (i + 1)), FATAL, ANI) << "'" << buff[i] << "' not equal to '" << 1.1 * (i + 1) << "'";
-    {%- elif type == "boolean" -%}
-        LOG_IF(buff[i] != (i + 1) % 2, FATAL, ANI) << "'" << buff[i] << "' not equal to '" << (i + 1) % 2 << "'";
+    ani_ref elem {};
+    {% if type == "string" -%}
+        std::string str;
     {%- else %}
-        LOG_IF(buff[i] != static_cast<int>(i + 1), FATAL, ANI) << "'" << buff[i] << "' not equal to '" << i + 1 << "'";
+        const uint32_t bufferSize = 5U;
+        ani_{{ type }} buff[bufferSize] = {};
     {%- endif %}
+    for (size_t i = 0; i < len; ++i) {
+        LOG_IF(env->Array_Get(arr, i, &elem) != ANI_OK, FATAL, ANI) << "Failed to get array";
+        {% if type == "string" -%}
+            auto string = reinterpret_cast<ani_string>(elem);
+            GetStdString(env, string, str);
+            LOG_IF(str != std::to_string(i + 1), FATAL, ANI) << "str '" << str << "' not equal to '" <<  std::to_string(i + 1) << "'";
+        {%- else %}
+            LOG_IF(env->Object_CallMethodByName_{{ Type }}(static_cast<ani_object>(elem), "unboxed", nullptr, &buff[i]) != ANI_OK, FATAL, ANI) << "Failed to call unboxed method for {{ type }}";
+        {%- endif %}
     }
+    {% if type != "string" -%}
+        auto vec = EtsArrToVec<ani_{{ type }}>(buff, len);
+        for (size_t i = 0; i < bufferSize; ++i) {
+            {% if type == "double" or type == "float" -%}
+                LOG_IF(!Equal(buff[i], 1.1 * (i + 1)), FATAL, ANI) << "'" << buff[i] << "' not equal to '" << 1.1 * (i + 1) << "'";
+            {%- elif type == "boolean" -%}
+                LOG_IF(buff[i] != (i + 1) % 2, FATAL, ANI) << "'" << buff[i] << "' not equal to '" << (i + 1) % 2 << "'";
+            {%- else %}
+                LOG_IF(buff[i] != static_cast<int>(i + 1), FATAL, ANI) << "'" << buff[i] << "' not equal to '" << i + 1 << "'";
+            {%- endif %}
+        }
+    {%- endif %}
 }
-{%- else %}
-void printStringArr(ani_env *env, ani_array_ref arr)
-{
-    ani_size sz;
-    ani_ref ref;
-    std::string str;
-    LOG_IF(env->Array_GetLength(arr, &sz) != ANI_OK, FATAL, ANI) << "Failed to get array's length";
-    for (ani_size i = 0; i < sz; ++i) {
-        LOG_IF(env->Array_Get_Ref(arr, i, &ref) != ANI_OK, FATAL, ANI) << "Failed to get array's ref";
-        auto string = reinterpret_cast<ani_string>(ref);
-        GetStdString(env, string, str);
-        LOG_IF(str != std::to_string(i + 1), FATAL, ANI) << "str '" << str << "' not equal to '" <<  std::to_string(i + 1) << "'";
-    }
-}
-{%- endif %}
 
 const std::vector<ani_native_function> g_{{ type }}Methods = {
     {"print{{ Type }}Arr", nullptr, reinterpret_cast<void *>(print{{ Type }}Arr)},
