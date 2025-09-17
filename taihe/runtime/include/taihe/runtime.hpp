@@ -15,6 +15,6 @@
 #ifndef RUNTIME_INCLUDE_TAIHE_RUNTIME_HPP_
 #define RUNTIME_INCLUDE_TAIHE_RUNTIME_HPP_
 
-#include <taihe/runtime_ani.hpp>
+#include <taihe/runtime_ani.h>
 
 #endif  // RUNTIME_INCLUDE_TAIHE_RUNTIME_HPP_

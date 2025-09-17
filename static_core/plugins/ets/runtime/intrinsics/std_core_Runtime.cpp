@@ -67,7 +67,7 @@ ObjectHeader *StdCoreRuntimeAllocSameTypeArray(EtsClass *cls, int32_t length)
 {
     if (UNLIKELY(!cls->IsArrayClass())) {
         // should not appear for the optimized version of intrinsic, which is always inlined
-        ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->escompatError, "class is not an array");
+        ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->coreError, "class is not an array");
         return nullptr;
     }
     return coretypes::Array::Create(cls->GetRuntimeClass(), length);

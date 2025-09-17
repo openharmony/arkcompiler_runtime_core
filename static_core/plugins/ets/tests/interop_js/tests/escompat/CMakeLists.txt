@@ -14,7 +14,7 @@
 panda_ets_interop_js_gtest(ets_interop_js_test__escompat
     CPP_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/escompat.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/escompat_error.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/std_core_error.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/escompat_array_buffer.cpp
     ETS_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/escompat_test.ets
@@ -52,7 +52,7 @@ panda_ets_interop_js_gtest(ets_interop_js_test__escompat
         ${CMAKE_CURRENT_SOURCE_DIR}/array_js_suites/test_with.js
         ${CMAKE_CURRENT_SOURCE_DIR}/compat_array.js
         ${CMAKE_CURRENT_SOURCE_DIR}/compat_boolean.js
-        ${CMAKE_CURRENT_SOURCE_DIR}/compat_error.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/std_core_error.js
         ${CMAKE_CURRENT_SOURCE_DIR}/compat_stringify.js
         ${CMAKE_CURRENT_SOURCE_DIR}/error_js_suites/test_cause.js
         ${CMAKE_CURRENT_SOURCE_DIR}/error_js_suites/test_to_string.js

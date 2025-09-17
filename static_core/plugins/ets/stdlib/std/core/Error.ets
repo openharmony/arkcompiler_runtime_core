@@ -17,7 +17,7 @@
  * @kit ArkTS
  */
 
-package escompat;
+package std.core;
 
 /**
  * Defines ErrorOptions interface

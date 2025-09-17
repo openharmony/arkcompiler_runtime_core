@@ -10,6 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-Unhandled exception: escompat.Error
+Unhandled exception: std.core.Error
 Error
         at main_n_24.ETSGLOBAL.main (main_n_24.ets:25:0)

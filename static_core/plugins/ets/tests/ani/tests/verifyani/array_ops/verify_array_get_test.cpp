@@ -111,9 +111,9 @@ TEST_F(ArrayGetTest, undef_input_array)
 TEST_F(ArrayGetTest, err_input_array)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("escompat.Error", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.Error", &cls), ANI_OK);
     ani_method ctor {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "C{std:core.String}C{escompat.ErrorOptions}:", &ctor), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "C{std:core.String}C{std.core.ErrorOptions}:", &ctor), ANI_OK);
     ani_ref undefinedArgument {};
     ASSERT_EQ(env_->GetUndefined(&undefinedArgument), ANI_OK);
     ani_object errObj {};

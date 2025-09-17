@@ -23,7 +23,7 @@
 namespace ark::ets::stdlib {
 
 constexpr const char *ERR_CLS_RUNTIME_EXCEPTION = "std.core.RuntimeError";
-constexpr const char *ERROR_CTOR_SIGNATURE = "C{std.core.String}C{escompat.ErrorOptions}:";
+constexpr const char *ERROR_CTOR_SIGNATURE = "C{std.core.String}C{std.core.ErrorOptions}:";
 
 void StdlibLogFatal(const char *msg);
 void StdlibLogFatal(const char *msg, ani_status status);

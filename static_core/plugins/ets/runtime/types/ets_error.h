@@ -28,7 +28,7 @@ namespace test {
 class EtsErrorTest;
 }  // namespace test
 
-// class Error is mirror class for escompat.Error
+// class Error is mirror class for std.core.Error
 // Currently, there is no necessity to declare this class as mirror in yaml files,
 // this this class is auxiliary for describing std.core error classes as mirror classes.
 class EtsError : public EtsObject {

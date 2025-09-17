@@ -158,14 +158,14 @@ static ani_int ThrowErrorInNative([[maybe_unused]] ani_env *env, [[maybe_unused]
 {
     ani_class errCls;
     std::string msg = "Throw Error in native";
-    char const *className = "escompat.Error";
+    char const *className = "std.core.Error";
     if (ANI_OK != env->FindClass(className, &errCls)) {
         std::cerr << "Not found '" << className << std::endl;
         return 0;
     }
 
     ani_method errCtor;
-    if (ANI_OK != env->Class_FindMethod(errCls, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &errCtor)) {
+    if (ANI_OK != env->Class_FindMethod(errCls, "<ctor>", "C{std:core.String}C{std.core.ErrorOptions}:", &errCtor)) {
         std::cerr << "Get Ctor Failed '" << className << "'" << std::endl;
         return 0;
     }

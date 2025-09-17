@@ -28,10 +28,10 @@ TEST_F(PromiseRejectTest, ResolvePromise)
     ASSERT_EQ(env_->Promise_New(&resolver, &promise), ANI_OK);
 
     ani_class errorClass {};
-    ASSERT_EQ(env_->FindClass("escompat.Error", &errorClass), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.Error", &errorClass), ANI_OK);
 
     ani_method constructor {};
-    ASSERT_EQ(env_->Class_FindMethod(errorClass, "<ctor>", "C{std:core.String}C{escompat.ErrorOptions}:", &constructor),
+    ASSERT_EQ(env_->Class_FindMethod(errorClass, "<ctor>", "C{std:core.String}C{std.core.ErrorOptions}:", &constructor),
               ANI_OK);
 
     std::string rejected = "rejected";

@@ -41,7 +41,7 @@
     TP("Lstd/core/Double;", coreDouble)                                                                               \
     /* Builtin language support */                                                                                    \
     TP("Lstd/core/BigInt;", coreBigInt)                                                                               \
-    TP("Lescompat/Error;", escompatError)                                                                             \
+    TP("Lstd/core/Error;", coreError)                                                                                 \
     TP("Lstd/core/Function;", coreFunction)                                                                           \
     IM("Lstd/core/Function;", "unsafeCall", "[LY;:LY;", coreFunctionUnsafeCall)                                       \
     TP("Lstd/core/Tuple;", coreTuple)                                                                                 \
@@ -76,6 +76,8 @@
     TP("Lstd/core/LinkerTypeCircularityError;", coreLinkerTypeCircularityError)                                       \
     TP("Lstd/core/LinkerMethodConflictError;", coreLinkerMethodConflictError)                                         \
     /* Core error handling */                                                                                         \
+    TP("Lstd/core/ErrorOptions;", coreErrorOptions)                                                                   \
+    TP("Lstd/core/ErrorOptionsImpl;", coreErrorOptionsImpl)                                                           \
     TP("Lstd/core/OutOfMemoryError;", coreOutOfMemoryError)                                                           \
     TP("Lstd/core/StackOverflowError;", coreStackOverflowError)                                                       \
     TP("Lstd/core/StackTraceElement;", coreStackTraceElement)                                                         \
@@ -98,8 +100,6 @@
     TP("Lescompat/FormatError;", escompatFormatError)                                                                 \
     TP("Lescompat/ReferenceError;", escompatReferenceError)                                                           \
     TP("Lescompat/URIError;", escompatURIError)                                                                       \
-    TP("Lescompat/ErrorOptions;", escompatErrorOptions)                                                               \
-    TP("Lstd/core/ErrorOptionsImpl;", coreErrorOptionsImpl)                                                           \
     /* ToStringCache */                                                                                               \
     TP("Lstd/core/DoubleToStringCacheElement;", coreDoubleToStringCacheElement)                                       \
     TP("Lstd/core/FloatToStringCacheElement;", coreFloatToStringCacheElement)                                         \

@@ -153,7 +153,7 @@ EtsAbcFile *EtsAbcFileLoadFromMemory(EtsRuntimeLinker *runtimeLinker, ObjectHead
         mmapedMem = os::mem::MapRWAnonymousRaw(sizeToMmap, false);
     }
     if (UNLIKELY(mmapedMem == nullptr)) {
-        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatError,
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreError,
                           PandaString("Failed to allocate in-memory AbcFile"));
         return nullptr;
     }
@@ -164,7 +164,7 @@ EtsAbcFile *EtsAbcFileLoadFromMemory(EtsRuntimeLinker *runtimeLinker, ObjectHead
 
     auto pf = panda_file::File::OpenFromMemory(std::move(ptr));
     if (pf == nullptr) {
-        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatError,
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreError,
                           PandaString("Failed to load abc file from memory"));
         return nullptr;
     }

@@ -11,8 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-Unhandled exception: escompat.Error
+Unhandled exception: std.core.Error
 Error: concurrent_nested.ets: task A failed
-        at escompat.Error.<ctor> (Error.ets:56:0)
+        at std.core.Error.<ctor> (Error.ets:56:0)
         at concurrent_nested.ETSGLOBAL.%async-A (concurrent_nested.ets:1:0)
 

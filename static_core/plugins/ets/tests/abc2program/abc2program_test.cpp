@@ -408,7 +408,7 @@ TEST_F(Abc2ProgramAnyTest, Any)
         "Any.ETSGLOBAL.foo9 Y N void",
         "Any.ETSGLOBAL.main void",
         "Any.NeverTypeTest._ctor_ Any.NeverTypeTest void",
-        "escompat.Error._ctor_ escompat.Error std.core.String escompat.ErrorOptions void",
+        "std.core.Error._ctor_ std.core.Error std.core.String std.core.ErrorOptions void",
         "std.core.Object._ctor_ std.core.Object void"};
     std::set<std::string> existingType {};
     for (auto &it : prog->functionInstanceTable) {

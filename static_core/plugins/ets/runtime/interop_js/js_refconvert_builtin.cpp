@@ -137,8 +137,8 @@ private:
     void RegisterExceptions()
     {
         static const ets_proxy::EtsClassWrapper::OverloadsMap W_ERROR_OVERLOADS = {
-            {utf::CStringAsMutf8("<ctor>"), {"Lstd/core/String;Lescompat/ErrorOptions;:V", 2, "<ctor>"}}};
-        wError_ = RegisterClass(PlatformTypes()->escompatError->GetDescriptor(), "Error", &W_ERROR_OVERLOADS);
+            {utf::CStringAsMutf8("<ctor>"), {"Lstd/core/String;Lstd/core/ErrorOptions;:V", 2, "<ctor>"}}};
+        wError_ = RegisterClass(PlatformTypes()->coreError->GetDescriptor(), "Error", &W_ERROR_OVERLOADS);
 
         static const std::array STD_EXCEPTIONS_LIST = {
             // Errors
