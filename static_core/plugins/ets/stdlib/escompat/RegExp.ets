@@ -26,15 +26,15 @@ export class RegExpResultArray extends Array<String | undefined> {
 
     private resultRaw_: String = ""
     /** The 0-based index of the match in the string */
-    protected index_: number = 0
+    protected index_: int = 0
     /** The original string that was matched against */
     protected input_: String = ""
 
-    private endIndex: number = 0
+    private endIndex: int = 0
     private wasProcessed: boolean = false
 
     // NOTE(shumilov-petr): Make nullable when #14813 will be fixed
-    protected indices_: Array<Array<number>> = []
+    protected indices_: Array<Array<int>> = []
 
     /** named groups names and indeces */
     protected groupsRaw_: String = ""
@@ -42,7 +42,7 @@ export class RegExpResultArray extends Array<String | undefined> {
     /** named groups names and indeces */
     public groups: RegExpGroupsContainer | undefined = undefined
 
-    constructor(index: int, input: String, result: Array<String | undefined>, indices: Array<Array<number>>) {
+    constructor(index: int, input: String, result: Array<String | undefined>, indices: Array<Array<int>>) {
         super(0)
         this.isCorrect = true
         this.index_ = index
@@ -64,7 +64,7 @@ export class RegExpResultArray extends Array<String | undefined> {
         return this
     }
 
-    private setNumberedField(index: number, value: String): void {
+    private setNumberedField(index: int, value: String): void {
         if (index > 9 || index <= 0) {
             return
         }
@@ -79,7 +79,7 @@ export class RegExpResultArray extends Array<String | undefined> {
         else if (index == 9) RegExp.$9_ = value
     }
 
-    public postExecProcessing(res: RegExpResultArray, input: String, index: number, hasIndices: boolean): void {
+    public postExecProcessing(res: RegExpResultArray, input: String, index: int, hasIndices: boolean): void {
         // NOTE(ekaterinazaytseva): temp solution - will be fixed in #20259
         if (this.wasProcessed) {
             return
@@ -130,16 +130,12 @@ export class RegExpResultArray extends Array<String | undefined> {
     public $_get(index: int): String | undefined {
         return super.$_get(index)
     }
-    public $_get(index: number): String | undefined {
-        return this.$_get(index.toInt())
-    }
+
     public $_set(index: int, val: String | undefined): void {
         super.$_set(index, val)
     }
-    public $_set(index: number, val: String | undefined): void {
-        this.$_set(index.toInt(), val)
-    }
-    public get indices(): Array<Array<number>> {
+
+    public get indices(): Array<Array<int>> {
         return this.indices_
     }
 
@@ -162,7 +158,7 @@ export class RegExpResultArray extends Array<String | undefined> {
         throw new Error("not overridden")
     }
 
-    private processStaticFields(index: number, str: String): void {
+    private processStaticFields(index: int, str: String): void {
         if (index == 0) {
             RegExp.lastMatch_ = str
         }
@@ -183,10 +179,10 @@ export class RegExpResultArray extends Array<String | undefined> {
         }
 
         if (hasIndices) {
-            this.indices_ = new Array<Array<number>>(n)
+            this.indices_ = new Array<Array<int>>(n)
             for (let i = 0; i < data.length; i += 2) {
-                const index = Number.parseInt(data[i])
-                const endIndex = Number.parseInt(data[i + 1])
+                const index: int = Number.parseInt(data[i])
+                const endIndex: int = Number.parseInt(data[i + 1])
                 const pos: int = (i / 2);
                 if (index == -1 || endIndex == -1) {
                     this.indices_[pos] = [0, 0]
@@ -217,20 +213,12 @@ export class RegExpMatchArray extends RegExpResultArray {
     private hasIndex_: boolean = true
     private hasInput_: boolean = true
 
-    constructor(index: int, input: String, result: Array<String | undefined>, indices: Array<Array<number>>) {
-        super(Double.toInt(index), input, result, indices)
+    constructor(index: int, input: String, result: Array<String | undefined>, indices: Array<Array<int>>) {
+        super(index, input, result, indices)
     }
 
     constructor(index: int, input: String, result: Array<String | undefined>) {
-        this(Double.toInt(index), input, result, [])
-    }
-
-    constructor(index: number, input: String, result: Array<String | undefined>, indices: Array<Array<number>>) {
-        this(Double.toInt(index), input, result, indices)
-    }
-
-    constructor(index: number, input: String, result: Array<String | undefined>) {
-        this(Double.toInt(index), input, result)
+        this(index, input, result, [])
     }
 
     protected constructor() {
@@ -311,20 +299,12 @@ export class RegExpMatchArray extends RegExpResultArray {
 }
 
 export class RegExpExecArray extends RegExpResultArray {
-    constructor(index: int, input: String, result: Array<String | undefined>, indices: Array<Array<number>>) {
-        super(Double.toInt(index), input, result, indices)
+    constructor(index: int, input: String, result: Array<String | undefined>, indices: Array<Array<int>>) {
+        super(index, input, result, indices)
     }
 
     constructor(index: int, input: String, result: Array<String | undefined>) {
-        this(Double.toInt(index), input, result, [])
-    }
-
-    constructor(index: number, input: String, result: Array<String | undefined>, indices: Array<Array<number>>) {
-        this(Double.toInt(index), input, result, indices)
-    }
-
-    constructor(index: number, input: String, result: Array<String | undefined>) {
-        this(Double.toInt(index), input, result)
+        this(index, input, result, [])
     }
 
     protected constructor() {
@@ -914,7 +894,7 @@ export class RegExp extends Object {
         }
         this.lastIndex = 0;
         let matches = new containers.UndefinableStringArray();
-        let indices = new Array<Array<number>>();
+        let indices = new Array<Array<int>>();
         let isUndefined = new Array<boolean>();
         let n = 0
         while (true) {

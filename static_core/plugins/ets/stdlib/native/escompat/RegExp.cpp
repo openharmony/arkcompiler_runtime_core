@@ -274,7 +274,7 @@ static void SetIndexField(ani_env *env, ani_class regexpResultClass, ani_object 
 {
     ani_field indexField;
     ANI_FATAL_IF_ERROR(env->Class_FindField(regexpResultClass, INDEX_FIELD_NAME, &indexField));
-    ANI_FATAL_IF_ERROR(env->Object_SetField_Double(regexpExecArrayObj, indexField, static_cast<double>(index)));
+    ANI_FATAL_IF_ERROR(env->Object_SetField_Int(regexpExecArrayObj, indexField, static_cast<double>(index)));
 }
 
 static void SetLastIndexField(ani_env *env, ani_object regexp, ani_field lastIndexField, ani_int value)
