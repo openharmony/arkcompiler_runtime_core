@@ -611,7 +611,8 @@ class InteropWorker implements InternalWorker {
     }
 
     getWorkerId(): int | undefined {
-        return this?.workerId;
+        if (this.workerId == INVALID_WORKER_ID) return undefined;
+        return this.workerId;
     }
 
     public run<R>(task:Function, ...args:FixedArray<Any>):Job<R> {
@@ -756,7 +757,8 @@ class StaticWorker implements InternalWorker {
     }
 
     getWorkerId(): int | undefined {
-        return this?.workerId;
+        if (this.workerId == INVALID_WORKER_ID) return undefined;
+        return this.workerId;
     }
 
     public run<T>(task: Function, ...args:FixedArray<Any>): Job<T> {
