@@ -23,6 +23,5 @@ tags: [compile-only, negative]
 import { FOO } from './const_as_type'
 
 function main() {
-    let i = FOO
-    i = 43
+    FOO = 43
 }
