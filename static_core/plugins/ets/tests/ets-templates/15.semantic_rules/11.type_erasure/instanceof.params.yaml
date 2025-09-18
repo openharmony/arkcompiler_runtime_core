@@ -177,11 +177,12 @@ cases:
           )
 
     # string literal types erased
-    - decl: |-
+    - tags: compile-only, negative
+      decl: |-
           let x: 'a'|'b'|'c' = 'a'
       use: |-
           arktest.assertTrue(
-              ((): Object => x)() instanceof 'a' // OK
+              ((): Object => x)() instanceof 'a' // CTE, string literal is erased
           )
 
     - decl: |-
@@ -191,11 +192,12 @@ cases:
               ((): Object => x)() instanceof string // OK
           )
 
-    - decl: |-
+    - tags: compile-only, negative
+      decl: |-
           let x: 'a'|'b'|int|Error = 1
       use: |-
           arktest.assertTrue(
-              ((): Object => x)() instanceof 'a'|'b'|int|Error // OK
+              ((): Object => x)() instanceof 'a'|'b'|int|Error // CTE, string literals are erased
           )
 
     - decl: |-

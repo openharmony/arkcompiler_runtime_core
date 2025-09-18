@@ -1099,6 +1099,35 @@
 07.expressions/15.instanceof_expression/instanceof-cte_3.ets
 07.expressions/15.instanceof_expression/instanceof-cte_4.ets
 
+#30095 const enum instanceof is not a base type
+07.expressions/15.instanceof_expression/instanceof_137.ets
+07.expressions/15.instanceof_expression/instanceof_138.ets
+07.expressions/15.instanceof_expression/instanceof_145.ets
+07.expressions/15.instanceof_expression/instanceof_146.ets
+07.expressions/15.instanceof_expression/instanceof_152.ets
+07.expressions/15.instanceof_expression/instanceof_153.ets
+07.expressions/15.instanceof_expression/instanceof_139.ets
+07.expressions/15.instanceof_expression/instanceof_147.ets
+07.expressions/15.instanceof_expression/instanceof_155.ets
+
+#30087 undefined instanceof Object
+07.expressions/15.instanceof_expression/instanceof_21.ets
+
+#29203 Warning: Type parameter is erased from type 'Array' when used in instanceof expression
+07.expressions/15.instanceof_expression/instanceof_161.ets
+07.expressions/15.instanceof_expression/instanceof_169.ets
+07.expressions/15.instanceof_expression/instanceof_177.ets
+07.expressions/15.instanceof_expression/instanceof_187.ets
+07.expressions/15.instanceof_expression/instanceof_194.ets
+07.expressions/15.instanceof_expression/instanceof_195.ets
+07.expressions/15.instanceof_expression/instanceof_205.ets
+
+#30094 tuple must be erased
+07.expressions/15.instanceof_expression/instanceof_190.ets
+
+#30092 string literal must be erased
+07.expressions/15.instanceof_expression/instanceof_65.ets
+
 #28907 Specifying type for too large integer number with as doesn't produce CTE
 07.expressions/16.cast_expressions/01.type_inference_in_cast_expression/type_inference_negative_0.ets
 07.expressions/16.cast_expressions/01.type_inference_in_cast_expression/type_inference_negative_1.ets
@@ -2147,6 +2176,10 @@
 15.semantic_rules/11.type_erasure/instanceof_gen_5.ets
 15.semantic_rules/11.type_erasure/instanceof_gen_7.ets
 15.semantic_rules/11.type_erasure/instanceof_gen_8.ets
+
+#30092 instanceof string-literal should produce CTE
+15.semantic_rules/11.type_erasure/instanceof_20.ets
+15.semantic_rules/11.type_erasure/instanceof_22.ets
 
 #27260
 17.experimental_features/02.fixed_array_types/01.fixed_size_array_creation/fixed_array_creation_con1_0.ets

@@ -1,33 +1,41 @@
+/*
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+{% for c in cases %}
+{% for t in c['types'] %}
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+desc: Any instanceof expression in the form 'expr instanceof T' is of type boolean
+tags: [{% if t.res == 'cte' %}compile-only, negative{% endif %}]
 ---*/
 
-{% for io in instanceof %}
+{{c.decl}}
 
-/*---
-desc: instanceof operator test
----*/
-
-class A {}
-class B {}
-
-function main(): void {
-  let a = new A;
-  let b = new B;
-  let с : Object | null = null;
-
-  arktest.assertTrue( {{io.negation}}({{io.left}} instanceof {{io.right}}) )
+function main() {
+{%- if t.res == 'rte' %}
+    arktest.expectThrow(() => {({{c.expr}} instanceof {{t.type}})})
+{%- else %}
+    let v1 = {{c.expr}} instanceof {{t.type}}
+{%- if t.res != 'cte' %}
+    arktest.assertTrue(v1 instanceof boolean)
+    arktest.assertEQ(v1 ? 1 : 0, {{t.res}})
+{% endif %}
+    let v2 = ((p: boolean) => p ? 1 : 0)({{c.expr}} instanceof {{t.type}})
+{%- if t.res != 'cte' %}
+    arktest.assertEQ(v2, {{t.res}})
+{%- endif %}
+{%- endif %}
 }
-
+{% endfor %}
 {% endfor %}
