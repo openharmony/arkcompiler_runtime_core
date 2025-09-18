@@ -2748,13 +2748,14 @@ TEST_F(InterpreterTest, DISABLED_TestCallNative)
 
 class InterpreterWithSTWTest : public testing::Test {
 public:
-    InterpreterWithSTWTest()
+    InterpreterWithSTWTest(std::string verificationMode = "ahead-of-time")
     {
         RuntimeOptions options;
         options.SetShouldLoadBootPandaFiles(false);
         options.SetShouldInitializeIntrinsics(false);
         options.SetRunGcInPlace(true);
         options.SetGcTriggerType("debug-never");
+        options.SetVerificationMode(verificationMode);
         options.SetVerifyCallStack(false);
         options.SetGcType("stw");
         Runtime::Create(options);
@@ -2796,10 +2797,21 @@ static inline void RunTask(ark::mem::GC *gc)
     task.Run(*gc);
 }
 
+// NOTE(mgroshev) : 30106 revert this change, when verifier works ok
+class InterpreterWithSTWTestNoVerifier : public InterpreterWithSTWTest {
+public:
+    InterpreterWithSTWTestNoVerifier() : InterpreterWithSTWTest("disabled") {};
+
+    ~InterpreterWithSTWTestNoVerifier() override {}
+
+    NO_COPY_SEMANTIC(InterpreterWithSTWTestNoVerifier);
+    NO_MOVE_SEMANTIC(InterpreterWithSTWTestNoVerifier);
+};
+
 #if defined(PANDA_TARGET_ARM32) && defined(NDEBUG)
-DEATH_TEST_F(InterpreterWithSTWTest, DISABLED_TestCreateFrame)
+DEATH_TEST_F(InterpreterWithSTWTestNoVerifier, DISABLED_TestCreateFrame)
 #else
-DEATH_TEST_F(InterpreterWithSTWTest, TestCreateFrame)
+DEATH_TEST_F(InterpreterWithSTWTestNoVerifier, TestCreateFrame)
 #endif
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
