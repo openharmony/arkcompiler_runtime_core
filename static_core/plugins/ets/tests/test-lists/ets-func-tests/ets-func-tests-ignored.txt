@@ -130,6 +130,9 @@ spec/07.expressions/7.19.Nullish-Coalescing_Expressions/issue14609_02.ets
 #24958
 spec/07.expressions/7.32.Lambda_Expressions/callAsyncMethodFromAsyncLambda1.ets
 
+#25889
+spec/07.expressions/7.32.Lambda_Expressions/callAsyncMethodFromAsyncLambda2.ets
+
 #23719 lambda issues
 spec/07.expressions/7.32.Lambda_Expressions/callMethodFromAsyncLambda1.ets
 
@@ -314,6 +317,9 @@ spec/17.Experimental_Features/Iterable_Types/for_of_10.ets
 spec/17.Experimental_Features/Iterable_Types/for_of_11.ets
 spec/17.Experimental_Features/Iterable_Types/for-of-s01-array-08.ets
 
+#29357
+std/concurrency/messageHandler_basic_interface.ets
+
 ### Type Erasure
 std/containers/BuiltinArrayMapTest.ets
 
@@ -331,6 +337,9 @@ std/core/dateformat/IntlDateFormatTest.ets
 
 #25130
 std/core/dateformat/DateTimeFormatTest.ets
+
+#29145
+std/core/json/JsonStringifyParseBigIntTest.ets
 
 #11468
 std/core/std_core_array_forEach_boolean_array_func_boolean.ets
@@ -404,6 +413,9 @@ escompat/JsonStringifyTest.ets
 
 #28345
 escompat/JsonParseTest.ets
+
+#29995
+escompat/JsonAnnotationTest.ets
 
 ############
 # temporary place for the tests related to primitive types refactoring
