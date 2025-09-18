@@ -13,12 +13,6 @@ regression/12581_custom_class_Engine_array.ets
 #25425
 regression/15278_1.ets
 
-#22791
-regression/16158_2.ets
-
-#23652
-regression/23652.ets
-
 #26443
 regression/23659_0.ets
 regression/23659_1.ets
@@ -37,7 +31,6 @@ spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-lambda-default-para
 
 ### Undefined type
 spec/03.types/References_Types/Type_undefined/undefined-and-array-of-class-and-undefined_10.ets
-spec/03.types/References_Types/Type_undefined/undefined-and-array-of-class-and-undefined_9.ets
 
 #19963
 spec/03.types/References_Types/Type_undefined/array-of-complex-type.ets
@@ -50,9 +43,6 @@ spec/03.types/References_Types/Type_undefined/array-of-type_1.ets
 #19961
 spec/03.types/References_Types/Type_undefined/assign/assign-undefined-to-undefined_1.ets
 spec/03.types/References_Types/Type_undefined/assign/assign-undefined-to-untyped_1.ets
-
-#19947
-spec/03.types/References_Types/Type_undefined/array-of-class-and-undefined_4.ets
 
 #19960
 spec/03.types/References_Types/Type_undefined/set-add/add-undefined-to-undefined.ets
@@ -127,17 +117,11 @@ spec/07.expressions/7.19.Nullish-Coalescing_Expressions/issue14609_01.ets
 #16535
 spec/07.expressions/7.19.Nullish-Coalescing_Expressions/issue14609_02.ets
 
-#24958
-spec/07.expressions/7.32.Lambda_Expressions/callAsyncMethodFromAsyncLambda1.ets
-
 #25889
 spec/07.expressions/7.32.Lambda_Expressions/callAsyncMethodFromAsyncLambda2.ets
 
 #23719 lambda issues
 spec/07.expressions/7.32.Lambda_Expressions/callMethodFromAsyncLambda1.ets
-
-#19964 lambda issues
-spec/07.expressions/7.32.Lambda_Expressions/callRegularLambdaWithAsyncOverload.ets
 
 #23445 lambda issues
 spec/07.expressions/7.32.Lambda_Expressions/issue15579_0.ets
@@ -170,12 +154,6 @@ spec/09.classes/constructor-inheritance/issue14720_6.ets
 #24361
 spec/09.classes/constructor-inheritance/issue14720_4.ets
 spec/09.classes/constructor-inheritance/issue14720_5.ets
-
-#21176
-spec/09.classes/9.5.Field_Declaration/class_with_optional_attributes_0006.ets
-
-#19725
-spec/09.classes/9.6.Method_Declarations/Issue-14273_3.ets
 
 ### Negative tests (Interfaces overriding issues)
 spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interface_overriding_02.ets
@@ -213,13 +191,11 @@ spec/11.Enumerations/enum_const_expr_01_06.ets
 spec/11.Enumerations/enum_const_expr_02_01.ets
 spec/11.Enumerations/enum_const_expr_02_02.ets
 spec/11.Enumerations/enum_const_expr_02_03.ets
-regression/14654_0.ets
 
 ### cannot create runtime (compound tests not supported) (Import-export)
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/05.default_import_binding/default_import_binding.ets
 
 #19935 (Import-export)
-spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/06.import_path/import_path_02.ets
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/06.import_path/import_path_03.ets
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/non_linux_path_separators.ets
 
@@ -237,7 +213,6 @@ spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/t_isnt_expor
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/t_isnt_exported_but_subtype_of_t_exported.ets
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/t_isnt_exported_but_var_of_t_exported.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/re-export_directive_02.ets
-spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/re_export_all_2.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/re_export_directive_04.ets
 
 ### Negative tests (Import-export)
@@ -332,9 +307,6 @@ std/containers/BlockingQueue/LinkedBlockingQueue_getEnd.ets
 #25264
 std/core/ConsoleArrayTest.ets
 
-#27145
-std/core/dateformat/IntlDateFormatTest.ets
-
 #25130
 std/core/dateformat/DateTimeFormatTest.ets
 
@@ -410,11 +382,18 @@ spec/09.classes/Accessor_Declarations/issue-15142_9.ets
 std/core/NumberTest.ets
 escompat/JsonStringifyTest.ets
 
+#30140
+std/core/DeepCopyTest.ets
+ets_func_tests/std/core/DeepCopyTest.ets
+
 #28345
 escompat/JsonParseTest.ets
 
 #29995
 escompat/JsonAnnotationTest.ets
+
+#26910
+escompat/ProxyTest.ets
 
 ############
 # temporary place for the tests related to primitive types refactoring
@@ -443,12 +422,6 @@ std/core/std_core_typeduarrays_methods__Uint8ClampedArray.ets
 
 # 6.
 # verifier failures:
-std/core/std_core_typedarrays_methods__Float32Array.ets
-std/core/std_core_typedarrays_methods__Float64Array.ets
-std/core/std_core_typedarrays_methods__Float64Array_001.ets
-std/core/std_core_typedarrays_methods__Int16Array.ets
-std/core/std_core_typedarrays_methods__Int32Array.ets
-std/core/std_core_typedarrays_methods__Int8Array.ets
 escompat/JsonTest.ets
 spec/09.classes/Accessor_Declarations/issue-15142_9.ets
 
@@ -459,7 +432,6 @@ std/serialization/std_serialization_json_stringify_float_array.ets
 
 # 8.
 # abort
-spec/17.Experimental_Features/Iterable_Types/for-of-s01-array-03.ets
 std/core/NumberTest.ets
 
 # 9.
@@ -488,24 +460,10 @@ std/core/TypeMethodInvoke.ets
 std/core/std_core_string_String_codePointCount_number_number.ets
 std/core/std_core_string_String_repeat_int.ets
 std/core/std_core_string_String_repeat_number.ets
-std/core/std_core_typedarrays_methods__Float32Array.ets
-std/core/std_core_typedarrays_methods__Float64Array.ets
-std/core/std_core_typedarrays_methods__Float64Array_001.ets
-std/core/std_core_typedarrays_methods__Int16Array.ets
-std/core/std_core_typedarrays_methods__Int32Array.ets
-std/core/std_core_typedarrays_methods__Int8Array.ets
-std/core/std_core_typeduarrays_methods__Uint16Array.ets
-std/core/std_core_typeduarrays_methods__Uint32Array.ets
-std/core/std_core_typeduarrays_methods__Uint8Array.ets
-std/core/std_core_typeduarrays_methods__Uint8ClampedArray.ets
 escompat/JsonReplacerTest.ets
 escompat/JsonStringifyRegExpExecArrayTest.ets
 std/core/std_core_typeduarrays_methods__BigUint64Array.ets
 regression/15278_0.ets
-spec/07.expressions/7.32.Lambda_Expressions/callMethodFromAsyncLambda2.ets
 
 #28648
 std/core/TypeClassInfoTest.ets
-
-#29513
-std/core/std_core_typedarrays_function2__Float64Array_001.ets

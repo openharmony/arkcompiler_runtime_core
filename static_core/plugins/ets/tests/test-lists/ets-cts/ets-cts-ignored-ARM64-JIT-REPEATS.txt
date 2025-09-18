@@ -1,5 +1,2 @@
 # 27197
 05.generics/03.utility_types/03.readonly_utility_type/readonly_type_6.ets
-
-#29205 Instanceof result on INT is different from AOT and JIT-with-repeats
-15.semantic_rules/11.type_erasure/instanceof_26.ets

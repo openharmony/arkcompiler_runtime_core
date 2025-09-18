@@ -1,6 +1,3 @@
-#23132
-std/core/SortInternalTestLong.ets
-
 #24986 (16 tests)
 std/core/Object.ets
 std/core/TypedArrayConstructorNumbersInts.ets
