@@ -348,6 +348,26 @@ EtsReflectField *StdCoreClassGetInstanceFieldByNameInternal(EtsClass *cls, EtsSt
     return CreateEtsReflectFieldUnderHandleScope(coro, field);
 }
 
+EtsReflectField *StdCoreClassGetStaticFieldByNameInternal(EtsClass *cls, EtsString *name, EtsBoolean publicOnly)
+{
+    ASSERT(cls != nullptr);
+    ASSERT(name != nullptr);
+
+    auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+
+    [[maybe_unused]] EtsHandleScope scope(coro);
+
+    EtsField *field = cls->GetStaticFieldIDByName(name->GetUtf8().data(), nullptr);
+    if (field == nullptr) {
+        return nullptr;
+    }
+    if (publicOnly != 0U && !field->IsPublic()) {
+        return nullptr;
+    }
+    return CreateEtsReflectFieldUnderHandleScope(coro, field);
+}
+
 static PandaVector<EtsMethod *> GetConstructors(EtsClass *cls, bool onlyPublic)
 {
     PandaVector<EtsMethod *> constructors;

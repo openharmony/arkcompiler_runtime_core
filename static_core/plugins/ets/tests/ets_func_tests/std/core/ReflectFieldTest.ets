@@ -5,7 +5,6 @@
  * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
- *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -102,8 +101,129 @@ function testField(): void {
     arktest.assertFalse(isOverrided(rf, typePoint3D))
 }
 
+class Parent {
+    private static PRIV: boolean = true
+    protected static PROT: string = 'prot'
+
+    static ID: number = 1.0
+    static EMPTY: string = ''
+
+    static get PROP(): number {
+        return 1
+    }
+
+    get prop(): number {
+        return 0
+    }
+
+    id: number = 0
+    private priv = true
+    protected prot = true
+}
+
+class Child extends Parent {
+    static ID: number = 2.0
+    static EOL: char = c'\n'
+    public EOL: string = '\n'
+
+    id: number = 1
+}
+
+function testInstanceField(): void {
+    const parentCls = Class.of(new Parent)
+    const parentIdFld = parentCls.getInstanceFieldByName('id')!
+
+    arktest.assertEQ(parentIdFld.getType(), Class.of(new Number(0)))
+    arktest.assertEQ(parentIdFld.getOwner(), parentCls)
+
+    const childCls = Class.of(new Child)
+    const childIdFld = childCls.getInstanceFieldByName('id')!
+
+    arktest.assertEQ(childIdFld.getType(), Class.of(new Number(0)))
+    arktest.assertEQ(childIdFld.getOwner(), childCls)
+    arktest.assertEQ(childIdFld.getType(), parentIdFld.getType())
+
+    arktest.assertEQ(parentCls.getInstanceFieldByName('prop'), undefined)
+    arktest.assertEQ(parentCls.getInstanceFieldByName('priv'), undefined)
+    arktest.assertEQ(parentCls.getInstanceFieldByName('prot'), undefined)
+    arktest.assertEQ(childCls.getInstanceFieldByName('prot'), undefined)
+
+    const parentFlds = parentCls.getInstanceFields()
+    const parentFldNames = new Set<string>(Array.from<reflect.InstanceField, string>(parentFlds, (f) => f.getName()))
+    arktest.assertFalse(parentFldNames.has('priv'))
+    arktest.assertFalse(parentFldNames.has('prot'))
+    arktest.assertTrue(parentFldNames.has('id'))
+
+    const childFlds = childCls.getInstanceFields()
+    const childFldNames = new Set<string>(Array.from<reflect.InstanceField, string>(childFlds, (f) => f.getName()))
+    arktest.assertFalse(childFldNames.has('prot'))
+    arktest.assertTrue(parentFldNames.has('id'))
+
+    const bools: FixedArray<boolean> = [true]
+    const boolsCls = Class.of(bools)
+    arktest.assertEQ(boolsCls.getInstanceFieldByName('length'), undefined)
+}
+
+function testStaticField(): void {
+    const parentCls = Class.of(new Parent)
+    const parentIdFld = parentCls.getStaticFieldByName('ID')!
+
+    arktest.assertEQ(parentIdFld.getType(), Class.of(new Number(0)))
+    arktest.assertEQ(parentIdFld.getOwner(), parentCls)
+    arktest.assertEQ(parentCls.getStaticFieldByName('EOL'), undefined)
+
+    const childCls = Class.of(new Child)
+    const childIdFld = childCls.getStaticFieldByName('ID')!
+
+    arktest.assertEQ(childIdFld.getType(), Class.of(new Number(0)))
+    arktest.assertEQ(childIdFld.getOwner(), childCls)
+    arktest.assertNE(childCls.getStaticFieldByName('EMPTY'), undefined)
+
+    const parentFld = parentCls.getStaticFieldByName('EMPTY')!
+    const childFld = childCls.getStaticFieldByName('EMPTY')!
+    arktest.assertEQ(parentFld.getType(), childFld.getType())
+    arktest.assertEQ(childCls.getStaticFieldByName('EOL')!.getType(), Class.of(new Char(c'\n')))
+    arktest.assertTrue(parentFld.equals(childFld))
+    arktest.assertFalse(parentIdFld.equals(childIdFld))
+
+    arktest.assertEQ(parentCls.getStaticFieldByName('PROP'), undefined)
+    arktest.assertEQ(childCls.getStaticFieldByName('PROP'), undefined)
+
+    arktest.assertEQ(parentCls.getStaticFieldByName('PRIV'), undefined)
+    arktest.assertEQ(childCls.getStaticFieldByName('PROT'), undefined)
+
+    const parentFlds = parentCls.getStaticFields()
+    const parentFldNames = new Set<string>(Array.from<reflect.StaticField, string>(parentFlds, (f) => f.getName()))
+    arktest.assertFalse(parentFldNames.has('PRIV'))
+    arktest.assertFalse(parentFldNames.has('PROT'))
+    arktest.assertTrue(parentFldNames.has('ID'))
+
+    const childFlds = childCls.getStaticFields()
+    const childFldNames = new Set<string>(Array.from<reflect.StaticField, string>(childFlds, (f) => f.getName()))
+    arktest.assertFalse(childFldNames.has('PROT'))
+    arktest.assertTrue(childFldNames.has('ID'))
+}
+
+interface Iface {
+    id: string
+}
+
+function testInterfaceField(): void {
+    const ifaces: FixedArray<Iface> = []
+    const ifaceCls = Class.of(ifaces).getFixedArrayComponentType()!
+
+    const idFld = ifaceCls.getInstanceFieldByName('id')
+    arktest.assertEQ(idFld, undefined)
+
+    arktest.assertEQ(ifaceCls.getInstanceFields().length, 0)
+    arktest.assertEQ(ifaceCls.getStaticFields().length, 0)
+}
+
 function main() {
     const suite = new arktest.ArkTestsuite('Reflect Field tests')
     suite.addTest('Test Reflect Field APIs', testField)
+    suite.addTest('Test Reflect instance Field APIs', testInstanceField)
+    suite.addTest('Test Reflect static Field APIs', testStaticField)
+    suite.addTest('Test Reflect interface Field APIs', testInterfaceField)
     return suite.run()
 }
