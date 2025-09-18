@@ -7,12 +7,12 @@
 ################################################
 
 # primitives
-07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_32.ets
-07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_33.ets
-07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_34.ets
-07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_35.ets
-07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_36.ets
-07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_37.ets
+07.expressions/24.relational_expressions/02.numeric_relational_operators/float_comparison_32.ets
+07.expressions/24.relational_expressions/02.numeric_relational_operators/float_comparison_33.ets
+07.expressions/24.relational_expressions/02.numeric_relational_operators/float_comparison_34.ets
+07.expressions/24.relational_expressions/02.numeric_relational_operators/float_comparison_35.ets
+07.expressions/24.relational_expressions/02.numeric_relational_operators/float_comparison_36.ets
+07.expressions/24.relational_expressions/02.numeric_relational_operators/float_comparison_37.ets
 07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_12.ets
 07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_13.ets
 07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_16.ets
@@ -141,9 +141,9 @@
 07.expressions/31.string_interpolation_expressions/siexp_6.ets
 
 # TODO invalid tests (numeric conversions):
-06.contexts_and_conversions/05.implicit_conversions/01.widening_numeric_conversions/call_lmbd/call-lmbd-ident_1.ets
-06.contexts_and_conversions/05.implicit_conversions/01.widening_numeric_conversions/call_lmbd/call-lmbd-ident_3.ets
-06.contexts_and_conversions/05.implicit_conversions/01.widening_numeric_conversions/enumlongtofloat.ets
+06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/call_lmbd/call-lmbd-ident_1.ets
+06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/call_lmbd/call-lmbd-ident_3.ets
+06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/enumlongtofloat.ets
 
 # #27402, #28006 Deprecated char operations and conversions:
 03.types/17.array_types/array_index.ets
@@ -360,22 +360,22 @@
 15.semantic_rules/06.compatibility_call_args/single_params_22.ets
 15.semantic_rules/06.compatibility_call_args/single_params_23.ets
 15.semantic_rules/06.compatibility_call_args/single_params_6.ets
-17.experimental_features/01.character_type_and_literals/01.character_literals/add_arr_val_0.ets
-17.experimental_features/01.character_type_and_literals/01.character_literals/add_arr_val_1.ets
-17.experimental_features/01.character_type_and_literals/01.character_literals/add_arr_val_2.ets
-17.experimental_features/01.character_type_and_literals/01.character_literals/add_arr_val_3.ets
-17.experimental_features/01.character_type_and_literals/01.character_literals/add_arr_val_4.ets
-17.experimental_features/01.character_type_and_literals/01.character_literals/add_arr_val_5.ets
-17.experimental_features/01.character_type_and_literals/01.character_literals/add_arr_val_6.ets
-17.experimental_features/01.character_type_and_literals/01.character_literals/sub_arr_val_0.ets
-17.experimental_features/01.character_type_and_literals/01.character_literals/sub_arr_val_1.ets
-17.experimental_features/01.character_type_and_literals/01.character_literals/sub_arr_val_2.ets
-17.experimental_features/01.character_type_and_literals/01.character_literals/sub_arr_val_3.ets
-17.experimental_features/01.character_type_and_literals/01.character_literals/sub_arr_val_4.ets
-17.experimental_features/01.character_type_and_literals/01.character_literals/sub_arr_val_5.ets
-17.experimental_features/01.character_type_and_literals/01.character_literals/sub_arr_val_6.ets
-17.experimental_features/01.character_type_and_literals/01.character_literals/conc2.ets
-17.experimental_features/01.character_type_and_literals/01.character_literals/cond_fld_val_1.ets
+17.experimental_features/01.type_char/01.character_literals/add_arr_val_0.ets
+17.experimental_features/01.type_char/01.character_literals/add_arr_val_1.ets
+17.experimental_features/01.type_char/01.character_literals/add_arr_val_2.ets
+17.experimental_features/01.type_char/01.character_literals/add_arr_val_3.ets
+17.experimental_features/01.type_char/01.character_literals/add_arr_val_4.ets
+17.experimental_features/01.type_char/01.character_literals/add_arr_val_5.ets
+17.experimental_features/01.type_char/01.character_literals/add_arr_val_6.ets
+17.experimental_features/01.type_char/01.character_literals/sub_arr_val_0.ets
+17.experimental_features/01.type_char/01.character_literals/sub_arr_val_1.ets
+17.experimental_features/01.type_char/01.character_literals/sub_arr_val_2.ets
+17.experimental_features/01.type_char/01.character_literals/sub_arr_val_3.ets
+17.experimental_features/01.type_char/01.character_literals/sub_arr_val_4.ets
+17.experimental_features/01.type_char/01.character_literals/sub_arr_val_5.ets
+17.experimental_features/01.type_char/01.character_literals/sub_arr_val_6.ets
+17.experimental_features/01.type_char/01.character_literals/conc2.ets
+17.experimental_features/01.type_char/01.character_literals/cond_fld_val_1.ets
 17.experimental_features/02.fixed_array_types/fixed_array_types_ext_17.ets
 18.annotations/01.declaring_annotations/declaration_default_values_0.ets
 18.annotations/01.declaring_annotations/declaration_default_values_1.ets
