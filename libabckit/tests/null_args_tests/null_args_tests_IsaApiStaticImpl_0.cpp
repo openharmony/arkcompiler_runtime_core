@@ -174,6 +174,13 @@ TEST_F(LibAbcKitNullptrTestsIsaApiStaticImpl0, iCreateIsUndefined)
     helpers_nullptr::TestNullptr(g_isaApiStaticImp->iCreateIsUndefined);
 }
 
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateNullCheck,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsIsaApiStaticImpl0, iCreateNullCheck)
+{
+    helpers_nullptr::TestNullptr(g_isaApiStaticImp->iCreateNullCheck);
+}
+
 // Test: test-kind=api, api=IsaApiStaticImpl::iCreateLenArray,
 // abc-kind=NoABC, category=negative-nullptr, extension=c
 TEST_F(LibAbcKitNullptrTestsIsaApiStaticImpl0, iCreateLenArray)

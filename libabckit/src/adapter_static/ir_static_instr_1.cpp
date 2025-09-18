@@ -2020,6 +2020,18 @@ AbckitInst *IcreateIsUndefinedStatic(AbckitGraph *graph, AbckitInst *inputObj)
     return CreateInstFromImpl(graph, intrImpl);
 }
 
+AbckitInst *IcreateNullCheckStatic(AbckitGraph *graph, AbckitInst *inputObj)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto intrImpl = graph->impl->CreateInstIntrinsic(compiler::DataType::VOID, 0,
+                                                     compiler::IntrinsicInst::IntrinsicId::INTRINSIC_ABCKIT_NULL_CHECK);
+    size_t argsCount {1U};
+    intrImpl->ReserveInputs(argsCount);
+    intrImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);
+    intrImpl->AppendInput(inputObj->impl, compiler::DataType::REFERENCE);
+    return CreateInstFromImpl(graph, intrImpl);
+}
+
 AbckitInst *IcreateReturnStatic(AbckitGraph *graph, AbckitInst *input0)
 {
     auto instImpl = graph->impl->CreateInstReturn(input0->impl->GetType(), compiler::INVALID_PC, input0->impl);

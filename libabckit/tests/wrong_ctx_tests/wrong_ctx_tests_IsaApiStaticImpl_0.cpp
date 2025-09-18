@@ -53,6 +53,13 @@ TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateIsUndefined)
     helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateIsUndefined);
 }
 
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateNullCheck,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateNullCheck)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateNullCheck);
+}
+
 // Test: test-kind=api, api=IsaApiStaticImpl::iCreateDivI,
 // abc-kind=NoABC, category=negative-file
 TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateDivI)
