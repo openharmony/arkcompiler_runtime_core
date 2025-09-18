@@ -33,6 +33,18 @@ public:
     static constexpr ani_int VAL4 = 3U;
 };
 
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+// CC-OFFNXT(G.PRE.02-CPP, G.PRE.06) solid logic
+#define CHECK_FIELD_AFTER_CALL_METHOD(obj, method, expectedValue)                                           \
+    do {                                                                                                    \
+        ani_boolean value {};                                                                               \
+        ASSERT_EQ(env_->Object_CallMethod_Boolean(obj, method, &value), ANI_OK);                            \
+        ani_int methodChecker {};                                                                           \
+        ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getCheckerValue", ":i", &methodChecker), ANI_OK); \
+        ASSERT_EQ(methodChecker, expectedValue);                                                            \
+    } while (0)
+// NOLINTEND(cppcoreguidelines-macro-usage)
+
 /**
  * @brief Test case for calling a boolean-returning method with an argument array.
  *
@@ -351,5 +363,67 @@ TEST_F(CallObjectMethodBooleanTest, call_Recursion_Method)
     ASSERT_EQ(env_->Object_CallMethod_Boolean_A(object, method, &result, args), ANI_OK);
     ASSERT_EQ(result, ANI_TRUE);
 }
+
+TEST_F(CallObjectMethodBooleanTest, check_hierarchy)
+{
+    ani_class clsParent {};
+    ASSERT_EQ(env_->FindClass("call_object_method_boolean_test.Parent", &clsParent), ANI_OK);
+    ani_method parentCtor {};
+    ASSERT_EQ(env_->Class_FindMethod(clsParent, "<ctor>", ":", &parentCtor), ANI_OK);
+    ani_object parentObj {};
+    ASSERT_EQ(env_->Object_New(clsParent, parentCtor, &parentObj), ANI_OK);
+
+    ani_class clsChild {};
+    ASSERT_EQ(env_->FindClass("call_object_method_boolean_test.Child", &clsChild), ANI_OK);
+    ani_method childCtor {};
+    ASSERT_EQ(env_->Class_FindMethod(clsChild, "<ctor>", ":", &childCtor), ANI_OK);
+    ani_object childObj {};
+    ASSERT_EQ(env_->Object_New(clsChild, childCtor, &childObj), ANI_OK);
+
+    ani_method parentMethodInParent {};
+    ASSERT_EQ(env_->Class_FindMethod(clsParent, "parentMethod", ":z", &parentMethodInParent), ANI_OK);
+    ani_method parentMethodInChild {};
+    ASSERT_EQ(env_->Class_FindMethod(clsChild, "parentMethod", ":z", &parentMethodInChild), ANI_OK);
+    ani_method childMethodInParent {};
+    ASSERT_EQ(env_->Class_FindMethod(clsParent, "childMethod", ":z", &childMethodInParent), ANI_NOT_FOUND);
+    ani_method childMethodInChild {};
+    ASSERT_EQ(env_->Class_FindMethod(clsChild, "childMethod", ":z", &childMethodInChild), ANI_OK);
+    ani_method overridedMethodInParent {};
+    ASSERT_EQ(env_->Class_FindMethod(clsParent, "overridedMethod", ":z", &overridedMethodInParent), ANI_OK);
+    ani_method overridedMethodInChild {};
+    ASSERT_EQ(env_->Class_FindMethod(clsChild, "overridedMethod", ":z", &overridedMethodInChild), ANI_OK);
+
+    const ani_int parentMethodInParentWasCalled = 1;
+    const ani_int childMethodInChildWasCalled = 2;
+    const ani_int overridedMethodInChildWasCalled = 3;
+    const ani_int overridedMethodInParentWasCalled = 4;
+
+    // |----------------------------------------------------------------------------------------------------------|
+    // |  ani_class  |           ani_static_method           |   ani_status  |               value                |
+    // |-------------|---------------------------------------|---------------|------------------------------------|
+    // |   Parent    |   parentMethod() from Parent class    |    ANI_OK     |    parentMethodInParentWasCalled   |
+    // |   Parent    |   parentMethod() from Child class     |    ANI_OK     |    parentMethodInParentWasCalled   |
+    // |   Parent    |    childMethod() from Child class     |      UB       |                --                  |
+    // |   Parent    |  overridedMethod() from Child class   |    ANI_OK     |  overridedMethodInParentWasCalled  |
+    // |   Parent    |  overridedMethod() from Parent class  |    ANI_OK     |  overridedMethodInParentWasCalled  |
+    // |   Child     |    parentMethod() from Parent class   |    ANI_OK     |    parentMethodInParentWasCalled   |
+    // |   Child     |    parentMethod() from Child class    |    ANI_OK     |    parentMethodInParentWasCalled   |
+    // |   Child     |    childMethod() from Child class     |    ANI_OK     |     childMethodInChildWasCalled    |
+    // |   Child     |  overridedMethod() from Child class   |    ANI_OK     |   overridedMethodInChildWasCalled  |
+    // |   Child     |  overridedMethod() from Parent class  |    ANI_OK     |   overridedMethodInChildWasCalled  |
+    // |-------------|---------------------------------------|---------------|------------------------------------|
+
+    CHECK_FIELD_AFTER_CALL_METHOD(parentObj, parentMethodInParent, parentMethodInParentWasCalled);
+    CHECK_FIELD_AFTER_CALL_METHOD(parentObj, parentMethodInChild, parentMethodInParentWasCalled);
+    CHECK_FIELD_AFTER_CALL_METHOD(parentObj, overridedMethodInChild, overridedMethodInParentWasCalled);
+    CHECK_FIELD_AFTER_CALL_METHOD(parentObj, overridedMethodInParent, overridedMethodInParentWasCalled);
+
+    CHECK_FIELD_AFTER_CALL_METHOD(childObj, parentMethodInParent, parentMethodInParentWasCalled);
+    CHECK_FIELD_AFTER_CALL_METHOD(childObj, parentMethodInChild, parentMethodInParentWasCalled);
+    CHECK_FIELD_AFTER_CALL_METHOD(childObj, childMethodInChild, childMethodInChildWasCalled);
+    CHECK_FIELD_AFTER_CALL_METHOD(childObj, overridedMethodInChild, overridedMethodInChildWasCalled);
+    CHECK_FIELD_AFTER_CALL_METHOD(childObj, overridedMethodInParent, overridedMethodInChildWasCalled);
+}
+
 }  // namespace ark::ets::ani::testing
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

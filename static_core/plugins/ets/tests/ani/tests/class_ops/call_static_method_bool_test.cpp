@@ -55,6 +55,18 @@ public:
     }
 };
 
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+// CC-OFFNXT(G.PRE.02-CPP, G.PRE.06) solid logic
+#define CHECK_CALLED_STATIC_METHOD(cls, method, expectedValue)                                                   \
+    do {                                                                                                         \
+        ani_boolean value {};                                                                                    \
+        ASSERT_EQ(env_->Class_CallStaticMethod_Boolean(cls, method, &value), ANI_OK);                            \
+        ani_int methodChecker {};                                                                                \
+        ASSERT_EQ(env_->Class_CallStaticMethodByName_Int(cls, "getCheckerValue", ":i", &methodChecker), ANI_OK); \
+        ASSERT_EQ(methodChecker, expectedValue);                                                                 \
+    } while (0)
+// NOLINTEND(cppcoreguidelines-macro-usage)
+
 TEST_F(CallStaticMethodTest, call_static_method_bool)
 {
     ani_class cls {};
@@ -360,6 +372,57 @@ TEST_F(CallStaticMethodTest, check_initialization_bool_a)
     args[1U].z = ANI_FALSE;
     ASSERT_EQ(env_->Class_CallStaticMethod_Boolean_A(cls, method, &value, args), ANI_OK);
     ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_bool_test.Operations"));
+}
+
+TEST_F(CallStaticMethodTest, check_hierarchy)
+{
+    ani_class clsParent {};
+    ASSERT_EQ(env_->FindClass("call_static_method_bool_test.Parent", &clsParent), ANI_OK);
+    ani_class clsChild {};
+    ASSERT_EQ(env_->FindClass("call_static_method_bool_test.Child", &clsChild), ANI_OK);
+
+    ani_static_method parentMethodInParent {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(clsParent, "parentStaticMethod", ":z", &parentMethodInParent), ANI_OK);
+    ani_static_method parentMethodInChild {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(clsChild, "parentStaticMethod", ":z", &parentMethodInChild), ANI_OK);
+    ani_static_method childMethodInParent {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(clsParent, "childStaticMethod", ":z", &childMethodInParent), ANI_NOT_FOUND);
+    ani_static_method childMethodInChild {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(clsChild, "childStaticMethod", ":z", &childMethodInChild), ANI_OK);
+    ani_static_method shadowingMethodInParent {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(clsParent, "shadowingStaticMethod", ":z", &shadowingMethodInParent), ANI_OK);
+    ani_static_method shadowingMethodInChild {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(clsChild, "shadowingStaticMethod", ":z", &shadowingMethodInChild), ANI_OK);
+
+    const ani_int parentMethodInParentWasCalled = 1;
+    const ani_int childMethodInChildWasCalled = 2;
+    const ani_int overridedMethodInChildWasCalled = 3;
+    const ani_int overridedMethodInParentWasCalled = 4;
+
+    // |--------------------------------------------------------------------------------------------------------------|
+    // |  ani_class  |              ani_static_method              |  ani_status  |              value                |
+    // |-------------|---------------------------------------------|--------------|-----------------------------------|
+    // |   Parent    |   parentStaticMethod() from Parent class    |    ANI_OK    |   parentMethodInParentWasCalled   |
+    // |   Parent    |   parentStaticMethod() from Child class     |    ANI_OK    |   parentMethodInParentWasCalled   |
+    // |   Parent    |    childStaticMethod() from Child class     |      UB      |               --                  |
+    // |   Parent    |  shadowingStaticMethod() from Child class   |      UB      |               --                  |
+    // |   Parent    |  shadowingStaticMethod() from Parent class  |    ANI_OK    |  overridedMethodInParentWasCalled |
+    // |   Child     |    parentStaticMethod() from Parent class   |    ANI_OK    |   parentMethodInParentWasCalled   |
+    // |   Child     |    parentStaticMethod() from Child class    |    ANI_OK    |   parentMethodInParentWasCalled   |
+    // |   Child     |    childStaticMethod() from Child class     |    ANI_OK    |    childMethodInChildWasCalled    |
+    // |   Child     |  shadowingStaticMethod() from Child class   |    ANI_OK    |  overridedMethodInChildWasCalled  |
+    // |   Child     |  shadowingStaticMethod() from Parent class  |    ANI_OK    |  overridedMethodInParentWasCalled |
+    // |-------------|---------------------------------------------|--------------|-----------------------------------|
+
+    CHECK_CALLED_STATIC_METHOD(clsParent, parentMethodInParent, parentMethodInParentWasCalled);
+    CHECK_CALLED_STATIC_METHOD(clsParent, parentMethodInChild, parentMethodInParentWasCalled);
+    CHECK_CALLED_STATIC_METHOD(clsParent, shadowingMethodInParent, overridedMethodInParentWasCalled);
+
+    CHECK_CALLED_STATIC_METHOD(clsChild, parentMethodInParent, parentMethodInParentWasCalled);
+    CHECK_CALLED_STATIC_METHOD(clsChild, parentMethodInChild, parentMethodInParentWasCalled);
+    CHECK_CALLED_STATIC_METHOD(clsChild, childMethodInChild, childMethodInChildWasCalled);
+    CHECK_CALLED_STATIC_METHOD(clsChild, shadowingMethodInChild, overridedMethodInChildWasCalled);
+    CHECK_CALLED_STATIC_METHOD(clsChild, shadowingMethodInParent, overridedMethodInParentWasCalled);
 }
 
 }  // namespace ark::ets::ani::testing

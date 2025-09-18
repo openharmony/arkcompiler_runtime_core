@@ -80,3 +80,34 @@ class G {
         return G.privateMethod(a0, a1);
     }
 }
+
+let parentMethodInParentWasCalled: int = 1;
+let childMethodInChildWasCalled: int = 2;
+let overridedMethodInChildWasCalled: int = 3;
+let overridedMethodInParentWasCalled: int = 4;
+
+class Parent {
+    static methodChecker: int = 0;
+    static getCheckerValue(): int {
+        return Parent.methodChecker;
+    }
+
+    static parentStaticMethod(): boolean {
+        Parent.methodChecker = parentMethodInParentWasCalled;
+        return true;
+    }
+    static shadowingStaticMethod(): boolean {
+        Parent.methodChecker = overridedMethodInParentWasCalled;
+        return true;
+    }
+}
+class Child extends Parent {
+    static childStaticMethod(): boolean {
+        Child.methodChecker = childMethodInChildWasCalled;
+        return true;
+    }
+    static shadowingStaticMethod(): boolean {
+        Child.methodChecker = overridedMethodInChildWasCalled;
+        return true;
+    }
+}
