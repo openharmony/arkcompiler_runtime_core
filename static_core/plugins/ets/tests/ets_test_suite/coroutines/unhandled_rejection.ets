@@ -13,34 +13,12 @@
  * limitations under the License.
  */
 
-import {AtomicFlag} from "std/debug/concurrency"
-
 type L = StdDebug.Logger
 
-class Event {
-    constructor() {
-        this.promise = new Promise<Number>((resolve: (val: Number) => void) => {
-            this.resolveFn = resolve;
-        })
-    }
-
-    public Wait() {
-        await this.promise;
-    }
-
-    public Fire() {
-        this.resolveFn!(0);
-    }
-
-    private promise: Promise<Number>;
-    private resolveFn: ((val: Number) => void) | null = null;
-}
-
-
-const kTotal = 5;
+const kTotal = 6;
 const asynclock = new AsyncLock();
 let current = 0;
-let event = new Event();
+let event = new CompletableJob<void>();
 
 async function AsyncFailing(): Promise<string> {
     throw Error('AsyncFailing');
@@ -50,13 +28,42 @@ function Failing(): string {
     throw Error('Failing');
 }
 
-function Handler(reason: Error, obj: Object): void {
-    await asynclock.lockAsync(() => {
+function WaitAll(): void {
+    event.Await();
+}
+
+// Called before or on the program completion
+function PromiseHandler(reason: Error, obj: Object): void {
+    // should be no-throw
+    asynclock.lockAsync((): void => {
         current++;
         if (current == kTotal) {
-            event.Fire();
-        } else {
-            arktest.assertTrue(current < kTotal, 'More rejections that expected');
+            event.finish();
+        } else if (current > kTotal) {
+            console.error('More rejections than expected');
+            let procManager = new StdProcess.ProcessManager();
+            procManager.exit(1);
+        }
+    },  AsyncLockMode.EXCLUSIVE);
+}
+
+let callWaitAll: boolean = true;
+
+// called on program completion. Intended that job handlers aren't concurrent with each other
+function JobHandler(reason: Error, obj: Object): void {
+    if (callWaitAll) {
+        callWaitAll = false;
+        launch<void, () => void>(WaitAll);
+    }
+    // should be no-throw
+    asynclock.lockAsync((): void => {
+        current++;
+        if (current == kTotal) {
+            event.finish();
+        } else if (current > kTotal) {
+            console.error('More rejections than expected');
+            let procManager = new StdProcess.ProcessManager();
+            procManager.exit(1);
         }
     },  AsyncLockMode.EXCLUSIVE);
 }
@@ -65,10 +72,11 @@ function testUnhandledRejection(): void {
     StdProcess.on('unhandledJobRejection', (reason: Error, obj: Object): void => {
         arktest.assertTrue(obj instanceof Job, 'The object should be of type Job');
         arktest.assertEQ(reason.message, 'Failing');
+        JobHandler(reason, obj);
     });
     StdProcess.on('unhandledPromiseRejection',  (reason: Error, obj: Object): void => {
         arktest.assertTrue(obj instanceof Promise, 'The object should be of type Promise');
-        Handler(reason, obj);
+        PromiseHandler(reason, obj);
     });
 
     let g = launch<string, () => string>(Failing);
@@ -82,7 +90,6 @@ function testUnhandledRejection(): void {
     })
     Promise.reject(new Error('promise2'));
     Promise.reject();
-    event.Wait();
 }
 
 function main(): int {
