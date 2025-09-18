@@ -6167,6 +6167,16 @@ intrinsics:
       args: [ std.core.String, u1 ]
     impl: ark::ets::intrinsics::StdCoreClassGetInstanceFieldByNameInternal
 
+  - name: StdCoreClassGetStaticFieldByNameInternal
+    space: ets
+    class_name: std.core.Class
+    method_name: getStaticFieldByNameInternal
+    static: false
+    signature:
+      ret: std.core.reflect.StaticField
+      args: [ std.core.String, u1 ]
+    impl: ark::ets::intrinsics::StdCoreClassGetStaticFieldByNameInternal
+
   - name: StdCoreClassGetStaticMethodsInternal
     space: ets
     class_name: std.core.Class
