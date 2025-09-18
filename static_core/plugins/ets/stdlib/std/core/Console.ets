@@ -672,7 +672,7 @@ export final class Console {
     private static parseObjectInner(value: Any, keyLength: int, columnMap: ColumnMap, index: int): void {
         let initialMap = new Map<string, boolean>();
         let keys:Array<string> = new Array<string>();
-        let innerLength: number = 0;
+        let innerLength: int = 0;
         let innerValue: Array<string> = new Array<string>();
         if (value instanceof Array) {
             const innerValueStr = DataFrame.toPrint(value, MAX_CONSOLE_PRINT_DEPTH)
@@ -682,15 +682,16 @@ export final class Console {
             Console.parseClassType(value, keys, innerValue);
             innerLength = innerValue.length;
         }
-        Console.setColumnMap(innerLength, initialMap, columnMap, innerValue, keys, keyLength, index);
+        Console.setColumnMap(innerLength, initialMap, columnMap, innerValue, keys, keyLength.toInt(), index);
     }
 
-    private static setColumnMap(innerLength: number, initialMap: Map<string, boolean>, columnMap: ColumnMap, innerValue: Array<string>, keys:Array<string>, keyLength:number, i: int): void {
+    private static setColumnMap(innerLength: int, initialMap: Map<string, boolean>, columnMap: ColumnMap, innerValue: Array<string>, 
+    keys:Array<string>, keyLength: int, i: int): void {
         for (let j = 0; j < innerLength; j++) {
             let innerKey = keys[j];
             if (!initialMap.has(innerKey)) {
-                let mapArrayLen = innerLength > keyLength ? innerLength : keyLength;
-                let mapArray = new Array<string>(mapArrayLen.toInt()).fill("");
+                let mapArrayLen: int = innerLength > keyLength ? innerLength : keyLength
+                let mapArray = new Array<string>(mapArrayLen).fill("");
                 mapArray[i] = innerValue[j];
                 columnMap.columnValue.set(innerKey, mapArray);
                 initialMap.set(innerKey, true);
@@ -748,15 +749,15 @@ export final class Console {
         return outputKeysArray;
     }
 
-    private static getValueArray(columnMap: ColumnMap, length: number, keyArray: Array<string>): Array<string> {
-        let mapLen = columnMap.columnValue.size;
+    private static getValueArray(columnMap: ColumnMap, length: int, keyArray: Array<string>): Array<string> {
+        let mapLen:int = columnMap.columnValue.size;
         let mapKeys: Array<string> = new Array<string>();
         for (const key of columnMap.columnValue.keys()) {
             mapKeys.push(key);
         }
-        let keyLength = mapLen + 1;
-        let valueLength = keyLength * length;
-        let outputValuesArray:Array<string> = new Array<string>(valueLength.toInt());
+        let keyLength: int = mapLen + 1;
+        let valueLength: int = keyLength * length;
+        let outputValuesArray:Array<string> = new Array<string>(valueLength);
         let valueIndex = 0;
         for (let i = 0; i < length; i++) {
             let key = keyArray[i];
@@ -952,7 +953,7 @@ class DataFrame {
         this.columnWidths = new Map<ColumnName, ColumnWidth>();
         for (let column of columns) {
             this.tableModel.set(column, new Array<string>());
-            this.columnWidths.set(column, column.length.toInt());
+            this.columnWidths.set(column, column.length);
         }
         this.rowsCount = 0;
     }
@@ -968,7 +969,7 @@ class DataFrame {
             const value = row.get(key) ?? "-";
             this.tableModel.get(key)!.push(value);
             const currentWidth = this.columnWidths.get(key)!;
-            const valueLength = value.length.toInt();
+            const valueLength = value.length
             this.columnWidths.set(key,
                                 currentWidth < valueLength
                                 ? valueLength

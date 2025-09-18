@@ -120,3 +120,8 @@ See test-u-runner [readme](../../readme.md#ets-es-checked-dependencies)
 - `ESChecker::Types` module parses types and detects (predicts) them based on expected values
 - function `preparePersist` in ts makes a json and mangles most of the values
 - generators for parameters reside in a module named `ScriptModule`
+
+## Type replacement number/int for .ts/.ets in templates
+- pattern %int% will be replaced with "number" type for .ts & "int" for .ets
+- pattern %.toInt()% will be replaced with "" type for .ts & ".toInt()" for .ets
+

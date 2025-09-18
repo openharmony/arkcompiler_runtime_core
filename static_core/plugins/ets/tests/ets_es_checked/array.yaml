@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -124,8 +124,8 @@ sub:
           - Array.of<number>(0.0, 2147483647, -0.0, -2147483648, Infinity, -Infinity)
           - Array.of<number>(0, -0.0, 0.0, -0.0, 0, -0.0, 0.0, -0.0, 0, -0.0, 0.0, -0.0)
         setup: |
-          const fn1 = (a: number, b: number): number => b - a
-          const fn2 = (a: number, b: number): number => a - b
+          const fn1 = (a: number, b: number) => (b - a)%.toInt()%
+          const fn2 = (a: number, b: number) => (a - b)%.toInt()%
         params:
           - paramOf 'fn1', 'fn2'
         mandatory: 0
@@ -134,7 +134,7 @@ sub:
           - Array.of<number | string | null | undefined>(0, -0.0, 4, 1, 2, -1, 1, 21, 111, 0, -0.0)
         self_type: Array<number | string | null | undefined>
         setup: |
-          const fn1 = (a: number | string | null | undefined, b: number | string | null | undefined): number => new String(a).length - new String(b).length
+          const fn1 = (a: number | string | null | undefined, b: number | string | null | undefined): %int% => (new String(a).length - new String(b).length)%.toInt()%
         params:
           - paramOf 'fn1'
         mandatory: 0
@@ -144,10 +144,9 @@ sub:
           - Array.of<number>(2, 14, 7, 7, 18, NaN, NaN, 15, 12, 7, 20, 18, 1, 4)
         expr: self.sort(pars)
         setup: |
-          const fn1 = (a: number, b: number): number => 0
-          const fn2 = (a: number, b: number): number => NaN
+          const fn1 = (a: number, b: number) => 0
         params:
-          - paramOf 'fn1', 'fn2'
+          - paramOf 'fn1'
       - self_type: Array<Object | null | undefined>
         self:
           - Array.of<Object | null | undefined>(null, undefined, 1, "123", 'undefined', 'undefine', 'undefined1', 'null', 'nul', 'null1')
@@ -224,17 +223,17 @@ sub:
             params:
               -
                 - Array.of<number>(1, 2, 3, NaN)
-                - new Set<number>(Array.of<number>(1, 2, 3, NaN))
-          - expr: Array.from<number, number>(pars)
+                - new Set<number>(Array.of<number>(1, 2, 3))
+          - expr: Array.from<number, %int%>(pars)
             params:
               -
-                - Array.of<number>(1, 2, 3, NaN)
-                - new Set<number>(Array.of<number>(1, 2, 3, NaN))
+                - Array.of<number>(1, 2, 3, 0)
+                - new Set<number>(Array.of<number>(1, 2, 3))
               -
                 - |
-                  (v: number, k: number): number => v * k
+                  (v: number, k: %int%): %int% => (v * k)%.toInt()%
                 - |
-                  (v: number, k: number): number => v / (k + 1)
+                  (v: number, k: %int%): %int% => (v / (k + 1))%.toInt()%
           - expr: Array.from<number, string>(pars)
             params:
               -
@@ -242,7 +241,7 @@ sub:
                 - new Set<number>(Array.of<number>(1, 2, 3, NaN))
               -
                 - |
-                  (v: number, k: number): string => '' + v + k
+                  (v: number, k: %int%): string => '' + v + k
           - expr: new Array<string>(pars)
             rest:
               - combinationRest ''.inspect, '123'.inspect, "!@#".inspect
@@ -266,11 +265,11 @@ sub:
       - self: null
         sub:
           - expr: Array<number>().length
-            ret_type: number
+            ret_type: int
             expected: 0
           - expr: Array<number>(5).length
-            ret_type: number
+            ret_type: int
             expected: 5
           - expr: Array<number>(0).length
-            ret_type: number
+            ret_type: int
             expected: 0

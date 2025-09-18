@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,10 +66,10 @@ function testLengthSyncSingleType() {
     let linkedList = new LinkedList<double>();
     arktest.assertEQ(linkedList.length, 0, "LinkedList length should be 0");
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
-    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length.toInt(),
+    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length,
         "LinkedList length should be TestData.arrayForNumber1 length");
     linkedList.remove(TestData.testNumber1);
-    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length.toInt() - TestData.testNumber1, "LinkedList length should - 1");
+    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length - TestData.testNumber1, "LinkedList length should - 1");
 }
 
 function testLengthSyncMultiType() {
@@ -124,23 +124,23 @@ function testAddFirstDeclaredType() {
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
     linkedList.addFirst(TestData.testNumber4);
     arktest.assertEQ(linkedList.get(0), TestData.testNumber4, "First element should be 4");
-    for (let i: int = 0; i < TestData.arrayForNumber1.length.toInt(); i++) {
+    for (let i: int = 0; i < TestData.arrayForNumber1.length; i++) {
         arktest.assertEQ(linkedList.get(i + TestData.testNumber1), TestData.arrayForNumber1[i], "Element should match");
     }
-    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length.toInt() + TestData.testNumber1, "LinkedList length should + 1");
+    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length + TestData.testNumber1, "LinkedList length should + 1");
 }
 
 function testAddFirstNull() {
     let linkedList = new LinkedList<double | null>();
-    for (let i: int = 0; i < TestData.arrayForNumber1.length.toInt(); i++) {
+    for (let i: int = 0; i < TestData.arrayForNumber1.length; i++) {
         linkedList.add(TestData.arrayForNumber1[i]);
     }
     linkedList.addFirst(null);
     arktest.assertEQ(linkedList.get(0), null, "First element should be null");
-    for (let i: int = 0; i < TestData.arrayForNumber1.length.toInt(); i++) {
+    for (let i: int = 0; i < TestData.arrayForNumber1.length; i++) {
         arktest.assertEQ(linkedList.get(i + TestData.testNumber1), TestData.arrayForNumber1[i], "Element should match");
     }
-    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length.toInt() + TestData.testNumber1,
+    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length + TestData.testNumber1,
         "LinkedList length should be + 1");
 }
 

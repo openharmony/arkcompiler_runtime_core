@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,7 +58,7 @@ function testGetKeyAtBoundaryIndex() {
     let plainArray = new PlainArray<double>();
     initializePlainArray(plainArray, TestData.forNumber2);
     arktest.assertEQ(plainArray.getKeyAt(0), 0, "The plainArray should return the correct key at index 0");
-    arktest.assertEQ(plainArray.getKeyAt(TestData.forNumber2.length.toInt() - TestData.testNumber1), TestData.testNumber4,
+    arktest.assertEQ(plainArray.getKeyAt(TestData.forNumber2.length - TestData.testNumber1), TestData.testNumber4,
         "The plainArray should return the correct key at index length - 1");
 }
 
@@ -85,7 +85,7 @@ function testGetValueAtBoundaryIndex() {
     let plainArray = new PlainArray<double>();
     initializePlainArray(plainArray, TestData.forNumber2);
     arktest.assertEQ(plainArray.getValueAt(0), 0, "The plainArray should return the correct value at index 0");
-    arktest.assertEQ(plainArray.getValueAt(TestData.forNumber2.length.toInt() - TestData.testNumber1), TestData.testNumber4,
+    arktest.assertEQ(plainArray.getValueAt(TestData.forNumber2.length - TestData.testNumber1), TestData.testNumber4,
         "The plainArray should return the correct value at index length - 1");
 }
 

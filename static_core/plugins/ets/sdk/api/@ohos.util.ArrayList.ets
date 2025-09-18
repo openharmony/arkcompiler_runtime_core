@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@ const EmptyContainerId: int = 10200010;
 const CapacityErrorCodeId: int = 10200062;
 const INT_MAX_VALUE_OFFSET: int = 2147483647;
 
-export type ArrayListComparatorFn<T> = (firstValue: T, secondValue: T) => double;
+export type ArrayListComparatorFn<T> = (firstValue: T, secondValue: T) => int;
 export type ArrayListForEachCb<T> =  (value: T, index: int, arrlist: ArrayList<T>) => void;
 export type ArrayListReplaceCb<T> =  (value: T, index: int, arrlist: ArrayList<T>) => T;
 
@@ -57,7 +57,7 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
      * property: The number of elements in the ArrayList.
      */
     get length(): int {
-        return this.buffer.length.toInt();
+        return this.buffer.length
     }
 
     /**
@@ -106,10 +106,10 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
 
         if (this.length + 1 <= this.capacity) {
             this.buffer.push(element); // length++
-            for (let i: int = (this.length - 1).toInt(); i > index; i--) {
+            for (let i: int = (this.length - 1); i > index; i--) {
                 this.buffer[i] = this.buffer[i - 1];
             }
-            this.buffer[index.toInt()] = element;
+            this.buffer[index] = element;
         } else {
             this.increaseCap((this.capacity * 1.5).toInt());
 
@@ -119,7 +119,7 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
                 newBuffer.push(this.buffer[i]);
             }
             newBuffer.push(element);
-            for (let i: int = index.toInt(); i < this.length; i++) {
+            for (let i: int = index; i < this.length; i++) {
                 newBuffer.push(this.buffer[i]);
             }
 
@@ -148,7 +148,7 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
     public getIndexOf(element: T): int {
         return this.buffer.findIndex((item: T): boolean => {
             return item == element;
-        }).toInt();
+        })
     }
 
     /**
@@ -161,7 +161,7 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
     public getLastIndexOf(element: T): int {
         return this.buffer.findLastIndex((item: T): boolean => {
             return item == element;
-        }).toInt();
+        })
     }
 
     /**
@@ -177,7 +177,7 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
 
         let delItem: T = this.buffer[index];
 
-        for (let i: int = index.toInt() + 1; i < this.length; i++) {
+        for (let i: int = index + 1; i < this.length; i++) {
             this.buffer[i - 1] = this.buffer[i];
         }
         this.buffer.length--
@@ -212,7 +212,7 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
         this.checkEmptyContainer();
         this.checkRange(fromIndex, toIndex);
 
-        for (let i: int = fromIndex.toInt(), j: int = toIndex.toInt(); j < this.length; i++, j++) {
+        for (let i: int = fromIndex, j: int = toIndex; j < this.length; i++, j++) {
             this.buffer[i] = this.buffer[j];
         }
 
@@ -267,8 +267,8 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
         this.checkRange(fromIndex, toIndex);
 
         let subArrLength = toIndex - fromIndex;
-        let newBuffer: ArrayList<T> = new ArrayList<T>(subArrLength.toInt());
-        for (let i: int = fromIndex.toInt(); i < toIndex; i++) {
+        let newBuffer: ArrayList<T> = new ArrayList<T>(subArrLength);
+        for (let i: int = fromIndex; i < toIndex; i++) {
             newBuffer.add(this.buffer[i]);
         }
 
@@ -364,7 +364,7 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
         }
 
         if (newCapacity > this.length) {
-            this.increaseCap(newCapacity.toInt());
+            this.increaseCap(newCapacity);
         }
     }
 
@@ -376,7 +376,7 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
         for (let i: int = 0; i < this.length; i++) {
             newBuffer[i] = this.buffer[i];
         }
-        this.capacity = this.length.toInt();
+        this.capacity = this.length;
 
         this.buffer = newBuffer;
     }

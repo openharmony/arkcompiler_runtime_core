@@ -1212,15 +1212,15 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns sorted Int8Array
      */
-    public sort(compareFn?: (a: number, b: number) => number): this {
+    public sort(compareFn?: (a: number, b: number) => int): this {
         if (compareFn == undefined) {
             this.sort()
             return this
         }
 
-        let cmp = (l: byte, r: byte): number => {
+        let cmp = (l: byte, r: byte): int => {
             const result = compareFn!((l).toDouble(), (r).toDouble())
-            return result
+            return result.toInt()
         }
 
         const MAX_SHORT_LENGTH = 24
@@ -2722,15 +2722,15 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns sorted Int16Array
      */
-    public sort(compareFn?: (a: number, b: number) => number): this {
+    public sort(compareFn?: (a: number, b: number) => int): this {
         if (compareFn == undefined) {
             this.sort()
             return this
         }
 
-        let cmp = (l: short, r: short): number => {
+        let cmp = (l: short, r: short): int => {
             const result = compareFn!((l).toDouble(), (r).toDouble())
-            return result
+            return result.toInt()
         }
 
         const MAX_SHORT_LENGTH = 24
@@ -4209,15 +4209,15 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns sorted Int32Array
      */
-    public sort(compareFn?: (a: number, b: number) => number): this {
+    public sort(compareFn?: (a: number, b: number) => int): this {
         if (compareFn == undefined) {
             this.sort()
             return this
         }
 
-        let cmp = (l: int, r: int): number => {
+        let cmp = (l: int, r: int): int => {
             const result = compareFn!((l).toDouble(), (r).toDouble())
-            return result
+            return result.toInt()
         }
 
         const MAX_SHORT_LENGTH = 24
@@ -5724,18 +5724,18 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @returns sorted BigInt64Array
      */
-    public sort(compareFn?: (a: BigInt, b: BigInt) => number | BigInt): this {
+    public sort(compareFn?: (a: BigInt, b: BigInt) => int | BigInt): this {
         if (compareFn == undefined) {
             this.sort()
             return this
         }
 
-        let cmp = (l: long, r: long): number => {
+        let cmp = (l: long, r: long): int => {
             const result = compareFn!(new BigInt(l), new BigInt(r))
             if (result instanceof BigInt) {
-                return result.getLong()
+                return result.getLong().toInt()
             } else {
-                return result.toDouble()
+                return result.toInt()
             }
         }
 
@@ -7219,15 +7219,15 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns sorted Float32Array
      */
-    public sort(compareFn?: (a: number, b: number) => number): this {
+    public sort(compareFn?: (a: number, b: number) => int): this {
         if (compareFn == undefined) {
             this.sort()
             return this
         }
 
-        let cmp = (l: float, r: float): number => {
+        let cmp = (l: float, r: float): int => {
             const result = compareFn!((l).toDouble(), (r).toDouble())
-            return result
+            return result.toInt()
         }
 
         const MAX_SHORT_LENGTH = 24
@@ -8609,15 +8609,15 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns sorted Float64Array
      */
-    public sort(compareFn?: (a: number, b: number) => number): this {
+    public sort(compareFn?: (a: number, b: number) => int): this {
         if (compareFn == undefined) {
             this.sort()
             return this
         }
 
-        let cmp = (l: double, r: double): number => {
+        let cmp = (l: double, r: double): int => {
             const result = compareFn!((l).toDouble(), (r).toDouble())
-            return result
+            return result.toInt()
         }
 
         const MAX_SHORT_LENGTH = 24

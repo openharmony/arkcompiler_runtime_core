@@ -25,7 +25,7 @@ function main() {
   let a = 1;
   let b = 1;
 
-  let i: int = (a = 2) + v[0].length.toInt() + (v[0][0] = new byte[10]).length.toInt() + (b = 2);
+  let i: int = (a = 2) + v[0].length + (v[0][0] = new byte[10]).length + (b = 2);
   arktest.assertEQ(a, 2);
   arktest.assertEQ(b, 2);
     

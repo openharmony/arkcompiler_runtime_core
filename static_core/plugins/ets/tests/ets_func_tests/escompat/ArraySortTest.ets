@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,12 +24,12 @@ function main(): int {
 function SortWithUndefined() {
     let myComparefn_1 = (x: number | undefined, y: number | undefined) => {
         if (x == undefined) {
-            return -1.0
+            return -1
         }
         if (y == undefined) {
-            return 1.0
+            return 1
         }
-        return 0.0
+        return 0
     }
     let x: Array<number | undefined> = new Array<number | undefined>(undefined, 1.0, undefined, 5.0, 2.0, 3.0)
     x.sort(myComparefn_1)
@@ -43,12 +43,12 @@ function SortWithUndefined() {
     let y: Array<int | undefined> = new Array<int | undefined>(3, undefined, 1, undefined, 5, 2)
     let myComparefn_2 = (x: int | undefined, y: int | undefined) => {
         if (x == undefined) {
-            return 1.0
+            return 1
         }
         if (y == undefined) {
-            return -1.0
+            return -1
         }
-        return 0.0
+        return 0
     }
     y.sort(myComparefn_2)
     arktest.assertEQ(y.length, 6)
@@ -75,17 +75,17 @@ function SortWithUndefinedAndNull() {
 }
 
 function SortWithFloat() {
-    const arr1 = new Float64Array([2.2, 3.1, 1.0]);
-    const result1 = arr1.sort((a, b) => {
-        return a-b
+    const arr1: Float64Array = new Float64Array([2.2, 3.1, 1.0]);
+    const result1 = arr1.sort((a: double, b: double): int => {
+        return (a - b).toInt()
     })
     arktest.assertEQ(result1.toString(), [1,2.2,3.1].toString())
 
     const arr2 = [1.1, 3.2, -0.2];
     const combined = arr2.concat(Array.from(arr1));
 
-    const result2 = combined.sort((a, b) => {
-        return a-b
+    const result2 = combined.sort((a: double, b: double): int => {
+        return Math.floor(a - b).toInt()
     })
     arktest.assertEQ(result2.toString(), [-0.2,1,1.1,2.2,3.1,3.2].toString())
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -98,7 +98,7 @@ function func1() : Array<Obj> {
         result.push(res[i]);
         result.push(resources[i + 10]);
     }
-    arktest.assertEQ(result.length.toInt(), 10);
+    arktest.assertEQ(result.length, 10);
     return result;
 }
 
@@ -115,7 +115,7 @@ function func2(i : int) : Array<Obj> {
         result.push(res[j]);
         result.push(resources[j]);
     }
-    arktest.assertEQ(result.length.toInt(), 6);
+    arktest.assertEQ(result.length, 6);
     return result;
 }
 
@@ -137,7 +137,7 @@ function func3(modVal : int) : Array<Obj> {
         result.push(res[i]);
         result.push(resources[i + 10]);
     }
-    arktest.assertEQ(result.length.toInt(), 10);
+    arktest.assertEQ(result.length, 10);
     return result;
 }
 
@@ -159,7 +159,7 @@ function func4() : Array<Obj> {
         result.push(res[i]);
         result.push(resources[i]);
     }
-    arktest.assertEQ(result.length.toInt(), 10);
+    arktest.assertEQ(result.length, 10);
     return result;
 }
 
@@ -175,7 +175,7 @@ function func5(i : int) : Array<Obj> {
         result.push(res[j]);
         result.push(resources[j]);
     }
-    arktest.assertEQ(result.length.toInt(), 4);
+    arktest.assertEQ(result.length, 4);
     return result;
 }
 
@@ -194,7 +194,7 @@ function func6(i : int) : Array<Obj> {
         result.push(res[0]);
         result.push(resources[0]);
     }
-    arktest.assertEQ(result.length.toInt(), 2);
+    arktest.assertEQ(result.length, 2);
     return result;
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,7 +61,7 @@ function testCreateFrom(): int {
 
 function testCreateFrom2(): int {
     const sourceArr = Array.from<object>(source)
-    const array = Array.from<Object, Object>(sourceArr, (v: Object, _: number): Object => { return v } )
+    const array = Array.from<Object, Object>(sourceArr, (v: Object, _: int): Object => { return v } )
     if (array.length != source.length) {
         console.println("Data length mismatch")
         return FAILURE

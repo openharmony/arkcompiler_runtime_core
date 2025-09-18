@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -124,7 +124,7 @@ function testConvertToArrayNonEmptyContainer() {
     let array = linkedList.convertToArray();
     arktest.assertTrue(Array.isArray(array), "The result should be an Array");
     arktest.assertEQ(array.length, linkedList.length, "Array length should be same as LinkedList length");
-    for (let i: int = 0; i < TestData.arrayForNumber1.length.toInt(); i++) {
+    for (let i: int = 0; i < TestData.arrayForNumber1.length; i++) {
         arktest.assertEQ(array[i], linkedList.get(i), `Element at index ${i} should be equal`);
     }
 }
@@ -141,9 +141,9 @@ function testConvertToArrayChangeArray() {
     let array = linkedList.convertToArray();
     array.push(TestData.testNumber1);
     arktest.assertEQ(array.length, linkedList.length + TestData.testNumber1, "Array length should be LinkedList length + 1");
-    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length.toInt(),
+    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length,
         "LinkedList length should not change");
-    for (let i: int = 0; i < TestData.arrayForNumber1.length.toInt(); i++) {
+    for (let i: int = 0; i < TestData.arrayForNumber1.length; i++) {
         arktest.assertEQ(linkedList.get(i), TestData.arrayForNumber1[i], `Element at index ${i} should be equal`);
     }
 }

@@ -222,7 +222,11 @@ const testTypedArraySort = parametrize<ObjectTypeAndExpectations<number[]>>(
         // descending
         array.sort(
             (x: {{.item.type}}, y: {{.item.type}}) => {
+                {%- if item.type == 'BigInt' -%}
+                return (y - x)
+                {%- else -%}
                 return (y - x){{.item.cast2primitive}}
+                {%- endif -%}
             }
         )
 

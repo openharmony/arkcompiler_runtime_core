@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -127,7 +127,7 @@ function testSortMultipleTypes() {
 function testSortDifferentTypesAscending() {
     let arrayList1 = new ArrayList<double>();
     initializeArrayList(arrayList1, TestData.result1);
-    arrayList1.sort((a: double, b: double) => a - b);
+    arrayList1.sort((a: double, b: double) => (a - b).toInt());
     for (let i: int = 0; i < arrayList1.length; i++) {
         arktest.assertEQ(arrayList1[i], TestData.forNumber[i], `Element at index ${i} should match`);
     }
@@ -153,12 +153,12 @@ function testSortDifferentTypesAscending() {
     let arrayList4 = new ArrayList<object>();
     initializeArrayList(arrayList4, TestData.forObject);
     let array4 = arrayList4.convertToArray();
-    arrayList4.sort((a: object, b: object): double => {
+    arrayList4.sort((a: object, b: object): int => {
         let sa = new String(a);
         let sb = new String(b);
         return sa.compareTo(sb);
     });
-    array4.sort((a: object, b: object): double => {
+    array4.sort((a: object, b: object): int => {
         let sa = new String(a);
         let sb = new String(b);
         return sa.compareTo(sb);
@@ -173,7 +173,7 @@ function testSortWithContainerChange() {
     initializeArrayList(arrayList, TestData.result1);
     arrayList.sort((a: double, b: double) => {
         arrayList.clear();
-        return a - b;
+        return (a - b).toInt();
     });
     arktest.assertEQ(arrayList.length, 0, "ArrayList length should be 0 after clear");
 }
@@ -181,7 +181,7 @@ function testSortWithContainerChange() {
 function testSortDifferentTypesDescending() {
     let arrayList1 = new ArrayList<double>();
     initializeArrayList(arrayList1, TestData.forNumber);
-    arrayList1.sort((a: double, b: double) => b - a);
+    arrayList1.sort((a: double, b: double) => (b - a).toInt());
     for (let i: int = 0; i < arrayList1.length; i++) {
         arktest.assertEQ(arrayList1[i], TestData.result1[i], `Element at index ${i} should match`);
     }
@@ -207,12 +207,12 @@ function testSortDifferentTypesDescending() {
     let arrayList4 = new ArrayList<object>();
     initializeArrayList(arrayList4, TestData.forObject);
     let array4 = arrayList4.convertToArray();
-    arrayList4.sort((a: object, b: object): double => {
+    arrayList4.sort((a: object, b: object): int => {
         let sa = new String(a);
         let sb = new String(b);
         return sb.compareTo(sa);
     });
-    array4.sort((a: object, b: object): double => {
+    array4.sort((a: object, b: object): int => {
         let sa = new String(a);
         let sb = new String(b);
         return sb.compareTo(sa);

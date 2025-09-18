@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@ function main() {
   let a = 1;
   let b = 1;
 
-  let i: int = (a = 2) + v[0].length.toInt() + (v[0][0] = new byte[10]).length.toInt() + (b = 2);
+  let i: int = (a = 2) + v[0].length + (v[0][0] = new byte[10]).length + (b = 2);
   arktest.assertEQ(a, 2);
   arktest.assertEQ(b, 2);
     

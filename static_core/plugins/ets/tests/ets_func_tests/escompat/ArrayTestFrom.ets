@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,14 +22,14 @@ function main(): int {
 
     suite.addTest("Test method from builtin array and () => U callback", testFromBuiltinArray0);
     suite.addTest("Test method from builtin array and (value: T) => U callback", testFromBuiltinArray1);
-    suite.addTest("Test method from builtin array and (value: T, index: number) => U callback", testFromBuiltinArray2);
+    suite.addTest("Test method from builtin array and (value: T, index: int) => U callback", testFromBuiltinArray2);
 
     return suite.run()
 }
 
 type cbFn0<U> = () => U
 type cbFn1<T, U> = (v: T) => U
-type cbFn2<T, U> = (v: T, k: number) => U
+type cbFn2<T, U> = (v: T, k: int) => U
 type cbFn<T, U> = cbFn2<T, U>
 type NumberToStringFn = cbFn<Number, String>
 type NumberToStringCase = [Number[], NumberToStringFn, String[]]
@@ -86,7 +86,7 @@ const testFromBuiltinArray2 = parametrize<NumberToStringCase>(
     [
         [
             [new Number(1), new Number(2)],
-            (x: Number, i: number): String => new String(`${x}:${i}`),
+            (x: Number, i: int): String => new String(`${x}:${i}`),
             [new String("1:0"), new String("2:1")]
         ] as NumberToStringCase,
     ],

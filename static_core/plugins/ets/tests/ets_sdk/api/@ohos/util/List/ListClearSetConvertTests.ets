@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,7 +66,7 @@ class TestData {
 function testClearNonEmptyContainer() {
     let list = new List<double>();
     initializeList(list, TestData.arrayForNumber1);
-    arktest.assertEQ(list.length, TestData.arrayForNumber1.length.toInt(), "List length should be same as TestData.arrayForNumber1");
+    arktest.assertEQ(list.length, TestData.arrayForNumber1.length, "List length should be same as TestData.arrayForNumber1");
     list.clear();
     arktest.assertEQ(list.length, 0, "List length should be 0 after clear");
 }
@@ -167,7 +167,7 @@ function testConvertToArrayNonEmptyContainer() {
     let array = list.convertToArray();
     arktest.assertTrue(Array.isArray(array), "The result should be an Array");
     arktest.assertEQ(array.length, list.length, "Array length should be same as List length");
-    for (let i: int = 0; i < TestData.arrayForNumber1.length.toInt(); i++) {
+    for (let i: int = 0; i < TestData.arrayForNumber1.length; i++) {
         arktest.assertEQ(array[i], list.get(i), `Element at index ${i} should be equal`);
     }
 }
@@ -184,8 +184,8 @@ function testConvertToArrayChangeArray() {
     let array = list.convertToArray();
     array.push(TestData.testNumber1);
     arktest.assertEQ(array.length, list.length + TestData.testNumber1, "Array length should be List length + 1");
-    arktest.assertEQ(list.length, TestData.arrayForNumber1.length.toInt(), "List length should not change");
-    for (let i: int = 0; i < TestData.arrayForNumber1.length.toInt(); i++) {
+    arktest.assertEQ(list.length, TestData.arrayForNumber1.length, "List length should not change");
+    for (let i: int = 0; i < TestData.arrayForNumber1.length; i++) {
         arktest.assertEQ(list.get(i), TestData.arrayForNumber1[i], `Element at index ${i} should be equal`);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1428,7 +1428,7 @@ export namespace stream {
             let res: buffer.Buffer | string | null = null;
 
             const buf = this.buf;
-            const len = buf.length.toInt();
+            const len: int = buf.length
 
             if (this.readableObjectModeInner) {
                 res = buf[num];
@@ -1699,7 +1699,7 @@ export namespace stream {
 
                     // Iterate over current buffer to convert already stored Buffers:
                     let currentBuffer: string = '';
-                    for (let i: int = 0; i < this.buf.length.toInt(); i++) {
+                    for (let i: int = 0; i < this.buf.length; i++) {
                         const decoder = this.stringDecoder as util.StringDecoder;
                         if (this.buf[i] instanceof string) {
                             currentBuffer += decoder.write(this.buf[i] as string);

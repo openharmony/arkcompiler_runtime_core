@@ -1871,8 +1871,8 @@ export namespace taskpool {
         }
         ConcurrencyHelpers.mutexUnlock(mutex);
         const Info: TaskPoolInfo = new TaskPoolInfo();
-        const taskInfosRes: TaskInfo[] = new TaskInfo[taskInfos.length.toInt()];
-        const threadInfosRes: ThreadInfo[] = new ThreadInfo[threadInfos.length.toInt()];
+        const taskInfosRes: TaskInfo[] = new TaskInfo[taskInfos.length];
+        const threadInfosRes: ThreadInfo[] = new ThreadInfo[threadInfos.length];
         taskInfos.forEach((taskInfo: TaskInfo, index: int) => {
             taskInfosRes[index.toInt()] = taskInfo;
         });
@@ -2393,7 +2393,7 @@ export namespace taskpool {
 
     function getTaskImpl(tasksQueue: Array<Task>): Task | undefined {
         let task: Task | undefined = undefined;
-        let len = tasksQueue.length.toInt();
+        let len = tasksQueue.length
         for (let i = 0; i < len; ++i) {
             task = tasksQueue.shift();
             if (InternalTask.of(task!).taskDependenciesCount == 0) {

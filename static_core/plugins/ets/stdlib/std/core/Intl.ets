@@ -2974,7 +2974,7 @@ export class DateTimeFormat {
 
         override next(): IteratorResult<SegmentData>
         {
-            if (this.idx < 0 || this.idx >= this.parent.length.toInt()) {
+            if (this.idx < 0 || this.idx >= this.parent.length) {
                 return new IteratorResult<SegmentData>()
             }
             return new IteratorResult<SegmentData>(false, this.parent[this.idx++])

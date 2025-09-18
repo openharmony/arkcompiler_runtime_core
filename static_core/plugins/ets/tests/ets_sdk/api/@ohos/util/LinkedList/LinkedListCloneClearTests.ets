@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,12 +71,12 @@ function testCloneAndDeleteFromOriginal() {
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
     let newLinkedList = linkedList.clone();
     linkedList.removeFirst();
-    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length.toInt() - TestData.testNumber1,
+    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length - TestData.testNumber1,
         "Origin LinkedList length should - 1");
-    for (let i: int = 0; i < TestData.arrayForNumber1.length.toInt(); i++) {
+    for (let i: int = 0; i < TestData.arrayForNumber1.length; i++) {
         arktest.assertEQ(TestData.arrayForNumber1[i], newLinkedList.get(i), `Element at index ${i} should be equal`);
     }
-    arktest.assertEQ(newLinkedList.length, TestData.arrayForNumber1.length.toInt(), "Cloned LinkedList length should not change");
+    arktest.assertEQ(newLinkedList.length, TestData.arrayForNumber1.length, "Cloned LinkedList length should not change");
 }
 
 function testCloneAndAddToNew() {
@@ -84,18 +84,18 @@ function testCloneAndAddToNew() {
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
     let newLinkedList = linkedList.clone();
     newLinkedList.add(TestData.testNumber1);
-    arktest.assertEQ(newLinkedList.length, TestData.arrayForNumber1.length.toInt() + TestData.testNumber1,
+    arktest.assertEQ(newLinkedList.length, TestData.arrayForNumber1.length + TestData.testNumber1,
         "Cloned LinkedList length should + 1");
-    for (let i: int = 0; i < TestData.arrayForNumber1.length.toInt(); i++) {
+    for (let i: int = 0; i < TestData.arrayForNumber1.length; i++) {
         arktest.assertEQ(TestData.arrayForNumber1[i], linkedList.get(i), `Element at index ${i} should be equal`);
     }
-    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length.toInt(), "Origin LinkedList length should not change");
+    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length, "Origin LinkedList length should not change");
 }
 
 function testClearNonEmptyContainer() {
     let linkedList = new LinkedList<double>();
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
-    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length.toInt(),
+    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length,
         "LinkedList length should be same as TestData.arrayForNumber1");
     linkedList.clear();
     arktest.assertEQ(linkedList.length, 0, "LinkedList length should be 0 after clear");
@@ -115,7 +115,7 @@ function testClearAddCloneClearAdd1() {
     newLinkedList.clear();
     newLinkedList.add(TestData.testNumber1);
     arktest.assertEQ(newLinkedList.length, TestData.testNumber1, "Cloned LinkedList length should be 1");
-    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length.toInt(), "Origin LinkedList length should not change");
+    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length, "Origin LinkedList length should not change");
 }
 
 function testClearAddCloneClearAdd2() {
@@ -125,5 +125,5 @@ function testClearAddCloneClearAdd2() {
     linkedList.clear();
     linkedList.add(TestData.testNumber1);
     arktest.assertEQ(linkedList.length, TestData.testNumber1, "Origin LinkedList length should be 1");
-    arktest.assertEQ(newLinkedList.length, TestData.arrayForNumber1.length.toInt(), "Cloned LinkedList length should not change");
+    arktest.assertEQ(newLinkedList.length, TestData.arrayForNumber1.length, "Cloned LinkedList length should not change");
 }

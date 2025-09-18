@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -85,15 +85,15 @@ function testInsertWithinRange() {
 function testInsertAtBoundary() {
     let linkedList = new LinkedList<double>();
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
-    linkedList.insert(TestData.arrayForNumber1.length.toInt(), 0);
+    linkedList.insert(TestData.arrayForNumber1.length, 0);
     linkedList.insert(0, 0);
 
-    for (let i: int = 0; i < TestData.arrayForNumber1.length.toInt(); i++) {
+    for (let i: int = 0; i < TestData.arrayForNumber1.length; i++) {
         arktest.assertEQ(linkedList.get(i + TestData.testNumber1), TestData.arrayForNumber1[i], "Element should match");
     }
     arktest.assertEQ(linkedList.get(0), 0, "Element should be 0");
     arktest.assertEQ(linkedList.get(linkedList.length - TestData.testNumber1), 0, "Element should be 0");
-    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length.toInt() + TestData.testNumber2, "LinkedList length should + 2");
+    arktest.assertEQ(linkedList.length, TestData.arrayForNumber1.length + TestData.testNumber2, "LinkedList length should + 2");
 }
 
 function testInsertAddFirstGetIndexOfRemoveByIndexHas() {
@@ -176,7 +176,7 @@ function testGetWithinRange() {
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
     arktest.assertEQ(linkedList.get(0), 0, "Element at index 0 should be 0");
     arktest.assertEQ(linkedList.get(TestData.testNumber1), TestData.testNumber1, "Element at index 1 should be 1");
-    arktest.assertEQ(linkedList.get(TestData.arrayForNumber1.length.toInt() - TestData.testNumber1), TestData.testNumber20,
+    arktest.assertEQ(linkedList.get(TestData.arrayForNumber1.length - TestData.testNumber1), TestData.testNumber20,
         "Element at index 20 should be 20");
 }
 
