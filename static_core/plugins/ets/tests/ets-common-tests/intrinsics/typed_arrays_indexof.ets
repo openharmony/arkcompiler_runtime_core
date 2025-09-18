@@ -17,58 +17,58 @@ function checkArrayForInt(data: BigInt64Array, elem: int, expected: number): voi
     arktest.assertEQ(data.indexOf(elem), expected, 'data.indexOf(elem: int) must return ' + expected);
 }
 
-function checkArray(data: BigInt64Array, elem: BigInt, expected: number, fromIndex?: number): void {
+function checkArray(data: BigInt64Array, elem: BigInt, expected: number, fromIndex?: int): void {
     arktest.assertEQ(data.indexOf(elem, fromIndex), expected,
-        'data.indexOf(elem: BigInt, fromIndex?: number) must return ' + expected);
+        'data.indexOf(elem: BigInt, fromIndex?: int) must return ' + expected);
 }
 
 function checkArrayForInt(data: BigUint64Array, elem: int, expected: number): void {
     arktest.assertEQ(data.indexOf(elem), expected, 'data.indexOf(elem: int) must return ' + expected);
 }
 
-function checkArray(data: BigUint64Array, elem: BigInt, expected: number, fromIndex?: number): void {
+function checkArray(data: BigUint64Array, elem: BigInt, expected: number, fromIndex?: int): void {
     arktest.assertEQ(data.indexOf(elem, fromIndex), expected,
-        'data.includes(elem: BigInt, fromIndex?: number) must return ' + expected);
+        'data.includes(elem: BigInt, fromIndex?: int) must return ' + expected);
 }
 
 function checkArrayForInt(data: Int32Array, elem: int, expected: number): void {
     arktest.assertEQ(data.indexOf(elem), expected, 'data.indexOf(elem: int) must return ' + expected);
 }
 
-function checkArray(data: Int32Array, elem: number, expected: number, fromIndex?: number): void {
+function checkArray(data: Int32Array, elem: number, expected: number, fromIndex?: int): void {
     arktest.assertEQ(data.indexOf(elem, fromIndex), expected,
-        'data.indexOf(elem: number, fromIndex?: number) must return ' + expected);
+        'data.indexOf(elem: number, fromIndex?: int) must return ' + expected);
 }
 
 function checkArrayForInt(data: Uint32Array, elem: int, expected: number): void {
     arktest.assertEQ(data.indexOf(elem), expected, 'data.indexOf(elem: int) must return ' + expected);
 }
 
-function checkArray(data: Uint32Array, elem: number, expected: number, fromIndex?: number): void {
+function checkArray(data: Uint32Array, elem: number, expected: number, fromIndex?: int): void {
     arktest.assertEQ(data.indexOf(elem, fromIndex), expected,
-        'data.indexOf(elem: number, fromIndex?: number) must return ' + expected);
+        'data.indexOf(elem: number, fromIndex?: int) must return ' + expected);
 }
 
 function checkArrayForInt(data: Int16Array, elem: int, expected: number): void {
     arktest.assertEQ(data.indexOf(elem), expected, 'data.indexOf(elem: int) must return ' + expected);
 }
 
-function checkArray(data: Int16Array, elem: number, expected: number, fromIndex?: number): void {
+function checkArray(data: Int16Array, elem: number, expected: number, fromIndex?: int): void {
     arktest.assertEQ(data.indexOf(elem, fromIndex), expected,
-        'data.indexOf(elem: number, fromIndex?: number) must return ' + expected);
+        'data.indexOf(elem: number, fromIndex?: int) must return ' + expected);
 }
 
 function checkArrayForInt(data: Uint16Array, elem: int, expected: number): void {
     arktest.assertEQ(data.indexOf(elem), expected, 'data.indexOf(elem: int) must return ' + expected);
 }
 
-function checkArray(data: Uint16Array, elem: number, expected: number, fromIndex?: number): void {
+function checkArray(data: Uint16Array, elem: number, expected: number, fromIndex?: int): void {
     arktest.assertEQ(data.indexOf(elem, fromIndex), expected,
-        'data.indexOf(elem: number, fromIndex?: number) must return ' + expected);
+        'data.indexOf(elem: number, fromIndex?: int) must return ' + expected);
 }
 
-function checkArrayForInt(data: Int8Array, elem: int, expected: number, fromIndex: number): void {
-    arktest.assertEQ(data.indexOf(elem, fromIndex.toInt()), expected,
+function checkArrayForInt(data: Int8Array, elem: int, expected: number, fromIndex: int): void {
+    arktest.assertEQ(data.indexOf(elem, fromIndex), expected,
         'data.indexOf(elem: int, fromIndex: int) must return ' + expected);
 }
 
@@ -76,45 +76,45 @@ function checkArrayForInt(data: Int8Array, elem: int, expected: number): void {
     arktest.assertEQ(data.indexOf(elem), expected, 'data.indexOf(elem: int) must return ' + expected);
 }
 
-function checkArray(data: Int8Array, elem: number, expected: number, fromIndex?: number): void {
+function checkArray(data: Int8Array, elem: number, expected: number, fromIndex?: int): void {
     arktest.assertEQ(data.indexOf(elem, fromIndex), expected,
-        'data.indexOf(elem: number, fromIndex?: number) must return ' + expected);
+        'data.indexOf(elem: number, fromIndex?: int) must return ' + expected);
 }
 
 function checkArrayForInt(data: Uint8Array, elem: int, expected: number): void {
     arktest.assertEQ(data.indexOf(elem), expected, 'data.indexOf(elem: int) must return ' + expected);
 }
 
-function checkArrayForInt(data: Uint8Array, elem: int, expected: number, fromIndex: number): void {
+function checkArrayForInt(data: Uint8Array, elem: int, expected: number, fromIndex: int): void {
     arktest.assertEQ(data.indexOf(elem, fromIndex), expected, 'data.indexOf(elem: int, fromIndex: int) must return ' +
         expected);
 }
 
-function checkArray(data: Uint8Array, elem: number, expected: number, fromIndex?: number): void {
+function checkArray(data: Uint8Array, elem: number, expected: number, fromIndex?: int): void {
     arktest.assertEQ(data.indexOf(elem, fromIndex), expected,
-        'data.indexOf(elem: number, fromIndex?: number) must return ' + expected);
+        'data.indexOf(elem: number, fromIndex?: numbinter) must return ' + expected);
 }
 
 function checkArrayForInt(data: Float32Array, elem: int, expected: number): void {
     arktest.assertEQ(data.indexOf(elem), expected, 'data.indexOf(elem: int) must return ' + expected);
 }
 
-function checkArrayForInt(data: Float32Array, elem: int, expected: number, fromIndex: number): void {
-    arktest.assertEQ(data.indexOf(elem, fromIndex.toInt()), expected,
+function checkArrayForInt(data: Float32Array, elem: int, expected: number, fromIndex: int): void {
+    arktest.assertEQ(data.indexOf(elem, fromIndex), expected,
         'data.indexOf(elem: int, fromIndex: int) must return ' + expected);
 }
 
-function checkArray(data: Float32Array, elem: number, expected: number, fromIndex?: number): void {
+function checkArray(data: Float32Array, elem: number, expected: number, fromIndex?: int): void {
     arktest.assertEQ(data.indexOf((elem.toFloat()).toDouble(), fromIndex), expected,
-        'data.indexOf(elem: number, fromIndex?: number) must return ' + expected);
+        'data.indexOf(elem: number, fromIndex?: int) must return ' + expected);
 }
 
 function checkArrayExactlyNumber(data: Float32Array, elem: number, expected: number): void {
     arktest.assertEQ(data.indexOf(elem), expected, 'data.indexOf(elem: number) must return ' + expected);
 }
 
-function checkArrayForInt(data: Float64Array, elem: int, expected: number, fromIndex: number): void {
-    arktest.assertEQ(data.indexOf(elem, fromIndex.toInt()), expected, 'data.indexOf(elem: int, fromIndex: int) must return ' +
+function checkArrayForInt(data: Float64Array, elem: int, expected: number, fromIndex: int): void {
+    arktest.assertEQ(data.indexOf(elem, fromIndex), expected, 'data.indexOf(elem: int, fromIndex: int) must return ' +
         expected);
 }
 
@@ -122,9 +122,9 @@ function checkArrayForInt(data: Float64Array, elem: int, expected: number): void
     arktest.assertEQ(data.indexOf(elem), expected, 'data.indexOf(elem: int) must return ' + expected);
 }
 
-function checkArray(data: Float64Array, elem: number, expected: number, fromIndex?: number): void {
+function checkArray(data: Float64Array, elem: number, expected: number, fromIndex?: int): void {
     arktest.assertEQ(data.indexOf(elem, fromIndex), expected,
-        'data.indexOf(elem: number, fromIndex?: number) must return ' + expected);
+        'data.indexOf(elem: number, fromIndex?: int) must return ' + expected);
 }
 
 function testIU8Array() {

@@ -15,11 +15,10 @@
 # limitations under the License.
 
 import os
-import shutil
 import unittest
 from io import StringIO
 from pathlib import Path
-from typing import cast
+from typing import ClassVar, cast
 from unittest.mock import patch
 
 from runner.common_exceptions import InvalidConfiguration
@@ -30,42 +29,33 @@ from runner.options.cli_options import CliOptions, CliOptionsParser, CliParserBu
 
 
 class TestSuiteConfigTest2(unittest.TestCase):
-    cfg_ext = ".yaml"
     workflow_name = "config-1"
-    workflow_path: Path
     test_suite_name = "test_suite2"
-    test_suite_path: Path
     current_path = Path(__file__).parent
-    cfg_path = current_path.parent.parent.parent.joinpath("cfg")
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        os.environ["ARKCOMPILER_RUNTIME_CORE_PATH"] = "."
-        os.environ["ARKCOMPILER_ETS_FRONTEND_PATH"] = "."
-        os.environ["WORK_DIR"] = "."
-        os.environ["PANDA_BUILD"] = "."
-
-        shutil.copy(cls.current_path.joinpath(cls.workflow_name + cls.cfg_ext), cls.cfg_path.joinpath("workflows"))
-        cls.workflow_path = cls.cfg_path.joinpath("workflows").joinpath(cls.workflow_name + cls.cfg_ext)
-
-        shutil.copy(cls.current_path.joinpath(cls.test_suite_name + cls.cfg_ext), cls.cfg_path.joinpath("test-suites"))
-        cls.test_suite_path = cls.cfg_path.joinpath("test-suites").joinpath(cls.test_suite_name + cls.cfg_ext)
-
-    @classmethod
-    def tearDownClass(cls) -> None:
-        cls.workflow_path.unlink(missing_ok=True)
-        cls.test_suite_path.unlink(missing_ok=True)
+    data_folder = current_path / "data"
+    test_environ: ClassVar[dict[str, str]] = {
+        'ARKCOMPILER_RUNTIME_CORE_PATH': Path.cwd().as_posix(),
+        'ARKCOMPILER_ETS_FRONTEND_PATH': Path.cwd().as_posix(),
+        'PANDA_BUILD': Path.cwd().as_posix(),
+        'WORK_DIR': Path.cwd().as_posix()
+    }
 
     def test_empty_args(self) -> None:
         args: list[str] = []
         with self.assertRaises(InvalidConfiguration):
             CliOptions(args)
 
+    @patch('runner.utils.get_config_workflow_folder', lambda: TestSuiteConfigTest2.data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', lambda: TestSuiteConfigTest2.data_folder)
+    @patch.dict(os.environ, test_environ, clear=True)
     def test_only_workflow(self) -> None:
         args = [self.workflow_name]
         with self.assertRaises(InvalidConfiguration):
             CliOptions(args)
 
+    @patch('runner.utils.get_config_workflow_folder', lambda: TestSuiteConfigTest2.data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', lambda: TestSuiteConfigTest2.data_folder)
+    @patch.dict(os.environ, test_environ, clear=True)
     @patch("sys.stderr", new_callable=StringIO)
     def test_option_without_value(self, handle: StringIO) -> None:
         args = [self.workflow_name, self.test_suite_name, "--verbose"]
@@ -78,11 +68,17 @@ class TestSuiteConfigTest2(unittest.TestCase):
                 self.assertGreaterEqual(pos, 0, "Error message about `--verbose` is not found")
                 raise IncorrectEnumValue(str(exc.args)) from exc
 
+    @patch('runner.utils.get_config_workflow_folder', lambda: TestSuiteConfigTest2.data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', lambda: TestSuiteConfigTest2.data_folder)
+    @patch.dict(os.environ, test_environ, clear=True)
     def test_option_with_incorrect_value(self) -> None:
         args = [self.workflow_name, self.test_suite_name, "--verbose", "abc"]
         with self.assertRaises(IncorrectEnumValue):
             CliOptions(args)
 
+    @patch('runner.utils.get_config_workflow_folder', lambda: TestSuiteConfigTest2.data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', lambda: TestSuiteConfigTest2.data_folder)
+    @patch.dict(os.environ, test_environ, clear=True)
     def test_option_with_repeated_value(self) -> None:
         args = [
             "--verbose", "all", "--verbose", "short"
@@ -105,6 +101,9 @@ class TestSuiteConfigTest2(unittest.TestCase):
         actual = cli_utils.restore_default_list(actual, key_lists_ts | key_lists_wf)
         self.assertEqual(VerboseKind.SHORT, actual.get("runner.verbose"))
 
+    @patch('runner.utils.get_config_workflow_folder', lambda: TestSuiteConfigTest2.data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', lambda: TestSuiteConfigTest2.data_folder)
+    @patch.dict(os.environ, test_environ, clear=True)
     def test_option_with_test_suite_option1(self) -> None:
         args = [
             "--with-js"
@@ -127,6 +126,9 @@ class TestSuiteConfigTest2(unittest.TestCase):
         actual = cli_utils.restore_default_list(actual, key_lists_ts | key_lists_wf)
         self.assertTrue(actual.get('test_suite2.parameters.with-js'))
 
+    @patch('runner.utils.get_config_workflow_folder', lambda: TestSuiteConfigTest2.data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', lambda: TestSuiteConfigTest2.data_folder)
+    @patch.dict(os.environ, test_environ, clear=True)
     def test_option_with_test_suite_option3(self) -> None:
         args = [
             "--validator", "a.b.c"
@@ -149,6 +151,9 @@ class TestSuiteConfigTest2(unittest.TestCase):
         actual = cli_utils.restore_default_list(actual, key_lists_ts | key_lists_wf)
         self.assertEqual("a.b.c", actual.get('test_suite2.parameters.validator'))
 
+    @patch('runner.utils.get_config_workflow_folder', lambda: TestSuiteConfigTest2.data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', lambda: TestSuiteConfigTest2.data_folder)
+    @patch.dict(os.environ, test_environ, clear=True)
     def test_option_with_test_suite_option_several_times1(self) -> None:
         args = [
             "--validator", "a.b.c", "--validator", "d.e.f"
@@ -173,6 +178,9 @@ class TestSuiteConfigTest2(unittest.TestCase):
 
         self.assertEqual("d.e.f", actual.get('test_suite2.parameters.validator'))
 
+    @patch('runner.utils.get_config_workflow_folder', lambda: TestSuiteConfigTest2.data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', lambda: TestSuiteConfigTest2.data_folder)
+    @patch.dict(os.environ, test_environ, clear=True)
     def test_option_with_test_suite_option_several_times2(self) -> None:
         args = [
             "--es2panda-full-args=--thread=0", "--es2panda-full-args=--parse-only", "--es2panda-full-args=--dump-ast",

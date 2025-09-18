@@ -13,11 +13,24 @@
  * limitations under the License.
  */
 
+//! CHECKER       escompat Array fill intrinsic
+//! SKIP_IF       @architecture == "arm32"
+//! RUN           force_jit: true, options: "--compiler-regex='.*escompat_array_fill.ETSGLOBAL::test_array.*'", entry: "escompat_array_fill.ETSGLOBAL::main"
+//! METHOD        "escompat_array_fill.ETSGLOBAL::test_array_fill"
+//! PASS_AFTER    "Codegen"
+//! INST          /CallVirtual.*escompat.Array::fill/
+//! INST_COUNT    /CallVirtual.*escompat.Array::fill/, 13
+//!
+//! METHOD        "escompat_array_fill.ETSGLOBAL::test_array_call_virtual_fill"
+//! PASS_AFTER    "Codegen"
+//! INST          /escompat_array_fill.MyArray::fill/
+//! INST_COUNT    /escompat_array_fill.MyArray::fill/, 8
+
 class TestClass {
     num: int;
     public constructor(num: int) {
         this.num = num;
-	}
+    }
     public get(): int {
         return this.num;
     }
@@ -38,13 +51,6 @@ function fill_big_array() {
     array2.fill(1);
 }
 
-//! CHECKER       escompat Array fill intrinsic
-//! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, entry: "escompat_array_fill.ETSGLOBAL::test_array_fill"
-//! METHOD        "escompat_array_fill.ETSGLOBAL::test_array_fill"
-//! PASS_AFTER    "Codegen"
-//! INST          /CallVirtual.*escompat.Array::fill/
-//! INST_COUNT    /CallVirtual.*escompat.Array::fill/, 13
 function test_array_fill() {
     array1.fill(99, 0, array_size);
     check_array(array1, 0, array_size, 99);
@@ -53,7 +59,7 @@ function test_array_fill() {
     check_array(array1, 0, array_size / 2, 99);
     check_array(array1, array_size / 2, array_size, 11);
 
-    array1.fill(12, -(array_size + 2) , array_size);
+    array1.fill(12, -(array_size + 2), array_size);
     check_array(array1, 0, array_size, 12);
 
     array1.fill(13, array_size / 2 - array_size, array_size + 3);
@@ -103,28 +109,21 @@ function test_array_fill() {
 class MyArray<T> extends Array<T> {
     counter: int;
     public constructor(len: number) {
-		super(len);
+        super(len);
         this.counter = 0;
-	}
+    }
 
-	public override fill(value: T, start: int, end: int): this {
+    public override fill(value: T, start: int, end: int): this {
         this.counter += 1;
-		super.fill(value, start, end);
+        super.fill(value, start, end);
         return this;
-	}
+    }
 
     public getCounter(): int {
         return this.counter;
     }
 }
 
-//! CHECKER       escompat Array test call virtual fill
-//! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, entry: "escompat_array_fill.ETSGLOBAL::test_array_call_virtual_fill"
-//! METHOD        "escompat_array_fill.ETSGLOBAL::test_array_call_virtual_fill"
-//! PASS_AFTER    "Codegen"
-//! INST          /escompat_array_fill.MyArray::fill/
-//! INST_COUNT    /escompat_array_fill.MyArray::fill/, 8
 function test_array_call_virtual_fill() {
     let array2: MyArray<int> = new MyArray<int>(array_size);
     array2.fill(99, 0, array_size);
@@ -136,7 +135,7 @@ function test_array_call_virtual_fill() {
     check_array(array2, array_size / 2, array_size, 11);
     arktest.assertEQ(array2.getCounter(), 2);
 
-    array2.fill(12, -(array_size + 2) , array_size);
+    array2.fill(12, -(array_size + 2), array_size);
     check_array(array2, 0, array_size, 12);
     arktest.assertEQ(array2.getCounter(), 3);
 
@@ -155,4 +154,9 @@ function test_array_call_virtual_fill() {
     arktest.assertEQ(array2.getCounter(), 7);
     arktest.assertEQ(array2.fill(16, 1, 2)[1], 16);
     arktest.assertEQ(array2.getCounter(), 8);
+}
+
+function main() {
+    test_array_fill();
+    test_array_call_virtual_fill();
 }

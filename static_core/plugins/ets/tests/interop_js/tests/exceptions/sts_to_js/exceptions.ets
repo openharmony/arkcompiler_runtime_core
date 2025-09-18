@@ -21,7 +21,7 @@ function throwErrorFromSts(): void {
 }
 
 function throwErrorWithCauseFromSts(): void {
-    let cause: ErrorOptions = new ErrorOptions("Test cause");
+    let cause: ErrorOptions = {cause: "Test cause" as Object} as ErrorOptions
     throw new Error("Throw Error with cause from ets!", cause);
 }
 

@@ -39,13 +39,13 @@ function launchImpl(func: () => NullishType): Promise<NullishType> {
         try {
             let res = job.Await();
             resolve(res);
-        } catch(e: Error) {
-            reject(e);
+        } catch (e) {
+            reject(e as Error);
         }
     });
 }
 
-function testDelayFunc(): NullishType {
+async function testDelayFunc(): Promise<Any> {
     let task = new taskpool.Task(max, 80, 90);
     let res = await taskpool.executeDelayed(50, task);
     let runner = new taskpool.SequenceRunner();
@@ -55,12 +55,12 @@ function testDelayFunc(): NullishType {
     return res;
 }
 
-function executeDelayedTest(): void {
+async function executeDelayedTest(): Promise<void> {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
     try {
         let res = await launchImpl(testDelayFunc);
         arktest.assertEQ(res, 90);
-    } catch(e: Error) {
+    } catch (e) {
         // NOTE(wangzhaoyong, #25035): del try catch when fix stackoverflow and invalid error message
         arktest.assertEQ(e instanceof StackOverflowError, true);
     }
@@ -73,7 +73,7 @@ function executeDelayedTest(): void {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
 }
 
-function executePeriodicallyTest(): void {
+async function executePeriodicallyTest() {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
     let runner = new taskpool.SequenceRunner();
     let task1 = new taskpool.Task(returnAbc);
@@ -84,7 +84,7 @@ function executePeriodicallyTest(): void {
     try {
         let res2 = await launchImpl(testPeriodFunc);
         arktest.assertEQ(res2, 'success');
-    } catch(e: Error) {
+    } catch (e) {
         // NOTE(wangzhaoyong, #25035): del try catch when fix stackoverflow and invalid error message
         arktest.assertEQ(e instanceof LinkerUnresolvedClassError, true);
     }
@@ -109,7 +109,7 @@ function testPeriodFunc(): NullishType {
     return 'success';
 }
 
-function orderTest() {
+async function orderTest() {
     let resultStr: string = '';
     let func1 = (): string => {
         resultStr += '1';
@@ -172,7 +172,7 @@ function executeGroupTaskTest() {
                 new Error('taskpool:: sequenceRunner cannot execute groupTask'));
 }
 
-function cancelNonStartedTaskTest() {
+async function cancelNonStartedTaskTest() {
     let task = new taskpool.Task(returnAbc);
     let runner = new taskpool.SequenceRunner();
     arktest.expectError(() => {
@@ -188,20 +188,21 @@ function cancelNonStartedTaskTest() {
     arktest.assertEQ(res2, 80);
 }
 
-function cancelExecutingTaskTest() {
+async function cancelExecutingTaskTest() {
     let task = new taskpool.Task(returnAbc);
     let runner = new taskpool.SequenceRunner();
     let p = runner.execute(task);
     try {
         taskpool.cancel(task);
-    } catch(e: Error) {
-        arktest.assertEQ(e.message, 'taskpool:: sequenceRunner task has been executed');
-        return;
+    } catch (e) {
+        let err = e as Error;
+        arktest.assertEQ(err.message, 'taskpool:: sequenceRunner task has been executed');
+        return undefined;
     }
-    arktest.expectError(() => { let res = await p; }, new Error('taskpool:: sequenceRunner task has been canceled'));
+    arktest.expectError(() => { let res = waitForCompletion<Any>(() => p); }, new Error('taskpool:: sequenceRunner task has been canceled'));
 }
 
-function cancelExecutedTaskTest() {
+async function cancelExecutedTaskTest() {
     let task = new taskpool.Task(returnAbc);
     let runner = new taskpool.SequenceRunner();
     arktest.expectError(() => {
@@ -234,7 +235,7 @@ function addDependencyExecutedTaskTest() {
     arktest.expectError(() => { task2.addDependency(task1) }, new Error('taskpool:: seqRunnerTask or executedTask cannot addDependency'));
 }
 
-function taskWithDifferentParamsTest() {
+async function taskWithDifferentParamsTest() {
     let testWithZeroParam = (): string => {
         return 'testWithZeroParam';
     }
@@ -288,19 +289,19 @@ function taskWithDifferentParamsTest() {
 function main(): int {
     let seqRunnerSuite = new arktest.ArkTestsuite('taskpool.SequenceRunner');
     let seqRunnerSuiteDisabled = new arktest.ArkTestsuite('taskpool.SequenceRunner.DISABLED');
-    seqRunnerSuite.addTest('ExecuteDelayedTest', executeDelayedTest);
-    seqRunnerSuite.addTest('ExecutePeriodicallyTest', executePeriodicallyTest);
+    seqRunnerSuite.addAsyncTest('ExecuteDelayedTest', executeDelayedTest);
+    seqRunnerSuite.addAsyncTest('ExecutePeriodicallyTest', executePeriodicallyTest);
     // #27912
-    seqRunnerSuiteDisabled.addTest('OrderTest', orderTest);
+    seqRunnerSuiteDisabled.addAsyncTest('OrderTest', orderTest);
     seqRunnerSuite.addTest('ExecuteCommonTest', executeCommonTest);
     seqRunnerSuite.addTest('ExecuteSeqRunnerTaskTest', executeSeqRunnerTaskTest);
     seqRunnerSuite.addTest('ExecuteGroupTaskTest', executeGroupTaskTest);
-    seqRunnerSuite.addTest('CancelNonStartedTaskTest', cancelNonStartedTaskTest);
-    seqRunnerSuite.addTest('CancelExecutingTaskTest', cancelExecutingTaskTest);
-    seqRunnerSuite.addTest('CancelExecutedTaskTest', cancelExecutedTaskTest);
+    seqRunnerSuite.addAsyncTest('CancelNonStartedTaskTest', cancelNonStartedTaskTest);
+    seqRunnerSuite.addAsyncTest('CancelExecutingTaskTest', cancelExecutingTaskTest);
+    seqRunnerSuite.addAsyncTest('CancelExecutedTaskTest', cancelExecutedTaskTest);
     seqRunnerSuite.addTest('AddDependentTaskTest', addDependentTaskTest);
     seqRunnerSuite.addTest('AddDependencyExecutedTaskTest', addDependencyExecutedTaskTest);
-    seqRunnerSuite.addTest('TaskWithDifferentParamsTest', taskWithDifferentParamsTest);
+    seqRunnerSuite.addAsyncTest('TaskWithDifferentParamsTest', taskWithDifferentParamsTest);
     let res = seqRunnerSuite.run();
     CoroutineExtras.stopTaskpool();
     return res;

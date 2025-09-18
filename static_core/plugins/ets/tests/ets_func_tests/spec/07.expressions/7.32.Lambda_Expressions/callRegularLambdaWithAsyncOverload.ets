@@ -28,7 +28,7 @@ class Test {
         return param();
     }
 
-    callOverloadRegularFunc(): void {
+    async callOverloadRegularFunc(): Promise<void> {
         let is_call_regular_func1 = await this.regularFunc((): boolean => { return true });
         arktest.assertEQ(is_call_regular_func1, true)
 
@@ -38,5 +38,5 @@ class Test {
 }
 
 function main(): void {
-    new Test().callOverloadRegularFunc();
+    waitForCompletion(new Test().callOverloadRegularFunc);
 }

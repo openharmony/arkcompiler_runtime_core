@@ -75,18 +75,11 @@ export final class IllegalArgumentError extends Error {
 }
 
 /**
- * @class Represents runtime exception 
+ * @class Represents runtime error 
  */
-export final class RuntimeException extends Exception {
-    constructor() {
-        super();
-    }
-
-    constructor(s: String) {
-        super(s);
-    }
-
-    constructor(s: String, cause: Object) {
-        super(s, cause);
+export final class RuntimeError extends Error {
+    // NOTE(kparshukov): #28318 move to std/core/Errors.ets
+    constructor(message?: String, options?: ErrorOptions) {
+        super("RuntimeError", message, options)
     }
 }

@@ -46,7 +46,7 @@ function launchImpl(func: () => NullishType): Promise<NullishType> {
     });
 }
 
-function testDelayFunc(): NullishType {
+async function testDelayFunc(): Promise<Any> {
     let task = new taskpool.LongTask(sumFunc);
     let res = await taskpool.executeDelayed(10, task);
     arktest.expectError(() => {
@@ -55,7 +55,7 @@ function testDelayFunc(): NullishType {
     return res;
 }
 
-function executeDelayedTest(): void {
+async function executeDelayedTest(): Promise<void> {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
     try {
         let res = await launchImpl(testDelayFunc);
@@ -72,7 +72,7 @@ function executeDelayedTest(): void {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
 }
 
-function executePeriodicallyTest(): void {
+async function executePeriodicallyTest(): Promise<void> {
     let task1 = new taskpool.LongTask(sumFunc);
     await taskpool.execute(task1);
     arktest.expectError(() => {
@@ -80,32 +80,32 @@ function executePeriodicallyTest(): void {
     }, new Error('taskpool:: The concurrent task has been executed and cannot be executed periodically'));
 }
 
-function executeTest() {
+async function executeTest() {
     let task = new taskpool.LongTask(sumFunc);
     let result = await taskpool.execute(task);
     arktest.assertEQ(result, 30);
 }
 
-function doubleExecutionTest() {
+async function doubleExecutionTest() {
     let task = new taskpool.LongTask(sumFunc);
     taskpool.execute(task);
     arktest.expectError(() => { taskpool.execute(task) },
                 new Error('taskpool:: The long task can only be executed once'));
 }
 
-function longTaskWithParamsTest() {
+async function longTaskWithParamsTest() {
     let task = new taskpool.LongTask(sum, 100, 200);
     let res = await taskpool.execute(task);
     arktest.assertEQ(res, 300);
 }
 
-function main(): int {
+function main():int {
     let longTaskTestsuite = new arktest.ArkTestsuite('taskpool.LongTask');
-    longTaskTestsuite.addTest('ExecuteDelayedTest', executeDelayedTest);
-    longTaskTestsuite.addTest('ExecutePeriodicallyTest', executePeriodicallyTest);
-    longTaskTestsuite.addTest('ExecuteTest', executeTest);
-    longTaskTestsuite.addTest('DoubleExecutionTest', doubleExecutionTest);
-    longTaskTestsuite.addTest('LongTaskWithParamsTest', longTaskWithParamsTest);
+    longTaskTestsuite.addAsyncTest('ExecuteDelayedTest', executeDelayedTest);
+    longTaskTestsuite.addAsyncTest('ExecutePeriodicallyTest', executePeriodicallyTest);
+    longTaskTestsuite.addAsyncTest('ExecuteTest', executeTest);
+    longTaskTestsuite.addAsyncTest('DoubleExecutionTest', doubleExecutionTest);
+    longTaskTestsuite.addAsyncTest('LongTaskWithParamsTest', longTaskWithParamsTest);
     let res = longTaskTestsuite.run();
     CoroutineExtras.stopTaskpool();
     return res;

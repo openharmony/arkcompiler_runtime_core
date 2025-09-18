@@ -696,6 +696,31 @@ export class Date {
         return this.toLocaleTimeString(undefined)
     }
 
+    private copyOptions(options: Intl.DateTimeFormatOptions): Intl.DateTimeFormatOptions {
+        let copy = {} as Intl.DateTimeFormatOptions
+        copy.calendar = options.calendar
+        copy.localeMatcher = options.localeMatcher
+        copy.dateStyle = options.dateStyle
+        copy.day = options.day
+        copy.dayPeriod = options.dayPeriod
+        copy.era = options.era
+        copy.formatMatcher = options.formatMatcher
+        copy.fractionalSecondDigits = options.fractionalSecondDigits
+        copy.hour12 = options.hour12
+        copy.hour = options.hour
+        copy.hourCycle = options.hourCycle
+        copy.minute = options.minute
+        copy.month = options.month
+        copy.numberingSystem = options.numberingSystem
+        copy.second = options.second
+        copy.timeStyle = options.timeStyle
+        copy.timeZone = options.timeZone
+        copy.timeZoneName = options.timeZoneName
+        copy.weekday = options.weekday
+        copy.year = options.year
+        return copy
+    }
+
     private appendDefaultTimeOptions(options: Intl.DateTimeFormatOptions): Intl.DateTimeFormatOptions {
         const appendTimeOptions = !options.dayPeriod
                 && !options.hour
@@ -706,7 +731,7 @@ export class Date {
         let effectiveOptions = options
         if (appendTimeOptions) {
             // client options instance should not be modified, so creating a copy
-            effectiveOptions = new Intl.DateTimeFormatOptions(options)
+            effectiveOptions = this.copyOptions(options)
             effectiveOptions.hour = Date.TIME_FORMAT_OPTIONS.hour
             effectiveOptions.minute = Date.TIME_FORMAT_OPTIONS.minute
             effectiveOptions.second = Date.TIME_FORMAT_OPTIONS.second
@@ -769,7 +794,7 @@ export class Date {
         let effectiveOptions = options
         if (appendDateOptions) {
             // client options instance should not be modified, so creating a copy
-            effectiveOptions = new Intl.DateTimeFormatOptions(options)
+            effectiveOptions = this.copyOptions(options)
             effectiveOptions.year = Date.DATE_FORMAT_OPTIONS.year
             effectiveOptions.month = Date.DATE_FORMAT_OPTIONS.month
             effectiveOptions.day = Date.DATE_FORMAT_OPTIONS.day

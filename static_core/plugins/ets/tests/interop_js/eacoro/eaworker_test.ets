@@ -72,7 +72,7 @@ function RunTasksWithJsAsyncCallTest(): void {
             modified = true;
         });
 
-        await promise1;
+        waitForCompletion(() => promise1);
 
         try {
             let value = JSRuntime.getPropertyInt(JSRuntime.getGlobal(), 'value');
@@ -108,4 +108,49 @@ function CreateEAWorkerWithoutInterop(): void {
         eaw.join();
     }
     arktest.assertEQ(res, true);
+}
+
+async function asyncCall(task: () => void) {
+    task();
+}
+
+function RunSetTimeoutTest(): void {
+    let job = new CompletableJob<void>();
+
+    let w = new EAWorker(true);
+    w.start();
+    let p = w.run<NullishType>(()=>{
+        let p1 = asyncCall(() => {});
+
+        let p2 = p1.then<NullishType, NullishType>((value: NullishType) => {
+            setTimeout(() => {
+                job.finish();
+            }, 100);
+
+        });
+    });
+    w.join();
+
+    job.Await();
+}
+
+function RunNewCoroInSetTimeoutTest(): void {
+    let job = new CompletableJob<void>();
+
+    let w = new EAWorker(true);
+    w.start();
+    let p = w.run<NullishType>(()=>{
+        let p1 = asyncCall(() => {
+        });
+        let p2 = p1.then<NullishType, NullishType>((value: NullishType) => {
+            setTimeout(() => {
+                let p3 = asyncCall(()=>{
+                    job.finish();
+                });
+            }, 100);
+        });
+    });
+    w.join();
+
+    job.Await();
 }

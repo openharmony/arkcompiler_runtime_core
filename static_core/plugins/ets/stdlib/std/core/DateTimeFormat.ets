@@ -17,14 +17,30 @@ package std.core;
 
 export namespace Intl {
     export class DateTimeFormat {
-        private static readonly DEFAULT_OPTIONS: DateTimeFormatOptions = {
-            year: "numeric",
-            month: "numeric",
-            day: "numeric"
+        private static isEmpty(options: DateTimeFormatOptions): boolean {
+            return options.localeMatcher === undefined 
+                    && options.dateStyle === undefined 
+                    && options.day === undefined 
+                    && options.dayPeriod === undefined 
+                    && options.era === undefined
+                    && options.formatMatcher === undefined 
+                    && options.fractionalSecondDigits === undefined 
+                    && options.hour12 === undefined 
+                    && options.hour === undefined 
+                    && options.hourCycle === undefined 
+                    && options.minute === undefined 
+                    && options.month === undefined 
+                    && options.numberingSystem === undefined 
+                    && options.second === undefined 
+                    && options.timeStyle === undefined 
+                    && options.timeZone === undefined 
+                    && options.timeZoneName === undefined 
+                    && options.weekday === undefined 
+                    && options.year === undefined
         }
 
         private readonly locale: string
-        private readonly options: DateTimeFormatOptions
+        private readonly options: DateTimeFormatOptionsImpl
         private readonly pattern: string
 
         public constructor(locales?: string | string[], options?: DateTimeFormatOptions) {
@@ -35,10 +51,10 @@ export namespace Intl {
                 this.locale = lookupLocale ? intlLookUpLocale(locales!) : intlBestFitLocale(locales!)
             }
 
-            if (options === undefined || DateTimeFormatOptions.isEmpty(options)) {
-                this.options = DateTimeFormat.DEFAULT_OPTIONS
+            if (options === undefined || DateTimeFormat.isEmpty(options)) {
+                this.options = { year: "numeric", month: "numeric", day: "numeric" } as DateTimeFormatOptionsImpl
             } else {
-                this.options = this.getResolvedOptions(options!)
+                this.options = this.getResolvedOptions(options!) as DateTimeFormatOptionsImpl
             }
 
             this.pattern = this.getPattern()
@@ -135,7 +151,8 @@ export namespace Intl {
             return date instanceof Date ? date.getTime() : date
         }
 
-        private getResolvedOptions(options: DateTimeFormatOptions): DateTimeFormatOptions {
+        private getResolvedOptions(options: DateTimeFormatOptions): DateTimeFormatOptionsImpl {
+            let ret = new DateTimeFormatOptionsImpl(options)
             if (options.hour12 !== undefined) {
                 let hourCycle = this.getLocaleHourCycle()
 
@@ -147,13 +164,13 @@ export namespace Intl {
                         hourCycle = "h12"
                     }
                 } else {
-                    hourCycle = "h23"   
+                    hourCycle = "h23"
                 }
 
-                options.hourCycle = hourCycle
+                ret.hourCycle = hourCycle
             }
 
-            return options
+            return ret
         }
 
         private getHourSymbol(): string {
@@ -386,7 +403,7 @@ export namespace Intl {
     type DayPeriod = "narrow" | "short" | "long"
     type FormatMatcher = "basic" | "best fit"
 
-    export class DateTimeFormatOptions {
+    export interface DateTimeFormatOptions {
         calendar?: string
         localeMatcher?: "lookup" | "best fit"
         dateStyle?: DateStyle
@@ -409,10 +426,76 @@ export namespace Intl {
         timeZoneName?: TimeZoneName
         weekday?: "long" | "short" | "narrow"
         year?: "numeric" | "2-digit"
+    }
+
+    class DateTimeFormatOptionsImpl implements DateTimeFormatOptions {
+        set calendar(val?: string) {this.calendar_ = val}
+        get calendar(): string | undefined { return this.calendar_ }
+        set localeMatcher(val?: "lookup" | "best fit") { this.localeMatcher_ = val}
+        get localeMatcher(): "lookup" | "best fit" | undefined { return this.localeMatcher_}
+        set dateStyle(val?: DateStyle) { this.dateStyle_ = val }
+        get dateStyle(): DateStyle | undefined { return this.dateStyle_}
+        set day(val?: "numeric" | "2-digit") { this.day_ = val }
+        get day(): "numeric" | "2-digit" | undefined { return this.day_ }
+        set dayPeriod(val?: "narrow" | "short" | "long") { this.dayPeriod_ = val}
+        get dayPeriod() : "narrow" | "short" | "long" | undefined { return this.dayPeriod_}
+        set era(val?: "long" | "short" | "narrow") { this.era_ = val}
+        get era(): "long" | "short" | "narrow" | undefined { return this.era_}
+        set formatMatcher(val ?: "basic" | "best fit") { this.formatMatcher_ = val}
+        get formatMatcher(): "basic" | "best fit" | undefined { return this.formatMatcher_}
+        // NOTE(cheezzario) 'number' literal types are not supported #23963
+        // fractionalSecondDigits?: 1 | 2 | 3
+        set fractionalSecondDigits(val?: number) {this.fractionalSecondDigits_ = val}
+        get fractionalSecondDigits(): number | undefined { return this.fractionalSecondDigits_}
+        set hour12(val?: boolean) {this.hour12_ = val}
+        get hour12(): boolean | undefined { return this.hour12_} 
+        set hour(val?: "numeric" | "2-digit") { this.hour_ = val}
+        get hour(): "numeric" | "2-digit" | undefined { return this.hour_}
+        set hourCycle(val?: "h11" | "h12" | "h23" | "h24") { this.hourCycle_ = val}
+        get hourCycle(): "h11" | "h12" | "h23" | "h24" | undefined { return this.hourCycle_}
+        set minute(val?: "numeric" | "2-digit") { this.minute_ = val}
+        get minute(): "numeric" | "2-digit" | undefined { return this.minute_}
+        set month(val?: "numeric" | "2-digit" | "long" | "short" | "narrow") { this.month_ = val}
+        get month(): "numeric" | "2-digit" | "long" | "short" | "narrow" | undefined { return this.month_}
+        set numberingSystem(val?: string) { this.numberingSystem_ = val}
+        get numberingSystem(): string | undefined { return this.numberingSystem_}
+        set second(val?: "numeric" | "2-digit") { this.second_ = val}
+        get second(): "numeric" | "2-digit" | undefined { return this.second_}
+        set timeStyle(val?: TimeStyle) { this.timeStyle_ = val}
+        get timeStyle(): TimeStyle | undefined {return this.timeStyle_}
+        set timeZone(val?: string) { this.timeZone_ = val}
+        get timeZone(): string | undefined { return this.timeZone_}
+        set timeZoneName(val?: TimeZoneName) { this.timeZoneName_ = val}
+        get timeZoneName(): TimeZoneName | undefined { return this.timeZoneName_}
+        set weekday(val?: "long" | "short" | "narrow") { this.weekday_ = val}
+        get weekday(): "long" | "short" | "narrow" | undefined { return this.weekday_}
+        set year(val?: "numeric" | "2-digit") { this.year_ = val}
+        get year(): "numeric" | "2-digit" | undefined { return this.year_}
+
+        private calendar_?: string
+        private localeMatcher_?: "lookup" | "best fit"
+        private dateStyle_?: DateStyle
+        private day_?: "numeric" | "2-digit"
+        private dayPeriod_?: "narrow" | "short" | "long"
+        private era_?: "long" | "short" | "narrow"
+        private formatMatcher_?: "basic" | "best fit"
+        private fractionalSecondDigits_?: number
+        private hour12_?: boolean
+        private hour_?: "numeric" | "2-digit"
+        private hourCycle_?: "h11" | "h12" | "h23" | "h24"
+        private minute_?: "numeric" | "2-digit"
+        private month_?: "numeric" | "2-digit" | "long" | "short" | "narrow"
+        private numberingSystem_?: string
+        private second_?: "numeric" | "2-digit"
+        private timeStyle_?: TimeStyle
+        private timeZone_?: string
+        private timeZoneName_?: TimeZoneName
+        private weekday_?: "long" | "short" | "narrow"
+        private year_?: "numeric" | "2-digit"
 
         constructor() {}
 
-        constructor(options: Intl.DateTimeFormatOptions) {
+        constructor(options: DateTimeFormatOptions) {
             this.calendar = options.calendar
             this.localeMatcher = options.localeMatcher
             this.dateStyle = options.dateStyle
@@ -433,32 +516,6 @@ export namespace Intl {
             this.timeZoneName = options.timeZoneName
             this.weekday = options.weekday
             this.year = options.year
-        }
-
-        static isEmpty(options: DateTimeFormatOptions): boolean {
-            return options.localeMatcher === undefined 
-                    && options.dateStyle === undefined 
-                    && options.day === undefined 
-                    && options.dayPeriod === undefined 
-                    && options.era === undefined
-                    && options.formatMatcher === undefined 
-                    && options.fractionalSecondDigits === undefined 
-                    && options.hour12 === undefined 
-                    && options.hour === undefined 
-                    && options.hourCycle === undefined 
-                    && options.minute === undefined 
-                    && options.month === undefined 
-                    && options.numberingSystem === undefined 
-                    && options.second === undefined 
-                    && options.timeStyle === undefined 
-                    && options.timeZone === undefined 
-                    && options.timeZoneName === undefined 
-                    && options.weekday === undefined 
-                    && options.year === undefined
-        }
-
-        public toString(): string {
-            return JSON.stringify(this)
         }
     }
 

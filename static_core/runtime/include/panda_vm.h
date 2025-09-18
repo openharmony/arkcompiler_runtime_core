@@ -46,6 +46,8 @@ class ReferenceProcessor;
 
 enum class PandaVMType : size_t { ECMA_VM };  // Deprecated. Only for Compability with js_runtime.
 
+enum class EventLoopRunMode : int { RUN_DEFAULT = 0, RUN_ONCE, RUN_NOWAIT };
+
 class PandaVM {
 public:
     static PandaVM *Create(Runtime *runtime, const RuntimeOptions &options, std::string_view runtimeType);
@@ -244,6 +246,14 @@ public:
     }
 
     virtual void FreeInternalResources();
+
+    // Current runtime implementation requires event loop support
+    // in a core non-language-specific runtime component,
+    // particularly StackfulCoroutineManager.
+    virtual bool RunEventLoop([[maybe_unused]] EventLoopRunMode mode)
+    {
+        return false;
+    }
 
     NO_MOVE_SEMANTIC(PandaVM);
     NO_COPY_SEMANTIC(PandaVM);

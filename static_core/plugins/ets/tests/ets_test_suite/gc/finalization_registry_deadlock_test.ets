@@ -19,14 +19,6 @@ let p = new Promise<String>((_resolve: (value: String) => void): void => {
         resolve = _resolve;
 });
 
-let finreg = new FinalizationRegistry<int>((tag: int) => {
-    if (tag == 1) {
-        await p;
-    } else if (tag == 2) {
-        resolve!("Panda");
-    }
-});
-
 function runGC(): void {
     try {
         // trigger FinalizationRegistry cleanup
@@ -38,7 +30,14 @@ function runGC(): void {
 }
 
 
-function deadlockTest(): void {
+async function deadlockTest(): Promise<void> {
+    let finreg = new FinalizationRegistry<int>((tag: int) => {
+    if (tag == 1) {
+        await p;
+    } else if (tag == 2) {
+        resolve!("Panda");
+    }
+    });
     // Regarding the implementation, after GC the callback will be executed 
     // first for register with number 1 and then for number 2
     finreg.register(new Object(), 2);

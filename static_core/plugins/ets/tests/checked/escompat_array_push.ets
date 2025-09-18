@@ -14,11 +14,27 @@
  */
 
 //! CHECKER       escompat Array push
-//! RUN           force_jit: true, entry: "escompat_array_push.ETSGLOBAL::test_array_push"
+//! RUN           force_jit: true, options: "--compiler-regex=.*::test_array_push_.*", entry: "escompat_array_push.ETSGLOBAL::main"
+//!
 //! METHOD        "escompat_array_push.ETSGLOBAL::test_array_push"
 //! PASS_AFTER    "Codegen"
 //! INST          /CallVirtual.*escompat.Array::push/
-//! INST_COUNT    /CallVirtual.*escompat.Array::push/, 3
+//! INST_COUNT    /CallVirtual.*escompat.Array::push/, 5
+//!
+//! METHOD        "escompat_array_push.ETSGLOBAL::test_array_push_unions"
+//! PASS_AFTER    "Codegen"
+//! INST          /CallVirtual.*escompat.Array::push/
+//! INST_COUNT    /CallVirtual.*escompat.Array::push/, 5
+//!
+//! METHOD        "escompat_array_push.ETSGLOBAL::test_array_push_one"
+//! PASS_AFTER    "Codegen"
+//! INST          /CallVirtual.*escompat.Array::pushOne/
+//! INST_COUNT    /CallVirtual.*escompat.Array::pushOne/, 5
+//!
+//! METHOD        "escompat_array_push.ETSGLOBAL::test_array_push_array"
+//! PASS_AFTER    "Codegen"
+//! INST          /CallVirtual.*escompat.Array::pushArray/
+//! INST_COUNT    /CallVirtual.*escompat.Array::pushArray/, 2
 
 function test_array_push() {
     let array_size: int = 3;
@@ -78,12 +94,6 @@ function test_array_push_managed_objects() {
     arktest.assertEQ(array2[array2.length - 1], undefined);
 }
 
-//! CHECKER       escompat Array push3
-//! RUN           force_jit: true, entry: "escompat_array_push.ETSGLOBAL::test_array_push_unions"
-//! METHOD        "escompat_array_push.ETSGLOBAL::test_array_push_unions"
-//! PASS_AFTER    "Codegen"
-//! INST          /CallVirtual.*escompat.Array::push/
-//! INST_COUNT    /CallVirtual.*escompat.Array::push/, 5
 function test_array_push_unions() {
     let array: Array<Object | null | undefined | number | string> =
         new Array<Object | null | undefined | number | string>();
@@ -111,12 +121,6 @@ function test_array_push_unions() {
     arktest.assertEQ(array.length, 5);
 }
 
-//! CHECKER       escompat Array push4
-//! RUN           force_jit: true, entry: "escompat_array_push.ETSGLOBAL::test_array_push_one"
-//! METHOD        "escompat_array_push.ETSGLOBAL::test_array_push_one"
-//! PASS_AFTER    "Codegen"
-//! INST          /CallVirtual.*escompat.Array::pushOne/
-//! INST_COUNT    /CallVirtual.*escompat.Array::pushOne/, 5
 function test_array_push_one() {
     let array: Array<Object | null | undefined | number | string> =
         new Array<Object | null | undefined | number | string>();
@@ -144,12 +148,6 @@ function test_array_push_one() {
     arktest.assertEQ(array.length, 5);
 }
 
-//! CHECKER       escompat Array push5
-//! RUN           force_jit: true, entry: "escompat_array_push.ETSGLOBAL::test_array_push_array"
-//! METHOD        "escompat_array_push.ETSGLOBAL::test_array_push_array"
-//! PASS_AFTER    "Codegen"
-//! INST          /CallVirtual.*escompat.Array::pushArray/
-//! INST_COUNT    /CallVirtual.*escompat.Array::pushArray/, 2
 function test_array_push_array() {
     let array: Array<Object | null | undefined | number | string> =
         new Array<Object | null | undefined | number | string>();
@@ -177,4 +175,11 @@ function test_array_push_array() {
     arktest.assertEQ(array[array.length - 1], undefined);
 
     arktest.assertEQ(array.length, 15);
+}
+
+function main(): void {
+    test_array_push()
+    test_array_push_unions()
+    test_array_push_one()
+    test_array_push_array()
 }

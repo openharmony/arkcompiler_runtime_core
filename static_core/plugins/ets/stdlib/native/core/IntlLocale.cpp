@@ -246,7 +246,7 @@ ani_ref StdCoreIntlLocaleParseTag(ani_env *env, [[maybe_unused]] ani_class klass
     auto l = icu::Locale::forLanguageTag(tagKey, success);
     if (UNLIKELY(U_FAILURE(success))) {
         std::string message = "Failed to find locale from tag";
-        ThrowNewError(env, "std.core.RuntimeException", message.c_str(), "C{std.core.String}:");
+        ThrowNewError(env, "std.core.RuntimeError", message.c_str(), "C{std.core.String}:");
         return nullptr;
     }
 
@@ -262,7 +262,7 @@ ani_ref StdCoreIntlLocaleParseTag(ani_env *env, [[maybe_unused]] ani_class klass
         auto unicodeKeywordValue = l.getUnicodeKeywordValue<std::string>(unicodeKey, success);
         if (UNLIKELY(U_FAILURE(success))) {
             std::string message = "Failed to getUnicodeKeywordValue";
-            ThrowNewError(env, "std.core.RuntimeException", message.c_str(), "C{std.core.String}:");
+            ThrowNewError(env, "std.core.RuntimeError", message.c_str(), "C{std.core.String}:");
             return nullptr;
         }
         int keyIndex = UnicodeKeyToLocaleInfo(unicodeKey);
@@ -295,7 +295,7 @@ ani_string StdCoreIntlLocaleDefaultTag(ani_env *env)
     if (UNLIKELY(U_FAILURE(status))) {
         std::string message = "Error receiving default locale language tag: ";
         message += u_errorName(status);
-        ThrowNewError(env, "std.core.RuntimeException", message.c_str(), "C{std.core.String}:");
+        ThrowNewError(env, "std.core.RuntimeError", message.c_str(), "C{std.core.String}:");
         return nullptr;
     }
     return StdStrToAni(env, tag);

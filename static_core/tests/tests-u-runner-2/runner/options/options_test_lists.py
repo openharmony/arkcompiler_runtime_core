@@ -22,23 +22,24 @@ from typing import Any, cast
 from runner.enum_types.configuration_kind import ArchitectureKind, BuildTypeKind, OSKind, SanitizerKind
 from runner.options.options import IOptions
 
+PARAMETERS = "parameters"
+TEST_LIST = "test-list"
+TEST_FILE = "test-file"
+SKIP_TEST_LISTS = "skip-test-lists"
+EXCLUDE_IGNORED_TESTS = "exclude-ignored-tests"
+UPDATE_EXCLUDED = "update-excluded"
+UPDATE_EXPECTED = "update-expected"
+TEST_LIST_ARCH = "test-list-arch"
+TEST_LIST_SAN = "test-list-san"
+TEST_LIST_OS = "test-list-os"
+TEST_LIST_BUILD = "test-list-build"
+
 
 class TestListsOptions(IOptions):
-    __DEFAULT_ARCH = ArchitectureKind.AMD64
-    __DEFAULT_SAN = SanitizerKind.NONE
-    __DEFAULT_OS = OSKind.LIN
-    __DEFAULT_BUILD_TYPE = BuildTypeKind.FAST_VERIFY
-
-    __PARAMETERS = "parameters"
-    __TEST_LIST = "test-list"
-    __TEST_FILE = "test-file"
-    __SKIP_TEST_LISTS = "skip-test-lists"
-    __UPDATE_EXCLUDED = "update-excluded"
-    __UPDATE_EXPECTED = "update-expected"
-    __TEST_LIST_ARCH = "test-list-arch"
-    __TEST_LIST_SAN = "test-list-san"
-    __TEST_LIST_OS = "test-list-os"
-    __TEST_LIST_BUILD = "test-list-build"
+    DEFAULT_ARCH = ArchitectureKind.AMD64
+    DEFAULT_SAN = SanitizerKind.NONE
+    DEFAULT_OS = OSKind.LIN
+    DEFAULT_BUILD_TYPE = BuildTypeKind.FAST_VERIFY
 
     def __init__(self, parameters: dict[str, Any]):  # type: ignore[explicit-any]
         super().__init__(parameters)
@@ -49,101 +50,119 @@ class TestListsOptions(IOptions):
 
     @staticmethod
     def add_cli_args(parser: argparse.ArgumentParser, dest: str | None = None) -> None:
+        TestListsOptions.add_test_list_cli_args(parser, dest)
+        TestListsOptions.add_tags_cli_args(parser, dest)
+
+    @staticmethod
+    def add_test_list_cli_args(parser: argparse.ArgumentParser, dest: str | None = None) -> None:
         # Test lists options
         parser.add_argument(
-            f'--{TestListsOptions.__TEST_LIST}', default=None,
-            dest=f"{dest}{TestListsOptions.__TEST_LIST}",
+            f'--{TEST_LIST}', default=None,
+            dest=f"{dest}{TEST_LIST}",
             help='run only the tests listed in this file')
         parser.add_argument(
-            f'--{TestListsOptions.__TEST_FILE}', default=None,
-            dest=f"{dest}{TestListsOptions.__TEST_FILE}",
+            f'--{TEST_FILE}', default=None,
+            dest=f"{dest}{TEST_FILE}",
             help='run only one test specified here')
         parser.add_argument(
-            f'--{TestListsOptions.__SKIP_TEST_LISTS}', action='store_true', default=False,
-            dest=f"{dest}{TestListsOptions.__SKIP_TEST_LISTS}",
+            f'--{SKIP_TEST_LISTS}', action='store_true', default=False,
+            dest=f"{dest}{SKIP_TEST_LISTS}",
             help='do not use ignored or excluded lists, run all available tests, report all found failures')
         parser.add_argument(
-            f'--{TestListsOptions.__UPDATE_EXCLUDED}', action='store_true', default=False,
-            dest=f"{dest}{TestListsOptions.__UPDATE_EXCLUDED}",
+            f'--{EXCLUDE_IGNORED_TESTS}', action='store_true', default=False,
+            dest=f"{dest}{EXCLUDE_IGNORED_TESTS}",
+            help='consider ignored tests as excluded one, run all available tests, report all found failures')
+        parser.add_argument(
+            f'--{UPDATE_EXCLUDED}', action='store_true', default=False,
+            dest=f"{dest}{UPDATE_EXCLUDED}",
             help='update list of excluded tests - put all failed tests into default excluded test list')
         parser.add_argument(
-            f'--{TestListsOptions.__UPDATE_EXPECTED}', action='store_true', default=False,
-            dest=f"{dest}{TestListsOptions.__UPDATE_EXPECTED}",
+            f'--{UPDATE_EXPECTED}', action='store_true', default=False,
+            dest=f"{dest}{UPDATE_EXPECTED}",
             help='update files with expected results')
+
+    @staticmethod
+    def add_tags_cli_args(parser: argparse.ArgumentParser, dest: str | None = None) -> None:
+        # Test lists options
         parser.add_argument(
-            f'--{TestListsOptions.__TEST_LIST_ARCH}', action='store',
-            default=TestListsOptions.__DEFAULT_ARCH,
-            type=lambda arg: ArchitectureKind.is_value(arg, f"--{TestListsOptions.__TEST_LIST_ARCH}"),
-            dest=f"{dest}{TestListsOptions.__TEST_LIST_ARCH}",
-            help='load specified architecture specific test lists. '
+            f'--{TEST_LIST_ARCH}', action='store',
+            default=TestListsOptions.DEFAULT_ARCH,
+            type=lambda arg: ArchitectureKind.is_value(arg, f"--{TEST_LIST_ARCH}"),
+            dest=f"{dest}{TEST_LIST_ARCH}",
+            help='load chosen architecture specific test lists. '
                  f'One of: {ArchitectureKind.values()}')
         parser.add_argument(
-            f'--{TestListsOptions.__TEST_LIST_SAN}', action='store',
-            default=TestListsOptions.__DEFAULT_SAN,
-            type=lambda arg: SanitizerKind.is_value(arg, f"--{TestListsOptions.__TEST_LIST_SAN}"),
-            dest=f"{dest}{TestListsOptions.__TEST_LIST_SAN}",
-            help='load specified sanitizer specific test lists. '
+            f'--{TEST_LIST_SAN}', action='store',
+            default=TestListsOptions.DEFAULT_SAN,
+            type=lambda arg: SanitizerKind.is_value(arg, f"--{TEST_LIST_SAN}"),
+            dest=f"{dest}{TEST_LIST_SAN}",
+            help='load chosen sanitizer specific test lists. '
                  f'One of {SanitizerKind.values()} where '
                  'asan - used on running against build with ASAN and UBSAN sanitizers), '
                  'tsan - used on running against build with TSAN sanitizers).')
         parser.add_argument(
-            f'--{TestListsOptions.__TEST_LIST_OS}', action='store',
-            default=TestListsOptions.__DEFAULT_OS,
-            type=lambda arg: OSKind.is_value(arg, f"--{TestListsOptions.__TEST_LIST_OS}"),
-            dest=f"{dest}{TestListsOptions.__TEST_LIST_OS}",
+            f'--{TEST_LIST_OS}', action='store',
+            default=TestListsOptions.DEFAULT_OS,
+            type=lambda arg: OSKind.is_value(arg, f"--{TEST_LIST_OS}"),
+            dest=f"{dest}{TEST_LIST_OS}",
             help='load specified operating system specific test lists. '
                  f'One of {OSKind.values()}')
         parser.add_argument(
-            f'--{TestListsOptions.__TEST_LIST_BUILD}', action='store',
-            default=TestListsOptions.__DEFAULT_BUILD_TYPE,
-            type=lambda arg: BuildTypeKind.is_value(arg, f"--{TestListsOptions.__TEST_LIST_BUILD}"),
-            dest=f"{dest}{TestListsOptions.__TEST_LIST_BUILD}",
+            f'--{TEST_LIST_BUILD}', action='store',
+            default=TestListsOptions.DEFAULT_BUILD_TYPE,
+            type=lambda arg: BuildTypeKind.is_value(arg, f"--{TEST_LIST_BUILD}"),
+            dest=f"{dest}{TEST_LIST_BUILD}",
             help='load specified build type specific test lists. '
                  f'One of {BuildTypeKind.values()}')
 
     @cached_property
     def architecture(self) -> ArchitectureKind:
-        if isinstance(self.__parameters[self.__TEST_LIST_ARCH], str):
-            self.__parameters[self.__TEST_LIST_ARCH] = ArchitectureKind.is_value(
-                value=self.__parameters[self.__TEST_LIST_ARCH],
-                option_name=f"--{self.__TEST_LIST_ARCH}")
-        return cast(ArchitectureKind, self.__parameters[self.__TEST_LIST_ARCH])
+        if isinstance(self.__parameters[TEST_LIST_ARCH], str):
+            self.__parameters[TEST_LIST_ARCH] = ArchitectureKind.is_value(
+                value=self.__parameters[TEST_LIST_ARCH],
+                option_name=f"--{TEST_LIST_ARCH}")
+        return cast(ArchitectureKind, self.__parameters[TEST_LIST_ARCH])
 
     @cached_property
     def build_type(self) -> BuildTypeKind:
-        if isinstance(self.__parameters[self.__TEST_LIST_BUILD], str):
-            self.__parameters[self.__TEST_LIST_BUILD] = BuildTypeKind.is_value(
-                value=self.__parameters[self.__TEST_LIST_BUILD],
-                option_name=f"--{self.__TEST_LIST_BUILD}")
-        return cast(BuildTypeKind, self.__parameters[self.__TEST_LIST_BUILD])
+        if isinstance(self.__parameters[TEST_LIST_BUILD], str):
+            self.__parameters[TEST_LIST_BUILD] = BuildTypeKind.is_value(
+                value=self.__parameters[TEST_LIST_BUILD],
+                option_name=f"--{TEST_LIST_BUILD}")
+        return cast(BuildTypeKind, self.__parameters[TEST_LIST_BUILD])
 
     @cached_property
     def explicit_file(self) -> str | None:
-        value = self.__parameters[self.__TEST_FILE]
+        value = self.__parameters[TEST_FILE]
         return str(value) if value is not None else value
 
     @cached_property
     def explicit_list(self) -> str | None:
-        value = self.__parameters[self.__TEST_LIST]
+        value = self.__parameters[TEST_LIST]
         return str(value) if value is not None else value
 
     @cached_property
     def skip_test_lists(self) -> bool:
-        return bool(self.__parameters[self.__SKIP_TEST_LISTS])
+        return cast(bool, self.__parameters[SKIP_TEST_LISTS])
+
+    @cached_property
+    def exclude_ignored_tests(self) -> bool:
+        return cast(bool, self.__parameters[EXCLUDE_IGNORED_TESTS])
 
     @cached_property
     def update_excluded(self) -> bool:
-        return bool(self.__parameters[self.__UPDATE_EXCLUDED])
+        return cast(bool, self.__parameters[UPDATE_EXCLUDED])
 
     @cached_property
     def update_expected(self) -> bool:
-        return bool(self.__parameters[self.__UPDATE_EXPECTED])
+        return cast(bool, self.__parameters[UPDATE_EXPECTED])
 
     def get_command_line(self) -> str:
         options = [
             f'--test-file="{self.explicit_file}"' if self.explicit_file is not None else '',
             f'--test-list="{self.explicit_list}"' if self.explicit_list is not None else '',
             '--skip-test-lists' if self.skip_test_lists else '',
+            '--exclude-ignored-tests' if self.exclude_ignored_tests else '',
             '--update-excluded' if self.update_excluded else '',
             '--update-expected' if self.update_expected else ''
         ]

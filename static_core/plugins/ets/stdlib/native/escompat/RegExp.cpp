@@ -277,9 +277,9 @@ static void SetIndexField(ani_env *env, ani_class regexpResultClass, ani_object 
     ANI_FATAL_IF_ERROR(env->Object_SetField_Double(regexpExecArrayObj, indexField, static_cast<double>(index)));
 }
 
-static void SetLastIndexField(ani_env *env, ani_object regexp, ani_field lastIndexField, ani_double value)
+static void SetLastIndexField(ani_env *env, ani_object regexp, ani_field lastIndexField, ani_int value)
 {
-    ANI_FATAL_IF_ERROR(env->Object_SetField_Double(regexp, lastIndexField, value));
+    ANI_FATAL_IF_ERROR(env->Object_SetField_Int(regexp, lastIndexField, value));
 }
 
 static void SetGroupsField(ani_env *env, ani_class regexpResultClass, ani_object regexpExecArray,
@@ -324,7 +324,7 @@ static ani_object DoExec(ani_env *env, ani_object regexp, ani_class resultClass,
     }
     if (static_cast<size_t>(lastIdx) > execData.inputSize) {
         if (globalOrSticky) {
-            SetLastIndexField(env, regexp, lastIndexField, 0.0);
+            SetLastIndexField(env, regexp, lastIndexField, 0);
         }
         SetIsCorrectField(env, resultClass, resultObject, false);
         return resultObject;
@@ -332,14 +332,14 @@ static ani_object DoExec(ani_env *env, ani_object regexp, ani_class resultClass,
     auto execResult = Execute(env, execData);
     if (!execResult.isSuccess) {
         if (globalOrSticky) {
-            SetLastIndexField(env, regexp, lastIndexField, 0.0);
+            SetLastIndexField(env, regexp, lastIndexField, 0);
         }
         SetIsCorrectField(env, resultClass, resultObject, false);
         return resultObject;
     }
 
     if (globalOrSticky) {
-        SetLastIndexField(env, regexp, lastIndexField, static_cast<ani_double>(execResult.endIndex));
+        SetLastIndexField(env, regexp, lastIndexField, execResult.endIndex);
     }
     SetIsCorrectField(env, resultClass, resultObject, true);
     SetIndexField(env, resultClass, resultObject, execResult.index);

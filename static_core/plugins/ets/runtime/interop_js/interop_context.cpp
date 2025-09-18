@@ -133,6 +133,12 @@ static bool RegisterTimerModule()
     ani_env *aniEnv = nullptr;
     status = vm->GetEnv(ANI_VERSION_1, &aniEnv);
     ASSERT(status == ANI_OK);
+#ifndef PANDA_TARGET_OHOS
+    auto jsEnv = InteropCtx::Current()->GetJSEnv();
+    napi_value global = nullptr;
+    napi_get_global(jsEnv, &global);
+    ark::ets::interop::js::helper::Init(jsEnv, global);
+#endif
     return TimerModule::Init(aniEnv);
 }
 
@@ -142,10 +148,25 @@ static void RegisterEventLoopModule(EtsCoroutine *coro)
     ASSERT(coro == coro->GetPandaVM()->GetCoroutineManager()->GetMainThread());
     coro->GetPandaVM()->CreateCallbackPosterFactory<EventLoopCallbackPosterFactoryImpl>();
     coro->GetPandaVM()->SetRunEventLoopFunction(
-        [](EventLoopRunMode mode) { EventLoop::RunEventLoop(static_cast<EventLoopRunMode>(mode)); });
+        [](EventLoopRunMode mode) { return EventLoop::RunEventLoop(static_cast<EventLoopRunMode>(mode)); });
     coro->GetPandaVM()->SetWalkEventLoopFunction(
         [](WalkEventLoopCallback &cb, void *args) { EventLoop::WalkEventLoop(cb, args); });
 }
+
+#ifdef PANDA_JS_ETS_HYBRID_MODE
+static PandaUniquePtr<SingleEventPoster> CreateExtSchedulingPoster()
+{
+    auto schedulingFunc = [] {
+        auto *coro = Coroutine::GetCurrent();
+        auto *w = coro->GetContext<StackfulCoroutineContext>()->GetWorker();
+        if (w->GetRunnablesCount(Coroutine::Type::MUTATOR) > 0) {
+            coro->GetManager()->Schedule();
+        }
+        w->TriggerSchedulerExternally(coro);
+    };
+    return MakePandaUnique<SingleEventPoster>(std::move(schedulingFunc));
+}
+#endif  // PANDA_JS_ETS_HYBRID_MODE
 
 std::atomic_uint32_t ConstStringStorage::qnameBufferSize_ {0U};
 
@@ -793,9 +814,9 @@ void InteropCtx::Init(EtsCoroutine *coro, napi_env env)
 #ifdef PANDA_JS_ETS_HYBRID_MODE
     Handshake::VmHandshake(env, ctx);
     XGC::GetInstance()->OnAttach(ctx);
-    auto workerPoster = coro->GetPandaVM()->CreateCallbackPoster();
-    ASSERT(workerPoster != nullptr);
-    worker->SetCallbackPoster(std::move(workerPoster));
+    auto extSchPoster = CreateExtSchedulingPoster();
+    ASSERT(extSchPoster != nullptr);
+    worker->SetCallbackPoster(std::move(extSchPoster));
 #endif  // PANDA_JS_ETS_HYBRID_MODE
 }
 

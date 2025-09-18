@@ -776,24 +776,24 @@ export namespace jsonx {
      * Interface for types that can be deserialized from JSON.
      * Classes implementing this interface can be converted from a JsonElement.
      */
-    interface JsonElementSerializable {
+    export interface JsonElementSerializable {
         /**
          * Deserializes an object from a JsonElement.
          * @param {JsonElement} jsonElem - The JSON element to deserialize from
          */
-        fromJson(jsonElem: JsonElement)
+        fromJSON(jsonElem: JsonElement)
     }
 
     /**
      * Interface for types that can be serialized to JSON.
      * Classes implementing this interface can be converted to a JsonElement.
      */
-    interface JsonElementDeserializable {
+    export interface JsonElementDeserializable {
         /**
          * Serializes an object to a JsonElement.
          * @returns {JsonElement} The JSON representation of the object
          */
-        toJson(): JsonElement
+        toJSON(): JsonElement
     }
 
 }

@@ -150,7 +150,9 @@ Expected<PandaEtsVM *, PandaString> PandaEtsVM::Create(Runtime *runtime, const R
         options.GetTaskpoolMode(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)) ==
                 ets::intrinsics::taskpool::TASKPOOL_EAWORKER_MODE
             ? ets::intrinsics::taskpool::TASKPOOL_EAWORKER_INIT_NUM
-            : 0};
+            : 0,
+        // enable external timer implementation
+        options.IsCoroutineEnableFeaturesEnableExternalTimer(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))};
     vm->coroutineManager_->Initialize(cfg, runtime, vm);
 
     return vm;

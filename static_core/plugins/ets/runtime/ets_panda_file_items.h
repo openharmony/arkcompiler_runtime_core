@@ -178,7 +178,7 @@ static constexpr std::string_view REFERENCE_ERROR                      = "Lescom
 static constexpr std::string_view URI_ERROR                            = "Lescompat/URIError;";
 static constexpr std::string_view TYPE_ERROR                           = "Lescompat/TypeError;";
 // remove or make an Error
-static constexpr std::string_view RUNTIME_EXCEPTION                    = "Lstd/core/RuntimeException;";
+static constexpr std::string_view RUNTIME_ERROR                        = "Lstd/core/RuntimeError;";
 static constexpr std::string_view STACK_OVERFLOW_ERROR                 = "Lstd/core/StackOverflowError;";
 static constexpr std::string_view STRING_INDEX_OUT_OF_BOUNDS_ERROR     = "Lstd/core/StringIndexOutOfBoundsError;";
 // remove or make an Error
@@ -192,6 +192,7 @@ static constexpr std::string_view ARGUMENT_OUT_OF_RANGE_ERROR          = "Lstd/c
 
 // stdlib Error classes
 static constexpr std::string_view ERROR_OPTIONS                        = "Lescompat/ErrorOptions;";
+static constexpr std::string_view ERROR_OPTIONS_IMPL                   = "Lescompat/ErrorOptionsImpl;";
 
 static constexpr std::string_view DOUBLE_TO_STRING_CACHE_ELEMENT       = "Lstd/core/DoubleToStringCacheElement;";
 static constexpr std::string_view FLOAT_TO_STRING_CACHE_ELEMENT        = "Lstd/core/FloatToStringCacheElement;";
@@ -233,6 +234,7 @@ static constexpr std::string_view ARRAY_VALUES_ITERATOR_T              = "Lescom
 static constexpr std::string_view MAP                                  = "Lescompat/Map;";
 static constexpr std::string_view MAPENTRY                             = "Lescompat/MapEntry;";
 static constexpr std::string_view MAPITERATOR                          = "Lescompat/MapIterator;";
+static constexpr std::string_view SETITERATOR                          = "Lescompat/SetIterator;";
 static constexpr std::string_view EMPTYMAPITERATOR                     = "Lescompat/EmptyMapIterator;";
 static constexpr std::string_view SET                                  = "Lescompat/Set;";
 static constexpr std::string_view RECORD                               = "Lescompat/Record;";

@@ -22,6 +22,7 @@ function main(): int {
     suite.addTest('Class equals', testClassEquals);
     suite.addTest('Array equals', testArrayEquals);
     suite.addTest('Different types not equals', testDifferentTypesNotEquals);
+    suite.addTest('Boolean equals', tesBooleanTypeEquals);
     return suite.run();
 }
 
@@ -90,4 +91,14 @@ function testDifferentTypesNotEquals() {
         tInt.equals(tBool),
         'int should not equal boolean'
     );
+}
+
+function tesBooleanTypeEquals() {
+    const val = BooleanType.VAL;
+    const ref = BooleanType.REF;
+
+    arktest.assertTrue(val.equals(BooleanType.VAL));
+    arktest.assertTrue(ref.equals(BooleanType.REF));
+    arktest.assertTrue(val.equals(ref));
+    arktest.assertTrue(ref.equals(val));
 }

@@ -29,6 +29,6 @@ class Person {
 function main(): void {
   const bob = new Person("Bob");
   bob.fetchData = async (): Promise<string> => "Data fetched";
-  const a: string = await bob.fetchData!();
+  const a: string = waitForCompletion(bob.fetchData!);
   arktest.assertEQ(a, "Data fetched");
 }

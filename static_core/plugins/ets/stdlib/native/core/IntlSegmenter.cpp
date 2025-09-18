@@ -67,7 +67,7 @@ std::optional<icu::Locale> EtsToLocale(ani_env *env, const ani_string &bcp47Loca
  * @param index Starting index of the cluster in original string
  * @param isWordLike Boolean indicating if cluster represents a word-like segment
  * @return Pointer to newly created IntlCluster object, nullptr if creation fails
- * @throws RuntimeException if class/constructor/field lookups fail
+ * @throws RuntimeError if class/constructor/field lookups fail
  */
 ani_object StdCoreIntlCreateClusterObject(ani_env *env, [[maybe_unused]] ani_class klass, ani_string cluster,
                                           ani_int index, ani_boolean isWordLike)
@@ -131,7 +131,7 @@ ani_boolean IntlCurrentClusterIsWordLike(std::unique_ptr<icu::BreakIterator> &br
  * @param str Input string to segment
  * @param localeStr BCP47 language tag string for locale-specific segmentation
  * @return Array of IntlCluster objects representing the segments, nullptr if operation fails
- * @throws RuntimeException if locale creation or break iterator initialization fails
+ * @throws RuntimeError if locale creation or break iterator initialization fails
  */
 ani_array IntlClusters(ani_env *env, [[maybe_unused]] ani_class klass, BreakerFactory factory, ani_string str,
                        ani_string localeStr)
@@ -140,7 +140,7 @@ ani_array IntlClusters(ani_env *env, [[maybe_unused]] ani_class klass, BreakerFa
     if (!locale) {
         std::string message = "Unable to create ICU locale for specified tag (bcp47): ";
         message += ConvertFromAniString(env, localeStr);
-        ThrowNewError(env, "std.core.RuntimeException", message.c_str(), "C{std.core.String}:");
+        ThrowNewError(env, "std.core.RuntimeError", message.c_str(), "C{std.core.String}:");
         return nullptr;
     }
     icu::Locale breakLocale = locale.value();
@@ -149,7 +149,7 @@ ani_array IntlClusters(ani_env *env, [[maybe_unused]] ani_class klass, BreakerFa
     std::unique_ptr<icu::BreakIterator> breaker(factory(breakLocale, status));
     if (UNLIKELY(U_FAILURE(status))) {
         std::string message = "Unable to create break iterator";
-        ThrowNewError(env, "std.core.RuntimeException", message.c_str(), "C{std.core.String}:");
+        ThrowNewError(env, "std.core.RuntimeError", message.c_str(), "C{std.core.String}:");
         return nullptr;
     }
 

@@ -132,6 +132,8 @@ public:
 
     EtsClass *escompatRegExpExecArray {};
     EtsClass *escompatJsonReplacer {};
+    EtsClass *escompatErrorOptions {};
+    EtsClass *escompatErrorOptionsImpl {};
 
     struct Entry {
         size_t slotIndex {};

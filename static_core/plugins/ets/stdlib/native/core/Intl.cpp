@@ -21,6 +21,7 @@
 #include "plugins/ets/stdlib/native/core/IntlSegmenter.h"
 #include "plugins/ets/stdlib/native/core/IntlCommon.h"
 #include "plugins/ets/stdlib/native/core/IntlLocale.h"
+#include "plugins/ets/stdlib/native/core/IntlLocaleHelper.h"
 #include "plugins/ets/stdlib/native/core/IntlPluralRules.h"
 #include "plugins/ets/stdlib/native/core/IntlDateTimeFormat.h"
 #include "plugins/ets/stdlib/native/core/IntlListFormat.h"
@@ -40,6 +41,7 @@ ani_status InitCoreIntl(ani_env *env)
     // Register Native methods. Stop if an error occurred
     ani_status err = RegisterIntlNumberFormatNativeMethods(env);
     err = err == ANI_OK ? RegisterIntlLocaleMatch(env) : err;
+    err = err == ANI_OK ? RegisterIntlLocaleHelper(env) : err;
     err = err == ANI_OK ? RegisterIntlCollator(env) : err;
     err = err == ANI_OK ? RegisterIntlLocaleNativeMethods(env) : err;
     err = err == ANI_OK ? RegisterIntlPluralRules(env) : err;

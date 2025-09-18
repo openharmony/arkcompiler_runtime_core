@@ -43,6 +43,8 @@ struct CoroutineManagerConfig {
     bool enablePerfStats = false;
     // number of exclusive workers created for runtime needs
     uint32_t preallocatedExclusiveWorkersCount = 0;
+    /// Enable external timer implementation
+    bool enableExternalTimer = false;
 };
 
 /// @brief defines the requested launch mode for a coroutine
@@ -320,6 +322,11 @@ public:
     virtual void PreZygoteFork() = 0;
     /// Called after Zygote fork to reinitialize and restart worker threads.
     virtual void PostZygoteFork() = 0;
+    /// NOTE(ivagin): all config-related stuff should be moved to some special class member
+    virtual bool IsExternalTimerEnabled()
+    {
+        return false;
+    };
 
 protected:
     using EntrypointInfo = Coroutine::EntrypointInfo;

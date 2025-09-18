@@ -17,7 +17,7 @@ export interface IVersionsResponse {
     frontend?: string;
     backendVersion?: string;
     arktsVersion?: string;
-    es2panda?: string;
+    es2pandaVersion?: string;
 }
 
 export interface IVersionsFetch {
@@ -25,9 +25,9 @@ export interface IVersionsFetch {
 
 export const versionsModel = {
     fromApi: (data: Partial<IVersionsResponse>): IVersionsResponse => ({
-        frontend: data.frontend || '0.0.3',
+        frontend: data.frontend || '0.0.4',
         backendVersion: data.backendVersion || '0.0.1',
         arktsVersion: data.arktsVersion || '0.0.1',
-        es2panda: data.es2panda || '0.0.1',
+        es2pandaVersion: data.es2pandaVersion || '0.0.1',
     }),
 };

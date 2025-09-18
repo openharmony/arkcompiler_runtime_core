@@ -130,3 +130,65 @@ enum E7 {
 enum E8 {
   A
 }
+
+type BaseType = string;
+type SubType<T> = BaseType | ((item: T, index: number) => void);
+type PropertyType<T> = SubType<T> | ((item: T, index: number) => string);
+
+type InterfacePropertyType = string;
+type InterfaceFunctionParamType = number;
+type InterfaceFunctionReturnType = boolean;
+interface InterfacePropertyInterface {}
+interface InterfaceFunctionParamInterface {}
+interface InterfaceFunctionReturnInterface {}
+class InterfacePropertyClass {}
+class InterfaceFunctionParamClass {}
+class InterfaceFunctionReturnClass {}
+interface BaseInterface {}
+interface SubInterface extends BaseInterface {}
+interface PropertyInterface extends SubInterface {
+  t: InterfacePropertyType;
+  i: InterfacePropertyInterface;
+  c: InterfacePropertyClass;
+  fti(p: InterfaceFunctionParamType): InterfaceFunctionReturnInterface;
+  fic(p: InterfaceFunctionParamInterface): InterfaceFunctionReturnClass;
+  fct(p: InterfaceFunctionParamClass): InterfaceFunctionReturnType;
+}
+class PropertyInterfaceImplementation implements PropertyInterface {
+  t: InterfacePropertyType = "default";
+  i: InterfacePropertyInterface = {};
+  c: InterfacePropertyClass = {};
+  fti(p: InterfaceFunctionParamType): InterfaceFunctionReturnInterface { return {}; }
+  fic(p: InterfaceFunctionParamInterface): InterfaceFunctionReturnClass { return {}; }
+  fct(p: InterfaceFunctionParamClass): InterfaceFunctionReturnType { return true; }
+}
+
+type ClassPropertyType = string;
+type ClassFunctionParamType = number;
+type ClassFunctionReturnType = boolean;
+interface ClassPropertyInteface {}
+interface ClassFunctionParamInterface {}
+interface ClassFunctionReturnInterface {}
+class ClassPropertyClass {}
+class ClassFunctionParamClass {}
+class ClassFunctionReturnClass {}
+interface ImplementedByBase1 {}
+interface ImplementedByBase2 {}
+interface ImplementedBySub {}
+interface ImplementedByProperty {}
+class BaseClass implements ImplementedByBase1, ImplementedByBase2 {}
+class SubClass extends BaseClass implements ImplementedBySub {}
+class PropertyClass extends SubClass implements ImplementedByProperty {
+  t: ClassPropertyType = "default";
+  i: ClassPropertyInteface = {};
+  c: ClassPropertyClass = {};
+  fti(p: ClassFunctionParamType): ClassFunctionReturnInterface { return {}; }
+  fic(p: ClassFunctionParamInterface): ClassFunctionReturnClass { return {}; }
+  fct(p: ClassFunctionParamClass): ClassFunctionReturnType { return true; }
+}
+
+export class ExportedClass {
+  t: PropertyType<boolean> = "default";
+  i: PropertyInterface = new PropertyInterfaceImplementation();
+  c: PropertyClass = new PropertyClass();
+}

@@ -56,6 +56,8 @@ class TestSuiteOptions(IOptions):
     __DEFAULT_REPEATS_BY_TIME = 0
     __WITH_JS = "with-js"
     __DEFAULT_WITH_JS = False
+    __SKIP_COMPILE_ONLY = "skip-compile-only"
+    __DEFAULT_SKIP_COMPILE_ONLY = False
     __WORK_DIR = "work-dir"
 
     def __init__(self, args: dict[str, Any], parent: IOptions):  # type: ignore[explicit-any]
@@ -126,9 +128,15 @@ class TestSuiteOptions(IOptions):
                  f'Number of repeats is always integer. By default {TestSuiteOptions.__DEFAULT_REPEATS_BY_TIME}')
         config.add_argument(
             f'--{TestSuiteOptions.__WITH_JS}', action='store_true',
-            default=TestSuiteOptions.__WITH_JS,
+            default=TestSuiteOptions.__DEFAULT_WITH_JS,
             dest=f"{dest}{TestSuiteOptions.__WITH_JS}",
             help='enable JS-related tests')
+        config.add_argument(
+            f'--{TestSuiteOptions.__SKIP_COMPILE_ONLY}', action='store_true',
+            default=TestSuiteOptions.__DEFAULT_SKIP_COMPILE_ONLY,
+            dest=f"{dest}{TestSuiteOptions.__SKIP_COMPILE_ONLY}",
+            help='if set the tests marked as `compile-only` are excluded from launch. '
+                 'By default, all tests are launched.')
 
         TestListsOptions.add_cli_args(parser, dest)
         ETSOptions.add_cli_args(parser, dest)
@@ -171,11 +179,15 @@ class TestSuiteOptions(IOptions):
     def parameters(self) -> dict[str, Any]:  # type: ignore[explicit-any]
         return self.__parameters
 
+    @cached_property
+    def skip_compile_only(self) -> bool:
+        return cast(bool, self.get_parameter(self.__SKIP_COMPILE_ONLY, self.__DEFAULT_SKIP_COMPILE_ONLY))
+
     def extension(self, collection: CollectionsOptions | None = None) -> str:
         return str(self.get_parameter(self.__EXTENSION, self.__DEFAULT_EXTENSION, collection))
 
     def with_js(self, collection: CollectionsOptions | None = None) -> bool:
-        return bool(self.get_parameter(self.__WITH_JS, self.__DEFAULT_WITH_JS, collection))
+        return cast(bool, self.get_parameter(self.__WITH_JS, self.__DEFAULT_WITH_JS, collection))
 
     def load_runtimes(self, collection: CollectionsOptions | None = None) -> str:
         return str(self.get_parameter(self.__LOAD_RUNTIMES, self.__DEFAULT_LOAD_RUNTIMES, collection))
