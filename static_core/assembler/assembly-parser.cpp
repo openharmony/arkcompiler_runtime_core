@@ -706,7 +706,7 @@ void Parser::ParseResetFunctionParams(bool isHomonym)
             if (currFunc_->ins[v.first - 1].GetReg(v.second) >= maxRegNumber) {
                 const auto &debug = currFunc_->ins[v.first - 1].insDebug;
                 context_.err = Error("Register width mismatch.", debug.LineNumber(), Error::ErrorType::ERR_BAD_NAME_REG,
-                                     "", debug.BoundLeft(), debug.BoundRight(), debug.WholeLine());
+                                     "", 0, 0, "");
                 SetError();
                 break;
             }
@@ -756,8 +756,7 @@ void Parser::ParseInsFromFuncTable(ark::pandasm::Function &func)
             if (itSynonym->second.size() > 1) {
                 const auto &debug = insn.insDebug;
                 context_.err = Error("Unable to resolve ambiguous function call", debug.LineNumber(),
-                                     Error::ErrorType::ERR_FUNCTION_MULTIPLE_ALTERNATIVES, "", debug.BoundLeft(),
-                                     debug.BoundRight(), debug.WholeLine());
+                                     Error::ErrorType::ERR_FUNCTION_MULTIPLE_ALTERNATIVES, "", 0, 0, "");
                 SetError();
                 break;
             }
@@ -774,8 +773,7 @@ void Parser::ParseInsFromFuncTable(ark::pandasm::Function &func)
 
             const auto &debug = insn.insDebug;
             context_.err = Error("Function argument mismatch.", debug.LineNumber(),
-                                 Error::ErrorType::ERR_FUNCTION_ARGUMENT_MISMATCH, "", debug.BoundLeft(),
-                                 debug.BoundRight(), debug.WholeLine());
+                                 Error::ErrorType::ERR_FUNCTION_ARGUMENT_MISMATCH, "", 0, 0, "");
             SetError();
         }
     }
@@ -792,8 +790,7 @@ bool Parser::CheckVirtualCallInsn(const ark::pandasm::Ins &insn)
             if (program_.functionStaticTable.find(insn.GetID(0U)) != program_.functionStaticTable.cend()) {
                 const auto &debug = insn.insDebug;
                 context_.err = Error("Virtual instruction calls static method.", debug.LineNumber(),
-                                     Error::ErrorType::ERR_BAD_OPERAND, "", debug.BoundLeft(), debug.BoundRight(),
-                                     debug.WholeLine());
+                                     Error::ErrorType::ERR_BAD_OPERAND, "", 0, 0, "");
                 SetError();
                 return false;
             }
@@ -2319,9 +2316,6 @@ void Parser::SetOperationInformation()
     context_.insNumber = currFunc_->ins.size();
     auto &currDebug = currFunc_->ins.back().insDebug;
     currDebug.SetLineNumber(lineStric_);
-    currDebug.SetWholeLine(context_.tokens[context_.number - 1].wholeLine);
-    currDebug.SetBoundLeft(context_.tokens[context_.number - 1].boundLeft);
-    currDebug.SetBoundRight(context_.tokens[context_.number - 1].boundRight);
 }
 
 bool Parser::ParseFunctionReturn()

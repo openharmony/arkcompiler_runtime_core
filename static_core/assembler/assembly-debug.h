@@ -28,15 +28,8 @@ inline const std::string EMPTY_LINE {};  // NOLINT(fuchsia-statically-constructe
 
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 class Ins {
-#if defined(NOT_OPTIMIZE_PERFORMANCE)
-    std::shared_ptr<std::string> wholeLine_ = nullptr;
-#else
-    std::unique_ptr<std::string> wholeLine_ = nullptr;
-#endif
     std::uint32_t lineNumber_ = 0U;
     std::uint32_t columnNumber_ = 0U;
-    std::uint32_t boundLeft_ = 0U;
-    std::uint32_t boundRight_ = 0U;
 
 public:
     Ins() = default;
@@ -60,29 +53,6 @@ public:
         columnNumber_ = cn;
     }
 
-    void SetBoundLeft(size_t const bl)
-    {
-        ASSERT(bl <= std::numeric_limits<uint32_t>::max());
-        boundLeft_ = bl;
-    }
-
-    void SetBoundRight(size_t const br)
-    {
-        ASSERT(br <= std::numeric_limits<uint32_t>::max());
-        boundRight_ = br;
-    }
-
-    template <typename... Args>
-    void SetWholeLine(Args &&...args)
-    {
-        static_assert(std::is_constructible_v<std::string, Args...>, "Invalid string initialization value.");
-#if defined(NOT_OPTIMIZE_PERFORMANCE)
-        wholeLine_ = std::make_shared<std::string>(std::forward<Args>(args)...);
-#else
-        wholeLine_ = std::make_unique<std::string>(std::forward<Args>(args)...);
-#endif
-    }
-
     std::uint32_t LineNumber() const noexcept
     {
         return lineNumber_;
@@ -93,31 +63,11 @@ public:
         return columnNumber_;
     }
 
-    std::uint32_t BoundLeft() const noexcept
-    {
-        return boundLeft_;
-    }
-
-    std::uint32_t BoundRight() const noexcept
-    {
-        return boundRight_;
-    }
-
-    std::string const &WholeLine() const noexcept
-    {
-        return wholeLine_ != nullptr ? *wholeLine_ : EMPTY_LINE;
-    }
-
     Ins Clone() const
     {
         Ins clone {};
         clone.SetLineNumber(lineNumber_);
         clone.SetColumnNumber(columnNumber_);
-        clone.SetBoundLeft(boundLeft_);
-        clone.SetBoundRight(boundRight_);
-        if (wholeLine_ != nullptr) {
-            clone.SetWholeLine(WholeLine());
-        }
         return clone;
     }
 };

@@ -268,6 +268,7 @@ private:
 
     std::map<std::string, std::vector<pandasm::Field>> externalFieldTable_ {};
     std::map<std::string, std::vector<std::string>> externalFieldsInfoTable_ {};
+    std::map<std::pair<panda_file::File::EntityId, uint32_t>, uint32_t> bytecodeOffset_;
 
     ProgAnnotations progAnn_ {};
 
