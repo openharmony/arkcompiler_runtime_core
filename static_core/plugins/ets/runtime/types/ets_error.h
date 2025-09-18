@@ -89,8 +89,7 @@ private:
     ObjectPointer<EtsTypedObjectArray<EtsStackTraceElement>> stackLines_;
     ObjectPointer<EtsString> stack_;  // non-mandatory field in `class Error`
     ObjectPointer<EtsObject> cause_;  // non-mandatory field in `class Error`
-    FIELD_UNUSED uint32_t padding_;
-    FIELD_UNUSED ObjectPointer<EtsDouble> code_;
+    FIELD_UNUSED ObjectPointer<EtsInt> code_;
 
     friend class test::EtsErrorTest;
 };
