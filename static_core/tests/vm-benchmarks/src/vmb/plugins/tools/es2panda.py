@@ -118,7 +118,7 @@ class Tool(ToolBase):
                 err='Please set $PANDA_BUILD env var'
             )
         self.default_arktsconfig = str(Path(self.panda_root).joinpath(
-            'tools', 'es2panda', 'generated', 'arktsconfig.json'))
+            'bin', 'arktsconfig.json'))
         panda_stdlib_src = os.environ.get('PANDA_STDLIB_SRC', None)
         stdlib_opt = f'--stdlib={panda_stdlib_src}' if panda_stdlib_src else '--gen-stdlib=false'
         self.opts = f'{stdlib_opt} --extension=ets --opt-level=2 ' \

@@ -29,6 +29,7 @@ function build_panda() {
         -GNinja \
         -S$ARK_ROOT \
         -DCMAKE_BUILD_TYPE=$PANDA_SDK_BUILD_TYPE \
+        -DPANDA_SDK_BUILD=true \
         -DPANDA_PRODUCT_BUILD=$product_build \
         -DPANDA_WITH_ECMASCRIPT=OFF \
         -DPANDA_WITH_ETS=ON \
@@ -59,10 +60,17 @@ function copy_into_sdk() {
     mkdir -p "$dst"
     cd "$src"
     for FILE in $(cat "$file_list"); do
-        for F in $(find "$FILE" -type f | grep "$include_pattern" | grep -v "$exclude_pattern"); do
-            cp --parents "$F" "$dst"
-        done
+        # See ets2panda's CMakeLists.txt for sdk arktsconfig peculiarities description.  
+        if [[ "$FILE" == "bin/arktsconfig.json" ]]; then
+            mkdir -p "$dst/bin"
+            cp "$src/bin/arktsconfig_to_deliver.json" "$dst/bin/arktsconfig.json"
+        else
+            for F in $(find "$FILE" -type f | grep "$include_pattern" | grep -v "$exclude_pattern"); do
+                cp --parents "$F" "$dst"
+            done
+        fi
     done
+
 }
 
 function copy_abc_files() {
@@ -71,7 +79,11 @@ function copy_abc_files() {
     if [[ -f "$build_dir"/plugins/ets/sdk/etssdk.abc ]]; then
         [[ -f "$PANDA_SDK_PATH"/ets/etssdk.abc ]] || cp "$build_dir"/plugins/ets/sdk/etssdk.abc "$PANDA_SDK_PATH"/ets
     fi
-    [[ -f "$PANDA_SDK_PATH"/ets/etsstdlib.abc ]] || cp "$build_dir"/plugins/ets/etsstdlib.abc "$PANDA_SDK_PATH"/ets
+    if [[ -f "$build_dir"/plugins/ets/etsstdlib.abc ]]; then
+        cp "$build_dir"/plugins/ets/etsstdlib.abc "$PANDA_SDK_PATH"/ets
+        mkdir -p "${PANDA_SDK_PATH}/ets/stdlib"
+        cp -r "$build_dir"/plugins/ets/stdlib/decls "${PANDA_SDK_PATH}/ets/stdlib"
+    fi
 }
 
 function linux_arm64_tools() {

@@ -18,6 +18,7 @@
 import logging
 from vmb.platform import PlatformBase
 from vmb.hook import HookBase
+from vmb.cli import Args
 from vmb.plugins.tools.es2panda import fix_arktsconfig
 
 log = logging.getLogger('vmb')
@@ -29,6 +30,11 @@ class Hook(HookBase):
     This is for the case when there is no ark source tree
     and stdlib is included inside build directory.
     """
+
+    @classmethod
+    def skipme(cls, args: Args) -> bool:
+        """Deprecated, artifacts should use generated declarations."""
+        return True
 
     @property
     def name(self) -> str:
