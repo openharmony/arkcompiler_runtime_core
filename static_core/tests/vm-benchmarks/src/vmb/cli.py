@@ -154,8 +154,20 @@ def add_report_opts(parser: argparse.ArgumentParser) -> None:
                         help='Compare 2 reports')
     parser.add_argument('--flaky-list', default='', type=str,
                         help='Exclude list file')
-    parser.add_argument('--tolerance', default=0.5, type=float,
-                        help='Percentage of tolerance in comparison')
+    parser.add_argument('--tolerance', default=-1.0, type=float,
+                        help='Overall tolerance percentage setting for test time, size, compile time')
+    parser.add_argument('--tolerance-time', default=0.5, type=float,
+                        help='Percentage of tolerance for time comparison')
+    parser.add_argument('--tolerance-code-size', default=0.5, type=float,
+                        help='Percentage of tolerance for code and mem size comparison')
+    parser.add_argument('--tolerance-rss', default=0.5, type=float,
+                        help='Percentage of tolerance for code and mem size comparison')
+    parser.add_argument('--tolerance-compile-time', default=0.5, type=float,
+                        help='Percentage of tolerance for compilation time comparison')
+    parser.add_argument('--tolerance-count', default=0.5, type=float,
+                        help='Percentage of tolerance for count (aot passes, optimisations)')
+    parser.add_argument('--tolerance-list', default='', type=str,
+                        help='Get percentages of tolerance in comparison from file')
     parser.add_argument('--status-only', action='store_true',
                         help='Set exit code 1 if run has fails')
     parser.add_argument('--status-by-compare', action='store_true',

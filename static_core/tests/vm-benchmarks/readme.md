@@ -189,6 +189,45 @@ Output format could be controlled by `--number-format` option to `run|all|report
 - `nano`: `1n 1000n ..`
 - `expo`: `7.00e-02 5.01e+03 ..`
 
+### Results comparison
+
+Reports could compared with `vmb report --compare etalon.json report.json`:
+
+```shell
+vmb report --compare \
+    [--full] \                  # print all (even same) results to console
+    [--json=file.json] \        # save comparison to file
+    [--flaky-list=flaky.txt] \  # ignore results for tests from flaky.txt
+    [--status-by-compare] \     # set non zero exit code if there were regressions
+    [--tags=general,basic] \    # compare only tests tagged general or basic
+    [--skip-tags=one,two] \     # skip tests tagged one or two
+    report-etalon.json report-to-check.json
+```
+
+By default all results are compared with precision (tolerance) of `0.5%`.
+This could be tuned by options:
+
+```shell
+```shell
+vmb report --compare \
+    [--tolerance=1.5] \                 # set overall tolerance as 1.5%
+    [--tolerance-time=2] \              # set tolerance for time-based metrics as 2%
+    [--tolerance-code-size=3] \         # set tolerance for code size-based metrics as 3%
+    [--tolerance-rss=4] \               # set tolerance for memory size-based metrics as 4%
+    [--tolerance-compile-time=5] \      # set tolerance for compilation time-based metrics as 5%
+    [--tolerance-count=6] \             # set tolerance for count-based metrics as 6% (number of passed)
+    [--tolerance-list=fine-tuning.csv]  # set tolerances individually for each test
+    report-etalon.json report-to-check.json
+```
+Example of `tolerance-fine-tuning.csv`.
+(No tabs allowed in header, only spaces; Comma should follow value immediately)
+
+```csv
+name,    time, code_size, rss, compile_time
+A_test,  3,    20,        30
+B_test,  15,   ,          ,    7.75
+```
+
 ### Comparison of full test time
 
 Two runs could be compared test by test on total bench time (including compilation, device interactions etc):
