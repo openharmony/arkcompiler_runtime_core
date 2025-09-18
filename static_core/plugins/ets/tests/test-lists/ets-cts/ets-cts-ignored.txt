@@ -1164,6 +1164,10 @@
 07.expressions/21.multiplicative_expressions/04.exponentiation/nan_14.ets
 07.expressions/21.multiplicative_expressions/04.exponentiation/nan_9.ets
 
+#29895 no CTE on shift operators with char
+07.expressions/23.shift_expressions/shift_negative_cases_11.ets
+07.expressions/23.shift_expressions/shift_negative_cases_12.ets
+
 #24367 no CTE on equality expressions with numeric types vs. enum int
 07.expressions/25.equality_expressions/eq_neg_100.ets
 07.expressions/25.equality_expressions/eq_neg_145.ets

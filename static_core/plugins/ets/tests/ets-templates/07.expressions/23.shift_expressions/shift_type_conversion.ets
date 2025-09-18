@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,11 @@ function main(): void {
     let n: {{c.lo_type}} = {{c.lo_value}};
     let s: {{c.ro_type}} = {{c.ro_value}};
     let result = n {{c.shift_op}} s;
+    arktest.assertTrue(
+        result instanceof {{c.result_type}},
+        "Type of " + n + "({{c.lo_type}}) {{c.shift_op}} " + 
+        s + "({{c.ro_type}}) should be {{c.result_type}}"
+    );
     arktest.assertEQ(result, {{c.result_value}})
 }
 
