@@ -25,7 +25,3 @@ class A {}
 type Person = A
 
 let Person: Person
-
-function main(): int {
-  return 0;
-}

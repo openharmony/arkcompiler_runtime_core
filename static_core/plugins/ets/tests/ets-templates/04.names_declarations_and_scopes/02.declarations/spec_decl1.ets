@@ -24,10 +24,12 @@ function Pi(): double {
     return PI;
 }
 type IP = byte[]
+enum Ip {one = 1, two, three}
 
-function main(): int {
+function main() {
     let x: IP = new byte[4]
     Pi()
-    if (Pi() == PI && pi == 3) return 0;
-    return 1;
+    arktest.assertEQ(Pi(), PI)
+    arktest.assertEQ(pi, 3)
+    arktest.assertEQ(Ip.three, 3)
 }

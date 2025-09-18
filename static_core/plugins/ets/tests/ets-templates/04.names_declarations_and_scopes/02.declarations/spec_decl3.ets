@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -15,11 +15,16 @@ limitations under the License.
 
 /*---
 desc: Declarations must be distinguishable in a declaration space.
-tags: [compile-only, negative]
+tags: [negative, compile-only]
 ---*/
 
-// Functions have override-equivalent signatures
+class A {
+    name: string = 'Alex'
+    age: string = '20'
+}
 
-function foo(x: int) {}
+// The type and enum have the same name:
 
-function foo(y: int) {}
+type Person = A
+
+enum Person {name = 'Alex', age = '20'}

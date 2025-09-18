@@ -24,4 +24,3 @@ class Person {}
 
 let Person: Person
 
-function main() {}

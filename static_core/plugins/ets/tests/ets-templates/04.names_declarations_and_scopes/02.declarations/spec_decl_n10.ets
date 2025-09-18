@@ -22,4 +22,3 @@ tags: [compile-only, negative]
 
 interface Object {}
 
-function main() {}
