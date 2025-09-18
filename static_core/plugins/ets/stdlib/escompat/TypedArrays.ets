@@ -731,10 +731,10 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         iteratorForEach<number>(iter, (x: number): void => {
             if (index[0] + 1 > temp.lengthInt) {
                 // NOTE (templin.konstantin): Progressive reallocation
-                const curLength = (temp.buffer as Buffer).getByteLength()
+                const curLength = temp.buffer.getByteLength()
                 const tb = new ArrayBuffer(curLength * 2)
                 for (let i = 0; i < curLength; ++i) {
-                    tb.set(i, (temp.buffer as Buffer).at(i))
+                    tb.set(i, temp.buffer.at(i))
                 }
                 temp = new Int8Array(tb)
             }
@@ -2246,10 +2246,10 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         iteratorForEach<number>(iter, (x: number): void => {
             if (index[0] + 1 > temp.lengthInt) {
                 // NOTE (templin.konstantin): Progressive reallocation
-                const curLength = (temp.buffer as Buffer).getByteLength()
+                const curLength = temp.buffer.getByteLength()
                 const tb = new ArrayBuffer(curLength * 2)
                 for (let i = 0; i < curLength; ++i) {
-                    tb.set(i, (temp.buffer as Buffer).at(i))
+                    tb.set(i, temp.buffer.at(i))
                 }
                 temp = new Int16Array(tb)
             }
@@ -3738,10 +3738,10 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         iteratorForEach<number>(iter, (x: number): void => {
             if (index[0] + 1 > temp.lengthInt) {
                 // NOTE (templin.konstantin): Progressive reallocation
-                const curLength = (temp.buffer as Buffer).getByteLength()
+                const curLength = temp.buffer.getByteLength()
                 const tb = new ArrayBuffer(curLength * 2)
                 for (let i = 0; i < curLength; ++i) {
-                    tb.set(i, (temp.buffer as Buffer).at(i))
+                    tb.set(i, temp.buffer.at(i))
                 }
                 temp = new Int32Array(tb)
             }
@@ -5249,10 +5249,10 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         iteratorForEach<BigInt>(iter, (x: BigInt): void => {
             if (index[0] + 1 > temp.lengthInt) {
                 // NOTE (templin.konstantin): Progressive reallocation
-                const curLength = (temp.buffer as Buffer).getByteLength()
+                const curLength = temp.buffer.getByteLength()
                 const tb = new ArrayBuffer(curLength * 2)
                 for (let i = 0; i < curLength; ++i) {
-                    tb.set(i, (temp.buffer as Buffer).at(i))
+                    tb.set(i, temp.buffer.at(i))
                 }
                 temp = new BigInt64Array(tb)
             }
@@ -6730,10 +6730,10 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
         iteratorForEach<number>(iter, (x: number): void => {
             if (index[0] + 1 > temp.lengthInt) {
                 // NOTE (templin.konstantin): Progressive reallocation
-                const curLength = (temp.buffer as Buffer).getByteLength()
+                const curLength = temp.buffer.getByteLength()
                 const tb = new ArrayBuffer(curLength * 2)
                 for (let i = 0; i < curLength; ++i) {
-                    tb.set(i, (temp.buffer as Buffer).at(i))
+                    tb.set(i, temp.buffer.at(i))
                 }
                 temp = new Float32Array(tb)
             }
@@ -8151,10 +8151,10 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
         iteratorForEach<number>(iter, (x: number): void => {
             if (index[0] + 1 > temp.lengthInt) {
                 // NOTE (templin.konstantin): Progressive reallocation
-                const curLength = (temp.buffer as Buffer).getByteLength()
+                const curLength = temp.buffer.getByteLength()
                 const tb = new ArrayBuffer(curLength * 2)
                 for (let i = 0; i < curLength; ++i) {
-                    tb.set(i, (temp.buffer as Buffer).at(i))
+                    tb.set(i, temp.buffer.at(i))
                 }
                 temp = new Float64Array(tb)
             }

@@ -165,7 +165,7 @@ function testDirectTransferStaticToDynamic(): void {
     let buffer = new ArrayBuffer(100);
     testNoSeamlessForClass(testDirectTransfer, buffer, 'Lescompat/ArrayBuffer;');
     testNoSeamlessForClass(testDirectTransfer, new Uint8Array(buffer), 'Lescompat/Uint8Array;');
-    testNoSeamlessForClass(testDirectTransfer, new DataView(buffer), 'Lescompat/DataView;');
+    testNoSeamlessForClass(testDirectTransfer, new DataView(buffer), 'Lstd/core/DataView;');
 }
 
 function testTransferStaticToDynamic(): boolean {
