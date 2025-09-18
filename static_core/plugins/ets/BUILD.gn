@@ -158,6 +158,7 @@ if (!(ark_standalone_build ||
     external_deps = [
       "bounds_checking_function:libsec_shared",
       "c_utils:utils",
+      "ets_utils:console",
       "hilog:libhilog",
       "openssl:libcrypto_shared",
       icuuc_dep,

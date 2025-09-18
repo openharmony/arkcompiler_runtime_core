@@ -38,6 +38,7 @@
                 "icu",
                 "vixl",
                 "c_utils",
+                "ets_utils",
                 "openssl",
                 "libuv",
                 "pcre2",
