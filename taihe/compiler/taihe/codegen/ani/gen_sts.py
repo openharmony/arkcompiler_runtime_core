@@ -1327,7 +1327,7 @@ class StsCodeGenerator:
             f"}}",
         ):
             target.writelns(
-                f"this._taihe_moveFrom({result_sts});",
+                f"this._taihe_copyFrom({result_sts});",
             )
 
         if overload_name is not None:

@@ -378,8 +378,8 @@ inline ani_static_field ani_find_class_static_field(ani_env *env)
 #define TH_ANI_FIND_CLASS_STATIC_FIELD(env, descriptor, name) \
     ::taihe::ani_find_class_static_field<descriptor, name>(env)
 #else  // __cplusplus >= 202002L
-#define TH_ANI_FIND_MODULE(env, descriptor)                                   \
-    ([env] {                                                                  \
+#define TH_ANI_FIND_MODULE(penv, descriptor)                                  \
+    ([env = (penv)] {                                                         \
         static ::taihe::sref_guard __guard(env, [env]() -> ani_module {       \
             ani_module __mod;                                                 \
             if (ANI_OK != env->FindModule(descriptor, &__mod)) {              \
@@ -391,8 +391,8 @@ inline ani_static_field ani_find_class_static_field(ani_env *env)
         return static_cast<ani_module>(__guard.get_ref());                    \
     }())
 
-#define TH_ANI_FIND_NAMESPACE(env, descriptor)                                   \
-    ([env] {                                                                     \
+#define TH_ANI_FIND_NAMESPACE(penv, descriptor)                                  \
+    ([env = (penv)] {                                                            \
         static ::taihe::sref_guard __guard(env, [env]() -> ani_namespace {       \
             ani_namespace __ns;                                                  \
             if (ANI_OK != env->FindNamespace(descriptor, &__ns)) {               \
@@ -404,8 +404,8 @@ inline ani_static_field ani_find_class_static_field(ani_env *env)
         return static_cast<ani_namespace>(__guard.get_ref());                    \
     }())
 
-#define TH_ANI_FIND_CLASS(env, descriptor)                                   \
-    ([env] {                                                                 \
+#define TH_ANI_FIND_CLASS(penv, descriptor)                                  \
+    ([env = (penv)] {                                                        \
         static ::taihe::sref_guard __guard(env, [env]() -> ani_class {       \
             ani_class __cls;                                                 \
             if (ANI_OK != env->FindClass(descriptor, &__cls)) {              \
@@ -417,8 +417,8 @@ inline ani_static_field ani_find_class_static_field(ani_env *env)
         return static_cast<ani_class>(__guard.get_ref());                    \
     }())
 
-#define TH_ANI_FIND_ENUM(env, descriptor)                                   \
-    ([env] {                                                                \
+#define TH_ANI_FIND_ENUM(penv, descriptor)                                  \
+    ([env = (penv)] {                                                       \
         static ::taihe::sref_guard __guard(env, [env]() -> ani_enum {       \
             ani_enum __enm;                                                 \
             if (ANI_OK != env->FindEnum(descriptor, &__enm)) {              \
@@ -430,8 +430,8 @@ inline ani_static_field ani_find_class_static_field(ani_env *env)
         return static_cast<ani_enum>(__guard.get_ref());                    \
     }())
 
-#define TH_ANI_FIND_MODULE_FUNCTION(env, descriptor, name, signature)                                                 \
-    ([env] {                                                                                                          \
+#define TH_ANI_FIND_MODULE_FUNCTION(penv, descriptor, name, signature)                                                \
+    ([env = (penv)] {                                                                                                 \
         static ani_function __function = [env]() -> ani_function {                                                    \
             ani_module __mod = TH_ANI_FIND_MODULE(env, descriptor);                                                   \
             if (__mod == nullptr) {                                                                                   \
@@ -448,8 +448,8 @@ inline ani_static_field ani_find_class_static_field(ani_env *env)
         return __function;                                                                                            \
     }())
 
-#define TH_ANI_FIND_NAMESPACE_FUNCTION(env, descriptor, name, signature)                                              \
-    ([env] {                                                                                                          \
+#define TH_ANI_FIND_NAMESPACE_FUNCTION(penv, descriptor, name, signature)                                             \
+    ([env = (penv)] {                                                                                                 \
         static ani_function __function = [env]() -> ani_function {                                                    \
             ani_namespace __ns = TH_ANI_FIND_NAMESPACE(env, descriptor);                                              \
             if (__ns == nullptr) {                                                                                    \
@@ -466,8 +466,8 @@ inline ani_static_field ani_find_class_static_field(ani_env *env)
         return __function;                                                                                            \
     }())
 
-#define TH_ANI_FIND_CLASS_METHOD(env, descriptor, name, signature)                                                  \
-    ([env] {                                                                                                        \
+#define TH_ANI_FIND_CLASS_METHOD(penv, descriptor, name, signature)                                                 \
+    ([env = (penv)] {                                                                                               \
         static ani_method __method = [env]() -> ani_method {                                                        \
             ani_class __cls = TH_ANI_FIND_CLASS(env, descriptor);                                                   \
             if (__cls == nullptr) {                                                                                 \
@@ -484,8 +484,8 @@ inline ani_static_field ani_find_class_static_field(ani_env *env)
         return __method;                                                                                            \
     }())
 
-#define TH_ANI_FIND_CLASS_STATIC_METHOD(env, descriptor, name, signature)                \
-    ([env] {                                                                             \
+#define TH_ANI_FIND_CLASS_STATIC_METHOD(penv, descriptor, name, signature)               \
+    ([env = (penv)] {                                                                    \
         static ani_static_method __method = [env]() -> ani_static_method {               \
             ani_class __cls = TH_ANI_FIND_CLASS(env, descriptor);                        \
             if (__cls == nullptr) {                                                      \
@@ -502,8 +502,8 @@ inline ani_static_field ani_find_class_static_field(ani_env *env)
         return __method;                                                                 \
     }())
 
-#define TH_ANI_FIND_MODULE_VARIABLE(env, descriptor, name)                                      \
-    ([env] {                                                                                    \
+#define TH_ANI_FIND_MODULE_VARIABLE(penv, descriptor, name)                                     \
+    ([env = (penv)] {                                                                           \
         static ani_variable __variable = [env]() -> ani_variable {                              \
             ani_module __mod = TH_ANI_FIND_MODULE(env, descriptor);                             \
             if (__mod == nullptr) {                                                             \
@@ -519,8 +519,8 @@ inline ani_static_field ani_find_class_static_field(ani_env *env)
         return __variable;                                                                      \
     }())
 
-#define TH_ANI_FIND_NAMESPACE_VARIABLE(env, descriptor, name)                                   \
-    ([env] {                                                                                    \
+#define TH_ANI_FIND_NAMESPACE_VARIABLE(penv, descriptor, name)                                  \
+    ([env = (penv)] {                                                                           \
         static ani_variable __variable = [env]() -> ani_variable {                              \
             ani_namespace __ns = TH_ANI_FIND_NAMESPACE(env, descriptor);                        \
             if (__ns == nullptr) {                                                              \
@@ -536,8 +536,8 @@ inline ani_static_field ani_find_class_static_field(ani_env *env)
         return __variable;                                                                      \
     }())
 
-#define TH_ANI_FIND_CLASS_FIELD(env, descriptor, name)                                       \
-    ([env] {                                                                                 \
+#define TH_ANI_FIND_CLASS_FIELD(penv, descriptor, name)                                      \
+    ([env = (penv)] {                                                                        \
         static ani_field __field = [env]() -> ani_field {                                    \
             ani_class __cls = TH_ANI_FIND_CLASS(env, descriptor);                            \
             if (__cls == nullptr) {                                                          \
@@ -553,8 +553,8 @@ inline ani_static_field ani_find_class_static_field(ani_env *env)
         return __field;                                                                      \
     }())
 
-#define TH_ANI_FIND_CLASS_STATIC_FIELD(env, descriptor, name)                                       \
-    ([env] {                                                                                        \
+#define TH_ANI_FIND_CLASS_STATIC_FIELD(penv, descriptor, name)                                      \
+    ([env = (penv)] {                                                                               \
         static ani_static_field __field = [env]() -> ani_static_field {                             \
             ani_class __cls = TH_ANI_FIND_CLASS(env, descriptor);                                   \
             if (__cls == nullptr) {                                                                 \
