@@ -68,6 +68,7 @@ tests:
     decl: |-
       import {SharedVars} from "./shared_vars_module.ets"
       import {C} from "./init_module_first_[loop.index0].ets"
+      initModule("./init_module_first_[loop.index0].ets")
     call: |-
       let c = new C()
       arktest.assertEQ(SharedVars.v2, 4)
@@ -116,6 +117,7 @@ tests:
     decl: |-
       import {SharedVars} from "./shared_vars_module.ets"
       import {NameSpace} from "./init_module_first_[loop.index0].ets"
+      initModule("./init_module_first_[loop.index0].ets")
     call: |-
       arktest.assertEQ(NameSpace.v, 10)
       arktest.assertEQ(SharedVars.v2, 8)
@@ -140,6 +142,7 @@ tests:
     decl: |-
       import {SharedVars} from "./shared_vars_module.ets"
       import {ExternalSpace} from "./init_module_first_[loop.index0].ets"
+      initModule("./init_module_first_[loop.index0].ets")
     call: |-
       arktest.assertEQ(ExternalSpace.EmbeddedSpace.v, 15)
       arktest.assertEQ(SharedVars.v2, 10)
