@@ -78,12 +78,14 @@ class A implements Iface {
 
     public static stfoo1(): void {}
     public static stfoo2(): void {}
+    public static stfoo3(): void {}
+    public static stfoo3(n1: int, n2: long): void {}
 
     private prfoo1(): void {}
     private prfoo2(): void {}
 }
 
-final class B extends A {
+class B extends A {
     public static stbooFld1: Number = 2
     public static stbooFld2: Number = 2
 
@@ -102,9 +104,12 @@ final class B extends A {
         return ""
     }
 
-    public static stboo2(): string {
+    public static stboo2(n: int): string {
         return "222"
     }
+
+    // shadows A.stfoo3
+    public static stfoo3(p: string): void {}
 }
 
 class CtorsTest {
@@ -147,18 +152,46 @@ class C<T> {
     bar(a: FixedArray<int | string>): FixedArray<int | string> { return a }
 }
 
+final class D extends B {
+    // shadows A.stfoo2
+    public static stfoo2(p: string): string {
+        return p
+    }
+
+    // shadows B.stboo2
+    public static stboo2(p: string): string {
+        return p + "222"
+    }
+
+    public static stboo3(): string {
+        return "333"
+    }
+
+    public static stboo3(b: B): string {
+        return "bbb"
+    }
+
+    private static stbar1(): string {
+        return "priv"
+    }
+
+    protected static stbar2(): string {
+        return "protec"
+    }
+}
+
 function testGetName(type: Class, expected: string) {
     arktest.assertEQ(type.getName(), expected)
 }
 
-function testGetInstanceMethods(classType: Class, expectedMethodsArr: string[]) {
-    let expectedMtdsSet: Set<string> = new Set<string>(expectedMethodsArr)
+function testGetInstanceMethods(classType: Class, expectedMethodsArrB: string[]) {
+    let expectedMtdsSetB: Set<string> = new Set<string>(expectedMethodsArrB)
 
     let methods: FixedArray<reflect.InstanceMethod> = classType.getInstanceMethods()
-    arktest.assertEQ(methods.length, expectedMethodsArr.length)
+    arktest.assertEQ(methods.length, expectedMethodsArrB.length)
 
     for (let i = 0; i < methods.length; ++i) {
-        arktest.assertTrue(expectedMtdsSet.has(methods[i].getName()), `failed on method: ${methods[i].getName()}`)
+        arktest.assertTrue(expectedMtdsSetB.has(methods[i].getName()), `failed on method: ${methods[i].getName()}`)
     }
 }
 
@@ -211,19 +244,121 @@ function testGetConstructors() {
 }
 
 function testGetStaticMethods() {
-    let info = Class.of(new B())
-    let expectedMethodsArr = ([ "keys", "keys", "assign", "hasOwn",
-                                "hasOwn", "values", "values", "entries",
-                                "entries", "fromEntries", "getOwnPropertyNames",
-                                "getOwnPropertyNames", "stboo1", "stboo2",
-                                "stfoo1", "stfoo2" ])
-    let expectedMtdsSet: Set<string> = new Set<string>(expectedMethodsArr)
+    let expectedMethodsArrA = ([ "keys", "keys", "assign", "hasOwn",
+                                 "hasOwn", "values", "values", "entries",
+                                 "entries", "fromEntries", "getOwnPropertyNames",
+                                 "getOwnPropertyNames", "stfoo1", "stfoo2", "stfoo3",
+                                 "stfoo3" ])
+    let expectedMethodsArrB = ([ "keys", "keys", "assign", "hasOwn",
+                                 "hasOwn", "values", "values", "entries",
+                                 "entries", "fromEntries", "getOwnPropertyNames",
+                                 "getOwnPropertyNames", "stboo1", "stboo2",
+                                 "stfoo1", "stfoo2", "stfoo3" ])
+    let expectedMethodsArrD = ([ "keys", "keys", "assign", "hasOwn",
+                                 "hasOwn", "values", "values", "entries",
+                                 "entries", "fromEntries", "getOwnPropertyNames",
+                                 "getOwnPropertyNames", "stboo1", "stboo2",
+                                 "stfoo1", "stfoo2", "stfoo3", "stboo3", "stboo3" ])
 
-    let methods: FixedArray<reflect.StaticMethod> = info.getStaticMethods()
-    arktest.assertEQ(methods.length, expectedMethodsArr.length)
-    for (let i = 0; i < methods.length; ++i) {
-        arktest.assertTrue(expectedMtdsSet.has(methods[i].getName()))
+    let expectedMtdsSetA: Set<string> = new Set<string>(expectedMethodsArrA)
+    let expectedMtdsSetB: Set<string> = new Set<string>(expectedMethodsArrB)
+    let expectedMtdsSetD: Set<string> = new Set<string>(expectedMethodsArrD)
+
+    let infoA = Class.of(new A())
+    let methodsA: FixedArray<reflect.StaticMethod> = infoA.getStaticMethods()
+    arktest.assertEQ(methodsA.length, expectedMethodsArrA.length)
+    for (let i = 0; i < methodsA.length; ++i) {
+        arktest.assertTrue(expectedMtdsSetA.has(methodsA[i].getName()))
     }
+
+    let infoB = Class.of(new B())
+    let methodsB: FixedArray<reflect.StaticMethod> = infoB.getStaticMethods()
+    arktest.assertEQ(methodsB.length, expectedMethodsArrB.length)
+    for (let i = 0; i < methodsB.length; ++i) {
+        arktest.assertTrue(expectedMtdsSetB.has(methodsB[i].getName()))
+        if (methodsB[i].getName() == "stfoo3") {
+            arktest.assertEQ(methodsB[i].getOwner(), infoB) // shadowed in A
+        }
+    }
+
+    let infoD = Class.of(new D())
+    let methodsD: FixedArray<reflect.StaticMethod> = infoD.getStaticMethods()
+    arktest.assertEQ(methodsD.length, expectedMethodsArrD.length)
+    for (let i = 0; i < methodsD.length; ++i) {
+        arktest.assertTrue(expectedMtdsSetD.has(methodsD[i].getName()))
+        if (methodsD[i].getName() == "stfoo3") {
+            arktest.assertEQ(methodsD[i].getOwner(), infoB) // shadowed in A by B
+        } else if (methodsD[i].getName() == "stfoo2") {
+            arktest.assertEQ(methodsD[i].getOwner(), infoD) // shadowed in A by D
+        } else if (methodsD[i].getName() == "stboo2") {
+            arktest.assertEQ(methodsD[i].getOwner(), infoD) // shadowed in B by D
+        }
+    }
+}
+
+function testGetStaticMethodByName() {
+    let infoA = Class.of(new A())
+    let methodA1 = infoA.getStaticMethodByName("getOwnPropertyNames");
+    arktest.assertNE(methodA1, undefined) // inherited from Object
+    let methodA2 = infoA.getStaticMethodByName("stfoo1");
+    arktest.assertNE(methodA2, undefined)
+    let methodA3 = infoA.getStaticMethodByName("stfoo3", []);
+    arktest.assertNE(methodA3, undefined)
+    let methodA4 = infoA.getStaticMethodByName("stfoo3", [ Class.of(new int()), Class.of(new long()) ]);
+    arktest.assertNE(methodA4, undefined)
+    let paramsMethodA4 = methodA4!.getParametersTypes()
+    let methodA5 = infoA.getStaticMethodByName("stfoo3", paramsMethodA4);
+    arktest.assertNE(methodA5, undefined)
+    let methodA6 = infoA.getStaticMethodByName("stboo1")
+    arktest.assertEQ(methodA6, undefined) // not exist in A
+
+    let infoB = Class.of(new B())
+    let methodB1 = infoB.getStaticMethodByName("stfoo2");
+    arktest.assertNE(methodB1, undefined) // inherited from A
+    arktest.assertEQ(methodB1!.getOwner(), infoA) // owner is A
+    let methodB2 = infoB.getStaticMethodByName("stboo2", [ Class.of(new int()) ]);
+    arktest.assertNE(methodB2, undefined)
+    let methodB3 = infoB.getStaticMethodByName("stfoo3");
+    arktest.assertNE(methodB3, undefined)
+    arktest.assertEQ(methodB3!.getOwner(), infoB) // owner is B
+    let methodB4 = infoB.getStaticMethodByName("stfoo3", []);
+    arktest.assertEQ(methodB4, undefined) // shadowed
+    let methodB5 = infoB.getStaticMethodByName("stfoo3", paramsMethodA4);
+    arktest.assertEQ(methodB5, undefined) // shadowed
+
+    let infoD = Class.of(new D())
+    let methodD1 = infoD.getStaticMethodByName("stbar1");
+    arktest.assertEQ(methodD1, undefined) // private in D
+    let methodD2 = infoD.getStaticMethodByName("stbar2");
+    arktest.assertEQ(methodD2, undefined) // protected in D
+    let methodD3 = infoD.getStaticMethodByName("stboo1");
+    arktest.assertNE(methodD3, undefined) // inherited from B
+    arktest.assertEQ(methodD3!.getOwner(), infoB) // owner is B
+    let methodD4 = infoD.getStaticMethodByName("stboo2", [ Class.of(new string()) ]);
+    arktest.assertNE(methodD4, undefined)
+    arktest.assertEQ(methodD4!.getOwner(), infoD) // owner is D
+    let methodD5 = infoD.getStaticMethodByName("stboo3");
+    arktest.assertNE(methodD5, undefined)
+    arktest.assertEQ(methodD5!.getOwner(), infoD) // owner is D
+    let methodD6 = infoD.getStaticMethodByName("stboo2", [ Class.of(new int()) ]);
+    arktest.assertEQ(methodD6, undefined) // shadowed
+    let methodD7 = infoD.getStaticMethodByName("stfoo1");
+    arktest.assertNE(methodD7, undefined) // inherited from A
+    arktest.assertEQ(methodD7!.getOwner(), infoA) // owner is A
+    let methodD8 = infoD.getStaticMethodByName("stfoo3");
+    arktest.assertNE(methodD8, undefined) // inherited from B
+    arktest.assertEQ(methodD8!.getOwner(), infoB) // owner is B
+    let methodD9 = infoD.getStaticMethodByName("stfoo3", paramsMethodA4);
+    arktest.assertEQ(methodD9, undefined) // shadowed by B
+    let methodD10 = infoD.getStaticMethodByName("stboo3", [ infoB ]);
+    arktest.assertNE(methodD10, undefined)
+    arktest.assertEQ(methodD10!.getOwner(), infoD) // owner is D
+    let methodD11 = infoD.getStaticMethodByName("stboo3", [ infoA ]);
+    arktest.assertEQ(methodD11, undefined) // A is not accepted as B
+    let methodD12 = infoD.getStaticMethodByName("stboo2");
+    arktest.assertNE(methodD12, undefined)
+    arktest.assertFalse(methodD4 == methodD12)
+    arktest.assertTrue(methodD12!.equals(methodD4!)) // the same with and without signature passed
 }
 
 function testGetStaticFields() {
@@ -534,6 +669,7 @@ function main(): int {
 
     testGetConstructors()
     testGetStaticMethods()
+    testGetStaticMethodByName()
     testGetStaticFields()
     testGetInstanceFields()
 
