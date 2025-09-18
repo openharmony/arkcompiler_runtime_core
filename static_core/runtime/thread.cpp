@@ -683,8 +683,12 @@ void MTManagedThread::ProcessCreatedThread()
 
 void ManagedThread::UpdateGCRoots(const GCRootUpdater &gcRootUpdater)
 {
-    if ((exception_ != nullptr)) {
+    if (exception_ != nullptr) {
         gcRootUpdater(&exception_);
+    }
+    if (flattenedStringCache_ != nullptr) {
+        // This is the cached pointer. We need to update it; visiting it as root is not required.
+        gcRootUpdater(&flattenedStringCache_);
     }
     for (auto **localObject : localObjects_) {
         gcRootUpdater(localObject);
@@ -852,6 +856,16 @@ bool ManagedThread::EraseCustomTLSData(const char *key)
 {
     os::memory::LockHolder lock(*Locks::customTlsLock_);
     return customTlsCache_.erase(key) != 0;
+}
+
+void ManagedThread::SetFlattenedStringCache(ObjectHeader *cacheInstance)
+{
+    flattenedStringCache_ = cacheInstance;
+}
+
+ObjectHeader *ManagedThread::GetFlattenedStringCache() const
+{
+    return flattenedStringCache_;
 }
 
 LanguageContext ManagedThread::GetLanguageContext()

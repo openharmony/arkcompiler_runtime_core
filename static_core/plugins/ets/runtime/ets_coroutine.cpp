@@ -14,6 +14,7 @@
  */
 
 #include "plugins/ets/runtime/ets_coroutine.h"
+#include "mem/refstorage/global_object_storage.h"
 #include "runtime/include/value.h"
 #include "libarkbase/macros.h"
 #include "mem/refstorage/reference.h"
@@ -255,10 +256,36 @@ ExternalIfaceTable *EtsCoroutine::GetExternalIfaceTable()
 
 void EtsCoroutine::OnHostWorkerChanged()
 {
+    UpdateCachedObjects();
+}
+
+void EtsCoroutine::UpdateCachedObjects()
+{
     // update the interop context pointer
     auto *worker = GetWorker();
     auto *ptr = worker->GetLocalStorage().Get<CoroutineWorker::DataIdx::INTEROP_CTX_PTR, void *>();
     GetLocalStorage().Set<DataIdx::INTEROP_CTX_PTR>(ptr);
+
+    if (GetType() == Coroutine::Type::MUTATOR) {
+        // update the string cache pointer
+        auto *curCoro = EtsCoroutine::GetCurrent();
+        ASSERT(curCoro != nullptr);
+        auto setStringCachePtr = [this, worker]() {
+            auto *cacheRef =
+                worker->GetLocalStorage().Get<CoroutineWorker::DataIdx::FLATTENED_STRING_CACHE, mem::Reference *>();
+            auto *cache = GetVM()->GetGlobalObjectStorage()->Get(cacheRef);
+            SetFlattenedStringCache(cache);
+        };
+        // We need to put the current coro into the managed state to be GC-safe, because we manipulate a raw
+        // ObjectHeader*
+        if (ManagedThread::IsManagedScope()) {
+            setStringCachePtr();
+        } else {
+            // maybe we will find a more performant solution in future...
+            ScopedManagedCodeThread s(curCoro);
+            setStringCachePtr();
+        }
+    }
 }
 
 void EtsCoroutine::OnContextSwitchedTo()

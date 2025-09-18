@@ -129,6 +129,7 @@ public:
                                             std::optional<Coroutine::EntrypointInfo> &&epInfo, Coroutine::Type type,
                                             CoroutinePriority priority);
     using NativeEntrypointFunc = Coroutine::NativeEntrypointInfo::NativeEntrypointFunc;
+    using EnumerateWorkerCallback = std::function<bool(CoroutineWorker *)>;
 
     NO_COPY_SEMANTIC(CoroutineManager);
     NO_MOVE_SEMANTIC(CoroutineManager);
@@ -143,7 +144,9 @@ public:
      *
      * @param config describes the CoroutineManager operation mode
      */
-    virtual void Initialize(Runtime *runtime, PandaVM *vm) = 0;
+    virtual void InitializeScheduler(Runtime *runtime, PandaVM *vm) = 0;
+    /// should be called once the VM is ready to create managed objects in the managed heap
+    void InitializeManagedStructures();
     /// Should be called after all execution is finished. Destroys the main coroutine.
     virtual void Finalize() = 0;
     /// Add coroutine to registry (used for enumeration and tracking) and perform all the required actions
@@ -266,6 +269,15 @@ public:
     virtual void FinalizeWorkers([[maybe_unused]] size_t howMany, [[maybe_unused]] Runtime *runtime,
                                  [[maybe_unused]] PandaVM *vm)
     {
+    }
+
+    /**
+     * @brief enumerate workers and apply @param cb to them
+     * @return true if @param cb call was successful (returned true) for every worekr and false otherwise
+     */
+    bool EnumerateWorkers(const EnumerateWorkerCallback &cb) const
+    {
+        return EnumerateWorkersImpl(cb);
     }
 
     virtual bool IsExclusiveWorkersLimitReached() const
@@ -391,6 +403,9 @@ protected:
 
     /// Can be used in descendants to create custom coroutines manually
     CoroutineFactory GetCoroutineFactory();
+
+    /// Worker enumerator, returns true iff cb call succeeds for every worker
+    virtual bool EnumerateWorkersImpl(const EnumerateWorkerCallback &cb) const = 0;
 
     /// limit the number of IDs for performance reasons
     static constexpr size_t MAX_COROUTINE_ID = std::min(0xffffU, Coroutine::MAX_COROUTINE_ID);

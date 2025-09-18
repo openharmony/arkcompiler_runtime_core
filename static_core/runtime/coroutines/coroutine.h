@@ -344,6 +344,8 @@ public:
         return abortFlag_;
     }
 
+    virtual void UpdateCachedObjects() {}
+
     /**
      * a converter function that stores the data from EntrypointInfo in the member variables
      * NOTE: should be made private after #29944

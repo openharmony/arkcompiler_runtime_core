@@ -322,10 +322,6 @@ void CodegenFastPath::EmitWriteTlabStatsSafeIntrinsic([[maybe_unused]] Intrinsic
 
     auto src1 = src[FIRST_OPERAND];
     auto src2 = src[SECOND_OPERAND];
-    auto tmp = src[THIRD_OPERAND];
-
-    ASSERT(tmp.IsValid());
-    ASSERT(tmp != GetRegfile()->GetZeroReg());
 
     auto regs = GetCallerRegsMask(GetArch(), false) | GetCalleeRegsMask(GetArch(), false);
     auto vregs = GetCallerRegsMask(GetArch(), true);
@@ -335,6 +331,9 @@ void CodegenFastPath::EmitWriteTlabStatsSafeIntrinsic([[maybe_unused]] Intrinsic
 
     auto id = RuntimeInterface::EntrypointId::WRITE_TLAB_STATS_NO_BRIDGE;
     MemRef entry(ThreadReg(), GetRuntime()->GetEntrypointTlsOffset(GetArch(), id));
+    constexpr size_t NUM_OF_ARGS = 2;
+    // Temp registers are not available because they are busy in irtoc tlab allocation. So it is faked with param reg.
+    auto tmp = GetEncoder()->GetTarget().GetParamReg(NUM_OF_ARGS);
     GetEncoder()->EncodeLdr(tmp, false, entry);
     GetEncoder()->MakeCall(tmp);
 

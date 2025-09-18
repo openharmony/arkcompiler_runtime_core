@@ -376,6 +376,11 @@ public:
         return MEMBER_OFFSET(ManagedThread, interpreterCache_);
     }
 
+    static constexpr uint32_t GetFlattenedStringCacheOffset()
+    {
+        return MEMBER_OFFSET(ManagedThread, flattenedStringCache_);
+    }
+
     void *GetLanguageExtensionsData() const
     {
         return languageExtensionData_;
@@ -436,6 +441,9 @@ public:
     PANDA_PUBLIC_API CustomTLSData *GetCustomTLSData(const char *key);
     PANDA_PUBLIC_API void SetCustomTLSData(const char *key, CustomTLSData *data);
     PANDA_PUBLIC_API bool EraseCustomTLSData(const char *key);
+
+    void SetFlattenedStringCache(ObjectHeader *cacheInstance);
+    ObjectHeader *GetFlattenedStringCache() const;
 
 #if EVENT_METHOD_ENTER_ENABLED || EVENT_METHOD_EXIT_ENABLED
     uint32_t RecordMethodEnter()
@@ -706,6 +714,9 @@ private:
     InterpreterCache interpreterCache_;
 
     PandaMap<const char *, PandaUniquePtr<CustomTLSData>> customTlsCache_ GUARDED_BY(Locks::customTlsLock_);
+
+    // NOTE(konstanting): this is to be moved once we decouple Thread from ManagedThread
+    ObjectHeader *flattenedStringCache_ {nullptr};
 
     mem::GCG1BarrierSet::G1PostBarrierRingBufferType *g1PostBarrierRingBuffer_ {nullptr};
     // Keep these here to speed up interpreter

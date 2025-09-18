@@ -25,6 +25,7 @@
 #include "runtime/include/mtmanaged_thread.h"
 #include "runtime/mem/tlab.h"
 #include "libarkbase/utils/cframe_layout.h"
+#include "runtime/include/flattened_string_cache.h"
 
 #include "plugins_defines.h"
 

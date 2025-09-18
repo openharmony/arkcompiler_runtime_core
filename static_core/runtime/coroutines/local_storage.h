@@ -72,11 +72,28 @@ public:
     }
 
     template <IndexType IDX, class T>
-    T Get()
+    T Get() const
     {
         static_assert((ToIndex(IDX) < NUM_ENTRIES), "idx should be correct");
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
         return reinterpret_cast<T>(entries_[ToIndex(IDX)].data.ptr);
+    }
+
+    template <IndexType IDX, class T>
+    T *GetPtr()
+    {
+        static_assert((ToIndex(IDX) < NUM_ENTRIES), "idx should be correct");
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+        return reinterpret_cast<T *>(&(entries_[ToIndex(IDX)].data.ptr));
+    }
+
+    template <IndexType IDX, class T>
+    constexpr size_t GetOffset() const
+    {
+        static_assert((ToIndex(IDX) < NUM_ENTRIES), "idx should be correct");
+        // NOTE(konstanting): TO BE IMPLEMENTED!
+        UNREACHABLE();
+        return 0;
     }
 
 private:

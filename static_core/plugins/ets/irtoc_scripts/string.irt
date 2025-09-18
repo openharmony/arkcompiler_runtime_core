@@ -247,15 +247,6 @@ Label(:SlowPathEntrypoint)
 }
 
 
-if Options.arch == :arm64
-  trim_left_regs = $temps_mask + :callee0 + :callee1
-  trim_right_regs = $temps_mask + :callee0 + :callee1
-else
-  trim_left_regs = $temps_mask + :callee0 + :caller0 + :caller1
-  trim_right_regs = $temps_mask + :callee0 + :caller0 + :caller1
-end
-
-
 function(:StringTrimLeftBase,
           params: {str: 'ref', unused1: 'i32', unused2: 'i32'},
           regmap: $full_regmap,
@@ -310,9 +301,9 @@ Label(:SlowPathEntrypoint)
 
 
 function(:StringTrimLeft,
-          params: {str: 'ref', unused1: 'i32', unused2: 'i32'},
+          params: {str_orig: 'ref', unused1: 'i32', unused2: 'i32'},
           regmap: $full_regmap,
-          regalloc_set: $trim_left_regs,
+          regalloc_set: $panda_mask,
           mode: [:FastPath]) {
 
   if Options.arch == :arm32
@@ -321,7 +312,7 @@ function(:StringTrimLeft,
     next
   end
   
-  check_string_type(str)
+  str := try_use_cached_flat_str(str_orig)
 
   length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
   If(length_packed, 1).LE.Unlikely.b {
@@ -351,7 +342,7 @@ Label(:L1)
   Intrinsic(:TAIL_CALL).AddImm(entrypoint2).MethodAsImm("StringTrimLeftBase").Terminator.ptr
 Label(:SlowPathEntrypoint)
   entrypoint = get_entrypoint_offset("STRING_TRIM_LEFT_SLOW_PATH")
-  Intrinsic(:SLOW_PATH_ENTRY, str).AddImm(entrypoint).MethodAsImm("StringTrimLeft3ArgBridge").Terminator.ptr
+  Intrinsic(:SLOW_PATH_ENTRY, str_orig).AddImm(entrypoint).MethodAsImm("StringTrimLeft3ArgBridge").Terminator.ptr
   Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 
@@ -411,9 +402,9 @@ Label(:SlowPathEntrypoint)
 
 
 function(:StringTrimRight,
-          params: {str: 'ref', unused1: 'i32', unused2: 'i32'},
+          params: {str_orig: 'ref', unused1: 'i32', unused2: 'i32'},
           regmap: $full_regmap,
-          regalloc_set: $trim_right_regs,
+          regalloc_set: $panda_mask,
           mode: [:FastPath]) {
 
   if Options.arch == :arm32
@@ -422,7 +413,7 @@ function(:StringTrimRight,
     next
   end
   
-  check_string_type(str)
+  str := try_use_cached_flat_str(str_orig)
 
   length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
   If(length_packed, 1).LE.Unlikely.b {
@@ -454,7 +445,7 @@ Label(:L1)
   Intrinsic(:TAIL_CALL).AddImm(entrypoint2).MethodAsImm("StringTrimRightBase").Terminator.ptr
 Label(:SlowPathEntrypoint)
   entrypoint = get_entrypoint_offset("STRING_TRIM_RIGHT_SLOW_PATH")
-  Intrinsic(:SLOW_PATH_ENTRY, str).AddImm(entrypoint).MethodAsImm("StringTrimRight3ArgBridge").Terminator.ptr
+  Intrinsic(:SLOW_PATH_ENTRY, str_orig).AddImm(entrypoint).MethodAsImm("StringTrimRight3ArgBridge").Terminator.ptr
   Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 
@@ -531,7 +522,7 @@ Label(:SlowPathEntrypoint)
 
 
 function(:StringTrim,
-          params: {str: 'ref', unused1: 'i32', unused2: 'i32'},
+          params: {str_orig: 'ref', unused1: 'i32', unused2: 'i32'},
           regmap: $full_regmap,
           regalloc_set: $panda_mask,
           mode: [:FastPath]) {
@@ -542,7 +533,7 @@ function(:StringTrim,
     next
   end
 
-  check_string_type(str)
+  str := try_use_cached_flat_str(str_orig)
 
   length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
   # length == 0
@@ -606,7 +597,7 @@ Label(:FirstCharWhitespace)
   Intrinsic(:TAIL_CALL).AddImm(entrypoint3).MethodAsImm("StringTrimLeftBase").Terminator.ptr
 Label(:SlowPathEntrypoint)
   entrypoint = get_entrypoint_offset("STRING_TRIM_SLOW_PATH")
-  Intrinsic(:SLOW_PATH_ENTRY, str).AddImm(entrypoint).MethodAsImm("StringTrim3ArgBridge").Terminator.ptr
+  Intrinsic(:SLOW_PATH_ENTRY, str_orig).AddImm(entrypoint).MethodAsImm("StringTrim3ArgBridge").Terminator.ptr
   Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 
@@ -667,7 +658,7 @@ def GenerateStringStartsWith(cgmode)
   suffix = (cgmode == :NativePlus ? 'NativePlus': '')
   upsuffix = (cgmode == :NativePlus ? '_NATIVE_PLUS': '')
   function("StringStartsWith#{suffix}".to_sym,
-           params: {str: 'ref', pfx: 'ref', from_index: 'i32'},
+           params: {str_orig: 'ref', pfx_orig: 'ref', from_index: 'i32'},
            regmap: $full_regmap,
            regalloc_set: $panda_mask,
            mode: [cgmode]) {
@@ -678,8 +669,8 @@ def GenerateStringStartsWith(cgmode)
     next
   end
 
-  check_string_type(str)
-  check_string_type(pfx)
+  str := try_use_cached_flat_str(str_orig)
+  pfx := try_use_cached_flat_str(pfx_orig)
 
   pfx_len_packed := LoadI(pfx).Imm(Constants::STRING_LENGTH_OFFSET).u32
   # Return 'true' if prefix is empty
@@ -724,10 +715,10 @@ def GenerateStringStartsWith(cgmode)
 
 Label(:SlowPathEntrypoint)
   if cgmode == :NativePlus
-    Return(Call(str, pfx, from_index).Method("StdCoreStringStartsWith").b).b
+    Return(Call(str_orig, pfx_orig, from_index).Method("StdCoreStringStartsWith").b).b
   else
     entrypoint = get_entrypoint_offset("STRING_STARTS_WITH_SLOW_PATH")
-    Intrinsic(:SLOW_PATH_ENTRY, str, pfx, from_index).AddImm(entrypoint).MethodAsImm("StringStartsWithOddSavedBridge").Terminator.b
+    Intrinsic(:SLOW_PATH_ENTRY, str_orig, pfx_orig, from_index).AddImm(entrypoint).MethodAsImm("StringStartsWithOddSavedBridge").Terminator.b
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
   end
 }
@@ -782,7 +773,7 @@ def GenerateStringEndsWith(cgmode)
   suffix = (cgmode == :NativePlus ? 'NativePlus': '')
   upsuffix = (cgmode == :NativePlus ? '_NATIVE_PLUS': '')
   function("StringEndsWith#{suffix}".to_sym,
-           params: {str: 'ref', sfx: 'ref', end_index: 'i32'},
+           params: {str_orig: 'ref', sfx_orig: 'ref', end_index: 'i32'},
            regmap: $full_regmap,
            regalloc_set: $panda_mask,
            mode: [cgmode]) {
@@ -793,8 +784,8 @@ def GenerateStringEndsWith(cgmode)
     next
   end
 
-  check_string_type(str)
-  check_string_type(sfx)
+  str := try_use_cached_flat_str(str_orig)
+  sfx := try_use_cached_flat_str(sfx_orig)
 
   sfx_len_packed := LoadI(sfx).Imm(Constants::STRING_LENGTH_OFFSET).u32
   # Return 'true' if suffix is empty
@@ -841,10 +832,10 @@ def GenerateStringEndsWith(cgmode)
   Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringEndsWithBase#{suffix}").Terminator.b
 Label(:SlowPathEntrypoint)
   if cgmode == :NativePlus
-    Return(Call(str, sfx, end_index).Method("StdCoreStringEndsWith").b).b
+    Return(Call(str_orig, sfx_orig, end_index).Method("StdCoreStringEndsWith").b).b
   else
     entrypoint = get_entrypoint_offset("STRING_ENDS_WITH_SLOW_PATH")
-    Intrinsic(:SLOW_PATH_ENTRY, str, sfx, end_index).AddImm(entrypoint).MethodAsImm("StringEndsWithOddSavedBridge").Terminator.b
+    Intrinsic(:SLOW_PATH_ENTRY, str_orig, sfx_orig, end_index).AddImm(entrypoint).MethodAsImm("StringEndsWithOddSavedBridge").Terminator.b
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
   end
 }
@@ -855,7 +846,7 @@ GenerateStringEndsWith(:NativePlus)
 
 
 function(:StringGetBytesTlab,
-        params: {str: 'ref', begin_index: 'i32', end_index: 'i32', array_klass: 'ref'},
+        params: {str_orig: 'ref', begin_index: 'i32', end_index: 'i32', array_klass: 'ref'},
         regmap: $full_regmap,
         regalloc_set: $panda_mask,
         mode: [:FastPath]) {
@@ -866,7 +857,7 @@ function(:StringGetBytesTlab,
     next
   end
 
-  check_string_type(str)
+  str := try_use_cached_flat_str(str_orig)
 
   If(begin_index, end_index).GT.Unlikely.b {
     Goto(:SlowPathEntrypoint)  # Out of range
@@ -875,8 +866,6 @@ function(:StringGetBytesTlab,
   If(begin_index, Cast(0).i32).LT.Unlikely.b {
     Goto(:SlowPathEntrypoint)  # Out of range
   }
-
-  check_string_type(str)
 
   # Note, 'str' is checked against nullptr in the InstBuilder (see AddArgNullcheckIfNeeded)
   length := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32;
@@ -906,7 +895,7 @@ function(:StringGetBytesTlab,
 
   Label(:SlowPathEntrypoint)
   entrypoint = get_entrypoint_offset("STRING_GET_BYTES_SLOW_PATH")
-  Intrinsic(:SLOW_PATH_ENTRY, str, begin_index, end_index).AddImm(entrypoint).MethodAsImm("StringGetBytes4ArgBridge").Terminator.ptr
+  Intrinsic(:SLOW_PATH_ENTRY, str_orig, begin_index, end_index).AddImm(entrypoint).MethodAsImm("StringGetBytes4ArgBridge").Terminator.ptr
   Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 
@@ -1480,7 +1469,7 @@ def GenerateStringIndexOf(cgmode)
   suffix = (cgmode == :NativePlus ? 'NativePlus': '')
   upsuffix = (cgmode == :NativePlus ? '_NATIVE_PLUS': '')
   function("StringIndexOf#{suffix}".to_sym,
-            params: {str: 'ref', ch: 'u16', fake: 'i32'},
+            params: {str_orig: 'ref', ch: 'u16', fake: 'i32'},
             regmap: $full_regmap,
             regalloc_set: $panda_mask,
             mode: [cgmode]) {
@@ -1491,7 +1480,7 @@ def GenerateStringIndexOf(cgmode)
     next
   end
 
-  check_string_type(str)
+  str := try_use_cached_flat_str(str_orig)
 
   str_len_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
 
@@ -1600,10 +1589,10 @@ def GenerateStringIndexOf(cgmode)
   end
 Label(:SlowPathEntrypoint)
   if cgmode == :NativePlus
-      Return(Call(str, ch).Method("StdCoreStringIndexOf").i32).i32
+      Return(Call(str_orig, ch).Method("StdCoreStringIndexOf").i32).i32
   else
     entrypoint = get_entrypoint_offset("STRING_INDEX_OF_SLOW_PATH")
-    Intrinsic(:SLOW_PATH_ENTRY, str, ch, fake).AddImm(entrypoint).MethodAsImm("StringIndexOfOddSavedBridge").Terminator.i32
+    Intrinsic(:SLOW_PATH_ENTRY, str_orig, ch, fake).AddImm(entrypoint).MethodAsImm("StringIndexOfOddSavedBridge").Terminator.i32
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
   end
 }
@@ -1622,7 +1611,7 @@ def GenerateStringIndexOfAfter(cgmode)
   suffix = (cgmode == :NativePlus ? 'NativePlus': '')
   upsuffix = (cgmode == :NativePlus ? '_NATIVE_PLUS': '')
   function("StringIndexOfAfter#{suffix}".to_sym,
-            params: {str: 'ref', ch: 'u16', start_index: 'i32'},
+            params: {str_orig: 'ref', ch: 'u16', start_index: 'i32'},
             regmap: $full_regmap,
             regalloc_set: $panda_mask,
             mode: [cgmode]) {
@@ -1643,7 +1632,7 @@ def GenerateStringIndexOfAfter(cgmode)
     start_index := Phi(start_index0, start_index1).i32
   end
 
-  check_string_type(str)
+  str := try_use_cached_flat_str(str_orig)
 
   str_len_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
   # Return '-1' if 'str' is empty.
@@ -1791,10 +1780,10 @@ def GenerateStringIndexOfAfter(cgmode)
   end
 Label(:SlowPathEntrypoint)
   if cgmode == :NativePlus
-      Return(Call(str, ch, start_index).Method("StdCoreStringIndexOfAfter").i32).i32
+      Return(Call(str_orig, ch, start_index).Method("StdCoreStringIndexOfAfter").i32).i32
   else
     entrypoint = get_entrypoint_offset("STRING_INDEX_OF_AFTER_SLOW_PATH")
-    Intrinsic(:SLOW_PATH_ENTRY, str, ch, start_index).AddImm(entrypoint).MethodAsImm("StringIndexOfAfterOddSavedBridge").Terminator.i32
+    Intrinsic(:SLOW_PATH_ENTRY, str_orig, ch, start_index).AddImm(entrypoint).MethodAsImm("StringIndexOfAfterOddSavedBridge").Terminator.i32
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
   end
 }
@@ -1805,7 +1794,7 @@ GenerateStringIndexOfAfter(:NativePlus)
 
 
 function(:StringRepeatTlab,
-        params: {str: 'ref', cnt: 'i32'},
+        params: {str_orig: 'ref', cnt: 'i32'},
         regmap: $full_regmap,
         regalloc_set: $panda_mask,
         mode: [:FastPath]) {
@@ -1820,7 +1809,7 @@ function(:StringRepeatTlab,
     Goto(:SlowPathEntrypoint)
   }
 
-  check_string_type(str)
+  str := try_use_cached_flat_str(str_orig)
 
   IfImm(Compare(count, 0).EQ.b).Imm(0).NE {
     klass := load_class(str)
@@ -1878,6 +1867,6 @@ Label(:End)
 
 Label(:SlowPathEntrypoint)
   entrypoint = get_entrypoint_offset("STRING_REPEAT_SLOW_PATH")
-  Intrinsic(:SLOW_PATH_ENTRY, str, count).AddImm(entrypoint).MethodAsImm("StringRepeatUsualBridge").Terminator.ptr
+  Intrinsic(:SLOW_PATH_ENTRY, str_orig, count).AddImm(entrypoint).MethodAsImm("StringRepeatUsualBridge").Terminator.ptr
   Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }

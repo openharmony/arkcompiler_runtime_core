@@ -255,10 +255,14 @@ private:
     bool IsPotentiallyBlocked();
     void MigrateCoroutinesImpl(StackfulCoroutineWorker *to, size_t migrateCount) REQUIRES(runnablesLock_);
 
+    /* events */
     /// called right before the coroutineContext is switched
     void OnBeforeContextSwitch(StackfulCoroutineContext *from, StackfulCoroutineContext *to);
     /// called right after the coroutineContext is switched (in case if no migration happened)
     void OnAfterContextSwitch(StackfulCoroutineContext *to);
+
+    /// worker local storage
+    void CacheLocalObjectsInCoroutines() override;
 
 private:  // data members
     StackfulCoroutineManager *coroManager_;

@@ -137,7 +137,7 @@ Expected<PandaEtsVM *, PandaString> PandaEtsVM::Create(Runtime *runtime, const R
         u_setDataDirectory(icuPath.c_str());
     }
 
-    vm->coroutineManager_->Initialize(runtime, vm);
+    vm->coroutineManager_->InitializeScheduler(runtime, vm);
 
     g_pandaEtsVM = vm;
     return vm;
@@ -326,6 +326,7 @@ bool PandaEtsVM::Initialize()
         }
 
         referenceProcessor_->Initialize();
+        coroutineManager_->InitializeManagedStructures();
     }
     [[maybe_unused]] bool cachesCreated =
         (doubleToStringCache_ != nullptr && floatToStringCache_ != nullptr && longToStringCache_ != nullptr);

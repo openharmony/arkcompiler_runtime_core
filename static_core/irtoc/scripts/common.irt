@@ -127,6 +127,7 @@ module Constants
     THREAD_FRAME_OFFSET = "cross_values::GetManagedThreadFrameOffset(GetArch())"
     THREAD_EXCEPTION_OFFSET = "cross_values::GetManagedThreadExceptionOffset(GetArch())"
     THREAD_INTERPRETER_CACHE_OFFSET = "cross_values::GetManagedThreadInterpreterCacheOffset(GetArch())"
+    THREAD_FLATTENED_STRING_CACHE_OFFSET = "cross_values::GetManagedThreadFlattenedStringCacheOffset(GetArch())"
     THREAD_FLAG_OFFSET = "cross_values::GetManagedThreadFlagOffset(GetArch())"
     THREAD_VM_OFFSET = "cross_values::GetThreadVmOffset(GetArch())"
     MARK_WORD_OFFSET = "cross_values::GetObjectHeaderMarkWordOffset(GetArch())"
@@ -224,8 +225,10 @@ macro(:call_runtime) { |e, *args|
 }
 
 macro(:call_runtime_save_all) { |e, *args|
+    # Load entry before save registers because stack SpillFill is possible
+    entry := LoadI(%tr).Imm(e).ptr
     Intrinsic(:SAVE_REGISTERS_EP).void
-    ret = call_runtime(e, *args)
+    ret := CallIndirect(entry, *args)
     Intrinsic(:RESTORE_REGISTERS_EP).void
     ret
 }
