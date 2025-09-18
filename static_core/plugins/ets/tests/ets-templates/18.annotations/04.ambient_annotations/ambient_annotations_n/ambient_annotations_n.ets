@@ -16,7 +16,7 @@
 /*---
 desc: An ambient annotation and the annotation that implements it must be exactly identical,
       including field initialization
-tags: [not-a-test, compile-only]
+tags: [compile-only]
 ---*/
 
 export enum MyEnum { EnumField1, EnumField2 }
