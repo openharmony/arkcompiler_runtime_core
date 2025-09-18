@@ -64,6 +64,8 @@ panda_ets_add_gtest(
         ets_stacktrace_element_test.cpp
         ets_typed_arrays_test.cpp
         ets_typed_unsigned_arrays_test.cpp
+        ets_map_test.cpp
+        ets_set_test.cpp
     LIBRARIES
         arkassembler
         arkruntime

@@ -310,6 +310,11 @@ function test_set_char() {
     set.add(c'B')
     arktest.assertTrue(set.delete(c'B'))
     arktest.assertFalse(set.delete(c'B'))
+
+    set.add(c'\u012C')
+    arktest.assertTrue(set.has(c'\u012C'))
+    arktest.assertFalse(set.has(c'\u002C'))
+    arktest.assertFalse(set.has(c'\u0001'))
 }
 
 function test_set_byte() {

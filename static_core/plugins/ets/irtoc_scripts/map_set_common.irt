@@ -31,9 +31,15 @@ module MapConstants
   SIZE_OFFSET = "cross_values::GetEscompatMapSizeOffset(graph->GetArch())"
   BUCKETS_OFFSET = "cross_values::GetEscompatMapBucketsOffset(graph->GetArch())"
 
-  PLATFORM_TYPES_CORE_LONG_TYPE_OFFSET = "cross_values::GetPlatformTypesCoreLongTypeOffset(graph->GetArch())"
-  PLATFORM_TYPES_CORE_FLOAT_TYPE_OFFSET = "cross_values::GetPlatformTypesCoreFloatTypeOffset(graph->GetArch())"
-  PLATFORM_TYPES_CORE_DOUBLE_TYPE_OFFSET = "cross_values::GetPlatformTypesCoreDoubleTypeOffset(graph->GetArch())"
+  ETS_CLASS_BOXED_TYPE_FIELD_START = "cross_values::GetEtsClassBoxedTypeFieldStart(graph->GetArch())"
+  ETS_CLASS_BOXED_TYPE_FIELD_SIZE = "cross_values::GetEtsClassBoxedTypeFieldSize(graph->GetArch())"
+  ETS_CLASS_BOXED_TYPE_FIELD_MASK = "(((1LLU << " + ETS_CLASS_BOXED_TYPE_FIELD_SIZE + ") - 1) << " + ETS_CLASS_BOXED_TYPE_FIELD_START + ")"
+  ETS_CLASS_BOXED_TYPE_CHAR_MASK_VALUE = "(cross_values::GetEtsClassBoxedTypeCharMaskValue(graph->GetArch()) << " + ETS_CLASS_BOXED_TYPE_FIELD_START + ")"
+  ETS_CLASS_BOXED_TYPE_SHORT_MASK_VALUE = "(cross_values::GetEtsClassBoxedTypeShortMaskValue(graph->GetArch()) << " + ETS_CLASS_BOXED_TYPE_FIELD_START + ")"
+  ETS_CLASS_BOXED_TYPE_INT_MASK_VALUE = "(cross_values::GetEtsClassBoxedTypeIntMaskValue(graph->GetArch()) << " + ETS_CLASS_BOXED_TYPE_FIELD_START + ")"
+  ETS_CLASS_BOXED_TYPE_LONG_MASK_VALUE = "(cross_values::GetEtsClassBoxedTypeLongMaskValue(graph->GetArch()) << " + ETS_CLASS_BOXED_TYPE_FIELD_START + ")"
+  ETS_CLASS_BOXED_TYPE_FLOAT_MASK_VALUE = "(cross_values::GetEtsClassBoxedTypeFloatMaskValue(graph->GetArch()) << " + ETS_CLASS_BOXED_TYPE_FIELD_START + ")"
+  ETS_CLASS_BOXED_TYPE_DOUBLE_MASK_VALUE = "(cross_values::GetEtsClassBoxedTypeDoubleMaskValue(graph->GetArch()) << " + ETS_CLASS_BOXED_TYPE_FIELD_START + ")"
 
   ETS_CLASS_IS_NULLVALUE_FLAG = "cross_values::GetEtsClassIsNullvalueFlag(graph->GetArch())"
   ETS_CLASS_IS_BOXED_FLAG = "cross_values::GetEtsClassIsBoxedFlag(graph->GetArch())"
@@ -102,6 +108,22 @@ scoped_macro(:isBoxedType) do |flags|
   AndI(flags).Imm(MapConstants::ETS_CLASS_IS_BOXED_FLAG).u32
 end
 
+scoped_macro(:getBoxedType) do |flags|
+  boxed_type = AndI(flags).Imm(MapConstants::ETS_CLASS_BOXED_TYPE_FIELD_MASK).u32
+end
+
+# isChar, isShort, isInt, isLong, isFloat, isDouble
+['Char', 'Short', 'Int', 'Long', 'Float', 'Double'].each do |name|
+  scoped_macro(:"is#{name}") do |type|
+    If(type, Cast(eval("MapConstants::ETS_CLASS_BOXED_TYPE_#{name.upcase}_MASK_VALUE")).u32).EQ.Likely {
+      _res1 := Cast(1).b
+    } Else {
+      _res2 := Cast(0).b
+    }
+    Phi(_res1, _res2).b
+  end
+end
+
 scoped_macro(:isBigintType) do |flags|
   AndI(flags).Imm(MapConstants::ETS_CLASS_IS_BIGINT_FLAG).u32
 end
@@ -126,14 +148,14 @@ scoped_macro(:fetchHashCode) do |obj, is_string|
 end
 
 
-scoped_macro(:calcHashCode) do |obj, type|
+scoped_macro(:calcHashCode) do |obj, flags|
   ptypes := LoadI(%tr).Imm(EtsConstants::CORO_LOCAL_STORAGE_OFFSET).ptr
+  btype := getBoxedType(flags)
 
   int_max := Cast(MapConstants::INT_MAX).f64
   int_min := Cast(MapConstants::INT_MIN).f64
 
-  double_type := getPlatType(ptypes, MapConstants::PLATFORM_TYPES_CORE_DOUBLE_TYPE_OFFSET)
-  If(type, double_type).EQ.b {
+  If(isDouble(btype), 1).EQ.b {
     value_double := LoadI(obj).Imm(EtsConstants::BOX_PRIMITIVE_VALUE_OFFSET).f64
 
     If(isNan64(value_double), 0).NE.b {
@@ -155,8 +177,7 @@ Label(:ValueDoubleDone)
     Goto(:Done)
   }
 
-  float_type := getPlatType(ptypes, MapConstants::PLATFORM_TYPES_CORE_FLOAT_TYPE_OFFSET)
-  If(type, float_type).EQ.b {
+  If(isFloat(btype), 1).EQ.b {
     value_float := LoadI(obj).Imm(EtsConstants::BOX_PRIMITIVE_VALUE_OFFSET).f32
 
     If(isNan32(value_float), 0).NE.b {
@@ -176,22 +197,33 @@ Label(:ValueDoubleDone)
 Label(:ValueFloatDone)
     hash_code_float := Phi(hash_code_float_nan, hash_code_float_large_pos, hash_code_float_large_neg, hash_code_float_norm).u32
     Goto(:Done)
-  } Else {
+  } 
+
+  isIntLong := Or(isInt(btype), isLong(btype)).b
+  If(isIntLong, 1).EQ.b {
     hash_code_int := LoadI(obj).Imm(EtsConstants::BOX_PRIMITIVE_VALUE_OFFSET).u32
+    Goto(:Done)
+  } 
+
+  isCharShort := Or(isChar(btype), isShort(btype)).b
+  If(isCharShort, 1).EQ.b {
+    hash_code_short := Cast(LoadI(obj).Imm(EtsConstants::BOX_PRIMITIVE_VALUE_OFFSET).u16).u32
+  } Else {
+    hash_code_byte := Cast(LoadI(obj).Imm(EtsConstants::BOX_PRIMITIVE_VALUE_OFFSET).u8).u32
   }
 
 Label(:Done)
-  hash_code := Phi(hash_code_double, hash_code_float, hash_code_int).u32
+  hash_code := Phi(hash_code_double, hash_code_float, hash_code_int, hash_code_short, hash_code_byte).u32
 end
 
-scoped_macro(:getBucketIdx) do |key, is_string, type, flags, buck_arr_len|
+scoped_macro(:getBucketIdx) do |key, is_string, flags, buck_arr_len|
   If(isNullValue(flags), 0).NE.b {
     buck_idx_null := 0
     Goto(:Done)
   }
 
   If(isBoxedType(flags), 0).NE.b {
-    key_hash_boxed := calcHashCode(key, type)
+    key_hash_boxed := calcHashCode(key, flags)
     Goto(:GotHashCode)
   }
 
@@ -218,22 +250,34 @@ scoped_macro(:compareByRef) do |obj, key|
   res := Compare(obj, key).b
 end
 
-scoped_macro(:getCompareVal) do |obj, type, long_type, float_type, double_type|
-  is_64 := Or(Compare(type, long_type).b, Compare(type, double_type).b).b
-
-  If(is_64, 0).NE.b {
+scoped_macro(:getCompareVal) do |obj, btype|
+  is_64 := Or(isLong(btype), isDouble(btype)).b
+  If(is_64, 1).EQ.b {
     obj_val_64 := LoadI(obj).Imm(EtsConstants::BOX_PRIMITIVE_VALUE_OFFSET).u64
-  } Else {
-    obj_val_32 := Cast(LoadI(obj).Imm(EtsConstants::BOX_PRIMITIVE_VALUE_OFFSET).u32).u64
+    Goto(:Done)
   }
-  val := Phi(obj_val_64, obj_val_32).u64
+
+  is_32 := Or(isInt(btype), isFloat(btype)).b
+  If(is_32, 1).EQ.b {
+    obj_val_32 := Cast(LoadI(obj).Imm(EtsConstants::BOX_PRIMITIVE_VALUE_OFFSET).u32).u64
+    Goto(:Done)
+  }
+
+  is_16 := Or(isChar(btype), isShort(btype)).b
+  If(is_16, 1).EQ.b {
+    obj_val_16 := Cast(LoadI(obj).Imm(EtsConstants::BOX_PRIMITIVE_VALUE_OFFSET).u16).u64
+  } Else {
+    obj_val_8 := Cast(LoadI(obj).Imm(EtsConstants::BOX_PRIMITIVE_VALUE_OFFSET).u8).u64
+  }
+
+Label(:Done)
+  val := Phi(obj_val_64, obj_val_32, obj_val_16, obj_val_8).u64
 end
 
-scoped_macro(:compareByVal) do |obj, type, key_val, long_type, float_type, double_type|
-  obj_val := getCompareVal(obj, type, long_type, float_type, double_type)
+scoped_macro(:compareByVal) do |obj, key_val, btype|
+  obj_val := getCompareVal(obj, btype)
 
-  is_double := Compare(type, double_type).b
-  If(is_double, 0).NE.b {
+  If(isDouble(btype), 0).NE.b {
     is_key_nan := isNan64(key_val)
     is_obj_nan := isNan64(obj_val)
 
@@ -251,8 +295,7 @@ scoped_macro(:compareByVal) do |obj, type, key_val, long_type, float_type, doubl
     Goto(:Done)
   }
 
-  is_float := Compare(type, float_type).b
-  If(is_float, 0).NE.b {
+  If(isFloat(btype), 0).NE.b {
     key_f32 := Bitcast(Cast(key_val).u32).f32
     obj_f32 := Bitcast(Cast(obj_val).u32).f32
     is_key_nan := isNan32(key_f32)
@@ -328,13 +371,10 @@ Label(:Done)
   found := ofs
 end
 
-macro(:findKeyByVal) do |buck_data, buck_len, key, type|
+macro(:findKeyByVal) do |buck_data, buck_len, key, type, flags|
   ptypes := LoadI(%tr).Imm(EtsConstants::CORO_LOCAL_STORAGE_OFFSET).ptr
-  long_type := getPlatType(ptypes, MapConstants::PLATFORM_TYPES_CORE_LONG_TYPE_OFFSET)
-  float_type := getPlatType(ptypes, MapConstants::PLATFORM_TYPES_CORE_FLOAT_TYPE_OFFSET)
-  double_type := getPlatType(ptypes, MapConstants::PLATFORM_TYPES_CORE_DOUBLE_TYPE_OFFSET)
-
-  key_val := getCompareVal(key, type, long_type, float_type, double_type)
+  btype := getBoxedType(flags)
+  key_val := getCompareVal(key, btype)
 
   ofs_0 := Mul(SubI(buck_len).Imm(1).i32, EtsConstants::OBJ_PTR_SIZE).i32
 Label(:findKeyByValLoop)
@@ -353,7 +393,7 @@ Label(:findKeyByValLoop)
     Goto(:SlowPathEntrypoint)
   }
 
-  If(compareByVal(object, type, key_val, long_type, float_type, double_type), 0).NE.Likely.b {
+  If(compareByVal(object, key_val, btype), 0).NE.Likely.b {
     Goto(:findKeyByValDone)
   }
 
@@ -392,7 +432,7 @@ macro(:findKey) do |buck_data, buck_len, key, type, flags, is_string|
   If(isRefKey(key, flags), 0).NE.b {
     find_by_ref := findKeyByRef(buck_data, buck_len, key)
   } Else {
-    find_by_val := findKeyByVal(buck_data, buck_len, key, type)
+    find_by_val := findKeyByVal(buck_data, buck_len, key, type, flags)
   }
 
 Label(:findKeyDone)
