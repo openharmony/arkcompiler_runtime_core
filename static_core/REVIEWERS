@@ -130,6 +130,7 @@ static_core/plugins/ets/runtime/intrinsics/std_core_gc.cpp                    ^d
 static_core/plugins/ets/runtime/libani_helpers/                               @wanzixuan330 @v-cherkashin ^slynkodenis ^liwentao_uiw
 static_core/plugins/ets/runtime/mem/                                          ^dmitriitr @udav
 static_core/plugins/ets/runtime/regexp/                                       ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin @dreamdoomwalker
+static_core/plugins/ets/runtime/types/                                        @nazarovkonstantin @slynkodenis
 static_core/plugins/ets/runtime/types/*atomic*                                ^dmitriitr @konstanting
 static_core/plugins/ets/runtime/types/*promise*                               ^dmitriitr @konstanting
 static_core/plugins/ets/runtime/types/*typeapi*                               @aleksander-sotov ^anton-sysoev @dreamdoomwalker
