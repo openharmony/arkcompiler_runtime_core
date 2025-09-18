@@ -19,6 +19,11 @@
 #include "plugins/ets/runtime/types/ets_map.h"
 
 namespace ark::ets {
+
+namespace test {
+class EtsSetTest;
+}  // namespace test
+
 class EtsEscompatSet : public EtsObject {
 public:
     EtsEscompatSet() = delete;
@@ -39,6 +44,8 @@ public:
 
 private:
     ObjectPointer<EtsEscompatMap> elements_;
+
+    friend class test::EtsSetTest;
 };
 }  // namespace ark::ets
 

@@ -21,6 +21,10 @@
 
 namespace ark::ets {
 
+namespace test {
+class EtsMapTest;
+}  // namespace test
+
 class EtsEscompatMapEntry : public EtsObject {
 public:
     EtsEscompatMapEntry() = delete;
@@ -29,57 +33,28 @@ public:
     NO_COPY_SEMANTIC(EtsEscompatMapEntry);
     NO_MOVE_SEMANTIC(EtsEscompatMapEntry);
 
-    static EtsEscompatMapEntry *Create(EtsObject *key, EtsObject *val)
+    static EtsEscompatMapEntry *Create(EtsCoroutine *coro, EtsHandle<EtsObject> &keyHandle,
+                                       EtsHandle<EtsObject> &valHandle)
     {
-        auto *coro = EtsCoroutine::GetCurrent();
-        ASSERT(coro->HasPendingException() == false);
+        ASSERT(coro != nullptr);
+        const EtsPlatformTypes *platformTypes = PlatformTypes(coro);
+        EtsHandle<EtsEscompatMapEntry> entryHandle(
+            coro, FromEtsObject(EtsObject::Create(coro, platformTypes->escompatMapEntry)));
+        if (UNLIKELY(entryHandle.GetPtr() == nullptr)) {
+            return nullptr;
+        }
 
-        [[maybe_unused]] EtsHandleScope scope(coro);
-        EtsHandle<EtsObject> keyHandle(coro, key);
-        EtsHandle<EtsObject> valHandle(coro, val);
-
-        const EtsPlatformTypes *platformTypes = PlatformTypes(coro->GetPandaVM());
-        EtsHandle<EtsClass> klass(coro, platformTypes->escompatMapEntry);
-        EtsHandle<EtsEscompatMapEntry> entryHandle(coro, FromEtsObject(EtsObject::Create(klass.GetPtr())));
         entryHandle->SetKey(coro, keyHandle.GetPtr());
         entryHandle->SetVal(coro, valHandle.GetPtr());
-
-        if (UNLIKELY(coro->HasPendingException())) {
-            if (coro->GetPandaVM()->GetOOMErrorObject() == nullptr ||
-                (coro->GetException()->ClassAddr<Class>() ==
-                 coro->GetPandaVM()->GetOOMErrorObject()->ClassAddr<Class>())) {
-                coro->ClearException();
-                return nullptr;
-            }
-            // We do not expect any other exception than OOM
-            UNREACHABLE();
-        }
 
         return entryHandle.GetPtr();
     }
 
-    static EtsEscompatMapEntry *Create()
+    static EtsEscompatMapEntry *Create(EtsCoroutine *coro)
     {
-        auto *coro = EtsCoroutine::GetCurrent();
-        ASSERT(coro->HasPendingException() == false);
-
-        EtsHandleScope scope(coro);
-        const EtsPlatformTypes *platformTypes = PlatformTypes(coro->GetPandaVM());
-        EtsHandle<EtsClass> klass(coro, platformTypes->escompatMapEntry);
-        EtsHandle<EtsEscompatMapEntry> entryHandle(coro, FromEtsObject(EtsObject::Create(klass.GetPtr())));
-
-        if (UNLIKELY(coro->HasPendingException())) {
-            if (coro->GetPandaVM()->GetOOMErrorObject() == nullptr ||
-                (coro->GetException()->ClassAddr<Class>() ==
-                 coro->GetPandaVM()->GetOOMErrorObject()->ClassAddr<Class>())) {
-                coro->ClearException();
-                return nullptr;
-            }
-            // We do not expect any other exception than OOM
-            UNREACHABLE();
-        }
-
-        return entryHandle.GetPtr();
+        ASSERT(coro != nullptr);
+        const EtsPlatformTypes *platformTypes = PlatformTypes(coro);
+        return FromEtsObject(EtsObject::Create(coro, platformTypes->escompatMapEntry));
     }
 
     static EtsEscompatMapEntry *FromCoreType(ObjectHeader *obj)
@@ -166,6 +141,8 @@ private:
     ObjectPointer<EtsEscompatMapEntry> next_;
     ObjectPointer<EtsObject> key_;
     ObjectPointer<EtsObject> val_;
+
+    friend class test::EtsMapTest;
 };
 
 class EtsEscompatMap : public EtsObject {
@@ -238,6 +215,8 @@ private:
     ObjectPointer<EtsEscompatMapEntry> head_;
     ObjectPointer<EtsEscompatArray> buckets_;
     FIELD_UNUSED EtsInt sizeVal_;
+
+    friend class test::EtsMapTest;
 };
 
 }  // namespace ark::ets

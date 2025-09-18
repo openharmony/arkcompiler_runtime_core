@@ -230,6 +230,9 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     findType(&EtsPlatformTypes::escompatRecord, RECORD);
     findMethod(&EtsPlatformTypes::escompatRecordGetter, escompatRecord, GET_INDEX_METHOD, nullptr, false);
     findMethod(&EtsPlatformTypes::escompatRecordSetter, escompatRecord, SET_INDEX_METHOD, nullptr, false);
+    findType(&EtsPlatformTypes::escompatMap, MAP);
+    findType(&EtsPlatformTypes::escompatMapEntry, MAPENTRY);
+    findType(&EtsPlatformTypes::escompatSet, SET);
 
     findType(&EtsPlatformTypes::interopJSValue, JS_VALUE);
 
@@ -259,9 +262,6 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     if (LIKELY(Runtime::GetOptions().IsUseStringCaches())) {
         CreateAndInitializeCaches();
     }
-
-    findType(&EtsPlatformTypes::escompatMap, MAP);
-    findType(&EtsPlatformTypes::escompatMapEntry, MAPENTRY);
 }
 
 void EtsPlatformTypes::InitializeClasses(EtsCoroutine *coro)

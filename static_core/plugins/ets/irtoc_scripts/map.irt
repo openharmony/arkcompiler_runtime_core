@@ -96,7 +96,7 @@ def GenerateGetHashCodeByValue(cgmode)
     flags := LoadI(klass).Imm(EtsConstants::ETS_CLASS_FLAGS_FROM_RUNTIME_CLASS_OFFSET).u32
     If(isBoxedType(flags), 0).NE.b {
       type := LoadI(klass).Imm(Constants::BASE_CLASS_MANAGED_OBJECT_OFFSET).ref
-      Return(Cast(calcHashCode(obj, type)).u64).i64
+      Return(Cast(calcHashCode(obj, flags)).u64).i64
     }
     If(isBigintType(flags), 0).NE.b {
       Goto(:SlowPathEntrypointBigint)

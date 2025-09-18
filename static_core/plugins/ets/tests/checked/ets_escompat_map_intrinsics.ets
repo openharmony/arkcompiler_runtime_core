@@ -419,6 +419,14 @@ function test_map_char_double() {
     map.set(c'B', 2.5)
     arktest.assertTrue(map.delete(c'B'))
     arktest.assertFalse(map.delete(c'B'))
+
+    map.set(c'\u012C', 1.5)
+    arktest.assertTrue(map.has(c'\u012C'))
+    arktest.assertEQ(map.get(c'\u012C'), 1.5)
+    arktest.assertFalse(map.has(c'\u002C'))
+    arktest.assertEQ(map.get(c'\u002C'), undefined)
+    arktest.assertFalse(map.has(c'\u0001'))
+    arktest.assertEQ(map.get(c'\u0001'), undefined)
 }
 
 function test_map_byte_int() {
