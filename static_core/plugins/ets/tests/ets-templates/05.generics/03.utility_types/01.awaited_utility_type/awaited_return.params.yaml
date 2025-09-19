@@ -29,11 +29,13 @@ cases:
 
     - return_value: |-
           await new Promise<Promise<T>>((resolve) => {
+            resolve(
                 new Promise<T>((resolve) => {
                   setTimeout(() => {
                       resolve("hello" as T)
-                  }, 1000)
+                  }, 1)
               })
+            )
           })
       expected_value: |-
         "hello"
