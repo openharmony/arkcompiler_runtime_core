@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package escompat;
+package std.core;
 
 export interface ReadonlySet<T> extends Iterable<T> {
     /**
@@ -226,7 +226,14 @@ export class Set<K> implements ReadonlySet<K> {
      * @param callbackfn to apply
      */
     override forEach(callbackfn: (k: K, v: K, set: Set<K>) => void): void {
-        iteratorForEach<K>(this.keys(), (x: K): void => callbackfn(x, x, this))
+        let it = this.keys();
+        while (true) {
+            const v = it.next()
+            if (v.done) {
+                return
+            }
+            callbackfn(v.value as K, v.value as K, this)
+        }
     }
 }
 

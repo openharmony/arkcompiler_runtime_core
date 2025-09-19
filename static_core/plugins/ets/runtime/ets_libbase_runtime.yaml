@@ -99,6 +99,9 @@ coretypes:
 - managed_class: std.core.RWLock
   mirror_class: ark::ets::EtsRWLock
 
+- managed_class: std.core.Set
+  mirror_class: ark::ets::EtsEscompatSet
+
 - managed_class: escompat.Array
   mirror_class: ark::ets::EtsEscompatArray
 
@@ -155,9 +158,6 @@ coretypes:
 
 - managed_class: escompat.MapEntry
   mirror_class: ark::ets::EtsEscompatMapEntry
-
-- managed_class: escompat.Set
-  mirror_class: ark::ets::EtsEscompatSet
 
 intrinsics_namespace: ark::ets::intrinsics
 

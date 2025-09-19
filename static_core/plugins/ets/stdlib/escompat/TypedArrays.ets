@@ -617,7 +617,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates an array from a set of type escompat.Set<int>.
+     * Creates an array from a set of type std.core.Set<int>.
      *
      * @param set A set object to convert to an array.
      *
@@ -2132,7 +2132,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates an array from a set of type escompat.Set<int>.
+     * Creates an array from a set of type std.core.Set<int>.
      *
      * @param set A set object to convert to an array.
      *
@@ -3636,7 +3636,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates an array from a set of type escompat.Set<int>.
+     * Creates an array from a set of type std.core.Set<int>.
      *
      * @param set A set object to convert to an array.
      *
@@ -5147,7 +5147,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     }
 
     /**
-     * Creates an array from a set of type escompat.Set<BigInt>.
+     * Creates an array from a set of type std.core.Set<BigInt>.
      *
      * @param set A set object to convert to an array.
      *
@@ -6628,7 +6628,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates an array from a set of type escompat.Set<number>.
+     * Creates an array from a set of type std.core.Set<number>.
      *
      * @param set A set object to convert to an array.
      *
@@ -8049,7 +8049,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates an array from a set of type escompat.Set<number>.
+     * Creates an array from a set of type std.core.Set<number>.
      *
      * @param set A set object to convert to an array.
      *

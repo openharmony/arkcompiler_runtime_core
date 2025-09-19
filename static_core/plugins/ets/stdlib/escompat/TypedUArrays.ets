@@ -621,7 +621,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
     }
 
     /**
-     * Creates an array from a set of type escompat.Set<int>.
+     * Creates an array from a set of type std.core.Set<int>.
      *
      * @param set A set object to convert to an array.
      *
@@ -2130,7 +2130,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates an array from a set of type escompat.Set<int>.
+     * Creates an array from a set of type std.core.Set<int>.
      *
      * @param set A set object to convert to an array.
      *
@@ -3635,7 +3635,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates an array from a set of type escompat.Set<int>.
+     * Creates an array from a set of type std.core.Set<int>.
      *
      * @param set A set object to convert to an array.
      *
@@ -5174,7 +5174,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates an array from a set of type escompat.Set<int>.
+     * Creates an array from a set of type std.core.Set<int>.
      *
      * @param set A set object to convert to an array.
      *
@@ -6714,7 +6714,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
     }
 
     /**
-     * Creates an array from a set of type escompat.Set<BigInt>.
+     * Creates an array from a set of type std.core.Set<BigInt>.
      *
      * @param set A set object to convert to an array.
      *

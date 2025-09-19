@@ -19,11 +19,11 @@
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::__noinline__SetHas_bool"
 //! PASS_AFTER    "Inline"
 //! INST_NOT      "Intrinsic.SetHas"
-//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::has/
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::__noinline__SetDelete_bool"
 //! PASS_AFTER    "Inline"
 //! INST_NOT      "Intrinsic.SetDelete"
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 
 //! CHECKER       AOT PGO: Set<boolean> overrided intrinsics
 //! SKIP_IF       @architecture == "arm32"
@@ -32,11 +32,11 @@
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::__noinline__SetHas_bool"
 //! PASS_AFTER    "Inline"
 //! INST_NOT      "Intrinsic.SetHas"
-//! INST          /CallVirtual.*escompat\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::has/
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::__noinline__SetDelete_bool"
 //! PASS_AFTER    "Inline"
 //! INST_NOT      "Intrinsic.SetDelete"
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 
 //! CHECKER       JIT: Set<boolean> overrided intrinsics
 //! RUN           force_jit: true, options: "--compiler-regex='.*(test_set|SetHas|SetDelete)_.*'", entry: "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_bool_double_overrided1"
@@ -68,75 +68,75 @@ function __noinline__SetDelete_bool(set: Set<boolean>): boolean {
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_bool"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /CallVirtual.*escompat\.Set::has/
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Set::has/
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_char"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /CallVirtual.*escompat\.Set::has/
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Set::has/
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_byte"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /CallVirtual.*escompat\.Set::has/
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Set::has/
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_short"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /CallVirtual.*escompat\.Set::has/
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Set::has/
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_int"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /CallVirtual.*escompat\.Set::has/
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Set::has/
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_long"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /CallVirtual.*escompat\.Set::has/
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Set::has/
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_float"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /CallVirtual.*escompat\.Set::has/
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Set::has/
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_double"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /CallVirtual.*escompat\.Set::has/
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Set::has/
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_string"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /CallVirtual.*escompat\.Set::has/
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Set::has/
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 
 //! CHECKER       AOT PGO: Set intrinsics
 //! SKIP_IF       @architecture == "arm32"
@@ -145,75 +145,75 @@ function __noinline__SetDelete_bool(set: Set<boolean>): boolean {
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_bool"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /CallVirtual.*escompat\.Set::has/
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Set::has/
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_char"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /CallVirtual.*escompat\.Set::has/
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Set::has/
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_byte"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /CallVirtual.*escompat\.Set::has/
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Set::has/
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_short"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /CallVirtual.*escompat\.Set::has/
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Set::has/
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_int"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /CallVirtual.*escompat\.Set::has/
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Set::has/
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_long"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /CallVirtual.*escompat\.Set::has/
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Set::has/
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_float"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /CallVirtual.*escompat\.Set::has/
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Set::has/
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_double"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /CallVirtual.*escompat\.Set::has/
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Set::has/
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 //!
 //! METHOD        "ets_escompat_set_intrinsics.ETSGLOBAL::test_set_string"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /CallVirtual.*escompat\.Set::has/
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Set::has/
-//! INST          /CallVirtual.*escompat\.Set::delete/
+//! INST          /CallVirtual.*std\.core\.Set::has/
+//! INST          /CallVirtual.*std\.core\.Set::delete/
 
 //! CHECKER       JIT: Set intrinsics
 //! RUN           force_jit: true, options: "--compiler-regex='.*test_set_.*'", entry: "ets_escompat_set_intrinsics.ETSGLOBAL::main"
