@@ -255,7 +255,7 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     findMethod(&EtsPlatformTypes::escompatProcessHandleUncaughtError, escompatProcess, "HandleUncaughtError",
                "Lstd/core/Object;:V", true);
 
-    findType(&EtsPlatformTypes::escompatRegExpExecArray, REG_EXP_EXEC_ARRAY);
+    findType(&EtsPlatformTypes::stdcoreRegExpExecArray, REG_EXP_EXEC_ARRAY);
     findType(&EtsPlatformTypes::escompatJsonReplacer, JSON_REPLACER);
     findType(&EtsPlatformTypes::escompatErrorOptions, ERROR_OPTIONS);
     findType(&EtsPlatformTypes::escompatErrorOptionsImpl, ERROR_OPTIONS_IMPL);

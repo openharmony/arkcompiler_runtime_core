@@ -461,7 +461,7 @@ std/core/std_core_string_String_codePointCount_number_number.ets
 std/core/std_core_string_String_repeat_int.ets
 std/core/std_core_string_String_repeat_number.ets
 escompat/JsonReplacerTest.ets
-escompat/JsonStringifyRegExpExecArrayTest.ets
+std/core/regexp/JsonStringifyRegExpExecArrayTest.ets
 std/core/std_core_typeduarrays_methods__BigUint64Array.ets
 regression/15278_0.ets
 

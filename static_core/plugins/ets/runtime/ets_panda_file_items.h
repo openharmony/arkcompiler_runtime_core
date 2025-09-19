@@ -217,7 +217,7 @@ static constexpr std::string_view INTEROP_DYNAMIC_FUNCTION             = "Lstd/i
 
 static constexpr std::string_view ARRAY                                = "Lescompat/Array;";
 static constexpr std::string_view ARRAY_AS_LIST_INT                    = "Lstd/containers/containers/ArrayAsListInt;";
-static constexpr std::string_view REG_EXP_EXEC_ARRAY                   = "Lescompat/RegExpExecArray;";
+static constexpr std::string_view REG_EXP_EXEC_ARRAY                   = "Lstd/core/RegExpExecArray;";
 static constexpr std::string_view JSON_REPLACER                        = "Lescompat/JsonReplacer;";
 
 // ANI annotation classes

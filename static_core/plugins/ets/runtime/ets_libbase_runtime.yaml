@@ -7244,15 +7244,15 @@ intrinsics:
 ###################
 # std.core.RegExp #
 ###################
-  - name: EscompatRegExpParse
+  - name: StdCoreRegExpParse
     space: ets
-    class_name: escompat.RegExp
+    class_name: std.core.RegExp
     method_name: parse
     static: true
     signature:
       ret: std.core.String
       args: [ std.core.String ]
-    impl: ark::ets::intrinsics::EscompatRegExpParse
+    impl: ark::ets::intrinsics::StdCoreRegExpParse
 
 ####################
 # std.core.TypeAPI #
