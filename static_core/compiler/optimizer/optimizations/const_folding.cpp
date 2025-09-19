@@ -942,7 +942,9 @@ bool ConstFoldingCmp(Inst *inst)
             default:
                 break;
         }
-        auto newCnst = inst->GetBasicBlock()->GetGraph()->FindOrCreateConstant(result);
+        auto graph = inst->GetBasicBlock()->GetGraph();
+        auto newCnst = graph->IsBytecodeOptimizer() ? graph->FindOrCreateConstant<int32_t>(result)
+                                                    : graph->FindOrCreateConstant(result);
         inst->ReplaceUsers(newCnst);
         return true;
     }
