@@ -650,13 +650,35 @@ void GC::PreStartup()
     }
 }
 
+#ifdef SAFEPOINT_TIME_CHECKER_ENABLED
+namespace {
+class NonRecordingScopedSafepointTimer final {
+public:
+    explicit NonRecordingScopedSafepointTimer(bool isManaged) : isManaged_ {isManaged}
+    {
+        if (isManaged_) {
+            SafepointTimerTable::ResetTimers(ManagedThread::GetCurrent()->GetInternalId(), true);
+        }
+    }
+
+    ~NonRecordingScopedSafepointTimer()
+    {
+        if (isManaged_) {
+            SafepointTimerTable::ResetTimers(ManagedThread::GetCurrent()->GetInternalId(), false);
+        }
+    }
+
+private:
+    bool isManaged_;
+};
+}  // unnamed namespace
+#endif  // SAFEPOINT_TIME_CHECKER_ENABLED
+
 // NOLINTNEXTLINE(performance-unnecessary-value-param)
 bool GC::AddGCTask(bool isManaged, PandaUniquePtr<GCTask> task)
 {
 #ifdef SAFEPOINT_TIME_CHECKER_ENABLED
-    if (isManaged) {
-        SafepointTimerTable::ResetTimers(ManagedThread::GetCurrent()->GetInternalId(), true);
-    }
+    NonRecordingScopedSafepointTimer scopedTimer {isManaged};
 #endif
     bool triggeredByThreshold = (task->reason == GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE);
     if (gcSettings_.RunGCInPlace()) {

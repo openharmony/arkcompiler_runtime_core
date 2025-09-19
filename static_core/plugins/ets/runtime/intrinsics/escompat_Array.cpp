@@ -15,8 +15,12 @@
 
 #include <charconv>
 #include <cstddef>
+#include <cstdint>
+
 #include "cross_values.h"
 #include <endian.h>
+#include <optional>
+
 #include "runtime/include/coretypes/string.h"
 #include "intrinsics.h"
 #include "interpreter/runtime_interface.h"
@@ -264,12 +268,45 @@ EtsDouble EtsEscompatArrayIndexOfNumeric(EtsObjectArray *buffer, EtsClass *value
         return -1;
     }
 
-    for (EtsInt index = fromIndex; index < actualLength; index++) {
-        auto element = buffer->Get(index);
-        if (element != nullptr && element->GetClass() == valueCls && valTyped == GetNumericValue<T>(element)) {
-            return index;
+    if (actualLength <= fromIndex) {
+        return -1;
+    }
+
+    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(coro);
+    EtsHandle<EtsObjectArray> bufferHandle(coro, buffer);
+
+    auto count = actualLength - fromIndex;
+    constexpr std::size_t chunkSize = 1U << 9;
+    auto iterCount = count / chunkSize;
+    auto remainder = count % chunkSize;
+
+    auto processChunk = [fromIndex, &valueCls, valTyped, &bufferHandle](std::size_t iter,
+                                                                        std::size_t size) -> std::optional<EtsDouble> {
+        auto startOffset = iter * chunkSize;
+        auto endOffset = startOffset + size;
+        for (size_t j = startOffset; j < endOffset; ++j) {
+            auto currentIndex = fromIndex + j;
+            auto element = bufferHandle.GetPtr()->Get(currentIndex);
+            if (element != nullptr && element->GetClass() == valueCls && valTyped == GetNumericValue<T>(element)) {
+                return currentIndex;
+            }
+        }
+        return std::nullopt;
+    };
+
+    for (size_t i = 0; i < iterCount; ++i) {
+        if (auto result = processChunk(i, chunkSize); result.has_value()) {
+            return result.value();
+        }
+        ark::interpreter::RuntimeInterface::Safepoint();
+    }
+    if (remainder > 0) {
+        if (auto result = processChunk(iterCount, remainder); result.has_value()) {
+            return result.value();
         }
     }
+
     return -1;
 }
 
@@ -464,10 +501,33 @@ extern "C" EtsEscompatArray *EtsEscompatArrayFill(EtsEscompatArray *array, EtsOb
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     [[maybe_unused]] EtsHandleScope scope(coro);
     EtsHandle<EtsEscompatArray> arrayHandle(coro, array);
+    EtsHandle<EtsObject> valueHandle(coro, value);
     auto actualLength = static_cast<int64_t>(array->GetActualLength());
     auto startInd = NormalizeIndex(start, actualLength);
     auto endInd = NormalizeIndex(end, actualLength);
-    arrayHandle->GetData()->Fill(value, startInd, endInd);
+    if (endInd <= startInd) {
+        return arrayHandle.GetPtr();
+    }
+
+    auto count = endInd - startInd;
+    constexpr std::size_t chunkSize = 1U << 12;
+    auto iterCount = count / chunkSize;
+    auto remainder = count % chunkSize;
+
+    auto processChunk = [&arrayHandle, &valueHandle, startInd](std::size_t iter, std::size_t size) {
+        auto startOffset = iter * chunkSize + startInd;
+        auto endOffset = startOffset + size;
+        arrayHandle->GetData()->Fill(valueHandle.GetPtr(), startOffset, endOffset);
+    };
+
+    for (std::uint32_t i = 0; i < iterCount; ++i) {
+        processChunk(i, chunkSize);
+        ark::interpreter::RuntimeInterface::Safepoint();
+    }
+    if (remainder > 0) {
+        processChunk(iterCount, remainder);
+    }
+
     return arrayHandle.GetPtr();
 }
 
@@ -553,10 +613,10 @@ static void RefReverse(ManagedThread *thread, EtsHandle<EtsEscompatArray> &array
     };
     auto putSafepoint = [&usePreBarrier, barrierSet, &arr, thread](size_t dstStart, size_t dstEndMirror, size_t count) {
         if (barrierSet->GetPostType() != ark::mem::BarrierType::POST_WRB_NONE) {
-            constexpr uint32_t OFFSET = ark::coretypes::Array::GetDataOffset();
+            constexpr uint32_t offset = ark::coretypes::Array::GetDataOffset();
             const uint32_t size = count * sizeof(T);
-            barrierSet->PostBarrier(arr, OFFSET + dstStart * sizeof(T), size);
-            barrierSet->PostBarrier(arr, OFFSET + dstEndMirror * sizeof(T) - size, size);
+            barrierSet->PostBarrier(arr, offset + dstStart * sizeof(T), size);
+            barrierSet->PostBarrier(arr, offset + dstEndMirror * sizeof(T) - size, size);
         }
         ark::interpreter::RuntimeInterface::Safepoint(thread);
         usePreBarrier = barrierSet->IsPreBarrierEnabled();
@@ -987,15 +1047,17 @@ extern "C" ark::ets::EtsString *EtsEscompatArrayJoinInternal(EtsEscompatArray *a
     auto actualLength = static_cast<EtsInt>(array->GetActualLength());
     ElementComputeResult res;
     [[maybe_unused]] EtsHandleScope scope(coroutine);
+    EtsHandle<EtsObjectArray> bufferHandle(coroutine, buffer);
     EtsHandle<EtsString> separatorHandle(coroutine, separator);
 
-    ComputeCharSize(buffer, actualLength, res, ptypes, separatorHandle);
+    ComputeCharSize(bufferHandle.GetPtr(), actualLength, res, ptypes, separatorHandle);
+    ark::interpreter::RuntimeInterface::Safepoint();
 
     if (res.utf16Size > 0) {
-        return EtsEscompatArrayJoinUtf16(buffer, actualLength, res, ptypes, separatorHandle);
+        return EtsEscompatArrayJoinUtf16(bufferHandle.GetPtr(), actualLength, res, ptypes, separatorHandle);
     }
 
-    return EtsEscompatArrayJoinUtf8(buffer, actualLength, res, ptypes, separatorHandle);
+    return EtsEscompatArrayJoinUtf8(bufferHandle.GetPtr(), actualLength, res, ptypes, separatorHandle);
 }
 
 extern "C" EtsObject *EtsEscompatArrayGetUnsafe(EtsEscompatArray *array, int32_t index)
