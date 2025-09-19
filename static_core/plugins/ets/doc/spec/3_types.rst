@@ -2373,9 +2373,6 @@ after another:
    for non-alias types.
 #. Identical types within a union type are replaced for a single type with
    account to the ``readonly`` type flag priority.
-#. If at least one type in a union is ``Any``, then all other types are
-   removed.
-#. If positioned among union types, type ``never`` is removed.
 #. If one type in a union is ``string``, then all string literal types (if
    any) are removed.
 

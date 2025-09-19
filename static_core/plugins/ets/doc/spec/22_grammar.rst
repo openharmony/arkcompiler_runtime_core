@@ -807,11 +807,7 @@ Grammar Summary
 
     namespaceDeclaration:
         'namespace' qualifiedName
-        '{' namespaceMember* staticBlock? namespaceMember* '}'
-        ;
-
-    namespaceMember:
-        topDeclaration | exportDirective
+        '{' (topDeclaration | topLevelStatements | exportDirective)* '}'
         ;
 
     exportDirective:
@@ -1193,7 +1189,7 @@ Grammar Summary
     FloatLiteral:
         DecimalIntegerLiteral '.' FractionalPart? ExponentPart? FloatTypeSuffix?
         | '.' FractionalPart ExponentPart? FloatTypeSuffix?
-        | DecimalIntegerLiteral ExponentPart FloatTypeSuffix?
+        | DecimalIntegerLiteral ExponentPart? FloatTypeSuffix
         ;
 
     ExponentPart:

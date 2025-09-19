@@ -1345,10 +1345,11 @@ from the initialization expression instead by using the following algorithm:
 
     let a = []                        // compile-time error, type cannot be inferred
     let b = ["a"]                     // type is string[]
-    let c = [1, 2, 3]                 // type is number[]
-    let d = ["a" + "b", 1, 3.14]      // type is (string | number)[]
-    let e = [u]                       // type is string[]
-    let f = [(): void => {}, new A()] // type is (() => void | A)[]
+    let c = [1, 2, 3]                 // type is int[]
+    let d = [1, 2.1, 3]               // type is number[]
+    let e = ["a" + "b", 1, 3.14]      // type is (string | number)[]
+    let f = [u]                       // type is string[]
+    let g = [(): void => {}, new A()] // type is (() => void | A)[]
 
 |
 

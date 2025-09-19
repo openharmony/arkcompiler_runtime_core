@@ -169,7 +169,6 @@ issue occurs then a proper exception is thrown.
    sting literal
    module
    argument
-   static initialization
    function
    argument
    access

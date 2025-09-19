@@ -217,18 +217,8 @@ also non-nullish.
     let b2 = new B<'f0'>    // Compile-time error as 'f0' does not fit the constraint
     let b3 = new B<keyof A> // OK
 
-
 A type parameter of a generic can *depend* on another type parameter
 of the same generic.
-
-If *S* constrains *T*, then the type parameter *T* *directly depends*
-on the type parameter *S*, while *T* directly depends on the following:
-
--  *S*; or
--  Type parameter *U* that depends on *S*.
-
-A :index:`compile-time error` occurs if a type parameter in the type parameter
-section depends on itself.
 
 .. index::
    type parameter
@@ -237,32 +227,25 @@ section depends on itself.
 .. code-block:: typescript
    :linenos:
 
+    class G<T, S extends T> {}
+
     class Base {}
     class Derived extends Base { }
     class SomeType { }
-
-    class G<T, S extends T> {}
 
     let x: G<Base, Derived>  // correct: the second argument directly
                              // depends on the first one
     let y: G<Base, SomeType> // error: SomeType does not depend on Base
 
-    class A0<T> {
-       data: T
-       constructor (p: T) { this.data = p }
-       foo () {
-          let o: Object = this.data // error: T not compatible with Object
-          console.log (this.data.toString()) // error: T has no methods or fields
-       }
-    }
+A :index:`compile-time error` occurs if a type parameter in the type parameter
+section depends on itself directly or indirectly:
 
-    class A1<T extends Object> extends A0<T> {
-       constructor (p: T) { super(p); this.data = p }
-       override foo () {
-          let o: Object = this.data // OK!
-          console.log (this.data.toString()) // OK!
-       }
-    }
+.. code-block:: typescript
+   :linenos:
+
+    class C<T extends T> {} // circular dependency
+    class D<T extends R, R extends T> {} // circular dependency
+    class E<T extends R, R extends T | undefined> {} // circular dependency
 
 |
 
@@ -532,24 +515,6 @@ arguments:
    array type
    tuple type
    function type
-
-A :index:`compile-time error` occurs if a generic instantiation leads to an
-instantiation of type ``FixedArray`` with a predefined value type (see
-:ref:`Value Types`).
-
-.. code-block:: typescript
-   :linenos:
-
-    class A <T> {
-       foo (p: FixedArray<T>) {}
-    }
-    A<int> // compile-time error as such instantiation leads to method foo()
-           // of class A that contains type FixedArray<int>.
-
-    // The actual code can be like code below - all such fragments cause compile-time errors
-    new A<int>
-    let a: A<int>|undefined
-    function foo (p: A<int>) {}
 
 |
 

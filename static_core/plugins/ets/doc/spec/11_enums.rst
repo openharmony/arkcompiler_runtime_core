@@ -88,15 +88,20 @@ are exported along with the mandatory qualification ``Color``.
 
 The value of an enum constant can be set as follows:
 
--  Explicitly to a numeric constant expression (expression of type ``int`` or
-   ``long`` ) or to a constant expression of type ``string``; or
--  Implicitly by omitting the constant expression.
+-  Explicitly as a numeric constant expression (expression of type ``int`` or
+   ``long`` ), or as a constant expression of type ``string``; or
+-  Implicitly by omitting the constant expression, in which case the value of
+   the enum constant is set to an integer value (see
+   :ref:`Enumeration Integer Values`).
 
-If constant expression is omitted, then the value of the enum constant is set
-implicitly to an integer value (see :ref:`Enumeration Integer Values`).
+A :index:`compile-time error` occurs if:
 
-A :index:`compile-time error` occurs if integer or ``string`` type enumeration
-constants are combined in a single enumeration.
+- Integer or ``string`` type enumeration constants are combined in a single
+  enumeration;
+- At least one initialization expression is not a constant expression; or
+- Enumeration values are set explicitly, and at least one initialization
+  expression type is other than ``int``, ``long``, or ``string``.
+
 
 .. index::
    enum constant
@@ -120,8 +125,9 @@ specified valid type (see :ref:`Enumeration with Explicit Type`).
    enumeration constant value
    type
 
-Any enumeration constant is of type ``enumeration``. Implicit conversion (see
-:ref:`Enumeration to Constants Type Conversions`) of an enumeration constant
+Any enumeration constant is of type ``enumeration``. Implicit conversion
+(see :ref:`Enumeration to Numeric Type Conversion`,
+:ref:`Enumeration to string Type Conversion`) of an enumeration constant
 to numeric types or type ``string`` depends on the type of constants.
 
 In addition, all enumeration constant names must be unique. Otherwise,
@@ -292,8 +298,9 @@ constant has the priority:
 .. code-block:: typescript
    :linenos:
 
-    enum E { One = 1, one = 1, oNe = 1 }
-    console.log(E.fromValue (1)) // prints: oNe
+   enum E { One = 1, one = 1, oNe = 1 }
+   console.log(E[E.fromValue(1)]) // Prints: oNe
+   console.log(E.fromValue(1).getName()) // Prints: oNe
 
 
 Additional methods available for enumeration types and constants are discussed

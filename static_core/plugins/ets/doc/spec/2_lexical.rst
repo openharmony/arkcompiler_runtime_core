@@ -694,7 +694,7 @@ a ``float`` type suffix as follows:
     FloatLiteral:
         DecimalIntegerLiteral '.' FractionalPart? ExponentPart? FloatTypeSuffix?
         | '.' FractionalPart ExponentPart? FloatTypeSuffix?
-        | DecimalIntegerLiteral ExponentPart FloatTypeSuffix?
+        | DecimalIntegerLiteral ExponentPart? FloatTypeSuffix
         ;
 
     ExponentPart:
@@ -718,6 +718,7 @@ The concept is represented by the examples below:
     3.14f
     3.141_592
     .5
+    1234f
     1e10
     1e10f
 
