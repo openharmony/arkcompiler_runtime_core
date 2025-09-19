@@ -120,7 +120,7 @@ function testConcat(): boolean {
 }
 
 function testCopyWithin(): boolean {
-    return arrayCopyWithin1.copyWithin(1).toString() === "1,1,2,3" && arrayCopyWithin2.copyWithin(0, 2).toString() === "3,4,3,4" && arrayCopyWithin3.copyWithin(0.0, 1, 3).toString() === "2,3,3,4"
+    return arrayCopyWithin1.copyWithin(1).toString() === "1,1,2,3" && arrayCopyWithin2.copyWithin(0, 2).toString() === "3,4,3,4" && arrayCopyWithin3.copyWithin(0, 1, 3).toString() === "2,3,3,4"
 }
 
 function testEntries(): boolean {
@@ -132,7 +132,7 @@ return !array.every(funcPredicate1) && array.every(funcPredicate2)
 }
 
 function testFill(): boolean {
-    return arrayFill.fill(8.0, 1.0, 3.0).toString() === "1,8,8,4"
+    return arrayFill.fill(8.0, 1, 3).toString() === "1,8,8,4"
 }
 
 function testFilter(): boolean {
@@ -282,6 +282,6 @@ function testValues(): boolean {
 }
 
 function testWith(): boolean {
-    let a = array.with(1.0, 8.0)
+    let a = array.with(1, 8.0)
     return a.toString() === "1,8,3,4"
 }

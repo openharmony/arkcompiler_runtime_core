@@ -115,7 +115,7 @@ class MyArray<T> extends Array<T> {
         this.counter = 0;
     }
 
-    public override fill(value: T, start: int, end: int): this {
+    public override fill(value: T, start?: int, end?: int): this {
         this.counter += 1;
         super.fill(value, start, end);
         return this;

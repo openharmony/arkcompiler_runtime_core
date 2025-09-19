@@ -86,7 +86,7 @@ class ReadonlyArrayProxy<T> implements ReadonlyArray<T> {
     	return this.target.join(separator)
     }
 
-    override includes(searchElement: T, fromIndex?: number): boolean {
+    override includes(searchElement: T, fromIndex?: int): boolean {
     	return this.target.includes(searchElement, fromIndex)
     }
 
@@ -122,7 +122,7 @@ class ReadonlyArrayProxy<T> implements ReadonlyArray<T> {
     	return this.target.reduceRight<U>(reducer, initialValue)
     }
 
-    override slice(start?: number, end?: number): Array<T> {
+    override slice(start?: int, end?: int): Array<T> {
     	return this.target.slice(start, end)
     }
 
@@ -142,7 +142,7 @@ class ReadonlyArrayProxy<T> implements ReadonlyArray<T> {
     	return this.target.values()
     }
 
-    override at(index: number): T | undefined {
+    override at(index: int): T | undefined {
     	return this.target.at(index)
     }
 

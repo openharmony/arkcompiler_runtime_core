@@ -44,7 +44,7 @@ function Array_TestJSSample(arr: Array<FooClass>): void {
     arktest.assertEQ((arr.at(0)! as FooClass).name, "zero");
     arktest.assertEQ(arr.at(1)!.toString(), "{Foo named one}");
 
-    let idx: number = 0;
+    let idx: int = 0;
     arktest.assertEQ((arr.at(idx)! as FooClass).name, "zero");
 
     arr.push(new FooClass("two"));

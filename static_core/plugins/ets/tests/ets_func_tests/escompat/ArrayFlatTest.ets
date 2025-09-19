@@ -40,10 +40,6 @@ function intTest() {
 
     compareArray<int | Array<int | Array<int>>>(arr.flat<int | Array<int | Array<int>>>(), [0,1,2,[3,[4,5]]])
     compareArray<int | Array<int>>(arr.flat<int | Array<int>>(2), [0,1,2,3,[4,5]])
-    compareArray<int>(arr.flat<int>(Infinity), [0,1,2,3,4,5])
-    compareArray<int | Array<int | Array<int | Array<int>>>>(arr.flat<int | Array<int | Array<int | Array<int>>>>(-Infinity), [0,1,[2,[3,[4,5]]]])
-    compareArray<int | Array<int | Array<int | Array<int>>>>(arr.flat<int | Array<int | Array<int | Array<int>>>>(NaN), [0,1,[2,[3,[4,5]]]])
-    compareArray<int | undefined>(arr1.flat<int | undefined>(Infinity), [1,1,1,undefined,2,2,3])
     compareArray<int | Array<int>>(arr2.flat<int | Array<int>>(), [1,2,3,4,[5,6]])
 }
 

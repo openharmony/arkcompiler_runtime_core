@@ -91,21 +91,6 @@ function cloneArray(self: FixedArray<boolean>): FixedArray<boolean> {
  * @returns The element in the array matching the given index.
  * Throw range error if `index` < `-length()` or `index` >= `length()`.
  */
-export function at(self: FixedArray<boolean>, index: number): Boolean {
-    return at(self, index.toInt())
-}
-
-/**
- * Takes an integer value and returns the item at that index,
- * allowing for positive and negative integers. Negative integers count back
- * from the last item in the array.
- *
- * @param index Zero-based index of the array element to be returned.
- * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
- *
- * @returns The element in the array matching the given index.
- * Throw range error if `index` < `-length()` or `index` >= `length()`.
- */
 export function at(self: FixedArray<boolean>, index: int): Boolean {
     let len = self.length;
     let k: int;
@@ -133,26 +118,10 @@ export function at(self: FixedArray<boolean>, index: int): Boolean {
  *
  * @returns this array after transformation
  */
-export function copyWithin(self: FixedArray<boolean>, target: number, start: number, end?: Number): FixedArray<boolean> {
-    copyWithin(self, target.toInt(), start.toInt(), asIntOrDefault(end, self.length));
-    return self;
-}
-
-/**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
- *
- * @param target index at which to copy the sequence
- *
- * @param start index at which to start copying elements from
- *
- * @param end index at which to end copying elements from
- *
- * @returns this array after transformation
- */
-export function copyWithin(self: FixedArray<boolean>, target: int, start: int, end: int): FixedArray<boolean> {
+export function copyWithin(self: FixedArray<boolean>, target: int, start: int, end?: int): FixedArray<boolean> {
     target = normalizeIndex(target, self.length)
     start = normalizeIndex(start, self.length)
-    end = normalizeIndex(end, self.length)
+    end = normalizeIndex(end ?? self.length, self.length)
 
     if (end <= start) {
         return self;
@@ -214,25 +183,9 @@ export function copyWithin(self: FixedArray<boolean>, target: int): FixedArray<b
  *
  * @returns this array after transformation
  */
-export function fill(self: FixedArray<boolean>, value: boolean, start?: Number, end?: Number): FixedArray<boolean> {
-    fill(self, value, asIntOrDefault(start, 0), asIntOrDefault(end, self.length));
-    return self;
-}
-
-/**
- * Changes all elements in the Array to a static value, from a start index to an end index
- *
- * @param value to fill the array with
- *
- * @param start index at which to start filling
- *
- * @param end index at which to end filling, but not including
- *
- * @returns this array after transformation
- */
-export function fill(self: FixedArray<boolean>, value: boolean, start: int, end: int): FixedArray<boolean> {
-    start = normalizeIndex(start, self.length);
-    end = normalizeIndex(end, self.length)
+export function fill(self: FixedArray<boolean>, value: boolean, start?: int, end?: int): FixedArray<boolean> {
+    start = normalizeIndex(start ?? 0, self.length);
+    end = normalizeIndex(end ?? self.length, self.length)
 
     for (let i = start; i < end; i++) {
         self[i] = value;
@@ -427,25 +380,10 @@ export function forEach(self: FixedArray<boolean>, callbackfn: (value: boolean, 
  *
  * @returns `Array` instance, constructed from extracted elements of `this` instance.
  */
-export function slice(self: FixedArray<boolean>, start?: Number, end?: Number): FixedArray<boolean> {
+export function slice(self: FixedArray<boolean>, start?: int, end?: int): FixedArray<boolean> {
     const len: int = self.length;
-    return slice(self, asIntOrDefault(start, 0), asIntOrDefault(end, len))
-}
-
-/**
- * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
- * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
- *
- * @param start zero-based index at which to start extraction
- *
- * @param end zero-based index at which to end extraction. `slice()` extracts up to but not including end.
- *
- * @returns `Array` instance, constructed from extracted elements of `this` instance.
- */
-export function slice(self: FixedArray<boolean>, start: int, end: int): FixedArray<boolean> {
-    const len: int = self.length;
-    const relStart = normalizeIndex(start, len)
-    const relEnd = normalizeIndex(end, len)
+    const relStart = normalizeIndex(start ?? 0, len)
+    const relEnd = normalizeIndex(end ?? len, len)
 
     let count = relEnd - relStart;
     if (count < 0) {
@@ -587,23 +525,9 @@ export function toLocaleString(self: FixedArray<boolean>): string {
  *
  * @returns a new Array with some elements removed and/or replaced at a given index.
  */
-export function toSpliced(self: FixedArray<boolean>, start?: Number, delete?: Number): FixedArray<boolean> {
+export function toSpliced(self: FixedArray<boolean>, start?: int, delete?: int): FixedArray<boolean> {
     const len = self.length;
     return toSpliced(self, asIntOrDefault(start, len), asIntOrDefault(delete, len))
-}
-
-/**
- * Copying version of the splice() method.
- *
- * @param start index
- *
- * @param delete number of items after start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
- */
-export function toSpliced(self: FixedArray<boolean>, start: number, delete: number, ...items: FixedArray<boolean>): FixedArray<boolean> {
-    const len = self.length;
-    return toSpliced(self, start.toInt(), delete.toInt(), ...items)
 }
 
 /**
@@ -660,7 +584,7 @@ export function toSpliced(self: FixedArray<boolean>, start: int): FixedArray<boo
  *
  * @returns true if val is in Array
  */
-export function includes(self: FixedArray<boolean>, val: boolean, fromIndex?: Number): boolean {
+export function includes(self: FixedArray<boolean>, val: boolean, fromIndex?: int): boolean {
     const len = self.length;
     const fi = normalizeIndex(asIntOrDefault(fromIndex, 0), len);
     for (let i = fi; i < len; i++) {
@@ -746,20 +670,6 @@ export function toReversed(self: FixedArray<boolean>): FixedArray<boolean> {
         arr[self.length - 1 - i] = self[i]
     }
     return arr
-}
-
-/**
- * Copying version of using the bracket notation to change the value of a given index.
- * It returns a new Array with the element at the given index replaced with the given value.
- *
- * @param index to replace
- *
- * @param value new value
- *
- * @returns a new Array with the element at the given index replaced with the given value
- */
-export function with(self: FixedArray<boolean>, index: number, value: boolean): FixedArray<boolean> {
-    return with(self, index.toInt(), value)
 }
 
 /**
@@ -1017,21 +927,6 @@ function cloneArray(self: FixedArray<byte>): FixedArray<byte> {
  * @returns The element in the array matching the given index.
  * Throw range error if `index` < `-length()` or `index` >= `length()`.
  */
-export function at(self: FixedArray<byte>, index: number): Byte {
-    return at(self, index.toInt())
-}
-
-/**
- * Takes an integer value and returns the item at that index,
- * allowing for positive and negative integers. Negative integers count back
- * from the last item in the array.
- *
- * @param index Zero-based index of the array element to be returned.
- * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
- *
- * @returns The element in the array matching the given index.
- * Throw range error if `index` < `-length()` or `index` >= `length()`.
- */
 export function at(self: FixedArray<byte>, index: int): Byte {
     let len = self.length;
     let k: int;
@@ -1059,26 +954,10 @@ export function at(self: FixedArray<byte>, index: int): Byte {
  *
  * @returns this array after transformation
  */
-export function copyWithin(self: FixedArray<byte>, target: number, start: number, end?: Number): FixedArray<byte> {
-    copyWithin(self, target.toInt(), start.toInt(), asIntOrDefault(end, self.length));
-    return self;
-}
-
-/**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
- *
- * @param target index at which to copy the sequence
- *
- * @param start index at which to start copying elements from
- *
- * @param end index at which to end copying elements from
- *
- * @returns this array after transformation
- */
-export function copyWithin(self: FixedArray<byte>, target: int, start: int, end: int): FixedArray<byte> {
+export function copyWithin(self: FixedArray<byte>, target: int, start: int, end?: int): FixedArray<byte> {
     target = normalizeIndex(target, self.length)
     start = normalizeIndex(start, self.length)
-    end = normalizeIndex(end, self.length)
+    end = normalizeIndex(end ?? self.length, self.length)
 
     if (end <= start) {
         return self;
@@ -1140,25 +1019,9 @@ export function copyWithin(self: FixedArray<byte>, target: int): FixedArray<byte
  *
  * @returns this array after transformation
  */
-export function fill(self: FixedArray<byte>, value: byte, start?: Number, end?: Number): FixedArray<byte> {
-    fill(self, value, asIntOrDefault(start, 0), asIntOrDefault(end, self.length));
-    return self;
-}
-
-/**
- * Changes all elements in the Array to a static value, from a start index to an end index
- *
- * @param value to fill the array with
- *
- * @param start index at which to start filling
- *
- * @param end index at which to end filling, but not including
- *
- * @returns this array after transformation
- */
-export function fill(self: FixedArray<byte>, value: byte, start: int, end: int): FixedArray<byte> {
-    start = normalizeIndex(start, self.length);
-    end = normalizeIndex(end, self.length)
+export function fill(self: FixedArray<byte>, value: byte, start?: int, end?: int): FixedArray<byte> {
+    start = normalizeIndex(start ?? 0, self.length);
+    end = normalizeIndex(end ?? self.length, self.length)
 
     for (let i = start; i < end; i++) {
         self[i] = value;
@@ -1353,25 +1216,10 @@ export function forEach(self: FixedArray<byte>, callbackfn: (value: byte, index:
  *
  * @returns `Array` instance, constructed from extracted elements of `this` instance.
  */
-export function slice(self: FixedArray<byte>, start?: Number, end?: Number): FixedArray<byte> {
+export function slice(self: FixedArray<byte>, start?: int, end?: int): FixedArray<byte> {
     const len: int = self.length;
-    return slice(self, asIntOrDefault(start, 0), asIntOrDefault(end, len))
-}
-
-/**
- * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
- * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
- *
- * @param start zero-based index at which to start extraction
- *
- * @param end zero-based index at which to end extraction. `slice()` extracts up to but not including end.
- *
- * @returns `Array` instance, constructed from extracted elements of `this` instance.
- */
-export function slice(self: FixedArray<byte>, start: int, end: int): FixedArray<byte> {
-    const len: int = self.length;
-    const relStart = normalizeIndex(start, len)
-    const relEnd = normalizeIndex(end, len)
+    const relStart = normalizeIndex(start ?? 0, len)
+    const relEnd = normalizeIndex(end ?? len, len)
 
     let count = relEnd - relStart;
     if (count < 0) {
@@ -1513,23 +1361,9 @@ export function toLocaleString(self: FixedArray<byte>): string {
  *
  * @returns a new Array with some elements removed and/or replaced at a given index.
  */
-export function toSpliced(self: FixedArray<byte>, start?: Number, delete?: Number): FixedArray<byte> {
+export function toSpliced(self: FixedArray<byte>, start?: int, delete?: int): FixedArray<byte> {
     const len = self.length;
     return toSpliced(self, asIntOrDefault(start, len), asIntOrDefault(delete, len))
-}
-
-/**
- * Copying version of the splice() method.
- *
- * @param start index
- *
- * @param delete number of items after start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
- */
-export function toSpliced(self: FixedArray<byte>, start: number, delete: number, ...items: FixedArray<byte>): FixedArray<byte> {
-    const len = self.length;
-    return toSpliced(self, start.toInt(), delete.toInt(), ...items)
 }
 
 /**
@@ -1586,7 +1420,7 @@ export function toSpliced(self: FixedArray<byte>, start: int): FixedArray<byte> 
  *
  * @returns true if val is in Array
  */
-export function includes(self: FixedArray<byte>, val: byte, fromIndex?: Number): boolean {
+export function includes(self: FixedArray<byte>, val: byte, fromIndex?: int): boolean {
     const len = self.length;
     const fi = normalizeIndex(asIntOrDefault(fromIndex, 0), len);
     for (let i = fi; i < len; i++) {
@@ -1672,20 +1506,6 @@ export function toReversed(self: FixedArray<byte>): FixedArray<byte> {
         arr[self.length - 1 - i] = self[i]
     }
     return arr
-}
-
-/**
- * Copying version of using the bracket notation to change the value of a given index.
- * It returns a new Array with the element at the given index replaced with the given value.
- *
- * @param index to replace
- *
- * @param value new value
- *
- * @returns a new Array with the element at the given index replaced with the given value
- */
-export function with(self: FixedArray<byte>, index: number, value: byte): FixedArray<byte> {
-    return with(self, index.toInt(), value)
 }
 
 /**
@@ -1943,21 +1763,6 @@ function cloneArray(self: FixedArray<short>): FixedArray<short> {
  * @returns The element in the array matching the given index.
  * Throw range error if `index` < `-length()` or `index` >= `length()`.
  */
-export function at(self: FixedArray<short>, index: number): Short {
-    return at(self, index.toInt())
-}
-
-/**
- * Takes an integer value and returns the item at that index,
- * allowing for positive and negative integers. Negative integers count back
- * from the last item in the array.
- *
- * @param index Zero-based index of the array element to be returned.
- * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
- *
- * @returns The element in the array matching the given index.
- * Throw range error if `index` < `-length()` or `index` >= `length()`.
- */
 export function at(self: FixedArray<short>, index: int): Short {
     let len = self.length;
     let k: int;
@@ -1985,26 +1790,10 @@ export function at(self: FixedArray<short>, index: int): Short {
  *
  * @returns this array after transformation
  */
-export function copyWithin(self: FixedArray<short>, target: number, start: number, end?: Number): FixedArray<short> {
-    copyWithin(self, target.toInt(), start.toInt(), asIntOrDefault(end, self.length));
-    return self;
-}
-
-/**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
- *
- * @param target index at which to copy the sequence
- *
- * @param start index at which to start copying elements from
- *
- * @param end index at which to end copying elements from
- *
- * @returns this array after transformation
- */
-export function copyWithin(self: FixedArray<short>, target: int, start: int, end: int): FixedArray<short> {
+export function copyWithin(self: FixedArray<short>, target: int, start: int, end?: int): FixedArray<short> {
     target = normalizeIndex(target, self.length)
     start = normalizeIndex(start, self.length)
-    end = normalizeIndex(end, self.length)
+    end = normalizeIndex(end ?? self.length, self.length)
 
     if (end <= start) {
         return self;
@@ -2066,25 +1855,9 @@ export function copyWithin(self: FixedArray<short>, target: int): FixedArray<sho
  *
  * @returns this array after transformation
  */
-export function fill(self: FixedArray<short>, value: short, start?: Number, end?: Number): FixedArray<short> {
-    fill(self, value, asIntOrDefault(start, 0), asIntOrDefault(end, self.length));
-    return self;
-}
-
-/**
- * Changes all elements in the Array to a static value, from a start index to an end index
- *
- * @param value to fill the array with
- *
- * @param start index at which to start filling
- *
- * @param end index at which to end filling, but not including
- *
- * @returns this array after transformation
- */
-export function fill(self: FixedArray<short>, value: short, start: int, end: int): FixedArray<short> {
-    start = normalizeIndex(start, self.length);
-    end = normalizeIndex(end, self.length)
+export function fill(self: FixedArray<short>, value: short, start?: int, end?: int): FixedArray<short> {
+    start = normalizeIndex(start ?? 0, self.length);
+    end = normalizeIndex(end ?? self.length, self.length)
 
     for (let i = start; i < end; i++) {
         self[i] = value;
@@ -2279,25 +2052,10 @@ export function forEach(self: FixedArray<short>, callbackfn: (value: short, inde
  *
  * @returns `Array` instance, constructed from extracted elements of `this` instance.
  */
-export function slice(self: FixedArray<short>, start?: Number, end?: Number): FixedArray<short> {
+export function slice(self: FixedArray<short>, start?: int, end?: int): FixedArray<short> {
     const len: int = self.length;
-    return slice(self, asIntOrDefault(start, 0), asIntOrDefault(end, len))
-}
-
-/**
- * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
- * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
- *
- * @param start zero-based index at which to start extraction
- *
- * @param end zero-based index at which to end extraction. `slice()` extracts up to but not including end.
- *
- * @returns `Array` instance, constructed from extracted elements of `this` instance.
- */
-export function slice(self: FixedArray<short>, start: int, end: int): FixedArray<short> {
-    const len: int = self.length;
-    const relStart = normalizeIndex(start, len)
-    const relEnd = normalizeIndex(end, len)
+    const relStart = normalizeIndex(start ?? 0, len)
+    const relEnd = normalizeIndex(end ?? len, len)
 
     let count = relEnd - relStart;
     if (count < 0) {
@@ -2439,23 +2197,9 @@ export function toLocaleString(self: FixedArray<short>): string {
  *
  * @returns a new Array with some elements removed and/or replaced at a given index.
  */
-export function toSpliced(self: FixedArray<short>, start?: Number, delete?: Number): FixedArray<short> {
+export function toSpliced(self: FixedArray<short>, start?: int, delete?: int): FixedArray<short> {
     const len = self.length;
     return toSpliced(self, asIntOrDefault(start, len), asIntOrDefault(delete, len))
-}
-
-/**
- * Copying version of the splice() method.
- *
- * @param start index
- *
- * @param delete number of items after start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
- */
-export function toSpliced(self: FixedArray<short>, start: number, delete: number, ...items: FixedArray<short>): FixedArray<short> {
-    const len = self.length;
-    return toSpliced(self, start.toInt(), delete.toInt(), ...items)
 }
 
 /**
@@ -2512,7 +2256,7 @@ export function toSpliced(self: FixedArray<short>, start: int): FixedArray<short
  *
  * @returns true if val is in Array
  */
-export function includes(self: FixedArray<short>, val: short, fromIndex?: Number): boolean {
+export function includes(self: FixedArray<short>, val: short, fromIndex?: int): boolean {
     const len = self.length;
     const fi = normalizeIndex(asIntOrDefault(fromIndex, 0), len);
     for (let i = fi; i < len; i++) {
@@ -2598,20 +2342,6 @@ export function toReversed(self: FixedArray<short>): FixedArray<short> {
         arr[self.length - 1 - i] = self[i]
     }
     return arr
-}
-
-/**
- * Copying version of using the bracket notation to change the value of a given index.
- * It returns a new Array with the element at the given index replaced with the given value.
- *
- * @param index to replace
- *
- * @param value new value
- *
- * @returns a new Array with the element at the given index replaced with the given value
- */
-export function with(self: FixedArray<short>, index: number, value: short): FixedArray<short> {
-    return with(self, index.toInt(), value)
 }
 
 /**
@@ -2869,21 +2599,6 @@ function cloneArray(self: FixedArray<int>): FixedArray<int> {
  * @returns The element in the array matching the given index.
  * Throw range error if `index` < `-length()` or `index` >= `length()`.
  */
-export function at(self: FixedArray<int>, index: number): Int {
-    return at(self, index.toInt())
-}
-
-/**
- * Takes an integer value and returns the item at that index,
- * allowing for positive and negative integers. Negative integers count back
- * from the last item in the array.
- *
- * @param index Zero-based index of the array element to be returned.
- * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
- *
- * @returns The element in the array matching the given index.
- * Throw range error if `index` < `-length()` or `index` >= `length()`.
- */
 export function at(self: FixedArray<int>, index: int): Int {
     let len = self.length;
     let k: int;
@@ -2911,26 +2626,10 @@ export function at(self: FixedArray<int>, index: int): Int {
  *
  * @returns this array after transformation
  */
-export function copyWithin(self: FixedArray<int>, target: number, start: number, end?: Number): FixedArray<int> {
-    copyWithin(self, target.toInt(), start.toInt(), asIntOrDefault(end, self.length));
-    return self;
-}
-
-/**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
- *
- * @param target index at which to copy the sequence
- *
- * @param start index at which to start copying elements from
- *
- * @param end index at which to end copying elements from
- *
- * @returns this array after transformation
- */
-export function copyWithin(self: FixedArray<int>, target: int, start: int, end: int): FixedArray<int> {
+export function copyWithin(self: FixedArray<int>, target: int, start: int, end?: int): FixedArray<int> {
     target = normalizeIndex(target, self.length)
     start = normalizeIndex(start, self.length)
-    end = normalizeIndex(end, self.length)
+    end = normalizeIndex(end ?? self.length, self.length)
 
     if (end <= start) {
         return self;
@@ -2992,25 +2691,9 @@ export function copyWithin(self: FixedArray<int>, target: int): FixedArray<int> 
  *
  * @returns this array after transformation
  */
-export function fill(self: FixedArray<int>, value: int, start?: Number, end?: Number): FixedArray<int> {
-    fill(self, value, asIntOrDefault(start, 0), asIntOrDefault(end, self.length));
-    return self;
-}
-
-/**
- * Changes all elements in the Array to a static value, from a start index to an end index
- *
- * @param value to fill the array with
- *
- * @param start index at which to start filling
- *
- * @param end index at which to end filling, but not including
- *
- * @returns this array after transformation
- */
-export function fill(self: FixedArray<int>, value: int, start: int, end: int): FixedArray<int> {
-    start = normalizeIndex(start, self.length);
-    end = normalizeIndex(end, self.length)
+export function fill(self: FixedArray<int>, value: int, start?: int, end?: int): FixedArray<int> {
+    start = normalizeIndex(start ?? 0, self.length);
+    end = normalizeIndex(end ?? self.length, self.length)
 
     for (let i = start; i < end; i++) {
         self[i] = value;
@@ -3205,25 +2888,10 @@ export function forEach(self: FixedArray<int>, callbackfn: (value: int, index: i
  *
  * @returns `Array` instance, constructed from extracted elements of `this` instance.
  */
-export function slice(self: FixedArray<int>, start?: Number, end?: Number): FixedArray<int> {
+export function slice(self: FixedArray<int>, start?: int, end?: int): FixedArray<int> {
     const len: int = self.length;
-    return slice(self, asIntOrDefault(start, 0), asIntOrDefault(end, len))
-}
-
-/**
- * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
- * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
- *
- * @param start zero-based index at which to start extraction
- *
- * @param end zero-based index at which to end extraction. `slice()` extracts up to but not including end.
- *
- * @returns `Array` instance, constructed from extracted elements of `this` instance.
- */
-export function slice(self: FixedArray<int>, start: int, end: int): FixedArray<int> {
-    const len: int = self.length;
-    const relStart = normalizeIndex(start, len)
-    const relEnd = normalizeIndex(end, len)
+    const relStart = normalizeIndex(start ?? 0, len)
+    const relEnd = normalizeIndex(end ?? len, len)
 
     let count = relEnd - relStart;
     if (count < 0) {
@@ -3365,23 +3033,9 @@ export function toLocaleString(self: FixedArray<int>): string {
  *
  * @returns a new Array with some elements removed and/or replaced at a given index.
  */
-export function toSpliced(self: FixedArray<int>, start?: Number, delete?: Number): FixedArray<int> {
+export function toSpliced(self: FixedArray<int>, start?: int, delete?: int): FixedArray<int> {
     const len = self.length;
     return toSpliced(self, asIntOrDefault(start, len), asIntOrDefault(delete, len))
-}
-
-/**
- * Copying version of the splice() method.
- *
- * @param start index
- *
- * @param delete number of items after start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
- */
-export function toSpliced(self: FixedArray<int>, start: number, delete: number, ...items: FixedArray<int>): FixedArray<int> {
-    const len = self.length;
-    return toSpliced(self, start.toInt(), delete.toInt(), ...items)
 }
 
 /**
@@ -3438,7 +3092,7 @@ export function toSpliced(self: FixedArray<int>, start: int): FixedArray<int> {
  *
  * @returns true if val is in Array
  */
-export function includes(self: FixedArray<int>, val: int, fromIndex?: Number): boolean {
+export function includes(self: FixedArray<int>, val: int, fromIndex?: int): boolean {
     const len = self.length;
     const fi = normalizeIndex(asIntOrDefault(fromIndex, 0), len);
     for (let i = fi; i < len; i++) {
@@ -3524,20 +3178,6 @@ export function toReversed(self: FixedArray<int>): FixedArray<int> {
         arr[self.length - 1 - i] = self[i]
     }
     return arr
-}
-
-/**
- * Copying version of using the bracket notation to change the value of a given index.
- * It returns a new Array with the element at the given index replaced with the given value.
- *
- * @param index to replace
- *
- * @param value new value
- *
- * @returns a new Array with the element at the given index replaced with the given value
- */
-export function with(self: FixedArray<int>, index: number, value: int): FixedArray<int> {
-    return with(self, index.toInt(), value)
 }
 
 /**
@@ -3795,21 +3435,6 @@ function cloneArray(self: FixedArray<long>): FixedArray<long> {
  * @returns The element in the array matching the given index.
  * Throw range error if `index` < `-length()` or `index` >= `length()`.
  */
-export function at(self: FixedArray<long>, index: number): Long {
-    return at(self, index.toInt())
-}
-
-/**
- * Takes an integer value and returns the item at that index,
- * allowing for positive and negative integers. Negative integers count back
- * from the last item in the array.
- *
- * @param index Zero-based index of the array element to be returned.
- * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
- *
- * @returns The element in the array matching the given index.
- * Throw range error if `index` < `-length()` or `index` >= `length()`.
- */
 export function at(self: FixedArray<long>, index: int): Long {
     let len = self.length;
     let k: int;
@@ -3837,26 +3462,10 @@ export function at(self: FixedArray<long>, index: int): Long {
  *
  * @returns this array after transformation
  */
-export function copyWithin(self: FixedArray<long>, target: number, start: number, end?: Number): FixedArray<long> {
-    copyWithin(self, target.toInt(), start.toInt(), asIntOrDefault(end, self.length));
-    return self;
-}
-
-/**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
- *
- * @param target index at which to copy the sequence
- *
- * @param start index at which to start copying elements from
- *
- * @param end index at which to end copying elements from
- *
- * @returns this array after transformation
- */
-export function copyWithin(self: FixedArray<long>, target: int, start: int, end: int): FixedArray<long> {
+export function copyWithin(self: FixedArray<long>, target: int, start: int, end?: int): FixedArray<long> {
     target = normalizeIndex(target, self.length)
     start = normalizeIndex(start, self.length)
-    end = normalizeIndex(end, self.length)
+    end = normalizeIndex(end ?? self.length, self.length)
 
     if (end <= start) {
         return self;
@@ -3918,25 +3527,9 @@ export function copyWithin(self: FixedArray<long>, target: int): FixedArray<long
  *
  * @returns this array after transformation
  */
-export function fill(self: FixedArray<long>, value: long, start?: Number, end?: Number): FixedArray<long> {
-    fill(self, value, asIntOrDefault(start, 0), asIntOrDefault(end, self.length));
-    return self;
-}
-
-/**
- * Changes all elements in the Array to a static value, from a start index to an end index
- *
- * @param value to fill the array with
- *
- * @param start index at which to start filling
- *
- * @param end index at which to end filling, but not including
- *
- * @returns this array after transformation
- */
-export function fill(self: FixedArray<long>, value: long, start: int, end: int): FixedArray<long> {
-    start = normalizeIndex(start, self.length);
-    end = normalizeIndex(end, self.length)
+export function fill(self: FixedArray<long>, value: long, start?: int, end?: int): FixedArray<long> {
+    start = normalizeIndex(start ?? 0, self.length);
+    end = normalizeIndex(end ?? self.length, self.length)
 
     for (let i = start; i < end; i++) {
         self[i] = value;
@@ -4131,25 +3724,10 @@ export function forEach(self: FixedArray<long>, callbackfn: (value: long, index:
  *
  * @returns `Array` instance, constructed from extracted elements of `this` instance.
  */
-export function slice(self: FixedArray<long>, start?: Number, end?: Number): FixedArray<long> {
+export function slice(self: FixedArray<long>, start?: int, end?: int): FixedArray<long> {
     const len: int = self.length;
-    return slice(self, asIntOrDefault(start, 0), asIntOrDefault(end, len))
-}
-
-/**
- * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
- * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
- *
- * @param start zero-based index at which to start extraction
- *
- * @param end zero-based index at which to end extraction. `slice()` extracts up to but not including end.
- *
- * @returns `Array` instance, constructed from extracted elements of `this` instance.
- */
-export function slice(self: FixedArray<long>, start: int, end: int): FixedArray<long> {
-    const len: int = self.length;
-    const relStart = normalizeIndex(start, len)
-    const relEnd = normalizeIndex(end, len)
+    const relStart = normalizeIndex(start ?? 0, len)
+    const relEnd = normalizeIndex(end ?? len, len)
 
     let count = relEnd - relStart;
     if (count < 0) {
@@ -4291,23 +3869,9 @@ export function toLocaleString(self: FixedArray<long>): string {
  *
  * @returns a new Array with some elements removed and/or replaced at a given index.
  */
-export function toSpliced(self: FixedArray<long>, start?: Number, delete?: Number): FixedArray<long> {
+export function toSpliced(self: FixedArray<long>, start?: int, delete?: int): FixedArray<long> {
     const len = self.length;
     return toSpliced(self, asIntOrDefault(start, len), asIntOrDefault(delete, len))
-}
-
-/**
- * Copying version of the splice() method.
- *
- * @param start index
- *
- * @param delete number of items after start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
- */
-export function toSpliced(self: FixedArray<long>, start: number, delete: number, ...items: FixedArray<long>): FixedArray<long> {
-    const len = self.length;
-    return toSpliced(self, start.toInt(), delete.toInt(), ...items)
 }
 
 /**
@@ -4364,7 +3928,7 @@ export function toSpliced(self: FixedArray<long>, start: int): FixedArray<long> 
  *
  * @returns true if val is in Array
  */
-export function includes(self: FixedArray<long>, val: long, fromIndex?: Number): boolean {
+export function includes(self: FixedArray<long>, val: long, fromIndex?: int): boolean {
     const len = self.length;
     const fi = normalizeIndex(asIntOrDefault(fromIndex, 0), len);
     for (let i = fi; i < len; i++) {
@@ -4450,20 +4014,6 @@ export function toReversed(self: FixedArray<long>): FixedArray<long> {
         arr[self.length - 1 - i] = self[i]
     }
     return arr
-}
-
-/**
- * Copying version of using the bracket notation to change the value of a given index.
- * It returns a new Array with the element at the given index replaced with the given value.
- *
- * @param index to replace
- *
- * @param value new value
- *
- * @returns a new Array with the element at the given index replaced with the given value
- */
-export function with(self: FixedArray<long>, index: number, value: long): FixedArray<long> {
-    return with(self, index.toInt(), value)
 }
 
 /**
@@ -4721,21 +4271,6 @@ function cloneArray(self: FixedArray<float>): FixedArray<float> {
  * @returns The element in the array matching the given index.
  * Throw range error if `index` < `-length()` or `index` >= `length()`.
  */
-export function at(self: FixedArray<float>, index: number): Float {
-    return at(self, index.toInt())
-}
-
-/**
- * Takes an integer value and returns the item at that index,
- * allowing for positive and negative integers. Negative integers count back
- * from the last item in the array.
- *
- * @param index Zero-based index of the array element to be returned.
- * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
- *
- * @returns The element in the array matching the given index.
- * Throw range error if `index` < `-length()` or `index` >= `length()`.
- */
 export function at(self: FixedArray<float>, index: int): Float {
     let len = self.length;
     let k: int;
@@ -4763,26 +4298,10 @@ export function at(self: FixedArray<float>, index: int): Float {
  *
  * @returns this array after transformation
  */
-export function copyWithin(self: FixedArray<float>, target: number, start: number, end?: Number): FixedArray<float> {
-    copyWithin(self, target.toInt(), start.toInt(), asIntOrDefault(end, self.length));
-    return self;
-}
-
-/**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
- *
- * @param target index at which to copy the sequence
- *
- * @param start index at which to start copying elements from
- *
- * @param end index at which to end copying elements from
- *
- * @returns this array after transformation
- */
-export function copyWithin(self: FixedArray<float>, target: int, start: int, end: int): FixedArray<float> {
+export function copyWithin(self: FixedArray<float>, target: int, start: int, end?: int): FixedArray<float> {
     target = normalizeIndex(target, self.length)
     start = normalizeIndex(start, self.length)
-    end = normalizeIndex(end, self.length)
+    end = normalizeIndex(end ?? self.length, self.length)
 
     if (end <= start) {
         return self;
@@ -4844,25 +4363,9 @@ export function copyWithin(self: FixedArray<float>, target: int): FixedArray<flo
  *
  * @returns this array after transformation
  */
-export function fill(self: FixedArray<float>, value: float, start?: Number, end?: Number): FixedArray<float> {
-    fill(self, value, asIntOrDefault(start, 0), asIntOrDefault(end, self.length));
-    return self;
-}
-
-/**
- * Changes all elements in the Array to a static value, from a start index to an end index
- *
- * @param value to fill the array with
- *
- * @param start index at which to start filling
- *
- * @param end index at which to end filling, but not including
- *
- * @returns this array after transformation
- */
-export function fill(self: FixedArray<float>, value: float, start: int, end: int): FixedArray<float> {
-    start = normalizeIndex(start, self.length);
-    end = normalizeIndex(end, self.length)
+export function fill(self: FixedArray<float>, value: float, start?: int, end?: int): FixedArray<float> {
+    start = normalizeIndex(start ?? 0, self.length);
+    end = normalizeIndex(end ?? self.length, self.length)
 
     for (let i = start; i < end; i++) {
         self[i] = value;
@@ -5057,25 +4560,10 @@ export function forEach(self: FixedArray<float>, callbackfn: (value: float, inde
  *
  * @returns `Array` instance, constructed from extracted elements of `this` instance.
  */
-export function slice(self: FixedArray<float>, start?: Number, end?: Number): FixedArray<float> {
+export function slice(self: FixedArray<float>, start?: int, end?: int): FixedArray<float> {
     const len: int = self.length;
-    return slice(self, asIntOrDefault(start, 0), asIntOrDefault(end, len))
-}
-
-/**
- * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
- * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
- *
- * @param start zero-based index at which to start extraction
- *
- * @param end zero-based index at which to end extraction. `slice()` extracts up to but not including end.
- *
- * @returns `Array` instance, constructed from extracted elements of `this` instance.
- */
-export function slice(self: FixedArray<float>, start: int, end: int): FixedArray<float> {
-    const len: int = self.length;
-    const relStart = normalizeIndex(start, len)
-    const relEnd = normalizeIndex(end, len)
+    const relStart = normalizeIndex(start ?? 0, len)
+    const relEnd = normalizeIndex(end ?? len, len)
 
     let count = relEnd - relStart;
     if (count < 0) {
@@ -5217,23 +4705,9 @@ export function toLocaleString(self: FixedArray<float>): string {
  *
  * @returns a new Array with some elements removed and/or replaced at a given index.
  */
-export function toSpliced(self: FixedArray<float>, start?: Number, delete?: Number): FixedArray<float> {
+export function toSpliced(self: FixedArray<float>, start?: int, delete?: int): FixedArray<float> {
     const len = self.length;
     return toSpliced(self, asIntOrDefault(start, len), asIntOrDefault(delete, len))
-}
-
-/**
- * Copying version of the splice() method.
- *
- * @param start index
- *
- * @param delete number of items after start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
- */
-export function toSpliced(self: FixedArray<float>, start: number, delete: number, ...items: FixedArray<float>): FixedArray<float> {
-    const len = self.length;
-    return toSpliced(self, start.toInt(), delete.toInt(), ...items)
 }
 
 /**
@@ -5290,7 +4764,7 @@ export function toSpliced(self: FixedArray<float>, start: int): FixedArray<float
  *
  * @returns true if val is in Array
  */
-export function includes(self: FixedArray<float>, val: float, fromIndex?: Number): boolean {
+export function includes(self: FixedArray<float>, val: float, fromIndex?: int): boolean {
     const len = self.length;
     const fi = normalizeIndex(asIntOrDefault(fromIndex, 0), len);
     if (isNaN(val)) {
@@ -5384,20 +4858,6 @@ export function toReversed(self: FixedArray<float>): FixedArray<float> {
         arr[self.length - 1 - i] = self[i]
     }
     return arr
-}
-
-/**
- * Copying version of using the bracket notation to change the value of a given index.
- * It returns a new Array with the element at the given index replaced with the given value.
- *
- * @param index to replace
- *
- * @param value new value
- *
- * @returns a new Array with the element at the given index replaced with the given value
- */
-export function with(self: FixedArray<float>, index: number, value: float): FixedArray<float> {
-    return with(self, index.toInt(), value)
 }
 
 /**
@@ -5655,21 +5115,6 @@ function cloneArray(self: FixedArray<double>): FixedArray<double> {
  * @returns The element in the array matching the given index.
  * Throw range error if `index` < `-length()` or `index` >= `length()`.
  */
-export function at(self: FixedArray<double>, index: number): Double {
-    return at(self, index.toInt())
-}
-
-/**
- * Takes an integer value and returns the item at that index,
- * allowing for positive and negative integers. Negative integers count back
- * from the last item in the array.
- *
- * @param index Zero-based index of the array element to be returned.
- * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
- *
- * @returns The element in the array matching the given index.
- * Throw range error if `index` < `-length()` or `index` >= `length()`.
- */
 export function at(self: FixedArray<double>, index: int): Double {
     let len = self.length;
     let k: int;
@@ -5697,26 +5142,10 @@ export function at(self: FixedArray<double>, index: int): Double {
  *
  * @returns this array after transformation
  */
-export function copyWithin(self: FixedArray<double>, target: number, start: number, end?: Number): FixedArray<double> {
-    copyWithin(self, target.toInt(), start.toInt(), asIntOrDefault(end, self.length));
-    return self;
-}
-
-/**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
- *
- * @param target index at which to copy the sequence
- *
- * @param start index at which to start copying elements from
- *
- * @param end index at which to end copying elements from
- *
- * @returns this array after transformation
- */
-export function copyWithin(self: FixedArray<double>, target: int, start: int, end: int): FixedArray<double> {
+export function copyWithin(self: FixedArray<double>, target: int, start: int, end?: int): FixedArray<double> {
     target = normalizeIndex(target, self.length)
     start = normalizeIndex(start, self.length)
-    end = normalizeIndex(end, self.length)
+    end = normalizeIndex(end ?? self.length, self.length)
 
     if (end <= start) {
         return self;
@@ -5778,25 +5207,9 @@ export function copyWithin(self: FixedArray<double>, target: int): FixedArray<do
  *
  * @returns this array after transformation
  */
-export function fill(self: FixedArray<double>, value: double, start?: Number, end?: Number): FixedArray<double> {
-    fill(self, value, asIntOrDefault(start, 0), asIntOrDefault(end, self.length));
-    return self;
-}
-
-/**
- * Changes all elements in the Array to a static value, from a start index to an end index
- *
- * @param value to fill the array with
- *
- * @param start index at which to start filling
- *
- * @param end index at which to end filling, but not including
- *
- * @returns this array after transformation
- */
-export function fill(self: FixedArray<double>, value: double, start: int, end: int): FixedArray<double> {
-    start = normalizeIndex(start, self.length);
-    end = normalizeIndex(end, self.length)
+export function fill(self: FixedArray<double>, value: double, start?: int, end?: int): FixedArray<double> {
+    start = normalizeIndex(start ?? 0, self.length);
+    end = normalizeIndex(end ?? self.length, self.length)
 
     for (let i = start; i < end; i++) {
         self[i] = value;
@@ -5991,25 +5404,10 @@ export function forEach(self: FixedArray<double>, callbackfn: (value: double, in
  *
  * @returns `Array` instance, constructed from extracted elements of `this` instance.
  */
-export function slice(self: FixedArray<double>, start?: Number, end?: Number): FixedArray<double> {
+export function slice(self: FixedArray<double>, start?: int, end?: int): FixedArray<double> {
     const len: int = self.length;
-    return slice(self, asIntOrDefault(start, 0), asIntOrDefault(end, len))
-}
-
-/**
- * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
- * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
- *
- * @param start zero-based index at which to start extraction
- *
- * @param end zero-based index at which to end extraction. `slice()` extracts up to but not including end.
- *
- * @returns `Array` instance, constructed from extracted elements of `this` instance.
- */
-export function slice(self: FixedArray<double>, start: int, end: int): FixedArray<double> {
-    const len: int = self.length;
-    const relStart = normalizeIndex(start, len)
-    const relEnd = normalizeIndex(end, len)
+    const relStart = normalizeIndex(start ?? 0, len)
+    const relEnd = normalizeIndex(end ?? len, len)
 
     let count = relEnd - relStart;
     if (count < 0) {
@@ -6151,23 +5549,9 @@ export function toLocaleString(self: FixedArray<double>): string {
  *
  * @returns a new Array with some elements removed and/or replaced at a given index.
  */
-export function toSpliced(self: FixedArray<double>, start?: Number, delete?: Number): FixedArray<double> {
+export function toSpliced(self: FixedArray<double>, start?: int, delete?: int): FixedArray<double> {
     const len = self.length;
     return toSpliced(self, asIntOrDefault(start, len), asIntOrDefault(delete, len))
-}
-
-/**
- * Copying version of the splice() method.
- *
- * @param start index
- *
- * @param delete number of items after start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
- */
-export function toSpliced(self: FixedArray<double>, start: number, delete: number, ...items: FixedArray<double>): FixedArray<double> {
-    const len = self.length;
-    return toSpliced(self, start.toInt(), delete.toInt(), ...items)
 }
 
 /**
@@ -6224,7 +5608,7 @@ export function toSpliced(self: FixedArray<double>, start: int): FixedArray<doub
  *
  * @returns true if val is in Array
  */
-export function includes(self: FixedArray<double>, val: double, fromIndex?: Number): boolean {
+export function includes(self: FixedArray<double>, val: double, fromIndex?: int): boolean {
     const len = self.length;
     const fi = normalizeIndex(asIntOrDefault(fromIndex, 0), len);
     if (isNaN(val)) {
@@ -6318,20 +5702,6 @@ export function toReversed(self: FixedArray<double>): FixedArray<double> {
         arr[self.length - 1 - i] = self[i]
     }
     return arr
-}
-
-/**
- * Copying version of using the bracket notation to change the value of a given index.
- * It returns a new Array with the element at the given index replaced with the given value.
- *
- * @param index to replace
- *
- * @param value new value
- *
- * @returns a new Array with the element at the given index replaced with the given value
- */
-export function with(self: FixedArray<double>, index: number, value: double): FixedArray<double> {
-    return with(self, index.toInt(), value)
 }
 
 /**
@@ -6589,21 +5959,6 @@ function cloneArray(self: FixedArray<char>): FixedArray<char> {
  * @returns The element in the array matching the given index.
  * Throw range error if `index` < `-length()` or `index` >= `length()`.
  */
-export function at(self: FixedArray<char>, index: number): Char {
-    return at(self, index.toInt())
-}
-
-/**
- * Takes an integer value and returns the item at that index,
- * allowing for positive and negative integers. Negative integers count back
- * from the last item in the array.
- *
- * @param index Zero-based index of the array element to be returned.
- * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
- *
- * @returns The element in the array matching the given index.
- * Throw range error if `index` < `-length()` or `index` >= `length()`.
- */
 export function at(self: FixedArray<char>, index: int): Char {
     let len = self.length;
     let k: int;
@@ -6631,26 +5986,10 @@ export function at(self: FixedArray<char>, index: int): Char {
  *
  * @returns this array after transformation
  */
-export function copyWithin(self: FixedArray<char>, target: number, start: number, end?: Number): FixedArray<char> {
-    copyWithin(self, target.toInt(), start.toInt(), asIntOrDefault(end, self.length));
-    return self;
-}
-
-/**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
- *
- * @param target index at which to copy the sequence
- *
- * @param start index at which to start copying elements from
- *
- * @param end index at which to end copying elements from
- *
- * @returns this array after transformation
- */
-export function copyWithin(self: FixedArray<char>, target: int, start: int, end: int): FixedArray<char> {
+export function copyWithin(self: FixedArray<char>, target: int, start: int, end?: int): FixedArray<char> {
     target = normalizeIndex(target, self.length)
     start = normalizeIndex(start, self.length)
-    end = normalizeIndex(end, self.length)
+    end = normalizeIndex(end ?? self.length, self.length)
 
     if (end <= start) {
         return self;
@@ -6712,25 +6051,9 @@ export function copyWithin(self: FixedArray<char>, target: int): FixedArray<char
  *
  * @returns this array after transformation
  */
-export function fill(self: FixedArray<char>, value: char, start?: Number, end?: Number): FixedArray<char> {
-    fill(self, value, asIntOrDefault(start, 0), asIntOrDefault(end, self.length));
-    return self;
-}
-
-/**
- * Changes all elements in the Array to a static value, from a start index to an end index
- *
- * @param value to fill the array with
- *
- * @param start index at which to start filling
- *
- * @param end index at which to end filling, but not including
- *
- * @returns this array after transformation
- */
-export function fill(self: FixedArray<char>, value: char, start: int, end: int): FixedArray<char> {
-    start = normalizeIndex(start, self.length);
-    end = normalizeIndex(end, self.length)
+export function fill(self: FixedArray<char>, value: char, start?: int, end?: int): FixedArray<char> {
+    start = normalizeIndex(start ?? 0, self.length);
+    end = normalizeIndex(end ?? self.length, self.length)
 
     for (let i = start; i < end; i++) {
         self[i] = value;
@@ -6925,25 +6248,10 @@ export function forEach(self: FixedArray<char>, callbackfn: (value: char, index:
  *
  * @returns `Array` instance, constructed from extracted elements of `this` instance.
  */
-export function slice(self: FixedArray<char>, start?: Number, end?: Number): FixedArray<char> {
+export function slice(self: FixedArray<char>, start?: int, end?: int): FixedArray<char> {
     const len: int = self.length;
-    return slice(self, asIntOrDefault(start, 0), asIntOrDefault(end, len))
-}
-
-/**
- * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
- * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
- *
- * @param start zero-based index at which to start extraction
- *
- * @param end zero-based index at which to end extraction. `slice()` extracts up to but not including end.
- *
- * @returns `Array` instance, constructed from extracted elements of `this` instance.
- */
-export function slice(self: FixedArray<char>, start: int, end: int): FixedArray<char> {
-    const len: int = self.length;
-    const relStart = normalizeIndex(start, len)
-    const relEnd = normalizeIndex(end, len)
+    const relStart = normalizeIndex(start ?? 0, len)
+    const relEnd = normalizeIndex(end ?? len, len)
 
     let count = relEnd - relStart;
     if (count < 0) {
@@ -7085,23 +6393,9 @@ export function toLocaleString(self: FixedArray<char>): string {
  *
  * @returns a new Array with some elements removed and/or replaced at a given index.
  */
-export function toSpliced(self: FixedArray<char>, start?: Number, delete?: Number): FixedArray<char> {
+export function toSpliced(self: FixedArray<char>, start?: int, delete?: int): FixedArray<char> {
     const len = self.length;
     return toSpliced(self, asIntOrDefault(start, len), asIntOrDefault(delete, len))
-}
-
-/**
- * Copying version of the splice() method.
- *
- * @param start index
- *
- * @param delete number of items after start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
- */
-export function toSpliced(self: FixedArray<char>, start: number, delete: number, ...items: FixedArray<char>): FixedArray<char> {
-    const len = self.length;
-    return toSpliced(self, start.toInt(), delete.toInt(), ...items)
 }
 
 /**
@@ -7158,7 +6452,7 @@ export function toSpliced(self: FixedArray<char>, start: int): FixedArray<char> 
  *
  * @returns true if val is in Array
  */
-export function includes(self: FixedArray<char>, val: char, fromIndex?: Number): boolean {
+export function includes(self: FixedArray<char>, val: char, fromIndex?: int): boolean {
     const len = self.length;
     const fi = normalizeIndex(asIntOrDefault(fromIndex, 0), len);
     for (let i = fi; i < len; i++) {
@@ -7244,20 +6538,6 @@ export function toReversed(self: FixedArray<char>): FixedArray<char> {
         arr[self.length - 1 - i] = self[i]
     }
     return arr
-}
-
-/**
- * Copying version of using the bracket notation to change the value of a given index.
- * It returns a new Array with the element at the given index replaced with the given value.
- *
- * @param index to replace
- *
- * @param value new value
- *
- * @returns a new Array with the element at the given index replaced with the given value
- */
-export function with(self: FixedArray<char>, index: number, value: char): FixedArray<char> {
-    return with(self, index.toInt(), value)
 }
 
 /**

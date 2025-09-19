@@ -194,7 +194,7 @@ sub:
           - method: includes
             params:
               - paramOf("null", "undefined", '""', '"123"', 123, "NaN")
-              - paramOf(0.0, 1.0, 2.0, 3.0)
+              - paramOf(0, 1, 2, 3)
             mandatory: 1
           - method: indexOf
             params:
