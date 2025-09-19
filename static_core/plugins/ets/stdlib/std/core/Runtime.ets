@@ -60,6 +60,8 @@ export final class Runtime {
 
         if (o1 instanceof Number && o2 instanceof Number) {
             return Runtime.sameNumberValue(o1 as Number, o2 as Number)
+        } else if (o1 instanceof String && o2 instanceof String) {
+            return (o1 as String).equals(o2) // same semantics as ==, but faster
         } else if (o1 instanceof Float && o2 instanceof Float) {
             return Runtime.sameFloatValue(o1 as Float, o2 as Float)
         }

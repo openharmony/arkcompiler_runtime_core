@@ -208,6 +208,16 @@ def GenerateStringEquals(lang, dynamic, compression, cgmode = :FastPath)
         Return(res).b
 
     Label(:Long)
+        hashcode1 := LoadI(str1).Imm(Constants::STRING_HASHCODE_OFFSET).u32
+        If(hashcode1, 0).NE.b {
+            hashcode2 := LoadI(str2).Imm(Constants::STRING_HASHCODE_OFFSET).u32
+            If(hashcode2, 0).NE.b {
+                If(hashcode1, hashcode2).NE.b {
+                    Goto(:NotEqual)
+                }
+            }
+        }
+
         unroll := Compare(length, 64).GE.b
         IfImm(unroll).Imm(0).SrcType("DataType::BOOL").NE.b {
           if cgmode == :NativePlus
