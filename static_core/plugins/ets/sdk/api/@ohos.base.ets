@@ -36,3 +36,5 @@ export class BusinessError<T = void> extends Error {
         this.data = data;
     }
 }
+
+export type RecordData = undefined | null | Object | Record<string, RecordData> | Array<RecordData>;
