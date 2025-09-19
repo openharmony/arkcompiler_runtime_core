@@ -38,7 +38,7 @@ static_core/extras/                   @igelhaus
 static_core/gn/                       @igelhaus
 static_core/irtoc/                    @Prof @mbolshov @asidorov ^dingding5 ^chernykhsergey
 static_core/isa/                      @mbolshov ^igelhaus @oatuwwutao ^seeuiceland
-static_core/libllvmbackend/           ^Prof ^kosovpavel @asidorov
+static_core/libllvmbackend/           ^Prof @urandon @asidorov
 static_core/libpandabase/             @dmitriitr @nazarovkonstantin ^igelhaus
 static_core/libpandafile/             @igelhaus
 static_core/libziparchive/            @nazarovkonstantin ^igelhaus
@@ -96,7 +96,7 @@ static_core/plugins/ets/doc/concurrency                  ^konstanting @anedoria 
 static_core/plugins/ets/doc/spec                         ^konstanting ^Prof ^sergeyandreev ^slynkodenis ^nazarovkonstantin @mbolshov @akmaevaleksey @anedoria @qyhuo32 @klooer @godmiaozi @wanzixuan330 @zsw_zhushiwei @wuzhefengh @mengbierr @davidwulanxi @huanghuijin @egavrin @igelhaus @vpukhov @dmitriitr
 static_core/plugins/ets/irtoc_scripts/                   @Prof @mbolshov @asidorov ^dingding5
 static_core/plugins/ets/isa/                             @mbolshov
-static_core/plugins/ets/libllvmbackend/                  ^Prof ^kosovpavel @asidorov
+static_core/plugins/ets/libllvmbackend/                  ^Prof @urandon @asidorov
 static_core/plugins/ets/runtime/                         @vpukhov
 static_core/plugins/ets/runtime/*coroutine*              ^dmitriitr @konstanting ^ychen3
 static_core/plugins/ets/runtime/ani                      @wanzixuan330 @v-cherkashin ^slynkodenis ^liwentao_uiw
