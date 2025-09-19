@@ -27,12 +27,12 @@ class MethodConcurrentExecution {
     return 42.0;
   }
 
-  async methodConcurrentExecution(): Promise<Array<Promise<String | number>>> {
+  async methodConcurrentExecution(): Promise<Array<String | number>> {
     const result = await Promise.all( new Array<Promise<string | number>>(
       this.methodReturnString(),
       this.methodReturnNumber(),
     ));
-    return result as Array<Promise<String | number>>;
+    return result as Array<String | number>;
   }
 }
 

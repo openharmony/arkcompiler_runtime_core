@@ -26,12 +26,12 @@ async function methodReturnNumber(): Promise<number> {
   return 42.0;
 }
 
-async function methodConcurrentExecution(): Promise<Array<Promise<String | number>>> {
+async function methodConcurrentExecution(): Promise<Array<String | number>> {
   const result = await Promise.all( new Array<Promise<string | number>>(
     methodReturnString(),
     methodReturnNumber(),
   ));
-  return result as Array<Promise<String | number>>;
+  return result as Array<String | number>;
 }
 
 async function startTest() {

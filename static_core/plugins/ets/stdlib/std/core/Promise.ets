@@ -260,11 +260,11 @@ export final class Promise<out T> implements PromiseLike<T> {
      * @param value value to resolve promise with
      * @returns { Promise } resolved promise
      */
-    static resolve<U>(value: U|PromiseLike<U>): Promise<U> {
+    static resolve<U>(value: U|PromiseLike<U>): Promise<Awaited<U>> {
         if (value instanceof Promise) {
-            return value as Promise<U>;
+            return value as Promise<Awaited<U>>;
         }
-        let p = new Promise<U>();
+        let p = new Promise<Awaited<U>>();
         p.doResolve(value);
         return p;
     }
@@ -286,8 +286,8 @@ export final class Promise<out T> implements PromiseLike<T> {
      * @param { Error } value value to reject promise with
      * @returns { Promise } rejected promise
      */
-    static reject<U = never>(error: Error): Promise<U> {
-        let p = new Promise<U>();
+    static reject<U = never>(error: Error): Promise<Awaited<U>> {
+        let p = new Promise<Awaited<U>>();
         p.rejectImpl(error, false);
         return p;
     }
@@ -299,8 +299,8 @@ export final class Promise<out T> implements PromiseLike<T> {
      * @returns { Promise } promise that will be resolved after all promises are resolved with an array of results
      *     or rejected if at least one promise is rejected with the rejection result
      */
-    static all<U>(promises: FixedArray<U|PromiseLike<U>|undefined>): Promise<Array<U>> {
-        return new Promise<Array<U>>((resolve: (value: Array<U>) => void, reject: (error: Error) => void): void => {
+    static all<U>(promises: FixedArray<U|PromiseLike<U>|undefined>): Promise<Array<Awaited<U>>> {
+        return new Promise<Array<Awaited<U>>>((resolve: (value: Array<U>) => void, reject: (error: Error) => void): void => {
             new AllPromiseConcurrency<U>(resolve, reject).all(promises);
         });
     }
@@ -312,12 +312,12 @@ export final class Promise<out T> implements PromiseLike<T> {
      * @returns { Promise } promise that will be resolved after all promises are resolved with an array of results
      *     or rejected if at least one promise is rejected with the rejection result
      */
-    static all<U>(promises: Iterable<U|PromiseLike<U>>): Promise<Array<U>> {
+    static all<U>(promises: Iterable<U|PromiseLike<U>>): Promise<Array<Awaited<U>>> {
         try {
             return Promise.all<U>(Promise.toArray(promises));
         } catch (e) {
             // NOTE(csaba.osztrogonac): remove as cast once e has Error type
-            return Promise.reject<Array<U>>(e as Error);
+            return Promise.reject<Array<Awaited<U>>>(e as Error);
         }
     }
 
@@ -356,8 +356,8 @@ export final class Promise<out T> implements PromiseLike<T> {
      * @returns { Promise } promise that will be resolved if at least one promise is resolved with the result of resolved promise
      * or rejected with AggregateError if all promises are rejected
      */
-    static any<U>(promises: FixedArray<U|PromiseLike<U>|undefined>): Promise<U> {
-        return new Promise<U>((resolve: (value: U) => void, reject: (error: Error) => void): void => {
+    static any<U>(promises: FixedArray<U|PromiseLike<U>|undefined>): Promise<Awaited<U>> {
+        return new Promise<Awaited<U>>((resolve: (value: U) => void, reject: (error: Error) => void): void => {
             // This temp object is needed because es2panda cannot change captured primitives
             new AnyPromiseConcurrency<U>(resolve, reject).any(promises);
         });
@@ -370,7 +370,7 @@ export final class Promise<out T> implements PromiseLike<T> {
      * @returns { Promise } promise that will be resolved if at least one promise is resolved with the result of resolved promise
      *     or rejected with AggregateError if all promises are rejected
      */
-    static any<U>(promises: Iterable<U|PromiseLike<U>>): Promise<U> {
+    static any<U>(promises: Iterable<U|PromiseLike<U>>): Promise<Awaited<U>> {
         try {
             return Promise.any<U>(Promise.toArray(promises));
         } catch (e) {
@@ -385,8 +385,8 @@ export final class Promise<out T> implements PromiseLike<T> {
      * @param promises array of promise-like objects
      * @returns { Promise } promise that will completed with the same value as one of the promises in the argument
      */
-    static race<U>(promises: FixedArray<U|PromiseLike<U>|undefined>): Promise<U> {
-        return new Promise<U>((resolve: (value: U) => void, reject: (error: Error) => void): void => {
+    static race<U>(promises: FixedArray<U|PromiseLike<U>|undefined>): Promise<Awaited<U>> {
+        return new Promise<Awaited<U>>((resolve: (value: U) => void, reject: (error: Error) => void): void => {
             // This temp object is needed because es2panda cannot change captured primitives
             new RacePromiseConcurrency<U>(resolve, reject).race(promises);
         });
@@ -398,7 +398,7 @@ export final class Promise<out T> implements PromiseLike<T> {
      * @param promises iterable object of promise-like objects
      * @returns { Promise } promise that will completed with the same value as one of the promises in the argument
      */
-    static race<U>(promises: Iterable<U|PromiseLike<U>>): Promise<U> {
+    static race<U>(promises: Iterable<U|PromiseLike<U>>): Promise<Awaited<U>> {
         try {
             return Promise.race<U>(Promise.toArray(promises));
         } catch (e) {
@@ -522,9 +522,9 @@ export final class Promise<out T> implements PromiseLike<T> {
 }
 
 class PromiseConcurrencyBase<T> {
-    toPromiseLike(value: T|PromiseLike<T>): PromiseLike<T> {
+    toPromiseLike(value: T|PromiseLike<T>): PromiseLike<Awaited<T>> {
         if (value instanceof Promise) {
-            let p = value as Promise<T>;
+            let p = value as Promise<Awaited<T>>;
             return p;
         } else {
             let p = Promise.resolve<T>(value as T);
@@ -548,8 +548,8 @@ class AllPromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
         }
         for (let i = 0; i < promises.length; ++i) {
             let idx = i;
-            this.toPromiseLike(promises[idx]!).then<void, void>((value: T): void => {
-                this.resolveImpl(value, idx);
+            this.toPromiseLike(promises[idx]!).then<void, void>((value: Awaited<T>): void => {
+                this.resolveImpl(value as T, idx);
             }, (error: Error): void => {
                 this.reject(error as Error);
             });
@@ -585,7 +585,7 @@ class AllSettledPromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
         }
         for (let i = 0; i < promises.length; ++i) {
             let idx = i;
-            this.toPromiseLike(promises[idx]!).then<void, void>((value: T): void => {
+            this.toPromiseLike(promises[idx]!).then<void, void>((value: Awaited<T>): void => {
                 this.resolveImpl(value as T, idx);
             }, (error: Error): void => {
                 this.rejectImpl(error as Error, idx);
@@ -635,7 +635,7 @@ class AnyPromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
         for (let i = 0; i < promises.length; ++i) {
             let idx = i;
             try {
-                this.toPromiseLike(promises[idx]!).then<void, void>((value: T): void => {
+                this.toPromiseLike(promises[idx]!).then<void, void>((value: Awaited<T>): void => {
                     this.resolveImpl(value as T);
                 }, (error: Error): void => {
                     this.rejectImpl(error as Error, idx);
@@ -682,7 +682,7 @@ class RacePromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
     race(promises: FixedArray<T|PromiseLike<T>|undefined>): void {
         for (let i = 0; i < promises.length; ++i) {
             let idx = i;
-            this.toPromiseLike(promises[idx]!).then<void, void>((value: T): void => {
+            this.toPromiseLike(promises[idx]!).then<void, void>((value: Awaited<T>): void => {
                 this.resolveImpl(value as T);
             }, (error: Error): void => {
                 this.rejectImpl(error as Error);
