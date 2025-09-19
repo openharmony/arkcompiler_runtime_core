@@ -17,21 +17,23 @@ limitations under the License.
 desc: Predefined type declaration.
 ---*/
 
-let b1: (string | null)[]
-b1 = ["aa", null]
-arktest.assertEQ(b1[0], "aa")
-arktest.assertEQ(b1[1], null)
+function main() {
+    let b1: (string | null)[]
+    b1 = ["aa", null]
+    arktest.assertEQ(b1[0], "aa")
+    arktest.assertEQ(b1[1], null)
 
-let b2: string | null[]
-b2 = [null, null]
-arktest.assertEQ(b2[0], null)
-arktest.assertEQ(b2[1], null)
+    let b2: string | null[]
+    b2 = [null, null]
+    arktest.assertEQ(b2[0], null)
+    arktest.assertEQ(b2[1], null)
 
-let c: () => string | null
-c = (): string | null => { return null }
-arktest.assertEQ(c(), null)
+    let c: () => string | null
+    c = (): string | null => { return null }
+    arktest.assertEQ(c(), null)
 
-let d: (() => string) | null
-d = null
-d = (): string => { return "hi" }
-arktest.assertEQ(d(), "hi")
+    let d: (() => string) | null
+    d = null
+    d = (): string => { return "hi" }
+    arktest.assertEQ(d(), "hi")
+}

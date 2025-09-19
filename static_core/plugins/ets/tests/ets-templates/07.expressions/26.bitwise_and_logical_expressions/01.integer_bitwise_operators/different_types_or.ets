@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,25 @@
  * limitations under the License.
  */
 
-{% for i in logical_ops %}
+{% for c in cases %}
 
 /*---
-desc: Bitwise logical operations (Boolean)
-params: {{i.xorigin}} {{i.op}} {{i.yorigin}} == {{i.dest}}
+desc: Bitwise or with different operand types
 ---*/
 
 function main(): void {
-  let x: Boolean = {{i.xorigin}};
-  let y: Boolean = {{i.yorigin}};
-  let dest: Boolean = {{i.dest}};
-  arktest.assertTrue((x {{i.op}} y) == dest);
+  let x: {{c.typex}} = {{c.x}}
+  let y: {{c.typey}} = {{c.y}}
+  {% if c.typex == 'bigint' %}
+  arktest.assertEQ(x | BigInt(y), {{c.result}})
+  arktest.assertEQ(BigInt(y) | x, {{c.result}})
+  {% elif c.typey == 'bigint' %}
+  arktest.assertEQ(BigInt(x) | y, {{c.result}})
+  arktest.assertEQ(y | BigInt(x), {{c.result}})
+  {% else %}
+  arktest.assertEQ(x | y, {{c.result}})
+  arktest.assertEQ(y | x, {{c.result}})
+  {% endif %}
 }
 
 {% endfor %}
