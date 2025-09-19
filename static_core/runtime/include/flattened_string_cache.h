@@ -34,7 +34,10 @@ public:
 
     static coretypes::String *Get(coretypes::Array *cache, coretypes::String *treeStr)
     {
-        ASSERT(cache != nullptr);
+        if (cache == nullptr) {
+            ASSERT(PandaVM::GetCurrent()->GetLanguageContext().GetLanguage() == SourceLanguage::PANDA_ASSEMBLY);
+            return nullptr;
+        }
         auto index = GetIndex(treeStr);
         auto *key = GetKey(cache, index);
         if (key != treeStr) {
@@ -45,6 +48,10 @@ public:
 
     static void Update(coretypes::Array *cache, coretypes::String *treeStr, coretypes::String *flatStr)
     {
+        if (cache == nullptr) {
+            ASSERT(PandaVM::GetCurrent()->GetLanguageContext().GetLanguage() == SourceLanguage::PANDA_ASSEMBLY);
+            return;
+        }
         ASSERT(cache != nullptr);
         ASSERT(treeStr != nullptr);
         ASSERT(flatStr != nullptr);
