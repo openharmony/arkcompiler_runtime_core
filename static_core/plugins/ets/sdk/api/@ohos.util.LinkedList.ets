@@ -185,26 +185,21 @@ export class LinkedList<T> implements Iterable<T>, JsonReplacer {
      * @param index The index of the element to get.
      * @returns The element at the specified index, or undefined if the index is out of range.
      */
-    public get(index: int): T | undefined {
+    public get(index: int): T {
         this.checkIndexType(index);
-
-        if (index >= 0 && index < this.elementNum) {
-            let currentNode: ListNode<T> | undefined = this.getNode(index);
-            return currentNode!.element;
-        }
-        return undefined;
+        this.checkIndex(index, this.elementNum - 1);
+        let currentNode: ListNode<T> | undefined = this.getNode(index);
+        return currentNode!.element;
     }
 
     /**
      * Retrieves the first element in the linked list.
      *
-     * @returns The first element of type `T` if the list is not empty, otherwise `undefined`.
+     * @returns The first element of type `T`.
      */
-    public getFirst(): T | undefined {
-        if (this.head !== undefined) {
-            return this.head!.element;
-        }
-        return undefined;
+    public getFirst(): T {
+        this.checkEmptyContainer(OutOfBoundsErrorCodeId);
+        return this.head!.element;
     }
 
     /**
@@ -228,13 +223,11 @@ export class LinkedList<T> implements Iterable<T>, JsonReplacer {
     /**
      * Retrieves the last element in the linked list.
      *
-     * @returns The last element of type `T` if the list is not empty, otherwise `undefined`.
+     * @returns The last element of type `T`.
      */
-    public getLast(): T | undefined {
-        if (this.tail !== undefined) {
-            return this.tail!.element;
-        }
-        return undefined;
+    public getLast(): T {
+        this.checkEmptyContainer(OutOfBoundsErrorCodeId);
+        return this.tail!.element;
     }
 
     /**
@@ -432,17 +425,14 @@ export class LinkedList<T> implements Iterable<T>, JsonReplacer {
      * @param element The new element.
      * @returns The replaced element, or undefined if the index is out of range.
      */
-    public set(index: int, element: T): T | undefined {
+    public set(index: int, element: T): T {
         this.checkIndexType(index);
         this.checkEmptyContainer(OutOfBoundsErrorCodeId);
         this.checkIndex(index, this.length - 1);
 
         let currentNode: ListNode<T> | undefined = this.getNode(index);
-        if (currentNode !== undefined) {
-            currentNode!.element = element;
-            return currentNode!.element;
-        }
-        return undefined;
+        currentNode!.element = element;
+        return element;
     }
 
     /**

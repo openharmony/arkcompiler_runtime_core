@@ -996,9 +996,9 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
      *
      * @returns The element in the array matching the given index.
-     * Returns undefined if `index` < `-length()` or `index` >= `length()`.
+     * Throw range error if `index` < `-length()` or `index` >= `length()`.
      */
-    public override at(index: number): T | undefined {
+    public override at(index: number): T {
         return this.at(index.toInt())
     }
 
@@ -1011,9 +1011,9 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
      *
      * @returns The element in the array matching the given index.
-     * Returns undefined if `index` < `-length()` or `index` >= `length()`.
+     * Throw range error if `index` < `-length()` or `index` >= `length()`.
      */
-    public at(index: int): T | undefined {
+    public at(index: int): T {
         let len = this.actualLength;
         let k: int;
         if (index >= 0) {
@@ -1023,7 +1023,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         }
 
         if (k < 0 || k >= len) {
-            return undefined;
+            throw new RangeError("Invalid index");
         }
 
         return this.$_get_unsafe(k);

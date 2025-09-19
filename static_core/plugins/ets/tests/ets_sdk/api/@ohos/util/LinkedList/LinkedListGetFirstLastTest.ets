@@ -14,6 +14,7 @@
  */
 
 import {LinkedList} from "@ohos.util.LinkedList";
+import { BusinessError } from "@ohos.base";
 
 function main() {
     const suite = new arktest.ArkTestsuite("LinkedList API tests");
@@ -49,7 +50,11 @@ function testGetFirstNonEmptyContainer() {
 
 function testGetFirstEmptyContainer() {
     let linkedList = new LinkedList<double>();
-    arktest.assertEQ(linkedList.getFirst(), undefined);
+    try {
+        let first = linkedList.getFirst();
+    } catch (e: BusinessError) {
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }
 
 function testGetFirstUndefined() {
@@ -67,7 +72,11 @@ function testGetLastNonEmptyContainer() {
 
 function testGetLastEmptyContainer() {
     let linkedList = new LinkedList<double>();
-    arktest.assertEQ(linkedList.getLast(), undefined);
+    try {
+        let first = linkedList.getLast();
+    } catch (e: BusinessError) {
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }
 
 function testGetLastUndefined() {

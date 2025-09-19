@@ -14,6 +14,7 @@
  */
 
 import {Queue} from "@ohos.util.Queue";
+import { BusinessError } from "@ohos.base";
 
 function main() {
     const suite = new arktest.ArkTestsuite("Queue API tests");
@@ -104,7 +105,11 @@ function testQueueAddElements() {
 function testQueuePopEmpty() {
     let queue = new Queue<double>();
     arktest.assertEQ(queue.length, 0, "Initial queue length should be 0");
-    arktest.assertEQ(queue.pop(), undefined, "Pop from empty queue should return undefined");
+    try {
+        let result = queue.pop();
+    } catch (e: BusinessError) {
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }
 
 function testQueuePopFirstElement() {

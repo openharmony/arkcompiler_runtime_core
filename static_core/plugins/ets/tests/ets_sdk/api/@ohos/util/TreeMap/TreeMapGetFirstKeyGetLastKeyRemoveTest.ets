@@ -14,6 +14,7 @@
  */
 
 import TreeMap from "@ohos.util.TreeMap";
+import {BusinessError} from "@ohos.base";
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("TreeMap GetFirstKey GetLastKey Remove API tests")
@@ -47,8 +48,11 @@ function main(): int {
 //Test cases ported from ArkTS 1.0:TREEMAP_2400
 function testGetFirstKeyOnEmptyMap() {
     let treeMap = new TreeMap<string, double>();
-    let result = treeMap.getFirstKey();
-    arktest.assertEQ(result, undefined);
+    try {
+        let result = treeMap.getFirstKey();
+    } catch (e: BusinessError) {
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }
 
 //Test cases ported from ArkTS 1.0:TREEMAP_2500
@@ -103,8 +107,11 @@ function testGetFirstKeyWithCustomNaturalOrderComparator() {
 //Test cases ported from ArkTS 1.0:TREEMAP_2900
 function testGetLastKeyOnEmptyMap() {
     let treeMap = new TreeMap<string, double>();
-    let result = treeMap.getLastKey();
-    arktest.assertEQ(result, undefined);
+    try {
+        let result = treeMap.getLastKey();
+    } catch (e: BusinessError) {
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }
 
 //Test cases ported from ArkTS 1.0:TREEMAP_3000

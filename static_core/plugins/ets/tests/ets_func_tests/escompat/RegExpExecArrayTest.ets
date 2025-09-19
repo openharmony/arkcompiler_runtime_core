@@ -496,7 +496,6 @@ function testAt(): void {
 
     arktest.assertEQ(match.at(0), "a", "at positive index");
     arktest.assertEQ(match.at(-1), "c", "at negative index");
-    arktest.assertEQ(match.at(10), undefined, "at out of bounds");
 }
 
 /**

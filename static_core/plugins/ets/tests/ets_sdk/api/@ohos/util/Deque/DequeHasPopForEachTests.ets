@@ -14,6 +14,7 @@
  */
 
 import Deque from "@ohos.util.Deque";
+import { BusinessError } from "@ohos.base";
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("Deque API tests");
@@ -85,7 +86,11 @@ function testDequeHasObjectElement() {
 function testDequePopFirstFromEmpty() {
     let deque = new Deque<double>();
     arktest.assertEQ(deque.length, 0, "Initial deque length should be 0");
-    arktest.assertEQ(deque.popFirst(), undefined, "Pop first from empty deque should return undefined");
+    try {
+        let result = deque.popFirst();
+    } catch (e: BusinessError) {
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }
 
 function testDequePopFirstElement() {
@@ -108,7 +113,11 @@ function testDequePopFirstElement() {
 function testDequePopLastFromEmpty() {
     let deque = new Deque<double>();
     arktest.assertEQ(deque.length, 0, "Initial deque length should be 0");
-    arktest.assertEQ(deque.popLast(), undefined, "Pop last from empty deque should return undefined");
+    try {
+        let result = deque.popLast();
+    } catch (e: BusinessError) {
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }
 
 function testDequePopLastElement() {

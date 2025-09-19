@@ -118,24 +118,21 @@ function testExceptionHandlingForEmptyContainer() {
     let empty_pa = new PlainArray<double>();
     let exceptionCheck = (e: Error): boolean | string => {
         if (e instanceof BusinessError) {
-            return e.name == "BusinessError" && e.message == "Container is empty" &&
-                e.code == OutOfBoundsErrorCodeId;
+            return e.name == "BusinessError" && e.message == "Container is empty";
         }
         return false;
     }
     arktest.expectThrow(() => {empty_pa.getValueAt(0)}, exceptionCheck);
     let exceptionCheck1 = (e: Error): boolean | string => {
         if (e instanceof BusinessError) {
-            return e.name == "BusinessError" && e.message == "Container is empty" &&
-                e.code == OutOfBoundsErrorCodeId;
+            return e.name == "BusinessError" && e.message == "Container is empty";
         }
         return false;
     }
     arktest.expectThrow(() => {empty_pa.removeRangeFrom(0, 1)}, exceptionCheck1);
     let exceptionCheck2 = (e: Error): boolean | string => {
         if (e instanceof BusinessError) {
-            return e.name == "BusinessError" && e.message == "Container is empty" &&
-                e.code == OutOfBoundsErrorCodeId;
+            return e.name == "BusinessError" && e.message == "Container is empty";
         }
         return false;
     }

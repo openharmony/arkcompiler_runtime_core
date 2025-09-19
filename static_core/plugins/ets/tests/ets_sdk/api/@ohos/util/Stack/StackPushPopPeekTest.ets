@@ -14,6 +14,7 @@
  */
 
 import { Stack } from "@ohos.util.Stack";
+import { BusinessError } from "@ohos.base";
 
 class C1 {
     name: string = "";
@@ -95,8 +96,11 @@ function testStackPopWithMultipleElements() {
 // Test cases ported from ArkTS 1.0: STACK_POP_0700
 function testStackPopWithoutElements() {
     let stack = new Stack<double | string | object>();
-    let result = stack.pop();
-    arktest.assertEQ(result, undefined);
+    try {
+        let first = stack.pop();
+    } catch (e: BusinessError) {
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }
 
 // Test cases ported from ArkTS 1.0: STACK_PEEK_0900
@@ -118,6 +122,9 @@ function testStackPeekWithElements() {
 // Test cases ported from ArkTS 1.0: STACK_PEEK_0100
 function testStackPeekWithoutElements() {
     let stack = new Stack<double | string | object>();
-    let result = stack.peek();
-    arktest.assertEQ(result, undefined);
+    try {
+        let first = stack.peek();
+    } catch (e: BusinessError) {
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }

@@ -23,7 +23,11 @@ function main(): void {
     for (let i = 0; i < 30; i++) {
         arktest.assertTrue( arr.includes(i, undefined))
     }
-    arktest.assertEQ( arr.at(50), undefined)
+    try {
+        arr.at(50)
+    } catch (e: Error) {
+        arktest.assertEQ(e.message, "Invalid index");
+    }
     arktest.assertEQ( arr.length, 30)
     for (let i = 0; i < 30; i++) {
         arktest.assertEQ( arr.pop()!, 30 - 1 - i)

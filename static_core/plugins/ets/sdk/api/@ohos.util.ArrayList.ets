@@ -18,6 +18,7 @@ import { BusinessError } from "@ohos.base";
 const TypeErrorCodeId: int = 401;
 const OutOfBoundsErrorCodeId: int = 10200001;
 const IncorrectBufferSizeId: int = 10200009;
+const EmptyContainerId: int = 10200010;
 const CapacityErrorCodeId: int = 10200062;
 const INT_MAX_VALUE_OFFSET: int = 2147483647;
 
@@ -403,7 +404,7 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
 
     private checkEmptyContainer(): void {
         if (this.isEmpty()) {
-            throw createBusinessError(OutOfBoundsErrorCodeId, `Container is empty`);
+            throw createBusinessError(EmptyContainerId, `Container is empty`);
         }
     }
 

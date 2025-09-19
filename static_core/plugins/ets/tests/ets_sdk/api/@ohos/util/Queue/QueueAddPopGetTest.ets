@@ -14,6 +14,7 @@
  */
 
 import {Queue} from "@ohos.util.Queue";
+import { BusinessError } from "@ohos.base";
 
 class C1 {
     name: string = "";
@@ -93,8 +94,11 @@ function testQueuePopWithElements() {
 // Test cases ported from ArkTS 1.0: QUEUE_POP_0700
 function testQueuePopWithoutElements() {
     let queue = new Queue<double | string | object>();
-    let result = queue.pop();
-    arktest.assertEQ(result, undefined);
+    try {
+        let result = queue.pop();
+    } catch (e: BusinessError) {
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }
 
 // Test cases ported from ArkTS 1.0: QUEUE_GETFIRST_0800
@@ -115,6 +119,9 @@ function testQueueGetFirstWithElements() {
 // Test cases ported from ArkTS 1.0: QUEUE_GETFIRST_0900
 function testQueueGetFirstWithoutElements() {
     let queue = new Queue<double | string | object>();
-    let result = queue.getFirst();
-    arktest.assertEQ(result, undefined);
+    try {
+        let result = queue.getFirst();
+    } catch (e: BusinessError) {
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }

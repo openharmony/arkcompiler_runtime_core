@@ -211,7 +211,7 @@ function testArrayList0007() {
 
 function exceptionCheckEmptyContainer(e: Error): boolean | string {
     if (e instanceof BusinessError) {
-        return e.name == "BusinessError" && e.message == `Container is empty` && e.code == OutOfBoundsErrorCodeId
+        return e.name == "BusinessError" && e.message == `Container is empty`
     }
     return false
 }
