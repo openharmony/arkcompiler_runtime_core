@@ -22,6 +22,6 @@ tags: [compile-only, negative]
 ---*/
 
 class C {
-  public static a: int = f + 5;
-  public static f: int;
+  public static a: int = C.f + 5;
+  public static f: int = C.a;
 }

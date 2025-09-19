@@ -16,8 +16,9 @@ limitations under the License.
 /*---
 desc: Non-static field initialization with keyword 'this'.
 assert: >-
-    It there is an initializer in a non-static field declaration, then the following rules apply to the initializer.
-    The initializer may refer to the current object using the keyword this or the keyword super.
+    The instance field initializer expression cannot use
+    this or super directly in any form.
+tags: [compile-only, negative]
 ---*/
 
 class A {
@@ -28,5 +29,5 @@ class A {
 function main(): void {
     let instance: A = new A();
 
-    arktest.assertEQ( instance.x, 5 );
+    arktest.assertEQ(instance.x, 5);
 }

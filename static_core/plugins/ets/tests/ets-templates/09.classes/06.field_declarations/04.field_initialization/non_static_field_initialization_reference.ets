@@ -14,14 +14,14 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Static field 'f' have reference in static variable.
+desc: Non-static field 'f' have reference in non-static variable.
 assert: >-
-    For a reference to a non-static field f declared in class or interface C, it is a compile-time error if.
-    The reference appears either in a non-static variable's initializer of C or in a static initializer of C.
+    The instance field initializer expression cannot use
+    this or super directly in any form.
 tags: [compile-only, negative]
 ---*/
 
 class C {
-  public a: int = f + 5;
   public f: int;
+  public a: int = this.f + 5;
 }
