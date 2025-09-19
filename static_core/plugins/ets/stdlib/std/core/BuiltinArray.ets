@@ -256,7 +256,7 @@ export function find(self: FixedArray<boolean>, predicate: (value: boolean, inde
     if (res == -1) {
         return undefined
     }
-    return self[res.toInt()];
+    return self[res];
 }
 
 /**
@@ -269,7 +269,7 @@ export function find(self: FixedArray<boolean>, predicate: (value: boolean, inde
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: FixedArray<boolean>, predicate: (value: boolean, index: int, array: FixedArray<boolean>) => boolean): number {
+export function findIndex(self: FixedArray<boolean>, predicate: (value: boolean, index: int, array: FixedArray<boolean>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
         if (predicate(self[i], i, self)) {
             return i;
@@ -341,7 +341,7 @@ export function some(self: FixedArray<boolean>, predicate: (value: boolean, inde
  *
  * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: FixedArray<boolean>, predicate: (element: boolean, index: int, array: FixedArray<boolean>) => boolean): number {
+export function findLastIndex(self: FixedArray<boolean>, predicate: (element: boolean, index: int, array: FixedArray<boolean>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
         if (predicate(self[i], i, self)) {
             return i
@@ -1182,7 +1182,7 @@ export function find(self: FixedArray<byte>, predicate: (value: byte, index: int
     if (res == -1) {
         return undefined
     }
-    return self[res.toInt()];
+    return self[res];
 }
 
 /**
@@ -1195,7 +1195,7 @@ export function find(self: FixedArray<byte>, predicate: (value: byte, index: int
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: FixedArray<byte>, predicate: (value: byte, index: int, array: FixedArray<byte>) => boolean): number {
+export function findIndex(self: FixedArray<byte>, predicate: (value: byte, index: int, array: FixedArray<byte>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
         if (predicate(self[i], i, self)) {
             return i;
@@ -1267,7 +1267,7 @@ export function some(self: FixedArray<byte>, predicate: (value: byte, index: int
  *
  * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: FixedArray<byte>, predicate: (element: byte, index: int, array: FixedArray<byte>) => boolean): number {
+export function findLastIndex(self: FixedArray<byte>, predicate: (element: byte, index: int, array: FixedArray<byte>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
         if (predicate(self[i], i, self)) {
             return i
@@ -2108,7 +2108,7 @@ export function find(self: FixedArray<short>, predicate: (value: short, index: i
     if (res == -1) {
         return undefined
     }
-    return self[res.toInt()];
+    return self[res];
 }
 
 /**
@@ -2121,7 +2121,7 @@ export function find(self: FixedArray<short>, predicate: (value: short, index: i
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: FixedArray<short>, predicate: (value: short, index: int, array: FixedArray<short>) => boolean): number {
+export function findIndex(self: FixedArray<short>, predicate: (value: short, index: int, array: FixedArray<short>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
         if (predicate(self[i], i, self)) {
             return i;
@@ -2193,7 +2193,7 @@ export function some(self: FixedArray<short>, predicate: (value: short, index: i
  *
  * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: FixedArray<short>, predicate: (element: short, index: int, array: FixedArray<short>) => boolean): number {
+export function findLastIndex(self: FixedArray<short>, predicate: (element: short, index: int, array: FixedArray<short>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
         if (predicate(self[i], i, self)) {
             return i
@@ -3034,7 +3034,7 @@ export function find(self: FixedArray<int>, predicate: (value: int, index: int, 
     if (res == -1) {
         return undefined
     }
-    return self[res.toInt()];
+    return self[res];
 }
 
 /**
@@ -3047,7 +3047,7 @@ export function find(self: FixedArray<int>, predicate: (value: int, index: int, 
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: FixedArray<int>, predicate: (value: int, index: int, array: FixedArray<int>) => boolean): number {
+export function findIndex(self: FixedArray<int>, predicate: (value: int, index: int, array: FixedArray<int>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
         if (predicate(self[i], i, self)) {
             return i;
@@ -3119,7 +3119,7 @@ export function some(self: FixedArray<int>, predicate: (value: int, index: int, 
  *
  * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: FixedArray<int>, predicate: (element: int, index: int, array: FixedArray<int>) => boolean): number {
+export function findLastIndex(self: FixedArray<int>, predicate: (element: int, index: int, array: FixedArray<int>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
         if (predicate(self[i], i, self)) {
             return i
@@ -3960,7 +3960,7 @@ export function find(self: FixedArray<long>, predicate: (value: long, index: int
     if (res == -1) {
         return undefined
     }
-    return self[res.toInt()];
+    return self[res];
 }
 
 /**
@@ -3973,7 +3973,7 @@ export function find(self: FixedArray<long>, predicate: (value: long, index: int
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: FixedArray<long>, predicate: (value: long, index: int, array: FixedArray<long>) => boolean): number {
+export function findIndex(self: FixedArray<long>, predicate: (value: long, index: int, array: FixedArray<long>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
         if (predicate(self[i], i, self)) {
             return i;
@@ -4045,7 +4045,7 @@ export function some(self: FixedArray<long>, predicate: (value: long, index: int
  *
  * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: FixedArray<long>, predicate: (element: long, index: int, array: FixedArray<long>) => boolean): number {
+export function findLastIndex(self: FixedArray<long>, predicate: (element: long, index: int, array: FixedArray<long>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
         if (predicate(self[i], i, self)) {
             return i
@@ -4886,7 +4886,7 @@ export function find(self: FixedArray<float>, predicate: (value: float, index: i
     if (res == -1) {
         return undefined
     }
-    return self[res.toInt()];
+    return self[res];
 }
 
 /**
@@ -4899,7 +4899,7 @@ export function find(self: FixedArray<float>, predicate: (value: float, index: i
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: FixedArray<float>, predicate: (value: float, index: int, array: FixedArray<float>) => boolean): number {
+export function findIndex(self: FixedArray<float>, predicate: (value: float, index: int, array: FixedArray<float>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
         if (predicate(self[i], i, self)) {
             return i;
@@ -4971,7 +4971,7 @@ export function some(self: FixedArray<float>, predicate: (value: float, index: i
  *
  * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: FixedArray<float>, predicate: (element: float, index: int, array: FixedArray<float>) => boolean): number {
+export function findLastIndex(self: FixedArray<float>, predicate: (element: float, index: int, array: FixedArray<float>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
         if (predicate(self[i], i, self)) {
             return i
@@ -5820,7 +5820,7 @@ export function find(self: FixedArray<double>, predicate: (value: double, index:
     if (res == -1) {
         return undefined
     }
-    return self[res.toInt()];
+    return self[res];
 }
 
 /**
@@ -5833,7 +5833,7 @@ export function find(self: FixedArray<double>, predicate: (value: double, index:
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: FixedArray<double>, predicate: (value: double, index: int, array: FixedArray<double>) => boolean): number {
+export function findIndex(self: FixedArray<double>, predicate: (value: double, index: int, array: FixedArray<double>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
         if (predicate(self[i], i, self)) {
             return i;
@@ -5905,7 +5905,7 @@ export function some(self: FixedArray<double>, predicate: (value: double, index:
  *
  * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: FixedArray<double>, predicate: (element: double, index: int, array: FixedArray<double>) => boolean): number {
+export function findLastIndex(self: FixedArray<double>, predicate: (element: double, index: int, array: FixedArray<double>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
         if (predicate(self[i], i, self)) {
             return i
@@ -6754,7 +6754,7 @@ export function find(self: FixedArray<char>, predicate: (value: char, index: int
     if (res == -1) {
         return undefined
     }
-    return self[res.toInt()];
+    return self[res];
 }
 
 /**
@@ -6767,7 +6767,7 @@ export function find(self: FixedArray<char>, predicate: (value: char, index: int
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: FixedArray<char>, predicate: (value: char, index: int, array: FixedArray<char>) => boolean): number {
+export function findIndex(self: FixedArray<char>, predicate: (value: char, index: int, array: FixedArray<char>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
         if (predicate(self[i], i, self)) {
             return i;
@@ -6839,7 +6839,7 @@ export function some(self: FixedArray<char>, predicate: (value: char, index: int
  *
  * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: FixedArray<char>, predicate: (element: char, index: int, array: FixedArray<char>) => boolean): number {
+export function findLastIndex(self: FixedArray<char>, predicate: (element: char, index: int, array: FixedArray<char>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
         if (predicate(self[i], i, self)) {
             return i

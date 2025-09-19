@@ -248,7 +248,7 @@ function testSort(): boolean {
 }
 
 function testSplice(): boolean {
-    return arraySplice1.splice(1).toString() === "2,3,4" && arraySplice3.splice(1.0, 1, 2).toString() === "2"  && arraySplice4.splice(1.0, 2, 6, 7).toString() === "2,3"
+    return arraySplice1.splice(1).toString() === "2,3,4" && arraySplice3.splice(1, 1, 2).toString() === "2"  && arraySplice4.splice(1, 2, 6, 7).toString() === "2,3"
 }
 
 function testToLocaleString(): boolean {

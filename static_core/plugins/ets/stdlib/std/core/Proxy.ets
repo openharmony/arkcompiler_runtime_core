@@ -864,39 +864,29 @@ abstract class ArrayProxy<T> extends Array<T> {
         throw new AssertionError("Array.concat() unexpected result type: " + Type.of(result))
     }
 
-    override pushArray(...items: Array<T>): number {
+    override pushArray(...items: Array<T>): int {
         const result = this.handler.invoke(this.target, ArrayProxy.PUSH_METHOD, [items])
-        if (result instanceof Number) {
+        if (result instanceof Int) {
             return result
         }
 
         throw new AssertionError("Array.push() unexpected result type: " + Type.of(result))
     }
 
-    override pushOne(item: T): number {
+    override pushOne(item: T): int {
         const result = this.handler.invoke(this.target, ArrayProxy.PUSH_SINGLE_METHOD, [item])
-        if (result instanceof Number) {
+        if (result instanceof Int) {
             return result
         }
 
         throw new AssertionError("Array.push() single push unexpected result type: " + Type.of(result))
     }
 
-    override pushECMA(...items: Array<T>): number {
+    override pushECMA(...items: Array<T>): int {
         return this.target.pushECMA(...items)
     }
 
-    override splice(start: number, deleteCount: Number | undefined, ...items: T[]): Array<T> {
-        const handler = this.handler
-        const result = handler.invoke(this.target, ArrayProxy.SPLICE_METHOD_NUM_OBJ_ARR, [start, deleteCount, items])
-        if (result instanceof Array) {
-            return result as Array<T>
-        }
-
-        throw new AssertionError("Array.splice(int, int, T[]) unexpected result type: " + Type.of(result))
-    }
-
-    override splice(start: int, deleteCount: int, ...items: T[]): Array<T> {
+    override splice(start: int, deleteCount: int | undefined, ...items: T[]): Array<T> {
         const handler = this.handler
         const result = handler.invoke(this.target, ArrayProxy.SPLICE_METHOD_INT_INT_ARR, [start, deleteCount, items])
         if (result instanceof Array) {
@@ -904,15 +894,6 @@ abstract class ArrayProxy<T> extends Array<T> {
         }
 
         throw new AssertionError("Array.splice(int, int, T[]) unexpected result type: " + Type.of(result))
-    }
-
-    override splice(start: number): Array<T> {
-        const result = this.handler.invoke(this.target, ArrayProxy.SPLICE_METHOD_NUM, [start])
-        if (result instanceof Array) {
-            return result as Array<T>
-        }
-
-        throw new AssertionError("Array.splice(number) unexpected result type: " + Type.of(result))
     }
 
     override splice(start: int): Array<T> {
@@ -960,9 +941,9 @@ abstract class ArrayProxy<T> extends Array<T> {
         throw new AssertionError("Array.toSpliced(int) unexpected result type: " + Type.of(result))
     }
 
-    override unshift(...items: T[]): number {
+    override unshift(...items: T[]): int {
         const result = this.handler.invoke(this.target, ArrayProxy.UNSHIFT_METHOD, [items])
-        if (result instanceof Number) {
+        if (result instanceof Int) {
             return result
         }
 

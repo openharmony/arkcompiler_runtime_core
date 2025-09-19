@@ -70,11 +70,11 @@ class ReadonlyArrayProxy<T> implements ReadonlyArray<T> {
     	return this.target.findLast(predicate)
     }
 
-    override findIndex(predicate: (value: T, index: int, obj: ReadonlyArray<T>) => boolean): number {
+    override findIndex(predicate: (value: T, index: int, obj: ReadonlyArray<T>) => boolean): int {
     	return this.target.findIndex(predicate)
     }
 
-    override findLastIndex(predicate: (value: T, index: int, obj: ReadonlyArray<T>) => boolean): number {
+    override findLastIndex(predicate: (value: T, index: int, obj: ReadonlyArray<T>) => boolean): int {
     	return this.target.findLastIndex(predicate)
     }
 

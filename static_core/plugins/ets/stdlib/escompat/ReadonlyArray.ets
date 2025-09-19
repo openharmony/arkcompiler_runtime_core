@@ -31,9 +31,9 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
 
     findLast(predicate: (value: T, index: int, obj: ReadonlyArray<T>) => boolean): T | undefined;
 
-    findIndex(predicate: (value: T, index: int, obj: ReadonlyArray<T>) => boolean): number;
+    findIndex(predicate: (value: T, index: int, obj: ReadonlyArray<T>) => boolean): int;
 
-    findLastIndex(predicate: (value: T, index: int, obj: ReadonlyArray<T>) => boolean): number;
+    findLastIndex(predicate: (value: T, index: int, obj: ReadonlyArray<T>) => boolean): int;
 
     // NOTE(ivan-tyulyandin): TBD, FlatArray is non-subset type
     // flat<A, D extends number = 1>(

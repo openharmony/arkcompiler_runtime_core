@@ -646,7 +646,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns new length
      */
-    public pushArray(...val: T[]): number {
+    public pushArray(...val: T[]): int {
         this.ensureUnusedCapacity(val.length.toInt())
         for (let i = 0; i < val.length; i++) {
             this.buffer[this.actualLength + i] = val[i]
@@ -664,7 +664,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns new length
      */
-    public pushOne(val: T): number {
+    public pushOne(val: T): int {
         this.ensureUnusedCapacity(1)
         this.buffer[this.actualLength] = val
         this.actualLength += 1
@@ -677,7 +677,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns new length
      */
-    public pushECMA(...val: T[]): number {
+    public pushECMA(...val: T[]): int {
         this.ensureUnusedCapacity(val.length.toInt())
         for (let i = 0; i < val.length; i++) {
             this.buffer[this.actualLength + i] = val[i]
@@ -706,21 +706,10 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns an Array with deleted elements
      */
-    public splice(start: number, delete: Number | undefined, ...items: T[]): Array<T> {
-        return this.splice(start.toInt(), asIntOrDefault(delete, 0), ...items)
-    }
-
-    /**
-     * Changes the contents of an array by removing or replacing existing elements
-     * and/or adding new elements in place.
-     *
-     * @param start index
-     *
-     * @param delete number of items after start index
-     *
-     * @returns an Array with deleted elements
-     */
-    public splice(start: int, delete: int, ...items: T[]): Array<T> {
+    public splice(start: int, delete: int | undefined, ...items: T[]): Array<T> {
+        if (delete === undefined) {
+            delete = 0
+        }
         start = normalizeIndex(start, this.actualLength)
         if (delete < 0) {
             delete = 0
@@ -758,18 +747,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             this.$_set_unsafe(start + i, items.$_get_unsafe(i))
         }
         return ret
-    }
-
-    /**
-     * Changes the contents of an array by removing or replacing existing elements
-     * and/or adding new elements in place.
-     *
-     * @param start index
-     *
-     * @returns an Array with deleted elements from start to the last element of the current instance
-     */
-    public splice(start: number): Array<T> {
-        return this.splice(start.toInt())
     }
 
     /**
@@ -823,7 +800,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns new length of the Array
      */
-    public unshift(...values: T[]): number {
+    public unshift(...values: T[]): int {
         if (this.buffer.length <= values.actualLength + this.actualLength) {
             let buffer: FixedArray<Any> = new Any[this.buffer.length * 2 + values.actualLength]
             this.unshiftInternal(buffer, values)
@@ -1154,7 +1131,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         if (res == -1) {
             return undefined
         }
-        return this.$_get_unsafe(res.toInt());
+        return this.$_get_unsafe(res);
     }
 
     /**
@@ -1167,7 +1144,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns found element index or -1 otherwise
      */
-    public override findIndex(predicate: (value: T, index: int, array: Array<T>) => boolean): number {
+    public override findIndex(predicate: (value: T, index: int, array: Array<T>) => boolean): int {
         for (let i = 0; i < this.actualLength; i++) {
             if (predicate(this.$_get_unsafe(i), i, this)) {
                 return i;
@@ -1240,7 +1217,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns index of first element satisfying to predicate, -1 if no such element
      */
-    public override findLastIndex(predicate: (element: T, index: int, array: Array<T>) => boolean): number {
+    public override findLastIndex(predicate: (element: T, index: int, array: Array<T>) => boolean): int {
         for (let i = this.actualLength - 1; i >= 0; i--) {
             if (predicate(this.$_get_unsafe(i), i, this)) {
                 return i

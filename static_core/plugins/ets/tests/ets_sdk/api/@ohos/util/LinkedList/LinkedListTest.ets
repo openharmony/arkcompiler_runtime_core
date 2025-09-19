@@ -46,13 +46,13 @@ function testLinkedListBasicCRUD() {
 
     list.removeByIndex(9);
 
-    testArray.splice(9.0, 1.0);
+    testArray.splice(9, 1);
     for (let i: int = 0; i < testArray.length; i++) {
         arktest.assertEQ(list.get(i), testArray[i]);
     }
 
     const removeRes = list.remove(8);
-    testArray.splice(8.0, 1.0);
+    testArray.splice(8, 1);
     for (let i: int = 0; i < testArray.length; i++) {
         arktest.assertEQ(list.get(i), testArray[i]);
     }
@@ -61,7 +61,7 @@ function testLinkedListBasicCRUD() {
     arktest.assertEQ(list.getLast(), 7);
 
     list.insert(3, 999);
-    testArray.splice(3.0, 0.0, 999);
+    testArray.splice(3, 0, 999);
     for (let i: int = 0; i < testArray.length; i++) {
         arktest.assertEQ(list.get(i), testArray[i]);
     }

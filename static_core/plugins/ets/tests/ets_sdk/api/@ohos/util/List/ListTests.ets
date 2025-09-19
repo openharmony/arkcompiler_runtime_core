@@ -106,13 +106,13 @@ function testBasicOperationsAndMethods() {
     arktest.assertEQ(list.getIndexOf(5), 5);
 
     list.removeByIndex(10);
-    testArray.splice(10.0, 1.0);
+    testArray.splice(10, 1);
     for (let i: int = 0; i < testArray.length; i++) {
         arktest.assertEQ(list[i], testArray[i]);
     }
 
     list.remove(9);
-    testArray.splice(9.0, 1.0);
+    testArray.splice(9, 1);
     for (let i: int = 0; i < testArray.length; i++) {
         arktest.assertEQ(list[i], testArray[i]);
         testArray[i] = testArray[i] * 2;
@@ -128,7 +128,7 @@ function testBasicOperationsAndMethods() {
     arktest.assertEQ(list.getFirst(), 0);
     arktest.assertEQ(list.getLast(), 16);
     list.insert(999, 3);
-    testArray.splice(3.0, 0.0, 999);
+    testArray.splice(3, 0, 999);
     for (let i: int = 0; i < testArray.length; i++) {
         arktest.assertEQ(list[i], testArray[i]);
     }
