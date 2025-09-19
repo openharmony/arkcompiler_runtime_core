@@ -204,7 +204,7 @@ function testDirectTransfer(): void {
     let buffer = new ArrayBuffer(100);
     testNoSeamlessForClass(testDirectTransferArrayBuffer, buffer, 'Lescompat/ArrayBuffer;');
     testNoSeamlessForClass(testDirectTransferTypedArray, new Uint8Array(buffer), 'Lescompat/Uint8Array;');
-    testNoSeamlessForClass(testDirectTransferDataView, new DataView(buffer), 'Lescompat/DataView;');
+    testNoSeamlessForClass(testDirectTransferDataView, new DataView(buffer), 'Lstd/core/DataView;');
 }
 
 function main(): void {

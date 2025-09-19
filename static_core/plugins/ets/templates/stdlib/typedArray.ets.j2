@@ -915,10 +915,10 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         iteratorForEach<{{elementCompat}}>(iter, (x: {{elementCompat}}): void => {
             if (index[0] + 1 > temp.lengthInt) {
                 // NOTE (templin.konstantin): Progressive reallocation
-                const curLength = (temp.buffer as Buffer).getByteLength()
+                const curLength = temp.buffer.getByteLength()
                 const tb = new ArrayBuffer(curLength * 2)
                 for (let i = 0; i < curLength; ++i) {
-                    tb.set(i, (temp.buffer as Buffer).at(i))
+                    tb.set(i, temp.buffer.at(i))
                 }
                 temp = new {{N}}Array(tb)
             }

@@ -15,17 +15,6 @@
 
 package escompat;
 
-/**
- * Either ArrayBuffer
- */
-// NOTE (kprokopenko): make abstract after abstract overloads get to work
-abstract class Buffer {
-    abstract getByteLength(): int
-    abstract at(i: int): byte
-    abstract set(i: int, b: byte)
-    // NOTE (egor-porsev): should be slice(int, int) without an extra 'sliceInternal' method. This is a workaround for #13402
-    abstract sliceInternal(begin: int, end: int): Buffer
-}
 
 export interface ArrayBufferView {
     /**
@@ -47,7 +36,7 @@ export interface ArrayBufferView {
 /**
  * JS ArrayBuffer API-compatible class
  */
-export class ArrayBuffer extends Buffer
+export class ArrayBuffer
 {
     public overload constructor { fromInt, fromNumber }
 
@@ -109,7 +98,7 @@ export class ArrayBuffer extends Buffer
             || obj instanceof BigUint64Array)
     }
 
-    override sliceInternal(begin: int, end: int): Buffer {
+    sliceInternal(begin: int, end: int): ArrayBuffer {
         const byteLength = this.getByteLength()
 
         const startIndex = normalizeIndex(begin, byteLength)
@@ -200,7 +189,7 @@ export class ArrayBuffer extends Buffer
         }
     }
 
-    public override getByteLength(): int {
+    public getByteLength(): int {
         return this._byteLength
     }
 

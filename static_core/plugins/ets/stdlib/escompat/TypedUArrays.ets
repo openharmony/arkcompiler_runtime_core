@@ -722,10 +722,10 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
         iteratorForEach<number>(arrayLike.$_iterator(), (x: number): void => {
             if (index[0] + 1 > temp.lengthInt) {
                 // NOTE (templin.konstantin): Progressive reallocation
-                const curLength = (temp.buffer as Buffer).getByteLength()
+                const curLength = temp.buffer.getByteLength()
                 const tb = new ArrayBuffer(curLength * 2)
                 for (let i = 0; i < curLength; ++i) {
-                    tb.set(i, (temp.buffer as Buffer).at(i))
+                    tb.set(i, temp.buffer.at(i))
                 }
                 temp = new Uint8ClampedArray(tb)
             }
@@ -2243,10 +2243,10 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
         iteratorForEach<number>(arrayLike.$_iterator(), (x: number): void => {
             if (index[0] + 1 > temp.lengthInt) {
                 // NOTE (templin.konstantin): Progressive reallocation
-                const curLength = (temp.buffer as Buffer).getByteLength()
+                const curLength = temp.buffer.getByteLength()
                 const tb = new ArrayBuffer(curLength * 2)
                 for (let i = 0; i < curLength; ++i) {
-                    tb.set(i, (temp.buffer as Buffer).at(i))
+                    tb.set(i, temp.buffer.at(i))
                 }
                 temp = new Uint8Array(tb)
             }
@@ -3748,10 +3748,10 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
         iteratorForEach<number>(arrayLike.$_iterator(), (x: number): void => {
             if (index[0] + 1 > temp.lengthInt) {
                 // NOTE (templin.konstantin): Progressive reallocation
-                const curLength = (temp.buffer as Buffer).getByteLength()
+                const curLength = temp.buffer.getByteLength()
                 const tb = new ArrayBuffer(curLength * 2)
                 for (let i = 0; i < curLength; ++i) {
-                    tb.set(i, (temp.buffer as Buffer).at(i))
+                    tb.set(i, temp.buffer.at(i))
                 }
                 temp = new Uint16Array(tb)
             }
@@ -5287,10 +5287,10 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
         iteratorForEach<number>(arrayLike.$_iterator(), (x: number): void => {
             if (index[0] + 1 > temp.lengthInt) {
                 // NOTE (templin.konstantin): Progressive reallocation
-                const curLength = (temp.buffer as Buffer).getByteLength()
+                const curLength = temp.buffer.getByteLength()
                 const tb = new ArrayBuffer(curLength * 2)
                 for (let i = 0; i < curLength; ++i) {
-                    tb.set(i, (temp.buffer as Buffer).at(i))
+                    tb.set(i, temp.buffer.at(i))
                 }
                 temp = new Uint32Array(tb)
             }
@@ -6815,10 +6815,10 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
         iteratorForEach<BigInt>(arrayLike.$_iterator(), (x: BigInt): void => {
             if (index[0] + 1 > temp.lengthInt) {
                 // NOTE (templin.konstantin): Progressive reallocation
-                const curLength = (temp.buffer as Buffer).getByteLength()
+                const curLength = temp.buffer.getByteLength()
                 const tb = new ArrayBuffer(curLength * 2)
                 for (let i = 0; i < curLength; ++i) {
-                    tb.set(i, (temp.buffer as Buffer).at(i))
+                    tb.set(i, temp.buffer.at(i))
                 }
                 temp = new BigUint64Array(tb)
             }
