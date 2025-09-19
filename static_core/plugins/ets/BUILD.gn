@@ -304,6 +304,11 @@ if (with_stdlib) {
         "$root_build_dir/ohos-sdk/windows/ets/ets1.2/build-tools/ets2panda/bin/arktsconfig.json",
         json_relative_path_array,
         "json")
+    write_file(
+        "$root_build_dir/ohos-sdk/mac/ets/ets1.2/build-tools/ets2panda/bin/arktsconfig.json",
+        json_relative_path_array,
+        "json")
+    
     if (defined(ohos_indep_compiler_enable) && ohos_indep_compiler_enable) {
       write_file(
           "$root_build_dir/clang_x64/obj/binarys/arkcompiler/ets_frontend/innerapis/ets2panda/clang_x64/libs/arktsconfig.json",
@@ -339,6 +344,18 @@ if (with_stdlib) {
         sources = [ "$target_gen_dir/etsstdlib.abc" ]
       }
       outputs = [ "$root_build_dir/ohos-sdk/windows/ets/ets1.2/build-tools/ets2panda/lib/etsstdlib.abc" ]
+    }
+  }
+
+  if (is_mac) {
+    copy("etsstdlib_copy_mac") {
+      deps = [ ":etsstdlib" ]
+      if (ark_static_standalone_build) {
+        sources = [ "$root_build_dir/plugins/ets/etsstdlib.abc" ]
+      } else {
+        sources = [ "$target_gen_dir/etsstdlib.abc" ]
+      }
+      outputs = [ "$root_build_dir/ohos-sdk/mac/ets/ets1.2/build-tools/ets2panda/lib/etsstdlib.abc" ]
     }
   }
 
