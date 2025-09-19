@@ -47,7 +47,7 @@ public:
         }
     }
 
-    ~FuzzTestEngine()
+    virtual ~FuzzTestEngine()
     {
         env_ = nullptr;
         if (vm_ != nullptr) {
