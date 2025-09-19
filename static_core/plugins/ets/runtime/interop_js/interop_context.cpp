@@ -162,7 +162,9 @@ static PandaUniquePtr<SingleEventPoster> CreateExtSchedulingPoster()
         if (w->GetRunnablesCount(Coroutine::Type::MUTATOR) > 0) {
             coro->GetManager()->Schedule();
         }
-        w->TriggerSchedulerExternally(coro);
+        if (!w->InExclusiveMode()) {
+            w->TriggerSchedulerExternally(coro);
+        }
     };
     return MakePandaUnique<SingleEventPoster>(std::move(schedulingFunc));
 }

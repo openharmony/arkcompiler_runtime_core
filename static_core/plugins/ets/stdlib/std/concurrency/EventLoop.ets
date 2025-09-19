@@ -73,7 +73,7 @@ class EventLoop {
     }
 
     private updateTimers() {
-        EventLoop.timerTable.removeClearedTimers(this.timerQueue);
+        this.timerQueue = EventLoop.timerTable.removeClearedTimers(this.timerQueue);
         let currentTime = Date.now();
         this.timerQueue.forEach((timer: Timer) => { timer.updateDelay(currentTime); });
     }
@@ -226,16 +226,30 @@ class TimerTable {
         });
     }
 
-    public removeClearedTimers(timerQueue: Array<Timer>) {
+    public removeClearedTimers(timerQueue: Array<Timer>): Array<Timer> {
+        let updatedTimers: Array<Timer> | undefined = undefined;
+        let startIdx = 0;
         ConcurrencyHelpers.spinlockGuard(this.tableSpinlock, () => {
-            let queueLen = timerQueue.length;
-            for (let i = 0; i < queueLen; ++i) {
-                let timer = timerQueue.shift()!;
-                if (this.timers.has(timer.getId())) {
-                    timerQueue.push(timer);
+            for (let idx = 0; idx < timerQueue.length; ++idx) {
+                if (!this.timers.has(timerQueue[idx].getId())) {
+                    if (updatedTimers === undefined) {
+                        updatedTimers = new Array<Timer>();
+                    }
+                    // copy from start idx to removed timer
+                    for (let subIdx = startIdx; subIdx < idx; ++subIdx) {
+                        updatedTimers!.push(timerQueue[subIdx]);
+                    }
+                    startIdx = idx + 1;
                 }
             }
         });
+        if (updatedTimers !== undefined) {
+            // copy from start idx to the end
+            for (let subIdx = startIdx; subIdx < timerQueue.length; ++subIdx) {
+                updatedTimers!.push(timerQueue[subIdx]);
+            }
+        }
+        return updatedTimers !== undefined ? updatedTimers! : timerQueue;
     }
 
     private nextFreeId: TimerId;
