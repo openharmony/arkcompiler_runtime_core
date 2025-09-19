@@ -23,9 +23,6 @@ ets-common-tests/taskpool/group_tasks.ets
 ets-common-tests/taskpool/long_task.ets
 ets-common-tests/taskpool/seqrunner_tasks.ets
 
-#30195
-ets-common-tests/intrinsics/array_reverse.ets
-
 # 24986
 ets-common-tests/generics/generics_methods.ets
 ets-common-tests/intrinsics/bigint64array_sort.ets

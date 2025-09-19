@@ -64,7 +64,7 @@ function test_long_len_array_reverse() {
     let orig_exp = new Array<number>();
     let rev_exp = new Array<number>();
     // SWAPPED_BETWEEN_SAFEPOINT_THRESHOLD = 50000UL;
-    let len = 100001;
+    let len = 50001;
     for (let i: number = 0; i < len; i++) {
       inp.push(i);
       orig_exp.push(i);
