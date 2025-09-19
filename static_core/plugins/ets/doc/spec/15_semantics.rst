@@ -246,7 +246,7 @@ Specifics of String Operator Contexts
 .. meta:
     frontend_status: Done
 
-If one operand of the binary operator ‘`+`’ is of type ``string``, then the
+If one operand of the binary operator ``'+'`` is of type ``string``, then the
 string conversion applies to another non-string operand to convert it to string
 (see :ref:`String Concatenation` and :ref:`String Operator Contexts`).
 
@@ -320,7 +320,7 @@ The semantics is represented in the example below:
 
     new C(1) // compile-time error
 
-The type of '``1``' in the example above is inferred as ``int`` (default type of
+The type of ``'1'`` in the example above is inferred as ``int`` (default type of
 an integer literal). The expression is considered ``new C<int>(1)`` and causes
 a :index:`compile-time error` because ``int`` is not a subtype of ``number``
 (type parameter constraint).
@@ -394,7 +394,7 @@ More formally speaking, the set is obtained by reflexive and transitive
 closure over the direct supertype relation.
 
 The terms *subclass*, *subinterface*, *superclass*, and *superinterface* are
-used in the following sections as synonyms for *subtype* and *supertype* 
+used in the following sections as synonyms for *subtype* and *supertype*
 when considering non-generic classes, generic classes, or interface types.
 
 If a relationship of two types is not described in one of the following
@@ -548,12 +548,13 @@ conditions is true:
 
       // Using subinterface of Object
       class A implements S {}
-      let s: S = new A; 
+      let s: S = new A;
       foo(s)
 
 .. index::
    subtype
-   subclasssubinterface
+   subclass
+   subinterface
    supertype
    superclass
    superinterface
@@ -590,20 +591,20 @@ true:
 
       // T<U, V>  is direct superclass of C<U,V>
       // T<U, V> >: C<U, V>
-   
+
       class T<U, V> {
-         foo(p: U|V): U|V { return p }  
+         foo(p: U|V): U|V { return p }
       }
 
       class C<U, V> extends T<U, V> {
-         bar(u: U): U { return u }         
+         bar(u: U): U { return u }
       }
 
 
       // OK, exact match
       let t: T<int, boolean>  = new T<int, boolean>
       let c: C<int, boolean> = new C<int, boolean>
-    
+
 
       // OK, assigning to direct superclass
       t =  new C<int, boolean>
@@ -627,12 +628,12 @@ true:
       }
 
       // J<U, V> <: I<U, V>
-      // since J extebds I 
+      // since J extends I
       interface J<U, V> extends I<U, V>
       {
          foo(u: U): U
          bar(v: V): V
-         
+
          foo1(p: U|V): U|V
       }
 
@@ -652,7 +653,7 @@ true:
         foo1(p: U|V): U|V { return p }
       }
 
-      let i: I<int, boolean> 
+      let i: I<int, boolean>
       let j: J<int, boolean>
       let x = new X<int, boolean>
       let y = new Y<int, boolean>
@@ -675,8 +676,8 @@ true:
    .. code-block:: typescript
       :linenos:
 
-      // Object is direct superclass and for C<U,V> 
-      // and direct superinrerface for I<U,V>
+      // Object is direct superclass and for C<U,V>
+      // and direct superinterface for I<U,V>
       //
       class C<U, V> {
          foo(u: U): U { return u }
@@ -715,16 +716,14 @@ constraint of that type parameter.
 If type parameters of a generic class or an interface have a variance specified
 (see :ref:`Type Parameter Variance`), then the subtyping for instantiations of
 the class or interface is determined in accordance with the variance of the
-appropriate type parameter. For example,  with generic class 
-``G<in T1,out T2>`` the ``G<S,T> <: G<U, V>``
-when ``S>:U`` and ``T<:V``
-
-The following code illustrates this:
+appropriate type parameter. For example, if a generic class ``G<in T1,out T2>``
+is defined, ``S>:U`` and ``T<:V``, then ``G<S,T> <: G<U, V>``.
+It is represented by the following code:
 
 .. code-block:: typescript
    :linenos:
 
-   // Subtyping illustration for generic with parameter variance
+   // Subtyping illustration for a generic with parameter variance
 
    // U1 <: U0
    class U0 {}
@@ -876,20 +875,56 @@ type ``T`` if each ``U``:sub:`i` is a subtype of ``T``.
     u = 1    // compile-time error, type 'int' is not a subtype of 'number'
     u = true // compile-time error
 
-**Note**. If union type normalization produces a single type, then this type
-is used instead of the initial set of union types. This concept is represented
-in the example below:
-
 .. index::
    union type
    union type normalization
    subtype
    number type
 
-.. code-block:: typescript
-   :linenos:
+.. note::
+   If union type normalization produces a single type, then this type is used
+   instead of the initial set of union types. This concept is represented
+   in the example below:
 
-    let u: "abc" | "cde" | string // type of 'u' is string
+   .. code-block:: typescript
+      :linenos:
+
+       let u: "abc" | "cde" | string // type of 'u' is string
+
+.. note::
+   A case of two union types is clarified as follows: union type
+   ``U2``(``U2``:sub:`1` ``| ... | U2``:sub:`n`) is a subtype of union type
+   ``U1`` (``U1``:sub:`1` ``| ... | U1``:sub:`m`) if Step 1 applies first,
+   followed by Step 2 applied to every type of ``U2``.
+
+
+   .. code-block:: typescript
+      :linenos:
+
+       class T1 {}
+       class T2 {}
+       class T3 extends T1 {}  // T3 <: T1
+       class T4 extends T2 {}  // T4 <: T2
+       class T5 {}
+
+       type U1 = T1 | T2
+       type U2 = T3 | T4 | T5
+
+       function foo (u1: U1, u2: U2) {
+           u1 = u2
+           // step 1. U2 to be a subtype of U1 iff T3 <: U1 and T4 <: U1 and T5 <: U1
+           // step 2.
+           //         T3 to be a subtype of T1 or T2 - T1 true
+           //         T4 to be a subtype of T1 or T2 - T2 true
+           //         T5 to be a subtype of T1 or T2 - false for both
+           // compile-time error as a result
+       }
+
+
+.. index::
+   union type
+   subtype
+   supertype
 
 |
 
@@ -911,8 +946,9 @@ following conditions are met:
 -  Parameter type of ``SP``:sub:`i` for each ``i`` :math:`\leq` ``m`` is a
    subtype of parameter type of ``FP``:sub:`i` (contravariance),
    and ``SP``:sub:`i` is:
-   -  Rest parameter if ``FP``:sub:`i` is a rest parameter;
-   -  Optional parameter if ``FP``:sub:`i` is an optional parameter.
+
+   -  Rest parameter where ``FP``:sub:`i` is a rest parameter;
+   -  Optional parameter where ``FP``:sub:`i` is an optional parameter.
 
 -  Type ``FR`` is a subtype of ``SR`` (covariance).
 
@@ -980,8 +1016,9 @@ following conditions are met:
 Subtyping for Fixed-Size Array Types
 ====================================
 
-Subtyping for fixed-size array types is based on subtyping of their element
-types. It is formally defined as follows:
+If a fixed-size array contains elements of reference types (see
+:ref:`Reference Types`), then the subtyping of elements is based on the
+subtyping of element types. It is formally described as follows:
 
 ``FixedSize<B> <: FixedSize<A>`` if ``B <: A``.
 
@@ -990,16 +1027,15 @@ The situation is represented in the following example:
 .. code-block:: typescript
    :linenos:
 
-    let x: FixedArray<number> = [1, 2, 3]
-    let y: FixedArray<Object> = x // ok, as number <: Object
+    let x: FixedArray<string> = ["aa", "bb", "cc"]
+    let y: FixedArray<Object> = x // ok, as string <: Object
     x = y // compile-time error
 
-Such subtyping allows array assignments that can lead to ``ArrayStoreError``
-at runtime if a value of a type which is not a subtype of an element type of
-one array is put into that array by using the subtyping of another array
-element type.
-Type safety is ensured by runtime checks performed by the runtime system as
-represented in the example below:
+The subtyping allows array assignments that can cause an ``ArrayStoreError``
+at runtime if a value of a type that is not a subtype of the element type of
+one array is put into that array by using a subtype of the element type of
+another array. Type safety is ensured by runtime checks performed by the runtime
+system as represented in the example below:
 
 .. index::
    type
@@ -1103,23 +1139,25 @@ Identity relation for types ``A`` and ``B`` is defined as follows:
 - Types ``A`` and ``B`` are identical if ``A`` is a subtype of ``B`` (``A<:B``),
   and ``B`` is  at the same time a subtype of ``A`` (``A:>B``).
 
-**Note.** :ref:`Type Alias Declaration` creates no new type but only a new
-name for the existing type. An alias is indistinguishable from its base type.
+.. note::
+   :ref:`Type Alias Declaration` creates no new type but only a new name for
+   the existing type. An alias is indistinguishable from its base type.
 
-**Note.** If a generic class or an interface has a type parameter ``T`` while
-its method has its own type parameter ``T``, then the two types are different
-and unrelated.
+.. note::
+   If a generic class or an interface has a type parameter ``T`` while its
+   method has its own type parameter ``T``, then the two types are different
+   and unrelated.
 
-.. code-block:: typescript
-   :linenos:
+   .. code-block:: typescript
+      :linenos:
 
-   class A<T> {
-      data: T
-      constructor (p: T) { this.data = p } // OK, as here 'T' is a class type parameter
-      method <T>(p: T) {
-          this.data = p // compile-time error as 'T' of the class is different from 'T' of the method
+      class A<T> {
+         data: T
+         constructor (p: T) { this.data = p } // OK, as here 'T' is a class type parameter
+         method <T>(p: T) {
+             this.data = p // compile-time error as 'T' of the class is different from 'T' of the method
+         }
       }
-   }
 
 
 .. index::
@@ -1148,10 +1186,6 @@ Assignability
     frontend_status: Done
 
 Type ``T``:sub:`1` is assignable to type ``T``:sub:`2` if:
-
--  ``T``:sub:`1` is type ``never``;
-
--  ``T``:sub:`1` is identical to ``T``:sub:`2` (see :ref:`Type Identity`);
 
 -  ``T``:sub:`1` is a subtype of ``T``:sub:`2` (see :ref:`Subtyping`); or
 
@@ -1294,7 +1328,7 @@ On the contrary, the following code causes compile-time errors:
       override method_one(p: Derived): Base {}
 
       // contravariance for the return type is prohibited
-      override method_tree(p: Derived): Base {}
+      override method_three(p: Derived): Base {}
    }
 
 |
@@ -1372,14 +1406,14 @@ right, starting from ``arg_pos`` = 1 and ``par_pos`` = 1:
    rest parameter
    check
 
-Checks are represented in the examples below:
+The checks are represented in the examples below:
 
 .. code-block:: typescript
    :linenos:
 
-    call (...[1, "str", true], ...[ ...123])  // Initial call form
-
-    call (1, "str", true, 123) // To be unfolded into the form with no spread expressions
+    function call (...p: Object[]) {}
+    call (...[1, "str", true], ...[ 123])  // Initial call form
+    call (1, "str", true, 123)             // To be unfolded into the form with no spread expressions
 
 
 
@@ -1485,7 +1519,7 @@ Type Inference for Numeric Literals
 .. meta:
     frontend_status: Partly
 
-The type of a numeric literal (see :ref:`Numeric Literals`) is firstly 
+The type of a numeric literal (see :ref:`Numeric Literals`) is firstly
 inferred from the context, if the context allows it.
 The following contexts allow inference:
 
@@ -1517,17 +1551,20 @@ Type inference is used only where the *target type* is one of the two cases:
 
 **Case 1: Target type is a numeric type**
 
-Where the *target type* is numeric, the type of a literal is inferred to the
+Where a *target type* is numeric, the type of a literal is inferred from the
 *target type* if one of following conditions is met:
 
-#. *Target type* is equal to or larger then the literal default type;
+#. *Target type* is equal to or larger than the literal default type;
 
 #. Literal is an *integer literal* with the value that fitting into the range
    of the *target type*; or
 
-#. Literal is an *floating-point literal* with the value fitting into the
-   range of the *target type* that is ``float``.
+#. Literal is a *floating-point literal* without a *floating point suffix* but
+   with a value that fits into the range of the *target type* that is ``float``.
 
+.. note::
+   A *floating-point suffix* if present declares a ``floating-point literal``,
+   and no type inference occurs.
 
 If none of the conditions above is met means that the *target type* is not a
 valid type for the literal, and a :index:`compile-time error` occurs.
@@ -1540,10 +1577,11 @@ Type inference for a numeric *target type* is represented in the examples below:
 .. code-block:: typescript
    :linenos:
 
-    let l: long = 1     // ok, target type is larger then literal default type
+    let l: long = 1     // ok, target type is larger than literal default type
     let b: byte = 127   // ok, integer literal value fits type 'byte'
     let f: float = 3.14 // ok, floating-point value fits type 'float'
-    
+    let g: float = 123f // ok, literal type set explicitly to 'float'
+
     l = 1.0    // compile-time error, 'double' cannot be assigned to 'long'
     b = 128    // compile-time error, value is out of range
     f = 3.4e39 // compile-time error, value is out of range
@@ -1556,52 +1594,62 @@ i.e., a supertype of a numeric type:
    :linenos:
 
     let x: Object | string = 1 // ok, instance of type 'int' is assigned to 'x'
-    
+
     x = 1.0 // ok, instance of type 'double' is assigned to 'x'
 
 **Case 2: Target type is a union type containing at least one numeric type**
 
-If the *target type* is a union type
+In the case the *target type* is a union type
 (``N``:sub:`1` ``| ... | N``:sub:`k` ``| ... | U``:sub:`n`), where ``k``
-:math:`\geq` ``1`` and ``N``:sub:`i` is a numeric type, each ``N``:sub:`i`
-is considered the *target type*. Then type inference for numeric target type is
-tried, and if:
+:math:`\geq` ``1`` and ``N``:sub:`i` is a numeric type, the inferred literal
+type is determined as follows:
 
-#. No ``N``:sub:`i` is a valid type for the literal, then the default literal
-   type is used;
+#. If no ``N``:sub:`i` suits the literal, then the default literal type is used;
 
-#. Only a single ``N``:sub:`i` is a valid type for the literal, then
-   ``N``:sub:`i` is the inferred type;
-   
-#. Several ``N``'s are valid types, then checks are performed as follows:
+#. If only a single ``N``:sub:`i` suits the literal, then ``N``:sub:`i` is the
+   inferred type;
 
-   - If the literal is an *integer literal*, and only one valid type is an
-     *integer type*, then this valid type becomes the inferred type;
-   
-   - If the literal is an *floating-point literal*, and only one valid type is
-     a *floating-point type*, the this valid type becomes the inferred type;
-   
-   - Otherwise, a :index:`compile-time error` due to the ambiguity.
+#. If several ``N``'s types suit the literal, then the following checks are
+   performed:
+
+   - If the literal is an *integer literal*, and only one suitable *integer*
+     ``N``:sub:`i` is present, then this ``N``:sub:`i` is the inferred type;
+
+   - If the literal is of a *floating-point literal*, and only one suitable
+     *floating-point* ``N``:sub:`i` is present, then this ``N``:sub:`i` is the
+     inferred type;
+
+
+Otherwise, a :index:`compile-time error` occurs due to type inference ambiguity.
 
 Type inference for a union target type is represented in the examples below:
 
 .. code-block:: typescript
    :linenos:
 
-    let b: byte | Object = 127 // inferred type is 'byte'
-    b = 128 // inferred type is 'int' (default literal type)
-    
-    let c: byte | string = 127 // inferred type is 'byte'
-    b = 128 // compile-time error, invalid value
-    
-    let d: int | double = 1.0 // inferred type is 'double'
-    d = 1 // inferred type is 'int'
+    let b: byte | Object = 127 // inferred type for 127 is 'byte'
+    b = 128 /* inferred type for 128 is 'int' (default literal type),
+               which is a subtype of Object
+            */
 
-    let i: byte | long = 128 // inferred type is 'long'
-    i = 127 // compile-time error, ambiguity
-    
-    let f: float | double = 3.4e39 // inferred type is 'double'
-    f = 1.0 // compile-time error, ambiguity
+    let c: byte | string = 127 // inferred type for 127 is 'byte'
+    c = 128 /* inferred type for 128 is 'int' (default literal type),
+               compile-time error as no type in a union is a supertype for
+               'int'
+            */
+
+    let d: int | double = 1.0 // inferred type for 1.0 is 'double'
+    d = 1 // inferred type for 1 is 'int'
+
+    let e: byte | long = 128 // inferred type for 128 is 'long'
+    e = 127 // compile-time error, type inference ambiguity for 127
+
+    let f: float | double = 3.4e39 // inferred type for3.4e39 is 'double'
+    f = 1.0 // compile-time error,  type inference ambiguity for 1.0
+
+    let g: float | double = 3.4e39 // inferred type is 'double'
+    g = 1 // compile-time error, type inference ambiguity for 1
+
 
 .. index::
    numeric type
@@ -1647,7 +1695,7 @@ the following conditions:
    (see :ref:`Throw Statements`), then the lambda return type is ``never`` (see
    :ref:`Type never`).
 -  If a function, a method, or a lambda is ``async`` (see
-   :ref:`Async Functions and Methods`), a return type is inferred by applying
+   :ref:`Asynchronous Features`), a return type is inferred by applying
    the above rules, and the return type ``T`` is not ``Promise``, then the return
    type is assumed to be ``Promise<T>``.
 
@@ -1709,9 +1757,9 @@ Return type inference is represented in the example below:
     // That is a compile-time error as there is an execution path with no return
 
 *Smart types* can appear in the process of return type inference
-(see :ref:`Smart Casts and Smart Types`). 
+(see :ref:`Smart Casts and Smart Types`).
 A :index:`compile-time error` occurs if an inferred return type is a :ref:`Type Expression`
-that can not be expressed in |LANG|:
+that cannot be expressed in |LANG|:
 
 .. code-block:: typescript
    :linenos:
@@ -1719,7 +1767,7 @@ that can not be expressed in |LANG|:
     class C{}
     interface I {}
     class D extends C implements I {}
-    
+
     function foo(c: C) {
         return c instanceof I ? c : new D() // compile-time error: inferred type is C & I
     }
@@ -1774,8 +1822,9 @@ and parameters.
    parameter
    lambda
 
-**Note.** Smart casts are not applied to global variabes and class fields,
-as it is hard to track their values.
+.. note::
+   Smart casts are not applied to global variables and class fields, as it is
+   difficult to track their values.
 
 A variable has a single declared type, and can have different *smart
 types* in different contexts. A *smart type* of variable is always
@@ -1910,15 +1959,16 @@ an :ref:`Object Literal`:
 The term *type expression* is used below as notation that consists of type
 names and operators on types, namely:
 
-- '``|``' for union operator;
-- '``&``' for intersection operator (see :ref:`Intersection Types`);
-- '``-``' for difference operator (see :ref:`Difference Types`).
+- ``'|'`` for union operator;
+- ``'&'`` for intersection operator (see :ref:`Intersection Types`);
+- ``'-'`` for difference operator (see :ref:`Difference Types`).
 
 Computing *smart types* is the process of creating, evaluating, and simplifying
 *type expressions*.
 
-**Note.** *Intersection types* and *difference types* are semantic (not
-syntactic notions) that cannot be represented in |LANG|.
+.. note::
+   *Intersection types* and *difference types* are semantic (not syntactic
+   notions) that cannot be represented in |LANG|.
 
 .. index::
    type expression
@@ -1951,7 +2001,7 @@ Intersection Types
 ==================
 
 An *intersection type* is a type created from other types by using the
-intersection operator '``&``'.
+intersection operator ``'&'``.
 The values of intersection type ``A & B`` are all values that belong
 to both ``A`` and ``B``. The same applies to the set of operations.
 
@@ -1978,7 +2028,7 @@ represented below:
         }
     }
 
-See also :ref:`Subtyping for Intersection Types`.
+More details are provided in :ref:`Subtyping for Intersection Types`.
 
 .. index::
    intersection type
@@ -2000,7 +2050,7 @@ Difference Types
 ================
 
 A *difference type* is a type created from two other types by a subtraction
-operation, i.e., by using the operator '``-``'.
+operation, i.e., by using the operator ``'-'``.
 The values of the difference type ``A - B`` are all values that belong to type
 ``A`` but not to type ``B``. The same applies to the set of operations.
 
@@ -2105,8 +2155,8 @@ At an **assignment to the variable** ``v``: ``v = e``:
    and *N(x)* adds to type *x* all types to which type *x* can be converted,
    namely:
 
-    - If *x* is a numeric type, then a larger numeric type;
-    - If *x* is an enumeration type, then the *enumeration base type*.
+    - Larger numeric type if *x* is a numeric type;
+    - *Enumeration base type* if *x* is an enumeration type.
 
 The following table summarizes the contexts for map evaluation at an
 *assumption node*:
@@ -2131,14 +2181,14 @@ The following table summarizes the contexts for map evaluation at an
    :header-rows: 1
 
    * - Branching on
-     - On the positive branch
-     - On the negative branch
+     - Positive Branch
+     - Negative Branch
    * - *v* ``instanceof`` ``A``
-     - assuming *v* ``instanceof`` ``A``:
+     - Assuming *v* ``instanceof`` ``A``:
 
        ``s'(l(v)):=s(l(v))&A``
 
-     - assuming !(*v* ``instanceof`` ``A``):
+     - Assuming !(*v* ``instanceof`` ``A``):
 
        ``s'(l(v)):=s(l(v))-A``,
 
@@ -2177,12 +2227,12 @@ The following table summarizes the contexts for map evaluation at an
      - ``s'(l(v)) := s(l(v))-T``
 
    * - *v* ``===`` *e*, where *e* is any expression
-     - if *e* is a variable *w*, no implicit conversion occurs,
-       and no ``null == undefined`` consideration is involved, then:
+     - If *e* is the variable *w*, no implicit conversion occurs,
+       and no consideration is given to ``null == undefined``, then:
 
        ``l'(v):=l'(w):=l(v)``:math:`\cup` ``l(w)``
 
-       otherwise:
+       Otherwise,
 
        ``s'(l'(v))=s(l(v))&N(T(e))``
 
@@ -2194,7 +2244,7 @@ The following table summarizes the contexts for map evaluation at an
      - ``s'(l(v)):=s(l(v)) - (null|undefined|"")``
      - ``s'(l(v)):=s(l(v))&T``,
 
-       where T is union of all types the contain at least one value considered as ``false`` 
+       where ``T`` is union of all types the contain at least one value considered as ``false``
        in :ref:`Extended Conditional Expressions`.
 
 .. index::
@@ -2209,34 +2259,43 @@ The following table summarizes the contexts for map evaluation at an
    union
    type
 
-**Notes**:
+.. note::
 
-#. In the table above the operator '``===``' can be replaced for '``==``' except
-   where '``==``' is used explicitly.
+   #. In the table above the operator ``'==='`` can be replaced for ``'=='``
+      except where ``'=='`` is used explicitly.
 
-#. For branching on ``typeof`` *v* ``===`` *str*, type *T* is
-   evaluated in accordance with the value of *str*:
+   #. For branching on ``typeof`` *v* ``===`` *str*, type *T* is
+      evaluated in accordance with the value of *str* as follows:
 
-    -  If ``"boolean"``, then *T* is ``boolean``;
+   .. list-table::
+      :width: 100%
+      :widths: 30 70
+      :header-rows: 1
 
-    -  If ``"string"``, then *T* is ``string | char``;
+      * - Value of *str*
+        - Type of *T*
+      * - ``"boolean"``
+        - ``boolean``
+      * - ``"string"``
+        - ``string | char``
+      * - ``"undefined"``
+        - ``undefined``
+      * - A name of a numeric type
+        - The same numeric type
+      * - ``"object"``
+        - ``Object - boolean - string - all numeric types``
 
-    -  If ``"undefined"``, then *T* is ``undefined``;
 
-    -  If a name of a numeric type, then *T* is this numeric type;
+   At a node that joins two CFG branches, namely
+   ``C``:sub:`1` :math:`\leq` :sub:`1`, ``s``:sub:`1` ``>``, and
+   ``C``:sub:`2` :math:`\leq` ``l``:sub:`2`, ``s``:sub:`2` ``>``, for each
+   variable *v*:
 
-    -  If ``"object"``, then *T* is ``Object - boolean - string - all numeric types``.
+   - ``l'(v):=l``:sub:`1` ``(v)``:math:`\cap` ``l``:sub:`2` ``(v)``; and
+   - ``s'(l'(v)):=s``:sub:`1` ``(l'``:sub:`1` ``(v))|s``:sub:`2` ``(l'``:sub:`2` ``(v))``.
 
-
-At a node that joins two CFG branches, namely ``C``:sub:`1` :math:`\leq` :sub:`1`, ``s``:sub:`1` ``>``,
-and ``C``:sub:`2` :math:`\leq` ``l``:sub:`2`, ``s``:sub:`2` ``>``, for each variable *v*:
-
-- ``l'(v):=l``:sub:`1` ``(v)``:math:`\cap` ``l``:sub:`2` ``(v)``; and
-
-- ``s'(l'(v)):=s``:sub:`1` ``(l'``:sub:`1` ``(v))|s``:sub:`2` ``(l'``:sub:`2` ``(v))``.
-
-At each *backedge node*, smart type of each variable attached to the node is set
-to its declared type.
+   At each *backedge node*, smart type of each variable attached to the node is
+   set to its declared type.
 
 .. index::
    operator
@@ -2292,13 +2351,13 @@ transformations to be performed at each node of the CFG:
    * - Transformation
      - Initial expression
      - Simplified expression
-   * - Associativity of '``&``'
+   * - Associativity of ``'&'``
      - ``(A&B)&C``
      - ``A&(B&C)``
-   * - Commutativity of '``&``'
+   * - Commutativity of ``'&'``
      - ``A&B``
      - ``B&A``
-   * - In case of subtyping ``A<:B`` and '``&``'
+   * - In case of subtyping ``A<:B`` and ``'&'``
      - ``A&B``
      - ``A``
    * -
@@ -2308,13 +2367,13 @@ transformations to be performed at each node of the CFG:
      - ``A&Any``
      - ``A``
 
-   * - Associativity of '``|``'
+   * - Associativity of ``'|'``
      - ``(A|B)C``
      - ``A|(B|C)``
-   * - Commutativity of '``|``'
+   * - Commutativity of ``'|'``
      - ``A|B``
      - ``B|A``
-   * - In case of subtyping ``A<:B`` and '``|``'
+   * - In case of subtyping ``A<:B`` and ``'|'``
      - ``A|B``
      - ``B``
    * -
@@ -2322,11 +2381,11 @@ transformations to be performed at each node of the CFG:
      - ``A``
    * -
      - ``A|Any``
-     - ``Any``     
+     - ``Any``
    * - Difference with ``never``
      - ``A-never``
      - ``A``
-   * - In case of subtyping ``A<:B`` and '``-``'
+   * - In case of subtyping ``A<:B`` and ``'-'``
      - ``A-B``
      - ``never``
    * -
@@ -2341,7 +2400,7 @@ transformations to be performed at each node of the CFG:
    * - Other transformations
      - ``(A&B)-C``
      - ``(A-C)&(B-C)``
-   * - 
+   * -
      - ``(A|B)&C``
      - ``(A&C)|(B&C)``
    * -
@@ -2378,7 +2437,7 @@ The following normalization procedure is performed for every *smart type* at
 every node of CFG where possible:
 
 #. Push *difference types* inside *intersection types* and unions, and
-   simplify the the difference.
+   simplify the difference.
 #. Push *intersection types* inside unions, and simplify the intersections.
 #. Simplify the resultant union types.
 
@@ -2490,7 +2549,6 @@ rather than a declared type of an argument (see
    cast expression
    check
    overloading
-   overload declaration
    type
    type argument
    function
@@ -2511,6 +2569,9 @@ with modified signature.
 
 The actual method to be called is determined at runtime based on object type.
 Thus, overriding is related to *runtime polymorphism*.
+
+.. note::
+   *Overriding* does not apply to constructors.
 
 |LANG| uses the *override-compatibility* rule to check the correctness of
 overriding. The *overriding* is correct if method signature in a subtype
@@ -2549,8 +2610,9 @@ Overriding in Classes
 .. meta:
     frontend_status: Partly
 
-**Note**. Only accessible (see :ref:`Accessible`) methods are subjected to
-overriding. The same rule applies to accessors in case of overriding.
+.. note::
+   Only accessible (see :ref:`Accessible`) methods are subjected to overriding.
+   The same rule applies to accessors in case of overriding.
 
 An overriding member can keep or extend an access modifier (see
 :ref:`Access Modifiers`) of a member that is inherited or implemented.
@@ -2605,26 +2667,17 @@ A :index:`compile-time error` occurs if an attempt is made to do the following:
          // or implement the private methods with default implementation
    }
 
-The table below represents semantic rules that apply in various contexts:
+If an *instance method* is defined in a subclass with the same name as the
+*instance method* in a superclass, then the following semantic rules are
+applied:
 
-.. index::
-   interface
-   public
-   implementation
-   private method
+- If signatures are *override-compatible* (see
+  :ref:`Override-Compatible Signatures`), then *overriding* is used.
 
-.. list-table::
-   :width: 100%
-   :widths: 50 50
-   :header-rows: 1
+- Otherwise, :ref:`Implicit Method Overloading` is used.
 
-   * - Context
-     - Semantic Check
-   * - An *instance method* is defined in a subclass with the same name as the
-       *instance method* in a superclass.
-     - If signatures are *override-compatible* (see
-       :ref:`Override-Compatible Signatures`), then *overriding* is used.
-       Otherwise, a :index:`compile-time error` occurs.
+.. note::
+   A single method in a subclass can override several methods of a superclass.
 
 .. index::
    context
@@ -2648,67 +2701,49 @@ The table below represents semantic rules that apply in various contexts:
       method_2(p: string) {} // compile-time error
    }
 
-
-.. list-table::
-   :width: 100%
-   :widths: 50 50
-   :header-rows: 0
-
-   * - A *constructor* is defined in a subclass.
-     - All base class constructors are available for call in all derived class
-       constructors via ``super`` call (see :ref:`Explicit Constructor Call`).
+If more than one method of the subclass overrides the same method of the
+superclass a :index:`compile-time error` occurs.
 
 .. code-block:: typescript
    :linenos:
 
-   class Base {
-      constructor(p: number) {}
-   }
-   class Derived extends Base {
-      constructor(p: string) {
-           super(5)
-      }
-   }
+     class I{
+        foo (p: C) {}
+     }
+     class C extends I { // More than one method of class C overrides the same method
+        foo (p: C) {}
+        foo (p: I) {}
+     }
 
-.. index::
-   constructor
-   subclass
-   class constructor
-   super call
-   constructor call
-   derived class constructor
 
 |
 
-.. _Overriding and Overloading in Interfaces:
+.. _Overriding in Interfaces:
 
-Overriding and Overloading in Interfaces
-========================================
+Overriding in Interfaces
+========================
 
 .. meta:
     frontend_status: Done
 
-.. list-table::
-   :width: 100%
-   :widths: 50 50
-   :header-rows: 1
+If a method is defined in a subinterface with the same name as the method in
+the superinterface, then the following semantic rules apply:
 
-   * - Context
-     - Semantic Check
-   * - A method is defined in a subinterface with the same name as the
-       method in the superinterface.
-     - If signatures are *override-compatible* (see
-       :ref:`Override-Compatible Signatures`), then *overriding* is used.
-       Otherwise, a :index:`compile-time error` occurs.
-   * - A method is defined in a subinterface with the same name as the
-       private method in the superinterface.
-     - A :index:`compile-time error` occurs.
+- A :index:`compile-time error` occurs if a method is ``private`` in
+  superinterface, but ``public`` in subinterface;
+
+- If signatures are *override-compatible* (see
+  :ref:`Override-Compatible Signatures`), then *overriding* is used.
+
+- Otherwise, :ref:`Implicit Method Overloading` is used.
+
+.. note::
+   Several methods of superinterface can be overriden by a single method in
+   a subinterface.
 
 .. index::
    overriding
-   overload signature
    interface
-   semantic check
    subinterface
    name
    method
@@ -2720,6 +2755,7 @@ Overriding and Overloading in Interfaces
    subinterface
    private method
 
+
 .. code-block:: typescript
    :linenos:
 
@@ -2729,40 +2765,26 @@ Overriding and Overloading in Interfaces
       private foo() {} // private method with implementation body
    }
    interface Derived extends Base {
-      method_1() // overriding
-      method_2(p: string) // compile-time error: non-compatible signature
+      method_1()           // overriding
+      method_2(p: string)  // compile-time error: non-compatible signature
       foo(p: number): void // compile-time error: the same name as private method
    }
 
 
-.. list-table::
-   :width: 100%
-   :widths: 50 50
-   :header-rows: 0
-
-   * - Two or more methods with the same name are defined in the same interface.
-     - TBD is used.
-
-.. index::
-   method
-   subinterface
-   superinterface
-   semantic check
-   override-compatible
-   override-compatible signature
-   signature
-   method overload signature
-   non-compatible signature
-   interface
-   private method
+If more than one method of the subinterface overrides the same method of the
+superinterface a :index:`compile-time error` occurs.
 
 .. code-block:: typescript
    :linenos:
 
-   interface anInterface {
-      instance_method()          // 1st signature
-      instance_method(p: number) // 2nd signature
-   }
+     interface I{
+        foo (p: C): void
+     }
+     interface C extends I { // More than one method of interface C overrides the same method
+        foo (p: C): void
+        foo (p: I): void
+     }
+
 
 |
 
@@ -2774,12 +2796,18 @@ Override-Compatible Signatures
 .. meta:
     frontend_status: Partly
 
-If there are two classes ``Base`` and ``Derived``, and class ``Derived``
-overrides the method ``foo()`` of ``Base``, then ``foo()`` in ``Base`` has
-signature ``S``:sub:`1` <``V``:sub:`1` ``, ... V``:sub:`k`>
-(``U``:sub:`1` ``, ..., U``:sub:`n`) ``:U``:sub:`n+1`, and ``foo()`` in
-``Derived`` has signature ``S``:sub:`2` <``W``:sub:`1` ``, ... W``:sub:`l`>
-(``T``:sub:`1` ``, ..., T``:sub:`m`) ``:T``:sub:`m+1` as in the example below:
+Let's consider classes ``Derived`` and ``Base`` for which:
+
+- ``Derived`` is a subclass of ``Base``
+- both classes declare method ``foo``
+- in ``Base``, ``foo()`` has a signature ``S``:sub:`1`
+  <``V``:sub:`1` ``, ... V``:sub:`k`>
+  (``U``:sub:`1` ``, ..., U``:sub:`n`) ``:U``:sub:`n+1`,
+- in ``Derived``, ``foo()`` has a signature ``S``:sub:`2`
+  <``W``:sub:`1` ``, ... W``:sub:`j`>
+  (``T``:sub:`1` ``, ..., T``:sub:`m`) ``:T``:sub:`m+1`
+
+as in the example below:
 
 .. index::
    override-compatible signature
@@ -2796,11 +2824,11 @@ signature ``S``:sub:`1` <``V``:sub:`1` ``, ... V``:sub:`k`>
        foo <V1, ... Vk> (p1: U1, ... pn: Un): Un+1
     }
     class Derived extends Base {
-       override foo <W1, ... Wl> (p1: T1, ... pm: Tm): Tm+1
+       override foo <W1, ... Wj> (p1: T1, ... pm: Tm): Tm+1
     }
 
-The signature ``S``:sub:`2` is override-compatible with ``S``:sub:`1` only
-if **all** of the following conditions are met:
+The signature ``S``:sub:`2` is override-compatible with ``S``:sub:`1`
+only if **all** of the following conditions are met:
 
 1. Number of parameters of both methods is the same, i.e., ``n = m``.
 2. Each parameter type ``T``:sub:`i` is a supertype of ``U``:sub:`i`
@@ -2808,8 +2836,8 @@ if **all** of the following conditions are met:
 3. If return type ``T``:sub:`m+1` is ``this``, then ``U``:sub:`n+1` is ``this``,
    or any of superinterfaces or superclass of the current type. Otherwise,
    return type ``T``:sub:`m+1` is a subtype of ``U``:sub:`n+1` (covariance).
-4. Number of type parameters of either method is the same, i.e., ``k = l``.
-5. Constraints of ``W``:sub:`1`, ... ``W``:sub:`l` are to be contravariant
+4. Number of type parameters of either method is the same, i.e., ``k = j``.
+5. Constraints of ``W``:sub:`1`, ... ``W``:sub:`j` are to be contravariant
    (see :ref:`Invariance, Covariance and Contravariance`) to the appropriate
    constraints of ``V``:sub:`1`, ... ``V``:sub:`k`.
 
@@ -2833,9 +2861,9 @@ if **all** of the following conditions are met:
 
 The following rule applies to generics:
 
-   - Derived class must have type parameter constraints to be subtype
-     (see :ref:`Subtyping`) of the respective type parameter
-     constraint in the base type;
+   - Derived class must have type parameter constraints to be subtypes
+     (see :ref:`Subtyping`) of respective type parameter constraints
+     in the base type;
    - Otherwise, a :index:`compile-time error` occurs.
 
 .. index::
@@ -2961,13 +2989,15 @@ Override compatibility with ``Object`` is represented in the example below:
 .. code-block:: typescript
    :linenos:
 
+    enum E  { One, Two }
     interface Base {
-       kinds_of_parameters<T extends Derived, U extends Base>( // It represents all possible kinds of parameter type
+       kinds_of_parameters<T extends Derived, U extends Base>(
+          // It represents all possible kinds of parameter type
           p01: Derived,
           p02: (q: Base)=>Derived,
           p03: number,
           p04: T | U,
-          p05: E1,
+          p05: E,
           p06: Base[],
           p07: [Base, Base]
        ): void
@@ -2998,7 +3028,7 @@ Override compatibility with ``Object`` is represented in the example below:
        kinds_of_return_type(): number | string // Valid overriding
     }
     interface Derived5 extends Base {
-       kinds_of_return_type(): E1 // Valid overriding
+       kinds_of_return_type(): E // Valid overriding
     }
     interface Derived6 extends Base {
        kinds_of_return_type(): Base[] // Valid overriding
@@ -3022,17 +3052,19 @@ Override compatibility with ``Object`` is represented in the example below:
 Overloading
 ***********
 
-*Overloading* is the language feature that allows to use the same name to
-call several functions, or methods, or constructors with different signatures.
+*Overloading* is the language feature that allows using the same name to
+call several functions, methods, or constructors with different signatures.
 
 The actual function, method, or constructor to be called is determined at
 compile time. Thus, *overloading* is compile-time *polymorphism by name*.
 
 |LANG| supports the following two *overloading*  mechanisms:
 
-- Conventional overloading TBD; and
-
-- Innovative *managed overloading* (see :ref:`Overload Declarations`).
+- *Implicit overloading*, where a set of overloaded entities for functions and
+  methods is determined by their names, or includes all unnamed constructors;
+  and
+- *Explicit overloading* (see :ref:`Explicit Overload Declarations`) that allows
+  a developer to specify a set of overloaded entities explicitly.
 
 .. index::
    overloading
@@ -3043,143 +3075,874 @@ compile time. Thus, *overloading* is compile-time *polymorphism by name*.
    constructor
    method
    signature
-   compile type
    compile-time polymorphism
    polymorphism by name
-   overload signature
-   overload declaration
-   managed overloading
-   type checking
-   compatibility
+   explicit overload declaration
 
-*Overload resolution* is used to select one entity to call from a set of
-candidates if the name to call refers to an *overload declaration* (see
-:ref:`Overload Resolution`).
+In either case, an ordered set of overloaded entities is built at compile time,
+and used by :ref:`Overload Resolution` to select one entity to call from within
+the set. *Overload resolution*  uses the first-match algorithm to streamline
+the resolution process, i.e., only the first appropriate entity is called, while
+all other entities are not considered.
 
-Both mechanisms of resolution use the first-match textual order to streamline
-the resolution process.
+If signatures of *implicitly overloaded entities* are
+*overload-equivalent*, then a :index:`compile-time error` occurs (see
+:ref:`Overload-Equivalent Signatures`). *Explicitly overloaded entities* are
+never checked for overload equivalence. *Explicitly overloaded entities*
+with separate names never cause a :index:`compile-time error`.
 
-TBD: A :index:`compile-time warning` is issued if the order of entities in an
-*overload declaration* implies that some overloaded entities can never be
-selected for a call.
+Overloading for the module scope name *main* is prohibited, and causes a
+:index:`compile-time error` if attempted:
 
 .. code-block:: typescript
    :linenos:
 
-    function f1 (p: number) {}
-    function f2 (p: string) {}
-    function f3 (p: number|string) {}
-    overload foo {f1, f2, f3}  // f3 will never be called as foo()
+    function main() {}
+    function main(p: string[]) {}
+    // Such declarations lead to a compile-time error
 
-    foo (5)                    // f1() is called
-    foo ("5")                  // f2() is called
+
+|
+
+.. _Implicit Function Overloading:
+
+Implicit Function Overloading
+=============================
+
+.. meta:
+    frontend_status: None
+
+Two or more functions declared with the same name in the same
+declaration scope are *implicitly overloaded*.
+
+.. note::
+   Same-name functions declared in different scopes cannot be *implicitly
+   overloaded* (see :ref:`Declaration Distinguishable by Signatures`).
+   A :index:`compile-time error` occurs if the names of an imported function
+   and of a function declared in the current module are the same.
+
+A :index:`compile-time error` occurs if signatures of two implicitly overloaded
+functions are *overload-equivalent* (see :ref:`Overload-Equivalent Signatures`).
+
+When calling an overloaded function (see :ref:`Function Call Expression`),
+:ref:`Overload Resolution` is used to determine exactly which function must be
+called.
 
 .. index::
-   signature resolution
-   entity
-   call
-   candidate
-   signature resolution
-   overload signature
+   implicit function overloading
+   declaration scope
    signature
-   overload declaration
-   resolution process
+   name
+   overload-equivalence
+   overload-equivalent signature
+   overloaded function
+   function call
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo(p: number) {} // #1
+    function foo(p: string) {} // #2
+
+    foo(5)   // function marked #1 is called
+    foo("5") // function marked #2 is called
+
+.. index::
+   overload set
    call
+
+Instantiation of a generic function can cause a :index:`compile-time error`
+if it leads to a function that is *overload-equivalent* to other function:
+
+.. code-block:: typescript
+   :linenos:
+
+     function foo<T>(x: T) {}
+     function foo(x: number) {}
+
+     // This instantiation leads to two *overload-equivalent* functions:
+     foo<number>(1)
+
+|
+
+.. _Implicit Method Overloading:
+
+Implicit Method Overloading
+===========================
+
+.. meta:
+    frontend_status: None
+
+Two or more methods within a class or an interface are implicitly overloaded
+if:
+
+- All have the same name;
+- All are either ``static`` or non-``static``.
+
+A :index:`compile-time error` occurs if signatures of two implicitly overloaded
+methods are *overload-equivalent* (see :ref:`Overload-Equivalent Signatures`).
+
+
+.. index::
+   implicit method overloading
+   class
+   signature
+   overload-equivalent signature
+   overload equivalence
+   overloaded method
+   method
+   instantiation
+   interface
+
+Implicit overload can be caused by method declaration or inheritance:
+
+.. code-block:: typescript
+   :linenos:
+
+    class Base{
+        foo(p: number) {} // #1
+    }
+
+    class Derived extends Base {
+        foo(p: string) {} // #2
+    }
+
+    let d = new Derived()
+
+    d.foo(5)   // method marked #1 is called
+    d.foo("5") // method marked #2 is called
+
+When calling an overloaded method (see :ref:`Method Call Expression`),
+:ref:`Overload Resolution` is used to determine exactly which method is to be
+called.
+
+.. index::
+   implicit method overloading
+   overload-equivalence
+   overload-equivalent signature
+   overloaded function
+   method call
+
+.. code-block:: typescript
+   :linenos:
+
+    class C{
+        foo(p: number) {} // #1
+        foo(p: string) {} // #2
+    }
+
+    let c = new C()
+
+    c.foo(5)   // method marked #1 is called
+    c.foo("5") // method marked #2 is called
+
+If an instantiation of a generic class or a generic interface leads to an
+*overload-equivalent* method, then a :index:`compile-time error` occurs
+as follows:
+
+.. code-block:: typescript
+   :linenos:
+
+     class Template<T> {
+        foo (p: number) { ... }
+        foo (p: T) { ... }
+     }
+
+     // This instantiation leads to two *overload-equivalent* methods
+     let instantiation: Template<number>
+
+|
+
+.. _Implicit Constructor Overloading:
+
+Implicit Constructor Overloading
+================================
+
+.. meta:
+    frontend_status: None
+
+Two or more unnamed constructors within a class are *implicitly overloaded*.
+
+A :index:`compile-time error` occurs, if signatures of two overloaded constructors
+are *overload-equivalent*  (see :ref:`Overload-Equivalent Signatures`).
+
+In a class instance creation expression (see :ref:`New Expressions`)
+:ref:`Overload Resolution` is used to determine exactly which one
+constructor is to be called.
+
+.. index::
+   constructor overloading
+   constructor
+   class instance
+   instance creation expression
+   compile time
+
+.. code-block:: typescript
+   :linenos:
+
+    class BigFloat {
+        /*other code*/
+        constructor (n: number) {/*body1*/} // #1
+        constructor (s: string) {/*body2*/} // #2
+    }
+
+    new BigFloat(1)      // constructor, marked #1,  is used
+    new BigFloat("3.14") // constructor, marked #1,  is used
+
+|
+
+.. _Overload-Equivalent Signatures:
+
+Overload-Equivalent Signatures
+==============================
+
+.. meta:
+    frontend_status: None
+
+Signatures *S1* and *S2* are *overload-equivalent* if:
+
+- Both have the same number of parameters;
+
+- *Effective types* (see :ref:`Type Erasure`) of each parameter type in *S1*
+  and *S2* are equal.
+
+Return types of *S1* and *S2* do not affect *overload-equivalence*.
+
+The following code causes a :index:`compile-time error` as function signatures
+are *overload-equivalent*:
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo(x: Array<string>): string {}
+    function foo(x: Array<number>): number {} // compile-time error
+
+.. index::
+   overload-equivalent signature
+   signature
+   overload equivalence
 
 |
 
 .. _Overload Resolution:
 
 Overload Resolution
-===================
+*******************
 
 .. meta:
     frontend_status: None
 
-*Overload declaration* defines an ordered set of entities, and the first entity
-from this set that is *accessible* and has an appropriate signature is used to
-call at the call site.
-This approach is called *managed overloading* because the *first-match*
-algorithm provides full control for a developer to select a specific entity
-to call. This developer control over calls is represented in the following
-example:
+*Overload resolution* is used to select one entity to call from an *ordered
+set of overloaded entities* (called in short *overload set*) in a function
+call or a method call or a constructor call, where the constructor call is
+a part of a new expression (see :ref:`New Expressions`).
+
+An *overload set* for each overloaded name is formed while processing
+declarations. The process (see :ref:`Forming an Overload Set`) takes into
+account the following:
+
+- Textual order of implicitly overloaded entities;
+- Listing order of explicit overload declarations; and
+- Inheritance.
+
+The *overload resolution* process is rather straightforward. The process takes
+overloaded entities one after another from an *overload set*, and checks the call
+of each entity to be valid for the arguments given. The first entity for which
+the call is valid is the selected entity. Other entities are not checked
+after the first valid entity is found.
+
+A :index:`compile-time` occurs if a call is invalid for any overload entities.
+
+A call of an entity is valid if:
+
+- Each required parameter has an argument;
+
+- There is no excess argument that fails to correspond to a parameter,
+  including to an optional parameter or to a rest parameter;
+
+- Each argument is assignable to a corresponding parameter type, or
+  to a corresponding element type of a rest parameter.
+
+Return types of overload entities are not considered by *overload resolution*,
+it means that the selected entity can lead to a :index:`compile-time` error,
+like in the following example:
 
 .. code-block:: typescript
    :linenos:
 
-    function max2i(a: int, b: int): int
-        return  a > b ? a : b
-    }
-    function max2d(a: double, b: double): double {
-        return  a > b ? a : b
-    }
-    function maxN(...a: double[]): double {
-        // returns max element in array 'a'
-    }
-    overload max {max2i, max2d, maxN}
+    function foo(n: number): number {}
+    function foo(s: string): string {}
 
-    let i = 1
-    let j = 2
-    let pi = 3.14
+    let x: number = foo("1") // compile-time error
 
-    max(i, j) // max2i is used
-    max(i, pi) // max2d is used
-    max(i, pi, 4) // maxN is used
-    max(1) // maxN is used
-    max(false, true) // compile-time error, no appropriate signature
+|
+
+.. _Forming an Overload Set:
+
+Forming an Overload Set
+=======================
+
+.. meta:
+    frontend_status: None
+
+Only a single *overload set* is created for each overloaded name in a scope.
+An overload set combines entities that are overloaded implicitly and explicitly.
+If an entity is not overloaded, then an *overload set* contains the very entity
+for the entity name. The order of an *overload set* is determined as follows:
+
+#. If an overload set is formed from *implicit overloads* only, then
+   the order of the *overload set* corresponds to the textual order of
+   entity declaration;
+
+#. If an overload set is formed from *explicit overloads* only, then
+   the order of the *overload set* is the same as the order of the entities
+   listed.
+
+#. If an overload set is a combination of implicitly and explicitly overloaded
+   entities, then:
+
+   - An *implicit overload* name coinciding with an *explicit overload* name
+     must be included in the *explicit overload* list. Otherwise, a
+     :index:`compile-time` occurs.
+
+   - The order is based on the order of the *explicit overload* list as an
+     *explicit overload* has a higher priority.
+     All implicitly overloaded entities are listed in the textual order of
+     declaration, and are included into the *explicit overload* list at the
+     position of the overloaded name.
+
+The textual position of an *explicit overload* does not influence
+the order in the *overload set*. An *explicit overload* is effectively processed
+at the end of the scope.
+
+An overload set for interface and instance class methods can contain methods
+from superinterfaces and superclasses. Methods defined in an interface or in a
+class are added to the *overload set* before any inherited method, i.e., more
+specific entities have a higher priority. Further details are discussed in
+:ref:`Overload Set for Interface Methods` and
+:ref:`Overload Set for Class Instance Methods`.
+
+|
+
+.. _Overload Set for Functions:
+
+Overload Set for Functions
+==========================
+
+.. meta:
+    frontend_status: None
+
+For a given function name, the overload set is formed from
+implicitly overloaded functions (see :ref:`Implicit Function Overloading`)
+and from functions listed in :ref:`Explicit Function Overload` (see
+:ref:`Forming an Overload Set`).
+
+The example below illustrates how *overload set* is formed and used
+by *overload resolution*:
+
+.. code-block:: typescript
+   :linenos:
+
+    function fooN(n: number) {}
+
+    function foo() {}           // implicitly overloaded foo#1
+    function foo(b: boolean) {} // implicitly overloaded foo#2
+
+    function fooX(x?: number) {}
+
+    overload foo {fooN, foo, fooX}  // implicitly overloaded 'foo' must be in the set
+    // The overload set for 'foo' is {fooN, foo#1, foo#2, fooX}
+
+    overload bar {fooX, foo}
+    // The overload set for 'bar' is {fooX, foo#1, foo#2}
+
+    foo(1) // fooN is called
+    bar(1) // fooX is called
+
+    foo()  // foo#1 is called
+    bar()  // fooN is called
+
+    foo(true) // foo#2 is called
+    bar(true) // foo#2 is called
+
+|
+
+.. _Overload Set for Interface Methods:
+
+Overload Set for Interface Methods
+==================================
+
+.. meta:
+    frontend_status: None
+
+An overload set for a given interface is formed from the following:
+
+- Implicitly overloaded methods (see :ref:`Implicit Method Overloading`);
+
+- Explicitly overloaded methods listed in
+  :ref:`Explicit Interface Method Overload`;
+
+- Overload sets from superinterfaces, if any.
+
+The following steps are taken to form an overload set:
+
+#. Explicitly and implicitly overloaded methods defined
+   in a given interface are added into the overload set in the order
+   described in :ref:`Forming an Overload Set`.
+
+#. Overload sets from each direct superinterface are added at the end of an
+   overload set in the order of the ``implements`` clauses. A method that is
+   already added to the overload set is not added again.
+
+.. note::
+   Overload sets from non-direct superinterfaces are not considered as they are
+   already accounted for in direct superinterfaces.
+
+Forming an *overload set* for an interface that has no superinterface is
+represented in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    interface I {
+        foo(x: number) // #1
+        foo(s: string) // #2
+        // The overload set for 'foo' is {foo#1, foo#2}
+    }
+
+    interface J {
+        foo(x: number) // #1
+        foo(s: string) // #2
+        fooOpt(x?: number)
+        overload foo { foo, fooOpt}
+        // The overload set for 'foo' is {foo#1, foo#2, fooOpt}
+    }
+
+Overload sets for an interface with superinterfaces is represented in the
+example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    interface I1 {
+        foo(x: number)  // #1
+    }
+    interface I2 {
+        foo(s: string)  // #2
+        foo(b: boolean) // #3
+    }
+    interface J extends I1, I2 { // the order in extends list is used
+        foo() // #4
+        /* The overload set is {foo#4, foo#1, foo#2, foo#3}
+           Formed as: set(J)={foo#4} append set(I1)={foo#1} append set(I2)={foo#2, foo#3}
+        */
+    }
+
+That overridden methods occur only once in a list (``I`` and ``I2`` as defined
+above) is represented in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    interface K extends I1, I2 {
+        foo(s: string) // #2 as it overrides I2.foo
+        /* The overload set is {foo#2, foo#1, foo#3}
+           Formed as: set(K)={foo#2} append set(I1)={foo#1} append set(I2)={foo#2, foo#3}
+           Second occurrence of foo#2 is skipped.
+        */
+    }
+
+Combining implicit and explicit overloads is represented in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    interface I {
+        foo(s: string)  // #1
+        fooOpt(x?: number)
+        overload foo {fooOpt, foo}
+        // The overload set is {fooOpt, foo#1}
+    }
+
+    interface J1 extends I {
+        foo(b: boolean) // #2
+        /* The overload set is {foo#2, fooOpt, foo#1}
+           Formed as: {foo#2} append set(I)={fooOpt, foo#1}
+        */
+    }
+
+    interface J2 extends I {
+        foo(b: boolean) // #2
+        overload foo {fooOpt, foo}
+        /* The overload set is {fooOpt, foo#2, foo#1}
+           Formed as: {fooOpt, foo#2} append set(A)={fooOpt, foo#1}
+           Second occurrence of fooOpt is skipped.
+        */
+    }
+
+|
+
+.. _Overload Set for Class Static Methods:
+
+Overload Set for Class Static Methods
+=====================================
+
+.. meta:
+    frontend_status: None
+
+An overload set of static methods for a given class is formed from implicitly
+overloaded methods (see :ref:`Implicit Method Overloading`), and from the
+methods listed in :ref:`Explicit Class Method Overload`.
+
+The algorithm that defines the order of an *overload set* considers only the
+static methods defined directly in a class scope (see
+:ref:`Forming an Overload Set`) because static methods are not inherited.
+
+The formation and the use of an *overload set* by the *overload resolution* is
+represented in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+
+        static foo() {}           // implicitly overloaded foo#1
+        static foo(b: boolean) {} // implicitly overloaded foo#2
+        static fooX(x?: number) {}
+
+        static overload foo {foo, fooX}
+        // The overload set for 'foo' is {foo#1, foo#2, fooX}
+    }
+
+    C.foo(1)    // fooX is called
+    C.foo()     // foo#1 is called
+    C.foo(true) // foo#2 is called
+
+|
+
+.. _Overload Set for Class Instance Methods:
+
+Overload Set for Class Instance Methods
+=======================================
+
+.. meta:
+    frontend_status: None
+
+An overload set for class instance methods of a given class is formed from
+the following:
+
+- Implicitly overloaded methods (see :ref:`Implicit Method Overloading`);
+
+- Explicitly overloaded methods listed in :ref:`Explicit Class Method Overload`;
+
+- Methods from a direct superclass, if any;
+
+- Methods from direct superclasses, if any.
+
+The following steps are taken to form an overload set:
+
+#. Explicitly and implicitly overloaded methods defined
+   in a given class are added into the overload set in the order
+   described in :ref:`Forming an Overload Set`, including the
+   methods that override or implement methods from supertypes.
+
+#. Overload set from a direct superclass (if any) is added at the end of an
+   overload set. A method that is already added to the overload set is not
+   added again.
+
+#. Overload sets from each superinterface are added at the end of an overload
+   set in the order of the ``implements`` clauses. A method that is already
+   added to the overload set is not added again.
+
+.. note::
+   Overload sets from non-direct supertypes are not considered.
+
+Forming an *overload set* for a class that has neither a superclass nor a
+superinterface is represented in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        foo(x: number) {} // #1
+        foo(s: string) {} // #2
+        // The overload set for 'foo' is {foo#1, foo#2}
+    }
+
+    class D {
+        foo(x: number) {} // #1
+        foo(s: string) {} // #2
+        fooOpt(x?: number) {}
+        overload foo { foo, fooOpt}
+        // The overload set for 'foo' is {foo#1, foo#2, fooOpt}
+    }
+
+An overload set for a class with a superclass and a superinterface is represented
+in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    interface I {
+        foo(x: number)  // #1
+    }
+
+    class C {
+        foo(s: string) {} // #2
+    }
+
+    class D extends C implements I{
+        foo(x: number) {}  // overrides #1
+        foo(x: boolean) {} // #3
+        /* The overload set is {foo#1, foo#3, foo#2}
+           Formed as: set(D)={foo#1, foo#3} append set(C)={foo#2} append set(I)={foo#1}
+           Second occurrence of foo#1 is skipped.
+        */
+    }
+
+That only direct supertypes are considered for overload sets is represented in
+the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    interface I{
+        foo(x: number) // #1
+    }
+    class C implement I{
+        foo(x: A)      // #2
+        // The overload set is {foo#2, foo#1}
+    }
+    class D extends C {
+        foo(s: string) {}   // #3
+        foo(x: A | null) {} // overrides #2
+        /* The overload set is {foo#3, foo#2, foo#1}
+           Formed as: set(D)={foo#3, foo#2} append set(C)={foo#2, foo#1}
+           Second occurrence of foo#2 from set(C) is skipped.
+        */
+    }
+    class E extends D {
+        foo(x: number) {} // overrides #1
+        /* The overload set is {foo#1, foo#3, foo#2}
+           Formed as: set(E)={foo#1} append set(D)={foo#3, foo#2, foo#1}
+           Second occurrence of foo#1 from set(D) is skipped.
+        */
+    }
+
+More details are provided in :ref:`Overloading and Overriding`.
+
+|
+
+.. _Overload Set for Constructors:
+
+Overload Set for Constructors
+=============================
+
+.. meta:
+    frontend_status: None
+
+For a given class, the overload set for constructors is formed from
+implicitly overloaded constructors
+(see :ref:`Implicit Constructor Overloading`)
+and from constructors listed in :ref:`Explicit Constructor Overload`.
+The order of constructors in the overload set is determined
+according to the following rules:
+
+- If an overload set is formed from implicitly overloaded constructors only,
+  the order is the textual order of constructors declarations;
+
+- If and overload set is formed from *explicit overload* only, the
+  order is the order of constructors in its list.
+
+- For a combination of implicitly and explicitly overloaded constructors,
+  the order is based by the order in *explicit overload*, all unnamed
+  constructors are included in textual order of their
+  declarations to the beginning of the ordered set.
+
+The example below illustrates how *overload set* is formed and used
+by *overload resolution*:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        constructor () {}       // ctor#1
+        constructor (s: string) // ctor#2
+        constructor fromNumber(n: number) {}
+        overload constructor { fromNumber }
+    }
+    /* The overload set of constructors for class 'C' is
+       {ctor#1, ctor2#1, fromNumber} */
+
+    new C()     // ctor#1 is used
+    new C("aa") // ctor#2 is used
+    new C(1)    // fromNumber is used
+
+|
+
+.. _Overload Set Warning:
+
+Overload Set Warning
+====================
+
+.. meta:
+    frontend_status: None
+
+A :index:`compile-time warning` is issued if the order of entities in an
+overload set implies that some overloaded entity can never be
+selected for a call:
+
+.. code-block:: typescript
+   :linenos:
+
+    function f1 (p: number) {}
+    function f2 (p: number|string) {}
+    function f3 (p: string) {}
+    overload foo {f1, f2, f3}  // warning: f3 will never be called as foo()
+
+    foo (5)                    // f1() is called
+    foo ("5")                  // f2() is called
 
 .. index::
-   overload declaration
-   signature
-   entity
-   set
-   access
-   accessible
-   call site
-   managed overloading
-   first-match algorithm
-   function
-   control
+   overload set
    call
 
-Overload resolution for an instance method overload (see
-:ref:`Class Method Overload Declarations`) always uses the type of the
-*object reference* known at compile time. It can be either the type used
-in a declaration, or a *smart type* (see :ref:`Smart Casts and Smart Types`)
-as represented in the example below:
+|
+
+.. _Overload Set at Method Call:
+
+Overload Set at Method Call
+===========================
+
+Additional processing of an *overload set* is used at
+:ref:`Method Call Expression` because an identifer at the call site can denote
+both *instance methods* and :ref:`Functions with Receiver`.
+
+If the identifier at the call expression denotes *functions with receiver*
+only, then :ref:`Overload Set for Functions` is used. However, only *functions
+with receiver* (not ordinary functions) are considered for *overload resolution*:
 
 .. code-block:: typescript
    :linenos:
 
+    class C {}
+
+    function foo(this: C) {}            // #1
+    function foo(this: C, s: string) {} // #2
+    function foo(c: C, n: number) {}    // #3
+
+    let c = new C()
+    c.foo() // only function #1, #2 are considered here, but not #1
+
+    foo(c) // all three functions are considered here
+
+If the identifier denotes both instance methods and *functions with receiver*,
+then the overload set for methods is used for *overload resolution*, i.e.,
+no function with receiver is called. Otherwise, a
+:index:`compile-time warning` is issued as represented in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    // File1
+    export class C {
+        bar() {}
+    }
+    export function foo(this: C) {}
+
+    // File2
+    import {C, foo as bar} from "File1"
+
+    new C().bar() // C.bar is called, warning is issued
+
+.. note::
+   If a function with receiver is declared, and the name of the function is the
+   same as the name of an accessible instance method or field of the receiver
+   type, then a :index:`compile-time error` occurs in most cases (see the
+   example in :ref:`Functions with Receiver`). A warning is issued where no such
+   error is reported.
+
+|
+
+.. _Overloading and Overriding:
+
+Overloading and Overriding
+==========================
+
+When calling an overloaded method (class instance method or interface method),
+both :ref:`Overloading` and :ref:`Overriding` influence the actual method
+to call. As *compile-time* polymorphism, *overload resolution* selects the
+method to call from a class type or an interface type known at compile time.
+However, the method can be overridden in subtypes, and the actual method is
+called in accordance with the *runtime type* of the object from which the method
+is called.
+
+.. note::
+   Overriding does not influence forming of overload sets by itself despite
+   any method declared in a class---both new or overridden---is placed in the
+   overload set before any inherited method.
+
+The manner *overloading* and *overriding* influence the method to call is
+represented in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C1 {}
+    class C2 extends C1 {}
+
     class A {
-        foo1(x: A) { console.log("A.foo") }
-        overload foo {foo1}
+        foo(c: C2) { console.log("A.C2") }
+        foo(c: C1) { console.log("A.C1") }
     }
+
     class B extends A {
-        foo2(x: B) { console.log("B.foo") }
-        overload foo {foo2, foo1}
+        override foo(c: C2) { console.log("B.C2") }
     }
 
-    function test(a: A) {
-        a.foo(new B()) // 'foo1' is called as overload from 'A' is used
+    let a: A = new B()
+    a.foo(new C2()) // 1st call output: B.C2
+    a.foo(new C1()) // 2nd call output: A.C1
+
+The details of the first call are as follows:
+
+-  Static type of ``a`` is ``A``, and only this type is considered for
+   overload resolution;
+-  First overloaded ``foo`` can be called, and is selected;
+-  Runtime type of ``a`` is ``B``, ``foo(c: C2)`` is overridden in ``B``, and
+   then the method from ``B`` is called.
+
+The details of the second call are as follows:
+
+-  ``foo(c: C1)`` is selected to call;
+-  ``foo(c: C1)`` is not overridden, and the original method from ``A`` is called.
+
+The situation where a single method in a subclass overrides several methods of
+a superclass is represented in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C1 {}
+    class C2 extends C1 {}
+
+    class A {
+        foo(c: C2) { console.log("A.C2") }
+        foo(c: C1) { console.log("A.C1") }
     }
 
-    test(new B()) // output: A.foo
+    class D extends A {
+        foo(c: C1) { console.log("D.C1") }
+    }
 
-    let b = new B()
-    b.foo(b) // output: B.foo, as overload from 'B' is used
+    a = new D()
+    a.foo(new C2()) // 1st call output: D.C1
+    a.foo(new C1()) // 2nd call output: D.C1
 
-.. index::
-   overload resolution
-   method overload
-   class method
-   overload declaration
-   type
-   object reference
-   compile time
-   smart type
-   smart cast
-   signature
+In the example above, ``foo`` in ``D`` overrides both ``A`` methods (see
+:ref:`Override-Compatible Signatures`). As a result, the same method is called
+despite different methods are selected at compile time for the first and the
+second calls.
 
 |
 
@@ -3224,6 +3987,76 @@ have the following two kinds:
    type mapping
    supertype
 
+Type mapping determines the *effective types* as follows:
+
+.. list-table::
+   :width: 100%
+   :widths: 45 55
+   :header-rows: 1
+
+   * - **Original Type**
+     - **Effective Type**
+   * - *Generic types* (see :ref:`Generics`)
+     - Instantiation of the same generic type
+       (see :ref:`Explicit Generic Instantiations`) with type arguments selected
+       in accordance with :ref:`Type Parameter Variance`:
+   * -
+     -
+       - *Covariant* type parameters are instantiated with the constraint type;
+   * -
+     -
+       - *Contravariant* type parameters are instantiated with type ``never``;
+   * -
+     -
+       - *Invariant* type parameters are instantiated with no type argument,
+         i.e., ``Array<T>`` is instantiated as ``Array<>``.
+   * - :ref:`Type Parameters`
+     - :ref:`Type Parameter Constraint`
+   * - :ref:`Union Types` in the form ``T1 | T2 ... Tn``
+     - Union type constructed from effective types
+       ``T1 | T2 ... Tn`` within the original union type.
+   * - :ref:`Array Types` in the form ``T[]``
+     - Same as for a generic type ``Array<T>``.
+   * - :ref:`Fixed-Size Array Types` (``FixedArray<T>``)
+     - Instantiations of ``FixedArray<T>`` (i.e., the effective type of type
+       argument ``T`` is preserved).
+   * - :ref:`Function Types` in the form ``(P1, P2 ..., Pn)`` :math:`\geq` ``R``
+     - Instantiation of an internal generic function type with respect to the
+       number of parameter types *n*. Parameter
+       types ``P1, P2 ... Pn`` are instantiated with ``Any``. Return type ``R``
+       is instantiated with type ``never``.
+   * - :ref:`Tuple Types` in the form ``[T1, T2 ..., Tn]``
+     - Instantiation of an internal generic tuple type with respect to the
+       number of element types *n*.
+   * - :ref:`String Literal Types`
+     - ``string``
+
+Otherwise, the original type is *preserved*.
+
+.. index::
+   type erasure
+   type mapping
+   generic type
+   type parameter
+   constraint
+   effective type
+   instantiation
+   type argument
+   covariant type parameter
+   type parameter
+   contravariant type parameter
+   type
+   generic tuple
+   tuple type
+   string
+   literal type
+   enumeration base type
+   const enum type
+   enumeration
+   invariant type parameter
+   parameter type
+   type preservation
+
 In addition, accessing a value of type ``T``, particularly by
 :ref:`Field Access Expression`, :ref:`Method Call Expression`, or
 :ref:`Function Call Expression`, can cause ``ClassCastError`` thrown if
@@ -3260,96 +4093,29 @@ value is produced by a :ref:`Cast Expression`.
    target type
    cast expression
 
-Type mapping determines the *effective types* as follows:
-
--  :ref:`Type Parameter Constraint` for :ref:`Type Parameters`.
-
--  Instantiation of the same generic type (see
-   :ref:`Explicit Generic Instantiations`) for *generic types* (see
-   :ref:`Generics`), with its type arguments selected in accordance with
-   :ref:`Type Parameter Variance` as outlined below:
-
-   - *Covariant* type parameters are instantiated with the constraint type;
-
-   - *Contravariant* type parameters are instantiated with the type ``never``;
-
-   - *Invariant* type parameters are instantiated with no type argument, i.e.,
-     ``Array<T>`` is instantiated as ``Array<>``.
-
--  Union type constructed from the effective types of types ``T1 | T2 ... Tn``
-   within the original union type for :ref:`Union Types` in the form
-   ``T1 | T2 ... Tn``.
-
--  Same for :ref:`Array Types` in the form ``T[]`` as for generic type
-   ``Array<T>``.
-
--  Instantiation of ``FixedArray`` for ``FixedArray<T>`` instantiations, with
-   the effective type of type argument ``T`` preserved.
-
--  Instantiation of an internal generic function type with respect to
-   the number of parameter types *n* for :ref:`Function Types` in the form
-   ``(P1, P2 ..., Pn) => R``. Parameter types ``P1, P2 ... Pn`` are
-   instantiated with ``Any``, and the return type ``R`` is instantiated with
-   type ``never``.
-
--  Instantiation of an internal generic tuple type with respect to the number
-   of element types *n* for :ref:`Tuple Types` in the form ``[T1, T2 ..., Tn]``.
-
--  String for :ref:`String Literal Types`.
-
--  Enumeration base type of the same const enum type for *const enum* types
-   (see :ref:`Enumerations`).
-
--  Otherwise, the original type is *preserved*.
-
-.. index::
-   type erasure
-   type mapping
-   generic type
-   type parameter
-   constraint
-   effective type
-   instantiation
-   type argument
-   covariant type parameter
-   type parameter
-   contravariant type parameter
-   type
-   generic tuple
-   tuple type
-   string
-   literal type
-   enumeration base type
-   const enum type
-   enumeration
-   invariant type parameter
-   parameter type
-   type preservation
-
 |
 
-.. _Static Initialization:
+.. _Initialization Sequence:
 
-Static Initialization
-*********************
+Initialization Sequence
+***********************
 
 .. meta:
     frontend_status: Done
 
-*Static initialization* is a routine performed once for each class (see
-:ref:`Classes`), namespace (see :ref:`Namespace Declarations`), or
-module (see :ref:`Modules and Namespaces`).
+*Initialization sequence* is a set of statements executed once for each class
+(see :ref:`Classes`), namespace (see :ref:`Namespace Declarations`), or
+module (see :ref:`Namespaces and Modules`).
 
-*Static initialization* execution involves the execution of the following:
+*Initialization sequence* presumes executing the following:
 
 - *Initializers* of *variables* or *static fields*;
 
-- *Top-level statements*;
+- *Top-level statements* for modules and namespaces;
 
-- Code inside a *static block*.
+- Code inside a *static block* for classes.
 
 .. index::
-   static initialization
    routine
    class
    namespace
@@ -3361,39 +4127,39 @@ module (see :ref:`Modules and Namespaces`).
    top-level statement
    static block
 
-*Static initialization* is performed before the first execution of one of the
-following operations:
+*Initialization sequence* is performed before one of the following operations is
+executed for the first time:
 
-- Invocation of a static method or function of an entity scope;
+- Calling a class static method (see :ref:`Method Call Expression`),
+  accessing a class static field (see :ref:`Accessing Static Fields`), and
+  creating a new class instance (see :ref:`New Expressions`) or a
+  *static initialization* of a direct subclass;
 
-- Access to a static field or variable of an entity scope;
+- Calling a function or accessing a variable of a namespace or a module.
 
-- Instantiation of an entity that is an interface or class;
+.. note::
+   None of the operations above invokes an *initialization sequence* recursively
+   if the *initialization sequence* of the same entity is not complete.
 
-- *Static initialization* of a direct subclass of an entity that is a class.
+   The code of a top-level statement in a namespace is executed only if
+   namespace members are used in the program (see :ref:`Namespace Declarations`
+   for an an example).
 
-**Note**. None of the operations above invokes a *static initialization*
-recursively if the *static initialization* of the same entity is not complete.
+An initialization is not complete if the execution of an *initialization
+sequence* is terminated due to an exception thrown. A repeated attempt to
+execute the *initialization sequence* can throw an exception again.
 
-**Note**. For namespaces, the code in a static block is executed only when
-namespace members are used in the program (an example is provided in
-:ref:`Namespace Declarations`).
+If an *initialization sequence* invokes a concurrent execution (see
+:ref:`Coroutines (Experimental)`), then all *coroutines* that try to invoke it
+are synchronized. The synchronization is to ensure that the initialization
+is performed only once, and that the operations requiring the *initialization
+sequence* to be performed are executed after the initialization completes.
 
-If *static initialization* routine execution is terminated due to an
-exception thrown, then the initialization is not complete. Repeating an attempt
-to execute a *static initialization* produces an exception again.
-
-*Static initialization* routine invocation of a concurrent execution (see
-:ref:`Coroutines (Experimental)`) involves synchronization of all *coroutines*
-that try to invoke it. The synchronization is to ensure that the initialization
-is performed only once, and the operations that require the *static
-initialization* to be performed are executed after the initialization completes.
-
-If *static initialization* routines of two concurrently initialized classes are
+If *initialization sequences* of two concurrently initialized classes are
 circularly dependent, then a deadlock can occur.
 
 .. index::
-   static initialization
+   initialization sequence
    entity
    scope
    static field
@@ -3413,10 +4179,10 @@ circularly dependent, then a deadlock can occur.
 
 |
 
-.. _Static Initialization Safety:
+.. _Initialization Sequence Safety:
 
-Static Initialization Safety
-============================
+Initialization Sequence Safety
+==============================
 
 .. meta:
     frontend_status: Done
@@ -3540,8 +4306,9 @@ to ensure better |TS| alignment. It affects the semantics of the following:
 
 -  ``if`` statements (see :ref:`if Statements`).
 
-**Note**. The extended semantics is to be deprecated in one of the future
-versions of |LANG|.
+.. note::
+   The extended semantics is to be deprecated in one of the future versions of
+   |LANG|.
 
 The extended semantics approach is based on the concept of *truthiness* that
 extends the boolean logic to operands of non-boolean types.
@@ -3587,6 +4354,10 @@ below:
    * - ``boolean``
      - ``false``
      - ``true``
+     - ``x``
+   * - ``char``
+     - ``c'\u0000'``
+     - ``any value except c'\u0000'``
      - ``x``
    * - ``enum``
      - ``enum`` constant handled as ``false``
@@ -3637,13 +4408,19 @@ Extended semantics of :ref:`Conditional-And Expression` and
 :ref:`Conditional-Or Expression` affects the resultant type of expressions
 as follows:
 
--  Type of *conditional-and* expression ``A && B`` equals the type of ``B``
-   if the result of ``A`` is handled as ``true``. Otherwise, the expression
-   type equals the type of ``A``.
+-  For *conditional-and* expression ``A && B``:
 
--  Type of *conditional-or* expression ``A || B`` equals the type of ``B``
-   if the result of ``A`` is handled as ``false``. Otherwise, the expression
-   type equals the type of ``A``.
+   - If ``A`` is known at compile time, then the type of an expression is type
+     of ``B`` when ``A`` is handled as ``true`` and type of ``A`` otherwise.
+   - If ``A`` is unknown at compile time, then the type of an expression is union
+     ``A | B``.
+
+-  For *conditional-or* expression ``A || B``:
+
+   - If ``A`` is known at compile time, then the type of an expression is type
+     of ``B`` when ``A`` is handled as ``false`` and type of ``A`` otherwise.
+   - If ``A`` is unknown at compile time, then the type of an expression is union
+     ``A | B``.
 
 The way this approach works in practice is represented in the example below.
 Any ``nonzero`` number is handled as ``true``. The loop continues until it

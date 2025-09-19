@@ -261,6 +261,7 @@ The type of this operand is assumed to be the same as the enumeration base type.
 Numeric contexts take the following forms:
 
 -  :ref:`Unary Expressions`;
+-  :ref:`Exponentiation expression`;
 -  :ref:`Multiplicative Expressions`;
 -  :ref:`Additive Expressions`;
 -  :ref:`Shift Expressions`;
@@ -294,15 +295,23 @@ Numeric Conversions for Relational and Equality Operands
  .. meta:
      frontend_status: Done
 
-Relational and equiality operators (see :ref:`Relational Expressions` and
+Relational and equality operators (see :ref:`Relational Expressions` and
 :ref:`Equality Expressions`) allow the following:
 
 - *Implicit conversion*, where operands are of ``numeric types`` but have
   different sizes (see :ref:`Widening numeric conversions`), with their specific
   details stated in :ref:`Specifics of Numeric Operator Contexts`; and
 - Conversion of operands with ``BigInt()`` function, where one operand type is
-  ``bigint`` and the other is ``numeric``. The situation for the relational
-  operator '``<``' is represented in the example below:
+  ``bigint`` and the other is an integer type (see :ref:`Integer Types and Operations`);
+- Conversion of the *integer* part of a floating-point operand with the function
+  ``BigInt()``, where one operand type is ``bigint`` and the other is a
+  floating-point type (see :ref:`Floating-Point Types and Operations`). In that
+  case, the fractional part of the floating-point operand is also taken into
+  account when evaluating a relational expression or an equality expression (see
+  :ref:`Numeric Relational Operators` and :ref:`Numeric Equality Operators`).
+  
+The situation for the relational operator '``<``' is represented in the example
+below:
 
 .. code-block:: typescript
    :linenos:
@@ -311,11 +320,11 @@ Relational and equiality operators (see :ref:`Relational Expressions` and
    let b: long = 0
    let c: bigint = -1n
 
-   if (b<a) { // `a`` converted to `long` prior to comparison
+   if (b<a) { // 'a' converted to 'long' prior to comparison
       ;
    }
 
-   if (c<b) { // `b` converted to `bigint` prior to comparison
+   if (c<b) { // 'b' converted to 'bigint' prior to comparison
       ;
    }
 
@@ -328,7 +337,6 @@ Relational and equiality operators (see :ref:`Relational Expressions` and
    bigint type
    numeric type
    conversion
-
 
 .. _Implicit Conversions:
 

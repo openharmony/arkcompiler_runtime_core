@@ -13,11 +13,13 @@
 
 @echo off
 md __build
+copy .\concurrency\*.plantuml .\spec
 cd spec
-sphinx-build -n -b latex . ..\__build
+sphinx-build -n -W --keep-going -b latex . ..\__build
 cd ..\__build
 latexmk -f -silent -pdf -dvi- -ps- *.tex
 md ..\spec\build
 move *.pdf ..\spec\build
 cd ..
 rmdir /S /Q __build
+del .\spec\*.plantuml 

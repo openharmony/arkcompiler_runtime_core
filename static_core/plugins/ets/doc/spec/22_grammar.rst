@@ -47,11 +47,6 @@ Grammar Summary
        type '[' ']'
        ;
 
-.. functionType:
-   typeParameters? '(' ftParameterList? ')' ftReturnType
-   ;
-
-
     functionType:
         '(' ftParameterList? ')' ftReturnType
         ;
@@ -160,7 +155,7 @@ Grammar Summary
         ;
 
     optionalParameter:
-        identifier (':' type)? '=' expression
+        identifier ':' type '=' expression
         | identifier '?' ':' type
         ;
 
@@ -233,6 +228,7 @@ Grammar Summary
 
     binaryExpression:
         multiplicativeExpression
+        | exponentiationExpression
         | additiveExpression
         | shiftExpression
         | relationalExpression
@@ -289,7 +285,7 @@ Grammar Summary
        identifier ':' expression
        ;
 
-    objectLiteralMethod
+    objectLiteralMethod:
        identifier typeParameters? signature block
        ;
 
@@ -409,7 +405,7 @@ Grammar Summary
 
     assignmentOperator
         : '='
-        | '+='  | '-='  | '*='   | '='  | '%=' | `**=` | `/=`
+        | '+='  | '-='  | '*='   | '/='  | '%=' | `**=`
         | '<<=' | '>>=' | '>>>='
         | '&='  | '|='  | '^=' | `&&=` | `||=`
         | `??=`
@@ -606,11 +602,6 @@ Grammar Summary
         'abstract' | 'final'
         ;
 
-.. classModifier:
-   'abstract' | 'final' | 'sealed'
-   ;
-
-
     classExtendsClause:
         'extends' typeReference
         ;
@@ -689,7 +680,7 @@ Grammar Summary
     classAccessorDeclaration:
         classAccessorModifier*
         ( 'get' identifier '(' ')' returnType? block?
-        | 'set' identifier '(' parameter ')' block?
+        | 'set' identifier '(' requiredParameter ')' block?
         )
         ;
 
@@ -733,7 +724,7 @@ Grammar Summary
     interfaceProperty:
         'readonly'? identifier '?'? ':' type
         | 'get' identifier '(' ')' returnType
-        | 'set' identifier '(' parameter ')'
+        | 'set' identifier '(' requiredParameter ')'
         ;
 
     interfaceMethodDeclaration:
@@ -788,7 +779,7 @@ Grammar Summary
         ;
 
     nameBinding:
-        `type`? identifier bindingAlias?
+        'type'? identifier bindingAlias?
         | 'default' 'as' identifier
         ;
 
@@ -836,7 +827,7 @@ Grammar Summary
 
     singleExportDirective:
         'export'
-        ( `type`? identifier
+        ( 'type'? identifier
         | 'default' (expression | identifier)
         | '{' identifier 'as' 'default' '}'
         )
@@ -882,7 +873,7 @@ Grammar Summary
         ;
 
     ambientConst:
-        identifier ((':' type) | ('=' (IntegerLiteral|FloatLiteral|StringLiteral|MultilineStringLiteral)))
+        identifier ':' type
         ;
 
     ambientFunctionDeclaration:
@@ -934,7 +925,7 @@ Grammar Summary
     ambientClassAccessorDeclaration:
         ambientMethodModifier*
         ( 'get' identifier '(' ')' returnType
-        | 'set' identifier '(' parameter ')'
+        | 'set' identifier '(' requiredParameter ')'
         )
         ;
 
@@ -992,7 +983,7 @@ Grammar Summary
 
     ambientAccessorDeclaration:
         ( 'get' identifier '(' ')' returnType
-        | 'set' identifier '(' parameter ')' 
+        | 'set' identifier '(' requiredParameter ')' 
         )
         ;
 
@@ -1031,7 +1022,7 @@ Grammar Summary
 
     accessorWithReceiverDeclaration:
           'get' identifier '(' receiverParameter ')' returnType block
-        | 'set' identifier '(' receiverParameter ',' parameter ')' block
+        | 'set' identifier '(' receiverParameter ',' requiredParameter ')' block
         ;
 
     functionTypeWithReceiver:
@@ -1292,8 +1283,8 @@ Grammar Summary
         ;
 
     RegexSpecialForms:
-        CharacterClass ('(' '?='|'?!' CharacterClasse ')')?
-        ('(' '?<='|'?<!' CharacterClasse ')') CharacterClass
+        CharacterClass ('(' '?='|'?!' CharacterClass ')')?
+        ('(' '?<='|'?<!' CharacterClass ')') CharacterClass
         ;
 
     CharacterClass:

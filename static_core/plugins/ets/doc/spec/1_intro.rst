@@ -103,20 +103,19 @@ The |LANG| language as a whole is characterized by the following:
 
 -  **Modularity**
 
-   The |LANG| language supports the *component programming* approach. It
+   The |LANG| language supports the *modular programming* approach. It
    presumes that software is designed and implemented as a composition
-   of *modules*. 
+   of *modules* or *top-level namespaces*. 
 
-   A *module* in |LANG| is a standalone, independently compiled unit that
-   combines various programming resources (types, classes, functions, and so
-   on). A module can communicate with other modules by exporting all or some
-   of its resources to, or importing from other modules.
+   A *module* combines various programming resources
+   (types, classes, functions, and so on). A module can interact with other
+   modules by exporting all or some of its resources to, or importing from
+   other modules.
 
 .. index::
-   modularity
-   component programming
-   maintainability
+   modular programming
    module
+   namespace
 
 -  **Genericity**
 
@@ -152,14 +151,14 @@ The |LANG| language as a whole is characterized by the following:
    *cross-platform development* providing a uniform programming environment
    for many popular platforms. It can generate optimized applications
    capable of operating under the limitations of lightweight devices, or
-   realizing the full potential of any specific-target hardware.
+   realizing the full potential of any target-specific hardware.
 
 .. index::
    multitargeting
    cross-platform development
-.. index::
    high-level language
    low-level representation
+   target-specific hardware
    storage management
    dynamically created object
    deallocation
@@ -208,7 +207,7 @@ numbers/numeric literals, operator signs, delimiters), special characters
 
 The tokens defined by the lexical grammar are terminal symbols of syntactic
 notation. Syntactic notation defines a set of productions starting from the
-goal symbol *moduleDeclaration* (see :ref:`Modules and Namespaces`). It is a
+goal symbol *moduleDeclaration* (see :ref:`Namespaces and Modules`). It is a
 sentence that consists of a single distinguished nonterminal, and describes how
 sequences of tokens can form syntactically correct programs.
 
@@ -227,9 +226,9 @@ production is comprised of the following:
 - Abstract symbol (*nonterminal*) as its left-hand side,
 - Sequence of one or more *nonterminal* and *terminal* symbols as its
   *right-hand side*,
-- Character '``:``' as a separator between the left- and
+- Character ``':'`` as a separator between the left- and
   right-hand sides, and
-- Character '``;``' as the end marker.
+- Character ``';'`` as the end marker.
 
 .. index::
    lexical grammar
@@ -257,16 +256,16 @@ Grammars can use the following additional symbols (sometimes called
 *metasymbols*) in the right-hand side of a grammar production along
 with terminal and nonterminal symbols:
 
--  Vertical line '``|``' to specify alternatives.
+-  Vertical line ``'|'`` to specify alternatives.
 
--  Question mark '``?``' to specify an optional occurrence (zero- or one-time)
+-  Question mark ``'?'`` to specify an optional occurrence (zero- or one-time)
    of the preceding terminal or nonterminal.
 
--  Asterisk '``*``' to mark a *terminal* or *nonterminal* that can occur zero
+-  Asterisk ``'*'`` to mark a *terminal* or *nonterminal* that can occur zero
    or more times.
 
--  Parentheses '``(``' and '``)``' to enclose any sequence of terminals and/or
-   nonterminals marked with the metasymbols '``?``' or '``*``'.
+-  Parentheses ``'('`` and ``')'`` to enclose any sequence of terminals and/or
+   nonterminals marked with the metasymbols ``'?'`` or ``'*'``.
 
 .. index::
    terminal
@@ -290,9 +289,9 @@ The example below represents a production that specifies a list of expressions:
 
 This production introduces the following structure defined by the
 nonterminal *expressionList*. The expression list must consist of a
-sequence of *expressions* separated by the terminal symbol ‘``,``’. The
+sequence of *expressions* separated by the terminal symbol ``','``. The
 sequence must have at least one *expression*. The list is optionally
-terminated by the terminal symbol ‘``,``’.
+terminated by the terminal symbol ``','``.
 
 All grammar rules are presented in the Grammar section (see
 :ref:`Grammar Summary`) of this Specification.
@@ -361,8 +360,8 @@ as used in other languages, application areas, or industries.
 
    operation sign
      -- a language token that signifies an operator and conventionally
-     denotes a usual mathematical operator, e.g., '``+``' for addition,
-     '``/``' for division, etc. However, some languages allow using
+     denotes a usual mathematical operator, e.g., ``'+'`` for addition,
+     ``'/'`` for division, etc. However, some languages allow using
      identifiers to denote operators, and/or arbitrarily combining characters
      that are not tokens in the alphabet of that language (i.e., operator
      signs).
@@ -378,7 +377,7 @@ as used in other languages, application areas, or industries.
      evaluation.
 
    metasymbol
-     -- additional symbols '``|``', '``?``', '``*``', '``(``', and '``)``' that
+     -- additional symbols ``'|'``, ``'?'``, ``'*'``, ``'('``, and ``')'`` that
      can be used along with terminal and nonterminal symbols in the right-hand
      side of a grammar production.
 
@@ -439,9 +438,9 @@ as used in other languages, application areas, or industries.
 
    qualified name
      -- a name that consists of a sequence of identifiers separated with the
-     token ‘``.``’.
+     token ``'.'``.
 
-   scope of a name
+   name scope
      -- a region of program code within which an entity---as declared by
      that name---can be accessed or referred to by its simple name without
      any qualification.
@@ -494,8 +493,8 @@ as used in other languages, application areas, or industries.
      Grammar is a range of productions. Each production comprises an
      abstract symbol (nonterminal) as its left-hand side, and a sequence
      of nonterminal and terminal symbols as its right-hand side.
-     Each production contains the characters ‘``:``’ as a separator between the
-     left- and right-hand sides, and ‘``;``’ as the end marker.
+     Each production contains the characters ``':'`` as a separator between the
+     left- and right-hand sides, and ``';'`` as the end marker.
 
    production
      -- a sequence of terminal and nonterminal symbols that a programming
@@ -535,9 +534,13 @@ as used in other languages, application areas, or industries.
      with different signatures and different bodies.
 
    module level scope
-     -- a name in the module level scope that is applicable to modules only,
-     and is accessible throughout the entire module and in other modules if
-     exported.
+     -- a name declared at the module level has a module level scope. It can
+     be accessed within another module if it is exported from and imported into
+     that other module.
+
+   namespace level scope
+     -- a name declared in a namespace has a namespace level scope.
+     It can be accessed outside the namespace if exported.
 
    class level scope
      -- a name that is declared inside a class, and is accessible inside the
@@ -607,6 +610,13 @@ as used in other languages, application areas, or industries.
 
    array type
      -- a type that consists of more than one element.
+
+   ``AsyncLock``
+     -- a class that implements an asynchronous lock and allows performing
+     asynchronous operations under a lock.
+
+   coroutine
+     -- a part of a program that can be suspended and resumed during execution.
 
 .. raw:: pdf
 

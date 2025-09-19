@@ -307,14 +307,15 @@ A :index:`compile-time error` occurs if:
 
 -  ``typeReference`` refers directly to, or is an alias of any
    non-class type, e.g., of interface, enumeration, union, function,
-   or utility type.
+   utility type, or any instantatiation of ``FixedArray``.
 
--  Class type named by ``typeReference`` is not accessible (see
+-  ``typeReference`` names a class type that is not accessible (see
    :ref:`Accessible`).
 
--  An ``extends`` clause appears in the declaration of the class ``Object``.
+-  ``extends`` clause appears in the declaration of the class ``Object``.
 
--  The ``extends`` graph has a cycle.
+-  ``extends`` graph has a cycle.
+
 
 *Class extension* implies that a class inherits all members of the direct
 superclass.
@@ -532,17 +533,18 @@ is static and the other is not.
 Implementing Interface Methods
 ==============================
 
-If superinterfaces have more then one default implementations (see
-:ref:`Default Interface Method Declarations`) for some method ``m``, then:
+When superinterfaces have more then one default implementation (see
+:ref:`Default Interface Method Declarations`) for some method ``m``,
+then one of the following conditions must be met:
 
-- The class that implements these interfaces has method that overrides ``m``
-  (see :ref:`Override-Compatible Signatures`); or
+- The class that implements these interfaces must have method that
+  overrides ``m`` (see :ref:`Override-Compatible Signatures`);
 
-- There is a single interface method with default implementation
+- There must be a single interface method with default implementation
   that overrides all other methods; or
 
-- All interface methods refer to the same implementation, and this default
-  implementation is the current class method.
+- All interface methods must refer to the same implementation, and
+  this default implementation must be the current class method.
 
 Otherwise, a :index:`compile-time error` occurs.
 
@@ -631,6 +633,9 @@ a :index:`compile-time error` occurs for any other combinations:
    getter and setter           field, or getter and setter
    setter only                 field, setter, or setter and getter
    =========================== ======================================================
+
+It is impossible to shadow the interface property by the field with the same name
+in a superclass (see :ref:`Override and Shadow fields`)
 
 Providing implementation for the property in the form of
 a field is not necessary:
@@ -987,7 +992,6 @@ The use of annotations is discussed in :ref:`Using Annotations`.
    overload
    scope
 
-|
 
 Class members are as follows:
 
@@ -1308,7 +1312,7 @@ A :index:`compile-time error` occurs if:
    static field
    non-static field
 
-Any static field can be accessed only with the qualification of a superclass
+Any static field can be accessed only with the qualification of a class
 name (see :ref:`Field Access Expression`).
 
 A class can inherit more than one field or property with the same name from
@@ -1648,19 +1652,17 @@ performant then access to other fields.
 
 |
 
-.. _Override Fields:
+.. _Override and Shadow Fields:
 
-Overriding Fields
-=================
+Override and Shadow Fields
+==========================
 
 .. meta:
     frontend_status: None
 
-When extending a class or implementing interfaces, a field declared in a
-superclass or a superinterface can be overridden by a field with the same name,
-and the same ``static`` or non-``static`` modifier status.
-Using the keyword ``override`` is not required. The new declaration acts as
-redeclaration.
+When extending a class an instance field declared in a superclass can be
+overridden by a field with the same type. Using the keyword ``override`` is not
+required. The new declaration acts as redeclaration.
 
 A :index:`compile-time error` occurs if:
 
@@ -1669,6 +1671,11 @@ A :index:`compile-time error` occurs if:
 -  Field declaration contains the modifier ``static`` along with the modifier
    ``override``.
 -  Types of the overriding field and of the overridden field are different.
+-  The class tries to override field with the same name as the property of any of
+   its superinterfaces or superclasses. 
+-  The class has both an `implements` clause and `extends` clause and the same
+   name is present as a field in a  superclass and as a property in any direct
+   or indirect superinterface.
 
 .. index::
    overriding field
@@ -1688,15 +1695,40 @@ A :index:`compile-time error` occurs if:
 .. code-block:: typescript
    :linenos:
 
+    interface I {
+        s: number;
+    }
+
+    class Base implements I {
+        s: number;
+    }
+
+    class Derived extends Base {
+        override s: number = 1; // compile-time error, 's' is property
+    }
+
+    class Base1 {
+        s: number = 1
+    }
+
+    class Derived1 extends Base1 implements I {
+        override s: number  // compile-time error
+	                    // ambiguity, 's' both in 'I' and 'Base1'
+    }
+
+    
     class C {
         field: number = 1
     }
     class D extends C {
-        field: string = "aa" // compile-time error: type is not the same
+        field: string = "aa"     // compile-time error: type is not the same
         override no_field = 1224 // compile-time error: no overridden field in the base class
         static override field: string = "aa" // compile-time error: static cannot override
     }
 
+|
+      
+    
 Initializers of overridden fields are preserved for execution, and the
 initialization is normally performed in the context of *superclass* constructors.
 
@@ -1710,21 +1742,22 @@ initialization is normally performed in the context of *superclass* constructors
            return 123
         }
     }
-    class D extends C {
-        override field: number = 123 // field can be explicitly marked as overridden
+    class D1 extends C {
+        override field: number = 321 // field can be explicitly marked as overridden
     }
 
-    class Derived extends D {
+    class D2 extends D1 {
         field = this.init_in_derived()
         private init_in_derived() {
            console.log ("Field initialization in Derived")
            return 42
         }
     }
-    new Derived()
+    console.log ((new D2()).field)
     /* Output:
         Field initialization in C
         Field initialization in Derived
+        42
     */
 
 .. index::
@@ -1832,6 +1865,23 @@ as follows:
    inherited field
    accessor declaration
    class accessor
+
+Static fields can be inherited from a superclass or shadowed by name regardless
+of the their type:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        static field: number = 1
+    }
+    class D1 extends C {}
+    class D2 extends D1 {
+        static field: string = "a string" // OK, shadowing of C.field occurs
+    }
+    console.log (C.field, D1.field, D2.field) // 1 1 "a string" - is the output
+
+
 
 |
 
@@ -2720,8 +2770,7 @@ following strategy is to be taken:
 
   - If the compiler can detect that a non-initialized field is accessed
     during compilation, then a :index:`compile-time error` occurs;
-  - Otherwise, it is a responsibility of the runtime system to detect such
-    cases and handle them with a runtime exception.
+  - Otherwise the behavior is detremined by the implementaion.
 
 .. code-block:: typescript
    :linenos:

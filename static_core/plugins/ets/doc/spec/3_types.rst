@@ -77,7 +77,8 @@ source code in |LANG|.
    ``FixedArray<T>``
    ========================= =========================
 
-**Note**. Type ``number`` is an alias to ``double``.
+.. note::
+   Type ``number`` is an alias to ``double``.
 
 .. index::
    user-defined type
@@ -154,7 +155,8 @@ Predefined types include the following:
 -  :ref:`Type null`;
 -  :ref:`Type string`;
 -  :ref:`Type bigint`;
--  :ref:`Array Types` (``Array<T>`` or ``T[]`` or ``FixedArray<T>``).
+-  :ref:`Array Types` (``Array<T>`` or ``T[]`` or ``FixedArray<T>``);
+-  :ref:`Type Function`.
 
 .. index::
    value
@@ -245,7 +247,7 @@ The syntax of *type* is presented below:
 .. code-block:: abnf
 
     type:
-        annotationUsage?
+        annotationUsageWithParentheses?
         ( typeReference
         | 'readonly'? arrayType
         | 'readonly'? tupleType
@@ -286,7 +288,7 @@ The usage of types is represented by the example below:
 
 Parentheses are used to specify the required type structure if the type is a
 combination of array, function, or union types. Without parentheses, the symbol
-'``|``' that constructs a union type has the lowest precedence as represented
+``'|'`` that constructs a union type has the lowest precedence as represented
 by the example below:
 
 .. index::
@@ -301,7 +303,7 @@ by the example below:
    type structure
    construct
    precedence
-   parenthesis
+   parentheses
 
 .. code-block:: typescript
    :linenos:
@@ -333,8 +335,9 @@ by the example below:
     d = (): string => { return "hi" } // ok
 
 
-If an annotation is used in front of type in parentheses, then the parentheses
-become a mandatory part of the annotation to prevent ambiguity.
+The annotation which is used in front of type always needs parentheses
+(as highlighted in grammar snippet above). The reason is to prevent ambiguity
+between annotation parentheses and parentheses used in a type declaration:
 
 .. code-block:: typescript
    :linenos:
@@ -346,7 +349,7 @@ become a mandatory part of the annotation to prevent ambiguity.
    nullable array
    string
    null
-   parenthesis
+   parentheses
 
 |
 
@@ -534,46 +537,32 @@ Numeric Types
 :ref:`Integer Types and Operations` and
 :ref:`Floating-Point Types and Operations`).
 
-Larger type values include all values of smaller types:
+Each numeric type has its own set of values.
+:ref:`Widening Numeric Conversions` are used in expressions
+to convert a value of a smaller type to a value of a larger type.
 
--  ``double`` > ``float`` > ``long`` > ``int`` > ``short`` > ``byte``
+Numeric type hierachy is defined in the following way, where the smallest type
+is ``byte``, and the largest type is ``double``:
 
-A value of a smaller type can be assigned to a variable of a larger type as
-a consequence (see :ref:`Widening Numeric Conversions`).
-
-In terms of operations available for the numeric types (see
-:ref:`Multiplication`, :ref:`Division`, :ref:`Remainder`,
-:ref:`Additive Expressions`) we state that ``number`` or ``double`` is the
-largest type and ``long`` is larger than ``int`` and so on respectively.
+- ``byte`` < ``short`` < ``int`` < ``long`` < ``float`` < ``double``
 
 Type ``bigint`` does not belong to this hierarchy. No implicit conversion from
-numeric types (see :ref:`Numeric Types`) to ``bigint`` occurs in any assignment
-context (see :ref:`Assignment-like Contexts`). The methods of class ``BigInt``
+numeric types to ``bigint`` occurs. The methods of class ``BigInt``
 (which is a part of :ref:`Standard Library`) must be used to create
 ``bigint`` values from numeric type values.
 
 .. index::
    integer type
    floating-point type
-   assignability
-   assignment context
-   variable
    numeric type
    value
    double
    float
-   number type
    long
    int
    short
    byte
    bigint
-   long
-   int
-   short
-   byte
-   string
-   BigInt
 
 |
 
@@ -604,31 +593,34 @@ below.
 
 -  Comparison operators that produce a value of type ``boolean``:
 
-   +  Numeric relational operators '``<``', '``<=``', '``>``', and '``>=``'
+   +  Numeric relational operators ``'<'``, ``'<='``, ``'>'``, and ``'>='``
       (see :ref:`Numeric Relational Operators`);
-   +  Numeric equality operators '``==``' and '``!=``' (see
+   +  Numeric equality operators ``'=='`` and ``'!='`` (see
       :ref:`Numeric Equality Operators`);
+
+-  Exponentiation operator ``'**'`` as a variant that produces a value of type
+   ``bigint`` (see :ref:`Exponentiation Expression`);
 
 -  Numeric operators that produce values of types ``int``, ``long``, or
    ``bigint``:
 
-   + Unary plus '``+``' and minus '``-``' operators (see :ref:`Unary Plus` and
+   + Unary plus ``'+'`` and minus ``'-'`` operators (see :ref:`Unary Plus` and
      :ref:`Unary Minus`);
-   + Multiplicative operators '``*``', '``/``', and '``%``' (see
+   + Multiplicative operators ``'*'``, ``'/'``, and ``'%'`` (see
      :ref:`Multiplicative Expressions`);
-   + Additive operators '``+``' and '``-``' (see :ref:`Additive Expressions`);
-   + Increment operator '``++``' used as prefix (see :ref:`Prefix Increment`)
+   + Additive operators ``'+'`` and ``'-'`` (see :ref:`Additive Expressions`);
+   + Increment operator ``'++'`` used as prefix (see :ref:`Prefix Increment`)
      or postfix (see :ref:`Postfix Increment`);
-   + Decrement operator '``--``' used as prefix (see :ref:`Prefix Decrement`)
+   + Decrement operator ``'--'`` used as prefix (see :ref:`Prefix Decrement`)
      or postfix (see :ref:`Postfix Decrement`);
-   + Signed and unsigned shift operators '``<<``', '``>>``', and '``>>>``' (see
+   + Signed and unsigned shift operators ``'<<'``, ``'>>'``, and ``'>>>'`` (see
      :ref:`Shift Expressions`);
-   + Bitwise complement operator '``~``' (see :ref:`Bitwise Complement`);
-   + Integer bitwise operators '``&``', '``^``', and '``|``' (see
+   + Bitwise complement operator ``'~'`` (see :ref:`Bitwise Complement`);
+   + Integer bitwise operators ``'&'``, ``'^'``, and ``'|'`` (see
      :ref:`Integer Bitwise Operators`);
 
--  Ternary conditional operator ' ``?`` ``:`` ' (see :ref:`Ternary Conditional Expressions`);
--  String concatenation operator '``+``' (see :ref:`String Concatenation`) that,
+-  Ternary conditional operator ``'?:'`` (see :ref:`Ternary Conditional Expressions`);
+-  String concatenation operator ``'+'`` (see :ref:`String Concatenation`) that,
    if one operand is ``string`` and the other is of an integer type, converts
    the integer operand to ``string`` with the decimal form, and then creates a
    concatenation of the two strings as a new ``string``.
@@ -688,7 +680,7 @@ If otherwise neither operand is of type ``long`` and any operand is of a type
 other than ``int``, then numeric conversion is used to widen the latter
 first to type ``int``. In this case:
 
--  Operation implementation uses 32-bit precision; and
+-  Operation implementation uses the 32-bit precision; and
 -  Result of the numeric operator is of type ``int``.
 
 Conversions between integer types and type ``boolean`` are not allowed.
@@ -699,7 +691,7 @@ The integer operators cannot indicate an overflow or an underflow.
 
 An integer operator can throw ``ArithmeticError`` if the right-hand-side operand
 of an integer division operator '``/``' (see :ref:`Division`) and an integer
-remainder operator '``%``' (see :ref:`Remainder`) is zero. The situation is
+remainder operator ``'%'`` (see :ref:`Remainder`) is zero. The situation is
 discussed in :ref:`Error Handling`.
 
 .. index::
@@ -770,33 +762,36 @@ discussed below.
 
 -  Comparison operators that produce a value of type *boolean*:
 
-   - Numeric relational operators '``<``', '``<=``', '``>``', and '``>=``'
+   - Numeric relational operators ``'<'``, ``'<='``, ``'>'``, and ``'>='``
      (see :ref:`Numeric Relational Operators`);
-   - Numeric equality operators '``==``' and '``!=``' (see
+   - Numeric equality operators ``'=='`` and ``'!='`` (see
      :ref:`Numeric Equality Operators`);
 
 -  Numeric operators that produce values of type ``float`` or ``double``:
 
-   + Unary plus '``+``' and minus '``-``' operators (see :ref:`Unary Plus` and
+   + Unary plus ``'+'`` and minus ``'-'`` operators (see :ref:`Unary Plus` and
      :ref:`Unary Minus`);
-   + Multiplicative operators '``*``', '``/``', and '``%``' (see
+-  + Exponentiation operator ``'**'`` as a variant that produces a value of type
+     ``double`` (see :ref:`Exponentiation Expression`);
+
+   + Multiplicative operators ``'*'``, ``'/'``, and ``'%'`` (see
      :ref:`Multiplicative Expressions`);
-   + Additive operators '``+``' and '``-``' (see :ref:`Additive Expressions`);
-   + Increment operator '``++``' used as prefix (see :ref:`Prefix Increment`)
+   + Additive operators ``'+'`` and ``'-'`` (see :ref:`Additive Expressions`);
+   + Increment operator ``'++'`` used as prefix (see :ref:`Prefix Increment`)
      or postfix (see :ref:`Postfix Increment`);
-   + Decrement operator '``--``' used as prefix (see :ref:`Prefix Decrement`)
+   + Decrement operator ``'--'`` used as prefix (see :ref:`Prefix Decrement`)
      or postfix (see :ref:`Postfix Decrement`);
 
 -  Numeric operators that produce values of type ``int`` or ``long``:
 
-   + Signed and unsigned shift operators '``<<``', '``>>``', and '``>>>``' (see
+   + Signed and unsigned shift operators ``'<<'``, ``'>>'``, and ``'>>>'`` (see
      :ref:`Shift Expressions`);
-   + Bitwise complement operator '``~``' (see :ref:`Bitwise Complement`);
-   + Integer bitwise operators '``&``', '``^``', and '``|``' (see
+   + Bitwise complement operator ``'~'`` (see :ref:`Bitwise Complement`);
+   + Integer bitwise operators ``'&'``, ``'^'``, and ``'|'`` (see
      :ref:`Integer Bitwise Operators`);
 
--  Ternary conditional operator ' ``?`` ``:`` ' (see :ref:`Ternary Conditional Expressions`);
--  The string concatenation operator '``+``' (see :ref:`String Concatenation`)
+-  Ternary conditional operator ``'?:'`` (see :ref:`Ternary Conditional Expressions`);
+-  The string concatenation operator ``'+'`` (see :ref:`String Concatenation`)
    that, if one operand is of type ``string`` and the other is of a
    floating-point type, converts the floating-point type operand to type
    ``string`` with a value represented in the decimal form (without loss
@@ -808,6 +803,7 @@ discussed below.
    floating-point number
    operator
    value
+   exponentiation operator
    ternary conditional operator
    numeric relational operator
    numeric equality operator
@@ -841,24 +837,35 @@ discussed below.
    loss of information
    concatenation
 
-An operation is called a *floating-point operation* if at least one of the
-operands in a binary operator is of a floating-point type (even if the
-other operand is integer), and that is not a string concatenation.
+An operation is called a *floating-point operation* when:
 
-If at least one operand of the numeric operator is of type ``double``,
-then the operation implementation uses the 64-bit floating-point arithmetic.
-The result of the numeric operator is a value of type ``double``.
+- Both  operands of an ``exponentiation operator`` are of a numeric type (see
+  :ref:`Exponentiation expression`); or
+- At least one operand in a binary operator is of a floating-point type even if
+  the other operand is integer, and the operator is not a string concatenation.
 
-If the other operand is not of type ``double``, then the numeric conversion
-(see :ref:`Widening Numeric Conversions`) is used to widen the operand
-first to type ``double``.
+The operation implementation for an ``exponentiation operator`` with numeric
+operands always uses the 64-bit floating-point arithmetic. Operands are
+converted to ``double`` values if needed. The result of the numeric operator is
+a value of type ``double``.
 
-If neither operand is of type ``double``, then the operation implementation
-is to use the 32-bit floating-point arithmetic. The result of the numeric
-operator is a value of type ``float``.
+The following rules apply to other floating-point operations:
 
-If the other operand is not of type ``float``, then the numeric conversion
-is used to widen the operator first to type ``float``.
+- If at least one operand of the numeric operator is of type ``double``, then
+  the operation implementation uses the 64-bit floating-point arithmetic. The
+  result of the numeric operator is a value of type ``double``.
+
+- If the first operand is of type ``double`` and the other operand is not, then
+  the numeric conversion (see :ref:`Widening Numeric Conversions`) is used to
+  widen the operand first to type ``double``.
+
+- If neither operand is of type ``double``, then the operation implementation
+  is to use the 32-bit floating-point arithmetic. The result of the numeric
+  operator is a value of type ``float``.
+
+- If the first operand is of type ``float`` and the other operand is not, then
+  the numeric conversion is used to widen the operator first to type ``float``.
+
 
 Any floating-point type value can be cast to or from any numeric type (see
 :ref:`Numeric Types`).
@@ -988,12 +995,12 @@ Type ``boolean`` represents logical values ``true`` and ``false``.
 The boolean operators are as follows:
 
 -  Equality operators (see :ref:`Equality Expressions`);
--  Logical complement operator '``!``' (see :ref:`Logical Complement`);
--  Logical operators '``&``', '``^``', and '``|``' (see :ref:`Boolean Logical Operators`);
--  Conditional-and operator '``&&``' (see :ref:`Conditional-And Expression`) and
-   conditional-or operator '``||``' (see :ref:`Conditional-Or Expression`);
--  Ternary conditional operator ' ``?`` ``:`` ' (see :ref:`Ternary Conditional Expressions`);
--  String concatenation operator '``+``' (see :ref:`String Concatenation`)
+-  Logical complement operator ``'!'`` (see :ref:`Logical Complement`);
+-  Logical operators ``'&'``, ``'^'``, and ``'|'`` (see :ref:`Boolean Logical Operators`);
+-  Conditional-and operator ``'&&'`` (see :ref:`Conditional-And Expression`) and
+   conditional-or operator ``'||'`` (see :ref:`Conditional-Or Expression`);
+-  Ternary conditional operator ``'?:'`` (see :ref:`Ternary Conditional Expressions`);
+-  String concatenation operator ``'+'`` (see :ref:`String Concatenation`)
    that converts an operand of type ``boolean`` to type ``string`` (``true`` or
    ``false``), and then creates a concatenation of the two strings as a new
    ``string``.
@@ -1062,6 +1069,31 @@ Reference Types
    void type
    type parameter
 
+Variables and constants (see :ref:`Variable and Constant Declarations`) of
+reference types refer to instances of any types called under the term
+*objects* in this document. 
+
+Multiple references to an object are possible.
+
+Objects can have states. A state of an object that is a class instance is
+stored in its fields. A state of an object that is an array (see
+:ref:`Array Types`) or a tuple (see :ref:`Tuple Types`) is stored in
+its elements.
+
+If two variables of any type except :ref:`Value Types` contain references
+to the same object, and the state of that object is modified in the reference
+of either variable, then the state so modified can be seen in the reference of
+the other variable.
+
+.. index::
+   object
+   subtype
+   state
+   array element
+   variable
+   instance
+   reference
+
 |
 
 .. _Type Any:
@@ -1096,12 +1128,13 @@ Type ``Object`` is a predefined class type which is the supertype
 (see :ref:`Subtyping`) of all types except :ref:`Type void`,
 :ref:`Type undefined`, :ref:`Type null`, :ref:`Nullish Types`,
 :ref:`Type Parameters`, and :ref:`Union types` that contain type parameters.
-All subtypes of ``Object`` inherit the methods of class ``Object`` (see
+Type ``Object`` is a subtype of type ``Any`` (see :ref:`Type Any`).
+All subtypes of ``Object`` inherit all methods of class ``Object`` (see
 :ref:`Inheritance`). All methods of class ``Object`` are described in full in
 :ref:`Standard Library`.
 
 The method ``toString`` used in the examples in this document returns a
-string representation of the object.
+string representation of any object.
 
 
 .. index::
@@ -1120,30 +1153,6 @@ string representation of the object.
    union type
    inheritance
    string
-
-The term *object* is used in the Specification to refer to an instance of any
-type.
-
-Pointers to objects are called *references*.
-Multiple references to an object are possible.
-
-Objects can have states. A state of an object that is a class instance is
-stored in its fields. A state of an array or tuple object is stored in its
-elements.
-
-If two variables of any type except :ref:`Value Types` contain references
-to the same object, and the state of that object is modified in the reference
-of either variable, then the state so modified can be seen in the reference of
-the other variable.
-
-.. index::
-   object
-   subtype
-   state
-   array element
-   variable
-   instance
-   reference
 
 |
 
@@ -1170,16 +1179,17 @@ Type ``never`` has no instance. Type ``never`` is used as one of the following:
    :linenos:
 
     function foo (): never {
-        throw new Error("foo() never returns")
+       // function foo never returns
+       throw new Error("foo() never returns")
     }
 
-    let x: never = foo() // x will never get a value
+    let x: never = foo() // x never gets a value
 
-    function bar (p: never) { // body of this
-       // function will never be executed
+    function bar (p: never) {
+       // function bar body is never executed
     }
 
-    bar (foo()) // neither foo nor bar are executed
+    bar (foo()) // bar is never called as foo() call never returns
 
 .. index::
    never type
@@ -1205,7 +1215,7 @@ Type ``void``
 .. meta:
     frontend_status: Done
 
-Type ``void`` is used as a return type to highlight that a function, a method,
+Type ``void`` is used typically as a return type to highlight that a function, a method,
 or a lambda can contain :ref:`Return Statements` with no expression, or no
 return statement at all:
 
@@ -1224,14 +1234,9 @@ return statement at all:
 
     let funcTypeVariable: FunctionWithNoParametersType = (): void => {}
 
-A :index:`compile-time error` occurs if:
-
--  Type ``void`` is used as type annotation;
--  Expression of type ``void`` is used as a value.
-
-Type ``void`` has no instance by itself. However, that it is a supertype of type
-``undefined`` (see :ref:`Type undefined`) affects the :ref:`Assignability` as
-follows:
+At the same time type ``void`` is an ordinary type which can be used as
+arbitrary type annotation. Type ``void`` is a supertype of type ``undefined``
+(see :ref:`Type undefined`) and it implies the :ref:`Assignability` as follows:
 
 .. code-block-meta:
    expect-cte:
@@ -1239,20 +1244,16 @@ follows:
 .. code-block:: typescript
    :linenos:
 
-    let x: void = undefined // compile-time error - void used as type annotation
+    let x1: void = undefined // OK as undefined is a subtype of void
+    let x2: void = bar()     // OK
+    let x3: void = foo()     // OK
+    let x4       = foo()     // OK
 
-    function foo (): void {}
-    console.log (foo())     // compile-time error - void used as a value
-
-    function bar1 (): void {
-       return void         // compile-time error - void used as a value
-    }
-
-    function bar2 (): void {
+    function bar (): void {
        return undefined    // OK as undefined is a subtype of void
     }
-
-    type aType = void | number // compile-time error - void used as type annotation
+    function foo () {} // return type is void
+    
 
 .. index::
    void type
@@ -1264,7 +1265,6 @@ follows:
    return type
    function
    method
-   type annotation
 
 Type ``void`` can be used as a type argument that instantiates a generic type,
 function, or method as follows:
@@ -1300,8 +1300,7 @@ function, or method as follows:
    type A2<T> = Array<T>
    const a1: A1<void> = [undefined]
    const a2: A2<void> = [undefined, undefined]
-   
-   let x: void[] // compile-time error - void used as type annotation
+   const a3: void[] = [undefined]
 
 
 .. index::
@@ -1422,7 +1421,7 @@ Type ``string`` has dual semantics, i.e.:
 
 A number of operators can act on ``string`` values as follows:
 
--  Accessing the ``length`` property returns string length as ``int``
+-  Accessing the property ``length`` returns string length as ``int``
    type value. String length is a non-negative integer number.
    String length is set once at runtime and cannot be changed after that.
 
@@ -1523,7 +1522,6 @@ Literal Types
 
 .. meta:
     frontend_status: Partly
-    todo: implement string literal types on runtime part #15276
 
 *Literal types* are aligned with some |LANG| literals (see :ref:`Literals`).
 Their names are the same as the names of their values, i.e., literals proper.
@@ -1617,10 +1615,11 @@ requirement.
 - *Fixed-Size arrays* have no methods defined.
 
 
-**Note**. The term *array type* as used in this Specification applies to both
-*resizable array type* and *fixed-size array type*. The same holds true for
-*array value* and *array instance*.
-*Resizable arrays* and *fixed-size arrays* are not assignable to each other.
+.. note::
+   The term *array type* as used in this Specification applies to both
+   *resizable array type* and *fixed-size array type*. The same holds true for
+   *array value* and *array instance*.
+   *Resizable arrays* and *fixed-size arrays* are not assignable to each other.
 
 .. index::
    array length
@@ -1643,8 +1642,8 @@ Resizable Array Types
 *Resizable array type* is a built-in type characterized by the following:
 
 -  Any object of resizable array type contains elements. The number of elements
-   is known as *array length*, and can be accessed by using the ``length``
-   property.
+   is known as *array length*, and can be accessed by using the property
+   ``length``.
 -  Array length is a non-negative integer number.
 -  Array length can be set and changed at runtime.
 -  Array element is accessed by its index. The index is an integer number
@@ -1688,8 +1687,9 @@ The first form uses the following syntax:
        type '[' ']'
        ;
 
-**Note**.  ``T[]`` and ``Array<T>`` specify identical, i.e., indistinguishable
-types (see :ref:`Type Identity`).
+.. note::
+   ``T[]`` and ``Array<T>`` specify identical, i.e., indistinguishable
+   types (see :ref:`Type Identity`).
 
 .. index::
    type identity
@@ -1717,8 +1717,8 @@ better |TS| compatibility. An error is caused by the following situations:
 
 -  The value is of type ``number`` or other floating-point type,
    and the fractional part differs from 0;
--  The value is less then zero; or
--  The value is greater then previous length.
+-  The value is less than zero; or
+-  The value is greater than previous length.
 
 The above situations cause errors as follows:
 
@@ -1764,7 +1764,7 @@ A type alias can set a name for an array type (see :ref:`Type Alias Declaration`
 .. code-block:: typescript
    :linenos:
 
-    type Matrix = number[][] /* array or array of numbers */
+    type Matrix = number[][] /* array of array of numbers */
 
 An array as an object is assignable to a variable of type ``Object``:
 
@@ -1825,7 +1825,8 @@ syntax forms:
 
 Both forms specify identical (indistinguishable) types (see :ref:`Type Identity`).
 
-**Note.** In arrays of arrays, all arrays are ``readonly``.
+.. note::
+   In arrays of arrays, all arrays are ``readonly``.
 
 .. index::
    prefix readonly
@@ -1864,7 +1865,7 @@ type declaration. The order of types in a tuple type declaration specifies the
 type of the corresponding value in the group.
 
 It implies that each element of a tuple has its own type.
-The operator '``[]``' (square brackets) is used to access the elements of a
+The operator ``'[]'`` (square brackets) is used to access the elements of a
 tuple in a manner similar to accessing the elements of an array.
 
 An index expression must be of integer type. The index of the first tuple
@@ -1878,6 +1879,19 @@ access to tuple elements:
               [     6,      7,  "abc",    true,    42]
    tuple[0] = 42
    console.log (tuple[0], tuple[4]) // `42 42` be printed
+
+A tuple has no property ``length``, and the following code legal in |TS|
+causes a :index:`compile-time error` in |LANG|:
+
+.. code-block:: typescript
+   :linenos:
+
+   let tuple : [number, string]  = [1, "" ]
+   for (let index = 0; index < tuple.length; index++ ) {  // compile-time error
+                                                          // no 'length' property
+      let element: Object = tuple[index]
+      // do something with the element
+   }
 
 Any tuple type is assignable (see :ref:`Assignability`) to class
 ``Object`` (see :ref:`Type Object`).
@@ -1968,12 +1982,6 @@ A function type consists of the following:
 
 The syntax of *function type* is as follows:
 
-
-.. functionType:
-   typeParameters? '(' ftParameterList? ')' ftReturnType
-   ;
-
-
 .. code-block:: abnf
 
     functionType:
@@ -2021,7 +2029,7 @@ A type alias can set a name for a *function type* (see
     type BinaryOp = (x: number, y: number) => number
     let op: BinaryOp
 
-If a function type has the '``?``' mark for a parameter name, then this
+If a function type has the ``'?'`` mark for a parameter name, then this
 parameter and all parameters that follow (if any) are optional. Otherwise, a
 :index:`compile-time error` occurs. The actual type of the parameter is then a
 union of the parameter type and type ``undefined``. This parameter has no
@@ -2171,6 +2179,7 @@ Union Types
 
 .. meta:
    frontend_status: Partly
+   todo: fix grammar - two types are mandatory
    todo: support string literal in union
    todo: implement using common fields and methods, fix related issues
 
@@ -2182,7 +2191,7 @@ The syntax of *union type* is as follows:
 .. code-block:: abnf
 
     unionType:
-        type ('|' type)*
+        type '|' type ('|' type)*
         ;
 
 The values of a *union* type are valid values of all types the union is created
@@ -2300,9 +2309,10 @@ Literal types are represented by the following example:
    predefined type
    conversion
 
-**Note**. A :index:`compile-time error` occurs if an expression of a *union*
-type is compared to a literal value or a constant that does not belong to the
-values of the *union* type:
+.. note::
+   A :index:`compile-time error` occurs if an expression of a *union*
+   type is compared to a literal value or a constant that does not belong to the
+   values of the *union* type:
 
 .. code-block:: typescript
    :linenos:
@@ -2665,7 +2675,8 @@ The following nullish-safe options exist for dealing with nullish type ``T``:
    -  Nullish-coalescing expression (see :ref:`Nullish-Coalescing Expression`
       for details).
 
-**Note**. *Nullish types* are not compatible with type ``Object``:
+.. note::
+   *Nullish types* are not compatible with type ``Object``:
 
 .. code-block:: typescript
    :linenos:
@@ -2714,7 +2725,8 @@ Default Values for Types
 .. meta:
     frontend_status: Done
 
-**Note**. This |LANG| feature is experimental.
+.. note::
+   This |LANG| feature is experimental.
 
 So-called *default values* are used by the following types for variables
 that require no explicit initialization (see :ref:`Variable Declarations`):
@@ -2779,6 +2791,13 @@ be assigned.
    let a = new A()
    console.log (a.f1, a.f2)
    // Output: undefined, undefined
+
+   let o1: Any
+   let o2: void
+   let o3: undefined
+   console.log (o1, o2, o3)
+   // Output: undefined, undefined, undefined
+
 
 .. index::
    number

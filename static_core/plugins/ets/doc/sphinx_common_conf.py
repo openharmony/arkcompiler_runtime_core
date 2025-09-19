@@ -31,11 +31,11 @@ copyright = u'2021-2024 Huawei Device Co., Ltd.'
 
 # The short X.Y version
 # CC-OFFNXT(G.NAM.01): project code style
-version = u'1.2.0'
+version = u'1.2.1'
 
 # The full version, including alpha/beta/rc tags
 # CC-OFFNXT(G.NAM.01): project code style
-release = u'1.2.0-alpha2'
+release = u'1.2.1-alpha'
 
 # Common glossary for the entire documentation bundle:
 rst_epilog = '''

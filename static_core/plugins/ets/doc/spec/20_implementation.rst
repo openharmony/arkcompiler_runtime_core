@@ -148,7 +148,7 @@ Ensuring Module Initialization
 The |LANG| standard library (see :ref:`Standard Library`) provides a top-level
 function ``initModule()`` with one parameter of ``string`` type. A call to this
 function ensures that the module referred by the argument is available, and
-that its initialization (see :ref:`Static Initialization`) is performed. An
+that its initialization (see :ref:`Initialization Sequence`) is performed. An
 argument must be a string literal. Otherwise, a :index:`compile-time error`
 occurs.
 
@@ -221,30 +221,6 @@ declarations that use specific ArkUI types.
    ArkUI plugin
    ArkUI type
    ArkUI code
-
-|
-
-.. OutOfMemoryError for Primitive Type Operations:
-
-``OutOfMemoryError`` for Primitive Type Operations
-**************************************************
-
-The execution of some primitive type operations (e.g., increment, decrement, and
-assignment) can throw ``OutOfMemoryError`` (see :ref:`Error Handling`) if
-allocation of a new object is required but the available memory is not
-sufficient to perform it.
-
-.. index::
-   primitive type
-   primitive type operation
-   operation
-   increment
-   decrement
-   assignment
-   error
-   allocation
-   object
-   available memory
 
 |
 
