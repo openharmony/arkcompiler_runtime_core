@@ -32,6 +32,7 @@ function main() {
     suite.addTest("Testing Queue pop operation without elements", testQueuePopWithoutElements);
     suite.addTest("Testing Queue getFirst operation with elements", testQueueGetFirstWithElements);
     suite.addTest("Testing Queue getFirst operation without elements", testQueueGetFirstWithoutElements);
+    suite.addTest("Testing Queue get and pop operation with undefined elements", testQueueGetPopWithUndefinedElements);
 
     return suite.run();
 }
@@ -124,4 +125,13 @@ function testQueueGetFirstWithoutElements() {
     } catch (e: BusinessError) {
         arktest.assertEQ(e.message, "Container is empty");
     }
+}
+
+function testQueueGetPopWithUndefinedElements () {
+    let queue = new Queue<undefined>();
+    queue.add(undefined);
+    let result = queue.getFirst();
+    arktest.assertEQ(result, undefined);
+    let result1 = queue.pop();
+    arktest.assertEQ(result1, undefined);
 }

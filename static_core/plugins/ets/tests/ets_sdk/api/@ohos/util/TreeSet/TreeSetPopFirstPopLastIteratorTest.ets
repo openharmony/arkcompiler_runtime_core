@@ -29,6 +29,8 @@ function main(): int {
         testPopFirstPopLastDescendingOrder)
     suite.addTest("TreeSet popFirst popLast first and last value after clear data",
         testPopFirstPopLastAfterClear)
+    suite.addTest("TreeSet popFirst popLast first and last undefined",
+        testPopFirstPopLastUndefined)
     suite.addTest("TreeSet $_iterator return iterator",
         testIterator)
     suite.addTest("TreeSet $_iterator return iterator with null treeSet",
@@ -125,6 +127,16 @@ function testPopFirstPopLastAfterClear() {
     arktest.assertEQ(result2, false, "The treeSet should not contain the value that is not set");
     arktest.assertEQ(result3, false, "The treeSet should not contain the value that is not set");
     arktest.assertEQ(treeSet.length, 0, "The treeSet length should be 0");
+}
+
+function testPopFirstPopLastUndefined() {
+    let treeSet: TreeSet<undefined> = new TreeSet<undefined>();
+    treeSet.add(undefined);
+    let result1 = treeSet.popFirst();
+    arktest.assertEQ(result1, undefined);
+    treeSet.add(undefined);
+    let result2 = treeSet.popLast();
+    arktest.assertEQ(result2, undefined);
 }
 
 function testIterator() {

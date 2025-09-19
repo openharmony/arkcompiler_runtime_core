@@ -163,7 +163,7 @@ export class TreeSet<T> implements ReadonlyTreeSet<T> {
      * @returns the value of the first element if exists
      */
     getFirstValue(): T {
-        return this.treeMap.getFirstKey()!;
+        return this.treeMap.getFirstKey();
     }
 
     /**
@@ -183,7 +183,7 @@ export class TreeSet<T> implements ReadonlyTreeSet<T> {
      * @returns the value of the last element if exists
      */
     getLastValue(): T {
-        return this.treeMap.getLastKey()!;
+        return this.treeMap.getLastKey();
     }
 
     /**
@@ -213,7 +213,7 @@ export class TreeSet<T> implements ReadonlyTreeSet<T> {
      */
     popFirst(): T {
         this.checkEmptyContainer();
-        const res = this.getFirstValue()!;
+        const res = this.getFirstValue();
         this.remove(res);
         return res;
     }
@@ -225,7 +225,7 @@ export class TreeSet<T> implements ReadonlyTreeSet<T> {
      */
     popLast(): T {
         this.checkEmptyContainer();
-        const res = this.getLastValue()!;
+        const res = this.getLastValue();
         this.remove(res);
         return res;
     }
