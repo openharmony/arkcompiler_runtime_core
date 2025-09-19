@@ -85,6 +85,9 @@ EtsObject *SetupEtsException(EtsCoroutine *coro, const char *classDescriptor, co
     EtsHandle<EtsObject> pending(coro, EtsObject::FromCoreType(coro->GetException()));
     coro->ClearException();
 
+    // NOTE(mgroshev): In case of usage of mock_stdlib.pa we do not support creation of exceptions
+    ASSERT(Runtime::GetOptions().ShouldInitializeIntrinsics());
+
     EtsHandle<EtsString> etsMsg(coro,
                                 msg == nullptr ? EtsString::CreateNewEmptyString() : EtsString::CreateFromMUtf8(msg));
     if (UNLIKELY(etsMsg.GetPtr() == nullptr)) {
