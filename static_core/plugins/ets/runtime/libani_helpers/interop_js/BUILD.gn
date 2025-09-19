@@ -39,7 +39,10 @@ ohos_source_set("hybridgref_static") {
     "$ark_root/runtime:libarkruntime",
   ]
   if (is_ohos && is_standard_system) {
-    external_deps = [ "napi:ace_napi" ]
+    external_deps = [
+      "bounds_checking_function:libsec_static",
+      "napi:ace_napi",
+    ]
   } else if (ark_standalone_build && ark_ets_hybrid) {
     deps += [ "$arkui_root/napi:ace_napi" ]
   }

@@ -32,7 +32,7 @@ function main(): void {
 
     let is_true: Boolean = new Boolean(true);
 
-    let is_resolution2: Boolean = await booleanPromise();
+    let is_resolution2: Boolean = waitForCompletion(booleanPromise);
 
     arktest.assertTrue( is_resolution2 instanceof Boolean)
     arktest.assertEQ(is_resolution2, is_true)

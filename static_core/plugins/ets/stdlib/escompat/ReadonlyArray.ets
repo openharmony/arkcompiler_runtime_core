@@ -57,7 +57,7 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
 
     keys(): IterableIterator<number>;
 
-    lastIndexOf(searchElement: T, fromIndex?: number): number;
+    lastIndexOf(searchElement: T, fromIndex?: int): int;
 
     map<U>(mapper: (value: T, index: number, array: ReadonlyArray<T>) => U): Array<U>;
 

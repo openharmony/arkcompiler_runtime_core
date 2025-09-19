@@ -137,7 +137,7 @@ bool Ins::Emit(BytecodeEmitter& emitter, panda_file::MethodItem *method,
         if (IDEmpty()) {
             return false;
         }
-        auto *foundMethod = GetMethodForHybridOpcode(GetID(0), staticMethods, methods);
+        auto *foundMethod = GetMethodForHybridOpcode(GetID(0), IsDevirtual() ? methods : staticMethods, methods);
         if (foundMethod == nullptr) {
             return false;
         }

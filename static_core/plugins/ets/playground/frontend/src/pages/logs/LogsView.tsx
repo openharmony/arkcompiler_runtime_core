@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,7 @@ import {Icon} from '@blueprintjs/core';
 import cx from 'classnames';
 import { AppDispatch } from '../../store';
 import { useDispatch } from 'react-redux';
-import { setOutLogs, setErrLogs } from '../../store/slices/logs';
+import { setOutLogs, setErrLogs, setJumpTo } from '../../store/slices/logs';
 
 
 interface IProps {
@@ -39,7 +39,7 @@ const LogsView = ({logArr, clearFilters, logType}: IProps): JSX.Element => {
             setLogs(logArr);
             return;
         }
-        const filtered = logs.filter(el => el.message.includes(val));
+        const filtered = logs.filter(el => el.message[0].message.includes(val));
         setLogs(filtered);
     };
     useEffect(() => {
@@ -83,7 +83,11 @@ const LogsView = ({logArr, clearFilters, logType}: IProps): JSX.Element => {
         <div className={styles.container}>
             <div className={styles.containerLogs} ref={containerRef}>
                 {logs.map((log: ILog, index) => (
-                    <pre key={index} data-index={index} className={styles.rowContainer}>
+                    <pre
+                        key={index}
+                        data-index={index}
+                        className={styles.rowContainer}
+                    >
                         <span
                             className={cx({
                                 [styles.tag]: true,
@@ -91,7 +95,17 @@ const LogsView = ({logArr, clearFilters, logType}: IProps): JSX.Element => {
                         >
                             [{log?.from?.includes('Err') ? 'ERR' : 'LOG'}]:
                         </span>
-                        <span className={styles.logText}>{log.message}</span>
+                        {log.message.map((el, ind) => (
+                            <span
+                                key={`${el.message}-${ind}`}
+                                className={styles.logText}
+                                onClick={(): void => {
+                                    if (el?.line && el?.column) {
+                                        dispatch(setJumpTo({line: el.line, column: el.column, nonce: Date.now()}));
+                                    }
+                                }}
+                            >{el.message}</span>
+                        ))}
                     </pre>
                 ))}
             </div>

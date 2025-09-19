@@ -16,7 +16,7 @@
 package std.interop.js;
 
 export final class ESError extends Error {
-    private err_: ESValue;
+    private err_: ESValue
 
     private constructor(err: Any) {
         super("ESError", "", undefined);

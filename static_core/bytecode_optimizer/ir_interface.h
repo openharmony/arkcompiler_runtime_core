@@ -33,6 +33,11 @@ public:
     NO_COPY_SEMANTIC(BytecodeOptIrInterface);
     NO_MOVE_SEMANTIC(BytecodeOptIrInterface);
 
+    virtual bool IsMethodStatic(uint32_t offset) const
+    {
+        return maps_->staticMethods.find(offset) != maps_->staticMethods.end();
+    }
+
     virtual std::string GetMethodIdByOffset(uint32_t offset) const
     {
         auto it = maps_->methods.find(offset);

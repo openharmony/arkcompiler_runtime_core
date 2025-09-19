@@ -30,7 +30,7 @@ async function async_chain_element(caller_wid: int, counter: int): Promise<int> 
     return await async_chain_element(caller_wid, counter - 1);
 }
 
-function async_function_chain(caller_wid: int, chain_len: int): int {
+async function async_function_chain(caller_wid: int, chain_len: int): Promise<int> {
     return await async_chain_element(caller_wid, chain_len);
 }
 
@@ -38,7 +38,7 @@ function compare_worker_ids_async(chain_len: int): int {
     L.log('Testing async function chain');
 
     let id_main: int = CoroutineExtras.getWorkerId();
-    let result = async_function_chain(id_main, chain_len);
+    let result = waitForCompletion(() => async_function_chain(id_main, chain_len));
     if (result == 0) {
         L.log('Successfully ran the async function chain')
     } else {

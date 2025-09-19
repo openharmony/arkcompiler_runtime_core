@@ -24,7 +24,9 @@ class Event {
     }
 
     public wait(): boolean {
-        return await this.promise;
+        return waitForCompletion<boolean>(() => {
+            return this.promise;
+        });
     }
 
     public fire(val: boolean = true) {
@@ -41,6 +43,14 @@ enum MessageType {
     NUMBER,
     BOOLEAN,
     ARRAY,
+}
+
+function sleep(ms: int) {
+    return new Promise<void>((res, rej) => {
+        setTimeout(() => {
+            res(undefined);
+        }, ms);
+    });
 }
 
 function testMessageHandlerCreation() {
@@ -290,6 +300,42 @@ function testRemoveMultipleMessages() {
     eaw.join();
 }
 
+function testHasMessage2() {
+    let eaw = new EAWorker();
+    eaw.start();
+    let handler: concurrency.MessageHandler;
+    let waiter = new Event();
+
+    handler = new concurrency.MessageHandler((msg: concurrency.Message) => {
+        if (msg.getCallback() != undefined) {
+            let cb = msg.getCallback() as Callback;
+            cb();
+        }
+    }, eaw);
+    let message = new concurrency.Message(MessageType.STRING, "test", handler);
+    let message2 = new concurrency.Message(MessageType.STRING, "test2", handler);
+
+    let callback = () => {
+        handler.sendMessage(message);
+        handler.sendMessage(message2);
+        arktest.assertEQ(handler.hasMessages(MessageType.STRING), true);
+        handler.removeMessages(MessageType.STRING, "test");
+        arktest.assertEQ(handler.hasMessages(MessageType.STRING), true);
+        handler.sendMessage(new concurrency.Message(MessageType.STRING, "test3", handler));
+        arktest.assertEQ(handler.hasMessages(MessageType.STRING, "test3"), true);
+        handler.removeMessages(MessageType.STRING);
+        arktest.assertEQ(handler.hasMessages(MessageType.STRING, "test3"), false);
+        arktest.assertEQ(handler.hasMessages(MessageType.STRING, "test2"), false);
+        arktest.assertEQ(handler.hasMessages(MessageType.STRING, "test"), false);
+        arktest.assertEQ(handler.hasMessages(MessageType.STRING), false);
+        waiter.fire();
+    }
+
+    handler.sendMessage(new concurrency.Message(callback, handler));
+    waiter.wait();
+    eaw.join();
+}
+
 function testMessageHandlerMismatch() {
     let eaw = new EAWorker();
     eaw.start();
@@ -305,11 +351,26 @@ function testMessageHandlerMismatch() {
     eaw.join();
 }
 
+function testDoubleRemoveMessage() {
+    let worker = new EAWorker();
+    worker.start();
+    let handler = new concurrency.MessageHandler((msg: concurrency.Message): void => {
+        waitForCompletion(async (): Promise<void> => {
+            await sleep(5000);
+        });
+    }, worker);
+
+    let message = new concurrency.Message(1, handler);
+    handler.sendMessage(message);
+    arktest.assertEQ(handler.removeMessages(1), true);
+    arktest.assertEQ(handler.removeMessages(1), false);
+    worker.quit();
+}
+
 function main() {
     let testSuite = new arktest.ArkTestsuite('messageHandlerBasicInterface');
     
     testSuite.addTest("testMessageHandlerCreation", testMessageHandlerCreation);
-    testSuite.addTest("testMessageHandlerWithoutWorker", testMessageHandlerWithoutWorker);
     testSuite.addTest("testSendEmptyMessage", testSendEmptyMessage);
     testSuite.addTest("testSendStringMessage", testSendStringMessage);
     testSuite.addTest("testSendNumberMessage", testSendNumberMessage);
@@ -319,6 +380,8 @@ function main() {
     testSuite.addTest("testMessageCallback", testMessageCallback);
     testSuite.addTest("testRemoveMultipleMessage", testRemoveMultipleMessages);
     testSuite.addTest("testMessageHandlerMismatch", testMessageHandlerMismatch);
+    testSuite.addTest("testDoubleRemoveMessage", testDoubleRemoveMessage);
+    testSuite.addTest("testHasMessage2", testHasMessage2);
 
     testSuite.run();
 }

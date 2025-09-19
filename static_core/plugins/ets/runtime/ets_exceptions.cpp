@@ -91,6 +91,7 @@ static EtsObject *CreateErrorInstance(EtsCoroutine *coro, EtsClass *cls, EtsHand
                                                      panda_file::Type(panda_file::Type::TypeId::REFERENCE)},
                         Method::Proto::RefTypeVector {panda_file_items::class_descriptors::STRING,
                                                       panda_file_items::class_descriptors::ERROR_OPTIONS});
+
     EtsMethod *ctor = cls->GetDirectMethod(panda_file_items::CTOR.data(), proto);
     if (ctor == nullptr) {
         LOG(FATAL, RUNTIME) << "No method " << panda_file_items::CTOR << " in class " << cls->GetDescriptor();
@@ -99,8 +100,8 @@ static EtsObject *CreateErrorInstance(EtsCoroutine *coro, EtsClass *cls, EtsHand
 
     std::array args {Value(error.GetPtr()->GetCoreType()), Value(msg.GetPtr()->GetCoreType()),
                      Value(errOptions.GetPtr()->AsObject()->GetCoreType())};
-
     EtsMethod::ToRuntimeMethod(ctor)->InvokeVoid(coro, args.data());
+
     if (UNLIKELY(coro->HasPendingException())) {
         return nullptr;
     }

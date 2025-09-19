@@ -57,9 +57,9 @@ public:
      * @param length of created array.
      * NOTE: non-movable creation ensures that native code can obtain raw pointer to buffer.
      */
-    ALWAYS_INLINE static ObjectHeader *AllocateNonMovableArray(EtsInt length)
+    ALWAYS_INLINE static EtsByteArray *AllocateNonMovableArray(EtsInt length)
     {
-        return EtsByteArray::Create(length, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT)->GetCoreType();
+        return EtsByteArray::Create(length, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
     }
 
     ALWAYS_INLINE static EtsLong GetAddress(const EtsByteArray *array)
@@ -81,7 +81,8 @@ public:
             return nullptr;
         }
 
-        handle->InitializeByDefault(coro, length);
+        auto *buf = AllocateNonMovableArray(length);
+        handle->InitializeByDefault(coro, buf);
         *resultData = handle->GetData();
         return handle.GetPtr();
     }
@@ -299,11 +300,11 @@ private:
      * Initializes ArrayBuffer.
      * NOTE: behavior of this method must repeat initialization from managed constructor.
      */
-    void InitializeByDefault(EtsCoroutine *coro, size_t length)
+    void InitializeByDefault(EtsCoroutine *coro, EtsByteArray *buffer)
     {
-        ObjectAccessor::SetObject(coro, this, GetManagedDataOffset(), AllocateNonMovableArray(length));
-        ASSERT(length <= static_cast<size_t>(std::numeric_limits<EtsInt>::max()));
-        byteLength_ = static_cast<EtsInt>(length);
+        ObjectAccessor::SetObject(coro, this, GetManagedDataOffset(), buffer->GetCoreType());
+        ASSERT(buffer->GetLength() <= static_cast<size_t>(std::numeric_limits<EtsInt>::max()));
+        byteLength_ = static_cast<EtsInt>(buffer->GetLength());
         nativeData_ =
             GetAddress(EtsByteArray::FromCoreType(ObjectAccessor::GetObject(coro, this, GetManagedDataOffset())));
         ASSERT(nativeData_ != 0);

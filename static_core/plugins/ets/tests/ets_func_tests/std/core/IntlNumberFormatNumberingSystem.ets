@@ -20,8 +20,8 @@ function main(): int {
 }
 
 function testNumberingSystem() {
-    const locales: string[] = [ "en-US", "zh", "ar-SA", ""];
-    const expected: string[] = [ "latn", "latn", "arab", "latn"];
+    const locales: string[] = [ "en-US", "zh", "ar-SA"];
+    const expected: string[] = [ "latn", "latn", "arab"];
     let i: int = 0;
     for (const l of locales) {
         const nf = new Intl.NumberFormat(l);

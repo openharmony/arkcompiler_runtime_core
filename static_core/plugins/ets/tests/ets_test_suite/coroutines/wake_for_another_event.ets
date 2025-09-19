@@ -23,7 +23,7 @@ async function foo() {}
 
 let resolvePromiseFn: ((value: String) => void) | null = null;
 
-function testWakeForEvent() {
+async function testWakeForEvent() {
     let p1 = new Promise<String>((resolve: (value: String) => void): void => {
         resolvePromiseFn = resolve;
     });
@@ -45,7 +45,7 @@ function testWakeForEvent() {
 
 function main(): int {
     let testSuite = new arktest.ArkTestsuite('coroutines.wake_for_another_event');
-    testSuite.addTest('testWakeForEvent', testWakeForEvent);
+    testSuite.addAsyncTest('testWakeForEvent', testWakeForEvent);
     let res = testSuite.run();
     return res;
 }

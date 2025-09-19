@@ -20,10 +20,10 @@ const mustChecks: Array<Function> = new Array<Function>();
 function main(): int {
     const suite = new arktest.ArkTestsuite("Stream API tests");
 
-    suite.addTest("Writable stream end method validation (gbk).", testWritableStreamEndEncodingGbk);
-    suite.addTest("Writable stream end method validation (gb2312).", testWritableStreamEndEncodingGb2312);
-    suite.addTest("Set default encoding validation (gb18030).", testWritableStreamSetDefaultEncodingGb18030);
-    suite.addTest("Set default encoding validation (gbk).", testWritableStreamSetDefaultEncodingGbk);
+    suite.addAsyncTest("Writable stream end method validation (gbk).", testWritableStreamEndEncodingGbk);
+    suite.addAsyncTest("Writable stream end method validation (gb2312).", testWritableStreamEndEncodingGb2312);
+    suite.addAsyncTest("Set default encoding validation (gb18030).", testWritableStreamSetDefaultEncodingGb18030);
+    suite.addAsyncTest("Set default encoding validation (gbk).", testWritableStreamSetDefaultEncodingGbk);
 
     return suite.run();
 }
@@ -88,7 +88,7 @@ class MyWrite1 extends stream.Writable {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamEncoding005
-function testWritableStreamEndEncodingGbk() {
+async function testWritableStreamEndEncodingGbk() {
     mustChecks.push(() => {
         if (callCount_MyWrite1 !== 1) {
             throw new Error(`Function was expected to be called 1 times, but was called ${callCount_MyWrite1} times.`);
@@ -114,7 +114,7 @@ class MyWrite2 extends stream.Writable {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamEncoding006
-function testWritableStreamEndEncodingGb2312() {
+async function testWritableStreamEndEncodingGb2312() {
     mustChecks.push(() => {
         if (callCount_MyWrite2 !== 1) {
             throw new Error(`Function was expected to be called 1 times, but was called ${callCount_MyWrite2} times.`);
@@ -140,7 +140,7 @@ class MyWrite3 extends stream.Writable {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamEncoding007
-function testWritableStreamSetDefaultEncodingGb18030() {
+async function testWritableStreamSetDefaultEncodingGb18030() {
     mustChecks.push(() => {
         if (callCount_MyWrite3 !== 1) {
             throw new Error(`Function was expected to be called 1 times, but was called ${callCount_MyWrite3} times.`);
@@ -167,7 +167,7 @@ class MyWrite4 extends stream.Writable {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamEncoding008
-function testWritableStreamSetDefaultEncodingGbk() {
+async function testWritableStreamSetDefaultEncodingGbk() {
     mustChecks.push(() => {
         if (callCount_MyWrite4 !== 1) {
             throw new Error(`Function was expected to be called 1 times, but was called ${callCount_MyWrite4} times.`);

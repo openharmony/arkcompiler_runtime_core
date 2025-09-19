@@ -27,7 +27,7 @@ class Event {
         })
     }
 
-    public wait(): boolean {
+    public async wait(): Promise<boolean> {
         return await this.promise;
     }
 
@@ -39,7 +39,7 @@ class Event {
     private resolveFn: ((val: boolean) => void) | null = null;
 }
 
-function countCheck() {
+async function countCheck() {
     await asynclock.lockAsync(() => {
         count++;
         if (count == REJECTION_COUNT) {
@@ -49,7 +49,7 @@ function countCheck() {
     },  AsyncLockMode.EXCLUSIVE);
 }
 
-function testUnhandledPromiseRejection(): void {
+async function testUnhandledPromiseRejection(): Promise<void> {
     StdProcess.on('unhandledPromiseRejection', (reason: Error, obj: Object): void => {
         arktest.assertTrue(obj instanceof Promise, 'The object should be of type Promise');
         arktest.assertEQ(reason.message, rejectionReason);
@@ -91,7 +91,7 @@ function testUnhandledPromiseRejection(): void {
 
 function main(): int {
     let testSuite = new arktest.ArkTestsuite('coroutines.unhandled_rejection_promise');
-    testSuite.addTest('testUnhandledPromiseRejection', testUnhandledPromiseRejection);
+    testSuite.addAsyncTest('testUnhandledPromiseRejection', testUnhandledPromiseRejection);
     let res = testSuite.run();
     return res;
 }

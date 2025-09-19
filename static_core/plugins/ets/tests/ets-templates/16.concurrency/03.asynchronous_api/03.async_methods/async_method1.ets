@@ -24,12 +24,12 @@ class MethodReturnInt {
     }
 }
 
-function startTest() {
+async function startTest() {
     const example = new MethodReturnInt();
     const result = await example.methodReturnInt();
     arktest.assertEQ(result, 10);
 }
 
 function main(): void {
-    startTest();
+    waitForCompletion(startTest);
 }

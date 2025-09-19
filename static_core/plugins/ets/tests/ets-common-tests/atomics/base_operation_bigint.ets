@@ -180,6 +180,7 @@ function testXorBigInt() {
 }
 
 function main() {
+    arktest.assertEQ(bigint64array.byteOffset, 0)
     const suite = new arktest.ArkTestsuite('Function Atomics base_operation_bigint tests')
     suite.addTest('Function testAddBigInt', testAddBigInt)
     suite.addTest('Function testAndBigInt', testAndBigInt)

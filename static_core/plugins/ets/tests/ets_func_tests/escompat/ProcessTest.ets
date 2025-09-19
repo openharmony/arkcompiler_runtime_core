@@ -382,8 +382,11 @@ function testProcessManagerIsAppUid(): int {
             // It should be in range of 10000-19999
             return 1;
         }
-    } catch (err: RuntimeException) {        
-        // It'll throw RuntimeException for Non-OHOS target
+    } catch (err) {
+        if (!(err instanceof RuntimeError)) {
+            throw new Error("Invalid error type")
+        }
+        // It'll throw RuntimeError for Non-OHOS target
         // If it's because of 'not implemented', regard it as passed, 
         // as it only support aarch64-ohos currently.
         if (err.message == 'not implemented for Non-OHOS target') {
@@ -408,8 +411,11 @@ function testIsIsolatedProcess(): int {
             // Current process is not isolated by default, test failed
             return 1;
         }
-    } catch (err: RuntimeException) {
-        // It'll throw RuntimeException for Non-OHOS target
+    } catch (err) {
+        if (!(err instanceof RuntimeError)) {
+            throw new Error("Invalid error type")
+        }
+        // It'll throw RuntimeError for Non-OHOS target
         // If it's because of 'not implemented', regard it as passed, 
         // as it only support aarch64-ohos currently.
         if (err.message == 'not implemented for Non-OHOS target') {

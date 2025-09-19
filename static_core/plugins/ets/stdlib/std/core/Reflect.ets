@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package escompat
+package std.core
 
 export class Reflect {
     private static native isLiteralInitializedInterfaceImpl(target: Object): boolean

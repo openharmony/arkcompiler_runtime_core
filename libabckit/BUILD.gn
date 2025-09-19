@@ -59,8 +59,11 @@ config("abckit_config") {
       "-lubsan",
     ]
   }
-
-  configs = [ sdk_libc_secshared_config ]
+  if (defined(ohos_indep_compiler_enable) && ohos_indep_compiler_enable) {
+    configs = []
+  } else {
+    configs = [ sdk_libc_secshared_config ]
+  }
   configs += [ "$ark_root:ark_config" ]
 }
 

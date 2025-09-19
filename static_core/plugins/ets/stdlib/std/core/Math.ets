@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package escompat;
+package std.core;
 
 import {PI, E, LN10, LN2, LOG2E, LOG10E, SQRT1_2, SQRT2} from "std/math/consts";
 

@@ -22,7 +22,7 @@ from runner.enum_types.verbose_format import VerboseFilter, VerboseKind
 
 args = {
     'workflow': 'config-1',
-    'config-1.path': Path(__file__).parent.parent.parent.parent.joinpath('cfg/workflows/config-1.yaml').resolve(),
+    'config-1.path': Path(__file__).with_name('config-1.yaml').resolve(),
     'config-1.data': {
         'runner-api-level': '0.0.0.1',
         'type': 'workflow',
@@ -52,8 +52,7 @@ args = {
     'config-1.parameters.bool-param': True,
     'config-1.parameters.list-param': ['--gen-stdlib=false', '--thread=0'],
     'test-suite': 'test_suite1',
-    'test_suite1.path': (Path(__file__).parent.parent.parent.parent
-                         .joinpath('cfg/test-suites/test_suite1.yaml').resolve()),
+    'test_suite1.path': (Path(__file__).with_name('test_suite1.yaml').resolve()),
     'test_suite1.data': {
         'version': '0.0.0.1',
         'type': 'test-suite',
@@ -69,9 +68,11 @@ args = {
     'test_suite1.parameters.filter': '*',
     'test_suite1.parameters.repeats': 1,
     'test_suite1.parameters.repeats-by-time': 0,
-    'test_suite1.parameters.with-js': 'with-js',
+    'test_suite1.parameters.skip-compile-only': False,
+    'test_suite1.parameters.with-js': False,
     'test_suite1.parameters.test-list': None,
     'test_suite1.parameters.test-file': None,
+    'test_suite1.parameters.exclude-ignored-tests': False,
     'test_suite1.parameters.skip-test-lists': False,
     'test_suite1.parameters.update-excluded': False,
     'test_suite1.parameters.update-expected': False,

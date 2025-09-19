@@ -31,115 +31,115 @@ function testByteType() {
     const val = ByteType.VAL;
     const ref = ByteType.REF;
 
-    arktest.assertEQ(true, val.isPrimitive());
-    arktest.assertEQ(false, val.isReference());
-    arktest.assertEQ(true, ref.isPrimitive());
-    arktest.assertEQ(true, ref.isReference());
+    arktest.assertTrue(val.isPrimitive());
+    arktest.assertFalse(val.isReference());
+    arktest.assertTrue(ref.isPrimitive());
+    arktest.assertTrue(ref.isReference());
 
-    arktest.assertEQ(false, val.hasName());
+    arktest.assertFalse(val.hasName());
     arktest.assertEQ('byte', val.getLiteral());
-    arktest.assertEQ(true, ref.hasName());
+    arktest.assertTrue(ref.hasName());
     arktest.assertEQ('Byte', ref.getLiteral());
 
-    arktest.assertEQ(true, val.equals(ByteType.VAL));
-    arktest.assertEQ(true, ref.equals(ByteType.REF));
-    arktest.assertEQ(false, val.equals(ref));
-    arktest.assertEQ(false, ref.equals(val));
+    arktest.assertTrue(val.equals(ByteType.VAL));
+    arktest.assertTrue(ref.equals(ByteType.REF));
+    arktest.assertTrue(val.equals(ref));
+    arktest.assertTrue(ref.equals(val));
 }
 
 function testShortType() {
     const val = ShortType.VAL;
     const ref = ShortType.REF;
 
-    arktest.assertEQ(true, val.isPrimitive());
-    arktest.assertEQ(false, val.isReference());
-    arktest.assertEQ(true, ref.isPrimitive());
-    arktest.assertEQ(true, ref.isReference());
+    arktest.assertTrue(val.isPrimitive());
+    arktest.assertFalse(val.isReference());
+    arktest.assertTrue(ref.isPrimitive());
+    arktest.assertTrue(ref.isReference());
 
-    arktest.assertEQ(false, val.hasName());
+    arktest.assertFalse(val.hasName());
     arktest.assertEQ('short', val.getLiteral());
-    arktest.assertEQ(true, ref.hasName());
+    arktest.assertTrue(ref.hasName());
     arktest.assertEQ('Short', ref.getLiteral());
 
-    arktest.assertEQ(true, val.equals(ShortType.VAL));
-    arktest.assertEQ(true, ref.equals(ShortType.REF));
-    arktest.assertEQ(false, val.equals(ref));
+    arktest.assertTrue(val.equals(ShortType.VAL));
+    arktest.assertTrue(ref.equals(ShortType.REF));
+    arktest.assertTrue(val.equals(ref));
 }
 
 function testIntType() {
     const val = IntType.VAL;
     const ref = IntType.REF;
 
-    arktest.assertEQ(true, val.isPrimitive());
-    arktest.assertEQ(false, val.isReference());
-    arktest.assertEQ(true, ref.isPrimitive());
-    arktest.assertEQ(true, ref.isReference());
+    arktest.assertTrue(val.isPrimitive());
+    arktest.assertFalse(val.isReference());
+    arktest.assertTrue(ref.isPrimitive());
+    arktest.assertTrue(ref.isReference());
 
-    arktest.assertEQ(false, val.hasName());
+    arktest.assertFalse(val.hasName());
     arktest.assertEQ('int', val.getLiteral());
-    arktest.assertEQ(true, ref.hasName());
+    arktest.assertTrue(ref.hasName());
     arktest.assertEQ('Int', ref.getLiteral());
 
-    arktest.assertEQ(true, val.equals(IntType.VAL));
-    arktest.assertEQ(true, ref.equals(IntType.REF));
-    arktest.assertEQ(false, val.equals(ref));
+    arktest.assertTrue(val.equals(IntType.VAL));
+    arktest.assertTrue(ref.equals(IntType.REF));
+    arktest.assertTrue(val.equals(ref));
 }
 
 function testLongType() {
     const val = LongType.VAL;
     const ref = LongType.REF;
 
-    arktest.assertEQ(true, val.isPrimitive());
-    arktest.assertEQ(false, val.isReference());
-    arktest.assertEQ(true, ref.isPrimitive());
-    arktest.assertEQ(true, ref.isReference());
+    arktest.assertTrue(val.isPrimitive());
+    arktest.assertFalse(val.isReference());
+    arktest.assertTrue(ref.isPrimitive());
+    arktest.assertTrue(ref.isReference());
 
-    arktest.assertEQ(false, val.hasName());
+    arktest.assertFalse(val.hasName());
     arktest.assertEQ('long', val.getLiteral());
-    arktest.assertEQ(true, ref.hasName());
+    arktest.assertTrue(ref.hasName());
     arktest.assertEQ('Long', ref.getLiteral());
 
-    arktest.assertEQ(true, val.equals(LongType.VAL));
-    arktest.assertEQ(true, ref.equals(LongType.REF));
-    arktest.assertEQ(false, val.equals(ref));
+    arktest.assertTrue(val.equals(LongType.VAL));
+    arktest.assertTrue(ref.equals(LongType.REF));
+    arktest.assertTrue(val.equals(ref));
 }
 
 function testFloatType() {
     const val = FloatType.VAL;
     const ref = FloatType.REF;
 
-    arktest.assertEQ(true, val.isPrimitive());
-    arktest.assertEQ(false, val.isReference());
-    arktest.assertEQ(true, ref.isPrimitive());
-    arktest.assertEQ(true, ref.isReference());
+    arktest.assertTrue(val.isPrimitive());
+    arktest.assertFalse(val.isReference());
+    arktest.assertTrue(ref.isPrimitive());
+    arktest.assertTrue(ref.isReference());
 
-    arktest.assertEQ(false, val.hasName());
+    arktest.assertFalse(val.hasName());
     arktest.assertEQ('float', val.getLiteral());
-    arktest.assertEQ(true, ref.hasName());
+    arktest.assertTrue(ref.hasName());
     arktest.assertEQ('Float', ref.getLiteral());
 
-    arktest.assertEQ(true, val.equals(FloatType.VAL));
-    arktest.assertEQ(true, ref.equals(FloatType.REF));
-    arktest.assertEQ(false, val.equals(ref));
+    arktest.assertTrue(val.equals(FloatType.VAL));
+    arktest.assertTrue(ref.equals(FloatType.REF));
+    arktest.assertTrue(val.equals(ref));
 }
 
 function testDoubleType() {
     const val = DoubleType.VAL;
     const ref = DoubleType.REF;
 
-    arktest.assertEQ(true, val.isPrimitive());
-    arktest.assertEQ(false, val.isReference());
-    arktest.assertEQ(true, ref.isPrimitive());
-    arktest.assertEQ(true, ref.isReference());
+    arktest.assertTrue(val.isPrimitive());
+    arktest.assertFalse(val.isReference());
+    arktest.assertTrue(ref.isPrimitive());
+    arktest.assertTrue(ref.isReference());
 
-    arktest.assertEQ(false, val.hasName());
+    arktest.assertFalse(val.hasName());
     arktest.assertEQ('double', val.getLiteral());
-    arktest.assertEQ(true, ref.hasName());
+    arktest.assertTrue(ref.hasName());
     arktest.assertEQ('Double', ref.getLiteral());
 
-    arktest.assertEQ(true, val.equals(DoubleType.VAL));
-    arktest.assertEQ(true, ref.equals(DoubleType.REF));
-    arktest.assertEQ(false, val.equals(ref));
+    arktest.assertTrue(val.equals(DoubleType.VAL));
+    arktest.assertTrue(ref.equals(DoubleType.REF));
+    arktest.assertTrue(val.equals(ref));
 }
 
 function testNumericAssignableFromAnyNumeric() {

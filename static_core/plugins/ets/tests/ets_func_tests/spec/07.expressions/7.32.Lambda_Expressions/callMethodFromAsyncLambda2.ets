@@ -25,7 +25,7 @@ function regularFunc(): boolean {
     return true;
 }
 
-function testCallFromAsyncLambdaRegularFunc(): void {
+async function testCallFromAsyncLambdaRegularFunc(): Promise<void> {
     let is_call_async_lambda = false;
     let async_lambda: asyncLambda = async (): Promise<void> => { 
         is_call_async_lambda = regularFunc();
@@ -36,5 +36,5 @@ function testCallFromAsyncLambdaRegularFunc(): void {
 }
 
 function main(): void {
-    testCallFromAsyncLambdaRegularFunc();
+    waitForCompletion(testCallFromAsyncLambdaRegularFunc);
 }

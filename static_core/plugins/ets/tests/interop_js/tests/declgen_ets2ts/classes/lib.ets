@@ -136,3 +136,26 @@ export class DeviceInfo {
   DeviceInfo() {}
   static instance?: DeviceInfo;
 }
+
+export class ReadOnlyClass {
+  foo1(nums: readonly number[]) {}
+  foo2(nums: readonly [number, string]) {}
+  foo3(nums: readonly Array<number>) {}
+  static foo4(nums: readonly Array<number>) {}
+  foo5(...nums: readonly Array<number>) {}
+  constructor(nums: readonly [number, string]) {}
+}
+
+export class Dog {
+  s: string = ''
+  n: number = 0;
+  foo1(s?: string, n?: number) {}
+  constructor(s?: string, n?: number) {
+    if (s !== undefined) {
+      this.s = s;
+    }
+    if (n !== undefined) {
+      this.n = n;
+    }
+  }
+}

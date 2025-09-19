@@ -26,7 +26,7 @@ class LambdaTests {
         return true;
     }
 
-    testCallAsyncLambda(): void {
+    async testCallAsyncLambda(): Promise<void> {
         let call_async_lambda = false;
 
         let async_lambda: asyncLambda = async (): Promise<void> => { 
@@ -41,5 +41,5 @@ class LambdaTests {
 }
 
 function main(): void {
-    new LambdaTests().testCallAsyncLambda();
+    waitForCompletion(new LambdaTests().testCallAsyncLambda);
 }

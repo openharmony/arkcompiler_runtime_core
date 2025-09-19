@@ -61,7 +61,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     ani_module md;
     if (ANI_OK != env->FindModule(moduleName, &md)) {
         auto msg = std::string("Cannot find \"") + moduleName + std::string("\" module!");
-        ark::ets::stdlib::ThrowNewError(env, "Lstd/core/RuntimeException;", msg.data(), "Lstd/core/String;:V");
+        ark::ets::stdlib::ThrowNewError(env, "Lstd/core/RuntimeError;", msg.data(), "Lstd/core/String;:V");
         return ANI_ERROR;
     }
 
@@ -70,7 +70,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 
     if (ANI_OK != env->Module_BindNativeFunctions(md, functions.data(), functions.size())) {
         auto msg = std::string("Cannot bind native functions to '") + moduleName + std::string("'");
-        ark::ets::stdlib::ThrowNewError(env, "Lstd/core/RuntimeException;", msg.data(), "Lstd/core/String;:V");
+        ark::ets::stdlib::ThrowNewError(env, "Lstd/core/RuntimeError;", msg.data(), "Lstd/core/String;:V");
         return ANI_ERROR;
     };
 

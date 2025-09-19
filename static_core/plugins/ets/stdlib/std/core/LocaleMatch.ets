@@ -22,6 +22,10 @@ export class LocaleMatch {
     static native lookupLocales(locale: string[]): string[]
 }
 
+class LocaleHelper {
+    static native verifyBCP47LanguageTag(locale: string): void
+}
+
 export function intlLookUpLocale(locale: Intl.BCP47LanguageTag | Intl.BCP47LanguageTag[]): string {
     const tagList = locale instanceof Intl.BCP47LanguageTag ? [locale] : locale
     return LocaleMatch.lookupLocale(tagList)
@@ -48,6 +52,8 @@ export function intlLocalesToLanguageTags(locales: string | Intl.Locale | Readon
     }
 
     if (locales instanceof string) {
+        const locale = locales as string
+        LocaleHelper.verifyBCP47LanguageTag(locale)
         return [locales]
     } else if (locales instanceof Intl.Locale) {
         return [locales.toString()]

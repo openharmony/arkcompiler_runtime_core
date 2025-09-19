@@ -25,7 +25,7 @@ async function asyncFunc(): Promise<boolean> {
     return true;
 }
 
-function testCallAsyncLambda(): void {
+async function testCallAsyncLambda(): Promise<void> {
     let call_async_lambda = false;
 
     let async_lambda: asyncLambda = async (): Promise<void> => { 
@@ -39,5 +39,5 @@ function testCallAsyncLambda(): void {
 }
 
 function main(): void {
-    testCallAsyncLambda();
+    waitForCompletion(testCallAsyncLambda);
 }

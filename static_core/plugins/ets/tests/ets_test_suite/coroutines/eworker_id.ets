@@ -34,9 +34,33 @@ function testEworkerId() {
     arktest.assertEQ(runId1, runId2);
 }
 
+function testGetEAWorkerId() {
+    let ew1 = new EAWorker('testWorker');
+    let ew2 = new EAWorker('testWorker');
+    let ew3 = new EAWorker('testWorker');
+    arktest.assertEQ(ew1.getWorkerId(), undefined);
+    ew1.start();
+    ew2.start();
+    ew3.start();
+    let worker1Id1 = ew1.getWorkerId();
+    let worker2Id1 = ew2.getWorkerId();
+    let worker3Id1 = ew3.getWorkerId();
+    let worker1Id2 = ew1.run<int>(() => {
+        return CoroutineExtras.getWorkerId();
+    }).Await();
+    arktest.assertEQ(worker1Id1, worker1Id2);
+    ew1.quit();
+    arktest.assertEQ(worker1Id1, ew1.getWorkerId());
+    ew2.quitSafely();
+    arktest.assertEQ(worker2Id1, ew2.getWorkerId());
+    ew3.join();
+    arktest.assertEQ(worker3Id1, ew3.getWorkerId());
+}
+
 function main(): int {
     let testSuite = new arktest.ArkTestsuite('coroutines.eworker_id');
     testSuite.addTest('testEworkerId', testEworkerId);
+    testSuite.addTest('testGetEAWorkerId', testGetEAWorkerId);
     let res = testSuite.run();
     return res;
 }

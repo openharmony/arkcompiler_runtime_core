@@ -582,6 +582,13 @@ public:
         return (accessFlags_.load(std::memory_order_acquire) & ACC_SYNCHRONIZED) != 0;
     }
 
+    bool IsCriticalNative() const
+    {
+        // Atomic with acquire order reason: data race with access_flags_ with dependecies on reads after the load which
+        // should become visible
+        return (accessFlags_.load(std::memory_order_acquire) & ACC_CRITICAL_NATIVE) != 0;
+    }
+
     bool HasVarArgs() const
     {
         // Atomic with acquire order reason: data race with access_flags_ with dependecies on reads after the load which

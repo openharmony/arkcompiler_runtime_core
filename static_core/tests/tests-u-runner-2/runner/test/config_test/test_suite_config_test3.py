@@ -15,44 +15,32 @@
 # limitations under the License.
 
 import os
-import shutil
 import unittest
 from pathlib import Path
-from typing import cast
+from typing import ClassVar, cast
+from unittest.mock import patch
 
 from runner.options.cli_options import CliOptions
-from runner.test.config_test import data_collections
+from runner.test.config_test.data import data_collections
 from runner.test.test_utils import compare_dicts
 
 
 class TestSuiteConfigTest3(unittest.TestCase):
-    cfg_ext = ".yaml"
     workflow_name = "config-1"
-    workflow_path: Path
     test_suite_name = "test_suite3"
-    test_suite_path: Path
     current_path = Path(__file__).parent
-    cfg_path = current_path.parent.parent.parent.joinpath("cfg")
+    data_folder = current_path / "data"
     collections = data_collections.collections
+    test_environ: ClassVar[dict[str, str]] = {
+        'ARKCOMPILER_RUNTIME_CORE_PATH': Path.cwd().as_posix(),
+        'ARKCOMPILER_ETS_FRONTEND_PATH': Path.cwd().as_posix(),
+        'PANDA_BUILD': Path.cwd().as_posix(),
+        'WORK_DIR': Path.cwd().as_posix()
+    }
 
-    @classmethod
-    def setUpClass(cls) -> None:
-        os.environ["ARKCOMPILER_RUNTIME_CORE_PATH"] = "."
-        os.environ["ARKCOMPILER_ETS_FRONTEND_PATH"] = "."
-        os.environ["WORK_DIR"] = "."
-        os.environ["PANDA_BUILD"] = "."
-
-        shutil.copy(cls.current_path.joinpath(cls.workflow_name + cls.cfg_ext), cls.cfg_path.joinpath("workflows"))
-        cls.workflow_path = cls.cfg_path.joinpath("workflows").joinpath(cls.workflow_name + cls.cfg_ext)
-
-        shutil.copy(cls.current_path.joinpath(cls.test_suite_name + cls.cfg_ext), cls.cfg_path.joinpath("test-suites"))
-        cls.test_suite_path = cls.cfg_path.joinpath("test-suites").joinpath(cls.test_suite_name + cls.cfg_ext)
-
-    @classmethod
-    def tearDownClass(cls) -> None:
-        cls.workflow_path.unlink(missing_ok=True)
-        cls.test_suite_path.unlink(missing_ok=True)
-
+    @patch('runner.utils.get_config_workflow_folder', lambda: TestSuiteConfigTest3.data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', lambda: TestSuiteConfigTest3.data_folder)
+    @patch.dict(os.environ, test_environ, clear=True)
     def test_collections1(self) -> None:
         args = [self.workflow_name, self.test_suite_name]
         actual = CliOptions(args)

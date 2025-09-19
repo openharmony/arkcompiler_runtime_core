@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-function checkArray<T extends Number | BigInt>(data: Array<T>, elem: T, expected: number, fromIndex: number | undefined): void {
+function checkArray<T extends Number | BigInt>(data: Array<T>, elem: T, expected: number, fromIndex: int | undefined): void {
     arktest.assertEQ(data.lastIndexOf(elem, fromIndex), expected,
         'data.lastIndexOf(elem: T, fromIndex: number | undefined) must return ' + expected);
 }

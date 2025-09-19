@@ -20,10 +20,10 @@ const mustChecks: Array<Function> = new Array<Function>();
 function main(): int {
     const suite = new arktest.ArkTestsuite("Stream API tests");
 
-    suite.addTest("Set default encoding for duplex stream (gbk).", testDuplexStreamSetDefaultEncodingGbk);
-    suite.addTest("Set default encoding for duplex stream (gb2312).", testDuplexStreamSetDefaultEncodingGb2312);
-    suite.addTest("Transform stream encoding validation (gb18030).", testTransformStreamWriteEncodingGb18030);
-    suite.addTest("Transform stream encoding validation (gbk).", testTransformStreamWriteEncodingGbk);
+    suite.addAsyncTest("Set default encoding for duplex stream (gbk).", testDuplexStreamSetDefaultEncodingGbk);
+    suite.addAsyncTest("Set default encoding for duplex stream (gb2312).", testDuplexStreamSetDefaultEncodingGb2312);
+    suite.addAsyncTest("Transform stream encoding validation (gb18030).", testTransformStreamWriteEncodingGb18030);
+    suite.addAsyncTest("Transform stream encoding validation (gbk).", testTransformStreamWriteEncodingGbk);
 
     return suite.run();
 }
@@ -86,7 +86,7 @@ class MyDuplex1 extends stream.Duplex {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamEncoding023
-function testDuplexStreamSetDefaultEncodingGbk() {
+async function testDuplexStreamSetDefaultEncodingGbk() {
     mustChecks.push(() => {
         if (callCount_MyDuplex1 !== 1) {
             throw new Error(`Function was expected to be called 1 times, but was called ${callCount_MyDuplex1} times.`);
@@ -113,7 +113,7 @@ class MyDuplex2 extends stream.Duplex {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamEncoding024
-function testDuplexStreamSetDefaultEncodingGb2312() {
+async function testDuplexStreamSetDefaultEncodingGb2312() {
     mustChecks.push(() => {
         if (callCount_MyDuplex2 !== 1) {
             throw new Error(`Function was expected to be called 1 times, but was called ${callCount_MyDuplex2} times.`);
@@ -141,7 +141,7 @@ class MyTransform3 extends stream.Transform {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamEncoding025
-function testTransformStreamWriteEncodingGb18030() {
+async function testTransformStreamWriteEncodingGb18030() {
     mustChecks.push(() => {
         if (callCount_MyTransform3 !== 1) {
             throw new Error(`Function was expected to be called 1 times, `
@@ -169,7 +169,7 @@ class MyTransform4 extends stream.Transform {
     }
 }
 // Test cases ported from ArkTS 1.0:testStreamEncoding026
-function testTransformStreamWriteEncodingGbk() {
+async function testTransformStreamWriteEncodingGbk() {
     mustChecks.push(() => {
         if (callCount_MyTransform4 !== 1) {
             throw new Error(`Function was expected to be called 1 times, `

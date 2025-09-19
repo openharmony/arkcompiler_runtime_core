@@ -70,7 +70,7 @@ class TestHumongousStress {
         return maxNumberOfObjects;
     }
 
-    public run(): void {
+    public async run(): Promise<void> {
         let maxObjects = this.getHeapSizeInObjects() - NUMBER_OF_FREE_REGIONS;
         let objPerCoroutine = (maxObjects / this.threadsCount) as int;
         let lastCoroutuneNumObjects = maxObjects - objPerCoroutine * (this.threadsCount - 1);

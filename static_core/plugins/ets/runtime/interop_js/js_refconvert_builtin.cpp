@@ -144,6 +144,7 @@ private:
 
         static const std::array STD_EXCEPTIONS_LIST = {
             // Errors
+            std::make_tuple("Lstd/core/RuntimeError;", NO_MIRROR, &W_ERROR_OVERLOADS),
             std::make_tuple("Lstd/core/AssertionError;", NO_MIRROR, &W_ERROR_OVERLOADS),
             std::make_tuple("Lstd/core/DivideByZeroError;", NO_MIRROR, &W_ERROR_OVERLOADS),
             std::make_tuple("Lstd/core/IllegalStateError;", NO_MIRROR, &W_ERROR_OVERLOADS),
@@ -162,7 +163,6 @@ private:
             // Exceptions
             std::make_tuple("Lstd/core/NoDataException;", NO_MIRROR, &W_EXCEPTION_OVERLOADS),
             std::make_tuple("Lstd/core/IllegalMonitorStateError;", NO_MIRROR, &W_EXCEPTION_OVERLOADS),
-            std::make_tuple("Lstd/core/RuntimeException;", NO_MIRROR, &W_EXCEPTION_OVERLOADS),
         };
         for (const auto &[descr, mirror, ovl] : STD_EXCEPTIONS_LIST) {
             RegisterClass(descr, mirror, ovl);
@@ -215,7 +215,7 @@ private:
             {utf::CStringAsMutf8("fill"),
              {"Lstd/core/Object;Lstd/core/Double;Lstd/core/Double;:Lescompat/Array;", 4, "fill"}},
             {utf::CStringAsMutf8("indexOf"), {"Lstd/core/Object;Lstd/core/Int;:I", 3, "indexOf"}},
-            {utf::CStringAsMutf8("lastIndexOf"), {"Lstd/core/Object;I:I", 3, "lastIndexOf"}},
+            {utf::CStringAsMutf8("lastIndexOf"), {"Lstd/core/Object;Lstd/core/Int;:I", 3, "lastIndexOf"}},
             {utf::CStringAsMutf8("slice"), {"II:Lescompat/Array;", 3, "slice"}},
             {utf::CStringAsMutf8("splice"), {"I:Lescompat/Array;", 2, "splice"}},
             {utf::CStringAsMutf8("splice"), {"IILescompat/Array;:Lescompat/Array;", 3, "splice"}},
@@ -469,6 +469,7 @@ public:
         RegisterClassWithLeafMatcher(descriptors::MAPENTRY, nullptr);
         RegisterClassWithLeafMatcher(descriptors::MAPITERATOR, nullptr);
         RegisterClassWithLeafMatcher(descriptors::EMPTYMAPITERATOR, nullptr);
+        RegisterClassWithLeafMatcher(descriptors::SETITERATOR, nullptr);
 
         RegisterMap();
         RegisterSet();

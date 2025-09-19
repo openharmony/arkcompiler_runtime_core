@@ -13,10 +13,44 @@
  * limitations under the License.
  */
 
+//! CHECKER       Array.join
+//! SKIP_IF       @architecture == "arm32"
+//! RUN           force_jit: true , options: "--compiler-dump:final --compiler-regex=.*::test_.*array_.*", entry: "escompat_array_join.ETSGLOBAL::main"
+//!
+//! METHOD        "test_array_int_join"
+//! PASS_AFTER    "Codegen"
+//! INST          /Call.*escompat.Array::join*/
+//!
+//! METHOD        "test_array_long_join"
+//! PASS_AFTER    "Codegen"
+//! INST          /Call.*escompat.Array::join*/
+//!
+//! METHOD        "test_array_short_join"
+//! PASS_AFTER    "Codegen"
+//! INST          /Call.*escompat.Array::join*/
+//!
+//! METHOD        "test_array_float_join"
+//! PASS_AFTER    "Codegen"
+//! INST          /Call.*escompat.Array::join*/
+//!
+//! METHOD        "test_array_double_join"
+//! PASS_AFTER    "Codegen"
+//! INST          /Call.*escompat.Array::join*/
+//!
+//! METHOD        "test_array_string_join"
+//! PASS_AFTER    "Codegen"
+//! INST          /Call.*escompat.Array::join*/
+
+
+//! CHECKER      OOM error for Array.join
+//! SKIP_IF      @architecture == "arm32"
+//! RUN          force_jit: true, options: "--heap-size-limit=12345678 --compiler-hotness-threshold=0 --compiler-regex='ETSGLOBAL::test_oom'", entry: "escompat_array_join.ETSGLOBAL::test_oom"
+//! EVENT        /Exception,escompat.Array::join.*NATIVE/
+
 const arrayIntStrRes = "1,3,5,7,9";
 const arrayIntStrRes1 = "1|3|5|7|9";
 const arrayIntStrRes2 = "1test3test5test7test9";
-const arrayFloatStrRes= "1.5,3.7,5.8,7.4,9.2";
+const arrayFloatStrRes = "1.5,3.7,5.8,7.4,9.2";
 const arrayFloatStrRes1 = "1.5|3.7|5.8|7.4|9.2"
 const arrayFloatStrRes2 = "1.5test3.7test5.8test7.4test9.2";
 const arrayIntMaxStrRes = "-2147483648,0,1,2,3,4,5,6,7,8,9,2147483647";
@@ -40,17 +74,10 @@ const arrayStrRes2 = "This|is|hello|world";
 const arrayStrRes3 = "Thistestistesthellotestworld";
 const arrayStrRes4 = "ThisΩisΩhelloΩworld";
 
-
-//! CHECKER       ArrayInt join
-//! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true , options: "--compiler-dump:final", entry: "escompat_array_join.ETSGLOBAL::test_array_int_join"
-//! METHOD        "escompat_array_join.ETSGLOBAL::test_array_int_join"
-//! PASS_AFTER    "Codegen"
-//! INST          /Call.*escompat.Array::join*/
 function test_array_int_join() {
     let arrayEmpty: Array<int> = new Array<int>(0);
-    let arrayInt: Array<int> = [1,3,5,7,9];
-    let arrayMax: Array<int> = [Int.MIN_VALUE,0,1,2,3,4,5,6,7,8,9,Int.MAX_VALUE];
+    let arrayInt: Array<int> = [1, 3, 5, 7, 9];
+    let arrayMax: Array<int> = [Int.MIN_VALUE, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, Int.MAX_VALUE];
     let arrayEmptyStr = arrayEmpty.join();
     let arrayEmptyStr1 = arrayEmpty.join("|");
     let arrayEmptyStr2 = arrayEmpty.join("test");
@@ -59,28 +86,23 @@ function test_array_int_join() {
     let arrayIntStr2 = arrayInt.join("test");
     let arrayMaxStr = arrayMax.join();
     let arrayMaxStr1 = arrayMax.join("|");
-    let arrayMaxStr2 =arrayMax.join("test");
+    let arrayMaxStr2 = arrayMax.join("test");
     arktest.assertTrue(arrayEmptyStr.isEmpty());
     arktest.assertTrue(arrayEmptyStr1.isEmpty());
     arktest.assertTrue(arrayEmptyStr2.isEmpty());
-    arktest.assertEQ(arrayIntStr,  arrayIntStrRes);
-    arktest.assertEQ(arrayIntStr1,  arrayIntStrRes1);
-    arktest.assertEQ(arrayIntStr2,  arrayIntStrRes2);
-    arktest.assertEQ(arrayMaxStr,  arrayIntMaxStrRes);
-    arktest.assertEQ(arrayMaxStr1,  arrayIntMaxStrRes1);
-    arktest.assertEQ(arrayMaxStr2,  arrayIntMaxStrRes2);
+    arktest.assertEQ(arrayIntStr, arrayIntStrRes);
+    arktest.assertEQ(arrayIntStr1, arrayIntStrRes1);
+    arktest.assertEQ(arrayIntStr2, arrayIntStrRes2);
+    arktest.assertEQ(arrayMaxStr, arrayIntMaxStrRes);
+    arktest.assertEQ(arrayMaxStr1, arrayIntMaxStrRes1);
+    arktest.assertEQ(arrayMaxStr2, arrayIntMaxStrRes2);
 }
 
-//! CHECKER       ArrayLong join
-//! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true , options: "--compiler-dump:final", entry: "escompat_array_join.ETSGLOBAL::test_array_long_join"
-//! METHOD        "escompat_array_join.ETSGLOBAL::test_array_long_join"
-//! PASS_AFTER    "Codegen"
-//! INST          /Call.*escompat.Array::join*/
+
 function test_array_long_join() {
     let arrayEmpty: Array<long> = new Array<long>(0);
-    let arrayLong: Array<long> = [1,3,5,7,9];
-    let arrayMax: Array<long> = [Long.MIN_VALUE,0,1,2,3,4,5,6,7,8,9,Long.MAX_VALUE];
+    let arrayLong: Array<long> = [1, 3, 5, 7, 9];
+    let arrayMax: Array<long> = [Long.MIN_VALUE, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, Long.MAX_VALUE];
     let arrayEmptyStr = arrayEmpty.join();
     let arrayEmptyStr1 = arrayEmpty.join("|");
     let arrayEmptyStr2 = arrayEmpty.join("test");
@@ -89,28 +111,22 @@ function test_array_long_join() {
     let arrayIntStr2 = arrayLong.join("test");
     let arrayMaxStr = arrayMax.join();
     let arrayMaxStr1 = arrayMax.join("|");
-    let arrayMaxStr2 =arrayMax.join("test");
+    let arrayMaxStr2 = arrayMax.join("test");
     arktest.assertTrue(arrayEmptyStr.isEmpty());
     arktest.assertTrue(arrayEmptyStr1.isEmpty());
     arktest.assertTrue(arrayEmptyStr2.isEmpty());
-    arktest.assertEQ(arrayIntStr,  arrayIntStrRes);
-    arktest.assertEQ(arrayIntStr1,  arrayIntStrRes1);
-    arktest.assertEQ(arrayIntStr2,  arrayIntStrRes2);
-    arktest.assertEQ(arrayMaxStr,  arrayLongMaxStrRes);
-    arktest.assertEQ(arrayMaxStr1,  arrayLongMaxStrRes1);
-    arktest.assertEQ(arrayMaxStr2,  arrayLongMaxStrRes2);
+    arktest.assertEQ(arrayIntStr, arrayIntStrRes);
+    arktest.assertEQ(arrayIntStr1, arrayIntStrRes1);
+    arktest.assertEQ(arrayIntStr2, arrayIntStrRes2);
+    arktest.assertEQ(arrayMaxStr, arrayLongMaxStrRes);
+    arktest.assertEQ(arrayMaxStr1, arrayLongMaxStrRes1);
+    arktest.assertEQ(arrayMaxStr2, arrayLongMaxStrRes2);
 }
 
-//! CHECKER       ArrayShort join
-//! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true , options: "--compiler-dump:final", entry: "escompat_array_join.ETSGLOBAL::test_array_short_join"
-//! METHOD        "escompat_array_join.ETSGLOBAL::test_array_short_join"
-//! PASS_AFTER    "Codegen"
-//! INST          /Call.*escompat.Array::join*/
 function test_array_short_join() {
     let arrayEmpty: Array<short> = new Array<short>(0);
-    let arrayShort: Array<short> = [1,3,5,7,9];
-    let arrayMax: Array<short> = [Short.MIN_VALUE,0,1,2,3,4,5,6,7,8,9,Short.MAX_VALUE];
+    let arrayShort: Array<short> = [1, 3, 5, 7, 9];
+    let arrayMax: Array<short> = [Short.MIN_VALUE, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, Short.MAX_VALUE];
     let arrayEmptyStr = arrayEmpty.join();
     let arrayEmptyStr1 = arrayEmpty.join("|");
     let arrayEmptyStr2 = arrayEmpty.join("test");
@@ -119,24 +135,18 @@ function test_array_short_join() {
     let arrayIntStr2 = arrayShort.join("test");
     let arrayMaxStr = arrayMax.join();
     let arrayMaxStr1 = arrayMax.join("|");
-    let arrayMaxStr2 =arrayMax.join("test");
+    let arrayMaxStr2 = arrayMax.join("test");
     arktest.assertTrue(arrayEmptyStr.isEmpty());
     arktest.assertTrue(arrayEmptyStr1.isEmpty());
     arktest.assertTrue(arrayEmptyStr2.isEmpty());
-    arktest.assertEQ(arrayIntStr,  arrayIntStrRes);
-    arktest.assertEQ(arrayIntStr1,  arrayIntStrRes1);
-    arktest.assertEQ(arrayIntStr2,  arrayIntStrRes2);
-    arktest.assertEQ(arrayMaxStr,  arrayShortMaxStrRes);
-    arktest.assertEQ(arrayMaxStr1,  arrayShortMaxStrRes1);
-    arktest.assertEQ(arrayMaxStr2,  arrayShortMaxStrRes2);
+    arktest.assertEQ(arrayIntStr, arrayIntStrRes);
+    arktest.assertEQ(arrayIntStr1, arrayIntStrRes1);
+    arktest.assertEQ(arrayIntStr2, arrayIntStrRes2);
+    arktest.assertEQ(arrayMaxStr, arrayShortMaxStrRes);
+    arktest.assertEQ(arrayMaxStr1, arrayShortMaxStrRes1);
+    arktest.assertEQ(arrayMaxStr2, arrayShortMaxStrRes2);
 }
 
-//! CHECKER       ArrayFloat join
-//! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true , options: "--compiler-dump:final", entry: "escompat_array_join.ETSGLOBAL::test_array_float_join"
-//! METHOD        "escompat_array_join.ETSGLOBAL::test_array_float_join"
-//! PASS_AFTER    "Codegen"
-//! INST          /Call.*escompat.Array::join*/
 function test_array_float_join() {
     let arrayEmpty: Array<float> = new Array<float>(0);
     let arrayMax: Array<float> = [Float.MIN_VALUE, Float.NaN, 2, 4, 6, 8, Float.MAX_VALUE];
@@ -145,7 +155,7 @@ function test_array_float_join() {
     let arrayEmptyStr2 = arrayEmpty.join("test");
     let arrayMaxStr = arrayMax.join();
     let arrayMaxStr1 = arrayMax.join("|");
-    let arrayMaxStr2 =arrayMax.join("test");
+    let arrayMaxStr2 = arrayMax.join("test");
     arktest.assertTrue(arrayEmptyStr.isEmpty());
     arktest.assertTrue(arrayEmptyStr1.isEmpty());
     arktest.assertTrue(arrayEmptyStr2.isEmpty());
@@ -154,12 +164,6 @@ function test_array_float_join() {
     arktest.assertEQ(arrayMaxStr2, arrayFloatMaxStrRes2);
 }
 
-//! CHECKER       ArrayDouble join
-//! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true , options: "--compiler-dump:final", entry: "escompat_array_join.ETSGLOBAL::test_array_double_join"
-//! METHOD        "escompat_array_join.ETSGLOBAL::test_array_double_join"
-//! PASS_AFTER    "Codegen"
-//! INST          /Call.*escompat.Array::join*/
 function test_array_double_join() {
     let arrayEmpty: Array<double> = new Array<double>(0);
     let maxCharsDouble: double = -1.7976931348623157e+308;
@@ -169,7 +173,7 @@ function test_array_double_join() {
     let arrayEmptyStr2 = arrayEmpty.join("test");
     let arrayMaxStr = arrayMax.join();
     let arrayMaxStr1 = arrayMax.join("|");
-    let arrayMaxStr2 =arrayMax.join("test");
+    let arrayMaxStr2 = arrayMax.join("test");
     arktest.assertTrue(arrayEmptyStr.isEmpty());
     arktest.assertTrue(arrayEmptyStr1.isEmpty());
     arktest.assertTrue(arrayEmptyStr2.isEmpty());
@@ -178,12 +182,6 @@ function test_array_double_join() {
     arktest.assertEQ(arrayMaxStr2, arrayDoubleMaxStrRes2);
 }
 
-//! CHECKER       ArrayString join
-//! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true , options: "--compiler-dump:final", entry: "escompat_array_join.ETSGLOBAL::test_array_string_join"
-//! METHOD        "escompat_array_join.ETSGLOBAL::test_array_string_join"
-//! PASS_AFTER    "Codegen"
-//! INST          /Call.*escompat.Array::join*/
 function test_array_string_join() {
     let arrayEmpty: Array<string> = new Array<string>(0);
     let arrayString: Array<string> = ["This", "is", "hello", "world"];
@@ -193,8 +191,8 @@ function test_array_string_join() {
     let arrayStr = arrayString.join();
     let arrayStr1 = arrayString.join("");
     let arrayStr2 = arrayString.join("|");
-    let arrayStr3 =arrayString.join("test");
-    let arrayStr4 =arrayString.join("Ω");
+    let arrayStr3 = arrayString.join("test");
+    let arrayStr4 = arrayString.join("Ω");
     arktest.assertEQ(arrayStr, arrayStrRes);
     arktest.assertEQ(arrayStr1, arrayStrRes1);
     arktest.assertEQ(arrayStr2, arrayStrRes2);
@@ -203,11 +201,6 @@ function test_array_string_join() {
 }
 
 
-//! CHECKER      OOM error for Array.join
-//! SKIP_IF       @architecture == "arm32"
-//! RUN          force_jit: true, options: "--compiler-enable-osr=false --compiler-regex='ETSGLOBAL::test_oom'", entry: "escompat_array_join.ETSGLOBAL::test_oom"
-//! EVENT        /Exception,escompat.Array::join.*NATIVE/
-function foo(n: int): int { return (n * 17 + 7) % 141;}
 function test_array_join_oom(): string {
     let c: char[] = new char[10000];
     let sb: StringBuilder = new StringBuilder();
@@ -230,8 +223,24 @@ function test_array_join_oom(): string {
     return "No excepiton";
 }
 
+function main(): void {
+    test_array_int_join()
+    test_array_long_join()
+    test_array_short_join()
+    test_array_float_join()
+    test_array_double_join()
+    test_array_string_join()
+}
+
 function test_oom() {
     const CatchOOMRes = "Catch OOM excepiton right";
     let result = test_array_join_oom();
     arktest.assertEQ(result, CatchOOMRes);
+}
+
+
+function foo(n: int): int { return (n * 17 + 7) % 141; }
+
+const expectedErrors = (e: Error): boolean => {
+    return (e instanceof OutOfMemoryError)
 }

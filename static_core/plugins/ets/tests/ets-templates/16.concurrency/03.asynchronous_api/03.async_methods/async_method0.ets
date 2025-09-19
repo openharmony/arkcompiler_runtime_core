@@ -24,12 +24,12 @@ class MethodReturnString {
     }
 }
 
-function startTest() {
+async function startTest() {
     const example = new MethodReturnString();
     const result = await example.methodReturnString();
     arktest.assertEQ(result, "Hello, World!");
 }
 
 function main(): void {
-    startTest();
+    waitForCompletion(startTest);
 }

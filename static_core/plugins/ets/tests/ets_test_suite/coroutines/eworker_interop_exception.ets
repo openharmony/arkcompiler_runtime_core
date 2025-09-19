@@ -13,23 +13,23 @@
  * limitations under the License.
  */
 
-function testEworkerInteropException() {
-    let exceptionWasCaught = false;
+function testEworkerInteropError() {
+    let errorWasCaught = false;
     try {
         let eaw : EAWorker = new EAWorker(true);
         eaw.start();
         eaw.join();
     } catch (e) {
-        if (e instanceof RuntimeException) {
-            exceptionWasCaught = true;
+        if (e instanceof RuntimeError) {
+            errorWasCaught = true;
         }
     }
-    arktest.assertTrue(exceptionWasCaught);
+    arktest.assertTrue(errorWasCaught);
 }
 
 function main(): int {
-    let testSuite = new arktest.ArkTestsuite('coroutines.eworker_interop_exception');
-    testSuite.addTest('testEworkerInteropException', testEworkerInteropException);
+    let testSuite = new arktest.ArkTestsuite('coroutines.eworker_interop_error');
+    testSuite.addTest('testEworkerInteropError', testEworkerInteropError);
     let res = testSuite.run();
     return res;
 }
