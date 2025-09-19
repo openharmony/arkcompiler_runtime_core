@@ -17,39 +17,23 @@ cases:
       vals:
           - { type: number, expr: Number.MIN_VALUE }
           - { type: number, expr: Number.MAX_VALUE }
-          - { type: Number, init_value: 0, expr: new Number(Number.MIN_VALUE) }
-          - { type: Number, init_value: 0, expr: new Number(Number.MAX_VALUE) }
 
     - res: 'number'
       vals:
           - { type: byte, expr: Byte.MIN_VALUE }
           - { type: byte, expr: Byte.MAX_VALUE }
-          - { type: Byte, init_value: 0, expr: new Byte(Byte.MIN_VALUE) }
-          - { type: Byte, init_value: 0, expr: new Byte(Byte.MAX_VALUE) }
           - { type: short, expr: Short.MIN_VALUE }
           - { type: short, expr: Short.MAX_VALUE }
-          - { type: Short, init_value: 0, expr: new Short(Short.MIN_VALUE) }
-          - { type: Short, init_value: 0, expr: new Short(Short.MAX_VALUE) }
           - { type: int, expr: Int.MIN_VALUE }
           - { type: int, expr: Int.MAX_VALUE }
-          - { type: Int, init_value: 0, expr: new Int(Int.MIN_VALUE) }
-          - { type: Int, init_value: 0, expr: new Int(Int.MAX_VALUE) }
           - { type: long, expr: Long.MIN_VALUE }
           - { type: long, expr: Long.MAX_VALUE }
-          - { type: Long, init_value: 0, expr: new Long(Long.MIN_VALUE) }
-          - { type: Long, init_value: 0, expr: new Long(Long.MAX_VALUE) }
           - { type: float, expr: Float.MIN_VALUE }
           - { type: float, expr: Float.MAX_VALUE }
-          - { type: Float, init_value: 0.0f, expr: new Float(Float.MIN_VALUE) }
-          - { type: Float, init_value: 0.0f, expr: new Float(Float.MAX_VALUE) }
           - { type: double, expr: Double.MIN_VALUE }
           - { type: double, expr: Double.MAX_VALUE }
-          - { type: Double, init_value: 0.0, expr: new Double(Double.MIN_VALUE) }
-          - { type: Double, init_value: 0.0, expr: new Double(Double.MAX_VALUE) }
           - { type: char, expr: Char.MIN_VALUE as char }
           - { type: char, expr: Char.MAX_VALUE as char }
-          - { type: Char, init_value: "c'\\0'", expr: new Char(Char.MIN_VALUE as char) }
-          - { type: Char, init_value: "c'\\0'", expr: new Char(Char.MAX_VALUE as char) }
 
     - res: 'string'
       decl: |-
@@ -58,25 +42,18 @@ cases:
           - { type: string, init_value: '""', expr: '"ABC"' }
           - { type: string, init_value: '""', expr: "'' + '' + 'CDE'" }
           - { type: string, init_value: '""', expr: '`a = ${a}` + '''' + "CDE"' }
-          - { type: String, init_value: '""', expr: 'new String("ABC")' }
-          - { type: String, init_value: '""', expr: "new String('' + '' + 'CDE')" }
-          - { type: String, init_value: '""', expr: 'new String(`a = ${a}` + '''' + "CDE")' }
           - { type: Comparable<String>, init_value: '""', expr: '"X"' }
 
     - res: 'boolean'
       vals:
           - { type: boolean, expr: 'true' }
           - { type: boolean, expr: 'false' }
-          - { type: Boolean, init_value: 'false', expr: 'new Boolean(true)' }
-          - { type: Boolean, init_value: 'false', expr: 'new Boolean(false)' }
           - { type: Comparable<Boolean>, init_value: 'false', expr: 'new Boolean()' }
 
     - res: 'bigint'
       vals:
           - { type: bigint, init_value: 0n, expr: '123456789012345678901234567890n' }
           - { type: bigint, init_value: 0n, expr: '999999999999999999999999999999n' }
-          - { type: BigInt, init_value: 0n, expr: 'new BigInt("123456789012345678901234567890")' }
-          - { type: BigInt, init_value: 0n, expr: 'new BigInt("999999999999999999999999999999")' }
 
     - res: 'object'
       decl: |-
@@ -88,33 +65,24 @@ cases:
 
     - res: 'number'
       vals:
-          - { type: 'Floating', init_value: 0.0f, expr: 'new Float(3.14f)' }
-          - { type: 'Integral', init_value: 0, expr: 'new Int(42)' }
-          - { type: 'Numeric', init_value: 0, expr: 'new Number(3.14)' }
+          - { type: 'Floating', init_value: 0.0f, expr: '3.14f' }
+          - { type: 'Integral', init_value: 0, expr: '42' }
+          - { type: 'Numeric', init_value: 0, expr: '3.14' }
 
     - res: 'object'
       vals:
           - { type: 'number[]', init_value: '[]', expr: '[Number.MIN_VALUE]' }
           - { type: 'number[]', init_value: '[]', expr: '[Number.MAX_VALUE]' }
-          - { type: 'Number[]', init_value: '[]', expr: '[new Number(Number.MIN_VALUE)]' }
-          - { type: 'Number[]', init_value: '[]', expr: '[new Number(Number.MAX_VALUE)]' }
 
     - res: 'object'
       vals:
           - { type: 'byte[]', init_value: '[]', expr: '[Byte.MIN_VALUE]' }
-          - { type: 'Byte[]', init_value: '[]', expr: '[new Byte(Byte.MIN_VALUE)]' }
           - { type: 'short[]', init_value: '[]', expr: '[Short.MIN_VALUE]' }
-          - { type: 'Short[]', init_value: '[]', expr: '[new Short(Short.MIN_VALUE)]' }
           - { type: 'int[]', init_value: '[]', expr: '[Int.MAX_VALUE]' }
-          - { type: 'Int[]', init_value: '[]', expr: '[new Int(Int.MIN_VALUE)]' }
           - { type: 'long[]', init_value: '[]', expr: '[Long.MIN_VALUE]' }
-          - { type: 'Long[]', init_value: '[]', expr: '[new Long(Long.MIN_VALUE)]' }
           - { type: 'float[]', init_value: '[]', expr: '[Float.MIN_VALUE]' }
-          - { type: 'Float[]', init_value: '[]', expr: '[new Float(Float.MIN_VALUE)]' }
           - { type: 'double[]', init_value: '[]', expr: '[Double.MIN_VALUE]' }
-          - { type: 'Double[]', init_value: '[]', expr: '[new Double(Double.MIN_VALUE)]' }
           - { type: 'char[]', init_value: '[]', expr: '[Char.MIN_VALUE as char]' }
-          - { type: 'Char[]', init_value: '[]', expr: '[new Char(Char.MAX_VALUE as char)]' }
 
     - res: 'object'
       decl: |-
@@ -123,13 +91,13 @@ cases:
       vals:
           - { type: 'A[]', init_value: '[]', expr: '[new A]' }
           - { type: 'I[]', init_value: '[]', expr: '[new A]' }
-          - { type: 'Comparable<Float>[]', init_value: '[]', expr: '[new Float(3.14f)]' }
+          - { type: 'Comparable<Float>[]', init_value: '[]', expr: '[3.14f]' }
 
     - res: 'object'
       vals:
-          - { type: 'Floating[]', init_value: '[]', expr: '[new Float(3.14f)]' }
-          - { type: 'Integral[]', init_value: '[]', expr: '[new Int(42)]' }
-          - { type: 'Numeric[]', init_value: '[]', expr: '[new Number(3.14)]' }
+          - { type: 'Floating[]', init_value: '[]', expr: '[3.14f]' }
+          - { type: 'Integral[]', init_value: '[]', expr: '[42]' }
+          - { type: 'Numeric[]', init_value: '[]', expr: '[3.14]' }
 
     - res: 'function'
       decl: |-
