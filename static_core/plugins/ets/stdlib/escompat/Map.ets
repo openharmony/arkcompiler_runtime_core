@@ -103,7 +103,7 @@ export final class MapIterator<K, V, R> implements IterableIterator<R> {
 
     override next(): IteratorResult<R> {
         const nextNode = this.node.next
-        if (Runtime.isSameReference(nextNode, this.tail)) {
+        if (Runtime.isSameReference(nextNode, this.tail) || this.tail.next == this.tail) {
             return new IteratorResult<R>()
         }
         this.node = nextNode
@@ -380,12 +380,15 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
 
     /**
      * Deletes all elements from the Map
+     * It is not supported to use clear() and add elements during foreach, 
+     * as doing so may lead to undefined behavior.
      */
     clear(): void {
         this.sizeVal = 0
-
-        if (this.headEntry !== undefined) {
-            this.headEntry = undefined
+        let headEntry = this.headEntry
+        if (headEntry !== undefined) {
+            headEntry.prev = headEntry!
+            headEntry.next = headEntry!
             this.buckets = new MapBucket<K, V>[Map.MIN_BUCKETS_COUNT]
         }
     }
@@ -424,6 +427,9 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
     private mappedIterator<R>(fn: (e: MapEntry<K, V>) => R): IterableIterator<R> {
         const headEntry = this.headEntry
         if (headEntry !== undefined) {
+            if (headEntry.next == headEntry) {
+                return new EmptyMapIterator<R>()
+            }
             return new MapIterator<K, V, R>(headEntry, headEntry, fn)
         } else {
             return new EmptyMapIterator<R>()
@@ -467,12 +473,12 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
      * @param callbackfn to apply
      */
     override forEach(callbackfn: (v: V, k: K, map: Map<K, V>) => void): void {
-        if (this.headEntry === undefined) {
+        if (this.headEntry === undefined || this.headEntry!.next == this.headEntry!) {
             return
         }
         const headEntry = this.headEntry!
         let curNode = headEntry.next!
-        while (curNode != headEntry){
+        while (curNode != headEntry && headEntry.next != headEntry){
             callbackfn(curNode.val, curNode.key, this)
             curNode = curNode.next!
         }
