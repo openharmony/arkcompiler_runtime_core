@@ -1,7 +1,2 @@
-#17881 Skip these, because the run fails if multiple files are connected. The connection is necessary, because of the export tests.
-13.compilation_units/02.import_directives/04.import_type_directive/type_binding_class.ets
-13.compilation_units/02.import_directives/04.import_type_directive/type_binding_class_alias.ets
-13.compilation_units/02.import_directives/04.import_type_directive/type_binding_interface.ets
-
 #29205 Instanceof result on INT is different from AOT and JIT-with-repeats
 15.semantic_rules/11.type_erasure/instanceof_26.ets

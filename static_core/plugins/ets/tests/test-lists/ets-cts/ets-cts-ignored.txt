@@ -6,9 +6,6 @@
 02.lexical_elements/07.keywords/hard_19.ets
 02.lexical_elements/07.keywords/hard_25.ets
 
-#28018
-02.lexical_elements/07.keywords/soft_2.ets
-
 #28019
 02.lexical_elements/07.keywords/soft_9.ets
 02.lexical_elements/07.keywords/soft_10.ets
@@ -949,9 +946,6 @@
 # 21362
 07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/nase3.ets
 
-# 27209
-07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/oome1.ets
-
 #24879 Cannot determine type of array expression in Union type
 07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_call_28.ets
 07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_call_30.ets
@@ -1147,10 +1141,6 @@
 07.expressions/20.unary_expressions/03.prefix_increment/records.ets
 07.expressions/20.unary_expressions/04.prefix_decrement/records.ets
 
-#28999 Es2Panda crashes on unary plus with Long Enum
-07.expressions/20.unary_expressions/05.unary_plus/long_enum.ets
-07.expressions/20.unary_expressions/06.unary_minus/unary_minus_long_enum.ets
-
 #28004 Exponentiation operator rejected
 07.expressions/21.multiplicative_expressions/04.exponentiation/inf_16.ets
 07.expressions/21.multiplicative_expressions/04.exponentiation/inf_17.ets
@@ -1303,16 +1293,9 @@
 #27010
 08.statements/15.try_statements/01.catch_clause/catch_2.ets
 
-#29409
-08.statements/15.try_statements/01.catch_clause/catch_3.ets
-
 #22428
 08.statements/15.try_statements/01.catch_clause/catch_6.ets
 08.statements/15.try_statements/01.catch_clause/catch_9.ets
-
-#28738
-09.classes/03.class_implementation_clause/direct_interface_Implementation_twice.ets
-09.classes/03.class_implementation_clause/direct_interface_Implementation_twice_2.ets
 
 #26730
 09.classes/03.class_implementation_clause/01.implementing_interface_methods/class_overrides_interface_methods_call.ets
@@ -2044,19 +2027,6 @@
 15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_12.ets
 15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_13.ets
 15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_14.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_2_sources_0.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_2_sources_1.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_2_sources_2.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_2_sources_3.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_2_sources_4.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_2_sources_5.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_2_sources_6.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_2_sources_7.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_2_sources_8.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_2_sources_9.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_2_sources_10.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_2_sources_11.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_2_sources_12.ets
 15.semantic_rules/10.overloading/overload_with_import/function_import_and_decl_8.ets
 15.semantic_rules/10.overloading/overload_with_import/function_import_and_decl_9.ets
 15.semantic_rules/10.overloading/overload_with_import/function_import_and_decl_10.ets
@@ -2345,9 +2315,6 @@
 #28486
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con1_8.ets
 
-#28488
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con1_36.ets
-
 #28490
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_0.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_10.ets
@@ -2428,9 +2395,6 @@
 
 #24859
 17.experimental_features/03.resizable_array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_2.ets
-
-#28488
-17.experimental_features/03.resizable_array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_15.ets
 
 #29161
 17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_integer_types_common_cte_20.ets
@@ -2846,9 +2810,6 @@
 18.annotations/05.standard_annotations/02.target_annotation/AnnotationTargets_80.ets
 18.annotations/05.standard_annotations/02.target_annotation/ClassAnnoTest.ets
 
-#29116
-18.annotations/05.standard_annotations/02.target_annotation/use_annotation_with_type_bad.ets
-
 #29172
 18.annotations/05.standard_annotations/02.target_annotation/AnnotationTargets_20.ets
 
@@ -2956,15 +2917,6 @@
 15.semantic_rules/07.type_inference/01.numeric_constant_expressions/narrowing_neg_22.ets
 15.semantic_rules/07.type_inference/01.numeric_constant_expressions/narrowing_neg_23.ets
 
-#29729
-07.expressions/17.typeof_expression/tof_meth_8.ets
-
-#29730
-17.experimental_features/05.indexable_types/ind_expr_7.ets
-17.experimental_features/05.indexable_types/ind_expr_6.ets
-
-#2160
-14.ambient_declarations/06.namespace_declarations/01.impl_ambient_namespace/negative/namespace_usage_n_5.ets
 #29727
 10.interfaces/06.interface_inheritance/multi_layer_interface/complex_inheritance/complex_inheritance_12.ets
 10.interfaces/06.interface_inheritance/multi_layer_interface/complex_inheritance/complex_inheritance_22.ets

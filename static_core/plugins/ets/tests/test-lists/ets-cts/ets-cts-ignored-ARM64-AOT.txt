@@ -1,20 +1,2 @@
-#17881 Skip these, because the run fails if multiple files are connected. The connection is necessary, because of the export tests.
-13.compilation_units/02.import_directives/04.import_type_directive/type_binding_class.ets
-13.compilation_units/02.import_directives/04.import_type_directive/type_binding_class_alias.ets
-13.compilation_units/02.import_directives/04.import_type_directive/type_binding_interface.ets
-
 #29205 Instanceof result on INT is different from AOT and JIT-with-repeats
 15.semantic_rules/11.type_erasure/instanceof_26.ets
-
-17.experimental_features/16.packages/import_and_overloading_of_function_names/pkgs_a_4.ets
-17.experimental_features/16.packages/import_and_overloading_of_function_names/pkgs_a_6.ets
-17.experimental_features/16.packages/import_and_overloading_of_function_names/pkgs_a_10.ets
-17.experimental_features/16.packages/import_and_overloading_of_function_names/pkgs_a_18.ets
-17.experimental_features/16.packages/import_and_overloading_of_function_names/pkgs_ab_4.ets
-17.experimental_features/16.packages/import_and_overloading_of_function_names/pkgs_ab_6.ets
-17.experimental_features/16.packages/import_and_overloading_of_function_names/pkgs_ab_12.ets
-17.experimental_features/16.packages/import_and_overloading_of_function_names/pkgs_ab_14.ets
-17.experimental_features/16.packages/import_and_overloading_of_function_names/pkgs_ab_15.ets
-17.experimental_features/16.packages/import_and_overloading_of_function_names/pkgs_ab_17.ets
-17.experimental_features/16.packages/import_and_overloading_of_function_names/pkgs_ab_18.ets
-17.experimental_features/16.packages/import_and_overloading_of_function_names/pkgs_ab_22.ets
