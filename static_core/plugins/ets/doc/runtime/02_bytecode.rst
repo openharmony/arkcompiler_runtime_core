@@ -10,9 +10,12 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
+|
+
 .. _Platform Bytecode:
 
 Platform Bytecode
-#################
+*****************
 
 For details, see https://gitee.com/openharmony/arkcompiler_runtime_core/blob/master/static_core/isa/isa.yaml
+

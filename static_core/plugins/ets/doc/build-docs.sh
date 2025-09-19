@@ -279,8 +279,10 @@ fi
 
 if [[ "${BUILD_SPEC}" == "yes" ]]; then
     echo "spec: Validating ${SCRIPT_DIR}/spec"
+    cp ${SCRIPT_DIR}/concurrency/*.plantuml ${SCRIPT_DIR}/spec/
     python3 "${SCRIPT_DIR}/validate_spec.py" "${SCRIPT_DIR}/spec"
     build_sphinx_document spec "${SCRIPT_DIR}/spec"
+    rm -f ${SCRIPT_DIR}/spec/*.plantuml
 fi
 
 if [[ "${BUILD_COOKBOOK}" == "yes" ]]; then

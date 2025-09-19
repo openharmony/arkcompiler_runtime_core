@@ -213,6 +213,7 @@ sub assert_recipes
     my $current_section = 'intro';
 
     my $in_comment = false;
+    my $in_note = false;
 
     my %skip_list = (
         151 => { code_bad => 'skip' },
@@ -233,6 +234,21 @@ sub assert_recipes
         die 'Line cannot contain \t, change to four spaces' if $line =~ /\t/;
         die 'Line cannot contain FIXME' if $line =~ /\bFIXME\b/i;
         die 'Line cannot contain TBD' if $line =~ /\bTBD\b/i;
+
+        # '.. note' directive processing
+        if ($in_note) {
+            # Just check whether the note ends or not,
+            # Assume that build script will check note syntax
+            if ($line =~ /^\S+.*$/) {
+                # Not in note (unindented line)
+                # Must  contiue further processing.
+                $in_note = false;
+            }
+            else {
+                # Still note content, skip further processing
+                next;
+            }
+        }
 
         if ($line =~ /^\.\. :comment-begin:/) {
             $in_comment = true;
@@ -304,6 +320,13 @@ sub assert_recipes
                 unless $line =~ /^\|CB_RULE\| ``(arkts-[a-z0-9-]+?)``$/;
             my $short_name = $1;
             recipe_add_short_name($current_recipe, $short_name);
+        } elsif ($line =~ /^\.\. note::(\s*)$/) {
+            # Start of 'note' directive
+            # Do not allow trailing spaces
+            # Some content on the same line is allowed though
+            $in_note = true;
+            die 'Garbage after ".. note" directive'
+                unless $1 eq '';
         } elsif ($line =~ /^\.\. meta:$/) {
             # $current_section should not change
             die 'Expected current section: desc_detailed'

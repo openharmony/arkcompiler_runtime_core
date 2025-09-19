@@ -24,7 +24,10 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
 
+from sphinx.directives.code import CodeBlock
+from docutils import nodes
 import sphinx_common_conf
+from docutils.parsers.rst import directives
 
 # -- Project information -----------------------------------------------------
 
@@ -44,6 +47,10 @@ today_fmt = sphinx_common_conf.default_today_fmt
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 # extensions can be ['sphinx.ext.autosectionlabel']
+
+# Add any Sphinx extension module names here, as strings. They can be
+# extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
+extensions = ["sphinx_markdown_builder", "sphinx.ext.todo", "sphinxcontrib.plantuml"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = []
@@ -77,3 +84,27 @@ htmlhelp_basename = 'Documentationdoc'
 latex_elements = {
     'passoptionstopackages': r'\PassOptionsToPackage{bookmarksdepth=2}{hyperref}',
 }
+
+# -- Directive options extension ---------------------------------------------
+
+
+class CustomCodeBlock(CodeBlock):
+    option_spec = CodeBlock.option_spec.copy()
+    option_spec["language-to-compile"] = lambda arg: arg
+    option_spec["donotcompile"] = directives.flag
+
+    def run(self):
+        language_value = self.options.get("language-to-compile")
+        no_compile = "donotcompile" in self.options
+        result = super().run()
+
+        for node in result:
+            if isinstance(node, nodes.literal_block):
+                node["language-to-compile"] = language_value
+                node["donotcompile"] = no_compile
+
+        return result
+
+
+def setup(app):
+    app.add_directive("code-block", CustomCodeBlock, override=True)

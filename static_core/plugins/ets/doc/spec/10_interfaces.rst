@@ -69,7 +69,6 @@ support common behaviors without sharing a superclass.
    hiding
    overridden member
    hidden member
-   shadowing
 
 The value of a variable declared *interface type* can be a reference to any
 instance of a class that implements the specified interface. However, it is not
@@ -147,7 +146,6 @@ The scope of an interface declaration is defined in :ref:`Scopes`.
    class name
    generic interface
    generic declaration
-   shadowing
    scope
 
 |
@@ -335,7 +333,7 @@ The syntax of *interface member* is presented below:
         : annotationUsage?
         ( interfaceProperty
         | interfaceMethodDeclaration
-        | overloadInterfaceMethodDeclaration
+        | explicitInterfaceMethodOverload
         )
         ;
 
@@ -420,7 +418,7 @@ The syntax of *interface property* is presented below:
     interfaceProperty:
         'readonly'? identifier '?'? ':' type
         | 'get' identifier '(' ')' returnType
-        | 'set' identifier '(' parameter ')'
+        | 'set' identifier '(' requiredParameter ')'
         ;
 
 .. index::
@@ -437,11 +435,11 @@ An interface property is a *required property* (see
 :ref:`Required Interface Properties`) if it is one of the following:
 
 - Explicit *accessor*, i.e., a getter or a setter; or
-- Form of a field that has no '``?``'.
+- Form of a field that has no ``'?'``.
 
 Otherwise, it is an *optional property* (see :ref:`Optional Interface Properties`).
 
-If '``?``' is used after the name of the property, then the property type is
+If ``'?'`` is used after the name of the property, then the property type is
 semantically equivalent to ``type | undefined``.
 
 .. code-block:: typescript
@@ -482,7 +480,7 @@ A *required property* defined in the form of a field implicitly
 defines the following:
 
 -  Getter, if the property is marked as ``readonly``;
--  Otherwise, both a getter and a setter with the same name.
+-  Otherwise, both a getter and a setter of the same name.
 
 A type annotation for the field defines return type for the getter
 and type of parameter for the setter.
@@ -516,8 +514,9 @@ As a result, the following declarations have the same effect:
         set color(s: string)
     }
 
-**Note.** A *required property* defined in a form of accessors does not
-define any additional entities in the interface.
+.. note::
+   A *required property* defined in a form of accessors does not define any
+   additional entities in the interface.
 
 A class that implements an interface with properties can also use a field or
 an accessor notation (see :ref:`Implementing Required Interface Properties`,
@@ -563,7 +562,7 @@ The *optional property* implicitly defines the following:
    identifier
 
 -  A getter (if the property is marked as ``readonly``);
--  Otherwise, both a getter and a setter with the same name.
+-  Otherwise, both a getter and a setter of the same name.
 
 Accessors have implicitly defined bodies, in this aspect they are similar to
 :ref:`Default Interface Method Declarations`.
@@ -658,10 +657,11 @@ Interface Inheritance
 
 Interface *I* inherits all properties and methods from its direct
 superinterfaces. Semantic checks are described in
-:ref:`Overriding and Overloading in Interfaces`.
+:ref:`Overriding in Interfaces` and :ref:`Implicit Method Overloading`.
 
-**Note**. The semantic rules of methods apply to properties because any
-interface property implicitly defines a getter, a setter, or both.
+.. note::
+   The semantic rules of methods apply to properties because any interface
+   property implicitly defines a getter, a setter, or both.
 
 Private methods defined in superinterfaces are not accessible (see
 :ref:`Accessible`) in the interface body.
@@ -672,7 +672,6 @@ Private methods defined in superinterfaces are not accessible (see
    interface inheritance
    direct superinterface
    overriding
-   overload signature
    method
    superinterface
    semantic check
@@ -702,6 +701,33 @@ superinterface of *I*.
    superinterface
    private method
    signature
+
+The same scheme applies to properties and accessors:
+
+.. code-block:: typescript
+   :linenos:
+
+    interface I1 {
+        prop1: number
+        set prop2 (p: number)
+        get prop3 (): number
+    }
+    interface I2 {
+        prop1: number
+        set prop2 (p: number)
+        get prop3 (): number
+    }
+    interface I3 extends I1, I2 {}
+    // There is only one property prop1, prop2 and prop3 in I3
+
+    function foo (i3: I3) {
+       i3.prop1 = 5 // setter for prop1 is called
+       i3.prop1     // getter for prop1 is called
+       i3.prop2 = 5 // setter for prop2 is called
+       i3.prop2     // compile-time error as no getter for prop2
+       i3.prop3 = 5 // compile-time error as no getter for prop3
+       i3.prop3     // getter for prop3 is called
+    }
 
 .. raw:: pdf
 

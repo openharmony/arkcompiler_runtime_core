@@ -73,8 +73,6 @@ handling is provided below:
    standard library
 
 
-|
-
 .. code-block:: typescript
    :linenos:
 
@@ -105,7 +103,8 @@ New error situations can be created and raised by ``throw`` statements (see
 
 Errors are handled by using ``try`` statements (see :ref:`Try Statements`).
 
-**Note**. Not every error can be recovered.
+.. note::
+   Not any error can be recovered.
 
 .. index::
    runtime system

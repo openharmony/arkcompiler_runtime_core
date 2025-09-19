@@ -29,25 +29,25 @@ Recipes
 
 |CB_ERROR|
 
-|LANG| does not support objects with property names that are numbers, or
+|LANG| does not support objects with property names that are numbers,
 strings, or computed values.
 
 1. For simple objects:
 
-   * Use classes with proper property declarations
-   * Convert numeric keys to semantic identifiers
+   * Use classes with proper property declarations;
+   * Convert numeric keys to semantic identifiers.
 
 
 2. For Collection-Like Objects:
 
-   * Use arrays for numerically-indexed data
-   * Use Maps for truly dynamic key-value pairs
+   * Use arrays for numerically-indexed data;
+   * Use Maps for truly dynamic key-value pairs.
 
 
 3. For Mixed Cases:
 
-   * Consider splitting into multiple structures
-   * Document access patterns clearly
+   * Consider splitting into multiple structures;
+   * Document access patterns clearly.
 
 
 |CB_BAD|
@@ -160,20 +160,20 @@ Migration Strategy
 
 1. Audit Codebase:
 
-   * Find all Symbol() usage
-   * Identify iterator vs non-iterator cases
+   * Find all Symbol() usage;
+   * Identify iterator cases vs non-iterator cases.
 
 2. Refactor Patterns:
 
-   * Convert symbol properties to class members
-   * Replace metadata symbols with annotation systems
-   * Preserve iterator symbols where valid
+   * Convert symbol properties to class members;
+   * Replace metadata symbols with annotation systems;
+   * Preserve iterator symbols where valid.
 
 3. Validation:
 
-   * Verify static type definitions
-   * Ensure no runtime property additions
-   * Test iteration functionality
+   * Verify static type definitions;
+   * Ensure no runtime property additions;
+   * Test iteration functionality.
 
 |CB_BAD|
 ~~~~~~~~
@@ -308,6 +308,10 @@ and function names.
 
 |LANG| does not support ``var``. Use ``let`` instead.
 
+.. note::
+   Scopes of ``var`` and ``let`` are different in |TS| so it is also
+   necessary to revise place of variable declaration.
+
 |CB_BAD|
 ~~~~~~~~
 
@@ -325,8 +329,8 @@ and function names.
 
     let upper_let = 0
     {
-        var scoped_var = 0
-        let scoped_let = 0
+        var scoped_var = 0 // same scope as for upper_let
+        let scoped_let = 0 // really scoped
         upper_let = 5
     }
     scoped_var = 5 // Visible
@@ -349,7 +353,7 @@ and function names.
     console.log(f(false)) // "undefined"
 
     let upper_let = 0
-    let scoped_var = 0
+    let scoped_var = 0  // ``var`` changed to ``let``, placement fixed
     {
         let scoped_let = 0
         upper_let = 5
@@ -373,13 +377,12 @@ and function names.
 |LANG| does not support the types ``any`` and ``unknown``. Specify
 types explicitly.
 
-If your |LANG| code has to interoperate with the standard |TS| or |JS| code,
-and no type information is available (or if type information is impossible
-to obtain), then you can use a special ``ESObject`` type to work with dynamic
-objects. Note that you must avoid such objects at all cost as they reduce
-type checking (i.e., the code is less stable and more error-prone) and cause
-severe runtime overhead. The usage of ``ESObject`` still produces a warning
-message.
+If your |LANG| code has to interoperate with standard |TS| or |JS| codes,
+and if type information is not available or is impossible to obtain, then you
+can use a special ``ESObject`` type to work with dynamic objects. Note that you
+must avoid such objects at all cost as they reduce type checking (i.e., the code
+is less stable and more error-prone) and cause severe runtime overhead. The
+usage of ``ESObject`` still produces a warning message.
 
 |CB_BAD|
 ~~~~~~~~
@@ -448,6 +451,11 @@ message.
         console.log(fn.description + " returned " + fn(6))
     }
 
+    const f: DescribableFunction = (v:number): string => { return v.toString();}
+    f.description = "desc"
+
+    doSomething(f)
+
 |CB_OK|
 ~~~~~~~
 
@@ -495,15 +503,20 @@ instead.
 
 .. code-block:: typescript
 
-    class SomeObject {}
+    class SomeObject {
+        s: string;
+        constructor(s: string) { this.s = s }
+    }
 
     type SomeConstructor = {
         new (s: string): SomeObject
     }
 
-    function fn(ctor: SomeConstructor) {
-        return new ctor("hello")
+    function fn(ctor: SomeConstructor, s: string) {
+        return new ctor(s)
     }
+
+    console.log(fn(SomeObject, "hello").s)
 
 |CB_OK|
 ~~~~~~~
@@ -520,6 +533,8 @@ instead.
     function fn(s: string): SomeObject {
         return new SomeObject(s)
     }
+
+    console.log(fn("hello").f)
 
 |CB_SEE|
 ~~~~~~~~
@@ -606,6 +621,8 @@ Combine multiple static block statements into a single static block.
     const myArray: StringArray = getStringArray()
     const secondItem = myArray[1]
 
+    console.log(secondItem)
+
 |CB_OK|
 ~~~~~~~
 
@@ -613,10 +630,14 @@ Combine multiple static block statements into a single static block.
 
     class X {
         f: string[] = []
+        constructor(p: string[]) { this.f = p }
     }
 
-    let myArray: X = new X()
+    let myArray: X = new X(["a", "b", "c"])
     const secondItem = myArray.f[1]
+
+    console.log(secondItem)
+
 
     // or
 
@@ -686,7 +707,7 @@ as a workaround.
 
 .. _R021:
 
-|CB_R| ``this`` typing is supported only for methods with explicit ``this`` return
+|CB_R| ``this`` typing is supported only for methods with explicit return ``this``
 ----------------------------------------------------------------------------------
 
 |CB_RULE| ``arkts-this-typing``
@@ -898,7 +919,7 @@ explicitly in the constructor body.
 
 |CB_ERROR|
 
-|LANG| does not support indexed access types. Use type name instead.
+|LANG| does not support indexed access types. Use type names instead.
 
 |CB_BAD|
 ~~~~~~~~
@@ -933,7 +954,7 @@ explicitly in the constructor body.
 |LANG| does not support dynamic field declaration and access. Declare all
 object fields right in a class. Access only those class fields
 that are either declared in a class, or accessible by inheritance. Accessing
-any other fields is prohibited, and causes compile-time errors.
+any other field is prohibited, and causes a compile-time error.
 
 To access a field, use ``obj.field`` syntax. |LANG| does not support indexed
 access (``obj["field"]``), except indexed access to all typed arrays found in
@@ -1013,7 +1034,7 @@ and enums.
 
 |CB_ERROR|
 
-Currently, |LANG| does not support structural typing and it is recommended to
+Currently, |LANG| does not support structural typing. It is recommended to
 use other mechanisms (inheritance, interfaces, or type aliases) instead.
 
 |CB_BAD|
@@ -1136,7 +1157,7 @@ use other mechanisms (inheritance, interfaces, or type aliases) instead.
 |CB_ERROR|
 
 |LANG| allows omitting generic type parameters if it is possible to infer
-a specific type from the parameters passed to the function. A compile-time
+a specific type from the parameters passed to a function. A compile-time
 error occurs otherwise. In particular, inference of generic type parameters
 based on function return types only is prohibited.
 
@@ -1220,12 +1241,12 @@ string literals instead.
 |LANG| supports the usage of object literals if the compiler can infer
 what classes or interfaces such literals correspond to.
 A compile-time error occurs otherwise. |LANG| does not support using literals
-to initialize classes and interfaces--and particularly so for the initialization
+to initialize classes and interfaces, and particularly so for the initialization
 of the following:
 
 * Anything with type ``any``, ``Object``, or ``object``;
 * Classes or interfaces with methods;
-* Classes that declare a ``constructor`` with parameters;
+* Classes that declare a ``constructor`` with parameters.
 
 In addition, |LANG| supports the usage of object literals to initialize the
 value of special type ``Record<K, V>``. The type ``K`` denotes an object key,
@@ -1411,8 +1432,8 @@ types in place. Declare classes and interfaces explicitly instead.
 |CB_ERROR|
 
 Basically, |LANG| infers the type of an array literal as union type of its
-contents. However, a compile-time error occurs if at least one element has
-a non-inferable type (e.g., untyped object literal).
+contents. However, if at least one element has a non-inferable type (e.g.,
+untyped object literal), then a compile-time error occurs.
 
 |CB_BAD|
 ~~~~~~~~
@@ -1580,9 +1601,9 @@ interfaces can be specified.
 
 |CB_ERROR|
 
-|LANG| does not support re-assigning a method for objects. In statically-typed
-languages, the layout of objects is fixed, and all instances of the same
-object must share identical code of each method.
+|LANG| does not support re-assigning a method for objects. The layout of objects
+in statically-typed languages is fixed, and all instances of the same object
+must share identical code of each method.
 
 To add specific behavior for certain objects, create separate wrapper functions,
 or use inheritance.
@@ -1794,7 +1815,7 @@ strings instead  in |LANG|.
 
 .. _R059:
 
-|CB_R| ``delete`` operator is not supported
+|CB_R| Operator ``delete`` is not supported
 -------------------------------------------
 
 |CB_RULE| ``arkts-no-delete``
@@ -1848,7 +1869,7 @@ changed at runtime. Thus, deleting a property makes no sense.
 
 .. _R060:
 
-|CB_R| ``typeof`` operator is allowed only in expression contexts
+|CB_R| Operator ``typeof`` is allowed only in expression contexts
 -----------------------------------------------------------------
 
 |CB_RULE| ``arkts-no-type-query``
@@ -1859,8 +1880,8 @@ changed at runtime. Thus, deleting a property makes no sense.
 
 |CB_ERROR|
 
-|LANG| supports ``typeof`` operator only in an *expression* context. |LANG| does
-not support using ``typeof`` to specify type notations.
+|LANG| supports the operator ``typeof`` only in an *expression* context.
+|LANG| does not support using ``typeof`` to specify type notations.
 
 |CB_BAD|
 ~~~~~~~~
@@ -1898,7 +1919,7 @@ not support using ``typeof`` to specify type notations.
 
 .. _R065:
 
-|CB_R| ``instanceof`` operator is partially supported
+|CB_R| Operator ``instanceof`` is partially supported
 -----------------------------------------------------
 
 |CB_RULE| ``arkts-instanceof-ref-types``
@@ -1948,7 +1969,7 @@ left operand cannot be a type. Otherwise, a compile-time error occurs.
 
 .. _R066:
 
-|CB_R| ``in`` operator is not supported
+|CB_R| Operator ``in`` is not supported
 ---------------------------------------
 
 |CB_RULE| ``arkts-no-in``
@@ -1987,8 +2008,6 @@ to check whether certain class members exist.
     let p = new Person()
 
     let b = p instanceof Person // true, and "name" is guaranteed to be present
-    // or
-    let b = Reflect.has(p, "name")
 
 |CB_SEE|
 ~~~~~~~~
@@ -2013,9 +2032,10 @@ to check whether certain class members exist.
 
 |CB_ERROR|
 
-|LANG| supports destructuring assignment for arrays and tuples. |LANG| does not
-support Object destructuring and the spread operator. Use other idioms instead,
-e.g., a temporary variable where applicable.
+|LANG| supports destructuring assignment for arrays and tuples. The
+destructuring assignment in |LANG| does not support the spread operator and
+Object destructuring. Use other idioms instead, e.g., a temporary variable
+where applicable.
 
 |CB_BAD|
 ~~~~~~~~
@@ -2042,7 +2062,7 @@ e.g., a temporary variable where applicable.
 
 .. code-block:: typescript
 
-    let one, two;
+    let one: number, two: number;
     [one, two] = [1, 2];
     [one, two] = [two, one];
 
@@ -2075,12 +2095,14 @@ e.g., a temporary variable where applicable.
 
 |CB_ERROR|
 
-|LANG| supports the comma operator '``,``' only in ``for`` loops. It is
-useless otherwise as it makes the execution order harder to understand.
+|TS| has a comma operator '``,``'. The |LANG| supports that functionality for
+comma only in the control part of ``for`` loops (not in the body of the loop).
+It is useless otherwise as it makes the execution order harder to understand.
 
-Note that this rule is applied to the *comma operator* only.
-You may use comma in other cases to delimit variable declarations or parameters
-of a function call.
+.. note::
+    This rule is applied to the *comma operator* only. You can use comma in
+    other cases to delimit variable declarations or parameters
+    of a function call.
 
 |CB_BAD|
 ~~~~~~~~
@@ -2123,18 +2145,14 @@ of a function call.
 
 |CB_ERROR|
 
-|LANG| supports destructuring variable declarations for arrays and tuples.
-|LANG| does not support Object destructuring and the spread operator. This is
-a dynamic feature that relies on structural compatibility. In addition, names
-in destructuring declarations must be equal to properties within destructured
-classes.
+|LANG| does not support destructuring variable declarations.
 
 |CB_BAD|
 ~~~~~~~~
 
 .. code-block:: typescript
 
-    let [one, two] = [1, 2]; // semicolon is required here
+    let [one, two] = [1, 2]
 
     class Point {
         x: number = 0.0
@@ -2152,7 +2170,8 @@ classes.
 
 .. code-block:: typescript
 
-    let [one, two] = [1, 2]; // semicolon is required here
+    let one: number, two: number; // semicolon is required here
+    [one, two] = [1, 2]
 
     class Point {
         x: number = 0.0
@@ -2236,9 +2255,9 @@ results when object structures change at runtime.
 
 Instead of ``for .. in``:
 
-1. For arrays, use the standard ``for`` loop with numeric indices.
+1. For arrays, use the standard ``for`` loop with numeric indices;
 2. For object properties, use ``Object.keys()`` or ``Object.entries()``
-   with a ``for .. of`` loop.
+   with a ``for .. of`` loop;
 3. For iterating over collections, use the ``for .. of`` loop.
 
 
@@ -2247,7 +2266,9 @@ Instead of ``for .. in``:
 
 .. code-block:: typescript
 
+    class CC { f: number = 1; q: string = "q" }
     let a: number[] = [1.0, 2.0, 3.0]
+
     for (let i in a) {
         console.log(a[i])
     }
@@ -2262,13 +2283,15 @@ Instead of ``for .. in``:
 
 .. code-block:: typescript
 
+    class CC { f: number = 1; q: string = "q" }
     let a: number[] = [1.0, 2.0, 3.0]
+
     for (let i = 0; i < a.length; ++i) {
         console.log(a[i])
     }
 
     let obj: CC = new CC()
-    for (let key in Object.keys(obj)) {
+    for (let key: string of  Object.keys(obj)) {
         console.log(key)
     }
 
@@ -2293,9 +2316,15 @@ classes to achieve that same behavior.
 
 .. code-block:: typescript
 
+    class C {
+        n: number = 0
+        s: string = ""
+    }
+
     type OptionsFlags<Type> = {
         [Property in keyof Type]: boolean
     }
+    let CFlags: OptionsFlags<C>
 
 |CB_OK|
 ~~~~~~~
@@ -2333,7 +2362,8 @@ classes to achieve that same behavior.
 
 .. code-block:: typescript
 
-    with (Math) { // Compile-time error, but JavaScript code still emitted
+    with (Math) { // Compile-time error, but JavaScript code still can be
+                  // emitted (depends on TS strict type checking serttings)
         let r: number = 42
         console.log("Area: ", PI * r * r)
     }
@@ -2464,8 +2494,7 @@ explicitly.
 
 |CB_ERROR|
 
-|LANG| supports unpacking arrays and tuples passed as function parameters.
-|LANG| does not support unpacking properties from objects.
+|LANG| Does not support destructuring in parameters.
 Parameters must be passed to the function directly, and local names must be
 assigned manually.
 
@@ -2495,12 +2524,12 @@ assigned manually.
 
 .. code-block:: typescript
 
-    function drawPoint([x, y] = [0, 0]) {
+    function drawPoint(x: number = 0, y: number = 0) {
         console.log(x)
         console.log(y)
     }
 
-    drawPoint([1, 2])
+    drawPoint(1, 2)
 
     function drawText(text: String, location: number[], bold: boolean) {
         let x = location[0]
@@ -2768,7 +2797,7 @@ appropriate type before use.
 |CB_ERROR|
 
 |LANG| supports the scenario in which the spread operator spreads an array and
-tuples (or class derived from an array) into a rest parameter or an array or
+tuples (or class derived from an array) into a rest parameter, an array, or a
 tuple literal. Otherwise, *unpack* data from arrays and objects manually, where
 necessary. |LANG| also supports all typed arrays from the standard library
 (e.g., ``Int32Array``).
@@ -3040,8 +3069,7 @@ extend interfaces.
 
 |CB_ERROR|
 
-|LANG| does not support using the constructor function type.
-Use lambdas instead.
+|LANG| does not support using constructor function types. Use lambdas instead.
 
 |CB_BAD|
 ~~~~~~~~
@@ -3228,52 +3256,10 @@ Classes or modules can be interpreted as placeholders of namespaces.
 
     MyNamespace.x = 2
 
-.. _R116:
-
-|CB_R| Non-declaration statements in namespaces are not supported
------------------------------------------------------------------
-
-|CB_RULE| ``arkts-no-ns-statements``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. meta:
-    :keywords: NonDeclarationInNamespace
-
-|CB_ERROR|
-
-|LANG| does not support statements in namespaces. Use function to execute
-a statement.
-
-|CB_BAD|
-~~~~~~~~
-
-.. code-block:: typescript
-
-    namespace A {
-        export let x: number
-        x = 1
-    }
-
-|CB_OK|
-~~~~~~~
-
-.. code-block:: typescript
-
-    namespace A {
-        export let x: number
-
-        export function init() {
-          x = 1
-        }
-    }
-
-    // Initialization function must be called to execute statements:
-    A.init()
-
 .. _R121:
 
-|CB_R| ``require`` and ``import`` assignment are not supported
---------------------------------------------------------------
+|CB_R| ``require`` and ``import`` assignments are not supported
+---------------------------------------------------------------
 
 |CB_RULE| ``arkts-no-require``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -3283,7 +3269,7 @@ a statement.
 
 |CB_ERROR|
 
-|LANG| does not support importing by the ``require`` and ``import`` assignments.
+|LANG| does not support importing by ``require`` and ``import`` assignments.
 Use regular ``import`` instead.
 
 |CB_BAD|
@@ -3318,7 +3304,7 @@ Use regular ``import`` instead.
 
 |CB_ERROR|
 
-|LANG| does not support ``export = ...`` syntax.
+|LANG| does not support the ``export = ...`` syntax.
 Use regular ``export`` / ``import`` instead.
 
 |CB_BAD|
@@ -3567,6 +3553,11 @@ This feature is considered not applicable to static typing.
 they are considered an excessive compiler hint.
 Use declaration with initialization instead.
 
+.. note::
+    |LANG| uses ``!:`` for requesting class fields late initialization,
+    the check that entity was initialized is performed at runtime on read
+    operation.
+
 |CB_BAD|
 ~~~~~~~~
 
@@ -3665,7 +3656,7 @@ mechanism instead to statically *combine* methods to data.
 
 |CB_WARNING|
 
-|LANG| does not support both global scope and ``globalThis`` because untyped
+|LANG| does not support global scope nor ``globalThis`` because untyped
 objects with dynamically changed layouts are unsupported.
 
 |CB_BAD|
@@ -3779,7 +3770,7 @@ For type ``Record<K, V>``, an indexing expression *rec[index]* is of type
     }
     console.log(persons["Bob"]!.age)
     if (persons["Rob"]) { // Explicit value check, no runtime exception
-        console.log(persons["Rob"].age)
+        console.log(persons["Rob"]!.age)
     }
 
 .. _R139:
@@ -3796,8 +3787,8 @@ For type ``Record<K, V>``, an indexing expression *rec[index]* is of type
 |CB_ERROR|
 
 |LANG| does not support declaring properties on functions because objects
-with dynamically changing layouts are unsupported. Function objects follow
-this rule, and their layout cannot be changed at runtime.
+with dynamically changing layouts are unsupported. This rule applies to function
+objects, and function object layout cannot be changed at runtime.
 
 |CB_BAD|
 ~~~~~~~~
@@ -3870,7 +3861,7 @@ this rule, and their layout cannot be changed at runtime.
 
 |LANG| does not allow using standard library function ``Function.bind``.
 The standard library requires this API to explicitly set the parameter ``this``
-for the called function.
+for a called function.
 The semantics of ``this`` in |LANG| is restricted to the conventional OOP
 style. Using ``this`` in stand-alone functions is prohibited. This function
 is thus excessive.
@@ -4031,28 +4022,26 @@ Most of the restricted APIs are related to handling objects dynamically, which
 is not compatible with static typing. |LANG| forbids the usage of the following
 APIs:
 
-Properties and functions of the global object: ``eval``;
+- Properties and functions of the global object: ``eval``;
 
-``Object``: ``__proto__``, ``__defineGetter__``, ``__defineSetter__``,
-``__lookupGetter__``, ``__lookupSetter__``, ``create``,
-``defineProperties``, ``defineProperty``, ``freeze``,
-``getOwnPropertyDescriptor``, ``getOwnPropertyDescriptors``,
-``getOwnPropertySymbols``, ``getPrototypeOf``,
-``hasOwnProperty``, ``is``, ``isExtensible``, ``isFrozen``,
-``isPrototypeOf``, ``isSealed``, ``preventExtensions``,
-``propertyIsEnumerable``, ``seal``, ``setPrototypeOf``;
+- ``Object``: ``__proto__``, ``__defineGetter__``, ``__defineSetter__``,
+  ``__lookupGetter__``, ``__lookupSetter__``, ``create``, ``defineProperties``,
+  ``defineProperty``, ``freeze``, ``getOwnPropertyDescriptor``,
+  ``getOwnPropertyDescriptors``, ``getOwnPropertySymbols``, ``getPrototypeOf``,
+  ``hasOwnProperty``, ``is``, ``isExtensible``, ``isFrozen``, ``isPrototypeOf``,
+  ``isSealed``, ``preventExtensions``, ``propertyIsEnumerable``, ``seal``,
+  ``setPrototypeOf``;
 
-``Reflect``: ``apply``, ``construct``, ``defineProperty``, ``deleteProperty``,
-``getOwnPropertyDescriptor``, ``getPrototypeOf``,
-``isExtensible``, ``preventExtensions``,
-``setPrototypeOf``;
+- ``Reflect``: ``apply``, ``construct``, ``defineProperty``, ``deleteProperty``,
+  ``getOwnPropertyDescriptor``, ``getPrototypeOf``, ``isExtensible``,
+  ``preventExtensions``, ``setPrototypeOf``;
 
-``Proxy``: ``handler.apply()``, ``handler.construct()``,
-``handler.defineProperty()``, ``handler.deleteProperty()``, ``handler.get()``,
-``handler.getOwnPropertyDescriptor()``, ``handler.getPrototypeOf()``,
-``handler.has()``, ``handler.isExtensible()``, ``handler.ownKeys()``,
-``handler.preventExtensions()``, ``handler.set()``,
-``handler.setPrototypeOf()``.
+- ``Proxy``: ``handler.apply()``, ``handler.construct()``,
+  ``handler.defineProperty()``, ``handler.deleteProperty()``, ``handler.get()``,
+  ``handler.getOwnPropertyDescriptor()``, ``handler.getPrototypeOf()``,
+  ``handler.has()``, ``handler.isExtensible()``, ``handler.ownKeys()``,
+  ``handler.preventExtensions()``, ``handler.set()``,
+  ``handler.setPrototypeOf()``.
 
 |LANG| supports the following APIs partially:
 
@@ -4151,7 +4140,7 @@ When porting from the standard |TS|, turn on the following flags:
 
 |CB_ERROR|
 
-Type checker in |LANG| is not optional: the code must be typed explicitly and
+Type checker in |LANG| is not optional: code must be typed explicitly and
 correctly to compile and run. |LANG| does not allow *suppressing* type checker
 in place with special comments. |LANG| does not support ``@ts-ignore`` and
 ``@ts-nocheck`` annotations in particular.
@@ -4286,7 +4275,7 @@ Any other decorator causes a compile-time error.
 |CB_WARNING|
 
 |LANG| does not support using classes as objects (assigning classes to
-variables, etc.) because a ``class`` declaration introduces a new type,
+variables, etc.) because a ``class`` declaration introduces a new type but
 not a value in the language.
 
 |CB_BAD|
@@ -4315,7 +4304,7 @@ not a value in the language.
 |CB_ERROR|
 
 All ``import`` statements in |LANG| must precede any other statements in
-the program.
+a program.
 
 |CB_BAD|
 ~~~~~~~~
@@ -4355,8 +4344,8 @@ the program.
 |CB_WARNING|
 
 |LANG| does not allow using ``ESObject`` type in some cases. Most limitations
-are put in place in order to prevent the spread of dynamic objects in a static
-codebase. The usage of ``ESObject`` as type specifier is only permitted in the
+are put in place because |LANG| does not support dynamic objects. The usage of
+``ESObject`` as type specifier is only permitted in the
 local variable declaration scenario.
 The initialization of ``ESObject`` type variables is also limited. Such
 variables can only be initialized with values that originate from interop, i.e.,
@@ -4417,9 +4406,9 @@ to interop calls and assigned to other variables of type ``ESObject``.
 
 |LANG| does not allow using standard library functions ``Function.apply``
 and ``Function.call``. These APIs are needed in the standard library to
-explicitly set the parameter ``this`` for the called function.
+explicitly set the parameter ``this`` for a called function.
 The semantics of ``this`` in |LANG| is restricted to the conventional OOP style.
-Using ``this`` in stand-alone functions is prohibited.
+Using ``this`` in a stand-alone function is prohibited.
 These functions are thus excessive.
 
 |CB_BAD|
@@ -4741,9 +4730,10 @@ Only ``Sendable data`` types are allowed as type arguments of generic
 **Note: This rule describes the restrictions of an ArkTS-specific feature**
 
 |LANG| does not support sharing closures at runtime. Therefore, ``Sendable``
-classes are not allowed to capture local variable, or use a function or class
-from the same module, as otherwise a closure is created. Imported variables,
-classes, and functions only can be used inside a ``Sendable`` class body.
+classes are allowed neither to capture local variable, nor to use a function or
+class from the same module, as otherwise a closure is created. Imported
+variables, classes, and functions only can be used inside a ``Sendable`` class
+body.
 
 |CB_NON_COMPLIANT_CODE|
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -5249,7 +5239,7 @@ consists of an identifier and an expression.
 |CB_ERROR|
 
 |LANG| does not support optional methods, unlike |TS| where methods with '``?``'
-are allowed to be not overriden in method overloading, or to be implemented
+are allowed to be not overridden in method overloading, or to be implemented
 in interface implementation.
 
 |CB_BAD|
@@ -5293,7 +5283,7 @@ in interface implementation.
 
 |CB_ERROR|
 
-|LANG| does not support local classes and interfaces, unlike |TS| where one may
+|LANG| does not support local classes and interfaces, unlike |TS| where one can
 define a class or interface in any block of code.
 
 |CB_BAD|
@@ -5331,7 +5321,7 @@ define a class or interface in any block of code.
 |CB_WARNING|
 
 |TS| has a single numeric type ``number`` that handles both integer and real
-numbers. |LANG| interprets numbers as variety of numeric types: ``int``,
+numbers. |LANG| interprets numbers as a variety of numeric types: ``int``,
 ``long``, ``float``, ``double``. Calculations depends on the context and can
 produce different results.
 
@@ -5370,8 +5360,8 @@ produce different results.
 |CB_ERROR|
 
 |TS| allows more relaxed assignments into variables of function type, while
-|LANG| follows stricter rules stated in 15.2.5 Subtyping for Function Types
-of the Specification.
+|LANG| follows stricter rules stated in `Subtyping for Function Types`
+in the Specification.
 
 |CB_BAD|
 ~~~~~~~~
@@ -5396,7 +5386,7 @@ of the Specification.
 
 .. _R193:
 
-|CB_R| ``void`` operator is not supported
+|CB_R| Operator ``void`` is not supported
 -----------------------------------------
 
 |CB_RULE| ``arkts-no-void-operator``
@@ -5407,8 +5397,8 @@ of the Specification.
 
 |CB_ERROR|
 
-|LANG| does not support ``void`` operator. Replace some of the code with
-a lambda function call, while retaining all side effects.
+|LANG| does not support the operator ``void``. Replace some code with a lambda
+function call, while retaining all side effects.
 
 |CB_BAD|
 ~~~~~~~~
@@ -5441,7 +5431,7 @@ a lambda function call, while retaining all side effects.
 
 |CB_WARNING|
 
-There is no ``override`` keyword for a fireld declarations in |LANG|
+There is no keyword ``override`` for field declarations in |LANG|.
 
 |CB_BAD|
 ~~~~~~~~
@@ -5502,7 +5492,7 @@ There is no ``override`` keyword for a fireld declarations in |LANG|
 
 |CB_ERROR|
 
-Importing itself and re-exporting itself is prohibited.
+Importing and re-exporting itself is prohibited.
 
 |CB_BAD|
 ~~~~~~~~
@@ -5535,13 +5525,13 @@ Importing itself and re-exporting itself is prohibited.
 By prohibiting side effect imports, |LANG| ensures that module initialization
 occurs in a predictable manner based on explicitly imported dependencies.
 
-If the module truly has no exports but only side effects (e.g., modifying
-global state):
+If a module truly has no exports but only side effects (e.g., modifying
+global state), then:
 
 - Consider refactoring the dependency to expose explicit exports;
 - Move the initialization code to a more appropriate location;
-- If the side effect is essential, consider using a different mechanism
-  like explicit initialization functions.
+- Consider using a different mechanism like explicit initialization functions
+  where the side effect is essential.
 
 |CB_BAD|
 ~~~~~~~~
@@ -5592,83 +5582,10 @@ a binding is not distinguishable.
 
     import { foo } from 'module'
 
-.. _R225:
-
-|CB_R| The ``DynamicObject`` type can only be casted to class or interface type
--------------------------------------------------------------------------------
-
-|CB_RULE| ``arkts-dynamic-obj-cast``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. meta:
-    :keywords: DynamicCtorCall
-
-|CB_WARNING|
-
-Dynamic objects in |LANG| represent data with structure unknown at compile
-time, typically originating from external sources like JSON, JavaScript
-interop, or web APIs. To bridge the gap between this dynamic data and |LANG|'s
-static type system, the language provides controlled casting mechanisms.
-
-The ``DynamicObject`` type can only be cast to class or interface types. This
-restriction ensures that dynamic data is mapped to well-defined structures with
-specific properties and methods.
-
-**Prohibited Cast Targets**
-
-- Primitive types: ``number``, ``string``, ``boolean``;
-- Union types;
-- Function types.
-
-When casting a dynamic object, the developer assumes responsibility for
-ensuring the runtime data actually matches the specified class or interface
-structure.
-
-|CB_BAD|
-~~~~~~~~
-
-.. code-block:: typescript
-
-    // Casting DynamicObject to primitive types
-    import { ESObject } from '@arkts.jsapi.d.ets'
-
-    function processDynamicData(data: ESObject) {
-        // Error: Cannot cast DynamicObject to primitive types
-        let id = data as number;
-        let name = data as string;
-        let isActive = data as boolean;
-
-        // Error: Cannot cast to union types
-        let value = data as (string | number);
-
-        // Error: Cannot cast to function type
-        let callback = data as () => void;
-    }
-
-|CB_OK|
-~~~~~~~
-
-.. code-block:: typescript
-
-    // Casting DynamicObject to class or interface types
-    import { ESObject } from '@arkts.jsapi.d.ets'
-
-    class DataModel {
-        id: number;
-        name: string;
-        isActive: boolean;
-        value: string | number;
-        callback: () => void;
-    }
-
-    function processDynamicData(data: ESObject) {
-        let model = data as DataModel;
-    }
-
 .. _R239:
 
-|CB_R| This keyword cannot be used as identifiers
--------------------------------------------------
+|CB_R| Keywords that cannot be used as identifiers
+--------------------------------------------------
 
 |CB_RULE| ``arkts-invalid-identifier``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -5703,8 +5620,8 @@ identifiers.
 
 .. _R228:
 
-|CB_R| Only loop statements are allowed to have a label
--------------------------------------------------------
+|CB_R| Only ``loop`` statements are allowed to have a label
+-----------------------------------------------------------
 
 |CB_RULE| ``arkts-invalid-label``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -5714,8 +5631,8 @@ identifiers.
 
 |CB_ERROR|
 
-Only loop statements are allowed to have a label. Only one label can be
-specified for a certain loop statement.
+Only ``loop`` statements are allowed to have a label. Only one label can be
+specified for a certain ``loop`` statement.
 
 |CB_BAD|
 ~~~~~~~~
@@ -5761,7 +5678,7 @@ specified for a certain loop statement.
     }
 
     // Correct: Using labeled while loop
-    pro cess: while (hasMoreData()) {
+    process: while (hasMoreData()) {
         const data = getData();
         if (isInvalid(data)) {
             break process;
@@ -5810,7 +5727,7 @@ specified for a certain loop statement.
 
 .. _R230:
 
-|CB_R| The parameter with ``this`` name is not supported
+|CB_R| The parameter with name ``this`` is not supported
 --------------------------------------------------------
 
 |CB_RULE| ``arkts-no-this-param``
@@ -5821,9 +5738,15 @@ specified for a certain loop statement.
 
 |CB_ERROR|
 
-|LANG| does not support a method parameter with ``this`` name. This restriction
-helps maintain consistency in function parameter lists, avoiding potential
-confusion between special and regular parameters.
+|LANG| does not support a method parameter with the name ``this``. That
+restriction helps maintaining consistency in function parameter lists, and
+avoid potential confusion between special and regular parameters.
+
+.. note::
+
+  The keyword ``this`` still can be used in |LANG| in *function* and
+  *lambda with receiver*  but only for the name  of the first parameter. It has
+  a special meaning of the *receiver parameter* in that case.
 
 |CB_BAD|
 ~~~~~~~~
@@ -5907,25 +5830,25 @@ confusion between special and regular parameters.
 
 Key differences between CommonJS and ESM that impact |LANG| compatibility:
 
-1. **Static vs. Dynamic**: ESM supports static analysis at compile time,
-allowing for better tree-shaking, type checking, and optimizations. CommonJS is
-inherently dynamic, with exports resolved at runtime.
+#. **Static vs. Dynamic**: ESM supports static analysis at compile time,
+   allowing better tree-shaking, type checking, and optimizations. CommonJS is
+   inherently dynamic, with exports resolved at runtime.
 
-2. **Synchronous vs. Asynchronous**: CommonJS modules are loaded synchronously,
-while ESM was designed with asynchronous loading in mind, making it more
-suitable for browser environments and modern applications.
+#. **Synchronous vs. Asynchronous**: CommonJS modules are loaded synchronously,
+   while ESM was designed with asynchronous loading in mind, making it more
+   suitable for browser environments and modern applications.
 
-3. **Single Export vs. Named Exports**: CommonJS uses a single object
-(``module.exports``)    as its export mechanism, while ESM allows for named
-exports that can be statically analyzed.
+#. **Single Export vs. Named Exports**: CommonJS uses a single object
+   (``module.exports``)  as its export mechanism, while ESM allows for named
+   exports that can be statically analyzed.
 
-When migrating from CommonJS to |LANG|'s ESM syntax:
+When migrating from CommonJS to |LANG|'s ESM, do the following:
 
-- Replace ``module.exports = value`` with ``export default value``;
-- Replace ``module.exports.name = value`` with ``export const name = value``;
-- Replace ``exports.name = value`` with ``export const name = value``;
-- Replace export objects with individual named exports or a default export;
-- Group multiple exports using the ``export { name1, name2 }`` syntax.
+- Replace ``module.exports = value`` for ``export default value``;
+- Replace ``module.exports.name = value`` for ``export const name = value``;
+- Replace ``exports.name = value`` for ``export const name = value``;
+- Replace export objects for individual named exports or the default export;
+- Group multiple exports by using the ``export { name1, name2 }`` syntax.
 
 
 |CB_BAD|
@@ -6017,7 +5940,7 @@ When migrating from CommonJS to |LANG|'s ESM syntax:
 |CB_ERROR|
 
 |LANG| does not support |TS|-like decorators.
-When migrating from |TS| to |LANG|, decorators must be refactored using
+When migrating from |TS| to |LANG|, decorators must be refactored by using
 alternative patterns such as:
 - Class composition and inheritance;
 - Higher-order functions;
@@ -6027,7 +5950,7 @@ alternative patterns such as:
 Note that while |TS|-style decorators are not supported, |LANG| does provide
 its own decorator system specifically for UI development (such as
 ``@Component``, ``@State``, etc.). These ArkTS UI decorators are fundamentally
-different - they're part of the language's UI framework and operate through
+different as they are a part of the language's UI framework and operate through
 compile-time transformations rather than runtime modifications.
 
 |CB_BAD|
@@ -6141,8 +6064,8 @@ compile-time transformations rather than runtime modifications.
 
 .. _R236:
 
-|CB_R| Method can't override a field in interface implemented
--------------------------------------------------------------
+|CB_R| Method cannot override a field in interface implemented
+--------------------------------------------------------------
 
 |CB_RULE| ``arkts-no-method-overriding-field``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -6152,17 +6075,17 @@ compile-time transformations rather than runtime modifications.
 
 |CB_ERROR|
 
-Overriding a field with a functional type and vice-versa is not allowed.
+Overriding a field with a functional type and *vice versa* is not allowed.
 
 |LANG| enforces strict type consistency between interfaces and their
 implementing classes, particularly regarding the distinction between methods
 and fields with function types. While both can represent callable entities,
-they have different semantics that cannot be interchanged.
+they have different semantics and are not interchangeable.
 
-1. **Method Declaration**: A method is a function that is part of a class or
-interface definition, defined using the syntax
-``methodName(parameters): returnType {...}``. Methods are invoked using the dot
-notation and have a fixed implementation.
+1. **Method Declaration**: A method is a function that is a part of a class or
+interface definition which is defined by using the syntax
+``methodName(parameters): returnType {...}``. Methods are invoked by using
+the dot notation, and have a fixed implementation.
 
 2. **Function-Typed Field**: A field with a function type (e.g.,
 ``fieldName: (parameters) => returnType``) is a property that holds a reference
@@ -6202,7 +6125,8 @@ fixed implementation.
 
 .. _R237:
 
-|CB_R| Implementation signature must have a predefiend form
+|CB_R| Implementation signature must have a predefined form
+-----------------------------------------------------------
 
 |CB_RULE| ``arkts-no-arbitrary-implementation-signature``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -6212,7 +6136,7 @@ fixed implementation.
 
 |CB_ERROR|
 
-An implementation signature must have a predefiend form.
+An implementation signature must have a predefined form.
 
 |LANG| enforces any implementation signature to have the most general
 form: method_of_function_name (...parameter: Any[]): Any
@@ -6248,8 +6172,8 @@ form: method_of_function_name (...parameter: Any[]): Any
 
 .. _R238:
 
-|CB_R| No types based on type '``this``'
-----------------------------------------
+|CB_R| No types based on type ``this``
+--------------------------------------
 
 |CB_RULE| ``arkts-no-types-based-on-this-type``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -6259,11 +6183,15 @@ form: method_of_function_name (...parameter: Any[]): Any
 
 |CB_ERROR|
 
-No this-based types allowed.
+No ``this``-based types are allowed.
 
-|LANG| enforces that type 'this' can be used only as a function or method
-return type. No other types can use 'this'  as their parts.
+|LANG| enforces that type ``this`` can be used only as a method return type.
+No other types can use ``this`` as their part.
 
+.. note::
+   |LANG| can use ``this`` as a keyword (and not as a type) instead of
+   a parameter name in the parameter list. Using ``this`` in a *function
+   with receiver* is an example of it.
 
 |CB_BAD|
 ~~~~~~~~

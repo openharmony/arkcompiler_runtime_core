@@ -217,18 +217,8 @@ also non-nullish.
     let b2 = new B<'f0'>    // Compile-time error as 'f0' does not fit the constraint
     let b3 = new B<keyof A> // OK
 
-
 A type parameter of a generic can *depend* on another type parameter
 of the same generic.
-
-If *S* constrains *T*, then the type parameter *T* *directly depends*
-on the type parameter *S*, while *T* directly depends on the following:
-
--  *S*; or
--  Type parameter *U* that depends on *S*.
-
-A :index:`compile-time error` occurs if a type parameter in the type parameter
-section depends on itself.
 
 .. index::
    type parameter
@@ -237,32 +227,25 @@ section depends on itself.
 .. code-block:: typescript
    :linenos:
 
+    class G<T, S extends T> {}
+
     class Base {}
     class Derived extends Base { }
     class SomeType { }
-
-    class G<T, S extends T> {}
 
     let x: G<Base, Derived>  // correct: the second argument directly
                              // depends on the first one
     let y: G<Base, SomeType> // error: SomeType does not depend on Base
 
-    class A0<T> {
-       data: T
-       constructor (p: T) { this.data = p }
-       foo () {
-          let o: Object = this.data // error: T not compatible with Object
-          console.log (this.data.toString()) // error: T has no methods or fields
-       }
-    }
+A :index:`compile-time error` occurs if a type parameter in the type parameter
+section depends on itself directly or indirectly:
 
-    class A1<T extends Object> extends A0<T> {
-       constructor (p: T) { super(p); this.data = p }
-       override foo () {
-          let o: Object = this.data // OK!
-          console.log (this.data.toString()) // OK!
-       }
-    }
+.. code-block:: typescript
+   :linenos:
+
+    class C<T extends T> {} // circular dependency
+    class D<T extends R, R extends T> {} // circular dependency
+    class E<T extends R, R extends T | undefined> {} // circular dependency
 
 |
 
@@ -359,7 +342,7 @@ When declaring *type parameters* of a generic type, special keywords ``in`` or
 ``out`` (called *variance modifiers*) are used to specify the variance of the
 type parameter (see :ref:`Invariance, Covariance and Contravariance`).
 
-Type parameters with the keyword ``out`` are *covariant* . Covariant type
+Type parameters with the keyword ``out`` are *covariant*. Covariant type
 parameters can be used in the out-position only as follows:
 
    - Constructors can have ``out`` type parameters as parameters;
@@ -532,24 +515,6 @@ arguments:
    array type
    tuple type
    function type
-
-A :index:`compile-time error` occurs if a generic instantiation leads to
-instantiation of the type FixedArray with the predefined value type (see
-:ref:`Value Types`).
-
-.. code-block:: typescript
-   :linenos:
-
-    class A <T> {
-       foo (p: FixedArray<T>) {}
-    }
-    A<int> // compile-time error as such instantiation leads to method foo()
-           // of class A to have type FixedArray<int> in it.
-
-    // The actual code could be like code below - all these fragments result in a compile-time error
-    new A<int>
-    let a: A<int>|undefined
-    function foo (p: A<int>) {}
 
 |
 
@@ -908,10 +873,11 @@ Type ``T`` is not assignable to ``Partial<T>`` (see :ref:`Assignability`),
 and variables of ``Partial<T>`` are to be initialized with valid object
 literals.
 
-**Note**. If class ``T`` has a user-defined getter, setter, or both, then none
-of those is called when object literal is used with ``Partial<T>`` variables.
-Object literal has its own built-in getters and setters to modify its variables.
-It is represented in the example below:
+.. note::
+   If class ``T`` has a user-defined getter, setter, or both, then none of
+   those is called when object literal is used with ``Partial<T>`` variables.
+   Object literal has its own built-in getters and setters to modify its
+   variables. It is represented in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -1090,7 +1056,7 @@ Type ``Record<K, V>`` constructs a container that maps keys (of type ``K``)
 to values of type ``V``.
 
 Type ``K`` is restricted to numeric types (see :ref:`Numeric Types`), type
-``string``, string literal types, enum types, and union types constructed from
+``string``, string literal types, and union types constructed from
 these types.
 
 A :index:`compile-time error` occurs if any other type, or literal of any other
@@ -1106,7 +1072,6 @@ Its usage is represented in the example below:
    restriction
    union type
    numeric type
-   enum type
    string type
    literal
    string literal type
@@ -1125,10 +1090,6 @@ Its usage is represented in the example below:
     type R4 = Record<"salary" | boolean, Object> // compile-time error
     type R5 = Record<"salary" | number, Object>  // ok
     type R6 = Record<string | number, Object>    // ok
-    enum Strings { A = "AA", B = "BB"}
-    type R7 = Record<Strings, Object>            // ok
-    enum Numbers { A, B}
-    type R8 = Record<Numbers, Object>            // ok
 
 Type ``V`` has no restrictions.
 

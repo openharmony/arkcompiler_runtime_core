@@ -10,60 +10,60 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-.. _Runtime Imports:
+.. _Runtime Initialization:
 
-Runtime Imports
-###############
+Runtime Initialization
+**********************
 
-This chapter describes runtime import and initialization rules.
+This section discusses the rules of runtime initialization.
 
 .. _Initialization Granularity And Execution Order:
 
 Initialization Granularity And Execution Order
 ==============================================
 
-- Each module, namespace and each nested namespace has its own top-level scope.
-  According to the |LANG| language specification, namespaces with same name
+- Each module, namespace, and nested namespace has its own top-level scope.
+  According to the |LANG| language specification, same-name namespaces
   within a single top-level scope are merged.
+- Each top-level scope has a runtime entity with an initializer. An initializer
+  executes all top-level statements and variable declarations one after another.
+- Each class has its own initializer. An initializer executes all static
+  property initializers and code inside a ``static`` block one after another.
 
-- Each top-level scope has a runtime entity with an initializer. Initializer
-  executes all the top-level statements and variable declarations sequentially.
+Top-level scope and class initializers are invoked at the first access to a
+representing runtime entity, in particular:
 
-- Each class has its own initializer. Initializer sequentially executes all
-  static properties initializers and code inside the ``static`` block.
+- Access to an exported variable or a function of a top-level scope triggers
+  an initializer;
+- Access to a nested namespace or class does **not** trigger an initializer.
 
-Top-level scope and class initializers are invoked on the first access to the
-representing runtime entity. In particular:
+Initializers are executed **only once**, and are concurrency-safe. In
+particular, each initializer is guarded with a lock, and all concurrent entities
+wait until an initialization completes.
 
-- Access to exported variable or function of top-level scope triggers the
-  initializer.
-
-- Access to nested namespace, class or module import does **not** trigger the
-  initializer.
-
-Initializers are executed **exactly once** and are concurrency-safe. In
-particular, each initializer is guarded with a lock and all concurrent entities
-wait until the initialization is complete.
+|
 
 .. _Initialization Laziness:
 
 Initialization Laziness
 =======================
 
-The **laziness** of |LANG| 2.0 source code imported by |LANG| 1.0 is regulated
-with |LANG| 1.0 import code itself, because the |LANG| 2.0 simply builds the
+The *laziness* of |LANG| 2.0 source code imported by |LANG| 1.0 is regulated
+with the |LANG| 1.0 import code itself because |LANG| 2.0 simply builds a
 module object when the module object is requested for the first time.
 
-Exisitng mainline already limits the usage of the sideeffects in top-level
-scopes. We may consider an option that will bind the initialization of nested
-scopes and trigger initialization on import for the application debug.
+The exisitng mainline already limits the usage of side effects in top-level
+scopes. Binding the initialization of nested scopes to a trigger initialization
+of import can be considered optionally to debug an application.
+
+|
 
 .. _Comprehensive Initializer Example:
 
 Comprehensive Initializer Example
 =================================
 
-Let's assume the following source code in ``appsrc/mod.ets``:
+If source code in ``appsrc/mod.ets`` is as follows:
 
 .. code-block:: typescript
     :linenos:
@@ -87,12 +87,12 @@ Let's assume the following source code in ``appsrc/mod.ets``:
         static x3 = foo()
     }
 
-Intialization is done as follows:
+--then the intialization is performed as represented below:
 
 .. code-block:: typescript
     :linenos:
 
-    import {A, foo} from "module1" // no sideeffects
+    import {A, foo} from "module1" // no side effects
 
     foo()  // call to function "foo" from "module1" toplevel triggers "module1.GLOBAL"
            // at this point "module1.A" is not affected
@@ -105,52 +105,51 @@ Intialization is done as follows:
     // the surrounding toplevel scope initializer
     export class A { }
 
-.. _Handling Binaries And Loading Classes:
+|
 
-Handling Binaries And Loading Classes
-#####################################
+.. _Handling Binaries and Loading Classes:
 
-While the build system may mandate some forms of distribution and rules of
-packaging, |LANG| runtime subsystem relies only on binary executable files:
+Handling Binaries and Loading Classes
+=====================================
 
-- Internal runtime loading APIs work **only** with binary executable files
-  and do not change / patch classes / modules or names on load.
-- Binary executable files for |LANG| 2.0 do not have the concept of the common
-  ``ohmurl``, every class itself is independent and the name of every class is
-  fully qualified.
+The build system can mandate some forms of distribution and rules of packaging,
+but the |LANG| runtime subsystem relies only on binary executable files:
 
-The rules are as follows:
+- Internal runtime loading APIs work with binary executable files **only**.
+  They neither change nor patch classes/modules or names on load.
+- Binary executable files for |LANG| 2.0 have no common ``ohmurl`` concept.
+  Each class is independent, and the name of each class is fully qualified.
 
-All entities (functions, records) inside the executable binary file have fully
-qualified names which are not modified by the runtime on load events. In other
-words, executable binary file is "flat" in terms of runtime names.
+The following rules apply:
+
+- All entities (functions, records) inside an executable binary file have fully
+  qualified names that are not modified by runtime onload events, i.e., an
+  executable binary file is *flat* in terms of runtime names.
 
 - Executable binary file by itself has no associated name or entrypoint,
-  nor is associated with any source file.
+  and is not associated with any source file.
 
-- Executable binary file can be moved within the filesystem and runtime is not
-  sensitive to the actual file system path to the executable binary file.
+- Executable binary file can be moved within a file system, and runtime is not
+  sensitive to the actual path to the executable binary file in a file system.
 
-- Several executable binary files *.abc* can be merged togethe, and it doesn't
-  affect the load procedure.
+- Several executable binary files ``.abc`` can be merged without affecting the
+  load procedure.
 
-- Executable binary files are processed **only** within a fixed **load context**
+- Executable binary files are processed **only** within a fixed *load context*.
 
-|LANG| runtime determines the load context with custom class loading policies:
+The |LANG| runtime uses a *custom class loading policy* to determine a load
+context, i.e., whether an executable binary file is to be located within a file
+system, or extracted and stored in a context.
 
-- Which executable binary file to locate in filesystem or extract and store
-  into the context is a custom class loading policy.
+The |LANG| runtime defines at least two built-in load contexts:
 
-|LANG| runtime defines at least two built-in load contexts:
+- ``boot``: the core language and common platform libraries set up in *AppSpawn*.
 
-- ``boot``: the core language and common platform libraries,
-    set up in **AppSpawn**.
+- ``app``: the context of application files.
 
-- ``app``: the context of the application files.
-
-All the files for these context have to be explicitly provided on **AppSpawn**
-and app startup. No any filesystem resolution for executable binary files on
-core runtime side.
+All files for these contexts must be provided explicitly in *AppSpawn* and at
+app startup. No file system resolution for executable binary files exists on
+the core runtime side.
 
 .. code-block:: typescript
     :linenos:
@@ -221,67 +220,73 @@ core runtime side.
     /* load abc file from binary */
     let memLinker = new MemoryRuntimeLinker(boot, loadRawFiles());
 
-Resolution request from runtime has two inputs:
+Runtime resolution request has two inputs:
 
-- Runtime class descriptor, which is computed from the **runtime name** used by
-  language APIs: reflection, class loading, dynamic import
-- Load context
+- Runtime class descriptor computed from the *runtime name* used by language
+  APIs: reflection, class loading, and dynamic import;
+- Load context.
+
+|
 
 .. _Load Contexts:
 
 Load Contexts
 =============
 
-Each class is assoiated with the context it was loaded to. Context may list
-classes, and a class has a link back to the context it was loaded into.
+Each class is assoiated with the context it is loaded into. A context can list
+classes, and a class has a link back to the context it is loaded into.
 
-All references to classes and methods from bytecode are lazily resolved with
+All references from bytecode to classes and methods are lazily resolved by
 the following rules:
 
-- Obtain a class which owns the bytecode.
+#. Obtain a class that owns the bytecode.
 
-- Obtain a context of the class, perform fast lookup if the class is already
-  available in the context.
+#. Obtain a context of the class, and perform fast lookup to check if the class
+   is already available in the context.
 
-- Obtain an associated loader and perform resoltuion specified by the custom
-  loader code.
+#. Obtain an associated loader, and perform the resoltuion specified by the
+   custom loader code.
 
-- Loader **may** delegate the request to its **parent** loader
+#. Loader can delegate the request to its *parent* loader.
 
-- Loader **may** be backed by a set of executable binary files, this loader is
-  backed by the runtime implementation.
+#. Loader can be backed by a set of executable binary files (such a loader is
+   backed by the runtime implementation).
 
-Overall, the core runtime does not rely on the particular distribution format
-unless it is explicitly told which binaries to load.
+The core runtime relies on no particular distribution format unless it is
+instructed explicitly what binaries to load.
+
+|
 
 .. _Application Load Contexts:
 
 Application Load Contexts
 =========================
 
-Loading contexts for executable binary files form a tree structure, and the
-resolution delegates the request to the parent linker if the class can not be
-loaded, while parent linker does not child context to resolve existing
-references in parent class.
+Load contexts for executable binary files form a tree structure.
+If a class cannot be loaded, then a request is delegated to a parent linker
+during resolution. On the opposite, a parent linker cannot delegate references
+existing in a parent class to a child context to resolve.
 
 **FIXME: picture**
 
-This approach isolates separate loading contexts, allowing to load different
-(or clashing) versions of the same module within in the single running
-application. It is the natural way to load potentially conflicting or
-independent parts of the application within independent class loaders.
+This approach isolates some load contexts and allows loading different and even
+clashing versions of the same module within in a single running application.
+A natural way to load independent or potentially conflicting parts of an
+application is by using independent class loaders.
 
 **FIXME: splitload**
 
 **FIXME: repackaging**
+
+|
 
 .. _Runtime Loading Limitations:
 
 Runtime Loading Limitations
 ===========================
 
-- |LANG| 2.0 to |LANG| 2.0 scenarios are handled with the class loading APIs.
+- |LANG| 2.0 to |LANG| 2.0 scenarios are handled with class loading APIs.
+- |LANG| 1.0 to 2.0 and |LANG| 2.0 to 1.0 scenarios are handled with explicit
+  APIs provided by interop.
 
-- |LANG| 1.0 to 2.0 scenarios handled with explicit APIs provided by interop.
 
-- |LANG| 2.0 to 1.0 scenarios handled with explicit APIs provided by interop,

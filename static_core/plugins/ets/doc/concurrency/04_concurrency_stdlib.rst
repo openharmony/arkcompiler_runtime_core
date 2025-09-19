@@ -10,30 +10,30 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-#########################
-Concurrency: stdlib
-#########################
 
-********
-Overview
-********
+.. _Concurrency stdlib:
+
+Concurrency: stdlib
+*******************
 
 In general we have several directions for concurrency in |LANG| stdlib:
 
 - interfaces for coroutines
-- concurrency/async primitives required for the compatibility with JS/TS
-- support for the OHOS-specific concurrency features(such as TaskPool, AsyncLock, etc.)
+- concurrency/``async`` primitives required for the compatibility with |JS|/|TS|
+- support for the OHOS-specific concurrency features(such as TaskPool, ``AsyncLock``, etc.)
 - new concurrent containers/concurrency primitives
 
-*************************
-Interfaces for coroutines
-*************************
+|
+
+.. _Interfaces for Coroutines:
+
+Interfaces for Coroutines
+=========================
 
 .. _Concurrency Job:
 
-===
-Job
-===
+Concurrency Job
+---------------
 
 Job is the class which represent the job/task executing on the coroutine.
 
@@ -46,69 +46,78 @@ If the during execution job function throws error this error will be propagated 
 In general Job class have these public API:
 
 .. code-block:: typescript
-  :donotcompile:
+    :donotcompile:
 
-  class Job<T> {
-    constructor(v: T) {
-        this.val = v
+    class Job<T> {
+      constructor(v: T) {
+          this.val = v
+      }
+
+      // Awaits execution of the job.
+      // On success return value, on fail the Error will be thrown
+      Await() : T {
+        // ...
+      }
     }
 
-    // Awaits execution of the job.
-    // On success return value, on fail the Error will be thrown
-    Await() : T {
-      // ...
-    }
-  }
+|
 
-------------------
-Exception handling
+.. _Exception Handling:
+
+Exception Handling
 ------------------
 
 The exception thrown during execution can be handled at the `Await` via try-catch block.
 
 In case if exception thrown, but `Await` method never called - an UnhandledExceptionHandler should be called upon the whole program completion.
 
-.. _Concurrency launch:
+|
 
-======
-launch
-======
+.. _Concurrency Launch:
 
-For creation of the coroutine you should use standard library function ``launch`` with this signature(Note: final inteface is still will be defined, current is just to demonstrate semantic):
+Concurrency Launch
+------------------
+
+For creation of the coroutine you should use standard library function ``launch`` with this signature(Note: final interface is still will be defined, current is just to demonstrate semantic):
 
 .. code-block:: typescript
-  :donotcompile:
+    :donotcompile:
 
-  function launch<R, F extends CoroFun<never, R>>() {
-    coroFun: F,
-    ..args: (Object | null | undefined)[]
-  ) : Job<R>
+    function launch<R, F extends CoroFun<never, R>>() {
+      coroFun: F,
+      ..args: (Object | null | undefined)[]
+    ) : Job<R>
 
 
 Where `coroFun` is either lambda, either static method or function.
 
 The created coroutine will be scheduled on the one of the coroutine worker threads and can be rescheduled to another later.
 
-========
+|
+
+.. _Schedule:
+
 Schedule
-========
+--------
 
 The `Schedule` is the method of `Coroutine` class which notifies Scheduler that current coroutine could be suspended at this moment,
 so if it is non-empty execution queue - current coroutine will be suspended and best suspended coroutine will be scheduled on current coroutine worker.
 
-***************************************
-JS/TS compatible concurrency primitives
-***************************************
+|
 
-.. _Concurrency Promise Class:
+.. _JS/TS Compatible Concurrency Primitives:
 
-=======
-Promise
-=======
+JS/TS Compatible Concurrency Primitives
+=======================================
+
+.. _Class Promise:
+
+Class Promise
+-------------
 
 The Promise object is introduced for the support asynchronous API. It is the object which represents a proxy for the result of the asynchronous operation. The semantic of the Promise is similar to the semantic of Promise in JS/TS if it used in the context of one coroutine.
 
-Promise object represents the values returned by call of async function.
+Promise object represents the values returned by call of ``async`` function.
 It belongs to the core packages of the standard library,
 and thus it is imported by default and may be used
 without any qualification.
@@ -144,7 +153,7 @@ The following methods are used as follows:
         Promise<U>::then<U, E = never>(onFulfilled: ((value: T) => U|PromiseLike<U> throws)|undefined, onRejected: ((error: Any) => E|PromiseLike<E> throws)|undefined): Promise<U|E>
 
 .. code-block:: typescript
-  :donotcompile:
+    :donotcompile:
 
         Promise<U>::then<U, E = never>(onFulfilled: ((value: T) => U|PromiseLike<U> throws)|undefined, onRejected: ((error: Any) => E|PromiseLike<E> throws)|undefined): Promise<U|E>
 
@@ -153,7 +162,7 @@ The following methods are used as follows:
 .. code-block-meta:
 
 .. code-block:: typescript
-  :donotcompile:
+    :donotcompile:
 
         Promise<U>::catch<U = never>(onRejected?: (error: Any) => U|PromiseLike<U> throws): Promise<T|U>
 
@@ -166,34 +175,45 @@ The following methods are used as follows:
    call
 
 .. code-block:: typescript
-  :donotcompile:
+    :donotcompile:
 
         finally(onFinally?: () => void throws): Promise<T>
 
+|
 
----------------------------
-Unhandled rejected promises
----------------------------
+.. _Unhandled Rejected Promise:
+
+Unhandled Rejected Promise
+--------------------------
 
 In case of unhandled rejection of promise either custom handler provided for promise rejection and it will be called,
 either default promise rejection handler will be called upon the whole program completion.
 
-****************************
-Concurrency extensions
-****************************
+|
+
+.. _Concurrency Extensions:
+
+Concurrency Extensions
+======================
 
 Besides JS/TS compatible concurrency primitives, there are some extensions in |LANG| which introduce some additional concurrency functionality.
 
-========
+|
+
+.. _TaskPool:
+
 TaskPool
-========
+--------
 
 TaskPool provides multi-threaded environments for applications. It helps to run sequence of tasks on the pool of threads. Also you shouldn't care about managing this pool: the TaskPool itself manage lifetime of threads in the pool, their number, etc.
 
 TaskPool allows to reduce resource consumption and improve system performance.
 
------------------------
-TaskPool for JS context
+|
+
+.. _TaskPool for JS Context:
+
+TaskPool for JS Context
 -----------------------
 
 TaskPool could be used in JS context and in the static context.
@@ -205,14 +225,17 @@ We have some limitations for the TaskPool used in JS context:
 * functions used as tasks in TaskPool should be defined with @Concurrent decorator
 * it is not allowed to use closure variables in @Concurrent function
 
----------------------------
-TaskPool for static context
+|
+
+.. _TaskPool for Static Context:
+
+TaskPool for Static Context
 ---------------------------
 
 In static context we have same API as for JS context to the language syntax/semantic extent and we don't have any specific requirements for functions used as tasks
 except one requirement which is applicable for all M:N coroutines: we shouldn't have interop in this function.
 
-In general TaskPool provides structured concurrency features. I.e. it allow you to start some set of tasks, cancel task, wait for tasks, etc.
+In general TaskPool provides structured concurrency features. I.e., it allow you to start some set of tasks, cancel task, wait for tasks, etc.
 
 The tasks are executed on the Coroutine Workers. The cross-language interoperability is forbidden in tasks.
 
@@ -220,23 +243,26 @@ For detailed information about TaskPool please take a look at standard library d
 
 Experimental: it is an option to use EACoroutines for the TaskPool, in this case it is allowed to use cross-language interoperability in the Tasks.
 
-=========
-AsyncLock
-=========
+|
 
-For objects shared between different concurrent domains, it is crucial to have some machinery to provide some machinery for synchronization. One of the ways to guarantee thread-safe access to the object is Locking machinery. For this we introduce AsyncLock in |LANG|.
+.. _AsyncLock:
+
+``AsyncLock``
+=============
+
+For objects shared between different concurrent domains, it is crucial to have some machinery to provide some machinery for synchronization. One of the ways to guarantee thread-safe access to the object is Locking machinery. For this we introduce ``AsyncLock`` in |LANG|.
 
 For languages with coroutines which are executing on the more than one CPU core we may need such synchronization primitive as Lock. But we can't use OS-level lock, since there are queue of coroutines waiting for execution on this core.
 
 For this we need introduce special type of lock, which will not block the whole OS-level thread on such Lock.
 
-.. uml:: os_based_lock_deadlock_seq.plantuml
+.. uml:: ../concurrency/os_based_lock_deadlock_seq.plantuml
 
-In Java language we have `synchronized` methods for guarantee that only one thread executing such method. For |LANG| we can introduce special class `AsyncLock`, which have method `async` for running code
+In Java language we have `synchronized` methods for guarantee that only one thread executing such method. For |LANG| we can introduce special class ``AsyncLock``, which have method ``async`` for running code
 
 .. code-block:: ts
-    :donotcompile:
     :linenos:
+    :donotcompile:
 
     class AsyncLock {
       async(lambda:any) {
@@ -249,8 +275,8 @@ In Java language we have `synchronized` methods for guarantee that only one thre
 The semantic of such lock should be something like this:
 
 .. code-block:: c++
-    :donotcompile:
     :linenos:
+    :donotcompile:
 
     void Lock(ObjectHeader* obj) {
         while (1) {
@@ -273,11 +299,11 @@ For this it is enough to have special state in `ObjectHeader` and change it atom
 
 But `while (1)` can be optimized if we will have explicit scheduler for such tasks. For example we can group locked coroutines by lock object, and have queue for unlock events, when we process something from this queue, we can add next coroutine from this queue to the queue for scheduler.
 
-Example with `AsyncLock` usage:
+Example with ``AsyncLock`` usage:
 
 .. code-block:: javascript
-    :donotcompile:
     :linenos:
+    :donotcompile:
 
     import {AsyncLock, SyncMode} from '@ohos.sync';
 
@@ -298,8 +324,7 @@ Example with `AsyncLock` usage:
     }
 
 
-For VMs without shared memory, however, the implementation of AsyncLock requires different approach. Since we can't share object, we can obtain lock object by name or id from different threads. And the lock object should be accessible from any VM instance. The same approach applicable for the VM with shared memory.
-
+For VMs without shared memory, however, the implementation of ``AsyncLock`` requires different approach. Since we can't share object, we can obtain lock object by name or id from different threads. And the lock object should be accessible from any VM instance. The same approach applicable for the VM with shared memory.
 
 
 ..
@@ -407,8 +432,11 @@ For VMs without shared memory, however, the implementation of AsyncLock requires
     reason: T
   }
 
-===========================
-AsyncLock Deadlock Detector
-===========================
+|
 
-It is possible that the developer make a mistake and create code which lead to the deadlock situation while using AsyncLock. For this it is possible to specify the maximum time which we expect is enough for successful Lock acquirence. In case if we reach the limit - the provided by developer callback will be called.
+.. _AsyncLock Deadlock Detector:
+
+``AsyncLock`` Deadlock Detector
+===============================
+
+It is possible that the developer make a mistake and create code which lead to the deadlock situation while using ``AsyncLock``. For this it is possible to specify the maximum time which we expect is enough to acquire ``Lock`` successfully. In case if we reach the limit - the provided by developer callback will be called.

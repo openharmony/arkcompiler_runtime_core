@@ -15,8 +15,8 @@
 Recipes Summarized
 ==================
 
-This chapter provides an informal summary of |TS| features that |LANG| either
-can support with limitations, or cannot support. See :ref:`Recipes` for the
+This chapter provides an informal summary of |TS| features that |LANG|
+can support with limitations or cannot support. See :ref:`Recipes` for the
 full list with more detailed code examples and workaround suggestions.
 
 |
@@ -28,21 +28,21 @@ Static Typing is Enforced
 
 |LANG| was designed with the following goals in mind:
 
-- |LANG| programs must be easy for a developer to read and understand because
+- |LANG| programs must be easy to read and understand for a developer because
   code is read more often than written;
 - |LANG| must execute fast and consume as little power as possible because
   it is particularly critical on mobile devices which |LANG| targets.
 
 
 One of the most important features of |LANG| that helps achieving both goals
-is static typing. A statically typed program has all types known at compile
+is static typing. All types in a statically typed program are known at compile
 time. As a result, understanding what data structures are used in the code
 is much easier.
 
-That all types are known before a program actually runs results in the
-compiler verifying code correctness, eliminating many runtime type checks,
-and improving performance. To achieve this, the usage of type ``any`` is
-prohibited in |LANG|.
+The result of all types being known before a program actually runs is that code
+correctness is verified by the compiler. It eliminates many runtime type checks
+and improves performance. The usage of type ``any`` is prohibited in |LANG|
+to achieve this.
 
 Example
 ~~~~~~~
@@ -75,7 +75,7 @@ Example
 Rationale and Impact
 ~~~~~~~~~~~~~~~~~~~~
 
-Our research and experiments let us conclude that ``any`` is not welcome already
+Our research and experiments show that ``any`` is not welcome already
 in |TS|. According to our measurements, ``any`` is used in approximately 1% of
 |TS| codebases. Moreover, today's code linters (e.g., ESLint) include a set
 of rules that prohibit the usage of ``any``.
@@ -101,7 +101,7 @@ the following:
 
 Note that many such operations are already prohibited by the |TS|
 compiler. However, |TS| compiler still can be "tricked", e.g., by ``as any``
-casts. |LANG| does not support such prohibited casts completely as shown in
+casts. |LANG| does not support such prohibited casts at all as shown in
 the detailed example below.
 
 Example
@@ -170,9 +170,9 @@ Rationale and Impact
 An unpredictable change of an object layout contradicts both good readability
 and code performance. Having class definition at one place, and modifying
 actual object layout elsewhere is confusing and error-prone from the developer's
-point of view. It opposes the idea of static typing (why adding or removing
-additional properties if typing is to be as explicit as possible?), and requires
-extra runtime support that causes undesired execution overhead.
+point of view. It counters the idea of static typing as adding or removing
+additional properties prevents typing from becoming as explicit as possible,
+and requires extra runtime support that causes undesired execution overhead.
 
 According to our observations and experiments, this feature is already not
 welcome in |TS|: it is used in a marginal number of real-world projects,
@@ -183,13 +183,13 @@ strong positive impact on the performance at the cost of low-effort refactoring.
 
 |
 
-.. _Semantics of Operators Is Restricted:
+.. _Semantics of Operators Is Narrowed:
 
-Semantics of Operators Is Restricted
-------------------------------------
+Semantics of Operators Is Narrowed
+----------------------------------
 
 To achieve better performance and encourage developers to write clearer code,
-|LANG| restricts the semantics of some operators. An example is given below,
+|LANG| narrows the semantics of some operators. An example is given below,
 while the full list of restrictions is outlined in :ref:`Recipes`.
 
 Example
@@ -205,7 +205,7 @@ Rationale and Impact
 ~~~~~~~~~~~~~~~~~~~~
 
 Loading language operators with extra semantics overcomplicates the language
-specification, makes developers remember all possible corner cases with
+specification, requires developers to remember all possible corner cases with
 appropriate handling rules, and causes some undesired runtime overhead in
 certain cases.
 
@@ -213,7 +213,7 @@ According to our observations and experiments, this feature is not popular
 already in |TS|. It is used in less than 1% of real-world codebases, and such
 cases are easy to refactor.
 
-Restricting the operator semantics results in a clearer code that can
+Narrowing the operator semantics results in a clearer code that can
 perform better at the cost of low-effort changes.
 
 |
@@ -280,14 +280,15 @@ It is debatable whether or not structural typing helps to produce a clearer
 and more understandable code as both *pro* and *contra* arguments can be found.
 Why not just support it then? The reason is that structural typing support is
 a major feature that needs much consideration and care for the implementation
-in the language specification, compiler, and runtime. More importantly, in the
-case of |LANG| that enforces static typing (see above), runtime support for
+in the language specification, compiler, and runtime. More importantly, since
+|LANG| enforces static typing (see above), the runtime support for
 structural typing implies performance overhead.
 
 Since functionally correct and performant implementation requires taking so
 many aspects into account, the structural typing support is postponed.
-The |LANG| team is ready to reconsider based on real-world scenarios and
-feedback. More cases and suggested workarounds can be found in :ref:`Recipes`.
+The |LANG| team is ready to reconsider the decision based on real-world
+scenarios and user feedback. More cases and suggested workarounds can be found
+in :ref:`Recipes`.
 
 |
 

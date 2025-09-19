@@ -30,8 +30,8 @@ Undefined is Not a Universal Value
 .. meta:
     frontend_status: Done
 
-A compile-time or a runtime error occurs in |LANG| in many cases, in which
-|TS| uses ``undefined`` as a runtime value.
+Compile-time or runtime errors occur in |LANG| in many cases where runtime
+value ``undefined`` is used in |TS|.
 
 .. code-block-meta:
    expect-cte
@@ -41,7 +41,7 @@ A compile-time or a runtime error occurs in |LANG| in many cases, in which
 
     let array = new Array<number>
     let x = array [1234]
-       // TypeScript: x will be assigned with undefined value !!!
+       // TypeScript: x will be assigned with value undefined!!!
        // ArkTS: compile-time error if analysis may detect array out of bounds
        //        violation or runtime error ArrayOutOfBounds
     console.log(x)
@@ -95,10 +95,10 @@ Covariant Overriding
 .. meta:
     frontend_status: Done
 
-|TS| object runtime model enables |TS| to handle situations where a
+|TS| object runtime model enables |TS| handling situations where a
 non-existing property is accessed from an object during program execution.
 
-|LANG| allows generating highly efficient code that relies on an objects'
+|LANG| allows generating highly efficient code that relies on the object
 layout known at compile time. Covariant overriding violates type-safety and
 is prohibited:
 
@@ -150,7 +150,7 @@ Function Types Compatibility
     frontend_status: Done
 
 |TS| allows rather relaxed assignment into variables of function type.
-|LANG| follows stricter rules as follows (see the |LANG| specification for
+|LANG| uses the following stricter rules (see the |LANG| specification for
 details):
 
 .. code-block:: typescript
@@ -361,7 +361,7 @@ Tuples and Arrays
 .. meta:
     frontend_status: None
 
-|TS| allows assignments of tuples into arrays. |LANG| handles arrays and tuples
+|TS| allows assignment of tuples into arrays. |LANG| handles arrays and tuples
 as different types. |LANG| allows no assignment of tuples into arrays. This
 situation is represented by the following example:
 
@@ -472,11 +472,11 @@ Functional Objects for Methods
 .. meta:
     frontend_status: None
 
-|TS| and |LANG| handle function objects differently. The sematics of work with
-``this`` is different. |TS| supports ``undefined`` as a value of ``this``. In
-|LANG| ``this`` is always attached to a valid object. This also affects
+|TS| and |LANG| handle function objects differently. The semantics of working
+with ``this`` is different. |TS| supports ``undefined`` as a value of ``this``.
+In |LANG|, ``this`` is always attached to a valid object. It also affects the
 comparison of function objects created from methods. |TS| does not bind ``this``
-with the function object, while |LANG| does.
+with a function object, while |LANG| does.
 
 .. code-block:: typescript
    :linenos:
@@ -507,11 +507,11 @@ Differences in Namespaces
 .. meta:
     frontend_status: Done
 
-|TS| allows having non-exported entities with the same name in two or more
-different declarations of a namespace, because these entities are local to a
+|TS| allows having non-exported same-name entities in two or more different
+declarations of a namespace, because these entities are local to a
 particular declaration of the namespace. |LANG| forbids such situations,
-because |LANG| merges all declarations into one, and the declarations become
-non-distinguishable:
+because all declarations in |LANG| are merged into one, and thus declarations
+become non-distinguishable:
 
 
 .. code-block:: typescript
@@ -539,19 +539,69 @@ Differences in Math.pow
 .. meta:
     frontend_status: Done
 
+The function ``Math.pow()`` in |TS| conforms to the outdated 2008 version of the
+IEEE 754-2008 standard, with the following exceptions:
+
+.. list-table::
+   :widths: 40 20 40
+   :header-rows: 1
+
+   * - Function Call
+     - IEEE 754-2008 Required Result
+     - |TS| Result
+
+   * - ``pow (−1, +/-Infinity)``
+     - ``1``
+     - ``NaN``
+
+   * - ``pow(+1, y)``
+     - ``1`` (for any ``y``)
+     - ``1`` for any ``y`` except ``NaN`` or ``Infinity``, and ``NaN``
+       for ``NaN`` and ``Infinity``
+
+
 The function ``Math.pow`` in |LANG| conforms to the latest IEEE 754-2019
-standard. The result of the following calls in |LANG| is *1* (one):
+standard. It also conforms the outdated *IEEE 754-2008* without exceptions
+mentioned for |TS| above.
 
-- ``Math.pow(1, Infinity)``,
-- ``Math.pow(-1, Infinity)``,
-- ``Math.pow(1, -Infinity)``,
-- ``Math.pow(-1, -Infinity)``.
+Both the |TS| and |LANG| give correct results for statements added in *IEEE
+754-2019* and listed below:
 
-The function ``Math.pow`` in |TS| conforms to the outdated 2008 version of the
-IEEE 754-2019 standard. The result of the above calls in |TS| is ``NaN``.
+- *pow(x, +Infinity)* is *+0* for *-1 < x < 1*
+- *pow(x, +Infinity)* is *+Infinity* for *x < -1* or for *1 < x* (including *+/-Infinity*)
+- *pow(x, -Infinity)* is *+Infinity* for *−1 < x < 1*
+- *pow(x, -Infinity)* is *+0* for *x < -1* or for *1 < x* (including *+/-Infinity*)
+- *pow(+Infinity, y)* is *+0* for a number *y < 0*
+- *pow(+Infinity, y)* is *+Infinity* for a number *y > 0*
+- *pow(-Infinity, y)* is *−0* for finite *y < 0* an odd integer
+- *pow(-Infinity, y)* is *-Infinity* for finite *y > 0* an odd integer
+- *pow(-Infinity, y)* is *+0* for finite *y < 0* and not an odd integer
+- *pow(-Infinity, y)* is *+Infinity* for finite *y > 0* and not an odd integer
+
+
+The difference in behaviour is summarized as follows:
+
+.. list-table::
+   :widths: 40 20 40
+   :header-rows: 1
+
+   * - Function Call
+     - |TS| Result
+     - |LANG| Result
+
+   * - ``pow (−1, +/-Infinity)``
+     - ``NaN``
+     - ``1``
+
+   * - ``pow(+1, y)``
+     - ``1`` for any ``y`` except ``NaN`` or ``Infinity``, and ``NaN`` for
+       ``NaN`` and ``Infinity``
+     - ``1`` for any ``y``
 
 .. index::
    IEEE 754
+   NaN
+   Infinity
 
 |
 
@@ -560,22 +610,89 @@ IEEE 754-2019 standard. The result of the above calls in |TS| is ``NaN``.
 Differences in Constructor Body
 -------------------------------
 
-Work is in progress to have support for corner cases of mandatory calls to
-``super()`` or ``this()`` in the compiler for |LANG|. The code below is
-temporarily rejected. The compiler requires a call to ``super()`` or ``this()``
-to be not embedded into other constructions as follows:
+Call to super() in constructors
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+|LANG| requires a call to ``super()`` in a derived class to be the first
+statement in a constructor body. |TS| implies no such restriction.
+Therefore, the following code valid in |TS| causes a compile-time error
+in |LANG|:
 
 .. code-block:: typescript
    :linenos:
 
-    class A {
+    class Base {
        constructor (p: number) {}
-       constructor (p: boolean) {  // Compile_time error: incorrect constructor body
-           if (p) { this (1) }
-           else { this (2) }
-       }     
     }
 
+    let some_condition = true
+
+    class Derived extends Base {
+       // Next constructor body is OK in TS
+       // but causes compile_time error in ArkTS
+       constructor (p: number) {
+           if (some_condition) { super (1) }
+           else { super (2) }
+       }
+    }
+
+This problem can be bypassed by calling ``super()`` with ``ternary expression``
+in some cases. The above chunk of code refactored for |LANG| is presented below:
+
+.. code-block:: typescript
+   :linenos:
+
+    class Base {
+       constructor (p: number) {}
+    }
+
+    let some_condition = true
+
+    class Derived extends Base {
+       // Next constructor body is OK in TS and ArkTS
+       constructor (p: number) {
+           super ( some_condition ? 1 : 2)
+       }
+    }
+
+**Note** The refactored code is also good for |TS|.
+
+
+Call to this() in secondary constructors
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+|TS| does not allow multiple constructors while |LANG| does.
+By calling ``this()``, a secondary constructor can call another constructor of
+the class.
+
+A ``this()`` call if used must be the first statement in a secondary
+constructor body. Otherwise, a compile-time error occurs. However, the
+ternary expression can be used as an argument of ``this()`` to bypass the
+limitation in some cases.
+
+This functionality legal in |LANG| only is represented in the following code:
+
+.. code-block:: typescript
+   :linenos:
+
+   let flag: boolean = false
+
+   class A {
+      num: number
+      constructor (p: number)
+      {
+         this.num = p
+      }
+      constructor(p: number, s: string)
+      {
+         this(flag ? p : -p)
+         console.log(this.num, " ", s)
+      }
+    }
+
+    new A(1, " for flag false") // prints '-1 for flag false'
+    flag = true
+    new A(1, " for flag true") // prints '1 for flag true'
 
 |
 
@@ -584,11 +701,11 @@ to be not embedded into other constructions as follows:
 Differences in Static Fields Initialization
 -------------------------------------------
 
-The order of initialization of the static fields is different.  |TS| processes
-the source code as it is, in the order of it was written. And that is why all 
-static fields are initialized when the module is being loaded. |LANG|
-initializes the static fields either at compile-time or right before the first
-use of the field.
+The order of initialization of static fields in |TS| and |LANG| is different.
+|TS| processes source code 'as is', i.e., in the order it is written. That's
+why all static fields are initialized when the module is being loaded. |LANG|
+initializes static fields either at compile time or right before the first
+use of a field.
 
 
 .. code-block:: typescript
@@ -623,9 +740,9 @@ use of the field.
         777
     */
 
-|TS| and |LANG| have different requirements to presense of the initialization.
-|TS| allows to omit initialization expression while |LANG| ensures that static
-field is initialized. 
+|TS| and |LANG| have different requirements to the presence of initialization.
+|TS| allows omitting an initialization expression, while |LANG| ensures that
+a static field is initialized.
 
 .. code-block:: typescript
    :linenos:
@@ -644,9 +761,9 @@ field is initialized.
 Differences in Overriding Properties
 ------------------------------------
 
-|LANG| treats fields and properites (i.e., pairs of accessors) differently.
-Thus, mixing fields and properties is not allowed in |LANG|, while the object
-model is |TS| is different as it allows such a mix.
+|LANG| handles fields and properties (i.e., pairs of accessors) differently.
+Thus, mixing fields and properties is not allowed in |LANG|, while in |TS|
+the object model is different and allows such a mix.
 
 .. code-block:: typescript
    :linenos:
@@ -670,16 +787,232 @@ model is |TS| is different as it allows such a mix.
 Differences in Export
 ---------------------
 
-|LANG| enforces export consistency that all types used in signatures of
-exported declaration or public class or interace members are also exported.
-|TS| allows is such declarations.
+|LANG| enforces export consistency, i.e., all types used in the signature of
+an exported declaration, public class, or interace members are also exported.
+|TS| allows such declarations.
 
 .. code-block:: typescript
    :linenos:
 
     class C {} // Not exported
-    export function foo (): C { return new C } // Expoprtred function returns non-exported type
+    export function foo (): C { return new C } // Exported function returns non-exported type
     // ArkTS will produce compile-time error, enforcing C to be exported
     // Typescript accepts such situation
 
+
+|
+
+.. _Differences in Type Alias Export Status:
+
+Differences in Type Alias Export Status
+---------------------------------------
+
+
+|LANG| enforces export consistency, i.e., non-exported types are kept
+non-exported in the case of aliasing. |TS| allows such declarations.
+
+.. code-block:: typescript
+   :linenos:
+
+    class B {}
+    export type A = B 
+    // ArkTS will produce compile-time error, as B is not exported
+    // Typescript accepts such situation
+
+
+|
+
+.. _Differences in Ambient Constant Declarations:
+
+Differences in Ambient Constant Declarations
+--------------------------------------------
+
+|LANG| enforces exact constant type annotation rather than inferring the type
+from a constant value as is allows in |TS|.
+
+.. code-block:: typescript
+   :linenos:
+
+    declare const a = 1
+    // ArkTS will produce compile-time error, as type is not specified
+    // Typescript accepts such declaration assuming 'a' is of type number
+
+|
+
+.. _TS Definite Assignment Assertion:
+
+|TS| Definite Assignment Assertion
+----------------------------------
+
+.. meta:
+    frontend_status: None
+
+|TS| supports *definite assignment assertion* ('``!:``') both in classes and
+interfaces. |LANG| does not use the term *definite assignment assertions* for
+'``!:``' but has a similar notion called *late initialization*. |LANG| allows
+it in classes only.
+
+The following code is valid in |TS| for both `class A` and `interface I`.
+In |LANG|, `interface I` causes a compile-time error:
+
+.. code-block:: typescript
+   :linenos:
+
+   class A {
+      f !: number
+   }
+
+   interface I {
+      field!: number
+   }
+
+|
+
+.. _TS Tuple Length Property:
+
+|TS| Tuple Length Property
+--------------------------
+
+.. meta:
+    frontend_status: Done
+
+Tuples have the property '``length``' in |TS| but not in |LANG|.
+The following code is valid in |TS| but causes a compile-time error in |LANG|:
+
+.. code-block:: typescript
+   :linenos:
+
+   let tuple : [number, string]  = [1, "" ]
+
+   for (let index = 0; index < tuple.length; index++ ) {
+      let element: Object = tuple[index]
+      // do something with the element
+   }
+
+
+|
+
+.. _TS Rest Parameter of Union Type Unsupported:
+
+|TS| Rest Parameter of Union Type Unsupported
+---------------------------------------------
+
+.. meta:
+    frontend_status: Done
+
+|TS| supports *rest parameter* of *union type* while |LANG| does not. The
+following example legal in |TS| causes a *compile-time error* in |LANG|:
+
+.. code-block:: typescript
+   :linenos:
+
+   type U = Array<number> | Array <string>
+   // next declaration causes compile time error - rest cannot have a union type
+   function bar (...u: U) {
+      console.log (u)
+   }
+   bar (1, 2, 3)  // create array of numbers from numbers
+   bar ("a", "bb", "ccc") // create array of strings
+
+|
+
+.. _Object Literal Property Status:
+
+Object Literal Property Status
+------------------------------
+
+.. meta:
+    frontend_status: Done
+
+If an interface has only a set accessor for some property, then |TS| allows
+getting the value of this property despite no getter is defined.
+The code pattern causes a compile-time error in |LANG|:
+
+.. code-block:: typescript
+   :linenos:
+
+   interface I {
+     set attr (attr: number)
+   }
+
+   function foo (i: I) {
+     console.log (i.attr) // compile_time error in ArkTS
+     i.attr = i.attr + 1  // compile_time error in ArkTS
+     console.log (i.attr) // compile_time error in ArkTS
+   }
+   foo ({attr: 123})
+
+|
+
+.. _TS Record Keys of enum Type Unsupported:
+
+|TS| Record Keys of enum Type Unsupported
+-----------------------------------------
+
+.. meta:
+    frontend_status: Done
+
+|TS| supports using ``enum`` type as a set of keys for a record in a variety
+of formats. |LANG| does not support record keys of ``enum`` type. The followig
+code sample legal in |TS| causes a compile-time error in |LANG|:
+
+.. code-block:: typescript
+   :linenos:
+
+   enum Test { A = 'a', B = 'b' }
+
+   // r1, r2, r3 are OK in TS but cause  compile-time error in ArkTS
+   let r1: Record<Test, number> = { a: 0, b: 1 }
+   let r2: Record<Test, number> = { 'a': 0, 'b': 1 }
+   let r3: Record<Test, number> = { [Test.A] : 0, [Test.B]: 1 }
+
+|
+
+.. Boolean({}) gives different results:
+
+Boolean({}) gives different results
+-----------------------------------
+
+.. meta:
+    frontend_status: Done
+
+In |TS|, the `Boolean({})` gives `true` value, while in |LANG|  it
+is `false`:
+
+.. code-block:: typescript
+   :linenos:
+
+   let b = new Boolean({})
+   console.log(b) // true in TS, false in ArkTS
+
+|
+
+.. Private members and subclasses
+
+Private members and subclasses
+------------------------------
+
+.. meta:
+    frontend_status: Done
+
+In |TS|, the name of private member of base class can not be used in subclasses.
+In |LANG|, names of private members of base class can be reused in subclasses
+without limitations. The following code is illegal in |TS| but compiles without
+errors in |LANG|:
+
+.. code-block:: typescript
+   :linenos:
+
+   class Base {
+     private foo() {}
+     private x: number = 1
+   }
+
+   // In TS, next gives "Class 'Derived' incorrectly extends base class 'Base'"
+   class Derived extends Base {
+     x: number = 10
+     foo() { console.log(this.x) }
+   }
+
+|
 

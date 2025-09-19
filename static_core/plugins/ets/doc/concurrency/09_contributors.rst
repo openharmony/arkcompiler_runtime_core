@@ -10,8 +10,11 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-####################################
-Concurrency requirements for interop
-####################################
+.. _Contributors:
 
-Any coroutine which trying to call JS can have CTE or RTE if it is executed not on the Main or EA domains.
+CONTRIBUTORS
+############
+
+Author of Concurrency specification:
+
+- Trubenkov Dmitrii
