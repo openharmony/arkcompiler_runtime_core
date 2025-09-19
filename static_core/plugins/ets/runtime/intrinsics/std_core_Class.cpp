@@ -63,6 +63,14 @@ EtsClass *StdCoreClassOf(EtsObject *obj)
     return cls->ResolvePublicClass();
 }
 
+EtsClass *StdCoreClassOfNull()
+{
+    auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+    const auto *nullObject = EtsObject::FromCoreType(coro->GetNullValue());
+    return nullObject->GetClass();
+}
+
 EtsClass *StdCoreClassCurrent()
 {
     return GetMethodOwnerClassInFrames(EtsCoroutine::GetCurrent(), 0);
