@@ -13,20 +13,6 @@
  * limitations under the License.
  */
 
-/*---
-desc: Test cases for various usage scenarios of asynchronous functions.
-      The asynchronous function returns a boolean.
----*/
+{% from "16.concurrency/03.asynchronous_api/async_returns_enum.base.jinja" import generate_complete_test %}
 
-async function testAsync(): Promise<boolean> {
-    return true;
-}
-
-async function startTest() {
-    let res: boolean = await testAsync();
-    arktest.assertEQ(res === true, true);
-}
-
-function main(): void {
-    startTest();
-}
+{{ generate_complete_test('lambda') }}

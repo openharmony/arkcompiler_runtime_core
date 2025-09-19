@@ -13,19 +13,6 @@
  * limitations under the License.
  */
 
-/*---
-desc: Test cases for various usage scenarios of asynchronous functions.
-      The asynchronous function returns a void.
-tags: [compile-only, positive]
----*/
+ {% from "16.concurrency/03.asynchronous_api/async_returns_tuple.base.jinja" import generate_complete_test %}
 
-async function testAsync(): Promise<void> {
-}
-
-async function startTest() {
-    await testAsync();
-}
-
-function main(): void {
-    startTest();
-}
+ {{ generate_complete_test('lambda') }}

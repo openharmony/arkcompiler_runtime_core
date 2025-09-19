@@ -13,20 +13,6 @@
  * limitations under the License.
  */
 
-/*---
-desc: Test cases for various usage scenarios of asynchronous functions.
-      The asynchronous function returns a string.
----*/
+ {% from "16.concurrency/03.asynchronous_api/async_returns_literal.base.jinja" import generate_complete_test %}
 
-async function testAsync(): Promise<string> {
-    return "testAsync";
-}
-
-async function startTest() {
-    let res: string = await testAsync();
-    arktest.assertEQ(res === "testAsync", true);
-}
-
-function main(): void {
-    startTest();
-}
+ {{ generate_complete_test('function') }}
