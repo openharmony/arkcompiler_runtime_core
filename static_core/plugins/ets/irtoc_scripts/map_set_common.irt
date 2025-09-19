@@ -531,8 +531,8 @@ scoped_macro(:processMapDelete) do |map, key, idx, mode|
   entry := Load(buck_data, offset).ref
   entry_next := LoadI(entry).Imm(MapConstants::ENTRY_NEXT_OFFSET).ref
   entry_prev := LoadI(entry).Imm(MapConstants::ENTRY_PREV_OFFSET).ref
-  Store(entry_prev, MapConstants::ENTRY_NEXT_OFFSET, entry_next).ref
-  Store(entry_next, MapConstants::ENTRY_PREV_OFFSET, entry_prev).ref
+  Store(entry_prev, MapConstants::ENTRY_NEXT_OFFSET, entry_next).SetNeedBarrier(true).ref
+  Store(entry_next, MapConstants::ENTRY_PREV_OFFSET, entry_prev).SetNeedBarrier(true).ref
 
   new_len := SubI(buck_len).Imm(1).u32
   StoreI(buck_hdr, new_len).Imm(EtsConstants::ESCOMPAT_ARRAY_ACTUAL_LENGTH_OFFSET).u32
@@ -540,7 +540,7 @@ scoped_macro(:processMapDelete) do |map, key, idx, mode|
   last_item_ofs := Mul(new_len, EtsConstants::OBJ_PTR_SIZE).i32
   If(offset, last_item_ofs).NE.b {
     popped_entry := Load(buck_data, last_item_ofs).ref
-    Store(buck_data, offset, popped_entry).ref
+    Store(buck_data, offset, popped_entry).SetNeedBarrier(true).ref
   }
 
   size := LoadI(map).Imm(MapConstants::SIZE_OFFSET).u32

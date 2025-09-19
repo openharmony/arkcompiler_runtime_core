@@ -366,7 +366,8 @@ public:
 
     bool IsOfflineCompilationMode() const
     {
-        return IsAotMode() || GetMode().IsInterpreter() || GetMode().IsFastPath() || GetMode().IsInterpreterEntry();
+        return IsAotMode() || GetMode().IsInterpreter() || GetMode().IsFastPath() || GetMode().IsNativePlus() ||
+               GetMode().IsInterpreterEntry();
     }
 
     bool IsDefaultLocationsInit() const
@@ -1358,7 +1359,8 @@ public:
 
     bool SupportsIrtocBarriers() const
     {
-        return (IsJitOrOsrMode() || IsAotMode() || GetMode().IsInterpreter() || GetMode().IsInterpreterEntry()) &&
+        return (GetMode().IsFastPath() || GetMode().IsNativePlus() || IsJitOrOsrMode() || IsAotMode() ||
+                GetMode().IsInterpreter() || GetMode().IsInterpreterEntry()) &&
                !IsDynamicMethod() && GetArch() != Arch::AARCH32;
     }
 
