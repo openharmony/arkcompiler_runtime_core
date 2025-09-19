@@ -13,11 +13,14 @@
  * limitations under the License.
  */
 
+{%- for c in cases %}
 /*---
-desc: Test of invalid return value at the program entry point.
-tags: [compile-only, negative]
+desc: >-
+    Entry point function must either have no parameters, or have one parameter
+    of type string[] that provides access to the arguments of a program command line
+tags: [no-warmup, {{c.tags}}]
+test_cli: [{{c.cmd_line_args}}]
 ---*/
 
-function main(): string {
-    return "Invalid";
-}
+{{c.use}}
+{%- endfor %}

@@ -10,6 +10,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-Unhandled exception: escompat.Error
-Error
-	at escompat.Error.<ctor> (Error.ets:56:0)
+Unhandled exception: std.core.AssertionError
+AssertionError: expected true but was false
+	at std.core.AssertionError.<ctor> (Errors.ets:23:0)
+	at std.core.AssertionError.<ctor> (Errors.ets:22:0)
+	at std.testing.arktest.failingAssertion (arktest.ets:39:0)
+	at std.testing.arktest.assertCommon (arktest.ets:28:0)
+	at std.testing.arktest.assertTrue (arktest.ets:49:0)

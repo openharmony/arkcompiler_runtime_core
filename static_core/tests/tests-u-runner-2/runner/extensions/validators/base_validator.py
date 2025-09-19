@@ -69,7 +69,7 @@ class BaseValidator(IValidator):
 
         if step == StepKind.RUNTIME.value:
             if test.is_negative_runtime:
-                return return_code == 1
+                return return_code in [1, 255]
             return return_code == 0
 
         return return_code == 0

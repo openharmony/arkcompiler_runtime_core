@@ -13,16 +13,11 @@
  * limitations under the License.
  */
 
+{%- for c in cases %}
 /*---
-desc: Top-level statement priority test.
+desc: Program execution starts from the execution of a program entry point
+tags: [no-warmup, {{c.tags}}]
 ---*/
 
-let topLevel: string = "Execute the top-level statements first";
-topLevel += "!";
-
-function main(): void {
-  arktest.assertTrue(topLevel === "Execute the top-level statements first!");
-  let lowLevel: string = "Execute the low-level statements after";
-  lowLevel += "!";
-  arktest.assertTrue(lowLevel === "Execute the low-level statements after!");
-}
+{{c.use}}
+{%- endfor %}

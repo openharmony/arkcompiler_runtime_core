@@ -82,6 +82,8 @@ class TestMetadata:     # type: ignore[explicit-any]
     assertion: str | None = None
     params: Any | None = None   # type: ignore[explicit-any]
     name: str | None = None
+    entry_point: str | None = None
+    test_cli: list[str] | None = None
     package: str | None = None
     ark_options: list[str] = field(default_factory=list)
     timeout: int | None = None
@@ -119,6 +121,8 @@ class TestMetadata:     # type: ignore[explicit-any]
     def create_filled_metadata(cls, metadata: dict[str, Any],       # type: ignore[explicit-any]
                                path: Path) -> 'TestMetadata':
         metadata['tags'] = Tags(metadata.get('tags'))
+        metadata['entry_point'] = metadata.get('entry_point')
+        metadata['test_cli'] = metadata.get('test_cli')
         if 'assert' in metadata:
             metadata['assertion'] = metadata.get('assert')
             del metadata['assert']

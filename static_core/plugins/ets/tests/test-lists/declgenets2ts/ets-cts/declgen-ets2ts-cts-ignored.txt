@@ -1613,6 +1613,12 @@
 13.compilation_units/07.export_directives/04.re-export_directive/modules/re-export_non-default.ets
 13.compilation_units/07.export_directives/04.re-export_directive/re-export_multiple_default.ets
 13.compilation_units/07.export_directives/04.re-export_directive/reexport_from_self_2.ets
+13.compilation_units/09.program_entry_point/entry_point_main_44.ets
+13.compilation_units/09.program_entry_point/entry_point_main_45.ets
+13.compilation_units/09.program_entry_point/entry_point_foo_10.ets
+13.compilation_units/09.program_entry_point/entry_point_foo_14.ets
+13.compilation_units/09.program_entry_point/entry_point_foo_5.ets
+13.compilation_units/09.program_entry_point/entry_point_foo_7.ets
 14.ambient_declarations/02.function_declarations/function_declarations_n_0.ets
 14.ambient_declarations/02.function_declarations/function_declarations_n_1.ets
 14.ambient_declarations/02.function_declarations/function_declarations_n_2.ets
