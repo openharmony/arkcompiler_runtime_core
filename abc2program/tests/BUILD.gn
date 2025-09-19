@@ -30,6 +30,7 @@ abc2prog_test_deps = [
 ]
 
 test_ts_dir = "//arkcompiler/runtime_core/abc2program/tests/ts/"
+test_js_dir = "//arkcompiler/runtime_core/abc2program/tests/js/"
 test_column_number_dir =
     "//arkcompiler/runtime_core/abc2program/tests/ts/release-column-number/"
 test_line_number_dir =
@@ -72,6 +73,39 @@ foreach(file, abc2prog_test_release_column_number_files) {
       "--module",
     ]
     in_puts = [ test_ts ]
+    out_puts = [ test_abc ]
+  }
+}
+
+abc2prog_test_js_files = [ "JsCommonSyntax"]
+
+foreach(file, abc2prog_test_js_files) {
+  es2abc_gen_abc("gen_${file}_abc") {
+    test_js = "${test_js_dir}${file}.js"
+    test_abc = "$target_out_dir/${file}.abc"
+
+    src_js = rebase_path(test_js)
+    dst_file = rebase_path(test_abc)
+    extra_args = [ "--module" ]
+    in_puts = [ test_js ]
+    out_puts = [ test_abc ]
+  }
+}
+
+abc2prog_debug_test_js_files = [ "JsCommonSyntax" ]
+
+foreach(file, abc2prog_debug_test_js_files) {
+  es2abc_gen_abc("gen_${file}_debug_abc") {
+    test_js = "${test_js_dir}${file}.js"
+    test_abc = "$target_out_dir/${file}Debug.abc"
+
+    src_js = rebase_path(test_js)
+    dst_file = rebase_path(test_abc)
+    extra_args = [
+      "--debug",
+      "--module",
+    ]
+    in_puts = [ test_js ]
     out_puts = [ test_abc ]
   }
 }
@@ -150,6 +184,7 @@ script_sources = [
   "cpp_sources/hello_world_test.cpp",
   "cpp_sources/release_column_number.cpp",
   "cpp_sources/release_line_number.cpp",
+  "cpp_sources/js_common_syntax_test.cpp",
 ]
 
 host_unittest_action("Abc2ProgScriptTest") {
@@ -161,9 +196,11 @@ host_unittest_action("Abc2ProgScriptTest") {
   deps = abc2prog_test_deps
   test_abc_dir = rebase_path(target_out_dir)
   test_abc_dump_dir = rebase_path(test_ts_dir)
+  test_js_abc_dump_dir = rebase_path(test_js_dir)
   defines = [
     "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"",
     "GRAPH_TEST_ABC_DUMP_DIR=\"${test_abc_dump_dir}/\"",
+    "GRAPH_JS_TEST_ABC_DUMP_DIR=\"${test_js_abc_dump_dir}/\"",
   ]
 
   foreach(file, abc2prog_test_ts_files) {
@@ -180,6 +217,12 @@ host_unittest_action("Abc2ProgScriptTest") {
   }
   foreach(file, abc2prog_test_release_line_number_files) {
     deps += [ ":gen_${file}_abc" ]
+  }
+  foreach(file, abc2prog_test_js_files) {
+    deps += [ ":gen_${file}_abc" ]
+  }
+  foreach(file, abc2prog_debug_test_js_files) {
+    deps += [ ":gen_${file}_debug_abc" ]
   }
 }
 
