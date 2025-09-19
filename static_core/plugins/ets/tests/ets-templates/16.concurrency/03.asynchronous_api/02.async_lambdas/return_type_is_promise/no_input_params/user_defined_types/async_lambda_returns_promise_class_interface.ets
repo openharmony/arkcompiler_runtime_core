@@ -13,24 +13,6 @@
  * limitations under the License.
  */
 
-/*---
-desc: Test cases for various usage scenarios of asynchronous method.
-      Asynchronous method returns array.
----*/
+{% from "16.concurrency/03.asynchronous_api/async_returns_class_interface.base.jinja" import generate_complete_test %}
 
-class MethodReturnArray {
-  async methodReturnArray(): Promise<Array<number>> {
-    return new Array<number>(1, 2, 3);
-  }
-}
-
-async function startTest() {
-  const example = new MethodReturnArray();
-  const result = await example.methodReturnArray();
-  const resTemp = new Array<number>(1, 2, 3);
-  arktest.assertEQ(result === resTemp, true);
-}
-
-function main(): void {
-  startTest();
-}
+{{ generate_complete_test('lambda') }}

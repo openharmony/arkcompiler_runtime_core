@@ -20,7 +20,13 @@ desc: The method async is an implicit coroutine that can be called as a regular 
 
 {{c.decl}}
 
-function main() {
+async function startTest() {
     {{c.use|indent}}
 }
+
+
+function main(){
+    waitForCompletion(startTest);
+}
+
 {% endfor %}

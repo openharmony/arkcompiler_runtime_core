@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,23 +13,6 @@
  * limitations under the License.
  */
 
-/*---
-desc: Test cases for various usage scenarios of asynchronous method.
-      Asynchronous method returns null.
----*/
+ {% from "16.concurrency/03.asynchronous_api/await_call_not_from_async_negative.base.jinja" import generate_complete_test %}
 
-class MethodReturnNull {
-    async methodReturnNull(): Promise<null> {
-        return null;
-    }
-}
-
-async function startTest() {
-    const example = new MethodReturnNull();
-    const result = await example.methodReturnNull();
-    arktest.assertEQ(result === null, true)
-}
-
-function main(): void {
-    startTest();
-}
+ {{ generate_complete_test('lambda') }}

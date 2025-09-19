@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,23 +13,6 @@
  * limitations under the License.
  */
 
-/*---
-desc: Test cases for various usage scenarios of asynchronous method.
-      Asynchronous method returns boolean.
----*/
+ {% from "16.concurrency/03.asynchronous_api/await_call_not_from_async_negative.base.jinja" import generate_complete_test %}
 
-class MethodReturnBoolean {
-    async methodReturnBoolean(): Promise<boolean> {
-        return true;
-    }
-}
-
-async function startTest() {
-    const example = new MethodReturnBoolean();
-    const result = await example.methodReturnBoolean();
-    arktest.assertEQ(result === true, true)
-}
-
-function main(): void {
-    startTest();
-}
+ {{ generate_complete_test('function') }}

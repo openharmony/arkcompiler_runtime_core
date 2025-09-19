@@ -28,7 +28,7 @@ class MethodWithErrorHandling {
             await this.methodThrowError();
             return "Success";
         } catch (error) {
-            return `Caught error: ${error as string}`;
+            return `Caught error: ${(error as Error).message}`;
         }
     }
 }
@@ -40,5 +40,5 @@ async function startTest() {
 }
 
 function main(): void {
-    startTest();
+    waitForCompletion(startTest);
 }

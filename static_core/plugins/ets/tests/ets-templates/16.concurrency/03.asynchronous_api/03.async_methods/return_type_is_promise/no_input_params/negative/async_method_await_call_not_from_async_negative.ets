@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,23 +13,6 @@
  * limitations under the License.
  */
 
-/*---
-desc: Test cases for various usage scenarios of asynchronous method.
-      The asynchronous method returns a int.
----*/
+ {% from "16.concurrency/03.asynchronous_api/await_call_not_from_async_negative.base.jinja" import generate_complete_test %}
 
-class MethodReturnInt {
-    async methodReturnInt(): Promise<int> {
-        return 10;
-    }
-}
-
-async function startTest() {
-    const example = new MethodReturnInt();
-    const result = await example.methodReturnInt();
-    arktest.assertEQ(result, 10);
-}
-
-function main(): void {
-    waitForCompletion(startTest);
-}
+ {{ generate_complete_test('method') }}

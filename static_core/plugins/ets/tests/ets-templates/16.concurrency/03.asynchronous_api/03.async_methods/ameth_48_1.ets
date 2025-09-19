@@ -14,25 +14,35 @@
  */
 
 /*---
-desc: Test cases for various usage scenarios of asynchronous method.
-      Asynchronous method throws error.
+desc: Throw error in chained catch await is forbidden for non-async function
 ---*/
 
-class MethodThrowError {
-    async methodThrowError(): Promise<void> {
-        throw new Error("Something went wrong!");
+type EN = Error|null
+let s = 'A'
+class A {
+    async foo(p: string): Promise<string> {
+        if (p == 'A') {
+            throw new Error('E')
+        }
+        return 'X'
     }
 }
 
-async function startTest() {
-    const example = new MethodThrowError();
+async function startTest(): Promise<void> {
+    // Throw error in chained catch
+    // await is forbidden for non-async function
+    let r = new A().foo(s)
+        .then((p: string): string => p + p)
+        .catch((p: EN): string => { throw p! })
     try {
-        await example.methodThrowError();
-    } catch (error) {
-        arktest.assertEQ((error as Error).message, "Something went wrong!");
+        await r
+    } catch (e) {
+        arktest.assertEQ((e as Error).message, 'E')
+        return
     }
+    arktest.assertTrue(false)
 }
 
 function main(): void {
-    waitForCompletion(startTest);
+   waitForCompletion(startTest);
 }
