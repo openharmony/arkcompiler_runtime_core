@@ -2084,6 +2084,16 @@ NO_UB_SANITIZE static ets_objectArray NewObjectsArray(EtsEnv *env, ets_size leng
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
     EtsClass *internalClass = s.ToInternalType(elementClass);
+    if (internalClass == nullptr) {
+        return nullptr;
+    }
+    if (internalClass->IsPrimitive() || internalClass->IsAbstract() || internalClass->IsInterface()) {
+        PandaStringStream ss;
+        ss << "Class " << internalClass->GetRuntimeClass()->GetName() << "is primitive, abstract or interface";
+        s.ThrowNewException(EtsNapiException::INSTANTIATION, ss.str().c_str());
+        return nullptr;
+    }
+
     EtsObjectArray *array = EtsObjectArray::Create(internalClass, static_cast<uint32_t>(length));
     if (array == nullptr) {
         PandaStringStream ss;
