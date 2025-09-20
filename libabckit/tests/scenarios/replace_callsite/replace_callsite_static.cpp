@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,7 +73,7 @@ class AbckitScenarioTest : public ::testing::Test {};
 TEST_F(AbckitScenarioTest, LibAbcKitTestReplaceCallSite)
 {
     constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "scenarios/replace_callsite/replace_callsite_static.abc";
-    auto output = helpers::ExecuteStaticAbc(INPUT_PATH, "replace_callsite_static/ETSGLOBAL", "main");
+    auto output = helpers::ExecuteStaticAbc(INPUT_PATH, "replace_callsite_static", "main");
     EXPECT_TRUE(helpers::Match(output, "4\n3\n"));
     AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
 
@@ -88,7 +88,7 @@ TEST_F(AbckitScenarioTest, LibAbcKitTestReplaceCallSite)
     constexpr auto OUTPUT_PATH = ABCKIT_ABC_DIR "scenarios/replace_callsite/replace_callsite_static_modified.abc";
     g_impl->writeAbc(file, OUTPUT_PATH, strlen(OUTPUT_PATH));
     g_impl->closeFile(file);
-    output = helpers::ExecuteStaticAbc(OUTPUT_PATH, "replace_callsite_static/ETSGLOBAL", "main");
+    output = helpers::ExecuteStaticAbc(OUTPUT_PATH, "replace_callsite_static", "main");
     EXPECT_TRUE(helpers::Match(output, "5\n4\n"));
 }
 

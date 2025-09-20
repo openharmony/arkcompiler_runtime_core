@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,8 +73,8 @@ static void TransformIrCreateReturnVoidInstValid(AbckitGraph *graph)
 // Test: test-kind=api, api=IsaApiStaticImpl::iCreateReturn, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCreateReturnInstTest, CreateReturnValid)
 {
-    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/return/return_static.abc",
-                                            "return_static/ETSGLOBAL", "main");
+    auto output =
+        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/return/return_static.abc", "return_static", "main");
     EXPECT_TRUE(helpers::Match(output, "10\n11\n"));
 
     helpers::TransformMethod(
@@ -96,15 +96,15 @@ TEST_F(LibAbcKitCreateReturnInstTest, CreateReturnValid)
         });
 
     output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/return/return_static_modified.abc",
-                                       "return_static/ETSGLOBAL", "main");
+                                       "return_static", "main");
     EXPECT_TRUE(helpers::Match(output, "5\n11\n"));
 }
 
 // Test: test-kind=api, api=IsaApiStaticImpl::iCreateReturnVoid, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCreateReturnInstTest, CreateReturnVoidValid)
 {
-    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/return/return_static.abc",
-                                            "return_static/ETSGLOBAL", "main");
+    auto output =
+        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/return/return_static.abc", "return_static", "main");
     EXPECT_TRUE(helpers::Match(output, "10\n11\n"));
 
     helpers::TransformMethod(
@@ -128,7 +128,7 @@ TEST_F(LibAbcKitCreateReturnInstTest, CreateReturnVoidValid)
         });
 
     output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/return/return_static_modified.abc",
-                                       "return_static/ETSGLOBAL", "main");
+                                       "return_static", "main");
     EXPECT_TRUE(helpers::Match(output, "10\n10\n"));
 }
 

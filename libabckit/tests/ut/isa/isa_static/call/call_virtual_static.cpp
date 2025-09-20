@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,7 +61,7 @@ class LibAbcKitCallVirtualStaticTest : public ::testing::Test {};
 TEST_F(LibAbcKitCallVirtualStaticTest, LibAbcKitTestCallVirtual)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/call/call_virtual_static.abc",
-                                            "call_virtual_static/ETSGLOBAL", "main");
+                                            "call_virtual_static", "main");
     EXPECT_TRUE(helpers::Match(output, ""));
 
     helpers::TransformMethod(
@@ -88,7 +88,7 @@ TEST_F(LibAbcKitCallVirtualStaticTest, LibAbcKitTestCallVirtual)
         });
 
     output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/call/call_virtual_static_modified.abc",
-                                       "call_virtual_static/ETSGLOBAL", "main");
+                                       "call_virtual_static", "main");
     EXPECT_TRUE(helpers::Match(output, "foo\n"));
 }
 

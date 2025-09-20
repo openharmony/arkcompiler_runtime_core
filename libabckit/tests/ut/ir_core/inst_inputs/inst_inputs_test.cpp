@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,7 +69,7 @@ void TransformIrStatic2(AbckitGraph *graph)
 TEST_F(LibAbcKitIrInstInputsTest, StaticSetInput)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/inst_inputs/inst_inputs_static.abc",
-                                            "inst_inputs_static/ETSGLOBAL", "main");
+                                            "inst_inputs_static", "main");
     EXPECT_TRUE(helpers::Match(output, "1 2\n"));
 
     helpers::TransformMethod(
@@ -97,7 +97,7 @@ TEST_F(LibAbcKitIrInstInputsTest, StaticSetInput)
         });
 
     output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/inst_inputs/inst_inputs_static_modified.abc",
-                                       "inst_inputs_static/ETSGLOBAL", "main");
+                                       "inst_inputs_static", "main");
     EXPECT_TRUE(helpers::Match(output, "10 20\n"));
 }
 
@@ -105,7 +105,7 @@ TEST_F(LibAbcKitIrInstInputsTest, StaticSetInput)
 TEST_F(LibAbcKitIrInstInputsTest, StaticSetInputs)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/inst_inputs/inst_inputs_static.abc",
-                                            "inst_inputs_static/ETSGLOBAL", "main");
+                                            "inst_inputs_static", "main");
     EXPECT_TRUE(helpers::Match(output, "1 2\n"));
 
     helpers::TransformMethod(
@@ -133,7 +133,7 @@ TEST_F(LibAbcKitIrInstInputsTest, StaticSetInputs)
         });
 
     output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/inst_inputs/inst_inputs_static_modified.abc",
-                                       "inst_inputs_static/ETSGLOBAL", "main");
+                                       "inst_inputs_static", "main");
     EXPECT_TRUE(helpers::Match(output, "10 20\n"));
 }
 

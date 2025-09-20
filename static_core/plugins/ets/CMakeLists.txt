@@ -161,7 +161,6 @@ add_subdirectory(bytecode_optimizer)
 add_subdirectory(irtoc_scripts)
 add_subdirectory(verification)
 add_subdirectory(tools)
-add_subdirectory(arkts_header)
 
 # NOTE(nsizov): change this logic when ets compiler moved into ets plugin
 if(TARGET es2panda)

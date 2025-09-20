@@ -225,7 +225,7 @@ Class *EtsClassLinkerContext::LoadClass(const uint8_t *descriptor, [[maybe_unuse
     const auto *runtimeLinker = GetRuntimeLinker();
     ASSERT(runtimeLinker != nullptr);
     ASSERT(etsClsName != nullptr);
-    std::array args {Value(runtimeLinker->GetCoreType()), Value(etsClsName->GetCoreType()), Value(ETS_TRUE)};
+    std::array args {Value(runtimeLinker->GetCoreType()), Value(etsClsName->GetCoreType()), Value(ANI_TRUE)};
 
     auto *loadClass = runtimeLinker->GetClass()->GetInstanceMethod("loadClass", "Lstd/core/String;Z:Lstd/core/Class;");
     ASSERT(loadClass != nullptr);

@@ -69,7 +69,7 @@ class LibAbcKitLoadStringStaticTest : public ::testing::Test {};
 TEST_F(LibAbcKitLoadStringStaticTest, LibAbcKitTestLoadString)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/load_string/load_string_static.abc",
-                                            "load_string_static/ETSGLOBAL", "main");
+                                            "load_string_static", "main");
     EXPECT_TRUE(helpers::Match(output, "\n"));
 
     helpers::TransformMethod(
@@ -92,7 +92,7 @@ TEST_F(LibAbcKitLoadStringStaticTest, LibAbcKitTestLoadString)
         });
 
     output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/load_string/load_string_static_modified.abc",
-                                       "load_string_static/ETSGLOBAL", "main");
+                                       "load_string_static", "main");
     EXPECT_TRUE(helpers::Match(output, "foo\n"));
 }
 

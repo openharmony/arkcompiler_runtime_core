@@ -87,8 +87,8 @@ class LibAbcKitEqualsStaticTest : public ::testing::Test {};
 // Test: test-kind=api, api=IsaApiStaticImpl::iCreateEquals, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitEqualsStaticTest, LibAbcKitTestEquals)
 {
-    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/equals/equals_static.abc",
-                                            "equals_static/ETSGLOBAL", "main");
+    auto output =
+        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/equals/equals_static.abc", "equals_static", "main");
     EXPECT_TRUE(helpers::Match(output, "true\n"));
 
     helpers::TransformMethod(
@@ -110,15 +110,15 @@ TEST_F(LibAbcKitEqualsStaticTest, LibAbcKitTestEquals)
         });
 
     output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/equals/equals_static_modified.abc",
-                                       "equals_static/ETSGLOBAL", "main");
+                                       "equals_static", "main");
     EXPECT_TRUE(helpers::Match(output, "false\n"));
 }
 
 // Test: test-kind=api, api=IsaApiStaticImpl::iCreateStrictEquals, abc-kind=ArkTS2, category=positive
 TEST_F(LibAbcKitEqualsStaticTest, LibAbcKitTestStrictEquals)
 {
-    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/equals/equals_static.abc",
-                                            "equals_static/ETSGLOBAL", "main");
+    auto output =
+        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/equals/equals_static.abc", "equals_static", "main");
     EXPECT_TRUE(helpers::Match(output, "true\n"));
 
     helpers::TransformMethod(
@@ -140,7 +140,7 @@ TEST_F(LibAbcKitEqualsStaticTest, LibAbcKitTestStrictEquals)
         });
 
     output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/equals/equals_static_modified.abc",
-                                       "equals_static/ETSGLOBAL", "main");
+                                       "equals_static", "main");
     EXPECT_TRUE(helpers::Match(output, "false\n"));
 }
 

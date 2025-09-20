@@ -15,7 +15,11 @@
 
 #include <gtest/gtest.h>
 
-#include "plugins/ets/tests/mock/calling_methods_test_helper.h"
+#include "libpandabase/mem/mem.h"
+#include "runtime/include/thread.h"
+#include "plugins/ets/runtime/ets_vm.h"
+#include "plugins/ets/runtime/ani/scoped_objects_fix.h"
+#include "plugins/ets/tests/mock/mock_test_helper.h"
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
 
@@ -23,31 +27,33 @@ namespace ark::ets::test {
 
 static const char *g_testBinFileName = "RegisterNativeAllocationTest.abc";
 
-class CallingMethodsTestGeneral : public CallingMethodsTestBase {
+class CallingMethodsTestGeneral : public MockEtsNapiTestBaseClass {
 public:
-    CallingMethodsTestGeneral() : CallingMethodsTestBase(g_testBinFileName) {}
+    CallingMethodsTestGeneral() : MockEtsNapiTestBaseClass(g_testBinFileName) {}
 };
 
 class RegisterNativeAllocationTest : public CallingMethodsTestGeneral {
     void SetUp() override
     {
-        std::vector<EtsVMOption> optionsVector;
+        const char *stdlib = std::getenv("PANDA_STD_LIB");
+        ASSERT_NE(stdlib, nullptr);
 
-        optionsVector = {{EtsOptionType::ETS_GC_TYPE, "g1-gc"},
-                         {EtsOptionType::ETS_RUN_GC_IN_PLACE, nullptr},
-                         {EtsOptionType::ETS_NO_JIT, nullptr},
-                         {EtsOptionType::ETS_BOOT_FILE, std::getenv("PANDA_STD_LIB")}};
+        // Create boot-panda-files options
+        std::string bootFileString =
+            std::string("--ext:boot-panda-files=") + std::string(stdlib) + ":" + g_testBinFileName;
 
-        if (testBinFileName_ != nullptr) {
-            optionsVector.push_back({EtsOptionType::ETS_BOOT_FILE, testBinFileName_});
-        }
+        // clang-format off
+        std::vector<ani_option> optionsVector{
+            {bootFileString.data(), nullptr},
+            {"--ext:gc-type=g1-gc", nullptr},
+            {"--ext:run-gc-in-place", nullptr},
+            {"--ext:compiler-enable-jit=false", nullptr},
+        };
+        // clang-format on
+        ani_options optionsPtr = {optionsVector.size(), optionsVector.data()};
 
-        EtsVMInitArgs vmArgs;
-        vmArgs.version = ETS_NAPI_VERSION_1_0;
-        vmArgs.options = optionsVector.data();
-        vmArgs.nOptions = static_cast<ets_int>(optionsVector.size());
-
-        ASSERT_TRUE(ETS_CreateVM(&vm_, &env_, &vmArgs) == ETS_OK) << "Cannot create ETS VM";
+        ASSERT_EQ(ANI_CreateVM(&optionsPtr, ANI_VERSION_1, &vm_), ANI_OK) << "Cannot create ETS VM";
+        ASSERT_EQ(vm_->GetEnv(ANI_VERSION_1, &env_), ANI_OK) << "Cannot get ani env";
     }
 };
 
@@ -55,26 +61,30 @@ TEST_F(RegisterNativeAllocationTest, testNativeAllocation)
 {
     mem::MemStatsType *memStats = Thread::GetCurrent()->GetVM()->GetMemStats();
 
-    ets_class testClass = env_->FindClass("RegisterNativeAllocationTest/NativeAllocationTest");
-    ASSERT_NE(testClass, nullptr);
+    ani_class testClass;
+    ASSERT_EQ(env_->FindClass("RegisterNativeAllocationTest.NativeAllocationTest", &testClass), ANI_OK);
 
-    ets_method allocMethod = env_->GetStaticp_method(testClass, "allocate_object", ":I");
-    ASSERT_NE(allocMethod, nullptr);
-    ASSERT_EQ(env_->CallStaticIntMethod(testClass, allocMethod), 0);
+    ani_static_method allocMethod {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(testClass, "allocate_object", ":i", &allocMethod), ANI_OK);
+    ani_int value1 = -1;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Int(testClass, allocMethod, &value1), ANI_OK);
+    ASSERT_EQ(value1, 0);
 
     size_t heapFreedBeforeMethod;
     {
-        ark::ets::napi::ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env_));
+        ark::ets::ani::ScopedManagedCodeFix s(env_);
         heapFreedBeforeMethod = memStats->GetFreedHeap();
     }
 
-    ets_method mainMethod = env_->GetStaticp_method(testClass, "main_method", ":I");
-    ASSERT_NE(mainMethod, nullptr);
-    ASSERT_EQ(env_->CallStaticIntMethod(testClass, mainMethod), 0);
+    ani_static_method mainMethod {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(testClass, "main_method", ":i", &mainMethod), ANI_OK);
+    ani_int value2 = -1;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Int(testClass, mainMethod, &value2), ANI_OK);
+    ASSERT_EQ(value2, 0);
 
     size_t heapFreedAfterMethod;
     {
-        ark::ets::napi::ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env_));
+        ark::ets::ani::ScopedManagedCodeFix s(env_);
         heapFreedAfterMethod = memStats->GetFreedHeap();
     }
 

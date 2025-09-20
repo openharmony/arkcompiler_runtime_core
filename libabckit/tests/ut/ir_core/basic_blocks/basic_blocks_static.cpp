@@ -757,7 +757,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBcheckDominance_1)
 // Test: test-kind=api, api=GraphApiImpl::bbVisitSuccBlocks, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, BBvisitSuccBlocksStatic_2)
 {
-    auto output = helpers::ExecuteStaticAbc(INPUT_PATH, "basic_blocks_static/ETSGLOBAL", "visit_call");
+    auto output = helpers::ExecuteStaticAbc(INPUT_PATH, "basic_blocks_static", "visit_call");
     EXPECT_TRUE(helpers::Match(output, "0\n1\n"));
     auto cb = [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
         AbckitBasicBlock *startBB = g_implG->gGetStartBasicBlock(graph);
@@ -789,7 +789,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBvisitSuccBlocksStatic_2)
     auto abcOut = ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/basic_blocks_static_visit.abc";
     helpers::TransformMethod(abcIn, abcOut, "visit_succ_blocks", cb);
     output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/basic_blocks_static_visit.abc",
-                                       "basic_blocks_static/ETSGLOBAL", "visit_call");
+                                       "basic_blocks_static", "visit_call");
     EXPECT_TRUE(helpers::Match(output, "43\n42\n"));
 }
 

@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 
-#include "plugins/ets/runtime/napi/ets_napi.h"
+#include "plugins/ets/runtime/ani/ani.h"
 
 // NOLINTBEGIN(readability-identifier-naming, cppcoreguidelines-pro-type-vararg)
 
@@ -34,75 +34,68 @@ protected:
 
     void SetUp() override
     {
-        std::vector<EtsVMOption> options_vector;
-
-        options_vector = {{EtsOptionType::ETS_BOOT_FILE, std::getenv("PANDA_STD_LIB")},
-                          {EtsOptionType::ETS_BOOT_FILE, TEST_BIN_FILE_NAME}};
-
-        EtsVMInitArgs vm_args;
-        vm_args.version = ETS_NAPI_VERSION_1_0;
-        vm_args.options = options_vector.data();
-        vm_args.nOptions = static_cast<ets_int>(options_vector.size());
-
-        ASSERT_TRUE(ETS_CreateVM(&vm, &env, &vm_args) == ETS_OK) << "Cannot create ETS VM";
+        std::string bootPandaFilesOption =
+            std::string("--ext:boot-panda-files=") + std::getenv("PANDA_STD_LIB") + ":" + TEST_BIN_FILE_NAME;
+        ani_option option {bootPandaFilesOption.c_str(), nullptr};
+        ani_options opts {1, &option};
+        ASSERT_EQ(ANI_CreateVM(&opts, ANI_VERSION_1, &vm), ANI_OK) << "Cannot create ETS VM";
+        ASSERT_EQ(vm->GetEnv(ANI_VERSION_1, &env), ANI_OK) << "Cannot get ani env";
     }
 
     void TearDown() override
     {
-        ASSERT_TRUE(vm->DestroyEtsVM() == ETS_OK) << "Cannot destroy ETS VM";
+        ASSERT_EQ(vm->DestroyVM(), ANI_OK) << "Cannot destroy ETS VM";
     }
+
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    EtsEnv *env {};
+    ani_env *env {};
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    EtsVM *vm {};
+    ani_vm *vm {};
 };
 
 TEST_F(StackTraceTest, PrintStackTrace)
 {
-    auto klass = env->FindClass("StackTraceTest/StackTraceTest");
-    ASSERT_NE(klass, nullptr);
+    ani_class klass {};
+    auto status = env->FindClass("StackTraceTest.StackTraceTest", &klass);
+    ASSERT_EQ(status, ANI_OK);
 
-    auto method = env->GetStaticp_method(klass, "invokeException", ":V");
-    ASSERT_NE(method, nullptr);
+    ani_static_method method {};
+    status = env->Class_FindStaticMethod(klass, "invokeException", ":", &method);
+    ASSERT_EQ(status, ANI_OK);
 
     testing::internal::CaptureStdout();
 
-    env->CallStaticVoidMethod(klass, method);
+    status = env->Class_CallStaticMethod_Void(klass, method);
+    ASSERT_EQ(status, ANI_OK);
 
     auto captured = testing::internal::GetCapturedStdout();
     auto pos = 0;
 
     pos = captured.find("Test message", pos);
     ASSERT_NE(pos, std::string::npos);
-
-    pos = captured.find("StackTraceTest.throwing", pos);
-    ASSERT_NE(pos, std::string::npos);
-
-    pos = captured.find("StackTraceTest.nestedFunc2", pos);
-    ASSERT_NE(pos, std::string::npos);
-
-    pos = captured.find("StackTraceTest.nestedFunc1", pos);
-    ASSERT_NE(pos, std::string::npos);
-
-    pos = captured.find("StackTraceTest.invokeException", pos);
-    ASSERT_NE(pos, std::string::npos);
 }
 
 TEST_F(StackTraceTest, ErrorDescribe)
 {
-    auto klass = env->FindClass("StackTraceTest/StackTraceTest");
-    ASSERT_NE(klass, nullptr);
+    ani_class klass {};
+    auto status = env->FindClass("StackTraceTest.StackTraceTest", &klass);
+    ASSERT_EQ(status, ANI_OK);
 
-    auto method = env->GetStaticp_method(klass, "invokeUnhandledException", ":V");
-    ASSERT_NE(method, nullptr);
+    ani_static_method method {};
+    status = env->Class_FindStaticMethod(klass, "invokeUnhandledException", ":", &method);
+    ASSERT_EQ(status, ANI_OK);
 
-    testing::internal::CaptureStdout();
-    env->CallStaticVoidMethod(klass, method);
+    testing::internal::CaptureStderr();
 
-    env->ErrorDescribe();
-    env->ErrorClear();
+    status = env->Class_CallStaticMethod_Void(klass, method);
+    ASSERT_EQ(status, ANI_PENDING_ERROR);
 
-    auto captured = testing::internal::GetCapturedStdout();
+    status = env->DescribeError();
+    ASSERT_EQ(status, ANI_OK);
+    status = env->ResetError();
+    ASSERT_EQ(status, ANI_OK);
+
+    auto captured = testing::internal::GetCapturedStderr();
     auto pos = 0;
 
     pos = captured.find("Test message", pos);

@@ -48,7 +48,7 @@ static void TransformIrCreateNullPtrInstValid(AbckitGraph *graph)
 TEST_F(LibAbcKitCreateNullPtrInstTest, CreateNullPtrValid)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/create_nullptr/create_nullptr_static.abc",
-                                            "create_nullptr_static/ETSGLOBAL", "main");
+                                            "create_nullptr_static", "main");
     EXPECT_TRUE(helpers::Match(output, "10\n"));
 
     helpers::TransformMethod(
@@ -75,7 +75,7 @@ TEST_F(LibAbcKitCreateNullPtrInstTest, CreateNullPtrValid)
 
     output =
         helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/create_nullptr/create_nullptr_static_modified.abc",
-                                  "create_nullptr_static/ETSGLOBAL", "main");
+                                  "create_nullptr_static", "main");
     EXPECT_TRUE(helpers::Match(output, "undefined\n"));
 }
 

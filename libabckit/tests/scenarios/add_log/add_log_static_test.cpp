@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -95,8 +95,8 @@ class AbckitScenarioTest : public ::testing::Test {};
 // Test: test-kind=scenario, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(AbckitScenarioTest, LibAbcKitTestStaticAddLog)
 {
-    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "scenarios/add_log/add_log_static.abc",
-                                            "add_log_static/ETSGLOBAL", "main");
+    auto output =
+        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "scenarios/add_log/add_log_static.abc", "add_log_static", "main");
     EXPECT_TRUE(helpers::Match(output, "buisiness logic...\n"));
 
     helpers::TransformMethod(
@@ -140,8 +140,8 @@ TEST_F(AbckitScenarioTest, LibAbcKitTestStaticAddLog)
             helpers::VerifyGraph(graph, bbSchemas);
         });
 
-    output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "scenarios/add_log/add_log_static_modified.abc",
-                                       "add_log_static/ETSGLOBAL", "main");
+    output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "scenarios/add_log/add_log_static_modified.abc", "add_log_static",
+                                       "main");
     EXPECT_TRUE(helpers::Match(output,
                                "file: NOTE; function: handle\n"
                                "buisiness logic...\n"

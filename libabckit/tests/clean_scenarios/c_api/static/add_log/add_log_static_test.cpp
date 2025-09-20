@@ -199,7 +199,7 @@ class AbckitScenarioCTestClean : public ::testing::Test {};
 TEST_F(AbckitScenarioCTestClean, LibAbcKitTestStaticAddLogClean)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "clean_scenarios/c_api/static/add_log/add_log_static.abc",
-                                            "add_log_static/ETSGLOBAL", "main");
+                                            "add_log_static", "main");
     EXPECT_TRUE(helpers::Match(output, "buisiness logic...\n"));
 
     constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "clean_scenarios/c_api/static/add_log/add_log_static.abc";
@@ -241,7 +241,7 @@ TEST_F(AbckitScenarioCTestClean, LibAbcKitTestStaticAddLogClean)
     g_impl->writeAbc(file, OUTPUT_PATH, strlen(OUTPUT_PATH));
     g_impl->closeFile(file);
 
-    output = helpers::ExecuteStaticAbc(OUTPUT_PATH, "add_log_static/ETSGLOBAL", "main");
+    output = helpers::ExecuteStaticAbc(OUTPUT_PATH, "add_log_static", "main");
     EXPECT_TRUE(helpers::Match(output,
                                "file: NOTE; function: handle\n"
                                "buisiness logic...\n"

@@ -25,7 +25,7 @@
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/ets_vtable_builder.h"
-#include "plugins/ets/runtime/napi/ets_napi_helpers.h"
+#include "plugins/ets/runtime/ani/ani_helpers.h"
 #include "plugins/ets/runtime/types/ets_abc_runtime_linker.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "runtime/class_linker_context.h"
@@ -647,21 +647,21 @@ const void *EtsClassLinkerExtension::GetNativeEntryPointFor(Method *method) cons
     }
     switch (GetEtsNapiType(method)) {
         case EtsNapiType::GENERIC: {
-            return napi::GetEtsNapiEntryPoint();
+            return ani::GetANIEntryPoint();
         }
         case EtsNapiType::FAST: {
             auto flags = method->GetAccessFlags();
             flags |= ACC_FAST_NATIVE;
             method->SetAccessFlags(flags);
 
-            return napi::GetEtsNapiEntryPoint();
+            return ani::GetANIEntryPoint();
         }
         case EtsNapiType::CRITICAL: {
             auto flags = method->GetAccessFlags();
             flags |= ACC_CRITICAL_NATIVE;
             method->SetAccessFlags(flags);
 
-            return napi::GetEtsNapiCriticalEntryPoint();
+            return ani::GetANICriticalEntryPoint();
         }
     }
 
