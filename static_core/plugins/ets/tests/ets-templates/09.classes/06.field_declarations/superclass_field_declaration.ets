@@ -16,20 +16,23 @@ limitations under the License.
 /*---
 desc: Declare field with name used in superclass.
 assert: >-
-    If a class declares a field with a certain name, then the declaration of that field is said to hide any and
-    all accessible declarations of field with the samename in superclasses and superinterfaces if the class.
+    When extending a class or implementing interfaces, a field declared
+    in a superclass or a superinterface can be overridden by a field
+    with the same name, and the same static or non-static modifier status.
+    Using the keyword override is not required. The new declaration acts
+    as redeclaration.
 ---*/
 
 class A {
-  public x: int;
+  public x: int = 4;
 }
 
 class B extends A {
-  public x: boolean;
+  public x: int = 5;
 }
 
 function main(): void {
-    let instance: B = new B();
+    let instance: A = new B();
 
-    arktest.assertEQ( instance.x, false );
+    arktest.assertEQ(instance.x, 5);
 }

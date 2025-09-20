@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,30 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
+
+{% if 'sub_cases_logic' in c %}
+  {% set sub_cases_logic=c.sub_cases_logic %}
+{% else %}
+  {% set sub_cases_logic=[""] %}
+{% endif %}
+{% for scl in sub_cases_logic %}
+
+{% for decl in c.decl_variants %}
+
+{% set logic_data  = "  " ~ (scl|indent(width=2)) %}
+
 /*---
-desc: Inheritance private field from of a superclass.
-assert: Nevertheless, a private field is never inherited by a superclass.
-tags: [negative, compile-only]
+desc: {{c.desc}}
+tags: [compile-only, negative]
 ---*/
 
-namespace A {
-  class C {
-    private x: int;
-  }
+{{decl}}
 
-  class B extends C {
-    public getX(): int {
-      return this.x;
-    }
-  }
+function main(): void {
+{{logic_data}}
 }
+
+{% endfor %}
+{% endfor %}
+{% endfor %}

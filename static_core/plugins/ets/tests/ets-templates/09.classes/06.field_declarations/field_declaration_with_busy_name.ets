@@ -13,23 +13,35 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for member in members %}
+{% for c in cases %}
+
+{% for decl in c.decl_variants %}
+
+{% if 'check_variants' in c %}
+  {% set check_variants=c.check_variants %}
+{% else %}
+  {% set check_variants=[{}] %}
+{% endif %}
+{% for cv in check_variants %}
+
+{% set ns = namespace() %}
+
+{% set ns.decl = decl %}
+{% for k, v in cv.items() %}
+  {% set ns.decl = ns.decl|replace("[" ~ k ~ "]", v) %}
+{% endfor %}
+{% set decl=ns.decl %}
 
 /*---
-desc: >-
-    Declare a field with the name that is already used for another field or a method
-    or a member type in this declaration.
-assert: >-
-    It is a compile-time error for the body of a class declaration to declare a field with the name
-    that is already used for another field or a method or a member type in this declaration.
-params: mod
+desc: {{c.desc}}
 tags: [compile-only, negative]
 ---*/
 
-class A {
-  {{member}}
+{{decl}}
 
-  x: int;
+function main(): void {
 }
 
+{% endfor %}
+{% endfor %}
 {% endfor %}

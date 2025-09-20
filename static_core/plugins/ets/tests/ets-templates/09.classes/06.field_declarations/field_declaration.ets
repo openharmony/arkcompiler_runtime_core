@@ -16,11 +16,21 @@ limitations under the License.
 /*---
 desc: Field declaration.
 assert: The variables of a class type are introduces by field declarations.
-tags: [compile-only]
 ---*/
 
 class A {
   public i: int;
   public static s: int;
   public readonly b: int = 5;
+}
+
+function main(): void {
+    let a: A = new A();
+
+    arktest.assertTrue(a.i instanceof int);
+    arktest.assertEQ(a.i, 0);
+    arktest.assertTrue(A.s instanceof int);
+    arktest.assertEQ(A.s, 0);
+    arktest.assertTrue(a.b instanceof int);
+    arktest.assertEQ(a.b, 5);
 }
