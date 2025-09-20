@@ -16,9 +16,13 @@
 #include "plugins/ets/runtime/types/ets_reflect_method.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
+#include "plugins/ets/runtime/types/ets_method.h"
+#include "plugins/ets/runtime/types/ets_typeapi.h"
+#include "plugins/ets/runtime/ets_annotation.h"
 
 namespace ark::ets {
 
+/* static */
 EtsReflectMethod *EtsReflectMethod::Create(EtsCoroutine *etsCoroutine, bool isStatic, bool isConstructor)
 {
     EtsClass *klass = isConstructor ? PlatformTypes(etsCoroutine)->reflectConstructor
@@ -26,6 +30,50 @@ EtsReflectMethod *EtsReflectMethod::Create(EtsCoroutine *etsCoroutine, bool isSt
                                                 : PlatformTypes(etsCoroutine)->reflectInstanceMethod);
     EtsObject *etsObject = EtsObject::Create(etsCoroutine, klass);
     return EtsReflectMethod::FromEtsObject(etsObject);
+}
+
+/* static */
+EtsReflectMethod *EtsReflectMethod::CreateFromEtsMethod(EtsCoroutine *coro, EtsMethod *method)
+{
+    ASSERT(coro != nullptr);
+    ASSERT(method != nullptr);
+
+    bool isStatic = method->IsStatic();
+    bool isConstructor = method->IsConstructor();
+
+    auto reflectMethod = EtsHandle<EtsReflectMethod>(coro, EtsReflectMethod::Create(coro, isStatic, isConstructor));
+    if (UNLIKELY(reflectMethod.GetPtr() == nullptr)) {
+        ASSERT(coro->HasPendingException());
+        return nullptr;
+    }
+    ASSERT(reflectMethod.GetPtr() != nullptr);
+
+    auto *ownerType = method->GetClass();
+    reflectMethod->SetOwnerType(ownerType);
+    reflectMethod->SetEtsMethod(reinterpret_cast<EtsLong>(method));
+
+    // Set specific attributes
+    uint32_t attr = 0;
+    attr |= isStatic ? static_cast<uint32_t>(EtsTypeAPIAttributes::STATIC) : 0U;
+    attr |= isConstructor ? static_cast<uint32_t>(EtsTypeAPIAttributes::CONSTRUCTOR) : 0U;
+    attr |= (method->IsAbstract()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::ABSTRACT) : 0U;
+    attr |= (method->IsGetter()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::GETTER) : 0U;
+    attr |= (method->IsSetter()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::SETTER) : 0U;
+    attr |= (method->IsFinal()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::FINAL) : 0U;
+    panda_file::File::EntityId asyncAnnId = EtsAnnotation::FindAsyncAnnotation(method->GetPandaMethod());
+    attr |= (method->IsNative() && !asyncAnnId.IsValid()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::NATIVE) : 0U;
+    attr |= (asyncAnnId.IsValid()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::ASYNC) : 0U;
+
+    reflectMethod->SetAttributes(attr);
+
+    int8_t accessMod = method->IsPublic()
+                           ? static_cast<int8_t>(EtsTypeAPIAccessModifier::PUBLIC)
+                           : (method->IsProtected() ? static_cast<int8_t>(EtsTypeAPIAccessModifier::PROTECTED)
+                                                    : static_cast<int8_t>(EtsTypeAPIAccessModifier::PRIVATE));
+
+    reflectMethod->SetAccessModifier(accessMod);
+
+    return reflectMethod.GetPtr();
 }
 
 }  // namespace ark::ets

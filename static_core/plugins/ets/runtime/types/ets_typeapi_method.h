@@ -85,6 +85,14 @@ public:
         ObjectAccessor::SetPrimitive(this, MEMBER_OFFSET(EtsTypeAPIMethod, attr_), attr);
     }
 
+    EtsObject *GetMethodType(EtsCoroutine *coro) const
+    {
+        return EtsObject::FromCoreType(
+            ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsTypeAPIMethod, methodType_)));
+    }
+
+    EtsMethod *GetEtsMethod();
+
 private:
     ObjectPointer<EtsTypeAPIType> methodType_;
     ObjectPointer<EtsTypeAPIType> ownerType_;

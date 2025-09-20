@@ -165,6 +165,32 @@ public:
         return GetPandaMethod()->IsNative();
     }
 
+    bool IsProxy() const
+    {
+        return GetPandaMethod()->IsProxy();
+    }
+
+    void SetProxyPointer(EtsMethod *proxyPointer)
+    {
+        ASSERT(IsProxy());
+        // Proxy method is never native, so we have free field.
+        return GetPandaMethod()->SetNativePointer(reinterpret_cast<void *>(proxyPointer));
+    }
+
+    EtsMethod *GetProxyPointer() const
+    {
+        ASSERT(IsProxy());
+        return reinterpret_cast<EtsMethod *>(GetPandaMethod()->GetNativePointer());
+    }
+
+    EtsMethod *GetInterfaceMethodIfProxy()
+    {
+        if (UNLIKELY(IsProxy())) {
+            return GetProxyPointer();
+        }
+        return this;
+    }
+
     bool HasRestParam() const
     {
         return (this->GetAccessFlags() & ACC_VARARGS) != 0;

@@ -60,6 +60,9 @@ static constexpr std::string_view REFLECT_STATIC_FIELD                 = "Lstd/c
 static constexpr std::string_view REFLECT_STATIC_METHOD                = "Lstd/core/reflect/StaticMethod;";
 static constexpr std::string_view REFLECT_CONSTRUCTOR                  = "Lstd/core/reflect/Constructor;";
 
+// Proxy
+static constexpr std::string_view PROXY                                = "Lstd/core/reflect/Proxy;";
+
 // Runtime classes
 static constexpr std::string_view STACK_TRACE_ELEMENT                  = "Lstd/core/StackTraceElement;";
 static constexpr std::string_view ABC_FILE                             = "Lstd/core/AbcFile;";

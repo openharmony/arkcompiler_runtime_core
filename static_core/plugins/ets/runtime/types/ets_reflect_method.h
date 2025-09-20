@@ -39,6 +39,8 @@ public:
 
     static EtsReflectMethod *Create(EtsCoroutine *etsCoroutine, bool isStatic = false, bool isConstructor = false);
 
+    static EtsReflectMethod *CreateFromEtsMethod(EtsCoroutine *coro, EtsMethod *method);
+
     EtsObject *AsObject()
     {
         return EtsObject::FromCoreType(this);

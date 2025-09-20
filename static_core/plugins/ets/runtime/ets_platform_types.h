@@ -134,6 +134,13 @@ public:
     EtsClass *reflectStaticMethod {};
     EtsClass *reflectConstructor {};
 
+    /* Proxy */
+    EtsClass *coreReflectProxy {};
+    EtsMethod *coreReflectProxyConstructor {};
+    EtsMethod *coreReflectProxyInvoke {};
+    EtsMethod *coreReflectProxyInvokeSet {};
+    EtsMethod *coreReflectProxyInvokeGet {};
+
     /* escompat.Process */
     EtsClass *escompatProcess {};
     EtsMethod *escompatProcessListUnhandledJobs {};
