@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,10 +18,23 @@ desc: null safety -> Not-null operator
 assert: For an expression e!, if the type of e is nullable, an ensure not-null expression checks whether the evaluation of e is equal to null and, if it is, throws a NullPointerError.
 ---*/
 
+function foo(arg: Object) : int {
+  return 1;
+}
+
+function foo(arg: Object|null) : int {
+  return 2;
+}
+
+let a: Object|null = new Object();
+let b: Object|null = null;
+
 function main(): void {
-  let res = 0;
-  let a: Int|null = (): Int|null => { return null; }();
-  let b: Int = 4;
-  let expectedException = (e: Error): boolean => { return (e instanceof NullPointerError) }
-  arktest.expectThrow(() => { let x = a! + b; }, expectedException)
+  arktest.assertEQ(foo(a), 2)
+  arktest.assertEQ(foo(a!), 1)
+  arktest.assertEQ(foo(b), 2)
+  arktest.expectThrow(
+    () => { foo(b!) },
+    (e: Error) => e instanceof NullPointerError
+  )
 }

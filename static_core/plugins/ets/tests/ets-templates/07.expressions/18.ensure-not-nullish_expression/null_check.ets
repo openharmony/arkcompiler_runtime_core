@@ -15,23 +15,22 @@
 
 /*---
 desc: null safety -> Not-null operator
-assert: For an expression e!, if the type of e is nullable, an ensure not-null expression checks whether the evaluation of e is equal to null and, if it is, throws a NullPointerError. 
+assert: For an expression e!, if the type of e is nullable, an ensure not-null expression checks whether the evaluation of e is equal to null and, if it is, throws a NullPointerError.
 ---*/
 
-function foo(arg: Object) : int { 
-  return 1; 
+function foo(arg: Object) : int {
+  return 1;
 }
 
-function foo(arg: Object|null) : int { 
-  return 2; 
-
+function foo(arg: Object|null) : int {
+  return 2;
 }
 
 function main(): void {
   let a: Object|null = new Object();
   let b: Object|null = null;
 
-  arktest.assertEQ( foo(a), 2 )
-  arktest.assertEQ( foo(a!), 1 )
-  arktest.assertEQ( foo(b), 2 )
+  arktest.assertEQ(foo(a), 1) // smart-casting works here
+  arktest.assertEQ(foo(a!), 1)
+  arktest.assertEQ(foo(b), 2)
 }
