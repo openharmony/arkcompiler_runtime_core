@@ -53,8 +53,14 @@ sdk_libc_secshared_config =
     "$ark_third_party_root/bounds_checking_function:libsec_public_config"
 
 if (is_mingw || is_mac || is_linux || target_os == "ios" ||
-    target_os == "android" || (is_build_sdk && is_ohos)) {
+    target_os == "android" || (is_build_sdk && is_ohos) ||
+    (defined(ohos_indep_compiler_enable) && ohos_indep_compiler_enable)) {
   sdk_libc_secshared_dep = "bounds_checking_function:libsec_static"
+}
+
+zlib_deps = "zlib:shared_libz"
+if (defined(ohos_indep_compiler_enable) && ohos_indep_compiler_enable) {
+  zlib_deps = "zlib:libz"
 }
 
 is_mob = !ark_standalone_build && !is_standard_system &&
