@@ -56,6 +56,27 @@ macro(:ets_nullvalue) do
   LoadI(%tr).Imm(EtsConstants::CORO_NULL_VALUE_OFFSET).ref
 end
 
+scoped_macro(:getPlatformTypes) do
+  ptypes := LoadI(%tr).Imm(EtsConstants::CORO_LOCAL_STORAGE_OFFSET).ptr
+end
+
+scoped_macro(:getPlatformTypeClass) do |ptypes, ofs|
+  ptype := LoadI(ptypes).Imm(ofs).ref_uint
+  klass := Bitcast(AddI(ptype).Imm(EtsConstants::ETS_CLASS_RUNTIME_CLASS_OFFSET).ref_uint).ref
+end
+
+scoped_macro(:getLineStringClass) do |ptypes|
+  klass := getPlatformTypeClass(ptypes, Constants::LINE_STRING_CLASS_OFFSET)
+end
+
+scoped_macro(:getSlicedStringClass) do |ptypes|
+  klass := getPlatformTypeClass(ptypes, Constants::SLICED_STRING_CLASS_OFFSET)
+end
+
+scoped_macro(:getTreeStringClass) do |ptypes|
+  klass := getPlatformTypeClass(ptypes, Constants::TREE_STRING_CLASS_OFFSET)
+end
+
 ###
 # Resolves a value of type 'ref' stored in the memory by address 'base + offset', where 'offset` is an immediate
 # value, and returns it as a pointer. See also the 'ark::ObjectPointerType' alias and the 'ark::ObjectPointer' class.

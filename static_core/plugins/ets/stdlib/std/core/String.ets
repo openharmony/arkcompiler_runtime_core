@@ -528,19 +528,20 @@ export final class String extends Object implements Comparable<String>, Iterable
      *
      * @returns new String which is a concatenation of this + strings[0] + ... + strings[string.length - 1]
      */
+    public concat2(s: String): String {
+        return String.concat2(this, s);
+    }
+    public concat3(s1: String, s2: String): String {
+        return String.concat3(this, s1, s2);
+    }
+    public concat4(s1: String, s2: String, s3: String): String {
+        return String.concat4(this, s1, s2, s3);
+    }
+
     public concat(...strings: String[]): String {
         let length = strings.length
         if (length == 0) {
             return this
-        }
-        if (length == 1) {
-            return String.concat2(this, strings[0]);
-        }
-        if (length == 2) {
-            return String.concat3(this, strings[0], strings[1]);
-        }
-        if (length == 3) {
-            return String.concat4(this, strings[0], strings[1], strings[2]);
         }
         let res = new StringBuilder(this);
         for (let i = 0; i < length; i++) {
@@ -548,6 +549,8 @@ export final class String extends Object implements Comparable<String>, Iterable
         }
         return res.toString();
     }
+
+    overload concat { concat2, concat3, concat4, concat };
 
     /**
      * Concatenation of two, three of four strings

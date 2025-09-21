@@ -39,9 +39,6 @@ private:
     bool EmitStringBuilderBool(Inst *inst);
     bool EmitStringBuilderChar(Inst *inst);
     bool EmitStringBuilderString(Inst *inst);
-    bool EmitStringConcat2(Inst *inst);
-    bool EmitStringConcat3(Inst *inst);
-    bool EmitStringConcat4(Inst *inst);
     bool EmitStringCompareTo(Inst *inst);
     bool EmitIsInf(Inst *inst);
     bool EmitMemmoveUnchecked(Inst *inst);

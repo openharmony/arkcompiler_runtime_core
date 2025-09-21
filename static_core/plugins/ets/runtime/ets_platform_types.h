@@ -171,6 +171,18 @@ public:
     {
         return MEMBER_OFFSET(EtsPlatformTypes, escompatArray);
     }
+    static constexpr size_t GetCoreLineStringClassOffset()
+    {
+        return MEMBER_OFFSET(EtsPlatformTypes, coreLineString);
+    }
+    static constexpr size_t GetCoreSlicedStringClassOffset()
+    {
+        return MEMBER_OFFSET(EtsPlatformTypes, coreSlicedString);
+    }
+    static constexpr size_t GetCoreTreeStringClassOffset()
+    {
+        return MEMBER_OFFSET(EtsPlatformTypes, coreTreeString);
+    }
 
 private:
     friend class EtsClassLinkerExtension;

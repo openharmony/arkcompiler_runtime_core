@@ -112,6 +112,26 @@ public:
         compress_ = compress;
     }
 
+    static constexpr size_t GetBufOffset()
+    {
+        return MEMBER_OFFSET(EtsStringBuilder, buf_);
+    }
+
+    static constexpr size_t GetIndexOffset()
+    {
+        return MEMBER_OFFSET(EtsStringBuilder, index_);
+    }
+
+    static constexpr size_t GetLengthOffset()
+    {
+        return MEMBER_OFFSET(EtsStringBuilder, length_);
+    }
+
+    static constexpr size_t GetCompressOffset()
+    {
+        return MEMBER_OFFSET(EtsStringBuilder, compress_);
+    }
+
 private:
     ObjectPointer<EtsObjectArray> buf_;  // array with pointers to strings or char[]
     EtsInt index_;                       // index of the current free element in the buf

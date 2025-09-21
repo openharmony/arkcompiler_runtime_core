@@ -714,21 +714,6 @@ bool LLVMIrConstructor::EmitStringBuilderString(Inst *inst)
     return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_BUILDER_STRING_COMPRESSED, 2U);
 }
 
-bool LLVMIrConstructor::EmitStringConcat2(Inst *inst)
-{
-    return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_CONCAT2_TLAB, 2U);
-}
-
-bool LLVMIrConstructor::EmitStringConcat3(Inst *inst)
-{
-    return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_CONCAT3_TLAB, 3U);
-}
-
-bool LLVMIrConstructor::EmitStringConcat4(Inst *inst)
-{
-    return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_CONCAT4_TLAB, 4U);
-}
-
 bool LLVMIrConstructor::EmitStringCompareTo(Inst *inst)
 {
     return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_COMPARE_TO, 2U);

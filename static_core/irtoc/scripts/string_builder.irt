@@ -16,8 +16,6 @@
 include_relative 'common.irt'
 
 module Constants
-    SB_VALUE_OFFSET = "ark::ObjectHeader::ObjectHeaderSize()"
-    SB_COUNT_OFFSET = SB_VALUE_OFFSET + " + ark::OBJECT_POINTER_SIZE"
     NULLSTR = "0x006c006c0075006e"
     NULLSTR_LEN = "4"
     TRUESTR = "0x0065007500720074"
@@ -37,9 +35,9 @@ function(:StringBuilderBool,
         next
     end
 
-    value := LoadI(sb).Imm(Constants::SB_VALUE_OFFSET).ref
+    value := LoadI(sb).Imm(Constants::SB_BUFFER_OFFSET).ref
     value := Cast(value).SrcType(Constants::COMPILER_REFERENCE).ptr
-    count := LoadI(sb).Imm(Constants::SB_COUNT_OFFSET).u32
+    count := LoadI(sb).Imm(Constants::SB_INDEX_OFFSET).u32
     size := LoadI(value).Imm(Constants::ARRAY_LENGTH_OFFSET).u32
     length := Cast(Constants::BOOLSTRLEN).u32
     # len("false") == 5, len("true") == len("false") - (int)true
@@ -66,7 +64,7 @@ function(:StringBuilderBool,
         StoreI(buf, v2).Imm(8).u16
     }
 
-    StoreI(sb, new_count.u32).Imm(Constants::SB_COUNT_OFFSET).u32
+    StoreI(sb, new_count.u32).Imm(Constants::SB_INDEX_OFFSET).u32
     Return(sb).ref
 }
 
@@ -81,9 +79,9 @@ function(:StringBuilderChar,
         next
     end
 
-    value := LoadI(sb).Imm(Constants::SB_VALUE_OFFSET).ref
+    value := LoadI(sb).Imm(Constants::SB_BUFFER_OFFSET).ref
     value := Cast(value).SrcType(Constants::COMPILER_REFERENCE).ptr
-    count := LoadI(sb).Imm(Constants::SB_COUNT_OFFSET).u32
+    count := LoadI(sb).Imm(Constants::SB_INDEX_OFFSET).u32
     size := LoadI(value).Imm(Constants::ARRAY_LENGTH_OFFSET).u32
     If(size, count).LE.Unlikely.b {
         ep_offset = get_entrypoint_offset("STRING_BUILDER_CHAR_SLOW_PATH");
@@ -93,7 +91,7 @@ function(:StringBuilderChar,
 
     buf := AddI(value).Imm(Constants::ARRAY_DATA_OFFSET).ptr
     Store(buf, ShlI(count).Imm(1).u32, ch).u16
-    StoreI(sb, AddI(count).Imm(1).u32).Imm(Constants::SB_COUNT_OFFSET).u32
+    StoreI(sb, AddI(count).Imm(1).u32).Imm(Constants::SB_INDEX_OFFSET).u32
 
     Return(sb).ref
 }
@@ -112,9 +110,9 @@ def GenerateStringBuilderString(compression)
         next
     end
 
-    value := LoadI(sb).Imm(Constants::SB_VALUE_OFFSET).ref
+    value := LoadI(sb).Imm(Constants::SB_BUFFER_OFFSET).ref
     value := Cast(value).SrcType(Constants::COMPILER_REFERENCE).ptr
-    count := LoadI(sb).Imm(Constants::SB_COUNT_OFFSET).u32
+    count := LoadI(sb).Imm(Constants::SB_INDEX_OFFSET).u32
     size := LoadI(value).Imm(Constants::ARRAY_LENGTH_OFFSET).u32
     dst := AddI(value).Imm(Constants::ARRAY_DATA_OFFSET).ptr
 
@@ -128,7 +126,7 @@ def GenerateStringBuilderString(compression)
         nullstr := Constants::NULLSTR
 
         Store(dst, ShlI(count).Imm(1).u32, nullstr).u64
-        StoreI(sb, new_count).Imm(Constants::SB_COUNT_OFFSET).Volatile.u32
+        StoreI(sb, new_count).Imm(Constants::SB_INDEX_OFFSET).Volatile.u32
     } Else {
         length := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
         compare := Compare(length, 0).EQ.b
@@ -202,7 +200,7 @@ Label(:SizeGT4)
         Store(dst, SubI(sz).Imm(8).u32, b2).u64
 
 Label(:StoreCount)        
-        StoreI(sb, new_count).Imm(Constants::SB_COUNT_OFFSET).Volatile.u32
+        StoreI(sb, new_count).Imm(Constants::SB_INDEX_OFFSET).Volatile.u32
     }
 
 Label(:Exit)

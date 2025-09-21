@@ -67,6 +67,9 @@ DEFINE_VALUE(ARRAY_BUFFER_IS_RESIZABLE_OFFSET, ark::ets::EtsEscompatArrayBuffer:
 DEFINE_VALUE(PLATFORM_TYPES_ASCII_CHAR_CACHE_SIZE, ark::ets::EtsPlatformTypes::GetAsciiCharCacheSize())
 DEFINE_VALUE(PLATFORM_TYPES_ASCII_CHAR_CACHE_OFFSET, ark::ets::EtsPlatformTypes::GetAsciiCharCacheOffset())
 DEFINE_VALUE(PLATFORM_TYPES_ESCOMPAT_ARRAY_CLASS_OFFSET, ark::ets::EtsPlatformTypes::GetEscompatArrayClassOffset())
+DEFINE_VALUE(PLATFORM_TYPES_CORE_LINE_STRING_CLASS_OFFSET, ark::ets::EtsPlatformTypes::GetCoreLineStringClassOffset())
+DEFINE_VALUE(PLATFORM_TYPES_CORE_SLICED_STRING_CLASS_OFFSET, ark::ets::EtsPlatformTypes::GetCoreSlicedStringClassOffset())
+DEFINE_VALUE(PLATFORM_TYPES_CORE_TREE_STRING_CLASS_OFFSET, ark::ets::EtsPlatformTypes::GetCoreTreeStringClassOffset())
 
 DEFINE_VALUE(ESCOMPAT_MAP_DATA_OFFSET, ark::ets::EtsEscompatMap::GetDataOffset())
 DEFINE_VALUE(ESCOMPAT_MAP_BUCKETS_OFFSET, ark::ets::EtsEscompatMap::GetBucketsOffset())

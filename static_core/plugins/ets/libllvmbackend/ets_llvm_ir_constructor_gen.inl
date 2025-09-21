@@ -577,3 +577,22 @@ bool LLVMIrConstructor::EmitEscompatArrayReverse(Inst *inst)
     SetCurrentBasicBlock(returnBb);
     return true;
 }
+
+bool LLVMIrConstructor::EmitStringConcat2(Inst *inst)
+{
+    if (GetGraph()->GetRuntime()->IsUseAllStrings()) {
+        return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_CONCAT2_TLAB_ALL_STRINGS, 2U);
+    } else {
+        return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_CONCAT2_TLAB, 2U);
+    }
+}
+
+bool LLVMIrConstructor::EmitStringConcat3(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_CONCAT3_TLAB, 3U);
+}
+
+bool LLVMIrConstructor::EmitStringConcat4(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_CONCAT4_TLAB, 4U);
+}

@@ -1734,6 +1734,105 @@
     - uint16_t            # char to look up
     - int32_t             # unused (always zero)
 
+- name: StringConcat2Tlab
+  entrypoint: StringConcat2Tlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringConcat2TlabAllStrings
+  entrypoint: StringConcat2TlabAllStrings
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringConcat3Tlab
+  entrypoint: StringConcat3Tlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringConcat4Tlab
+  entrypoint: StringConcat4Tlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringConcat2SlowPath
+  entrypoint: CoreStringConcat2
+  bridge: slow_path
+  properties: []
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringConcat3SlowPath
+  entrypoint: CoreStringConcat3
+  bridge: slow_path
+  properties: []
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringConcat4SlowPath
+  entrypoint: CoreStringConcat4
+  bridge: slow_path
+  properties: []
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringConcat2Usual
+  entrypoint: CoreStringConcat2
+  bridge: entrypoint
+  properties: []
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringConcat3OddSaved
+  entrypoint: CoreStringConcat3
+  bridge: odd_saved
+  properties: []
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringConcat4Usual
+  entrypoint: CoreStringConcat4
+  bridge: entrypoint
+  properties: []
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
 - name: EscompatArrayIsPlatformArrayFast
   entrypoint: EscompatArrayIsPlatformArrayFast
   bridge: none
