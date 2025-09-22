@@ -316,18 +316,44 @@ AbckitGraph *CreateGraphFromFunctionStatic(AbckitCoreFunction *function)
     LIBABCKIT_LOG_DUMP(func->DebugDump(), DEBUG);
     LIBABCKIT_LOG(DEBUG) << func->name << '\n';
 
+    auto *file = function->owningModule->file;
     auto program = function->owningModule->file->GetStaticProgram();
 
-    auto maps = std::make_unique<pandasm::AsmEmitter::PandaFileToPandaAsmMaps>();
-    auto pf = pandasm::AsmEmitter::Emit(*program, maps.get()).release();
+    pandasm::AsmEmitter::PandaFileToPandaAsmMaps *maps;
+    panda_file::File *pf = nullptr;
+    if (function->owningModule->file->needOptimize && file->generateStatus.generated) {
+        maps = static_cast<pandasm::AsmEmitter::PandaFileToPandaAsmMaps *>(file->generateStatus.maps);
+        pf = static_cast<panda_file::File *>(file->generateStatus.pf);
+    } else {
+        if (file->generateStatus.pf != nullptr) {
+            delete static_cast<panda_file::File *>(file->generateStatus.pf);
+        }
+        if (file->generateStatus.maps != nullptr) {
+            delete static_cast<pandasm::AsmEmitter::PandaFileToPandaAsmMaps *>(file->generateStatus.maps);
+        }
+
+        maps = new pandasm::AsmEmitter::PandaFileToPandaAsmMaps();
+        pf = const_cast<panda_file::File *>(pandasm::AsmEmitter::Emit(*program, maps).release());
+    }
+
     if (pf == nullptr) {
         LIBABCKIT_LOG(DEBUG) << "FAILURE: " << pandasm::AsmEmitter::GetLastError() << '\n';
         statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        if (!function->owningModule->file->needOptimize) {
+            delete maps;
+        }
         return nullptr;
     }
 
+    if (function->owningModule->file->needOptimize) {
+        file->generateStatus = {true, pf, maps};
+    }
+
     uint32_t methodOffset = 0;
-    if (!GetMethodOffset(func, maps.get(), &methodOffset)) {
+    if (!GetMethodOffset(func, maps, &methodOffset)) {
+        if (!function->owningModule->file->needOptimize) {
+            delete maps;
+        }
         return nullptr;
     }
 
@@ -345,6 +371,9 @@ AbckitGraph *CreateGraphFromFunctionStatic(AbckitCoreFunction *function)
     if (graphImpl == nullptr) {
         DeleteGraphArgs(allocator, localAllocator, adapter, irInterface);
         statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_MEMORY_ALLOCATION);
+        if (!function->owningModule->file->needOptimize) {
+            delete maps;
+        }
         return nullptr;
     }
     graphImpl->SetLanguage(SourceLanguage::ETS);
@@ -357,6 +386,9 @@ AbckitGraph *CreateGraphFromFunctionStatic(AbckitCoreFunction *function)
     if (!irBuilderRes) {
         DeleteGraphArgs(allocator, localAllocator, adapter, irInterface);
         statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        if (!function->owningModule->file->needOptimize) {
+            delete maps;
+        }
         return nullptr;
     }
 
@@ -365,7 +397,11 @@ AbckitGraph *CreateGraphFromFunctionStatic(AbckitCoreFunction *function)
     GraphInvalidateAnalyses(graphImpl);
     CheckInvalidOpcodes(graphImpl, false);
 
-    return CreateGraph(function, irInterface, graphImpl, adapter);
+    AbckitGraph *graph = CreateGraph(function, irInterface, graphImpl, adapter);
+    if (!function->owningModule->file->needOptimize) {
+        delete maps;
+    }
+    return graph;
 }
 
 bool FunctionIsStaticStatic(AbckitCoreFunction *function)

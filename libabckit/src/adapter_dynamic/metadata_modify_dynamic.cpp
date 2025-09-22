@@ -66,6 +66,17 @@ AbckitString *CreateStringDynamic(AbckitFile *file, const char *value, size_t le
 
 void FunctionSetGraphDynamic(AbckitCoreFunction *function, AbckitGraph *graph)
 {
+    if (function->owningModule->file->needOptimize) {
+        std::unordered_map<AbckitCoreFunction *, FunctionStatus *> &functionsMap =
+            function->owningModule->file->functionsMap;
+        functionsMap[function]->writeBack = true;
+    } else {
+        FunctionSetGraphDynamicSync(function, graph);
+    }
+}
+
+void FunctionSetGraphDynamicSync(AbckitCoreFunction *function, AbckitGraph *graph)
+{
     LIBABCKIT_LOG_FUNC;
 
     auto func = GetDynFunction(function);

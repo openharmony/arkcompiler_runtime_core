@@ -24,6 +24,7 @@ namespace libabckit {
 
 AbckitString *CreateStringDynamic(AbckitFile *file, const char *value, size_t len);
 void FunctionSetGraphDynamic(AbckitCoreFunction *function, AbckitGraph *graph);
+void FunctionSetGraphDynamicSync(AbckitCoreFunction *function, AbckitGraph *graph);
 AbckitJsModule *FileAddExternalJsModule(AbckitFile *file, const struct AbckitJsExternalModuleCreateParams *params);
 AbckitArktsModule *FileAddExternalArkTsV1Module(AbckitFile *file,
                                                 const struct AbckitArktsV1ExternalModuleCreateParams *params);

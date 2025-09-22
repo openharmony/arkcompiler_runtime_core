@@ -1259,6 +1259,17 @@ AbckitFile *OpenAbcDynamic(const char *path, size_t len)
 
 void WriteAbcDynamic(AbckitFile *file, const char *path, size_t len)
 {
+    if (file->needOptimize) {
+        std::unordered_map<AbckitCoreFunction *, FunctionStatus *> &functionsMap = file->functionsMap;
+        for (auto &[func, status] : functionsMap) {
+            if (status->writeBack) {
+                FunctionSetGraphDynamicSync(func, status->graph);
+            }
+            delete status;
+        }
+        functionsMap.clear();
+    }
+
     auto program = file->GetDynamicProgram();
 
     pandasm::AsmEmitter::PandaFileToPandaAsmMaps *mapsp = nullptr;
@@ -1273,6 +1284,13 @@ void WriteAbcDynamic(AbckitFile *file, const char *path, size_t len)
 
 void DestroyGraphDynamic(AbckitGraph *graph)
 {
+    if (!graph->file->needOptimize) {
+        DestroyGraphDynamicSync(graph);
+    }
+}
+
+void DestroyGraphDynamicSync(AbckitGraph *graph)
+{
     LIBABCKIT_LOG_FUNC;
     GraphWrapper::DestroyGraphDynamic(graph);
 }
@@ -1280,6 +1298,22 @@ void DestroyGraphDynamic(AbckitGraph *graph)
 void CloseFileDynamic(AbckitFile *file)
 {
     LIBABCKIT_LOG_FUNC;
+
+    if (file->needOptimize) {
+        std::unordered_map<AbckitCoreFunction *, FunctionStatus *> &functionsMap = file->functionsMap;
+        for (auto &[_, status] : functionsMap) {
+            DestroyGraphDynamicSync(status->graph);
+            delete status;
+        }
+        functionsMap.clear();
+
+        if (file->generateStatus.pf != nullptr) {
+            delete static_cast<panda_file::File *>(file->generateStatus.pf);
+        }
+        if (file->generateStatus.maps != nullptr) {
+            delete static_cast<pandasm::AsmEmitter::PandaFileToPandaAsmMaps *>(file->generateStatus.maps);
+        }
+    }
 
     auto *ctxIInternal = reinterpret_cast<struct CtxIInternal *>(file->internal);
     delete ctxIInternal->driver;

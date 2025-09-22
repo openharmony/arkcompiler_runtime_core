@@ -876,6 +876,17 @@ struct AbckitType {
     }
 };
 
+struct AbckitFileGenerateStatus {
+    bool generated = false;
+    void *pf = nullptr;
+    void *maps = nullptr;
+};
+
+struct FunctionStatus {
+    AbckitGraph *graph = nullptr;
+    bool writeBack = false;
+};
+
 struct AbckitFile {
     struct AbcKitLiterals {
         std::unordered_map<bool, std::unique_ptr<AbckitLiteral>> boolLits;
@@ -958,6 +969,10 @@ struct AbckitFile {
      * To store some data for build all objects
      */
     void *data = nullptr;
+
+    bool needOptimize = false;
+    AbckitFileGenerateStatus generateStatus;
+    std::unordered_map<AbckitCoreFunction *, FunctionStatus *> functionsMap;
 };
 
 struct AbckitDynamicImportDescriptorPayload {

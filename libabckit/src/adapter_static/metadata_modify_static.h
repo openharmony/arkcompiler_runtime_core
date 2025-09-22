@@ -47,6 +47,7 @@ bool EnumSetNameStatic(AbckitCoreEnum *enm, const char *newName);
 bool EnumFieldSetNameStatic(AbckitCoreEnumField *field, const char *newName);
 
 void FunctionSetGraphStatic(AbckitCoreFunction *function, AbckitGraph *graph);
+void FunctionSetGraphStaticSync(AbckitCoreFunction *function, AbckitGraph *graph);
 
 AbckitLiteral *FindOrCreateLiteralBoolStatic(AbckitFile *file, bool value);
 AbckitLiteral *FindOrCreateLiteralU8Static(AbckitFile *file, uint8_t value);

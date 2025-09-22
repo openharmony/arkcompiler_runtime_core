@@ -235,8 +235,11 @@ void GraphWrapper::DestroyGraphDynamic(AbckitGraph *graph)
     auto *ctxGInternal = reinterpret_cast<CtxGInternalDynamic *>(graph->internal);
     // dirty hack to obtain FileWrapper pointer
     // NOTE(mshimenkov): refactor it
-    auto *fileWrapper = reinterpret_cast<FileWrapper *>(ctxGInternal->runtimeAdapter->GetBinaryFileForMethod(nullptr));
-    delete fileWrapper;
+    if (!graph->file->needOptimize) {
+        auto *fileWrapper =
+            reinterpret_cast<FileWrapper *>(ctxGInternal->runtimeAdapter->GetBinaryFileForMethod(nullptr));
+        delete fileWrapper;
+    }
     delete ctxGInternal->runtimeAdapter;
     delete ctxGInternal->irInterface;
     delete ctxGInternal->localAllocator;

@@ -19,6 +19,7 @@
 
 #include "libabckit/src/helpers_common.h"
 #include "libabckit/src/adapter_dynamic/metadata_modify_dynamic.h"
+#include "libabckit/src/adapter_static/metadata_modify_static.h"
 #include "libabckit/src/logger.h"
 #include "libabckit/src/macros.h"
 #include "scoped_timer.h"
@@ -26,7 +27,9 @@
 #include "libabckit/src/metadata_arkts_inspect_impl.h"
 #include "libabckit/src/metadata_js_inspect_impl.h"
 #include "libabckit/src/metadata_unknown_inspect_impl.h"
+#include "libabckit/src/adapter_dynamic/abckit_dynamic.h"
 #include "libabckit/src/adapter_dynamic/metadata_inspect_dynamic.h"
+#include "libabckit/src/adapter_static/abckit_static.h"
 #include "libabckit/src/adapter_static/metadata_inspect_static.h"
 
 namespace libabckit {
@@ -1733,12 +1736,68 @@ extern "C" bool FunctionEnumerateAnnotations(AbckitCoreFunction *function, void 
     }
 }
 
+AbckitGraph *getGraphFromCache(AbckitCoreFunction *function)
+{
+    std::unordered_map<AbckitCoreFunction *, FunctionStatus *> &functionsMap =
+        function->owningModule->file->functionsMap;
+
+    if (functionsMap.find(function) != functionsMap.end()) {
+        bool reuse = true;
+        for (auto &[_, status] : functionsMap) {
+            if (!status->writeBack) {
+                reuse = false;
+            }
+        }
+
+        if (reuse) {
+            return functionsMap[function]->graph;
+        }
+
+        for (auto &[func, status] : functionsMap) {
+            if (!status->writeBack) {
+                continue;
+            }
+            if (IsDynamic(function->owningModule->target)) {
+                FunctionSetGraphDynamicSync(func, status->graph);
+            } else {
+                FunctionSetGraphStaticSync(func, status->graph);
+            }
+        }
+
+        for (auto &[_, status] : functionsMap) {
+            if (IsDynamic(function->owningModule->target)) {
+                DestroyGraphDynamicSync(status->graph);
+            } else {
+                DestroyGraphStaticSync(status->graph);
+            }
+            delete status;
+        }
+
+        functionsMap.clear();
+        function->owningModule->file->generateStatus.generated = false;
+    }
+
+    AbckitGraph *graph = nullptr;
+    if (IsDynamic(function->owningModule->target)) {
+        graph = CreateGraphFromFunctionDynamic(function);
+    } else {
+        graph = CreateGraphFromFunctionStatic(function);
+    }
+    functionsMap[function] = new FunctionStatus {graph, false};
+
+    return graph;
+}
+
 extern "C" AbckitGraph *CreateGraphFromFunction(AbckitCoreFunction *function)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
     LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(function, nullptr);
+
+    if (function->owningModule->file->needOptimize) {
+        return getGraphFromCache(function);
+    }
 
     if (IsDynamic(function->owningModule->target)) {
         return CreateGraphFromFunctionDynamic(function);

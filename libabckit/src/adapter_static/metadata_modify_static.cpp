@@ -236,6 +236,17 @@ bool EnumFieldSetNameStatic(AbckitCoreEnumField *field, const char *newName)
 
 void FunctionSetGraphStatic(AbckitCoreFunction *function, AbckitGraph *graph)
 {
+    if (function->owningModule->file->needOptimize) {
+        std::unordered_map<AbckitCoreFunction *, FunctionStatus *> &functionsMap =
+            function->owningModule->file->functionsMap;
+        functionsMap[function]->writeBack = true;
+    } else {
+        FunctionSetGraphStaticSync(function, graph);
+    }
+}
+
+void FunctionSetGraphStaticSync(AbckitCoreFunction *function, AbckitGraph *graph)
+{
     LIBABCKIT_LOG_FUNC;
 
     auto *func = function->GetArkTSImpl()->GetStaticImpl();

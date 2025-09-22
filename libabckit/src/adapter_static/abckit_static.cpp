@@ -1142,6 +1142,22 @@ void CloseFileStatic(AbckitFile *file)
 {
     LIBABCKIT_LOG_FUNC;
 
+    if (file->needOptimize) {
+        std::unordered_map<AbckitCoreFunction *, FunctionStatus *> &functionsMap = file->functionsMap;
+        for (auto &[_, status] : functionsMap) {
+            DestroyGraphStaticSync(status->graph);
+            delete status;
+        }
+        functionsMap.clear();
+
+        if (file->generateStatus.pf != nullptr) {
+            delete static_cast<panda_file::File *>(file->generateStatus.pf);
+        }
+        if (file->generateStatus.maps != nullptr) {
+            delete static_cast<pandasm::AsmEmitter::PandaFileToPandaAsmMaps *>(file->generateStatus.maps);
+        }
+    }
+
     auto *ctxIInternal = reinterpret_cast<struct CtxIInternal *>(file->internal);
     delete ctxIInternal->driver;
     delete ctxIInternal;
@@ -1151,6 +1167,17 @@ void CloseFileStatic(AbckitFile *file)
 
 void WriteAbcStatic(AbckitFile *file, const char *path, size_t len)
 {
+    if (file->needOptimize) {
+        std::unordered_map<AbckitCoreFunction *, FunctionStatus *> &functionsMap = file->functionsMap;
+        for (auto &[func, status] : functionsMap) {
+            if (status->writeBack) {
+                FunctionSetGraphStaticSync(func, status->graph);
+            }
+            delete status;
+        }
+        functionsMap.clear();
+    }
+
     LIBABCKIT_LOG_FUNC;
     auto spath = std::string(path, len);
     LIBABCKIT_LOG(DEBUG) << spath << '\n';
@@ -1171,6 +1198,13 @@ void WriteAbcStatic(AbckitFile *file, const char *path, size_t len)
 }
 
 void DestroyGraphStatic(AbckitGraph *graph)
+{
+    if (!graph->file->needOptimize) {
+        DestroyGraphStaticSync(graph);
+    }
+}
+
+void DestroyGraphStaticSync(AbckitGraph *graph)
 {
     LIBABCKIT_LOG_FUNC;
     auto *ctxGInternal = reinterpret_cast<CtxGInternal *>(graph->internal);
