@@ -75,5 +75,62 @@ class TestUnsupported {
         }
         return check(dst, [1, 2, 6, 7, 8]);
     }
-};
 
+    //! CHECKER       TestUnsupported4
+    //! RUN           force_jit: true, entry: "memmove_unsupported.TestUnsupported::noAlias_RefTypeCheck"
+    //! METHOD        "memmove_unsupported.TestUnsupported::__noinline__noAlias_RefTypeCheck"
+    //! PASS_AFTER    "LoopIdioms"
+    //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
+    //! INST          /RefTypeCheck/
+
+    //! CHECKER       AOT TestUnsupported4
+    //! SKIP_IF       @architecture == "arm32"
+    //! RUN_PAOC      options: "--compiler-regex='.*__noinline__noAlias_RefTypeCheck'"
+    //! METHOD        "memmove_unsupported.TestUnsupported::__noinline__noAlias_RefTypeCheck"
+    //! PASS_AFTER    "LoopIdioms"
+    //! INST_NOT      /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
+    //! INST          /RefTypeCheck/
+    static noAlias_RefTypeCheck(): int {
+        let src: FixedArray<string> = ["1", "2", "3", "4"];
+        return check(TestUnsupported.__noinline__noAlias_RefTypeCheck(src), src);
+    }
+    static __noinline__noAlias_RefTypeCheck(src: FixedArray<string>): FixedArray<string> {
+        let dst: FixedArray<string> = new string[4];
+        for (let i: int = 0; i < src.length; i++) {
+            dst[i] = src[i];
+        }
+        return dst;
+    }
+
+    //! CHECKER       TestUnsupported5
+    //! RUN           force_jit: true, entry: "memmove_unsupported.TestUnsupported::noAlias_UpdateFirst_inLoop_ref"
+    //! METHOD        "memmove_unsupported.TestUnsupported::noAlias_UpdateFirst_inLoop_ref"
+    //! PASS_AFTER    "LoopIdioms"
+    //! IN_BLOCK      "head, loop 6, depth 1, bc: 0x00000024"
+    //! INST_NOT      /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
+    //! INST          /CallStatic.*__noinline__updateFirst/
+    //! INST_NEXT     /LoadArray/
+    //! INST_NEXT     /StoreArray/
+
+    //! CHECKER       AOT TestUnsupported5
+    //! SKIP_IF       @architecture == "arm32"
+    //! RUN_PAOC      options: "--compiler-regex='.*noAlias_UpdateFirst_inLoop_ref'"
+    //! METHOD        "memmove_unsupported.TestUnsupported::noAlias_UpdateFirst_inLoop_ref"
+    //! PASS_AFTER    "LoopIdioms"
+    //! INST_NOT      /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
+    //! INST          /CallStatic.*__noinline__updateFirst/
+    //! INST_NEXT     /LoadArray/
+    //! INST_NEXT     /StoreArray/
+    static noAlias_UpdateFirst_inLoop_ref(): int {
+        let src: FixedArray<string> = ["1", "2", "3", "4"];
+        let dst: FixedArray<string> = new string[4];
+        for (let i: int = 0; i < src.length; i++) {
+            TestUnsupported.__noinline__updateFirst(dst);
+            dst[i] = src[i];
+        }
+        return check(dst, ["", "2", "3", "4"]);
+    }
+    static __noinline__updateFirst(a: FixedArray<string>) {
+        a[0] = "";
+    }
+};

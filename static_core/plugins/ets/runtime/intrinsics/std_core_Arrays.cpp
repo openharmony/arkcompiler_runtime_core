@@ -241,7 +241,7 @@ static void RefCopy(ManagedThread *thread, ObjectArrayHandle<T> srcArray, Object
 {
     auto *src = srcArray.GetStartPtr();
     auto *dst = dstArray.GetStartPtr();
-    bool backwards = reinterpret_cast<int64_t>(src) < reinterpret_cast<int64_t>(dst);
+    bool backwards = reinterpret_cast<uintptr_t>(src) < reinterpret_cast<uintptr_t>(dst);
     auto copy = GetCopy<T>(src);
 
     if constexpr (NEED_PRE_WRITE_BARRIER) {
@@ -322,6 +322,14 @@ extern "C" void EscompatObjectFastCopyToUnchecked(EtsCharArray *src, EtsCharArra
                                                   int32_t srcStart, int32_t srcEnd)
 {
     StdCoreCopyToForObjects<false, false>(src, dst, dstStart, srcStart, srcEnd);
+}
+
+extern "C" void CompilerMemmoveUnchecked(ark::ObjectHeader *src, ark::ObjectHeader *dst, int32_t dstStart,
+                                         int32_t srcStart, int32_t srcEnd)
+{
+    auto *srcArr = EtsCharArray::FromEtsObject(EtsObject::FromCoreType(src));
+    auto *dstArr = EtsCharArray::FromEtsObject(EtsObject::FromCoreType(dst));
+    StdCoreCopyToForObjects<true, false>(srcArr, dstArr, dstStart, srcStart, srcEnd);
 }
 
 }  // namespace ark::ets::intrinsics
