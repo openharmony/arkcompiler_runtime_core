@@ -20,6 +20,7 @@ function main(): int {
     suite.addTest('Decimal min and max with default config', testMinAndMaxWithDefaultConfig001);
     suite.addTest('Decimal min and max with default config', testMinAndMaxWithDefaultConfig002);
     suite.addTest('Decimal min and max with default config', testMinAndMaxWithDefaultConfig003);
+    suite.addTest('Decimal min and max with default config', testMinAndMaxWithDefaultConfig004);
     return suite.run();
 }
 
@@ -31,6 +32,15 @@ function checkResultIsNaN(...n: Value[]) {
 function checkResultValues(min: double | string, max: double | string, ...n: Value[]) {
     arktest.assertEQ(new Decimal(min).valueOf(), Decimal.min(...n).valueOf());
     arktest.assertEQ(new Decimal(max).valueOf(), Decimal.max(...n).valueOf());
+}
+
+function checkResultCompareZero(min: Decimal, max: Decimal, ...n: Value[]) {
+    let minDecimal = Decimal.min(...n);
+    let maxDecimal = Decimal.max(...n);
+    arktest.assertEQ(min.valueOf(), minDecimal.valueOf());
+    arktest.assertEQ(min.s, minDecimal.s);
+    arktest.assertEQ(max.valueOf(), maxDecimal.valueOf());
+    arktest.assertEQ(max.s, maxDecimal.s);
 }
 
 function testMinAndMaxWithDefaultConfig001() {
@@ -90,4 +100,11 @@ function testMinAndMaxWithDefaultConfig003() {
     checkResultValues(-Infinity, 1, 1, '-1e+9000000000000001', -1e200);
     checkResultValues(0, 1, 1, '1e-9000000000000001', 1e-200);
     checkResultValues(-3, 3, 1, '2', 3, '-1', -2, '-3');
+}
+
+function testMinAndMaxWithDefaultConfig004() {
+    checkResultCompareZero(new Decimal("-0"), new Decimal(0), "-0", 0, "-0");
+    checkResultCompareZero(new Decimal("-0"), new Decimal(0), 0, "-0", 0);
+    checkResultCompareZero(new Decimal("-0"), new Decimal("0"), "-0", 0, "-0");
+    checkResultCompareZero(new Decimal("-0"), new Decimal("0"), 0, "-0", 0);
 }
