@@ -215,9 +215,14 @@ void GCG1BarrierSet::Enqueue(CardTable::CardPtr card)
         }
         // After 2 unsuccessfull pushing, we see that current buffer still full
         // so, reuse shared buffer
-        os::memory::LockHolder lock(*queueLock_);
-        updatedRefsQueue_->push_back(card);
+        PostCardToQueue(card);
     }
+}
+
+void GCG1BarrierSet::PostCardToQueue(CardTable::CardPtr card)
+{
+    os::memory::LockHolder lock(*queueLock_);
+    updatedRefsQueue_->push_back(card);
 }
 
 void GCCMCBarrierSet::PostBarrier([[maybe_unused]] const void *objAddr, [[maybe_unused]] size_t offset,

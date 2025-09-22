@@ -258,6 +258,8 @@ public:
 
     void Enqueue(CardTable::CardPtr card);
 
+    void PostCardToQueue(CardTable::CardPtr card);
+
     ~GCG1BarrierSet() override = default;
 
     CardTable *GetCardTable() const
