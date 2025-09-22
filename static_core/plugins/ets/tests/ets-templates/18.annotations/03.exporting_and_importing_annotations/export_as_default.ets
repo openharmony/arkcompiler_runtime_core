@@ -13,20 +13,14 @@
 * limitations under the License.
 */
 
+
 /*---
-desc: As any other declared entity, an annotation can be exported by using the keyword export.
-tags: []
-files: ['./to_export.ets']
+desc: As any other declared entity, an annotation can be exported by using the keyword export. Default export id forbidden
+
+name: Export As Default
+tags:
+- compile-only
+- negative
 ---*/
 
-import * as ns from "./to_export"
-
-// Annotation use:
-@ns.ClassAnnotation({field: "Some string" })
-@ns.mb.IAnnotation({field: "Some string" })
-class MyClass {}
-
-
-function main() {
-    new MyClass
-}
+export default @interface MyAnnotationExportDefault {} //  SyntaxError: Can not export annotation default.

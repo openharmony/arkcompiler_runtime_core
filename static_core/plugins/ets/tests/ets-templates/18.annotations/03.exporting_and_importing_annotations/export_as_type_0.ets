@@ -13,17 +13,17 @@
 * limitations under the License.
 */
 
-{% for case in cases %}
 
 /*---
-desc: As any other declared entity, an annotation can be exported by using the keyword export.
-tags: [compile-only, negative]
-files: ['./to_export_n.ets']
+desc: As any other declared entity, an annotation can be exported by using the keyword export. Renamed export id forbidden
+
+name: Export With Rename
+tags:
+- compile-only
+- negative
 ---*/
 
-{{ case.import }} from "./to_export_n.ets"
+@interface MyAnnotationToExport {}
 
-{{ case.use }}
-class MyClass {}
 
-{% endfor %}
+export type MyAnnotationToExport as ExportType  //TypeError: Annotations cannot be used as a type.

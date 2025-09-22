@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,19 @@
  * limitations under the License.
  */
 
-/*---
- desc: 18.01.declaring_annotations export
- tags: [not-a-test]
+ /*---
+ desc: Annotations can be applied to the following
+         Top-level declarations;
+ tags: [compile-only]
  ---*/
 
-export @interface ClassAnnotation {
- field: string
-}
+@interface Getter {}
+@interface Setter {}
 
-export namespace mb {
-    export @interface IAnnotation {
-     field: string
-    }
-}
+let _name: string = ""
+
+@Getter
+get name(): string { return _name }
+
+@Setter
+set name(x: string) { _name = x }

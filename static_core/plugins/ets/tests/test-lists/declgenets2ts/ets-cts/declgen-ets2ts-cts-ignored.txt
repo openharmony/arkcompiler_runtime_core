@@ -184,6 +184,9 @@
 17.experimental_features/09.overload_declarations/03.interface_method_overload_declarations/two_interfaces_1.ets
 17.experimental_features/09.overload_declarations/03.interface_method_overload_declarations/two_interfaces_4.ets
 17.experimental_features/09.overload_declarations/03.interface_method_overload_declarations/two_interfaces_9.ets
+18.annotations/03.exporting_and_importing_annotations/export_as_renamed.ets
+18.annotations/03.exporting_and_importing_annotations/export_as_type_0.ets
+18.annotations/03.exporting_and_importing_annotations/export_as_type_1.ets
 03.types/20.union_types/03.keyof_types/keyof_inheritance_9.ets
 04.names_declarations_and_scopes/03.scopes/interface_level2.ets
 04.names_declarations_and_scopes/03.scopes/type_param_interface.ets

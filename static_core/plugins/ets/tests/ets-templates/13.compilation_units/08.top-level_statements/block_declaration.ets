@@ -15,8 +15,8 @@
 
 {% for statement in statements %}
 /*---
-desc: All statements in the module level must be enclosed in curly braces to form a block.
-tags: [compile-only]
+desc: Statements in the module top level must be enclosed in curly braces to form a block.
+tags: []
 ---*/
 
 enum Enum { v1, v2 }
@@ -30,8 +30,11 @@ function pass(): void {
   arktest.assertTrue( true )
 }
 
+  {{statement.block}}
+
 {
   {{statement.block}}
 }
+  pass()
 
 {% endfor %}
