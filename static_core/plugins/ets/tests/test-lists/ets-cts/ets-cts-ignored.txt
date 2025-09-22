@@ -944,10 +944,65 @@
 07.expressions/05.object_literal/03.object_literal_of_record_type/re_27.ets
 
 #28898 Iterable refused as spread
-07.expressions/06.spread_expression/iterable.ets
-
-#563 arkts-2.0-specification
+07.expressions/06.spread_expression/iterable0.ets
+07.expressions/06.spread_expression/iterable1.ets
+07.expressions/06.spread_expression/iterable2.ets
+07.expressions/06.spread_expression/iterable3.ets
+07.expressions/06.spread_expression/iterable4.ets
+07.expressions/06.spread_expression/spex_55.ets
+07.expressions/06.spread_expression/spex_56.ets
 07.expressions/06.spread_expression/spex_func_50.ets
+07.expressions/06.spread_expression/spex_func_82.ets
+07.expressions/06.spread_expression/spex_func_83.ets
+
+#30372 Spread of union doesn't work
+07.expressions/06.spread_expression/spex_57.ets
+07.expressions/06.spread_expression/spex_58.ets
+07.expressions/06.spread_expression/spex_59.ets
+07.expressions/06.spread_expression/spex_60.ets
+07.expressions/06.spread_expression/spex_61.ets
+07.expressions/06.spread_expression/spex_62.ets
+07.expressions/06.spread_expression/spex_63.ets
+07.expressions/06.spread_expression/spex_64.ets
+07.expressions/06.spread_expression/spex_65.ets
+07.expressions/06.spread_expression/spex_66.ets
+07.expressions/06.spread_expression/spex_67.ets
+07.expressions/06.spread_expression/spex_68.ets
+07.expressions/06.spread_expression/spex_69.ets
+07.expressions/06.spread_expression/spex_70.ets
+07.expressions/06.spread_expression/spex_func_84.ets
+07.expressions/06.spread_expression/spex_func_85.ets
+07.expressions/06.spread_expression/spex_func_86.ets
+07.expressions/06.spread_expression/spex_func_87.ets
+07.expressions/06.spread_expression/spex_func_88.ets
+07.expressions/06.spread_expression/spex_func_89.ets
+07.expressions/06.spread_expression/spex_func_90.ets
+07.expressions/06.spread_expression/spex_func_91.ets
+07.expressions/06.spread_expression/spex_func_92.ets
+07.expressions/06.spread_expression/spex_func_93.ets
+07.expressions/06.spread_expression/spex_func_94.ets
+07.expressions/06.spread_expression/spex_func_95.ets
+07.expressions/06.spread_expression/spex_func_96.ets
+07.expressions/06.spread_expression/spex_func_97.ets
+
+#30371 Cannot spread into array with supertype elements
+07.expressions/06.spread_expression/spex_func_15.ets
+07.expressions/06.spread_expression/spex_func_28.ets
+07.expressions/06.spread_expression/spex_func_53.ets
+07.expressions/06.spread_expression/spex_func_57.ets
+07.expressions/06.spread_expression/spex_func_59.ets
+07.expressions/06.spread_expression/spex_func_60.ets
+07.expressions/06.spread_expression/spex_func_69.ets
+07.expressions/06.spread_expression/spex_func_70.ets
+
+#30368  Cannot spread tuple of strings to FixedArray of strings
+07.expressions/06.spread_expression/spex_80.ets
+
+#30367 Cannot spread custom array
+07.expressions/06.spread_expression/spex_87.ets
+07.expressions/06.spread_expression/spex_88.ets
+07.expressions/06.spread_expression/spex_89.ets
+07.expressions/06.spread_expression/spex_90.ets
 
 #20371 Unexpected Type Error on string array
 07.expressions/06.spread_expression/spex_lmbd_32.ets
