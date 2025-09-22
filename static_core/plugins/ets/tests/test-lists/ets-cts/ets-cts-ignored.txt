@@ -97,9 +97,6 @@
 04.names_declarations_and_scopes/07.function_declarations/03.readonly_parameters/readonly_12.ets
 04.names_declarations_and_scopes/07.function_declarations/03.readonly_parameters/readonly_13.ets
 
-#26657
-04.names_declarations_and_scopes/07.function_declarations/04.optional_parameters/opt_param_23.ets
-
 #563 arkts-2.0-specification
 04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/record_to_rest.ets
 
