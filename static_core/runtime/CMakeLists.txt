@@ -1112,6 +1112,11 @@ add_gtests(
     $<TARGET_OBJECTS:arkruntime_stack_walker_obj>
 )
 
+add_gtests(
+    arkruntime_flattened_string_cache_test
+    tests/flattened_string_cache_test.cpp
+)
+
 include(intrinsics.cmake)
 include(icu.cmake)
 
