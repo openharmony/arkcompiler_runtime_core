@@ -1,0 +1,103 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:
+    - |-
+        arktest.assertEQ(c'\u0000' ? 1 : 0, 0)
+
+    - |-
+        let v: char = c'\u0001'
+        arktest.assertEQ(v ? 1 : 0, 1)
+
+    - |-
+        let v: char = c'\u0000'  // falsy
+        let res: int = 0
+    
+        do {
+            if (++res > 1) {
+                break
+            }
+        } while (v)
+    
+        arktest.assertEQ(res, 1)
+
+    - |-
+        let v: char = c'\u0001'
+        let res: boolean = false
+
+        for (let i: int = 0; v; i++) {  
+            if (i == 0) {
+                res = true
+                break
+            }
+        }
+        arktest.assertTrue(res)
+
+    - |-
+        let res: boolean = false
+        if (new char) {
+            res = false
+        }
+        else {
+            res = true
+        }
+        arktest.assertTrue(res)
+
+    - |-
+        let res: boolean = false
+        if (c'1') {
+            res = true
+        } else {
+            res = false
+        }
+        arktest.assertTrue(res)
+
+    - |-
+        let res: boolean = false
+        let v: char = c'\u0001'
+        if (v) {
+            res = true
+        } else {
+            res = false
+        }
+        arktest.assertTrue(res)
+
+    - |-
+        let a: char = c'\u0000'; 
+        {
+            let b: char = c' ';  // truthy
+            arktest.assertTrue((a && b) ? false : true);
+            arktest.assertTrue((a || b) ? true : false);
+        }
+        {
+            let b: Char = new Char(c'\u0000');  // falsy
+            arktest.assertTrue((a && b) ? false : true);
+            arktest.assertTrue((a || b) ? false : true);
+        }
+        {
+            let b: Char = new Char(c' ');  // truthy
+            arktest.assertTrue((a && b) ? false : true);
+            arktest.assertTrue((a || b) ? true : false);
+        }
+    
+    - |-
+        let v: char = c'\u0001'
+        let res: int = 1
+
+        while (v) {  // truthy
+            if (res == 1) {
+                res = 0
+                break
+            }
+        }
+        arktest.assertEQ(res, 0)

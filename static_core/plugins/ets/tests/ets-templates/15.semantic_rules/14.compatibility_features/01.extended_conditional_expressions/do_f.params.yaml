@@ -44,8 +44,6 @@ cases:
     - { val: '"" + ""', type: 'string' }
     - { val: '``', type: 'string' }
 
-    - { val: "c'\\u0000'", type: 'char' }
-
     - { val: 'false', type: 'boolean' }
     - { val: '!!false', type: 'boolean' }
     - { val: '!true', type: 'boolean' }
