@@ -749,11 +749,9 @@ static const std::string LAMBDA_RECORD_KEY = "%%lambda-";
 [[maybe_unused]] static const std::string INIT_FUNC_NAME = "_$init$_";
 static const std::string TRIGGER_CCTOR_FUNC_NAME = "_$trigger_cctor$_";
 
-static bool ShouldCreateFuncWrapper(const pandasm::Function &functionImpl, const std::string &className,
-                                    const std::string &functionName)
+static bool ShouldCreateFuncWrapper(const pandasm::Function &functionImpl, const std::string &functionName)
 {
     return (!functionImpl.metadata->IsForeign() &&
-            (className.substr(0, LAMBDA_RECORD_KEY.size()) != LAMBDA_RECORD_KEY) &&
             (functionName.find(TRIGGER_CCTOR_FUNC_NAME, 0) == std::string::npos));
 }
 
@@ -766,17 +764,15 @@ static void CollectAllFunctions(pandasm::Program *prog, AbckitFile *file)
     for (auto &[functionName, functionImpl] : prog->functionStaticTable) {
         LIBABCKIT_LOG(DEBUG) << "function function key:" << functionName << std::endl;
         LIBABCKIT_LOG(DEBUG) << "function function value:" << functionImpl.name << std::endl;
-        auto [moduleName, className] = FuncGetNames(functionName);
 
-        if (ShouldCreateFuncWrapper(functionImpl, className, functionName)) {
+        if (ShouldCreateFuncWrapper(functionImpl, functionName)) {
             container->functions.emplace_back(CollectFunction(file, functionName, functionImpl));
         }
     }
     for (auto &[functionName, functionImpl] : prog->functionInstanceTable) {
         LIBABCKIT_LOG(DEBUG) << "function function at instance table:" << functionName << std::endl;
-        auto [moduleName, className] = FuncGetNames(functionName);
 
-        if (ShouldCreateFuncWrapper(functionImpl, className, functionName)) {
+        if (ShouldCreateFuncWrapper(functionImpl, functionName)) {
             container->functions.emplace_back(CollectFunction(file, functionName, functionImpl));
         }
     }
@@ -882,7 +878,7 @@ static void CollectAllInstances(AbckitFile *file, pandasm::Program *prog)
 
     for (auto &[recordName, record] : prog->recordTable) {
         auto [moduleName, className] = ClassGetModuleNames(recordName, container->nameToNamespace);
-        if (recordName.find(LAMBDA_RECORD_KEY) != std::string::npos || IsModuleName(className) ||
+        if (IsModuleName(className) ||
             container->nameToNamespace.find(recordName) != container->nameToNamespace.end()) {
             // NOTE: find and fill AbckitCoreImportDescriptor
             continue;
