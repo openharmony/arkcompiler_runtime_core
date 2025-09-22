@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this File except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1176,6 +1176,13 @@ bool ValueGetU1(AbckitValue *value)
     return DEFAULT_BOOL;
 }
 
+int ValueGetInt(AbckitValue *value)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(value == DEFAULT_VALUE);
+    return DEFAULT_I32;
+}
+
 double ValueGetDouble(AbckitValue *value)
 {
     g_calledFuncs.push(__func__);
@@ -1345,6 +1352,7 @@ static AbckitInspectApi g_inspectApiImpl = {
     ValueGetFile,
     ValueGetType,
     ValueGetU1,
+    ValueGetInt,
     ValueGetDouble,
     ValueGetString,
     ArrayValueGetLiteralArray,

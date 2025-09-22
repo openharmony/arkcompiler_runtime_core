@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -264,6 +264,12 @@ inline abckit::Value GetMockValueU1(const abckit::File &file)
 {
     abckit::Value val = file.CreateValueU1(DEFAULT_BOOL);
     EXPECT_TRUE(CheckMockedApi("CreateValueU1"));
+    return val;
+}
+inline abckit::Value GetMockValueInt(const abckit::File &file)
+{
+    abckit::Value val = file.CreateValueInt(DEFAULT_I32);
+    EXPECT_TRUE(CheckMockedApi("CreateValueInt"));
     return val;
 }
 

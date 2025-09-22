@@ -142,6 +142,23 @@ extern "C" AbckitValue *CreateValueU1(AbckitFile *file, bool value)
     }
 }
 
+extern "C" AbckitValue *CreateValueInt(AbckitFile *file, int value)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(file, nullptr);
+    switch (file->frontend) {
+        case Mode::DYNAMIC:
+            return FindOrCreateValueIntDynamic(file, value);
+        case Mode::STATIC:
+            return FindOrCreateValueIntStatic(file, value);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
+}
+
 extern "C" AbckitValue *CreateValueDouble(AbckitFile *file, double value)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
@@ -493,6 +510,7 @@ AbckitModifyApi g_modifyApiImpl = {
     // ========================================
 
     CreateValueU1,
+    CreateValueInt,
     CreateValueDouble,
     CreateValueString,
     CreateLiteralArrayValue,

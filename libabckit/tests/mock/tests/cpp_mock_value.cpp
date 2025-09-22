@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,20 @@ TEST_F(LibAbcKitCppMockTestValue, Value_GetU1)
         ASSERT_TRUE(CheckMockedApi("OpenAbc"));
         abckit::mock::helpers::GetMockValueU1(f).GetU1();
         ASSERT_TRUE(CheckMockedApi("ValueGetU1"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
+
+// Test: test-kind=mock, api=Value::GetInt, abc-kind=ArkTS1, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockTestValue, Value_GetInt)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File f(DEFAULT_PATH);
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        abckit::mock::helpers::GetMockValueInt(f).GetInt();
+        ASSERT_TRUE(CheckMockedApi("ValueGetInt"));
     }
     ASSERT_TRUE(CheckMockedApi("CloseFile"));
     ASSERT_TRUE(CheckMockedStackEmpty());

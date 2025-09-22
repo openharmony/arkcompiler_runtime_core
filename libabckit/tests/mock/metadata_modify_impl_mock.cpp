@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -107,6 +107,14 @@ AbckitValue *CreateValueU1(AbckitFile *file, bool value)
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(file == DEFAULT_FILE);
     EXPECT_TRUE(value == DEFAULT_BOOL);
+    return DEFAULT_VALUE;
+}
+
+AbckitValue *CreateValueInt(AbckitFile *file, int32_t value)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(file == DEFAULT_FILE);
+    EXPECT_TRUE(value == DEFAULT_I32);
     return DEFAULT_VALUE;
 }
 
@@ -311,6 +319,7 @@ static AbckitModifyApi g_modifyApiImpl = {
     // ========================================
 
     CreateValueU1,
+    CreateValueInt,
     CreateValueDouble,
     CreateValueString,
     CreateLiteralArrayValue,

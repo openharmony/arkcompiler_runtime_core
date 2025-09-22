@@ -1001,6 +1001,11 @@ AbckitValue *FindOrCreateValueDoubleStaticImpl(AbckitFile *file, double value)
     return FindOrCreateScalarValue<double, ark::pandasm::Value::Type::F64>(file, file->values.doubleVals, value);
 }
 
+AbckitValue *FindOrCreateValueIntStaticImpl(AbckitFile *file, int value)
+{
+    return FindOrCreateScalarValue<int, ark::pandasm::Value::Type::I32>(file, file->values.intVals, value);
+}
+
 AbckitValue *FindOrCreateValueStringStaticImpl(AbckitFile *file, const std::string &value)
 {
     return FindOrCreateScalarValue<std::string, ark::pandasm::Value::Type::STRING>(file, file->values.stringVals,
@@ -1029,6 +1034,7 @@ AbckitValue *FindOrCreateValueStatic(AbckitFile *file, const ark::pandasm::Value
         case ark::pandasm::Value::Type::I16:
         case ark::pandasm::Value::Type::U16:
         case ark::pandasm::Value::Type::I32:
+            return FindOrCreateValueIntStaticImpl(file, value.GetAsScalar()->GetValue<int>());
         case ark::pandasm::Value::Type::U32:
         case ark::pandasm::Value::Type::I64:
         case ark::pandasm::Value::Type::U64:

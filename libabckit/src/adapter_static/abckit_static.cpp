@@ -316,6 +316,8 @@ static std::unique_ptr<AbckitCoreTypeField> CreateField(AbckitFile *file, Abckit
         field->name = CreateNameString(file, recordField.name);
     }
     field->type = PandasmTypeToAbckitType(file, recordField.type);
+    auto optionalValue = recordField.metadata->GetValue();
+    field->value = optionalValue.has_value() ? FindOrCreateValueStatic(file, optionalValue.value()) : nullptr;
     AddFieldUserToAbckitType(field->type, field.get());
 
     if constexpr (std::is_same_v<AbckitCoreType, AbckitCoreClass>) {

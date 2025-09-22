@@ -419,6 +419,12 @@ AbckitValue *FindOrCreateValueU1Static(AbckitFile *file, bool value)
     return FindOrCreateValueU1StaticImpl(file, value);
 }
 
+AbckitValue *FindOrCreateValueIntStatic(AbckitFile *file, int value)
+{
+    LIBABCKIT_LOG_FUNC;
+    return FindOrCreateValueIntStaticImpl(file, value);
+}
+
 AbckitValue *FindOrCreateValueDoubleStatic(AbckitFile *file, double value)
 {
     LIBABCKIT_LOG_FUNC;

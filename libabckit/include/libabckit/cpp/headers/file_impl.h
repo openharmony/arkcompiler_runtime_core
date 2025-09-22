@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -98,6 +98,13 @@ inline Type File::CreateReferenceType(core::Class &klass) const
 inline abckit::Value File::CreateValueU1(bool val) const
 {
     AbckitValue *value = GetApiConfig()->cMapi_->createValueU1(GetResource(), val);
+    CheckError(GetApiConfig());
+    return abckit::Value(value, GetApiConfig(), this);
+}
+
+inline abckit::Value File::CreateValueInt(int val) const
+{
+    AbckitValue *value = GetApiConfig()->cMapi_->createValueInt(GetResource(), val);
     CheckError(GetApiConfig());
     return abckit::Value(value, GetApiConfig(), this);
 }

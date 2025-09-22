@@ -138,6 +138,7 @@ AbckitLiteral *FindOrCreateLiteralStringStaticImpl(AbckitFile *file, const std::
 AbckitLiteral *FindOrCreateLiteralMethodStaticImpl(AbckitFile *file, const std::string &value);
 
 AbckitValue *FindOrCreateValueU1StaticImpl(AbckitFile *file, bool value);
+AbckitValue *FindOrCreateValueIntStaticImpl(AbckitFile *file, int value);
 AbckitValue *FindOrCreateValueDoubleStaticImpl(AbckitFile *file, double value);
 AbckitValue *FindOrCreateValueStringStaticImpl(AbckitFile *file, const std::string &value);
 AbckitValue *FindOrCreateLiteralArrayValueStaticImpl(AbckitFile *file, const std::string &value);

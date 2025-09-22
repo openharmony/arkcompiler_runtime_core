@@ -143,6 +143,7 @@ AbckitLiteralTag LiteralGetTagStatic(AbckitLiteral *lit);
 
 AbckitType *ValueGetTypeStatic(AbckitValue *value);
 bool ValueGetU1Static(AbckitValue *value);
+int ValueGetIntStatic(AbckitValue *value);
 double ValueGetDoubleStatic(AbckitValue *value);
 AbckitString *ValueGetStringStatic(AbckitValue *value);
 AbckitLiteralArray *ArrayValueGetLiteralArrayStatic(AbckitValue *value);

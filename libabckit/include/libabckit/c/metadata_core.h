@@ -251,6 +251,15 @@ struct CAPI_EXPORT AbckitInspectApi {
     bool (*valueGetU1)(AbckitValue *value);
 
     /**
+     * @brief Returns int value that given `value` holds.
+     * @return Int value that is stored in the `value`.
+     * @param [ in ] value - Value item to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `value` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `value` type id differs from `ABCKIT_TYPE_ID_INT`.
+     */
+    int (*valueGetInt)(AbckitValue *value);
+
+    /**
      * @brief Returns double value that given `value` holds.
      * @return Double value that is stored in the `value`.
      * @param [ in ] value - Value item to be inspected.
@@ -1943,6 +1952,16 @@ struct CAPI_EXPORT AbckitModifyApi {
      * @note Allocates
      */
     AbckitValue *(*createValueU1)(AbckitFile *file, bool value);
+
+    /**
+     * @brief Creates value item containing the given int value `value`.
+     * @return Pointer to the `AbckitValue`.
+     * @param [ in ] file - Binary file to be modified.
+     * @param [ in ] value - Int value from which value item is created.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `file` is NULL.
+     * @note Allocates
+     */
+    AbckitValue *(*createValueInt)(AbckitFile *file, int value);
 
     /**
      * @brief Creates value item containing the given double value `value`.

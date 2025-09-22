@@ -891,6 +891,7 @@ struct AbckitFile {
         std::unordered_map<std::string, std::unique_ptr<AbckitLiteral>> methodLits;
     };
     struct AbcKitValues {
+        std::unordered_map<int, std::unique_ptr<AbckitValue>> intVals;
         std::unordered_map<bool, std::unique_ptr<AbckitValue>> boolVals;
         std::unordered_map<double, std::unique_ptr<AbckitValue>> doubleVals;
         std::unordered_map<std::string, std::unique_ptr<AbckitValue>> stringVals;
