@@ -22,6 +22,10 @@ config("arkbase_public_config") {
     "$target_gen_dir",
   ]
 
+  if (enable_hilog) {
+    include_dirs += [ "$hilog_root/include" ]
+  }
+
   include_dirs += platform_include_dirs
   if (is_arkui_x) {
     defines = [ "IS_ARKUI_X_TARGET" ]

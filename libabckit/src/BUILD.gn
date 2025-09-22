@@ -133,6 +133,10 @@ ohos_shared_library("libabckit") {
     output_extension = "so"
   }
 
+  if (enable_hilog) {
+    public_external_deps = [ "hilog:libhilog" ]
+  }
+
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
 }
@@ -146,6 +150,34 @@ ohos_source_set("libabckit_mock") {
   if (is_linux) {
     libs = [ "stdc++fs" ]
   }
+
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
+}
+
+group("libabckit_all") {
+  deps = []
+  deps += libabckit_so_deps
+  deps += [":libabckit_source_set"]
+  deps += [
+    "$ark_root_static/abc2program:arkts_abc2program_static",
+    "$ark_root_static/assembler:libarktsassembler_frontend_static",
+    "$ark_root_static/bytecode_optimizer:libarktsbytecodeopt_frontend_static",
+    "$ark_root_static/libpandabase:libarktsbase_frontend_static",
+    "$ark_root_static/libpandafile:libarktsfile_frontend_static",
+  ]
+}
+
+ohos_static_library("libabckit_static") {
+  deps = [":libabckit_all"]
+  include_dirs = libabckit_include_dirs                    
+  configs = [ "$abckit_root:abckit_config" ]
+
+  if (enable_hilog) {
+    public_external_deps = [ "hilog:libhilog" ]
+  }
+
+  complete_static_lib = true
 
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"

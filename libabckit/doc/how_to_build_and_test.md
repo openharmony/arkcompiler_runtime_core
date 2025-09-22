@@ -53,18 +53,18 @@ NOTE: Replace ${target} with build target: x64.debug, x64.release, mingw\_x86\_6
 
 ```sh
 # Debug mode
-./ark.py x64.debug abckit_tests --gn-args="is_standard_system=true abckit_enable=true"
+./ark.py x64.debug abckit_tests --gn-args="is_standard_system=true abckit_enable=true abckit_enable_tests=true"
 # Release mode
-./ark.py x64.release abckit_tests --gn-args="is_standard_system=true abckit_enable=true"
+./ark.py x64.release abckit_tests --gn-args="is_standard_system=true abckit_enable=true abckit_enable_tests=true"
 ```
 
 ## Run unit tests with sanitizers
 
 ```sh
 # Debug mode
-./ark.py x64.debug abckit_tests --gn-args="is_standard_system=true abckit_enable=true libabckit_with_sanitizers=true"
+./ark.py x64.debug abckit_tests --gn-args="is_standard_system=true abckit_enable=true libabckit_with_sanitizers=true abckit_enable_tests=true"
 # Release mode
-./ark.py x64.release abckit_tests --gn-args="is_standard_system=true abckit_enable=true libabckit_with_sanitizers=true"
+./ark.py x64.release abckit_tests --gn-args="is_standard_system=true abckit_enable=true libabckit_with_sanitizers=true abckit_enable_tests=true"
 ```
 
 # How to use AbcKit
