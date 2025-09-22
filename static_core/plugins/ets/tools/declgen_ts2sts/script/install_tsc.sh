@@ -21,28 +21,20 @@ ROOT_DIR="${1:-$(pwd)}"
 
 # Clone the repository and checkout the current Git branch
 TYPESCRIPT_REPO="https://gitcode.com/openharmony/third_party_typescript.git"  # Replace with your correct Typescript repository URL
-CURRENT_BRANCH=$(git rev-parse --abbrev-ref @{u} | sed 's/^openharmony\///')
+CURRENT_BRANCH="OpenHarmony-v5.0.1-Release"
 
 # Define the third_party directory
 THIRD_PARTY_DIR="$ROOT_DIR/third_party"
 TYPESCRIPT_ROOT_DIR="$THIRD_PARTY_DIR/typescript"  # Set the directory to 'typescript' inside 'third_party'
 
 # Clone the repository if it doesn't exist, or fetch the latest changes
-if [ ! -d "$TYPESCRIPT_ROOT_DIR" ]; then
-    echo "Cloning the TypeScript repository..."
-    mkdir -p "$THIRD_PARTY_DIR"  # Create third_party directory if it doesn't exist
-    git clone "$TYPESCRIPT_REPO" "$TYPESCRIPT_ROOT_DIR"
-else
-    echo "Repository already exists. Pulling the latest changes..."
-    cd "$TYPESCRIPT_ROOT_DIR"
-
-    # Fetch the latest changes and ensure we are on the correct branch
-    git fetch origin
-
-    git checkout "$CURRENT_BRANCH"
-    git pull origin "$CURRENT_BRANCH"
-    cd -
+if [ -d "$TYPESCRIPT_ROOT_DIR" ]; then
+    echo "Directory $TYPESCRIPT_ROOT_DIR exists, removing..."
+    rm -rf "$TYPESCRIPT_ROOT_DIR"
 fi
+echo "Cloning the TypeScript repository, tag: $CURRENT_BRANCH"
+mkdir -p "$THIRD_PARTY_DIR"
+git clone --depth 1 --branch "$CURRENT_BRANCH" "$TYPESCRIPT_REPO" "$TYPESCRIPT_ROOT_DIR"
 
 old_work_dir=$(pwd)
 echo "-----------------------------start building typescript-----------------------------"
@@ -67,4 +59,8 @@ else
 fi
 
 mv "$package_path" "$target_dir"
+if [ -d "$TYPESCRIPT_ROOT_DIR" ]; then
+    echo "Clean $TYPESCRIPT_ROOT_DIR..."
+    rm -rf "$TYPESCRIPT_ROOT_DIR"
+fi
 echo "------------------------------------finished-------------------------------------"
