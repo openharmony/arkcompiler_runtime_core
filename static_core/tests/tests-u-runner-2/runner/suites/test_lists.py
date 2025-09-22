@@ -49,12 +49,19 @@ class TestLists:
         self.excluded_lists: list[Path] = []
         self.ignored_lists: list[Path] = []
 
+        _LOGGER.default(f"Initialize TestLists: gn_build = {self.config.general.gn_build}")
         self.cache: list[str] = self.__gn_cache() if self.config.general.gn_build else self.cmake_cache()
+        _LOGGER.default(f"Initialize TestLists: cache = {self.cache}")
         self.sanitizer = self.search_sanitizer()
+        _LOGGER.default(f"Initialize TestLists: sanitizer = {self.sanitizer}")
         self.architecture = detect_architecture()
+        _LOGGER.default(f"Initialize TestLists: architecture = {self.architecture}")
         self.operating_system = detect_operating_system()
+        _LOGGER.default(f"Initialize TestLists: operating_system = {self.operating_system}")
         self.build_type = self.search_build_type()
+        _LOGGER.default(f"Initialize TestLists: build_type = {self.build_type}")
         self.conf_kind = self.detect_conf()
+        _LOGGER.default(f"Initialize TestLists: conf_kind = {self.conf_kind}")
 
     @staticmethod
     def __search_option_in_list(option: str, arg_list: list[str] | None) -> list[str]:
@@ -110,6 +117,7 @@ class TestLists:
         full_template_name += f"(-({gc_type}))?"
         full_template_name += f"(-{self.build_type.value})?"
         full_template_name += ".txt"
+        _LOGGER.default(f"Test lists searching: template = {full_template_name}")
         full_pattern = re.compile(full_template_name)
 
         def is_matched(file: str) -> bool:
