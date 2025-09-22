@@ -936,6 +936,8 @@ struct AbckitFile {
 
     std::unordered_map<std::string, AbckitCoreFunction *> nameToFunctionStatic;
     std::unordered_map<std::string, AbckitCoreFunction *> nameToFunctionInstance;
+    std::unordered_map<std::string, AbckitCoreFunction *> nameToExternalFunction;
+    std::vector<std::unique_ptr<AbckitCoreFunction>> externalFunctions;
 
     std::unordered_map<std::string, std::variant<AbckitCoreModuleField *, AbckitCoreNamespaceField *,
                                                  AbckitCoreClassField *, AbckitCoreInterfaceField *,
