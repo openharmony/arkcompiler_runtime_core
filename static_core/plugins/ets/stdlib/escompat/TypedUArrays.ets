@@ -105,6 +105,62 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
     public native static toUint8Clamped(val: double): int;
 
     /**
+     * Creates an Uint8ClampedArray with respect to length.
+     *
+     * @param length data initializer
+     */
+    public constructor(length: int) {
+        this(length.toDouble())
+    }
+
+    /**
+     * Creates an Uint8ClampedArray with respect to length.
+     *
+     * @param length data initializer
+     */
+    public constructor(length: number) {
+        if (length < 0 || length > (Int.MAX_VALUE / Uint8ClampedArray.BYTES_PER_ELEMENT)) {
+            throw new TypeError("Type Error: length " + length + " is outside the bounds of the buffer")
+        }
+        this.lengthInt = length.toInt()
+        this.byteLengthInt = this.lengthInt * Uint8ClampedArray.BYTES_PER_ELEMENT
+        this.byteOffsetInt = 0
+        this.buffer = new ArrayBuffer(this.byteLengthInt)
+    }
+
+    /**
+     * Creates an Uint8ClampedArray from FixedArray<int>
+     */
+    public constructor(numbers: FixedArray<int>) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafeClamp(i, numbers[i].toInt())
+        }
+    }
+
+    /**
+     * Creates an Uint8ClampedArray from FixedArray<number>
+     */
+    public constructor(numbers: FixedArray<number>) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafeClamp(i, Uint8ClampedArray.toUint8Clamped(numbers[i]))
+        }
+    }
+
+    /**
+     * Creates a copy of Uint8ClampedArray.
+     *
+     * @param other data initializer
+     */
+    public constructor(other: Uint8ClampedArray) {
+        this.buffer = other.buffer.slice(other.byteOffset, other.byteOffset + other.byteLength) as ArrayBuffer
+        this.byteLengthInt = other.byteLength
+        this.lengthInt = other.length
+        this.byteOffsetInt = 0
+    }
+
+    /**
      * Creates an Uint8ClampedArray with respect to data accessed via Iterable<Number> interface
      */
     public constructor(elements: Iterable<Number>) {
@@ -125,6 +181,30 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
             this.buffer = x.buffer
             this.byteOffsetInt = x.byteOffsetInt
         }
+    }
+
+    /**
+     * Creates an Uint8ClampedArray with respect to data, byteOffset and length.
+     *
+     * @param buf data initializer
+     *
+     * @param byteOffset byte offset from begin of the buf
+     *
+     * @param length size of elements of type int in newly created Uint8ClampedArray
+     */
+    public constructor(buf: ArrayBufferLike, byteOffset: int, length: int) {
+        this(buf, new Number(byteOffset), new Number(length))
+    }
+
+    /**
+     * Creates an Uint8ClampedArray with respect to buf and byteOffset.
+     *
+     * @param buf data initializer
+     *
+     * @param byteOffset byte offset from begin of the buf
+     */
+    public constructor(buf: ArrayBuffer, byteOffset: int) {
+        this(buf, new Number(byteOffset), undefined)
     }
 
     /**
@@ -182,30 +262,6 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
     }
 
     /**
-     * Creates an Uint8ClampedArray with respect to data, byteOffset and length.
-     *
-     * @param buf data initializer
-     *
-     * @param byteOffset byte offset from begin of the buf
-     *
-     * @param length size of elements of type int in newly created Uint8ClampedArray
-     */
-    public constructor(buf: ArrayBufferLike, byteOffset: int, length: int) {
-        this(buf, new Number(byteOffset), new Number(length))
-    }
-
-    /**
-     * Creates an Uint8ClampedArray with respect to buf and byteOffset.
-     *
-     * @param buf data initializer
-     *
-     * @param byteOffset byte offset from begin of the buf
-     */
-    public constructor(buf: ArrayBuffer, byteOffset: int) {
-        this(buf, new Number(byteOffset), undefined)
-    }
-
-    /**
      * Creates an Uint8ClampedArray with respect to buf.
      *
      * @param buf data initializer
@@ -232,62 +288,6 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
             }
         } else {
             throw new Error("unexpected type of buf")
-        }
-    }
-
-    /**
-     * Creates an Uint8ClampedArray with respect to length.
-     *
-     * @param length data initializer
-     */
-    public constructor(length: int) {
-        this(length.toDouble())
-    }
-
-    /**
-     * Creates an Uint8ClampedArray with respect to length.
-     *
-     * @param length data initializer
-     */
-    public constructor(length: number) {
-        if (length < 0 || length > (Int.MAX_VALUE / Uint8ClampedArray.BYTES_PER_ELEMENT)) {
-            throw new TypeError("Type Error: length " + length + " is outside the bounds of the buffer")
-        }
-        this.lengthInt = length.toInt()
-        this.byteLengthInt = this.lengthInt * Uint8ClampedArray.BYTES_PER_ELEMENT
-        this.byteOffsetInt = 0
-        this.buffer = new ArrayBuffer(this.byteLengthInt)
-    }
-
-    /**
-     * Creates a copy of Uint8ClampedArray.
-     *
-     * @param other data initializer
-     */
-    public constructor(other: Uint8ClampedArray) {
-        this.buffer = other.buffer.slice(other.byteOffset, other.byteOffset + other.byteLength) as ArrayBuffer
-        this.byteLengthInt = other.byteLength
-        this.lengthInt = other.length
-        this.byteOffsetInt = 0
-    }
-
-    /**
-     * Creates an Uint8ClampedArray from FixedArray<number>
-     */
-    public constructor(numbers: FixedArray<number>) {
-        this(numbers.length)
-        for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafeClamp(i, Uint8ClampedArray.toUint8Clamped(numbers[i]))
-        }
-    }
-
-    /**
-     * Creates an Uint8ClampedArray from FixedArray<int>
-     */
-    public constructor(numbers: FixedArray<int>) {
-        this(numbers.length)
-        for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafeClamp(i, numbers[i].toInt())
         }
     }
 
@@ -336,9 +336,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @param index index to change
      */
-    public $_set(index: int, val: number): void {
-        this.$_set(index, Uint8ClampedArray.toUint8Clamped(val))
-    }
+    public native $_set(index: int, val: int): void
 
     /**
      * Assigns val as element on index.
@@ -347,7 +345,9 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @param index index to change
      */
-    public native $_set(index: int, val: int): void
+    public $_set(index: int, val: number): void {
+        this.$_set(index, Uint8ClampedArray.toUint8Clamped(val))
+    }
 
     /**
      * Makes a copy of internal elements to targetPos from startPos to endPos.
@@ -405,8 +405,11 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @returns modified Uint8ClampedArray
      */
-    public fill(value: number, start?: int, end?: int): Uint8ClampedArray {
-        this.fill(Uint8ClampedArray.toUint8Clamped(value), start, end)
+    public fill(value: int, start?: int, end?: int): Uint8ClampedArray {
+        value = Uint8ClampedArray.clamp(value)
+        const k = normalizeIndex(start ?? 0, this.lengthInt)
+        const finalPos = normalizeIndex(end ?? this.lengthInt, this.lengthInt)
+        this.fillInternal(value, k, finalPos)
         return this
     }
 
@@ -417,26 +420,12 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @returns modified Uint8ClampedArray
      */
-    public fill(value: int, start?: int, end?: int): Uint8ClampedArray {
-        value = Uint8ClampedArray.clamp(value)
-        const k = normalizeIndex(start ?? 0, this.lengthInt)
-        const finalPos = normalizeIndex(end ?? this.lengthInt, this.lengthInt)
-        this.fillInternal(value, k, finalPos)
+    public fill(value: number, start?: int, end?: int): Uint8ClampedArray {
+        this.fill(Uint8ClampedArray.toUint8Clamped(value), start, end)
         return this
     }
 
     private final native fillInternal(value: int, start: int, end: int): void
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
-    public set(insertPos: int, val: number): void {
-        this.$_set(insertPos, val)
-    }
 
     /**
      * Assigns val as element on index.
@@ -450,21 +439,14 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
     }
 
     /**
-     * Copies all elements of arr to the current Uint8ClampedArray starting from insertPos.
+     * Assigns val as element on index.
      *
-     * @param arr array to copy data from
+     * @param val value to set
      *
-     * @param insertPos start index where data from arr will be inserted
-     *
-     * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
+     * @param index index to change
      */
-    public set(arr: FixedArray<number>, insertPos: int): void {
-        if (insertPos < 0 || insertPos + arr.length > this.lengthInt) {
-            throw new RangeError("set(insertPos: int, arr: FixedArray<int>): size of arr is greater than Uint8ClampedArray.length")
-        }
-        for (let i = 0; i < arr.length; i++) {
-            this.setUnsafeClamp(insertPos + i, Uint8ClampedArray.toUint8Clamped(arr[i]))
-        }
+    public set(insertPos: int, val: number): void {
+        this.$_set(insertPos, val)
     }
 
     /**
@@ -486,12 +468,21 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
     }
 
     /**
-     * Copies all elements of arr to the current Uint8ClampedArray.
+     * Copies all elements of arr to the current Uint8ClampedArray starting from insertPos.
      *
      * @param arr array to copy data from
+     *
+     * @param insertPos start index where data from arr will be inserted
+     *
+     * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
-    public set(arr: FixedArray<number>): void {
-        this.set(arr, 0)
+    public set(arr: FixedArray<number>, insertPos: int): void {
+        if (insertPos < 0 || insertPos + arr.length > this.lengthInt) {
+            throw new RangeError("set(insertPos: int, arr: FixedArray<int>): size of arr is greater than Uint8ClampedArray.length")
+        }
+        for (let i = 0; i < arr.length; i++) {
+            this.setUnsafeClamp(insertPos + i, Uint8ClampedArray.toUint8Clamped(arr[i]))
+        }
     }
 
     /**
@@ -502,6 +493,17 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
     public set(arr: FixedArray<int>): void {
         this.set(arr, 0)
     }
+
+    /**
+     * Copies all elements of arr to the current Uint8ClampedArray.
+     *
+     * @param arr array to copy data from
+     */
+    public set(arr: FixedArray<number>): void {
+        this.set(arr, 0)
+    }
+
+    private native final set(array: Array<int>): void;
 
     public native set(array: Uint8ClampedArray): void
 
@@ -531,9 +533,9 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @returns new Uint8ClampedArray
      */
-    public static of(...items: FixedArray<number>): Uint8ClampedArray {
+    public static of(...items: FixedArray<short>): Uint8ClampedArray {
         let res = new Uint8ClampedArray(items.length.toInt())
-        res.ofNumber(items)
+        res.ofShort(items)
         return res
     }
 
@@ -557,9 +559,9 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @returns new Uint8ClampedArray
      */
-    public static of(...items: FixedArray<short>): Uint8ClampedArray {
+    public static of(...items: FixedArray<number>): Uint8ClampedArray {
         let res = new Uint8ClampedArray(items.length.toInt())
-        res.ofShort(items)
+        res.ofNumber(items)
         return res
     }
 
@@ -640,8 +642,6 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
         result.ofInt(arr)
         return result
     }
-
-    private native final set(array: Array<int>): void;
 
     /**
      * Creates an array from an object of escompat.Array<int>.
@@ -749,19 +749,6 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @returns true if searchElement is in Uint8ClampedArray, false otherwise
      */
-    public includes(searchElement: number, fromIndex?: int): boolean {
-        return this.indexOf(searchElement, asIntOrDefault(fromIndex, 0)) != -1
-    }
-
-    /**
-     * Determines whether Uint8ClampedArray includes a certain element, returning true or false as appropriate
-     *
-     * @param searchElement The element to search for
-     *
-     * @param fromIndex The position in this array at which to begin searching for searchElement
-     *
-     * @returns true if searchElement is in Uint8ClampedArray, false otherwise
-     */
     public includes(searchElement: int, fromIndex: int): boolean {
         return this.indexOf(searchElement.toInt(), fromIndex) != -1
     }
@@ -780,6 +767,19 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
     }
 
     /**
+     * Determines whether Uint8ClampedArray includes a certain element, returning true or false as appropriate
+     *
+     * @param searchElement The element to search for
+     *
+     * @param fromIndex The position in this array at which to begin searching for searchElement
+     *
+     * @returns true if searchElement is in Uint8ClampedArray, false otherwise
+     */
+    public includes(searchElement: number, fromIndex?: int): boolean {
+        return this.indexOf(searchElement, asIntOrDefault(fromIndex, 0)) != -1
+    }
+
+    /**
      * Returns the index of the first occurrence of a value in Uint8ClampedArray.
      *
      * @param searchElement The value to locate in the array.
@@ -789,8 +789,8 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(searchElement: number, fromIndex?: int): int {
-            return this.indexOfImpl(searchElement, fromIndex ?? 0)
+    public indexOf(searchElement: int): int {
+        return this.indexOf(searchElement, 0)
     }
 
     /**
@@ -808,7 +808,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
     }
 
     /**
-     * Returns the index of the first occurrence of a value in Array.
+     * Returns the index of the first occurrence of a value in Uint8ClampedArray.
      *
      * @param searchElement The value to locate in the array.
      *
@@ -817,7 +817,9 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    private final native indexOfImpl(searchElement: number, fromIndex: int): int
+    public indexOf(searchElement: number, fromIndex?: int): int {
+            return this.indexOfImpl(searchElement, fromIndex ?? 0)
+    }
 
     /**
      * Returns the index of the first occurrence of a value in Array.
@@ -832,7 +834,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
     private final native indexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
-     * Returns the index of the first occurrence of a value in Uint8ClampedArray.
+     * Returns the index of the first occurrence of a value in Array.
      *
      * @param searchElement The value to locate in the array.
      *
@@ -841,9 +843,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(searchElement: int): int {
-        return this.indexOf(searchElement, 0)
-    }
+    private final native indexOfImpl(searchElement: number, fromIndex: int): int
 
     /**
      * Converts all elements of an array to strings and joins them using the specified separator.
@@ -888,7 +888,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: number): int {
+    public lastIndexOf(searchElement: int): int {
         return this.lastIndexOf(searchElement, this.lengthInt - 1)
     }
 
@@ -902,8 +902,8 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: number, fromIndex: int | undefined): int {
-            return this.lastIndexOfImpl(searchElement, fromIndex ?? 0)
+    public lastIndexOf(searchElement: number): int {
+        return this.lastIndexOf(searchElement, this.lengthInt - 1)
     }
 
     /**
@@ -921,16 +921,18 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
     }
 
     /**
-     * Returns the index of the first occurrence of a value in Array.
+     * Returns the index of the last occurrence of a value in Uint8ClampedArray.
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     *  search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is omitted, the search begins at index length-1
      *
-     * @returns index of element if it presents, -1 otherwise
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    private final native lastIndexOfImpl(searchElement: number, fromIndex: int): int
+    public lastIndexOf(searchElement: number, fromIndex: int | undefined): int {
+            return this.lastIndexOfImpl(searchElement, fromIndex ?? 0)
+    }
 
     /**
      * Returns the index of the first occurrence of a value in Array.
@@ -945,18 +947,16 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
     private final native lastIndexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
-     * Returns the index of the last occurrence of a value in Uint8ClampedArray.
+     * Returns the index of the first occurrence of a value in Array.
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
-     * search starts at index 0. If fromIndex is omitted, the search begins at index length-1
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
      *
-     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
+     * @returns index of element if it presents, -1 otherwise
      */
-    public lastIndexOf(searchElement: int): int {
-        return this.lastIndexOf(searchElement, this.lengthInt - 1)
-    }
+    private final native lastIndexOfImpl(searchElement: number, fromIndex: int): int
 
    /**
     * Creates a new Uint8ClampedArray using initializer
@@ -1162,8 +1162,8 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @returns an Uint8ClampedArray with replaced value on index
      */
-    public with(index: int, value: number): Uint8ClampedArray {
-        return this.withImpl(index, value.toInt())
+    public with(index: int, value: int): Uint8ClampedArray {
+        return this.withImpl(index, value)
     }
 
     /**
@@ -1175,8 +1175,8 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @returns an Uint8ClampedArray with replaced value on index
      */
-    public with(index: int, value: int): Uint8ClampedArray {
-        return this.withImpl(index, value)
+    public with(index: int, value: number): Uint8ClampedArray {
+        return this.withImpl(index, value.toInt())
     }
 
     /// === with element lambda functions ===
@@ -1595,6 +1595,62 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
+     * Creates an Uint8Array with respect to length.
+     *
+     * @param length data initializer
+     */
+    public constructor(length: int) {
+        this(length.toDouble())
+    }
+
+    /**
+     * Creates an Uint8Array with respect to length.
+     *
+     * @param length data initializer
+     */
+    public constructor(length: number) {
+        if (length < 0 || length > (Int.MAX_VALUE / Uint8Array.BYTES_PER_ELEMENT)) {
+            throw new TypeError("Type Error: length " + length + " is outside the bounds of the buffer")
+        }
+        this.lengthInt = length.toInt()
+        this.byteLengthInt = this.lengthInt * Uint8Array.BYTES_PER_ELEMENT
+        this.byteOffsetInt = 0
+        this.buffer = new ArrayBuffer(this.byteLengthInt)
+    }
+
+    /**
+     * Creates an Uint8Array from FixedArray<int>
+     */
+    public constructor(numbers: FixedArray<int>) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafeClamp(i, numbers[i].toInt())
+        }
+    }
+
+    /**
+     * Creates an Uint8Array from FixedArray<number>
+     */
+    public constructor(numbers: FixedArray<number>) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafe(i, Uint8Array.doubleToInt(numbers[i]))
+        }
+    }
+
+    /**
+     * Creates a copy of Uint8Array.
+     *
+     * @param other data initializer
+     */
+    public constructor(other: Uint8Array) {
+        this.buffer = other.buffer.slice(other.byteOffset, other.byteOffset + other.byteLength) as ArrayBuffer
+        this.byteLengthInt = other.byteLength
+        this.lengthInt = other.length
+        this.byteOffsetInt = 0
+    }
+
+    /**
      * Creates an Uint8Array with respect to data accessed via Iterable<Number> interface
      */
     public constructor(elements: Iterable<Number>) {
@@ -1617,6 +1673,30 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
         }
     }
     private static native doubleToInt(d: double): Int;
+
+    /**
+     * Creates an Uint8Array with respect to data, byteOffset and length.
+     *
+     * @param buf data initializer
+     *
+     * @param byteOffset byte offset from begin of the buf
+     *
+     * @param length size of elements of type int in newly created Uint8Array
+     */
+    public constructor(buf: ArrayBufferLike, byteOffset: int, length: int) {
+        this(buf, new Number(byteOffset), new Number(length))
+    }
+
+    /**
+     * Creates an Uint8Array with respect to buf and byteOffset.
+     *
+     * @param buf data initializer
+     *
+     * @param byteOffset byte offset from begin of the buf
+     */
+    public constructor(buf: ArrayBuffer, byteOffset: int) {
+        this(buf, new Number(byteOffset), undefined)
+    }
 
     /**
      * Creates an Uint8Array with respect to data, byteOffset and length.
@@ -1673,30 +1753,6 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates an Uint8Array with respect to data, byteOffset and length.
-     *
-     * @param buf data initializer
-     *
-     * @param byteOffset byte offset from begin of the buf
-     *
-     * @param length size of elements of type int in newly created Uint8Array
-     */
-    public constructor(buf: ArrayBufferLike, byteOffset: int, length: int) {
-        this(buf, new Number(byteOffset), new Number(length))
-    }
-
-    /**
-     * Creates an Uint8Array with respect to buf and byteOffset.
-     *
-     * @param buf data initializer
-     *
-     * @param byteOffset byte offset from begin of the buf
-     */
-    public constructor(buf: ArrayBuffer, byteOffset: int) {
-        this(buf, new Number(byteOffset), undefined)
-    }
-
-    /**
      * Creates an Uint8Array with respect to buf.
      *
      * @param buf data initializer
@@ -1723,62 +1779,6 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
             }
         } else {
             throw new Error("unexpected type of buf")
-        }
-    }
-
-    /**
-     * Creates an Uint8Array with respect to length.
-     *
-     * @param length data initializer
-     */
-    public constructor(length: int) {
-        this(length.toDouble())
-    }
-
-    /**
-     * Creates an Uint8Array with respect to length.
-     *
-     * @param length data initializer
-     */
-    public constructor(length: number) {
-        if (length < 0 || length > (Int.MAX_VALUE / Uint8Array.BYTES_PER_ELEMENT)) {
-            throw new TypeError("Type Error: length " + length + " is outside the bounds of the buffer")
-        }
-        this.lengthInt = length.toInt()
-        this.byteLengthInt = this.lengthInt * Uint8Array.BYTES_PER_ELEMENT
-        this.byteOffsetInt = 0
-        this.buffer = new ArrayBuffer(this.byteLengthInt)
-    }
-
-    /**
-     * Creates a copy of Uint8Array.
-     *
-     * @param other data initializer
-     */
-    public constructor(other: Uint8Array) {
-        this.buffer = other.buffer.slice(other.byteOffset, other.byteOffset + other.byteLength) as ArrayBuffer
-        this.byteLengthInt = other.byteLength
-        this.lengthInt = other.length
-        this.byteOffsetInt = 0
-    }
-
-    /**
-     * Creates an Uint8Array from FixedArray<number>
-     */
-    public constructor(numbers: FixedArray<number>) {
-        this(numbers.length)
-        for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafe(i, Uint8Array.doubleToInt(numbers[i]))
-        }
-    }
-
-    /**
-     * Creates an Uint8Array from FixedArray<int>
-     */
-    public constructor(numbers: FixedArray<int>) {
-        this(numbers.length)
-        for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafeClamp(i, numbers[i].toInt())
         }
     }
 
@@ -1827,9 +1827,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param index index to change
      */
-    public $_set(index: int, val: number): void {
-        this.$_set(index, Uint8Array.doubleToInt(val))
-    }
+    public native $_set(index: int, val: int): void
 
     /**
      * Assigns val as element on index.
@@ -1838,7 +1836,9 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param index index to change
      */
-    public native $_set(index: int, val: int): void
+    public $_set(index: int, val: number): void {
+        this.$_set(index, Uint8Array.doubleToInt(val))
+    }
 
     /**
      * Makes a copy of internal elements to targetPos from startPos to endPos.
@@ -1896,8 +1896,10 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns modified Uint8Array
      */
-    public fill(value: number, start?: int, end?: int): Uint8Array {
-        this.fill(Uint8Array.doubleToInt(value), start, end)
+    public fill(value: int, start?: int, end?: int): Uint8Array {
+        const k = normalizeIndex(start ?? 0, this.lengthInt)
+        const finalPos = normalizeIndex(end ?? this.lengthInt, this.lengthInt)
+        this.fillInternal(value, k, finalPos)
         return this
     }
 
@@ -1908,25 +1910,12 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns modified Uint8Array
      */
-    public fill(value: int, start?: int, end?: int): Uint8Array {
-        const k = normalizeIndex(start ?? 0, this.lengthInt)
-        const finalPos = normalizeIndex(end ?? this.lengthInt, this.lengthInt)
-        this.fillInternal(value, k, finalPos)
+    public fill(value: number, start?: int, end?: int): Uint8Array {
+        this.fill(Uint8Array.doubleToInt(value), start, end)
         return this
     }
 
     private final native fillInternal(value: int, start: int, end: int): void
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
-    public set(insertPos: int, val: number): void {
-        this.$_set(insertPos, val)
-    }
 
     /**
      * Assigns val as element on index.
@@ -1940,21 +1929,14 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Copies all elements of arr to the current Uint8Array starting from insertPos.
+     * Assigns val as element on index.
      *
-     * @param arr array to copy data from
+     * @param val value to set
      *
-     * @param insertPos start index where data from arr will be inserted
-     *
-     * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
+     * @param index index to change
      */
-    public set(arr: FixedArray<number>, insertPos: int): void {
-        if (insertPos < 0 || insertPos + arr.length > this.lengthInt) {
-            throw new RangeError("set(insertPos: int, arr: FixedArray<int>): size of arr is greater than Uint8Array.length")
-        }
-        for (let i = 0; i < arr.length; i++) {
-            this.setUnsafe(insertPos + i, Uint8Array.doubleToInt(arr[i]))
-        }
+    public set(insertPos: int, val: number): void {
+        this.$_set(insertPos, val)
     }
 
     /**
@@ -1976,12 +1958,21 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Copies all elements of arr to the current Uint8Array.
+     * Copies all elements of arr to the current Uint8Array starting from insertPos.
      *
      * @param arr array to copy data from
+     *
+     * @param insertPos start index where data from arr will be inserted
+     *
+     * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
-    public set(arr: FixedArray<number>): void {
-        this.set(arr, 0)
+    public set(arr: FixedArray<number>, insertPos: int): void {
+        if (insertPos < 0 || insertPos + arr.length > this.lengthInt) {
+            throw new RangeError("set(insertPos: int, arr: FixedArray<int>): size of arr is greater than Uint8Array.length")
+        }
+        for (let i = 0; i < arr.length; i++) {
+            this.setUnsafe(insertPos + i, Uint8Array.doubleToInt(arr[i]))
+        }
     }
 
     /**
@@ -1992,6 +1983,17 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     public set(arr: FixedArray<int>): void {
         this.set(arr, 0)
     }
+
+    /**
+     * Copies all elements of arr to the current Uint8Array.
+     *
+     * @param arr array to copy data from
+     */
+    public set(arr: FixedArray<number>): void {
+        this.set(arr, 0)
+    }
+
+    private native final set(array: Array<int>): void;
 
     public native set(array: Uint8Array): void
     private native final set(array: Int8Array): void
@@ -2022,9 +2024,9 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Uint8Array
      */
-    public static of(...items: FixedArray<number>): Uint8Array {
+    public static of(...items: FixedArray<short>): Uint8Array {
         let res = new Uint8Array(items.length.toInt())
-        res.ofNumber(items)
+        res.ofShort(items)
         return res
     }
 
@@ -2048,9 +2050,9 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Uint8Array
      */
-    public static of(...items: FixedArray<short>): Uint8Array {
+    public static of(...items: FixedArray<number>): Uint8Array {
         let res = new Uint8Array(items.length.toInt())
-        res.ofShort(items)
+        res.ofNumber(items)
         return res
     }
 
@@ -2141,8 +2143,6 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
         result.ofInt(arr)
         return result
     }
-
-    private native final set(array: Array<int>): void;
 
     /**
      * Creates an array from an object of escompat.Array<int>.
@@ -2250,19 +2250,6 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns true if searchElement is in Uint8Array, false otherwise
      */
-    public includes(searchElement: number, fromIndex?: int): boolean {
-        return this.indexOf(searchElement, asIntOrDefault(fromIndex, 0)) != -1
-    }
-
-    /**
-     * Determines whether Uint8Array includes a certain element, returning true or false as appropriate
-     *
-     * @param searchElement The element to search for
-     *
-     * @param fromIndex The position in this array at which to begin searching for searchElement
-     *
-     * @returns true if searchElement is in Uint8Array, false otherwise
-     */
     public includes(searchElement: int, fromIndex: int): boolean {
         return this.indexOf(searchElement.toInt(), fromIndex) != -1
     }
@@ -2281,6 +2268,19 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
+     * Determines whether Uint8Array includes a certain element, returning true or false as appropriate
+     *
+     * @param searchElement The element to search for
+     *
+     * @param fromIndex The position in this array at which to begin searching for searchElement
+     *
+     * @returns true if searchElement is in Uint8Array, false otherwise
+     */
+    public includes(searchElement: number, fromIndex?: int): boolean {
+        return this.indexOf(searchElement, asIntOrDefault(fromIndex, 0)) != -1
+    }
+
+    /**
      * Returns the index of the first occurrence of a value in Uint8Array.
      *
      * @param searchElement The value to locate in the array.
@@ -2290,8 +2290,8 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(searchElement: number, fromIndex?: int): int {
-            return this.indexOfImpl(searchElement, fromIndex ?? 0)
+    public indexOf(searchElement: int): int {
+        return this.indexOf(searchElement, 0)
     }
 
     /**
@@ -2309,7 +2309,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Returns the index of the first occurrence of a value in Array.
+     * Returns the index of the first occurrence of a value in Uint8Array.
      *
      * @param searchElement The value to locate in the array.
      *
@@ -2318,7 +2318,9 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    private final native indexOfImpl(searchElement: number, fromIndex: int): int
+    public indexOf(searchElement: number, fromIndex?: int): int {
+            return this.indexOfImpl(searchElement, fromIndex ?? 0)
+    }
 
     /**
      * Returns the index of the first occurrence of a value in Array.
@@ -2333,7 +2335,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     private final native indexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
-     * Returns the index of the first occurrence of a value in Uint8Array.
+     * Returns the index of the first occurrence of a value in Array.
      *
      * @param searchElement The value to locate in the array.
      *
@@ -2342,9 +2344,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(searchElement: int): int {
-        return this.indexOf(searchElement, 0)
-    }
+    private final native indexOfImpl(searchElement: number, fromIndex: int): int
 
     /**
      * Converts all elements of an array to strings and joins them using the specified separator.
@@ -2389,7 +2389,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: number): int {
+    public lastIndexOf(searchElement: int): int {
         return this.lastIndexOf(searchElement, this.lengthInt - 1)
     }
 
@@ -2403,8 +2403,8 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: number, fromIndex: int | undefined): int {
-            return this.lastIndexOfImpl(searchElement, fromIndex ?? 0)
+    public lastIndexOf(searchElement: number): int {
+        return this.lastIndexOf(searchElement, this.lengthInt - 1)
     }
 
     /**
@@ -2422,16 +2422,18 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Returns the index of the first occurrence of a value in Array.
+     * Returns the index of the last occurrence of a value in Uint8Array.
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     *  search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is omitted, the search begins at index length-1
      *
-     * @returns index of element if it presents, -1 otherwise
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    private final native lastIndexOfImpl(searchElement: number, fromIndex: int): int
+    public lastIndexOf(searchElement: number, fromIndex: int | undefined): int {
+            return this.lastIndexOfImpl(searchElement, fromIndex ?? 0)
+    }
 
     /**
      * Returns the index of the first occurrence of a value in Array.
@@ -2446,18 +2448,16 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     private final native lastIndexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
-     * Returns the index of the last occurrence of a value in Uint8Array.
+     * Returns the index of the first occurrence of a value in Array.
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
-     * search starts at index 0. If fromIndex is omitted, the search begins at index length-1
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
      *
-     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
+     * @returns index of element if it presents, -1 otherwise
      */
-    public lastIndexOf(searchElement: int): int {
-        return this.lastIndexOf(searchElement, this.lengthInt - 1)
-    }
+    private final native lastIndexOfImpl(searchElement: number, fromIndex: int): int
 
    /**
     * Creates a new Uint8Array using initializer
@@ -2663,8 +2663,8 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns an Uint8Array with replaced value on index
      */
-    public with(index: int, value: number): Uint8Array {
-        return this.withImpl(index, value.toInt())
+    public with(index: int, value: int): Uint8Array {
+        return this.withImpl(index, value)
     }
 
     /**
@@ -2676,8 +2676,8 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns an Uint8Array with replaced value on index
      */
-    public with(index: int, value: int): Uint8Array {
-        return this.withImpl(index, value)
+    public with(index: int, value: number): Uint8Array {
+        return this.withImpl(index, value.toInt())
     }
 
     /// === with element lambda functions ===
@@ -3090,6 +3090,62 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
+     * Creates an Uint16Array with respect to length.
+     *
+     * @param length data initializer
+     */
+    public constructor(length: int) {
+        this(length.toDouble())
+    }
+
+    /**
+     * Creates an Uint16Array with respect to length.
+     *
+     * @param length data initializer
+     */
+    public constructor(length: number) {
+        if (length < 0 || length > (Int.MAX_VALUE / Uint16Array.BYTES_PER_ELEMENT)) {
+            throw new TypeError("Type Error: length " + length + " is outside the bounds of the buffer")
+        }
+        this.lengthInt = length.toInt()
+        this.byteLengthInt = this.lengthInt * Uint16Array.BYTES_PER_ELEMENT
+        this.byteOffsetInt = 0
+        this.buffer = new ArrayBuffer(this.byteLengthInt)
+    }
+
+    /**
+     * Creates an Uint16Array from FixedArray<int>
+     */
+    public constructor(numbers: FixedArray<int>) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafeClamp(i, numbers[i].toInt())
+        }
+    }
+
+    /**
+     * Creates an Uint16Array from FixedArray<number>
+     */
+    public constructor(numbers: FixedArray<number>) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafe(i, Uint16Array.doubleToInt(numbers[i]))
+        }
+    }
+
+    /**
+     * Creates a copy of Uint16Array.
+     *
+     * @param other data initializer
+     */
+    public constructor(other: Uint16Array) {
+        this.buffer = other.buffer.slice(other.byteOffset, other.byteOffset + other.byteLength) as ArrayBuffer
+        this.byteLengthInt = other.byteLength
+        this.lengthInt = other.length
+        this.byteOffsetInt = 0
+    }
+
+    /**
      * Creates an Uint16Array with respect to data accessed via Iterable<Number> interface
      */
     public constructor(elements: Iterable<Number>) {
@@ -3112,6 +3168,30 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
         }
     }
     private static native doubleToInt(d: double): Int;
+
+    /**
+     * Creates an Uint16Array with respect to data, byteOffset and length.
+     *
+     * @param buf data initializer
+     *
+     * @param byteOffset byte offset from begin of the buf
+     *
+     * @param length size of elements of type int in newly created Uint16Array
+     */
+    public constructor(buf: ArrayBufferLike, byteOffset: int, length: int) {
+        this(buf, new Number(byteOffset), new Number(length))
+    }
+
+    /**
+     * Creates an Uint16Array with respect to buf and byteOffset.
+     *
+     * @param buf data initializer
+     *
+     * @param byteOffset byte offset from begin of the buf
+     */
+    public constructor(buf: ArrayBuffer, byteOffset: int) {
+        this(buf, new Number(byteOffset), undefined)
+    }
 
     /**
      * Creates an Uint16Array with respect to data, byteOffset and length.
@@ -3172,30 +3252,6 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates an Uint16Array with respect to data, byteOffset and length.
-     *
-     * @param buf data initializer
-     *
-     * @param byteOffset byte offset from begin of the buf
-     *
-     * @param length size of elements of type int in newly created Uint16Array
-     */
-    public constructor(buf: ArrayBufferLike, byteOffset: int, length: int) {
-        this(buf, new Number(byteOffset), new Number(length))
-    }
-
-    /**
-     * Creates an Uint16Array with respect to buf and byteOffset.
-     *
-     * @param buf data initializer
-     *
-     * @param byteOffset byte offset from begin of the buf
-     */
-    public constructor(buf: ArrayBuffer, byteOffset: int) {
-        this(buf, new Number(byteOffset), undefined)
-    }
-
-    /**
      * Creates an Uint16Array with respect to buf.
      *
      * @param buf data initializer
@@ -3222,62 +3278,6 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
             }
         } else {
             throw new Error("unexpected type of buf")
-        }
-    }
-
-    /**
-     * Creates an Uint16Array with respect to length.
-     *
-     * @param length data initializer
-     */
-    public constructor(length: int) {
-        this(length.toDouble())
-    }
-
-    /**
-     * Creates an Uint16Array with respect to length.
-     *
-     * @param length data initializer
-     */
-    public constructor(length: number) {
-        if (length < 0 || length > (Int.MAX_VALUE / Uint16Array.BYTES_PER_ELEMENT)) {
-            throw new TypeError("Type Error: length " + length + " is outside the bounds of the buffer")
-        }
-        this.lengthInt = length.toInt()
-        this.byteLengthInt = this.lengthInt * Uint16Array.BYTES_PER_ELEMENT
-        this.byteOffsetInt = 0
-        this.buffer = new ArrayBuffer(this.byteLengthInt)
-    }
-
-    /**
-     * Creates a copy of Uint16Array.
-     *
-     * @param other data initializer
-     */
-    public constructor(other: Uint16Array) {
-        this.buffer = other.buffer.slice(other.byteOffset, other.byteOffset + other.byteLength) as ArrayBuffer
-        this.byteLengthInt = other.byteLength
-        this.lengthInt = other.length
-        this.byteOffsetInt = 0
-    }
-
-    /**
-     * Creates an Uint16Array from FixedArray<number>
-     */
-    public constructor(numbers: FixedArray<number>) {
-        this(numbers.length)
-        for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafe(i, Uint16Array.doubleToInt(numbers[i]))
-        }
-    }
-
-    /**
-     * Creates an Uint16Array from FixedArray<int>
-     */
-    public constructor(numbers: FixedArray<int>) {
-        this(numbers.length)
-        for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafeClamp(i, numbers[i].toInt())
         }
     }
 
@@ -3326,9 +3326,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param index index to change
      */
-    public $_set(index: int, val: number): void {
-        this.$_set(index, Uint16Array.doubleToInt(val))
-    }
+    public native $_set(index: int, val: int): void
 
     /**
      * Assigns val as element on index.
@@ -3337,7 +3335,9 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param index index to change
      */
-    public native $_set(index: int, val: int): void
+    public $_set(index: int, val: number): void {
+        this.$_set(index, Uint16Array.doubleToInt(val))
+    }
 
     /**
      * Makes a copy of internal elements to targetPos from startPos to endPos.
@@ -3395,8 +3395,10 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns modified Uint16Array
      */
-    public fill(value: number, start?: int, end?: int): Uint16Array {
-        this.fill(Uint16Array.doubleToInt(value), start, end)
+    public fill(value: int, start?: int, end?: int): Uint16Array {
+        const k = normalizeIndex(start ?? 0, this.lengthInt)
+        const finalPos = normalizeIndex(end ?? this.lengthInt, this.lengthInt)
+        this.fillInternal(value, k, finalPos)
         return this
     }
 
@@ -3407,25 +3409,12 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns modified Uint16Array
      */
-    public fill(value: int, start?: int, end?: int): Uint16Array {
-        const k = normalizeIndex(start ?? 0, this.lengthInt)
-        const finalPos = normalizeIndex(end ?? this.lengthInt, this.lengthInt)
-        this.fillInternal(value, k, finalPos)
+    public fill(value: number, start?: int, end?: int): Uint16Array {
+        this.fill(Uint16Array.doubleToInt(value), start, end)
         return this
     }
 
     private final native fillInternal(value: int, start: int, end: int): void
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
-    public set(insertPos: int, val: number): void {
-        this.$_set(insertPos, val)
-    }
 
     /**
      * Assigns val as element on index.
@@ -3439,21 +3428,14 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Copies all elements of arr to the current Uint16Array starting from insertPos.
+     * Assigns val as element on index.
      *
-     * @param arr array to copy data from
+     * @param val value to set
      *
-     * @param insertPos start index where data from arr will be inserted
-     *
-     * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
+     * @param index index to change
      */
-    public set(arr: FixedArray<number>, insertPos: int): void {
-        if (insertPos < 0 || insertPos + arr.length > this.lengthInt) {
-            throw new RangeError("set(insertPos: int, arr: FixedArray<int>): size of arr is greater than Uint16Array.length")
-        }
-        for (let i = 0; i < arr.length; i++) {
-            this.setUnsafe(insertPos + i, Uint16Array.doubleToInt(arr[i]))
-        }
+    public set(insertPos: int, val: number): void {
+        this.$_set(insertPos, val)
     }
 
     /**
@@ -3475,12 +3457,21 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Copies all elements of arr to the current Uint16Array.
+     * Copies all elements of arr to the current Uint16Array starting from insertPos.
      *
      * @param arr array to copy data from
+     *
+     * @param insertPos start index where data from arr will be inserted
+     *
+     * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
-    public set(arr: FixedArray<number>): void {
-        this.set(arr, 0)
+    public set(arr: FixedArray<number>, insertPos: int): void {
+        if (insertPos < 0 || insertPos + arr.length > this.lengthInt) {
+            throw new RangeError("set(insertPos: int, arr: FixedArray<int>): size of arr is greater than Uint16Array.length")
+        }
+        for (let i = 0; i < arr.length; i++) {
+            this.setUnsafe(insertPos + i, Uint16Array.doubleToInt(arr[i]))
+        }
     }
 
     /**
@@ -3491,6 +3482,17 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     public set(arr: FixedArray<int>): void {
         this.set(arr, 0)
     }
+
+    /**
+     * Copies all elements of arr to the current Uint16Array.
+     *
+     * @param arr array to copy data from
+     */
+    public set(arr: FixedArray<number>): void {
+        this.set(arr, 0)
+    }
+
+    private native final set(array: Array<int>): void;
 
     public native set(array: Uint16Array): void
     private native final set(array: Int16Array): void
@@ -3521,9 +3523,9 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Uint16Array
      */
-    public static of(...items: FixedArray<number>): Uint16Array {
+    public static of(...items: FixedArray<int>): Uint16Array {
         let res = new Uint16Array(items.length.toInt())
-        res.ofNumber(items)
+        res.ofInt(items)
         return res
     }
 
@@ -3534,9 +3536,9 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Uint16Array
      */
-    public static of(...items: FixedArray<int>): Uint16Array {
+    public static of(...items: FixedArray<number>): Uint16Array {
         let res = new Uint16Array(items.length.toInt())
-        res.ofInt(items)
+        res.ofNumber(items)
         return res
     }
 
@@ -3626,8 +3628,6 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
         result.ofInt(arr)
         return result
     }
-
-    private native final set(array: Array<int>): void;
 
     /**
      * Creates an array from an object of escompat.Array<int>.
@@ -3735,19 +3735,6 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns true if searchElement is in Uint16Array, false otherwise
      */
-    public includes(searchElement: number, fromIndex?: int): boolean {
-        return this.indexOf(searchElement, asIntOrDefault(fromIndex, 0)) != -1
-    }
-
-    /**
-     * Determines whether Uint16Array includes a certain element, returning true or false as appropriate
-     *
-     * @param searchElement The element to search for
-     *
-     * @param fromIndex The position in this array at which to begin searching for searchElement
-     *
-     * @returns true if searchElement is in Uint16Array, false otherwise
-     */
     public includes(searchElement: int, fromIndex: int): boolean {
         return this.indexOf(searchElement.toInt(), fromIndex) != -1
     }
@@ -3766,6 +3753,19 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
+     * Determines whether Uint16Array includes a certain element, returning true or false as appropriate
+     *
+     * @param searchElement The element to search for
+     *
+     * @param fromIndex The position in this array at which to begin searching for searchElement
+     *
+     * @returns true if searchElement is in Uint16Array, false otherwise
+     */
+    public includes(searchElement: number, fromIndex?: int): boolean {
+        return this.indexOf(searchElement, asIntOrDefault(fromIndex, 0)) != -1
+    }
+
+    /**
      * Returns the index of the first occurrence of a value in Uint16Array.
      *
      * @param searchElement The value to locate in the array.
@@ -3775,8 +3775,8 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(searchElement: number, fromIndex?: int): int {
-            return this.indexOfImpl(searchElement, fromIndex ?? 0)
+    public indexOf(searchElement: int): int {
+        return this.indexOf(searchElement, 0)
     }
 
     /**
@@ -3794,7 +3794,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Returns the index of the first occurrence of a value in Array.
+     * Returns the index of the first occurrence of a value in Uint16Array.
      *
      * @param searchElement The value to locate in the array.
      *
@@ -3803,7 +3803,9 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    private final native indexOfImpl(searchElement: number, fromIndex: int): int
+    public indexOf(searchElement: number, fromIndex?: int): int {
+            return this.indexOfImpl(searchElement, fromIndex ?? 0)
+    }
 
     /**
      * Returns the index of the first occurrence of a value in Array.
@@ -3818,7 +3820,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     private final native indexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
-     * Returns the index of the first occurrence of a value in Uint16Array.
+     * Returns the index of the first occurrence of a value in Array.
      *
      * @param searchElement The value to locate in the array.
      *
@@ -3827,9 +3829,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(searchElement: int): int {
-        return this.indexOf(searchElement, 0)
-    }
+    private final native indexOfImpl(searchElement: number, fromIndex: int): int
 
     /**
      * Converts all elements of an array to strings and joins them using the specified separator.
@@ -3874,7 +3874,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: number): int {
+    public lastIndexOf(searchElement: int): int {
         return this.lastIndexOf(searchElement, this.lengthInt - 1)
     }
 
@@ -3888,8 +3888,8 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: number, fromIndex: int | undefined): int {
-            return this.lastIndexOfImpl(searchElement, fromIndex ?? 0)
+    public lastIndexOf(searchElement: number): int {
+        return this.lastIndexOf(searchElement, this.lengthInt - 1)
     }
 
     /**
@@ -3907,16 +3907,18 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Returns the index of the first occurrence of a value in Array.
+     * Returns the index of the last occurrence of a value in Uint16Array.
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     *  search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is omitted, the search begins at index length-1
      *
-     * @returns index of element if it presents, -1 otherwise
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    private final native lastIndexOfImpl(searchElement: number, fromIndex: int): int
+    public lastIndexOf(searchElement: number, fromIndex: int | undefined): int {
+            return this.lastIndexOfImpl(searchElement, fromIndex ?? 0)
+    }
 
     /**
      * Returns the index of the first occurrence of a value in Array.
@@ -3931,18 +3933,16 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     private final native lastIndexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
-     * Returns the index of the last occurrence of a value in Uint16Array.
+     * Returns the index of the first occurrence of a value in Array.
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
-     * search starts at index 0. If fromIndex is omitted, the search begins at index length-1
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
      *
-     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
+     * @returns index of element if it presents, -1 otherwise
      */
-    public lastIndexOf(searchElement: int): int {
-        return this.lastIndexOf(searchElement, this.lengthInt - 1)
-    }
+    private final native lastIndexOfImpl(searchElement: number, fromIndex: int): int
 
    /**
     * Creates a new Uint16Array using initializer
@@ -4148,8 +4148,8 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns an Uint16Array with replaced value on index
      */
-    public with(index: int, value: number): Uint16Array {
-        return this.withImpl(index, value.toInt())
+    public with(index: int, value: int): Uint16Array {
+        return this.withImpl(index, value)
     }
 
     /**
@@ -4161,8 +4161,8 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns an Uint16Array with replaced value on index
      */
-    public with(index: int, value: int): Uint16Array {
-        return this.withImpl(index, value)
+    public with(index: int, value: number): Uint16Array {
+        return this.withImpl(index, value.toInt())
     }
 
     /// === with element lambda functions ===
@@ -4586,6 +4586,62 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
+     * Creates an Uint32Array with respect to length.
+     *
+     * @param length data initializer
+     */
+    public constructor(length: int) {
+        this(length.toDouble())
+    }
+
+    /**
+     * Creates an Uint32Array with respect to length.
+     *
+     * @param length data initializer
+     */
+    public constructor(length: number) {
+        if (length < 0 || length > (Int.MAX_VALUE / Uint32Array.BYTES_PER_ELEMENT)) {
+            throw new TypeError("Type Error: length " + length + " is outside the bounds of the buffer")
+        }
+        this.lengthInt = length.toInt()
+        this.byteLengthInt = this.lengthInt * Uint32Array.BYTES_PER_ELEMENT
+        this.byteOffsetInt = 0
+        this.buffer = new ArrayBuffer(this.byteLengthInt)
+    }
+
+    /**
+     * Creates an Uint32Array from FixedArray<int>
+     */
+    public constructor(numbers: FixedArray<int>) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafeClamp(i, numbers[i].toLong())
+        }
+    }
+
+    /**
+     * Creates an Uint32Array from FixedArray<number>
+     */
+    public constructor(numbers: FixedArray<number>) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafe(i, Uint32Array.doubleToInt(numbers[i]))
+        }
+    }
+
+    /**
+     * Creates a copy of Uint32Array.
+     *
+     * @param other data initializer
+     */
+    public constructor(other: Uint32Array) {
+        this.buffer = other.buffer.slice(other.byteOffset, other.byteOffset + other.byteLength) as ArrayBuffer
+        this.byteLengthInt = other.byteLength
+        this.lengthInt = other.length
+        this.byteOffsetInt = 0
+    }
+
+    /**
      * Creates an Uint32Array with respect to data accessed via Iterable<Number> interface
      */
     public constructor(elements: Iterable<Number>) {
@@ -4608,6 +4664,30 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
         }
     }
     private static native doubleToInt(d: double): Long;
+
+    /**
+     * Creates an Uint32Array with respect to data, byteOffset and length.
+     *
+     * @param buf data initializer
+     *
+     * @param byteOffset byte offset from begin of the buf
+     *
+     * @param length size of elements of type long in newly created Uint32Array
+     */
+    public constructor(buf: ArrayBufferLike, byteOffset: int, length: int) {
+        this(buf, new Number(byteOffset), new Number(length))
+    }
+
+    /**
+     * Creates an Uint32Array with respect to buf and byteOffset.
+     *
+     * @param buf data initializer
+     *
+     * @param byteOffset byte offset from begin of the buf
+     */
+    public constructor(buf: ArrayBuffer, byteOffset: int) {
+        this(buf, new Number(byteOffset), undefined)
+    }
 
     /**
      * Creates an Uint32Array with respect to data, byteOffset and length.
@@ -4668,30 +4748,6 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates an Uint32Array with respect to data, byteOffset and length.
-     *
-     * @param buf data initializer
-     *
-     * @param byteOffset byte offset from begin of the buf
-     *
-     * @param length size of elements of type long in newly created Uint32Array
-     */
-    public constructor(buf: ArrayBufferLike, byteOffset: int, length: int) {
-        this(buf, new Number(byteOffset), new Number(length))
-    }
-
-    /**
-     * Creates an Uint32Array with respect to buf and byteOffset.
-     *
-     * @param buf data initializer
-     *
-     * @param byteOffset byte offset from begin of the buf
-     */
-    public constructor(buf: ArrayBuffer, byteOffset: int) {
-        this(buf, new Number(byteOffset), undefined)
-    }
-
-    /**
      * Creates an Uint32Array with respect to buf.
      *
      * @param buf data initializer
@@ -4718,62 +4774,6 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
             }
         } else {
             throw new Error("unexpected type of buf")
-        }
-    }
-
-    /**
-     * Creates an Uint32Array with respect to length.
-     *
-     * @param length data initializer
-     */
-    public constructor(length: int) {
-        this(length.toDouble())
-    }
-
-    /**
-     * Creates an Uint32Array with respect to length.
-     *
-     * @param length data initializer
-     */
-    public constructor(length: number) {
-        if (length < 0 || length > (Int.MAX_VALUE / Uint32Array.BYTES_PER_ELEMENT)) {
-            throw new TypeError("Type Error: length " + length + " is outside the bounds of the buffer")
-        }
-        this.lengthInt = length.toInt()
-        this.byteLengthInt = this.lengthInt * Uint32Array.BYTES_PER_ELEMENT
-        this.byteOffsetInt = 0
-        this.buffer = new ArrayBuffer(this.byteLengthInt)
-    }
-
-    /**
-     * Creates a copy of Uint32Array.
-     *
-     * @param other data initializer
-     */
-    public constructor(other: Uint32Array) {
-        this.buffer = other.buffer.slice(other.byteOffset, other.byteOffset + other.byteLength) as ArrayBuffer
-        this.byteLengthInt = other.byteLength
-        this.lengthInt = other.length
-        this.byteOffsetInt = 0
-    }
-
-    /**
-     * Creates an Uint32Array from FixedArray<number>
-     */
-    public constructor(numbers: FixedArray<number>) {
-        this(numbers.length)
-        for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafe(i, Uint32Array.doubleToInt(numbers[i]))
-        }
-    }
-
-    /**
-     * Creates an Uint32Array from FixedArray<int>
-     */
-    public constructor(numbers: FixedArray<int>) {
-        this(numbers.length)
-        for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafeClamp(i, numbers[i].toLong())
         }
     }
 
@@ -4822,9 +4822,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param index index to change
      */
-    public $_set(index: int, val: number): void {
-        this.$_set(index, Uint32Array.doubleToInt(val))
-    }
+    public native $_set(index: int, val: int): void
 
     /**
      * Assigns val as element on index.
@@ -4842,7 +4840,9 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param index index to change
      */
-    public native $_set(index: int, val: int): void
+    public $_set(index: int, val: number): void {
+        this.$_set(index, Uint32Array.doubleToInt(val))
+    }
 
     /**
      * Makes a copy of internal elements to targetPos from startPos to endPos.
@@ -4900,8 +4900,10 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns modified Uint32Array
      */
-    public fill(value: number, start?: int, end?: int): Uint32Array {
-        this.fill(Uint32Array.doubleToInt(value), start, end)
+    public fill(value: long, start?: int, end?: int): Uint32Array {
+        const k = normalizeIndex(start ?? 0, this.lengthInt)
+        const finalPos = normalizeIndex(end ?? this.lengthInt, this.lengthInt)
+        this.fillInternal(value, k, finalPos)
         return this
     }
 
@@ -4912,25 +4914,12 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns modified Uint32Array
      */
-    public fill(value: long, start?: int, end?: int): Uint32Array {
-        const k = normalizeIndex(start ?? 0, this.lengthInt)
-        const finalPos = normalizeIndex(end ?? this.lengthInt, this.lengthInt)
-        this.fillInternal(value, k, finalPos)
+    public fill(value: number, start?: int, end?: int): Uint32Array {
+        this.fill(Uint32Array.doubleToInt(value), start, end)
         return this
     }
 
     private final native fillInternal(value: long, start: int, end: int): void
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
-    public set(insertPos: int, val: number): void {
-        this.$_set(insertPos, val)
-    }
 
     /**
      * Assigns val as element on index.
@@ -4944,21 +4933,14 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Copies all elements of arr to the current Uint32Array starting from insertPos.
+     * Assigns val as element on index.
      *
-     * @param arr array to copy data from
+     * @param val value to set
      *
-     * @param insertPos start index where data from arr will be inserted
-     *
-     * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
+     * @param index index to change
      */
-    public set(arr: FixedArray<number>, insertPos: int): void {
-        if (insertPos < 0 || insertPos + arr.length > this.lengthInt) {
-            throw new RangeError("set(insertPos: int, arr: FixedArray<long>): size of arr is greater than Uint32Array.length")
-        }
-        for (let i = 0; i < arr.length; i++) {
-            this.setUnsafe(insertPos + i, Uint32Array.doubleToInt(arr[i]))
-        }
+    public set(insertPos: int, val: number): void {
+        this.$_set(insertPos, val)
     }
 
     /**
@@ -4980,12 +4962,21 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Copies all elements of arr to the current Uint32Array.
+     * Copies all elements of arr to the current Uint32Array starting from insertPos.
      *
      * @param arr array to copy data from
+     *
+     * @param insertPos start index where data from arr will be inserted
+     *
+     * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
-    public set(arr: FixedArray<number>): void {
-        this.set(arr, 0)
+    public set(arr: FixedArray<number>, insertPos: int): void {
+        if (insertPos < 0 || insertPos + arr.length > this.lengthInt) {
+            throw new RangeError("set(insertPos: int, arr: FixedArray<long>): size of arr is greater than Uint32Array.length")
+        }
+        for (let i = 0; i < arr.length; i++) {
+            this.setUnsafe(insertPos + i, Uint32Array.doubleToInt(arr[i]))
+        }
     }
 
     /**
@@ -4996,6 +4987,17 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     public set(arr: FixedArray<long>): void {
         this.set(arr, 0)
     }
+
+    /**
+     * Copies all elements of arr to the current Uint32Array.
+     *
+     * @param arr array to copy data from
+     */
+    public set(arr: FixedArray<number>): void {
+        this.set(arr, 0)
+    }
+
+    private native final set(array: Array<int>): void;
 
     public native set(array: Uint32Array): void
     private native final set(array: Int32Array): void
@@ -5026,19 +5028,6 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Uint32Array
      */
-    public static of(...items: FixedArray<number>): Uint32Array {
-        let res = new Uint32Array(items.length.toInt())
-        res.ofNumber(items)
-        return res
-    }
-
-    /**
-     * Returns a new array from a set of elements.
-     *
-     * @param items a set of elements to include in the new array object.
-     *
-     * @returns new Uint32Array
-     */
     public static of(...items: FixedArray<int>): Uint32Array {
         let res = new Uint32Array(items.length.toInt())
         res.ofInt(items)
@@ -5055,6 +5044,19 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     public static of(...items: FixedArray<long>): Uint32Array {
         let res = new Uint32Array(items.length.toInt())
         res.ofLong(items)
+        return res
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new Uint32Array
+     */
+    public static of(...items: FixedArray<number>): Uint32Array {
+        let res = new Uint32Array(items.length.toInt())
+        res.ofNumber(items)
         return res
     }
 
@@ -5145,8 +5147,6 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
         result.ofInt(arr)
         return result
     }
-
-    private native final set(array: Array<int>): void;
 
     /**
      * Creates an array from an object of escompat.Array<int>.
@@ -5254,19 +5254,6 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns true if searchElement is in Uint32Array, false otherwise
      */
-    public includes(searchElement: number, fromIndex?: int): boolean {
-        return this.indexOf(searchElement, asIntOrDefault(fromIndex, 0)) != -1
-    }
-
-    /**
-     * Determines whether Uint32Array includes a certain element, returning true or false as appropriate
-     *
-     * @param searchElement The element to search for
-     *
-     * @param fromIndex The position in this array at which to begin searching for searchElement
-     *
-     * @returns true if searchElement is in Uint32Array, false otherwise
-     */
     public includes(searchElement: long, fromIndex: int): boolean {
         return this.indexOf(searchElement.toInt(), fromIndex) != -1
     }
@@ -5285,6 +5272,19 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
+     * Determines whether Uint32Array includes a certain element, returning true or false as appropriate
+     *
+     * @param searchElement The element to search for
+     *
+     * @param fromIndex The position in this array at which to begin searching for searchElement
+     *
+     * @returns true if searchElement is in Uint32Array, false otherwise
+     */
+    public includes(searchElement: number, fromIndex?: int): boolean {
+        return this.indexOf(searchElement, asIntOrDefault(fromIndex, 0)) != -1
+    }
+
+    /**
      * Returns the index of the first occurrence of a value in Uint32Array.
      *
      * @param searchElement The value to locate in the array.
@@ -5294,8 +5294,8 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(searchElement: number, fromIndex?: int): int {
-            return this.indexOfImpl(searchElement, fromIndex ?? 0)
+    public indexOf(searchElement: int): int {
+        return this.indexOf(searchElement, 0)
     }
 
     /**
@@ -5313,7 +5313,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Returns the index of the first occurrence of a value in Array.
+     * Returns the index of the first occurrence of a value in Uint32Array.
      *
      * @param searchElement The value to locate in the array.
      *
@@ -5322,7 +5322,9 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    private final native indexOfImpl(searchElement: number, fromIndex: int): int
+    public indexOf(searchElement: number, fromIndex?: int): int {
+            return this.indexOfImpl(searchElement, fromIndex ?? 0)
+    }
 
     /**
      * Returns the index of the first occurrence of a value in Array.
@@ -5337,7 +5339,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     private final native indexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
-     * Returns the index of the first occurrence of a value in Uint32Array.
+     * Returns the index of the first occurrence of a value in Array.
      *
      * @param searchElement The value to locate in the array.
      *
@@ -5346,9 +5348,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(searchElement: int): int {
-        return this.indexOf(searchElement, 0)
-    }
+    private final native indexOfImpl(searchElement: number, fromIndex: int): int
 
     /**
      * Converts all elements of an array to strings and joins them using the specified separator.
@@ -5393,7 +5393,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: number): int {
+    public lastIndexOf(searchElement: int): int {
         return this.lastIndexOf(searchElement, this.lengthInt - 1)
     }
 
@@ -5407,8 +5407,8 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: number, fromIndex: int | undefined): int {
-            return this.lastIndexOfImpl(searchElement, fromIndex ?? 0)
+    public lastIndexOf(searchElement: number): int {
+        return this.lastIndexOf(searchElement, this.lengthInt - 1)
     }
 
     /**
@@ -5426,16 +5426,18 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Returns the index of the first occurrence of a value in Array.
+     * Returns the index of the last occurrence of a value in Uint32Array.
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     *  search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is omitted, the search begins at index length-1
      *
-     * @returns index of element if it presents, -1 otherwise
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    private final native lastIndexOfImpl(searchElement: number, fromIndex: int): int
+    public lastIndexOf(searchElement: number, fromIndex: int | undefined): int {
+            return this.lastIndexOfImpl(searchElement, fromIndex ?? 0)
+    }
 
     /**
      * Returns the index of the first occurrence of a value in Array.
@@ -5450,18 +5452,16 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     private final native lastIndexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
-     * Returns the index of the last occurrence of a value in Uint32Array.
+     * Returns the index of the first occurrence of a value in Array.
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
-     * search starts at index 0. If fromIndex is omitted, the search begins at index length-1
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
      *
-     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
+     * @returns index of element if it presents, -1 otherwise
      */
-    public lastIndexOf(searchElement: int): int {
-        return this.lastIndexOf(searchElement, this.lengthInt - 1)
-    }
+    private final native lastIndexOfImpl(searchElement: number, fromIndex: int): int
 
    /**
     * Creates a new Uint32Array using initializer
@@ -5667,8 +5667,8 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns an Uint32Array with replaced value on index
      */
-    public with(index: int, value: number): Uint32Array {
-        return this.withImpl(index, value.toLong())
+    public with(index: int, value: long): Uint32Array {
+        return this.withImpl(index, value)
     }
 
     /**
@@ -5680,8 +5680,8 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns an Uint32Array with replaced value on index
      */
-    public with(index: int, value: long): Uint32Array {
-        return this.withImpl(index, value)
+    public with(index: int, value: number): Uint32Array {
+        return this.withImpl(index, value.toLong())
     }
 
     /// === with element lambda functions ===
@@ -6105,6 +6105,72 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
     }
 
     /**
+     * Creates an BigUint64Array with respect to length.
+     *
+     * @param length data initializer
+     */
+    public constructor(length: int) {
+        this(length.toDouble())
+    }
+
+    /**
+     * Creates an BigUint64Array with respect to length.
+     *
+     * @param length data initializer
+     */
+    public constructor(length: number) {
+        if (length < 0 || length > (Int.MAX_VALUE / BigUint64Array.BYTES_PER_ELEMENT)) {
+            throw new TypeError("Type Error: length " + length + " is outside the bounds of the buffer")
+        }
+        this.lengthInt = length.toInt()
+        this.byteLengthInt = this.lengthInt * BigUint64Array.BYTES_PER_ELEMENT
+        this.byteOffsetInt = 0
+        this.buffer = new ArrayBuffer(this.byteLengthInt)
+    }
+
+    /**
+     * Creates an BigUint64Array from FixedArray<int>
+     */
+    public constructor(numbers: FixedArray<int>) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafeClamp(i, new BigInt(numbers[i]).getULong())
+        }
+    }
+
+    /**
+     * Creates an BigUint64Array from FixedArray<number>
+     */
+    public constructor(numbers: FixedArray<number>) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafe(i, new BigInt(numbers[i]).getULong())
+        }
+    }
+
+    /**
+     * Creates an BigUint64Array from FixedArray<bigint>
+     */
+    public constructor(numbers: FixedArray<bigint>) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafe(i, numbers[i].getULong())
+        }
+    }
+
+    /**
+     * Creates a copy of BigUint64Array.
+     *
+     * @param other data initializer
+     */
+    public constructor(other: BigUint64Array) {
+        this.buffer = other.buffer.slice(other.byteOffset, other.byteOffset + other.byteLength) as ArrayBuffer
+        this.byteLengthInt = other.byteLength
+        this.lengthInt = other.length
+        this.byteOffsetInt = 0
+    }
+
+    /**
      * Creates an BigUint64Array with respect to data accessed via Iterable<Number> interface
      */
     public constructor(elements: Iterable<BigInt>) {
@@ -6125,6 +6191,30 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
             this.buffer = x.buffer
             this.byteOffsetInt = x.byteOffsetInt
         }
+    }
+
+    /**
+     * Creates an BigUint64Array with respect to data, byteOffset and length.
+     *
+     * @param buf data initializer
+     *
+     * @param byteOffset byte offset from begin of the buf
+     *
+     * @param length size of elements of type long in newly created BigUint64Array
+     */
+    public constructor(buf: ArrayBufferLike, byteOffset: int, length: int) {
+        this(buf, new Number(byteOffset), new Number(length))
+    }
+
+    /**
+     * Creates an BigUint64Array with respect to buf and byteOffset.
+     *
+     * @param buf data initializer
+     *
+     * @param byteOffset byte offset from begin of the buf
+     */
+    public constructor(buf: ArrayBuffer, byteOffset: int) {
+        this(buf, new Number(byteOffset), undefined)
     }
 
     /**
@@ -6186,30 +6276,6 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
     }
 
     /**
-     * Creates an BigUint64Array with respect to data, byteOffset and length.
-     *
-     * @param buf data initializer
-     *
-     * @param byteOffset byte offset from begin of the buf
-     *
-     * @param length size of elements of type long in newly created BigUint64Array
-     */
-    public constructor(buf: ArrayBufferLike, byteOffset: int, length: int) {
-        this(buf, new Number(byteOffset), new Number(length))
-    }
-
-    /**
-     * Creates an BigUint64Array with respect to buf and byteOffset.
-     *
-     * @param buf data initializer
-     *
-     * @param byteOffset byte offset from begin of the buf
-     */
-    public constructor(buf: ArrayBuffer, byteOffset: int) {
-        this(buf, new Number(byteOffset), undefined)
-    }
-
-    /**
      * Creates an BigUint64Array with respect to buf.
      *
      * @param buf data initializer
@@ -6236,72 +6302,6 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
             }
         } else {
             throw new Error("unexpected type of buf")
-        }
-    }
-
-    /**
-     * Creates an BigUint64Array with respect to length.
-     *
-     * @param length data initializer
-     */
-    public constructor(length: int) {
-        this(length.toDouble())
-    }
-
-    /**
-     * Creates an BigUint64Array with respect to length.
-     *
-     * @param length data initializer
-     */
-    public constructor(length: number) {
-        if (length < 0 || length > (Int.MAX_VALUE / BigUint64Array.BYTES_PER_ELEMENT)) {
-            throw new TypeError("Type Error: length " + length + " is outside the bounds of the buffer")
-        }
-        this.lengthInt = length.toInt()
-        this.byteLengthInt = this.lengthInt * BigUint64Array.BYTES_PER_ELEMENT
-        this.byteOffsetInt = 0
-        this.buffer = new ArrayBuffer(this.byteLengthInt)
-    }
-
-    /**
-     * Creates a copy of BigUint64Array.
-     *
-     * @param other data initializer
-     */
-    public constructor(other: BigUint64Array) {
-        this.buffer = other.buffer.slice(other.byteOffset, other.byteOffset + other.byteLength) as ArrayBuffer
-        this.byteLengthInt = other.byteLength
-        this.lengthInt = other.length
-        this.byteOffsetInt = 0
-    }
-
-    /**
-     * Creates an BigUint64Array from FixedArray<number>
-     */
-    public constructor(numbers: FixedArray<number>) {
-        this(numbers.length)
-        for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafe(i, new BigInt(numbers[i]).getULong())
-        }
-    }
-
-    /**
-     * Creates an BigUint64Array from FixedArray<int>
-     */
-    public constructor(numbers: FixedArray<int>) {
-        this(numbers.length)
-        for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafeClamp(i, new BigInt(numbers[i]).getULong())
-        }
-    }
-
-    /**
-     * Creates an BigUint64Array from FixedArray<bigint>
-     */
-    public constructor(numbers: FixedArray<bigint>) {
-        this(numbers.length)
-        for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafe(i, numbers[i].getULong())
         }
     }
 
@@ -6353,9 +6353,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @param index index to change
      */
-    public $_set(index: int, val: BigInt): void {
-        this.$_set(index, val.getULong())
-    }
+    public native $_set(index: int, val: int): void
 
     /**
      * Assigns val as element on index.
@@ -6373,7 +6371,9 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @param index index to change
      */
-    public native $_set(index: int, val: int): void
+    public $_set(index: int, val: BigInt): void {
+        this.$_set(index, val.getULong())
+    }
 
     /**
      * Makes a copy of internal elements to targetPos from startPos to endPos.
@@ -6431,8 +6431,10 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @returns modified BigUint64Array
      */
-    public fill(value: BigInt, start?: int, end?: int): BigUint64Array {
-        this.fill(value.getULong(), start, end)
+    public fill(value: long, start?: int, end?: int): BigUint64Array {
+        const k = normalizeIndex(start ?? 0, this.lengthInt)
+        const finalPos = normalizeIndex(end ?? this.lengthInt, this.lengthInt)
+        this.fillInternal(value, k, finalPos)
         return this
     }
 
@@ -6443,25 +6445,12 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @returns modified BigUint64Array
      */
-    public fill(value: long, start?: int, end?: int): BigUint64Array {
-        const k = normalizeIndex(start ?? 0, this.lengthInt)
-        const finalPos = normalizeIndex(end ?? this.lengthInt, this.lengthInt)
-        this.fillInternal(value, k, finalPos)
+    public fill(value: BigInt, start?: int, end?: int): BigUint64Array {
+        this.fill(value.getULong(), start, end)
         return this
     }
 
     private final native fillInternal(value: long, start: int, end: int): void
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
-    public set(insertPos: int, val: BigInt): void {
-        this.$_set(insertPos, val)
-    }
 
     /**
      * Assigns val as element on index.
@@ -6475,21 +6464,14 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
     }
 
     /**
-     * Copies all elements of arr to the current BigUint64Array starting from insertPos.
+     * Assigns val as element on index.
      *
-     * @param arr array to copy data from
+     * @param val value to set
      *
-     * @param insertPos start index where data from arr will be inserted
-     *
-     * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
+     * @param index index to change
      */
-    public set(arr: FixedArray<BigInt>, insertPos: int): void {
-        if (insertPos < 0 || insertPos + arr.length > this.lengthInt) {
-            throw new RangeError("set(insertPos: int, arr: FixedArray<long>): size of arr is greater than BigUint64Array.length")
-        }
-        for (let i = 0; i < arr.length; i++) {
-            this.setUnsafe(insertPos + i, arr[i].getULong())
-        }
+    public set(insertPos: int, val: BigInt): void {
+        this.$_set(insertPos, val)
     }
 
     /**
@@ -6511,12 +6493,21 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
     }
 
     /**
-     * Copies all elements of arr to the current BigUint64Array.
+     * Copies all elements of arr to the current BigUint64Array starting from insertPos.
      *
      * @param arr array to copy data from
+     *
+     * @param insertPos start index where data from arr will be inserted
+     *
+     * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
-    public set(arr: FixedArray<BigInt>): void {
-        this.set(arr, 0)
+    public set(arr: FixedArray<BigInt>, insertPos: int): void {
+        if (insertPos < 0 || insertPos + arr.length > this.lengthInt) {
+            throw new RangeError("set(insertPos: int, arr: FixedArray<long>): size of arr is greater than BigUint64Array.length")
+        }
+        for (let i = 0; i < arr.length; i++) {
+            this.setUnsafe(insertPos + i, arr[i].getULong())
+        }
     }
 
     /**
@@ -6527,6 +6518,17 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
     public set(arr: FixedArray<long>): void {
         this.set(arr, 0)
     }
+
+    /**
+     * Copies all elements of arr to the current BigUint64Array.
+     *
+     * @param arr array to copy data from
+     */
+    public set(arr: FixedArray<BigInt>): void {
+        this.set(arr, 0)
+    }
+
+    private native final set(array: Array<BigInt>): void;
 
     public native set(array: BigUint64Array): void
 
@@ -6547,21 +6549,6 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
         for (let i = 0; i < array.length; ++i) {
             this.setUnsafe(insertPos + i, array[i].getULong())
         }
-    }
-
-    /**
-     * Returns a new array from a set of elements.
-     *
-     * @param items a set of elements to include in the new array object.
-     *
-     * @returns new BigUint64Array
-     */
-    public static of(...items: FixedArray<number>): BigUint64Array {
-        let res = new BigUint64Array(items.length.toInt())
-        for (let i: int = 0; i < items.length; i++) {
-            res.setUnsafeClamp(i, (new BigInt(items[i])).getULong())
-        }
-        return res
     }
 
     /**
@@ -6600,6 +6587,21 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
     public static of(...items: FixedArray<bigint>): BigUint64Array {
         let res = new BigUint64Array(items.length.toInt())
         res.ofBigInt(items)
+        return res
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new BigUint64Array
+     */
+    public static of(...items: FixedArray<number>): BigUint64Array {
+        let res = new BigUint64Array(items.length.toInt())
+        for (let i: int = 0; i < items.length; i++) {
+            res.setUnsafeClamp(i, (new BigInt(items[i])).getULong())
+        }
         return res
     }
 
@@ -6676,8 +6678,6 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
         result.ofBigInt(arr)
         return result
     }
-
-    private native final set(array: Array<BigInt>): void;
 
     /**
      * Creates an array from an object of escompat.Array<BigInt>.
@@ -6785,19 +6785,6 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @returns true if searchElement is in BigUint64Array, false otherwise
      */
-    public includes(searchElement: BigInt, fromIndex?: int): boolean {
-        return this.indexOf(searchElement, asIntOrDefault(fromIndex, 0)) != -1
-    }
-
-    /**
-     * Determines whether BigUint64Array includes a certain element, returning true or false as appropriate
-     *
-     * @param searchElement The element to search for
-     *
-     * @param fromIndex The position in this array at which to begin searching for searchElement
-     *
-     * @returns true if searchElement is in BigUint64Array, false otherwise
-     */
     public includes(searchElement: long, fromIndex: int): boolean {
         return this.indexOf(searchElement.toInt(), fromIndex) != -1
     }
@@ -6816,6 +6803,19 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
     }
 
     /**
+     * Determines whether BigUint64Array includes a certain element, returning true or false as appropriate
+     *
+     * @param searchElement The element to search for
+     *
+     * @param fromIndex The position in this array at which to begin searching for searchElement
+     *
+     * @returns true if searchElement is in BigUint64Array, false otherwise
+     */
+    public includes(searchElement: BigInt, fromIndex?: int): boolean {
+        return this.indexOf(searchElement, asIntOrDefault(fromIndex, 0)) != -1
+    }
+
+    /**
      * Returns the index of the first occurrence of a value in BigUint64Array.
      *
      * @param searchElement The value to locate in the array.
@@ -6825,8 +6825,8 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(searchElement: BigInt, fromIndex?: int): int {
-            return this.indexOfImpl(searchElement.getLong(), fromIndex ?? 0)
+    public indexOf(searchElement: int): int {
+        return this.indexOf(searchElement, 0)
     }
 
     /**
@@ -6844,7 +6844,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
     }
 
     /**
-     * Returns the index of the first occurrence of a value in Array.
+     * Returns the index of the first occurrence of a value in BigUint64Array.
      *
      * @param searchElement The value to locate in the array.
      *
@@ -6853,7 +6853,9 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    private final native indexOfImpl(searchElement: number, fromIndex: int): int
+    public indexOf(searchElement: BigInt, fromIndex?: int): int {
+            return this.indexOfImpl(searchElement.getLong(), fromIndex ?? 0)
+    }
 
     /**
      * Returns the index of the first occurrence of a value in Array.
@@ -6868,7 +6870,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
     private final native indexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
-     * Returns the index of the first occurrence of a value in BigUint64Array.
+     * Returns the index of the first occurrence of a value in Array.
      *
      * @param searchElement The value to locate in the array.
      *
@@ -6877,9 +6879,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(searchElement: int): int {
-        return this.indexOf(searchElement, 0)
-    }
+    private final native indexOfImpl(searchElement: number, fromIndex: int): int
 
     /**
      * Converts all elements of an array to strings and joins them using the specified separator.
@@ -6924,7 +6924,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: BigInt): int {
+    public lastIndexOf(searchElement: int): int {
         return this.lastIndexOf(searchElement, this.lengthInt - 1)
     }
 
@@ -6938,8 +6938,8 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: BigInt, fromIndex: int | undefined): int {
-            return this.lastIndexOfImpl(searchElement.getLong(), fromIndex ?? 0)
+    public lastIndexOf(searchElement: BigInt): int {
+        return this.lastIndexOf(searchElement, this.lengthInt - 1)
     }
 
     /**
@@ -6957,16 +6957,18 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
     }
 
     /**
-     * Returns the index of the first occurrence of a value in Array.
+     * Returns the index of the last occurrence of a value in BigUint64Array.
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     *  search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is omitted, the search begins at index length-1
      *
-     * @returns index of element if it presents, -1 otherwise
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    private final native lastIndexOfImpl(searchElement: number, fromIndex: int): int
+    public lastIndexOf(searchElement: BigInt, fromIndex: int | undefined): int {
+            return this.lastIndexOfImpl(searchElement.getLong(), fromIndex ?? 0)
+    }
 
     /**
      * Returns the index of the first occurrence of a value in Array.
@@ -6981,18 +6983,16 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
     private final native lastIndexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
-     * Returns the index of the last occurrence of a value in BigUint64Array.
+     * Returns the index of the first occurrence of a value in Array.
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
-     * search starts at index 0. If fromIndex is omitted, the search begins at index length-1
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
      *
-     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
+     * @returns index of element if it presents, -1 otherwise
      */
-    public lastIndexOf(searchElement: int): int {
-        return this.lastIndexOf(searchElement, this.lengthInt - 1)
-    }
+    private final native lastIndexOfImpl(searchElement: number, fromIndex: int): int
 
    /**
     * Creates a new BigUint64Array using initializer
@@ -7202,8 +7202,8 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @returns an BigUint64Array with replaced value on index
      */
-    public with(index: int, value: BigInt): BigUint64Array {
-        return this.withImpl(index, value.getULong())
+    public with(index: int, value: long): BigUint64Array {
+        return this.withImpl(index, value)
     }
 
     /**
@@ -7215,8 +7215,8 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @returns an BigUint64Array with replaced value on index
      */
-    public with(index: int, value: long): BigUint64Array {
-        return this.withImpl(index, value)
+    public with(index: int, value: BigInt): BigUint64Array {
+        return this.withImpl(index, value.getULong())
     }
 
     /// === with element lambda functions ===

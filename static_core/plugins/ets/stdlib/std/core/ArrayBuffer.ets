@@ -126,9 +126,12 @@ export class ArrayBuffer
      *
      * @returns data taken from current ArrayBuffer with respect to begin and end parameters
      */
-    public slice(begin: number, end?: number): ArrayBuffer {
-        if (end == undefined) return this.slice(begin.toInt())
-        else return this.slice(begin.toInt(), end.toInt())
+    public slice(begin: int, end?: int): ArrayBuffer {
+        if (this.detached) {
+            throw new TypeError("ArrayBuffer was detached")
+        }
+        if (end == undefined) return this.sliceInternal(begin, this.getByteLength()) as ArrayBuffer
+        else return this.sliceInternal(begin, end) as ArrayBuffer
     }
 
     /**
@@ -140,12 +143,9 @@ export class ArrayBuffer
      *
      * @returns data taken from current ArrayBuffer with respect to begin and end parameters
      */
-    public slice(begin: int, end?: int): ArrayBuffer {
-        if (this.detached) {
-            throw new TypeError("ArrayBuffer was detached")
-        }
-        if (end == undefined) return this.sliceInternal(begin, this.getByteLength()) as ArrayBuffer
-        else return this.sliceInternal(begin, end) as ArrayBuffer
+    public slice(begin: number, end?: number): ArrayBuffer {
+        if (end == undefined) return this.slice(begin.toInt())
+        else return this.slice(begin.toInt(), end.toInt())
     }
 
     /**
@@ -289,23 +289,6 @@ export class ArrayBuffer
     }
 
     /**
-    * Creates a new ArrayBuffer from an array of numbers.
-    *
-    * The numbers in the provided array are converted to bytes, and then a new ArrayBuffer is constructed
-    * using these bytes.
-    *
-    * @param {double[]} array - An array of numbers representing byte values.
-    * @returns {ArrayBuffer} A new ArrayBuffer containing the data from the array.
-    */
-    public static from(array: double[]): ArrayBuffer {
-        const buf = new ArrayBuffer(array.length)
-        for (let i = 0; i < array.length; ++i) {
-            buf.set(i, array[i].toByte())
-        }
-        return buf
-    }
-
-    /**
     * Creates a new ArrayBuffer from a Uint8Array.
     *
     * This method extracts the underlying ArrayBuffer from the provided Uint8Array and converts it
@@ -322,6 +305,23 @@ export class ArrayBuffer
         const result = new ArrayBuffer(arrBuff.byteLength)
         result.setValues(arrBuff, 0)
         return result
+    }
+
+    /**
+    * Creates a new ArrayBuffer from an array of numbers.
+    *
+    * The numbers in the provided array are converted to bytes, and then a new ArrayBuffer is constructed
+    * using these bytes.
+    *
+    * @param {double[]} array - An array of numbers representing byte values.
+    * @returns {ArrayBuffer} A new ArrayBuffer containing the data from the array.
+    */
+    public static from(array: double[]): ArrayBuffer {
+        const buf = new ArrayBuffer(array.length)
+        for (let i = 0; i < array.length; ++i) {
+            buf.set(i, array[i].toByte())
+        }
+        return buf
     }
 
     /**

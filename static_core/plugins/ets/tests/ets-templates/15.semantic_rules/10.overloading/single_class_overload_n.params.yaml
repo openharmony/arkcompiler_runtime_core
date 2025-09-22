@@ -16,6 +16,8 @@ cases:
   # Constructors
   - decl: |-
       constructor() { res = 1;}
+      constructor(i: boolean) { res = 17;}
+      constructor(i: byte) { res = 15;}
       constructor(i: short) { res = 2;}
       constructor(i: int) { res = 4;}
       constructor(i: long) { res = 6;}
@@ -23,8 +25,6 @@ cases:
       constructor(i: double) { res = 10;}
       constructor(i: char) { res = 12;}
       constructor(i: string) { res = 14;}
-      constructor(i: byte) { res = 15;}
-      constructor(i: boolean) { res = 17;}
       constructor(i: int, j: int) { res = 19;}
       constructor(i: Gen<T>) { res = 20;}
       constructor(i: Gen2<T, S>) { res = 21;}
@@ -134,6 +134,8 @@ cases:
   # Instance methods
   - decl: |-
       foo() { res = 1;}
+      foo(i: boolean) { res = 17;}
+      foo(i: byte) { res = 15;}
       foo(i: short) { res = 2;}
       foo(i: int) { res = 4;}
       foo(i: long) { res = 6;}
@@ -141,8 +143,6 @@ cases:
       foo(i: double) { res = 10;}
       foo(i: char) { res = 12;}
       foo(i: string) { res = 14;}
-      foo(i: byte) { res = 15;}
-      foo(i: boolean) { res = 17;}
       foo(i: int, j: int) { res = 19;}
       foo(i: Gen<T>) { res = 20;}
       foo(i: Gen2<T, S>) { res = 21;}
@@ -254,6 +254,8 @@ cases:
   # Static methods
   - decl: |-
       static foo() { res = 1;}
+      static foo(i: boolean) { res = 17;}
+      static foo(i: byte) { res = 15;}
       static foo(i: short) { res = 2;}
       static foo(i: int) { res = 4;}
       static foo(i: long) { res = 6;}
@@ -261,8 +263,6 @@ cases:
       static foo(i: double) { res = 10;}
       static foo(i: char) { res = 12;}
       static foo(i: string) { res = 14;}
-      static foo(i: byte) { res = 15;}
-      static foo(i: boolean) { res = 17;}
       static foo(i: int, j: int) { res = 19;}
       static foo(i: Number|undefined|null) { res = 20;}
     use: |-

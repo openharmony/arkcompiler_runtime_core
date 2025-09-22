@@ -22,16 +22,16 @@ class BA extends A {}
 class CBA extends BA {}
 class DA extends A {}
 
-function foo(p: Object): int {
-  return 1;
+function foo(p: BA): int {
+  return 3;
 }
 
 function foo(p: A): int {
   return 2;
 }
 
-function foo(p: BA): int {
-  return 3;
+function foo(p: Object): int {
+  return 1;
 }
 
 let a: CBA = new CBA();

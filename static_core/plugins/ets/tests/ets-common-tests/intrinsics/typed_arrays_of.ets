@@ -245,18 +245,18 @@ function testIU64OfBigInt() {
             18401708077435846657n));
 }
 
-function prepareTestData(length: int, from: number): FixedArray<number> {
-    let fixarr: FixedArray<number> = new number[length];
-    let v: number = from;
+function prepareTestData(length: int, from: int): FixedArray<int> {
+    let fixarr: FixedArray<int> = new int[length];
+    let v: int = from;
     for (let i = 0; i < length; i++) {
         fixarr[i] = v++;
     }
     return fixarr;
 }
 
-function prepareTestData(length: int, from: int): FixedArray<int> {
-    let fixarr: FixedArray<int> = new int[length];
-    let v: int = from;
+function prepareTestData(length: int, from: number): FixedArray<number> {
+    let fixarr: FixedArray<number> = new number[length];
+    let v: number = from;
     for (let i = 0; i < length; i++) {
         fixarr[i] = v++;
     }

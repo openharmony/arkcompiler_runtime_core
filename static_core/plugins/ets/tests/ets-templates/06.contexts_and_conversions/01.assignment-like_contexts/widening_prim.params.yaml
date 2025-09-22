@@ -29,14 +29,14 @@ cases:
   - { src_type: byte, src_val: 127, dst_type: double, dst_val: 127.0 }
   - { src_type: byte, src_val: -128, dst_type: double, dst_val: -128.0 }
 
-  - { src_type: char, src_val: Int.toChar(0), dst_type: int, dst_val: 0 }
-  - { src_type: char, src_val: "c'\\uFFFF'", dst_type: int, dst_val: 0x0000FFFF }
-  - { src_type: char, src_val: Int.toChar(0), dst_type: long, dst_val: 0 }
-  - { src_type: char, src_val: "c'\\uFFFF'", dst_type: long, dst_val: 0x000000000000FFFF }
-  - { src_type: char, src_val: Int.toChar(0), dst_type: float, dst_val: 0.0 }
-  - { src_type: char, src_val: "c'\\uFFFF'", dst_type: float, dst_val: 65535.0 }
-  - { src_type: char, src_val: Int.toChar(0), dst_type: double, dst_val: 0.0 }
-  - { src_type: char, src_val: "c'\\uFFFF'", dst_type: double, dst_val: 65535.0 }
+  - { src_type: char, src_val: Int.toChar(0), src_to_dst: "Char.toInt(src)", dst_type: int, dst_val: 0 }
+  - { src_type: char, src_val: "c'\\uFFFF'", src_to_dst: "Char.toInt(src)", dst_type: int, dst_val: 0x0000FFFF }
+  - { src_type: char, src_val: Int.toChar(0), src_to_dst: "Char.toLong(src)", dst_type: long, dst_val: 0 }
+  - { src_type: char, src_val: "c'\\uFFFF'", src_to_dst: "Char.toLong(src)", dst_type: long, dst_val: 0x000000000000FFFF }
+  - { src_type: char, src_val: Int.toChar(0), src_to_dst: "Char.toFloat(src)", dst_type: float, dst_val: 0.0 }
+  - { src_type: char, src_val: "c'\\uFFFF'", src_to_dst: "Char.toFloat(src)", dst_type: float, dst_val: 65535.0 }
+  - { src_type: char, src_val: Int.toChar(0), src_to_dst: "Char.toDouble(src)", dst_type: double, dst_val: 0.0 }
+  - { src_type: char, src_val: "c'\\uFFFF'", src_to_dst: "Char.toDouble(src)", dst_type: double, dst_val: 65535.0 }
 
   - { src_type: short, src_val: 0, dst_type: int, dst_val: 0 }
   - { src_type: short, src_val: 32_767, dst_type: int, dst_val: 32_767 }

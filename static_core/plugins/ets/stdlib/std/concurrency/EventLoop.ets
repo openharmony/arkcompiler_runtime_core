@@ -181,10 +181,6 @@ class TimerTable {
         this.timers = new Map<TimerId, Timer>();
     }
 
-    public createTimer(callback: Object, delay: int, repeat: boolean, linkedTimer: long): Timer {
-        return this.createTimer(callback as Callback, delay, repeat, linkedTimer);
-    }
-
     public createTimer(callback: Callback, delay: int, repeat: boolean, linkedTimer: long): Timer {
         let timer: Timer | undefined;
         ConcurrencyHelpers.spinlockGuard(this.tableSpinlock, () => {
@@ -193,6 +189,10 @@ class TimerTable {
             this.timers.set(timerId, timer!);
         });
         return timer!;
+    }
+
+    public createTimer(callback: Object, delay: int, repeat: boolean, linkedTimer: long): Timer {
+        return this.createTimer(callback as Callback, delay, repeat, linkedTimer);
     }
 
     public findTimer(id: TimerId): Timer | undefined {

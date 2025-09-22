@@ -72,39 +72,22 @@ export function createFromJSONValue(this: Char, json: JSONValue): Char {
 }
 
 /**
- * Creates a Double instance based on JSONValue
+ * Creates a Short instance based on JSONValue
  *
  * @param json: JSONValue - a JSON representation
  *
- * @throws JSONTypeError if json does not encode a valid double
+ * @throws JSONTypeError if json does not encode a valid short
  *
- * @returns Double - double value decoded from JSON
- * @tag arkts
+ * @returns Short - short value decoded from JSON
  */
-export function createFromJSONValue(this: Double, json: JSONValue): Double {
+export function createFromJSONValue(this: Short, json: JSONValue): Short {
     if (json instanceof JSONNumber) {
-        return Double.valueOf((json as JSONNumber).value)
-    }
-    throw new JSONTypeError('Cannot create Double from JSON', {cause: json as Object} as ErrorOptions)
-}
-
-/**
- * Creates a Float instance based on JSONValue
- *
- * @param json: JSONValue - a JSON representation
- *
- * @throws JSONTypeError if json does not encode a valid float
- *
- * @returns Float - float value decoded from JSON
- */
-export function createFromJSONValue(this: Float, json: JSONValue): Float {
-    if (json instanceof JSONNumber) {
-        let val = (json as JSONNumber).value
-        if (-Float.MAX_VALUE <= val && val <= Float.MAX_VALUE) {
-            return Float.valueOf(((json as JSONNumber).value).toFloat())
+        let num = (json as JSONNumber).value
+        if (Double.isInteger(num) && Short.MIN_VALUE <= num && num <= Short.MAX_VALUE) {
+            return Short.valueOf(num.toShort())
         }
     }
-    throw new JSONTypeError('Cannot create Double from JSON', {cause: json as Object} as ErrorOptions)
+    throw new JSONTypeError('Cannot create Short from JSON', {cause: json as Object} as ErrorOptions)
 }
 
 /**
@@ -146,22 +129,39 @@ export function createFromJSONValue(this: Long, json: JSONValue): Long {
 }
 
 /**
- * Creates a Short instance based on JSONValue
+ * Creates a Float instance based on JSONValue
  *
  * @param json: JSONValue - a JSON representation
  *
- * @throws JSONTypeError if json does not encode a valid short
+ * @throws JSONTypeError if json does not encode a valid float
  *
- * @returns Short - short value decoded from JSON
+ * @returns Float - float value decoded from JSON
  */
-export function createFromJSONValue(this: Short, json: JSONValue): Short {
+export function createFromJSONValue(this: Float, json: JSONValue): Float {
     if (json instanceof JSONNumber) {
-        let num = (json as JSONNumber).value
-        if (Double.isInteger(num) && Short.MIN_VALUE <= num && num <= Short.MAX_VALUE) {
-            return Short.valueOf(num.toShort())
+        let val = (json as JSONNumber).value
+        if (-Float.MAX_VALUE <= val && val <= Float.MAX_VALUE) {
+            return Float.valueOf(((json as JSONNumber).value).toFloat())
         }
     }
-    throw new JSONTypeError('Cannot create Short from JSON', {cause: json as Object} as ErrorOptions)
+    throw new JSONTypeError('Cannot create Double from JSON', {cause: json as Object} as ErrorOptions)
+}
+
+/**
+ * Creates a Double instance based on JSONValue
+ *
+ * @param json: JSONValue - a JSON representation
+ *
+ * @throws JSONTypeError if json does not encode a valid double
+ *
+ * @returns Double - double value decoded from JSON
+ * @tag arkts
+ */
+export function createFromJSONValue(this: Double, json: JSONValue): Double {
+    if (json instanceof JSONNumber) {
+        return Double.valueOf((json as JSONNumber).value)
+    }
+    throw new JSONTypeError('Cannot create Double from JSON', {cause: json as Object} as ErrorOptions)
 }
 
 /**

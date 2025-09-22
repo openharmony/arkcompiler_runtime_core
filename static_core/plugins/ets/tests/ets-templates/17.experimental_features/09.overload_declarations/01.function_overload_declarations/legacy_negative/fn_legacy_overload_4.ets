@@ -15,7 +15,6 @@ limitations under the License.
 
 /*---
 desc: ArkTS supports the following two overloading mechanisms overload signatures and overload declarations. Legacy overload must be removed.
-tags: [compile-only, negative]
 ---*/
 
 function foo(a: int, ...p: int[]): int {
@@ -31,5 +30,5 @@ function foo(a: boolean, ...p: int[]): int {
 }
 
 function main(): void {
-  arktest.assertNE(foo(1), 0);
+  arktest.assertEQ(foo(1), 1);
 }

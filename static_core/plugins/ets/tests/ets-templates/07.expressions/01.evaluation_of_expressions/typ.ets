@@ -48,9 +48,6 @@ function foo(a: boolean): int {
 function foo(a: string): int {
   return 31;
 }
-function foo(a: Object): int {
-  return 32;
-}
 function foo(a: FixedArray<byte>): int {
   return 101;
 }
@@ -74,6 +71,9 @@ function foo(a: FixedArray<double>): int {
 }
 function foo(a: FixedArray<boolean>): int {
   return 108;
+}
+function foo(a: Object): int {
+  return 32;
 }
 
 {{c.defs}}

@@ -23,7 +23,7 @@ params: from {{c.from_type}} to {{c.to_type}}
 function main(): void {
 {%- for v in c['values'] %}
     let s{{loop.index}}: {{c.from_type}} = {{v.expr|safe}}
-    arktest.assertEQ(((p: {{c.to_type}}): {{c.to_type}} => { return p })(s{{loop.index}}), {{v.val}})
+    arktest.assertEQ(((p: {{c.to_type}}): {{c.to_type}} => { return p })({% if c.type_trans is defined %}{{c.type_trans|safe}}(s{{loop.index}}){% else %}s{{loop.index}}{% endif %}), {{v.val}})
 {%- endfor %}
 }
 {%- endfor %}

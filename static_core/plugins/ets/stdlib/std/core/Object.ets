@@ -426,24 +426,6 @@ export class Object {
     }
 
     /**
-    * Determines whether an object has a field with the specified name
-    *
-    * @param key the string name of the field to test
-    *
-    * @returns true if the object has the specified field; false otherwise
-    */
-    public hasOwnProperty(key: string): boolean {
-        const keys = Object.getOwnPropertyNames(this)
-        const len = keys.length
-        for(let i = 0; i < len; i++) {
-            if (keys[i] == key) {
-                return true
-            }
-        }
-        return false
-    }
-
-    /**
     * Determines whether an object has a element with the specified index
     *
     * @param index the number index of the element to test
@@ -476,6 +458,24 @@ export class Object {
             let arr = this as Array<Any>
             let len = arr.length
             return (0 <= idx && idx < len)
+        }
+        return false
+    }
+
+    /**
+    * Determines whether an object has a field with the specified name
+    *
+    * @param key the string name of the field to test
+    *
+    * @returns true if the object has the specified field; false otherwise
+    */
+    public hasOwnProperty(key: string): boolean {
+        const keys = Object.getOwnPropertyNames(this)
+        const len = keys.length
+        for(let i = 0; i < len; i++) {
+            if (keys[i] == key) {
+                return true
+            }
         }
         return false
     }

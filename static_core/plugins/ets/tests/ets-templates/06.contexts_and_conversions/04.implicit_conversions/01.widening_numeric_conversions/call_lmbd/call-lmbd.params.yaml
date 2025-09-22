@@ -61,6 +61,7 @@ cases:
           - { expr: 0b0 as byte, val: "c'\\u0000'" }
           - { expr: Byte.MIN_VALUE, val: "c'\\uFF80'" }
           - { expr: Byte.MAX_VALUE, val: "c'\\u007F'" }
+      type_trans: "Byte.toChar"
 
     - from_type: short
       to_type: int
@@ -162,6 +163,7 @@ cases:
           - { expr: "c'\\u0000'", val: 0 }
           - { expr: "c'\\u0FFF'", val: 4095 }
           - { expr: "c'\\uFFFF'", val: 65535 }
+      type_trans: "Char.toInt"
 
     - from_type: char
       to_type: long
@@ -169,6 +171,7 @@ cases:
           - { expr: "c'\\u0000'", val: 0 }
           - { expr: "c'\\u0FFF'", val: 4095 }
           - { expr: "c'\\uFFFF'", val: 65535 }
+      type_trans: "Char.toLong"
 
     - from_type: char
       to_type: float
@@ -176,6 +179,7 @@ cases:
           - { expr: "c'\\u0000'", val: 0.0f }
           - { expr: "c'\\u0FFF'", val: 4095.0f }
           - { expr: "c'\\uFFFF'", val: 65535.0f }
+      type_trans: "Char.toFloat"
 
     - from_type: char
       to_type: double
@@ -183,6 +187,7 @@ cases:
           - { expr: "c'\\u0000'", val: 0.0 }
           - { expr: "c'\\u0FFF'", val: 4095.0 }
           - { expr: "c'\\uFFFF'", val: 65535.0 }
+      type_trans: "Char.toDouble"
 
     - from_type: Color
       to_type: int

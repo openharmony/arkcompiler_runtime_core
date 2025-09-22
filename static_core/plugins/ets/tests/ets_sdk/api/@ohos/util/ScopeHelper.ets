@@ -22,12 +22,13 @@ class NumberType implements util.ScopeType<NumberType> {
     }
     
     // NOTE (aleksander-sotov): Remove after internal issue #22930 fix
-    compareTo(other: Object): boolean {
-       return this.compareTo(other as NumberType)
-    }
-   
+
     compareTo(other: NumberType): boolean {
        	return this.n >= other.n
+    }
+
+    compareTo(other: Object): boolean {
+       return this.compareTo(other as NumberType)
     }
    
     toString(): string {

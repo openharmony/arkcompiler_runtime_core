@@ -1619,10 +1619,150 @@ export class JSONParser {
      * @throws SyntaxError if JSON is invalid
      *
      */
+    private parse(res: JSONNumber): JSONNumber {
+        let number = new StringBuilder()
+        let posCopy = this.curPos.makeCopy()
+        do {
+            number.append(this.curChar)
+            posCopy = this.curPos.makeCopy()
+        } while (this.getNextChar() && (Char.isDecDigit(this.curChar) ||
+                                               this.curChar == c'.' ||
+                                               this.curChar == c'e' ||
+                                               this.curChar == c'-' ||
+                                               this.curChar == c'+' ))
+        res.value = Double.parseFloat(number.toString())
+        try {
+            res.bigintValue = new BigInt(number.toString())
+        } catch (e) {
+            res.bigintValue = new BigInt()
+        }
+        this.curPos.restoreFromCopy(posCopy)
+        return res
+    }
+
+    private parse(res: JSONString): JSONString {
+        let resBuilder: StringBuilder = new StringBuilder()
+        let hasMetEscape: boolean = false
+        this.escapeWhitespaces = false
+        while (this.getNextChar() && ((this.curChar != JSONString.END_CHAR) || (this.curChar == JSONString.END_CHAR && hasMetEscape))) {
+            if (!hasMetEscape) {
+                if (this.curChar != c'\\') {
+                    resBuilder.append(this.curChar)
+                }
+            } else {
+                let escapedCharIndex = indexOf(JSONParser.CAN_BE_ESCAPED_CHARS, this.curChar, 0)
+                if (escapedCharIndex != -1) {
+                    resBuilder.append(JSONParser.ESCAPED_CHARS[escapedCharIndex])
+                } else {
+                    throw new SyntaxError("Bad escape sequence \\" + this.curChar + " at " + this.getCurPosDescr())
+                }
+            }
+            hasMetEscape = hasMetEscape ? false : this.curChar == c'\\'
+        }
+        if (this.curChar == JSONString.END_CHAR) {
+            res.value = resBuilder.toString()
+        } else {
+            throw new SyntaxError("Unexpected end of String at " + this.getCurPosDescr())
+        }
+        this.escapeWhitespaces = true
+        return res
+    }
+
     static parse(json: String): JSONValue {
         let parser = new JSONParser(json)
         let res: JSONValue = new JSONValue()
         return parser.parse(res)
+    }
+
+    private parse(res: JSONTrue): JSONTrue {
+        let metTrue = this.getNextChar() && this.curChar == c'r'
+                    && this.getNextChar() && this.curChar == c'u'
+                    && this.getNextChar() && this.curChar == c'e'
+        if (!metTrue) {
+            throw new SyntaxError("Expected true at " + this.getCurPosDescr())
+        }
+        return res
+    }
+
+    private parse(res: JSONFalse): JSONFalse {
+        let metFalse = this.getNextChar() && this.curChar == c'a'
+                    && this.getNextChar() && this.curChar == c'l'
+                    && this.getNextChar() && this.curChar == c's'
+                    && this.getNextChar() && this.curChar == c'e'
+        if (!metFalse) {
+            throw new SyntaxError("Expected false at " + this.getCurPosDescr())
+        }
+        return res
+    }
+
+    private parse(res: JSONNull): JSONNull {
+        let metNull = this.getNextChar() && this.curChar == c'u'
+                    && this.getNextChar() && this.curChar == c'l'
+                    && this.getNextChar() && this.curChar == c'l'
+        if (!metNull) {
+            throw new SyntaxError("Expected null at " + this.getCurPosDescr())
+        }
+        return res
+    }
+
+    private parse(res: JSONArray): JSONArray {
+        let posCopy = this.curPos.makeCopy()
+        this.getNextChar()
+        if (this.curChar == JSONArray.END_CHAR) {
+            return res
+        }
+        this.curPos.restoreFromCopy(posCopy)
+
+        res.values.push(this.parse(new JSONValue()))
+        // Parse JSONArray until ]
+        while (this.getNextChar()) {
+            switch (this.curChar) {
+                case c',':
+                    res.values.push(this.parse(new JSONValue()))
+                    break
+                // TODO(ivan-tyulyandin): replace by JSONArray.END_CHAR, frontend bug
+                case c']':
+                    return res
+                default:
+                    throw new SyntaxError("Expected , or " + JSONArray.END_CHAR.toString() + " at " + this.getCurPosDescr() + ", got " + this.curChar.toString())
+            }
+        }
+        return res
+    }
+
+    private parseKeyValue(res: JSONObject): JSONObject {
+        res.keys_.push(this.parse(new JSONValue()) as JSONString)
+        this.getNextChar()
+        if (this.curChar  != c':') {
+            throw new SyntaxError("Expected : \",\" at " + this.getCurPosDescr() + " got \"" + this.curChar + "\"")
+        }
+        res.values.push(this.parse(new JSONValue()))
+        return res
+    }
+
+    private parse(res: JSONObject): JSONObject {
+        let posCopy = this.curPos.makeCopy()
+        this.getNextChar()
+        if (this.curChar == JSONObject.END_CHAR) {
+            return res
+        }
+        this.curPos.restoreFromCopy(posCopy)
+
+        res = this.parseKeyValue(res)
+        // Parse JSONObject until }
+        while (this.getNextChar()) {
+            switch (this.curChar) {
+                case c',':
+                    res = this.parseKeyValue(res)
+                    break
+                // TODO(ivan-tyulyandin): replace by JSONObject.END_CHAR, frontend bug
+                case c'}':
+                    return res
+                default:
+                    throw new SyntaxError("Expected \",\" or \"" + JSONObject.END_CHAR.toString() + "\" at " + this.getCurPosDescr() + ", got \"" + this.curChar.toString() + "\"")
+            }
+        }
+        return res
     }
 
     private parse(res: JSONValue): JSONValue {
@@ -1663,148 +1803,8 @@ export class JSONParser {
         return res
     }
 
-    private parseKeyValue(res: JSONObject): JSONObject {
-        res.keys_.push(this.parse(new JSONValue()) as JSONString)
-        this.getNextChar()
-        if (this.curChar  != c':') {
-            throw new SyntaxError("Expected : \",\" at " + this.getCurPosDescr() + " got \"" + this.curChar + "\"")
-        }
-        res.values.push(this.parse(new JSONValue()))
-        return res
-    }
-
-    private parse(res: JSONObject): JSONObject {
-        let posCopy = this.curPos.makeCopy()
-        this.getNextChar()
-        if (this.curChar == JSONObject.END_CHAR) {
-            return res
-        }
-        this.curPos.restoreFromCopy(posCopy)
-
-        res = this.parseKeyValue(res)
-        // Parse JSONObject until }
-        while (this.getNextChar()) {
-            switch (this.curChar) {
-                case c',':
-                    res = this.parseKeyValue(res)
-                    break
-                // TODO(ivan-tyulyandin): replace by JSONObject.END_CHAR, frontend bug
-                case c'}':
-                    return res
-                default:
-                    throw new SyntaxError("Expected \",\" or \"" + JSONObject.END_CHAR.toString() + "\" at " + this.getCurPosDescr() + ", got \"" + this.curChar.toString() + "\"")
-            }
-        }
-        return res
-    }
-
-    private parse(res: JSONArray): JSONArray {
-        let posCopy = this.curPos.makeCopy()
-        this.getNextChar()
-        if (this.curChar == JSONArray.END_CHAR) {
-            return res
-        }
-        this.curPos.restoreFromCopy(posCopy)
-
-        res.values.push(this.parse(new JSONValue()))
-        // Parse JSONArray until ]
-        while (this.getNextChar()) {
-            switch (this.curChar) {
-                case c',':
-                    res.values.push(this.parse(new JSONValue()))
-                    break
-                // TODO(ivan-tyulyandin): replace by JSONArray.END_CHAR, frontend bug
-                case c']':
-                    return res
-                default:
-                    throw new SyntaxError("Expected , or " + JSONArray.END_CHAR.toString() + " at " + this.getCurPosDescr() + ", got " + this.curChar.toString())
-            }
-        }
-        return res
-    }
-
-    private parse(res: JSONNumber): JSONNumber {
-        let number = new StringBuilder()
-        let posCopy = this.curPos.makeCopy()
-        do {
-            number.append(this.curChar)
-            posCopy = this.curPos.makeCopy()
-        } while (this.getNextChar() && (Char.isDecDigit(this.curChar) ||
-                                               this.curChar == c'.' ||
-                                               this.curChar == c'e' ||
-                                               this.curChar == c'-' ||
-                                               this.curChar == c'+' ))
-        res.value = Double.parseFloat(number.toString())
-        try {
-            res.bigintValue = new BigInt(number.toString())
-        } catch (e) {
-            res.bigintValue = new BigInt()
-        }
-        this.curPos.restoreFromCopy(posCopy)
-        return res
-    }
-
     private static readonly CAN_BE_ESCAPED_CHARS: FixedArray<char> = [c'"', c'\\', c'/', c'b', c'f', c'n', c'r', c't']
     private static readonly ESCAPED_CHARS: FixedArray<char> = [c'\"', c'\\', c'\/', c'\b', c'\f', c'\n', c'\r', c'\t']
-
-    private parse(res: JSONString): JSONString {
-        let resBuilder: StringBuilder = new StringBuilder()
-        let hasMetEscape: boolean = false
-        this.escapeWhitespaces = false
-        while (this.getNextChar() && ((this.curChar != JSONString.END_CHAR) || (this.curChar == JSONString.END_CHAR && hasMetEscape))) {
-            if (!hasMetEscape) {
-                if (this.curChar != c'\\') {
-                    resBuilder.append(this.curChar)
-                }
-            } else {
-                let escapedCharIndex = indexOf(JSONParser.CAN_BE_ESCAPED_CHARS, this.curChar, 0)
-                if (escapedCharIndex != -1) {
-                    resBuilder.append(JSONParser.ESCAPED_CHARS[escapedCharIndex])
-                } else {
-                    throw new SyntaxError("Bad escape sequence \\" + this.curChar + " at " + this.getCurPosDescr())
-                }
-            }
-            hasMetEscape = hasMetEscape ? false : this.curChar == c'\\'
-        }
-        if (this.curChar == JSONString.END_CHAR) {
-            res.value = resBuilder.toString()
-        } else {
-            throw new SyntaxError("Unexpected end of String at " + this.getCurPosDescr())
-        }
-        this.escapeWhitespaces = true
-        return res
-    }
-
-    private parse(res: JSONTrue): JSONTrue {
-        let metTrue = this.getNextChar() && this.curChar == c'r'
-                    && this.getNextChar() && this.curChar == c'u'
-                    && this.getNextChar() && this.curChar == c'e'
-        if (!metTrue) {
-            throw new SyntaxError("Expected true at " + this.getCurPosDescr())
-        }
-        return res
-    }
-
-    private parse(res: JSONFalse): JSONFalse {
-        let metFalse = this.getNextChar() && this.curChar == c'a'
-                    && this.getNextChar() && this.curChar == c'l'
-                    && this.getNextChar() && this.curChar == c's'
-                    && this.getNextChar() && this.curChar == c'e'
-        if (!metFalse) {
-            throw new SyntaxError("Expected false at " + this.getCurPosDescr())
-        }
-        return res
-    }
-
-    private parse(res: JSONNull): JSONNull {
-        let metNull = this.getNextChar() && this.curChar == c'u'
-                    && this.getNextChar() && this.curChar == c'l'
-                    && this.getNextChar() && this.curChar == c'l'
-        if (!metNull) {
-            throw new SyntaxError("Expected null at " + this.getCurPosDescr())
-        }
-        return res
-    }
 }
 
 class JSONValueParser {

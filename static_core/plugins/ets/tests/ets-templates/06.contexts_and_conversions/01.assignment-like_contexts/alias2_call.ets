@@ -17,6 +17,7 @@
 /*---
 desc: Invocation contexts followed by a widening primitive conversion.
 params: from '{{c.ref_type}}' to '{{c.type}}'
+tags: [{{c.tags}}]
 ---*/
 
 class A {

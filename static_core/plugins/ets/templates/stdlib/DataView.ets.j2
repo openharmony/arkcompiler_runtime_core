@@ -112,19 +112,6 @@ export final class DataView implements ArrayBufferView {
 
     {%- else %}
 
-    /**
-     * Sets bytes as they represent given type
-     * @param byteOffset zero index to write
-     * @param littleEndian read as little or big endian
-     */
-    public set{{methodName}}(byteOffset: int, value: {{type2nameCompat[bit]}}, littleEndian?: boolean): void {
-        if (littleEndian !== undefined && littleEndian.valueOf() == true) {
-            this.set{{methodName}}Little(byteOffset, value)
-        } else {
-            this.set{{methodName}}Big(byteOffset, value)
-        }
-    }
-
     {%- if type2nameCompat[bit] != type2name[bit] %}
 
     /**
@@ -140,6 +127,19 @@ export final class DataView implements ArrayBufferView {
         }
     }
     {%- endif %}
+
+    /**
+     * Sets bytes as they represent given type
+     * @param byteOffset zero index to write
+     * @param littleEndian read as little or big endian
+     */
+    public set{{methodName}}(byteOffset: int, value: {{type2nameCompat[bit]}}, littleEndian?: boolean): void {
+        if (littleEndian !== undefined && littleEndian.valueOf() == true) {
+            this.set{{methodName}}Little(byteOffset, value)
+        } else {
+            this.set{{methodName}}Big(byteOffset, value)
+        }
+    }
 
     /**
      * Read bytes as they represent given type

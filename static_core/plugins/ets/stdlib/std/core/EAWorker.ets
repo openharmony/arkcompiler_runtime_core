@@ -253,14 +253,13 @@ export class EAWorker {
         return this.worker.run<R>(task, ...args);
     }
 
-    public static postToMain<R>(coroFun: Function, ...args: FixedArray<Any>) : Job<R> {
-        return EAWorker.postTaskToMain<R>(coroFun, args as FixedArray<Any>, false);
-    }
-
     public static postToMain<R>(coroFun: Function, launchParams: LaunchParams, ...args: FixedArray<Any>) : Job<R> {
         return EAWorker.postTaskToMain<R>(coroFun, args as FixedArray<Any>, launchParams.abortFlag);
     }
 
+    public static postToMain<R>(coroFun: Function, ...args: FixedArray<Any>) : Job<R> {
+        return EAWorker.postTaskToMain<R>(coroFun, args as FixedArray<Any>, false);
+    }
     /**
      * Post task to main worker
      * Note: it has no effect if EAWorker was stoped

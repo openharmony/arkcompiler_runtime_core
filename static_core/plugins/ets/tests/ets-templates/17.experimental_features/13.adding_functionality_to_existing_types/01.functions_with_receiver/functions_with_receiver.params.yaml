@@ -108,8 +108,8 @@ cases:
   - decl: |
       class A {}
       class B extends A {}
-      function f(this: A): number { return 1 }
       function f(this: B): number { return 2 }
+      function f(this: A): number { return 1 }
     use: |
       let a: A = new A()
       let b: B = new B()
@@ -120,8 +120,8 @@ cases:
   - decl: |
       class A {}
       class B extends A {}
-      function f(this: A): number { return 1 }
       function f(this: B): number { return 2 }
+      function f(this: A): number { return 1 }
     use: |
       let a: A = new A()
       let b: B = new B()

@@ -26,6 +26,10 @@ desc: >-
 enum Colors {Red, Blue=-2}
 type TPL = [number, string]
 
+function foo(i: Colors) {
+    return 23;
+}
+
 function foo(i: byte) {
     return 1;
 }
@@ -60,10 +64,6 @@ function foo(i: boolean) {
 
 function foo(i: int[]) {
     return 21;
-}
-
-function foo(i: Colors) {
-    return 23;
 }
 
 function foo(i: TPL) {

@@ -38,19 +38,22 @@ cases:
   - src_type: Char
     dst_type: Int
     values: ["c'\\u0000'", "c'X'", "c'\\uffff'"]
+    tags: 'compile-only, negative'
 
   - src_type: Char
     dst_type: Long
     values: ["c'\\u0000'", "c'X'", "c'\\uffff'"]
+    tags: 'compile-only, negative'
 
   - src_type: Char
     dst_type: Float
     values: ["c'\\u0000'", "c'X'", "c'\\uffff'"]
+    tags: 'compile-only, negative'
 
   - src_type: Char
     dst_type: Double
     values: ["c'\\u0000'", "c'X'", "c'\\uffff'"]
-
+    tags: 'compile-only, negative'
 
   - src_type: Short
     dst_type: Int

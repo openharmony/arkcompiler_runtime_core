@@ -34,6 +34,30 @@ type CoroFunT<A, R> = (
   a15: A
 ) => R;
 
+
+/**
+ * @class LaunchParams Class for coroutine launch params.
+ */
+export class LaunchParams {
+  /** @property { boolean } abortFlag if true, aborts the program if unhandled exception were thrown inside the coroutine. */
+  abortFlag: boolean = false;
+  /** @property { WorkerGroupId } workerGroupId unique ID of the coroutine worker group that will host the newly created coroutine. */
+  workerGroupId: WorkerGroupId = WorkerGroup.ANY_ID;
+}
+
+/**
+ * Launch new coroutine with LaunchParams
+ *
+ * @param coroFun entrypoint of the the new coroutine.
+ * @param launchParams parameters of the new coroutine.
+ * @param args arguments for the function coroFun.
+ *
+ * @returns instance of the Job class that represents newly launched coroutine.
+ */
+export function launch<R, F extends CoroFunT<never, R>>(coroFun: F, launchParams: LaunchParams, ...args: FixedArray<Any>): Job<R> {
+  return launchInternal<R, F>(coroFun, args as FixedArray<Any>, launchParams);
+}
+
 /**
  * This function is used to launch new coroutines.
  *
@@ -98,29 +122,6 @@ export class WorkerGroup {
      * @returns an ID of the worker group to be used in launch()
      */
     private static native generateGroupIdImpl(domain: int, hint: Array<int>): FixedArray<long>;
-}
-
-/**
- * @class LaunchParams Class for coroutine launch params.
- */
-export class LaunchParams {
-  /** @property { boolean } abortFlag if true, aborts the program if unhandled exception were thrown inside the coroutine. */
-  abortFlag: boolean = false;
-  /** @property { WorkerGroupId } workerGroupId unique ID of the coroutine worker group that will host the newly created coroutine. */
-  workerGroupId: WorkerGroupId = WorkerGroup.ANY_ID;
-}
-
-/**
- * Launch new coroutine with LaunchParams
- *
- * @param coroFun entrypoint of the the new coroutine.
- * @param launchParams parameters of the new coroutine.
- * @param args arguments for the function coroFun.
- *
- * @returns instance of the Job class that represents newly launched coroutine.
- */
-export function launch<R, F extends CoroFunT<never, R>>(coroFun: F, launchParams: LaunchParams, ...args: FixedArray<Any>): Job<R> {
-  return launchInternal<R, F>(coroFun, args as FixedArray<Any>, launchParams);
 }
 
 /**

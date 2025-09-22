@@ -47,8 +47,8 @@ class A1 {
 class A2 extends A1 {
     static create(): A1 { return new A2() }
 
-    p1(a: T1): void { }
     n1(a: T2): void { }
+    p1(a: T1): void { }
     p2(): T2 { return new T2() }
     // n2(): T1 { return new T1() }
 }
@@ -71,8 +71,8 @@ class BInterm extends B1 { }
 class B2 extends BInterm {
     static create(): B1 { return new B2() }
 
-    p1(a: B1): void { }
     n1(a: B2): void { }
+    p1(a: B1): void { }
     p2(): B2 { return new B2() }
 }
 function loops() {
@@ -86,9 +86,9 @@ function loops() {
 }
 
 class C1 {
-    m(a: T0): void { stub() }
-    m(a: T1): void { stub() }
     m(a: T2): void { stub() }
+    m(a: T1): void { stub() }
+    m(a: T0): void { stub() }
 }
 class C2 extends C1 {
     static create(): C1 { return new C2() }

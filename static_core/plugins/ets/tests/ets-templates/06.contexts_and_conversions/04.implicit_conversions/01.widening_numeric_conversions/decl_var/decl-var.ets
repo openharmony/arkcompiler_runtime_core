@@ -17,6 +17,7 @@
 /*---
 desc: Declaration context, variable declaration, widening primitive conversion, implicit
 params: from {{c.from_type}} to {{c.to_type}}
+tags: [{{c.tags}}]
 ---*/
 {{c.defs}}
 

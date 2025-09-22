@@ -388,6 +388,70 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
         return [data, buckets]
     }
 
+    // NOTE: This API may be removed someday due #28030 internal issue
+    constructor(initialCapacity: int) {
+        const capacity = Map.adjustCapacity(initialCapacity)
+        const alloc = this.allocDataAndBuckets(capacity)
+        this.data = alloc[0]
+        this.buckets = alloc[1]
+        this.cap = capacity
+        this.initialCapacity = capacity
+    }
+
+    // NOTE(templin.konstantin): Temporary workaround due #20944 internal issue
+    //  if we remove this constructor we got error on "readonly (readonly [K,V])[]"
+    //  branch at constructor from union type
+    constructor(values: FixedArray<[K, V]>) {
+        const capacity = Map.computeCapacity(values.length)
+        const alloc = this.allocDataAndBuckets(capacity)
+        this.data = alloc[0]
+        this.buckets = alloc[1]
+        this.cap = capacity
+        this.initialCapacity = capacity
+
+        for (let i = 0; i < values.length; ++i) {
+            let pair = values[i]
+            if (pair == null) {
+                continue
+            }
+            this.set(pair[Map.ENTRY_KEY] as K, pair[Map.ENTRY_VAL] as V)
+        }
+    }
+
+    /**
+     * Constructs a Map from Array of entries
+     * @param entries Array of entries
+     */
+    constructor(entries: Array<[K, V]>) {
+        const capacity = Map.computeCapacity(entries.length)
+        const alloc = this.allocDataAndBuckets(capacity)
+        this.data = alloc[0]
+        this.buckets = alloc[1]
+        this.cap = capacity
+        this.initialCapacity = capacity
+
+        entries.forEach((entry: [K, V]) => {
+            this.set(entry[Map.ENTRY_KEY] as K, entry[Map.ENTRY_VAL] as V)
+        })
+    }
+
+    /**
+     * Constructs a Map from another Map
+     * @param map another map
+     */
+    constructor(map: Map<K, V>) {
+        const capacity = Map.computeCapacity(map.sizeVal)
+        const alloc = this.allocDataAndBuckets(capacity)
+        this.data = alloc[0]
+        this.buckets = alloc[1]
+        this.cap = capacity
+        this.initialCapacity = capacity
+
+        map.forEach((v: V, k: K) => {
+            this.set(k, v)
+        })
+    }
+
     /**
      * Constructs a Map from collection
      * @param entries initial collection
@@ -433,70 +497,6 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
             })
         }
         this.initialCapacity = this.cap
-    }
-
-    /**
-     * Constructs a Map from another Map
-     * @param map another map
-     */
-    constructor(map: Map<K, V>) {
-        const capacity = Map.computeCapacity(map.sizeVal)
-        const alloc = this.allocDataAndBuckets(capacity)
-        this.data = alloc[0]
-        this.buckets = alloc[1]
-        this.cap = capacity
-        this.initialCapacity = capacity
-
-        map.forEach((v: V, k: K) => {
-            this.set(k, v)
-        })
-    }
-
-    /**
-     * Constructs a Map from Array of entries
-     * @param entries Array of entries
-     */
-    constructor(entries: Array<[K, V]>) {
-        const capacity = Map.computeCapacity(entries.length)
-        const alloc = this.allocDataAndBuckets(capacity)
-        this.data = alloc[0]
-        this.buckets = alloc[1]
-        this.cap = capacity
-        this.initialCapacity = capacity
-
-        entries.forEach((entry: [K, V]) => {
-            this.set(entry[Map.ENTRY_KEY] as K, entry[Map.ENTRY_VAL] as V)
-        })
-    }
-
-    // NOTE(templin.konstantin): Temporary workaround due #20944 internal issue
-    //  if we remove this constructor we got error on "readonly (readonly [K,V])[]"
-    //  branch at constructor from union type
-    constructor(values: FixedArray<[K, V]>) {
-        const capacity = Map.computeCapacity(values.length)
-        const alloc = this.allocDataAndBuckets(capacity)
-        this.data = alloc[0]
-        this.buckets = alloc[1]
-        this.cap = capacity
-        this.initialCapacity = capacity
-
-        for (let i = 0; i < values.length; ++i) {
-            let pair = values[i]
-            if (pair == null) {
-                continue
-            }
-            this.set(pair[Map.ENTRY_KEY] as K, pair[Map.ENTRY_VAL] as V)
-        }
-    }
-
-    // NOTE: This API may be removed someday due #28030 internal issue
-    constructor(initialCapacity: int) {
-        const capacity = Map.adjustCapacity(initialCapacity)
-        const alloc = this.allocDataAndBuckets(capacity)
-        this.data = alloc[0]
-        this.buckets = alloc[1]
-        this.cap = capacity
-        this.initialCapacity = capacity
     }
 
     override toString(): String {

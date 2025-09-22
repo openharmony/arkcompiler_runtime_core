@@ -181,6 +181,15 @@ export final class BigInt {
     }
 
     /**
+     * Converts a number to a string by using current locale
+     *
+     * @returns string representation
+     */
+    public toLocaleString(): string {
+        return this.toLocaleString(undefined)
+    }
+
+    /**
      * Converts a number to a string by using the current or specified locale.
      *
      * @param locales
@@ -193,15 +202,6 @@ export final class BigInt {
         const numFmtOptions = BigInt.toNumberFormatOptions(options)
         const formatter = new Intl.NumberFormat(intlLocalesToLanguageTags(locales), numFmtOptions)
         return formatter.format(this)
-    }
-
-    /**
-     * Converts a number to a string by using current locale
-     *
-     * @returns string representation
-     */
-    public toLocaleString(): string {
-        return this.toLocaleString(undefined)
     }
 
     private static toNumberFormatOptions(options?: BigIntToLocaleStringOptions): Intl.NumberFormatOptions | undefined {
@@ -279,16 +279,6 @@ export final class BigInt {
         return this.toString(10)
     }
 
-    public toString(radix?: double): string {
-        if (radix == undefined) {
-            return this.toString(10)
-        }
-        if (radix == -Infinity || radix == +Infinity || radix == NaN) {
-            throw new RangeError(BigInt.INVALID_RADIX_MESSAGE)
-        }
-        return this.toString(radix.toInt())
-    }
-
     public toString(radix: int): string {
         if (radix < 2 || radix > 36) {
             throw new RangeError(BigInt.INVALID_RADIX_MESSAGE)
@@ -299,6 +289,16 @@ export final class BigInt {
         let fastToStringHandler = FAST_TO_STRING_HANDLER_MAP[radix]
         // NOTE(@aendrewpolyakov, #19643): Rewrite concat() with '+' operator once it got fixed for string operands
         return (this.negative() ? "-" : "").concat((fastToStringHandler != undefined) ? fastToStringHandler!(this) : this.toStringAsGenericRadix(radix))
+    }
+
+    public toString(radix?: double): string {
+        if (radix == undefined) {
+            return this.toString(10)
+        }
+        if (radix == -Infinity || radix == +Infinity || radix == NaN) {
+            throw new RangeError(BigInt.INVALID_RADIX_MESSAGE)
+        }
+        return this.toString(radix.toInt())
     }
 
     public toStringAsBinary(): string {
@@ -369,10 +369,6 @@ export final class BigInt {
         return this
     }
 
-    public static asIntN(bits: Number, num: BigInt): BigInt {
-        return BigInt.asIntN(bits.toLong(), num)
-    }
-
     public static asIntN(bits: long, num: BigInt): BigInt {
         if (bits == 0 || num.isZero()) {
             return 0n
@@ -397,8 +393,8 @@ export final class BigInt {
         return masked >= half ? masked - (mask + 1n) : masked
     }
 
-    public static asUintN(bits: Number, num: BigInt): BigInt {
-        return BigInt.asUintN(bits.toLong(), num)
+    public static asIntN(bits: Number, num: BigInt): BigInt {
+        return BigInt.asIntN(bits.toLong(), num)
     }
 
     public static asUintN(bits: long, num: BigInt): BigInt {
@@ -415,6 +411,10 @@ export final class BigInt {
         // in this case must be bits <= 255
         // please check `operatorLeftShift` implementation
         return num & ((1n << (new BigInt(bits))) - 1n)
+    }
+
+    public static asUintN(bits: Number, num: BigInt): BigInt {
+        return BigInt.asUintN(bits.toLong(), num)
     }
 
     public negative(): boolean {

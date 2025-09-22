@@ -20,36 +20,36 @@
 //! METHOD        "ets_string_builder_append_merge_part3.ETSGLOBAL::_0_int_3_append4"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",3
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendInt",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendByte",1
 //! PASS_AFTER    "SimplifyStringBuilder"
-//! INST_NEXT     "Intrinsic.StdCoreSbAppendInt"
+//! INST_NEXT     "Intrinsic.StdCoreSbAppendByte"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString3"
 //!
 //! METHOD        "ets_string_builder_append_merge_part3.ETSGLOBAL::_1_int_2_append4"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",3
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendInt",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendByte",1
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString "
-//! INST_NEXT     "Intrinsic.StdCoreSbAppendInt"
+//! INST_NEXT     "Intrinsic.StdCoreSbAppendByte"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString2"
 //!
 //! METHOD        "ets_string_builder_append_merge_part3.ETSGLOBAL::_2_int_1_append4"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",3
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendInt",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendByte",1
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString2"
-//! INST_NEXT     "Intrinsic.StdCoreSbAppendInt"
+//! INST_NEXT     "Intrinsic.StdCoreSbAppendByte"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString "
 //!
 //! METHOD        "ets_string_builder_append_merge_part3.ETSGLOBAL::_3_int_0_append4"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",3
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendInt",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendByte",1
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString3"
-//! INST_NEXT     "Intrinsic.StdCoreSbAppendInt"
+//! INST_NEXT     "Intrinsic.StdCoreSbAppendByte"
 //!
 //! METHOD        "ets_string_builder_append_merge_part3.ETSGLOBAL::_0_toString_5_append6"
 //! PASS_BEFORE   "BranchElimination"
@@ -102,36 +102,36 @@
 //! METHOD        "ets_string_builder_append_merge_part3.ETSGLOBAL::_0_int_3_append4"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",3
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendInt",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendByte",1
 //! PASS_AFTER    "SimplifyStringBuilder"
-//! INST_NEXT     "Intrinsic.StdCoreSbAppendInt"
+//! INST_NEXT     "Intrinsic.StdCoreSbAppendByte"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString3"
 //!
 //! METHOD        "ets_string_builder_append_merge_part3.ETSGLOBAL::_1_int_2_append4"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",3
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendInt",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendByte",1
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString "
-//! INST_NEXT     "Intrinsic.StdCoreSbAppendInt"
+//! INST_NEXT     "Intrinsic.StdCoreSbAppendByte"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString2"
 //!
 //! METHOD        "ets_string_builder_append_merge_part3.ETSGLOBAL::_2_int_1_append4"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",3
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendInt",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendByte",1
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString2"
-//! INST_NEXT     "Intrinsic.StdCoreSbAppendInt"
+//! INST_NEXT     "Intrinsic.StdCoreSbAppendByte"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString "
 //!
 //! METHOD        "ets_string_builder_append_merge_part3.ETSGLOBAL::_3_int_0_append4"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",3
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendInt",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendByte",1
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString3"
-//! INST_NEXT     "Intrinsic.StdCoreSbAppendInt"
+//! INST_NEXT     "Intrinsic.StdCoreSbAppendByte"
 //!
 //! METHOD        "ets_string_builder_append_merge_part3.ETSGLOBAL::_0_toString_5_append6"
 //! PASS_BEFORE   "BranchElimination"
