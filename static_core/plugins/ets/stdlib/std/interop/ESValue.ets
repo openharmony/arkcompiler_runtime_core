@@ -15,6 +15,8 @@
 
 package std.interop;
 
+import {IterableIterator, IteratorResult} from "std/core";
+
 // NOTE(from InteropTransferHelper.ets): #IC8LO3 remove local declaration after Any type is supported
 type Any = Object | null | undefined
 

@@ -184,7 +184,7 @@ private:
     napi_ref jsProxyCtorRef_ {};
     napi_ref jsProxyHandlerRef_ {};
 
-    static constexpr const char *INTERFACE_ITERABLE_NAME = "escompat.IterableIterator";
+    static constexpr const char *INTERFACE_ITERABLE_NAME = "std.core.IterableIterator";
 };
 
 class JSRefConvertJSProxy : public JSRefConvert {

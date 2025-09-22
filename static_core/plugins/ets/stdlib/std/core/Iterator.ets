@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package escompat;
+package std.core;
 
 export class IteratorResult<T> {
     done: boolean
@@ -49,7 +49,7 @@ export interface IterableIterator<out T> extends Iterator<T>, Iterable<T> {
     }
 }
 
-function iteratorForEach<V>(x: Iterator<V>, fn: (x: V) => void): void {
+export function iteratorForEach<V>(x: Iterator<V>, fn: (x: V) => void): void {
     while (true) {
         const v = x.next()
         if (v.done) {
@@ -59,7 +59,7 @@ function iteratorForEach<V>(x: Iterator<V>, fn: (x: V) => void): void {
     }
 }
 
-function tryGetIteratorLength (a: Object): int | null {
+export function tryGetIteratorLength (a: Object): int | null {
     const aType = Type.of(a) as ClassType
     for (let i = 0; i < aType.getMethodsNum(); ++i) {
         let m = aType.getMethod(i)
