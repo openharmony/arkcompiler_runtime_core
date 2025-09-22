@@ -22,16 +22,17 @@ class BA extends A {}
 class CBA extends BA {}
 class DA extends A {}
 
-function foo(p: Object): int {
-  return 1;
+// the most specific signature should come as early as possible
+function foo(p: BA): int {
+  return 3;
 }
 
 function foo(p: A): int {
   return 2;
 }
 
-function foo(p: BA): int {
-  return 3;
+function foo(p: Object): int {
+  return 1;
 }
 
 function main(): void {
