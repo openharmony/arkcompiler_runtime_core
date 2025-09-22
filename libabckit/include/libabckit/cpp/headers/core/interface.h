@@ -40,6 +40,8 @@ class Interface : public ViewInResource<AbckitCoreInterface *, const File *> {
     friend abckit::DefaultHash<Interface>;
     /// @brief to access private constructor
     friend class abckit::File;
+    /// @brief to access private constructor
+    friend class arkts::Interface;
 
 protected:
     /// @brief Core API View type

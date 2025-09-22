@@ -44,6 +44,15 @@
         return;                                                        \
     }
 
+// CC-OFFNXT(G.PRE.02) code readability
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define LIBABCKIT_CHECK_SAME_TARGET_RETURN(target1, target2, value)    \
+    if ((target1) != (target2)) {                                      \
+        libabckit::statuses::SetLastError(ABCKIT_STATUS_WRONG_TARGET); \
+        /* CC-OFFNXT(G.PRE.05) code generation */                      \
+        return value;                                                  \
+    }
+
 namespace libabckit {
 
 // ========================================
@@ -336,26 +345,101 @@ extern "C" void ClassRemoveAnnotation(AbckitArktsClass *klass, AbckitArktsAnnota
 
 extern "C" bool ClassAddInterface(AbckitArktsClass *klass, AbckitArktsInterface *iface)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)klass;
-    (void)iface;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+
+    LIBABCKIT_BAD_ARGUMENT(klass, false);
+    LIBABCKIT_BAD_ARGUMENT(iface, false);
+
+    LIBABCKIT_INTERNAL_ERROR(klass->core, false);
+    LIBABCKIT_INTERNAL_ERROR(iface->core, false);
+
+    LIBABCKIT_INTERNAL_ERROR(klass->core->owningModule, false);
+    LIBABCKIT_INTERNAL_ERROR(iface->core->owningModule, false);
+
+    LIBABCKIT_INTERNAL_ERROR(klass->core->owningModule->file, false);
+    LIBABCKIT_INTERNAL_ERROR(iface->core->owningModule->file, false);
+
+    auto kt = klass->core->owningModule->target;
+    auto it = iface->core->owningModule->target;
+
+    LIBABCKIT_CHECK_SAME_TARGET_RETURN(kt, it, false);
+
+    switch (kt) {
+        case ABCKIT_TARGET_ARK_TS_V1:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return ClassAddInterfaceStatic(klass, iface);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
 }
 
 extern "C" bool ClassRemoveInterface(AbckitArktsClass *klass, AbckitArktsInterface *iface)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)klass;
-    (void)iface;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+
+    LIBABCKIT_BAD_ARGUMENT(klass, false);
+    LIBABCKIT_BAD_ARGUMENT(iface, false);
+
+    LIBABCKIT_INTERNAL_ERROR(klass->core, false);
+    LIBABCKIT_INTERNAL_ERROR(iface->core, false);
+
+    LIBABCKIT_INTERNAL_ERROR(klass->core->owningModule, false);
+    LIBABCKIT_INTERNAL_ERROR(iface->core->owningModule, false);
+
+    LIBABCKIT_INTERNAL_ERROR(klass->core->owningModule->file, false);
+    LIBABCKIT_INTERNAL_ERROR(iface->core->owningModule->file, false);
+
+    auto kt = klass->core->owningModule->target;
+    auto it = iface->core->owningModule->target;
+
+    LIBABCKIT_CHECK_SAME_TARGET_RETURN(kt, it, false);
+
+    switch (kt) {
+        case ABCKIT_TARGET_ARK_TS_V1:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return ClassRemoveInterfaceStatic(klass, iface);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
 }
 
 extern "C" bool ClassSetSuperClass(AbckitArktsClass *klass, AbckitArktsClass *superClass)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)klass;
-    (void)superClass;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+
+    LIBABCKIT_BAD_ARGUMENT(klass, false);
+    LIBABCKIT_BAD_ARGUMENT(superClass, false);
+
+    LIBABCKIT_INTERNAL_ERROR(klass->core, false);
+    LIBABCKIT_INTERNAL_ERROR(superClass->core, false);
+
+    LIBABCKIT_INTERNAL_ERROR(klass->core->owningModule, false);
+    LIBABCKIT_INTERNAL_ERROR(superClass->core->owningModule, false);
+
+    LIBABCKIT_INTERNAL_ERROR(klass->core->owningModule->file, false);
+    LIBABCKIT_INTERNAL_ERROR(superClass->core->owningModule->file, false);
+
+    auto kt = klass->core->owningModule->target;
+    auto st = superClass->core->owningModule->target;
+
+    LIBABCKIT_CHECK_SAME_TARGET_RETURN(kt, st, false);
+
+    switch (kt) {
+        case ABCKIT_TARGET_ARK_TS_V1:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return ClassSetSuperClassStatic(klass, superClass);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
 }
 
 extern "C" bool ClassSetName(AbckitArktsClass *klass, const char *name)
@@ -377,49 +461,160 @@ extern "C" bool ClassSetName(AbckitArktsClass *klass, const char *name)
 
 extern "C" bool ClassAddField(AbckitArktsClass *klass, AbckitArktsClassField *field)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)klass;
-    (void)field;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(klass, false);
+    LIBABCKIT_BAD_ARGUMENT(field, false);
+    LIBABCKIT_INTERNAL_ERROR(klass->core, false);
+    LIBABCKIT_INTERNAL_ERROR(klass->core->owningModule, false);
+    LIBABCKIT_INTERNAL_ERROR(field->core, false);
+    LIBABCKIT_INTERNAL_ERROR(field->core->owner, false);
+    LIBABCKIT_INTERNAL_ERROR(field->core->owner->owningModule, false);
+
+    auto kt = klass->core->owningModule->target;
+    auto at = field->core->owner->owningModule->target;
+    LIBABCKIT_CHECK_SAME_TARGET_RETURN(kt, at, false);
+
+    switch (kt) {
+        case ABCKIT_TARGET_ARK_TS_V1:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return ClassAddFieldStatic(klass->core, field->core);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
 }
 
 extern "C" bool ClassRemoveField(AbckitArktsClass *klass, AbckitArktsClassField *field)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)klass;
-    (void)field;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+
+    LIBABCKIT_BAD_ARGUMENT(klass, false);
+    LIBABCKIT_BAD_ARGUMENT(field, false);
+
+    LIBABCKIT_INTERNAL_ERROR(klass->core, false);
+    LIBABCKIT_INTERNAL_ERROR(field->core, false);
+
+    auto kt = klass->core->owningModule->target;
+    auto at = field->core->owner->owningModule->target;
+    LIBABCKIT_CHECK_SAME_TARGET_RETURN(kt, at, false);
+
+    switch (kt) {
+        case ABCKIT_TARGET_ARK_TS_V1:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return ClassRemoveFieldStatic(klass, field->core);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
 }
 
 extern "C" bool ClassAddMethod(AbckitArktsClass *klass, AbckitArktsFunction *method)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)klass;
-    (void)method;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+
+    LIBABCKIT_BAD_ARGUMENT(klass, false);
+    LIBABCKIT_BAD_ARGUMENT(method, false);
+
+    LIBABCKIT_INTERNAL_ERROR(klass->core, false);
+    LIBABCKIT_INTERNAL_ERROR(method->core, false);
+
+    auto kt = klass->core->owningModule->target;
+    auto at = method->core->owningModule->target;
+    LIBABCKIT_CHECK_SAME_TARGET_RETURN(kt, at, false);
+
+    switch (kt) {
+        case ABCKIT_TARGET_ARK_TS_V1:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return ClassAddMethodStatic(klass, method);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
 }
 
 extern "C" bool ClassRemoveMethod(AbckitArktsClass *klass, AbckitArktsFunction *method)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)klass;
-    (void)method;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_BAD_ARGUMENT(klass, false);
+    LIBABCKIT_BAD_ARGUMENT(method, false);
+    LIBABCKIT_INTERNAL_ERROR(klass->core, false);
+    LIBABCKIT_INTERNAL_ERROR(method->core, false);
+    LIBABCKIT_INTERNAL_ERROR(klass->core->owningModule, false);
+    LIBABCKIT_INTERNAL_ERROR(method->core->owningModule, false);
+    LIBABCKIT_INTERNAL_ERROR(klass->core->owningModule->file, false);
+    LIBABCKIT_INTERNAL_ERROR(method->core->owningModule->file, false);
+
+    auto kt = klass->core->owningModule->target;
+    auto mt = method->core->owningModule->target;
+
+    LIBABCKIT_CHECK_SAME_TARGET_RETURN(kt, mt, false);
+    switch (kt) {
+        case ABCKIT_TARGET_ARK_TS_V1:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            break;
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return ClassRemoveMethodStatic(klass->core, method->core);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
     return false;
 }
 
-extern "C" AbckitArktsClass *CreateClass(const char *name)
+extern "C" AbckitArktsClass *CreateClass(AbckitArktsModule *m, const char *name)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)name;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_BAD_ARGUMENT(m, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(name, nullptr);
+    LIBABCKIT_INTERNAL_ERROR(m->core, nullptr);
+    LIBABCKIT_INTERNAL_ERROR(m->core->file, nullptr);
+
+    switch (m->core->target) {
+        case ABCKIT_TARGET_ARK_TS_V1:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            break;
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return CreateClassStatic(m->core, name);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
     return nullptr;
 }
 
 extern "C" bool ClassSetOwningModule(AbckitArktsClass *klass, AbckitArktsModule *module)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)klass;
-    (void)module;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(klass, false);
+    LIBABCKIT_BAD_ARGUMENT(module, false);
+    LIBABCKIT_INTERNAL_ERROR(klass->core, false);
+    LIBABCKIT_INTERNAL_ERROR(klass->core->owningModule, false);
+    LIBABCKIT_INTERNAL_ERROR(module->core, false);
+
+    auto kt = klass->core->owningModule->target;
+    auto at = module->core->target;
+    LIBABCKIT_CHECK_SAME_TARGET_RETURN(kt, at, false);
+
+    switch (kt) {
+        case ABCKIT_TARGET_ARK_TS_V1:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return ClassSetOwningModuleStatic(klass->core, module->core);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
 }
 
 extern "C" bool ClassSetParentFunction(AbckitArktsClass *klass, AbckitArktsFunction *func)
@@ -436,18 +631,58 @@ extern "C" bool ClassSetParentFunction(AbckitArktsClass *klass, AbckitArktsFunct
 
 extern "C" bool InterfaceAddSuperInterface(AbckitArktsInterface *iface, AbckitArktsInterface *superIface)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)iface;
-    (void)superIface;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(iface, false);
+    LIBABCKIT_BAD_ARGUMENT(superIface, false);
+    LIBABCKIT_INTERNAL_ERROR(iface->core, false);
+    LIBABCKIT_INTERNAL_ERROR(iface->core->owningModule, false);
+    LIBABCKIT_INTERNAL_ERROR(superIface->core, false);
+    LIBABCKIT_INTERNAL_ERROR(superIface->core->owningModule, false);
+
+    auto kt = iface->core->owningModule->target;
+    auto at = superIface->core->owningModule->target;
+    LIBABCKIT_CHECK_SAME_TARGET_RETURN(kt, at, false);
+
+    switch (kt) {
+        case ABCKIT_TARGET_ARK_TS_V1:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return InterfaceAddSuperInterfaceStatic(iface->core, superIface->core);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
 }
 
 extern "C" bool InterfaceRemoveSuperInterface(AbckitArktsInterface *iface, AbckitArktsInterface *superIface)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)iface;
-    (void)superIface;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(iface, false);
+    LIBABCKIT_BAD_ARGUMENT(superIface, false);
+    LIBABCKIT_INTERNAL_ERROR(iface->core, false);
+    LIBABCKIT_INTERNAL_ERROR(iface->core->owningModule, false);
+    LIBABCKIT_INTERNAL_ERROR(superIface->core, false);
+    LIBABCKIT_INTERNAL_ERROR(superIface->core->owningModule, false);
+
+    auto kt = iface->core->owningModule->target;
+    auto at = superIface->core->owningModule->target;
+    LIBABCKIT_CHECK_SAME_TARGET_RETURN(kt, at, false);
+
+    switch (kt) {
+        case ABCKIT_TARGET_ARK_TS_V1:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return InterfaceRemoveSuperInterfaceStatic(iface->core, superIface->core);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
 }
 
 extern "C" bool InterfaceSetName(AbckitArktsInterface *iface, const char *name)
@@ -469,42 +704,141 @@ extern "C" bool InterfaceSetName(AbckitArktsInterface *iface, const char *name)
 
 extern "C" bool InterfaceAddField(AbckitArktsInterface *iface, AbckitArktsInterfaceField *field)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)iface;
-    (void)field;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(iface, false);
+    LIBABCKIT_BAD_ARGUMENT(field, false);
+
+    LIBABCKIT_INTERNAL_ERROR(iface->core, false);
+    LIBABCKIT_INTERNAL_ERROR(field->core, false);
+
+    auto kt = iface->core->owningModule->target;
+    switch (kt) {
+        case ABCKIT_TARGET_ARK_TS_V1:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return InterfaceAddFieldStatic(iface, field->core);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
 }
 
 extern "C" bool InterfaceRemoveField(AbckitArktsInterface *iface, AbckitArktsInterfaceField *field)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)iface;
-    (void)field;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(iface, false);
+    LIBABCKIT_BAD_ARGUMENT(field, false);
+
+    LIBABCKIT_INTERNAL_ERROR(iface->core, false);
+    LIBABCKIT_INTERNAL_ERROR(field->core, false);
+
+    LIBABCKIT_INTERNAL_ERROR(iface->core->owningModule, false);
+    LIBABCKIT_INTERNAL_ERROR(field->core->owner, false);
+    LIBABCKIT_INTERNAL_ERROR(field->core->owner->owningModule, false);
+
+    auto kt = iface->core->owningModule->target;
+    auto at = field->core->owner->owningModule->target;
+
+    LIBABCKIT_CHECK_SAME_TARGET_RETURN(kt, at, false);
+
+    switch (kt) {
+        case ABCKIT_TARGET_ARK_TS_V1:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return InterfaceRemoveFieldStatic(iface, field->core);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
 }
 
 extern "C" bool InterfaceAddMethod(AbckitArktsInterface *iface, AbckitArktsFunction *method)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)iface;
-    (void)method;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(iface, false);
+    LIBABCKIT_BAD_ARGUMENT(method, false);
+
+    LIBABCKIT_INTERNAL_ERROR(iface->core, false);
+    LIBABCKIT_INTERNAL_ERROR(method->core, false);
+
+    auto kt = iface->core->owningModule->target;
+    auto at = method->core->owningModule->target;
+
+    LIBABCKIT_CHECK_SAME_TARGET_RETURN(kt, at, false);
+
+    switch (kt) {
+        case ABCKIT_TARGET_ARK_TS_V1:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return InterfaceAddMethodStatic(iface, method);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
 }
 
 extern "C" bool InterfaceRemoveMethod(AbckitArktsInterface *iface, AbckitArktsFunction *method)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)iface;
-    (void)method;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(iface, false);
+    LIBABCKIT_BAD_ARGUMENT(method, false);
+    LIBABCKIT_INTERNAL_ERROR(iface->core, false);
+    LIBABCKIT_INTERNAL_ERROR(iface->core->owningModule, false);
+    LIBABCKIT_INTERNAL_ERROR(method->core, false);
+    LIBABCKIT_INTERNAL_ERROR(method->core->owningModule, false);
+
+    auto kt = iface->core->owningModule->target;
+    auto at = method->core->owningModule->target;
+    LIBABCKIT_CHECK_SAME_TARGET_RETURN(kt, at, false);
+
+    switch (kt) {
+        case ABCKIT_TARGET_ARK_TS_V1:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return InterfaceRemoveMethodStatic(iface->core, method->core);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
 }
 
 extern "C" bool InterfaceSetOwningModule(AbckitArktsInterface *iface, AbckitArktsModule *module)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)iface;
-    (void)module;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(iface, false);
+    LIBABCKIT_BAD_ARGUMENT(module, false);
+    LIBABCKIT_INTERNAL_ERROR(iface->core, false);
+    LIBABCKIT_INTERNAL_ERROR(iface->core->owningModule, false);
+    LIBABCKIT_INTERNAL_ERROR(module->core, false);
+
+    auto kt = iface->core->owningModule->target;
+    auto at = module->core->target;
+    LIBABCKIT_CHECK_SAME_TARGET_RETURN(kt, at, false);
+
+    switch (kt) {
+        case ABCKIT_TARGET_ARK_TS_V1:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return InterfaceSetOwningModuleStatic(iface->core, module->core);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
 }
 
 extern "C" bool InterfaceSetParentFunction(AbckitArktsInterface *iface, AbckitArktsFunction *func)
@@ -515,11 +849,24 @@ extern "C" bool InterfaceSetParentFunction(AbckitArktsInterface *iface, AbckitAr
     return false;
 }
 
-extern "C" AbckitArktsInterface *CreateInterface(const char *name)
+extern "C" AbckitArktsInterface *CreateInterface(AbckitArktsModule *m, const char *name)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)name;
-    return nullptr;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+
+    LIBABCKIT_BAD_ARGUMENT(m, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(name, nullptr);
+    LIBABCKIT_INTERNAL_ERROR(m->core, nullptr);
+
+    switch (m->core->target) {
+        case ABCKIT_TARGET_ARK_TS_V1:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return nullptr;
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return CreateInterfaceStatic(m, name);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
 }
 
 // ========================================

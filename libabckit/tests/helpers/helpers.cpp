@@ -436,6 +436,15 @@ void AssertExportVisitor([[maybe_unused]] AbckitCoreExportDescriptor *ed, [[mayb
     EXPECT_TRUE(data != nullptr);
 }
 
+void AssertFieldVisitor(AbckitCoreClassField *field, void *data)
+{
+    EXPECT_TRUE(field != nullptr);
+    EXPECT_TRUE(field->owner != nullptr);
+    EXPECT_TRUE(field->owner->owningModule != nullptr);
+    EXPECT_TRUE(field->owner->owningModule->file != nullptr);
+    EXPECT_TRUE(data != nullptr);
+}
+
 void AssertClassVisitor([[maybe_unused]] AbckitCoreClass *klass, [[maybe_unused]] void *data)
 {
     EXPECT_TRUE(klass != nullptr);
@@ -517,6 +526,19 @@ bool EnumByNameFinder(AbckitCoreEnum *enm, void *data)
     return true;
 }
 
+bool ClassFieldFinder(AbckitCoreClassField *field, void *data)
+{
+    AssertFieldVisitor(field, data);
+
+    auto ctxFinder = reinterpret_cast<CoreClassField *>(data);
+    auto name = helpers::AbckitStringToString(g_implI->classFieldGetName(field));
+    if (name == ctxFinder->name) {
+        ctxFinder->filed = field;
+        return false;
+    }
+    return true;
+}
+
 bool NamespaceByNameFinder(AbckitCoreNamespace *n, void *data)
 {
     AssertNamespaceVisitor(n, data);
@@ -551,14 +573,14 @@ bool InterfaceByNameFinder(AbckitCoreInterface *iface, void *data)
     auto ctxFinder = reinterpret_cast<InterfaceByNameContext *>(data);
     auto name = helpers::AbckitStringToString(g_implI->interfaceGetName(iface));
     if (name == ctxFinder->name) {
-        ctxFinder->face = iface;
+        ctxFinder->iface = iface;
         return false;
     }
 
     return true;
 }
 
-bool FiledByNameFinder(AbckitCoreInterfaceField *field, void *data)
+bool FieldByNameFinder(AbckitCoreInterfaceField *field, void *data)
 {
     AssertFieldVisitor(field, data);
 

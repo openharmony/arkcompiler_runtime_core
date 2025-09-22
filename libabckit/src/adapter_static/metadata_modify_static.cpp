@@ -26,8 +26,12 @@
 #include "optimizer/analysis/rpo.h"
 #include "src/adapter_static/metadata_inspect_static.h"
 #include "src/adapter_static/helpers_static.h"
+#include "src/helpers_common.h"
+#include "static_core/assembler/assembly-field.h"
 #include "static_core/assembler/assembly-program.h"
 #include "static_core/assembler/mangling.h"
+#include "static_core/assembler/assembly-record.h"
+#include "static_core/assembler/meta.h"
 
 #include "static_core/compiler/optimizer/ir/graph_checker.h"
 #include "static_core/compiler/optimizer/ir/graph_cloner.h"
@@ -38,10 +42,15 @@
 
 #include "modify_name_helper.h"
 #include "inst_modifier.h"
+#include "static_core/plugins/ets/assembler/extension/ets_meta.h"
+#include "static_core/plugins/ets/runtime/types/ets_type.h"
 #include "utils/function_util.h"
 
 #include <cstdint>
 #include <string>
+
+static auto g_implI = AbckitGetInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
+static auto g_implArkI = AbckitGetArktsInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
 // CC-OFFNXT(WordsTool.95) sensitive word conflict
 // NOLINTNEXTLINE(google-build-using-namespace)
@@ -545,4 +554,954 @@ bool FunctionSetReturnTypeStatic(AbckitArktsFunction *func, AbckitType *abckitTy
     abckit::util::UpdateFileMap(coreFunc->owningModule->file, oldMangleName, newMangleName);
     return true;
 }
+
+// ========================================
+// Class
+// ========================================
+AbckitArktsClass *CreateClassStatic(AbckitCoreModule *m, const char *name)
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_INTERNAL_ERROR(m->file->GetStaticProgram(), nullptr);
+    LIBABCKIT_INTERNAL_ERROR(m->moduleName, nullptr);
+
+    auto fullName = std::string(m->moduleName->impl) + '.' + name;
+    auto prog = m->file->GetStaticProgram();
+    auto progRecord = pandasm::Record(fullName, prog->lang);
+    progRecord.metadata->SetAttributeValue("ets.extends", "std.core.Object");
+    progRecord.metadata->SetAttributeValue("access.record", "public");
+    prog->recordTable.try_emplace(fullName, std::move(progRecord));
+    pandasm::Record &record = prog->recordTable.find(fullName)->second;
+    auto klass = std::make_unique<AbckitCoreClass>(m, AbckitArktsClass(&record));
+
+    m->ct.try_emplace(name, std::move(klass));
+    return (m->ct)[name]->GetArkTSImpl();
+}
+
+template <typename TblType>
+static void RemoveFuncInTable(TblType &table, const std::string &name)
+{
+    for (auto iter = table.begin(); iter != table.end();) {
+        if (iter->first.find(name) != std::string::npos) {
+            iter = table.erase(iter);
+        } else {
+            ++iter;
+        }
+    }
+}
+
+bool ClassRemoveMethodStatic(AbckitCoreClass *klass, AbckitCoreFunction *method)
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_INTERNAL_ERROR(klass->owningModule->file->GetStaticProgram(), false);
+
+    auto funcNameWithParas = GetMangleFuncName(method);
+    auto &methods = klass->methods;
+    auto func = method->GetArkTSImpl()->GetStaticImpl();
+    auto isStatic = func->IsStatic();
+    auto iter = std::find_if(methods.begin(), methods.end(),
+                             [&func](auto &funcIt) { return funcIt->GetArkTSImpl()->GetStaticImpl() == func; });
+    if (iter == methods.end()) {
+        LIBABCKIT_LOG(ERROR) << "Can not find the methods to delete\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        return false;
+    }
+    methods.erase(iter);
+
+    auto prog = klass->owningModule->file->GetStaticProgram();
+    auto file = klass->owningModule->file;
+    if (isStatic) {
+        RemoveFuncInTable(prog->functionStaticTable, funcNameWithParas);
+        RemoveFuncInTable(file->nameToFunctionStatic, funcNameWithParas);
+    } else {
+        RemoveFuncInTable(prog->functionInstanceTable, funcNameWithParas);
+        RemoveFuncInTable(file->nameToFunctionInstance, funcNameWithParas);
+    }
+
+    return true;
+}
+
+bool ClassAddInterfaceStatic(AbckitArktsClass *klass, AbckitArktsInterface *iface)
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_INTERNAL_ERROR(klass->impl.GetStaticClass(), false);
+    LIBABCKIT_INTERNAL_ERROR(klass->impl.GetStaticClass()->metadata, false);
+    LIBABCKIT_INTERNAL_ERROR(klass->core->owningModule->file->GetStaticProgram(), false);
+    LIBABCKIT_INTERNAL_ERROR(iface->impl.GetStaticClass(), false);
+
+    AbckitCoreInterface *ifaceCore = iface->core;
+    ark::pandasm::Record *record = klass->impl.GetStaticClass();
+    std::string fullName = iface->impl.GetStaticClass()->name;
+
+    // if the target interface is not in the program, add it
+    auto ifaceRecord = iface->impl.GetStaticClass();
+    ark::pandasm::Program *prog = klass->core->owningModule->file->GetStaticProgram();
+    if (prog->recordTable.find(fullName) == prog->recordTable.end()) {
+        prog->recordTable.emplace(fullName, std::move(*ifaceRecord));
+        iface->impl.cl = &(prog->recordTable.find(fullName)->second);
+    }
+
+    auto it = record->metadata->GetInterfaces();
+    if (std::find(it.begin(), it.end(), fullName) == it.end()) {
+        auto res = record->metadata->AddInterface(fullName);
+        if (!res) {
+            LIBABCKIT_LOG(ERROR) << "Failed to add interface\n";
+            statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        }
+    } else {
+        LIBABCKIT_LOG(ERROR) << "The interface already exists\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+    }
+
+    auto &interfaces = klass->core->interfaces;
+    auto interfaceName = std::get<1>(ClassGetNames(fullName));
+    auto iter = std::find_if(interfaces.begin(), interfaces.end(), [&interfaceName](auto &interIt) {
+        return interfaceName == InterfaceGetNameStatic(interIt)->impl;
+    });
+    if (iter == interfaces.end()) {
+        interfaces.push_back(ifaceCore);
+    } else {
+        LIBABCKIT_LOG(ERROR) << "The interface already exists\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+    }
+
+    return statuses::GetLastError() == AbckitStatus::ABCKIT_STATUS_NO_ERROR;
+}
+
+bool ClassRemoveInterfaceStatic(AbckitArktsClass *klass, AbckitArktsInterface *iface)
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_INTERNAL_ERROR(klass->impl.GetStaticClass(), false);
+    LIBABCKIT_INTERNAL_ERROR(klass->impl.GetStaticClass()->metadata, false);
+    LIBABCKIT_INTERNAL_ERROR(iface->impl.GetStaticClass(), false);
+
+    ark::pandasm::Record *record = klass->impl.GetStaticClass();
+    std::string fullName = iface->impl.GetStaticClass()->name;
+    auto interfaceName = std::get<1>(ClassGetNames(fullName));
+
+    auto &interfaces = klass->core->interfaces;
+    auto iter = std::find_if(interfaces.begin(), interfaces.end(), [&interfaceName](auto &interIt) {
+        return interfaceName == InterfaceGetNameStatic(interIt)->impl;
+    });
+    if (iter != interfaces.end()) {
+        interfaces.erase(iter);
+    } else {
+        LIBABCKIT_LOG(ERROR) << "Can not find the interface to delete\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+    }
+
+    auto res = record->metadata->RemoveInterface(fullName);
+    if (!res) {
+        LIBABCKIT_LOG(ERROR) << "Failed to remove the interface from metadata\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+    }
+
+    return statuses::GetLastError() == AbckitStatus::ABCKIT_STATUS_NO_ERROR;
+}
+
+bool ClassSetSuperClassStatic(AbckitArktsClass *klass, AbckitArktsClass *superClass)
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_INTERNAL_ERROR(klass->impl.GetStaticClass(), false);
+    LIBABCKIT_INTERNAL_ERROR(klass->impl.GetStaticClass()->metadata, false);
+    LIBABCKIT_INTERNAL_ERROR(superClass->impl.GetStaticClass(), false);
+
+    if ((klass->core->superClass != nullptr) &&
+        (klass->core->superClass->GetArkTSImpl()->impl.GetStaticClass()->name != "std.core.Object")) {
+        LIBABCKIT_LOG(ERROR) << "Class already has a super class\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        return false;
+    }
+
+    klass->core->superClass = superClass->core;
+
+    auto superClassName = superClass->impl.GetStaticClass()->name;
+    ark::pandasm::Record *record = klass->impl.GetStaticClass();
+    auto res = record->metadata->SetBase(superClassName);
+    if (!res) {
+        LIBABCKIT_LOG(ERROR) << "Failed to set super class in metadata\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        return false;
+    }
+
+    return true;
+}
+
+static void UpdateClassNameInFuncParams(std::vector<ark::pandasm::Function::Parameter> &params,
+                                        const std::string &oldName, const std::string &setNewName)
+{
+    for (auto &param : params) {
+        if (param.type.GetComponentName().find(oldName) != std::string::npos) {
+            param.type = pandasm::Type(setNewName, param.type.GetRank());
+        }
+    }
+}
+
+bool CheckIsNeedAddMethod(ark::pandasm::Program *program, AbckitArktsFunction *method,
+                          const std::string &moduleClassName)
+{
+    LIBABCKIT_INTERNAL_ERROR(program, false);
+    LIBABCKIT_INTERNAL_ERROR(method, false);
+    auto funcNameCropModule = std::string(g_implI->functionGetName(method->core)->impl.data());
+    auto isStatic = method->GetStaticImpl()->IsStatic();
+    if (isStatic) {
+        auto funcName = std::string(moduleClassName) + "." + funcNameCropModule;
+        auto &funcStaticTable = program->functionStaticTable;
+        if (funcStaticTable.find(funcName) != funcStaticTable.end()) {
+            return false;
+        }
+    } else {
+        size_t colonPos = funcNameCropModule.find(':');
+        if (colonPos != std::string::npos) {
+            std::string paras = funcNameCropModule.substr(colonPos + 1);
+            size_t semicolonPos = paras.find(';');
+            if (semicolonPos != std::string::npos) {
+                paras.replace(0, semicolonPos, moduleClassName);
+            }
+            auto funcName = moduleClassName + "." + funcNameCropModule.substr(0, colonPos) + ":" + paras;
+            auto &funcInstanceTable = program->functionInstanceTable;
+            if (funcInstanceTable.find(funcName) != funcInstanceTable.end()) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+static AbckitType *PandasmTypeToAbckitType(AbckitFile *file, const pandasm::Type &pandasmType)
+{
+    auto typeId = ArkPandasmTypeToAbckitTypeId(pandasmType);
+    auto rank = pandasmType.GetRank();
+    auto abckitName = CreateStringStatic(file, pandasmType.GetName().c_str(), pandasmType.GetName().length());
+    return GetOrCreateType(file, typeId, rank, nullptr, abckitName);
+}
+
+static std::unique_ptr<AbckitCoreFunctionParam> CreateFunctionParam(AbckitCoreFunction *function,
+                                                                    const pandasm::Function::Parameter &parameter)
+{
+    auto param = std::make_unique<AbckitCoreFunctionParam>();
+    param->function = function;
+    param->type = PandasmTypeToAbckitType(function->owningModule->file, parameter.type);
+
+    return param;
+}
+
+static std::unique_ptr<AbckitCoreAnnotation> CreateAnnotation(AbckitFile *file, AbckitCoreFunction *function,
+                                                              const std::string &name)
+{
+    auto [_, annotationName] = ClassGetNames(name);
+    auto anno = std::make_unique<AbckitCoreAnnotation>();
+    anno->name = CreateStringStatic(file, annotationName.data(), annotationName.size());
+    anno->owner = function;
+    anno->impl = std::make_unique<AbckitArktsAnnotation>();
+    anno->GetArkTSImpl()->core = anno.get();
+    return anno;
+}
+
+std::unique_ptr<AbckitCoreFunction> CreateCoreFunction(AbckitCoreModule *md, ark::pandasm::Function &functionImpl)
+{
+    auto function = std::make_unique<AbckitCoreFunction>();
+    function->owningModule = md;
+    function->impl = std::make_unique<AbckitArktsFunction>();
+    function->GetArkTSImpl()->impl = &functionImpl;
+    function->GetArkTSImpl()->core = function.get();
+
+    auto annoNames = functionImpl.metadata->GetAttributeValues("ets.annotation.class");
+    for (const auto &annoName : annoNames) {
+        function->annotations.emplace_back(CreateAnnotation(md->file, function.get(), annoName));
+        function->annotationTable.emplace(annoName, function->annotations.back().get());
+    }
+
+    for (auto &functionParam : functionImpl.params) {
+        function->parameters.emplace_back(CreateFunctionParam(function.get(), functionParam));
+    }
+
+    function->returnType = PandasmTypeToAbckitType(md->file, functionImpl.returnType);
+    AddFunctionUserToAbckitType(function->returnType, function.get());
+
+    return function;
+}
+
+template <typename AbckitArktsType>
+std::unique_ptr<ark::pandasm::Function> CreatePandasmFunction(AbckitArktsType *instance, AbckitArktsFunction *method,
+                                                              const std::string &newFuncName)
+{
+    auto funcData = method->GetStaticImpl();
+    size_t colonPos = newFuncName.find(':');
+    auto newFunction = std::make_unique<pandasm::Function>(newFuncName.substr(0, colonPos), funcData->language);
+    newFunction->returnType = funcData->returnType;
+    newFunction->sourceFile = funcData->sourceFile;
+    newFunction->metadata->SetAccessFlags(funcData->metadata->GetAccessFlags());
+
+    for (auto &param : funcData->params) {
+        newFunction->params.emplace_back(param.type, param.lang);
+    }
+    if (!funcData->IsStatic()) {
+        auto thisType = pandasm::Type(instance->impl.GetStaticClass()->name, 0);
+        newFunction->params[0] = pandasm::Function::Parameter(thisType, instance->impl.GetStaticClass()->language);
+    }
+    auto &setAttributes = funcData->metadata->GetBoolAttributes();
+    for (auto &sa : setAttributes) {
+        newFunction->metadata->SetAttribute(sa);
+    }
+    auto &attributes = funcData->metadata->GetAttributes();
+    for (auto &[key, valueVec] : attributes) {
+        for (auto &value : valueVec) {
+            newFunction->metadata->SetAttributeValue(key, value);
+        }
+    }
+    if (funcData->HasImplementation()) {
+        for (auto &tmpIns : funcData->ins) {
+            ark::pandasm::Ins clone = tmpIns.Clone();
+            newFunction->ins.emplace_back(std::move(clone));
+        }
+        newFunction->regsNum = funcData->regsNum;
+        for (auto &tmpBlock : funcData->catchBlocks) {
+            newFunction->catchBlocks.emplace_back(tmpBlock);
+        }
+    }
+    return newFunction;
+}
+
+static void UpdateClassName(std::string &input, const std::string &oldName, const std::string &newName)
+{
+    size_t pos = 0;
+    while ((pos = input.find(oldName, pos)) != std::string::npos) {
+        input.replace(pos, oldName.length(), newName);
+        pos += newName.length();
+    }
+}
+
+static void UpdateClassNameInFuncIns(std::vector<ark::pandasm::Ins> &ins, const std::string &oldName,
+                                     const std::string &setNewName)
+{
+    for (auto &tmpIns : ins) {
+#if defined(NOT_OPTIMIZE_PERFORMANCE)
+        for (auto &tmpIds : tmpIns.ids) {
+            if (tmpIds.find(oldName) != std::string::npos) {
+                UpdateClassName(tmpIds, oldName, setNewName);
+            }
+        }
+#else
+        std::size_t count = tmpIns.IDSize();
+        for (std::size_t i = 0; i < count; i++) {
+            if (tmpIns.GetID(i).find(oldName) != std::string::npos) {
+                auto &str = const_cast<std::string &>(tmpIns.GetID(i));
+                UpdateClassName(str, oldName, setNewName);
+                tmpIns.SetID(i, str);
+            }
+        }
+#endif
+    }
+}
+
+bool ClassAddMethodStatic(AbckitArktsClass *klass, AbckitArktsFunction *method)
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_INTERNAL_ERROR(klass, false);
+    LIBABCKIT_INTERNAL_ERROR(method, false);
+    if (klass->core == method->core->parentClass) {
+        LIBABCKIT_LOG(ERROR) << "method have been in klass.\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_BAD_ARGUMENT);
+        return false;
+    }
+    auto program = klass->core->owningModule->file->GetStaticProgram();
+    auto moduleClassName = klass->impl.GetStaticClass()->name;
+    // Check whether the method exists
+    // method name, method parameters, return type and method attributes are the same
+    if (!CheckIsNeedAddMethod(program, method, moduleClassName)) {
+        LIBABCKIT_LOG(ERROR) << "Method already exists\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_BAD_ARGUMENT);
+        return false;
+    }
+    auto isStaticFunc = method->GetStaticImpl()->IsStatic();
+    std::unordered_map<std::string, AbckitCoreFunction *> &nameToFuncMap =
+        isStaticFunc ? method->core->owningModule->file->nameToFunctionStatic
+                     : method->core->owningModule->file->nameToFunctionInstance;
+
+    std::map<std::string, ark::pandasm::Function> &funcTable =
+        isStaticFunc ? method->core->owningModule->file->GetStaticProgram()->functionStaticTable
+                     : method->core->owningModule->file->GetStaticProgram()->functionInstanceTable;
+    std::string funcMangledName = GetMangleFuncName(method->core);
+    ASSERT(funcMangledName != "__ABCKIT_INVALID__");
+    auto funcModuleName = funcMangledName.substr(0, funcMangledName.find(':'));
+    auto oldModuleClassName = funcModuleName.substr(0, funcModuleName.rfind('.'));
+    UpdateClassName(funcMangledName, oldModuleClassName, moduleClassName);
+
+    auto funcData = CreatePandasmFunction(klass, method, funcMangledName);
+    UpdateClassNameInFuncIns(funcData->ins, oldModuleClassName, moduleClassName);
+    funcTable.insert(std::make_pair(funcMangledName, std::move(*funcData)));
+
+    auto newCoreFunc = CreateCoreFunction(klass->core->owningModule, funcTable.at(funcMangledName));
+    newCoreFunc->parent = klass->core;
+    nameToFuncMap.emplace(funcMangledName, newCoreFunc.get());
+    klass->core->methods.emplace_back(std::move(newCoreFunc));
+    return true;
+}
+
+bool ClassRemoveFieldStatic(AbckitArktsClass *klass, AbckitCoreClassField *field)
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_INTERNAL_ERROR(klass, false);
+    LIBABCKIT_INTERNAL_ERROR(klass->core, false);
+    LIBABCKIT_INTERNAL_ERROR(klass->impl.GetStaticClass(), false);
+
+    LIBABCKIT_INTERNAL_ERROR(field, false);
+
+    auto nameStr = field->GetArkTSImpl()->GetStaticImpl()->name;
+    auto iter = std::find_if(klass->core->fields.begin(), klass->core->fields.end(), [&nameStr](auto &tempfieldIter) {
+        return nameStr == tempfieldIter->GetArkTSImpl()->GetStaticImpl()->name;
+    });
+    if (iter == klass->core->fields.end()) {
+        LIBABCKIT_LOG(ERROR) << "Can not find the field to delete\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        return false;
+    }
+    klass->core->fields.erase(iter);
+
+    auto fieldIter =
+        std::find_if(klass->impl.GetStaticClass()->fieldList.begin(), klass->impl.GetStaticClass()->fieldList.end(),
+                     [&nameStr](auto &tempIter) { return nameStr == tempIter.name; });
+    if (fieldIter == klass->impl.GetStaticClass()->fieldList.end()) {
+        LIBABCKIT_LOG(ERROR) << "Can not find the field to delete\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        return false;
+    }
+    klass->impl.GetStaticClass()->fieldList.erase(fieldIter);
+    return true;
+}
+
+template <typename FuncTblProgram>
+static void UpdateClassNameInFuncTable(FuncTblProgram &table, const std::string &oldName, const std::string &setNewName)
+{
+    FuncTblProgram tmpTable;
+    for (auto iter = table.begin(); iter != table.end();) {
+        if (iter->first.find(oldName) != std::string::npos) {
+            auto node = table.extract(iter++);
+            UpdateClassName(node.key(), oldName, setNewName);
+            UpdateClassName(node.mapped().name, oldName, setNewName);
+            UpdateClassNameInFuncParams(node.mapped().params, oldName, setNewName);
+            UpdateClassNameInFuncIns(node.mapped().ins, oldName, setNewName);
+            tmpTable.insert(std::move(node));
+        } else {
+            UpdateClassNameInFuncParams(iter->second.params, oldName, setNewName);
+            UpdateClassNameInFuncIns(iter->second.ins, oldName, setNewName);
+            ++iter;
+        }
+    }
+
+    for (auto it = tmpTable.begin(); it != tmpTable.end();) {
+        auto node = tmpTable.extract(it++);
+        table.insert(std::move(node));
+    }
+}
+
+template <typename CommonTbl>
+static void UpdateClassNameInCommonTbl(CommonTbl &table, const std::string &oldName, const std::string &setNewName)
+{
+    CommonTbl tmpTable;
+    for (auto iter = table.begin(); iter != table.end();) {
+        if (iter->first.find(oldName) != std::string::npos) {
+            auto node = table.extract(iter++);
+            UpdateClassName(node.key(), oldName, setNewName);
+            tmpTable.insert(std::move(node));
+        } else {
+            ++iter;
+        }
+    }
+    table.insert(std::make_move_iterator(tmpTable.begin()), std::make_move_iterator(tmpTable.end()));
+}
+
+static void UpdateModuleAndClassName(AbckitFile *file, const std::string &oldName, const std::string &setNewName)
+{
+    LIBABCKIT_INTERNAL_ERROR_VOID(file);
+    auto program = file->GetStaticProgram();
+    auto iter = std::find_if(program->recordTable.begin(), program->recordTable.end(),
+                             [&oldName](const auto &pair) { return pair.first == oldName; });
+    if (iter != program->recordTable.end()) {
+        auto node = program->recordTable.extract(iter);
+        node.key() = setNewName;
+        node.mapped().name = setNewName;
+        program->recordTable.insert(std::move(node));
+    }
+    UpdateClassNameInFuncTable(program->functionStaticTable, oldName, setNewName);
+    UpdateClassNameInFuncTable(program->functionInstanceTable, oldName, setNewName);
+    UpdateClassNameInCommonTbl(file->nameToFunctionStatic, oldName, setNewName);
+    UpdateClassNameInCommonTbl(file->nameToFunctionInstance, oldName, setNewName);
+}
+
+static void UpdateExtendsInfo(AbckitFile *file, const std::string &oldName, const std::string &setNewName)
+{
+    LIBABCKIT_INTERNAL_ERROR_VOID(file);
+    for (auto &[name, record] : file->GetStaticProgram()->recordTable) {
+        auto baseStr = record.metadata->GetBase();
+        if (baseStr == oldName) {
+            record.metadata->RemoveAttributeValue("ets.extends", oldName);
+            record.metadata->SetAttributeValue("ets.extends", setNewName);
+        }
+    }
+}
+
+bool ClassAddFieldStatic(AbckitCoreClass *klass, AbckitCoreClassField *coreClassField)
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_BAD_ARGUMENT(klass, false);
+    LIBABCKIT_BAD_ARGUMENT(coreClassField, false);
+
+    auto record = klass->GetArkTSImpl()->impl.GetStaticClass();
+    auto pandaField = coreClassField->GetArkTSImpl()->GetStaticImpl();
+    auto it = std::find_if(record->fieldList.begin(), record->fieldList.end(),
+                           [&pandaField](auto &field) { return field.name == pandaField->name; });
+    if (it != record->fieldList.end()) {
+        LIBABCKIT_LOG(ERROR) << "field name already exist.\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_BAD_ARGUMENT);
+        return false;
+    }
+    ark::pandasm::Field tmpField(ark::SourceLanguage::ETS);
+    tmpField.name = pandaField->name;
+    tmpField.type = ark::pandasm::Type(pandaField->type.GetComponentName(), pandaField->type.GetRank());
+    auto &setAttributes = pandaField->metadata->GetBoolAttributes();
+    for (auto &sa : setAttributes) {
+        tmpField.metadata->SetAttribute(sa);
+    }
+    auto &attributes = pandaField->metadata->GetAttributes();
+    for (auto &[key, valueVec] : attributes) {
+        for (auto &value : valueVec) {
+            tmpField.metadata->SetAttributeValue(key, value);
+        }
+    }
+    auto value = pandaField->metadata->GetValue();
+    if (value.has_value()) {
+        tmpField.metadata->SetValue(value.value());
+    }
+    record->fieldList.emplace_back(std::move(tmpField));
+    // record->fieldList's emplace_back operation may lead to memory reallocation, pandasm::Field's address may change
+    klass->fields.clear();
+    for (auto &tmpField : record->fieldList) {
+        auto classField = std::make_unique<AbckitCoreClassField>(klass, &tmpField);
+        classField->name = CreateStringStatic(klass->owningModule->file, tmpField.name.c_str(), tmpField.name.length());
+        klass->fields.emplace_back(std::move(classField));
+    }
+    return true;
+}
+
+template <typename TblType>
+static void UpdateClassInfoToNewModule(TblType &table1, TblType &table2, const std::string &name)
+{
+    for (auto iter = table1.begin(); iter != table1.end();) {
+        if (iter->first.find(name) != std::string::npos) {
+            auto node = table1.extract(iter++);
+            table2.insert(std::move(node));
+        } else {
+            ++iter;
+        }
+    }
+}
+
+template <typename VecType>
+static void UpdateOwningModuleInfo(VecType &vec, AbckitCoreModule *module)
+{
+    for (auto &item : vec) {
+        item->owningModule = module;
+    }
+}
+
+bool ClassSetOwningModuleStatic(AbckitCoreClass *klass, AbckitCoreModule *module)
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_BAD_ARGUMENT(klass, false);
+    LIBABCKIT_BAD_ARGUMENT(module, false);
+    LIBABCKIT_INTERNAL_ERROR(klass->owningModule, false);
+
+    if ((klass->owningModule->file) != (module->file)) {
+        LIBABCKIT_LOG(ERROR) << "new module and current module should be in same AbckitFile.\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_UNSUPPORTED);
+        return false;
+    }
+    auto className = g_implI->abckitStringToString(g_implI->classGetName(klass));
+    ark::pandasm::Record *record = klass->GetArkTSImpl()->impl.GetStaticClass();
+    auto [tmpModuleName, tmpClassName] = ClassGetNames(record->name);
+    auto oldModuleName = tmpModuleName;
+    auto newModuleName = g_implI->abckitStringToString(module->moduleName);
+    auto setNewName = std::string(newModuleName) + "." + className;
+    auto oldName = std::string(oldModuleName) + "." + className;
+    if (newModuleName == oldModuleName) {
+        LIBABCKIT_LOG(ERROR) << "same module. No need to setOwningModule\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_BAD_ARGUMENT);
+        return false;
+    }
+    auto file = module->file;
+    UpdateModuleAndClassName(file, oldName, setNewName);
+    UpdateClassInfoToNewModule(klass->owningModule->ct, module->ct, className);
+    UpdateExtendsInfo(klass->owningModule->file, oldName, setNewName);
+    UpdateOwningModuleInfo(klass->methods, module);
+    UpdateOwningModuleInfo(klass->interfaces, module);
+    klass->owningModule = module;
+    return true;
+}
+
+// ========================================
+// Interface
+// ========================================
+template <typename TblType>
+static void RemoveFuncInTable(TblType &table, const std::string &interfaceName, const std::string &name)
+{
+    std::string cleanFieldName = name;
+    const std::string propertyPrefix = "<property>";
+    if (cleanFieldName.find(propertyPrefix) == 0) {
+        cleanFieldName = cleanFieldName.substr(propertyPrefix.length());
+    }
+
+    for (auto iter = table.begin(); iter != table.end();) {
+        if (iter->first.find(cleanFieldName + ":") != std::string::npos &&
+            iter->first.find(std::string(interfaceName)) != std::string::npos) {
+            iter = table.erase(iter);
+        } else {
+            ++iter;
+        }
+    }
+}
+
+bool InterfaceRemoveFieldStatic(AbckitArktsInterface *iface, AbckitCoreInterfaceField *field)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    if (field->name == nullptr) {
+        LIBABCKIT_LOG(ERROR) << "Field name is nullptr\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        return false;
+    }
+    auto fieldName = field->name->impl;
+    auto fieldIt = std::find_if(iface->core->fields.begin(), iface->core->fields.end(),
+                                [&fieldName](auto &field) { return field.first == fieldName; });
+    if (fieldIt == iface->core->fields.end()) {
+        LIBABCKIT_LOG(ERROR) << "Field does not exist\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        return false;
+    }
+    iface->core->fields.erase(fieldIt);
+
+    auto interfaceName = g_implI->interfaceGetName(iface->core)->impl;
+    RemoveFuncInTable(iface->core->owningModule->file->GetStaticProgram()->functionInstanceTable,
+                      std::string(interfaceName), std::string(fieldName));
+    RemoveFuncInTable(iface->core->owningModule->file->nameToFunctionInstance, std::string(interfaceName),
+                      std::string(fieldName));
+    return true;
+}
+
+AbckitArktsInterface *CreateInterfaceStatic(AbckitArktsModule *m, const char *name)
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_INTERNAL_ERROR(m->core->file->GetStaticProgram(), nullptr);
+    LIBABCKIT_INTERNAL_ERROR(m->core->moduleName, nullptr);
+
+    auto prog = m->core->file->GetStaticProgram();
+    auto fullName = std::string(m->core->moduleName->impl) + '.' + name;
+    auto record = pandasm::Record(fullName, prog->lang);
+    record.metadata->SetAttribute("ets.interface");
+    record.metadata->SetAttribute("ets.abstract");
+    record.metadata->SetAttributeValue("ets.extends", "std.core.Object");
+    record.metadata->SetAttributeValue("access.record", "public");
+    prog->recordTable.try_emplace(fullName, std::move(record));
+
+    auto recordPtr = &prog->recordTable.find(fullName)->second;
+    auto interface = std::make_unique<AbckitCoreInterface>(m->core, AbckitArktsInterface(recordPtr));
+    interface->name = CreateStringStatic(m->core->file, name, strlen(name));
+    auto &interfaces = m->core->it;
+    interfaces.try_emplace(name, std::move(interface));
+
+    return interfaces[name]->GetArkTSImpl();
+}
+
+void UpdateImplementList(std::map<std::string, pandasm::Record> &records, const std::string &ifaceNameOrigin,
+                         const std::string &ifaceNameNew)
+{
+    for (auto &[_, record] : records) {
+        if (record.metadata->RemoveInterface(ifaceNameOrigin)) {
+            record.metadata->AddInterface(ifaceNameNew);
+        }
+    }
+}
+
+std::unique_ptr<AbckitCoreInterfaceField> CloneInterfaceField(AbckitArktsInterface *iface,
+                                                              AbckitCoreInterfaceField *field)
+{
+    auto newField = std::make_unique<AbckitCoreInterfaceField>();
+    newField->name = field->name;
+    newField->owner = iface->core;
+    newField->flag = field->flag;
+    newField->type = field->type;
+    newField->impl = std::make_unique<AbckitArktsInterfaceField>();
+    newField->GetArkTSImpl()->core = newField.get();
+    return newField;
+}
+
+std::string InterfaceFieldNameSplit(AbckitCoreInterfaceField *field)
+{
+    auto fieldName = field->name->impl;
+    std::string splitedFieldName;
+
+    if (fieldName.find(ark::ets::PROPERTY) == 0) {
+        splitedFieldName = fieldName.substr(ark::ets::PROPERTY_PREFIX_LENGTH);
+    } else {
+        LIBABCKIT_LOG(ERROR) << "The input field's name is invalid.\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        return "";
+    }
+    return splitedFieldName;
+}
+
+std::unique_ptr<pandasm::Function> CreateAccessorFunction(std::string_view &fieldTypeName, std::string &accessorName,
+                                                          std::string &ifaceName, bool isSetter)
+{
+    auto function = std::make_unique<ark::pandasm::Function>(accessorName, ark::panda_file::SourceLang::ETS);
+    function->metadata->SetAttribute("ets.abstract");
+    function->metadata->SetAttribute("noimpl");
+    function->metadata->SetAttributeValue("access.function", "public");
+    function->params.emplace_back(ark::pandasm::Type::FromName(ifaceName), ark::panda_file::SourceLang::ETS);
+    if (isSetter) {
+        function->params.emplace_back(ark::pandasm::Type::FromName(fieldTypeName), ark::panda_file::SourceLang::ETS);
+        function->returnType = ark::pandasm::Type::FromName("void");
+    } else {
+        function->returnType = ark::pandasm::Type::FromName(fieldTypeName);
+    }
+
+    return function;
+}
+
+void InterfaceAddFieldAccessor(AbckitArktsInterface *iface, AbckitCoreInterfaceField *field, std::string &accessorName,
+                               bool isSetter)
+{
+    auto function =
+        CreateAccessorFunction(field->type->name->impl, accessorName, iface->impl.GetStaticClass()->name, isSetter);
+    auto funcMangledName =
+        MangleFunctionName(ark::pandasm::DeMangleName(function->name), function->params, function->returnType);
+    auto &funcInstanceTab = iface->core->owningModule->file->GetStaticProgram()->functionInstanceTable;
+    funcInstanceTab.emplace(funcMangledName, std::move(*function));
+    auto &functionImpl = funcInstanceTab.at(funcMangledName);
+
+    auto accessor = CreateCoreFunction(iface->core->owningModule, functionImpl);
+    accessor->parent = iface->core;
+    auto &nameToFunction = iface->core->owningModule->file->nameToFunctionInstance;
+    nameToFunction.emplace(funcMangledName, accessor.get());
+    iface->core->methods.emplace_back(std::move(accessor));
+}
+
+bool InterfaceAddFieldAccessors(AbckitArktsInterface *iface, AbckitCoreInterfaceField *field)
+{
+    auto splitedFieldName = InterfaceFieldNameSplit(field);
+    if (splitedFieldName.empty()) {
+        return false;
+    }
+
+    auto prefix = iface->impl.GetStaticClass()->name + ".";
+    auto addGetter = ((field->flag & ACC_PUBLIC) != 0U);
+    auto addSetter = ((field->flag & ACC_READONLY) == 0U);
+
+    if (addGetter) {
+        auto getterName = prefix + ark::ets::GETTER_BEGIN + splitedFieldName;
+        InterfaceAddFieldAccessor(iface, field, getterName, false);
+    }
+
+    if (addSetter) {
+        auto setterName = prefix + ark::ets::SETTER_BEGIN + splitedFieldName;
+        InterfaceAddFieldAccessor(iface, field, setterName, true);
+    }
+
+    return true;
+}
+
+bool InterfaceAddFieldStatic(AbckitArktsInterface *iface, AbckitCoreInterfaceField *field)
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_INTERNAL_ERROR(iface->core, false);
+    LIBABCKIT_INTERNAL_ERROR(iface->impl.GetStaticClass(), false);
+
+    LIBABCKIT_INTERNAL_ERROR(field->name, false);
+    LIBABCKIT_INTERNAL_ERROR(field->owner, false);
+
+    auto &fieldList = iface->impl.GetStaticClass()->fieldList;
+    auto fieldName = field->name->impl;
+    auto it = std::find_if(fieldList.begin(), fieldList.end(),
+                           [&fieldName](const ark::pandasm::Field &field) { return field.name == fieldName; });
+    if (it != fieldList.end()) {
+        LIBABCKIT_LOG(ERROR) << "The field already exists in the interface\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        return false;
+    }
+
+    if (InterfaceAddFieldAccessors(iface, field)) {
+        auto newField = CloneInterfaceField(iface, field);
+        iface->core->fields.emplace(fieldName, std::move(newField));
+        return true;
+    }
+
+    return false;
+}
+
+bool InterfaceAddMethodStatic(AbckitArktsInterface *iface, AbckitArktsFunction *method)
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_INTERNAL_ERROR(iface->core, false);
+    LIBABCKIT_INTERNAL_ERROR(iface->core->owningModule, false);
+    LIBABCKIT_INTERNAL_ERROR(iface->core->owningModule->file, false);
+    LIBABCKIT_INTERNAL_ERROR(iface->core->owningModule->file->GetStaticProgram(), false);
+    LIBABCKIT_INTERNAL_ERROR(iface->impl.GetStaticClass(), false);
+
+    LIBABCKIT_INTERNAL_ERROR(method->GetStaticImpl(), false);
+    LIBABCKIT_INTERNAL_ERROR(method->core, false);
+    LIBABCKIT_INTERNAL_ERROR(method->core->owningModule, false);
+    LIBABCKIT_INTERNAL_ERROR(method->core->owningModule->file, false);
+    LIBABCKIT_INTERNAL_ERROR(method->core->owningModule->file->GetStaticProgram(), false);
+
+    if (method->GetStaticImpl()->IsStatic()) {
+        LIBABCKIT_LOG(ERROR) << "Static method should not be added to the interface.\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        return false;
+    }
+
+    if (!CheckIsNeedAddMethod(iface->core->owningModule->file->GetStaticProgram(), method,
+                              iface->impl.GetStaticClass()->name)) {
+        LIBABCKIT_LOG(ERROR) << "Method already exists in the interface\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        return false;
+    }
+
+    std::string funcMangledName = GetMangleFuncName(method->core);
+    ASSERT(funcMangledName != "__ABCKIT_INVALID__");
+
+    auto funcModuleName = funcMangledName.substr(0, funcMangledName.find(':'));
+    auto oldModuleClassName = funcModuleName.substr(0, funcModuleName.rfind('.'));
+    UpdateClassName(funcMangledName, oldModuleClassName, iface->impl.GetStaticClass()->name);
+
+    auto funcData = CreatePandasmFunction(iface, method, funcMangledName);
+    auto &funcInstanceTab = iface->core->owningModule->file->GetStaticProgram()->functionInstanceTable;
+    funcInstanceTab.emplace(funcMangledName, std::move(*funcData));
+    auto newCoreFunc = CreateCoreFunction(iface->core->owningModule, funcInstanceTab.at(funcMangledName));
+    newCoreFunc->parent = iface->core;
+    iface->core->owningModule->file->nameToFunctionInstance.emplace(funcMangledName, newCoreFunc.get());
+    iface->core->methods.emplace_back(std::move(newCoreFunc));
+    return true;
+}
+
+bool InterfaceAddSuperInterfaceStatic(AbckitCoreInterface *iface, AbckitCoreInterface *superIface)
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_BAD_ARGUMENT(iface, false);
+    LIBABCKIT_BAD_ARGUMENT(superIface, false);
+
+    auto superIfaceName = g_implI->abckitStringToString(g_implI->interfaceGetName(superIface));
+    auto it = std::find_if(iface->superInterfaces.begin(), iface->superInterfaces.end(),
+                           [&superIfaceName](auto &tmpSuperIface) {
+                               auto name = g_implI->abckitStringToString(g_implI->interfaceGetName(tmpSuperIface));
+                               return std::string(name) == std::string(superIfaceName);
+                           });
+    if (it != iface->superInterfaces.end()) {
+        LIBABCKIT_LOG(ERROR) << "same superInterface already exits.\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        return false;
+    }
+    iface->superInterfaces.emplace_back(superIface);
+    auto record = iface->GetArkTSImpl()->impl.GetStaticClass();
+    auto superIfaceFulldName = superIface->GetArkTSImpl()->impl.GetStaticClass()->name;
+    auto res = record->metadata->AddInterface(superIfaceFulldName);
+    if (!res) {
+        LIBABCKIT_LOG(ERROR) << "failed to add superiface in metadata.\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        return false;
+    }
+    return true;
+}
+
+bool InterfaceRemoveSuperInterfaceStatic(AbckitCoreInterface *iface, AbckitCoreInterface *superIface)
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_BAD_ARGUMENT(iface, false);
+    LIBABCKIT_BAD_ARGUMENT(superIface, false);
+
+    auto superIfaceName = g_implI->abckitStringToString(g_implI->interfaceGetName(superIface));
+    auto it = std::find_if(iface->superInterfaces.begin(), iface->superInterfaces.end(),
+                           [&superIfaceName](auto &tmpSuperIface) {
+                               auto name = g_implI->abckitStringToString(g_implI->interfaceGetName(tmpSuperIface));
+                               return std::string(name) == std::string(superIfaceName);
+                           });
+    if (it == iface->superInterfaces.end()) {
+        LIBABCKIT_LOG(ERROR) << "same superInterface not exits.\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        return false;
+    }
+    iface->superInterfaces.erase(it);
+
+    auto record = iface->GetArkTSImpl()->impl.GetStaticClass();
+    auto superIfaceFulldName = superIface->GetArkTSImpl()->impl.GetStaticClass()->name;
+    auto res = record->metadata->RemoveInterface(superIfaceFulldName);
+    if (!res) {
+        LIBABCKIT_LOG(ERROR) << "failed to remove superiface in metadata.\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        return false;
+    }
+    return true;
+}
+
+bool InterfaceRemoveMethodStatic(AbckitCoreInterface *iface, AbckitCoreFunction *method)
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_BAD_ARGUMENT(iface, false);
+    LIBABCKIT_BAD_ARGUMENT(method, false);
+    LIBABCKIT_INTERNAL_ERROR(iface->owningModule, false);
+
+    auto funcNameWithParas = GetMangleFuncName(method);
+    auto file = iface->owningModule->file;
+    auto it = std::find_if(iface->methods.begin(), iface->methods.end(), [&funcNameWithParas](auto &tmpMethod) {
+        return GetMangleFuncName(tmpMethod.get()) == funcNameWithParas;
+    });
+    if (it == iface->methods.end()) {
+        LIBABCKIT_LOG(ERROR) << "same method not exits.\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        return false;
+    }
+    iface->methods.erase(it);
+    RemoveFuncInTable(file->GetStaticProgram()->functionInstanceTable, funcNameWithParas);
+    RemoveFuncInTable(file->nameToFunctionInstance, funcNameWithParas);
+    return true;
+}
+
+bool InterfaceSetOwningModuleStatic(AbckitCoreInterface *iface, AbckitCoreModule *module)
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_BAD_ARGUMENT(iface, false);
+    LIBABCKIT_BAD_ARGUMENT(module, false);
+    LIBABCKIT_INTERNAL_ERROR(iface->owningModule, false);
+
+    if ((iface->owningModule->file) != (module->file)) {
+        LIBABCKIT_LOG(ERROR) << "new module and current module should be in same AbckitFile.\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_UNSUPPORTED);
+        return false;
+    }
+    auto ifaceModuleName = g_implI->abckitStringToString(iface->owningModule->moduleName);
+    auto newModuleName = g_implI->abckitStringToString(module->moduleName);
+    if (ifaceModuleName == newModuleName) {
+        LIBABCKIT_LOG(ERROR) << "same module. No need to setOwningModule\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_BAD_ARGUMENT);
+        return false;
+    }
+    auto fullInterfaceName = iface->GetArkTSImpl()->impl.GetStaticClass()->name;
+    auto setNewInterfaceName = fullInterfaceName;
+    auto ifaceName = g_implI->abckitStringToString(g_implI->interfaceGetName(iface));
+    auto file = iface->owningModule->file;
+    UpdateClassName(setNewInterfaceName, ifaceModuleName, newModuleName);
+    UpdateModuleAndClassName(file, fullInterfaceName, setNewInterfaceName);
+    UpdateClassInfoToNewModule(iface->owningModule->it, module->it, ifaceName);
+    UpdateOwningModuleInfo(iface->methods, module);
+    // modify derived class/interface's info
+    for (auto &[name, record] : file->GetStaticProgram()->recordTable) {
+        auto interfaceVec = record.metadata->GetInterfaces();
+        if (std::find(interfaceVec.begin(), interfaceVec.end(), fullInterfaceName) != interfaceVec.end()) {
+            record.metadata->RemoveInterface(fullInterfaceName);
+            record.metadata->AddInterface(setNewInterfaceName);
+        }
+    }
+    iface->owningModule = module;
+    return true;
+}
+
 }  // namespace libabckit

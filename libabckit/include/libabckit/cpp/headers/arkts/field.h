@@ -167,6 +167,8 @@ class ClassField final : public core::ClassField {
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
     /// @brief abckit::DefaultHash<Class>
     friend class abckit::DefaultHash<ClassField>;
+    /// @brief to access private constructor
+    friend class Class;
     /// @brief to access private TargetCast
     friend class abckit::traits::TargetCheckCast<ClassField>;
 
@@ -238,6 +240,8 @@ class InterfaceField final : public core::InterfaceField {
     friend class abckit::DefaultHash<InterfaceField>;
     /// @brief to access private TargetCast
     friend class abckit::traits::TargetCheckCast<InterfaceField>;
+    /// @brief to access private constructor
+    friend class abckit::arkts::Interface;
 
 public:
     /**

@@ -447,9 +447,24 @@ std::string RecordMetadata::GetBase() const
     return "";
 }
 
+bool RecordMetadata::SetBase(std::string_view /* unusedParam */)
+{
+    return false;
+}
+
 std::vector<std::string> RecordMetadata::GetInterfaces() const
 {
     return {};
+}
+
+bool RecordMetadata::AddInterface(std::string_view /* unusedParam */)
+{
+    return false;
+}
+
+bool RecordMetadata::RemoveInterface(std::string_view /* unusedParam */)
+{
+    return false;
 }
 
 bool RecordMetadata::IsAnnotation() const

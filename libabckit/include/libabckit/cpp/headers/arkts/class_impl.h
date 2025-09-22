@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,13 @@
 #ifndef CPP_ABCKIT_ARKTS_CLASS_IMPL_H
 #define CPP_ABCKIT_ARKTS_CLASS_IMPL_H
 
-#include "class.h"
 #include "annotation.h"
 #include "annotation_interface.h"
+#include "class.h"
+#include "field.h"
+#include "function.h"
+#include "interface.h"
+#include "module.h"
 
 // NOLINTBEGIN(performance-unnecessary-value-param)
 namespace abckit::arkts {
@@ -35,6 +39,34 @@ inline Class::Class(const core::Class &coreOther) : core::Class(coreOther), targ
 inline bool Class::SetName(const std::string &name) const
 {
     const auto ret = GetApiConfig()->cArktsMapi_->classSetName(TargetCast(), name.c_str());
+    CheckError(GetApiConfig());
+    return ret;
+}
+
+inline bool Class::RemoveField(arkts::ClassField field) const
+{
+    const auto ret = GetApiConfig()->cArktsMapi_->classRemoveField(TargetCast(), field.TargetCast());
+    CheckError(GetApiConfig());
+    return ret;
+}
+
+inline bool Class::AddMethod(arkts::Function function)
+{
+    const auto ret = GetApiConfig()->cArktsMapi_->classAddMethod(TargetCast(), function.TargetCast());
+    CheckError(GetApiConfig());
+    return ret;
+}
+
+inline bool Class::AddField(const ClassField &field) const
+{
+    const auto ret = GetApiConfig()->cArktsMapi_->classAddField(TargetCast(), field.TargetCast());
+    CheckError(GetApiConfig());
+    return ret;
+}
+
+inline bool Class::SetOwningModule(const Module &module) const
+{
+    const auto ret = GetApiConfig()->cArktsMapi_->classSetOwningModule(TargetCast(), module.TargetCast());
     CheckError(GetApiConfig());
     return ret;
 }
@@ -58,6 +90,46 @@ inline Annotation Class::AddAnnotation(AnnotationInterface ai)
     auto coreAnno = GetApiConfig()->cArktsIapi_->arktsAnnotationToCoreAnnotation(arktsAnno);
     CheckError(GetApiConfig());
     return Annotation(core::Annotation(coreAnno, GetApiConfig(), GetResource()));
+}
+
+inline bool Class::AddInterface(arkts::Interface iface)
+{
+    const auto ret = GetApiConfig()->cArktsMapi_->classAddInterface(TargetCast(), iface.TargetCast());
+    CheckError(GetApiConfig());
+    return ret;
+}
+
+inline bool Class::RemoveInterface(arkts::Interface iface)
+{
+    const auto ret = GetApiConfig()->cArktsMapi_->classRemoveInterface(TargetCast(), iface.TargetCast());
+    CheckError(GetApiConfig());
+    return ret;
+}
+
+inline bool Class::SetSuperClass(arkts::Class superClass)
+{
+    const auto ret = GetApiConfig()->cArktsMapi_->classSetSuperClass(TargetCast(), superClass.TargetCast());
+    CheckError(GetApiConfig());
+    return ret;
+}
+
+inline bool Class::RemoveMethod(arkts::Function method)
+{
+    const auto ret = GetApiConfig()->cArktsMapi_->classRemoveMethod(TargetCast(), method.TargetCast());
+    CheckError(GetApiConfig());
+    return ret;
+}
+
+inline Class Class::CreateClass(Module m, const std::string &name)
+{
+    auto klass = m.GetApiConfig()->cArktsMapi_->createClass(m.TargetCast(), name.c_str());
+    CheckError(m.GetApiConfig());
+
+    auto coreClass =
+        core::Class(m.GetApiConfig()->cArktsIapi_->arktsClassToCoreClass(klass), m.GetApiConfig(), m.GetResource());
+    CheckError(m.GetApiConfig());
+
+    return Class(coreClass);
 }
 
 }  // namespace abckit::arkts

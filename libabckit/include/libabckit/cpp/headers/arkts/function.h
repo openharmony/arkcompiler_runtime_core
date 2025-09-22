@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,8 @@ class Function final : public core::Function {
     friend class Class;
     /// @brief to access private constructor
     friend class Namespace;
+    /// @brief to access private constructor
+    friend class Interface;
     /// @brief abckit::DefaultHash<Function>
     friend class abckit::DefaultHash<Function>;
     /// @brief to access private TargetCast

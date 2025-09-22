@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,8 @@ namespace abckit::arkts {
 class Interface final : public core::Interface {
     // To access private constructor.
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
+    /// @brief to access private constructor
+    friend class arkts::Class;
     /// @brief to access private constructor
     friend class Module;
     /// @brief to access private constructor
@@ -81,6 +83,76 @@ public:
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     bool SetName(const std::string &name) const;
+
+    /**
+     * @brief Remove field for interface
+     * @return `true` on success.
+     * @param [ in ] field - Field to be remove.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool RemoveField(arkts::InterfaceField field) const;
+
+    /**
+     * @brief Creates a new Interface with name `name`.
+     * @return The newly created Interface object.
+     * @param [ in ] m - The module in which to create the Interface.
+     * @param [ in ] name - The name of the Interface to create.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `m` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     */
+    static Interface CreateInterface(Module m, const std::string &name);
+
+    /**
+     * @brief add field for interface
+     * @return `true` on success.
+     * @param [ in ] field - Field to be add.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool AddField(arkts::InterfaceField field);
+
+    /**
+     * @brief add function for interface
+     * @return `true` on success.
+     * @param [ in ] function - Function to be add.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool AddMethod(arkts::Function function);
+
+    /**
+     * @brief Add superinterface to the interface
+     * @return `true` on success.
+     * @param [ in ] iface - Interface to be added.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if iface is false.
+     */
+    bool AddSuperInterface(const Interface &iface) const;
+
+    /**
+     * @brief Remove superinterface from the interface
+     * @return `true` on success.
+     * @param [ in ] iface - Interface to be removed.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if iface is false.
+     */
+    bool RemoveSuperInterface(const Interface &iface) const;
+
+    /**
+     * @brief Remove method from the interface
+     * @return `true` on success.
+     * @param [ in ] method - Function to be removed.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if method is false.
+     */
+    bool RemoveMethod(const Function &method) const;
+
+    /**
+     * @brief Sets owning module for interface
+     * @return `true` on success.
+     * @param [ in ] module - Module to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if module is false.
+     */
+    bool SetOwningModule(const Module &module) const;
 
 private:
     /**

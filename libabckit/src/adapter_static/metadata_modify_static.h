@@ -63,6 +63,7 @@ AbckitLiteralArray *CreateLiteralArrayStatic(AbckitFile *file, AbckitLiteral **v
 AbckitValue *FindOrCreateValueU1Static(AbckitFile *file, bool value);
 AbckitValue *FindOrCreateValueDoubleStatic(AbckitFile *file, double value);
 AbckitValue *FindOrCreateValueStringStatic(AbckitFile *file, const char *value, size_t len);
+
 // ========================================
 // Function
 // ========================================
@@ -70,6 +71,31 @@ bool FunctionSetNameStatic(AbckitArktsFunction *function, const char *name);
 bool FunctionAddParameterStatic(AbckitArktsFunction *func, AbckitArktsFunctionParam *param);
 bool FunctionSetReturnTypeStatic(AbckitArktsFunction *func, AbckitType *type);
 bool FunctionRemoveParameterStatic(AbckitArktsFunction *func, size_t index);
+
+// ========================================
+// Class
+// ========================================
+AbckitArktsClass *CreateClassStatic(AbckitCoreModule *m, const char *name);
+bool ClassRemoveMethodStatic(AbckitCoreClass *klass, AbckitCoreFunction *method);
+bool ClassAddInterfaceStatic(AbckitArktsClass *klass, AbckitArktsInterface *iface);
+bool ClassRemoveInterfaceStatic(AbckitArktsClass *klass, AbckitArktsInterface *iface);
+bool ClassSetSuperClassStatic(AbckitArktsClass *klass, AbckitArktsClass *superClass);
+bool ClassAddMethodStatic(AbckitArktsClass *klass, AbckitArktsFunction *method);
+bool ClassRemoveFieldStatic(AbckitArktsClass *klass, AbckitCoreClassField *field);
+bool ClassAddFieldStatic(AbckitCoreClass *klass, AbckitCoreClassField *coreClassField);
+bool ClassSetOwningModuleStatic(AbckitCoreClass *klass, AbckitCoreModule *module);
+
+// ========================================
+// Interface
+// ========================================
+bool InterfaceRemoveFieldStatic(AbckitArktsInterface *iface, AbckitCoreInterfaceField *field);
+AbckitArktsInterface *CreateInterfaceStatic(AbckitArktsModule *m, const char *name);
+bool InterfaceAddFieldStatic(AbckitArktsInterface *iface, AbckitCoreInterfaceField *field);
+bool InterfaceAddMethodStatic(AbckitArktsInterface *iface, AbckitArktsFunction *method);
+bool InterfaceAddSuperInterfaceStatic(AbckitCoreInterface *iface, AbckitCoreInterface *superIface);
+bool InterfaceRemoveSuperInterfaceStatic(AbckitCoreInterface *iface, AbckitCoreInterface *superIface);
+bool InterfaceRemoveMethodStatic(AbckitCoreInterface *iface, AbckitCoreFunction *method);
+bool InterfaceSetOwningModuleStatic(AbckitCoreInterface *iface, AbckitCoreModule *module);
 }  // namespace libabckit
 
 #endif

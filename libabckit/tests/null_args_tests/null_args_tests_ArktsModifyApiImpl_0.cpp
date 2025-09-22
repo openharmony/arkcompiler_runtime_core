@@ -76,6 +76,83 @@ TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, classRemoveAnnotation)
     helpers_nullptr::TestNullptr(g_arktsModifyApiImp->classRemoveAnnotation);
 }
 
+// Test: test-kind=api, api=ArktsModifyApiImpl::classRemoveField,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, classRemoveField)
+{
+    helpers_nullptr::TestNullptr(g_arktsModifyApiImp->classRemoveField);
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::classAddMethod,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, classAddMethod)
+{
+    helpers_nullptr::TestNullptr(g_arktsModifyApiImp->classAddMethod);
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::interfaceAddField,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, interfaceAddField)
+{
+    helpers_nullptr::TestNullptr(g_arktsModifyApiImp->interfaceAddField);
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::interfaceAddMethod,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, interfaceAddMethod)
+{
+    helpers_nullptr::TestNullptr(g_arktsModifyApiImp->interfaceAddMethod);
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::classSetName,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, classSetName)
+{
+    helpers_nullptr::TestNullptr(g_arktsModifyApiImp->classSetName);
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::classAddField,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, classAddField)
+{
+    helpers_nullptr::TestNullptr(g_arktsModifyApiImp->classAddField);
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::classSetOwningModule,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, classSetOwningModule)
+{
+    helpers_nullptr::TestNullptr(g_arktsModifyApiImp->classSetOwningModule);
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::interfaceAddSuperInterface,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, interfaceAddSuperInterface)
+{
+    helpers_nullptr::TestNullptr(g_arktsModifyApiImp->interfaceAddSuperInterface);
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::interfaceRemoveSuperInterface,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, interfaceRemoveSuperInterface)
+{
+    helpers_nullptr::TestNullptr(g_arktsModifyApiImp->interfaceRemoveSuperInterface);
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::interfaceRemoveMethod,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, interfaceRemoveMethod)
+{
+    helpers_nullptr::TestNullptr(g_arktsModifyApiImp->interfaceRemoveMethod);
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::interfaceSetOwningModule,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, interfaceSetOwningModule)
+{
+    helpers_nullptr::TestNullptr(g_arktsModifyApiImp->interfaceSetOwningModule);
+}
+
 // Test: test-kind=api, api=ArktsModifyApiImpl::fileAddExternalModuleArktsV1,
 // abc-kind=NoABC, category=negative-nullptr, extension=c
 TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, fileAddExternalModuleArktsV1)
@@ -88,6 +165,13 @@ TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, fileAddExternalModuleArktsV1)
 TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, functionAddAnnotation)
 {
     helpers_nullptr::TestNullptr(g_arktsModifyApiImp->functionAddAnnotation);
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::interfaceSetName,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, interfaceSetName)
+{
+    helpers_nullptr::TestNullptr(g_arktsModifyApiImp->interfaceSetName);
 }
 
 // Test: test-kind=api, api=ArktsModifyApiImpl::functionRemoveAnnotation,
@@ -137,6 +221,55 @@ TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, moduleRemoveImport)
 TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, AbckitGetArktsModifyApiImpl)
 {
     helpers_nullptr::TestNullptr(AbckitGetArktsModifyApiImpl);
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::interfaceRemoveField,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, interfaceRemoveField)
+{
+    helpers_nullptr::TestNullptr(g_arktsModifyApiImp->interfaceRemoveField);
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::createClass,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, createClass)
+{
+    helpers_nullptr::TestNullptr(g_arktsModifyApiImp->createClass);
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::classRemoveMethod,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, classRemoveMethod)
+{
+    helpers_nullptr::TestNullptr(g_arktsModifyApiImp->classRemoveMethod);
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::classAddInterface,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, classAddInterface)
+{
+    helpers_nullptr::TestNullptr(g_arktsModifyApiImp->classAddInterface);
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::classRemoveInterface,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, classRemoveInterface)
+{
+    helpers_nullptr::TestNullptr(g_arktsModifyApiImp->classRemoveInterface);
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::classSetSuperClass,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, classSetSuperClass)
+{
+    helpers_nullptr::TestNullptr(g_arktsModifyApiImp->classSetSuperClass);
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::createInterface,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, createInterface)
+{
+    helpers_nullptr::TestNullptr(g_arktsModifyApiImp->createInterface);
 }
 
 }  // namespace libabckit::test

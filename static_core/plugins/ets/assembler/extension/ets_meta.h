@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -65,9 +65,29 @@ public:
         return "";
     }
 
+    bool SetBase(std::string_view base) override
+    {
+        if (GetBase() != "std.core.Object") {
+            return false;
+        }
+
+        RemoveAttributeValue("ets.extends", "std.core.Object");
+        return !SetAttributeValue("ets.extends", base);
+    }
+
     std::vector<std::string> GetInterfaces() const override
     {
         return GetAttributeValues("ets.implements");
+    }
+
+    bool AddInterface(std::string_view value) override
+    {
+        return !SetAttributeValue("ets.implements", value);
+    }
+
+    bool RemoveInterface(std::string_view value) override
+    {
+        return !RemoveAttributeValue("ets.implements", value);
     }
 
     bool IsAnnotation() const override
