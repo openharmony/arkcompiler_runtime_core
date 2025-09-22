@@ -2004,6 +2004,13 @@ export final class InterfaceType extends Type {
     }
 
     /**
+     * @returns Class of interface
+     */
+    public getClass(): Class {
+        return this.cls
+    }
+
+    /**
      * Checks whether type is primitive or composite
      *
      * @returns true if type is primitive and false otherwise
