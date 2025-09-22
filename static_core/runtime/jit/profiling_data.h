@@ -244,8 +244,11 @@ private:
 class ProfilingData {
 public:
     explicit ProfilingData(Span<CallSiteInlineCache> inlineCaches, Span<BranchData> branchData,
-                           Span<ThrowData> throwData)
-        : inlineCaches_(inlineCaches), branchData_(branchData), throwData_(throwData)
+                           Span<ThrowData> throwData, bool branchProfilingEnabled = false)
+        : inlineCaches_(inlineCaches),
+          branchData_(branchData),
+          throwData_(throwData),
+          branchProfilingEnabled_(branchProfilingEnabled)
     {
     }
 
@@ -262,6 +265,18 @@ public:
     Span<ThrowData> GetThrowData() const
     {
         return throwData_;
+    }
+
+    // Check if branch profiling is enabled
+    bool IsBranchProfilingEnabled() const
+    {
+        return branchProfilingEnabled_;
+    }
+
+    // Get branch profiling flag memory offset for assembly code
+    static constexpr uint32_t GetBranchProfilingEnabledOffset()
+    {
+        return MEMBER_OFFSET(ProfilingData, branchProfilingEnabled_);
     }
 
     CallSiteInlineCache *FindInlineCache(uintptr_t pc)
@@ -285,17 +300,19 @@ public:
     void UpdateBranchTaken(uintptr_t pc)
     {
         auto branch = FindBranchData(pc);
-        ASSERT(branch != nullptr);
-        branch->IncrementTaken();
-        isUpdated_ = true;
+        if (branch != nullptr) {
+            branch->IncrementTaken();
+            isUpdated_ = true;
+        }
     }
 
     void UpdateBranchNotTaken(uintptr_t pc)
     {
         auto branch = FindBranchData(pc);
-        ASSERT(branch != nullptr);
-        branch->IncrementNotTaken();
-        isUpdated_ = true;
+        if (branch != nullptr) {
+            branch->IncrementNotTaken();
+            isUpdated_ = true;
+        }
     }
 
     int64_t GetBranchTakenCounter(uintptr_t pc)
@@ -384,6 +401,7 @@ private:
     Span<CallSiteInlineCache> inlineCaches_;
     Span<BranchData> branchData_;
     Span<ThrowData> throwData_;
+    bool branchProfilingEnabled_ {false};
     std::atomic_bool isUpdated_ {true};
 };
 

@@ -14,6 +14,7 @@
  */
 
 #include <cstdint>
+
 #include "libpandafile/file.h"
 #include "runtime/include/class.h"
 #include "runtime/include/coretypes/array.h"
@@ -23,6 +24,7 @@
 #include "runtime/include/hclass.h"
 #include "runtime/include/method.h"
 #include "runtime/include/mtmanaged_thread.h"
+#include "runtime/jit/profiling_data.h"
 #include "runtime/mem/tlab.h"
 #include "utils/cframe_layout.h"
 

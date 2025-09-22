@@ -591,19 +591,16 @@ macro(:update_hotness_counter) do |callee, is_initobj|
   }
 end
 
-macro(:update_branch_taken) do |method_ptr|
+# Common macro for branch profiling with configurable runtime function
+macro(:update_branch_statistics) do |method_ptr, entrypoint|
   prof_data := LoadI(method_ptr).Volatile(true).Imm(Constants::METHOD_NATIVE_POINTER_OFFSET).ptr
   #TODO(mshimenkov): place likely/unlikely
   If(prof_data, 0).NE {
-    call_runtime("UpdateBranchTaken", method_ptr, %frame, %pc, prof_data).void
-  }
-end
-
-macro(:update_branch_untaken) do |method_ptr|
-  prof_data := LoadI(method_ptr).Volatile(true).Imm(Constants::METHOD_NATIVE_POINTER_OFFSET).ptr
-  #TODO(mshimenkov): place likely/unlikely
-  If(prof_data, 0).NE {
-    call_runtime("UpdateBranchUntaken", method_ptr, %frame, %pc, prof_data).void
+    # Check if branch profiling is enabled
+    branch_profiling_enabled := LoadI(prof_data).Imm(Constants::PROFILING_DATA_BRANCH_PROFILING_ENABLED_OFFSET).u8
+    If(branch_profiling_enabled, 0).NE {
+      call_runtime(entrypoint, method_ptr, %frame, %pc, prof_data).void
+    }
   }
 end
 
@@ -1705,10 +1702,10 @@ end
       method_ptr := get_method_ptr()
       If(acc.i32, vs).send(:"#{cc.upcase}") {
         imm_casted = Cast(imm).SrcType("DataType::INT#{from}").i32
-        update_branch_taken(method_ptr)
+        update_branch_statistics(method_ptr, "UpdateBranchTaken")
         pc1 := instrument_branches(imm_casted, :"i32", method_ptr)
       } Else {
-        update_branch_untaken(method_ptr)
+        update_branch_statistics(method_ptr, "UpdateBranchUntaken")
         pc2 := advance_pc_imm(pc, size)
       }
       load_to_acc_reg(Phi(acc_sf, acc).i32, Phi(acc_tag_sf, acc_tag).i64)
@@ -1728,10 +1725,10 @@ end
       method_ptr := get_method_ptr()
       If(acc.i32, 0).send(:"#{cc.upcase}") {
         imm_casted = Cast(imm).SrcType("DataType::INT#{from}").i32
-        update_branch_taken(method_ptr)
+        update_branch_statistics(method_ptr, "UpdateBranchTaken")
         pc1 := instrument_branches(imm_casted, :"i32", method_ptr)
       } Else {
-        update_branch_untaken(method_ptr)
+        update_branch_statistics(method_ptr, "UpdateBranchUntaken")
         pc2 := advance_pc_imm(pc, size)
       }
       load_to_acc_reg(Phi(acc_sf, acc).i32, Phi(acc_tag_sf, acc_tag).i64)
@@ -1767,10 +1764,10 @@ end
       method_ptr := get_method_ptr()
       If(vs, acc.ref).send(:"#{cc.upcase}") {
         imm_casted = Cast(imm).SrcType("DataType::INT#{from}").i32
-        update_branch_taken(method_ptr)
+        update_branch_statistics(method_ptr, "UpdateBranchTaken")
         pc1 := instrument_branches(imm_casted, :"ref", method_ptr)
       } Else {
-        update_branch_untaken(method_ptr)
+        update_branch_statistics(method_ptr, "UpdateBranchUntaken")
         pc2 := advance_pc_imm(pc, size)
       }
       load_to_acc_reg(Phi(acc_sf, acc).ref, Phi(acc_tag_sf, acc_tag).i64)
@@ -1790,10 +1787,10 @@ end
       method_ptr := get_method_ptr()
       If(acc.ref, 0).send(:"#{cc.upcase}") {
         imm_casted = Cast(imm).SrcType("DataType::INT#{from}").i32
-        update_branch_taken(method_ptr)
+        update_branch_statistics(method_ptr, "UpdateBranchTaken")
         pc1 := instrument_branches(imm_casted, :"ref", method_ptr)
       } Else {
-        update_branch_untaken(method_ptr)
+        update_branch_statistics(method_ptr, "UpdateBranchUntaken")
         pc2 := advance_pc_imm(pc, size)
       }
       load_to_acc_reg(Phi(acc_sf, acc).ref, Phi(acc_tag_sf, acc_tag).i64)
