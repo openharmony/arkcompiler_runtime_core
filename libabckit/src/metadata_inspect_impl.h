@@ -129,6 +129,11 @@ struct AbckitCoreAnnotationInterface {
      */
     std::vector<AbckitCoreAnnotation *> annotations;
 
+    /*
+     * Store records that has annotationInterface's name in attributes.
+     */
+    std::vector<ark::pandasm::Record *> recordUsers;
+
     std::variant<std::unique_ptr<AbckitArktsAnnotationInterface>> impl;
     AbckitArktsAnnotationInterface *GetArkTSImpl()
     {
@@ -373,6 +378,11 @@ struct AbckitCoreClass {
     std::vector<AbckitType *> typeUsers;
 
     /*
+     * Store records that has class's name in attributes.
+     */
+    std::vector<ark::pandasm::Record *> recordUsers;
+
+    /*
      * Language-dependent implementation to store class data.
      */
     std::variant<std::unique_ptr<AbckitJsClass>, std::unique_ptr<AbckitArktsClass>> impl;
@@ -463,6 +473,11 @@ struct AbckitCoreFunction {
      * To store parameters of the function.
      */
     std::vector<std::unique_ptr<AbckitCoreFunctionParam>> parameters;
+
+    /*
+     * Store records that has function's name in attributes.
+     */
+    std::vector<ark::pandasm::Record *> recordUsers;
 
     /*
      * To store function return type
@@ -559,6 +574,11 @@ struct AbckitCoreNamespace {
     std::unordered_map<std::string, std::unique_ptr<AbckitCoreInterface>> it;
     std::unordered_map<std::string, std::unique_ptr<AbckitCoreEnum>> et;
     std::unordered_map<std::string, std::unique_ptr<AbckitCoreAnnotationInterface>> at;
+
+    /*
+     * Store records that has namespace's name in attributes.
+     */
+    std::vector<ark::pandasm::Record *> recordUsers;
 
     std::variant<std::unique_ptr<AbckitArktsNamespace>> impl;
 
@@ -729,6 +749,11 @@ struct AbckitCoreModule {
      * Only stores top level functions.
      */
     std::vector<std::unique_ptr<AbckitCoreFunction>> functions;
+
+    /*
+     * Store records that has module's name in attributes.
+     */
+    std::vector<ark::pandasm::Record *> recordUsers;
 
     /*
      * Current module's name.
@@ -1496,6 +1521,11 @@ struct AbckitCoreInterface {
      */
     std::vector<AbckitType *> typeUsers;
 
+    /*
+     * Store records that has interface's name in attributes.
+     */
+    std::vector<ark::pandasm::Record *> recordUsers;
+
     std::variant<std::unique_ptr<AbckitArktsInterface>> impl;
     AbckitArktsInterface *GetArkTSImpl()
     {
@@ -1616,6 +1646,11 @@ struct AbckitCoreEnum {
      * To store type users
      */
     std::vector<AbckitType *> typeUsers;
+
+    /*
+     * Store records that has enum's name in attributes.
+     */
+    std::vector<ark::pandasm::Record *> recordUsers;
 
     /*
      * To store enum[]

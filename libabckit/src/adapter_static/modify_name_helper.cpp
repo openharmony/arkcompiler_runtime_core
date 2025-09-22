@@ -25,9 +25,6 @@
 #include "string_util.h"
 
 namespace {
-constexpr std::string_view ETS_EXTENDS = "ets.extends";
-constexpr std::string_view ETS_IMPLEMENTS = "ets.implements";
-constexpr std::string_view ETS_ANNOTATION_CLASS = "ets.annotation.class";
 constexpr std::string_view ARRAY_ENUM_SUFFIX = "[]";
 constexpr std::string_view GLOBAL_CLASS = "ETSGLOBAL";
 constexpr std::string_view NAME_DELIMITER = ".";
@@ -35,6 +32,19 @@ constexpr std::string_view FUNCTION_DELIMITER = ":";
 constexpr std::string_view INTERFACE_FIELD_PREFIX = "<property>";
 constexpr std::string_view ASYNC_PATTERN = "(%%async-)(.+):(.+)";
 constexpr std::string_view ASYNC_PREFIX = "%%async-";
+constexpr std::string_view GETTER_PREFIX = "<get>";
+constexpr std::string_view SETTER_PREFIX = "<set>";
+
+std::string AddGetSetPrefix(const std::string &input, const std::string &name)
+{
+    if (input.find(GETTER_PREFIX) != std::string::npos) {
+        return std::string(GETTER_PREFIX) + name;
+    }
+    if (input.find(SETTER_PREFIX) != std::string::npos) {
+        return std::string(SETTER_PREFIX) + name;
+    }
+    return name;
+}
 
 std::string GetSetPattern(const std::string &name)
 {
@@ -113,9 +123,41 @@ bool ProgramUpdateFunctionTableKey(ark::pandasm::Program *prog, const std::strin
     return true;
 }
 
-bool ObjectRefreshName(
-    std::variant<AbckitCoreNamespace *, AbckitCoreClass *, AbckitCoreEnum *, AbckitCoreInterface *> object,
-    const std::string &newName, bool isObjectLiteral = false)
+std::vector<std::string> GetUpdatedValues(const std::vector<std::string> &values, const std::string &oldName,
+                                          const std::string &newName)
+{
+    std::vector<std::string> updatedValues;
+    for (auto &value : values) {
+        if (value == oldName) {
+            updatedValues.emplace_back(newName);
+        } else {
+            updatedValues.emplace_back(value);
+        }
+    }
+    return updatedValues;
+}
+
+void UpdateRecordAttributes(const std::vector<ark::pandasm::Record *> &recordUsers, const std::string &oldName,
+                            const std::string &newName)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    for (auto &record : recordUsers) {
+        const auto &attributes = record->metadata->GetAttributes();
+        for (auto &[attribute, values] : attributes) {
+            if (std::find(values.begin(), values.end(), oldName) == values.end()) {
+                continue;
+            }
+
+            record->metadata->SetAttributeValues(attribute, GetUpdatedValues(values, oldName, newName));
+        }
+    }
+}
+
+bool ObjectRefreshName(std::variant<AbckitCoreNamespace *, AbckitCoreClass *, AbckitCoreEnum *, AbckitCoreInterface *,
+                                    AbckitCoreAnnotationInterface *>
+                           object,
+                       const std::string &newName, bool isObjectLiteral = false)
 {
     LIBABCKIT_LOG_FUNC;
     const auto funcName = libabckit::StringUtil::GetFuncNameWithSquareBrackets(__func__);
@@ -136,6 +178,7 @@ bool ObjectRefreshName(
                 LIBABCKIT_LOG_NO_FUNC(ERROR) << funcName << "Failed to update object program record" << std::endl;
                 return false;
             }
+            UpdateRecordAttributes(coreObject->recordUsers, oldFullName, newFullName);
             record->name = newFullName;
 
             return true;
@@ -151,7 +194,8 @@ bool libabckit::ModifyNameHelper::ModuleRefreshName(AbckitCoreModule *m, const s
     LIBABCKIT_LOG(DEBUG) << "old module name:" << m->moduleName->impl << std::endl;
     LIBABCKIT_LOG(DEBUG) << "new module name:" << newName << std::endl;
 
-    const auto oldRecordName = GetStaticImplRecord(m)->name;
+    auto record = GetStaticImplRecord(m);
+    const auto oldRecordName = record->name;
     const auto newRecordName = newName + NAME_DELIMITER.data() + GLOBAL_CLASS.data();
 
     LIBABCKIT_LOG(DEBUG) << "old module record name:" << oldRecordName << std::endl;
@@ -162,8 +206,10 @@ bool libabckit::ModifyNameHelper::ModuleRefreshName(AbckitCoreModule *m, const s
         LIBABCKIT_LOG(ERROR) << "Failed to update module program record" << std::endl;
         return false;
     }
+    UpdateRecordAttributes(m->recordUsers, oldRecordName, newRecordName);
 
-    GetStaticImplRecord(m)->name = newRecordName;
+    record->name = newRecordName;
+    record->sourceFile = StringUtil::ReplaceAll(record->sourceFile, m->moduleName->impl.data(), newName);
 
     // update module name
     m->moduleName = CreateStringStatic(m->file, newName.data(), newName.length());
@@ -173,6 +219,7 @@ bool libabckit::ModifyNameHelper::ModuleRefreshName(AbckitCoreModule *m, const s
     ModuleRefreshInterfaces(m);
     ModuleRefreshClasses(m);
     ModuleRefreshFunctions(m);
+    ModuleRefreshAnnotationInterfaces(m);
 
     return true;
 }
@@ -190,6 +237,7 @@ bool libabckit::ModifyNameHelper::NamespaceRefreshName(AbckitCoreNamespace *ns, 
     NamespaceRefreshInterfaces(ns);
     NamespaceRefreshClasses(ns);
     NamespaceRefreshFunctions(ns);
+    NamespaceRefreshAnnotationInterfaces(ns);
 
     return true;
 }
@@ -218,7 +266,8 @@ bool libabckit::ModifyNameHelper::FunctionRefreshName(AbckitCoreFunction *functi
             std::regex_replace(oldFunctionKeyName, std::regex(ASYNC_PATTERN.data()), AsyncReplace(newName));
         newFunctionName = Split(newFunctionKeyName, FUNCTION_DELIMITER.data())[0];
     } else {
-        newFunctionName = NameUtil::GetPackageName(function) + NAME_DELIMITER.data() + newName;
+        auto newFuncName = AddGetSetPrefix(oldFunctionKeyName, newName);
+        newFunctionName = NameUtil::GetPackageName(function) + NAME_DELIMITER.data() + newFuncName;
         newFunctionKeyName = ark::pandasm::MangleFunctionName(newFunctionName, funcImpl->params, funcImpl->returnType);
     }
     LIBABCKIT_LOG(DEBUG) << "old function key name:" << oldFunctionKeyName << std::endl;
@@ -252,7 +301,6 @@ bool libabckit::ModifyNameHelper::ClassRefreshName(AbckitCoreClass *klass, const
 
     ClassRefreshMethods(klass);
     ClassRefreshObjectLiteral(klass);
-    ClassRefreshSubClasses(klass);
 
     return true;
 }
@@ -286,28 +334,10 @@ bool libabckit::ModifyNameHelper::AnnotationRefreshName(AbckitCoreAnnotation *an
         return true;
     }
     if (!newName.empty()) {
-        if (!AnnotationInterfaceRefreshName(anno->ai, newName)) {
-            return false;
-        }
+        return AnnotationInterfaceRefreshName(anno->ai, newName);
     }
-    anno->name = AnnotationInterfaceGetNameStatic(anno->ai);
 
-    return std::visit(
-        [](auto owner) {
-            using Type = std::decay_t<decltype(owner)>;
-            if constexpr (std::is_same_v<Type, AbckitCoreClass *>) {
-                return ClassRefreshAnnotations(owner);
-            } else if constexpr (std::is_same_v<Type, AbckitCoreInterface *>) {
-                return InterfaceRefreshAnnotations(owner);
-            } else if constexpr (std::is_same_v<Type, AbckitCoreFunction *>) {
-                return FunctionRefreshAnnotations(owner);
-            } else if constexpr (std::is_same_v<Type, AbckitCoreClassField *>) {
-                return ClassFieldRefreshAnnotations(owner);
-            } else {
-                return false;
-            }
-        },
-        anno->owner);
+    return true;
 }
 
 bool libabckit::ModifyNameHelper::InterfaceRefreshName(AbckitCoreInterface *iface, const std::string &newName)
@@ -323,8 +353,6 @@ bool libabckit::ModifyNameHelper::InterfaceRefreshName(AbckitCoreInterface *ifac
     }
 
     InterfaceRefreshObjectLiteral(iface);
-    InterfaceRefreshClasses(iface);
-    InterfaceRefreshSubInterfaces(iface);
     InterfaceRefreshMethods(iface);
 
     return true;
@@ -334,25 +362,8 @@ bool libabckit::ModifyNameHelper::AnnotationInterfaceRefreshName(AbckitCoreAnnot
                                                                  const std::string &newName)
 {
     LIBABCKIT_LOG_FUNC;
-    const auto record = GetStaticImplRecord(ai);
-    const auto oldAIName = record->name;
-    const auto newAIName = NameUtil::GetFullName(ai, newName);
-    if (oldAIName == newAIName) {
-        return true;
-    }
 
-    LIBABCKIT_LOG(DEBUG) << "old annotation interface name:" << oldAIName << std::endl;
-    LIBABCKIT_LOG(DEBUG) << "new annotation interface name:" << newAIName << std::endl;
-
-    if (!ProgramUpdateRecordTableKey(ai->owningModule->file->GetStaticProgram(), oldAIName, newAIName)) {
-        LIBABCKIT_LOG(ERROR) << "Failed to update annotation interface program record" << std::endl;
-        return false;
-    }
-
-    record->name = newAIName;
-
-    AnnotationInterfaceRefreshAnnotation(ai);
-    return true;
+    return ObjectRefreshName(ai, newName);
 }
 
 bool libabckit::ModifyNameHelper::FieldRefreshName(
@@ -374,10 +385,18 @@ bool libabckit::ModifyNameHelper::FieldRefreshName(
             if (oldName == newName) {
                 return true;
             }
+            std::string processNewName;
+            // if oldName is <property>xxx and newName does not contain '<property>' prefix, add '<property>' to the
+            // beginning of newName
+            if (oldName.find(INTERFACE_FIELD_PREFIX) == 0 && newName.find(INTERFACE_FIELD_PREFIX) != 0) {
+                processNewName.append(INTERFACE_FIELD_PREFIX).append(newName);
+            } else {
+                processNewName = newName;
+            }
 
-            LIBABCKIT_LOG_NO_FUNC(DEBUG) << funcName << "fieldName refreshed: " << oldName << " --> " << newName
+            LIBABCKIT_LOG_NO_FUNC(DEBUG) << funcName << "fieldName refreshed: " << oldName << " --> " << processNewName
                                          << std::endl;
-            fieldRecord->name = newName;
+            fieldRecord->name = processNewName;
 
             return true;
         },
@@ -463,6 +482,18 @@ bool libabckit::ModifyNameHelper::ModuleRefreshEnums(AbckitCoreModule *m)
     return true;
 }
 
+bool libabckit::ModifyNameHelper::ModuleRefreshAnnotationInterfaces(AbckitCoreModule *m)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    for (const auto &[_, ai] : m->at) {
+        if (!AnnotationInterfaceRefreshName(ai.get())) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool libabckit::ModifyNameHelper::NamespaceRefreshNamespaces(AbckitCoreNamespace *ns)
 {
     LIBABCKIT_LOG_FUNC;
@@ -528,6 +559,18 @@ bool libabckit::ModifyNameHelper::NamespaceRefreshEnums(AbckitCoreNamespace *ns)
     return true;
 }
 
+bool libabckit::ModifyNameHelper::NamespaceRefreshAnnotationInterfaces(AbckitCoreNamespace *ns)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    for (const auto &[_, ai] : ns->at) {
+        if (!AnnotationInterfaceRefreshName(ai.get())) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool libabckit::ModifyNameHelper::FunctionRefreshParams(AbckitCoreFunction *function)
 {
     LIBABCKIT_LOG(DEBUG) << "functionName:" << function->GetArkTSImpl()->GetStaticImpl()->name << std::endl;
@@ -539,6 +582,7 @@ bool libabckit::ModifyNameHelper::FunctionRefreshParams(AbckitCoreFunction *func
         }
 
         auto newName = StringUtil::GetTypeNameStr(function->parameters[i]->type);
+        newName = StringUtil::RemoveBracketsSuffix(newName);  // ark::pandasm::Type will add []
         LIBABCKIT_LOG(DEBUG) << "old param[" << i << "] type name:" << funcImpl->params[i].type.GetName() << std::endl;
         LIBABCKIT_LOG(DEBUG) << "new param[" << i << "] type name:" << newName << std::endl;
         auto progType = funcImpl->params[i].type;
@@ -556,23 +600,12 @@ bool libabckit::ModifyNameHelper::FunctionRefreshReturnType(AbckitCoreFunction *
 
     const auto funcImpl = function->GetArkTSImpl()->GetStaticImpl();
     auto newName = StringUtil::GetTypeNameStr(function->returnType);
+    newName = StringUtil::RemoveBracketsSuffix(newName);  // ark::pandasm::Type will add []
     LIBABCKIT_LOG(DEBUG) << "old returnType name:" << funcImpl->returnType.GetName() << std::endl;
     LIBABCKIT_LOG(DEBUG) << "new returnType name:" << newName << std::endl;
     const auto progType = funcImpl->returnType;
     funcImpl->returnType = ark::pandasm::Type(newName, progType.GetRank());
 
-    return true;
-}
-
-bool libabckit::ModifyNameHelper::FunctionRefreshAnnotations(AbckitCoreFunction *function)
-{
-    LIBABCKIT_LOG_FUNC;
-    const auto &record = function->GetArkTSImpl()->GetStaticImpl();
-    std::vector<std::string> annotationNames;
-    for (const auto &annotation : function->annotations) {
-        annotationNames.emplace_back(NameUtil::GetFullName(annotation->ai));
-    }
-    record->metadata->SetAttributeValues(ETS_ANNOTATION_CLASS.data(), annotationNames);
     return true;
 }
 
@@ -594,34 +627,8 @@ bool libabckit::ModifyNameHelper::ClassRefreshObjectLiteral(AbckitCoreClass *kla
 
     auto baseName = GetStaticImplRecord(klass)->name;
     for (const auto &objectLiteral : klass->objectLiterals) {
-        const auto &record = GetStaticImplRecord(objectLiteral.get());
-        record->metadata->SetAttributeValues(ETS_EXTENDS.data(), {baseName});
         ObjectLiteralRefreshName(objectLiteral.get(), baseName);
     }
-    return true;
-}
-
-bool libabckit::ModifyNameHelper::ClassRefreshSubClasses(AbckitCoreClass *klass)
-{
-    LIBABCKIT_LOG_FUNC;
-    const auto superClassName = GetStaticImplRecord(klass)->name;
-
-    for (const auto &subClass : klass->subClasses) {
-        const auto &record = GetStaticImplRecord(subClass);
-        record->metadata->SetAttributeValues(ETS_EXTENDS.data(), {superClassName});
-    }
-    return true;
-}
-
-bool libabckit::ModifyNameHelper::ClassRefreshAnnotations(AbckitCoreClass *klass)
-{
-    LIBABCKIT_LOG_FUNC;
-    const auto &record = GetStaticImplRecord(klass);
-    std::vector<std::string> annotationNames;
-    for (const auto &annotation : klass->annotations) {
-        annotationNames.emplace_back(NameUtil::GetFullName(annotation->ai));
-    }
-    record->metadata->SetAttributeValues(ETS_ANNOTATION_CLASS.data(), annotationNames);
     return true;
 }
 
@@ -665,62 +672,7 @@ bool libabckit::ModifyNameHelper::InterfaceRefreshObjectLiteral(AbckitCoreInterf
 
     auto baseName = GetStaticImplRecord(iface)->name;
     for (const auto &objectLiteral : iface->objectLiterals) {
-        const auto &record = GetStaticImplRecord(objectLiteral.get());
-        record->metadata->SetAttributeValues(ETS_IMPLEMENTS.data(), {baseName});
         ObjectLiteralRefreshName(objectLiteral.get(), baseName);
-    }
-    return true;
-}
-
-bool libabckit::ModifyNameHelper::InterfaceRefreshClasses(AbckitCoreInterface *iface)
-{
-    LIBABCKIT_LOG_FUNC;
-    auto newName = GetStaticImplRecord(iface)->name;
-    for (const auto &klass : iface->classes) {
-        std::vector<std::string> implements;
-        for (const auto &interface : klass->interfaces) {
-            implements.emplace_back(GetStaticImplRecord(interface)->name);
-        }
-        if (!implements.empty()) {
-            GetStaticImplRecord(klass)->metadata->SetAttributeValues(ETS_IMPLEMENTS.data(), implements);
-        }
-    }
-    return true;
-}
-
-bool libabckit::ModifyNameHelper::InterfaceRefreshAnnotations(AbckitCoreInterface *iface)
-{
-    LIBABCKIT_LOG_FUNC;
-    const auto &record = GetStaticImplRecord(iface);
-    std::vector<std::string> annotationNames;
-    for (const auto &[_, annotation] : iface->annotationTable) {
-        annotationNames.emplace_back(NameUtil::GetFullName(annotation->ai));
-    }
-    record->metadata->SetAttributeValues(ETS_ANNOTATION_CLASS.data(), annotationNames);
-    return true;
-}
-
-bool libabckit::ModifyNameHelper::InterfaceRefreshSubInterfaces(AbckitCoreInterface *iface)
-{
-    LIBABCKIT_LOG_FUNC;
-    for (const auto &subInterface : iface->subInterfaces) {
-        const auto &record = GetStaticImplRecord(subInterface);
-        std::vector<std::string> superInterfaceNames;
-        for (const auto &superInterface : subInterface->superInterfaces) {
-            superInterfaceNames.emplace_back(NameUtil::GetFullName(superInterface));
-        }
-        record->metadata->SetAttributeValues(ETS_IMPLEMENTS.data(), superInterfaceNames);
-    }
-    return true;
-}
-
-bool libabckit::ModifyNameHelper::AnnotationInterfaceRefreshAnnotation(AbckitCoreAnnotationInterface *ai)
-{
-    LIBABCKIT_LOG_FUNC;
-    for (const auto &anno : ai->annotations) {
-        if (!AnnotationRefreshName(anno)) {
-            return false;
-        }
     }
     return true;
 }
@@ -738,18 +690,6 @@ bool libabckit::ModifyNameHelper::ObjectLiteralRefreshName(AbckitCoreClass *obje
     }
 
     ClassRefreshMethods(objectLiteral);
-    return true;
-}
-
-bool libabckit::ModifyNameHelper::ClassFieldRefreshAnnotations(AbckitCoreClassField *classField)
-{
-    LIBABCKIT_LOG_FUNC;
-    const auto &record = classField->GetArkTSImpl()->GetStaticImpl();
-    std::vector<std::string> annotationNames;
-    for (const auto &[_, annotation] : classField->annotationTable) {
-        annotationNames.emplace_back(NameUtil::GetFullName(annotation->ai));
-    }
-    record->metadata->SetAttributeValues(ETS_ANNOTATION_CLASS.data(), annotationNames);
     return true;
 }
 
@@ -802,7 +742,7 @@ bool libabckit::ModifyNameHelper::InterfaceRefreshObjectLiteralField(AbckitCoreI
     for (const auto &objectLiteral : iface->objectLiterals) {
         for (const auto &field : objectLiteral->fields) {
             if (ClassFieldGetNameStatic(field.get())->impl.data() == oldName) {
-                FieldRefreshName(field.get(), INTERFACE_FIELD_PREFIX.data() + newName);
+                FieldRefreshName(field.get(), newName);
                 GetSetMethodRefreshName(objectLiteral.get(), oldName, newName);
             }
         }
@@ -825,7 +765,8 @@ bool libabckit::ModifyNameHelper::FieldRefreshTypeName(
 
             auto &fieldType = object->GetArkTSImpl()->GetStaticImpl()->type;
             const auto oldName = fieldType.GetName();
-            const auto newName = StringUtil::GetTypeNameStr(object->type);
+            auto newName = StringUtil::GetTypeNameStr(object->type);
+            newName = StringUtil::RemoveBracketsSuffix(newName);  // ark::pandasm::Type will add []
             LIBABCKIT_LOG_NO_FUNC(DEBUG) << funcName << "FieldRefreshTypeName : " << oldName << " --> " << newName
                                          << std::endl;
             fieldType = ark::pandasm::Type(newName, fieldType.GetRank());

@@ -67,7 +67,8 @@ std::string libabckit::NameUtil::GetPackageName(const std::variant<AbckitCoreNam
 
 std::string libabckit::NameUtil::GetFullName(
     const std::variant<AbckitCoreNamespace *, AbckitCoreClass *, AbckitCoreClassField *, AbckitCoreEnum *,
-                       AbckitCoreInterface *, AbckitCoreAnnotationInterface *, AbckitCoreFunction *> &object,
+                       AbckitCoreInterface *, AbckitCoreAnnotationInterface *, AbckitCoreFunction *,
+                       AbckitCoreAnnotation *> &object,
     const std::string &newName, bool isObjectLiteral)
 {
     if (const auto coreNameSpace = std::get_if<AbckitCoreNamespace *>(&object)) {
@@ -99,6 +100,10 @@ std::string libabckit::NameUtil::GetFullName(
 
     if (const auto coreFunction = std::get_if<AbckitCoreFunction *>(&object)) {
         return FunctionGetFullName(*coreFunction);
+    }
+
+    if (const auto coreAnno = std::get_if<AbckitCoreAnnotation *>(&object)) {
+        return AnnotationGetFullName(*coreAnno);
     }
 
     ASSERT(false);
@@ -213,4 +218,12 @@ std::string libabckit::NameUtil::AnnotationInterfaceGetFullName(AbckitCoreAnnota
 std::string libabckit::NameUtil::FunctionGetFullName(AbckitCoreFunction *function)
 {
     return FunctionGetPackageName(function) + NAME_DELIMITER.data() + FunctionGetNameStatic(function)->impl.data();
+}
+
+std::string libabckit::NameUtil::AnnotationGetFullName(AbckitCoreAnnotation *anno)
+{
+    if (anno->ai != nullptr) {
+        return AnnotationInterfaceGetFullName(anno->ai);
+    }
+    return anno->name->impl.data();
 }

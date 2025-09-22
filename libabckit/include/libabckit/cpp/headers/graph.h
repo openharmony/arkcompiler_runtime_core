@@ -121,6 +121,12 @@ public:
     DynamicIsa DynIsa() const;
 
     /**
+     * @brief Get static ISA
+     * @return `StaticIsa`
+     */
+    StaticIsa StatIsa() const;
+
+    /**
      * @brief EnumerateBasicBlocksRpo
      * @return New state of `graph`.
      * @param cb
