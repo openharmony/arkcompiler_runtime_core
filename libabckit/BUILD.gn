@@ -82,7 +82,7 @@ group("abckit_packages") {
 
 group("abckit_tests") {
   testonly = true
-  if (abckit_enable) {
+  if (abckit_enable && abckit_enable_tests) {
     deps = [
       ":abckit_documentation",
 
@@ -99,14 +99,14 @@ group("abckit_tests") {
 
 group("abckit_clean_scenario_tests") {
   testonly = true
-  if (abckit_enable) {
+  if (abckit_enable && abckit_enable_tests) {
     deps = [ "tests:abckit_clean_scenarios_action" ]
   }
 }
 
 group("abckit_tests_full") {
   testonly = true
-  if (abckit_enable) {
+  if (abckit_enable && abckit_enable_tests) {
     deps = [
       ":abckit_check_clang_format",
       ":abckit_check_clang_tidy",

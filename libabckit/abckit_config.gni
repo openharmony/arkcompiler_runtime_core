@@ -20,4 +20,5 @@ declare_args() {
   abckit_enable = false
   abckit_with_sanitizers = false
   abckit_with_coverage = false
+  abckit_enable_tests = false
 }

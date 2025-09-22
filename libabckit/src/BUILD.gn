@@ -131,6 +131,10 @@ ohos_shared_library("libabckit") {
     output_extension = "so"
   }
 
+  if (enable_hilog) {
+    public_external_deps = [ "hilog:libhilog" ]
+  }
+
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
 }
@@ -166,6 +170,10 @@ ohos_static_library("libabckit_static") {
   deps = [":libabckit_all"]
   include_dirs = libabckit_include_dirs                    
   configs = [ "$abckit_root:abckit_config" ]
+
+  if (enable_hilog) {
+    public_external_deps = [ "hilog:libhilog" ]
+  }
 
   complete_static_lib = true
 
