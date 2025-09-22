@@ -11,13 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include(cmake/ani_verify_tests.cmake)
-
-add_subdirectory(array_ops)
-add_subdirectory(error_ops)
-add_subdirectory(local_scope_ops)
-add_subdirectory(object_ops)
-add_subdirectory(ref_ops)
-add_subdirectory(scope_ops)
-add_subdirectory(string_ops)
-add_subdirectory(vm_ops)
+ani_verify_add_gtest(ani_verify_test_ensure_enough_references
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_ensure_enough_references_test.cpp
+)

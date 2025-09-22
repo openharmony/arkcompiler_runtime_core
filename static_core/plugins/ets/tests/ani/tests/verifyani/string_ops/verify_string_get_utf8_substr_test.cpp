@@ -176,8 +176,9 @@ TEST_F(StringGetUtf8SubstrTest, throw_error)
         {"utf8Buffer", "char *"},
         {"result", "ani_size *"},
     };
-    ASSERT_EQ(env_->ResetError(), ANI_OK);
     ASSERT_ERROR_ANI_ARGS_MSG("String_GetUTF8SubString", testLines);
+
+    ASSERT_EQ(env_->ResetError(), ANI_OK);
 }
 
 TEST_F(StringGetUtf8SubstrTest, success)

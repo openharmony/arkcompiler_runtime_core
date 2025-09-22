@@ -5930,7 +5930,7 @@ NO_UB_SANITIZE static ani_status ArrayBuffer_GetInfo(ani_env *env, ani_arraybuff
 NO_UB_SANITIZE static ani_status EnsureEnoughReferences(ani_env *env, ani_size nrRefs)
 {
     ANI_DEBUG_TRACE(env);
-    CHECK_ENV(env);
+    CHECK_ENV_THAT_CAN_HAVE_PENDING_ERROR(env);
 
     ScopedManagedCodeFix s(env);
     return s.EnsureLocalEnoughRefs(nrRefs);

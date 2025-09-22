@@ -336,10 +336,13 @@ public:
 
     std::optional<PandaString> VerifyRef(VRef *vref)
     {
-        if (!GetEnvANIVerifier()->IsValidInCurrentFrame(vref)) {
-            return "wrong reference";
+        if (GetEnvANIVerifier()->IsValidInCurrentFrame(vref)) {
+            return {};
         }
-        return {};
+        if (GetEnvANIVerifier()->IsValidGlobalVerifiedRef(vref)) {
+            return {};
+        }
+        return "wrong reference";
     }
 
     std::optional<PandaString> VerifyClass(VClass *vclass)

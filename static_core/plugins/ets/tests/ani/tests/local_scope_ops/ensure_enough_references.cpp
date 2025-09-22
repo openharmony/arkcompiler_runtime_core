@@ -94,4 +94,11 @@ TEST_F(EnsureEnoughReferencesTest, ensure_enough_references_invalid_env)
     ASSERT_EQ(env_->c_api->EnsureEnoughReferences(nullptr, MIN_CAPACITY), ANI_INVALID_ARGS);
 }
 
+TEST_F(EnsureEnoughReferencesTest, ensure_enough_references_pending_error)
+{
+    ThrowError();
+    ASSERT_EQ(env_->EnsureEnoughReferences(SPECIFIED_CAPACITY), ANI_OK);
+    ASSERT_EQ(env_->ResetError(), ANI_OK);
+}
+
 }  // namespace ark::ets::ani::testing

@@ -114,8 +114,9 @@ TEST_F(StringGetUtf16SizeTest, throw_error)
         {"string", "ani_string"},
         {"result", "ani_size *"},
     };
-    ASSERT_EQ(env_->ResetError(), ANI_OK);
     ASSERT_ERROR_ANI_ARGS_MSG("String_GetUTF16Size", testLines);
+
+    ASSERT_EQ(env_->ResetError(), ANI_OK);
 }
 
 TEST_F(StringGetUtf16SizeTest, success)

@@ -19,3 +19,32 @@ ani_verify_add_gtest(ani_verify_test_reference_delete
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_reference_delete_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_reference_delete_test.ets
 )
+
+ani_verify_add_gtest(ani_verify_test_get_null
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_get_null_test.cpp
+)
+
+ani_verify_add_gtest(ani_verify_test_reference_is_undefined
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_reference_is_undefined_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_reference_is_undefined_test.ets
+)
+
+ani_verify_add_gtest(ani_verify_test_reference_is_null
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_reference_is_null_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_reference_is_null_test.ets
+)
+
+ani_verify_add_gtest(ani_verify_test_reference_is_nullish_value
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_reference_is_nullish_value_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_reference_is_nullish_value_test.ets
+)
+
+ani_verify_add_gtest(ani_verify_test_reference_equals
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_reference_equals_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_reference_equals_test.ets
+)
+
+ani_verify_add_gtest(ani_verify_test_reference_strict_equals
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_reference_strict_equals_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_reference_strict_equals_test.ets
+)

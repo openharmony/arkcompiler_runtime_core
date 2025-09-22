@@ -137,8 +137,9 @@ TEST_F(StringGetUtf8Test, throw_error)
         {"utf8BufferSize", "ani_size"},
         {"result", "ani_size *"},
     };
-    ASSERT_EQ(env_->ResetError(), ANI_OK);
     ASSERT_ERROR_ANI_ARGS_MSG("String_GetUTF8", testLines);
+
+    ASSERT_EQ(env_->ResetError(), ANI_OK);
 }
 
 TEST_F(StringGetUtf8Test, success)

@@ -84,8 +84,9 @@ TEST_F(StringNewUtf16Test, throw_error)
         {"result", "ani_string *"},
     };
     // clang-format on
-    ASSERT_EQ(env_->ResetError(), ANI_OK);
     ASSERT_ERROR_ANI_ARGS_MSG("String_NewUTF16", testLines);
+
+    ASSERT_EQ(env_->ResetError(), ANI_OK);
 }
 
 TEST_F(StringNewUtf16Test, success)

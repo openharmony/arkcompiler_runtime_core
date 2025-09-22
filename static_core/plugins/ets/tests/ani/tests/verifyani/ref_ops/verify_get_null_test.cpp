@@ -17,60 +17,60 @@
 
 namespace ark::ets::ani::verify::testing {
 
-class GetUndefinedTest : public VerifyAniTest {};
+class GetNullTest : public VerifyAniTest {};
 
-TEST_F(GetUndefinedTest, wrong_env)
+TEST_F(GetNullTest, wrong_env)
 {
     ani_ref ref {};
-    ASSERT_EQ(env_->c_api->GetUndefined(nullptr, &ref), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->GetNull(nullptr, &ref), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"result", "ani_ref *"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("GetUndefined", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("GetNull", testLines);
 }
 
-TEST_F(GetUndefinedTest, wrong_result)
+TEST_F(GetNullTest, wrong_ref)
 {
-    ASSERT_EQ(env_->c_api->GetUndefined(env_, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->GetNull(env_, nullptr), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"result", "ani_ref *", "wrong pointer for storing 'ani_ref'"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("GetUndefined", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("GetNull", testLines);
 }
 
-TEST_F(GetUndefinedTest, wrong_all_args)
+TEST_F(GetNullTest, wrong_all_args)
 {
-    ASSERT_EQ(env_->c_api->GetUndefined(nullptr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->GetNull(nullptr, nullptr), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"result", "ani_ref *", "wrong pointer for storing 'ani_ref'"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("GetUndefined", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("GetNull", testLines);
 }
 
-TEST_F(GetUndefinedTest, success)
+TEST_F(GetNullTest, success)
 {
     ani_ref ref {};
-    ASSERT_EQ(env_->c_api->GetUndefined(env_, &ref), ANI_OK);
+    ASSERT_EQ(env_->c_api->GetNull(env_, &ref), ANI_OK);
 
     ani_boolean result = ANI_FALSE;
-    ASSERT_EQ(env_->Reference_IsUndefined(ref, &result), ANI_OK);
+    ASSERT_EQ(env_->Reference_IsNull(ref, &result), ANI_OK);
     ASSERT_TRUE(result == ANI_TRUE);
 }
 
-TEST_F(GetUndefinedTest, throw_error)
+TEST_F(GetNullTest, throw_error)
 {
     ThrowError();
 
     ani_ref ref {};
-    ASSERT_EQ(env_->c_api->GetUndefined(env_, &ref), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->GetNull(env_, &ref), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"result", "ani_ref *"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("GetUndefined", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("GetNull", testLines);
 
     ASSERT_EQ(env_->ResetError(), ANI_OK);
 }

@@ -140,8 +140,9 @@ TEST_F(StringGetUtf16Test, throw_error)
         {"result", "ani_size *"},
     };
     // clang-format on
-    ASSERT_EQ(env_->ResetError(), ANI_OK);
     ASSERT_ERROR_ANI_ARGS_MSG("String_GetUTF16", testLines);
+
+    ASSERT_EQ(env_->ResetError(), ANI_OK);
 }
 
 TEST_F(StringGetUtf16Test, success)
