@@ -38,14 +38,6 @@
 03.types/06.value_types/01.numeric_types/conversions_with_bigint_64.ets
 03.types/06.value_types/01.numeric_types/conversions_with_bigint_82.ets
 
-#26515 Double too large value causes abort_fail
-03.types/06.value_types/03.floating-point_types_and_operations/multiplication/multiplication_double_35.ets
-03.types/06.value_types/03.floating-point_types_and_operations/subtraction/subtraction_double_51.ets
-03.types/06.value_types/03.floating-point_types_and_operations/postfix_decrement/postfix_decrement_double_12.ets
-03.types/06.value_types/03.floating-point_types_and_operations/postfix_increment/postfix_increment_double_12.ets
-03.types/06.value_types/03.floating-point_types_and_operations/prefix_decrement/prefix_decrement_double_12.ets
-03.types/06.value_types/03.floating-point_types_and_operations/prefix_increment/prefix_increment_double_12.ets
-
 #28320 CTE in the spec example 3.11
 03.types/11.type_void/generic_void_2.ets
 

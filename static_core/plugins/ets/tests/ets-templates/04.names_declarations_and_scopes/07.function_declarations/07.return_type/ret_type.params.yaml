@@ -15,7 +15,7 @@
 function_decls:
     - decl: |-
           let i = 0
-          function foo() {  // infer void
+          function foo(): void {
               i += 1
           }
       call: |-
@@ -25,7 +25,7 @@ function_decls:
 
     - decl: |-
           let i = 0
-          function foo() {  // infer void
+          function foo(): void {
               i += 1
               return
           }
@@ -36,7 +36,7 @@ function_decls:
 
     - decl: |-
           let s = "foo"
-          function foo() {  // infer string
+          function foo(): string {
               return s;
           }
       call: |-
@@ -45,7 +45,7 @@ function_decls:
 
     - decl: |-
           let s: int = 42
-          function foo() {  // infer int
+          function foo(): int {
               return s;
           }
       call: |-
@@ -54,7 +54,7 @@ function_decls:
 
     - decl: |-
           let s: number = 1.0
-          function foo() {  // infer number
+          function foo(): number {
               return s;
           }
       call: |-
@@ -63,7 +63,7 @@ function_decls:
 
     - decl: |-
           let s = new Error()
-          function foo() {  // infer Error
+          function foo(): Error {
               return s;
           }
       call: |-
@@ -72,7 +72,7 @@ function_decls:
 
     - decl: |-
           let s: number[] = [1.0, 2.0, 3.0]
-          function foo() {  // infer number[]
+          function foo(): number[] {
               return s;
           }
       call: |-
@@ -81,7 +81,7 @@ function_decls:
 
     - decl: |-
           let s: Boolean[] = new Boolean[0]
-          function foo() {  // infer Boolean[]
+          function foo(): boolean[] {
               return s;
           }
       call: |-
@@ -90,7 +90,7 @@ function_decls:
 
     - decl: |-
           let s: Long[][] = new Long[1][1]
-          function foo() {  // infer Long[][]
+          function foo(): long[][] {
               if (s != null)
                   return s;
               else
@@ -102,7 +102,7 @@ function_decls:
 
     - decl: |-
           let s: long[][] = new long[1][1]
-          function foo() {  // infer Error[][]|long[][]
+          function foo(): long[][] | Error[][] {
               if (s != null)
                   return s;
               else
@@ -115,7 +115,7 @@ function_decls:
 
     - decl: |-
           let s: Long[][] = new Long[1][1]
-          function foo() {  // infer Error[]|Long[][]
+          function foo(): long[][] | Error[] {
               if (s == null)
                   return s;
               else
@@ -127,7 +127,7 @@ function_decls:
 
     - decl: |-
           let s: Long[][] | null = new Long[1][1]
-          function foo() {  // infer Error|Long[][]
+          function foo(): Long[][] | null | Error {
               if (s != null)
                   return s;
               else
@@ -145,7 +145,7 @@ function_decls:
           type TypeC = C
           let s = 1
 
-          function foo() {  // infer A
+          function foo(): B | C {
               if (s == 0)
                   return new TypeB();
               else
@@ -162,7 +162,7 @@ function_decls:
           class D extends B {}
           let s = 1
 
-          function foo() {  // infer B
+          function foo(): C | D {
               if (s == 0)
                   return new C();
               else
@@ -175,7 +175,7 @@ function_decls:
 
     - decl: |-
           let s = 0
-          async function foo() {  // infer Promise<Boolean>
+          async function foo(): Promise<boolean> {
               if (s == 0)
                   return new Boolean(true);
               else
@@ -187,7 +187,7 @@ function_decls:
 
     - decl: |-
         let s = new Object()
-        function foo() {    // infer true|boolean[]
+        function foo(): boolean | boolean[] {  
            if (s != null)
                return true;
            else
@@ -200,7 +200,7 @@ function_decls:
           class B<T, U> {}
           let s = 1
 
-          function foo<T>() {  // infer  B<T, Long|Error>
+          function foo<T>(): B<T, Long> | B<T, Error> {
               if (s == 0)
                   return new B<T, Long>();
               else

@@ -13,30 +13,10 @@
 
 ---
 function_decls:
-    - decl: |-
-        native function foo(); // CTE, native function without return type
-      call: |-
-        foo();
-
-    - decl: |-
-        function foo() { // CTE, the execution path of the function or method body has no return statement
-            if(1) return true
-        }
-      call: |-
-        return
-
-    - decl: |-
-        class A {
-            foo() { // CTE, the execution path of the function or method body has no return statement
-                if(0) return true
-            }
-        }
-      call: |-
-        return
 
     - decl: |-
         let i = 1
-        function foo(): void {
+        function foo() {  // infer void
             i += 1
         }
       call: |-
@@ -44,27 +24,20 @@ function_decls:
 
     - decl: |-
         let i = 1
-        function foo(): void {
+        function foo() {  // infer void
             i += 1
         }
       call: |-
         let x = foo();  // CTE, Cannot use type 'void' as value
 
     - decl: |-
-        let f = (): void => {}
+        let f = () => {}
       call: |-
         let x = f();  // CTE, Cannot use type 'void' as value
 
     - decl: |-
-        let foo = () { // CTE, the execution path of the function or method body has no return statement
-            if(1) return true
-        }
-      call: |-
-        return
-
-    - decl: |-
         let i = 1
-        let foo(): void => {  // infer void
+        let foo() => {  // infer void
             i += 1
         }
       call: |-

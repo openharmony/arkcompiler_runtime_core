@@ -25,4 +25,4 @@ values:
 - { value: Double.MAX_VALUE, result: Double.MAX_VALUE }
 - { value: 3.1415927, result: 2.1415927 }
 - { value: 0e38, result: -1.0 }
-- { value: 2.2250738585072009e-308, result: 1.450147717014402e-308 }
+- { value: 2.2250738585072009e-308, result: -1.0 }
