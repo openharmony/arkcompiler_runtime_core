@@ -17,6 +17,7 @@ limitations under the License.
 
 /*---
 desc: A constant declaration introduces a named entity with mandatory initial value
+tags: [negative, compile-only]
 ---*/
 
 type literal = "aa"
