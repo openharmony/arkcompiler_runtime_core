@@ -18,8 +18,8 @@
 
 #include "annotation.h"
 #include "annotation_element.h"
-#include "../value.h"
-#include "../core/annotation_element.h"
+#include "libabckit/cpp/headers/value.h"
+#include "libabckit/cpp/headers/core/annotation_element.h"
 
 // NOLINTBEGIN(performance-unnecessary-value-param)
 namespace abckit::arkts {

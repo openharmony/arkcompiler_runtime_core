@@ -18,8 +18,8 @@
 
 #include "annotation_interface.h"
 #include "annotation_interface_field.h"
-#include "../core/annotation_interface.h"
-#include "../core/annotation_interface_field.h"
+#include "libabckit/cpp/headers/core/annotation_interface.h"
+#include "libabckit/cpp/headers/core/annotation_interface_field.h"
 
 // NOLINTBEGIN(performance-unnecessary-value-param)
 namespace abckit::arkts {

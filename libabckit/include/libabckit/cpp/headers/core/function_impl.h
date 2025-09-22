@@ -19,8 +19,8 @@
 #include "function.h"
 #include "class.h"
 #include "module.h"
-#include "../config.h"
-#include "../graph.h"
+#include "libabckit/cpp/headers/config.h"
+#include "libabckit/cpp/headers/graph.h"
 
 namespace abckit::core {
 

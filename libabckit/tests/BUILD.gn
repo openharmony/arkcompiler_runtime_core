@@ -861,6 +861,7 @@ libabckit_host_unittest_action("abckit_mock_gtests") {
   include_dirs = [
     "$abckit_root",
     "$abckit_root/src",
+    "$abckit_root/include",
   ]
 
   configs = [ "$abckit_root:abckit_mock_config" ]
@@ -879,6 +880,7 @@ libabckit_host_unittest_action("abckit_gtests") {
     "$abckit_root/include",
     "$abckit_root/src",
     "$abckit_root/tests",
+    "$abckit_root/src/include_v2",
   ]
 
   configs = [ "$abckit_root:abckit_config" ]

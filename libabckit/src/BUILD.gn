@@ -74,6 +74,8 @@ libabckit_include_dirs = [
   "$ark_root_dynamic/libabckit/include",
   "$ark_root_dynamic/libpandabase",
   "$target_gen_dir/src",
+  "$abckit_root",
+  "$abckit_root/include/",
 ]
 
 libabckit_deps = [ ":libabckit_header_deps" ]

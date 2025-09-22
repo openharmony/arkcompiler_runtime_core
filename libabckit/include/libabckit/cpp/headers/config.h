@@ -15,13 +15,13 @@
 #ifndef CPP_ABCKIT_CONFIG_H
 #define CPP_ABCKIT_CONFIG_H
 
-#include "../../c/abckit.h"
-#include "../../c/metadata_core.h"
-#include "../../c/ir_core.h"
-#include "../../c/isa/isa_dynamic.h"
-#include "../../c/isa/isa_static.h"
-#include "../../c/extensions/arkts/metadata_arkts.h"
-#include "../../c/extensions/js/metadata_js.h"
+#include "libabckit/c/abckit.h"
+#include "libabckit/c/metadata_core.h"
+#include "libabckit/c/ir_core.h"
+#include "libabckit/c/isa/isa_dynamic.h"
+#include "libabckit/c/isa/isa_static.h"
+#include "libabckit/c/extensions/arkts/metadata_arkts.h"
+#include "libabckit/c/extensions/js/metadata_js.h"
 
 #include "utils.h"
 

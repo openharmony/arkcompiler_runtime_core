@@ -16,9 +16,9 @@
 #ifndef CPP_ABCKIT_ARKTS_ANNOTATION_INTERFACE_H
 #define CPP_ABCKIT_ARKTS_ANNOTATION_INTERFACE_H
 
-#include "../core/annotation_interface.h"
-#include "../base_concepts.h"
-#include "../type.h"
+#include "libabckit/cpp/headers/core/annotation_interface.h"
+#include "libabckit/cpp/headers/base_concepts.h"
+#include "libabckit/cpp/headers/type.h"
 
 namespace abckit::arkts {
 

@@ -23,6 +23,10 @@ config("abckit_canary_cpp_config") {
     "-Wextra",
     "-Werror",
   ]
+    include_dirs = [
+    "$abckit_root",
+    "$abckit_root/include",
+  ]
 }
 
 ohos_executable("abckit_canary_cpp") {

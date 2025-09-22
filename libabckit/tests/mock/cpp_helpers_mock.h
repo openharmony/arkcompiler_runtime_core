@@ -17,7 +17,7 @@
 #define ABCKIT_CPP_HELPERS_MOCK
 
 #include <string>
-#include "../../include/libabckit/cpp/abckit_cpp.h"
+#include "include/libabckit/cpp/abckit_cpp.h"
 #include "check_mock.h"
 #include "include/libabckit/cpp/headers/value.h"
 #include "include/libabckit/cpp/headers/arkts/annotation.h"

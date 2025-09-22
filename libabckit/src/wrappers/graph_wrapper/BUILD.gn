@@ -59,6 +59,7 @@ ohos_source_set("libabckit_graph_wrapper_source_set") {
     # so static_core must be listed first
     "$ark_root_static/..",
     "$ark_root_static/../libabckit/include",
+    "$abckit_root/include/",
   ]
 
   if (ark_hybrid) {

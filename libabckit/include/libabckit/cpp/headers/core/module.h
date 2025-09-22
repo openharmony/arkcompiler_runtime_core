@@ -16,7 +16,7 @@
 #ifndef CPP_ABCKIT_CORE_MODULE_H
 #define CPP_ABCKIT_CORE_MODULE_H
 
-#include "../base_classes.h"
+#include "libabckit/cpp/headers/base_classes.h"
 #include "class.h"
 #include "export_descriptor.h"
 #include "namespace.h"

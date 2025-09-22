@@ -18,7 +18,7 @@
 
 #include "annotation_interface_field.h"
 #include "annotation_interface.h"
-#include "../value.h"
+#include "libabckit/cpp/headers/value.h"
 
 namespace abckit::core {
 

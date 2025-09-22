@@ -16,8 +16,8 @@
 #ifndef CPP_ABCKIT_ARKTS_EXPORT_DESCRIPTOR_H
 #define CPP_ABCKIT_ARKTS_EXPORT_DESCRIPTOR_H
 
-#include "../core/export_descriptor.h"
-#include "../base_concepts.h"
+#include "libabckit/cpp/headers/core/export_descriptor.h"
+#include "libabckit/cpp/headers/base_concepts.h"
 
 namespace abckit::arkts {
 
