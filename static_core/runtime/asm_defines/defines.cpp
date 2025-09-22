@@ -14,6 +14,7 @@
  */
 
 #include <cstdint>
+
 #include "libarkfile/file.h"
 #include "runtime/include/class.h"
 #include "runtime/include/coretypes/array.h"
@@ -23,6 +24,7 @@
 #include "runtime/include/hclass.h"
 #include "runtime/include/method.h"
 #include "runtime/include/mtmanaged_thread.h"
+#include "runtime/jit/profiling_data.h"
 #include "runtime/mem/tlab.h"
 #include "libarkbase/utils/cframe_layout.h"
 #include "runtime/include/flattened_string_cache.h"

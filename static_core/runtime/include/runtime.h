@@ -395,6 +395,11 @@ public:
         return isProfilerEnabled_ || isJitEnabled_;
     }
 
+    bool IsProfileBranches() const
+    {
+        return isProfileBranches_;
+    }
+
     void ForceEnableJit()
     {
         isJitEnabled_ = true;
@@ -552,6 +557,7 @@ private:
     bool isStacktrace_ {false};
     bool isJitEnabled_ {false};
     bool isProfilerEnabled_ {false};
+    bool isProfileBranches_ {false};
 
     bool isDumpNativeCrash_ {true};
 

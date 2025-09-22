@@ -22,6 +22,7 @@
 #include "runtime/include/mtmanaged_thread.h"
 #include "runtime/include/thread.h"
 #include "runtime/include/flattened_string_cache.h"
+#include "runtime/jit/profiling_data.h"
 #include "plugins_defines.h"
 
 namespace ark {

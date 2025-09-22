@@ -156,6 +156,8 @@ module Constants
     CLASS_ITABLE_ENTRY_INTERFACE_OFFSET = "cross_values::GetClassItableEntryInterfaceOffset(GetArch())"
     METHOD_ACCESS_FLAGS_OFFSET = "cross_values::GetMethodAccessFlagsOffset(GetArch())"
 
+    PROFILING_DATA_BRANCH_PROFILING_ENABLED_OFFSET = "cross_values::GetProfilingDataBranchProfilingEnabledOffset(GetArch())"
+
     IC_HANDLER_KIND_BIT = "cross_values::GetIcHandlerKindBitStartBit(graph->GetArch())"
     IC_HANDLER_KIND_MASK = "cross_values::GetIcHandlerKindBitMask(graph->GetArch())"
     IC_HANDLER_OFFSET_BIT = "cross_values::GetIcHandlerOffsetBitStartBit(graph->GetArch())"

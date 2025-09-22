@@ -128,6 +128,11 @@ options:
   default: false
   description: Is the sampling profiler created and available during runtime execution
 
+- name: profile-branches
+  type: bool
+  default: false
+  description: whether to collect detailed branch statistics data for PGO
+
 - name: sampling-profiler-startup-run
   type: bool
   default: false

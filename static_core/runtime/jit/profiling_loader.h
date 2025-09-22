@@ -18,6 +18,7 @@
 
 #include "jit/profiling_data.h"
 #include "libprofile/aot_profiling_data.h"
+#include "runtime/include/runtime.h"
 
 namespace ark {
 class PANDA_PUBLIC_API ProfilingLoader {
@@ -30,17 +31,23 @@ public:
     }
 
     template <typename ClassResolverT>
+
     ProfilingData *CreateProfilingData(const pgo::AotProfilingData::AotMethodProfilingData &methodProfile,
                                        mem::InternalAllocatorPtr allocator, ClassResolverT &&classResolver)
     {
         auto inlineCaches = methodProfile.GetInlineCaches();
         auto branches = methodProfile.GetBranchData();
         auto throws = methodProfile.GetThrowData();
+
+        // Set branch profiling enabled based on runtime options (auto-enabled when JIT is active)
+        bool branchProfilingEnabled = Runtime::GetCurrent()->IsProfileBranches();
         return ProfilingData::Make(allocator, inlineCaches.size(), branches.size(), throws.size(),
                                    [&](void *data, void *vcallsMem, void *branchesMem, void *throwsMem) {
-                                       return new (data) ProfilingData(
-                                           CreateInlineCaches(vcallsMem, inlineCaches, classResolver),
-                                           CreateBranchData(branchesMem, branches), CreateThrowData(throwsMem, throws));
+                                       return new (data)
+                                           // CC-OFFNXT(G.FMT.02) project code style
+                                           ProfilingData(CreateInlineCaches(vcallsMem, inlineCaches, classResolver),
+                                                         CreateBranchData(branchesMem, branches),
+                                                         CreateThrowData(throwsMem, throws), branchProfilingEnabled);
                                    });  // CC-OFF(G.FMT.02) project code style
     }
 

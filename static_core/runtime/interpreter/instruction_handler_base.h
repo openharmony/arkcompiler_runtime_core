@@ -19,6 +19,7 @@
 #include <isa_constants_gen.h>
 #include "runtime/include/safepoint_timer.h"
 #include "runtime/include/method.h"
+#include "runtime/include/runtime.h"
 #include "runtime/interpreter/instruction_handler_state.h"
 
 namespace ark::interpreter {
@@ -314,7 +315,7 @@ protected:
     ALWAYS_INLINE void UpdateBranchStatistics()
     {
         ProfilingData *profData = this->GetFrame()->GetMethod()->GetProfilingDataWithoutCheck();
-        if (profData != nullptr) {
+        if (profData != nullptr && profData->IsBranchProfilingEnabled()) {
             auto pc = this->GetBytecodeOffset();
             if constexpr (TAKEN) {
                 profData->UpdateBranchTaken(pc);
