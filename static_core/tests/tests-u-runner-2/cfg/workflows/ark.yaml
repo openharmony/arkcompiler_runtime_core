@@ -23,7 +23,7 @@ parameters:
     full-gc-bombing-frequency: 0
     load-runtimes: ${parameters.load-runtimes}
     ark-args: []  # for specifying in CLI
-    ark-extra-args: []  # for specifying in configs
+    ark-test-suite-args: []  # for specifying in test-suite configs
     stdlib: "${parameters.build}/plugins/ets/etsstdlib.abc"
     output-file: "${parameters.work-dir}/intermediate/${test-id}.abc"
     compiler-enable-jit: "false"
@@ -43,6 +43,6 @@ steps:
             - "--load-runtimes=${parameters.load-runtimes}"
             - "--compiler-enable-jit=${parameters.compiler-enable-jit}"
             - "${parameters.ark-args}"
-            - "${parameters.ark-extra-args}"
+            - "${parameters.ark-test-suite-args}"
             - "${parameters.output-file}"
             - "ETSGLOBAL::main"
