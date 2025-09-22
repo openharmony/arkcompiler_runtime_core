@@ -22,10 +22,10 @@ desc: >-
 enum Color {Red, Green, Blue}
 
 function main(): void {
-  try {
-    Color.getValueOf("Yellow");
-  } catch (e) {
-    return
+  let expectedError = (e: Error): boolean => {
+    return (e instanceof Error)
   }
-  arktest.assertTrue(false, "Error was expected")
+  arktest.expectThrow(() => {
+    Color.getValueOf("Yellow")
+  }, expectedError)
 }
