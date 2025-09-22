@@ -121,6 +121,8 @@ ohos_executable("ark_link") {
       deps += [ "$ark_root/plugins/ets:etsstdlib_copy_linux" ]
     } else if (is_mingw || is_win) {
       deps += [ "$ark_root/plugins/ets:etsstdlib_copy_windows" ]
+    } else if (is_mac) {
+      deps += [ "$ark_root/plugins/ets:etsstdlib_copy_mac" ]
     }
   }
 
