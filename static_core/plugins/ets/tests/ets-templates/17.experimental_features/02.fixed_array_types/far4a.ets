@@ -14,8 +14,7 @@
  */
 
 /*---
-desc: Arrays are invariant.
-tags: [compile-only, negative]
+desc: FixedArrays are covariant.
 ---*/
 
 class A {}
@@ -26,4 +25,8 @@ let arrB: FixedArray<B> = [new B, new B]
 
 function main() {
     arrA = arrB
+    arktest.assertTrue(arrA[0] instanceof B)
+    arktest.assertTrue(arrA[0] instanceof A)
+    arktest.assertTrue(arrA instanceof FixedArray<A>)
+    arktest.assertTrue(arrA instanceof FixedArray<B>)
 }
