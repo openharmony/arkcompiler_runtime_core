@@ -44,7 +44,7 @@ export class Error {
     private stackLines: FixedArray<StackTraceElement> = []
     private stack_?: String
     private cause_?: Object
-    private code_: number
+    private code_: int
 
     /**
     * Constructs a new error instance with provided message and cause
@@ -54,7 +54,7 @@ export class Error {
     * @param options options of the error
     */
     constructor(message?: String, options?: ErrorOptions) {
-        this("Error", 0 as number, message, options)
+        this("Error", 0, message, options)
     }
 
     /**
@@ -66,7 +66,7 @@ export class Error {
      *
      * @param options options of the error
      */
-    constructor(code: number, message?: String, options?: ErrorOptions) {
+    constructor(code: int, message?: String, options?: ErrorOptions) {
         this("Error", code, message, options)
     }
 
@@ -80,7 +80,7 @@ export class Error {
     * @param options options of the error
     */
     constructor(name: String, message: String | undefined, options?: ErrorOptions) {
-        this(name, 0 as number, message, options)
+        this(name, 0, message, options)
     }
 
     /**
@@ -94,7 +94,7 @@ export class Error {
      *
      * @param options options of the error
      */
-    constructor(name: String, code: number, message?: String, options?: ErrorOptions) {
+    constructor(name: String, code: int, message?: String, options?: ErrorOptions) {
         this.code_ = code
         this.message_ = (message == undefined) ? "" : message
         this.cause_ = (options == undefined) ? undefined : options.cause
@@ -122,7 +122,7 @@ export class Error {
      * Gets the code of the error.
      * @returns The error code.
      */
-    get code(): number {
+    get code(): int {
         return this.code_
     }
 
@@ -130,7 +130,7 @@ export class Error {
      * Sets the code of the error.
      * @param val The new code of the error.
      */
-    set code(val: number) {
+    set code(val: int) {
         this.code_ = val
     }
 
