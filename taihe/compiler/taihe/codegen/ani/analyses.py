@@ -1954,7 +1954,7 @@ class RecordTypeAniInfo(TypeAniInfo):
                 f"ani_object {ani_next} = {{}};",
                 f"ani_boolean {ani_done} = {{}};",
                 f'{env}->Object_CallMethod_Ref({ani_iter}, TH_ANI_FIND_CLASS_METHOD({env}, "escompat.MapIterator", "next", nullptr), reinterpret_cast<ani_ref*>(&{ani_next}));',
-                f'{env}->Object_GetField_Boolean({ani_next}, TH_ANI_FIND_CLASS_FIELD({env}, "escompat.IteratorResult", "done"), &{ani_done});',
+                f'{env}->Object_GetField_Boolean({ani_next}, TH_ANI_FIND_CLASS_FIELD({env}, "std.core.IteratorResult", "done"), &{ani_done});',
             )
             with target.indented(
                 f"if ({ani_done}) {{;",
@@ -1965,7 +1965,7 @@ class RecordTypeAniInfo(TypeAniInfo):
                 )
             target.writelns(
                 f"ani_tuple_value {ani_item} = {{}};",
-                f'{env}->Object_GetField_Ref({ani_next},  TH_ANI_FIND_CLASS_FIELD({env}, "escompat.IteratorResult", "value"), reinterpret_cast<ani_ref*>(&{ani_item}));',
+                f'{env}->Object_GetField_Ref({ani_next},  TH_ANI_FIND_CLASS_FIELD({env}, "std.core.IteratorResult", "value"), reinterpret_cast<ani_ref*>(&{ani_item}));',
                 f"ani_ref {ani_key} = {{}};",
                 f"{env}->TupleValue_GetItem_Ref({ani_item}, 0, &{ani_key});",
                 f"ani_ref {ani_val} = {{}};",

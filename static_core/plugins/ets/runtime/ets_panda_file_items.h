@@ -228,7 +228,7 @@ static constexpr std::string_view INTERFACE_OBJ_LITERAL                = "Lstd/a
 // escompat
 static constexpr std::string_view DATE                                 = "Lescompat/Date;";
 static constexpr std::string_view ARRAY_ENTRIES_ITERATOR_T             = "Lescompat/ArrayEntriesIterator_T;";
-static constexpr std::string_view ITERATOR_RESULT                      = "Lescompat/IteratorResult;";
+static constexpr std::string_view ITERATOR_RESULT                      = "Lstd/core/IteratorResult;";
 static constexpr std::string_view ARRAY_KEYS_ITERATOR                  = "Lescompat/ArrayKeysIterator;";
 static constexpr std::string_view ARRAY_VALUES_ITERATOR_T              = "Lescompat/ArrayValuesIterator_T;";
 static constexpr std::string_view MAP                                  = "Lescompat/Map;";
