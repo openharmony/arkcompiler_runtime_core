@@ -38,13 +38,13 @@ ohos_static_library("libarkziparchive_static") {
     ]
   } else if (ark_standalone_build) {
     external_deps = [
-      "zlib:shared_libz",
       sdk_libc_secshared_dep,
+      zlib_deps,
     ]
   } else {
     public_external_deps = [
-      "zlib:shared_libz",
       sdk_libc_secshared_dep,
+      zlib_deps,
     ]
   }
 
