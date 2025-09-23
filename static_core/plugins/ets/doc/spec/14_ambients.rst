@@ -55,7 +55,7 @@ The syntax of *ambient declaration* is presented below:
         'declare'
         ( ambientConstantDeclaration
         | ambientFunctionDeclaration
-        | overloadFunctionDeclaration
+        | explicitFunctionOverload
         | ambientClassDeclaration
         | ambientInterfaceDeclaration
         | ambientNamespaceDeclaration
@@ -200,7 +200,7 @@ Ambient Overload Function Declarations
     frontend_status: None
 
 The syntax of *ambient overload function declaration* is identical to that of
-:ref:`Function Overload Declarations`. The semantics of such declarations is
+:ref:`Explicit Function Overload`. The semantics of such declarations is
 defined by the same rules.
 
 
@@ -228,7 +228,7 @@ defined by the same rules.
 .. index::
    ambient overload function declaration
    ambient overload function
-   function overload declaration
+   explicit function overload
    semantics
    syntax
 
@@ -257,7 +257,7 @@ The syntax of *ambient class declaration* is presented below:
         ( ambientFieldDeclaration
         | ambientConstructorDeclaration
         | ambientMethodDeclaration
-        | overloadMethodDeclaration
+        | explicitClassMethodOverload
         | ambientClassAccessorDeclaration
         | ambientIndexerDeclaration
         | ambientCallSignatureDeclaration
@@ -325,7 +325,7 @@ Their syntax is presented below:
         ;
 
 Ambient methods can be overloaded similarly to non-ambient methods with the
-same syntax and semantics (see :ref:`Class Method Overload Declarations`).
+same syntax and semantics (see :ref:`Explicit Class Method Overload`).
 
 .. code-block:: typescript
    :linenos:

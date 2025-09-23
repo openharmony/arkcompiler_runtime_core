@@ -273,7 +273,7 @@ Functions with overload-equivalent signatures cause a
 
       // Functions have overload-equivalent signatures because of type erasure
       function bar(x: Array<number>) {}
-      function bar(x: Array<string>) {} 
+      function bar(x: Array<string>) {}
 
 .. index::
    distinguishable function

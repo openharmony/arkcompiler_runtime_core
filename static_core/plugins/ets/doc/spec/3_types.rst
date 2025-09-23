@@ -2520,7 +2520,7 @@ the name ``m`` is overloaded (see :ref:`Overloading`):
     }
 
     function test(x: C | D) {
-        x.foo() // compile-time error, as 'foo' in C is the overload alias
+        x.foo() // compile-time error, as 'foo' in C is the explicit overload
         x.foo2("aa") // ok, as 'foo2' in both C and D is a method
     }
 

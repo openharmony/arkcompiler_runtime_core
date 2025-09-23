@@ -664,7 +664,7 @@ the original name. Otherwise, the identifier specified in *binding alias*
 is used. In the latter case, the bounded entity is no longer accessible (see
 :ref:`Accessible`) under the original name.
 
-If an *identifier* refers to an *overloaded function* (see 
+If an *identifier* refers to an *overloaded function* (see
 :ref:`Overloading`), then all accessible overloaded functions are imported,
 including *explicitly overloaded functions* (see
 :ref:`Explicit Function Overload`).
@@ -675,7 +675,7 @@ including *explicitly overloaded functions* (see
     // File1
     export function foo(p: number) {} // #1
     export function foo(p: string) {} // #2
-    export function fooBoolean(p: Boolean) {} 
+    export function fooBoolean(p: Boolean) {}
     export overload foo {foo, fooBoolean)
 
     function foo() {} // #3
@@ -684,7 +684,7 @@ including *explicitly overloaded functions* (see
     import {foo} from "File1"  // all exported 'foo' are imported
     foo(5)          // #1 is called
     foo("a string") // #2 is called
-    foo(true)       // fooBoolean is called 
+    foo(true)       // fooBoolean is called
     foo()           // compile-time error, as #3 is not exported
 
 *Selective binding* that uses exported entities is represented in the examples

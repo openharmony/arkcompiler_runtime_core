@@ -187,8 +187,12 @@ Grammar Summary
         '<' type (',' type)* '>'
         ;
 
-    overloadFunctionDeclaration:
-        'overload' identifier '{' qualifiedName (',' qualifiedName)* ','? '}'
+    explicitFunctionOverload:
+        'overload' identifier overloadList
+        ;
+
+    overloadList:
+        '{' identifier (',' identifier)* ','? '}'
         ;
 
 
@@ -624,10 +628,10 @@ Grammar Summary
         annotationUsage?
         accessModifier?
         ( constructorDeclaration
-        | overloadConstructorDeclaration
+        | explicitConstructorOverload
         | classFieldDeclaration
         | classMethodDeclaration
-        | overloadMethodDeclaration
+        | explicitClassMethodOverload
         | classAccessorDeclaration
         )
         ;
@@ -669,12 +673,12 @@ Grammar Summary
         | 'async'
         ;
 
-    overloadMethodDeclaration:
-        overloadMethodModifier*
-        'overload' identifier '{' identifier (',' identifier)* ','? '}'
+    explicitClassMethodOverload:
+        explicitClassMethodOverloadModifier*
+        'overload' identifier overloadList
         ;
 
-    overloadMethodModifier: 'static' | 'async';
+    explicitClassMethodOverloadModifier: 'static' | 'async';
 
 
     classAccessorDeclaration:
@@ -699,8 +703,8 @@ Grammar Summary
         '{' statement* '}'
         ;
 
-    overloadConstructorDeclaration:
-        'overload' 'constructor' '{' identifier (',' identifier)* ','? '}'
+    explicitConstructorOverload:
+        'overload' 'constructor' overloadList
         ;
 
 
@@ -717,7 +721,7 @@ Grammar Summary
         : annotationUsage?
         ( interfaceProperty
         | interfaceMethodDeclaration
-        | overloadInterfaceMethodDeclaration
+        | explicitInterfaceMethodOverload
         )
         ;
 
@@ -732,8 +736,8 @@ Grammar Summary
         | interfaceDefaultMethodDeclaration
         ;
 
-    overloadInterfaceMethodDeclaration:
-        'overload' identifier '{' identifier (',' identifier)* ','? '}'
+    explicitInterfaceMethodOverload:
+        'overload' identifier overloadList'
         ;
 
     enumDeclaration:
@@ -795,7 +799,7 @@ Grammar Summary
         | variableDeclarations
         | constantDeclarations
         | functionDeclaration
-        | overloadFunctionDeclaration
+        | explicitFunctionOverload
         | namespaceDeclaration
         | ambientDeclaration
         | annotationDeclaration

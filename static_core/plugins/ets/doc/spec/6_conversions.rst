@@ -25,9 +25,9 @@ Contexts can be of the following kinds:
 
 -  :ref:`Assignment-like Contexts`;
 
--  :ref:`String Operator Contexts` with ``string`` concatenation (operator '``+``');
+-  :ref:`String Operator Contexts` with ``string`` concatenation (operator ``'+'``);
 
--  :ref:`Numeric Operator Contexts` with all numeric operators ('``+``', '``-``', etc.).
+-  :ref:`Numeric Operator Contexts` with all numeric operators (``'+'``, ``'-'``, etc.).
 
 .. index::
    context
@@ -160,7 +160,7 @@ String Operator Contexts
     frontend_status: Done
 
 *String context* applies only to a non-*string* operand of the binary operator
-'``+``' if the other operand is ``string``.
+``'+'`` if the other operand is ``string``.
 
 *String conversion* for a non-``string`` operand is evaluated as follows:
 
@@ -310,7 +310,7 @@ Relational and equality operators (see :ref:`Relational Expressions` and
   account when evaluating a relational expression or an equality expression (see
   :ref:`Numeric Relational Operators` and :ref:`Numeric Equality Operators`).
   
-The situation for the relational operator '``<``' is represented in the example
+The situation for the relational operator ``'<'`` is represented in the example
 below:
 
 .. code-block:: typescript
@@ -375,15 +375,33 @@ Widening Numeric Conversions
 
 .. meta:
     frontend_status: Partly
-    todo: short to char conversion
 
-*Widening numeric conversions* convert the following:
+*Widening numeric conversion* converts a value of a numeric type
+(see :ref:`Numeric Types`) to one of the following:
 
-- Values of a smaller numeric type to a larger type (see
-  :ref:`Numeric Types`);
+- Larger numeric type; or
+- Union type (see :ref:`Widening Numeric to a Union Type`).
 
-- Values of *enumeration* type (if enumeration constants of this type are
-  of a numeric type) to the same or a larger numeric type.
+This conversion never causes a runtime error.
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo(l: long) {}
+    function bar(d: double) {}
+
+    let b: byte = 1
+    let s: short = 2
+    let i: int = 3
+
+    foo(b) // byte to long conversion
+    foo(s) // short to long conversion
+    foo(i) // int to long conversion
+
+    let f: float = 3.14f
+
+    bar(i) // int to double conversion
+    bar(f) // float to double conversion
 
 .. index::
    widening
@@ -393,15 +411,15 @@ Widening Numeric Conversions
    value
    byte
    short
-   enumeration type
    int
    long
    float
    integer type
 
+All *widening numeric conversions* are presented in the following table:
 
 +------------------+------------------------------------------------------+
-| From             | To                                                   |
+| From Type        | To Type                                              |
 +==================+======================================================+
 | ``byte``         | ``short``, ``int``, ``long``, ``float``, ``double``  |
 +------------------+------------------------------------------------------+
@@ -413,9 +431,6 @@ Widening Numeric Conversions
 +------------------+------------------------------------------------------+
 | ``float``        | ``double``                                           |
 +------------------+------------------------------------------------------+
-| enumeration with | larger numeric type                                  |
-| numeric constants|                                                      |
-+------------------+------------------------------------------------------+
 
 The above conversions cause no loss of information about the overall magnitude
 of a numeric value. Some least significant bits of the value can be lost only
@@ -423,7 +438,6 @@ in conversions from an integer type to a floating-point type if the IEEE 754
 *round-to-nearest* mode is used correctly. The resultant floating-point value
 is properly rounded to the integer value.
 
-*Widening numeric conversions* never cause runtime errors.
 
 .. index::
    conversion
@@ -441,31 +455,82 @@ is properly rounded to the integer value.
 
 |
 
-.. _Enumeration to Constants Type Conversions:
+.. _Widening Numeric to a Union Type:
 
-Enumeration to Constants Type Conversions
-=========================================
+Widening Numeric to a Union Type
+================================
 
 .. meta:
     frontend_status: Done
 
-The following conversions never cause a runtime error:
+A numeric value ``v`` is converted to ``U``:sub:`i` of union type
+(``U``:sub:`1` ``| ... | U``:sub:`n`), if ``U``:sub:`i`
+is a single numeric type in the union that is larger then the value type.
+Otherwise, a :index:`compile-time error` occurs.
 
--  Value of *enumeration* type without explicit base type is converted to
-   the corresponding integer type (see :ref:`Enumerations`).
--  Value of *enumeration* type with explicit numeric base type
-   (see :ref:`Enumeration with Explicit Type`) is converted to the base type.
+.. note::
+   *Before* widening to a union type, the following semantic rules are applied
+   in most cases:
 
+    - :ref:`Type Inference for Numeric Literals` if ``v`` is
+      a numeric literal; or
+
+    - :ref:`Subtyping for Union Types` if ``U``:sub:`i` is equal
+      to the value type.
+
+   If one of these rules applies successfully, then no widening conversion is
+   required.
+
+All cases are represented in the following example:
+
+.. code-block:: typescript
+   :linenos:
+
+   let s: short = 1
+   let i: int = 2
+
+   let u: byte | int = 256 // ok, type inference for numeric literal
+   console.log(u instanceof int) // output: true
+
+   u = i // ok, subtyping
+   console.log(u instanceof int) // output: true
+
+   u = s // ok, widening to union type, short => int conversion
+   console.log(u instanceof int) // output: true
+
+|
+
+.. _Enumeration to Numeric Type Conversion:
+
+Enumeration to Numeric Type Conversion
+======================================
+
+.. meta:
+    frontend_status: Done
+
+If *enumeration base type* is a numeric type, then a value of the enumeration
+type is converted to one of the following:
+
+-  Numeric type equal to or larger than the *enumeration base type*; or
+
+-  Union type considering the value type of the *enumeration base type* (see
+   :ref:`Widening Numeric to a Union Type`).
+
+This conversion never causes a runtime error.
 
 .. code-block:: typescript
    :linenos:
 
     enum IntegerEnum {a, b, c}
-    let int_enum: IntegerEnum = IntegerEnum.a
-    let int_value: int = int_enum // int_value will get the value of 0
+    let int_enum: IntegerEnum = IntegerEnum.b
+    let int_value: int = int_enum // int_value will get the value 1
     let number_value: number = int_enum
-       /* number_value will get the value of 0 as a result of conversion
-          sequence: enumeration -> int - > number  */
+       /* number_value will get the value 1 as a result of conversion
+          to a larger numeric type */
+
+    enum DoubleEnum: double {a = 1.0, b = 2.0, c = 3.141592653589}
+    let d_enum: DoubleEnum = DoubleEnum.a
+    let d_value: double = d_enum // d_value will get the value 1.0
 
 .. index::
    enumeration type
@@ -474,42 +539,36 @@ The following conversions never cause a runtime error:
    conversion
    integer type
    constant
-   runtime error
    type int
 
-A value of *enumeration* type with ``string`` constants is converted to type ``string``. This conversion never causes
-a runtime error.
+|
+
+.. _Enumeration to string Type Conversion:
+
+Enumeration to ``string`` Type Conversion
+=========================================
+
+.. meta:
+    frontend_status: Done
+
+A value of *enumeration* type with ``string`` constants is converted to type
+``string`` or to a union type (see :ref:`Union Types`) that contains type ``string``.
+This conversion never causes a runtime error.
 
 .. code-block:: typescript
    :linenos:
 
     enum StringEnum {a = "a", b = "b", c = "c"}
-    let string_enum: StringEnum = StringEnum.a
-    let a_string: string = string_enum // a_string will get the value of "a"
+    let s_enum: StringEnum = StringEnum.a
+    let s: string = string_enum // 's' will get the value of "a"
+
+    let u: string | number = string_enum // 'u' will get the value of "a"
 
 .. index::
    enumeration type
    string type
    conversion
    constant
-   runtime error
-
-A value of *enumeration* type with an explicitly declared type of constants
-is converted to the declared type. This conversion never causes a runtime error.
-
-.. code-block:: typescript
-   :linenos:
-
-    enum DoubleEnum: double {a = 1.0, b = 2.0, c = 3.141592653589}
-    let dbl_enum: DoubleEnum = DoubleEnum.a
-    let dbl_value: double = dbl_enum // dbl_value will get the value of 1.0
-
-.. index::
-   enumeration type
-   conversion
-   value
-   constant
-   type declaration
    runtime error
 
 |

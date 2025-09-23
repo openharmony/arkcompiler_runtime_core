@@ -207,7 +207,7 @@ numbers/numeric literals, operator signs, delimiters), special characters
 
 The tokens defined by the lexical grammar are terminal symbols of syntactic
 notation. Syntactic notation defines a set of productions starting from the
-goal symbol *moduleDeclaration* (see :ref:`Namespaces and Modules`). It is a
+goal symbol *moduleDeclaration* (see :ref:`Module Declarations`). It is a
 sentence that consists of a single distinguished nonterminal, and describes how
 sequences of tokens can form syntactically correct programs.
 

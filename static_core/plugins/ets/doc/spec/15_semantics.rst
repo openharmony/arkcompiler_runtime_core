@@ -3935,7 +3935,7 @@ a superclass is represented in the example below:
         foo(c: C1) { console.log("D.C1") }
     }
 
-    a = new D()
+    let a: A = new D()
     a.foo(new C2()) // 1st call output: D.C1
     a.foo(new C1()) // 2nd call output: D.C1
 
