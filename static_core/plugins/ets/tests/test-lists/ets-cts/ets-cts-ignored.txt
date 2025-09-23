@@ -4,7 +4,6 @@
 #28017
 02.lexical_elements/07.keywords/hard_6.ets
 02.lexical_elements/07.keywords/hard_19.ets
-02.lexical_elements/07.keywords/hard_25.ets
 
 #28019
 02.lexical_elements/07.keywords/soft_9.ets
