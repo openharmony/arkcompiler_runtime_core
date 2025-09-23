@@ -20,20 +20,8 @@ cases:
 
     - res: 'number'
       vals:
-          - { type: byte, expr: Byte.MIN_VALUE }
-          - { type: byte, expr: Byte.MAX_VALUE }
-          - { type: short, expr: Short.MIN_VALUE }
-          - { type: short, expr: Short.MAX_VALUE }
-          - { type: int, expr: Int.MIN_VALUE }
-          - { type: int, expr: Int.MAX_VALUE }
-          - { type: long, expr: Long.MIN_VALUE }
-          - { type: long, expr: Long.MAX_VALUE }
-          - { type: float, expr: Float.MIN_VALUE }
-          - { type: float, expr: Float.MAX_VALUE }
           - { type: double, expr: Double.MIN_VALUE }
           - { type: double, expr: Double.MAX_VALUE }
-          - { type: char, expr: Char.MIN_VALUE as char }
-          - { type: char, expr: Char.MAX_VALUE as char }
 
     - res: 'string'
       decl: |-
@@ -65,8 +53,6 @@ cases:
 
     - res: 'number'
       vals:
-          - { type: 'Floating', expr: '3.14f' }
-          - { type: 'Integral', expr: '42' }
           - { type: 'Numeric', expr: '3.14' }
 
     - res: 'object'
@@ -190,10 +176,66 @@ cases:
 
     - res: 'number'
       vals:
-          - { type: 'Comparable<Float>', expr: 'new Float()' }
           - { type: 'Comparable<Double>', expr: 'new Double()' }
+
+    - res: 'byte'
+      vals:
+          - { type: byte, expr: Byte.MIN_VALUE }
+          - { type: byte, expr: Byte.MAX_VALUE }
+
+    - res: 'short'
+      vals:
+          - { type: short, expr: Short.MIN_VALUE }
+          - { type: short, expr: Short.MAX_VALUE }
+
+    - res: 'int'
+      vals:
+          - { type: int, expr: Int.MIN_VALUE }
+          - { type: int, expr: Int.MAX_VALUE }
+
+    - res: 'long'
+      vals:
+          - { type: long, expr: Long.MIN_VALUE }
+          - { type: long, expr: Long.MAX_VALUE }
+
+    - res: 'float'
+      vals:
+          - { type: float, expr: Float.MIN_VALUE }
+          - { type: float, expr: Float.MAX_VALUE }
+
+    - res: 'char'
+      vals:
+          - { type: char, expr: Char.MIN_VALUE as char }
+          - { type: char, expr: Char.MAX_VALUE as char }
+
+    - res: 'float'
+      vals:
+          - { type: 'Comparable<Float>', expr: 'new Float()' }
+
+    - res: 'byte'
+      vals:
           - { type: 'Comparable<Byte>', expr: 'new Byte()' }
+
+    - res: 'short'
+      vals:
           - { type: 'Comparable<Short>', expr: 'new Short()' }
+
+    - res: 'int'
+      vals:
           - { type: 'Comparable<Int>', expr: 'new Int()' }
+
+    - res: 'long'
+      vals:
           - { type: 'Comparable<Long>', expr: 'new Long()' }
+
+    - res: 'char'
+      vals:
           - { type: 'Comparable<Char>', expr: 'new Char()' }
+
+    - res: 'float'
+      vals:
+          - { type: 'Floating', expr: '3.14f' }
+
+    - res: 'int'
+      vals:
+          - { type: 'Integral', expr: '42' }

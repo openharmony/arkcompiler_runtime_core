@@ -14,7 +14,7 @@
 ---
 cases:
     - desc: numeric type
-      name: number
+      name: int
       decl: |-
           const n = 53
           let t = typeof (n / 2)

@@ -36,7 +36,7 @@ cases:
           function foo(p: number): int { return 2 }
       use: |-
           let b = cond ? 1 : 2  // typeof b is int
-          arktest.assertEQ(typeof b, "number")
+          arktest.assertEQ(typeof b, "int")
           arktest.assertEQ(foo(b), 1)
 
     - decl: |-
@@ -75,7 +75,7 @@ cases:
       tags: 'compile-only, negative'
       use: |-
           const b = cond ? 1 : 2  // type of b is int
-          arktest.assertEQ(typeof b, "number")
+          arktest.assertEQ(typeof b, "int")
           arktest.assertEQ(foo(b), 2)
 
     - decl: |-

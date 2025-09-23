@@ -13,7 +13,7 @@
 
 ---
 cases:
-  - {type: 'number', val: '42'}
+  - {type: 'int', val: '42'}
   - {type: 'string', val: '"String"'}
   - {type: 'boolean', val: 'true'}
   - {type: 'object', val: 'null'}
@@ -29,6 +29,6 @@ cases:
   - {type: 'boolean', val: '[1] instanceof number[]'}
   - {type: 'string', val:  '(typeof x == "string") ? x:""'}
   - {type: 'boolean', val: 'true && false'}
-  - {type: 'number', val: '10 + 5'}
+  - {type: 'int', val: '10 + 5'}
   - {type: 'boolean', val: '(1 > 2)'}
-  - {type: 'number', val: 'x ? 1:0'}
+  - {type: 'int', val: 'x ? 1:0'}

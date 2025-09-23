@@ -14,6 +14,7 @@
  */
 
 #include "libarkbase/utils/utf.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/ets_utils.h"
@@ -332,11 +333,56 @@ bool EtsValueTypedEquals(EtsCoroutine *coro, EtsObject *obj1, EtsObject *obj2)
     UNREACHABLE();
 }
 
-[[maybe_unused]] static bool DbgIsBoxedNumericClass(EtsCoroutine *coro, EtsClass *cls)
+[[maybe_unused]] static bool DbgIsBoxedClass(EtsClass *cls)
 {
-    auto ptypes = PlatformTypes(coro);
-    return cls == ptypes->coreByte || cls == ptypes->coreChar || cls == ptypes->coreShort || cls == ptypes->coreInt ||
-           cls == ptypes->coreLong || cls == ptypes->coreFloat || cls == ptypes->coreDouble;
+    switch (cls->GetBoxedType()) {
+        case EtsClass::BoxedType::BOOLEAN:
+        case EtsClass::BoxedType::BYTE:
+        case EtsClass::BoxedType::CHAR:
+        case EtsClass::BoxedType::SHORT:
+        case EtsClass::BoxedType::INT:
+        case EtsClass::BoxedType::LONG:
+        case EtsClass::BoxedType::FLOAT:
+        case EtsClass::BoxedType::DOUBLE: {
+            return true;
+        }
+        default: {
+            return false;
+        }
+    }
+}
+
+static EtsString *CreateStringFromBoxedClass(EtsClass *cls)
+{
+    switch (cls->GetBoxedType()) {
+        case EtsClass::BoxedType::BOOLEAN: {
+            return EtsString::CreateFromMUtf8("boolean");
+        }
+        case EtsClass::BoxedType::BYTE: {
+            return EtsString::CreateFromMUtf8("byte");
+        }
+        case EtsClass::BoxedType::CHAR: {
+            return EtsString::CreateFromMUtf8("char");
+        }
+        case EtsClass::BoxedType::SHORT: {
+            return EtsString::CreateFromMUtf8("short");
+        }
+        case EtsClass::BoxedType::INT: {
+            return EtsString::CreateFromMUtf8("int");
+        }
+        case EtsClass::BoxedType::LONG: {
+            return EtsString::CreateFromMUtf8("long");
+        }
+        case EtsClass::BoxedType::FLOAT: {
+            return EtsString::CreateFromMUtf8("float");
+        }
+        case EtsClass::BoxedType::DOUBLE: {
+            return EtsString::CreateFromMUtf8("number");
+        }
+        default: {
+            UNREACHABLE();
+        }
+    }
 }
 
 EtsString *EtsGetTypeof(EtsCoroutine *coro, EtsObject *obj)
@@ -383,13 +429,8 @@ EtsString *EtsGetTypeof(EtsCoroutine *coro, EtsObject *obj)
     }
 
     ASSERT(cls->IsBoxed());
-
-    if (cls == PlatformTypes(coro)->coreBoolean) {
-        return EtsString::CreateFromMUtf8("boolean");
-    }
-
-    ASSERT(DbgIsBoxedNumericClass(coro, cls));
-    return EtsString::CreateFromMUtf8("number");
+    ASSERT(DbgIsBoxedClass(cls));
+    return CreateStringFromBoxedClass(cls);
 }
 
 bool EtsGetIstrue(EtsCoroutine *coro, EtsObject *obj)
@@ -428,7 +469,7 @@ bool EtsGetIstrue(EtsCoroutine *coro, EtsObject *obj)
         return EtsBoxPrimitive<EtsBoolean>::FromCoreType(obj)->GetValue() != 0;
     }
 
-    ASSERT(DbgIsBoxedNumericClass(coro, cls) || cls->GetRuntimeClass()->IsXRefClass());
+    ASSERT(DbgIsBoxedClass(cls) || cls->GetRuntimeClass()->IsXRefClass());
     if (auto num = GetBoxedNumericValue<EtsDouble>(ptypes, obj); num.has_value()) {
         return num.value() != 0 && !std::isnan(num.value());
     }
