@@ -19,9 +19,12 @@
 #include "libarkbase/utils/span.h"
 #include "libarkbase/utils/utf.h"
 #include "libarkbase/utils/utils.h"
+#include "runtime/mem/vm_handle-inl.h"
+#include "runtime/handle_scope-inl.h"
 #include "runtime/include/class_linker_extension.h"
 #include "runtime/include/coretypes/array-inl.h"
 #include "runtime/include/coretypes/line_string.h"
+#include "runtime/include/panda_vm.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/thread.h"
 
@@ -987,6 +990,106 @@ TEST_F(StringTest, CreateNewStingFromByteArray)
     ASSERT_EQ(String::StringsAreEqual(result, string1), true);
 }
 
+TEST_F(StringTest, SlicedStringGC)
+{
+    // 1. create SlicedString
+    auto thread = ManagedThread::GetCurrent();
+    HandleScope<ObjectHeader *> scope(thread);
+    String *string = String::CreateFromMUtf8(reinterpret_cast<const uint8_t *>("abcdefghijklmnopkrstuvwxyz"),
+                                             GetLanguageContext(), Runtime::GetCurrent()->GetPandaVM());
+    VMHandle<String> stringHandle(thread, string);
+
+    String *expected = String::CreateFromMUtf8(reinterpret_cast<const uint8_t *>("abcdefghijklmno"),
+                                               GetLanguageContext(), Runtime::GetCurrent()->GetPandaVM());
+    VMHandle<String> expectedHandle(thread, expected);
+
+    String *result = String::FastSubString(string, 0, 15, GetLanguageContext(), Runtime::GetCurrent()->GetPandaVM());
+    VMHandle<String> resultHandle(thread, result);
+
+    ASSERT_EQ(stringHandle->IsLineString(), true);
+    ASSERT_EQ(resultHandle->IsSlicedString(), true);
+
+    auto firstReadBarrier = [](void *obj, size_t offset) {
+        return reinterpret_cast<common::BaseString *>(ObjectAccessor::GetObject(obj, offset));
+    };
+    const common::SlicedString *slicedString = resultHandle->ToSlicedString();
+    String *parentString = String::Cast(slicedString->GetParent<common::BaseString *>(std::move(firstReadBarrier)));
+    ASSERT_EQ(parentString->IsLineString(), true);
+    ASSERT_EQ(slicedString->IsSlicedString(), true);
+    ASSERT_EQ(String::StringsAreEqual(parentString, stringHandle.GetPtr()), true);
+    ASSERT_EQ(String::StringsAreEqual(resultHandle.GetPtr(), expectedHandle.GetPtr()), true);
+
+    // 2. trigger gc
+    Runtime::GetCurrent()->GetPandaVM()->GetGC()->WaitForGCInManaged(GCTask(GCTaskCause::OOM_CAUSE));
+
+    // 3. check SlicedString not changed
+    auto secondReadBarrier = [](void *obj, size_t offset) {
+        return reinterpret_cast<common::BaseString *>(ObjectAccessor::GetObject(obj, offset));
+    };
+    slicedString = resultHandle->ToSlicedString();
+    parentString = String::Cast(slicedString->GetParent<common::BaseString *>(std::move(secondReadBarrier)));
+    ASSERT_EQ(parentString->IsLineString(), true);
+    ASSERT_EQ(slicedString->IsSlicedString(), true);
+    ASSERT_EQ(String::StringsAreEqual(parentString, stringHandle.GetPtr()), true);
+    ASSERT_EQ(String::StringsAreEqual(resultHandle.GetPtr(), expectedHandle.GetPtr()), true);
+}
+
+TEST_F(StringTest, TreeStringGC)
+{
+    // 1. create TreeString
+    auto thread = ManagedThread::GetCurrent();
+    HandleScope<ObjectHeader *> scope(thread);
+    String *sub1 = String::CreateFromMUtf8(reinterpret_cast<const uint8_t *>("subLeftString"), GetLanguageContext(),
+                                           Runtime::GetCurrent()->GetPandaVM());
+    VMHandle<String> sub1Handle(thread, sub1);
+
+    String *sub2 = String::CreateFromMUtf8(reinterpret_cast<const uint8_t *>("subRightString"), GetLanguageContext(),
+                                           Runtime::GetCurrent()->GetPandaVM());
+    VMHandle<String> sub2Handle(thread, sub2);
+
+    String *result = String::Concat(sub1Handle.GetPtr(), sub2Handle.GetPtr(), GetLanguageContext(),
+                                    Runtime::GetCurrent()->GetPandaVM());
+    VMHandle<String> resultHandle(thread, result);
+
+    ASSERT_EQ(sub1Handle->IsLineString(), true);
+    ASSERT_EQ(sub2Handle->IsLineString(), true);
+    ASSERT_EQ(resultHandle->IsTreeString(), true);
+
+    auto leftFirstReadBarrier = [](void *obj, size_t offset) {
+        return reinterpret_cast<common::BaseString *>(ObjectAccessor::GetObject(obj, offset));
+    };
+
+    auto rightFirstReadBarrier = [](void *obj, size_t offset) {
+        return reinterpret_cast<common::BaseString *>(ObjectAccessor::GetObject(obj, offset));
+    };
+
+    common::TreeString *tree = resultHandle->ToTreeString();
+    String *left = String::Cast(tree->GetLeftSubString<common::BaseString *>(std::move(leftFirstReadBarrier)));
+    String *right = String::Cast(tree->GetRightSubString<common::BaseString *>(std::move(rightFirstReadBarrier)));
+    ASSERT_EQ(left->IsLineString(), true);
+    ASSERT_EQ(right->IsLineString(), true);
+    ASSERT_EQ(String::StringsAreEqual(left, sub1Handle.GetPtr()), true);
+    ASSERT_EQ(String::StringsAreEqual(right, sub2Handle.GetPtr()), true);
+
+    // 2. trigger gc
+    Runtime::GetCurrent()->GetPandaVM()->GetGC()->WaitForGCInManaged(GCTask(GCTaskCause::OOM_CAUSE));
+
+    // 3. check TreeString not changed
+    auto leftSecondReadBarrier = [](void *obj, size_t offset) {
+        return reinterpret_cast<common::BaseString *>(ObjectAccessor::GetObject(obj, offset));
+    };
+
+    auto rightSecondReadBarrier = [](void *obj, size_t offset) {
+        return reinterpret_cast<common::BaseString *>(ObjectAccessor::GetObject(obj, offset));
+    };
+    tree = resultHandle->ToTreeString();
+    left = String::Cast(tree->GetLeftSubString<common::BaseString *>(std::move(leftSecondReadBarrier)));
+    right = String::Cast(tree->GetRightSubString<common::BaseString *>(std::move(rightSecondReadBarrier)));
+    ASSERT_EQ(left->IsLineString(), true);
+    ASSERT_EQ(right->IsLineString(), true);
+    ASSERT_EQ(String::StringsAreEqual(left, sub1Handle.GetPtr()), true);
+    ASSERT_EQ(String::StringsAreEqual(right, sub2Handle.GetPtr()), true);
+}
 }  // namespace ark::coretypes::test
 
 // NOLINTEND(readability-magic-numbers)

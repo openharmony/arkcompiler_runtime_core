@@ -23,6 +23,7 @@
 #include "libarkbase/macros.h"
 #include "runtime/handle_scope-inl.h"
 #include "runtime/include/coretypes/string.h"
+#include "runtime/include/coretypes/string_flatten.h"
 #include "runtime/entrypoints/string_index_of.h"
 #include "runtime/arch/memory_helpers.h"
 #include "plugins/ets/runtime/types/ets_string.h"

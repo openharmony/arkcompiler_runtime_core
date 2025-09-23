@@ -1,15 +1,15 @@
-# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+#Copyright(c) 2022 - 2025 Huawei Device Co., Ltd.
+#Licensed under the Apache License, Version 2.0(the "License");
+#you may not use this file except in compliance with the License.
+#You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#http:  // www.apache.org/licenses/LICENSE-2.0
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#Unless required by applicable law or agreed to in writing, software
+#distributed under the License is distributed on an "AS IS" BASIS,
+#WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#See the License for the specific language governing permissions and
+#limitations under the License.
 
 add_custom_target(ets_checked_tests COMMENT "Running ets core tests with checkers")
 add_dependencies(ets_checked_tests ark)
@@ -18,11 +18,11 @@ add_subdirectory(jitinterface)
 function(panda_add_checked_test_ets)
     set(prefix ARG)
     set(options SUPPORT_RELEASE JITINTERFACE NATIVE BOOT_SELF)
-    set(singleValues NAME FILE LIBCORE OPT_LEVEL)
+    set(singleValues NAME FILE LIBCORE OPT_LEVEL ETS_STRINGS_CONCAT)
     set(multiValues AUX_FILES EXT_FILES)
     cmake_parse_arguments(${prefix} "${options}" "${singleValues}" "${multiValues}" ${ARGN})
 
-    # Events does not work in Release mode
+#Events does not work in Release mode
     if (NOT ARG_SUPPORT_RELEASE AND "${CMAKE_BUILD_TYPE}" STREQUAL "Release")
         return()
     endif()
@@ -52,10 +52,15 @@ function(panda_add_checked_test_ets)
     if (NOT DEFINED ARG_OPT_LEVEL)
         set(ARG_OPT_LEVEL 2)
     endif()
+
+    if (NOT DEFINED ARG_ETS_STRINGS_CONCAT)
+        set(ARG_ETS_STRINGS_CONCAT "true")
+    endif()
+
     if (${TEST_TYPE} MATCHES "ets")
-        compile_ets_code(${ARG_FILE} ${BINARY_FILE} ${ABC_TARGET} OPT_LEVEL ${ARG_OPT_LEVEL})
+        compile_ets_code(${ARG_FILE} ${BINARY_FILE} ${ABC_TARGET} OPT_LEVEL ${ARG_OPT_LEVEL} ETS_STRINGS_CONCAT ${ARG_ETS_STRINGS_CONCAT})
     else()
-    # Compile assembly file
+#Compile assembly file
         add_custom_command(OUTPUT "${BINARY_FILE}"
                 COMMENT "Building ${TEST_NAME}"
                 COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark_asm> --log-file ${BUILD_LOG} ${ARG_FILE} ${BINARY_FILE}
@@ -69,7 +74,7 @@ function(panda_add_checked_test_ets)
         set(APP_FILE_OUTPUT "${TEST_DIR}/${APP_FILE_BASE}.abc")
         set(ABC_APP_TARGET ${TEST_NAME}-${APP_FILE_BASE}-ets-es2panda)
         compile_ets_code(${APP_FILE} ${APP_FILE_OUTPUT} ${ABC_APP_TARGET})
-        # TODO(pishin): pass external files via --app-panda-files (now it doesn't work)
+#TODO(pishin) : pass external files via-- app - panda - files(now it doesn't work)
         list(APPEND stdlibs "${APP_FILE_OUTPUT}")
         list(APPEND EXT_FILES "${APP_FILE_OUTPUT}")
     endforeach()
@@ -118,7 +123,7 @@ function(panda_add_checked_test_ets)
         set(PANDA_OPTIONS ${PANDA_OPTIONS} "--ets.native-library-path=${TEST_DIR}")
     endif()
 
-    # Run checker
+#Run checker
     add_custom_target(${TEST_NAME}
                       COMMAND ${CHECKER} --source ${ARG_FILE}
                                          --panda $<TARGET_FILE:ark>
@@ -165,17 +170,17 @@ function(panda_add_checked_test_ets)
 
 endfunction()
 
-# Disable checked tests with sanitizers for arm64, since it takes too long time running.
+#Disable checked tests with sanitizers for arm64, since it takes too long time running.
 if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
     if (PANDA_TARGET_AMD64 OR PANDA_TARGET_ARM64)
-        # 26982 64-bit pointer support
+# 26982 64 - bit pointer support
         if (PANDA_32_BIT_MANAGED_POINTER OR NOT PANDA_TARGET_ARM64)
-            # No deoptimization occurs in String.split on arm32
+#No deoptimization occurs in String.split on arm32
             panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/string_split_test.ets)
             panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/loop_idioms/memmove_unsupported.ets)
             panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/loop_idioms/memmove_supported.ets)
             panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/loop_idioms/memmove_bailout.ets)
-            # Causes regalloc verification failure on ARM32
+#Causes regalloc verification failure on ARM32
             panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_escompat_typed_arrays_set_get.ets)
             panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_escompat_typed_arrays_set_values.ets)
             panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_escompat_typed_arrays_index_of.ets)
@@ -186,10 +191,10 @@ if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
             panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/if_conversion_2.ets)
             panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/lowering_bitfield_extraction.ets)
         endif()
-        # inlining of the following intrinsics is only enabled for these two targets
+#inlining of the following intrinsics is only enabled for these two targets
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_isFinite.ets)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_isNaN.ets)
-        # AOT mode for arm32 is not supported
+#AOT mode for arm32 is not supported
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_equals.ets SUPPORT_RELEASE)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/inlining_test/inlining_order_1.ets)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/inlining_test/inlining_order_2.ets)
@@ -208,21 +213,21 @@ if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
             panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/inlining_test/inline_external_test.ets EXT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/inlining_test/external_file_1.ets ${CMAKE_CURRENT_SOURCE_DIR}/inlining_test/external_file_2.ets ${CMAKE_CURRENT_SOURCE_DIR}/inlining_test/external_file_3.ets)
         endif()
         if (NOT PANDA_PRODUCT_BUILD)
-            # Disabled as stdlib API was required to change. issue 25232
-            # panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/string_tlab_allocations.ets JITINTERFACE)
+#Disabled as stdlib API was required to change.issue 25232
+#panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / string_tlab_allocations.ets JITINTERFACE)
             panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/string_tlab_repeat.ets JITINTERFACE)
         endif()
-        # LoadAndInitClass in AOT mode for arm32 is not supported
-        # NOTE(pantos) Issue #17103 reassign readonly property
-        # panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/optimize_load_readonly_static.ets)
-        # panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/optimize_load_readonly_instance.ets)
+#LoadAndInitClass in AOT mode for arm32 is not supported
+#NOTE(pantos) Issue #17103 reassign readonly property
+#panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / optimize_load_readonly_static.ets)
+#panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / optimize_load_readonly_instance.ets)
 
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_escompat_typed_arrays_reverse.ets)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_escompat_typed_arrays_slice.ets)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_escompat_typed_arrays_with.ets)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_escompat_typed_arrays_of.ets)
-        # Issue 26080 (work only with disabled jit)
-        # panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_escompat_typed_arrays_fill.ets)
+#Issue 26080(work only with disabled jit)
+#panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / ets_escompat_typed_arrays_fill.ets)
         if (NOT PANDA_TARGET_OHOS) # TODO: remove. issue 29517
             panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_escompat_map_intrinsics.ets)
             panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_escompat_map_inheritance_intrinsics.ets)
@@ -233,11 +238,12 @@ if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/hash_code_double_float.ets)
     endif()
     if (PANDA_TARGET_ARM64)
-        # Disabled as stdlib API was required to change. issue 25232
-        # panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/memory_coalescing3.ets)
-        # 26982 64-bit pointer support
-        if (PANDA_32_BIT_MANAGED_POINTER)
-            panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/charAt.ets)
+#Disabled as stdlib API was required to change.issue 25232
+#panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / memory_coalescing3.ets)
+# 26982 64 - bit pointer support
+        if (NOT PANDA_USE_64_BIT_POINTER)
+#Disabled as not support fast charAt.issue 28281
+#panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / charAt.ets)
             panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/memory_coalescing.ets)
             panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/memory_coalescing1.ets)
             panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/memory_coalescing2.ets)
@@ -247,48 +253,48 @@ if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
     endif()
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_runtime_equals.ets SUPPORT_RELEASE)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_abs.ets)
-    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_equals.ets)
+    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_equals.ets ETS_STRINGS_CONCAT "false")
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_strict_equals.ets)
-    # Disabled as stdlib API was required to change. issue 25232
-    # panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_escape_array.ets)
-    # NOTE(vpukhov): #16340 requires ets.equals profiling
-    # panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_inline_intrinsics.ets)
+#Disabled as stdlib API was required to change.issue 25232
+#panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / ets_escape_array.ets)
+#NOTE(vpukhov) : #16340 requires ets.equals profiling
+#panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / ets_inline_intrinsics.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_min.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_max.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_mod.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_istrue.ets)
     if (PANDA_COMPILER_TARGET_AARCH64)
-        # 26982 64-bit pointer support
+# 26982 64 - bit pointer support
         if (PANDA_32_BIT_MANAGED_POINTER OR NOT PANDA_TARGET_ARM64)
-            # issue #25345
-            # panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/checks_elimination_no_hoist.ets)
+#issue #25345
+#panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / checks_elimination_no_hoist.ets)
         endif()
     endif()
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/optimize_mod.ets)
-    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/escape_analysis_decompose.ets)
+    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/escape_analysis_decompose.ets ETS_STRINGS_CONCAT "false")
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/checks_elimination_osr.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/cleanup_call_inlined.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/loop_unroll_shl_shr_ashr.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_isinteger.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/hoist_loop_inv_bounds_check.ets)
-    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/escompat_array_get_set_derived.ets)
-    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/escompat_array_reverse.ets)
-    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_length.ets)
-    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_isempty.ets)
-    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_append_merge_part1.ets)
-    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_append_merge_part2.ets)
-    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_append_merge_part3.ets)
-    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_deopt1.ets)
-    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_deopt2.ets)
-    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_deopt3.ets)
-    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_hoist.ets)
-    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_merge_uber_export.ets)
-    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_reserve_part01-10.ets)
-    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_reserve_part11-19.ets)
-    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_reserve_part20-29.ets)
-    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_concat.ets)
-    # Disabled as stdlib API was required to change. issue 25232
-    # panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_concat_func.ets)
+    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/escompat_array_get_set_derived.ets ETS_STRINGS_CONCAT "false")
+    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/escompat_array_reverse.ets ETS_STRINGS_CONCAT "false")
+    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_length.ets ETS_STRINGS_CONCAT "false")
+    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_isempty.ets ETS_STRINGS_CONCAT "false")
+    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_append_merge_part1.ets ETS_STRINGS_CONCAT "false")
+    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_append_merge_part2.ets ETS_STRINGS_CONCAT "false")
+    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_append_merge_part3.ets ETS_STRINGS_CONCAT "false")
+    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_deopt1.ets ETS_STRINGS_CONCAT "false")
+    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_deopt2.ets ETS_STRINGS_CONCAT "false")
+    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_deopt3.ets ETS_STRINGS_CONCAT "false")
+    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_hoist.ets ETS_STRINGS_CONCAT "false")
+    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_merge_uber_export.ets ETS_STRINGS_CONCAT "false")
+    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_reserve_part01-10.ets ETS_STRINGS_CONCAT "false")
+    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_reserve_part11-19.ets ETS_STRINGS_CONCAT "false")
+    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_reserve_part20-29.ets ETS_STRINGS_CONCAT "false")
+    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_concat.ets ETS_STRINGS_CONCAT "false")
+    #Disabled as stdlib API was required to change.issue 25232
+    #panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / ets_string_concat_func.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_try_catch.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_try_catch1.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_try_catch2.ets)
@@ -309,10 +315,10 @@ if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_static_lookup_16bit.pa)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_nullish.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_nested_loops.ets)
-    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_stringbuilder.ets)
-    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_stringbuilder_length.ets)
-    # triggers an OOM segfault in ReallocateBuffer
-    # panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_stringbuilder_oom.ets)
+    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_stringbuilder.ets ETS_STRINGS_CONCAT "false")
+    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_stringbuilder_length.ets ETS_STRINGS_CONCAT "false")
+#triggers an OOM segfault in ReallocateBuffer
+#panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / ets_stringbuilder_oom.ets ETS_STRINGS_CONCAT "false")
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_const_array.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/hoist_checkcast.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/escape_deoptimization.ets)
@@ -320,26 +326,26 @@ if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/escape_phi.ets)
     endif()
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/fast_divisor.ets)
-    # Issue: 25424
-    # panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_pea_loads_upward_propagation.ets)
+#Issue : 25424
+#panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / ets_pea_loads_upward_propagation.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_sum_elem_array.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_safepoints.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_typeof_compare.ets)
-    # NOTE: #21521 typeof peephole for numeric types
-    # panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_typeof_compare1.ets)
-    # panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_typeof_compare5.ets)
-    # panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_typeof_compare2.ets)
-    # panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_typeof_compare3.ets)
-    # panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_typeof_compare4.ets)
-    # panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_typeof_compare6.ets)
-    #24004 jit assert
-    # panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_promise_launch.ets)
+#NOTE : #21521 typeof peephole for numeric types
+#panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / ets_typeof_compare1.ets)
+#panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / ets_typeof_compare5.ets)
+#panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / ets_typeof_compare2.ets)
+#panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / ets_typeof_compare3.ets)
+#panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / ets_typeof_compare4.ets)
+#panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / ets_typeof_compare6.ets)
+# 24004 jit assert
+#panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / ets_promise_launch.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/inlining_test/inlining_nested_lambdas.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/isinstance_elim_load_static.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/lse_parameter_aliasing.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/lse_loop_non_dominating_store.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/type_propagation.ets)
-    # 26982 64-bit pointer support
+# 26982 64 - bit pointer support
     if (PANDA_32_BIT_MANAGED_POINTER OR NOT PANDA_TARGET_ARM64)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_trunc.ets)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_round.ets)
@@ -350,63 +356,63 @@ if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_catch_assert1.ets)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_catch_assert2.ets)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_catch_assert3.ets)
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/escompat_array_from.ets)
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_merge.ets)
+        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/escompat_array_from.ets ETS_STRINGS_CONCAT "false")
+        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_merge.ets ETS_STRINGS_CONCAT "false")
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_double_compare.ets)
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/escompat_array_indexof.ets)
+        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/escompat_array_indexof.ets ETS_STRINGS_CONCAT "false")
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/string_test.ets SUPPORT_RELEASE)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_append_merge_part4.ets)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/escompat_array_join.ets)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_ceil.ets)
-        # Disabled - Replace typedarray length LoadObject with constant with external inlining support. issue 28689
-        # panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/typedarray_get_length_loadobject.ets)
+#Disabled - Replace typedarray length LoadObject with constant with external inlining support.issue 28689
+#panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / typedarray_get_length_loadobject.ets)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/escompat_array_get_set.ets)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/escompat_array_fill.ets)
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/escompat_array_concat.ets)
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/escompat_array_push.ets)
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/escompat_array_unshift.ets)
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_substring.ets)
+        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/escompat_array_concat.ets ETS_STRINGS_CONCAT "false")
+        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/escompat_array_push.ets ETS_STRINGS_CONCAT "false")
+        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/escompat_array_unshift.ets ETS_STRINGS_CONCAT "false")
+        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_substring.ets ETS_STRINGS_CONCAT "false")
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_overflow.ets)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/bounds_analysis_overflow.ets)
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_reserve_uber.ets)
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_merge_uber_part1.ets AUX_FILES ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_merge_uber_export.ets)
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_merge_uber_part2.ets AUX_FILES ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_merge_uber_export.ets)
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_merge_uber_part3.ets AUX_FILES ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_merge_uber_export.ets)
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_merge_uber_part4.ets AUX_FILES ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_merge_uber_export.ets)
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_merge_uber_part5.ets AUX_FILES ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_merge_uber_export.ets)
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_merge_uber_part6.ets AUX_FILES ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_merge_uber_export.ets)
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_merge_uber_part7.ets AUX_FILES ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_merge_uber_export.ets)
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_merge_uber_part8.ets AUX_FILES ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_merge_uber_export.ets)
+        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_reserve_uber.ets ETS_STRINGS_CONCAT "false")
+        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_merge_uber_part1.ets AUX_FILES ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_merge_uber_export.ets ETS_STRINGS_CONCAT "false")
+        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_merge_uber_part2.ets AUX_FILES ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_merge_uber_export.ets ETS_STRINGS_CONCAT "false")
+        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_merge_uber_part3.ets AUX_FILES ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_merge_uber_export.ets ETS_STRINGS_CONCAT "false")
+        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_merge_uber_part4.ets AUX_FILES ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_merge_uber_export.ets ETS_STRINGS_CONCAT "false")
+        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_merge_uber_part5.ets AUX_FILES ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_merge_uber_export.ets ETS_STRINGS_CONCAT "false")
+        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_merge_uber_part6.ets AUX_FILES ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_merge_uber_export.ets ETS_STRINGS_CONCAT "false")
+        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_merge_uber_part7.ets AUX_FILES ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_merge_uber_export.ets ETS_STRINGS_CONCAT "false")
+        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_merge_uber_part8.ets AUX_FILES ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_merge_uber_export.ets ETS_STRINGS_CONCAT "false")
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/loop_unroll_defer_preheader_transform.ets)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/multiarray.ets)
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_concat_loop.ets)
+        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_concat_loop.ets ETS_STRINGS_CONCAT "false")
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_char_isuppercase.ets)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_lse_phi_test.ets)
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_reserve_part30-44.ets)
+        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_reserve_part30-44.ets ETS_STRINGS_CONCAT "false")
     endif()
 endif()
 
-# Disabled as this test needs to reimplement. issue 28520
-# panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/escape_analysis_casted.ets)
+#Disabled as this test needs to reimplement.issue 28520
+#panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / escape_analysis_casted.ets)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/escape_analysis_check_phi.ets)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/load_array.ets)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/optimize_negation.ets)
-# NOTE #28944
-# panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/llvm_infer_flags.ets)
+#NOTE #28944
+#panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / llvm_infer_flags.ets)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ani/direct_native.ets NATIVE SUPPORT_RELEASE)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ani/quick_native.ets NATIVE SUPPORT_RELEASE)
-#panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/optimize_load_object_boxed.ets)
+#panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / optimize_load_object_boxed.ets)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/load_static_const_folding.ets)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/lower_boxed_boolean.ets)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/optimize_doubled_xor.ets OPT_LEVEL 0)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ani/unsafe_memory.ets NATIVE BOOT_SELF SUPPORT_RELEASE)
-panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_cache_options.ets)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/optimize_istrue.ets)
+panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_cache_options.ets ETS_STRINGS_CONCAT "false")
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/interface_cache_intrinsic.ets)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/lambda_with_capture_optimized.ets)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/type_propagation_unknown_offset.ets)
 
 if (NOT ENABLE_UNIT_TESTS_FULL_COVERAGE)
-    # NOTE #28944
-    # panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/llvm_infer_flags.ets)
+#NOTE #28944
+#panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / llvm_infer_flags.ets)
 endif()

@@ -303,7 +303,7 @@ TEST_F(EtsStringTest, Compare)
 TEST_F(EtsStringTest, Concat)
 {
     // utf8 + utf8
-    std::vector<uint8_t> data1 {'H', 'e', 'l', 'l', 'o', 0};
+    std::vector<uint8_t> data1 {'H', 'e', 'l', 'l', 'o', 'I', 'a', 'm', 'f', 'r', 'o', 'm', 'c', 'h', 'i', 'n', 'a', 0};
     std::vector<uint8_t> data2 {'w', 'o', 'r', 'l', 'd', '!', 0};
     std::vector<uint8_t> data3;
 

@@ -314,8 +314,11 @@ static std::optional<std::pair<napi_value, napi_value>> ResolveQualifiedReceiver
                                                                                        coretypes::String *qnameStr)
 {
     napi_value jsThis {};
+    PandaVector<uint8_t> tree8Buf;
     ASSERT(qnameStr->IsMUtf8());
-    auto qname = std::string(utf::Mutf8AsCString(qnameStr->GetDataMUtf8()), qnameStr->GetMUtf8Length());
+    auto qname = std::string(utf::Mutf8AsCString(qnameStr->IsTreeString() ? qnameStr->GetTreeStringDataMUtf8(tree8Buf)
+                                                                          : qnameStr->GetDataMUtf8()),
+                             qnameStr->GetMUtf8Length());
 
     auto resolveName = [&jsThis, &jsVal, &env](const std::string &name) -> bool {
         jsThis = jsVal;

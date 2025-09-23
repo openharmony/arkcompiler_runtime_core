@@ -143,7 +143,9 @@ JSValue *JSRuntimeNewJSValueString(EtsString *v)
     if (v->IsUtf16()) {
         InteropCtx::Fatal("not implemented");
     } else {
-        str = std::string(utf::Mutf8AsCString(v->GetDataMUtf8()), v->GetLength());
+        PandaVector<uint8_t> tree8Buf;
+        uint8_t *data = v->IsTreeString() ? v->GetTreeStringDataMUtf8(tree8Buf) : v->GetDataMUtf8();
+        str = std::string(utf::Mutf8AsCString(data), v->GetLength());
     }
     return JSValue::CreateString(coro, ctx, std::move(str));
 }
@@ -953,7 +955,9 @@ void ESValueAnyNamedSetter(EtsObject *etsObject, EtsString *etsPropName, EtsObje
     if (CheckEtsObjectFoundException(coro, etsObject)) {
         return;
     }
-    auto nameChar = utf::Mutf8AsCString(etsPropName->GetDataMUtf8());
+    PandaVector<uint8_t> tree8Buf;
+    auto nameChar = utf::Mutf8AsCString(etsPropName->IsTreeString() ? etsPropName->GetTreeStringDataMUtf8(tree8Buf)
+                                                                    : etsPropName->GetDataMUtf8());
     panda_file::File::StringData propName = {
         static_cast<uint32_t>(utf::MUtf8ToUtf16Size(utf::CStringAsMutf8(nameChar))), utf::CStringAsMutf8(nameChar)};
     EtsStbyname(coro, etsObject, propName, value);
@@ -974,7 +978,9 @@ EtsObject *ESValueAnyNamedGetter(EtsObject *etsObject, EtsString *etsPropName)
     if (CheckEtsObjectFoundException(coro, etsObject)) {
         return nullptr;
     }
-    auto nameChar = utf::Mutf8AsCString(etsPropName->GetDataMUtf8());
+    PandaVector<uint8_t> tree8Buf;
+    auto nameChar = utf::Mutf8AsCString(etsPropName->IsTreeString() ? etsPropName->GetTreeStringDataMUtf8(tree8Buf)
+                                                                    : etsPropName->GetDataMUtf8());
     panda_file::File::StringData propName = {
         static_cast<uint32_t>(utf::MUtf8ToUtf16Size(utf::CStringAsMutf8(nameChar))), utf::CStringAsMutf8(nameChar)};
     return EtsLdbyname(coro, etsObject, propName);

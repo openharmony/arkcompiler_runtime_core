@@ -960,7 +960,7 @@ options:
 
 - name: use-all-strings
   type: bool
-  default: false
+  default: true
   description: Whether to create strings with LineString/SlicedString/TreeString or only LineString.
 
 - name: safepoint-checkers-recording-time

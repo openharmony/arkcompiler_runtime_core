@@ -188,6 +188,7 @@
   "quickener": "*",
   "runtime/coretypes/line_string.cpp": "*",
   "runtime/coretypes/string.cpp": "*",
+  "runtime/coretypes/string_flatten.cpp": "*",
   "runtime/interpreter/frame.h": "*",
   "runtime/asm_defines/defines_generator.rb": "*",
   "runtime/mem/gc/g1/g1-gc.cpp": "*",

@@ -249,15 +249,21 @@ void JSONStringifier::AppendUtf8ToQuotedString(const Span<const uint8_t> &sp)
 bool JSONStringifier::SerializeJSONString(EtsHandle<EtsObject> &value)
 {
     EtsHandleScope scope(EtsCoroutine::GetCurrent());
+    PandaVector<uint8_t> tree8Buf;
+    PandaVector<uint16_t> tree16Buf;
     auto stringHandle = EtsHandle<EtsString>(EtsCoroutine::GetCurrent(), EtsString::FromEtsObject(value.GetPtr()));
     ASSERT(stringHandle.GetPtr() != nullptr);
     if (stringHandle->IsEmpty()) {
         buffer_ += "\"\"";
     } else if (stringHandle->IsUtf16()) {
-        Span<const uint16_t> sp(stringHandle->GetDataUtf16(), stringHandle->GetLength());
+        Span<const uint16_t> sp(stringHandle->IsTreeString() ? stringHandle->GetTreeStringDataUtf16(tree16Buf)
+                                                             : stringHandle->GetDataUtf16(),
+                                stringHandle->GetLength());
         AppendUtf16ToQuotedString(sp);
     } else {
-        Span<const uint8_t> sp(stringHandle->GetDataMUtf8(), stringHandle->GetLength());
+        Span<const uint8_t> sp(stringHandle->IsTreeString() ? stringHandle->GetTreeStringDataMUtf8(tree8Buf)
+                                                            : stringHandle->GetDataMUtf8(),
+                               stringHandle->GetLength());
         AppendUtf8ToQuotedString(sp);
     }
     return true;

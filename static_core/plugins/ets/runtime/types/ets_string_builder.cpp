@@ -124,11 +124,12 @@ ObjectHeader *AppendCharArrayToBuffer(VMHandle<EtsObject> &sbHandle, EtsCharArra
     return sb->GetCoreType();
 }
 
-static void ReconstructStringAsMUtf8(EtsString *dstString, EtsObjectArray *buffer, uint32_t index, uint32_t length,
+static void ReconstructStringAsMUtf8(EtsString *lineDstString, EtsObjectArray *buffer, uint32_t index, uint32_t length,
                                      EtsClass *stringClass)
 {
     // All strings in the buf are MUtf8
-    uint8_t *dstData = dstString->GetDataMUtf8();
+    ASSERT(lineDstString->IsLineString());
+    uint8_t *dstData = lineDstString->GetDataMUtf8();
     for (uint32_t i = 0; i < index; ++i) {
         EtsObject *obj = buffer->Get(i);
         if (obj->IsInstanceOf(stringClass)) {
@@ -150,11 +151,12 @@ static void ReconstructStringAsMUtf8(EtsString *dstString, EtsObjectArray *buffe
     }
 }
 
-static void ReconstructStringAsUtf16(EtsString *dstString, EtsObjectArray *buffer, uint32_t index, uint32_t length,
+static void ReconstructStringAsUtf16(EtsString *lineDstString, EtsObjectArray *buffer, uint32_t index, uint32_t length,
                                      EtsClass *stringClass)
 {
     // Some strings in the buf are Utf16
-    uint16_t *dstData = dstString->GetDataUtf16();
+    ASSERT(lineDstString->IsLineString());
+    uint16_t *dstData = lineDstString->GetDataUtf16();
     for (uint32_t i = 0; i < index; ++i) {
         EtsObject *obj = buffer->Get(i);
         if (obj->IsInstanceOf(stringClass)) {
