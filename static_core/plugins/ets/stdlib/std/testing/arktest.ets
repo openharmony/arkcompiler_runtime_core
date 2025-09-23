@@ -314,17 +314,17 @@ export namespace arktest {
     export function expectError(fn: () => void, expect?: string | Error): void {
         expectThrow(fn, (e) => {
             if (!(e instanceof Error)) {
-                return "Expected an instance of Error, got " + Type.of(e).getName()
+                return "Expected an instance of Error, got " + Class.of(e).getName()
             }
-            if (expect == undefined) {
+            if (expect === undefined) {
                 return true
             } else if (typeof expect == "string") {
                 return e.message == expect
             } else {
                 const expectedError = expect as Error // broken smartcast
-                const eType = Type.of(e)
-                const expectType = Type.of(expectedError)
-                if (!eType.equals(expectType)) {
+                const eType = Class.of(e)
+                const expectType = Class.of(expectedError)
+                if (eType !== expectType) {
                     return "Expected " + expectType.getName() + ", got " + eType.getName()
                 }
                 if (e.message != expectedError.message) {
