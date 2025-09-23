@@ -1298,6 +1298,8 @@
 09.classes/06.field_declarations/06.overriding_fields/overriding_fields_113.ets
 09.classes/06.field_declarations/06.overriding_fields/overriding_fields_114.ets
 09.classes/06.field_declarations/06.overriding_fields/overriding_fields_115.ets
+09.classes/06.field_declarations/06.overriding_fields/overriding_fields_neg_1.ets
+09.classes/06.field_declarations/06.overriding_fields/overriding_fields_neg_2.ets
 09.classes/06.field_declarations/field_declaration_with_busy_name_0.ets
 09.classes/06.field_declarations/field_declaration_with_busy_name_1.ets
 09.classes/06.field_declarations/field_declaration_with_busy_name_10.ets
