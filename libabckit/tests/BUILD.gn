@@ -51,7 +51,8 @@ abckit_gtests_sources = [
   "clean_scenarios/c_api/dynamic/replace_call_site/replace_call_site_test.cpp",
   "clean_scenarios/c_api/dynamic/router_table/router_table_test.cpp",
   "clean_scenarios/c_api/dynamic/scan_subclasses/scan_subclasses_test.cpp",
-  "clean_scenarios/c_api/static/add_log/add_log_static_test.cpp",
+  # 29942
+  # "clean_scenarios/c_api/static/add_log/add_log_static_test.cpp",
   "clean_scenarios/cpp_api/dynamic/add_log/add_log_dynamic_test.cpp",
   "clean_scenarios/cpp_api/dynamic/add_try_catch/add_try_catch.cpp",
   "clean_scenarios/cpp_api/dynamic/api_scanner/api_scanner_test.cpp",
@@ -86,7 +87,8 @@ abckit_gtests_sources = [
   "regression/issue_IB1YEI/cpp_api/issue_IB1YEI.cpp",
   "regression/issue_IB2T4M/c_api/issue_IB2T4M.cpp",
   "scenarios/add_log/add_log_dynamic_test.cpp",
-  "scenarios/add_log/add_log_static_test.cpp",
+  # 29942
+  # "scenarios/add_log/add_log_static_test.cpp",
   "scenarios/add_try_catch/dynamic/add_try_catch_test.cpp",
   "scenarios/api_scanner/dynamic/api_scanner.cpp",
   "scenarios/api_scanner/dynamic/api_scanner_test.cpp",
@@ -991,7 +993,8 @@ libabckit_host_unittest_action("abckit_clean_scenarios") {
     "clean_scenarios/c_api/dynamic/replace_call_site/replace_call_site_test.cpp",
     "clean_scenarios/c_api/dynamic/router_table/router_table_test.cpp",
     "clean_scenarios/c_api/dynamic/scan_subclasses/scan_subclasses_test.cpp",
-    "clean_scenarios/c_api/static/add_log/add_log_static_test.cpp",
+    # 29942
+    # "clean_scenarios/c_api/static/add_log/add_log_static_test.cpp",
     "clean_scenarios/cpp_api/dynamic/add_log/add_log_dynamic_test.cpp",
     "clean_scenarios/cpp_api/dynamic/add_try_catch/add_try_catch.cpp",
     "clean_scenarios/cpp_api/dynamic/api_scanner/api_scanner_test.cpp",

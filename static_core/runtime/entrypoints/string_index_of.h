@@ -20,6 +20,7 @@
 #include "utils/bit_utils.h"
 #include "runtime/include/coretypes/line_string.h"
 #include "runtime/include/coretypes/string.h"
+#include "runtime/include/coretypes/string_flatten.h"
 #include "runtime/handle_scope-inl.h"
 #include "runtime/mem/vm_handle.h"
 

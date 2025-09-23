@@ -350,13 +350,17 @@ bool EtsGetIstrue(EtsCoroutine *coro, EtsObject *obj)
 
 bool EtsHasPropertyByName([[maybe_unused]] EtsCoroutine *coro, EtsObject *thisObj, [[maybe_unused]] EtsString *name)
 {
+    PandaVector<uint8_t> tree8Buf;
     if (thisObj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
         PANDA_ETS_INTEROP_JS_GUARD({
             auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(thisObj);
-            return xRefObjectOperator.HasProperty(coro, utf::Mutf8AsCString(name->GetDataMUtf8()));
+            return xRefObjectOperator.HasProperty(coro, utf::Mutf8AsCString(name->IsTreeString()
+                                                                                ? name->GetTreeStringDataMUtf8(tree8Buf)
+                                                                                : name->GetDataMUtf8()));
         })
     } else {
-        auto namePtr = utf::Mutf8AsCString(name->GetDataMUtf8());
+        auto namePtr =
+            utf::Mutf8AsCString(name->IsTreeString() ? name->GetTreeStringDataMUtf8(tree8Buf) : name->GetDataMUtf8());
         auto fieldIndex = thisObj->GetClass()->GetFieldIndexByName(namePtr);
         if (fieldIndex != static_cast<uint32_t>(-1)) {
             return true;
@@ -393,13 +397,19 @@ bool EtsHasPropertyByIdx([[maybe_unused]] EtsCoroutine *coro, EtsObject *thisObj
 
 bool EtsHasOwnPropertyByName([[maybe_unused]] EtsCoroutine *coro, EtsObject *thisObj, [[maybe_unused]] EtsString *name)
 {
+    PandaVector<uint8_t> tree8Buf;
     if (thisObj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
         PANDA_ETS_INTEROP_JS_GUARD({
             auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(thisObj);
-            return xRefObjectOperator.HasProperty(coro, utf::Mutf8AsCString(name->GetDataMUtf8()), true);
+            return xRefObjectOperator.HasProperty(coro,
+                                                  utf::Mutf8AsCString(name->IsTreeString()
+                                                                          ? name->GetTreeStringDataMUtf8(tree8Buf)
+                                                                          : name->GetDataMUtf8()),
+                                                  true);
         });
     } else {
-        auto fieldName = utf::Mutf8AsCString(name->GetDataMUtf8());
+        auto fieldName =
+            utf::Mutf8AsCString(name->IsTreeString() ? name->GetTreeStringDataMUtf8(tree8Buf) : name->GetDataMUtf8());
         EtsField *etsFiled = thisObj->GetClass()->GetDeclaredFieldIDByName(fieldName);
         if (etsFiled != nullptr) {
             return true;
@@ -429,9 +439,15 @@ bool HandleStaticHasProperty(EtsCoroutine *coro, EtsObject *thisObj, EtsObject *
         if (isOwn) {
             return EtsHasOwnPropertyByName(coro, thisObj, EtsString::FromEtsObject(property));
         }
-        auto fieldName = utf::Mutf8AsCString(EtsString::FromEtsObject(property)->GetDataMUtf8());
+        PandaVector<uint8_t> tree8Buf;
+        EtsString *propertyStr = EtsString::FromEtsObject(property);
+        auto fieldName = utf::Mutf8AsCString(propertyStr->IsTreeString() ? propertyStr->GetTreeStringDataMUtf8(tree8Buf)
+                                                                         : propertyStr->GetDataMUtf8());
         EtsHandle<EtsObject> thisObjHandle(coro, thisObj);
         auto fieldNameStr = EtsString::CreateFromUtf8(fieldName, std::strlen(fieldName));
+        if (fieldNameStr == nullptr) {
+            return false;
+        }
         return EtsHasPropertyByName(coro, thisObjHandle.GetPtr(), fieldNameStr);
     }
     auto unboxedValue = GetBoxedNumericValue<int64_t>(PlatformTypes(coro), property);
@@ -576,8 +592,11 @@ EtsObject *EtsLdbyval(EtsCoroutine *coro, EtsObject *thisObj, EtsObject *valObj)
         PANDA_ETS_INTEROP_JS_GUARD({
             auto xRefObjectThis = interop::js::XRefObjectOperator::FromEtsObject(thisObj);
             if (valObj->IsStringClass()) {
+                PandaVector<uint8_t> tree8Buf;
+                EtsString *valObjStr = EtsString::FromEtsObject(valObj);
                 return xRefObjectThis.GetProperty(
-                    coro, utf::Mutf8AsCString(EtsString::FromEtsObject(valObj)->GetDataMUtf8()));
+                    coro, utf::Mutf8AsCString(valObjStr->IsTreeString() ? valObjStr->GetTreeStringDataMUtf8(tree8Buf)
+                                                                        : valObjStr->GetDataMUtf8()));
             } else {
                 return xRefObjectThis.GetProperty(coro, valObj);
             }
@@ -586,7 +605,10 @@ EtsObject *EtsLdbyval(EtsCoroutine *coro, EtsObject *thisObj, EtsObject *valObj)
         // ASSERTION. LHS is not a JSValue
         // then it is must a static object
         if (valObj->IsStringClass()) {
-            auto strObj = EtsString::FromEtsObject(valObj)->GetDataMUtf8();
+            PandaVector<uint8_t> tree8Buf;
+            EtsString *valObjStr = EtsString::FromEtsObject(valObj);
+            auto strObj =
+                valObjStr->IsTreeString() ? valObjStr->GetTreeStringDataMUtf8(tree8Buf) : valObjStr->GetDataMUtf8();
             panda_file::File::StringData propName = {static_cast<uint32_t>(utf::MUtf8ToUtf16Size(strObj)), strObj};
             return EtsLdbyname(coro, thisObj, propName);
         }
@@ -611,46 +633,55 @@ EtsObject *EtsLdbyval(EtsCoroutine *coro, EtsObject *thisObj, EtsObject *valObj)
     }
 }
 
-bool EtsStbyval(EtsCoroutine *coro, EtsObject *thisObj, EtsObject *key, EtsObject *value)
+static ALWAYS_INLINE bool EtsStbyvalWithXRefClass([[maybe_unused]] EtsCoroutine *coro, [[maybe_unused]] EtsObject *obj,
+                                                  [[maybe_unused]] EtsObject *key, [[maybe_unused]] EtsObject *value)
 {
-    if (thisObj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
-        PANDA_ETS_INTEROP_JS_GUARD({
-            auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(thisObj);
+    PANDA_ETS_INTEROP_JS_GUARD({
+        auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(obj);
+        if (key->IsStringClass()) {
+            PandaVector<uint8_t> tree8Buf;
+            auto keyStr = EtsString::FromEtsObject(key);
+            auto strObj = keyStr->IsTreeString() ? keyStr->GetTreeStringDataMUtf8(tree8Buf) : keyStr->GetDataMUtf8();
+            std::string name = utf::Mutf8AsCString(strObj);
+            return xRefObjectOperator.SetProperty(coro, name, value);
+        }
+        return xRefObjectOperator.SetProperty(coro, key, value);
+    });
+}
 
-            if (key->IsStringClass()) {
-                std::string name = utf::Mutf8AsCString(EtsString::FromEtsObject(key)->GetDataMUtf8());
-                return xRefObjectOperator.SetProperty(coro, name, value);
-            } else {
-                return xRefObjectOperator.SetProperty(coro, key, value);
+bool EtsStbyval(EtsCoroutine *coro, EtsObject *obj, EtsObject *key, EtsObject *value)
+{
+    if (obj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
+        return EtsStbyvalWithXRefClass(coro, obj, key, value);
+    }
+
+    // ASSERTION. LHS is not a JSValue
+    // then it is must a static object
+    if (key->IsStringClass()) {
+        PandaVector<uint8_t> tree8Buf;
+        EtsString *keyStr = EtsString::FromEtsObject(key);
+        auto strObj = keyStr->IsTreeString() ? keyStr->GetTreeStringDataMUtf8(tree8Buf) : keyStr->GetDataMUtf8();
+        panda_file::File::StringData propName = {static_cast<uint32_t>(utf::MUtf8ToUtf16Size(strObj)), strObj};
+        return EtsStbyname(coro, obj, propName, value);
+    }
+    auto unboxedValue = GetBoxedNumericValue<int64_t>(PlatformTypes(coro), key);
+    if (unboxedValue.has_value()) {
+        return EtsStbyidx(coro, obj, unboxedValue.value(), value);
+    }
+    if (value->GetClass()->GetRuntimeClass()->IsXRefClass()) {
+        PANDA_ETS_INTEROP_JS_GUARD({
+            auto ctx = interop::js::InteropCtx::Current(coro);
+            auto env = ctx->GetJSEnv();
+            interop::js::ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
+            if (LIKELY(storage->HasReference(obj, env))) {
+                auto jsThis = storage->GetJsObject(obj, env);
+                return interop::js::GetPropertyObject(JSValue::Create(coro, ctx, jsThis),
+                                                      JSValue::FromEtsObject(value));
             }
         });
-    } else {
-        // ASSERTION. LHS is not a JSValue
-        // then it is must a static object
-        if (key->IsStringClass()) {
-            auto strObj = EtsString::FromEtsObject(key)->GetDataMUtf8();
-            panda_file::File::StringData propName = {static_cast<uint32_t>(utf::MUtf8ToUtf16Size(strObj)), strObj};
-            return EtsStbyname(coro, thisObj, propName, value);
-        }
-        auto unboxedValue = GetBoxedNumericValue<int64_t>(PlatformTypes(coro), key);
-        if (unboxedValue.has_value()) {
-            return EtsStbyidx(coro, thisObj, unboxedValue.value(), value);
-        }
-        if (value->GetClass()->GetRuntimeClass()->IsXRefClass()) {
-            PANDA_ETS_INTEROP_JS_GUARD({
-                auto ctx = interop::js::InteropCtx::Current(coro);
-                auto env = ctx->GetJSEnv();
-                interop::js::ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
-                if (LIKELY(storage->HasReference(thisObj, env))) {
-                    auto jsThis = storage->GetJsObject(thisObj, env);
-                    return interop::js::GetPropertyObject(JSValue::Create(coro, ctx, jsThis),
-                                                          JSValue::FromEtsObject(value));
-                }
-            });
-        }
-        ThrowEtsInvalidKey(coro, key->GetClass()->GetDescriptor());
-        return false;
     }
+    ThrowEtsInvalidKey(coro, key->GetClass()->GetDescriptor());
+    return false;
 }
 
 bool EtsIsinstance([[maybe_unused]] EtsCoroutine *coro, EtsObject *lhsObj, EtsObject *rhsObj)

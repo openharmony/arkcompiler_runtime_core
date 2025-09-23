@@ -89,6 +89,21 @@ public:
     static LineString *CreateNewLineStringFromBytes(uint32_t offset, uint32_t length, uint32_t highByte,
                                                     Array *bytearray, const LanguageContext &ctx, PandaVM *vm);
 
+    common::BaseString *ToString()
+    {
+        return common::BaseString::Cast(reinterpret_cast<common::BaseObject *>(this));
+    }
+
+    const common::BaseString *ToStringConst() const
+    {
+        return common::BaseString::ConstCast(reinterpret_cast<const common::BaseObject *>(this));
+    }
+
+    common::LineString *ToLineString()
+    {
+        return common::LineString::Cast(ToString());
+    }
+
     template <bool VERIFY = true>
     uint16_t At(int32_t index)
     {
@@ -99,12 +114,8 @@ public:
                 return 0;
             }
         }
-        if (!IsUtf16()) {
-            Span<uint8_t> sp(GetDataMUtf8(), length);
-            return sp[index];
-        }
-        Span<uint16_t> sp(GetDataUtf16(), length);
-        return sp[index];
+
+        return ToLineString()->Get(index);
     }
 
     PANDA_PUBLIC_API int32_t Compare(LineString *rstr);
@@ -116,7 +127,7 @@ public:
 
     bool IsUtf16() const
     {
-        return compressedStringsEnabled_ ? ((length_ & STRING_COMPRESSED_BIT) == STRING_UNCOMPRESSED) : true;
+        return compressedStringsEnabled_ ? ToStringConst()->IsUtf16() : true;
     }
 
     bool IsMUtf8() const
@@ -126,38 +137,35 @@ public:
 
     static size_t ComputeDataSizeUtf16(uint32_t length)
     {
-        return length * sizeof(dataUtf16_[0]);
+        return length * sizeof(uint16_t);
     }
 
     /// Methods for uncompressed strings (UTF16)
     static size_t ComputeSizeUtf16(uint32_t utf16Length)
     {
-        return sizeof(LineString) + ComputeDataSizeUtf16(utf16Length);
+        return common::LineString::ComputeSizeUtf16(utf16Length);
     }
 
     uint16_t *GetDataUtf16()
     {
-        ASSERT_PRINT(IsUtf16(), "String: Read data as utf16 for mutf8 string");
-        return dataUtf16_;
+        return ToLineString()->GetDataUtf16Writable();
     }
 
     /// Methods for compresses strings (MUTF8 or LATIN1)
     static size_t ComputeSizeMUtf8(uint32_t mutf8Length)
     {
-        return sizeof(LineString) + mutf8Length;
+        return common::LineString::ComputeSizeUtf8(mutf8Length);
     }
 
     uint8_t *GetDataUtf8()
     {
-        ASSERT_PRINT(!IsUtf16(), "LineString: Read data as utf8 for utf16 line string");
-        return reinterpret_cast<uint8_t *>(dataUtf16_);
+        return ToLineString()->GetDataUtf8Writable();
     }
 
     /// It's MUtf8 format, but without 0 in the end.
     uint8_t *GetDataMUtf8()
     {
-        ASSERT_PRINT(!IsUtf16(), "LineString: Read data as mutf8 for utf16 line string");
-        return reinterpret_cast<uint8_t *>(dataUtf16_);
+        return ToLineString()->GetDataUtf8Writable();
     }
 
     size_t GetMUtf8Length()
@@ -165,7 +173,7 @@ public:
         if (!IsUtf16()) {
             return GetLength() + 1;  // add place for zero at the end
         }
-        return ark::utf::Utf16ToMUtf8Size(dataUtf16_, GetLength());
+        return ark::utf::Utf16ToMUtf8Size(GetDataUtf16(), GetLength());
     }
 
     size_t GetUtf16Length()
@@ -178,7 +186,7 @@ public:
         if (!IsUtf16()) {
             return GetLength();
         }
-        return ark::utf::Utf16ToUtf8Size(dataUtf16_, GetLength(), false) - 1;
+        return ark::utf::Utf16ToUtf8Size(GetDataUtf16(), GetLength(), false) - 1;
     }
 
     size_t CopyDataRegionUtf8(uint8_t *buf, size_t start, size_t length, size_t maxLength)
@@ -271,33 +279,27 @@ public:
 
     uint32_t GetLength() const
     {
-        uint32_t length;
-        if (compressedStringsEnabled_) {
-            length = length_ >> STRING_LENGTH_SHIFT;
-        } else {
-            length = length_;
-        }
-        return length;
+        return ToStringConst()->GetLength();
     }
 
     bool IsEmpty() const
     {
         // do not shift right length because it is always zero for empty string
-        return length_ == 0;
+        return GetLength() == 0;
     }
 
     size_t ObjectSize() const
     {
-        uint32_t length = GetLength();
-        return IsUtf16() ? ComputeSizeUtf16(length) : ComputeSizeMUtf8(length);
+        return common::LineString::ObjectSize(ToStringConst());
     }
 
     uint32_t GetHashcode()
     {
-        if (hashcode_ == 0) {
-            hashcode_ = ComputeHashcode();
-        }
-        return hashcode_;
+        auto readBarrier = [](void *obj, size_t offset) {
+            return reinterpret_cast<common::BaseString *>(
+                ObjectAccessor::GetObject(const_cast<const void *>(obj), offset));
+        };
+        return ToString()->GetHashcode(std::move(readBarrier));
     }
 
     int32_t IndexOf(LineString *rhs, int pos = 0);
@@ -305,17 +307,17 @@ public:
 
     static constexpr uint32_t GetLengthOffset()
     {
-        return MEMBER_OFFSET(LineString, length_);
+        return common::BaseString::LENGTH_AND_FLAGS_OFFSET;
     }
 
     static constexpr uint32_t GetDataOffset()
     {
-        return MEMBER_OFFSET(LineString, dataUtf16_);
+        return common::LineString::DATA_OFFSET;
     }
 
     static constexpr uint32_t GetHashcodeOffset()
     {
-        return MEMBER_OFFSET(LineString, hashcode_);
+        return common::BaseString::MIX_HASHCODE_OFFSET;
     }
 
     static constexpr uint32_t GetStringCompressionMask()
@@ -385,25 +387,18 @@ public:
     static bool IsASCIICharacter(uint16_t data)
     {
         // \0 is not considered ASCII in Modified-UTF8
-        return data - 1U < utf::UTF8_1B_MAX;
+        return common::BaseString::IsASCIICharacter(data);
     }
 
 protected:
     void SetLength(uint32_t length, bool compressed = false)
     {
-        if (compressedStringsEnabled_) {
-            ASSERT(length <= MAX_STRING_LENGTH);
-            // Use 0u for compressed/utf8 expression
-            length_ = (length << STRING_LENGTH_SHIFT) | (static_cast<uint32_t>(NON_INTERNED) << 1U) |
-                      (compressed ? STRING_COMPRESSED : STRING_UNCOMPRESSED);
-        } else {
-            length_ = length;
-        }
+        return ToString()->InitLengthAndFlags(length, compressed, false);
     }
 
     void SetHashcode(uint32_t hashcode)
     {
-        hashcode_ = hashcode;
+        ToString()->SetMixHashcode(hashcode);
     }
 
     uint32_t ComputeHashcode();
@@ -442,14 +437,6 @@ private:
     template <typename T>
     /// Check that two spans are equal. Should have the same length.
     static bool LineStringsAreEquals(Span<const T> &str1, Span<const T> &str2);
-
-    // In last bit of length_ we store if this string is compressed or not.
-    // In last second bit of length_ we store if this string is intern or not.
-    uint32_t length_;
-    uint32_t hashcode_;
-    // A pointer to the string data stored after the string header.
-    // Data can be stored in mutf8 or utf16 form according to compressed bit.
-    __extension__ uint16_t dataUtf16_[0];  // NOLINT(modernize-avoid-c-arrays)
 };
 
 }  // namespace ark::coretypes

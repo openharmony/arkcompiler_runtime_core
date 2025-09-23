@@ -34,16 +34,23 @@ namespace {
 
 double ParseFloat(EtsString *s, const uint32_t flags)
 {
+    PandaVector<uint8_t> tree8Buf;
+    PandaVector<uint16_t> tree16Buf;
+
     if (UNLIKELY(s->IsUtf16())) {
-        size_t len = utf::Utf16ToUtf8Size(s->GetDataUtf16(), s->GetUtf16Length()) - 1;
+        size_t len = s->IsTreeString()
+                         ? utf::Utf16ToUtf8Size(s->GetTreeStringDataUtf16(tree16Buf), s->GetUtf16Length()) - 1
+                         : utf::Utf16ToUtf8Size(s->GetDataUtf16(), s->GetUtf16Length()) - 1;
         PandaVector<uint8_t> buf(len);
-        len = utf::ConvertRegionUtf16ToUtf8(s->GetDataUtf16(), buf.data(), s->GetLength(), len, 0);
+        len = s->IsTreeString() ? utf::ConvertRegionUtf16ToUtf8(tree16Buf.data(), buf.data(), s->GetLength(), len, 0)
+                                : utf::ConvertRegionUtf16ToUtf8(s->GetDataUtf16(), buf.data(), s->GetLength(), len, 0);
 
         Span<uint8_t> str = Span<uint8_t>(buf.data(), len);
         return helpers::StringToDouble(str.begin(), str.end(), 0, flags);
     }
 
-    Span<uint8_t> str = Span<uint8_t>(s->GetDataMUtf8(), s->GetMUtf8Length() - 1);
+    Span<uint8_t> str = s->IsTreeString() ? Span<uint8_t>(s->GetTreeStringDataMUtf8(tree8Buf), s->GetMUtf8Length() - 1)
+                                          : Span<uint8_t>(s->GetDataMUtf8(), s->GetMUtf8Length() - 1);
     return helpers::StringToDouble(str.begin(), str.end(), 0, flags);
 }
 
@@ -76,12 +83,16 @@ double StdCoreDoubleParseInt(EtsString *s, int32_t radix)
     const int baseDec = 10;
     const int baseHex = 16;
 
-    Span<uint16_t> utf16Span {};
     Span<uint8_t> mutf8Span {};
+    Span<uint16_t> utf16Span {};
+    PandaVector<uint8_t> tree8Buf;
+    PandaVector<uint16_t> tree16Buf;
     if (isUtf16) {
-        utf16Span = {s->GetDataUtf16(), s->GetUtf16Length()};
+        uint16_t *utf16SpanBegin = s->IsTreeString() ? s->GetTreeStringDataUtf16(tree16Buf) : s->GetDataUtf16();
+        utf16Span = {utf16SpanBegin, s->GetUtf16Length()};
     } else {
-        mutf8Span = {s->GetDataMUtf8(), s->GetMUtf8Length()};
+        uint8_t *mutf8SpanBegin = s->IsTreeString() ? s->GetTreeStringDataMUtf8(tree8Buf) : s->GetDataMUtf8();
+        mutf8Span = {mutf8SpanBegin, s->GetMUtf8Length()};
     }
 
     if (length >= 1) {
@@ -104,13 +115,18 @@ double StdCoreDoubleParseInt(EtsString *s, int32_t radix)
 
     if (isUtf16) {
         size_t utf16Length = s->GetUtf16Length();
-        size_t utf8Size = utf::Utf16ToUtf8Size(s->GetDataUtf16(), utf16Length) - 1;
+        size_t utf8Size = s->IsTreeString() ? utf::Utf16ToUtf8Size(tree16Buf.data(), utf16Length) - 1
+                                            : utf::Utf16ToUtf8Size(s->GetDataUtf16(), utf16Length) - 1;
         PandaVector<uint8_t> buf(utf8Size);
-        size_t convertedSize = utf::ConvertRegionUtf16ToUtf8(s->GetDataUtf16(), buf.data(), length, utf8Size, 0);
+        size_t convertedSize = s->IsTreeString()
+                                   ? utf::ConvertRegionUtf16ToUtf8(tree16Buf.data(), buf.data(), length, utf8Size, 0)
+                                   : utf::ConvertRegionUtf16ToUtf8(s->GetDataUtf16(), buf.data(), length, utf8Size, 0);
         Span<uint8_t> str = Span<uint8_t>(buf.data(), convertedSize);
         return std::trunc(helpers::StringToDoubleWithRadix(str.begin(), str.end(), radix));
     }
-    Span<uint8_t> str = Span<uint8_t>(s->GetDataMUtf8(), s->GetMUtf8Length() - 1);
+
+    Span<uint8_t> str = s->IsTreeString() ? Span<uint8_t>(tree8Buf.data(), s->GetMUtf8Length() - 1)
+                                          : Span<uint8_t>(s->GetDataMUtf8(), s->GetMUtf8Length() - 1);
     return std::trunc(helpers::StringToDoubleWithRadix(str.begin(), str.end(), radix));
 }
 

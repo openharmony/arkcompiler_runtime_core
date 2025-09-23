@@ -33,6 +33,7 @@
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/coretypes/string.h"
 #include "runtime/include/coretypes/line_string.h"
+#include "runtime/include/coretypes/string_flatten.h"
 
 namespace ark::coretypes {
 
@@ -166,8 +167,7 @@ String *String::AllocLineStringObject(size_t length, bool compressed, const Lang
     auto *thread = ManagedThread::GetCurrent();
     auto *stringClass =
         Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::LINE_STRING);
-    size_t size =
-        compressed ? common::LineString::ComputeSizeUtf8(length) : common::LineString::ComputeSizeUtf16(length);
+    size_t size = compressed ? LineString::ComputeSizeMUtf8(length) : LineString::ComputeSizeUtf16(length);
     common::BaseString *string =
         movable ? reinterpret_cast<common::BaseString *>(
                       // CC-OFFNXT(G.FMT.06-CPP) project code style
@@ -189,36 +189,6 @@ String *String::AllocLineStringObject(size_t length, bool compressed, const Lang
         arch::FullMemoryBarrier();
     }
     return String::Cast(string);
-}
-
-/* static */
-String *FlatStringInfo::SlowFlatten(VMHandle<String> &str, const LanguageContext &ctx)
-{
-    ASSERT(str->IsSlicedString() || str->IsTreeString());
-    PandaVM *vm = Runtime::GetCurrent()->GetPandaVM();
-
-    uint32_t length = str->GetLength();
-    bool compressed = str->IsUtf8();
-
-    String *result = String::AllocLineStringObject(length, compressed, ctx, vm);
-    if (result == nullptr) {
-        return nullptr;
-    }
-
-    auto thread = ManagedThread::GetCurrent();
-    VMHandle<String> resultHandle(thread, result);
-    auto readBarrier = [](void *obj, size_t offset) {
-        return reinterpret_cast<common::BaseString *>(ObjectAccessor::GetObject(const_cast<const void *>(obj), offset));
-    };
-
-    if (compressed) {
-        common::BaseString::WriteToFlat(std::move(readBarrier), str->ToString(), resultHandle->GetDataUtf8Writable(),
-                                        length);
-    } else {
-        common::BaseString::WriteToFlat(std::move(readBarrier), str->ToString(), resultHandle->GetDataUtf16Writable(),
-                                        length);
-    }
-    return resultHandle.GetPtr();
 }
 
 /* static */
@@ -328,6 +298,91 @@ String *String::FastSubString(String *src, uint32_t start, uint32_t length, cons
     return GetSlicedString(srcHandle.GetPtr(), start, length, ctx, vm);
 }
 
+String *String::ConcatLineStringCompressed(VMHandle<String> &str1Handle, VMHandle<String> &str2Handle,
+                                           const LanguageContext &ctx, PandaVM *vm)
+{
+    uint32_t length1 = str1Handle->GetLength();
+    uint32_t length2 = str2Handle->GetLength();
+    uint32_t newLength = length1 + length2;
+    auto newString = String::AllocLineStringObject(newLength, true, ctx, vm);
+    if (UNLIKELY(newString == nullptr)) {
+        return nullptr;
+    }
+    VMHandle<String> newStringHandle(ManagedThread::GetCurrent(), newString);
+
+    // After copying we should have a full barrier, so this writes should happen-before barrier
+    TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
+    PandaVector<uint8_t> tree8Buf1;
+    PandaVector<uint8_t> tree8Buf2;
+    // copy left part
+    common::Span<uint8_t> sp(newStringHandle->GetDataUtf8Writable(), newLength);
+    common::Span<const uint8_t> src1(
+        str1Handle->IsTreeString() ? str1Handle->GetTreeStringDataUtf8(tree8Buf1) : str1Handle->GetDataUtf8(), length1);
+    common::BaseString::MemCopyChars(sp, newLength, src1, length1);
+
+    // copy right part
+    sp = sp.SubSpan(length1);
+    common::Span<const uint8_t> src2(
+        str2Handle->IsTreeString() ? str2Handle->GetTreeStringDataUtf8(tree8Buf2) : str2Handle->GetDataUtf8(), length2);
+    common::BaseString::MemCopyChars(sp, length2, src2, length2);
+    TSAN_ANNOTATE_IGNORE_WRITES_END();
+    // String is supposed to be a constant object, so all its data should be visible by all threads
+    arch::FullMemoryBarrier();
+    return newStringHandle.GetPtr();
+}
+
+String *String::ConcatLineStringUnCompressed(VMHandle<String> &str1Handle, VMHandle<String> &str2Handle,
+                                             const LanguageContext &ctx, PandaVM *vm)
+{
+    uint32_t length1 = str1Handle->GetLength();
+    uint32_t length2 = str2Handle->GetLength();
+    uint32_t newLength = length1 + length2;
+
+    auto newString = String::AllocLineStringObject(newLength, false, ctx, vm);
+    if (UNLIKELY(newString == nullptr)) {
+        return nullptr;
+    }
+    VMHandle<String> newStringHandle(ManagedThread::GetCurrent(), newString);
+    // After copying we should have a full barrier, so this writes should happen-before barrier
+    TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
+
+    // copy left part
+    PandaVector<uint8_t> tree8Buf1;
+    PandaVector<uint16_t> tree16Buf1;
+    common::Span<uint16_t> sp(newStringHandle->GetDataUtf16Writable(), newLength);
+    if (str1Handle->IsUtf8()) {
+        common::BaseString::CopyChars(sp.data(),
+                                      str1Handle->IsTreeString() ? str1Handle->GetTreeStringDataUtf8(tree8Buf1)
+                                                                 : str1Handle->GetDataUtf8(),
+                                      length1);
+    } else {
+        common::Span<const uint16_t> src1(str1Handle->IsTreeString() ? str1Handle->GetTreeStringDataUtf16(tree16Buf1)
+                                                                     : str1Handle->GetDataUtf16(),
+                                          length1);
+        common::BaseString::MemCopyChars(sp, newLength << 1U, src1, length1 << 1U);
+    }
+    // copy right part
+    PandaVector<uint8_t> tree8Buf2;
+    PandaVector<uint16_t> tree16Buf2;
+    sp = sp.SubSpan(length1);
+    if (str2Handle->IsUtf8()) {
+        common::BaseString::CopyChars(sp.data(),
+                                      str2Handle->IsTreeString() ? str2Handle->GetTreeStringDataUtf8(tree8Buf2)
+                                                                 : str2Handle->GetDataUtf8(),
+                                      length2);
+    } else {
+        common::Span<const uint16_t> src2(str2Handle->IsTreeString() ? str2Handle->GetTreeStringDataUtf16(tree16Buf2)
+                                                                     : str2Handle->GetDataUtf16(),
+                                          length2);
+        common::BaseString::MemCopyChars(sp, length2 << 1U, src2, length2 << 1U);
+    }
+
+    TSAN_ANNOTATE_IGNORE_WRITES_END();
+    // String is supposed to be a constant object, so all its data should be visible by all threads
+    arch::FullMemoryBarrier();
+    return newStringHandle.GetPtr();
+}
+
 /* static */
 String *String::Concat(String *str1, String *str2, const LanguageContext &ctx, PandaVM *vm)
 {
@@ -365,56 +420,8 @@ String *String::Concat(String *str1, String *str2, const LanguageContext &ctx, P
     // concat with line string if short
     ASSERT(str1Handle->IsLineString());
     ASSERT(str2Handle->IsLineString());
-    return ConcatLineString(str1Handle, str2Handle, ctx, vm);
-}
-
-/* static */
-String *String::ConcatLineString(VMHandle<String> &str1Handle, VMHandle<String> &str2Handle, const LanguageContext &ctx,
-                                 PandaVM *vm)
-{
-    uint32_t length1 = str1Handle->GetLength();
-    uint32_t length2 = str2Handle->GetLength();
-    uint32_t newLength = length1 + length2;
-    bool compressed = String::GetCompressedStringsEnabled() && (str1Handle->IsUtf8()) && (str2Handle->IsUtf8());
-
-    auto newString = String::AllocLineStringObject(newLength, compressed, ctx, vm);
-    if (UNLIKELY(newString == nullptr)) {
-        return nullptr;
-    }
-    VMHandle<String> newStringHandle(ManagedThread::GetCurrent(), newString);
-    // After copying we should have a full barrier, so this writes should happen-before barrier
-    TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
-    if (compressed) {
-        // copy left part
-        common::Span<uint8_t> sp(newStringHandle->GetDataUtf8Writable(), newLength);
-        common::Span<const uint8_t> src1(str1Handle->GetDataUtf8(), length1);
-        common::BaseString::MemCopyChars(sp, newLength, src1, length1);
-        // copy right part
-        sp = sp.SubSpan(length1);
-        common::Span<const uint8_t> src2(str2Handle->GetDataUtf8(), length2);
-        common::BaseString::MemCopyChars(sp, length2, src2, length2);
-    } else {
-        // copy left part
-        common::Span<uint16_t> sp(newStringHandle->GetDataUtf16Writable(), newLength);
-        if (str1Handle->IsUtf8()) {
-            common::BaseString::CopyChars(sp.data(), str1Handle->GetDataUtf8(), length1);
-        } else {
-            common::Span<const uint16_t> src1(str1Handle->GetDataUtf16(), length1);
-            common::BaseString::MemCopyChars(sp, newLength << 1U, src1, length1 << 1U);
-        }
-        // copy right part
-        sp = sp.SubSpan(length1);
-        if (str2Handle->IsUtf8()) {
-            common::BaseString::CopyChars(sp.data(), str2Handle->GetDataUtf8(), length2);
-        } else {
-            common::Span<const uint16_t> src2(str2Handle->GetDataUtf16(), length2);
-            common::BaseString::MemCopyChars(sp, length2 << 1U, src2, length2 << 1U);
-        }
-    }
-    TSAN_ANNOTATE_IGNORE_WRITES_END();
-    // String is supposed to be a constant object, so all its data should be visible by all threads
-    arch::FullMemoryBarrier();
-    return newStringHandle.GetPtr();
+    return compressed ? ConcatLineStringCompressed(str1Handle, str2Handle, ctx, vm)
+                      : ConcatLineStringUnCompressed(str1Handle, str2Handle, ctx, vm);
 }
 
 /* static */
@@ -643,11 +650,10 @@ int32_t String::Compare(VMHandle<String> &left, VMHandle<String> &right, const L
         return 0;
     }
 
-    auto thread = ManagedThread::GetCurrent();
-    FlatStringInfo lflat = FlatStringInfo::FlattenAllString(left, ctx);
-    VMHandle<String> string(thread, lflat.GetString());
-    FlatStringInfo rflat = FlatStringInfo::FlattenAllString(right, ctx);
-    lflat.SetString(string.GetPtr());
+    // when left or right is tree string , use native memory , no need to handle
+    // when function exit , native memory will be deleted in ~FlatStringInfo()
+    FlatStringInfo lflat = FlatStringInfo::FlattenAllString(left, ctx, true);
+    FlatStringInfo rflat = FlatStringInfo::FlattenAllString(right, ctx, true);
 
     int32_t lCount = static_cast<int32_t>(lflat.GetLength());  // NOLINT(modernize-use-auto)
     int32_t rCount = static_cast<int32_t>(rflat.GetLength());  // NOLINT(modernize-use-auto)
@@ -866,59 +872,6 @@ bool String::StringsAreEqual(String *str1, String *str2)
         return reinterpret_cast<common::BaseString *>(ObjectAccessor::GetObject(const_cast<const void *>(obj), offset));
     };
     return common::BaseString::StringsAreEqual(std::move(readBarrier), str1->ToString(), str2->ToString());
-}
-
-/* static */
-FlatStringInfo FlatStringInfo::FlattenTreeString(VMHandle<String> &treeStr, const LanguageContext &ctx)
-{
-    common::TreeString *treeString = treeStr->ToTreeString();
-    auto readBarrier = [](void *obj, size_t offset) {
-        return reinterpret_cast<common::BaseString *>(ObjectAccessor::GetObject(const_cast<const void *>(obj), offset));
-    };
-    if (treeString->IsFlat(std::move(readBarrier))) {
-        auto readBarrierLeft = [](void *obj, size_t offset) {
-            return reinterpret_cast<common::BaseString *>(
-                ObjectAccessor::GetObject(const_cast<const void *>(obj), offset));
-        };
-        // NOLINTNEXTLINE(modernize-use-auto)
-        common::BaseString *first = treeString->GetLeftSubString<common::BaseString *>(std::move(readBarrierLeft));
-        return FlatStringInfo(String::Cast(first), 0, treeString->GetLength());
-    }
-
-    String *s = SlowFlatten(treeStr, ctx);
-    return FlatStringInfo(s, 0, treeString->GetLength());
-}
-
-/* static */
-FlatStringInfo FlatStringInfo::FlattenSlicedString(VMHandle<String> &slicedStr)
-{
-    const common::SlicedString *slicedString = slicedStr->ToSlicedString();
-    auto readBarrier = [](void *obj, size_t offset) {
-        return reinterpret_cast<common::BaseString *>(ObjectAccessor::GetObject(const_cast<const void *>(obj), offset));
-    };
-    // NOLINTNEXTLINE(modernize-use-auto)
-    common::BaseString *parent = slicedString->GetParent<common::BaseString *>(std::move(readBarrier));
-    return FlatStringInfo(String::Cast(parent), slicedString->GetStartIndex(), slicedString->GetLength());
-}
-
-/* static */
-FlatStringInfo FlatStringInfo::FlattenAllString(VMHandle<String> &str, const LanguageContext &ctx)
-{
-    String *string = str.GetPtr();
-    // 1. LineString return directly
-    if (string->IsLineString()) {
-        return FlatStringInfo(string, 0, string->GetLength());
-    }
-    // 2. SlicedString
-    if (string->IsSlicedString()) {
-        return FlattenSlicedString(str);
-    }
-    // 3. TreeString
-    if (string->IsTreeString()) {
-        return FlattenTreeString(str, ctx);
-    }
-    UNREACHABLE();
-    return FlatStringInfo(string, 0, string->GetLength());
 }
 
 }  // namespace ark::coretypes
