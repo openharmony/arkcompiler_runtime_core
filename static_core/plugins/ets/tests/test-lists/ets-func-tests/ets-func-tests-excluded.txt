@@ -111,7 +111,7 @@ std/core/TypeCreateErasedBodyTest.ets
 std/core/TypeMethodInvoke.ets
 std/core/std_core_string_String_repeat_int.ets
 std/core/std_core_string_String_repeat_number.ets
-escompat/escompat_BigInt_instance_BigInt_toString_011.ets
+std/core/std_core_BigInt_instance_BigInt_toString_011.ets
 std/core/std_core_string_String_codePointCount_number_number.ets
 
 # 3.

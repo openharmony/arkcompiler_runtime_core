@@ -143,7 +143,7 @@ public:
 
     void BigintCreator(ani_class *cls, ani_object *result)
     {
-        ASSERT_EQ(env_->FindClass("escompat.BigInt", cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("std.core.BigInt", cls), ANI_OK);
         ASSERT_NE(cls, nullptr);
 
         ani_method ctor;

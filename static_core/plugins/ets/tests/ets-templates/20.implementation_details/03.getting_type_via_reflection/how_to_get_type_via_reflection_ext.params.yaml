@@ -28,7 +28,7 @@ cases:
   - desc: How to get bigint via reflection.
     logic: |-
       let type_of_bigint: Type = Type.from<bigint>();
-      arktest.assertEQ(type_of_bigint.toString(), "escompat.BigInt");
+      arktest.assertEQ(type_of_bigint.toString(), "std.core.BigInt");
   - desc: How to get RegExp[] via reflection.
     logic: |-
       let type_of_Array_RegExp: Type = Type.from<RegExp[]>();

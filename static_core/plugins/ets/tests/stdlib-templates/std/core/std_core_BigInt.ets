@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-{% for item in escompat_BigInt_instance %}
+{% for item in std_core_BigInt_instance %}
 /*---
 desc:  {function: instance_{{.item.object_type}}_{{.item.method_name}}}
 ---*/
@@ -22,7 +22,7 @@ desc:  {function: instance_{{.item.object_type}}_{{.item.method_name}}}
 {% endfor %}
 
 
-{% for item in escompat_BigInt_static %}
+{% for item in std_core_BigInt_static %}
 /*---
 desc:  {function: static_{{.item.object_type}}_{{.item.method_name}}}
 ---*/
