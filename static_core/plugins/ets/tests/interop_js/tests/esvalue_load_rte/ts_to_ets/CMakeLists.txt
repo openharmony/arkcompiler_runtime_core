@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,25 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(DISABLES_TESTS
-    checked
-    generic_as_parameter
-    generic_call_params
-    generic_static
-    getter
-    getter_arkjs
-    number_subtypes
-    perf
-    standalone_function
-    test_intrins
-    esvalue_load_rte
+panda_ets_interop_js_gtest(ets_interop_js__esvalueloadrte_ts_to_ets
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/esvalue_load_rte.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/esvalue_load_rte.ets
+    JS_SOURCES  ${CMAKE_CURRENT_SOURCE_DIR}/esvalue_load_rte.ts
 )
-
-SUBDIRLIST(EXECUTED_TESTS
-    ${CMAKE_CURRENT_LIST_DIR}
-    DISABLES_TESTS
-)
-
-foreach(TEST_DIR ${EXECUTED_TESTS})
-    add_subdirectory(${TEST_DIR})
-endforeach()
