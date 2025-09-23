@@ -529,12 +529,16 @@ ohos_static_library("libarkruntime_static") {
   subsystem_name = "$ark_subsystem_name"
 }
 
-config("ark_integrate_public_config") {
-  include_dirs = [ "$ark_root/plugins/ets/runtime/integrate" ]
+config("ark_runtime_public_config") {
+  include_dirs = [
+    "$ark_root/plugins/ets/dfx",
+    "$ark_root/plugins/ets/runtime/integrate",
+    "$ark_root/runtime/tooling/inspector",
+  ]
 }
 
 ohos_shared_library("libarkruntime") {
-  public_configs = [ ":ark_integrate_public_config" ]
+  public_configs = [ ":ark_runtime_public_config" ]
   deps = [ ":libarkruntime_set_static" ]
 
   if (ark_hybrid) {
