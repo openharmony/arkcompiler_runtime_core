@@ -569,8 +569,7 @@ EtsString *StdCoreStringFromCharCode(EtsEscompatArray *charCodes)
 EtsString *StdCoreStringFromCharCodeSingle(EtsDouble charCode)
 {
     if (LIKELY(Runtime::GetOptions().IsUseStringCaches())) {
-        constexpr double UTF16_CHAR_DIVIDER = 0x10000;
-        auto character = static_cast<uint16_t>(static_cast<int64_t>(std::fmod(charCode, UTF16_CHAR_DIVIDER)));
+        auto character = EtsString::CodeToChar(charCode);
         if (character < EtsPlatformTypes::ASCII_CHAR_TABLE_SIZE && coretypes::String::IsASCIICharacter(character)) {
             auto *cache = PlatformTypes()->GetAsciiCacheTable();
             return static_cast<EtsString *>(cache->Get(character));

@@ -22,6 +22,8 @@
 #include <tuple>
 #include <utility>
 
+#include "securec.h"
+
 // NOLINTNEXTLINE(hicpp-signed-bitwise)
 static constexpr uint32_t U16_SURROGATE_OFFSET = (0xd800 << 10UL) + 0xdc00 - 0x10000;
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -616,23 +618,25 @@ void UInt64ToUtf16Array(uint64_t v, uint16_t *outUtf16Buf, uint32_t nDigits, boo
     constexpr uint64_t POW10_1 = 10U;
     constexpr uint64_t POW10_2 = 100U;
 
-    Span<uint16_t> outSpan(outUtf16Buf, nDigits);
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    auto *out = reinterpret_cast<uint32_t *>(outUtf16Buf + nDigits);
-    int i = 0;
+    auto *bufEnd = outUtf16Buf + nDigits;
+    constexpr uint64_t endShift = 2;  // uint32_t = 2 * uint16_t
     while (v >= POW10_2) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        out[--i] = BIDIGITS_CODE_TAB[v % POW10_2];
+        bufEnd -= endShift;
+        if (memcpy_s(bufEnd, endShift * sizeof(uint16_t), &BIDIGITS_CODE_TAB[v % POW10_2], sizeof(uint32_t))) {
+            UNREACHABLE();
+        }
         v /= POW10_2;
     }
     if (v >= POW10_1) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        out[--i] = BIDIGITS_CODE_TAB[v];
+        bufEnd -= endShift;
+        if (memcpy_s(bufEnd, endShift * sizeof(uint16_t), &BIDIGITS_CODE_TAB[v], sizeof(uint32_t))) {
+            UNREACHABLE();
+        }
     } else {
-        outSpan[negative ? 1U : 0] = v + '0';
+        *(outUtf16Buf + negative) = v + '0';
     }
     if (negative) {
-        outSpan[0] = '-';
+        *outUtf16Buf = '-';
     }
 }
 
