@@ -58,7 +58,7 @@ function length(): int {
             return fail;
         }
 
-        a.pushECMA(1, 2, 3, 4, 5);
+        a.push(1, 2, 3, 4, 5);
         if (a.length != 5) {
             return fail;
         }
@@ -107,11 +107,11 @@ function pushPop(): int {
         if (a.pop() !== undefined) {
             return fail;
         }
-        a.pushECMA(1, 2, 3)
+        a.push(1, 2, 3)
         if (a.length != 3) {
             return fail;
         }
-        a.pushECMA(4, 5, 6)
+        a.push(4, 5, 6)
         if (a.length != 6) {
             return fail;
         }

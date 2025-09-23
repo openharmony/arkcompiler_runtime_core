@@ -672,19 +672,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     overload push{ pushOne, pushArray }
-    /**
-     * Adds the specified elements to the end of an array and returns the new length of the array.
-     *
-     * @returns new length
-     */
-    public pushECMA(...val: T[]): int {
-        this.ensureUnusedCapacity(val.length.toInt())
-        for (let i = 0; i < val.length; i++) {
-            this.buffer[this.actualLength + i] = val[i]
-        }
-        this.actualLength += val.length.toInt()
-        return this.actualLength
-    }
 
     private ensureUnusedCapacity(cap: int): void {
         if (this.actualLength + cap > this.buffer.length) {
