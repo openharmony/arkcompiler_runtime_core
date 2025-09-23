@@ -13,7 +13,7 @@ ets-common-tests/exporting-ambient-decl/main.ets
 # 25057
 ets-common-tests/annotation_import_export_test/AmbientImportAl.ets
 
-#30131
+#30136
 ets-common-tests/atomics/base_operation_xor.ets
 
 #29378

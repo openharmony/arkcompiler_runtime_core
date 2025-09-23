@@ -6,6 +6,7 @@ std/core/IntlPluralRulesTest.ets
 std/core/TypeAssignableFromTest.ets
 std/core/std_core_char_instance_Char_toLowerCase.ets
 std/core/std_core_type_numeric_type_numeric_type.ets
+std/core/std_core_typedarrays_slicing__Int8Array.ets
 escompat/JsonTest.ets
 regression/15867_spread_in_arrayof_segfaut.ets
 spec/05.Generics/callFromAsyncLambda.ets
