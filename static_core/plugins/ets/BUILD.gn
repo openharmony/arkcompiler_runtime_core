@@ -159,6 +159,7 @@ if (!(ark_standalone_build ||
       "bounds_checking_function:libsec_shared",
       "c_utils:utils",
       "hilog:libhilog",
+      "libuv:uv",
       "openssl:libcrypto_shared",
       icuuc_dep,
     ]

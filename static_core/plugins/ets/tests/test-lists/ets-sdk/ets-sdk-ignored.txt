@@ -8,3 +8,6 @@ api/@ohos/util/TextDecoder/TextDecoderDecodeToStringTest.ets
 
 ### Issue 27033
 api/@ohos/util/LightWeightMap/LightWeightMapGetKeysValuesSetValueAtTest.ets
+
+### Issue 28302
+api/@ohos/util/ErrnoToStringTest.ets
