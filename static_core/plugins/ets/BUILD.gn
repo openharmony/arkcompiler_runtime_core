@@ -246,6 +246,23 @@ ark_isa_gen("isa_gen_ets_bytecodeopt") {
 }
 
 if (with_stdlib) {
+  ohos_prebuilt_etc("gen_arktsconfig") {
+    json_relative_path_array = {
+      compilerOptions = {
+        baseUrl = "."
+        paths = {
+          std = [ "../lib/stdlib/std" ]
+          escompat = [ "../lib/stdlib/escompat" ]
+        }
+      }
+    }
+    output_file = "$target_out_dir/$target_name/arktsconfig.json"
+    write_file(output_file, json_relative_path_array, "json")
+    source = output_file
+    install_enable = false
+    subsystem_name = "arkcompiler"
+    part_name = "runtime_core"
+  }
   es2panda_gen("etsstdlib") {
     inputs = [ "stdlib" ]
     if (ark_static_standalone_build) {
@@ -270,15 +287,6 @@ if (with_stdlib) {
       "  }",
       "}",
     ]
-    json_relative_path_array = {
-      compilerOptions = {
-        baseUrl = "."
-        paths = {
-          std = [ "../lib/stdlib/std" ]
-          escompat = [ "../lib/stdlib/escompat" ]
-        }
-      }
-    }
 
     default_arktsconfig =
         get_label_info("$ark_es2panda_root/aot:ets2panda(${host_toolchain})",
@@ -296,14 +304,6 @@ if (with_stdlib) {
     write_file("$default_arktsconfig/arktsconfig.json",
                json_array,
                "list lines")
-    write_file(
-        "$root_build_dir/ohos-sdk/linux/ets/ets1.2/build-tools/ets2panda/bin/arktsconfig.json",
-        json_relative_path_array,
-        "json")
-    write_file(
-        "$root_build_dir/ohos-sdk/windows/ets/ets1.2/build-tools/ets2panda/bin/arktsconfig.json",
-        json_relative_path_array,
-        "json")
     if (defined(ohos_indep_compiler_enable) && ohos_indep_compiler_enable) {
       write_file(
           "$root_build_dir/clang_x64/obj/binarys/arkcompiler/ets_frontend/innerapis/ets2panda/clang_x64/libs/arktsconfig.json",
