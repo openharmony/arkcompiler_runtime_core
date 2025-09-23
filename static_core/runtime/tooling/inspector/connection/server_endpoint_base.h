@@ -50,7 +50,7 @@ public:
     void Call(const std::string &sessionId, const char *method,
               std::function<void(JsonObjectBuilder &)> &&params) override;
 
-    void OnCall(const char *method, Handler &&handler) override;
+    void OnCallImpl(const char *method, Handler &&handler) override;
 
 protected:
     std::function<void()> onValidate_ = []() {};  // NOLINT(misc-non-private-member-variables-in-classes)

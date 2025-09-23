@@ -43,7 +43,10 @@
 #include "types/url_breakpoint_response.h"
 
 namespace ark::tooling::inspector {
-InspectorServer::InspectorServer(Server &server) : server_(server) {}
+InspectorServer::InspectorServer(Server &server) : server_(server)
+{
+    OnCallTargetAttachToTarget();
+}
 
 void InspectorServer::Kill()
 {
@@ -206,12 +209,14 @@ void InspectorServer::CallRuntimeExecutionContextsCleared()
     server_.Call("Runtime.executionContextsCleared");
 }
 
-void InspectorServer::CallTargetAttachedToTarget(PtThread thread)
+bool InspectorServer::CallTargetAttachedToTarget(PtThread thread)
 {
     auto &sessionId = sessionManager_.AddSession(thread);
     if (!sessionId.empty()) {
         SendTargetAttachedToTarget(sessionId);
+        return true;
     }
+    return false;
 }
 
 void InspectorServer::CallTargetDetachedFromTarget(PtThread thread)
@@ -228,7 +233,7 @@ void InspectorServer::CallTargetDetachedFromTarget(PtThread thread)
 
     if (!sessionId.empty()) {
         server_.Call("Target.detachedFromTarget",
-                     [&sessionId](auto &params) { params.AddProperty("session_id", sessionId); });
+                     [&sessionId](auto &params) { params.AddProperty("sessionId", sessionId); });
     }
 }
 
@@ -957,7 +962,7 @@ void InspectorServer::OnCallProfilerSetSamplingInterval(std::function<void(uint3
             } else {
                 std::string_view msg = "No 'interval' property";
                 LOG(INFO, DEBUGGER) << msg;
-                return Unexpected(JRPCError(msg, ErrorCode::INTERNAL_ERROR));
+                return Unexpected(JRPCError(msg, ErrorCode::INVALID_REQUEST));
             }
             return std::unique_ptr<JsonSerializable>();
         });
@@ -969,9 +974,8 @@ void InspectorServer::OnCallProfilerStart(std::function<Expected<bool, std::stri
     server_.OnCall("Profiler.start", [handler = std::move(handler)](auto &, auto &) -> Server::MethodResponse {
         auto optResult = handler();
         if (!optResult) {
-            std::stringstream ss;
-            ss << "Profiler failed: " << optResult.Error();
-            auto msg = ss.str();
+            std::string msg = "Profiler failed: ";
+            msg = msg.append(optResult.Error());
             LOG(DEBUG, DEBUGGER) << msg;
             return Unexpected(JRPCError(std::move(msg), ErrorCode::INTERNAL_ERROR));
         }
@@ -984,14 +988,48 @@ void InspectorServer::OnCallProfilerStop(std::function<Expected<Profile, std::st
     server_.OnCall("Profiler.stop", [handler = std::move(handler)](auto &, auto &) -> Server::MethodResponse {
         auto optResult = handler();
         if (!optResult) {
-            std::stringstream ss;
-            ss << "Profiler failed: " << optResult.Error();
-            auto msg = ss.str();
+            std::string msg = "Profiler failed: ";
+            msg = msg.append(optResult.Error());
             LOG(DEBUG, DEBUGGER) << msg;
             return Unexpected(JRPCError(std::move(msg), ErrorCode::INTERNAL_ERROR));
         }
         return std::unique_ptr<JsonSerializable>(std::make_unique<Profile>(std::move(*optResult)));
     });
+}
+
+void InspectorServer::OnCallTargetAttachToTarget()
+{
+    class Response : public JsonSerializable {
+    public:
+        explicit Response(std::string sessionId) : sessionId_(std::move(sessionId)) {}
+        void Serialize(JsonObjectBuilder &builder) const override
+        {
+            builder.AddProperty("sessionId", sessionId_);
+        }
+
+    private:
+        std::string sessionId_;
+    };
+    // clang-format off
+    server_.OnCall("Target.attachToTarget",
+        [this](auto &, const JsonObject &params) -> Server::MethodResponse {
+            const auto *targetId = params.template GetValue<JsonObject::StringT>("targetId");
+            if (targetId == nullptr) {
+                std::string_view msg = "No 'targetId' property";
+                LOG(INFO, DEBUGGER) << msg;
+                return Unexpected(JRPCError(msg, ErrorCode::INVALID_REQUEST));
+            }
+            auto thread = sessionManager_.GetThreadBySessionId(*targetId);
+            if (thread == PtThread::NONE) {
+                std::string msg = "'targetId' ";
+                msg = msg.append(*targetId).append(" did not start");
+                LOG(INFO, DEBUGGER) << msg;
+                return Unexpected(JRPCError(msg, ErrorCode::INVALID_PARAMS));
+            }
+            // No-op if coroutine already exists
+            return std::unique_ptr<JsonSerializable>(std::make_unique<Response>(*targetId));
+        });
+    // clang-format on
 }
 
 void InspectorServer::SendTargetAttachedToTarget(const std::string &sessionId)

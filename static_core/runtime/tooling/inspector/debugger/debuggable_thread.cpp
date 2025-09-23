@@ -286,4 +286,11 @@ void DebuggableThread::Resume()
 
     callbacks_.postResume();
 }
+
+bool DebuggableThread::IsPausedByBreakOnStart()
+{
+    os::memory::LockHolder lock(mutex_);
+    return state_.IsPaused() && (state_.GetPauseReason() == PauseReason::BREAK_ON_START);
+}
+
 }  // namespace ark::tooling::inspector
