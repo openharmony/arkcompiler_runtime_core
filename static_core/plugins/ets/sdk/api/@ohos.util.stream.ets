@@ -1118,7 +1118,7 @@ export namespace stream {
          * @param { ReadableOptions } options - Provide options.
          * @throws { BusinessError } 401 - Parameter error.
          */
-        constructor fromOptions(options: ReadableOptions) {
+        constructor(options: ReadableOptions) {
             this.initializeMembers();
 
             if (options.encoding) {
@@ -1134,13 +1134,6 @@ export namespace stream {
                 this.stringDecoder = new util.StringDecoder(this.readableEncodingInner!);
             }
         }
-
-        /**
-         * The Readable constructor.
-         *
-         * @overload { fromOptions }
-         */
-        overload constructor { fromOptions }
 
         private initializeMembers(): void {
             this.listener = new EventEmitter();

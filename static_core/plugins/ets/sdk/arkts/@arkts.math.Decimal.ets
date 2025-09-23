@@ -288,7 +288,7 @@ export class Decimal {
      *
      * @returns { string } the string type
      */
-    public toBinaryWithNoArg(): string {
+    public toBinary(): string {
         return this.toStringBinary(2);
     }
 
@@ -300,7 +300,7 @@ export class Decimal {
      * @returns { string } the string type
      * @throws { BusinessError } 10200001 - The value of `significantDigits` is out of range.
      */
-    public toBinaryWithSignificantDigits(significantDigits: double): string {
+    public toBinary(significantDigits: double): string {
         return this.toStringBinary(2, significantDigits);
     }
 
@@ -313,23 +313,16 @@ export class Decimal {
      * @returns { string } the string type
      * @throws { BusinessError } 10200001 - The value of `significantDigits | rounding` is out of range.
      */
-    public toBinaryWithSignificantDigitsRounding(significantDigits: double, rounding: Rounding): string {
+    public toBinary(significantDigits: double, rounding: Rounding): string {
         return this.toStringBinary(2, significantDigits, rounding);
     }
-
-    /**
-     * Return a string representing the value of this Decimal in base 2.
-     *
-     * @overload { toBinaryWithNoArg, toBinaryWithSignificantDigits, toBinaryWithSignificantDigitsRounding }
-     */
-    overload toBinary { toBinaryWithNoArg, toBinaryWithSignificantDigits, toBinaryWithSignificantDigitsRounding }
 
     /**
      * Return a string representing the value of this Decimal in base 8.
      *
      * @returns { string } the string type
      */
-    public toOctalWithNoArg(): string {
+    public toOctal(): string {
         return this.toStringBinary(8);
     }
 
@@ -340,7 +333,7 @@ export class Decimal {
      * @returns { string } the string type
      * @throws { BusinessError } 10200001 - The value of `significantDigits` is out of range.
      */
-    public toOctalSignificantDigits(significantDigits: double): string {
+    public toOctal(significantDigits: double): string {
         return this.toStringBinary(8, significantDigits);
     }
 
@@ -353,23 +346,16 @@ export class Decimal {
      * @returns { string } the string type
      * @throws { BusinessError } 10200001 - The value of `significantDigits | rounding` is out of range.
      */
-    public toOctalWithSignificantDigitsRounding(significantDigits: double, rounding: Rounding): string {
+    public toOctal(significantDigits: double, rounding: Rounding): string {
         return this.toStringBinary(8, significantDigits, rounding);
     }
-
-    /**
-     * Return a string representing the value of this Decimal in base 8.
-     *
-     * @overload { toOctalWithNoArg, toOctalSignificantDigits, toOctalWithSignificantDigitsRounding }
-     */
-    overload toOctal { toOctalWithNoArg, toOctalSignificantDigits, toOctalWithSignificantDigitsRounding }
 
     /**
      * Return a string representing the value of this Decimal in base 16
      *
      * @returns { string } the string type
      */
-    public toHexadecimalWithNoArg(): string {
+    public toHexadecimal(): string {
         return this.toStringBinary(16);
     }
 
@@ -380,7 +366,7 @@ export class Decimal {
      * @returns { string } the string type
      * @throws { BusinessError } 10200001 - The value of `significantDigits` is out of range.
      */
-    public toHexadecimalWithSignificantDigits(significantDigits: double): string {
+    public toHexadecimal(significantDigits: double): string {
         return this.toStringBinary(16, significantDigits);
     }
 
@@ -393,16 +379,9 @@ export class Decimal {
      * @returns { string } the string type
      * @throws { BusinessError } 10200001 - The value of `significantDigits | rounding` is out of range.
      */
-    public toHexadecimalWithSignificantDigitsRounding(significantDigits: double, rounding: Rounding): string {
+    public toHexadecimal(significantDigits: double, rounding: Rounding): string {
         return this.toStringBinary(16, significantDigits, rounding);
     }
-
-    /**
-     * Return a string representing the value of this Decimal in base 16.
-     *
-     * @overload { toHexadecimalWithNoArg, toHexadecimalWithSignificantDigits, toHexadecimalWithSignificantDigitsRounding }
-     */
-    overload toHexadecimal { toHexadecimalWithNoArg, toHexadecimalWithSignificantDigits, toHexadecimalWithSignificantDigitsRounding }
 
     /**
      * Return an array representing the value of this Decimal as a simple fraction with an integer
@@ -410,7 +389,7 @@ export class Decimal {
      *
      * @returns { Decimal[] } the Decimal[] type
      */
-    public toFractionWithNoArg(): Decimal[] {
+    public toFraction(): Decimal[] {
         return this.fraction();
     }
 
@@ -422,24 +401,16 @@ export class Decimal {
      * @param { Value } maxDenominator {double | string | Decimal}
      * @returns { Decimal[] } the Decimal[] type
      */
-    public toFractionWithMaxDenominator(maxDenominator: Value): Decimal[] {
+    public toFraction(maxDenominator: Value): Decimal[] {
         return this.fraction(maxDenominator);
     }
-
-    /**
-   * Return an array representing the value of this Decimal as a simple fraction with an integer
-   * numerator and an integer denominator.
-   *
-   * @overload { toFractionWithNoArg, toFractionWithMaxDenominator }
-   */
-    overload toFraction { toFractionWithNoArg, toFractionWithMaxDenominator }
 
     /**
      * Return a new Decimal whose value is the value of this Decimal.
      *
      * @returns { Decimal } the Decimal type
      */
-    public toDecimalPlacesWithNoArg(): Decimal {
+    public toDecimalPlaces(): Decimal {
         return new Decimal(this);
     }
 
@@ -450,7 +421,7 @@ export class Decimal {
      * @param { double } decimalPlaces Significant digits. Integer, 1 to MAX_DIGITS inclusive.
      * @returns { Decimal } the Decimal type
      */
-    public toDecimalPlacesWithDecimalPlaces(decimalPlaces: double): Decimal {
+    public toDecimalPlaces(decimalPlaces: double): Decimal {
         return this.toDecimalPlaces(decimalPlaces, Decimal.rounding);
     }
 
@@ -462,7 +433,7 @@ export class Decimal {
      * @param { Rounding } rounding Rounding mode. Integer, 0 to 8 inclusive.
      * @returns { Decimal } the Decimal type
      */
-    public toDecimalPlacesWithDecimalPlacesRounding(decimalPlaces: double, rounding: Rounding): Decimal {
+    public toDecimalPlaces(decimalPlaces: double, rounding: Rounding): Decimal {
         let decimal = this.toDecimalPlaces();
         Utils.checkInt32(decimalPlaces, 0, MAX_DIGITS);
         Utils.checkInt32(rounding, 0, 8);
@@ -470,18 +441,11 @@ export class Decimal {
     }
 
     /**
-     * Return a new Decimal with various types of value.
-     *
-     * @overload { toDecimalPlacesWithNoArg, toDecimalPlacesWithDecimalPlaces, toDecimalPlacesWithDecimalPlacesRounding }
-     */
-    overload toDecimalPlaces { toDecimalPlacesWithNoArg, toDecimalPlacesWithDecimalPlaces, toDecimalPlacesWithDecimalPlacesRounding }
-
-    /**
      * Return a string representing the value of this Decimal in exponential notation.
      *
      * @returns { string } the string type
      */
-    public toExponentialWithNoArg(): string {
+    public toExponential(): string {
         let str = this.finiteToString(true);
         return this.isNegative() && !this.isZero() ? '-' + str : str;
     }
@@ -494,7 +458,7 @@ export class Decimal {
      * @returns { string } the string type
      * @throws { BusinessError } 10200001 - The value of `decimalPlaces` is out of range.
      */
-    public toExponentialWithDecimalPlaces(decimalPlaces: double): string {
+    public toExponential(decimalPlaces: double): string {
         return this.toExponential(decimalPlaces, Decimal.rounding);
     }
 
@@ -507,7 +471,7 @@ export class Decimal {
      * @returns { string } the string type
      * @throws { BusinessError } 10200001 - The value of `decimalPlaces | rounding` is out of range.
      */
-    public toExponentialWithDecimalPlacesRounding(decimalPlaces: double, rounding: Rounding): string {
+    public toExponential(decimalPlaces: double, rounding: Rounding): string {
         Utils.checkInt32(decimalPlaces, 0, MAX_DIGITS);
         Utils.checkInt32(rounding, 0, 8);
         let x = Utils.finalise(new Decimal(this), decimalPlaces + 1, rounding);
@@ -516,18 +480,11 @@ export class Decimal {
     }
 
     /**
-     * Return a string representing the value of this Decimal in exponential notation.
-     *
-     * @overload { toExponentialWithNoArg, toExponentialWithDecimalPlaces, toExponentialWithDecimalPlacesRounding }
-     */
-    overload toExponential { toExponentialWithNoArg, toExponentialWithDecimalPlaces, toExponentialWithDecimalPlacesRounding }
-
-    /**
      * Return a string representing the value of this Decimal in normal (fixed-point).
      *
      * @returns { string } the string type
      */
-    public toFixedWithNoArg(): string {
+    public toFixed(): string {
         let str = this.finiteToString(false);
         return this.isNegative() && !this.isZero() ? '-' + str : str;
     }
@@ -540,7 +497,7 @@ export class Decimal {
      * @returns { string } the string type
      * @throws { BusinessError } 10200001 - The value of `decimalPlaces` is out of range.
      */
-    public toFixedWithDecimalPlaces(decimalPlaces: double): string {
+    public toFixed(decimalPlaces: double): string {
         return this.toFixed(decimalPlaces, Decimal.rounding);
     }
 
@@ -553,7 +510,7 @@ export class Decimal {
      * @returns { string } the string type
      * @throws { BusinessError } 10200001 - The value of `decimalPlaces | rounding` is out of range.
      */
-    public toFixedWithDecimalPlacesRounding(decimalPlaces: double, rounding: Rounding): string {
+    public toFixed(decimalPlaces: double, rounding: Rounding): string {
         Utils.checkInt32(decimalPlaces, 0, MAX_DIGITS);
         Utils.checkInt32(rounding, 0, 8);
         let y = Utils.finalise(new Decimal(this), decimalPlaces + this.e + 1, rounding);
@@ -562,19 +519,12 @@ export class Decimal {
     }
 
     /**
-   * Return a string representing the value of this Decimal in normal (fixed-point).
-   *
-   * @overload { toFixedWithNoArg, toFixedWithDecimalPlaces, toFixedWithDecimalPlacesRounding }
-   */
-  overload toFixed { toFixedWithNoArg, toFixedWithDecimalPlaces, toFixedWithDecimalPlacesRounding }
-
-    /**
      * Returns a new Decimal whose value is the nearest multiple of `n`.
      *
      * @param { Value } n {double | string | Decimal}
      * @returns { Decimal } the Decimal type
      */
-    public toNearestWithN(n: Value): Decimal {
+    public toNearest(n: Value): Decimal {
         return this.toNearest(n, Decimal.rounding);
     }
 
@@ -587,7 +537,7 @@ export class Decimal {
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200001 - The value of `rounding` is out of range.
      */
-    public toNearestWithNRounding(n: Value, rounding: Rounding): Decimal {
+    public toNearest(n: Value, rounding: Rounding): Decimal {
         let x = new Decimal(this);
         let y = new Decimal(n);
         Utils.checkInt32(rounding, 0, 8);
@@ -621,18 +571,11 @@ export class Decimal {
     }
 
     /**
-   * Returns a new Decimal with various types of value.
-   *
-   * @overload { toNearestWithN, toNearestWithNRounding }
-   */
-    overload toNearest { toNearestWithN, toNearestWithNRounding }
-
-    /**
      * Return a string representing the value of this Decimal.
      *
      * @returns { string } the string type
      */
-    public toPrecisionWithNoArg(): string {
+    public toPrecision(): string {
         let str = this.finiteToString(this.e <= Decimal.toExpNeg || this.e >= Decimal.toExpPos);
         return this.isNegative() && !this.isZero() ? '-' + str : str;
     }
@@ -644,7 +587,7 @@ export class Decimal {
      * @returns { string } the string type
      * @throws { BusinessError } 10200001 - The value of `significantDigits` is out of range.
      */
-    public toPrecisionWithSignificantDigits(significantDigits: double): string {
+    public toPrecision(significantDigits: double): string {
         return this.toPrecision(significantDigits, Decimal.rounding);
     }
 
@@ -657,7 +600,7 @@ export class Decimal {
      * @returns { string } the string type
      * @throws { BusinessError } 10200001 - The value of `significantDigits | rounding` is out of range.
      */
-    public toPrecisionWithSignificantDigitsRounding(significantDigits: double, rounding: Rounding): string {
+    public toPrecision(significantDigits: double, rounding: Rounding): string {
         Utils.checkInt32(significantDigits, 1, MAX_DIGITS);
         Utils.checkInt32(rounding, 0, 8);
         let x = Utils.finalise(new Decimal(this), significantDigits, rounding);
@@ -666,18 +609,11 @@ export class Decimal {
     }
 
     /**
-   * Return a string representing the value of this Decimal.
-   *
-   * @overload { toPrecisionWithNoArg, toPrecisionWithSignificantDigits, toPrecisionWithSignificantDigitsRounding }
-   */
-    overload toPrecision { toPrecisionWithNoArg, toPrecisionWithSignificantDigits, toPrecisionWithSignificantDigitsRounding }
-
-    /**
      * Return a new Decimal whose value is the value of this Decimal.
      *
      * @returns { Decimal } the Decimal type
      */
-    public toSignificantDigitsWithNoArg(): Decimal {
+    public toSignificantDigits(): Decimal {
         return Utils.finalise(new Decimal(this), Decimal.precision, Decimal.rounding);
     }
 
@@ -689,7 +625,7 @@ export class Decimal {
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200001 - The value of `significantDigits` is out of range.
      */
-    public toSignificantDigitsWithSignificantDigits(significantDigits: double): Decimal {
+    public toSignificantDigits(significantDigits: double): Decimal {
         return this.toSignificantDigits(significantDigits, Decimal.rounding);
     }
 
@@ -702,18 +638,11 @@ export class Decimal {
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200001 - The value of `significantDigits | rounding` is out of range.
      */
-    public toSignificantDigitsWithSignificantDigitsRounding(significantDigits: double, rounding: Rounding): Decimal {
+    public toSignificantDigits(significantDigits: double, rounding: Rounding): Decimal {
         Utils.checkInt32(significantDigits, 1, MAX_DIGITS);
         Utils.checkInt32(rounding, 0, 8);
         return Utils.finalise(new Decimal(this), significantDigits, rounding);
     }
-
-    /**
-     * Return a new Decimal whose value is the value of this Decimal.
-     *
-     * @overload { toSignificantDigitsWithNoArg, toSignificantDigitsWithSignificantDigits, toSignificantDigitsWithSignificantDigitsRounding }
-     */
-    overload toSignificantDigits { toSignificantDigitsWithNoArg, toSignificantDigitsWithSignificantDigits, toSignificantDigitsWithSignificantDigitsRounding }
 
     /**
      * Return the value of this Decimal converted to a number primitive. Zero keeps its sign.
@@ -777,7 +706,7 @@ export class Decimal {
      *
      * @returns { double } the number type
      */
-    public precisionWithNoArg(): double {
+    public precision(): double {
         let result: double;
         if (this.digits) {
             result = Utils.getPrecision(this.digits!);
@@ -796,7 +725,7 @@ export class Decimal {
      * @returns { double } the number type
      * @throws { BusinessError } 10200001 - The value of `includeZeros` is out of range.
      */
-    public precisionWithIncludeZeros(includeZeros: boolean | int): double {
+    public precision(includeZeros: boolean | int): double {
         let result: double;
         if (includeZeros != undefined && includeZeros !== !!includeZeros && includeZeros !== 1 && includeZeros !== 0) {
             throw Utils.createBusinessError(RANGE_ERROR_CODE,
@@ -813,13 +742,6 @@ export class Decimal {
         }
         return result;
     }
-
-    /**
-     * Return the number of significant digits of the value of this Decimal.
-     *
-     * @overload { precisionWithNoArg, precisionWithIncludeZeros }
-     */
-    overload precision { precisionWithNoArg, precisionWithIncludeZeros }
 
     /**
      * Return a new Decimal whose value is the absolute value of `n`.
@@ -1304,7 +1226,7 @@ export class Decimal {
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200061 - Crypto unavailable
      */
-    static randomWithNoArg(): Decimal {
+    static random(): Decimal {
         return Utils.random();
     }
 
@@ -1316,22 +1238,9 @@ export class Decimal {
      * @returns { Decimal } the Decimal type
      * @throws { BusinessError } 10200061 - Crypto unavailable
      */
-    static randomWithSignificantDigits(significantDigits: double): Decimal {
+    static random(significantDigits: double): Decimal {
         return Utils.random(significantDigits);
     }
-
-    /**
-   * Returns a new Decimal with a random value equal to or greater than 0 and less than 1.
-   *
-   * @overload { randomWithNoArg, randomWithSignificantDigits }
-   * @static
-   * @syscap SystemCapability.Utils.Lang
-   * @crossplatform
-   * @atomicservice
-   * @since 20
-   * @arkts 1.2
-   */
-  static overload random { randomWithNoArg, randomWithSignificantDigits }
 
     /**
      * Return the sign of the passed value to the method.
