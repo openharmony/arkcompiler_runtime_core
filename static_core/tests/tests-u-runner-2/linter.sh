@@ -59,6 +59,11 @@ flake8 --radon-max-cc 15 --select=R701 .
 save_exit_code ${EXIT_CODE} $?
 EXIT_CODE=$?
 
+echo "Yamllint check"
+python ../test-linters/check_yaml_templates.py ./cfg
+save_exit_code ${EXIT_CODE} $?
+EXIT_CODE=$?
+
 set -e
 
 deactivate_venv

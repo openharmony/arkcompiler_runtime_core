@@ -211,6 +211,7 @@
   "tests/cts-generator": "*",
   "tests/irtoc-interpreter-tests": "*",
   "tests/panda": "*",
+  "tests/test-linters/null_check.py": "*",
   "tests/tests-u-runner/runner": "*",
   "tests/tests-u-runner/runner_test.py": "*",
   "tests/tests-u-runner-2/runner/suites/__init__.py": "*",

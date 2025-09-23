@@ -21,8 +21,8 @@ generator-class: runner.extensions.generators.hermes.hermes_generator.HermesGene
 parameters:
     hermes-revision: 3feac7b2f9759d83879b04232479041baa805e7b
     hermes-url: https://github.com/facebook/hermes/archive
-    force-download: False
+    force-download: false
     extension: js
     load-runtimes: js
     work-dir: ${WORK_DIR}/${suite-name}
-    with-js: True
+    with-js: true

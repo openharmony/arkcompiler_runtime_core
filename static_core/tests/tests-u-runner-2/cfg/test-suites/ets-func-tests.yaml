@@ -23,7 +23,7 @@ parameters:
     work-dir: ${WORK_DIR}/${suite-name}
 
 collections:
-    ets_func_tests:
+    ets_func_tests: |-
     stdlib-templates:
         generator-class: runner.extensions.generators.sts_stdlib.stdlib_templates_generator.StdlibTemplatesGenerator
     ets-func-tests-templates:

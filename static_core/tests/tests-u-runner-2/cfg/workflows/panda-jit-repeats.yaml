@@ -23,8 +23,8 @@ parameters:
     opt-level: 2
     es2panda-timeout: 30
     verifier-timeout: 30
-    enable-es2panda: True
-    enable-verifier: True
+    enable-es2panda: true
+    enable-verifier: true
     extension: ${parameters.extension}
     # ark
     ark-timeout: 180
@@ -45,7 +45,7 @@ parameters:
     # adds --boot-panda-files option to verifier with all dependent and the current abc files
     # adds --boot-panda-files option to ark with all dependent and the current abc files
     # adds --panda-files option to ark with all dependent and the current abc files
-    is-panda: True
+    is-panda: true
 steps:
     compile:
         from: es2panda-verifier

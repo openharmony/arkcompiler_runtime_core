@@ -28,7 +28,7 @@ cases:
           ).catch(
               (p: Error): string => {}
           );
-        
+
     - decl: |-
           //TODO update after 30498 issue
       use: |-

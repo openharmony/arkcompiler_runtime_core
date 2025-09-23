@@ -13,16 +13,16 @@
 
 
 cases:
-  - tags:
+  - tags: |-
     typedef: "Array<String>"
-  - tags:
+  - tags: |-
     typedef: "String[]"
-  - tags:
+  - tags: |-
     typedef: "Array<Object>"
-  - tags:
+  - tags: |-
     typedef: "Object[]"
-  - tags:
+  - tags: |-
     typedef: "Array<NS>"
-  - tags:
+  - tags: |-
     typedef: "NS[]"
 

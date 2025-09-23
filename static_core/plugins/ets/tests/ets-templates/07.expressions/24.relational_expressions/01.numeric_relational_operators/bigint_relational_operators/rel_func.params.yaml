@@ -44,4 +44,4 @@ cases:
   - { desc: "new BigInt < function() (true)", b: 'new BigInt(10)', op: '<', operand_val: '20', expected_bool: 'true' }
   - { desc: "new BigInt > function() (false)", b: 'new BigInt(10)', op: '>', operand_val: '20', expected_bool: 'false' }
   - { desc: "new BigInt <= function() (true, equal)", b: 'new BigInt(20)', op: '<=', operand_val: '20', expected_bool: 'true' }
-  - { desc: "new BigInt >= function() (true, equal)", b: 'new BigInt(20)', op: '>=', operand_val: '20', expected_bool: 'true' } 
+  - { desc: "new BigInt >= function() (true, equal)", b: 'new BigInt(20)', op: '>=', operand_val: '20', expected_bool: 'true' }

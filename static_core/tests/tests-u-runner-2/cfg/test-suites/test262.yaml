@@ -21,8 +21,8 @@ generator-class: runner.extensions.generators.test262.test262_generator.Test262G
 parameters:
     revision: 747bed2e8aaafe8fdf2c65e8a10dd7ae64f66c47
     url: https://github.com/tc39/test262/archive
-    force-download: False
+    force-download: false
     extension: js
     load-runtimes: js
     work-dir: ${WORK_DIR}/${suite-name}
-    with-js: True
+    with-js: true

@@ -19,7 +19,7 @@ cases:
       result: 
         - 0
         - -128
-        -  127
+        - 127
 
     - to_type: int[]
       value: |-
@@ -27,7 +27,7 @@ cases:
       result: 
         - 0
         - -128
-        -  127
+        - 127
 
     - to_type: long[]
       value: |-
@@ -51,7 +51,7 @@ cases:
       result: 
         - 0
         - -32_768
-        -  32_767
+        - 32_767
 
     - to_type: number[]
       value: |-
@@ -59,7 +59,7 @@ cases:
       result: 
         - 0.0
         - -32_768 as number
-        -  32_767 as number
+        - 32_767 as number
 
     - defs: |-
          class B {}

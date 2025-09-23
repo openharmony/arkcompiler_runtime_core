@@ -28,4 +28,3 @@ cases:
   - { type: Float, val: new Float(1.0f), r: [7.0f, 7.0f, 7.0f, -1.0f, 1.0f, -1.0f] }
   - { type: Double, val: new Double(1.00), r: [8, 8, 8, -1.0, 1.0, -1.0] }
   - { type: IntEnum, val: IntEnum.Two, r: [5, 5, 5, 1, -1, 1] }
-  

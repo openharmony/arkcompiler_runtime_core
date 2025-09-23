@@ -44,4 +44,4 @@ cases:
   - { desc: "new BigInt < variable (true)", b: 'new BigInt(10)', op: '<', operand_val: '20', expected_bool: 'true' }
   - { desc: "new BigInt > variable (false)", b: 'new BigInt(10)', op: '>', operand_val: '20', expected_bool: 'false' }
   - { desc: "new BigInt <= variable (true, equal)", b: 'new BigInt(20)', op: '<=', operand_val: '20', expected_bool: 'true' }
-  - { desc: "new BigInt >= variable (true, equal)", b: 'new BigInt(20)', op: '>=', operand_val: '20', expected_bool: 'true' } 
+  - { desc: "new BigInt >= variable (true, equal)", b: 'new BigInt(20)', op: '>=', operand_val: '20', expected_bool: 'true' }

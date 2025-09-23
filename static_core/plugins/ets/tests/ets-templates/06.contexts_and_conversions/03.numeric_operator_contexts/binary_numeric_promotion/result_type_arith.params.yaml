@@ -124,4 +124,3 @@ cases:
   - { type: IntEnum, val: IntEnum.One, rt: Long, rv: new Long(1), op: '-', res: 4 }
   - { type: IntEnum, val: IntEnum.One, rt: Float, rv: new Float(1.0f), op: '*', res: 7 }
   - { type: IntEnum, val: IntEnum.One, rt: Double, rv: new Double(1.0), op: '/', res: 8 }
-  

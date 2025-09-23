@@ -24,9 +24,9 @@ cases:
   - {type: "boolean", vals: ["true", "false", "false", "true", "false", "true"]}
   - {type: "char", vals: ["c'\\u2028'", "c'\\u005c'", "c'\\u0027'", "c'x'", "c'Z'"]}
   - {type: "String", vals: ["\"ab\"", "\"cd\"", "\"efg\""]}
-  - {type: "object", vals: ["new Object", "new Object", "new Object"], no_check_vals: true}
+  - {type: "object", vals: ["new Object", "new Object", "new Object"], no_check_vals: "true"}
   - {type: "Number", vals: ["9", "13", "1", "5.7", "10", "12.4"]}
   - {type: "Boolean", vals: ["true", "false", "false", "true", "false", "true"]}
-  - {type: "MyClass", vals: ["new MyClass", "new MyClass", "new MyClass"], no_check_vals: true}
-  - {type: "MyInterface", vals: ["{}", "{}", "{}"], no_check_vals: true}
+  - {type: "MyClass", vals: ["new MyClass", "new MyClass", "new MyClass"], no_check_vals: "true"}
+  - {type: "MyInterface", vals: ["{}", "{}", "{}"], no_check_vals: "true"}
 

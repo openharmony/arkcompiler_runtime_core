@@ -17,4 +17,3 @@ cases:
   - { type: 'null',      value: 'null',             expected: 'undefined' }
   - { type: 'undefined', value: '["abc", "def"]',   expected: '"abc"'     }
   - { type: 'undefined', value: 'undefined',        expected: 'undefined' }
-    

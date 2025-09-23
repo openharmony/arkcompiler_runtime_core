@@ -40,7 +40,7 @@ parameters:
     # adds --paoc-panda-files option to ark_aot with all dependent and the current abc files
     # adds --boot-panda-files option to ark with all dependent and the current abc files
     # adds --panda-files option to ark with all dependent and the current abc files
-    is-panda: True
+    is-panda: true
 steps:
     ark-creates-profile-for-aot-pgo:
         from: ark

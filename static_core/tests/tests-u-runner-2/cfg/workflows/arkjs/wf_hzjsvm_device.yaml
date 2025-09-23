@@ -41,7 +41,7 @@ steps:
     es2abc:
         order: 10
         executable-path: ${general.host-tools}/arkcompiler/ets_frontend/es2abc
-        can-be-instrumented: True
+        can-be-instrumented: true
         args:
             - "--opt-level=2"
             - "--module"

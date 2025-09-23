@@ -40,7 +40,7 @@ cases:
       function main() {
           new C<undefined>()
       }
-  - tags:
+  - tags: |-
     code: |-
       class AType<T> {}
       type A<T> = AType<T>
@@ -49,7 +49,7 @@ cases:
           arktest.assertTrue(new A<null>() instanceof AType)
           arktest.assertTrue(new A<undefined>() instanceof AType)
       }
-  - tags:
+  - tags: |-
     code: |-
       let res = 0
       class AType {

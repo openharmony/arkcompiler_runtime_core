@@ -21,4 +21,3 @@ cases:
   - { list: '1, 2, 3', index: 3            }
   - { list: '1, 2, 3', index: 300          }
   - { list: '1, 2, 3', index: 'arr.length' }
-    

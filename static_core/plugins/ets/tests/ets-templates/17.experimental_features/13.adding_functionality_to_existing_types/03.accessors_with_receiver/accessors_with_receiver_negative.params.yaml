@@ -246,4 +246,3 @@ cases:
     use: |
       let a = new A()
       a.m++
-      

@@ -33,7 +33,7 @@ parameters:
     # adds --boot-panda-files option to verifier with all dependent and the current abc files
     # adds --boot-panda-files option to ark with all dependent and the current abc files
     # adds --panda-files option to ark with all dependent and the current abc files
-    is-panda: True
+    is-panda: true
 
     # ark - for int mode
     ark-int-timeout: 80
@@ -59,8 +59,8 @@ steps:
         work-dir: ${parameters.work-dir}
         extension: ${parameters.extension}
         load-runtimes: ${parameters.load-runtimes}
-        enable-es2panda: True
-        enable-verifier: True
+        enable-es2panda: true
+        enable-verifier: true
         es2panda-timeout: ${parameters.es2panda-timeout}
         verifier-timeout: ${parameters.verifier-timeout}
         es2panda-args: ${parameters.es2panda-args}
@@ -70,8 +70,8 @@ steps:
         work-dir: ${parameters.work-dir}
         load-runtimes: ${parameters.load-runtimes}
         extension: ${parameters.extension}
-        enable-es2panda: False
-        enable-verifier: False
+        enable-es2panda: false
+        enable-verifier: false
         ark-timeout: ${parameters.ark-int-timeout}
         heap-verifier: ${parameters.heap-verifier}
         full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
@@ -86,8 +86,8 @@ steps:
         work-dir: ${parameters.work-dir}
         load-runtimes: ${parameters.load-runtimes}
         extension: ${parameters.extension}
-        enable-es2panda: False
-        enable-verifier: False
+        enable-es2panda: false
+        enable-verifier: false
         ark-timeout: ${parameters.ark-int-timeout}
         heap-verifier: ${parameters.heap-verifier}
         full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
@@ -102,8 +102,8 @@ steps:
         work-dir: ${parameters.work-dir}
         load-runtimes: ${parameters.load-runtimes}
         extension: ${parameters.extension}
-        enable-es2panda: False
-        enable-verifier: False
+        enable-es2panda: false
+        enable-verifier: false
         ark-timeout: ${parameters.ark-int-timeout}
         heap-verifier: ${parameters.heap-verifier}
         full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
@@ -118,8 +118,8 @@ steps:
         work-dir: ${parameters.work-dir}
         load-runtimes: ${parameters.load-runtimes}
         extension: ${parameters.extension}
-        enable-es2panda: False
-        enable-verifier: False
+        enable-es2panda: false
+        enable-verifier: false
         ark-timeout: ${parameters.ark-int-timeout}
         heap-verifier: ${parameters.heap-verifier}
         full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
@@ -134,8 +134,8 @@ steps:
         work-dir: ${parameters.work-dir}
         load-runtimes: ${parameters.load-runtimes}
         extension: ${parameters.extension}
-        enable-es2panda: False
-        enable-verifier: False
+        enable-es2panda: false
+        enable-verifier: false
         gc-type: ${parameters.gc-type}
         full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
         ark-timeout: ${parameters.ark-aot-timeout}
@@ -152,8 +152,8 @@ steps:
         work-dir: ${parameters.work-dir}
         load-runtimes: ${parameters.load-runtimes}
         extension: ${parameters.extension}
-        enable-es2panda: False
-        enable-verifier: False
+        enable-es2panda: false
+        enable-verifier: false
         gc-type: ${parameters.gc-type}
         full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
         ark-timeout: ${parameters.ark-aot-timeout}
@@ -170,8 +170,8 @@ steps:
         work-dir: ${parameters.work-dir}
         load-runtimes: ${parameters.load-runtimes}
         extension: ${parameters.extension}
-        enable-es2panda: False
-        enable-verifier: False
+        enable-es2panda: false
+        enable-verifier: false
         heap-verifier: ${parameters.heap-verifier}
         gc-type: ${parameters.gc-type}
         full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
@@ -186,8 +186,8 @@ steps:
         work-dir: ${parameters.work-dir}
         load-runtimes: ${parameters.load-runtimes}
         extension: ${parameters.extension}
-        enable-es2panda: False
-        enable-verifier: False
+        enable-es2panda: false
+        enable-verifier: false
         heap-verifier: ${parameters.heap-verifier}
         full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
         ark-timeout: ${parameters.ark-jit-timeout}
@@ -202,8 +202,8 @@ steps:
         work-dir: ${parameters.work-dir}
         load-runtimes: ${parameters.load-runtimes}
         extension: ${parameters.extension}
-        enable-es2panda: False
-        enable-verifier: False
+        enable-es2panda: false
+        enable-verifier: false
         heap-verifier: ${parameters.heap-verifier}
         full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
         ark-timeout: ${parameters.ark-jit-timeout}
@@ -218,8 +218,8 @@ steps:
         work-dir: ${parameters.work-dir}
         load-runtimes: ${parameters.load-runtimes}
         extension: ${parameters.extension}
-        enable-es2panda: False
-        enable-verifier: False
+        enable-es2panda: false
+        enable-verifier: false
         heap-verifier: ${parameters.heap-verifier}
         full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
         ark-timeout: ${parameters.ark-jit-timeout}
@@ -234,8 +234,8 @@ steps:
         work-dir: ${parameters.work-dir}
         load-runtimes: ${parameters.load-runtimes}
         extension: ${parameters.extension}
-        enable-es2panda: False
-        enable-verifier: False
+        enable-es2panda: false
+        enable-verifier: false
         heap-verifier: ${parameters.heap-verifier}
         full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
         ark-timeout: ${parameters.ark-jit-timeout}

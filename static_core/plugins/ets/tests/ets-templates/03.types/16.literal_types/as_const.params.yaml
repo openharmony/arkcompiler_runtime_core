@@ -14,5 +14,5 @@
 --- # list of values
 values:
 - "hello"
-- null
+- "null"
 - undefined

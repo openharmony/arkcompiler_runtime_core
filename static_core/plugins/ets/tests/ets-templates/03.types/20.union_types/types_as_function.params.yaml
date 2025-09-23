@@ -324,8 +324,3 @@ cases:
       type: Int32Array | Date
       value1: new Int32Array([1, 2, 3])
       value2: '1,2,3'
-
-
-
-
-
