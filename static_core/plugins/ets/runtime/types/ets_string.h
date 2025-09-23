@@ -347,6 +347,15 @@ public:
             coretypes::LineString::AllocLineStringObject(length, compressed, ctx, Runtime::GetCurrent()->GetPandaVM()));
     }
 
+    static uint16_t CodeToChar(double code)
+    {
+        if (std::isnan(code) || std::isinf(code)) {
+            return 0;
+        }
+        constexpr double UTF16_CHAR_DIVIDER = 0x10000;
+        return static_cast<uint16_t>(static_cast<int64_t>(std::fmod(code, UTF16_CHAR_DIVIDER)));
+    }
+
     EtsString() = delete;
     ~EtsString() = delete;
 
@@ -355,12 +364,6 @@ public:
 
 private:
     friend EtsString *StringBuilderToString(ObjectHeader *sb);
-
-    static uint16_t CodeToChar(double code)
-    {
-        constexpr double UTF16_CHAR_DIVIDER = 0x10000;
-        return static_cast<uint16_t>(static_cast<int64_t>(std::fmod(code, UTF16_CHAR_DIVIDER)));
-    }
 };
 
 }  // namespace ark::ets
