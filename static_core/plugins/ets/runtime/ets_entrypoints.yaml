@@ -839,27 +839,18 @@
     - ark::ObjectHeader*  # array of numbers (f64)
     - ark::Class*         # string class pointer
 
-- name: CreateStringFromCharCodeTlabCompressed
-  entrypoint: CreateStringFromCharCodeTlabCompressed
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - ark::ObjectHeader*  # string (result)
-    - ark::ObjectHeader*  # array of numbers (f64)
-    - ark::Class*         # string class pointer
-
 - name: CreateStringFromCharCodeSlowPath
-  entrypoint: CreateStringFromCharCodeEntrypoint
+  entrypoint: StdCoreStringFromCharCode
   bridge: slow_path
-  properties: []
+  properties: [intrinsic]
   signature:
     - ark::coretypes::String*  # resulting string
     - ark::ObjectHeader*       # array of numbers (f64)
 
 - name: CreateStringFromCharCode2Arg
-  entrypoint: CreateStringFromCharCodeEntrypoint
+  entrypoint: StdCoreStringFromCharCode
   bridge: odd_saved2
-  properties: []
+  properties: [intrinsic]
   signature:
     - ark::coretypes::String*  # resulting string
     - ark::ObjectHeader*       # array of numbers (f64)
@@ -873,8 +864,8 @@
     - uint64_t                 # number (double after a bitcast to uin64_t), char code
     - ark::Class*              # string class pointer
 
-- name: CreateStringFromCharCodeSingleTlabCompressed
-  entrypoint: CreateStringFromCharCodeSingleTlabCompressed
+- name: CreateStringFromCharCodeSingleNoCacheTlab
+  entrypoint: CreateStringFromCharCodeSingleNoCacheTlab
   bridge: none
   properties: [irtoc]
   signature:
@@ -882,16 +873,16 @@
     - uint64_t                 # number (double after a bitcast to uin64_t), char code
     - ark::Class*              # string class pointer
 
-- name: CreateStringFromCharCodeSingleSlowPath
-  entrypoint: CreateStringFromCharCodeSingleEntrypoint
+- name: CreateStringFromCharCodeSingleNoCacheSlowPath
+  entrypoint: CreateStringFromCharCodeSingleNoCacheEntrypoint
   bridge: slow_path
   properties: []
   signature:
     - ark::coretypes::String*  # resulting string
     - uint64_t                 # number (double after a bitcast to uin64_t), char code
 
-- name: CreateStringFromCharCodeSingle2Arg
-  entrypoint: CreateStringFromCharCodeSingleEntrypoint
+- name: CreateStringFromCharCodeSingleNoCache2Arg
+  entrypoint: CreateStringFromCharCodeSingleNoCacheEntrypoint
   bridge: odd_saved2
   properties: []
   signature:

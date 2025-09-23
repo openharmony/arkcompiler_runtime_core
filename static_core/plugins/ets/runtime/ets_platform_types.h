@@ -159,7 +159,14 @@ public:
     }
     Entry const *GetTypeEntry(const uint8_t *descriptor) const;
 
-public:
+    static constexpr uint32_t GetAsciiCharCacheSize()
+    {
+        return ASCII_CHAR_TABLE_SIZE;
+    }
+    static constexpr size_t GetAsciiCharCacheOffset()
+    {
+        return MEMBER_OFFSET(EtsPlatformTypes, asciiCharCache_);
+    }
     static constexpr size_t GetEscompatArrayClassOffset()
     {
         return MEMBER_OFFSET(EtsPlatformTypes, escompatArray);

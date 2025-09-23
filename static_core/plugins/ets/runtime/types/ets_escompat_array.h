@@ -107,7 +107,7 @@ public:
         ObjectAccessor::SetObject(coro, arrayHandle.GetPtr(), GetBufferOffset(), buffer->GetCoreType());
 
         // Set length
-        arrayHandle->actualLength_ = length;
+        arrayHandle->actualLength_ = static_cast<EtsInt>(length);
 
         return arrayHandle.GetPtr();
     }

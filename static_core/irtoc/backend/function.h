@@ -280,9 +280,8 @@ private:
     // the llvm::Intrinsic::aarch64_fjcvtzs intrinsic lowering yet.
     static constexpr std::array SKIPPED_FASTPATHS_JSCVT = {
         "CreateStringFromCharCodeTlab",
-        "CreateStringFromCharCodeTlabCompressed",
         "CreateStringFromCharCodeSingleTlab",
-        "CreateStringFromCharCodeSingleTlabCompressed",
+        "CreateStringFromCharCodeSingleNoCacheTlab",
     };
 #endif  // PANDA_LLVM_FASTPATH
 #endif  // PANDA_LLVM_IRTOC

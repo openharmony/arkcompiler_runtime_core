@@ -32,8 +32,6 @@ module MapConstants
   BUCKETS_OFFSET = "cross_values::GetEscompatMapBucketsOffset(graph->GetArch())"
 
   ETS_CLASS_BOXED_TYPE_FIELD_START = "cross_values::GetEtsClassBoxedTypeFieldStart(graph->GetArch())"
-  ETS_CLASS_BOXED_TYPE_FIELD_SIZE = "cross_values::GetEtsClassBoxedTypeFieldSize(graph->GetArch())"
-  ETS_CLASS_BOXED_TYPE_FIELD_MASK = "(((1LLU << " + ETS_CLASS_BOXED_TYPE_FIELD_SIZE + ") - 1) << " + ETS_CLASS_BOXED_TYPE_FIELD_START + ")"
   ETS_CLASS_BOXED_TYPE_CHAR_MASK_VALUE = "(cross_values::GetEtsClassBoxedTypeCharMaskValue(graph->GetArch()) << " + ETS_CLASS_BOXED_TYPE_FIELD_START + ")"
   ETS_CLASS_BOXED_TYPE_SHORT_MASK_VALUE = "(cross_values::GetEtsClassBoxedTypeShortMaskValue(graph->GetArch()) << " + ETS_CLASS_BOXED_TYPE_FIELD_START + ")"
   ETS_CLASS_BOXED_TYPE_INT_MASK_VALUE = "(cross_values::GetEtsClassBoxedTypeIntMaskValue(graph->GetArch()) << " + ETS_CLASS_BOXED_TYPE_FIELD_START + ")"
@@ -92,10 +90,6 @@ scoped_macro(:isHashed) do |obj, is_string|
   is_hashed := Phi(is_hashed_str, is_hashed_obj).b
 end
 
-scoped_macro(:getPlatType) do |ptypes, ofs|
-  LoadI(ptypes).Imm(ofs).ref
-end
-
 scoped_macro(:isNullValue) do |flags|
   is_nullvalue := AndI(flags).Imm(MapConstants::ETS_CLASS_IS_NULLVALUE_FLAG).u32
 end
@@ -111,10 +105,6 @@ end
 
 scoped_macro(:isValueTypedType) do |flags|
   AndI(flags).Imm(MapConstants::ETS_CLASS_IS_VALUE_TYPED_FLAG).u32
-end
-
-scoped_macro(:getBoxedType) do |flags|
-  boxed_type = AndI(flags).Imm(MapConstants::ETS_CLASS_BOXED_TYPE_FIELD_MASK).u32
 end
 
 # isChar, isShort, isInt, isLong, isFloat, isDouble
@@ -154,7 +144,6 @@ end
 
 
 scoped_macro(:calcHashCode) do |obj, flags|
-  ptypes := LoadI(%tr).Imm(EtsConstants::CORO_LOCAL_STORAGE_OFFSET).ptr
   btype := getBoxedType(flags)
 
   int_max := Cast(MapConstants::INT_MAX).f64

@@ -30,8 +30,7 @@ function(:EscompatArrayIsPlatformArrayFast,
     next
   end
 
-  ptypes := LoadI(%tr).Imm(EtsConstants::CORO_LOCAL_STORAGE_OFFSET).ptr
-  arrayClass := LoadI(ptypes).Imm(ArrayConstants::PLATFORM_TYPES_ESCOMPAT_ARRAY_CLASS_OFFSET).ref_uint
+  arrayClass := get_platform_type_ref_uint(ArrayConstants::PLATFORM_TYPES_ESCOMPAT_ARRAY_CLASS_OFFSET)
   klass := LoadI(obj).Imm(Constants::OBJECT_CLASS_OFFSET).ref_uint
   etsKlass := SubI(klass).Imm(EtsConstants::ETS_CLASS_RUNTIME_CLASS_OFFSET).ref_uint
   If(arrayClass, etsKlass).EQ.Likely {

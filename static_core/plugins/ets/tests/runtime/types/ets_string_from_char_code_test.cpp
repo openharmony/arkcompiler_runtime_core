@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 #include <gtest/gtest.h>
 
 #include "ets_coroutine.h"
+#include "intrinsics.h"
+#include "entrypoints_gen.h"
 #include "types/ets_box_primitive.h"
 #include "types/ets_box_primitive-inl.h"
 #include "types/ets_array.h"
@@ -24,9 +26,9 @@
 // NOLINTBEGIN(readability-magic-numbers)
 
 namespace ark::ets::test {
-class EtsStringFromCharCodeTest : public testing::Test {
+class BasicEtsStringFromCharCodeTest : public testing::Test {
 public:
-    EtsStringFromCharCodeTest()
+    BasicEtsStringFromCharCodeTest()
     {
         options_.SetShouldLoadBootPandaFiles(true);
         options_.SetShouldInitializeIntrinsics(false);
@@ -44,13 +46,13 @@ public:
         Runtime::Create(options_);
     }
 
-    ~EtsStringFromCharCodeTest() override
+    ~BasicEtsStringFromCharCodeTest() override
     {
         Runtime::Destroy();
     }
 
-    NO_COPY_SEMANTIC(EtsStringFromCharCodeTest);
-    NO_MOVE_SEMANTIC(EtsStringFromCharCodeTest);
+    NO_COPY_SEMANTIC(BasicEtsStringFromCharCodeTest);
+    NO_MOVE_SEMANTIC(BasicEtsStringFromCharCodeTest);
 
     void SetUp() override
     {
@@ -64,7 +66,7 @@ public:
     }
 
     template <typename DoubleIter>
-    EtsString *CreateNewStringFromCharCodes(DoubleIter first, DoubleIter last)
+    EtsString::CharCodeArray *CreateCharCodeArray(DoubleIter first, DoubleIter last)
     {
         using CharCodeArray = EtsString::CharCodeArray;
         using CharCode = EtsBoxPrimitive<EtsDouble>;
@@ -76,8 +78,29 @@ public:
             auto *boxedValue = CharCode::Create(coroutine_, d);
             charCodeArray->Set(idx++, boxedValue);
         });
+        return charCodeArray;
+    }
 
-        return EtsString::CreateNewStringFromCharCode(charCodeArray, length);
+    EtsEscompatArray *CreateEtsEscompatArray(const std::vector<double> &codes)
+    {
+        // Allocate and create the buffer
+        auto *buffer = CreateCharCodeArray(codes.begin(), codes.end());
+        auto ptypes = PlatformTypes(coroutine_);
+        EtsClass *klass = ptypes->escompatArray;
+        // Allocate the array object
+        auto *array = EtsEscompatArray::FromEtsObject(EtsObject::Create(klass));
+        // Fill the array with the pre-created buffer
+        ObjectAccessor::SetObject(coroutine_, array, EtsEscompatArray::GetBufferOffset(), buffer->GetCoreType());
+        // Set length
+        array->SetActualLength(std::distance(codes.begin(), codes.end()));
+        return array;
+    }
+
+    template <typename DoubleIter>
+    EtsString *CreateNewStringFromCharCodes(DoubleIter first, DoubleIter last)
+    {
+        EtsString::CharCodeArray *charCodeArray = CreateCharCodeArray<DoubleIter>(first, last);
+        return EtsString::CreateNewStringFromCharCode(charCodeArray, std::distance(first, last));
     }
 
     EtsString *CreateNewStringFromCharCodes(const std::vector<double> &codes)
@@ -95,13 +118,15 @@ private:
     EtsCoroutine *coroutine_ = nullptr;
 };
 
+class EtsStringFromCharCodeTest : public BasicEtsStringFromCharCodeTest {};
+
 TEST_F(EtsStringFromCharCodeTest, CreateNewCompressedStringFromCharCodes)
 {
     EtsString *expectedCompressedString = EtsString::CreateFromMUtf8("Helloff\n");
     EtsString *stringFromCompressedCharCodes =
         CreateNewStringFromCharCodes({0x48, 0x65, 0x6C, 0x6C, 0x6F, 4294901862, 0xffff0066, 10.316});
-    ASSERT_TRUE(stringFromCompressedCharCodes->GetCoreType()->IsMUtf8());
-    ASSERT_TRUE(coretypes::String::StringsAreEqual(expectedCompressedString->GetCoreType(),
+    EXPECT_TRUE(stringFromCompressedCharCodes->GetCoreType()->IsMUtf8());
+    EXPECT_TRUE(coretypes::String::StringsAreEqual(expectedCompressedString->GetCoreType(),
                                                    stringFromCompressedCharCodes->GetCoreType()));
 }
 
@@ -109,13 +134,13 @@ TEST_F(EtsStringFromCharCodeTest, CreateNewCompressedStringFromCharCode)
 {
     EtsString *expectedCompressedString = EtsString::CreateFromMUtf8("A");
     EtsString *stringFromCompressedCharCodes = CreateNewStringFromCharCodes({0x41});
-    ASSERT_TRUE(stringFromCompressedCharCodes->GetCoreType()->IsMUtf8());
-    ASSERT_TRUE(coretypes::String::StringsAreEqual(expectedCompressedString->GetCoreType(),
+    EXPECT_TRUE(stringFromCompressedCharCodes->GetCoreType()->IsMUtf8());
+    EXPECT_TRUE(coretypes::String::StringsAreEqual(expectedCompressedString->GetCoreType(),
                                                    stringFromCompressedCharCodes->GetCoreType()));
 
     EtsString *stringFromCompressedCharCode = CreateNewStringFromCharCode(0x41);
-    ASSERT_TRUE(stringFromCompressedCharCode->GetCoreType()->IsMUtf8());
-    ASSERT_TRUE(coretypes::String::StringsAreEqual(expectedCompressedString->GetCoreType(),
+    EXPECT_TRUE(stringFromCompressedCharCode->GetCoreType()->IsMUtf8());
+    EXPECT_TRUE(coretypes::String::StringsAreEqual(expectedCompressedString->GetCoreType(),
                                                    stringFromCompressedCharCode->GetCoreType()));
 }
 
@@ -124,13 +149,13 @@ TEST_F(EtsStringFromCharCodeTest, CreateNewUncompressedStringFromCharCode)
     std::vector<uint16_t> data = {0x3B2};
     EtsString *expectedUncompressedString = EtsString::CreateFromUtf16(data.data(), static_cast<EtsInt>(data.size()));
     EtsString *stringFromUncompressedCharCodes = CreateNewStringFromCharCodes({0x3B2});
-    ASSERT_TRUE(stringFromUncompressedCharCodes->GetCoreType()->IsUtf16());
-    ASSERT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
+    EXPECT_TRUE(stringFromUncompressedCharCodes->GetCoreType()->IsUtf16());
+    EXPECT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
                                                    stringFromUncompressedCharCodes->GetCoreType()));
 
     EtsString *stringFromUncompressedCharCode = CreateNewStringFromCharCode(0x3B2);
-    ASSERT_TRUE(stringFromUncompressedCharCode->GetCoreType()->IsUtf16());
-    ASSERT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
+    EXPECT_TRUE(stringFromUncompressedCharCode->GetCoreType()->IsUtf16());
+    EXPECT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
                                                    stringFromUncompressedCharCode->GetCoreType()));
 }
 
@@ -153,8 +178,8 @@ TEST_F(EtsStringFromCharCodeTest, CreateNewUncompressedStringFromCharCodes)
                                    static_cast<double>(0x8000000000000000),
                                    0};
     EtsString *stringFromUncompressedCharCodes = CreateNewStringFromCharCodes(charCodes);
-    ASSERT_TRUE(stringFromUncompressedCharCodes->GetCoreType()->IsUtf16());
-    ASSERT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
+    EXPECT_TRUE(stringFromUncompressedCharCodes->GetCoreType()->IsUtf16());
+    EXPECT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
                                                    stringFromUncompressedCharCodes->GetCoreType()));
 }
 
@@ -162,8 +187,8 @@ TEST_F(EtsStringFromCharCodeTest, CreateNewEmptyStringFromCharCode)
 {
     EtsString *emptyString = EtsString::CreateNewEmptyString();
     EtsString *stringFromCharCodes = CreateNewStringFromCharCodes({});
-    ASSERT_TRUE(stringFromCharCodes->GetCoreType()->IsMUtf8());
-    ASSERT_TRUE(coretypes::String::StringsAreEqual(emptyString->GetCoreType(), stringFromCharCodes->GetCoreType()));
+    EXPECT_TRUE(stringFromCharCodes->GetCoreType()->IsMUtf8());
+    EXPECT_TRUE(coretypes::String::StringsAreEqual(emptyString->GetCoreType(), stringFromCharCodes->GetCoreType()));
 }
 
 TEST_F(EtsStringFromCharCodeTest, CreateNewStringFromNaNCharCode)
@@ -172,13 +197,13 @@ TEST_F(EtsStringFromCharCodeTest, CreateNewStringFromNaNCharCode)
     EtsString *expectedUncompressedString = EtsString::CreateFromUtf16(data.data(), static_cast<EtsInt>(data.size()));
     EtsString *stringFromUncompressedCharCodes =
         CreateNewStringFromCharCodes({std::numeric_limits<double>::quiet_NaN()});
-    ASSERT_TRUE(stringFromUncompressedCharCodes->GetCoreType()->IsUtf16());
-    ASSERT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
+    EXPECT_TRUE(stringFromUncompressedCharCodes->GetCoreType()->IsUtf16());
+    EXPECT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
                                                    stringFromUncompressedCharCodes->GetCoreType()));
 
     EtsString *stringFromUncompressedCharCode = CreateNewStringFromCharCode(std::numeric_limits<double>::quiet_NaN());
-    ASSERT_TRUE(stringFromUncompressedCharCode->GetCoreType()->IsUtf16());
-    ASSERT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
+    EXPECT_TRUE(stringFromUncompressedCharCode->GetCoreType()->IsUtf16());
+    EXPECT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
                                                    stringFromUncompressedCharCode->GetCoreType()));
 }
 
@@ -188,13 +213,13 @@ TEST_F(EtsStringFromCharCodeTest, CreateNewStringFromInfinityCharCode)
     EtsString *expectedUncompressedString = EtsString::CreateFromUtf16(data.data(), static_cast<EtsInt>(data.size()));
     EtsString *stringFromUncompressedCharCodes =
         CreateNewStringFromCharCodes({std::numeric_limits<double>::infinity()});
-    ASSERT_TRUE(stringFromUncompressedCharCodes->GetCoreType()->IsUtf16());
-    ASSERT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
+    EXPECT_TRUE(stringFromUncompressedCharCodes->GetCoreType()->IsUtf16());
+    EXPECT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
                                                    stringFromUncompressedCharCodes->GetCoreType()));
 
     EtsString *stringFromUncompressedCharCode = CreateNewStringFromCharCode(std::numeric_limits<double>::infinity());
-    ASSERT_TRUE(stringFromUncompressedCharCode->GetCoreType()->IsUtf16());
-    ASSERT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
+    EXPECT_TRUE(stringFromUncompressedCharCode->GetCoreType()->IsUtf16());
+    EXPECT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
                                                    stringFromUncompressedCharCode->GetCoreType()));
 }
 
@@ -205,8 +230,8 @@ TEST_F(EtsStringFromCharCodeTest, CreateNewStringFromNaNAndInfinityCharCodes)
     EtsString *stringFromUncompressedCharCodes =
         CreateNewStringFromCharCodes({std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::infinity(),
                                       -std::numeric_limits<double>::infinity()});
-    ASSERT_TRUE(stringFromUncompressedCharCodes->GetCoreType()->IsUtf16());
-    ASSERT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
+    EXPECT_TRUE(stringFromUncompressedCharCodes->GetCoreType()->IsUtf16());
+    EXPECT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
                                                    stringFromUncompressedCharCodes->GetCoreType()));
 }
 
@@ -215,13 +240,13 @@ TEST_F(EtsStringFromCharCodeTest, CreateNewStringFromMaxAvailableCharCode)
     std::vector<uint16_t> data = {0xffff};
     EtsString *expectedUncompressedString = EtsString::CreateFromUtf16(data.data(), static_cast<EtsInt>(data.size()));
     EtsString *stringFromMaxCharCodes1 = CreateNewStringFromCharCodes({9007199254740991.0});
-    ASSERT_TRUE(stringFromMaxCharCodes1->GetCoreType()->IsUtf16());
-    ASSERT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
+    EXPECT_TRUE(stringFromMaxCharCodes1->GetCoreType()->IsUtf16());
+    EXPECT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
                                                    stringFromMaxCharCodes1->GetCoreType()));
 
     EtsString *stringFromMaxCharCode1 = CreateNewStringFromCharCode(9007199254740991.0);
-    ASSERT_TRUE(stringFromMaxCharCode1->GetCoreType()->IsUtf16());
-    ASSERT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
+    EXPECT_TRUE(stringFromMaxCharCode1->GetCoreType()->IsUtf16());
+    EXPECT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
                                                    stringFromMaxCharCode1->GetCoreType()));
 }
 
@@ -229,13 +254,13 @@ TEST_F(EtsStringFromCharCodeTest, CreateNewStringFromMinAvailableCharCode)
 {
     EtsString *expectedCompressedString = EtsString::CreateFromMUtf8("\x01");
     EtsString *stringFromMaxCharCodes1 = CreateNewStringFromCharCodes({-9007199254740991.0});
-    ASSERT_TRUE(stringFromMaxCharCodes1->GetCoreType()->IsMUtf8());
-    ASSERT_TRUE(coretypes::String::StringsAreEqual(expectedCompressedString->GetCoreType(),
+    EXPECT_TRUE(stringFromMaxCharCodes1->GetCoreType()->IsMUtf8());
+    EXPECT_TRUE(coretypes::String::StringsAreEqual(expectedCompressedString->GetCoreType(),
                                                    stringFromMaxCharCodes1->GetCoreType()));
 
     EtsString *stringFromMaxCharCode1 = CreateNewStringFromCharCode(-9007199254740991.0);
-    ASSERT_TRUE(stringFromMaxCharCode1->GetCoreType()->IsMUtf8());
-    ASSERT_TRUE(coretypes::String::StringsAreEqual(expectedCompressedString->GetCoreType(),
+    EXPECT_TRUE(stringFromMaxCharCode1->GetCoreType()->IsMUtf8());
+    EXPECT_TRUE(coretypes::String::StringsAreEqual(expectedCompressedString->GetCoreType(),
                                                    stringFromMaxCharCode1->GetCoreType()));
 }
 
@@ -244,33 +269,33 @@ TEST_F(EtsStringFromCharCodeTest, CreateNewStringFromHugeCharCode)
     std::vector<uint16_t> data = {0};
     EtsString *expectedUncompressedString = EtsString::CreateFromUtf16(data.data(), static_cast<EtsInt>(data.size()));
     EtsString *stringFromHugeCharCodes1 = CreateNewStringFromCharCodes({18446744073709551616.0});
-    ASSERT_TRUE(stringFromHugeCharCodes1->GetCoreType()->IsUtf16());
-    ASSERT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
+    EXPECT_TRUE(stringFromHugeCharCodes1->GetCoreType()->IsUtf16());
+    EXPECT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
                                                    stringFromHugeCharCodes1->GetCoreType()));
 
     EtsString *stringFromHugeCharCode1 = CreateNewStringFromCharCode(18446744073709551616.0);
-    ASSERT_TRUE(stringFromHugeCharCode1->GetCoreType()->IsUtf16());
-    ASSERT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
+    EXPECT_TRUE(stringFromHugeCharCode1->GetCoreType()->IsUtf16());
+    EXPECT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
                                                    stringFromHugeCharCode1->GetCoreType()));
 
     EtsString *stringFromHugeCharCodes2 = CreateNewStringFromCharCodes({18446744073709551617.0});
-    ASSERT_TRUE(stringFromHugeCharCodes2->GetCoreType()->IsUtf16());
-    ASSERT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
+    EXPECT_TRUE(stringFromHugeCharCodes2->GetCoreType()->IsUtf16());
+    EXPECT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
                                                    stringFromHugeCharCodes2->GetCoreType()));
 
     EtsString *stringFromHugeCharCode2 = CreateNewStringFromCharCode(18446744073709551617.0);
-    ASSERT_TRUE(stringFromHugeCharCode2->GetCoreType()->IsUtf16());
-    ASSERT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
+    EXPECT_TRUE(stringFromHugeCharCode2->GetCoreType()->IsUtf16());
+    EXPECT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
                                                    stringFromHugeCharCode2->GetCoreType()));
 
     EtsString *stringFromHugeCharCodes3 = CreateNewStringFromCharCodes({9007199254740992.0});
-    ASSERT_TRUE(stringFromHugeCharCodes3->GetCoreType()->IsUtf16());
-    ASSERT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
+    EXPECT_TRUE(stringFromHugeCharCodes3->GetCoreType()->IsUtf16());
+    EXPECT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
                                                    stringFromHugeCharCodes3->GetCoreType()));
 
     EtsString *stringFromHugeCharCode3 = CreateNewStringFromCharCode(9007199254740992.0);
-    ASSERT_TRUE(stringFromHugeCharCode3->GetCoreType()->IsUtf16());
-    ASSERT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
+    EXPECT_TRUE(stringFromHugeCharCode3->GetCoreType()->IsUtf16());
+    EXPECT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
                                                    stringFromHugeCharCode3->GetCoreType()));
 }
 
@@ -279,33 +304,33 @@ TEST_F(EtsStringFromCharCodeTest, CreateNewStringFromHugeNegativeCharCode)
     std::vector<uint16_t> data = {0};
     EtsString *expectedUncompressedString = EtsString::CreateFromUtf16(data.data(), static_cast<EtsInt>(data.size()));
     EtsString *stringFromHugeCharCodes1 = CreateNewStringFromCharCodes({-18446744073709551616.0});
-    ASSERT_TRUE(stringFromHugeCharCodes1->GetCoreType()->IsUtf16());
-    ASSERT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
+    EXPECT_TRUE(stringFromHugeCharCodes1->GetCoreType()->IsUtf16());
+    EXPECT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
                                                    stringFromHugeCharCodes1->GetCoreType()));
 
     EtsString *stringFromHugeCharCode1 = CreateNewStringFromCharCode(-18446744073709551616.0);
-    ASSERT_TRUE(stringFromHugeCharCode1->GetCoreType()->IsUtf16());
-    ASSERT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
+    EXPECT_TRUE(stringFromHugeCharCode1->GetCoreType()->IsUtf16());
+    EXPECT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
                                                    stringFromHugeCharCode1->GetCoreType()));
 
     EtsString *stringFromHugeCharCodes2 = CreateNewStringFromCharCodes({-18446744073709551617.0});
-    ASSERT_TRUE(stringFromHugeCharCodes2->GetCoreType()->IsUtf16());
-    ASSERT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
+    EXPECT_TRUE(stringFromHugeCharCodes2->GetCoreType()->IsUtf16());
+    EXPECT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
                                                    stringFromHugeCharCodes2->GetCoreType()));
 
     EtsString *stringFromHugeCharCode2 = CreateNewStringFromCharCode(-18446744073709551617.0);
-    ASSERT_TRUE(stringFromHugeCharCode2->GetCoreType()->IsUtf16());
-    ASSERT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
+    EXPECT_TRUE(stringFromHugeCharCode2->GetCoreType()->IsUtf16());
+    EXPECT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
                                                    stringFromHugeCharCode2->GetCoreType()));
 
     EtsString *stringFromHugeCharCodes3 = CreateNewStringFromCharCodes({-9007199254740992.0});
-    ASSERT_TRUE(stringFromHugeCharCodes3->GetCoreType()->IsUtf16());
-    ASSERT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
+    EXPECT_TRUE(stringFromHugeCharCodes3->GetCoreType()->IsUtf16());
+    EXPECT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
                                                    stringFromHugeCharCodes3->GetCoreType()));
 
     EtsString *stringFromHugeCharCode3 = CreateNewStringFromCharCode(-9007199254740992.0);
-    ASSERT_TRUE(stringFromHugeCharCode3->GetCoreType()->IsUtf16());
-    ASSERT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
+    EXPECT_TRUE(stringFromHugeCharCode3->GetCoreType()->IsUtf16());
+    EXPECT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
                                                    stringFromHugeCharCode3->GetCoreType()));
 }
 
@@ -317,10 +342,65 @@ TEST_F(EtsStringFromCharCodeTest, CreateNewStringFromHugeCharCodes)
                                    -18446744073709551616.0, -18446744073709551617.0, -9007199254740992.0,
                                    9007199254740991.0,      -9007199254740991.0};
     EtsString *stringFromHugeCharCodes = CreateNewStringFromCharCodes(charCodes);
-    ASSERT_TRUE(stringFromHugeCharCodes->GetCoreType()->IsUtf16());
-    ASSERT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
+    EXPECT_TRUE(stringFromHugeCharCodes->GetCoreType()->IsUtf16());
+    EXPECT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
                                                    stringFromHugeCharCodes->GetCoreType()));
 }
+
+class EtsStringFromCharCodeIntrinsicTest : public BasicEtsStringFromCharCodeTest {};
+
+TEST_F(EtsStringFromCharCodeIntrinsicTest, CreateNewCachedStringFromCharCode)
+{
+    EtsString *expectedCompressedString = EtsString::CreateFromMUtf8("A");
+    EtsString *stringFromCompressedCharCodes = intrinsics::StdCoreStringFromCharCode(CreateEtsEscompatArray({0x41}));
+    EXPECT_TRUE(stringFromCompressedCharCodes->GetCoreType()->IsMUtf8());
+    EXPECT_TRUE(coretypes::String::StringsAreEqual(expectedCompressedString->GetCoreType(),
+                                                   stringFromCompressedCharCodes->GetCoreType()));
+
+    EtsString *stringFromCompressedCharCode = intrinsics::StdCoreStringFromCharCodeSingle(0x41);
+    EXPECT_TRUE(stringFromCompressedCharCode->GetCoreType()->IsMUtf8());
+    EXPECT_TRUE(coretypes::String::StringsAreEqual(expectedCompressedString->GetCoreType(),
+                                                   stringFromCompressedCharCode->GetCoreType()));
+}
+
+TEST_F(EtsStringFromCharCodeIntrinsicTest, CreateNewNonCachedStringFromCharCode)
+{
+    std::vector<uint16_t> data = {0x3B2};
+    EtsString *expectedUncompressedString = EtsString::CreateFromUtf16(data.data(), static_cast<EtsInt>(data.size()));
+    EtsString *stringFromUncompressedCharCodes = intrinsics::StdCoreStringFromCharCode(CreateEtsEscompatArray({0x3B2}));
+    EXPECT_TRUE(stringFromUncompressedCharCodes->GetCoreType()->IsUtf16());
+    EXPECT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
+                                                   stringFromUncompressedCharCodes->GetCoreType()));
+
+    EtsString *stringFromUncompressedCharCode = intrinsics::StdCoreStringFromCharCodeSingle(0x3B2);
+    EXPECT_TRUE(stringFromUncompressedCharCode->GetCoreType()->IsUtf16());
+    EXPECT_TRUE(coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(),
+                                                   stringFromUncompressedCharCode->GetCoreType()));
+}
+
+class EtsStringFromCharCodeEntrypointTest : public BasicEtsStringFromCharCodeTest {};
+
+TEST_F(EtsStringFromCharCodeEntrypointTest, CreateNewCachedStringFromCharCodeNoCacheEntrypoint)
+{
+    EtsString *expectedCompressedString = EtsString::CreateFromMUtf8("A");
+    coretypes::String *stringFromCompressedCharCode =
+        CreateStringFromCharCodeSingleNoCacheEntrypoint(bit_cast<uint64_t>(double {0x41}));
+    EXPECT_TRUE(stringFromCompressedCharCode->IsMUtf8());
+    EXPECT_TRUE(
+        coretypes::String::StringsAreEqual(expectedCompressedString->GetCoreType(), stringFromCompressedCharCode));
+}
+
+TEST_F(EtsStringFromCharCodeEntrypointTest, CreateNewNonCachedStringFromCharCodeNoCacheEntrypoint)
+{
+    std::vector<uint16_t> data = {0x3B2};
+    EtsString *expectedUncompressedString = EtsString::CreateFromUtf16(data.data(), static_cast<EtsInt>(data.size()));
+    coretypes::String *stringFromUncompressedCharCode =
+        CreateStringFromCharCodeSingleNoCacheEntrypoint(bit_cast<uint64_t>(double {0x3B2}));
+    EXPECT_TRUE(stringFromUncompressedCharCode->IsUtf16());
+    EXPECT_TRUE(
+        coretypes::String::StringsAreEqual(expectedUncompressedString->GetCoreType(), stringFromUncompressedCharCode));
+}
+
 }  // namespace ark::ets::test
 
 // NOLINTEND(readability-magic-numbers)

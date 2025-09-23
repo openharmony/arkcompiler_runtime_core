@@ -43,6 +43,7 @@ bool EmitStringGetBytesTlab(Inst *inst);
 bool EmitStringIndexOf(Inst *inst);
 bool EmitStringIndexOfAfter(Inst *inst);
 bool EmitStringFromCharCode(Inst *inst);
+bool EmitStringFromCharCodeSingle(Inst *inst);
 bool EmitStringRepeat(Inst *inst)
 {
     return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_REPEAT, 2U);
