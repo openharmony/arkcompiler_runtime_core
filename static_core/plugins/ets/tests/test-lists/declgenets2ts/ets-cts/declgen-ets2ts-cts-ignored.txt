@@ -1522,6 +1522,14 @@
 11.enumerations/02.enumeration_string_values/enum_str_9.ets
 11.enumerations/enum_cte_36.ets
 11.enumerations/repeating_constants.ets
+11.enumerations/03.enumeration_operations/enum_implicit_type_constant_get_name_10.ets
+11.enumerations/03.enumeration_operations/enum_implicit_type_constant_get_name_11.ets
+11.enumerations/03.enumeration_operations/enum_implicit_type_constant_get_name_8.ets
+11.enumerations/03.enumeration_operations/enum_implicit_type_constant_get_name_9.ets
+11.enumerations/03.enumeration_operations/enum_implicit_type_constant_to_string_10.ets
+11.enumerations/03.enumeration_operations/enum_implicit_type_constant_to_string_11.ets
+11.enumerations/03.enumeration_operations/enum_implicit_type_constant_to_string_8.ets
+11.enumerations/03.enumeration_operations/enum_implicit_type_constant_to_string_9.ets
 13.compilation_units/01.separate_modules/cyclic_dependency/module.ets
 13.compilation_units/01.separate_modules/cyclic_dependency/test.ets
 13.compilation_units/01.separate_modules/import_declarations_0.ets
