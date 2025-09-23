@@ -140,6 +140,9 @@ export final class Class {
      * @returns Immutable array of instance {@link reflect.InstanceField} objects
      */
     public getInstanceFields(): FixedArray<reflect.InstanceField> {
+        if (this.isInterface()) {
+            return []
+        }
         return this.getInstanceFieldsInternal(true)
     }
 
@@ -158,7 +161,21 @@ export final class Class {
      * @returns Immutable array of static {@link reflect.StaticField} objects
      */
     public getStaticFields(): FixedArray<reflect.StaticField> {
+        if (this.isInterface()) {
+            return []
+        }
         return this.getStaticFieldsInternal(true)
+    }
+
+    /**
+     * Looks up a public static field by name
+     *
+     * @param name - The field name to search for
+     *
+     * @returns The {@link reflect.StaticField} if found, `undefined` otherwise
+     */
+    public getStaticFieldByName(name: string): reflect.StaticField | undefined {
+        return this.getStaticFieldByNameInternal(name, true)
     }
 
     /**
@@ -176,5 +193,6 @@ export final class Class {
     private native getInstanceFieldsInternal(publicOnly: boolean): FixedArray<reflect.InstanceField>
     private native getStaticMethodsInternal(publicOnly: boolean): FixedArray<reflect.StaticMethod>
     private native getStaticFieldsInternal(publicOnly: boolean): FixedArray<reflect.StaticField>
+    private native getStaticFieldByNameInternal(name: string, publicOnly: boolean): reflect.StaticField | undefined
     private native getConstructorsInternal(publicOnly: boolean): FixedArray<reflect.Constructor>
 }
