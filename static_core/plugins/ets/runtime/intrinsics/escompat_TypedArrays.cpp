@@ -1747,8 +1747,10 @@ static ark::ets::EtsString *TypedArrayJoinUtf16(Span<T> &data, ark::ets::EtsStri
     size_t strSize = 0;
     auto n = data.Size() - 1;
     if (sepSize == 1) {
+        PandaVector<uint16_t> tree16Buf;
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        auto sep = separator->GetDataUtf16()[0];
+        auto sep =
+            separator->IsTreeString() ? separator->GetTreeStringDataUtf16(tree16Buf)[0] : separator->GetDataUtf16()[0];
         for (auto i = 0U; i < n; i++) {
             strSize += NumberToU16Chars(buf, strSize, static_cast<T>(data[i]));
             buf[strSize] = sep;
@@ -1789,8 +1791,10 @@ static ark::ets::EtsString *TypedArrayJoinUtf8(Span<T> &data, ark::ets::EtsStrin
     size_t strSize = 0;
     auto n = data.Size() - 1;
     if (sepSize == 1) {
+        PandaVector<uint8_t> tree8Buf;
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        auto sep = separator->GetDataUtf8()[0];
+        auto sep =
+            separator->IsTreeString() ? separator->GetTreeStringDataUtf8(tree8Buf)[0] : separator->GetDataUtf8()[0];
         for (auto i = 0U; i < n; i++) {
             strSize += NumberToU8Chars(buf, strSize, data[i]);
             buf[strSize] = sep;

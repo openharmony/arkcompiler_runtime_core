@@ -24,7 +24,7 @@
 //! INST_COUNT        /StoreObject.*SomeObject/, 12
 //! INST_COUNT        /StoreObject.*HelperObject/, 2
 //! PASS_AFTER        "EscapeAnalysis"
-//! INST_COUNT        "Phi", 14
+//! INST_COUNT        "Phi", 12
 //! INST_COUNT        /.*f64.*Phi.*/, 4
 //! INST_COUNT        /StoreObject.*SomeObject/, 0
 //! INST_COUNT        /StoreObject.*HelperObject/, 2
@@ -39,7 +39,7 @@
 //! INST_COUNT        /StoreObject.*SomeObject/, 12
 //! INST_COUNT        /StoreObject.*HelperObject/, 2
 //! PASS_AFTER        "EscapeAnalysis"
-//! INST_COUNT        "Phi", 14
+//! INST_COUNT        "Phi", 12
 //! INST_COUNT        /.*f64.*Phi.*/, 4
 //! INST_COUNT        /StoreObject.*SomeObject/, 0
 //! INST_COUNT        /StoreObject.*HelperObject/, 2

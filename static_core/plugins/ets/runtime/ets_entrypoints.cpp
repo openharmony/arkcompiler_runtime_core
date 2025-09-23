@@ -504,7 +504,9 @@ extern "C" int32_t WriteStringToMem(int64_t buf, ObjectHeader *s)
             return -1;
         }
     } else {
-        if (memcpy_s(addr, size, str->GetDataMUtf8(), size) != 0) {
+        PandaVector<uint8_t> tree8Buf;
+        if (memcpy_s(addr, size, str->IsTreeString() ? str->GetTreeStringDataMUtf8(tree8Buf) : str->GetDataMUtf8(),
+                     size) != 0) {
             return -1;
         }
     }

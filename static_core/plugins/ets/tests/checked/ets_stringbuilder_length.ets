@@ -15,7 +15,7 @@
 
 //! CHECKER     StringBuilder length field access AOT unoptimized
 //! SKIP_IF     @architecture == "arm32"
-//! RUN_PAOC    options: "--compiler-regex='.*StringCalculation00' --compiler-inlining=false --compiler-check-final=false --compiler-simplify-string-builder=false"
+//! RUN_PAOC    options: "--compiler-regex='.*StringCalculation00' --compiler-optimize-string-concat=true --compiler-inlining=false --compiler-check-final=false --compiler-simplify-string-builder=false"
 //!
 //! METHOD      "ets_stringbuilder_length.ETSGLOBAL::StringCalculation00"
 //! PASS_AFTER  "OptimizeStringConcat"
@@ -29,7 +29,7 @@
 
 //! CHECKER     StringBuilder length field access AOT optimized
 //! SKIP_IF     @architecture == "arm32"
-//! RUN_PAOC    options: "--compiler-regex='.*StringCalculation00' --compiler-inlining=false --compiler-check-final=false"
+//! RUN_PAOC    options: "--compiler-regex='.*StringCalculation00' --compiler-optimize-string-concat=true --compiler-inlining=false --compiler-check-final=false"
 //!
 //! METHOD      "ets_stringbuilder_length.ETSGLOBAL::StringCalculation00"
 //! PASS_AFTER  "OptimizeStringConcat"
@@ -71,7 +71,7 @@ function StringCalculation00() {
 
 //! CHECKER     StringBuilder without length field AOT
 //! SKIP_IF     @architecture == "arm32"
-//! RUN_PAOC    options: "--compiler-regex='.*StringCalculation01' --compiler-inlining=false --compiler-check-final=false"
+//! RUN_PAOC    options: "--compiler-regex='.*StringCalculation01' --compiler-optimize-string-concat=true --compiler-inlining=false --compiler-check-final=false"
 //!
 //! METHOD      "ets_stringbuilder_length.ETSGLOBAL::StringCalculation01"
 //! PASS_AFTER  "OptimizeStringConcat"
@@ -102,12 +102,12 @@ function StringCalculation01() {
 
 //! CHECKER     StringBuilder length field access at nested unoptimized loop AOT
 //! SKIP_IF     @architecture == "arm32"
-//! RUN_PAOC    options: "--compiler-regex='.*StringCalculation02' --compiler-inlining=false --compiler-check-final=false --compiler-simplify-string-builder=false"
+//! RUN_PAOC    options: "--compiler-regex='.*StringCalculation02' --compiler-optimize-string-concat=true --compiler-inlining=false --compiler-check-final=false --compiler-simplify-string-builder=false"
 //! RUN         entry: "ets_stringbuilder_length.ETSGLOBAL::StringCalculation02", result: 0
 
 //! CHECKER     StringBuilder length field access at nested loop AOT
 //! SKIP_IF     @architecture == "arm32"
-//! RUN_PAOC    options: "--compiler-regex='.*StringCalculation02' --compiler-inlining=false --compiler-check-final=false"
+//! RUN_PAOC    options: "--compiler-regex='.*StringCalculation02' --compiler-optimize-string-concat=true --compiler-inlining=false --compiler-check-final=false"
 //!
 //! METHOD      "ets_stringbuilder_length.ETSGLOBAL::StringCalculation02"
 //! PASS_AFTER  "OptimizeStringConcat"
@@ -148,12 +148,12 @@ function StringCalculation02() {
 
 //! CHECKER     Concat loop with length access unoptimized loop AOT
 //! SKIP_IF     @architecture == "arm32"
-//! RUN_PAOC    options: "--compiler-regex='.*StringCalculation03|.*reuse_concat_loop1' --compiler-inlining=false --compiler-check-final=false --compiler-simplify-string-builder=false"
+//! RUN_PAOC    options: "--compiler-regex='.*StringCalculation03|.*reuse_concat_loop1' --compiler-optimize-string-concat=true --compiler-inlining=false --compiler-check-final=false --compiler-simplify-string-builder=false"
 //! RUN         entry: "ets_stringbuilder_length.ETSGLOBAL::StringCalculation03", result: 0
 
 //! CHECKER     Concat loop with length access loop AOT CHA inline
 //! SKIP_IF     @architecture == "arm32"
-//! RUN_PAOC    options: "--compiler-regex='.*StringCalculation03|.*reuse_concat_loop1' --compiler-inlining=true --paoc-use-cha=true --compiler-check-final=false"
+//! RUN_PAOC    options: "--compiler-regex='.*StringCalculation03|.*reuse_concat_loop1' --compiler-optimize-string-concat=true --compiler-inlining=true --paoc-use-cha=true --compiler-check-final=false"
 //!
 //! METHOD      "ets_stringbuilder_length.ETSGLOBAL::reuse_concat_loop1"
 //! PASS_AFTER  "OptimizeStringConcat"

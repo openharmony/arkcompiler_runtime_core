@@ -46,7 +46,7 @@ LineString *LineString::CreateFromLineString(LineString *str, const LanguageCont
 
     // retrive str after gc
     str = strHandle.GetPtr();
-    string->hashcode_ = str->hashcode_;
+    string->SetHashcode(str->GetHashcode());
 
     uint32_t length = str->GetLength();
     // After memcpy we should have a full barrier, so this writes should happen-before barrier
@@ -79,7 +79,6 @@ LineString *LineString::CreateFromMUtf8(const uint8_t *mutf8Data, size_t mutf8Le
         return nullptr;
     }
 
-    ASSERT(string->hashcode_ == 0);
     // After copying we should have a full barrier, so this writes should happen-before barrier
     TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
     if (canBeCompressed) {
@@ -164,7 +163,6 @@ LineString *LineString::CreateFromUtf16(const uint16_t *utf16Data, uint32_t utf1
         return nullptr;
     }
 
-    ASSERT(string->hashcode_ == 0);
     // After copying we should have a full barrier, so this writes should happen-before barrier
     TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
     if (canBeCompressed) {
@@ -232,7 +230,6 @@ LineString *LineString::CreateNewLineStringFromChars(uint32_t offset, uint32_t l
 
     // retrieve src since gc may move it
     src = reinterpret_cast<uint16_t *>(ToUintPtr<uint32_t>(arrayHandle->GetData()) + (offset << 1UL));
-    ASSERT(string->hashcode_ == 0);
     // After copying we should have a full barrier, so this writes should happen-before barrier
     TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
     if (canBeCompressed) {
@@ -273,7 +270,6 @@ LineString *LineString::CreateNewLineStringFromBytes(uint32_t offset, uint32_t l
 
     // retrieve src since gc may move it
     src = reinterpret_cast<uint8_t *>(ToUintPtr<uint32_t>(arrayHandle->GetData()) + offset);
-    ASSERT(string->hashcode_ == 0);
     // After copying we should have a full barrier, so this writes should happen-before barrier
     TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
     if (canBeCompressed) {
@@ -925,7 +921,6 @@ LineString *LineString::DoReplace(LineString *src, uint16_t oldC, uint16_t newC,
 
     // retrieve src after gc
     src = srcHandle.GetPtr();
-    ASSERT(string->hashcode_ == 0);
 
     // After replacing we should have a full barrier, so this writes should happen-before barrier
     TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
@@ -975,7 +970,6 @@ LineString *LineString::FastSubLineString(LineString *src, uint32_t start, uint3
 
     // retrieve src after gc
     src = srcHandle.GetPtr();
-    ASSERT(string->hashcode_ == 0);
 
     // After copying we should have a full barrier, so this writes should happen-before barrier
     TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
@@ -1069,8 +1063,6 @@ LineString *LineString::Concat(LineString *string1, LineString *string2, const L
     if (UNLIKELY(newString == nullptr)) {
         return nullptr;
     }
-
-    ASSERT(newString->hashcode_ == 0);
 
     // retrieve strings after gc
     auto str1 = str1Handle.GetPtr();

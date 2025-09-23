@@ -838,9 +838,10 @@ void ProcessUtf8Element(EtsObject *element, PandaVector<char> &buf, const EtsPla
         }
     }
 
+    PandaVector<uint8_t> tree8Buf;
     if (elementCls->IsStringClass()) {
         auto strElement = coretypes::String::Cast(elementHandle->GetCoreType());
-        auto str = strElement->GetDataUtf8();
+        auto str = strElement->IsTreeString() ? strElement->GetTreeStringDataUtf8(tree8Buf) : strElement->GetDataUtf8();
         auto elementSize = strElement->GetUtf8Length();
         if (elementSize > 0) {
             memcpy_s(&buf[pos], utf8Size, str, elementSize);
@@ -854,7 +855,7 @@ void ProcessUtf8Element(EtsObject *element, PandaVector<char> &buf, const EtsPla
         pos += len;
     } else {
         auto objStr = GetObjStr(elementHandle);
-        auto objStrData = objStr->GetDataUtf8();
+        auto objStrData = objStr->IsTreeString() ? objStr->GetTreeStringDataUtf8(tree8Buf) : objStr->GetDataUtf8();
         auto objStrSize = objStr->GetUtf8Length();
         if (objStrSize > 0) {
             memcpy_s(&buf[pos], utf8Size, objStrData, objStrSize);
@@ -875,14 +876,18 @@ ark::ets::EtsString *EtsEscompatArrayJoinUtf8(EtsObjectArray *buffer, EtsInt &ac
     }
 
     PandaVector<char> buf(res.utf8Size + 1);
+    PandaVector<uint8_t> tree8Buf;
     const size_t sepSize = separatorHandle.GetPtr()->GetUtf8Length();
+    uint8_t *separator = separatorHandle.GetPtr()->IsTreeString()
+                             ? separatorHandle.GetPtr()->GetTreeStringDataUtf8(tree8Buf)
+                             : separatorHandle.GetPtr()->GetDataUtf8();
     size_t pos = 0;
     for (EtsInt index = 0; index < actualLength - 1; index++) {
         auto element = buffer->Get(index);
         ProcessUtf8Element(element, buf, ptypes, pos, res.utf8Size);
 
         if (sepSize > 0) {
-            MemcpyUnsafe(&buf[pos], separatorHandle.GetPtr()->GetDataUtf8(), sepSize);
+            MemcpyUnsafe(&buf[pos], separator, sepSize);
             pos += sepSize;
         }
     }

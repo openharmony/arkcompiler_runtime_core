@@ -23,7 +23,7 @@ set(DEFAULT_TEST_GROUP ets_tests)
 set(STDLIB ${CMAKE_CURRENT_SOURCE_DIR}/stdlib)
 
 function(compile_ets_code ETS_SRC OUTPUT_ABC TARGET)
-    set(oneValueArgs ARKTS_CONFIG ETSPATH OPT_LEVEL)
+    set(oneValueArgs ARKTS_CONFIG ETSPATH OPT_LEVEL ETS_STRINGS_CONCAT)
     set(multiValueArgs COMPILER_EXTRA_OPTIONS)
     cmake_parse_arguments(ARG "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -42,12 +42,18 @@ function(compile_ets_code ETS_SRC OUTPUT_ABC TARGET)
         list(APPEND ES2PANDA_ARGUMENTS "--arktsconfig=${ARG_ARKTS_CONFIG}")
         list(APPEND ES2PANDA_ARGUMENTS "--stdlib=${PANDA_ROOT}/plugins/ets/stdlib")
     endif()
+
     if (DEFINED ARG_ETSPATH)
         list(APPEND ES2PANDA_ARGUMENTS "--ets-path=${ARG_ETSPATH}")
     endif()
 
+    if (DEFINED ARG_ETS_STRINGS_CONCAT)
+        list(APPEND ES2PANDA_ARGUMENTS "--ets-strings-concat=${ARG_ETS_STRINGS_CONCAT}")
+    endif()
+
     set(COMPILE_DEPENDENCIES)
     set(E2P)
+    
     get_filename_component(OUTPUT_DIR ${OUTPUT_ABC} DIRECTORY)
     file(MAKE_DIRECTORY ${OUTPUT_DIR})
 

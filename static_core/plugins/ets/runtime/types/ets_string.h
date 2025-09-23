@@ -138,6 +138,16 @@ public:
         return GetCoreType()->GetLength();
     }
 
+    bool IsLineString()
+    {
+        return GetCoreType()->IsLineString();
+    }
+
+    bool IsTreeString()
+    {
+        return GetCoreType()->IsTreeString();
+    }
+
     size_t CopyDataMUtf8(void *buf, size_t maxLength, bool isCString)
     {
         return GetCoreType()->CopyDataMUtf8(reinterpret_cast<uint8_t *>(buf), maxLength, isCString);
@@ -213,14 +223,29 @@ public:
         return GetCoreType()->GetDataUtf8();
     }
 
+    uint8_t *GetTreeStringDataUtf8(PandaVector<uint8_t> &buf)
+    {
+        return GetCoreType()->GetTreeStringDataUtf8(buf);
+    }
+
     uint8_t *GetDataMUtf8()
     {
         return GetCoreType()->GetDataMUtf8();
     }
 
+    uint8_t *GetTreeStringDataMUtf8(PandaVector<uint8_t> &buf)
+    {
+        return GetCoreType()->GetTreeStringDataMUtf8(buf);
+    }
+
     uint16_t *GetDataUtf16()
     {
         return GetCoreType()->GetDataUtf16();
+    }
+
+    uint16_t *GetTreeStringDataUtf16(PandaVector<uint16_t> &buf)
+    {
+        return GetCoreType()->GetTreeStringDataUtf16(buf);
     }
 
     bool IsEmpty()

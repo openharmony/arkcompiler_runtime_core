@@ -907,7 +907,6 @@ intrinsics:
     codegen_arch: [arm64]
     codegen_func: CreateStringIndexOf
     llvm_codegen_func: EmitStringIndexOf
-    safe_intrinsic: true
 
   - name: StdCoreStringIndexOfAfter
     space: ets
@@ -923,7 +922,6 @@ intrinsics:
     codegen_func: CreateStringIndexOfAfter
     llvm_codegen_func: EmitStringIndexOfAfter
     need_param_locations: true
-    safe_intrinsic: true
 
   - name: StdCoreStringIndexOfString
     space: ets
@@ -934,7 +932,6 @@ intrinsics:
       ret: i32
       args: [std.core.String, i32]
     impl: ark::ets::intrinsics::StdCoreStringIndexOfString
-    safe_intrinsic: true
 
   - name: StdCoreStringLastIndexOfString
     space: ets
@@ -945,7 +942,6 @@ intrinsics:
       ret: i32
       args: [std.core.String, i32]
     impl: ark::ets::intrinsics::StdCoreStringLastIndexOfString
-    safe_intrinsic: true
 
   - name: StdCoreStringSubstring
     space: ets
@@ -1059,7 +1055,6 @@ intrinsics:
     impl: ark::ets::intrinsics::StdCoreStringCompareTo
     irtoc_impl: StringCompareToNativePlus
     need_param_locations: true
-    safe_intrinsic: true
 
   - name: StdCoreStringTrimLeft
     space: ets

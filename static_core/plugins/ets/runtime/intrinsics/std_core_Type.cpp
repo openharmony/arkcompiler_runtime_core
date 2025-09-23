@@ -288,7 +288,23 @@ ObjectHeader *TypeAPIGetOwnFieldPtr(EtsClass *cls, EtsLong idx)
 
 static EtsField *GetField(EtsClass *cls, EtsString *name)
 {
-    auto fieldName = name->GetMutf8();
+    PandaString fieldName;
+    PandaVector<uint8_t> tree8Buf;
+    PandaVector<uint16_t> tree16Buf;
+
+    if (name->IsMUtf8()) {
+        uint8_t *data = name->IsTreeString() ? name->GetTreeStringDataMUtf8(tree8Buf) : name->GetDataMUtf8();
+        size_t len = name->GetUtf8Length();
+        fieldName.resize(len);
+        std::copy(data, data + len, fieldName.data());
+    } else {
+        uint16_t *data = name->IsTreeString() ? name->GetTreeStringDataUtf16(tree16Buf) : name->GetDataUtf16();
+        size_t len = name->GetUtf8Length();
+        fieldName.resize(len);
+        ark::utf::ConvertRegionUtf16ToUtf8(data, reinterpret_cast<uint8_t *>(fieldName.data()), name->GetLength(), len,
+                                           0, false);
+    }
+
     auto instanceField = ManglingUtils::GetFieldIDByDisplayName(cls, fieldName);
     if (instanceField != nullptr) {
         return instanceField;
