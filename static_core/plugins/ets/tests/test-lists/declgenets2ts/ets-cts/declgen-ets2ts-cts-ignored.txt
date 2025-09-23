@@ -193,6 +193,7 @@
 07.expressions/09.field_access_expressions/01.accessing_current_object_fields/incorrect_class_field_access_1.ets
 07.expressions/09.field_access_expressions/01.accessing_current_object_fields/incorrect_class_field_access_5.ets
 07.expressions/10.method_call_expression/01.step_1_selection_of_type_to_use/step1_4.ets
+08.statements/06.loop_statements/labeled_statement_1.ets
 09.classes/03.class_implementation_clause/01.implementing_interface_methods/refer_to_same_impl_at_class_n2.ets
 09.classes/03.class_implementation_clause/01.implementing_interface_methods/same_implementation.ets
 09.classes/04.class_members/inherited_from_superinterface_0.ets
