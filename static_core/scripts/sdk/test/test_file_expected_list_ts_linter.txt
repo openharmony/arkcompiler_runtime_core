@@ -78,3 +78,4 @@ build-sdk/sdk/tslinter/package.json
 build-sdk/sdk/tslinter/rule-config.json
 build-sdk/sdk/tslinter/docs
 build-sdk/sdk/tslinter/docs/rules-cn
+build-sdk/sdk/tslinter/tsconfig-sdk.json
