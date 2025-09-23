@@ -21,8 +21,8 @@ type Any = Object | null | undefined
 export type StaticOrESValue = ESValue | Object | null | undefined
 export type ESValueCallbackData = object
 export type ESValueCallback = (argThis: ESValue, argNewTgt: ESValue, args: FixedArray<ESValue>, data?: ESValueCallbackData) => ESValue
-export declare class ESValuePropertyDescriptor {
-    key: string | ESValue
+export class ESValuePropertyDescriptor {
+    key: string | ESValue = ''
     call?: ESValueCallback
     getter?: ESValueCallback
     setter?: ESValueCallback
@@ -317,11 +317,18 @@ export final class ESValue {
     }
 
     public setProperty(index: number, value: StaticOrESValue): void {
+        let valueObj: Any;
         if (value instanceof ESValue) {
-            JSRuntime.setElementObject(this.ev, index.toInt(), (value as ESValue).ev);
+            valueObj = (value as ESValue).ev
+        } else {
+            valueObj = ESValue.wrap(value).ev;
+        }
+        if (Number.isInteger(index) && index >= 0) {
+            JSRuntime.setElementObject(this.ev, index.toInt(), valueObj);
             return;
         }
-        JSRuntime.setElementObject(this.ev, index.toInt(), ESValue.wrap(value).ev);
+        let numObj = ESValue.wrapNumber(index);
+        this.setProperty(numObj, value);
     }
 
     public setProperty(property: ESValue, value: StaticOrESValue): void {
@@ -459,9 +466,6 @@ export final class ESValue {
         if (!this.isPromise()) {
             throw new TypeError("Promise expected");
         }
-        const callerClass = Class.ofCaller();
-        const linker = callerClass == undefined ? getBootRuntimeLinker() : callerClass.getLinker();
-        let clsName = 'std.core.Promise';
         return new Promise<ESValue>((resolve, reject) => {
             let jsPromise = this.ev as Promise<Any>;
             jsPromise.then((value: Any) => {
