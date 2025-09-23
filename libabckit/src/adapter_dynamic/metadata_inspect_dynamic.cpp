@@ -153,6 +153,9 @@ AbckitGraph *CreateGraphFromFunctionDynamic(AbckitCoreFunction *function)
 
     auto *wpf = new FileWrapper(reinterpret_cast<const void *>(pf));
     auto graph = GraphWrapper::BuildGraphDynamic(wpf, irInterface, file, functionOffset);
+    if (graph == nullptr) {
+        return nullptr;
+    }
     if (statuses::GetLastError() != AbckitStatus::ABCKIT_STATUS_NO_ERROR) {
         return nullptr;
     }
