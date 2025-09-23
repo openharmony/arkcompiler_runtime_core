@@ -179,14 +179,23 @@ public:
 
     explicit CallConvDynInfo() = default;
 
-    explicit CallConvDynInfo(uint32_t numExpectedArgs, uintptr_t expandEntrypointTlsOffset)
-        : expandEntrypointTlsOffset_(expandEntrypointTlsOffset), numExpectedArgs_(numExpectedArgs), checkRequired_(true)
+    explicit CallConvDynInfo(uint32_t numExpectedArgs, uintptr_t expandEntrypointsTableTlsOffset,
+                             uintptr_t expandEntrypointOffset)
+        : expandEntrypointsTableTlsOffset_(expandEntrypointsTableTlsOffset),
+          expandEntrypointOffset_(expandEntrypointOffset),
+          numExpectedArgs_(numExpectedArgs),
+          checkRequired_(true)
     {
     }
 
-    auto GetExpandEntrypointTlsOffset()
+    auto GetExpandEntrypointsTableTlsOffset()
     {
-        return expandEntrypointTlsOffset_;
+        return expandEntrypointsTableTlsOffset_;
+    }
+
+    auto GetExpandEntrypointOffset()
+    {
+        return expandEntrypointOffset_;
     }
 
     auto GetNumExpectedArgs()
@@ -200,7 +209,8 @@ public:
     }
 
 private:
-    uintptr_t expandEntrypointTlsOffset_ {0};
+    uintptr_t expandEntrypointsTableTlsOffset_ {0};
+    uintptr_t expandEntrypointOffset_ {0};
     uint32_t numExpectedArgs_ {0};
     bool checkRequired_ {false};
 };

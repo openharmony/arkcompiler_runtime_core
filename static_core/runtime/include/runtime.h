@@ -456,6 +456,11 @@ public:
         return tools_;
     }
 
+    EntrypointsTable *GetEntrypointsTable(void)
+    {
+        return &entrypoints_;
+    }
+
 private:
     void NotifyAboutLoadedModules();
 
@@ -583,6 +588,8 @@ private:
     UnwindStackFn unwindStackFn_ {nullptr};
 
     tooling::Tools tools_;
+
+    EntrypointsTable entrypoints_ {};
 
     NO_COPY_SEMANTIC(Runtime);
     NO_MOVE_SEMANTIC(Runtime);

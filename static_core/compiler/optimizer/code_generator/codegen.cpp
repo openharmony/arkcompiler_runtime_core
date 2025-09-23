@@ -18,6 +18,7 @@ Codegen Hi-Level implementation
 */
 #include "operands.h"
 #include "codegen.h"
+#include "codegen_load_entrypoint.h"
 #include "encode_visitor.h"
 #include "compiler_options.h"
 #include "optimizer/ir/inst.h"
@@ -605,8 +606,8 @@ bool Codegen::RunImpl()
     if (GetCallingConvention()->IsDynCallMode()) {
         auto numExpectedArgs = GetRuntime()->GetMethodTotalArgumentsCount(GetGraph()->GetMethod());
         if (numExpectedArgs > GetRuntime()->GetDynamicNumFixedArgs()) {
-            CallConvDynInfo dynInfo(numExpectedArgs,
-                                    GetRuntime()->GetEntrypointTlsOffset(
+            CallConvDynInfo dynInfo(numExpectedArgs, GetRuntime()->GetEntrypointsTablePointerTlsOffset(GetArch()),
+                                    GetRuntime()->GetEntrypointOffset(
                                         GetArch(), RuntimeInterface::EntrypointId::EXPAND_COMPILED_CODE_ARGS_DYN));
             GetCallingConvention()->SetDynInfo(dynInfo);
             frameInfo_->SetSaveFrameAndLinkRegs(true);
@@ -1126,8 +1127,9 @@ bool Codegen::EmitCallRuntimeCode(Inst *inst, std::variant<EntrypointId, Reg> en
         encoder->MakeCall(reg);
     } else {
         auto id = std::get<EntrypointId>(entrypoint);
-        MemRef entry(ThreadReg(), GetRuntime()->GetEntrypointTlsOffset(GetArch(), id));
-        encoder->MakeCall(entry);
+        ScopedTmpReg tmpReg(encoder, true);
+        GetEntrypoint(tmpReg, id);
+        encoder->MakeCall(tmpReg);
     }
 
     SaveStateInst *saveState =
@@ -1707,8 +1709,9 @@ void Codegen::EmitResolveVirtualAot(ResolveVirtualInst *resolver, Reg methodReg)
     // PLT CallVirtual Resolver has a very special calling convention:
     //   First encoder temporary (method_reg) works as a parameter and return value
     CHECK_EQ(methodReg64.GetId(), GetTarget().GetTempRegsMask().GetMinRegister());
-    MemRef entry(ThreadReg(), GetRuntime()->GetEntrypointTlsOffset(GetArch(), EntrypointId::CALL_VIRTUAL_RESOLVER));
-    GetEncoder()->MakeCall(entry);
+    ScopedTmpReg tmpReg1(GetEncoder(), true);
+    GetEntrypoint(tmpReg1, EntrypointId::CALL_VIRTUAL_RESOLVER);
+    GetEncoder()->MakeCall(tmpReg1);
     // Need a stackmap to build correct boundary frame
     CreateStackMap(resolver);
     GetEncoder()->BindLabel(label);
@@ -2916,6 +2919,19 @@ Reg Codegen::ConvertInstTmpReg(const Inst *inst) const
     return ConvertInstTmpReg(inst, Is64BitsArch(GetArch()) ? DataType::INT64 : DataType::INT32);
 }
 
+void Codegen::GetEntrypoint(Reg entry, intptr_t epOffset) const
+{
+    auto epTable = MemRef(ThreadReg(), GetRuntime()->GetEntrypointsTablePointerTlsOffset(GetArch()));
+    LoadEntrypoint(entry, GetEncoder(), epTable, epOffset);
+}
+
+void Codegen::GetEntrypoint(Reg entry, EntrypointId id) const
+{
+    auto epTable = MemRef(ThreadReg(), GetRuntime()->GetEntrypointsTablePointerTlsOffset(GetArch()));
+    auto epOffset = GetRuntime()->GetEntrypointOffset(GetArch(), id);
+    LoadEntrypoint(entry, GetEncoder(), epTable, epOffset);
+}
+
 void PostWriteBarrier::Encode(MemRef mem, Reg reg1, Reg reg2, bool checkObject, RegMask preserved)
 {
     ASSERT(reg1.IsValid());
@@ -2976,8 +2992,9 @@ void PostWriteBarrier::EncodeOnlineIrtocBarrier(Args args)
         cg_->SaveCallerRegisters(paramRegs, VRegMask(), false);
         auto paramReg0 = enc->GetTarget().GetParamReg(0);
         enc->EncodeMov(paramReg0, base);
-        MemRef entry(cg_->ThreadReg(), cg_->GetRuntime()->GetEntrypointTlsOffset(cg_->GetArch(), ENTRYPOINT_ID));
-        enc->MakeCall(entry);
+        ScopedTmpReg tmpReg(enc, true);
+        cg_->GetEntrypoint(tmpReg, ENTRYPOINT_ID);
+        enc->MakeCall(tmpReg);
         cg_->LoadCallerRegisters(paramRegs, VRegMask(), false);
     }
 }
@@ -3002,7 +3019,6 @@ void PostWriteBarrier::EncodeOnlineIrtocRegionTwoRegsBarrier(Args args)
     auto *enc {cg_->GetEncoder()};
     auto base = GetBase(args);
     auto paramReg0 = enc->GetTarget().GetParamReg(0);
-    MemRef entry(cg_->ThreadReg(), cg_->GetRuntime()->GetEntrypointTlsOffset(cg_->GetArch(), ENTRYPOINT_ID));
     auto paramRegs = GetParamRegs(1U, args);
     auto lblMarkCardAndExit = enc->CreateLabel();
     auto lblCheck1Obj = enc->CreateLabel();
@@ -3015,14 +3031,17 @@ void PostWriteBarrier::EncodeOnlineIrtocRegionTwoRegsBarrier(Args args)
         enc->EncodeAnd(tmp, paramReg0, Imm(cross_values::GetCardAlignmentMask(cg_->GetArch())));
         enc->EncodeJump(lblMarkCardAndExit, tmp, Condition::NE);
     }
-    enc->MakeCall(entry);
+    ScopedTmpReg tmpReg(enc, true);
+    cg_->GetEntrypoint(tmpReg, ENTRYPOINT_ID);
+    enc->MakeCall(tmpReg);
     cg_->LoadCallerRegisters(paramRegs, VRegMask(), false);
     enc->BindLabel(lblCheck1Obj);
     EncodeCheckObject(base, args.reg1, lblDone, args.checkObject);
     cg_->SaveCallerRegisters(paramRegs, VRegMask(), false);
     EncodeWrapOneArg(paramReg0, base, args.mem);
     enc->BindLabel(lblMarkCardAndExit);
-    enc->MakeCall(entry);
+    cg_->GetEntrypoint(tmpReg, ENTRYPOINT_ID);
+    enc->MakeCall(tmpReg);
     cg_->LoadCallerRegisters(paramRegs, VRegMask(), false);
     enc->BindLabel(lblDone);
 }
@@ -3033,13 +3052,14 @@ void PostWriteBarrier::EncodeOnlineIrtocRegionOneRegBarrier(Args args)
     auto *enc {cg_->GetEncoder()};
     auto base = GetBase(args);
     auto paramReg0 = enc->GetTarget().GetParamReg(0);
-    MemRef entry(cg_->ThreadReg(), cg_->GetRuntime()->GetEntrypointTlsOffset(cg_->GetArch(), ENTRYPOINT_ID));
     auto paramRegs = GetParamRegs(1U, args);
     auto skip = enc->CreateLabel();
     EncodeCheckObject(base, args.reg1, skip, args.checkObject);
     cg_->SaveCallerRegisters(paramRegs, VRegMask(), false);
     EncodeWrapOneArg(paramReg0, base, args.mem);
-    enc->MakeCall(entry);
+    ScopedTmpReg tmpReg(enc, true);
+    cg_->GetEntrypoint(tmpReg, ENTRYPOINT_ID);
+    enc->MakeCall(tmpReg);
     cg_->LoadCallerRegisters(paramRegs, VRegMask(), false);
     enc->BindLabel(skip);
 }

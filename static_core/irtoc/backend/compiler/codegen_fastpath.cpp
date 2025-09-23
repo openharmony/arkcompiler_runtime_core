@@ -248,7 +248,7 @@ void CodegenFastPath::CreateTailCall(IntrinsicInst *inst, bool isFastpath)
     } else {
         ScopedTmpReg tmp(encoder);
         auto offset = inst->GetImms()[0];
-        encoder->EncodeLdr(tmp, false, MemRef(ThreadReg(), offset));
+        GetEntrypoint(tmp, offset);
         encoder->EncodeJump(tmp);
     }
 }
@@ -330,11 +330,10 @@ void CodegenFastPath::EmitWriteTlabStatsSafeIntrinsic([[maybe_unused]] Intrinsic
     FillCallParams(src1, src2);
 
     auto id = RuntimeInterface::EntrypointId::WRITE_TLAB_STATS_NO_BRIDGE;
-    MemRef entry(ThreadReg(), GetRuntime()->GetEntrypointTlsOffset(GetArch(), id));
     constexpr size_t NUM_OF_ARGS = 2;
     // Temp registers are not available because they are busy in irtoc tlab allocation. So it is faked with param reg.
     auto tmp = GetEncoder()->GetTarget().GetParamReg(NUM_OF_ARGS);
-    GetEncoder()->EncodeLdr(tmp, false, entry);
+    GetEntrypoint(tmp, id);
     GetEncoder()->MakeCall(tmp);
 
     GetEncoder()->PopRegisters(regs, vregs);

@@ -99,6 +99,8 @@ Thread::Thread(PandaVM *vm, ThreadType threadType) : ThreadProxy(vm->GetMutatorL
     signalStack_.ss_flags = 0;
     sigaltstack(&signalStack_, nullptr);
 #endif
+
+    entrypointsTable_ = Runtime::GetCurrent()->GetEntrypointsTable();
 }
 
 void Thread::InitThreadRandomState()

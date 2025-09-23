@@ -81,12 +81,12 @@ module Constants
     TLAB_CUR_FREE_POSITION_OFFSET = "cross_values::GetTlabCurFreePositionOffset(GetArch())"
     TLAB_MEMORY_END_ADDR_OFFSET = "cross_values::GetTlabMemoryEndAddrOffset(GetArch())"
     OBJECT_CLASS_OFFSET = "cross_values::GetObjectHeaderClassPointerOffset(GetArch())"
-    WRITE_TLAB_STATS_NO_BRIDGE = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::WRITE_TLAB_STATS_NO_BRIDGE)"
-    ANNOTATE_SANITIZERS_NO_BRIDGE = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::ANNOTATE_SANITIZERS_NO_BRIDGE)"
-    ANNOTATE_SANITIZERS_POISON_NO_BRIDGE = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::ANNOTATE_SANITIZERS_POISON_NO_BRIDGE)"
-    GET_CALLEE_METHOD = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::GET_CALLEE_METHOD_DIRECT)"
-    INITIALIZE_CLASS_BY_ID = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::INITIALIZE_CLASS_BY_ID_DIRECT)"
-    RESOLVE_CLASS = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::RESOLVE_CLASS_DIRECT)"
+    WRITE_TLAB_STATS_NO_BRIDGE = "cross_values::GetEntrypointOffset(GetArch(), EntrypointId::WRITE_TLAB_STATS_NO_BRIDGE)"
+    ANNOTATE_SANITIZERS_NO_BRIDGE = "cross_values::GetEntrypointOffset(GetArch(), EntrypointId::ANNOTATE_SANITIZERS_NO_BRIDGE)"
+    ANNOTATE_SANITIZERS_POISON_NO_BRIDGE = "cross_values::GetEntrypointOffset(GetArch(), EntrypointId::ANNOTATE_SANITIZERS_POISON_NO_BRIDGE)"
+    GET_CALLEE_METHOD = "cross_values::GetEntrypointOffset(GetArch(), EntrypointId::GET_CALLEE_METHOD_DIRECT)"
+    INITIALIZE_CLASS_BY_ID = "cross_values::GetEntrypointOffset(GetArch(), EntrypointId::INITIALIZE_CLASS_BY_ID_DIRECT)"
+    RESOLVE_CLASS = "cross_values::GetEntrypointOffset(GetArch(), EntrypointId::RESOLVE_CLASS_DIRECT)"
     GET_VTABLE_INDEX = "cross_values::GetMethodVTableIndexOffset(GetArch())"
     CLASS_STATE_OFFSET = "cross_values::GetClassStateOffset(GetArch())"
     ARRAY_LENGTH_OFFSET = "cross_values::GetCoretypesArrayLengthOffset(GetArch())"
@@ -250,14 +250,19 @@ module Constants
     SB_COMPRESS_OFFSET = "RuntimeInterface::GetSbCompressOffset()"
   end
 
-macro(:call_runtime) { |e, *args|
-    entry := LoadI(%tr).Imm(e).ptr
+macro(:get_entry) { |entry_offset|
+    table := LoadI(%tr).Imm("cross_values::GetManagedThreadEntrypointsTableOffset(GetArch())").ptr
+    LoadI(table).Imm(entry_offset).ptr
+}
+
+macro(:call_runtime) { |entry_offset, *args|
+    entry := get_entry(entry_offset)
     CallIndirect(entry, *args)
 }
 
-macro(:call_runtime_save_all) { |e, *args|
+macro(:call_runtime_save_all) { |entry_offset, *args|
     # Load entry before save registers because stack SpillFill is possible
-    entry := LoadI(%tr).Imm(e).ptr
+    entry := get_entry(entry_offset)
     Intrinsic(:SAVE_REGISTERS_EP).void
     ret := CallIndirect(entry, *args)
     Intrinsic(:RESTORE_REGISTERS_EP).void
@@ -394,7 +399,7 @@ macro(:nullptr) do
 end
 
 macro(:get_entrypoint_offset) do |entrypoint_id|
-  "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::#{entrypoint_id})"
+  "cross_values::GetEntrypointOffset(GetArch(), EntrypointId::#{entrypoint_id})"
 end
 
 macro(:reftoptr) do |ref_val|

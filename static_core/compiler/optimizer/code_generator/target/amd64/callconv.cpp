@@ -15,6 +15,8 @@
 /*
 Low-level calling convention
 */
+#include "optimizer/code_generator/codegen_load_entrypoint.h"
+#include "scoped_tmp_reg.h"
 #include "target/amd64/target.h"
 
 namespace ark::compiler::amd64 {
@@ -161,9 +163,11 @@ void Amd64CallingConvention::GeneratePrologue([[maybe_unused]] const FrameInfo &
         encoder->EncodeJump(expandDone, NUM_ACTUAL_REG, Imm(numExpected), Condition::GE);
         encoder->EncodeMov(NUM_EXPECTED_REG, Imm(numExpected));
 
-        MemRef expandEntrypoint(Reg(GetThreadReg(Arch::X86_64), GetTarget().GetPtrRegType()),
-                                GetDynInfo().GetExpandEntrypointTlsOffset());
-        GetEncoder()->MakeCall(expandEntrypoint);
+        ScopedTmpRegU64 tmpReg(encoder);
+        MemRef epTable = MemRef(Reg(GetThreadReg(Arch::X86_64), GetTarget().GetPtrRegType()),
+                                GetDynInfo().GetExpandEntrypointsTableTlsOffset());
+        LoadEntrypoint(tmpReg, encoder, epTable, GetDynInfo().GetExpandEntrypointOffset());
+        encoder->MakeCall(tmpReg);
         encoder->BindLabel(expandDone);
     }
 

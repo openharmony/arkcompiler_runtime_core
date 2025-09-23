@@ -160,11 +160,17 @@ LLVMArkInterface::RegMasks LLVMArkInterface::GetCalleeSavedRegistersMask(llvm::S
     return calleeSavedRegisters_.lookup(method);
 }
 
-uintptr_t LLVMArkInterface::GetEntrypointTlsOffset(EntrypointId id) const
+uintptr_t LLVMArkInterface::GetEntrypointsTablePointerTlsOffset() const
+{
+    Arch arkArch = LLVMArchToArkArch(triple_.getArch());
+    return runtime_->GetEntrypointsTablePointerTlsOffset(arkArch);
+}
+
+uintptr_t LLVMArkInterface::GetEntrypointOffset(EntrypointId id) const
 {
     Arch arkArch = LLVMArchToArkArch(triple_.getArch());
     using PandaEntrypointId = ark::compiler::RuntimeInterface::EntrypointId;
-    return runtime_->GetEntrypointTlsOffset(arkArch, static_cast<PandaEntrypointId>(id));
+    return runtime_->GetEntrypointOffset(arkArch, static_cast<PandaEntrypointId>(id));
 }
 
 size_t LLVMArkInterface::GetTlsFrameKindOffset() const
