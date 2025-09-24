@@ -59,14 +59,18 @@ cases:
   - decl: let myV = "true"
     assert: typeof myV == "string"
 
-  - decl: declare const myC = 1
-    assert: typeof myC == "number"
+  - files: './impl/case_1.ets'
+    decl: import { myC } from './decl/case_1'
+    assert: typeof myC == "number" && myC == 10
 
-  - decl: declare const myC = 2.0
-    assert: typeof myC == "number"
+  - files: './impl/case_2.ets'
+    decl: import { myC } from './decl/case_2'
+    assert: typeof myC == "number" && myC == 20.0
 
-  - decl: declare const myC = "1"
-    assert: typeof myC == "string"
+  - files: './impl/case_3.ets'
+    decl: import { myC } from './decl/case_3'
+    assert: typeof myC == "string" && myC == "11"
 
-  - decl: declare const myC = "string"
-    assert: typeof myC == "string"
+  - files: './impl/case_4.ets'
+    decl: import { myC } from './decl/case_4'
+    assert: typeof myC == "string" && myC == "implementation string"

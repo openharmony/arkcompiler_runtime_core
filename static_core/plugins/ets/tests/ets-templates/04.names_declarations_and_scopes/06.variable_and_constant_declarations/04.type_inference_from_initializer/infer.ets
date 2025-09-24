@@ -17,6 +17,7 @@ limitations under the License.
 
 /*---
 desc: Check type inference from the initialization expression
+files: [{{c.files}}]
 ---*/
 
 {{c.decl}}
