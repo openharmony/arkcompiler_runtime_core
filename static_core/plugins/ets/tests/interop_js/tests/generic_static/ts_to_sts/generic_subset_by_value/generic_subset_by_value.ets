@@ -13,20 +13,47 @@
  * limitations under the License.
  */
 
-import {
-    SubsetByValueStatic,
-    genericSubsetByValueStaticCallFromTs,
-    BaseObj,
-} from "main_js"
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/generic_static/ts_to_sts/main');
+let SubsetByValueStatic = module.getProperty('SubsetByValueStatic');
+let genericSubsetByValueStaticCallFromTs = module.getProperty('genericSubsetByValueStaticCallFromTs');
+let BaseObj = module.getProperty('BaseObj');
 
 function checkSubsetByValueStatic(): boolean {
-    const res = SubsetByValueStatic.get(BaseObj.a);
-
-    return res as int == BaseObj.a as int
+    try {
+        const baseObjA = BaseObj.getProperty('a');
+        
+        if (baseObjA == null) {
+            return false;
+        }
+        
+        const res = SubsetByValueStatic.invokeMethod('get', baseObjA);
+        
+        if (res == null) {
+            return false;
+        }
+        
+        return res.toNumber() === baseObjA.toNumber();
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkGenericSubsetByValueStaticCallFromTs(): boolean {
-    const res = genericSubsetByValueStaticCallFromTs(BaseObj.a);
-
-    return res as int == BaseObj.a as int
+    try {
+        const baseObjA = BaseObj.getProperty('a');
+        
+        if (baseObjA == null) {
+            return false;
+        }
+        
+        const res = genericSubsetByValueStaticCallFromTs.invoke(baseObjA);
+        
+        if (res == null) {
+            return false;
+        }
+        
+        return res.toNumber() === baseObjA.toNumber();
+    } catch (e) {
+        return false;
+    }
 }

@@ -15,18 +15,17 @@
 
 package getter.test;
 
-import {
-    PUBLIC_GETTER_CLASS_VALUE,
-    PUBLIC_GETTER_OVERRIDE_CLASS_VALUE,
-    PROTECTED_GETTER_CLASS_VALUE,
-    PROTECTED_GETTER_OVERRIDE_CLASS_VALUE,
-    PRIVATE_GETTER_CLASS_VALUE,
-    PRIVATE_GETTER_OVERRIDE_CLASS_VALUE,
-    PUBLIC_STATIC_GETTER_CLASS_VALUE
-} from 'constant_js'
+class ModuleLoader {
+    static _module: ESValue = ESValue.load('../../plugins/ets/tests/interop_js/tests/getter_arkjs/ets_to_js/constant');
+
+    public static getProp(propertyName: string): ESValue {
+        return ModuleLoader._module.getProperty(propertyName);
+    }
+}
 
 class PublicGetterClass {
-    _value = PUBLIC_GETTER_CLASS_VALUE;
+    PUBLIC_GETTER_CLASS_VALUE = ModuleLoader.getProp("PUBLIC_GETTER_CLASS_VALUE");    
+    _value = this.PUBLIC_GETTER_CLASS_VALUE.toString();
 
     get value(): string {
         return this._value;
@@ -38,8 +37,9 @@ function create_public_getter_class_from_ets(): PublicGetterClass {
 }
 
 class PublicGetterOverrideClass extends PublicGetterClass {
+    PUBLIC_GETTER_OVERRIDE_CLASS_VALUE = ModuleLoader.getProp('PUBLIC_GETTER_OVERRIDE_CLASS_VALUE');
     public get value(): string {
-        return PUBLIC_GETTER_OVERRIDE_CLASS_VALUE;
+        return this.PUBLIC_GETTER_OVERRIDE_CLASS_VALUE.toString();
     }
 }
 
@@ -48,7 +48,8 @@ function create_public_getter_override_class_from_ets(): PublicGetterOverrideCla
 }
 
 class ProtectedGetterOrigenClass {
-    protected _value = PROTECTED_GETTER_CLASS_VALUE;
+    PROTECTED_GETTER_CLASS_VALUE = ModuleLoader.getProp('PROTECTED_GETTER_CLASS_VALUE');
+    protected _value = this.PROTECTED_GETTER_CLASS_VALUE.toString();
 
     public get value(): string {
         return this._value;
@@ -66,8 +67,9 @@ function create_protected_getter_inheritance_class_from_ets(): ProtectedGetterIn
 }
 
 class ProtectedGetterOverrideClass extends ProtectedGetterOrigenClass {
+    PROTECTED_GETTER_OVERRIDE_CLASS_VALUE = ModuleLoader.getProp('PROTECTED_GETTER_OVERRIDE_CLASS_VALUE');
     public get value(): string {
-        return PROTECTED_GETTER_OVERRIDE_CLASS_VALUE;
+        return this.PROTECTED_GETTER_OVERRIDE_CLASS_VALUE.toString();
     }
 }
 
@@ -76,7 +78,8 @@ function create_protected_getter_override_class_from_ets(): ProtectedGetterOverr
 }
 
 class PrivateGetterClass {
-    private _value = PRIVATE_GETTER_CLASS_VALUE;
+    PRIVATE_GETTER_CLASS_VALUE = ModuleLoader.getProp('PRIVATE_GETTER_CLASS_VALUE');
+    private _value = this.PRIVATE_GETTER_CLASS_VALUE.toString();
 
     public get value(): string {
         return this._value;
@@ -94,8 +97,9 @@ function create_private_getter_inheritance_class_from_ets(): PrivateGetterInheri
 }
 
 class PrivateGetterOverrideClass extends PrivateGetterClass {
+    PRIVATE_GETTER_OVERRIDE_CLASS_VALUE = ModuleLoader.getProp('PRIVATE_GETTER_OVERRIDE_CLASS_VALUE');
     public get value(): string {
-        return PRIVATE_GETTER_OVERRIDE_CLASS_VALUE;
+        return this.PRIVATE_GETTER_OVERRIDE_CLASS_VALUE.toString();
     }
 }
 
@@ -103,7 +107,7 @@ function create_private_getter_override_class_from_ets(): PrivateGetterOverrideC
     return new PrivateGetterOverrideClass();
 }
 
-type Union = int | string;
+type Union = number | string;
 
 class UnionTypeClass {
     public _value: Union;

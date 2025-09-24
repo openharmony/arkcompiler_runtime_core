@@ -13,45 +13,138 @@
  * limitations under the License.
  */
 
-import {
-    tsInt,
-    tsString,
-    tsBool,
-    tsArr,
-    GenericStatic,
-    genericStaticMethodCallFromTs,
-} from "main_js"
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/generic_static/ts_to_sts/main');
+let GenericStatic = module.getProperty('GenericStatic');
+let genericStaticMethodCallFromTs = module.getProperty('genericStaticMethodCallFromTs');
 
 function checkGenericStaticInt(): boolean {
-    return GenericStatic.get(tsInt) as int == tsInt as int;
+    try {
+        const tsInt = ESValue.wrapInt(1);
+        const res = GenericStatic.invokeMethod('get', tsInt);
+        
+        if (res == null) {
+            return false;
+        }
+        
+        return res.toNumber() === 1;
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkGenericStaticString(): boolean {
-    return GenericStatic.get(tsString) as string == tsString as string;
+    try {
+        const tsString = ESValue.wrapString("test");
+        const res = GenericStatic.invokeMethod('get', tsString);
+        
+        if (res == null) {
+            return false;
+        }
+        
+        return res.toString() === "test";
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkGenericStaticBool(): boolean {
-    return GenericStatic.get(tsBool) as boolean == tsBool as boolean;
+    try {
+        const tsBool = ESValue.wrapBoolean(true);
+        const res = GenericStatic.invokeMethod('get', tsBool);
+        
+        if (res == null) {
+            return false;
+        }
+        
+        return res.toBoolean() === true;
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkGenericStaticArr(): boolean {
-    const res = GenericStatic.get(tsArr);
-    return res as Array<int> instanceof Array && res[0] as int == tsArr[0] as int;
+    try {
+        const jsArray = [1, 2, 3];
+        const tsArr = ESValue.wrap(jsArray);
+        const res = GenericStatic.invokeMethod('get', tsArr);
+        
+        if (res == null) {
+            return false;
+        }
+        
+        const firstElement = res.getProperty(0);
+        if (firstElement == null) {
+            return false;
+        }
+        
+        return firstElement.toNumber() === 1;
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkGenericStaticMethodCallFromTsInt(): boolean {
-    return genericStaticMethodCallFromTs(tsInt) as int == tsInt as int;
+    try {
+        const tsInt = ESValue.wrapInt(1);
+        const res = genericStaticMethodCallFromTs.invoke(tsInt);
+        
+        if (res == null) {
+            return false;
+        }
+        
+        return res.toNumber() === 1;
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkGenericStaticMethodCallFromTsString(): boolean {
-    return genericStaticMethodCallFromTs(tsString) as string == tsString as string;
+    try {
+        const tsString = ESValue.wrapString("test");
+        const res = genericStaticMethodCallFromTs.invoke(tsString);
+        
+        if (res == null) {
+            return false;
+        }
+        
+        return res.toString() === "test";
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkGenericStaticMethodCallFromTsBool(): boolean {
-    return genericStaticMethodCallFromTs(tsBool) as boolean == tsBool as boolean;
+    try {
+        const tsBool = ESValue.wrapBoolean(true);
+        const res = genericStaticMethodCallFromTs.invoke(tsBool);
+        
+        if (res == null) {
+            return false;
+        }
+        
+        return res.toBoolean() === true;
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkGenericStaticMethodCallFromTsArr(): boolean {
-    const res = genericStaticMethodCallFromTs(tsArr);
-    return res as Array<int> instanceof Array && res[0] as int == tsArr[0] as int;
+    try {
+        const jsArray = [1, 2, 3];
+        const tsArr = ESValue.wrap(jsArray);
+        const res = genericStaticMethodCallFromTs.invoke(tsArr);
+        
+        if (res == null) {
+            return false;
+        }
+        
+        const firstElement = res.getProperty(0);
+        if (firstElement == null) {
+            return false;
+        }
+        
+        return firstElement.toNumber() === 1;
+    } catch (e) {
+        return false;
+    }
 }

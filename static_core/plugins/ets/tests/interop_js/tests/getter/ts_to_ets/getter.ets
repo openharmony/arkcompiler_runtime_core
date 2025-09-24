@@ -13,363 +13,523 @@
  * limitations under the License.
  */
 
-import {
-    tsString,
-    tsNumber,
-    PublicGetterClass,
-    createPublicGetterClassFromTs,
-    publicGetterInstanceClass,
-    UnionTypeClass,
-    createUnionTypeGetterClassFromTs,
-    unionTypeGetterInstanceClassInt,
-    unionTypeGetterInstanceClassString,
-    LiteralClass,
-    createLiteralTypeGetterClassFromTs,
-    literalTypeGetterInstanceClassInt,
-    literalTypeGetterInstanceClassString,
-    TupleType,
-    TupleTypeClass,
-    createTupleTypeGetterClassFromTs,
-    tupleTypeGetterInstanceClass,
-    AnyTypeClass,
-    createAnyTypeGetterClassFromTs,
-    anyTypeGetterInstanceClass,
-    anyTypeExplicitGetterInstanceClass,
-    SubsetByRef,
-    createSubsetByRefGetterClassFromTs,
-    subsetByRefInstanceClass,
-    SubsetByValueClass,
-    createSubsetByValueGetterClassFromTs,
-    subsetByValueInstanceClass,
-} from 'dynamic_import';
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/getter/ts_to_ets/getter');
 
+let tsString = module.getProperty('tsString');
+let tsNumber = module.getProperty('tsNumber');
+let PublicGetterClass = module.getProperty('PublicGetterClass');
+let createPublicGetterClassFromTs = module.getProperty('createPublicGetterClassFromTs');
+let publicGetterInstanceClass = module.getProperty('publicGetterInstanceClass');
+let UnionTypeClass = module.getProperty('UnionTypeClass');
+let createUnionTypeGetterClassFromTs = module.getProperty('createUnionTypeGetterClassFromTs');
+let unionTypeGetterInstanceClassInt = module.getProperty('unionTypeGetterInstanceClassInt');
+let unionTypeGetterInstanceClassString = module.getProperty('unionTypeGetterInstanceClassString');
+let LiteralClass = module.getProperty('LiteralClass');
+let createLiteralTypeGetterClassFromTs = module.getProperty('createLiteralTypeGetterClassFromTs');
+let literalTypeGetterInstanceClassInt = module.getProperty('literalTypeGetterInstanceClassInt');
+let literalTypeGetterInstanceClassString = module.getProperty('literalTypeGetterInstanceClassString');
+let TupleTypeClass = module.getProperty('TupleTypeClass');
+let createTupleTypeGetterClassFromTs = module.getProperty('createTupleTypeGetterClassFromTs');
+let tupleTypeGetterInstanceClass = module.getProperty('tupleTypeGetterInstanceClass');
+let AnyTypeClass = module.getProperty('AnyTypeClass');
+let createAnyTypeGetterClassFromTs = module.getProperty('createAnyTypeGetterClassFromTs');
+let anyTypeGetterInstanceClass = module.getProperty('anyTypeGetterInstanceClass');
+let anyTypeExplicitGetterInstanceClass = module.getProperty('anyTypeExplicitGetterInstanceClass');
+let SubsetByRef = module.getProperty('SubsetByRef');
+let createSubsetByRefGetterClassFromTs = module.getProperty('createSubsetByRefGetterClassFromTs');
+let subsetByRefInstanceClass = module.getProperty('subsetByRefInstanceClass');
+let SubsetByValueClass = module.getProperty('SubsetByValueClass');
+let createSubsetByValueGetterClassFromTs = module.getProperty('createSubsetByValueGetterClassFromTs');
+let subsetByValueInstanceClass = module.getProperty('subsetByValueInstanceClass');
 
-const tupleArr: TupleType = [tsNumber, tsString] as FixedArray<JSValue>;
-const etsNumber = 1;
-const etsString = 'string';
-const etsArr: FixedArray<int> = [etsNumber];
-const etsBool = true;
-const etsObj: Object = {};
-const etsUnion: int | string = etsNumber;
+const etsNumber: int = 1;
+const etsString: string = 'string';
+const etsBool: boolean = true;
+const etsObj: Object = new Object();
+const etsUnion: int = etsNumber;
 
 function checkGetterPublicClass(): boolean {
-    const GClass = new PublicGetterClass();
-
-    return GClass.value as string == tsString as string;
+    try {
+        const GClass = PublicGetterClass.instantiate();
+        const value = GClass.getProperty('value');
+        return value.toString() == tsString.toString();
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreatePublicGetterClassFromTs(): boolean {
-    const GClass = createPublicGetterClassFromTs();
-
-    return tsString as string == GClass.value as string;
+    try {
+        const GClass = createPublicGetterClassFromTs.invoke();
+        const value = GClass.getProperty('value');
+        return tsString.toString() == value.toString();
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkPublicGetterInstanceClassFromTs(): boolean {
-    return tsString as string == publicGetterInstanceClass.value as string;
+    try {
+        const value = publicGetterInstanceClass.getProperty('value');
+        return tsString.toString() == value.toString();
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkUnionTypeGetterClassInt(): boolean {
-    const GClass = new UnionTypeClass(tsNumber);
-
-    return GClass.value as int == tsNumber as int;
+    try {
+        const GClass = UnionTypeClass.instantiate(tsNumber);
+        const value = GClass.getProperty('value');
+        return value.toNumber() == tsNumber.toNumber();
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateUnionTypeGetterClassFromTsInt(): boolean {
-    const GClass = createUnionTypeGetterClassFromTs(tsNumber);
-
-    return GClass.value as int == tsNumber as int;
+    try {
+        const GClass = createUnionTypeGetterClassFromTs.invoke(tsNumber);
+        const value = GClass.getProperty('value');
+        return value.toNumber() == tsNumber.toNumber();
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkInstanceUnionTypeGetterClassFromTsInt(): boolean {
-    return tsNumber as int == unionTypeGetterInstanceClassInt.value as int;
+    try {
+        const value = unionTypeGetterInstanceClassInt.getProperty('value');
+        return tsNumber.toNumber() == value.toNumber();
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkUnionTypeGetterClassString(): boolean {
-    const GClass = new UnionTypeClass(tsString);
-
-    return GClass.value as string == tsString as string;
+    try {
+        const GClass = UnionTypeClass.instantiate(tsString);
+        const value = GClass.getProperty('value');
+        return value.toString() == tsString.toString();
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateUnionTypeGetterClassFromTsString(): boolean {
-    const GClass = createUnionTypeGetterClassFromTs(tsString);
-
-    return GClass.value as string == tsString as string;
+    try {
+        const GClass = createUnionTypeGetterClassFromTs.invoke(tsString);
+        const value = GClass.getProperty('value');
+        return value.toString() == tsString.toString();
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkInstanceUnionTypeGetterClassFromTsString(): boolean {
-    return tsString as string == unionTypeGetterInstanceClassString.value as string;
+    try {
+        const value = unionTypeGetterInstanceClassString.getProperty('value');
+        return tsString.toString() == value.toString();
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkLiteralTypeGetterClassInt(): boolean {
-    const GClass = new LiteralClass(tsNumber);
-
-    return GClass.value as int == tsNumber as int;
+    try {
+        const GClass = LiteralClass.instantiate(tsNumber);
+        const value = GClass.getProperty('value');
+        return value.toNumber() == tsNumber.toNumber();
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkLiteralTypeGetterClassString(): boolean {
-    const GClass = new LiteralClass(tsString);
-
-    return GClass.value as string == tsString as string;
+    try {
+        const GClass = LiteralClass.instantiate(tsString);
+        const value = GClass.getProperty('value');
+        return value.toString() == tsString.toString();
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateLiteralTypeGetterClassFromTsInt(): boolean {
-    const GClass = createLiteralTypeGetterClassFromTs(tsNumber);
-
-    return GClass.value as int == tsNumber as int;
+    try {
+        const GClass = createLiteralTypeGetterClassFromTs.invoke(tsNumber);
+        const value = GClass.getProperty('value');
+        return value.toNumber() == tsNumber.toNumber();
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateLiteralTypeGetterClassFromTsString(): boolean {
-    const GClass = createLiteralTypeGetterClassFromTs(tsString);
-
-    return GClass.value as string == tsString as string;
+    try {
+        const GClass = createLiteralTypeGetterClassFromTs.invoke(tsString);
+        const value = GClass.getProperty('value');
+        return value.toString() == tsString.toString();
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkInstanceLiteralTypeGetterClassFromTsInt(): boolean {
-    return tsNumber as int == literalTypeGetterInstanceClassInt.value as int;
+    try {
+        const value = literalTypeGetterInstanceClassInt.getProperty('value');
+        return tsNumber.toNumber() == value.toNumber();
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkInstanceLiteralTypeGetterClassFromTsString(): boolean {
-    return tsString as string == literalTypeGetterInstanceClassString.value as string;
+    try {
+        const value = literalTypeGetterInstanceClassString.getProperty('value');
+        return tsString.toString() == value.toString();
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkTupleTypeGetterClass(): boolean {
-    const GClass = new TupleTypeClass(tupleArr);
-
-    return GClass.value as Array<TupleType> instanceof Array
-        && GClass.value[0] as int == tupleArr[0] as int
-        && GClass.value[1] as string == tupleArr[1] as string;
+    try {
+        const GClass = TupleTypeClass.instantiate([etsNumber, etsString]);
+        const value = GClass.getProperty('value');
+        const elem0 = value.getProperty(0);
+        const elem1 = value.getProperty(1);
+        return elem0.toNumber() == tsNumber.toNumber() &&
+               elem1.toString() == tsString.toString();
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateTupleTypeGetterClassFromTs(): boolean {
-    const GClass = createTupleTypeGetterClassFromTs(tupleArr);
-
-    return GClass.value as Array<TupleType> instanceof Array
-        && GClass.value[0] as int == tupleArr[0] as int
-        && GClass.value[1] as string == tupleArr[1] as string;
+    try {
+        const GClass = createTupleTypeGetterClassFromTs.invoke([etsNumber, etsString]);
+        const value = GClass.getProperty('value');
+        const elem0 = value.getProperty(0);
+        const elem1 = value.getProperty(1);
+        return elem0.toNumber() == tsNumber.toNumber() &&
+               elem1.toString() == tsString.toString();
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkInstanceTupleTypeGetterClassFromTs(): boolean {
-    const GClass = tupleTypeGetterInstanceClass;
-
-    return GClass.value as Array<TupleType> instanceof Array
-        && GClass.value[0] as int == tupleArr[0] as int
-        && GClass.value[1] as string == tupleArr[1] as string;
+    try {
+        const value = tupleTypeGetterInstanceClass.getProperty('value');
+        const elem0 = value.getProperty(0);
+        const elem1 = value.getProperty(1);
+        return elem0.toNumber() == tsNumber.toNumber() &&
+               elem1.toString() == tsString.toString();
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkAnyTypeGetterClassInt(): boolean {
-    const GClass = new AnyTypeClass();
-
-    GClass._value = etsNumber;
-
-    return GClass.value as int == etsNumber as int
+    try {
+        const GClass = AnyTypeClass.instantiate();
+        GClass.setProperty('_value', ESValue.wrapInt(etsNumber));
+        const value = GClass.getProperty('value');
+        return value.toNumber() == etsNumber;
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkAnyTypeGetterClassString(): boolean {
-    const GClass = new AnyTypeClass();
-
-    GClass._value = etsString;
-
-    return GClass.value as string == etsString as string;
+    try {
+        const GClass = AnyTypeClass.instantiate();
+        GClass.setProperty('_value', ESValue.wrapString(etsString));
+        const value = GClass.getProperty('value');
+        return value.toString() == etsString;
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkAnyTypeGetterClassBool(): boolean {
-    const GClass = new AnyTypeClass();
-
-    GClass._value = etsBool;
-
-    return GClass.value as boolean == etsBool as boolean;
+    try {
+        const GClass = AnyTypeClass.instantiate();
+        GClass.setProperty('_value', ESValue.wrapBoolean(etsBool));
+        const value = GClass.getProperty('value');
+        return value.toBoolean() == etsBool;
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkAnyTypeGetterClassArr(): boolean {
-    const GClass = new AnyTypeClass();
-
-    GClass._value = etsArr;
-
-    return GClass.value as Array<int> instanceof Array;
+    try {
+        const GClass = AnyTypeClass.instantiate();
+        GClass.setProperty('_value', [ESValue.wrapInt(etsNumber)]);
+        const value = GClass.getProperty('value');
+        return value != null;
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkAnyTypeGetterClassObj(): boolean {
-    const GClass = new AnyTypeClass();
-
-    GClass._value = etsObj;
-
-    return typeof GClass.value as Object == 'object';
+    try {
+        const GClass = AnyTypeClass.instantiate();
+        GClass.setProperty('_value', etsObj);
+        const value = GClass.getProperty('value');
+        return value.typeOf() == 'object';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkAnyTypeGetterClassTuple(): boolean {
-    const GClass = new AnyTypeClass();
-
-    GClass._value = tupleArr;
-
-    return GClass.value as Array<TupleType> instanceof Array
-        && GClass.value[0] as int == tupleArr[0] as int
-        && GClass.value[1] as string == tupleArr[1] as string;
+    try {
+        const GClass = AnyTypeClass.instantiate();
+        GClass.setProperty('_value', [tsNumber, tsString]);
+        const value = GClass.getProperty('value');
+        const elem0 = value.getProperty(0);
+        const elem1 = value.getProperty(1);
+        return elem0.toNumber() == tsNumber.toNumber() &&
+               elem1.toString() == tsString.toString();
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkAnyTypeGetterClassUnion(): boolean {
-    const GClass = new AnyTypeClass();
-
-    GClass._value = etsUnion;
-
-    return GClass.value as int == etsUnion as int;
+    try {
+        const GClass = AnyTypeClass.instantiate();
+        GClass.setProperty('_value', ESValue.wrapInt(etsUnion));
+        const value = GClass.getProperty('value');
+        return value.toNumber() == etsUnion;
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateAnyTypeGetterClassFromTsInt(): boolean {
-    const GClass = createAnyTypeGetterClassFromTs();
-
-    GClass._value = etsNumber;
-
-    return GClass.value as int == etsNumber as int
+    try {
+        const GClass = createAnyTypeGetterClassFromTs.invoke();
+        GClass.setProperty('_value', ESValue.wrapInt(etsNumber));
+        const value = GClass.getProperty('value');
+        return value.toNumber() == etsNumber;
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateAnyTypeGetterClassFromTsString(): boolean {
-    const GClass = createAnyTypeGetterClassFromTs();
-
-    GClass._value = etsString;
-
-    return GClass.value as string == etsString as string;
+    try {
+        const GClass = createAnyTypeGetterClassFromTs.invoke();
+        GClass.setProperty('_value', ESValue.wrapString(etsString));
+        const value = GClass.getProperty('value');
+        return value.toString() == etsString;
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateAnyTypeGetterClassFromTsBool(): boolean {
-    const GClass = createAnyTypeGetterClassFromTs();
-
-    GClass._value = etsBool;
-
-    return GClass.value as boolean == etsBool as boolean;
+    try {
+        const GClass = createAnyTypeGetterClassFromTs.invoke();
+        GClass.setProperty('_value', ESValue.wrapBoolean(etsBool));
+        const value = GClass.getProperty('value');
+        return value.toBoolean() == etsBool;
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateAnyTypeGetterClassFromTsArr(): boolean {
-    const GClass = createAnyTypeGetterClassFromTs();
-
-    GClass._value = etsArr;
-
-    return GClass.value as Array<int> instanceof Array;
+    try {
+        const GClass = createAnyTypeGetterClassFromTs.invoke();
+        GClass.setProperty('_value', [ESValue.wrapInt(etsNumber)]);
+        const value = GClass.getProperty('value');
+        return value != null;
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateAnyTypeGetterClassFromTsObj(): boolean {
-    const GClass = createAnyTypeGetterClassFromTs();
-
-    GClass._value = etsObj;
-
-    return typeof GClass.value as Object == 'object';
+    try {
+        const GClass = createAnyTypeGetterClassFromTs.invoke();
+        GClass.setProperty('_value', etsObj);
+        const value = GClass.getProperty('value');
+        return value != null;
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateAnyTypeGetterClassFromTsTuple(): boolean {
-    const GClass = createAnyTypeGetterClassFromTs();
-
-    GClass._value = tupleArr;
-
-    return GClass.value as Array<TupleType> instanceof Array
-        && GClass.value[0] as int == tupleArr[0] as int
-        && GClass.value[1] as string == tupleArr[1] as string;
+    try {
+        const GClass = createAnyTypeGetterClassFromTs.invoke();
+        GClass.setProperty('_value', [etsNumber, etsString]);
+        const value = GClass.getProperty('value');
+        const elem0 = value.getProperty(0);
+        const elem1 = value.getProperty(1);
+        return elem0.toNumber() == tsNumber.toNumber() &&
+               elem1.toString() == tsString.toString();
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateAnyTypeGetterClassFromTsUnion(): boolean {
-    const GClass = createAnyTypeGetterClassFromTs();
-
-    GClass._value = etsUnion;
-
-    return GClass.value as int == etsUnion as int;
+    try {
+        const GClass = createAnyTypeGetterClassFromTs.invoke();
+        GClass.setProperty('_value', ESValue.wrapInt(etsUnion));
+        const value = GClass.getProperty('value');
+        return value.toNumber() == etsUnion;
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkInstanceAnyTypeGetterClassFromTsInt(): boolean {
-    const GClass = anyTypeGetterInstanceClass;
-
-    GClass._value = etsNumber;
-
-    return GClass.value as int == etsNumber as int
+    try {
+        anyTypeGetterInstanceClass.setProperty('_value', ESValue.wrapInt(etsNumber));
+        const value = anyTypeGetterInstanceClass.getProperty('value');
+        return value.toNumber() == etsNumber;
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkInstanceAnyTypeGetterClassFromTsString(): boolean {
-    const GClass = anyTypeGetterInstanceClass;
-
-    GClass._value = etsString;
-
-    return GClass.value as string == etsString as string;
+    try {
+        anyTypeGetterInstanceClass.setProperty('_value', ESValue.wrapString(etsString));
+        const value = anyTypeGetterInstanceClass.getProperty('value');
+        return value.toString() == etsString;
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkInstanceAnyTypeGetterClassFromTsBool(): boolean {
-    const GClass = anyTypeGetterInstanceClass;
-
-    GClass._value = etsBool;
-
-    return GClass.value as boolean == etsBool as boolean;
+    try {
+        anyTypeGetterInstanceClass.setProperty('_value', ESValue.wrapBoolean(etsBool));
+        const value = anyTypeGetterInstanceClass.getProperty('value');
+        return value.toBoolean() == etsBool;
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkInstanceAnyTypeGetterClassFromTsArr(): boolean {
-    const GClass = anyTypeGetterInstanceClass;
-
-    GClass._value = etsArr;
-
-    return GClass.value as Array<int> instanceof Array;
+    try {
+        anyTypeGetterInstanceClass.setProperty('_value', [ESValue.wrapInt(etsNumber)]);
+        const value = anyTypeGetterInstanceClass.getProperty('value');
+        return value != null;
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkInstanceAnyTypeGetterClassFromTsObj(): boolean {
-    const GClass = anyTypeGetterInstanceClass;
-
-    GClass._value = etsObj;
-
-    return typeof GClass.value as Object == 'object';
+    try {
+        anyTypeGetterInstanceClass.setProperty('_value', etsObj);
+        const value = anyTypeGetterInstanceClass.getProperty('value');
+        return value != null;
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkInstanceAnyTypeGetterClassFromTsTuple(): boolean {
-    const GClass = anyTypeGetterInstanceClass;
-
-    GClass._value = tupleArr;
-
-    return GClass.value as Array<TupleType> instanceof Array
-        && GClass.value[0] as int == tupleArr[0] as int
-        && GClass.value[1] as string == tupleArr[1] as string;
+    try {
+        anyTypeGetterInstanceClass.setProperty('_value', [etsNumber, etsString]);
+        const value = anyTypeGetterInstanceClass.getProperty('value');
+        const elem0 = value.getProperty(0);
+        const elem1 = value.getProperty(1);
+        return elem0.toNumber() == tsNumber.toNumber() &&
+               elem1.toString() == tsString.toString();
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkInstanceAnyTypeGetterClassFromTsUnion(): boolean {
-    const GClass = anyTypeGetterInstanceClass;
-
-    GClass._value = etsUnion;
-
-    return GClass.value as int == etsUnion as int;
+    try {
+        anyTypeGetterInstanceClass.setProperty('_value', ESValue.wrapInt(etsUnion));
+        const value = anyTypeGetterInstanceClass.getProperty('value');
+        return value.toNumber() == etsUnion;
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkInstanceAnyExplicitTypeGetterClassFromTsExplicit(): boolean {
-    const GClass = anyTypeExplicitGetterInstanceClass;
-
-    GClass._value = etsString;
-
-    return GClass.value as string == etsString as string;
+    try {
+        anyTypeExplicitGetterInstanceClass.setProperty('_value', ESValue.wrapString(etsString));
+        const value = anyTypeExplicitGetterInstanceClass.getProperty('value');
+        return value.toString() == etsString;
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkGetterSubsetByRefClass(): boolean {
-    const GClass = new SubsetByRef();
-
-    return GClass.value as string == tsString as string;
+    try {
+        const GClass = SubsetByRef.instantiate();
+        const value = GClass.getProperty('value');
+        return value.toString() == tsString.toString();
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateSubsetByRefGetterClassFromTs(): boolean {
-    const GClass = createSubsetByRefGetterClassFromTs();
-
-    return tsString as string == GClass.value as string;
+    try {
+        const GClass = createSubsetByRefGetterClassFromTs.invoke();
+        const value = GClass.getProperty('value');
+        return tsString.toString() == value.toString();
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkInstanceSubsetByRefGetterClassFromTs(): boolean {
-    const GClass = subsetByRefInstanceClass;
-
-    return GClass.value as string == etsString as string;
+    try {
+        const value = subsetByRefInstanceClass.getProperty('value');
+        return value.toString() == etsString;
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkGetterSubsetByValueClass(): boolean {
-    const GClass = new SubsetByValueClass(new PublicGetterClass().value);
-
-    return GClass.value as string == tsString as string;
+    try {
+        const publicGetter = PublicGetterClass.instantiate();
+        const publicValue = publicGetter.getProperty('value');
+        const GClass = SubsetByValueClass.instantiate(publicValue);
+        const value = GClass.getProperty('value');
+        return value.toString() == tsString.toString();
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateSubsetByValueGetterClassFromTs(): boolean {
-    const GClass = createSubsetByValueGetterClassFromTs();
-
-    return tsString as string == GClass.value as string;
+    try {
+        const GClass = createSubsetByValueGetterClassFromTs.invoke();
+        const value = GClass.getProperty('value');
+        return tsString.toString() == value.toString();
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkInstanceSubsetByValueGetterClassFromTs(): boolean {
-    const GClass = subsetByValueInstanceClass;
-
-    return GClass.value as string == etsString as string;
+    try {
+        const value = subsetByValueInstanceClass.getProperty('value');
+        return value.toString() == etsString;
+    } catch (e) {
+        return false;
+    }
 }
