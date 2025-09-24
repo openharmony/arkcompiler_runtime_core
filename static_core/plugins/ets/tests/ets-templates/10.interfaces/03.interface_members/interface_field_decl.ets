@@ -27,4 +27,14 @@ interface ExtendedColors extends BaseColors {
   YELLOW: int;
 }
 
+interface BaseColorsWithUndefined {
+  RED: int;
+  GREEN ?: int;
+  BLUE: int;
+}
+
+interface ExtendedColorsWithUndefined extends BaseColorsWithUndefined {
+  YELLOW ?: int;
+}
+
 function main(): void {}
