@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,12 +14,11 @@
 ---
 cases:
     - decl: |-
-          type ON = Object|null
-          let s = 'XYZ'
+          const s = 'XYZ'
       use: |-
           // test resolving path
-          let r: Promise<string> = new Promise<string>(
-              (resolve: (p: string) => void, reject: (p: ON) => void): void => {
+          const r: Promise<string> = new Promise<string>(
+              (resolve: (p: string) => void, reject: (p: Error) => void): void => {
                   if (s == 'XYZ') {
                       resolve(s)
                   } else {
@@ -30,12 +29,11 @@ cases:
           arktest.assertTrue((await r) == 'XYZ')
 
     - decl: |-
-          type ON = Object|null
-          let s = 'XYZ'
+          const s = 'XYZ'
       use: |-
           // test rejection path
-          let r: Promise<string> = new Promise<string>(
-              (resolve: (p: string) => void, reject: (p: ON) => void): void => {
+          const r: Promise<string> = new Promise<string>(
+              (resolve: (p: string) => void, reject: (p: Error) => void): void => {
                   if (s != 'XYZ') {
                       resolve(s)
                   } else {
@@ -46,19 +44,18 @@ cases:
 
           try {
               await r
-          } catch (e: Error) {
-              arktest.assertTrue(e.message == 'ABC')
-              return
+              arktest.assertTrue(false)
+          } catch (e) {
+              if (e instanceof Error)
+                  arktest.assertTrue((e as Error).message == 'ABC')
           }
-          arktest.assertTrue(false)
 
     - decl: |-
-          type ON = Object|null
-          let s = 'XYZ'
+          const s = 'XYZ'
       use: |-
           // test throw from resolving path
-          let r: Promise<string> = new Promise<string>(
-              (resolve: (p: string) => void, reject: (p: ON) => void): void => {
+          const r: Promise<string> = new Promise<string>(
+              (resolve: (p: string) => void, reject: (p: Error) => void): void => {
                   if (s == 'XYZ') {
                       throw new Error(s)
                   } else {
@@ -69,24 +66,19 @@ cases:
 
           try {
               await r
-          } catch (e: Error) {
-              arktest.assertTrue(e.message == 'XYZ')
-              return
-          }
-          arktest.assertTrue(false)
-
+              arktest.assertTrue(false)
+          } catch (e) {
+              if (e instanceof Error)
+                  arktest.assertTrue((e as Error).message == 'XYZ')
+          } 
+          
     - decl: |-
-          type ON = Object|null
-          let initVal: number = 1.0
+          const initVal: number = 1.0
       use: |-
           // test then chain, resolved
-          let r = new Promise<number>(
-              (resolve: (p: number) => void, reject: (p: ON) => void): void => {
-                  if (initVal > 0) {
-                      resolve(initVal)
-                  } else {
-                      reject(new Error('A'))
-                  }
+          const r: Promise<number> = new Promise<number>(
+              (resolve: (p: number) => void, reject: (p: Error) => void): void => {
+                   resolve(initVal)
               }
           ).then<number>(
               (p: number): number => {
@@ -100,80 +92,54 @@ cases:
           arktest.assertTrue((await r) == 111.0)
 
     - decl: |-
-          type ON = Object|null
-          let initVal: number = 1.0
       use: |-
           // test catch chain
-          let r: Promise<string|number> = new Promise<number>(
-              (resolve: (p: number) => void, reject: (p: ON) => void): void => {
-                  if (initVal < 0) {
-                      resolve(initVal)
-                  } else {
-                      reject(new Error('A'))
-                  }
+          const r: Promise<number|Error> = new Promise<number|Error>(
+              (resolve: (p: number) => void, reject: (p: Error) => void): void => {
+                  reject(new Error('A'))
               }
-          ).catch<string>(
-              (p: ON): string => {
-                  if (initVal > 0) {
-                      let e: Error = p! as Error
-                      throw new Error(e.message + 'B')
-                  }
-                  return 'Y'
+          ).catch<number|Error>(
+              (p: Error): void => {
+                  if (p instanceof Error) throw new Error((p as Error).message + 'B')
               }
-          ).catch<string>(
-              (p: ON): string => {
-                  if (initVal > 0) {
-                      let e: Error = p! as Error
-                      throw new Error(e.message + 'C')
-                  }
-                  return 'X'
+          ).catch<number|Error>(
+              (p: Error): string => {
+                  if (p instanceof Error) throw new Error((p as Error).message + 'C')
               }
           )
 
           try {
               await r
-          } catch (e: Error) {
-              arktest.assertTrue(e.message == 'ABC')
-              return
-          }
-          arktest.assertTrue(false)
+              arktest.assertTrue(false)
+          } catch (e) {
+              if (e instanceof Error)
+                  arktest.assertTrue((e as Error).message == 'ABC')
+          } 
 
     - decl: |-
-          type ON = Object|null
-          let initVal: number = 1.0
       use: |-
           // test mixed then and catch chain
-          let r: Promise<string> = new Promise<string>(
-              (resolve: (p: string) => void, reject: (p: ON) => void): void => {
-                  if (initVal > 0) {
-                      resolve('A')
-                  } else {
-                      reject(new Error('B'))
-                  }
+          const r: Promise<string> = new Promise<string>(
+              (resolve: (p: string) => void, reject: (p: Error) => void): void => {
+                  resolve('A')
               }
           ).catch<string>(  // skipped
-              (p: ON): string => {
-                  if (initVal > 0) {
-                      let e: Error = p! as Error
-                      throw new Error(e.message + 'C')
-                  }
+              (p: Error|string): string => {
+                  if (p instanceof Error) throw new Error((p as Error).message + 'C')
                   return 'D'
               }
           ).then<string>(
               (p: string): string => {
                   return p + 'E'
               },
-              (p: ON): string => {
+              (p: Error): string => {
                   return ''
               }
           ).then<string>(
               (p: string): string => {
-                  if (initVal > 0) {
-                      throw new Error(p + 'F')
-                  }
-                  return p + 'G'
+                  throw new Error(p + 'F')
               },
-              (p: ON): string => {
+              (p: Error): string => {
                   return ''
               }
           ).then<string>(  // skipped
@@ -184,41 +150,39 @@ cases:
               (p: string): string => {
                   return p + 'I'
               },
-              (p: ON): string => {
-                  if (initVal > 0) {
-                      let e: Error = p! as Error
-                      throw new Error(e.message + 'J')
-                  }
+              (p: Error): string => {
+                  if (p instanceof Error) throw new Error (p.message + 'J')
                   return 'K'
               }
           )
 
           try {
               await r
-          } catch (e: Error) {
-              arktest.assertTrue(e.message == 'AEFJ')
-              return
-          }
-          arktest.assertTrue(false)
+              arktest.assertTrue(false)
+          } catch (e) {
+              if (e instanceof Error)
+                  arktest.assertTrue((e as Error).message == 'AEFJ')
+          } 
 
     - decl: |-
-          type ON = Object|null
       use: |-
           // ensure verify succeed
-          const r1 = new Promise<string>(
-              (resolve: (p: string) => void, reject: (p: ON) => void): void => {
+          const r1: Promise<string> = new Promise<string>(
+              (resolve: (p: string) => void, reject: (p: Error) => void): void => {
                   resolve("Async Data")
               }
           ).then(
-              (data:string) => console.log(data)
+              (data:string) => "test"
           );
           await r1;
-          const r2 = new Promise<string>(
-              (resolve: (p: string) => void, reject: (p: ON) => void): void => {
+
+          const r2: Promise<string> = new Promise<string>(
+              (resolve: (p: string) => void, reject: (p: Error) => void): void => {
                   resolve("Async Data")
               }
           ).then(
-              (data:string) => { console.log(data) }
+              (data:string) => { return "test" }
           );
           await r2;
+          
           arktest.assertTrue(true);

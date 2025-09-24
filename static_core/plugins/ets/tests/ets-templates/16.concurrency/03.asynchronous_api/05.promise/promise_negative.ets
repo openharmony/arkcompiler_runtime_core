@@ -16,6 +16,7 @@
 {% for c in cases %}
 /*---
 desc: The class Promise<T> represents the values returned by launch expressions.
+tags: [compile-only, negative]
 ---*/
 
 {{c.decl}}

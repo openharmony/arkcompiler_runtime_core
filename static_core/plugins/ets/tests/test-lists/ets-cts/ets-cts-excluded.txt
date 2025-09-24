@@ -82,15 +82,6 @@
 # Looks like should be positive (async tests)
 16.concurrency/03.asynchronous_api/01.async_functions/afunc_n_9.ets
 
-# Promise lambda type errors
-16.concurrency/03.asynchronous_api/05.promise/p_6.ets
-16.concurrency/03.asynchronous_api/05.promise/p_2.ets
-16.concurrency/03.asynchronous_api/05.promise/p_3.ets
-16.concurrency/03.asynchronous_api/05.promise/p_5.ets
-16.concurrency/03.asynchronous_api/05.promise/p_4.ets
-16.concurrency/03.asynchronous_api/05.promise/p_1.ets
-16.concurrency/03.asynchronous_api/05.promise/p_0.ets
-
 # TypeError: Type 'Int' cannot be assigned to type 'Byte'
 07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_0.ets
 07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_1.ets
