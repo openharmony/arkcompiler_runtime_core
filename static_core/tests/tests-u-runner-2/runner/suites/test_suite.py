@@ -62,6 +62,7 @@ class TestSuite:
         self._test_lists.collect_ignored_test_lists(test_name=self.__suite_name)
         self.excluded = 0
         self.ignored_tests: list[Path] = []
+        self.ignored_tests_with_failures: dict[Path, str] = {}
         self.excluded_tests: list[Path] = []
 
     @property
@@ -131,6 +132,18 @@ class TestSuite:
     def __is_path_excluded(collection: CollectionsOptions, tested_path: Path) -> bool:
         excluded = [excl for excl in collection.exclude if tested_path.as_posix().endswith(excl)]
         return len(excluded) > 0
+
+    @staticmethod
+    def _comment_has_failure(comment: str | None) -> bool:
+        return bool(TestSuite._get_failure_text(comment))
+
+    @staticmethod
+    def _get_failure_text(comment: str | None) -> str:
+        pattern = r'^#\d+\s+.*?@@Failure:\s*(.+?)@@.*$'
+        if comment is not None:
+            match = re.match(pattern, comment)
+            return match.group(1) if match else ""
+        return ""
 
     @cached_property
     def name(self) -> str:
@@ -272,6 +285,8 @@ class TestSuite:
             if not self.config.test_suite.test_lists.skip_test_lists:
                 self.excluded_tests = self.__load_excluded_tests()
                 self.ignored_tests = self.__load_ignored_tests()
+                self.ignored_tests_with_failures = self._get_tests_from_ignore_with_failures(
+                    self._test_lists.ignored_lists)
             test_files.extend(self.__load_test_files(raw_test_files))
         return test_files
 
@@ -301,6 +316,9 @@ class TestSuite:
             params=IOptions(params),
             test_id=test_id)
         test.ignored = is_ignored
+        if is_ignored and test.path in self.ignored_tests_with_failures:
+            test.last_failure = self.ignored_tests_with_failures[test.path]
+
         return test
 
     def __get_coll_name(self, test_id: str) -> str | None:
@@ -427,3 +445,42 @@ class TestSuite:
         for collection in self.__test_env.config.test_suite.collections:
             result[collection.name] = collection.parameters
         return result
+
+    def _get_tests_from_ignore_with_failures(self, lists: list[Path]) -> dict[Path, str]:
+        tests: dict[Path, str] = {}
+        for list_path in lists:
+            tests_from_list = self._get_tests_with_comment(list_path)
+            tests = {**tests, **tests_from_list}
+
+        tests = {key: val for key, val in tests.items() if TestSuite._comment_has_failure(val)}
+        tests = {key: TestSuite._get_failure_text(val) for key, val in tests.items()}
+        return tests
+
+    def _get_tests_with_comment(self, list_path: Path) -> dict[Path, str]:
+        tests: dict[Path, str] = {}
+        comment_lines: list[str] = []
+        prev_line_was_comment = False
+
+        with open(list_path, encoding="utf-8") as f:
+            for line in f:
+                line = line.rstrip('\n').strip()
+                if not line:
+                    continue
+
+                if line.startswith("#"):
+                    if not prev_line_was_comment:
+                        comment_lines = []
+                    comment_lines.append(line)
+                    prev_line_was_comment = True
+                    continue
+
+                prev_line_was_comment = False
+
+                if not line.endswith(".ets"):
+                    continue
+
+                test_path = self.test_root / line
+                if test_path.exists():
+                    tests[test_path] = "\n".join(comment_lines)
+
+        return tests

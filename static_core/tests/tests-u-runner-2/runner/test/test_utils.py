@@ -111,5 +111,5 @@ def test_environ(test_root_name: str | None = None, test_root_value: str | None 
     return env
 
 
-def data_folder(main_path: str) -> Path:
-    return Path(main_path).parent / "data"
+def data_folder(main_path: str, test_data_folder: str = "data") -> Path:
+    return Path(main_path).parent / test_data_folder

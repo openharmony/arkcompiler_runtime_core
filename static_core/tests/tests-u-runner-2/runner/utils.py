@@ -491,3 +491,10 @@ def replace_special_keys(params_list: list) -> list:
                 params_list[i] = param.replace(key, val) if key in param else param
 
     return params_list
+
+
+def normalize_str(input_str: str) -> str:
+    input_str = input_str.replace("\r\n", "\n").replace("\r", "\n")
+    input_str = input_str.lower()
+    input_str = re.sub(r"\s+", " ", input_str).strip()
+    return input_str

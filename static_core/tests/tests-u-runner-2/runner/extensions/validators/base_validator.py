@@ -14,11 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import re
 from typing import TYPE_CHECKING
 
 from runner.extensions.validators.ivalidator import IValidator
 from runner.logger import Log
 from runner.options.step import StepKind
+from runner.utils import normalize_str
 
 if TYPE_CHECKING:
     from runner.suites.test_standard_flow import TestStandardFlow
@@ -38,6 +40,10 @@ class BaseValidator(IValidator):
             _LOGGER.all(f"Step validator {step_value}: get error output '{error_output}'")
         if output.find('[Fail]Device not founded or connected') > -1:
             return False
+
+        if test.ignored and test.last_failure:
+            test.last_failure_check_passed = BaseValidator._check_last_failure_for_ignored_test(test.last_failure,
+                                                                                                output, error_output)
 
         if BaseValidator._step_passed(test, return_code, step_value):
             # the step has passed
@@ -73,3 +79,16 @@ class BaseValidator(IValidator):
             return return_code == 0
 
         return return_code == 0
+
+    @staticmethod
+    def _check_last_failure_for_ignored_test(failure: str, output: str, error_output: str) -> bool:
+        output = normalize_str(output)
+        error_output = normalize_str(error_output)
+        failure = normalize_str(failure)
+
+        if output:
+            return bool(re.search(failure, output))
+        if error_output:
+            return bool(re.search(failure, error_output))
+
+        return False

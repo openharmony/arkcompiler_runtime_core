@@ -111,6 +111,16 @@ All test lists are loaded automatically from the specified `LIST_ROOT` and got a
 > **Note**: these options just specifies what test lists to load and do not affect on how and where to start the runner
 > itself and binaries used within.
 
+It is possible to describe an expected failure for a test in the ignore list.  
+Place the Failure markup in the comment immediately before the test entry:
+@@Failure: _Expected failure description_@@
+
+Example:
+
+#26512 @@Failure: SyntaxError: Unexpected token *@@
+02.lexical_elements/09.literals/08.regex_literal/regex_anchor_boundaries.ets
+
+
 ## Utility runner options:
 
 -   `--skip-test-lists` - do not use ignored or excluded lists, run all available tests, report all found failures

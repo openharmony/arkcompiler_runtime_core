@@ -69,6 +69,10 @@ class Test:
         self.passed: bool | None = None
         # If the test is mentioned in any ignored_list
         self.ignored = False
+        # failure description for a test from ignore list (if any)
+        self.last_failure: str = ""
+        # The result of last failure check for the test from ignore list
+        self.last_failure_check_passed: bool = True
         # Test can detect itself as excluded additionally to excluded_tests
         # In such case the test will be counted as `excluded by other reasons`
         self.excluded = False
@@ -131,9 +135,14 @@ class Test:
     def status(self) -> TestStatus:
         if self.excluded:
             return TestStatus.EXCLUDED
+
         if self.passed:
             return TestStatus.PASSED_IGNORED if self.ignored else TestStatus.PASSED
-        return TestStatus.FAILURE_IGNORED if self.ignored else TestStatus.NEW_FAILURE
+
+        if self.ignored:
+            return TestStatus.FAILURE_IGNORED if self.last_failure_check_passed else TestStatus.NEW_FAILURE
+
+        return TestStatus.NEW_FAILURE
 
     def status_as_cstring(self) -> str:
         if self.excluded:
