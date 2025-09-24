@@ -950,3 +950,13 @@ export final class Double extends Floating implements Comparable<Double> {
      */
     private static native numberFromString(s: String): double;
 }
+
+/**
+ * `Number' values represent floating-point numbers like 6 or -3.14
+ */
+export type Number = Double;
+
+/**
+ Number is a synonym for type number
+ */
+export type number = double;
