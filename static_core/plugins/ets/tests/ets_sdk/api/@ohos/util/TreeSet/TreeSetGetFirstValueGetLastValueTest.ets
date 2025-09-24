@@ -21,6 +21,8 @@ function main(): int {
 
     suite.addTest("TreeSet getFirstValue getLastValue first and last value",
         testGetFirstValueGetLastValueSingleElement)
+    suite.addTest("TreeSet getFirstValue getLastValue first and last value from the treeSet with a data of undefined",
+        testGetFirstValueGetLastValueUndefinedTreeSet)
     suite.addTest("TreeSet getFirstValue getLastValue first and last value from the null treeSet",
         testGetFirstValueGetLastValueEmptyTreeSet)
     suite.addTest("TreeSet getFirstValue getLastValue first and last value from the TreeSet with a set of data",
@@ -53,6 +55,15 @@ function testGetFirstValueGetLastValueSingleElement() {
     arktest.assertEQ(result1, "aa", "The treeSet should return the correct first value");
     arktest.assertEQ(result2, "bb", "The treeSet should return the correct last value");
     arktest.assertEQ(treeSet.length, 2, "The treeSet length should be 2")
+}
+
+function testGetFirstValueGetLastValueUndefinedTreeSet() {
+    let treeSet: TreeSet<undefined> = new TreeSet<undefined>();
+    treeSet.add(undefined);
+    let result1 = treeSet.getFirstValue();
+    arktest.assertEQ(result1, undefined);
+    let result2 = treeSet.getLastValue();
+    arktest.assertEQ(result2, undefined);
 }
 
 function testGetFirstValueGetLastValueEmptyTreeSet() {
