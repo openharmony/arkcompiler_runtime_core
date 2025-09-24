@@ -29,7 +29,7 @@ public:
     EtsReflectTest()
     {
         options_.SetShouldLoadBootPandaFiles(true);
-        options_.SetShouldInitializeIntrinsics(false);
+        options_.SetShouldInitializeIntrinsics(true);
         options_.SetCompilerEnableJit(false);
         options_.SetGcType("g1-gc");
         options_.SetLoadRuntimes({"ets"});

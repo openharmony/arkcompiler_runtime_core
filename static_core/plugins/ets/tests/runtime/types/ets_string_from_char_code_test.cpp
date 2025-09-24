@@ -31,7 +31,7 @@ public:
     BasicEtsStringFromCharCodeTest()
     {
         options_.SetShouldLoadBootPandaFiles(true);
-        options_.SetShouldInitializeIntrinsics(false);
+        options_.SetShouldInitializeIntrinsics(true);
         options_.SetCompilerEnableJit(false);
         options_.SetGcType("epsilon");
         options_.SetLoadRuntimes({"ets"});

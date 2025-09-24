@@ -49,7 +49,7 @@ public:
 
         RuntimeOptions options;
         options.SetShouldLoadBootPandaFiles(true);
-        options.SetShouldInitializeIntrinsics(false);
+        options.SetShouldInitializeIntrinsics(true);
         options.SetLoadRuntimes({"ets"});
         options.SetUseStringCaches(cacheEnabled);
 

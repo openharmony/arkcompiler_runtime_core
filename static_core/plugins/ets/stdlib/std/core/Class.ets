@@ -25,6 +25,71 @@ export final class Class {
     private typeMetaData: long
     private overloadMap: long
 
+    /**
+     * Stores Class of boolean primitive type
+     */
+    public static readonly PRIMITIVE_BOOLEAN: Class = Class.of(null)
+
+    /**
+     * Stores Class of byte primitive type
+     */
+    public static readonly PRIMITIVE_BYTE: Class = Class.of(null)
+
+    /**
+     * Stores Class of char primitive type
+     */
+    public static readonly PRIMITIVE_CHAR: Class = Class.of(null)
+
+    /**
+     * Stores Class of short primitive type
+     */
+    public static readonly PRIMITIVE_SHORT: Class = Class.of(null)
+
+    /**
+     * Stores Class of int primitive type
+     */
+    public static readonly PRIMITIVE_INT: Class = Class.of(null)
+
+    /**
+     * Stores Class of long primitive type
+     */
+    public static readonly PRIMITIVE_LONG: Class = Class.of(null)
+
+    /**
+     * Stores Class of float primitive type
+     */
+    public static readonly PRIMITIVE_FLOAT: Class = Class.of(null)
+
+    /**
+     * Stores Class of double primitive type
+     */
+    public static readonly PRIMITIVE_DOUBLE: Class = Class.of(null)
+
+    /**
+     * Stores Class of number primitive type (same as double)
+     */
+    public static readonly PRIMITIVE_NUMBER: Class = Class.of(null)
+
+    /**
+     * Stores Class of void type
+     */
+    public static readonly PRIMITIVE_VOID: Class = Class.of(null)
+
+    static {
+        initializePrimitivesInClass()
+
+        Class.PRIMITIVE_BOOLEAN.name = 'u1'
+        Class.PRIMITIVE_BYTE.name = 'i8'
+        Class.PRIMITIVE_SHORT.name = 'i16'
+        Class.PRIMITIVE_CHAR.name = 'u16'
+        Class.PRIMITIVE_INT.name = 'i32'
+        Class.PRIMITIVE_LONG.name = 'i64'
+        Class.PRIMITIVE_FLOAT.name = 'f32'
+        Class.PRIMITIVE_DOUBLE.name = 'f64'
+        Class.PRIMITIVE_NUMBER.name = 'f64'
+        Class.PRIMITIVE_VOID.name = 'void'
+    }
+
     private constructor() { throw new Error("Class constructor called") }
     private native getNameInternal(): string;
 
@@ -239,6 +304,13 @@ export final class Class {
      */ 
     public native isAbstract(): boolean
 
+    /**
+     * Check if class is primitive type
+     *
+     * @returns true if class is primitive
+     */
+    public native isPrimitive(): boolean
+
     private native getInstanceMethodsInternal(publicOnly: boolean): FixedArray<reflect.InstanceMethod>
     private native getInstanceMethodByNameInternal(name: string, publicOnly: boolean): reflect.InstanceMethod | undefined
     private native getInstanceFieldByNameInternal(name: string, publicOnly: boolean): reflect.InstanceField | undefined
@@ -250,3 +322,5 @@ export final class Class {
     private native getConstructorsInternal(publicOnly: boolean): FixedArray<reflect.Constructor>
     private native getUnionConstituentTypesInternal(): FixedArray<Class>
 }
+
+native function initializePrimitivesInClass(): void

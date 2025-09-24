@@ -180,6 +180,18 @@ final class D extends B {
     }
 }
 
+final class P {
+    fldBoolean: boolean = false
+    fldByte: byte = 100
+    fldShort: short = 1000
+    fldChar: char = c'x'
+    fldInt: int = 100000
+    fldLong: long = 3000000
+    fldFloat: float = 5.0
+    fldDouble: double = 123456789.99
+    foo() {}
+}
+
 function testGetName(type: Class, expected: string) {
     arktest.assertEQ(type.getName(), expected)
 }
@@ -304,7 +316,7 @@ function testGetStaticMethodByName() {
     arktest.assertNE(methodA2, undefined)
     let methodA3 = infoA.getStaticMethodByName("stfoo3", []);
     arktest.assertNE(methodA3, undefined)
-    let methodA4 = infoA.getStaticMethodByName("stfoo3", [ Class.of(new int()), Class.of(new long()) ]);
+    let methodA4 = infoA.getStaticMethodByName("stfoo3", [ Class.PRIMITIVE_INT, Class.PRIMITIVE_LONG ]);
     arktest.assertNE(methodA4, undefined)
     let paramsMethodA4 = methodA4!.getParametersTypes()
     let methodA5 = infoA.getStaticMethodByName("stfoo3", paramsMethodA4);
@@ -316,7 +328,7 @@ function testGetStaticMethodByName() {
     let methodB1 = infoB.getStaticMethodByName("stfoo2");
     arktest.assertNE(methodB1, undefined) // inherited from A
     arktest.assertEQ(methodB1!.getOwner(), infoA) // owner is A
-    let methodB2 = infoB.getStaticMethodByName("stboo2", [ Class.of(new int()) ]);
+    let methodB2 = infoB.getStaticMethodByName("stboo2", [ Class.PRIMITIVE_INT ]);
     arktest.assertNE(methodB2, undefined)
     let methodB3 = infoB.getStaticMethodByName("stfoo3");
     arktest.assertNE(methodB3, undefined)
@@ -340,7 +352,7 @@ function testGetStaticMethodByName() {
     let methodD5 = infoD.getStaticMethodByName("stboo3");
     arktest.assertNE(methodD5, undefined)
     arktest.assertEQ(methodD5!.getOwner(), infoD) // owner is D
-    let methodD6 = infoD.getStaticMethodByName("stboo2", [ Class.of(new int()) ]);
+    let methodD6 = infoD.getStaticMethodByName("stboo2", [ Class.PRIMITIVE_INT ]);
     arktest.assertEQ(methodD6, undefined) // shadowed
     let methodD7 = infoD.getStaticMethodByName("stfoo1");
     arktest.assertNE(methodD7, undefined) // inherited from A
@@ -609,6 +621,105 @@ function testUnionRet() {
     }
 }
 
+function testPrimitive() {
+    let arr1: FixedArray<Int> = [ 1, 2 ]
+    let arr2: FixedArray<Int | undefined> = [ 1, undefined, 3 ]
+    let arr3: FixedArray<boolean> = [ true, false ]
+    let arr4: FixedArray<boolean | undefined> = [ undefined, false ]
+
+    let classType1 = Class.of(arr1)
+    let classType2 = Class.of(arr2)
+    let classType3 = Class.of(arr3)
+    let classType4 = Class.of(arr4)
+
+    arktest.assertFalse(classType1.isPrimitive())
+    arktest.assertFalse(classType2.isPrimitive())
+    arktest.assertFalse(classType3.isPrimitive())
+    arktest.assertFalse(classType4.isPrimitive())
+
+    let componentType1 = classType1.getFixedArrayComponentType()!
+    let componentType2 = classType2.getFixedArrayComponentType()!
+    let componentType3 = classType3.getFixedArrayComponentType()!
+    let componentType4 = classType4.getFixedArrayComponentType()!
+
+    arktest.assertTrue(componentType1.isPrimitive())
+    arktest.assertFalse(componentType2.isPrimitive())
+    arktest.assertTrue(componentType3.isPrimitive())
+    arktest.assertFalse(componentType4.isPrimitive())
+
+    arktest.assertEQ(componentType1, Class.PRIMITIVE_INT)
+    arktest.assertEQ(componentType3, Class.PRIMITIVE_BOOLEAN)
+
+    arktest.assertEQ(componentType2.getName(), 'std.core.Int')
+    arktest.assertEQ(componentType4.getName(), 'std.core.Boolean')
+
+    const pCls = Class.of(new P())
+    const fld1 = pCls.getInstanceFieldByName('fldBoolean')!
+    const fldType1 = fld1.getType()
+    arktest.assertTrue(fldType1.isPrimitive())
+    arktest.assertEQ(fldType1, Class.PRIMITIVE_BOOLEAN)
+    arktest.assertEQ(fldType1.getName(), 'u1')
+    const fld2 = pCls.getInstanceFieldByName('fldByte')!
+    const fldType2 = fld2.getType()
+    arktest.assertTrue(fldType2.isPrimitive())
+    arktest.assertEQ(fldType2, Class.PRIMITIVE_BYTE)
+    arktest.assertEQ(fldType2.getName(), 'i8')
+    const fld3 = pCls.getInstanceFieldByName('fldShort')!
+    const fldType3 = fld3.getType()
+    arktest.assertTrue(fldType3.isPrimitive())
+    arktest.assertEQ(fldType3, Class.PRIMITIVE_SHORT)
+    arktest.assertEQ(fldType3.getName(), 'i16')
+    const fld4 = pCls.getInstanceFieldByName('fldChar')!
+    const fldType4 = fld4.getType()
+    arktest.assertTrue(fldType4.isPrimitive())
+    arktest.assertEQ(fldType4, Class.PRIMITIVE_CHAR)
+    arktest.assertEQ(fldType4.getName(), 'u16')
+    const fld5 = pCls.getInstanceFieldByName('fldInt')!
+    const fldType5 = fld5.getType()
+    arktest.assertTrue(fldType5.isPrimitive())
+    arktest.assertEQ(fldType5, Class.PRIMITIVE_INT)
+    arktest.assertEQ(fldType5.getName(), 'i32')
+    const fld6 = pCls.getInstanceFieldByName('fldLong')!
+    const fldType6 = fld6.getType()
+    arktest.assertTrue(fldType6.isPrimitive())
+    arktest.assertEQ(fldType6, Class.PRIMITIVE_LONG)
+    arktest.assertEQ(fldType6.getName(), 'i64')
+    const fld7 = pCls.getInstanceFieldByName('fldFloat')!
+    const fldType7 = fld7.getType()
+    arktest.assertTrue(fldType7.isPrimitive())
+    arktest.assertEQ(fldType7, Class.PRIMITIVE_FLOAT)
+    arktest.assertEQ(fldType7.getName(), 'f32')
+    const fld8 = pCls.getInstanceFieldByName('fldDouble')!
+    const fldType8 = fld8.getType()
+    arktest.assertTrue(fldType8.isPrimitive())
+    arktest.assertEQ(fldType8, Class.PRIMITIVE_DOUBLE)
+    arktest.assertEQ(fldType8, Class.PRIMITIVE_NUMBER)
+    arktest.assertEQ(fldType8.getName(), 'f64')
+    const meth1 = pCls.getInstanceMethodByName('foo')!
+    const methRetType1 = meth1.getReturnType()
+    arktest.assertTrue(methRetType1.isPrimitive())
+    arktest.assertEQ(methRetType1, Class.PRIMITIVE_VOID)
+    arktest.assertEQ(methRetType1.getName(), 'void')
+
+    arktest.assertTrue(fldType5.isFinal())
+    arktest.assertTrue(fldType5.isAbstract())
+    arktest.assertFalse(fldType5.isNamespace())
+    arktest.assertFalse(fldType5.isEnum())
+    arktest.assertFalse(fldType5.isInterface())
+    arktest.assertFalse(fldType5.isUnion())
+    arktest.assertFalse(fldType5.isFixedArray())
+    arktest.assertEQ(fldType5.getSuper(), undefined)
+    arktest.assertEQ(fldType5.getLinker(), getBootRuntimeLinker())
+    arktest.assertEQ(fldType5.getFixedArrayComponentType(), undefined)
+    arktest.assertEQ(fldType5.getInterfaces().length, 0)
+    arktest.assertEQ(fldType5.getInstanceMethods().length, 0)
+    arktest.assertEQ(fldType5.getInstanceFields().length, 0)
+    arktest.assertEQ(fldType5.getStaticMethods().length, 0)
+    arktest.assertEQ(fldType5.getStaticFields().length, 0)
+    arktest.assertEQ(fldType5.getConstructors().length, 0)
+    arktest.assertEQ(fldType5.getUnionConstituentTypes(), undefined)
+}
+
 function main(): int {
     let typeBaseObj = Class.of(new Object())
 
@@ -681,6 +792,8 @@ function main(): int {
     testUnionField()
     testUnionParameter()
     testUnionRet()
+
+    testPrimitive()
 
     return 0
 }
