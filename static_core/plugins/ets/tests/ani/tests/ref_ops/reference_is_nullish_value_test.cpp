@@ -94,4 +94,22 @@ TEST_F(ReferenceIsNullishValueTest, mix_test)
     ASSERT_EQ(env_->Reference_Equals(ref, nullRef, &isEquals), ANI_OK);
     ASSERT_EQ(isEquals, ANI_TRUE);
 }
+
+TEST_F(ReferenceIsNullishValueTest, get_undef_test)
+{
+    ani_ref ref {};
+    ani_boolean isNullish = ANI_FALSE;
+    ASSERT_EQ(env_->GetUndefined(&ref), ANI_OK);
+    ASSERT_EQ(env_->Reference_IsNullishValue(ref, &isNullish), ANI_OK);
+    ASSERT_EQ(isNullish, ANI_TRUE);
+}
+
+TEST_F(ReferenceIsNullishValueTest, get_null_test)
+{
+    ani_ref ref {};
+    ani_boolean isNullish = ANI_FALSE;
+    ASSERT_EQ(env_->GetNull(&ref), ANI_OK);
+    ASSERT_EQ(env_->Reference_IsNullishValue(ref, &isNullish), ANI_OK);
+    ASSERT_EQ(isNullish, ANI_TRUE);
+}
 }  // namespace ark::ets::ani::testing

@@ -142,4 +142,22 @@ TEST_F(ReferenceIsUndefinedTest, CheckUndefinedFromNative)
     ASSERT_EQ(isCorrectUndefined, ANI_TRUE);
 }
 
+TEST_F(ReferenceIsUndefinedTest, get_undef_test)
+{
+    ani_ref ref {};
+    ani_boolean isUndef = ANI_FALSE;
+    ASSERT_EQ(env_->GetUndefined(&ref), ANI_OK);
+    ASSERT_EQ(env_->Reference_IsUndefined(ref, &isUndef), ANI_OK);
+    ASSERT_EQ(isUndef, ANI_TRUE);
+}
+
+TEST_F(ReferenceIsUndefinedTest, get_null_test)
+{
+    ani_ref ref {};
+    ani_boolean isUndef = ANI_FALSE;
+    ASSERT_EQ(env_->GetNull(&ref), ANI_OK);
+    ASSERT_EQ(env_->Reference_IsUndefined(ref, &isUndef), ANI_OK);
+    ASSERT_EQ(isUndef, ANI_FALSE);
+}
+
 }  // namespace ark::ets::ani::testing
