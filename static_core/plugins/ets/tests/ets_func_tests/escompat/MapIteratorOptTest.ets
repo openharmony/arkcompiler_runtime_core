@@ -159,7 +159,7 @@ function main(): int {
     suite.addTest("Map test delete current in iterator", testDeleteCurrentIterator)
     suite.addTest("Map test delete in foreach", testDeleteInForEach)
     suite.addTest("Map test delete in iterator", testDeleteInIterator)
-    suite.addTest("Map test set in foreach", testDeleteInForEach)
-    suite.addTest("Map test set in iterator", testDeleteInIterator)
+    suite.addTest("Map test set in foreach", testSetInForEach)
+    suite.addTest("Map test set in iterator", testSetInIterator)
     return suite.run()
 }
