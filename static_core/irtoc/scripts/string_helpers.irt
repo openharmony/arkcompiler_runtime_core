@@ -64,12 +64,12 @@ macro(:try_use_cached_flat_str) do |str|
     strShifted := ShrI(strUint).Imm(FlattenedStringCacheConstants::ADDRESS_SHIFT).word
     strMasked := AndI(strShifted).Imm(FlattenedStringCacheConstants::ADDRESS_MASK).word
     strIndex := Mul(strMasked, FlattenedStringCacheConstants::ENTRY_SIZE).word
-    key := LoadArray(stringCache, strIndex).ref
+    key := LoadArray(stringCache, strIndex).SetNeedBarrier(true).ref
     If(key, str).NE {
       Goto(:SlowPathEntrypoint)
     }
     strIndex := AddI(strIndex).Imm(FlattenedStringCacheConstants::VALUE_OFFSET).ref_uint
-    strCached := LoadArray(stringCache, strIndex).ref
+    strCached := LoadArray(stringCache, strIndex).SetNeedBarrier(true).ref
   }
   result := Phi(str, strCached).ref
 end
@@ -143,7 +143,7 @@ def GenerateStringEquals(lang, dynamic, compression, cgmode = :FastPath)
     }
 
     reg_mask = Options.arch == :arm64 ? RegMask.new($full_regmap, :arg0, :arg1, :callee0, :callee2) :
-        RegMask.new($full_regmap, :arg0, :arg1, :tmp0, :tmp1, :callee0, :caller1)
+        RegMask.new($full_regmap, :arg0, :arg1, :callee0, :caller1)
 
     function("#{lang}StringEquals#{suffix}".to_sym,
             params: {str1_orig: 'ref', str2_orig: 'ref'},
