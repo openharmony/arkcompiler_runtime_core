@@ -39,6 +39,7 @@ public:
     void BuildDefaultAbcKitIntrinsic(const BytecodeInstruction *bcInst, RuntimeInterface::IntrinsicId intrinsicId);
 
 private:
+    void BuildNullcheck(const BytecodeInstruction *bcInst) override;
     void BuildIsNullValue(const BytecodeInstruction *bcInst) override;
     void BuildLoadStatic(const BytecodeInstruction *bcInst, DataType::Type type) override;
     void BuildStoreStatic(const BytecodeInstruction *bcInst, DataType::Type type) override;

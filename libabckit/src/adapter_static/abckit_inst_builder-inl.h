@@ -33,6 +33,11 @@ void AbcKitInstBuilder::AbcKitBuildStoreObject(const BytecodeInstruction *bcInst
     BuildAbcKitStoreObjectIntrinsic<IS_ACC_READ>(bcInst, type);
 }
 
+void AbcKitInstBuilder::BuildNullcheck(const BytecodeInstruction *bcInst)
+{
+    BuildDefaultAbcKitIntrinsic(bcInst, ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_NULL_CHECK);
+}
+
 void AbcKitInstBuilder::BuildIsNullValue(const BytecodeInstruction *bcInst)
 {
     BuildDefaultAbcKitIntrinsic(bcInst, ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_IS_NULL_VALUE);

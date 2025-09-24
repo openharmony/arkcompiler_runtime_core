@@ -898,6 +898,20 @@ extern "C" AbckitInst *IcreateIsUndefined(AbckitGraph *graph, AbckitInst *inputO
     return IcreateIsUndefinedStatic(graph, inputObj);
 }
 
+extern "C" AbckitInst *IcreateNullCheck(AbckitGraph *graph, AbckitInst *inputObj)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(inputObj, nullptr);
+
+    LIBABCKIT_WRONG_CTX(graph, inputObj->graph, nullptr);
+    LIBABCKIT_WRONG_MODE(graph, Mode::STATIC, nullptr);
+    return IcreateNullCheckStatic(graph, inputObj);
+}
+
 AbckitIsaApiStatic g_isaApiStaticImpl = {
 
     IgetClass,
@@ -956,6 +970,7 @@ AbckitIsaApiStatic g_isaApiStaticImpl = {
     IcreateXorI,
     IcreateThrow,
     IcreateIsUndefined,
+    IcreateNullCheck,
 };
 
 }  // namespace libabckit

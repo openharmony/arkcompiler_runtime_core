@@ -83,7 +83,7 @@ enum AbckitIsaApiStaticOpcode {
     ABCKIT_ISA_API_STATIC_OPCODE_LOADNULLVALUE,
     ABCKIT_ISA_API_STATIC_OPCODE_EQUALS,
     ABCKIT_ISA_API_STATIC_OPCODE_STRICTEQUALS,
-
+    ABCKIT_ISA_API_STATIC_OPCODE_NULLCHECK,
     /* Return: */
     ABCKIT_ISA_API_STATIC_OPCODE_RETURN_VOID,
 
@@ -839,6 +839,16 @@ struct CAPI_EXPORT AbckitIsaApiStatic {
      * @note are not the same.
      */
     AbckitInst *(*iCreateIsUndefined)(AbckitGraph *graph /* in */, AbckitInst *inputObj /* in */);
+
+    /**
+     * @brief Creates `NullCheck` inst.
+     * @return AbckitInst *.
+     * @param [ in ] AbckitGraph *graph .
+     * @param [ in ]  AbckitInst *input0 .
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input0  is NULL.
+     */
+    AbckitInst *(*iCreateNullCheck)(AbckitGraph *graph /* in */, AbckitInst *inputObj /* in */);
 };
 
 /**

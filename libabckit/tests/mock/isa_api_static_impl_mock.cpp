@@ -559,6 +559,14 @@ AbckitInst *IcreateIsUndefined(AbckitGraph *graph, AbckitInst *inputObj)
     return DEFAULT_INST;
 }
 
+AbckitInst *IcreateNullCheck(AbckitGraph *graph, AbckitInst *inputObj)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(graph == DEFAULT_GRAPH);
+    EXPECT_TRUE(inputObj == DEFAULT_INST);
+    return DEFAULT_INST;
+}
+
 AbckitIsaApiStatic g_isaApiStaticImpl = {
     IgetClass,
     IsetClass,
@@ -615,6 +623,7 @@ AbckitIsaApiStatic g_isaApiStaticImpl = {
     IcreateXorI,
     IcreateThrow,
     IcreateIsUndefined,
+    IcreateNullCheck,
 };
 
 // NOLINTEND(readability-identifier-naming)

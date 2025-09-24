@@ -539,6 +539,10 @@ def call_me_from_template
     plain('ets.isnullvalue')
   end
 
+  visit('NullCheckIntrinsic') do
+    plain('ets.nullcheck')
+  end
+
   # Empty visitors for IR instructions we want to ignore
   # (Add missing IRs on demand)
   %w[NullCheck BoundsCheck ZeroCheck NegativeCheck SafePoint
