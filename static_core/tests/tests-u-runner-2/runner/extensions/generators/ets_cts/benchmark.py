@@ -45,7 +45,7 @@ class Benchmark:
         _LOGGER.all(f"Starting generate test template: {self.__name}")
         rendered_tests = template.render_template()
         if len(rendered_tests) <= 0:
-            raise common_exceptions.TestNotExistException("Internal error: there should be tests")
+            raise common_exceptions.TestNotExistException(f"{self.__name}: Incorrect test template")
 
         tests = []
         for i, test in enumerate(rendered_tests):

@@ -67,15 +67,6 @@ class Template:
             text = text.replace(old, new)
         return text
 
-    @staticmethod
-    def __get_in_out_content(text: str, meta_start: str, meta_end: str) -> tuple[str, str]:
-        start, end = text.find(meta_start), text.find(meta_end)
-        if start > end or start == -1 or end == -1:
-            raise InvalidMetaException("Invalid meta or meta does not exist")
-        inside_content = text[start + len(meta_start):end]
-        outside_content = text[:start] + text[end + len(meta_end):]
-        return inside_content, outside_content
-
     def render_template(self) -> list[str]:
         try:
             template = self.__jinja_env.from_string(self.text)
@@ -113,3 +104,11 @@ class Template:
             raise InvalidFileFormatException(message=f"Could not load YAML in test params: {exc!s}",
                                              filepath=self.test_path) from exc
         return result
+
+    def __get_in_out_content(self, text: str, meta_start: str, meta_end: str) -> tuple[str, str]:
+        start, end = text.find(meta_start), text.find(meta_end)
+        if start > end or start == -1 or end == -1:
+            raise InvalidMetaException(f"{Path(self.test_path).name}: Invalid meta or meta does not exist")
+        inside_content = text[start + len(meta_start):end]
+        outside_content = text[:start] + text[end + len(meta_end):]
+        return inside_content, outside_content
