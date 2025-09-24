@@ -19,25 +19,21 @@
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {
 
-class ClassSetStaticFieldIntTest : public AniTest {
-public:
-    void CheckFieldValue(const char *className, const char *fieldName)
-    {
-        ani_class cls {};
-        ASSERT_EQ(env_->FindClass(className, &cls), ANI_OK);
-        ani_static_field field {};
-        ASSERT_EQ(env_->Class_FindStaticField(cls, fieldName, &field), ANI_OK);
-        ASSERT_NE(field, nullptr);
-        ani_int result = 0U;
-        const ani_int target = 3U;
-        ASSERT_EQ(env_->Class_GetStaticField_Int(cls, field, &result), ANI_OK);
-        ASSERT_EQ(result, target);
-        const ani_int setTar = 2U;
-        ASSERT_EQ(env_->Class_SetStaticField_Int(cls, field, setTar), ANI_OK);
-        ASSERT_EQ(env_->Class_GetStaticField_Int(cls, field, &result), ANI_OK);
-        ASSERT_EQ(result, setTar);
-    }
-};
+class ClassSetStaticFieldIntTest : public AniTest {};
+
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+// CC-OFFNXT(G.PRE.02-CPP, G.PRE.06) solid logic
+#define CHECK_FIELD_VALUE(cls, field, target, setTar)                           \
+    do {                                                                        \
+        ani_int result = 0U;                                                    \
+        ASSERT_EQ(env_->Class_GetStaticField_Int(cls, field, &result), ANI_OK); \
+        ASSERT_EQ(result, target);                                              \
+        ASSERT_EQ(env_->Class_SetStaticField_Int(cls, field, setTar), ANI_OK);  \
+        ASSERT_EQ(env_->Class_GetStaticField_Int(cls, field, &result), ANI_OK); \
+        ASSERT_EQ(result, setTar);                                              \
+        ASSERT_EQ(env_->Class_SetStaticField_Int(cls, field, target), ANI_OK);  \
+    } while (0)
+// NOLINTEND(cppcoreguidelines-macro-usage)
 
 TEST_F(ClassSetStaticFieldIntTest, set_int)
 {
@@ -153,12 +149,22 @@ TEST_F(ClassSetStaticFieldIntTest, combination_test1)
 
 TEST_F(ClassSetStaticFieldIntTest, combination_test2)
 {
-    CheckFieldValue("class_set_static_field_int_test.TestSetIntA", "int_value");
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_int_test.TestSetIntA", &cls), ANI_OK);
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "int_value", &field), ANI_OK);
+    ASSERT_NE(field, nullptr);
+    CHECK_FIELD_VALUE(cls, field, 3U, 2U);
 }
 
 TEST_F(ClassSetStaticFieldIntTest, combination_test3)
 {
-    CheckFieldValue("class_set_static_field_int_test.TestSetIntFinal", "int_value");
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_int_test.TestSetIntFinal", &cls), ANI_OK);
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "int_value", &field), ANI_OK);
+    ASSERT_NE(field, nullptr);
+    CHECK_FIELD_VALUE(cls, field, 3U, 2U);
 }
 
 TEST_F(ClassSetStaticFieldIntTest, check_initialization)
@@ -173,6 +179,52 @@ TEST_F(ClassSetStaticFieldIntTest, check_initialization)
     const ani_int intValue = 2410;
     ASSERT_EQ(env_->Class_SetStaticField_Int(cls, field, intValue), ANI_OK);
     ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_int_test.TestSetIntFinal"));
+}
+
+TEST_F(ClassSetStaticFieldIntTest, check_hierarchy)
+{
+    ani_class clsParent {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_int_test.Parent", &clsParent), ANI_OK);
+    ani_class clsChild {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_int_test.Child", &clsChild), ANI_OK);
+
+    ani_static_field parentFieldInParent {};
+    ASSERT_EQ(env_->Class_FindStaticField(clsParent, "parentField", &parentFieldInParent), ANI_OK);
+    ani_static_field parentFieldInChild {};
+    ASSERT_EQ(env_->Class_FindStaticField(clsChild, "parentField", &parentFieldInChild), ANI_OK);
+    ani_static_field childFieldInParent {};
+    ASSERT_EQ(env_->Class_FindStaticField(clsParent, "childField", &childFieldInParent), ANI_NOT_FOUND);
+    ani_static_field childFieldInChild {};
+    ASSERT_EQ(env_->Class_FindStaticField(clsChild, "childField", &childFieldInChild), ANI_OK);
+    ani_static_field overridedFieldInParent {};
+    ASSERT_EQ(env_->Class_FindStaticField(clsParent, "overridedField", &overridedFieldInParent), ANI_OK);
+    ani_static_field overridedFieldInChild {};
+    ASSERT_EQ(env_->Class_FindStaticField(clsChild, "overridedField", &overridedFieldInChild), ANI_OK);
+
+    // |-------------------------------------------------------------------------------------------------------|
+    // |  ani_class  |          ani_static_field          |  ani_status  |               action                |
+    // |-------------|------------------------------------|--------------|-------------------------------------|
+    // |   Parent    |   parentField from Parent class    |    ANI_OK    |    access to Parent.parentField     |
+    // |   Parent    |   parentField from Child class     |    ANI_OK    |    access to Parent.parentField     |
+    // |   Parent    |    childField from Child class     |      UB      |                 --                  |
+    // |   Parent    |  overridedField from Child class   |      UB      |                 --                  |
+    // |   Parent    |  overridedField from Parent class  |    ANI_OK    |   access to Parent.overridedField   |
+    // |   Child     |    parentField from Parent class   |    ANI_OK    |    access to Parent.parentField     |
+    // |   Child     |    parentField from Child class    |    ANI_OK    |    access to Parent.parentField     |
+    // |   Child     |    childField from Child class     |    ANI_OK    |     access to Child.childField      |
+    // |   Child     |  overridedField from Child class   |    ANI_OK    |   access to Child.overridedField    |
+    // |   Child     |  overridedField from Parent class  |    ANI_OK    |   access to Parent.overridedField   |
+    // |-------------|------------------------------------|--------------|-------------------------------------|
+
+    CHECK_FIELD_VALUE(clsParent, parentFieldInParent, 0U, 1U);
+    CHECK_FIELD_VALUE(clsParent, parentFieldInChild, 0U, 2U);
+    CHECK_FIELD_VALUE(clsParent, overridedFieldInParent, 0U, 3U);
+
+    CHECK_FIELD_VALUE(clsChild, parentFieldInParent, 0U, 4U);
+    CHECK_FIELD_VALUE(clsChild, parentFieldInChild, 0U, 5U);
+    CHECK_FIELD_VALUE(clsChild, childFieldInChild, 0U, 6U);
+    CHECK_FIELD_VALUE(clsChild, overridedFieldInChild, 0U, 7U);
+    CHECK_FIELD_VALUE(clsChild, overridedFieldInParent, 0U, 8U);
 }
 
 }  // namespace ark::ets::ani::testing

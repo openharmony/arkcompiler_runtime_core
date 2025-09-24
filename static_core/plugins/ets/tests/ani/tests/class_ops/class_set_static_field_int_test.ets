@@ -24,3 +24,12 @@ class TestSetIntA extends TestSetInt {
 final class TestSetIntFinal extends TestSetInt {
     static int_value: int = 3;
 }
+
+class Parent {
+    static parentField: int = 0;
+    static overridedField: int = 0;
+}
+class Child extends Parent {
+    static overridedField: int = 0;
+    static childField: int = 0;
+}

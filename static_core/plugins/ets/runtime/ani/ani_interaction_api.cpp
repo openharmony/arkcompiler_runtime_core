@@ -335,7 +335,8 @@ static ani_status ClassGetStaticField(ani_env *env, ani_class cls, ani_static_fi
     ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<T>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
 
     ScopedManagedCodeFix s(env);
-    EtsClass *etsClass = s.ToInternalType(cls);
+    EtsClass *etsClass = etsField->GetDeclaringClass();
+    ;
     ani_status status = InitializeClass(s, etsClass);
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
 
@@ -354,7 +355,7 @@ static ani_status ClassSetStaticField(ani_env *env, ani_class cls, ani_static_fi
     ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<T>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
 
     ScopedManagedCodeFix s(env);
-    EtsClass *etsClass = s.ToInternalType(cls);
+    EtsClass *etsClass = etsField->GetDeclaringClass();
     ani_status status = InitializeClass(s, etsClass);
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
 
