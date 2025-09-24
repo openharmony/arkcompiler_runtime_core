@@ -127,11 +127,13 @@ export final class AsyncLock {
 
     private syncwrapper<T,U>(callback: AsyncLockCallback<T>, options : AsyncLockOptions<U>, asyncLockInfo: AsyncLockInfo) : Promise<Awaited<T>> {
         return Promise.resolve<T>(callback()).finally(() => {
-            if (options.signal != null && options.signal!.aborted == true ) {
-            this.fireCondEvent();
-            throw new Error('Aborted');
-        }
-        this.unlock(asyncLockInfo); });
+             if (options.signal != null && options.signal!.aborted == true) {
+                this.fireCondEvent();
+                throw new Error('Aborted');
+            }
+            this.unlock(asyncLockInfo);
+        });
+
     }
 
     private static launchPromise<T>(f: Function, ...args: FixedArray<Any>): Promise<T> {
@@ -169,11 +171,12 @@ export final class AsyncLock {
         let isDone = false;
         let timeout = options.timeout;
         let isTimeoutExec: boolean = false;
-
+       
         if (timeout) {
            setTimeout(() => {
-                 this.fireCondEvent();
-               isTimeoutExec = true;
+              this.queryAllDeadlocks();
+              this.fireCondEvent();
+              isTimeoutExec = true;
            }, timeout);
         }
 
@@ -184,7 +187,7 @@ export final class AsyncLock {
                  throw new Error('Aborted');
             }
             if(isTimeoutExec == true) {
-                throw new Error('AsyncLock timeout');
+                throw new Error (this.deadLockPrinter.toString('lockAsync timed out'));
             }
 
             if(options.isAvailable) {
@@ -266,6 +269,25 @@ export final class AsyncLock {
         ConcurrencyHelpers.mutexUnlock(this.mutex);
         return state;
     }
+   
+    private queryDeadlock(deadLockPrinter : DeadLockInfo) {
+        ConcurrencyHelpers.mutexLock(this.mutex);     
+        this.held.forEach((v : AsyncLockInfo) => {
+            this.pending.forEach((p : AsyncLockInfo) => {
+                if (v.contextId != p.contextId) {
+                    deadLockPrinter.add(v, p);
+                }
+            })
+        });
+        ConcurrencyHelpers.mutexUnlock(this.mutex);   
+    }    
+
+    private  queryAllDeadlocks() {
+        let arr = asyncLockManager.queryAllLocks() ;
+        for (let i = 0; i < arr.length; ++i) {
+            arr[i].queryDeadlock(this.deadLockPrinter);
+        }
+    }
 
     private static generateAnonymousLockName() {
         return "__AnonymousLockName__" + Number.toString(AsyncLock.LastAnonymousId++);
@@ -280,4 +302,45 @@ export final class AsyncLock {
     private held: Set<AsyncLockInfo> = new Set<AsyncLockInfo>();
     private pending: Set<AsyncLockInfo> = new Set<AsyncLockInfo>();
     private event: Object = ConcurrencyHelpers.eventCreate();
+    private deadLockPrinter: DeadLockInfo = new DeadLockInfo();
+}
+
+
+type StoreType  = [string, int, int];
+
+class DeadLockInfo {
+    public  constructor() {}
+
+    public toString(head : string ) : string {
+        return head + this.toStringHelper();
+    }
+
+    public add(h: AsyncLockInfo, p : AsyncLockInfo) {
+        this.arr.push([h.name, h.contextId, p.contextId]);
+    }
+
+    private toStringHelper()
+    {
+        let sb =  new StringBuilder();
+
+        for (let i  = 0; i < this.arr.length; ++i) {
+            sb.append(this.helper(this.arr[i]).toString());
+        }
+        return sb;
+    }
+    private helper(t : StoreType)
+    {
+        let sb  = new StringBuilder();
+     
+        sb.append('\n');
+        sb.append('!!! DEADLOCK WARNING !!!');
+        sb.append(t[1]);
+        sb.append(' <--  {');
+        sb.append(t[0]);
+        sb.append('} -- WAITED BY TID: ');
+        sb.append(t[2]);
+        return sb;
+    }
+
+    private arr: Array<StoreType>  = new Array<StoreType>;
 }
