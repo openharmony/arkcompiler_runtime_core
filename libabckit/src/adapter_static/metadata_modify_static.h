@@ -61,6 +61,7 @@ AbckitLiteral *FindOrCreateLiteralMethodStatic(AbckitFile *file, AbckitCoreFunct
 AbckitLiteralArray *CreateLiteralArrayStatic(AbckitFile *file, AbckitLiteral **value, size_t size);
 
 AbckitValue *FindOrCreateValueU1Static(AbckitFile *file, bool value);
+AbckitValue *FindOrCreateValueIntStatic(AbckitFile *file, int value);
 AbckitValue *FindOrCreateValueDoubleStatic(AbckitFile *file, double value);
 AbckitValue *FindOrCreateValueStringStatic(AbckitFile *file, const char *value, size_t len);
 

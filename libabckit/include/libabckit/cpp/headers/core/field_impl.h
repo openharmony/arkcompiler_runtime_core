@@ -50,6 +50,14 @@ inline Type ModuleField::GetType() const
     return Type(type, conf, GetResource());
 }
 
+inline Value ModuleField::GetValue() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    AbckitValue *value = conf->cIapi_->moduleFieldGetValue(GetView());
+    CheckError(conf);
+    return Value(value, conf, GetResource());
+}
+
 inline bool ModuleField::IsPublic() const
 {
     const ApiConfig *conf = GetApiConfig();
@@ -124,6 +132,14 @@ inline Type ClassField::GetType() const
     AbckitType *type = conf->cIapi_->classFieldGetType(GetView());
     CheckError(conf);
     return Type(type, conf, GetResource());
+}
+
+inline Value ClassField::GetValue() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    AbckitValue *value = conf->cIapi_->classFieldGetValue(GetView());
+    CheckError(conf);
+    return Value(value, conf, GetResource());
 }
 
 inline bool ClassField::IsPublic() const

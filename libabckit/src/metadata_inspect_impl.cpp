@@ -1119,9 +1119,11 @@ extern "C" AbckitType *ModuleFieldGetType(AbckitCoreModuleField *field)
 
 extern "C" AbckitValue *ModuleFieldGetValue(AbckitCoreModuleField *field)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    return nullptr;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(field, nullptr);
+    return field->value;
 }
 
 extern "C" bool ModuleFieldIsPublic(AbckitCoreModuleField *field)
@@ -1220,9 +1222,14 @@ extern "C" AbckitType *ClassFieldGetType(AbckitCoreClassField *field)
 
 extern "C" AbckitValue *ClassFieldGetValue(AbckitCoreClassField *field)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    return nullptr;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(field, nullptr);
+    if (IsDynamic(field->owner->owningModule->target)) {
+        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+        return nullptr;
+    }
+    return field->value;
 }
 
 extern "C" bool ClassFieldIsPublic(AbckitCoreClassField *field)
@@ -1426,9 +1433,11 @@ extern "C" AbckitType *EnumFieldGetType(AbckitCoreEnumField *field)
 
 extern "C" AbckitValue *EnumFieldGetValue(AbckitCoreEnumField *field)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    return nullptr;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(field, nullptr);
+    return field->value;
 }
 
 // ========================================
@@ -2090,6 +2099,22 @@ extern "C" bool ValueGetU1(AbckitValue *value)
     }
 }
 
+extern "C" int ValueGetInt(AbckitValue *value)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(value, false);
+
+    switch (value->file->frontend) {
+        case Mode::STATIC:
+            return ValueGetIntStatic(value);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
+}
+
 extern "C" double ValueGetDouble(AbckitValue *value)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
@@ -2447,6 +2472,7 @@ AbckitInspectApi g_inspectApiImpl = {
     ValueGetFile,
     ValueGetType,
     ValueGetU1,
+    ValueGetInt,
     ValueGetDouble,
     ValueGetString,
     ArrayValueGetLiteralArray,

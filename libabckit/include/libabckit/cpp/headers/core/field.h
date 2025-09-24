@@ -91,6 +91,13 @@ public:
     Type GetType() const;
 
     /**
+     * @brief Returns value.
+     * @return abckit::Value
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    Value GetValue() const;
+
+    /**
      * @brief Tell if field is Public.
      * @return Return `true` if field is Public otherwise false
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
@@ -275,6 +282,13 @@ public:
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     Type GetType() const;
+
+    /**
+     * @brief Returns value.
+     * @return abckit::Value
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    Value GetValue() const;
 
     /**
      * @brief Tell if field is Public.

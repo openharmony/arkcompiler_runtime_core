@@ -321,6 +321,12 @@ inline abckit::Value GetMockValueU1(const abckit::File &file)
     EXPECT_TRUE(CheckMockedApi("CreateValueU1"));
     return val;
 }
+inline abckit::Value GetMockValueInt(const abckit::File &file)
+{
+    abckit::Value val = file.CreateValueInt(DEFAULT_I32);
+    EXPECT_TRUE(CheckMockedApi("CreateValueInt"));
+    return val;
+}
 
 inline abckit::Value GetMockValueLiteralArray(const abckit::File &file)
 {

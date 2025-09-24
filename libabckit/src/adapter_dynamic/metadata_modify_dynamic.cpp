@@ -740,6 +740,12 @@ AbckitValue *FindOrCreateValueU1Dynamic(AbckitFile *file, bool value)
     return FindOrCreateValueU1DynamicImpl(file, value);
 }
 
+AbckitValue *FindOrCreateValueIntDynamic(AbckitFile *file, int value)
+{
+    LIBABCKIT_LOG_FUNC;
+    return FindOrCreateValueIntDynamicImpl(file, value);
+}
+
 AbckitValue *FindOrCreateValueDoubleDynamic(AbckitFile *file, double value)
 {
     LIBABCKIT_LOG_FUNC;

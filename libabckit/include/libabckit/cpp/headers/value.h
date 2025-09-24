@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,10 @@ class Value : public ViewInResource<AbckitValue *, const File *> {
     friend class abckit::DefaultHash<Value>;
     /// @brief arkts::AnnotationInterface
     friend class arkts::AnnotationInterface;
+    /// @brief abckit::core::ClassField
+    friend class core::ClassField;
+    /// @brief abckit::core::ModuleField
+    friend class core::ModuleField;
 
 public:
     /**
@@ -78,6 +82,14 @@ public:
      * @note Set `ABCKIT_STATUS_TODO` error if value type id differs from `ABCKIT_TYPE_ID_U1`.
      */
     bool GetU1() const;
+
+    /**
+     * @brief Returns int value that value holds.
+     * @return Int value that is stored in the value.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if value is NULL.
+     * @note Set `ABCKIT_STATUS_TODO` error if value type id differs from `ABCKIT_TYPE_ID_INT`.
+     */
+    int GetInt() const;
 
     /**
      * @brief Returns double value that value holds.

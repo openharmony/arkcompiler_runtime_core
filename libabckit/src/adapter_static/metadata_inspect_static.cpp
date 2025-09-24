@@ -667,6 +667,9 @@ AbckitType *ValueGetTypeStatic(AbckitValue *value)
         case pandasm::Value::Type::U32:
             id = ABCKIT_TYPE_ID_U32;
             break;
+        case pandasm::Value::Type::I32:
+            id = ABCKIT_TYPE_ID_I32;
+            break;
         case pandasm::Value::Type::U64:
             id = ABCKIT_TYPE_ID_U64;
             break;
@@ -693,6 +696,18 @@ bool ValueGetU1Static(AbckitValue *value)
 
     auto *pVal = reinterpret_cast<pandasm::ScalarValue *>(value->val.get());
     return pVal->GetValue<bool>();
+}
+
+int ValueGetIntStatic(AbckitValue *value)
+{
+    LIBABCKIT_LOG_FUNC;
+    if (ValueGetTypeStatic(value)->id != ABCKIT_TYPE_ID_I32) {
+        statuses::SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return 0;
+    }
+
+    auto *pVal = reinterpret_cast<pandasm::ScalarValue *>(value->val.get());
+    return pVal->GetValue<int>();
 }
 
 double ValueGetDoubleStatic(AbckitValue *value)
