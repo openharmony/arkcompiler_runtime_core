@@ -14,13 +14,10 @@
  */
 
 /*---
-desc: Test import ets files(number).
-files:
-- ./test_file_01.ets
+desc: Test File for folder path import.
+tags:
+- compile-only
+- not-a-test
 ---*/
 
-import {a} from './test_file_01.ets';
-
-function main(): void {
-  arktest.assertEQ(a, 10);
-}
+export let a: number = 20;
