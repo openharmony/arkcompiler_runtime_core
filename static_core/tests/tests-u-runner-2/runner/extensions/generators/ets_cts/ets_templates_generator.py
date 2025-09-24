@@ -45,7 +45,7 @@ class EtsTemplatesGenerator(IGenerator):
     def __generate_test(self, path: Path) -> None:
         test_full_name = os.path.relpath(path, self._source)
         output = self._target / test_full_name
-        bench = Benchmark(path, output, test_full_name, self.extension, self.extension)
+        bench = Benchmark(path, output, test_full_name, self._source, self.extension)
         self.generated_tests.extend(bench.generate())
 
     def __dfs(self, path: Path, seen: set) -> None:

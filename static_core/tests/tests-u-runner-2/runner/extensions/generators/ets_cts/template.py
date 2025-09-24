@@ -20,7 +20,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import yaml
-from jinja2 import Environment, TemplateSyntaxError, select_autoescape
+from jinja2 import Environment, FileSystemLoader, TemplateSyntaxError, select_autoescape
 
 from runner.sts_utils.constants import (
     META_COPYRIGHT,
@@ -44,11 +44,14 @@ class Meta:
 
 
 class Template:
-    def __init__(self, test_path: Path, params: dict[str, list]) -> None:
+    def __init__(self, test_path: Path, params: dict[str, list], ets_templates_path: Path) -> None:
         self.test_path = str(test_path)
         self.text = read_file(test_path)
         self.__params = params
-        self.__jinja_env = Environment(autoescape=select_autoescape())
+        self.__jinja_env = Environment(
+            loader=FileSystemLoader([test_path.parent.as_posix(), ets_templates_path.as_posix()]),
+            autoescape=select_autoescape()
+        )
 
         if self.is_copyright:
             self.__copyright = read_file(COPYRIGHT_PATH)
