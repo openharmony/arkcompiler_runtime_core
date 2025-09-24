@@ -23,8 +23,10 @@ require_relative 'instructions_data'
 require_relative 'output'
 require_relative 'ir_generator'
 require_relative 'isa'
+require 'fileutils'
 require 'logger'
 require 'optparse'
+require 'securerandom'
 require 'tempfile'
 require 'yaml'
 
@@ -152,7 +154,8 @@ class Irtoc
   end
 
   def preprocess(filename, output_filename)
-    File.open(output_filename, "w") do | file|
+    tmp_filename = "#{output_filename}.#{SecureRandom.uuid}.tmp"
+    File.open(tmp_filename, "w") do |file|
       File.open(filename).readlines.each do |line|
         line_matches = line.match(/include_plugin '(.*)'/)
         if line_matches
@@ -163,6 +166,7 @@ class Irtoc
         end
       end
     end
+    FileUtils.mv tmp_filename, output_filename, force: true
   end
 
   def run(input_file)
