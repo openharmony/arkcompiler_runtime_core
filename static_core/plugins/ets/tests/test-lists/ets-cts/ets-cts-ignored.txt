@@ -2394,24 +2394,3 @@
 09.classes/10.inheritance/inheritance_abstr_meth_override_10.ets
 09.classes/10.inheritance/inheritance_abstr_meth_override_11.ets
 
-# 29337 no CTE in ambiguous narrowing
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/narrowing_neg_2.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/narrowing_neg_3.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/narrowing_neg_4.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/narrowing_neg_5.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/narrowing_neg_6.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/narrowing_neg_7.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/narrowing_neg_8.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/narrowing_neg_9.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/narrowing_neg_10.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/narrowing_neg_11.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/narrowing_neg_12.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/narrowing_neg_13.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/narrowing_neg_14.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/narrowing_neg_15.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/narrowing_neg_16.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/narrowing_neg_17.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/narrowing_neg_20.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/narrowing_neg_21.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/narrowing_neg_22.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/narrowing_neg_23.ets
