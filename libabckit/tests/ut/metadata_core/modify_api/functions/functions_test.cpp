@@ -727,4 +727,19 @@ TEST_F(LibAbcKitModifyApiFunctionsTest, StaticFunctionRemoveParamExist)
     g_impl->closeFile(modifiedFile);
 }
 
+TEST_F(LibAbcKitModifyApiFunctionsTest, StaticFunctionRemoveParamNonExist)
+{
+    auto output = helpers::ExecuteStaticAbc(INITIAL_STATIC, "functions_static", "main");
+    helpers::TransformMethod(
+        INITIAL_STATIC, MODIFIED_STATIC, "add1",
+        [&](AbckitFile *file, AbckitCoreFunction *method, AbckitGraph *graph) {
+            AbckitArktsFunction *arktsFunc = method->GetArkTSImpl();
+
+            bool success = g_arktsModifyApiImpl->functionRemoveParameter(arktsFunc, 2);
+            ASSERT_FALSE(success) << "Failed to remove parameter from function";
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+        },
+        [](AbckitGraph *) {});
+}
+
 }  // namespace libabckit::test
