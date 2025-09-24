@@ -531,10 +531,12 @@ template("libarkruntime_set_static_template") {
         "PANDA_OHOS_USE_INNER_HILOG",
         "PANDA_USE_HITRACE",
         "PANDA_USE_QOS",
+        "PANDA_USE_ETS_UTILS",
       ]
       external_deps += [
         "hilog:libhilog",
         "hitrace:hitrace_meter",
+        "ets_utils:console",
         "libuv:uv",
         "qos_manager:qos",
       ]

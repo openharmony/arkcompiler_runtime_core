@@ -35,6 +35,10 @@
 #include "plugins/ets/runtime/interop_js/napi_impl/napi_impl.h"
 #include "plugins/ets/runtime/interop_js/timer_helper/interop_timer_helper.h"
 
+#if defined(PANDA_USE_ETS_UTILS)
+#include "console.h"
+#endif
+
 #if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
 // NOLINTBEGIN(readability-identifier-naming, readability-redundant-declaration)
 // CC-OFFNXT(G.FMT.10-CPP) project code style
@@ -431,6 +435,9 @@ void InteropCtx::InitExternalInterfaces()
         napi_value global = nullptr;
         napi_get_global(resultJsEnv, &global);
         ark::ets::interop::js::helper::Init(resultJsEnv, global);
+#if defined(PANDA_USE_ETS_UTILS)
+        OHOS::JsSysModule::Console::InitConsoleModule(resultJsEnv);
+#endif
         return resultJsEnv;
     });
 #endif
