@@ -28,6 +28,8 @@
 #include "plugins/ets/runtime/types/ets_box_primitive-inl.h"
 #include "intrinsics.h"
 
+constexpr unsigned COUNTER_MODULO = 61;
+
 namespace ark::ets {
 
 // ExternalIfaceTable contains std::function, which cannot be trivially constructed even for nullptr
@@ -290,7 +292,13 @@ void EtsCoroutine::UpdateCachedObjects()
 
 void EtsCoroutine::OnContextSwitchedTo()
 {
+    static std::atomic<unsigned> counter = 1;
     if ((GetPriority() == CoroutinePriority::MEDIUM_PRIORITY) && (GetType() == Coroutine::Type::MUTATOR)) {
+        // Atomic with relaxed order reason: data race with no synchronization or ordering constraints imposed
+        // on other reads or writes
+        if (counter.fetch_add(1, std::memory_order_relaxed) % COUNTER_MODULO == 0) {
+            ProcessUnhandledFailedJobs();
+        }
         ProcessUnhandledRejectedPromises(false);
     }
 }

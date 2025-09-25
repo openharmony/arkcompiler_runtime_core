@@ -259,5 +259,5 @@ options:
     description: "promises"
   - name: jobs
     type: bool
-    default: false
+    default: true
     description: "jobs"
