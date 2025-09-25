@@ -13,20 +13,6 @@
  * limitations under the License.
  */
 
-/*---
-desc: Test cases for various usage scenarios of asynchronous functions.
-      The asynchronous function returns a int.
----*/
+{% from "16.concurrency/03.asynchronous_api/async_returns_enum.base.jinja" import generate_complete_test %}
 
-async function testAsync(): Promise<int> {
-    return 10;
-}
-
-async function startTest() {
-    let res: int = await testAsync();
-    arktest.assertEQ(res === 10, true);
-}
-
-function main(): void {
-    startTest();
-}
+{{ generate_complete_test('method') }}

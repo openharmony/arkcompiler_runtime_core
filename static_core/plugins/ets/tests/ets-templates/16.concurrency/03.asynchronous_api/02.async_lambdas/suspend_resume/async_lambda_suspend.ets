@@ -13,20 +13,6 @@
  * limitations under the License.
  */
 
-/*---
-desc: Test cases for various usage scenarios of asynchronous functions.
-      The asynchronous function returns a double.
----*/
+ {% from "16.concurrency/03.asynchronous_api/async_suspend.base.jinja" import generate_complete_test %}
 
-async function testAsync(): Promise<double> {
-    return 10.1;
-}
-
-async function startTest() {
-    let res: double = await testAsync();
-    arktest.assertEQ(res === 10.1, true);
-}
-
-function main(): void {
-    startTest();
-}
+ {{ generate_complete_test('lambda') }}

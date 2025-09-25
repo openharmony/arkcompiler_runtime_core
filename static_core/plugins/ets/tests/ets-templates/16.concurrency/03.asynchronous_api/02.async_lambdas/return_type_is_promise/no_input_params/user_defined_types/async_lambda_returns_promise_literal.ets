@@ -13,20 +13,6 @@
  * limitations under the License.
  */
 
-/*---
-desc: Test cases for various usage scenarios of asynchronous functions.
-      Explicitly return in an asynchronous function using return.
-tags: [compile-only, positive]
----*/
+ {% from "16.concurrency/03.asynchronous_api/async_returns_literal.base.jinja" import generate_complete_test %}
 
-async function testAsync(): Promise<void> {
-    return;
-}
-
-async function startTest() {
-    await testAsync();
-}
-
-function main(): void {
-    startTest();
-}
+ {{ generate_complete_test('lambda') }}
