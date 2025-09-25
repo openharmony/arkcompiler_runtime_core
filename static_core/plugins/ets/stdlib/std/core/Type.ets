@@ -725,6 +725,8 @@ export abstract class Type extends Object {
         } else if (other.equals(ObjectType)) {
             let isNullish = (this) instanceof UndefinedType || (this) instanceof NullType
             return this.isReference() && !isNullish
+        } else if (other instanceof ClassType && this.isReference()) {
+            return other.isAnyClass()
         }
         return false
     }
@@ -2470,6 +2472,8 @@ export final class DoubleType extends Type {
 export final class ClassType extends Type {
     private readonly cls: Class
     private readonly attrs: int
+    private static readonly anyCls = Class.from<Any>()
+    private static readonly neverCls = Class.from<never>()
 
     /**
      * constructor
@@ -2932,6 +2936,14 @@ export final class ClassType extends Type {
         return ctors.at(0)!.invoke(undefined, args) as Object
     }
 
+    public isAnyClass(): boolean {
+        return this.cls == ClassType.anyCls
+    }
+
+    public isNeverClass(): boolean {
+        return this.cls == ClassType.neverCls
+    }
+
     // class.subTypeOf(U) means that `class extends U` or `class implements U`
     /**
      * Checks if this type is a subtype of another type.
@@ -2948,6 +2960,12 @@ export final class ClassType extends Type {
         }
         // `this` is derived of `other` class?
         if (other instanceof ClassType) {
+            if (other.isAnyClass()) {
+                return true;
+            }
+            if (this.isNeverClass()) {
+                return true;
+            }
             let bt = this;
             while (!bt.equals(bt.getBaseType())) {
                 if (bt.equals(other)) {

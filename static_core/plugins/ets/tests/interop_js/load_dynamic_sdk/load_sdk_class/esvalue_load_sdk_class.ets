@@ -17,10 +17,9 @@ export function test_load_hashmap() {
     let module = ESValue.load('@ohos.util.hashmap');
     if (module.isUndefined()) {
         throw new Error('module not found');
-    } else {
-        let def = module.getProperty('default');
-        let hashMapClass = def.getProperty('HashMap');
-        let myHashMap = hashMapClass.instantiate();
-        arktest.assertEQ(myHashMap.isUndefined(), false);
     }
+    let def = module.getProperty('default');
+    let hashMapClass = def.getProperty('HashMap');
+    let myHashMap = hashMapClass.instantiate();
+    arktest.assertEQ(myHashMap.isUndefined(), false);
 }

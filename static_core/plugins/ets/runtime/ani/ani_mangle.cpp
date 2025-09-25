@@ -167,8 +167,8 @@ static size_t ParseType(char type, const std::string_view data, PandaString &str
         case 'l': str.push_back('J'); return 1;
         case 'f': str.push_back('F'); return 1;
         case 'd': str.push_back('D'); return 1;
-        case 'Y': str.append("Lstd/core/Object;"); return 1;
-        case 'N': str.append("Lstd/core/Object;"); return 1;
+        case 'Y': str.append("LY;"); return 1;
+        case 'N': str.append("LN;"); return 1;
         case 'U': str.append("Lstd/core/Object;"); return 1;
         case 'A': bodySize = ParseArrayBody(data.substr(1), str); break;
         case 'X': bodySize = ParseUnionBody(data.substr(1), str); break;
@@ -278,7 +278,7 @@ private:
     {
         if (UNLIKELY(foundReturnDelimiter_)) {
             ASSERT(!refParamTypes_.empty());
-            ASSERT(refParamTypes_[0] == "");
+            ASSERT(refParamTypes_[0].empty());
             refParamTypes_[0] = std::move(type);
         } else {
             refParamTypes_.emplace_back(std::move(type));

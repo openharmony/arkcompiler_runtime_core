@@ -52,6 +52,7 @@ constexpr std::string_view INTERFACE_SET_MARKER = "%%set-";
 constexpr std::string_view ASYNC_PREFIX = "%%async-";
 constexpr std::string_view ARRAY_ENUM_SUFFIX = "[]";
 constexpr std::string_view OBJECT_CLASS = "std.core.Object";
+constexpr std::string_view ANY_CLASS = "Y";
 constexpr std::string_view OBJECT_LITERAL_NAME = "$ObjectLiteral";
 constexpr std::string_view INTERFACE_FIELD_PREFIX = "%%property-";
 constexpr std::string_view ASYNC_ORIGINAL_RETURN = "std.core.Promise;";
@@ -483,7 +484,7 @@ static std::string FindOriginalFunctionName(const std::string &asyncFunctionName
 {
     // format: prefix.%%async-funcName:params;returnType;
     auto pos1 = asyncFunctionName.find(ASYNC_PREFIX);
-    auto pos2 = asyncFunctionName.rfind(OBJECT_CLASS);
+    auto pos2 = asyncFunctionName.rfind(ANY_CLASS);
     auto size = ASYNC_PREFIX.size();
 
     if (pos1 == std::string::npos || pos2 == std::string::npos) {

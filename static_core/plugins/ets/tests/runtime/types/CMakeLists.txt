@@ -70,6 +70,9 @@ panda_ets_add_gtest(
         ets_map_test.cpp
         ets_set_test.cpp
         ets_weakmap_test.cpp
+        ets_null_test.cpp
+        ets_any_test.cpp
+        ets_never_test.cpp
     LIBRARIES
         arkassembler
         arkruntime

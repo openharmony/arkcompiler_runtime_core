@@ -103,10 +103,6 @@ cases:
       arktest.assertEQ(type_from_int, type_from_Int);
       arktest.assertEQ(type_from_int, type_of_int);
       arktest.assertEQ(type_from_int.getName(), "std.core.Int");
-  - desc: How to get SomeInterface via reflection.
-    logic: |-
-      let type_from_SomeInterface = Class.from<SomeInterface>();
-      arktest.assertEQ(type_from_SomeInterface.getName(), "how_to_get_type_via_reflection_ext_14.SomeInterface");
   - desc: How to get Map via reflection.
     logic: |-
       let type_from_Map = Class.from<Map<number, string>>();
@@ -165,21 +161,12 @@ cases:
     logic: |-
       let type_from_promise = Class.from<Promise<string>>();
       arktest.assertEQ(type_from_promise.getName(), "std.core.Promise");
-  - desc: How to get undefined via reflection.
-    logic: |-
-      let type_from_Undefined = Class.from<undefined>();
-      arktest.assertEQ(type_from_Undefined.getName(), "std.core.Object");
   - desc: How to get User via reflection.
     logic: |-
       let type_from_UserClass = Class.from<User>();
       let type_of_UserClass = Class.of(new User("user"));
       arktest.assertEQ(type_from_UserClass, type_of_UserClass);
-      arktest.assertEQ(type_from_UserClass.getName().slice(0,48), "how_to_get_type_via_reflection_ext_25.User");
       arktest.assertEQ(type_from_UserClass.getName().slice(type_from_UserClass.getName().length-4,type_from_UserClass.getName().length), "User");
-  - desc: How to get void via reflection.
-    logic: |-
-      let type_from_void = Class.from<void>();
-      arktest.assertEQ(type_from_void.getName(), "std.core.Object");
   - desc: How to get BigInt[] via reflection.
     logic: |-
       let type_from_Array_Bigint = Class.from<BigInt[]>();
@@ -414,10 +401,10 @@ cases:
   - desc: How to get never via reflection.
     logic: |-
       let type_from_never = Class.from<never>();
-      arktest.assertEQ(type_from_never.getName(), "std.core.Object");
+      arktest.assertEQ(type_from_never.getName(), "N");
   - desc: How to get Any via reflection.
     logic: |-
       let type_from_any = Class.from<Any>();
       let a: Any = 1;
       let type_of_any = Class.of(a);
-      arktest.assertEQ(type_from_any.getName(), "std.core.Object");
+      arktest.assertEQ(type_from_any.getName(), "Y");

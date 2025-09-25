@@ -197,11 +197,6 @@ public:
 
     EtsObject *CreateInstance();
 
-    bool IsEtsObject()
-    {
-        return GetRuntimeClass()->IsObjectClass();
-    }
-
     bool IsPrimitive() const
     {
         return GetRuntimeClass()->IsPrimitive();

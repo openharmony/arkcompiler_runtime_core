@@ -36,7 +36,7 @@ public:
 
         ani_class finRegClass = nullptr;
         ASSERT_EQ(env_->FindClass("std:core.FinalizationRegistry", &finRegClass), ANI_OK);
-        std::string_view registerSignature = "C{std:core.Object}C{std:core.Object}C{std:core.Object}:";
+        std::string_view registerSignature = "C{std:core.Object}YC{std:core.Object}:";
         ASSERT_EQ(env_->Class_FindMethod(finRegClass, "register", registerSignature.data(), registerMethod), ANI_OK);
 
         std::string_view ctorSignature = "C{std:core.Function1}:";

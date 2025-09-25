@@ -134,17 +134,17 @@ private:
                                        llvm::ArrayRef<llvm::Value *> args = llvm::None);
 
     llvm::Value *CreateIsInstanceEntrypointCall(Inst *inst);
-    llvm::Value *CreateIsInstanceObject(llvm::Value *klassObj);
+    llvm::Value *CreateIsInstanceAny(llvm::Value *klassObj);
     llvm::Value *CreateIsInstanceOther(Inst *inst, llvm::Value *klassObj, llvm::Value *klassId);
     llvm::Value *CreateIsInstanceArray(Inst *inst, llvm::Value *klassObj, llvm::Value *klassId);
-    llvm::Value *CreateIsInstanceArrayObject(Inst *inst, llvm::Value *klassObj);
+    llvm::Value *CreateIsInstanceArrayAny(Inst *inst, llvm::Value *klassObj);
     llvm::Value *CreateIsInstanceInnerBlock(Inst *inst, llvm::Value *klassObj, llvm::Value *klassId);
 
     void CreateCheckCastEntrypointCall(Inst *inst);
-    void CreateCheckCastObject(Inst *inst, llvm::Value *klassObj, llvm::Value *klassId);
+    void CreateCheckCastAny(Inst *inst, llvm::Value *klassObj, llvm::Value *klassId);
     void CreateCheckCastOther(Inst *inst, llvm::Value *klassObj, llvm::Value *klassId);
     void CreateCheckCastArray(Inst *inst, llvm::Value *klassObj, llvm::Value *klassId);
-    void CreateCheckCastArrayObject(Inst *inst, llvm::Value *klassObj, llvm::Value *klassId);
+    void CreateCheckCastArrayAny(Inst *inst, llvm::Value *klassObj, llvm::Value *klassId);
     void CreateCheckCastInner(Inst *inst, llvm::Value *klassObj, llvm::Value *klassId);
 
     void CreateInterpreterReturnRestoreRegs(RegMask &regMask, size_t offset, bool fp);

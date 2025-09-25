@@ -202,7 +202,7 @@
 //! SKIP_IF       @architecture == "arm32"
 //! RUN           force_jit: true,
 //!               options: "--compiler-regex='.*main.*' --compiler-reserve-string-builder-buffer=false \
-//!                         --compiler-inlining=true",
+//!                         --compiler-inlining=true --compiler-inlining-max-insts=2000",
 //!               entry: "ets_string_builder_reserve_part30-44.ETSGLOBAL::mainEventsCheck"
 //! EVENT         "SbBufferRealloc"
 
@@ -210,7 +210,7 @@
 //! SKIP_IF       @architecture == "arm32"
 //! RUN           force_jit: true,
 //!               options: "--compiler-regex='.*main.*' --compiler-reserve-string-builder-buffer=true \
-//!                         --compiler-inlining=true",
+//!                         --compiler-inlining=true --compiler-inlining-max-insts=2000",
 //!               entry: "ets_string_builder_reserve_part30-44.ETSGLOBAL::mainEventsCheck"
 //! EVENT_NOT     "SbBufferRealloc"
 

@@ -135,17 +135,35 @@ EtsAbcFile *EtsAbcFileLoadFromMemory(EtsRuntimeLinker *runtimeLinker, ObjectHead
         return nullptr;
     }
 
+    auto *ctx = runtimeLinker->GetClassLinkerContext();
     auto *coro = EtsCoroutine::GetCurrent();
-    auto *array = EtsByteArray::FromCoreType(rawFileArray);
+    [[maybe_unused]] EtsHandleScope hs(coro);
+    EtsHandle<EtsByteArray> arrayHandle(coro, EtsByteArray::FromEtsObject(EtsObject::FromCoreType(rawFileArray)));
 
-    auto pf = panda_file::OpenPandaFileFromMemory(array->GetData<void>(), array->GetLength());
+    auto length = arrayHandle->GetLength();
+    size_t sizeToMmap = AlignUp(length, ark::os::mem::GetPageSize());
+    void *mmapedMem = nullptr;
+    {
+        // mmap might be time-consuming, which would affect GC unless being executed in native scope
+        [[maybe_unused]] ScopedNativeCodeThread ns(coro);
+        mmapedMem = os::mem::MapRWAnonymousRaw(sizeToMmap, false);
+    }
+    if (UNLIKELY(mmapedMem == nullptr)) {
+        ThrowEtsException(coro, PlatformTypes(coro)->escompatError,
+                          PandaString("Failed to allocate in-memory AbcFile"));
+        return nullptr;
+    }
+    if (UNLIKELY(memcpy_s(mmapedMem, sizeToMmap, arrayHandle->GetData<void>(), length) != 0)) {
+        PLOG(FATAL, RUNTIME) << "Failed to copy buffer into mem";
+    }
+    os::mem::ConstBytePtr ptr(static_cast<std::byte *>(mmapedMem), sizeToMmap, os::mem::MmapDeleter);
+
+    auto pf = panda_file::File::OpenFromMemory(std::move(ptr));
     if (pf == nullptr) {
-        ets::ThrowEtsException(coro, PlatformTypes(coro)->escompatError,
-                               PandaString("Failed to load abc file from memory"));
+        ThrowEtsException(coro, PlatformTypes(coro)->escompatError, PandaString("Failed to load abc file from memory"));
         return nullptr;
     }
 
-    auto *ctx = runtimeLinker->GetClassLinkerContext();
     return CreateAbcFile(coro, ctx, std::move(pf));
 }
 

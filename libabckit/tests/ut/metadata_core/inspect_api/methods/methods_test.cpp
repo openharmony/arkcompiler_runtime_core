@@ -63,9 +63,9 @@ TEST_F(LibAbcKitInspectApiMethodsTest, StaticMethodGetName)
         "M0C0F2:methods_static.M0C0;std.core.Promise;",
         "_ctor_:methods_static.M0C0;void;",
         "_ctor_:methods_static.%%lambda-lambda_invoke-1;void;",
-        "invoke0:methods_static.%%lambda-lambda_invoke-1;std.core.Object;",
+        "invoke0:methods_static.%%lambda-lambda_invoke-1;Y;",
         "_ctor_:methods_static.%%lambda-lambda_invoke-0;void;",
-        "invoke0:methods_static.%%lambda-lambda_invoke-0;std.core.Object;",
+        "invoke0:methods_static.%%lambda-lambda_invoke-0;Y;",
         "_cctor_:void;",
         "lambda_invoke-0:void;",
         "lambda_invoke-1:void;",
@@ -505,8 +505,8 @@ TEST_F(LibAbcKitInspectApiMethodsTest, StaticFunctionGetParentClass)
         {"_ctor_:methods_static.M0C0;void;", "M0C0"},
         {"_ctor_:methods_static.%%lambda-lambda_invoke-0;void;", "%%lambda-lambda_invoke-0"},
         {"_ctor_:methods_static.%%lambda-lambda_invoke-1;void;", "%%lambda-lambda_invoke-1"},
-        {"invoke0:methods_static.%%lambda-lambda_invoke-0;std.core.Object;", "%%lambda-lambda_invoke-0"},
-        {"invoke0:methods_static.%%lambda-lambda_invoke-1;std.core.Object;", "%%lambda-lambda_invoke-1"},
+        {"invoke0:methods_static.%%lambda-lambda_invoke-0;Y;", "%%lambda-lambda_invoke-0"},
+        {"invoke0:methods_static.%%lambda-lambda_invoke-1;Y;", "%%lambda-lambda_invoke-1"},
     };
 
     helpers::EnumerateAllMethods(file, [&methodClasses](AbckitCoreFunction *method) {

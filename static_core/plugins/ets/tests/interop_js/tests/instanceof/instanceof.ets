@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,12 +62,12 @@ function TestEtstypeInstanceofObject(): boolean {
 
 function TestJsvalueInstanceofObject(): boolean {
     // Check js object as left argument
-    if (!(jsAvalue.unwrap() instanceof Object)) {
+    if (jsAvalue.unwrap() instanceof Object) {
         errLog("js_avalue instanceof Object");
         return false;
     }
     let jsAvalueX = asJsvalue(jsAvalue.unwrap());
-    if (!(jsAvalueX instanceof Object)) {
+    if (jsAvalueX instanceof Object) {
         errLog("js_avalue_x instanceof Object");
         return false;
     }
@@ -82,14 +82,36 @@ function TestJsvalueInstanceofObject(): boolean {
     return true;
 }
 
+function TestJsvalueInstanceofAny(): boolean {
+    // Check js object as left argument
+    if (!(jsAvalue.unwrap() instanceof Any)) {
+        errLog('js_avalue instanceof Any');
+        return false;
+    }
+    let jsAvalueX = asJsvalue(jsAvalue.unwrap());
+    if (!(jsAvalueX instanceof Any)) {
+        errLog('js_avalue_x instanceof Any');
+        return false;
+    }
+
+    // Check ets object as left argumet
+    let a = new A();
+    let aJsvalue: Any = asJsvalue(a);
+    if (!(aJsvalue instanceof Any)) {
+        errLog('a_jsvalue instanceof Any');
+        return false;
+    }
+    return true;
+}
+
 function TestDynvalueInstanceofObject(): boolean {
     let avalue: ESValue = AValue.instantiate();
-    if (!(avalue.unwrap() instanceof Object)) {
+    if (avalue.unwrap() instanceof Object) {
         errLog("avalue instanceof Object");
         return false;
     }
     let cvalue: ESValue = CValue.instantiate();
-    if (!(cvalue.unwrap() instanceof Object)) {
+    if (cvalue.unwrap() instanceof Object) {
         errLog("cvalue instanceof Object");
         return false;
     }
@@ -98,8 +120,31 @@ function TestDynvalueInstanceofObject(): boolean {
 
 function TestDyndeclInstanceofObject(): boolean {
     let adecl = new ADeclared();
-    if (!(adecl instanceof Object)) {
+    if (adecl instanceof Object) {
         errLog("adecl instanceof Object");
+        return false;
+    }
+    return true;
+}
+
+function TestDynvalueInstanceofAny(): boolean {
+    let avalue: ESValue = AValue.instantiate();
+    if (!(avalue.unwrap() instanceof Any)) {
+        errLog('avalue instanceof Any');
+        return false;
+    }
+    let cvalue: ESValue = CValue.instantiate();
+    if (!(cvalue.unwrap() instanceof Any)) {
+        errLog('cvalue instanceof Any');
+        return false;
+    }
+    return true;
+}
+
+function TestDyndeclInstanceofAny(): boolean {
+    let adecl = new ADeclared();
+    if (!(adecl instanceof Any)) {
+        errLog('adecl instanceof Any');
         return false;
     }
     return true;

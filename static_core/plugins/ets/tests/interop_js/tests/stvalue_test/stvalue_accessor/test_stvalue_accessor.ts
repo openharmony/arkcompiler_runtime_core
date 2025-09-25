@@ -891,7 +891,7 @@ function testFindGenericClass(): void {
     let data = STValue.wrapInt(100);
     let intObj = intCls.classInstantiate('i:', [data]);
 
-    let area = container.objectInvokeMethod('calArea', 'C{std.core.Object}:C{std.core.Object}', [intObj]);
+    let area = container.objectInvokeMethod('calArea', 'Y:Y', [intObj]);
     let value = area.objectInvokeMethod('toInt', ':i', []);
     ASSERT_TRUE(value.unwrapToNumber() === 100);
 }

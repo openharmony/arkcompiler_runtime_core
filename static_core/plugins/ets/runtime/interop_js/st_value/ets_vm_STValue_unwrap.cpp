@@ -307,8 +307,7 @@ napi_value DynamicToJSONImpl([[maybe_unused]] napi_env env, [[maybe_unused]] nap
     ANI_CHECK_ERROR_RETURN(env, aniEnv->FindClass("std.core.JSON", &jsonClass));
     ani_ref jsonRes {};
     ANI_CHECK_ERROR_RETURN(env, aniEnv->Class_CallStaticMethodByName_Ref_A(jsonClass, "stringify",
-                                                                           "C{std.core.Object}:C{std.core.String}",
-                                                                           &jsonRes, parseArg));
+                                                                           "Y:C{std.core.String}", &jsonRes, parseArg));
 
     ani_class stringClass;
     ANI_CHECK_ERROR_RETURN(env, aniEnv->FindClass("std.core.String", &stringClass));

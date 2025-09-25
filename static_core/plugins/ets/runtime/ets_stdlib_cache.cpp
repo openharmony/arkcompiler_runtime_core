@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -78,8 +78,7 @@ PandaUniquePtr<StdlibCache> CreateStdLibCache(ani_env *env)
     CacheMethod(env, stdlibCache->std_core_String_Builder, "append",
                 "C{std.core.String}C{std.core.String}C{std.core.String}:C{std.core.StringBuilder}",
                 &stdlibCache->std_core_String_Builder_append);
-    CacheMethod(env, stdlibCache->escompat_Array, "pushOne", "C{std.core.Object}:i",
-                &stdlibCache->escompat_Array_pushOne);
+    CacheMethod(env, stdlibCache->escompat_Array, "pushOne", "Y:i", &stdlibCache->escompat_Array_pushOne);
 
     // Cache variables
     CacheVariable(env, stdlibCache->std_core, "console", &stdlibCache->std_core_console);

@@ -208,6 +208,7 @@ static void TestPrimitiveClassRoot(const ClassLinkerExtension &classLinkerExt, C
     EXPECT_EQ(klass->GetType().GetId(), typeId) << msg;
     EXPECT_FALSE(klass->IsArrayClass()) << msg;
     EXPECT_FALSE(klass->IsStringClass()) << msg;
+    EXPECT_FALSE(klass->IsAnyClass()) << msg;
     EXPECT_TRUE(klass->IsPrimitive()) << msg;
     EXPECT_TRUE(klass->IsAbstract()) << msg;
     EXPECT_FALSE(klass->IsClass()) << msg;
@@ -271,6 +272,7 @@ static void TestArrayClassRoot(const ClassLinkerExtension &classLinkerExt, Class
     EXPECT_TRUE(klass->IsArrayClass()) << msg;
     EXPECT_FALSE(klass->IsStringClass()) << msg;
     EXPECT_FALSE(klass->IsPrimitive()) << msg;
+    EXPECT_FALSE(klass->IsAnyClass()) << msg;
     EXPECT_TRUE(klass->IsAbstract()) << msg;
     EXPECT_TRUE(klass->IsClass()) << msg;
     EXPECT_FALSE(klass->IsInterface()) << msg;
@@ -305,6 +307,7 @@ static void TestClassRoot(Class *classClass, ClassLinkerExtension *ext)
     EXPECT_FALSE(classClass->IsObjectArrayClass());
     EXPECT_FALSE(classClass->IsStringClass());
     EXPECT_FALSE(classClass->IsPrimitive());
+    EXPECT_FALSE(classClass->IsAnyClass());
     EXPECT_TRUE(classClass->IsClass());
     EXPECT_FALSE(classClass->IsInterface());
 }
@@ -314,15 +317,33 @@ static void TestObjectClassRoot(Class *objectClass)
     ASSERT_NE(objectClass, nullptr);
     EXPECT_EQ(objectClass->GetBase(), nullptr);
     EXPECT_EQ(objectClass->GetComponentSize(), 0U);
-    EXPECT_EQ(objectClass->GetRuntimeFlags(), 0U);
+    EXPECT_EQ(objectClass->GetRuntimeFlags(), 32U);
     EXPECT_EQ(objectClass->GetType().GetId(), panda_file::Type::TypeId::REFERENCE);
     EXPECT_TRUE(objectClass->IsObjectClass());
     EXPECT_FALSE(objectClass->IsArrayClass());
+    EXPECT_FALSE(objectClass->IsAnyClass());
     EXPECT_FALSE(objectClass->IsObjectArrayClass());
     EXPECT_FALSE(objectClass->IsStringClass());
     EXPECT_FALSE(objectClass->IsPrimitive());
     EXPECT_TRUE(objectClass->IsClass());
     EXPECT_FALSE(objectClass->IsInterface());
+}
+
+static void TestAnyClassRoot(Class *anyClass)
+{
+    ASSERT_NE(anyClass, nullptr);
+    EXPECT_EQ(anyClass->GetBase(), nullptr);
+    EXPECT_EQ(anyClass->GetComponentSize(), 0U);
+    EXPECT_EQ(anyClass->GetFlags(), 64U);
+    EXPECT_EQ(anyClass->GetType().GetId(), panda_file::Type::TypeId::REFERENCE);
+    EXPECT_TRUE(anyClass->IsAnyClass());
+    EXPECT_FALSE(anyClass->IsObjectClass());
+    EXPECT_FALSE(anyClass->IsArrayClass());
+    EXPECT_FALSE(anyClass->IsObjectArrayClass());
+    EXPECT_FALSE(anyClass->IsStringClass());
+    EXPECT_FALSE(anyClass->IsPrimitive());
+    EXPECT_TRUE(anyClass->IsClass());
+    EXPECT_FALSE(anyClass->IsInterface());
 }
 
 static void TestStringClassRoot(Class *stringClass, Class *objectClass)
@@ -334,6 +355,7 @@ static void TestStringClassRoot(Class *stringClass, Class *objectClass)
     EXPECT_EQ(stringClass->GetType().GetId(), panda_file::Type::TypeId::REFERENCE);
     EXPECT_FALSE(stringClass->IsObjectClass());
     EXPECT_FALSE(stringClass->IsArrayClass());
+    EXPECT_FALSE(stringClass->IsAnyClass());
     EXPECT_FALSE(stringClass->IsObjectArrayClass());
     EXPECT_TRUE(stringClass->IsStringClass());
     EXPECT_FALSE(stringClass->IsPrimitive());
@@ -352,6 +374,7 @@ static void TestLineStringClassRoot(Class *lineStringClass, Class *stringClass)
     EXPECT_FALSE(lineStringClass->IsObjectClass());
     EXPECT_FALSE(lineStringClass->IsArrayClass());
     EXPECT_FALSE(lineStringClass->IsObjectArrayClass());
+    EXPECT_FALSE(lineStringClass->IsAnyClass());
     EXPECT_TRUE(lineStringClass->IsStringClass());
     EXPECT_FALSE(lineStringClass->IsPrimitive());
     EXPECT_TRUE(lineStringClass->IsClass());
@@ -372,6 +395,9 @@ TEST_F(ClassLinkerTest, TestClassRoots)
 
     Class *objectClass = ext->GetClassRoot(ClassRoot::OBJECT);
     TestObjectClassRoot(objectClass);
+
+    Class *anyClass = ext->GetClassRoot(ClassRoot::ANY);
+    TestAnyClassRoot(anyClass);
 
     Class *stringClass = ext->GetClassRoot(ClassRoot::STRING);
     TestStringClassRoot(stringClass, objectClass);

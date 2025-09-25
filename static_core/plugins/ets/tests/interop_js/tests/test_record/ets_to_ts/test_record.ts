@@ -27,6 +27,7 @@ const largeNumberRecord = recordClass.largeNumberRecord;
 const sequenceRecord = recordClass.sequenceRecord;
 const modifyRecord = recordClass.modifyRecord;
 const specialStringRecord = recordClass.specialStringRecord;
+const numberOrStringRecord = recordClass.numberOrStringRecord;
 
 function testGetRecordValue(): void {
   let dayValue = myRecord.day;

@@ -457,9 +457,7 @@ void InteropCtx::InitJsValueFinalizationRegistry(EtsCoroutine *coro)
     jsvalueFregistryRef_ = Refstor()->Add(queue->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
     ASSERT(jsvalueFregistryRef_ != nullptr);
     jsvalueFregistryRegister_ =
-        queue->GetClass()
-            ->GetInstanceMethod("register", "Lstd/core/Object;Lstd/core/Object;Lstd/core/Object;:V")
-            ->GetPandaMethod();
+        queue->GetClass()->GetInstanceMethod("registerImpl", "LY;LY;Lstd/core/Object;:V")->GetPandaMethod();
     ASSERT(jsvalueFregistryRegister_ != nullptr);
 }
 
@@ -481,7 +479,7 @@ EtsObject *InteropCtx::CreateETSCoreESError(EtsCoroutine *coro, EtsObject *etsOb
     Method::Proto proto(Method::Proto::ShortyVector {panda_file::Type(panda_file::Type::TypeId::VOID),
                                                      panda_file::Type(panda_file::Type::TypeId::REFERENCE)},
                         Method::Proto::RefTypeVector {
-                            utf::Mutf8AsCString(PlatformTypes(coro)->coreObject->GetRuntimeClass()->GetDescriptor())});
+                            coro->GetPandaVM()->GetClassLinker()->GetClassRoot(EtsClassRoot::ANY)->GetDescriptor()});
     auto ctorName = utf::CStringAsMutf8(panda_file_items::CTOR.data());
     auto ctor = PlatformTypes(coro)->interopESError->GetRuntimeClass()->GetDirectMethod(ctorName, proto);
     ASSERT(ctor != nullptr);

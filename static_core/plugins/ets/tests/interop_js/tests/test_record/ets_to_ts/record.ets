@@ -83,3 +83,11 @@ let specialStringRecord: Record<SpecialStrKey, string> = {
     'space': 'hello world',
     'special': 'a@b#c$'
 };
+
+// Test case 7: Record with `number | string` as key type
+type NumberOrString = number | string
+
+let numberOrStringRecord: Record<NumberOrString, string> = {
+    's': 'str',
+    1: 'num'
+}

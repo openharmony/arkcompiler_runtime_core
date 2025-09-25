@@ -146,8 +146,8 @@ TEST_F(EtsRuntimeLinkerTest, CreateUnionClassNotRedecl)
     auto *ext = static_cast<ark::ets::EtsClassLinkerExtension *>(
         ark::Runtime::GetCurrent()->GetClassLinker()->GetExtension(ark::panda_file::SourceLang::ETS));
     SuppressErrorHandler handler;
-    const auto *classWithError = reinterpret_cast<const uint8_t *>("LD;");
-    Class *klass = ext->GetClass(classWithError, true, nullptr, &handler);
+    const auto *classDesc = reinterpret_cast<const uint8_t *>("LD;");
+    Class *klass = ext->GetClass(classDesc, true, nullptr, &handler);
     ASSERT_NE(klass, nullptr);
     ASSERT_EQ(handler.GetMessage(), "");
 }
@@ -267,42 +267,6 @@ TEST_F(EtsRuntimeLinkerTest, CreateUnionClassMultiOverriding4)
         ".language eTS\n"
 
         ".record Base <ets.extends=std.core.Object, access.record=public> {}\n"
-        ".record Derv1 <ets.extends=Base, access.record=public> {}\n"
-        ".record Derv2 <ets.extends=Derv1, access.record=public> {}\n"
-        ".record Derv3 <ets.extends=Derv2, access.record=public> {}\n"
-        ".record Derv4 <ets.extends=Derv3, access.record=public> {}\n"
-        ".record Derv11 <ets.extends=Derv1, access.record=public> {}\n"
-        ".record D <ets.extends=std.core.Object, access.record=public> {}\n"
-        ".record E <ets.extends=D, access.record=public> {}\n"
-        ".record std.core.Object <external>\n"
-        ".function void D.foo(D a0, {UDerv11,Derv4} a1) <access.function=public> { return.void }\n"
-        ".function void E.foo(E a0, {UDerv11,Derv3} a1) <access.function=public> { return.void }\n"
-        ".function void E.foo(E a0, Derv1 a1) <access.function=public> { return.void }\n";
-    auto res = p.Parse(source);
-    ASSERT_EQ(p.ShowError().err, pandasm::Error::ErrorType::ERR_NONE);
-    auto pf = pandasm::AsmEmitter::Emit(res.Value());
-
-    auto classLinker = Runtime::GetCurrent()->GetClassLinker();
-    ASSERT(classLinker);
-    classLinker->AddPandaFile(std::move(pf));
-
-    auto *ext = static_cast<ark::ets::EtsClassLinkerExtension *>(
-        ark::Runtime::GetCurrent()->GetClassLinker()->GetExtension(ark::panda_file::SourceLang::ETS));
-    SuppressErrorHandler handler;
-    const auto *classWithError = reinterpret_cast<const uint8_t *>("LE;");
-    Class *klass = ext->GetClass(classWithError, true, nullptr, &handler);
-    ASSERT_EQ(klass, nullptr);
-    ASSERT_EQ(handler.GetMessage(), "Multiple override LE;foo LD;foo");
-}
-
-TEST_F(EtsRuntimeLinkerTest, CreateUnionClassMultiOverriding5)
-{
-    pandasm::Parser p;
-
-    const char *source =
-        ".language eTS\n"
-
-        ".record Base <ets.extends=std.core.Object, access.record=public> {}\n"
         ".record I <ets.abstract, ets.interface, ets.extends=std.core.Object, access.record=public> {}\n"
         ".record A <ets.implements=I, ets.extends=Base, access.record=public> {}\n"
         ".record BB <ets.extends=std.core.Object, access.record=public> {}\n"
@@ -360,13 +324,13 @@ TEST_F(EtsRuntimeLinkerTest, CreateUnionClassOverload)
     auto *ext = static_cast<ark::ets::EtsClassLinkerExtension *>(
         ark::Runtime::GetCurrent()->GetClassLinker()->GetExtension(ark::panda_file::SourceLang::ETS));
     SuppressErrorHandler handler;
-    const auto *classWithError = reinterpret_cast<const uint8_t *>("LE;");
-    Class *klass = ext->GetClass(classWithError, true, nullptr, &handler);
+    const auto *classDesc = reinterpret_cast<const uint8_t *>("LE;");
+    Class *klass = ext->GetClass(classDesc, true, nullptr, &handler);
     ASSERT_NE(klass, nullptr);
     ASSERT_EQ(handler.GetMessage(), "");
 }
 
-TEST_F(EtsRuntimeLinkerTest, CreateUnionClassOverriding)
+TEST_F(EtsRuntimeLinkerTest, CreateUnionClassOverriding1)
 {
     pandasm::Parser p;
 
@@ -396,10 +360,46 @@ TEST_F(EtsRuntimeLinkerTest, CreateUnionClassOverriding)
     auto *ext = static_cast<ark::ets::EtsClassLinkerExtension *>(
         ark::Runtime::GetCurrent()->GetClassLinker()->GetExtension(ark::panda_file::SourceLang::ETS));
     SuppressErrorHandler handler;
-    const auto *classWithError = reinterpret_cast<const uint8_t *>("LE;");
-    Class *klass = ext->GetClass(classWithError, true, nullptr, &handler);
+    const auto *classDesc = reinterpret_cast<const uint8_t *>("LE;");
+    Class *klass = ext->GetClass(classDesc, true, nullptr, &handler);
     ASSERT_NE(klass, nullptr);
     ASSERT_EQ(handler.GetMessage(), "");
+}
+
+TEST_F(EtsRuntimeLinkerTest, CreateUnionClassOverriding2)
+{
+    pandasm::Parser p;
+
+    const char *source =
+        ".language eTS\n"
+
+        ".record Base <ets.extends=std.core.Object, access.record=public> {}\n"
+        ".record Derv1 <ets.extends=Base, access.record=public> {}\n"
+        ".record Derv2 <ets.extends=Derv1, access.record=public> {}\n"
+        ".record Derv3 <ets.extends=Derv2, access.record=public> {}\n"
+        ".record Derv4 <ets.extends=Derv3, access.record=public> {}\n"
+        ".record Derv11 <ets.extends=Derv1, access.record=public> {}\n"
+        ".record D <ets.extends=std.core.Object, access.record=public> {}\n"
+        ".record E <ets.extends=D, access.record=public> {}\n"
+        ".record std.core.Object <external>\n"
+        ".function void D.foo(D a0, {UDerv11,Derv4} a1) <access.function=public> { return.void }\n"
+        ".function void E.foo(E a0, {UDerv11,Derv3} a1) <access.function=public> { return.void }\n"
+        ".function void E.foo(E a0, Derv1 a1) <access.function=public> { return.void }\n";
+    auto res = p.Parse(source);
+    ASSERT_EQ(p.ShowError().err, pandasm::Error::ErrorType::ERR_NONE);
+    auto pf = pandasm::AsmEmitter::Emit(res.Value());
+
+    auto classLinker = Runtime::GetCurrent()->GetClassLinker();
+    ASSERT(classLinker);
+    classLinker->AddPandaFile(std::move(pf));
+
+    auto *ext = static_cast<ark::ets::EtsClassLinkerExtension *>(
+        ark::Runtime::GetCurrent()->GetClassLinker()->GetExtension(ark::panda_file::SourceLang::ETS));
+    SuppressErrorHandler handler;
+    const auto *classWithError = reinterpret_cast<const uint8_t *>("LE;");
+    Class *klass = ext->GetClass(classWithError, true, nullptr, &handler);
+    ASSERT_EQ(klass, nullptr);
+    ASSERT_EQ(handler.GetMessage(), "Multiple override LE;foo LD;foo");
 }
 
 }  // namespace ark::ets::test

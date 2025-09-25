@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,9 +16,10 @@
 .record N <external>
 .record std.core.Object <external>
 .record escompat.Error <external>
+.record escompat.ErrorOptions <external>
 .record std.core.String <external>
 .function void std.core.Object._ctor_(std.core.Object a0) <ctor, external, access.function=public>
-.function void escompat.Error._ctor_(escompat.Error a0, std.core.String a1) <ctor, external, access.function=public>
+.function void escompat.Error._ctor_(escompat.Error a0, std.core.String a1, escompat.ErrorOptions a2) <ctor, external, access.function=public>
 
 .record A {
     N field
@@ -38,9 +39,10 @@
 .function N foo() {
 	lda.str "foo() never returns"
 	sta.obj v0
-	initobj.short escompat.Error._ctor_:(escompat.Error,std.core.String), v0
-	sta.obj v0
-	throw v0
+	mov.null v1
+	initobj.short escompat.Error._ctor_:(escompat.Error,std.core.String,escompat.ErrorOptions), v0, v1
+	sta.obj v2
+	throw v2
 }
 .function void bar(N a0) {
 	return.void

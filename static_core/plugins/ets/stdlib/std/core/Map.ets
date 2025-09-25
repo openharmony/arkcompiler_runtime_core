@@ -381,7 +381,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
             return pairs(1)
         }
 
-        const keyHash: int = Runtime.getHashCodeByValue(k! as object).toInt() // #26217
+        const keyHash: int = Runtime.getHashCodeByValue(k!).toInt() // #26217
         const t = keyHash >> 31
 
         return pairs(((keyHash ^ t) - t) & (capacity - 1))

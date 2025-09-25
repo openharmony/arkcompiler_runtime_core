@@ -20,6 +20,7 @@ set(abc2progTestFiles
     "Metadata"
     "Record"
     "Type"
+    "Any"
 )
 
 add_custom_target(abc2program_gen)

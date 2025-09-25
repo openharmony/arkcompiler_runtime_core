@@ -504,7 +504,7 @@ std::pair<EtsClassWrapper::FieldsVec, EtsClassWrapper::MethodsVec> EtsClassWrapp
     }
 
     CollectClassMethods(&propsMethod, overloads);
-    if (etsClass_ != PlatformTypes()->coreObject) {
+    if (!etsClass_->GetRuntimeClass()->IsObjectClass() && !etsClass_->GetRuntimeClass()->IsAnyClass()) {
         UpdatePropsWithBaseClasses(&propsMethod, &propsField);
     }
 
@@ -574,7 +574,9 @@ void EtsClassWrapper::UpdatePropsWithBaseClasses(EtsClassWrapper::PropsMethod *p
 
     if (hasSquashedProto(this)) {
         // Copy properties of base classes if we have to split prototype chain
-        for (auto wclass = baseWrapper_; wclass != nullptr && (wclass->etsClass_ != PlatformTypes()->coreObject);
+        auto *anyClass = EtsCoroutine::GetCurrent()->GetPandaVM()->GetClassLinker()->GetClassRoot(EtsClassRoot::ANY);
+        for (auto wclass = baseWrapper_;
+             wclass != nullptr && (wclass->etsClass_ != PlatformTypes()->coreObject) && (wclass->etsClass_ != anyClass);
              wclass = wclass->baseWrapper_) {
             for (auto &wfield : wclass->GetFields()) {
                 Field *field = wfield.GetField();
@@ -813,6 +815,7 @@ void EtsClassWrapper::DefinePropertiesBatch(napi_env env, napi_value jsCtor,
 }
 
 /*static*/
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) big switch case
 std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsClass *etsClass, const char *jsBuiltinName,
                                                          const OverloadsMap *overloads)
 {
@@ -835,7 +838,7 @@ std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsCla
     if (_this->HasBuiltin() && !fields.empty()) {
         INTEROP_LOG(ERROR) << "built-in class " << etsClass->GetDescriptor() << " has field properties";
     }
-    if (_this->HasBuiltin() && etsClass->IsFinal()) {
+    if (_this->HasBuiltin() && etsClass->IsFinal() && !etsClass->GetRuntimeClass()->IsAnyClass()) {
         INTEROP_LOG(FATAL) << "built-in class " << etsClass->GetDescriptor() << " is final";
     }
     // NOTE(vpukhov): forbid "true" ets-field overriding in js-derived class, as it cannot be proxied back
@@ -846,7 +849,7 @@ std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsCla
     napi_value jsCtor {};
     _this->DefineJSClass(env, jsProps, &jsCtor);
 
-    if (etsClass == PlatformTypes()->coreObject) {
+    if (etsClass->GetRuntimeClass()->IsObjectClass() || etsClass->GetRuntimeClass()->IsAnyClass()) {
         SetNullPrototype(env, jsCtor);
 
         NAPI_CHECK_FATAL(napi_create_reference(env, jsCtor, 1, &_this->jsCtorRef_));

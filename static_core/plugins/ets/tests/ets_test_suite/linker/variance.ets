@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -103,8 +103,83 @@ function overrideMultiple() {
     c.m(new T2());
 }
 
+class D1 {
+    m(a: FixedArray<string> | T1): void { stub() }
+}
+class D2 extends D1 {
+    m(a: FixedArray<object> | T0): void { }
+}
+function overrideUnionArrays() {
+    let d = new D2()
+    let arr: FixedArray<string> = new FixedArray<string>(3)
+    d.m(arr)
+}
+
+class E1 {
+    m(a: FixedArray<string>) { stub() }
+}
+class E2 extends E1 {
+    static create(): E1 { return new E2() }
+    m(a: FixedArray<FixedArray<Date> | string | number>): void { }
+}
+function overrideFixedArrayUnion1() {
+    let e: E1 = E2.create();
+    const fa: FixedArray<string> = ['s', '1']
+    e.m(fa)
+}
+
+class F1 {
+    m(a: FixedArray<string | number>) { stub() }
+}
+class F2 extends F1 {
+    static create(): F1 { return new F2() }
+    m(a: FixedArray<Object>): void { }
+}
+function overrideFixedArrayUnion2() {
+    let f: F1 = F2.create();
+    const fa: FixedArray<string | number> = ['s', 1]
+    f.m(fa)
+}
+
+class G1 {
+    m(a: Object | null): void { }
+}
+
+class G2 extends G1 {
+    static create(): G1 { return new G2() }
+    m(a: Object ) { stub() }
+}
+
+function notOverrideUnionWithNull1() {
+    let g1: G1 = G2.create();
+    let g2: G2 = new G2()
+    g1.m(null)
+    g2.m(null)
+}
+
+class H1 {
+    m<T>(a: T): void { }
+}
+
+class H2 extends H1 {
+    static create(): H1 { return new H2() }
+    m(a: Object ) { stub() }
+}
+
+function notOverrideUnionWithNull2() {
+    let h1: H1 = H2.create();
+    let h2: H2 = new H2()
+    h1.m(null)
+    h2.m(null)
+}
+
 function main() {
     simple();
     loops();
     overrideMultiple();
+    overrideUnionArrays();
+    overrideFixedArrayUnion1();
+    overrideFixedArrayUnion2();
+    notOverrideUnionWithNull1();
+    notOverrideUnionWithNull2();
 }

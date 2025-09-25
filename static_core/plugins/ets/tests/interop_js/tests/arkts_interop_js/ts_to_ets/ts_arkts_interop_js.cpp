@@ -177,8 +177,7 @@ static void CheckAnyRef(ani_env *env, ani_ref anyRef, std::string_view testStrin
     ani_class esValueClass {};
     ASSERT_EQ(env->FindClass("std.interop.ESValue", &esValueClass), ANI_OK);
     ani_ref esValue {};
-    ASSERT_EQ(env->Class_CallStaticMethodByName_Ref(esValueClass, "wrap", "C{std.core.Object}:C{std.interop.ESValue}",
-                                                    &esValue, anyRef),
+    ASSERT_EQ(env->Class_CallStaticMethodByName_Ref(esValueClass, "wrap", "Y:C{std.interop.ESValue}", &esValue, anyRef),
               ANI_OK);
     // const property = esValue.getPropertySafe(testString)
     ani_string propertyName {};

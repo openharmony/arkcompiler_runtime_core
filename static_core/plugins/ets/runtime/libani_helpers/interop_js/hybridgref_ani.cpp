@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -85,12 +85,9 @@ static bool InitializeGlobal(ani_env *env)
     status = env->Class_FindMethod(esobjectClass, "getPropertySafe", "d:C{std.interop.ESValue}",
                                    &g_methodGetPropertyByIndex);
     ASSERT(status == ANI_OK);
-    status =
-        env->Class_FindMethod(esobjectClass, "setProperty",
-                              "C{std.core.String}X{C{std.core.Null}C{std.core.Object}}:", &g_methodSetPropertyByName);
+    status = env->Class_FindMethod(esobjectClass, "setProperty", "C{std.core.String}Y:", &g_methodSetPropertyByName);
     ASSERT(status == ANI_OK);
-    status = env->Class_FindMethod(esobjectClass, "setProperty",
-                                   "dX{C{std.core.Null}C{std.core.Object}}:", &g_methodSetPropertyByIndex);
+    status = env->Class_FindMethod(esobjectClass, "setProperty", "dY:", &g_methodSetPropertyByIndex);
     ASSERT(status == ANI_OK);
     status =
         env->Class_FindStaticMethod(esobjectClass, "%%get-Undefined", ":C{std.interop.ESValue}", &g_methodGetUndefined);

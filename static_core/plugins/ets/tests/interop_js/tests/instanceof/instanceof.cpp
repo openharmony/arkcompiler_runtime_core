@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,6 +48,21 @@ TEST_F(EtsInteropInstanceOf, Test_dynvalue_instanceof_object)
 TEST_F(EtsInteropInstanceOf, Test_dyndecl_instanceof_object)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "TestDyndeclInstanceofObject"));
+}
+
+TEST_F(EtsInteropInstanceOf, Test_jsvalue_instanceof_any)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "TestJsvalueInstanceofAny"));
+}
+
+TEST_F(EtsInteropInstanceOf, Test_dynvalue_instanceof_any)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "TestDynvalueInstanceofAny"));
+}
+
+TEST_F(EtsInteropInstanceOf, Test_dyndecl_instanceof_any)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "TestDyndeclInstanceofAny"));
 }
 
 /*

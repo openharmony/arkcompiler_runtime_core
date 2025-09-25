@@ -127,6 +127,10 @@ public:
     {
         return Type {Builtin::TOP};
     }
+    static Type Reference()
+    {
+        return Type {Builtin::REFERENCE};
+    }
 
     ALWAYS_INLINE bool IsNone() const
     {

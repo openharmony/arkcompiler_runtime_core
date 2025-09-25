@@ -118,6 +118,16 @@ interface InvokeTester {
     funcRestParamsObj(v?: Object, ...v1: Object[]): Class
 }
 
+class NeverError extends Error {}
+
+class NeverClass {
+    funcGetNever1(n: never): void {}
+    funcGetNever2(a: Object, n: never): void {}
+    funcReturnNever(): never {
+        throw new NeverError()
+    }
+}
+
 class BaseInvokeTester implements InvokeTester {
     public objVal: Object | undefined
     public intVal: int | undefined
@@ -640,8 +650,21 @@ function invokeByInterface(tester: InvokeTester, ifaceType: Class) {
     }
 }
 
+function invokeMethodWithNever(neverTester: NeverClass): void {
+    let neverTesterType = Class.of(neverTester)
+    let neverType = Class.from<never>()
+    let neverTesterMethod1 = neverTesterType.getInstanceMethod("funcGetNever1")!
+    arktest.expectThrow(() => { neverTesterMethod1.invoke(neverTester, [new Object()]) }, (e) => e instanceof TypeError)
+    arktest.expectThrow(() => { neverTesterMethod1.invoke(neverTester, [neverType]) }, (e) => e instanceof TypeError)
+    let neverTesterMethod2 = neverTesterType.getInstanceMethod("funcGetNever2")!
+    arktest.expectThrow(() => { neverTesterMethod2.invoke(neverTester, [new Object(), neverType]) }, (e) => e instanceof TypeError)
+    let neverTesterMethod3 = neverTesterType.getInstanceMethod("funcReturnNever")!
+    arktest.expectThrow(() => { neverTesterMethod3.invoke(neverTester) }, (e) => e instanceof NeverError)
+}
+
 function testReflectMethodInvoke(): void {
     let baseTester = new BaseInvokeTester()
+    let neverTester = new NeverClass()
     let derivedTester = new DerivedInvokeTester()
     let ifaceType = Class.of(baseTester).getInterfaces()[0]
 
@@ -649,6 +672,41 @@ function testReflectMethodInvoke(): void {
     invokeByBaseTester(derivedTester)
     invokeByInterface(baseTester, ifaceType)
     invokeByInterface(derivedTester, ifaceType)
+    invokeMethodWithNever(neverTester)
+}
+
+class AnyTypeClass {
+    returnAny(): Any {
+        return null
+    }
+    paramAny(a: Any) {}
+}
+
+function testAnyMethods(): void{
+    let typeAny = Class.from<Any>()
+    let testAnyType = Class.from<AnyTypeClass>()
+
+    let returnAny = testAnyType.getInstanceMethod("returnAny")!
+    let paramAny = testAnyType.getInstanceMethod("paramAny")!
+    arktest.assertEQ(returnAny.getReturnType(), typeAny)
+    arktest.assertEQ(paramAny.getParameterType(0)!, typeAny)
+}
+
+class NeverTypeClass {
+    returnNever(): never {
+        throw new Error()
+    }
+    paramNever(a: never) {}
+}
+
+function testNeverMethods(): void{
+    let typeNever = Class.from<never>()
+    let testNeverType = Class.from<NeverTypeClass>()
+
+    let returnNever = testNeverType.getInstanceMethod("returnNever")!
+    let paramNever = testNeverType.getInstanceMethod("paramNever")!
+    arktest.assertEQ(returnNever.getReturnType(), typeNever)
+    arktest.assertEQ(paramNever.getParameterType(0)!, typeNever)
 }
 
 function testReflectMethod(): void {
@@ -677,6 +735,9 @@ function testReflectMethod(): void {
     arktest.assertEQ(setter.getParameterType(0)!, Class.PRIMITIVE_INT)
     arktest.assertEQ(setter.getReturnType().getName(), "void")
     arktest.assertEQ(setter.getOwner(), typeHWriter)
+
+    testAnyMethods()
+    testNeverMethods()
 }
 
 function testMethodAttributes(): void {

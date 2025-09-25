@@ -21,7 +21,7 @@ export declare class ESUser {
 export declare function returnESUserArray(): es.Array<ESUser>;
 export declare function testUserArrayName(arr: es.Array<object>, idx: number, name: string): boolean;
 export declare function testUserArrayAge(arr: es.Array<object>, idx: number, age: number): boolean;
-export declare function returnFlatArray(): es.Array<object>;
+export declare function returnFlatArray(): es.Array<Any>;
 export declare function esFuncArrayTest(arr: es.Array<number>, func: (arr: es.Array<number>) => boolean): boolean;
 export declare function returnSameArray(): es.Array<number>;
 export declare function createEmptyArray<T>(): es.Array<T>;

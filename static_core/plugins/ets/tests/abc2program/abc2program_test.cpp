@@ -33,6 +33,7 @@ constexpr std::string_view LITERAL_ARRAY_ABC_TEST_FILE_NAME = "LiteralArray.abc"
 constexpr std::string_view METADATA_ABC_TEST_FILE_NAME = "Metadata.abc";
 constexpr std::string_view RECORD_ABC_TEST_FILE_NAME = "Record.abc";
 constexpr std::string_view TYPE_ABC_TEST_FILE_NAME = "Type.abc";
+constexpr std::string_view ANY_ABC_TEST_FILE_NAME = "Any.abc";
 constexpr size_t ANNOTATION_ID_SIZE = 1;
 constexpr size_t ANNOTATION_ID_PREFIX_SIZE = 3;
 
@@ -115,6 +116,15 @@ public:
     void SetUp() override
     {
         (void)driver.Compile(TYPE_ABC_TEST_FILE_NAME.data());
+        prog = &(driver.GetProgram());
+    }
+};
+
+class Abc2ProgramAnyTest : public Abc2ProgramTest {
+public:
+    void SetUp() override
+    {
+        (void)driver.Compile(ANY_ABC_TEST_FILE_NAME.data());
         prog = &(driver.GetProgram());
     }
 };
@@ -251,9 +261,9 @@ TEST_F(Abc2ProgramFunctionsTest, Functions)
         "Functions.ETSGLOBAL.lambda_invoke-1:std.core.String;std.core.String;",
         "Functions.ETSGLOBAL.main:void;",
         prefix + "-0._ctor_:Functions.%%lambda-lambda_invoke-0;void;",
-        prefix + "-0.invoke1:Functions.%%lambda-lambda_invoke-0;std.core.Object;std.core.Object;",
+        prefix + "-0.invoke1:Functions.%%lambda-lambda_invoke-0;Y;Y;",
         prefix + "-1._ctor_:Functions.%%lambda-lambda_invoke-1;void;",
-        prefix + "-1.invoke1:Functions.%%lambda-lambda_invoke-1;std.core.Object;std.core.Object;",
+        prefix + "-1.invoke1:Functions.%%lambda-lambda_invoke-1;Y;Y;",
         "std.core.Lambda1._ctor_:std.core.Lambda1;void;",
         "std.core.Object._ctor_:std.core.Object;void;",
         "std.core.StringBuilder._ctor_:std.core.StringBuilder;std.core.String;void;",
@@ -286,9 +296,9 @@ TEST_F(Abc2ProgramFunctionsConcatTest, Functions)
         "Functions.ETSGLOBAL.lambda_invoke-1:std.core.String;std.core.String;",
         "Functions.ETSGLOBAL.main:void;",
         prefix + "-0._ctor_:Functions.%%lambda-lambda_invoke-0;void;",
-        prefix + "-0.invoke1:Functions.%%lambda-lambda_invoke-0;std.core.Object;std.core.Object;",
+        prefix + "-0.invoke1:Functions.%%lambda-lambda_invoke-0;Y;Y;",
         prefix + "-1._ctor_:Functions.%%lambda-lambda_invoke-1;void;",
-        prefix + "-1.invoke1:Functions.%%lambda-lambda_invoke-1;std.core.Object;std.core.Object;",
+        prefix + "-1.invoke1:Functions.%%lambda-lambda_invoke-1;Y;Y;",
         "std.core.Lambda1._ctor_:std.core.Lambda1;void;",
         "std.core.Object._ctor_:std.core.Object;void;",
         "std.core.StringBuilder.concatStrings:std.core.String;std.core.String;std.core.String;",
@@ -348,6 +358,58 @@ TEST_F(Abc2ProgramTypeTest, Type)
         "Type.ETSGLOBAL.main void",
         "std.core.Object._ctor_ std.core.Object void",
     };
+    std::set<std::string> existingType {};
+    for (auto &it : prog->functionInstanceTable) {
+        std::stringstream str;
+        str << it.second.name;
+        for (auto &param : it.second.params) {
+            str << " " << param.type.GetName();
+        }
+        str << " " << it.second.returnType.GetName();
+        existingType.insert(str.str());
+    }
+    for (auto &it : prog->functionStaticTable) {
+        std::stringstream str;
+        str << it.second.name;
+        for (auto &param : it.second.params) {
+            str << " " << param.type.GetName();
+        }
+        str << " " << it.second.returnType.GetName();
+        existingType.insert(str.str());
+    }
+    EXPECT_EQ(existingType, expectedType);
+}
+
+TEST_F(Abc2ProgramAnyTest, Any)
+{
+    const std::set<std::string> expectedType = {
+        "Any.AnyTypeTest._ctor_ Any.AnyTypeTest void",
+        "Any.AnyTypeTest2._ctor_ Any.AnyTypeTest2 void",
+        "Any.AnyTypeTest2.foo1 Any.AnyTypeTest2 Y void",
+        "Any.AnyTypeTest2.foo2 Any.AnyTypeTest2 Y Y",
+        "Any.AnyTypeTest2.foo3 Any.AnyTypeTest2 N void",
+        "Any.AnyTypeTest2.foo4 Any.AnyTypeTest2 N N",
+        "Any.AnyTypeTest2.foo5 Any.AnyTypeTest2 std.core.Array void",
+        "Any.AnyTypeTest2.foo6 Any.AnyTypeTest2 std.core.Array std.core.Array",
+        "Any.AnyTypeTest2.foo7 Any.AnyTypeTest2 i32 std.core.Array void",
+        "Any.AnyTypeTest2.foo8 Any.AnyTypeTest2 i32 N void",
+        "Any.ETSGLOBAL._cctor_ void",
+        "Any.ETSGLOBAL.foo N",
+        "Any.ETSGLOBAL.foo1 Y void",
+        "Any.ETSGLOBAL.foo10 std.core.Array std.core.Array",
+        "Any.ETSGLOBAL.foo12 N Y",
+        "Any.ETSGLOBAL.foo2 N void",
+        "Any.ETSGLOBAL.foo3 Y N void",
+        "Any.ETSGLOBAL.foo4 std.core.Array void",
+        "Any.ETSGLOBAL.foo5 Y std.core.Array void",
+        "Any.ETSGLOBAL.foo6 N std.core.Array void",
+        "Any.ETSGLOBAL.foo7 Y Y",
+        "Any.ETSGLOBAL.foo8 N N",
+        "Any.ETSGLOBAL.foo9 Y N void",
+        "Any.ETSGLOBAL.main void",
+        "Any.NeverTypeTest._ctor_ Any.NeverTypeTest void",
+        "escompat.Error._ctor_ escompat.Error std.core.String escompat.ErrorOptions void",
+        "std.core.Object._ctor_ std.core.Object void"};
     std::set<std::string> existingType {};
     for (auto &it : prog->functionInstanceTable) {
         std::stringstream str;

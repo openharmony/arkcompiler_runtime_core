@@ -24,7 +24,7 @@ export declare class Foo {
     constructor();
 
     barProperty: number;
-    arrayLikeProperty: Object;
+    arrayLikeProperty: Any;
 
     getBar(): number;
     static getMagic(): number;

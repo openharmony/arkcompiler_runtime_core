@@ -50,7 +50,7 @@
 namespace ark::ets::interop::js {
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-static const std::unordered_set<char> SINGLE_CHARS = {'c', 'b', 's', 'i', 'l', 'f', 'd', 'N', 'U', 'z'};
+static const std::unordered_set<char> SINGLE_CHARS = {'c', 'b', 's', 'i', 'l', 'f', 'd', 'N', 'U', 'z', 'Y'};
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
 static const std::unordered_set<char> BRACKET_PREFIXES = {'C', 'A', 'E', 'P', 'X'};
 
@@ -175,8 +175,8 @@ bool CheckArgsAndGetReturnType(napi_env env, const std::string &signature, size_
     }
 
     static const std::unordered_map<char, SType> CHAR_MAP = {
-        {'z', SType::BOOLEAN}, {'b', SType::BYTE}, {'c', SType::CHAR},  {'s', SType::SHORT},
-        {'i', SType::INT},     {'l', SType::LONG}, {'f', SType::FLOAT}, {'d', SType::DOUBLE}};
+        {'z', SType::BOOLEAN}, {'b', SType::BYTE},  {'c', SType::CHAR},   {'s', SType::SHORT},    {'i', SType::INT},
+        {'l', SType::LONG},    {'f', SType::FLOAT}, {'d', SType::DOUBLE}, {'Y', SType::REFERENCE}};
 
     auto returnTypeSign = signature[colonPos + 1];
     auto it = CHAR_MAP.find(returnTypeSign);

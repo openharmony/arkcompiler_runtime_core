@@ -927,7 +927,7 @@ class JSONWriter {
 
     private indentLevel: int = 0
 
-    private readonly path = new Set<Object>()
+    private readonly path = new Set<Any>()
     private buffer = new StringBuilder()
 
     public constructor(replacer?: (key: String, value: Any) => Any, space?: String) {
@@ -1005,11 +1005,11 @@ class JSONWriter {
             this.writeTypedArray(obj)
         } else if (obj instanceof Set || obj instanceof Promise || obj instanceof Map || obj instanceof RegExp) {
             this.buffer.append(JSONObject.EMPTY)
+        } else if (obj instanceof JSValue) {
+            this.buffer.append(JSON.stringify(obj as JSValue))
         } else if (obj instanceof Object) {
             const objCls = Class.of(obj)
-            if (objCls === JSONWriter.STD_CORE_INTEROP_JSVALUE_CLASS) {
-                this.buffer.append(JSON.stringify(obj as JSValue))
-            } else if (objCls.isFixedArray()) {
+            if (objCls.isFixedArray()) {
                 if (obj instanceof FixedArray<boolean>) {
                     this.writeArrayHandleValue(new BoolArrayHandle(obj))
                 } else if (obj instanceof FixedArray<byte>) {
@@ -1027,7 +1027,8 @@ class JSONWriter {
                 } else if (obj instanceof FixedArray<double>) {
                     this.writeArrayHandleValue(new DoubleArrayHandle(obj))
                 } else {
-                    this.writeArrayValue(Types.asFixedArray(obj))
+                    // NOTE(aantipina): Issue #31995
+                    this.writeArrayValue(obj as FixedArray<Any>)
                 }
             } else if (objCls.isEnum()) {
                 this.writeEnumValue(obj, objCls)
@@ -1705,7 +1706,7 @@ class JSONWriter {
             return
         }
 
-        const cycleDetected = this.path.has(obj as Object)
+        const cycleDetected = this.path.has(obj)
         if (cycleDetected) {
             throw new TypeError('cyclic object value')
         }

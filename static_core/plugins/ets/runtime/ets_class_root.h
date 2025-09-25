@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,8 @@ enum class EtsClassRoot {
     LONG = helpers::ToUnderlying(ClassRoot::I64),
     FLOAT = helpers::ToUnderlying(ClassRoot::F32),
     DOUBLE = helpers::ToUnderlying(ClassRoot::F64),
+
+    ANY = helpers::ToUnderlying(ClassRoot::ANY),
 
     BOOLEAN_ARRAY = helpers::ToUnderlying(ClassRoot::ARRAY_U1),
     BYTE_ARRAY = helpers::ToUnderlying(ClassRoot::ARRAY_I8),
