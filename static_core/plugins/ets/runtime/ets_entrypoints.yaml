@@ -1545,74 +1545,39 @@
     - ark::ObjectHeader*       # src array
 
 # Map
-- name: MapGet
-  entrypoint: MapGet
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - ark::ObjectHeader*  # object pointer
-    - ark::ObjectHeader*  # src map
-    - ark::ObjectHeader*  # key
-    - uint32_t            # bucket index
-
-- name: MapGetOddSaved
-  entrypoint: EtsEscompatMapGet
-  bridge: odd_saved
-  properties: [intrinsic]
-  signature:
-    - ark::ObjectHeader*  # object pointer
-    - ark::ObjectHeader*  # src map
-    - ark::ObjectHeader*  # key
-    - uint32_t            # bucket index
-
-
-- name: MapHas
-  entrypoint: MapHas
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - uint8_t             # boolean
-    - ark::ObjectHeader*  # src map
-    - ark::ObjectHeader*  # key
-    - uint32_t            # bucket index
-
-- name: MapHasOddSaved
-  entrypoint: EtsEscompatMapHas
-  bridge: odd_saved
-  properties: [intrinsic]
-  signature:
-    - uint8_t             # boolean
-    - ark::ObjectHeader*  # src map
-    - ark::ObjectHeader*  # key
-    - uint32_t            # bucket index
-
-
-- name: MapDelete
-  entrypoint: MapDelete
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - uint8_t             # boolean
-    - ark::ObjectHeader*  # src map
-    - ark::ObjectHeader*  # key
-    - uint32_t            # bucket index
-
-- name: MapDeleteOddSaved
-  entrypoint: EtsEscompatMapDelete
-  bridge: odd_saved
-  properties: [intrinsic]
-  signature:
-    - uint8_t             # boolean
-    - ark::ObjectHeader*  # src map
-    - ark::ObjectHeader*  # key
-    - uint32_t            # bucket index
-
 - name: GetHashCodeByValueFastPath
   entrypoint: GetHashCodeByValue
   bridge: none
   properties: [irtoc]
   signature:
     - int64_t
+    - ark::ObjectHeader*
+
+- name: SameValueZeroFastPath
+  entrypoint: SameValueZero
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - bool
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+
+- name: SameValueZeroUsual
+  entrypoint: SameValueZeroEntrypoint
+  bridge: entrypoint
+  properties: []
+  signature:
+    - bool
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+
+- name: SameValueZeroSlowPath
+  entrypoint: SameValueZeroEntrypoint
+  bridge: slow_path
+  properties: []
+  signature:
+    - bool
+    - ark::ObjectHeader*
     - ark::ObjectHeader*
 
 - name: GetHashCodeStringOddSaved

@@ -416,6 +416,8 @@ EtsString *FpToString(FpType number, int radix)
     return EtsString::CreateFromMUtf8(result.c_str());
 }
 
+bool SameValueZero(EtsCoroutine *coro, EtsObject *a, EtsObject *b);
+
 }  // namespace ark::ets::intrinsics::helpers
 
 namespace ark::ets::intrinsics::helpers::flags {

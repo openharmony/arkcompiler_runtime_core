@@ -15,6 +15,7 @@
 
 #include "include/object_header.h"
 #include "intrinsics.h"
+#include "intrinsics/helpers/ets_intrinsics_helpers.h"
 #include "libarkbase/utils/logger.h"
 #include "runtime/handle_scope-inl.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
@@ -47,6 +48,11 @@ EtsInt StdCoreRuntimeGetHashCode(EtsObject *source)
 EtsLong StdRuntimeGetHashCodeByValue(EtsObject *source)
 {
     return static_cast<EtsLong>(EtsEscompatMap::GetHashCode(source));
+}
+
+EtsBoolean StdRuntimeSameValueZero(EtsObject *a, EtsObject *b)
+{
+    return ark::ets::intrinsics::helpers::SameValueZero(EtsCoroutine::GetCurrent(), a, b);
 }
 
 static char const *ReferenceTypeString(EtsObject *obj)

@@ -101,17 +101,7 @@ export final class Runtime {
         }
     }
 
-    public static sameValueZero(o1: Any, o2: Any): boolean {
-        if (Runtime.sameValue(o1, o2)) {
-            return true;
-        }
-        if (o1 instanceof Number && o2 instanceof Number) {
-            const n1 = (o1 as Number).valueOf()
-            const n2 = (o2 as Number).valueOf()
-            return n1 == 0 && n2 == 0;
-        }
-        return false;
-    }
+    public static native sameValueZero(o1: Any, o2: Any): boolean
 
     /**
      * Check if it is a little-endian platform

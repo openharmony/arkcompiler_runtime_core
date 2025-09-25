@@ -132,19 +132,6 @@ bool EmitBigUint64ArraySetValuesFromArray(Inst *inst)
     return EmitFastPath(inst, RuntimeInterface::EntrypointId::BIG_UINT64_ARRAY_SET_VALUES_FROM_ARRAY, 2U);
 }
 
-bool EmitMapGet(Inst *inst)
-{
-    return EmitFastPath(inst, RuntimeInterface::EntrypointId::MAP_GET, 3U);
-}
-bool EmitMapHas(Inst *inst)
-{
-    return EmitFastPath(inst, RuntimeInterface::EntrypointId::MAP_HAS, 3U);
-}
-bool EmitMapDelete(Inst *inst)
-{
-    return EmitFastPath(inst, RuntimeInterface::EntrypointId::MAP_DELETE, 3U);
-}
-
 bool EmitGetHashCodeByValue(Inst *inst)
 {
     return EmitFastPath(inst, RuntimeInterface::EntrypointId::GET_HASH_CODE_BY_VALUE_FAST_PATH, 1U);
@@ -156,3 +143,8 @@ bool EmitEscompatArrayIsPlatformArray(Inst *inst)
 }
 
 bool EmitArrayFastCopyToRef(Inst *inst);
+
+bool EmitSameValueZero(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::SAME_VALUE_ZERO_FAST_PATH, 2U);
+}

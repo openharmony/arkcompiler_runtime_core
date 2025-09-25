@@ -36,7 +36,7 @@ public:
         auto stdlib = std::getenv("PANDA_STD_LIB");
         if (stdlib == nullptr) {
             std::cerr << "PANDA_STD_LIB env variable should be set and point to mock_stdlib.abc" << std::endl;
-            std::abort();
+            std::abort();  // CC-OFF(G.STD.16-CPP) fatal error
         }
         options.SetBootPandaFiles({stdlib});
 
@@ -55,17 +55,18 @@ public:
 
     static std::vector<MirrorFieldInfo> GetMapMembers()
     {
-        return std::vector<MirrorFieldInfo> {MIRROR_FIELD_INFO(EtsEscompatMap, head_, "headEntry"),
+        return std::vector<MirrorFieldInfo> {MIRROR_FIELD_INFO(EtsEscompatMap, data_, "data"),
                                              MIRROR_FIELD_INFO(EtsEscompatMap, buckets_, "buckets"),
+                                             MIRROR_FIELD_INFO(EtsEscompatMap, cap_, "cap"),
+                                             MIRROR_FIELD_INFO(EtsEscompatMap, numEntries_, "numEntries"),
                                              MIRROR_FIELD_INFO(EtsEscompatMap, sizeVal_, "sizeVal")};
     }
 
     static std::vector<MirrorFieldInfo> GetMapEntryMembers()
     {
-        return std::vector<MirrorFieldInfo> {MIRROR_FIELD_INFO(EtsEscompatMapEntry, prev_, "prev"),
-                                             MIRROR_FIELD_INFO(EtsEscompatMapEntry, next_, "next"),
-                                             MIRROR_FIELD_INFO(EtsEscompatMapEntry, key_, "key"),
-                                             MIRROR_FIELD_INFO(EtsEscompatMapEntry, val_, "val")};
+        return std::vector<MirrorFieldInfo> {MIRROR_FIELD_INFO(EtsEscompatMapEntry, key_, "key"),
+                                             MIRROR_FIELD_INFO(EtsEscompatMapEntry, val_, "val"),
+                                             MIRROR_FIELD_INFO(EtsEscompatMapEntry, next_, "next")};
     }
 
 protected:

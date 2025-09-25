@@ -778,10 +778,10 @@ private:
     constexpr static uint32_t IS_FINALIZE_REFERENCE = 1U << 18U;
     constexpr static uint32_t IS_REFERENCE = IS_WEAK_REFERENCE | IS_FINALIZE_REFERENCE;
 
+public:
     // Class is a value-semantic type
     constexpr static uint32_t IS_VALUE_TYPED = 1U << 19U;
 
-public:
     // Class is an internal "nullvalue" class
     constexpr static uint32_t IS_NULLVALUE = 1U << 20U;
     // Class is a boxed type

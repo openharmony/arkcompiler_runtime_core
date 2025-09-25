@@ -437,23 +437,17 @@ bool JSONStringifier::SerializeJSONRecord(EtsHandle<EtsObject> &value)
         return false;
     }
 
-    EtsHandle<EtsEscompatMapEntry> head(coro, recordObj->GetHead(coro));
-    if (head.GetPtr() == nullptr) {
-        buffer_ += "{}";
-        return true;
-    }
-
     auto hasContent = false;
-    EtsHandle<EtsEscompatMapEntry> next(coro, head->GetNext(coro));
-    if (next.GetPtr() == nullptr) {
+    EtsEscompatMap::MapIdx recIdx = recordObj->GetFirstIdx(coro);
+    if (recIdx == EtsEscompatMap::MAP_IDX_END) {
         buffer_ += "{}";
         return true;
     }
     buffer_ += "{";
     do {
-        EtsHandle<EtsObject> key(coro, next->GetKey(coro));
-        EtsHandle<EtsObject> val(coro, next->GetVal(coro));
-        next = EtsHandle<EtsEscompatMapEntry>(coro, next->GetNext(coro));
+        EtsHandle<EtsObject> key(coro, recordObj->GetKey(coro, recIdx));
+        EtsHandle<EtsObject> val(coro, recordObj->GetValue(coro, recIdx));
+        recIdx = recordObj->GetNextIdx(coro, recIdx);
         if (key.GetPtr() == nullptr || val.GetPtr() == nullptr) {
             continue;
         }
@@ -463,7 +457,7 @@ bool JSONStringifier::SerializeJSONRecord(EtsHandle<EtsObject> &value)
         HandleRecordKey(key);
         AppendJSONString(val, hasContent);
         hasContent = true;
-    } while (head.GetPtr() != next.GetPtr() && next.GetPtr() != nullptr);
+    } while (recIdx != EtsEscompatMap::MAP_IDX_END);
     buffer_ += "}";
     PopValue(value);
     return true;
