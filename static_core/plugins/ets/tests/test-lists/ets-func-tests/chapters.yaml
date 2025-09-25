@@ -59,6 +59,8 @@ chapters:
       - spec1
 
   # chapters by several folders
+  - std-core-reflect1:
+    - 'ets-func-tests-templates/std/core/test-ClassGetInstanceMethodByName-*.ets'
   - std-core1:
     - 'std/core/BadRadixTest*.ets'
     - 'std/core/EscapeUnescapeTest*.ets'
@@ -104,6 +106,15 @@ chapters:
       - "std-core1"
       - "std-core2"
       - "std-core3"
+
+  - jit-preheat-low:
+    - "std-core-reflect1"
+
+  - jit-preheat-high:
+    - '*'
+    - exclude:
+      - "jit-preheat-low"
+
   - not-specified:
     - '*'
     - exclude:
