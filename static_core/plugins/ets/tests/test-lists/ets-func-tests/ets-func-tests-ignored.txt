@@ -330,9 +330,6 @@ std/core/std_core_typedarrays_bignum__BigInt64Array.ets
 #23989
 std/core/std_core_typedarrays_bignum__BigUint64Array.ets
 
-#22948 TypeApi produces invalid bytecode
-std/core/TypeCreatePrimitiveNameTest.ets
-
 ### Negative tests (Import-export)
 spec/import_export/07.export_directives/02.export_type_directives/to_export_negative.ets
 
@@ -382,9 +379,16 @@ spec/09.classes/Accessor_Declarations/issue-15142_9.ets
 std/core/NumberTest.ets
 escompat/JsonStringifyTest.ets
 
+#30301
+std/core/std_core_typedarrays_methods__BigInt64Array.ets
+stdlib-templates/std/core/std_core_typedarrays_methods__BigInt64Array.ets
+
 #30140
 std/core/DeepCopyTest.ets
 ets_func_tests/std/core/DeepCopyTest.ets
+
+#30228
+ets_func_tests/std/core/IntlNumberFormatTest2.ets
 
 #28345
 escompat/JsonParseTest.ets
@@ -464,6 +468,3 @@ escompat/JsonReplacerTest.ets
 escompat/JsonStringifyRegExpExecArrayTest.ets
 std/core/std_core_typeduarrays_methods__BigUint64Array.ets
 regression/15278_0.ets
-
-#28648
-std/core/TypeClassInfoTest.ets
