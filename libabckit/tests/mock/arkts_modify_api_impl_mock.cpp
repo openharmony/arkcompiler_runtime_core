@@ -300,11 +300,12 @@ bool EnumSetName(AbckitArktsEnum *enm, const char *name)
     return DEFAULT_BOOL;
 }
 
-bool ModuleFieldAddAnnotation(AbckitArktsModuleField *field, AbckitArktsAnnotation *annotation)
+bool ModuleFieldAddAnnotation(AbckitArktsModuleField *field,
+                              [[maybe_unused]] const struct AbckitArktsAnnotationCreateParams *params)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(field == DEFAULT_ARKTS_MODULE_FIELD);
-    EXPECT_TRUE(annotation == DEFAULT_ANNOTATION);
+    EXPECT_TRUE(params->ai == DEFAULT_ANNOTATION_INTERFACE);
     return DEFAULT_BOOL;
 }
 
@@ -320,7 +321,7 @@ bool ModuleFieldSetName(AbckitArktsModuleField *field, const char *name)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(field == DEFAULT_ARKTS_MODULE_FIELD);
-    EXPECT_TRUE(name == DEFAULT_CONST_CHAR);
+    EXPECT_TRUE(strncmp(name, DEFAULT_CONST_CHAR, DEFAULT_CONST_CHAR_SIZE) == 0);
     return DEFAULT_BOOL;
 }
 
@@ -361,11 +362,12 @@ bool NamespaceFieldSetName(AbckitArktsNamespaceField *field, const char *name)
     return DEFAULT_BOOL;
 }
 
-bool ClassFieldAddAnnotation(AbckitArktsClassField *field, AbckitArktsAnnotation *annotation)
+bool ClassFieldAddAnnotation(AbckitArktsClassField *field,
+                             [[maybe_unused]] const struct AbckitArktsAnnotationCreateParams *params)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(field == DEFAULT_ARKTS_CLASS_FIELD);
-    EXPECT_TRUE(annotation == DEFAULT_ANNOTATION);
+    EXPECT_TRUE(params->ai == DEFAULT_ANNOTATION_INTERFACE);
     return DEFAULT_BOOL;
 }
 
@@ -381,7 +383,7 @@ bool ClassFieldSetName(AbckitArktsClassField *field, const char *name)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(field == DEFAULT_ARKTS_CLASS_FIELD);
-    EXPECT_TRUE(name == DEFAULT_CONST_CHAR);
+    EXPECT_TRUE(strncmp(name, DEFAULT_CONST_CHAR, DEFAULT_CONST_CHAR_SIZE) == 0);
     return DEFAULT_BOOL;
 }
 
@@ -411,11 +413,12 @@ AbckitArktsClassField *CreateClassField(AbckitArktsClass *klass, const char *nam
     return DEFAULT_ARKTS_CLASS_FIELD;
 }
 
-bool InterfaceFieldAddAnnotation(AbckitArktsInterfaceField *field, AbckitArktsAnnotation *annotation)
+bool InterfaceFieldAddAnnotation(AbckitArktsInterfaceField *field,
+                                 [[maybe_unused]] const struct AbckitArktsAnnotationCreateParams *params)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(field == DEFAULT_ARKTS_INTERFACE_FIELD);
-    EXPECT_TRUE(annotation == DEFAULT_ANNOTATION);
+    EXPECT_TRUE(params->ai == DEFAULT_ANNOTATION_INTERFACE);
     return DEFAULT_BOOL;
 }
 
@@ -431,7 +434,7 @@ bool InterfaceFieldSetName(AbckitArktsInterfaceField *field, const char *name)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(field == DEFAULT_ARKTS_INTERFACE_FIELD);
-    EXPECT_TRUE(name == DEFAULT_CONST_CHAR);
+    EXPECT_TRUE(strncmp(name, DEFAULT_CONST_CHAR, DEFAULT_CONST_CHAR_SIZE) == 0);
     return DEFAULT_BOOL;
 }
 
@@ -458,7 +461,7 @@ bool EnumFieldSetName(AbckitArktsEnumField *field, const char *name)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(field == DEFAULT_ARKTS_ENUM_FIELD);
-    EXPECT_TRUE(name == DEFAULT_CONST_CHAR);
+    EXPECT_TRUE(strncmp(name, DEFAULT_CONST_CHAR, DEFAULT_CONST_CHAR_SIZE) == 0);
     return DEFAULT_BOOL;
 }
 

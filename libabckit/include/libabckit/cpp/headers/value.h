@@ -42,6 +42,18 @@ class Value : public ViewInResource<AbckitValue *, const File *> {
     friend class core::ClassField;
     /// @brief abckit::core::ModuleField
     friend class core::ModuleField;
+    /// @brief arkts::ModuleField
+    friend class arkts::ModuleField;
+    /// @brief arkts::ClassField
+    friend class arkts::ClassField;
+    /// @brief arkts::Class
+    friend class arkts::Class;
+    /// @brief arkts::Module
+    friend class arkts::Module;
+    /// @brief arkts::Interface
+    friend class arkts::Interface;
+    /// @brief arkts::Enum
+    friend class arkts::Enum;
 
 public:
     /**

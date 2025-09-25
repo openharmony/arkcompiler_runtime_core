@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,13 @@ class AnnotationInterface : public core::AnnotationInterface {
     /// @brief to access private constructor
     friend class arkts::Class;
     /// @brief to access private constructor
+    friend class arkts::ClassField;
+    /// @brief to access private constructor
     friend class arkts::Function;
+    /// @brief to access private constructor
+    friend class arkts::InterfaceField;
+    // @brief to access private constructor
+    friend class arkts::ModuleField;
     /// @brief abckit::DefaultHash<AnnotationInterface>
     friend class abckit::DefaultHash<AnnotationInterface>;
     /// @brief to access private TargetCast

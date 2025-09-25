@@ -29,6 +29,8 @@ class ModuleField : public ViewInResource<AbckitCoreModuleField *, const File *>
     /// @brief to access private constructor
     friend class core::Module;
     /// @brief to access private constructor
+    friend class arkts::Module;
+    /// @brief to access private constructor
     friend class core::Namespace;
     /// @brief abckit::DefaultHash<ModuleField>
     friend class abckit::DefaultHash<ModuleField>;
@@ -42,7 +44,7 @@ public:
      * @brief Construct a new ModuleField object
      * @param other
      */
-    ModuleField(const ModuleField &other) = default;
+    ModuleField(const ModuleField &other) = default;  // CC-OFF(G.CLS.07): design decision, detail: base_concepts.h
 
     /**
      * @brief Constructor
@@ -55,7 +57,7 @@ public:
      * @brief Construct a new ModuleField object
      * @param other
      */
-    ModuleField(ModuleField &&other) = default;
+    ModuleField(ModuleField &&other) = default;  // CC-OFF(G.CLS.07): design decision, detail: base_concepts.h
 
     /**
      * @brief Constructor
@@ -223,6 +225,8 @@ class ClassField : public ViewInResource<AbckitCoreClassField *, const File *> {
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
     /// @brief to access private constructor
     friend class core::Class;
+    /// @brief to access private constructor
+    friend class arkts::Class;
     /// @brief abckit::DefaultHash<ClassField>
     friend class abckit::DefaultHash<ClassField>;
 
@@ -372,6 +376,8 @@ class InterfaceField : public ViewInResource<AbckitCoreInterfaceField *, const F
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
     /// @brief to access private constructor
     friend class core::Interface;
+    /// @brief to access private constructor
+    friend class arkts::Interface;
     /// @brief abckit::DefaultHash<InterfaceField>
     friend class abckit::DefaultHash<InterfaceField>;
 
@@ -480,6 +486,8 @@ class EnumField : public ViewInResource<AbckitCoreEnumField *, const File *> {
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
     /// @brief to access private constructor
     friend class core::Enum;
+    /// @brief to access private constructor
+    friend class arkts::Enum;
     /// @brief abckit::DefaultHash<EnumField>
     friend class abckit::DefaultHash<EnumField>;
 
@@ -492,7 +500,7 @@ public:
      * @brief Construct a new EnumField object
      * @param other
      */
-    EnumField(const EnumField &other) = default;
+    EnumField(const EnumField &other) = default;  // CC-OFF(G.CLS.07): design decision, detail: base_concepts.h
 
     /**
      * @brief Constructor
@@ -505,7 +513,7 @@ public:
      * @brief Construct a new EnumField object
      * @param other
      */
-    EnumField(EnumField &&other) = default;
+    EnumField(EnumField &&other) = default;  // CC-OFF(G.CLS.07): design decision, detail: base_concepts.h
 
     /**
      * @brief Constructor

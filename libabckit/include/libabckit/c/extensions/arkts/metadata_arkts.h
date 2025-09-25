@@ -1034,11 +1034,12 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @brief Adds annotation `anno` to the list of annotations for module field `field`.
      * @return `true` on success.
      * @param [ in ] field - Field to be inspected.
-     * @param [ in ] anno - Annotation to be added.
+     * @param [ in ] params - Data that is used to create the annotation.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `params` is NULL.
      */
-    bool (*moduleFieldAddAnnotation)(AbckitArktsModuleField *field, AbckitArktsAnnotation *anno);
+    bool (*moduleFieldAddAnnotation)(AbckitArktsModuleField *field,
+                                     const struct AbckitArktsAnnotationCreateParams *params);
 
     /**
      * @brief Removes annotation `anno` from the list of annotations for module field `field`.
@@ -1118,11 +1119,12 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @brief Adds annotation `anno` to the list of annotations for class field `field`.
      * @return `true` on success.
      * @param [ in ] field - Field to be inspected.
-     * @param [ in ] anno - Annotation to be added.
+     * @param [ in ] params - Data that is used to create the annotation.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `params` is NULL.
      */
-    bool (*classFieldAddAnnotation)(AbckitArktsClassField *field, AbckitArktsAnnotation *anno);
+    bool (*classFieldAddAnnotation)(AbckitArktsClassField *field,
+                                    const struct AbckitArktsAnnotationCreateParams *params);
 
     /**
      * @brief Removes annotation `anno` from the list of annotations for class field `field`.
@@ -1188,11 +1190,12 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @brief Adds annotation `anno` to the list of annotations for interface field `field`.
      * @return `true` on success.
      * @param [ in ] field - Field to be inspected.
-     * @param [ in ] anno - Annotation to be added.
+     * @param [ in ] params - Data that is used to create the annotation.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `params` is NULL.
      */
-    bool (*interfaceFieldAddAnnotation)(AbckitArktsInterfaceField *field, AbckitArktsAnnotation *anno);
+    bool (*interfaceFieldAddAnnotation)(AbckitArktsInterfaceField *field,
+                                        const struct AbckitArktsAnnotationCreateParams *params);
 
     /**
      * @brief Removes annotation `anno` from the list of annotations for interface field `field`.

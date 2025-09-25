@@ -78,6 +78,42 @@ public:
      */
     bool SetName(const std::string &name) const;
 
+    /**
+     * @brief Set type for module field
+     * @return `true` on success.
+     * @param [ in ] type - Type to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool SetType(const Type &type) const;
+
+    /**
+     * @brief Set value for module field
+     * @return `true` on success.
+     * @param [ in ] value - Value to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool SetValue(const Value &value) const;
+
+    /**
+     * @brief Add annotation to the moduleField declaration.
+     * @return `true` on success.
+     * @param [ in ] ai - Annotation Interface that is used to create the annotation.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `ai` is false.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if `ModuleField` doesn't have `ABCKIT_TARGET_ARK_TS_V1` target.
+     */
+    bool AddAnnotation(const AnnotationInterface &ai) const;
+
+    /**
+     * @brief Remove annotation from the moduleField declaration.
+     * @return `true` on success.
+     * @param [ in ] anno - Annotation to remove.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is false.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if `ModuleField` doesn't have `ABCKIT_TARGET_ARK_TS_V1` target.
+     */
+    bool RemoveAnnotation(const arkts::Annotation &anno) const;
+
 private:
     /**
      * @brief Converts ModuleField from Core to Arkts target
@@ -218,6 +254,42 @@ public:
      */
     bool SetName(const std::string &name) const;
 
+    /**
+     * @brief Set type for class field
+     * @return `true` on success.
+     * @param [ in ] type - Type to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool SetType(const Type &type) const;
+
+    /**
+     * @brief Set value for class field
+     * @return `true` on success.
+     * @param [ in ] value - Value to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool SetValue(const Value &value) const;
+
+    /**
+     * @brief Add annotation to the classField declaration.
+     * @return `true` on success.
+     * @param [ in ] ai - Annotation Interface that is used to create the annotation.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `ai` is false.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if `ClassField` doesn't have `ABCKIT_TARGET_ARK_TS_V1` target.
+     */
+    bool AddAnnotation(const AnnotationInterface &ai) const;
+
+    /**
+     * @brief Remove annotation from the classField declaration.
+     * @return `true` on success.
+     * @param [ in ] anno - Annotation to remove.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is false.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if `ClassField` doesn't have `ABCKIT_TARGET_ARK_TS_V1` target.
+     */
+    bool RemoveAnnotation(const arkts::Annotation &anno) const;
+
 private:
     /**
      * @brief Converts classField from Core to Arkts target
@@ -288,6 +360,34 @@ public:
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if current `ClassField` is false.
      */
     bool SetName(const std::string &name) const;
+
+    /**
+     * @brief Set type for interface field
+     * @return `true` on success.
+     * @param [ in ] type - Type to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool SetType(const Type &type) const;
+
+    /**
+     * @brief Add annotation to the interface field.
+     * @return `true` on success.
+     * @param [ in ] ai - Annotation Interface that is used to create the annotation.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `ai` is false.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if `InterfaceField` doesn't have `ABCKIT_TARGET_ARK_TS_V1` target.
+     */
+    bool AddAnnotation(const AnnotationInterface &ai) const;
+
+    /**
+     * @brief Remove annotation from the interface field.
+     * @return `true` on success.
+     * @param [ in ] anno - Annotation to remove.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is false.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if `InterfaceField` doesn't have `ABCKIT_TARGET_ARK_TS_V1` target.
+     */
+    bool RemoveAnnotation(const arkts::Annotation &anno) const;
 
 private:
     /**

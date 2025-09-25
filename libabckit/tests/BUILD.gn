@@ -888,6 +888,7 @@ libabckit_host_unittest_action("abckit_mock_gtests") {
     "mock/tests/arkts/cpp_api_annotation_element.cpp",
     "mock/tests/arkts/cpp_api_annotation_interface.cpp",
     "mock/tests/arkts/cpp_api_class.cpp",
+    "mock/tests/arkts/cpp_api_field.cpp",
     "mock/tests/arkts/cpp_api_function.cpp",
     "mock/tests/arkts/cpp_api_interface.cpp",
     "mock/tests/arkts/cpp_api_module.cpp",

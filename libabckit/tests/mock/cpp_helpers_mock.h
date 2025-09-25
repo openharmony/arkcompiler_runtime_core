@@ -100,6 +100,24 @@ inline abckit::arkts::Class GetMockArktsClass(const abckit::File &file)
     return c;
 }
 
+inline abckit::core::ModuleField GetMockCoreModuleField(const abckit::File &file)
+{
+    abckit::core::Module cmd = GetMockCoreModule(file);
+
+    std::vector<abckit::core::ModuleField> moduleFields = cmd.GetFields();
+
+    EXPECT_TRUE(CheckMockedApi("ModuleEnumerateFields"));
+
+    return moduleFields.front();
+}
+
+inline abckit::arkts::ModuleField GetMockArktsModuleField(const abckit::File &file)
+{
+    auto f = abckit::arkts::ModuleField(GetMockCoreModuleField(file));
+    EXPECT_TRUE(CheckMockedApi("CoreModuleFieldToArktsModuleField"));
+    return f;
+}
+
 inline abckit::core::Interface GetMockCoreInterface(const abckit::File &file)
 {
     abckit::core::Module cmd = GetMockCoreModule(file);
@@ -137,6 +155,31 @@ inline abckit::core::Enum GetMockCoreEnum(const abckit::File &file)
     EXPECT_TRUE(CheckMockedApi("ModuleEnumerateEnums"));
 
     return enums.front();
+}
+
+inline abckit::arkts::Enum GetMockArktsEnum(const abckit::File &file)
+{
+    auto e = abckit::arkts::Enum(GetMockCoreEnum(file));
+    EXPECT_TRUE(CheckMockedApi("CoreEnumToArktsEnum"));
+    return e;
+}
+
+inline abckit::core::EnumField GetMockCoreEnumField(const abckit::File &file)
+{
+    abckit::core::Enum ce = GetMockCoreEnum(file);
+
+    std::vector<abckit::core::EnumField> enumFields = ce.GetFields();
+
+    EXPECT_TRUE(CheckMockedApi("EnumEnumerateFields"));
+
+    return enumFields.front();
+}
+
+inline abckit::arkts::EnumField GetMockArktsEnumField(const abckit::File &file)
+{
+    auto f = abckit::arkts::EnumField(GetMockCoreEnumField(file));
+    EXPECT_TRUE(CheckMockedApi("CoreEnumFieldToArktsEnumField"));
+    return f;
 }
 
 inline abckit::core::Function GetMockCoreInterfaceMethod(const abckit::File &file)

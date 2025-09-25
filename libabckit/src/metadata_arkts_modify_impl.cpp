@@ -894,11 +894,11 @@ extern "C" bool EnumSetName(AbckitArktsEnum *enm, const char *name)
 // Module Field
 // ========================================
 
-extern "C" bool ModuleFieldAddAnnotation(AbckitArktsModuleField *field, AbckitArktsAnnotation *anno)
+extern "C" bool ModuleFieldAddAnnotation(AbckitArktsModuleField *field, const AbckitArktsAnnotationCreateParams *params)
 {
     LIBABCKIT_UNIMPLEMENTED;
     (void)field;
-    (void)anno;
+    (void)params;
     return false;
 }
 
@@ -979,11 +979,11 @@ extern "C" bool NamespaceFieldSetName(AbckitArktsNamespaceField *field, const ch
 // Class Field
 // ========================================
 
-extern "C" bool ClassFieldAddAnnotation(AbckitArktsClassField *field, AbckitArktsAnnotation *anno)
+extern "C" bool ClassFieldAddAnnotation(AbckitArktsClassField *field, const AbckitArktsAnnotationCreateParams *params)
 {
     LIBABCKIT_UNIMPLEMENTED;
     (void)field;
-    (void)anno;
+    (void)params;
     return false;
 }
 
@@ -1043,11 +1043,12 @@ extern "C" AbckitArktsClassField *CreateClassField(AbckitArktsClass *klass, cons
 // Interface Field
 // ========================================
 
-extern "C" bool InterfaceFieldAddAnnotation(AbckitArktsInterfaceField *field, AbckitArktsAnnotation *anno)
+extern "C" bool InterfaceFieldAddAnnotation(AbckitArktsInterfaceField *field,
+                                            const AbckitArktsAnnotationCreateParams *params)
 {
     LIBABCKIT_UNIMPLEMENTED;
     (void)field;
-    (void)anno;
+    (void)params;
     return false;
 }
 
