@@ -837,3 +837,99 @@ cases:
         arktest.assertEQ(Enum.first.toString(), "-1")
         arktest.assertEQ(Enum.second.toString(), "27")
         arktest.assertEQ(Enum.third.toString(), "28")
+
+  - desc: |-
+      Checking integer type overflow on max value (Don't throw CTE at all)
+    check_variants:
+      - {check_type: "long", max_value: "9223372036854775807"}
+      - {check_type: "int", max_value: "2147483647"}
+      - {check_type: "short", max_value: "32767"}
+      - {check_type: "byte", max_value: "127"}
+    decl_variants:
+      - |-
+        enum Enum: [check_type] { first = [max_value] - 1, second,
+          third }
+      - |-
+        const enum Enum: [check_type] { first = [max_value] - 1, second,
+          third }
+    sub_cases_logic:
+      - |-
+        arktest.assertEQ(Enum.first.valueOf(), [max_value] - 1);
+        arktest.assertEQ(Enum.second.valueOf(), [max_value]);
+        arktest.assertEQ(Enum.third.valueOf(), [max_value] + 1);
+      - |-
+        arktest.assertEQ(Enum.first.valueOf(), [max_value] - 1);
+        arktest.assertEQ(Enum.second.valueOf(), [max_value]);
+        arktest.assertEQ(Enum.third.valueOf(), [max_value] + 1);
+
+  - desc: |-
+      Checking integer type overflow on max value (Don't throw CTE at all)
+    check_variants:
+      - {check_type: "long", max_value: "9223372036854775807"}
+      - {check_type: "int", max_value: "2147483647"}
+      - {check_type: "short", max_value: "32767"}
+      - {check_type: "byte", max_value: "127"}
+    decl_variants:
+      - |-
+        enum Enum: [check_type] { first = [max_value] - 10, second,
+          third = first + 110 }
+      - |-
+        const enum Enum: [check_type] { first = [max_value] - 10, second,
+          third = first + 110 }
+    sub_cases_logic:
+      - |-
+        arktest.assertEQ(Enum.first.valueOf(), [max_value] - 10);
+        arktest.assertEQ(Enum.second.valueOf(), [max_value] - 9);
+        arktest.assertEQ(Enum.third.valueOf(), [max_value] + 100);
+      - |-
+        arktest.assertEQ(Enum.first.valueOf(), [max_value] - 10);
+        arktest.assertEQ(Enum.second.valueOf(), [max_value] - 9);
+        arktest.assertEQ(Enum.third.valueOf(), [max_value] + 100);
+
+  - desc: |-
+      Checking integer type overflow on min value (Don't throw CTE at all)
+    check_variants:
+      - {check_type: "long", min_value: "-9223372036854775808"}
+      - {check_type: "int", min_value: "-2147483648"}
+      - {check_type: "short", min_value: "-32768"}
+      - {check_type: "byte", min_value: "-128"}
+    decl_variants:
+      - |-
+        enum Enum: [check_type] { first, second = [min_value],
+          third = second - 1 }
+      - |-
+        const enum Enum: [check_type] { first, second = [min_value],
+          third = second - 1 }
+    sub_cases_logic:
+      - |-
+        arktest.assertEQ(Enum.first.valueOf(), 0);
+        arktest.assertEQ(Enum.second.valueOf(), [min_value]);
+        arktest.assertEQ(Enum.third.valueOf(), [min_value] - 1);
+      - |-
+        arktest.assertEQ(Enum.first.valueOf(), 0);
+        arktest.assertEQ(Enum.second.valueOf(), [min_value]);
+        arktest.assertEQ(Enum.third.valueOf(), [min_value] - 1);
+
+  - desc: |-
+      Checking integer type overflow on min value (Don't throw CTE at all)
+    check_variants:
+      - {check_type: "long", min_value: "-9223372036854775808"}
+      - {check_type: "int", min_value: "-2147483648"}
+      - {check_type: "short", min_value: "-32768"}
+      - {check_type: "byte", min_value: "-128"}
+    decl_variants:
+      - |-
+        enum Enum: [check_type] { first = [min_value] + 10, second,
+          third = first - 110}
+      - |-
+        const enum Enum: [check_type] { first = [min_value] + 10, second,
+          third = first - 110}
+    sub_cases_logic:
+      - |-
+        arktest.assertEQ(Enum.first.valueOf(), [min_value] + 10);
+        arktest.assertEQ(Enum.second.valueOf(), [min_value] + 11);
+        arktest.assertEQ(Enum.third.valueOf(), [min_value] - 100);
+      - |-
+        arktest.assertEQ(Enum.first.valueOf(), [min_value] + 10);
+        arktest.assertEQ(Enum.second.valueOf(), [min_value] + 11);
+        arktest.assertEQ(Enum.third.valueOf(), [min_value] - 100);
