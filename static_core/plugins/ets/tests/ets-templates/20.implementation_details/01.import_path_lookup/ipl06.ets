@@ -17,12 +17,11 @@
 desc: Test importing ets files to modify constants.
 files:
 - ./test_file_03.ets
-tags: [compile-only, negative]
 ---*/
 
-import {b} from './test_file_03.ets';
+import {TEST_LIST} from './test_file_03.ets';
 
 function main(): void {
   TEST_LIST[2] = 0x05;
-  arktest.assertTrue(TEST_LIST[2] === 0x05);
+  arktest.assertEQ(TEST_LIST[2], 0x05);
 }

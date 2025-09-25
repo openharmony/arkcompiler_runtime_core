@@ -14,13 +14,12 @@
  */
 
 /*---
-desc: Test import ets files(number).
-files:
-- ./test_file_01.ets
+desc: If the folder contains the file index.ets, then this file is imported as a module written in ArkTS
+files: ['./path_to_import/index.ets', './path_to_import/not_index.ets']
 ---*/
 
-import {a} from './test_file_01.ets';
+import {a} from './path_to_import';
 
 function main(): void {
-  arktest.assertEQ(a, 10);
+  arktest.assertEQ(a, 20);
 }
