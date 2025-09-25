@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,22 @@
  * limitations under the License.
  */
 
-{%- for c in cases %}
 /*---
 desc: >-
     An embedded expression is an expression specified inside the dollar
     sign '$' and curly braces. The type of a string interpolation expression
     is string.
 ---*/
-{{c.defs}}
+
+const count = `${ 2 + (() => 3 - 1)()}`
+const interpolation: String = 'interpolation'
+const cr = '\n'
+
+const sentence = `This is an example of
+a multiline string, contains ${count} lines and with an ${interpolation}
+which should be enclosed in${cr}backticks`
 
 function main() {
-    {{c.use|indent}}
-    arktest.assertEQ( v, expected )
-    {{c.xcheck}}
+    let exp = "This is an example of\na multiline string, contains 4 lines and with an interpolation\nwhich should be enclosed in\nbackticks"
+    arktest.assertEQ(exp, sentence)
 }
-{%- endfor %}
