@@ -56,6 +56,24 @@ entrypoints:
   - void const*
   - size_t
 
+- name: AnnotateSanitizersPoison
+  entrypoint: AnnotateSanitizersPoisonEntrypoint
+  bridge: entrypoint
+  properties: []
+  signature:
+  - void
+  - void const*
+  - size_t
+
+- name: AnnotateSanitizersPoisonNoBridge
+  entrypoint: AnnotateSanitizersPoisonEntrypoint
+  bridge: none
+  properties: []
+  signature:
+  - void
+  - void const*
+  - size_t
+
 - name: CheckCast
   entrypoint: CheckCastEntrypoint
   bridge: entrypoint

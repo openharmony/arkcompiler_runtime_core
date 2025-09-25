@@ -54,6 +54,16 @@ public:
         return AllocatorType::STACK_LIKE_ALLOCATOR;
     }
 
+    static constexpr uint32_t GetFreePointerOffset()
+    {
+        return MEMBER_OFFSET(StackLikeAllocator, freePointer_);
+    }
+
+    static constexpr uint32_t GetEndAddrOffset()
+    {
+        return MEMBER_OFFSET(StackLikeAllocator, endAddr_);
+    }
+
     size_t GetAllocatedSize() const
     {
         ASSERT(ToUintPtr(freePointer_) >= ToUintPtr(startAddr_));
@@ -82,9 +92,10 @@ public:
         return ToUintPtr(allocatedEndAddr_) - ToUintPtr(startAddr_);
     }
 
+    static constexpr size_t RELEASE_PAGES_SHIFT = 18;
+
 private:
     static constexpr size_t RELEASE_PAGES_SIZE = 256_KB;
-    static constexpr size_t RELEASE_PAGES_SHIFT = 18;
     static_assert(RELEASE_PAGES_SIZE == (1U << RELEASE_PAGES_SHIFT));
     static_assert(MAX_SIZE % GetAlignmentInBytes(ALIGNMENT) == 0);
     void *startAddr_ {nullptr};

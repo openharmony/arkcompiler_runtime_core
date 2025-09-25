@@ -136,12 +136,14 @@ extern "C" NO_ADDRESS_SANITIZE void InterpreterEntryPoint(Method *method, Frame 
 
 extern "C" void AnnotateSanitizersEntrypoint([[maybe_unused]] void const *addr, [[maybe_unused]] size_t size)
 {
-#ifdef PANDA_TSAN_ON
     TSAN_ANNOTATE_HAPPENS_BEFORE(const_cast<void *>(addr));
-#endif
-#ifdef PANDA_ASAN_ON
     ASAN_UNPOISON_MEMORY_REGION(addr, size);
-#endif
+}
+
+extern "C" void AnnotateSanitizersPoisonEntrypoint([[maybe_unused]] void const *addr, [[maybe_unused]] size_t size)
+{
+    TSAN_ANNOTATE_HAPPENS_AFTER(const_cast<void *>(addr));
+    ASAN_POISON_MEMORY_REGION(addr, size);
 }
 
 extern "C" void WriteTlabStatsEntrypoint([[maybe_unused]] void const *mem, size_t size)
@@ -1336,6 +1338,14 @@ extern "C" void *AllocFrameInterp(ManagedThread *current, size_t allocSz)
     return mem;
 }
 
+extern "C" void *AllocFrameStackOverflow(ManagedThread *current)
+{
+    current->DisableStackOverflowCheck();
+    ark::ThrowStackOverflowException(current);
+    current->EnableStackOverflowCheck();
+    return nullptr;
+}
+
 extern "C" Frame *InitializeFrame(void *mem, Method *method, Frame *prev, size_t nregs)
 {
     return new (Frame::FromExt(mem, CORE_EXT_FRAME_DATA_SIZE)) Frame(mem, method, prev, nregs);
@@ -1627,7 +1637,7 @@ extern "C" const uint8_t *GetInstructionsByMethod(const Method *method)
     return method->GetInstructions();
 }
 
-extern "C" size_t GetNumVregsByMethod(const Method *method)
+extern "C" uint32_t GetNumVregsByMethod(const Method *method)
 {
     return method->GetNumVregs();
 }

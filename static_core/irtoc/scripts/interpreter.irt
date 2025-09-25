@@ -711,6 +711,23 @@ macro(:get_alloc_size) do |size|
   align_up(AddI(v).Imm("CORE_EXT_FRAME_DATA_SIZE + #{Constants::FRAME_SIZE}").word).word
 end
 
+macro(:alloc_frame) do |alloc_size|
+  frame_allocator := LoadI(%tr).Imm(Constants::MANAGED_THREAD_STACK_FRAME_ALLOCATOR_OFFSET).ptr
+  free_pointer := LoadI(frame_allocator).Imm(Constants::STACK_FRAME_ALLOCATOR_FREE_POINTER_OFFSET).ptr
+  end_addr := LoadI(frame_allocator).Imm(Constants::STACK_FRAME_ALLOCATOR_END_ADDR_OFFSET).ptr
+  new_free_pointer := Add(free_pointer, alloc_size).ptr
+  If(new_free_pointer, end_addr).A.Unlikely {
+    call_runtime("AllocFrameStackOverflow", %tr).ptr
+    move_to_exception
+  }
+  StoreI(frame_allocator, new_free_pointer).Imm(Constants::STACK_FRAME_ALLOCATOR_FREE_POINTER_OFFSET).ptr
+
+  if defines.__SANITIZE_ADDRESS__ || defines.__SANITIZE_THREAD__
+    call_runtime("AnnotateSanitizersEntrypoint", free_pointer, alloc_size).void
+  end
+  free_pointer
+end
+
 macro(:create_frame) do |frame_size, callee|
   actual_size := Add(frame_size, frame_size).word
 
@@ -721,11 +738,8 @@ macro(:create_frame) do |frame_size, callee|
   end
   alloc_sz := get_alloc_size(actual_size)
   mirror_sz := Mul(frame_size, Constants::VREGISTER_SIZE).word
+  mem := alloc_frame(alloc_sz)
   mirror_offset = AddI(mirror_sz).Imm("CORE_EXT_FRAME_DATA_SIZE + #{Constants::FRAME_SIZE}").word
-  mem := call_runtime("AllocFrameInterp", %tr, alloc_sz).ptr
-  If(mem, 0).EQ.Unlikely {
-    move_to_exception
-  }
   mirror_frame := Add(mem, mirror_offset).ptr
   frame_end_addr := Add(mem, alloc_sz).ptr
 
@@ -744,11 +758,29 @@ macro(:create_frame) do |frame_size, callee|
   call_runtime("InitializeFrame", mem, callee, %frame, frame_size).ptr
 end
 
+macro(:get_instructions) do |callee|
+    pc_int1 := LoadI(callee).Imm(Constants::METHOD_INSTRUCTIONS_OFFSET).Volatile.ptr
+    If(pc_int1, 0).EQ.Unlikely {      
+      pc_int2 := call_runtime("GetInstructionsByMethod", callee).ptr
+    }
+    Phi(pc_int1, pc_int2).ptr
+end
+
+macro(:get_numvregs) do |callee|
+    num_vregs1 := LoadI(callee).Imm(Constants::METHOD_NUM_VREGS_OFFSET).Volatile.u32
+    If(num_vregs1, Constants::METHOD_VREGS_UNKNOWN).EQ.Unlikely {
+      num_vregs2 := call_runtime("GetNumVregsByMethod", callee).u32
+    }
+    Phi(num_vregs1, num_vregs2).u32
+end
+
 macro(:generic_call) do |id, size, is_initobj, callee, nargs, copy_lambda|
   safepoint(acc.type, !is_initobj)
   acc := acc_
   update_hotness_counter(callee, is_initobj)
 
+  # Note: IsCompiled call can be cached to optimize performance. In cached state it will give around
+  #       1.5% speed increase on specialized benchmark
   entrypoint := LoadI(callee).Imm(Constants::METHOD_COMPILED_ENTRY_POINT_OFFSET).ptr
   If(call_runtime("IsCompiled", entrypoint).i32, 0).NE.Unlikely {
     save_acc_var(acc, acc_tag) unless is_initobj
@@ -765,9 +797,10 @@ macro(:generic_call) do |id, size, is_initobj, callee, nargs, copy_lambda|
 
     pc_native := advance_pc_imm(%pc, size)
   } Else {
-    num_vregs := read_uleb(method_file_data(callee))
-    num_vregs := u32toword(num_vregs)
-    num_vregs := AddI(num_vregs).Imm(1).word if is_initobj
+    pc_int := get_instructions(callee)
+    num_vregs := u32toword(get_numvregs(callee))
+    num_vregs := AddI(num_vregs).Imm(1).word if is_initobj    
+
     if nargs
       num_args := nargs
     else
@@ -791,7 +824,6 @@ macro(:generic_call) do |id, size, is_initobj, callee, nargs, copy_lambda|
     copy_lambda.call(new_frame, num_vregs, num_args, new_moffset)
     StoreI(new_frame, frame).Imm(Constants::FRAME_PREV_FRAME_OFFSET).ptr
     StoreI(frame, advance_pc_imm(pc, size)).Imm(Constants::FRAME_NEXT_INSTRUCTION_OFFSET).ptr
-    pc_int := call_runtime("GetInstructionsByMethod", callee).ptr
     StoreI(new_frame, pc_int).Imm(Constants::FRAME_INSTRUCTIONS_OFFSET).ptr
     StoreI(%tr, new_frame).Imm(Constants::THREAD_FRAME_OFFSET).ptr
   }
@@ -804,6 +836,23 @@ macro(:generic_call) do |id, size, is_initobj, callee, nargs, copy_lambda|
   pc := Phi(pc_native, pc_int).ptr
 end
 
+macro(:free_frame) do |frame|
+  frame_allocator := LoadI(%tr).Imm(Constants::MANAGED_THREAD_STACK_FRAME_ALLOCATOR_OFFSET).ptr
+  free_pointer := LoadI(frame_allocator).Imm(Constants::STACK_FRAME_ALLOCATOR_FREE_POINTER_OFFSET).ptr
+
+  frame_word := Bitcast(frame).SrcType("DataType::POINTER").word
+  free_pointer_word := Bitcast(free_pointer).SrcType("DataType::POINTER").word
+  If(ShrI(frame_word).Imm(Constants::STACK_FRAME_ALLOCATOR_RELEASE_PAGES_SHIFT).word, 
+    ShrI(free_pointer_word).Imm(Constants::STACK_FRAME_ALLOCATOR_RELEASE_PAGES_SHIFT).word).NE.Unlikely {
+    call_runtime("FreeFrameInterp", frame, %tr).void
+  } Else {
+    StoreI(frame_allocator, frame).Imm(Constants::STACK_FRAME_ALLOCATOR_FREE_POINTER_OFFSET).ptr
+    if defines.__SANITIZE_ADDRESS__ || defines.__SANITIZE_THREAD__
+      call_runtime("AnnotateSanitizersPoisonEntrypoint", free_pointer_word, Sub(free_pointer_word, frame_word).u32).void
+    end
+  }
+end
+
 macro(:generic_return) do |copy_lambda|
   frame_flags := LoadI(%frame).Imm(Constants::FRAME_FLAGS_OFFSET).word
   If(And(frame_flags, "Frame::IS_STACKLESS").word, 0).NE.Likely {
@@ -811,7 +860,7 @@ macro(:generic_return) do |copy_lambda|
     next_pc := LoadI(prev_frame).Imm(Constants::FRAME_NEXT_INSTRUCTION_OFFSET).ptr
     copy_lambda.call(prev_frame, frame_flags)
     StoreI(%tr, prev_frame).Imm(Constants::THREAD_FRAME_OFFSET).ptr
-    call_runtime("FreeFrameInterp", frame, %tr).void
+    free_frame(frame)
     frame := prev_frame
     if Options.arm64?
       moffset := get_moffset_frame(frame)

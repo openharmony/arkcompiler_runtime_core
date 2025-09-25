@@ -14,6 +14,11 @@
  */
 
 // NOLINTBEGIN(readability-identifier-naming)
+
+DEFINE_VALUE(MANAGED_THREAD_STACK_FRAME_ALLOCATOR_OFFSET, ManagedThread::GetStackFrameAllocatorOffset())
+DEFINE_VALUE(STACK_FRAME_ALLOCATOR_FREE_POINTER_OFFSET, mem::StackFrameAllocator::GetFreePointerOffset())
+DEFINE_VALUE(STACK_FRAME_ALLOCATOR_END_ADDR_OFFSET, mem::StackFrameAllocator::GetEndAddrOffset())
+
 DEFINE_VALUE(SLOT_SIZE, PointerSize(RUNTIME_ARCH))
 DEFINE_VALUE(POINTER_LOG_SIZE, helpers::math::GetIntLog2(static_cast<uint64_t>(sizeof(void *))))
 
@@ -31,6 +36,9 @@ DEFINE_VALUE(METHOD_PANDA_FILE_OFFSET, Method::GetPandaFileOffset())
 DEFINE_VALUE(METHOD_NATIVE_POINTER_OFFSET, Method::GetNativePointerOffset())
 DEFINE_VALUE(METHOD_SHORTY_OFFSET, Method::GetShortyOffset())
 DEFINE_VALUE(METHOD_CODE_ID_OFFSET, Method::GetCodeIdOffset())
+DEFINE_VALUE(METHOD_NUM_VREGS_OFFSET, Method::GetNumVregsOffset())
+DEFINE_VALUE(METHOD_INSTRUCTIONS_OFFSET, Method::GetInstructionsOffset())
+DEFINE_VALUE(METHOD_VREGS_UNKNOWN, Method::NUM_VREGS_UNKNOWN)
 
 // Frame offsets
 DEFINE_VALUE(FRAME_METHOD_OFFSET, Frame::GetMethodOffset())
