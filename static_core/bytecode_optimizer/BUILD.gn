@@ -61,6 +61,7 @@ if (!ark_static_standalone_build) {
 libarkbytecodeopt_sources = [
   "$ark_root/bytecode_optimizer/bytecodeopt_peepholes.cpp",
   "$ark_root/bytecode_optimizer/canonicalization.cpp",
+  "$ark_root/bytecode_optimizer/call_devirtualization.cpp",
   "$ark_root/bytecode_optimizer/check_resolver.cpp",
   "$ark_root/bytecode_optimizer/codegen.cpp",
   "$ark_root/bytecode_optimizer/common.cpp",

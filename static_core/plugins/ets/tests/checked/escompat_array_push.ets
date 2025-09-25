@@ -18,23 +18,23 @@
 //!
 //! METHOD        "escompat_array_push.ETSGLOBAL::test_array_push"
 //! PASS_AFTER    "Codegen"
-//! INST          /CallVirtual.*escompat.Array::push/
-//! INST_COUNT    /CallVirtual.*escompat.Array::push/, 5
+//! INST          /CallStatic.*escompat.Array::push/
+//! INST_COUNT    /CallStatic.*escompat.Array::push/, 5
 //!
 //! METHOD        "escompat_array_push.ETSGLOBAL::test_array_push_unions"
 //! PASS_AFTER    "Codegen"
-//! INST          /CallVirtual.*escompat.Array::push/
-//! INST_COUNT    /CallVirtual.*escompat.Array::push/, 5
+//! INST          /CallStatic.*escompat.Array::push/
+//! INST_COUNT    /CallStatic.*escompat.Array::push/, 5
 //!
 //! METHOD        "escompat_array_push.ETSGLOBAL::test_array_push_one"
 //! PASS_AFTER    "Codegen"
-//! INST          /CallVirtual.*escompat.Array::pushOne/
-//! INST_COUNT    /CallVirtual.*escompat.Array::pushOne/, 5
+//! INST          /CallStatic.*escompat.Array::pushOne/
+//! INST_COUNT    /CallStatic.*escompat.Array::pushOne/, 5
 //!
 //! METHOD        "escompat_array_push.ETSGLOBAL::test_array_push_array"
 //! PASS_AFTER    "Codegen"
-//! INST          /CallVirtual.*escompat.Array::pushArray/
-//! INST_COUNT    /CallVirtual.*escompat.Array::pushArray/, 2
+//! INST          /CallStatic.*escompat.Array::pushArray/
+//! INST_COUNT    /CallStatic.*escompat.Array::pushArray/, 5
 
 function test_array_push() {
     let array_size: int = 3;
@@ -63,8 +63,8 @@ function test_array_push() {
 //! RUN           force_jit: true, entry: "escompat_array_push.ETSGLOBAL::test_array_push_managed_objects"
 //! METHOD        "escompat_array_push.ETSGLOBAL::test_array_push_managed_objects"
 //! PASS_AFTER    "Codegen"
-//! INST          /CallVirtual.*escompat.Array::push/
-//! INST_COUNT    /CallVirtual.*escompat.Array::push/, 3
+//! INST          /CallStatic.*escompat.Array::push/
+//! INST_COUNT    /CallStatic.*escompat.Array::push/, 5
 function test_array_push_managed_objects() {
     let array: Array<Object> = new Array<Object>();
 

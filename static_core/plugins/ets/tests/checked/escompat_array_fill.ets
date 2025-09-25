@@ -19,7 +19,9 @@
 //! METHOD        "escompat_array_fill.ETSGLOBAL::test_array_fill"
 //! PASS_AFTER    "Codegen"
 //! INST          /CallVirtual.*escompat.Array::fill/
-//! INST_COUNT    /CallVirtual.*escompat.Array::fill/, 13
+//! INST_COUNT    /CallVirtual.*escompat.Array::fill/, 8
+//! INST          /CallStatic.*escompat.Array::fill/
+//! INST_COUNT    /CallStatic.*escompat.Array::fill/, 5
 //!
 //! METHOD        "escompat_array_fill.ETSGLOBAL::test_array_call_virtual_fill"
 //! PASS_AFTER    "Codegen"

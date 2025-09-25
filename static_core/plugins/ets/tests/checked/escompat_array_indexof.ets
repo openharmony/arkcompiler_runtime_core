@@ -17,8 +17,8 @@
 //! RUN           force_jit: true , options: "--compiler-dump:final", entry: "escompat_array_indexof.ETSGLOBAL::test_array_int_index_of"
 //! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_int_index_of"
 //! PASS_AFTER    "Codegen"
-//! INST          /CallVirtual.*escompat.Array::indexOf/
-//! INST_COUNT    /CallVirtual.*escompat.Array::indexOf/, 5
+//! INST          /CallStatic.*escompat.Array::indexOf/
+//! INST_COUNT    /CallStatic.*escompat.Array::indexOf /, 5
 function test_array_int_index_of() {
     let array: Array<int> = [2, 3, 2, 3, 3, 4, 5];
     arktest.assertEQ(array.indexOf(3 ,  0),  1.);
@@ -32,8 +32,8 @@ function test_array_int_index_of() {
 //! RUN           force_jit: true, options: "--compiler-dump:final", entry: "escompat_array_indexof.ETSGLOBAL::test_array_number_index_of"
 //! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_number_index_of"
 //! PASS_AFTER    "Codegen"
-//! INST          /CallVirtual.*escompat.Array::indexOf/
-//! INST_COUNT    /CallVirtual.*escompat.Array::indexOf/, 5
+//! INST          /CallStatic.*escompat.Array::indexOf/
+//! INST_COUNT    /CallStatic.*escompat.Array::indexOf /, 5
 function test_array_number_index_of() {
     let array: Array<number> = ([1.1, 2.2, 3.3, 3.3, 5.5, 2.2, 4.4]);
     arktest.assertEQ(array.indexOf(3 ,   0), -1.);
@@ -47,8 +47,8 @@ function test_array_number_index_of() {
 //! RUN           force_jit: true, options: "--compiler-dump:final", entry: "escompat_array_indexof.ETSGLOBAL::test_array_short_index_of"
 //! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_short_index_of"
 //! PASS_AFTER    "Codegen"
-//! INST          /CallVirtual.*escompat.Array::indexOf/
-//! INST_COUNT    /CallVirtual.*escompat.Array::indexOf/, 5
+//! INST          /CallStatic.*escompat.Array::indexOf/
+//! INST_COUNT    /CallStatic.*escompat.Array::indexOf /, 5
 function test_array_short_index_of() {
     let array: Array<short> = [2, 3, 2, 3, 3, 4, 5];
     let searchElement: short = 3;
@@ -63,8 +63,8 @@ function test_array_short_index_of() {
 //! RUN           force_jit: true, options: "--compiler-dump:final", entry: "escompat_array_indexof.ETSGLOBAL::test_array_long_index_of"
 //! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_long_index_of"
 //! PASS_AFTER    "Codegen"
-//! INST          /CallVirtual.*escompat.Array::indexOf/
-//! INST_COUNT    /CallVirtual.*escompat.Array::indexOf/, 5
+//! INST          /CallStatic.*escompat.Array::indexOf/
+//! INST_COUNT    /CallStatic.*escompat.Array::indexOf /, 5
 function test_array_long_index_of() {
     let array: Array<long> = [2, 3, 2, 3, 3, 4, 5];
     let searchElement: long = 3;
@@ -79,8 +79,8 @@ function test_array_long_index_of() {
 //! RUN           force_jit: true, options: "--compiler-dump:final", entry: "escompat_array_indexof.ETSGLOBAL::test_array_float_index_of"
 //! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_float_index_of"
 //! PASS_AFTER    "Codegen"
-//! INST          /CallVirtual.*escompat.Array::indexOf/
-//! INST_COUNT    /CallVirtual.*escompat.Array::indexOf/, 4
+//! INST          /CallStatic.*escompat.Array::indexOf/
+//! INST_COUNT    /CallStatic.*escompat.Array::indexOf /, 4
 function test_array_float_index_of() {
     let array: Array<float> = [1.1f, 2.2f, 3.3f, 3.3f, 5.5f, 2.2f, 4.4f];
     let searchElement : float = 2.2f;
@@ -94,8 +94,8 @@ function test_array_float_index_of() {
 //! RUN           force_jit: true, options: "--compiler-dump:final", entry: "escompat_array_indexof.ETSGLOBAL::test_array_char_index_of"
 //! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_char_index_of"
 //! PASS_AFTER    "Codegen"
-//! INST          /CallVirtual.*escompat.Array::indexOf/
-//! INST_COUNT    /CallVirtual.*escompat.Array::indexOf/, 5
+//! INST          /CallStatic.*escompat.Array::indexOf/
+//! INST_COUNT    /CallStatic.*escompat.Array::indexOf /, 5
 function test_array_char_index_of() {
     let array: Array<char> = [c'a', c'b', c'c', c'a', c'd', c'a', c'b'];
     let searchElement : char = c'b';
@@ -114,8 +114,8 @@ function test_array_char_index_of() {
 //! RUN           force_jit: true, options: "--compiler-dump:final", entry: "escompat_array_indexof.ETSGLOBAL::test_array_boolean_index_of"
 //! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_boolean_index_of"
 //! PASS_AFTER    "Codegen"
-//! INST          /CallVirtual.*escompat.Array::indexOf/
-//! INST_COUNT    /CallVirtual.*escompat.Array::indexOf/, 5
+//! INST          /CallStatic.*escompat.Array::indexOf/
+//! INST_COUNT    /CallStatic.*escompat.Array::indexOf /, 5
 function test_array_boolean_index_of() {
     let array: Array<boolean> = [true, false, false, true, false, true, false];
     arktest.assertEQ(array.indexOf(false ,  0),  1.);
@@ -129,8 +129,8 @@ function test_array_boolean_index_of() {
 //! RUN           force_jit: true, options: "--compiler-dump:final", entry: "escompat_array_indexof.ETSGLOBAL::test_array_string_index_of"
 //! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_string_index_of"
 //! PASS_AFTER    "Codegen"
-//! INST          /CallVirtual.*escompat.Array::indexOf/
-//! INST_COUNT    /CallVirtual.*escompat.Array::indexOf/, 5
+//! INST          /CallStatic.*escompat.Array::indexOf/
+//! INST_COUNT    /CallStatic.*escompat.Array::indexOf /, 5
 function test_array_string_index_of() {
     let array: Array<string> = ["this", "is", "hello", "world", "hello"];
     arktest.assertEQ(array.indexOf("hello",   0),  2.);

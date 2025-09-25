@@ -93,9 +93,9 @@ function __noinline__MapDelete_bool_double(map: Map<boolean, double>): boolean {
 //! INST_NOT      "Intrinsic.MapGet"
 //! INST_NOT      "Intrinsic.MapDelete"
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Map::has/
-//! INST          /CallVirtual.*escompat\.Map::get/
-//! INST          /CallVirtual.*escompat\.Map::delete/
+//! INST          /CallStatic.*escompat\.Map::has/
+//! INST          /CallStatic.*escompat\.Map::get/
+//! INST          /CallStatic.*escompat\.Map::delete/
 //!
 //! METHOD        "ets_escompat_map_intrinsics.ETSGLOBAL::test_map_char_double"
 //! PASS_AFTER    "IrBuilder"
@@ -103,9 +103,9 @@ function __noinline__MapDelete_bool_double(map: Map<boolean, double>): boolean {
 //! INST_NOT      "Intrinsic.MapGet"
 //! INST_NOT      "Intrinsic.MapDelete"
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Map::has/
-//! INST          /CallVirtual.*escompat\.Map::get/
-//! INST          /CallVirtual.*escompat\.Map::delete/
+//! INST          /CallStatic.*escompat\.Map::has/
+//! INST          /CallStatic.*escompat\.Map::get/
+//! INST          /CallStatic.*escompat\.Map::delete/
 //!
 //! METHOD        "ets_escompat_map_intrinsics.ETSGLOBAL::test_map_byte_int"
 //! PASS_AFTER    "IrBuilder"
@@ -113,9 +113,9 @@ function __noinline__MapDelete_bool_double(map: Map<boolean, double>): boolean {
 //! INST_NOT      "Intrinsic.MapGet"
 //! INST_NOT      "Intrinsic.MapDelete"
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Map::has/
-//! INST          /CallVirtual.*escompat\.Map::get/
-//! INST          /CallVirtual.*escompat\.Map::delete/
+//! INST          /CallStatic.*escompat\.Map::has/
+//! INST          /CallStatic.*escompat\.Map::get/
+//! INST          /CallStatic.*escompat\.Map::delete/
 //!
 //! METHOD        "ets_escompat_map_intrinsics.ETSGLOBAL::test_map_short_double"
 //! PASS_AFTER    "IrBuilder"
@@ -123,9 +123,9 @@ function __noinline__MapDelete_bool_double(map: Map<boolean, double>): boolean {
 //! INST_NOT      "Intrinsic.MapGet"
 //! INST_NOT      "Intrinsic.MapDelete"
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Map::has/
-//! INST          /CallVirtual.*escompat\.Map::get/
-//! INST          /CallVirtual.*escompat\.Map::delete/
+//! INST          /CallStatic.*escompat\.Map::has/
+//! INST          /CallStatic.*escompat\.Map::get/
+//! INST          /CallStatic.*escompat\.Map::delete/
 //!
 //! METHOD        "ets_escompat_map_intrinsics.ETSGLOBAL::test_map_int_double"
 //! PASS_AFTER    "IrBuilder"
@@ -133,9 +133,9 @@ function __noinline__MapDelete_bool_double(map: Map<boolean, double>): boolean {
 //! INST_NOT      "Intrinsic.MapGet"
 //! INST_NOT      "Intrinsic.MapDelete"
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Map::has/
-//! INST          /CallVirtual.*escompat\.Map::get/
-//! INST          /CallVirtual.*escompat\.Map::delete/
+//! INST          /CallStatic.*escompat\.Map::has/
+//! INST          /CallStatic.*escompat\.Map::get/
+//! INST          /CallStatic.*escompat\.Map::delete/
 //!
 //! METHOD        "ets_escompat_map_intrinsics.ETSGLOBAL::test_map_long_double"
 //! PASS_AFTER    "IrBuilder"
@@ -143,9 +143,9 @@ function __noinline__MapDelete_bool_double(map: Map<boolean, double>): boolean {
 //! INST_NOT      "Intrinsic.MapGet"
 //! INST_NOT      "Intrinsic.MapDelete"
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Map::has/
-//! INST          /CallVirtual.*escompat\.Map::get/
-//! INST          /CallVirtual.*escompat\.Map::delete/
+//! INST          /CallStatic.*escompat\.Map::has/
+//! INST          /CallStatic.*escompat\.Map::get/
+//! INST          /CallStatic.*escompat\.Map::delete/
 //!
 //! METHOD        "ets_escompat_map_intrinsics.ETSGLOBAL::test_map_float_double"
 //! PASS_AFTER    "IrBuilder"
@@ -153,9 +153,9 @@ function __noinline__MapDelete_bool_double(map: Map<boolean, double>): boolean {
 //! INST_NOT      "Intrinsic.MapGet"
 //! INST_NOT      "Intrinsic.MapDelete"
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Map::has/
-//! INST          /CallVirtual.*escompat\.Map::get/
-//! INST          /CallVirtual.*escompat\.Map::delete/
+//! INST          /CallStatic.*escompat\.Map::has/
+//! INST          /CallStatic.*escompat\.Map::get/
+//! INST          /CallStatic.*escompat\.Map::delete/
 //!
 //! METHOD        "ets_escompat_map_intrinsics.ETSGLOBAL::test_map_double_double"
 //! PASS_AFTER    "IrBuilder"
@@ -163,9 +163,9 @@ function __noinline__MapDelete_bool_double(map: Map<boolean, double>): boolean {
 //! INST_NOT      "Intrinsic.MapGet"
 //! INST_NOT      "Intrinsic.MapDelete"
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Map::has/
-//! INST          /CallVirtual.*escompat\.Map::get/
-//! INST          /CallVirtual.*escompat\.Map::delete/
+//! INST          /CallStatic.*escompat\.Map::has/
+//! INST          /CallStatic.*escompat\.Map::get/
+//! INST          /CallStatic.*escompat\.Map::delete/
 //!
 //! METHOD        "ets_escompat_map_intrinsics.ETSGLOBAL::test_map_double_number"
 //! PASS_AFTER    "IrBuilder"
@@ -173,9 +173,9 @@ function __noinline__MapDelete_bool_double(map: Map<boolean, double>): boolean {
 //! INST_NOT      "Intrinsic.MapGet"
 //! INST_NOT      "Intrinsic.MapDelete"
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Map::has/
-//! INST          /CallVirtual.*escompat\.Map::get/
-//! INST          /CallVirtual.*escompat\.Map::delete/
+//! INST          /CallStatic.*escompat\.Map::has/
+//! INST          /CallStatic.*escompat\.Map::get/
+//! INST          /CallStatic.*escompat\.Map::delete/
 //!
 //! METHOD        "ets_escompat_map_intrinsics.ETSGLOBAL::test_map_string_number"
 //! PASS_AFTER    "IrBuilder"
@@ -183,9 +183,9 @@ function __noinline__MapDelete_bool_double(map: Map<boolean, double>): boolean {
 //! INST_NOT      "Intrinsic.MapGet"
 //! INST_NOT      "Intrinsic.MapDelete"
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Map::has/
-//! INST          /CallVirtual.*escompat\.Map::get/
-//! INST          /CallVirtual.*escompat\.Map::delete/
+//! INST          /CallStatic.*escompat\.Map::has/
+//! INST          /CallStatic.*escompat\.Map::get/
+//! INST          /CallStatic.*escompat\.Map::delete/
 
 //! CHECKER       AOT PGO: Map intrinsics
 //! SKIP_IF       @architecture == "arm32"
@@ -198,9 +198,9 @@ function __noinline__MapDelete_bool_double(map: Map<boolean, double>): boolean {
 //! INST_NOT      "Intrinsic.MapGet"
 //! INST_NOT      "Intrinsic.MapDelete"
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Map::has/
-//! INST          /CallVirtual.*escompat\.Map::get/
-//! INST          /CallVirtual.*escompat\.Map::delete/
+//! INST          /CallStatic.*escompat\.Map::has/
+//! INST          /CallStatic.*escompat\.Map::get/
+//! INST          /CallStatic.*escompat\.Map::delete/
 //!
 //! METHOD        "ets_escompat_map_intrinsics.ETSGLOBAL::test_map_char_double"
 //! PASS_AFTER    "IrBuilder"
@@ -208,9 +208,9 @@ function __noinline__MapDelete_bool_double(map: Map<boolean, double>): boolean {
 //! INST_NOT      "Intrinsic.MapGet"
 //! INST_NOT      "Intrinsic.MapDelete"
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Map::has/
-//! INST          /CallVirtual.*escompat\.Map::get/
-//! INST          /CallVirtual.*escompat\.Map::delete/
+//! INST          /CallStatic.*escompat\.Map::has/
+//! INST          /CallStatic.*escompat\.Map::get/
+//! INST          /CallStatic.*escompat\.Map::delete/
 //!
 //! METHOD        "ets_escompat_map_intrinsics.ETSGLOBAL::test_map_byte_int"
 //! PASS_AFTER    "IrBuilder"
@@ -218,9 +218,9 @@ function __noinline__MapDelete_bool_double(map: Map<boolean, double>): boolean {
 //! INST_NOT      "Intrinsic.MapGet"
 //! INST_NOT      "Intrinsic.MapDelete"
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Map::has/
-//! INST          /CallVirtual.*escompat\.Map::get/
-//! INST          /CallVirtual.*escompat\.Map::delete/
+//! INST          /CallStatic.*escompat\.Map::has/
+//! INST          /CallStatic.*escompat\.Map::get/
+//! INST          /CallStatic.*escompat\.Map::delete/
 //!
 //! METHOD        "ets_escompat_map_intrinsics.ETSGLOBAL::test_map_short_double"
 //! PASS_AFTER    "IrBuilder"
@@ -228,9 +228,9 @@ function __noinline__MapDelete_bool_double(map: Map<boolean, double>): boolean {
 //! INST_NOT      "Intrinsic.MapGet"
 //! INST_NOT      "Intrinsic.MapDelete"
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Map::has/
-//! INST          /CallVirtual.*escompat\.Map::get/
-//! INST          /CallVirtual.*escompat\.Map::delete/
+//! INST          /CallStatic.*escompat\.Map::has/
+//! INST          /CallStatic.*escompat\.Map::get/
+//! INST          /CallStatic.*escompat\.Map::delete/
 //!
 //! METHOD        "ets_escompat_map_intrinsics.ETSGLOBAL::test_map_int_double"
 //! PASS_AFTER    "IrBuilder"
@@ -238,9 +238,9 @@ function __noinline__MapDelete_bool_double(map: Map<boolean, double>): boolean {
 //! INST_NOT      "Intrinsic.MapGet"
 //! INST_NOT      "Intrinsic.MapDelete"
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Map::has/
-//! INST          /CallVirtual.*escompat\.Map::get/
-//! INST          /CallVirtual.*escompat\.Map::delete/
+//! INST          /CallStatic.*escompat\.Map::has/
+//! INST          /CallStatic.*escompat\.Map::get/
+//! INST          /CallStatic.*escompat\.Map::delete/
 //!
 //! METHOD        "ets_escompat_map_intrinsics.ETSGLOBAL::test_map_long_double"
 //! PASS_AFTER    "IrBuilder"
@@ -248,9 +248,9 @@ function __noinline__MapDelete_bool_double(map: Map<boolean, double>): boolean {
 //! INST_NOT      "Intrinsic.MapGet"
 //! INST_NOT      "Intrinsic.MapDelete"
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Map::has/
-//! INST          /CallVirtual.*escompat\.Map::get/
-//! INST          /CallVirtual.*escompat\.Map::delete/
+//! INST          /CallStatic.*escompat\.Map::has/
+//! INST          /CallStatic.*escompat\.Map::get/
+//! INST          /CallStatic.*escompat\.Map::delete/
 //!
 //! METHOD        "ets_escompat_map_intrinsics.ETSGLOBAL::test_map_float_double"
 //! PASS_AFTER    "IrBuilder"
@@ -258,9 +258,9 @@ function __noinline__MapDelete_bool_double(map: Map<boolean, double>): boolean {
 //! INST_NOT      "Intrinsic.MapGet"
 //! INST_NOT      "Intrinsic.MapDelete"
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Map::has/
-//! INST          /CallVirtual.*escompat\.Map::get/
-//! INST          /CallVirtual.*escompat\.Map::delete/
+//! INST          /CallStatic.*escompat\.Map::has/
+//! INST          /CallStatic.*escompat\.Map::get/
+//! INST          /CallStatic.*escompat\.Map::delete/
 //!
 //! METHOD        "ets_escompat_map_intrinsics.ETSGLOBAL::test_map_double_double"
 //! PASS_AFTER    "IrBuilder"
@@ -268,9 +268,9 @@ function __noinline__MapDelete_bool_double(map: Map<boolean, double>): boolean {
 //! INST_NOT      "Intrinsic.MapGet"
 //! INST_NOT      "Intrinsic.MapDelete"
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Map::has/
-//! INST          /CallVirtual.*escompat\.Map::get/
-//! INST          /CallVirtual.*escompat\.Map::delete/
+//! INST          /CallStatic.*escompat\.Map::has/
+//! INST          /CallStatic.*escompat\.Map::get/
+//! INST          /CallStatic.*escompat\.Map::delete/
 //!
 //! METHOD        "ets_escompat_map_intrinsics.ETSGLOBAL::test_map_double_number"
 //! PASS_AFTER    "IrBuilder"
@@ -278,9 +278,9 @@ function __noinline__MapDelete_bool_double(map: Map<boolean, double>): boolean {
 //! INST_NOT      "Intrinsic.MapGet"
 //! INST_NOT      "Intrinsic.MapDelete"
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Map::has/
-//! INST          /CallVirtual.*escompat\.Map::get/
-//! INST          /CallVirtual.*escompat\.Map::delete/
+//! INST          /CallStatic.*escompat\.Map::has/
+//! INST          /CallStatic.*escompat\.Map::get/
+//! INST          /CallStatic.*escompat\.Map::delete/
 //!
 //! METHOD        "ets_escompat_map_intrinsics.ETSGLOBAL::test_map_string_number"
 //! PASS_AFTER    "IrBuilder"
@@ -288,9 +288,9 @@ function __noinline__MapDelete_bool_double(map: Map<boolean, double>): boolean {
 //! INST_NOT      "Intrinsic.MapGet"
 //! INST_NOT      "Intrinsic.MapDelete"
 //! PASS_AFTER    "Inline"
-//! INST          /CallVirtual.*escompat\.Map::has/
-//! INST          /CallVirtual.*escompat\.Map::get/
-//! INST          /CallVirtual.*escompat\.Map::delete/
+//! INST          /CallStatic.*escompat\.Map::has/
+//! INST          /CallStatic.*escompat\.Map::get/
+//! INST          /CallStatic.*escompat\.Map::delete/
 
 //! CHECKER       JIT: Map intrinsics
 //! RUN           force_jit: true, options: "--compiler-regex='.*test_map_.*'", entry: "ets_escompat_map_intrinsics.ETSGLOBAL::main"
