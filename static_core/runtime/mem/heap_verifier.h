@@ -31,7 +31,8 @@ class HeapReferenceVerifier {
 public:
     explicit HeapReferenceVerifier(HeapManager *heap, size_t *count) : heap_(heap), failCount_(count) {}
 
-    void operator()(ObjectHeader *objectHeader, ObjectHeader *referent);
+    bool operator()(ObjectHeader *objectHeader, ObjectHeader *referent, uint32_t offset,
+                    [[maybe_unused]] bool isVolatile);
 
     void operator()(const GCRoot &root);
 
@@ -114,6 +115,7 @@ private:
     struct ObjectCache {
         const ObjectHeader *heapObject;
         const ObjectHeader *referent;
+        const size_t offset;
     };
 
     size_t CheckHeap(const PandaUnorderedSet<const ObjectHeader *> &heapObjects,
