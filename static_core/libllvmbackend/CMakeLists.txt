@@ -233,6 +233,10 @@ panda_target_compile_options(llvmbackend PUBLIC "-Wno-unused-parameter")
 
 panda_target_compile_definitions(llvmbackend PUBLIC REQUIRED_LLVM_VERSION=${REQUIRED_LLVM_VERSION})
 
+# LLVM_DEFINITIONS is defined in ${LLVM_TARGET_PATH}/lib/cmake/llvm/LLVMConfig.cmake.
+separate_arguments(LLVM_DEFINITIONS)
+panda_target_compile_definitions(llvmbackend PRIVATE ${LLVM_DEFINITIONS})
+
 if (PANDA_LLVM_AOT AND PANDA_TARGET_AMD64 AND PANDA_COMPILER_TARGET_AARCH64 AND PANDA_WITH_TESTS)
     set(PANDA_LLVM_AOT_TESTS_SOURCES
         ${PANDA_ROOT}/compiler/tests/unit_test.cpp

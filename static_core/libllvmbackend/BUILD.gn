@@ -39,8 +39,28 @@ if (is_llvmbackend) {
     }
   }
 
+  action("llvm_cflags") {
+    script = "$ark_root/scripts/llvm/llvm-config.sh"
+    outputs = [ "$target_gen_dir/llvm_cflags.rsp" ]
+    if (defined(clang_base_path)) {
+      llvm_config_path = rebase_path("${clang_base_path}/bin/llvm-config")
+    } else {
+      # Assume that "llvm-config" can be found in $PATH, similar to
+      # how //build/toolchain:clang-14 finds "clang-14".
+      llvm_config_path = "llvm-config"
+    }
+    args = [
+      rebase_path("$target_gen_dir/llvm_cflags.rsp"),
+      llvm_config_path,
+      "--cflags",
+    ]
+  }
+
   ### LLVM Backend
   config("libllvmbackend_public_config") {
+    llvm_cflags_outputs = get_target_outputs(":llvm_cflags")
+    cflags = [ "@" + rebase_path(llvm_cflags_outputs[0]) ]
+
     include_dirs = [
       "$ark_root/libllvmbackend",
       "$target_gen_dir",
@@ -134,6 +154,7 @@ if (is_llvmbackend) {
       ":libllvmbackend_llvm_passes_inl",
       ":libllvmbackend_pipeline_gen_inc",
       ":libllvmbackend_pipeline_irtoc_gen_inc",
+      ":llvm_cflags",
       ":llvm_lib",
       "$ark_root/compiler:libarktscompiler",
       "$ark_root/libarkbase:libarktsbase",

@@ -92,7 +92,7 @@ declare_args() {
     is_llvm_fastpath = is_llvmbackend && target_cpu == "arm64"
   }
   if (!defined(is_llvm_aot)) {
-    is_llvm_aot = is_llvmbackend
+    is_llvm_aot = false
   }
 }
 
