@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,6 +35,32 @@ inline bool Enum::SetName(const std::string &name) const
     const auto ret = GetApiConfig()->cArktsMapi_->enumSetName(TargetCast(), name.c_str());
     CheckError(GetApiConfig());
     return ret;
+}
+
+inline arkts::EnumField Enum::AddField(const std::string_view name, const Type &type, const Value &value,
+                                       AbckitArktsFieldVisibility fieldVisibility)
+{
+    const struct AbckitArktsFieldCreateParams params {
+        name.data(), type.GetView(), value.GetView(), true, fieldVisibility
+    };
+    auto *arkEnumField = GetApiConfig()->cArktsMapi_->enumAddField(TargetCast(), &params);
+    CheckError(GetApiConfig());
+    auto *coreEnumField = GetApiConfig()->cArktsIapi_->arktsEnumFieldToCoreEnumField(arkEnumField);
+    CheckError(GetApiConfig());
+    return arkts::EnumField(core::EnumField(coreEnumField, GetApiConfig(), GetResource()));
+}
+
+inline arkts::EnumField Enum::AddField(const std::string_view name, const Type &type,
+                                       AbckitArktsFieldVisibility fieldVisibility)
+{
+    const struct AbckitArktsFieldCreateParams params {
+        name.data(), type.GetView(), nullptr, true, fieldVisibility
+    };
+    auto *arkEnumField = GetApiConfig()->cArktsMapi_->enumAddField(TargetCast(), &params);
+    CheckError(GetApiConfig());
+    auto *coreEnumField = GetApiConfig()->cArktsIapi_->arktsEnumFieldToCoreEnumField(arkEnumField);
+    CheckError(GetApiConfig());
+    return arkts::EnumField(core::EnumField(coreEnumField, GetApiConfig(), GetResource()));
 }
 
 }  // namespace abckit::arkts

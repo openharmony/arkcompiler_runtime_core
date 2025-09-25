@@ -57,11 +57,30 @@ inline bool Class::AddMethod(arkts::Function function)
     return ret;
 }
 
-inline bool Class::AddField(const ClassField &field) const
+inline arkts::ClassField Class::AddField(const std::string_view name, const Type &type, const Value &value,
+                                         bool isStatic, AbckitArktsFieldVisibility fieldVisibility)
 {
-    const auto ret = GetApiConfig()->cArktsMapi_->classAddField(TargetCast(), field.TargetCast());
+    const struct AbckitArktsFieldCreateParams params {
+        name.data(), type.GetView(), value.GetView(), isStatic, fieldVisibility
+    };
+    auto *arkClassField = GetApiConfig()->cArktsMapi_->classAddField(TargetCast(), &params);
     CheckError(GetApiConfig());
-    return ret;
+    auto *coreClassField = GetApiConfig()->cArktsIapi_->arktsClassFieldToCoreClassField(arkClassField);
+    CheckError(GetApiConfig());
+    return arkts::ClassField(core::ClassField(coreClassField, GetApiConfig(), GetResource()));
+}
+
+inline arkts::ClassField Class::AddField(const std::string_view name, const Type &type, bool isStatic,
+                                         AbckitArktsFieldVisibility fieldVisibility)
+{
+    const struct AbckitArktsFieldCreateParams params {
+        name.data(), type.GetView(), nullptr, isStatic, fieldVisibility
+    };
+    auto *arkClassField = GetApiConfig()->cArktsMapi_->classAddField(TargetCast(), &params);
+    CheckError(GetApiConfig());
+    auto *coreClassField = GetApiConfig()->cArktsIapi_->arktsClassFieldToCoreClassField(arkClassField);
+    CheckError(GetApiConfig());
+    return arkts::ClassField(core::ClassField(coreClassField, GetApiConfig(), GetResource()));
 }
 
 inline bool Class::SetOwningModule(const Module &module) const

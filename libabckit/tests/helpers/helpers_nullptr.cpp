@@ -117,6 +117,12 @@ static constexpr uintptr_t ABCKIT_TEST_POINTER_TAG = 0x1;
     reinterpret_cast<AbckitArktsClassField *>(ABCKIT_TEST_POINTER_TAG);
 [[maybe_unused]] static AbckitArktsEnumField *g_abckitArktsEnumField =
     reinterpret_cast<AbckitArktsEnumField *>(ABCKIT_TEST_POINTER_TAG);
+[[maybe_unused]] static AbckitArktsEnum *g_abckitArktsEnum =
+    reinterpret_cast<AbckitArktsEnum *>(ABCKIT_TEST_POINTER_TAG);
+[[maybe_unused]] static const AbckitArktsFieldCreateParams *g_constAbckitArktsFieldCreateParams =
+    reinterpret_cast<const AbckitArktsFieldCreateParams *>(ABCKIT_TEST_POINTER_TAG);
+[[maybe_unused]] static const AbckitArktsInterfaceFieldCreateParams *g_constAbckitArktsInterfaceFieldCreateParams =
+    reinterpret_cast<const AbckitArktsInterfaceFieldCreateParams *>(ABCKIT_TEST_POINTER_TAG);
 // NOLINTEND(cppcoreguidelines-pro-type-cstyle-cast)
 
 static const char *GetConstChar()
@@ -3349,6 +3355,52 @@ void TestNullptr(AbckitArktsInterface *(*apiToCheck)(AbckitArktsModule *, const 
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
 
     ASSERT_EQ(apiToCheck(nullptr, "test"), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(AbckitArktsModuleField *(*apiToCheck)(AbckitArktsModule *,
+                                                       const struct AbckitArktsFieldCreateParams *))
+{
+    ASSERT_EQ(apiToCheck(nullptr, nullptr), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    ASSERT_EQ(apiToCheck(g_abckitArktsModule, nullptr), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    ASSERT_EQ(apiToCheck(nullptr, g_constAbckitArktsFieldCreateParams), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(AbckitArktsClassField *(*apiToCheck)(AbckitArktsClass *, const struct AbckitArktsFieldCreateParams *))
+{
+    ASSERT_EQ(apiToCheck(nullptr, nullptr), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    ASSERT_EQ(apiToCheck(g_abckitArktsClass, nullptr), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    ASSERT_EQ(apiToCheck(nullptr, g_constAbckitArktsFieldCreateParams), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(AbckitArktsInterfaceField *(*apiToCheck)(AbckitArktsInterface *,
+                                                          const struct AbckitArktsInterfaceFieldCreateParams *))
+{
+    ASSERT_EQ(apiToCheck(nullptr, nullptr), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    ASSERT_EQ(apiToCheck(g_abckitArktsInterface, nullptr), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    ASSERT_EQ(apiToCheck(nullptr, g_constAbckitArktsInterfaceFieldCreateParams), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(AbckitArktsEnumField *(*apiToCheck)(AbckitArktsEnum *, const struct AbckitArktsFieldCreateParams *))
+{
+    ASSERT_EQ(apiToCheck(nullptr, nullptr), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    ASSERT_EQ(apiToCheck(g_abckitArktsEnum, nullptr), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    ASSERT_EQ(apiToCheck(nullptr, g_constAbckitArktsFieldCreateParams), nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
 }
 

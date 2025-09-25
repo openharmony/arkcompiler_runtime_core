@@ -259,6 +259,30 @@ extern "C" AbckitArktsAnnotationInterface *ModuleAddAnnotationInterface(
     }
 }
 
+extern "C" AbckitArktsModuleField *ModuleAddField(AbckitArktsModule *m,
+                                                  const struct AbckitArktsFieldCreateParams *params)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(m, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(params, nullptr);
+    LIBABCKIT_INTERNAL_ERROR(m->core, nullptr);
+
+    auto mt = m->core->target;
+    switch (mt) {
+        case ABCKIT_TARGET_ARK_TS_V1:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return nullptr;
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return ModuleAddFieldStatic(m->core, params);
+        default:
+            statuses::SetLastError(ABCKIT_STATUS_WRONG_TARGET);
+            return nullptr;
+    }
+}
+
 // ========================================
 // Namespace
 // ========================================
@@ -458,30 +482,25 @@ extern "C" bool ClassSetName(AbckitArktsClass *klass, const char *name)
     return ClassSetNameStatic(klass->core, name);
 }
 
-extern "C" bool ClassAddField(AbckitArktsClass *klass, AbckitArktsClassField *field)
+extern "C" AbckitArktsClassField *ClassAddField(AbckitArktsClass *klass,
+                                                const struct AbckitArktsFieldCreateParams *params)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
     LIBABCKIT_TIME_EXEC;
 
-    LIBABCKIT_BAD_ARGUMENT(klass, false);
-    LIBABCKIT_BAD_ARGUMENT(field, false);
-    LIBABCKIT_INTERNAL_ERROR(klass->core, false);
-    LIBABCKIT_INTERNAL_ERROR(klass->core->owningModule, false);
-    LIBABCKIT_INTERNAL_ERROR(field->core, false);
-    LIBABCKIT_INTERNAL_ERROR(field->core->owner, false);
-    LIBABCKIT_INTERNAL_ERROR(field->core->owner->owningModule, false);
+    LIBABCKIT_BAD_ARGUMENT(klass, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(params, nullptr);
+    LIBABCKIT_INTERNAL_ERROR(klass->core, nullptr);
+    LIBABCKIT_INTERNAL_ERROR(klass->core->owningModule, nullptr);
 
     auto kt = klass->core->owningModule->target;
-    auto at = field->core->owner->owningModule->target;
-    LIBABCKIT_CHECK_SAME_TARGET_RETURN(kt, at, false);
-
     switch (kt) {
         case ABCKIT_TARGET_ARK_TS_V1:
             statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
-            return false;
+            return nullptr;
         case ABCKIT_TARGET_ARK_TS_V2:
-            return ClassAddFieldStatic(klass->core, field->core);
+            return ClassAddFieldStatic(klass->core, params);
         default:
             LIBABCKIT_UNREACHABLE;
     }
@@ -701,25 +720,26 @@ extern "C" bool InterfaceSetName(AbckitArktsInterface *iface, const char *name)
     return InterfaceSetNameStatic(iface->core, name);
 }
 
-extern "C" bool InterfaceAddField(AbckitArktsInterface *iface, AbckitArktsInterfaceField *field)
+extern "C" AbckitArktsInterfaceField *InterfaceAddField(AbckitArktsInterface *iface,
+                                                        const struct AbckitArktsInterfaceFieldCreateParams *params)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
     LIBABCKIT_TIME_EXEC;
 
-    LIBABCKIT_BAD_ARGUMENT(iface, false);
-    LIBABCKIT_BAD_ARGUMENT(field, false);
+    LIBABCKIT_BAD_ARGUMENT(iface, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(params, nullptr);
 
-    LIBABCKIT_INTERNAL_ERROR(iface->core, false);
-    LIBABCKIT_INTERNAL_ERROR(field->core, false);
+    LIBABCKIT_INTERNAL_ERROR(iface->core, nullptr);
+    LIBABCKIT_INTERNAL_ERROR(iface->core->owningModule, nullptr);
 
     auto kt = iface->core->owningModule->target;
     switch (kt) {
         case ABCKIT_TARGET_ARK_TS_V1:
             statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
-            return false;
+            return nullptr;
         case ABCKIT_TARGET_ARK_TS_V2:
-            return InterfaceAddFieldStatic(iface, field->core);
+            return InterfaceAddFieldStatic(iface, params);
         default:
             LIBABCKIT_UNREACHABLE;
     }
@@ -889,6 +909,30 @@ extern "C" bool EnumSetName(AbckitArktsEnum *enm, const char *name)
     return EnumSetNameStatic(enm->core, name);
 }
 
+extern "C" AbckitArktsEnumField *EnumAddField(AbckitArktsEnum *enm, const struct AbckitArktsFieldCreateParams *params)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(enm, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(params, nullptr);
+    LIBABCKIT_INTERNAL_ERROR(enm->core, nullptr);
+    LIBABCKIT_INTERNAL_ERROR(enm->core->owningModule, nullptr);
+
+    auto mt = enm->core->owningModule->target;
+    switch (mt) {
+        case ABCKIT_TARGET_ARK_TS_V1:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return nullptr;
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return EnumAddFieldStatic(enm->core, params);
+        default:
+            statuses::SetLastError(ABCKIT_STATUS_WRONG_TARGET);
+            return nullptr;
+    }
+}
+
 // ========================================
 // Module Field
 // ========================================
@@ -968,17 +1012,6 @@ extern "C" bool ModuleFieldSetValue(AbckitArktsModuleField *field, AbckitValue *
         default:
             LIBABCKIT_UNREACHABLE;
     }
-}
-
-extern "C" AbckitArktsModuleField *CreateModuleField(AbckitArktsModule *module, const char *name, AbckitType *type,
-                                                     AbckitValue *value)
-{
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)module;
-    (void)name;
-    (void)type;
-    (void)value;
-    return nullptr;
 }
 
 // ========================================
@@ -1133,17 +1166,6 @@ extern "C" bool ClassFieldSetValue(AbckitArktsClassField *field, AbckitValue *va
     }
 }
 
-extern "C" AbckitArktsClassField *CreateClassField(AbckitArktsClass *klass, const char *name, AbckitType *type,
-                                                   AbckitValue *value)
-{
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)klass;
-    (void)name;
-    (void)type;
-    (void)value;
-    return nullptr;
-}
-
 // ========================================
 // Interface Field
 // ========================================
@@ -1256,17 +1278,6 @@ extern "C" bool InterfaceFieldSetType(AbckitArktsInterfaceField *field, AbckitTy
     }
 }
 
-extern "C" AbckitArktsInterfaceField *CreateInterfaceField(AbckitArktsInterface *iface, const char *name,
-                                                           AbckitType *type, AbckitValue *value)
-{
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)iface;
-    (void)name;
-    (void)type;
-    (void)value;
-    return nullptr;
-}
-
 // ========================================
 // Enum Field
 // ========================================
@@ -1302,17 +1313,6 @@ extern "C" bool EnumFieldSetValue(AbckitArktsEnumField *field, AbckitValue *valu
     (void)field;
     (void)value;
     return false;
-}
-
-extern "C" AbckitArktsEnumField *CreateEnumField(AbckitArktsEnum *enm, const char *name, AbckitType *type,
-                                                 AbckitValue *value)
-{
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)enm;
-    (void)name;
-    (void)type;
-    (void)value;
-    return nullptr;
 }
 
 // ========================================
@@ -1638,7 +1638,7 @@ AbckitArktsModifyApi g_arktsModifyApiImpl = {
     // ========================================
 
     ModuleSetName, ModuleAddImportFromArktsV1ToArktsV1, ModuleRemoveImport, ModuleAddExportFromArktsV1ToArktsV1,
-    ModuleRemoveExport, ModuleAddAnnotationInterface,
+    ModuleRemoveExport, ModuleAddAnnotationInterface, ModuleAddField,
 
     // ========================================
     // Namespace
@@ -1666,14 +1666,13 @@ AbckitArktsModifyApi g_arktsModifyApiImpl = {
     // Enum
     // ========================================
 
-    EnumSetName,
+    EnumSetName, EnumAddField,
 
     // ========================================
     // Module Field
     // ========================================
 
     ModuleFieldAddAnnotation, ModuleFieldRemoveAnnotation, ModuleFieldSetName, ModuleFieldSetType, ModuleFieldSetValue,
-    CreateModuleField,
 
     // ========================================
     // Namespace Field
@@ -1686,20 +1685,18 @@ AbckitArktsModifyApi g_arktsModifyApiImpl = {
     // ========================================
 
     ClassFieldAddAnnotation, ClassFieldRemoveAnnotation, ClassFieldSetName, ClassFieldSetType, ClassFieldSetValue,
-    CreateClassField,
 
     // ========================================
     // Interface Field
     // ========================================
 
     InterfaceFieldAddAnnotation, InterfaceFieldRemoveAnnotation, InterfaceFieldSetName, InterfaceFieldSetType,
-    CreateInterfaceField,
 
     // ========================================
     // Enum Field
     // ========================================
 
-    EnumFieldSetName, EnumFieldSetType, EnumFieldSetValue, CreateEnumField,
+    EnumFieldSetName, EnumFieldSetType, EnumFieldSetValue,
 
     // ========================================
     // AnnotationInterface
