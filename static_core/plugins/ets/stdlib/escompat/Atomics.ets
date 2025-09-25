@@ -28,7 +28,11 @@ class Waiter {
             ConcurrencyHelpers.mutexUnlock(this.mutex);
             return Waiter.notEqualStatus;
         }
-        if(!(timeout instanceof undefined) && (timeout as number) > 0) {
+        if(!(timeout instanceof undefined)) {
+            if ((timeout as number) <= 0) {
+                ConcurrencyHelpers.mutexUnlock(this.mutex);
+                return Waiter.timeOutStatus;
+            }
             setTimeout((waiter: Waiter) => {
                 waiter.notify(Waiter.timeOutStatus);
             }, (timeout as number).toInt(), this);
