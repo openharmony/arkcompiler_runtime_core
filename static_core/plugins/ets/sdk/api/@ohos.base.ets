@@ -17,7 +17,6 @@
  * Represents an error that occurs when using a function under the API package in an incorrect manner
  */
 export class BusinessError<T = void> extends Error {
-    public code: int;
     data?: T;
 
     constructor() {
@@ -33,6 +32,11 @@ export class BusinessError<T = void> extends Error {
     constructor(code: int, data: T, error: Error) {
         super(error.name, error.message, {cause: error.cause} as ErrorOptions);
         this.code = code;
+        this.data = data;
+    }
+
+    constructor(code: int, message: string, data?: T) {
+        super(code, message);
         this.data = data;
     }
 }

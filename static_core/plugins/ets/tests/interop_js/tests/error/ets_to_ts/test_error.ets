@@ -25,14 +25,13 @@ export function ErrorFunc(message: string): void {
 }
 
 export class CustomError extends Error {
-  code: number;
-  constructor(message: string, code: number) {
+  constructor(message: string, code: int) {
     super(message);
     this.name = "CustomError";
     this.code = code;
   }
 }
 
-export function CustomErrorFunc(message: string, code: number): void {
+export function CustomErrorFunc(message: string, code: int): void {
   throw new CustomError(message, code);
 }

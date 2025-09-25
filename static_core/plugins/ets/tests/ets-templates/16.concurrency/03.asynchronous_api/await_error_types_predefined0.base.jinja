@@ -23,11 +23,11 @@ desc: Error type must be correct when reject Promise<{{type_name}}>.
 
 {% if declaration_type == 'custom' %}
 class CustomError extends Error {
-    code: number;
+    customCode: number;
     
     constructor(message: string, customCode: number) {
         super(message);
-        this.code = customCode;
+        this.customCode = customCode;
         this.name = 'CustomError';
     }
 }
@@ -36,11 +36,11 @@ const code = 999;
 const errorMessage = 'Custom error';
 {% elif declaration_type == 'business' %}
 class BusinessError<T = void> extends Error {
-    public code: int;
+    public businessCode: int;
 
     constructor(code: int, error: Error) {
         super(error.name, error.message, {cause: error.cause} as ErrorOptions);
-        this.code = code;
+        this.businessCode = code;
     }
 }
 
@@ -75,17 +75,20 @@ async function startTest() {
 {% if declaration_type == 'custom' %}
         let err = error as CustomError;
         arktest.assertTrue(error instanceof CustomError);
+        arktest.assertEQ(err.customCode, code, `Status Code should be ${code}`);
 {% elif declaration_type == 'business' %}
         let err = error as BusinessError;
         arktest.assertTrue(error instanceof BusinessError);
+        arktest.assertEQ(err.businessCode, code, `Status Code should be ${code}`);
 {% elif declaration_type == 'object' %}
         let err = error as Error;
         arktest.assertTrue(error instanceof Object);
+        arktest.assertEQ(err.code, code, `Status Code should be ${code}`);
 {% elif declaration_type == 'standart' %}
         let err = error as Error;
         arktest.assertTrue(error instanceof Error);
-{% endif %}
         arktest.assertEQ(err.code, code, `Status Code should be ${code}`);
+{% endif %}
         arktest.assertEQ(err.message, errorMessage, `Error message should be ${errorMessage}`);
     }
 }

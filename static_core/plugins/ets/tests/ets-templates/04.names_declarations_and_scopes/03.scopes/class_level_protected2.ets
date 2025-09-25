@@ -35,13 +35,13 @@ class C {
 }
 
 class D extends C {
-    private x: int = 10;
+    private xx: int = 10;
 
     public get():int {
-        return this.x;
+        return this.xx;
     }
     public put(p: int) {
-        this.x = p;
+        this.xx = p;
     }
 
     public getSuper():int {
