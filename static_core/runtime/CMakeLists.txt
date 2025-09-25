@@ -1056,6 +1056,12 @@ add_gtests(
 )
 
 add_gtests(
+    arkruntime_interpreter_frame_test
+    tests/interpreter_frame_test.cpp
+    ${INVOKE_HELPER}
+)
+
+add_gtests(
     interpreter_test_resolve_ctor_class
     tests/interpreter_test_resolve_ctor_class.cpp
 )
