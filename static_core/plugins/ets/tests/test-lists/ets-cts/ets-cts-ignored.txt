@@ -1256,6 +1256,14 @@
 09.classes/01.class_declaration/01.abstract_classes/abstract_object_literal_1.ets
 09.classes/01.class_declaration/01.abstract_classes/abstract_object_literal_3.ets
 
+#30295
+09.classes/02.class_extension_clause/extension_clause_negative_5.ets
+09.classes/02.class_extension_clause/extension_clause_negative_6.ets
+09.classes/02.class_extension_clause/extension_clause_negative_7.ets
+09.classes/02.class_extension_clause/extension_clause_negative_8.ets
+09.classes/02.class_extension_clause/extension_clause_negative_9.ets
+09.classes/02.class_extension_clause/extension_clause_negative_10.ets
+
 #28738
 09.classes/03.class_implementation_clause/direct_interface_Implementation_twice.ets
 09.classes/03.class_implementation_clause/direct_interface_Implementation_twice_2.ets
