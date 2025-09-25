@@ -40,6 +40,14 @@ class Command(StringEnum):
     LOG = 'log'
 
 
+class UnionSetAction(argparse.Action):
+    """Set::Union variant for 'append' action of List."""
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        already = getattr(namespace, self.dest, set())
+        setattr(namespace, self.dest, already.union(values))
+
+
 def comma_separated_list(arg_val: str) -> Set[str]:
     if not arg_val:
         return set()
@@ -76,13 +84,16 @@ def add_measurement_opts(parser: argparse.ArgumentParser) -> None:
 
 
 def add_gen_opts(parser: argparse.ArgumentParser, command: Command) -> None:
-    parser.add_argument('-l', '--langs', type=comma_separated_list, default=set(),
-                        required=(command == Command.GEN), help='Comma-separated list of lang plugins')
+    parser.add_argument('-l', '--langs', required=(command == Command.GEN),
+                        type=comma_separated_list, default=set(), action=UnionSetAction,
+                        help='Comma-separated list of lang plugins')
     parser.add_argument('-o', '--outdir', default='generated', type=str,
                         help='Dir for generated benches')
-    parser.add_argument('-t', '--tests', default=set(),
-                        type=comma_separated_list, help='Filter by name (comma-separated list)')
-    parser.add_argument('-L', '--src-langs', default=set(), type=comma_separated_list,
+    parser.add_argument('-t', '--tests',
+                        type=comma_separated_list, default=set(), action=UnionSetAction,
+                        help='Filter by name (comma-separated list)')
+    parser.add_argument('-L', '--src-langs',
+                        type=comma_separated_list, default=set(), action=UnionSetAction,
                         help='Override src file extentions (comma-separated list)')
     parser.add_argument('--template', type=str, default='',
                         metavar='FILE_NAME', help='Override template')
@@ -105,8 +116,8 @@ def add_run_opts(parser: argparse.ArgumentParser) -> None:
                         help='device server in form server:port in case you use remote device')
     parser.add_argument('--device-dir', type=str, default='/data/local/tmp/vmb',
                         help='Base dir on device (%(default)s)')
-    parser.add_argument('--hooks', type=str, default='',
-                        help='Comma-separated list of hook plugins')
+    parser.add_argument('--hooks', help='Comma-separated list of hook plugins',
+                        type=comma_separated_list, default=set(), action=UnionSetAction)
     parser.add_argument('-A', '--aot-skip-libs', action='store_true',
                         help='Skip AOT compilation of stdlib')
     parser.add_argument('-g', '--enable-gc-logs', action='store_true',
@@ -136,6 +147,12 @@ def add_run_opts(parser: argparse.ArgumentParser) -> None:
                         help='Test count per one batch run (%(default)s)')
     parser.add_argument('--fail-list', default='', type=str,
                         metavar='FILE_NAME', help='Create test list for failures')
+    parser.add_argument('--custom-script', default='', type=str,
+                        metavar='FILE_NAME', help='Run shell script after each test')
+    parser.add_argument('--skip-cleanup', action='store_true',
+                        help='Do not remove compiled files after test')
+    parser.add_argument('--skip-compilation', action='store_true',
+                        help='Do not compile tests. Reuse existing binaries.')
 
 
 def add_report_opts(parser: argparse.ArgumentParser) -> None:
@@ -180,12 +197,10 @@ def add_report_opts(parser: argparse.ArgumentParser) -> None:
 
 def add_filter_opts(parser: argparse.ArgumentParser) -> None:
     parser.add_argument('-T', '--tags',
-                        default=set(),
-                        type=comma_separated_list,
+                        type=comma_separated_list, default=set(), action=UnionSetAction,
                         help='Filter by tag (comma-separated list)')
     parser.add_argument('-ST', '--skip-tags',
-                        default=set(),
-                        type=comma_separated_list,
+                        type=comma_separated_list, default=set(), action=UnionSetAction,
                         help='Skip if tagged (comma-separated list)')
 
 
@@ -249,6 +264,7 @@ class Args(argparse.Namespace):
         super().__init__()
         self.command = None
         self.custom_opts: Dict[str, List[str]] = {}
+        self.custom_paths: Dict[str, str] = {}
         if len(sys.argv) < 2 \
             or sys.argv[1] == 'help' \
                 or sys.argv[1] not in Command.getall():
@@ -299,8 +315,10 @@ class Args(argparse.Namespace):
 
     def process_custom_opts(self, custom: List[str]) -> None:
         re_custom = re.compile(r'^--(?P<tool>\w+)-custom-option=(?P<opt>.+)$')
+        re_path = re.compile(r'^--(?P<tool>\w+)-path=(?P<path>.+)$')
         for opt in custom:
             m = re.search(re_custom, opt)
+            m1 = re.search(re_path, opt)
             if m:
                 tool = m.group('tool')
                 custom_opt = m.group('opt')
@@ -308,8 +326,12 @@ class Args(argparse.Namespace):
                     self.custom_opts[tool] = [custom_opt]
                 else:
                     self.custom_opts[tool].append(custom_opt)
+            elif m1:
+                tool = m1.group('tool')
+                path = m1.group('path')
+                self.custom_paths[tool] = path
             else:
-                die(not m, f'Unknown option: {opt}')
+                die(not m and not m1, f'Unknown option: {opt}')
 
     def get(self, arg: str, default=None) -> Any:
         return vars(self).get(arg, default)
@@ -346,6 +368,8 @@ class Args(argparse.Namespace):
         # backward compatibility
         if 'false' == self.get('compiler_inlining', ''):
             flags |= OptFlags.DISABLE_INLINING
+        if self.get('skip_compilation', False):
+            flags |= OptFlags.SKIP_COMPILATION
         return flags
 
     def get_shared_path(self) -> str:

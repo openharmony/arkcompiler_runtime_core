@@ -339,6 +339,9 @@ def force_link(link: Path, dest: Path) -> None:
     log.trace('Force link: %s -> %s', str(link), str(dest))
     if link.exists():
         link.unlink()
+    if 'nt' == os.name:
+        copy_file(dest, link)
+        return
     link.symlink_to(dest)
 
 

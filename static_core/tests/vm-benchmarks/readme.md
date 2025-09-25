@@ -10,6 +10,9 @@ Prerequisites are `python3` (3.7+) with `jinja2` module installed.
 Virtual Machine to test should be installed on host and/or device.
 See [Notes on setup for platforms](#platforms).
 
+For experimental Windows host support please refer to [this notes](./windows.readme.md).
+
+
 #### Option 1: Using wrapper script
 
 This option is to try VMB without any installation involved.
@@ -164,11 +167,49 @@ Note: options `--tests` and `--test-list` could be combined (by OR condition) in
   (no warmup, no tuning cycles).
   Benchmark will run this number of iterations, regardless of time elapsed.
 
+## Reuse compiled test binaries (experimental)
+To re-run tests several times without re-compilation use combination of
+`vmb all --skip-cleanup` and `vmb run --skip-compilation`.
+First command will go through whole cycle (generation, compilation and run)
+and the second one will use compiled binaries.
+Note `all` vs `run` and paths used:
+
+```shell
+vmb all -p arkts_host -A -v debug --skip-cleanup ./examples/benchmarks/ets
+
+find ./generated/ -name "*.abc"
+./generated/benches/bu_ArraySort_baseline/bench_ArraySort_baseline.abc
+./generated/benches/bu_ArraySort_sort/bench_ArraySort_sort.abc
+./generated/benches/bu_ArraySort_sort_1/bench_ArraySort_sort_1.abc
+./generated/benches/bu_ArraySort_baseline_1/bench_ArraySort_baseline_1.abc
+
+vmb run -p arkts_host -A -v debug --skip-cleanup --skip-compilation ./generated/
+```
+
+
 ## Custom options
 To provide additional option to compiler or virtual machine
 `--<tool>-custom-option` could be used. F.e. add cpu profiling for `node`:
 `vmb all -p node_host --node-custom-option='--cpu-prof' -v debug ./examples/benchmarks/ts/VoidBench.ts`
 
+## Custom paths to executables (experimental)
+To override paths to compilers and/or virtual machines
+`--<tool>-path` option could be used. F.e. to not use `OHOS_SDK` root:
+`--es2abc-path=/path/to/es2abc.exe`.
+(Only `es2abc`, `es2panda` and `ark_js_vm` are supported currently)
+
+## Custom script
+To run custom shell script after each benchmark test
+use `--custom-script` option.
+Provided script will run on host or device depending on target platform.
+F.e.
+```shell
+vmb all -p node_host -v debug \
+    --custom-script ./examples/scripts/print_health.sh ./examples/benchmarks/ts/
+```
+These env vars will be set for script:
+- `VMB_BU_PATH` - full path to work dir with current test
+- `VMB_BU_NAME` - test name as it stored in report
 
 ## Reports:
 * `--report-json=path.json` to save results in json format,

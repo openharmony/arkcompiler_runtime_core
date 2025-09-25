@@ -15,6 +15,7 @@
 # limitations under the License.
 #
 
+import sys
 import logging
 from pathlib import Path
 from typing import List, Tuple
@@ -36,17 +37,23 @@ class VmbRunner:
     def __init__(self, args: Args) -> None:
         self.platform = PlatformBase.create(args)
         log.info('Using platform: %s', self.platform.name)
-        hook_names = self.platform.required_hooks
+        # add hooks specifically requested by platform
+        args.hooks = args.hooks.union(self.platform.required_hooks)
         # add some hooks depending on args
         if args.get('enable_gc_logs', False):
-            hook_names.append('gclog')
+            args.hooks.add('gclog')
         if args.get('cpumask', False):
-            hook_names.append('cpumask')
-        # add hooks specifically requested by platform
-        hook_names += [h for h in args.hooks.split(',') if h.strip()]
-        self.hooks = HookRegistry().register_all_by_name(hook_names, args)
+            args.hooks.add('cpumask')
+        if args.get('custom_script', False):
+            args.hooks.add('run_custom_script')
+        try:
+            self.hooks = HookRegistry().register_all_by_name(args.hooks, args)
+        except (RuntimeError, ValueError) as e:
+            log.fatal(e)
+            sys.exit(1)
         self.abort_on_fail = args.abort_on_fail
         self.dry_run = args.dry_run
+        self.skip_cleanup = args.skip_cleanup
         self.exclude_list = args.exclude_list
         self.fail_logs = args.fail_logs
         self.tests_per_batch = args.tests_per_batch
@@ -111,7 +118,7 @@ class VmbRunner:
         except KeyboardInterrupt as e:
             raise KeyboardInterrupt() from e
         finally:
-            if not self.dry_run:
+            if not (self.dry_run or self.skip_cleanup):
                 self.platform.cleanup(bu)
             timer_unit.finish()
             elapsed = timer_unit.elapsed().total_seconds()

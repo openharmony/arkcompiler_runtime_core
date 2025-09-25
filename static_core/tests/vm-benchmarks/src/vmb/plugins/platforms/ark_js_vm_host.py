@@ -15,12 +15,10 @@
 # limitations under the License.
 #
 
-# pylint: disable=duplicate-code
 import logging
 from typing import List
 
 from vmb.platform import PlatformBase
-from vmb.tool import ToolBase
 from vmb.target import Target
 from vmb.unit import BenchUnit
 from vmb.cli import Args, OptFlags
@@ -34,14 +32,8 @@ class Platform(PlatformBase):
         super().__init__(args)
         self.es2abc = self.tools_get('es2abc')
         self.ark_js_vm = self.tools_get('ark_js_vm')
-        self.aot_compiler = self.tools_get('ark_aot_compiler')
-        sdk = self.es2abc.sdk
-        libark_ts = f'{sdk}/arkcompiler/ets_runtime/' \
-            'ecmascript/ts_types/lib_ark_builtins.d.ts'
-        self.libark_abc = ToolBase.libs / 'lib_ark_builtins.d.abc'
-        res = self.es2abc.run_es2abc(libark_ts, self.libark_abc)
-        if not res or res.ret != 0:
-            raise RuntimeError('lib_ark_builtins compilation failed')
+        if OptFlags.AOT in self.flags:
+            self.aot_compiler = self.tools_get('ark_aot_compiler')
         self.lang = list(self.langs)[0]
 
     @property
@@ -54,7 +46,9 @@ class Platform(PlatformBase):
 
     @property
     def required_tools(self) -> List[str]:
-        return ['es2abc', 'ark_js_vm', 'ark_aot_compiler']
+        if OptFlags.AOT in self.flags:
+            return ['es2abc', 'ark_js_vm', 'ark_aot_compiler']
+        return ['es2abc', 'ark_js_vm']
 
     @property
     def langs(self) -> List[str]:
@@ -64,6 +58,7 @@ class Platform(PlatformBase):
         self.es2abc.exec_lang(bu, lang=self.lang)
         if self.dry_run_stop(bu):
             return
+        self.push_unit(bu, '.abc')  # for device; on host does nothing
         if OptFlags.AOT in self.flags:
             self.ark_js_vm.profile(bu)
             self.aot_compiler(bu)

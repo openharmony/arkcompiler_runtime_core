@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,7 +18,7 @@
 from __future__ import annotations
 import sys
 import logging
-from typing import List
+from typing import List, Set
 from abc import ABC, abstractmethod
 from vmb.platform import PlatformBase
 from vmb.cli import Args
@@ -72,11 +72,11 @@ class HookRegistry(metaclass=Singleton):
             self.__a_s_hooks.append(hook)
 
     def register_all_by_name(self,
-                             names: List[str],
+                             names: Set[str],
                              args: Args) -> HookRegistry:
         for hook in [hook_module.Hook(args)
                      for (_, hook_module)
-                     in get_plugins('hooks', names,
+                     in get_plugins('hooks', list(names),
                                     extra=args.extra_plugins).items()]:
             log.debug('Register hook: %s', hook.name)
             self.register(hook, args)
