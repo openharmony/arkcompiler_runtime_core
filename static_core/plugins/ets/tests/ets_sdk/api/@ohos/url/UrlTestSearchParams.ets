@@ -166,6 +166,34 @@ function testUrlSearchParamsConstruction008() {
  arktest.assertEQ(paramsResult, 'abcde=fghki')
 }
 
+function testUrlSearchParamsToUSVStringToString() {
+  let params = new url.URLParams()
+  params.append('\uD800', 'abc');
+  let paramsString = params.toString();
+  console.log("YaoTest toStrng: " + paramsString);
+  arktest.assertEQ(paramsString, '%EF%BF%BD=abc');
+}
+
+function testUrlSearchParamsToUSVStringHas() {
+  let params = new url.URLParams()
+  params.append('\uD800', 'abc');
+  let res1 = params.has('\uD800');
+  arktest.assertTrue(res1);
+
+  let res2 = params.has('�');
+  arktest.assertFalse(res2);
+}
+
+function testUrlSearchParamsToUSVStringGet() {
+  let params = new url.URLParams()
+  params.append('\uD800', 'abc');
+  let res1 = params.get('\uD800');
+  arktest.assertEQ(res1, 'abc');
+
+  let res2 = params.get('�');
+  arktest.assertEQ(res2, undefined);
+}
+
 function main(): int {
 	let suite = new arktest.ArkTestsuite("URL UT tests");
 	suite.addTest("testUrlSearchParamsToString001", testUrlSearchParamsToString001);
@@ -178,7 +206,9 @@ function main(): int {
 	suite.addTest("testUrlSearchParamsConstruction006", testUrlSearchParamsConstruction006);
 	suite.addTest("testUrlSearchParamsConstruction007", testUrlSearchParamsConstruction007);
 	suite.addTest("testUrlSearchParamsConstruction008", testUrlSearchParamsConstruction008);
-
+	suite.addTest("testUrlSearchParamsToUSVStringToString", testUrlSearchParamsToUSVStringToString);
+	suite.addTest("testUrlSearchParamsToUSVStringHas", testUrlSearchParamsToUSVStringHas);
+	suite.addTest("testUrlSearchParamsToUSVStringGet", testUrlSearchParamsToUSVStringGet);
 
 	//passed
 	return suite.run();
