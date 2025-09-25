@@ -52,7 +52,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/escompat_TypedArrays.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_Date.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_JSON.cpp
-    ${ETS_EXT_SOURCES}/intrinsics/escompat_taskpool.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_concurrency_taskpool.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_Reflect.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_Map.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Set.cpp
@@ -90,7 +90,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Arrays.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Job.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_concurrency_Launch.cpp
-    ${ETS_EXT_SOURCES}/intrinsics/escompat_Atomics.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_concurrency_Atomics.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_math.cpp
     ${ETS_EXT_SOURCES}/intrinsics/unsafe_memory.cpp
     ${ETS_EXT_SOURCES}/intrinsics/helpers/dtoa_helper.cpp
@@ -131,7 +131,6 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/static_type_converter.cpp
     ${ETS_EXT_SOURCES}/entrypoints/ets_proxy_entrypoints.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/init_native_methods.cpp
-    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/escompat/Process.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/regexp/RegExp.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/regexp/regexp.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/regexp/regexp_16.cpp
@@ -155,6 +154,7 @@ set(ETS_RUNTIME_SOURCES
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlDisplayNames.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlRelativeTimeFormat.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlLanguageTag.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/Process.cpp
 )
 
 get_directory_property(CURRENT_DEFS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} COMPILE_DEFINITIONS)

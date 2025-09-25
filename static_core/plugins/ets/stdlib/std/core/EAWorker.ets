@@ -19,7 +19,7 @@ import { launch } from "std/concurrency";
 import { InteropSerializeHelper } from "std/interop";
 
 type Task = () => void;
-type ErrorHandler = (error: Error) => void;
+type ErrorHandlerType = (error: Error) => void;
 
 /**
 * @enum defines the message status
@@ -294,7 +294,7 @@ export class EAWorker {
      * Get the current uncaught exception handler
      * @returns { (error: Error) => void } The current exception handler function
      */
-    public getUncaughtExceptionHandler(): ErrorHandler | undefined {
+    public getUncaughtExceptionHandler(): ErrorHandlerType | undefined {
         if (this.isMain) {
             return undefined;
         }
@@ -541,11 +541,11 @@ interface InternalWorker {
 
     join();
 
-    setErrorHandler(handler: ErrorHandler);
+    setErrorHandler(handler: ErrorHandlerType);
 
     getWorkerId(): int | undefined;
 
-    getErrorHandler(): ErrorHandler | undefined;
+    getErrorHandler(): ErrorHandlerType | undefined;
 
     getMessages(): containers.ConcurrentHashMap<concurrency.Message, MessageStatus>;
 }
@@ -587,7 +587,7 @@ class InteropWorker implements InternalWorker {
     private workerId: int = INVALID_WORKER_ID;
     // eaworkerNum is the current count of the worker, will be used for identifying the worker in workers map
     private readonly eaworkerNum: int;
-    private errorHandler: ErrorHandler | undefined = undefined;
+    private errorHandler: ErrorHandlerType | undefined = undefined;
     private errHandlerMutex: QueueSpinlock = new QueueSpinlock();
     private messages: containers.ConcurrentHashMap<concurrency.Message, MessageStatus>;
 
@@ -662,7 +662,7 @@ class InteropWorker implements InternalWorker {
                     }
                 } catch (e) {
                     if (this.errorHandler != undefined) {
-                        let errHandler = this.errorHandler as ErrorHandler;
+                        let errHandler = this.errorHandler as ErrorHandlerType;
                         // NOTE(csaba.osztrogonac): remove as cast once e has Error type
                         errHandler(e as Error);
                     }
@@ -696,14 +696,14 @@ class InteropWorker implements InternalWorker {
         this.join();
     }
 
-    setErrorHandler(handler: ErrorHandler) {
+    setErrorHandler(handler: ErrorHandlerType) {
         this.errHandlerMutex.guard(() => {
             this.errorHandler = handler;
         });
     }
 
-    getErrorHandler(): ErrorHandler | undefined {
-        let errHandler: ErrorHandler | undefined = undefined;
+    getErrorHandler(): ErrorHandlerType | undefined {
+        let errHandler: ErrorHandlerType | undefined = undefined;
         this.errHandlerMutex.guard(() => {
             errHandler = this.errorHandler;
         });
@@ -729,7 +729,7 @@ class StaticWorker implements InternalWorker {
     // eaworkerNum is the current count of the worker, will be used for identifying the worker in workers map
     private readonly eaworkerNum: int;
     private errHandlerMutex: QueueSpinlock = new QueueSpinlock();
-    private errorHandler: ErrorHandler | undefined = undefined;
+    private errorHandler: ErrorHandlerType | undefined = undefined;
     // TODO: using maaged mutex instead of concurrent hash map
     private messages: containers.ConcurrentHashMap<concurrency.Message, MessageStatus>;
     // TODO: using managed mutex instead of concurrent hash map
@@ -795,7 +795,7 @@ class StaticWorker implements InternalWorker {
                 // NOTE(csaba.osztrogonac): remove as cast once e has Error type
                 job.fail(e as Error);
                 if (this.errorHandler != undefined) {
-                    let errHandler = this.errorHandler as ErrorHandler;
+                    let errHandler = this.errorHandler as ErrorHandlerType;
                     // NOTE(csaba.osztrogonac): remove as cast once e has Error type
                     errHandler(e as Error);
                 }
@@ -823,14 +823,14 @@ class StaticWorker implements InternalWorker {
         this.join();
     }
 
-    setErrorHandler(handler: ErrorHandler) {
+    setErrorHandler(handler: ErrorHandlerType) {
         this.errHandlerMutex.guard(() => {
             this.errorHandler = handler;
         });
     }
 
-    getErrorHandler(): ErrorHandler | undefined {
-        let errHandler: ErrorHandler | undefined = undefined;
+    getErrorHandler(): ErrorHandlerType | undefined {
+        let errHandler: ErrorHandlerType | undefined = undefined;
         this.errHandlerMutex.guard(() => {
             errHandler = this.errorHandler;
         });

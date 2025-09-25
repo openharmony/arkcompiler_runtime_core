@@ -121,8 +121,8 @@ static_core/plugins/ets/runtime/interop_js/*promise*                          ^d
 static_core/plugins/ets/runtime/interop_js/sts_vm_interface_impl*             ^dmitriitr @udav ^ipetrov ^molotkovmikhail
 static_core/plugins/ets/runtime/intrinsics/compiler_intrinsics.cpp            @Prof
 static_core/plugins/ets/runtime/intrinsics/escompat_*                         ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
-static_core/plugins/ets/runtime/intrinsics/escompat_taskpool.cpp              ^dmitriitr ^konstanting @ipetrov
 static_core/plugins/ets/runtime/intrinsics/std_*                              ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
+static_core/plugins/ets/runtime/intrinsics/std_concurrency_taskpool.cpp       ^dmitriitr ^konstanting @ipetrov
 static_core/plugins/ets/runtime/intrinsics/std_core_Method.cpp                @magikarp777 ^anton-sysoev @Nojpg
 static_core/plugins/ets/runtime/intrinsics/std_core_Type*                     @magikarp777 ^anton-sysoev @Nojpg
 static_core/plugins/ets/runtime/intrinsics/std_core_Value.cpp                 @magikarp777 ^anton-sysoev @Nojpg
@@ -139,8 +139,6 @@ static_core/plugins/ets/runtime/types/*typeapi*                               @m
 static_core/plugins/ets/runtime/types/ets_class*                              @magikarp777 ^anton-sysoev @Nojpg
 static_core/plugins/ets/runtime/types/ets_method*                             @magikarp777 ^anton-sysoev @Nojpg
 static_core/plugins/ets/runtime/types/ets_promise.h                           ^tanglu10 @zhuangkudecha ^yuesiyuan ^Wangyuzhong11 ^dmitriitr @konstanting
-static_core/plugins/ets/stdlib/escompat/Atomics.ets                           ^dmitriitr @konstanting
-static_core/plugins/ets/stdlib/escompat/taskpool.ets                          ^dmitriitr @konstanting @zhuangkudecha ^tanglu10 ^yuesiyuan ^Wangyuzhong11
 static_core/plugins/ets/templates/stdlib/                                     ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
 static_core/plugins/ets/tests/benchmarks/ani                                  @ignatenkooleg @v-cherkashin @Prof @asidorov
 static_core/plugins/ets/tests/benchmarks/interop_js                           @nazarovkonstantin @ignatenkooleg @Prof
@@ -159,6 +157,8 @@ static_core/tests/tests-u-runner/tools/generate-es-checked/                   ^a
 static_core/plugins/ets/runtime/interop_js/ets_proxy/shared_reference*        ^dmitriitr @udav ^ipetrov
 static_core/plugins/ets/runtime/interop_js/xgc/                               ^dmitriitr @udav ^ipetrov
 static_core/plugins/ets/stdlib/std/concurrency/                               @konstanting ^dmitriitr ^udav ^wang_zhaoyong ^ychen3 @zhuangkudecha ^tanglu10 ^yuesiyuan ^Wangyuzhong11
+static_core/plugins/ets/stdlib/std/concurrency/Atomics.ets                    ^dmitriitr @konstanting
+static_core/plugins/ets/stdlib/std/concurrency/taskpool.ets                   @ipetrov ^dmitriitr ^konstanting ^molotkovmikhail @zhuangkudecha ^tanglu10 ^yuesiyuan ^Wangyuzhong11
 static_core/plugins/ets/stdlib/std/containers/BlockingQueue.ets               @konstanting ^tanglu10 @zhuangkudecha ^yuesiyuan ^Wangyuzhong11
 static_core/plugins/ets/stdlib/std/core/Coroutine.ets                         ^dmitriitr @konstanting ^ychen3
 static_core/plugins/ets/stdlib/std/core/EAWorker.ets                          ^dmitriitr @konstanting ^ychen3 @zhuangkudecha ^tanglu10 ^yuesiyuan ^Wangyuzhong11
@@ -216,14 +216,14 @@ static_core/tests/tests-u-runner-2/runner/extensions/generators/ets_es_checked/g
 /disassembler/	@oatuwwutao
 /docs/ @jokerxd-liu
 /gn/ @jokerxd-liu
-/isa/ @oatuwwutao	
-/ldscripts/	@gitee-dakeQI @jokerxd-liu	
+/isa/ @oatuwwutao
+/ldscripts/	@gitee-dakeQI @jokerxd-liu
 /libabckit/	@nazarovkonstantin	@oatuwwutao	@oatuwwutao	^seeuiceland
 /libark_defect_scan_aux/ @gitee-dakeQI @oatuwwutao ^seeuiceland
-/libpandabase/	@gitee-dakeQI @jokerxd-liu	
+/libpandabase/	@gitee-dakeQI @jokerxd-liu
 /libpandafile/	@jokerxd-liu @gitee-dakeQI @oatuwwutao ^seeuiceland
-/libziparchive/	@gitee-dakeQI @jokerxd-liu	
-/panda/	@gitee-dakeQI	@jokerxd-liu	
+/libziparchive/	@gitee-dakeQI @jokerxd-liu
+/panda/	@gitee-dakeQI	@jokerxd-liu
 /panda_guard/	@oatuwwutao	^seeuiceland
 /pandastdlib/	@jokerxd-liu
 /platforms/	@gitee-dakeQI @jokerxd-liu
@@ -231,7 +231,7 @@ static_core/tests/tests-u-runner-2/runner/extensions/generators/ets_es_checked/g
 /scripts/ @jokerxd-liu
 /templates/	@jokerxd-liu
 /tests/	@jokerxd-liu
-/verifier/	@oatuwwutao	^seeuiceland	
+/verifier/	@oatuwwutao	^seeuiceland
 
 /common_interfaces/heap/    @wuzhefengh @weng-changcheng @dmitriitr @udav @ipetrov ^yingguofeng
 /common_interfaces/objects/ @wuzhefengh @weng-changcheng @dmitriitr @udav @ipetrov ^yingguofeng

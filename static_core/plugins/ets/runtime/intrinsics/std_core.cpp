@@ -236,7 +236,7 @@ static Class *GetTaskPoolClass()
     auto *runtime = Runtime::GetCurrent();
     auto *classLinker = runtime->GetClassLinker();
     ClassLinkerExtension *cle = classLinker->GetExtension(SourceLanguage::ETS);
-    auto mutf8Name = reinterpret_cast<const uint8_t *>("Lescompat/taskpool;");
+    auto mutf8Name = reinterpret_cast<const uint8_t *>("Lstd/concurrency/taskpool;");
     return cle->GetClass(mutf8Name);
 }
 

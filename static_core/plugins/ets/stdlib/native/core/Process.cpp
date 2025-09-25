@@ -25,7 +25,7 @@
 #include "libarkbase/os/pipe.h"
 #include "libarkbase/os/system_environment.h"
 #include "libarkbase/os/time.h"
-#include "plugins/ets/stdlib/native/escompat/Process.h"
+#include "plugins/ets/stdlib/native/core/Process.h"
 #include "plugins/ets/stdlib/native/core/stdlib_ani_helpers.h"
 
 namespace ark::ets::stdlib {
@@ -575,17 +575,17 @@ void RegisterProcessNativeMethods(ani_env *env)
     };
 
     ani_class childProcessKlass;
-    ANI_FATAL_IF_ERROR(env->FindClass("escompat.StdProcess.ChildProcess", &childProcessKlass));
+    ANI_FATAL_IF_ERROR(env->FindClass("std.core.StdProcess.ChildProcess", &childProcessKlass));
     ANI_FATAL_IF_ERROR(
         env->Class_BindNativeMethods(childProcessKlass, childProcessImpls.data(), childProcessImpls.size()));
 
     ani_class processManagerKlass;
-    ANI_FATAL_IF_ERROR(env->FindClass("escompat.StdProcess.ProcessManager", &processManagerKlass));
+    ANI_FATAL_IF_ERROR(env->FindClass("std.core.StdProcess.ProcessManager", &processManagerKlass));
     ANI_FATAL_IF_ERROR(
         env->Class_BindNativeMethods(processManagerKlass, processManagerImpls.data(), processManagerImpls.size()));
 
     ani_namespace ns {};
-    ANI_FATAL_IF_ERROR(env->FindNamespace("escompat.StdProcess", &ns));
+    ANI_FATAL_IF_ERROR(env->FindNamespace("std.core.StdProcess", &ns));
 
     ANI_FATAL_IF_ERROR(env->Namespace_BindNativeFunctions(ns, processImpls.data(), processImpls.size()));
 }

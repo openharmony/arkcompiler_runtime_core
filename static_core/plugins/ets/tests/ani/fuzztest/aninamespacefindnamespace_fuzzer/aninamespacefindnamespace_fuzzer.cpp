@@ -35,7 +35,7 @@ void AniNamespaceFindNamespaceFuzzTest(const char *data, size_t size)
     ani_env *env {};
     engine->GetAniEnv(&env);
     ani_namespace subNs {};
-    std::string nsName = "escompat.taskpool." + std::string(data, size);
+    std::string nsName = "std.concurrency.taskpool." + std::string(data, size);
     env->FindNamespace(nsName.c_str(), &subNs);
 }
 }  // namespace OHOS

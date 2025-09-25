@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
-package escompat;
+package std.concurrency;
 
-import {launch, CoroutineId, WorkerId} from "std/concurrency"
 import { InteropSerializeHelper } from "std/interop";
 
 export namespace taskpool {
