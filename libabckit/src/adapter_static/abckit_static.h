@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include "libabckit/c/ir_core.h"
 #include "libabckit/c/metadata_core.h"
+#include "libabckit/src/metadata_inspect_impl.h"
 
 namespace libabckit {
 
@@ -27,6 +28,14 @@ void DestroyGraphStatic(AbckitGraph *graph);
 void DestroyGraphStaticSync(AbckitGraph *graph);
 void CloseFileStatic(AbckitFile *file);
 
+std::unique_ptr<AbckitCoreEnumField> EnumCreateField(AbckitFile *file, AbckitCoreEnum *owner,
+                                                     ark::pandasm::Field &recordField);
+
+std::unique_ptr<AbckitCoreClassField> ClassCreateField(AbckitFile *file, AbckitCoreClass *owner,
+                                                       ark::pandasm::Field &recordField);
+
+std::unique_ptr<AbckitCoreModuleField> ModuleCreateField(AbckitFile *file, AbckitCoreModule *owner,
+                                                         ark::pandasm::Field &recordField);
 }  // namespace libabckit
 
 #endif

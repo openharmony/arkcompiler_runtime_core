@@ -186,6 +186,37 @@ public:
      */
     arkts::AnnotationInterface AddAnnotationInterface(std::string_view name) const;
 
+    /**
+     * @brief Add field to the Module.
+     * @return Newly Add ModuleField.
+     * @param [ in ] name - Name to be set.
+     * @param [ in ] type - Type to be set.
+     * @param [ in ] value - Value to be set.
+     * @param [ in ] fieldVisibility - fieldVisibility to be set.
+     * @note Allocates
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `type` is false.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if Module doesn't have `ABCKIT_TARGET_ARK_TS_V1` target.
+     */
+    arkts::ModuleField AddField(const std::string_view name, const Type &type, const Value &value,
+                                AbckitArktsFieldVisibility fieldVisibility = AbckitArktsFieldVisibility::PUBLIC);
+
+    /**
+     * @brief Add field to the Module.
+     * @return Newly Add ModuleField.
+     * @param [ in ] name - Name to be set.
+     * @param [ in ] type - Type to be set.
+     * @param [ in ] fieldVisibility - fieldVisibility to be set.
+     * @note Allocates
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `type` is false.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if Module doesn't have `ABCKIT_TARGET_ARK_TS_V1` target.
+     */
+    arkts::ModuleField AddField(const std::string_view name, const Type &type,
+                                AbckitArktsFieldVisibility fieldVisibility = AbckitArktsFieldVisibility::PUBLIC);
+
 private:
     /**
      * @brief Converts underlying module from Core to Arkts target

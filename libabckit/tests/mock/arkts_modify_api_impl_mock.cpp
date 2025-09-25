@@ -141,6 +141,26 @@ AbckitArktsAnnotationInterface *ModuleAddAnnotationInterface(
     return DEFAULT_ANNOTATION_INTERFACE;
 }
 
+AbckitArktsModuleField *ModuleAddField(AbckitArktsModule *m, const struct AbckitArktsFieldCreateParams *params)
+{
+    g_calledFuncs.push(__func__);
+
+    EXPECT_TRUE(m == DEFAULT_ARKTS_MODULE);
+    EXPECT_TRUE(strncmp(params->name, DEFAULT_CONST_CHAR, DEFAULT_CONST_CHAR_SIZE) == 0);
+    EXPECT_TRUE(params->type == DEFAULT_TYPE);
+    return DEFAULT_ARKTS_MODULE_FIELD;
+}
+
+AbckitArktsEnumField *EnumAddField(AbckitArktsEnum *enm, const struct AbckitArktsFieldCreateParams *params)
+{
+    g_calledFuncs.push(__func__);
+
+    EXPECT_TRUE(enm == DEFAULT_ARKTS_ENUM);
+    EXPECT_TRUE(strncmp(params->name, DEFAULT_CONST_CHAR, DEFAULT_CONST_CHAR_SIZE) == 0);
+    EXPECT_TRUE(params->type == DEFAULT_TYPE);
+    return DEFAULT_ARKTS_ENUM_FIELD;
+}
+
 bool NamespaceSetName(AbckitArktsNamespace *ns, const char *name)
 {
     g_calledFuncs.push(__func__);
@@ -200,12 +220,13 @@ bool ClassSetName(AbckitArktsClass *klass, const char *name)
     return DEFAULT_BOOL;
 }
 
-bool ClassAddField(AbckitArktsClass *klass, AbckitArktsClassField *field)
+AbckitArktsClassField *ClassAddField(AbckitArktsClass *klass, const struct AbckitArktsFieldCreateParams *params)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(klass == DEFAULT_ARKTS_CLASS);
-    EXPECT_TRUE(field == DEFAULT_ARKTS_CLASS_FIELD);
-    return DEFAULT_BOOL;
+    EXPECT_TRUE(strncmp(params->name, DEFAULT_CONST_CHAR, DEFAULT_CONST_CHAR_SIZE) == 0);
+    EXPECT_TRUE(params->type == DEFAULT_TYPE);
+    return DEFAULT_ARKTS_CLASS_FIELD;
 }
 
 bool ClassRemoveField(AbckitArktsClass *klass, AbckitArktsClassField *field)
@@ -264,12 +285,14 @@ bool InterfaceSetName(AbckitArktsInterface *iface, const char *name)
     return DEFAULT_BOOL;
 }
 
-bool InterfaceAddField(AbckitArktsInterface *iface, AbckitArktsInterfaceField *field)
+AbckitArktsInterfaceField *InterfaceAddField(AbckitArktsInterface *iface,
+                                             const struct AbckitArktsInterfaceFieldCreateParams *params)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(iface == DEFAULT_ARKTS_INTERFACE);
-    EXPECT_TRUE(field == DEFAULT_ARKTS_INTERFACE_FIELD);
-    return DEFAULT_BOOL;
+    EXPECT_TRUE(strncmp(params->name, DEFAULT_CONST_CHAR, DEFAULT_CONST_CHAR_SIZE) == 0);
+    EXPECT_TRUE(params->type == DEFAULT_TYPE);
+    return DEFAULT_ARKTS_INTERFACE_FIELD;
 }
 
 bool InterfaceRemoveField(AbckitArktsInterface *iface, AbckitArktsInterfaceField *field)
@@ -453,6 +476,22 @@ bool EnumFieldSetName(AbckitArktsEnumField *field, const char *name)
     return DEFAULT_BOOL;
 }
 
+bool EnumFieldSetType(AbckitArktsEnumField *field, AbckitType *type)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_ARKTS_ENUM_FIELD);
+    EXPECT_TRUE(type == DEFAULT_TYPE);
+    return DEFAULT_BOOL;
+}
+
+bool EnumFieldSetValue(AbckitArktsEnumField *field, AbckitValue *value)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_ARKTS_ENUM_FIELD);
+    EXPECT_TRUE(value == DEFAULT_VALUE);
+    return DEFAULT_BOOL;
+}
+
 bool AnnotationInterfaceSetName(AbckitArktsAnnotationInterface *ai, const char *name)
 {
     g_calledFuncs.push(__func__);
@@ -586,7 +625,7 @@ AbckitArktsModifyApi g_arktsModifyApiImpl = {
 
     ModuleSetName, ModuleAddImportFromArktsV1ToArktsV1, ModuleImportClassFromArktsV2ToArktsV2,
     ModuleImportStaticFunctionFromArktsV2ToArktsV2, ModuleImportClassMethodFromArktsV2ToArktsV2, ModuleRemoveImport,
-    ModuleAddExportFromArktsV1ToArktsV1, ModuleRemoveExport, ModuleAddAnnotationInterface,
+    ModuleAddExportFromArktsV1ToArktsV1, ModuleRemoveExport, ModuleAddAnnotationInterface, ModuleAddField,
 
     // ========================================
     // Namespace
@@ -612,7 +651,7 @@ AbckitArktsModifyApi g_arktsModifyApiImpl = {
     // Enum
     // ========================================
 
-    EnumSetName,
+    EnumSetName, EnumAddField,
 
     // ========================================
     // Module Field
@@ -641,7 +680,7 @@ AbckitArktsModifyApi g_arktsModifyApiImpl = {
     // Enum Field
     // ========================================
 
-    EnumFieldSetName,
+    EnumFieldSetName, EnumFieldSetType, EnumFieldSetValue,
 
     // ========================================
     // AnnotationInterface

@@ -31,8 +31,25 @@ static auto g_impl = AbckitGetApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 static auto g_implI = AbckitGetInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 static auto g_implArkI = AbckitGetArktsInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 static auto g_implArkM = AbckitGetArktsModifyApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
+static auto g_implM = AbckitGetModifyApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
 class LibAbcKitArkTSModifyApiEnumsTest : public ::testing::Test {};
+
+static AbckitCoreEnum *GetAbckitCoreEnum(AbckitFile *file, std::string moduleName, std::string enumName)
+{
+    helpers::ModuleByNameContext mdlFinder = {nullptr, moduleName.c_str()};
+    g_implI->fileEnumerateModules(file, &mdlFinder, helpers::ModuleByNameFinder);
+    EXPECT_TRUE(g_impl->getLastError() == ABCKIT_STATUS_NO_ERROR);
+    EXPECT_TRUE(mdlFinder.module != nullptr);
+    auto *module = mdlFinder.module;
+
+    helpers::EnumByNameContext ceFinder = {nullptr, enumName.c_str()};
+    g_implI->moduleEnumerateEnums(module, &ceFinder, helpers::EnumByNameFinder);
+    EXPECT_TRUE(g_impl->getLastError() == ABCKIT_STATUS_NO_ERROR);
+    EXPECT_TRUE(ceFinder.enm != nullptr);
+
+    return ceFinder.enm;
+}
 
 // Test: test-kind=api, api=ArktsModifyApiImpl::enumSetName, abc-kind=ArkTS2, category=positive
 TEST_F(LibAbcKitArkTSModifyApiEnumsTest, EnumSetNameStatic)
@@ -70,6 +87,52 @@ TEST_F(LibAbcKitArkTSModifyApiEnumsTest, EnumSetNameStatic)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(newEnumFinder.enm, nullptr);
 
+    g_impl->closeFile(file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_EQ(helpers::ExecuteStaticAbc(INPUT_PATH, "enums_static_modify", "main"),
+              helpers::ExecuteStaticAbc(OUTPUT_PATH, "enums_static_modify", "main"));
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::EnumAddField, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitArkTSModifyApiEnumsTest, EnumAddField)
+{
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(INPUT_PATH, &file);
+
+    auto coreEnum = GetAbckitCoreEnum(file, "enums_static_modify", "Enum1");
+
+    struct AbckitArktsFieldCreateParams params;
+    params.name = "YELLOW";
+    params.type = g_implM->createType(file, AbckitTypeId::ABCKIT_TYPE_ID_STRING);
+    std::string moduleFieldValue = "hello";
+    params.value = g_implM->createValueString(file, moduleFieldValue.c_str(), moduleFieldValue.length());
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    params.isStatic = true;
+    params.fieldVisibility = AbckitArktsFieldVisibility::PUBLIC;
+
+    auto ret = g_implArkM->enumAddField(g_implArkI->coreEnumToArktsEnum(coreEnum), &params);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_TRUE(ret);
+
+    g_impl->writeAbc(file, OUTPUT_PATH, strlen(OUTPUT_PATH));
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    g_impl->closeFile(file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    helpers::AssertOpenAbc(OUTPUT_PATH, &file);
+
+    auto coreEnum2 = GetAbckitCoreEnum(file, "enums_static_modify", "Enum1");
+
+    std::vector<std::string> FieldNames;
+    g_implI->enumEnumerateFields(coreEnum2, &FieldNames, [](AbckitCoreEnumField *field, void *data) {
+        auto ctx = static_cast<std::vector<std::string> *>(data);
+        auto filedName = g_implI->abckitStringToString(g_implI->enumFieldGetName(field));
+        (*ctx).emplace_back(filedName);
+        return true;
+    });
+    std::vector<std::string> actualFieldNames = {
+        "_ordinal",           "RED",         "BLUE",  "BLACK", "_NamesArray", "_ValuesArray",
+        "_StringValuesArray", "_ItemsArray", "YELLOW"};
+    ASSERT_EQ(FieldNames, actualFieldNames);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_EQ(helpers::ExecuteStaticAbc(INPUT_PATH, "enums_static_modify", "main"),

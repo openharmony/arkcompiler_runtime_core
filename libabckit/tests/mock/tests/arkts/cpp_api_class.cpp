@@ -178,9 +178,16 @@ TEST_F(LibAbcKitCppMockArktsTestClass, Class_AddField)
     {
         abckit::File f(DEFAULT_PATH);
         ASSERT_TRUE(CheckMockedApi("OpenAbc"));
-        abckit::mock::helpers::GetMockArktsClass(f).AddField(abckit::mock::helpers::GetMockArktsFiled(f));
-        ASSERT_TRUE(CheckMockedApi("ClassAddField"));
+        abckit::mock::helpers::GetMockArktsClass(f).AddField(DEFAULT_CONST_CHAR, abckit::mock::helpers::GetMockType(f),
+                                                             abckit::mock::helpers::GetMockValueDouble(f));
         ASSERT_TRUE(CheckMockedApi("CoreClassFieldToArktsClassField"));
+        ASSERT_TRUE(CheckMockedApi("ArktsClassFieldToCoreClassField"));
+        ASSERT_TRUE(CheckMockedApi("ClassAddField"));
+        ASSERT_TRUE(CheckMockedApi("CoreClassToArktsClass"));
+        abckit::mock::helpers::GetMockArktsClass(f).AddField(DEFAULT_CONST_CHAR, abckit::mock::helpers::GetMockType(f));
+        ASSERT_TRUE(CheckMockedApi("CoreClassFieldToArktsClassField"));
+        ASSERT_TRUE(CheckMockedApi("ArktsClassFieldToCoreClassField"));
+        ASSERT_TRUE(CheckMockedApi("ClassAddField"));
         ASSERT_TRUE(CheckMockedApi("CoreClassToArktsClass"));
     }
     ASSERT_TRUE(CheckMockedApi("CloseFile"));

@@ -592,6 +592,60 @@ struct AbckitArktsAnnotationElementCreateParams {
     AbckitValue *value;
 };
 
+enum AbckitArktsFieldVisibility {
+    PUBLIC,
+    PRIVATE,
+    PROTECTED,
+};
+
+/**
+ * @brief Struct that is used to create new field.
+ */
+struct AbckitArktsFieldCreateParams {
+    /**
+     * @brief Name of the created field.
+     */
+    const char *name;
+    /**
+     * @brief Type of the created field.
+     */
+    AbckitType *type;
+    /**
+     * @brief Value of the created field.
+     */
+    AbckitValue *value;
+    /**
+     * @brief field is static.
+     */
+    bool isStatic;
+    /**
+     * @brief Enumeration access control levels of fields.
+     */
+    enum AbckitArktsFieldVisibility fieldVisibility;
+};
+
+/**
+ * @brief Struct that is used to create new field.
+ */
+struct AbckitArktsInterfaceFieldCreateParams {
+    /**
+     * @brief Name of the created field.
+     */
+    const char *name;
+    /**
+     * @brief Type of the created field.
+     */
+    AbckitType *type;
+    /**
+     * @brief field is readonly.
+     */
+    bool isReadOnly;
+    /**
+     * @brief Enumeration access control levels of fields.
+     */
+    enum AbckitArktsFieldVisibility fieldVisibility;
+};
+
 /**
  * @brief Struct that is used to create new imports.
  */
@@ -854,6 +908,17 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
     AbckitArktsAnnotationInterface *(*moduleAddAnnotationInterface)(
         AbckitArktsModule *m, const struct AbckitArktsAnnotationInterfaceCreateParams *params);
 
+    /**
+     * @brief Create and adds field to the list of fields to the module `m`.
+     * @return return Pointer to the created module field.
+     * @param [ in ] module - Module to be inspected.
+     * @param [ in ] params - param of field to be added.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `module` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `params` is NULL.
+     * @note Only modified the module record.
+     */
+    AbckitArktsModuleField *(*moduleAddField)(AbckitArktsModule *m, const struct AbckitArktsFieldCreateParams *params);
+
     /* ========================================
      * Namespace
      * ======================================== */
@@ -939,14 +1004,15 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
     bool (*classSetName)(AbckitArktsClass *klass, const char *name);
 
     /**
-     * @brief Adds field `field` to the list of fields for class `klass`.
-     * @return `true` on success.
+     * @brief Create and adds field to the list of fields to the class `klass`.
+     * @return return Pointer to the created class field.
      * @param [ in ] klass - Class to be inspected.
-     * @param [ in ] field - Field to be added.
+     * @param [ in ] params -  param of field to be added.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `params` is NULL.
+     * @note Only modified the class record.
      */
-    bool (*classAddField)(AbckitArktsClass *klass, AbckitArktsClassField *field);
+    AbckitArktsClassField *(*classAddField)(AbckitArktsClass *klass, const struct AbckitArktsFieldCreateParams *params);
 
     /**
      * @brief Removes field `field` from the list of fields for class `klass`.
@@ -1024,15 +1090,15 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
     bool (*interfaceSetName)(AbckitArktsInterface *iface, const char *name);
 
     /**
-     * @brief Adds field `field` to the list of fields for interface `iface`.
-     * @return `true` on success.
+     * @brief Create and adds field to the list of fields to the interface `iface`.
+     * @return return Pointer to the created interface field.
      * @param [ in ] iface - Interface to be inspected.
-     * @param [ in ] field - Field to be added.
+     * @param [ in ] params - param of field to be added.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `params` is NULL.
      */
-    bool (*interfaceAddField)(AbckitArktsInterface *iface, AbckitArktsInterfaceField *field);
-
+    AbckitArktsInterfaceField *(*interfaceAddField)(AbckitArktsInterface *iface,
+                                                    const struct AbckitArktsInterfaceFieldCreateParams *params);
     /**
      * @brief Removes field `field` from the list of fields for interface `iface`.
      * @return `true` on success.
@@ -1096,6 +1162,17 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
      */
     bool (*enumSetName)(AbckitArktsEnum *enm, const char *name);
+
+    /**
+     * @brief Create and adds field to the list of fields to the enum `enm`.
+     * @return return Pointer to the created enum field.
+     * @param [ in ] enm - Enum to be inspected.
+     * @param [ in ] params - param of field to be added.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `enm` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `params` is NULL.
+     * @note Only modified the enum record.
+     */
+    AbckitArktsEnumField *(*enumAddField)(AbckitArktsEnum *enm, const struct AbckitArktsFieldCreateParams *params);
 
     /* ========================================
      * Module Field
@@ -1282,6 +1359,26 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
      */
     bool (*enumFieldSetName)(AbckitArktsEnumField *field, const char *name);
+
+    /**
+     * @brief Sets type for enum field `field`.
+     * @return `true` on success.
+     * @param [ in ] field - Field to be inspected.
+     * @param [ in ] type - Type to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `type` is NULL.
+     */
+    bool (*enumFieldSetType)(AbckitArktsEnumField *field, AbckitType *type);
+
+    /**
+     * @brief Sets value for enum field `field`.
+     * @return `true` on success.
+     * @param [ in ] field - Field to be inspected.
+     * @param [ in ] value - Value to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `value` is NULL.
+     */
+    bool (*enumFieldSetValue)(AbckitArktsEnumField *field, AbckitValue *value);
 
     /* ========================================
      * AnnotationInterface

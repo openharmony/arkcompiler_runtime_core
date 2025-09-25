@@ -77,6 +77,11 @@ AbckitValue *FindOrCreateValueDoubleStatic(AbckitFile *file, double value);
 AbckitValue *FindOrCreateValueStringStatic(AbckitFile *file, const char *value, size_t len);
 
 // ========================================
+// Enum
+// ========================================
+AbckitArktsEnumField *EnumAddFieldStatic(AbckitCoreEnum *enm, const struct AbckitArktsFieldCreateParams *params);
+
+// ========================================
 // ModuleField
 // ========================================
 bool ModuleFieldSetTypeStatic(AbckitArktsModuleField *field, AbckitType *type);
@@ -95,6 +100,7 @@ bool ClassFieldSetValueStatic(AbckitArktsClassField *field, AbckitValue *value);
 // ========================================
 AbckitArktsAnnotationInterface *ModuleAddAnnotationInterfaceStatic(
     AbckitCoreModule *m, const struct AbckitArktsAnnotationInterfaceCreateParams *params);
+AbckitArktsModuleField *ModuleAddFieldStatic(AbckitCoreModule *m, const struct AbckitArktsFieldCreateParams *params);
 
 // ========================================
 // AnnotationInterface
@@ -130,9 +136,8 @@ bool ClassRemoveMethodStatic(AbckitCoreClass *klass, AbckitCoreFunction *method)
 bool ClassAddInterfaceStatic(AbckitArktsClass *klass, AbckitArktsInterface *iface);
 bool ClassRemoveInterfaceStatic(AbckitArktsClass *klass, AbckitArktsInterface *iface);
 bool ClassSetSuperClassStatic(AbckitArktsClass *klass, AbckitArktsClass *superClass);
-bool ClassAddMethod(AbckitArktsClass *klass, AbckitArktsFunction *method);
 bool ClassRemoveFieldStatic(AbckitArktsClass *klass, AbckitCoreClassField *field);
-bool ClassAddFieldStatic(AbckitCoreClass *klass, AbckitCoreClassField *coreClassField);
+AbckitArktsClassField *ClassAddFieldStatic(AbckitCoreClass *klass, const struct AbckitArktsFieldCreateParams *params);
 bool ClassSetOwningModuleStatic(AbckitCoreClass *klass, AbckitCoreModule *module);
 
 // ========================================
@@ -140,7 +145,8 @@ bool ClassSetOwningModuleStatic(AbckitCoreClass *klass, AbckitCoreModule *module
 // ========================================
 bool InterfaceRemoveFieldStatic(AbckitArktsInterface *iface, AbckitCoreInterfaceField *field);
 AbckitArktsInterface *CreateInterfaceStatic(AbckitArktsModule *m, const char *name);
-bool InterfaceAddFieldStatic(AbckitArktsInterface *iface, AbckitCoreInterfaceField *field);
+AbckitArktsInterfaceField *InterfaceAddFieldStatic(AbckitArktsInterface *iface,
+                                                   const struct AbckitArktsInterfaceFieldCreateParams *params);
 bool InterfaceAddMethodStatic(AbckitArktsInterface *iface, AbckitArktsFunction *method);
 bool InterfaceAddSuperInterfaceStatic(AbckitCoreInterface *iface, AbckitCoreInterface *superIface);
 bool InterfaceRemoveSuperInterfaceStatic(AbckitCoreInterface *iface, AbckitCoreInterface *superIface);

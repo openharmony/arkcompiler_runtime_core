@@ -18,6 +18,7 @@
 #include "libabckit/c/metadata_core.h"
 #include "libabckit/c/extensions/arkts/metadata_arkts.h"
 #include "inst.h"
+#include "libabckit/src/adapter_static/abckit_static.h"
 #include "libabckit/src/metadata_inspect_impl.h"
 #include "libabckit/src/ir_impl.h"
 #include "libabckit/src/logger.h"
@@ -327,6 +328,15 @@ AbckitArktsClass *ModuleImportClassFromArktsV2ToArktsV2Static(AbckitArktsModule 
 
     auto &addedRecord = result.first->second;
     AbckitArktsClass arktsClass(&addedRecord);
+    // Check if className already exists in ct to avoid emplace failure
+    auto ctIt = coreModule->ct.find(className);
+    if (ctIt != coreModule->ct.end()) {
+        // Class already exists, return existing one
+        auto *existingClassPtr = ctIt->second.get();
+        coreModule->file->nameToClass.emplace(className, existingClassPtr);
+        return existingClassPtr->GetArkTSImpl();
+    }
+    // Create new class since it doesn't exist
     auto coreClass = std::make_unique<AbckitCoreClass>(coreModule, arktsClass);
     auto *coreClassPtr = coreClass.get();
 
@@ -717,6 +727,101 @@ static std::unique_ptr<AbckitCoreAnnotation> CreateAnnotation(
     return anno;
 }
 
+static uint32_t GetFieldCreateFlag(const struct AbckitArktsFieldCreateParams *params)
+{
+    uint32_t flag = 0;
+    if (params->isStatic) {
+        flag |= ACC_STATIC;
+    }
+    switch (params->fieldVisibility) {
+        case PUBLIC:
+            flag |= ACC_PUBLIC;
+            break;
+        case PRIVATE:
+            flag |= ACC_PRIVATE;
+            break;
+        case PROTECTED:
+            flag |= ACC_PROTECTED;
+            break;
+        default:
+            break;
+    }
+    return flag;
+}
+
+static uint32_t GetInterfaceFieldCreateFlag(const struct AbckitArktsInterfaceFieldCreateParams *params)
+{
+    uint32_t flag = 0;
+    if (params->isReadOnly) {
+        flag |= ACC_READONLY;
+    }
+    switch (params->fieldVisibility) {
+        case PUBLIC:
+            flag |= ACC_PUBLIC;
+            break;
+        case PRIVATE:
+            flag |= ACC_PRIVATE;
+            break;
+        case PROTECTED:
+            flag |= ACC_PROTECTED;
+            break;
+        default:
+            break;
+    }
+    return flag;
+}
+
+// ========================================
+// Enum
+// ========================================
+AbckitArktsEnumField *EnumAddFieldStatic(AbckitCoreEnum *enm, const struct AbckitArktsFieldCreateParams *params)
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_BAD_ARGUMENT(enm, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(params, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(params->name, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(params->type, nullptr);
+
+    if (params->value != nullptr && params->type->id != ValueGetTypeStatic(params->value)->id) {
+        LIBABCKIT_LOG(ERROR) << "field type is not same value type\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        return nullptr;
+    }
+
+    std::string name(params->name);
+    auto record = enm->GetArkTSImpl()->impl.GetStaticClass();
+    auto iter = std::find_if(record->fieldList.begin(), record->fieldList.end(),
+                             [&name](auto &field) { return field.name == name; });
+    if (iter != record->fieldList.end()) {
+        LIBABCKIT_LOG(DEBUG) << "field name already exist.\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
+
+    auto prog = enm->owningModule->file->GetStaticProgram();
+    auto progField = pandasm::Field(prog->lang);
+    progField.name = name;
+    progField.type = pandasm::Type(TypeToNameStatic(params->type), params->type->rank);
+    if (params->value != nullptr) {
+        progField.metadata->SetValue(*reinterpret_cast<pandasm::ScalarValue *>(params->value->val.get()));
+    }
+    progField.metadata->SetAccessFlags(GetFieldCreateFlag(params));
+    record->fieldList.emplace_back(std::move(progField));
+
+    // record->fieldList's emplace_back operation may lead to memory reallocation, pandasm::Field's address may change
+    enm->fields.clear();
+    AbckitArktsEnumField *retPtr = nullptr;
+    for (auto &tmpField : record->fieldList) {
+        auto coreField = EnumCreateField(enm->owningModule->file, enm, tmpField);
+        if (EnumFieldGetNameStatic(coreField.get())->impl == name) {
+            retPtr = coreField.get()->GetArkTSImpl();
+        }
+        enm->fields.emplace_back(std::move(coreField));
+    }
+
+    return retPtr;
+}
+
 // ========================================
 // ModuleField
 // ========================================
@@ -821,6 +926,54 @@ AbckitArktsAnnotationInterface *ModuleAddAnnotationInterfaceStatic(
     ai->GetArkTSImpl()->impl = &record;
     ai->GetArkTSImpl()->core = ai.get();
     return m->at.emplace(name, std::move(ai)).first->second->GetArkTSImpl();
+}
+
+AbckitArktsModuleField *ModuleAddFieldStatic(AbckitCoreModule *m, const struct AbckitArktsFieldCreateParams *params)
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_BAD_ARGUMENT(m, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(params, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(params->name, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(params->type, nullptr);
+
+    if (params->value != nullptr && params->type->id != ValueGetTypeStatic(params->value)->id) {
+        LIBABCKIT_LOG(ERROR) << "field type is not same value type\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        return nullptr;
+    }
+
+    std::string name(params->name);
+    auto record = m->GetArkTSImpl()->impl.GetStatModule().record;
+    auto iter = std::find_if(record->fieldList.begin(), record->fieldList.end(),
+                             [&name](auto &field) { return field.name == name; });
+    if (iter != record->fieldList.end()) {
+        LIBABCKIT_LOG(DEBUG) << "field name already exist.\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
+
+    auto prog = m->file->GetStaticProgram();
+    auto progField = pandasm::Field(prog->lang);
+    progField.name = name;
+    progField.type = pandasm::Type(TypeToNameStatic(params->type), params->type->rank);
+    if (params->value != nullptr) {
+        progField.metadata->SetValue(*reinterpret_cast<pandasm::ScalarValue *>(params->value->val.get()));
+    }
+    progField.metadata->SetAccessFlags(GetFieldCreateFlag(params));
+    record->fieldList.emplace_back(std::move(progField));
+
+    // record->fieldList's emplace_back operation may lead to memory reallocation, pandasm::Field's address may change
+    m->fields.clear();
+    AbckitArktsModuleField *retPtr = nullptr;
+    for (auto &tmpField : record->fieldList) {
+        auto coreField = ModuleCreateField(m->file, m, tmpField);
+        if (ModuleFieldGetNameStatic(coreField.get())->impl == name) {
+            retPtr = coreField.get()->GetArkTSImpl();
+        }
+        m->fields.emplace_back(std::move(coreField));
+    }
+
+    return retPtr;
 }
 
 // ========================================
@@ -1083,10 +1236,26 @@ bool InterfaceFieldRemoveAnnotationStatic(AbckitArktsInterfaceField *field, Abck
         std::string methodName = FunctionGetNameStatic(method.get())->impl.data();
         if (methodName.compare(0, interfaceGetMethodName.length(), interfaceGetMethodName) == 0) {
             auto progFunc = method->GetArkTSImpl()->GetStaticImpl();
-            progFunc->metadata->DeleteAnnotationByName(name);
+            progFunc->metadata->DeleteAnnotationByName(annotationName);
+            // Also remove from method's annotation collections
+            auto &methodAnnotations = method->annotations;
+            auto methodIter = std::find_if(methodAnnotations.begin(), methodAnnotations.end(),
+                                           [&name](auto &annoIt) { return name == annoIt.get()->name->impl; });
+            if (methodIter != methodAnnotations.end()) {
+                methodAnnotations.erase(methodIter);
+            }
+            method->annotationTable.erase(annotationName);
         } else if (methodName.compare(0, interfaceSetMethodName.length(), interfaceSetMethodName) == 0) {
             auto progFunc = method->GetArkTSImpl()->GetStaticImpl();
-            progFunc->metadata->DeleteAnnotationByName(name);
+            progFunc->metadata->DeleteAnnotationByName(annotationName);  // Use full annotation name
+            // Also remove from method's annotation collections
+            auto &methodAnnotations = method->annotations;
+            auto methodIter = std::find_if(methodAnnotations.begin(), methodAnnotations.end(),
+                                           [&name](auto &annoIt) { return name == annoIt.get()->name->impl; });
+            if (methodIter != methodAnnotations.end()) {
+                methodAnnotations.erase(methodIter);
+            }
+            method->annotationTable.erase(annotationName);
         }
     }
 
@@ -1650,47 +1819,51 @@ static void UpdateExtendsInfo(AbckitFile *file, const std::string &oldName, cons
     }
 }
 
-bool ClassAddFieldStatic(AbckitCoreClass *klass, AbckitCoreClassField *coreClassField)
+AbckitArktsClassField *ClassAddFieldStatic(AbckitCoreClass *klass, const struct AbckitArktsFieldCreateParams *params)
 {
     LIBABCKIT_LOG_FUNC;
-    LIBABCKIT_BAD_ARGUMENT(klass, false);
-    LIBABCKIT_BAD_ARGUMENT(coreClassField, false);
+    LIBABCKIT_BAD_ARGUMENT(klass, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(params, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(params->name, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(params->type, nullptr);
 
+    if (params->value != nullptr && params->type->id != ValueGetTypeStatic(params->value)->id) {
+        LIBABCKIT_LOG(ERROR) << "field type is not same value type\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        return nullptr;
+    }
+
+    std::string name(params->name);
     auto record = klass->GetArkTSImpl()->impl.GetStaticClass();
-    auto pandaField = coreClassField->GetArkTSImpl()->GetStaticImpl();
     auto it = std::find_if(record->fieldList.begin(), record->fieldList.end(),
-                           [&pandaField](auto &field) { return field.name == pandaField->name; });
+                           [&name](auto &field) { return field.name == name; });
     if (it != record->fieldList.end()) {
         LIBABCKIT_LOG(ERROR) << "field name already exist.\n";
         statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_BAD_ARGUMENT);
-        return false;
+        return nullptr;
     }
-    ark::pandasm::Field tmpField(ark::SourceLanguage::ETS);
-    tmpField.name = pandaField->name;
-    tmpField.type = ark::pandasm::Type(pandaField->type.GetComponentName(), pandaField->type.GetRank());
-    auto &setAttributes = pandaField->metadata->GetBoolAttributes();
-    for (auto &sa : setAttributes) {
-        tmpField.metadata->SetAttribute(sa);
+
+    auto prog = klass->owningModule->file->GetStaticProgram();
+    auto progField = pandasm::Field(prog->lang);
+    progField.name = name;
+    progField.type = pandasm::Type(TypeToNameStatic(params->type), params->type->rank);
+    if (params->value != nullptr) {
+        progField.metadata->SetValue(*reinterpret_cast<pandasm::ScalarValue *>(params->value->val.get()));
     }
-    auto &attributes = pandaField->metadata->GetAttributes();
-    for (auto &[key, valueVec] : attributes) {
-        for (auto &value : valueVec) {
-            tmpField.metadata->SetAttributeValue(key, value);
-        }
-    }
-    auto value = pandaField->metadata->GetValue();
-    if (value.has_value()) {
-        tmpField.metadata->SetValue(value.value());
-    }
-    record->fieldList.emplace_back(std::move(tmpField));
+    progField.metadata->SetAccessFlags(GetFieldCreateFlag(params));
+    record->fieldList.emplace_back(std::move(progField));
+
     // record->fieldList's emplace_back operation may lead to memory reallocation, pandasm::Field's address may change
     klass->fields.clear();
+    AbckitArktsClassField *retPtr = nullptr;
     for (auto &tmpField : record->fieldList) {
-        auto classField = std::make_unique<AbckitCoreClassField>(klass, &tmpField);
-        classField->name = CreateStringStatic(klass->owningModule->file, tmpField.name.c_str(), tmpField.name.length());
+        auto classField = ClassCreateField(klass->owningModule->file, klass, tmpField);
+        if (ClassFieldGetNameStatic(classField.get())->impl == name) {
+            retPtr = classField.get()->GetArkTSImpl();
+        }
         klass->fields.emplace_back(std::move(classField));
     }
-    return true;
+    return retPtr;
 }
 
 template <typename TblType>
@@ -1859,7 +2032,7 @@ std::string InterfaceFieldNameSplit(AbckitCoreInterfaceField *field)
     return splitedFieldName;
 }
 
-std::unique_ptr<pandasm::Function> CreateAccessorFunction(std::string_view &fieldTypeName, std::string &accessorName,
+std::unique_ptr<pandasm::Function> CreateAccessorFunction(std::string &fieldTypeName, std::string &accessorName,
                                                           std::string &ifaceName, bool isSetter)
 {
     auto function = std::make_unique<ark::pandasm::Function>(accessorName, ark::panda_file::SourceLang::ETS);
@@ -1880,8 +2053,8 @@ std::unique_ptr<pandasm::Function> CreateAccessorFunction(std::string_view &fiel
 void InterfaceAddFieldAccessor(AbckitArktsInterface *iface, AbckitCoreInterfaceField *field, std::string &accessorName,
                                bool isSetter)
 {
-    auto function =
-        CreateAccessorFunction(field->type->name->impl, accessorName, iface->impl.GetStaticClass()->name, isSetter);
+    std::string type = TypeToNameStatic(field->type);
+    auto function = CreateAccessorFunction(type, accessorName, iface->impl.GetStaticClass()->name, isSetter);
     auto funcMangledName =
         MangleFunctionName(ark::pandasm::DeMangleName(function->name), function->params, function->returnType);
     auto &funcInstanceTab = iface->core->owningModule->file->GetStaticProgram()->functionInstanceTable;
@@ -1919,32 +2092,42 @@ bool InterfaceAddFieldAccessors(AbckitArktsInterface *iface, AbckitCoreInterface
     return true;
 }
 
-bool InterfaceAddFieldStatic(AbckitArktsInterface *iface, AbckitCoreInterfaceField *field)
+AbckitArktsInterfaceField *InterfaceAddFieldStatic(AbckitArktsInterface *iface,
+                                                   const struct AbckitArktsInterfaceFieldCreateParams *params)
 {
     LIBABCKIT_LOG_FUNC;
-    LIBABCKIT_INTERNAL_ERROR(iface->core, false);
-    LIBABCKIT_INTERNAL_ERROR(iface->impl.GetStaticClass(), false);
+    LIBABCKIT_INTERNAL_ERROR(iface->core, nullptr);
+    LIBABCKIT_INTERNAL_ERROR(iface->impl.GetStaticClass(), nullptr);
 
-    LIBABCKIT_INTERNAL_ERROR(field->name, false);
-    LIBABCKIT_INTERNAL_ERROR(field->owner, false);
+    LIBABCKIT_BAD_ARGUMENT(params, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(params->name, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(params->type, nullptr);
 
-    auto &fieldList = iface->impl.GetStaticClass()->fieldList;
-    auto fieldName = field->name->impl;
-    auto it = std::find_if(fieldList.begin(), fieldList.end(),
-                           [&fieldName](const ark::pandasm::Field &field) { return field.name == fieldName; });
-    if (it != fieldList.end()) {
+    std::string fieldName = std::string(ark::ets::PROPERTY) + params->name;
+    auto &fields = iface->core->fields;
+    auto it = fields.find(fieldName);
+    if (it != fields.end()) {
         LIBABCKIT_LOG(ERROR) << "The field already exists in the interface\n";
         statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
-        return false;
+        return nullptr;
     }
 
-    if (InterfaceAddFieldAccessors(iface, field)) {
-        auto newField = CloneInterfaceField(iface, field);
-        iface->core->fields.emplace(fieldName, std::move(newField));
-        return true;
+    auto coreField = std::make_unique<AbckitCoreInterfaceField>();
+    coreField->name = CreateStringStatic(iface->core->owningModule->file, fieldName.c_str(), fieldName.length());
+    coreField->type = params->type;
+    coreField->owner = iface->core;
+    coreField->impl = std::make_unique<AbckitArktsInterfaceField>();
+    coreField->GetArkTSImpl()->core = coreField.get();
+    coreField->flag = GetInterfaceFieldCreateFlag(params);
+
+    if (!InterfaceAddFieldAccessors(iface, coreField.get())) {
+        LIBABCKIT_LOG(ERROR) << "Create set/get function error\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        return nullptr;
     }
 
-    return false;
+    iface->core->fields.emplace(fieldName, std::move(coreField));
+    return iface->core->fields[fieldName]->GetArkTSImpl();
 }
 
 bool InterfaceAddMethodStatic(AbckitArktsInterface *iface, AbckitArktsFunction *method)
@@ -2292,9 +2475,6 @@ AbckitArktsFunction *ModuleImportClassMethodStatic(AbckitArktsModule *externalMo
 
     return coreFunctionPtr->GetArkTSImpl();
 }
-
-
-
 
 AbckitArktsFunction *ModuleAddFunctionStatic(AbckitArktsModule *module, struct AbckitArktsFunctionCreateParams *params)
 {

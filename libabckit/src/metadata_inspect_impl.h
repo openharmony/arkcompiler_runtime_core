@@ -979,6 +979,11 @@ struct AbckitFile {
     bool needOptimize = false;
     AbckitFileGenerateStatus generateStatus;
     std::unordered_map<AbckitCoreFunction *, FunctionStatus *> functionsMap;
+
+    /**
+     * Function point to delete data
+     */
+    void (*destoryData)(void *) = nullptr;
 };
 
 struct AbckitDynamicImportDescriptorPayload {

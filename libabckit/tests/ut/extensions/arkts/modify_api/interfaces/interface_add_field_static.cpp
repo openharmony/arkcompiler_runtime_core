@@ -88,15 +88,15 @@ TEST_F(LibAbcKitModifyApiIfaceTests, InterfaceAddFieldTest0)
     helpers::InterfaceByNameContext ifaceCtxFinder = {nullptr, "MyInterface"};
     g_implI->moduleEnumerateInterfaces(ctxFinder.module, &ifaceCtxFinder, helpers::InterfaceByNameFinder);
 
-    helpers::InterfaceByNameContext testIfaceCtxFinder = {nullptr, "Test"};
-    g_implI->moduleEnumerateInterfaces(ctxFinder.module, &testIfaceCtxFinder, helpers::InterfaceByNameFinder);
+    struct AbckitArktsInterfaceFieldCreateParams params;
+    params.name = "newInterfaceField";
+    params.type = g_implM->createType(file, AbckitTypeId::ABCKIT_TYPE_ID_STRING);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    params.isReadOnly = false;
+    params.fieldVisibility = AbckitArktsFieldVisibility::PUBLIC;
 
     auto arktsInterface = g_implArkI->coreInterfaceToArktsInterface(ifaceCtxFinder.iface);
-
-    const auto &it = testIfaceCtxFinder.iface->fields.begin();
-    auto atktsInterfaceField = g_implArkI->coreInterfaceFieldToArktsInterfaceField(it->second.get());
-
-    g_implArkM->interfaceAddField(arktsInterface, atktsInterfaceField);
+    g_implArkM->interfaceAddField(arktsInterface, &params);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->writeAbc(file, output.c_str(), output.length());
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -119,9 +119,12 @@ TEST_F(LibAbcKitModifyApiIfaceTests, InterfaceAddFieldTest0)
             (*ctx).emplace_back(filedName);
             return true;
         });
-    std::vector<std::string> testFileds = {"<property>key", "<property>age"};
+    std::vector<std::string> testFileds = {"<property>newInterfaceField", "<property>key"};
     ASSERT_EQ(FieldNames, testFileds);
     g_impl->closeFile(file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_EQ(helpers::ExecuteStaticAbc(input, "interface_add_field_static", "main"),
+              helpers::ExecuteStaticAbc(output, "interface_add_field_static", "main"));
 }
 
 TEST_F(LibAbcKitModifyApiIfaceTests, InterfaceAddMethodTest0)

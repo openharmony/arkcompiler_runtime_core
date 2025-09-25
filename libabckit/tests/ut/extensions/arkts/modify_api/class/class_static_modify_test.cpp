@@ -125,6 +125,22 @@ void SuperClassTransformMainIr(AbckitFile *file)
     helpers::TransformMethod(file, "main", transformCb);
 }
 
+static AbckitCoreClass *GetAbckitCoreClass(AbckitFile *file, std::string moduleName, std::string className)
+{
+    helpers::ModuleByNameContext mdlFinder = {nullptr, moduleName.c_str()};
+    g_implI->fileEnumerateModules(file, &mdlFinder, helpers::ModuleByNameFinder);
+    EXPECT_TRUE(g_impl->getLastError() == ABCKIT_STATUS_NO_ERROR);
+    EXPECT_TRUE(mdlFinder.module != nullptr);
+    auto *module = mdlFinder.module;
+
+    helpers::ClassByNameContext classFinder = {nullptr, className.c_str()};
+    g_implI->moduleEnumerateClasses(module, &classFinder, helpers::ClassByNameFinder);
+    EXPECT_TRUE(g_impl->getLastError() == ABCKIT_STATUS_NO_ERROR);
+    EXPECT_TRUE(classFinder.klass != nullptr);
+
+    return classFinder.klass;
+}
+
 // Test: test-kind=api, api=ArktsModifyApiImpl::createClass, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitArkTSModifyApiClassTests, CreateClassTest0)
 {
@@ -623,55 +639,45 @@ TEST_F(LibAbcKitArkTSModifyApiClassTests, ClassAddField)
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/class/classset_static.abc", &file);
 
-    helpers::ModuleByNameContext mdFinder = {nullptr, "classset_static"};
-    g_implI->fileEnumerateModules(file, &mdFinder, helpers::ModuleByNameFinder);
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    ASSERT_NE(mdFinder.module, nullptr);
-    auto *module = mdFinder.module;
+    auto coreClass = GetAbckitCoreClass(file, "classset_static", "PersonTest");
 
-    helpers::ClassByNameContext clsFinder = {nullptr, "PersonTest"};
-    g_implI->moduleEnumerateClasses(module, &clsFinder, helpers::ClassByNameFinder);
+    struct AbckitArktsFieldCreateParams params;
+    params.name = "newClassField";
+    params.type = g_implM->createType(file, AbckitTypeId::ABCKIT_TYPE_ID_STRING);
+    std::string moduleFieldValue = "hello";
+    params.value = g_implM->createValueString(file, moduleFieldValue.c_str(), moduleFieldValue.length());
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    ASSERT_NE(clsFinder.klass, nullptr);
-    auto *klass = clsFinder.klass;
+    params.isStatic = true;
+    params.fieldVisibility = AbckitArktsFieldVisibility::PUBLIC;
 
-    helpers::ClassByNameContext clsFinderTest = {nullptr, "MyClass"};
-    g_implI->moduleEnumerateClasses(module, &clsFinderTest, helpers::ClassByNameFinder);
+    auto ret = g_implArkM->classAddField(g_implArkI->coreClassToArktsClass(coreClass), &params);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    ASSERT_NE(clsFinderTest.klass, nullptr);
-    auto *klassTest = clsFinderTest.klass;
+    ASSERT_TRUE(ret);
 
-    for (auto &field : klassTest->fields) {
-        bool ret = g_implArkM->classAddField(g_implArkI->coreClassToArktsClass(klass), field.get()->GetArkTSImpl());
-        ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-        ASSERT_TRUE(ret);
-    }
     constexpr auto OUTPUT_PATH =
         ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/class/class_static_modify_ClassAddField.abc";
     g_impl->writeAbc(file, OUTPUT_PATH, strlen(OUTPUT_PATH));
     g_impl->closeFile(file);
 
     helpers::AssertOpenAbc(OUTPUT_PATH, &file);
-    mdFinder = {nullptr, "classset_static"};
-    g_implI->fileEnumerateModules(file, &mdFinder, helpers::ModuleByNameFinder);
-    ASSERT_NE(mdFinder.module, nullptr);
-    module = mdFinder.module;
-    clsFinder = {nullptr, "PersonTest"};
-    g_implI->moduleEnumerateClasses(module, &clsFinder, helpers::ClassByNameFinder);
-    ASSERT_NE(clsFinder.klass, nullptr);
-    klass = clsFinder.klass;
+
+    auto coreClass2 = GetAbckitCoreClass(file, "classset_static", "PersonTest");
+
     std::vector<std::string> FieldNames;
-    g_implI->classEnumerateFields(klass, &FieldNames, [](AbckitCoreClassField *field, void *data) {
+    g_implI->classEnumerateFields(coreClass2, &FieldNames, [](AbckitCoreClassField *field, void *data) {
         auto ctx = static_cast<std::vector<std::string> *>(data);
         auto filedName = g_implI->abckitStringToString(g_implI->classFieldGetName(field));
         (*ctx).emplace_back(filedName);
         return true;
     });
     sort(FieldNames.begin(), FieldNames.end());
-    std::vector<std::string> actualFieldNames = {"age",   "levelArray", "myEnum", "myMap",
-                                                 "mySet", "name",       "score",  "testObj"};
+    std::vector<std::string> actualFieldNames = {"age", "name", "newClassField"};
     ASSERT_EQ(FieldNames, actualFieldNames);
     g_impl->closeFile(file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_EQ(helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/class/classset_static.abc",
+                                        "classset_static", "main"),
+              helpers::ExecuteStaticAbc(OUTPUT_PATH, "classset_static", "main"));
 }
 
 // Test: test-kind=api, api=ArktsModifyApiImpl::ClassSetOwningModule, abc-kind=ArkTS2, category=positive,
