@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,19 +15,21 @@
 # limitations under the License.
 #
 
-import typing
+from collections import defaultdict
 from contextlib import asynccontextmanager
-from typing import Any, AsyncGenerator, Callable, Coroutine, Dict, Generator, Optional, TypeAlias
+import typing
+from typing import Any, AsyncGenerator, Callable, Coroutine, Dict, Generator, Iterator, Optional, TypeAlias
 
 import cdp
 import cdp.util
 import trio
 import trio_cdp
-from cdp import debugger, runtime
+from cdp import debugger, runtime, target
 
 T: TypeAlias = trio_cdp.T
 E = typing.TypeVar("E")
 T_JSON_DICT: TypeAlias = cdp.util.T_JSON_DICT
+BUFF_SIZE: int = 10
 
 
 class Proxy(typing.Generic[E]):
@@ -47,45 +49,52 @@ class Proxy(typing.Generic[E]):
 
 class ArkConnection:
 
-    def __init__(self, conn: trio_cdp.CdpConnection, nursery: trio.Nursery) -> None:
+    def __init__(self, conn: trio_cdp.CdpBase, nursery: trio.Nursery) -> None:
         self._conn = conn
         self._nursery = nursery
         self.context_id: runtime.ExecutionContextId
 
     @property
-    def connection(self) -> trio_cdp.CdpConnection:
+    def connection(self) -> trio_cdp.CdpBase:
         return self._conn
 
-    def listen(self, *event_types, buffer_size=10) -> trio.MemoryReceiveChannel:
+    @property
+    def nursery(self) -> trio.Nursery:
+        return self._nursery
+
+    @property
+    def session_id(self) -> target.SessionID | None:
+        return self._conn.session_id
+
+    def listen(self, *event_types, buffer_size: int = BUFF_SIZE) -> trio.MemoryReceiveChannel:
         return self._conn.listen(*event_types, buffer_size=buffer_size)
+
+    async def open_session(self, target_id: target.TargetID) -> trio_cdp.CdpSession | None:
+        if isinstance(self._conn, trio_cdp.CdpConnection):
+            conn: trio_cdp.CdpConnection = self._conn
+            return await conn.open_session(target_id)
+        return None  # noqa: ASYNC910
 
     async def send(self, cmd: Generator[dict, T, Any]) -> T:
         return await self._conn.execute(cmd)
-
-    @asynccontextmanager
-    async def wait_for(self, event_type: typing.Type[T], buffer_size=10) -> AsyncGenerator[Proxy[T], None]:
-        cmd_proxy: trio_cdp.CmEventProxy
-        proxy = Proxy[T]()
-        async with self._conn.wait_for(event_type, buffer_size) as cmd_proxy:
-            yield proxy
-        proxy.value = cmd_proxy.value  # type: ignore[attr-defined]
 
     async def send_and_wait_for(
         self,
         cmd: Generator[dict, T, Any],
         event_type: typing.Type[E],
-        buffer_size=10,
+        buffer_size=BUFF_SIZE,
     ) -> E:
         async with self.wait_for(event_type, buffer_size) as proxy:
             await self._conn.execute(cmd)
         return proxy.value
 
-    def _listen(self, event_type: T, handler):
-        async def a():
-            async for event in self._conn.listen(event_type):
-                handler(event)
-
-        self._nursery.start_soon(a)
+    @asynccontextmanager
+    async def wait_for(self, event_type: typing.Type[T], buffer_size=BUFF_SIZE) -> AsyncGenerator[Proxy[T], None]:
+        cmd_proxy: trio_cdp.CmEventProxy
+        proxy = Proxy[T]()
+        async with self._conn.wait_for(event_type, buffer_size) as cmd_proxy:
+            yield proxy
+        proxy.value = cmd_proxy.value  # type: ignore[attr-defined]
 
 
 class DebugConnection(trio_cdp.CdpConnection):
@@ -101,10 +110,16 @@ class DebugConnection(trio_cdp.CdpConnection):
             self._close_channels()
 
     def _close_channels(self):
-        channels: set[trio.MemorySendChannel] = set([c for s in self.channels.values() for c in s])
-        self.channels.clear()
-        for ch in channels:
-            ch.close()
+        for channels_dict in self._get_all_channels():
+            channels = set([ch for s in channels_dict.values() for ch in s])
+            channels_dict.clear()
+            for ch in channels:
+                ch.close()
+
+    def _get_all_channels(self) -> Iterator[defaultdict[T, set[trio.MemorySendChannel]]]:
+        yield self.channels
+        for session in self.sessions.values():
+            yield session.channels
 
 
 async def connect_cdp(nursery: trio.Nursery, url, max_retries: int) -> DebugConnection:

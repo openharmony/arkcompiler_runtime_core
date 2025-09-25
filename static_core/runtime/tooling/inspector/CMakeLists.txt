@@ -17,7 +17,6 @@ project(arkinspector)
 
 set(ARKINSPECTOR_ROOTS
     connection/endpoint_base.cpp
-    connection/event_loop.cpp
     connection/server_endpoint_base.cpp
     debugger/breakpoint.cpp
     debugger/breakpoint_storage.cpp

@@ -16,13 +16,14 @@
 #ifndef PANDA_TOOLING_INSPECTOR_CONNECTION_SERVER_H
 #define PANDA_TOOLING_INSPECTOR_CONNECTION_SERVER_H
 
+#include <atomic>
 #include <functional>
 
 #include "json_serialization/serializable.h"
+#include "libpandabase/os/mutex.h"
 #include "libpandabase/utils/expected.h"
 #include "libpandabase/utils/json_builder.h"
 
-#include "connection/event_loop.h"
 #include "json_serialization/jrpc_error.h"
 
 namespace ark {
@@ -31,18 +32,56 @@ class JsonObjectBuilder;
 }  // namespace ark
 
 namespace ark::tooling::inspector {
-class Server : public virtual EventLoop {  // NOLINT(fuchsia-virtual-inheritance)
+
+/// @brief Base class for server with a single listener thread
+class Server {
 public:
     using MethodResponse = Expected<std::unique_ptr<JsonSerializable>, JRPCError>;
-    using Handler = std::function<MethodResponse(const std::string &, const JsonObject &params)>;
+    using Handler = std::function<MethodResponse(const std::string &, const JsonObject &)>;
 
 public:
-    virtual void OnValidate(std::function<void()> &&handler) = 0;
-    virtual void OnOpen(std::function<void()> &&handler) = 0;
-    virtual void OnFail(std::function<void()> &&handler) = 0;
+    Server() = default;
+    NO_COPY_SEMANTIC(Server);
+    NO_MOVE_SEMANTIC(Server);
+    virtual ~Server() = default;
 
-    virtual void Call(const std::string &sessionId, const char *method,
-                      std::function<void(JsonObjectBuilder &)> &&params) = 0;
+    /// @brief Notifies the running server to stop.
+    bool Kill()
+    {
+        return running_.exchange(false);
+    }
+
+    /// @brief Runs server loop until paused. This function must be entrypoint of listener thread.
+    void Run()
+    {
+        ASSERT_PRINT(!running_, "Server is already running");
+        for (running_ = true; running_;) {
+            RunOne();
+        }
+    }
+
+    /// @brief Runs at most one server loop handler, may block.
+    virtual bool RunOne() = 0;
+
+    /// @brief Pauses the server while waiting for the current task to finish.
+    void Pause() ACQUIRE_SHARED(taskExecution_)
+    {
+        taskExecution_.ReadLock();
+    }
+
+    /// @brief Notifies the event loop to continue.
+    void Continue() RELEASE_GENERIC(taskExecution_)
+    {
+        taskExecution_.Unlock();
+    }
+
+    void OnCall(const char *method, Handler &&handler)
+    {
+        OnCallImpl(method, [this, h = std::move(handler)](const std::string &sessionId, const JsonObject &params) {
+            os::memory::WriteLockHolder lock(taskExecution_);
+            return h(sessionId, params);
+        });
+    }
 
     void Call(const char *method, std::function<void(JsonObjectBuilder &)> &&params)
     {
@@ -59,8 +98,21 @@ public:
         Call({}, method, [](JsonObjectBuilder & /* builder */) {});
     }
 
-    virtual void OnCall(const char *method, Handler &&handler) = 0;
+    virtual void Call(const std::string &sessionId, const char *method,
+                      std::function<void(JsonObjectBuilder &)> &&params) = 0;
+
+    virtual void OnValidate(std::function<void()> &&handler) = 0;
+    virtual void OnOpen(std::function<void()> &&handler) = 0;
+    virtual void OnFail(std::function<void()> &&handler) = 0;
+
+private:
+    virtual void OnCallImpl(const char *method, Handler &&handler) = 0;
+
+private:
+    std::atomic<bool> running_ {false};
+    os::memory::RWLock taskExecution_;
 };
+
 }  // namespace ark::tooling::inspector
 
 #endif  // PANDA_TOOLING_INSPECTOR_CONNECTION_SERVER_H

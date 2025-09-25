@@ -15,7 +15,6 @@ import("//arkcompiler/runtime_core/static_core/ark_config.gni")
 
 libarkinspector_sources = [
   "connection/endpoint_base.cpp",
-  "connection/event_loop.cpp",
   "connection/ohos_ws/ohos_ws_server.cpp",
   "connection/ohos_ws/ohos_ws_server_endpoint.cpp",
   "connection/server_endpoint_base.cpp",
