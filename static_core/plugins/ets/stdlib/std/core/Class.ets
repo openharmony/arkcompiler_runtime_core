@@ -142,6 +142,29 @@ export final class Class {
     }
 
     /**
+     * Looks up an public static method by name
+     *
+     * @param name - The method name to search for
+     * @param signature - The method signature to search for (optional). If omitted, first match is returned
+     *
+     * @returns The {@link reflect.StaticMethod} if found, `undefined` otherwise
+     */
+    public getStaticMethodByName(name: string, signature?: FixedArray<Class>): reflect.StaticMethod | undefined {
+        let cls: Class | undefined = this
+        while (cls != undefined) {
+            let methodFoundByName = cls.getDirectStaticMethodByNameInternal(name, undefined, true)
+            if (methodFoundByName != undefined) {
+                if (signature == undefined) {
+                    return methodFoundByName
+                }
+                return cls.getDirectStaticMethodByNameInternal(name, signature, true)
+            }
+            cls = cls.getSuper()
+        }
+        return undefined
+    }
+
+    /**
      * Gets only public instance fields of a class
      *
      * @returns Immutable array of instance {@link reflect.InstanceField} objects
@@ -219,6 +242,7 @@ export final class Class {
     private native getInstanceMethodsInternal(publicOnly: boolean): FixedArray<reflect.InstanceMethod>
     private native getInstanceMethodByNameInternal(name: string, publicOnly: boolean): reflect.InstanceMethod | undefined
     private native getInstanceFieldByNameInternal(name: string, publicOnly: boolean): reflect.InstanceField | undefined
+    private native getDirectStaticMethodByNameInternal(name: string, signature: FixedArray<Class> | undefined, publicOnly: boolean): reflect.StaticMethod | undefined
     private native getInstanceFieldsInternal(publicOnly: boolean): FixedArray<reflect.InstanceField>
     private native getStaticMethodsInternal(publicOnly: boolean): FixedArray<reflect.StaticMethod>
     private native getStaticFieldsInternal(publicOnly: boolean): FixedArray<reflect.StaticField>
