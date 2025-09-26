@@ -19,3 +19,7 @@ interface_members:
   - "m(value?: Number)"
   - "m(value: Number| undefined)"
   - "m(): Number| undefined"
+  - "f ?: int;"
+  - "readonly f: int;"
+  - "get f(): int;"
+  - "get f(): int;\n  set f(f: int);"

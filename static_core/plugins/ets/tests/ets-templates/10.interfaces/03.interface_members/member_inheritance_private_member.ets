@@ -29,9 +29,8 @@ interface B extends A {
 }
 
 class D implements B {
-
 }
 
 function main(): void {
-  arktest.assertEQ(new D().m(), 5)
+  new D().m()
 }

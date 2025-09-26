@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,17 +13,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
-
 /*---
-desc: Inherite all non-private members.
-assert: An interface inherits from its direct superinterfaces all the non-private member types of the superinterfaces that are both accessible to code in the interface and not hidden by a declaration in the interface.
+desc: Creating an instance of interface type.
+assert: Creating an instance of interface type is not possible.
+tags: [compile-only, negative]
 ---*/
 
-{{c.decl}}
+interface A {}
 
 function main(): void {
-  {{c.assert}}
+  new A()
 }
-
-{% endfor %}
