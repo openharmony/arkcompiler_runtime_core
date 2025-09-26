@@ -14,20 +14,20 @@
  */
 
 class A {
-    param: string = "123";
+    public param: string = '123';
     foo(a: string): void {
       console.log(a);
     }
 }
 
 class MyClass {
-    prop: string;
+    public prop: string;
     constructor() {
-        this.prop = "class prop";
+        this.prop = 'class prop';
     }
 }
 
-function InitFuncName(a: string, inst: MyClass) {
+function initFuncName(a: string, inst: MyClass) {
   console.log(a)
   console.log(inst.prop)
 }
@@ -39,11 +39,11 @@ function add2(a: int, b: int): number {
     return a;
 }
 function add3(a: int, b: int): string {
-    return "123";
+    return '123';
 }
 function main() {
     let classA = new A();
-    InitFuncName("123", new MyClass());
+    initFuncName('123', new MyClass());
     console.log(add1(1, 2));
     console.log(add3(1, 2));
     classA.foo("foo");
