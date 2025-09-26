@@ -30,6 +30,8 @@ enum class ClassRoot {
     U64,
     F32,
     F64,
+    ANY,
+    NEVER,
     TAGGED,
     ARRAY_U1,
     ARRAY_I8,

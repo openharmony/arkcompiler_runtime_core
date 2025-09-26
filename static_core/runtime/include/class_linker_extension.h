@@ -48,6 +48,8 @@ public:
         return false;
     }
 
+    virtual void InitializeSyntheticClass(Class *synClass) = 0;
+
     virtual void InitializePrimitiveClass(Class *primitiveClass) = 0;
 
     virtual size_t GetClassVTableSize(ClassRoot root) = 0;
@@ -276,6 +278,8 @@ protected:
     void InitializePrimitiveClassRoot(ClassRoot root, panda_file::Type::TypeId typeId, const char *descriptor);
 
     void InitializeArrayClassRoot(ClassRoot root, ClassRoot componentRoot, const char *descriptor);
+
+    void InitializeSyntheticClassRoot(ClassRoot root, const char *descriptor);
 
     void FreeLoadedClasses();
 

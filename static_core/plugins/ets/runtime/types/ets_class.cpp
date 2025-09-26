@@ -609,6 +609,10 @@ EtsString *EtsClass::CreateEtsClassName([[maybe_unused]] const char *descriptor)
             return EtsString::CreateFromMUtf8("double");
         case 'V':
             return EtsString::CreateFromMUtf8("void");
+        case 'Y':
+            return EtsString::CreateFromMUtf8("Y");
+        case 'N':
+            return EtsString::CreateFromMUtf8("N");
         default:
             LOG(FATAL, RUNTIME) << "Incorrect primitive name" << descriptor;
             UNREACHABLE();

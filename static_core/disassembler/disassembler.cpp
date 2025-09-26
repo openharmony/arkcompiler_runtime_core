@@ -324,9 +324,10 @@ void Disassembler::Serialize(const pandasm::Function &method, std::ostream &os, 
 inline bool Disassembler::IsSystemType(const std::string &typeName)
 {
     bool isArrayType = typeName.back() == ']';
+    bool isSyntheticType = typeName.front() == '{';
     bool isGlobal = typeName == "_GLOBAL";
 
-    return isArrayType || isGlobal;
+    return isArrayType || isGlobal || isSyntheticType;
 }
 
 void Disassembler::GetRecord(pandasm::Record &record, const panda_file::File::EntityId &recordId)

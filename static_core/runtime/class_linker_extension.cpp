@@ -110,6 +110,19 @@ void ClassLinkerExtension::InitializePrimitiveClassRoot(ClassRoot root, panda_fi
     SetClassRoot(root, primitiveClass);
 }
 
+void ClassLinkerExtension::InitializeSyntheticClassRoot(ClassRoot root, const char *descriptor)
+{
+    ASSERT(IsInitialized());
+
+    auto *synClass = CreateClass(utf::CStringAsMutf8(descriptor), 0, 0, GetClassSize(root));
+    ASSERT(synClass != nullptr);
+    synClass->SetType(panda_file::Type(panda_file::Type::TypeId::REFERENCE));
+    synClass->SetLoadContext(&bootContext_);
+    InitializeSyntheticClass(synClass);
+    AddClass(synClass);
+    SetClassRoot(root, synClass);
+}
+
 bool ClassLinkerExtension::Initialize(ClassLinker *classLinker, bool compressedStringEnabled)
 {
     classLinker_ = classLinker;

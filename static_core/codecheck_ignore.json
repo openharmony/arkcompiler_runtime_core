@@ -146,6 +146,7 @@
   "plugins/ets/tests/interop_js/xgc/mark_test_sts.ets": "*",
   "plugins/ets/tests/libani_helpers/tests/ani_signature_builder": "*",
   "plugins/ets/tests/lookup_by_name": "*",
+  "plugins/ets/tests/any_never": "*",
   "plugins/ets/tests/micro-benchmarks": "*",
   "plugins/ets/tests/mock": "*",
   "plugins/ets/tests/napi": "*",

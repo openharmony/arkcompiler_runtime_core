@@ -220,6 +220,7 @@ private:
     bool ParseOperandLabel();
     bool ParseOperandField();
     bool ParseOperandType(Type::VerificationType verType);
+    void ParseComponentOperandTypeIfNeeded(Type type);
     bool ParseOperandNone();
     bool ParseOperandString();
     bool ParseOperandLiteralArray();

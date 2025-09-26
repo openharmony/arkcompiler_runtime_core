@@ -139,6 +139,8 @@ std::set<std::string> GetClassesForEnumerateClassesTest()
             "f32",
             "f64",
             "any",
+            "Y",
+            "N",
             "[Z",
             "[B",
             "[H",

@@ -88,6 +88,9 @@ void CoreClassLinkerExtension::InitializeClassRoots(const LanguageContext &ctx)
     InitializeArrayClassRoot(ClassRoot::ARRAY_TAGGED, ClassRoot::TAGGED, "[A");
     InitializeArrayClassRoot(ClassRoot::ARRAY_STRING, ClassRoot::STRING,
                              utf::Mutf8AsCString(ctx.GetStringArrayClassDescriptor()));
+
+    InitializeSyntheticClassRoot(ClassRoot::ANY, "Y");
+    InitializeSyntheticClassRoot(ClassRoot::NEVER, "N");
 }
 
 void CoreClassLinkerExtension::FillStringClass(Class *strCls, ClassRoot flag)
@@ -259,6 +262,14 @@ void CoreClassLinkerExtension::InitializePrimitiveClass(Class *primitiveClass)
     primitiveClass->SetState(Class::State::INITIALIZED);
 }
 
+void CoreClassLinkerExtension::InitializeSyntheticClass(Class *synClass)
+{
+    ASSERT(IsInitialized());
+
+    synClass->SetAccessFlags(ACC_PUBLIC | ACC_FINAL | ACC_ABSTRACT);
+    synClass->SetState(Class::State::INITIALIZED);
+}
+
 size_t CoreClassLinkerExtension::GetClassVTableSize(ClassRoot root)
 {
     ASSERT(IsInitialized());
@@ -275,6 +286,8 @@ size_t CoreClassLinkerExtension::GetClassVTableSize(ClassRoot root)
         case ClassRoot::U64:
         case ClassRoot::F32:
         case ClassRoot::F64:
+        case ClassRoot::ANY:
+        case ClassRoot::NEVER:
         case ClassRoot::TAGGED:
             return 0;
         case ClassRoot::ARRAY_U1:
@@ -322,6 +335,8 @@ size_t CoreClassLinkerExtension::GetClassIMTSize(ClassRoot root)
         case ClassRoot::F32:
         case ClassRoot::F64:
         case ClassRoot::TAGGED:
+        case ClassRoot::ANY:
+        case ClassRoot::NEVER:
             return 0;
         case ClassRoot::ARRAY_U1:
         case ClassRoot::ARRAY_I8:
@@ -367,6 +382,8 @@ size_t CoreClassLinkerExtension::GetClassSize(ClassRoot root)
         case ClassRoot::U64:
         case ClassRoot::F32:
         case ClassRoot::F64:
+        case ClassRoot::ANY:
+        case ClassRoot::NEVER:
         case ClassRoot::TAGGED:
             return Class::ComputeClassSize(GetClassVTableSize(root), GetClassIMTSize(root), 0, 0, 0, 0, 0, 0);
         case ClassRoot::ARRAY_U1:
