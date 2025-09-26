@@ -349,7 +349,11 @@ Region *RegionPool::NewRegion(void *region, RegionSpace *space, size_t regionSiz
     TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
     ret->AddFlag(edenOrOldOrNonmovable);
     ret->AddFlag(properties);
-    ret->AddFlag(zeroed);
+    // Don't add zeroed flag for the old region during GC, because GC copies object without memory zeroing,
+    // but can "touch" memory that can be available after GC
+    if (edenOrOldOrNonmovable != RegionFlag::IS_OLD || properties != RegionFlag::IS_UNUSED) {
+        ret->AddFlag(zeroed);
+    }
     ret->CreateRemSet();
     ret->SetupAtomics();
     ret->CreateMarkBitmap();
