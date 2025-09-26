@@ -592,6 +592,8 @@ export abstract class Type extends Object {
             return FloatType.REF
         } else if (primitiveType instanceof DoubleType) {
             return DoubleType.REF
+        } else if (primitiveType instanceof VoidType) {
+            return VoidType.REF
         } else {
             throw new Error(`failed to convert primitive type ${primitiveType.getName()} to relevant reference type`)
         }

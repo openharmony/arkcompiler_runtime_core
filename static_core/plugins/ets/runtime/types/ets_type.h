@@ -43,6 +43,7 @@ static constexpr const uint8_t PROPERTY_PREFIX_LENGTH = 10;
 static constexpr const char *STD_CORE_FUNCTION_PREFIX = "std.core.Function";
 static constexpr const char *STD_CORE_FUNCTION_UNSAFECALL_METHOD = "unsafeCall";
 static constexpr const char *STD_CORE_FUNCTION_INVOKE_PREFIX = "invoke";
+static constexpr const char *STD_CORE_FUNCTION_INVOKE_R_PREFIX = "invokeR";
 
 enum class EtsType { BOOLEAN, BYTE, CHAR, SHORT, INT, LONG, FLOAT, DOUBLE, OBJECT, UNKNOWN, VOID };
 
