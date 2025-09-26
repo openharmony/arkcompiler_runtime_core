@@ -866,7 +866,11 @@ ClassLinkerContext *EtsClassLinkerExtension::CreateApplicationClassLinkerContext
 /* static */
 ClassLinkerContext *EtsClassLinkerExtension::GetParentContext(ClassLinkerContext *ctx)
 {
-    auto *linker = GetOrCreateEtsRuntimeLinker(ctx);
+    if (ctx->IsBootContext()) {
+        return nullptr;
+    }
+    auto linker = GetEtsRuntimeLinker(ctx);
+    ASSERT(linker != nullptr);
     auto *abcRuntimeLinker = EtsAbcRuntimeLinker::FromEtsObject(linker);
     auto *parentLinker = abcRuntimeLinker->GetParentLinker();
     return parentLinker->GetClassLinkerContext();

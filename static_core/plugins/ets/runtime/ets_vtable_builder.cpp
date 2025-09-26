@@ -101,6 +101,17 @@ private:
             return true;
         }
 
+        auto linker = Runtime::GetCurrent()->GetClassLinker();
+
+        for (auto itctx = const_cast<ClassLinkerContext *>(ctx_); itctx != nullptr;
+             itctx = EtsClassLinkerExtension::GetParentContext(itctx)) {
+            if (auto cls = linker->FindLoadedClass(descriptor_, itctx); cls != nullptr) {
+                pf_ = cls->GetPandaFile();
+                id_ = cls->GetFileId();
+                return true;
+            }
+        }
+
         // Need to traverse `RuntimeLinker` chain, which is why `EnumeratePandaFilesInChain` is used
         // NOTE(vpukhov): speedup lookup with tls cache
         ctx_->EnumeratePandaFilesInChain([this](panda_file::File const &itpf) {
