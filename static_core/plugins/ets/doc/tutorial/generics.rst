@@ -37,8 +37,7 @@ type definition, like the type parameter ``Element`` in the following example:
         }
     }
 
-To use type ``Stack``, the type argument must be specified for each type
-parameter:
+To use type ``Stack``, type argument must be specified for each type parameter:
 
 .. code-block:: typescript
 

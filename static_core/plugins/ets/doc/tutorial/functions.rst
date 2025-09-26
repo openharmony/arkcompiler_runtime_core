@@ -23,8 +23,8 @@ Function Declarations
 A function declaration introduces a named function by specifying its name,
 parameters, return type, and body.
 
-Below is an example of a simple function with two string parameters and string
-return type:
+A simple function with two string parameters and string return type is
+represented in the example below:
 
 .. code-block:: typescript
 
@@ -33,7 +33,7 @@ return type:
         return z
     }
 
-Every parameter's type annotation must be specified. When calling a function,
+Type annotation of each parameter must be specified. When calling a function,
 the corresponding argument of an optional parameter can be omitted. The last
 parameter of a function can be a rest parameter (see below).
 
@@ -56,7 +56,7 @@ An optional parameter has the form '``name?: Type``':
 
 Another form contains an expression that specifies a default value. If the
 corresponding argument to such parameter is omitted in a function call,
-then this parameter's value is default:
+then the parameter has the default value:
 
 .. code-block:: typescript
 
@@ -91,8 +91,8 @@ functions or methods can take an unlimited number of arguments:
 Return Types
 ------------
 
-If the function return type is inferable from the function body's content,
-then it can be omitted from the function declaration:
+If function return type can be inferred from the content of the function body,
+then the type can be omitted from the function declaration:
 
 .. code-block:: typescript
 
@@ -102,9 +102,9 @@ then it can be omitted from the function declaration:
     // Implicit return type inferred as string
     function goo() { return "goo" }
 
-If the function return type does not need to return a value, then it can
-be explicitly specified as ``void``, or omitted altogether. Such functions
-require no return statement.
+If a function requires no return statement, and function return type does not
+need to return a value, then the type can be explicitly specified as ``void``
+or omitted altogether.
 
 Both notations are valid in the example below:
 
@@ -130,7 +130,7 @@ Function Calls
 --------------
 
 Calling a function actually leads to the execution of its body, while
-the arguments of the call are assigned to the function parameters.
+arguments of the call are assigned to function parameters.
 
 If the function is defined as follows:
 
@@ -170,7 +170,8 @@ Function types are commonly used as follows to define callbacks:
 Arrow Functions or Lambdas
 ---------------------------
 
-A function can be defined as an arrow function, for example:
+A function can be defined as an arrow function as in the following
+example:
 
 .. code-block:: typescript
 
@@ -181,8 +182,8 @@ A function can be defined as an arrow function, for example:
 If an arrow function return type is omitted, then it is inferred
 from the function body.
 
-An expression can be specified as an arrow function to make the notation
-shorter. For example, the following two notations are semantically equivalent:
+An expression can be specified as an arrow function to shorten a notation.
+For example, the following two notations are semantically equivalent:
 
 .. code-block:: typescript
 
@@ -220,8 +221,8 @@ Function Overload Signatures
 ----------------------------
 
 Overload signatures can be written to specify that a function can be called
-in different ways. Writing an overload signature means that the functions'
-several headers have the same name but different signatures, and are immediately
+in different ways. Writing an overload signature means that several headers
+of the function have the same name but different signatures, and are immediately
 followed by a single implementation function:
 
 .. code-block:: typescript

@@ -114,6 +114,11 @@ The syntax of *class declaration* is presented below:
         'abstract' | 'final'
         ;
 
+.. classModifier:
+   'abstract' | 'final' | 'sealed'
+   ;
+
+
 .. index::
    class declaration
    class type
@@ -123,6 +128,9 @@ The syntax of *class declaration* is presented below:
 
 Classes with the ``final`` modifier are an experimental feature
 discussed in :ref:`Final Classes`.
+
+.. Classes with the ``sealed`` modifier are an experimental feature
+   discussed in :ref:`Sealed Classes`.
 
 The scope of a class declaration is specified in :ref:`Scopes`.
 
@@ -171,10 +179,10 @@ Abstract Classes
     frontend_status: Done
 
 A class with the modifier ``abstract`` is known as abstract class. An abstract
-class is a class that cannot be instantiated, meaning no objects of this type
-can be created. It serves as a blueprint for other classes, defining common
+class is a class that cannot be instantiated, i.e., no objects of this type
+can be created. It serves as a blueprint for other classes by defining common
 fields and methods that subclasses must implement. Abstract classes can contain
-both abstract and concrete methods. 
+both abstract and concrete methods.
 
 A :index:`compile-time error` occurs if an attempt is made to create an
 instance of an abstract class:
@@ -344,8 +352,8 @@ accessible (see :ref:`Accessible`) within subclasses:
    :linenos:
 
     class Base {
-      // All methods are mutually accessible in the class where
-          they were declared
+      /* All methods are accessible in the class where
+          they were declared */
       public publicMethod () {
         this.protectedMethod()
         this.privateMethod()
@@ -611,7 +619,7 @@ A class must implement all required properties from all superinterfaces (see
 or as a getter, a setter, or both. In any case implementation may be provided
 in a form of field or accessors.
 
-The following table summarises all valid variants of implemenatation,
+The following table summarizes all valid variants of implementation, and
 a :index:`compile-time error` occurs for any other combinations:
 
    =========================== ======================================================
@@ -628,7 +636,7 @@ Providing implementation for the property in the form of
 a field is not necessary:
 
 .. index::
-   implementatoin
+   implementation
    interface
    class
    superinterface
@@ -664,10 +672,9 @@ a field is not necessary:
       }
     }
 
-If a property is implemented as a field, the required accessors
-and a private hidden field are defined implicitly. For the
-``StyleClassOne`` the following entities are implicitly defined,
-as shown below:
+If a property is implemented as a field, then any required accessors
+and a private hidden field are defined implicitly. Entities for
+``StyleClassOne`` are implicitly defined as follows:
 
 .. code-block:: typescript
    :linenos:
@@ -821,14 +828,14 @@ the interface:
 
 
 If a property is implemented by accessors (see
-:ref:`Class Accessor Declarations`) then it is OK to implement only one
-of accessors for the optional field, the default implementation will be
-used for another one. That is illustrated in the following example:
+:ref:`Class Accessor Declarations`), then it is acceptable to implement only one
+accessor for an optional field, and use default implementation for another
+accessor as represented in the following example:
 
 .. index::
    interface
    implementation
-   propery
+   property
    field
    private field
    hidden field
@@ -924,11 +931,9 @@ The syntax is presented below:
         annotationUsage?
         accessModifier?
         ( constructorDeclaration
-        | constructorWithOverloadSignatures
         | overloadConstructorDeclaration
         | classFieldDeclaration
         | classMethodDeclaration
-        | classMethodWithOverloadSignatures
         | overloadMethodDeclaration
         | classAccessorDeclaration
         )
@@ -1188,6 +1193,7 @@ class derived from ``C``:
       c.count++ // compile-time error - 'count' is not accessible
     }
 
+
 .. index::
    protected modifier
    access modifier
@@ -1244,7 +1250,7 @@ Field Declarations
 
 *Field declarations* represent data members in class instances or static data
 members (see :ref:`Static and Instance Fields`). Class instance
-*field declarations* are its *own fields* in constrast to the inherited ones.
+*field declarations* are its *own fields* in contrast to the inherited ones.
 Syntactically, a field declaration is similar to a variable declaration.
 
 .. code-block:: abnf
@@ -1263,7 +1269,7 @@ Syntactically, a field declaration is similar to a variable declaration.
         ;
 
 .. index::
-   field delcaration
+   field declaration
    data member
    class instance
    static data member
@@ -1494,10 +1500,11 @@ subsequent assignment are only performed once.
 The initializer of a non-static field declaration is evaluated at runtime.
 The assignment is performed each time an instance of the class is created.
 
-The instance field initializer expression cannot use the following:
+The instance field initializer expression cannot use the following directly in
+any form:
 
-- ``super`` directly in any form; or
-- ``this`` directly in any form.
+- ``super``; or
+- ``this``.
 
 If the initializer expression contains one of the above patterns, then a
 :index:`compile-time error` occurs.
@@ -1589,7 +1596,7 @@ Initialization of this field can be performed in a constructor
    nullish type
    class declaration
    field
-   constuctor
+   constructor
    constructor declaration
 
 *Field with late initialization* cannot have *field initializers* or be an
@@ -1959,6 +1966,35 @@ regardless of the their signature:
     Derived.foo()           // compile-time error as foo() in Derived has shadowed Base.foo()
 
 
+Note: class static methods may access protected or private members of the same
+class type or derived one represented as parameters or local variables:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+      protected count1: number   
+      private   count2: number   
+      static getCount(c: C): number {
+        const local_c = new C
+        return c.count1 + c.count2 + local_c.count1 + local_c.count2 // OK
+      }
+      static handleDerived (b: B) {
+          b.count1 + b.count2 // OK
+      }
+    }
+    class B extends C {
+      static dealWithProtected (b: B) {
+          b.count1 // OK
+          b.count2 // compile-time error
+      }
+    }
+
+    C.getCount (new C)      // will return the sum of counts
+    C.handleDerived (new B) // will work with protected and private fields
+
+
+
 .. index::
    static method
    method
@@ -2130,7 +2166,7 @@ always use the same default parameter values for the overridden method.
 Otherwise, a :index:`compile-time error` occurs.
 
 More details on overriding are provided in :ref:`Overriding in Classes` and
-:ref:`Overriding and Overload Signatures in Interfaces`.
+:ref:`Overriding and Overloading in Interfaces`.
 
 
 .. index::
@@ -2421,7 +2457,7 @@ If a getter has no return type specified, then the type is inferred as in
 
     class Person {
       private _age: number = 0
-      get age() { return this._age } // retuirn type is inferred as number
+      get age() { return this._age } // return type is inferred as number
     }
 
 
@@ -2664,7 +2700,7 @@ Constructors have two variations:
 
 The high-level sequence of a *primary constructor* body includes the following:
 
-1. Optional arbitrary code that does not use ``this`` or ``super``.
+1. Optional arbitrary code that uses neither ``this`` nor ``super``.
 
 2. Mandatory call to a superconstructor (see :ref:`Explicit Constructor Call`)
    if a class has an extension clause (see :ref:`Class Extension Clause`) on all
@@ -2673,14 +2709,45 @@ The high-level sequence of a *primary constructor* body includes the following:
 3. Mandatory execution of field initializers (if any) in the order they appear
    in a class body implicitly added by the compiler.
 
-4. Optional arbitrary code that uses neither of the following:
+4. Optional arbitrary code that avoids usage of non-initialized fields.
 
-   - Value of an instance field before its initialization;
-   - Keyword ``this`` to denote a newly created instance before the
-     initialization of all instance fields except
-     :ref:`Fields with Late Initialization`.
+5. Optional code that ensures all object fields to be initialized.
 
-5. All object fields are initialized.
+6. Optional arbitrary code.
+
+As step 4 above cannot be guaranted at compile time in all possible cases, the
+following strategy is to be taken:
+
+  - If the compiler can detect that a non-initialized field is accessed
+    during compilation, then a :index:`compile-time error` occurs;
+  - Otherwise, it is a responsibility of the runtime system to detect such
+    cases and handle them with a runtime exception.
+
+.. code-block:: typescript
+   :linenos:
+
+    class Base {
+      x: Object
+      constructor() {
+          this.x = new Object // Base object is fully initialized
+          crash_this (this)
+      }
+    }
+    class Derived {
+      y: Object
+      constructor () {
+          super() // mandatory call to base class constructor
+          this.y = new Object
+      }
+    }
+    function crash_this (b: Base) {
+          if (b instanceof Derived) { // If b is of type Derived, then
+                console.log ((b as Derived).y) // Access y field of Derived object
+                // Depending on the compilation context, either the compiler reports
+                // a compile-time error, or the runtime system is to detect the case
+          }
+    }
+
 
 
 .. index::

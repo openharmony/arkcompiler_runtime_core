@@ -115,18 +115,16 @@ Asynchronous API
 .. meta:
     frontend_status: Done
 
-``Async`` functions are coroutines (functions which can be suspended and then
-resumed) that can be called as regular functions. 
+``Async`` functions are coroutines (i.e., functions which can be suspended and
+resumed later) that can be called as regular functions.
+A :index:`compile-time error` occurs if:
 
-A :index:`compile-time error` occurs if
+- ``Async`` function is called in a static initializer, including module scope;
+- ``Async`` function has an ``abstract`` or a ``native`` modifier;
+- Return type of an ``async`` function is other than ``Promise<T>``.
 
-- ``Async`` functions are called in static initializers, including module
-  scope;
-- ``Async`` functions have ``abstract`` or ``native`` modifier;
-- The return type of an ``async`` function is different from ``Promise<T>``.
-
-Type ``Promise<T>`` a library type discussed in detail in the |LANG| Concurrency
-Specification.
+Type ``Promise<T>`` is a library type discussed in detail in the |LANG| 
+Concurrency Specification.
 
 The returning values of both type ``Promise<T>`` and type ``T`` are allowed
 inside the ``async`` function body (see :ref:`Return Type Inference`).
@@ -296,7 +294,7 @@ The methods are used as follows:
    The callback is called on the coroutine when ``then`` called, and if
    ``Promise`` is passed from one coroutine to another and called ``then`` in
    both, then they are called in different coroutines (possibly concurrently).
-   The developer must consider a possible data race and take appropriate care.
+   The developer must consider a possible data race, and take appropriate care.
 
 .. index::
    coroutine

@@ -207,7 +207,7 @@ Grammar Summary
         | unaryExpression
         | binaryExpression
         | assignmentExpression
-        | conditionalExpression
+        | ternaryConditionalExpression
         | stringInterpolation
         | lambdaExpression
         | lambdaExpressionWithReceiver
@@ -409,9 +409,10 @@ Grammar Summary
 
     assignmentOperator
         : '='
-        | '+='  | '-='  | '*='   | '='  | '%='
+        | '+='  | '-='  | '*='   | '='  | '%=' | `**=` | `/=`
         | '<<=' | '>>=' | '>>>='
-        | '&='  | '|='  | '^='
+        | '&='  | '|='  | '^=' | `&&=` | `||=`
+        | `??=`
         ;
 
     lhsExpression:
@@ -422,7 +423,7 @@ Grammar Summary
         expression
         ;
 
-    conditionalExpression:
+    ternaryConditionalExpression:
         expression '?' expression ':' expression
         ;
 
@@ -605,6 +606,11 @@ Grammar Summary
         'abstract' | 'final'
         ;
 
+.. classModifier:
+   'abstract' | 'final' | 'sealed'
+   ;
+
+
     classExtendsClause:
         'extends' typeReference
         ;
@@ -627,11 +633,9 @@ Grammar Summary
         annotationUsage?
         accessModifier?
         ( constructorDeclaration
-        | constructorWithOverloadSignatures
         | overloadConstructorDeclaration
         | classFieldDeclaration
         | classMethodDeclaration
-        | classMethodWithOverloadSignatures
         | overloadMethodDeclaration
         | classAccessorDeclaration
         )
@@ -753,18 +757,8 @@ Grammar Summary
         identifier ('=' constantExpression)?
         ;
 
-    compilationUnit:
-        moduleDeclaration
-        | declarationModule
-        | libraryDescription
-        ;
-
     moduleDeclaration:
         importDirective* (topDeclaration | topLevelStatements | exportDirective)*
-        ;
-
-    libraryDescription:
-        (importDirective|reExportDirective)*
         ;
 
     importDirective:
@@ -802,13 +796,6 @@ Grammar Summary
         StringLiteral
         ;
 
-    declarationModule:
-        importDirective*
-        ( 'export'? ambientDeclaration
-        | 'export'? typeAlias
-        | selectiveExportDirective
-        )*
-        ;
 
     topDeclaration:
         ('export' 'default'?)?
@@ -817,7 +804,6 @@ Grammar Summary
         | variableDeclarations
         | constantDeclarations
         | functionDeclaration
-        | functionWithOverloadSignatures
         | overloadFunctionDeclaration
         | namespaceDeclaration
         | ambientDeclaration

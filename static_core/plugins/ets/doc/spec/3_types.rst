@@ -384,7 +384,7 @@ substituted for the type parameters of a named type.
    enumeration
    alias
    type parameter
-   prefedined type
+   predefined type
    function
    array
    union type
@@ -627,7 +627,7 @@ below.
    + Integer bitwise operators '``&``', '``^``', and '``|``' (see
      :ref:`Integer Bitwise Operators`);
 
--  Conditional operator '``?:``' (see :ref:`Conditional Expressions`);
+-  Ternary conditional operator ' ``?`` ``:`` ' (see :ref:`Ternary Conditional Expressions`);
 -  String concatenation operator '``+``' (see :ref:`String Concatenation`) that,
    if one operand is ``string`` and the other is of an integer type, converts
    the integer operand to ``string`` with the decimal form, and then creates a
@@ -642,6 +642,7 @@ below.
    bigint
    integer value
    comparison operator
+   ternary conditional operator
    numeric relational operator
    numeric equality operator
    equality operator
@@ -794,7 +795,7 @@ discussed below.
    + Integer bitwise operators '``&``', '``^``', and '``|``' (see
      :ref:`Integer Bitwise Operators`);
 
--  Conditional operator '``?:``' (see :ref:`Conditional Expressions`);
+-  Ternary conditional operator ' ``?`` ``:`` ' (see :ref:`Ternary Conditional Expressions`);
 -  The string concatenation operator '``+``' (see :ref:`String Concatenation`)
    that, if one operand is of type ``string`` and the other is of a
    floating-point type, converts the floating-point type operand to type
@@ -807,6 +808,7 @@ discussed below.
    floating-point number
    operator
    value
+   ternary conditional operator
    numeric relational operator
    numeric equality operator
    comparison operator
@@ -990,7 +992,7 @@ The boolean operators are as follows:
 -  Logical operators '``&``', '``^``', and '``|``' (see :ref:`Boolean Logical Operators`);
 -  Conditional-and operator '``&&``' (see :ref:`Conditional-And Expression`) and
    conditional-or operator '``||``' (see :ref:`Conditional-Or Expression`);
--  Conditional operator '``?:``' (see :ref:`Conditional Expressions`);
+-  Ternary conditional operator ' ``?`` ``:`` ' (see :ref:`Ternary Conditional Expressions`);
 -  String concatenation operator '``+``' (see :ref:`String Concatenation`)
    that converts an operand of type ``boolean`` to type ``string`` (``true`` or
    ``false``), and then creates a concatenation of the two strings as a new
@@ -1005,8 +1007,8 @@ The boolean operators are as follows:
    logical operator
    conditional-and operator
    conditional-or operator
-   conditional operator
-   conditional expression
+   ternary conditional operator
+   ternary conditional expression
    string concatenation operator
    floating-point expression
    comparison
@@ -1077,7 +1079,7 @@ supertype of :ref:`Type void` and :ref:`Type null` in particular.
 Type ``Any`` has no methods or fields.
 
 .. Type ``NonNullable<Any>`` provides ability to call ``toString()`` from any 
-   non-nullable object returning a string representation of that object. This is
+   non-nullable object returning a string representation of that object. This is
    used in the examples in this document. 
 
 |
@@ -1762,7 +1764,7 @@ A type alias can set a name for an array type (see :ref:`Type Alias Declaration`
 .. code-block:: typescript
    :linenos:
 
-    type Matrix = number[][] /* Two-dimensional array */
+    type Matrix = number[][] /* array or array of numbers */
 
 An array as an object is assignable to a variable of type ``Object``:
 
@@ -1780,7 +1782,6 @@ An array as an object is assignable to a variable of type ``Object``:
    array element
    access
    type alias
-   two-dimensional array
    assignability
    array type
    object
@@ -1824,7 +1825,7 @@ syntax forms:
 
 Both forms specify identical (indistinguishable) types (see :ref:`Type Identity`).
 
-**Note.** In multidimensional arrays, all dimensions are ``readonly``.
+**Note.** In arrays of arrays, all arrays are ``readonly``.
 
 .. index::
    prefix readonly
@@ -1836,8 +1837,6 @@ Both forms specify identical (indistinguishable) types (see :ref:`Type Identity`
    syntax
    array
    initial value
-   multidimensional array
-   dimension
 
 |
 
@@ -2446,7 +2445,7 @@ conditions are fulfilled:
 
 - Each ``T``:sub:`i` is an interface or class type;
 
-- Each ``T``:sub:`i` has a member with the name ``m``; and
+- Each ``T``:sub:`i` has a non-static member with the name ``m``; and
 
 - For any ``T``:sub:`i`, ``m`` is one of the following:
 
@@ -2471,12 +2470,14 @@ Otherwise, a :index:`compile-time error` occurs as follows:
         s = "aa"
         foo() {}
         goo(n: number) {}
+        static foo () {}
     }
     class B {
         n = 2
         s = 3.14
         foo() {}
         goo() {}
+        static foo () {}
     }
 
     let u: A | B = new A
@@ -2487,13 +2488,16 @@ Otherwise, a :index:`compile-time error` occurs as follows:
     console.log(u.s) // compile-time error as field types differ
     u.goo() // compile-time error as signatures differ
 
+    type AB = A | B
+    AB.foo() // compile-time error as foo() is a static method
+
 .. index::
    field
    signature
    method
 
 A :index:`compile-time error` occurs if in some ``T``:sub:`i`
-the name ``m`` refers to the *overload alias*:
+the name ``m`` is overloaded (see :ref:`Overloading`):
 
 .. code-block:: typescript
    :linenos:
@@ -2512,30 +2516,6 @@ the name ``m`` refers to the *overload alias*:
         x.foo() // compile-time error, as 'foo' in C is the overload alias
         x.foo2("aa") // ok, as 'foo2' in both C and D is a method
     }
-
-A :index:`compile-time error` also occurs if in some ``T``:sub:`i`
-the name ``m`` refers to the *method with overload signatures*:
-
-.. code-block:: typescript
-   :linenos:
-
-    class C {
-        foo(a: number): void
-        foo(a: string): void
-        foo(...x: Any[]): Any {}
-    }
-    class D {
-        foo(a: number): void {}
-    }
-
-    function test(x: C | D) {
-        x.foo(1) // compile-time error, as 'foo' in C has overload signatures
-    }
-
-.. index::
-   overload alias
-   method
-   overload signature
 
 |
 

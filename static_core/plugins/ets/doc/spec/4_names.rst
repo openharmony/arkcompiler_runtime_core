@@ -77,8 +77,8 @@ In a qualified name *N.x* (where *N* is a simple name, and ``x`` is an
 identifier that can follow a sequence of identifiers separated with '``.``'
 tokens), *N* can name the following:
 
--  Name of a compilation unit (see :ref:`Compilation Units`) that is introduced
-   as a result of ``import * as N`` (see :ref:`Bind All with Qualified Access`)
+-  Name of a module (see :ref:`Modules and Namespaces`) that is introduced as a
+   result of    ``import * as N`` (see :ref:`Bind All with Qualified Access`)
    with ``x`` to name the exported entity;
 
 -  A class or interface type (see :ref:`Classes`, :ref:`Interfaces`) with ``x``
@@ -90,7 +90,6 @@ tokens), *N* can name the following:
    name
    entity
    simple name
-   compilation unit
    qualified access
    exported entity
    interface type variable
@@ -129,7 +128,6 @@ A declaration introduces a named entity in an appropriate *declaration scope*
 - :ref:`Type Declarations`;
 - :ref:`Variable and Constant Declarations`;
 - :ref:`Function Declarations`;
-- :ref:`Declarations with Overload Signatures`;
 - :ref:`Classes`;
 - :ref:`Interfaces`;
 - :ref:`Enumerations`;
@@ -192,12 +190,15 @@ A :index:`compile-time error` occurs if a declaration is not distinguishable:
     interface Object {}
     let Array = 42
 
-**Note**. :ref:`Declarations with Overload Signatures` declares a single entity
-with an unique name and several signatures, but not several entities.
+
+    /* compile-time error: ambient and non-ambient declarations refer to the
+       same entity in a single module
+    */
+    declare function foo()
+    function foo() {}
 
 .. index::
    declaration
-   overloading
    distinguishable functions
 
 |
@@ -259,8 +260,7 @@ declared in:
    and *variables* are accessible (see :ref:`Accessible`)
    from their respective points of declaration to the end of the module.
    Other entities are accessible through the entire scope level.
-   If exported, a name can be accessed in other
-   compilation units.
+   If exported, a name can be accessed in other modules.
 
 .. _namespace-access:
 
@@ -282,7 +282,6 @@ declared in:
    access
    name
    declaration
-   compilation unit
    namespace
    namespace level scope
 
@@ -460,7 +459,7 @@ follows:
   or interface properties;
 - Function or method name is used to call the function or method;
 - Variable name is used to read or change the value of the variable;
-- Name of a compilation unit introduced as a result of import with Bind All with
+- Name of a module introduced as a result of import with Bind All with
   Qualified Access (see :ref:`Bind All with Qualified Access`) is used to deal
   with exported entities.
 
@@ -471,7 +470,7 @@ follows:
    function name
    method name
    value
-   compilation unit
+   module
    qualified access
    import
    bind all
@@ -845,9 +844,6 @@ The type ``T`` of a constant declaration is determined as follows:
    ``T`` (see :ref:`Assignability with Initializer`).
 -  If no type annotation is available, then ``T`` is inferred from the
    initializer expression (see :ref:`Type Inference from Initializer`).
--  If '``?``' is used after the name of the constant, then the type of the
-   constant is ``T | undefined``, regardless of whether ``T`` is identified
-   explicitly or via type inference.
 
 .. index::
    constant declaration
@@ -1042,9 +1038,6 @@ The syntax of *signature* is presented below:
         '(' parameterList? ')' returnType?
         ;
 
-A function, method, or constructor can have several *overload signatures* (see
-:ref:`Declarations with Overload Signatures`).
-
 .. index::
    signature
    parameter
@@ -1052,11 +1045,6 @@ A function, method, or constructor can have several *overload signatures* (see
    function
    method
    constructor
-   function overloading
-   method overloading
-   function overloading
-   overloaded entity
-   identification
 
 |
 
@@ -1212,21 +1200,6 @@ omitted in a function or method call:
     }
     pair(1, 2) // prints: 1 2
     pair(1) // prints: 1 7
-
-This form with the *default value* can be used only for functions or methods
-with an implementation body provided. Otherwise, a :index:`compile-time error`
-occurs.
-
-.. code-block:: typescript
-   :linenos:
-
-    function foo (p: number|undefined = undefined): void // compile-time error
-    function foo (...p: Any[]): Any {}
-
-    class X {
-        foo (p: number|undefined = undefined): void // compile-time error
-        foo (...p: Any[]): Any {}
-    }
 
 If type annotation is omitted, then the parameter type is inferred from
 the type of the ``expression``. If the type cannot be inferred, then a
@@ -1622,332 +1595,6 @@ then the function, method, or lambda return type is ``void`` (see
    type annotation
    class instance method
 
-
-|
-
-.. _Declarations with Overload Signatures:
-
-Declarations with Overload Signatures
-*************************************
-
-.. meta:
-    frontend_status: None
-
-|LANG| allows specifying a function, a method and a constructor that can
-have several *overload signatures* followed by one implementation body.
-
-A call of an entity with overload signatures is always a call of the
-implementation body. If the implementation body is missing, then a
-:index:`compile-time error` occurs.
-
-.. index::
-   overload signature
-   declaration
-   function
-   method
-   constructor
-   implementation body
-   call
-
-|
-
-.. _Function with Overload Signatures:
-
-Function with Overload Signatures
-=================================
-
-.. meta:
-    frontend_status: None
-
-The syntax of a *function with overload signatures*
-is presented below (see also :ref:`Function Declarations`):
-
-.. code-block:: abnf
-
-    functionWithOverloadSignatures:
-        functionOverloadSignature*
-        functionDeclaration
-
-    functionOverloadSignature:
-      'async'? 'function' identifier typeParameters? signature
-      ;
-
-*Function with overload signatures* declared in a non-ambient context must have
-an *implementation body* (it is then called *function with a body*).
-Otherwise, a  :index:`compile-time error` occurs.
-
-The semantic rules for *implementation bodies* are discussed in
-:ref:`Overload Signatures Implementation Body`.
-
-A :index:`compile-time error` occurs if not all overload signatures and
-implementation bodies (if any) are either exported or non-exported.
-
-The example below shows two overload signatures defined for a function:
-
-.. index::
-   function with overload signature
-   overload signature
-   non-ambient context
-   implementation body
-   function with a body
-   function declaration
-   devlaration
-   syntax
-   call
-   implementation function
-   export
-   function
-
-.. code-block:: typescript
-   :linenos:
-
-    function foo(): void           // 1st signature
-    function foo(x: string): void  // 2nd signature
-    function foo(...args: Any[]): Any // implementation signature
-    {
-        console.log(args)
-    }
-
-    foo()          // ok, call fits the 1st signature
-    foo("aa")      // ok, call fits the 2nd signature
-    foo(undefined) // compile-time error, implementation signature is not accessible
-
-The call of ``foo()`` is executed as a call of an implementation function
-with an empty array argument. The call of ``foo(x)`` is executed as a call
-of an implementation function with an argument in the form of an array with
-the sole element ``x``.
-
-.. index::
-   call
-   implementation function
-   array argument
-   argument
-   array
-
-|
-
-.. _Class Method with Overload Signatures:
-
-Class Method with Overload Signatures
-=====================================
-
-.. meta:
-    frontend_status: None
-
-The syntax of a *method with overload signatures*
-is presented below (see also :ref:`Method Declarations`):
-
-.. code-block:: abnf
-
-    classMethodWithOverloadSignatures:
-        methodOverloadSignature*
-        classMethodDeclaration
-
-    methodOverloadSignature:
-        methodModifier* identifier signature
-        ;
-
-*Method with overload signatures* declared in a non-ambient context must have
-an *implementation body* (it is then called *method with a body*). Otherwise,
-a :index:`compile-time error` occurs.
-
-.. index::
-   class method
-   overload signature
-   method declaration
-   method with overload signature
-   syntax
-   non-ambient context
-   implementation body
-   method with a body
-
-The semantic rules for *implementation bodies* are discussed in
-:ref:`Overload Signatures Implementation Body`.
-
-A :index:`compile-time error` also occurs if not **all** of the following
-requirements are met:
-
-- Access modifiers of an overload signature and an implementation method are
-  the same;
-- All overload signatures and an implementation method are either static or
-  non-static;
-- All overload signatures and an implementation method are either final or
-  non-final;
-- Overload signatures are not native (however, a native implementation method
-  is allowed);
-- Overload signatures are not abstract.
-
-Two overload signatures defined for a method are represented in the example
-below:
-
-.. index::
-   method
-   implementation body
-   overload signature
-   implementation method
-   access modifier
-   implementation method
-   static implementation method
-   non-static implementation method
-   final implementation method
-   non-final implementation method
-
-.. code-block:: typescript
-   :linenos:
-
-    class A {
-      foo(): void           // 1st signature
-      foo(x: string): void  // 2nd signature
-      foo(...args: Any[]): Any // implementation signature
-      {
-        console.log(args)
-        return new Object
-      }
-    }
-
-    const a = new A
-    a.foo()          // ok, call fits the 1st signature
-    a.foo("aa")      // ok, call fits the 2nd signature
-    a.foo(undefined) // compile-time error, implementation signature is not accessible
-
-The call of ``a.foo()`` is executed as a call of the implementation method
-with an empty array argument. The call of ``a.foo(x)`` is executed as a call
-of an implementation method with an argument in the form of an array with the
-sole element ``x``.
-
-.. code-block:: typescript
-   :linenos:
-
-    // compile-time errors: mix of different accessibility statuses,
-    // mix of static and non-static
-    class Incorrect {
-      foo(): void                    // 1st signature
-      private foo(x: string): void   // 2nd signature
-      protected foo(x: string): void // 3rd signature
-      static foo(x: Object): void    // 4th signature
-      foo(...args: Any[]): Any       // implementation signature
-      { return new Object }
-    }
-
-.. index::
-   signature
-   implementation signature
-   access
-   call
-   implementation method
-   array argument
-   array element
-
-|
-
-.. _Constructor with Overload Signatures:
-
-Constructor with Overload Signatures
-====================================
-
-.. meta:
-    frontend_status: None
-
-The syntax of a *constructor with overload signatures*
-is presented below (see also :ref:`Constructor Declaration`):
-
-.. code-block:: abnf
-
-    constructorWithOverloadSignatures:
-        constructorOverloadSignature*
-        constructorDeclaration:
-        ;
-
-    constructorOverloadSignature:
-        accessModifier? 'constructor' signature
-        ;
-
-*Constructor with overload signatures* declared in a non-ambient context must
-have an *implementation body* (it is then called *constructor with a body*).
-A :index:`compile-time error` occurs in the following situations:
-
-- Implementation body is missing;
-- Implementation body fails to follow a signature immediately; or
-- Two or more signatures of an implementation body have different access
-  modifiers.
-
-The semantic rules for *implementation bodies* are discussed in
-:ref:`Overload Signatures Implementation Body`.
-
-The example below shows two overload signatures defined for a constructor:
-
-.. index::
-   constructor
-   overload signature
-   constructor with overload signature
-   implementation constructor
-   syntax
-   non-ambient context
-   implementation body
-   signature
-   access modifier
-   access
-   implementation body
-
-.. code-block:: typescript
-   :linenos:
-
-    class A {
-      constructor ()           // 1st signature
-      constructor(x: string)  // 2nd signature
-      constructor(...args: Any[]) // implementation signature
-      {}
-    }
-
-    new A()          // ok, call fits the 1st signature
-    new A("aa")      // ok, call fits the 2nd signature
-    new A(undefined) // compile-time error, implementation signature is not accessible
-
-
-The call of ``A()`` is executed as a call of an implementation constructor with
-an empty array argument. The call of ``A(x)`` is executed as a call of an
-implementation constructor with an argument in the form of an array with the
-sole element ``x``.
-
-.. index::
-   call
-   implementation constructor
-   array argument
-   array element
-
-|
-
-.. _Overload Signatures Implementation Body:
-
-Overload Signatures Implementation Body
-=======================================
-
-*Implementation body* must have a signature as follows:
-
-- For functions or methods (see :index:`Type Any`):
-
-.. code-block:: typescript
-   :linenos:
-
-    (...args: Any[]): Any
-
-- For constructors:
-
-.. code-block:: typescript
-   :linenos:
-
-    (...args: Any[])
-
-
-Otherwise, a :index:`compile-time error` occurs.
-
-.. index::
-   implementation body
-   signature
-   any type
-   function
-   method
-   constructor
 
 |
 

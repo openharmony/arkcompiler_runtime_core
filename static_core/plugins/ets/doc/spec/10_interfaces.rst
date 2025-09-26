@@ -78,7 +78,8 @@ its superclasses must be actually declared to implement an interface.
 Otherwise, the class is not considered to implement the interface.
 
 The rules of subtyping are discussed in detail in
-:ref:`Subtyping for Classes and Interfaces`.
+:ref:`Subtyping for Non-Generic Classes and Interfaces`
+and :ref:`Subtyping for Generic Classes and Interfaces`.
 
 .. index::
    value
@@ -647,62 +648,6 @@ The syntax of *interface method declaration* is presented below:
 
 |
 
-.. _Interface Method Overload Signatures:
-
-Interface Method Overload Signatures
-====================================
-
-.. meta:
-    frontend_status: Partly
-
-|LANG| allows specifying several interface methods with a single name.
-It is a special case of :ref:`Declarations with Overload Signatures`.
-
-An *implementation body* cannot be defined in the interface, but must
-be defined in a class that implements this interface.
-
-.. index::
-   interface
-   method
-   interface method
-   overload signature
-   name
-   implementation
-
-The order of textual declarations of overloaded signatures affects the manner
-a type check is performed at the call site, starting from the signature declared
-first, and then proceeding in the proper sequence.
-
-The use of *overload signatures* is represented by the example below:
-
-.. code-block-meta:
-
-.. code-block:: typescript
-   :linenos:
-
-    interface I {
-        foo(): number                        // 1st signature
-        foo(p: string): string               // 2nd signature
-        foo(p1: string, p2?: number): number // 3rd signature       
-    }
-
-    function demo(i: I) {
-       i.foo()                     // ok, call matches the 1st signature
-       i.foo("aa")                 // ok, call matches the 2nd signature
-       let n: number = i.foo("aa") // compile-time error, as the 2nd signature returns string
-       n = i.foo("aa", undefined)  // ok, call matches the 3rd signature
-    }
-
-.. index::
-   implementation body
-   overload signatures
-   declaration
-   call site
-   signature
-   string
-
-|
-
 .. _Interface Inheritance:
 
 Interface Inheritance
@@ -713,7 +658,7 @@ Interface Inheritance
 
 Interface *I* inherits all properties and methods from its direct
 superinterfaces. Semantic checks are described in
-:ref:`Overriding and Overload Signatures in Interfaces`.
+:ref:`Overriding and Overloading in Interfaces`.
 
 **Note**. The semantic rules of methods apply to properties because any
 interface property implicitly defines a getter, a setter, or both.

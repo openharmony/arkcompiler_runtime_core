@@ -33,14 +33,22 @@ Recipes
 strings, or computed values.
 
 1. For simple objects:
+
    * Use classes with proper property declarations
    * Convert numeric keys to semantic identifiers
+
+
 2. For Collection-Like Objects:
+
    * Use arrays for numerically-indexed data
    * Use Maps for truly dynamic key-value pairs
+
+
 3. For Mixed Cases:
+
    * Consider splitting into multiple structures
    * Document access patterns clearly
+
 
 |CB_BAD|
 ~~~~~~~~
@@ -689,7 +697,7 @@ as a workaround.
 
 |CB_ERROR|
 
-|LANG| allows type notation using the keyword ``this``  only for a return type
+|LANG| allows type notation using the keyword ``this`` only for a return type
 of an instance method of a class or struct.
 Such methods can only return ``this`` explicitly (``return this``).
 
@@ -2227,10 +2235,12 @@ prototype chain. This behavior is inherently dynamic and can lead to unexpected
 results when object structures change at runtime.
 
 Instead of ``for .. in``:
+
 1. For arrays, use the standard ``for`` loop with numeric indices.
-2. For object properties, use ``Object.keys()`` or ``Object.entries()`` with a
-``for .. of`` loop.
+2. For object properties, use ``Object.keys()`` or ``Object.entries()``
+   with a ``for .. of`` loop.
 3. For iterating over collections, use the ``for .. of`` loop.
+
 
 |CB_BAD|
 ~~~~~~~~
@@ -4998,7 +5008,7 @@ objects of type ``Sendable``.
 
 .. _R162:
 
-|CB_R| Importing a module for side-effects only is not supported in shared modules
+|CB_R| Importing a module for side effects only is not supported in shared modules
 ----------------------------------------------------------------------------------
 
 |CB_RULE| ``arkts-no-side-effects-imports``
@@ -5011,7 +5021,7 @@ objects of type ``Sendable``.
 
 **Note: This rule describes the restrictions of an ArkTS-specific feature**
 
-|LANG| does not support importing a module for side-effects only in a shared
+|LANG| does not support importing a module for side effects only in a shared
 module.
 
 |CB_NON_COMPLIANT_CODE|
@@ -5019,7 +5029,7 @@ module.
 
 .. code-block:: typescript
 
-    import 'module' // Error, importing a module for side-effects
+    import 'module' // Error, importing a module for side effects
     'use shared'
 
 |CB_COMPLIANT_CODE|
@@ -5360,7 +5370,8 @@ produce different results.
 |CB_ERROR|
 
 |TS| allows more relaxed assignments into variables of function type, while
-|LANG| follows stricter rules stated in Function Types Conversions (6.5.10)
+|LANG| follows stricter rules stated in 15.2.5 Subtyping for Function Types
+of the Specification.
 
 |CB_BAD|
 ~~~~~~~~
@@ -5491,7 +5502,7 @@ There is no ``override`` keyword for a fireld declarations in |LANG|
 
 |CB_ERROR|
 
-Importing itself and re-exporting itself is prohibited
+Importing itself and re-exporting itself is prohibited.
 
 |CB_BAD|
 ~~~~~~~~
@@ -5510,7 +5521,7 @@ Importing itself and re-exporting itself is prohibited
 
 .. _R222:
 
-|CB_R| Import for side-effect only is prohibited.
+|CB_R| Import for side effect only is prohibited.
 -------------------------------------------------
 
 |CB_RULE| ``arkts-no-side-effect-import``
@@ -5521,16 +5532,16 @@ Importing itself and re-exporting itself is prohibited
 
 |CB_ERROR|
 
-By prohibiting side-effect imports, |LANG| ensures that module initialization
+By prohibiting side effect imports, |LANG| ensures that module initialization
 occurs in a predictable manner based on explicitly imported dependencies.
 
 If the module truly has no exports but only side effects (e.g., modifying
 global state):
 
-- Consider refactoring the dependency to expose explicit exports
-- Move the initialization code to a more appropriate location
+- Consider refactoring the dependency to expose explicit exports;
+- Move the initialization code to a more appropriate location;
 - If the side effect is essential, consider using a different mechanism
-  like explicit initialization functions
+  like explicit initialization functions.
 
 |CB_BAD|
 ~~~~~~~~
@@ -5565,7 +5576,7 @@ Each binding adds a declaration or declarations to the scope of a module or
 a package (see Scopes). Any declaration added so must be distinguishable
 in the declaration scope (see Distinguishable Declarations). A compile-time
 error occurs if a declaration added to the scope of a module or a package by
-a binding is not distinguishable
+a binding is not distinguishable.
 
 |CB_BAD|
 ~~~~~~~~
@@ -5605,9 +5616,9 @@ specific properties and methods.
 
 **Prohibited Cast Targets**
 
-- Primitive types: ``number``, ``string``, ``boolean``
-- Union types
-- Function types
+- Primitive types: ``number``, ``string``, ``boolean``;
+- Union types;
+- Function types.
 
 When casting a dynamic object, the developer assumes responsibility for
 ensuring the runtime data actually matches the specified class or interface
@@ -5779,7 +5790,7 @@ specified for a certain loop statement.
 
 |CB_ERROR|
 
-|LANG| does not support ``keyof`` types
+|LANG| does not support ``keyof`` types.
 
 |CB_BAD|
 ~~~~~~~~
@@ -5910,11 +5921,11 @@ exports that can be statically analyzed.
 
 When migrating from CommonJS to |LANG|'s ESM syntax:
 
-- Replace ``module.exports = value`` with ``export default value``
-- Replace ``module.exports.name = value`` with ``export const name = value``
-- Replace ``exports.name = value`` with ``export const name = value``
-- Replace export objects with individual named exports or a default export
-- Group multiple exports using the ``export { name1, name2 }`` syntax
+- Replace ``module.exports = value`` with ``export default value``;
+- Replace ``module.exports.name = value`` with ``export const name = value``;
+- Replace ``exports.name = value`` with ``export const name = value``;
+- Replace export objects with individual named exports or a default export;
+- Group multiple exports using the ``export { name1, name2 }`` syntax.
 
 
 |CB_BAD|
@@ -6008,10 +6019,10 @@ When migrating from CommonJS to |LANG|'s ESM syntax:
 |LANG| does not support |TS|-like decorators.
 When migrating from |TS| to |LANG|, decorators must be refactored using
 alternative patterns such as:
-- Class composition and inheritance
-- Higher-order functions
-- Explicit proxying or wrapper methods
-- Direct implementation of cross-cutting concerns
+- Class composition and inheritance;
+- Higher-order functions;
+- Explicit proxying or wrapper methods;
+- Direct implementation of cross-cutting concerns.
 
 Note that while |TS|-style decorators are not supported, |LANG| does provide
 its own decorator system specifically for UI development (such as

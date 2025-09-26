@@ -623,6 +623,19 @@ use of the field.
         777
     */
 
+|TS| and |LANG| have different requirements to presense of the initialization.
+|TS| allows to omit initialization expression while |LANG| ensures that static
+field is initialized. 
+
+.. code-block:: typescript
+   :linenos:
+
+    class AClass {
+        static field: string // ArkTS will report a compile-time error
+    }
+    console.log (AClass.field) // Typescript will output 'undefined'
+
+
 
 |
 
@@ -648,4 +661,25 @@ model is |TS| is different as it allows such a mix.
         num: number = 2 // ArkTS compile-time error, conflict in overriding
         // Typescript accepts such situation
     }
+
+
+|
+
+.. _Differences in Export:
+
+Differences in Export
+---------------------
+
+|LANG| enforces export consistency that all types used in signatures of
+exported declaration or public class or interace members are also exported.
+|TS| allows is such declarations.
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {} // Not exported
+    export function foo (): C { return new C } // Expoprtred function returns non-exported type
+    // ArkTS will produce compile-time error, enforcing C to be exported
+    // Typescript accepts such situation
+
 

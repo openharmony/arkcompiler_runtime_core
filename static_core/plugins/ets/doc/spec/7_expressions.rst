@@ -20,7 +20,8 @@ Expressions
 
 This Chapter describes the meanings of expressions and the rules for the
 evaluation of expressions, except the expressions related to coroutines
-(see :ref:`Coroutines (Experimental)`) and expressions described as experimental
+(see :ref:`Coroutines (Experimental)`) and expressions described
+as experimental
 (see :ref:`Lambda Expressions with Receiver`).
 
 .. index::
@@ -43,7 +44,7 @@ The syntax of *expression* is presented below:
         | unaryExpression
         | binaryExpression
         | assignmentExpression
-        | conditionalExpression
+        | ternaryConditionalExpression
         | stringInterpolation
         | lambdaExpression
         | lambdaExpressionWithReceiver
@@ -184,7 +185,7 @@ The result of a program expression *evaluation* denotes the following:
 A variable or a value are equally considered the *value of the expression*
 if such a value is required for further evaluation.
 
-The type of an expression is evaluated at compile time (see
+The type of an expression is determined at compile time (see
 :ref:`Type of Expression`).
 
 Expressions can contain assignments, increment operators, decrement operators,
@@ -220,7 +221,7 @@ Type of Expression
     frontend_status: Done
 
 Every expression in the |LANG| programming language has a type. The type of an
-expression is defined at compile time.
+expression is determined at compile time.
 
 In most contexts, an expression must be *compatible* with the type expected in
 a context. This type is called *target type*. If no target type is available
@@ -229,10 +230,10 @@ in a context, then the expression is called a *standalone expression*:
 .. code-block:: typescript
    :linenos:
 
-    let a = expr // no target type is available 
+    let a = expr // no target type is available
 
     function foo() {
-        expr // no target type is available 
+        expr // no target type is available
     }
 
 Otherwise, the expression is *non-standalone*:
@@ -447,7 +448,8 @@ the following rules:
    of a binary operator is fully evaluated.
 
 -  Any part of the operation can be executed only after every operand of an
-   operator (except conditional operators '``&&``', '``||``', and '``?:``')
+   operator (except conditional operators
+   '``&&``', '``||``', and ' ``?`` ``:`` ')
    is fully evaluated.
 
    The execution of a binary operator that is an integer division '``/``' (see
@@ -577,7 +579,7 @@ also contains detailed information.
      - ``??``
      - left-to-right
    * - ternary
-     - ``?:``
+     - ``condition?whenTrue:whenFalse``
      - right-to-left
    * - assignment
      - ``= += -= %= *= /= &= ^= |= <<= >>= >>>=``
@@ -738,12 +740,12 @@ it is called a *simple name*.
 
 *Simple name* refers to the following:
 
--  Entity declared in the current compilation unit;
+-  Entity declared in the current module;
 -  Local variable or parameter of the surrounding function or method.
 
 If not a *simple name*, *qualifiedName* refers to the following:
 
--  Entity imported from a compilation unit,
+-  Entity imported from a module,
 -  Entity exported from a namespace, or
 -  Member of some class or interface, or
 -  Special syntax form of :ref:`Record Indexing Expression`.
@@ -767,7 +769,7 @@ If a *named reference* refers to a method name, it is called :ref:`Method Refere
    simple name
    entity
    declaration
-   compilation unit
+   module
    variable
    parameter
    function
@@ -839,29 +841,6 @@ used in a named reference:
    foo(1)          // OK, overload call
    let x = foo     // Error: ref to overload
    let y = foo2    // ok, ref to foo2
-
-A name of a :ref:`Function with Overload Signatures` can be used
-as named reference. The type of a *function reference* is derived
-from a signature of implementation body
-(see :ref:`Overload Signatures Implementation Body`):
-
-.. code-block:: typescript
-   :linenos:
-
-   function foo(n: number)
-   function foo(s: string)
-   function foo(...x: Any[]): Any {}
-
-   let x = foo // ok, type is (...x: Any[]) => Any
-
-.. index::
-   overloading
-   overload alias
-   named reference
-   function
-   overload signature
-   function reference
-   implementation body
 
 |
 
@@ -957,32 +936,6 @@ used in a named reference:
    overload alias
    named reference
 
-A name of a :ref:`Class Method with Overload Signatures` or
-:ref:`Interface Method Overload Signatures` can be used as a named reference.
-The type of a *method reference* is derived from the signature of an
-implementation body (see :ref:`Overload Signatures Implementation Body`):
-
-.. code-block:: typescript
-   :linenos:
-
-    class C {
-        foo1(n: number)
-        foo2(s: string)
-        foo(...x: Any[]): Any {)
-    }
-
-    let f = new C().foo // ok, type is (...x: Any[]) => Any
-
-.. index::
-   class
-   method
-   overload signature
-   interface
-   named reference
-   method reference
-   signature
-   implementation body
-
 |
 
 .. _Array Literal:
@@ -1036,9 +989,9 @@ expression in an array literal is ignored:
 The number of initializer expressions enclosed in square brackets of the array
 initializer determines the length of the array to be constructed.
 
-If sufficient space is allocated for a new array, then a one-dimensional
-array of the specified length is created. All elements of the array
-are initialized to the values specified by initializer expressions.
+If memory is allocated as required for an array literal, then an array of the
+specified length is created, and all elements of the array are initialized to
+the values specified by initializer expressions.
 
 .. index::
    initializer expression
@@ -1046,24 +999,21 @@ are initialized to the values specified by initializer expressions.
    array length
    array initializer
    array
-   one-dimensional array
    array element
    initialization
    initializer expression
    value
 
-On the contrary, the evaluation of the array initializer completes abruptly if:
+On the contrary, the evaluation of an *array literal* expression completes
+abruptly if:
 
--  Space allocated for a new array is insufficient, and
-   ``OutOfMemoryError`` is thrown; or
+-  Not enough memory is available for a new array, and ``OutOfMemoryError`` is
+   thrown; or
 -  Some initialization expression completes abruptly.
 
 .. index::
    evaluation
-   array initializer
    abrupt completion
-   array
-   initialization expression
 
 Initializer expressions are executed from left to right. The *n*’th expression
 specifies the value of the *n-1*’th element of the array.
@@ -1128,7 +1078,7 @@ of an assignment, call parameter type, or type of a cast expression:
     }
     min([1., 3.14, 0.99]); // ok, parameter type is used
 
-    // Two-dimensional array initialization
+    // Array of array initialization
     type Matrix = number[][]
     let m: Matrix = [[1, 2], [3, 4], [5, 6]]
 
@@ -1150,7 +1100,6 @@ of an assignment, call parameter type, or type of a cast expression:
    assignment
    cast expression
    call parameter type
-   two-dimensional array
    array initialization
    array literal
    literal
@@ -1381,9 +1330,25 @@ The syntax of *object literal* is presented below:
 An *object literal* is written as a comma-separated list of
 *object literal members* enclosed in curly braces '``{``' and '``}``'. A
 trailing comma after the last member is ignored. Each *object literal member*
-can be either an *object literal field* or an *object literal method*.
+can be either an *object literal field* or an *object literal method*. Only an
+*object literal* of *interface type* can contain  *object literal methods*.
+An attempt to declare a method in an *object literal* of *class type* causes a
+:index:`compile-time error` (see :ref:`Object Literal of Class Type` and
+:ref:`Object Literal of Interface Type`):
 
-**Note**. All methods of an *object literal* are public.
+.. code-block:: typescript
+   :linenos:
+
+      class A {}
+      interface I {
+         m(): void
+      }
+      const a: A = { m(): void {} } // compile-time error
+      const i: I = { m(): void {} } // OK
+
+.. index::
+   object literal
+   method
 
 An *object literal field* consists of an identifier and an expression as follows:
 
@@ -1407,99 +1372,9 @@ An *object literal field* consists of an identifier and an expression as follows
     let a: Person = {name: "Alice", age: 18, } //ok, trailing comma is ignored
     let c: Person | number = {name: "Mary", age: 17} // literal will be of type Person
 
-And *object literal method* is a complete declaration of a public method:
-
-.. code-block:: typescript
-   :linenos:
-
-    abstract class Person {
-      name: string = ""
-      abstract set_name (name: string): void
-    }
-    let p: Person = {
-      name: "Bob",
-      set_name (name: string) { this.name = name }
-    }
-    p.set_name ("Alice")
-
-
-A :index:`compile-time error` occurs if an object literal introduces new
-methods:
-
-.. code-block:: typescript
-   :linenos:
-
-    class Base1 {}
-    interface Base2 {}
-    const o1: Base1 = { m() {} } // compile-time error
-    const o2: Base2 = { m() {} } // compile-time error
-
-.. index::
-   object literal
-   method
-
-A :index:`compile-time error` occurs if a class has a private or a protected
-method, and its object literal contains same-name methods with
-override-compatible signatures (see :ref:`Override-Compatible Signatures`):
-
-.. code-block:: typescript
-   :linenos:
-
-    class Base {}
-    class Derived extends Base {}
-    class aClass {
-      private method (p: Derived): Base { return new Base }
-    }
-    const x: aClass = {
-      method (p: Base): Derived { return new Derived } // compile-time error
-      method () {} // OK as it is not an overriding case
-    }
-
-    interface I {
-      method (p: Derived): Base
-    }
-    const o: I = {
-      method (p: Base): Derived { return new Derived } // OK
-    }
-    o.method (new Derived) // OK
-    o.method (new Base) // compile-time error
-
-If a class or an interface has some method implementation, then its object
-literal can either skip providing a new method implementation, or
-provide its own version of method implementation:
-
-.. index::
-   overriding
-   signature
-   compatibility
-   interface
-   method implementation
-
-
-.. code-block:: typescript
-   :linenos:
-
-    class Base {
-      method () { console.log ("method() from Base is called") }
-    }
-    const x1: Base = {} // Valid literal of type Base
-    x1.method ()
-
-    const x2: Base = { // Valid literal of type compatible to Base
-      method () { console.log ("method() from object literal is called") }
-    }
-    x2.method ()
-
-    interface I {
-      method () { console.log ("method() from I is called") }
-    }
-    const x3: I = {} // Valid literal of anonymous class type
-    x3.method ()
-
-    const x4: I = { // Valid literal of anonymous class type
-      method () { console.log ("method() from object literal is called") }
-    }
-    x4.method ()
+An *object literal method* is a complete declaration of a public method.
+Examples of object literals with methods are provided in
+:ref:`Object Literal of Interface Type`.
 
 
 Type of an *object literal expression* is always some class ``C`` that is
@@ -1507,40 +1382,24 @@ inferred from the context. A type inferred from the context can be either a
 class (see :ref:`Object Literal of Class Type`), or an anonymous class created
 for the inferred interface type (see :ref:`Object Literal of Interface Type`).
 
-Thus any reference to ``this`` in an object literal method is the reference to
-the type of the object literal, i.e., the class defined above.
-
 .. index::
    object literal
    object literal expression
    class type
    inferred type
    context
-   interface type
-   this
    class
-
-.. code-block:: typescript
-   :linenos:
-
-    class A {
-      method () {
-         this /* refers to class A type */
-         const b: B = { method () {  this /* refers to class B type */ } }
-      }
-    }
-
 
 A :index:`compile-time error` occurs if:
 
 -  Type of an object literal cannot be inferred from the context (see
    :ref:`Type of Expression` for an example);
--  The inferred type is not a class or interface type;
--  The context is a union type, and an object literal can be treated
-   as value of several of union component types; or
--  The inferred type has abstract methods (see :ref:`Abstract Methods`).
-
-   **Note**. An abstract class without abstract methods can be used.
+-  Inferred type is not a class or interface type, or is an abstract
+   class type (see :ref:`Abstract Classes`);
+-  Inferred type is not an interface type, and an object literal contains
+   methods;
+-  Context is a union type, and an object literal can be treated
+   as the value of several union component types.
 
 .. index::
    object literal expression
@@ -1567,7 +1426,6 @@ A :index:`compile-time error` occurs if:
     let q: A | B = {field: 6}
             // compile-time error, type cannot be inferred as the literal
             // fits both A and B
-
 
 |
 
@@ -1735,7 +1593,7 @@ Object Literal of Interface Type
 .. meta:
     frontend_status: Done
 
-If the interface type ``I`` is inferred from the context, then type of an
+If an interface type ``I`` is inferred from the context, then type of an
 object literal is an anonymous class implicitly created for interface ``I``:
 
 .. code-block:: typescript
@@ -1779,8 +1637,71 @@ despite some property types having default values (see
 :ref:`Default Values for Types`). If a non-optional property (e.g., *age* in
 the example above) is skipped, then a :index:`compile-time error` occurs.
 
-If interface type ``I`` contains a method, then an object literal must provide
-this method with its implementation as follows:
+An object literal of interface type can contain method implementations unlike
+an :ref:`Object Literal of Class Type`. All methods in an object literal of
+interface type are public.
+
+.. code-block:: typescript
+   :linenos:
+
+    interface I {
+      print_name (name: string): void
+    }
+    let p: I = {
+      print_name (name: string) { console.log(name) }
+    }
+    p.print_name ("Alice")
+
+Any reference to ``this`` in an object literal method is a reference to
+an anonymous class created for the inferred interface type:
+
+.. index::
+   inferred interface type
+   this
+   anonymous class
+
+.. code-block:: typescript
+   :linenos:
+
+    interface I { method(i: I): I }
+    const i: I = { method(i: I): I { return this } }
+
+
+A :index:`compile-time error` occurs if an object literal of interface type
+introduces a new method:
+
+.. code-block:: typescript
+   :linenos:
+
+    interface I {}
+    const i: I = { foo(): void {} } // compile-time error
+
+If an interface has a method implementation, then its object literal can
+optionally  provide a new method implementation. Otherwise, the interface
+implementation is used:
+
+.. index::
+   object literal
+   interface
+   method
+   method implementation
+
+
+.. code-block:: typescript
+   :linenos:
+
+   interface I {
+      method(): void { console.log ("method() from I is called") }
+   }
+
+   // Valid literal of anonymous class type using interface method
+   const i1: I = {}
+   i1.method()
+
+   // Valid literal of anonymous class type using own metod declaration
+   const i2: I = {
+      method(): void { console.log ("method() from object literal is called") }
+   }
 
 .. index::
    object literal
@@ -1796,16 +1717,6 @@ this method with its implementation as follows:
    interface
    property
    method
-
-.. code-block:: typescript
-   :linenos:
-
-    interface I {
-      name: string
-      foo()
-    }
-    let i1 : I = {name: "Bob"} // compile-time error, method foo() is not defined
-    let i2 : I = {name: "Bob", foo() {console.log ("Hi!")} } // OK
 
 If an interface has accessors (see :ref:`Interface Properties`) for some
 property, and the property is used in an object literal, then a
@@ -2000,10 +1911,10 @@ Spread Expression
 
 *Spread expression* can be used only within an array literal (see
 :ref:`Array Literal`) or argument passing. The *expression* must be of
-array type (see :ref:`Array Types`), tuple type (see :ref:`Tuple Types`), 
-any type which has the iterator defined (see :ref:`Iterable Types`), or union
-type (see :ref:`Union Types`) which consists only of types mentioned before
-after normalization. Otherwise, a :index:`compile-time error` occurs.
+array type (see :ref:`Array Types`), tuple type (see :ref:`Tuple Types`),
+any type with an iterator defined (see :ref:`Iterable Types`), or union
+type (see :ref:`Union Types`) which after normalization consists only of the
+types mentioned before. Otherwise, a :index:`compile-time error` occurs.
 
 The syntax of *spread expression* is presented below:
 
@@ -2094,7 +2005,7 @@ A spread expression for tuples is represented in the example below:
     }
     run_time_spread_application2 (tuple1, tuple2) // prints [1, 2, true, 42, 4, "5"]
 
-Example below presents how spread expression works for union types:
+A spread expression for a union type is represented in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -2116,7 +2027,7 @@ the example below:
 
 
     class A<T> implements Iterable<T|undefined> { // variables of type A can be spread
-        // To check code with TS, commment line with  `$_iterator()`
+        // To check code with TS, comment line with  `$_iterator()`
         // and uncomment one with `[Symbol.iterator]()`
         $_iterator(): Iterator<T|undefined>  {
         // [Symbol.iterator](): Iterator<T|undefined>  {
@@ -2610,7 +2521,7 @@ Step 2: Selection of Method
 After the type to use is known, the method to call must be determined.
 If a method name in the call refers an *overload declaration* (see
 :ref:`Overload Declarations`), then
-:ref:`Overload Resolution for Overload Declarations` is used
+:ref:`Overload Resolution` is used
 to select the method to call.
 A :index:`compile-time error` occurs if no method is available to call.
 
@@ -2645,6 +2556,13 @@ semantic checks must be performed:
 -  If the method call has the form ``super.identifier``, then the method must
    not be declared ``abstract`` or ``static``. Otherwise, a
    :index:`compile-time error` occurs.
+
+
+A :index:`compile-time error` occurs if a method has at least one parameter or 
+return type of the type FixedArray parameterized with a type parameter and 
+*method call expression* leads to instantiation of the type FixedArray with the 
+predefined value type (see :ref:`Value Types`).
+
 
 .. index::
    method
@@ -2761,9 +2679,16 @@ The function call is *safe* because it handles nullish values properly.
 
 If the form of expression in the call is *qualifiedName*, and *qualifiedName*
 refers an *overload declaration* (:ref:`Overload Declarations`), then
-:ref:`Overload Resolution for Overload Declarations` is used
+:ref:`Overload Resolution` is used
 to select the function to call.
+
 A :index:`compile-time error` occurs if no function is available to call.
+
+A :index:`compile-time error` occurs if a function has at least one parameter or 
+return type of the type FixedArray parameterized with a type parameter and 
+*function call expression* leads to instantiation of the type FixedArray with the 
+predefined value type (see :ref:`Value Types`).
+
 
 Semantic check for call is performed in accordance with
 :ref:`Compatibility of Call Arguments`.
@@ -3413,6 +3338,31 @@ It optionally lists all actual arguments for the constructor.
    argument
    initialization
 
+When a *class instance creation expression* refers to classes *FixedArray*,
+*Array*, or derived classes of *Array* instantiated with an array element type
+of some class type then it turns out to be a special form of array creation
+expression. And in case when such array creation expression defines a number of
+elements of the created array it leads to a :index:`compile-time error` if the
+type of an array element:
+
+- refers to a class that contains neither an accessible
+  (see :ref:`Accessible`) parameterless constructor nor a constructor with all
+  parameters of the second form of optional parameters (see
+  :ref:`Optional Parameters`); or
+- has no default value.
+
+The same restriction applies to ref:`Resizable Array Creation Expressions`.
+
+.. code-block:: typescript
+   :linenos:
+
+    class A<T> {
+       foo () {
+          const a1 = new Array<T> (5) // Array with 5 elements of type T cannot be created
+          const a1 = new FixedArray<T> (5) // Array with 5 elements of type T cannot be created
+       }
+    }
+
 The execution of a class instance creation expression is performed as follows:
 
 -  New instance of class is created;
@@ -3487,14 +3437,14 @@ The result of an ``instanceof`` expression is ``true`` if the *actual type* of
 evaluated ``expr`` is a subtype of ``T`` (see :ref:`Subtyping`). Otherwise,
 the result is ``false``.
 
-A :index:`compile-time error` occurs if type ``T`` is not preserved by
+A :index:`compile-time error` occurs if type ``T`` is not retained by
 :ref:`Type Erasure`.
 
 *Generic type* (see :ref:`Generics`) in the form of *type name* (see :ref:`Type References`)
 can be used as ``T`` operand of an ``instanceof`` expression. In this case,
 the check is performed against the *type name*, and *type parameters* are
 ignored. *Instantiated generic types* (see :ref:`Explicit Generic Instantiations`)
-cannot be used because the ``T`` operand of an ``instanceof`` must be preserved
+cannot be used because the ``T`` operand of an ``instanceof`` must be retained
 by :ref:`Type Erasure`.
 
 .. code-block:: typescript
@@ -3550,8 +3500,8 @@ The syntax of *cast expression* is as follows:
         ;
 
 *Cast expression* in the form ``expr as target`` applies the *cast operator*
-``as`` to ``expr`` by issuing the value of a specified ``target`` type. Thus
-the cast expression type is always the ``target`` type.
+``as`` to ``expr`` by issuing the value of a specified ``target`` type. Thus,
+the type of a cast expression is always the ``target`` type.
 
 .. code-block:: typescript
    :linenos:
@@ -3582,17 +3532,15 @@ A :index:`compile-time error` occurs if the ``target`` type is type ``never``:
 A :index:`compile-time error` occurs if ``target`` type is not preserved by
 :ref:`Type Erasure`.
 
+Two specific cases of a *cast expression* are described in the sections below:
 
-There are two cases of *cast expression* described in the following sections
-below:
+- :ref:`Type Inference in Cast Expression` if ``expr`` is a numeric literal
+  (see :ref:`Numeric Literals`), an :ref:`Array literal`, or an
+  :ref:`Object Literal`;
 
-- If ``expr`` is a constant expression (see :ref:`Constant Expressions`),
-  :ref:`Array literal`, or :ref:`Object Literal`, then see 
-  :ref:`Type Inference in Cast Expression`;
+- :ref:`Runtime Checking in Cast Expression` otherwise.
 
-- Otherwise, see :ref:`Runtime Checking in Cast Expression`.
-
-If none of conditions stated in the sections are satisfied a
+If none of conditions stated in these sections are satisfied, then a
 :index:`compile-time error` occurs.
 
 
@@ -3604,7 +3552,6 @@ If none of conditions stated in the sections are satisfied a
    type inference
    expression
    runtime
-
 
 |
 
@@ -3619,14 +3566,8 @@ Type Inference in Cast Expression
 The following combinations of ``expr`` and ``target`` are considered for the
 ``expr as target`` expression:
 
--  ``expr`` is a constant expression (see :ref:`Constant Expressions`) of a
-   numeric type, and ``target`` is a numeric type. A :index:`compile-time error`
-   occurs if the value of ``expr`` does not belong to the ``target``;
-
--  ``expr`` is a constant expression (see :ref:`Constant Expressions`), and
-   ``target`` is an enumeration type. A :index:`compile-time error` occurs
-   if the value of ``expr`` does not equal a value of an enumeration type
-   constant;
+-  ``expr`` is a numeric literal, see :ref:`Type Inference for Numeric Literals`
+   for detail;
 
 -  ``expr`` is an :ref:`Array Literal`, and ``target`` is an *array type* or
    a *tuple type* (see :ref:`Array Literal Type Inference from Context` for
@@ -3636,16 +3577,12 @@ The following combinations of ``expr`` and ``target`` are considered for the
    *interface type*, or :ref:`Record Utility Type` (see the subsections of
    :ref:`Object Literal` for detail).
 
-
 .. index::
    cast expression
    type inference
    expression
-   constant expression
    numeric type
    value
-   enumeration type
-   constant
    interface type
    record type
    utility type
@@ -3653,12 +3590,14 @@ The following combinations of ``expr`` and ``target`` are considered for the
    interface type
    object literal
 
-
 This kind of a *cast expression* results in inferring the target type for
-``expr``, and never causes a runtime error by itself. However, the evaluation
-of array literal elements or object literal properties can cause a runtime error.
+``expr``. A :index:`compile-time error` can occur when processing
+a *cast expression* (see corresponding sections for detail),
+but this expression never causes a runtime error by itself.
+However, the evaluation of array literal elements
+or object literal properties can cause a runtime error.
 
-Casting for constant expressions of *numeric types* is represented in the
+Casting for numeric literals is represented in the
 example below:
 
 .. code-block:: typescript
@@ -3673,13 +3612,10 @@ example below:
    evaluation
    runtime error
    array literal
-   object property
+   object literal
    cast
-   constant expression
-   numeric type
 
-Casting for array literals of *numeric types* is represented in the example
-below:
+Casting for array literals is represented in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -3687,21 +3623,16 @@ below:
    let a = [1, 2] as double[] // ok, [1.0, 2.0]
    let b = [1, 2] as double // compile-time error, wrong target type
    let c = [1, "cc"] as double[] // compile-time error, wrong element type
-   let d = [1, "cc"] as [double, string] // ok
+   let d = [1, "cc"] as [double, string] // ok, cast to the tuple type
    let e = [1.0, "cc"] as [int, string] // compile-time error, wrong element type
 
 **Note.** *Assignability* check is applied to the elements of an array literal.
 
-Examples with object literals are provided in :ref:`Object literal`.
-
 .. index::
-   cast
    array literal
-   numeric type
-   target type
    assignability
-   check
-   object literal
+
+Examples with object literals are provided in :ref:`Object literal`.
 
 |
 
@@ -3728,7 +3659,7 @@ the usage of the resulting value can cause type violation, and ``ClassCastError`
 is thrown as a consequence (see :ref:`Type Erasure` for detail).
 
 Semantically, a *cast expression* of this kind is coupled tightly with
-:ref:`Instanceof Expression`:
+:ref:`Instanceof Expression` as follows:
 
 .. index::
    runtime check
@@ -3744,8 +3675,9 @@ Semantically, a *cast expression* of this kind is coupled tightly with
 -  If the result of ``x instanceof T`` is ``true``, then ``x as T`` never
    causes a runtime error;
 
--  If ``x instanceof T`` causes a :index:`compile-time error`, then
-   :ref:`Type Erasure` affects the semantics of ``x as T``.
+-  If ``x instanceof T`` causes a :index:`compile-time error` as a result of
+   :ref:`Type Erasure`, then ``x as T`` also causes
+   a :index:`compile-time error`.
 
 -  If otherwise the result of ``x instanceof T`` is ``false``, then ``x as T``
    causes ``ClassCastError`` thrown at runtime.
@@ -3821,12 +3753,12 @@ Any ``typeof`` expression is of type ``string``.
 If *typeof expression* refers to a name of an overloaded function or method,
 then a :index:`compile-time error` occurs.
 
-The evaluation of a *typeof expression* starts with the ``expression`` 
+The evaluation of a *typeof expression* starts with the ``expression``
 evaluation. If this evaluation causes an error, then the ``typeof`` expression
 evaluation terminates abruptly. Otherwise, the value of a ``typeof expression``
 is defined as follows:
 
-1. TypeOf expression value known at compile time
+1. The value of a ``TypeOf`` expression is known at compile time
 
 .. index::
    syntax
@@ -3838,7 +3770,7 @@ is defined as follows:
    value
 
 +---------------------------------+-------------------------+-----------------------------+
-|       Expression of Type        |  TypeOf result          |   Code Example              |
+|       Expression Type           |  TypeOf Result          |   Code Example              |
 +=================================+=========================+=============================+
 | ``string``                      | "string"                | .. code-block:: typescript  |
 |                                 |                         |                             |
@@ -3901,13 +3833,13 @@ is defined as follows:
 |                                 |                         |  typeof x                   |
 +---------------------------------+-------------------------+-----------------------------+
 
-2. TypeOf expression value determined at runtime
+2. The value of a ``TypeOf`` expression is determined at runtime
 
-The result is a name of the actual type used at runtime for the following
+The result is the name of an actual type used at runtime for the following
 expression types:
 
 +------------------------+-----------------------------+
-|  Expression of Type    |   Code Example              |
+|  Expression    Type    |   Code Example              |
 +========================+=============================+
 | Object                 | .. code-block:: typescript  |
 |                        |                             |
@@ -4029,10 +3961,8 @@ left-hand-side expression equals the *nullish* value:
    nullish value
    lazy operator
 
-If the left-hand-side expression is not of a nullish type, then type of the
-expression is a nullish-coalescing expression. Otherwise, type of a
-nullish-coalescing expression is a normalized *union type*
-(see :ref:`Union Types`) formed from the following:
+The type of a nullish-coalescing expression is a normalized *union type* (see
+:ref:`Union Types`) formed from the following:
 
 - Non-nullish variant of the type of the left-hand-side expression; and
 - Type of the right-hand-side expression.
@@ -4043,12 +3973,12 @@ following example:
 .. code-block:: typescript
    :linenos:
 
-    let x = expression1 ?? expression2
+    let x = lhs_expression ?? rhs_expression
 
-    let x$ = expression1
-    if (x$ == null) {x = expression2} else x = x$!
+    let x$ = lhs_expression
+    if (x$ == null) {x = rhs_expression} else x = x$!
 
-    // Type of x is NonNullishType(expression1)|Type(expression2)
+    // Type of x is NonNullishType(lhs_expression)|Type(rhs_expression)
 
 A :index:`compile-time error` occurs if the nullish-coalescing operator is
 mixed with conditional-and or conditional-or operators without parentheses.
@@ -4364,9 +4294,9 @@ expression is a variable).
 Numeric widening occurs on the *expression* before a *unary plus* operator
 is applied. The type of the *unary plus* is determined as follows:
 
-  - Type of result is `int` for `byte`, `short`, and `int`.
-  - Type of result is the same as that of the initial *expression* for `long`,
-    `float`, and `double``.
+  - Type of result is ``int`` for ``byte``, ``short``, and ``int``;
+  - Type of result is the same as that of the initial *expression* for ``long``,
+    ``float``, and ``double``.
 
 
 .. index::
@@ -4405,9 +4335,9 @@ be convertible (see :ref:`Widening Numeric Conversions`) to a numeric type (see
 Numeric widening occurs on the *expression* before a *unary minus* operator is
 applied. The type of the *unary minus* is determined as follows:
 
-- Type of result is `int` for `byte`, `short`, and `int`.
-- Type of result is the same as that of the initial *expression* for `long`,
-  `float`, and `double``.
+- Type of result is `int` for ``byte``, ``short``, and ``int``;
+- Type of result is the same as that of the initial *expression* for ``long``,
+  ``float``, and ``double``.
 
 The result of a unary minus expression is a value, not a variable (even if the
 result of the operand expression is a variable).
@@ -4608,9 +4538,8 @@ The resultant type of an expression is inferred by the largest type
 after promoting ``byte`` and ``short`` operands to ``int``:
 
 - ``double`` if any operand is ``double``;
-- ``float`` if any operand is ``float`` and there is no ``double`` operand;
-- ``long`` if any operand is ``long`` and there is no ``double`` nor ``float``
-  operand;
+- ``float`` if any operand is ``float``, and no operand is ``double``;
+- ``long`` if any operand is ``long``, and no operand is ``double`` or ``float``;
 - ``int`` if all operands are of type ``byte``, ``short``, or ``int``.
 
 This situation is represented in the following example:
@@ -4800,9 +4729,11 @@ satisfies :math:`|d\cdot{}q|\leq{}|n|`.
 The only one special case that does not comply with this rule is where integer
 overflow occurs. The result equals the dividend if the dividend is a negative
 integer of the largest possible magnitude for its type, while the divisor
-is *-1*. No error is thrown in this case despite the overflow. However, if the
-divisor value is *0* in an integer division, then ``ArithmeticError`` is
-thrown.
+is *-1*. No error is thrown in this case despite the overflow.
+
+However, if the divisor value of integer division is detected to be *0* during
+compilation, then a :index:`compile-time error` occurs. Otherwise, an
+``ArithmeticError`` is thrown during execution.
 
 The result of a floating-point division is determined in compliance with the
 IEEE 754 arithmetic:
@@ -4942,8 +4873,9 @@ operation can only be one of the following:
 
 The magnitude of the result is always less than that of the divisor.
 
-If the value of the divisor for an integer remainder operator is *0*, then
-``ArithmeticError`` is thrown.
+If the divisor value of integer remainder operator is detected to be *0* during
+compilation, then a :index:`compile-time error` occurs. Otherwise, an
+``ArithmeticError`` is thrown during execution.
 
 The result of a floating-point remainder operation as computed by the operator
 '``%``' is different than that produced by the remainder operation defined by
@@ -5058,7 +4990,7 @@ NaN in the following cases:
 - Base is less than 0, and exponent is not an integer.
 
 The binary operator '``**``' is equivalent to Math.pow(), except it also
-accepts BigInts as operands.
+accepts ``bigint`` types as operands.
 
 .. index::
    exponentiation
@@ -5184,7 +5116,7 @@ of two numeric operands.
 
 Type of an additive expression performed on numeric operands is the
 largest type (see :ref:`Numeric Types`) to which operands of that
-expression are converted (see the example in :ref:`Multiplicative Expressions`).
+expression are converted (see :ref:`Multiplicative Expressions` for an example).
 
 If the promoted type is ``int`` or ``long``, then integer arithmetic is
 performed.
@@ -5496,32 +5428,6 @@ types described below.
 
 |
 
-.. _Numeric Conversions for Operands:
-
-Numeric Conversions for Operands
-================================
-
-.. meta:
-    frontend_status: Done
-
-If at least one operand is of ``bigint`` type, then the other operand is
-converted to ``bigint`` by using a ``BigInt()`` function. Otherwise, numeric
-types conversion (see :ref:`Widening Numeric Conversions`) is performed on each
-operand to ensure all operands are of the the largest numeric type of operands
-(see :ref:`Numeric Types`).
-
-
-.. index::
-   numeric conversion
-   numeric types conversion
-   widening numeric conversion
-   operand
-   bigint type
-   numeric type
-   conversion
-
-|
-
 .. _Numeric Relational Operators:
 
 Numeric Relational Operators
@@ -5530,12 +5436,11 @@ Numeric Relational Operators
 .. meta:
     frontend_status: Done
 
-Type of each operand in a numeric relational operator must be convertible
-to a numeric type (see :ref:`Numeric Types`) or to a ``bigint`` type.
+Type of each operand in a ``numeric relational operator`` must be convertible
+to a numeric type (see :ref:`Numeric Types`) or to a ``bigint`` type
+(see :ref:`Type bigint`) as described in
+:ref:`Numeric Conversions for Relational and Equality Operands`.
 Otherwise, a :index:`compile-time error` occurs.
-
-Numeric conversions for operands (see :ref:'Numeric conversions for operands')
-are performed on all operands. 
 
 Depending on the converted type of operands, a comparison is performed as follows:
 
@@ -5590,7 +5495,7 @@ standard specification as follows:
    IEEE 754
 
 Based on the above presumption, the following rules apply to integer,
-floating-point, or bigint operands other than ``NaN``:
+floating-point, or ``bigint`` operands other than ``NaN``:
 
 -  The value produced by the operator '``<``' is ``true`` if the value of the
    left-hand-side operand is less than that of the right-hand-side operand.
@@ -5656,22 +5561,22 @@ Boolean Relational Operators
 
 Results of all boolean comparisons are defined as follows:
 
--  Operator '``<``' delivers ``true`` if the left-hand-side operand is ``false``
+-  Operator '``<``' delivers ``true`` if the left-hand-side operand is ``false``,
    and the right-hand-side operand is true, or ``false`` otherwise.
 -  Operator '``<=``' delivers:
 
    - ``true`` when both operands are ``true``, or the left-hand-side operand
-     is ``false`` (for any right-hand value)
-   - ``false`` when the left-hand-side operand is ``true`` and the
+     is ``false`` for any right-hand value;
+   - ``false`` when the left-hand-side operand is ``true``, and the
      right-hand-side operand is ``false``.
 
--  Operator '``>``' delivers ``true`` if the left-hand-side operand is ``true``
+-  Operator '``>``' delivers ``true`` if the left-hand-side operand is ``true``,
    and the right-hand-side operand is ``false``, or ``false`` otherwise.
 -  Operator '``>=``' delivers:
 
    - ``true`` when both operands are ``false``, or the left-hand-side operand
-     is ``true`` (for any right-hand-side value)
-   - ``false`` when the left-hand-side operand is ``false`` and the
+     is ``true`` for any right-hand-side value;
+   - ``false`` when the left-hand-side operand is ``false``, and the
      right-hand-side operand is ``true``.
 
 .. index::
@@ -5737,8 +5642,9 @@ Equality operators are commutative if operand expressions cause no side
 effects.
 
 Similarly to relational operators, equality operators return ``true`` or
-``false`` but the latter have a lower precedence (:math:`a < b==c < d` is
-``true`` if both :math:`a < b` and :math:`c < d` have the same ``truth`` value).
+``false``.  Equality operators have lower precedence than relational operators,
+for example, :math:`a < b==c < d` is `true` when both :math:`a < b` 
+and :math:`c < d` are ``true``.
 
 Any equality expression is of type ``boolean``.
 
@@ -5752,15 +5658,15 @@ Any equality expression is of type ``boolean``.
    relational operator
    precedence
 
-The results produced by ``a != b`` and ``!(a == b)`` is the same in all cases.
-The results produced by ``a !== b`` and as ``!(a === b)`` is the same.
+The result produced by ``a != b`` and ``!(a == b)`` is the same in all cases.
+The result produced by ``a !== b`` and ``!(a === b)`` is the same.
 
 The result of the operators '``==``' and '``===``' is the same in all cases
 except when comparing the values ``null`` and ``undefined`` (see
 :ref:`Extended Equality with null or undefined`).
 
 A comparison that uses the operators '``==``' and '``===``' is evaluated to
-``true`` with the following:
+``true`` when
 
 .. index::
    operator
@@ -5768,25 +5674,25 @@ A comparison that uses the operators '``==``' and '``===``' is evaluated to
    value
    evaluation
 
-- Operands of :ref:`Type boolean` of the same value;
+- Operands of :ref:`Type boolean` have the same value;
 
 - Operands of :ref:`Type string` or string literal type
-  (see :ref:`String Literal Types`) with the same contents;
+  (see :ref:`String Literal Types`) have the same contents;
 
-- Operands after a numeric conversion (see
-  :ref:`Numeric Conversions for Operands`) are of :ref:`Type bigint` of the
-  same value;
+- Operands after a numeric conversion are of :ref:`Type bigint`
+  (see :ref:`Numeric Conversions for Relational and Equality Operands`)
+  and have the same value;
 
-- Operands of :ref:`Type char` of the same value (both operands represent the
+- Operands after a numeric conversion (see :ref:`Widening numeric conversions`,
+  :ref:`Numeric Conversions for Relational and Equality Operands`)
+  are of :ref:`Numeric Types` of the same value except ``NaN``
+  (see :ref:`Numeric Equality Operators` for detail);
+
+- Operands of :ref:`Type char` have the same value (both operands represent the
   same Unicode code point);
 
-- Operands after a numeric conversion (see
-  :ref:`Numeric conversions for operands`) are of :ref:`Numeric Types` of the
-  same value except ``NaN`` (see :ref:`Numeric Equality Operators` for
-  detail);
-
 - Operands of the same enumeration type (see :ref:`Enumerations`)
-  that have the same numeric values or the same string contents,
+  have the same numeric values or the same string contents,
   depending on the type of enumeration constant values;
 
 - Function references that refer to the same functional object (see
@@ -5807,37 +5713,37 @@ A comparison that uses the operators '``==``' and '``===``' is evaluated to
    equality operator
    function type
 
-In all other cases, if a comparison of values of types ``A`` and ``B``  is
-always known to evaluate to ``false`` at compile time (when types
-do not overlap), then a :index:`compile-time error` occurs. Otherwise,
-the result of the comparison is evaluated at runtime, i.e., during program
-execution.
+In all other cases, if types ``A`` and ``B`` do not overlap (and therefore an
+expression always evaluated to ``false`` at compile time), then:
 
-This semantics is represented in the examples below:
+- if each of ``A`` and ``B`` is either a predefined type or a union of predefined types, a :index:`compile-time-error` is issued..
+- in all other cases, a :index:`compile-time warning` is issued.
 
-.. code-block:: typescript
-   :linenos:
+**Note**. There are two main reasons why compiler do not use always a compile-time error:
 
-   class X {}
-   new X() == new X()  // false, two different instances of class X
-   new X() === new X() // false, two different instances of class X
-   let x1 = new X()
-   let x2 = x1
-   x1 == x2 // true, as x1 and x2 refer to the same instance
-   x1 === x2 // true, the same instance
+- Compatibility with TypeScript code base
+- The inferred *smart type* (see :ref:`Smart Casts and Smart Types`) could
+  lead in some cases to triggering the error even in the case when it is
+  impossible at runtime (see an example below):
 
-   let x = 5
-   x == 5 // true, values are compared
+    .. code-block:: typescript
+       :linenos:
 
-   new Number(5) === new Number(5) // true, values are equal
-   new Number(5) == new Number(6) // false, values are not equal
+       class B {
+           f(): B|undefined { return undefined }
+       }
+       class D extends B {
+           f(): D { return this }
+       }
 
-   1 == "a" // compile-time error, as type int and type string do not overlap
+       function f(c: B) {
+           if (c instanceof D) {
+               // smart type causes compile-time warning
+               c.f() == undefined
+           }
+       }
 
-   class X {}
-   class Y {}
-
-   new X() == new Y() // compile-time error, as type X and type Y do not overlap
+    |
 
 
 An evaluation of equality expressions always uses the actual types of operands
@@ -5868,7 +5774,7 @@ as in the example below:
     equ(1, 2) // false, value are compared
 
     equ("aa", "aa") // true, string contexts are compared
-    equ(1, "aa") // false, not compatible types
+    equ(1, "aa")    // false, not compatible types
 
     interface I1 {}
     interface I2 {}
@@ -5891,7 +5797,8 @@ An equality with values of two union types is represented in the example below:
     }
 
     function f2(x: number | string, y: boolean | "abc"): boolean {
-        return x == y // ok, can be evaluated to true
+        // ok, can be evaluated as true
+        return x == y
     }
 
 .. index::
@@ -5911,8 +5818,10 @@ Numeric Equality Operators
 .. meta:
     frontend_status: Done
 
-Type of each operand in a numeric equality operator must be convertible
-(see :ref:`Implicit Conversions`) to a numeric type (see :ref:`Numeric Types`).
+Type of each operand in a ``numeric equality operator`` must be convertible
+to a numeric type (see :ref:`Numeric Types`) or to a ``bigint`` type
+(see :ref:`Type bigint`) as described in
+:ref:`Numeric Conversions for Relational and Equality Operands`.
 Otherwise, a :index:`compile-time error` occurs.
 
 A widening conversion can occur (see :ref:`Widening Numeric Conversions`)
@@ -6412,7 +6321,7 @@ The syntax of *assignment expression* is presented below:
 
     assignmentOperator
         : '='
-        | '+='  | '-='  | '*='   | '='  | '%=' | `**=`
+        | '+='  | '-='  | '*='   | '='  | '%=' | `**=` | `/=`
         | '<<=' | '>>=' | '>>>='
         | '&='  | '|='  | '^=' | `&&=` | `||=`
         | `??=`
@@ -6874,28 +6783,31 @@ A :index:`compile-time error` occurs in the following situations:
 |
 
 
-.. _Conditional Expressions:
+.. _Ternary Conditional Expressions:
 
-Conditional Expressions
-***********************
+Ternary Conditional Expressions
+*******************************
 
 .. meta:
     frontend_status: Done
     todo: implement full LUB support (now only basic LUB implemented)
 
-The conditional expression '``? :``' uses the boolean value of the first
-expression to decide which of the other two expressions to evaluate:
+The ternary conditional expression '``condition?whenTrue:whenFalse``'
+uses the boolean value of the first expression (``condition``) to
+decide which of other two expressions to evaluate:
 
 .. code-block:: abnf
 
-    conditionalExpression:
+    ternaryConditionalExpression:
         expression '?' expression ':' expression
         ;
 
-The conditional operator '``? :``' groups right-to-left (i.e., the meaning of
+The ternary conditional operator groups
+right-to-left (i.e., the meaning of
 :math:`a?b:c?d:e?f:g` and :math:`a?b:(c?d:(e?f:g))` is the same).
 
-The conditional operator '``? :``' consists of three operand expressions
+The ternary conditional operator '``condition?whenTrue:whenFalse``' consists
+of three operand expressions
 with the separators '``?``' between the first and the second expression, and
 '``:``' between the second and the third expression.
 
@@ -6904,31 +6816,32 @@ A :index:`compile-time error` occurs if the first expression is not of type
 :ref:`Extended Conditional Expressions`.
 
 .. index::
-   conditional expression
+   ternary conditional expression
    boolean value
    expression
-   conditional operator
+   ternary conditional operator
    operand
    operand expression
    separator
    boolean type
    extended conditional expression
 
-Type of the conditional expression is determined as the union of types of the
-second and the third expressions further normalized in accordance with the
-process discussed in :ref:`Union Types Normalization`. If the second and the
-third expressions are of the same type, then this is the type of the
+Type of the ternary conditional expression is determined as the union of types
+of the second and the third expressions further normalized in accordance with
+the process discussed in :ref:`Union Types Normalization`. If the second and
+the third expressions are of the same type, then this is the type of the
 conditional expression.
 
-The following steps are performed as the evaluation of a conditional expression
-occurs at runtime:
+The following steps are performed as the evaluation of a ternary
+conditional expression occurs at runtime:
 
-#. The operand expression of a conditional expression is evaluated first.
+#. The first operand (``condition``) of a ternary conditional
+   expression is evaluated first.
 
 #. If the value of the first operand is ``true``, then the second operand
-   expression is evaluated. Otherwise, the third operand expression is
-   evaluated. The result of successful evaluation is the result of the
-   conditional expression.
+   expression (``whenTrue``) is evaluated. Otherwise, the third operand
+   expression (``whenFalse``) is evaluated. The result of successful
+   evaluation is the result of the ternary conditional expression.
 
 The examples below represent different scenarios with standalone expressions:
 
@@ -6945,7 +6858,7 @@ The examples below represent different scenarios with standalone expressions:
     condition ? "5" : 6           // "5" | int
 
 .. index::
-   conditional expression
+   ternary conditional expression
    union type normalization
    evaluation
    operand expression
@@ -7310,9 +7223,8 @@ If the available space is not sufficient for a new instance to be created,
 then the evaluation of the lambda expression completes abruptly, and
 ``OutOfMemoryError`` is thrown.
 
-During a lambda expression evaluation, the outer variables refrred by the
-lambda expression are captured. This happens every time when the lambda
-expression is evaluated:
+Every time a lambda expression is evaluated, the outer variables referred to by
+the lambda expression are captured as follows:
 
 .. index::
    runtime evaluation
@@ -7337,7 +7249,7 @@ expression is evaluated:
    :linenos:
 
      function foo() {
-        let y: int = 1 
+        let y: int = 1
         let x = () => { return y+1 } // 'y' is *captured*.
         console.log(x())             // Output: 2
      }
@@ -7364,7 +7276,7 @@ variable is implied to change:
        console.log(y) // Output: 2
      }
 
-This example highlights capturing within the function scope:
+Capturing within the function scope is highlighted by the following example:
 
 .. code-block:: typescript
    :linenos:
@@ -7380,17 +7292,17 @@ This example highlights capturing within the function scope:
      const func1 = capturingFunction ()
      const func2 = capturingFunction ()
      // Note: func1 and func2 are two different function type instances
-  
+
      func1(11) // Previous value: 0 new value: 11
      func2(22) // Previous value: 0 new value: 22
      func1(33) // Previous value: 11 new value: 33
      func2(44) // Previous value: 22 new value: 44
-     /* Note: 
+     /* Note:
            func1 calls work with their own version of variable 'v'
            func2 calls work with their own version of variable 'v'
      */
 
-This example highlights capturing within the loop scope:
+Capturing within the loop scope is highlighted by the following example:
 
 .. code-block:: typescript
    :linenos:
@@ -7469,14 +7381,15 @@ while being composed only of the following:
 -  Conditional-and operator '``&&``' (see :ref:`Conditional-And Expression`),
    and conditional-or operator '``||``' (see :ref:`Conditional-Or Expression`);
 
--  Ternary conditional operator '``? :``' (see :ref:`Conditional Expressions`);
+-  Ternary conditional operator '``condition?whenTrue:whenFalse``'
+   (see :ref:`Ternary Conditional Expressions`);
 
 -  Parenthesized expressions (see :ref:`Parenthesized Expression`) that contain
    constant expressions;
 
 -  Simple names or qualified names that refer to constants (see
    :ref:`Constant Declarations`) with constant expressions as initializers,
-   declared in the same compilation unit.
+   declared in the same module.
 
 .. index::
    constant expression
@@ -7526,7 +7439,7 @@ while being composed only of the following:
    equality operator
    constant expression
    initializer
-   compilation unit
+   module
 
 The examples of constant expressions are presented below:
 

@@ -334,6 +334,38 @@ cannot be used as identifiers:
 +--------------------+-------------------+------------------+------------------+
 
 
+.. +--------------------+-------------------+------------------+------------------+
+   |                    |                   |                  |                  |
+   +====================+===================+==================+==================+
+   |   ``abstract``     |   ``enum``        |   ``let``        |   ``super``      |
+   +--------------------+-------------------+------------------+------------------+
+   |   ``as``           |   ``export``      |   ``native``     |   ``this``       |
+   +--------------------+-------------------+------------------+------------------+
+   |   ``async``        |   ``extends``     |   ``new``        |   ``throw``      |
+   +--------------------+-------------------+------------------+------------------+
+   |   ``await``        |   ``false``       |   ``null``       |   ``true``       |
+   +--------------------+-------------------+------------------+------------------+
+   |   ``break``        |   ``final``       |   ``overload``   |   ``try``        |
+   +--------------------+-------------------+-------------+----+------------------+
+   |   ``case``         |   ``for``         |   ``override``   |   ``typeof``     |
+   +--------------------+----+--------------+------------------+------------------+
+   |   ``class``        |   ``function``    |   ``private``    |   ``undefined``  |
+   +--------------------+-------------------+------------------+------------------+
+   |   ``const``        |   ``if``          |   ``protected``  |   ``while``      |
+   +--------------------+-------------------+------------------+------------------+
+   |   ``constructor``  |   ``implements``  |   ``public``     |                  |
+   +--------------------+-------------------+------------------+------------------+
+   |   ``continue``     |   ``import``      |   ``return``     |                  |
+   +--------------------+-------------------+------------------+------------------+
+   |   ``default``      |   ``in``          |   ``sealed``     |                  |
+   +--------------------+-------------------+------------------+------------------+
+   |   ``do``           |   ``instanceof``  |   ``static``     |                  |
+   +--------------------+-------------------+------------------+------------------+
+   |   ``else``         |   ``interface``   |   ``switch``     |                  |
+   +--------------------+-------------------+------------------+------------------+
+
+
+
 |
 
 2. Names and aliases of predefined types are *hard keywords*, and cannot be
@@ -606,7 +638,9 @@ last symbol of an integer literal.
    integer
    underscore character
 
-Integer literals are of ``int`` or ``long`` types as follows:
+Type of integer literal is determined by using
+:ref:`Type Inference for Numeric Literals` if its context allows inferring type.
+Otherwise, the type is determened as follows:
 
 - ``int`` if the literal value can be represented
   by a non-negative 32-bit number, i.e., the value is in the
@@ -697,13 +731,22 @@ Floating-point literals are of floating-point types that match literals as
 follows:
 
 - ``float`` if *float type suffix* is present; or
+- ``float`` or ``double`` that is inferred using
+  :ref:`Type Inference for Numeric Literals`
+  if its context allows to infer type; or
 - ``double`` otherwise (type ``number`` is an alias to ``double``).
+    
+A :index:`compile-time error` occurs if a floating-point literal is
+too large for its type:
 
-A floating-point literal in variable and constant declarations can be implicitly
-converted to type ``float`` (see :ref:`Assignability with Initializer`).
+.. code-block:: typescript
+   :linenos:
 
-A :index:`compile-time error` occurs if a non-zero floating-point literal is
-too large for its type.
+    // compile-time error as value is too large for type float:
+    3.4e39f
+
+    // compile-time error as value is too large for type double:
+    1.7e309
 
 .. index::
    floating-point literal
@@ -1032,8 +1075,8 @@ Regex Literal
         ;
 
     RegexSpecialForms:   
-        CharacterClass ('(' '?='|'?!' CharacterClasse ')')? 
-        ('(' '?<='|'?<!' CharacterClasse ')') CharacterClass
+        CharacterClass ('(' '?='|'?!' CharacterClass ')')? 
+        ('(' '?<='|'?<!' CharacterClass ')') CharacterClass
         ;
 
     CharacterClass: 

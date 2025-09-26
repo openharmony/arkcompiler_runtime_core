@@ -161,6 +161,13 @@ enclosing context.
 ``Let`` and ``const`` declarations have the initialization part that presumes
 execution, and actually act as statements.
 
+.. index::
+   local declaration
+   let declaration
+   const declaration
+
+|
+
 The syntax of *local declaration* is presented below:
 
 .. code-block:: abnf
@@ -184,11 +191,8 @@ are dedicated to a detailed discussion of the following entities:
 The usage of annotations is discussed in :ref:`Using Annotations`.
 
 .. index::
-   local declaration
    enclosing context
    context
-   let declaration
-   const declaration
    mutable variable
    immutable variable
    initialization
@@ -541,7 +545,7 @@ the result of class iterator advancement.
    instance
    iterable class
    iterable interface
-   itarable type
+   iterable type
    expression
    type
    array
@@ -1031,7 +1035,7 @@ transferred to the statements of the *defaultClause*.
    switch statement
    switch expression
    expression value
-   execution trasnfer
+   execution transfer
    evaluation
    constant
    operator

@@ -65,6 +65,9 @@ Assignment-like Contexts
   :ref:`Function Call Expression`, :ref:`Method Call Expression`,
   :ref:`Explicit Constructor Call`, and :ref:`New Expressions`);
 
+- *Return contexts* (see :ref:`return Statements`) the allow specifying
+  a resultant value of a function, method or lambda call;
+
 - *Composite literal contexts* that allow setting an expression value to an
   array element (see :ref:`Array Literal Type Inference from Context`),
   a class, or an interface field (see :ref:`Object Literal`);
@@ -238,9 +241,10 @@ Numeric contexts use numeric types conversions
 expression can be converted to target type ``T`` while the arithmetic
 operation for the values of type ``T`` is being defined.
 
-An operand of enumeration type (see :ref:`Enumerations`) can be used in
-a numeric context if values of this enumeration are of type ``int``.
-The type of this operand is assumed to be ``int``.
+An operand of enumeration type (see :ref:`Enumerations` and
+:ref:`Enumeration with Explicit Type`) can be used in
+a numeric context if enumeration base type is a numeric type.
+The type of this operand is assumed to be the same as the enumeration base type.
 
 .. index::
    numeric context
@@ -281,6 +285,50 @@ Numeric contexts take the following forms:
    conditional-or expression
 
 |
+
+.. _Numeric Conversions for Relational and Equality Operands:
+
+Numeric Conversions for Relational and Equality Operands
+========================================================
+
+ .. meta:
+     frontend_status: Done
+
+Relational and equiality operators (see :ref:`Relational Expressions` and
+:ref:`Equality Expressions`) allow the following:
+
+- *Implicit conversion*, where operands are of ``numeric types`` but have
+  different sizes (see :ref:`Widening numeric conversions`), with their specific
+  details stated in :ref:`Specifics of Numeric Operator Contexts`; and
+- Conversion of operands with ``BigInt()`` function, where one operand type is
+  ``bigint`` and the other is ``numeric``. The situation for the relational
+  operator '``<``' is represented in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+   let a: int = 1
+   let b: long = 0
+   let c: bigint = -1n
+
+   if (b<a) { // `a`` converted to `long` prior to comparison
+      ;
+   }
+
+   if (c<b) { // `b` converted to `bigint` prior to comparison
+      ;
+   }
+
+
+.. index::
+   numeric conversion
+   numeric types conversion
+   widening numeric conversion
+   operand
+   bigint type
+   numeric type
+   conversion
+
 
 .. _Implicit Conversions:
 

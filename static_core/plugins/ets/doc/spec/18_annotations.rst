@@ -67,7 +67,7 @@ allowed between the character '``@``' and the name:
 
 A :index:`compile-time error` occurs if the annotation name is not accessible
 (see :ref:`Accessible`) at the place of use. An annotation declaration can be
-exported and used in other compilation units.
+exported and used in other modules.
 
 Multiple annotations can be applied to a single declaration:
 
@@ -83,7 +83,6 @@ Multiple annotations can be applied to a single declaration:
    access
    accessibility
    annotation declaration
-   compilation unit
    declaration
 
 |
@@ -190,8 +189,8 @@ The choice of *types for annotation fields* is limited to the following:
 - Type ``boolean`` (see :ref:`Type boolean`);
 - :ref:`Type string`;
 - Enumeration types (see :ref:`Enumerations`);
-- Array of the above types (e.g., ``string[]``), including multidimensional
-  arrays (e.g., ``string[][]``).
+- Array of the above types (e.g., ``string[]``), including arrays of arrays
+  (e.g., ``string[][]``).
 
 A :index:`compile-time error` occurs if any other type is used as the type of
 an *annotation field*.
@@ -204,7 +203,6 @@ an *annotation field*.
    string type
    enumeration type
    array
-   multidimensional array
 
 |
 
