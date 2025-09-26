@@ -23,7 +23,7 @@ class IntKeepper {
 }
 
 function main(): int {
-    let x: int = 0;
+    let x: number = 0;
     let a: int[] = [2, 3];
     // grouping
     x = (1 + 2)**(2 + 1);
