@@ -2836,11 +2836,6 @@
 #21301 Not work overloading with union parameter, different union have the similar assambly signature, mangling is necessary
 17.experimental_features/packages/import_and_overloading_of_function_names/pkgs_ab_22.ets
 
-#25679
-17.experimental_features/02.fixed_array_types/far4a.ets
-17.experimental_features/02.fixed_array_types/far4c.ets
-17.experimental_features/02.fixed_array_types/far4d.ets
-
 #29159
 18.annotations/05.standard_annotations/02.target_annotation/AnnotationTargets_0.ets
 18.annotations/05.standard_annotations/02.target_annotation/AnnotationTargets_100.ets

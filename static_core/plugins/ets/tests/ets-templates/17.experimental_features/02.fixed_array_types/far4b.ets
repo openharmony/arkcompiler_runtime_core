@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: Arrays are invariant.
+desc: FixedArrays are covariant.
 tags: [compile-only, negative]
 ---*/
 
