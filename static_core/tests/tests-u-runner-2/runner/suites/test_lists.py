@@ -51,7 +51,6 @@ class TestLists:
 
         _LOGGER.default(f"Initialize TestLists: gn_build = {self.config.general.gn_build}")
         self.cache: list[str] = self.__gn_cache() if self.config.general.gn_build else self.cmake_cache()
-        _LOGGER.default(f"Initialize TestLists: cache = {self.cache}")
         self.sanitizer = self.search_sanitizer()
         _LOGGER.default(f"Initialize TestLists: sanitizer = {self.sanitizer}")
         self.architecture = detect_architecture()
