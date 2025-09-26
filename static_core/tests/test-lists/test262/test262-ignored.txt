@@ -1,7 +1,5 @@
 #29182
 language/block-scope/shadowing/hoisting-var-declarations-out-of-blocks.js
-#30321
-language/expressions/optional-chaining/member-expression.js
 #29183
 language/eval-code/direct/global-env-rec-catch.js
 #29184
