@@ -33,7 +33,7 @@ parameters:
     heap-verifier: fail_on_verification
     compiler-enable-jit: "true"
     ark-args: [ ]
-    ark-full-args:
+    ark-workflow-args:
         - ${parameters.ark-args}
         - "--compiler-check-final=true"
         - "--compiler-ignore-failures=false"
@@ -63,5 +63,5 @@ steps:
         gc-type: ${parameters.gc-type}
         full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
         load-runtimes: ${parameters.load-runtimes}
-        ark-args: ${parameters.ark-full-args}
+        ark-args: ${parameters.ark-workflow-args}
         compiler-enable-jit: ${parameters.compiler-enable-jit}

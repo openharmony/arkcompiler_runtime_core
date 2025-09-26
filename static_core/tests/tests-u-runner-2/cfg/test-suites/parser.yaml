@@ -29,7 +29,7 @@ collections:
   ark_tests:
     parameters:
       extension: js
-      es2panda-full-args:
+      es2panda-workflow-args:
         - "--dump-ast"
         - "--extension=${parameters.extension}"
         - "--thread=0"
@@ -37,7 +37,7 @@ collections:
   parser/js:
     parameters:
       extension: js
-      es2panda-full-args:
+      es2panda-workflow-args:
         - "--dump-ast"
         - "--extension=${parameters.extension}"
         - "--thread=0"
@@ -45,7 +45,7 @@ collections:
   compiler/js:
     parameters:
       extension: js
-      es2panda-full-args:
+      es2panda-workflow-args:
         - "--dump-ast"
         - "--extension=${parameters.extension}"
         - "--thread=0"
@@ -54,7 +54,7 @@ collections:
   parser/ts:
     parameters:
       extension: ts
-      es2panda-full-args:
+      es2panda-workflow-args:
         - "--dump-ast"
         - "--extension=${parameters.extension}"
         - "--thread=0"
@@ -62,7 +62,7 @@ collections:
   compiler/ts:
     parameters:
       extension: ts
-      es2panda-full-args:
+      es2panda-workflow-args:
         - "--dump-ast"
         - "--extension=${parameters.extension}"
         - "--thread=0"
@@ -71,7 +71,7 @@ collections:
   parser/as:
     parameters:
       extension: ts
-      es2panda-full-args:
+      es2panda-workflow-args:
         - "--dump-ast"
         - "--extension=${parameters.extension}"
         - "--thread=0"
@@ -81,7 +81,7 @@ collections:
     parameters:
       arktsconfig: "${parameters.build}/tools/es2panda/generated/arktsconfig.json"
       extension: ets
-      es2panda-full-args:
+      es2panda-workflow-args:
         - "--dump-ast"
         - "--extension=${parameters.extension}"
         - "--thread=0"
@@ -91,7 +91,7 @@ collections:
     parameters:
       arktsconfig: "${parameters.build}/tools/es2panda/generated/arktsconfig.json"
       extension: ets
-      es2panda-full-args:
+      es2panda-workflow-args:
         - "--dump-ast"
         - "--extension=${parameters.extension}"
         - "--thread=0"

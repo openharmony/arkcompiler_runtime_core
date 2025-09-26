@@ -24,7 +24,7 @@ parameters:
     opt-level: 2
     es2panda-timeout: 80
     verifier-timeout: 30
-    es2panda-extra-args: [ ]
+    es2panda-args: [ ]
 
     # ark - for all launches
     gc-type: g1-gc
@@ -41,8 +41,8 @@ parameters:
     # ark and ark_aot - for ordinal aot mode
     ark-aot-timeout: 180
     aot-timeout: 30
-    ark-aot-args: [ ]
-    aot-args: [ ]
+    ark-aot-args: [ ] # args for ark binary
+    aot-args: [ ] # args for ark_aot binary
     # ark and ark_aot - for aot-pgo mode
     ark-pgo-timeout: 180
     aot-pgo-timeout: 30
@@ -63,7 +63,7 @@ steps:
         enable-verifier: True
         es2panda-timeout: ${parameters.es2panda-timeout}
         verifier-timeout: ${parameters.verifier-timeout}
-        es2panda-extra-args: ${parameters.es2panda-extra-args}
+        es2panda-args: ${parameters.es2panda-args}
     ark-int-cpp-stw:
         from: panda-int
         build: ${parameters.build}
@@ -143,7 +143,7 @@ steps:
         aot-args: ${parameters.aot-args}
         heap-verifier: fail_on_verification:pre:into:before_g1_concurrent:post
         ark-args:
-            - ${parameters.ark-int-args}
+            - ${parameters.ark-aot-args}
             - "--interpreter-type=cpp"
         is-panda: ${parameters.is-panda}
     ark-with-aot-irtoc:
@@ -161,7 +161,7 @@ steps:
         aot-args: ${parameters.aot-args}
         heap-verifier: fail_on_verification:pre:into:before_g1_concurrent:post
         ark-args:
-            - ${parameters.ark-int-args}
+            - ${parameters.ark-aot-args}
             - "--interpreter-type=irtoc"
         is-panda: ${parameters.is-panda}
     ark-with-aot-pgo:
@@ -193,7 +193,7 @@ steps:
         ark-timeout: ${parameters.ark-jit-timeout}
         gc-type: stw
         ark-args:
-            - ${parameters.ark-int-args}
+            - ${parameters.ark-jit-args}
             - "--interpreter-type=cpp"
         is-panda: ${parameters.is-panda}
     ark-with-jit-irtoc-stw:
@@ -209,7 +209,7 @@ steps:
         ark-timeout: ${parameters.ark-jit-timeout}
         gc-type: stw
         ark-args:
-            - ${parameters.ark-int-args}
+            - ${parameters.ark-jit-args}
             - "--interpreter-type=irtoc"
         is-panda: ${parameters.is-panda}
     ark-with-jit-cpp-g1-gc:
@@ -225,7 +225,7 @@ steps:
         ark-timeout: ${parameters.ark-jit-timeout}
         gc-type: g1-gc
         ark-args:
-            - ${parameters.ark-int-args}
+            - ${parameters.ark-jit-args}
             - "--interpreter-type=cpp"
         is-panda: ${parameters.is-panda}
     ark-with-jit-irtoc-g1-gc:
@@ -241,6 +241,6 @@ steps:
         ark-timeout: ${parameters.ark-jit-timeout}
         gc-type: g1-gc
         ark-args:
-            - ${parameters.ark-int-args}
+            - ${parameters.ark-jit-args}
             - "--interpreter-type=irtoc"
         is-panda: ${parameters.is-panda}

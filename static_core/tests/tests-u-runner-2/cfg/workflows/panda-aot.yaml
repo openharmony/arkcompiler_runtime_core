@@ -33,7 +33,7 @@ parameters:
     heap-verifier: fail_on_verification
     ark-args: [ ]
     compiler-enable-jit: "false"
-    ark-full-args:
+    ark-workflow-args:
         - ${parameters.ark-args}
         - "--enable-an:force"
     aot-args: [ ]
@@ -75,5 +75,5 @@ steps:
         load-runtimes: ${parameters.load-runtimes}
         compiler-enable-jit: ${parameters.compiler-enable-jit}
         ark-args:
-            - ${parameters.ark-full-args}
+            - ${parameters.ark-workflow-args}
             - "--aot-files=${parameters.paoc-output-file}"

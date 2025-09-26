@@ -26,7 +26,7 @@ parameters:
     enable-es2panda: True
     enable-verifier: True
     extension: ${parameters.extension}
-    es2panda-extra-args: []
+    es2panda-args: []
     # ark
     ark-timeout: 180
     gc-type: g1-gc

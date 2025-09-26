@@ -110,6 +110,8 @@ class TestLists:
             full_template_name += "(-DI)?"
         if self.is_full_ast_verifier():
             full_template_name += "(-FULLASTV)?"
+        if self.is_simultaneous():
+            full_template_name += "(-SIMULTANEOUS)?"
         if self.conf_kind == ConfigurationKind.JIT and self.is_jit_with_repeats():
             full_template_name += "(-(repeats|REPEATS))?"
         gc_type = cast(str, self.config.workflow.get_parameter('gc-type', 'g1-gc')).upper()
@@ -195,17 +197,23 @@ class TestLists:
 
     def debug_info(self) -> bool:
         debug_info_opt = "--debug-info"
-        args = self.config.workflow.get_parameter("es2panda-extra-args")
+        args = self.get_es2panda_args()
         if isinstance(args, str):
             return args == debug_info_opt
         return len(self.__search_option_in_list(debug_info_opt, args)) > 0
 
     def is_full_ast_verifier(self) -> bool:
         option = "--verifier-all-checks"
-        args = self.config.workflow.get_parameter("es2panda-extra-args")
+        args = self.get_es2panda_args()
         if isinstance(args, str):
             return args == option
         return len(self.__search_option_in_list(option, args)) > 0
+
+    def is_simultaneous(self) -> bool:
+        return "--simultaneous=true" in self.get_es2panda_args()
+
+    def get_es2panda_args(self) -> list[str] | str:
+        return args if (args := self.config.workflow.get_parameter("es2panda-args")) else []
 
     def cmake_cache(self) -> list[str]:
         cmake_cache_txt = "CMakeCache.txt"
