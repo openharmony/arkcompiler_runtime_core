@@ -59,10 +59,7 @@ function(compile_ets_code ETS_SRC OUTPUT_ABC TARGET)
 
     if ("${ETS_SRC}" STREQUAL "GEN_STD_LIB")
         set(E2P ${es2panda_bin_stdlib})
-        set(DECLS_DST_DIR "${OUTPUT_DIR}/stdlib/decls")
-        file(MAKE_DIRECTORY ${DECLS_DST_DIR})
         list(APPEND ES2PANDA_ARGUMENTS "--gen-stdlib=true")
-        list(APPEND ES2PANDA_ARGUMENTS "--generate-decl:enabled,path=${DECLS_DST_DIR}")
         list(APPEND ES2PANDA_ARGUMENTS "--arktsconfig=${STDLIB}/stdconfig.json")
 
         set(STAMP "${OUTPUT_ABC}.stamp")
