@@ -19,7 +19,6 @@ keywords:
     - await
     - break
     - case
-    - catch
     - class
     - const
     - constructor
@@ -32,7 +31,6 @@ keywords:
     - extends
     - 'false'
     - final
-    - finally
     - for
     - function
     - if
