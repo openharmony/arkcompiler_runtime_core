@@ -14,6 +14,7 @@
 set(ANI_HELPERS_SOURCES
     ani_signature_builder.cpp
     concurrency_helpers.cpp
+    external_array_buffer.cpp
 )
 
 if (PANDA_ETS_INTEROP_JS)

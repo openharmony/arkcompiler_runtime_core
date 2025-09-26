@@ -34,7 +34,7 @@ extern "C" {
  *  This API can be called only from ANI code
  * Returned `hybridgref` can be used from both NAPI and ANI code
  */
-HYBRIDGREF_EXPORT bool hybridgref_create_from_ani(ani_env *env, ani_ref value, hybridgref *result);
+__attribute__((visibility("default"))) bool hybridgref_create_from_ani(ani_env *env, ani_ref value, hybridgref *result);
 
 /**
  * @brief Delete a reference previously created by `hybridgref_create_from_ani`
@@ -43,7 +43,7 @@ HYBRIDGREF_EXPORT bool hybridgref_create_from_ani(ani_env *env, ani_ref value, h
  * Notes:
  *  This API can be called only from ANI code
  */
-HYBRIDGREF_EXPORT bool hybridgref_delete_from_ani(ani_env *env, hybridgref ref);
+__attribute__((visibility("default"))) bool hybridgref_delete_from_ani(ani_env *env, hybridgref ref);
 
 /**
  * @brief Returns ani_object with `ESValue` containing previously saved reference
@@ -53,10 +53,11 @@ HYBRIDGREF_EXPORT bool hybridgref_delete_from_ani(ani_env *env, hybridgref ref);
  * Notes:
  *  This API can be called only from ANI code
  */
-HYBRIDGREF_EXPORT bool hybridgref_get_esvalue(ani_env *env, hybridgref ref, ani_object *result);
+__attribute__((visibility("default"))) bool hybridgref_get_esvalue(ani_env *env, hybridgref ref, ani_object *result);
 
 #ifdef __cplusplus
 }
 #endif
 // NOLINTEND(readability-identifier-naming)
+
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_LIBANI_HELPERS_INTEROP_JS_HYBRIDGREF_ANI_H

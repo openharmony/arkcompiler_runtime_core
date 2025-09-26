@@ -26,8 +26,9 @@ public:
     static std::vector<MirrorFieldInfo> GetMembers()
     {
         return std::vector<MirrorFieldInfo> {MIRROR_FIELD_INFO(EtsEscompatArrayBuffer, managedData_, "data"),
-                                             MIRROR_FIELD_INFO(EtsEscompatArrayBuffer, byteLength_, "_byteLength"),
+                                             MIRROR_FIELD_INFO(EtsEscompatArrayBuffer, weakRef_, "weakRef"),
                                              MIRROR_FIELD_INFO(EtsEscompatArrayBuffer, nativeData_, "dataAddress"),
+                                             MIRROR_FIELD_INFO(EtsEscompatArrayBuffer, byteLength_, "_byteLength"),
                                              MIRROR_FIELD_INFO(EtsEscompatArrayBuffer, isResizable_, "isResizable")};
     }
 };

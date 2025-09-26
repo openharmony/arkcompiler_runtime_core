@@ -5876,9 +5876,7 @@ NO_UB_SANITIZE static ani_status WeakReference_GetReference(ani_env *env, ani_wr
     return s.GetLocalRef(wref, wasReleasedResult, refResult);
 }
 
-template <bool IS_EXTERNAL>
-static ani_status DoCreateArrayBuffer(ani_env *env, [[maybe_unused]] void *externalData, size_t length,
-                                      [[maybe_unused]] void **resultData, ani_arraybuffer *resultBuffer)
+static ani_status DoCreateArrayBuffer(ani_env *env, size_t length, void **resultData, ani_arraybuffer *resultBuffer)
 {
     CHECK_PTR_ARG(resultBuffer);
     ANI_CHECK_RETURN_IF_GT(length, static_cast<size_t>(std::numeric_limits<ani_int>::max()), ANI_INVALID_ARGS);
@@ -5886,12 +5884,7 @@ static ani_status DoCreateArrayBuffer(ani_env *env, [[maybe_unused]] void *exter
     ScopedManagedCodeFix s(env);
     EtsCoroutine *coro = s.GetCoroutine();
 
-    EtsEscompatArrayBuffer *internalArrayBuffer = nullptr;
-    if constexpr (IS_EXTERNAL) {
-        internalArrayBuffer = EtsEscompatArrayBuffer::Create(coro, externalData, length, nullptr, nullptr);
-    } else {
-        internalArrayBuffer = EtsEscompatArrayBuffer::Create(coro, length, resultData);
-    }
+    EtsEscompatArrayBuffer *internalArrayBuffer = EtsEscompatArrayBuffer::Create(coro, length, resultData);
 
     ASSERT(coro->HasPendingException() == false);
     ANI_CHECK_RETURN_IF_EQ(internalArrayBuffer, nullptr, ANI_OUT_OF_MEMORY);
@@ -5913,7 +5906,7 @@ ani_status CreateArrayBuffer(ani_env *env, size_t length, void **dataResult, ani
     CHECK_PTR_ARG(dataResult);
     CHECK_PTR_ARG(arraybufferResult);
 
-    return DoCreateArrayBuffer<false>(env, nullptr, length, dataResult, arraybufferResult);
+    return DoCreateArrayBuffer(env, length, dataResult, arraybufferResult);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)

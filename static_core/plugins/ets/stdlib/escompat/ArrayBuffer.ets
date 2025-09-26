@@ -205,7 +205,11 @@ export class ArrayBuffer
         return this.isResizable
     }
 
-    /// @brief Explicitly does boundary check, as `data` array can shrink down
+    /**
+     * Performs boundary check due to `data` array possibly shrinking down
+     *
+     * @param pos index to be checked before accessing the underlying buffer
+     */
     private final doBoundaryCheck(pos: int): void {
         if (pos < 0 || pos >= this._byteLength) {
             throw new IndexOutOfBoundsError("ArrayBuffer position " + pos + " is out of bounds")
@@ -213,13 +217,27 @@ export class ArrayBuffer
     }
 
     /**
-     * @brief Copies into `this` array `this.byteLength` bytes starting from `begin` index of `other` data
-     * Always valid for a non-detached ArrayBuffer
+     * Copies into `this` array `this.byteLength` bytes starting from `begin` index of `other` data.
+     * Always valid for a non-detached ArrayBuffer.
+     *
+     * @param other ArrayBuffer with source data
+     *
+     * @param begin index inside `other` buffer
      */
     private final native setValues(other: ArrayBuffer, begin: int): void
-    /// @brief Reads byte from specified position. Always valid for a non-detached ArrayBuffer
+
+    /**
+     * Reads byte from specified position. Always valid for a non-detached ArrayBuffer
+     *
+     * @param pos index to read value from
+     */
     private final native atImpl(pos: int): byte
-    /// @brief Writes byte at specified position. Always valid for a non-detached ArrayBuffer
+
+    /**
+     * Writes byte at specified position. Always valid for a non-detached ArrayBuffer
+     *
+     * @param pos index to write value into
+     */
     private final native setImpl(pos: int, val: byte): void
 
     /**
@@ -227,7 +245,6 @@ export class ArrayBuffer
      *
      * @param newLen new length
      */
-    //NOTE: return undefined
     public resize(newLen : int): void {
         if (this.detached) {
             throw new TypeError("ArrayBuffer was detached")
@@ -241,10 +258,16 @@ export class ArrayBuffer
         this._byteLength = newLen
     }
 
-    /// @brief Allocates non-movable array of fixed length
+    /**
+     * Allocates non-movable array of fixed length
+     */
     private native static allocateNonMovable(length: int): FixedArray<byte>
 
-    /// @brief Returns native address of non-movable array
+    /**
+     * Returns native address of non-movable array
+     *
+     * @param array FixedArray to read native address from, must be allocated in non-movable memory
+     */
     private native static getAddress(array: FixedArray<byte>): long
 
     /**
@@ -367,10 +390,11 @@ export class ArrayBuffer
 
     // Fields' order is important due to alignment
     private data: FixedArray<byte> | undefined
-    // Length in bytes
-    private _byteLength: int
+    private weakRef: Object | undefined
     // Pointer to underlying array, which is either non-movable array or native
     private dataAddress: long
+    // Length in bytes
+    private _byteLength: int
     private isResizable: boolean
 
 
@@ -400,6 +424,69 @@ export class ArrayBuffer
     * @returns {string} The decoded string representation of the specified segment of the ArrayBuffer.
     */
     public static native stringify(buffer: ArrayBuffer, encoding: string, start: int, end: int): string;
+
+    private constructor createExternal(data: long, length: int) {
+        // This constructor must be called only from boot
+        const callerClass = Class.ofCaller()
+        if (callerClass != undefined && callerClass.getLinker() != getBootRuntimeLinker()) {
+            throw new RuntimeError("External ArrayBuffer can be instantiated only from boot context")
+        }
+        this.data = undefined
+        this.weakRef = undefined
+        this.dataAddress = data
+        this._byteLength = length
+        this.isResizable = false
+    }
+
+    private constructor createFinalizable(data: long, length: int, finalizer: long, finalizerData: long) {
+        // This constructor must be called only from boot
+        const callerClass = Class.ofCaller()
+        if (callerClass != undefined && callerClass.getLinker() != getBootRuntimeLinker()) {
+            throw new RuntimeError("External ArrayBuffer can be instantiated only from boot context")
+        }
+        this.data = undefined
+        this.weakRef = ArrayBuffer.registerWeakRef(this, finalizer, finalizerData)
+        this.dataAddress = data
+        this._byteLength = length
+        this.isResizable = false
+    }
+
+    /**
+     * Detaches finalizer from `this` and returns the argument which was stored inside
+     */
+    private detach(): long {
+        // This method must be called only from boot
+        const callerClass = Class.ofCaller()
+        if (callerClass != undefined && callerClass.getLinker() != getBootRuntimeLinker()) {
+            throw new RuntimeError("ArrayBuffer can be detached only from boot context")
+        }
+        // Check that ArrayBuffer is external and was not detached yet
+        if (this.data != undefined || this.detached) {
+            return 0
+        }
+        this.dataAddress = 0
+        this._byteLength = 0
+        // Need to unregister finalizer to avoid double free
+        let finalizerData: long = 0
+        if (this.weakRef != undefined) {
+            finalizerData = ArrayBuffer.unregisterWeakRef(this.weakRef!)
+            if (finalizerData == 0) {
+                throw new RuntimeError("Failed to unregister finalizer")
+            }
+        }
+        this.weakRef = undefined
+        return finalizerData
+    }
+
+    /**
+     * Registers `FinalizableWeakRef` for the given ArrayBuffer instance
+     */
+    private static native registerWeakRef(self: ArrayBuffer, finalizer: long, finalizerData: long): Object
+
+    /**
+     * Unregisters `FinalizableWeakRef` instance and returns the finalizer argument which was stored inside
+     */
+    private static native unregisterWeakRef(weakRef: Object): long
 
     public native atomicAddI8(index: int, byteOffset: int, value: byte): double;
 
