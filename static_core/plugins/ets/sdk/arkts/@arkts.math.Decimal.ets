@@ -1193,7 +1193,8 @@ export class Decimal {
             if (other.isNaN()) {
                 result = other;
                 break;
-            } else if (result.lessThan(other)) {
+            }
+            if (Utils.lessThan(result, other)) {
                 result = other;
             }
         }
@@ -1213,7 +1214,9 @@ export class Decimal {
             if (other.isNaN()) {
                 result = other;
                 break;
-            } else if (result.greaterThan(other)) {
+            }
+
+            if (Utils.greaterThan(result, other)) {
                 result = other;
             }
         }
@@ -3975,5 +3978,15 @@ class Utils {
 
     public static createBusinessError(code: int, message: string) {
         return new BusinessError(code, new Error('BusinessError', message, undefined));
+    }
+
+    public static greaterThan(left: Decimal, right: Decimal): boolean {
+        let result = left.comparedTo(right);
+        return result > 0 || result === 0 && left.s > right.s;
+    }
+
+    public static lessThan(left: Decimal, right: Decimal): boolean {
+        let result = left.comparedTo(right);
+        return result < 0 || result === 0 && left.s < right.s;
     }
 }
