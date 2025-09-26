@@ -1907,6 +1907,12 @@
 #27911 Generic functions subtyping
 15.semantic_rules/02.subtyping/04.subtyping_for_function_types/positive_function_generic_1.ets
 
+#30506
+15.semantic_rules/03.type_identity/union_types_identity_4.ets
+15.semantic_rules/03.type_identity/union_types_identity_5.ets
+15.semantic_rules/03.type_identity/union_types_identity_6.ets
+15.semantic_rules/03.type_identity/union_types_identity_7.ets
+
 #30441
 15.semantic_rules/04.assignability/never_assignability_0.ets
 15.semantic_rules/04.assignability/never_assignability_2.ets
