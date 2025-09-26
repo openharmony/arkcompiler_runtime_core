@@ -1648,6 +1648,15 @@
 09.classes/07.method_declarations/08.methods_returning_this/met_ret_this_27.ets
 09.classes/07.method_declarations/08.methods_returning_this/met_ret_this_28.ets
 
+#30324
+09.classes/08.accessor_declarations/accessor_declarations_neg_6.ets
+09.classes/08.accessor_declarations/accessor_declarations_neg_7.ets
+09.classes/08.accessor_declarations/accessor_declarations_neg_22.ets
+09.classes/08.accessor_declarations/accessor_declarations_neg_23.ets
+
+#30338
+09.classes/08.accessor_declarations/accessor_declarations_neg_13.ets
+
 #26730
 09.classes/09.constructor_declaration/constructor_declaration_overload1.ets
 09.classes/09.constructor_declaration/constructor_declaration_overload2.ets
