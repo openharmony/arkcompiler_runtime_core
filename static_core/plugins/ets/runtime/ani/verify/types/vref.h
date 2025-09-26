@@ -36,6 +36,14 @@ enum class ANIRefType {
     TYPE,
     CLASS,
     ENUM,
+    FIXED_ARRAY_BOOLEAN,
+    FIXED_ARRAY_CHAR,
+    FIXED_ARRAY_BYTE,
+    FIXED_ARRAY_SHORT,
+    FIXED_ARRAY_INT,
+    FIXED_ARRAY_LONG,
+    FIXED_ARRAY_FLOAT,
+    FIXED_ARRAY_DOUBLE,
 };
 
 class VRef {
@@ -81,7 +89,7 @@ class VClass final : public VObject {
 public:
     ani_class GetRef()
     {
-        return static_cast<ani_class>(VRef::GetRef());
+        return static_cast<ani_class>(VObject::GetRef());
     }
 };
 
@@ -89,7 +97,7 @@ class VString final : public VObject {
 public:
     ani_string GetRef()
     {
-        return static_cast<ani_string>(VRef::GetRef());
+        return static_cast<ani_string>(VObject::GetRef());
     }
 };
 
@@ -97,7 +105,79 @@ class VError final : public VObject {
 public:
     ani_error GetRef()
     {
-        return static_cast<ani_error>(VRef::GetRef());
+        return static_cast<ani_error>(VObject::GetRef());
+    }
+};
+
+class VFixedArray : public VObject {
+public:
+    ani_fixedarray GetRef()
+    {
+        return static_cast<ani_fixedarray>(VObject::GetRef());
+    }
+};
+
+class VFixedArrayBoolean final : public VFixedArray {
+public:
+    ani_fixedarray_boolean GetRef()
+    {
+        return static_cast<ani_fixedarray_boolean>(VFixedArray::GetRef());
+    }
+};
+
+class VFixedArrayChar final : public VFixedArray {
+public:
+    ani_fixedarray_char GetRef()
+    {
+        return static_cast<ani_fixedarray_char>(VFixedArray::GetRef());
+    }
+};
+
+class VFixedArrayByte final : public VFixedArray {
+public:
+    ani_fixedarray_byte GetRef()
+    {
+        return static_cast<ani_fixedarray_byte>(VFixedArray::GetRef());
+    }
+};
+
+class VFixedArrayShort final : public VFixedArray {
+public:
+    ani_fixedarray_short GetRef()
+    {
+        return static_cast<ani_fixedarray_short>(VFixedArray::GetRef());
+    }
+};
+
+class VFixedArrayInt final : public VFixedArray {
+public:
+    ani_fixedarray_int GetRef()
+    {
+        return static_cast<ani_fixedarray_int>(VFixedArray::GetRef());
+    }
+};
+
+class VFixedArrayLong final : public VFixedArray {
+public:
+    ani_fixedarray_long GetRef()
+    {
+        return static_cast<ani_fixedarray_long>(VFixedArray::GetRef());
+    }
+};
+
+class VFixedArrayFloat final : public VFixedArray {
+public:
+    ani_fixedarray_float GetRef()
+    {
+        return static_cast<ani_fixedarray_float>(VFixedArray::GetRef());
+    }
+};
+
+class VFixedArrayDouble final : public VFixedArray {
+public:
+    ani_fixedarray_double GetRef()
+    {
+        return static_cast<ani_fixedarray_double>(VFixedArray::GetRef());
     }
 };
 

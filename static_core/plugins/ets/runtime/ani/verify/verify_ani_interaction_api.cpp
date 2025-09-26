@@ -776,59 +776,147 @@ NO_UB_SANITIZE static ani_status FixedArray_GetLength(VEnv *venv, ani_fixedarray
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_New_Boolean(VEnv *venv, ani_size length, ani_fixedarray_boolean *result)
+NO_UB_SANITIZE static ani_status FixedArray_New_Boolean(VEnv *venv, ani_size length, VFixedArrayBoolean **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->FixedArray_New_Boolean(venv->GetEnv(), length, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForSize(length, "length"),
+        ANIArg::MakeForArrayBooleanStorage(vresult, "result")
+    );
+    // clang-format on
+
+    ani_fixedarray_boolean result {};
+    ani_status status = GetInteractionAPI(venv)->FixedArray_New_Boolean(venv->GetEnv(), length, &result);
+
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_New_Char(VEnv *venv, ani_size length, ani_fixedarray_char *result)
+NO_UB_SANITIZE static ani_status FixedArray_New_Char(VEnv *venv, ani_size length, VFixedArrayChar **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->FixedArray_New_Char(venv->GetEnv(), length, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForSize(length, "length"),
+        ANIArg::MakeForArrayCharStorage(vresult, "result")
+    );
+    // clang-format on
+
+    ani_fixedarray_char result {};
+    ani_status status = GetInteractionAPI(venv)->FixedArray_New_Char(venv->GetEnv(), length, &result);
+
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_New_Byte(VEnv *venv, ani_size length, ani_fixedarray_byte *result)
+NO_UB_SANITIZE static ani_status FixedArray_New_Byte(VEnv *venv, ani_size length, VFixedArrayByte **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->FixedArray_New_Byte(venv->GetEnv(), length, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForSize(length, "length"),
+        ANIArg::MakeForArrayByteStorage(vresult, "result")
+    );
+    // clang-format on
+
+    ani_fixedarray_byte result {};
+    ani_status status = GetInteractionAPI(venv)->FixedArray_New_Byte(venv->GetEnv(), length, &result);
+
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_New_Short(VEnv *venv, ani_size length, ani_fixedarray_short *result)
+NO_UB_SANITIZE static ani_status FixedArray_New_Short(VEnv *venv, ani_size length, VFixedArrayShort **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->FixedArray_New_Short(venv->GetEnv(), length, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForSize(length, "length"),
+        ANIArg::MakeForArrayShortStorage(vresult, "result")
+    );
+    // clang-format on
+
+    ani_fixedarray_short result {};
+    ani_status status = GetInteractionAPI(venv)->FixedArray_New_Short(venv->GetEnv(), length, &result);
+
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_New_Int(VEnv *venv, ani_size length, ani_fixedarray_int *result)
+NO_UB_SANITIZE static ani_status FixedArray_New_Int(VEnv *venv, ani_size length, VFixedArrayInt **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->FixedArray_New_Int(venv->GetEnv(), length, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForSize(length, "length"),
+        ANIArg::MakeForArrayIntStorage(vresult, "result")
+    );
+    // clang-format on
+
+    ani_fixedarray_int result {};
+    ani_status status = GetInteractionAPI(venv)->FixedArray_New_Int(venv->GetEnv(), length, &result);
+
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_New_Long(VEnv *venv, ani_size length, ani_fixedarray_long *result)
+NO_UB_SANITIZE static ani_status FixedArray_New_Long(VEnv *venv, ani_size length, VFixedArrayLong **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->FixedArray_New_Long(venv->GetEnv(), length, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForSize(length, "length"),
+        ANIArg::MakeForArrayLongStorage(vresult, "result")
+    );
+    // clang-format on
+
+    ani_fixedarray_long result {};
+    ani_status status = GetInteractionAPI(venv)->FixedArray_New_Long(venv->GetEnv(), length, &result);
+
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_New_Float(VEnv *venv, ani_size length, ani_fixedarray_float *result)
+NO_UB_SANITIZE static ani_status FixedArray_New_Float(VEnv *venv, ani_size length, VFixedArrayFloat **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->FixedArray_New_Float(venv->GetEnv(), length, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForSize(length, "length"),
+        ANIArg::MakeForArrayFloatStorage(vresult, "result")
+    );
+    // clang-format on
+
+    ani_fixedarray_float result {};
+    ani_status status = GetInteractionAPI(venv)->FixedArray_New_Float(venv->GetEnv(), length, &result);
+
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_New_Double(VEnv *venv, ani_size length, ani_fixedarray_double *result)
+NO_UB_SANITIZE static ani_status FixedArray_New_Double(VEnv *venv, ani_size length, VFixedArrayDouble **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->FixedArray_New_Double(venv->GetEnv(), length, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForSize(length, "length"),
+        ANIArg::MakeForArrayDoubleStorage(vresult, "result")
+    );
+    // clang-format on
+
+    ani_fixedarray_double result {};
+    ani_status status = GetInteractionAPI(venv)->FixedArray_New_Double(venv->GetEnv(), length, &result);
+
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)

@@ -63,19 +63,27 @@ std::string_view ANIRefTypeToString(ANIRefType refType)
 {
     // clang-format off
     switch (refType) {
-        case ANIRefType::REFERENCE:   return "ani_ref";
-        case ANIRefType::MODULE:      return "ani_module";
-        case ANIRefType::NAMESPACE:   return "ani_namespace";
-        case ANIRefType::OBJECT:      return "ani_object";
-        case ANIRefType::FN_OBJECT:   return "ani_fn_object";
-        case ANIRefType::ENUM_ITEM:   return "ani_enum_item";
-        case ANIRefType::ERROR:       return "ani_error";
-        case ANIRefType::ARRAYBUFFER: return "ani_arraybuffer";
-        case ANIRefType::STRING:      return "ani_string";
-        case ANIRefType::ARRAY:       return "ani_array";
-        case ANIRefType::TYPE:        return "ani_type";
-        case ANIRefType::CLASS:       return "ani_class";
-        case ANIRefType::ENUM:        return "ani_enum";
+        case ANIRefType::REFERENCE:             return "ani_ref";
+        case ANIRefType::MODULE:                return "ani_module";
+        case ANIRefType::NAMESPACE:             return "ani_namespace";
+        case ANIRefType::OBJECT:                return "ani_object";
+        case ANIRefType::FN_OBJECT:             return "ani_fn_object";
+        case ANIRefType::ENUM_ITEM:             return "ani_enum_item";
+        case ANIRefType::ERROR:                 return "ani_error";
+        case ANIRefType::ARRAYBUFFER:           return "ani_arraybuffer";
+        case ANIRefType::STRING:                return "ani_string";
+        case ANIRefType::ARRAY:                 return "ani_array";
+        case ANIRefType::TYPE:                  return "ani_type";
+        case ANIRefType::CLASS:                 return "ani_class";
+        case ANIRefType::ENUM:                  return "ani_enum";
+        case ANIRefType::FIXED_ARRAY_BOOLEAN:   return "ani_fixedarray_boolean";
+        case ANIRefType::FIXED_ARRAY_CHAR:      return "ani_fixedarray_char";
+        case ANIRefType::FIXED_ARRAY_BYTE:      return "ani_fixedarray_byte";
+        case ANIRefType::FIXED_ARRAY_SHORT:     return "ani_fixedarray_short";
+        case ANIRefType::FIXED_ARRAY_INT:       return "ani_fixedarray_int";
+        case ANIRefType::FIXED_ARRAY_LONG:      return "ani_fixedarray_long";
+        case ANIRefType::FIXED_ARRAY_FLOAT:     return "ani_fixedarray_float";
+        case ANIRefType::FIXED_ARRAY_DOUBLE:    return "ani_fixedarray_double";
     }
     // clang-format on
     UNREACHABLE();
@@ -123,30 +131,38 @@ PandaString ANIArg::GetStringType() const
 {
     // clang-format off
     switch (type_) {
-        case ValueType::ANI_ENV:             return "ani_env *";
-        case ValueType::ANI_VM:              return "ani_vm *";
-        case ValueType::ANI_OPTIONS:         return "ani_options *";
-        case ValueType::ANI_SIZE:            return "ani_size";
-        case ValueType::ANI_REF:             return "ani_ref";
-        case ValueType::ANI_CLASS:           return "ani_class";
-        case ValueType::ANI_METHOD:          return "ani_method";
-        case ValueType::ANI_STRING:          return "ani_string";
-        case ValueType::ANI_VALUE_ARGS:      return "const ani_value *";
-        case ValueType::ANI_UTF8_BUFFER:     return "char *";
-        case ValueType::ANI_UTF8_STRING:     return "const char *";
-        case ValueType::ANI_UTF16_BUFFER:    return "uint16_t *";
-        case ValueType::ANI_UTF16_STRING:    return "const uint16_t *";
-        case ValueType::ANI_ENV_STORAGE:     return "ani_env **";
-        case ValueType::ANI_VM_STORAGE:      return "ani_env **";
-        case ValueType::ANI_BOOLEAN_STORAGE: return "ani_boolean *";
-        case ValueType::ANI_REF_STORAGE:     return "ani_ref *";
-        case ValueType::ANI_OBJECT_STORAGE:  return "ani_object *";
-        case ValueType::ANI_STRING_STORAGE:  return "ani_string *";
-        case ValueType::ANI_SIZE_STORAGE:    return "ani_size *";
-        case ValueType::UINT32:              return "uint32_t";
-        case ValueType::ANI_ERROR:           return "ani_error";
-        case ValueType::ANI_ERROR_STORAGE:   return "ani_error *";
-        default:                             UNREACHABLE(); return "";
+        case ValueType::ANI_ENV:                          return "ani_env *";
+        case ValueType::ANI_VM:                           return "ani_vm *";
+        case ValueType::ANI_OPTIONS:                      return "ani_options *";
+        case ValueType::ANI_SIZE:                         return "ani_size";
+        case ValueType::ANI_REF:                          return "ani_ref";
+        case ValueType::ANI_CLASS:                        return "ani_class";
+        case ValueType::ANI_METHOD:                       return "ani_method";
+        case ValueType::ANI_STRING:                       return "ani_string";
+        case ValueType::ANI_VALUE_ARGS:                   return "const ani_value *";
+        case ValueType::ANI_UTF8_BUFFER:                  return "char *";
+        case ValueType::ANI_UTF8_STRING:                  return "const char *";
+        case ValueType::ANI_UTF16_BUFFER:                 return "uint16_t *";
+        case ValueType::ANI_UTF16_STRING:                 return "const uint16_t *";
+        case ValueType::ANI_ENV_STORAGE:                  return "ani_env **";
+        case ValueType::ANI_VM_STORAGE:                   return "ani_env **";
+        case ValueType::ANI_BOOLEAN_STORAGE:              return "ani_boolean *";
+        case ValueType::ANI_REF_STORAGE:                  return "ani_ref *";
+        case ValueType::ANI_OBJECT_STORAGE:               return "ani_object *";
+        case ValueType::ANI_STRING_STORAGE:               return "ani_string *";
+        case ValueType::ANI_SIZE_STORAGE:                 return "ani_size *";
+        case ValueType::UINT32:                           return "uint32_t";
+        case ValueType::ANI_ERROR:                        return "ani_error";
+        case ValueType::ANI_ERROR_STORAGE:                return "ani_error *";
+        case ValueType::ANI_FIXED_ARRAY_BOOLEAN_STORAGE:  return "ani_fixedarray_boolean *";
+        case ValueType::ANI_FIXED_ARRAY_CHAR_STORAGE:     return "ani_fixedarray_char *";
+        case ValueType::ANI_FIXED_ARRAY_BYTE_STORAGE:     return "ani_fixedarray_byte *";
+        case ValueType::ANI_FIXED_ARRAY_SHORT_STORAGE:    return "ani_fixedarray_short *";
+        case ValueType::ANI_FIXED_ARRAY_INT_STORAGE:      return "ani_fixedarray_int *";
+        case ValueType::ANI_FIXED_ARRAY_LONG_STORAGE:     return "ani_fixedarray_long *";
+        case ValueType::ANI_FIXED_ARRAY_FLOAT_STORAGE:    return "ani_fixedarray_float *";
+        case ValueType::ANI_FIXED_ARRAY_DOUBLE_STORAGE:   return "ani_fixedarray_double *";
+        default:                                          UNREACHABLE(); return "";
         case ValueType::METHOD_ARGS:
             if (action_ == Action::VERIFY_METHOD_A_ARGS) {
                 return "ani_value *";
@@ -611,6 +627,54 @@ static std::optional<PandaString> VerifyErrorStorage(Verifier &v, const ANIArg &
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_ERROR_STORAGE);
     return v.VerifyTypeStorage(arg.GetValueErrorStorage(), "ani_error");
+}
+
+static std::optional<PandaString> VerifyFixedArrayBooleanStorage(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIXED_ARRAY_BOOLEAN_STORAGE);
+    return v.VerifyTypeStorage(arg.GetValueFixedArrayBooleanStorage(), "ani_fixedarray_boolean");
+}
+
+static std::optional<PandaString> VerifyFixedArrayCharStorage(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIXED_ARRAY_CHAR_STORAGE);
+    return v.VerifyTypeStorage(arg.GetValueFixedArrayCharStorage(), "ani_fixedarray_char");
+}
+
+static std::optional<PandaString> VerifyFixedArrayByteStorage(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIXED_ARRAY_BYTE_STORAGE);
+    return v.VerifyTypeStorage(arg.GetValueFixedArrayByteStorage(), "ani_fixedarray_byte");
+}
+
+static std::optional<PandaString> VerifyFixedArrayShortStorage(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIXED_ARRAY_SHORT_STORAGE);
+    return v.VerifyTypeStorage(arg.GetValueFixedArrayShortStorage(), "ani_fixedarray_short");
+}
+
+static std::optional<PandaString> VerifyFixedArrayIntStorage(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIXED_ARRAY_INT_STORAGE);
+    return v.VerifyTypeStorage(arg.GetValueFixedArrayIntStorage(), "ani_fixedarray_int");
+}
+
+static std::optional<PandaString> VerifyFixedArrayLongStorage(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIXED_ARRAY_LONG_STORAGE);
+    return v.VerifyTypeStorage(arg.GetValueFixedArrayLongStorage(), "ani_fixedarray_long");
+}
+
+static std::optional<PandaString> VerifyFixedArrayFloatStorage(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIXED_ARRAY_FLOAT_STORAGE);
+    return v.VerifyTypeStorage(arg.GetValueFixedArrayFloatStorage(), "ani_fixedarray_float");
+}
+
+static std::optional<PandaString> VerifyFixedArrayDoubleStorage(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIXED_ARRAY_DOUBLE_STORAGE);
+    return v.VerifyTypeStorage(arg.GetValueFixedArrayDoubleStorage(), "ani_fixedarray_double");
 }
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)

@@ -29,6 +29,14 @@ class VClass;
 class VString;
 class VMethod;
 class VError;
+class VFixedArrayBoolean;
+class VFixedArrayChar;
+class VFixedArrayByte;
+class VFixedArrayShort;
+class VFixedArrayInt;
+class VFixedArrayLong;
+class VFixedArrayFloat;
+class VFixedArrayDouble;
 
 namespace internal {
 
@@ -111,6 +119,46 @@ struct TypeMapping<VError **> {
 template <>
 struct TypeMapping<VError *> {
     using Type = ani_error;
+};
+
+template <>
+struct TypeMapping<VFixedArrayBoolean **> {
+    using Type = ani_fixedarray_boolean *;
+};
+
+template <>
+struct TypeMapping<VFixedArrayChar **> {
+    using Type = ani_fixedarray_char *;
+};
+
+template <>
+struct TypeMapping<VFixedArrayByte **> {
+    using Type = ani_fixedarray_byte *;
+};
+
+template <>
+struct TypeMapping<VFixedArrayShort **> {
+    using Type = ani_fixedarray_short *;
+};
+
+template <>
+struct TypeMapping<VFixedArrayInt **> {
+    using Type = ani_fixedarray_int *;
+};
+
+template <>
+struct TypeMapping<VFixedArrayLong **> {
+    using Type = ani_fixedarray_long *;
+};
+
+template <>
+struct TypeMapping<VFixedArrayFloat **> {
+    using Type = ani_fixedarray_float *;
+};
+
+template <>
+struct TypeMapping<VFixedArrayDouble **> {
+    using Type = ani_fixedarray_double *;
 };
 
 template <typename X>
