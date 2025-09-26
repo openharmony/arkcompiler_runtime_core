@@ -248,14 +248,8 @@ export class JSON {
         if (obj === undefined) {
             return "undefined"
         }
-        let output = JSON.stringifyFast(obj)
-        if (output !== undefined) {
-            return output
-        }
         return new JSONWriter().write(obj)
     }
-
-    private static native stringifyFast(obj: Any): String;
 
     public static stringifyJsonReplacer(obj: JsonReplacer): String {
         const record = obj.jsonReplacer();
@@ -713,12 +707,9 @@ export class JSON {
 }
 
 class JSONWriter {
-    // NOTE(cheezzario) replace with Type.for<JSValue>() when it will be implemented
-    private static readonly STD_CORE_INTEROP_JSVALUE_TYPE = (Type.of([] as FixedArray<JSValue>) as ArrayType).getElementType()
-    private static readonly ESCOMPAT_ARRAY_TYPE = Type.of(new Array<Object>(0))
-    private static readonly ESCOMPAT_SET_TYPE = Type.of(new Set<Object>())
-    private static readonly ESCOMPAT_MAP_TYPE = Type.of(new Map<Object, Object>())
-    private static readonly STD_CORE_PROMISE_TYPE = Type.of(new Promise<Object>((res) => {}))
+    // NOTE(cheezzario) replace with Class.for<JSValue>() when it will be implemented
+    private static readonly STD_CORE_INTEROP_JSVALUE_CLASS = Class.of([] as FixedArray<JSValue>).getFixedArrayComponentType()!
+    private static readonly GETTER_PREFIX = "<get>"
 
     private readonly replacer: ((key: String, value: Any) => Any) | undefined
     private readonly fieldsFilter: FixedArray<string>
@@ -785,29 +776,27 @@ class JSONWriter {
             this.buffer.append(JSON.stringifyJsonElement(obj))
         } else if (obj instanceof ArrayBuffer) {
             this.buffer.append(JSONObject.EMPTY)
+        } else if (obj instanceof Function) {
+            this.buffer.append("undefined")
         } else if (this.writeValueTypeWrapper(obj)) {
             // nothing to do - write completed successfully
-        } else {
-            const objType = Type.of(obj)
-            if (objType.getName() == "escompat.Date") {
-                this.buffer.append("\"").append((obj as Date).toISOString()).append("\"")
-            } else if (objType.getName() == JSONWriter.STD_CORE_INTEROP_JSVALUE_TYPE.getName()) {
+        } else if (obj instanceof Date) {
+            this.buffer.append("\"").append((obj as Date).toISOString()).append("\"")
+        } else if (obj instanceof Array) {
+            this.writeEscompatArray(obj)
+        } else if (obj instanceof Set || obj instanceof Promise || obj instanceof Map) {
+            this.buffer.append(JSONObject.EMPTY)
+        } else if (obj instanceof Object) {
+            const objCls = Class.of(obj)
+            if (objCls === JSONWriter.STD_CORE_INTEROP_JSVALUE_CLASS) {
                 this.buffer.append(JSON.stringify(obj as JSValue))
-            } else if (objType instanceof ArrayType) {
-                this.writeArrayValue(reflect.Value.of(obj) as ArrayValue, objType as ArrayType)
-            } else if (objType.getName() == JSONWriter.ESCOMPAT_ARRAY_TYPE.getName()) {
-                this.writeEscompatArray(obj as Array<Object>)
-            } else if (objType.getName() == JSONWriter.ESCOMPAT_SET_TYPE.getName() ||
-                       objType.getName() == JSONWriter.STD_CORE_PROMISE_TYPE.getName() ||
-                       objType.getName() == JSONWriter.ESCOMPAT_MAP_TYPE.getName()) {
-                this.buffer.append(JSONObject.EMPTY)
-            } else if (objType instanceof ClassType) {
-                this.writeClassValue(obj as Object, objType as ClassType)
-            } else if (objType instanceof LambdaType) {
-                this.buffer.append("undefined")
+            } else if (objCls.isFixedArray()) {
+                this.writeArrayValue(reflect.Value.of(obj) as ArrayValue)
             } else {
-                throw new AssertionError("Unsupported object type: " + objType)
+                this.writeClassValue(obj, objCls)
             }
+        } else {
+            throw new AssertionError("Unsupported object type: " + typeof obj)
         }
     }
 
@@ -820,9 +809,9 @@ class JSONWriter {
             this.indentLevel += 1
         }
 
-        const objType = Type.of(obj) as ClassType
+        const objClass = Class.of(obj)
 
-        const writableFields = this.getWritableFields(objType, reflect.Value.of(obj) as ClassValue)
+        const writableFields = this.getWritableFields(objClass, reflect.Value.of(obj) as ClassValue)
 
         let fieldDumped = false
         if (writableFields.length > 0) {
@@ -848,7 +837,7 @@ class JSONWriter {
         this.buffer = currentBuffer
     }
 
-    private writeTupleElements(tupleFields: Array<[Field, reflect.Value]>): boolean {
+    private writeTupleElements(tupleFields: Array<[string, reflect.Value]>): boolean {
         const FIELD_VALUE = 1
 
         let fieldDumped = false
@@ -984,7 +973,7 @@ class JSONWriter {
         }
     }
 
-    private writeClassValue(obj: Object, objType: ClassType): void {
+    private writeClassValue(obj: Object, objCls: Class): void {
         const currentBuffer = this.buffer
         // we need this local buffer to discard empty object prolog: '{','\n',<space> and replace it with '{}'
         this.buffer = new StringBuilder("{")
@@ -994,7 +983,7 @@ class JSONWriter {
             this.indentLevel += 1
         }
 
-        const writableFields = this.getWritableFields(objType, reflect.Value.of(obj) as ClassValue)
+        const writableFields = this.getWritableFields(objCls, reflect.Value.of(obj) as ClassValue)
 
         let fieldDumped = false
         if (writableFields.length > 0) {
@@ -1021,8 +1010,7 @@ class JSONWriter {
             return fieldDumped
         }
 
-        const fieldValType = Type.of(fieldVal)
-        if (fieldValType instanceof LambdaType) {
+        if (fieldVal instanceof Function) {
             return fieldDumped
         }
 
@@ -1051,102 +1039,127 @@ class JSONWriter {
         return fieldDumped
     }
 
-    private writeClassFields(writableFields: Array<[Field, reflect.Value]>): boolean {
-        const FIELD_TYPE = 0
+    private writeClassFields(writableFields: Array<[string, reflect.Value]>): boolean {
+        const FIELD_NAME = 0
         const FIELD_VALUE = 1
 
         let fieldDumped = false
         for (let fieldIdx = 0; fieldIdx < writableFields.length; fieldIdx++) {
             const fieldTypeValuePair = writableFields[fieldIdx]
 
-            const objField = fieldTypeValuePair[0] as Field
-            const objFieldValue = fieldTypeValuePair[1] as reflect.Value
+            const objFieldName = fieldTypeValuePair[FIELD_NAME]
+            const objFieldValue = fieldTypeValuePair[FIELD_VALUE] as reflect.Value
 
-            const objToDump = this.useReplacer ? this.replacer!(objField.getName(), objFieldValue.getData()) : objFieldValue.getData()
-            fieldDumped = this.writeField(objField.getName(), objToDump, fieldDumped)
+            const objToDump = this.useReplacer ? this.replacer!(objFieldName, objFieldValue.getData()) : objFieldValue.getData()
+            fieldDumped = this.writeField(objFieldName, objToDump, fieldDumped)
         }
 
         return fieldDumped
     }
 
-    private checkSameRename(field: Field, fields: Array<[Field, reflect.Value]>): boolean {
-        return fields.some((value, index, array) => value[0].getName() == field.getName());
+    private checkSameRename(fieldName: string, fields: Array<[string, reflect.Value]>): boolean {
+        return fields.some((writableField) => writableField[0] == fieldName);
     }
 
-    private findKeyIndex(field: Field, fields: Array<[Field, reflect.Value]>): number {
-        return fields.findIndex((value, index, array) => value[0].getName() == field.getName());
+    private findKeyIndex(fieldName: string, fields: Array<[string, reflect.Value]>): number {
+        return fields.findIndex((writableField) => writableField[0] == fieldName);
     }
 
-    private getWritableFields(classType: ClassType, classValue: ClassValue): Array<[Field, reflect.Value]> {
-        const writableFields = new Array<[Field, reflect.Value]>()
+    private addWritableProperty(cls: Class, clsVal: ClassValue, propName: string, writableFields: Array<[string, reflect.Value]>): void {
+        const getterName = JSONWriter.GETTER_PREFIX + propName
+        const getter = cls.getInstanceMethodByName(getterName)
+        if (getter === undefined) {
+            return
+        }
+
+        const propVal = getter.invoke(clsVal.getData() as object)
+
+        const propNameValuePair: [string, reflect.Value] = [propName, reflect.Value.of(propVal)]
+        writableFields.push(propNameValuePair)
+    }
+
+    private addWritableProperties(cls: Class, clsVal: ClassValue, writableFields: Array<[string, reflect.Value]>): void {
+        for (const method of cls.getInstanceMethods()) {
+            const methodName = method.getName()
+            if (methodName.startsWith(JSONWriter.GETTER_PREFIX)) {
+                const propName = methodName.substring(JSONWriter.GETTER_PREFIX.length)
+                const propValue = method.invoke(clsVal.getData() as object)
+                const fieldNameValuePair: [string, reflect.Value] = [propName, reflect.Value.of(propValue)]
+                writableFields.push(fieldNameValuePair)
+            }
+        }
+    }
+
+    private getWritableFields(cls: Class, classValue: ClassValue): Array<[string, reflect.Value]> {
+        const writableFields = new Array<[string, reflect.Value]>()
         let hasJsonIgnore: boolean = false
         let fieldRename : string | undefined = undefined
 
         if (this.useFieldsFilter) {
             for (let fieldIdx = 0; fieldIdx < this.fieldsFilter.length; fieldIdx++) {
                 const fieldName = this.fieldsFilter[fieldIdx]
-                if (!classType.hasField(fieldName)) {
+                const field = cls.getInstanceFieldByName(fieldName)
+                if (field === undefined) {
+                    this.addWritableProperty(cls, classValue, fieldName, writableFields)
                     continue
                 }
 
-                const field = classType.getFieldByName(fieldName)
-                hasJsonIgnore = JSONAPI.getJSONStringifyIgnoreByName(classType.cls, fieldName);
-                if (hasJsonIgnore || field.isStatic()) {
+                hasJsonIgnore = JSONAPI.getJSONStringifyIgnoreByName(cls, fieldName);
+                if (hasJsonIgnore) {
                     continue
                 }
-                fieldRename = JSONAPI.getJSONRenameByName(classType.cls, fieldName);
+                fieldRename = JSONAPI.getJSONRenameByName(cls, fieldName);
                 if (fieldRename != undefined) {
-                    if (classType.hasField(fieldRename)) {
-                        throw new Error("Cannot rename " + fieldRename + " in keys of " + classType.getName())
+                    if (cls.getInstanceFieldByName(fieldRename) !== undefined) {
+                        throw new Error("Cannot rename " + fieldRename + " in keys of " + cls.getName())
                     } else {
                         field.name = fieldRename
                     }
-                    if (this.checkSameRename(field, writableFields)) {
-                        throw new Error("Cannot double rename " + field.getName() + " in keys of " + classType.getName())
+                    if (this.checkSameRename(field.getName(), writableFields)) {
+                        throw new Error("Cannot double rename " + field.getName() + " in keys of " + cls.getName())
                     }
                 }
 
                 const fieldValue = classValue.getFieldByName(fieldName)
 
-                const fieldTypeValuePair: [Field, reflect.Value] = [field, fieldValue]
-                writableFields.push(fieldTypeValuePair)
+                const fieldNameValuePair: [string, reflect.Value] = [field.getName(), fieldValue]
+                writableFields.push(fieldNameValuePair)
             }
         } else {
-            const fieldsCount = classValue.getFieldsNum()
-            for (let fieldIdx = 0; fieldIdx < fieldsCount; fieldIdx++) {
-                const field = classType.getField(fieldIdx)
-                hasJsonIgnore = JSONAPI.getJSONStringifyIgnoreByIdx(classType.cls, fieldIdx);
-                if (hasJsonIgnore || field.isStatic()) {
+            for (const field of cls.getInstanceFields()) {
+                hasJsonIgnore = JSONAPI.getJSONStringifyIgnoreByName(cls, field.getName());
+                if (hasJsonIgnore) {
                     continue
                 }
-                const index: int = this.findKeyIndex(field, writableFields).toInt()
-                fieldRename = JSONAPI.getJSONRenameByIdx(classType.cls, fieldIdx);
-                if (fieldRename != undefined) {
-                    if (classType.hasField(fieldRename)) {
-                        throw new Error("Cannot rename " + fieldRename + " in keys of " + classType.getName())
+                const index: int = this.findKeyIndex(field.getName(), writableFields).toInt()
+                fieldRename = JSONAPI.getJSONRenameByName(cls, field.getName());
+                if (fieldRename !== undefined) {
+                    if (cls.getInstanceFieldByName(fieldRename) !== undefined) {
+                        throw new Error("Cannot rename " + fieldRename + " in keys of " + cls.getName())
                     } else {
                         field.name = fieldRename
                     }
-                    if (this.checkSameRename(field, writableFields)) {
-                        throw new Error("Cannot double rename " + field.getName() + " in keys of " + classType.getName())
+                    if (this.checkSameRename(field.getName(), writableFields)) {
+                        throw new Error("Cannot double rename " + field.getName() + " in keys of " + cls.getName())
                     }
                 }
 
-                const fieldValue = classValue.getField(fieldIdx)
+                const fieldValue = classValue.getFieldByName(field.getName())
 
-                const fieldTypeValuePair: [Field, reflect.Value] = [field, fieldValue]
+                const fieldNameValuePair: [string, reflect.Value] = [field.getName(), fieldValue]
                 if (fieldRename != undefined || index == -1) {
-                    writableFields.push(fieldTypeValuePair)
+                    writableFields.push(fieldNameValuePair)
                 } else {
-                    writableFields[index] = fieldTypeValuePair
+                    writableFields[index] = fieldNameValuePair
                 }
             }
+            this.addWritableProperties(cls, classValue, writableFields)
         }
 
         return writableFields
     }
 
-    private writeArrayValue(arrayValue: ArrayValue, arrayType: ArrayType): void {
+    private writeArrayValue(arrayValue: ArrayValue): void {
         this.buffer.append("[")
 
         if (this.useIndent) {
@@ -1263,14 +1276,13 @@ class JSONWriter {
     private writeObjectsArrayElement(arrayElement: Any, elementIndex: int): void {
         this.writePadding()
 
-        const replacedArrayElement = this.useReplacer ? this.replacer!("" + elementIndex, arrayElement) : arrayElement
+        const replacedElem = this.useReplacer ? this.replacer!("" + elementIndex, arrayElement) : arrayElement
 
-        const arrayElementType = Type.of(replacedArrayElement)
-        if (replacedArrayElement == null || arrayElementType instanceof LambdaType) {
+        if (replacedElem == null || replacedElem instanceof Function) {
             this.buffer.append("null")
         } else {
-            this.checkReferencesCycle(replacedArrayElement)
-            this.writeObject(replacedArrayElement)
+            this.checkReferencesCycle(replacedElem)
+            this.writeObject(replacedElem)
         }
     }
 
