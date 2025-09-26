@@ -30,6 +30,9 @@
 02.lexical_elements/09.literals/08.regex_literal/regex_lookaround_literal.ets
 02.lexical_elements/09.literals/08.regex_literal/regex_quantifier_literal.ets
 
+#30347
+03.types/alias_unconversion/comp_obj/comp-clss_20.ets
+
 #29471 Exponentiation doesn't work for BigInt
 03.types/06.value_types/01.numeric_types/conversions_with_bigint_10.ets
 03.types/06.value_types/01.numeric_types/conversions_with_bigint_100.ets
@@ -97,7 +100,7 @@
 #26657
 04.names_declarations_and_scopes/07.function_declarations/04.optional_parameters/opt_param_23.ets
 
-#26981
+#563 arkts-2.0-specification
 04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/record_to_rest.ets
 
 #29268
@@ -943,7 +946,7 @@
 #28898 Iterable refused as spread
 07.expressions/06.spread_expression/iterable.ets
 
-#26981 Unable to spread Record
+#563 arkts-2.0-specification
 07.expressions/06.spread_expression/spex_func_50.ets
 
 #20371 Unexpected Type Error on string array
@@ -1418,6 +1421,9 @@
 
 #29937
 09.classes/06.field_declarations/04.field_initialization/class_static_fields_cte_15.ets
+
+#30350
+09.classes/06.field_declarations/04.field_initialization/class_static_fields_decl_23.ets
 
 #29938
 09.classes/06.field_declarations/04.field_initialization/interface_fields_cte_2.ets
