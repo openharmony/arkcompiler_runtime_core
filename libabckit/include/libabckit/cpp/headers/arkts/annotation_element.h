@@ -16,8 +16,8 @@
 #ifndef CPP_ABCKIT_ARKTS_ANNOTATION_ELEMENT_H
 #define CPP_ABCKIT_ARKTS_ANNOTATION_ELEMENT_H
 
-#include "../core/annotation_element.h"
-#include "../base_concepts.h"
+#include "libabckit/cpp/headers/core/annotation_element.h"
+#include "libabckit/cpp/headers/base_concepts.h"
 
 namespace abckit::arkts {
 

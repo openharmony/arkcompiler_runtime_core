@@ -17,7 +17,7 @@
 #define CPP_ABCKIT_ARKTS_IMPORT_DESCRIPTOR_IMPL_H
 
 #include "import_descriptor.h"
-#include "../core/import_descriptor.h"
+#include "libabckit/cpp/headers/core/import_descriptor.h"
 
 namespace abckit::arkts {
 

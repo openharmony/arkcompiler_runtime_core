@@ -16,8 +16,8 @@
 #ifndef CPP_ABCKIT_ARKTS_FUNCTION_H
 #define CPP_ABCKIT_ARKTS_FUNCTION_H
 
-#include "../core/function.h"
-#include "../base_concepts.h"
+#include "libabckit/cpp/headers/core/function.h"
+#include "libabckit/cpp/headers/base_concepts.h"
 
 namespace abckit::arkts {
 

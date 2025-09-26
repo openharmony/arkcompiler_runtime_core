@@ -16,7 +16,7 @@
 #ifndef CPP_ABCKIT_CORE_CLASS_H
 #define CPP_ABCKIT_CORE_CLASS_H
 
-#include "../base_classes.h"
+#include "libabckit/cpp/headers/base_classes.h"
 #include "function.h"
 
 #include <functional>

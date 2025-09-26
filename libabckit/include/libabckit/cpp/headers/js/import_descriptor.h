@@ -16,8 +16,8 @@
 #ifndef CPP_ABCKIT_JS_IMPORT_DESCRIPTOR_H
 #define CPP_ABCKIT_JS_IMPORT_DESCRIPTOR_H
 
-#include "../core/import_descriptor.h"
-#include "../base_concepts.h"
+#include "libabckit/cpp/headers/core/import_descriptor.h"
+#include "libabckit/cpp/headers/base_concepts.h"
 
 namespace abckit::js {
 

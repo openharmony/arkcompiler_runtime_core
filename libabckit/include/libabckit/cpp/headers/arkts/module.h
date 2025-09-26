@@ -16,8 +16,8 @@
 #ifndef CPP_ABCKIT_ARKTS_MODULE_H
 #define CPP_ABCKIT_ARKTS_MODULE_H
 
-#include "../core/module.h"
-#include "../base_concepts.h"
+#include "libabckit/cpp/headers/core/module.h"
+#include "libabckit/cpp/headers/base_concepts.h"
 #include "import_descriptor.h"
 #include "export_descriptor.h"
 #include "annotation_interface.h"

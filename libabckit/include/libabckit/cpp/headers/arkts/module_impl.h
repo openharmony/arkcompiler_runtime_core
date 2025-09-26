@@ -18,9 +18,9 @@
 
 #include "module.h"
 #include "import_descriptor.h"
-#include "../core/import_descriptor.h"
+#include "libabckit/cpp/headers/core/import_descriptor.h"
 #include "annotation_interface.h"
-#include "../core/annotation_interface.h"
+#include "libabckit/cpp/headers/core/annotation_interface.h"
 
 // NOLINTBEGIN(performance-unnecessary-value-param)
 namespace abckit::arkts {

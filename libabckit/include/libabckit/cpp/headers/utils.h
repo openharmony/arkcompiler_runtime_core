@@ -16,7 +16,7 @@
 #ifndef CPP_ABCKIT_UTILS_H
 #define CPP_ABCKIT_UTILS_H
 
-#include "../../c/statuses.h"
+#include "libabckit/c/statuses.h"
 
 #include <string>
 

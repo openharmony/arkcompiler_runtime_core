@@ -16,8 +16,8 @@
 #ifndef CPP_ABCKIT_ARKTS_CLASS_H
 #define CPP_ABCKIT_ARKTS_CLASS_H
 
-#include "../core/class.h"
-#include "../base_concepts.h"
+#include "libabckit/cpp/headers/core/class.h"
+#include "libabckit/cpp/headers/base_concepts.h"
 #include "annotation_interface.h"
 
 namespace abckit::arkts {

@@ -16,9 +16,9 @@
 #ifndef CPP_ABCKIT_ARKTS_NAMESPACE_H
 #define CPP_ABCKIT_ARKTS_NAMESPACE_H
 
-#include "../core/namespace.h"
+#include "libabckit/cpp/headers/core/namespace.h"
 #include "function.h"
-#include "../base_concepts.h"
+#include "libabckit/cpp/headers/base_concepts.h"
 
 namespace abckit::arkts {
 

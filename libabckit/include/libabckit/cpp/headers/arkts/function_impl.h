@@ -18,7 +18,7 @@
 
 #include "function.h"
 #include "annotation.h"
-#include "../core/annotation.h"
+#include "libabckit/cpp/headers/core/annotation.h"
 #include "annotation_interface.h"
 
 // NOLINTBEGIN(performance-unnecessary-value-param)

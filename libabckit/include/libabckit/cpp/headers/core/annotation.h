@@ -19,7 +19,7 @@
 #include <functional>
 
 #include "annotation_element.h"
-#include "../base_classes.h"
+#include "libabckit/cpp/headers/base_classes.h"
 
 namespace abckit::core {
 

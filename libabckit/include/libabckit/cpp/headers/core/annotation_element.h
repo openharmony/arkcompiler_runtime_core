@@ -16,8 +16,8 @@
 #ifndef CPP_ABCKIT_CORE_ANNOTATION_ELEMENT_H
 #define CPP_ABCKIT_CORE_ANNOTATION_ELEMENT_H
 
-#include "../base_classes.h"
-#include "../value.h"
+#include "libabckit/cpp/headers/base_classes.h"
+#include "libabckit/cpp/headers/value.h"
 
 #include <string>
 

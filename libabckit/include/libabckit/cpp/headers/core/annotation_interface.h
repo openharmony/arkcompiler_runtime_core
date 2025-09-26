@@ -16,9 +16,9 @@
 #ifndef CPP_ABCKIT_CORE_ANNOTATION_INTERFACE_H
 #define CPP_ABCKIT_CORE_ANNOTATION_INTERFACE_H
 
-#include "../base_classes.h"
+#include "libabckit/cpp/headers/base_classes.h"
 #include "annotation_interface_field.h"
-#include "../config.h"
+#include "libabckit/cpp/headers/config.h"
 
 #include <vector>
 #include <string>
