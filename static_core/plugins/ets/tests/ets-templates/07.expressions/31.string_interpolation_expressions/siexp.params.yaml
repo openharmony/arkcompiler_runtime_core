@@ -14,19 +14,19 @@
 cases:
     - use: |-
           const b1: byte = Byte.MIN_VALUE
-          const b2: byte = 0 as byte
+          const b2: byte = (0).toByte()
           const b3: byte = Byte.MAX_VALUE
           const s1: short = Short.MIN_VALUE
-          const s2: short = 0 as short
+          const s2: short = (0).toShort()
           const s3: short = Short.MAX_VALUE
           const i1: int = Int.MIN_VALUE
-          const i2: int = 0 as int
+          const i2: int = (0).toInt()
           const i3: int = Int.MAX_VALUE
           const l1: long = Long.MIN_VALUE
-          const l2: long = 0 as long
+          const l2: long = (0).toInt().toLong()
           const l3: long = Long.MAX_VALUE
           const f1: float = Float.MIN_VALUE
-          const f2: float = 0.0.toFloat()
+          const f2: float = 0.0f
           const f3: float = Float.MAX_VALUE
           const n1: number = Number.MIN_VALUE
           const n2: number = 0.0
@@ -37,19 +37,19 @@ cases:
 
     - use: |-
           const b1: Byte = Byte.MIN_VALUE
-          const b2: Byte = 0 as byte
+          const b2: Byte = (0).toByte()
           const b3: Byte = Byte.MAX_VALUE
           const s1: Short = Short.MIN_VALUE
-          const s2: Short = 0 as short
+          const s2: Short = (0).toShort()
           const s3: Short = Short.MAX_VALUE
           const i1: Int = Int.MIN_VALUE
-          const i2: Int = 0 as int
+          const i2: Int = (0).toInt()
           const i3: Int = Int.MAX_VALUE
           const l1: Long = Long.MIN_VALUE
-          const l2: Long = 0 as long
+          const l2: Long = (0).toInt().toLong()
           const l3: Long = Long.MAX_VALUE
           const f1: Float = Float.MIN_VALUE
-          const f2: Float = 0.0.toFloat()
+          const f2: Float = 0.0f
           const f3: Float = Float.MAX_VALUE
           const n1: Number = Number.MIN_VALUE
           const n2: Number = 0.0
@@ -133,3 +133,128 @@ cases:
           let b = 'World'
           const v = `${a   }, ${  b} !`
           const expected = 'Hello, World !'
+
+    - use: |-
+        const v = iss
+        const expected = 'Hello, String!'
+      defs: |-
+        let iss: String = `Hello, ${TString}!`
+        let TString = 'String'
+
+    - use: |-
+        let a: AClass = new AClass        
+        const v = `${AClass.hello}, ${a.world}!`
+        const expected = 'Hello, World!'
+      defs: |-
+        class AClass {
+          static hello: string  = 'Hello'
+          private _world: string = 'World'
+          get world() { return this._world }
+        }
+
+    - use: |-
+        let a: IPerson = {name: 'Bob', id: 25}        
+        const v = `Hello ${a.name}, ${a.id}!`
+        const expected = 'Hello Bob, 25!'
+      defs: |-
+        interface IPerson {
+          name: String
+          id: int
+        }
+
+    - use: |-
+        let a: IPerson = {name: 'Bob', id: 25}  
+        let name: string
+        let id: int
+        const v = `Hello ${name = a.name}, ${id = a.id}!`
+        const expected = 'Hello Bob, 25!'
+      defs: |-
+        interface IPerson {
+          name: String
+          id: int
+        }
+      xcheck: |-
+        arktest.assertEQ(name, 'Bob')
+        arktest.assertEQ(id, 25)
+
+    - use: |-
+        let a: IPerson = {id: 25}  
+        let name: string | undefined = 'Bob'
+        let id: int
+        const v = `Hello ${name = a.name}, ${id = a.id}!`
+        const expected = 'Hello undefined, 25!'
+      defs: |-
+        interface IPerson {
+          name?: String
+          id: int
+        }
+      xcheck: |-
+        arktest.assertEQ(name, undefined)
+        arktest.assertEQ(id, 25)
+
+    - use: |-
+        let a: IPerson = {id: 25}  
+        let name: string | undefined = 'Bob'
+        let id: int
+        const v = `Hello ${name = (a.name == undefined ? 'Mary' : a.name)}, ${id = a.id}!`
+        const expected = 'Hello Mary, 25!'
+      defs: |-
+        interface IPerson {
+          name?: String
+          id: int
+        }
+      xcheck: |-
+        arktest.assertEQ(name, 'Mary')
+        arktest.assertEQ(id, 25)
+
+    - use: |-
+        let a: IPerson = {id: 25}  
+        let id: int
+        const v = `Hello ${a.name ?? 'Jane'}, ${id = a.id}!`
+        const expected = 'Hello Jane, 25!'
+      defs: |-
+        interface IPerson {
+          name?: String
+          id: int
+        }
+      xcheck: |-
+        arktest.assertEQ(id, 25)
+        
+
+    - use: |-
+        const v = `___${Flags.Read}___${Flags.Write}___${Flags.Full}`
+        const expected = '___0___1___1'
+      defs: |-
+        enum Flags { Read, Write, Full = Read | Write }
+
+    - use: |-
+        const v = `___${Flags.Read}___${Flags.Write}___${Flags.Full}`
+        const expected = '___Read___Write___Full'
+      defs: |-
+        enum Flags { Read = 'Read', Write = 'Write', Full = 'Full' }
+
+    - use: |-
+        const v = `___${triple[0]}___${triple[1]}___${triple[2]}`
+        const expected = '___1___Test___true'
+      defs: |-
+        const triple: [number, string, boolean] = [1, 'Test', true]
+
+    - use: |-
+        const v = `___${pair['key1']}___${pair['key2']}`
+        const expected = '___1___2'
+      defs: |-
+        const pair: Record<string, number> = {'key1': 1, 'key2': 2}
+
+    - use: |-
+        let values: int[] = [1,2,3,4,5]
+        const v: String = `Hello ${values}`
+        const expected = 'Hello 1,2,3,4,5'
+
+    - use: |-
+        let values: int[] = [1,2,3,4,5]
+        const v: String = `Hello ${[...values]}`
+        const expected = 'Hello 1,2,3,4,5'
+
+    - use: |-
+        const v = `...${null}...${undefined}...`
+        const expected = '...null...undefined...'      

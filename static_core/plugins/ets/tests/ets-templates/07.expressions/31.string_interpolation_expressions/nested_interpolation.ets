@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,19 @@
  * limitations under the License.
  */
 
-{%- for c in cases %}
 /*---
 desc: >-
     An embedded expression is an expression specified inside the dollar
     sign '$' and curly braces. The type of a string interpolation expression
     is string.
 ---*/
-{{c.defs}}
+
+function getEgg(): string {
+    return `${'egg'}`
+}
 
 function main() {
-    {{c.use|indent}}
-    arktest.assertEQ( v, expected )
-    {{c.xcheck}}
+    let nsi = `God, a ${`${'red nugget'}`}, a fat ${getEgg()} under a dog`
+    let exp = 'God, a red nugget, a fat egg under a dog'
+    arktest.assertEQ(exp, nsi)
 }
-{%- endfor %}
