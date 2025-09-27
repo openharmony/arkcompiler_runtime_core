@@ -52,7 +52,7 @@ class RunnerSRCDumper(RunnerJS):
         Log.summary(_LOGGER, f'TEST_ROOT set to {self.test_root}')
 
         # Set up artifacts directory for dumped source files
-        self.artifacts_root = Path(config.general.work_dir) / 'dumped_src'
+        self.artifacts_root = self.get_work_dir(config) / 'dumped_src'
         self.artifacts_root.mkdir(parents=True, exist_ok=True)
         Log.summary(_LOGGER, f'Artifacts directory set to {self.artifacts_root}')
 
@@ -69,6 +69,9 @@ class RunnerSRCDumper(RunnerJS):
     @property
     def default_work_dir_root(self) -> Path:
         return Path('/tmp') / 'srcdumper'
+
+    def get_work_dir(self, config: Config) -> Path:
+        return Path(config.general.work_dir) if config.general.work_dir else self.default_work_dir_root
 
     def create_test(self, test_file: str, flags: List[str], is_ignored: bool) -> TestSRCDumper:
         test = TestSRCDumper(self.test_env, test_file, flags, get_test_id(test_file, self.test_root))

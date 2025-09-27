@@ -16,7 +16,6 @@
 #
 
 import json
-import logging
 import os
 import re
 from typing import List, Any
@@ -28,8 +27,6 @@ from runner.enum_types.fail_kind import FailKind
 from runner.plugins.srcdumper.util_srcdumper import AstComparator, PathConverter
 from runner.enum_types.params import TestReport
 
-_LOGGER = logging.getLogger("runner.plugins.srcdumper")
-
 
 class TestSRCDumper(TestFileBased):
     def __init__(self, test_env: TestEnv, test_path: str, flags: List[str], test_id: str) -> None:
@@ -39,7 +36,7 @@ class TestSRCDumper(TestFileBased):
         self.original_ast: str = ""
         self.dumped_ast: str = ""
 
-        self.path_conv = PathConverter(test_id, test_env.config.general.work_dir)
+        self.path_conv = PathConverter(test_id, test_env.work_dir.root.as_posix())
 
 
     def do_run(self) -> TestFileBased:
