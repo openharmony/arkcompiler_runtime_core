@@ -187,7 +187,7 @@
     "/tmp/abckit_test_ets/spec/03.types/References_Types/Type_undefined/issue14610.ets": 1,
     "/tmp/abckit_test_ets/escompat/WeakSetGCTest.ets": 1,
     "/tmp/abckit_test_ets/escompat/JsonReplacerTest.ets": 1,
-    "/tmp/abckit_test_ets/escompat/ReadonlyArrayTest.ets": 1,
+    "/tmp/abckit_test_ets/std/core/ReadonlyArrayTest.ets": 1,
     "/tmp/abckit_test_ets/spec/13.Compilation_Units_Packages_and_Modules/05.top-level_declarations/01.exported_declarations/exported_declarations_02.ets": 1,
     "/tmp/abckit_test_ets/escompat/DataViewBigIntTest.ets": 1,
     "/tmp/abckit_test_ets/escompat/ArrayIteratorDone.ets": 1,

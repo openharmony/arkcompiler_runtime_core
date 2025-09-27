@@ -13,30 +13,12 @@
  * limitations under the License.
  */
 
-package escompat;
+package std.core;
 
-class ArrayLikeIterator<T> implements IterableIterator<T> {
-    private base: ArrayLike<T>
-    private index: int = 0
+export interface ConcatArray<T> extends ArrayLike<T> {
+    at(index: int): T | undefined;
 
-    constructor(base: ArrayLike<T>) {
-        this.base = base
-    }
+    join(separator?: String): string;
 
-    override next(): IteratorResult<T> {
-        if (this.index >= this.base.length) {
-            return new IteratorResult<T>()
-        }
-        return new IteratorResult<T>(this.base.$_get(this.index++))
-    }
-}
-
-export interface ArrayLike<T> extends Iterable<T> {
-    $_get(index: int): T
-
-    get length(): int
-
-    $_iterator(): IterableIterator<T> {
-        return new ArrayLikeIterator<T>(this)
-    }
+    slice(start?: int, end?: int): Array<T>;
 }

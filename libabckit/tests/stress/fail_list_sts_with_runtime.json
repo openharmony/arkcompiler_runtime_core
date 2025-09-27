@@ -13,7 +13,7 @@
   "/tmp/abckit_test_ets/escompat/JsonReplacerTest.sts": "ETS Test result changed. Was 0, now 5",
   "/tmp/abckit_test_ets/escompat/JsonTest.sts": "ETS Test result changed. Was 0, now 1",
   "/tmp/abckit_test_ets/escompat/ProcessTest.sts": "ETS Test result changed. Was 0, now 1",
-  "/tmp/abckit_test_ets/escompat/ReadonlyArrayTest.sts": "ETS Test result changed. Was 0, now 1",
+  "/tmp/abckit_test_ets/std/core/ReadonlyArrayTest.sts": "ETS Test result changed. Was 0, now 1",
   "/tmp/abckit_test_ets/escompat/ReflectGet.sts": "ETS Test result changed. Was 0, now 1",
   "/tmp/abckit_test_ets/escompat/RegExpCompileTest.sts": "ETS Test result changed. Was 0, now 2",
   "/tmp/abckit_test_ets/regression/SaveStateBridge.sts": "ETS Test result changed. Was 0, now 1",
