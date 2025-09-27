@@ -48,7 +48,7 @@ values:
 - { left: 3.1415927, right: -1.0, result: -3.1415927 }
 - { left: 3.1415927, right: 3.1415927, result: 9.86960469269329 }
 - { left: 3.1415927, right: -3.1415927, result: -9.86960469269329 }
-- { left: 3.33333325386, right: 2.66666650772, result: 8.888888 } # DEL
+- { left: 3.33333333333333325386, right: 2.66666666666666650772, result: 8.888888888888888 } # 2^1 * 1.10101010101010101010101 + 2^1 * 1.01010101010101010101010 = 2^2 * 1.00011100011100011100011
 - { left: 1.25, right: 3.75, result: 4.6875 } # no rounding errors
 - { left: -1.25, right: -3.75, result: 4.6875 } # no rounding errors
 - { left: 1.25, right: -3.75, result: -4.6875 } # no rounding errors

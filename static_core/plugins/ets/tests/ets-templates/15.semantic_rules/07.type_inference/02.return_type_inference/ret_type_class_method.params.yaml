@@ -17,7 +17,7 @@ function_decls:
     - decl: |-
           class A {
             i = 0
-            foo(): void {
+            foo() {
                 this.i += 1
             }
           }
@@ -29,7 +29,7 @@ function_decls:
     - decl: |-
           class A {
             i = 0
-            foo(): void {
+            foo() {
                 this.i += 1
                 return
             }
@@ -42,7 +42,7 @@ function_decls:
     - decl: |-
           class A {
             s = "foo"
-            foo(): string {
+            foo() {
                 return this.s
             }
           }
@@ -55,7 +55,7 @@ function_decls:
     - decl: |-
           class A {
             s: int = 42
-            foo(): int {
+            foo() {
                 return this.s
             }
           }
@@ -68,7 +68,7 @@ function_decls:
     - decl: |-
           class A {
             s: number = 1.0
-            foo(): number {
+            foo() {
                 return this.s
             }
           }
@@ -81,7 +81,7 @@ function_decls:
     - decl: |-
           class A {
             s = new Error()
-            foo(): Error {
+            foo() {
                 return this.s
             }
           }
@@ -94,7 +94,7 @@ function_decls:
     - decl: |-
           class A {
             s: number[] = [1.0, 2.0, 3.0]
-            foo(): number[] {
+            foo() {
                 return this.s
             }
           }
@@ -106,7 +106,7 @@ function_decls:
     - decl: |-
           class A {
             s: Boolean[] = new Boolean[0]
-            foo(): boolean[] {
+            foo() {
                 return this.s
             }
           }
@@ -118,7 +118,7 @@ function_decls:
     - decl: |-
           class A {
             s: Long[][] = new Long[1][1]
-            foo(): long[][] {
+            foo() {
                 if (this.s != null)
                     return this.s
                 else
@@ -133,7 +133,7 @@ function_decls:
     - decl: |-
           class A {
             s: long[][] = new long[1][1]
-            foo(): Error[][] | long[][] {
+            foo() {
                 if (this.s != null)
                     return this.s
                 else
@@ -149,7 +149,7 @@ function_decls:
     - decl: |-
           class A {
             s: Long[][] = new Long[1][1]
-            foo(): Error[] | long[][] {
+            foo() {
                 if (this.s == null)
                     return this.s
                 else
@@ -164,7 +164,7 @@ function_decls:
     - decl: |-
           class A {
             s: Long[][] | null = new Long[1][1]
-            foo(): Error | long[][] | null {
+            foo() {
                 if (this.s != null)
                     return this.s
                 else
@@ -185,7 +185,7 @@ function_decls:
 
           class D {
             s = 1
-            foo(): TypeB | TypeC {
+            foo() {
                 if (this.s == 0)
                     return new TypeB()
                 else
@@ -205,7 +205,7 @@ function_decls:
           
           class E {
             s = 1
-            foo(): C | D {
+            foo() {
                 if (this.s == 0)
                     return new C()
                 else
@@ -221,7 +221,7 @@ function_decls:
     - decl: |-
           class A {
             s = 0
-            async foo(): Promise<boolean> {
+            async foo() {
                 if (this.s == 0)
                     return new Boolean(true)
                 else
@@ -236,7 +236,7 @@ function_decls:
     - decl: |-
           class A {
             s = new Object()
-            foo(): boolean | boolean[] {  
+            foo() {  
                 if (this.s != null)
                     return true
                 else
@@ -251,7 +251,7 @@ function_decls:
           class B<T, U> {}
           class A {
             s = 1
-            foo<T>(): B<T, Long> | B<T, Error> {
+            foo<T>() {
                 if (this.s == 0)
                     return new B<T, Long>()
                 else
@@ -264,7 +264,7 @@ function_decls:
 
     - decl: |-
           class A {
-            foo(): A {
+            foo() {
                 return this
             }
           }
@@ -276,7 +276,7 @@ function_decls:
     - decl: |-
           class A {
             static i = 0
-            static foo(): void {
+            static foo() {
                 A.i = 1
             }
           }
@@ -287,7 +287,7 @@ function_decls:
     - decl: |-
           class A {
             static i = 0
-            static foo(): void {
+            static foo() {
                 A.i = 1
                 return
             }
@@ -298,7 +298,7 @@ function_decls:
 
     - decl: |-
           class A {
-            static foo(): string {
+            static foo() {
                 let s = "foo"
                 return s
             }
@@ -308,7 +308,7 @@ function_decls:
 
     - decl: |-
           class A {
-            static foo(): number {
+            static foo() {
                 let s: number = 1.0
                 return s
             }
@@ -318,7 +318,7 @@ function_decls:
 
     - decl: |-
           class A {
-            static foo(): Error {
+            static foo() {
                 let s = new Error()
                 return s
             }
@@ -328,7 +328,7 @@ function_decls:
 
     - decl: |-
           class A {
-            static foo(): number[] {
+            static foo() {
                 let s: number[] = [1.0, 2.0, 3.0]
                 return s
             }
@@ -339,7 +339,7 @@ function_decls:
 
     - decl: |-
           class A {
-            static foo(): boolean[] {
+            static foo() {
                 let s: Boolean[] = new Boolean[0]
                 return s
             }
@@ -350,7 +350,7 @@ function_decls:
 
     - decl: |-
           class A {
-            static foo(): long[][] {
+            static foo() {
                 let s: Long[][] = new Long[1][1]
                 if (s != null)
                     return s
@@ -363,7 +363,7 @@ function_decls:
 
     - decl: |-
           class A {
-            static foo(): Error[][]|long[][] {
+            static foo() {
                 let s: long[][] = new long[1][1]
                 if (s != null)
                     return s
@@ -378,7 +378,7 @@ function_decls:
 
     - decl: |-
           class A {
-            static foo(): Error[]|Long[][] {
+            static foo() {
                 let s: Long[][] = new Long[1][1]
                 if (s == null)
                     return s
@@ -392,7 +392,7 @@ function_decls:
 
     - decl: |-
           class A {
-            static foo(): Error|Long[][] {
+            static foo() {
                 let s: Long[][] | null = new Long[1][1]
                 if (s != null)
                     return s
@@ -412,7 +412,7 @@ function_decls:
           type TypeC = C
 
           class D {
-            static foo(): TypeB | TypeC {
+            static foo() {
                 let s = 1
                 if (s == 0)
                     return new TypeB()
@@ -431,7 +431,7 @@ function_decls:
           class D extends B {}
           
           class E {
-            static foo(): C | D {
+            static foo() {
                 let s = 1
                 if (s == 0)
                     return new C()
@@ -446,7 +446,7 @@ function_decls:
 
     - decl: |-
           class A {
-           static foo(): boolean|boolean[] {  
+           static foo() {  
                 let s = new Object()
                 if (s != null)
                     return true
@@ -461,7 +461,7 @@ function_decls:
     - decl: |-
           class B<T, U> {}
           class A {
-            static foo<T>(): B<T, Long> | B<T, Error> {
+            static foo<T>() {
                 let s = 1
                 if (s == 0)
                     return new B<T, Long>()
