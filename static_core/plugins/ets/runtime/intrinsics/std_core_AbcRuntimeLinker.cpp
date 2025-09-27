@@ -70,7 +70,9 @@ EtsClass *EtsAbcRuntimeLinkerLoadClassFromAbcFiles(EtsAbcRuntimeLinker *runtimeL
 
     auto *abcFiles = runtimeLinker->GetAbcFiles();
     for (size_t i = 0, end = abcFiles->GetLength(); i < end; ++i) {
-        auto *pf = EtsAbcFile::FromEtsObject(abcFiles->Get(i))->GetPandaFile();
+        auto *currentFile = abcFiles->Get(i);
+        ASSERT(currentFile != nullptr);
+        auto *pf = EtsAbcFile::FromEtsObject(currentFile)->GetPandaFile();
         const auto classId = pf->GetClassId(classDescriptor);
         if (!classId.IsValid() || pf->IsExternal(classId)) {
             continue;

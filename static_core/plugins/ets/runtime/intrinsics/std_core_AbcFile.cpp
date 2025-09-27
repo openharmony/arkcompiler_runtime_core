@@ -49,6 +49,17 @@ static bool IsHspPath(const std::string &path)
     return std::equal(suffix.rbegin(), suffix.rend(), path.rbegin());
 }
 
+static bool CheckExtractor(const std::shared_ptr<ark::extractor::Extractor> &extractor, EtsCoroutine *coro,
+                           const std::string &path)
+{
+    if (!extractor || !extractor->Init()) {
+        ets::ThrowEtsException(coro, panda_file_items::class_descriptors::ABC_FILE_NOT_FOUND_ERROR,
+                               "Open failed, file: " + path);
+        return false;
+    }
+    return true;
+}
+
 EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *filePath)
 {
     ASSERT(filePath != nullptr);
@@ -70,7 +81,7 @@ EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *fi
         // get hsp path
         std::string hspPath = pathStr;
         std::shared_ptr<ark::extractor::Extractor> extractor = std::make_shared<ark::extractor::Extractor>(hspPath);
-        if (!extractor || !extractor->Init()) {
+        if (!CheckExtractor(extractor, coro, pathStr)) {
             return nullptr;
         }
         std::string abcPath = hspPath.substr(0, hspPath.length() - 4).append("/ets/modules_static.abc");
@@ -90,9 +101,7 @@ EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *fi
         hapPath += ".hap";
 
         std::shared_ptr<ark::extractor::Extractor> extractor = std::make_shared<ark::extractor::Extractor>(hapPath);
-        if (!extractor || !extractor->Init()) {
-            ets::ThrowEtsException(coro, panda_file_items::class_descriptors::ABC_FILE_NOT_FOUND_ERROR,
-                                   PandaString("Open failed, file: ") + path);
+        if (!CheckExtractor(extractor, coro, pathStr)) {
             return nullptr;
         }
         auto safeData = extractor->GetSafeData(pathStr);

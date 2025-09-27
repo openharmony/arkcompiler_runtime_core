@@ -20,6 +20,8 @@
 namespace ark::extractor {
 constexpr char EXT_NAME_ABC[] = ".abc";  // NOLINT(modernize-avoid-c-arrays)
 constexpr const char *LOCAL_CODE_PATH = "/data/storage/el1/bundle";
+constexpr std::array<const char *, 3> LOCAL_HSP_CODE_PATHS = {"/data/storage/el1/bundle", "/system/app/appServiceFwk",
+                                                              "/system/app/shared_bundles"};
 constexpr const char *FILE_SEPARATOR = "/";
 constexpr const int MAX_INNER_HSP_SLASHES = 3;
 
@@ -48,13 +50,32 @@ static std::string GetRelativePath(const std::string &srcPath)
     return relativePath;
 }
 
+/**
+ * @brief Converts a given absolute path to a relative path, specifically for HSP path handling.
+ * This function processes to path based on its type (internal HSP path or external path) and returns a relative path
+ * suitable for HSP modules.
+ *
+ * @param srcPath The input absolute path
+ * @return std::string The processed relative path
+ * @example
+ * Input path: 1."/data/storage/el1/bundle/com.example.hsp/library/library/ets/module_static.abc"
+ *             2."/system/app/appServiceFwk/com.example.hsp/library/library/ets/module_static.abc"
+ *             3."/system/app/shared_bundles/com.example.hsp/library/library/ets/module_static.abc"
+ * Output path: "ets/module_static.abc"
+ */
 static std::string GetRelativePathForHsp(const std::string &srcPath)
 {
     if (srcPath.empty() || srcPath[0] != '/') {
         return srcPath;
     }
-    std::regex srcPattern(LOCAL_CODE_PATH);
-    std::string relativePath = std::regex_replace(srcPath, srcPattern, "");
+    std::string relativePath = srcPath;
+    for (const auto &path : LOCAL_HSP_CODE_PATHS) {
+        std::string tempRelativePath = std::regex_replace(srcPath, std::regex(path), "");
+        if (tempRelativePath != srcPath) {
+            relativePath = std::move(tempRelativePath);
+            break;
+        }
+    }
     if (IsInnerHspPath(relativePath)) {
         if (relativePath.find(FILE_SEPARATOR) == 0) {
             relativePath = relativePath.substr(1);
@@ -63,7 +84,10 @@ static std::string GetRelativePathForHsp(const std::string &srcPath)
     } else {
         if (relativePath.find(FILE_SEPARATOR) == 0) {
             std::string bundleName = relativePath.substr(1);
-            std::string moduleName = bundleName.substr(bundleName.find(std::string(FILE_SEPARATOR)) + 1);
+            std::string moduleName = bundleName;
+            if (srcPath.find(LOCAL_CODE_PATH) == 0) {
+                moduleName = bundleName.substr(bundleName.find(std::string(FILE_SEPARATOR)) + 1);
+            }
             std::string hspName = moduleName.substr(moduleName.find(std::string(FILE_SEPARATOR)) + 1);
             relativePath = hspName.substr(hspName.find(std::string(FILE_SEPARATOR)) + 1);
         }
