@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-let removed_object_callbacks: boolean[] = new boolean[4];
+let removed_object_callbacks: boolean[] = new boolean[5];
 // Make it global beacuse optimizer is free to kill local variables
 let object1: Object | null = null;
 let object2: Object | null = null;
 let object3: Object | null = null;
+let object4: Object | null = null;
 let registry: FinalizationRegistry<String> | null = null;
 let unusedRegistry: FinalizationRegistry<String> | null = null;
 let emptyArgCallbackRegistry: FinalizationRegistry<Int> | null = null;
@@ -35,6 +36,8 @@ function callback(string: String): void {
         removed_object_callbacks[0] = true;
     } else if (string.equals("Third object removed")) {
         removed_object_callbacks[2] = true;
+    } else if (string.equals("Fifth object removed")) {
+        removed_object_callbacks[4] = true;
     } else {
         // Must be unreachable
         arktest.assertTrue(false, "Calling unexpected callback: " + string);
@@ -84,6 +87,16 @@ function registerTest(registry: FinalizationRegistry<String> | null): void {
     arktest.assertNE(object3, null, "Object 3 is alive");
     object1 = null;
     object3 = null;
+    doFullGC();
+
+    // Test cleanup for deleted token
+    object4 = new Object();
+    let object4_callbackArg = new String("Fifth object removed");
+    {
+        let object4_token = new Object();
+        registry!.register(object4!, object4_callbackArg, object4_token);
+    }
+    object4 = null;
     doFullGC();
 }
 
@@ -263,7 +276,8 @@ function main(): void {
     arktest.assertTrue(removed_object_callbacks[0], "First callback hasn't been called");
     arktest.assertFalse(removed_object_callbacks[1], "Second callback has been called");
     arktest.assertTrue(removed_object_callbacks[2], "Third callback hasn't been called");
-    arktest.assertTrue(removed_object_callbacks[3], "Fouth callback hasn't been called");
+    arktest.assertTrue(removed_object_callbacks[3], "Forth callback hasn't been called");
+    arktest.assertTrue(removed_object_callbacks[4], "Fifth callback hasn't been called");
     arktest.assertNE(registry, null, "Instance still alive");
 
     ctorTests();
