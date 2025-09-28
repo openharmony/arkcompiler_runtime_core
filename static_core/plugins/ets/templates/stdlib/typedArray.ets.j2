@@ -34,23 +34,23 @@ package escompat
     {%- set numberBigIntToPrimitive = ('.to' + BT + '()') if elementCompat == 'number' else '.getLong()' %}
     {%- set numberBigIntUndefToPrimitive = ('!' + numberBigIntToPrimitive) %}
 
-class {{N}}ArrayIteratorKeys implements IterableIterator<number> {
+class {{N}}ArrayIteratorKeys implements IterableIterator<int> {
     private length: int
     private idx: int = 0
 
     constructor(parent: {{N}}Array) {
-        this.length = parent.length.toInt()
+        this.length = parent.length
     }
 
-    public override $_iterator(): IterableIterator<number> {
+    public override $_iterator(): IterableIterator<int> {
         return this
     }
 
-    override next(): IteratorResult<number> {
+    override next(): IteratorResult<int> {
         if (this.idx < 0 || this.idx >= this.length) {
-            return new IteratorResult<number>()
+            return new IteratorResult<int>()
         }
-        return new IteratorResult<number>(false, (this.idx++).toDouble())
+        return new IteratorResult<int>(false, this.idx++)
     }
 }
 
@@ -67,14 +67,14 @@ class {{N}}ArrayIterator implements IterableIterator<{{subsetTypeValues}}> {
     }
 
     override next(): IteratorResult<{{subsetTypeValues}}> {
-        if (this.idx < 0 || this.idx >= this.parent.length.toInt()) {
+        if (this.idx < 0 || this.idx >= this.parent.length) {
             return new IteratorResult<{{subsetTypeValues}}>()
         }
         return new IteratorResult<{{subsetTypeValues}}>(false, new {{subsetTypeValues}}(this.parent[this.idx++]))
     }
 }
 
-{% set subsetTypeValuesEntries = '[' + 'Number' + ', ' + subsetTypeValues + ']' -%}
+{% set subsetTypeValuesEntries = '[' + 'int' + ', ' + subsetTypeValues + ']' -%}
 
 class {{N}}ArrayIteratorEntries implements IterableIterator<{{subsetTypeValuesEntries}}> {
     private parent: {{N}}Array
@@ -89,11 +89,11 @@ class {{N}}ArrayIteratorEntries implements IterableIterator<{{subsetTypeValuesEn
     }
 
     override next(): IteratorResult<{{subsetTypeValuesEntries}}> {
-        if (this.idx < 0 || this.idx >= this.parent.length.toInt()) {
+        if (this.idx < 0 || this.idx >= this.parent.length) {
             return new IteratorResult<{{subsetTypeValuesEntries}}>()
         }
         return new IteratorResult<{{subsetTypeValuesEntries}}>(
-            false, [new Number(this.idx), new {{subsetTypeValues}}(this.parent[this.idx++])]{{ '' if elementCompat != 'BigInt' else ' as ' + subsetTypeValuesEntries }}
+            false, [this.idx, new {{subsetTypeValues}}(this.parent[this.idx++])]{{ '' if elementCompat != 'BigInt' else ' as ' + subsetTypeValuesEntries }}
         )
     }
 }
@@ -1127,7 +1127,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns iterator over keys
      */
-    public keys(): IterableIterator<number> {
+    public keys(): IterableIterator<int> {
         return new {{N}}ArrayIteratorKeys(this)
     }
 

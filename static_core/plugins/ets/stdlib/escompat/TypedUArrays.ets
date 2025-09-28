@@ -19,23 +19,23 @@ package escompat
 // initialized in _initializerBlock_.ets
 const IS_LITTLE_ENDIAN: boolean;
 
-class Uint8ClampedArrayIteratorKeys implements IterableIterator<number> {
+class Uint8ClampedArrayIteratorKeys implements IterableIterator<int> {
     private length: int = 0
     private idx: int = 0
 
     constructor(parent: Uint8ClampedArray) {
-        this.length = parent.length.toInt()
+        this.length = parent.length
     }
 
-    public override $_iterator(): IterableIterator<Number> {
+    public override $_iterator(): IterableIterator<int> {
         return this
     }
 
-    override next(): IteratorResult<number> {
+    override next(): IteratorResult<int> {
         if (this.idx < 0 || this.idx >= this.length) {
-            return new IteratorResult<number>()
+            return new IteratorResult<int>()
         }
-        return new IteratorResult<number>(false, (this.idx++).toDouble())
+        return new IteratorResult<int>(false, this.idx++)
     }
 }
 
@@ -59,7 +59,7 @@ class Uint8ClampedArrayIterator implements IterableIterator<Number> {
     }
 }
 
-class Uint8ClampedArrayIteratorEntries implements IterableIterator<[Number, Number]> {
+class Uint8ClampedArrayIteratorEntries implements IterableIterator<[int, Number]> {
     private parent: Uint8ClampedArray
     private idx: int = 0
 
@@ -67,17 +67,17 @@ class Uint8ClampedArrayIteratorEntries implements IterableIterator<[Number, Numb
         this.parent = parent
     }
 
-    public override $_iterator(): IterableIterator<[Number, Number]> {
+    public override $_iterator(): IterableIterator<[int, Number]> {
         return this
     }
 
-    override next(): IteratorResult<[Number, Number]> {
+    override next(): IteratorResult<[int, Number]> {
         if (this.idx < 0 || this.idx >= this.parent.length) {
-            return new IteratorResult<[Number, Number]>()
+            return new IteratorResult<[int, Number]>()
         }
-        return new IteratorResult<[Number, Number]>(
+        return new IteratorResult<[int, Number]>(
             false,
-            [new Number(this.idx), new Number(this.parent[this.idx++])]
+            [this.idx, new Number(this.parent[this.idx++])]
         )
     }
 }
@@ -394,7 +394,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @returns key, value pairs for every entry in the array
      */
-    public entries(): IterableIterator<[Number, Number]> {
+    public entries(): IterableIterator<[int, Number]> {
         return new Uint8ClampedArrayIteratorEntries(this)
     }
 
@@ -897,7 +897,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @returns iterator over keys
      */
-    public keys(): IterableIterator<number> {
+    public keys(): IterableIterator<int> {
         return new Uint8ClampedArrayIteratorKeys(this)
     }
 
@@ -1533,23 +1533,23 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
 }
 
 
-class Uint8ArrayIteratorKeys implements IterableIterator<number> {
+class Uint8ArrayIteratorKeys implements IterableIterator<int> {
     private length: int = 0
     private idx: int = 0
 
     constructor(parent: Uint8Array) {
-        this.length = parent.length.toInt()
+        this.length = parent.length
     }
 
-    public override $_iterator(): IterableIterator<Number> {
+    public override $_iterator(): IterableIterator<int> {
         return this
     }
 
-    override next(): IteratorResult<number> {
+    override next(): IteratorResult<int> {
         if (this.idx < 0 || this.idx >= this.length) {
-            return new IteratorResult<number>()
+            return new IteratorResult<int>()
         }
-        return new IteratorResult<number>(false, (this.idx++).toDouble())
+        return new IteratorResult<int>(false, this.idx++)
     }
 }
 
@@ -1573,7 +1573,7 @@ class Uint8ArrayIterator implements IterableIterator<Number> {
     }
 }
 
-class Uint8ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
+class Uint8ArrayIteratorEntries implements IterableIterator<[int, Number]> {
     private parent: Uint8Array
     private idx: int = 0
 
@@ -1581,17 +1581,17 @@ class Uint8ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
         this.parent = parent
     }
 
-    public override $_iterator(): IterableIterator<[Number, Number]> {
+    public override $_iterator(): IterableIterator<[int, Number]> {
         return this
     }
 
-    override next(): IteratorResult<[Number, Number]> {
+    override next(): IteratorResult<[int, Number]> {
         if (this.idx < 0 || this.idx >= this.parent.length) {
-            return new IteratorResult<[Number, Number]>()
+            return new IteratorResult<[int, Number]>()
         }
-        return new IteratorResult<[Number, Number]>(
+        return new IteratorResult<[int, Number]>(
             false,
-            [new Number(this.idx), new Number(this.parent[this.idx++])]
+            [this.idx, new Number(this.parent[this.idx++])]
         )
     }
 }
@@ -1927,7 +1927,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns key, value pairs for every entry in the array
      */
-    public entries(): IterableIterator<[Number, Number]> {
+    public entries(): IterableIterator<[int, Number]> {
         return new Uint8ArrayIteratorEntries(this)
     }
 
@@ -2418,7 +2418,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns iterator over keys
      */
-    public keys(): IterableIterator<number> {
+    public keys(): IterableIterator<int> {
         return new Uint8ArrayIteratorKeys(this)
     }
 
@@ -3048,23 +3048,23 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
 }
 
 
-class Uint16ArrayIteratorKeys implements IterableIterator<number> {
+class Uint16ArrayIteratorKeys implements IterableIterator<int> {
     private length: int = 0
     private idx: int = 0
 
     constructor(parent: Uint16Array) {
-        this.length = parent.length.toInt()
+        this.length = parent.length
     }
 
-    public override $_iterator(): IterableIterator<Number> {
+    public override $_iterator(): IterableIterator<int> {
         return this
     }
 
-    override next(): IteratorResult<number> {
+    override next(): IteratorResult<int> {
         if (this.idx < 0 || this.idx >= this.length) {
-            return new IteratorResult<number>()
+            return new IteratorResult<int>()
         }
-        return new IteratorResult<number>(false, (this.idx++).toDouble())
+        return new IteratorResult<int>(false, this.idx++)
     }
 }
 
@@ -3088,7 +3088,7 @@ class Uint16ArrayIterator implements IterableIterator<Number> {
     }
 }
 
-class Uint16ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
+class Uint16ArrayIteratorEntries implements IterableIterator<[int, Number]> {
     private parent: Uint16Array
     private idx: int = 0
 
@@ -3096,17 +3096,17 @@ class Uint16ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
         this.parent = parent
     }
 
-    public override $_iterator(): IterableIterator<[Number, Number]> {
+    public override $_iterator(): IterableIterator<[int, Number]> {
         return this
     }
 
-    override next(): IteratorResult<[Number, Number]> {
+    override next(): IteratorResult<[int, Number]> {
         if (this.idx < 0 || this.idx >= this.parent.length) {
-            return new IteratorResult<[Number, Number]>()
+            return new IteratorResult<[int, Number]>()
         }
-        return new IteratorResult<[Number, Number]>(
+        return new IteratorResult<[int, Number]>(
             false,
-            [new Number(this.idx), new Number(this.parent[this.idx++])]
+            [this.idx, new Number(this.parent[this.idx++])]
         )
     }
 }
@@ -3446,7 +3446,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns key, value pairs for every entry in the array
      */
-    public entries(): IterableIterator<[Number, Number]> {
+    public entries(): IterableIterator<[int, Number]> {
         return new Uint16ArrayIteratorEntries(this)
     }
 
@@ -3923,7 +3923,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns iterator over keys
      */
-    public keys(): IterableIterator<number> {
+    public keys(): IterableIterator<int> {
         return new Uint16ArrayIteratorKeys(this)
     }
 
@@ -4564,23 +4564,23 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
 }
 
 
-class Uint32ArrayIteratorKeys implements IterableIterator<number> {
+class Uint32ArrayIteratorKeys implements IterableIterator<int> {
     private length: int = 0
     private idx: int = 0
 
     constructor(parent: Uint32Array) {
-        this.length = parent.length.toInt()
+        this.length = parent.length
     }
 
-    public override $_iterator(): IterableIterator<Number> {
+    public override $_iterator(): IterableIterator<int> {
         return this
     }
 
-    override next(): IteratorResult<number> {
+    override next(): IteratorResult<int> {
         if (this.idx < 0 || this.idx >= this.length) {
-            return new IteratorResult<number>()
+            return new IteratorResult<int>()
         }
-        return new IteratorResult<number>(false, (this.idx++).toDouble())
+        return new IteratorResult<int>(false, this.idx++)
     }
 }
 
@@ -4604,7 +4604,7 @@ class Uint32ArrayIterator implements IterableIterator<Number> {
     }
 }
 
-class Uint32ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
+class Uint32ArrayIteratorEntries implements IterableIterator<[int, Number]> {
     private parent: Uint32Array
     private idx: int = 0
 
@@ -4612,17 +4612,17 @@ class Uint32ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
         this.parent = parent
     }
 
-    public override $_iterator(): IterableIterator<[Number, Number]> {
+    public override $_iterator(): IterableIterator<[int, Number]> {
         return this
     }
 
-    override next(): IteratorResult<[Number, Number]> {
+    override next(): IteratorResult<[int, Number]> {
         if (this.idx < 0 || this.idx >= this.parent.length) {
-            return new IteratorResult<[Number, Number]>()
+            return new IteratorResult<[int, Number]>()
         }
-        return new IteratorResult<[Number, Number]>(
+        return new IteratorResult<[int, Number]>(
             false,
-            [new Number(this.idx), new Number(this.parent[this.idx++])]
+            [this.idx, new Number(this.parent[this.idx++])]
         )
     }
 }
@@ -4971,7 +4971,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns key, value pairs for every entry in the array
      */
-    public entries(): IterableIterator<[Number, Number]> {
+    public entries(): IterableIterator<[int, Number]> {
         return new Uint32ArrayIteratorEntries(this)
     }
 
@@ -5462,7 +5462,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns iterator over keys
      */
-    public keys(): IterableIterator<number> {
+    public keys(): IterableIterator<int> {
         return new Uint32ArrayIteratorKeys(this)
     }
 
@@ -6103,23 +6103,23 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
 }
 
 
-class BigUint64ArrayIteratorKeys implements IterableIterator<number> {
+class BigUint64ArrayIteratorKeys implements IterableIterator<int> {
     private length: int = 0
     private idx: int = 0
 
     constructor(parent: BigUint64Array) {
-        this.length = parent.length.toInt()
+        this.length = parent.length
     }
 
-    public override $_iterator(): IterableIterator<Number> {
+    public override $_iterator(): IterableIterator<int> {
         return this
     }
 
-    override next(): IteratorResult<number> {
+    override next(): IteratorResult<int> {
         if (this.idx < 0 || this.idx >= this.length) {
-            return new IteratorResult<number>()
+            return new IteratorResult<int>()
         }
-        return new IteratorResult<number>(false, (this.idx++).toDouble())
+        return new IteratorResult<int>(false, this.idx++)
     }
 }
 
@@ -6143,7 +6143,7 @@ class BigUint64ArrayIterator implements IterableIterator<BigInt> {
     }
 }
 
-class BigUint64ArrayIteratorEntries implements IterableIterator<[Number, BigInt]> {
+class BigUint64ArrayIteratorEntries implements IterableIterator<[int, BigInt]> {
     private parent: BigUint64Array
     private idx: int = 0
 
@@ -6151,17 +6151,17 @@ class BigUint64ArrayIteratorEntries implements IterableIterator<[Number, BigInt]
         this.parent = parent
     }
 
-    public override $_iterator(): IterableIterator<[Number, BigInt]> {
+    public override $_iterator(): IterableIterator<[int, BigInt]> {
         return this
     }
 
-    override next(): IteratorResult<[Number, BigInt]> {
+    override next(): IteratorResult<[int, BigInt]> {
         if (this.idx < 0 || this.idx >= this.parent.length) {
-            return new IteratorResult<[Number, BigInt]>()
+            return new IteratorResult<[int, BigInt]>()
         }
-        return new IteratorResult<[Number, BigInt]>(
+        return new IteratorResult<[int, BigInt]>(
             false,
-            [new Number(this.idx), new BigInt(this.parent[this.idx++])] as [Number, BigInt]
+            [this.idx, new BigInt(this.parent[this.idx++])] as [int, BigInt]
         )
     }
 }
@@ -6503,7 +6503,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @returns key, value pairs for every entry in the array
      */
-    public entries(): IterableIterator<[Number, BigInt]> {
+    public entries(): IterableIterator<[int, BigInt]> {
         return new BigUint64ArrayIteratorEntries(this)
     }
 
@@ -6990,7 +6990,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @returns iterator over keys
      */
-    public keys(): IterableIterator<number> {
+    public keys(): IterableIterator<int> {
         return new BigUint64ArrayIteratorKeys(this)
     }
 

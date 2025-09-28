@@ -34,23 +34,23 @@ const IS_LITTLE_ENDIAN: boolean;
     {%- set valueOrBigIntGetULong = '%s' if element['subsetType'] != 'BigInt' else 'new BigInt(%s).getULong()' %}
     {%- set asElementCompatOrBigInt = ('%s.to' + element['primitiveType'].capitalize() + '()') if element['subsetType'] != 'BigInt' else '%s' %}
 
-class {{element['name']}}ArrayIteratorKeys implements IterableIterator<number> {
+class {{element['name']}}ArrayIteratorKeys implements IterableIterator<int> {
     private length: int = 0
     private idx: int = 0
 
     constructor(parent: {{element['name']}}Array) {
-        this.length = parent.length.toInt()
+        this.length = parent.length
     }
 
-    public override $_iterator(): IterableIterator<Number> {
+    public override $_iterator(): IterableIterator<int> {
         return this
     }
 
-    override next(): IteratorResult<number> {
+    override next(): IteratorResult<int> {
         if (this.idx < 0 || this.idx >= this.length) {
-            return new IteratorResult<number>()
+            return new IteratorResult<int>()
         }
-        return new IteratorResult<number>(false, (this.idx++).toDouble())
+        return new IteratorResult<int>(false, this.idx++)
     }
 }
 
@@ -74,7 +74,7 @@ class {{element['name']}}ArrayIterator implements IterableIterator<{{element['su
     }
 }
 
-{% set subsetTypeValuesEntries = '[' + 'Number' + ', ' + element['subsetTypeValues'] + ']' -%}
+{% set subsetTypeValuesEntries = '[' + 'int' + ', ' + element['subsetTypeValues'] + ']' -%}
 
 class {{element['name']}}ArrayIteratorEntries implements IterableIterator<{{subsetTypeValuesEntries}}> {
     private parent: {{element['name']}}Array
@@ -94,7 +94,7 @@ class {{element['name']}}ArrayIteratorEntries implements IterableIterator<{{subs
         }
         return new IteratorResult<{{subsetTypeValuesEntries}}>(
             false,
-            [new Number(this.idx), new {{element['subsetTypeValues']}}(this.parent[this.idx++])]{{ '' if element['subsetType'] != 'BigInt' else ' as ' + subsetTypeValuesEntries }}
+            [this.idx, new {{element['subsetTypeValues']}}(this.parent[this.idx++])]{{ '' if element['subsetType'] != 'BigInt' else ' as ' + subsetTypeValuesEntries }}
         )
     }
 }
@@ -1102,7 +1102,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *
      * @returns iterator over keys
      */
-    public keys(): IterableIterator<number> {
+    public keys(): IterableIterator<int> {
         return new {{element['name']}}ArrayIteratorKeys(this)
     }
 
