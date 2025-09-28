@@ -15,6 +15,22 @@
 
 type callbackT = (id: int) => void;
 
+class Event {
+    public Wait() {
+        while (this.flag.get() != true) {
+            Coroutine.Schedule();
+        }
+    }
+
+    public Fire() {
+        this.flag.set(true);
+    }
+
+    private flag = new AtomicFlag(false);
+};
+
+let event = new Event();
+
 class SharedJob<T> {
     constructor(jobs: Array<T>) {
         this.sharedJob = new CompletableJob<void>();
@@ -92,7 +108,21 @@ function illegalLockStateTest() {
     }
 
     try {
+        rwLock.writeLock().lock();
         rwLock.readLock().unlock();
+    } catch (e) {
+        rwLock.writeLock().unlock();
+        arrError.push(e);
+    }
+
+    try {
+        rwLock.readLock().unlock();
+    } catch (e) {
+        arrError.push(e);
+    }
+
+    try {
+        rwLock.writeLock().unlock();
     } catch (e) {
         arrError.push(e);
     }
@@ -103,10 +133,38 @@ function illegalLockStateTest() {
         arrError.push(e);
     }
 
-    arktest.assertEQ(arrError.length, 3);
+    arktest.assertEQ(arrError.length, 5);
     for (let error of arrError) {
         arktest.assertTrue(error instanceof IllegalLockStateError);
     }
+}
+
+// The test checks whether read-write locks are mutually exclusive
+function readWriteMutualExclusionTest() {
+    let rwLock = new RWLock();
+    let readLock = rwLock.readLock();
+    let writeLock = rwLock.writeLock();
+
+    let writeAcquired = false;
+    let writeLockAttempted = false;
+
+    readLock.lock();
+
+    let job = launch<void, () => void>(() => {
+        writeLockAttempted = true;
+        event.Fire();
+        writeLock.lock();
+        writeAcquired = true;
+        writeLock.unlock();
+    });
+    event.Wait();
+
+    arktest.assertTrue(writeLockAttempted);
+    arktest.assertFalse(writeAcquired);
+
+    readLock.unlock();
+    job.Await();
+    arktest.assertTrue(writeAcquired);
 }
 
 function exclusiveMutexLockTest() {
@@ -123,6 +181,7 @@ function main() {
     testSuite.addTest('exclusiveRWLockTest', exclusiveRWLockTest);
     testSuite.addTest('sharedLockTest', sharedLockTest);
     testSuite.addTest('illegalLockStateTest', illegalLockStateTest);
+    testSuite.addTest('readWriteMutualExclusionTest', readWriteMutualExclusionTest);
 
     return testSuite.run();
 }
