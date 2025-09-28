@@ -38,7 +38,7 @@ void ServerEndpointBase::Call(const std::string &sessionId, const char *method,
     EndpointBase::Call(sessionId, std::nullopt, method, std::move(params));
 }
 
-void ServerEndpointBase::OnCall(const char *method, Handler &&handler)
+void ServerEndpointBase::OnCallImpl(const char *method, Handler &&handler)
 {
     EndpointBase::OnCall(method, [this, handler = std::move(handler)](auto &sessionId, auto id, auto &params) {
         if (!id) {

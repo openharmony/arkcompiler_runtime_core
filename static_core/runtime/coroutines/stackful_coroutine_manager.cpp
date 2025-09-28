@@ -1015,6 +1015,7 @@ Coroutine *StackfulCoroutineManager::CreateExclusiveWorkerForThread(Runtime *run
     OnWorkerStartup(eWorker);
 
     ASSERT(Coroutine::GetCurrent() == eCoro);
+    Runtime::GetCurrent()->GetNotificationManager()->ThreadStartEvent(eCoro);
     return eCoro;
 }
 

@@ -74,7 +74,7 @@ public:
                                      const std::vector<RemoteObject> &arguments);
     void CallRuntimeExecutionContextCreated(PtThread thread);
     void CallRuntimeExecutionContextsCleared();
-    void CallTargetAttachedToTarget(PtThread thread);
+    bool CallTargetAttachedToTarget(PtThread thread);
     void CallTargetDetachedFromTarget(PtThread thread);
 
     void OnCallDebuggerContinueToLocation(std::function<void(PtThread, std::string_view, size_t)> &&handler);
@@ -115,6 +115,7 @@ public:
     void OnCallRuntimeRunIfWaitingForDebugger(std::function<void(PtThread)> &&handler);
     void OnCallRuntimeEvaluate(
         std::function<Expected<EvaluationResult, std::string>(PtThread, const std::string &)> &&handler);
+    void OnCallTargetAttachToTarget();
     void OnCallProfilerEnable();
     void OnCallProfilerDisable();
     void OnCallProfilerSetSamplingInterval(std::function<void(uint32_t)> &&handler);

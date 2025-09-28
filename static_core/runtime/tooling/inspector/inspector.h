@@ -147,6 +147,7 @@ private:
     void CollectModules();
     void DebuggerEnable();
     void SourceNameInsert(const panda_file::DebugInfoExtractor *extractor);
+    void PauseOtherThreads(PtThread thread);
 
 private:
     bool breakOnStart_;

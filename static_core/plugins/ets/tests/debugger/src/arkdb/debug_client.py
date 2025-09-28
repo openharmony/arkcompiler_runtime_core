@@ -15,15 +15,15 @@
 # limitations under the License.
 #
 
-import dataclasses
 from contextlib import asynccontextmanager
-from dataclasses import dataclass
+import dataclasses
 from inspect import getfullargspec
-from typing import Any, AsyncIterator, Callable, Dict, List, Literal, Optional, Tuple, Type, TypeAlias
+from typing import Any, AsyncIterator, Callable, Dict, Iterator, List, Literal, Optional, Tuple, Type, TypeAlias
+from typing import Awaitable
 
 import trio
 import trio_cdp
-from cdp import debugger, runtime, profiler
+from cdp import debugger, profiler, runtime, target
 
 from arkdb.compiler import StringCodeCompiler
 from arkdb.debug_connection import ArkConnection, Proxy, ScriptsCache, SourcesCache, connect_cdp
@@ -31,9 +31,10 @@ from arkdb.extensions import debugger as ext_debugger
 from arkdb.extensions import profiler as ext_profiler
 
 T: TypeAlias = trio_cdp.T
+BUFF_SIZE: int = 10
 
 
-@dataclass
+@dataclasses.dataclass
 class DebuggerConfig:
     pause_on_exceptions_mode: Literal["none", "caught", "uncaught", "all"] = "none"
 
@@ -56,22 +57,75 @@ class DebuggerClient:
         self.sources = sources
         self.context = context
         self.code_compiler = code_compiler
+        # Sessions management, which corresponds to ArkTS coroutines
+        self._sessions: dict[target.SessionID, ArkConnection] = {}
+        self._sessions_lock = trio.Lock()
 
-    async def configure(self, nursery: trio.Nursery):
-        self._listen(nursery, self._create_on_execution_contexts_cleared(nursery))
-        await self.set_pause_on_exceptions()
+    @staticmethod
+    async def _resume_and_wait_for_paused(connection: ArkConnection) -> debugger.Paused:
+        async with DebuggerClient._wait_for(connection, debugger.Paused) as proxy:
+            await connection.send_and_wait_for(debugger.resume(), debugger.Resumed)
+        await trio.lowlevel.checkpoint()
+        return proxy.value
 
-    async def run_if_waiting_for_debugger(self) -> debugger.Paused:
-        return await self.connection.send_and_wait_for(
+    @staticmethod
+    async def _run_if_waiting_for_debugger(connection: ArkConnection) -> debugger.Paused:
+        return await connection.send_and_wait_for(
             runtime.run_if_waiting_for_debugger(),
             debugger.Paused,
         )
 
+    @staticmethod
     @asynccontextmanager
-    async def wait_for(self, event_type: Type[T], buffer_size=1):
+    async def _wait_for(connection: ArkConnection, event_type: Type[T], buffer_size=BUFF_SIZE):
         proxy: Proxy[T]
-        async with self.connection.wait_for(event_type=event_type, buffer_size=buffer_size) as proxy:
+        async with connection.wait_for(event_type=event_type, buffer_size=buffer_size) as proxy:
             yield proxy
+
+    async def get_session_count(self) -> int:
+        async with self._sessions_lock:
+            return len(self._sessions)
+
+    async def get_session(self, session_id: target.SessionID) -> ArkConnection | None:
+        async with self._sessions_lock:
+            return self._sessions.get(session_id)
+
+    async def sessions_wait_for(
+        self,
+        event_type: Type[T],
+        wait_time: Optional[float] = None,
+        trigger: Optional[Callable[[], Awaitable[None]]] = None,
+    ) -> List[Tuple[target.SessionID, T]]:
+        events_received: List[Tuple[target.SessionID, T]] = []
+        receivers = await self._setup_receivers(event_type)
+
+        try:
+            if trigger is not None:
+                await trigger()
+
+            if wait_time is None:
+                await self._collect_first_events(receivers, events_received)
+            else:
+                await self._collect_events_with_timeout(receivers, events_received, wait_time)
+        finally:
+            pass
+
+        return events_received
+
+    async def configure(self, nursery: trio.Nursery):
+        self._listen(
+            nursery,
+            [
+                self._create_on_execution_contexts_cleared(nursery),
+                self._create_on_attached_to_target(nursery),
+                self._create_on_detached_from_target(nursery),
+            ]
+            + self._create_additional_events_handlers(),  # noqa W503
+        )
+        await self.set_pause_on_exceptions()
+
+    async def run_if_waiting_for_debugger(self) -> debugger.Paused:
+        return await DebuggerClient._run_if_waiting_for_debugger(self.connection)
 
     async def set_pause_on_exceptions(
         self,
@@ -90,13 +144,10 @@ class DebuggerClient:
         )
 
     async def resume_and_wait_for_paused(self) -> debugger.Paused:
-        async with self.wait_for(debugger.Paused) as proxy:
-            await self.resume()
-        await trio.lowlevel.checkpoint()
-        return proxy.value
+        return await DebuggerClient._resume_and_wait_for_paused(self.connection)
 
     async def send_and_wait_for_paused(self, send_arg) -> debugger.Paused:
-        async with self.wait_for(debugger.Paused) as proxy:
+        async with DebuggerClient._wait_for(self.connection, debugger.Paused) as proxy:
             await self.connection.send(send_arg)
         await trio.lowlevel.checkpoint()
         return proxy.value
@@ -165,6 +216,27 @@ class DebuggerClient:
         return await self.connection.send(
             debugger.remove_breakpoint(
                 breakpoint_id=breakpoint_id,
+            ),
+        )
+
+    async def add_breakpoint_for_all_sessions(
+        self,
+        location: debugger.Location,
+        condition: Optional[str] = None,
+    ) -> Tuple[debugger.BreakpointId, debugger.Location]:
+        async with self._sessions_lock:
+            for connection in self._sessions.values():
+                await connection.send(
+                    debugger.set_breakpoint(
+                        location=location,
+                        condition=condition,
+                    )
+                )
+
+        return await self.connection.send(
+            debugger.set_breakpoint(
+                location=location,
+                condition=condition,
             ),
         )
 
@@ -250,6 +322,49 @@ class DebuggerClient:
     async def profiler_disable(self) -> None:
         await self.connection.send(profiler.disable())
 
+    def _configure_session_events(self, _: ArkConnection) -> None:
+        return
+
+    def _create_additional_events_handlers(self) -> list:
+        return []
+
+    def _create_on_attached_to_target(self, nursery: trio.Nursery):
+        def _spawn_on_attached_to_target(event: target.AttachedToTarget):
+            async def _on_attached_to_target():  # noqa: ASYNC910
+                try:
+                    session = await self.connection.open_session(event.target_info.target_id)
+                    if session is None:
+                        return
+                    await trio.lowlevel.checkpoint()
+
+                    connection = ArkConnection(session, nursery)
+                    async with self._sessions_lock:
+                        self._sessions[session.session_id] = connection
+                    self._configure_session_events(connection)
+                    await connection.send(runtime.run_if_waiting_for_debugger())
+                except trio_cdp.BrowserError as exc:
+                    # `Target.attachToTarget` is OK to fail when session has already detached
+                    if exc.code != -32602:
+                        raise
+                except trio.EndOfChannel:
+                    pass
+
+            nursery.start_soon(_on_attached_to_target)
+
+        return _spawn_on_attached_to_target
+
+    def _create_on_detached_from_target(self, nursery: trio.Nursery):
+        def _spawn_on_detached_from_target(event: target.DetachedFromTarget):
+            async def _on_detached_from_target():  # noqa: ASYNC910
+                session_id = event.session_id
+                async with self._sessions_lock:
+                    if session_id in self._sessions:
+                        del self._sessions[session_id]
+
+            nursery.start_soon(_on_detached_from_target)
+
+        return _spawn_on_detached_from_target
+
     def _create_on_execution_contexts_cleared(self, nursery: trio.Nursery):
         def _on_execution_contexts_cleared(_: runtime.ExecutionContextsCleared):
             # A deadlock can occur when client awaits a response after server's disconnect.
@@ -259,23 +374,98 @@ class DebuggerClient:
 
         return _on_execution_contexts_cleared
 
+    def _get_all_connections(self) -> Iterator[ArkConnection]:
+        for conn in list(self._sessions.values()) + [self.connection]:
+            yield conn
+
     def _listen(
         self,
         nursery: trio.Nursery,
-        handler: Callable[[T], None],
-    ):
-        async def _t():
-            args_annotations = getfullargspec(handler).annotations
-            event_type = list(args_annotations.values())[0]
-            # Passing `T` as event type will not work
-            async for event in self.connection.listen(event_type):
-                handler(event)
+        event_handlers: list[Callable[[T], None]],
+    ) -> None:
+        async def _t() -> None:
+            handlers_dict: dict[Any, Callable[[T], None]] = {}
+            for handler in event_handlers:
+                # Passing `T` as event type will not work,
+                # hence type of events are taken from annotations
+                args_annotations = getfullargspec(handler).annotations
+                event_type = list(args_annotations.values())[0]
+                handlers_dict[event_type] = handler
+            async for event in self.connection.listen(*tuple(handlers_dict.keys())):
+                event_handler = handlers_dict.get(type(event))
+                if event_handler is not None:
+                    event_handler(event)
+                await trio.lowlevel.checkpoint()
 
         nursery.start_soon(_t)
 
+    async def _setup_receivers(self, event_type: Type[T]):
+        receivers = []
+        async with self._sessions_lock:
+            for session_id, session in self._sessions.items():
+                receiver = session.listen(event_type)
+                receivers.append((session_id, receiver))
+        return receivers
+
+    async def _collect_first(self, session_id, receiver, events_received, nursery):
+        async for event in receiver:
+            events_received.append((session_id, event))
+            nursery.cancel_scope.cancel()
+
+    async def _collect_first_events(self, receivers, events_received):
+        async with trio.open_nursery() as nursery:
+            for session_id, receiver in receivers:
+                nursery.start_soon(self._collect_first, session_id, receiver, events_received, nursery)
+
+    async def _collect_with_deadline(self, session_id, receiver, events_received, deadline):
+        async for event in receiver:
+            if trio.current_time() > deadline:
+                break
+            if isinstance(event, debugger.Paused) and event.reason == "Break on start":
+                continue
+            events_received.append((session_id, event))
+
+    async def _collect_events_with_timeout(self, receivers, events_received, wait_time):
+        deadline = trio.current_time() + wait_time
+        async with trio.open_nursery() as nursery:
+            for session_id, receiver in receivers:
+                nursery.start_soon(self._collect_with_deadline, session_id, receiver, events_received, deadline)
+
+            await trio.sleep_until(deadline)
+            nursery.cancel_scope.cancel()
+
+
+class NoPauseDebuggerClient(DebuggerClient):
+    def _create_on_debugger_paused(self, connection: ArkConnection):
+        async def _on_debugger_paused(event: debugger.Paused) -> None:
+            if event.reason == "Break on start":
+                await connection.send_and_wait_for(
+                    debugger.resume(),
+                    debugger.Resumed,
+                )
+            else:
+                await trio.lowlevel.checkpoint()
+
+        return _on_debugger_paused
+
+    def _configure_session_events(self, connection: ArkConnection) -> None:
+        super()._configure_session_events(connection)
+
+        async def _t() -> None:
+            event_handler = self._create_on_debugger_paused(connection)
+            async for event in connection.listen((debugger.Paused)):
+                try:
+                    await event_handler(event)
+                except trio.EndOfChannel:
+                    return
+                await trio.lowlevel.checkpoint()
+
+        connection.nursery.start_soon(_t)
+
 
 @asynccontextmanager
-async def create_debugger_client(
+async def _create_debugger_client(
+    client_type: T,
     connection: ArkConnection,
     scripts: ScriptsCache,
     sources: SourcesCache,
@@ -289,7 +479,7 @@ async def create_debugger_client(
     debugger_id = await connection.send(
         debugger.enable(),
     )
-    yield DebuggerClient(
+    yield client_type(
         connection=connection,
         config=debugger_config,
         debugger_id=debugger_id,
@@ -353,10 +543,21 @@ class DebugLocator:
 
     @asynccontextmanager
     async def connect(self, nursery: trio.Nursery) -> AsyncIterator[DebuggerClient]:
+        async with self._connect(DebuggerClient, nursery) as debugger_client:
+            yield debugger_client
+
+    @asynccontextmanager
+    async def connect_as_no_pauses(self, nursery: trio.Nursery) -> AsyncIterator[NoPauseDebuggerClient]:
+        async with self._connect(NoPauseDebuggerClient, nursery) as debugger_client:
+            yield debugger_client
+
+    @asynccontextmanager
+    async def _connect(self, client_type: T, nursery: trio.Nursery) -> AsyncIterator[T]:
         cdp = await connect_cdp(nursery, self.url, 10)
         async with cdp:
             connection = ArkConnection(cdp, nursery)
-            async with create_debugger_client(
+            async with _create_debugger_client(
+                client_type,
                 connection,
                 self.scripts,
                 self.sources,
