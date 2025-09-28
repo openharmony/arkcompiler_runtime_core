@@ -47,7 +47,7 @@ export final class FinalizationRegistry<T> {
 
     private static readonly FIRST_SIZE = 32;
 
-    private static execCleanup(array: FixedArray<(WeakRef<FinalizationRegistry<T>> | undefined)>, workerDomain: int): void {
+    private static execCleanup<T>(array: FixedArray<(WeakRef<FinalizationRegistry<T>> | undefined)>, workerDomain: int): void {
         FinalizationRegistry.finalizationRegistryLock.lock();
         try {
             for (let i = 0; i < array.length; i++) {

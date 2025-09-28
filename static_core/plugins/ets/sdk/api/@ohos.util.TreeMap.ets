@@ -263,7 +263,7 @@ export default class TreeMap<K, V> implements ReadonlyTreeMap<K, V> {
         }
     }
 
-    private static defaultComparator(firstValue: K, secondValue: K): int {
+    private static defaultComparator<K>(firstValue: K, secondValue: K): int {
         if (firstValue instanceof Number && secondValue instanceof Number) {
             const firstValueN = (firstValue as Number).valueOf();
             const secondValueN = (secondValue as Number).valueOf();

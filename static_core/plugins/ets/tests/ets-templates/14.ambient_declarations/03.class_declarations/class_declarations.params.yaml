@@ -49,7 +49,7 @@ declarations:
   - >
     declare class A<U, V> {
       readonly v1: U
-      static v2: V
+      v2: V
     }
   # classes and constructors
   - >
