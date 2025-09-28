@@ -31,6 +31,8 @@ public:
      */
     explicit Namespace(abckit::core::Namespace ns) : BaseModule(std::move(ns)) {}
 
+    bool SetName(const std::string &name) override;
+
     /**
      * @brief Accept visit
      * @param visitor NamespaceVisitor

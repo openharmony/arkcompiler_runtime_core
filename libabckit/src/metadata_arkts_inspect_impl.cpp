@@ -791,6 +791,12 @@ bool ArkTSNamespaceEnumerateTopLevelFunctions(AbckitCoreNamespace *n, void *data
     return true;
 }
 
+bool ArkTSNamespaceEnumerateAnnotationInterfaces(AbckitCoreNamespace *n, void *data,
+                                                 bool (*cb)(AbckitCoreAnnotationInterface *ai, void *data))
+{
+    return NamespaceEnumerateAnnotationInterfacesHelper(n, data, cb);
+}
+
 // ========================================
 // Class
 // ========================================

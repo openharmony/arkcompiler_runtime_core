@@ -18,6 +18,7 @@
 
 #include "visitor_wrapper.h"
 #include "class_visitor.h"
+#include "annotation_visitor.h"
 
 namespace abckit_wrapper {
 
@@ -86,6 +87,22 @@ public:
      * @param visitor ClassVisitor
      */
     explicit ModuleClassVisitor(ClassVisitor &visitor) : BaseVisitorWrapper(visitor) {}
+
+private:
+    bool Visit(Module *module) override;
+};
+
+/**
+ * @brief ModuleAnnotationVisitor
+ * visit all module annotations
+ */
+class ModuleAnnotationVisitor final : public ModuleVisitor, public BaseVisitorWrapper<AnnotationVisitor> {
+public:
+    /**
+     * @brief ModuleAnnotationsVisitor Constructor
+     * @param visitor AnnotationVisitor
+     */
+    explicit ModuleAnnotationVisitor(AnnotationVisitor &visitor) : BaseVisitorWrapper(visitor) {}
 
 private:
     bool Visit(Module *module) override;

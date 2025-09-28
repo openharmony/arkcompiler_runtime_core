@@ -191,6 +191,20 @@ bool NamespaceEnumerateFieldsHelper(AbckitCoreNamespace *n, void *data,
     return true;
 }
 
+bool NamespaceEnumerateAnnotationInterfacesHelper(AbckitCoreNamespace *n, void *data,
+                                                  bool (*cb)(AbckitCoreAnnotationInterface *ai, void *data))
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_BAD_ARGUMENT(n, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+    for (auto &[atName, at] : n->at) {
+        if (!cb(at.get(), data)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool ClassEnumerateMethodsHelper(AbckitCoreClass *klass, void *data, bool (*cb)(AbckitCoreFunction *method, void *data))
 {
     LIBABCKIT_LOG_FUNC;

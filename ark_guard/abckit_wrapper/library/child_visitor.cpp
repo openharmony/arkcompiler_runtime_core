@@ -19,7 +19,22 @@ bool abckit_wrapper::ChildVisitor::VisitNamespace(Namespace *ns)
     return true;
 }
 
+bool abckit_wrapper::ChildVisitor::VisitMethod(Method *method)
+{
+    return true;
+}
+
+bool abckit_wrapper::ChildVisitor::VisitField(Field *field)
+{
+    return true;
+}
+
 bool abckit_wrapper::ChildVisitor::VisitClass(Class *clazz)
+{
+    return true;
+}
+
+bool abckit_wrapper::ChildVisitor::VisitAnnotationInterface(AnnotationInterface *ai)
 {
     return true;
 }

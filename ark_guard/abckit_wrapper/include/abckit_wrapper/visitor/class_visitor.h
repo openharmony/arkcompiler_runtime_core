@@ -17,6 +17,7 @@
 #define ABCKIT_WRAPPER_CLASS_VISITOR_H
 
 #include "visitor_wrapper.h"
+#include "member_visitor.h"
 
 namespace abckit_wrapper {
 
@@ -72,6 +73,21 @@ public:
 
 private:
     bool Accepted(Class *clazz) override;
+};
+
+/**
+ * @brief ClassMemberVisitor
+ */
+class ClassMemberVisitor final : public ClassVisitor, public BaseVisitorWrapper<MemberVisitor> {
+public:
+    /**
+     * @brief ClassMemberVisitor Constructor
+     * @param visitor MemberVisitor
+     */
+    explicit ClassMemberVisitor(MemberVisitor &visitor) : BaseVisitorWrapper(visitor) {}
+
+private:
+    bool Visit(Class *clazz) override;
 };
 
 }  // namespace abckit_wrapper

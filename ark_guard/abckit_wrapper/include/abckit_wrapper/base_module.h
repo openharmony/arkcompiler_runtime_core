@@ -55,11 +55,17 @@ protected:
 private:
     AbckitWrapperErrorCode InitNamespaces();
 
+    AbckitWrapperErrorCode InitFunctions();
+
+    AbckitWrapperErrorCode InitModuleFields();
+
     AbckitWrapperErrorCode InitClasses();
 
     AbckitWrapperErrorCode InitInterfaces();
 
     AbckitWrapperErrorCode InitEnums();
+
+    AbckitWrapperErrorCode InitAnnotationInterfaces();
 };
 }  // namespace abckit_wrapper
 

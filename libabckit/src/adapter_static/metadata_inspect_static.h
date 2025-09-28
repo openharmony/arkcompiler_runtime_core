@@ -33,6 +33,8 @@ bool ModuleEnumerateAnonymousFunctionsStatic(AbckitCoreModule *m, void *data,
 
 AbckitString *NamespaceGetNameStatic(AbckitCoreNamespace *ns);
 
+bool NamespaceIsExternalStatic(AbckitCoreNamespace *ns);
+
 // ========================================
 // Class
 // ========================================

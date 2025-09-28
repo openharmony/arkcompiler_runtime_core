@@ -16,16 +16,15 @@
 #ifndef ABCKIT_WRAPPER_CLASS_H
 #define ABCKIT_WRAPPER_CLASS_H
 
-#include "libabckit/cpp/abckit_cpp.h"
-#include "visitor.h"
-#include "modifiers.h"
-#include "object.h"
+#include "method.h"
+#include "field.h"
 
 namespace abckit_wrapper {
 /**
  * @brief Class
  */
 class Class final : public Object,
+                    public AnnotationTarget,
                     public AccessFlagsTarget,
                     public MultiImplObject<abckit::core::Class, abckit::core::Interface, abckit::core::Enum> {
 public:
@@ -42,11 +41,31 @@ public:
 
     std::string GetName() const override;
 
+    bool SetName(const std::string &name) override;
+
     /**
      * @brief Tells if Class is defined in the same binary or externally in another binary.
      * @return Returns `true` if Class is defined in another binary and `false` if defined locally.
      */
     bool IsExternal() const;
+
+    /**
+     * @brief Check if it is an interface
+     * @return Returns `true` Class actual is interface, `false` not interface
+     */
+    bool IsInterface() const;
+
+    /**
+     * @brief Check if it is a class
+     * @return Returns `true` Class actual is class, `false` not class
+     */
+    bool IsClass() const;
+
+    /**
+     * @brief Check if it is an enum
+     * @return Returns `true` Class actual is enum, `false` not enum
+     */
+    bool IsEnum() const;
 
     /**
      * @brief Accept visit
@@ -63,6 +82,13 @@ public:
     bool Accept(ChildVisitor &visitor);
 
     /**
+     * @brief Class members accept visit
+     * @param visitor MemberVisitor
+     * @return `false` if was early exited. Otherwise - `true`.
+     */
+    bool MembersAccept(MemberVisitor &visitor);
+
+    /**
      * @brief Class hierarchy accept
      * @param visitor ClassVisitor
      * @param visitThis whether visit current class
@@ -75,12 +101,22 @@ public:
                          bool visitSubclasses);
 
 private:
+    AbckitWrapperErrorCode InitMethods();
+
+    AbckitWrapperErrorCode InitFields();
+
+    void InitAnnotation(Annotation *annotation) override;
+
+    std::vector<abckit::core::Annotation> GetAnnotations() const override;
+
     void InitAccessFlags() override;
 
 public:
     std::optional<Class *> superClass_;
     std::unordered_map<std::string, Class *> interfaces_;
     std::unordered_map<std::string, Class *> subClasses_;
+    std::unordered_map<std::string, Method *> methodTable_;
+    std::unordered_map<std::string, Field *> fieldTable_;
 };
 }  // namespace abckit_wrapper
 

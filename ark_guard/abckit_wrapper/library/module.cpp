@@ -14,6 +14,17 @@
  */
 #include "abckit_wrapper/module.h"
 #include "object_visitor.h"
+#include "annotation_target_visitor.h"
+
+bool abckit_wrapper::Module::SetName(const std::string &name)
+{
+    const auto module = this->GetArkTsImpl<abckit::core::Module, abckit::arkts::Module>();
+    if (!module.has_value()) {
+        return false;
+    }
+
+    return module->SetName(name);
+}
 
 void abckit_wrapper::Module::InitForObject(Object *object)
 {
@@ -43,7 +54,33 @@ bool abckit_wrapper::Module::NamespacesAccept(NamespaceVisitor &visitor)
     return this->TypedObjectsAccept(visitor);
 }
 
+bool abckit_wrapper::Module::MethodsAccept(MethodVisitor &visitor)
+{
+    return this->TypedObjectsAccept(visitor);
+}
+
+bool abckit_wrapper::Module::FieldsAccept(FieldVisitor &visitor)
+{
+    return this->TypedObjectsAccept(visitor);
+}
+
 bool abckit_wrapper::Module::ClassesAccept(ClassVisitor &visitor)
 {
     return this->TypedObjectsAccept(visitor);
+}
+
+bool abckit_wrapper::Module::AnnotationInterfacesAccept(AnnotationInterfaceVisitor &visitor)
+{
+    return this->TypedObjectsAccept(visitor);
+}
+
+bool abckit_wrapper::Module::AnnotationsAccept(AnnotationVisitor &visitor)
+{
+    for (auto &[_, object] : this->typedObjectTable_) {
+        if (!std::visit(AnnotationTargetVisitor(visitor), object)) {
+            return false;
+        }
+    }
+
+    return true;
 }

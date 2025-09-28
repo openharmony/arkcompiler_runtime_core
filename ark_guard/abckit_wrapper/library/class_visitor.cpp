@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "abckit_wrapper/visitor/class_visitor.h"
+
 #include "abckit_wrapper/class.h"
 
 bool abckit_wrapper::ClassFilter::Visit(Class *clazz)
@@ -27,4 +28,9 @@ bool abckit_wrapper::ClassFilter::Visit(Class *clazz)
 bool abckit_wrapper::LeafClassVisitor::Accepted(Class *clazz)
 {
     return clazz->subClasses_.empty();
+}
+
+bool abckit_wrapper::ClassMemberVisitor::Visit(Class *clazz)
+{
+    return clazz->MembersAccept(this->visitor_);
 }

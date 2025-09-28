@@ -362,9 +362,17 @@ extern "C" AbckitString *NamespaceGetName(AbckitCoreNamespace *n)
 
 extern "C" bool NamespaceIsExternal(AbckitCoreNamespace *ns)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)ns;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(ns, false);
+
+    if (IsDynamic(ns->owningModule->target)) {
+        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+        return false;
+    }
+
+    return NamespaceIsExternalStatic(ns);
 }
 
 extern "C" AbckitCoreNamespace *NamespaceGetParentNamespace(AbckitCoreNamespace *n)
@@ -498,11 +506,21 @@ extern "C" bool NamespaceEnumerateTopLevelFunctions(AbckitCoreNamespace *n, void
 extern "C" bool NamespaceEnumerateAnnotationInterfaces(AbckitCoreNamespace *n, void *data,
                                                        bool (*cb)(AbckitCoreAnnotationInterface *ai, void *data))
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)n;
-    (void)data;
-    (void)cb;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(n, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+    switch (ModuleGetTarget(n->owningModule)) {
+        case ABCKIT_TARGET_ARK_TS_V1:
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return ArkTSNamespaceEnumerateAnnotationInterfaces(n, data, cb);
+        case ABCKIT_TARGET_JS:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
 }
 
 // ========================================
@@ -1466,9 +1484,13 @@ extern "C" AbckitCoreModule *AnnotationInterfaceGetModule(AbckitCoreAnnotationIn
 
 extern "C" AbckitCoreNamespace *AnnotationInterfaceGetParentNamespace(AbckitCoreAnnotationInterface *anno)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)anno;
-    return nullptr;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(anno, nullptr);
+
+    return anno->parentNamespace;
 }
 
 extern "C" AbckitString *AnnotationInterfaceGetName(AbckitCoreAnnotationInterface *ai)

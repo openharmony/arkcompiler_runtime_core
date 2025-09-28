@@ -33,3 +33,8 @@ bool abckit_wrapper::ModuleClassVisitor::Visit(Module *module)
 {
     return module->ClassesAccept(this->visitor_);
 }
+
+bool abckit_wrapper::ModuleAnnotationVisitor::Visit(Module *module)
+{
+    return module->AnnotationsAccept(this->visitor_);
+}
