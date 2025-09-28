@@ -42,24 +42,46 @@ abckit_wrapper_sources = [
   "library/string_util.cpp",
 ]
 
+abckit_wrapper_include_dirs = [
+  "$ark_root/libabckit/include",
+  "$ark_root/static_core",
+]
+
+abckit_wrapper_configs = [
+  "$ark_root/libabckit:abckit_config",
+  "$ark_root/static_core/libarkbase:arkbase_public_config",
+]
+
 ohos_static_library("abckit_wrapper_static") {
   sources = abckit_wrapper_sources
 
-  include_dirs = [
-    "$ark_root/libabckit/include",
-    "$ark_root/static_core",
+  include_dirs = abckit_wrapper_include_dirs
+
+  configs = abckit_wrapper_configs
+
+  public_configs = [ ":abckit_wrapper_public_config" ]
+
+  deps = [
+    "$ark_root/libabckit/src:libabckit_static",
+    "$ark_root/static_core/libarkbase:libarktsbase_frontend_static",
   ]
 
-  configs = [
-    "$ark_root/libabckit:abckit_config",
-    "$ark_root/static_core/libarkbase:arkbase_public_config",
-  ]
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
+}
+
+ohos_shared_library("abckit_wrapper_shared") {
+  sources = abckit_wrapper_sources
+
+  include_dirs = abckit_wrapper_include_dirs
+
+  configs = abckit_wrapper_configs
 
   public_configs = [ ":abckit_wrapper_public_config" ]
 
   deps = [
     "$ark_root/libabckit/src:libabckit",
-    "$ark_root/static_core/libarkbase:libarktsbase_frontend_static",
+    "$ark_root/static_core/libarkbase:libarktsbase",
   ]
 
   part_name = "runtime_core"
