@@ -380,8 +380,8 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
 
     /**
      * Deletes all elements from the Map
-     * It is not supported to use clear() and add elements during foreach, 
-     * as doing so may lead to undefined behavior.
+     * Never call clear inside a foreach loop, 
+     * and always reacquire the new iterator after calling clear
      */
     clear(): void {
         this.sizeVal = 0
