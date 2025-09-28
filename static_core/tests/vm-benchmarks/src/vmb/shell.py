@@ -22,7 +22,7 @@ import signal
 import time
 from typing import Union, Optional
 from pathlib import Path
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, CalledProcessError, check_output
 from threading import Thread, Timer
 from dataclasses import dataclass
 from tempfile import mktemp
@@ -119,6 +119,13 @@ class ShellBase(metaclass=Singleton):
     def timed_cmd(cmd: str) -> str:
         return f"\\time -v env {cmd}"
 
+    def effective_timeout(self, timeout: Optional[float] = None) -> Optional[float]:
+        # Note: self._timeout=None so default behaivior is to wait forever
+        to = timeout if timeout else self._timeout
+        if timeout is not None and self._timeout is not None:
+            to = max(timeout, self._timeout)
+        return to
+
     def run(self,
             cmd: str,
             measure_time: bool = False,
@@ -168,10 +175,11 @@ class ShellBase(metaclass=Singleton):
         self.taskset = f'/system/bin/taskset -a {arg}'
 
 
-class ShellUnix(ShellBase):
+class ShellHost(ShellBase):
 
     def __init__(self, timeout: Optional[float] = None) -> None:
         super().__init__(timeout=timeout)
+        self.is_win = 'nt' == os.name
 
     def run(self,
             cmd: str,
@@ -215,9 +223,10 @@ class ShellUnix(ShellBase):
               measure_time: bool = False,
               timeout: Optional[float] = None,
               cwd: str = '') -> ShellResult:
-        if measure_time:
+        if measure_time and not self.is_win:
             cmd = self.timed_cmd(cmd)
-        result = self.__exec_process(cmd, cwd=cwd, timeout=timeout)
+        exec_fn = self.__exec_process_win if self.is_win else self.__exec_process
+        result = exec_fn(cmd, cwd=cwd, timeout=self.effective_timeout(timeout))
         if measure_time:
             result.set_time()
         result.log_output()
@@ -226,29 +235,44 @@ class ShellUnix(ShellBase):
     def __exec_process(self, cmd: str, cwd: str = '',
                        timeout: Optional[float] = None) -> ShellResult:
         result = ShellResult()
-        # Note: self._timeout=None so default behaivior is to wait forever
-        to = timeout if timeout else self._timeout
-        if timeout is not None and self._timeout is not None:
-            to = max(timeout, self._timeout)
         log.debug(cmd)
-        log.trace('CWD="%s" Timeout=[%s]', cwd, to)
+        log.trace('CWD="%s" Timeout=[%s]', cwd, timeout)
         # pylint: disable-next=all
         with Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE,  # NOQA
                    cwd=(cwd if cwd else None),
                    preexec_fn=os.setsid) as proc:
-            if to is not None:
-                timer = Timer(to,
+            if timeout is not None:
+                timer = Timer(timeout,
                               lambda x: os.killpg(
                                   os.getpgid(x.pid), signal.SIGKILL), [proc])
                 timer.start()
-            out, err = proc.communicate(timeout=to)
-            if to is not None:
+            out, err = proc.communicate(timeout=timeout)
+            if timeout is not None:
                 timer.cancel()
             ret_code = proc.poll()
             if ret_code is not None:
                 result.ret = ret_code
-            result.out = out.decode('utf-8', errors='replace')
-            result.err = err.decode('utf-8', errors='replace')
+            result.out = str(out.decode('utf-8', errors='replace'))
+            result.err = str(err.decode('utf-8', errors='replace'))
+        return result
+
+    def __exec_process_win(self, cmd: str, cwd: str = '',
+                           timeout: Optional[float] = None) -> ShellResult:
+        """Win realisation for exec process.
+
+        In host: No shell; No RSS; No time; No kill group;
+        On device: using 'time' shell builtin and cmd stderr redirection
+        """
+        result = ShellResult()
+        log.debug(cmd)
+        try:
+            out = check_output(cmd, shell=False, cwd=(cwd if cwd else None),
+                               timeout=timeout)
+            result.ret = 0
+            result.out = str(out.decode('utf-8', errors='replace'))
+        except CalledProcessError as e:
+            result.ret = e.returncode
+            result.out = str(e.output)
         return result
 
 
@@ -258,7 +282,7 @@ class ShellDevice(ShellBase):
                  timeout: Optional[float] = None,
                  tmp_dir: str = '/data/local/tmp/vmb',) -> None:
         super().__init__(timeout=timeout)
-        self._sh = ShellUnix()
+        self._sh = ShellHost()
         self._devsh = dev_sh
         self.tmp_dir = tmp_dir
         self.stderr_out = os.path.join(tmp_dir, 'vmb-stderr.out')
@@ -272,8 +296,12 @@ class ShellDevice(ShellBase):
             cmd = f"\\time -v {self.taskset} env {cmd}"
             redir = f' 2>{self.stderr_out}'
         cwd = f'cd {cwd}; ' if cwd else ''
+        # Single/Double quote problem for cross-platform shell:
+        # 1) there is no proper way to have '>' inside single quotes on Windows
+        # 2) on the other hand "echo $?" will be prematurely expanded on Unix host
+        q = '"' if self._sh.is_win else "'"
         res = self._sh.run(
-            f"{self._devsh} shell '{cwd}({cmd}){redir}; echo __RET_VAL__=$?'",
+            f'{self._devsh} shell {q}{cwd}({cmd}){redir}; echo __RET_VAL__=$?{q}',
             timeout=timeout,
             measure_time=False)
         res.set_ret_val()
@@ -306,9 +334,13 @@ class ShellDevice(ShellBase):
 
     def get_filesize(self, filepath: Union[str, Path]) -> int:
         res = self.run(f"stat -c '%s' {filepath}")
+        size = 0
         if res.ret == 0 and res.out:
-            return int(res.out.split("\n")[0])
-        return 0
+            try:
+                size = int(res.out.split("\n")[0])
+            except Exception:  # pylint: disable=broad-exception-caught
+                log.warning('Error getting size of "%s"', str(filepath))
+        return size
 
     def push(self,
              src: Union[str, Path],

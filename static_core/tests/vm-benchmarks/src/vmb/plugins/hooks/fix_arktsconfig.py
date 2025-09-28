@@ -33,7 +33,7 @@ class Hook(HookBase):
 
     @classmethod
     def skipme(cls, args: Args) -> bool:
-        """Deprecated, artifacts should use generated declarations."""
+        """Deprecate, artifacts should use generated declarations."""
         return True
 
     @property

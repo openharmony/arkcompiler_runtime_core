@@ -25,7 +25,7 @@ from vmb.target import Target
 from vmb.unit import BenchUnit, UNIT_PREFIX
 from vmb.helpers import get_plugins, get_plugin, die
 from vmb.cli import Args
-from vmb.shell import ShellUnix, ShellAdb, ShellHdc, ShellDevice
+from vmb.shell import ShellHost, ShellAdb, ShellHdc, ShellDevice
 from vmb.result import ExtInfo
 from vmb.x_shell import CrossShell
 from vmb.gensettings import GenSettings
@@ -39,7 +39,7 @@ class PlatformBase(CrossShell, ABC):
     """Platform Base."""
 
     def __init__(self, args: Args) -> None:
-        self.__sh = ShellUnix(args.timeout)
+        self.__sh = ShellHost(args.timeout)
         self.__andb = None
         self.__hdc = None
         self.__dev_dir = Path(args.get('device_dir', 'unknown'))
@@ -58,6 +58,8 @@ class PlatformBase(CrossShell, ABC):
         ToolBase.andb_ = self.andb
         ToolBase.hdc_ = self.hdc
         ToolBase.dev_dir = self.dev_dir
+        self.flags = args.get_opts_flags()
+        self.tools = {}
         # dir with shared libs (init before the suite)
         ToolBase.libs = Path(args.get_shared_path()).joinpath('libs').resolve()
         ToolBase.libs.mkdir(parents=True, exist_ok=True)
@@ -66,12 +68,11 @@ class PlatformBase(CrossShell, ABC):
             'tools',
             self.required_tools,
             extra=args.extra_plugins)
-        self.flags = args.get_opts_flags()
-        self.tools = {}
         for n, t in tool_plugins.items():
             tool: ToolBase = t.Tool(self.target,
                                     self.flags,
-                                    args.custom_opts.get(n, []))
+                                    args.custom_opts.get(n, []),
+                                    args.custom_paths.get(n, ''))
             self.tools[n] = tool
             log.info('%s %s', tool.name, tool.version)
 
@@ -109,8 +110,8 @@ class PlatformBase(CrossShell, ABC):
         return self.__dev_dir
 
     @property
-    def sh(self) -> ShellUnix:
-        """Posix shell."""
+    def sh(self) -> ShellHost:
+        """Host shell."""
         return self.__sh
 
     @property

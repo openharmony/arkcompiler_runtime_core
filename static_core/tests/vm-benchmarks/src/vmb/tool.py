@@ -27,7 +27,7 @@ from enum import Flag, auto
 from subprocess import TimeoutExpired
 from vmb.unit import BenchUnit
 from vmb.helpers import StringEnum
-from vmb.shell import ShellDevice, ShellUnix, ShellResult
+from vmb.shell import ShellDevice, ShellHost, ShellResult
 from vmb.target import Target
 from vmb.x_shell import CrossShell
 
@@ -63,6 +63,7 @@ class OptFlags(Flag):
     AOT_STATS = auto()
     AOT_SKIP_LIBS = auto()
     DRY_RUN = auto()
+    SKIP_COMPILATION = auto()
     DISABLE_INLINING = auto()
     AOT = auto()
     INT = auto()
@@ -76,7 +77,7 @@ class OptFlags(Flag):
 
 class ToolBase(CrossShell, ABC):
 
-    sh_: ShellUnix
+    sh_: ShellHost
     andb_: ShellDevice
     hdc_: ShellDevice
     dev_dir: Path
@@ -85,10 +86,12 @@ class ToolBase(CrossShell, ABC):
     def __init__(self,
                  target: Target = Target.HOST,
                  flags: OptFlags = OptFlags.NONE,
-                 custom_opts: Optional[List[str]] = None):
+                 custom_opts: Optional[List[str]] = None,
+                 custom_path: str = ''):
         self._target = target
         self.flags = flags
         self.custom_opts = custom_opts if custom_opts else []
+        self.custom_path = custom_path
 
     def __call__(self, bu: BenchUnit) -> None:
         self.exec(bu)
@@ -107,7 +110,7 @@ class ToolBase(CrossShell, ABC):
         return self._target
 
     @property
-    def sh(self) -> ShellUnix:
+    def sh(self) -> ShellHost:
         return ToolBase.sh_
 
     @property
