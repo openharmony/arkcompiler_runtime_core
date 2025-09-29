@@ -373,8 +373,8 @@ cases:
           arktest.assertEQ(v, 1)
           v = Color.Green
           arktest.assertEQ(v, Color.Green)
-          v = 0xffffffff
-          arktest.assertEQ(v, 0xffffffff)
+          v = 0x7fffffff
+          arktest.assertEQ(v, 0x7fffffff)
 
     - decl: |-
           enum Color { Red = 'r', Green = 'g', Blue = 'b' }

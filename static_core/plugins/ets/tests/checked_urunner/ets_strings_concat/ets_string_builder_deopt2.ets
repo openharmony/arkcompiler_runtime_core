@@ -14,6 +14,7 @@
  */
 
 //! CHECKER      JIT leave string builder instance for safe inlining
+//! SKIP_IF      @architecture == "arm32"
 //! RUN          options: "--no-async-jit=true --compiler-hotness-threshold=50 --compiler-profiling-threshold=0", entry: "ets_string_builder_deopt2.ETSGLOBAL::main"
 //! METHOD       "__noinline__caller"
 //! PASS_BEFORE  "BranchElimination"

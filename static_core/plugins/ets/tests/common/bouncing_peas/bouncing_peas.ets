@@ -106,7 +106,7 @@ class Ball {
     draw(canvasPtr: long/*KNativePointer*/): void {
         let shapePaintPtr = _skoala_Paint__1nMake();
         let paintFinalizer = _skoala_Paint__1nGetFinalizer();
-        _skoala_Paint__1nSetColor(shapePaintPtr, 0xFF00FF00 as int/*KInt*/); // green
+        _skoala_Paint__1nSetColor(shapePaintPtr, 0xFF00FF00.toInt()/*KInt*/); // green
         _skoala_Canvas__1nDrawOval(canvasPtr, this.left(), this.top(), this.right(), this.bottom(), shapePaintPtr);
         _skoala_impl_Managed__invokeFinalizer(paintFinalizer, shapePaintPtr);
     }
@@ -201,7 +201,7 @@ class Drawer {
         const textStylePtr = _skoala_paragraph_TextStyle__1nMake();
         const textStyleFinalizer = _skoala_paragraph_TextStyle__1nGetFinalizer()
 
-        _skoala_paragraph_TextStyle__1nSetColor(textStylePtr, 0xffff0000 as int/*KInt*/);
+        _skoala_paragraph_TextStyle__1nSetColor(textStylePtr, 0xffff0000.toInt()/*KInt*/);
         _skoala_paragraph_TextStyle__1nSetFontSize(textStylePtr, 64);
         _skoala_paragraph_ParagraphBuilder__1nPushStyle(paragraphBuilderPtr, textStylePtr);
 

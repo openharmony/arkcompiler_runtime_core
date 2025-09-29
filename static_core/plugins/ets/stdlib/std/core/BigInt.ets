@@ -59,7 +59,7 @@ export final class BigInt {
     private static readonly maskSys: long = BigInt.baseSys - (1 as long)
     private static readonly INVALID_RADIX_MESSAGE: string = "toString() radix argument must be between 2 and 36"
     private static readonly BITS_PER_1024_DEC = 3402
-    private static readonly BIGINT64_MASK = new BigInt(0xffffffffffffffff)
+    private static readonly BIGINT64_MASK = new BigInt("0xffffffffffffffff")
 
     private static resetBytes(b: FixedArray<int>):void {
         for (let i = 0; i<b.length; i++) {
@@ -768,7 +768,7 @@ export final class BigInt {
             let rightShift = wordSize - bitShift;
             for (let i: int = 0; i < oldLength; i++) {
                 let currentWord: int = this.bytes[i];
-                let newWord: int = ((currentWord << bitShift) | carry) & 0xFFFFFFFF;
+                let newWord: int = (((currentWord << bitShift) | carry) & 0xFFFFFFFF).toInt();
                 carry = (currentWord >>> rightShift);
                 newBytes[i + wordShift] = newWord;
             }

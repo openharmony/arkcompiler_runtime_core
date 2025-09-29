@@ -282,7 +282,7 @@
     expected_data_type: "FixedArray<boolean>",
     param_list:
       {
-        "param1": "[0xD000, 0xD7FF, 0x10000, 0x10401, 0x10FBFE, 0x10FFFF, 0xE000, 0xD800DBFF]",
+        "param1": "[0xD000, 0xD7FF, 0x10000, 0x10401, 0x10FBFE, 0x10FFFF, 0xE000, -0x27FF2401]",
       },
     expected_test_data: "[true, true, true, true, true, true, true, false ]",
     verify_test_result_function: comparePrimitiveValue,

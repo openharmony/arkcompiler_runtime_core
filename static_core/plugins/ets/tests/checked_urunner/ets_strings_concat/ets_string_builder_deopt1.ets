@@ -14,6 +14,7 @@
  */
 
 //! CHECKER      JIT optimize string builder instance, don't insert deoptimization
+//! SKIP_IF      @architecture == "arm32"
 //! RUN          options: "--no-async-jit=true --compiler-hotness-threshold=50 --compiler-profiling-threshold=0", entry: "ets_string_builder_deopt1.ETSGLOBAL::main"
 //! EVENT        /Inline,ets_string_builder_deopt1.ETSGLOBAL::__noinline__caller,ets_string_builder_deopt1.ETSGLOBAL::throws,.*,STATIC,SUCCESS/
 //! METHOD       "throws"

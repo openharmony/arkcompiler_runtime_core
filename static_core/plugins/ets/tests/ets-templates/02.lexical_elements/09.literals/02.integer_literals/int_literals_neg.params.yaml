@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,7 +11,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # List of shift operators and numeric errors
-right_shift_negative:
-  - {type: int,  value: "-0x80000000"}
-  - {type: long, value: "-1"}
+--- # List of Invalid int literals
+cases:
+    - { lit: '0xffffffff' }
+    - { lit: '0x80000000' }
+    - { lit: '0xca_fe_CA_FE' }
+    - { lit: '0X00_00_00_00_ca_fe_CA_FE' }
+    - { lit: '0xa_Ab_Bc_Cd_D' }
+    - { lit: '0O37777777777' }
+    - { lit: '0O20000000000' }
+    - { lit: '0B11111111111111111111111111111111' }
+    - { lit: '0b10000000000000000000000000000000' }
+    - { lit: '0B1010_1010_1010_1010_1010_1010_1010_1010' }

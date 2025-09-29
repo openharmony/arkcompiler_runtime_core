@@ -21,7 +21,7 @@ desc: >-
 params: {{c.type}}
 ---*/
 
-enum IntEnum {One = 1, Two = 0xFFFFFFFF, Three}
+enum IntEnum {One = 1, Two = 0x7FFFFFFF, Three = 0x7FFFFFFF}
 
 function foo(a: byte): int {
   return 2;

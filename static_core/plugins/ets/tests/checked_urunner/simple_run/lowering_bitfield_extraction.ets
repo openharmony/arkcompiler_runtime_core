@@ -120,8 +120,8 @@ function __noinline__foo5(x: int, y: int, z: long, w: long): long[] {
     const y1: int = (y & -3804) >> 12;  // -3804 = 2's complement of 0xFFFF_F124
     const y2: int = (y & -4096) >>> 12; // -4096 = 2's complement of 0xFFFF_F000
     z = (z & 0x3FFF_FFFF_FF00) >>> 15;
-    const w1: long = (w & 0xFFFF_FFFF_FFFF_0000) >> 16;
-    const w2: long = (w & 0xFFFF_FFFF_FFFF_0124) >>> 16;
+    const w1: long = (w & (-0x10000)) >> 16;
+    const w2: long = (w & (-0xFEDC)) >>> 16;
     return [Int.toLong(x), Int.toLong(y1), Int.toLong(y2), z, w1, w2];
 }
 
@@ -134,8 +134,8 @@ function __noinline__foo6(x: int, y: int, z: long, w: long): long[] {
 }
 
 function main(): void {
-    const a: int   = 0b1011_0111_0111_1011_1110_1111_1101_1111;
-    const b: long  = 0b1011_0111_0111_1011_1110_1111_1101_1111_1101_1111_1110_1111_1111_1011_1111_1111;
+    const a: int   = -0b100_1000_1000_0100_0001_0000_0010_0001;
+    const b: long  = -0b100_1000_1000_0100_0001_0000_0010_0000_0010_0000_0001_0000_0000_0100_0000_0001;
 
     const a1 = __noinline__foo1(a, a, b, b);
     arktest.assertEQ(a1[0], 0b1_0110);
@@ -150,23 +150,23 @@ function main(): void {
     arktest.assertEQ(a2[3], 0b00_1011_0111_0111_1011_1110_1111_1101);
 
     const a3 = __noinline__foo3(a, a, b, b);
-    arktest.assertEQ(a3[0], 0b1111_0111_0111_1011_1110_1111_1101_1111);
+    arktest.assertEQ(a3[0], -0b0000_1000_1000_0100_0001_0000_0010_0001);
     arktest.assertEQ(a3[1], 0b1111_0111);
     arktest.assertEQ(a3[2], 0b0_1111_1011_1111_0111_1111_0111_1111);
     arktest.assertEQ(a3[3], 0b10_1111_1110_1111_1111);
 
     const a4 = __noinline__foo4(a, a, b, b);
-    arktest.assertEQ(a4[0], 0b1110_1110_1111_0111_1101_1111_1011_1110);
+    arktest.assertEQ(a4[0], -0b0001_0001_0000_1000_0010_0000_0100_0010);
     arktest.assertEQ(a4[1], 0b11_0000);
     arktest.assertEQ(a4[2], 0b0111_1110_1111_1110_1111_1111_0111_1111_1101_1111_1111_1000_0000);
     arktest.assertEQ(a4[3], 0b1111_1111_0111_1111_1110);
 
     const a5 = __noinline__foo5(a, a, b, b);
     arktest.assertEQ(a5[0], 0b1_0111_1110);
-    arktest.assertEQ(a5[1], 0b1111_1111_1111_1011_0111_0111_1011_1110);
+    arktest.assertEQ(a5[1], -0b0000_0000_0000_0100_1000_1000_0100_0010);
     arktest.assertEQ(a5[2], 0b0000_0000_0000_1011_0111_0111_1011_1110);
     arktest.assertEQ(a5[3], 0b101_1111_1011_1111_1011_1111_1101_1111);
-    arktest.assertEQ(a5[4], 0b1111_1111_1111_1111_1011_0111_0111_1011_1110_1111_1101_1111_1101_1111_1110_1111);
+    arktest.assertEQ(a5[4], -0b0100_1000_1000_0100_0001_0000_0010_0000_0010_0000_0001_0001);
     arktest.assertEQ(a5[5], 0b0000_0000_0000_0000_1011_0111_0111_1011_1110_1111_1101_1111_1101_1111_1110_1111);
 
     const a6 = __noinline__foo6(a, a, b, b);

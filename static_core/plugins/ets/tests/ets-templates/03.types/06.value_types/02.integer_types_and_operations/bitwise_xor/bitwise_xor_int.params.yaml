@@ -22,5 +22,4 @@ values:
 - { left: Int.MIN_VALUE, right: Int.MAX_VALUE, result: -1 }
 - { left: 1123456789, right: 1123456789, result: 0 }
 - { left: 1123456789, right: -1123456789, result: -2 }
-- { left: "0x55555555", right: "0xaaaaaaaa", result: -1 }
-  
+- { left: "0x55555555", right: "-0x55555556", result: -1 }

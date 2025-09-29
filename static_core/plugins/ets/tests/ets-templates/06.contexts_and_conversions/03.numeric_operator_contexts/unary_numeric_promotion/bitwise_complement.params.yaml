@@ -17,10 +17,10 @@ cases:
   - { type: byte, val: -42, r: [5, 5, 5, 41, -42, 41] }
   - { type: short, val: 255, r: [5, 5, 5, -256, 255, -256] }
   - { type: short, val: -255, r: [5, 5, 5, 254, -255, 254] }
-  - { type: int, val: '0xFFFFFFFF', r: [5, 5, 5, 0, -1, 0] }
-  - { type: long, val: '0xFFFFFFFFFFFFFFFF', r: [6, 6, 6, 0, -1, 0] }
+  - { type: int, val: '0x7FFFFFFF', r: [5, 5, 5, -2147483648, 2147483647, -2147483648] }
+  - { type: long, val: '0x7FFFFFFFFFFFFFFF', r: [6, 6, 6, -9223372036854775808, 9223372036854775807, -9223372036854775808] }
   - { type: Byte, val: new Byte(3 as byte), r: [5, 5, 5, -4, 3, -4] }
   - { type: Short, val: new Short(0x1ff), r: [5, 5, 5, -512, 511, -512] }
   - { type: Int, val: new Int(128), r: [5, 5, 5, -129, 128, -129] }
   - { type: Long, val: new Long(1), r: [6, 6, 6, -2, 1, -2] }
-  - { type: IntEnum, val: IntEnum.Two, r: [5, 5, 5, 0, -1, 0] }
+  - { type: IntEnum, val: IntEnum.Two, r: [5, 5, 5, -2147483648, 2147483647, -2147483648] }

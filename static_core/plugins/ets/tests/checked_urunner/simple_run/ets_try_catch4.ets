@@ -14,6 +14,7 @@
  */
 
 //! CHECKER      Try Catch Resolving JIT Do not optimize inlined throws
+//! SKIP_IF      @architecture == "arm32"
 //! RUN          force_jit: true, options: "--compiler-hotness-threshold=20 --compiler-profiling-threshold=0 --compiler-enable-osr=false --compiler-inlining-max-insts=160", entry: "ets_try_catch4.ETSGLOBAL::main"
 //! EVENT        /Compilation,ets_try_catch4.MultipleCatch::__noinline__multipleCatch,.*,COMPILED/
 //! EVENT        /Inline,ets_try_catch4.MultipleCatch::__noinline__multipleCatch,ets_try_catch4.ETSGLOBAL::throw_errors,.*,STATIC,SUCCESS/

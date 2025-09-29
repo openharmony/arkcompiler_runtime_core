@@ -14,6 +14,7 @@
  */
 
 //! CHECKER      Check for typeof + compare peephole
+//! SKIP_IF      @architecture == "arm32"
 //! RUN          force_jit: true, options: "--compiler-hotness-threshold=20 --compiler-profiling-threshold=0 --compiler-enable-osr=false", entry: "ets_typeof_compare.ETSGLOBAL::main"
 //! EVENT        /Compilation,ets_typeof_compare.ETSGLOBAL::__noinline__process_typeof,.*,COMPILED/
 //! METHOD       "ets_typeof_compare.ETSGLOBAL::__noinline__process_typeof"

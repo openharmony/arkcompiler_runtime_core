@@ -19,7 +19,7 @@ desc: NegativeArraySizeError is thrown by an array creation expression
 ---*/
 
 function main() {
-  let sz: int = 0xffffffff;
+  let sz: int = -1;
   let a: int = 1;
   let b: int = 1;
   let expectedException = (e: Error): boolean => { return (e instanceof NegativeArraySizeError) }

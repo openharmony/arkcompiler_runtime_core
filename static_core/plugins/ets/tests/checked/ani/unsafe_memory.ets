@@ -107,7 +107,7 @@ function testInt16() : int {
 }
 
 function testInt32() : int {
-    let vals: int[] = [1, -1, 0, 2, -2, 0x7fffffff, 0x80000000];
+    let vals: int[] = [1, -1, 0, 2, -2, 0x7fffffff, -0x80000000];
     let size: int = vals.length.toInt() * Int.BYTE_SIZE;
     let addend = Int.BYTE_SIZE - 1
     let addr: long = allocMem(size + addend);
@@ -133,7 +133,7 @@ function testInt32() : int {
 }
 
 function testInt64() : int {
-    let vals: long[] = [1, -1, 0, 2, -2, 0x7fffffffffffffff as long, 0x8000000000000000 as long];
+    let vals: long[] = [1, -1, 0, 2, -2, 0x7fffffffffffffff as long, -0x8000000000000000 as long];
     let size: int = vals.length.toInt() * Long.BYTE_SIZE;
     let addend = Long.BYTE_SIZE - 1
     let addr: long = allocMem(size + addend);

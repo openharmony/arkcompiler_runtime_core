@@ -23,11 +23,11 @@ cases:
       val: '(0x0505).toShort()'
 
     - type: int
-      vals: '0x80000000, 0x7fffffff'
+      vals: '0x70000000, 0x7fffffff'
       val: '32768'
 
     - type: long
-      vals: '0x8000000000000000, 0x7fffffffffffffff'
+      vals: '0x7000000000000000, 0x7fffffffffffffff'
       val: '1234567890'
 
     - type: float
