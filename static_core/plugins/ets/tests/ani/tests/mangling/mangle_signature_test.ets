@@ -29,10 +29,25 @@ class F {
     foo(x: long) {}
     foo(x: float) {}
     foo(x: double) {}
+    fooAny(x: Any) {}
+    fooAny(): Any { return null }
+    fooNever(x: never) {}
+    fooNever(): never {
+        throw new Error()
+    }
     foo(x: double, y: A, z: B): E { return E.R }
     foo(p: Partial<A>, a: Array<B>) {}
     foo(u: number | string | FixedArray<char>): (E | B) | Partial<A> { return E.R }
     foo1<T extends A, V extends T | string>(u: T | V | A | number): FixedArray<T> | null | V { return null }
+    foo1<T>(u: T) {}
+    foo1<T>(): T { return 'Hello' as T}
+    foo1<T>(u: T): never {
+        throw new Error()
+    }
+    fooFixedArray<T>(u: FixedArray<T>) {}
+    fooFixedArray<T>(): FixedArray<T> {
+        return 'Hello' as FixedArray<T>
+    }
 
     $_get(index: number): int { return 0 }
 
@@ -45,6 +60,7 @@ class F {
     $_set(index: number, x: float) {}
     $_set(index: number, x: double) {}
     $_set(index: number, s: String) {}
+    $_set(index: number, s: Any) {}
 
     foo(a: int, b: int): int {return a + b }
 
@@ -62,10 +78,26 @@ class G {
     static foo(x: long) {}
     static foo(x: float) {}
     static foo(x: double) {}
+    static fooAny(x: Any) {}
+    static fooAny(): Any { return null }
+    static fooNever(x: never) {}
+    static fooNever(): never {
+        throw new Error()
+    }
     static foo(x: double, y: A, z: B): E { return E.R }
     static foo(p: Partial<A>, a: Array<B>) {}
     static foo(u: number | string | FixedArray<char>): (E | B) | Partial<A> { return E.R }
     static foo1<T extends A, V extends T | string>(u: T | V | A | number): FixedArray<T> | null | V { return null }
+    static foo1<T>(u: T) {}
+    static foo1<T>(): T { return 'Hello' as T }
+    static foo1<T>(u: T): never {
+        throw new Error()
+    }
+    static fooFixedArray<T>(u: FixedArray<T>) {}
+    static fooFixedArray<T>(): FixedArray<T> {
+        return 'Hello' as FixedArray<T>
+    }
+
     static foo(a: int, b: int, c: int): int {return a + b + c }
 }
 
@@ -78,10 +110,25 @@ function foo(x: int) {}
 function foo(x: long) {}
 function foo(x: float) {}
 function foo(x: double) {}
+function fooAny(x: Any) {}
+function fooAny(): Any { return null }
+function fooNever(x: never) {}
+function fooNever(): never {
+    throw new Error()
+}
 function foo(x: double, y: A, z: B): E { return E.R }
 function foo(p: Partial<A>, a: Array<B>) {}
 function foo(u: number | string | FixedArray<char>): (E | B) | Partial<A> { return E.R }
 function foo1<T extends A, V extends T | string>(u: T | V | A | number): FixedArray<T> | null | V { return null }
+function foo1<T>(u: T) {}
+function foo1<T>(): T { return 'Hello' as T }
+function foo1<T>(u: T): never {
+    throw new Error()
+}
+function fooFixedArray<T>(u: FixedArray<T>) {}
+function fooFixedArray<T>(): FixedArray<T> {
+    return 'Hello' as FixedArray<T>
+}
 
 native function foo(data: string[]): string[];
 native function foo(data: string[], fn : (it: string) => void): void;
@@ -100,10 +147,25 @@ namespace rls {
     function foo(x: long) {}
     function foo(x: float) {}
     function foo(x: double) {}
+    function fooAny(x: Any) {}
+    function fooAny(): Any { return null }
+    function fooNever(x: never) {}
+    function fooNever(): never {
+        throw new Error()
+    }
     function foo(x: double, y: A, z: B): E { return E.R }
     function foo(p: Partial<A>, a: Array<B>) {}
     function foo(u: number | string | FixedArray<char>): (E | B) | Partial<A> { return E.R }
     function foo1<T extends A, V extends T | string>(u: T | V | A | number): FixedArray<T> | null | V { return null }
+    function foo1<T>(u: T) {}
+    function foo1<T>(): T { return 'Hello' as T }
+    function foo1<T>(u: T): never {
+        throw new Error()
+    }
+    function fooFixedArray<T>(u: FixedArray<T>) {}
+    function fooFixedArray<T>(): FixedArray<T> {
+        return 'Hello' as FixedArray<T>
+    }
 
     native function foo(data: string[]): string[];
     native function foo(data: string[], fn : (it: string) => void): void;
