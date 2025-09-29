@@ -17,23 +17,43 @@ function testStringIndexOutOfBoundsErrorExtendsRangeError() {
     let str: string = "123";
     try {
         str[-1];
-    } catch (err: Error) {
-        arktest.assertTrue(err instanceof StringIndexOutOfBoundsError);
-        arktest.assertEQ(err.name, "StringIndexOutOfBoundsError");
-        arktest.assertTrue(err instanceof RangeError);
+    } catch (e) {
+        arktest.assertTrue(e instanceof StringIndexOutOfBoundsError);
+        arktest.assertEQ((e as Error).name, "StringIndexOutOfBoundsError");
+        arktest.assertTrue(e instanceof RangeError);
     }
 
     try {
         str[5];
-    } catch (err: Error) {
-        arktest.assertTrue(err instanceof StringIndexOutOfBoundsError);
-        arktest.assertEQ(err.name, "StringIndexOutOfBoundsError");
-        arktest.assertTrue(err instanceof RangeError);
+    } catch (e) {
+        arktest.assertTrue(e instanceof StringIndexOutOfBoundsError);
+        arktest.assertEQ((e as Error).name, "StringIndexOutOfBoundsError");
+        arktest.assertTrue(e instanceof RangeError);
+    }
+}
+
+function testArrayIndexOutOfBoundsErrorExtendsRangeError() {
+    try {
+        throw new ArrayIndexOutOfBoundsError("ArrayIndexOutOfBoundsError");
+    } catch (e) {
+        arktest.assertEQ((e as Error).name, "ArrayIndexOutOfBoundsError");
+        arktest.assertTrue(e instanceof RangeError);
+    }
+}
+
+function testIndexOutOfBoundsErrorExtendsRangeError() {
+    try {
+        throw new IndexOutOfBoundsError("IndexOutOfBoundsError");
+    } catch (e) {
+        arktest.assertEQ((e as Error).name, "IndexOutOfBoundsError");
+        arktest.assertTrue(e instanceof RangeError);
     }
 }
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("Errors.testErrors");
     suite.addTest("Test StringIndexOutOfBoundsErrorExtendsRangeError", testStringIndexOutOfBoundsErrorExtendsRangeError);
+    suite.addTest("Test ArrayIndexOutOfBoundsErrorExtendsRangeError", testArrayIndexOutOfBoundsErrorExtendsRangeError);
+    suite.addTest("Test IndexOutOfBoundsErrorExtendsRangeError", testIndexOutOfBoundsErrorExtendsRangeError);
     return suite.run();
 }
