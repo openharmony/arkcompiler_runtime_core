@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,8 +75,8 @@ public:
     virtual void InitializeGC() = 0;
     virtual void StartGC() = 0;
     virtual void StopGC() = 0;
-    virtual void VisitVmRoots(const GCRootVisitor &visitor);
-    virtual void UpdateVmRefs(const GCRootUpdater &gcRootUpdater);
+    virtual void VisitVmRoots(const GCRootVisitor &visitor) = 0;
+    virtual void UpdateVmRefs(const GCRootUpdater &gcRootUpdater) = 0;
     virtual void UninitializeThreads() = 0;
     virtual void SaveProfileInfo() {}
 
@@ -121,7 +121,7 @@ public:
     {
         return nullptr;
     }
-    virtual void VisitStringTable(const StringTable::StringVisitor &visitor, mem::VisitGCRootFlags flags)
+    virtual void VisitStringTable(const GCRootVisitor &visitor, mem::VisitGCRootFlags flags)
     {
         GetStringTable()->VisitRoots(visitor, flags);
     }
@@ -231,11 +231,6 @@ public:
         return mutatorLock_;
     }
 
-    // Intrusive GC test API
-    void MarkObject(ObjectHeader *obj);
-    void IterateOverMarkQueue(const std::function<void(ObjectHeader *)> &visitor);
-    void ClearMarkQueue();
-
     // NOTE(konstanting): a potential candidate for moving out of the core part
     // Cleans up language-specific CFrame resources
     virtual void CleanupCompiledFrameResources([[maybe_unused]] Frame *frame) {}
@@ -276,10 +271,6 @@ private:
     MutatorLock *mutatorLock_;
     uint32_t frameExtSize_ {EMPTY_EXT_FRAME_DATA_SIZE};
     LoadableAgentHandle debuggerAgent_;
-
-    // Intrusive GC test API
-    PandaList<ObjectHeader *> markQueue_ GUARDED_BY(markQueueLock_);
-    os::memory::Mutex markQueueLock_;
 };
 
 }  // namespace ark

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -751,17 +751,16 @@ void MTManagedThread::UpdateGCRoots(const GCRootUpdater &gcRootUpdater)
     ptReferenceStorage_->UpdateMovedRefs(gcRootUpdater);
 }
 
-void MTManagedThread::VisitGCRoots(const ObjectVisitor &cb)
+void MTManagedThread::VisitGCRoots(const GCRootVisitor &cb)
 {
     ManagedThread::VisitGCRoots(cb);
 
     // Visit enter_monitor_object_
     if (enterMonitorObject_ != nullptr) {
-        cb(enterMonitorObject_);
+        cb({mem::RootType::ROOT_THREAD, &enterMonitorObject_});
     }
 
-    ptReferenceStorage_->VisitObjects([&cb](const mem::GCRoot &gcRoot) { cb(gcRoot.GetObjectHeader()); },
-                                      mem::RootType::ROOT_PT_LOCAL);
+    ptReferenceStorage_->VisitObjects(cb, mem::RootType::ROOT_PT_LOCAL);
 }
 void MTManagedThread::SetDaemon()
 {
@@ -794,13 +793,13 @@ void MTManagedThread::StopDaemonThread()
     MTManagedThread::Interrupt(this);
 }
 
-void ManagedThread::VisitGCRoots(const ObjectVisitor &cb)
+void ManagedThread::VisitGCRoots(const GCRootVisitor &cb)
 {
     if (exception_ != nullptr) {
-        cb(exception_);
+        cb({mem::RootType::ROOT_THREAD, &exception_});
     }
-    for (auto it : localObjects_) {
-        cb(*it);
+    for (auto obj : localObjects_) {
+        cb({mem::RootType::ROOT_THREAD, obj});
     }
 
     if (!taggedHandleScopes_.empty()) {

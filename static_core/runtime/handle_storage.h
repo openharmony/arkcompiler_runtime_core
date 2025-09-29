@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,18 +66,18 @@ private:
                                  const GCRootUpdater &gcRootUpdater);
 
     void VisitGCRootsForNode(std::array<coretypes::TaggedType, NODE_BLOCK_SIZE> *node, uint32_t size,
-                             const ObjectVisitor &cb);
+                             const GCRootVisitor &cb);
 
     void UpdateHeapObjectForNode(std::array<ObjectHeader *, NODE_BLOCK_SIZE> *node, uint32_t size,
                                  const GCRootUpdater &gcRootUpdater);
 
-    void VisitGCRootsForNode(std::array<ObjectHeader *, NODE_BLOCK_SIZE> *node, uint32_t size, const ObjectVisitor &cb);
+    void VisitGCRootsForNode(std::array<ObjectHeader *, NODE_BLOCK_SIZE> *node, uint32_t size, const GCRootVisitor &cb);
 
     // TaggedType has been specialized for js, Other types are empty implementation
     void UpdateHeapObject([[maybe_unused]] const GCRootUpdater &gcRootUpdater) {}
 
     // TaggedType has been specialized for js, Other types are empty implementation
-    void VisitGCRoots([[maybe_unused]] const ObjectVisitor &cb) {}
+    void VisitGCRoots([[maybe_unused]] const GCRootVisitor &cb) {}
 
     uintptr_t NewHandle(T value = 0);
 

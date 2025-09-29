@@ -33,7 +33,6 @@ ark_runtime_unittest("arkruntime_memory_management_test") {
     "gc_log_test.cpp",
     "gc_task_test.cpp",
     "heap_verifier_test.cpp",
-    "intrusive_gc_test_api_test.cpp",
     "object_helpers_test.cpp",
     "panda_smart_pointers_test.cpp",
     "panda_tl_containers_test.cpp",

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,7 @@
 namespace ark {
 class PandaVM;
 class ManagedThread;
+class StackWalker;
 }  // namespace ark
 
 namespace ark::mem {
@@ -55,20 +56,53 @@ PANDA_PUBLIC_API uint32_t operator&(VisitGCRootFlags left, VisitGCRootFlags righ
 PANDA_PUBLIC_API VisitGCRootFlags operator|(VisitGCRootFlags left, VisitGCRootFlags right);
 
 /// @brief I am groot
-class GCRoot {
+class GCRoot final {
 public:
-    GCRoot(RootType type, ObjectHeader *obj);
-    GCRoot(RootType type, ObjectHeader *fromObject, ObjectHeader *obj);
+    GCRoot(RootType type, ObjectHeader **obj)
+        : type_(type), fromObject_(nullptr), object_(reinterpret_cast<ObjectPointerType *>(obj))
+    {
+    }
 
-    RootType GetType() const;
-    ObjectHeader *GetObjectHeader() const;
-    ObjectHeader *GetFromObjectHeader() const;
+    GCRoot(RootType type, ObjectPointerType *obj) : type_(type), fromObject_(nullptr), object_(obj) {}
+
+    GCRoot(RootType type, ObjectHeader *fromObject, ObjectPointerType *obj)
+        : type_(type), fromObject_(fromObject), object_(obj)
+    {
+        ASSERT(type != RootType::ROOT_TENURED || fromObject != nullptr);
+    }
+
+    GCRoot(RootType type, ObjectHeader *fromObject, ObjectHeader **obj)
+        : type_(type), fromObject_(fromObject), object_(reinterpret_cast<ObjectPointerType *>(obj))
+    {
+        ASSERT(type != RootType::ROOT_TENURED || fromObject != nullptr);
+    }
+
+    RootType GetType() const
+    {
+        return type_;
+    }
+
+    ObjectHeader *GetObjectHeader() const
+    {
+        return reinterpret_cast<ObjectHeader *>(*object_);
+    }
+
+    ObjectPointerType *GetObjectPointer() const
+    {
+        return object_;
+    }
+
+    ObjectHeader *GetFromObjectHeader() const
+    {
+        return fromObject_;
+    }
+
     friend std::ostream &operator<<(std::ostream &os, const GCRoot &root);
 
-    virtual ~GCRoot() = default;
+    ~GCRoot() = default;
 
-    NO_COPY_SEMANTIC(GCRoot);
-    NO_MOVE_SEMANTIC(GCRoot);
+    DEFAULT_COPY_SEMANTIC(GCRoot);
+    DEFAULT_MOVE_SEMANTIC(GCRoot);
 
 private:
     RootType type_;
@@ -77,7 +111,7 @@ private:
      * found from card_table
      */
     ObjectHeader *fromObject_;
-    ObjectHeader *object_;
+    ObjectPointerType *object_;
 };
 
 template <class LanguageConfig>
@@ -86,10 +120,10 @@ public:
     explicit RootManager(PandaVM *vm) : vm_(vm) {};
     /// Visit all non-heap roots(registers, thread locals, etc)
     void VisitNonHeapRoots(const GCRootVisitor &gcRootVisitor,
-                           VisitGCRootFlags flags = VisitGCRootFlags::ACCESS_ROOT_ALL) const;
+                           VisitGCRootFlags flags = VisitGCRootFlags::ACCESS_ROOT_ALL);
 
     /// Visit local roots for frame
-    void VisitLocalRoots(const GCRootVisitor &gcRootVisitor) const;
+    void VisitLocalRoots(const GCRootVisitor &gcRootVisitor);
 
     /**
      * Visit card table roots
@@ -117,8 +151,9 @@ private:
     /// Visit VM-specific roots
     void VisitVmRoots(const GCRootVisitor &gcRootVisitor) const;
 
-    template <class VRegRef>
-    void VisitRegisterRoot(const VRegRef &vRegister, const GCRootVisitor &gcRootVisitor) const;
+    template <class VRegRef, class VRegInfo>
+    void VisitRegisterRoot(VRegRef &vRegister, VRegInfo &regInfo, StackWalker &pframe,
+                           const GCRootVisitor &gcRootVisitor);
 
     void VisitClassLinkerContextRoots(const GCRootVisitor &gcRootVisitor) const;
 

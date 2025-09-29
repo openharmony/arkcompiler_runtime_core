@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -511,7 +511,7 @@ void SharedReferenceStorage::VisitRoots(const GCRootVisitor &visitor)
     for (size_t i = 1U; i < capacity; ++i) {
         SharedReference *ref = GetItemByIndex(i);
         if (!ref->IsEmpty() && ref->flags_.GetNextIndex() == 0U) {
-            visitor(mem::GCRoot {mem::RootType::ROOT_VM, ref->GetEtsObject()->GetCoreType()});
+            visitor(ref->GetGCRoot());
         }
     }
 }

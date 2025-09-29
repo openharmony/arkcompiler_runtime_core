@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -129,18 +129,18 @@ inline void GlobalHandleStorage<coretypes::TaggedType>::UpdateHeapObject(const G
 
 template <>
 inline void GlobalHandleStorage<coretypes::TaggedType>::DealVisitGCRoots(std::array<Node, GLOBAL_BLOCK_SIZE> *block,
-                                                                         size_t index, const ObjectVisitor &cb)
+                                                                         size_t index, const GCRootVisitor &cb)
 {
     coretypes::TaggedValue value(block->at(index).GetObject());
     if (value.IsHeapObject()) {
-        cb(value.GetHeapObject());
+        cb({mem::RootType::ROOT_THREAD, reinterpret_cast<ObjectPointerType *>(&value)});
     }
 }
 
 template <>
 // CC-OFFNXT(G.FUD.06) solid logic
 inline void GlobalHandleStorage<coretypes::TaggedType>::VisitGCRootsInBlock(std::array<Node, GLOBAL_BLOCK_SIZE> *block,
-                                                                            size_t size, const ObjectVisitor &cb)
+                                                                            size_t size, const GCRootVisitor &cb)
 {
     for (size_t i = 0; i < size; i++) {
         DealVisitGCRoots(block, i, cb);
@@ -149,7 +149,7 @@ inline void GlobalHandleStorage<coretypes::TaggedType>::VisitGCRootsInBlock(std:
 
 template <>
 // CC-OFFNXT(G.FUD.06) solid logic
-inline void GlobalHandleStorage<coretypes::TaggedType>::VisitGCRoots([[maybe_unused]] const ObjectVisitor &cb)
+inline void GlobalHandleStorage<coretypes::TaggedType>::VisitGCRoots([[maybe_unused]] const GCRootVisitor &cb)
 {
     if (globalNodes_->empty()) {
         return;

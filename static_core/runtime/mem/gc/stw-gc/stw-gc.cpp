@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -88,9 +88,10 @@ void StwGC<LanguageConfig>::Mark(const GCTask &task)
 
     this->VisitRoots(
         [&objectsStack, &useGcWorkers, this](const GCRoot &gcRoot) {
-            LOG_DEBUG_GC << "Handle root " << GetDebugInfoAboutObject(gcRoot.GetObjectHeader());
-            if (marker_.MarkIfNotMarked(gcRoot.GetObjectHeader())) {
-                objectsStack.PushToStack(gcRoot.GetType(), gcRoot.GetObjectHeader());
+            auto *object = gcRoot.GetObjectHeader();
+            LOG_DEBUG_GC << "Handle root " << GetDebugInfoAboutObject(object);
+            if (marker_.MarkIfNotMarked(object)) {
+                objectsStack.PushToStack(gcRoot.GetType(), object);
             }
             if (!useGcWorkers) {
                 MarkStack(&objectsStack);
@@ -99,7 +100,8 @@ void StwGC<LanguageConfig>::Mark(const GCTask &task)
         VisitGCRootFlags::ACCESS_ROOT_ALL);
 
     this->GetPandaVm()->VisitStringTable(
-        [this, &objectsStack](ObjectHeader *str) {
+        [this, &objectsStack](GCRoot root) {
+            auto str = root.GetObjectHeader();
             if (this->marker_.MarkIfNotMarked(str)) {
                 ASSERT(str != nullptr);
                 objectsStack.PushToStack(RootType::STRING_TABLE, str);

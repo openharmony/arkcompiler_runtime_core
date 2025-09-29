@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,7 +51,7 @@ public:
 
     using StringVisitor = std::function<void(ObjectHeader *)>;
 
-    void VisitRoots(const StringVisitor &visitor, mem::VisitGCRootFlags flags = mem::VisitGCRootFlags::ACCESS_ROOT_ALL)
+    void VisitRoots(GCRootVisitor visitor, mem::VisitGCRootFlags flags = mem::VisitGCRootFlags::ACCESS_ROOT_ALL)
     {
         internalTable_.VisitRoots(visitor, flags);
     }
@@ -134,7 +134,7 @@ protected:
 
         coretypes::String *GetStringFast(const panda_file::File &pf, panda_file::File::EntityId id);
 
-        void VisitRoots(const StringVisitor &visitor,
+        void VisitRoots(const GCRootVisitor &visitor,
                         mem::VisitGCRootFlags flags = mem::VisitGCRootFlags::ACCESS_ROOT_ALL);
 
     protected:

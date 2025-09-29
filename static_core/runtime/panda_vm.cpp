@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,23 +32,6 @@ PandaVM *PandaVM::Create(Runtime *runtime, const RuntimeOptions &options, std::s
 {
     LanguageContext ctx = runtime->GetLanguageContext(std::string(runtimeType));
     return ctx.CreateVM(runtime, options);
-}
-
-void PandaVM::VisitVmRoots(const GCRootVisitor &visitor)
-{
-    os::memory::LockHolder lock(markQueueLock_);
-    for (ObjectHeader *obj : markQueue_) {
-        visitor(mem::GCRoot(mem::RootType::ROOT_VM, obj));
-    }
-}
-
-void PandaVM::UpdateVmRefs(const GCRootUpdater &gcRootUpdater)
-{
-    os::memory::LockHolder lock(markQueueLock_);
-    // NOLINTNEXTLINE(modernize-loop-convert)
-    for (auto it = markQueue_.begin(); it != markQueue_.end(); ++it) {
-        gcRootUpdater(&(*it));
-    }
 }
 
 Expected<int, Runtime::Error> PandaVM::InvokeEntrypoint(Method *entrypoint, const std::vector<std::string> &args)
@@ -101,27 +84,6 @@ coretypes::String *PandaVM::GetNonMovableString(const panda_file::File &pf, pand
 bool PandaVM::ShouldEnableDebug()
 {
     return !Runtime::GetOptions().GetDebuggerLibraryPath().empty() || Runtime::GetOptions().IsDebuggerEnable();
-}
-
-// Intrusive GC test API
-void PandaVM::MarkObject(ObjectHeader *obj)
-{
-    os::memory::LockHolder lock(markQueueLock_);
-    markQueue_.push_back(obj);
-}
-
-void PandaVM::IterateOverMarkQueue(const std::function<void(ObjectHeader *)> &visitor)
-{
-    os::memory::LockHolder lock(markQueueLock_);
-    for (ObjectHeader *obj : markQueue_) {
-        visitor(obj);
-    }
-}
-
-void PandaVM::ClearMarkQueue()
-{
-    os::memory::LockHolder lock(markQueueLock_);
-    markQueue_.clear();
 }
 
 void PandaVM::FreeInternalResources()
