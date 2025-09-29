@@ -814,6 +814,10 @@ void AbcFile::ExtractClassInheritInfo(Function *func) const
         }
 
         Class *cur_class = GetClassByNameImpl(record_name + GetStringByInst(inst));
+        if (cur_class == nullptr) {
+            LOG(FATAL, DEFECT_SCAN_AUX) << "Failed to extract class inherit info, can not find class";
+            return;
+        }
         ASSERT(cur_class != nullptr);
         Inst def_class_input1 = inst.GetInputInsts()[0];
         auto [ret_ptr, ret_sym, ret_type] = ResolveInstCommon(func, def_class_input1);
@@ -1152,6 +1156,10 @@ ResolveResult AbcFile::ResolveInstCommon(Function *func, Inst inst) const
         case InstType::WIDE_LDLOCALMODULEVAR_PREF_IMM16: {
             size_t index = inst.GetImms()[0];
             auto module_record = GetModuleRecordByName(record_name);
+            if (module_record == nullptr) {
+                LOG(FATAL, DEFECT_SCAN_AUX) << "Failed to GetLocalNameByExportName from merge abc,"
+                                            << "can't get module_record";
+            }
             const std::string &export_name = module_record->GetExportNameByIndex(index);
             const Function *func = GetExportFunctionByExportName(export_name, record_name);
             if (func != nullptr) {
@@ -1167,6 +1175,10 @@ ResolveResult AbcFile::ResolveInstCommon(Function *func, Inst inst) const
         case InstType::WIDE_LDEXTERNALMODULEVAR_PREF_IMM16: {
             size_t index = inst.GetImms()[0];
             auto module_record = GetModuleRecordByName(func->GetRecordName());
+            if (module_record == nullptr) {
+                LOG(FATAL, DEFECT_SCAN_AUX) << "Failed to GetLocalNameByExportName from merge abc,"
+                                            << "can't get module_record";
+            }
             const std::string &inter_name = module_record->GetImportLocalNameByIndex(index);
             return std::make_tuple(nullptr, inter_name, ResolveType::UNRESOLVED_MODULE);
         }
@@ -1174,6 +1186,10 @@ ResolveResult AbcFile::ResolveInstCommon(Function *func, Inst inst) const
         case InstType::WIDE_GETMODULENAMESPACE_PREF_IMM16: {
             size_t index = inst.GetImms()[0];
             auto module_record = GetModuleRecordByName(func->GetRecordName());
+            if (module_record == nullptr) {
+                LOG(FATAL, DEFECT_SCAN_AUX) << "Failed to GetLocalNameByExportName from merge abc,"
+                                            << "can't get module_record";
+            }
             const std::string &str = module_record->GetImportNamespaceNameByIndex(index);
             return std::make_tuple(nullptr, str, ResolveType::UNRESOLVED_MODULE);
         }
