@@ -28,24 +28,23 @@ abstract class A {
 }
 
 final class B extends A {
-    constructor(a: string) {
+    constructor(a: string) {  // primary
         super(a)
     }
 
-    constructor fromInt(a: int) {
+    constructor fromInt(a: int) {  // secondary
         if (a == 0) {
             throw new Error('zero')
-        } else {
-            if (a == 1) {
-                this('1')
-                return
-            } else {
-                if (a == 2) {
-                    this('2')
-                    return
-                }
-                this('3')
-            }
+        }
+        switch (a) {
+            case 1:
+                this('' + a)
+                break
+            case 2:
+                this('' + a + a)
+                break
+            default:
+                throw new Error('wrong arg = ' + a)
         }
     }
 }
@@ -58,8 +57,7 @@ function main() {
     arktest.assertEQ(b.fldA, '1')
 
     b = new B.fromInt(2)
-    arktest.assertEQ(b.fldA, '2')
+    arktest.assertEQ(b.fldA, '22')
 
-    b = new B.fromInt(-1)
-    arktest.assertEQ(b.fldA, '3')
+    arktest.expectError(() => { b = new B.fromInt(3) }, 'wrong arg = 3')
 }

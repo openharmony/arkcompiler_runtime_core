@@ -14,29 +14,24 @@ limitations under the License.
 ---*/
 
 /*---
-desc: >-
-    this can be passed as an argument no matter if fields are initialized.
-    If an uninitialized field is used, NullPointerError is thrown.
+desc: this can be passed as an argument only after each object field receives an initial value
 ---*/
 
 class A {
-    public n: number;
-    public s: string;
+    public n: number
+    public s: string
 
     foo(a: A) {
-        return a.s.length;
+        return a.s.length
     }
 
     public constructor() {
-        this.n = this.foo(this);
-        this.s = 'abcd';
+        this.s = 'abcd'
+        this.n = this.foo(this)
     }
 }
 
 function main() {
-    let a: A
-    arktest.expectThrow(
-        () => { a = new A },
-        (e) => e instanceof NullPointerError
-    )
+    arktest.assertEQ(new A().n, 4)
+    arktest.assertEQ(new A().s, 'abcd')
 }

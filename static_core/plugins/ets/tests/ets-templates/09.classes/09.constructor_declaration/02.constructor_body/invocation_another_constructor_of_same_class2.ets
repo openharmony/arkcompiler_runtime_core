@@ -14,29 +14,25 @@ limitations under the License.
 ---*/
 
 /*---
-desc: >-
-    this can be passed as an argument no matter if fields are initialized.
-    If an uninitialized field is used, NullPointerError is thrown.
+desc: Invocation constructor of same class.
+assert: >-
+    The first statement of a constructor body may be an explicit invocation of another constructor of the same class
+    or of the direct superclass.
 ---*/
 
 class A {
-    public n: number;
-    public s: string;
-
-    foo(a: A) {
-        return a.s.length;
-    }
+    public x: int;
 
     public constructor() {
-        this.n = this.foo(this);
-        this.s = 'abcd';
+        this(5);
+    }
+
+    public constructor(a: int) {
+        this.x = a;
     }
 }
 
 function main() {
-    let a: A
-    arktest.expectThrow(
-        () => { a = new A },
-        (e) => e instanceof NullPointerError
-    )
+    arktest.assertEQ(new A().x, 5)
+    arktest.assertEQ(new A(1).x, 1)
 }

@@ -1661,24 +1661,43 @@
 #28527
 09.classes/09.constructor_declaration/01.formal_parameters/cons_parameters_gen_35.ets
 
-#28693
+#28693 CTE when a call to `super` is not the first statement
 09.classes/09.constructor_declaration/02.constructor_body/spec_example1.ets
-
-#28235
-09.classes/09.constructor_declaration/02.constructor_body/invocation_another_constructor_of_same_class.ets
 09.classes/09.constructor_declaration/02.constructor_body/primary01.ets
 09.classes/09.constructor_declaration/02.constructor_body/primary02.ets
 09.classes/09.constructor_declaration/02.constructor_body/primary03.ets
 09.classes/09.constructor_declaration/02.constructor_body/primary04.ets
 09.classes/09.constructor_declaration/02.constructor_body/secondary01.ets
-09.classes/09.constructor_declaration/02.constructor_body/secondary02.ets
 09.classes/09.constructor_declaration/02.constructor_body/secondary03.ets
-09.classes/09.constructor_declaration/02.constructor_body/secondary04.ets
-09.classes/09.constructor_declaration/02.constructor_body/spec_example2.ets
-09.classes/09.constructor_declaration/02.constructor_body/invocation_another_constructor_of_superclass1.ets
-09.classes/09.constructor_declaration/02.constructor_body/invocation_another_constructor_of_superclass2.ets
+09.classes/09.constructor_declaration/02.constructor_body/secondary05.ets
+09.classes/09.constructor_declaration/02.constructor_body/secondary07.ets
+09.classes/09.constructor_declaration/02.constructor_body/check_fld_init20.ets
+09.classes/09.constructor_declaration/02.constructor_body/check_fld_init21.ets
+09.classes/09.constructor_declaration/02.constructor_body/check_fld_init22.ets
+09.classes/09.constructor_declaration/02.constructor_body/check_fld_init23.ets
+09.classes/09.constructor_declaration/02.constructor_body/check_fld_init24.ets
 
-#28235
+#30467 Field initialization expression performed multiple times
+09.classes/09.constructor_declaration/02.constructor_body/check_fld_init00.ets
+09.classes/09.constructor_declaration/02.constructor_body/check_fld_init02.ets
+09.classes/09.constructor_declaration/02.constructor_body/check_fld_init11.ets
+09.classes/09.constructor_declaration/02.constructor_body/check_fld_init15.ets
+09.classes/09.constructor_declaration/02.constructor_body/check_fld_init01a.ets
+09.classes/09.constructor_declaration/02.constructor_body/check_fld_init13a.ets
+09.classes/09.constructor_declaration/02.constructor_body/check_fld_init13b.ets
+
+#28235 Constructor Names not yet work
+09.classes/09.constructor_declaration/02.constructor_body/invocation_another_constructor_of_same_class1.ets
+09.classes/09.constructor_declaration/02.constructor_body/secondary02.ets
+09.classes/09.constructor_declaration/02.constructor_body/secondary04.ets
+09.classes/09.constructor_declaration/02.constructor_body/secondary06.ets
+09.classes/09.constructor_declaration/02.constructor_body/secondary08.ets
+09.classes/09.constructor_declaration/02.constructor_body/spec_example2.ets
+09.classes/09.constructor_declaration/02.constructor_body/invocation_another_constructor_of_superclass06.ets
+09.classes/09.constructor_declaration/02.constructor_body/invocation_another_constructor_of_superclass08.ets
+09.classes/09.constructor_declaration/02.constructor_body/invocation_another_constructor_of_superclass10.ets
+
+#28235 Constructor Names not yet work
 09.classes/09.constructor_declaration/03.explicit_constructor_call/explicit_cons_call_0.ets
 09.classes/09.constructor_declaration/03.explicit_constructor_call/explicit_cons_call_1.ets
 09.classes/09.constructor_declaration/03.explicit_constructor_call/explicit_cons_call_2.ets

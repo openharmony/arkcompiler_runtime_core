@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -18,23 +18,19 @@ desc: Invocation constructor of superclass.
 assert: >-
     The first statement of a constructor body may be an explicit invocation of another constructor of the same class
     or of the direct superclass.
+tags: [compile-only, negative]
 ---*/
 
 class A {
-    public x: int;
+    public x: int
 
     public constructor(a: int) {
-        this.x = a;
+        this.x = a
     }
 }
 
 class B extends A {
-    public constructor() {  // primary constructor
-        super(5);
+    public constructor() {
+        // CTE: Must call super constructor
     }
-}
-
-function main() {
-    arktest.assertEQ(new A(42).x, 42)
-    arktest.assertEQ(new B().x, 5)
 }

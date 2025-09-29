@@ -14,23 +14,38 @@ limitations under the License.
 ---*/
 
 /*---
-desc: this can be passed as an argument only after each object field receives an initial value
+desc: Invocation constructor of superclass.
+assert: >-
+    The first statement of a constructor body may be an explicit invocation of another constructor of the same class
+    or of the direct superclass.
 ---*/
 
 class A {
-    public n: number
-    public s: string
+    public x: int
 
-    foo(a: A) {
-        return a.s.length
+    constructor(a: int) {
+        this.x = a
+    }
+}
+
+class B extends A {
+    constructor() {  // secondary
+        this(5)
     }
 
-    public constructor() {
-        this.s = "abcd"
-        this.n = this.foo(this)
+    constructor(p: int) {  // primary
+        super(p)
     }
 }
 
 function main() {
-    arktest.assertEQ(new A().n, 4)
+    arktest.assertEQ(new A(42).x, 42)
+    arktest.assertEQ(new B(33).x, 33)
+    arktest.assertEQ(new B().x, 5)
+
+    let b: B = {}
+    arktest.assertEQ(b.x, 5)
+
+    b = { x: -1 }
+    arktest.assertEQ(b.x, -1)
 }

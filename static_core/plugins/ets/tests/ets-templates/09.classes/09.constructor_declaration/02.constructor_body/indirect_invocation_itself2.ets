@@ -14,29 +14,21 @@ limitations under the License.
 ---*/
 
 /*---
-desc: >-
-    this can be passed as an argument no matter if fields are initialized.
-    If an uninitialized field is used, NullPointerError is thrown.
+desc: Indirect invocation itself.
+assert: >-
+    It is a compile-time error for a constructor to directly or indirectly invoke itself through a series of one or
+    more explicit constructor invocations involving this.
+tags: [compile-only, negative]
 ---*/
 
 class A {
-    public n: number;
-    public s: string;
+    public x: int;
 
-    foo(a: A) {
-        return a.s.length;
+    public constructor(a: int) {
+        this(5, 5)
     }
 
-    public constructor() {
-        this.n = this.foo(this);
-        this.s = 'abcd';
+    public constructor(a: int, b : int) {
+        this(b);
     }
-}
-
-function main() {
-    let a: A
-    arktest.expectThrow(
-        () => { a = new A },
-        (e) => e instanceof NullPointerError
-    )
 }

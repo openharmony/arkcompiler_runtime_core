@@ -28,40 +28,38 @@ abstract class A {
 }
 
 final class B extends A {
-    constructor(a: string) {
+    constructor(a: string) {  // primary
         super(a)
     }
 
-    constructor fromInt(a: int) {
-        try {
-          if (a <= 3) {
-              throw new Error('error ' + a)
-          }
-          this('ok')
-        } catch (e) {
-            if (e.message == 'error 1') {
-                this('e1')
+    constructor(a: int) {  // secondary
+        if (a == 0) {
+            throw new Error('zero')
+        } else {
+            if (a == 1) {
+                this('1')
+                return
             } else {
-                if (e.message == 'error 2') {
-                    this('e2')
+                if (a == 2) {
+                    this('2')
                     return
                 }
-                this('e3')
+                this('3')
             }
         }
     }
 }
 
 function main() {
-    let b = new B.fromInt(1)
-    arktest.assertEQ(b.fldA, 'e1')
+    let b: B
+    arktest.expectError(() => { b = new B(0) }, 'zero')
 
-    b = new B.fromInt(2)
-    arktest.assertEQ(b.fldA, 'e2')
+    b = new B(1)
+    arktest.assertEQ(b.fldA, '1')
 
-    b = new B.fromInt(3)
-    arktest.assertEQ(b.fldA, 'e3')
+    b = new B(2)
+    arktest.assertEQ(b.fldA, '2')
 
-    b = new B.fromInt(4)
-    arktest.assertEQ(b.fldA, 'ok')
+    b = new B(-1)
+    arktest.assertEQ(b.fldA, '3')
 }
