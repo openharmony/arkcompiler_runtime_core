@@ -14,9 +14,7 @@
  */
 
 /*---
-  arktsconfig: ../../arktsconfig.json
-  tags: [compile-only]
+  tags: [not-a-test]
 ---*/
 
-import { test } from 'dynamic_import_tests/a'
-import { bar2 } from 'HarC/bar'
+export declare function bar1(): number;
