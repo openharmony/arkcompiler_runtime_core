@@ -101,7 +101,9 @@ export final class Method extends Object {
         }
         let convertedArgs: FixedArray<Any> = new Any[args.length]
         for (let i = 0; i < convertedArgs.length; i++) {
-            if (args[i] === undefined) {
+            if (args[i] === null && thisType.getParameter(i).getType().equals(ObjectType)) {
+                convertedArgs[i] = args[i]
+            } else if (args[i] === undefined) {
                 convertedArgs[i] = args[i]
             } else {
                 convertedArgs[i] = thisType.getParameter(i).getType().convertObject(args[i])
