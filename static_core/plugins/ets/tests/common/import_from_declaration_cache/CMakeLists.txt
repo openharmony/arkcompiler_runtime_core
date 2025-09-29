@@ -16,7 +16,7 @@ if (PANDA_TARGET_ARM32)
 endif()
 
 set(EXPORT_FILE_ETS ${CMAKE_CURRENT_SOURCE_DIR}/dir/export_file.ets)
-set(EXPORT_FILE_D_ETS ${CMAKE_CURRENT_BINARY_DIR}/dir/export_file.d.ets)
+set(EXPORT_FILE_CACHE ${CMAKE_CURRENT_BINARY_DIR}/dir/export_file.etscache)
 set(EXPORT_FILE_ABC ${CMAKE_CURRENT_BINARY_DIR}/dir/export_file.abc)
 set(EXPORT_FILE_CACHE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/dir)
 set(EXPORT_FILE_ABC_TARGET compile_export_file_abc)
@@ -24,7 +24,7 @@ set(EXPORT_FILE_ABC_TARGET compile_export_file_abc)
 make_directory(${EXPORT_FILE_CACHE_DIRECTORY})
 
 compile_ets_code(${EXPORT_FILE_ETS} ${EXPORT_FILE_ABC} ${EXPORT_FILE_ABC_TARGET}
-                 COMPILER_EXTRA_OPTIONS --generate-decl:enabled=true --generate-decl:path=${EXPORT_FILE_D_ETS})
+                 COMPILER_EXTRA_OPTIONS --generate-decl:enabled=true --generate-decl:path=${EXPORT_FILE_CACHE})
 
 set(ETS_CONFIG ${CMAKE_CURRENT_BINARY_DIR}/arktsconfig.json)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
