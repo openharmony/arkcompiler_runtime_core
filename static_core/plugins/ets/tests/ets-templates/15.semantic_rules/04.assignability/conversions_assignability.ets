@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,37 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-{% for c in cases %}
+ 
+{% for case in cases %}
+{% for type2 in case.type2 %}
 
 /*---
-desc: Compatible functions have same number of arguments. Arguments and return values should follow the variance rule.
-tags: [{{c.tags}}]
+desc: Type T1 is assignable to type T2 if implicit conversion is present
 ---*/
 
-function foo(i: int) {
-    return 1;
-}
+{{case.decl}}
 
-function bars(i: int, j: string) {
-    return 2;
-}
+let t1: {{case.type1}} = {{case.value}}
+let t2: {{type2}} = t1
 
-function barf(i: float) {
-    return 3;
-}
-
-function barl(i: long) {
-    return 4;
-}
-
-function barretstr(i: int) {
-    return "str";
-}
-
-function main() {
-    let x: (i: int) => int = {{c.assign}};
-    arktest.assertEQ(x({{c.call}}), {{c.res}});
-}
-
+{% endfor %}
 {% endfor %}

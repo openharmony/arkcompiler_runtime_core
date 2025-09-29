@@ -1906,6 +1906,10 @@
 #27911 Generic functions subtyping
 15.semantic_rules/02.subtyping/04.subtyping_for_function_types/positive_function_generic_1.ets
 
+#30441
+15.semantic_rules/04.assignability/never_assignability_0.ets
+15.semantic_rules/04.assignability/never_assignability_2.ets
+
 #23537
 15.semantic_rules/10.overloading/single_class_over_generic_1.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/access_modifier_over_private_5.ets
