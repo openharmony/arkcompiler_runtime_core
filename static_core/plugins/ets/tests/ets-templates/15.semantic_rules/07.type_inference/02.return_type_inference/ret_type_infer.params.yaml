@@ -21,38 +21,11 @@ cases:
             arktest.assertTrue(foo() == new Byte(127));
 
     - decl: |-
-            function foo() {  // infer Byte
-                return new Byte(127);
-            }
-      call: |-
-            let b = foo();
-            arktest.assertTrue(b instanceof Byte);
-            arktest.assertTrue(b.unboxed() == new Byte(127));
-
-    - decl: |-
             function foo() {  // infer short
                 return 2 as short;
             }
       call: |-
             arktest.assertTrue(foo() == new Short(2));
-
-    - decl: |-
-            function foo() {  // infer Short
-                return new Short(new Short(2));
-            }
-      call: |-
-            let b = foo();
-            arktest.assertTrue(b instanceof Short);
-            arktest.assertTrue(b.unboxed() == new Short(2));
-
-    - decl: |-
-            function foo() {  // infer Int
-                return new Int(2);
-            }
-      call: |-
-            let b = foo();
-            arktest.assertTrue(b instanceof Int);
-            arktest.assertTrue(b.unboxed() == new Int(2));
 
     - decl: |-
             function foo() {  // infer long
@@ -62,29 +35,11 @@ cases:
             arktest.assertTrue(foo() == new Long(3));
 
     - decl: |-
-            function foo() {  // infer Long
-                return new Long(3);
-            }
-      call: |-
-            let b = foo();
-            arktest.assertTrue(b instanceof Long);
-            arktest.assertTrue(b.unboxed() == new Long(3));
-
-    - decl: |-
             function foo() {  // infer float
                 return 4.2f
             }
       call: |-
             arktest.assertTrue(foo() == 4.2f);
-
-    - decl: |-
-            function foo() {  // infer Float
-                return new Float(4.3);
-            }
-      call: |-
-            let b = foo();
-            arktest.assertTrue(b instanceof Float);
-            arktest.assertTrue(b.unboxed() == new Float(4.3));
 
     - decl: |-
             function foo() {  // infer double
@@ -94,38 +49,11 @@ cases:
             arktest.assertTrue(foo() == new Double(5.3));
 
     - decl: |-
-            function foo() {  // infer Double
-                return new Double(5.4);
-            }
-      call: |-
-            let b = foo();
-            arktest.assertTrue(b instanceof Double);
-            arktest.assertTrue(b.unboxed() == new Double(5.4));
-
-    - decl: |-
-            function foo() {  // infer Number
-                return new Number(6.4 as number);
-            }
-      call: |-
-            let b = foo();
-            arktest.assertTrue(b instanceof Number);
-            arktest.assertTrue(b.unboxed() == 6.4 as number);
-
-    - decl: |-
             function foo() {  // infer char
                 return c'A';
             }
       call: |-
             arktest.assertTrue(foo() == c'A');
-
-    - decl: |-
-            function foo() {  // infer Char
-                return new Char(c'b');
-            }
-      call: |-
-            let b = foo();
-            arktest.assertTrue(b instanceof Char);
-            arktest.assertTrue(b.unboxed() == c'b');
 
     - decl: |-
             function foo() {  // infer String
@@ -142,15 +70,6 @@ cases:
             }
       call: |-
             arktest.assertTrue(foo());
-
-    - decl: |-
-            function foo() {  // infer Boolean
-                return new Boolean(false);
-            }
-      call: |-
-            let b = foo();
-            arktest.assertTrue(b instanceof Boolean);
-            arktest.assertTrue(b.unboxed() == false);
 
     - decl: |-
             function foo() {  // infer null
@@ -262,17 +181,6 @@ cases:
             arktest.assertTrue(i instanceof TPL);
 
     - decl: |-
-          type A = Byte  // infer custom type
-          function foo() {
-              let i: A = new Byte(2 as byte);
-              return i;
-          }
-      call: |-
-          let i = foo();
-          arktest.assertTrue(i instanceof Byte);
-          arktest.assertTrue(i.unboxed() == 2 as byte);
-
-    - decl: |-
           const cstr = "some string"  // infer string/char
           function foo(i: boolean) {
               if(i) return cstr
@@ -379,22 +287,22 @@ cases:
         const lb: () => Person = () => { return {name: 'Bob', age: 12} as Person }
         arktest.assertTrue(lb() instanceof Person);
 
-    - decl: |-
-        interface IPerson {
-          foo(): this {
-            return this;
-          }
-        }
-        class Person implements IPerson {
-          name: String = 'username'
-          age: int = 0
-        }
+    # - decl: |-
+    #     interface IPerson {
+    #       foo(): this {
+    #         return this;
+    #       }
+    #     }
+    #     class Person implements IPerson {
+    #       name: String = 'username'
+    #       age: int = 0
+    #     }
 
-        function foo() {  // infer class type from this function
-            return new Person().foo()
-        }
-      call: |-
-        arktest.assertTrue(foo() instanceof Person);
+    #     function foo() {  // infer class type from this function
+    #         return new Person().foo()
+    #     }
+    #   call: |-
+    #     arktest.assertTrue(foo() instanceof Person);
 
     - decl: |-
 

@@ -134,7 +134,7 @@ function main() {
         if (force_log) {
             console.log("[" + test + "]");
         }
-        let ctor_answer = (new Number(test)).unboxed(); // change to .valueOf to run script in TS
+        let ctor_answer = (new Number(test)); // change to .valueOf to run script in TS
         let parse_answer = Number.parseFloat(test);
         fails += check(ctor_answer, correct_cts[test_id], "Number(" + test + ")");
         fails += check(parse_answer, correct_pfs[test_id], "parseFloat(" + test + ")");

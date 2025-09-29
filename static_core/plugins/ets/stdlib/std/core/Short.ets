@@ -38,15 +38,6 @@ export final class Short extends Integral implements Comparable<Short> {
     }
 
     /**
-     * Returns value of this instance as a primitive
-     *
-     * @returns value of this instance
-     */
-    public unboxed(): short {
-        return this.value;
-    }
-
-    /**
      * Returns boxed representation of the primitive
      *
      * @param value value to box

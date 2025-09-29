@@ -27,7 +27,7 @@ function main(): int {
     let d{{loop.index}}: {{c.to_type}}[] = [s{{loop.index}}, s{{loop.index}}]
     d{{loop.index}} = []
     d{{loop.index}} = [s{{loop.index}}]
-    if (d{{loop.index}}[0].unboxed() != {{t.val}}) {
+    if (d{{loop.index}}[0] != {{t.val}}) {
         return 1
     }
 {%- endfor %}

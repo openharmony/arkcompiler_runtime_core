@@ -18,14 +18,14 @@ cases:
           type Func<T> = (p: int) => T;
       use: |-
           let v: Func<Int> = (p: int): Int => { return new Int(p); };
-          let ok = v(1).unboxed() == 1;
+          let ok = v(1) == 1;
 
     - defs: |-
           type Func<T> = (p: int) => T;
           type NullableFunc<T> = Func<T>|null;
       use: |-
           let v: NullableFunc<Int> = (p: int): Int => { return new Int(p); };
-          let ok = v(1).unboxed() == 1;
+          let ok = v(1) == 1;
 
     - defs: |-
           type Func<T> = (p: int) => T;
@@ -55,14 +55,14 @@ cases:
           type FF = Func<Int>[]
       use: |-
           let v: FF = [(p: int): Int => { return new Int(p); }]
-          let ok = v[0](1).unboxed() == 1;
+          let ok = v[0](1) == 1;
 
     - defs: |-
           type Func<T> = (p: int) => T;
           type FF<T> = Func<T>[]
       use: |-
           let v: FF<Int> = [(p: int): Int => { return new Int(p); }]
-          let ok = v[0](1).unboxed() == 1;
+          let ok = v[0](1) == 1;
 
     # classes
     - defs: |-

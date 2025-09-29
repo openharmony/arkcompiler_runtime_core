@@ -342,12 +342,11 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     private searchNumber(val: Number, fi: int, len: int): boolean {
-        const unboxedVal: number = val.valueOf()
-        if (isNaN(unboxedVal)) {
+        if (isNaN(val)) {
             for (let i = fi; i < len; i++) {
                 const tmp = this.$_get_unsafe(i)
                 if (tmp instanceof Number) {
-                    if (isNaN(tmp.valueOf())) {
+                    if (isNaN(tmp)) {
                         return true
                     }
                 }
@@ -356,7 +355,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             for (let i = fi; i < len; i++) {
                 const tmp = this.$_get_unsafe(i)
                 if (tmp instanceof Number) {
-                    if (unboxedVal == tmp.unboxed()) {
+                    if (val == tmp) {
                         return true
                     }
                 }
@@ -366,12 +365,11 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     private searchFloat(val: Float, fi: int, len: int): boolean {
-        const unboxedVal: float = val.unboxed()
-        if (isNaN(unboxedVal)) {
+        if (isNaN(val)) {
             for (let i = fi; i < len; i++) {
                 const tmp = this.$_get_unsafe(i)
                 if (tmp instanceof Float) {
-                    if (isNaN(tmp.unboxed())) {
+                    if (isNaN(tmp)) {
                         return true
                     }
                 }
@@ -380,7 +378,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             for (let i = fi; i < len; i++) {
                 const tmp = this.$_get_unsafe(i)
                 if (tmp instanceof Float) {
-                    if (unboxedVal == tmp.unboxed()) {
+                    if (val == tmp) {
                         return true
                     }
                 }
@@ -390,11 +388,10 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     private searchLong(val: Long, fi: int, len: int): boolean {
-        const unboxedVal: long = val.unboxed()
         for (let i = fi; i < len; i++) {
             const tmp = this.$_get_unsafe(i)
             if (tmp instanceof Long) {
-                if (tmp == unboxedVal) {
+                if (tmp == val) {
                     return true
                 }
             }
@@ -403,11 +400,10 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     private searchInt(val: Int, fi: int, len: int): boolean {
-        const unboxedVal: int = val.unboxed()
         for (let i = fi; i < len; i++) {
             const tmp = this.$_get_unsafe(i)
             if (tmp instanceof Int) {
-                if (tmp == unboxedVal) {
+                if (tmp == val) {
                     return true
                 }
             }

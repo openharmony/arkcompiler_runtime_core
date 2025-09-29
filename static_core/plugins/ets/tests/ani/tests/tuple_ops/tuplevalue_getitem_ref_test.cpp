@@ -57,7 +57,7 @@ protected:
         ASSERT_EQ(env_->FindClass("std.core.Double", &doubleClass), ANI_OK);
         ASSERT(doubleClass != nullptr);
         ani_method doubleUnbox;
-        env_->Class_FindMethod(doubleClass, "unboxed", ":d", &doubleUnbox);
+        env_->Class_FindMethod(doubleClass, "toDouble", ":d", &doubleUnbox);
         ASSERT(doubleClass != nullptr);
 
         ani_ref result {};
@@ -149,7 +149,7 @@ TEST_F(TupleValueGetItemRefTest, tupleValueGetItemIntCompositeScene)
     ASSERT_EQ(env_->FindClass("std.core.Double", &doubleClass), ANI_OK);
     ASSERT(doubleClass != nullptr);
     ani_method doubleUnbox;
-    env_->Class_FindMethod(doubleClass, "unboxed", ":d", &doubleUnbox);
+    env_->Class_FindMethod(doubleClass, "toDouble", ":d", &doubleUnbox);
     ASSERT(doubleClass != nullptr);
 
     ASSERT_EQ(env_->TupleValue_GetItem_Ref(tuple, 1U, &result), ANI_OK);

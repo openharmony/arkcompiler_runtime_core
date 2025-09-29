@@ -46,7 +46,7 @@ class A {
 let s: byte = -128 as byte;
 
 function main_char(): int {
-    let c: char = new A(s).fld.unboxed();
+    let c: char = new A(s).fld;
     if (c != c'\uFF80') {
         return 1;
     }
@@ -90,7 +90,7 @@ class B {
 let b: int = (1 << 17) + (1 << 8) + 1;
 
 function main_long(): int {
-    let c: char = new B(b).fld.unboxed();
+    let c: char = new B(b).fld;
     if (c != c'\u0001') {
         return 1;
     }

@@ -89,7 +89,7 @@ function testConstructor(initDataIdx : int) : boolean {
     let object4Copy : {{.item.object_type}} = new {{.item.object_type}}({{.item.init_object_param_list.keys()|list|join(', ')}});
     let actualClone : {{.item.object_type}} = new {{.item.object_type}}(object4Copy);
     // console.print("actualClone:");
-    // console.print(actualClone.unboxed());
+    // console.print(actualClone);
     // console.print(";");
     if ({{.item.verify_test_result_function}}(actualClone,  TEST_DATA_EXPECTED[initDataIdx])) {
       resultCopy = true

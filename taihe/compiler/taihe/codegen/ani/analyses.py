@@ -1009,7 +1009,7 @@ class TypeAniInfo(AbstractAnalysis[NonVoidType], ABC):
             ani_value = f"{cpp_after}_ani_value"
             target.writelns(
                 f"{self.ani_type} {ani_value} = {{}};",
-                f'{env}->Object_CallMethod_{self.ani_type.suffix}(static_cast<ani_object>({ani_boxed}), TH_ANI_FIND_CLASS_METHOD({env}, "{self.type_desc}", "unboxed", ":{self.type_sig}"), &{ani_value});',
+                f'{env}->Object_CallMethod_{self.ani_type.suffix}(static_cast<ani_object>({ani_boxed}), TH_ANI_FIND_CLASS_METHOD({env}, "{self.type_desc}", "to{self.ani_type.suffix}", ":{self.type_sig}"), &{ani_value});',
             )
             self.from_ani(target, env, ani_value, cpp_after)
 

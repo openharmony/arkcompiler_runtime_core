@@ -18,7 +18,7 @@ cases:
       let checked = false;
       {
           let a: A = new Boolean(true);
-          checked = a.unboxed();
+          checked = a;
       }
 
       function main() {

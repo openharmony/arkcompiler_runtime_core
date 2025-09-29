@@ -24,7 +24,7 @@ function foo(p: {{c.to_type}}): {{c.to_type}} { return p }
 function main() {
 {%- for t in c['values'] %}
     let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
-    arktest.assertTrue({{c.to_type}}.isNaN(foo(s{{loop.index}}).unboxed()))
+    arktest.assertTrue({{c.to_type}}.isNaN(foo(s{{loop.index}})))
 {%- endfor %}
 }
 {%- endfor %}

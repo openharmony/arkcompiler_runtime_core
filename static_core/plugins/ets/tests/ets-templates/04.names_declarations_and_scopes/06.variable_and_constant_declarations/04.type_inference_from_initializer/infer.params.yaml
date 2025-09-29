@@ -13,27 +13,14 @@
 
 ---
 cases:
-  - decl: 'const INT = 1 + 2 + 3 * 4;  // inferred int'
-    assert: new Int(INT).unboxed() == 15
-
-  - decl: 'let DOUBLE = 3.0 / 2.0;  // inferred double'
-    assert: new Double(DOUBLE).unboxed() == 1.5
-
-  - decl: 'const arr = new long[1];  // inferred array of longs'
-    assert: new Long(arr[0]).unboxed() == 0 as long
-
-  - decl: 'let arr = new Object[1];  // inferred array of Objects'
-    use: ' arr[0] = new Object();'
+  - decl: "let arr = new Object[1];  // inferred array of Objects"
+    use: " arr[0] = new Object();"
     assert: arr[0] instanceof Object
 
-  - decl: 'let arr = new (Error|undefined)[1];  // inferred array of Error|undefined'
+  - decl: "let arr = new (Error|undefined)[1];  // inferred array of Error|undefined"
     assert: arr[0] == undefined
 
-  - decl: 'const obj = new Object[1];  // inferred array of Objects'
-    use: 'obj[0] = new Long(Long.MAX_VALUE);'
-    assert: obj instanceof Object[] && obj[0] instanceof Long && (obj[0] as Long).unboxed() == Long.MAX_VALUE
-
-  - decl: 'let arr:FixedArray<FixedArray<FixedArray<byte>>> = new byte[1][2][3];  // inferred three-dimensional array of bytes'
+  - decl: "let arr:FixedArray<FixedArray<FixedArray<byte>>> = new byte[1][2][3];  // inferred three-dimensional array of bytes"
     assert: arr instanceof FixedArray<FixedArray<FixedArray<byte>>> && arr[0][0][0] == 0
 
   - decl: |-

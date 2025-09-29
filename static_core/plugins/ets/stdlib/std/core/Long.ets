@@ -38,15 +38,6 @@ export final class Long extends Integral implements Comparable<Long> {
     }
 
     /**
-     * Returns value of this instance as a primitive
-     *
-     * @returns value of this instance
-     */
-    public unboxed(): long {
-        return this.value;
-    }
-
-    /**
      * Returns boxed representation of the primitive
      *
      * @param value value to box
@@ -283,10 +274,10 @@ export final class Long extends Integral implements Comparable<Long> {
      * @returns result of the comparison
      */
     public override compareTo(other: Long): int {
-        if (this.value < other.unboxed()) {
+        if (this.value < other) {
             return -1;
         }
-        if (this.value == other.unboxed()) {
+        if (this.value == other) {
             return 0;
         }
         return 1;

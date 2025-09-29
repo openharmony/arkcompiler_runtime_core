@@ -26,9 +26,5 @@ cases:
       - { type: Byte, expr: new Byte(new Int(1).byteValue()), op: '!==' }
       - { type: Char, expr: new Char(c'A'), op: '!==' }
       - { type: 'char[]', expr: "[c'A', c'B']", op: '!==' }
-      - { type: '(x: Char) => char', expr: '(p: Char): char => { return p.unboxed(); }', op: '!==' }
-      - { type: '((x: Char) => char)[]', expr: '[(p: Char): char => { return p.unboxed(); }]', op: '!==' }
-      - { type: Foo, expr: '(p: Char): char => { return p.unboxed(); }', op: '!==' }
-      - { type: 'Foo[]', expr: '[(p: Char): char => { return p.unboxed(); }]', op: '!==' }
       - { type: 'Color', expr: Color.Red, op: '!==' }
       - { type: 'Color[]', expr: '[Color.Blue]', op: '!==' }

@@ -27,7 +27,7 @@ function main(): void {
     let a: A = new A()
 {%- for t in c['values'] %}
     let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
-	arktest.assertTrue({{c.to_type}}.isNaN(a.meth(s{{loop.index}}).unboxed()))
+	arktest.assertTrue({{c.to_type}}.isNaN(a.meth(s{{loop.index}})))
 {%- endfor %}
 }
 {%- endfor %}

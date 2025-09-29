@@ -22,7 +22,7 @@ desc: >-
 
 type Incrementor = (i: int) => int;
 let sg: int;
-let ig: int = new Int(1).unboxed();
+let ig: int = new Int(1);
 
 class A {
   public fld: int = 42 + (sg = "abc".length.toInt());

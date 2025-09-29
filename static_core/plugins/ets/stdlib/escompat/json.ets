@@ -1205,28 +1205,28 @@ class JSONWriter {
 
     private writeValueTypeWrapper(obj: Any): boolean {
         if (obj instanceof Boolean) {
-            this.buffer.append(JSON.stringify(obj.unboxed()))
+            this.buffer.append(JSON.stringify(obj))
             return true
         } else if (obj instanceof Byte) {
-            this.buffer.append(JSON.stringify(obj.unboxed()))
+            this.buffer.append(JSON.stringify(obj))
             return true
         } else if (obj instanceof Char) {
-            this.buffer.append(JSON.stringify(obj.unboxed()))
+            this.buffer.append(JSON.stringify(obj))
             return true
         } else if (obj instanceof Short) {
-            this.buffer.append(JSON.stringify(obj.unboxed()))
+            this.buffer.append(JSON.stringify(obj))
             return true
         } else if (obj instanceof Int) {
-            this.buffer.append(JSON.stringify(obj.unboxed()))
+            this.buffer.append(JSON.stringify(obj))
             return true
         } else if (obj instanceof Long) {
-            this.buffer.append(JSON.stringify(obj.unboxed()))
+            this.buffer.append(JSON.stringify(obj))
             return true
         } else if (obj instanceof Float) {
-            this.buffer.append(JSON.stringify(obj.unboxed()))
+            this.buffer.append(JSON.stringify(obj))
             return true
         } else if (obj instanceof Double) {
-            this.buffer.append(JSON.stringify(obj.unboxed()))
+            this.buffer.append(JSON.stringify(obj))
             return true
         } else if (obj instanceof BigInt) {
             this.buffer.append(JSON.stringify(obj))

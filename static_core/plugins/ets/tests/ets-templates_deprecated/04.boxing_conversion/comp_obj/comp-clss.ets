@@ -26,7 +26,7 @@ let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}};
 function main(): int {
 {%- for t in c['values'] %}
     let d{{loop.index}}: A{{loop.index}} = { fld: s{{loop.index}} }
-    if (d{{loop.index}}.fld.unboxed() != {{t.val}}) {
+    if (d{{loop.index}}.fld != {{t.val}}) {
         return 1
     }
 {%- endfor %}

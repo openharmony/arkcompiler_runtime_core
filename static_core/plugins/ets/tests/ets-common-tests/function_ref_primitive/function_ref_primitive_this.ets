@@ -139,8 +139,6 @@ function test(a: A, b: B) {
 let v = new B();
 test(v, v);
 
-let x: Int = 1;
-arktest.assertEQ(x.unboxed == x.unboxed, true);
 
 // Virtual override resolution
 class VBase { foo(): Int { return 1; } }

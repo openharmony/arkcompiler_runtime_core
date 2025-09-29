@@ -12,20 +12,6 @@
 # limitations under the License.
 
 - {
-    method_name: unboxed,
-    object_type: Byte,
-    init_object_data_type: "FixedArray<byte>",
-    init_object_data: "[0 as byte, 1 as byte, Byte.MIN_VALUE.toByte(), Byte.MAX_VALUE.toByte()]",
-    param_init_data_types: {} ,
-    param_types: {},
-    method_return_type: byte,
-    expected_data_item_type: byte,
-    expected_data_type: "FixedArray<byte>",
-    param_list: {},
-    expected_test_data: "[0 as byte, 1 as byte, Byte.MIN_VALUE.toByte(), Byte.MAX_VALUE.toByte()]",
-    verify_test_result_function: comparePrimitiveValue,
-  }
-- {
     method_name: toByte,
     object_type: Byte,
     init_object_data_type: "FixedArray<byte>",

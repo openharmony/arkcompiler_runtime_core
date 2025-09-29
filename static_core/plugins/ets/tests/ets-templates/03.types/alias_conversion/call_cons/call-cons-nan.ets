@@ -27,7 +27,7 @@ class A {
 function main(){
 {%- for t in c['values'] %}
     let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
-    arktest.assertTrue({{c.to_type}}.isNaN(new A(s{{loop.index}}).f.unboxed()))
+    arktest.assertTrue({{c.to_type}}.isNaN(new A(s{{loop.index}}).f))
 {%- endfor %}
 }
 {%- endfor %}

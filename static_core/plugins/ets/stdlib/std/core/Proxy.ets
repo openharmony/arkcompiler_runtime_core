@@ -819,7 +819,7 @@ abstract class ArrayProxy<T> extends Array<T> {
     override get length(): int {
         const length = this.handlerGet(this.target, this.handler, ArrayProxy.LENGTH_PROP_NAME)
         if (length instanceof Int) {
-            return length.unboxed()
+            return length
         }
 
         throw new TypeError("unexpected Array.length value type: " + Type.of(length))

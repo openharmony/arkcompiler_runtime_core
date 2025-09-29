@@ -29,7 +29,7 @@ class A{{loop.index}} {
 function main(): int {
 {%- for t in c['values'] %}
     let a{{loop.index}}: A{{loop.index}} = new A{{loop.index}}()
-    if (! {{c.to_type}}.isNaN(a{{loop.index}}.d.unboxed())) {
+    if (! {{c.to_type}}.isNaN(a{{loop.index}}.d)) {
         return 1
     }
 {%- endfor %}

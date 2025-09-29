@@ -27,7 +27,7 @@ function main(): int {
     let d{{loop.index}}: {{c.to_type}}[] = [s{{loop.index}}, s{{loop.index}}]
     d{{loop.index}} = []
     d{{loop.index}} = [s{{loop.index}}]
-    if (! {{c.to_type}}.isNaN(d{{loop.index}}[0].unboxed())) {
+    if (! {{c.to_type}}.isNaN(d{{loop.index}}[0])) {
         return 1
     }
 {%- endfor %}

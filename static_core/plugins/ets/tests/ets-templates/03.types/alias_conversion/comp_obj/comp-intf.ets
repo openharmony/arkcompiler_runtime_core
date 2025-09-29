@@ -26,7 +26,7 @@ let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}};
 function main(): void {
 {%- for t in c['values'] %}
 	let d{{loop.index}}: J{{loop.index}} = { fld: s{{loop.index}} }
-	arktest.assertEQ(d{{loop.index}}.fld.unboxed(), {{t.val}})
+	arktest.assertEQ(d{{loop.index}}.fld, {{t.val}})
 {%- endfor %}
 }
 {%- endfor %}

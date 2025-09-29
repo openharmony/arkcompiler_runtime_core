@@ -229,16 +229,20 @@ void ThrowBusinessError(ani_env *env, int code, const std::string &message)
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define FUN_UNBOX_METHOD(aniType, typeName, signature)                                                         \
-    aniType UnboxTo##typeName(ani_env *env, ani_object value)                                                  \
-    {                                                                                                          \
-        aniType result {};                                                                                     \
-        ANI_FATAL_IF_ERROR(env->Object_CallMethodByName_##typeName(value, "unboxed", ":" signature, &result)); \
-        /* CC-OFFNXT(G.PRE.05) function defination, no effects */                                              \
-        return result;                                                                                         \
+#define STR_IMPL(x) #x
+#define STR(x) STR_IMPL(x)
+#define MAKE_TOTYPE_METHOD(x) STR(to##x)
+#define FUN_TOTYPE_METHOD(aniType, typeName, signature)                                                            \
+    aniType To##typeName(ani_env *env, ani_object value)                                                           \
+    {                                                                                                              \
+        aniType result {};                                                                                         \
+        ANI_FATAL_IF_ERROR(                                                                                        \
+            env->Object_CallMethodByName_##typeName(value, MAKE_TOTYPE_METHOD(typeName), ":" signature, &result)); \
+        /* CC-OFFNXT(G.PRE.05) function defination, no effects */                                                  \
+        return result;                                                                                             \
     }
 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-BOX_VALUE_LIST(FUN_UNBOX_METHOD);
-#undef FUN_UNBOX_METHOD
+BOX_VALUE_LIST(FUN_TOTYPE_METHOD);
+#undef FUN_TOTYPE_METHOD
 
 }  // namespace ark::ets::sdk::util

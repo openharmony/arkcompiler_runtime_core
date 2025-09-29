@@ -27,7 +27,7 @@ function main(): void {
     let d{{loop.index}}: {{c.to_type}}[] = [s{{loop.index}}, s{{loop.index}}]
     d{{loop.index}} = []
     d{{loop.index}} = [s{{loop.index}}]
-	arktest.assertTrue({{c.to_type}}.isNaN(d{{loop.index}}[0].unboxed()))
+	arktest.assertTrue({{c.to_type}}.isNaN(d{{loop.index}}[0]))
 {%- endfor %}
 }
 {%- endfor %}

@@ -92,8 +92,7 @@ TEST_F(AnySetPropertyTest, AnySetByIndex_Valid)
     ani_ref result {};
     ASSERT_EQ(env_->Any_GetByIndex(arrayRef, 0U, &result), ANI_OK);
     ani_int intResult = 0;
-    ASSERT_EQ(env_->Object_CallMethodByName_Int(static_cast<ani_object>(result), "unboxed", nullptr, &intResult),
-              ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Int(static_cast<ani_object>(result), "toInt", nullptr, &intResult), ANI_OK);
     ASSERT_EQ(intResult, intValue);
 }
 

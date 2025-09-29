@@ -19,11 +19,11 @@
 	sta v0
 	lda.null
 	checkcast panda.Object
-	call.virt.acc.short A.unboxed:(A), v0, 0x0
+	call.virt.acc.short A.toShort:(A), v0, 0x0
 	return
 }
 
-.function i32 A.unboxed(A a0) {
+.function i32 A.toShort(A a0) {
 	ldai 0x1
 	return
 }

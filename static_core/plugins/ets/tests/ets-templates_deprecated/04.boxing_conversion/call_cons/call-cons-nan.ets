@@ -27,7 +27,7 @@ class A {
 function main(): int {
 {%- for t in c['values'] %}
     let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
-    if (! {{c.to_type}}.isNaN(new A(s{{loop.index}}).f.unboxed())) {
+    if (! {{c.to_type}}.isNaN(new A(s{{loop.index}}).f)) {
         return 1
     }
 {%- endfor %}

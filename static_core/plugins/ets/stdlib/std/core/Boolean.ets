@@ -121,21 +121,21 @@ export final class Boolean extends Object implements Comparable<Boolean> {
         if (value == null || value == undefined) {
             this.value = false;
         } else if (value instanceof Boolean) {
-            this.value = value.unboxed();
+            this.value = value;
         } else if (value instanceof Number) {
-            this.value = (value.unboxed() != 0 && !isNaN(value.unboxed()));
+            this.value = (value != 0 && !isNaN(value));
         } else if (value instanceof Char) {
-            this.value = value.unboxed() != c'\u0000';
+            this.value = value != c'\u0000';
         } else if (value instanceof Float) {
-            this.value = (value.unboxed() != 0.0 && !isNaN(value.unboxed()));
+            this.value = (value != 0.0 && !isNaN(value));
         } else if (value instanceof Long) {
-            this.value = value.unboxed() != 0;
+            this.value = value != 0;
         } else if (value instanceof Int) {
-            this.value = value.unboxed() != 0;
+            this.value = value != 0;
         } else if (value instanceof Byte) {
-            this.value = value.unboxed() != 0;
+            this.value = value != 0;
         } else if (value instanceof Short) {
-            this.value = value.unboxed() != 0;
+            this.value = value != 0;
         } else if (value instanceof String) {
             this.value = value != '';
         } else if (value instanceof Object) {
@@ -165,15 +165,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      */
     static $_invoke<T>(value: T): boolean {
         return new Boolean(value).valueOf();
-    }
-
-    /**
-     * Returns the value of this instance as a primitive
-     *
-     * @returns primitive boolean value
-     */
-    public unboxed(): boolean {
-        return this.value;
     }
 
     /**
@@ -312,7 +303,7 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @returns value as a result of logical `and`
      */
     public and(other: Boolean): Boolean {
-        return Boolean.valueOf(this.value && other.unboxed())
+        return Boolean.valueOf(this.value && other)
     }
 
     /**
@@ -323,7 +314,7 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @returns value as a result of logical `or`
      */
     public or(other: Boolean): Boolean {
-        return Boolean.valueOf(this.value || other.unboxed())
+        return Boolean.valueOf(this.value || other)
     }
 
     /**
@@ -334,6 +325,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @returns value as a result of `xor`
      */
     public xor(other: Boolean): Boolean {
-        return Boolean.valueOf(this.value ^ other.unboxed())
+        return Boolean.valueOf(this.value ^ other)
     }
 }

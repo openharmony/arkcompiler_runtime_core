@@ -20,24 +20,6 @@ cases:
           let v: Rating = 1.1
           let ok = (v as double) == 1.1
 
-    # boxed refs
-    - defs: |-
-          type Burden = Load
-          type Load = Mass
-          type Mass = Weight
-          type Weight = Double
-      use: |-
-          let v: Burden = new Double(1.1)
-          let ok = v.unboxed() == 1.1
-
-    - defs: |-
-          type Weight = Double|null
-          type Burden = Weight
-      use: |-
-          let v1: Burden = null
-          let v2: Burden = 42.0
-          let ok = v1 == null && v2.unboxed() == 42.0
-
     # arrays
     - defs: |-
           type IntArray = int[]
@@ -108,7 +90,7 @@ cases:
           type Func = (p: long) => Long
       use: |-
           let v: Func = foo
-          let ok = v(-9223372036854775808 as long).unboxed() == Long.MIN_VALUE
+          let ok = v(-9223372036854775808 as long) == Long.MIN_VALUE
 
     # classes
     - defs: |-

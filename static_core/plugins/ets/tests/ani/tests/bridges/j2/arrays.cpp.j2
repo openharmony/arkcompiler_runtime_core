@@ -69,7 +69,7 @@ void print{{ Type }}Arr(ani_env *env, ani_array arr)
             GetStdString(env, string, str);
             LOG_IF(str != std::to_string(i + 1), FATAL, ANI) << "str '" << str << "' not equal to '" <<  std::to_string(i + 1) << "'";
         {%- else %}
-            LOG_IF(env->Object_CallMethodByName_{{ Type }}(static_cast<ani_object>(elem), "unboxed", nullptr, &buff[i]) != ANI_OK, FATAL, ANI) << "Failed to call unboxed method for {{ type }}";
+            LOG_IF(env->Object_CallMethodByName_{{ Type }}(static_cast<ani_object>(elem), "to{{ Type }}", nullptr, &buff[i]) != ANI_OK, FATAL, ANI) << "Failed to call to{{ Type }} method for {{ type }}";
         {%- endif %}
     }
     {% if type != "string" -%}

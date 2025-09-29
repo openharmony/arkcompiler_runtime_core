@@ -32,4 +32,4 @@ var_decl:
 
   - decl: let x:Object;
     use:  x = new Number(42);  // assigned before first use
-    assert: x instanceof Number && (x as Number).unboxed() == 42
+    assert: x instanceof Number && (x as Number) == 42

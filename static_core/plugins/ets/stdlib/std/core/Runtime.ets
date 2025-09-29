@@ -85,19 +85,16 @@ export final class Runtime {
     }
 
     private static sameFloatValue(f1: Float, f2: Float): boolean {
-        const f1val = f1.unboxed()
-        const f2val = f2.unboxed()
-
-        if (f1val == 0 || f2val == 0) {
-            return Float.bitCastToInt(f1val) == Float.bitCastToInt(f2val)
+        if (f1 == 0 || f2 == 0) {
+            return Float.bitCastToInt(f1) == Float.bitCastToInt(f2)
         }
 
-        if (isNaN(f1val) != isNaN(f2val)) {
+        if (isNaN(f1) != isNaN(f2)) {
             return false
-        } else if (isNaN(f1val)) {
+        } else if (isNaN(f1)) {
             return true
         } else {
-            return f1val == f2val
+            return f1 == f2
         }
     }
 
