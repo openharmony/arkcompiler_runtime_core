@@ -27,6 +27,6 @@ const c{{loop.index}} = {{c}}
 
 function main() {
 {% for c in cases %}
-    {{c}}
+    {{c}};
 {% endfor %}
 }

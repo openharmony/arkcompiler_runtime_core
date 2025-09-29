@@ -818,6 +818,7 @@
 
 #24165
 05.generics/03.utility_types/04.required_utility_type/required_getter_and_setter_int.ets
+07.expressions/05.object_literal/02.object_literal_of_interface_type/spec_ex4.ets
 
 #24168 no methods should be inherited using required utility type
 05.generics/03.utility_types/04.required_utility_type/method_excluded_from_required_1.ets
@@ -917,10 +918,6 @@
 
 #28484 Interface has methods
 07.expressions/05.object_literal/spec_ex6.ets
-
-#28721 Accessor in object literal allowed
-07.expressions/05.object_literal/02.object_literal_of_interface_type/spec_ex4.ets
-07.expressions/05.object_literal/02.object_literal_of_interface_type/spec_ex5.ets
 
 #25990
 07.expressions/05.object_literal/03.object_literal_of_record_type/re_14.ets
@@ -2967,9 +2964,6 @@
 # 27159
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_27.ets
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_28.ets
-
-# 27390
-15.semantic_rules/01.semantic_essentials/01.type_of_standalone_expression/union_types.ets
 
 # 27886 Issues with default values
 09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_3.ets

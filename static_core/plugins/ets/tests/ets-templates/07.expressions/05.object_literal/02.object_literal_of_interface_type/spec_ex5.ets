@@ -17,12 +17,12 @@
 desc: >-
     If an interface has accessors for some property,
     and the property is used in an object literal,
-    then a compile-time error occurs
-tags: [compile-only, negative]
+    then a compile-time error does not occurs
 ---*/
 
 interface I2 {
     get attr (): number
 }
-// 'attr' cannot be used in object literal
+
 const b: I2 = {attr: 42}
+arktest.assertEQ(b.attr, 42)
