@@ -1114,6 +1114,21 @@ TEST_F(LibAbcKitIrInstTest, IgetFunction_4)
                            cb);
 }
 
+// Test: test-kind=api, api=GraphApiImpl::iGetFunction, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitIrInstTest, IgetFunction_6)
+{
+    auto userInspector = [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
+        auto *call = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_CALL_STATIC);
+        ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+        auto *currMethod = g_implG->iGetFunction(call);
+        auto name = g_implI->functionGetName(currMethod);
+        auto nameStr = helpers::AbckitStringToString(name);
+        ASSERT_EQ(nameStr, "log:std.core.Console;std.core.String;void;");
+    };
+    helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc", "test",
+                           userInspector);
+}
+
 // Test: test-kind=api, api=GraphApiImpl::iRemove, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, Iremove_1)
 {

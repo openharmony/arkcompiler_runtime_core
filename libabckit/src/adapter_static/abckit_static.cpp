@@ -808,6 +808,102 @@ static void CollectExternalModules(pandasm::Program *prog, AbckitFile *file)
     }
 }
 
+static void CollectExternalFunctions(pandasm::Program *prog, AbckitFile *file)
+{
+    LIBABCKIT_LOG_FUNC;
+    const auto container = static_cast<Container *>(file->data);
+
+    for (auto &[functionName, functionImpl] : prog->functionStaticTable) {
+        if (!functionImpl.metadata->IsForeign()) {
+            continue;
+        }
+
+        LIBABCKIT_LOG(DEBUG) << "Found External Static Function: " << functionName << std::endl;
+
+        auto [moduleName, className] = FuncGetNames(functionName);
+        LIBABCKIT_LOG(DEBUG) << "moduleName: " << moduleName << std::endl;
+        LIBABCKIT_LOG(DEBUG) << "className: " << className << std::endl;
+        auto function = std::make_unique<AbckitCoreFunction>();
+
+        AbckitCoreModule *resolvedModule = nullptr;
+        if (container->nameToModule.find(moduleName) != container->nameToModule.end()) {
+            resolvedModule = container->nameToModule.at(moduleName).get();
+        } else if (container->nameToNamespace.find(moduleName) != container->nameToNamespace.end()) {
+            auto rootModuleName = ClassGetModuleNames(moduleName, container->nameToNamespace).first;
+            if (container->nameToModule.find(rootModuleName) != container->nameToModule.end()) {
+                resolvedModule = container->nameToModule.at(rootModuleName).get();
+            }
+        }
+
+        function->owningModule = resolvedModule;
+
+        function->impl = std::make_unique<AbckitArktsFunction>();
+        function->GetArkTSImpl()->impl = &functionImpl;
+        function->GetArkTSImpl()->core = function.get();
+
+        function->returnType = PandasmTypeToAbckitType(file, functionImpl.returnType);
+        AddFunctionUserToAbckitType(function->returnType, function.get());
+
+        for (auto &functionParam : functionImpl.params) {
+            function->parameters.emplace_back(CreateFunctionParam(file, function, functionParam));
+        }
+
+        for (const auto &anno : GetAnnotationNames(&functionImpl)) {
+            function->annotations.emplace_back(CreateAnnotation(file, function.get(), anno));
+            function->annotationTable.emplace(anno, function->annotations.back().get());
+        }
+
+        auto name = GetMangleFuncName(function.get());
+        file->nameToExternalFunction.insert({name, function.get()});
+        file->externalFunctions.emplace_back(std::move(function));
+    }
+
+    for (auto &[functionName, functionImpl] : prog->functionInstanceTable) {
+        if (!functionImpl.metadata->IsForeign()) {
+            continue;
+        }
+
+        LIBABCKIT_LOG(DEBUG) << "Found External Instance Function: " << functionName << std::endl;
+
+        auto [moduleName, className] = FuncGetNames(functionName);
+        LIBABCKIT_LOG(DEBUG) << "moduleName: " << moduleName << std::endl;
+        LIBABCKIT_LOG(DEBUG) << "className: " << className << std::endl;
+        auto function = std::make_unique<AbckitCoreFunction>();
+
+        AbckitCoreModule *resolvedModule = nullptr;
+        if (container->nameToModule.find(moduleName) != container->nameToModule.end()) {
+            resolvedModule = container->nameToModule.at(moduleName).get();
+        } else if (container->nameToNamespace.find(moduleName) != container->nameToNamespace.end()) {
+            auto rootModuleName = ClassGetModuleNames(moduleName, container->nameToNamespace).first;
+            if (container->nameToModule.find(rootModuleName) != container->nameToModule.end()) {
+                resolvedModule = container->nameToModule.at(rootModuleName).get();
+            }
+        }
+
+        function->owningModule = resolvedModule;
+
+        function->impl = std::make_unique<AbckitArktsFunction>();
+        function->GetArkTSImpl()->impl = &functionImpl;
+        function->GetArkTSImpl()->core = function.get();
+
+        function->returnType = PandasmTypeToAbckitType(file, functionImpl.returnType);
+        AddFunctionUserToAbckitType(function->returnType, function.get());
+
+        for (auto &functionParam : functionImpl.params) {
+            function->parameters.emplace_back(CreateFunctionParam(file, function, functionParam));
+        }
+
+        for (const auto &anno : GetAnnotationNames(&functionImpl)) {
+            function->annotations.emplace_back(CreateAnnotation(file, function.get(), anno));
+            function->annotationTable.emplace(anno, function->annotations.back().get());
+        }
+
+        auto name = GetMangleFuncName(function.get());
+        file->nameToExternalFunction.insert({name, function.get()});
+        file->externalFunctions.emplace_back(std::move(function));
+    }
+}
+
 static void CollectAnnotations(AbckitFile *file)
 {
     LIBABCKIT_LOG_FUNC;
@@ -876,7 +972,7 @@ static void CollectAllInstances(AbckitFile *file, pandasm::Program *prog)
 
     for (auto &[recordName, record] : prog->recordTable) {
         auto [moduleName, className] = ClassGetModuleNames(recordName, container->nameToNamespace);
-        if (recordName.find(LAMBDA_RECORD_KEY) != std::string::npos || IsModuleName(className) ||
+        if (IsModuleName(className) ||
             container->nameToNamespace.find(recordName) != container->nameToNamespace.end()) {
             // NOTE: find and fill AbckitCoreImportDescriptor
             continue;
@@ -956,6 +1052,7 @@ static void CreateWrappers(pandasm::Program *prog, AbckitFile *file)
         }
     }
     CollectExternalModules(prog, file);
+    CollectExternalFunctions(prog, file);
     AssignOwningModuleOfNamespace(file);
 
     // Collect classes, interfaces, enums, interfaceObjectLiteral and annotationInterface

@@ -1516,11 +1516,17 @@ AbckitCoreFunction *IgetFunctionStatic(AbckitInst *inst)
     auto &nameToFunction = reinterpret_cast<CtxGInternal *>(graph->internal)->runtimeAdapter->IsMethodStatic(methodPtr)
                                ? graph->file->nameToFunctionStatic
                                : graph->file->nameToFunctionInstance;
-    if (nameToFunction.count(it->second) == 0) {
-        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
-        return nullptr;
+
+    if (nameToFunction.count(it->second) != 0) {
+        return nameToFunction[it->second];
     }
-    return nameToFunction[it->second];
+
+    if (graph->file->nameToExternalFunction.count(it->second) != 0) {
+        return graph->file->nameToExternalFunction[it->second];
+    }
+
+    statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+    return nullptr;
 }
 
 void IsetFunctionStatic(AbckitInst *inst, AbckitCoreFunction *function)

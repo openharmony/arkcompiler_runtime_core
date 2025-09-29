@@ -52,7 +52,7 @@ void EnumerateInsts(AbckitBasicBlock *bb, std::unordered_map<std::string, int> *
     while (inst != nullptr) {
         if (g_implG->iCheckIsCall(inst)) {
             auto *method = g_implG->iGetFunction(inst);
-            if (method != nullptr) {
+            if (method != nullptr && !g_implI->functionIsExternal(method)) {
                 auto methodName = GetMethodName(method);
                 methodsMap->at(methodName) += 1;
             }
