@@ -54,23 +54,29 @@ TEST_F(LibAbcKitInspectApiMethodsTest, StaticMethodGetName)
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/methods/methods_static.abc", &file);
 
     std::set<std::string> names = {
-        "main:void;",
+        "M0N0C0F1:void;",
+        "M0N0C0F0:methods_static.M0N0C0;void;",
+        "M0N0C0F2:methods_static.M0N0C0;std.core.Promise;",
+        "_ctor_:methods_static.M0N0C0;void;",
+        "M0C0F1:void;",
+        "M0C0F0:methods_static.M0C0;void;",
+        "M0C0F2:methods_static.M0C0;std.core.Promise;",
+        "_ctor_:methods_static.M0C0;void;",
+        "$_invoke:methods_static.%%lambda-lambda_invoke-1;void;",
+        "_ctor_:methods_static.%%lambda-lambda_invoke-1;void;",
+        "invoke0:methods_static.%%lambda-lambda_invoke-1;std.core.Object;",
+        "$_invoke:methods_static.%%lambda-lambda_invoke-0;void;",
+        "_ctor_:methods_static.%%lambda-lambda_invoke-0;void;",
+        "invoke0:methods_static.%%lambda-lambda_invoke-0;std.core.Object;",
+        "_cctor_:void;",
+        "lambda_invoke-0:void;",
+        "lambda_invoke-1:void;",
         "m0F0:void;",
         "m0F2:std.core.Promise;",
         "m0N0F0:void;",
         "m0N0F2:std.core.Promise;",
         "m0N0N0F0:void;",
-        "_cctor_:void;",
-        "lambda_invoke-0:void;",
-        "lambda_invoke-1:void;",
-        "M0C0F0:methods_static.M0C0;void;",
-        "M0C0F1:void;",
-        "M0C0F2:methods_static.M0C0;std.core.Promise;",
-        "_ctor_:methods_static.M0C0;void;",
-        "M0N0C0F0:methods_static.M0N0C0;void;",
-        "M0N0C0F1:void;",
-        "M0N0C0F2:methods_static.M0N0C0;std.core.Promise;",
-        "_ctor_:methods_static.M0N0C0;void;",
+        "main:void;",
     };
 
     helpers::EnumerateAllMethods(file, [&](AbckitCoreFunction *m) {
@@ -222,10 +228,16 @@ TEST_F(LibAbcKitInspectApiMethodsTest, StaticFunctionIsCtor)
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/methods/methods_static.abc", &file);
 
-    std::set<std::string> ctorMethods = {"_ctor_:methods_static.M0C0;void;", "_ctor_:methods_static.M0N0C0;void;"};
+    std::set<std::string> ctorMethods = {
+        "_ctor_:methods_static.M0C0;void;",
+        "_ctor_:methods_static.M0N0C0;void;",
+        "_ctor_:methods_static.%%lambda-lambda_invoke-1;void;",
+        "_ctor_:methods_static.%%lambda-lambda_invoke-0;void;",
+    };
 
     helpers::EnumerateAllMethods(file, [&ctorMethods](AbckitCoreFunction *method) {
         auto methodName = helpers::AbckitStringToString(g_implI->functionGetName(method));
+
         bool isCtor = g_implI->functionIsCtor(method);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         if (isCtor) {
@@ -476,23 +488,29 @@ TEST_F(LibAbcKitInspectApiMethodsTest, StaticFunctionGetParentClass)
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/methods/methods_static.abc", &file);
 
     std::unordered_map<std::string, std::string> methodClasses = {
-        {"main:void;", ""},
+        {"_cctor_:void;", ""},
+        {"lambda_invoke-0:void;", ""},
+        {"lambda_invoke-1:void;", ""},
         {"m0F0:void;", ""},
         {"m0F2:std.core.Promise;", ""},
         {"m0N0F0:void;", ""},
         {"m0N0F2:std.core.Promise;", ""},
         {"m0N0N0F0:void;", ""},
-        {"_cctor_:void;", ""},
-        {"lambda_invoke-0:void;", ""},
-        {"lambda_invoke-1:void;", ""},
-        {"M0C0F0:methods_static.M0C0;void;", "M0C0"},
-        {"M0C0F1:void;", "M0C0"},
-        {"M0C0F2:methods_static.M0C0;std.core.Promise;", "M0C0"},
-        {"_ctor_:methods_static.M0C0;void;", "M0C0"},
-        {"M0N0C0F0:methods_static.M0N0C0;void;", "M0N0C0"},
+        {"main:void;", ""},
         {"M0N0C0F1:void;", "M0N0C0"},
+        {"M0N0C0F0:methods_static.M0N0C0;void;", "M0N0C0"},
         {"M0N0C0F2:methods_static.M0N0C0;std.core.Promise;", "M0N0C0"},
         {"_ctor_:methods_static.M0N0C0;void;", "M0N0C0"},
+        {"M0C0F1:void;", "M0C0"},
+        {"M0C0F0:methods_static.M0C0;void;", "M0C0"},
+        {"M0C0F2:methods_static.M0C0;std.core.Promise;", "M0C0"},
+        {"_ctor_:methods_static.M0C0;void;", "M0C0"},
+        {"$_invoke:methods_static.%%lambda-lambda_invoke-1;void;", "%%lambda-lambda_invoke-1"},
+        {"_ctor_:methods_static.%%lambda-lambda_invoke-0;void;", "%%lambda-lambda_invoke-0"},
+        {"_ctor_:methods_static.%%lambda-lambda_invoke-1;void;", "%%lambda-lambda_invoke-1"},
+        {"invoke0:methods_static.%%lambda-lambda_invoke-0;std.core.Object;", "%%lambda-lambda_invoke-0"},
+        {"invoke0:methods_static.%%lambda-lambda_invoke-1;std.core.Object;", "%%lambda-lambda_invoke-1"},
+        {"$_invoke:methods_static.%%lambda-lambda_invoke-0;void;", "%%lambda-lambda_invoke-0"},
     };
 
     helpers::EnumerateAllMethods(file, [&methodClasses](AbckitCoreFunction *method) {
