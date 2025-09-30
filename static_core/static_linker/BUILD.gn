@@ -134,7 +134,7 @@ ohos_executable("ark_link") {
   libs = platform_libs
   ldflags = platform_ldflags
 
-  install_enable = true
+  install_enable = false
   part_name = ark_part_name
   subsystem_name = "$ark_subsystem_name"
 }
