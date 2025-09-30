@@ -379,16 +379,9 @@ spec/09.classes/Accessor_Declarations/issue-15142_9.ets
 std/core/NumberTest.ets
 escompat/JsonStringifyTest.ets
 
-#30301
-std/core/std_core_typedarrays_methods__BigInt64Array.ets
-stdlib-templates/std/core/std_core_typedarrays_methods__BigInt64Array.ets
-
 #30140
 std/core/DeepCopyTest.ets
 ets_func_tests/std/core/DeepCopyTest.ets
-
-#30228
-ets_func_tests/std/core/IntlNumberFormatTest2.ets
 
 #28345
 escompat/JsonParseTest.ets

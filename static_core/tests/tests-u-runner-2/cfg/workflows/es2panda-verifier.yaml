@@ -21,6 +21,7 @@ parameters:
     enable-verifier: True
     es2panda-args: []  # for specifying in CLI
     es2panda-test-suite-args: []  # for specifying in test-suite config
+    verifier-test-suite-args: []
     es2panda-workflow-args:
         - "--arktsconfig=${parameters.arktsconfig}"
         - "--gen-stdlib=false"
@@ -58,4 +59,5 @@ steps:
             - "--boot-panda-files=${parameters.stdlib}"
             - "--load-runtimes=${parameters.load-runtimes}"
             - "--config-file=${parameters.verifier-config}"
+            - "${parameters.verifier-test-suite-args}"
             - "${parameters.output-file}"
