@@ -698,10 +698,10 @@ cases:
           field: [check_type] = [base_value]
           async foo(): Promise<void> {
             return new Promise<void> (
-              (resolve: () => void) => {
+              (resolve) => {
                 setTimeout(() => {
                   this.field = [new_value]
-                  resolve()
+                  resolve(undefined)
                 }, 1)
               }
             )
