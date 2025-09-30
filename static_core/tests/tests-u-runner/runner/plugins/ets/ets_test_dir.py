@@ -47,7 +47,8 @@ class EtsTestDir:
 
     @property
     def gc_stress(self) -> Path:
-        return self.tests / "ets_test_suite" / "gc" / "stress"
+        return (self.__static_core_root.parent.parent
+                / "ets_frontend" / "ets2panda" / "test"/ "ark_tests" / "ets-tests" / "ets-gc-stress")
 
     @property
     def ets_es_checked(self) -> Path:
