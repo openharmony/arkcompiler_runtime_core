@@ -22,8 +22,9 @@ desc: >-
     if the number and types of the arguments are valid.
 ---*/
 
-function foo(n: {{c.type}}) {}
+function foo(n: {{c.type}}) { return n }
 const f: Function = foo
-f.unsafeCall({{c.use}})
+let res = f.unsafeCall({{c.use}})
+arktest.assertTrue(res instanceof ({{c.assert}}))
 
 {%- endfor %}
