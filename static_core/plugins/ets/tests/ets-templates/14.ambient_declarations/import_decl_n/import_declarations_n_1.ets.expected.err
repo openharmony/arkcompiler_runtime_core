@@ -15,6 +15,6 @@
 [TID 005e60] E/verifier: Cannot link class: Cannot find method 'foo (D)D' in class 'declarations_n.B'
 [TID 005e60] E/verifier: Verifier error 54: Cache miss for method at offset
 [TID 005e60] E/verifier: Verifier error 62: Cannot resolve method id
-[TID 005e60] E/verifier: Class verification failed: 'import_declarations_n_1.ETSGLOBAL' method: void import_declarations_n_1.ETSGLOBAL::main()
+[TID 005e60] E/verifier: Class verification failed: 'import_declarations_n_1.ETSGLOBAL' method: void import_declarations_n_1.ETSGLOBAL::usage()
 Unhandled exception: std.core.LinkerVerificationError
 LinkerVerificationError: Limport_declarations_n_1/ETSGLOBAL;

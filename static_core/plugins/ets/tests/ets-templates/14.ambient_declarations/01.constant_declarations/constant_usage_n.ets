@@ -22,8 +22,12 @@ tags: [negative]
 
 import { {{c.decl}} } from './constant_declarations_n.d'
 
-function main() {
+function usage() {
   {{c.use|indent}}
+}
+
+function main() {
+  usage()
 }
 
 {% endfor %}

@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+ /*---
+    tags: [no-warmup]
+ ---*/
+
 function testInit() {
     let str = 'workerLocal';
     let wl = new WorkerLocal<string>(() => str);

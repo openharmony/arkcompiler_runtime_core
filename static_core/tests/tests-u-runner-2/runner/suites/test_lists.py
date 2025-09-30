@@ -21,7 +21,6 @@ from os import path
 from pathlib import Path
 from typing import cast
 
-from runner import utils
 from runner.common_exceptions import InvalidConfiguration
 from runner.enum_types.configuration_kind import (
     BuildTypeKind,
@@ -37,7 +36,7 @@ _LOGGER = Log.get_logger(__file__)
 
 
 class TestLists:
-    def __init__(self, list_root: Path, test_env: TestEnv):
+    def __init__(self, list_root: Path, test_env: TestEnv, jit_repeats: int | None):
         self.list_root = list_root
         self.config = test_env.config
         self.explicit_list: Path | None = (
@@ -48,6 +47,7 @@ class TestLists:
         self.explicit_test: Path | None = None
         self.excluded_lists: list[Path] = []
         self.ignored_lists: list[Path] = []
+        self.is_jit_with_repeats = jit_repeats is not None and jit_repeats > 0
 
         _LOGGER.default(f"Initialize TestLists: gn_build = {self.config.general.gn_build}")
         self.cache: list[str] = self.__gn_cache() if self.config.general.gn_build else self.cmake_cache()
@@ -112,7 +112,7 @@ class TestLists:
             full_template_name += "(-FULLASTV)?"
         if self.is_simultaneous():
             full_template_name += "(-SIMULTANEOUS)?"
-        if self.conf_kind == ConfigurationKind.JIT and self.is_jit_with_repeats():
+        if self.conf_kind == ConfigurationKind.JIT and self.is_jit_with_repeats:
             full_template_name += "(-(repeats|REPEATS))?"
         gc_type = cast(str, self.config.workflow.get_parameter('gc-type', 'g1-gc')).upper()
         full_template_name += f"(-({gc_type}))?"
@@ -165,10 +165,6 @@ class TestLists:
     def is_jit(self) -> bool:
         jit = str(self.config.workflow.get_parameter("compiler-enable-jit"))
         return jit.lower() == "true"
-
-    def is_jit_with_repeats(self) -> bool:
-        jit_with_repeats = cast(str | None, self.config.workflow.get_parameter("with-repeats"))
-        return utils.to_bool(jit_with_repeats) if jit_with_repeats is not None else False
 
     def get_interpreter(self) -> str:
         result: list[str] | str | None = self.config.workflow.get_parameter("ark-args")

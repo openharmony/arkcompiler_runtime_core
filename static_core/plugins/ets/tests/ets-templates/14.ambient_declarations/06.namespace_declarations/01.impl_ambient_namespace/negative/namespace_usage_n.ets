@@ -24,9 +24,12 @@ import { {{c.import}} } from './namespace_decl_d/namespace_declarations_n_{{loop
 
 {{c.decl}}
 
-function main() {
-    {{c.use|indent}}
+function usage() {
+  {{c.use|indent}}
 }
 
+function main() {
+  usage()
+}
 
 {% endfor %}

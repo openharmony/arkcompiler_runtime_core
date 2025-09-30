@@ -31,7 +31,7 @@ from runner.enum_types.params import TestEnv
 from runner.logger import Log
 from runner.options.options import IOptions
 from runner.options.options_collections import CollectionsOptions
-from runner.suites.preparation_step import CopyStep, CustomGeneratorTestPreparationStep, TestPreparationStep
+from runner.suites.preparation_step import CopyStep, CustomGeneratorTestPreparationStep, JitStep, TestPreparationStep
 from runner.suites.step_utils import StepUtils
 from runner.suites.test_lists import TestLists
 from runner.suites.test_standard_flow import TestStandardFlow
@@ -52,12 +52,14 @@ class TestSuite:
 
         self.config = test_env.config
 
+        self.jit_repeats: int = int(repeats) \
+            if (repeats := self.config.workflow.get_parameter("num-repeats")) is not None else 0
         self._preparation_steps: list[TestPreparationStep] = self.set_preparation_steps()
         self.__collections_parameters = self.__get_collections_parameters()
 
         self._explicit_file: Path | None = None
         self._explicit_list: Path | None = None
-        self._test_lists = TestLists(self._list_root, self.__test_env)
+        self._test_lists = TestLists(self._list_root, self.__test_env, self.jit_repeats)
         self._test_lists.collect_excluded_test_lists(test_name=self.__suite_name)
         self._test_lists.collect_ignored_test_lists(test_name=self.__suite_name)
         self.excluded = 0
@@ -198,6 +200,8 @@ class TestSuite:
             with_js = self.config.test_suite.with_js(collection)
             if (extension == "js" and with_js) or extension != "js":
                 steps.extend(self.__add_copy_steps(collection, copy_source_path, extension))
+            if self.jit_repeats > 0:
+                steps.extend(self.__add_jit_steps(collection, copy_source_path, extension))
         return steps
 
     def __add_copy_steps(self, collection: CollectionsOptions, copy_source_path: Path, extension: str) \
@@ -221,6 +225,32 @@ class TestSuite:
                 config=self.config,
                 collection=collection,
                 extension=extension
+            ))
+        return steps
+
+    def __add_jit_steps(self, collection: CollectionsOptions, copy_source_path: Path, extension: str) \
+            -> list[TestPreparationStep]:
+        steps: list[TestPreparationStep] = []
+        if collection.exclude:
+            for file_path in copy_source_path.iterdir():
+                if self.__is_path_excluded(collection, file_path):
+                    continue
+                steps.append(JitStep(
+                    test_source_path=file_path,
+                    test_gen_path=self.test_root / collection.name / file_path.name,
+                    config=self.config,
+                    collection=collection,
+                    extension=extension,
+                    num_repeats=self.jit_repeats
+                ))
+        else:
+            steps.append(JitStep(
+                test_source_path=copy_source_path,
+                test_gen_path=self.test_root / collection.name,
+                config=self.config,
+                collection=collection,
+                extension=extension,
+                num_repeats=self.jit_repeats
             ))
         return steps
 

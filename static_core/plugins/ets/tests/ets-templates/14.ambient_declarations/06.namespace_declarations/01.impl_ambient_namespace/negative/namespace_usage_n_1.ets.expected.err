@@ -14,8 +14,8 @@
 [TID 00222e] E/verifier: Cannot link class: Cannot find field 'x' in class 'namespace_declarations_n_1.Ambient'
 [TID 00222e] E/verifier: Cannot link class: Cannot find field 'y' in class 'namespace_declarations_n_1.Ambient'
 [TID 00222e] E/verifier: Cannot link class: Cannot find field 'z' in class 'namespace_declarations_n_1.Ambient'
-[TID 00222e] E/verifier: Method verification failed: void namespace_usage_n_1.ETSGLOBAL::main()
-[TID 00222e] E/verifier: Class verification failed: 'namespace_usage_n_1.ETSGLOBAL' method: void namespace_usage_n_1.ETSGLOBAL::main()
+[TID 00222e] E/verifier: Method verification failed: void namespace_usage_n_1.ETSGLOBAL::usage()
+[TID 00222e] E/verifier: Class verification failed: 'namespace_usage_n_1.ETSGLOBAL' method: void namespace_usage_n_1.ETSGLOBAL::usage()
 [TID 00222e] E/runtime: Cannot initialize class 'namespace_usage_n_1.ETSGLOBAL'
 Unhandled exception: std.core.LinkerVerificationError
 LinkerVerificationError: Lnamespace_usage_n_1/ETSGLOBAL;
