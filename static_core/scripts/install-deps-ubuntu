@@ -569,6 +569,7 @@ fi
 
 
 if [[ "x$INSTALL_VMB" == "xyes" ]]; then
+    install_dep "$SCRIPT_DIR/dep-lists/ubuntu-vmb"
     install_python_dependencies
     install_pip_dep "${SCRIPT_DIR}/dep-lists/requirements-vmb"
     build_and_install_vmb
