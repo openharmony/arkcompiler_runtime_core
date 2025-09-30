@@ -331,7 +331,12 @@ TEST_F(Abc2ProgramLiteralArrayTest, LiteralArray)
     std::set<std::string> existingLiterArray {};
     for (auto &[unused, litArray] : prog->literalarrayTable) {
         std::stringstream content {};
+        bool skipTag = false;
         for (const auto &l : litArray.literals) {
+            skipTag = !skipTag;
+            if (skipTag) {
+                continue;
+            }
             content << static_cast<int>(l.tag) << " " << std::get<std::string>(l.value) << " ";
         }
         existingLiterArray.insert(content.str());

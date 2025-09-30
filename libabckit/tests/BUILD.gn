@@ -253,6 +253,7 @@ abckit_gtests_sources = [
   "ut/metadata_core/inspect_api/values/values_test.cpp",
   "ut/metadata_core/modify_api/functions/functions_test.cpp",
   "ut/metadata_core/modify_api/literals/literals_test.cpp",
+  "ut/metadata_core/modify_api/literal_arrays/literal_arrays_test.cpp",
   "ut/metadata_core/modify_api/strings/strings_test.cpp",
   "ut/metadata_core/modify_api/types/types_test.cpp",
   "ut/metadata_core/modify_api/values/values_test.cpp",
@@ -487,6 +488,7 @@ test_ets_files = [
   "ut/metadata_core/modify_api/strings/strings_static",
   "ut/metadata_core/modify_api/types/types_static",
   "ut/metadata_core/modify_api/literals/literals_static",
+  "ut/metadata_core/modify_api/literal_arrays/literal_arrays_static",
   "ut/metadata_core/modify_api/values/values_static",
 
   "ut/isa/isa_static/arithmetic/bininst_imm_static",
