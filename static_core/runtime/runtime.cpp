@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstdio>
+#include <filesystem>
 #include <memory>
 #include <string>
 #include <string_view>
@@ -67,6 +68,7 @@
 #include "runtime/mem/gc/gc-hung/gc_hung.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/profilesaver/profile_saver.h"
+#include "runtime/tooling/coverage_listener.h"
 #include "runtime/tooling/debugger.h"
 #include "runtime/tooling/memory_allocation_dumper.h"
 #include "runtime/include/file_manager.h"
@@ -90,6 +92,7 @@ RuntimeOptions Runtime::options_;   // NOLINT(fuchsia-statically-constructed-obj
 std::string Runtime::runtimeType_;  // NOLINT(fuchsia-statically-constructed-objects)
 os::memory::Mutex Runtime::mutex_;  // NOLINT(fuchsia-statically-constructed-objects)
 bool Runtime::isTaskManagerUsed_ = false;
+tooling::CoverageListener *Runtime::coverageListener_ = nullptr;
 
 const LanguageContextBase *g_ctxsJsRuntime = nullptr;  // Deprecated. Only for capability with js_runtime.
 
@@ -322,6 +325,44 @@ bool Runtime::Create(const RuntimeOptions &options, const std::vector<LanguageCo
 }
 
 /* static */
+bool Runtime::GetCoverageEnable()
+{
+    bool codeCoverageEnable = false;
+#if defined(PANDA_GET_PARAMETER)
+    codeCoverageEnable = OHOS::system::GetBoolParameter("persist.ark.static.codecoverage.enable", false);
+#endif
+    if (!codeCoverageEnable) {
+        codeCoverageEnable = options_.IsCodeCoverageEnabled();
+    }
+    return codeCoverageEnable;
+}
+
+/* static */
+void Runtime::StartCoverageListener()
+{
+    if (!GetCoverageEnable()) {
+        return;
+    }
+    std::filesystem::path filePath = options_.GetCodeCoverageOutput();
+    coverageListener_ = new tooling::CoverageListener(filePath.string());
+    instance_->GetNotificationManager()->AddListener(coverageListener_,
+                                                     RuntimeNotificationManager::Event::BYTECODE_PC_CHANGED);
+}
+
+/* static */
+void Runtime::StopCoverageListener()
+{
+    if (!GetCoverageEnable() || coverageListener_ == nullptr) {
+        return;
+    }
+    instance_->GetNotificationManager()->RemoveListener(coverageListener_,
+                                                        RuntimeNotificationManager::Event::BYTECODE_PC_CHANGED);
+    coverageListener_->StopCoverage();
+    delete coverageListener_;
+    coverageListener_ = nullptr;
+}
+
+/* static */
 bool Runtime::Create(const RuntimeOptions &options)
 {
     if (instance_ != nullptr) {
@@ -376,6 +417,7 @@ bool Runtime::Create(const RuntimeOptions &options)
     instance_->GetNotificationManager()->VmStartEvent();
     instance_->GetNotificationManager()->VmInitializationEvent(thread);
     instance_->GetNotificationManager()->ThreadStartEvent(thread);
+    instance_->StartCoverageListener();
 
     if (options_.IsSamplingProfilerCreate()) {
         instance_->GetTools().CreateSamplingProfiler();
@@ -507,6 +549,8 @@ bool Runtime::Destroy()
     // UninitializeThreads may execute managed code which
     // uses barriers
     instance_->GetPandaVM()->StopGC();
+
+    instance_->StopCoverageListener();
 
     if (verifier::IsEnabled(verifier::VerificationModeFromString(options_.GetVerificationMode()))) {
         verifier::DestroyService(instance_->verifierService_, options_.IsVerificationUpdateCache());

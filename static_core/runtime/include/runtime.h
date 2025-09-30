@@ -65,6 +65,7 @@ class Trace;
 namespace tooling {
 class DebugInterface;
 class MemoryAllocationDumper;
+class CoverageListener;
 }  // namespace tooling
 
 using UnwindStackFn = os::native_stack::FuncUnwindstack;
@@ -121,6 +122,10 @@ public:
     static bool Destroy();
 
     static Runtime *GetCurrent();
+
+    static bool GetCoverageEnable();
+    static void StartCoverageListener();
+    static void StopCoverageListener();
 
     template <typename Handler>
     static auto GetCurrentSync(Handler &&handler)
@@ -515,6 +520,7 @@ private:
     static std::string runtimeType_;
     static os::memory::Mutex mutex_;
     static bool isTaskManagerUsed_;
+    static tooling::CoverageListener *coverageListener_;
 
     // NOTE(dtrubenk): put all of it in the permanent space
     mem::InternalAllocatorPtr internalAllocator_;

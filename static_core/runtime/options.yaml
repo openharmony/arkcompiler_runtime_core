@@ -962,3 +962,13 @@ options:
   type: bool
   default: true
   description: Whether to create strings with LineString/SlicedString/TreeString or only LineString.
+
+- name: code-coverage-enabled
+  type: bool
+  default: false
+  description: whether ArkTS 1.2 code coverage is enabled.
+
+- name: code-coverage-output
+  type: std::string
+  default: "/data/storage/el2/base/files/coverageBytecodeInfo.csv"
+  description: Specify the location the collected code coverage information.
