@@ -12,3 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+const field1 = 'Module';
+
+function main(){};
+
+class Class1 {}
+
+interface Interface1 {}
+
+namespace Ns1 {}

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -740,6 +740,12 @@ AbckitValue *FindOrCreateValueU1Dynamic(AbckitFile *file, bool value)
     return FindOrCreateValueU1DynamicImpl(file, value);
 }
 
+AbckitValue *FindOrCreateValueIntDynamic(AbckitFile *file, int value)
+{
+    LIBABCKIT_LOG_FUNC;
+    return FindOrCreateValueIntDynamicImpl(file, value);
+}
+
 AbckitValue *FindOrCreateValueDoubleDynamic(AbckitFile *file, double value)
 {
     LIBABCKIT_LOG_FUNC;
@@ -949,7 +955,7 @@ void AnnotationRemoveAnnotationElementDynamic(AbckitCoreAnnotation *anno, Abckit
 std::string TypeToName(AbckitType *type)
 {
     if (type->id == ABCKIT_TYPE_ID_REFERENCE) {
-        auto str = ClassGetNameDynamic(type->klass);
+        auto str = ClassGetNameDynamic(type->GetClass());
         if (str == nullptr) {
             return "";
         }

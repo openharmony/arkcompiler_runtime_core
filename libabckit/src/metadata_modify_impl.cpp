@@ -107,7 +107,7 @@ extern "C" AbckitType *CreateType(AbckitFile *file, AbckitTypeId id)
         statuses::SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
         return nullptr;
     }
-    return GetOrCreateType(file, id, 0, nullptr);
+    return GetOrCreateType(file, id, 0, nullptr, nullptr);
 }
 
 extern "C" AbckitType *CreateReferenceType(AbckitFile *file, AbckitCoreClass *klass)
@@ -118,7 +118,7 @@ extern "C" AbckitType *CreateReferenceType(AbckitFile *file, AbckitCoreClass *kl
 
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     LIBABCKIT_BAD_ARGUMENT(klass, nullptr);
-    return GetOrCreateType(file, AbckitTypeId::ABCKIT_TYPE_ID_REFERENCE, 0, klass);
+    return GetOrCreateType(file, AbckitTypeId::ABCKIT_TYPE_ID_REFERENCE, 0, klass, nullptr);
 }
 
 // ========================================
@@ -137,6 +137,23 @@ extern "C" AbckitValue *CreateValueU1(AbckitFile *file, bool value)
             return FindOrCreateValueU1Dynamic(file, value);
         case Mode::STATIC:
             return FindOrCreateValueU1Static(file, value);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
+}
+
+extern "C" AbckitValue *CreateValueInt(AbckitFile *file, int value)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(file, nullptr);
+    switch (file->frontend) {
+        case Mode::DYNAMIC:
+            return FindOrCreateValueIntDynamic(file, value);
+        case Mode::STATIC:
+            return FindOrCreateValueIntStatic(file, value);
         default:
             LIBABCKIT_UNREACHABLE;
     }
@@ -493,6 +510,7 @@ AbckitModifyApi g_modifyApiImpl = {
     // ========================================
 
     CreateValueU1,
+    CreateValueInt,
     CreateValueDouble,
     CreateValueString,
     CreateLiteralArrayValue,

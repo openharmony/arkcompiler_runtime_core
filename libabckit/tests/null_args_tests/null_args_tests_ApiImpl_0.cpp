@@ -62,4 +62,10 @@ TEST_F(LibAbcKitNullptrTestsApiImpl0, writeAbc)
     helpers_nullptr::TestNullptr(g_apiImp->writeAbc);
 }
 
+// Test: test-kind=api, api=ApiImpl::AbckitGetApiImpl,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsApiImpl0, AbckitGetApiImpl)
+{
+    helpers_nullptr::TestNullptr(AbckitGetApiImpl);
+}
 }  // namespace libabckit::test

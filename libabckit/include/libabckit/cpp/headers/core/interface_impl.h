@@ -35,6 +35,13 @@ inline std::string Interface::GetName() const
     return str;
 }
 
+inline bool Interface::IsExternal() const
+{
+    const auto isExternal = GetApiConfig()->cIapi_->interfaceIsExternal(GetView());
+    CheckError(GetApiConfig());
+    return isExternal;
+}
+
 inline core::Module Interface::GetModule() const
 {
     AbckitCoreModule *mod = GetApiConfig()->cIapi_->interfaceGetModule(GetView());
@@ -130,6 +137,22 @@ inline std::vector<core::Class> Interface::GetClasses() const
     CheckError(GetApiConfig());
 
     return classes;
+}
+
+inline std::vector<core::Annotation> Interface::GetAnnotations() const
+{
+    std::vector<core::Annotation> anns;
+    Payload<std::vector<core::Annotation> *> payload {&anns, GetApiConfig(), GetResource()};
+
+    GetApiConfig()->cIapi_->interfaceEnumerateAnnotations(
+        GetView(), &payload, [](AbckitCoreAnnotation *method, void *data) {
+            const auto &payload = *static_cast<Payload<std::vector<core::Annotation> *> *>(data);
+            payload.data->push_back(core::Annotation(method, payload.config, payload.resource));
+            return true;
+        });
+
+    CheckError(GetApiConfig());
+    return anns;
 }
 }  // namespace abckit::core
 

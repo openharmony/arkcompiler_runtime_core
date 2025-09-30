@@ -43,6 +43,8 @@ template("create_merge_file") {
 }
 
 abckit_gtests_sources = [
+  "adapter_static/ir_static_test.cpp",
+  #"adapter_static/runtime_adapter_static_test.cpp",
   "clean_scenarios/c_api/dynamic/add_log/add_log_dynamic_test.cpp",
   "clean_scenarios/c_api/dynamic/add_try_catch/add_try_catch_test.cpp",
   "clean_scenarios/c_api/dynamic/api_scanner/api_scanner_test.cpp",
@@ -72,11 +74,14 @@ abckit_gtests_sources = [
   "internal/implementation_api/abc_stuff.cpp",
   "internal/implementation_api/graph_stuff.cpp",
   "internal/mem_manager/several_abc.cpp",
+  "logger/logger_test.cpp",
+  "adapter_dynamic/convert_test.cpp",
   "null_args_tests/null_args_tests_ApiImpl_0.cpp",
   "null_args_tests/null_args_tests_ArktsInspectApiImpl_0.cpp",
   "null_args_tests/null_args_tests_ArktsModifyApiImpl_0.cpp",
   "null_args_tests/null_args_tests_GraphApiImpl_0.cpp",
   "null_args_tests/null_args_tests_InspectApiImpl_0.cpp",
+  "null_args_tests/null_args_tests_InspectApiImpl_1.cpp",
   "null_args_tests/null_args_tests_IsaApiDynamicImpl_0.cpp",
   "null_args_tests/null_args_tests_IsaApiDynamicImpl_1.cpp",
   "null_args_tests/null_args_tests_IsaApiStaticImpl_0.cpp",
@@ -105,10 +110,23 @@ abckit_gtests_sources = [
   "scenarios/scan_subclasses/dynamic/subclasses_scanner.cpp",
   "scenarios/static_branch_elimination/static_branch_elimination.cpp",
   "ut/extensions/arkts/inspect_api/api_casts/api_casts.cpp",
+  "ut/extensions/arkts/inspect_api/methods/methods_static_test.cpp",
   "ut/extensions/arkts/inspect_api/modules/modules_dynamic_test.cpp",
   "ut/extensions/arkts/inspect_api/namespace/namespace_arkts.cpp",
+  #"ut/extensions/arkts/inspect_api/helpers/helpers_static_test.cpp",
+  "ut/extensions/arkts/modify_api/annotations/annotations_static_modify_test.cpp",
   "ut/extensions/arkts/modify_api/annotations/annotations_test.cpp",
+  "ut/extensions/arkts/modify_api/class/class_api_modify_static.cpp",
+  "ut/extensions/arkts/modify_api/class/class_static_modify_test.cpp",
+  "ut/extensions/arkts/modify_api/classes/classes_static_modify_test.cpp",
+  "ut/extensions/arkts/modify_api/enums/enums_static_modify_test.cpp",
+  "ut/extensions/arkts/modify_api/interface/interface_static_test.cpp",
+  "ut/extensions/arkts/modify_api/interfaces/interface_add_field_static.cpp",
+  "ut/extensions/arkts/modify_api/interfaces/interface_test.cpp",
+  "ut/extensions/arkts/modify_api/interfaces/interfaces_static_modify_test.cpp",
+  "ut/extensions/arkts/modify_api/interfaces/static_interface_set_name.cpp",
   "ut/extensions/arkts/modify_api/modules/modules_dynamic_modify_test.cpp",
+  "ut/extensions/arkts/modify_api/modules/modules_static_modify_test.cpp",
   "ut/extensions/js/inspect_api/api_casts/api_casts.cpp",
   "ut/extensions/js/inspect_api/enumerators/enumerators_test.cpp",
   "ut/extensions/js/inspect_api/modules/modules_dynamic_test.cpp",
@@ -205,11 +223,13 @@ abckit_gtests_sources = [
   "ut/isa/isa_static/get_opcode/get_opcode_static.cpp",
   "ut/isa/isa_static/is_instance/is_instance.cpp",
   "ut/isa/isa_static/is_nullvalue/is_nullvalue.cpp",
+  "ut/isa/isa_static/nullcheck/nullcheck_test.cpp",
   "ut/isa/isa_static/load_nullvalue/load_nullvalue_static.cpp",
   "ut/isa/isa_static/load_string/load_string_static.cpp",
   "ut/isa/isa_static/objects/objects.cpp",
   "ut/isa/isa_static/return/return_static.cpp",
   "ut/isa/isa_static/throw/throw_static.cpp",
+  "ut/metadata_core/inspect_api/annotations/annotations_static_test.cpp",
   "ut/metadata_core/inspect_api/annotations/annotations_test.cpp",
   "ut/metadata_core/inspect_api/classes/classes_static_test.cpp",
   "ut/metadata_core/inspect_api/classes/classes_test.cpp",
@@ -219,6 +239,7 @@ abckit_gtests_sources = [
   "ut/metadata_core/inspect_api/files/files_test.cpp",
   "ut/metadata_core/inspect_api/interfaces/interfaces_static_test.cpp",
   "ut/metadata_core/inspect_api/literals/literals_test.cpp",
+  "ut/metadata_core/inspect_api/methods/methods_static_test.cpp",
   "ut/metadata_core/inspect_api/methods/methods_test.cpp",
   "ut/metadata_core/inspect_api/modules/modules_dynamic_test.cpp",
   "ut/metadata_core/inspect_api/modules/modules_static_test.cpp",
@@ -227,6 +248,7 @@ abckit_gtests_sources = [
   "ut/metadata_core/inspect_api/strings/strings_test.cpp",
   "ut/metadata_core/inspect_api/types/types_test.cpp",
   "ut/metadata_core/inspect_api/values/values_test.cpp",
+  "ut/metadata_core/modify_api/functions/functions_test.cpp",
   "ut/metadata_core/modify_api/literals/literals_test.cpp",
   "ut/metadata_core/modify_api/strings/strings_test.cpp",
   "ut/metadata_core/modify_api/types/types_test.cpp",
@@ -430,18 +452,25 @@ test_ts_files = [
 
   "ut/extensions/arkts/inspect_api/api_casts/api_casts",
   "ut/extensions/arkts/inspect_api/namespace/namespace_arkts_dynamic",
+  "ut/extensions/arkts/inspect_api/helpers/helpers_dynamic_test",
+  "ut/extensions/arkts/modify_api/class/myclass",
   "regression/issue_IB1YEI/issue_IB1YEI",
   "regression/issue_IB2T4M/issue_IB2T4M",
 ]
 test_ts_files += clean_scenario_ts_files
 
 test_ets_files = [
+  "ut/metadata_core/inspect_api/annotations/annotations_static",
   "ut/metadata_core/inspect_api/modules/targets/ArkTS2_target",
   "ut/metadata_core/inspect_api/modules/modules_static",
+  "ut/metadata_core/inspect_api/modules/modules_static_test",
+  "ut/metadata_core/inspect_api/modules/import_test",
   "ut/metadata_core/inspect_api/classes/classes_static",
   "ut/metadata_core/inspect_api/interfaces/interfaces_static",
+  "ut/metadata_core/inspect_api/interfaces/interface_test",
   "ut/metadata_core/inspect_api/enums/enums_static",
   "ut/metadata_core/inspect_api/classes/classes_empty_static",
+  "ut/metadata_core/inspect_api/methods/methods_static_other",
   "ut/metadata_core/inspect_api/methods/methods_static",
   "ut/metadata_core/inspect_api/methods/native_method",
   "ut/metadata_core/inspect_api/namespaces/namespaces_static",
@@ -451,6 +480,7 @@ test_ets_files = [
   "ut/metadata_core/inspect_api/literals/literals_static",
   "ut/metadata_core/inspect_api/values/values_static",
   "ut/metadata_core/inspect_api/types/types_static",
+  "ut/metadata_core/modify_api/functions/functions_static",
   "ut/metadata_core/modify_api/strings/strings_static",
   "ut/metadata_core/modify_api/types/types_static",
   "ut/metadata_core/modify_api/literals/literals_static",
@@ -481,6 +511,7 @@ test_ets_files = [
   "ut/isa/isa_static/get_opcode/get_opcode_static",
   "ut/isa/isa_static/is_instance/is_instance_static",
   "ut/isa/isa_static/is_nullvalue/is_nullvalue_static",
+  "ut/isa/isa_static/nullcheck/nullcheck_static",
   "ut/isa/isa_static/create_if/create_if_static",
   "ut/isa/isa_static/objects/objects",
   "ut/isa/isa_static/throw/throw_static",
@@ -503,7 +534,32 @@ test_ets_files = [
   "ut/ir_core/loops/loop_static",
   "ut/ir_core/insert_try_catch/insert_try_catch_static",
   "ut/ir_core/graph_verifier/graph_verifier",
+  "ut/extensions/arkts/inspect_api/methods/methods_static",
+  "ut/extensions/arkts/modify_api/annotations/annotations_static_modify",
+  "ut/extensions/arkts/modify_api/enums/enums_static_modify",
+  "ut/extensions/arkts/modify_api/classes/classes_static_modify",
+  "ut/extensions/arkts/modify_api/interfaces/interfaces_static_modify",
   "ut/extensions/arkts/modify_api/modules/modules_static_modify",
+  #"ut/extensions/arkts/inspect_api/helpers/helpers_static_test",
+  "ut/extensions/arkts/modify_api/class/class_add_method_static",
+  "ut/extensions/arkts/modify_api/class/class_add_method_static_extral",
+  "ut/extensions/arkts/modify_api/class/class_interface",
+  "ut/extensions/arkts/modify_api/class/class_remove_field",
+  "ut/extensions/arkts/modify_api/class/class_remove_field_static_delete",
+  "ut/extensions/arkts/modify_api/class/class_static_modify",
+  "ut/extensions/arkts/modify_api/class/classset_static",
+  "ut/extensions/arkts/modify_api/class/interface",
+  "ut/extensions/arkts/modify_api/class/suclass",
+  "ut/extensions/arkts/modify_api/class/super_class",
+  "ut/extensions/arkts/modify_api/interface/addsuperinterface",
+  "ut/extensions/arkts/modify_api/interface/interfaceset_static",
+  "ut/extensions/arkts/modify_api/interface/removesuperinterface",
+  "ut/extensions/arkts/modify_api/interfaces/interface",
+  "ut/extensions/arkts/modify_api/interfaces/interface_add_field_static",
+  "ut/extensions/arkts/modify_api/interfaces/interface_add_method_static",
+  "ut/extensions/arkts/modify_api/interfaces/interface_add_method_static_extral",
+  "ut/extensions/arkts/modify_api/interfaces/interface_remove_field_static",
+  "ut/extensions/arkts/modify_api/interfaces/static_interface_set_name",
 
   "internal/implementation_api/abc_static",
   "internal/mem_manager/abc_static_1",
@@ -832,7 +888,9 @@ libabckit_host_unittest_action("abckit_mock_gtests") {
     "mock/tests/arkts/cpp_api_annotation_element.cpp",
     "mock/tests/arkts/cpp_api_annotation_interface.cpp",
     "mock/tests/arkts/cpp_api_class.cpp",
+    "mock/tests/arkts/cpp_api_field.cpp",
     "mock/tests/arkts/cpp_api_function.cpp",
+    "mock/tests/arkts/cpp_api_interface.cpp",
     "mock/tests/arkts/cpp_api_module.cpp",
     "mock/tests/arkts/cpp_api_namespace.cpp",
     "mock/tests/core/cpp_api_annotation.cpp",
@@ -877,20 +935,43 @@ libabckit_host_unittest_action("abckit_gtests") {
   sources = abckit_gtests_sources
 
   include_dirs = [
+    "$ark_root_dynamic/static_core",  # this target should not include headers
+                                      # from dynamic runtime, so static_core
+                                      # must be listed first
     "$ark_root_dynamic",
     "$abckit_root",
     "$abckit_root/include",
     "$abckit_root/src",
     "$abckit_root/tests",
     "$abckit_root/src/include_v2",
+    "$ark_root_static/assembler",
+    "$ark_root_static/compiler",
+    "$ark_root_static/libpandabase",
+    "$ark_root_static/runtime",
+    "$target_gen_dir/../../static_core/",
+    "$target_gen_dir/../../static_core/assembler",
+    "$target_gen_dir/../../static_core/compiler/generated",
+    "$target_gen_dir/../../static_core/cross_values",
+    "$target_gen_dir/../../static_core/libpandabase",
+    "$target_gen_dir/../../static_core/libpandabase/generated",
+    "$target_gen_dir/../../static_core/runtime",
+    "$target_gen_dir/../../static_core/runtime/generated",
   ]
 
-  configs = [ "$abckit_root:abckit_config" ]
+  configs = [
+    "$abckit_root:abckit_config",
+    "$ark_root_static/assembler:arkassembler_public_config",
+    "$ark_root_static/libpandabase:arkbase_public_config",
+  ]
 
   deps = [
     ":abckit_ets_vm_helpers",
     ":abckit_js_vm_helpers",
     "$abckit_root/src:libabckit",
+    "$ark_root_static/assembler:libarktsassembler",
+    "$ark_root_static/compiler:libarktscompiler",
+    "$ark_root_static/libpandafile:libarktsfile",
+    "$ark_root_static/libpandabase:libarktsbase",
   ]
 
   foreach(file, test_js_files) {
@@ -926,6 +1007,8 @@ libabckit_host_unittest_action("abckit_gtests") {
   defines = [
     "ABCKIT_ABC_DIR=\"${test_abc_dir}/\"",
     "ABCKIT_TEST_DIR=\"${test_js_dir}\"",
+    "PANDA_WITH_ETS",
+    "ENABLE_LIBABCKIT",
   ]
 }
 
@@ -935,20 +1018,43 @@ libabckit_host_unittest_action("arklink_strip_unused_code_gtests") {
   sources = abckit_gtests_sources
 
   include_dirs = [
+    "$ark_root_dynamic/static_core",  # this target should not include headers
+                                      # from dynamic runtime, so static_core
+                                      # must be listed first
     "$ark_root_dynamic",
     "$abckit_root",
     "$abckit_root/include",
     "$abckit_root/src",
     "$abckit_root/tests",
+    "$ark_root_static/assembler",
+    "$ark_root_static/compiler",
+    "$ark_root_static/libpandabase",
+    "$ark_root_static/runtime",
+    "$target_gen_dir/../../static_core/",
+    "$target_gen_dir/../../static_core/assembler",
+    "$target_gen_dir/../../static_core/compiler/generated",
+    "$target_gen_dir/../../static_core/cross_values",
+    "$target_gen_dir/../../static_core/libpandabase",
+    "$target_gen_dir/../../static_core/libpandabase/generated",
+    "$target_gen_dir/../../static_core/runtime",
+    "$target_gen_dir/../../static_core/runtime/generated",
   ]
 
-  configs = [ "$abckit_root:abckit_config" ]
+  configs = [
+    "$abckit_root:abckit_config",
+    "$ark_root_static/assembler:arkassembler_public_config",
+    "$ark_root_static/libpandabase:arkbase_public_config",
+  ]
 
   deps = [
     ":abckit_ets_vm_helpers",
     ":abckit_gtests_action",
     ":abckit_js_vm_helpers",
     "$abckit_root/src:libabckit",
+    "$ark_root_static/assembler:libarktsassembler",
+    "$ark_root_static/compiler:libarktscompiler",
+    "$ark_root_static/libpandafile:libarktsfile",
+    "$ark_root_static/libpandabase:libarktsbase",
   ]
 
   foreach(file, test_js_files) {
@@ -978,6 +1084,8 @@ libabckit_host_unittest_action("arklink_strip_unused_code_gtests") {
   defines = [
     "ABCKIT_ABC_DIR=\"${test_abc_dir}/\"",
     "ABCKIT_TEST_DIR=\"${test_js_dir}\"",
+    "PANDA_WITH_ETS",
+    "ENABLE_LIBABCKIT",
   ]
 }
 

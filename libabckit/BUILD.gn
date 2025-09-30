@@ -59,6 +59,7 @@ config("abckit_config") {
       "-lubsan",
     ]
   }
+
   if (defined(ohos_indep_compiler_enable) && ohos_indep_compiler_enable) {
     configs = []
   } else {

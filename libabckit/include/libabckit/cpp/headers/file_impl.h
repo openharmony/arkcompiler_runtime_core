@@ -102,6 +102,13 @@ inline abckit::Value File::CreateValueU1(bool val) const
     return abckit::Value(value, GetApiConfig(), this);
 }
 
+inline abckit::Value File::CreateValueInt(int val) const
+{
+    AbckitValue *value = GetApiConfig()->cMapi_->createValueInt(GetResource(), val);
+    CheckError(GetApiConfig());
+    return abckit::Value(value, GetApiConfig(), this);
+}
+
 inline abckit::Value File::CreateValueDouble(double val) const
 {
     AbckitValue *value = GetApiConfig()->cMapi_->createValueDouble(GetResource(), val);

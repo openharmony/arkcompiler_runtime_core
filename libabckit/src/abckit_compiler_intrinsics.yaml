@@ -632,3 +632,23 @@ intrinsics:
   need_nullcheck: []
   is_fastpath: false
   need_param_locations: false
+
+- name: AbckitNullCheck
+  space: abckit
+  class_name: "NullCheck"
+  method_name: "ets.nullcheck"
+  compiler_only: true
+  private: false
+  static: true
+  safepoint_after_call: false 
+  signature:
+    ret: none 
+    args: [ ref ]
+  clear_flags: ["call", "heap_inv", "barrier", "acc_read", "acc_write" ]
+  set_flags: [ "can_throw", "no_dst","no_nullptr" ]
+  is_stub: false
+  additional_temps: 0
+  codegen_arch: []
+  need_nullcheck: []
+  is_fastpath: false
+  need_param_locations: false

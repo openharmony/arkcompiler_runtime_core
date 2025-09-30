@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,9 @@
 #ifndef CPP_ABCKIT_CORE_ANNOTATION_INTERFACE_H
 #define CPP_ABCKIT_CORE_ANNOTATION_INTERFACE_H
 
-#include "libabckit/cpp/headers/base_classes.h"
+#include "../base_classes.h"
 #include "annotation_interface_field.h"
-#include "libabckit/cpp/headers/config.h"
+#include "../config.h"
 
 #include <vector>
 #include <string>
@@ -35,6 +35,8 @@ class AnnotationInterface : public ViewInResource<AbckitCoreAnnotationInterface 
     friend class arkts::Module;
     /// @brief core::Module
     friend class core::Module;
+    /// @brief core::Namespace
+    friend class core::Namespace;
     /// @brief core::AnnotationInterfaceField
     friend class core::AnnotationInterfaceField;
     /// @brief abckit::DefaultHash<AnnotationInterface>
@@ -105,6 +107,13 @@ public:
 
      */
     core::Module GetModule() const;
+
+    /**
+     * @brief Returns parent namespace for AnnotationInterface.
+     * @return `core::Namespace`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    Namespace GetParentNamespace() const;
 
     /**
      * @brief Enumerates fields of Annotation Interface, invoking callback `cb` for each field.

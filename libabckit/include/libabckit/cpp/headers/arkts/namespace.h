@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,9 @@
 #ifndef CPP_ABCKIT_ARKTS_NAMESPACE_H
 #define CPP_ABCKIT_ARKTS_NAMESPACE_H
 
-#include "libabckit/cpp/headers/core/namespace.h"
+#include "../core/namespace.h"
 #include "function.h"
-#include "libabckit/cpp/headers/base_concepts.h"
+#include "../base_concepts.h"
 
 namespace abckit::arkts {
 
@@ -75,6 +75,14 @@ public:
      * @return Function that is invoked upon Namespace construction.
      */
     Function GetConstructor() const;
+
+    /**
+     * @brief Sets name for namespace
+     * @return `true` on success.
+     * @param [ in ] name - Name to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool SetName(const std::string &name) const;
 
 private:
     /**

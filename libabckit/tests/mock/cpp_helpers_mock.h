@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -100,6 +100,24 @@ inline abckit::arkts::Class GetMockArktsClass(const abckit::File &file)
     return c;
 }
 
+inline abckit::core::ModuleField GetMockCoreModuleField(const abckit::File &file)
+{
+    abckit::core::Module cmd = GetMockCoreModule(file);
+
+    std::vector<abckit::core::ModuleField> moduleFields = cmd.GetFields();
+
+    EXPECT_TRUE(CheckMockedApi("ModuleEnumerateFields"));
+
+    return moduleFields.front();
+}
+
+inline abckit::arkts::ModuleField GetMockArktsModuleField(const abckit::File &file)
+{
+    auto f = abckit::arkts::ModuleField(GetMockCoreModuleField(file));
+    EXPECT_TRUE(CheckMockedApi("CoreModuleFieldToArktsModuleField"));
+    return f;
+}
+
 inline abckit::core::Interface GetMockCoreInterface(const abckit::File &file)
 {
     abckit::core::Module cmd = GetMockCoreModule(file);
@@ -116,6 +134,13 @@ inline abckit::core::Interface GetMockCoreInterface(const abckit::File &file)
     return interfaces.front();
 }
 
+inline abckit::arkts::Interface GetMockArktsInterface(const abckit::File &file)
+{
+    auto i = abckit::arkts::Interface(GetMockCoreInterface(file));
+    EXPECT_TRUE(CheckMockedApi("CoreInterfaceToArktsInterface"));
+    return i;
+}
+
 inline abckit::core::Enum GetMockCoreEnum(const abckit::File &file)
 {
     abckit::core::Module cmd = GetMockCoreModule(file);
@@ -130,6 +155,49 @@ inline abckit::core::Enum GetMockCoreEnum(const abckit::File &file)
     EXPECT_TRUE(CheckMockedApi("ModuleEnumerateEnums"));
 
     return enums.front();
+}
+
+inline abckit::arkts::Enum GetMockArktsEnum(const abckit::File &file)
+{
+    auto e = abckit::arkts::Enum(GetMockCoreEnum(file));
+    EXPECT_TRUE(CheckMockedApi("CoreEnumToArktsEnum"));
+    return e;
+}
+
+inline abckit::core::EnumField GetMockCoreEnumField(const abckit::File &file)
+{
+    abckit::core::Enum ce = GetMockCoreEnum(file);
+
+    std::vector<abckit::core::EnumField> enumFields = ce.GetFields();
+
+    EXPECT_TRUE(CheckMockedApi("EnumEnumerateFields"));
+
+    return enumFields.front();
+}
+
+inline abckit::arkts::EnumField GetMockArktsEnumField(const abckit::File &file)
+{
+    auto f = abckit::arkts::EnumField(GetMockCoreEnumField(file));
+    EXPECT_TRUE(CheckMockedApi("CoreEnumFieldToArktsEnumField"));
+    return f;
+}
+
+inline abckit::core::Function GetMockCoreInterfaceMethod(const abckit::File &file)
+{
+    auto cf = GetMockCoreInterface(file);
+    std::vector<abckit::core::Function> functions = cf.GetAllMethods();
+
+    EXPECT_TRUE(CheckMockedApi("InterfaceEnumerateMethods"));
+
+    return functions.front();
+}
+
+inline abckit::arkts::Function GetMockArktsInterfaceMethod(const abckit::File &file)
+{
+    auto cf = GetMockCoreInterfaceMethod(file);
+    auto fn = abckit::arkts::Function(cf);
+    EXPECT_TRUE(CheckMockedApi("CoreFunctionToArktsFunction"));
+    return fn;
 }
 
 inline abckit::core::Function GetMockCoreFunction(const abckit::File &file)
@@ -173,6 +241,22 @@ inline abckit::arkts::Annotation GetMockArktsAnnotation(const abckit::File &file
 {
     auto a = abckit::arkts::Annotation(GetMockCoreAnnotation(file));
     EXPECT_TRUE(CheckMockedApi("CoreAnnotationToArktsAnnotation"));
+    return a;
+}
+
+inline abckit::core::ClassField GetMockCoreClassField(const abckit::File &file)
+{
+    abckit::core::Class cls = GetMockCoreClass(file);
+    std::vector<abckit::core::ClassField> fields = cls.GetFields();
+
+    EXPECT_TRUE(CheckMockedApi("ClassEnumerateFields"));
+    return fields.front();
+}
+
+inline abckit::arkts::ClassField GetMockArktsFiled(const abckit::File &file)
+{
+    auto a = abckit::arkts::ClassField(GetMockCoreClassField(file));
+    EXPECT_TRUE(CheckMockedApi("CoreClassFieldToArktsClassField"));
     return a;
 }
 
@@ -239,6 +323,20 @@ inline abckit::LiteralArray GetMockLiteralArray(const abckit::File &file)
     return litarr;
 }
 
+inline abckit::arkts::ClassField GetMockArktsClassField(const abckit::File &file)
+{
+    auto cf = abckit::arkts::ClassField(GetMockCoreClassField(file));
+    EXPECT_TRUE(CheckMockedApi("CoreClassFieldToArktsClassField"));
+    return cf;
+}
+
+inline abckit::arkts::Function GetMockArktsClassMothed(const abckit::File &file)
+{
+    auto fn = abckit::arkts::Function(GetMockCoreFunction(file));
+    EXPECT_TRUE(CheckMockedApi("CoreFunctionToArktsFunction"));
+    return fn;
+}
+
 inline abckit::Type GetMockType(const abckit::File &file)
 {
     abckit::Type t = file.CreateType(DEFAULT_TYPE_ID);
@@ -264,6 +362,12 @@ inline abckit::Value GetMockValueU1(const abckit::File &file)
 {
     abckit::Value val = file.CreateValueU1(DEFAULT_BOOL);
     EXPECT_TRUE(CheckMockedApi("CreateValueU1"));
+    return val;
+}
+inline abckit::Value GetMockValueInt(const abckit::File &file)
+{
+    abckit::Value val = file.CreateValueInt(DEFAULT_I32);
+    EXPECT_TRUE(CheckMockedApi("CreateValueInt"));
     return val;
 }
 
@@ -410,6 +514,23 @@ inline abckit::arkts::AnnotationInterfaceField GetMockArktsAnnotationInterfaceFi
     auto aif = abckit::arkts::AnnotationInterfaceField(GetMockCoreAnnotationInterfaceField(file));
     EXPECT_TRUE(CheckMockedApi("CoreAnnotationInterfaceFieldToArktsAnnotationInterfaceField"));
     return aif;
+}
+
+inline abckit::core::InterfaceField GetMockCoreInterfaceField(const abckit::File &file)
+{
+    auto iface = GetMockCoreInterface(file);
+    std::vector<abckit::core::InterfaceField> fields;
+
+    fields = iface.GetFields();
+    EXPECT_TRUE(CheckMockedApi("InterfaceEnumerateFields"));
+    return fields.front();
+}
+
+inline abckit::arkts::InterfaceField GetMockArktsInterfaceField(const abckit::File &file)
+{
+    auto fd = abckit::arkts::InterfaceField(GetMockCoreInterfaceField(file));
+    EXPECT_TRUE(CheckMockedApi("CoreInterfaceFieldToArktsInterfaceField"));
+    return fd;
 }
 
 // NOLINTEND(performance-unnecessary-value-param)

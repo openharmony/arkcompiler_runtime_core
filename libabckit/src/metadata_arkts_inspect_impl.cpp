@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -200,9 +200,12 @@ extern "C" AbckitCoreInterface *ArktsInterfaceToCoreInterface(AbckitArktsInterfa
 
 extern "C" AbckitArktsInterface *CoreInterfaceToArktsInterface(AbckitCoreInterface *iface)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)iface;
-    return nullptr;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(iface, nullptr);
+    LIBABCKIT_CHECK_ARKTS_TARGET(iface->owningModule);
+    return iface->GetArkTSImpl();
 }
 
 /* ========================================
@@ -218,9 +221,11 @@ extern "C" AbckitCoreEnum *ArktsEnumToCoreEnum(AbckitArktsEnum *enm)
 
 extern "C" AbckitArktsEnum *CoreEnumToArktsEnum(AbckitCoreEnum *enm)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)enm;
-    return nullptr;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(enm, nullptr);
+    return enm->GetArkTSImpl();
 }
 
 /* ========================================
@@ -236,9 +241,11 @@ extern "C" AbckitCoreModuleField *ArktsModuleFieldToCoreModuleField(AbckitArktsM
 
 extern "C" AbckitArktsModuleField *CoreModuleFieldToArktsModuleField(AbckitCoreModuleField *field)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    return nullptr;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(field, nullptr);
+    return field->GetArkTSImpl();
 }
 
 extern "C" bool ArktsModuleFieldIsReadonly(AbckitArktsModuleField *field)
@@ -246,6 +253,19 @@ extern "C" bool ArktsModuleFieldIsReadonly(AbckitArktsModuleField *field)
     LIBABCKIT_UNIMPLEMENTED;
     (void)field;
     return false;
+}
+
+/* ========================================
+ * Namespace Field
+ * ======================================== */
+
+extern "C" AbckitArktsNamespaceField *CoreNamespaceFieldToArktsNamespaceField(AbckitCoreNamespaceField *field)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(field, nullptr);
+    return field->GetArkTSImpl();
 }
 
 /* ========================================
@@ -261,9 +281,11 @@ extern "C" AbckitCoreClassField *ArktsClassFieldToCoreClassField(AbckitArktsClas
 
 extern "C" AbckitArktsClassField *CoreClassFieldToArktsClassField(AbckitCoreClassField *field)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    return nullptr;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(field, nullptr);
+    return field->GetArkTSImpl();
 }
 
 extern "C" bool ArktsClassFieldIsReadonly(AbckitArktsClassField *field)
@@ -286,9 +308,11 @@ extern "C" AbckitCoreInterfaceField *ArktsInterfaceFieldToCoreInterfaceField(Abc
 
 extern "C" AbckitArktsInterfaceField *CoreInterfaceFieldToArktsInterfaceField(AbckitCoreInterfaceField *field)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    return nullptr;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(field, nullptr);
+    return field->GetArkTSImpl();
 }
 
 extern "C" bool ArktsInterfaceFieldIsReadonly(AbckitArktsInterfaceField *field)
@@ -311,9 +335,11 @@ extern "C" AbckitCoreEnumField *ArktsEnumFieldToCoreEnumField(AbckitArktsEnumFie
 
 extern "C" AbckitArktsEnumField *CoreEnumFieldToArktsEnumField(AbckitCoreEnumField *field)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    return nullptr;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(field, nullptr);
+    return field->GetArkTSImpl();
 }
 
 // ========================================
@@ -358,23 +384,44 @@ extern "C" bool FunctionIsNative(AbckitArktsFunction *function)
 
 extern "C" bool FunctionIsAsync(AbckitArktsFunction *function)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)function;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_BAD_ARGUMENT(function, false);
+
+    switch (function->core->owningModule->target) {
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return FunctionIsAsyncStatic(function->core);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
 }
 
 extern "C" bool FunctionIsFinal(AbckitArktsFunction *function)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)function;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_BAD_ARGUMENT(function, false);
+
+    switch (function->core->owningModule->target) {
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return FunctionIsFinalStatic(function->core);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
 }
 
 extern "C" bool FunctionIsAbstract(AbckitArktsFunction *function)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)function;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_BAD_ARGUMENT(function, false);
+
+    switch (function->core->owningModule->target) {
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return FunctionIsAbstractStatic(function->core);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
 }
 
 // ========================================
@@ -545,6 +592,12 @@ AbckitArktsInspectApi g_arktsInspectApiImpl = {
     // ========================================
 
     ArktsModuleFieldToCoreModuleField, CoreModuleFieldToArktsModuleField, ArktsModuleFieldIsReadonly,
+
+    // ========================================
+    // Namespace Field
+    // ========================================
+
+    CoreNamespaceFieldToArktsNamespaceField,
 
     // ========================================
     // Class Field
@@ -738,6 +791,12 @@ bool ArkTSNamespaceEnumerateTopLevelFunctions(AbckitCoreNamespace *n, void *data
     return true;
 }
 
+bool ArkTSNamespaceEnumerateAnnotationInterfaces(AbckitCoreNamespace *n, void *data,
+                                                 bool (*cb)(AbckitCoreAnnotationInterface *ai, void *data))
+{
+    return NamespaceEnumerateAnnotationInterfacesHelper(n, data, cb);
+}
+
 // ========================================
 // Class
 // ========================================
@@ -812,6 +871,12 @@ bool ArkTSInterfaceEnumerateClasses(AbckitCoreInterface *iface, void *data,
     return InterfaceEnumerateClassesHelper(iface, data, cb);
 }
 
+bool ArkTSInterfaceEnumerateAnnotations(AbckitCoreInterface *iface, void *data,
+                                        bool (*cb)(AbckitCoreAnnotation *anno, void *data))
+{
+    return InterfaceEnumerateAnnotationsHelper(iface, data, cb);
+}
+
 // ========================================
 // Enum
 // ========================================
@@ -824,6 +889,22 @@ bool ArkTSEnumEnumerateMethods(AbckitCoreEnum *enm, void *data, bool (*cb)(Abcki
 bool ArkTSEnumEnumerateFields(AbckitCoreEnum *enm, void *data, bool (*cb)(AbckitCoreEnumField *field, void *data))
 {
     return EnumEnumerateFieldsHelper(enm, data, cb);
+}
+
+// ========================================
+// Field
+// ========================================
+
+bool ArkTSClassFieldEnumerateAnnotations(AbckitCoreClassField *field, void *data,
+                                         bool (*cb)(AbckitCoreAnnotation *anno, void *data))
+{
+    return ClassFieldEnumerateAnnotationsHelper(field, data, cb);
+}
+
+bool ArkTSInterfaceFieldEnumerateAnnotations(AbckitCoreInterfaceField *field, void *data,
+                                             bool (*cb)(AbckitCoreAnnotation *anno, void *data))
+{
+    return InterfaceFieldEnumerateAnnotationsHelper(field, data, cb);
 }
 
 // ========================================
@@ -855,6 +936,20 @@ bool ArkTSFunctionEnumerateAnnotations(AbckitCoreFunction *function, void *data,
 
     for (auto &annotation : function->annotations) {
         if (!cb(annotation.get(), data)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool ArkTSFunctionEnumerateParameters(AbckitCoreFunction *function, void *data,
+                                      bool (*cb)(AbckitCoreFunctionParam *param, void *data))
+{
+    LIBABCKIT_BAD_ARGUMENT(function, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+
+    for (auto &param : function->parameters) {
+        if (!cb(param.get(), data)) {
             return false;
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,4 +58,164 @@ TEST_F(LibAbcKitCppMockArktsTestClass, Class_AddAnnotation)
     ASSERT_TRUE(CheckMockedStackEmpty());
 }
 
+// Test: test-kind=mock, api=Class::AddInterface, abc-kind=ArkTS2, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockArktsTestClass, Class_AddInterface)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File f(DEFAULT_PATH);
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        abckit::mock::helpers::GetMockArktsClass(f).AddInterface(abckit::mock::helpers::GetMockArktsInterface(f));
+        ASSERT_TRUE(CheckMockedApi("ClassAddInterface"));
+        ASSERT_TRUE(CheckMockedApi("CoreInterfaceToArktsInterface"));
+        ASSERT_TRUE(CheckMockedApi("CoreClassToArktsClass"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
+
+// Test: test-kind=mock, api=Class::RemoveInterface, abc-kind=ArkTS2, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockArktsTestClass, Class_RemoveInterface)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File f(DEFAULT_PATH);
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        abckit::mock::helpers::GetMockArktsClass(f).RemoveInterface(abckit::mock::helpers::GetMockArktsInterface(f));
+        ASSERT_TRUE(CheckMockedApi("ClassRemoveInterface"));
+        ASSERT_TRUE(CheckMockedApi("CoreInterfaceToArktsInterface"));
+        ASSERT_TRUE(CheckMockedApi("CoreClassToArktsClass"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
+
+// Test: test-kind=mock, api=Class::SetSuperClass, abc-kind=ArkTS2, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockArktsTestClass, Class_SetSuperClass)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File f(DEFAULT_PATH);
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        abckit::mock::helpers::GetMockArktsClass(f).SetSuperClass(abckit::mock::helpers::GetMockArktsClass(f));
+        ASSERT_TRUE(CheckMockedApi("ClassSetSuperClass"));
+        ASSERT_TRUE(CheckMockedApi("CoreClassToArktsClass"));
+        ASSERT_TRUE(CheckMockedApi("CoreClassToArktsClass"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
+
+// Test: test-kind=mock, api=Class::AddMethod, abc-kind=ArkTS2, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockArktsTestClass, Class_AddMethod)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File f(DEFAULT_PATH);
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        abckit::mock::helpers::GetMockArktsClass(f).AddMethod(abckit::mock::helpers::GetMockArktsFunction(f));
+        ASSERT_TRUE(CheckMockedApi("ClassAddMethod"));
+        ASSERT_TRUE(CheckMockedApi("CoreFunctionToArktsFunction"));
+        ASSERT_TRUE(CheckMockedApi("CoreClassToArktsClass"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
+
+// Test: test-kind=mock, api=Class::RemoveMethod, abc-kind=ArkTS2, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockArktsTestClass, Class_RemoveMethod)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File f(DEFAULT_PATH);
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        abckit::mock::helpers::GetMockArktsClass(f).RemoveMethod(abckit::mock::helpers::GetMockArktsFunction(f));
+        ASSERT_TRUE(CheckMockedApi("ClassRemoveMethod"));
+        ASSERT_TRUE(CheckMockedApi("CoreFunctionToArktsFunction"));
+        ASSERT_TRUE(CheckMockedApi("CoreClassToArktsClass"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
+
+// Test: test-kind=mock, api=Class::CreateClass, abc-kind=ArkTS2, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockArktsTestClass, Class_CreateClass)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File f(DEFAULT_PATH);
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        abckit::arkts::Class::CreateClass(abckit::mock::helpers::GetMockArktsModule(f), DEFAULT_CONST_CHAR);
+        ASSERT_TRUE(CheckMockedApi("CoreClassToArktsClass"));
+        ASSERT_TRUE(CheckMockedApi("ArktsClassToCoreClass"));
+        ASSERT_TRUE(CheckMockedApi("CreateClass"));
+        ASSERT_TRUE(CheckMockedApi("CoreModuleToArktsModule"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
+
+// Test: test-kind=mock, api=Class::RemoveField, abc-kind=ArkTS1, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockArktsTestClass, Class_RemoveField)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File f(DEFAULT_PATH);
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        auto ae = abckit::mock::helpers::GetMockArktsClassField(f);
+        abckit::mock::helpers::GetMockArktsClass(f).RemoveField(ae);
+        ASSERT_TRUE(CheckMockedApi("ClassRemoveField"));
+        ASSERT_TRUE(CheckMockedApi("CoreClassFieldToArktsClassField"));
+        ASSERT_TRUE(CheckMockedApi("CoreClassToArktsClass"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
+
+// Test: test-kind=mock, api=Class::SetName, abc-kind=ArkTS2, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockArktsTestClass, Class_SetName)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File f(DEFAULT_PATH);
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        abckit::mock::helpers::GetMockArktsClass(f).SetName(DEFAULT_CONST_CHAR);
+        ASSERT_TRUE(CheckMockedApi("ClassSetName"));
+        ASSERT_TRUE(CheckMockedApi("CoreClassToArktsClass"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
+
+// Test: test-kind=mock, api=Class::AddField, abc-kind=ArkTS2, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockArktsTestClass, Class_AddField)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File f(DEFAULT_PATH);
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        abckit::mock::helpers::GetMockArktsClass(f).AddField(abckit::mock::helpers::GetMockArktsFiled(f));
+        ASSERT_TRUE(CheckMockedApi("ClassAddField"));
+        ASSERT_TRUE(CheckMockedApi("CoreClassFieldToArktsClassField"));
+        ASSERT_TRUE(CheckMockedApi("CoreClassToArktsClass"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
+
+// Test: test-kind=mock, api=Class::SetOwningModule, abc-kind=ArkTS2, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockArktsTestClass, Class_SetOwningModule)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File f(DEFAULT_PATH);
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        abckit::mock::helpers::GetMockArktsClass(f).SetOwningModule(abckit::mock::helpers::GetMockArktsModule(f));
+        ASSERT_TRUE(CheckMockedApi("ClassSetOwningModule"));
+        ASSERT_TRUE(CheckMockedApi("CoreModuleToArktsModule"));
+        ASSERT_TRUE(CheckMockedApi("CoreClassToArktsClass"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
 }  // namespace libabckit::cpp_test

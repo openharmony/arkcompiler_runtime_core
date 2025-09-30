@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,6 +37,13 @@ inline Function Namespace::GetConstructor() const
     CheckError(GetApiConfig());
     auto coreCon = GetApiConfig()->cArktsIapi_->arktsFunctionToCoreFunction(arktsCon);
     return Function(core::Function(coreCon, GetApiConfig(), GetResource()));
+}
+
+inline bool Namespace::SetName(const std::string &name) const
+{
+    const auto ret = GetApiConfig()->cArktsMapi_->namespaceSetName(TargetCast(), name.c_str());
+    CheckError(GetApiConfig());
+    return ret;
 }
 
 }  // namespace abckit::arkts

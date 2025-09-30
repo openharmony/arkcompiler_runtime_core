@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -23,7 +23,7 @@ config("abckit_canary_cpp_config") {
     "-Wextra",
     "-Werror",
   ]
-    include_dirs = [
+  include_dirs = [
     "$abckit_root",
     "$abckit_root/include",
   ]
@@ -50,8 +50,7 @@ abckit_standalone_canary("abckit_canary_cpp_headers_graph") {
 abckit_standalone_canary(
     "abckit_canary_cpp_headers_core_import_descriptor_impl") {
   configs = [ ":abckit_canary_cpp_config" ]
-  input_file =
-      "$abckit_root/include/libabckit/cpp/headers/core/import_descriptor_impl.h"
+  input_file = "$abckit_root/include/libabckit/cpp/headers/core/import_descriptor_impl.h"
   extension = "cpp"
 }
 
@@ -76,14 +75,16 @@ abckit_standalone_canary("abckit_canary_cpp_headers_core_class_impl") {
 abckit_standalone_canary(
     "abckit_canary_cpp_headers_core_annotation_interface_field") {
   configs = [ ":abckit_canary_cpp_config" ]
-  input_file = "$abckit_root/include/libabckit/cpp/headers/core/annotation_interface_field.h"
+  input_file =
+      "$abckit_root/include/libabckit/cpp/headers/core/annotation_interface_field.h"
   extension = "cpp"
 }
 
 abckit_standalone_canary(
     "abckit_canary_cpp_headers_core_annotation_interface_impl") {
   configs = [ ":abckit_canary_cpp_config" ]
-  input_file = "$abckit_root/include/libabckit/cpp/headers/core/annotation_interface_impl.h"
+  input_file =
+      "$abckit_root/include/libabckit/cpp/headers/core/annotation_interface_impl.h"
   extension = "cpp"
 }
 
@@ -95,8 +96,7 @@ abckit_standalone_canary("abckit_canary_cpp_headers_core_annotation") {
 
 abckit_standalone_canary("abckit_canary_cpp_headers_core_annotation_impl") {
   configs = [ ":abckit_canary_cpp_config" ]
-  input_file =
-      "$abckit_root/include/libabckit/cpp/headers/core/annotation_impl.h"
+  input_file = "$abckit_root/include/libabckit/cpp/headers/core/annotation_impl.h"
   extension = "cpp"
 }
 
@@ -108,8 +108,7 @@ abckit_standalone_canary("abckit_canary_cpp_headers_core_module") {
 
 abckit_standalone_canary("abckit_canary_cpp_headers_core_annotation_element") {
   configs = [ ":abckit_canary_cpp_config" ]
-  input_file =
-      "$abckit_root/include/libabckit/cpp/headers/core/annotation_element.h"
+  input_file = "$abckit_root/include/libabckit/cpp/headers/core/annotation_element.h"
   extension = "cpp"
 }
 
@@ -123,8 +122,7 @@ abckit_standalone_canary(
 abckit_standalone_canary(
     "abckit_canary_cpp_headers_core_export_descriptor_impl") {
   configs = [ ":abckit_canary_cpp_config" ]
-  input_file =
-      "$abckit_root/include/libabckit/cpp/headers/core/export_descriptor_impl.h"
+  input_file = "$abckit_root/include/libabckit/cpp/headers/core/export_descriptor_impl.h"
   extension = "cpp"
 }
 
@@ -136,8 +134,7 @@ abckit_standalone_canary("abckit_canary_cpp_headers_core_module_impl") {
 
 abckit_standalone_canary("abckit_canary_cpp_headers_core_import_descriptor") {
   configs = [ ":abckit_canary_cpp_config" ]
-  input_file =
-      "$abckit_root/include/libabckit/cpp/headers/core/import_descriptor.h"
+  input_file = "$abckit_root/include/libabckit/cpp/headers/core/import_descriptor.h"
   extension = "cpp"
 }
 
@@ -150,14 +147,14 @@ abckit_standalone_canary("abckit_canary_cpp_headers_core_class") {
 abckit_standalone_canary(
     "abckit_canary_cpp_headers_core_annotation_interface_field_impl") {
   configs = [ ":abckit_canary_cpp_config" ]
-  input_file = "$abckit_root/include/libabckit/cpp/headers/core/annotation_interface_field_impl.h"
+  input_file =
+      "$abckit_root/include/libabckit/cpp/headers/core/annotation_interface_field_impl.h"
   extension = "cpp"
 }
 
 abckit_standalone_canary("abckit_canary_cpp_headers_core_export_descriptor") {
   configs = [ ":abckit_canary_cpp_config" ]
-  input_file =
-      "$abckit_root/include/libabckit/cpp/headers/core/export_descriptor.h"
+  input_file = "$abckit_root/include/libabckit/cpp/headers/core/export_descriptor.h"
   extension = "cpp"
 }
 
@@ -169,16 +166,14 @@ abckit_standalone_canary("abckit_canary_cpp_headers_core_namespace") {
 
 abckit_standalone_canary("abckit_canary_cpp_headers_core_namespace_impl") {
   configs = [ ":abckit_canary_cpp_config" ]
-  input_file =
-      "$abckit_root/include/libabckit/cpp/headers/core/namespace_impl.h"
+  input_file = "$abckit_root/include/libabckit/cpp/headers/core/namespace_impl.h"
   extension = "cpp"
 }
 
 abckit_standalone_canary(
     "abckit_canary_cpp_headers_core_annotation_interface") {
   configs = [ ":abckit_canary_cpp_config" ]
-  input_file =
-      "$abckit_root/include/libabckit/cpp/headers/core/annotation_interface.h"
+  input_file = "$abckit_root/include/libabckit/cpp/headers/core/annotation_interface.h"
   extension = "cpp"
 }
 
@@ -232,29 +227,29 @@ abckit_standalone_canary("abckit_canary_cpp_headers_arkts_function") {
 
 abckit_standalone_canary("abckit_canary_cpp_headers_arkts_function_impl") {
   configs = [ ":abckit_canary_cpp_config" ]
-  input_file =
-      "$abckit_root/include/libabckit/cpp/headers/arkts/function_impl.h"
+  input_file = "$abckit_root/include/libabckit/cpp/headers/arkts/function_impl.h"
   extension = "cpp"
 }
 
 abckit_standalone_canary(
     "abckit_canary_cpp_headers_arkts_annotation_interface_field") {
   configs = [ ":abckit_canary_cpp_config" ]
-  input_file = "$abckit_root/include/libabckit/cpp/headers/arkts/annotation_interface_field.h"
+  input_file =
+      "$abckit_root/include/libabckit/cpp/headers/arkts/annotation_interface_field.h"
   extension = "cpp"
 }
 
 abckit_standalone_canary(
     "abckit_canary_cpp_headers_arkts_annotation_interface_field_impl") {
   configs = [ ":abckit_canary_cpp_config" ]
-  input_file = "$abckit_root/include/libabckit/cpp/headers/arkts/annotation_interface_field_impl.h"
+  input_file =
+      "$abckit_root/include/libabckit/cpp/headers/arkts/annotation_interface_field_impl.h"
   extension = "cpp"
 }
 
 abckit_standalone_canary("abckit_canary_cpp_headers_arkts_annotation_impl") {
   configs = [ ":abckit_canary_cpp_config" ]
-  input_file =
-      "$abckit_root/include/libabckit/cpp/headers/arkts/annotation_impl.h"
+  input_file = "$abckit_root/include/libabckit/cpp/headers/arkts/annotation_impl.h"
   extension = "cpp"
 }
 
@@ -278,15 +273,13 @@ abckit_standalone_canary("abckit_canary_cpp_headers_arkts_module_impl") {
 
 abckit_standalone_canary("abckit_canary_cpp_headers_arkts_annotation_element") {
   configs = [ ":abckit_canary_cpp_config" ]
-  input_file =
-      "$abckit_root/include/libabckit/cpp/headers/arkts/annotation_element.h"
+  input_file = "$abckit_root/include/libabckit/cpp/headers/arkts/annotation_element.h"
   extension = "cpp"
 }
 
 abckit_standalone_canary("abckit_canary_cpp_headers_arkts_import_descriptor") {
   configs = [ ":abckit_canary_cpp_config" ]
-  input_file =
-      "$abckit_root/include/libabckit/cpp/headers/arkts/import_descriptor.h"
+  input_file = "$abckit_root/include/libabckit/cpp/headers/arkts/import_descriptor.h"
   extension = "cpp"
 }
 
@@ -311,8 +304,7 @@ abckit_standalone_canary("abckit_canary_cpp_headers_arkts_class_impl") {
 
 abckit_standalone_canary("abckit_canary_cpp_headers_arkts_export_descriptor") {
   configs = [ ":abckit_canary_cpp_config" ]
-  input_file =
-      "$abckit_root/include/libabckit/cpp/headers/arkts/export_descriptor.h"
+  input_file = "$abckit_root/include/libabckit/cpp/headers/arkts/export_descriptor.h"
   extension = "cpp"
 }
 
@@ -331,30 +323,30 @@ abckit_standalone_canary("abckit_canary_cpp_headers_arkts_namespace") {
 
 abckit_standalone_canary("abckit_canary_cpp_headers_arkts_namespace_impl") {
   configs = [ ":abckit_canary_cpp_config" ]
-  input_file =
-      "$abckit_root/include/libabckit/cpp/headers/arkts/namespace_impl.h"
+  input_file = "$abckit_root/include/libabckit/cpp/headers/arkts/namespace_impl.h"
   extension = "cpp"
 }
 
 abckit_standalone_canary(
     "abckit_canary_cpp_headers_arkts_annotation_element_impl") {
   configs = [ ":abckit_canary_cpp_config" ]
-  input_file = "$abckit_root/include/libabckit/cpp/headers/arkts/annotation_element_impl.h"
+  input_file =
+      "$abckit_root/include/libabckit/cpp/headers/arkts/annotation_element_impl.h"
   extension = "cpp"
 }
 
 abckit_standalone_canary(
     "abckit_canary_cpp_headers_arkts_annotation_interface") {
   configs = [ ":abckit_canary_cpp_config" ]
-  input_file =
-      "$abckit_root/include/libabckit/cpp/headers/arkts/annotation_interface.h"
+  input_file = "$abckit_root/include/libabckit/cpp/headers/arkts/annotation_interface.h"
   extension = "cpp"
 }
 
 abckit_standalone_canary(
     "abckit_canary_cpp_headers_arkts_annotation_interface_impl") {
   configs = [ ":abckit_canary_cpp_config" ]
-  input_file = "$abckit_root/include/libabckit/cpp/headers/arkts/annotation_interface_impl.h"
+  input_file =
+      "$abckit_root/include/libabckit/cpp/headers/arkts/annotation_interface_impl.h"
   extension = "cpp"
 }
 
@@ -438,8 +430,7 @@ abckit_standalone_canary("abckit_canary_cpp_abckit_cpp") {
 
 abckit_standalone_canary("abckit_canary_cpp_hash_specializations") {
   configs = [ ":abckit_canary_cpp_config" ]
-  input_file =
-      "$abckit_root/include/libabckit/cpp/headers/hash_specializations.h"
+  input_file = "$abckit_root/include/libabckit/cpp/headers/hash_specializations.h"
   extension = "cpp"
 }
 

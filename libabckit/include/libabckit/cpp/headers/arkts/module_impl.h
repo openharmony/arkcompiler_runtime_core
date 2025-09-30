@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,9 +18,9 @@
 
 #include "module.h"
 #include "import_descriptor.h"
-#include "libabckit/cpp/headers/core/import_descriptor.h"
+#include "../core/import_descriptor.h"
 #include "annotation_interface.h"
-#include "libabckit/cpp/headers/core/annotation_interface.h"
+#include "../core/annotation_interface.h"
 
 // NOLINTBEGIN(performance-unnecessary-value-param)
 namespace abckit::arkts {
@@ -33,6 +33,13 @@ inline AbckitArktsModule *Module::TargetCast() const
 }
 
 inline Module::Module(const core::Module &coreOther) : core::Module(coreOther), targetChecker_(this) {}
+
+inline bool Module::SetName(const std::string &name) const
+{
+    const auto ret = GetApiConfig()->cArktsMapi_->moduleSetName(TargetCast(), name.c_str());
+    CheckError(GetApiConfig());
+    return ret;
+}
 
 inline arkts::ImportDescriptor Module::AddImportFromArktsV1ToArktsV1(Module imported, std::string_view name,
                                                                      std::string_view alias) const

@@ -1001,6 +1001,11 @@ AbckitValue *FindOrCreateValueDoubleStaticImpl(AbckitFile *file, double value)
     return FindOrCreateScalarValue<double, ark::pandasm::Value::Type::F64>(file, file->values.doubleVals, value);
 }
 
+AbckitValue *FindOrCreateValueIntStaticImpl(AbckitFile *file, int value)
+{
+    return FindOrCreateScalarValue<int, ark::pandasm::Value::Type::I32>(file, file->values.intVals, value);
+}
+
 AbckitValue *FindOrCreateValueStringStaticImpl(AbckitFile *file, const std::string &value)
 {
     return FindOrCreateScalarValue<std::string, ark::pandasm::Value::Type::STRING>(file, file->values.stringVals,
@@ -1029,6 +1034,7 @@ AbckitValue *FindOrCreateValueStatic(AbckitFile *file, const ark::pandasm::Value
         case ark::pandasm::Value::Type::I16:
         case ark::pandasm::Value::Type::U16:
         case ark::pandasm::Value::Type::I32:
+            return FindOrCreateValueIntStaticImpl(file, value.GetAsScalar()->GetValue<int>());
         case ark::pandasm::Value::Type::U32:
         case ark::pandasm::Value::Type::I64:
         case ark::pandasm::Value::Type::U64:
@@ -1129,6 +1135,64 @@ bool GraphDominatorsTreeAnalysisIsValid(ark::compiler::Graph *graph)
         }
     }
     return true;
+}
+
+AbckitTypeId ArkPandasmTypeToAbckitTypeId(const ark::pandasm::Type &type)
+{
+    switch (type.GetId()) {
+        case ark::panda_file::Type::TypeId::VOID:
+            return ABCKIT_TYPE_ID_VOID;
+        case ark::panda_file::Type::TypeId::U1:
+            return ABCKIT_TYPE_ID_U1;
+        case ark::panda_file::Type::TypeId::I8:
+            return ABCKIT_TYPE_ID_I8;
+        case ark::panda_file::Type::TypeId::U8:
+            return ABCKIT_TYPE_ID_U8;
+        case ark::panda_file::Type::TypeId::I16:
+            return ABCKIT_TYPE_ID_I16;
+        case ark::panda_file::Type::TypeId::U16:
+            return ABCKIT_TYPE_ID_U16;
+        case ark::panda_file::Type::TypeId::F32:
+            return ABCKIT_TYPE_ID_F32;
+        case ark::panda_file::Type::TypeId::I32:
+            return ABCKIT_TYPE_ID_I32;
+        case ark::panda_file::Type::TypeId::U32:
+            return ABCKIT_TYPE_ID_U32;
+        case ark::panda_file::Type::TypeId::F64:
+            return ABCKIT_TYPE_ID_F64;
+        case ark::panda_file::Type::TypeId::I64:
+            return ABCKIT_TYPE_ID_I64;
+        case ark::panda_file::Type::TypeId::U64:
+            return ABCKIT_TYPE_ID_U64;
+        case ark::panda_file::Type::TypeId::REFERENCE:
+            if (type.IsArray()) {
+                return ArkPandasmTypeToAbckitTypeId(type.GetComponentType());
+            }
+            return ABCKIT_TYPE_ID_REFERENCE;
+        default:
+            return ABCKIT_TYPE_ID_INVALID;
+    }
+}
+
+ark::pandasm::Record *GetStaticImplRecord(
+    const std::variant<AbckitCoreModule *, AbckitCoreNamespace *, AbckitCoreClass *, AbckitCoreInterface *,
+                       AbckitCoreEnum *, AbckitCoreAnnotationInterface *> &coreObject)
+{
+    return std::visit(
+        [](auto *obj) -> ark::pandasm::Record * {
+            if constexpr (std::is_same_v<decltype(obj), AbckitCoreModule *>) {
+                return obj->GetArkTSImpl()->impl.GetStatModule().record;
+            } else if constexpr (std::is_same_v<decltype(obj), AbckitCoreAnnotationInterface *>) {
+                return obj->GetArkTSImpl()->GetStaticImpl();
+            } else if constexpr (std::is_same_v<decltype(obj), AbckitCoreNamespace *> ||
+                                 std::is_same_v<decltype(obj), AbckitCoreClass *> ||
+                                 std::is_same_v<decltype(obj), AbckitCoreInterface *> ||
+                                 std::is_same_v<decltype(obj), AbckitCoreEnum *>) {
+                return obj->GetArkTSImpl()->impl.GetStaticClass();
+            }
+            return nullptr;
+        },
+        coreObject);
 }
 
 }  // namespace libabckit

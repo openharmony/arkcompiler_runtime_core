@@ -89,11 +89,25 @@ public:
     std::string GetName() const;
 
     /**
+     * @brief Tells if Enum is defined in the same binary or externally in another binary.
+     * @return Returns `true` if Enum is defined in another binary and `false` if defined locally.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool IsExternal() const;
+
+    /**
      * @brief Returns module for this `Enum`.
      * @return Owning `core::Module`.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `bool(*this)` results in `false`.
      */
     core::Module GetModule() const;
+
+    /**
+     * @brief Returns parent namespace for interface.
+     * @return `core::Namespace`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    Namespace GetParentNamespace() const;
 
     /**
      * @brief Get vector with all Methods

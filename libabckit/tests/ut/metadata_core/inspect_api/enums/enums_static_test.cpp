@@ -17,8 +17,10 @@
 #include <vector>
 #include <algorithm>
 #include <string>
+#include <set>
 
 #include "libabckit/cpp/abckit_cpp.h"
+#include "helpers/helpers.h"
 
 namespace libabckit::test {
 
@@ -92,6 +94,25 @@ TEST_F(LibAbcKitInspectApiEnumsTest, EnumGetFieldsStatic)
     sort(actualFieldName.begin(), actualFieldName.end());
     sort(fieldNames.begin(), fieldNames.end());
     ASSERT_EQ(fieldNames, actualFieldName);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::enumIsExternal, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitInspectApiEnumsTest, EnumIsExternalStatic)
+{
+    abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/enums/enums_static.abc");
+
+    std::set<std::string> gotEnumNames;
+    std::set<std::string> expectEnumNames = {"EnumA"};
+
+    for (const auto &module : file.GetModules()) {
+        for (const auto &enm : module.GetEnums()) {
+            if (!enm.IsExternal()) {
+                gotEnumNames.insert(enm.GetName());
+            }
+        }
+    }
+
+    ASSERT_EQ(gotEnumNames, expectEnumNames);
 }
 
 }  // namespace libabckit::test

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,8 @@
 #ifndef CPP_ABCKIT_ARKTS_MODULE_H
 #define CPP_ABCKIT_ARKTS_MODULE_H
 
-#include "libabckit/cpp/headers/core/module.h"
-#include "libabckit/cpp/headers/base_concepts.h"
+#include "../core/module.h"
+#include "../base_concepts.h"
 #include "import_descriptor.h"
 #include "export_descriptor.h"
 #include "annotation_interface.h"
@@ -34,6 +34,10 @@ class Module final : public core::Module {
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
     /// @brief to access private constructor
     friend class abckit::File;
+    /// @brief to access private constructor
+    friend class Class;
+    /// @brief to access private constructor
+    friend class Interface;
     /// @brief abckit::DefaultHash<Module>
     friend class abckit::DefaultHash<Module>;
     /// @brief to access private TargetCast
@@ -76,6 +80,14 @@ public:
      * @brief Destroy the Module object
      */
     ~Module() override = default;
+
+    /**
+     * @brief Sets name for module
+     * @return `true` on success.
+     * @param [ in ] name - Name to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool SetName(const std::string &name) const;
 
     /**
      * @brief Adds import from one ArktsV1 module to another ArktsV1 module.

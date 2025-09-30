@@ -174,4 +174,10 @@ TEST_F(LibAbcKitNullptrTestsModifyApiImpl0, functionSetGraph)
     helpers_nullptr::TestNullptr(g_modifyApiImp->functionSetGraph);
 }
 
+// Test: test-kind=api, api=ModifyApiImpl::AbckitGetModifyApiImpl,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsModifyApiImpl0, AbckitGetModifyApiImpl)
+{
+    helpers_nullptr::TestNullptr(AbckitGetModifyApiImpl);
+}
 }  // namespace libabckit::test

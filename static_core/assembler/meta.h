@@ -88,9 +88,33 @@ public:
         setAttributes_.erase(attribute);
     }
 
+    std::optional<Error> RemoveAttributeValue(std::string_view attribute, std::string_view value)
+    {
+        return RemoveValue(attribute, value);
+    }
+
     bool GetAttribute(const std::string &attribute) const
     {
         return setAttributes_.find(attribute) != setAttributes_.cend();
+    }
+
+    virtual std::optional<Error> RemoveValue(std::string_view attribute, std::string_view value)
+    {
+        std::string key(attribute);
+        auto it = attributes_.find(key);
+        if (it == attributes_.cend()) {
+            return Error("attribute does not exist.", Error::Type::MISSING_ATTRIBUTE);
+        }
+
+        std::string valueS(value);
+
+        auto valueIt = std::find(it->second.begin(), it->second.end(), valueS);
+        if (valueIt == it->second.cend()) {
+            return Error("value does not exist.", Error::Type::MISSING_VALUE);
+        }
+
+        it->second.erase(valueIt);
+        return {};
     }
 
     std::optional<Error> SetAttributeValue(std::string_view attribute, std::string_view value)
@@ -103,6 +127,16 @@ public:
         SetFlags(attribute, value);
 
         return StoreValue(attribute, value);
+    }
+
+    void SetAttributeValues(const std::string &attribute, const std::vector<std::string> &values)
+    {
+        auto it = attributes_.find(attribute);
+        if (it == attributes_.cend()) {
+            return;
+        }
+
+        it->second = values;
     }
 
     std::vector<std::string> GetAttributeValues(const std::string &attribute) const
@@ -500,7 +534,13 @@ class RecordMetadata : public ItemMetadata {
 public:
     virtual std::string GetBase() const;
 
+    virtual bool SetBase(std::string_view base);
+
     virtual std::vector<std::string> GetInterfaces() const;
+
+    virtual bool AddInterface(std::string_view value);
+
+    virtual bool RemoveInterface(std::string_view value);
 
     virtual bool IsAnnotation() const;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,6 +36,27 @@ inline std::string Class::GetName() const
     std::string str = conf->cIapi_->abckitStringToString(cString);
     CheckError(conf);
     return str;
+}
+
+inline bool Class::IsExternal() const
+{
+    const auto isExternal = GetApiConfig()->cIapi_->classIsExternal(GetView());
+    CheckError(GetApiConfig());
+    return isExternal;
+}
+
+inline bool Class::IsFinal() const
+{
+    const auto isFinal = GetApiConfig()->cIapi_->classIsFinal(GetView());
+    CheckError(GetApiConfig());
+    return isFinal;
+}
+
+inline bool Class::IsAbstract() const
+{
+    const auto isAbstract = GetApiConfig()->cIapi_->classIsAbstract(GetView());
+    CheckError(GetApiConfig());
+    return isAbstract;
 }
 
 // CC-OFFNXT(G.FUD.06) perf critical

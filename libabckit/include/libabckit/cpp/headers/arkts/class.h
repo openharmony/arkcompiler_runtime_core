@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,8 @@
 #ifndef CPP_ABCKIT_ARKTS_CLASS_H
 #define CPP_ABCKIT_ARKTS_CLASS_H
 
-#include "libabckit/cpp/headers/core/class.h"
-#include "libabckit/cpp/headers/base_concepts.h"
-#include "annotation_interface.h"
+#include "../core/class.h"
+#include "../base_concepts.h"
 
 namespace abckit::arkts {
 
@@ -76,6 +75,32 @@ public:
     ~Class() override = default;
 
     /**
+     * @brief Sets name for class
+     * @return `true` on success.
+     * @param [ in ] name - Name to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool SetName(const std::string &name) const;
+
+    /**
+     * @brief Add field to the class.
+     * @return `true` on success.
+     * @param [ in ] field - Field to be added.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if field is false.
+     */
+    bool AddField(const ClassField &field) const;
+
+    /**
+     * @brief Sets owning module for class.
+     * @return `true` on success.
+     * @param [ in ] module - Module to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if module is false.
+     */
+    bool SetOwningModule(const Module &module) const;
+
+    /**
      * @brief Remove annotation from the class declaration.
      * @param [ in ] anno - Annotation to remove.
      * @return New state of Class.
@@ -95,6 +120,71 @@ public:
      * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if class Class doesn't have `ABCKIT_TARGET_ARK_TS_V1` target.
      */
     Annotation AddAnnotation(AnnotationInterface ai);
+
+    /**
+     * @brief Adds interface `iface` to the class declaration.
+     * @return `true` on success.
+     * @param [ in ] iface - Interface to be added.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
+     */
+    bool AddInterface(arkts::Interface iface);
+
+    /**
+     * @brief Removes interface `iface` from the class declaration.
+     * @return `true` on success.
+     * @param [ in ] iface - Interface to be removed.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is not an interface of the class.
+     */
+    bool RemoveInterface(arkts::Interface iface);
+
+    /**
+     * @brief Set super class `superClass` for the class declaration.
+     * @return `true` on success.
+     * @param [ in ] superClass - Super class to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `superClass` is NULL.
+     */
+    bool SetSuperClass(arkts::Class superClass);
+
+    /**
+     * @brief Creates a new class with name `name`.
+     * @return The newly created Class object.
+     * @param [ in ] m - The module in which to create the class.
+     * @param [ in ] name - The name of the class to create.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `m` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     */
+    static Class CreateClass(Module m, const std::string &name);
+
+    /**
+     * @brief Remove class field from the class declaration.
+     * @param [ in ] field - class field to remove.
+     * @return `true` on success.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if current `Class` is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is false.
+     */
+    bool RemoveField(arkts::ClassField field) const;
+
+    /**
+     * @brief Add function to the class declaration.
+     * @param [ in ] function - the function is added to the class.
+     * @return `true` on success.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if current `Class` is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is false.
+     */
+    bool AddMethod(arkts::Function function);
+
+    /**
+     * @brief Removes method `method` from the list of methods for the class declaration.
+     * @return `true` on success.
+     * @param [ in ] method - Method to be removed.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `method` is NULL.
+     */
+    bool RemoveMethod(arkts::Function method);
 
 private:
     /**

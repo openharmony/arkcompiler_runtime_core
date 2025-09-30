@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,8 @@
 #ifndef CPP_ABCKIT_ARKTS_FUNCTION_H
 #define CPP_ABCKIT_ARKTS_FUNCTION_H
 
-#include "libabckit/cpp/headers/core/function.h"
-#include "libabckit/cpp/headers/base_concepts.h"
+#include "../core/function.h"
+#include "../base_concepts.h"
 
 namespace abckit::arkts {
 
@@ -30,6 +30,8 @@ class Function final : public core::Function {
     friend class Class;
     /// @brief to access private constructor
     friend class Namespace;
+    /// @brief to access private constructor
+    friend class Interface;
     /// @brief abckit::DefaultHash<Function>
     friend class abckit::DefaultHash<Function>;
     /// @brief to access private TargetCast
@@ -80,6 +82,27 @@ public:
     bool IsNative() const;
 
     /**
+     * @brief Tells if method is abstract.
+     * @return bool
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool IsAbstract() const;
+
+    /**
+     * @brief Tells if method is final.
+     * @return bool
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool IsFinal() const;
+
+    /**
+     * @brief Tells if method is async.
+     * @return bool
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool IsAsync() const;
+
+    /**
      * @brief Function to add annotation to.
      * @return Newly created annotation.
      * @param [ in ] ai -  Annotation Interface that is used to create the annotation.
@@ -99,6 +122,14 @@ public:
      * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if Function doesn't have `ABCKIT_TARGET_ARK_TS_V1` target.
      */
     Function RemoveAnnotation(Annotation anno) const;
+
+    /**
+     * @brief Sets name for function
+     * @return `true` on success.
+     * @param [ in ] name - Name to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if current `ClassField` is false.
+     */
+    bool SetName(const std::string &name) const;
 
 private:
     /**

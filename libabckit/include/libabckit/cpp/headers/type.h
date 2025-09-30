@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,6 +35,34 @@ class Type : public ViewInResource<AbckitType *, const File *> {
     friend class arkts::AnnotationInterface;
     /// @brief abckit::Instruction
     friend class abckit::Instruction;
+    /// @brief core::ModuleField
+    friend class abckit::core::ModuleField;
+    /// @brief core::NamespaceField
+    friend class abckit::core::NamespaceField;
+    /// @brief core::ClassField
+    friend class abckit::core::ClassField;
+    /// @brief core::InterfaceField
+    friend class abckit::core::InterfaceField;
+    /// @brief core::EnumField
+    friend class abckit::core::EnumField;
+    /// @brief core::FunctionParam
+    friend class abckit::core::FunctionParam;
+    /// @brief core::Function
+    friend class abckit::core::Function;
+    /// @brief arkts::ModuleField
+    friend class arkts::ModuleField;
+    /// @brief arkts::ClassField
+    friend class arkts::ClassField;
+    /// @brief arkts::Class
+    friend class arkts::Class;
+    /// @brief arkts::Module
+    friend class arkts::Module;
+    /// @brief arkts::InterfaceField
+    friend class arkts::InterfaceField;
+    /// @brief arkts::Interface
+    friend class arkts::Interface;
+    /// @brief arkts::Enum
+    friend class arkts::Enum;
 
 public:
     /**
@@ -88,6 +116,20 @@ public:
         auto *ret = GetApiConfig()->cIapi_->typeGetReferenceClass(GetView());
         CheckError(GetApiConfig());
         return core::Class(ret, GetApiConfig(), GetResource());
+    }
+
+    /**
+     * @brief Returns the Type Name of type
+     * @return std::String
+     */
+    inline std::string GetName() const
+    {
+        const ApiConfig *conf = GetApiConfig();
+        AbckitString *cString = conf->cIapi_->typeGetName(GetView());
+        CheckError(conf);
+        std::string str = conf->cIapi_->abckitStringToString(cString);
+        CheckError(conf);
+        return str;
     }
 
 protected:

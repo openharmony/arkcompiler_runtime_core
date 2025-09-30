@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,8 +18,6 @@
 
 #include "libabckit/c/metadata_core.h"
 
-#include <iostream>
-
 namespace libabckit {
 
 // ========================================
@@ -35,11 +33,19 @@ bool ModuleEnumerateAnonymousFunctionsStatic(AbckitCoreModule *m, void *data,
 
 AbckitString *NamespaceGetNameStatic(AbckitCoreNamespace *ns);
 
+bool NamespaceIsExternalStatic(AbckitCoreNamespace *ns);
+
 // ========================================
 // Class
 // ========================================
 
 AbckitString *ClassGetNameStatic(AbckitCoreClass *klass);
+
+bool ClassIsExternalStatic(AbckitCoreClass *klass);
+
+bool ClassIsFinalStatic(AbckitCoreClass *klass);
+
+bool ClassIsAbstractStatic(AbckitCoreClass *klass);
 
 // ========================================
 // Interface
@@ -47,19 +53,28 @@ AbckitString *ClassGetNameStatic(AbckitCoreClass *klass);
 
 AbckitString *InterfaceGetNameStatic(AbckitCoreInterface *iface);
 
+bool InterfaceIsExternalStatic(AbckitCoreInterface *iface);
+
 // ========================================
 // Enum
 // ========================================
 
 AbckitString *EnumGetNameStatic(AbckitCoreEnum *enm);
 
+bool EnumIsExternalStatic(AbckitCoreEnum *enm);
+
 // ========================================
 // Field
 // ========================================
 
+AbckitString *ModuleFieldGetNameStatic(AbckitCoreModuleField *field);
+AbckitString *NamespaceFieldGetNameStatic(AbckitCoreNamespaceField *field);
+AbckitString *ClassFieldGetNameStatic(AbckitCoreClassField *field);
+AbckitString *EnumFieldGetNameStatic(AbckitCoreEnumField *field);
 bool ClassFieldIsPublicStatic(AbckitCoreClassField *field);
 bool ClassFieldIsProtectedStatic(AbckitCoreClassField *field);
 bool ClassFieldIsPrivateStatic(AbckitCoreClassField *field);
+bool ClassFieldIsInternalStatic(AbckitCoreClassField *field);
 bool ClassFieldIsStaticStatic(AbckitCoreClassField *field);
 bool InterfaceFieldIsReadonlyStatic(AbckitCoreInterfaceField *field);
 
@@ -71,12 +86,29 @@ AbckitString *FunctionGetNameStatic(AbckitCoreFunction *function);
 AbckitGraph *CreateGraphFromFunctionStatic(AbckitCoreFunction *function);
 bool FunctionIsStaticStatic(AbckitCoreFunction *function);
 bool FunctionIsCtorStatic(AbckitCoreFunction *function);
+bool FunctionIsCctorStatic(AbckitCoreFunction *function);
 bool FunctionIsAnonymousStatic(AbckitCoreFunction *function);
 bool FunctionIsNativeStatic(AbckitCoreFunction *function);
+bool FunctionIsPublicStatic(AbckitCoreFunction *function);
+bool FunctionIsProtectedStatic(AbckitCoreFunction *function);
+bool FunctionIsPrivateStatic(AbckitCoreFunction *function);
+bool FunctionIsInternalStatic(AbckitCoreFunction *function);
+bool FunctionIsExternalStatic(AbckitCoreFunction *function);
+bool FunctionIsAbstractStatic(AbckitCoreFunction *function);
+bool FunctionIsFinalStatic(AbckitCoreFunction *function);
+bool FunctionIsOverrideStatic(AbckitCoreFunction *function);
+bool FunctionIsAsyncStatic(AbckitCoreFunction *function);
+AbckitType *FunctionGetReturnTypeStatic(AbckitCoreFunction *function);
 
 // ========================================
 // Annotation
 // ========================================
+
+// ========================================
+// AnnotationInterface
+// ========================================
+
+AbckitString *AnnotationInterfaceGetNameStatic(AbckitCoreAnnotationInterface *ai);
 
 // ========================================
 // String
@@ -113,6 +145,7 @@ AbckitLiteralTag LiteralGetTagStatic(AbckitLiteral *lit);
 
 AbckitType *ValueGetTypeStatic(AbckitValue *value);
 bool ValueGetU1Static(AbckitValue *value);
+int ValueGetIntStatic(AbckitValue *value);
 double ValueGetDoubleStatic(AbckitValue *value);
 AbckitString *ValueGetStringStatic(AbckitValue *value);
 AbckitLiteralArray *ArrayValueGetLiteralArrayStatic(AbckitValue *value);

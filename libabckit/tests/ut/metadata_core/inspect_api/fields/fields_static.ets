@@ -12,19 +12,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@interface AI1 {
+  a1F1: string
+}
 
-const F1: string = 'Hello';
+@interface AI3 {
+  a3F1: string
+}
+
+const f1: string = 'Hello';
 
 class C1 {
-  public C1F1: string = 'public';
-  protected C1F2: string = 'protected';
-  private C1F3: string = 'private';
-  public static C1F4: string = 'static';
+  @AI1({a1F1: 'C1F1'})
+  public c1F1: string = 'public';
+  protected c1F2: string = 'protected';
+  private c1F3: string = 'private';
+  public static c1F4: string = 'static';
+  internal c1F5: int = 1;
+  public readonly c1F6: int = 2;
 }
 
 interface I1 {
-  I1F1: number;
-  readonly I1F2: string;
+  @AI3({a3F1: 'interface annotation'})
+  i1F1: number;
+  readonly i1F2: string;
 }
 
 enum E1 {
@@ -32,5 +43,5 @@ enum E1 {
 }
 
 namespace NS1 {
-  const NS1F1: string[] = ['namespace'];
+  const nS1F1: string[] = ['namespace'];
 }

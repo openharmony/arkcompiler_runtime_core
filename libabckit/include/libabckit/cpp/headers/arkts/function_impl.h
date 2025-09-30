@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,7 @@
 
 #include "function.h"
 #include "annotation.h"
-#include "libabckit/cpp/headers/core/annotation.h"
+#include "../core/annotation.h"
 #include "annotation_interface.h"
 
 // NOLINTBEGIN(performance-unnecessary-value-param)
@@ -35,11 +35,30 @@ inline Function::Function(const core::Function &other) : core::Function(other), 
 
 inline bool Function::IsNative() const
 {
-    auto arktsFunc = GetApiConfig()->cArktsIapi_->coreFunctionToArktsFunction(GetView());
+    const auto ret = GetApiConfig()->cArktsIapi_->functionIsNative(TargetCast());
     CheckError(GetApiConfig());
-    auto arktsIsNative = GetApiConfig()->cArktsIapi_->functionIsNative(arktsFunc);
+    return ret;
+}
+
+inline bool Function::IsAbstract() const
+{
+    const auto ret = GetApiConfig()->cArktsIapi_->functionIsAbstract(TargetCast());
     CheckError(GetApiConfig());
-    return arktsIsNative;
+    return ret;
+}
+
+inline bool Function::IsFinal() const
+{
+    const auto ret = GetApiConfig()->cArktsIapi_->functionIsFinal(TargetCast());
+    CheckError(GetApiConfig());
+    return ret;
+}
+
+inline bool Function::IsAsync() const
+{
+    const auto ret = GetApiConfig()->cArktsIapi_->functionIsAsync(TargetCast());
+    CheckError(GetApiConfig());
+    return ret;
 }
 
 inline Annotation Function::AddAnnotation(AnnotationInterface ai) const
@@ -59,6 +78,13 @@ inline Function Function::RemoveAnnotation(Annotation anno) const
     GetApiConfig()->cArktsMapi_->functionRemoveAnnotation(TargetCast(), anno.TargetCast());
     CheckError(GetApiConfig());
     return *this;
+}
+
+inline bool Function::SetName(const std::string &name) const
+{
+    const auto ret = GetApiConfig()->cArktsMapi_->functionSetName(TargetCast(), name.c_str());
+    CheckError(GetApiConfig());
+    return ret;
 }
 
 }  // namespace abckit::arkts

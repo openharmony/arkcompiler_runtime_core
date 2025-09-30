@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -784,6 +784,11 @@ AbckitValue *FindOrCreateValueU1DynamicImpl(AbckitFile *file, bool value)
     return FindOrCreateScalarValue<bool, panda::pandasm::Value::Type::U1>(file, file->values.boolVals, value);
 }
 
+AbckitValue *FindOrCreateValueIntDynamicImpl(AbckitFile *file, int value)
+{
+    return FindOrCreateScalarValue<int, panda::pandasm::Value::Type::I32>(file, file->values.intVals, value);
+}
+
 AbckitValue *FindOrCreateValueDoubleDynamicImpl(AbckitFile *file, double value)
 {
     return FindOrCreateScalarValue<double, panda::pandasm::Value::Type::F64>(file, file->values.doubleVals, value);
@@ -817,6 +822,7 @@ AbckitValue *FindOrCreateValueDynamic(AbckitFile *file, const pandasm::Value &va
         case pandasm::Value::Type::I16:
         case pandasm::Value::Type::U16:
         case pandasm::Value::Type::I32:
+            return FindOrCreateValueIntDynamicImpl(file, value.GetAsScalar()->GetValue<int>());
         case pandasm::Value::Type::U32:
         case pandasm::Value::Type::I64:
         case pandasm::Value::Type::U64:

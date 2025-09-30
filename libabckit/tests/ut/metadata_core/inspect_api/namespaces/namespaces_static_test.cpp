@@ -15,16 +15,17 @@
 
 #include <gtest/gtest.h>
 #include <string>
+#include <set>
+#include <optional>
 
 #include "libabckit/cpp/abckit_cpp.h"
-
-#include <set>
+#include "helpers/helpers.h"
 
 namespace libabckit::test {
 
 class LibAbcKitInspectApiNamespacesTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=InspectApiImpl::namespaceGetInterfacesStatic, abc-kind=ArkTS2, category=positive,
+// Test: test-kind=api, api=InspectApiImpl::namespaceEnumerateInterfaces, abc-kind=ArkTS2, category=positive,
 // extension=c
 TEST_F(LibAbcKitInspectApiNamespacesTest, NamespaceGetInterfacesStatic)
 {
@@ -47,8 +48,7 @@ TEST_F(LibAbcKitInspectApiNamespacesTest, NamespaceGetInterfacesStatic)
     ASSERT_EQ(gotInterfaceNames, expectedInterfaceNames);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::namespaceGetEnumsStatic, abc-kind=ArkTS2, category=positive,
-// extension=c
+// Test: test-kind=api, api=InspectApiImpl::namespaceEnumerateEnums, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiNamespacesTest, NamespaceGetEnumsStatic)
 {
     abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/namespaces/namespaces_static.abc");
@@ -70,14 +70,13 @@ TEST_F(LibAbcKitInspectApiNamespacesTest, NamespaceGetEnumsStatic)
     ASSERT_EQ(gotEnumNames, expectedEnumNames);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::namespaceGetFieldsStatic, abc-kind=ArkTS2, category=positive,
-// extension=c
+// Test: test-kind=api, api=InspectApiImpl::namespaceEnumerateFields, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiNamespacesTest, NamespaceGetFieldsStatic)
 {
     abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/namespaces/namespaces_static.abc");
 
     std::set<std::string> gotFieldNames;
-    std::set<std::string> expectedFieldNames = {"F1"};
+    std::set<std::string> expectedFieldNames = {"f1"};
 
     for (const auto &module : file.GetModules()) {
         if (module.IsExternal()) {
@@ -116,7 +115,7 @@ TEST_F(LibAbcKitInspectApiNamespacesTest, NamespaceEnumerateTopLevelFunctionsSta
     ASSERT_EQ(gotFunctionNames, expectedFunctionNames);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::namespaceGetNamespacesStatic, abc-kind=ArkTS2, category=positive,
+// Test: test-kind=api, api=InspectApiImpl::namespaceEnumerateNamespaces, abc-kind=ArkTS2, category=positive,
 // extension=c
 TEST_F(LibAbcKitInspectApiNamespacesTest, NamespaceGetNamespacesStatic)
 {
@@ -138,4 +137,47 @@ TEST_F(LibAbcKitInspectApiNamespacesTest, NamespaceGetNamespacesStatic)
 
     ASSERT_EQ(gotNamespaceNames, expectedNamespaceNames);
 }
+
+// Test: test-kind=api, api=InspectApiImpl::namespaceEnumerateAnnotationInterfaces, abc-kind=ArkTS2, category=positive,
+// extension=c
+TEST_F(LibAbcKitInspectApiNamespacesTest, NamespaceGetAnnotationInterfacesStatic)
+{
+    abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/namespaces/namespaces_static.abc");
+
+    std::set<std::string> gotAIs;
+    std::set<std::string> expectedAIs = {"Anno"};
+
+    for (const auto &module : file.GetModules()) {
+        if (module.IsExternal()) {
+            continue;
+        }
+        for (const auto &ns : module.GetNamespaces()) {
+            for (const auto &ai : ns.GetAnnotationInterfaces()) {
+                gotAIs.emplace(ai.GetName());
+            }
+        }
+    }
+
+    ASSERT_EQ(gotAIs, expectedAIs);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::namespaceIsExternal, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitInspectApiNamespacesTest, NamespaceIsExternalStatic)
+{
+    abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/namespaces/namespaces_static.abc");
+
+    std::set<std::string> gotNamespaceNames;
+    std::set<std::string> expectedNamespaceNames = {"N1"};
+
+    for (const auto &module : file.GetModules()) {
+        for (const auto &ns : module.GetNamespaces()) {
+            if (!ns.IsExternal()) {
+                gotNamespaceNames.emplace(ns.GetName());
+            }
+        }
+    }
+
+    ASSERT_EQ(gotNamespaceNames, expectedNamespaceNames);
+}
+
 }  // namespace libabckit::test

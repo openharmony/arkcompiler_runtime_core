@@ -119,3 +119,4 @@ extern "C" int Entry(AbckitFile *file)
 ```sh
 ./arkcompiler/runtime_core/libabckit/scripts/self-check.sh --dir=/path/to/standalone/root --coverage
 ```
+

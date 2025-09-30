@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -153,9 +153,6 @@ AbckitGraph *CreateGraphFromFunctionDynamic(AbckitCoreFunction *function)
 
     auto *wpf = new FileWrapper(reinterpret_cast<const void *>(pf));
     auto graph = GraphWrapper::BuildGraphDynamic(wpf, irInterface, file, functionOffset);
-    if (graph == nullptr) {
-        return nullptr;
-    }
     if (statuses::GetLastError() != AbckitStatus::ABCKIT_STATUS_NO_ERROR) {
         return nullptr;
     }
@@ -547,7 +544,7 @@ AbckitType *ValueGetTypeDynamic(AbckitValue *value)
             LIBABCKIT_UNIMPLEMENTED;
     }
     // NOTE implement logic for classes
-    return GetOrCreateType(value->file, id, 0, nullptr);
+    return GetOrCreateType(value->file, id, 0, nullptr, nullptr);
 }
 
 bool ValueGetU1Dynamic(AbckitValue *value)

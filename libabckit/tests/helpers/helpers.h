@@ -235,6 +235,11 @@ struct ClassByNameContext {
     const char *name;
 };
 
+struct EnumByNameContext {
+    AbckitCoreEnum *enm;
+    const char *name;
+};
+
 struct MethodByNameContext {
     AbckitCoreFunction *method = nullptr;
     const char *name = "";
@@ -256,12 +261,28 @@ struct AnnotationByNameContext {
     const char *name;
 };
 
+struct InterfaceByNameContext {
+    AbckitCoreInterface *iface;
+    const char *name;
+};
+
+struct FieldByNameContext {
+    AbckitCoreInterfaceField *field;
+    const char *name;
+};
+struct CoreClassField {
+    AbckitCoreClassField *filed;
+    const char *name;
+};
+
 AbckitCoreFunction *FindMethodByName(AbckitFile *file, const std::string &name);
 AbckitCoreNamespace *FindNamespaceByName(AbckitFile *file, const std::string &name);
 bool ModuleByNameFinder(AbckitCoreModule *module, void *data);
 bool ImportByAliasFinder(AbckitCoreImportDescriptor *id, void *data);
 bool ExportByAliasFinder(AbckitCoreExportDescriptor *ed, void *data);
 bool ClassByNameFinder(AbckitCoreClass *klass, void *data);
+bool EnumByNameFinder(AbckitCoreEnum *enm, void *data);
+bool InterfaceByNameFinder(AbckitCoreInterface *iface, void *data);
 bool NamespaceByNameFinder(AbckitCoreNamespace *n, void *data);
 bool MethodByNameFinder(AbckitCoreFunction *method, void *data);
 bool AnnotationInterfaceByNameFinder(AbckitCoreAnnotationInterface *ai, void *data);
@@ -274,13 +295,20 @@ void AssertModuleVisitor(AbckitCoreModule *module, void *data);
 void AssertImportVisitor(AbckitCoreImportDescriptor *id, void *data);
 void AssertExportVisitor(AbckitCoreExportDescriptor *ed, void *data);
 void AssertClassVisitor(AbckitCoreClass *klass, void *data);
+void AssertEnumVisitor(AbckitCoreEnum *enm, void *data);
 void AssertMethodVisitor(AbckitCoreFunction *method, void *data);
 void AssertOpenAbc(const char *fname, AbckitFile **file);
 std::string_view AbckitStringToString(AbckitString *str);
 std::string GetCropFuncName(const std::string &fullSig);
 std::optional<abckit::core::Class> GetClassByName(const abckit::core::Module &module, const std::string &name);
 std::optional<abckit::core::Interface> GetInterfaceByName(const abckit::core::Module &module, const std::string &name);
+std::optional<abckit::core::Enum> GetEnumByName(const abckit::core::Module &module, const std::string &name);
+std::optional<abckit::core::Namespace> GetNamespaceByName(const abckit::core::Module &module, const std::string &name);
+std::optional<abckit::core::Function> GetFunctionByName(const abckit::core::Module &module, const std::string &name);
 
+bool InterfaceByNameFinder(AbckitCoreInterface *iface, void *data);
+bool FieldByNameFinder(AbckitCoreInterfaceField *field, void *data);
+bool ClassFieldFinder(AbckitCoreClassField *field, void *data);
 }  // namespace libabckit::test::helpers
 
 #endif  // LIBABCKIT_TESTS_HELPERS

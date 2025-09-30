@@ -30,7 +30,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, ClassGetFieldsStatic)
     abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_static.abc");
 
     std::set<std::string> gotFieldNames;
-    std::set<std::string> expectFieldNames = {"F1", "F2", "<property>I1F1"};
+    std::set<std::string> expectFieldNames = {"f1", "f2", "<property>i1F1"};
 
     for (const auto &module : file.GetModules()) {
         if (module.IsExternal()) {
@@ -52,7 +52,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, ClassGetAllMethodsStatic)
     abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_static.abc");
 
     std::set<std::string> gotMethodNames;
-    std::set<std::string> expectMethodNames = {"C1M1:classes_static.C1;void;", "C1M2:void;",
+    std::set<std::string> expectMethodNames = {"c1M1:classes_static.C1;void;", "c1M2:void;",
                                                "_ctor_:classes_static.C1;void;"};
 
     for (const auto &module : file.GetModules()) {
@@ -91,7 +91,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, ClassGetSuperClassStatic)
     ASSERT_EQ(gotClassNames, expectClassNames);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classGetSubClasses, abc-kind=ArkTS2, category=positive, extension=c
+// Test: test-kind=api, api=InspectApiImpl::classEnumerateSubClasses, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, ClassGetSubClassesStatic)
 {
     abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_static.abc");
@@ -114,7 +114,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, ClassGetSubClassesStatic)
     ASSERT_EQ(gotClassNames, expectClassNames);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classGetInterfaces, abc-kind=ArkTS2, category=positive, extension=c
+// Test: test-kind=api, api=InspectApiImpl::classEnumerateInterfaces, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, ClassGetInterfacesStatic)
 {
     abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_static.abc");
@@ -136,4 +136,94 @@ TEST_F(LibAbcKitInspectApiClassesTest, ClassGetInterfacesStatic)
 
     ASSERT_EQ(gotInterfaceNames, expectInterfaceNames);
 }
+
+// Test: test-kind=api, api=InspectApiImpl::classEnumerateAnnotations, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitInspectApiClassesTest, ClassGetAnnotationsStatic)
+{
+    abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_static.abc");
+
+    std::set<std::string> gotAnnotationNames;
+    std::set<std::string> expectAnnotationNames = {"A1"};
+
+    for (const auto &module : file.GetModules()) {
+        if (module.IsExternal()) {
+            continue;
+        }
+        auto result = helpers::GetClassByName(module, "C3");
+        ASSERT_NE(result, std::nullopt);
+        const auto &klass = result.value();
+        for (const auto &anno : klass.GetAnnotations()) {
+            gotAnnotationNames.emplace(anno.GetName());
+        }
+    }
+
+    ASSERT_EQ(gotAnnotationNames, expectAnnotationNames);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::classIsAbstract, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitInspectApiClassesTest, ClassIsAbstractStatic)
+{
+    abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_static.abc");
+
+    std::set<std::string> gotClassNames;
+    std::set<std::string> expectClassNames = {"C4"};
+
+    for (const auto &module : file.GetModules()) {
+        if (module.IsExternal()) {
+            continue;
+        }
+        for (const auto &klass : module.GetClasses()) {
+            if (klass.IsAbstract()) {
+                gotClassNames.emplace(klass.GetName());
+            }
+        }
+    }
+
+    ASSERT_EQ(gotClassNames, expectClassNames);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::classIsFinal, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitInspectApiClassesTest, ClassIsFinalStatic)
+{
+    abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_static.abc");
+
+    std::set<std::string> gotClassNames;
+    std::set<std::string> expectClassNames = {"C2"};
+
+    for (const auto &module : file.GetModules()) {
+        if (module.IsExternal()) {
+            continue;
+        }
+        for (const auto &klass : module.GetClasses()) {
+            if (klass.IsFinal()) {
+                gotClassNames.emplace(klass.GetName());
+            }
+        }
+    }
+
+    ASSERT_EQ(gotClassNames, expectClassNames);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::classIsExternal, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitInspectApiClassesTest, ClassIsExternalStatic)
+{
+    abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_static.abc");
+
+    std::set<std::string> gotClassNames;
+    std::set<std::string> expectClassNames = {"C1", "C2", "C3", "C4"};
+
+    for (const auto &module : file.GetModules()) {
+        if (module.IsExternal()) {
+            continue;
+        }
+        for (const auto &klass : module.GetClasses()) {
+            if (!klass.IsExternal()) {
+                gotClassNames.emplace(klass.GetName());
+            }
+        }
+    }
+
+    ASSERT_EQ(gotClassNames, expectClassNames);
+}
+
 }  // namespace libabckit::test

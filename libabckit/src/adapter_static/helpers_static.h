@@ -24,7 +24,7 @@
 #include "libabckit/src/adapter_static/runtime_adapter_static.h"
 
 #include "static_core/compiler/optimizer/ir/inst.h"
-#include "static_core/libpandabase/mem/arena_allocator.h"
+#include "libpandabase/mem/arena_allocator.h"
 #include "static_core/assembler/annotation.h"
 
 #include <string>
@@ -138,6 +138,7 @@ AbckitLiteral *FindOrCreateLiteralStringStaticImpl(AbckitFile *file, const std::
 AbckitLiteral *FindOrCreateLiteralMethodStaticImpl(AbckitFile *file, const std::string &value);
 
 AbckitValue *FindOrCreateValueU1StaticImpl(AbckitFile *file, bool value);
+AbckitValue *FindOrCreateValueIntStaticImpl(AbckitFile *file, int value);
 AbckitValue *FindOrCreateValueDoubleStaticImpl(AbckitFile *file, double value);
 AbckitValue *FindOrCreateValueStringStaticImpl(AbckitFile *file, const std::string &value);
 AbckitValue *FindOrCreateLiteralArrayValueStaticImpl(AbckitFile *file, const std::string &value);
@@ -146,6 +147,10 @@ AbckitValue *FindOrCreateValueStatic(AbckitFile *file, const ark::pandasm::Value
 void GraphInvalidateAnalyses(ark::compiler::Graph *graph);
 bool GraphHasUnreachableBlocks(ark::compiler::Graph *graph);
 bool GraphDominatorsTreeAnalysisIsValid(ark::compiler::Graph *graph);
+AbckitTypeId ArkPandasmTypeToAbckitTypeId(const ark::pandasm::Type &type);
+ark::pandasm::Record *GetStaticImplRecord(
+    const std::variant<AbckitCoreModule *, AbckitCoreNamespace *, AbckitCoreClass *, AbckitCoreInterface *,
+                       AbckitCoreEnum *, AbckitCoreAnnotationInterface *> &coreObject);
 
 constexpr AbckitBitImmSize GetBitLengthUnsigned(uint64_t imm)
 {

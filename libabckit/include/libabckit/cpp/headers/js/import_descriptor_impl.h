@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,8 @@
 #ifndef CPP_ABCKIT_JS_IMPORT_DESCRIPTOR_IMPL_H
 #define CPP_ABCKIT_JS_IMPORT_DESCRIPTOR_IMPL_H
 
-#include "import_descriptor.h"
-#include "libabckit/cpp/headers/core/import_descriptor.h"
+#include "./import_descriptor.h"
+#include "../core/import_descriptor.h"
 
 namespace abckit::js {
 

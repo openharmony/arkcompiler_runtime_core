@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -63,6 +63,13 @@ inline core::Module AnnotationInterface::GetModule() const
     auto mod = GetApiConfig()->cIapi_->annotationInterfaceGetModule(GetView());
     CheckError(GetApiConfig());
     return Module(mod, GetApiConfig(), GetResource());
+}
+
+inline Namespace AnnotationInterface::GetParentNamespace() const
+{
+    AbckitCoreNamespace *ns = GetApiConfig()->cIapi_->annotationInterfaceGetParentNamespace(GetView());
+    CheckError(GetApiConfig());
+    return Namespace(ns, GetApiConfig(), GetResource());
 }
 
 inline std::string AnnotationInterface::GetName() const

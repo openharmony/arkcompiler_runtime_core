@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,8 +18,8 @@
 
 #include "annotation.h"
 #include "annotation_element.h"
-#include "libabckit/cpp/headers/value.h"
-#include "libabckit/cpp/headers/core/annotation_element.h"
+#include "../value.h"
+#include "../core/annotation_element.h"
 
 // NOLINTBEGIN(performance-unnecessary-value-param)
 namespace abckit::arkts {
@@ -32,6 +32,13 @@ inline AbckitArktsAnnotation *Annotation::TargetCast() const
 }
 
 inline Annotation::Annotation(const core::Annotation &coreOther) : core::Annotation(coreOther), targetChecker_(this) {}
+
+inline bool Annotation::SetName(const std::string &name) const
+{
+    const auto ret = GetApiConfig()->cArktsMapi_->annotationSetName(TargetCast(), name.c_str());
+    CheckError(GetApiConfig());
+    return ret;
+}
 
 inline arkts::Annotation Annotation::AddElement(const abckit::Value &val, std::string_view name) const
 {

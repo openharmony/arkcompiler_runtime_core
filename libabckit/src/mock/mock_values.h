@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -173,6 +173,8 @@ extern const size_t DEFAULT_SIZE_T;
 #define DEFAULT_ARKTS_MODULE_FIELD (reinterpret_cast<AbckitArktsModuleField *>(0xdead0047))
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFAULT_CORE_NAMESPACE_FIELD (reinterpret_cast<AbckitCoreNamespaceField *>(0xdead0056))
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define DEFAULT_ARKTS_NAMESPACE_FIELD (reinterpret_cast<AbckitArktsNamespaceField *>(0xdead0057))
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFAULT_CORE_CLASS_FIELD (reinterpret_cast<AbckitCoreClassField *>(0xdead0048))
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -292,6 +292,21 @@ struct CAPI_EXPORT AbckitArktsInspectApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
      */
     bool (*arktsModuleFieldIsReadonly)(AbckitArktsModuleField *field);
+
+    /* ========================================
+     * Namespace Field
+     * ======================================== */
+
+    /**
+     * @brief Convert an instance of type `AbckitCoreNamespaceField` to the instance of type
+     * `AbckitArktsNamespaceField`, which can be used to invoke the corresponding APIs.
+     * @return Pointer to the language-dependent representation of the `field`.
+     * @param [ in ] field - Namespace field to convert.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `field` is does not have `ABCKIT_TARGET_ARK_TS_V1` or
+     * `ABCKIT_TARGET_ARK_TS_V2` target.
+     */
+    AbckitArktsNamespaceField *(*coreNamespaceFieldToArktsNamespaceField)(AbckitCoreNamespaceField *field);
 
     /* ========================================
      * Class Field
@@ -660,6 +675,16 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * ======================================== */
 
     /**
+     * @brief Sets name for module `m`.
+     * @return `true` on success.
+     * @param [ in ] m - Module to be inspected.
+     * @param [ in ] name - Name to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `m` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     */
+    bool (*moduleSetName)(AbckitArktsModule *m, const char *name);
+
+    /**
      * @brief Adds import from one Arkts module to another Arkts module.
      * @return Pointer to the newly created import descriptor.
      * @param [ in ] importing - Importing module.
@@ -727,6 +752,20 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      */
     AbckitArktsAnnotationInterface *(*moduleAddAnnotationInterface)(
         AbckitArktsModule *m, const struct AbckitArktsAnnotationInterfaceCreateParams *params);
+
+    /* ========================================
+     * Namespace
+     * ======================================== */
+
+    /**
+     * @brief Sets name for module `ns`.
+     * @return `true` on success.
+     * @param [ in ] ns - Namespace to be inspected.
+     * @param [ in ] name - Name to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `ns` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     */
+    bool (*namespaceSetName)(AbckitArktsNamespace *ns, const char *name);
 
     /* ========================================
      * Class
@@ -846,7 +885,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] name - Name of the class to be created.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
      */
-    AbckitArktsClass *(*createClass)(const char *name);
+    AbckitArktsClass *(*createClass)(AbckitArktsModule *m, const char *name);
 
     /**
      * @brief Sets owning module for class `klass`.
@@ -971,7 +1010,21 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] name - Name of the interface to be created.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
      */
-    AbckitArktsInterface *(*createInterface)(const char *name);
+    AbckitArktsInterface *(*createInterface)(AbckitArktsModule *m, const char *name);
+
+    /* ========================================
+     * Enum
+     * ======================================== */
+
+    /**
+     * @brief Sets name for enum `enm`.
+     * @return `true` on success.
+     * @param [ in ] enm - Enum to be inspected.
+     * @param [ in ] name - Name to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `enm` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     */
+    bool (*enumSetName)(AbckitArktsEnum *enm, const char *name);
 
     /* ========================================
      * Module Field
@@ -981,11 +1034,12 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @brief Adds annotation `anno` to the list of annotations for module field `field`.
      * @return `true` on success.
      * @param [ in ] field - Field to be inspected.
-     * @param [ in ] anno - Annotation to be added.
+     * @param [ in ] params - Data that is used to create the annotation.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `params` is NULL.
      */
-    bool (*moduleFieldAddAnnotation)(AbckitArktsModuleField *field, AbckitArktsAnnotation *anno);
+    bool (*moduleFieldAddAnnotation)(AbckitArktsModuleField *field,
+                                     const struct AbckitArktsAnnotationCreateParams *params);
 
     /**
      * @brief Removes annotation `anno` from the list of annotations for module field `field`.
@@ -1044,6 +1098,20 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
                                                  AbckitValue *value);
 
     /* ========================================
+     * Namespace Field
+     * ======================================== */
+
+    /**
+     * @brief Sets name for namespace field `field`.
+     * @return `true` on success.
+     * @param [ in ] field - NamespaceField to be inspected.
+     * @param [ in ] name - Name to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     */
+    bool (*namespaceFieldSetName)(AbckitArktsNamespaceField *field, const char *name);
+
+    /* ========================================
      * Class Field
      * ======================================== */
 
@@ -1051,11 +1119,12 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @brief Adds annotation `anno` to the list of annotations for class field `field`.
      * @return `true` on success.
      * @param [ in ] field - Field to be inspected.
-     * @param [ in ] anno - Annotation to be added.
+     * @param [ in ] params - Data that is used to create the annotation.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `params` is NULL.
      */
-    bool (*classFieldAddAnnotation)(AbckitArktsClassField *field, AbckitArktsAnnotation *anno);
+    bool (*classFieldAddAnnotation)(AbckitArktsClassField *field,
+                                    const struct AbckitArktsAnnotationCreateParams *params);
 
     /**
      * @brief Removes annotation `anno` from the list of annotations for class field `field`.
@@ -1121,11 +1190,12 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @brief Adds annotation `anno` to the list of annotations for interface field `field`.
      * @return `true` on success.
      * @param [ in ] field - Field to be inspected.
-     * @param [ in ] anno - Annotation to be added.
+     * @param [ in ] params - Data that is used to create the annotation.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `params` is NULL.
      */
-    bool (*interfaceFieldAddAnnotation)(AbckitArktsInterfaceField *field, AbckitArktsAnnotation *anno);
+    bool (*interfaceFieldAddAnnotation)(AbckitArktsInterfaceField *field,
+                                        const struct AbckitArktsAnnotationCreateParams *params);
 
     /**
      * @brief Removes annotation `anno` from the list of annotations for interface field `field`.
@@ -1227,6 +1297,16 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * ======================================== */
 
     /**
+     * @brief Sets name for annotation interface `ai`.
+     * @return `true` on success.
+     * @param [ in ] ai - AnnotationInterface to be inspected.
+     * @param [ in ] name - Name to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `ai` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     */
+    bool (*annotationInterfaceSetName)(AbckitArktsAnnotationInterface *ai, const char *name);
+
+    /**
      * @brief Add new field to the annotation interface.
      * @return Pointer to the newly created annotation field.
      * @param [ in ] ai - Annotation interface to add new field to.
@@ -1297,7 +1377,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @brief Sets parent class for function `function`.
      * @return `true` on success.
      * @param [ in ] function - Function to be inspected.
-     * @param [ in ] class - Class to be set.
+     * @param [ in ] klass - Class to be set.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `class` is NULL.
      */
@@ -1342,7 +1422,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `param` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `param` is not a parameter of function `func`.
      */
-    bool (*functionRemoveParameter)(AbckitArktsFunction *func, AbckitArktsFunctionParam *param);
+    bool (*functionRemoveParameter)(AbckitArktsFunction *func, size_t index);
 
     /**
      * @brief Sets return type for function `func`.
@@ -1367,6 +1447,16 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
     /* ========================================
      * Annotation
      * ======================================== */
+
+    /**
+     * @brief Sets name for annotation `anno`.
+     * @return `true` on success.
+     * @param [ in ] anno - AnnotationInterface to be inspected.
+     * @param [ in ] name - Name to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     */
+    bool (*annotationSetName)(AbckitArktsAnnotation *anno, const char *name);
 
     /**
      * @brief Add annotation element to the existing annotation.
