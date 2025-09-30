@@ -1,5 +1,0 @@
-# #20150
-test_stress_gc_humongous.ets
-test_stress_gc_humongous_bq.ets
-# #20621
-test_gc_old_longrun.ets
