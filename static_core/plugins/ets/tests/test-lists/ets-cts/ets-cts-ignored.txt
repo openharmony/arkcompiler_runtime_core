@@ -1267,11 +1267,6 @@
 #29940
 08.statements/12.return_statements/return_negative_7.ets
 
-#29987
-08.statements/13.switch_statements/Any_Switch.ets
-08.statements/13.switch_statements/Object_Switch.ets
-08.statements/13.switch_statements/switch_double_branch.ets
-
 #30145
 08.statements/14.throw_statements/throw_7.ets
 

@@ -15,9 +15,7 @@ limitations under the License.
 
 /*---
 desc: >-
-    The switch expression type must be of type char, byte, short, int, long, Char, Byte, Short, Int, Long, string,
-    or enum.
-tags: [negative, compile-only]
+    The switch expression can be any type.
 ---*/
 
 function main(): void {
