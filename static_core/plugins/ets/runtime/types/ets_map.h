@@ -169,9 +169,19 @@ public:
         return MEMBER_OFFSET(EtsEscompatMap, sizeVal_);
     }
 
+    static constexpr size_t GetInitialCapacityOffset()
+    {
+        return MEMBER_OFFSET(EtsEscompatMap, initialCapacity_);
+    }
+
     EtsInt GetSize()
     {
         return ObjectAccessor::GetPrimitive<EtsInt>(this, GetSizeValOffset());
+    }
+
+    EtsInt GetInitialCapacity() const
+    {
+        return ObjectAccessor::GetPrimitive<EtsInt>(this, GetInitialCapacityOffset());
     }
 
     MapIdx GetFirstIdx(EtsCoroutine *coro)
@@ -231,6 +241,7 @@ private:
     EtsInt cap_;
     EtsInt numEntries_;
     EtsInt sizeVal_;
+    EtsInt initialCapacity_;
 
     friend class test::EtsMapTest;
 };

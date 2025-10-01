@@ -17,6 +17,7 @@ type KeyType = Number
 type ValType = String
 
 type TestMap = Map<KeyType, ValType>
+type InitArray = Array<[KeyType, ValType]>
 
 function print(str: string) {
     console.log(str)
@@ -33,6 +34,12 @@ function buildVal(key: KeyType, suffix: string = ""): ValType {
 function setMap(map: TestMap, from: int, to: int, suffix: string = "") {
     for (let key = from; key <= to; ++key) {
         map.set(key, buildVal(key))
+    }        
+}
+
+function setArray(arr: InitArray, from: int, to: int, suffix: string = "") {
+    for (let key = from; key <= to; ++key) {
+        arr.push([key, buildVal(key)])
     }        
 }
 
@@ -85,12 +92,30 @@ function testSetAfterClearInForEach_0(clear_inside: boolean, step: int, init_fro
         init_from + ", " + init_to + ", " + inside_from + ", " + inside_to + ", " + qty + ")")
 }
 
+function testSetAfterClearInForEach_1(step: int, initial_capacity: int, init_from: int, init_to: int, inside_from: int, inside_to: int, qty: int) {
+    let map = new TestMap(initial_capacity)
+    setMap(map, init_from, init_to)
+    let cnt: int = 0
+    map.forEach((v, k, map) => {
+        ++cnt
+        if (cnt === step) {
+            map.clear()
+            setMap(map, inside_from, inside_to, "_")
+        }
+    });
+    arktest.assertEQ(cnt, qty, "SetAfterClearInForEach_1(" + step + ", " + initial_capacity + ", " +
+        init_from + ", " + init_to + ", " + inside_from + ", " + inside_to + ", " + qty + ")")
+}
+
 function testSetAfterClearInForEach() {
     testSetAfterClearInForEach_0(false, 1, 0, 3, 1, 1, 2)
     testSetAfterClearInForEach_0(false, 1, 0, 3, 1, 5, 2)
     testSetAfterClearInForEach_0(false, 1, 0, 3, 1, 555, 2)
     testSetAfterClearInForEach_0(true, 2, 0, 3, 1, 1, 3)
     testSetAfterClearInForEach_0(true, 2, 0, 3, 1, 55, 57)
+    testSetAfterClearInForEach_1(10, 0, 0, 35, 101, 350, 260)
+    testSetAfterClearInForEach_1(20, 175, 0, 35, 201, 550, 370)
+    testSetAfterClearInForEach_1(30, 601, 0, 35, 301, 750, 480)
 }
 
 ////////////////////////////////////////////////////////////////
@@ -217,7 +242,7 @@ function testMultipleDeleteForEach_0(init_qty: int, step: int, res_qty: int): vo
         ++cnt
         if (cnt <= step) {
             arktest.assertEQ(k, cnt) 
-            arktest.assertEQ(v, buildVal(k)) 
+            arktest.assertEQ(v, buildVal(k))
         }
         
         if (cnt === step) {
@@ -239,6 +264,44 @@ function testMultipleDeleteForEach() {
     testMultipleDeleteForEach_0(1000, 100, 100 + 9)
     testMultipleDeleteForEach_0(1000, 99, 99 + 10)
     testMultipleDeleteForEach_0(1000, 101, 101 + 9)
+}
+////////////////////////////////////////////////////////////////
+
+function testMultipleDeleteAndSetForEach_0(init_qty: int, step: int, initial_capacity: int, res_qty: int): void {
+    let arr = new InitArray()
+    setArray(arr, 1, initial_capacity)
+    let map = new TestMap(arr)
+    setMap(map, initial_capacity + 1, init_qty)
+    let cnt: int = 0
+    map.forEach((v, k, map) => {
+        ++cnt
+        if (cnt <= step) {
+            arktest.assertEQ(k, cnt)
+            arktest.assertEQ(v, buildVal(k))
+        }
+
+        if (cnt === step) {
+            for (let kk: int = 1; kk <= init_qty; ++kk) {
+                if (kk % 50 != 0)
+                    map.delete(kk)
+                else
+                    map.set(init_qty + kk, buildVal(init_qty + kk))
+            }
+        }
+
+        if (cnt > step) {
+            arktest.assertEQ(k % 50, 0)
+            arktest.assertEQ(v, buildVal(k))
+        }
+    });
+    arktest.assertEQ(cnt, res_qty, "testMultipleDeleteAndSetForEach_0(" + init_qty + ", " + step + ", " +
+        initial_capacity + ", " + res_qty + ")")
+}
+
+function testMultipleDeleteAndSetForEach() {
+    testMultipleDeleteAndSetForEach_0(1000, 100, 0, 100 + 38)
+    testMultipleDeleteAndSetForEach_0(1000, 99, 125, 99 + 39)
+    testMultipleDeleteAndSetForEach_0(1000, 101, 500, 101 + 38)
 }
 
 ////////////////////////////////////////////////////////////////
@@ -275,6 +338,54 @@ function testSetAfterEnd() {
 
 ////////////////////////////////////////////////////////////////
 
+function getHashCodeByValue64(o: Object): long {
+    if (o instanceof Long) {
+        return o.toLong()
+    }
+    if (o instanceof Int) {
+        return o.toLong()
+    }
+
+    return Runtime.getHashCodeByValue(o)
+}
+
+function testHashInt_0(key: int, res_idx: int): void {
+    let idx = 0
+    const keyHash64: long = getHashCodeByValue64(key as object)
+    const keyHash: int = keyHash64.toInt()
+    const t = keyHash >> 31
+    idx = (keyHash ^ t) - t
+
+    arktest.assertEQ(key, keyHash64, "testHashInt_0(" + key + ", " + res_idx + ") for hash")
+    arktest.assertEQ(idx, res_idx, "testHashInt_0(" + key + ", " + res_idx + ") for result")
+}
+
+function testHashLong_0(key: long, res_idx: int): void {
+    let idx = 0
+    const keyHash64: long = getHashCodeByValue64(key as object)
+    const keyHash: int = keyHash64.toInt()
+    const t = keyHash >> 31
+    idx = (keyHash ^ t) - t
+
+    arktest.assertEQ(key, keyHash64, "testHashLong_0(" + key + ", " + res_idx + ") for hash")
+    arktest.assertEQ(idx, res_idx, "testHashLong_0(" + key + ", " + res_idx + ") for result")
+}
+
+function testHash() {
+    // NOTE: verifies the behavior of the bucket index calculation algorithm in the
+    // scenario where Runtime.getHashCodeByValue() (EtsEscompatMap::GetHashCode())
+    // returns a 64-bit signed hash code
+    testHashInt_0( 0, 0)
+    testHashInt_0( -3, 3)
+    testHashInt_0(-12357, 12357)
+    testHashLong_0(0x8000000100000055, 0x00000055) // -9223372032559808427, 85
+    testHashLong_0(0x8000000180000055, 0x7FFFFFAB) // -9223372030412324779, 2147483563
+    testHashLong_0(0x1000000000000055, 0x00000055) // 1152921504606847061, 85
+    testHashLong_0(0x1000000080000055, 0x7FFFFFAB) // 1152921506754330709, 2147483563
+}
+
+////////////////////////////////////////////////////////////////
+
 function main(): int {
     const suite = new arktest.ArkTestsuite("Map opt about iterator")
 
@@ -285,9 +396,10 @@ function main(): int {
     suite.addTest("Map test delete in iterator", testDeleteInIterator)
     suite.addTest("Map test set in foreach", testSetInForEach)
     suite.addTest("Map test set in iterator", testSetInIterator)
-
     suite.addTest("Multiple delete in foreach", testMultipleDeleteForEach)
+    suite.addTest("Multiple delete and set in foreach", testMultipleDeleteAndSetForEach)
     suite.addTest("Set after end", testSetAfterEnd)
+    suite.addTest("Signed 64-bit Hash", testHash)
 
     return suite.run()
 }

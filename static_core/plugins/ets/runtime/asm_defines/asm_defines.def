@@ -76,6 +76,7 @@ DEFINE_VALUE(ESCOMPAT_MAP_BUCKETS_OFFSET, ark::ets::EtsEscompatMap::GetBucketsOf
 DEFINE_VALUE(ESCOMPAT_MAP_CAP_OFFSET, ark::ets::EtsEscompatMap::GetCapOffset())
 DEFINE_VALUE(ESCOMPAT_MAP_NUM_ENTRIES_OFFSET, ark::ets::EtsEscompatMap::GetNumEntriesOffset())
 DEFINE_VALUE(ESCOMPAT_MAP_SIZE_VAL_OFFSET, ark::ets::EtsEscompatMap::GetSizeValOffset())
+DEFINE_VALUE(ESCOMPAT_MAP_INITIAL_CAPACITY_OFFSET, ark::ets::EtsEscompatMap::GetInitialCapacityOffset())
 
 DEFINE_VALUE(ESCOMPAT_MAP_ENTRY_KEY_OFFSET, ark::ets::EtsEscompatMapEntry::GetKeyOffset())
 DEFINE_VALUE(ESCOMPAT_MAP_ENTRY_VAL_OFFSET, ark::ets::EtsEscompatMapEntry::GetValOffset())
