@@ -157,9 +157,6 @@ cases:
     - decl: |-
           let x: [Promise<number>|undefined, Array<string>|Array<number>] = [undefined, ['']]
       use: |-
-          arktest.assertTrue(
-              ((): Object => x)() instanceof [Any, Any] // OK, erased to Tuple2
-          )
 
     - tags: compile-only, negative
       decl: |-
@@ -172,9 +169,6 @@ cases:
     - decl: |-
           let x: [Array<number>, FixedArray<string>|Array<number>] = [[1.0], [1.0]]
       use: |-
-          arktest.assertTrue(
-              ((): Object => x)() instanceof [Any, Any] // OK, erased to Tuple2
-          )
 
     # string literal types erased
     - tags: compile-only, negative

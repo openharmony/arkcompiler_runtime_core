@@ -13,20 +13,30 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
+{% for use_const in const_to_initialise %}
+
 /*---
-desc: 03.8.10 Tuple Types
-name: tuple_as_param_5.ets
-tags: []
+desc: Check type inference from the initialization expression
+tags: [negative, compile-only]
 ---*/
-type TNumberStringPair = [number, string];
 
-function receiver(tuple: TNumberStringPair): void {
-    let tmp = tuple;
+let cond = true
 
-    arktest.assertEQ( tuple[0], 123.0)
-    arktest.assertEQ( tuple[1], "123.0")
-}
+{% if "true" in use_const %}
+const a = cond ? {{c.decl}}
+{% else %}
+let a = cond ? {{c.decl}}
+{% endif %}
+
+
 function main(): void {
-
-    receiver([123.0, "123.0"] as TNumberStringPair);
+{% if "true" in use_const %}
+    arktest.assertTrue(a instanceof {{c.expected_const}})
+{% else %}
+    arktest.assertTrue(a instanceof {{c.expected_let}})
+{% endif %}
 }
+
+{% endfor %}
+{% endfor %}

@@ -33,8 +33,8 @@ global_tests_data:
       check_value_0: "true",
       check_value_1: "5",
       check_value_2: "\"abc\""}
-    - {check_type_a: "\"Done\" | \"In Progress\" | \"On Review\"",
-      check_type_b: "\"In Progress\" | \"On Review\" | \"Done\"",
+    - {check_type_a: "String",
+      check_type_b: "String",
       check_value_0: "\"On Review\"",
       check_value_1: "\"In Progress\"",
       check_value_2: "\"Done\""}

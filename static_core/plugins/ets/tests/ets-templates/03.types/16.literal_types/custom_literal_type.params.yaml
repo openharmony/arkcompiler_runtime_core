@@ -19,8 +19,6 @@ cases:
           type LITERAL = "some str"
       use: |-
           let a: LITERAL = "some str"
-          arktest.assertTrue( a instanceof "some str" )
-          arktest.assertTrue( a instanceof LITERAL )
           arktest.assertEQ( a, "some str" )
 
     - doc: |-
@@ -44,7 +42,6 @@ cases:
           type LITERAL = "some str" | "another str" | Number | boolean | string
       use: |-
           let a: LITERAL = "some str"
-          arktest.assertTrue( a instanceof LITERAL )
           arktest.assertEQ( a, "some str" )
           a = "another str"
           arktest.assertEQ( a, "another str" )

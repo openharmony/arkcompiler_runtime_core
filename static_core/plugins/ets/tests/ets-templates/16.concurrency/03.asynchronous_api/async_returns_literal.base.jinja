@@ -41,7 +41,6 @@ async function startTest(){
     let result = {{ call_async(declaration_type, params) }}
     arktest.assertTrue(result instanceof Promise)
     let awaited_result = await result
-    arktest.assertTrue(awaited_result instanceof {{literal_name}})
     arktest.assertEQ(awaited_result, {{literal_name}})
 }
 

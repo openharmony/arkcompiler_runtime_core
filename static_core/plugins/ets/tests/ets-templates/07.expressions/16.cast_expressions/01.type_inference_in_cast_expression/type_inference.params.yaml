@@ -60,16 +60,16 @@ cases:
     assert: arktest.assertTrue(a instanceof Object[])
   - type: "[byte, short, int, long]"
     val: "[1, 2, 3, 4]"
-    assert: arktest.assertTrue(a instanceof [byte, short, int, long])
+    assert: ""
   - type: "[float, double]"
     val: "[1, 2]"
-    assert: arktest.assertTrue(a instanceof [float, double])
+    assert: ""
   - type: "[char, string]"
     val: "[c'a', 'ccc']"
-    assert: arktest.assertTrue(a instanceof [char, string])
+    assert: ""
   - type: "[double, string, Object]"
     val: "[1, 'cc', 1]"
-    assert: arktest.assertTrue(a instanceof [double, string, Object])
+    assert: ""
   - type: Record<byte, short>
     val: "{1: 2}"
     assert: arktest.assertTrue(a instanceof Record<byte, short>)

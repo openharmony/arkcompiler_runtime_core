@@ -141,8 +141,6 @@ global_tests_data:
             }
           }
           function check_func_4(a: Any) {
-            arktest.assertTrue(a instanceof "Done" | "In Progress" | "On Review")
-            arktest.assertTrue(a instanceof "In Progress" | "On Review" | "Done")
             arktest.assertEQ(a as "Done" | "In Progress" | "On Review", [check_value_4])
           }
           function check_func_5(a: Any) {

@@ -26,14 +26,12 @@ cases:
 
     - use: |-
           let e: [boolean, string] = [true, "A"]
-          arktest.assertTrue( e instanceof [boolean, string] )
           arktest.assertTrue( e instanceof Object )
 
     - decl: |-
           type TUPLE = [boolean, string]
       use: |-
           let e: TUPLE = [true, "A"]
-          arktest.assertTrue( e instanceof TUPLE )
           arktest.assertTrue( e instanceof Object )
 
     - use: |-

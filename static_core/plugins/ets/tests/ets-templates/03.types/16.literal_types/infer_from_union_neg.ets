@@ -20,6 +20,7 @@ desc: >-
     Literal types are aligned with some ArkTS literals (see Literals).
     Their names are same as the names of their values, i.e., literals.
     Only three literal types are supported - string, null and undefined.
+tags: [negative, compile-only]
 ---*/
 
 type number_tuple = [int, double]
@@ -31,8 +32,8 @@ type fooType = () => int
 {{c.decl}}
 
 function main(): void {
-    let {{c.test_type}} | {{union_type.def}} = {{c.rh_value}}
-    arktest.assertTrue({{c.retrieve}} instanceof string)
+    const {{c.test_type}} | {{union_type.def}} = {{c.rh_value}}
+    arktest.assertTrue({{c.retrieve}} instanceof {{c.literal}})
     arktest.assertEQ({{c.retrieve}}, {{c.literal}})
 }
 

@@ -120,7 +120,7 @@ cases:
             class B extends AC {
                 foo(): int { return 2 }
             }
-  
+
             function foo(i: boolean) {
                 if(i)
                     return new A();
@@ -140,7 +140,7 @@ cases:
             interface III extends I {}
             class A implements II {}
             class B implements III {}
-  
+
             function foo(i: boolean) {
                 if(i)
                     return new A();
@@ -178,7 +178,6 @@ cases:
             }
       call: |-
             let i = foo()
-            arktest.assertTrue(i instanceof TPL);
 
     - decl: |-
           const cstr = "some string"  // infer string/char
@@ -334,7 +333,7 @@ cases:
           lb = () => { return 0 }
           rtl() {
             return this.lb
-          }     
+          }
         }
 
       call: |-
@@ -356,7 +355,7 @@ cases:
         interface IMy {}
         class MyClass implements IMy {
         }
-        
+
         function getMyClass(...val: IMy[]) {
           return val[0]
         }
@@ -369,7 +368,7 @@ cases:
         interface IMy {}
         class MyClass implements IMy {
         }
-        
+
         function getArrayLength(...val: IMy[]) {
           return val.length
         }
@@ -380,7 +379,7 @@ cases:
 
     - decl: |-
         const a: 'string literal' = 'string literal'
-        
+
         function getASL() {
           return a
         }
@@ -398,7 +397,7 @@ cases:
         arktest.assertTrue(getSumASL() instanceof String);
 
     - decl: |-
-        const a: 'string literal' = 'string literal'        
+        const a: 'string literal' = 'string literal'
         function getType() {
           return typeof a
         }
