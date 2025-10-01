@@ -35,6 +35,6 @@ function main(): void {
   last = 0;
   f(5);
 
-  arktest.assertEQ(0, def)
-  arktest.assertEQ(1, last)
+  arktest.assertEQ(1, def)
+  arktest.assertEQ(2, last)
 }
