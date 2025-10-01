@@ -1260,9 +1260,6 @@
 #25042 Ast verifier failure for for-of with labelled statement
 08.statements/11.continue_statements/continue_for_of5l.ets
 
-#29940
-08.statements/12.return_statements/return_negative_7.ets
-
 #30145
 08.statements/14.throw_statements/throw_7.ets
 
