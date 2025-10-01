@@ -22,15 +22,12 @@ params: NaN conversion from {{c.from_type}} to {{c.to_type}}
 let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
 {%- endfor %}
 
-function main(): int {
+function main(): void {
 {%- for t in c['values'] %}
-    let d{{loop.index}}: {{c.to_type}}[] = [s{{loop.index}}, s{{loop.index}}]
-    d{{loop.index}} = []
-    d{{loop.index}} = [s{{loop.index}}]
-    if (! {{c.to_type|capitalize}}.isNaN(d{{loop.index}}[0])) {
-        return 1
-    }
+	let d{{loop.index}}: {{c.to_type}}[] = [s{{loop.index}}, s{{loop.index}}]
+	d{{loop.index}} = []
+	d{{loop.index}} = [s{{loop.index}}]
+	arktest.assertTrue({{c.to_type|capitalize}}.isNaN(d{{loop.index}}[0]))
 {%- endfor %}
-    return 0
 }
 {%- endfor %}

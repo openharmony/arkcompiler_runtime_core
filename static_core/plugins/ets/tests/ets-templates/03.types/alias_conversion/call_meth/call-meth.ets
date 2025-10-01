@@ -23,14 +23,11 @@ class A {
     meth(p: {{c.to_type}}): {{c.to_type}} { return p }
 }
 
-function main(): int {
+function main(): void {
     let a: A = new A()
 {%- for t in c['values'] %}
     let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
-    if (a.meth(s{{loop.index}}).unboxed() != {{t.val}}) {
-        return 1
-    }
+	arktest.assertEQ(a.meth(s{{loop.index}}).unboxed(), {{t.val}})
 {%- endfor %}
-    return 0
 }
 {%- endfor %}

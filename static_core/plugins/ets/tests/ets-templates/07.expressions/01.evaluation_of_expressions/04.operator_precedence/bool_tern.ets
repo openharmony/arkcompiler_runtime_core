@@ -29,12 +29,13 @@ function ft(): boolean {
     return true;
 }
 
-function main(): int {
+function main() {
+
     let v = false, vt = true, vf = false
     res = "";
 
     v = ft() ? ff() ? vt: ft() ? ff() ? vt : ff() ? vt : vf : vf : vf;
-    if (v || res != "TFTFF") return 1;
+    arktest.assertFalse(v || res != "TFTFF");
 
-    return 0;
+    
 }

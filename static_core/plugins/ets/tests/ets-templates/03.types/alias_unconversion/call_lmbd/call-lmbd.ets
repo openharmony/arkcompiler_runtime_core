@@ -19,13 +19,10 @@ desc: Call context, lambda, unboxing conversion, implicit
 params: from {{c.from_type}} to {{c.to_type}}
 ---*/
 
-function main(): int {
+function main(): void {
 {%- for t in c['values'] %}
-    let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
-    if (((p: {{c.to_type}}): {{c.to_type}} => { return p })(s{{loop.index}}) != {{t.val}}) {
-        return 1
-    }
+	let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
+	arktest.assertEQ(((p: {{c.to_type}}): {{c.to_type}} => { return p })(s{{loop.index}}), {{t.val}})
 {%- endfor %}
-    return 0
 }
 {%- endfor %}

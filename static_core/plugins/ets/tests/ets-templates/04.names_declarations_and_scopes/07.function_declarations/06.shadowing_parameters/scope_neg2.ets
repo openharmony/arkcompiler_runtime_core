@@ -27,6 +27,6 @@ function foo(): int {  // duplicate identifier
     return foo;
 }
 
-function main(): int {
-    return foo();
+function main(): void {
+    return arktest.assertEQ(foo(), 0);
 }

@@ -43,12 +43,9 @@ final class C extends A {
   }
 }
 
-function main(): int {
+function main(): void {
   let c = new C()
-  if (c.test() == 5) {
-    return 0
-  }
-  return 1
+  arktest.assertEQ(c.test(), 5)
 }
 
 {% endfor %}

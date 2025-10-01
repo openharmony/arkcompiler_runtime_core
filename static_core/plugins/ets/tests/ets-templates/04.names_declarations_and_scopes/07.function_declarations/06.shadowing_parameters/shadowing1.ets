@@ -27,8 +27,8 @@ function bar(q: int): int { // q shadows top-level q
     return q + q;
 }
 
-function main(): int {
+function main() {
     q = 1;
-    if (bar(10) == 20 && q == 1) return 0;
-    return 1;
+    arktest.assertEQ(bar(10), 20);
+    arktest.assertEQ(q, 1);
 }

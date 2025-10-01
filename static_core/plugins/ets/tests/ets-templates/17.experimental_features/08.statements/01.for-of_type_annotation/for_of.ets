@@ -20,9 +20,8 @@ desc: An explicit type annotation is allowed for a for variable
 let res = ""
 {{c.decl}}
 
-function main(): int {
+function main(): void {
     res = ""
     {{c.use|indent}}
-    return 1;
 }
 {% endfor %}

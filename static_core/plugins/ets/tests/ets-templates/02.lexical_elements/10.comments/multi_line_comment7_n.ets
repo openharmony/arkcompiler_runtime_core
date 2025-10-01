@@ -17,7 +17,7 @@ limitations under the License.
 desc: Multi-line comments
 ---*/
 
-function main(): int {
+function main(): void {
     let i: int =
     /*
       /*
@@ -26,5 +26,5 @@ function main(): int {
     */
     5;
 
-    return i-5;
+    arktest.assertEQ(i - 5, 0);
 }

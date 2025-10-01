@@ -41,8 +41,9 @@ function foo <T{{c.bound}}> (t: T, v: T): T {
 
 {{c.decl}}
 
-function main(): int {
+function main() {
+
     {{c.use|indent}}
-    return 0;
+    
 }
 {% endfor %}

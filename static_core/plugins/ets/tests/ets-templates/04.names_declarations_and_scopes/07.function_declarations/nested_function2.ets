@@ -24,6 +24,7 @@ class A {
     }
 }
 
-function main(): int {
-  return 0;
+function main() {
+
+  
 }

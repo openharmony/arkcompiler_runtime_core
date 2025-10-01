@@ -23,10 +23,11 @@ desc: >-
 let iss: String = `Hello ${pString}`
 let pString = 'String'
 
-function main(): int {
+function main() {
+
     pString = 'String'
     arktest.assertEQ('Hello String', iss)
     pString = 'World'
     arktest.assertEQ('Hello String', iss)
-    return 0;
+    
 }

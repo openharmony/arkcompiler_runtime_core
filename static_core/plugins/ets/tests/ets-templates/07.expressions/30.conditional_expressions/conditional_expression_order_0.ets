@@ -32,7 +32,8 @@ function op2(order: Order): void {
 type LF = (flag: boolean, order: Order) => boolean
 
 
-function main(): int {
+function main() {
+
     let o0 = new Order
     let o1 = new Order
     let o2 = new Order
@@ -55,5 +56,5 @@ function main(): int {
     arktest.assertEQ(1, o1.order)
     arktest.assertEQ(0, o2.order)
 
-    return 0;
+    
 }

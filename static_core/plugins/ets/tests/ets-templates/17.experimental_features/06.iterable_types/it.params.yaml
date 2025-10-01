@@ -41,7 +41,7 @@ cases:
           for (let x of c) {
               res += x
           }
-          if (res != 'abc') return 1
+          arktest.assertEQ(res, 'abc')
 
     # example from the spec, use Symbol.iterator (deprecated)
     - decl: |-
@@ -70,7 +70,7 @@ cases:
           for (let x of c) {
               res += x
           }
-          if (res != 'abc') return 1
+          arktest.assertEQ(res, 'abc')
 
     # example from the spec
     - decl: |-
@@ -99,7 +99,7 @@ cases:
           for (let x of c) {
               res += x
           }
-          if (res != 'abc') return 1
+          arktest.assertEQ(res, 'abc')
 
     # example from the spec, with common abstract base class
     - decl: |-
@@ -156,7 +156,7 @@ cases:
                   res += y
               }
           }
-          if (res != 'abcdef') return 1
+          arktest.assertEQ(res, 'abcdef')
 
     # example from the spec, iterator in superclass
     - decl: |-
@@ -207,7 +207,7 @@ cases:
           for (let x of c) {
               res += x
           }
-          if (res != 'abc') return 1
+          arktest.assertEQ(res, 'abc')
 
     # protected iterator
     - decl: |-
@@ -239,7 +239,7 @@ cases:
       use: |-
           let d = new D()
           let res = d.iterate()
-          if (res != 'abc') return 1
+          arktest.assertEQ(res, 'abc')
 
     # private iterator
     - decl: |-
@@ -267,7 +267,7 @@ cases:
       use: |-
           let c = new C()
           let res = c.iterate()
-          if (res != 'abc') return 1
+          arktest.assertEQ(res, 'abc')
 
     # example from the spec, static
     - tags: 'compile-only, negative'
@@ -297,7 +297,7 @@ cases:
           for (let x of c) {
               res += x
           }
-          if (res != 'abc') return 1
+          arktest.assertEQ(res, 'abc')
 
     # data class is iterator
     - decl: |-
@@ -320,7 +320,7 @@ cases:
           for (let x of c) {
               res += x
           }
-          if (res != 'abc') return 1
+          arktest.assertEQ(res, 'abc')
 
     # use indexable class as data source
     - decl: |-
@@ -360,7 +360,7 @@ cases:
           for (let x of c) {
               res += x
           }
-          if (res != 'abc') return 1
+          arktest.assertEQ(res, 'abc')
 
     # iterator of iterators
     - decl: |-
@@ -408,7 +408,7 @@ cases:
                   res += y
               }
           }
-          if (res != 'abcabcabc') return 1
+          arktest.assertEQ(res, 'abcabcabc')
 
     # iteration over array of iterators
     - decl: |-
@@ -449,7 +449,7 @@ cases:
                   res += x
               }
           }
-          if (res != 'abcdef') return 1
+          arktest.assertEQ(res, 'abcdef')
 
     # iteration over array of iterator and string
     - decl: |-
@@ -477,7 +477,7 @@ cases:
                   res += x
               }
           }
-          if (res != 'abcdef') return 1
+          arktest.assertEQ(res, 'abcdef')
 
     # iterator in default method in interface
     - decl: |-
@@ -503,7 +503,7 @@ cases:
           for (let x of c) {
               res += x
           }
-          if (res != 'abc') return 1
+          arktest.assertEQ(res, 'abc')
 
     # iterator in abstract superclass
     - decl: |-
@@ -529,7 +529,7 @@ cases:
           for (let x of c) {
               res += x
           }
-          if (res != 'abc') return 1
+          arktest.assertEQ(res, 'abc')
 
     # empty iterator case
     - decl: |-
@@ -547,7 +547,7 @@ cases:
           for (let x of c) {
               res += '.'
           }
-          if (res != '') return 1
+          arktest.assertEQ(res, '')
 
     # iterator of iterators on parameterized class
     - decl: |-
@@ -577,4 +577,4 @@ cases:
                   res += y
               }
           }
-          if (res != 18) return 1
+          arktest.assertEQ(res, 18)

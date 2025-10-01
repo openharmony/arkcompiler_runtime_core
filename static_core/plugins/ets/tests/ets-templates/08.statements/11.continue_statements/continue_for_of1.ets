@@ -19,7 +19,7 @@ desc: >-
   to the next iteration with proper check of the loop exit condition depending on the loop kind.
 ---*/
 
-function main(): int {
+function main(): void {
     let sum: int
     let arr: int[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     for (let x of arr) {
@@ -28,6 +28,5 @@ function main(): int {
         }
         sum += x
     }
-    if (sum == 25) return 0;
-    return 1;
+    arktest.assertEQ(sum, 25)
 }

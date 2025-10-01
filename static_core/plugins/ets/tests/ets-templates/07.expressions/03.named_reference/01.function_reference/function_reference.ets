@@ -35,22 +35,21 @@ function funGeneric<T> (x: T): T {
     return x;
 }
 
-function main(): int {
+function main() {
 
     let ref1 = fun1;
-    if (ref1() !== 'ok') return 1;
+	arktest.assertEQ(ref1(), 'ok')
 
-    let ref2 = fun2;
-    if (ref2(1) !== undefined) return 2;
+	let ref2 = fun2;
+	arktest.assertEQ(ref2(1), undefined)
 
-    let ref3 = sum;
-    if (ref3(1, 2) !== (3 as int)) return 3;
+	let ref3 = sum;
+	arktest.assertEQ(ref3(1, 2), 3 as int)
 
-    let ref4 = ref1;
-    if (ref4() !== 'ok') return 4;
+	let ref4 = ref1;
+	arktest.assertEQ(ref4(), 'ok')
 
-    let refGeneric = funGeneric<string> // ; #28174
-    if (refGeneric('yes') !== 'yes') return 5;
-
-    return 0;
+	let refGeneric = funGeneric<string> // ; #28174
+	arktest.assertEQ(refGeneric('yes'), 'yes')
+  
 }

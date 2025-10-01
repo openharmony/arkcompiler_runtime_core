@@ -34,17 +34,14 @@ class D {
 
 enum Enum { abc, def, ghk, xyz }
 
-let xyz: int = 4;
-
-function main(): int {
-    if (0 == foo() &&
-        1 == new C().xyz &&
-        2 == new D().xyz() &&
-        3 == Enum.xyz.valueOf() &&
-        4 == xyz
-    ) {
-        let xyz = 0;
-        return xyz;
-    }
-    return 1;
+function main(): void {
+    let xyz: int = 4;
+    arktest.assertEQ(foo(), 0);
+    arktest.assertEQ(new C().xyz, 1);
+    arktest.assertEQ(new D().xyz(), 2);
+    arktest.assertEQ(Enum.xyz.valueOf(), 3);
+    arktest.assertEQ(xyz, 4);
+    
+    xyz = 0;
+    arktest.assertEQ(xyz, 0);
 }

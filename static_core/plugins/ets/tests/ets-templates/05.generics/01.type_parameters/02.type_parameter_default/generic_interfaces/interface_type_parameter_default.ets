@@ -26,9 +26,8 @@ class OtherType {}
 
 {{c.decl|indent}}
 
-function main(): int {
+function main(): void {
     {{c.use|indent}}
-    return 0
 }
 
 {% endfor %}

@@ -21,8 +21,9 @@ tags: [compile-only, negative]
 
 {{c.defs}}
 
-function main(): int {
+function main() {
+
     {{c.use}}
-    return 0;
+    
 }
 {% endfor %}

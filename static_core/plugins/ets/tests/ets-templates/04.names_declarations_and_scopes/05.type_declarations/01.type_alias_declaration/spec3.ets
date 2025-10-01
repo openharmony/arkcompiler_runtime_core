@@ -21,6 +21,5 @@ desc: >-
 
 type A<T> = string | Array<A<T>> // ok, A<T> is used as a type argument
 
-function main(): int {
-    return 0
+function main(): void {
 }

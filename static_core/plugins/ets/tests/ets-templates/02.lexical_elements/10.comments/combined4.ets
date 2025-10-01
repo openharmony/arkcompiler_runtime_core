@@ -19,12 +19,12 @@ params: multi-line over one-liner with multi-line
 tags: [compile-only, negative]
 ---*/
 
-function main(): int {
+function main(): void {
     // CTE - nested multi-line comments are prohibited
     let i: int =
       /*
           // /* comment */
       */
       5;
-    return i - 5;
+    arktest.assertEQ(i - 5, 0);
 }

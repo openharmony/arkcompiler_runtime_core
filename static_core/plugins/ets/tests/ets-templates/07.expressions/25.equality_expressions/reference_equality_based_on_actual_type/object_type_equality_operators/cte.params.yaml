@@ -15,7 +15,9 @@
 cases:
     - decl: |-
           function eq(p: Object, q: String): boolean {
-              return p == q && q == p
+          	arktest.assertEQ(p, q)
+          	arktest.assertEQ(q, p)
+          	return true
           }
 
           class A<T extends Object, U extends String> {
@@ -25,7 +27,7 @@ cases:
           }
       code: |-
           let a: A<string, string> = new A<string, string>()
-          if (!a.meth('a', 'a')) return 1
+          arktest.assertTrue(a.meth('a', 'a'))
 
     - decl: |-
           let p: Object
@@ -35,16 +37,20 @@ cases:
               meth(t: T, u: U): boolean {
                   p = t
                   q = u
-                  return p == q && q == p
+          	arktest.assertEQ(p, q)
+          	arktest.assertEQ(q, p)
+          	return true
               }
           }
       code: |-
           let a: A<string, string> = new A<string, string>()
-          if (!a.meth('a', 'a')) return 1
+          arktest.assertTrue(a.meth('a', 'a'))
 
     - decl: |-
           function eq(p: Object|null|undefined, q: Object|null|undefined): boolean {
-              return p == q && q == p
+          	arktest.assertEQ(p, q)
+          	arktest.assertEQ(q, p)
+          	return true
           }
 
           class A<T extends Object|null, U extends Number|undefined> {
@@ -54,12 +60,14 @@ cases:
           }
       code: |-
           let a: A<number, number> = new A<number, number>()
-          if (!a.meth(1.0, 1.0)) return 1
+          arktest.assertTrue(a.meth(1.0, 1.0))
 
     - tags: 'compile-only, negative'
       decl: |-
           function eq(p: Object, q: String): boolean {
-              return p == q && q == p
+          	arktest.assertEQ(p, q)
+          	arktest.assertEQ(q, p)
+          	return true
           }
 
           class A<T, U> {
@@ -69,7 +77,7 @@ cases:
           }
       code: |-
           let a: A<string, string> = new A<string, string>()
-          if (!a.meth('a', 'a')) return 1
+          arktest.assertTrue(a.meth('a', 'a'))
 
     - tags: 'compile-only, negative'
       decl: |-
@@ -80,17 +88,21 @@ cases:
               meth(t: T, u: U): boolean {
                   p = t
                   q = u
-                  return p == q && q == p
+          	arktest.assertEQ(p, q)
+          	arktest.assertEQ(q, p)
+          	return true
               }
           }
       code: |-
           let a: A<string, string> = new A<string, string>()
-          if (!a.meth('a', 'a')) return 1
+          arktest.assertTrue(a.meth('a', 'a'))
 
     - tags: 'compile-only, negative'
       decl: |-
           function eq(p: Object, q: Number): boolean {
-              return p == q && q == p
+          	arktest.assertEQ(p, q)
+          	arktest.assertEQ(q, p)
+          	return true
           }
 
           class A<T extends Object|null, U> {
@@ -100,4 +112,4 @@ cases:
           }
       code: |-
           let a: A<number, number> = new A<number, number>()
-          if (!a.meth(1.0, 1.0)) return 1
+          arktest.assertTrue(a.meth(1.0, 1.0))

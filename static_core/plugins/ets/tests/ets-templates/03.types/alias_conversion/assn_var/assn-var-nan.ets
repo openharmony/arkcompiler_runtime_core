@@ -22,14 +22,11 @@ params: NaN conversion from {{c.from_type}} to {{c.to_type}}
 let d{{loop.index}}: {{c.to_type}}
 {%- endfor %}
 
-function main(): int {
+function main(){
 {%- for t in c['values'] %}
     let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
     d{{loop.index}} = s{{loop.index}}
-    if (! {{c.to_type}}.isNaN(d{{loop.index}})) {
-        return 1
-    }
+    arktest.assertTrue({{c.to_type}}.isNaN(d{{loop.index}}))
 {%- endfor %}
-    return 0
 }
 {%- endfor %}

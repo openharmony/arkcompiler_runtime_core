@@ -19,14 +19,11 @@ desc: Declaration context, constant, boxing conversion, implicit
 params: NaN conversion  from {{c.from_type}} to {{c.to_type}}
 ---*/
 
-function main(): int {
+function main(): void {
 {%- for t in c['values'] %}
-    let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
-    const d{{loop.index}}: {{c.to_type}} = s{{loop.index}}
-    if (! {{c.to_type}}.isNaN(d{{loop.index}}.unboxed())) {
-        return 1
-    }
+	let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
+	const d{{loop.index}}: {{c.to_type}} = s{{loop.index}}
+	arktest.assertTrue({{c.to_type}}.isNaN(d{{loop.index}}.unboxed()))
 {%- endfor %}
-    return 0
 }
 {%- endfor %}

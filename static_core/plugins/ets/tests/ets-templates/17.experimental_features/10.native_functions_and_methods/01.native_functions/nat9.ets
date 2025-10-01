@@ -20,7 +20,8 @@ tags: [compile-only, negative]
 
 native function foo(a: number); // CTE: return type is missing
 
-function main(): int {
+function main() {
+
     foo(1.0);
-    return 0;
+    
 }

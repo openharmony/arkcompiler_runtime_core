@@ -23,7 +23,7 @@ desc: >-
 
 let retcode: int
 
-function main(): int {
+function main(): void {
     let v: {{c.type}} = {{c.val}}
     retcode = 1
 
@@ -33,6 +33,6 @@ function main(): int {
             break
         }
     }
-    return retcode
+    arktest.assertEQ(retcode, 0)
 }
 {%- endfor %}

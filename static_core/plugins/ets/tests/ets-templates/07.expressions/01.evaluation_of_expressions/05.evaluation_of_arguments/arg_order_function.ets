@@ -54,7 +54,10 @@ function td(): int {
 
 
 function test(a: int, b: int, c: int, d: int): void {
-  arktest.assertTrue( a == 0 && b == 1 && c == 2 && d == 3 );
+  arktest.assertEQ(a, 0)
+	arktest.assertEQ(b, 1)
+	arktest.assertEQ(c, 2)
+	arktest.assertEQ(d, 3)
 }
 
 function main(): void {

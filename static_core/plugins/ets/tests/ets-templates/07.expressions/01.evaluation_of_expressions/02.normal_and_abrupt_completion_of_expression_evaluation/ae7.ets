@@ -18,17 +18,14 @@ desc: ArithmeticError is thrown by an integer division or integer
   remainder operator if the right-hand operand expression has the zero value.
 ---*/
 
-function main(): int {
+function main() {
+
   let a = 1;
   let b = 1;
   let i = 1;
   let j: int;
 
-  try {
-    let v: boolean = (++a > 0) || (i / j) > 0;
-    if (a != 2 || b != 1) return 1;
-    return 0;
-  } catch (e) {
-    return 1;
-  }
+  let v: boolean = (++a > 0) || (i / j) > 0;
+  arktest.assertTrue(a == 2 || b == 1)
+
 }

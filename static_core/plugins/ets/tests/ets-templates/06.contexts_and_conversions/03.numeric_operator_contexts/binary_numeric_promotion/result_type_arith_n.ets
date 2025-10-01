@@ -65,10 +65,10 @@ function foo(p: Object): int {
   return 40;
 }
 
-function main(): int {
+function main(): void {
   let v: {{c.type}} = {{c.val}};
   let r: {{c.rt}} = {{c.rv}};
   let result: int = foo(v {{c.op}} r);
-  return result;
+  arktest.assertEQ(result, 0)
 }
 {% endfor %}

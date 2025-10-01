@@ -20,7 +20,8 @@ desc: >-
     can throw ArithmeticError only after the evaluations of both operands complete normally.
 ---*/
 
-function main(): int {
+function main() {
+
     let a = new int[2];
     let x: int = 42;
     let exceptions: int = 0;
@@ -52,5 +53,5 @@ function main(): int {
     arktest.assertEQ(exceptions, 3);
     arktest.assertEQ(x, 42);
 
-    return 0;
+    
 }

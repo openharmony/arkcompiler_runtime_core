@@ -19,10 +19,11 @@ desc: >-
     (except conditional operators ‘&&’, ‘||’, and ‘?:’) is fully evaluated.
 ---*/
 
-function main(): int {
+function main() {
+
     let a: boolean[] = [true, false];
     arktest.assertTrue(a[0] || a[5]);
     arktest.assertFalse(a[1] && a[5]);
     arktest.assertTrue(a[1] ? a[5] : a[0]);
-    return 0;
+    
 }

@@ -17,16 +17,19 @@ limitations under the License.
 desc: check remainder of division by zero for short integer operands
 ---*/
 
-function main(): int {
-    try {
-        const a: short = (() : short => 1)()
-        const b: short = (() : short => 0)()
-        arktest.assertTrue(a instanceof Short)
-        arktest.assertTrue(b instanceof Short)
-        a % b
-    } catch (e) {
-        return e instanceof ArithmeticError ? 0 : 1
-    }
-    arktest.assertTrue(false)
-    return -1
+function modulo(a: short, b: short): int {
+    return a % b
+}
+
+function main(): void {
+    const a: short = (() : short => 1)()
+    const b: short = (() : short => 0)()
+    arktest.assertTrue(a instanceof Short)
+    arktest.assertTrue(b instanceof Short)
+    
+    let checkException = (e: Error): boolean => { return (e instanceof ArithmeticError) }
+
+    arktest.expectThrow(() => {
+        modulo(a, b)
+    }, checkException)
 }

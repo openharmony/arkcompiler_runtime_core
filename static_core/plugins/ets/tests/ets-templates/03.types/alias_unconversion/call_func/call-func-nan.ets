@@ -21,13 +21,10 @@ params: NaN conversion from {{c.from_type}} to {{c.to_type}}
 
 function foo(p: {{c.to_type}}): {{c.to_type}} { return p }
 
-function main(): int {
+function main(): void {
 {%- for t in c['values'] %}
-    let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
-    if (! {{c.to_type|capitalize}}.isNaN(foo(s{{loop.index}}))) {
-        return 1
-    }
+	let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
+	arktest.assertTrue({{c.to_type|capitalize}}.isNaN(foo(s{{loop.index}})))
 {%- endfor %}
-    return 0
 }
 {%- endfor %}

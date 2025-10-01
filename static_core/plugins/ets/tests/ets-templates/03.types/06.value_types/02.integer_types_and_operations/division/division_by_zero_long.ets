@@ -17,16 +17,19 @@ limitations under the License.
 desc: check division by zero for long integer operand
 ---*/
 
-function main(): int {
-    try {
-        const a: long = (() : long => 1)()
-        const b: long = (() : long => 0)()
-        arktest.assertTrue(a instanceof Long)
-        arktest.assertTrue(b instanceof Long)
-        a / b
-    } catch (e) {
-        return e instanceof ArithmeticError ? 0 : 1
-    }
-    arktest.assertTrue(false)
-    return -1
+function divide(a: long, b: long): long {
+    return a / b
+}
+
+function main(): void {
+    const a: long = (() : long => 1)()
+    const b: long = (() : long => 0)()
+    arktest.assertTrue(a instanceof Long)
+    arktest.assertTrue(b instanceof Long)
+
+    let checkException = (e: Error): boolean => { return e instanceof ArithmeticError }
+    
+    arktest.expectThrow(() => {
+        divide(a, b)
+    }, checkException)
 }

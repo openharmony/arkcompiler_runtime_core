@@ -21,7 +21,7 @@ desc: >-
 tags: [compile-only, negative]
 ---*/
 
-function main(): int {
+function main(): void {
     let sum: int
     let arr1: int[] = [0, 1, 2, 3, 4]
     let arr2: int[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -36,6 +36,5 @@ function main(): int {
             continue loop1; // misplaced label
         }
     }
-    if (sum == 125) return 0;
-    return 1;
+    arktest.assertEQ(sum, 125)
 }

@@ -29,10 +29,10 @@ params: {{c.type}}, cannot promote
 tags: [compile-only, negative]
 ---*/
 
-function main(): int {
+function main(): void {
   let v: {{c.type}} = {{c.val}};
   let r: {{c.rt}} = {{c.rv}};
   let result: int = v {{c.op}} r ? 0 : 1;
-  return result;
+  arktest.assertEQ(result, 0)
 }
 {% endfor %}

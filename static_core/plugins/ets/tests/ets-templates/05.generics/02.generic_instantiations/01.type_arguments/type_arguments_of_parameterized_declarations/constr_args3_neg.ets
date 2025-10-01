@@ -31,8 +31,9 @@ class A {
     }
 }
 
-function main(): int {
+function main() {
+
     {{c.use|indent}}
-    return 0;
+    
 }
 {% endfor %}

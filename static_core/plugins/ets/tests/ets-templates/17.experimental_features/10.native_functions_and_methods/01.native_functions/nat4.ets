@@ -20,7 +20,8 @@ tags: [compile-only, negative]
 
 native function foo(); // native without parameters
 
-function main(): int {
+function main() {
+
     foo();
-    return 0;
+    
 }

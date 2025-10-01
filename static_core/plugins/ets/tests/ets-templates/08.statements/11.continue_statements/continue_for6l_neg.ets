@@ -42,7 +42,8 @@ function bar(v: int) {
     }
 }
 
-function main(): int {
+function main() {
+
     foo()
-    return 0;
+    
 }

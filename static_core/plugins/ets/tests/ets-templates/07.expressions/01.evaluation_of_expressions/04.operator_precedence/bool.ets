@@ -17,57 +17,57 @@
 desc: operators on boolean values
 ---*/
 
-function main(): int {
-    let v = false, vt = true, vf = false;
+function main() {
 
-    // & |
-    v = vt | vf & vf
-    if (!v) return 1;
+	let v = false, vt = true, vf = false;
 
-    v = vt | vt & vf
-    if (!v) return 1;
+	// & |
+	v = vt | vf & vf
+	arktest.assertTrue(v)
 
-    // & ^
-    v = vt ^ vf & vf
-    if (!v) return 1;
+	v = vt | vt & vf
+	arktest.assertTrue(v)
 
-    v = vt ^ vt & vf
-    if (!v) return 1;
+	// & ^
+	v = vt ^ vf & vf
+	arktest.assertTrue(v)
 
-    // ^ |
-    v = vt | vf ^ vt
-    if (!v) return 1;
+	v = vt ^ vt & vf
+	arktest.assertTrue(v)
 
-    v = vt | vt ^ vt
-    if (!v) return 1;
+	// ^ |
+	v = vt | vf ^ vt
+	arktest.assertTrue(v)
 
-    // & ==
-    v = vf & vf == vf
-    if (v) return 1;
+	v = vt | vt ^ vt
+	arktest.assertTrue(v)
 
-    v = vf & vt == vf
-    if (v) return 1;
+	// & ==
+	v = vf & vf == vf
+	arktest.assertFalse(v)
 
-    // & !=
-    v = vf & vf != vt
-    if (v) return 1;
+	v = vf & vt == vf
+	arktest.assertFalse(v)
 
-    v = vf & vt != vt
-    if (v) return 1;
+	// & !=
+	v = vf & vf != vt
+	arktest.assertFalse(v)
 
-    // | ==
-    v = vt | vf == vf
-    if (!v) return 1;
+	v = vf & vt != vt
+	arktest.assertFalse(v)
 
-    v = vt | vt == vf
-    if (!v) return 1;
+	// | ==
+	v = vt | vf == vf
+	arktest.assertTrue(v)
 
-    // | !=
-    v = vt | vf != vt
-    if (!v) return 1;
+	v = vt | vt == vf
+	arktest.assertTrue(v)
 
-    v = vt | vt != vt
-    if (!v) return 1;
+	// | !=
+	v = vt | vf != vt
+	arktest.assertTrue(v)
 
-    return 0;
+	v = vt | vt != vt
+	arktest.assertTrue(v)
+    
 }

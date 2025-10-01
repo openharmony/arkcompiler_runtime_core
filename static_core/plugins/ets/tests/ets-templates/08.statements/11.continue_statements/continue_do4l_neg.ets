@@ -21,7 +21,7 @@ desc: >-
 tags: [compile-only, negative]
 ---*/
 
-function main(): int {
+function main(): void {
     let sum: int, y: int
     loop2: do {
         let x = 0
@@ -37,6 +37,5 @@ function main(): int {
         }
     } while (y++ < 100)
 
-    if (sum == 252500) return 0;
-    return 1;
+    arktest.assertEQ(sum, 252500)
 }

@@ -26,13 +26,10 @@ class A{{loop.index}} {
 }
 {%- endfor %}
 
-function main(): int {
+function main(): void {
 {%- for t in c['values'] %}
-    let a{{loop.index}}: A{{loop.index}} = new A{{loop.index}}()
-    if (a{{loop.index}}.d.unboxed() != {{t.val}}) {
-        return 1
-    }
+	let a{{loop.index}}: A{{loop.index}} = new A{{loop.index}}()
+	arktest.assertEQ(a{{loop.index}}.d.unboxed(), {{t.val}})
 {%- endfor %}
-    return 0
 }
 {%- endfor %}

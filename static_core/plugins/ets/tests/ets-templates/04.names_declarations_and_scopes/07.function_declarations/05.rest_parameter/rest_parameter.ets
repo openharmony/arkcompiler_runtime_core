@@ -25,8 +25,9 @@ function {{c.sig}} {
     {{c.def|indent}}
 }
 
-function main(): int {
+function main() {
+
     {{c.call|indent}}
-    return 0;
+    
 }
 {% endfor %}

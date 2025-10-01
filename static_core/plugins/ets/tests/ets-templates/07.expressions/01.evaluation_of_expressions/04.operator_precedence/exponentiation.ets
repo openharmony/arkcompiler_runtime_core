@@ -22,38 +22,38 @@ class IntKeepper {
     y: int = 3;
 }
 
-function main(): int {
-    let x: number = 0;
-    let a: int[] = [2, 3];
-    // grouping
-    x = (1 + 2)**(2 + 1);
-    if (x != 27) return 1;
-    // member access
-    let v = new IntKeepper();
-    x = v.x ** v.y;
-    if (x != 8) return 2;
-    // index
-    x = a[1] ** a[0];
-    if (x != 9) return 3;
-    // pre/post-fix increment and decrement
-    x = 1;
-    x = ++x ** ++x;
-    if (x != 8) return 4;
-    x = 3;
-    x = x-- ** x--;
-    if (x != 9) return 5;
-    // unary -/+
-    x = -3;
-    x = x ** -x;
-    if (x != -27) return 6;
-    // ** associativity: right-to-left (4**(3**2))
-    x = 4 ** 3 ** 2;
-    if (x != 262144) return 7;
-    // multiplication has lower precedence
-    x = 2*3**2;
-    if (x != 18) return 8;
-    x = 11+3**2-19;
-    if (x != 1) return 9;
-    return 0;
+function main() {
+	let x: number = 0;
+	let a: int[] = [2, 3];
+	// grouping
+	x = (1 + 2)**(2 + 1);
+	arktest.assertEQ(x, 27)
+	// member access
+	let v = new IntKeepper();
+	x = v.x ** v.y;
+	arktest.assertEQ(x, 8)
+	// index
+	x = a[1] ** a[0];
+	arktest.assertEQ(x, 9)
+	// pre/post-fix increment and decrement
+	x = 1;
+	x = ++x ** ++x;
+	arktest.assertEQ(x, 8)
+	x = 3;
+	x = x-- ** x--;
+	arktest.assertEQ(x, 9)
+	// unary -/+
+	x = -3;
+	x = x ** -x;
+	arktest.assertEQ(x, -27)
+	// ** associativity: right-to-left (4**(3**2))
+	x = 4 ** 3 ** 2;
+	arktest.assertEQ(x, 262144)
+	// multiplication has lower precedence
+	x = 2*3**2;
+	arktest.assertEQ(x, 18)
+	x = 11+3**2-19;
+	arktest.assertEQ(x, 1)
+    
 }
 

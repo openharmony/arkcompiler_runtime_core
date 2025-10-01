@@ -18,11 +18,11 @@ desc: Combined comments
 params: multi-line over one-liner
 ---*/
 
-function main(): int {
+function main(): void {
     let i: int =
       /*
           // /* comment
       */
       5;
-    return i - 5;
+    arktest.assertEQ(i - 5, 0);
 }

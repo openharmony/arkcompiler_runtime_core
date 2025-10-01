@@ -23,13 +23,12 @@ params: "{{op.name}}, {{c.vtype}} or {{c.rtype}} cannot be promoted to primitive
 tags: [compile-only, negative]
 ---*/
 
-function main(): int {
+function main() {
+
   let v: {{c.vtype}} = {{c.vval}};
   let r: {{c.rtype}} = {{c.rval}};
-  if (v {{op.op}} r != 0) {
-    return 1;
-  }
-  return 0;
+  arktest.assertEQ(v {{op.op}} r, 0)
+  
 }
 {% endfor %}
 {% endfor %}

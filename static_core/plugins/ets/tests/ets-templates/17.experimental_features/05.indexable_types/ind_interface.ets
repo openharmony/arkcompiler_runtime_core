@@ -40,13 +40,14 @@ class A implements I {
     }
 }
 
-function main(): int {
+function main() {
+
     let i: I = new A
     {% for t in c['values'] %}
-    if (i[{{t.ind}}] != undefined) return 1
-    i[{{t.ind}}] = {{t.val}}
-    if (i[{{t.ind}}] != {{t.val}}) return 1
+	arktest.assertEQ(i[{{t.ind}}], undefined)
+	i[{{t.ind}}] = {{t.val}}
+	arktest.assertEQ(i[{{t.ind}}], {{t.val}})
     {% endfor %}
-    return 0;
+    
 }
 {% endfor %}

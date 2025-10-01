@@ -19,7 +19,8 @@ desc: If the value of an array index expression is negative,
   then an array indexing expression throws RangeError.
 ---*/
 
-function main(): int {
+function main() {
+
   let v = new int[100];
   let a = 1;
   let b = 1;
@@ -27,9 +28,9 @@ function main(): int {
   try {
     // negative because (v[100] = 42) returns void.
     let s = "X" + (a = 2) + (v[100] = 42) + (b = 2);
-    return 1;
   } catch (e) {
-    if (a == 2 && b == 1) return 0;
+      arktest.assertEQ(a, 2);
+      arktest.assertEQ(b, 1);
   }
-  return 1;
+  
 }

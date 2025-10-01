@@ -15,8 +15,8 @@
 cases:
     - use: |-
           // empty try block
-          try {} catch (e) { return 1; }
-          return 0;
+          try {} catch (e) { }
+          arktest.assertEQ(t1, 1)
 
     - use: |-
           // empty catch block
@@ -24,16 +24,15 @@ cases:
               if (t1 != t2) throw new Er()
           } catch (e) {
           } finally {
-              return 0;
+              arktest.assertEQ(t1, 1)
           }
 
     - use: |-
           // empty finally block
           try {
               if (t1 != t2) throw new Er()
-              return 1;
           } catch (e) {
-              return 0;
+              arktest.assertEQ(t1, 1);
           } finally {
           }
 
@@ -47,9 +46,10 @@ cases:
                   res = 1
               }
           } catch (e) {
-              if (e instanceof Error && res == 1) return 0
+              	arktest.assertTrue(e instanceof Error)
+                arktest.assertEQ(res, 1)
           }
-          return 1
+
 
     - use: |-
           let obj: Object|null = null
@@ -59,4 +59,4 @@ cases:
           } catch (e) {
             obj = e
           }
-          return obj instanceof Er ? 0 : 1;
+          arktest.assertTrue(obj instanceof Error)

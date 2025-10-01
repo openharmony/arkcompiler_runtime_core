@@ -24,13 +24,10 @@ class A {
     constructor(p: {{c.to_type}}) { this.f = p }
 }
 
-function main(): int {
+function main(){
 {%- for t in c['values'] %}
     let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
-    if (! {{c.to_type}}.isNaN(new A(s{{loop.index}}).f.unboxed())) {
-        return 1
-    }
+    arktest.assertTrue({{c.to_type}}.isNaN(new A(s{{loop.index}}).f.unboxed()))
 {%- endfor %}
-    return 0
 }
 {%- endfor %}

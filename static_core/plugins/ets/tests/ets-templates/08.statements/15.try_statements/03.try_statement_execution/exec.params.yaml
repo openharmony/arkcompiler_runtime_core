@@ -19,15 +19,14 @@ cases:
 
       function foo(e: Er, cnt: int): Er {
           if (cnt > 0) throw foo(e, --cnt);
-          return e;
+          return e
       }
     use: |-
       try {
           foo(new Er(), 100);
       } catch (e) {
-          return e instanceof Er ? 0 : 1;
+          arktest.assertTrue(e instanceof Er)
       }
-      return 1;
 
   # assignment compatible to error
   - defs: |-
@@ -38,6 +37,6 @@ cases:
       try {
           if (1 != 2) throw err as Error;
       } catch (e) {
-          return e instanceof I && e instanceof Er ? 0 : 1;
+          arktest.assertTrue(e instanceof I)
+          arktest.assertTrue(e instanceof Er)
       }
-      return 1;

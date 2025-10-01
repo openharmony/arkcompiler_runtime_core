@@ -17,156 +17,172 @@
 desc: typeof operator with other operators
 ---*/
 
-function main(): int {
-    let t255: int = 255
-    let num: number = 1.0
-    let str: string = ""
-    let bool: boolean = true
-    let obj: Object = new Object()
+function main() {
 
-    // postfix
-    str = typeof num++
-    if (str != "number" || num != 2.0) return 1;
-    str = ""
+	let t255: int = 255
+	let num: number = 1.0
+	let str: string = ""
+	let bool: boolean = true
+	let obj: Object = new Object()
 
-    str = typeof num--
-    if (str != "number" || num != 1.0) return 1;
-    str = ""
+	// postfix
+	str = typeof num++
+	arktest.assertEQ(str, "number")
+	arktest.assertEQ(num, 2.0)
+	str = ""
 
-    str = typeof typeof num++
-    if (str != "string" || num != 2.0) return 1;
-    str = ""
+	str = typeof num--
+	arktest.assertEQ(str, "number")
+	arktest.assertEQ(num, 1.0)
+	str = ""
 
-    str = typeof typeof num--
-    if (str != "string" || num != 1.0) return 1;
-    str = ""
+	str = typeof typeof num++
+	arktest.assertEQ(str, "string")
+	arktest.assertEQ(num, 2.0)
+	str = ""
 
-    // prefix
-    str = typeof ++num
-    if (str != "number" || num != 2.0) return 1;
-    str = ""
+	str = typeof typeof num--
+	arktest.assertEQ(str, "string")
+	arktest.assertEQ(num, 1.0)
+	str = ""
 
-    str = typeof --num
-    if (str != "number" || num != 1.0) return 1;
-    str = ""
+	// prefix
+	str = typeof ++num
+	arktest.assertEQ(str, "number")
+	arktest.assertEQ(num, 2.0)
+	str = ""
 
-    str = typeof typeof ++num
-    if (str != "string" || num != 2.0) return 1;
-    str = ""
+	str = typeof --num
+	arktest.assertEQ(str, "number")
+	arktest.assertEQ(num, 1.0)
+	str = ""
 
-    str = typeof typeof --num
-    if (str != "string" || num != 1.0) return 1;
-    str = ""
+	str = typeof typeof ++num
+	arktest.assertEQ(str, "string")
+	arktest.assertEQ(num, 2.0)
+	str = ""
 
-    // unary plus
-    str = typeof +num
-    if (str != "number" || num != 1.0) return 1;
-    str = ""
+	str = typeof typeof --num
+	arktest.assertEQ(str, "string")
+	arktest.assertEQ(num, 1.0)
+	str = ""
 
-    str = typeof typeof +num
-    if (str != "string" || num != 1.0) return 1;
-    str = ""
+	// unary plus
+	str = typeof +num
+	arktest.assertEQ(str, "number")
+	arktest.assertEQ(num, 1.0)
+	str = ""
 
-    // unary minus
-    str = typeof -num
-    if (str != "number" || num != 1.0) return 1;
-    str = ""
+	str = typeof typeof +num
+	arktest.assertEQ(str, "string")
+	arktest.assertEQ(num, 1.0)
+	str = ""
 
-    str = typeof typeof -num
-    if (str != "string" || num != 1.0) return 1;
-    str = ""
+	// unary minus
+	str = typeof -num
+	arktest.assertEQ(str, "number")
+	arktest.assertEQ(num, 1.0)
+	str = ""
 
-    // not
-    str = typeof !bool
-    if (str != "boolean" || bool != true) return 1;
-    str = ""
+	str = typeof typeof -num
+	arktest.assertEQ(str, "string")
+	arktest.assertEQ(num, 1.0)
+	str = ""
 
-    str = typeof typeof !bool
-    if (str != "string" || bool != true) return 1;
-    str = ""
+	// not
+	str = typeof !bool
+	arktest.assertEQ(str, "boolean")
+	arktest.assertTrue(bool)
+	str = ""
 
-    // xor
-    str = typeof ~t255
-    if (str != "number") return 1;
-    str = ""
+	str = typeof typeof !bool
+	arktest.assertEQ(str, "string")
+	arktest.assertTrue(bool)
+	str = ""
 
-    str = typeof typeof ~t255
-    if (str != "string") return 1;
-    str = ""
+	// xor
+	str = typeof ~t255
+	arktest.assertEQ(str, "number")
+	str = ""
 
-    // addition
-    num = 42.0
-    str = typeof num + num
-    if (str != "number42") return 1;
-    str = ""
+	str = typeof typeof ~t255
+	arktest.assertEQ(str, "string")
+	str = ""
 
-    num = 42.0
-    str = typeof typeof num + num
-    if (str != "string42") return 1;
-    str = ""
+	// addition
+	num = 42.0
+	str = typeof num + num
+	arktest.assertEQ(str, "number42")
+	str = ""
 
-    num = 42.0
-    str = typeof num + typeof num
-    if (str != "numbernumber") return 1;
-    str = ""
+	num = 42.0
+	str = typeof typeof num + num
+	arktest.assertEQ(str, "string42")
+	str = ""
 
-    num = 42.0
-    str = typeof num + typeof typeof num
-    if (str != "numberstring") return 1;
-    str = ""
+	num = 42.0
+	str = typeof num + typeof num
+	arktest.assertEQ(str, "numbernumber")
+	str = ""
 
-    // cast
-    obj = typeof num as Object
-    if (obj as string != "number") return 1;
+	num = 42.0
+	str = typeof num + typeof typeof num
+	arktest.assertEQ(str, "numberstring")
+	str = ""
 
-    obj = typeof typeof str as String
-    if (obj as string != "string") return 1;
+	// cast
+	obj = typeof num as Object
+	arktest.assertEQ(obj as string, "number")
 
-    obj = typeof typeof str as String as Object
-    if (obj as string != "string") return 1;
+	obj = typeof typeof str as String
+	arktest.assertEQ(obj as string, "string")
 
-    // relational
-    if (typeof num > typeof str) return 0;
-    if (typeof num >= typeof str) return 0;
-    if (typeof num == typeof str) return 0;
-    if (typeof typeof num != typeof str) return 0;
-    if (typeof typeof num > typeof str) return 0;
-    if (typeof typeof num >= typeof str) return 0;
-    if (typeof typeof num < typeof str) return 0;
-    if (typeof typeof num <= typeof str) return 0;
-    if (typeof typeof num != typeof typeof str) return 0;
-    if (typeof typeof num > typeof typeof str) return 0;
-    if (typeof typeof num >= typeof typeof str) return 0;
-    if (typeof typeof num < typeof typeof str) return 0;
-    if (typeof typeof num <= typeof typeof str) return 0;
+	obj = typeof typeof str as String as Object
+	arktest.assertEQ(obj as string, "string")
 
-    // ternary
-    str = typeof num < typeof str ? typeof num : typeof str
-    if (str != "number") return 1;
-    str = ""
+	// relational
+	arktest.assertTrue(typeof num > typeof str)
+	arktest.assertTrue(typeof num >= typeof str)
+	arktest.assertFalse(typeof num == typeof str)
+	arktest.assertTrue(typeof typeof num != typeof str)
+	arktest.assertTrue(typeof typeof num > typeof str)
+	arktest.assertTrue(typeof typeof num >= typeof str)
+	arktest.assertFalse(typeof typeof num < typeof str)
+	arktest.assertFalse(typeof typeof num <= typeof str)
+	arktest.assertFalse(typeof typeof num != typeof typeof str)
+	arktest.assertFalse(typeof typeof num > typeof typeof str)
+	arktest.assertTrue(typeof typeof num >= typeof typeof str)
+	arktest.assertFalse(typeof typeof num < typeof typeof str)
+	arktest.assertTrue(typeof typeof num <= typeof typeof str)
 
-    str = typeof num > typeof str ? typeof num : typeof str
-    if (str != "string") return 1;
-    str = ""
+	// ternary
+	str = typeof num < typeof str ? typeof num : typeof str
+	arktest.assertEQ(str, "number")
+	str = ""
 
-    str = typeof str < typeof typeof str ? typeof typeof num : typeof num + 1
-    if (str != "number1") return 1;
-    str = ""
+	str = typeof num > typeof str ? typeof num : typeof str
+	arktest.assertEQ(str, "string")
+	str = ""
 
-    // assignments
-    let s = "1"
-    str = s += typeof num
-    if (str != "1number" || s != "1number") return 1;
-    s = "1"
-    str = ""
+	str = typeof str < typeof typeof str ? typeof typeof num : typeof num + 1
+	arktest.assertEQ(str, "number1")
+	str = ""
 
-    str = s += typeof typeof num
-    if (str != "1string" || s != "1string") return 1;
-    s = "1"
-    str = ""
+	// assignments
+	let s = "1"
+	str = s += typeof num
+	arktest.assertEQ(str, "1number")
+	arktest.assertEQ(s, "1number")
+	s = "1"
+	str = ""
 
-    str = s += typeof typeof num + typeof num
-    if (str != "1stringnumber" || s != "1stringnumber") return 1;
+	str = s += typeof typeof num
+	arktest.assertEQ(str, "1string")
+	arktest.assertEQ(s, "1string")
+	s = "1"
+	str = ""
 
-    return 0;
+	str = s += typeof typeof num + typeof num
+	arktest.assertEQ(str, "1stringnumber")
+	arktest.assertEQ(s, "1stringnumber")
 }

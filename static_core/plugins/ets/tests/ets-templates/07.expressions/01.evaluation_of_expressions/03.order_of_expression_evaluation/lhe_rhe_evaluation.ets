@@ -19,7 +19,8 @@ desc: >-
     the left-hand expression of a binary operator is fully evaluated.
 ---*/
 
-function main(): int {
+function main() {
+
     let a = new int[2];
     let x: int = 1;
     let y: int = 1;
@@ -27,21 +28,20 @@ function main(): int {
 
     try {
         y = (a[3]) * (--x);  // eval should abort on left-hand
-        return 1;
     } catch (e) {
-        arktest.assertTrue(x == 1 && y == 1);
+        arktest.assertEQ(x,1)
+        arktest.assertEQ(y,1)
         exceptions++;
     }
     arktest.assertEQ(exceptions, 1);
 
     try {
         y = (x++) + (a[3]);  // eval should abort on right-hand
-        return 1;
     } catch (e) {
-        arktest.assertTrue(x == 2 && y == 1);
+        arktest.assertEQ(x,2)
+        arktest.assertEQ(y,1)
         exceptions++;
     }
     arktest.assertEQ(exceptions, 2);
 
-    return 0;
 }

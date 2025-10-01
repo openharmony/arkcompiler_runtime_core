@@ -19,17 +19,15 @@ desc: ArithmeticError is thrown by an integer division or integer
 params: 1/1
 ---*/
 
-function main(): int {
+function main() {
+
   let a = 1;
   let b = 1;
   let i = 1;
   let j = 1;
 
-  try {
-    let v: String = "X" + (a = 2) + i % j-- + (b = 2);
-    if (a != 2 || b != 2) return 1;
-    return 0;
-  } catch (e) {
-    return 1;
-  }
+  let v: String = "X" + (a = 2) + i % j-- + (b = 2);
+
+  arktest.assertEQ(a, 2)
+  arktest.assertEQ(b, 2)
 }

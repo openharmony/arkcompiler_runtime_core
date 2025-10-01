@@ -19,7 +19,7 @@ params: from float to double
 ---*/
 function foo(p: double): double { return p }
 
-function main(): int {
+function main(): void {
     let s: float = Float.NaN
-    return Double.isNaN(foo(s)) ? 0 : 1
+    arktest.assertTrue(Double.isNaN(foo(s)) )
 }

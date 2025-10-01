@@ -18,13 +18,7 @@ desc: Nullable types
 tags: [negative, compile-only]
 ---*/
 
-function main(): int {
-  let a: Int | null = null;
-  let b: int = 4;
-  try {
-      let x: Int | null = b + a;
-  } catch (e: NullPointerError) {
-      return 0;
-  }
-  return 1;
-}
+let a: Int | null = null;
+let b: int = 4;
+let x: Int | null = b + a;
+

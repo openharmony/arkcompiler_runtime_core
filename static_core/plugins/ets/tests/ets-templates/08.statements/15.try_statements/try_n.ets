@@ -23,7 +23,7 @@ tags: [compile-only, negative]
 
 let t1 = 1, t2 = 2  // global vars, never changed in tests
 
-function main(): int {
+function main(): void {
     {{t.use|indent}}
 }
 {% endfor %}

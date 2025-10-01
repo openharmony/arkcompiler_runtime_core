@@ -23,15 +23,16 @@ class A {
     age: number|null = null
 }
 
-function main(): int {
+let a: A = { name: "Alice", age: 4 };
+function foo(): void {
   let t: number[] = [1, 2, 3, 4, 5]
   let a: A|null = null;
-  try {
-      a = { name: "Bob", age: t[5] } as A
-  } catch (e) {
-      arktest.assertTrue(e instanceof RangeError)
-      arktest.assertTrue( a == null );
-      return 0;
-  }
-  return 1;
+  a = { name: "Bob", age: t[5] } as A
+}
+
+let checkException = (e: Error): boolean => { return e instanceof RangeError }
+
+function main() {
+    arktest.expectThrow(() => foo(), checkException)
+	arktest.assertEQ(a.age, 4);
 }

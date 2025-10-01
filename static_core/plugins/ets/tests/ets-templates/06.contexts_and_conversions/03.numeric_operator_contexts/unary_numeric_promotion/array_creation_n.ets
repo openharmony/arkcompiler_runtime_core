@@ -22,12 +22,11 @@ params: {{c.type}} cannot be promoted to int
 tags: [compile-only, negative]
 ---*/
 
-function main(): int {
+function main() {
+
   let v: {{c.type}} = {{c.val}};
   let arr: FixedArray<FixedArray<{{c.type}}>> = new {{c.type}}[v][v];
-  if (arr.length != {{c.len}}) {
-    return 1;
-  }
-  return 0;
+  arktest.assertEQ(arr.length, {{c.len}})
+  
 }
 {% endfor %}

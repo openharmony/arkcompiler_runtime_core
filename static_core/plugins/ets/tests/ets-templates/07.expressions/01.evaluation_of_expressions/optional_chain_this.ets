@@ -27,9 +27,10 @@ class Invalid {
     }
 }
 
-function main(): int {
+function main() {
+
     let a: Invalid = new Invalid();
     arktest.assertEQ(a.f(), undefined);
-    return 0;
+    
 }
 

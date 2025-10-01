@@ -38,9 +38,10 @@ class A {
     }
 }
 
-function main(): int {
+function main() {
+
     let a: A = new A(new X())
     {{c.use|indent}}
-    return 0;
+    
 }
 {% endfor %}

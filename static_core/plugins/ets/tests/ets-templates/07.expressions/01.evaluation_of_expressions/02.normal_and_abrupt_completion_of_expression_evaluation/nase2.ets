@@ -18,16 +18,13 @@ desc: NegativeArraySizeError is thrown by an array creation expression
   if any dimension expression has a value that is less than zero.
 ---*/
 
-function main(): int {
+function main() {
+
   let a: int = 1;
   let b: int = 1;
   // Changed to small number because it will cause runtime timeout
   let sz: int = 10;
-  try {
-    let v: int = 42 + (a = 2) + new byte[sz].length.toInt() + (b = 2);
-    if (a != 2 || b != 2) return 1;
-    return 0;
-  } catch (e) {
-    return 1;
-  }
+  let v: int = 42 + (a = 2) + new byte[sz].length.toInt() + (b = 2);
+  arktest.assertEQ(a, 2);
+  arktest.assertEQ(b, 2);
 }

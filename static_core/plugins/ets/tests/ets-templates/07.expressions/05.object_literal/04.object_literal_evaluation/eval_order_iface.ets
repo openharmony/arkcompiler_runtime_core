@@ -38,12 +38,12 @@ function mayThrow(n: number): number {
     return n;
 }
 
-function main(): int {
-  try {
-      let i: I = { c: mayThrow(1), b: mayThrow(2), a: mayThrow(3) }
-  } catch (e) {
-      arktest.assertTrue(e instanceof NullPointerError)
-      return 0;
-  }
-  return 1;
+function foo(): void {
+	let x: I = { c: mayThrow(1), b: mayThrow(2), a: mayThrow(3) }
+}
+
+let checkException = (e: Error): boolean => { return e instanceof NullPointerError }
+
+function main() {
+    arktest.expectThrow(() => foo(), checkException)
 }

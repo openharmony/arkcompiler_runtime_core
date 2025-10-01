@@ -46,13 +46,12 @@ function foo(): A {
 let ind{{loop.index}} = (): {{c.ind_type}} => {{t.ind}}
 {%- endfor %}
 
-function main(): int {
+function main(): void {
     let a: A
     {% for t in c['values'] %}
     (a = foo())[ind{{loop.index}}()] = {{t.val}}
-    if (new A()[ind{{loop.index}}()] != {{t.val}}) return 1
+    arktest.assertEQ(new A()[ind{{loop.index}}()], {{t.val}})
     a[ind{{loop.index}}()] = undefined;
     {% endfor %}
-    return 0
 }
 {% endfor %}

@@ -19,8 +19,7 @@ desc: The result of the first operand of an assignment operator must be a variab
 tags: [compile-only, negative]
 ---*/
 
-function main(): int {
+function main(): void {
     {{c.expr|indent}}
-    return 0
 }
 {% endfor %}

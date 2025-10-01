@@ -22,10 +22,11 @@ params: {{c.type}} cannot be promoted to int
 tags: [compile-only, negative]
 ---*/
 
-function main(): int {
+function main() {
+
   let v: {{c.type}} = {{c.val}};
   let arr: FixedArray<{{c.type}}> = new {{c.type}}[{{c.len}} + 1];
   arr[v] = v;
-  return 0;
+  
 }
 {% endfor %}

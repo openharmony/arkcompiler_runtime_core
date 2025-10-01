@@ -26,13 +26,10 @@ class A{{loop.index}} {
 }
 {%- endfor %}
 
-function main(): int {
+function main(): void {
 {%- for t in c['values'] %}
-    let a{{loop.index}}: A{{loop.index}} = new A{{loop.index}}()
-    if (! {{c.to_type}}.isNaN(a{{loop.index}}.d.unboxed())) {
-        return 1
-    }
+	let a{{loop.index}}: A{{loop.index}} = new A{{loop.index}}()
+	arktest.assertTrue({{c.to_type}}.isNaN(a{{loop.index}}.d.unboxed()))
 {%- endfor %}
-    return 0
 }
 {%- endfor %}

@@ -37,29 +37,38 @@ class A {
   }
 }
 
-function main(): int {
-    sg = "a"; // reset due to jit mode warmup
-    ig = 42;
+function main() {
 
-    // assignment side effect
-    let i: int = (sg += "b").length.toInt() + (ig = 43);
-    if (i != 45 || sg != "ab" || ig != 43) return 1;
+	sg = "a"; // reset due to jit mode warmup
+	ig = 42;
 
-    // increment side effect
-    let k: int = ig++ + ++ig;
-    if (k != 88 || ig != 45) return 1;
+	// assignment side effect
+	let i: int = (sg += "b").length.toInt() + (ig = 43);
+	arktest.assertEQ(i, 45)
+	arktest.assertEQ(sg, "ab")
+	arktest.assertEQ(ig, 43)
 
-    // decrement side effect
-    let j: int = ig-- + --ig;
-    if (j != 88 || ig != 43) return 1;
+	// increment side effect
+	let k: int = ig++ + ++ig;
+	arktest.assertEQ(k, 88)
+	arktest.assertEQ(ig, 45)
 
-    // function call side effect
-    let m: int = foo(j, sg);
-    if (m != 86 || ig != -1 || sg != "abab") return 1;
+	// decrement side effect
+	let j: int = ig-- + --ig;
+	arktest.assertEQ(j, 88)
+	arktest.assertEQ(ig, 43)
 
-    // method call side effect
-    let n: int = new A().meth(m, sg);
-    if (n != 82 || ig != 1 || sg != "abababab") return 1;
+	// function call side effect
+	let m: int = foo(j, sg);
+	arktest.assertEQ(m, 86)
+	arktest.assertEQ(ig, -1)
+	arktest.assertEQ(sg, "abab")
 
-    return 0;
+	// method call side effect
+	let n: int = new A().meth(m, sg);
+	arktest.assertEQ(n, 82)
+	arktest.assertEQ(ig, 1)
+	arktest.assertEQ(sg, "abababab")
+
+    
 }

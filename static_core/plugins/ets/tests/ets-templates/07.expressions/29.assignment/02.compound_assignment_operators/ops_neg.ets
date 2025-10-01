@@ -22,12 +22,9 @@ params: {{c.type}}, "{{c.op|safe}}="
 tags: [compile-only, negative]
 ---*/
 
-function main(): int {
-    let v:{{c.type}} = {{c.v}}
-    let q:{{c.type}} = {{c.q}}
-    if ((v {{c.op}} q) != (v {{c.op}}= q)) {
-        return 1
-    }
-    return 0
+function main(): void {
+	let v:{{c.type}} = {{c.v}}
+	let q:{{c.type}} = {{c.q}}
+	arktest.assertEQ((v {{c.op}} q), (v {{c.op}}= q))
 }
 {% endfor %}

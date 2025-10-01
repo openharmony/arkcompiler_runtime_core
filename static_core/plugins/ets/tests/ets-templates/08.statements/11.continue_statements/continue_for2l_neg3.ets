@@ -21,7 +21,7 @@ desc: >-
 tags: [negative, compile-only]
 ---*/
 
-function main(): int {
+function main(): void {
     let sum: int
     for (let y: int = 0; y < 3; y++) {
         for (let x: int = 0; x < 100; x++) {
@@ -34,6 +34,5 @@ function main(): int {
     loop2: for (let z = 0; z < 100; z++) {
         sum += z
     }
-    if (sum == 7500) return 0;
-    return 1;
+    arktest.assertEQ(sum, 7500)
 }

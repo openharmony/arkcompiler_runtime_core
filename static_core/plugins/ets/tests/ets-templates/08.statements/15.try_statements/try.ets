@@ -22,7 +22,7 @@ class Er extends Error {}
 let t1 = 1, t2 = 2  // global vars, never changed in tests
 
 {{t.defs}}
-function main(): int {
+function main(): void {
     {{t.use|indent}}
 }
 {% endfor %}

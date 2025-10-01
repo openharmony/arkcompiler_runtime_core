@@ -20,6 +20,7 @@ tags: [compile-only, negative]
 
 async native function foo<T extends Object>(): Promise<T>; // async can't coexist with native
 
-function main(): int {
-    return 0;
+function main() {
+
+    
 }

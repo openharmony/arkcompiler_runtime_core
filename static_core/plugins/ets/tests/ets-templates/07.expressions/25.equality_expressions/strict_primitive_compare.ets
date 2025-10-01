@@ -19,15 +19,15 @@
 desc: Strict equality for primitive types
 ---*/
 
-function strictCompare(a: {{ee.type}}, b: {{ee.type}}): int {
-    return a === b ? 0 : 1
+function strictCompare(a: {{ee.type}}, b: {{ee.type}}): void {
+    arktest.assertTrue(a === b)
 }
 
-function main(): int {
+function main(): void {
     let a: {{ee.type}} = {{ee.value}};
     let b: {{ee.type}} = {{ee.value}};
 
-    return strictCompare(a, b)
+    strictCompare(a, b)
 }
 
 {% endfor %}

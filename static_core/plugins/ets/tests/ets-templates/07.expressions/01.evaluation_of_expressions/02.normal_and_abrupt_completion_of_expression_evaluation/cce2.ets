@@ -18,16 +18,14 @@ desc: ClassCastError is thrown by a cast expression
   if at run time a cast cannot be performed.
 ---*/
 
-function main(): int {
+function main() {
+
   let a = 1;
   let b = 1;
   let t: Long|null = (): Long|null => { return  null; }();
 
-  try {
-    let v: long = (a = 2) + (t === null ? 0 : t.unboxed()) + (b = 2);
-    if (a != 2 || b != 2) return 1;
-    return 0;
-  } catch (e) {
-    return 1;
-  }
+  let v: long = (a = 2) + (t === null ? 0 : t.unboxed()) + (b = 2);
+  arktest.assertEQ(a, 2);
+  arktest.assertEQ(b, 2);
+    
 }

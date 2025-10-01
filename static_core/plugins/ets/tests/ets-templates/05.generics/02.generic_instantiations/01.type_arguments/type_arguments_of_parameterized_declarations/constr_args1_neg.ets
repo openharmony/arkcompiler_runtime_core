@@ -42,8 +42,9 @@ enum Size { S, M, L, XL }
 
 {{c.decl}}
 
-function main(): int {
+function main() {
+
     {{c.use|indent}}
-    return 0;
+    
 }
 {% endfor %}

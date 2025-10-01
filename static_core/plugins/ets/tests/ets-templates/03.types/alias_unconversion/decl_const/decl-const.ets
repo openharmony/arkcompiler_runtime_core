@@ -19,12 +19,11 @@ desc: Declaration context, constant, unboxing conversion, implicit
 params: from {{c.from_type}} to {{c.to_type}}
 ---*/
 
-function main() {
+function main(): void {
 {%- for t in c['values'] %}
-    let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
-    const d{{loop.index}}: {{c.to_type}} = s{{loop.index}}
-    arktest.assertEQ(d{{loop.index}}, {{t.val}}, "Assert fails on item {{loop.index}}")
+	let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
+	const d{{loop.index}}: {{c.to_type}} = s{{loop.index}}
+	arktest.assertEQ(d{{loop.index}}, {{t.val}}, "Assert fails on item {{loop.index}}")
 {%- endfor %}
-    return 0
 }
 {%- endfor %}

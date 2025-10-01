@@ -28,26 +28,17 @@ let ba: bigint[] = [
     {%- endfor %}
 ]
 
-function main(): int {
-    for (let i: int = 0; i < ba.length - 1; i++) {
-        for (let j: int = i + 1; j < ba.length; j++) {
-            let a = ba[i]
-            let b = ba[j]
+function main(): void {
+	for (let i: int = 0; i < ba.length - 1; i++) {
+		for (let j: int = i + 1; j < ba.length; j++) {
+			let a = ba[i]
+			let b = ba[j]
 
-            if (!(a <= b)) {
-                return 1
-            }
-            if (!(b <= a)) {
-                return 1
-            }
-            if (a + 1n <= b) {
-                return 1
-            }
-            if (b + 1n <= a) {
-                return 1
-            }
-        }
-    }
-    return 0
+			arktest.assertTrue(a <= b)
+			arktest.assertTrue(b <= a)
+			arktest.assertFalse(a + 1n <= b)
+			arktest.assertFalse(b + 1n <= a)
+		}
+	}
 }
 {%- endfor %}

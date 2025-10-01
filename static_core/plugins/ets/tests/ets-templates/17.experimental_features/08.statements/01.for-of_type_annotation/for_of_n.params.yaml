@@ -12,59 +12,69 @@
 # limitations under the License.
 ---
 cases:
-    - use: |-
+    - tags: 'compile-only, negative'
+      use: |-
           for (const v: int of [1,2,3,4]) {
               res += v
               v = 0   // shouldn't be allowed for const
               res += v
           }
-          if (res == "10203040") return 0;
+          arktest.assertEQ(res, "10203040")
 
-    - use: |-
+    - tags: 'compile-only, negative'  
+      use: |-
           for (let v: int of []) res += v  // shouldn't be allowed
-          if (res == "") return 0;
+          arktest.assertEQ(res, "")
 
-    - use: |-
+    - tags: 'compile-only, negative'
+      use: |-
           for (const ch: char of "ABCD") {
               res += ch
               ch = ' '   // shouldn't be allowed for const
               res += ch
           }
-          if (res == "A B C D ") return 0;
+          arktest.assertEQ(res, "A B C D ")
 
-    - use: |-
+    - tags: 'compile-only, negative'
+      use: |-
           // wrong expr type
           for (const ch: char of 123) res += ch
-          if (res == "123") return 0;
+          arktest.assertEQ(res, "123")
 
-    - use: |-
+    - tags: 'compile-only, negative'
+      use: |-
           let obj: Object = new Object()
           // wrong expr type
           for (const v: Object of obj) res += v
-          if (res == "") return 0;
+          arktest.assertEQ(res, "")
 
-    - use: |-
+    - tags: 'compile-only, negative'
+      use: |-
           let arr: Error[] = [new Error(), new Error()]
           // wrong var type
           for (const v: Number of arr) res += v
-          if (res == "") return 0;
+          arktest.assertEQ(res, "")
 
-    - use: |-
+    - tags: 'compile-only, negative'
+      use: |-
           let arr: int[] = new int[0]
           // missing right parenthesis
           for (let v: int of arr res += v
 
-    - use: |-
+    - tags: 'compile-only, negative'
+      use: |-
           let arr: int[] = new int[0]
           // missing left parenthesis
           for let v: int of arr) res += v
 
-    - use: |-
+    - tags: 'compile-only, negative'
+      use: |-
           let arr: int[] = new int[0]
           // missing both parentheses
           for let v: int of arr res += v
 
-    - use: |-
+    - tags: 'compile-only, negative'
+      use: |-
           let arr: int[] = new int[0]
           // missing semicolon separating type
           for (let v int of arr) res += v

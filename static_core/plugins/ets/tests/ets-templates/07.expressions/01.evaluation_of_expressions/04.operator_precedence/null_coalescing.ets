@@ -21,26 +21,27 @@ interface I {}
 class A implements I {}
 class B {}
 
-function main(): int {
-    let a: A = new A();
-    let b: B = new B();
-    let i: I = a;
-    let an: A|null = null;
-    let bn: B|null = null;
+function main() {
 
-    // ternary
-    let res: boolean = ((an ?? a) instanceof I ? bn ?? b : an ?? a) === b
-    if (!res) return 1;
+   	let a: A = new A();
+	let b: B = new B();
+	let i: I = a;
+	let an: A|null = null;
+	let bn: B|null = null;
 
-    res = ((a ?? an) instanceof B ? an ?? a : bn ?? b) === b
-    if (!res) return 1;
+	// ternary
+	let res: boolean = ((an ?? a) instanceof I ? bn ?? b : an ?? a) === b
+	arktest.assertTrue(res)
 
-    // assignment
-    let x: Object = bn ?? a
-    if (x !== a) return 1;
+	res = ((a ?? an) instanceof B ? an ?? a : bn ?? b) === b
+	arktest.assertTrue(res)
 
-    let y: Object = an ?? b
-    if (y !== b) return 1;
+	// assignment
+	let x: Object = bn ?? a
+	arktest.assertEQ(x, a)
 
-    return 0;
+	let y: Object = an ?? b
+	arktest.assertEQ(y, b)
+
+    
 }

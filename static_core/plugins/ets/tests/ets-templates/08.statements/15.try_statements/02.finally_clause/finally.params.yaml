@@ -15,12 +15,13 @@
 cases:
     - use: |-
         // no catch blocks
+        let ret:int = 1
         try {
-            if (t1 != t2) throw new Er()
-            return 1;
+            if (t1 == t2) throw new Er()
         } finally {
-            return 0;
+            ret = 0
         }
+        arktest.assertEQ(ret, 0)
 
     - use: |-
         let ret:int = 1
@@ -33,29 +34,31 @@ cases:
         } finally {
             ret = 0
         }
-        return ret;
+        arktest.assertEQ(ret, 0)
 
     - use: |-
         // return from finally block with no error thrown
+        let ret: int = 0
         try {
             if (t1 == t2) throw new Er()
-            return 1;
         } catch (e) {
-            return 1;
-        } finally {
-            return 0;
+          ret = 1
+        } finally {        
         }
+        arktest.assertEQ(ret, 0)
 
     - use: |-
         // return from finally block with error thrown
+        let ret: int = 0
         try {
             if (t1 != t2) throw new Er()
-            return 1;
         } catch (e) {
-            return 1;
+          ret = 1
         } finally {
-            return 0;
+          ret = 0
         }
+        arktest.assertEQ(ret, 0)
+
 
     - defs: |-
         let ret: int;  // global var, safe for jit warmup.
@@ -80,7 +83,7 @@ cases:
         } finally {
             ok = ret == 1100 && t1 == t1_orig;
         }
-        return ok ? 0 : 1;
+        arktest.assertFalse(!ok)
 
     - defs: |-
         let ret: int;  // global var, safe for jit warmup.
@@ -107,7 +110,7 @@ cases:
         } finally {
             ok = ret == 1010 && t1 == t1_orig;
         }
-        return ok ? 0 : 1;
+        arktest.assertFalse(!ok)
 
     - defs: |-
         let ret: int;  // global var, safe for jit warmup.
@@ -135,7 +138,7 @@ cases:
         } finally {
             ok = ret == 11010 && t1 == t1_orig;
         }
-        return ok ? 0 : 1;
+        arktest.assertFalse(!ok)
 
     - defs: |-
         let ret: int;  // global var, safe for jit warmup.
@@ -164,4 +167,4 @@ cases:
         } finally {
             ok = ret == 11010 && t1 == t1_orig;
         }
-        return ok ? 0 : 1;
+        arktest.assertFalse(!ok)

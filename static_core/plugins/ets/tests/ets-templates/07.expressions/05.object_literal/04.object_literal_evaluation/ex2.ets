@@ -26,18 +26,20 @@ class A {
     }
 }
 
+let a: A|null = null;
+
 function foo(a: A|null): number {
     return a!.getAge()
 }
 
-function main(): int {
+function foo(): void {
   let a: A|null = null;
-  try {
-      a = { name: "Bob", age: foo(a) } as A
-  } catch (e) {
-      arktest.assertTrue(e instanceof NullPointerError)
-      arktest.assertTrue( a == null );
-      return 0;
-  }
-  return 1;
+  a = { name: "Bob", age: foo(a) } as A
+}
+
+let checkException = (e: Error): boolean => { return e instanceof NullPointerError }
+
+function main() {
+    arktest.expectThrow(() => foo(), checkException)
+	arktest.assertEQ(a, null);
 }

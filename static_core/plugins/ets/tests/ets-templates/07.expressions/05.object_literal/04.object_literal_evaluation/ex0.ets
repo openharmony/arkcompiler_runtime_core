@@ -29,14 +29,13 @@ class A {
     }
 }
 
-function main(): int {
-  let a: A|null = null;
-  try {
-      a = { name: "Bob", age: 42 } as A
-  } catch (e) {
-      arktest.assertTrue(e instanceof ArithmeticError)
-      arktest.assertEQ(a, null);
-      return 0;
-  }
-  return 1;
+function foo(): void {
+    let a: A|null = null;
+	a = { name: "Bob", age: 42 } as A
+}
+
+let checkException = (e: Error): boolean => { return e instanceof ArithmeticError }
+
+function main() {
+    arktest.expectThrow(() => foo(), checkException)
 }

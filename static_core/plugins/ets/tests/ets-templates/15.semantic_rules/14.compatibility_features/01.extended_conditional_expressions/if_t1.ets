@@ -19,11 +19,12 @@ desc: >-
     ArkTS provides extended semantics for conditional-and and conditional-or expressions for better alignment.
 ---*/
 
-function main(): int {
+function main(): void {
+    let res: int = 0;
     if ({{c}}) {  // truthy
     } else {
-        return 1
+        res = 1
     }
-    return 0
+    arktest.assertEQ(res, 0)
 }
 {%- endfor %}

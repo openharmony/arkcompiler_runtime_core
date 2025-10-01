@@ -17,16 +17,20 @@ limitations under the License.
 desc: check remainder of division by zero for byte operands
 ---*/
 
-function main(): int {
-    try {
-        const a: byte = (() : byte => 1)()
-        const b: byte = (() : byte => 0)()
-        arktest.assertTrue(a instanceof Byte)
-        arktest.assertTrue(b instanceof Byte)
-        a % b
-    } catch (e) {
-        return e instanceof ArithmeticError ? 0 : 1
-    }
-    arktest.assertTrue(false)
-    return -1
+function modulo(a: byte, b: byte): int {
+    return a % b
+}
+
+function main(): void {
+    const a: byte = (() : byte => 1)()
+    const b: byte = (() : byte => 0)()
+    arktest.assertTrue(a instanceof Byte)
+    arktest.assertTrue(b instanceof Byte)
+
+    let checkException = (e: Error): boolean 
+        => { return e instanceof ArithmeticError }
+    
+    arktest.expectThrow(() => {
+        modulo(a, b)
+    }, checkException)
 }

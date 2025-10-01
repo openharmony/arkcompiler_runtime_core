@@ -47,8 +47,12 @@ function inc(p: int): int {
     return p + 1;
 }
 
-function main(): int {
+function main() {
+
     let a: A = new A(inc);
-    if (a.fld != 45 || A.i != 13 || a.meth() != 4 || sg != 3) return 1;
-    return 0;
+    arktest.assertEQ(a.fld, 45)
+    arktest.assertEQ(A.i, 13)
+    arktest.assertEQ(a.meth(), 4)
+    arktest.assertEQ(sg, 3)
+    
 }

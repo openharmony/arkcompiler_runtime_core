@@ -39,13 +39,14 @@ class A<T, U> extends Base<T, U> {
     }
 }
 
-function main(): int {
+function main() {
+
     let a: A<{{c.ind_type}}, {{c.val_type}}> = new A<{{c.ind_type}}, {{c.val_type}}>
     {% for t in c['values'] %}
-    if (a[{{t.ind}}] != undefined) return 1
-    a[{{t.ind}}] = {{t.val}}
-    if (a[{{t.ind}}] != {{t.val}}) return 1
+	arktest.assertEQ(a[{{t.ind}}], undefined)
+	a[{{t.ind}}] = {{t.val}}
+	arktest.assertEQ(a[{{t.ind}}], {{t.val}})
     {% endfor %}
-    return 0;
+    
 }
 {% endfor %}

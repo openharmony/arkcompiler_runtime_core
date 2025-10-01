@@ -18,7 +18,7 @@ desc: Multi-line comments
 tags: [compile-only, negative]
 ---*/
 
-function main(): int {
+function main(): void {
     let i: int =
     /*
       /*
@@ -28,5 +28,5 @@ function main(): int {
     */
     5;
 
-    return i;
+    arktest.assertEQ(i, 5);
 }
