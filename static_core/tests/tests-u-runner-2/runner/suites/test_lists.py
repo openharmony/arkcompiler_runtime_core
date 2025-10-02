@@ -16,8 +16,7 @@
 #
 
 import re
-from glob import glob
-from os import path
+from fnmatch import fnmatch
 from pathlib import Path
 from typing import cast
 
@@ -63,6 +62,22 @@ class TestLists:
         _LOGGER.default(f"Initialize TestLists: conf_kind = {self.conf_kind}")
 
     @staticmethod
+    def matched_test_lists(test_lists: list[Path], extra_lists: list[Path]) -> list[Path]:
+        found_test_lists = set()
+        if not extra_lists:
+            return []
+        patterns = [pattern.as_posix() for pattern in extra_lists]
+        for test_list in test_lists:
+            test_list_name = test_list.name
+
+            for pattern in patterns:
+                if fnmatch(test_list_name, pattern) or fnmatch(test_list.as_posix(), pattern):
+                    found_test_lists.add(test_list)
+                    break
+
+        return list(found_test_lists)
+
+    @staticmethod
     def __search_option_in_list(option: str, arg_list: list[str] | None) -> list[str]:
         if arg_list is None:
             return []
@@ -80,17 +95,27 @@ class TestLists:
 
     def collect_ignored_test_lists(self, extra_list: list[str] | None = None,
                                    test_name: str | None = None) -> None:
-        if self.config.test_suite.test_lists.exclude_ignored_tests:
+        exclude_test_lists = self.config.test_suite.test_lists.exclude_ignored_test_lists
+        exclude_all_ignored_lists = self.config.test_suite.test_lists.exclude_ignored_tests
+
+        if exclude_all_ignored_lists:
             self.excluded_lists.extend(self.collect_test_lists("ignored", extra_list, test_name))
+        elif exclude_test_lists:
+
+            self.excluded_lists.extend(self.collect_test_lists("ignored", list(exclude_test_lists),
+                                                               test_name, filter_list=True))
+            self.ignored_lists.extend(self.collect_test_lists("ignored", list(exclude_test_lists),
+                                                              test_name, filter_list=False))
         else:
             self.ignored_lists.extend(self.collect_test_lists("ignored", extra_list, test_name))
 
     def collect_test_lists(
             self,
             kind: str, extra_lists: list[str] | None = None,
-            test_name: str | None = None
+            test_name: str | None = None, filter_list: bool | None = None
     ) -> list[Path]:
-        test_lists = extra_lists[:] if extra_lists else []
+
+        test_lists: list[Path] = []
         test_name = test_name if test_name else self.config.test_suite.suite_name
 
         short_template_name = f"{test_name}*-{kind}*.txt"
@@ -103,9 +128,8 @@ class TestLists:
                              f"(-{interpreter})?"
         if self.sanitizer != SanitizerKind.NONE:
             full_template_name += f"(-{self.sanitizer.value})?"
-        opt_level = self.opt_level()
-        if opt_level is not None:
-            full_template_name += f"(-OL{opt_level})?"
+        if self.opt_level() is not None:
+            full_template_name += f"(-OL{self.opt_level()})?"
         if self.debug_info():
             full_template_name += "(-DI)?"
         if self.is_full_ast_verifier():
@@ -121,20 +145,28 @@ class TestLists:
         _LOGGER.default(f"Test lists searching: template = {full_template_name}")
         full_pattern = re.compile(full_template_name)
 
-        def is_matched(file: str) -> bool:
-            file = file.split(path.sep)[-1]
-            match = full_pattern.match(file)
+        def is_matched(file: Path) -> bool:
+            file_name = file.name
+            match = full_pattern.match(file_name)
             return match is not None
 
-        glob_expression = path.join(self.list_root, f"**/{short_template_name}")
+        glob_expression = f"**/{short_template_name}"
         test_lists.extend(filter(
             is_matched,
-            glob(glob_expression, recursive=True)
+            self.list_root.glob(glob_expression)
         ))
 
         _LOGGER.all(f"Loading {kind} test lists: {test_lists}")
 
-        return [Path(test_list) for test_list in test_lists]
+        if filter_list is not None and extra_lists:
+            found_test_lists = TestLists.matched_test_lists(test_lists,
+                                                            [Path(extra_list) for extra_list in extra_lists])
+            if filter_list:
+                return found_test_lists
+
+            return list(set(test_lists) - set(found_test_lists))
+
+        return test_lists
 
     def search_build_type(self) -> BuildTypeKind:
         search_option = "x64" if self.config.general.gn_build else "CMAKE_BUILD_TYPE"

@@ -73,6 +73,7 @@ args = {
     'test_suite1.parameters.test-list': None,
     'test_suite1.parameters.test-file': None,
     'test_suite1.parameters.exclude-ignored-tests': False,
+    'test_suite1.parameters.exclude-ignored-test-lists': None,
     'test_suite1.parameters.skip-test-lists': False,
     'test_suite1.parameters.update-excluded': False,
     'test_suite1.parameters.update-expected': False,
