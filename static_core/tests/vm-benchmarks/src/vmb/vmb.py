@@ -107,8 +107,6 @@ def main() -> None:
     if not bus:
         log.error('No tests run!')
         sys.exit(1)
-    if args.dry_run:
-        sys.exit(0)
     if args.fail_list:
         VmbRunner.save_failure_lists(bus, args.fail_list)
     report_main(args, bus=bus, ext_info=ext_info, timer=timer)
