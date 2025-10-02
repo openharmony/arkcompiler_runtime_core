@@ -18,4 +18,4 @@ cases:
   - { type: 'null',      list: 'null',      index: 2, eType: 'null',   value: 'null'      }
   - { type: 'undefined', list: 'undefined', index: 0, eType: 'Int',    value: 1           }
   - { type: 'undefined', list: 'undefined', index: 1, eType: 'Object', value: 2           }
-  - { type: 'undefined', list: 'undefined', index: 2, eType: 'Object', value: 'undefined' }
+  - { type: 'undefined', list: 'undefined', index: 2, eType: 'Any', value: 'undefined' }
