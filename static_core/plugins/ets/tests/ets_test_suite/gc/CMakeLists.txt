@@ -109,10 +109,7 @@ add_ets_gc_test(TIMEOUT_CMD timeout TIMEOUT_TIME 10m FILE finalization_registry_
 add_ets_gc_test(FILE scheduled_gc.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug-never" "--gc-use-nth-alloc-trigger=true" MODE "INT")
 add_ets_gc_test(FILE scheduled_gc_trigger_exception.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug-never" MODE "INT")
 
-# NOTE(@srokashevich, #30217): enable with tsan after fix
-if(NOT PANDA_ENABLE_THREAD_SANITIZER)
 add_ets_gc_test(FILE postpone_gc_test.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug" MODE "INT")
-endif()
 
 add_ets_gc_test(FILE run_gc_every_safepoint.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug" "--run-gc-in-place" "--run-gc-every-safepoint" MODE "INT")
 add_ets_gc_test(FILE run_gc_every_safepoint.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug" "--run-gc-in-place" "--run-gc-every-safepoint" MODE "JIT")
