@@ -40,6 +40,11 @@ public:
                                            ObjectAllocatorBase::ObjMemInitPolicy objInit) override;
 
     void IterateOverObjectsSafe([[maybe_unused]] const ObjectVisitor &objectVisitor) override;
+
+    bool IsNonMovable([[maybe_unused]] const ObjectHeader *obj) override
+    {
+        return false;
+    }
 };
 
 }  // namespace ark::mem

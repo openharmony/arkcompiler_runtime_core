@@ -576,6 +576,14 @@ bool ObjectAllocatorGen<MT_MODE>::IsObjectInNonMovableSpace(const ObjectHeader *
 }
 
 template <MTModeT MT_MODE>
+bool ObjectAllocatorGen<MT_MODE>::IsNonMovable(const ObjectHeader *obj)
+{
+    return objectAllocator_->ContainObject(obj) || nonMovableObjectAllocator_->ContainObject(obj) ||
+           largeObjectAllocator_->ContainObject(obj) || humongousObjectAllocator_->ContainObject(obj) ||
+           largeNonMovableObjectAllocator_->ContainObject(obj);
+}
+
+template <MTModeT MT_MODE>
 bool ObjectAllocatorGen<MT_MODE>::HasYoungSpace()
 {
     return youngGenAllocator_ != nullptr;
