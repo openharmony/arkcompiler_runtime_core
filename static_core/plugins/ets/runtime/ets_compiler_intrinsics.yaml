@@ -227,6 +227,28 @@ intrinsics:
     clear_flags: [ ]
     peephole_func: PeepholeNullcheck
 
+  - name: CompilerEtsStringFromCharCodeSingle
+    space: ets
+    compiler_only: true
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ ref, u64 ]
+    codegen_arch: [ arm64, amd64 ]
+    codegen_func: CreateStringFromCharCodeSingle
+    llvm_codegen_func: EmitStringFromCharCodeSingle
+
+  - name: CompilerEtsStringFromCharCodeSingleNoCache
+    space: ets
+    compiler_only: true
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ u64 ]
+    codegen_arch: [ arm64, amd64 ]
+    codegen_func: CreateStringFromCharCode
+    llvm_codegen_func: EmitStringFromCharCode
+
   - name: CompilerEtsMemmoveUnchecked_Ref
     space: ets
     compiler_only: true

@@ -861,6 +861,7 @@
   properties: [irtoc]
   signature:
     - ark::coretypes::String*  # resulting string
+    - ark::ObjectHeader*       # cache
     - uint64_t                 # number (double after a bitcast to uin64_t), char code
     - ark::Class*              # string class pointer
 
@@ -876,6 +877,14 @@
 - name: CreateStringFromCharCodeSingleNoCacheSlowPath
   entrypoint: CreateStringFromCharCodeSingleNoCacheEntrypoint
   bridge: slow_path
+  properties: []
+  signature:
+    - ark::coretypes::String*  # resulting string
+    - uint64_t                 # number (double after a bitcast to uin64_t), char code
+
+- name: CreateStringFromCharCodeSingleNoCache3Arg
+  entrypoint: CreateStringFromCharCodeSingleNoCacheEntrypoint
+  bridge: odd_saved3
   properties: []
   signature:
     - ark::coretypes::String*  # resulting string

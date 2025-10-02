@@ -19,11 +19,14 @@
 //! METHOD        "ets_string_from_char_code.ETSGLOBAL::fromCharCodes"
 //! PASS_AFTER    "Peephole"
 //! INST          /Intrinsic.StdCoreStringFromCharCode/
-//! INST_NOT      /Intrinsic.StdCoreStringFromCharCodeSingle/
+//! INST_NOT      /Intrinsic.CompilerEtsStringFromCharCodeSingle/
+//! INST_NOT      /Intrinsic.CompilerEtsStringFromCharCodeSingleNoCache/
 //!
 //! METHOD        "ets_string_from_char_code.ETSGLOBAL::fromLargeCharCode"
 //! PASS_AFTER    "Peephole"
-//! INST          /Intrinsic.StdCoreStringFromCharCodeSingle/
+//! INST_NOT      /Intrinsic.StdCoreStringFromCharCodeSingle/
+//! INST          /Intrinsic.CompilerEtsStringFromCharCodeSingle/
+//! INST_NOT      /Intrinsic.CompilerEtsStringFromCharCodeSingleNoCache/
 
 //! CHECKER       AOT IR Builder, check String creation from a single and numerous char code(s) with no string caches
 //! RUN_PAOC      options: "--compiler-regex='.*from.*CharCode.*' --compiler-inlining=false --use-string-caches=false"
@@ -31,11 +34,13 @@
 //! METHOD        "ets_string_from_char_code.ETSGLOBAL::fromCharCodes"
 //! PASS_AFTER    "Peephole"
 //! INST          /Intrinsic.StdCoreStringFromCharCode/
-//! INST_NOT      /Intrinsic.StdCoreStringFromCharCodeSingle/
+//! INST_NOT      /Intrinsic.CompilerEtsStringFromCharCodeSingle/
+//! INST_NOT      /Intrinsic.CompilerEtsStringFromCharCodeSingleNoCache/
 //!
 //! METHOD        "ets_string_from_char_code.ETSGLOBAL::fromLargeCharCode"
 //! PASS_AFTER    "Peephole"
-//! INST          /Intrinsic.StdCoreStringFromCharCodeSingle/
+//! INST_NOT      /Intrinsic.StdCoreStringFromCharCodeSingle/
+//! INST          /Intrinsic.CompilerEtsStringFromCharCodeSingleNoCache/
 
 //! CHECKER       JIT IR Builder, check String creation from a single and numerous char code(s)
 //! RUN           force_jit: true, options: "--compiler-regex='.*from.*CharCode.*' --compiler-inlining=false", entry: "ets_string_from_char_code.ETSGLOBAL::main"
@@ -43,11 +48,14 @@
 //! METHOD        "ets_string_from_char_code.ETSGLOBAL::fromCharCodes"
 //! PASS_AFTER    "Peephole"
 //! INST          /Intrinsic.StdCoreStringFromCharCode/
-//! INST_NOT      /Intrinsic.StdCoreStringFromCharCodeSingle/
+//! INST_NOT      /Intrinsic.CompilerEtsStringFromCharCodeSingle/
+//! INST_NOT      /Intrinsic.CompilerEtsStringFromCharCodeSingleNoCache/
 //!
 //! METHOD        "ets_string_from_char_code.ETSGLOBAL::fromLargeCharCode"
 //! PASS_AFTER    "Peephole"
-//! INST          /Intrinsic.StdCoreStringFromCharCodeSingle/
+//! INST_NOT      /Intrinsic.StdCoreStringFromCharCodeSingle/
+//! INST_NOT      /Intrinsic.CompilerEtsStringFromCharCodeSingleNoCache/
+//! INST          /Intrinsic.CompilerEtsStringFromCharCodeSingle/
 
 function fromCharCodes(code1: number, code2: number): string {
     return string.fromCharCode(code1, code2);

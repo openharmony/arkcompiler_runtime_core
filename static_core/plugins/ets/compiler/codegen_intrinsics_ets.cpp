@@ -585,10 +585,14 @@ void Codegen::CreateStringIndexOfAfter(IntrinsicInst *inst, Reg dst, SRCREGS src
 
 void Codegen::CreateStringFromCharCode(IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
-    ASSERT(GetArch() != Arch::AARCH32);
+    auto intrId = inst->GetIntrinsicId();
+    ASSERT(intrId == RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_FROM_CHAR_CODE ||
+           intrId == RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_STRING_FROM_CHAR_CODE_SINGLE_NO_CACHE);
     ASSERT(inst->GetInputsCount() == 2U && inst->RequireState());
+    auto eid = intrId == RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_FROM_CHAR_CODE
+                   ? EntrypointId::CREATE_STRING_FROM_CHAR_CODE_TLAB
+                   : EntrypointId::CREATE_STRING_FROM_CHAR_CODE_SINGLE_NO_CACHE_TLAB;
     auto array = src[FIRST_OPERAND];
-    constexpr auto eid = EntrypointId::CREATE_STRING_FROM_CHAR_CODE_TLAB;
     if (GetGraph()->IsAotMode()) {
         ScopedTmpReg klassReg(GetEncoder());
         GetEncoder()->EncodeLdr(
@@ -604,22 +608,22 @@ void Codegen::CreateStringFromCharCode(IntrinsicInst *inst, Reg dst, SRCREGS src
 
 void Codegen::CreateStringFromCharCodeSingle(IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
-    ASSERT(GetArch() != Arch::AARCH32);
-    ASSERT(inst->GetInputsCount() == 2U && inst->RequireState());
-    ScopedTmpReg number(GetEncoder(), ConvertDataType(DataType::UINT64, GetArch()));
-    GetEncoder()->EncodeMov(number, src[FIRST_OPERAND]);
-    auto eid = GetRuntime()->IsStringCachesUsed() ? EntrypointId::CREATE_STRING_FROM_CHAR_CODE_SINGLE_TLAB
-                                                  : EntrypointId::CREATE_STRING_FROM_CHAR_CODE_SINGLE_NO_CACHE_TLAB;
+    ASSERT(inst->GetInputsCount() == 3U && inst->RequireState());
+    ASSERT(GetGraph()->GetRuntime()->IsStringCachesUsed());
+    auto cache = src[FIRST_OPERAND];
+    auto number = src[SECOND_OPERAND];
+    constexpr auto eid = EntrypointId::CREATE_STRING_FROM_CHAR_CODE_SINGLE_TLAB;
+
     if (GetGraph()->IsAotMode()) {
         ScopedTmpReg klassReg(GetEncoder());
         GetEncoder()->EncodeLdr(
             klassReg, false,
             MemRef(ThreadReg(), static_cast<ssize_t>(GetRuntime()->GetStringClassPointerTlsOffset(GetArch()))));
-        CallFastPath(inst, eid, dst, {}, number, klassReg);
+        CallFastPath(inst, eid, dst, {}, cache, number, klassReg);
     } else {
         auto klassImm =
             TypedImm(reinterpret_cast<uintptr_t>(GetRuntime()->GetLineStringClass(GetGraph()->GetMethod(), nullptr)));
-        CallFastPath(inst, eid, dst, {}, number, klassImm);
+        CallFastPath(inst, eid, dst, {}, cache, number, klassImm);
     }
 }
 

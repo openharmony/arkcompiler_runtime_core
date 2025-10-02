@@ -418,7 +418,13 @@ bool LLVMIrConstructor::EmitStringIndexOfAfter(Inst *inst)
 
 bool LLVMIrConstructor::EmitStringFromCharCode(Inst *inst)
 {
-    auto eid = RuntimeInterface::EntrypointId::CREATE_STRING_FROM_CHAR_CODE_TLAB;
+    auto intrId = inst->CastToIntrinsic()->GetIntrinsicId();
+    ASSERT(intrId == RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_FROM_CHAR_CODE ||
+           intrId == RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_STRING_FROM_CHAR_CODE_SINGLE_NO_CACHE);
+    ASSERT(inst->GetInputsCount() == 2U && inst->RequireState());
+    auto eid = intrId == RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_FROM_CHAR_CODE
+                   ? RuntimeInterface::EntrypointId::CREATE_STRING_FROM_CHAR_CODE_TLAB
+                   : RuntimeInterface::EntrypointId::CREATE_STRING_FROM_CHAR_CODE_SINGLE_NO_CACHE_TLAB;
     auto array = GetInputValue(inst, 0);
     auto klassOffset = GetGraph()->GetRuntime()->GetStringClassPointerTlsOffset(GetGraph()->GetArch());
     auto klass = llvmbackend::runtime_calls::LoadTLSValue(&builder_, arkInterface_, klassOffset, builder_.getPtrTy());
@@ -430,13 +436,14 @@ bool LLVMIrConstructor::EmitStringFromCharCode(Inst *inst)
 
 bool LLVMIrConstructor::EmitStringFromCharCodeSingle(Inst *inst)
 {
-    auto eid = GetGraph()->GetRuntime()->IsStringCachesUsed()
-                   ? RuntimeInterface::EntrypointId::CREATE_STRING_FROM_CHAR_CODE_SINGLE_TLAB
-                   : RuntimeInterface::EntrypointId::CREATE_STRING_FROM_CHAR_CODE_SINGLE_NO_CACHE_TLAB;
-    auto number = builder_.CreateZExtOrBitCast(GetInputValue(inst, 0), builder_.getInt64Ty());
+    ASSERT(inst->GetInputsCount() == 3U && inst->RequireState());
+    ASSERT(GetGraph()->GetRuntime()->IsStringCachesUsed());
+    constexpr auto eid = RuntimeInterface::EntrypointId::CREATE_STRING_FROM_CHAR_CODE_SINGLE_TLAB;
+    auto cache = GetInputValue(inst, 0);
+    auto number = GetInputValue(inst, 1);
     auto klassOffset = GetGraph()->GetRuntime()->GetStringClassPointerTlsOffset(GetGraph()->GetArch());
     auto klass = llvmbackend::runtime_calls::LoadTLSValue(&builder_, arkInterface_, klassOffset, builder_.getPtrTy());
-    auto call = CreateFastPathCall(inst, eid, {number, klass});
+    auto call = CreateFastPathCall(inst, eid, {cache, number, klass});
     MarkAsAllocation(call);
     ValueMapAdd(inst, call);
     return true;
@@ -550,8 +557,7 @@ bool LLVMIrConstructor::EmitEscompatArrayReverse(Inst *inst)
 
     auto arrObj = GetInputValue(inst, 0);
     uint32_t actualLenghtOffset = ark::cross_values::GetEscompatArrayActualLengthOffset(arch);
-    auto arrLengthOffset =
-        builder_.CreateConstInBoundsGEP1_32(builder_.getInt8Ty(), arrObj, actualLenghtOffset);
+    auto arrLengthOffset = builder_.CreateConstInBoundsGEP1_32(builder_.getInt8Ty(), arrObj, actualLenghtOffset);
     auto arrLength = builder_.CreateLoad(builder_.getInt32Ty(), arrLengthOffset);
 
     auto shortArrayThreshold = builder_.getInt32(MAGIC_NUM_FOR_SHORT_ARRAY_THRESHOLD);

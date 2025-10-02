@@ -5,7 +5,7 @@
  * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
- *tsClass *$1;
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,8 +29,9 @@ namespace ark::ets {
 void EtsPlatformTypes::CreateAndInitializeCaches()
 {
     auto *charClass = this->coreString;
+    // asciiCharCache_ must point to a piece of memory in the non-movable space.
     asciiCharCache_ = EtsTypedObjectArray<EtsString>::Create(charClass, EtsPlatformTypes::ASCII_CHAR_TABLE_SIZE,
-                                                             ark::SpaceType::SPACE_TYPE_OBJECT);
+                                                             ark::SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
     if (UNLIKELY(asciiCharCache_ == nullptr)) {
         LOG(FATAL, RUNTIME) << "Failed to create asciiCharCache";
     }
@@ -45,16 +46,6 @@ void EtsPlatformTypes::VisitRoots(const GCRootVisitor &visitor) const
 {
     if (asciiCharCache_ != nullptr) {
         visitor(mem::GCRoot(mem::RootType::ROOT_VM, asciiCharCache_->GetCoreType()));
-    }
-}
-
-void EtsPlatformTypes::UpdateCachesVmRefs(const GCRootUpdater &updater) const
-{
-    if (asciiCharCache_ != nullptr) {
-        auto *obj = static_cast<ark::ObjectHeader *>(asciiCharCache_->GetCoreType());
-        if (updater(&obj)) {
-            asciiCharCache_ = reinterpret_cast<EtsTypedObjectArray<EtsString> *>(obj);
-        }
     }
 }
 
