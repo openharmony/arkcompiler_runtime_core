@@ -21,12 +21,14 @@ package std.core;
 export final class Class {
     private name: string | undefined
     private superClass: Class | undefined
+    private linker: RuntimeLinker | undefined
     private flags: int
     private typeMetaData: long
     private overloadMap: long
 
     private constructor() { throw new Error("Class constructor called") }
-    private native getNameInternal(): string;
+    private native getNameInternal(): string
+    private native getLinkerInternal(): RuntimeLinker | undefined
 
     public getName(): string {
         return this.name ?? this.getNameInternal()
@@ -43,7 +45,13 @@ export final class Class {
 
     public native final isSubtypeOf(other: Class): boolean
 
-    public native getLinker(): RuntimeLinker
+    public getLinker(): RuntimeLinker {
+        if (this.linker == undefined) {
+            const linker = this.getLinkerInternal()
+            this.linker = linker ?? getBootRuntimeLinker()
+        }
+        return this.linker!
+    }
 
     public native isNamespace(): boolean;
 

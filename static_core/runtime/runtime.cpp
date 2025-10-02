@@ -617,6 +617,7 @@ Runtime::~Runtime()
 #endif
 
     delete cha_;
+    // `classLinker_` is deleted before `pandaVm_` in order to allow the former to use `pandaVm_` during destruction
     delete classLinker_;
     if (dprofiler_ != nullptr) {
         internalAllocator_->Delete(dprofiler_);

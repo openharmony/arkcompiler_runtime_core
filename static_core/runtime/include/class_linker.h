@@ -46,7 +46,11 @@ using compiler::AotManager;
 
 class ClassLinkerErrorHandler;
 
-class ClassLinker {
+/**
+ * @brief Thread-safe container with language-agnostic API for operations on classes.
+ * `ClassLinker` instance is owned by `Runtime`, effectively making it singleton.
+ */
+class ClassLinker final {
 public:
     enum class Error {
         CLASS_NOT_FOUND,

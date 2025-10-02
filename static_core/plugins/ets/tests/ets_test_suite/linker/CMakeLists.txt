@@ -132,10 +132,14 @@ function(test_runtime_linker_extensions test)
         ${PANDA_RUN_PREFIX})
 
     add_custom_target(additional_dependencies DEPENDS ${compilations_targets_list} ${native_lib})
+    # Note that some functions must be deliberately not inlined due to tests purposes.
+    # For more information please refer to definitions of those methods
     add_linker_test(${test} additional_dependencies
         SKIP_ARM32_COMPILER
-        # issues:22179: remove "--verification-mode=disabled" option after fix
-        RUNTIME_EXTRA_OPTIONS "--compiler-inlining-blacklist=${test}.Test::createWeakRef" "--verification-mode=disabled")
+        RUNTIME_EXTRA_OPTIONS
+        "--compiler-inlining-blacklist='${test}.Test::createReferencedLinker,${test}.Test::createUnreferencedLinker'"
+        "--verification-mode=disabled" # issues:22179: remove "--verification-mode=disabled" option after fix
+        )
 
 endfunction()
 

@@ -20,6 +20,7 @@
 #include "libarkbase/macros.h"
 #include "libarkbase/utils/logger.h"
 #include "plugins/ets/runtime/ets_annotation.h"
+#include "plugins/ets/runtime/ets_class_linker_context.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
@@ -620,9 +621,6 @@ EtsClassLinkerExtension::~EtsClassLinkerExtension()
     }
 
     FreeLoadedClasses();
-
-    // References from `EtsClassLinkerContext` are removed in their destructors, need to process only boot context.
-    RemoveRefToLinker(GetBootContext());
 }
 
 bool EtsClassLinkerExtension::IsMethodNativeApi(const Method *method) const
@@ -790,72 +788,6 @@ void EtsClassLinkerExtension::InitializeFinish()
     plaformTypes_->InitializeClasses(EtsCoroutine::GetCurrent());
 }
 
-static EtsRuntimeLinker *GetEtsRuntimeLinker(ClassLinkerContext *ctx)
-{
-    ASSERT(ctx != nullptr);
-    auto *ref = ctx->GetRefToLinker();
-    if (ref == nullptr) {
-        return nullptr;
-    }
-    return EtsRuntimeLinker::FromCoreType(PandaEtsVM::GetCurrent()->GetGlobalObjectStorage()->Get(ref));
-}
-
-static EtsRuntimeLinker *CreateBootRuntimeLinker(ClassLinkerContext *ctx)
-{
-    ASSERT(ctx->IsBootContext());
-    ASSERT(ctx->GetRefToLinker() == nullptr);
-    auto *etsObject = EtsObject::Create(PlatformTypes()->coreBootRuntimeLinker);
-    if (UNLIKELY(etsObject == nullptr)) {
-        LOG(FATAL, CLASS_LINKER) << "Could not allocate BootRuntimeLinker";
-    }
-    auto *runtimeLinker = EtsRuntimeLinker::FromEtsObject(etsObject);
-    ASSERT(runtimeLinker != nullptr);
-    runtimeLinker->SetClassLinkerContext(ctx);
-    return runtimeLinker;
-}
-
-/* static */
-EtsRuntimeLinker *EtsClassLinkerExtension::GetOrCreateEtsRuntimeLinker(ClassLinkerContext *ctx)
-{
-    ASSERT(ctx != nullptr);
-
-    // CC-OFFNXT(G.CTL.03) false positive
-    while (true) {
-        auto *runtimeLinker = GetEtsRuntimeLinker(ctx);
-        if (runtimeLinker != nullptr) {
-            return runtimeLinker;
-        }
-        // Only BootRuntimeLinker is created after its corresponding context
-        ASSERT(ctx->IsBootContext());
-        runtimeLinker = CreateBootRuntimeLinker(ctx);
-        auto *objectStorage = PandaEtsVM::GetCurrent()->GetGlobalObjectStorage();
-        auto *refToLinker = objectStorage->Add(runtimeLinker->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
-        if (ctx->CompareAndSetRefToLinker(nullptr, refToLinker)) {
-            return runtimeLinker;
-        }
-        objectStorage->Remove(refToLinker);
-    }
-    UNREACHABLE();
-}
-
-/* static */
-void EtsClassLinkerExtension::RemoveRefToLinker(ClassLinkerContext *ctx)
-{
-    ASSERT(ctx != nullptr);
-    if (Thread::GetCurrent() == nullptr) {
-        // Do not remove references during runtime destruction
-        return;
-    }
-    auto *ref = ctx->GetRefToLinker();
-    if (ref != nullptr) {
-        auto *etsVm = PandaEtsVM::GetCurrent();
-        ASSERT(etsVm != nullptr);
-        auto *objectStorage = etsVm->GetGlobalObjectStorage();
-        ASSERT(objectStorage != nullptr);
-        objectStorage->Remove(ref);
-    }
-}
-
 ClassLinkerContext *EtsClassLinkerExtension::CreateApplicationClassLinkerContext(const PandaVector<PandaString> &path)
 {
     ClassLinkerContext *ctx = PandaEtsVM::GetCurrent()->CreateApplicationRuntimeLinker(path);
@@ -866,11 +798,15 @@ ClassLinkerContext *EtsClassLinkerExtension::CreateApplicationClassLinkerContext
 /* static */
 ClassLinkerContext *EtsClassLinkerExtension::GetParentContext(ClassLinkerContext *ctx)
 {
+    // Boot context is the root, no need to get parent from it
     if (ctx->IsBootContext()) {
         return nullptr;
     }
-    auto linker = GetEtsRuntimeLinker(ctx);
+    auto *etsLinkerContext = EtsClassLinkerContext::FromCoreType(ctx);
+    auto *linker = etsLinkerContext->GetRuntimeLinker();
     ASSERT(linker != nullptr);
+    // NOTE(dslynko, #30466): remove this assertion after moving `parentLinker` to `RuntimeLinker`
+    ASSERT(linker->GetClass()->IsAssignableFrom(PlatformTypes()->coreAbcRuntimeLinker));
     auto *abcRuntimeLinker = EtsAbcRuntimeLinker::FromEtsObject(linker);
     auto *parentLinker = abcRuntimeLinker->GetParentLinker();
     return parentLinker->GetClassLinkerContext();

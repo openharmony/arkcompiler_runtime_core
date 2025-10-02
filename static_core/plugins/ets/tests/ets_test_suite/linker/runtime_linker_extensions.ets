@@ -179,8 +179,32 @@ class Test {
         });
     }
 
-    // Do not inline this method, otherwise `AbcRuntimeLinker` will survive and test will fail
-    private static createWeakRef(): WeakRef<AbcRuntimeLinker> {
+    /*
+     * Creates unreferenced `AbcRuntimeLinker` and returns `WeakRef` to it.
+     *
+     * Notes:
+     * Do not inline this method, otherwise local reference to `AbcRuntimeLinker` will survive and the test will fail.
+     */
+    private static createUnreferencedLinker(): WeakRef<AbcRuntimeLinker> {
+        const abcLinker = new AbcRuntimeLinker(undefined, Test.getAdditionalFilesList())
+
+        const objectClass = abcLinker.loadClass(Test.stdCoreObjectName)
+        arktest.assertEQ(objectClass, Class.of(new Object()))
+        arktest.assertEQ(objectClass.getLinker(), getBootRuntimeLinker(), "std.core.Object must be loaded by BootRuntimeLinker")
+
+        return new WeakRef<AbcRuntimeLinker>(abcLinker)
+    }
+
+    /*
+     * Creates `AbcRuntimeLinker`, loads `Class` which belongs to the linker and returns weak reference to it.
+     *
+     * This function is used to check that `RuntimeLinker` is NOT collected by GC when a `Class` corresponding
+     * to that linker is loaded. This is ensured by `Class` holding a reference to its `RuntimeLinker`.
+     *
+     * Notes:
+     * Do not inline this method, otherwise local reference to `AbcRuntimeLinker` will survive and the test will fail.
+     */
+    private static createReferencedLinker(): [WeakRef<AbcRuntimeLinker>, Class] {
         const abcLinker = new AbcRuntimeLinker(undefined, Test.getAdditionalFilesList());
 
         const objectClass = abcLinker.loadClass(Test.stdCoreObjectName);
@@ -192,21 +216,19 @@ class Test {
         arktest.assertNE(cls1, undefined, "AdditionalClass1 must be found");
         arktest.assertEQ(cls1.getLinker(), abcLinker, "AdditionalClass1 must be loaded by custom linker");
 
-        Test.triggerGC();
-
-        // Load class from "additional2.ets"
-        // As side effect, this must load "additional3.ets" and execute code from it
-        const cls2 = abcLinker.loadClass(Test.additionalClass2Name, true);
-        arktest.assertNE(cls2, undefined, "AdditionalClass2 must be found");
-        arktest.assertEQ(cls2.getLinker(), abcLinker, "AdditionalClass2 must be loaded by custom linker");
-
-        return new WeakRef<AbcRuntimeLinker>(abcLinker);
+        // Return `cls1` to ensure that `AbcRuntimeLinker` is referenced
+        return [new WeakRef<AbcRuntimeLinker>(abcLinker), cls1];
     }
 
     static testAbcRuntimeLinkerUnload() {
-        const abcLinkerRef = Test.createWeakRef();
-        Test.triggerGC();
-        arktest.assertEQ(abcLinkerRef.deref(), undefined, "AbcRuntimeLinker must be collected");
+        const unreferencedLinker = Test.createUnreferencedLinker()
+        Test.triggerGC()
+        arktest.assertEQ(unreferencedLinker.deref(), undefined, "Unreferenced AbcRuntimeLinker must be collected")
+
+        const linkerAndClass = Test.createReferencedLinker()
+        const referencedLinker = linkerAndClass[0]
+        Test.triggerGC()
+        arktest.assertNE(referencedLinker.deref(), undefined, "Referenced AbcRuntimeLinker must NOT be collected")
     }
 
     private static testAddAbcFiles(linker: AbcRuntimeLinker, newFiles: string[]) {

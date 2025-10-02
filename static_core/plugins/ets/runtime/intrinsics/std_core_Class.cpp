@@ -62,14 +62,15 @@ EtsString *StdCoreClassGetNameInternal(EtsClass *cls)
     return cls->GetName();
 }
 
+EtsRuntimeLinker *StdCoreClassGetLinkerInternal(EtsClass *cls)
+{
+    auto *ctx = cls->GetLoadContext();
+    return ctx->IsBootContext() ? nullptr : EtsClassLinkerContext::FromCoreType(ctx)->GetRuntimeLinker();
+}
+
 EtsBoolean StdCoreClassIsNamespace(EtsClass *cls)
 {
     return cls->IsModule();
-}
-
-EtsRuntimeLinker *StdCoreClassGetLinker(EtsClass *cls)
-{
-    return EtsClassLinkerExtension::GetOrCreateEtsRuntimeLinker(cls->GetLoadContext());
 }
 
 EtsClass *StdCoreClassOf(EtsObject *obj)
@@ -145,7 +146,14 @@ EtsClass *EtsRuntimeLinkerFindLoadedClass(EtsRuntimeLinker *runtimeLinker, EtsSt
 
 void EtsRuntimeLinkerInitializeContext(EtsRuntimeLinker *runtimeLinker)
 {
-    auto *ext = PandaEtsVM::GetCurrent()->GetEtsClassLinkerExtension();
+    auto *coro = EtsCoroutine::GetCurrent();
+    auto *ext = coro->GetPandaVM()->GetEtsClassLinkerExtension();
+    if (UNLIKELY(runtimeLinker->IsInstanceOf(PlatformTypes(coro)->coreBootRuntimeLinker))) {
+        // BootRuntimeLinker is a singletone, initialize it once
+        runtimeLinker->SetClassLinkerContext(ext->GetBootContext());
+        return;
+    }
+
     ext->RegisterContext([ext, runtimeLinker]() {
         ASSERT(runtimeLinker->GetClassLinkerContext() == nullptr);
         auto allocator = ext->GetClassLinker()->GetAllocator();
@@ -201,7 +209,7 @@ EtsRuntimeLinker *EtsGetNearestNonBootRuntimeLinker()
             auto *ctx = cls->GetLoadContext();
             ASSERT(ctx != nullptr);
             if (!ctx->IsBootContext()) {
-                return reinterpret_cast<EtsClassLinkerContext *>(ctx)->GetRuntimeLinker();
+                return EtsClassLinkerContext::FromCoreType(ctx)->GetRuntimeLinker();
             }
         }
     }

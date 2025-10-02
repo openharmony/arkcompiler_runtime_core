@@ -34,17 +34,16 @@ public:
     {
         auto *objectStorage = PandaEtsVM::GetCurrent()->GetGlobalObjectStorage();
         // Store weak reference in order not to prevent collection of managed RuntimeLinker object.
-        auto *refToLinker = objectStorage->Add(runtimeLinker->GetCoreType(), mem::Reference::ObjectType::WEAK);
-        SetRefToLinker(refToLinker);
+        refToLinker_ = objectStorage->Add(runtimeLinker->GetCoreType(), mem::Reference::ObjectType::WEAK);
+        ASSERT(refToLinker_ != nullptr);
     }
 
     NO_COPY_SEMANTIC(EtsClassLinkerContext);
     NO_MOVE_SEMANTIC(EtsClassLinkerContext);
 
-    ~EtsClassLinkerContext() override
-    {
-        EtsClassLinkerExtension::RemoveRefToLinker(this);
-    }
+    ~EtsClassLinkerContext() override;
+
+    static EtsClassLinkerContext *FromCoreType(ClassLinkerContext *ctx);
 
     /// @brief Load class according to corresponding RuntimeLinker.
     Class *LoadClass(const uint8_t *descriptor, bool needCopyDescriptor,
@@ -69,9 +68,7 @@ public:
 
     EtsRuntimeLinker *GetRuntimeLinker() const
     {
-        auto *ref = GetRefToLinker();
-        ASSERT(ref != nullptr);
-        auto *linker = PandaEtsVM::GetCurrent()->GetGlobalObjectStorage()->Get(ref);
+        auto *linker = PandaEtsVM::GetCurrent()->GetGlobalObjectStorage()->Get(refToLinker_);
         ASSERT(linker != nullptr);
         return EtsRuntimeLinker::FromCoreType(linker);
     }
@@ -97,6 +94,7 @@ private:
 
 private:
     os::memory::RecursiveMutex abcFilesMutex_;
+    mem::Reference *refToLinker_ {nullptr};
 };
 
 }  // namespace ark::ets

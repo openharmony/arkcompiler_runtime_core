@@ -18,6 +18,7 @@
 #include "include/mem/panda_containers.h"
 #include "libarkbase/utils/utf.h"
 #include "libarkbase/macros.h"
+#include "plugins/ets/runtime/ets_class_linker_context.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_utils.h"
@@ -733,6 +734,7 @@ static bool HasFunctionTypeInSuperClasses(EtsClass *cls)
     return false;
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP, G.FUD.05) solid logic
 void EtsClass::Initialize(EtsClass *superClass, uint16_t accessFlags, bool isPrimitiveType,
                           ClassLinkerErrorHandler *errorHandler)
 {
@@ -740,6 +742,12 @@ void EtsClass::Initialize(EtsClass *superClass, uint16_t accessFlags, bool isPri
     SetName(nullptr);
     // Class of interface extends Object, but we should not expose this information to user.
     IsInterface() ? SetSuperClass(nullptr) : SetSuperClass(superClass);
+
+    // Save reference to defining RuntimeLinker in order to prevent its collection
+    auto *ctx = GetLoadContext();
+    ASSERT(ctx != nullptr);
+    SetLinker(ctx->IsBootContext() ? nullptr
+                                   : EtsClassLinkerContext::FromCoreType(ctx)->GetRuntimeLinker()->GetCoreType());
 
     uint32_t flags = accessFlags;
     if (isPrimitiveType) {
@@ -816,6 +824,11 @@ EtsClass *EtsClass::GetComponentType() const
         return nullptr;
     }
     return FromRuntimeClass(componentType);
+}
+
+void EtsClass::SetLinker(ObjectHeader *linker)
+{
+    GetObjectHeader()->SetFieldObject(MEMBER_OFFSET(EtsClass, linker_), linker);
 }
 
 void EtsClass::SetName(EtsString *name)
