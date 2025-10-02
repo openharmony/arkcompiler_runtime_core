@@ -1411,10 +1411,6 @@
 #30350
 09.classes/06.field_declarations/04.field_initialization/class_static_fields_decl_23.ets
 
-#29938
-09.classes/06.field_declarations/04.field_initialization/interface_fields_cte_2.ets
-09.classes/06.field_declarations/04.field_initialization/interface_fields_cte_3.ets
-
 #29713
 09.classes/06.field_declarations/04.field_initialization/static_field_initialization_reference.ets
 09.classes/06.field_declarations/04.field_initialization/static_field_self_initialization_reference.ets
