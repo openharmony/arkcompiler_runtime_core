@@ -17,13 +17,8 @@
 tags: [not-a-test, compile-only]
 ---*/
 
-export class ClassA {
-  f: int = 1
-}
-export interface InterfaceA {}
-export function foo(): void {}
-export const BAR: int = 146
-
-type AOI = ClassA | InterfaceA
-
-export AOI
+export { ClassA } from './module_a'
+export { InterfaceA } from './module_a'
+export { foo } from './module_a'
+export { BAR } from './module_a'
+export { AOI } from './module_a'

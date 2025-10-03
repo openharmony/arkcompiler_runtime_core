@@ -17,13 +17,13 @@
 tags: [not-a-test, compile-only]
 ---*/
 
-export class ClassA {
+export class ClassC {
   f: int = 1
 }
-export interface InterfaceA {}
-export function foo(): void {}
-export const BAR: int = 146
+export interface InterfaceC {}
+export function baz(): void {}
+export const BCR: int = 146
 
-type AOI = ClassA | InterfaceA
+type AOI_C = ClassC | InterfaceC
 
-export AOI
+export AOI_C
