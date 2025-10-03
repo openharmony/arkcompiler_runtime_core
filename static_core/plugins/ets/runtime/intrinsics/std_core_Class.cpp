@@ -701,10 +701,10 @@ EtsBoolean StdCoreClassIsFixedArray(EtsClass *cls)
 
 EtsBoolean StdCoreClassIsSubtypeOf(EtsClass *cls, EtsClass *other)
 {
-    if (LIKELY(other->IsInterface())) {
+    if (other->IsInterface()) {
         return static_cast<EtsBoolean>(cls->GetRuntimeClass()->Implements(other->GetRuntimeClass()));
     }
-    return static_cast<EtsBoolean>(cls->IsSubClass(other));
+    return static_cast<EtsBoolean>(other->IsAssignableFrom(cls));
 }
 
 namespace {
