@@ -1599,26 +1599,26 @@
 09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_306.ets
 
 #23050
+09.classes/06.field_declarations/06.overriding_fields/overriding_fields_11.ets
+09.classes/06.field_declarations/06.overriding_fields/overriding_fields_12.ets
 09.classes/06.field_declarations/06.overriding_fields/overriding_fields_13.ets
 09.classes/06.field_declarations/06.overriding_fields/overriding_fields_14.ets
 09.classes/06.field_declarations/06.overriding_fields/overriding_fields_15.ets
 09.classes/06.field_declarations/06.overriding_fields/overriding_fields_16.ets
-09.classes/06.field_declarations/06.overriding_fields/overriding_fields_17.ets
-09.classes/06.field_declarations/06.overriding_fields/overriding_fields_18.ets
-09.classes/06.field_declarations/06.overriding_fields/overriding_fields_236.ets
-09.classes/06.field_declarations/06.overriding_fields/overriding_fields_237.ets
-09.classes/06.field_declarations/06.overriding_fields/overriding_fields_238.ets
-
-#28785
-09.classes/06.field_declarations/06.overriding_fields/overriding_fields_10.ets
-09.classes/06.field_declarations/06.overriding_fields/overriding_fields_9.ets
-09.classes/06.field_declarations/06.overriding_fields/overriding_fields_32.ets
-09.classes/06.field_declarations/06.overriding_fields/overriding_fields_33.ets
+09.classes/06.field_declarations/06.overriding_fields/overriding_fields_232.ets
+09.classes/06.field_declarations/06.overriding_fields/overriding_fields_233.ets
+09.classes/06.field_declarations/06.overriding_fields/overriding_fields_234.ets
 
 #28786
-09.classes/06.field_declarations/06.overriding_fields/overriding_fields_233.ets
-09.classes/06.field_declarations/06.overriding_fields/overriding_fields_246.ets
-09.classes/06.field_declarations/06.overriding_fields/overriding_fields_247.ets
+09.classes/06.field_declarations/06.overriding_fields/overriding_fields_229.ets
+
+09.classes/06.field_declarations/06.overriding_fields/overriding_fields_242.ets
+09.classes/06.field_declarations/06.overriding_fields/overriding_fields_243.ets
+
+09.classes/06.field_declarations/06.overriding_fields/overriding_fields_274.ets
+09.classes/06.field_declarations/06.overriding_fields/overriding_fields_275.ets
+09.classes/06.field_declarations/06.overriding_fields/overriding_fields_276.ets
+09.classes/06.field_declarations/06.overriding_fields/overriding_fields_277.ets
 09.classes/06.field_declarations/06.overriding_fields/overriding_fields_278.ets
 09.classes/06.field_declarations/06.overriding_fields/overriding_fields_279.ets
 09.classes/06.field_declarations/06.overriding_fields/overriding_fields_280.ets
@@ -1641,27 +1641,23 @@
 09.classes/06.field_declarations/06.overriding_fields/overriding_fields_297.ets
 09.classes/06.field_declarations/06.overriding_fields/overriding_fields_298.ets
 09.classes/06.field_declarations/06.overriding_fields/overriding_fields_299.ets
-09.classes/06.field_declarations/06.overriding_fields/overriding_fields_300.ets
-09.classes/06.field_declarations/06.overriding_fields/overriding_fields_301.ets
-09.classes/06.field_declarations/06.overriding_fields/overriding_fields_302.ets
-09.classes/06.field_declarations/06.overriding_fields/overriding_fields_303.ets
 
 #28787
-09.classes/06.field_declarations/06.overriding_fields/overriding_fields_62.ets
-09.classes/06.field_declarations/06.overriding_fields/overriding_fields_63.ets
-09.classes/06.field_declarations/06.overriding_fields/overriding_fields_245.ets
+09.classes/06.field_declarations/06.overriding_fields/overriding_fields_58.ets
+09.classes/06.field_declarations/06.overriding_fields/overriding_fields_59.ets
+09.classes/06.field_declarations/06.overriding_fields/overriding_fields_241.ets
 09.classes/06.field_declarations/06.overriding_fields/overriding_fields_neg_0.ets
 
 #28790
-09.classes/06.field_declarations/06.overriding_fields/overriding_fields_276.ets
+09.classes/06.field_declarations/06.overriding_fields/overriding_fields_272.ets
 
 #28791
-09.classes/06.field_declarations/06.overriding_fields/overriding_fields_277.ets
+09.classes/06.field_declarations/06.overriding_fields/overriding_fields_273.ets
 
 #28793
-09.classes/06.field_declarations/06.overriding_fields/overriding_fields_304.ets
-09.classes/06.field_declarations/06.overriding_fields/overriding_fields_305.ets
-09.classes/06.field_declarations/06.overriding_fields/overriding_fields_306.ets
+09.classes/06.field_declarations/06.overriding_fields/overriding_fields_300.ets
+09.classes/06.field_declarations/06.overriding_fields/overriding_fields_301.ets
+09.classes/06.field_declarations/06.overriding_fields/overriding_fields_302.ets
 
 # 30286
 09.classes/06.field_declarations/06.overriding_fields/overriding_fields_neg_3.ets

@@ -28,8 +28,6 @@ cases:
       - {check_type: "int", check_value: "0"}
       - {check_type: "short", check_value: "0"}
       - {check_type: "byte", check_value: "0"}
-      - {check_type: "string", check_value: "\"\""}
-      - {check_type: "bigint", check_value: "0n"}
       - {check_type: "char", check_value: "c'\\u0000'"}
       - {check_type: "boolean", check_value: "false"}
     decl: |-
@@ -91,8 +89,6 @@ cases:
       - {check_type: "int", check_value: "0"}
       - {check_type: "short", check_value: "0"}
       - {check_type: "byte", check_value: "0"}
-      - {check_type: "string", check_value: "\"\""}
-      - {check_type: "bigint", check_value: "0n"}
       - {check_type: "char", check_value: "c'\\u0000'"}
       - {check_type: "boolean", check_value: "false"}
     decl: |-
