@@ -869,6 +869,53 @@ export final class BigInt {
         return new BigInt(res, sign)
     }
 
+    public pow(exponent: BigInt): BigInt {
+        if (exponent.negative()) {
+            throw new RangeError("Exponent must be non-negative")
+        }
+        if (exponent.isZero()) {
+            return 1n
+        }
+        if (this.isZero()) {
+            return 0n
+        }
+
+        const one = 1n
+        if (exponent === one) {
+            return new BigInt(this)
+        }
+
+        let trailingZeros = 0n
+        let temp = new BigInt(exponent)
+        while((temp & one).isZero()) {
+            trailingZeros++
+            temp = temp >> one
+        }
+
+        const shiftedExp = exponent >> trailingZeros
+
+        let result: BigInt = 1n
+        let base: BigInt = this
+        let exp: BigInt = shiftedExp
+
+        while (!exp.isZero()) {
+            if ((exp & one) === one) {
+                result = result * base
+                if (exp === one) {
+                    break;
+                }
+            }
+            base = base * base
+            exp = exp >> one
+        }
+
+        for (let i = 0; i < trailingZeros; i++) {
+            result = result * result
+        }
+
+        return result
+    }
+
     public negate(): BigInt {
         return new BigInt(this.bytes, this.sign * -1)
     }
