@@ -84,7 +84,10 @@ function receiverFunction1(@ReceiverParamAnnotation this: Receiver) {
 namespace annotatedNS {
 }
 
+@interface LocalFieldAnnotation {}
+
 function goo(@Optional b: string = "Optional value") {
+    let lvar: String = "Local variable with annotation in function"
 }
 
 @SomeAnnotation
@@ -101,12 +104,15 @@ class MyClass {
     bar(@SomeAnnotation({field1: {{ case.value1 }}, field2: {{ case.value2 }} }) a: int, @Optional b?: string) {
         return a
     }
+
+    foo() {
+        let lvar: String = "Local variable with annotation in method"
+    }
 }
 
 @SomeAnnotation
 abstract class MyAbstractClass {
 }
-
 
 @SomeAnnotation({field1: {{ case.value1 }}, field2: {{ case.value2 }} })
 interface MyInterface {}

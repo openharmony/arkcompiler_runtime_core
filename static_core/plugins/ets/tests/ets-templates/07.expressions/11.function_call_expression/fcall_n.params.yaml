@@ -119,3 +119,15 @@ cases:
       use: |-
         let lc: LT = getLambdaOrNull()
         let r = lc('Hello', 42, true)
+
+    - decl: |-
+        let calls: int = 0;
+        interface User {
+          name: string;
+          age: number;
+        }
+        type LP = () => User
+      use: |-
+        let value = ((up: LP): User => { return up() }) () { return {name: 'Alice', age: 16 } }
+        arktest.assertEQ('Alice', value.name)
+        arktest.assertTrue(value instanceof User)

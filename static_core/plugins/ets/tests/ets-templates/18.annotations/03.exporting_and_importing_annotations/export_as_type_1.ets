@@ -13,20 +13,18 @@
 * limitations under the License.
 */
 
+
 /*---
-desc: As any other declared entity, an annotation can be exported by using the keyword export.
-tags: []
-files: ['./to_export.ets']
+desc: As any other declared entity, an annotation can be exported by using the keyword export. Renamed export id forbidden
+
+name: Export With Rename
+tags:
+- compile-only
+- negative
 ---*/
 
-import * as ns from "./to_export"
+@interface MyAnnotationToExport {}
 
-// Annotation use:
-@ns.ClassAnnotation({field: "Some string" })
-@ns.mb.IAnnotation({field: "Some string" })
-class MyClass {}
+type TAE = MyAnnotationToExport
 
-
-function main() {
-    new MyClass
-}
+export TAE as ExportType  //TypeError: Annotations cannot be used as a type.

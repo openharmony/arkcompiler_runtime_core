@@ -14,17 +14,34 @@
  */
 
 /*---
- desc: 18.01.declaring_annotations export
- tags: [not-a-test, compile-only, negative]
- files: ['./to_export.ets']
- ---*/
+desc: Module to be imported
+tags:
+- compile-only
+- not-a-test
+---*/
 
-export @interface ClassAnnoNotDefault {
-    field: string
+export let x: string = ''
+
+pass('H')
+
+{
+  pass("e");
 }
-
-export default @interface ClassAnnoDefault {
-    field: string
+{
+  pass('l');
 }
+export function foo(): string { return x }
 
-export { ClassAnnotation as ClassRenamed } from "./to_export"
+{
+  pass('l');
+}
+pass('o')
+pass(' '); pass('World');
+
+
+
+
+function pass(cc: string): void {
+  x += cc;
+  arktest.assertTrue( true )
+}

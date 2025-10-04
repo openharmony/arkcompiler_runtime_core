@@ -283,14 +283,4 @@ cases:
         arktest.assertEQ('Alice', value.name)
         arktest.assertTrue(value instanceof User)
 
-    - decl: |-
-        let calls: int = 0;
-        interface User {
-          name: string;
-          age: number;
-        }
-        type LP = () => User
-      use: |-
-        let value = ((up: LP): User => { return up() }) () { return {name: 'Alice', age: 16 } }
-        arktest.assertEQ('Alice', value.name)
-        arktest.assertTrue(value instanceof User)
+

@@ -15,7 +15,7 @@
 
 /*---
 desc: As any other declared entity, an annotation can be exported by using the keyword export.
-tags: [compile-only]
+tags: []
 files: ['./to_export.ets']
 ---*/
 
@@ -23,6 +23,7 @@ import {ClassAnnotation} from "./to_export"
 
 // Annotation use:
 @ClassAnnotation({field: "Some string" })
-class MyClass {/*body*/}
+class MyClass {}
 
-
+function main() {
+}

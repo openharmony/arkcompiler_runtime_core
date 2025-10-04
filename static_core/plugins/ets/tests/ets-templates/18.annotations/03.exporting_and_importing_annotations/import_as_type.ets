@@ -13,20 +13,14 @@
 * limitations under the License.
 */
 
+
 /*---
-desc: As any other declared entity, an annotation can be exported by using the keyword export.
-tags: []
+desc: An annotation is not a type. Using export type or import type notations to export or import annotations is
+      forbidden
+
+name: Import As Type
+tags: [compile-only, negative]
 files: ['./to_export.ets']
 ---*/
 
-import * as ns from "./to_export"
-
-// Annotation use:
-@ns.ClassAnnotation({field: "Some string" })
-@ns.mb.IAnnotation({field: "Some string" })
-class MyClass {}
-
-
-function main() {
-    new MyClass
-}
+import type { ClassAnnotation } from "./to_export"

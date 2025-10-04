@@ -14,19 +14,49 @@
  */
 
 /*---
-desc: A module may contain any number of such blocks that merge logically into a single block in the order
-tags:
-  - compile-only
+desc: A module may contain any number of blocks that merge logically into a single block
+
 ---*/
 
-function pass(): void {
-  arktest.assertTrue( true )
+let x: string = '';
+
+
+pass('H')
+
+{
+  pass("e");
+}
+const foo: String = 'Foo'
+{
+  pass('l');
+}
+
+interface IMyInterface {
+    name: String
 }
 
 {
-  pass();
+  pass('l');
 }
 
+class SomeClass {
+}
+
+pass('o')
+pass(' '); pass('World');
+
 function main(): void {
-  arktest.assertTrue( false )
+  arktest.assertEQ('Hello World', x)
+  let vi: IMyInterface = {name: 'Bob'}
+  arktest.assertEQ('final+final', last)
+}
+
+let last: String = "final"
+{
+    last += "+final"
+}
+
+function pass(cc: string): void {
+  x += cc;
+  arktest.assertTrue( true )
 }

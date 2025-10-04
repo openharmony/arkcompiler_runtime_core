@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,16 +14,15 @@
  */
 
 /*---
- desc: 18.01.declaring_annotations export
- tags: [not-a-test]
- ---*/
+desc: Module to be test import top-level statements exec order
+tags:
+files: [./to_export.ets]
+---*/
 
-export @interface ClassAnnotation {
- field: string
-}
 
-export namespace mb {
-    export @interface IAnnotation {
-     field: string
-    }
+import * as order from './to_export.ets'
+
+function main() {
+    arktest.assertEQ("Hello World", order.foo())
+    arktest.assertEQ("Hello World", order.x)
 }
