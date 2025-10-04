@@ -24,6 +24,7 @@
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/intrinsics/helpers/ets_to_string_cache.h"
+#include "plugins/ets/runtime/intrinsics/helpers/ets_intrinsics_helpers.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
 #include "plugins/ets/runtime/types/ets_escompat_array.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
@@ -522,6 +523,12 @@ extern "C" ObjectHeader *CreateStringFromMem(int64_t buf, int32_t len)
 extern "C" int32_t GetStringSizeInBytes(ObjectHeader *str)
 {
     return reinterpret_cast<EtsString *>(str)->GetUtf8Length();
+}
+
+extern "C" bool SameValueZeroEntrypoint(ObjectHeader *o1, ObjectHeader *o2)
+{
+    return ark::ets::intrinsics::helpers::SameValueZero(EtsCoroutine::GetCurrent(), EtsObject::FromCoreType(o1),
+                                                        EtsObject::FromCoreType(o2));
 }
 
 }  // namespace ark::ets

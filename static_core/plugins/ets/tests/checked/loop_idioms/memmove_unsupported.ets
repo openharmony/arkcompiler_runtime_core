@@ -106,7 +106,7 @@ class TestUnsupported {
     //! RUN           force_jit: true, entry: "memmove_unsupported.TestUnsupported::noAlias_UpdateFirst_inLoop_ref"
     //! METHOD        "memmove_unsupported.TestUnsupported::noAlias_UpdateFirst_inLoop_ref"
     //! PASS_AFTER    "LoopIdioms"
-    //! IN_BLOCK      "head, loop 6, depth 1, bc: 0x00000024"
+    //! IN_BLOCK      "head, loop .*, depth 1, bc: 0x00000024"
     //! INST_NOT      /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
     //! INST          /CallStatic.*__noinline__updateFirst/
     //! INST_NEXT     /LoadArray/

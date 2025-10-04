@@ -16,6 +16,8 @@
 #include <cstdlib>
 #include "dtoa_helper.h"
 #include "ets_intrinsics_helpers.h"
+#include "ets_stubs.h"
+#include "ets_stubs-inl.h"
 #include "include/mem/panda_string.h"
 #include "types/ets_field.h"
 #include "types/ets_string.h"
@@ -649,5 +651,42 @@ template char *SmallFpToString<float>(float number, bool negative, char *buffer)
 
 template Span<char> FpToStringDecimalRadixMainCase<double>(double number, bool negative, Span<char> buffer);
 template Span<char> FpToStringDecimalRadixMainCase<float>(float number, bool negative, Span<char> buffer);
+
+namespace {
+template <typename T>
+bool SameValueZeroFloatingPoint(EtsObject *a, EtsObject *b)
+{
+    auto aVal = EtsBoxPrimitive<T>::FromCoreType(a)->GetValue();
+    auto bVal = EtsBoxPrimitive<T>::FromCoreType(b)->GetValue();
+    if (std::isnan(aVal) && std::isnan(bVal)) {
+        return true;
+    }
+    return aVal == bVal;
+}
+}  // namespace
+
+bool SameValueZero(EtsCoroutine *coro, EtsObject *a, EtsObject *b)
+{
+    if (UNLIKELY(a == b)) {
+        return true;
+    }
+
+    if (EtsReferenceNullish(coro, a) || EtsReferenceNullish(coro, b)) {
+        // a == b is already handled
+        return false;
+    }
+
+    EtsClass *aKlass = a->GetClass();
+    EtsClass *bKlass = b->GetClass();
+    auto ptypes = PlatformTypes(coro);
+    if (aKlass == ptypes->coreDouble && bKlass == ptypes->coreDouble) {
+        return SameValueZeroFloatingPoint<EtsDouble>(a, b);
+    }
+    if (aKlass == ptypes->coreFloat && bKlass == ptypes->coreFloat) {
+        return SameValueZeroFloatingPoint<EtsFloat>(a, b);
+    }
+
+    return EtsReferenceEquals(coro, a, b);
+}
 
 }  // namespace ark::ets::intrinsics::helpers

@@ -14,57 +14,16 @@
  */
 
 #include "plugins/ets/runtime/types/ets_map.h"
-#include "plugins/ets/runtime/types/ets_base_enum.h"
+#include "intrinsics/helpers/ets_intrinsics_helpers.h"
 #include "plugins/ets/runtime/types/ets_bigint.h"
-#include "plugins/ets/runtime/ets_stubs-inl.h"
-#include "intrinsics.h"
 
 namespace ark::ets {
 static constexpr int NUMERIC_INT_MAX = std::numeric_limits<int>::max();
 static constexpr int NUMERIC_INT_MIN = std::numeric_limits<int>::min();
 
-static inline bool CompareDouble(EtsObject *a, EtsObject *b)
+[[maybe_unused]] static bool Compare(EtsCoroutine *coro, EtsObject *a, EtsObject *b)
 {
-    EtsDouble aVal = EtsBoxPrimitive<EtsDouble>::FromCoreType(a)->GetValue();
-    EtsDouble bVal = EtsBoxPrimitive<EtsDouble>::FromCoreType(b)->GetValue();
-    if (intrinsics::StdCoreDoubleIsNan(aVal) && intrinsics::StdCoreDoubleIsNan(bVal)) {
-        return true;
-    }
-    return aVal == bVal;
-}
-
-static inline bool CompareFloat(EtsObject *a, EtsObject *b)
-{
-    EtsFloat aVal = EtsBoxPrimitive<EtsFloat>::FromCoreType(a)->GetValue();
-    EtsFloat bVal = EtsBoxPrimitive<EtsFloat>::FromCoreType(b)->GetValue();
-    if (intrinsics::StdCoreFloatIsNan(aVal) && intrinsics::StdCoreFloatIsNan(bVal)) {
-        return true;
-    }
-    return aVal == bVal;
-}
-
-static bool Compare(EtsCoroutine *coro, EtsObject *a, EtsObject *b)
-{
-    if (UNLIKELY(a == b)) {
-        return true;
-    }
-
-    if (EtsReferenceNullish(coro, a) || EtsReferenceNullish(coro, b)) {
-        return EtsReferenceNullish(coro, a) && EtsReferenceNullish(coro, b);
-    }
-
-    EtsClass *aKlass = a->GetClass();
-    EtsClass *bKlass = b->GetClass();
-    auto ptypes = PlatformTypes(coro);
-    if (aKlass == ptypes->coreDouble && bKlass == ptypes->coreDouble) {
-        return CompareDouble(a, b);
-    }
-
-    if (aKlass == ptypes->coreFloat && bKlass == ptypes->coreFloat) {
-        return CompareFloat(a, b);
-    }
-
-    return EtsReferenceEquals(coro, a, b);
+    return ark::ets::intrinsics::helpers::SameValueZero(coro, a, b);
 }
 
 template <typename T>
@@ -128,88 +87,6 @@ uint32_t EtsEscompatMap::GetHashCode(EtsObject *&key)
     }
 
     return key->GetHashCode();
-}
-
-static inline EtsEscompatArray *GetBucket(EtsCoroutine *&coro, EtsEscompatMap *&map, EtsInt idx)
-{
-    return EtsEscompatArray::FromEtsObject(map->GetBuckets(coro)->GetData()->Get(idx));
-}
-
-EtsBoolean EtsEscompatMap::Has(EtsEscompatMap *map, EtsObject *key, EtsInt idx)
-{
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro->HasPendingException() == false);
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    EtsHandle<EtsObject> keyHandle(coro, key);
-    EtsHandle<EtsEscompatArray> bucket(coro, GetBucket(coro, map, idx));
-    if (bucket.GetPtr() != nullptr) {
-        uint32_t bucketSize = bucket->GetActualLength();
-        for (uint32_t i = 0; i < bucketSize; ++i) {
-            auto *entry = reinterpret_cast<EtsEscompatMapEntry *>(bucket->GetData()->Get(i));
-            if (Compare(coro, entry->GetKey(coro), keyHandle.GetPtr())) {
-                return ToEtsBoolean(true);
-            }
-        }
-    }
-
-    return ToEtsBoolean(false);
-}
-
-EtsObject *EtsEscompatMap::Get(EtsEscompatMap *map, EtsObject *key, EtsInt idx)
-{
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro->HasPendingException() == false);
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    EtsHandle<EtsObject> keyHandle(coro, key);
-    EtsHandle<EtsEscompatArray> bucket(coro, GetBucket(coro, map, idx));
-    if (bucket.GetPtr() != nullptr) {
-        uint32_t bucketSize = bucket->GetActualLength();
-        for (uint32_t i = 0; i < bucketSize; ++i) {
-            EtsHandle<EtsEscompatMapEntry> entry(coro,
-                                                 reinterpret_cast<EtsEscompatMapEntry *>(bucket->GetData()->Get(i)));
-            if (Compare(coro, entry->GetKey(coro), keyHandle.GetPtr())) {
-                return entry->GetVal(coro);
-            }
-        }
-    }
-
-    return nullptr;
-}
-
-EtsBoolean EtsEscompatMap::Delete(EtsEscompatMap *map, EtsObject *key, EtsInt idx)
-{
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro->HasPendingException() == false);
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    EtsHandle<EtsObject> keyHandle(coro, key);
-    EtsHandle<EtsEscompatArray> bucket(coro, GetBucket(coro, map, idx));
-    if (bucket.GetPtr() == nullptr) {
-        return ToEtsBoolean(false);
-    }
-
-    uint32_t bucketSize = bucket->GetActualLength();
-    for (uint32_t i = 0; i < bucketSize; ++i) {
-        EtsHandle<EtsEscompatMapEntry> entry(coro, reinterpret_cast<EtsEscompatMapEntry *>(bucket->GetData()->Get(i)));
-        if (!Compare(coro, entry->GetKey(coro), keyHandle.GetPtr())) {
-            continue;
-        }
-
-        entry->GetPrev(coro)->SetNext(coro, entry->GetNext(coro));
-        entry->GetNext(coro)->SetPrev(coro, entry->GetPrev(coro));
-
-        [[maybe_unused]] auto lastEntry = bucket->Pop();
-        if (i != (bucketSize--)) {
-            bucket->SetRef(i, lastEntry);
-        }
-
-        map->SetSize(map->GetSize() - 1);
-        if (map->GetSize() == 0) {
-            map->SetHead(coro, nullptr);
-        }
-        return ToEtsBoolean(true);
-    }
-
-    return ToEtsBoolean(false);
 }
 
 }  // namespace ark::ets

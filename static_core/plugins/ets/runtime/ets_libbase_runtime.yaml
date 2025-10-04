@@ -6798,6 +6798,19 @@ intrinsics:
     llvm_codegen_func: EmitGetHashCodeByValue
     need_param_locations: true
 
+  - name: StdRuntimeSameValueZero
+    space: ets
+    class_name: std.core.Runtime
+    method_name: sameValueZero
+    static: true
+    signature:
+      ret: u1
+      args: [ std.core.Object, std.core.Object ]
+    impl: ark::ets::intrinsics::StdRuntimeSameValueZero
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateSameValueZero
+    llvm_codegen_func: EmitSameValueZero
+
   - name: StdCoreRuntimeFailedTypeCastException
     space: ets
     class_name: std.core.Runtime
@@ -9763,44 +9776,3 @@ intrinsics:
 ########################
 # escompat.Map #
 ########################
-  - name: MapGet
-    space: ets
-    class_name: escompat.Map
-    method_name: getNat
-    static: false
-    signature:
-      ret: std.core.Object
-      args: [ std.core.Object, i32 ]
-    impl: ark::ets::intrinsics::EtsEscompatMapGet
-    irtoc_impl: MapGetNativePlus
-    codegen_arch: [arm64, amd64]
-    codegen_func: CreateMapGet
-    llvm_codegen_func: EmitMapGet
-
-  - name: MapHas
-    space: ets
-    class_name: escompat.Map
-    method_name: hasNat
-    static: false
-    signature:
-      ret: u1
-      args: [ std.core.Object, i32 ]
-    impl: ark::ets::intrinsics::EtsEscompatMapHas
-    irtoc_impl: MapHasNativePlus
-    codegen_arch: [arm64, amd64]
-    codegen_func: CreateMapHas
-    llvm_codegen_func: EmitMapHas
-
-  - name: MapDelete
-    space: ets
-    class_name: escompat.Map
-    method_name: deleteNat
-    static: false
-    signature:
-      ret: u1
-      args: [ std.core.Object, i32 ]
-    impl: ark::ets::intrinsics::EtsEscompatMapDelete
-    irtoc_impl: MapDeleteNativePlus
-    codegen_arch: [arm64, amd64]
-    codegen_func: CreateMapDelete
-    llvm_codegen_func: EmitMapDelete

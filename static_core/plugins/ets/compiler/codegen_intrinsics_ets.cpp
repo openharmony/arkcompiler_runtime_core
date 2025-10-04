@@ -705,32 +705,18 @@ CODEGEN_TYPED_ARRAY_SET_VALUES_FROM_ARRAY(BigUint64, BIG_UINT64)
 
 #undef CODEGEN_TYPED_ARRAY_SET_VALUES_FROM_ARRAY
 
-void Codegen::CreateMapGet([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
-{
-    ASSERT(GetArch() != Arch::AARCH32);
-    auto entrypointId = EntrypointId::MAP_GET;
-    CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND]);
-}
-
-void Codegen::CreateMapHas([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
-{
-    ASSERT(GetArch() != Arch::AARCH32);
-    auto entrypointId = EntrypointId::MAP_HAS;
-    CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND]);
-}
-
-void Codegen::CreateMapDelete([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
-{
-    ASSERT(GetArch() != Arch::AARCH32);
-    auto entrypointId = EntrypointId::MAP_DELETE;
-    CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND]);
-}
-
 void Codegen::CreateGetHashCodeByValue([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
     ASSERT(GetArch() != Arch::AARCH32);
     auto entrypointId = EntrypointId::GET_HASH_CODE_BY_VALUE_FAST_PATH;
     CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND]);
+}
+
+void Codegen::CreateSameValueZero([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(GetArch() != Arch::AARCH32);
+    auto entrypointId = EntrypointId::SAME_VALUE_ZERO_FAST_PATH;
+    CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND]);
 }
 
 static RuntimeInterface::EntrypointId GetArrayFastCopyToRefEntrypointId(mem::BarrierType barrierType)

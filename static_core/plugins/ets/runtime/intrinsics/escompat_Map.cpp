@@ -20,21 +20,6 @@
 
 namespace ark::ets::intrinsics {
 
-extern "C" EtsBoolean EtsEscompatMapHas(EtsEscompatMap *map, EtsObject *key, EtsInt idx)
-{
-    return EtsEscompatMap::Has(map, key, idx);
-}
-
-extern "C" EtsObject *EtsEscompatMapGet(EtsEscompatMap *map, EtsObject *key, EtsInt idx)
-{
-    return EtsEscompatMap::Get(map, key, idx);
-}
-
-extern "C" EtsBoolean EtsEscompatMapDelete(EtsEscompatMap *map, EtsObject *key, EtsInt idx)
-{
-    return EtsEscompatMap::Delete(map, key, idx);
-}
-
 extern "C" EtsLong GetHashCodeString(EtsObject *obj)
 {
     ASSERT(obj->GetClass()->IsStringClass());
