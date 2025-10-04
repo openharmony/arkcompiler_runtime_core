@@ -16,63 +16,63 @@
 #! READ_FILE    	"console.out"
 #! LLVM_METHOD  	/define.*barrierToSink/
 #! INST         	/br i1/
-#! INST_NEXT 	    /fence/
-#! INST_NEXT 	    /fence/
-#! INST_NEXT_NOT 	/fence/
+#! INST_NEXT 	    /fence|dmb/
+#! INST_NEXT 	    /fence|dmb/
+#! INST_NEXT_NOT 	/fence|dmb/
 
 #! CHECKER          Check DMB deletion if both paths are protected
 #! RUN_LLVM     	options: "--llvm-pre-opt=0 --llvm-options='--print-after=mem-barriers'"
 #! READ_FILE    	"console.out"
 #! LLVM_METHOD  	/define.*barrierToDelete/
-#! INST         	/fence/
-#! INST_NEXT    	/fence/
-#! INST_NEXT_NOT    /fence/
+#! INST         	/fence|dmb/
+#! INST_NEXT    	/fence|dmb/
+#! INST_NEXT_NOT    /fence|dmb/
 
 #! CHECKER          Check DMB not sunk with unconditional branch 
 #! RUN_LLVM     	options: "--llvm-pre-opt=0 --llvm-options='--print-after=mem-barriers'"
 #! READ_FILE    	"console.out"
 #! LLVM_METHOD  	/define.*unconditionalBranch/
-#! INST				/fence/
+#! INST				/fence|dmb/
 #! INST_NEXT		/br/
-#! INST_NEXT_NOT	/fence/
+#! INST_NEXT_NOT	/fence|dmb/
 
 #! CHECKER          Check DMB not sunk with successor basicblock have two predecessors 
 #! RUN_LLVM     	options: "--llvm-pre-opt=0 --llvm-options='--print-after=mem-barriers'"
 #! READ_FILE    	"console.out"
 #! LLVM_METHOD  	/define.*twoPredecessors/
-#! INST				/fence/
+#! INST				/fence|dmb/
 #! INST_NEXT		/br i1/
-#! INST_NEXT		/fence/
-#! INST_NEXT_NOT	/fence/
+#! INST_NEXT		/fence|dmb/
+#! INST_NEXT_NOT	/fence|dmb/
 
 #! CHECKER          Check DMB not sunk if object is used before branching 
 #! RUN_LLVM     	options: "--llvm-pre-opt=0 --llvm-options='--print-after=mem-barriers'"
 #! READ_FILE    	"console.out"
 #! LLVM_METHOD  	/define.*useBeforeBranch/
-#! INST				/fence/
+#! INST				/fence|dmb/
 #! INST_NEXT		/br i1/
-#! INST_NEXT		/fence/
-#! INST_NEXT_NOT	/fence/
+#! INST_NEXT		/fence|dmb/
+#! INST_NEXT_NOT	/fence|dmb/
 
 #! CHECKER          Check DMB not sunk if both path uses object before next dmb 
 #! RUN_LLVM     	options: "--llvm-pre-opt=0 --llvm-options='--print-after=mem-barriers'"
 #! READ_FILE    	"console.out"
 #! LLVM_METHOD  	/define.*useBeforeNewObjectNotSink/
-#! INST				/fence/
+#! INST				/fence|dmb/
 #! INST_NEXT		/br i1/
-#! INST_NEXT		/fence/
-#! INST_NEXT		/fence/
-#! INST_NEXT_NOT	/fence/
+#! INST_NEXT		/fence|dmb/
+#! INST_NEXT		/fence|dmb/
+#! INST_NEXT_NOT	/fence|dmb/
 
 #! CHECKER          Check DMB not deleted if one path use object before dmb. DMB should be sunk instead 
 #! RUN_LLVM     	options: "--llvm-pre-opt=0 --llvm-options='--print-after=mem-barriers'"
 #! READ_FILE    	"console.out"
 #! LLVM_METHOD  	/define.*useBeforeNewObjectNotDelete/
 #! INST				/br i1/
-#! INST_NEXT		/fence/
-#! INST_NEXT		/fence/
-#! INST_NEXT		/fence/
-#! INST_NEXT_NOT	/fence/
+#! INST_NEXT		/fence|dmb/
+#! INST_NEXT		/fence|dmb/
+#! INST_NEXT		/fence|dmb/
+#! INST_NEXT_NOT	/fence|dmb/
 
 .record A <access.record=public> {
 	i32 a <final>
