@@ -38,7 +38,7 @@ const initialState: IState = {
     theme: (localStorage.getItem('theme') as Theme) || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
     disasm: false,
     verifier: true,
-    runtimeVerify: false,
+    runtimeVerify: true,
     primaryColor: '#e32b49',
     versions: {
         frontend: '',
