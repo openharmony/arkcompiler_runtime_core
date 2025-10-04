@@ -54,7 +54,7 @@ TEST_F(LibAbcKitStaticCatchPhiTest, CatchPhiStaticValid)
         [](AbckitFile * /*file*/, AbckitCoreFunction *method, AbckitGraph *graph) {
             auto *oldCall = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_CALL_STATIC);
             EXPECT_NE(oldCall, nullptr);
-            auto *log = helpers::FindMethodByName(g_implI->functionGetFile(method), "LogError");
+            auto *log = helpers::FindMethodByName(g_implI->functionGetFile(method), "logError");
             auto *catchPhi = g_implG->bbCreateCatchPhi(g_implG->iGetBasicBlock(oldCall), 0);
             auto *newCall = g_statG->iCreateCallStatic(graph, log, 1, catchPhi);
             g_implG->iInsertBefore(newCall, oldCall);
