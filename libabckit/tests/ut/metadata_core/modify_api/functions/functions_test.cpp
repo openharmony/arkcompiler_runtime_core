@@ -259,7 +259,7 @@ TEST_F(LibAbcKitModifyApiFunctionsTest, StaticFunctionSetReturnType1)
     auto *retType = g_implI->functionGetReturnType(helpers::FindMethodByName(file, "add2"));
     ASSERT_NE(retType, nullptr);
     auto typeId = g_implI->typeGetTypeId(retType);
-    ASSERT_EQ(typeId, ABCKIT_TYPE_ID_REFERENCE);
+    ASSERT_EQ(typeId, ABCKIT_TYPE_ID_STRING);
     g_impl->closeFile(file);
     EXPECT_TRUE(helpers::Match(modifiedOutput, "123\nclass prop\n1\nhello\nfoo\n"));
 }

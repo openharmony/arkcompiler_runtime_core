@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,6 +55,7 @@ void InspectIr(AbckitGraph *graph)
     inst = CheckInstAndGetNext(inst, ABCKIT_ISA_API_STATIC_OPCODE_NEWARRAY);
     inst = CheckInstAndGetNext(inst, ABCKIT_ISA_API_STATIC_OPCODE_STOREARRAY);
     inst = CheckInstAndGetNext(inst, ABCKIT_ISA_API_STATIC_OPCODE_INITOBJECT);
+    inst = CheckInstAndGetNext(inst, ABCKIT_ISA_API_STATIC_OPCODE_STOREOBJECT);
     inst = CheckInstAndGetNext(inst, ABCKIT_ISA_API_STATIC_OPCODE_STOREARRAY);
     inst = CheckInstAndGetNext(inst, ABCKIT_ISA_API_STATIC_OPCODE_LOADARRAY);
     inst = CheckInstAndGetNext(inst, ABCKIT_ISA_API_STATIC_OPCODE_LOADOBJECT);

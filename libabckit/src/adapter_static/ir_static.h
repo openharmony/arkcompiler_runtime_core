@@ -459,7 +459,9 @@ AbckitInst *IcreateInitObjectStatic(AbckitGraph *graph, AbckitCoreFunction *inpu
                                     va_list argp);
 
 bool IcheckIsCallStatic(AbckitInst *inst);
-
+AbckitInst *IcreateStobjObjStatic(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1,
+                                  AbckitString *newKeyString);
+AbckitInst *IcreateLdobjObjStatic(AbckitGraph *graph, AbckitInst *input0, AbckitString *keyString);
 }  // namespace libabckit
 
 #endif

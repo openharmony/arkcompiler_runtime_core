@@ -21,6 +21,7 @@
 #include "libabckit/c/isa/isa_dynamic.h"
 #include "libabckit/c/isa/isa_static.h"
 #include "libabckit/src/ir_impl.h"
+#include "libabckit/src/adapter_static/metadata_inspect_static.h"
 #include "libabckit/src/adapter_static/runtime_adapter_static.h"
 
 #include "static_core/compiler/optimizer/ir/inst.h"
@@ -63,6 +64,7 @@ std::string GetMangleFuncName(AbckitCoreFunction *function);
 uint32_t GetClassOffset(AbckitGraph *graph, AbckitCoreClass *klass);
 uint32_t GetMethodOffset(AbckitGraph *graph, AbckitCoreFunction *function);
 uint32_t GetStringOffset(AbckitGraph *graph, AbckitString *string);
+uint32_t GetFieldOffset(AbckitGraph *graph, AbckitString *string);
 uint32_t GetLiteralArrayOffset(AbckitGraph *graph, AbckitLiteralArray *arr);
 
 AbckitInst *CreateInstFromImpl(AbckitGraph *graph, ark::compiler::Inst *impl);
@@ -151,6 +153,8 @@ AbckitTypeId ArkPandasmTypeToAbckitTypeId(const ark::pandasm::Type &type);
 ark::pandasm::Record *GetStaticImplRecord(
     const std::variant<AbckitCoreModule *, AbckitCoreNamespace *, AbckitCoreClass *, AbckitCoreInterface *,
                        AbckitCoreEnum *, AbckitCoreAnnotationInterface *> &coreObject);
+
+std::string TypeToNameStatic(AbckitType *type);
 
 constexpr AbckitBitImmSize GetBitLengthUnsigned(uint64_t imm)
 {

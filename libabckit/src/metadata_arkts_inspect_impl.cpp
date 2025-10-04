@@ -193,9 +193,11 @@ extern "C" bool ArktsClassIsAbstract(AbckitArktsClass *klass)
 
 extern "C" AbckitCoreInterface *ArktsInterfaceToCoreInterface(AbckitArktsInterface *iface)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)iface;
-    return nullptr;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(iface, nullptr);
+    return iface->core;
 }
 
 extern "C" AbckitArktsInterface *CoreInterfaceToArktsInterface(AbckitCoreInterface *iface)
@@ -214,9 +216,11 @@ extern "C" AbckitArktsInterface *CoreInterfaceToArktsInterface(AbckitCoreInterfa
 
 extern "C" AbckitCoreEnum *ArktsEnumToCoreEnum(AbckitArktsEnum *enm)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)enm;
-    return nullptr;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(enm, nullptr);
+    return enm->core;
 }
 
 extern "C" AbckitArktsEnum *CoreEnumToArktsEnum(AbckitCoreEnum *enm)
@@ -234,9 +238,11 @@ extern "C" AbckitArktsEnum *CoreEnumToArktsEnum(AbckitCoreEnum *enm)
 
 extern "C" AbckitCoreModuleField *ArktsModuleFieldToCoreModuleField(AbckitArktsModuleField *field)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    return nullptr;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(field, nullptr);
+    return field->core;
 }
 
 extern "C" AbckitArktsModuleField *CoreModuleFieldToArktsModuleField(AbckitCoreModuleField *field)
@@ -274,9 +280,11 @@ extern "C" AbckitArktsNamespaceField *CoreNamespaceFieldToArktsNamespaceField(Ab
 
 extern "C" AbckitCoreClassField *ArktsClassFieldToCoreClassField(AbckitArktsClassField *field)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    return nullptr;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(field, nullptr);
+    return field->core;
 }
 
 extern "C" AbckitArktsClassField *CoreClassFieldToArktsClassField(AbckitCoreClassField *field)
@@ -301,9 +309,11 @@ extern "C" bool ArktsClassFieldIsReadonly(AbckitArktsClassField *field)
 
 extern "C" AbckitCoreInterfaceField *ArktsInterfaceFieldToCoreInterfaceField(AbckitArktsInterfaceField *field)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    return nullptr;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(field, nullptr);
+    return field->core;
 }
 
 extern "C" AbckitArktsInterfaceField *CoreInterfaceFieldToArktsInterfaceField(AbckitCoreInterfaceField *field)
@@ -328,9 +338,11 @@ extern "C" bool ArktsInterfaceFieldIsReadonly(AbckitArktsInterfaceField *field)
 
 extern "C" AbckitCoreEnumField *ArktsEnumFieldToCoreEnumField(AbckitArktsEnumField *field)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    return nullptr;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(field, nullptr);
+    return field->core;
 }
 
 extern "C" AbckitArktsEnumField *CoreEnumFieldToArktsEnumField(AbckitCoreEnumField *field)

@@ -188,6 +188,34 @@ TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, moduleAddAnnotationInterface)
     helpers_nullptr::TestNullptr(g_arktsModifyApiImp->moduleAddAnnotationInterface);
 }
 
+// Test: test-kind=api, api=ArktsModifyApiImpl::moduleFieldSetName,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, moduleFieldSetName)
+{
+    helpers_nullptr::TestNullptr(g_arktsModifyApiImp->moduleFieldSetName);
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::classFieldAddAnnotation,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, classFieldAddAnnotation)
+{
+    helpers_nullptr::TestNullptr(g_arktsModifyApiImp->classFieldAddAnnotation);
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::classFieldRemoveAnnotation,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, classFieldRemoveAnnotation)
+{
+    helpers_nullptr::TestNullptr(g_arktsModifyApiImp->classFieldRemoveAnnotation);
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::classFieldSetName,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, classFieldSetName)
+{
+    helpers_nullptr::TestNullptr(g_arktsModifyApiImp->classFieldSetName);
+}
+
 // Test: test-kind=api, api=ArktsModifyApiImpl::moduleAddExportFromArktsV1ToArktsV1,
 // abc-kind=NoABC, category=negative-nullptr, extension=c
 TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, moduleAddExportFromArktsV1ToArktsV1)
@@ -272,4 +300,66 @@ TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, createInterface)
     helpers_nullptr::TestNullptr(g_arktsModifyApiImp->createInterface);
 }
 
+// Test: test-kind=api, api=ArktsModifyApiImpl::classFieldSetType,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, classFieldSetType)
+{
+    helpers_nullptr::TestNullptr(g_arktsModifyApiImp->classFieldSetType);
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::classFieldSetValue,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, classFieldSetValue)
+{
+    helpers_nullptr::TestNullptr(g_arktsModifyApiImp->classFieldSetValue);
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::moduleFieldSetType,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, moduleFieldSetType)
+{
+    helpers_nullptr::TestNullptr(g_arktsModifyApiImp->moduleFieldSetType);
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::moduleFieldSetValue,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, moduleFieldSetValue)
+{
+    helpers_nullptr::TestNullptr(g_arktsModifyApiImp->moduleFieldSetValue);
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::interfaceFieldAddAnnotation,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, interfaceFieldAddAnnotation)
+{
+    helpers_nullptr::TestNullptr(g_arktsModifyApiImp->interfaceFieldAddAnnotation);
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::interfaceFieldRemoveAnnotation,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, interfaceFieldRemoveAnnotation)
+{
+    helpers_nullptr::TestNullptr(g_arktsModifyApiImp->interfaceFieldRemoveAnnotation);
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::interfaceFieldSetName,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, interfaceFieldSetName)
+{
+    helpers_nullptr::TestNullptr(g_arktsModifyApiImp->interfaceFieldSetName);
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::interfaceFieldSetType,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, interfaceFieldSetType)
+{
+    helpers_nullptr::TestNullptr(g_arktsModifyApiImp->interfaceFieldSetType);
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::enumFieldSetName,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, enumFieldSetName)
+{
+    helpers_nullptr::TestNullptr(g_arktsModifyApiImp->enumFieldSetName);
+}
 }  // namespace libabckit::test

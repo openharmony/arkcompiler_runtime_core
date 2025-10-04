@@ -849,6 +849,38 @@ struct CAPI_EXPORT AbckitIsaApiStatic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input0  is NULL.
      */
     AbckitInst *(*iCreateNullCheck)(AbckitGraph *graph /* in */, AbckitInst *inputObj /* in */);
+
+    /**
+     * @brief Creates instruction with opcode INTRINSIC_ABCKIT_STORE_OBJECT_OBJECT.
+     * @return Pointer to created `AbckitInst`.
+     * @param [ in ] graph - Graph where instruction will be inserted.
+     * @param [ in ] input0 - Value to store.
+     * @param [ in ] input1 - Destonation object.
+     * @param [ in ] keyString - Destonation string.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `graph` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `input0` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `input1` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `keyString` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning one of `AbckitInst` and `graph` differs.
+     * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not STATIC.
+     * @note Allocates
+     */
+    AbckitInst *(*iCreateStobjObj)(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1, AbckitString *keyString);
+
+    /**
+     * @brief Creates instruction with opcode INTRINSIC_ABCKIT_LOAD_OBJECT_OBJECT.
+     * @return Pointer to created `AbckitInst`.
+     * @param [ in ] graph - Graph where instruction will be inserted.
+     * @param [ in ] input0 - Key.
+     * @param [ in ] keyString - Destonation string.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `graph` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `input0` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `keyString` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning one of `AbckitInst` and `graph` differs.
+     * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not STATIC.
+     * @note Allocates
+     */
+    AbckitInst *(*iCreateLdobjObj)(AbckitGraph *graph, AbckitInst *input0, AbckitString *keyString);
 };
 
 /**
