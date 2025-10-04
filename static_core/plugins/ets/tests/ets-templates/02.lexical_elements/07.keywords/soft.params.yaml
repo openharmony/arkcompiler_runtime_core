@@ -13,6 +13,8 @@
 
 --- # List of soft keywords
 keywords:
+    - catch
+    - finally
     - from
     - get
     - keyof

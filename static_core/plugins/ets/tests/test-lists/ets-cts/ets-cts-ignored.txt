@@ -1,13 +1,9 @@
 #25066
 02.lexical_elements/07.keywords/types_local_18.ets
 
-#28017
-02.lexical_elements/07.keywords/hard_6.ets
-02.lexical_elements/07.keywords/hard_19.ets
-
 #28019
-02.lexical_elements/07.keywords/soft_9.ets
-02.lexical_elements/07.keywords/soft_10.ets
+02.lexical_elements/07.keywords/soft_11.ets
+02.lexical_elements/07.keywords/soft_12.ets
 
 #26476 bigint literals with hex, oct, bin
 02.lexical_elements/09.literals/04.bigint_literals/bigint_literals_10.ets
