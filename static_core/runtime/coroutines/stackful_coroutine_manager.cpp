@@ -192,9 +192,9 @@ void StackfulCoroutineManager::OnWorkerStartup(StackfulCoroutineWorker *worker)
 
 void StackfulCoroutineManager::OnWorkerStartupImpl(StackfulCoroutineWorker *worker)
 {
-    worker->OnWorkerStartup();
     workers_.push_back(worker);
     ++activeWorkersCount_;
+    worker->OnWorkerStartup();
     workersCv_.Signal();
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::OnWorkerStartup(): COMPLETED, active workers = "
                            << activeWorkersCount_;
