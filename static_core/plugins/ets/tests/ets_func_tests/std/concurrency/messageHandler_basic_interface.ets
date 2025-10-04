@@ -45,14 +45,6 @@ enum MessageType {
     ARRAY,
 }
 
-function sleep(ms: int) {
-    return new Promise<void>((res, rej) => {
-        setTimeout(() => {
-            res(undefined);
-        }, ms);
-    });
-}
-
 function testMessageHandlerCreation() {
     let eaw = new EAWorker();
     eaw.start();
@@ -354,16 +346,19 @@ function testMessageHandlerMismatch() {
 function testDoubleRemoveMessage() {
     let worker = new EAWorker();
     worker.start();
-    let handler = new concurrency.MessageHandler((msg: concurrency.Message): void => {
-        waitForCompletion(async (): Promise<void> => {
-            await sleep(5000);
-        });
+
+    let awake_waiter: (val: int)=>void = ()=>{};
+    let waiter = new Promise<int>((res, rej)=>{awake_waiter = res;})
+
+    let handler = new concurrency.MessageHandler(async (msg: concurrency.Message) => {
+        await waiter;
     }, worker);
 
     let message = new concurrency.Message(1, handler);
     handler.sendMessage(message);
     arktest.assertEQ(handler.removeMessages(1), true);
     arktest.assertEQ(handler.removeMessages(1), false);
+    awake_waiter(0);
     worker.quit();
 }
 
