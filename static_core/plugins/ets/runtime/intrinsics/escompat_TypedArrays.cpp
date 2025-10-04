@@ -2102,6 +2102,9 @@ static int Clamp(double val)
 {
     const int minUint8 = 0;
     const int maxUint8 = 255;
+    if (std::isnan(val)) {
+        return minUint8;
+    }
     if (val > maxUint8) {
         val = maxUint8;
     } else if (val < minUint8) {
