@@ -32,6 +32,44 @@ namespace ark {
 class ClassLinker;
 class ClassLinkerErrorHandler;
 
+/// @brief Wrapper around a recursive mutex and a condition variable
+class ClassMutexHandler {
+public:
+    ClassMutexHandler() = default;
+
+    void Lock() ACQUIRE(clsHandlerMtx_)
+    {
+        clsHandlerMtx_.Lock();
+    }
+
+    void Unlock() RELEASE(clsHandlerMtx_)
+    {
+        clsHandlerMtx_.Unlock();
+    }
+
+    void Wait()
+    {
+        clsHandlerCondVar_.Wait(&clsHandlerMtx_);
+    }
+
+    void Signal()
+    {
+        clsHandlerCondVar_.Signal();
+    }
+
+    void SignalAll()
+    {
+        clsHandlerCondVar_.SignalAll();
+    }
+
+    NO_COPY_SEMANTIC(ClassMutexHandler);
+    NO_MOVE_SEMANTIC(ClassMutexHandler);
+
+private:
+    os::memory::RecursiveMutex clsHandlerMtx_;
+    os::memory::ConditionVariable clsHandlerCondVar_;
+};
+
 class ClassLinkerContext {
 public:
     explicit ClassLinkerContext(panda_file::SourceLang lang) : lang_(lang) {}
@@ -73,6 +111,8 @@ public:
 
         ASSERT(klass->GetSourceLang() == lang_);
         loadedClasses_.insert({klass->GetDescriptor(), klass});
+        os::memory::LockHolder<os::memory::Mutex> lockHolder(mapLock_);
+        mutexTable_[klass];
         return nullptr;
     }
 
@@ -80,6 +120,8 @@ public:
     {
         os::memory::LockHolder lock(classesLock_);
         loadedClasses_.erase(klass->GetDescriptor());
+        os::memory::LockHolder<os::memory::Mutex> lockHolder(mapLock_);
+        mutexTable_.erase(klass);
     }
 
     template <class Callback>
@@ -180,6 +222,12 @@ public:
         return false;
     }
 
+    ClassMutexHandler *GetClassMutexHandler(Class *cls)
+    {
+        os::memory::LockHolder<os::memory::Mutex> lockHolder(mapLock_);
+        return &mutexTable_.at(cls);
+    }
+
     ClassLinkerContext() = default;
     virtual ~ClassLinkerContext() = default;
 
@@ -191,6 +239,8 @@ private:
     os::memory::RecursiveMutex classesLock_;
     PandaUnorderedMap<const uint8_t *, Class *, utf::Mutf8Hash, utf::Mutf8Equal> loadedClasses_
         GUARDED_BY(classesLock_);
+    os::memory::Mutex mapLock_;
+    PandaUnorderedMap<Class *, ClassMutexHandler> mutexTable_;
     PandaVector<ObjectHeader *> roots_;
     std::atomic<mem::Reference *> refToLinker_ {nullptr};
     panda_file::SourceLang lang_ {panda_file::SourceLang::PANDA_ASSEMBLY};

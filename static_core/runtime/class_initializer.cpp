@@ -24,7 +24,7 @@
 #include "runtime/handle_scope-inl.h"
 #include "runtime/monitor.h"
 #include "runtime/monitor_object_lock.h"
-#include "runtime/global_object_lock.h"
+#include "runtime/class_lock.h"
 #include "runtime/coroutines/coroutine.h"
 #include "runtime/coroutines/coroutine_manager.h"
 #include "verification/util/is_system.h"
@@ -46,16 +46,15 @@ template <>
 class ObjectLockConfig<MT_MODE_TASK> {
 public:
     /**
-     * NOTE(konstanting):
-     * For the sake of simplicity we use a global mutex-like lock for synchronization. We imply that there will be no
+     * Note(shemetov.philip)
+     * At the moment, we are using per-class locks. We imply that there will be no
      * coroutine switch during the class initialization and that assumption includes static constructor bodies too.
-     * With a global lock, coroutine switch during a class initialiation sequence will possibly lead to deadlocks and
-     * other failures, so expect various checkers to fire and warn you in case a coroutine switch is detected.
+     * With a per-class lock, we have some global synchronization for accessing the mutex table, so coroutine switch
+     * during a class initialiation sequence will possibly lead to deadlocks and other failures, so expect various
+     * checkers to fire and warn you in case a coroutine switch is detected.
      *
-     * In future, we probably we would like to have coroutine-friendly per-class locks as it is a more performant
-     * solution, which places less restrictions on the class initialization sequence.
      */
-    using LockT = GlobalObjectLock;
+    using LockT = ClassLock;
 };
 
 template <>

@@ -205,6 +205,7 @@ template("libarkruntime_set_static_template") {
       "file_manager.cpp",
       "gc_task.cpp",
       "global_object_lock.cpp",
+      "class_lock.cpp",
       "handle_scope.cpp",
       "hotreload/hotreload.cpp",
       "imtable_builder.cpp",
