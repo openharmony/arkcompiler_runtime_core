@@ -162,4 +162,11 @@ cases:
           const originalResult: string = await originalPromise
           
           arktest.assertTrue(originalResult == 'SYNC_COROUTINES_SAFE_ORIGINAL_THEN')
-          arktest.assertTrue(resultFromOtherCoroutine == 'SYNC_COROUTINES_SAFE_OTHER_THEN')  
+          arktest.assertTrue(resultFromOtherCoroutine == 'SYNC_COROUTINES_SAFE_OTHER_THEN')
+
+    - decl: |-
+          //Promise.resolve static method check + one argument constructor
+      use: |-
+          const checkPromise: Promise<string> = Promise.resolve("test")
+
+          arktest.assertEQ((await checkPromise), 'test')
