@@ -1272,9 +1272,6 @@
 08.statements/13.switch_statements/Object_Switch.ets
 08.statements/13.switch_statements/switch_double_branch.ets
 
-#30058
-08.statements/13.switch_statements/switch_default_order_2.ets
-
 #30145
 08.statements/14.throw_statements/throw_7.ets
 
