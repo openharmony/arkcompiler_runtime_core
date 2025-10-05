@@ -1031,9 +1031,6 @@
 #26730
 07.expressions/09.field_access_expressions/02.accessing_superclass_fields/access_by_super_from_method_3.ets
 
-#29019
-07.expressions/10.method_call_expression/01.step_1_selection_of_type_to_use/step1_8.ets
-
 #26730
 07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_27.ets
 
