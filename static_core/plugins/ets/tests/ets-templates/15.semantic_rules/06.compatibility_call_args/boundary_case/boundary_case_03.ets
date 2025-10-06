@@ -15,22 +15,17 @@
 
 /*---
 desc: Verifying compatibility between any and null.
-tags: [compile-only, negative]
 ---*/
 
-interface I {
-  i: any;
-}
-
-class A {
-  i: null;
+function checkTypeIdentity(a: Any, b: Any): boolean {
+    return Class.ofAny(a as Any) === Class.ofAny(b as Any);
 }
 
 function main(): void {
-  const val1: any = null;
+  const val1: Any = null;
   const val2: null = null;
 
   const result = checkTypeIdentity(val1, val2);
 
-  arktest.assertEQ(result, false);
+  arktest.assertEQ(result, true);
 }

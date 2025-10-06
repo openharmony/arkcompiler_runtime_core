@@ -18,16 +18,12 @@ desc: Ensuring type identity in type guards.
 tags: [compile-only, negative]
 ---*/
 
-interface I {
-  i: any;
-}
-
-class A {
-  i: unknown;
+function checkTypeIdentity(a: Any, b: Any): boolean {
+    return Class.ofAny(a as Any) === Class.ofAny(b as Any);
 }
 
 function main(): void {
-  const val1: any = "test";
+  const val1: Any = "test";
   const val2: unknown = "test";
 
   const result = checkTypeIdentity(val1, val2);

@@ -15,27 +15,18 @@
 
 /*---
 desc: T1 is compatible with T2 if implicitly convertible. Class does not implement interface.
-tags: [compile-only, negative]
 ---*/
 
-interface I {
-  i: bigint;
-}
-
-class A {
-  i: bigint;
-}
-
-function checkTypeIdentity<T>(a: T, b: T): boolean {
-    return typeof a === typeof b;
+function checkTypeIdentity(a: Any, b: Any): boolean {
+    return Class.of(a as Object) === Class.of(b as Object);
 }
 
 function main(): void {
-  const val1: bigint = BigInt(100);
-  const val2: bigint = BigInt(200);
-  const diffTypeVal: any = "This can be any type";
+  const val1: bigint = new BigInt(100);
+  const val2: bigint = new BigInt(200);
+  const diffTypeVal: Any = "This can be any type";
 
-  const result1 = checkTypeIdentity<bigint>(val1, val2);
+  const result1 = checkTypeIdentity(val1, val2);
 
   const result2 = checkTypeIdentity(val1, diffTypeVal);
 

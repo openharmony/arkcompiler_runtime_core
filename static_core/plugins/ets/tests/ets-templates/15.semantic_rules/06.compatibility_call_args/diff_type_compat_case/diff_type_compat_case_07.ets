@@ -18,12 +18,8 @@ desc: Ensuring type identity in type guards.
 tags: [compile-only, negative]
 ---*/
 
-interface I {
-  i: symbol;
-}
-
-class A {
-  i: string;
+function checkTypeIdentity(a: Any, b: Any): boolean {
+    return Class.ofAny(a as Any) === Class.ofAny(b as Any);
 }
 
 function main(): void {

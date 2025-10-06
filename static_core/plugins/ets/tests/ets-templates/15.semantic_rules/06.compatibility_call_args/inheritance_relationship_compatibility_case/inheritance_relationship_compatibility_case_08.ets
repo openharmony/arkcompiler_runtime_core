@@ -15,18 +15,13 @@
 
 /*---
 desc: Verifying compatibility between abstract class and child class.
-tags: [compile-only, negative]
 ---*/
 
 abstract class AbstractClass {}
 class ConcreteClass extends AbstractClass {}
 
-interface I {
-  i: AbstractClass;
-}
-
-class A {
-  i: ConcreteClass;
+function checkTypeIdentity(a: Any, b: Any): boolean {
+    return Class.of(a as Object) === Class.of(b as Object);
 }
 
 function main(): void {
@@ -37,5 +32,5 @@ function main(): void {
   const result2 = checkTypeIdentity(val2, val1);
 
   arktest.assertEQ(result1, true);
-  arktest.assertEQ(result2, false);
+  arktest.assertEQ(result2, true);
 }

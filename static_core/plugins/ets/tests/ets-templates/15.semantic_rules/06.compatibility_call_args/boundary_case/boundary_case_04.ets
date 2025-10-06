@@ -18,12 +18,8 @@ desc: Verifying compatibility between unknown and never.
 tags: [compile-only, negative]
 ---*/
 
-interface I {
-  i: unknown;
-}
-
-class A {
-  i: never;
+function checkTypeIdentity(a: Any, b: Any): boolean {
+    return Class.ofAny(a as Any) === Class.ofAny(b as Any);
 }
 
 function main(): void {

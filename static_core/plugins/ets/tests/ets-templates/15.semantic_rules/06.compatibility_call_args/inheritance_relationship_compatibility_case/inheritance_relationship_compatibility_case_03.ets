@@ -15,7 +15,6 @@
 
 /*---
 desc: Verifying compatibility between interface and implementing class.
-tags: [compile-only, negative]
 ---*/
 
 interface MyInterface {
@@ -23,20 +22,16 @@ interface MyInterface {
 }
 
 class MyClass implements MyInterface {
-  method() {}
+  method(): void {}
 }
 
-interface I {
-  i: MyInterface;
-}
-
-class A {
-  i: MyClass;
+function checkTypeIdentity(a: Any, b: Any): boolean {
+    return Class.of(a as Object) === Class.of(b as Object);
 }
 
 function main(): void {
   const val1: MyClass = new MyClass();
-  const val2: MyInterface = { method() {} };
+  const val2: MyInterface = { method(): void {} };
 
   const result1 = checkTypeIdentity(val1, val2);
   const result2 = checkTypeIdentity(val2, val1);

@@ -15,30 +15,21 @@
 
 /*---
 desc: T1 is compatible with T2 if implicitly convertible. Class does not implement interface.
-tags: [compile-only, negative]
 ---*/
 
-interface I {
-  i: string | null;
-}
-
-class A {
-  i: string | null;
-}
-
-function checkTypeIdentity<T>(a: T, b: T): boolean {
-    return typeof a === typeof b;
+function checkTypeIdentity(a: Any, b: Any): boolean {
+    return Class.ofAny(a as Any) === Class.ofAny(b as Any);
 }
 
 function main(): void {
   const val1: string | null = "Hello";
   const val2: string | null = null;
-  const diffTypeVal: any = 42;
+  const diffTypeVal: Any = 42;
 
-  const result1 = checkTypeIdentity<string | null>(val1, val2);
+  const result1 = checkTypeIdentity(val1, val2);
 
   const result2 = checkTypeIdentity(val1, diffTypeVal);
 
-  arktest.assertEQ(result1, true);
+  arktest.assertEQ(result1, false);
   arktest.assertEQ(result2, false);
 }

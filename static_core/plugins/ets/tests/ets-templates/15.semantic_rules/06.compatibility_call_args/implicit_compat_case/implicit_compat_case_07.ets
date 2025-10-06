@@ -15,19 +15,14 @@
 
 /*---
 desc: Verifying implicit conversion from object to string.
-tags: [compile-only, negative]
 ---*/
 
-interface I {
-  i: object;
-}
-
-class A {
-  i: string;
+function checkTypeIdentity(a: Any, b: Any): boolean {
+    return Class.of(a as Object) === Class.of(b as Object);
 }
 
 function main(): void {
-  const val1: object = { key: "value" };
+  const val1: Record<string, string> = { "key": "value" };
   const val2: string = JSON.stringify(val1);
 
   const result = checkTypeIdentity(val1, val2);

@@ -18,12 +18,8 @@ desc: Verifying compatibility between void and undefined.
 tags: [compile-only, negative]
 ---*/
 
-interface I {
-  i: void;
-}
-
-class A {
-  i: undefined;
+function checkTypeIdentity(a: Any, b: Any): boolean {
+    return Class.ofAny(a as Any) === Class.ofAny(b as Any);
 }
 
 function main(): void {

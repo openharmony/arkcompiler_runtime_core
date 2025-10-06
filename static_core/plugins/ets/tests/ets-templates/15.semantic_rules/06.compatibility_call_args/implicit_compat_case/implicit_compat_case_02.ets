@@ -15,15 +15,10 @@
 
 /*---
 desc: Verifying implicit conversion from string to boolean.
-tags: [compile-only, negative]
 ---*/
 
-interface I {
-  i: string;
-}
-
-class A {
-  i: boolean;
+function checkTypeIdentity(a: Any, b: Any): boolean {
+    return Class.of(a as Object) === Class.of(b as Object);
 }
 
 function main(): void {

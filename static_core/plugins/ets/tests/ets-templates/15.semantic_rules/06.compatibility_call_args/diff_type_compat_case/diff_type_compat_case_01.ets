@@ -15,15 +15,10 @@
 
 /*---
 desc: Ensuring type identity in type guards.
-tags: [compile-only, negative]
 ---*/
 
-interface I {
-  i: Array<number>;
-}
-
-class A {
-  i: object;
+function checkTypeIdentity(a: Any, b: Any): boolean {
+    return Class.of(a as Object) === Class.of(b as Object);
 }
 
 function main(): void {

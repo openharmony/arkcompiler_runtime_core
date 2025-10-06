@@ -15,7 +15,6 @@
 
 /*---
 desc: Ensuring type identity in type guards.
-tags: [compile-only, negative]
 ---*/
 
 enum Color {
@@ -24,12 +23,8 @@ enum Color {
   Blue
 }
 
-interface I {
-  i: Color;
-}
-
-class A {
-  i: number;
+function checkTypeIdentity(a: Any, b: Any): boolean {
+    return Class.of(a as Object) === Class.of(b as Object);
 }
 
 function main(): void {

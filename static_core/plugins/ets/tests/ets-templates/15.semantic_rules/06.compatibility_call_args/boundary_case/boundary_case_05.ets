@@ -18,16 +18,12 @@ desc: Verifying compatibility between any and void.
 tags: [compile-only, negative]
 ---*/
 
-interface I {
-  i: any;
-}
-
-class A {
-  i: void;
+function checkTypeIdentity(a: Any, b: Any): boolean {
+    return Class.ofAny(a as Any) === Class.ofAny(b as Any);
 }
 
 function main(): void {
-  const val1: any = undefined;
+  const val1: Any = undefined;
   const val2: void = undefined;
 
   const result = checkTypeIdentity(val1, val2);

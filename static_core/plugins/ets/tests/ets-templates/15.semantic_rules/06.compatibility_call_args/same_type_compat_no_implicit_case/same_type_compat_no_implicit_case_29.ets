@@ -18,24 +18,18 @@ desc: T1 is compatible with T2 if implicitly convertible. Class does not impleme
 tags: [compile-only, negative]
 ---*/
 
-interface I {
-  i: { name?: string; age?: number };
-}
+type my_type = { name?: string, age?: number }
 
-class A {
-  i: { name?: string; age?: number };
-}
-
-function checkTypeIdentity<T>(a: T, b: T): boolean {
-    return typeof a === typeof b;
+function checkTypeIdentity(a: Any, b: Any): boolean {
+    return Class.of(a as Object) === Class.of(b as Object);
 }
 
 function main(): void {
-  const val1: { name?: string; age?: number } = { name: "Alice" };
-  const val2: { name?: string; age?: number } = { age: 25 };
-  const diffTypeVal: any = "This can be any type";
+  const val1: my_type = { name: "Alice" };
+  const val2: my_type = { age: 25 };
+  const diffTypeVal: Any = "This can be any type";
 
-  const result1 = checkTypeIdentity<{ name?: string; age?: number }>(val1, val2);
+  const result1 = checkTypeIdentity(val1, val2);
 
   const result2 = checkTypeIdentity(val1, diffTypeVal);
 

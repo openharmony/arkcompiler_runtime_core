@@ -18,12 +18,8 @@ desc: Verifying compatibility between null and void.
 tags: [compile-only, negative]
 ---*/
 
-interface I {
-  i: null;
-}
-
-class A {
-  i: void;
+function checkTypeIdentity(a: Any, b: Any): boolean {
+    return Class.ofAny(a as Any) === Class.ofAny(b as Any);
 }
 
 function main(): void {

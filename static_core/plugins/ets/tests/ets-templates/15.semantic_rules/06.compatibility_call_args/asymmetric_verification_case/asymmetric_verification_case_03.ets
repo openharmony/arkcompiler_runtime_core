@@ -15,15 +15,10 @@
 
 /*---
 desc: Verifying asymmetric compatibility between Function and string.
-tags: [compile-only, negative]
 ---*/
 
-interface I {
-  i: Function;
-}
-
-class A {
-  i: string;
+function checkTypeIdentity(a: Any, b: Any): boolean {
+    return Class.ofAny(a as Any) === Class.ofAny(b as Any);
 }
 
 function main(): void {

@@ -15,17 +15,11 @@
 
 /*---
 desc: Verifying asymmetric compatibility between number and string.
-tags: [compile-only, negative]
 ---*/
 
-interface I {
-  i: number;
+function checkTypeIdentity(a: Any, b: Any): boolean {
+    return Class.of(a as Object) === Class.of(b as Object);
 }
-
-class A {
-  i: string;
-}
-
 function main(): void {
   const val1: number = 123;
   const val2: string = "123";
