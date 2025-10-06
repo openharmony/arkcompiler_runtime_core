@@ -13,7 +13,37 @@
 
 ---
 cases:
-  - '{}'
-  - 'Math.random() > 0.5 ? 1:"1"'
-  - '{name:"Alice", age:21}'
-  - '{ "x":1, "y":2 }'
+  # empty object literal
+  - class: |-
+      b = {}
+    global: |-
+      {}
+
+  - global: |-
+      {}
+
+  # object literal
+  - class: |-
+      b = {id: 1, name: "Bob"}
+    global: |-
+      {id: 1, name: "Bob"}
+
+
+  - global: |-
+      {name:"Alice", age:21}
+
+  # nested object literal
+  - class: |-
+      b: B = new B
+    global: |-
+      {name: "Alice", age: 21, b: {id: 1, name: "Bob"}}
+
+
+  # empty array literal
+  - class: |-
+      b = []
+    global: |-
+      []
+
+  - global: |-
+      []
