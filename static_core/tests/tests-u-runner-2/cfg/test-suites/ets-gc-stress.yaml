@@ -14,8 +14,9 @@
 version: 0.0.0.1
 type: test-suite
 suite-name: ets-gc-stress
-test-root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tests/ets_test_suite/gc/stress
-list-root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tests/test-lists/ets-gc-stress
+# In case tests are not found, please consider that GC stress tests and test-lists are located in separate repo!'
+test-root: ${ARKCOMPILER_ETS_FRONTEND_PATH}/ets2panda/test/ark_tests/ets-tests/ets-gc-stress
+list-root: ${ARKCOMPILER_ETS_FRONTEND_PATH}/ets2panda/test/ark_tests/ets-tests/test-lists/ets-gc-stress
 
 parameters:
     extension: ets
