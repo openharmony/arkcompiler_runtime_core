@@ -15,7 +15,9 @@
  */
 #}
 
-{% set print_func = 'console' %}
+{%- if print_func == '' -%}
+{%- set print_func = 'console' -%}
+{%- endif -%}
 
 package {{bench_name}};
 

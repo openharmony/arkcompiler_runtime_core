@@ -111,15 +111,7 @@ class Tool(ToolBase):
                         f'--profile-output={abc}.profdata ')
         arkts_cmd = self.get_cmd(
             name=bu.name, abc=str(abc), options=options, gclog=gclog, an=an)
-        if Target.OHOS == self.target:  # console writes to hilog on OHOS
-            res = self.hdc.run_syslog(
-                cmd=arkts_cmd,
-                finished_marker=f'Benchmark result: {bu.name}',
-                measure_time=True,
-                ping_interval=0,  # grep log immidiately after cmd
-                tag='ArkTSApp')   # grep only bench-related records
-        else:
-            res = self.x_run(arkts_cmd)
+        res = self.x_run(arkts_cmd)
         if profile:
             return  # profiling run should not affect bu.result
         bu.parse_run_output(res)
