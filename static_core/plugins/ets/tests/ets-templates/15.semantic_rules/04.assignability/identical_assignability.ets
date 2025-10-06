@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,33 +16,18 @@
 {% for c in cases %}
 
 /*---
-desc: Compatible functions have same number of arguments. Arguments and return values should follow the variance rule.
-tags: [{{c.tags}}]
+desc: Type T1 is assignable to type T2 if T1 is identical to T2
 ---*/
 
-function foo(i: int) {
-    return 1;
+class C {
+  name: string = ''
+  constructor() {}
+  constructor(name: string) {
+    this.name = name
+  }
 }
 
-function bars(i: int, j: string) {
-    return 2;
-}
-
-function barf(i: float) {
-    return 3;
-}
-
-function barl(i: long) {
-    return 4;
-}
-
-function barretstr(i: int) {
-    return "str";
-}
-
-function main() {
-    let x: (i: int) => int = {{c.assign}};
-    arktest.assertEQ(x({{c.call}}), {{c.res}});
-}
+let t1: {{c.type1}} = {{c.value}}
+let t2: {{c.type2 if c.type2 else c.type1}} = t1
 
 {% endfor %}
