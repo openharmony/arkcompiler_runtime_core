@@ -39,9 +39,12 @@ OptionParser.new do |opts|
   opts.banner = 'Usage: checker.rb [options] TEST_FILE'
 
   opts.on('--run-prefix=PREFIX', 'Prefix that will be inserted before panda run command') do |v|
-    options.run_prefix = v
+    options.run_prefix = v.eql?("\'\'") ? "" : v
   end
   opts.on('--source=FILE', 'Path to source file')
+  opts.on('--test-dir=DIR', 'Path to test directory') do |v|
+    options.test_dir = v
+  end
   opts.on('--test-file=FILE', 'Path to test file') do |v|
     options.test_file = v
   end
@@ -51,13 +54,13 @@ OptionParser.new do |opts|
   end
   opts.on('--frontend=FRONTEND', 'Path to frontend binary')
   opts.on('--panda-options=OPTIONS', 'Default options for panda run') do |v|
-    options.panda_options = v
+    options.panda_options = v.gsub ',', ' '
   end
   opts.on('--paoc-options=OPTIONS', 'Default options for paoc run') do |v|
-    options.paoc_options = v
+    options.paoc_options = v.gsub ',', ' '
   end
   opts.on('--frontend-options=OPTIONS', 'Default options for frontend+bco run') do |v|
-    options.frontend_options = v
+    options.frontend_options = v.gsub ',', ' '
   end
   opts.on('--method=METHOD', 'Method to optimize')
   opts.on('--command-token=STRING', 'String that is recognized as command start') do |v|
@@ -75,6 +78,15 @@ OptionParser.new do |opts|
   end
   opts.on('--checker-filter=STRING', 'Run only checkers with filter-matched name') do |v|
     options.checker_filter = v
+  end
+  opts.on('--is-llvm=ISLLVM', 'Uranner option if --with-llvm should be added') do |v|
+    options.with_llvm = v.eql?("true") ? true : false
+  end
+  opts.on('--is-verbose=ISVERBOSE', 'Uranner option if --verbose should be added') do |v|
+    options.verbose = v.eql?("true") ? true : false
+  end
+  opts.on('--is-release=ISRELEASE', 'Uranner option if --release should be added') do |v|
+    options.release = v.eql?("true") ? true : false
   end
   opts.on('--interop', 'Do interop-specific actions')
     options.interop = true
@@ -882,6 +894,7 @@ def read_checks(options)
 end
 
 def main(options)
+  Dir.chdir options.test_dir if options.test_dir
   read_checks(options).flat_map(&:populate).each(&:run)
   0
 end

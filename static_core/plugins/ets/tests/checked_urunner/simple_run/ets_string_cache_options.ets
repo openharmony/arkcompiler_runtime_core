@@ -15,15 +15,15 @@
 
 //! CHECKER       AOT, check ets cache used by default
 //! SKIP_IF       @architecture == "arm32" || is_hybrid_config?
-//! RUN_PAOC      options: "--paoc-mode=aot --load-runtimes=ets --paoc-output=test.an"
-//! RUN           options: "--compiler-enable-events --compiler-events-path=./events.csv --compiler-enable-jit=false --aot-file=test.an", entry: "ets_string_cache_options.ETSGLOBAL::main"
+//! RUN_PAOC      options: "--paoc-mode=aot --load-runtimes=ets"
+//! RUN           options: "--compiler-enable-events --compiler-events-path=./events.csv --compiler-enable-jit=false", entry: "ets_string_cache_options.ETSGLOBAL::main"
 //!
 //! EVENT         "EtsCache,Fastpath: create string from number with cache"
 
 //! CHECKER       AOT, check ets cache not used with option
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC      options: "--paoc-mode=aot --load-runtimes=ets --paoc-output=test.an"
-//! RUN           options: "--compiler-enable-events --use-string-caches=false --compiler-events-path=./events.csv --compiler-enable-jit=false --aot-file=test.an", entry: "ets_string_cache_options.ETSGLOBAL::main"
+//! RUN_PAOC      options: "--paoc-mode=aot --load-runtimes=ets"
+//! RUN           options: "--compiler-enable-events --use-string-caches=false --compiler-events-path=./events.csv --compiler-enable-jit=false", entry: "ets_string_cache_options.ETSGLOBAL::main"
 //!
 //! EVENT         "EtsCache,Slowpath: create string from number without cache"
 

@@ -66,6 +66,7 @@
   "plugins/ets/tests/benchmarks/promise/bu_j2j/bench_j2j.js": "*",
   "plugins/ets/tests/common": "*",
   "plugins/ets/tests/checked": "*",
+  "plugins/ets/tests/checked_urunner": "*",
   "plugins/ets/tests/debugger/CMakeLists.txt": {"bc-40001": "*"},
   "plugins/ets/tests/debugger/src/arkdb/debug_client.py": "*",
   "plugins/ets/tests/debugger/src/arkdb/compiler_verification": "*",

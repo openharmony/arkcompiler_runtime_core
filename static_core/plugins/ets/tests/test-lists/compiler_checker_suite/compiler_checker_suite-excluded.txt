@@ -1,0 +1,2 @@
+# Disabled as this test needs to reimplement. issue 28520
+simple_run/escape_analysis_casted.ets
