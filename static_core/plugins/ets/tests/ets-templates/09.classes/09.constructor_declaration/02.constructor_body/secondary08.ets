@@ -19,6 +19,8 @@ desc: >-
     on all execution paths of the constructor body.
 ---*/
 
+enum Color { Red, Green, Blue }
+
 abstract class A {
     fldA: string
 
@@ -28,38 +30,33 @@ abstract class A {
 }
 
 final class B extends A {
-    constructor(a: string) {  // primary
+    constructor(a: string) { // primary
         super(a)
     }
 
+    constructor fromEnum(a: Color) {  // secondary
+        this('valid color = ' + a.getName())
+    }
+
     constructor fromInt(a: int) {  // secondary
-        if (a == 0) {
-            throw new Error('zero')
-        } else {
-            if (a == 1) {
-                this('1')
-                return
-            } else {
-                if (a == 2) {
-                    this('2')
-                    return
-                }
-                this('3')
-            }
+        try {
+            this.fromEnum(Color.fromValue(a))
+        } catch (e) {
+            this('invalid color')
         }
     }
 }
 
 function main() {
-    let b: B
-    arktest.expectError(() => { b = new B.fromInt(0) }, 'zero')
+    let b = new B.fromInt(0)
+    arktest.assertEQ(b.fldA, 'valid color = Red')
 
     b = new B.fromInt(1)
-    arktest.assertEQ(b.fldA, '1')
+    arktest.assertEQ(b.fldA, 'valid color = Green')
 
     b = new B.fromInt(2)
-    arktest.assertEQ(b.fldA, '2')
+    arktest.assertEQ(b.fldA, 'valid color = Blue')
 
-    b = new B.fromInt(-1)
-    arktest.assertEQ(b.fldA, '3')
+    b = new B.fromInt(3)
+    arktest.assertEQ(b.fldA, 'invalid color')
 }

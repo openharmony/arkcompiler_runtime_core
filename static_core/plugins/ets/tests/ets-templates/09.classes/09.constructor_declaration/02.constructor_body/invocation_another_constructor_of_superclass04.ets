@@ -14,34 +14,27 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Invocation constructor of abstract superclass.
+desc: Invocation constructor of superclass.
 assert: >-
     The first statement of a constructor body may be an explicit invocation of another constructor of the same class
     or of the direct superclass.
+tags: [compile-only, negative]
 ---*/
 
-abstract class A {
-    x: int;
+class A {
+    public x: int
 
-    protected constructor(a: int) {
-        this.x = a + 1;
+    constructor(a: int) {
+        this.x = a
     }
 }
 
 class B extends A {
-    constructor() {  // primary constructor
-        super(42)
+    constructor() {
+        // CTE: Must call super constructor
     }
 
-    constructor fromInt(a: int) { // primary constructor
-        super(a + 1);
+    constructor(p: int) {
+        super(p)
     }
-}
-
-function main() {
-    arktest.assertEQ(new B().x, 43)
-    arktest.assertEQ(new B.fromInt(5).x, 7)
-
-    let b: B = {}
-    arktest.assertEQ(b.x, 43)
 }

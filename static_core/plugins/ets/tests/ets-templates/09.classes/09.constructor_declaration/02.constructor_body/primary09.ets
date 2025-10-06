@@ -19,45 +19,31 @@ desc: >-
     on all execution paths of the constructor body.
 ---*/
 
-abstract class A {
-    fldA: string
+let res = ''
 
-    constructor(a: string) {
-        this.fldA = a
+class A {
+    x: Object
+    constructor() {
+        this.x = 'a'
+        assert(this)
     }
 }
 
-final class B extends A {
-    constructor(a: string) {  // primary
-        super(a)
+class B extends A {
+    y: Object
+    constructor() {
+        super()
+        this.y = 'xyz'
     }
+}
 
-    constructor(a: int) {  // secondary
-        if (a == 0) {
-            throw new Error('zero')
-        }
-        switch (a) {
-            case 1:
-                this('' + a)
-                break
-            case 2:
-                this('' + a + a)
-                break
-            default:
-                throw new Error('wrong arg = ' + a)
-        }
-    }
+function assert(p: A) {
+    arktest.expectThrow(() => { if (p instanceof B) res = p.y.toString() })
 }
 
 function main() {
-    let b: B
-    arktest.expectError(() => { b = new B(0) }, 'zero')
-
-    b = new B(1)
-    arktest.assertEQ(b.fldA, '1')
-
-    b = new B(2)
-    arktest.assertEQ(b.fldA, '22')
-
-    arktest.expectError(() => { b = new B(3) }, 'wrong arg = 3')
+    let b: B = { y: 'b' }
+    arktest.assertEQ(b.x, 'a')
+    arktest.assertEQ(b.y, 'b')
+    arktest.assertEQ(res, '')
 }
