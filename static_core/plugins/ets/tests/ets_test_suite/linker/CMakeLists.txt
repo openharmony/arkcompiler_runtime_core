@@ -20,6 +20,7 @@ set(linker_tests
     # end #17626
     implements_basic
     implements_variance
+    itf_resolution
     override_abstract
     override_basic
     variance
