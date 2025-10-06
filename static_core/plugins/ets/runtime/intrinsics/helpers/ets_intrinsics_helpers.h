@@ -20,6 +20,8 @@
 #include <cmath>
 #include <cstdint>
 #include <type_traits>
+#include "ets_class_linker_extension.h"
+#include "plugins/ets/runtime/ets_utils.h"
 #include "libarkbase/utils/bit_helpers.h"
 #include "libarkbase/utils/utils.h"
 #include "intrinsics.h"
@@ -417,6 +419,20 @@ EtsString *FpToString(FpType number, int radix)
 }
 
 bool SameValueZero(EtsCoroutine *coro, EtsObject *a, EtsObject *b);
+bool CheckReceiverType(EtsCoroutine *coro, EtsObject *arg, EtsClass *paramClass, Value *argValue);
+EtsObject *InvokeAndResolveReturnValue(EtsMethod *method, EtsCoroutine *coro, Value *args);
+EtsMethod *ValidateAndResolveInstanceMethod(EtsCoroutine *coro, EtsObject *thisObj, EtsMethod *method);
+
+template <typename T>
+bool CheckAndUnpackBoxedType(EtsClassLinkerExtension *linkExt, EtsObject *arg, EtsClass *paramClass, Value *argValue,
+                             ClassRoot primitiveRoot)
+{
+    if (paramClass != EtsClass::FromRuntimeClass(linkExt->GetClassRoot(primitiveRoot))) {
+        return false;
+    }
+    *argValue = Value(EtsBoxPrimitive<T>::Unbox(arg));
+    return true;
+}
 
 }  // namespace ark::ets::intrinsics::helpers
 

@@ -69,11 +69,16 @@ class Method {
         return Method.getParametersNumImpl(this.methodPtr)
     }
 
+    protected invoke(thisObj: Object | undefined, args?: FixedArray<Any>): Any {
+        return this.invokeInternal(thisObj, args)
+    }
+
     private static native getNameInternal(methodPtr: long): string
     private static native getReturnTypeImpl(methodPtr: long): Class | undefined
     private static native getParametersTypesImpl(methodPtr: long): FixedArray<Class>
     private static native getParameterTypeByIdxImpl(methodPtr: long, idx: int): Class | undefined
     private static native getParametersNumImpl(methodPtr: long): int
+    private native invokeInternal(thisObj: Object | undefined, args?: FixedArray<Any>): Any
 }
 
 } // namespace reflect

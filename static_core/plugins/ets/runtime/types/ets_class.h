@@ -236,6 +236,11 @@ public:
         return GetRuntimeClass()->IsPrimitive();
     }
 
+    bool IsVoid() const
+    {
+        return GetRuntimeClass()->IsVoid();
+    }
+
     bool IsAbstract()
     {
         return GetRuntimeClass()->IsAbstract();
