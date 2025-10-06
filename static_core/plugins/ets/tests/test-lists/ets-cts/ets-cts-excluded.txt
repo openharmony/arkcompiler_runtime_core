@@ -7,65 +7,17 @@
 ################################################
 
 # primitives
-07.expressions/24.relational_expressions/02.numeric_relational_operators/float_comparison_32.ets
-07.expressions/24.relational_expressions/02.numeric_relational_operators/float_comparison_33.ets
-07.expressions/24.relational_expressions/02.numeric_relational_operators/float_comparison_34.ets
-07.expressions/24.relational_expressions/02.numeric_relational_operators/float_comparison_35.ets
-07.expressions/24.relational_expressions/02.numeric_relational_operators/float_comparison_36.ets
-07.expressions/24.relational_expressions/02.numeric_relational_operators/float_comparison_37.ets
-07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_12.ets
 07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_13.ets
-07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_16.ets
-07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_19.ets
 07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_20.ets
-07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_25.ets
 07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_26.ets
-07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_31.ets
 07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_32.ets
-07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_37.ets
-07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_5.ets
 07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_6.ets
-07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_9.ets
-07.expressions/33.constant_expression/check_annotation/constant_number_conversion_5.ets
-07.expressions/33.constant_expression/check_annotation/constant_number_conversion_6.ets
-07.expressions/33.constant_expression/check_annotation/constant_unary_operation_11.ets
-07.expressions/33.constant_expression/check_annotation/constant_unary_operation_12.ets
-07.expressions/33.constant_expression/check_annotation/constant_unary_operation_17.ets
-07.expressions/33.constant_expression/check_annotation/constant_unary_operation_18.ets
-07.expressions/33.constant_expression/check_annotation/constant_unary_operation_5.ets
-07.expressions/33.constant_expression/check_annotation/constant_unary_operation_6.ets
-07.expressions/33.constant_expression/check_array/constant_number_conversion_2.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_25.ets
 07.expressions/33.constant_expression/check_enum/constant_calculation_26.ets
 07.expressions/33.constant_expression/check_enum/constant_calculation_27.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_28.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_29.ets
-07.expressions/33.constant_expression/check_enum/constant_number_conversion_0.ets
-07.expressions/33.constant_expression/check_enum/constant_number_conversion_1.ets
 07.expressions/33.constant_expression/check_enum/constant_number_conversion_2.ets
-07.expressions/33.constant_expression/check_enum/constant_number_conversion_3.ets
-07.expressions/33.constant_expression/check_enum/constant_number_conversion_4.ets
 07.expressions/33.constant_expression/check_enum/constant_number_conversion_5.ets
-07.expressions/33.constant_expression/check_enum/constant_number_conversion_6.ets
-07.expressions/33.constant_expression/check_enum/constant_shift_30.ets
-07.expressions/33.constant_expression/check_enum/constant_shift_31.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_minus_11.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_minus_5.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_minus_6.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_plus_11.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_plus_5.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_plus_6.ets
-17.experimental_features/02.fixed_array_types/far1_7.ets
 17.experimental_features/02.fixed_array_types/far3_6.ets
 17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/cm_over1_7.ets
-17.experimental_features/09.overload_declarations/04.constructor_overload_declarations/co1_over_8.ets
-
-
-# Runtime Fail Exclude list (Type changes from byte -> std.core.Byte)
-20.implementation_details/03.getting_type_via_reflection/how_to_get_type_via_reflection_ext_13.ets
-20.implementation_details/03.getting_type_via_reflection/how_to_get_type_via_reflection_ext_17.ets
-20.implementation_details/03.getting_type_via_reflection/how_to_get_type_via_reflection_ext_34.ets
-20.implementation_details/03.getting_type_via_reflection/how_to_get_type_via_reflection_ext_35.ets
 
 # TypeError: No matching call signature
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/func_7.ets
@@ -88,53 +40,21 @@
 07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_14.ets
 07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_15.ets
 07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_21.ets
-07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_22.ets
 07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_27.ets
-07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_28.ets
 07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_33.ets
-07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_34.ets
 07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_7.ets
 07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_8.ets
-15.semantic_rules/12.static_initialization/package_initializer/p4/init4_1.ets
-15.semantic_rules/12.static_initialization/package_initializer/p4/init4_2.ets
 07.expressions/33.constant_expression/check_array/constant_logical_expression_12.ets
 07.expressions/33.constant_expression/check_array/constant_logical_expression_13.ets
 07.expressions/33.constant_expression/check_array/constant_logical_expression_14.ets
 07.expressions/33.constant_expression/check_array/constant_logical_expression_15.ets
 
-# Looks like should be positive (union of numeric types)
-03.types/20.union_types/ut_n2_1.ets
-03.types/20.union_types/ut_n2_10.ets
-03.types/20.union_types/ut_n2_11.ets
-03.types/20.union_types/ut_n2_13.ets
-03.types/20.union_types/ut_n2_14.ets
-03.types/20.union_types/ut_n2_15.ets
-03.types/20.union_types/ut_n2_16.ets
-03.types/20.union_types/ut_n2_17.ets
-03.types/20.union_types/ut_n2_2.ets
-03.types/20.union_types/ut_n2_20.ets
-03.types/20.union_types/ut_n2_21.ets
-03.types/20.union_types/ut_n2_24.ets
-03.types/20.union_types/ut_n2_25.ets
-03.types/20.union_types/ut_n2_28.ets
-03.types/20.union_types/ut_n2_29.ets
-03.types/20.union_types/ut_n2_3.ets
-03.types/20.union_types/ut_n2_32.ets
-03.types/20.union_types/ut_n2_33.ets
-03.types/20.union_types/ut_n2_36.ets
-03.types/20.union_types/ut_n2_37.ets
-03.types/20.union_types/ut_n2_5.ets
-03.types/20.union_types/ut_n2_6.ets
-03.types/20.union_types/ut_n2_7.ets
-03.types/20.union_types/ut_n2_9.ets
+#28058 packages should throw CTE
+15.semantic_rules/12.static_initialization/package_initializer/p4/init4_1.ets
+15.semantic_rules/12.static_initialization/package_initializer/p4/init4_2.ets
 
 # c'\u0000' + '0000' != "00000"
 07.expressions/31.string_interpolation_expressions/siexp_6.ets
-
-# TODO invalid tests (numeric conversions):
-06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/call_lmbd/call-lmbd-ident_1.ets
-06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/call_lmbd/call-lmbd-ident_3.ets
-06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/enumlongtofloat.ets
 
 # #27402, #28006 Deprecated char operations and conversions:
 03.types/17.array_types/array_index.ets
