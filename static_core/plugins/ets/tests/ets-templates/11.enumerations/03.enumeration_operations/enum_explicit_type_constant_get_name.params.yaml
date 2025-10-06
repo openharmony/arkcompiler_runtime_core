@@ -173,31 +173,31 @@ cases:
         arktest.assertEQ(Enum[Enum.oNe], "oNe")
       - |-
         let c: Enum = Enum.Red
-        arktest.assertTrue(c.valueOf() instanceof int)
+        arktest.assertTrue(c.valueOf() instanceof byte)
         arktest.assertEQ(Enum[c], "Red")
         c = Enum.Green
-        arktest.assertTrue(c.valueOf() instanceof int)
+        arktest.assertTrue(c.valueOf() instanceof byte)
         arktest.assertEQ(Enum[c], "Green")
         c = Enum.Blue
-        arktest.assertTrue(c.valueOf() instanceof int)
+        arktest.assertTrue(c.valueOf() instanceof byte)
         arktest.assertEQ(Enum[c], "Blue")
         c = Enum.First
-        arktest.assertTrue(c.valueOf() instanceof int)
+        arktest.assertTrue(c.valueOf() instanceof byte)
         arktest.assertEQ(Enum[c], "First")
         c = Enum.Second
-        arktest.assertTrue(c.valueOf() instanceof int)
+        arktest.assertTrue(c.valueOf() instanceof byte)
         arktest.assertEQ(Enum[c], "Second")
         c = Enum.Third
-        arktest.assertTrue(c.valueOf() instanceof int)
+        arktest.assertTrue(c.valueOf() instanceof byte)
         arktest.assertEQ(Enum[c], "Third")
         c = Enum.One
-        arktest.assertTrue(c.valueOf() instanceof int)
+        arktest.assertTrue(c.valueOf() instanceof byte)
         arktest.assertEQ(Enum[c], "One")
         c = Enum.one
-        arktest.assertTrue(c.valueOf() instanceof int)
+        arktest.assertTrue(c.valueOf() instanceof byte)
         arktest.assertEQ(Enum[c], "one")
         c = Enum.oNe
-        arktest.assertTrue(c.valueOf() instanceof int)
+        arktest.assertTrue(c.valueOf() instanceof byte)
         arktest.assertEQ(Enum[c], "oNe")
 
   - desc: |-
@@ -235,31 +235,31 @@ cases:
         arktest.assertEQ(Enum[Enum.oNe], "oNe")
       - |-
         let c: Enum = Enum.Red
-        arktest.assertTrue(c.valueOf() instanceof int)
+        arktest.assertTrue(c.valueOf() instanceof short)
         arktest.assertEQ(Enum[c], "Red")
         c = Enum.Green
-        arktest.assertTrue(c.valueOf() instanceof int)
+        arktest.assertTrue(c.valueOf() instanceof short)
         arktest.assertEQ(Enum[c], "Green")
         c = Enum.Blue
-        arktest.assertTrue(c.valueOf() instanceof int)
+        arktest.assertTrue(c.valueOf() instanceof short)
         arktest.assertEQ(Enum[c], "Blue")
         c = Enum.First
-        arktest.assertTrue(c.valueOf() instanceof int)
+        arktest.assertTrue(c.valueOf() instanceof short)
         arktest.assertEQ(Enum[c], "First")
         c = Enum.Second
-        arktest.assertTrue(c.valueOf() instanceof int)
+        arktest.assertTrue(c.valueOf() instanceof short)
         arktest.assertEQ(Enum[c], "Second")
         c = Enum.Third
-        arktest.assertTrue(c.valueOf() instanceof int)
+        arktest.assertTrue(c.valueOf() instanceof short)
         arktest.assertEQ(Enum[c], "Third")
         c = Enum.One
-        arktest.assertTrue(c.valueOf() instanceof int)
+        arktest.assertTrue(c.valueOf() instanceof short)
         arktest.assertEQ(Enum[c], "One")
         c = Enum.one
-        arktest.assertTrue(c.valueOf() instanceof int)
+        arktest.assertTrue(c.valueOf() instanceof short)
         arktest.assertEQ(Enum[c], "one")
         c = Enum.oNe
-        arktest.assertTrue(c.valueOf() instanceof int)
+        arktest.assertTrue(c.valueOf() instanceof short)
         arktest.assertEQ(Enum[c], "oNe")
 
   - desc: |-
@@ -297,31 +297,31 @@ cases:
         arktest.assertEQ(Enum[Enum.oNe], "oNe")
       - |-
         let c: Enum = Enum.Red
-        arktest.assertTrue(c.valueOf() instanceof int)
+        arktest.assertTrue(c.valueOf() instanceof double)
         arktest.assertEQ(Enum[c], "Red")
         c = Enum.Green
-        arktest.assertTrue(c.valueOf() instanceof int)
+        arktest.assertTrue(c.valueOf() instanceof double)
         arktest.assertEQ(Enum[c], "Green")
         c = Enum.Blue
-        arktest.assertTrue(c.valueOf() instanceof int)
+        arktest.assertTrue(c.valueOf() instanceof double)
         arktest.assertEQ(Enum[c], "Blue")
         c = Enum.First
-        arktest.assertTrue(c.valueOf() instanceof int)
+        arktest.assertTrue(c.valueOf() instanceof double)
         arktest.assertEQ(Enum[c], "First")
         c = Enum.Second
-        arktest.assertTrue(c.valueOf() instanceof int)
+        arktest.assertTrue(c.valueOf() instanceof double)
         arktest.assertEQ(Enum[c], "Second")
         c = Enum.Third
-        arktest.assertTrue(c.valueOf() instanceof int)
+        arktest.assertTrue(c.valueOf() instanceof double)
         arktest.assertEQ(Enum[c], "Third")
         c = Enum.One
-        arktest.assertTrue(c.valueOf() instanceof int)
+        arktest.assertTrue(c.valueOf() instanceof double)
         arktest.assertEQ(Enum[c], "One")
         c = Enum.one
-        arktest.assertTrue(c.valueOf() instanceof int)
+        arktest.assertTrue(c.valueOf() instanceof double)
         arktest.assertEQ(Enum[c], "one")
         c = Enum.oNe
-        arktest.assertTrue(c.valueOf() instanceof int)
+        arktest.assertTrue(c.valueOf() instanceof double)
         arktest.assertEQ(Enum[c], "oNe")
 
   - desc: |-
@@ -359,31 +359,31 @@ cases:
         arktest.assertEQ(Enum[Enum.oNe], "oNe")
       - |-
         let c: Enum = Enum.Red
-        arktest.assertTrue(c.valueOf() instanceof int)
+        arktest.assertTrue(c.valueOf() instanceof float)
         arktest.assertEQ(Enum[c], "Red")
         c = Enum.Green
-        arktest.assertTrue(c.valueOf() instanceof int)
+        arktest.assertTrue(c.valueOf() instanceof float)
         arktest.assertEQ(Enum[c], "Green")
         c = Enum.Blue
-        arktest.assertTrue(c.valueOf() instanceof int)
+        arktest.assertTrue(c.valueOf() instanceof float)
         arktest.assertEQ(Enum[c], "Blue")
         c = Enum.First
-        arktest.assertTrue(c.valueOf() instanceof int)
+        arktest.assertTrue(c.valueOf() instanceof float)
         arktest.assertEQ(Enum[c], "First")
         c = Enum.Second
-        arktest.assertTrue(c.valueOf() instanceof int)
+        arktest.assertTrue(c.valueOf() instanceof float)
         arktest.assertEQ(Enum[c], "Second")
         c = Enum.Third
-        arktest.assertTrue(c.valueOf() instanceof int)
+        arktest.assertTrue(c.valueOf() instanceof float)
         arktest.assertEQ(Enum[c], "Third")
         c = Enum.One
-        arktest.assertTrue(c.valueOf() instanceof int)
+        arktest.assertTrue(c.valueOf() instanceof float)
         arktest.assertEQ(Enum[c], "One")
         c = Enum.one
-        arktest.assertTrue(c.valueOf() instanceof int)
+        arktest.assertTrue(c.valueOf() instanceof float)
         arktest.assertEQ(Enum[c], "one")
         c = Enum.oNe
-        arktest.assertTrue(c.valueOf() instanceof int)
+        arktest.assertTrue(c.valueOf() instanceof float)
         arktest.assertEQ(Enum[c], "oNe")
 
   - desc: |-
