@@ -508,11 +508,9 @@ function invokeByBaseTester(tester: BaseInvokeTester) {
     arktest.assertEQ(testerType.getInstanceMethodByName("<get>getter")!.invoke(tester), testerType)
     arktest.assertEQ(testerType.getInstanceMethodByName("<set>setter")!.invoke(tester, [ ReferenceValueHolder.objReference ]), undefined)
 
-    try {
+    arktest.expectError(() => {
         testerType.getInstanceMethodByName("funcEmpty")!.invoke(new Object())
-    } catch(e) {
-        arktest.assertTrue(e instanceof TypeError)
-    }
+    }, new TypeError("Object type is not compatible with method owner type"))
 
     let notVirtualDerived = testerType.getInstanceMethodByName("notVirtualDerived")
     if (notVirtualDerived == undefined) {
@@ -546,11 +544,9 @@ function invokeByBaseTester(tester: BaseInvokeTester) {
     arktest.assertEQ(getStaticMethodByName(methods, "<set>staticSetter")!.invoke([ ReferenceValueHolder.objReference ]), undefined)
     arktest.assertEQ(getStaticMethodByName(methods, "funcTestStatic")!.invoke(), testerType)
 
-    try {
+    arktest.expectError(() => {
         testerType.getInstanceMethodByName("funcEmpty")!.invoke(new Object())
-    } catch(e) {
-        arktest.assertTrue(e instanceof TypeError)
-    }
+    }, new TypeError("Object type is not compatible with method owner type"))
 
     let constructors = testerType.getConstructors()
     let constructorsNum = constructors.length
@@ -596,7 +592,7 @@ function invokeByBaseTester(tester: BaseInvokeTester) {
             ++created
         } else {
             // Unreachable
-            arktest.assertTrue(false)
+            arktest.expectError(() => { throw new Error() });
         }
     }
 
@@ -626,19 +622,13 @@ function invokeByInterface(tester: InvokeTester, ifaceType: Class) {
     arktest.assertEQ(ifaceType.getInstanceMethodByName("funcRestParamsObj")!.invoke(tester, [ ReferenceValueHolder.objReference, ReferenceValueHolder.objArrReference ]), testerType)
     arktest.assertEQ(ifaceType.getInstanceMethodByName("funcRestParamsObj")!.invoke(tester, [ undefined, ReferenceValueHolder.objArrReference ]), testerType)
 
-    try {
+    arktest.expectError(() => {
         ifaceType.getInstanceMethodByName("funcEmpty")!.invoke(new Object())
-    } catch(e) {
-        arktest.assertTrue(e instanceof TypeError)
-    }
+    }, new TypeError("Object type is not compatible with method owner type"))
 
-
-    try {
-        arktest.assertNE(ifaceType.getInstanceMethodByName("funcBoolean")!.invoke(tester, [ ReferenceValueHolder.floatReference ]), testerType)
-        arktest.assertTrue(false) // Unreachable, method signatues mismatch
-    } catch (e) {
-        arktest.assertTrue(e instanceof TypeError)
-    }
+    arktest.expectError(() => {
+        ifaceType.getInstanceMethodByName("funcBoolean")!.invoke(tester, [ ReferenceValueHolder.floatReference ])
+    }, new TypeError("Invalid operand type: Lstd/core/Float;"))
 
     let notVirtualDerived = testerType.getInstanceMethodByName("notVirtualDerived")
     if (notVirtualDerived == undefined) {

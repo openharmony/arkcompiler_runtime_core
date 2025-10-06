@@ -28,12 +28,30 @@ export final class StaticField extends Field {
         return this.fieldPtr == other.fieldPtr
     }
 
+    /**
+     * Reads value from an instance field.
+     *
+     * @returns field value.
+     *
+     * @throws OutofMemoryError if there is no memory to allocate return value.
+     *
+     */
     public getValue(): Any {
-        throw new Error("Not implemeted yet")
+        return this.getValueInternal(undefined)
     }
 
-    public setValue(v: Any) {
-        throw new Error("Not implemeted yet")
+    /**
+     * Writes value into a static field.
+     *
+     * @param value value to write.
+     *
+     * @throws TypeError if there is an incompatible value.
+     */
+    public setValue(value: Any): void {
+        if (this.isReadonly()) {
+            throw new TypeError("setValue to a readonly field")
+        }
+        this.setValueInternal(undefined, value)
     }
 }
 
