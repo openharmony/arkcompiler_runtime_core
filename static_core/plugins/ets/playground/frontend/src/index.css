@@ -31,6 +31,7 @@ body,
   height: 100% !important;
   width: 100% !important;
   margin: 0;
+  overflow: hidden;
 }
 #app {
   width: 100%;
@@ -55,6 +56,7 @@ body.dark-theme {
 }
 .mosaic-tile {
   margin: 2px !important;
+  overflow: hidden;
 }
 a {
   color: #da70d6 !important;
@@ -71,9 +73,10 @@ a {
 .monaco-editor .scroll-decoration {
   box-shadow: none !important;
 }
-.bp5-popover-transition-container {
-  z-index: 2000 !important;
-}
 .mosaic-window, .mosaic-preview {
   overflow: unset !important;
+}
+
+.bp5-popover-transition-container {
+  z-index: 2000 !important;
 }

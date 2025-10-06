@@ -22,10 +22,11 @@ export const mockAllState: RootState = {
         primaryColor: '#e32b49',
         disasm: false,
         verifier: true,
+        astView: false,
         runtimeVerify: false,
         versions: {},
         versionsLoading: false,
-        clearLogsEachRun: false
+        clearLogsEachRun: false,
     },
     options: {
         isLoading: false,
@@ -59,6 +60,11 @@ export const mockAllState: RootState = {
         highlightErrors: [],
         jumpTo: null
     },
+    ast: {
+        isAstLoading: false,
+        astRes: null
+    },
+    features: { astMode: 'manual' }
 };
 describe('Redux Selectors', () => {
     let mockState: RootState;

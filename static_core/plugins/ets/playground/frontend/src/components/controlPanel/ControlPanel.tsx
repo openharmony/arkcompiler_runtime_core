@@ -18,18 +18,20 @@ import {Button, ButtonGroup, Checkbox, Icon, Popover, Tooltip} from '@blueprintj
 import styles from './styles.module.scss';
 import CompileOptions from '../../pages/compileOptions/CompileOptions';
 import {useDispatch, useSelector} from 'react-redux';
-import {withDisasm, withRuntimeVerify, withVerifier} from '../../store/selectors/appState';
+import {withAstView, withDisasm, withRuntimeVerify, withVerifier} from '../../store/selectors/appState';
 import {AppDispatch} from '../../store';
 import {setDisasmAction, setRuntimeVerifAction, setVerifAction} from '../../store/actions/appState';
 import {fetchCompileCode, fetchRunCode} from '../../store/actions/code';
 import {selectCompileLoading, selectRunLoading, selectShareLoading} from '../../store/selectors/code';
 import {useClickOutside} from '../../utils/useClickOutside';
 import cx from 'classnames';
+import { setAstView } from '../../store/slices/appState';
 
 const ControlPanel = (): JSX.Element => {
     const popoverRef = useRef<HTMLDivElement | null>(null);
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const disasm = useSelector(withDisasm);
+    const astView = useSelector(withAstView);
     const runtimeVerify = useSelector(withRuntimeVerify);
     const verifier = useSelector(withVerifier);
     const dispatch = useDispatch<AppDispatch>();
@@ -48,6 +50,9 @@ const ControlPanel = (): JSX.Element => {
     };
     const handleVerifChange = (): void => {
         dispatch(setVerifAction(!verifier));
+    };
+    const handleAstViewChange = (): void => {
+        dispatch(setAstView(!astView));
     };
     const handleCompile = (): void => {
         dispatch(fetchCompileCode());
@@ -144,6 +149,13 @@ const ControlPanel = (): JSX.Element => {
                     </Button>
                 </Tooltip> */}
             </ButtonGroup>
+            <Checkbox
+                checked={astView}
+                label="AST View"
+                onChange={handleAstViewChange}
+                className={styles.disasm}
+                data-testid="ast-checkbox"
+            />
             <Checkbox
                 checked={disasm}
                 label="Disasm"

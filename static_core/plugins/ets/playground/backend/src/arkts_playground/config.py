@@ -16,7 +16,7 @@
 
 from argparse import ArgumentParser
 from functools import lru_cache
-from typing import List, Optional, Tuple, Dict, Union
+from typing import List, Optional, Tuple, Dict, Union, Literal
 
 import yaml
 from pydantic import BaseModel, Field
@@ -48,11 +48,16 @@ class Binary(BaseModel):
     icu_data: str = ""
 
 
+class Features(BaseModel):
+    ast_mode: Literal["auto", "manual"] = "auto"
+
+
 class PlaygroundSettings(BaseSettings):
     server: Server
     binary: Binary
     options: List[OptionModel]
     syntax: SyntaxModel
+    features: Features = Field(default_factory=Features)
 
 
 @lru_cache
@@ -73,3 +78,8 @@ def get_options(args: Optional[Tuple] = None) -> List[OptionModel]:
 @lru_cache
 def get_syntax(args: Optional[Tuple] = None) -> SyntaxModel:
     return get_settings(args).syntax
+
+
+@lru_cache
+def get_features(args: Optional[Tuple] = None) -> Features:
+    return get_settings(args).features
