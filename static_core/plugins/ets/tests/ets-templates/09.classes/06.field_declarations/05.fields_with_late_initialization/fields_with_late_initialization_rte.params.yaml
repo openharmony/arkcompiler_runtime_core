@@ -365,9 +365,9 @@ cases:
           field!: [check_type]
           async foo(): Promise<void> {
             return new Promise<void> (
-              (resolve: () => void) => {
+              (resolve) => {
                 setTimeout(() => {
-                  resolve()
+                  resolve(undefined)
                 }, 1)
               }
             )
