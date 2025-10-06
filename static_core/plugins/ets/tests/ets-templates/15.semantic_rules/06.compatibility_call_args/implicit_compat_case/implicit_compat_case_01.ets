@@ -15,15 +15,10 @@
 
 /*---
 desc: Verifying implicit conversion from number to string.
-tags: [compile-only, negative]
 ---*/
 
-interface I {
-  i: number;
-}
-
-class A {
-  i: string;
+function checkTypeIdentity(a: Any, b: Any): boolean {
+    return Class.of(a as Object) === Class.of(b as Object);
 }
 
 function main(): void {

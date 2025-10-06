@@ -15,27 +15,18 @@
 
 /*---
 desc: T1 is compatible with T2 if implicitly convertible. Class does not implement interface.
-tags: [compile-only, negative]
 ---*/
 
-interface I {
-  i: string;
-}
-
-class A {
-  i: string;
-}
-
-function checkTypeIdentity<T>(a: T, b: T): boolean {
-    return typeof a === typeof b;
+function checkTypeIdentity(a: Any, b: Any): boolean {
+    return Class.of(a as Object) === Class.of(b as Object);
 }
 
 function main(): void {
   const val1: string = "Hello";
   const val2: string = "World";
-  const diffTypeVal: any = 42;
+  const diffTypeVal: Any = 42;
 
-  const result1 = checkTypeIdentity<string>(val1, val2);
+  const result1 = checkTypeIdentity(val1, val2);
 
   const result2 = checkTypeIdentity(val1, diffTypeVal);
 

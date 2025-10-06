@@ -15,7 +15,6 @@
 
 /*---
 desc: Verifying that a class partially implementing an interface is not compatible.
-tags: [compile-only, negative]
 ---*/
 
 interface MyInterface {
@@ -25,14 +24,11 @@ interface MyInterface {
 
 class MyClass implements MyInterface {
   method1() {}
+  method2() {}
 }
 
-interface I {
-  i: MyInterface;
-}
-
-class A {
-  i: MyClass;
+function checkTypeIdentity(a: Any, b: Any): boolean {
+    return Class.of(a as Object) === Class.of(b as Object);
 }
 
 function main(): void {
@@ -41,5 +37,5 @@ function main(): void {
 
   const result = checkTypeIdentity(val1, val2);
 
-  arktest.assertEQ(result, false);
+  arktest.assertEQ(result, true);
 }

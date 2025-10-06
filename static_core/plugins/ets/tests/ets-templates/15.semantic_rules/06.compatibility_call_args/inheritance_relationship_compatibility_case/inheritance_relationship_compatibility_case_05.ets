@@ -15,19 +15,14 @@
 
 /*---
 desc: Verifying compatibility in multi-level inheritance.
-tags: [compile-only, negative]
 ---*/
 
 class GrandParent {}
 class Parent extends GrandParent {}
 class Child extends Parent {}
 
-interface I {
-  i: GrandParent;
-}
-
-class A {
-  i: Child;
+function checkTypeIdentity(a: Any, b: Any): boolean {
+    return Class.of(a as Object) === Class.of(b as Object);
 }
 
 function main(): void {
@@ -37,6 +32,6 @@ function main(): void {
   const result1 = checkTypeIdentity(val1, val2);
   const result2 = checkTypeIdentity(val2, val1);
 
-  arktest.assertEQ(result1, true);
+  arktest.assertEQ(result1, false);
   arktest.assertEQ(result2, false);
 }

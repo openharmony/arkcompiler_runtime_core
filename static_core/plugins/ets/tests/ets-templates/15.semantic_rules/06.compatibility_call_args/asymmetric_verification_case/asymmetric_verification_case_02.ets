@@ -18,16 +18,12 @@ desc: Verifying asymmetric compatibility between any and unknown.
 tags: [compile-only, negative]
 ---*/
 
-interface I {
-  i: any;
-}
-
-class A {
-  i: unknown;
+function checkTypeIdentity<T>(a: T, b: T): boolean {
+    return Class.ofAny(a as Any) === Class.ofAny(b as Any);
 }
 
 function main(): void {
-  const val1: any = "test";
+  const val1: Any = "test";
   const val2: unknown = "test";
 
   const result1 = checkTypeIdentity(val1, val2);

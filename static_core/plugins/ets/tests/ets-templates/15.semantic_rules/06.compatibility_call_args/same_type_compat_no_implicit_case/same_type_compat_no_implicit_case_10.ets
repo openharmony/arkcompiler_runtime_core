@@ -20,24 +20,16 @@ desc: >-
 tags: [compile-only, negative]
 ---*/
 
-interface I {
-  i: void;
-}
-
-class A {
-  i: void;
-}
-
-function checkTypeIdentity<T>(a: T, b: T): boolean {
-    return typeof a === typeof b;
+function checkTypeIdentity(a: Any, b: Any): boolean {
+    return Class.of(a as Object) === Class.of(b as Object);
 }
 
 function main(): void {
   const val1: void = undefined;
   const val2: void = undefined;
-  const diffTypeVal: any = "This can be any type";
+  const diffTypeVal: Any = "This can be any type";
 
-  const result1 = checkTypeIdentity<void>(val1, val2);
+  const result1 = checkTypeIdentity(val1, val2);
 
   const result2 = checkTypeIdentity(val1, diffTypeVal);
 

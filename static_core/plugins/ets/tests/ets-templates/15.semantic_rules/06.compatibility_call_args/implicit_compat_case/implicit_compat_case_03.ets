@@ -15,15 +15,10 @@
 
 /*---
 desc: Verifying implicit conversion from boolean to number.
-tags: [compile-only, negative]
 ---*/
 
-interface I {
-  i: boolean;
-}
-
-class A {
-  i: number;
+function checkTypeIdentity(a: Any, b: Any): boolean {
+    return Class.of(a as Object) === Class.of(b as Object);
 }
 
 function main(): void {

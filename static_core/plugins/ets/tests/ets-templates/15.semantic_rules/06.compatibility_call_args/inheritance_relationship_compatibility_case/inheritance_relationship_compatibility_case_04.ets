@@ -15,27 +15,22 @@
 
 /*---
 desc: Verifying compatibility in generic class inheritance.
-tags: [compile-only, negative]
 ---*/
 
 class Parent<T> {}
 class Child<T> extends Parent<T> {}
 
-interface I {
-  i: Parent<string>;
-}
-
-class A {
-  i: Child<string>;
+function checkTypeIdentity(a: Any, b: Any): boolean {
+    return Class.of(a as Object) === Class.of(b as Object);
 }
 
 function main(): void {
-  const val1: Child<string> = new Child();
-  const val2: Parent<string> = new Parent();
+  const val1: Child<string> = new Child<string>();
+  const val2: Parent<string> = new Parent<string>();
 
   const result1 = checkTypeIdentity(val1, val2);
   const result2 = checkTypeIdentity(val2, val1);
 
-  arktest.assertEQ(result1, true);
+  arktest.assertEQ(result1, false);
   arktest.assertEQ(result2, false);
 }

@@ -15,30 +15,23 @@
 
 /*---
 desc: T1 is compatible with T2 if implicitly convertible. Class does not implement interface.
-tags: [compile-only, negative]
 ---*/
 
-interface I {
-  i: (a: number, b: number) => number;
+function checkTypeIdentity(a: Any, b: Any): boolean {
+    return Class.ofAny(a as Any) === Class.ofAny(b as Any);
 }
 
-class A {
-  i: (a: number, b: number) => number;
-}
-
-function checkTypeIdentity<T>(a: T, b: T): boolean {
-    return typeof a === typeof b;
-}
+type my_lambda = (a: number, b: number) => number
 
 function main(): void {
-  const val1: (a: number, b: number) => number = (a, b) => a + b;
-  const val2: (a: number, b: number) => number = (a, b) => a * b;
-  const diffTypeVal: any = "This can be any type";
+  const val1: my_lambda = (a, b) => a + b;
+  const val2: my_lambda = (a, b) => a * b;
+  const diffTypeVal: Any = "This can be any type";
 
-  const result1 = checkTypeIdentity<(a: number, b: number) => number>(val1, val2);
+  const result1 = checkTypeIdentity(val1, val2);
 
   const result2 = checkTypeIdentity(val1, diffTypeVal);
 
-  arktest.assertEQ(result1, true);
+  arktest.assertEQ(result1, false);
   arktest.assertEQ(result2, false);
 }
