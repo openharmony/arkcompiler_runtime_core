@@ -144,7 +144,7 @@ class Runner:
         if retcode != 0:
             result["exit_code"] = retcode
             return result
-        async with aiofiles.open(output_file, mode="r", encoding="utf-8") as f:
+        async with aiofiles.open(output_file, mode="r", encoding="utf-8", errors="replace") as f:
             result["code"] = await f.read()
         return result
 
@@ -203,12 +203,14 @@ class Runner:
             stderr=asyncio.subprocess.PIPE
         )
         try:
-            stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=self._exec_timeout)
+            stdout_b, stderr_b = await asyncio.wait_for(proc.communicate(), timeout=self._exec_timeout)
         except asyncio.exceptions.TimeoutError:
             proc.kill()
-            stdout, stderr = b"", b"Timeout expired"
+            stdout_b, stderr_b = b"", b"Timeout expired"
 
-        return stdout.decode("utf-8"), stderr.decode("utf-8"), proc.returncode
+        stdout = stdout_b.decode("utf-8", errors="replace")
+        stderr = stderr_b.decode("utf-8", errors="replace")
+        return stdout, stderr, proc.returncode
 
     async def _get_arkts_version(self) -> None:
         """Get ark version
