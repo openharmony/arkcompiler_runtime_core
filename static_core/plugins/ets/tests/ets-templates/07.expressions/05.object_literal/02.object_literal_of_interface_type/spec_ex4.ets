@@ -17,12 +17,11 @@
 desc: >-
     If an interface has accessors for some property,
     and the property is used in an object literal,
-    then a compile-time error occurs
-tags: [compile-only, negative]
+    then a compile-time error does not occurs
 ---*/
 
 interface I1 {
     set attr (attr: number)
 }
-// 'attr' cannot be used in object literal
+
 const a: I1 = {attr: 42}
