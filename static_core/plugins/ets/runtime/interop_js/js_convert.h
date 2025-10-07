@@ -16,6 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JS_CONVERT_H
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JS_CONVERT_H
 
+#include "interop_js/interop_common.h"
 #include "js_convert_base.h"
 #include "js_convert_stdlib.h"
 #include "napi_impl/ark_napi_helper.h"
@@ -183,6 +184,7 @@ JSCONVERT_UNWRAP(String)
         return {};
     }
     std::string value = GetString(env, result);
+    ScopedManagedCodeThreadIfNeeded managedScope(EtsCoroutine::GetCurrent());
     return EtsString::CreateFromUtf8(value.data(), value.length());
 }
 
@@ -217,6 +219,8 @@ JSCONVERT_UNWRAP(BigInt)
         TypeCheckFailed();
         return {};
     }
+    auto coro = EtsCoroutine::GetCurrent();
+    ScopedManagedCodeThreadIfNeeded managedScope(coro);
 
     auto [words, signBit] = GetBigInt(env, jsVal);
     std::vector<EtsInt> array = ConvertBigIntArrayFromJsToEts(words);
@@ -227,7 +231,6 @@ JSCONVERT_UNWRAP(BigInt)
         etsIntArray->Set(i, array[i]);
     }
 
-    auto coro = EtsCoroutine::GetCurrent();
     [[maybe_unused]] EtsHandleScope scope(coro);
     EtsHandle etsIntArrayHandle(coro, etsIntArray);
 
@@ -281,7 +284,7 @@ JSCONVERT_WRAP(ESError)
         ThrowNoInteropContextException();
         return {};
     }
-
+    ScopedManagedCodeThreadIfNeeded managedScope(coro);
     auto klass = etsVal->GetClass();
     INTEROP_FATAL_IF(klass->GetRuntimeClass() != ctx->GetESErrorClass());
 
@@ -311,6 +314,7 @@ JSCONVERT_UNWRAP(ESError)
     bool isError = false;
     NAPI_CHECK_FATAL(napi_is_error(env, jsVal, &isError));
     if (isError) {
+        ScopedManagedCodeThreadIfNeeded managedScope(coro);
         auto jsValueObj = JSValue::Create(coro, ctx, jsVal);
         etsObject = jsValueObj->AsObject();
     } else {
@@ -329,6 +333,25 @@ JSCONVERT_UNWRAP(ESError)
 
 JSCONVERT_DEFINE_TYPE(Promise, EtsPromise *);
 
+static void ResolveDeferred(napi_env env, EtsCoroutine *coro, InteropCtx *ctx, EtsHandle<EtsPromise> &hpromise,
+                            napi_deferred deferred)
+{
+    EtsHandle<EtsObject> value(coro, hpromise->GetValue(coro));
+    ScopedNativeCodeThreadIfNeeded nativeScope(coro);
+    napi_value completionValue;
+    if (value.GetPtr() == nullptr) {
+        completionValue = GetUndefined(env);
+    } else {
+        auto refconv = JSRefConvertResolve(ctx, value->GetClass()->GetRuntimeClass());
+        completionValue = refconv->Wrap(ctx, value.GetPtr());
+    }
+    if (hpromise->IsResolved()) {
+        NAPI_CHECK_FATAL(napi_resolve_deferred(env, deferred, completionValue));
+    } else {
+        NAPI_CHECK_FATAL(napi_reject_deferred(env, deferred, completionValue));
+    }
+}
+
 JSCONVERT_WRAP(Promise)
 {
     auto *coro = EtsCoroutine::GetCurrent();
@@ -337,6 +360,7 @@ JSCONVERT_WRAP(Promise)
         ThrowNoInteropContextException();
         return {};
     }
+    ScopedManagedCodeThreadIfNeeded managedScope(coro);
     ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
     // SharedReferenceStorage uses object's MarkWord to store interop hash.
     // Also runtime may lock a Promise object (this operation also requires MarkWord modification).
@@ -359,20 +383,7 @@ JSCONVERT_WRAP(Promise)
     hpromise->Lock();
     // NOTE(alimovilya, #23064) This if should be removed. Only else branch should remain.
     if (!hpromise->IsPending() && !hpromise->IsLinked()) {  // it will never get PENDING again
-        EtsHandle<EtsObject> value(coro, hpromise->GetValue(coro));
-        napi_value completionValue;
-        if (value.GetPtr() == nullptr) {
-            completionValue = GetUndefined(env);
-        } else {
-            auto refconv = JSRefConvertResolve(ctx, value->GetClass()->GetRuntimeClass());
-            completionValue = refconv->Wrap(ctx, value.GetPtr());
-        }
-        ScopedNativeCodeThread nativeScope(coro);
-        if (hpromise->IsResolved()) {
-            NAPI_CHECK_FATAL(napi_resolve_deferred(env, deferred, completionValue));
-        } else {
-            NAPI_CHECK_FATAL(napi_reject_deferred(env, deferred, completionValue));
-        }
+        ResolveDeferred(env, coro, ctx, hpromise, deferred);
     } else {
         // connect->Invoke calls EtsPromiseSubmitCallback that acquires the mutex and checks the state again
         hpromise->Unlock();
@@ -407,6 +418,7 @@ JSCONVERT_UNWRAP(Promise)
         return EtsPromise::FromEtsObject(ref->GetTarget(coro));
     }
 
+    ScopedManagedCodeThreadIfNeeded managedScope(coro);
     [[maybe_unused]] EtsHandleScope s(coro);
     auto *promise = EtsPromise::Create(coro);
     EtsHandle<EtsPromise> hpromise(coro, promise);

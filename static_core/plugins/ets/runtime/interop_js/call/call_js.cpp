@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "interop_js/interop_common.h"
 #include "macros.h"
 #include "runtime/mem/local_object_handle.h"
 #include "plugins/ets/runtime/interop_js/call/call.h"
@@ -272,7 +273,7 @@ ALWAYS_INLINE inline std::optional<napi_value> CallJSHandler::CallConverted(Span
     napi_value jsRetval;
     napi_status jsStatus;
     {
-        ScopedNativeCodeThread nativeScope(coro_);
+        ScopedNativeCodeThreadIfNeeded nativeScope(coro_);
         if constexpr (IS_NEWCALL) {
             jsStatus = napi_new_instance(env, jsFn_, jsargs.size(), jsargs.data(), &jsRetval);
         } else {

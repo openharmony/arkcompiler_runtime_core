@@ -242,7 +242,7 @@ static bool AddOptions(logger::Options *loggerOptions, ark::RuntimeOptions *runt
     }
 
     napi_value options = argv[0];
-    if (GetValueType(env, options) != napi_object) {
+    if (GetValueType<false>(env, options) != napi_object) {
         LogError("CreateRuntimeLegacy: argument is not an object");
         return napiFalse;
     }
@@ -287,7 +287,7 @@ static napi_value CreateRuntimeViaAni(napi_env env, napi_callback_info info)
     }
 
     napi_value options = argv[0];
-    if (GetValueType(env, options) != napi_object) {
+    if (GetValueType<false>(env, options) != napi_object) {
         LogError("CreateRuntimeViaAni: argument is not an object");
         return napiFalse;
     }

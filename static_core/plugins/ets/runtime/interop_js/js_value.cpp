@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "interop_js/interop_common.h"
 #include "plugins/ets/runtime/interop_js/js_value.h"
 #include "plugins/ets/runtime/interop_js/js_convert.h"
 #include "plugins/ets/runtime/types/ets_method.h"
@@ -73,6 +74,34 @@ void JSValue::FinalizeETSWeak(InteropCtx *ctx, EtsObject *cbarg)
     UNREACHABLE();
 }
 
+JSValue *JSValue::CreateStringJSValue(InteropCtx *ctx, napi_env env, napi_value nvalue, JSValue *jsvalue)
+{
+    auto coro = EtsCoroutine::GetCurrent();
+    ScopedManagedCodeThreadIfNeeded managedScope(coro);
+    LocalObjectHandle<JSValue> handle(coro, jsvalue);
+    auto cachedStr = ctx->GetStringStor()->Get(interop::js::GetString(env, nvalue));
+    handle->SetString(cachedStr);
+    return JSValue::AttachFinalizer(coro, handle.GetPtr());
+}
+
+JSValue *JSValue::CreateBigIntJSValue(napi_env env, napi_value nvalue, JSValue *jsvalue)
+{
+    auto coro = EtsCoroutine::GetCurrent();
+    ScopedManagedCodeThreadIfNeeded managedScope(coro);
+    LocalObjectHandle<JSValue> handle(coro, jsvalue);
+    handle->SetBigInt(interop::js::GetBigInt(env, nvalue));
+    return JSValue::AttachFinalizer(coro, handle.GetPtr());
+}
+
+JSValue *JSValue::CreateRefJSValue(InteropCtx *ctx, napi_value nvalue, JSValue *jsvalue, napi_valuetype jsType)
+{
+    auto coro = EtsCoroutine::GetCurrent();
+    ScopedManagedCodeThreadIfNeeded managedScope(coro);
+    LocalObjectHandle<JSValue> handle(coro, jsvalue);
+    handle->SetRefValue(ctx, nvalue, jsType);
+    return handle.GetPtr();
+}
+
 JSValue *JSValue::CreateByType(InteropCtx *ctx, napi_env env, napi_value nvalue, napi_valuetype jsType,
                                JSValue *jsvalue)
 {
@@ -96,17 +125,10 @@ JSValue *JSValue::CreateByType(InteropCtx *ctx, napi_env env, napi_value nvalue,
             return jsvalue;
         }
         case napi_string: {
-            auto coro = EtsCoroutine::GetCurrent();
-            LocalObjectHandle<JSValue> handle(coro, jsvalue);
-            auto cachedStr = ctx->GetStringStor()->Get(interop::js::GetString(env, nvalue));
-            handle->SetString(cachedStr);
-            return JSValue::AttachFinalizer(coro, handle.GetPtr());
+            return CreateStringJSValue(ctx, env, nvalue, jsvalue);
         }
         case napi_bigint: {
-            auto coro = EtsCoroutine::GetCurrent();
-            LocalObjectHandle<JSValue> handle(coro, jsvalue);
-            handle->SetBigInt(interop::js::GetBigInt(env, nvalue));
-            return JSValue::AttachFinalizer(coro, handle.GetPtr());
+            return CreateBigIntJSValue(env, nvalue, jsvalue);
         }
         case napi_symbol:
             [[fallthrough]];
@@ -115,15 +137,14 @@ JSValue *JSValue::CreateByType(InteropCtx *ctx, napi_env env, napi_value nvalue,
         case napi_function:
             [[fallthrough]];
         case napi_external: {
-            LocalObjectHandle<JSValue> handle(EtsCoroutine::GetCurrent(), jsvalue);
-            handle->SetRefValue(ctx, nvalue, jsType);
-            return handle.GetPtr();
+            return CreateRefJSValue(ctx, nvalue, jsvalue, jsType);
         }
         default:
             InteropCtx::Fatal("Unsupported JSValue.Type: " + std::to_string(jsType));
     }
     UNREACHABLE();
 }
+
 JSValue *JSValue::Create(EtsCoroutine *coro, InteropCtx *ctx, napi_value nvalue)
 {
     auto env = ctx->GetJSEnv();
@@ -139,6 +160,7 @@ JSValue *JSValue::Create(EtsCoroutine *coro, InteropCtx *ctx, napi_value nvalue)
 
 napi_value JSValue::GetNapiValue(napi_env env)
 {
+    ScopedNativeCodeThreadIfNeeded nativeScope(EtsCoroutine::GetCurrent());
     napi_value jsValue {};
 
     auto jsType = GetType();

@@ -96,7 +96,7 @@ napi_value EtsClassWrapper::Wrap(InteropCtx *ctx, EtsObject *etsObject)
     EtsHandle<EtsObject> handle(coro, etsObject);
     ctx->SetPendingNewInstance(handle);
     {
-        ScopedNativeCodeThread nativeScope(coro);
+        ScopedNativeCodeThreadIfNeeded nativeScope(coro);
         NAPI_CHECK_FATAL(napi_new_instance(env, GetJsCtor(env), 0, nullptr, &jsValue));
     }
 
@@ -173,6 +173,7 @@ EtsObject *EtsClassWrapper::CreateJSBuiltinProxy(InteropCtx *ctx, napi_value jsV
     auto *storage = ctx->GetSharedRefStorage();
     ASSERT(storage->GetReference(ctx->GetJSEnv(), jsValue) == nullptr);
 
+    ScopedManagedCodeThreadIfNeeded managedScope(EtsCoroutine::GetCurrent());
     EtsObject *etsObject = EtsObject::Create(jsproxyWrapper_->GetProxyClass());
     if (UNLIKELY(etsObject == nullptr)) {
         ctx->ForwardEtsException(EtsCoroutine::GetCurrent());
@@ -296,6 +297,7 @@ public:
             proxy = js_proxy::JSProxy::CreateInterfaceProxy(interfaces, interfaceName);
             ctx->SetInterfaceProxyInstance(interfaceName, proxy);
         }
+        ScopedManagedCodeThreadIfNeeded managedScope(coro);
         LocalObjectHandle<EtsObject> etsObject(coro, EtsObject::Create(proxy->GetProxyClass()));
         if (UNLIKELY(etsObject.GetPtr() == nullptr)) {
             ctx->ThrowJSTypeError(ctx->GetJSEnv(),

@@ -16,6 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JS_CONVERT_STDLIB_H
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JS_CONVERT_STDLIB_H
 
+#include "interop_js/interop_common.h"
 #include "js_convert_base.h"
 
 namespace ark::ets::interop::js {
@@ -42,7 +43,9 @@ JSCONVERT_UNWRAP(StdlibBoolean)
     }
     bool val;
     NAPI_CHECK_FATAL(napi_get_value_bool(env, result, &val));
-    return EtsBoxPrimitive<EtsBoolean>::Create(EtsCoroutine::GetCurrent(), static_cast<EtsBoolean>(val));
+    auto coro = EtsCoroutine::GetCurrent();
+    ScopedManagedCodeThreadIfNeeded managedScope(coro);
+    return EtsBoxPrimitive<EtsBoolean>::Create(coro, static_cast<EtsBoolean>(val));
 }
 
 JSCONVERT_DEFINE_TYPE(StdlibByte, EtsObject *);
@@ -67,7 +70,9 @@ JSCONVERT_UNWRAP(StdlibByte)
     }
     int32_t val;
     NAPI_CHECK_FATAL(napi_get_value_int32(env, result, &val));
-    return EtsBoxPrimitive<EtsByte>::Create(EtsCoroutine::GetCurrent(), val);
+    auto coro = EtsCoroutine::GetCurrent();
+    ScopedManagedCodeThreadIfNeeded managedScope(coro);
+    return EtsBoxPrimitive<EtsByte>::Create(coro, val);
 }
 
 static bool GetValueFromNumber(napi_env env, napi_value &jsVal, EtsChar &val)
@@ -126,7 +131,9 @@ JSCONVERT_UNWRAP(StdlibChar)
 {
     EtsChar val = 0;
     if (GetValueFromNumber(env, jsVal, val) || GetValueFromString(env, jsVal, val)) {
-        return EtsBoxPrimitive<EtsChar>::Create(EtsCoroutine::GetCurrent(), static_cast<EtsChar>(val));
+        auto coro = EtsCoroutine::GetCurrent();
+        ScopedManagedCodeThreadIfNeeded managedScope(coro);
+        return EtsBoxPrimitive<EtsChar>::Create(coro, static_cast<EtsChar>(val));
     }
     TypeCheckFailed();
     return {};
@@ -154,7 +161,9 @@ JSCONVERT_UNWRAP(StdlibShort)
     }
     int32_t val;
     NAPI_CHECK_FATAL(napi_get_value_int32(env, result, &val));
-    return EtsBoxPrimitive<EtsShort>::Create(EtsCoroutine::GetCurrent(), static_cast<EtsShort>(val));
+    auto coro = EtsCoroutine::GetCurrent();
+    ScopedManagedCodeThreadIfNeeded managedScope(coro);
+    return EtsBoxPrimitive<EtsShort>::Create(coro, static_cast<EtsShort>(val));
 }
 
 JSCONVERT_DEFINE_TYPE(StdlibInt, EtsObject *);
@@ -179,7 +188,9 @@ JSCONVERT_UNWRAP(StdlibInt)
     }
     EtsLong val;
     NAPI_CHECK_FATAL(napi_get_value_int64(env, result, &val));
-    return EtsBoxPrimitive<EtsInt>::Create(EtsCoroutine::GetCurrent(), static_cast<EtsInt>(val));
+    auto coro = EtsCoroutine::GetCurrent();
+    ScopedManagedCodeThreadIfNeeded managedScope(coro);
+    return EtsBoxPrimitive<EtsInt>::Create(coro, static_cast<EtsInt>(val));
 }
 
 JSCONVERT_DEFINE_TYPE(StdlibLong, EtsObject *);
@@ -204,7 +215,9 @@ JSCONVERT_UNWRAP(StdlibLong)
     }
     EtsLong val;
     NAPI_CHECK_FATAL(napi_get_value_int64(env, result, &val));
-    return EtsBoxPrimitive<EtsLong>::Create(EtsCoroutine::GetCurrent(), val);
+    auto coro = EtsCoroutine::GetCurrent();
+    ScopedManagedCodeThreadIfNeeded managedScope(coro);
+    return EtsBoxPrimitive<EtsLong>::Create(coro, val);
 }
 
 JSCONVERT_DEFINE_TYPE(StdlibFloat, EtsObject *);
@@ -230,7 +243,9 @@ JSCONVERT_UNWRAP(StdlibFloat)
     double val;
     NAPI_CHECK_FATAL(napi_get_value_double(env, result, &val));
     auto fval = static_cast<EtsFloat>(val);
-    return EtsBoxPrimitive<EtsFloat>::Create(EtsCoroutine::GetCurrent(), fval);
+    auto coro = EtsCoroutine::GetCurrent();
+    ScopedManagedCodeThreadIfNeeded managedScope(coro);
+    return EtsBoxPrimitive<EtsFloat>::Create(coro, fval);
 }
 
 JSCONVERT_DEFINE_TYPE(StdlibDouble, EtsObject *);
@@ -255,7 +270,9 @@ JSCONVERT_UNWRAP(StdlibDouble)
     }
     EtsDouble val;
     NAPI_CHECK_FATAL(napi_get_value_double(env, result, &val));
-    return EtsBoxPrimitive<EtsDouble>::Create(EtsCoroutine::GetCurrent(), val);
+    auto coro = EtsCoroutine::GetCurrent();
+    ScopedManagedCodeThreadIfNeeded managedScope(coro);
+    return EtsBoxPrimitive<EtsDouble>::Create(coro, val);
 }
 
 }  // namespace ark::ets::interop::js

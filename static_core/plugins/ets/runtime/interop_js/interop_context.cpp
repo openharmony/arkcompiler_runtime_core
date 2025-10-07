@@ -494,6 +494,7 @@ void InteropCtx::InitJsValueFinalizationRegistry(EtsCoroutine *coro)
 
 EtsObject *InteropCtx::CreateETSCoreESError(EtsCoroutine *coro, EtsObject *etsObject)
 {
+    ScopedManagedCodeThreadIfNeeded managedScope(coro);
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coro);
     VMHandle<ObjectHeader> etsObjectHandle(coro, etsObject->GetCoreType());
 
@@ -522,7 +523,7 @@ EtsObject *InteropCtx::CreateETSCoreESError(EtsCoroutine *coro, EtsObject *etsOb
 void InteropCtx::ThrowETSError(EtsCoroutine *coro, napi_value val)
 {
     auto ctx = Current(coro);
-
+    ScopedManagedCodeThreadIfNeeded managedScope(coro);
     if (coro->IsUsePreAllocObj()) {
         coro->SetUsePreAllocObj(false);
         coro->SetException(coro->GetVM()->GetOOMErrorObject());
@@ -570,6 +571,7 @@ void InteropCtx::ThrowETSError(EtsCoroutine *coro, napi_value val)
 
 void InteropCtx::ThrowETSError(EtsCoroutine *coro, const char *msg)
 {
+    ScopedManagedCodeThreadIfNeeded managedScope(coro);
     ASSERT(!coro->HasPendingException());
     ets::ThrowEtsException(coro, panda_file_items::class_descriptors::ERROR, msg);
 }
@@ -647,6 +649,7 @@ void InteropCtx::ForwardEtsException(EtsCoroutine *coro)
     auto env = GetJSEnv();
     ASSERT(coro != nullptr);
     ASSERT(coro->HasPendingException());
+    ScopedManagedCodeThreadIfNeeded managedScope(coro);
     LocalObjectHandle<ObjectHeader> exc(coro, coro->GetException());
     coro->ClearException();
 
