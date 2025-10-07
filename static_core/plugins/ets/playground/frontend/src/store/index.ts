@@ -21,6 +21,7 @@ import code from './slices/code';
 import logs from './slices/logs';
 import ast from './slices/ast';
 import features from './slices/features';
+import notifications from './slices/notifications';
 
 export const store = configureStore({
     reducer: {
@@ -30,7 +31,8 @@ export const store = configureStore({
         code,
         logs,
         ast,
-        features
+        features,
+        notifications,
     },
     middleware: (getDefaultMiddleware) => getDefaultMiddleware({
         serializableCheck: false,

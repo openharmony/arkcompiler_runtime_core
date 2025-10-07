@@ -431,3 +431,76 @@ async def test_dump_ast_segfault(monkeypatch, ark_build):
         "error": "oopsast: Segmentation fault",
         "exit_code": -11,
     }
+
+
+@pytest.mark.asyncio
+async def test_compile_utf8_decode_with_replace(monkeypatch, ark_build):
+    """
+    Ensure _execute_cmd decodes stdout/stderr with errors='replace'
+    and does not crash on non-UTF8 bytes.
+    """
+    mocker = MockAsyncSubprocess([
+        FakeCommand(
+            expected=str(ark_build[1]),         # es2panda
+            opts=["--extension=ets"],
+            stdout=b"\xf7\xfa non-utf8 \xa0",
+            stderr=b"\xff\xfe error bytes",
+            return_code=0,
+        ),
+    ])
+    monkeypatch.setattr("asyncio.create_subprocess_exec", mocker.create_subprocess_exec())
+
+    r = Runner(ark_build[0])
+    res = await r.compile_arkts("code", [], disasm=False, verifier=False)
+
+    assert res["compile"]["exit_code"] == 0
+    # Replacement characters should be present instead of raising UnicodeDecodeError
+    assert "\ufffd" in res["compile"]["output"]
+    assert "\ufffd" in res["compile"]["error"]
+
+
+@pytest.mark.asyncio
+async def test_disassembly_opens_file_with_errors_replace(monkeypatch, ark_build):
+    """
+    Ensure disassembly opens the .pa file with encoding='utf-8' and errors='replace'.
+    """
+    mocker = MockAsyncSubprocess([
+        FakeCommand(
+            expected=str(ark_build[2]),  # ark_disasm
+            opts=[],
+            stdout=b"",
+            return_code=0,
+        ),
+    ])
+    monkeypatch.setattr("asyncio.create_subprocess_exec", mocker.create_subprocess_exec())
+
+    captured: dict[str, object] = {}
+
+    class _DummyFile:
+        async def read(self) -> str:
+            return "X"
+
+    class _DummyCtx:
+        async def __aenter__(self):
+            return _DummyFile()
+
+        async def __aexit__(self, exc_type, exc, tb):
+            return False
+
+    def open_spy(path, mode="r", encoding=None, errors=None):
+        captured["path"] = path
+        captured["mode"] = mode
+        captured["encoding"] = encoding
+        captured["errors"] = errors
+        return _DummyCtx()
+
+    monkeypatch.setattr("src.arkts_playground.deps.runner.aiofiles.open", open_spy)
+
+    r = Runner(ark_build[0])
+    res = await r.disassembly("in.abc", "out.pa")
+
+    assert res["exit_code"] == 0
+    assert res["code"] == "X"
+
+    assert captured.get("encoding") == "utf-8"
+    assert captured.get("errors") == "replace"

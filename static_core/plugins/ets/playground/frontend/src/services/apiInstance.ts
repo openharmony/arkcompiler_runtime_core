@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,8 @@
  */
 
 import axios, { AxiosError, AxiosResponse, AxiosRequestConfig, AxiosHeaders, AxiosInstance } from 'axios';
+import { store } from '../store'
+import { showMessage } from '../store/actions/notification';
 
 interface CustomAxiosRequestConfig extends AxiosRequestConfig {
     _retry?: boolean;
@@ -38,6 +40,11 @@ const handleResponseSuccess = (response: AxiosResponse): AxiosResponse => respon
 
 const handleResponseError = async (err: AxiosError): Promise<CustomAxiosRequestConfig> => {
     const config = err.config as CustomAxiosRequestConfig;
+    store.dispatch(showMessage({
+        type: 'error',
+        title: err.message,
+        message: String(err),
+    }));
     return Promise.reject(err);
 };
 
