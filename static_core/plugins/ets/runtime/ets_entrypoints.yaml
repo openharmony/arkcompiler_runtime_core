@@ -1742,7 +1742,47 @@
     - uint8_t             # boolean
     - ark::ObjectHeader*
 
-- name: ArrayFastCopyTo_Ref_Sync
+- name: EscompatArrayReverse
+  entrypoint: EtsEscompatArrayReverse
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*
+
+- name: EscompatArrayReverseSync
+  entrypoint: EscompatArrayReverseSync
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+
+- name: EscompatArrayReverseAsync
+  entrypoint: EscompatArrayReverseAsync
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+
+- name: EscompatArrayReverseAsyncManual
+  entrypoint: EscompatArrayReverseAsyncManual
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+
+- name: EscompatArrayReverseHybrid
+  entrypoint: EscompatArrayReverseHybrid
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+
+- name: ArrayFastCopyToRefSync
   entrypoint: ArrayFastCopyToRefSync
   bridge: none
   properties: [irtoc]
@@ -1754,7 +1794,7 @@
     - int32_t
     - int32_t
 
-- name: ArrayFastCopyTo_Ref_Async
+- name: ArrayFastCopyToRefAsync
   entrypoint: ArrayFastCopyToRefAsync
   bridge: none
   properties: [irtoc]
@@ -1766,7 +1806,7 @@
     - int32_t
     - int32_t
 
-- name: ArrayFastCopyTo_Ref_AsyncManual
+- name: ArrayFastCopyToRefAsyncManual
   entrypoint: ArrayFastCopyToRefAsyncManual
   bridge: none
   properties: [irtoc]
@@ -1778,7 +1818,7 @@
     - int32_t
     - int32_t
 
-- name: ArrayFastCopyTo_Ref_Hybrid
+- name: ArrayFastCopyToRefHybrid
   entrypoint: ArrayFastCopyToRefHybrid
   bridge: none
   properties: [irtoc]

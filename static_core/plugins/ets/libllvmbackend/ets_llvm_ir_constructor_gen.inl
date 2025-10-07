@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "plugins/ets/compiler/compiler_constants_inl.h"
 
 bool LLVMIrConstructor::EmitArrayCopyTo(Inst *inst)
 {
@@ -518,6 +519,58 @@ bool LLVMIrConstructor::EmitArrayFastCopyToRef(Inst *inst)
 
     SetCurrentBasicBlock(slowPathBb);
     constexpr auto slowPathEntrypointId = RuntimeInterface::EntrypointId::ARRAY_FAST_COPY_TO_REF_ENTRYPOINT;
+    CreateEntrypointCall(slowPathEntrypointId, inst, callArgs);
+    builder_.CreateBr(returnBb);
+
+    SetCurrentBasicBlock(returnBb);
+    return true;
+}
+
+static RuntimeInterface::EntrypointId GetArrayFastReverseEntrypointId(mem::BarrierType barrierType)
+{
+    using EntrypointId = RuntimeInterface::EntrypointId;
+    switch (barrierType) {
+        case mem::BarrierType::POST_INTERGENERATIONAL_BARRIER:  // Gen GC
+            return EntrypointId::ESCOMPAT_ARRAY_REVERSE_ASYNC_MANUAL;
+        case mem::BarrierType::POST_CMC_WRITE_BARRIER:  // CMC GC
+            return EntrypointId::ESCOMPAT_ARRAY_REVERSE_HYBRID;
+        case mem::BarrierType::POST_INTERREGION_BARRIER:  // G1 GC
+            return EntrypointId::ESCOMPAT_ARRAY_REVERSE_ASYNC;
+        default:  // STW GC
+            return EntrypointId::ESCOMPAT_ARRAY_REVERSE_SYNC;
+    }
+}
+
+bool LLVMIrConstructor::EmitEscompatArrayReverse(Inst *inst)
+{
+    auto arch = GetGraph()->GetArch();
+    if (arch == Arch::AARCH32) {
+        return false;
+    }
+
+    auto arrObj = GetInputValue(inst, 0);
+    uint32_t actualLenghtOffset = ark::cross_values::GetEscompatArrayActualLengthOffset(arch);
+    auto arrLengthOffset =
+        builder_.CreateConstInBoundsGEP1_32(builder_.getInt8Ty(), arrObj, actualLenghtOffset);
+    auto arrLength = builder_.CreateLoad(builder_.getInt32Ty(), arrLengthOffset);
+
+    auto shortArrayThreshold = builder_.getInt32(MAGIC_NUM_FOR_SHORT_ARRAY_THRESHOLD);
+
+    auto fastPathBb =
+        llvm::BasicBlock::Create(func_->getContext(), CreateBasicBlockName(inst, "emit_go_to_fastpath"), func_);
+    auto slowPathBb =
+        llvm::BasicBlock::Create(func_->getContext(), CreateBasicBlockName(inst, "emit_go_to_slowpath"), func_);
+    auto returnBb = llvm::BasicBlock::Create(func_->getContext(), CreateBasicBlockName(inst, "emit_return"), func_);
+    builder_.CreateCondBr(builder_.CreateICmpUGT(arrLength, shortArrayThreshold), slowPathBb, fastPathBb);
+    const std::array callArgs = {arrObj};
+
+    SetCurrentBasicBlock(fastPathBb);
+    auto fastPathEntrypointId = GetArrayFastReverseEntrypointId(GetGraph()->GetRuntime()->GetPostType());
+    CreateFastPathCall(inst, fastPathEntrypointId, callArgs);
+    builder_.CreateBr(returnBb);
+
+    SetCurrentBasicBlock(slowPathBb);
+    constexpr auto slowPathEntrypointId = RuntimeInterface::EntrypointId::ESCOMPAT_ARRAY_REVERSE;
     CreateEntrypointCall(slowPathEntrypointId, inst, callArgs);
     builder_.CreateBr(returnBb);
 

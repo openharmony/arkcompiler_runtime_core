@@ -145,6 +145,8 @@ bool EmitEscompatArrayIsPlatformArray(Inst *inst)
 
 bool EmitArrayFastCopyToRef(Inst *inst);
 
+bool EmitEscompatArrayReverse(Inst *inst);
+
 bool EmitSameValueZero(Inst *inst)
 {
     return EmitFastPath(inst, RuntimeInterface::EntrypointId::SAME_VALUE_ZERO_FAST_PATH, 2U);

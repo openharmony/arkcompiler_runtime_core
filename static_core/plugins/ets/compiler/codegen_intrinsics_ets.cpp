@@ -18,6 +18,7 @@
 #include "runtime/include/coretypes/string.h"
 #include "runtime/include/coretypes/array.h"
 #include "libarkbase/utils/regmask.h"
+#include "plugins/ets/compiler/compiler_constants_inl.h"
 
 namespace ark::compiler {
 
@@ -123,6 +124,43 @@ void Codegen::CreateArrayCopyTo(IntrinsicInst *inst, [[maybe_unused]] Reg dst, S
 void Codegen::CreateEscompatArrayIsPlatformArray(IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
     CallFastPath(inst, EntrypointId::ESCOMPAT_ARRAY_IS_PLATFORM_ARRAY_FAST, dst, {}, src[FIRST_OPERAND]);
+}
+
+static RuntimeInterface::EntrypointId GetArrayFastReverseEntrypointId(mem::BarrierType barrierType)
+{
+    using EntrypointId = RuntimeInterface::EntrypointId;
+    switch (barrierType) {
+        case mem::BarrierType::POST_INTERGENERATIONAL_BARRIER:  // Gen GC
+            return EntrypointId::ESCOMPAT_ARRAY_REVERSE_ASYNC_MANUAL;
+        case mem::BarrierType::POST_CMC_WRITE_BARRIER:  // CMC GC
+            return EntrypointId::ESCOMPAT_ARRAY_REVERSE_HYBRID;
+        case mem::BarrierType::POST_INTERREGION_BARRIER:  // G1 GC
+            return EntrypointId::ESCOMPAT_ARRAY_REVERSE_ASYNC;
+        default:  // STW GC
+            return EntrypointId::ESCOMPAT_ARRAY_REVERSE_SYNC;
+    }
+}
+
+void Codegen::CreateEscompatArrayReverse(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(GetArch() != Arch::AARCH32);
+
+    ScopedTmpReg tmp1(enc_);
+    auto reg1 = tmp1.GetReg().As(INT32_TYPE);
+    enc_->EncodeLdr(
+        reg1, false,
+        MemRef(src[FIRST_OPERAND], cross_values::GetEscompatArrayActualLengthOffset(GetGraph()->GetArch())));
+    auto labelSlowPath = enc_->CreateLabel();
+    auto labelEnd = enc_->CreateLabel();
+    enc_->EncodeJump(labelSlowPath, reg1, Imm(MAGIC_NUM_FOR_SHORT_ARRAY_THRESHOLD), Condition::GT);
+    auto fastPathEntrypointId = GetArrayFastReverseEntrypointId(GetGraph()->GetRuntime()->GetPostType());
+    CallFastPath(inst, fastPathEntrypointId, dst, {}, src[FIRST_OPERAND]);
+    enc_->EncodeJump(labelEnd);
+
+    enc_->BindLabel(labelSlowPath);
+    static constexpr auto SLOW_PATH_ENTRYPOINT_ID = EntrypointId::ESCOMPAT_ARRAY_REVERSE;
+    CallRuntime(inst, SLOW_PATH_ENTRYPOINT_ID, dst, {}, src[FIRST_OPERAND]);
+    enc_->BindLabel(labelEnd);
 }
 
 // Generates a call to StringBuilder.append() for values (EtsBool/Char/Bool/Short/Int/Long),

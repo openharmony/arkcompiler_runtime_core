@@ -40,6 +40,8 @@ module EtsConstants
     FLOAT64_NAN = "0x7ff8000000000000"
     FLOAT64_INF = "0x7ff0000000000000"
     FLOAT64_MINUS_INF = "0xfff0000000000000"
+
+    MAX_ALLOWED_INVALIDATING_CARDS = "2"
 end
 
 scoped_macro(:getBoxedType) do |flags|
@@ -87,3 +89,56 @@ macro(:get_platform_type_ref) do |offset|
   ptypes := LoadI(%tr).Imm(EtsConstants::CORO_LOCAL_STORAGE_OFFSET).ptr
   LoadI(ptypes).Imm(offset).ref
 end
+
+scoped_macro(:post_inter_region_barrier) do |data, size|
+  addr_first := Cast(data).ptr
+  addr_last := SubI(Add(addr_first.ptr, Cast(size.u32).word).ptr).Imm(1).ptr
+
+  min_addr := LoadI(%tr).Imm(Constants::TLS_CARD_TABLE_MIN_ADDR_OFFSET).word
+  addr_first_word := Bitcast(addr_first).word
+  first_card_offset := ShrI(Sub(addr_first_word, min_addr).word).Imm(Constants::CARD_TABLE_CARD_BITS).word
+  addr_last_word := Bitcast(addr_last).word
+  last_card_offset := ShrI(Sub(addr_last_word, min_addr).word).Imm(Constants::CARD_TABLE_CARD_BITS).word
+  cards := Sub(last_card_offset, first_card_offset).word
+
+  # If the fist and the last addresses belong to different cards, we need to invalidate two subsequent cards.
+  # Invariant: size <= (1 << CARD_TABLE_CARD_BITS), but no one guarantees addr_first_word is aligned at card size.
+  if defines.DEBUG
+    If(cards, Cast(EtsConstants::MAX_ALLOWED_INVALIDATING_CARDS).word).AE.Unlikely {
+      Intrinsic(:UNREACHABLE).Terminator.void
+    }
+  end
+
+  If(cards, Cast(1).word).EQ.Unlikely {
+    # `addr_second` here is a pointer to the slot just at the start of the 2nd card. A slot just at the start
+    # of a card must be aligned at card size.
+    addr_second := Add(ShlI(last_card_offset).Imm(Constants::CARD_TABLE_CARD_BITS).word, min_addr).word
+    addr_second_ref := Cast(addr_second).SrcType(Options.arch_64_bits? ? "DataType::UINT64" :
+        "DataType::UINT32").ref_uint
+    if defines.DEBUG
+      If(AndI(addr_second_ref).Imm(Constants::CARD_ALIGNMENT_MASK).ref_uint, 0).NE.Unlikely {
+        Intrinsic(:UNREACHABLE).Terminator.void
+      }
+    end
+    LiveOut(addr_second_ref).DstReg(regmap[:arg0]).ref_uint
+    ep_offset = get_entrypoint_offset("POST_INTER_REGION_BARRIER_TWO_CARDS_SLOW")
+    Intrinsic(:TAIL_CALL).AddImm(ep_offset).MethodAsImm("PostInterRegionBarrierTwoCardsSlow").Terminator.void
+  }
+
+  addr_first_ref := Cast(Bitcast(addr_first).SrcType("DataType::POINTER").word).SrcType(Options.arch_64_bits? ?
+      "DataType::UINT64" : "DataType::UINT32").ref_uint
+  LiveOut(addr_first_ref).DstReg(regmap[:arg0]).ref_uint
+  ep_offset = get_entrypoint_offset("POST_INTER_REGION_BARRIER_SLOW")
+  Intrinsic(:TAIL_CALL).AddImm(ep_offset).MethodAsImm("PostInterRegionBarrierSlow").Terminator.void
+end # post_inter_region_barrier
+
+scoped_macro(:post_inter_generational_barrier) do |obj|
+  min_addr := LoadI(%tr).Imm(Constants::TLS_CARD_TABLE_MIN_ADDR_OFFSET).word
+  cards := LoadI(%tr).Imm(Constants::TLS_CARD_TABLE_ADDR_OFFSET).ptr
+
+  # GCGenBarrierSet just ignores the offset to the data and count and works with the dst object only.
+  mem_word := Bitcast(obj).word
+  card_offset := ShrI(Sub(mem_word, min_addr).word).Imm(Constants::CARD_TABLE_CARD_BITS).word
+  card := Add(cards, card_offset).ptr
+  StoreI(card, Constants::CARD_DIRTY_VALUE).Imm(Constants::CARD_VALUE_OFFSET).u8
+end # post_inter_generational_barrier
