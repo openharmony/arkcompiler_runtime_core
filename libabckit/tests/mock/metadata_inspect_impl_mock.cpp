@@ -1108,6 +1108,27 @@ AbckitString *TypeGetName(AbckitType *type)
     return DEFAULT_STRING;
 }
 
+size_t TypeGetRank(AbckitType *type)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(type == DEFAULT_TYPE);
+    return DEFAULT_SIZE_T;
+}
+
+bool TypeIsUnion(AbckitType *type)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(type == DEFAULT_TYPE);
+    return DEFAULT_BOOL;
+}
+
+bool TypeEnumerateUnionTypes(AbckitType *type, void *data, bool (*cb)(AbckitType *unionType, void *data))
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(type == DEFAULT_TYPE);
+    return cb(DEFAULT_TYPE, data);
+}
+
 // ========================================
 // Value
 // ========================================
@@ -1301,6 +1322,9 @@ static AbckitInspectApi g_inspectApiImpl = {
     TypeGetTypeId,
     TypeGetReferenceClass,
     TypeGetName,
+    TypeGetRank,
+    TypeIsUnion,
+    TypeEnumerateUnionTypes,
 
     // ========================================
     // Value

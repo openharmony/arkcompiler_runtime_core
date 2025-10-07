@@ -19,6 +19,7 @@
 
 #include "libabckit/c/statuses.h"
 #include "libabckit/src/macros.h"
+#include "macros.h"
 #include "scoped_timer.h"
 
 #include "libabckit/src/metadata_inspect_impl.h"
@@ -119,6 +120,66 @@ extern "C" AbckitType *CreateReferenceType(AbckitFile *file, AbckitCoreClass *kl
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     LIBABCKIT_BAD_ARGUMENT(klass, nullptr);
     return GetOrCreateType(file, AbckitTypeId::ABCKIT_TYPE_ID_REFERENCE, 0, klass, nullptr);
+}
+
+extern "C" void TypeSetName(AbckitType *type, const char *name, size_t len)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT_VOID(type);
+    LIBABCKIT_BAD_ARGUMENT_VOID(name);
+
+    switch (type->file->frontend) {
+        case Mode::STATIC:
+            TypeSetNameStatic(type, name, len);
+            break;
+        case Mode::DYNAMIC:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            break;
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
+}
+
+extern "C" void TypeSetRank(AbckitType *type, size_t rank)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT_VOID(type);
+
+    switch (type->file->frontend) {
+        case Mode::STATIC:
+            TypeSetRankStatic(type, rank);
+            break;
+        case Mode::DYNAMIC:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            break;
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
+}
+
+extern "C" AbckitType *CreateUnionType(AbckitFile *file, AbckitType **types, size_t size)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(file, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(types, nullptr);
+    switch (file->frontend) {
+        case Mode::STATIC:
+            return CreateUnionTypeStatic(file, types, size);
+        case Mode::DYNAMIC:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return nullptr;
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
 }
 
 // ========================================
@@ -504,6 +565,9 @@ AbckitModifyApi g_modifyApiImpl = {
 
     CreateType,
     CreateReferenceType,
+    TypeSetName,
+    TypeSetRank,
+    CreateUnionType,
 
     // ========================================
     // Value

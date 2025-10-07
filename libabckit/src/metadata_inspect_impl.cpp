@@ -2083,6 +2083,51 @@ extern "C" AbckitString *TypeGetName(AbckitType *type)
     return type->name;
 }
 
+extern "C" size_t TypeGetRank(AbckitType *type)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(type, 0);
+
+    return type->rank;
+}
+
+extern "C" bool TypeIsUnion(AbckitType *type)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(type, false);
+
+    switch (type->file->frontend) {
+        case Mode::DYNAMIC:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
+        case Mode::STATIC:
+            return TypeIsUnionStatic(type);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
+}
+
+extern "C" bool TypeEnumerateUnionTypes(AbckitType *type, void *data, bool (*cb)(AbckitType *type, void *data))
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(type, false);
+    LIBABCKIT_BAD_ARGUMENT(cb, false);
+
+    switch (type->file->frontend) {
+        case Mode::STATIC:
+            return TypeEnumerateUnionTypesStatic(type, data, cb);
+        case Mode::DYNAMIC:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
+    }
+}
+
 // ========================================
 // Value
 // ========================================
@@ -2499,6 +2544,9 @@ AbckitInspectApi g_inspectApiImpl = {
     TypeGetTypeId,
     TypeGetReferenceClass,
     TypeGetName,
+    TypeGetRank,
+    TypeIsUnion,
+    TypeEnumerateUnionTypes,
 
     // ========================================
     // Value

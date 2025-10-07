@@ -257,6 +257,28 @@ AbckitLiteral *CreateLiteralMethod(AbckitFile *file, AbckitCoreFunction *functio
     return DEFAULT_LITERAL;
 }
 
+void TypeSetName(AbckitType *type, const char *name, size_t /*len*/)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(type == DEFAULT_TYPE);
+    EXPECT_TRUE(name == DEFAULT_CONST_CHAR);
+}
+
+void TypeSetRank(AbckitType *type, size_t rank)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(type == DEFAULT_TYPE);
+    EXPECT_TRUE(rank == DEFAULT_SIZE_T);
+}
+
+AbckitType *CreateUnionType(AbckitFile *file, AbckitType **types, size_t size)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(file == DEFAULT_FILE);
+    EXPECT_TRUE(types == DEFAULT_TYPE_PTR);
+    EXPECT_TRUE(size == DEFAULT_SIZE_T);
+    return DEFAULT_TYPE;
+}
 // NOLINTEND(readability-identifier-naming)
 
 static AbckitModifyApi g_modifyApiImpl = {
@@ -313,6 +335,9 @@ static AbckitModifyApi g_modifyApiImpl = {
 
     CreateType,
     CreateReferenceType,
+    TypeSetName,
+    TypeSetRank,
+    CreateUnionType,
 
     // ========================================
     // Value

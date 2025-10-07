@@ -634,7 +634,7 @@ TEST_F(LibAbcKitArkTSModifyApiClassTests, ClassSetName2)
 }
 
 // Test: test-kind=api, api=ArktsModifyApiImpl::ClassAddField, abc-kind=ArkTS2, category=positive, extension=c
-TEST_F(LibAbcKitArkTSModifyApiClassTests, ClassAddField)
+TEST_F(LibAbcKitArkTSModifyApiClassTests, ClassAddField1)
 {
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/class/classset_static.abc", &file);

@@ -82,6 +82,10 @@ AbckitType *GetOrCreateType(
     std::variant<AbckitCoreClass *, AbckitCoreInterface *, AbckitCoreEnum *, std::nullptr_t> reference,
     AbckitString *name);
 
+void TypeSetNameHelper(AbckitType *type, const char *name, size_t len);
+
+void TypeSetRankHelper(AbckitType *type, size_t rank);
+
 void AddFunctionUserToAbckitType(AbckitType *abckitType, AbckitCoreFunction *function);
 
 void AddFieldUserToAbckitType(AbckitType *abckitType,

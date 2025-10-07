@@ -363,6 +363,59 @@ TEST_F(LibAbcKitModifyApiFunctionsTest, StaticFunctionSetReturnType4)
     ASSERT_EQ(typeId, ABCKIT_TYPE_ID_VOID);
     g_impl->closeFile(file);
 }
+
+// Test: test-kind=api, api=FunctionSetReturnTypeStatic, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitModifyApiFunctionsTest, StaticFunctionSetReturnType5)
+{
+    helpers::TransformMethod(
+        INITIAL_STATIC, MODIFIED_STATIC, "add3",
+        [&](AbckitFile *file, AbckitCoreFunction *method, AbckitGraph *graph) {
+            // int to int | string
+            auto *types = new AbckitType *[2];
+            const char *typeIntName = "std.core.Int";
+            types[0] = g_implM->createType(file, ABCKIT_TYPE_ID_REFERENCE);
+            g_implM->typeSetName(types[0], typeIntName, strlen(typeIntName));
+            ASSERT_NE(types[0], nullptr);
+
+            const char *typeStringName = "std.core.String";
+            types[1] = g_implM->createType(file, ABCKIT_TYPE_ID_REFERENCE);
+            g_implM->typeSetName(types[1], typeStringName, strlen(typeStringName));
+            ASSERT_NE(types[1], nullptr);
+
+            auto *unionType = g_implM->createUnionType(file, types, 2);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+            ASSERT_NE(unionType, nullptr);
+
+            auto *arktsFunc = method->GetArkTSImpl();
+            bool success = g_arktsModifyApiImpl->functionSetReturnType(arktsFunc, unionType);
+            ASSERT_TRUE(success) << "Failed to set return type to function";
+
+            delete[] types;
+        },
+        [](AbckitGraph *) {});
+    auto *file = g_impl->openAbc(MODIFIED_STATIC, strlen(MODIFIED_STATIC));
+    ASSERT_NE(file, nullptr);
+    auto *retType = g_implI->functionGetReturnType(helpers::FindMethodByName(file, "add3"));
+    ASSERT_NE(retType, nullptr);
+    auto typeId = g_implI->typeGetTypeId(retType);
+    ASSERT_EQ(typeId, ABCKIT_TYPE_ID_REFERENCE);
+    ASSERT_TRUE(g_implI->typeIsUnion(retType));
+    auto typeName = std::string(g_implI->abckitStringToString(g_implI->typeGetName(retType)));
+    auto expectedTypeName = std::string("{Ustd.core.Int,std.core.String}");
+    ASSERT_EQ(typeName, expectedTypeName);
+    std::vector<std::string> unionTypes;
+    g_implI->typeEnumerateUnionTypes(retType, &unionTypes, [](AbckitType *type, void *data) {
+        auto unionTypes = (std::vector<std::string> *)data;
+        auto typeName = std::string(g_implI->abckitStringToString(g_implI->typeGetName(type)));
+        unionTypes->push_back(typeName);
+        return true;
+    });
+    std::vector<std::string> expectedUnionTypes = {"std.core.Int", "std.core.String"};
+    ASSERT_EQ(unionTypes, expectedUnionTypes);
+
+    g_impl->closeFile(file);
+}
+
 // Test: test-kind=api, api=FunctionSetReturnTypeStatic, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitModifyApiFunctionsTest, InstanceFunctionSetReturnType)
 {

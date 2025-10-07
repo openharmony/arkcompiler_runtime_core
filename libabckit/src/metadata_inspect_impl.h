@@ -845,6 +845,7 @@ struct AbckitType {
     AbckitTypeId id = ABCKIT_TYPE_ID_INVALID;
     size_t rank = 0;
     AbckitString *name = nullptr;
+    AbckitFile *file = nullptr;
 
     /*
      * If it is a union type, this field will record each type. name will store union name and other field in this case

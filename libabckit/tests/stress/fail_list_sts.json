@@ -227,5 +227,8 @@
     "/tmp/abckit_test_ets/std/core/Object.ets": 1,
     "/tmp/abckit_test_ets/regression/verifer_const_fold.ets": 1,
     "/tmp/abckit_test_ets/spec/07.expressions/7.32.Lambda_Expressions/correctAsyncLambdaReturnValue.ets": 1,
-    "/tmp/abckit_test_ets/spec/05.Generics/tuple_as_generic_args_0060.ets": 1
+    "/tmp/abckit_test_ets/spec/05.Generics/tuple_as_generic_args_0060.ets": 1,
+    "/tmp/abckit_test_ets/std/core/ClassTest.ets": 1,
+    "/tmp/abckit_test_ets/std/core/ReflectMethodTest.ets": 1,
+    "/tmp/abckit_test_ets/std/core/MethodAllTest.ets": 1
 }

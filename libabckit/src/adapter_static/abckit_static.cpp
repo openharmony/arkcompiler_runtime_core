@@ -841,30 +841,39 @@ static void CollectExternalModules(pandasm::Program *prog, AbckitFile *file)
             continue;
         }
 
+        std::vector<std::string> moduleNames;
         pandasm::Type type = pandasm::Type::FromName(recordName);
         if (type.IsUnion()) {
             LIBABCKIT_LOG(DEBUG) << "Record:" << recordName << " is a union\n";
-            continue;
+            auto recordNames = type.GetComponentNames();
+            for (auto &recordName : recordNames) {
+                auto [moduleName, _] = ClassGetNames(recordName);
+                moduleNames.push_back(moduleName);
+            }
+        } else {
+            auto [moduleName, _] = ClassGetNames(recordName);
+            moduleNames.push_back(moduleName);
         }
 
-        auto [moduleName, _] = ClassGetNames(recordName);
-        if (container->nameToModule.find(moduleName) != container->nameToModule.end()) {
-            continue;
-        }
+        for (auto &moduleName : moduleNames) {
+            if (container->nameToModule.find(moduleName) != container->nameToModule.end()) {
+                continue;
+            }
 
-        if (container->nameToNamespace.find(moduleName) != container->nameToNamespace.end()) {
-            continue;
-        }
+            if (container->nameToNamespace.find(moduleName) != container->nameToNamespace.end()) {
+                continue;
+            }
 
-        if (prog->recordTable.find(moduleName) != prog->recordTable.end()) {
-            LIBABCKIT_LOG(DEBUG) << "Found External Namespace: " << moduleName << '\n';
-            container->namespaces.emplace_back(CreateNamespace(prog->recordTable.at(moduleName), moduleName));
-            container->nameToNamespace.emplace(moduleName, container->namespaces.back().get());
-            continue;
-        }
+            if (prog->recordTable.find(moduleName) != prog->recordTable.end()) {
+                LIBABCKIT_LOG(DEBUG) << "Found External Namespace: " << moduleName << '\n';
+                container->namespaces.emplace_back(CreateNamespace(prog->recordTable.at(moduleName), moduleName));
+                container->nameToNamespace.emplace(moduleName, container->namespaces.back().get());
+                continue;
+            }
 
-        LIBABCKIT_LOG(DEBUG) << "Found External Module: " << moduleName << '\n';
-        CreateExternalModule(file, moduleName, record);
+            LIBABCKIT_LOG(DEBUG) << "Found External Module: " << moduleName << '\n';
+            CreateExternalModule(file, moduleName, record);
+        }
     }
 }
 

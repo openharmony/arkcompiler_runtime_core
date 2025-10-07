@@ -140,6 +140,12 @@ AbckitString *LiteralGetStringStatic(AbckitLiteral *lit);
 AbckitLiteralTag LiteralGetTagStatic(AbckitLiteral *lit);
 
 // ========================================
+// Type
+// ========================================
+bool TypeIsUnionStatic(AbckitType *type);
+bool TypeEnumerateUnionTypesStatic(AbckitType *type, void *data, bool (*cb)(AbckitType *type, void *data));
+
+// ========================================
 // Value
 // ========================================
 

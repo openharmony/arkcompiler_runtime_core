@@ -39,4 +39,49 @@ TEST_F(LibAbcKitCppMockTestType, Type_GetTypeId)
     ASSERT_TRUE(CheckMockedStackEmpty());
 }
 
+// Test: test-kind=mock, api=Type::GetRank, abc-kind=ArkTS1, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockTestType, Type_GetRank)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File f(DEFAULT_PATH);
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        auto t = abckit::mock::helpers::GetMockType(f);
+        ASSERT_TRUE(t.GetRank() == DEFAULT_SIZE_T);
+        ASSERT_TRUE(CheckMockedApi("TypeGetRank"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
+
+// Test: test-kind=mock, api=Type::SetName, abc-kind=ArkTS1, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockTestType, Type_SetName)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File f(DEFAULT_PATH);
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        auto t = abckit::mock::helpers::GetMockType(f);
+        t.SetName(DEFAULT_STRING);
+        ASSERT_TRUE(CheckMockedApi("TypeSetName"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
+
+// Test: test-kind=mock, api=Type::SetRank, abc-kind=ArkTS1, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockTestType, Type_SetRank)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File f(DEFAULT_PATH);
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        auto t = abckit::mock::helpers::GetMockType(f);
+        t.SetRank(DEFAULT_SIZE_T);
+        ASSERT_TRUE(CheckMockedApi("TypeSetRank"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
+
 }  // namespace libabckit::cpp_test

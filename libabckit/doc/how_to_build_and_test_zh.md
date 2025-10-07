@@ -43,7 +43,7 @@ repo forall -c 'git lfs pull'
 # debug模式
 ./ark.py mac_arm64.debug abckit_packages --gn-args="is_standard_system=true abckit_enable=true enable_cmc_gc=false"
 # release模式
-./ark.py mac_arm64.release abckit_packages --gn-args="is_standard_system=true abckit_enable=true enable_cmc_gc=false"
+./ark.py mac_arm64.release abckit_packages --gn-args="is_standard_system=true abckit_enable=true abckit_enable_tests=true enable_cmc_gc=false"
 ```
 
 ## 构建产物的位置
@@ -62,18 +62,18 @@ repo forall -c 'git lfs pull'
 
 ```sh
 # debug模式
-./ark.py x64.debug abckit_tests --gn-args="is_standard_system=true abckit_enable=true enable_cmc_gc=false"
+./ark.py x64.debug abckit_tests --gn-args="is_standard_system=true abckit_enable=true abckit_enable_tests=true enable_cmc_gc=false"
 # release模式
-./ark.py x64.release abckit_tests --gn-args="is_standard_system=true abckit_enable=true enable_cmc_gc=false"
+./ark.py x64.release abckit_tests --gn-args="is_standard_system=true abckit_enable=true abckit_enable_tests=true enable_cmc_gc=false"
 ```
 
 ## 使用 Sanitizer 运行单元测试
 
 ```sh
 # debug模式
-./ark.py x64.debug abckit_tests --gn-args="is_standard_system=true abckit_enable=true abckit_with_sanitizers=true enable_cmc_gc=false"
+./ark.py x64.debug abckit_tests --gn-args="is_standard_system=true abckit_enable=true abckit_with_sanitizers=true abckit_enable_tests=true enable_cmc_gc=false"
 # release模式
-./ark.py x64.release abckit_tests --gn-args="is_standard_system=true abckit_enable=true abckit_with_sanitizers=true enable_cmc_gc=false"
+./ark.py x64.release abckit_tests --gn-args="is_standard_system=true abckit_enable=true abckit_with_sanitizers=true abckit_enable_tests=true enable_cmc_gc=false"
 ```
 
 # 如何使用 AbcKit

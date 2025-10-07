@@ -1364,7 +1364,12 @@ bool FunctionSetReturnTypeStatic(AbckitArktsFunction *func, AbckitType *abckitTy
     LIBABCKIT_INTERNAL_ERROR(prog, false);
 
     std::string oldMangleName = abckit::util::GenerateFunctionMangleName(funcImpl->name, *funcImpl);
-    ark::pandasm::Type type(abckit::util::GetTypeName(coreFunc, abckitType, false), abckitType->rank);
+    // ark::pandasm::Type type(abckit::util::GetTypeName(coreFunc, abckitType, false), abckitType->rank);
+    auto typeDescriptor = abckit::util::GetTypeName(coreFunc, abckitType, false);
+    for (size_t i = 0; i < abckitType->rank; i++) {
+        typeDescriptor += "[]";
+    }
+    ark::pandasm::Type type = ark::pandasm::Type::FromName(typeDescriptor);
     funcImpl->returnType = type;
     std::string newMangleName = abckit::util::GenerateFunctionMangleName(funcImpl->name, *funcImpl);
     if (!abckit::util::UpdateFunctionTableKey(prog, funcImpl, funcImpl->name, oldMangleName, newMangleName)) {
@@ -2294,6 +2299,40 @@ bool InterfaceSetOwningModuleStatic(AbckitCoreInterface *iface, AbckitCoreModule
     }
     iface->owningModule = module;
     return true;
+}
+
+// ========================================
+// Type
+// ========================================
+
+void TypeSetNameStatic(AbckitType *type, const char *name, size_t len)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    TypeSetNameHelper(type, name, len);
+}
+
+void TypeSetRankStatic(AbckitType *type, size_t rank)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    TypeSetRankHelper(type, rank);
+}
+
+AbckitType *CreateUnionTypeStatic(AbckitFile *file, AbckitType **types, size_t size)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    if (size < 2) {
+        LIBABCKIT_LOG(DEBUG) << "Size of the union type to be created is less than 2\n";
+        statuses::SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
+    auto unionType = GetOrCreateType(file, AbckitTypeId::ABCKIT_TYPE_ID_REFERENCE, 0, nullptr, nullptr);
+    for (size_t i = 0; i < size; i++) {
+        unionType->types.emplace_back(types[i]);
+    }
+    return unionType;
 }
 
 // NOLINTNEXTLINE(modernize-avoid-c-arrays,cppcoreguidelines-avoid-c-arrays)

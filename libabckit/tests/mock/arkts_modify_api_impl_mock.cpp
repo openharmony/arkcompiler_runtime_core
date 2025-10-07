@@ -611,6 +611,29 @@ void AnnotationRemoveAnnotationElement(AbckitArktsAnnotation *anno, AbckitArktsA
     EXPECT_TRUE(elem == DEFAULT_ANNOTATION_ELEMENT);
 }
 
+void TypeSetName(AbckitType *type, const char *name)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(type == DEFAULT_TYPE);
+    EXPECT_TRUE(name == DEFAULT_CONST_CHAR);
+}
+
+void TypeSetRank(AbckitType *type, size_t rank)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(type == DEFAULT_TYPE);
+    EXPECT_TRUE(rank == DEFAULT_SIZE_T);
+}
+
+AbckitType *CreateUnionType(AbckitType *type, AbckitType **types, size_t size)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(type == DEFAULT_TYPE);
+    EXPECT_TRUE(types == DEFAULT_TYPE_PTR);
+    EXPECT_TRUE(size == DEFAULT_SIZE_T);
+    return DEFAULT_TYPE;
+}
+
 AbckitArktsModifyApi g_arktsModifyApiImpl = {
 
     // ========================================
@@ -704,7 +727,6 @@ AbckitArktsModifyApi g_arktsModifyApiImpl = {
     // ========================================
     // Type
     // ========================================
-
     // ========================================
     // Value
     // ========================================

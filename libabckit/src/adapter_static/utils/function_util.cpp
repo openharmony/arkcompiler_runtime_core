@@ -17,6 +17,7 @@
 #include "libabckit/c/statuses.h"
 #include "libabckit/src/macros.h"
 #include "libabckit/src/adapter_static/metadata_inspect_static.h"
+#include "libabckit/src/adapter_static/string_util.h"
 #include "libabckit/src/metadata_inspect_impl.h"
 #include "static_core/assembler/assembly-program.h"
 #include <algorithm>
@@ -109,6 +110,9 @@ void ReplaceInstructionIds(ark::pandasm::Program *prog, ark::pandasm::Function *
 
 static std::string GetReferenceTypeName(AbckitCoreFunction *coreFunc, const AbckitType *type)
 {
+    if (!type->types.empty()) {
+        return libabckit::StringUtil::GetTypeNameStr(type);
+    }
     AbckitString *classNameStr = libabckit::ClassGetNameStatic(type->GetClass());
     if (classNameStr == nullptr) {
         LIBABCKIT_LOG(ERROR) << "[Error] Class name is null" << std::endl;

@@ -99,6 +99,8 @@ extern const size_t DEFAULT_SIZE_T;
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFAULT_TYPE (reinterpret_cast<AbckitType *>(0xdead0021))
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define DEFAULT_TYPE_PTR (reinterpret_cast<AbckitType **>(0xdead0025))
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFAULT_FILE_VERSION (reinterpret_cast<AbckitFileVersion>(0xdead0022))
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFAULT_BB (reinterpret_cast<AbckitBasicBlock *>(0xdead0023))

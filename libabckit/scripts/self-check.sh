@@ -65,7 +65,7 @@ build_standalone() {
     set -e
     rm -rf out/$TARGET
 
-    ./ark.py $TARGET abckit_packages --gn-args="is_standard_system=true abckit_with_sanitizers=$SANITIZERS enable_notice_collection=false abckit_with_coverage=$COVERAGE ohos_components_checktype=3 abckit_enable=true enable_cmc_gc=false"
+    ./ark.py $TARGET abckit_packages --gn-args="is_standard_system=true abckit_with_sanitizers=$SANITIZERS enable_notice_collection=false abckit_with_coverage=$COVERAGE ohos_components_checktype=3 abckit_enable=true abckit_enable_tests=true enable_cmc_gc=false"
 
     set +e
 }

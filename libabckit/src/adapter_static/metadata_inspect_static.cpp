@@ -688,6 +688,27 @@ AbckitLiteralTag LiteralGetTagStatic(AbckitLiteral *lit)
 }
 
 // ========================================
+// Type
+// ========================================
+
+bool TypeIsUnionStatic(AbckitType *type)
+{
+    LIBABCKIT_LOG_FUNC;
+    return !type->types.empty();
+}
+
+bool TypeEnumerateUnionTypesStatic(AbckitType *type, void *data, bool (*cb)(AbckitType *type, void *data))
+{
+    LIBABCKIT_LOG_FUNC;
+    for (auto &t : type->types) {
+        if (!cb(t, data)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// ========================================
 // Value
 // ========================================
 

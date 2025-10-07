@@ -484,6 +484,7 @@ test_ets_files = [
   "ut/metadata_core/inspect_api/literals/literals_static",
   "ut/metadata_core/inspect_api/values/values_static",
   "ut/metadata_core/inspect_api/types/types_static",
+  "ut/metadata_core/inspect_api/types/union_types_static",
   "ut/metadata_core/modify_api/functions/functions_static",
   "ut/metadata_core/modify_api/strings/strings_static",
   "ut/metadata_core/modify_api/types/types_static",

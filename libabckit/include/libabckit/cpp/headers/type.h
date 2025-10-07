@@ -18,6 +18,10 @@
 
 #include "base_classes.h"
 #include "core/class.h"
+#include "libabckit/c/abckit.h"
+
+#include <string>
+#include <vector>
 
 namespace abckit {
 
@@ -130,6 +134,66 @@ public:
         std::string str = conf->cIapi_->abckitStringToString(cString);
         CheckError(conf);
         return str;
+    }
+
+    /**
+     * @brief Returns the Rank of type
+     * @return Returns the Rank of type
+     */
+    inline size_t GetRank() const
+    {
+        auto ret = GetApiConfig()->cIapi_->typeGetRank(GetView());
+        CheckError(GetApiConfig());
+        return ret;
+    }
+
+    /**
+     * @brief Sets the Name of type
+     * @param name The Name of type
+     */
+    inline void SetName(const std::string &name)
+    {
+        GetApiConfig()->cMapi_->typeSetName(GetView(), name.c_str(), name.size());
+        CheckError(GetApiConfig());
+    }
+
+    /**
+     * @brief Sets the Rank of type
+     * @param rank The Rank of type
+     */
+    inline void SetRank(size_t rank)
+    {
+        GetApiConfig()->cMapi_->typeSetRank(GetView(), rank);
+        CheckError(GetApiConfig());
+    }
+
+    /**
+     * @brief Returns true if the type is a union
+     * @return true if the type is a union
+     */
+    inline bool IsUnion() const
+    {
+        auto ret = GetApiConfig()->cIapi_->typeIsUnion(GetView());
+        CheckError(GetApiConfig());
+        return ret;
+    }
+
+    /**
+     * @brief Enumerates the union types
+     * @param types The union types
+     * @return true if the enumeration is successful
+     */
+    inline bool EnumerateUnionTypes(std::vector<Type> &types) const
+    {
+        Payload<std::vector<Type> *> payload {&types, GetApiConfig(), GetResource()};
+        auto ret =
+            GetApiConfig()->cIapi_->typeEnumerateUnionTypes(GetView(), &payload, [](AbckitType *type, void *data) {
+                const auto &payload = *static_cast<Payload<std::vector<Type> *> *>(data);
+                payload.data->push_back(Type(type, payload.config, payload.resource));
+                return true;
+            });
+        CheckError(GetApiConfig());
+        return ret;
     }
 
 protected:

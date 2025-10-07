@@ -221,6 +221,38 @@ struct CAPI_EXPORT AbckitInspectApi {
      */
     AbckitString *(*typeGetName)(AbckitType *t);
 
+    /**
+     * @brief Returns rank of the given type `t`.
+     * @return Rank of the `t` argument.
+     * @param [ in ] t - Type to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `t` is NULL.
+     */
+    size_t (*typeGetRank)(AbckitType *t);
+
+    /**
+     * @brief Returns boolean value that tells if the given type `t` is a union.
+     * @return Boolean value that tells if the given type `t` is a union.
+     * @param [ in ] t - Type to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `t` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for dynamic type.
+     */
+    bool (*typeIsUnion)(AbckitType *t);
+
+    /**
+     * @brief Enumerates union types of the given type `t`, invoking callback `cb` for each of it's
+     * union types.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] t - Type to be inspected.
+     * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
+     * it is invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `t` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for dynamic type.
+     */
+    bool (*typeEnumerateUnionTypes)(AbckitType *t, void *data, bool (*cb)(AbckitType *type, void *data));
+
     /* ========================================
      * Value
      * ======================================== */
@@ -1884,6 +1916,41 @@ struct CAPI_EXPORT AbckitModifyApi {
      * @note Allocates
      */
     AbckitType *(*createReferenceType)(AbckitFile *file, AbckitCoreClass *klass);
+
+    /**
+     * @brief Sets name for type `type`.
+     * @return None.
+     * @param [ in ] type - Type to be modified.
+     * @param [ in ] name - Name to be set.
+     * @param [ in ] len - Length of the name.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `type` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for dynamic type.
+     */
+    void (*typeSetName)(AbckitType *type, const char *name, size_t len);
+
+    /**
+     * @brief Sets rank for type `type`.
+     * @return None.
+     * @param [ in ] type - Type to be modified.
+     * @param [ in ] rank - Rank to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `type` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for dynamic type.
+     */
+    void (*typeSetRank)(AbckitType *type, size_t rank);
+
+    /**
+     * @brief Creates union type according to the given types `types`.
+     * @return Pointer to the `AbckitType`.
+     * @param [ in ] file - Binary file to be modified.
+     * @param [ in ] types - Types from which the union type is created.
+     * @param [ in ] size - Size of the union type to be created.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `file` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `types` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `size` is less than 2.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for dynamic type.
+     */
+    AbckitType *(*createUnionType)(AbckitFile *file, AbckitType **types, size_t size);
 
     /* ========================================
      * Value

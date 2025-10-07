@@ -328,6 +328,27 @@ TEST_F(LibAbcKitNullptrTestsInspectApiImpl1, typeGetName)
     helpers_nullptr::TestNullptr(g_inspectApiImp->typeGetName);
 }
 
+// Test: test-kind=api, api=InspectApiImpl::typeGetRank,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsInspectApiImpl1, typeGetRank)
+{
+    helpers_nullptr::TestNullptr(g_inspectApiImp->typeGetRank);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::typeIsUnion,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsInspectApiImpl1, typeIsUnion)
+{
+    helpers_nullptr::TestNullptr(g_inspectApiImp->typeIsUnion);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::typeEnumerateUnionTypes,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsInspectApiImpl1, typeEnumerateUnionTypes)
+{
+    helpers_nullptr::TestNullptr(g_inspectApiImp->typeEnumerateUnionTypes);
+}
+
 // Test: test-kind=api, api=InspectApiImpl::typeGetReferenceClass,
 // abc-kind=NoABC, category=negative-nullptr, extension=c
 TEST_F(LibAbcKitNullptrTestsInspectApiImpl1, typeGetReferenceClass)

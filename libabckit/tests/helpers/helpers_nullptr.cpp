@@ -2392,6 +2392,21 @@ void TestNullptr(AbckitString *(*apiToCheck)(AbckitType *))
     ASSERT_EQ(apiToCheck(nullptr), nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
 }
+void TestNullptr(size_t (*apiToCheck)(AbckitType *))
+{
+    ASSERT_EQ(apiToCheck(nullptr), 0);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(bool (*apiToCheck)(AbckitType *))
+{
+    ASSERT_EQ(apiToCheck(nullptr), false);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(bool (*apiToCheck)(AbckitType *, void *, bool (*cb)(AbckitType *, void *)))
+{
+    ASSERT_EQ(apiToCheck(nullptr, g_void, [](AbckitType *, void *) { return false; }), false);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
 void TestNullptr(double (*apiToCheck)(AbckitValue *))
 {
     apiToCheck(nullptr);
@@ -3415,5 +3430,17 @@ void TestNullptr(AbckitArktsEnumField *(*apiToCheck)(AbckitArktsEnum *, const st
     ASSERT_EQ(apiToCheck(nullptr, g_constAbckitArktsFieldCreateParams), nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
 }
+void TestNullptr(void (*apiToCheck)(AbckitType *, const char *, size_t))
+{
+    apiToCheck(nullptr, nullptr, 0);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
 
+    apiToCheck(g_abckitType, nullptr, 0);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(void (*apiToCheck)(AbckitType *, size_t))
+{
+    apiToCheck(nullptr, 0);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
 }  // namespace libabckit::test::helpers_nullptr

@@ -15,6 +15,7 @@
  */
 
 #include "libabckit/src/adapter_static/helpers_static.h"
+#include "libabckit/src/adapter_static/string_util.h"
 #include "libabckit/src/helpers_common.h"
 #include "libabckit/src/macros.h"
 #include "libabckit/src/logger.h"
@@ -1272,6 +1273,9 @@ bool GraphDominatorsTreeAnalysisIsValid(ark::compiler::Graph *graph)
 std::string TypeToNameStatic(AbckitType *type)
 {
     if (type->id == ABCKIT_TYPE_ID_REFERENCE) {
+        if (!type->types.empty()) {
+            return libabckit::StringUtil::GetTypeNameStr(type);
+        }
         if (type->GetClass() == nullptr) {
             return "";
         }

@@ -165,6 +165,13 @@ void FunctionRemoveAnnotationStatic(AbckitCoreFunction *function, AbckitCoreAnno
 AbckitArktsAnnotation *ClassAddAnnotationStatic(AbckitCoreClass *klass,
                                                 const AbckitArktsAnnotationCreateParams *params);
 void ClassRemoveAnnotationStatic(AbckitCoreClass *klass, AbckitCoreAnnotation *anno);
+
+// ========================================
+// Type
+// ========================================
+void TypeSetNameStatic(AbckitType *type, const char *name, size_t len);
+void TypeSetRankStatic(AbckitType *type, size_t rank);
+AbckitType *CreateUnionTypeStatic(AbckitFile *file, AbckitType **types, size_t size);
 }  // namespace libabckit
 
 #endif

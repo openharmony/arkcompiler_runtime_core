@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "libabckit/src/adapter_dynamic/metadata_modify_dynamic.h"
+#include "libabckit/src/adapter_static/metadata_modify_static.h"
 #include "libabckit/src/helpers_common.h"
 #include "libabckit/src/macros.h"
 
@@ -436,6 +438,7 @@ AbckitType *GetOrCreateType(
     type->rank = rank;
     type->name = name;
     type->reference = reference;
+    type->file = file;
 
     if (const auto klass = std::get_if<AbckitCoreClass *>(&reference)) {
         if (*klass) {
@@ -457,6 +460,72 @@ AbckitType *GetOrCreateType(
 
     cache.insert({hash, std::move(type)});
     return cache[hash].get();
+}
+
+void TypeSetNameHelper(AbckitType *type, const char *name, size_t len)
+{
+    auto &cache = type->file->types;
+
+    size_t oldHash = 0;
+    oldHash = HashCombine(oldHash, (size_t)type->id);
+    oldHash = HashCombine(oldHash, type->rank);
+    oldHash = HashCombine(
+        oldHash, std::visit([](const auto &object) { return reinterpret_cast<size_t>(object); }, type->reference));
+    oldHash = HashCombine(oldHash, reinterpret_cast<size_t>(type->name));
+
+    std::unique_ptr<AbckitType> existingTypePtr;
+    if (cache.count(oldHash) == 1) {
+        existingTypePtr = std::move(cache[oldHash]);
+        cache.erase(oldHash);
+    }
+
+    if (type->file->frontend == Mode::DYNAMIC) {
+        type->name = CreateStringDynamic(type->file, name, len);
+    } else {
+        type->name = CreateStringStatic(type->file, name, len);
+    }
+
+    size_t newHash = 0;
+    newHash = HashCombine(newHash, (size_t)type->id);
+    newHash = HashCombine(newHash, type->rank);
+    newHash = HashCombine(
+        newHash, std::visit([](const auto &object) { return reinterpret_cast<size_t>(object); }, type->reference));
+    newHash = HashCombine(newHash, reinterpret_cast<size_t>(type->name));
+
+    if (existingTypePtr) {
+        cache.insert({newHash, std::move(existingTypePtr)});
+    }
+}
+
+void TypeSetRankHelper(AbckitType *type, size_t rank)
+{
+    auto &cache = type->file->types;
+
+    size_t oldHash = 0;
+    oldHash = HashCombine(oldHash, (size_t)type->id);
+    oldHash = HashCombine(oldHash, type->rank);
+    oldHash = HashCombine(
+        oldHash, std::visit([](const auto &object) { return reinterpret_cast<size_t>(object); }, type->reference));
+    oldHash = HashCombine(oldHash, reinterpret_cast<size_t>(type->name));
+
+    std::unique_ptr<AbckitType> existingTypePtr;
+    if (cache.count(oldHash) == 1) {
+        existingTypePtr = std::move(cache[oldHash]);
+        cache.erase(oldHash);
+    }
+
+    type->rank = rank;
+
+    size_t newHash = 0;
+    newHash = HashCombine(newHash, (size_t)type->id);
+    newHash = HashCombine(newHash, type->rank);
+    newHash = HashCombine(
+        newHash, std::visit([](const auto &object) { return reinterpret_cast<size_t>(object); }, type->reference));
+    newHash = HashCombine(newHash, reinterpret_cast<size_t>(type->name));
+
+    if (existingTypePtr) {
+        cache.insert({newHash, std::move(existingTypePtr)});
+    }
 }
 
 void AddFunctionUserToAbckitType(AbckitType *abckitType, AbckitCoreFunction *function)
