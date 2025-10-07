@@ -84,7 +84,8 @@ static_core/tests/benchmarks/                            @igelhaus
 static_core/tests/checked/                               @Prof @dingding5 ^chernykhsergey
 static_core/tests/panda/                                 @igelhaus
 static_core/tests/test-lists/                            ^amate ^sergeyandreev @kuchkovairina
-static_core/tests/tests-u-runner/                        ^amate @sergeyandreev @anton-sysoev @Nojpg
+static_core/tests/tests-u-runner-2/                      ^amate ^sergeyandreev @anton-sysoev ^Nojpg @shirunova_viktoria @kozhevnikova_elizaveta
+static_core/tests/tests-u-runner/                        ^amate ^sergeyandreev @anton-sysoev ^Nojpg @shirunova_viktoria @kozhevnikova_elizaveta
 static_core/tests/verifier-tests/                        @igelhaus
 static_core/tools/ark_js_napi_cli/                       @nazarovkonstantin @ipetrov ^rokashevichsvetlana ^kurnevichstanislav
 static_core/libpandabase/tests/genmc/                    @udav
@@ -194,6 +195,7 @@ static_core/plugins/ets/tests/interop_js/tests/checked/                       ^i
 static_core/plugins/ets/tests/interop_js/tests/compiler/                      ^igelhaus @nazarovkonstantin @ignatenkooleg ^rokashevichsvetlana @Prof @dingding5
 static_core/plugins/ets/tests/interop_js/tests/declgen_ets2ts/                @Nojpg ^igelhaus ^trubachevilya ^ivagin ^Prof  @chenmudan	^luobohua2025
 static_core/plugins/ets/tests/interop_js/tests/promise/                       @udav
+static_core/tests/tests-u-runner-2/runner/extensions/generators/ets_es_checked/generate-es-checked ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
 
 /AUTHORS @jokerxd-liu @dmitriitr @Prof @igelhaus
 /BUILD.gn @jokerxd-liu
