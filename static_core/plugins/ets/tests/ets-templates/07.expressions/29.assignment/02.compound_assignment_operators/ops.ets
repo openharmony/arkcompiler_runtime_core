@@ -13,20 +13,19 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
+{% for operation in operations %}
 /*---
 desc: >-
   A compound assignment expression of the form E1 op= E2 is equivalent to E1 = ((E1) op (E2)) as T,
   where T is the type of E1, except that E1 is evaluated only once.
-params: {{c.type}}, "{{c.op|safe}}="
+params: "{{operation.op|safe}}="
 ---*/
 
-function main(): int {
-    let v:{{c.type}} = {{c.v}}
-    let q:{{c.type}} = {{c.q}}
-    if ((v {{c.op}} q).to{{c.type}}() != (v {{c.op}}= q)) {
-        return 1
-    }
-    return 0
+function main() {
+    {% for c in operation.cases %}
+    let v_{{loop.index}}:{{c.type.lower()}} = {{c.v}}
+    let q_{{loop.index}}:{{c.type.lower()}} = {{c.q}}
+    arktest.assertEQ((v_{{loop.index}} {{operation.op}} q_{{loop.index}}).to{{c.type}}(), v_{{loop.index}} {{operation.op}}= q_{{loop.index}})
+    {% endfor %}
 }
 {% endfor %}
