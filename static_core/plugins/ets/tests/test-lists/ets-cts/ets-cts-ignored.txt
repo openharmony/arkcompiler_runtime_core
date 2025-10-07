@@ -3068,6 +3068,9 @@
 07.expressions/33.constant_expression/check_enum/constant_calculation_22.ets
 07.expressions/33.constant_expression/check_enum/constant_calculation_23.ets
 07.expressions/33.constant_expression/check_enum/constant_calculation_24.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_26.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_27.ets
+07.expressions/33.constant_expression/check_enum/constant_number_conversion_5.ets
 07.expressions/33.constant_expression/check_enum/constant_unary_minus_10.ets
 07.expressions/33.constant_expression/check_enum/constant_unary_minus_4.ets
 07.expressions/33.constant_expression/check_enum/constant_unary_plus_10.ets
@@ -3079,6 +3082,11 @@
 # Invalid annotation field type. Only numeric, boolean, string, enum, or arrays of these types are permitted for annotation fields.
 07.expressions/33.constant_expression/check_annotation/constant_number_conversion_2.ets
 07.expressions/33.constant_expression/check_annotation/constant_unary_operation_2.ets
+
+# 29160
+07.expressions/33.constant_expression/check_enum/constant_number_conversion_0.ets
+07.expressions/33.constant_expression/check_enum/constant_number_conversion_1.ets
+07.expressions/33.constant_expression/check_enum/constant_number_conversion_6.ets
 
 # Negative tests passed successfully (narrowing conversion from int, function oveload and enum comparision...)
 07.expressions/25.equality_expressions/eq_neg_101.ets

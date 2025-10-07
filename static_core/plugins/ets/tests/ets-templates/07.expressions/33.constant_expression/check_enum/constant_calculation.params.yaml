@@ -24,11 +24,11 @@ cases:
   - { type: short, value: 260, sign: '+', expected: 270  }
   - { type: short, value: 260, sign: '-', expected: 250  }
 
-  - { type: char, value: c'p', sign: '*', expected: 1120 }
-  - { type: char, value: c'p', sign: '/', expected: 11  }
-  - { type: char, value: c'p', sign: '%', expected: 2  }
-  - { type: char, value: c'p', sign: '+', expected: 122  }
-  - { type: char, value: c'p', sign: '-', expected: 102  }
+  - { type: char, value: c'p', sign: '*', expected: 1120, neg: 'compile-only,negative' }
+  - { type: char, value: c'p', sign: '/', expected: 11, neg: 'compile-only,negative'  }
+  - { type: char, value: c'p', sign: '%', expected: 2, neg: 'compile-only,negative'  }
+  - { type: char, value: c'p', sign: '+', expected: 122, neg: 'compile-only,negative'  }
+  - { type: char, value: c'p', sign: '-', expected: 102, neg: 'compile-only,negative'  }
 
   - { type: long, value: 5006,  sign: '*', expected: 50060 }
   - { type: long, value: 50006, sign: '/', expected: 5000 }

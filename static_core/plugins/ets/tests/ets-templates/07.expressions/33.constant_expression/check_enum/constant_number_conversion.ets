@@ -22,7 +22,7 @@ tags: [{{c.neg}}]
 
 const testValue: {{c.type}} = {{c.value}}
 
-enum TestEnum { One = testValue }
+enum TestEnum:{{c.type}} { One = testValue }
 
 function main() {
     arktest.assertEQ(TestEnum.One.valueOf(), {{c.expected}})
