@@ -28,7 +28,6 @@ function main(): void {
     let x = 13n
     let a = new A
     let ar: bigint[] = [-1n, 1n]
-    let r: Record<int, bigint> = {0: 42n}
 
     arktest.assertEQ(--x, 12n)
     arktest.assertEQ(x, 12n)
@@ -38,7 +37,4 @@ function main(): void {
 
     arktest.assertEQ(--ar[0], -2n)
     arktest.assertEQ(ar[0], -2n)
-
-    arktest.assertEQ(--r[0], 41n)
-    arktest.assertEQ(r[0], 41n)
 }

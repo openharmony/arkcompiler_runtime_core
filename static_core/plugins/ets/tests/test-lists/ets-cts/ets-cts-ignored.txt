@@ -851,9 +851,6 @@
 05.generics/03.utility_types/07.return_type_utility_type/return_type_func_4.ets
 05.generics/03.utility_types/07.return_type_utility_type/return_type_func_5.ets
 
-#28998
-05.generics/03.utility_types/09.nesting_utility_type/PartialWithGeneric.ets
-
 #27058
 07.expressions/01.evaluation_of_expressions/01.type_of_expression/standalone_expression_n_1.ets
 
@@ -1097,18 +1094,6 @@
 07.expressions/17.typeof_expression/comptime_8.ets
 07.expressions/17.typeof_expression/comptime_9.ets
 
-#28958 Unary inc for BigInt
-07.expressions/20.unary_expressions/01.postfix_increment/bigint.ets
-07.expressions/20.unary_expressions/02.postfix_decrement/bigint.ets
-07.expressions/20.unary_expressions/03.prefix_increment/bigint.ets
-07.expressions/20.unary_expressions/04.prefix_decrement/bigint.ets
-
-#28961 Unary inc for Record
-07.expressions/20.unary_expressions/01.postfix_increment/records.ets
-07.expressions/20.unary_expressions/02.postfix_decrement/records.ets
-07.expressions/20.unary_expressions/03.prefix_increment/records.ets
-07.expressions/20.unary_expressions/04.prefix_decrement/records.ets
-
 #28004 Exponentiation operator rejected
 07.expressions/21.multiplicative_expressions/04.exponentiation/inf_16.ets
 07.expressions/21.multiplicative_expressions/04.exponentiation/inf_17.ets
@@ -1295,10 +1280,6 @@
 09.classes/02.class_extension_clause/extension_clause_negative_8.ets
 09.classes/02.class_extension_clause/extension_clause_negative_9.ets
 09.classes/02.class_extension_clause/extension_clause_negative_10.ets
-
-#28738
-09.classes/03.class_implementation_clause/direct_interface_Implementation_twice.ets
-09.classes/03.class_implementation_clause/direct_interface_Implementation_twice_2.ets
 
 #26730
 09.classes/03.class_implementation_clause/01.implementing_interface_methods/class_overrides_interface_methods_call.ets
@@ -3048,9 +3029,6 @@
 18.annotations/05.standard_annotations/02.target_annotation/AnnotationTargets_60.ets
 18.annotations/05.standard_annotations/02.target_annotation/AnnotationTargets_80.ets
 18.annotations/05.standard_annotations/02.target_annotation/ClassAnnoTest.ets
-
-#29172
-18.annotations/05.standard_annotations/02.target_annotation/AnnotationTargets_20.ets
 
 ############
 # temporary place for the tests related to primitive types refactoring
