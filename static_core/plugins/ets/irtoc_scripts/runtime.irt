@@ -209,3 +209,198 @@ Label(:ValueFloatDone)
 Label(:Done)
   hash_code := Phi(hash_code_double, hash_code_float, hash_code_int, hash_code_short, hash_code_byte).u32
 end
+
+################################################################
+
+def GenerateGetHashCodeByValue(cgmode)
+  prefix = (cgmode == :NativePlus ? 'NativePlus': '')
+  function("GetHashCodeByValue#{prefix}".to_sym,
+          params: {obj: 'ref'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [cgmode]) {
+
+    if Options.arch == :arm32
+      Intrinsic(:UNREACHABLE).Terminator.void
+      next
+    end
+
+    klass := LoadI(obj).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+    If(isString(klass), 0).NE {
+      str := try_use_cached_flat_str(obj)
+      hash := fetchHashCodeString(str)
+      If(hash, 0).EQ.Unlikely {
+        Goto(:SlowPathEntrypointString)
+      }
+      Return(Cast(hash).u64).i64
+    }
+
+    flags := LoadI(klass).Imm(EtsConstants::ETS_CLASS_FLAGS_FROM_RUNTIME_CLASS_OFFSET).u32
+    If(isBoxedType(flags), 0).NE.Likely {
+      Return(Cast(calcHashCode(obj, flags)).u64).i64
+    }
+    If(isBigintType(flags), 0).NE.Unlikely {
+      Goto(:SlowPathEntrypointBigint)
+    }
+
+    If(isHashedObject(obj), 0).EQ.Unlikely {
+      Goto(:SlowPathEntrypointObject)
+    }
+
+    Return(Cast(fetchHashCodeObject(obj)).u64).i64
+
+Label(:SlowPathEntrypoint)  # jump here from try_use_cached_flat_str macro
+Label(:SlowPathEntrypointString)
+  if mode == :NativePlus
+    Return(Call(obj).Method('GetHashCodeStringSlowPath').i64).i64
+  else
+    entrypoint = get_entrypoint_offset("GET_HASH_CODE_STRING_ODD_SAVED")
+    Intrinsic(:SLOW_PATH_ENTRY, obj).AddImm(entrypoint).MethodAsImm("GetHashCodeStringOddSavedBridge").Terminator.i64
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  end
+
+Label(:SlowPathEntrypointBigint)
+  if mode == :NativePlus
+    Return(Call(obj).Method('GetHashCodeBigintSlowPath').i64).i64
+  else
+    entrypoint = get_entrypoint_offset("GET_HASH_CODE_BIGINT_ODD_SAVED")
+    Intrinsic(:SLOW_PATH_ENTRY, obj).AddImm(entrypoint).MethodAsImm("GetHashCodeBigintOddSavedBridge").Terminator.i64
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  end
+
+Label(:SlowPathEntrypointObject)
+  if mode == :NativePlus
+    Return(Call(obj).Method('GetHashCodeBigintSlowPath').i64).i64
+  else
+    entrypoint = get_entrypoint_offset("GET_HASH_CODE_OBJECT_ODD_SAVED")
+    Intrinsic(:SLOW_PATH_ENTRY, obj).AddImm(entrypoint).MethodAsImm("GetHashCodeObjectOddSavedBridge").Terminator.i64
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  end
+}
+end
+GenerateGetHashCodeByValue(:FastPath)
+#GenerateGetHashCodeByValue(:NativePlus)
+
+scoped_macro(:compare_float_vals) do |o1, o2, bits|
+  obj1_val := LoadI(o1).Imm(EtsConstants::BOX_PRIMITIVE_VALUE_OFFSET).send(:"u#{bits}")
+  obj2_val := LoadI(o2).Imm(EtsConstants::BOX_PRIMITIVE_VALUE_OFFSET).send(:"u#{bits}")
+
+  is_obj1_nan := send(:"isNan#{bits}", obj1_val)
+  is_obj2_nan := send(:"isNan#{bits}", obj2_val)
+
+  IfImm(Or(is_obj1_nan, is_obj2_nan).b).Imm(0).EQ.Likely {
+    obj1_f := Bitcast(obj1_val).send(:"f#{bits}")
+    obj2_f := Bitcast(obj2_val).send(:"f#{bits}")
+    res_not_nan := Compare(obj1_f, obj2_f).EQ.b
+  } Else {
+    res_nan := And(is_obj1_nan, is_obj2_nan).b
+  }
+
+  res := Phi(res_not_nan, res_nan).b
+end
+
+scoped_macro(:compare_int_vals) do |o1, o2, bits|
+  obj1_val := LoadI(o1).Imm(EtsConstants::BOX_PRIMITIVE_VALUE_OFFSET).send(:"u#{bits}")
+  obj2_val := LoadI(o2).Imm(EtsConstants::BOX_PRIMITIVE_VALUE_OFFSET).send(:"u#{bits}")
+  res := Compare(obj1_val, obj2_val).EQ.b
+end
+
+def GenerateSameValueZero(cgmode)
+  prefix = (cgmode == :NativePlus ? 'NativePlus': '')
+  function("SameValueZero#{prefix}".to_sym,
+          params: {o1: 'ref', o2: 'ref'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [cgmode]) {
+
+    if Options.arch == :arm32
+      Intrinsic(:UNREACHABLE).Terminator.void
+      next
+    end
+
+    If(o1, o2).EQ.Likely.b {
+      Return(1).b
+    }
+
+    If(o1, 0).EQ.Unlikely.b {
+      Return(0).b
+    }
+
+    If(o2, 0).EQ.Unlikely.b {
+      Return(0).b
+    }
+
+    klass1 := load_class(o1)
+    flags1 := LoadI(klass1).Imm(EtsConstants::ETS_CLASS_FLAGS_FROM_RUNTIME_CLASS_OFFSET).u32
+    If(isValueTypedType(flags1), 0).EQ.Likely.b {
+      Return(0).b
+    }
+
+    klass2 := load_class(o2)
+    flags2 := LoadI(klass2).Imm(EtsConstants::ETS_CLASS_FLAGS_FROM_RUNTIME_CLASS_OFFSET).u32
+    If(isValueTypedType(flags2), 0).EQ.Likely.b {
+      Return(0).b
+    }
+
+    If(isBoxedType(flags1), 0).NE.b {
+      If(isBoxedType(flags2), 0).EQ.b {
+        Goto(:SlowPathEntrypoint)
+      }
+
+      btype1 := getBoxedType(flags1)
+      btype2 := getBoxedType(flags2)
+      If(btype1, btype2).NE.b {
+        Goto(:SlowPathEntrypoint)
+      }
+
+      If(isInt(btype1), 1).EQ.b {
+        Return(compare_int_vals(o1, o2, 32).b).b
+      }
+
+      If(isDouble(btype1), 1).EQ.b {
+        Return(compare_float_vals(o1, o2, 64).b).b
+      }
+
+      If(isFloat(btype1), 1).EQ.b {
+        Return(compare_float_vals(o1, o2, 32).b).b
+      }
+
+      If(isLong(btype1), 1).EQ.b {
+        Return(compare_int_vals(o1, o2, 64).b).b
+      }
+
+      is_16 := Or(isChar(btype1), isShort(btype1)).b
+      If(is_16, 1).EQ.b {
+        Return(compare_int_vals(o1, o2, 16).b).b
+      } Else {
+        Return(compare_int_vals(o1, o2, 8).b).b
+      }
+    }
+
+    If(isString(klass1), 0).NE.b {
+      If(isString(klass1), 0).EQ.b {
+        Goto(:SlowPathEntrypoint)
+      }
+      ep_offset = get_entrypoint_offset("STRING_EQUALS_COMPRESSED")
+      LiveOut(o1).DstReg(regmap[:arg0]).ref
+      LiveOut(o2).DstReg(regmap[:arg1]).ref
+      Intrinsic(:TAIL_CALL).AddImm(ep_offset).MethodAsImm("StringEqualsCompressed").Terminator.b
+      Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+    }
+
+    nv := ets_nullvalue
+    If(o1, nv).EQ.Unlikely.b {
+      Return(0).b
+    }
+    If(o2, nv).EQ.Unlikely.b {
+      Return(0).b
+    }
+
+  Label(:SlowPathEntrypoint)
+    entrypoint = get_entrypoint_offset("SAME_VALUE_ZERO_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, o1, o2).AddImm(entrypoint).MethodAsImm("SameValueZeroUsualBridge").Terminator.b
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  }
+end
+
+GenerateSameValueZero(:FastPath)
