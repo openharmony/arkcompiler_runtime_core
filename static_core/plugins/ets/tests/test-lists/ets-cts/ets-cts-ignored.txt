@@ -1070,9 +1070,6 @@
 07.expressions/15.instanceof_expression/instanceof_147.ets
 07.expressions/15.instanceof_expression/instanceof_155.ets
 
-#30087 undefined instanceof Object
-07.expressions/15.instanceof_expression/instanceof_21.ets
-
 #29203 Warning: Type parameter is erased from type 'Array' when used in instanceof expression
 07.expressions/15.instanceof_expression/instanceof_161.ets
 07.expressions/15.instanceof_expression/instanceof_169.ets
