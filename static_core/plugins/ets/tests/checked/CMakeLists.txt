@@ -391,6 +391,7 @@ if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_lse_phi_test.ets)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_reserve_part30-44.ets ETS_STRINGS_CONCAT "false")
     endif()
+    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/codegen_new_obj_call.ets)
 endif()
 
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ani/direct_native.ets NATIVE SUPPORT_RELEASE)

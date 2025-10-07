@@ -157,7 +157,7 @@ Codegen::Codegen(Graph *graph)
       liveOuts_(graph->GetLocalAllocator()->Adapter()),
       disasm_(this),
       spillFillsResolver_(graph),
-      phiInputInstructions_(graph->GetLocalAllocator()->Adapter())
+      initInputInstructions_(graph->GetLocalAllocator()->Adapter())
 {
     graph->SetCodeBuilder(codeBuilder_);
     regfile_ = graph->GetRegisters();
@@ -1239,19 +1239,22 @@ void GetOriginalInstInputs(Inst *inst, ArenaVector<Inst *> &v)
     }
 }
 
-bool Codegen::CheckPhiClassInputsAreEqual(Inst *phi)
+bool Codegen::CheckInitClassInputsAreEqual(Inst *init)
 {
-    ASSERT(phi->IsPhi());
+    if (!init->IsOneOf(Opcode::NullCheck, Opcode::Select, Opcode::SelectImm, Opcode::Phi)) {
+        return false;
+    }
     // We can omit runtime call only if all inputs are of the same class,
     // see checks in CreateNewObjCall below.
-    GetOriginalInstInputs(phi, phiInputInstructions_);
+    initInputInstructions_.clear();
+    GetOriginalInstInputs(init, initInputInstructions_);
 
     auto checkOpcode = [](Opcode op) {
         // Fastpath only works for these opcodes
         return op == Opcode::LoadAndInitClass || op == Opcode::LoadImmediate;
     };
 
-    auto checkInst = phiInputInstructions_.front();
+    auto checkInst = initInputInstructions_.front();
     if (!checkOpcode(checkInst->GetOpcode())) {
         return false;
     }
@@ -1264,7 +1267,7 @@ bool Codegen::CheckPhiClassInputsAreEqual(Inst *phi)
     };
 
     auto klass = getClass(checkInst);
-    for (auto inst : phiInputInstructions_) {
+    for (auto inst : initInputInstructions_) {
         if (!checkOpcode(inst->GetOpcode())) {
             return false;
         }
@@ -1284,13 +1287,14 @@ void Codegen::CreateNewObjCall(NewObjectInst *newObj)
     auto srcClass = ConvertRegister(newObj->GetSrcReg(0), DataType::POINTER);
     auto runtime = GetRuntime();
 
-    if (initClass->IsPhi() && CheckPhiClassInputsAreEqual(initClass)) {
+    if (CheckInitClassInputsAreEqual(initClass)) {
         initClass = initClass->GetInput(0).GetInst();
     }
 
     auto maxTlabSize = runtime->GetTLABMaxSize();
     if (maxTlabSize == 0 ||
         (initClass->GetOpcode() != Opcode::LoadAndInitClass && initClass->GetOpcode() != Opcode::LoadImmediate)) {
+        EVENT_CODEGEN("CallRuntime for NewObj");
         CallRuntime(newObj, EntrypointId::CREATE_OBJECT_BY_CLASS, dst, RegMask::GetZeroMask(), src);
         return;
     }
@@ -1302,6 +1306,7 @@ void Codegen::CreateNewObjCall(NewObjectInst *newObj)
         klass = initClass->CastToLoadImmediate()->GetClass();
     }
     if (klass == nullptr || !runtime->CanUseTlabForClass(klass)) {
+        EVENT_CODEGEN("CallRuntime for NewObj");
         CallRuntime(newObj, EntrypointId::CREATE_OBJECT_BY_CLASS, dst, RegMask::GetZeroMask(), src);
         return;
     }
@@ -1310,9 +1315,11 @@ void Codegen::CreateNewObjCall(NewObjectInst *newObj)
 
     classSize = (classSize & ~(alignment - 1U)) + ((classSize % alignment) != 0U ? alignment : 0U);
     if (classSize > maxTlabSize) {
+        EVENT_CODEGEN("CallRuntime for NewObj");
         CallRuntime(newObj, EntrypointId::CREATE_OBJECT_BY_CLASS, dst, RegMask::GetZeroMask(), src);
         return;
     }
+    EVENT_CODEGEN("CallFastPath for NewObj");
     CallFastPath(newObj, EntrypointId::ALLOCATE_OBJECT_TLAB, dst, RegMask::GetZeroMask(), srcClass,
                  TypedImm(classSize));
 }

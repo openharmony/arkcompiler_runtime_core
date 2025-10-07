@@ -441,7 +441,7 @@ private:
     template <typename T>
     void EncodeImms(const T &imms, bool skipFirstLocation);
 
-    bool CheckPhiClassInputsAreEqual(Inst *phi);
+    bool CheckInitClassInputsAreEqual(Inst *phi);
     static bool EnsureParamsFitIn32Bit(std::initializer_list<std::variant<Reg, TypedImm>> params);
 
     template <typename... Args>
@@ -492,7 +492,7 @@ private:
 
     // Used in `CheckPhiClassInputsAreEqual` to collect
     // origin (not aliased) instructions
-    ArenaVector<Inst *> phiInputInstructions_;
+    ArenaVector<Inst *> initInputInstructions_;
 
     friend class EncodeVisitor;
     friend class BaselineCodegen;
