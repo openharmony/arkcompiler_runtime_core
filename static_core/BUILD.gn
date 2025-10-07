@@ -166,15 +166,6 @@ config("ark_common_config") {
     defines += [ "PANDA_TARGET_EMULATOR" ]
   }
 
-  if (is_llvm_interpreter || is_llvm_fastpath) {
-    defines += [ "PANDA_LLVM_IRTOC" ]
-    if (is_llvm_interpreter) {
-      defines += [ "PANDA_LLVM_INTERPRETER" ]
-    }
-    if (is_llvm_fastpath) {
-      defines += [ "PANDA_LLVM_FASTPATH" ]
-    }
-  }
   if (is_llvm_aot) {
     defines += [ "PANDA_LLVM_AOT" ]
   }
@@ -389,6 +380,15 @@ config("ark_config") {
   if (is_linux) {
     if (enable_irtoc) {
       defines += [ "PANDA_WITH_IRTOC" ]
+    }
+  }
+  if (is_llvm_interpreter || is_llvm_fastpath) {
+    defines += [ "PANDA_LLVM_IRTOC" ]
+    if (is_llvm_interpreter) {
+      defines += [ "PANDA_LLVM_INTERPRETER" ]
+    }
+    if (is_llvm_fastpath) {
+      defines += [ "PANDA_LLVM_FASTPATH" ]
     }
   }
 }
