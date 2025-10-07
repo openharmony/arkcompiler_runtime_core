@@ -13,6 +13,7 @@
 
 module EtsConstants
     CORO_NULL_VALUE_OFFSET = "cross_values::GetEtsCoroutineNullValueOffset(graph->GetArch())"
+    CORO_LOCAL_STORAGE_OFFSET = "cross_values::GetEtsCoroutineLocalStorageOffset(graph->GetArch())"
     ESCOMPAT_ARRAY_DATA_OFFSET = "cross_values::GetEscompatArrayBufferOffset(graph->GetArch())"
     ESCOMPAT_ARRAY_ACTUAL_LENGTH_OFFSET = "cross_values::GetEscompatArrayActualLengthOffset(graph->GetArch())"
     BOX_PRIMITIVE_VALUE_OFFSET = "cross_values::GetEtsBoxPrimitiveValueOffset(graph->GetArch())"
@@ -21,7 +22,6 @@ module EtsConstants
     TYPED_UNSIGNED_ARRAY_BUFFER_OFFSET = "cross_values::GetTypedUnsignedArrayBufferOffset(graph->GetArch())"
     TYPED_UNSIGNED_ARRAY_BYTE_OFFSET_OFFSET = "cross_values::GetTypedUnsignedArrayByteOffsetOffset(graph->GetArch())"
     ARRAY_BUFFER_DATA_OFFSET = "cross_values::GetArrayBufferDataOffset(graph->GetArch())"
-    CORO_LOCAL_STORAGE_OFFSET = "cross_values::GetEtsCoroutineLocalStorageOffset(graph->GetArch())"
 
     ETS_CLASS_RUNTIME_CLASS_OFFSET = "cross_values::GetEtsClassRuntimeClassOffset(graph->GetArch())"
     ETS_CLASS_FLAGS_OFFSET = "cross_values::GetEtsClassFlagsOffset(graph->GetArch())"
@@ -34,7 +34,7 @@ module EtsConstants
     ETS_CLASS_BOXED_TYPE_DOUBLE_MASK_VALUE = "(cross_values::GetEtsClassBoxedTypeDoubleMaskValue(graph->GetArch()) << " + ETS_CLASS_BOXED_TYPE_FIELD_START + ")"
 
     OBJ_PTR_SIZE = "ark::OBJECT_POINTER_SIZE"
-    LOG2_BYTES_PER_OBJ_PTR = "2" # object pointer has a size of 4 bytes on each supported platform
+    OBJ_PTR_LOG2_SIZE = "ark::OBJECT_POINTER_LOG2_SIZE"
 
     FLOAT32_NAN = "0x7fc00000"
     FLOAT64_NAN = "0x7ff8000000000000"
@@ -68,4 +68,22 @@ end
 #
 macro(:get_object_pointer) do |base, offset|
   Cast(Load(base, Cast(offset).word).ref).ptr
+end
+
+###
+# Load an address value (as `ref_uint`) from the EtsPlatformTypes storage. The deserved address must be stored
+# in the platform types by offset `offset`.
+#
+macro(:get_platform_type_ref_uint) do |offset|
+  ptypes := LoadI(%tr).Imm(EtsConstants::CORO_LOCAL_STORAGE_OFFSET).ptr
+  LoadI(ptypes).Imm(offset).ref_uint
+end
+
+###
+# Load a reference from the EtsPlatformTypes storage. The deserved reference must be stored
+# in the platform types by offset `offset`.
+#
+macro(:get_platform_type_ref) do |offset|
+  ptypes := LoadI(%tr).Imm(EtsConstants::CORO_LOCAL_STORAGE_OFFSET).ptr
+  LoadI(ptypes).Imm(offset).ref
 end

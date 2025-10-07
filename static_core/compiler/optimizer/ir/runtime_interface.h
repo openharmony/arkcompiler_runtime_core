@@ -1789,6 +1789,11 @@ public:
         return nullptr;
     }
 
+    virtual void *GetAsciiCharCache() const
+    {
+        return nullptr;
+    }
+
     virtual bool IsStringCachesUsed() const
     {
         return false;

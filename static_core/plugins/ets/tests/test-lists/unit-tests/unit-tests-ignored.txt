@@ -40,10 +40,6 @@ ets-common-tests/intrinsics/stringbuilder.ets
 # 28957
 ets-common-tests/intrinsics/string_compare_to.ets
 
-#30151
-ets-common-tests/intrinsics/string_from_char_code.ets
-ets-common-tests/intrinsics/string_from_char_code_escape.ets
-
 # 25111 fail in aot after primitive types removal
 ets-common-tests/intrinsics/typed_arrays_reverse.ets
 

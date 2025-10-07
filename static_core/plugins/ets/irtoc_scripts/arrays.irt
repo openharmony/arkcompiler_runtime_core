@@ -101,8 +101,8 @@ def GenerateArrayFastCopyToRef(sync_type)
       Goto(:Done)
     }
 
-    src_from_bytes := ShlI(src_start).Imm(EtsConstants::LOG2_BYTES_PER_OBJ_PTR).u32
-    dst_from_bytes := ShlI(dst_start).Imm(EtsConstants::LOG2_BYTES_PER_OBJ_PTR).u32
+    src_from_bytes := ShlI(src_start).Imm(EtsConstants::OBJ_PTR_LOG2_SIZE).u32
+    dst_from_bytes := ShlI(dst_start).Imm(EtsConstants::OBJ_PTR_LOG2_SIZE).u32
 
     src_data := AddI(Cast(src_obj).ptr).Imm(Constants::ARRAY_DATA_OFFSET).ptr
     src_data := Add(src_data, Cast(src_from_bytes).word).ptr
@@ -116,7 +116,7 @@ def GenerateArrayFastCopyToRef(sync_type)
     }
 
     # start copying
-    len_bytes := ShlI(len).Imm(EtsConstants::LOG2_BYTES_PER_OBJ_PTR).u32
+    len_bytes := ShlI(len).Imm(EtsConstants::OBJ_PTR_LOG2_SIZE).u32
 
     src_offset1 := Cast(0).u32
     dst_offset1 := Cast(0).u32

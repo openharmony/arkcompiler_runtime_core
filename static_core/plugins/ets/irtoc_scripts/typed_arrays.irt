@@ -338,7 +338,7 @@ def GenerateTypedArraySetValuesFromArray(name, etype, stype, elm_size, mode)
 
     source_offset1 := Cast(0).u64
     dest_offset1 := Cast(0).u64
-    source_byte_len := ShlI(Cast(source_length).u64).Imm(EtsConstants::LOG2_BYTES_PER_OBJ_PTR).u64
+    source_byte_len := ShlI(Cast(source_length).u64).Imm(EtsConstants::OBJ_PTR_LOG2_SIZE).u64
 Label(:Loop)
     source_offset := Phi(source_offset1, source_offset2).u64
     dest_offset := Phi(dest_offset1, dest_offset2).u64

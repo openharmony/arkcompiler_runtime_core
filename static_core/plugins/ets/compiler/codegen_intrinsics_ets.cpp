@@ -550,30 +550,38 @@ void Codegen::CreateStringFromCharCode(IntrinsicInst *inst, Reg dst, SRCREGS src
     ASSERT(GetArch() != Arch::AARCH32);
     ASSERT(inst->GetInputsCount() == 2U && inst->RequireState());
     auto array = src[FIRST_OPERAND];
-    auto getEntryId = [this, inst]() {
-        switch (inst->GetIntrinsicId()) {
-            case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_FROM_CHAR_CODE:
-                return GetRuntime()->IsCompressedStringsEnabled()
-                           ? EntrypointId::CREATE_STRING_FROM_CHAR_CODE_TLAB_COMPRESSED
-                           : EntrypointId::CREATE_STRING_FROM_CHAR_CODE_TLAB;
-            case RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_STRING_FROM_CHAR_CODE_SINGLE:
-                return GetRuntime()->IsCompressedStringsEnabled()
-                           ? EntrypointId::CREATE_STRING_FROM_CHAR_CODE_SINGLE_TLAB_COMPRESSED
-                           : EntrypointId::CREATE_STRING_FROM_CHAR_CODE_SINGLE_TLAB;
-            default:
-                UNREACHABLE();
-        }
-    };
+    constexpr auto eid = EntrypointId::CREATE_STRING_FROM_CHAR_CODE_TLAB;
     if (GetGraph()->IsAotMode()) {
         ScopedTmpReg klassReg(GetEncoder());
         GetEncoder()->EncodeLdr(
             klassReg, false,
             MemRef(ThreadReg(), static_cast<ssize_t>(GetRuntime()->GetStringClassPointerTlsOffset(GetArch()))));
-        CallFastPath(inst, getEntryId(), dst, RegMask::GetZeroMask(), array, klassReg);
+        CallFastPath(inst, eid, dst, {}, array, klassReg);
     } else {
         auto klassImm =
             TypedImm(reinterpret_cast<uintptr_t>(GetRuntime()->GetLineStringClass(GetGraph()->GetMethod(), nullptr)));
-        CallFastPath(inst, getEntryId(), dst, RegMask::GetZeroMask(), array, klassImm);
+        CallFastPath(inst, eid, dst, {}, array, klassImm);
+    }
+}
+
+void Codegen::CreateStringFromCharCodeSingle(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(GetArch() != Arch::AARCH32);
+    ASSERT(inst->GetInputsCount() == 2U && inst->RequireState());
+    ScopedTmpReg number(GetEncoder(), ConvertDataType(DataType::UINT64, GetArch()));
+    GetEncoder()->EncodeMov(number, src[FIRST_OPERAND]);
+    auto eid = GetRuntime()->IsStringCachesUsed() ? EntrypointId::CREATE_STRING_FROM_CHAR_CODE_SINGLE_TLAB
+                                                  : EntrypointId::CREATE_STRING_FROM_CHAR_CODE_SINGLE_NO_CACHE_TLAB;
+    if (GetGraph()->IsAotMode()) {
+        ScopedTmpReg klassReg(GetEncoder());
+        GetEncoder()->EncodeLdr(
+            klassReg, false,
+            MemRef(ThreadReg(), static_cast<ssize_t>(GetRuntime()->GetStringClassPointerTlsOffset(GetArch()))));
+        CallFastPath(inst, eid, dst, {}, number, klassReg);
+    } else {
+        auto klassImm =
+            TypedImm(reinterpret_cast<uintptr_t>(GetRuntime()->GetLineStringClass(GetGraph()->GetMethod(), nullptr)));
+        CallFastPath(inst, eid, dst, {}, number, klassImm);
     }
 }
 

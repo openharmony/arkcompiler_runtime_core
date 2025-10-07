@@ -293,6 +293,7 @@ if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_reserve_part11-19.ets ETS_STRINGS_CONCAT "false")
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_reserve_part20-29.ets ETS_STRINGS_CONCAT "false")
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_concat.ets ETS_STRINGS_CONCAT "false")
+    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_from_char_code.ets)
     #Disabled as stdlib API was required to change.issue 25232
     #panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / ets_string_concat_func.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_try_catch.ets)
