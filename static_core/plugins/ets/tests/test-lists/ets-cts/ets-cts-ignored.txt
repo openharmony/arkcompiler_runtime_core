@@ -2949,7 +2949,7 @@
 #24114
 17.experimental_features/09.overload_declarations/04.constructor_overload_declarations/co1_over_7.ets
 
-#24289
+#30508
 17.experimental_features/09.overload_declarations/04.constructor_overload_declarations/co2_over_10.ets
 
 #28235
