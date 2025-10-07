@@ -76,9 +76,6 @@
 04.names_declarations_and_scopes/04.accessible/type_name_const_enum.ets
 04.names_declarations_and_scopes/04.accessible/type_name_variable_enum.ets
 
-#23134
-04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_neg_15.ets
-
 #26485
 04.names_declarations_and_scopes/07.function_declarations/03.readonly_parameters/readonly_11.ets
 04.names_declarations_and_scopes/07.function_declarations/03.readonly_parameters/readonly_12.ets
