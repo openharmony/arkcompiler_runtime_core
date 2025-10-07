@@ -32,7 +32,7 @@ public:
     NO_COPY_SEMANTIC(EtsCoroutine);
     NO_MOVE_SEMANTIC(EtsCoroutine);
 
-    enum class DataIdx { ETS_PLATFORM_TYPES_PTR, INTEROP_CTX_PTR, LAST_ID };
+    enum class DataIdx { ETS_PLATFORM_TYPES_PTR, INTEROP_CTX_PTR, INTEROP_CALL_STACK_PTR, LAST_ID };
     using LocalStorage = StaticLocalStorage<DataIdx>;
 
     /**
@@ -140,12 +140,22 @@ public:
         return localStorage_;
     }
 
+    const LocalStorage &GetLocalStorage() const
+    {
+        return localStorage_;
+    }
+
     // event handlers
     void OnHostWorkerChanged() override;
     void OnContextSwitchedTo() override;
 
     /// @brief print stack and exit the program
     [[noreturn]] void HandleUncaughtException() override;
+
+    /// The method returns true if there are interop JS code frames in the coroutine call stack
+    bool IsContextSwitchRisky() const override;
+
+    void PrintCallStack() const override;
 
     static constexpr CoroutinePriority ASYNC_CALL = CoroutinePriority::HIGH_PRIORITY;
     static constexpr CoroutinePriority PROMISE_CALLBACK = CoroutinePriority::HIGH_PRIORITY;

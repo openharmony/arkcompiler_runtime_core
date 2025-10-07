@@ -395,6 +395,10 @@ void StackfulCoroutineWorker::SuspendCurrentCoroGeneric()
 {
     auto *currentCoro = Coroutine::GetCurrent();
     ASSERT(currentCoro != nullptr);
+    if (currentCoro->IsContextSwitchRisky()) {
+        LOG(ERROR, COROUTINES) << "RISKY CONTEXT SWITCH!!! Call stack: ";
+        currentCoro->PrintCallStack();
+    }
     currentCoro->RequestSuspend(SUSPEND_AS_BLOCKED);
     if constexpr (!SUSPEND_AS_BLOCKED) {
         os::memory::LockHolder lock(runnablesLock_);

@@ -346,6 +346,15 @@ public:
 
     virtual void UpdateCachedObjects() {}
 
+    /// The method returns true if context switching at this point in the managed code is risky
+    virtual bool IsContextSwitchRisky() const
+    {
+        return false;
+    }
+
+    /// The method prints managed call stack of coroutine
+    virtual void PrintCallStack() const;
+
     /**
      * a converter function that stores the data from EntrypointInfo in the member variables
      * NOTE: should be made private after #29944
