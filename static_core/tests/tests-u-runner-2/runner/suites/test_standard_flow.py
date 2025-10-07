@@ -231,6 +231,7 @@ class TestStandardFlow(Test):
                 self.passed = dependent_result.passed if not package_neg_compile else True
                 self.report = dependent_result.report
                 self.fail_kind = dependent_result.fail_kind
+                self.last_failure_check_passed = dependent_result.last_failure_check_passed
                 return False
         return True
 

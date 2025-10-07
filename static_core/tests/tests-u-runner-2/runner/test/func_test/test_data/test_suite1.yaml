@@ -14,10 +14,10 @@
 version: 0.0.0.1
 type: test-suite
 suite-name: test_suite
-test-root: .
-list-root: .
+test-root: ${TESTS_LOADING_TEST_ROOT}
+list-root: ${TESTS_LOADING_TEST_ROOT}
 
 parameters:
-    extension: sts
+    extension: ets
     load-runtimes: ets
     work-dir: ${WORK_DIR}
