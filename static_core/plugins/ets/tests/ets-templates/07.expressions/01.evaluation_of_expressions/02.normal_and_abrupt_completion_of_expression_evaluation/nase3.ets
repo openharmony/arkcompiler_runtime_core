@@ -24,5 +24,6 @@ function main() {
   let sz: int = 0x80000000;
   let expectedException = (e: Error): boolean => { return (e instanceof NegativeArraySizeError) }
   arktest.expectThrow(() => { let v: String = "" + (a = 2) + new byte[2][sz] + (b = 2); }, expectedException)
-  arktest.assertEQ(a != 2 || b != 2, false)
+  arktest.assertEQ(a, 2, "a value not changed")
+  arktest.assertEQ(b, 1, "b value changed")
 }
