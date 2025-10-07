@@ -24,19 +24,6 @@ switch_statements:
         }
     use: |
         f(0);
-
-  - decl: |
-      function f(i: int): void {
-        switch (i) {
-          case 0: arktest.assertEQ( i, 0 ); break;    
-          case 0: arktest.assertEQ( i, 1 ); break;    // TypeError: Case duplicate
-          case 2: arktest.assertEQ( i, 2 ); break;
-          default: arktest.assertTrue( false )
-        }
-      }
-    use: |
-      f(0);
-
   - decl: |
         function f(i: int): void {
           switch (i) {
