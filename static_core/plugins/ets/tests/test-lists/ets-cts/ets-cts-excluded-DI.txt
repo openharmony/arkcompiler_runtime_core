@@ -22,7 +22,7 @@
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_10.ets
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_13.ets
 08.statements/15.try_statements/01.catch_clause/catch_2.ets
-13.compilation_units/08.top-level_statements/block_declaration_13.ets
+13.modules_and_namespaces/06.top-level_statements/block_declaration_13.ets
 15.semantic_rules/07.type_inference/02.smart_types/cond_expr_1.ets
 15.semantic_rules/07.type_inference/02.smart_types/cond_expr_5.ets
 15.semantic_rules/07.type_inference/02.smart_types/cond_expr_9.ets
@@ -77,5 +77,5 @@
 07.expressions/03.named_reference/qualified_name_0.ets
 07.expressions/03.named_reference/qualified_name_1.ets
 07.expressions/25.equality_expressions/eq_19.ets
-13.compilation_units/08.top-level_statements/block_declaration_3.ets
-13.compilation_units/08.top-level_statements/block_declaration_5.ets
+13.modules_and_namespaces/06.top-level_statements/block_declaration_3.ets
+13.modules_and_namespaces/06.top-level_statements/block_declaration_5.ets
