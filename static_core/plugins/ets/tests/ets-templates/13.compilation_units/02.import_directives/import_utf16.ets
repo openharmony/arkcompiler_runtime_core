@@ -19,7 +19,7 @@ files:
 - ./文件名.ets
 ---*/
 
-import A from "./文件名.ets"
+import {A} from "./文件名.ets"
 
 function main() {
   arktest.assertEQ(new A().foo(), 7)
