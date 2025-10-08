@@ -1,0 +1,117 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  # Below tests are based on code examples from chapter 17.15 spec version 1.2.0-alpha2 TECHNICAL PREVIEW 9
+  # non-native accessor has no body
+  - decl: |-
+      let saved_age = 0        
+      get age(): number;
+      set age(a: number);
+
+  - decl: |-
+      let saved_age = 0        
+      export get age(): number;
+      export set age(a: number);
+
+  # native accessor has a body
+  - decl: |-
+        native get age(): number {}
+        native set age(a: number) {}
+
+  # get-accessor without return type and can't infer it
+  - decl: |-
+      get magicNumber() { }
+
+  # set-accessor without parameters
+  - decl: |-
+      let saved_age = 0        
+      get age(): number {}
+      set age() {}
+
+  # set-accessor with more than one parameter
+  - decl: |-
+      let saved_age = 0        
+      get age(): number {}
+      set age(a: number, b: number) {}
+
+  # set-accessor with return type
+  - decl: |-
+      let saved_age = 0        
+      get age(): number {}
+      set age(a: number): number { return 42; }
+
+  # set-accessor with optional parameter 1
+  - decl: |-
+      let saved_age = 0        
+      get age(): number {}
+      set age(a?: number): {}
+
+  # set-accessor with optional parameter 2
+  - decl: |-
+      let saved_age = 0        
+      get age(): number {}
+      set age(a?: number = 1): {}
+
+  # getter is used in a call expression (like a function)
+  - decl: |-
+      get age(): number { return 42 }
+    use: |-
+      age()
+
+  # setter is used in a call expression (like a function)
+  - decl: |-
+      set age(a: number): {}
+    use: |-
+      age(42)
+
+  # getter is used in a call expression (like a function)
+  - decl: |-
+      get age(): number { return 42 }
+    use: |-
+      age()
+
+  # Get-accessor name is the same as that of another entity in a scope
+  - decl: |-
+      let name = "Bob"
+      get name(): string { return "Alice" }
+
+  # Set-accessor name is the same as that of another entity in a scope
+  - decl: |-
+      let name = "Bob"
+      set name(a: string)  { }
+
+  # Names of two getters in a scope are the same
+  - decl: |-
+      get name(): string { return "Alice" }
+      get name(): string { return "Malice" }
+
+  # Names of two setters in a scope are the same
+  - decl: |-
+      set name(a: string) { }
+      set name(a: string) { }
+
+  # Getter is used in the position of a left-hand-side expression in an Assignment
+  - decl: |-
+      get magicNumber(): number { return 42 }
+    tags: []
+    use: |-
+      magicNumber = 42
+
+  # Setter is used to get a value.
+  - decl: |-
+      set randomSeed(a: number) {}
+    tags: []
+    use: |-
+      arktest.assertEQ(randomSeed, 42)

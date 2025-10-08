@@ -3092,6 +3092,14 @@
 17.experimental_features/packages/import_and_overloading_of_function_names/pkgs_0_4.ets
 17.experimental_features/packages/import_and_overloading_of_function_names/pkgs_a_4.ets
 
+#30251 Top-Level accessors
+17.experimental_features/15.accessor_declarations/accessor_0.ets
+17.experimental_features/15.accessor_declarations/accessor_1.ets
+17.experimental_features/15.accessor_declarations/accessor_2.ets
+17.experimental_features/15.accessor_declarations/accessor_3.ets
+17.experimental_features/15.accessor_declarations/accessor_4.ets
+17.experimental_features/15.accessor_declarations/accessor_5.ets
+
 #24114
 17.experimental_features/packages/import_and_overloading_of_function_names/pkgs_a_10.ets
 
