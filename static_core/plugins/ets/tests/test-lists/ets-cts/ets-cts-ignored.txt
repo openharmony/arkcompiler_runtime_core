@@ -1859,11 +1859,6 @@
 13.compilation_units/09.program_entry_point/entry_point_foo_args_1.ets
 13.compilation_units/09.program_entry_point/entry_point_foo_args_2.ets
 
-#28847
-14.ambient_declarations/bad_ambient_declarations_18.ets
-14.ambient_declarations/bad_ambient_declarations_19.ets
-14.ambient_declarations/bad_ambient_declarations_20.ets
-
 #29153
 14.ambient_declarations/04.class_declarations/02.ambient_call_signature/call_sig_declarations_neg_2.ets
 
