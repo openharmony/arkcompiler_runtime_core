@@ -457,7 +457,7 @@ AbckitInst *IcreateNewArrayStatic(AbckitGraph *graph, AbckitCoreClass *inputClas
 AbckitInst *IcreateNewObjectStatic(AbckitGraph *graph, AbckitCoreClass *inputClass);
 AbckitInst *IcreateInitObjectStatic(AbckitGraph *graph, AbckitCoreFunction *inputFunction, size_t argCount,
                                     va_list argp);
-
+AbckitInst *IcreateLoadObjectStatic(AbckitGraph *graph, AbckitInst *inputObj, AbckitCoreClassField *field);
 bool IcheckIsCallStatic(AbckitInst *inst);
 AbckitInst *IcreateStobjObjStatic(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1,
                                   AbckitString *newKeyString);

@@ -178,13 +178,6 @@ AbckitArktsModuleField *CoreModuleFieldToArktsModuleField(AbckitCoreModuleField 
     return DEFAULT_ARKTS_MODULE_FIELD;
 }
 
-bool ArktsModuleFieldIsReadonly(AbckitArktsModuleField *field)
-{
-    g_calledFuncs.push(__func__);
-    EXPECT_TRUE(field == DEFAULT_ARKTS_MODULE_FIELD);
-    return DEFAULT_BOOL;
-}
-
 AbckitArktsNamespaceField *CoreNamespaceFieldToArktsNamespaceField(AbckitCoreNamespaceField *field)
 {
     g_calledFuncs.push(__func__);
@@ -207,13 +200,6 @@ AbckitArktsClassField *CoreClassFieldToArktsClassField(AbckitCoreClassField *fie
 
     EXPECT_TRUE(field == DEFAULT_CORE_CLASS_FIELD);
     return DEFAULT_ARKTS_CLASS_FIELD;
-}
-
-bool ArktsClassFieldIsReadonly(AbckitArktsClassField *field)
-{
-    g_calledFuncs.push(__func__);
-    EXPECT_TRUE(field == DEFAULT_ARKTS_CLASS_FIELD);
-    return DEFAULT_BOOL;
 }
 
 AbckitCoreInterfaceField *ArktsInterfaceFieldToCoreInterfaceField(AbckitArktsInterfaceField *field)
@@ -421,7 +407,7 @@ AbckitArktsInspectApi g_arktsInspectApiImpl = {
     // Module Field
     // ========================================
 
-    ArktsModuleFieldToCoreModuleField, CoreModuleFieldToArktsModuleField, ArktsModuleFieldIsReadonly,
+    ArktsModuleFieldToCoreModuleField, CoreModuleFieldToArktsModuleField,
 
     // ========================================
     // Namespace Field
@@ -433,7 +419,7 @@ AbckitArktsInspectApi g_arktsInspectApiImpl = {
     // Class Field
     // ========================================
 
-    ArktsClassFieldToCoreClassField, CoreClassFieldToArktsClassField, ArktsClassFieldIsReadonly,
+    ArktsClassFieldToCoreClassField, CoreClassFieldToArktsClassField,
 
     // ========================================
     // Interface Field

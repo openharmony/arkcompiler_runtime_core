@@ -15,6 +15,8 @@
 
 #include "libabckit/src/adapter_static/metadata_modify_static.h"
 
+#include "libabckit/c/metadata_core.h"
+#include "libabckit/c/extensions/arkts/metadata_arkts.h"
 #include "inst.h"
 #include "libabckit/src/adapter_static/abckit_static.h"
 #include "libabckit/src/metadata_inspect_impl.h"
@@ -49,6 +51,7 @@
 
 #include <cstdint>
 #include <string>
+#include <array>
 
 static auto g_implI = AbckitGetInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 static auto g_implArkI = AbckitGetArktsInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
@@ -56,6 +59,170 @@ static auto g_implArkI = AbckitGetArktsInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0
 // CC-OFFNXT(WordsTool.95) sensitive word conflict
 // NOLINTNEXTLINE(google-build-using-namespace)
 namespace libabckit {
+
+static constexpr std::string_view ASYNC_PREFIX = "%%async-";
+
+static ark::pandasm::Type AbckitTypeToPandasmType(const AbckitType &abckitType)
+{
+    if (abckitType.name == nullptr) {
+        LIBABCKIT_LOG(DEBUG) << "AbckitType name is null, inferring from typeId: " << (int)abckitType.id << '\n';
+        switch (abckitType.id) {
+            case ABCKIT_TYPE_ID_VOID:
+                return ark::pandasm::Type::FromName("void");
+            case ABCKIT_TYPE_ID_U1:
+                return ark::pandasm::Type::FromName("u1");
+            case ABCKIT_TYPE_ID_I8:
+                return ark::pandasm::Type::FromName("i8");
+            case ABCKIT_TYPE_ID_U8:
+                return ark::pandasm::Type::FromName("u8");
+            case ABCKIT_TYPE_ID_I16:
+                return ark::pandasm::Type::FromName("i16");
+            case ABCKIT_TYPE_ID_U16:
+                return ark::pandasm::Type::FromName("u16");
+            case ABCKIT_TYPE_ID_I32:
+                return ark::pandasm::Type::FromName("i32");
+            case ABCKIT_TYPE_ID_U32:
+                return ark::pandasm::Type::FromName("u32");
+            case ABCKIT_TYPE_ID_I64:
+                return ark::pandasm::Type::FromName("i64");
+            case ABCKIT_TYPE_ID_U64:
+                return ark::pandasm::Type::FromName("u64");
+            case ABCKIT_TYPE_ID_F32:
+                return ark::pandasm::Type::FromName("f32");
+            case ABCKIT_TYPE_ID_F64:
+                return ark::pandasm::Type::FromName("f64");
+            default:
+                LIBABCKIT_LOG(ERROR) << "Cannot infer type name from typeId: " << (int)abckitType.id << '\n';
+                return ark::pandasm::Type::FromName("void");
+        }
+    }
+
+    auto typeName = abckitType.name->impl;
+    if (typeName == "void") {
+        return ark::pandasm::Type::FromName("void");
+    }
+
+    // process union type
+    if (abckitType.types.size() > 1) {
+        std::string unionName = "{U";
+        for (const auto *type : abckitType.types) {
+            if (type != nullptr && type->name != nullptr) {
+                unionName += std::string(type->name->impl) + ",";
+            }
+        }
+        if (!abckitType.types.empty()) {
+            unionName.pop_back();
+        }
+        unionName += "}";
+        return ark::pandasm::Type::FromName(unionName);
+    }
+
+    return ark::pandasm::Type(typeName, abckitType.rank);
+}
+
+static AbckitArktsFunction *CreateFunctionImpl(AbckitFile *file, AbckitCoreModule *owningModule,
+                                               const std::string &fullFuncName, AbckitType *returnType,
+                                               AbckitArktsFunctionParam **params, size_t paramsCount, bool isStatic,
+                                               const std::string &visibility)
+{
+    auto *prog = file->GetStaticProgram();
+    LIBABCKIT_INTERNAL_ERROR(prog, nullptr);
+
+    // create AbckitCoreFunction object
+    auto newCoreFunc = std::make_unique<AbckitCoreFunction>();
+    newCoreFunc->owningModule = owningModule;
+    newCoreFunc->returnType = returnType;
+
+    // create pandasm::Function and set attributes
+    ark::pandasm::Function pandasmFunc(fullFuncName, ark::panda_file::SourceLang::ETS);
+    pandasmFunc.returnType = AbckitTypeToPandasmType(*returnType);
+    LIBABCKIT_LOG(DEBUG) << "Return type: " << pandasmFunc.returnType.GetName() << '\n';
+
+    if (pandasmFunc.metadata) {
+        if (isStatic) {
+            pandasmFunc.metadata->SetAttribute("static");
+        }
+        std::string accessAttr = "access.function=" + visibility;
+        pandasmFunc.metadata->SetAttribute(accessAttr);
+        LIBABCKIT_LOG(DEBUG) << "Set function attributes: " << (isStatic ? "static, " : "") << visibility << '\n';
+    }
+
+    // process parameters: add this parameter for instance method, then process user parameters
+    size_t totalParamsCount = paramsCount;
+    if (!isStatic) {
+        totalParamsCount++;
+    }
+
+    if (totalParamsCount > 0) {
+        LIBABCKIT_LOG(DEBUG) << "Processing " << totalParamsCount << " parameters (including this if needed)\n";
+        newCoreFunc->parameters.reserve(totalParamsCount);
+        pandasmFunc.params.reserve(totalParamsCount);
+
+        if (!isStatic) {
+            // create this parameter type using current class reference type
+            std::string className = fullFuncName.substr(0, fullFuncName.find_last_of('.'));
+            ark::pandasm::Type thisType(className, 0);
+            ark::pandasm::Function::Parameter thisParam(thisType, ark::panda_file::SourceLang::ETS);
+            pandasmFunc.params.push_back(std::move(thisParam));
+            LIBABCKIT_LOG(DEBUG) << "Added this parameter with type: " << className << '\n';
+        }
+
+        // process user provided parameters
+        if (params != nullptr && paramsCount > 0U) {
+            for (size_t i = 0; i < paramsCount; ++i) {
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                auto *arktsParam = params[i];
+                auto *coreParam = arktsParam->core;
+
+                coreParam->function = newCoreFunc.get();
+
+                // construct pandasm parameter
+                ark::pandasm::Type type = AbckitTypeToPandasmType(*coreParam->type);
+                ark::pandasm::Function::Parameter pandaParam(type, ark::panda_file::SourceLang::ETS);
+                pandasmFunc.params.push_back(std::move(pandaParam));
+
+                newCoreFunc->parameters.emplace_back(std::unique_ptr<AbckitCoreFunctionParam>(coreParam));
+            }
+        }
+        LIBABCKIT_LOG(DEBUG) << "All parameters processed successfully\n";
+    }
+
+    // add basic function body (default return instruction)
+    pandasmFunc.ins.emplace_back(ark::pandasm::Create_RETURN_VOID());
+    LIBABCKIT_LOG(DEBUG) << "Added default return.void instruction\n";
+
+    // insert into corresponding function table according to isStatic parameter
+    const std::string mangleKey = abckit::util::GenerateFunctionMangleName(pandasmFunc.name, pandasmFunc);
+    ark::pandasm::Function *implPtr = nullptr;
+
+    if (isStatic) {
+        auto emplaceRes = prog->functionStaticTable.emplace(mangleKey, std::move(pandasmFunc));
+        if (!emplaceRes.second) {
+            LIBABCKIT_LOG(ERROR) << "Static function already exists: " << mangleKey << '\n';
+            statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_BAD_ARGUMENT);
+            return nullptr;
+        }
+        implPtr = &emplaceRes.first->second;
+        file->nameToFunctionStatic.emplace(mangleKey, newCoreFunc.get());
+    } else {
+        auto emplaceRes = prog->functionInstanceTable.emplace(mangleKey, std::move(pandasmFunc));
+        if (!emplaceRes.second) {
+            LIBABCKIT_LOG(ERROR) << "Instance function already exists: " << mangleKey << '\n';
+            statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_BAD_ARGUMENT);
+            return nullptr;
+        }
+        implPtr = &emplaceRes.first->second;
+        file->nameToFunctionInstance.emplace(mangleKey, newCoreFunc.get());
+    }
+
+    newCoreFunc->impl = std::make_unique<AbckitArktsFunction>();
+    newCoreFunc->GetArkTSImpl()->impl = implPtr;
+    newCoreFunc->GetArkTSImpl()->core = newCoreFunc.get();
+
+    owningModule->functions.emplace_back(std::move(newCoreFunc));
+
+    return owningModule->functions.back()->GetArkTSImpl();
+}
 
 static constexpr std::string_view GET_FUNCTION_PATTERN = "<get>";
 static constexpr std::string_view SET_FUNCTION_PATTERN = "<set>";
@@ -567,7 +734,7 @@ AbckitArktsEnumField *EnumAddFieldStatic(AbckitCoreEnum *enm, const struct Abcki
     for (auto &tmpField : record->fieldList) {
         auto coreField = EnumCreateField(enm->owningModule->file, enm, tmpField);
         if (EnumFieldGetNameStatic(coreField.get())->impl == name) {
-            retPtr = coreField.get()->GetArkTSImpl();
+            retPtr = coreField->GetArkTSImpl();
         }
         enm->fields.emplace_back(std::move(coreField));
     }
@@ -731,7 +898,7 @@ AbckitArktsModuleField *ModuleAddFieldStatic(AbckitCoreModule *m, const struct A
     for (auto &tmpField : record->fieldList) {
         auto coreField = ModuleCreateField(m->file, m, tmpField);
         if (ModuleFieldGetNameStatic(coreField.get())->impl == name) {
-            retPtr = coreField.get()->GetArkTSImpl();
+            retPtr = coreField->GetArkTSImpl();
         }
         m->fields.emplace_back(std::move(coreField));
     }
@@ -870,11 +1037,10 @@ static bool ClassModifyTypeAndMethodSig(AbckitCoreClassField *field, std::string
 static bool InterfaceFieldSetTypeDealForObjectLiteral(AbckitCoreInterfaceField *field, AbckitType *type)
 {
     for (auto &objectLiteral : field->owner->objectLiterals) {
-        for (auto &objectLiteralField : objectLiteral.get()->fields) {
+        for (auto &objectLiteralField : objectLiteral->fields) {
             if (ClassFieldGetNameStatic(objectLiteralField.get())->impl.data() == field->name->impl.data()) {
-                std::string objectLiteralFullName =
-                    std::string(objectLiteral.get()->owningModule->moduleName->impl.data()) + "." +
-                    ClassGetNameStatic(objectLiteral.get())->impl.data();
+                std::string objectLiteralFullName = std::string(objectLiteral->owningModule->moduleName->impl.data()) +
+                                                    "." + ClassGetNameStatic(objectLiteral.get())->impl.data();
                 std::string objectLiteralGetMethodName =
                     ReplacePropertyWithId(field->name->impl.data(), GET_FUNCTION_PATTERN.data()) + ":" +
                     objectLiteralFullName;
@@ -963,10 +1129,10 @@ bool InterfaceFieldAddAnnotationStatic(AbckitArktsInterfaceField *field,
     for (auto &method : field->core->owner->methods) {
         std::string methodName = FunctionGetNameStatic(method.get())->impl.data();
         if (methodName.compare(0, interfaceGetMethodName.length(), interfaceGetMethodName) == 0) {
-            auto progFunc = method.get()->GetArkTSImpl()->GetStaticImpl();
+            auto progFunc = method->GetArkTSImpl()->GetStaticImpl();
             progFunc->metadata->AddAnnotations(vec);
         } else if (methodName.compare(0, interfaceSetMethodName.length(), interfaceSetMethodName) == 0) {
-            auto progFunc = method.get()->GetArkTSImpl()->GetStaticImpl();
+            auto progFunc = method->GetArkTSImpl()->GetStaticImpl();
             progFunc->metadata->AddAnnotations(vec);
         }
     }
@@ -998,10 +1164,10 @@ bool InterfaceFieldRemoveAnnotationStatic(AbckitArktsInterfaceField *field, Abck
     for (auto &method : field->core->owner->methods) {
         std::string methodName = FunctionGetNameStatic(method.get())->impl.data();
         if (methodName.compare(0, interfaceGetMethodName.length(), interfaceGetMethodName) == 0) {
-            auto progFunc = method.get()->GetArkTSImpl()->GetStaticImpl();
+            auto progFunc = method->GetArkTSImpl()->GetStaticImpl();
             progFunc->metadata->DeleteAnnotationByName(name);
         } else if (methodName.compare(0, interfaceSetMethodName.length(), interfaceSetMethodName) == 0) {
-            auto progFunc = method.get()->GetArkTSImpl()->GetStaticImpl();
+            auto progFunc = method->GetArkTSImpl()->GetStaticImpl();
             progFunc->metadata->DeleteAnnotationByName(name);
         }
     }
@@ -1436,50 +1602,6 @@ static void UpdateClassNameInFuncIns(std::vector<ark::pandasm::Ins> &ins, const 
     }
 }
 
-bool ClassAddMethodStatic(AbckitArktsClass *klass, AbckitArktsFunction *method)
-{
-    LIBABCKIT_LOG_FUNC;
-    LIBABCKIT_INTERNAL_ERROR(klass, false);
-    LIBABCKIT_INTERNAL_ERROR(method, false);
-    if (klass->core == method->core->parentClass) {
-        LIBABCKIT_LOG(ERROR) << "method have been in klass.\n";
-        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_BAD_ARGUMENT);
-        return false;
-    }
-    auto program = klass->core->owningModule->file->GetStaticProgram();
-    auto moduleClassName = klass->impl.GetStaticClass()->name;
-    // Check whether the method exists
-    // method name, method parameters, return type and method attributes are the same
-    if (!CheckIsNeedAddMethod(program, method, moduleClassName)) {
-        LIBABCKIT_LOG(ERROR) << "Method already exists\n";
-        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_BAD_ARGUMENT);
-        return false;
-    }
-    auto isStaticFunc = method->GetStaticImpl()->IsStatic();
-    std::unordered_map<std::string, AbckitCoreFunction *> &nameToFuncMap =
-        isStaticFunc ? method->core->owningModule->file->nameToFunctionStatic
-                     : method->core->owningModule->file->nameToFunctionInstance;
-
-    std::map<std::string, ark::pandasm::Function> &funcTable =
-        isStaticFunc ? method->core->owningModule->file->GetStaticProgram()->functionStaticTable
-                     : method->core->owningModule->file->GetStaticProgram()->functionInstanceTable;
-    std::string funcMangledName = GetMangleFuncName(method->core);
-    ASSERT(funcMangledName != "__ABCKIT_INVALID__");
-    auto funcModuleName = funcMangledName.substr(0, funcMangledName.find(':'));
-    auto oldModuleClassName = funcModuleName.substr(0, funcModuleName.rfind('.'));
-    UpdateClassName(funcMangledName, oldModuleClassName, moduleClassName);
-
-    auto funcData = CreatePandasmFunction(klass, method, funcMangledName);
-    UpdateClassNameInFuncIns(funcData->ins, oldModuleClassName, moduleClassName);
-    funcTable.insert(std::make_pair(funcMangledName, std::move(*funcData)));
-
-    auto newCoreFunc = CreateCoreFunction(klass->core->owningModule, funcTable.at(funcMangledName));
-    newCoreFunc->parent = klass->core;
-    nameToFuncMap.emplace(funcMangledName, newCoreFunc.get());
-    klass->core->methods.emplace_back(std::move(newCoreFunc));
-    return true;
-}
-
 bool ClassRemoveFieldStatic(AbckitArktsClass *klass, AbckitCoreClassField *field)
 {
     LIBABCKIT_LOG_FUNC;
@@ -1623,7 +1745,7 @@ AbckitArktsClassField *ClassAddFieldStatic(AbckitCoreClass *klass, const struct 
     for (auto &tmpField : record->fieldList) {
         auto classField = ClassCreateField(klass->owningModule->file, klass, tmpField);
         if (ClassFieldGetNameStatic(classField.get())->impl == name) {
-            retPtr = classField.get()->GetArkTSImpl();
+            retPtr = classField->GetArkTSImpl();
         }
         klass->fields.emplace_back(std::move(classField));
     }
@@ -2058,6 +2180,104 @@ bool InterfaceSetOwningModuleStatic(AbckitCoreInterface *iface, AbckitCoreModule
     }
     iface->owningModule = module;
     return true;
+}
+
+AbckitArktsFunction *ModuleAddFunctionStatic(AbckitArktsModule *module, struct AbckitArktsFunctionCreateParams *params)
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_LOG(DEBUG) << "=== ModuleAddFunctionStatic START ===\n";
+
+    LIBABCKIT_BAD_ARGUMENT(params->name, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(params->returnType, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(module->core->moduleName, nullptr);
+
+    auto *file = module->core->file;
+    LIBABCKIT_INTERNAL_ERROR(file, nullptr);
+
+    const std::string moduleName = std::string(module->core->moduleName->impl);
+    if (moduleName.empty()) {
+        LIBABCKIT_LOG(ERROR) << "Module name is empty\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
+
+    size_t paramsCount = 0;
+    if (params->params != nullptr) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        while (params->params[paramsCount] != nullptr) {
+            paramsCount++;
+        }
+    }
+
+    std::string funcName = params->isAsync ? std::string(ASYNC_PREFIX) + params->name : params->name;
+    std::string fullFuncName = moduleName + ".ETSGLOBAL." + funcName;
+
+    LIBABCKIT_LOG(DEBUG) << "Function name: " << params->name << '\n';
+    LIBABCKIT_LOG(DEBUG) << "Params count: " << paramsCount << '\n';
+    LIBABCKIT_LOG(DEBUG) << "Is async: " << (params->isAsync ? "true" : "false") << '\n';
+    LIBABCKIT_LOG(DEBUG) << "Full function name: " << fullFuncName << '\n';
+
+    return CreateFunctionImpl(file, module->core, fullFuncName, params->returnType, params->params, paramsCount, true,
+                              "public");
+}
+
+AbckitArktsFunction *ClassAddMethodStatic(AbckitArktsClass *klass, struct ArktsMethodCreateParams *params)
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_LOG(DEBUG) << "=== ClassAddMethodCreatedStatic START ===\n";
+
+    LIBABCKIT_BAD_ARGUMENT(params->name, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(params->returnType, nullptr);
+    LIBABCKIT_INTERNAL_ERROR(klass->core, nullptr);
+    LIBABCKIT_INTERNAL_ERROR(klass->core->owningModule, nullptr);
+
+    auto *file = klass->core->owningModule->file;
+    LIBABCKIT_INTERNAL_ERROR(file, nullptr);
+
+    LIBABCKIT_BAD_ARGUMENT(klass->core->owningModule->moduleName, nullptr);
+    const std::string moduleName = std::string(klass->core->owningModule->moduleName->impl);
+    if (moduleName.empty()) {
+        LIBABCKIT_LOG(ERROR) << "Module name is empty\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
+
+    auto *record = klass->impl.GetStaticClass();
+    LIBABCKIT_INTERNAL_ERROR(record, nullptr);
+    const std::string className = record->name;
+    if (className.empty()) {
+        LIBABCKIT_LOG(ERROR) << "Class name is empty\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
+
+    std::string methodName = params->isAsync ? std::string(ASYNC_PREFIX) + params->name : params->name;
+    std::string fullMethodName = className + "." + methodName;
+
+    constexpr std::array<const char *, 3U> VISIBILITY_STR = {"public", "protected", "private"};
+    auto visibilityIndex = static_cast<size_t>(params->methodVisibility);
+    if (visibilityIndex >= VISIBILITY_STR.size()) {
+        visibilityIndex = 0U;
+    }
+    std::string visibility = VISIBILITY_STR[visibilityIndex];
+
+    size_t paramsCount = 0;
+    if (params->params != nullptr) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        while (params->params[paramsCount] != nullptr) {
+            paramsCount++;
+        }
+    }
+
+    LIBABCKIT_LOG(DEBUG) << "Method name: " << params->name << '\n';
+    LIBABCKIT_LOG(DEBUG) << "Params count: " << paramsCount << '\n';
+    LIBABCKIT_LOG(DEBUG) << "Is static: " << (params->isStatic ? "true" : "false") << '\n';
+    LIBABCKIT_LOG(DEBUG) << "Is async: " << (params->isAsync ? "true" : "false") << '\n';
+    LIBABCKIT_LOG(DEBUG) << "Visibility: " << visibility << '\n';
+    LIBABCKIT_LOG(DEBUG) << "Full method name: " << fullMethodName << '\n';
+
+    return CreateFunctionImpl(file, klass->core->owningModule, fullMethodName, params->returnType, params->params,
+                              paramsCount, params->isStatic, visibility);
 }
 
 }  // namespace libabckit

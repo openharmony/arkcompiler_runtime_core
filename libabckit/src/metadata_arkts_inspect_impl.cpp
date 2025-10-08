@@ -175,16 +175,20 @@ extern "C" AbckitArktsClass *CoreClassToArktsClass(AbckitCoreClass *c)
 
 extern "C" bool ArktsClassIsFinal(AbckitArktsClass *klass)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)klass;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(klass, false);
+    return ClassIsFinalStatic(klass->core);
 }
 
 extern "C" bool ArktsClassIsAbstract(AbckitArktsClass *klass)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)klass;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(klass, false);
+    return ClassIsAbstractStatic(klass->core);
 }
 
 /* ========================================
@@ -254,13 +258,6 @@ extern "C" AbckitArktsModuleField *CoreModuleFieldToArktsModuleField(AbckitCoreM
     return field->GetArkTSImpl();
 }
 
-extern "C" bool ArktsModuleFieldIsReadonly(AbckitArktsModuleField *field)
-{
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    return false;
-}
-
 /* ========================================
  * Namespace Field
  * ======================================== */
@@ -296,13 +293,6 @@ extern "C" AbckitArktsClassField *CoreClassFieldToArktsClassField(AbckitCoreClas
     return field->GetArkTSImpl();
 }
 
-extern "C" bool ArktsClassFieldIsReadonly(AbckitArktsClassField *field)
-{
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    return false;
-}
-
 /* ========================================
  * Interface Field
  * ======================================== */
@@ -327,9 +317,11 @@ extern "C" AbckitArktsInterfaceField *CoreInterfaceFieldToArktsInterfaceField(Ab
 
 extern "C" bool ArktsInterfaceFieldIsReadonly(AbckitArktsInterfaceField *field)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(field, false);
+    return InterfaceFieldIsReadonlyStatic(field->core);
 }
 
 /* ========================================
@@ -603,7 +595,7 @@ AbckitArktsInspectApi g_arktsInspectApiImpl = {
     // Module Field
     // ========================================
 
-    ArktsModuleFieldToCoreModuleField, CoreModuleFieldToArktsModuleField, ArktsModuleFieldIsReadonly,
+    ArktsModuleFieldToCoreModuleField, CoreModuleFieldToArktsModuleField,
 
     // ========================================
     // Namespace Field
@@ -615,7 +607,7 @@ AbckitArktsInspectApi g_arktsInspectApiImpl = {
     // Class Field
     // ========================================
 
-    ArktsClassFieldToCoreClassField, CoreClassFieldToArktsClassField, ArktsClassFieldIsReadonly,
+    ArktsClassFieldToCoreClassField, CoreClassFieldToArktsClassField,
 
     // ========================================
     // Interface Field

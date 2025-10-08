@@ -567,6 +567,15 @@ AbckitInst *IcreateNullCheck(AbckitGraph *graph, AbckitInst *inputObj)
     return DEFAULT_INST;
 }
 
+AbckitInst *IcreateLoadObject(AbckitGraph *graph, AbckitInst *inputObj, AbckitCoreClassField *field)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(graph == DEFAULT_GRAPH);
+    EXPECT_TRUE(inputObj == DEFAULT_INST);
+    EXPECT_TRUE(field == DEFAULT_CORE_CLASS_FIELD);
+    return DEFAULT_INST;
+}
+
 AbckitInst *IcreateStobjObj(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1, AbckitString *keyString)
 {
     g_calledFuncs.push(__func__);
@@ -578,7 +587,7 @@ AbckitInst *IcreateStobjObj(AbckitGraph *graph, AbckitInst *input0, AbckitInst *
     return DEFAULT_INST;
 }
 
-AbckitInst *IcreateStobjObj(AbckitGraph *graph, AbckitInst *input0, AbckitString *keyString)
+AbckitInst *IcreateLdobjObj(AbckitGraph *graph, AbckitInst *input0, AbckitString *keyString)
 {
     g_calledFuncs.push(__func__);
 
@@ -645,8 +654,9 @@ AbckitIsaApiStatic g_isaApiStaticImpl = {
     IcreateThrow,
     IcreateIsUndefined,
     IcreateNullCheck,
+    IcreateLoadObject,
     IcreateStobjObj,
-    IcreateStobjObj,
+    IcreateLdobjObj,
 };
 
 // NOLINTEND(readability-identifier-naming)

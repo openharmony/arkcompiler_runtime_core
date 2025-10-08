@@ -115,6 +115,8 @@ bool FunctionAddParameterStatic(AbckitArktsFunction *func, AbckitArktsFunctionPa
 bool FunctionSetReturnTypeStatic(AbckitArktsFunction *func, AbckitType *type);
 bool FunctionRemoveParameterStatic(AbckitArktsFunction *func, size_t index);
 
+AbckitArktsFunction *ModuleAddFunctionStatic(AbckitArktsModule *module, struct AbckitArktsFunctionCreateParams *params);
+AbckitArktsFunction *ClassAddMethodStatic(AbckitArktsClass *klass, struct ArktsMethodCreateParams *params);
 // ========================================
 // Class
 // ========================================
@@ -123,7 +125,7 @@ bool ClassRemoveMethodStatic(AbckitCoreClass *klass, AbckitCoreFunction *method)
 bool ClassAddInterfaceStatic(AbckitArktsClass *klass, AbckitArktsInterface *iface);
 bool ClassRemoveInterfaceStatic(AbckitArktsClass *klass, AbckitArktsInterface *iface);
 bool ClassSetSuperClassStatic(AbckitArktsClass *klass, AbckitArktsClass *superClass);
-bool ClassAddMethodStatic(AbckitArktsClass *klass, AbckitArktsFunction *method);
+bool ClassAddMethod(AbckitArktsClass *klass, AbckitArktsFunction *method);
 bool ClassRemoveFieldStatic(AbckitArktsClass *klass, AbckitCoreClassField *field);
 AbckitArktsClassField *ClassAddFieldStatic(AbckitCoreClass *klass, const struct AbckitArktsFieldCreateParams *params);
 bool ClassSetOwningModuleStatic(AbckitCoreClass *klass, AbckitCoreModule *module);

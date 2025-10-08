@@ -106,22 +106,6 @@ TEST_F(LibAbcKitCppMockArktsTestClass, Class_SetSuperClass)
     ASSERT_TRUE(CheckMockedStackEmpty());
 }
 
-// Test: test-kind=mock, api=Class::AddMethod, abc-kind=ArkTS2, category=internal, extension=cpp
-TEST_F(LibAbcKitCppMockArktsTestClass, Class_AddMethod)
-{
-    ASSERT_TRUE(CheckMockedStackEmpty());
-    {
-        abckit::File f(DEFAULT_PATH);
-        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
-        abckit::mock::helpers::GetMockArktsClass(f).AddMethod(abckit::mock::helpers::GetMockArktsFunction(f));
-        ASSERT_TRUE(CheckMockedApi("ClassAddMethod"));
-        ASSERT_TRUE(CheckMockedApi("CoreFunctionToArktsFunction"));
-        ASSERT_TRUE(CheckMockedApi("CoreClassToArktsClass"));
-    }
-    ASSERT_TRUE(CheckMockedApi("CloseFile"));
-    ASSERT_TRUE(CheckMockedStackEmpty());
-}
-
 // Test: test-kind=mock, api=Class::RemoveMethod, abc-kind=ArkTS2, category=internal, extension=cpp
 TEST_F(LibAbcKitCppMockArktsTestClass, Class_RemoveMethod)
 {
@@ -194,8 +178,7 @@ TEST_F(LibAbcKitCppMockArktsTestClass, Class_AddField)
     {
         abckit::File f(DEFAULT_PATH);
         ASSERT_TRUE(CheckMockedApi("OpenAbc"));
-        abckit::mock::helpers::GetMockArktsClass(f).AddField(DEFAULT_CONST_CHAR, abckit::mock::helpers::GetMockType(f),
-                                                             abckit::mock::helpers::GetMockValueDouble(f));
+        abckit::mock::helpers::GetMockArktsClass(f).AddField(DEFAULT_CONST_CHAR, abckit::mock::helpers::GetMockType(f));
         ASSERT_TRUE(CheckMockedApi("CoreClassFieldToArktsClassField"));
         ASSERT_TRUE(CheckMockedApi("ArktsClassFieldToCoreClassField"));
         ASSERT_TRUE(CheckMockedApi("ClassAddField"));
