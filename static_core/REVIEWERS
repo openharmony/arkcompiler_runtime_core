@@ -83,7 +83,7 @@ static_core/scripts/sdk/                                 ^igelhaus ^Prof @Nojpg 
 static_core/tests/benchmarks/                            @igelhaus
 static_core/tests/checked/                               @Prof @dingding5 ^chernykhsergey
 static_core/tests/panda/                                 @igelhaus
-static_core/tests/test-lists/                            ^amate ^sergeyandreev @kuchkovairina
+static_core/tests/test-lists/                            ^amate ^sergeyandreev @Prof @kuchkovairina
 static_core/tests/tests-u-runner-2/                      ^amate ^sergeyandreev @anton-sysoev ^Nojpg @shirunova_viktoria @kozhevnikova_elizaveta
 static_core/tests/tests-u-runner/                        ^amate ^sergeyandreev @anton-sysoev ^Nojpg @shirunova_viktoria @kozhevnikova_elizaveta
 static_core/tests/verifier-tests/                        @igelhaus
@@ -151,8 +151,8 @@ static_core/plugins/ets/tests/ets_sdk/                                        ^a
 static_core/plugins/ets/tests/interop_js/                                     ^igelhaus @nazarovkonstantin ^rokashevichsvetlana ^kurnevichstanislav
 static_core/plugins/ets/tests/libani_helpers/                                 @wanzixuan330 @v-cherkashin ^slynkodenis ^liwentao_uiw
 static_core/plugins/ets/tests/stdlib-templates/                               ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
-static_core/plugins/ets/tests/test-lists/                                     ^amate ^sergeyandreev @kuchkovairina
-static_core/plugins/ets/tests/test-lists/declgenets2ts                        ^amate ^sergeyandreev @kuchkovairina @Nojpg ^luobohua2025 @chenmudan
+static_core/plugins/ets/tests/test-lists/                                     ^amate ^sergeyandreev @Prof @kuchkovairina
+static_core/plugins/ets/tests/test-lists/declgenets2ts                        ^amate ^sergeyandreev @Prof @kuchkovairina @Nojpg ^luobohua2025 @chenmudan
 static_core/plugins/ets/tools/declgen_ts2sts/                                 @Nojpg ^trubachevilya @nazarovkonstantin ^luobohua2025 @chenmudan @lihao000
 static_core/tests/tests-u-runner/runner/plugins/declgenets2ts                 @Nojpg ^amate @sergeyandreev @anton-sysoev
 static_core/tests/tests-u-runner/tools/generate-es-checked/                   ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
