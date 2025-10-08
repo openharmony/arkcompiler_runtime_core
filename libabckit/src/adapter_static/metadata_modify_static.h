@@ -19,12 +19,22 @@
 #include "libabckit/c/metadata_core.h"
 #include "libabckit/c/extensions/arkts/metadata_arkts.h"
 #include "libabckit/c/extensions/js/metadata_js.h"
+#include <vector>
 
 namespace libabckit {
 
 // ========================================
 // Create / Update
 // ========================================
+AbckitArktsModule *FileAddExternalModuleArktsV2Static(AbckitFile *file, const char *moduleName);
+AbckitArktsClass *ModuleImportClassFromArktsV2ToArktsV2Static(AbckitArktsModule *externalModule, const char *className);
+
+AbckitArktsFunction *ModuleImportStaticFunctionStatic(AbckitArktsModule *externalModule, const char *functionName,
+                                                      const char *returnType, const std::vector<const char *> &params);
+
+AbckitArktsFunction *ModuleImportClassMethodStatic(AbckitArktsModule *externalModule, const char *className,
+                                                   const char *methodName, const char *returnType,
+                                                   const std::vector<const char *> &params);
 
 AbckitString *CreateStringStatic(AbckitFile *file, const char *value, size_t len);
 

@@ -715,6 +715,17 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
     AbckitArktsModule *(*fileAddExternalModuleArktsV1)(AbckitFile *file,
                                                        const struct AbckitArktsV1ExternalModuleCreateParams *params);
 
+    /**
+     * @brief Creates an external Arkts module with target `ABCKIT_TARGET_ARK_TS_V2` and adds it to the file `file`.
+     * @return Pointer to the newly created module.
+     * @param [ in ] file - Binary file to .
+     * @param [ in ] moduleName - The name of the external module.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `file` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `moduleName` is NULL.
+     * @note Allocates
+     */
+    AbckitArktsModule *(*fileAddExternalModuleArktsV2)(AbckitFile *file, const char *moduleName);
+
     /* ========================================
      * Module
      * ======================================== */
@@ -743,7 +754,52 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
     AbckitArktsImportDescriptor *(*moduleAddImportFromArktsV1ToArktsV1)(
         AbckitArktsModule *importing, AbckitArktsModule *imported,
         const struct AbckitArktsImportFromDynamicModuleCreateParams *params);
+    /**
+     * @brief Adds import from one Arkts module to another Arkts module.
+     * @return Pointer to the newly created import descriptor.
+     * @param [ in ] externalModule - The external module to import the class from.
+     * @param [ in ] className - The name of the class to import.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `externalModule` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `className` is NULL.
+     * @note Allocates
+     */
+    AbckitArktsClass *(*moduleImportClassFromArktsV2toArktsV2)(AbckitArktsModule *externalModule,
+                                                               const char *className);
 
+    /**
+     * @brief Import static function from external module (e.g., std.math.ETSGLOBAL.abs).
+     * @return Pointer to the newly created function.
+     * @param [ in ] externalModule - The external module to import the function from.
+     * @param [ in ] functionName - The name of the static function to import.
+     * @param [ in ] returnType - Return type of the function.
+     * @param [ in ] params - Array of parameter type strings.
+     * @param [ in ] paramCount - Number of parameters in the params array.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if any parameter is NULL.
+     * @note Allocates
+     */
+    AbckitArktsFunction *(*moduleImportStaticFunctionFromArktsV2ToArktsV2)(AbckitArktsModule *externalModule,
+                                                                           const char *functionName,
+                                                                           const char *returnType,
+                                                                           const char *const *params,
+                                                                           size_t paramCount);
+
+    /**
+     * @brief Import class instance method from external module (e.g., std.core.Console.log).
+     * Automatically imports the class if needed and adds class field to module.
+     * @return Pointer to the newly created function.
+     * @param [ in ] externalModule - The external module to import the method from.
+     * @param [ in ] className - The name of the class containing the method.
+     * @param [ in ] methodName - The name of the instance method to import.
+     * @param [ in ] returnType - Return type of the method.
+     * @param [ in ] params - Array of parameter type strings (excluding 'this' parameter).
+     * @param [ in ] paramCount - Number of parameters in the params array.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if any parameter is NULL.
+     * @note Allocates
+     */
+    AbckitArktsFunction *(*moduleImportClassMethodFromArktsV2ToArktsV2)(AbckitArktsModule *externalModule,
+                                                                        const char *className, const char *methodName,
+                                                                        const char *returnType,
+                                                                        const char *const *params, size_t paramCount);
     /**
      * @brief Removes import `id` from module `m`.
      * @return None.

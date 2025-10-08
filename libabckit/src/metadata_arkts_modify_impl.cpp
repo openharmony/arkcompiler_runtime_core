@@ -81,10 +81,29 @@ extern "C" AbckitArktsModule *FileAddExternalModuleArktsV1(AbckitFile *file,
     }
 }
 
+extern "C" AbckitArktsModule *FileAddExternalModuleArktsV2(AbckitFile *file, const char *moduleName)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(file, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(moduleName, nullptr);
+
+    switch (file->frontend) {
+        case Mode::STATIC:
+            return FileAddExternalModuleArktsV2Static(file, moduleName);
+        case Mode::DYNAMIC:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return nullptr;
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
+}
+
 // ========================================
 // Module
 // ========================================
-
 extern "C" bool ModuleSetName(AbckitArktsModule *m, const char *name)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
@@ -130,16 +149,67 @@ extern "C" AbckitArktsImportDescriptor *ModuleAddImportFromArktsV1ToArktsV1(
     return ModuleAddImportFromDynamicModuleDynamic(importing->core, imported->core, params);
 }
 
-extern "C" AbckitArktsImportDescriptor *ModuleAddImportFromArktsV2ToArktsV2(
-    AbckitArktsModule * /*importing*/, AbckitArktsModule * /*imported*/,
-    const AbckitArktsImportFromDynamicModuleCreateParams * /*params*/)
+extern "C" AbckitArktsClass *ModuleImportClassFromArktsV2ToArktsV2(AbckitArktsModule *externalModule,
+                                                                   const char *className)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
     LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(externalModule, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(className, nullptr);
 
-    statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
-    return nullptr;
+    if (externalModule->core->target != ABCKIT_TARGET_ARK_TS_V2) {
+        statuses::SetLastError(ABCKIT_STATUS_WRONG_TARGET);
+        return nullptr;
+    }
+    return ModuleImportClassFromArktsV2ToArktsV2Static(externalModule, className);
+}
+
+extern "C" AbckitArktsFunction *ModuleImportStaticFunctionFromArktsV2ToArktsV2(AbckitArktsModule *externalModule,
+                                                                               const char *functionName,
+                                                                               const char *returnType,
+                                                                               const char *const *params,
+                                                                               size_t paramCount)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(externalModule, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(functionName, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(returnType, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(params, nullptr);
+
+    if (externalModule->core->target != ABCKIT_TARGET_ARK_TS_V2) {
+        statuses::SetLastError(ABCKIT_STATUS_WRONG_TARGET);
+        return nullptr;
+    }
+
+    // Convert C-style array to std::vector for internal use
+    std::vector<const char *> paramsVector(params, params + paramCount);
+    return ModuleImportStaticFunctionStatic(externalModule, functionName, returnType, paramsVector);
+}
+
+extern "C" AbckitArktsFunction *ModuleImportClassMethodFromArktsV2ToArktsV2(
+    AbckitArktsModule *externalModule, const char *className, const char *methodName, const char *returnType,
+    const char *const *params, size_t paramCount)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(externalModule, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(className, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(methodName, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(returnType, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(params, nullptr);
+
+    if (externalModule->core->target != ABCKIT_TARGET_ARK_TS_V2) {
+        statuses::SetLastError(ABCKIT_STATUS_WRONG_TARGET);
+        return nullptr;
+    }
+
+    // Convert C-style array to std::vector for internal use
+    std::vector<const char *> paramsVector(params, params + paramCount);
+    return ModuleImportClassMethodStatic(externalModule, className, methodName, returnType, paramsVector);
 }
 
 extern "C" void ModuleRemoveImport(AbckitArktsModule *m, AbckitArktsImportDescriptor *i)
@@ -1533,14 +1603,15 @@ AbckitArktsModifyApi g_arktsModifyApiImpl = {
     // File
     // ========================================
 
-    FileAddExternalModuleArktsV1,
+    FileAddExternalModuleArktsV1, FileAddExternalModuleArktsV2,
 
     // ========================================
     // Module
     // ========================================
 
-    ModuleSetName, ModuleAddImportFromArktsV1ToArktsV1, ModuleRemoveImport, ModuleAddExportFromArktsV1ToArktsV1,
-    ModuleRemoveExport, ModuleAddAnnotationInterface,
+    ModuleSetName, ModuleAddImportFromArktsV1ToArktsV1, ModuleImportClassFromArktsV2ToArktsV2,
+    ModuleImportStaticFunctionFromArktsV2ToArktsV2, ModuleImportClassMethodFromArktsV2ToArktsV2, ModuleRemoveImport,
+    ModuleAddExportFromArktsV1ToArktsV1, ModuleRemoveExport, ModuleAddAnnotationInterface,
 
     // ========================================
     // Namespace

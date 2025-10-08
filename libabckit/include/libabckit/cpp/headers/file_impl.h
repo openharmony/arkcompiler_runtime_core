@@ -223,6 +223,15 @@ inline arkts::Module File::AddExternalModuleArktsV1(std::string_view name) const
     return arkts::Module(core::Module(coreMod, GetApiConfig(), this));
 }
 
+inline arkts::Module File::AddExternalModuleArktsV2(std::string_view name) const
+{
+    auto mod = GetApiConfig()->cArktsMapi_->fileAddExternalModuleArktsV2(GetResource(), name.data());
+    CheckError(GetApiConfig());
+    auto coreMod = GetApiConfig()->cArktsIapi_->arktsModuleToCoreModule(mod);
+    CheckError(GetApiConfig());
+    return arkts::Module(core::Module(coreMod, GetApiConfig(), this));
+}
+
 inline js::Module File::AddExternalModuleJs(std::string_view name) const
 {
     const struct AbckitJsExternalModuleCreateParams params {

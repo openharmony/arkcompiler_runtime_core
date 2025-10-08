@@ -36,6 +36,7 @@
 #include "static_core/assembler/mangling.h"
 #include "static_core/assembler/assembly-record.h"
 #include "static_core/assembler/meta.h"
+#include "static_core/libpandafile/modifiers.h"
 
 #include "static_core/compiler/optimizer/ir/graph_checker.h"
 #include "static_core/compiler/optimizer/ir/graph_cloner.h"
@@ -52,14 +53,55 @@
 
 #include <cstdint>
 #include <string>
-#include <array>
+#include <vector>
+#include <algorithm>
+#include <cctype>
 
 static auto g_implI = AbckitGetInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 static auto g_implArkI = AbckitGetArktsInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
-
 // CC-OFFNXT(WordsTool.95) sensitive word conflict
 // NOLINTNEXTLINE(google-build-using-namespace)
 namespace libabckit {
+// ========================================
+// File
+// ========================================
+
+AbckitArktsModule *FileAddExternalModuleArktsV2Static(AbckitFile *file, const char *moduleName)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    auto coreModule = std::make_unique<AbckitCoreModule>();
+    coreModule->impl = std::make_unique<AbckitArktsModule>();
+    coreModule->file = file;
+    coreModule->target = ABCKIT_TARGET_ARK_TS_V2;
+    coreModule->GetArkTSImpl()->core = coreModule.get();
+
+    auto *prog = file->GetStaticProgram();
+    // module name in recordTable ends with .ETSGLOBAL
+    std::string recordName = std::string(moduleName) + ".ETSGLOBAL";
+
+    auto recordIter = prog->recordTable.find(recordName);
+    if (recordIter == prog->recordTable.end()) {
+        auto record = pandasm::Record(recordName, prog->lang);
+        record.metadata->SetAttribute("external");
+        prog->recordTable.emplace(recordName, std::move(record));
+    }
+
+    prog->strings.insert(moduleName);
+    auto &strings = file->strings;
+    if (strings.find(moduleName) != strings.end()) {
+        coreModule->moduleName = strings.at(moduleName).get();
+    } else {
+        auto s = std::make_unique<AbckitString>();
+        s->impl = moduleName;
+        strings.insert({moduleName, std::move(s)});
+        coreModule->moduleName = strings[moduleName].get();
+    }
+
+    coreModule->isExternal = true;
+    file->externalModules[moduleName] = std::move(coreModule);
+    return file->externalModules[moduleName]->GetArkTSImpl();
+}
 
 static constexpr std::string_view ASYNC_PREFIX = "%%async-";
 
@@ -261,6 +303,36 @@ bool ModuleSetNameStatic(AbckitCoreModule *m, const char *newName)
     modifier.Modify();
 
     return true;
+}
+
+AbckitArktsClass *ModuleImportClassFromArktsV2ToArktsV2Static(AbckitArktsModule *externalModule, const char *className)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto coreModule = externalModule->core;
+    auto *prog = coreModule->file->GetStaticProgram();
+
+    // combine external module name with class name
+    std::string fullClassName = std::string(coreModule->moduleName->impl) + "." + std::string(className);
+
+    auto classRecordIter = prog->recordTable.find(fullClassName);
+    std::pair<std::map<std::string, pandasm::Record>::iterator, bool> result;
+
+    if (classRecordIter == prog->recordTable.end()) {
+        auto pandasmClass = pandasm::Record(fullClassName, prog->lang);
+        pandasmClass.metadata->SetAttribute("external");
+        result = prog->recordTable.emplace(fullClassName, std::move(pandasmClass));
+    } else {
+        result = {classRecordIter, false};
+    }
+
+    auto &addedRecord = result.first->second;
+    AbckitArktsClass arktsClass(&addedRecord);
+    auto coreClass = std::make_unique<AbckitCoreClass>(coreModule, arktsClass);
+    auto *coreClassPtr = coreClass.get();
+
+    coreModule->ct.emplace(className, std::move(coreClass));
+    coreModule->file->nameToClass.emplace(className, coreClassPtr);
+    return coreClassPtr->GetArkTSImpl();
 }
 
 bool ModuleFieldSetNameStatic(AbckitCoreModuleField *field, const char *newName)
@@ -2040,6 +2112,189 @@ bool InterfaceSetOwningModuleStatic(AbckitCoreInterface *iface, AbckitCoreModule
     iface->owningModule = module;
     return true;
 }
+
+// NOLINTNEXTLINE(modernize-avoid-c-arrays,cppcoreguidelines-avoid-c-arrays)
+AbckitArktsFunction *ModuleImportStaticFunctionStatic(AbckitArktsModule *externalModule, const char *functionName,
+                                                      const char *returnType,
+                                                      const std::vector<const char *> &params)  // NOLINT
+{
+    LIBABCKIT_LOG_FUNC;
+
+    auto coreModule = externalModule->core;
+    auto *prog = coreModule->file->GetStaticProgram();
+
+    // fullName: moduleName.ETSGLOBAL.functionName
+    const std::string fullName = std::string(coreModule->moduleName->impl) + ".ETSGLOBAL." + std::string(functionName);
+
+    ark::pandasm::Function f(functionName, prog->lang);
+    f.name = fullName;
+
+    // if the return type is not a base type, make sure it is in recordTable
+    std::string returnTypeStr(returnType);
+    if (returnTypeStr.find('.') != std::string::npos) {
+        auto recordIter = prog->recordTable.find(returnTypeStr);
+        if (recordIter == prog->recordTable.end()) {
+            auto externalRecord = pandasm::Record(returnTypeStr, prog->lang);
+            externalRecord.metadata->SetAttribute("external");
+            prog->recordTable.emplace(returnTypeStr, std::move(externalRecord));
+        }
+    }
+
+    f.returnType = ark::pandasm::Type(returnType, 0);
+
+    for (const auto &paramType : params) {
+        std::string paramTypeStr(paramType);
+
+        if (paramTypeStr.find('.') != std::string::npos) {
+            auto recordIter = prog->recordTable.find(paramTypeStr);
+            if (recordIter == prog->recordTable.end()) {
+                auto externalRecord = pandasm::Record(paramTypeStr, prog->lang);
+                externalRecord.metadata->SetAttribute("external");
+                prog->recordTable.emplace(paramTypeStr, std::move(externalRecord));
+            }
+        }
+
+        f.params.emplace_back(ark::pandasm::Type(paramType, 0), prog->lang);
+    }
+
+    f.metadata->SetAttribute("external");
+    f.metadata->SetAccessFlags(f.metadata->GetAccessFlags() | ACC_STATIC);
+    f.metadata->SetAttributeValue("access.function", "public");
+
+    const auto mangled = MangleFunctionName(ark::pandasm::DeMangleName(fullName), f.params, f.returnType);
+
+    prog->functionStaticTable.insert_or_assign(mangled, std::move(f));
+    auto &addedFunction = prog->functionStaticTable.at(mangled);
+
+    auto coreFunction = std::make_unique<AbckitCoreFunction>();
+    coreFunction->owningModule = coreModule;
+    coreFunction->impl = std::make_unique<AbckitArktsFunction>();
+    coreFunction->GetArkTSImpl()->impl = &addedFunction;
+    coreFunction->GetArkTSImpl()->core = coreFunction.get();
+
+    coreModule->file->nameToFunctionStatic.insert_or_assign(mangled, coreFunction.get());
+    auto *coreFunctionPtr = coreFunction.get();
+    coreModule->functions.emplace_back(std::move(coreFunction));
+
+    return coreFunctionPtr->GetArkTSImpl();
+}
+
+// NOLINTNEXTLINE(modernize-avoid-c-arrays,cppcoreguidelines-avoid-c-arrays)
+AbckitArktsFunction *ModuleImportClassMethodStatic(AbckitArktsModule *externalModule, const char *className,
+                                                   const char *methodName, const char *returnType,
+                                                   const std::vector<const char *> &params)  // NOLINT
+{
+    LIBABCKIT_LOG_FUNC;
+
+    auto coreModule = externalModule->core;
+    auto *prog = coreModule->file->GetStaticProgram();
+
+    // make sure the class exists
+    std::string fullClassName = std::string(coreModule->moduleName->impl) + "." + std::string(className);
+
+    auto classRecordIter = prog->recordTable.find(fullClassName);
+    if (classRecordIter == prog->recordTable.end()) {
+        // if the class does not exist, auto-import it
+        ModuleImportClassFromArktsV2ToArktsV2Static(externalModule, className);
+        classRecordIter = prog->recordTable.find(fullClassName);
+        assert(classRecordIter != prog->recordTable.end());
+    }
+
+    // add to owningModule's fieldList (e.g. console: std.core.Console)
+    std::string owingModuleName = std::string(coreModule->moduleName->impl) + ".ETSGLOBAL";
+    auto moduleRecordIter = prog->recordTable.find(owingModuleName);
+
+    if (moduleRecordIter != prog->recordTable.end()) {
+        // create field name (class name to lowercase)
+        std::string fieldName = std::string(className);
+        std::transform(fieldName.begin(), fieldName.end(), fieldName.begin(), ::tolower);
+
+        // check if the field exists
+        bool fieldExists = false;
+        for (const auto &field : moduleRecordIter->second.fieldList) {
+            if (field.name == fieldName) {
+                fieldExists = true;
+                break;
+            }
+        }
+
+        if (!fieldExists) {
+            // create class field
+            auto pandasmField = pandasm::Field(prog->lang);
+            pandasmField.name = fieldName;
+            pandasmField.type = pandasm::Type(fullClassName, 0);
+            pandasmField.metadata->SetAttribute("external");
+            pandasmField.metadata->SetAccessFlags(pandasmField.metadata->GetAccessFlags() | ACC_STATIC);
+            pandasmField.metadata->SetAttributeValue("access.field", "public");
+
+            moduleRecordIter->second.fieldList.emplace_back(std::move(pandasmField));
+            LIBABCKIT_LOG(INFO) << "Added class field '" << fieldName << "' of type '" << fullClassName << "'"
+                                << std::endl;
+        } else {
+            LIBABCKIT_LOG(INFO) << "Class field '" << fieldName << "' already exists" << std::endl;
+        }
+    }
+
+    // import instance method
+    std::string fullMethodName = fullClassName + "." + std::string(methodName);
+
+    ark::pandasm::Function f(methodName, prog->lang);
+    f.name = fullMethodName;
+
+    // make sure the return type is in recordTable
+    std::string returnTypeStr(returnType);
+    if (returnTypeStr.find('.') != std::string::npos) {
+        auto recordIter = prog->recordTable.find(returnTypeStr);
+        if (recordIter == prog->recordTable.end()) {
+            auto externalRecord = pandasm::Record(returnTypeStr, prog->lang);
+            externalRecord.metadata->SetAttribute("external");
+            prog->recordTable.emplace(returnTypeStr, std::move(externalRecord));
+        }
+    }
+
+    f.returnType = ark::pandasm::Type(returnType, 0);
+
+    f.params.emplace_back(ark::pandasm::Type(fullClassName, 0), prog->lang);  // this parameter
+    for (const auto &paramType : params) {
+        std::string paramTypeStr(paramType);
+
+        // if the parameter type is not a base type, make sure it is in recordTable
+        if (paramTypeStr.find('.') != std::string::npos) {
+            auto recordIter = prog->recordTable.find(paramTypeStr);
+            if (recordIter == prog->recordTable.end()) {
+                auto externalRecord = pandasm::Record(paramTypeStr, prog->lang);
+                externalRecord.metadata->SetAttribute("external");
+                prog->recordTable.emplace(paramTypeStr, std::move(externalRecord));
+            }
+        }
+
+        f.params.emplace_back(ark::pandasm::Type(paramType, 0), prog->lang);
+    }
+
+    f.metadata->SetAttribute("external");
+    f.metadata->SetAttributeValue("access.function", "public");
+
+    const auto mangled = MangleFunctionName(ark::pandasm::DeMangleName(fullMethodName), f.params, f.returnType);
+
+    prog->functionInstanceTable.insert_or_assign(mangled, std::move(f));
+    auto &addedFunction = prog->functionInstanceTable.at(mangled);
+
+    // create mapping
+    auto coreFunction = std::make_unique<AbckitCoreFunction>();
+    coreFunction->owningModule = coreModule;
+    coreFunction->impl = std::make_unique<AbckitArktsFunction>();
+    coreFunction->GetArkTSImpl()->impl = &addedFunction;
+    coreFunction->GetArkTSImpl()->core = coreFunction.get();
+
+    coreModule->file->nameToFunctionInstance.insert_or_assign(mangled, coreFunction.get());
+    auto *coreFunctionPtr = coreFunction.get();
+    coreModule->functions.emplace_back(std::move(coreFunction));
+
+    return coreFunctionPtr->GetArkTSImpl();
+}
+
+
+
 
 AbckitArktsFunction *ModuleAddFunctionStatic(AbckitArktsModule *module, struct AbckitArktsFunctionCreateParams *params)
 {

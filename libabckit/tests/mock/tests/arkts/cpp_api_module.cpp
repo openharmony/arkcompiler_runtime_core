@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,6 +36,23 @@ TEST_F(LibAbcKitCppMockArktsTestModule, Module_AddImportFromArktsV1ToArktsV1)
         ASSERT_TRUE(CheckMockedApi("ArktsImportDescriptorToCoreImportDescriptor"));
         ASSERT_TRUE(CheckMockedApi("ModuleAddImportFromArktsV1ToArktsV1"));
         ASSERT_TRUE(CheckMockedApi("CoreModuleToArktsModule"));
+        ASSERT_TRUE(CheckMockedApi("CoreModuleToArktsModule"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
+// Test: test-kind=mock, api=Module::ImportClassFromArktsV2ToArktsV2, abc-kind=ArkTS1, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockArktsTestModule, Module_ImportClassFromArktsV2ToArktsV2)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File f(DEFAULT_PATH);
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        abckit::mock::helpers::GetMockArktsModule(f).ImportClassFromArktsV2ToArktsV2(
+            abckit::mock::helpers::GetMockArktsModule(f), DEFAULT_CONST_CHAR);
+        ASSERT_TRUE(CheckMockedApi("CoreClassToArktsClass"));
+        ASSERT_TRUE(CheckMockedApi("ArktsClassToCoreClass"));
+        ASSERT_TRUE(CheckMockedApi("ModuleImportClassFromArktsV2ToArktsV2"));
         ASSERT_TRUE(CheckMockedApi("CoreModuleToArktsModule"));
     }
     ASSERT_TRUE(CheckMockedApi("CloseFile"));

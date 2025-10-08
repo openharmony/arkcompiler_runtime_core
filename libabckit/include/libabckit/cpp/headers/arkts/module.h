@@ -21,6 +21,7 @@
 #include "import_descriptor.h"
 #include "export_descriptor.h"
 #include "annotation_interface.h"
+#include <vector>
 
 #include <string_view>
 
@@ -103,7 +104,44 @@ public:
      */
     ImportDescriptor AddImportFromArktsV1ToArktsV1(Module imported, std::string_view name,
                                                    std::string_view alias) const;
+    /**
+     * @brief Import class from one ArktsV2 module to another ArktsV2 module.
+     * @return Pointer to the newly created class.
+     * @param [ in ] exported - The module the class is exported from.
+     * @param [ in ] name - The name of the class to import.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `exported` is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is false.
+     */
+    arkts::Class ImportClassFromArktsV2ToArktsV2(arkts::Module exported, std::string_view name) const;
 
+    /**
+     * @brief Import static function from one ArktsV2 module to another ArktsV2 module.
+     * @return Pointer to the newly created function.
+     * @param [ in ] exported - The module the function is exported from.
+     * @param [ in ] functionName - The name of the function to import.
+     * @param [ in ] returnType - The return type of the function.
+     * @param [ in ] params - The parameter types of the function.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `exported` is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `functionName` is false.
+     */
+    arkts::Function ImportStaticFunctionFromArktsV2ToArktsV2(arkts::Module exported, std::string_view functionName,
+                                                             std::string_view returnType,
+                                                             const std::vector<const char *> &params) const;
+
+    /**
+     * @brief Import class instance method from one ArktsV2 module to another ArktsV2 module.
+     * @return Pointer to the newly created function.
+     * @param [ in ] exported - The module the method is exported from.
+     * @param [ in ] className - The name of the class containing the method.
+     * @param [ in ] methodName - The name of the method to import.
+     * @param [ in ] returnType - The return type of the method.
+     * @param [ in ] params - The parameter types of the method.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `exported` is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `className` or `methodName` is false.
+     */
+    arkts::Function ImportClassMethodFromArktsV2ToArktsV2(arkts::Module exported, std::string_view className,
+                                                          std::string_view methodName, std::string_view returnType,
+                                                          const std::vector<const char *> &params) const;
     /**
      * @brief Removes import `id` from Module.
      * @param [ in ] desc - Import to remove from the Module.

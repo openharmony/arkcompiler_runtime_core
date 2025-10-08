@@ -43,6 +43,8 @@ class Class : public ViewInResource<AbckitCoreClass *, const File *> {
     friend class abckit::Type;
     /// @brief to access private constructor
     friend class arkts::Class;
+    /// @brief to access private constructor
+    friend class arkts::Module;
     /// @brief abckit::DefaultHash<Class>
     friend class abckit::DefaultHash<Class>;
     /// @brief to access private constructor

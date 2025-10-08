@@ -2192,7 +2192,7 @@ void TestNullptr(bool (*apiToCheck)(AbckitCoreNamespace *, void *, bool (*cb)(Ab
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
 
     auto module = std::make_unique<AbckitCoreModule>();
-    auto coreNamespace = std::make_unique<AbckitCoreNamespace>(std::move(module).get());
+    auto coreNamespace = std::make_unique<AbckitCoreNamespace>(module.get());
     module->target = ABCKIT_TARGET_ARK_TS_V2;
     auto function = std::make_unique<AbckitCoreFunction>();
     coreNamespace->functions.emplace_back(std::move(function));

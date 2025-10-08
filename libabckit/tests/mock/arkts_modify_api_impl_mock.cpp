@@ -35,6 +35,14 @@ AbckitArktsModule *FileAddExternalModuleArktsV1(AbckitFile *file,
     return DEFAULT_ARKTS_MODULE;
 }
 
+AbckitArktsModule *FileAddExternalModuleArktsV2(AbckitFile *file, const char *moduleName)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(file == DEFAULT_FILE);
+    EXPECT_TRUE(moduleName == DEFAULT_CONST_CHAR);
+    return DEFAULT_ARKTS_MODULE;
+}
+
 bool ModuleSetName(AbckitArktsModule *m, const char *name)
 {
     g_calledFuncs.push(__func__);
@@ -56,6 +64,42 @@ AbckitArktsImportDescriptor *ModuleAddImportFromArktsV1ToArktsV1(
     EXPECT_TRUE(strncmp(params->name, DEFAULT_CONST_CHAR, DEFAULT_CONST_CHAR_SIZE) == 0);
     EXPECT_TRUE(strncmp(params->alias, DEFAULT_CONST_CHAR, DEFAULT_CONST_CHAR_SIZE) == 0);
     return DEFAULT_ARKTS_IMPORT_DESCRIPTOR;
+}
+
+AbckitArktsClass *ModuleImportClassFromArktsV2ToArktsV2(AbckitArktsModule *externalModule, const char *className)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(externalModule == DEFAULT_ARKTS_MODULE);
+    EXPECT_TRUE(className == DEFAULT_CONST_CHAR);
+    return DEFAULT_ARKTS_CLASS;
+}
+
+AbckitArktsFunction *ModuleImportStaticFunctionFromArktsV2ToArktsV2(AbckitArktsModule *externalModule,
+                                                                    const char *functionName, const char *returnType,
+                                                                    const char *const *params, size_t paramCount)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(externalModule == DEFAULT_ARKTS_MODULE);
+    EXPECT_TRUE(functionName == DEFAULT_CONST_CHAR);
+    EXPECT_TRUE(returnType == DEFAULT_CONST_CHAR);
+    EXPECT_TRUE(params != nullptr);
+    EXPECT_TRUE(paramCount == DEFAULT_SIZE_T);
+    return DEFAULT_ARKTS_FUNCTION;
+}
+
+AbckitArktsFunction *ModuleImportClassMethodFromArktsV2ToArktsV2(AbckitArktsModule *externalModule,
+                                                                 const char *className, const char *methodName,
+                                                                 const char *returnType, const char *const *params,
+                                                                 size_t paramCount)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(externalModule == DEFAULT_ARKTS_MODULE);
+    EXPECT_TRUE(className == DEFAULT_CONST_CHAR);
+    EXPECT_TRUE(methodName == DEFAULT_CONST_CHAR);
+    EXPECT_TRUE(returnType == DEFAULT_CONST_CHAR);
+    EXPECT_TRUE(params != nullptr);
+    EXPECT_TRUE(paramCount == DEFAULT_SIZE_T);
+    return DEFAULT_ARKTS_FUNCTION;
 }
 
 void ModuleRemoveImport(AbckitArktsModule *m, AbckitArktsImportDescriptor *id)
@@ -534,14 +578,15 @@ AbckitArktsModifyApi g_arktsModifyApiImpl = {
     // File
     // ========================================
 
-    FileAddExternalModuleArktsV1,
+    FileAddExternalModuleArktsV1, FileAddExternalModuleArktsV2,
 
     // ========================================
     // Module
     // ========================================
 
-    ModuleSetName, ModuleAddImportFromArktsV1ToArktsV1, ModuleRemoveImport, ModuleAddExportFromArktsV1ToArktsV1,
-    ModuleRemoveExport, ModuleAddAnnotationInterface,
+    ModuleSetName, ModuleAddImportFromArktsV1ToArktsV1, ModuleImportClassFromArktsV2ToArktsV2,
+    ModuleImportStaticFunctionFromArktsV2ToArktsV2, ModuleImportClassMethodFromArktsV2ToArktsV2, ModuleRemoveImport,
+    ModuleAddExportFromArktsV1ToArktsV1, ModuleRemoveExport, ModuleAddAnnotationInterface,
 
     // ========================================
     // Namespace
