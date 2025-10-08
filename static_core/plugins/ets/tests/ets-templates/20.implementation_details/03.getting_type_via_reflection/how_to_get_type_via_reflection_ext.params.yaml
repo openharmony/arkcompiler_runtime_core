@@ -97,7 +97,7 @@ cases:
   - desc: How to get RegExp via reflection.
     logic: |-
       let type_of_RegExp: Type = Type.from<RegExp>();
-      arktest.assertEQ(type_of_RegExp.toString(), "escompat.RegExp");
+      arktest.assertEQ(type_of_RegExp.toString(), "std.core.RegExp");
   - desc: How to get Set via reflection.
     logic: |-
       let type_of_Set: Type = Type.from<Set<number>>();

@@ -48,7 +48,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/std_core.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_Array.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_ArrayBuffer.cpp
-    ${ETS_EXT_SOURCES}/intrinsics/escompat_RegExp.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_RegExp.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_TypedArrays.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_Date.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_JSON.cpp
@@ -131,10 +131,10 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/static_type_converter.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/init_native_methods.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/escompat/Process.cpp
-    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/escompat/RegExp.cpp
-    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/escompat/regexp/regexp.cpp
-    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/escompat/regexp/regexp_16.cpp
-    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/escompat/regexp/regexp_8.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/regexp/RegExp.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/regexp/regexp.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/regexp/regexp_16.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/regexp/regexp_8.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/etsstdlib.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/Intl.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlCommon.cpp

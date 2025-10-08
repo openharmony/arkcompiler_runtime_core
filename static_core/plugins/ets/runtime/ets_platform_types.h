@@ -140,7 +140,7 @@ public:
     EtsMethod *escompatProcessListUnhandledPromises {};
     EtsMethod *escompatProcessHandleUncaughtError {};
 
-    EtsClass *escompatRegExpExecArray {};
+    EtsClass *stdcoreRegExpExecArray {};
     EtsClass *escompatJsonReplacer {};
     EtsClass *escompatErrorOptions {};
     EtsClass *escompatErrorOptionsImpl {};

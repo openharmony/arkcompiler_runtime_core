@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-{% for item in escompat_regexp_instance %}
+{% for item in std_core_regexp_instance %}
 /*---
 desc:  {function: {{.item.method_name}}_{{.item.method_signature_desc.values()|join("_")}}}
 ---*/

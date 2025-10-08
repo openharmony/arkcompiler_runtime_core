@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_STDLIB_NATIVE_ESCOMPAT_REGEXP_REGEXP_8_H
-#define PANDA_PLUGINS_ETS_STDLIB_NATIVE_ESCOMPAT_REGEXP_REGEXP_8_H
+#ifndef PANDA_PLUGINS_ETS_STDLIB_NATIVE_ESCOMPAT_REGEXP_REGEXP_16_H
+#define PANDA_PLUGINS_ETS_STDLIB_NATIVE_ESCOMPAT_REGEXP_REGEXP_16_H
 
-#include "plugins/ets/stdlib/native/escompat/regexp/regexp_exec_result.h"
+#include "plugins/ets/stdlib/native/core/regexp/regexp_exec_result.h"
 
 #include <cstdint>
 
@@ -24,18 +24,17 @@ namespace ark::ets::stdlib {
 
 using Pcre2Obj = void *;
 
-class RegExp8 {
+class RegExp16 {
 public:
-    static Pcre2Obj CreatePcre2Object(const uint8_t *pattern, uint32_t flags, uint32_t extraFlags, const int len);
-    static RegExpExecResult Execute(Pcre2Obj re, const uint8_t *str, const int len, const int startOffset);
+    static Pcre2Obj CreatePcre2Object(const uint16_t *pattern, uint32_t flags, uint32_t extraFlags, const int len);
+    static RegExpExecResult Execute(Pcre2Obj re, const uint16_t *str, int len, const int startOffset);
     static void ExtractGroups(Pcre2Obj expression, int count, RegExpExecResult &result, void *data);
     static void FreePcre2Object(Pcre2Obj re);
-    static void EraseExtraGroups(const uint8_t *pattern, const size_t len, RegExpExecResult &result);
-    static bool IsUncountable(const uint8_t *pattern, const size_t len, size_t index);
+    static void EraseExtraGroups(const uint16_t *pattern, const size_t len, RegExpExecResult &result);
+    static bool IsUncountable(const uint16_t *pattern, const size_t len, size_t index);
     static void SanitizeGroupCaptureResults(const std::vector<bool> &countableGroups,
                                             const std::map<size_t, size_t> &parentGroups, RegExpExecResult &result);
 };
 
 }  // namespace ark::ets::stdlib
-
-#endif  // PANDA_PLUGINS_ETS_STDLIB_NATIVE_ESCOMPAT_REGEXP_REGEXP_8_H
+#endif  // PANDA_PLUGINS_ETS_STDLIB_NATIVE_ESCOMPAT_REGEXP_REGEXP_16_H

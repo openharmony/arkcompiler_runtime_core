@@ -20,7 +20,7 @@
 namespace ark::ets::intrinsics {
 using RegExpParser = ark::RegExpParser;
 
-extern "C" EtsString *EscompatRegExpParse(EtsString *pattern)
+extern "C" EtsString *StdCoreRegExpParse(EtsString *pattern)
 {
     RegExpParser parse = RegExpParser();
     auto patternstr = ark::PandaStringToStd(pattern->GetUtf8());

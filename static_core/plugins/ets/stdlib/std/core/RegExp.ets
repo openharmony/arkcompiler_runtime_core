@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package escompat
+package std.core
 
 type RegExpGroupsContainer = Record<String, String | undefined>
 

@@ -16,7 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_STDLIB_NATIVE_ESCOMPAT_REGEXP_H
 #define PANDA_PLUGINS_ETS_STDLIB_NATIVE_ESCOMPAT_REGEXP_H
 
-#include "plugins/ets/stdlib/native/escompat/regexp/regexp_exec_result.h"
+#include "plugins/ets/stdlib/native/core/regexp/regexp_exec_result.h"
 
 #include <ani.h>
 

@@ -16,7 +16,7 @@
 #include "RegExp.h"
 
 #include "plugins/ets/stdlib/native/core/stdlib_ani_helpers.h"
-#include "plugins/ets/stdlib/native/escompat/regexp/regexp.h"
+#include "plugins/ets/stdlib/native/core/regexp/regexp.h"
 
 #include "runtime/coroutines/coroutine_scopes.h"
 #include "plugins/ets/runtime/ani/ani_checkers.h"
@@ -53,9 +53,9 @@ namespace {
 
 constexpr const char *LAST_INDEX_FIELD_NAME = "lastIndex";
 
-constexpr const char *REGEXP_CLASS_NAME = "escompat.RegExp";
-constexpr const char *EXEC_ARRAY_CLASS_NAME = "escompat.RegExpExecArray";
-constexpr const char *MATCH_ARRAY_CLASS_NAME = "escompat.RegExpMatchArray";
+constexpr const char *REGEXP_CLASS_NAME = "std.core.RegExp";
+constexpr const char *EXEC_ARRAY_CLASS_NAME = "std.core.RegExpExecArray";
+constexpr const char *MATCH_ARRAY_CLASS_NAME = "std.core.RegExpMatchArray";
 constexpr const char *INDEX_FIELD_NAME = "index_";
 constexpr const char *RESULT_FIELD_NAME = "resultRaw_";
 constexpr const char *IS_CORRECT_FIELD_NAME = "isCorrect";
@@ -402,12 +402,12 @@ static ani_object Match(ani_env *env, ani_object regexp, ani_string pattern, ani
 void RegisterRegExpNativeMethods(ani_env *env)
 {
     const auto regExpImpls = std::array {
-        ani_native_function {"compile", ":C{escompat.RegExp}", reinterpret_cast<void *>(Compile)},
+        ani_native_function {"compile", ":C{std.core.RegExp}", reinterpret_cast<void *>(Compile)},
         ani_native_function {"execImpl",
-                             "C{std.core.String}C{std.core.String}C{std.core.String}iiiz:C{escompat.RegExpExecArray}",
+                             "C{std.core.String}C{std.core.String}C{std.core.String}iiiz:C{std.core.RegExpExecArray}",
                              reinterpret_cast<void *>(Exec)},
         ani_native_function {"matchImpl",
-                             "C{std.core.String}C{std.core.String}C{std.core.String}iiiz:C{escompat.RegExpMatchArray}",
+                             "C{std.core.String}C{std.core.String}C{std.core.String}iiiz:C{std.core.RegExpMatchArray}",
                              reinterpret_cast<void *>(Match)}};
 
     ani_class regexpClassLocal;
