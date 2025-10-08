@@ -62,12 +62,13 @@ end
 
 class Label
   attr_reader :refs, :name
-  attr_accessor :bb
+  attr_accessor :bb, :explicitly_defined
 
   def initialize(name, bb=nil)
     @name = name
     @bb = bb
     @refs = []
+    @explicitly_defined = false
   end
 end
 
@@ -92,6 +93,8 @@ class Function
     @unresolved = [{}]
     @cf_stack = []
     @labels = [{}]
+    @global_labels = {}
+
     if validate
       @validation = {}
       validate.each do |k, v|
@@ -218,6 +221,23 @@ class Function
     end
   end
 
+  def verify_labels()
+    # verifies if labels mentioned in the code are explicitly defined
+    # by means of :Label or :LabelGlobal
+    @labels.each do |label|
+      label.each do |k, v|
+        if v.explicitly_defined == false
+          raise "label '#{v.name}' is undefined in '#{@name}'"
+        end
+      end
+    end
+    @global_labels.each do |k, v|
+      if v.explicitly_defined == false
+          raise "global label '#{v.name}' is undefined in '#{@name}'"
+      end
+    end
+  end
+
   def emit_body()
     if @regalloc_mask
       Output.println("GetGraph()->SetArchUsedRegs(~0x#{@regalloc_mask.value.to_s(16)});")
@@ -269,6 +289,8 @@ class Function
 
   def emit_ir(suffix)
     raise "Compilation mode is not specified" unless @mode
+
+    verify_labels()
 
     if @mode.include?(:FastPathPlus) # only FastPathPlus macro is supported for now
       @mode.delete(:FastPathPlus)
@@ -369,6 +391,79 @@ class Function
     inst
   end
 
+  def StaticAssertEQ(*inputs)
+        raise "Current basic block is nil" if @current_block.nil?
+        if inputs.size != 2
+          raise "expects 2 arguments, got #{inputs.size} "
+        end
+        inputs.each_with_index do |input, i|
+          if !(input.is_a? Integer or input.is_a? Float or input.is_a? String)
+            raise "expected constant argument, got \'#{input.name}\'"
+          end
+        end
+        inst = create_instruction(:StaticAssertEQ, inputs)
+        inst.annotation = Kernel.send(:caller)[0].split(':in')[0]
+        caller_data = caller_locations[0]
+        file_path = File.expand_path(caller_data.path)
+        inst.debug_info.dir = add_source_dir(File.dirname(file_path))
+        inst.debug_info.file = add_source_file(File.basename(file_path))
+        inst.debug_info.line = caller_data.lineno
+        process_inst(inst)
+        inst
+      end
+
+  def AsGlobalLabel(name)
+    global_label_name = "#{@name}_" + name.to_s
+    if !(@global_labels.key? global_label_name)
+      label = Label.new(global_label_name, nil)
+      label.explicitly_defined = false
+      @global_labels[global_label_name] = label
+    end
+    global_label_name
+  end
+
+  def GotoGlobal(name)
+    if @global_labels.key? name.to_s
+      label = @global_labels[name.to_s]
+      if label.bb
+        @current_block.set_true_succ(label.bb)
+      else
+        label.refs << @current_block
+      end
+    else
+      raise "Global label is undefined: #{__method__}(#{name})"
+    end
+  end
+
+  def LabelGlobal(name)
+    last_bb = @current_block
+    new_basic_block
+    last_bb.set_true_succ(@current_block) if last_bb.true_succ.nil? && !last_bb.terminator?
+    global_label_name = "#{@name}_" + name.to_s
+    if @global_labels.key? global_label_name
+      label = @global_labels[global_label_name]
+      label.explicitly_defined = true
+      label.bb = @current_block
+      label.refs.each { |bb| bb.set_true_succ(@current_block) }
+    else
+      label = @Label.new(global_label_name, @current_block)
+      label.explicitly_defined = true
+      label.refs.each { |bb| bb.set_true_succ(@current_block) }
+      @global_labels[global_label_name] = label
+    end
+    # Create its local clone as one may need Goto(:name) locally (not from scoped_macro)
+    label = @labels.last[name]
+    if label
+      label.bb = @current_block
+      label.refs.each { |bb| bb.set_true_succ(@current_block) }
+      label.explicitly_defined = true
+    else
+      label = Label.new(name, @current_block)
+      label.explicitly_defined = true
+      @labels.last[name] = label
+    end
+  end
+
   def Label(name)
     last_bb = @current_block
     new_basic_block
@@ -377,8 +472,11 @@ class Function
     if label
       label.bb = @current_block
       label.refs.each { |bb| bb.set_true_succ(@current_block) }
+      label.explicitly_defined = true
     else
-      @labels.last[name] = Label.new(name, @current_block)
+      new_lab = Label.new(name, @current_block)
+      new_lab.explicitly_defined = true
+      @labels.last[name] = new_lab
     end
   end
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -151,6 +151,12 @@ class IRInstruction
       Output.println "PARAMETER(#{@index}, #{@fields[:ArgIndex]}).#{@type}();"
       return
     elsif IsElse?
+      return
+    elsif IsStaticAssertEQ?
+      lhs = @inputs[0].fields[:Value]
+      rhs = @inputs[1].fields[:Value]
+      ss = "static_assert((#{lhs}) == (#{rhs}));"
+      Output.println ss
       return
     else
       opc = :If if IsWhile?
