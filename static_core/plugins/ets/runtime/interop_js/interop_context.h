@@ -236,14 +236,7 @@ public:
     }
 
     // NOTE(vpukhov): implement in native code
-    [[nodiscard]] bool PushOntoFinalizationRegistry(EtsCoroutine *coro, EtsObject *obj, EtsObject *cbarg)
-    {
-        auto queue = Refstor()->Get(jsvalueFregistryRef_);
-        std::array<Value, 4U> args = {Value(queue), Value(obj->GetCoreType()), Value(cbarg->GetCoreType()),
-                                      Value(static_cast<ObjectHeader *>(nullptr))};
-        jsvalueFregistryRegister_->Invoke(coro, args.data());
-        return !coro->HasPendingException();
-    }
+    [[nodiscard]] bool PushOntoFinalizationRegistry(EtsCoroutine *coro, EtsObject *obj, EtsObject *cbarg);
 
     // NOTE(vpukhov): replace with stack-like allocator
     template <typename T, size_t OPT_SZ>
@@ -435,7 +428,7 @@ public:
 
     static void InitializeDefaultLinkerCtxIfNeeded(EtsRuntimeLinker *linker);
     static void SetDefaultLinkerContext(EtsRuntimeLinker *linker);
-
+    static EtsRuntimeLinker *GetDefaultInteropLinker();
     void ForwardEtsException(EtsCoroutine *coro);
     void ForwardJSException(EtsCoroutine *coro);
 

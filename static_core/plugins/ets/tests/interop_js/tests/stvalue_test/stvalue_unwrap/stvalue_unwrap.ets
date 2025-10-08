@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,16 @@
  * limitations under the License.
  */
 
-package std.interop;
+export let magicInt: int = 15;
+export let magicString1: string = 'Hello World';
+export let magicString2: string = 'Hello World!!!';
 
-export class InteropContext {
-    static setDefaultInteropLinker(linker: RuntimeLinker): void {
-        // Note: This interface should only be called from system component
-        InteropContext.setInteropRuntimeLinker(linker);
-    }
-
-    private static native getInteropRuntimeLinker(): RuntimeLinker;
-    
-    private static native setInteropRuntimeLinker(linker: RuntimeLinker): void;
-}
+/*
+ * toBigIntTest
+ */
+export let defaultNumber: int = 42;
+export let bigIntFromString: bigint = BigInt('999999999999999999');
+export let bigIntFromLiteral: bigint = 123456789012345678901234567890n;
+export let stringVariable: string = 'Hello, World!';
+export let zeroBigInt: bigint = 0n;
+export let negativeBigInt: bigint = -1234567890123456789n;

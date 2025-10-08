@@ -492,6 +492,15 @@ void InteropCtx::InitJsValueFinalizationRegistry(EtsCoroutine *coro)
     ASSERT(jsvalueFregistryRegister_ != nullptr);
 }
 
+bool InteropCtx::PushOntoFinalizationRegistry(EtsCoroutine *coro, EtsObject *obj, EtsObject *cbarg)
+{
+    auto queue = Refstor()->Get(jsvalueFregistryRef_);
+    std::array<Value, 4U> args = {Value(queue), Value(obj->GetCoreType()), Value(cbarg->GetCoreType()),
+                                  Value(static_cast<ObjectHeader *>(nullptr))};
+    jsvalueFregistryRegister_->Invoke(coro, args.data());
+    return !coro->HasPendingException();
+}
+
 EtsObject *InteropCtx::CreateETSCoreESError(EtsCoroutine *coro, EtsObject *etsObject)
 {
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coro);
@@ -640,6 +649,12 @@ void InteropCtx::SetDefaultLinkerContext(EtsRuntimeLinker *linker)
     PandaVM::GetCurrent()->GetGlobalObjectStorage()->Remove(SharedEtsVmState::refToDefaultLinker_);
     SharedEtsVmState::refToDefaultLinker_ = PandaVM::GetCurrent()->GetGlobalObjectStorage()->Add(
         linker->AsObject()->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
+}
+
+EtsRuntimeLinker *InteropCtx::GetDefaultInteropLinker()
+{
+    auto header = PandaVM::GetCurrent()->GetGlobalObjectStorage()->Get(SharedEtsVmState::refToDefaultLinker_);
+    return EtsRuntimeLinker::FromCoreType(header);
 }
 
 void InteropCtx::ForwardEtsException(EtsCoroutine *coro)
