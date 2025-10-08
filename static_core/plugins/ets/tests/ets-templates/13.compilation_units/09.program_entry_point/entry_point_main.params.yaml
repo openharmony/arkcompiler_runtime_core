@@ -50,14 +50,13 @@ cases:
               return
           }
 
-    - tags: negative, compile-only
-      use: |-
-          // entry point function main, explicit void, compile-time negative
+    - use: |-
+          // entry point function main, explicit void, compile-time
           function main(): void {
               if (true) {
                   return
               }
-              return undefined // CTE, wrong return type
+              return undefined
           }
 
     # explicit int return type
