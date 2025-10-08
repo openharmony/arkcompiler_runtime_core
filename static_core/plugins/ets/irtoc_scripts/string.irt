@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include_relative 'string_helpers.irt'
 include_relative '../../plugins/ets/irtoc_scripts/common.irt'
 
 module Constants
