@@ -30,6 +30,7 @@ panda_target_link_libraries(ani_app_lib ani_interface)
 add_dependencies(ani_app ani_app_lib)
 
 panda_add_sanitizers(TARGET ani_app SANITIZERS ${PANDA_SANITIZERS_LIST})
+panda_add_sanitizers(TARGET ani_app_lib SANITIZERS ${PANDA_SANITIZERS_LIST})
 
 set(ANI_APP_ETS_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/interface/ability.ets
@@ -50,6 +51,7 @@ if (NOT PANDA_ENABLE_ADDRESS_SANITIZER)
     add_custom_target(run_ani_app
         COMMAND ARK_ETS_STDLIB_PATH=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc
                 APP_ABC_FILES=${APP_ABC_FILES}
+                LD_LIBRARY_PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
             ${PANDA_RUN_PREFIX} $<TARGET_FILE:ani_app>
         DEPENDS ani_app ani_app_lib ani_app_managed_code
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
