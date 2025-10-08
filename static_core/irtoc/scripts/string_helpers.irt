@@ -35,7 +35,7 @@ scoped_macro(:unpack_length_with_compression) do |length, length_shift|
 end  # unpack_length_with_compression
 
 macro(:check_string_type) do |str|
-  baseClass := LoadI(str).ref
+  baseClass := load_class(str)
   stringType := LoadI(baseClass).Imm(Constants::STRING_TYPE_OFFSET).u64
   If(stringType, Constants::STRING_TYPE_SLICE).EQ {
     Goto(:SlowPathEntrypoint)
@@ -44,6 +44,56 @@ macro(:check_string_type) do |str|
     Goto(:SlowPathEntrypoint)
   }
 end  # check_string_type
+
+
+scoped_macro(:get_tree_data_ptr) do |tree_str, cache_miss_label|
+  stringCache := LoadI(%tr).Imm(Constants::THREAD_FLATTENED_STRING_CACHE_OFFSET).ref
+  If(stringCache, 0).EQ {
+    GotoGlobal(cache_miss_label)
+  }
+  # cannot cast directly from ref to uint
+  strPtr := Cast(tree_str).ptr
+  strUint := Bitcast(strPtr).word
+  strShifted := ShrI(strUint).Imm(FlattenedStringCacheConstants::ADDRESS_SHIFT).word
+  strMasked := AndI(strShifted).Imm(FlattenedStringCacheConstants::ADDRESS_MASK).word
+  strIndex := Mul(strMasked, FlattenedStringCacheConstants::ENTRY_SIZE).word
+  key := LoadArray(stringCache, strIndex).SetNeedBarrier(true).ref
+  If(key, tree_str).NE {
+    GotoGlobal(cache_miss_label)
+  }
+  strIndex := AddI(strIndex).Imm(FlattenedStringCacheConstants::VALUE_OFFSET).ref_uint
+  strCached := LoadArray(stringCache, strIndex).SetNeedBarrier(true).ref
+  data_ptr := AddI(Cast(strCached).SrcType(Constants::COMPILER_REFERENCE).ptr).Imm(Constants::STRING_DATA_OFFSET).ptr
+end
+
+
+scoped_macro(:get_sliced_data_ptr) do |sliced_str, length_packed|
+  # According to the specification the parent string must always be LineString.
+  parent := LoadI(sliced_str).Imm(Constants::SLICED_STRING_PARENT_OFFSET).SetNeedBarrier(true).ref
+  not_compressed := AndI(length_packed).Imm(1).u64
+  startIndex := LoadI(sliced_str).Imm(Constants::SLICED_STRING_STARTINDEX_AND_FLAGS_OFFSET).u32
+  startIndex := ShrI(startIndex).Imm(Constants::SLICED_STRING_STARTINDEX_SHIFT).u64
+  offset := Shl(startIndex, not_compressed).u64
+  data_ptr := AddI(Cast(parent).SrcType(Constants::COMPILER_REFERENCE).ptr).Imm(Constants::STRING_DATA_OFFSET).ptr
+  data_ptr := Add(data_ptr, offset).ptr
+end
+
+
+scoped_macro(:dispatch_on_string_type) do |str, line_label, sliced_label, tree_label|
+  baseClass := load_class(str)
+  stringType := LoadI(baseClass).Imm(Constants::STRING_TYPE_OFFSET).u64
+  If(stringType, Constants::STRING_TYPE_LINE).EQ {
+    GotoGlobal(line_label)
+  }
+  If(stringType, Constants::STRING_TYPE_SLICE).EQ {
+    GotoGlobal(sliced_label)
+  }
+  If(stringType, Constants::STRING_TYPE_TREE).EQ {
+    GotoGlobal(tree_label)
+  }
+  Intrinsic(:UNREACHABLE).Terminator.void
+end
+
 
 module FlattenedStringCacheConstants
   ADDRESS_SHIFT = "cross_values::GetFlattenedStringCacheAddressShift(GetArch())"
