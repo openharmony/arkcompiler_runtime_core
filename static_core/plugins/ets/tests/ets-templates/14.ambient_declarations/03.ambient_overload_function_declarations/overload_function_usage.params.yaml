@@ -27,7 +27,7 @@ cases:
       bar
     use: |-
       arktest.assertEQ(bar<number, number, string>(5, 5), '[5,5]');
-      arktest.assertEQ(bar<number, number, string>(5), '5');
+      arktest.assertEQ(bar<number, string>(5), '5');
   - decl: |-
       baz
     use: |-

@@ -1839,7 +1839,7 @@
 13.compilation_units/09.program_entry_point/entry_point_foo_args_11.ets
 13.compilation_units/09.program_entry_point/entry_point_foo_args_12.ets
 
-#28972 CTE on string[] type parameter 
+#28972 CTE on string[] type parameter
 13.compilation_units/09.program_entry_point/entry_point_foo_args_13.ets
 13.compilation_units/09.program_entry_point/entry_point_foo_args_14.ets
 13.compilation_units/09.program_entry_point/entry_point_foo_args_15.ets
@@ -1863,12 +1863,6 @@
 14.ambient_declarations/bad_ambient_declarations_18.ets
 14.ambient_declarations/bad_ambient_declarations_19.ets
 14.ambient_declarations/bad_ambient_declarations_20.ets
-
-#28850
-14.ambient_declarations/03.ambient_overload_function_declarations/overload_function_usage_0.ets
-14.ambient_declarations/03.ambient_overload_function_declarations/overload_function_usage_1.ets
-14.ambient_declarations/03.ambient_overload_function_declarations/overload_function_usage_2.ets
-14.ambient_declarations/03.ambient_overload_function_declarations/overload_function_usage_3.ets
 
 #29153
 14.ambient_declarations/04.class_declarations/02.ambient_call_signature/call_sig_declarations_neg_2.ets
