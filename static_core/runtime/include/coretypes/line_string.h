@@ -91,12 +91,14 @@ public:
 
     common::BaseString *ToString()
     {
-        return common::BaseString::Cast(reinterpret_cast<common::BaseObject *>(this));
+        return common::BaseString::Cast(reinterpret_cast<common::BaseObject *>(this),
+                                        this->ClassAddr<common::BaseClass>());
     }
 
     const common::BaseString *ToStringConst() const
     {
-        return common::BaseString::ConstCast(reinterpret_cast<const common::BaseObject *>(this));
+        return common::BaseString::ConstCast(reinterpret_cast<const common::BaseObject *>(this),
+                                             this->ClassAddr<common::BaseClass>());
     }
 
     common::LineString *ToLineString()

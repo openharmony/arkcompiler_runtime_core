@@ -370,12 +370,14 @@ public:
 
     common::BaseString *ToString()
     {
-        return common::BaseString::Cast(reinterpret_cast<common::BaseObject *>(this));
+        return common::BaseString::Cast(reinterpret_cast<common::BaseObject *>(this),
+                                        this->ClassAddr<common::BaseClass>());
     }
 
     const common::BaseString *ToStringConst() const
     {
-        return common::BaseString::ConstCast(reinterpret_cast<const common::BaseObject *>(this));
+        return common::BaseString::ConstCast(reinterpret_cast<const common::BaseObject *>(this),
+                                             this->ClassAddr<common::BaseClass>());
     }
 
     static constexpr uint32_t GetLengthOffset()
@@ -473,19 +475,19 @@ public:
     common::LineString *ToLineString()
     {
         ASSERT(IsLineString());
-        return common::LineString::Cast(ToString());
+        return common::LineString::Cast(ToString(), this->ClassAddr<common::BaseClass>());
     }
 
     const common::SlicedString *ToSlicedString() const
     {
         ASSERT(IsSlicedString());
-        return common::SlicedString::ConstCast(ToStringConst());
+        return common::SlicedString::ConstCast(ToStringConst(), this->ClassAddr<common::BaseClass>());
     }
 
     common::TreeString *ToTreeString()
     {
         ASSERT(IsTreeString());
-        return common::TreeString::Cast(ToString());
+        return common::TreeString::Cast(ToString(), this->ClassAddr<common::BaseClass>());
     }
 
     uint16_t *GetDataUtf16()
