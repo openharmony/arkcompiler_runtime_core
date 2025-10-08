@@ -42,9 +42,6 @@
 #28399 Possible to create a void array
 03.types/11.type_void/generic_void_n_3.ets
 
-#18080 Push method works for ReadonlyArray
-03.types/17.array_types/02.readonly_array_types/array_readonly_push_n.ets
-
 #25512
 03.types/20.union_types/united_switch_ext_1.ets
 03.types/20.union_types/united_switch_ext_3.ets

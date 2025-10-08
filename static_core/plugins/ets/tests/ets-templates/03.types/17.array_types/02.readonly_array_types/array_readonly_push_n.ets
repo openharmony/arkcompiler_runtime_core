@@ -19,6 +19,6 @@ tags: [compile-only, negative]
 ---*/
 
 function main() {
-  let y: readonly Array<int> = [1]
+  let y: ReadonlyArray<int> = [1]
   y.push(2)
 }
