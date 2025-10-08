@@ -1256,6 +1256,10 @@
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_14.ets
 
 
+#29971
+08.statements/04.local_declarations/post_declaration_func_n_1.ets
+08.statements/04.local_declarations/post_declaration_n_1.ets
+
 #25042 Ast verifier failure for for-of with labelled statement
 08.statements/11.continue_statements/continue_for_of5l.ets
 
