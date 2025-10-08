@@ -871,7 +871,7 @@
 # 27963
 07.expressions/01.evaluation_of_expressions/optional_chain_this.ets
 
-# 24036
+# 30469
 07.expressions/01.evaluation_of_expressions/04.operator_precedence/typeof.ets
 
 # 28179
