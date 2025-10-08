@@ -264,7 +264,7 @@ inline constexpr size_t Array::GetElementSize()
 }
 
 template <class T>
-T Array::GetBase()
+T Array::GetBase() const
 {
     return reinterpret_cast<T>(ToUintPtr(this) + GetDataOffset());
 }

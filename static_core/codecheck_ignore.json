@@ -199,6 +199,7 @@
   "runtime/tests/mem_stats_gc_test.cpp": "*",
   "runtime/tests/mem_stats_gen_gc_test.cpp": "*",
   "runtime/tests/g1gc_test.cpp": "*",
+  "runtime/tests/heap_verifier_test.cpp": "*",
   "runtime/tests/g1gc_fullgc_test.cpp": "*",
   "scripts": "*",
   "static_linker/tests/data": "*",

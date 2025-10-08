@@ -200,7 +200,7 @@ public:
     static constexpr size_t GetElementSize();
 
     template <class T>
-    T GetBase();
+    T GetBase() const;
 
     // Pass thread parameter to speed up interpreter
     template <class T, bool NEED_WRITE_BARRIER = true, bool IS_DYN = false>
