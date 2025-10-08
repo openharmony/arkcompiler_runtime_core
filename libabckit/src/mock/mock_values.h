@@ -193,6 +193,11 @@ extern const size_t DEFAULT_SIZE_T;
 #define DEFAULT_ARKTS_FUNCTION_PARAM (reinterpret_cast<AbckitArktsFunctionParam *>(0xdead0055))
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage, cppcoreguidelines-pro-type-cstyle-cast)
 #define DEFAULT_ENUM_BITSIZE AbckitBitImmSize::BITSIZE_0
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define DEFAULT_ARKTS_FUNCTION_CREATE_PARAMS \
+    (reinterpret_cast<const struct AbckitArktsFunctionCreateParams *>(0xdead0058))
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define DEFAULT_ARKTS_METHOD_CREATE_PARAMS (reinterpret_cast<const struct ArktsMethodCreateParams *>(0xdead0059))
 
 // CC-OFFNXT(G.PRE.02) code readability
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)

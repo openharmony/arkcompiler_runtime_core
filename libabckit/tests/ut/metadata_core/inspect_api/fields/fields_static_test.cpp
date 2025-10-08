@@ -141,8 +141,7 @@ TEST_F(LibAbcKitInspectApiFieldsTest, ClassFieldGetValueStatic)
     using FieldVal = std::variant<bool, int, double, std::string>;
     std::vector<FieldVal> gotClassFieldValues;
     std::vector<FieldVal> expectClassFieldValues = {
-        std::string("public"), std::string("protected"), std::string("private"), std::string("static"), 1, 2
-    };
+        std::string("public"), std::string("protected"), std::string("private"), std::string("static"), 1, 2};
     for (const auto &module : file.GetModules()) {
         if (module.IsExternal()) {
             continue;

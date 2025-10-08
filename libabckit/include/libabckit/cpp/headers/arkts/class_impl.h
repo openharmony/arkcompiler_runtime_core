@@ -50,13 +50,6 @@ inline bool Class::RemoveField(arkts::ClassField field) const
     return ret;
 }
 
-inline bool Class::AddMethod(arkts::Function function)
-{
-    const auto ret = GetApiConfig()->cArktsMapi_->classAddMethod(TargetCast(), function.TargetCast());
-    CheckError(GetApiConfig());
-    return ret;
-}
-
 inline bool Class::AddField(const ClassField &field) const
 {
     const auto ret = GetApiConfig()->cArktsMapi_->classAddField(TargetCast(), field.TargetCast());

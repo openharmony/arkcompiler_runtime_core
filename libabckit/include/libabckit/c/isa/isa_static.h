@@ -851,6 +851,17 @@ struct CAPI_EXPORT AbckitIsaApiStatic {
     AbckitInst *(*iCreateNullCheck)(AbckitGraph *graph /* in */, AbckitInst *inputObj /* in */);
 
     /**
+     * @brief Creates `iCreateLoadObject` inst for loading 32-bit basic type fields.
+     * @return AbckitInst *.
+     * @param [ in ] AbckitGraph *graph.
+     * @param [ in ] AbckitInst *inputObj - Object instance (this).
+     * @param [ in ] AbckitCoreClassField *field - Field to load.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if any parameter is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `graph` and `inputObj->graph` are not the same.
+     */
+    AbckitInst *(*iCreateLoadObject)(AbckitGraph *graph, AbckitInst *inputObj, AbckitCoreClassField *field);
+
+    /**
      * @brief Creates instruction with opcode INTRINSIC_ABCKIT_STORE_OBJECT_OBJECT.
      * @return Pointer to created `AbckitInst`.
      * @param [ in ] graph - Graph where instruction will be inserted.
