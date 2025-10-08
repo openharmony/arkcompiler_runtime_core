@@ -153,11 +153,6 @@ class TestStandardFlow(Test):
             if test.dependent_packages:
                 for dep_key, dep_item in test.dependent_packages.items():
                     self.dependent_packages[dep_key] = self.dependent_packages.get(dep_key, False) or dep_item
-            if len(self.invalid_tags) > 0:
-                Log.default(
-                    _LOGGER,
-                    f"\n{utils.FontColor.RED_BOLD.value}Invalid tags:{utils.FontColor.RESET.value} `"
-                    f"{' '.join(self.invalid_tags)}` in test file {test.test_id}:")
         return self._dependent_tests
 
     @property
@@ -214,6 +209,13 @@ class TestStandardFlow(Test):
             return return_code_from_device
         return actual_return_code
 
+    def log_invalid_tags(self) -> None:
+        if len(self.invalid_tags) > 0:
+            Log.default(
+                _LOGGER,
+                f"\n{utils.FontColor.RED_BOLD.value}Invalid tags:{utils.FontColor.RESET.value} `"
+                f"{', '.join(self.invalid_tags)}` in test file: {self.test_id}")
+
     def continue_after_process_dependent_files(self) -> bool:
         """
         Processes dependent files
@@ -239,6 +241,7 @@ class TestStandardFlow(Test):
         if not self.continue_after_process_dependent_files():
             return self
 
+        self.log_invalid_tags()
         compile_only_test = self.is_compile_only or self.metadata.tags.not_a_test or self.parent_test_id != ""
         allowed_steps = [StepKind.COMPILER]  # steps to run for compile only or not-a-test tests
         steps = [step for step in self.test_env.config.workflow.steps

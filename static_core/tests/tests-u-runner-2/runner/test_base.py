@@ -262,6 +262,8 @@ class Test:
             if not collection.parameters:
                 continue
             for key, val in collection.parameters.items():
+                if isinstance(val, list):
+                    val = " ".join(val)
                 if key in collection_params:
                     collection_params[key] += [*val.split()]
                 else:

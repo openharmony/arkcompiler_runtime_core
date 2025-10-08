@@ -71,7 +71,10 @@ class Tags:
         return self.__values.get(Tags.EtsTag.NO_WARMUP, False)
 
     @staticmethod
-    def get_invalid_tags(tags: list[str] | None) -> list[str]:
+    def get_invalid_tags(tags: str | list[str] | None) -> list[str]:
+        if isinstance(tags, str):
+            tags = [tag.strip() for tag in tags.split(",")]
+
         if tags:
             return [tag for tag in tags if tag not in Tags.EtsTag.values()]
         return []
