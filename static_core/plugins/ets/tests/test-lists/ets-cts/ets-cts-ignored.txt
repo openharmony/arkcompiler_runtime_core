@@ -840,14 +840,6 @@
 #28679
 05.generics/03.utility_types/06.record_utility_type/enum_record_0.ets
 
-#28970
-05.generics/03.utility_types/07.return_type_utility_type/return_type_func_0.ets
-05.generics/03.utility_types/07.return_type_utility_type/return_type_func_1.ets
-05.generics/03.utility_types/07.return_type_utility_type/return_type_func_2.ets
-05.generics/03.utility_types/07.return_type_utility_type/return_type_func_3.ets
-05.generics/03.utility_types/07.return_type_utility_type/return_type_func_4.ets
-05.generics/03.utility_types/07.return_type_utility_type/return_type_func_5.ets
-
 #29887
 06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_72.ets
 06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_73.ets
