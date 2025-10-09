@@ -366,12 +366,6 @@ void GinsertTryCatchStatic(AbckitBasicBlock *tryFirstBB, AbckitBasicBlock *tryLa
 
     AbckitGraph *graph = tryFirstBB->graph;
 
-    // NOTE(nsizov): implement for static mode as well
-    if (!IsDynamic(graph->function->owningModule->target)) {
-        libabckit::statuses::SetLastError(ABCKIT_STATUS_WRONG_TARGET);
-        return;
-    }
-
     if ((graph != tryLastBB->graph) || (graph != catchBeginBB->graph) || (graph != catchEndBB->graph)) {
         SetLastError(ABCKIT_STATUS_WRONG_CTX);
         return;
