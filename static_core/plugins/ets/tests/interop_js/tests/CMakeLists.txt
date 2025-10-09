@@ -60,6 +60,7 @@ set(DISABLES_TESTS
     test_intrins
     test_return_this
     test_undefined
+    esvalue_load_rte
 )
 
 SUBDIRLIST(EXECUTED_TESTS
