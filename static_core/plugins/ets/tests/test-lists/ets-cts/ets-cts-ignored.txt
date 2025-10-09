@@ -1359,10 +1359,6 @@
 09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_decl_23.ets
 09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_decl_24.ets
 
-#30542
-09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_override_decl_4.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_override_decl_5.ets
-
 #29573
 09.classes/06.field_declarations/02.readonly_constant_fields/class_static_readonly_fields_cte_4.ets
 09.classes/06.field_declarations/02.readonly_constant_fields/class_static_readonly_fields_cte_5.ets
