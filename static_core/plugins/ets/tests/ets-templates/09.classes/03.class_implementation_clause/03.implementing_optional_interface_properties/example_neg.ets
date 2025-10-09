@@ -17,7 +17,6 @@
 desc: >-
       A class can implement Optional Interface Properties) from superinterfaces
       or use implicitly defined accessors from an interface.
-tags: [negative]
 ---*/
 
 interface I {
@@ -28,5 +27,13 @@ class C implements I {}
 
 function main() {
   let c = new C()
-  c.n = 1 // runtime error is thrown
+  try {
+    c.n = 1
+  } catch (e) {
+    if (e instanceof InvalidStoreAccessError) {
+        arktest.assertTrue(true);
+    } else {
+        arktest.assertTrue(false);
+    }
+  }
 }
