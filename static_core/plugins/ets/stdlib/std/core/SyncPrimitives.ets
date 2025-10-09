@@ -25,8 +25,22 @@ final class WaitersList {
     private tail: long;
 }
 
+export interface Lock {
+    /**
+     * The method acquires associated lock and gives access to the critical section.
+     * Otherwise, blocks current coroutine until other coroutine will unlock the mutex.
+     */
+    lock(): void;
+
+    /**
+     * The method releases associated lock and unblocks blocked coroutines.
+     * Should be called at the end of the critical section. 
+     */
+    unlock(): void;
+}
+
 /// Coroutine mutex. This allows to get exclusive access to the critical section.
-final class Mutex {
+export final class Mutex implements Lock {
     public constructor() {
         this.waitersList = new WaitersList();
         this.waiters = 0;
@@ -157,4 +171,76 @@ final class QueueSpinlock {
     private static native guard(spinlock: Object, callback: Object): void;
 
     private tail: long;
+}
+
+export final class RWLock {
+    public constructor() {
+        this.rLock = new ReadLock(this);
+        this.wLock = new WriteLock(this);
+        this.readers = new WaitersList();
+        this.writers = new WaitersList();
+        this.state = 0;
+    }
+
+    public readLock(): ReadLock {
+        return this.rLock;
+    }
+
+    public writeLock(): WriteLock {
+        return this.wLock;
+    }
+
+    private rLock: ReadLock;
+    private wLock: WriteLock;
+    private readers: WaitersList;
+    private writers: WaitersList;
+    private state: long;
+}
+
+export final class ReadLock implements Lock {
+    public constructor(lock: RWLock) {
+        this.rwLock = lock;
+    }
+
+    /// Acquires lock and allows to get shared with other readers access to the critical seciton
+    public lock() {
+        ReadLock.lock(this.rwLock);
+    }
+
+    /**
+     * Releases lock and unblocks waiters
+     * NOTE: readers have higher priority for unblocking than writers
+     */
+    public unlock() {
+        ReadLock.unlock(this.rwLock);
+    }
+
+    private static native lock(rwLock: Object): void;
+    private static native unlock(rwLock: Object): void;
+
+    private rwLock : RWLock;
+}
+
+export final class WriteLock implements Lock {
+    public constructor(lock: RWLock) {
+        this.rwLock = lock;
+    }
+
+    /// Acquires lock and allows to get exclusive access to the critical seciton
+    public lock() {
+        WriteLock.lock(this.rwLock);
+    }
+
+    /**
+     * Releases lock and unblocks waiters
+     * NOTE: readers have higher priority for unblocking than writers
+     */
+    public unlock() {
+        WriteLock.unlock(this.rwLock);
+    }
+
+    private static native lock(rwLock: Object): void;
+    private static native unlock(rwLock: Object): void;
+
+    private rwLock : RWLock;
 }

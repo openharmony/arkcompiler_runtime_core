@@ -78,6 +78,9 @@ coretypes:
 - managed_class: std.core.QueueSpinlock
   mirror_class: ark::ets::EtsQueueSpinlock
 
+- managed_class: std.core.RWLock
+  mirror_class: ark::ets::EtsRWLock
+
 - managed_class: escompat.Array
   mirror_class: ark::ets::EtsEscompatArray
 
@@ -4941,6 +4944,49 @@ intrinsics:
       ret: void
       args: [ std.core.Object, std.core.Object ]
     impl: ark::ets::intrinsics::EtsQueueSpinlockGuard
+
+######################
+# std.core.RWLock #
+######################
+  - name: StdReadLock
+    space: ets
+    class_name: std.core.ReadLock
+    method_name: lock
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsReadLock
+
+  - name: StdReadUnlock
+    space: ets
+    class_name: std.core.ReadLock
+    method_name: unlock
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsReadUnlock
+
+  - name: StdWriteLock
+    space: ets
+    class_name: std.core.WriteLock
+    method_name: lock
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsWriteLock
+
+  - name: StdWriteUnlock
+    space: ets
+    class_name: std.core.WriteLock
+    method_name: unlock
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsWriteUnlock
 
 ############################
 #   escompat.ArrayBuffer  #

@@ -38,6 +38,7 @@ static constexpr std::string_view MUTEX                                = "Lstd/c
 static constexpr std::string_view EVENT                                = "Lstd/core/Event;";
 static constexpr std::string_view COND_VAR                             = "Lstd/core/CondVar;";
 static constexpr std::string_view QUEUE_SPINLOCK                       = "Lstd/core/QueueSpinlock;";
+static constexpr std::string_view RW_LOCK                              = "Lstd/core/RWLock;";
 static constexpr std::string_view NULL_VALUE                           = "Lstd/core/Null;";
 static constexpr std::string_view STRING                               = "Lstd/core/String;";
 static constexpr std::string_view LINE_STRING                          = "Lstd/core/LineString;";
