@@ -712,7 +712,7 @@ abstract class ArrayProxy<T> extends Array<T> {
 
     public static readonly ARRAY_TYPE = Type.of(new Array<Object>()) as ClassType
 
-    public static readonly ARRAY_TYPE_METHODS_COUNT = ArrayProxy.ARRAY_TYPE.getMethodsNum()
+    public static readonly ARRAY_TYPE_METHODS_COUNT = ArrayProxy.ARRAY_TYPE.getMethodsNum().toInt()
 
     public static readonly ARRAY_TYPE_METHODS: ReadonlyArray<Method> = ArrayProxy.getArrayMethods()
 

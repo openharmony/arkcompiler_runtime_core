@@ -84,10 +84,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         this.actualLength = arrayLen
     }
 
-    public constructor(arrayLen: number) {
-        this(arrayLen.toInt())
-    }
-
     protected constructor(_tag: FromBuffer, buf: FixedArray<Any>) {
         this.buffer = buf
         this.actualLength = buf.length
@@ -198,7 +194,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      */
     static $_invoke<T>(arrayLength?: number): Array<T> {
         if (arrayLength != undefined) {
-            return new Array<T>(arrayLength);
+            return new Array<T>(arrayLength.toInt());
         } else {
             return new Array<T>();
         }

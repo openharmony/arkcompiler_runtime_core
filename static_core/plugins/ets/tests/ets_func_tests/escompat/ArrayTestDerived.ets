@@ -17,7 +17,7 @@ const DERIVED_ACCESS_OFFSET = 1000;
 
 class Derived extends Array<Number> {
     public constructor(arrayLen: number) {
-        super(arrayLen);
+        super(arrayLen.toInt());
     }
 
     public override $_get(index: int): Number {

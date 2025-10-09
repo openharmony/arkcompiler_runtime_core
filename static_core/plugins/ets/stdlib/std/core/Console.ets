@@ -693,7 +693,7 @@ export final class Console {
             let innerKey = keys[j];
             if (!initialMap.has(innerKey)) {
                 let mapArrayLen = innerLength > keyLength ? innerLength : keyLength;
-                let mapArray = new Array<string>(mapArrayLen).fill("");
+                let mapArray = new Array<string>(mapArrayLen.toInt()).fill("");
                 mapArray[i] = innerValue[j];
                 columnMap.columnValue.set(innerKey, mapArray);
                 initialMap.set(innerKey, true);
@@ -769,7 +769,7 @@ export final class Console {
         }
         let keyLength = mapLen + 1;
         let valueLength = keyLength * length;
-        let outputValuesArray:Array<string> = new Array<string>(valueLength);
+        let outputValuesArray:Array<string> = new Array<string>(valueLength.toInt());
         let valueIndex = 0;
         for (let i = 0; i < length; i++) {
             let key = keyArray[i];

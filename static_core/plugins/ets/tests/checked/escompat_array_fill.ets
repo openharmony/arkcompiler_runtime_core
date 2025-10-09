@@ -111,7 +111,7 @@ function test_array_fill() {
 class MyArray<T> extends Array<T> {
     counter: int;
     public constructor(len: number) {
-        super(len);
+        super(len.toInt());
         this.counter = 0;
     }
 

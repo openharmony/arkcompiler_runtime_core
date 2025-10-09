@@ -109,7 +109,7 @@ function clearCounter(): void {
 
 class MyArray<T> extends Array<T> {
     public constructor(len: number) {
-		super(len);
+		super(len.toInt());
 	}
 
 	public override $_get(index: int): T {
