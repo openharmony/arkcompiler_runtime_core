@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "regexp.h"
+#include "regexp_executor.h"
 
 #include "regexp_8.h"
 #include "regexp_16.h"

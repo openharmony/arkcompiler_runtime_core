@@ -210,7 +210,7 @@ srcs_runtime = [
   "stdlib/native/init_native_methods.cpp",
   "stdlib/native/escompat/Process.cpp",
   "stdlib/native/core/regexp/RegExp.cpp",
-  "stdlib/native/core/regexp/regexp.cpp",
+  "stdlib/native/core/regexp/regexp_executor.cpp",
   "stdlib/native/core/regexp/regexp_16.cpp",
   "stdlib/native/core/regexp/regexp_8.cpp",
   "stdlib/native/core/Intl.cpp",

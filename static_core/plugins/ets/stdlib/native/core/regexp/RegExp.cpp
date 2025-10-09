@@ -16,7 +16,7 @@
 #include "RegExp.h"
 
 #include "plugins/ets/stdlib/native/core/stdlib_ani_helpers.h"
-#include "plugins/ets/stdlib/native/core/regexp/regexp.h"
+#include "regexp_executor.h"
 
 #include "runtime/coroutines/coroutine_scopes.h"
 #include "plugins/ets/runtime/ani/ani_checkers.h"

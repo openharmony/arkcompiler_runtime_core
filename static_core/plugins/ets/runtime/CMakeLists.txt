@@ -132,7 +132,7 @@ set(ETS_RUNTIME_SOURCES
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/init_native_methods.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/escompat/Process.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/regexp/RegExp.cpp
-    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/regexp/regexp.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/regexp/regexp_executor.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/regexp/regexp_16.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/regexp/regexp_8.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/etsstdlib.cpp
