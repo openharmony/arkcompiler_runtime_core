@@ -264,7 +264,9 @@ endif()
 if (PANDA_WITH_SAFEPOINT_CHECKER)
     list(APPEND SOURCES
         timer_table.cpp
-        safepoint_timer.cpp)
+        safepoint_timer.cpp
+    )
+    add_runtime_options(${CMAKE_CURRENT_SOURCE_DIR}/safepoint_checker_options.yaml)
 endif()
 
 set(INTERPRETER_IMPL_SOURCES
@@ -1046,7 +1048,7 @@ if (TARGET arkruntime_test_interpreter_impl)
         # Issue: #29519
         list(APPEND INTERPRETER_TESTS_SOURCES tests/exception_test.cpp)
     endif()
-        
+
     add_gtests(
         ${INTERPRETER_TESTS_SOURCES}
         $<TARGET_OBJECTS:arkruntime_test_interpreter_impl>

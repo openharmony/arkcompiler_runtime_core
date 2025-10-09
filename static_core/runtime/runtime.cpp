@@ -968,7 +968,8 @@ bool Runtime::Initialize()
 
     InitializeCompilerOptions();
 
-    SAFEPOINT_TIME_CHECKER(SafepointTimerTable::Initialize(options_.GetSafepointCheckersRecordingTime()));
+    SAFEPOINT_TIME_CHECKER(SafepointTimerTable::Initialize(options_.GetSafepointCheckersRecordingTime(),
+                                                           options_.GetSafepointCheckersReportFilepath()));
 
     if (!CreatePandaVM(GetRuntimeType())) {
         return false;

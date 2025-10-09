@@ -23,6 +23,7 @@
 #define SAFEPOINT_TIME_CHECKER(expr)
 #endif  // SAFEPOINT_TIME_CHECKER_ENABLED
 
+#ifdef SAFEPOINT_TIME_CHECKER_ENABLED
 #include "libarkbase/macros.h"
 #include "runtime/include/timer_table.h"
 
@@ -55,10 +56,11 @@ public:
         return safepointTimers_ != nullptr;
     }
 
-    static void Initialize(TimerTable::TimeDiff recordingTime);
+    static void Initialize(TimerTable::TimeDiff recordingTime, std::string reportFilepath);
     static void Destroy();
 
 public:
+    static inline std::string reportFilepath_;
     static TimerTable *safepointTimers_;
 };
 
@@ -74,5 +76,6 @@ private:
 };
 
 }  // namespace ark
+#endif  // SAFEPOINT_TIME_CHECKER_ENABLED
 
 #endif  // PANDA_RUNTIME_SAFEPOINT_TIMER_H_
