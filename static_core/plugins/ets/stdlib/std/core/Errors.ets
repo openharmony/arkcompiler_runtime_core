@@ -100,9 +100,10 @@ export final class NegativeArraySizeError extends RangeError {
 /**
  * @class Represents an error that occurs when array is oging to be indexed out of its bounds
  */
-export final class ArrayIndexOutOfBoundsError extends Error {
+export final class ArrayIndexOutOfBoundsError extends RangeError {
     constructor(message?: String, options?: ErrorOptions) {
-        super("ArrayIndexOutOfBoundsError", message, options)
+        super(message, options)
+        this.name = "ArrayIndexOutOfBoundsError"
     }
 }
 
@@ -163,9 +164,10 @@ export class IllegalMonitorStateError extends Error {
 /**
  * @class Represents exception that is thrown when provided collection index is out of bounds
  */
-export class IndexOutOfBoundsError extends Error {
+export class IndexOutOfBoundsError extends RangeError {
     constructor(message?: String, options?: ErrorOptions) {
-        super("IndexOutOfBoundsError", message, options)
+        super(message, options)
+        this.name = "IndexOutOfBoundsError"
     }
 }
 
