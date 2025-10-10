@@ -36,7 +36,7 @@ void EtsAbcRuntimeLinkerAddNewAbcFiles(EtsAbcRuntimeLinker *runtimeLinker, Objec
     [[maybe_unused]] EtsHandleScope hs(coro);
     EtsHandle newAbcFilesHandle(coro, EtsTypedObjectArray<EtsAbcFile>::FromCoreType(newAbcFilesArray));
     EtsHandle linkerHandle(coro, runtimeLinker);
-    auto *ctx = reinterpret_cast<EtsClassLinkerContext *>(linkerHandle->GetClassLinkerContext());
+    auto *ctx = EtsClassLinkerContext::FromCoreType(linkerHandle->GetClassLinkerContext());
 
     os::memory::LockHolder lock(ctx->GetAbcFilesMutex());
     EtsHandle currentAbcFilesHandle(coro, linkerHandle->GetAbcFiles());

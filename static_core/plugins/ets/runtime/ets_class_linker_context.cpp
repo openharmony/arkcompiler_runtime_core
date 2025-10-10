@@ -111,7 +111,7 @@ bool TryLoadingClassInChain(const uint8_t *descriptor, DecoratorErrorHandler &er
     }
 
     // All non-boot contexts are represented by EtsClassLinkerContext.
-    auto *etsLinkerContext = reinterpret_cast<EtsClassLinkerContext *>(ctx);
+    auto *etsLinkerContext = EtsClassLinkerContext::FromCoreType(ctx);
     auto *runtimeLinker = etsLinkerContext->GetRuntimeLinker();
     ASSERT(runtimeLinker != nullptr);
     if (runtimeLinker->GetClass() != PlatformTypes()->coreAbcRuntimeLinker &&
@@ -299,6 +299,26 @@ bool EtsClassLinkerContext::TryLoadingClassFromNative(const uint8_t *descriptor,
         ReportClassNotFound(descriptor, errorHandler);
     }
     return succeeded;
+}
+
+EtsClassLinkerContext::~EtsClassLinkerContext()
+{
+    // Destruction of `ClassLinker` (and hence `EtsClassLinkerContext`) is guaranteed
+    // to happen before `PandaVM` is destroyed. Because of this, it is valid to use `PandaEtsVM` here.
+    auto *etsVm = PandaEtsVM::GetCurrent();
+    ASSERT(etsVm != nullptr);
+    auto *objectStorage = etsVm->GetGlobalObjectStorage();
+    ASSERT(objectStorage != nullptr);
+    objectStorage->Remove(refToLinker_);
+}
+
+/* static */
+EtsClassLinkerContext *EtsClassLinkerContext::FromCoreType(ClassLinkerContext *ctx)
+{
+    ASSERT(ctx != nullptr);
+    ASSERT(ctx->GetSourceLang() == panda_file::SourceLang::ETS);
+    ASSERT(!ctx->IsBootContext());
+    return reinterpret_cast<EtsClassLinkerContext *>(ctx);
 }
 
 }  // namespace ark::ets

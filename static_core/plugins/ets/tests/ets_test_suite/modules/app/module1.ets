@@ -28,6 +28,11 @@ export class Dummy { }
 
 export function dummy(): Dummy { return new Dummy() }
 
+class UnionHolder {
+    public native bootUnionHolder(): Dummy | foo.Dummy | string
+    public native appUnionHolder(): Dummy | UnionHolder
+}
+
 function testLazyLoading() {
     const appLinker = Class.current().getLinker();
 
@@ -119,36 +124,51 @@ function testArrayClass() {
     arktest.assertEQ(arrClass.getLinker(), elementClass.getLinker());
 }
 
+function testUnionClass() {
+    const holder = Class.of(new UnionHolder())
+
+    // May rewrite it with `Class.from<Dummy | foo.Dummy | string>` after implementation of the latter
+    const bootUnionClass = holder.getInstanceMethodByName("bootUnionHolder")!.getReturnType()
+    // Union is loaded into boot because it contains `std.core.String` as a constituent type
+    arktest.assertEQ(bootUnionClass.getLinker(), getBootRuntimeLinker())
+
+    // May rewrite it with `Class.from<Dummy | UnionHolder>` after implementation of the latter
+    const appUnionClass = holder.getInstanceMethodByName("appUnionHolder")!.getReturnType()
+    const appLinker = Class.of(dummy()).getLinker()
+    arktest.assertEQ(appUnionClass.getLinker(), appLinker)
+}
+
 function testNames() {
-    triggerGC();
+    triggerGC()
 
     arktest.assertEQ(Class.current().getName(), "@app.module1.ETSGLOBAL")
 
-    testLazyLoading();
+    testLazyLoading()
 
-    triggerGC();
+    triggerGC()
 
-    arktest.assertTrue(bar.dummy() instanceof bar.Dummy);
-    arktest.assertEQ(getNameOfClass(bar.dummy()), "@bar.bar.Dummy");
+    arktest.assertTrue(bar.dummy() instanceof bar.Dummy)
+    arktest.assertEQ(getNameOfClass(bar.dummy()), "@bar.bar.Dummy")
 
-    arktest.assertTrue(foo.dummy() instanceof foo.Dummy);
-    arktest.assertEQ(getNameOfClass(foo.dummy()), "@foo.foo.Dummy");
+    arktest.assertTrue(foo.dummy() instanceof foo.Dummy)
+    arktest.assertEQ(getNameOfClass(foo.dummy()), "@foo.foo.Dummy")
 
-    arktest.assertTrue(dummy() instanceof Dummy);
-    arktest.assertEQ(getNameOfClass(dummy()), "@app.module1.Dummy");
+    arktest.assertTrue(dummy() instanceof Dummy)
+    arktest.assertEQ(getNameOfClass(dummy()), "@app.module1.Dummy")
 
-    arktest.assertTrue(module2.dummy() instanceof module2.Dummy);
-    arktest.assertEQ(getNameOfClass(module2.dummy()), "@app.module2.Dummy");
+    arktest.assertTrue(module2.dummy() instanceof module2.Dummy)
+    arktest.assertEQ(getNameOfClass(module2.dummy()), "@app.module2.Dummy")
 
-    arktest.assertTrue(module3.dummy() instanceof module3.Dummy);
-    arktest.assertEQ(getNameOfClass(module3.dummy()), "@app.module3.Dummy");
+    arktest.assertTrue(module3.dummy() instanceof module3.Dummy)
+    arktest.assertEQ(getNameOfClass(module3.dummy()), "@app.module3.Dummy")
 
-    testStdCoreType();
-    testStdCoreProxy();
+    testStdCoreType()
+    testStdCoreProxy()
 
-    testArrayClass();
+    testArrayClass()
+    testUnionClass()
 
-    triggerGC();
+    triggerGC()
 }
 
 class MainAbility implements Ability {

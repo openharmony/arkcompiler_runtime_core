@@ -124,13 +124,8 @@ public:
 
     void InitializeFinish();
 
-    static EtsRuntimeLinker *GetOrCreateEtsRuntimeLinker(ClassLinkerContext *ctx);
-
     ClassLinkerContext *GetCommonContext(Span<Class *> classes) const override;
     static ClassLinkerContext *GetParentContext(ClassLinkerContext *ctx);
-
-    /// @brief Removes reference to `RuntimeLinker` from `BootContext` and `EtsClassLinkerContext`.
-    static void RemoveRefToLinker(ClassLinkerContext *ctx);
 
     NO_COPY_SEMANTIC(EtsClassLinkerExtension);
     NO_MOVE_SEMANTIC(EtsClassLinkerExtension);

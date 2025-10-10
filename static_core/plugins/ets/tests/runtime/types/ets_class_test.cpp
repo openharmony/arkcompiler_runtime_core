@@ -71,6 +71,7 @@ public:
         return std::vector<MirrorFieldInfo> {
             MIRROR_FIELD_INFO(EtsClass, name_, "name"),
             MIRROR_FIELD_INFO(EtsClass, superClass_, "superClass"),
+            MIRROR_FIELD_INFO(EtsClass, linker_, "linker"),
             MIRROR_FIELD_INFO(EtsClass, typeMetaData_, "typeMetaData"),
             MIRROR_FIELD_INFO(EtsClass, overloadMap_, "overloadMap"),
             MIRROR_FIELD_INFO(EtsClass, flags_, "flags"),

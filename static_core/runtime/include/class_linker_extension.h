@@ -28,6 +28,11 @@ namespace ark {
 class ClassLinker;
 class ClassLinkerErrorHandler;
 
+/**
+ * @brief Base class for class loading extensions.
+ * Plugins must extend this class in order to define language-specific operations with classes.
+ * `ClassLinkerExtension` instances are owned by `ClassLinker` in a one-to-many relationship.
+ */
 class ClassLinkerExtension {
 public:
     explicit ClassLinkerExtension(panda_file::SourceLang lang) : lang_(lang), bootContext_(this) {}

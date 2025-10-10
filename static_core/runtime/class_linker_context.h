@@ -70,6 +70,12 @@ private:
     os::memory::ConditionVariable clsHandlerCondVar_;
 };
 
+/**
+ * @brief Base class implementing logic of load context for runtime classes.
+ * Plugins can extend this class in order to define language-specific class loading algorithms
+ * in method `LoadClass`.
+ * `ClassLinkerContext` instances are owned by `ClassLinkerExtension` in a one-to-many relationship.
+ */
 class ClassLinkerContext {
 public:
     explicit ClassLinkerContext(panda_file::SourceLang lang) : lang_(lang) {}
@@ -186,25 +192,6 @@ public:
         }
     }
 
-    mem::Reference *GetRefToLinker() const
-    {
-        // Atomic with relaxed order reason: read of field
-        return refToLinker_.load(std::memory_order_relaxed);
-    }
-
-    void SetRefToLinker(mem::Reference *ref)
-    {
-        // Atomic with release order reason: write to field, other threads should see correct value
-        refToLinker_.store(ref, std::memory_order_release);
-    }
-
-    bool CompareAndSetRefToLinker(mem::Reference *oldRef, mem::Reference *newRef)
-    {
-        // Atomic with release order reason: write to field, other threads should see correct value
-        return refToLinker_.compare_exchange_strong(oldRef, newRef, std::memory_order_release,
-                                                    std::memory_order_relaxed);
-    }
-
     virtual PandaVector<std::string_view> GetPandaFilePaths() const
     {
         return PandaVector<std::string_view>();
@@ -242,7 +229,6 @@ private:
     os::memory::Mutex mapLock_;
     PandaUnorderedMap<Class *, ClassMutexHandler> mutexTable_;
     PandaVector<ObjectHeader *> roots_;
-    std::atomic<mem::Reference *> refToLinker_ {nullptr};
     panda_file::SourceLang lang_ {panda_file::SourceLang::PANDA_ASSEMBLY};
 };
 

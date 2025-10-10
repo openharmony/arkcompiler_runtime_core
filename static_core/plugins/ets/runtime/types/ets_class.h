@@ -48,6 +48,7 @@ class EtsTypeAPIMethod;
 class EtsTypeAPIParameter;
 class EtsReflectMethod;
 class EtsReflectField;
+class EtsRuntimeLinker;
 
 enum class EtsType;
 
@@ -766,6 +767,8 @@ private:
         return etsMethods;
     }
 
+    void SetLinker(ObjectHeader *linker);
+
     ObjectHeader *GetObjectHeader()
     {
         return &header_;
@@ -812,9 +815,10 @@ private:
     // ets.Class fields BEGIN
     FIELD_UNUSED ObjectPointer<EtsString> name_;       // String
     FIELD_UNUSED ObjectPointer<EtsClass> superClass_;  // Class<? super T>
+    FIELD_UNUSED ObjectPointer<EtsRuntimeLinker> linker_;
+    FIELD_UNUSED uint32_t flags_;
     FIELD_UNUSED EtsLong typeMetaData_;
     FIELD_UNUSED EtsLong overloadMap_;
-    FIELD_UNUSED uint32_t flags_;
     // ets.Class fields END
 
     ark::Class klass_;
