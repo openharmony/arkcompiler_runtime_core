@@ -14,16 +14,19 @@
  */
 
 /*---
-tags: [not-a-test, compile-only]
+desc: Re-export directive, new names should be available, but old should not
+tags: [compile-only, negative]
+files: ['./modules/module_all_renamed.ets', './modules/module_a.ets']
 ---*/
 
-export class ClassA {
-  f: int = 1
+import { NewClassA, NewInterfaceA, newFoo, NEW_BAR, AOIR } from './modules/module_all_renamed'
+
+class ConsumeOldA implements InterfaceA {
 }
-export interface InterfaceA {}
-export function foo(): void {}
-export const BAR: int = 146
+type ATO = AOI
 
-type AOI = ClassA | InterfaceA
-
-export AOI
+function main() {
+    foo()
+    new ClassA
+    arktest.assertEQ(146, BAR)
+}

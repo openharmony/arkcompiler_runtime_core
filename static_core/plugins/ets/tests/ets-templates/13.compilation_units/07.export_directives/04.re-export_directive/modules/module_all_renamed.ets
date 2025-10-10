@@ -20,5 +20,6 @@ export {
     ClassA as NewClassA,
     InterfaceA as NewInterfaceA,
     foo as newFoo,
-    BAR as NEW_BAR
+    BAR as NEW_BAR,
+    AOI as AOIR
 } from './module_a'

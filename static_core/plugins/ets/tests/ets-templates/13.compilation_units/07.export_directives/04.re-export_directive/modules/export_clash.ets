@@ -14,16 +14,12 @@
  */
 
 /*---
+desc: module contains exported entity
 tags: [not-a-test, compile-only]
 ---*/
 
-export class ClassA {
-  f: int = 1
+export function clash(): string { return 'I am clash'}
+
+export class Clash {
+    clash(): string { return 'I am clash'}
 }
-export interface InterfaceA {}
-export function foo(): void {}
-export const BAR: int = 146
-
-type AOI = ClassA | InterfaceA
-
-export AOI

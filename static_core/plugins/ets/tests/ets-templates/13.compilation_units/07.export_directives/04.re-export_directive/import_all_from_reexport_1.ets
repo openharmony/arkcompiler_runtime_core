@@ -14,16 +14,20 @@
  */
 
 /*---
-tags: [not-a-test, compile-only]
+desc: Re-export directive, all names should be available
+files: ['./modules/module_a.ets', './modules/module_all_export_star_with_rename.ets']
 ---*/
 
-export class ClassA {
-  f: int = 1
+import { ER } from './modules/module_all_export_star_with_rename'
+
+type ImpAOI = ER.AOI
+
+class InterfaceAImpl implements ER.InterfaceA {}
+
+function main() {
+    ER.foo()
+    new ER.ClassA
+    new InterfaceAImpl
+    arktest.assertEQ(146, ER.BAR)
+
 }
-export interface InterfaceA {}
-export function foo(): void {}
-export const BAR: int = 146
-
-type AOI = ClassA | InterfaceA
-
-export AOI

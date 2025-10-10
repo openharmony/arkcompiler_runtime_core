@@ -14,12 +14,21 @@
  */
 
 /*---
-desc: Re-export directive, new names should be available
-files: ['./modules/module_all_renamed.ets', './modules/module_a.ets']
+desc: Re-export directive, all names should be available
+files: ['./modules/module_a.ets', './modules/module_all.ets']
 ---*/
 
-import { NewClassA, NewInterfaceA, newFoo, NEW_BAR } from './modules/module_all_renamed'
+import { ClassA, InterfaceA, foo, BAR, AOI } from './modules/module_all'
+import { ClassA, InterfaceA, foo, BAR, AOI } from './modules/module_a'
+
+class InterfaceAImpl implements InterfaceA {
+}
+
+type ImpAOI = AOI
 
 function main() {
-    arktest.assertEQ(NEW_BAR, 146)
+    foo()
+    new ClassA
+    new InterfaceAImpl
+    arktest.assertEQ(BAR, 146)
 }

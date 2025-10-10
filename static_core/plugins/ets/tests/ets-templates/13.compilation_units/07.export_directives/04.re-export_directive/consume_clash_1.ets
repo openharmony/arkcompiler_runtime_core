@@ -14,16 +14,15 @@
  */
 
 /*---
-tags: [not-a-test, compile-only]
+desc: Import reexported entity with new name and define local with original
+files: ['./modules/export_clash.ets', './modules/re_export_clash_1.ets']
 ---*/
 
-export class ClassA {
-  f: int = 1
+import { origin as original } from './modules/re_export_clash_1.ets'
+
+function clash(): string { return 'I am local'}
+
+function main() {
+    arktest.assertEQ('I am clash', original())
+    arktest.assertEQ('I am local', clash())
 }
-export interface InterfaceA {}
-export function foo(): void {}
-export const BAR: int = 146
-
-type AOI = ClassA | InterfaceA
-
-export AOI

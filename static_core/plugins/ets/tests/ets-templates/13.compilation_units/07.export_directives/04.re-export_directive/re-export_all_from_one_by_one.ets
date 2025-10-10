@@ -14,16 +14,20 @@
  */
 
 /*---
-tags: [not-a-test, compile-only]
+desc: Re-export directive, all names should be available
+files: ['./modules/module_a.ets', './modules/module_all_one_by_one.ets']
 ---*/
 
-export class ClassA {
-  f: int = 1
+import { ClassA, InterfaceA, foo, BAR, AOI } from './modules/module_all_one_by_one'
+
+class InterfaceAImpl implements InterfaceA {
 }
-export interface InterfaceA {}
-export function foo(): void {}
-export const BAR: int = 146
 
-type AOI = ClassA | InterfaceA
+type ImpAOI = AOI
 
-export AOI
+function main() {
+    foo()
+    new ClassA
+    new InterfaceAImpl
+    arktest.assertEQ(BAR, 146)
+}

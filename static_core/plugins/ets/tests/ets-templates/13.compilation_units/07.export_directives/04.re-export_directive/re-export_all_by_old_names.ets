@@ -18,8 +18,17 @@ desc: Re-export directive, old names should be available
 files: ['./modules/module_a.ets']
 ---*/
 
-import { ClassA, InterfaceA, foo, BAR } from './modules/module_a'
+import { ClassA, InterfaceA, foo, BAR, AOI } from './modules/module_a'
+
+class InterfaceAImpl implements InterfaceA {
+}
+
+type ImpAOI = AOI
+
 
 function main() {
-    arktest.assertEQ(BAR, 146)
+    foo()
+    new ClassA
+    new InterfaceAImpl
+    arktest.assertEQ(146, BAR)
 }
