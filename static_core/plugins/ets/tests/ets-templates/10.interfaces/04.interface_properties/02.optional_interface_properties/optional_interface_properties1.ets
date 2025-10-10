@@ -15,7 +15,6 @@ limitations under the License.
 
 /*---
 desc: Optional interface properties should be undefined
-tags: [compile-only, negative]
 ---*/
 
 interface I {

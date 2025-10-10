@@ -55,7 +55,6 @@ cases:
 
   - decl: |-
      set n(i: number|undefined) {}
-    tags: compile-only, negative
     doc: optional property is implemented as setter
 
   - decl: |-
