@@ -458,7 +458,8 @@ static uint32_t NormalizeIndex(int32_t idx, int64_t len)
     return idx > len ? len : idx;
 }
 
-extern "C" EtsEscompatArray *EtsEscompatArrayFill(EtsEscompatArray *array, EtsObject *value, int32_t start, int32_t end)
+extern "C" EtsEscompatArray *EtsEscompatArrayFillImpl(EtsEscompatArray *array, EtsObject *value, int32_t start,
+                                                      int32_t end)
 {
     ASSERT(array != nullptr);
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();

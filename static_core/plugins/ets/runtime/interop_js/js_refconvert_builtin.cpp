@@ -206,14 +206,9 @@ private:
             {utf::CStringAsMutf8("$_get"), {"I:Lstd/core/Object;", 2, "$_get"}},
             {utf::CStringAsMutf8("$_set"), {"ILstd/core/Object;:V", 3, "$_set"}},
             {utf::CStringAsMutf8("at"), {"I:Lstd/core/Object;", 2, "at"}},
-            {utf::CStringAsMutf8("copyWithin"), {"III:Lescompat/Array;", 4, "copyWithin"}},
-            {utf::CStringAsMutf8("fill"),
-             {"Lstd/core/Object;Lstd/core/Double;Lstd/core/Double;:Lescompat/Array;", 4, "fill"}},
             {utf::CStringAsMutf8("indexOf"), {"Lstd/core/Object;Lstd/core/Int;:I", 3, "indexOf"}},
             {utf::CStringAsMutf8("lastIndexOf"), {"Lstd/core/Object;Lstd/core/Int;:I", 3, "lastIndexOf"}},
-            {utf::CStringAsMutf8("slice"), {"II:Lescompat/Array;", 3, "slice"}},
             {utf::CStringAsMutf8("toSpliced"), {"II[Lstd/core/Object;:Lescompat/Array;", 3, "toSpliced"}},
-            {utf::CStringAsMutf8("with"), {"DLstd/core/Object;:Lescompat/Array;", 3, "with"}},
             {utf::CStringAsMutf8("push"), {"Lescompat/Array;:I", 1, "pushArray"}}};
 
         wArray_ = RegisterClass(descriptors::ARRAY, "Array", &W_ARRAY_OVERLOADS);

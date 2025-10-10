@@ -785,8 +785,7 @@ abstract class ArrayProxy<T> extends Array<T> {
     private static readonly SHIFT_METHOD: Method = ArrayProxy.getArrayMethod("shift")
     private static readonly SPLICE_METHOD_NUM: Method = ArrayProxy.getArrayMethod("splice", Type.of(1 as number))
     private static readonly SPLICE_METHOD_INT: Method = ArrayProxy.getArrayMethod("splice", Type.of(1 as int))
-    private static readonly TO_SPLICED_METHOD_NUM_NUM: Method = ArrayProxy.getArrayMethod("toSpliced", Type.of(Number(1)), Type.of(Number(1)))
-    private static readonly TO_SPLICED_METHOD_NUM_NUM_ARR: Method = ArrayProxy.getArrayMethod("toSpliced", Type.of(1 as number), Type.of(1 as number), Type.of([] as FixedArray<object>))
+    private static readonly TO_SPLICED_METHOD_INT_INT: Method = ArrayProxy.getArrayMethod("toSpliced", Type.of(1), Type.of(1))
     private static readonly TO_SPLICED_METHOD_INT_INT_ARR: Method = ArrayProxy.getArrayMethod("toSpliced", Type.of(1 as int), Type.of(1 as int), Type.of([] as FixedArray<object>))
     private static readonly TO_SPLICED_METHOD_INT: Method = ArrayProxy.getArrayMethod("toSpliced", Type.of(1))
 
@@ -901,22 +900,13 @@ abstract class ArrayProxy<T> extends Array<T> {
         throw new AssertionError("Array.splice(int) unexpected result type: " + Type.of(result))
     }
 
-    override toSpliced(start?: Number, deleteCount?: Number): Array<T> {
-        const result = this.handler.invoke(this.target, ArrayProxy.TO_SPLICED_METHOD_NUM_NUM, [start, deleteCount])
+    override toSpliced(start?: int, deleteCount?: int): Array<T> {
+        const result = this.handler.invoke(this.target, ArrayProxy.TO_SPLICED_METHOD_INT_INT, [start, deleteCount])
         if (result instanceof Array) {
             return result as Array<T>
         }
 
-        throw new AssertionError("Array.toSpliced(Number, Number) unexpected result type: " + Type.of(result))
-    }
-
-    override toSpliced(start: number, deleteCount: number, ...items: FixedArray<T>): Array<T> {
-        const result = this.handler.invoke(this.target, ArrayProxy.TO_SPLICED_METHOD_NUM_NUM_ARR, [start, deleteCount, items])
-        if (result instanceof Array) {
-            return result as Array<T>
-        }
-
-        throw new AssertionError("Array.toSpliced(number, number, FixedArray<T>) unexpected result type: " + Type.of(result))
+        throw new AssertionError("Array.toSpliced(int, int) unexpected result type: " + Type.of(result))
     }
 
     override toSpliced(start: int, deleteCount: int, ...items: FixedArray<T>): Array<T> {

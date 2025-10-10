@@ -1593,15 +1593,15 @@ intrinsics:
       args: [ std.core.Object, i32]
     impl: ark::ets::intrinsics::EtsEscompatArrayInternalLastIndexOf
 
-  - name: EscompatArrayFill
+  - name: EscompatArrayFillImpl
     space: ets
     class_name: escompat.Array
-    method_name: fill
+    method_name: fillImpl
     static: false
     signature:
       ret: escompat.Array
       args: [ std.core.Object, i32, i32 ]
-    impl: ark::ets::intrinsics::EtsEscompatArrayFill
+    impl: ark::ets::intrinsics::EtsEscompatArrayFillImpl
 
   - name: EscompatArrayGetUnsafe
     space: ets

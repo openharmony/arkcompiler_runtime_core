@@ -24,22 +24,7 @@
  * @returns The element in the array matching the given index.
  * Throw range error if `index` < `-length()` or `index` >= `length()`.
  */
-<%= access_public %> <%= override %> at<%= this_generic %>(<%= this_arg %>index: number): <%= el_type_boxed %> {
-    return <%= this_call.('at') %>index.toInt())
-}
-
-/**
- * Takes an integer value and returns the item at that index,
- * allowing for positive and negative integers. Negative integers count back
- * from the last item in the array.
- *
- * @param index Zero-based index of the array element to be returned.
- * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
- *
- * @returns The element in the array matching the given index.
- * Throw range error if `index` < `-length()` or `index` >= `length()`.
- */
-<%= access_public %> at<%= this_generic %>(<%= this_arg %>index: int): <%= el_type_boxed %> {
+<%= access_public %> <%= override %> at<%= this_generic %>(<%= this_arg %>index: int): <%= el_type_boxed %> {
     let len = <%= this_len_int %>;
     let k: int;
     if (index >= 0) {
@@ -66,26 +51,10 @@
  *
  * @returns this array after transformation
  */
-<%= access_public %> copyWithin<%= this_generic %>(<%= this_arg %>target: number, start: number, end?: Number): <%= this_return_type %> {
-    <%= this_call.('copyWithin') %>target.toInt(), start.toInt(), asIntOrDefault(end, <%= this_len_int %>));
-    return <%= this %>;
-}
-
-/**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
- *
- * @param target index at which to copy the sequence
- *
- * @param start index at which to start copying elements from
- *
- * @param end index at which to end copying elements from
- *
- * @returns this array after transformation
- */
-<%= access_public %> copyWithin<%= this_generic %>(<%= this_arg %>target: int, start: int, end: int): <%= this_return_type %> {
+<%= access_public %> copyWithin<%= this_generic %>(<%= this_arg %>target: int, start: int, end?: int): <%= this_return_type %> {
     target = normalizeIndex(target, <%= this_len_int %>)
     start = normalizeIndex(start, <%= this_len_int %>)
-    end = normalizeIndex(end, <%= this_len_int %>)
+    end = normalizeIndex(end ?? <%= this_len_int %>, <%= this_len_int %>)
 
     if (end <= start) {
         return <%= this %>;
@@ -147,26 +116,10 @@
  *
  * @returns this array after transformation
  */
-<%= access_public %> fill<%= this_generic %>(<%= this_arg %>value: <%= el_type %>, start?: Number, end?: Number): <%= this_return_type %> {
-    <%= this_call.('fill') %>value, asIntOrDefault(start, 0), asIntOrDefault(end, <%= this_len_int %>));
-    return <%= this %>;
-}
-
-/**
- * Changes all elements in the Array to a static value, from a start index to an end index
- *
- * @param value to fill the array with
- *
- * @param start index at which to start filling
- *
- * @param end index at which to end filling, but not including
- *
- * @returns this array after transformation
- */
 % if function_type != 'has_native'
-<%= access_public %> fill<%= this_generic %>(<%= this_arg %>value: <%= el_type %>, start: int, end: int): <%= this_return_type %> {
-    start = normalizeIndex(start, <%= this_len_int %>);
-    end = normalizeIndex(end, <%= this_len_int %>)
+<%= access_public %> fill<%= this_generic %>(<%= this_arg %>value: <%= el_type %>, start?: int, end?: int): <%= this_return_type %> {
+    start = normalizeIndex(start ?? 0, <%= this_len_int %>);
+    end = normalizeIndex(end ?? <%= this_len_int %>, <%= this_len_int %>)
 
     for (let i = start; i < end; i++) {
         <%= set_unsafe.(this, 'i', 'value') %>;
@@ -176,7 +129,12 @@
 }
 
 % else
-<%= access_public %> native fill<%= this_generic %>(<%= this_arg %>value: <%= el_type %>, start: int, end: int): <%= this_return_type %>;
+<%= access_public %> fill<%= this_generic %>(<%= this_arg %>value: <%= el_type %>, start?: int, end?: int): <%= this_return_type %> {
+    <%= this_call.('fillImpl') %>value, start ?? 0, end ?? <%= this_len_int %>);
+    return <%= this %>;
+}
+
+<%= access_private %> native fillImpl<%= this_generic %>(<%= this_arg %>value: <%= el_type %>, start: int, end: int): <%= this_return_type %>;
 % end
 
 % TemplateData::get_lambda_data.each { |lambda_args_params|
@@ -371,25 +329,10 @@
  *
  * @returns `Array` instance, constructed from extracted elements of `this` instance.
  */
-<%= access_public %> <%= override %> slice<%= this_generic %>(<%= this_arg %>start?: Number, end?: Number): <%= this_type %> {
+<%= access_public %> slice<%= this_generic %>(<%= this_arg %>start?: int, end?: int): <%= this_type %> {
     const len: int = <%= this_len_int %>;
-    return <%= this_call.('slice') %>asIntOrDefault(start, 0), asIntOrDefault(end, len))
-}
-
-/**
- * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
- * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
- *
- * @param start zero-based index at which to start extraction
- *
- * @param end zero-based index at which to end extraction. `slice()` extracts up to but not including end.
- *
- * @returns `Array` instance, constructed from extracted elements of `this` instance.
- */
-<%= access_public %> slice<%= this_generic %>(<%= this_arg %>start: int, end: int): <%= this_type %> {
-    const len: int = <%= this_len_int %>;
-    const relStart = normalizeIndex(start, len)
-    const relEnd = normalizeIndex(end, len)
+    const relStart = normalizeIndex(start ?? 0, len)
+    const relEnd = normalizeIndex(end ?? len, len)
 
     let count = relEnd - relStart;
     if (count < 0) {
@@ -641,23 +584,9 @@ private joinObject(sep?: String): string {
  *
  * @returns a new Array with some elements removed and/or replaced at a given index.
  */
-<%= access_public %> toSpliced<%= this_generic %>(<%= this_arg %>start?: Number, delete?: Number): <%= this_type %> {
+<%= access_public %> toSpliced<%= this_generic %>(<%= this_arg %>start?: int, delete?: int): <%= this_type %> {
     const len = <%= this_len_int %>;
     return <%= this_call.('toSpliced') %>asIntOrDefault(start, len), asIntOrDefault(delete, len))
-}
-
-/**
- * Copying version of the splice() method.
- *
- * @param start index
- *
- * @param delete number of items after start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
- */
-<%= access_public %> toSpliced<%= this_generic %>(<%= this_arg %>start: number, delete: number, ...items: FixedArray<<%= el_type %>>): <%= this_type %> {
-    const len = <%= this_len_int %>;
-    return <%= this_call.('toSpliced') %>start.toInt(), delete.toInt(), ...items)
 }
 
 /**
@@ -714,7 +643,7 @@ private joinObject(sep?: String): string {
  *
  * @returns true if val is in Array
  */
-<%= access_public %> <%= override %> includes<%= this_generic %>(<%= this_arg %>val: <%= el_type %>, fromIndex?: Number): boolean {
+<%= access_public %> <%= override %> includes<%= this_generic %>(<%= this_arg %>val: <%= el_type %>, fromIndex?: int): boolean {
     const len = <%= this_len_int %>;
     const fi = normalizeIndex(asIntOrDefault(fromIndex, 0), len);
 % if ['float', 'double', 'number'].include?(el_type)
@@ -872,20 +801,6 @@ private joinObject(sep?: String): string {
         arr[<%= this_len_int %> - 1 - i] = <%= get_unsafe.(this, 'i') %>
     }
     return <%= from_buffer.('arr') %>
-}
-
-/**
- * Copying version of using the bracket notation to change the value of a given index.
- * It returns a new Array with the element at the given index replaced with the given value.
- *
- * @param index to replace
- *
- * @param value new value
- *
- * @returns a new Array with the element at the given index replaced with the given value
- */
-<%= access_public %> with<%= this_generic %>(<%= this_arg %>index: number, value: <%= el_type %>): <%= this_type %> {
-    return <%= this_call.('with') %>index.toInt(), value)
 }
 
 /**

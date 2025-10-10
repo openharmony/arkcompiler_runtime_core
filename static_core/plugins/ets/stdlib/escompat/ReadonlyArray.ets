@@ -51,7 +51,7 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
 
     join(separator?: string): string;
 
-    includes(searchElement: T, fromIndex?: number): boolean;
+    includes(searchElement: T, fromIndex?: int): boolean;
 
     indexOf(searchElement: T, fromIndex?: int): int;
 
@@ -69,7 +69,7 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
 
     reduceRight<U>(reducer: (previousValue: U, currentValue: T, currentIndex: int, array: ReadonlyArray<T>) => U, initialValue: U): U;
 
-    slice(start?: number, end?: number): Array<T>;
+    slice(start?: int, end?: int): Array<T>;
 
     some(predicate: (value: T, index: int, array: ReadonlyArray<T>) => boolean): boolean;
 

@@ -153,15 +153,11 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @param initialValue initial value of added elements.
      *
      */
-    public extendTo(arrayLength: number, initialValue: T): void {
+    public extendTo(arrayLength: int, initialValue: T): void {
         if(arrayLength < 0){
             throw new RangeError("Parameter error.Invalid array length.")
         }
-        if (arrayLength > Int.MAX_VALUE) {
-            throw new RangeError("arrayLength must be <= int32 max")
-        }
-        const len = arrayLength.toInt()
-        const delta: int = len - this.actualLength
+        const delta: int = arrayLength - this.actualLength
         if (delta <= 0) {
             return
         }
@@ -169,7 +165,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         for (let i: int = 0; i < delta; i++) {
             this.buffer[this.actualLength + i] = initialValue
         }
-        this.actualLength = len
+        this.actualLength = arrayLength
     }
 
     /**
@@ -178,14 +174,14 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @param arrayLength length at which to shrink.
      *
      */
-    public shrinkTo(arrayLength: number): void {
+    public shrinkTo(arrayLength: int): void {
         if(arrayLength < 0){
             throw new RangeError("Parameter error.Invalid array length.")
         }
         if (arrayLength >= this.actualLength) {
             return
         }
-        let newLen: int = arrayLength.toInt()
+        let newLen: int = arrayLength
         if (newLen < 0) {
             // Convert from signed to unsigned
             newLen = newLen & Int.MAX_VALUE
@@ -839,18 +835,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns a flattened Array with respect to depth
      */
-    public flat<U>(depth: number): Array<U> {
-        return this.flat<U>(depth.toInt())
-    }
-
-    /**
-     * Creates a new Array with all sub-array elements concatenated
-     * into it recursively up to the specified depth.
-     *
-     * @param depth
-     *
-     * @returns a flattened Array with respect to depth
-     */
     public flat<U>(depth: int): Array<U> {
         let ret = new Array<U>()
         this.flatImpl<U>(depth, ret)
@@ -958,22 +942,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns The element in the array matching the given index.
      * Throw range error if `index` < `-length()` or `index` >= `length()`.
      */
-    public override at(index: number): T {
-        return this.at(index.toInt())
-    }
-
-    /**
-     * Takes an integer value and returns the item at that index,
-     * allowing for positive and negative integers. Negative integers count back
-     * from the last item in the array.
-     *
-     * @param index Zero-based index of the array element to be returned.
-     * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
-     *
-     * @returns The element in the array matching the given index.
-     * Throw range error if `index` < `-length()` or `index` >= `length()`.
-     */
-    public at(index: int): T {
+    public override at(index: int): T {
         let len = this.actualLength;
         let k: int;
         if (index >= 0) {
@@ -1000,26 +969,10 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns this array after transformation
      */
-    public copyWithin(target: number, start: number, end?: Number): this {
-        this.copyWithin(target.toInt(), start.toInt(), asIntOrDefault(end, this.actualLength));
-        return this;
-    }
-
-    /**
-     * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
-     *
-     * @param target index at which to copy the sequence
-     *
-     * @param start index at which to start copying elements from
-     *
-     * @param end index at which to end copying elements from
-     *
-     * @returns this array after transformation
-     */
-    public copyWithin(target: int, start: int, end: int): this {
+    public copyWithin(target: int, start: int, end?: int): this {
         target = normalizeIndex(target, this.actualLength)
         start = normalizeIndex(start, this.actualLength)
-        end = normalizeIndex(end, this.actualLength)
+        end = normalizeIndex(end ?? this.actualLength, this.actualLength)
 
         if (end <= start) {
             return this;
@@ -1081,23 +1034,12 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns this array after transformation
      */
-    public fill(value: T, start?: Number, end?: Number): this {
-        this.fill(value, asIntOrDefault(start, 0), asIntOrDefault(end, this.actualLength));
+    public fill(value: T, start?: int, end?: int): this {
+        this.fillImpl(value, start ?? 0, end ?? this.actualLength);
         return this;
     }
 
-    /**
-     * Changes all elements in the Array to a static value, from a start index to an end index
-     *
-     * @param value to fill the array with
-     *
-     * @param start index at which to start filling
-     *
-     * @param end index at which to end filling, but not including
-     *
-     * @returns this array after transformation
-     */
-    public native fill(value: T, start: int, end: int): this;
+    private native fillImpl(value: T, start: int, end: int): this;
 
     /**
      * Returns the value of the first element in the array where predicate is true, and undefined
@@ -1286,25 +1228,10 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns `Array` instance, constructed from extracted elements of `this` instance.
      */
-    public override slice(start?: Number, end?: Number): Array<T> {
+    public slice(start?: int, end?: int): Array<T> {
         const len: int = this.actualLength;
-        return this.slice(asIntOrDefault(start, 0), asIntOrDefault(end, len))
-    }
-
-    /**
-     * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
-     * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
-     *
-     * @param start zero-based index at which to start extraction
-     *
-     * @param end zero-based index at which to end extraction. `slice()` extracts up to but not including end.
-     *
-     * @returns `Array` instance, constructed from extracted elements of `this` instance.
-     */
-    public slice(start: int, end: int): Array<T> {
-        const len: int = this.actualLength;
-        const relStart = normalizeIndex(start, len)
-        const relEnd = normalizeIndex(end, len)
+        const relStart = normalizeIndex(start ?? 0, len)
+        const relEnd = normalizeIndex(end ?? len, len)
 
         let count = relEnd - relStart;
         if (count < 0) {
@@ -1508,23 +1435,9 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns a new Array with some elements removed and/or replaced at a given index.
      */
-    public toSpliced(start?: Number, delete?: Number): Array<T> {
+    public toSpliced(start?: int, delete?: int): Array<T> {
         const len = this.actualLength;
         return this.toSpliced(asIntOrDefault(start, len), asIntOrDefault(delete, len))
-    }
-
-    /**
-     * Copying version of the splice() method.
-     *
-     * @param start index
-     *
-     * @param delete number of items after start index
-     *
-     * @returns a new Array with some elements removed and/or replaced at a given index.
-     */
-    public toSpliced(start: number, delete: number, ...items: FixedArray<T>): Array<T> {
-        const len = this.actualLength;
-        return this.toSpliced(start.toInt(), delete.toInt(), ...items)
     }
 
     /**
@@ -1581,7 +1494,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns true if val is in Array
      */
-    public override includes(val: T, fromIndex?: Number): boolean {
+    public override includes(val: T, fromIndex?: int): boolean {
         const len = this.actualLength;
         const fi = normalizeIndex(asIntOrDefault(fromIndex, 0), len);
         if (val instanceof String) {
@@ -1684,20 +1597,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             arr[this.actualLength - 1 - i] = this.$_get_unsafe(i)
         }
         return new Array<T>(FROM_BUFFER, arr)
-    }
-
-    /**
-     * Copying version of using the bracket notation to change the value of a given index.
-     * It returns a new Array with the element at the given index replaced with the given value.
-     *
-     * @param index to replace
-     *
-     * @param value new value
-     *
-     * @returns a new Array with the element at the given index replaced with the given value
-     */
-    public with(index: number, value: T): Array<T> {
-        return this.with(index.toInt(), value)
     }
 
     /**

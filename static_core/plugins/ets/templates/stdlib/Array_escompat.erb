@@ -132,15 +132,11 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @param initialValue initial value of added elements.
      *
      */
-    public extendTo(arrayLength: number, initialValue: T): void {
+    public extendTo(arrayLength: int, initialValue: T): void {
         if(arrayLength < 0){
             throw new RangeError("Parameter error.Invalid array length.")
         }
-        if (arrayLength > Int.MAX_VALUE) {
-            throw new RangeError("arrayLength must be <= int32 max")
-        }
-        const len = arrayLength.toInt()
-        const delta: int = len - this.actualLength
+        const delta: int = arrayLength - this.actualLength
         if (delta <= 0) {
             return
         }
@@ -148,7 +144,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         for (let i: int = 0; i < delta; i++) {
             this.buffer[this.actualLength + i] = initialValue
         }
-        this.actualLength = len
+        this.actualLength = arrayLength
     }
 
     /**
@@ -157,14 +153,14 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @param arrayLength length at which to shrink.
      *
      */
-    public shrinkTo(arrayLength: number): void {
+    public shrinkTo(arrayLength: int): void {
         if(arrayLength < 0){
             throw new RangeError("Parameter error.Invalid array length.")
         }
         if (arrayLength >= this.actualLength) {
             return
         }
-        let newLen: int = arrayLength.toInt()
+        let newLen: int = arrayLength
         if (newLen < 0) {
             // Convert from signed to unsigned
             newLen = newLen & Int.MAX_VALUE
@@ -808,18 +804,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             }
         }
         return res
-    }
-
-    /**
-     * Creates a new Array with all sub-array elements concatenated
-     * into it recursively up to the specified depth.
-     *
-     * @param depth
-     *
-     * @returns a flattened Array with respect to depth
-     */
-    public flat<U>(depth: number): Array<U> {
-        return this.flat<U>(depth.toInt())
     }
 
     /**

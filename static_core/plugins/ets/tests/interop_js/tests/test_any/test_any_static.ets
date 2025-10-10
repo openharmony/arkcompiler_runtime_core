@@ -108,16 +108,12 @@ function testCallWithUndefined() {
 
 function testArray(): void {
     let arr1: Array<Number> = arrNum.with(1, 8);
-    let arr2: Array<Number> = arrNum.with(1.0, 8.0);
     arktest.assertEQ(arr1.toString(), '1,8,3,4');
-    arktest.assertEQ(arr2.toString(), '1,8,3,4');
 }
 
 function testArrayFill(): void {
     let arr1: Array<Number> = arrFill.fill(8, 1, 3);
-    let arr2: Array<Number> = arrFill.fill(8.0, 1.0, 3.0);
     arktest.assertEQ(arr1.toString(), '1,8,8,4');
-    arktest.assertEQ(arr2.toString(), '1,8,8,4');
 }
 
 function testBigInt(): void {
