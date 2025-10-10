@@ -30,7 +30,7 @@ class LambdaTests {
         let is_call_async_lambda = false;
 
         let async_lambda: asyncLambda = async (): Promise<void> => { 
-            is_call_async_lambda = regularFunc();
+            is_call_async_lambda = this.regularFunc();
         }
 
         arktest.assertEQ(is_call_async_lambda, false)

@@ -16,7 +16,7 @@
 /*---
 desc: Issue 15579 Test
 name: issue15579_0.ets
-tags: [compile-only]
+tags: [compile-only, negative]
 ---*/
 
 const d = (y, m) => new Date(y, m, 0);
