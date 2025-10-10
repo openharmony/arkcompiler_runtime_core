@@ -1905,3 +1905,8 @@ class StringIterator implements IterableIterator<string> {
         return new IteratorResult<String>(String.fromCharCode(highValue.toDouble(), lowValue.toDouble()));
     }
 }
+
+/**
+ * `string` is an alias for type `String`
+ */
+export type string = String;
