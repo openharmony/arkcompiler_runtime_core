@@ -39,9 +39,9 @@ cases:
         base_value: "false", check_value: "true"}
       - {type: "Object", check_type: "Object",
         base_value: "0", check_value: "5"}
-      - {type: "Object | null", check_type: "null",
+      - {type: "Object | null", check_type: "Object | null",
         base_value: "0", check_value: "null"}
-      - {type: "Object | undefined", check_type: "undefined",
+      - {type: "Object | undefined", check_type: "Object | undefined",
         base_value: "0", check_value: "undefined"}
       - {type: "Object | undefined | null", check_type: "Object",
         base_value: "0", check_value: "5"}
