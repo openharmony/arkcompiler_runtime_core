@@ -179,8 +179,9 @@ TEST_F(StringGetUtf16SubstrTest, throw_error)
         {"utf16Buffer", "uint16_t *"},
         {"result", "ani_size *"},
     };
-    ASSERT_EQ(env_->ResetError(), ANI_OK);
     ASSERT_ERROR_ANI_ARGS_MSG("String_GetUTF16SubString", testLines);
+
+    ASSERT_EQ(env_->ResetError(), ANI_OK);
 }
 
 TEST_F(StringGetUtf16SubstrTest, success)

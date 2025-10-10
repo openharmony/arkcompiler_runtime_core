@@ -62,14 +62,14 @@ TEST_F(FixedArrayNewCharTest, throw_error)
 
     ani_fixedarray_char res {};
     ASSERT_EQ(env_->c_api->FixedArray_New_Char(env_, length_, &res), ANI_ERROR);
-    ASSERT_EQ(env_->ResetError(), ANI_OK);
-
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"length", "ani_size"},
         {"result", "ani_fixedarray_char *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_New_Char", testLines);
+
+    ASSERT_EQ(env_->ResetError(), ANI_OK);
 }
 
 TEST_F(FixedArrayNewCharTest, success)

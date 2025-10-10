@@ -376,7 +376,13 @@ NO_UB_SANITIZE static ani_status Reference_Delete(VEnv *venv, VRef *lvref)
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status EnsureEnoughReferences(VEnv *venv, ani_size nrRefs)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env", false),
+        ANIArg::MakeForSize(nrRefs, "nrRefs"),
+    );
+    // clang-format on
+
     return GetInteractionAPI(venv)->EnsureEnoughReferences(venv->GetEnv(), nrRefs);
 }
 
@@ -522,7 +528,13 @@ NO_UB_SANITIZE static ani_status Abort(VEnv *venv, const char *message)
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status GetNull(VEnv *venv, VRef **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForRefStorage(vresult, "result")
+    );
+    // clang-format on
+
     ani_ref result {};
     ani_status status = GetInteractionAPI(venv)->GetNull(venv->GetEnv(), &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
@@ -545,10 +557,17 @@ NO_UB_SANITIZE static ani_status GetUndefined(VEnv *venv, VRef **vresult)
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Reference_IsNull(VEnv *venv, ani_ref ref, ani_boolean *result)
+NO_UB_SANITIZE static ani_status Reference_IsNull(VEnv *venv, VRef *vref, ani_boolean *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Reference_IsNull(venv->GetEnv(), ref, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForRef(vref, "ref"),
+        ANIArg::MakeForBooleanStorage(result, "result")
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Reference_IsNull(venv->GetEnv(), vref->GetRef(), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -565,24 +584,47 @@ NO_UB_SANITIZE static ani_status Reference_IsUndefined(VEnv *venv, VRef *vref, a
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Reference_IsNullishValue(VEnv *venv, ani_ref ref, ani_boolean *result)
+NO_UB_SANITIZE static ani_status Reference_IsNullishValue(VEnv *venv, VRef *vref, ani_boolean *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Reference_IsNullishValue(venv->GetEnv(), ref, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForRef(vref, "ref"),
+        ANIArg::MakeForBooleanStorage(result, "result"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Reference_IsNullishValue(venv->GetEnv(), vref->GetRef(), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Reference_Equals(VEnv *venv, ani_ref ref0, ani_ref ref1, ani_boolean *result)
+NO_UB_SANITIZE static ani_status Reference_Equals(VEnv *venv, VRef *vref0, VRef *vref1, ani_boolean *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Reference_Equals(venv->GetEnv(), ref0, ref1, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForRef(vref0, "ref0"),
+        ANIArg::MakeForRef(vref1, "ref1"),
+        ANIArg::MakeForBooleanStorage(result, "result"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Reference_Equals(venv->GetEnv(), vref0->GetRef(), vref1->GetRef(), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Reference_StrictEquals(VEnv *venv, ani_ref ref0, ani_ref ref1, ani_boolean *result)
+NO_UB_SANITIZE static ani_status Reference_StrictEquals(VEnv *venv, VRef *vref0, VRef *vref1, ani_boolean *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Reference_StrictEquals(venv->GetEnv(), ref0, ref1, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForRef(vref0, "ref0"),
+        ANIArg::MakeForRef(vref1, "ref1"),
+        ANIArg::MakeForBooleanStorage(result, "result"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Reference_StrictEquals(venv->GetEnv(), vref0->GetRef(), vref1->GetRef(), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
