@@ -10,7 +10,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "tsc": "tsc",
-    "postinstall": "npm run build",
+    "install_tsc": "./script/install_tsc.sh",
     "webpack": "webpack -t node --config webpack.config.js",
     "clean": "rimraf build dist bundle",
     "compile": "npm run tsc",
