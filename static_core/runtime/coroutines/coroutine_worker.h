@@ -54,7 +54,11 @@ public:
     }
     virtual ~CoroutineWorker()
     {
-        DestroyCallbackPoster();
+        os::memory::LockHolder l(posterLock_);
+        if (extSchedulingPoster_ != nullptr) {
+            extSchedulingPoster_->SetDestroyInPlace();
+            extSchedulingPoster_.reset(nullptr);
+        }
     }
 
     Runtime *GetRuntime()
@@ -97,8 +101,6 @@ public:
         ASSERT(!extSchedulingPoster_);
         extSchedulingPoster_ = std::move(poster);
     }
-
-    void DestroyCallbackPoster();
 
     bool IsExternalSchedulingEnabled() const
     {

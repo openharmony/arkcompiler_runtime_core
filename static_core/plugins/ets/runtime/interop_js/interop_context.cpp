@@ -138,7 +138,7 @@ static bool RegisterTimerModule()
     ani_env *aniEnv = nullptr;
     status = vm->GetEnv(ANI_VERSION_1, &aniEnv);
     ASSERT(status == ANI_OK);
-#ifndef PANDA_BUILD_IN_OHOS_TREE
+#ifndef PANDA_TARGET_OHOS
     auto jsEnv = InteropCtx::Current()->GetJSEnv();
     napi_value global = nullptr;
     napi_get_global(jsEnv, &global);
@@ -158,7 +158,7 @@ static void RegisterEventLoopModule(EtsCoroutine *coro)
         [](WalkEventLoopCallback &cb, void *args) { EventLoop::WalkEventLoop(cb, args); });
 }
 
-#if defined(PANDA_JS_ETS_HYBRID_MODE) && !defined(PANDA_BUILD_IN_OHOS_TREE)
+#ifdef PANDA_JS_ETS_HYBRID_MODE
 static PandaUniquePtr<SingleEventPoster> CreateExtSchedulingPoster()
 {
     auto schedulingFunc = [] {
@@ -821,12 +821,9 @@ void InteropCtx::Init(EtsCoroutine *coro, napi_env env)
 #ifdef PANDA_JS_ETS_HYBRID_MODE
     Handshake::VmHandshake(env, ctx);
     XGC::GetInstance()->OnAttach(ctx);
-#ifndef PANDA_BUILD_IN_OHOS_TREE
     auto extSchPoster = CreateExtSchedulingPoster();
     ASSERT(extSchPoster != nullptr);
     worker->SetCallbackPoster(std::move(extSchPoster));
-    worker->TriggerSchedulerExternally(coro);
-#endif
 #endif  // PANDA_JS_ETS_HYBRID_MODE
 }
 
