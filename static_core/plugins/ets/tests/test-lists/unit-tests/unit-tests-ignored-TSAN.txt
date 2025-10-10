@@ -1,6 +1,3 @@
 #30109
 ets-common-tests/atomics/concurrent_wait_store_notify.ets
 
-#30196
-ets-common-tests/intrinsics/copyTo.ets
-ets-common-tests/intrinsics/map_set.ets
