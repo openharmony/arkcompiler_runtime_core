@@ -511,6 +511,18 @@ if (is_ohos && is_standard_system) {
     "libuv:uv",
     "qos_manager:qos",
   ]
+  if (!(ark_standalone_build || ark_static_standalone_build)) {
+    _libarkruntime_calculated_defines += [
+      "PANDA_GET_PARAMETER",
+    ]
+    _libarkruntime_calculated_external_deps += [
+      "init:libbegetutil",
+    ]
+    _libarkruntime_calculated_deps += [
+      "$ark_root/runtime/para:RuntimeEnableDebugger.para",
+      "$ark_root/runtime/para:RuntimeEnableDebugger.para.dac",
+    ]
+  }
 }
 
 

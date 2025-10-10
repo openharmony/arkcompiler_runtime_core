@@ -77,6 +77,9 @@
 #ifdef ARK_HYBRID
 #include "base_runtime.h"
 #endif
+#ifdef PANDA_GET_PARAMETER
+#include "parameters.h"
+#endif
 
 namespace ark {
 
@@ -327,6 +330,10 @@ bool Runtime::Create(const RuntimeOptions &options)
 
     IntrusiveTestOption::SetTestId(options);
 
+#ifdef PANDA_GET_PARAMETER
+    SetDebuggerOptions(const_cast<RuntimeOptions &>(options));
+#endif
+
     const_cast<RuntimeOptions &>(options).InitializeRuntimeSpacesAndType();
     trace::ScopedTrace scopedTrace("Runtime::Create");
 
@@ -381,6 +388,19 @@ bool Runtime::Create(const RuntimeOptions &options)
 
     return true;
 }
+
+#ifdef PANDA_GET_PARAMETER
+void Runtime::SetDebuggerOptions(RuntimeOptions &options)
+{
+    bool enableDebugMode = OHOS::system::GetBoolParameter("persist.ark.enableDebugMode", false);
+    if (enableDebugMode) {
+        options.SetInterpreterType("cpp");
+        options.SetDebuggerEnable(true);
+        options.SetDebuggerLibraryPath("/system/lib64/libarkinspector.so");
+        options.SetDebuggerBreakOnStart(true);
+    }
+}
+#endif
 
 Runtime *Runtime::GetCurrent()
 {
