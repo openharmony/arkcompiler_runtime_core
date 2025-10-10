@@ -17,7 +17,7 @@ import {BusinessError} from "@ohos.base";
 
 const TypeErrorCodeId: int = 401;
 const OutOfBoundsErrorCodeId: int = 10200001;
-const EmptyContainerErrorCodeId: int = 10200010;
+const EmptyContainerId: int = 10200010;
 
 function createBusinessError(code: int, message: string) {
     let err = new BusinessError();
@@ -198,7 +198,7 @@ export class LinkedList<T> implements Iterable<T>, JsonReplacer {
      * @returns The first element of type `T`.
      */
     public getFirst(): T {
-        this.checkEmptyContainer(OutOfBoundsErrorCodeId);
+        this.checkEmptyContainer();
         return this.head!.element;
     }
 
@@ -226,7 +226,7 @@ export class LinkedList<T> implements Iterable<T>, JsonReplacer {
      * @returns The last element of type `T`.
      */
     public getLast(): T {
-        this.checkEmptyContainer(OutOfBoundsErrorCodeId);
+        this.checkEmptyContainer();
         return this.tail!.element;
     }
 
@@ -342,7 +342,7 @@ export class LinkedList<T> implements Iterable<T>, JsonReplacer {
      */
     public removeByIndex(index: int): T | undefined {
         this.checkIndexType(index);
-        this.checkEmptyContainer(OutOfBoundsErrorCodeId);
+        this.checkEmptyContainer();
         this.checkIndex(index, this.length - 1);
 
         let removedNode: ListNode<T> | undefined;
@@ -370,7 +370,7 @@ export class LinkedList<T> implements Iterable<T>, JsonReplacer {
      * @returns The removed element, or undefined if the list is empty.
      */
     public removeFirst(): T | undefined {
-        this.checkEmptyContainer(EmptyContainerErrorCodeId);
+        this.checkEmptyContainer();
         return this.removeByIndex(0);
     }
 
@@ -388,7 +388,7 @@ export class LinkedList<T> implements Iterable<T>, JsonReplacer {
      * @returns The removed element, or undefined if the list is empty.
      */
     public removeLast(): T | undefined {
-        this.checkEmptyContainer(EmptyContainerErrorCodeId);
+        this.checkEmptyContainer();
         return this.removeByIndex(this.elementNum - 1);
     }
 
@@ -427,7 +427,7 @@ export class LinkedList<T> implements Iterable<T>, JsonReplacer {
      */
     public set(index: int, element: T): T {
         this.checkIndexType(index);
-        this.checkEmptyContainer(OutOfBoundsErrorCodeId);
+        this.checkEmptyContainer();
         this.checkIndex(index, this.length - 1);
 
         let currentNode: ListNode<T> | undefined = this.getNode(index);
@@ -479,9 +479,9 @@ export class LinkedList<T> implements Iterable<T>, JsonReplacer {
         }
     }
 
-    private checkEmptyContainer(id: int): void {
+    private checkEmptyContainer(): void {
         if (this.elementNum == 0) {
-            throw createBusinessError(id, `Container is empty`);
+            throw createBusinessError(EmptyContainerId, `Container is empty`);
         }
     }
 }

@@ -17,6 +17,7 @@ import {List} from '@ohos.util.List';
 import {BusinessError} from "@ohos.base";
 
 const OutOfBoundsErrorCodeId: int = 10200001;
+const EmptyContainerErrorCodeId: int = 10200010;
 
 function main() {
     const suite = new arktest.ArkTestsuite("List API tests");
@@ -95,7 +96,7 @@ function testSetElementsInEmptyContainer() {
     let list = new List<double>();
     let exceptionCheck = (e: Error): boolean | string => {
         if (e instanceof BusinessError) {
-            return e.name == "BusinessError" && e.message == "Container is empty" && e.code == OutOfBoundsErrorCodeId;
+            return e.name == "BusinessError" && e.message == "Container is empty" && e.code == EmptyContainerErrorCodeId;
         }
         return false;
     }
