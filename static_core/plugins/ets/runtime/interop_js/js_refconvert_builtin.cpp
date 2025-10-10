@@ -284,6 +284,7 @@ private:
 
     EtsObject *MArray(InteropCtx *ctxx, napi_value jsValue, bool verified = true)
     {
+        ScopedNativeCodeThreadIfNeeded nativeScope(EtsCoroutine::GetCurrent());
         napi_env env = ctxx->GetJSEnv();
         bool isInstanceof;
         if (!verified) {
@@ -342,6 +343,7 @@ private:
 
     EtsObject *MError(InteropCtx *ctxx, napi_value jsValue, bool verified = true)
     {
+        ScopedNativeCodeThreadIfNeeded nativeScope(EtsCoroutine::GetCurrent());
         napi_env env = ctxx->GetJSEnv();
         bool isInstanceof;
         if (!verified) {
@@ -412,6 +414,7 @@ private:
 
     EtsObject *MObject(InteropCtx *ctxx, napi_value jsValue, bool verified = true)
     {
+        ScopedNativeCodeThreadIfNeeded nativeScope(EtsCoroutine::GetCurrent());
         napi_env env = ctxx->GetJSEnv();
         (void)verified;  // ignored for Object
 

@@ -39,33 +39,6 @@ public:
     }
 };
 
-// NOTE(ipetrov, 20146): It's tempoary solution for SharedReferencesStorage. All napi calls should in native scope
-class ScopedNativeCodeThreadIfNeeded {
-public:
-    explicit ScopedNativeCodeThreadIfNeeded(ManagedThread *thread) : thread_(thread)
-    {
-        ASSERT(thread_ != nullptr);
-        if (thread_->IsInNativeCode()) {
-            needToEndNativeCode_ = false;
-        } else {
-            thread_->NativeCodeBegin();
-        }
-    }
-    NO_COPY_SEMANTIC(ScopedNativeCodeThreadIfNeeded);
-    NO_MOVE_SEMANTIC(ScopedNativeCodeThreadIfNeeded);
-
-    ~ScopedNativeCodeThreadIfNeeded()
-    {
-        if (needToEndNativeCode_) {
-            thread_->NativeCodeEnd();
-        }
-    }
-
-private:
-    ManagedThread *thread_ {nullptr};
-    bool needToEndNativeCode_ {true};
-};
-
 SharedReferenceStorage *SharedReferenceStorage::sharedStorage_ = nullptr;
 
 /* static */
@@ -125,7 +98,7 @@ SharedReference *ExtractMaybeReference(napi_env env, napi_value jsObject)
 
 SharedReference *SharedReferenceStorage::GetReference(napi_env env, napi_value jsObject) const
 {
-    ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
+    ScopedNativeCodeThreadIfNeeded nativeScope(EtsCoroutine::GetCurrent());
     void *data = ExtractMaybeReference(env, jsObject);
     if (UNLIKELY(data == nullptr)) {
         return nullptr;
@@ -337,11 +310,14 @@ SharedReference *SharedReferenceStorage::CreateJSObjectRef(InteropCtx *ctx, EtsO
     EtsHandle<EtsObject> hobject(coro, etsObject);
     TriggerXGCIfNeeded(ctx);
     napi_ref jsRef;
+    {
+        ScopedNativeCodeThreadIfNeeded nativeScope(coro);
 #if defined(PANDA_JS_ETS_HYBRID_MODE)
-    NAPI_CHECK_FATAL(napi_create_xref(ctx->GetJSEnv(), jsObject, 1, &jsRef));
+        NAPI_CHECK_FATAL(napi_create_xref(ctx->GetJSEnv(), jsObject, 1, &jsRef));
 #else
-    NAPI_CHECK_FATAL(napi_create_reference(ctx->GetJSEnv(), jsObject, 1, &jsRef));
+        NAPI_CHECK_FATAL(napi_create_reference(ctx->GetJSEnv(), jsObject, 1, &jsRef));
 #endif
+    }
     os::memory::WriteLockHolder lock(storageLock_);
     auto *sharedRef = CreateReference<&SharedReference::InitJSObject>(ctx, hobject, jsRef);
     return sharedRef;

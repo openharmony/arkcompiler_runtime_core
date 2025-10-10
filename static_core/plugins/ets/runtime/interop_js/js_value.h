@@ -236,6 +236,9 @@ public:
     JSValue() = delete;
 
 private:
+    static JSValue *CreateStringJSValue(InteropCtx *ctx, napi_env env, napi_value nvalue, JSValue *jsvalue);
+    static JSValue *CreateBigIntJSValue(napi_env env, napi_value nvalue, JSValue *jsvalue);
+    static JSValue *CreateRefJSValue(InteropCtx *ctx, napi_value nvalue, JSValue *jsvalue, napi_valuetype jsType);
     static JSValue *CreateByType(InteropCtx *ctx, napi_env env, napi_value nvalue, napi_valuetype jsType,
                                  JSValue *jsvalue);
 
@@ -274,6 +277,7 @@ private:
     {
         JSValue *jsValue;
         {
+            ScopedManagedCodeThreadIfNeeded managedScope(coro);
             auto obj = ObjectHeader::Create(coro, ctx->GetJSValueClass());
             if (UNLIKELY(!obj)) {
                 return nullptr;

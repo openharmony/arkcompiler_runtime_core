@@ -23,6 +23,8 @@ namespace ark::ets::interop::js {
 JSRefConvertFunction::JSRefConvertFunction(Class *klass)
     : JSRefConvert(this), klass_ {EtsClass::FromRuntimeClass(klass)}
 {
+    auto coro = EtsCoroutine::GetCurrent();
+    ScopedManagedCodeThreadIfNeeded managedScope(coro);
     // Mark interop function dynamic class as XRef class
     auto *classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
 
@@ -31,7 +33,6 @@ JSRefConvertFunction::JSRefConvertFunction(Class *klass)
         classLinker->GetClass(panda_file_items::class_descriptors::INTEROP_DYNAMIC_FUNCTION.data());
     if (UNLIKELY(interopDynamicFunction == nullptr)) {
         // just throw exception
-        auto coro = EtsCoroutine::GetCurrent();
         InteropCtx::ThrowETSError(
             coro, "Interop: Interop function dynamic class Lstd/interop/js/DynamicFunction; is not found.");
         return;
@@ -71,7 +72,7 @@ napi_value EtsLambdaProxyInvoke(napi_env env, napi_callback_info cbinfo)
     auto *sharedRef = AtomicLoad(static_cast<ets_proxy::SharedReference **>(data), std::memory_order_acquire);
     ASSERT(sharedRef != nullptr);
 
-    ScopedManagedCodeThread managedScope(coro);
+    ScopedManagedCodeThreadIfNeeded managedScope(coro);
     auto *etsThis = sharedRef->GetEtsObject();
     ASSERT(etsThis != nullptr);
     EtsMethod *method = etsThis->GetClass()->GetInstanceMethod(INVOKE_METHOD_NAME, nullptr);
@@ -131,6 +132,7 @@ EtsObject *JSRefConvertFunction::UnwrapImpl(InteropCtx *ctx, napi_value jsFun)
     }
 
     auto *coro = EtsCoroutine::GetCurrent();
+    ScopedManagedCodeThreadIfNeeded managedScope(coro);
     HandleScope<ObjectHeader *> scope(coro);
 
     auto ret = interopCreateDynamicFunctionMethod_->GetPandaMethod()->Invoke(coro, {}).GetAs<ObjectHeader *>();

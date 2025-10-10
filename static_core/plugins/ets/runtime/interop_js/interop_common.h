@@ -16,6 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTEROP_COMMON_H_
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTEROP_COMMON_H_
 
+#include "ets_coroutine.h"
 #include "runtime/include/thread_scopes.h"
 #include "runtime/mem/refstorage/global_object_storage.h"
 #include "plugins/ets/runtime/interop_js/logger.h"
@@ -137,16 +138,71 @@ void InteropTrace(const char *func, const char *file, int line);
 
 // NOLINTEND(cppcoreguidelines-macro-usage)
 
+// NOTE(ipetrov, 20146): It's tempoary solution for SharedReferencesStorage. All napi calls should in native scope
+class ScopedNativeCodeThreadIfNeeded {
+public:
+    explicit ScopedNativeCodeThreadIfNeeded(ManagedThread *thread) : thread_(thread)
+    {
+        ASSERT(thread_ != nullptr);
+        if (thread_->IsInNativeCode()) {
+            needToEndNativeCode_ = false;
+        } else {
+            thread_->NativeCodeBegin();
+        }
+    }
+    NO_COPY_SEMANTIC(ScopedNativeCodeThreadIfNeeded);
+    NO_MOVE_SEMANTIC(ScopedNativeCodeThreadIfNeeded);
+
+    ~ScopedNativeCodeThreadIfNeeded()
+    {
+        if (needToEndNativeCode_) {
+            thread_->NativeCodeEnd();
+        }
+    }
+
+private:
+    ManagedThread *thread_ {nullptr};
+    bool needToEndNativeCode_ {true};
+};
+
+class ScopedManagedCodeThreadIfNeeded {
+public:
+    explicit ScopedManagedCodeThreadIfNeeded(ManagedThread *thread) : thread_(thread)
+    {
+        ASSERT(thread_ != nullptr);
+        if (thread_->IsManagedCode()) {
+            needToEndManagedCode_ = false;
+        } else {
+            thread_->ManagedCodeBegin();
+        }
+    }
+    NO_COPY_SEMANTIC(ScopedManagedCodeThreadIfNeeded);
+    NO_MOVE_SEMANTIC(ScopedManagedCodeThreadIfNeeded);
+
+    ~ScopedManagedCodeThreadIfNeeded()
+    {
+        if (needToEndManagedCode_) {
+            thread_->ManagedCodeEnd();
+        }
+    }
+
+private:
+    ManagedThread *thread_ {nullptr};
+    bool needToEndManagedCode_ {true};
+};
+
 class NapiScope {
 public:
     explicit NapiScope(napi_env env) : env_(env)
     {
+        ScopedNativeCodeThreadIfNeeded nativeScope(EtsCoroutine::GetCurrent());
         [[maybe_unused]] auto status = napi_open_handle_scope(env_, &scope_);
         ASSERT(status == napi_ok);
     }
 
     ~NapiScope()
     {
+        ScopedNativeCodeThreadIfNeeded nativeScope(EtsCoroutine::GetCurrent());
         [[maybe_unused]] auto status = napi_close_handle_scope(env_, scope_);
         ASSERT(status == napi_ok);
     }
@@ -163,18 +219,21 @@ class NapiEscapableScope {
 public:
     explicit NapiEscapableScope(napi_env env) : env_(env)
     {
+        ScopedNativeCodeThreadIfNeeded nativeScope(EtsCoroutine::GetCurrent());
         [[maybe_unused]] auto status = napi_open_escapable_handle_scope(env_, &scope_);
         ASSERT(status == napi_ok);
     }
 
     void Escape(napi_value &val)
     {
+        ScopedNativeCodeThreadIfNeeded nativeScope(EtsCoroutine::GetCurrent());
         [[maybe_unused]] auto status = napi_escape_handle(env_, scope_, val, &val);
         ASSERT(status == napi_ok);
     }
 
     ~NapiEscapableScope()
     {
+        ScopedNativeCodeThreadIfNeeded nativeScope(EtsCoroutine::GetCurrent());
         [[maybe_unused]] auto status = napi_close_escapable_handle_scope(env_, scope_);
         ASSERT(status == napi_ok);
     }
@@ -187,10 +246,16 @@ private:
     napi_escapable_handle_scope scope_ {};
 };
 
+template <bool IS_IN_NATIVE = true>
 inline napi_valuetype GetValueType(napi_env env, napi_value val)
 {
     napi_valuetype vtype;
-    NAPI_CHECK_FATAL(napi_typeof(env, val, &vtype));
+    if constexpr (IS_IN_NATIVE) {
+        ScopedNativeCodeThreadIfNeeded nativeScope(EtsCoroutine::GetCurrent());
+        NAPI_CHECK_FATAL(napi_typeof(env, val, &vtype));
+    } else {
+        NAPI_CHECK_FATAL(napi_typeof(env, val, &vtype));
+    }
     return vtype;
 }
 
