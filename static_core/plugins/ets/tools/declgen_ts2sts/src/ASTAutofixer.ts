@@ -1507,7 +1507,7 @@ export class Autofixer {
       }
 
       let hasImportType = false;
-      const visitNode = (childNode: ts.Node) => {
+      const visitNode = (childNode: ts.Node): void => {
         if (ts.isImportTypeNode(childNode)) {
           hasImportType = true;
           return;
@@ -2696,7 +2696,7 @@ function isSpecificTypes(node: ts.Node): boolean {
  */
 function createNodeFromUtilType(targetType: string, factory: ts.NodeFactory):
   ts.TypeReferenceNode | ts.ArrayTypeNode {
-  if (targetType == ArrayType) {
+  if (targetType === ArrayType) {
     return factory.createArrayTypeNode(factory.createTypeReferenceNode(JSValue));
   }
   return factory.createTypeReferenceNode(JSValue);
@@ -2851,7 +2851,7 @@ function getTypeNameKey(type: ts.TypeNode): string {
     return getName(type.typeName);
   }
   if (ts.isArrayTypeNode(type)) {
-    return getTypeNameKey(type.elementType) + "[]";
+    return getTypeNameKey(type.elementType) + '[]';
   }
   return ts.SyntaxKind[type.kind];
 }
