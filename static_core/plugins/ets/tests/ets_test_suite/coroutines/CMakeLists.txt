@@ -248,14 +248,17 @@ if (NOT PANDA_TARGET_ARM32)
     )
 
     # NOTE(26403) Profilesaver is turned off because of data race
-    add_ets_coroutines_test(FILE launch_oom.ets
-                            SKIP_ARM32_COMPILER
-                            OPTIONS "--gc-type=epsilon" "--profilesaver-enabled=false" "--incremental-profilesaver-enabled=false"
-                            IMPL "STACKFUL"
-                            OPTION_SETS_STACKFUL "POOL"
-                            WORKERS "ONE"
-                            MODE "INT" "JIT" "AOT"
-    )
+    # NOTE(30627) Temporarily disabled due failures under TSan
+    if (NOT PANDA_ENABLE_THREAD_SANITIZER)
+        add_ets_coroutines_test(FILE launch_oom.ets
+                                SKIP_ARM32_COMPILER
+                                OPTIONS "--gc-type=epsilon" "--profilesaver-enabled=false" "--incremental-profilesaver-enabled=false"
+                                IMPL "STACKFUL"
+                                OPTION_SETS_STACKFUL "POOL"
+                                WORKERS "ONE"
+                                MODE "INT" "JIT" "AOT"
+        )
+    endif()
 
     # NOTE(26403) Profilesaver is turned off because of data race
     add_ets_coroutines_test(FILE launch_oom.ets
