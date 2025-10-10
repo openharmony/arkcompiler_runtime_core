@@ -6,6 +6,9 @@
             "HarB": [
                 "./test_path/aaa"
             ],
+            "HarC": [
+                "./test_path/ccc"
+            ],
             "std": [
                 "${PANDA_ROOT}/plugins/ets/stdlib/std"
             ],
@@ -21,6 +24,11 @@
                 "language": "js",
                 "path": "./test_path/aaa/a.d.ets",
                 "ohmUrl": "./test_path/aaa/a.d.ets"
+            },
+            "HarC/bar": {
+                "language": "js",
+                "path": "./test_path/ccc/src/bar.d.ets",
+                "ohmUrl": "./test_path/ccc/src/bar.d.ets"
             },
             "dynamic_import_tests/xxx": {
                 "language": "js",
