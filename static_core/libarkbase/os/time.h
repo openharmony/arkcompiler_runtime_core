@@ -34,6 +34,7 @@ namespace ark::os::time {
 
 static constexpr uint64_t MICRO_TO_NANO = 1000;
 static constexpr uint64_t MILLIS_TO_MICRO = 1000;
+static constexpr uint64_t MILLIS_TO_NANO = MILLIS_TO_MICRO * MICRO_TO_NANO;
 
 PANDA_PUBLIC_API uint64_t GetClockTimeInMicro();
 PANDA_PUBLIC_API uint64_t GetClockTimeInMilli();
