@@ -100,33 +100,24 @@ function __lambdaUnsafeCallStub(fn: Function, r: FixedArray<Any>): Any {
     throw new ArgumentsUnderapplicationError()
 }
 
-{%- macro defineChainingHelper(name, narg, erasedArgs) -%}
-export interface __{{name}}{{narg}} extends {{name}}{{narg}}{{erasedTypeArgsList(erasedArgs)}}
-{%- endmacro %}
-
-{%- macro defineLambdaHelper(lambda, name, narg) -%}
-export abstract class {{lambda}}{{narg}} implements __{{name}}{{narg}}
+{%- macro defineLambdaHelper(lambda, name, narg, gnarg) -%}
+export abstract class {{lambda}}{{narg}} implements {{name}}{{narg}}{{typeParamsList(gnarg)}}
 {%- endmacro %}
 
 {% for narg in range(maxarity + 1) %}
 export interface FunctionR{{ narg }}{{ typeParamsDeclList(narg, True) }}
-    extends Function{% if not loop.last %}, __FunctionR{{narg + 1}}{% endif %}{% if loop.last %}, FunctionN<Any>{% endif %}
+    extends Function{% if not loop.last %}, FunctionR{{narg + 1}}{{erasedTypeArgsList(narg + 2)}}{% else %}, FunctionN<Any>{% endif %}
 {
     {{invokeName(narg, "R")}}{{ signature(narg, True) }};
 }
 export interface Function{{ narg }}{{ typeParamsDeclList(narg) }}
-    extends FunctionR{{narg}}{{ typeParamsList(narg, "Any") }}{% if not loop.last %}, __Function{{narg + 1}}{% endif %}
+    extends FunctionR{{narg}}{{ typeParamsList(narg, "Any") }}{% if not loop.last %}, Function{{narg + 1}}{{erasedTypeArgsList(narg + 1)}}{% endif %}
 {
     {{invokeName(narg)}}{{ signature(narg) }};
 }
-{{ defineChainingHelper("FunctionR", narg, narg + 1) }} {}
-{{ defineChainingHelper("Function", narg, narg) }} {}
-{{ defineLambdaHelper("LambdaR", "FunctionR", narg) }} {
 
-    get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object)
-    }
-
+export abstract class LambdaR{{narg}}{{typeParamsDeclList(narg, True)}}
+    implements FunctionR{{narg}}{{typeParamsList(narg, "PR")}} {
     abstract {{invokeName(narg, "R")}}{{erasedSignature(narg, True)}};
 {%- if narg == 0 %}
     final unsafeCall(...r: FixedArray<Any>): Any {
@@ -145,18 +136,15 @@ export interface Function{{ narg }}{{ typeParamsDeclList(narg) }}
             ...Runtime.addFrontElementsStub(r, [{{listArgs(narg, extNarg)}}]))
     }
 {%- endfor %}
+    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
-{{ defineLambdaHelper("Lambda", "Function", narg) }} {
+export abstract class Lambda{{narg}}{{typeParamsDeclList(narg, False)}}
+    implements Function{{narg}}{{typeParamsList(narg)}} {
     abstract {{invokeName(narg)}}{{erasedSignature(narg)}};
     final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < {{narg}}) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.{{invokeName(narg)}}({{listArgArrayLoads(narg)}})
     }
-
-    get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object)
-    }
-
 {%- for extNarg in range(narg + 1, maxarity + 1) %}
     final {{invokeName(extNarg)}} {{erasedSignature(extNarg, False)}} {
         return this.{{invokeName(narg)}}({{listArgs(0, narg)}})
@@ -167,5 +155,6 @@ export interface Function{{ narg }}{{ typeParamsDeclList(narg) }}
         return this.{{invokeName(narg)}}({{listArgs(0, narg)}})
     }
 {%- endfor %}
+    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
 {% endfor %}

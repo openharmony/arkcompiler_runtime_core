@@ -19,7 +19,7 @@ function fakeLambdaInvoke(a: string, b: string | undefined): string {
     return a + (b === undefined ? 'u' : b);
 }
 
-class FakeLambdaObject extends Lambda2 implements Function1<Any, Any> {
+class FakeLambdaObject extends Lambda2<Any, Any, Any> implements Function1<Any, Any> {
     public constructor() { }
 
     public invoke1(a: Any): Any {

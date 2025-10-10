@@ -26,22 +26,6 @@
 
 namespace ark::ets::interop::js {
 
-static bool IsFunctionClass(InteropCtx *ctx, Class *klass)
-{
-    if (panda_file_items::class_descriptors::FUNCTION.compare(utf::Mutf8AsCString(klass->GetDescriptor())) == 0) {
-        return true;
-    }
-    if (ctx->IsFunctionalInterface(klass)) {
-        return true;
-    }
-    for (auto *itf : klass->GetInterfaces()) {
-        if (ctx->IsFunctionalInterface(itf)) {
-            return true;
-        }
-    }
-    return false;
-}
-
 static bool IsRecord(Class *klass)
 {
     return PlatformTypes()->escompatRecord->GetRuntimeClass()->IsAssignableFrom(klass);
@@ -73,7 +57,7 @@ static std::unique_ptr<JSRefConvert> JSRefConvertCreateImpl(InteropCtx *ctx, Cla
         return ets_proxy::EtsClassWrapper::CreateJSRefConvertJSProxy(ctx, klass);
     }
 
-    if (IsFunctionClass(ctx, klass)) {
+    if (EtsClass::FromRuntimeClass(klass)->IsFunction()) {
         return std::make_unique<JSRefConvertFunction>(klass);
     }
 
