@@ -16,21 +16,21 @@
 {% for c in cases %}
 /*---
 desc: no target type is expected in the context, then the expression is called a standalone expression.
-      The type of some expressions cannot be inferred from the expression itself   
-params: Assignment from '{{c}}'
-tags: [negative, compile-only]
+      The type of some expressions cannot be inferred from the expression itself
+tags: [compile-only, negative]
 ---*/
-
-let x = ' ';
 
 class A {
     name: string = ""
     age: number = 0
+    {% if c.class %}{{c.class}}{% endif %}
 }
 
-let a = {{c}}; // no target type is expected
-
-function foo() {
-    {{c}}; // no target type is expected
+class B { 
+    id: number = 0
+    name: string = ""
 }
+
+let a = {{c.global}}; // no target type is expected
+
 {% endfor %}

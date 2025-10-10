@@ -848,9 +848,6 @@
 05.generics/03.utility_types/07.return_type_utility_type/return_type_func_4.ets
 05.generics/03.utility_types/07.return_type_utility_type/return_type_func_5.ets
 
-#27058
-07.expressions/01.evaluation_of_expressions/01.type_of_expression/standalone_expression_n_1.ets
-
 #29887
 06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_72.ets
 06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_73.ets
