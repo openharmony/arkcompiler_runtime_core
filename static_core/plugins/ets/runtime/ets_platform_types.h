@@ -74,6 +74,7 @@ public:
     /* Error handling */
     EtsClass *coreOutOfMemoryError {};
     EtsClass *coreStackTraceElement {};
+    EtsClass *coreLinkerClassNotFoundError {};
 
     /* StringBuilder */
     EtsClass *coreStringBuilder {};

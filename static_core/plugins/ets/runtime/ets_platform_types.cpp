@@ -190,6 +190,7 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
 
     findType(&EtsPlatformTypes::coreOutOfMemoryError, OUT_OF_MEMORY_ERROR);
     findType(&EtsPlatformTypes::coreStackTraceElement, STACK_TRACE_ELEMENT);
+    findType(&EtsPlatformTypes::coreLinkerClassNotFoundError, LINKER_CLASS_NOT_FOUND_ERROR);
 
     findType(&EtsPlatformTypes::coreStringBuilder, STRING_BUILDER);
 
