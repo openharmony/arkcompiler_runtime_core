@@ -288,8 +288,8 @@ AbckitString *CreateStringStatic(AbckitFile *file, const char *value, size_t len
 
     auto s = std::make_unique<AbckitString>();
     s->impl = progValue;
-    strings.insert({progValue, std::move(s)});
-    return strings[progValue].get();
+    auto result = strings.emplace(progValue, std::move(s));
+    return result.first->second.get();
 }
 
 bool ModuleSetNameStatic(AbckitCoreModule *m, const char *newName)

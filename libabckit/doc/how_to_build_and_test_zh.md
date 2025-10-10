@@ -62,9 +62,9 @@ repo forall -c 'git lfs pull'
 
 ```sh
 # debug模式
-./ark.py x64.debug abckit_tests --gn-args="is_standard_system=true abckit_enable=true libabckit_with_sanitizers=true"
+./ark.py x64.debug abckit_tests --gn-args="is_standard_system=true abckit_enable=true abckit_with_sanitizers=true enable_cmc_gc=false"
 # release模式
-./ark.py x64.release abckit_tests --gn-args="is_standard_system=true abckit_enable=true libabckit_with_sanitizers=true"
+./ark.py x64.release abckit_tests --gn-args="is_standard_system=true abckit_enable=true abckit_with_sanitizers=true enable_cmc_gc=false"
 ```
 
 # 如何使用 AbcKit

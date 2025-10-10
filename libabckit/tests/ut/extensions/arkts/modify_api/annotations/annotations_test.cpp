@@ -656,9 +656,6 @@ TEST_F(LibAbcKitModifyApiAnnotationsTests, ClassAddAnnotation)
 // Test: test-kind=api, api=ArktsModifyApiImpl::classAddAnnotation, abc-kind=ArkTS1, category=negative, extension=c
 TEST_F(LibAbcKitModifyApiAnnotationsTests, ClassAddAnnotation_WrongTargets)
 {
-    // Test is disabled
-    // Annotation imports are not supported yet
-
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/annotations/annotations_dynamic.abc", &file);
 
@@ -711,9 +708,6 @@ TEST_F(LibAbcKitModifyApiAnnotationsTests, ClassRemoveAnnotation)
 // Test: test-kind=api, api=ArktsModifyApiImpl::classRemoveAnnotation, abc-kind=ArkTS1, category=negative, extension=c
 TEST_F(LibAbcKitModifyApiAnnotationsTests, ClassRemoveAnnotation_WrongTargets)
 {
-    // Test is disabled
-    // Annotation imports are not supported yet
-
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/annotations/annotations_dynamic.abc", &file);
 
@@ -804,9 +798,6 @@ TEST_F(LibAbcKitModifyApiAnnotationsTests, FunctionAddAnnotation)
 // Test: test-kind=api, api=ArktsModifyApiImpl::functionAddAnnotation, abc-kind=ArkTS1, category=negative
 TEST_F(LibAbcKitModifyApiAnnotationsTests, FunctionAddAnnotation_WrongTargets)
 {
-    // Test is disabled
-    // Annotation imports are not supported yet
-
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/annotations/annotations_dynamic.abc", &file);
 
@@ -851,9 +842,6 @@ TEST_F(LibAbcKitModifyApiAnnotationsTests, FunctionRemoveAnnotation)
 // extension=c
 TEST_F(LibAbcKitModifyApiAnnotationsTests, FunctionRemoveAnnotation_WrongTargets)
 {
-    // Test is disabled
-    // Annotation imports are not supported yet
-
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/annotations/annotations_dynamic.abc", &file);
 

@@ -34,7 +34,7 @@ class AnnotationInterface : public core::AnnotationInterface {
     friend class arkts::Function;
     /// @brief to access private constructor
     friend class arkts::InterfaceField;
-    // @brief to access private constructor
+    /// @brief to access private constructor
     friend class arkts::ModuleField;
     /// @brief abckit::DefaultHash<AnnotationInterface>
     friend class abckit::DefaultHash<AnnotationInterface>;

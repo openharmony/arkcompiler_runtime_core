@@ -62,9 +62,9 @@ NOTE: Replace ${target} with build target: x64.debug, x64.release, mingw\_x86\_6
 
 ```sh
 # Debug mode
-./ark.py x64.debug abckit_tests --gn-args="is_standard_system=true abckit_enable=true libabckit_with_sanitizers=true"
+./ark.py x64.debug abckit_tests --gn-args="is_standard_system=true abckit_enable=true abckit_with_sanitizers=true enable_cmc_gc=false"
 # Release mode
-./ark.py x64.release abckit_tests --gn-args="is_standard_system=true abckit_enable=true libabckit_with_sanitizers=true"
+./ark.py x64.release abckit_tests --gn-args="is_standard_system=true abckit_enable=true abckit_with_sanitizers=true enable_cmc_gc=false"
 ```
 
 # How to use AbcKit

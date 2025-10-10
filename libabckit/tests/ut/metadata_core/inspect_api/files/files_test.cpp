@@ -89,30 +89,4 @@ TEST_F(LibAbcKitInspectApiFilesTest, DynamicFileEnumerateModules)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// NOTE: fix after ets2bundle integrated into abckit unit tests
-// Test: test-kind=api, api=InspectApiImpl::fileEnumerateExternalModules, abc-kind=ArkTS1, category=positive,
-// extension=c
-TEST_F(LibAbcKitInspectApiFilesTest, DISABLED_DynamicFileEnumerateExternalModules)
-{
-    AbckitFile *file = nullptr;
-    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/modules/modules_dynamic.abc", &file);
-
-    std::unordered_map<std::string, AbckitCoreModule *> gotModulesMap;
-
-    g_implI->fileEnumerateExternalModules(file, &gotModulesMap, helpers::NameToModuleCollector);
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-
-    std::set<std::string> expectedNames = {"modules/module1", "modules/module2", "modules/module3"};
-    ASSERT_EQ(expectedNames.size(), gotModulesMap.size());
-    for (auto &expectedName : expectedNames) {
-        ASSERT_NE(gotModulesMap.find(expectedName), gotModulesMap.end());
-    }
-
-    constexpr auto OUTPUT_PATH = ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/modules/modules_dynamic_modified.abc";
-    g_impl->writeAbc(file, OUTPUT_PATH, strlen(OUTPUT_PATH));
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    g_impl->closeFile(file);
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-}
-
 }  // namespace libabckit::test

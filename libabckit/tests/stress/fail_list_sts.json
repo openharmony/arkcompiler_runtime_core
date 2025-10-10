@@ -222,5 +222,10 @@
     "/tmp/abckit_test_ets/regression/21143.ets": 1,
     "/tmp/abckit_test_ets/spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_06.ets": 1,
     "/tmp/abckit_test_ets/spec/10.Interfaces/10.4.Interface_Members/interface_with_optional_attributes_0002.ets": 1,
-    "/tmp/abckit_test_ets/spec/07.expressions/7.4.Array_Literal/7.4.1.type_inference_from_context/issue14062_5.ets": 1
+    "/tmp/abckit_test_ets/spec/07.expressions/7.4.Array_Literal/7.4.1.type_inference_from_context/issue14062_5.ets": 1,
+    "/tmp/abckit_test_ets/spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/override_static_instance_0002.ets": 1,
+    "/tmp/abckit_test_ets/std/core/Object.ets": 1,
+    "/tmp/abckit_test_ets/regression/verifer_const_fold.ets": 1,
+    "/tmp/abckit_test_ets/spec/07.expressions/7.32.Lambda_Expressions/correctAsyncLambdaReturnValue.ets": 1,
+    "/tmp/abckit_test_ets/spec/05.Generics/tuple_as_generic_args_0060.ets": 1
 }

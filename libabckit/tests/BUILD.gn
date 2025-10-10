@@ -547,6 +547,7 @@ test_ets_files = [
   "ut/extensions/arkts/modify_api/classes/classes_static_modify",
   "ut/extensions/arkts/modify_api/interfaces/interfaces_static_modify",
   "ut/extensions/arkts/modify_api/modules/modules_static_modify",
+  "ut/extensions/arkts/modify_api/modules/module_static_modify2",
   #"ut/extensions/arkts/inspect_api/helpers/helpers_static_test",
   "ut/extensions/arkts/modify_api/class/class_add_method_static",
   "ut/extensions/arkts/modify_api/class/class_add_method_static_extral",

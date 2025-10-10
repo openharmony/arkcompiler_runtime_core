@@ -722,7 +722,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBisLoopHead_1)
 }
 
 // Test: test-kind=api, api=GraphApiImpl::bbSplitBlockAfterInstruction, abc-kind=ArkTS2, category=positive, extension=c
-TEST_F(LibAbcKitBasicBlocksTest, DISABLED_BBsplitBlockAfterInstruction_1)
+TEST_F(LibAbcKitBasicBlocksTest, BBsplitBlockAfterInstruction_1)
 {
     AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);

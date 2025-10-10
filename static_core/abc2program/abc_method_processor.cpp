@@ -99,8 +99,7 @@ void AbcMethodProcessor::GetMetaData()
         LOG(DEBUG, ABC2PROGRAM) << "method (raw: \'" << methodNameRaw
                                 << "\') is not static. emplacing self-argument of type " << thisType.GetName();
 
-        function_.params.insert(function_.params.begin(),
-                                pandasm::Function::Parameter(thisType, keyData_.GetFileLanguage()));
+        function_.params.emplace(function_.params.begin(), thisType, keyData_.GetFileLanguage());
     }
     SetEntityAttribute(
         function_, [this]() { return methodDataAccessor_->IsStatic(); }, "static");
