@@ -1791,9 +1791,6 @@
 11.enumerations/03.enumeration_operations/enum_explicit_type_constant_to_string_22.ets
 11.enumerations/03.enumeration_operations/enum_explicit_type_constant_to_string_23.ets
 
-#29393
-13.compilation_units/02.import_directives/import_utf16.ets
-
 #29515
 13.compilation_units/02.import_directives/not_distinguishable_import_2.ets
 13.compilation_units/02.import_directives/not_distinguishable_import_3.ets
@@ -1804,11 +1801,6 @@
 #29656
 13.compilation_units/02.import_directives/04.import_type_directive/export_type_with_bind.ets
 13.compilation_units/02.import_directives/04.import_type_directive/import_type_with_bind.ets
-
-#29393
-13.compilation_units/07.export_directives/02.single_export_directive/re_export_test_3.ets
-13.compilation_units/07.export_directives/02.single_export_directive/re_export_test_4.ets
-13.compilation_units/07.export_directives/02.single_export_directive/re_export_test_5.ets
 
 #29735
 13.compilation_units/07.export_directives/03.export_type_directive/type_binding_neg.ets
