@@ -216,49 +216,6 @@ EtsRuntimeLinker *EtsGetNearestNonBootRuntimeLinker()
     return nullptr;
 }
 
-static EtsReflectMethod *CreateEtsReflectMethodUnderHandleScope(EtsCoroutine *coro, EtsMethod *method)
-{
-    ASSERT(coro != nullptr);
-    ASSERT(method != nullptr);
-
-    bool isStatic = method->IsStatic();
-    bool isConstructor = method->IsConstructor();
-
-    auto reflectMethod = EtsHandle<EtsReflectMethod>(coro, EtsReflectMethod::Create(coro, isStatic, isConstructor));
-    if (UNLIKELY(reflectMethod.GetPtr() == nullptr)) {
-        ASSERT(coro->HasPendingException());
-        return nullptr;
-    }
-    ASSERT(reflectMethod.GetPtr() != nullptr);
-
-    auto *ownerType = method->GetClass();
-    reflectMethod->SetOwnerType(ownerType);
-    reflectMethod->SetEtsMethod(reinterpret_cast<EtsLong>(method));
-
-    // Set specific attributes
-    uint32_t attr = 0;
-    attr |= isStatic ? static_cast<uint32_t>(EtsTypeAPIAttributes::STATIC) : 0U;
-    attr |= isConstructor ? static_cast<uint32_t>(EtsTypeAPIAttributes::CONSTRUCTOR) : 0U;
-    attr |= (method->IsAbstract()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::ABSTRACT) : 0U;
-    attr |= (method->IsGetter()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::GETTER) : 0U;
-    attr |= (method->IsSetter()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::SETTER) : 0U;
-    attr |= (method->IsFinal()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::FINAL) : 0U;
-    panda_file::File::EntityId asyncAnnId = EtsAnnotation::FindAsyncAnnotation(method->GetPandaMethod());
-    attr |= (method->IsNative() && !asyncAnnId.IsValid()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::NATIVE) : 0U;
-    attr |= (asyncAnnId.IsValid()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::ASYNC) : 0U;
-
-    reflectMethod->SetAttributes(attr);
-
-    int8_t accessMod = method->IsPublic()
-                           ? static_cast<int8_t>(EtsTypeAPIAccessModifier::PUBLIC)
-                           : (method->IsProtected() ? static_cast<int8_t>(EtsTypeAPIAccessModifier::PROTECTED)
-                                                    : static_cast<int8_t>(EtsTypeAPIAccessModifier::PRIVATE));
-
-    reflectMethod->SetAccessModifier(accessMod);
-
-    return reflectMethod.GetPtr();
-}
-
 template <typename Func>
 static void GetInterfaceMethodsRecursive(Class *currIntf, Func &&collectDirectMethods)
 {
@@ -340,7 +297,7 @@ static ObjectHeader *CreateEtsReflectMethodArray(EtsCoroutine *coro, const Panda
     ASSERT(arrayH.GetPtr() != nullptr);
 
     for (size_t idx = 0; idx < methods.size(); ++idx) {
-        auto *reflectMethod = CreateEtsReflectMethodUnderHandleScope(coro, methods[idx]);
+        auto *reflectMethod = EtsReflectMethod::CreateFromEtsMethod(coro, methods[idx]);
         arrayH->Set(idx, reflectMethod->AsObject());
     }
 
@@ -378,7 +335,7 @@ EtsReflectMethod *StdCoreClassGetInstanceMethodByNameInternal(EtsClass *cls, Ets
         return nullptr;
     }
 
-    return CreateEtsReflectMethodUnderHandleScope(coro, method);
+    return EtsReflectMethod::CreateFromEtsMethod(coro, method);
 }
 
 static EtsReflectField *CreateEtsReflectFieldUnderHandleScope(EtsCoroutine *coro, EtsField *field)
@@ -593,7 +550,7 @@ EtsReflectMethod *StdCoreClassGetDirectStaticMethodByNameInternal(EtsClass *cls,
         return nullptr;
     }
 
-    return CreateEtsReflectMethodUnderHandleScope(coro, method);
+    return EtsReflectMethod::CreateFromEtsMethod(coro, method);
 }
 
 static PandaVector<EtsField *> GetInstanceFields(EtsClass *cls, bool onlyPublic)
