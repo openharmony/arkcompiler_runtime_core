@@ -356,6 +356,26 @@ function testStartafterJoin() {
     eaw.quit();
 }
 
+function testRunAfterQuitSafely() {
+    let eaw = new EAWorker();
+    eaw.start();
+    eaw.run<void>(() => {
+        sleep(1);
+    });
+    eaw.quitSafely();
+    /**
+     * Since task below could be added to task queue in two scenarios:
+     * 1. during quitting process, specifically, after enqueueing closingTask 
+     * 2. after quitting finished, specifically, after executing closingTask
+     * So it might throw exception either
+     * 1. "Can not run task when worker is quitted" or
+     * 2. "Can not run task when worker is not started"
+     */
+    arktest.expectError(() => {
+        eaw.run<void>(() => {});
+    });
+}
+
 function main() {
     const suite = new arktest.ArkTestsuite('EAWorker Message Test Suite');
     suite.addTest('testNamedEAWorker', testNamedEAWorker);
@@ -373,7 +393,8 @@ function main() {
     suite.addTest('testQuitBeforeStart', testQuitBeforeStart);
     suite.addTest('testQuitSafelyBeforeStart', testQuitSafelyBeforeStart);
     suite.addTest('testStartafterJoin', testStartafterJoin);
+    suite.addTest('testRunAfterQuitSafely', testRunAfterQuitSafely);
     // flaky fail test case #28321
     // suite.addTest('testTaskPool', testTaskPool);
-    suite.run();
+    return suite.run();
 }
