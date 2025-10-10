@@ -28,3 +28,13 @@ cases:
           ).catch(
               (p: Error): string => {}
           );
+        
+    - decl: |-
+          //TODO update after 30498 issue
+      use: |-
+          // test Promise<never>
+          const neverPromise: Promise<never> = new Promise<never>(
+              (): void => {}
+          )
+          // Promise<never> must never be awaited - expect compile time error
+          const neverAwaited: string = await neverPromise
