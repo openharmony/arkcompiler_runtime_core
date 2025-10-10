@@ -35,6 +35,7 @@ constexpr std::string_view EVENT_READ_INPUT_AND_CACHE = "Read input and cache (a
 constexpr std::string_view EVENT_COMPILE_FILE = "Compile file (async)";
 constexpr std::string_view EVENT_COMPILE_ABC_FILE = "Compile abc file (async)";
 constexpr std::string_view EVENT_COMPILE_ABC_FILE_RECORD = "Compile abc file record (async)";
+constexpr std::string_view EVENT_REPLACE_ABC_FILE_RECORD = "Replace abc file records (async)";
 constexpr std::string_view EVENT_UPDATE_ABC_PKG_VERSION = "Update abc package version (async)";
 constexpr std::string_view EVENT_UPDATE_ABC_PROGRAM_STRING = "Update abc program string (async)";
 constexpr std::string_view EVENT_UPDATE_ABC_PROG_CACHE = "Update abc program cache (async)";
@@ -69,6 +70,7 @@ const std::unordered_map<std::string_view, EventLevel> eventMap = {
     {EVENT_EMIT_SINGLE_PROGRAM, EventLevel::SECOND},
     {EVENT_EMIT_MERGED_PROGRAM, EventLevel::SECOND},
     {EVENT_EMIT_CACHE_FILE, EventLevel::SECOND},
+    {EVENT_REPLACE_ABC_FILE_RECORD, EventLevel::THIRD},
 };
 
 const std::unordered_map<std::string_view, std::string_view> eventParent = {
@@ -77,6 +79,7 @@ const std::unordered_map<std::string_view, std::string_view> eventParent = {
     { EVENT_READ_INPUT_AND_CACHE, EVENT_COMPILE },
     { EVENT_COMPILE_ABC_FILE, EVENT_COMPILE },
     { EVENT_COMPILE_ABC_FILE_RECORD, EVENT_COMPILE_ABC_FILE },
+    { EVENT_REPLACE_ABC_FILE_RECORD, EVENT_COMPILE_ABC_FILE },
     { EVENT_UPDATE_ABC_PKG_VERSION, EVENT_COMPILE_ABC_FILE },
     { EVENT_UPDATE_ABC_PROGRAM_STRING, EVENT_COMPILE_ABC_FILE },
     { EVENT_UPDATE_ABC_PROG_CACHE, EVENT_COMPILE_ABC_FILE },
