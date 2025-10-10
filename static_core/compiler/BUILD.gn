@@ -301,21 +301,41 @@ config("arkassembler_isa_h_public_config") {
                                   "target_gen_dir") ]
 }
 
+_libarktscompiler_calculated_configs = libarkcompiler_configs
+
+_libarktscompiler_calculated_deps = [
+  ":arktscompiler_header_deps",
+  ":isa_gen_libarkcompiler_inst_builder_gen_cpp",
+  "$ark_root/libpandabase:libarktsbase",
+  "$ark_root/libpandafile:libarktsfile",
+]
+
+_libarktscompiler_calculated_external_deps = [ sdk_libc_secshared_dep ]
+
+_libarktscompiler_calculated_configs += [ ":arkassembler_isa_h_public_config" ]
+
+if (enable_codegen && !is_mac) {
+  _libarktscompiler_calculated_deps += [ "$ark_root/compiler/optimizer/code_generator:libarkencoder" ]
+}
+
+_libarktscompiler_calculated_deps += plugin_compiler_deps
+
+_libarktscompiler_calculated_include_dirs = [ "$ark_root/compiler/optimizer" ]
+if (!is_mac) {
+  _libarktscompiler_calculated_include_dirs += [ "$ark_root/compiler/optimizer/code_generator" ]
+}
+
+if (abckit_enable) {
+  _libarktscompiler_calculated_include_dirs += libabckit_includes
+  _libarktscompiler_calculated_deps += libabckit_deps
+}
+
 ohos_shared_library("libarktscompiler") {
   sources = libarkcompiler_sources
 
-  public_configs = libarkcompiler_configs
+  public_configs = _libarktscompiler_calculated_configs
 
-  deps = [
-    ":arktscompiler_header_deps",
-    ":isa_gen_libarkcompiler_inst_builder_gen_cpp",
-    "$ark_root/libpandabase:libarktsbase",
-    "$ark_root/libpandafile:libarktsfile",
-  ]
-
-  external_deps = [ sdk_libc_secshared_dep ]
-
-  public_configs += [ ":arkassembler_isa_h_public_config" ]
+  deps = _libarktscompiler_calculated_deps
 
   if (enable_irtoc) {
     deps += [
@@ -325,21 +345,30 @@ ohos_shared_library("libarktscompiler") {
       ":plugin_create_pipeline_inl",
     ]
   }
-  if (enable_codegen && !is_mac) {
-    deps += [ "$ark_root/compiler/optimizer/code_generator:libarkencoder" ]
-  }
 
-  deps += plugin_compiler_deps
+  external_deps = _libarktscompiler_calculated_external_deps
 
-  include_dirs = [ "$ark_root/compiler/optimizer" ]
-  if (!is_mac) {
-    include_dirs += [ "$ark_root/compiler/optimizer/code_generator" ]
-  }
+  include_dirs = _libarktscompiler_calculated_include_dirs
 
-  if (abckit_enable) {
-    include_dirs += libabckit_includes
-    deps += libabckit_deps
+  if (is_mingw || is_win) {
+    output_extension = "dll"
+  } else {
+    output_extension = "so"
   }
+  part_name = ark_part_name
+  subsystem_name = "$ark_subsystem_name"
+}
+
+ohos_shared_library("libarktscompiler_host") {
+  sources = libarkcompiler_sources
+
+  public_configs = _libarktscompiler_calculated_configs
+
+  deps = _libarktscompiler_calculated_deps
+
+  external_deps = _libarktscompiler_calculated_external_deps
+
+  include_dirs = _libarktscompiler_calculated_include_dirs
 
   if (is_mingw || is_win) {
     output_extension = "dll"
