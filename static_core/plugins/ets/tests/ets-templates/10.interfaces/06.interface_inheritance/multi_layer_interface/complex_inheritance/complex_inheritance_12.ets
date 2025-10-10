@@ -15,6 +15,9 @@
 
 /*---
 desc: Rewriting of constants in the test class.
+assertion: Compile-time error occurs in case, where a field simultaneously overrides 
+           a field from a superclass and implements a property from a superinterface.
+tags: [compile-only, negative]
 ---*/
 
 interface G {
@@ -29,8 +32,4 @@ class A implements G {
 class B extends A {
     static readonly CONSTANT = "Constant from B";
     readonly CONSTANT: string = "Constant from interface B";
-}
-
-function main(): void {
-    arktest.assertEQ(B.CONSTANT, "Constant from B");
 }

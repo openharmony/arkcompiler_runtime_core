@@ -14,24 +14,16 @@
  */
 
 /*---
-desc: Interface combined with multi-level inheritance of static constants.
-assertion: Compile-time error occurs in case, where a field simultaneously overrides 
-           a field from a superclass and implements a property from a superinterface.
+desc: Overriding getter.
+assertion:  A compile-time error occurs if a field overrides getter or setter in a superclass.
 tags: [compile-only, negative]
 ---*/
 
-interface Greetable {
-    readonly MESSAGE: string;
+class C {
+    get num(): number { return 42 }
+    set num(x: number) {}
 }
 
-class GrandParent implements Greetable {
-    static readonly MESSAGE = "Hello from GrandParent";
-    readonly MESSAGE = "Hello from GrandParent Instance";
-}
-
-class Parent extends GrandParent {}
-
-class Child extends Parent {
-    static readonly MESSAGE = "Hello from Child";
-    readonly MESSAGE = "Hello from Child Instance";
+class D extends C {
+    num: number = 2
 }
