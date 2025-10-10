@@ -194,3 +194,4 @@ cases:
       use: |-
           let v: BaseColor = BaseColor.Red;
           let ok = true;
+    

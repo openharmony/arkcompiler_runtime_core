@@ -66,7 +66,7 @@ cases:
           let v1: NestedTup = [true, [true, undefined, 'xyz'], 'abc']
 
     - defs: |-
-          type RU = number | string | RU
+          type RU = number | string | RU // TypeError: Circular type alias reference
       use: |-
           let v1: RU = 1.0
 
@@ -153,3 +153,64 @@ cases:
       use: |-
         let xx: Alias<String> = "Divine"
         let ok = xx instanceof String && xx instanceof Alias<String>;
+
+    - defs: |-
+        type TSStyleAlias<T> = { value: T } // SyntaxError: Using object literals to declare types in place is not supported
+      use: |-
+        let xx: TSStyleAlias<String>;
+
+    - defs: |-
+        class MC {}
+        type TSStyleAlias = MC | { } // SyntaxError: Using object literals to declare types in place is not supported
+      use: |-
+        let xx: TSStyleAlias
+
+    - defs: |-
+        class MC {}
+        type TSStyleAlias = MC | undefined | { } // SyntaxError: Using object literals to declare types in place is not supported
+      use: |-
+        let xx: TSStyleAlias
+
+    - defs: |-
+        type IsString<T> = T extends string ? true : false; // TypeError: Conditional type aliases are not supported.
+        type A = IsString<string>; // true
+        type B = IsString<number>; // false
+      use: |-
+        let xx: IsString<string>;
+
+    - defs: |-
+        interface Named { name: string; }        
+        interface Aged { age: number; }
+        type Person = Named & Aged // SyntaxError: Intersection types are not supported
+      use: |-
+        let xx: Person;
+
+    - defs: |-
+        type CustomReturnType<T> = T extends (...args: Any[]) => infer P ? P : Any // TypeError: Conditional type aliases are not supported
+      use: |-
+        let xx: CustomReturnType<Long>;
+
+    - defs: |-
+        type CArrayType<T> = T extends (infer Item)[] ? Item : T  // TypeError: Conditional type aliases are not supported
+      use: |-
+        let xx: CArrayType<Long>;
+
+    - defs: |-
+        type CCT = [string, string, string?]  // TypeError: Conditional type aliases are not supported
+      use: |-
+        let xx: CCT
+
+    - defs: |-
+        type Rec<T extends string | number> = T | Rec<T>  // TypeError: Circular type alias reference
+      use: |-
+        let xx: Rec<String>
+
+    - defs: |-
+        type NESA<X> = [X, ...X[]] // Syntax Error: Invalid Type
+      use: |-
+        let xx: NESA<String>
+
+    - defs: |-
+        type ELP = | string  // Syntax Error: Invalid Type
+      use: |-
+        let xx: ELP
