@@ -19,10 +19,13 @@ desc: An if statement can be conditionally executed, or one of the two two state
 tags: [compile-only, negative]
 ---*/
 
-function main(): int {
+function foo(): void {
+    {{c.use|indent}}
+}
+
+function main() {
     let i = 1;
     let j = 1;
-    {{c.use|indent}}
-    return 0;
+    arktest.assertEQ(foo(), 0)
 }
 {% endfor %}

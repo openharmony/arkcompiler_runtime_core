@@ -37,18 +37,18 @@ class B extends A {
   }
 }
 
-function main(): int {
-    let a: A = new A();
-    if (!a.meth("X").equals("XA")) return 1;
+function main() {
 
-    a = new B();
-    if (!a.meth("Y").equals("YAB")) return 2;
+	let a: A = new A();
+	arktest.assertEQ(a.meth("X"), "XA")
 
-    let i: I = new A();
-    if (!i.meth("Z").equals("ZA")) return 3;
+	a = new B();
+	arktest.assertEQ(a.meth("Y"), "YAB")
 
-    i = new B();
-    if (!i.meth("W").equals("WAB")) return 4;
+	let i: I = new A();
+	arktest.assertEQ(i.meth("Z"), "ZA")
 
-    return 0;
+	i = new B();
+	arktest.assertEQ(i.meth("W"), "WAB")
+    
 }

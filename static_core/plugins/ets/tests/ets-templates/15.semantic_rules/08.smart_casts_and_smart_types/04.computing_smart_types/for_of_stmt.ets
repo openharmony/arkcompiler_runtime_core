@@ -23,7 +23,7 @@ tags: [{{c.tags}}]
 
 {{c.decl}}
 
-function main(): int {
+function main(): void {
     {{c.code|indent}}
 }
 {%- endfor %}

@@ -23,8 +23,7 @@ files: [{{c.importFile}}.ets]
 
 {{c.importStmt}}
 
-function main(): int {
-    return 0
+function main(): void {
 }
 
 {% endfor %}

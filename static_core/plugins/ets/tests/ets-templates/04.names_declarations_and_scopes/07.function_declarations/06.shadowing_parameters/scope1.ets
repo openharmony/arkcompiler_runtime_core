@@ -38,10 +38,13 @@ function foo(): int {
     return q;
 }
 
-function main(): int {
+function main(){
     let q: int;  // function main scope, top-level q is shadowed
     q = q + 30;
 
-    if (getQ() == 1 && bar() == 11 && foo() == 20 && q == 30 && getQ() == 11) return 0;
-    return 1;
+    arktest.assertEQ(getQ(), 1);
+    arktest.assertEQ(bar(), 11);
+    arktest.assertEQ(foo(), 20);
+    arktest.assertEQ(q, 30);
+    arktest.assertEQ(getQ(), 11);
 }

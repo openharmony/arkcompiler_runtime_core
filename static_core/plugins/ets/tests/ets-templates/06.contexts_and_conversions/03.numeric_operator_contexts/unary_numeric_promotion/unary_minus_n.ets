@@ -22,24 +22,24 @@ params: {{c.type}} cannot be promoted
 tags: [compile-only, negative]
 ---*/
 
-function foo(a: Object): int {
-  return 0;
+function foo(a: Object): void {
+  
 }
 
-function foo(a: boolean): int {
-  return 0;
+function foo(a: boolean): void {
+  
 }
 
-function foo(a: int): int {
-  return 0;
+function foo(a: void): void {
+  
 }
 
-function foo(a: double): int {
-  return 0;
+function foo(a: double): void {
+  
 }
 
-function main(): int {
+function main() {
   let v: {{c.type}} = {{c.val}};
-  return foo(-v);
+  foo(-v);
 }
 {% endfor %}

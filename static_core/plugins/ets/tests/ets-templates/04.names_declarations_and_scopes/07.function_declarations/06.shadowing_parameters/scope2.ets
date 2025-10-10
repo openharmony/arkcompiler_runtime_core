@@ -40,9 +40,11 @@ function foo(q: int): int {
     return ++q;
 }
 
-function main(): int {
+function main() {
     q = 1;  // reset due to jit mode warmup
 
-    if (bar(10) == 11 && q == 1 && foo(5) == 6 && q == 5) return 0;
-    return 1;
+    arktest.assertEQ(bar(10), 11);
+    arktest.assertEQ(q, 1);
+    arktest.assertEQ(foo(5), 6);
+    arktest.assertEQ(q, 5);
 }

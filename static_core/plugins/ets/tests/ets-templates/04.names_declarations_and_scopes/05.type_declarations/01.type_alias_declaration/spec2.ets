@@ -29,18 +29,16 @@ type B = C<A> // ok, used as a type argument
 class B {}
 type D = string | Array<B> // ok
 
-function main(): int {
-    let a: A = []
-    if (a.length != 0) return 1
+function main(): void {
+	let a: A = []
+	arktest.assertEQ(a.length, 0)
 
-    let b: B = new B()
-    if (!(b instanceof C)) return 1
+	let b: B = new B()
+	arktest.assertTrue(b instanceof C)
 
-    let d: D = ''
-    if (!(d instanceof String)) return 1
+	let d: D = ''
+	arktest.assertTrue(d instanceof String)
 
-    d = new Array<B>()
-    if (!(d instanceof Array)) return 1
-
-    return 0
+	d = new Array<B>()
+	arktest.assertTrue(d instanceof Array)
 }

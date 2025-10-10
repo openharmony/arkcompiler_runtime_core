@@ -25,8 +25,7 @@ tags: [{{c.tags}}]
 
 {{c.decl}}
 
-function main(): int {
+function main(): void {
     {{c.use|indent}}
-    return 0
 }
 {%- endfor %}

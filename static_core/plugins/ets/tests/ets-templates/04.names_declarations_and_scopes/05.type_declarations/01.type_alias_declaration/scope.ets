@@ -23,8 +23,8 @@ tags: [{{c.tags}}]
 
 {{c.decl}}
 
-function main(): int {
+function main(): void {
     {{c.use|indent}}
-    return ok ? 0 : 1
+    arktest.assertFalse(!ok)
 }
 {%- endfor %}

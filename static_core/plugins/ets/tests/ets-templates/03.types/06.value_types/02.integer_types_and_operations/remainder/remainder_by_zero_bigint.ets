@@ -17,14 +17,14 @@ limitations under the License.
 desc: check remainder by zero for bigint operand
 ---*/
 
-function main(): int {
-    try {
-        const a: bigint = 1n
-	    const b: bigint = 0n
-	    const result: bigint = a % b
-    } catch (e) {
-        arktest.assertEQ((e as Error).message, 'BigInt: division by zero')
-        return 0
-    }
-    return 1
+function foo(): void {
+    const a: bigint = 1n
+    const b: bigint = 0n
+    const result: bigint = a % b
+}
+
+let checkException = (e: Error): boolean => { return e.message.contains('BigInt: division by zero', 0) }
+
+function main() {
+    arktest.expectThrow(() => foo(), checkException)
 }

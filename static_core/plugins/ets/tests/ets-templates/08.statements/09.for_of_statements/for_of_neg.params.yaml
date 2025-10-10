@@ -19,16 +19,16 @@ cases:
               v = 0   // shouldn't be allowed
               res += v
           }
-          if (res == "10203040") return 0;
+          arktest.assertEQ(res, "10203040")
 
     - use: |-
           const v: int = 0;
           for (v of [1, 2, 3, 4]) res += v  // shouldn't be allowed  TypeError: Cannot assign a value to a constant variable v
-          if (res == "1234") return 0;
+          arktest.assertEQ(res, "1234")
 
     - use: |-
           for (let v of []) res += v  // shouldn't be allowed
-          if (res == "") return 0;
+          arktest.assertEQ(res, "")
 
     - use: |-
           for (const ch of "ABCD") {
@@ -36,23 +36,23 @@ cases:
               ch = c' '   // shouldn't be allowed
               res += ch
           }
-          if (res == "A B C D ") return 0;
+          arktest.assertEQ(res, "A B C D ")
 
     - use: |-
           const ch: char = c' ';
           for (ch of "ABCD") res += ch  // shouldn't be allowed
-          if (res == "ABCD") return 0;
+          arktest.assertEQ(res, "ABCD")
 
     - use: |-
           // wrong expr type
           for (const ch of 123) res += ch
-          if (res == "123") return 0;
+          arktest.assertEQ(res, "123")
 
     - use: |-
           let obj: Object = new Object()
           // wrong expr type
           for (const v of obj) res += v
-          if (res == "") return 0;
+          arktest.assertEQ(res, "")
 
     - use: |-
           let arr: int[] = new int[0]

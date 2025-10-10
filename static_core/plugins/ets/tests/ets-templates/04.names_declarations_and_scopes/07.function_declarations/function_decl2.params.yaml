@@ -28,7 +28,9 @@ function_decls:
       }
     call: |-
       res = 0
-      if (res == 0 && foo(bar) == 100 && res == 200) return 0;
+      arktest.assertEQ(res, 0)
+      arktest.assertEQ(foo(bar), 100)
+      arktest.assertEQ(res, 200)
 
   # several different args function type
   - decl: |-
@@ -45,8 +47,10 @@ function_decls:
           return 1;
       }
     call: |-
-      res = ""
-      if (res == "" && foo(bar, 1, 1.5, false) == 0 && res == "11.5false") return 0;
+        res = ""
+        arktest.assertEQ(res, "")
+        arktest.assertEQ(foo(bar, 1, 1.5, false), 0)
+        arktest.assertEQ(res, "11.5false")
 
   # call variables of function types
   - decl: |-
@@ -69,4 +73,4 @@ function_decls:
       let vbar: BarType = bar
       let vfoo: FooType = foo
       let vbaz: BazType = baz
-      if (vbaz(vfoo, vbar, 42) == 84) return 0;
+      arktest.assertEQ(vbaz(vfoo, vbar, 42), 84)

@@ -20,7 +20,8 @@ tags: [compile-only, negative]
 
 native function foo(a: Object): int throws; // CTE on throws
 
-function main(): int {
+function main() {
+
     let v: int = foo(new Object());
-    return 0;
+    
 }

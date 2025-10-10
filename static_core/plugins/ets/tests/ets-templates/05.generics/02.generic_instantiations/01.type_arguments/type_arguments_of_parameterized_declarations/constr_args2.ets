@@ -39,9 +39,10 @@ enum Color { Red, Green, Blue }
 
 {{c.decl}}
 
-function main(): int {
+function main() {
+
     {{c.use|indent}}
     arktest.assertTrue(v instanceof A)
-    return 0;
+    
 }
 {% endfor %}

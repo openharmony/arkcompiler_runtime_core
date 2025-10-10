@@ -36,8 +36,9 @@ class A<T{{c.bound}}> implements J<T> {
 enum Color { Red, Green, Blue }
 enum Size { S, M, L, XL, XXL }
 {{c.decl}}
-function main(): int {
+function main() {
+
     {{c.use|indent}}
-    return 0;
+    
 }
 {% endfor %}

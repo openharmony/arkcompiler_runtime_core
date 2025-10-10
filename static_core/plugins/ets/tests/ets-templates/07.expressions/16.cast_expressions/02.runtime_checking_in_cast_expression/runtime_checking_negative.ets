@@ -27,12 +27,12 @@ interface K {}
 class A implements I {}
 class B extends A implements J {}
 
-function main(): int {
-    try {
-        let a = {{c.val}} as {{c.type}}
-    } catch (e) {
-        return e instanceof ClassCastError ? 0 : 1
-    }
-    return 1
+function foo(): void {
+    let a = {{c.val}} as {{c.type}}
+}
+
+function main(): void {
+    let checkException = (e: Error): boolean => { return e instanceof ClassCastError }
+	arktest.expectThrow(() => foo(), checkException)
 }
 {% endfor %}

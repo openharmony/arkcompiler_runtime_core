@@ -19,13 +19,11 @@ desc: Call context, lambda, boxing conversion, implicit
 params: NaN conversion from {{c.from_type}} to {{c.to_type}}
 ---*/
 
-function main(): int {
+function main() {
 {%- for t in c['values'] %}
     let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
-    if (! {{c.to_type}}.isNaN(((p: {{c.to_type}}): {{c.to_type}} => { return p })(s{{loop.index}}).unboxed())) {
-        return 1
-    }
+    arktest.assertTrue({{c.to_type}}.isNaN(((p: {{c.to_type}}): {{c.to_type}} 
+                                            => { return p })(s{{loop.index}}).unboxed()))
 {%- endfor %}
-    return 0
 }
 {%- endfor %}

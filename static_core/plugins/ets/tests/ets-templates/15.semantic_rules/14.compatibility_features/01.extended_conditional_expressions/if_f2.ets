@@ -21,11 +21,12 @@ desc: >-
 
 {{c.decl}}
 
-function main(): int {
+function main(): void {
     let v: {{c.type}} = {{c.val}}
+    let res: int = 0
     if (v) {  // falsy
-        return 1
+        res = 1
     }
-    return 0
+    arktest.assertEQ(res, 0)
 }
 {%- endfor %}

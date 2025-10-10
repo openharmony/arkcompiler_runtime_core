@@ -20,17 +20,17 @@ desc: >-
 ---*/
 
 let arr: number[] = [{{c.list}}];
+let index: int = {{c.index}};
+let a: number;
 
-function main(): int {
-    let index: int = {{c.index}};
-    try {
-        let a: number = arr[index];
-    } catch (error) {
-        error = error as Error;
-        arktest.assertEQ('RangeError', error.name);
-        arktest.assertEQ('Out of bounds', error.message);
-        return 0;
-    }
-    throw new Error('RTE RangeError expected but no error was thrown');
+function foo(): void {
+	let a: number = arr[index];
+}
+
+let checkException = (e: Error): boolean => { return e instanceof RangeError && e.message.contains("Out of bounds", 0) }
+
+function main() {
+    arktest.expectThrow(() => foo(), checkException)
+	arktest.assertEQ(a, 0);
 }
 {% endfor %}

@@ -23,14 +23,11 @@ class A {
     meth(p: {{c.to_type}}): {{c.to_type}} { return p }
 }
 
-function main(): int {
-    let a: A = new A()
+function main(): void {
+	let a: A = new A()
 {%- for t in c['values'] %}
-    let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
-    if (! {{c.to_type|capitalize}}.isNaN(a.meth(s{{loop.index}}))) {
-        return 1
-    }
+	let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
+	arktest.assertTrue({{c.to_type|capitalize}}.isNaN(a.meth(s{{loop.index}})))
 {%- endfor %}
-    return 0
 }
 {%- endfor %}

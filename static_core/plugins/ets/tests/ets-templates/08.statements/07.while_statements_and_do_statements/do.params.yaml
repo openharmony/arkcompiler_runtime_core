@@ -15,24 +15,24 @@
 cases:
     - use: |-
           do i++; while (i < 10)
-          if (i ==  10) return 0;
+          arktest.assertEQ(i, 10)
 
     - use: |-
           let res = ""
           do res += "L"; while ((i += 2) < 7)
-          if (res == "LLL") return 0;
+          arktest.assertEQ(res, "LLL")
 
     - use: |-
           do {} while (++i < 10)
-          if (i == 10) return 0;
+          arktest.assertEQ(i, 10)
 
     - use: |-
           do do do i += 1; while (i < 3) while (i < 5) while (i < 7)
-          if (i == 7) return 0;
+          arktest.assertEQ(i, 7)
 
     - use: |-
           do { while (i < 7) i += 1 } while (i < 5)
-          if (i == 7) return 0;
+          arktest.assertEQ(i, 7)
 
     - use: |-
           do {
@@ -40,12 +40,13 @@ cases:
             j = i * 2;
             i = j;
           } while (j < 3)
-          if (i == 1 && j == 4) return 0;
+          arktest.assertEQ(i, 1)
+          arktest.assertEQ(j, 4)
 
     - use: |-
           do {i--} while (i+j)
-          if (i == -1) return 0;
+          arktest.assertEQ(i, -1)
 
     - use: |-
           do {i--} while (i & j)
-          if (i == 0) return 0;
+          arktest.assertEQ(i, 0)

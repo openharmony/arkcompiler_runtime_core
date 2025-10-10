@@ -20,7 +20,8 @@ tags: [compile-only]
 
 native function foo(a: Object): int; // native with parameters
 
-function main(): int {
+function main() {
+
     let v: int = foo(new Object());
-    return 0;
+    
 }

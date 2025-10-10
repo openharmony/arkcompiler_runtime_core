@@ -23,8 +23,9 @@ tags: [compile-only, negative]
 ---*/
 {{t.defs}}
 
-function main(): int {
+function main() {
+
   {{t.use}}
-  return 0;
+  
 }
 {% endfor %}

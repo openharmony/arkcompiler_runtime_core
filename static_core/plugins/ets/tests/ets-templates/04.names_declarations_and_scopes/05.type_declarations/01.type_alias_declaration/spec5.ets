@@ -21,6 +21,5 @@ desc: >-
 
 type NodeValue<T> = T | Array<T> | Array<NodeValue<T>>
 
-function main(): int {
-    return 0
+function main(): void {
 }

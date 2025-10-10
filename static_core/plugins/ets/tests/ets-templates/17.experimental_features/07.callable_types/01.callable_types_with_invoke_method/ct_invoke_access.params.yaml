@@ -19,7 +19,7 @@ cases:
               public static $_invoke() { return C('abc') }
           }
       use: |-
-          if (C() != 'abc') return 1
+          arktest.assertEQ(C(), 'abc')
 
     - decl: |-
           // private invoke from same-class method
@@ -30,7 +30,7 @@ cases:
               }
           }
       use: |-
-          if (new C().meth() != 'abcabc') return 1
+          arktest.assertEQ(new C().meth(), 'abcabc')
 
     - decl: |-
           // protected invoke from same-class another invoke
@@ -39,7 +39,7 @@ cases:
               public static $_invoke() { return C('abc') }
           }
       use: |-
-          if (C() != 'abc') return 1
+          arktest.assertEQ(C(), 'abc')
 
     - decl: |-
           // protected invoke from same-class method
@@ -50,7 +50,7 @@ cases:
               }
           }
       use: |-
-          if (new C().meth() != 'abcabc') return 1
+          arktest.assertEQ(new C().meth(), 'abcabc')
 
     - decl: |-
           // protected invoke from subclass invoke
@@ -61,7 +61,7 @@ cases:
               public static $_invoke() { return B('abc') }
           }
       use: |-
-          if (C() != 'abc') return 1
+          arktest.assertEQ(C(), 'abc')
 
     - decl: |-
           // protected invoke from subclass method
@@ -74,7 +74,7 @@ cases:
               }
           }
       use: |-
-          if (new C().meth() != 'abcabc') return 1
+          arktest.assertEQ(new C().meth(), 'abcabc')
 
     - tags: 'compile-only, negative'
       decl: |-
@@ -86,7 +86,7 @@ cases:
               public static $_invoke() { return B('abc') }
           }
       use: |-
-          if (C() != 'abc') return 1
+          arktest.assertEQ(C(), 'abc')
 
     - tags: 'compile-only, negative'
       decl: |-
@@ -100,7 +100,7 @@ cases:
               }
           }
       use: |-
-          if (new C().meth() != 'abcabc') return 1
+          arktest.assertEQ(new C().meth(), 'abcabc')
 
     - tags: 'compile-only, negative'
       decl: |-
@@ -112,7 +112,7 @@ cases:
               public static $_invoke() { return B('abc') }
           }
       use: |-
-          if (C() != 'abc') return 1
+          arktest.assertEQ(C(), 'abc')
 
     - tags: 'compile-only, negative'
       decl: |-
@@ -126,4 +126,4 @@ cases:
               }
           }
       use: |-
-          if (new C().meth() != 'abcabc') return 1
+          arktest.assertEQ(new C().meth(), 'abcabc')

@@ -17,16 +17,22 @@ limitations under the License.
 desc: check division by zero for byte operand
 ---*/
 
-function main(): int {
-    try {
-        const a: byte = (() : byte => 1)()
-        const b: byte = (() : byte => 0)()
-        arktest.assertTrue(a instanceof Byte)
-        arktest.assertTrue(b instanceof Byte)
-        a / b
-    } catch (e) {
-        return e instanceof ArithmeticError ? 0 : 1
-    }
-    arktest.assertTrue(false)
-    return -1
+function divide(a: int, b: int): int {
+    return a / b
 }
+
+function main(): void {
+    const a: int = (() : int => 1)()
+    const b: int = (() : int => 0)()
+    arktest.assertTrue(a instanceof Int)
+    arktest.assertTrue(b instanceof Int)
+
+    let checkException = (e: Error): boolean 
+        => { return e instanceof ArithmeticError }
+    
+    
+    arktest.expectThrow(() => {
+        divide(a, b)
+    }, checkException)
+}
+

@@ -21,8 +21,9 @@ desc: >-
 
 {{c.decl}}
 
-function main(): int {
+function main(): void {
     let v: {{c.type}} = {{c.val}}  // truthy
-    return v ? 0 : 1
+    let res = v ? 0 : 1
+    arktest.assertEQ(res, 0)
 }
 {%- endfor %}

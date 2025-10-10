@@ -26,7 +26,8 @@ import {Shapes} from "./named_reference_export4.ets"
 
 class Shapes {}
 
-function main(): int {
+function main() {
+
   let s = new Shapes;
-  return 0;
+  
 }

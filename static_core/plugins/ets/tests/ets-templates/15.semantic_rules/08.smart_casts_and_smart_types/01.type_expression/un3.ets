@@ -31,9 +31,9 @@ class X {
 
 {{c.decl}}
 
-function main(): int {
+function main(): void {
     let res: boolean = false
     {{c.code|indent}}
-    return (res ? 0 : 1)
+    arktest.assertTrue(res)
 }
 {%- endfor %}

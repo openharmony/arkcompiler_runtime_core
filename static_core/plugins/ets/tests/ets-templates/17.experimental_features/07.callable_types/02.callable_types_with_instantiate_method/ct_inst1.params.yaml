@@ -21,7 +21,7 @@ cases:
           }
       use: |-
           let x = C()
-          if (!(x instanceof C)) return 1
+          arktest.assertTrue(x instanceof C)
 
     - decl: |-
           // implicit factory call with args
@@ -33,7 +33,7 @@ cases:
       use: |-
           let ii: int[] = [1, 2, 3]
           let x = C(ii)
-          if (!(x instanceof C)) return 1
+          arktest.assertTrue(x instanceof C)
 
     - decl: |-
           // explicit factory call
@@ -45,7 +45,7 @@ cases:
           class D extends C {}
       use: |-
           let x = C.$_instantiate() { return new D() }
-          if (!(x instanceof C)) return 1
+          arktest.assertTrue(x instanceof C)
 
     - decl: |-
           // explicit factory call with args
@@ -59,7 +59,7 @@ cases:
           }
       use: |-
           let x = C.$_instantiate(foo, foo)
-          if (!(x instanceof C)) return 1
+          arktest.assertTrue(x instanceof C)
 
     - tags: 'compile-only, negative'
       decl: |-
@@ -127,7 +127,7 @@ cases:
           }
       use: |-
           let x = C.$_instantiate(new C())
-          if (!(x instanceof C)) return 1
+          arktest.assertTrue(x instanceof C)
 
     - tags: 'compile-only, negative'
       decl: |-
@@ -153,7 +153,7 @@ cases:
           let x = C.$_instantiate() {
               return new C('')
           }
-          if (!(x instanceof C)) return 1
+          arktest.assertTrue(x instanceof C)
 
     - decl: |-
           // parameterized class
@@ -172,6 +172,6 @@ cases:
           }
       use: |-
           let x = C.$_instantiate(() => { return new C<String>() }, '')
-          if (x.fld != '') return 1
+          arktest.assertEQ(x.fld, '')
           let y = C.$_instantiate(() => { return new C<Number>() }, 42.0)
-          if (y.fld != 42.0) return 1
+          arktest.assertEQ(y.fld, 42.0)

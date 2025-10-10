@@ -19,7 +19,7 @@ desc: >-
   to the next iteration with proper check of the loop exit condition depending on the loop kind.
 ---*/
 
-function main(): int {
+function main(): void {
     let sum: int, y = 0
     do {
         let x = 0
@@ -30,6 +30,5 @@ function main(): int {
             sum += x
         } while (x++ < 100)
     } while (y++ < 3)
-    if (sum == 10000) return 0;
-    return 1;
+	arktest.assertEQ(sum, 10000)
 }

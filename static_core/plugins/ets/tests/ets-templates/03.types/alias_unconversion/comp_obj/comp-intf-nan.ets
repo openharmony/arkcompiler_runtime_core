@@ -23,13 +23,10 @@ interface J{{loop.index}} { fld: {{c.to_type}} }
 let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}};
 {%- endfor %}
 
-function main(): int {
+function main(): void {
 {%- for t in c['values'] %}
-    let d{{loop.index}}: J{{loop.index}} = { fld: s{{loop.index}} }
-    if (! {{c.to_type|capitalize}}.isNaN(d{{loop.index}}.fld)) {
-        return 1
-    }
+	let d{{loop.index}}: J{{loop.index}} = { fld: s{{loop.index}} }
+	arktest.assertTrue({{c.to_type|capitalize}}.isNaN(d{{loop.index}}.fld))
 {%- endfor %}
-    return 0
 }
 {%- endfor %}

@@ -42,9 +42,10 @@ class A <V> {
 
 {{c.decl}}
 
-function main(): int {
+function main() {
+
     let a: A<X> = new A<X>()
     {{c.use|indent}}
-    return 0;
+    
 }
 {% endfor %}

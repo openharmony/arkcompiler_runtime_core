@@ -23,12 +23,11 @@ tags: [compile-only, negative]
 ---*/
 {{c.decl}}
 
-function foo(p: {{c.type1}}, q: {{c.type2}}): boolean {
-    return p {{c.op}} q
+function foo(p: {{c.type1}}, q: {{c.type2}}): void {
+    p {{c.op}} q
 }
 
-function main(): int {
+function main(): void {
     {{c.code|indent}}
-    return 0
 }
 {%- endfor %}

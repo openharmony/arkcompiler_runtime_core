@@ -27,6 +27,6 @@ function foo(q: int): int {
     return q;
 }
 
-function main(): int {
-    return foo(1);
+function main(): void {
+    return arktest.assertEQ(foo(1), 0);
 }

@@ -20,7 +20,7 @@ desc: >-
   function or method otherwise compile - time error is raised by the compiler.
 ---*/
 
-function main(): int {
+function main(): void {
     let sum: int
     loop1: for (let y: int = 0; y < 100; y++) {
         for (let x: int = 0; x < 100; x++) {
@@ -30,6 +30,5 @@ function main(): int {
             continue loop1; // the outer loop only with label
         }
     }
-    if (sum == 495000) return 0;
-    return 1;
+    arktest.assertEQ(sum, 495000)
 }

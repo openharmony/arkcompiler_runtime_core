@@ -34,12 +34,12 @@ cases:
               }
           }
       use: |-
-          if (new C().fld != 'C') return 1
-          if (new C(42.0).fld != 'N') return 1
-          if (C().fld != 'CI') return 1
-          if (C(42.0).fld != 'NJ') return 1
-          if (C.$_invoke().fld != 'CI') return 1
-          if (C.$_invoke(42.0).fld != 'NJ') return 1
+          arktest.assertEQ(new C().fld, 'C')
+          arktest.assertEQ(new C(42.0).fld, 'N')
+          arktest.assertEQ(C().fld, 'CI')
+          arktest.assertEQ(C(42.0).fld, 'NJ')
+          arktest.assertEQ(C.$_invoke().fld, 'CI')
+          arktest.assertEQ(C.$_invoke(42.0).fld, 'NJ')
 
     - decl: |-
           // Only constructor is called in new
@@ -63,9 +63,9 @@ cases:
               }
           }
       use: |-
-          if (new C().fld != 'C') return 1
-          if (new C(42.0).fld != 'N') return 1
-          if (C().fld != 'CI') return 1
-          if (C(42.0).fld != 'CJ') return 1
-          if (C.$_instantiate(() => new C()).fld != 'CI') return 1
-          if (C.$_instantiate(() => new C(), 42.0).fld != 'CJ') return 1
+          arktest.assertEQ(new C().fld, 'C')
+          arktest.assertEQ(new C(42.0).fld, 'N')
+          arktest.assertEQ(C().fld, 'CI')
+          arktest.assertEQ(C(42.0).fld, 'CJ')
+          arktest.assertEQ(C.$_instantiate(() => new C()).fld, 'CI')
+          arktest.assertEQ(C.$_instantiate(() => new C(), 42.0).fld, 'CJ')

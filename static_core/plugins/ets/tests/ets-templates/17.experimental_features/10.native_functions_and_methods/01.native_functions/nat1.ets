@@ -22,6 +22,6 @@ native function foo(a: int): int {
     return a;
 }
 
-function main(): int {
-    return foo(0);
+function main(): void {
+    foo(0);
 }

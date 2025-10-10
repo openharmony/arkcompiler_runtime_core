@@ -19,16 +19,14 @@ desc: If the value of an array index expression is negative,
   then an array indexing expression throws RangeError.
 ---*/
 
-function main(): int {
+function main() {
+
   let v: int[][] = [[1, 2], [3, 4], [5, 6]];
   let a = 1;
   let b = 1;
 
-  try {
-    let s: String = "X" + (a = 2) + ++v[1][1] + (b = 2);
-    if (a != 2 || b != 2) return 1;
-    return 0;
-  } catch (e) {
-    return 1;
-  }
+  let s: String = "X" + (a = 2) + ++v[1][1] + (b = 2);
+  arktest.assertEQ(a, 2);
+  arktest.assertEQ(b, 2);
+    
 }

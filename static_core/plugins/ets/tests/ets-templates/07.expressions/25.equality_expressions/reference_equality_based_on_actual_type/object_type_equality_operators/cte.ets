@@ -22,8 +22,7 @@ tags: [{{c.tags}}]
 ---*/
 {{c.decl}}
 
-function main(): int {
+function main(): void {
     {{c.code|indent}}
-    return 0
 }
 {%- endfor %}

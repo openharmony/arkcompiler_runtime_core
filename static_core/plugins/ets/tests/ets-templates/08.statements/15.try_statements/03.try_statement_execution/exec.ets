@@ -22,7 +22,7 @@ desc: >-
 
 {{t.defs}}
 
-function main(): int {
+function main(): void {
     {{t.use|indent}}
 }
 {% endfor %}

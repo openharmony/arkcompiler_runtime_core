@@ -23,7 +23,8 @@ tags: [compile-only, negative]
 
 {{c.decl}}
 
-function main(): int {
-    return 0;
+function main() {
+
+    
 }
 {% endfor %}

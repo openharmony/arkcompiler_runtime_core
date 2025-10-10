@@ -24,7 +24,7 @@ cases:
               }
           }
       use: |-
-          if (C(42.0).fld != '42') return 1
+          arktest.assertEQ(C(42.0).fld, '42')
 
     - decl: |-
           // private instantiate from same-class method
@@ -40,7 +40,7 @@ cases:
               }
           }
       use: |-
-          if (new C().meth(42.0).fld != '42') return 1
+          arktest.assertEQ(new C().meth(42.0).fld, '42')
 
     - decl: |-
           // protected instantiate from same-class another instantiate
@@ -54,7 +54,7 @@ cases:
               }
           }
       use: |-
-          if (C(42.0).fld != '42') return 1
+          arktest.assertEQ(C(42.0).fld, '42')
 
     - decl: |-
           // protected instantiate from same-class method
@@ -70,7 +70,7 @@ cases:
               }
           }
       use: |-
-          if (new C().meth(42.0).fld != '42') return 1
+          arktest.assertEQ(new C().meth(42.0).fld, '42')
 
     - decl: |-
           // protected instantiate from subclass instantiate
@@ -86,7 +86,7 @@ cases:
               public static $_instantiate(f: ()=>C, p: number): B { return C('' + p) }
           }
       use: |-
-          if (C(42.0).fld != '42') return 1
+          arktest.assertEQ(C(42.0).fld, '42')
 
     - decl: |-
           // protected instantiate from subclass method
@@ -104,7 +104,7 @@ cases:
               }
           }
       use: |-
-          if (new C().meth(42.0).fld != '42') return 1
+          arktest.assertEQ(new C().meth(42.0).fld, '42')
 
     - tags: 'compile-only, negative'
       decl: |-
@@ -121,7 +121,7 @@ cases:
               public static $_instantiate(f: ()=>C, p: number): B { return B('' + p) }
           }
       use: |-
-          if (C(42.0).fld != '42') return 1
+          arktest.assertEQ(C(42.0).fld, '42')
 
     - tags: 'compile-only, negative'
       decl: |-
@@ -140,7 +140,7 @@ cases:
               }
           }
       use: |-
-          if (new C().meth(42.0).fld != '42') return 1
+          arktest.assertEQ(new C().meth(42.0).fld, '42')
 
     - tags: 'compile-only, negative'
       decl: |-
@@ -157,7 +157,7 @@ cases:
               public static $_instantiate(f: ()=>C, p: number): B { return B('' + p) }
           }
       use: |-
-          if (C(42.0).fld != '42') return 1
+          arktest.assertEQ(C(42.0).fld, '42')
 
     - tags: 'compile-only, negative'
       decl: |-
@@ -176,4 +176,4 @@ cases:
               }
           }
       use: |-
-          if (new C().meth(42.0).fld != '42') return 1
+          arktest.assertEQ(new C().meth(42.0).fld, '42')

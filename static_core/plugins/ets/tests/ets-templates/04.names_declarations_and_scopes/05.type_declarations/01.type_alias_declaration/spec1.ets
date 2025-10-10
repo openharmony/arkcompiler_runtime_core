@@ -36,7 +36,7 @@ function max(x: Vector): number {
     return m
 }
 
-function main(): int {
+function main(): void {
     let x: Vector = [1, 2, 3]
-    return max(x) == 3 ? 0 : 1
+    arktest.assertEQ(max(x), 3)
 }

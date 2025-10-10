@@ -18,17 +18,15 @@ desc: NullPointerError is thrown by an array access expression
   if the array reference expression has the null value.
 ---*/
 
-function main(): int {
+function main() {
+
   let a = 1;
   let b = 1;
   let byt: byte;
   let foo = (i: byte): byte[]|null => { return i <= 0 ? null : [i] };
 
-  try {
-    let v: String = "X" + (a = 2) + (byt = foo(42 as byte)![0]) + (b = 2);
-    if (a != 2 || b != 2) return 1;
-    return 0;
-  } catch (e) {
-    return 1;
-  }
+  let v: String = "X" + (a = 2) + (byt = foo(42 as byte)![0]) + (b = 2);
+  arktest.assertEQ(a, 2);
+  arktest.assertEQ(b, 2);
+    
 }

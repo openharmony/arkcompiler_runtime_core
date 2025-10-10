@@ -25,9 +25,10 @@ import * as PkgB from './pkg_b/pkg_{{loop.index0}}.ets'
 
 {{c.decl}}
 
-function main(): int {
+function main(): void {
     let v1 = PkgB.foo{{loop.index0}}({{c.arg1}})
     let v2 = PkgA.foo{{loop.index0}}({{c.arg2}})
-    return v1 == 1 && v2 == 2 ? 0 : 1
+    arktest.assertEQ(v1, 1)
+    arktest.assertEQ(v2, 2)
 }
 {%- endfor %}

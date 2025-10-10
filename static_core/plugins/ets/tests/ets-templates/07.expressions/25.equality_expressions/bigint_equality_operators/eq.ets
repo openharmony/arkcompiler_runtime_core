@@ -34,14 +34,11 @@ let ba: bigint[] = [
     {%- endfor %}
 ]
 
-function main(): int {
-    for (let i: int = 0; i < ba.length - 1; i++) {
-        for (let j: int = i + 1; j < ba.length; j++) {
-            if (!eq(ba[i], ba[j])) {
-                return 1
-            }
-        }
-    }
-    return 0
+function main(): void {
+	for (let i: int = 0; i < ba.length - 1; i++) {
+		for (let j: int = i + 1; j < ba.length; j++) {
+			arktest.assertTrue(eq(ba[i], ba[j]))
+		}
+	}
 }
 {%- endfor %}

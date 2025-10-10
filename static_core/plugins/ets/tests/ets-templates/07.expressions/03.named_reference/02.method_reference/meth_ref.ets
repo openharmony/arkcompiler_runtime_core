@@ -30,20 +30,19 @@ class C {
     }
 }
 
-function main(): int {
+function main() {
 
-    // Method reference to a static method
-    const statRef = C.foo
-    if (statRef() !== 13) return 1;
+	// Method reference to a static method
+	const statRef = C.foo
+	arktest.assertEQ(statRef(), 13)
 
-    // Method reference to an instance method
-    let c1 = new C;
-    let c2 = new C;
-    const instRef1 = c1.bar
-    const instRef2 = c2.bar
-    c2.barVal = 100500;
-    if (instRef1() !== 42) return 2;
-    if (instRef2() !== 100500) return 3;
-
-    return 0;
+	// Method reference to an instance method
+	let c1 = new C;
+	let c2 = new C;
+	const instRef1 = c1.bar
+	const instRef2 = c2.bar
+	c2.barVal = 100500;
+	arktest.assertEQ(instRef1(), 42)
+	arktest.assertEQ(instRef2(), 100500)
+    
 }

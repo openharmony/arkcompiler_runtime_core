@@ -39,9 +39,10 @@ class A {
 
 {{c.decl}}
 
-function main(): int {
+function main() {
+
     let a = new A()
     {{c.use|indent}}
-    return 0;
+    
 }
 {% endfor %}

@@ -27,23 +27,19 @@ function getIdx(i: int): int {
     return i
 }
 
-function main(): int {
+function main(): void {
 
-    // without braces
-    result = ""
-    let x: int[] = new int[3]
-    let t: int = x[getIdx(0)] = x[getIdx(1)] = x[getIdx(2)] = 3
-    if (result != "012" || t != 3) {
-        return 1
-    }
+	// without braces
+	result = ""
+	let x: int[] = new int[3]
+	let t: int = x[getIdx(0)] = x[getIdx(1)] = x[getIdx(2)] = 3
+	arktest.assertEQ(result, "012")
+	arktest.assertEQ(t, 3)
 
-    // with braces
-    result = ""
-    let y: int[] = new int[3]
-    let q: int = (y[getIdx(0)] = (y[getIdx(1)] = (y[getIdx(2)] = 3)))
-    if (result != "012" || q != 3) {
-        return 1
-    }
-
-    return 0
+	// with braces
+	result = ""
+	let y: int[] = new int[3]
+	let q: int = (y[getIdx(0)] = (y[getIdx(1)] = (y[getIdx(2)] = 3)))
+	arktest.assertEQ(result, "012")
+	arktest.assertEQ(q, 3)
 }

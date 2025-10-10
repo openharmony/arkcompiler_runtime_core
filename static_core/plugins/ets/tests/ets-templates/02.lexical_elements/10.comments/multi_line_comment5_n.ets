@@ -19,7 +19,6 @@ tags: [compile-only, negative]
 params: missing opening asterisk
 ---*/
 
-function main(): int {
+function main(): void {
     let i: int / CTE expected */ = 5;
-    return i;
 }

@@ -24,13 +24,10 @@ class A {
     constructor(p: {{c.to_type}}) { this.f = p }
 }
 
-function main(): int {
+function main() {
 {%- for t in c['values'] %}
     let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
-    if (new A(s{{loop.index}}).f.unboxed() != {{t.val}}) {
-        return 1
-    }
+    arktest.assertEQ(new A(s{{loop.index}}).f.unboxed(), {{t.val}})
 {%- endfor %}
-    return 0
 }
 {%- endfor %}

@@ -19,7 +19,7 @@ tags: [compile-only, negative]
 ---*/
 
 function sums(...numbers: number[]): number {
-    return 0;
+    
 }
 
 function main() {

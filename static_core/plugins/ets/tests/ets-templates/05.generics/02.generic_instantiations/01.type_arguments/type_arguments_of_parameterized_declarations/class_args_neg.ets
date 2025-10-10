@@ -40,8 +40,9 @@ class A<T{{c.bound}}> {
 
 {{c.decl}}
 
-function main(): int {
+function main() {
+
     {{c.use|indent}}
-    return 0;
+    
 }
 {% endfor %}

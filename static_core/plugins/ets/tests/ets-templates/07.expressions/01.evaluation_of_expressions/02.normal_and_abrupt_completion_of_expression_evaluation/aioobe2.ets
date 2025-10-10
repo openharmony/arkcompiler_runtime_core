@@ -20,7 +20,8 @@ desc: If the value of an array index expression is negative,
 tags:
 ---*/
 
-function main(): int {
+function main() {
+
   let v = new int[256];
   let a = 1;
   let b = 1;
@@ -28,9 +29,9 @@ function main(): int {
   try {
     // Negative because (v[0xff.toByte()] = 42) returns void
     let s: String = "X" + (a = 2) + (v[0xff.toByte()] = 42) + (b = 2);
-    return 1;
   } catch (e) {
-    if (a == 2 && b == 1) return 0;
-  }
-  return 1;
+    arktest.assertEQ(a, 2);
+    arktest.assertEQ(b, 1);
+    }
+
 }

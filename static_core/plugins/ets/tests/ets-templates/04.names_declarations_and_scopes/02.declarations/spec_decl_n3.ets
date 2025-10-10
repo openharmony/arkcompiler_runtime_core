@@ -28,6 +28,6 @@ class C {
     }
 }
 
-function main(): int {
-  return new C().counter();
+function main(): void {
+    new C().counter();
 }

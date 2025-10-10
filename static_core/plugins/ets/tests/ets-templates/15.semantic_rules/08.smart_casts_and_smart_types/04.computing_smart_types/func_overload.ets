@@ -68,8 +68,7 @@ function foo_i(p: I): string {
 
 overload foo { foo_c, foo_d, foo_a, foo_k, foo_i }
 
-function main(): int {
+function main(): void {
     {{c.code|indent}}
-    return 0
 }
 {%- endfor %}

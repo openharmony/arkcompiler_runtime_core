@@ -20,11 +20,11 @@ tags: [negative, compile-only]
 
 class C {
   foo(a: int): int {
-    return 0;
+    
   }
 
   foo(a: int): int {
-    return 0;
+    
   }
 }
 

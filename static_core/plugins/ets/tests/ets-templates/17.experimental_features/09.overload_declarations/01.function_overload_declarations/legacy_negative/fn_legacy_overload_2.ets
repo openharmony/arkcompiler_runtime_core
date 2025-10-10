@@ -28,6 +28,6 @@ function foo<T, U, V>(a: T, b: U, c: V): int {
   return 3;
 }
 
-function main(): int {
+function main(): void {
   let v: string = foo<string, string>(v, v);
 }

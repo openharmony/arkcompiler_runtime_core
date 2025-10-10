@@ -18,7 +18,7 @@ cases:
               static $_instantiate() { return 'abc' }
           }
       use: |-
-          if (C.$_instantiate() != 'abc') return 1
+          arktest.assertEQ(C.$_instantiate(), 'abc')
 
     - decl: |-
           // calling a static method with a factory, not a callable type case
@@ -29,7 +29,7 @@ cases:
               return new C()
           }
       use: |-
-          if (C.$_instantiate(foo) != 'abc') return 1
+          arktest.assertEQ(C.$_instantiate(foo), 'abc')
 
     - decl: |-
           // no parameters, implicit void return
@@ -40,7 +40,7 @@ cases:
       use: |-
           C.inst = null
           C()
-          if (!(C.inst instanceof C)) return 1
+          arktest.assertTrue(C.inst instanceof C)
 
     - decl: |-
           // no parameters, explicit void return
@@ -51,7 +51,7 @@ cases:
       use: |-
           C.inst = null
           C()
-          if (!(C.inst instanceof C)) return 1
+          arktest.assertTrue(C.inst instanceof C)
 
     - decl: |-
           // using type alias
@@ -63,7 +63,7 @@ cases:
               meth(p: string): string { return p + p }
           }
       use: |-
-          if (A('abc') != 'abcabc') return 1
+          arktest.assertEQ(A('abc'), 'abcabc')
 
     - decl: |-
           // singleton with implicit factory
@@ -77,7 +77,7 @@ cases:
               }
           }
       use: |-
-          if (C() != C()) return 1
+          arktest.assertEQ(C(), C())
 
     - decl: |-
           // singleton with explicit factory
@@ -92,7 +92,7 @@ cases:
           }
       use: |-
           let f: ()=>C = (): C => new C()
-          if (C.$_instantiate(f) != C.$_instantiate(f)) return 1
+          arktest.assertEQ(C.$_instantiate(f), C.$_instantiate(f))
 
     - decl: |-
           // using parameters
@@ -107,7 +107,8 @@ cases:
           }
       use: |-
           let x = C(Color.Green)
-          if (x[0] != x[1] || x[1] != x[2]) return 1
+          arktest.assertEQ(x[0], x[1])
+          arktest.assertEQ(x[1], x[2])
 
     - decl: |-
           // using rest parameters
@@ -122,8 +123,8 @@ cases:
               s: string = 'X'
           }
       use: |-
-          if (Conc().s != '') return 1
-          if (Conc('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h').s != 'abcdefgh') return 1
+          arktest.assertEQ(Conc().s, '')
+          arktest.assertEQ(Conc('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h').s, 'abcdefgh')
 
     - decl: |-
           // shadowed instantiate
@@ -138,11 +139,17 @@ cases:
           }
       use: |-
           let a = A()
-          if (!(a instanceof A) || a instanceof B || a instanceof C) return 1
+          arktest.assertTrue(a instanceof A)
+          arktest.assertFalse(a instanceof B)
+          arktest.assertFalse(a instanceof C)
           let b = B()
-          if (!(b instanceof A) || !(b instanceof B) || b instanceof C) return 1
+          arktest.assertTrue(b instanceof A)
+          arktest.assertTrue(b instanceof B)
+          arktest.assertFalse(b instanceof C)
           let c = C()
-          if (!(c instanceof A) || !(c instanceof B) || !(c instanceof C)) return 1
+          arktest.assertTrue(c instanceof A)
+          arktest.assertTrue(c instanceof B)
+          arktest.assertTrue(c instanceof C)
 
     - decl: |-
           // shadowed instantiate
@@ -162,9 +169,9 @@ cases:
               return r
           }
       use: |-
-          if (A(1.0).name != 'A1') return 1
-          if (B(2.0).name != 'B2') return 1
-          if (C(3.0).name != 'C3') return 1
+          arktest.assertEQ(A(1.0).name, 'A1')
+          arktest.assertEQ(B(2.0).name, 'B2')
+          arktest.assertEQ(C(3.0).name, 'C3')
 
     - decl: |-
           // overloaded instantiate
@@ -174,11 +181,11 @@ cases:
           }
       use: |-
           // implicit factory arg
-          if (C(42.0) != 84.0) return 1
-          if (C('abc') != 'abcabc') return 1
+          arktest.assertEQ(C(42.0), 84.0)
+          arktest.assertEQ(C('abc'), 'abcabc')
           // explicit factory arg
-          if (C.$_instantiate(() => { return new C() }, 42.0) != 84.0) return 1
-          if (C.$_instantiate(() => { return new C() }, 'abc') != 'abcabc') return 1
+          arktest.assertEQ(C.$_instantiate(() => { return new C() }, 42.0), 84.0)
+          arktest.assertEQ(C.$_instantiate(() => { return new C() }, 'abc'), 'abcabc')
 
     - decl: |-
           // overloaded instantiate
@@ -190,11 +197,11 @@ cases:
           }
       use: |-
           // implicit factory arg
-          if (C(42.0) != 84.0) return 1
-          if (C('abc') != 'abcabc') return 1
+          arktest.assertEQ(C(42.0), 84.0)
+          arktest.assertEQ(C('abc'), 'abcabc')
           // explicit factory arg
-          if (C.$_instantiate(() => { return new C() }, 42.0) != 84.0) return 1
-          if (C.$_instantiate(() => { return new C() }, 'abc') != 'abcabc') return 1
+          arktest.assertEQ(C.$_instantiate(() => { return new C() }, 42.0), 84.0)
+          arktest.assertEQ(C.$_instantiate(() => { return new C() }, 'abc'), 'abcabc')
 
     - decl: |-
           // mix of static and instance instantiate
@@ -214,9 +221,9 @@ cases:
               return new C()
           }
       use: |-
-          if (C('abc') != '1abc') return 1
-          if (B(42.0) != 84.0) return 1
-          if (C(42.0) != 84.0) return 1
+          arktest.assertEQ(C('abc'), '1abc')
+          arktest.assertEQ(B(42.0), 84.0)
+          arktest.assertEQ(C(42.0), 84.0)
 
     - decl: |-
           // error propagation from instantiate
@@ -230,12 +237,10 @@ cases:
               }
           }
       use: |-
-          try {
-              let x = C(true)
-              return 1
-          } catch (e) {
-              if (!(e instanceof MyError)) return 1
-          }
+          let checkException = (e: Error): boolean => { return e instanceof MyError }  
+          arktest.expectThrow(() => {
+              C(true)
+          }, checkException)
 
     - decl: |-
           // error propagation from instantiate
@@ -249,12 +254,10 @@ cases:
               }
           }
       use: |-
-          try {
-              let x = C(true)
-              return 1
-          } catch (e) {
-              if (!(e instanceof MyError)) return 1
-          }
+          let checkException = (e: Error): boolean => { return e instanceof MyError }  
+          arktest.expectThrow(() => {
+              C(true)
+          }, checkException)
 
     - decl: |-
           // using trailing lambda as explicit factory
@@ -268,7 +271,7 @@ cases:
           }
       use: |-
           let x = C.$_instantiate() { return new C() }
-          if (x.fld != 1.0) return 1
+          arktest.assertEQ(x.fld, 1.0)
 
     - decl: |-
           // instantiate returns the factory
@@ -276,8 +279,8 @@ cases:
               static $_instantiate(f: ()=>C): ()=>C { return f }
           }
       use: |-
-          if (!(C()() instanceof C)) return 1
-          if (!(C.$_instantiate(() => { return new C() })() instanceof C)) return 1
+          arktest.assertTrue(C()() instanceof C)
+          arktest.assertTrue(C.$_instantiate(() => { return new C() })() instanceof C)
 
     - decl: |-
           // instantiate returns array
@@ -289,7 +292,7 @@ cases:
           }
       use: |-
           for (let z of C())
-              if (!(z instanceof C)) return 1
+              arktest.assertTrue(z instanceof C)
 
           for (let z of C.$_instantiate() { return new C() })
-              if (!(z instanceof C)) return 1
+              arktest.assertTrue(z instanceof C)

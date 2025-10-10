@@ -21,9 +21,8 @@ tags: [compile-only, negative]
 
 let res = ""
 
-function main(): int {
+function main(): void {
     res = ""
     {{c.use|indent}}
-    return 1;
 }
 {% endfor %}

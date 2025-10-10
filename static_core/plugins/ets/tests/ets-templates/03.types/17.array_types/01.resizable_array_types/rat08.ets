@@ -17,14 +17,15 @@
 desc: Test increasing array length.
 ---*/
 
-function main(): int {
-   let array1: number[] = [0, 1, 2];
+let array1: number[] = [0, 1, 2];
 
-  try {
+function foo(): void {
    array1.length = 5;
    let a: number = array1.length;
-  } catch(RangeError) {
-    return 0
-  }
-  return 1
+}
+
+let checkException = (e: Error): boolean => { return (e instanceof RangeError) }
+
+function main() {
+	arktest.expectThrow(() => foo(), checkException)
 }

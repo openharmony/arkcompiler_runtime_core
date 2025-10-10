@@ -20,7 +20,6 @@ tags: [compile-only, negative]
 
 function cond(): void {}
 
-function main(): int {
+function main(): void {
   let a = cond() ? 1 : 0;
-  return a;
 }

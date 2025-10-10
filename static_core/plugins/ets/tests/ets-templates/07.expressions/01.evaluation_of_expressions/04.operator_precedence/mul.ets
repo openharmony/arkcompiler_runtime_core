@@ -17,107 +17,107 @@
 desc: multiplicative operator with other operators
 ---*/
 
-function main(): int {
-    let res: int, t2 = 2, t3 = 3, t4 = 4, t8 = 8, t255  = 255
+function main() {
 
-    // division
-    res = t8 / t3 * t2
-    if (res != 4) return 1;
+    	let res: int, t2 = 2, t3 = 3, t4 = 4, t8 = 8, t255 = 255
 
-    // modulo
-    res = t8 % t3 * t2
-    if (res != 4) return 1;
+	// division
+	res = t8 / t3 * t2
+	arktest.assertEQ(res, 4)
 
-    // addition
-    res = t2 + t4 * t3
-    if (res != 14) return 1;
+	// modulo
+	res = t8 % t3 * t2
+	arktest.assertEQ(res, 4)
 
-    // subtraction
-    res = t2 - t3 * t4
-    if (res != -10) return 1;
+	// addition
+	res = t2 + t4 * t3
+	arktest.assertEQ(res, 14)
 
-    // cast
-    res = t2 * t255.toByte()
-    if (res != -2) return 1;
+	// subtraction
+	res = t2 - t3 * t4
+	arktest.assertEQ(res, -10)
 
-    res = t255.toByte() * t3
-    if (res != -3) return 1;
+	// cast
+	res = t2 * t255.toByte()
+	arktest.assertEQ(res, -2)
 
-    // shifts
-    res = t4 << t3 * t2
-    if (res != 256) return 1;
+	res = t255.toByte() * t3
+	arktest.assertEQ(res, -3)
 
-    res = - t255 >> t2 * t3
-    if (res != -4) return 1;
+	// shifts
+	res = t4 << t3 * t2
+	arktest.assertEQ(res, 256)
 
-    res = - t255 >>> t2 * t3
-    if (res != 67108860) return 1;
+	res = - t255 >> t2 * t3
+	arktest.assertEQ(res, -4)
 
-    // relational
-    if (t255 < t8 * t8) return 1;
-    if (t255 <= t2 * t8) return 1;
-    if (t2 > t8 * t4) return 1;
-    if (t4 >= t8 * t4) return 1;
-    if (t2 == t2 * t4) return 1;
-    if (t8 != t4 * t2) return 1;
+	res = - t255 >>> t2 * t3
+	arktest.assertEQ(res, 67108860)
 
-    // bitwise
-    res = t255 & t4 * t8
-    if (res != 32) return 1;
+	// relational
+	arktest.assertFalse(t255 < t8 * t8)
+	arktest.assertFalse(t255 <= t2 * t8)
+	arktest.assertFalse(t2 > t8 * t4)
+	arktest.assertFalse(t4 >= t8 * t4)
+	arktest.assertFalse(t2 == t2 * t4)
+	arktest.assertFalse(t8 != t4 * t2)
 
-    res = t3 | t4 * t2
-    if (res != 11) return 1;
+	// bitwise
+	res = t255 & t4 * t8
+	arktest.assertEQ(res, 32)
 
-    res = t255 ^ t8 * t2
-    if (res != 239) return 1;
+	res = t3 | t4 * t2
+	arktest.assertEQ(res, 11)
 
-    // ternary
-    res = t3 <= t4 ? t4 : t3 * t4
-    if (res != 4) return 1;
+	res = t255 ^ t8 * t2
+	arktest.assertEQ(res, 239)
 
-    res = t4 * t2 > t4 ? t4 : t3
-    if (res != 4) return 1;
+	// ternary
+	res = t3 <= t4 ? t4 : t3 * t4
+	arktest.assertEQ(res, 4)
 
-    // assignments
-    res = t2 += t4 * t3
-    if (res != 14) return 1;
-    t2 = 2
+	res = t4 * t2 > t4 ? t4 : t3
+	arktest.assertEQ(res, 4)
 
-    res = t2 -= t4 * t3
-    if (res != -10) return 1;
-    t2 = 2
+	// assignments
+	res = t2 += t4 * t3
+	arktest.assertEQ(res, 14)
+	t2 = 2
 
-    res = t8 /= t2 * t3
-    if (res != 1) return 1;
-    t8 = 8
+	res = t2 -= t4 * t3
+	arktest.assertEQ(res, -10)
+	t2 = 2
 
-    res = t8 %= t2 * t3
-    if (res != 2) return 1;
-    t8 = 8
+	res = t8 /= t2 * t3
+	arktest.assertEQ(res, 1)
+	t8 = 8
 
-    res = t255 &= t2 * t3
-    if (res != 6) return 1;
-    t255 = 255
+	res = t8 %= t2 * t3
+	arktest.assertEQ(res, 2)
+	t8 = 8
 
-    res = t2 |= t3 * t4
-    if (res != 14) return 1;
-    t2 = 2
+	res = t255 &= t2 * t3
+	arktest.assertEQ(res, 6)
+	t255 = 255
 
-    res = t255 ^= t4 * t8
-    if (res != 223) return 1;
-    t255 = 255
+	res = t2 |= t3 * t4
+	arktest.assertEQ(res, 14)
+	t2 = 2
 
-    res = t4 <<= t3 * t2
-    if (res != 256) return 1;
-    t4 = 4
+	res = t255 ^= t4 * t8
+	arktest.assertEQ(res, 223)
+	t255 = 255
 
-    res = t255 >>= t2 * t3
-    if (res != 3) return 1;
-    t255 = 255
+	res = t4 <<= t3 * t2
+	arktest.assertEQ(res, 256)
+	t4 = 4
 
-    res = t255 >>>= t3 * t2
-    if (res != 3) return 1;
-    t255 = 255
+	res = t255 >>= t2 * t3
+	arktest.assertEQ(res, 3)
+	t255 = 255
 
-    return 0;
+	res = t255 >>>= t3 * t2
+	arktest.assertEQ(res, 3)
+	t255 = 255
+    
 }

@@ -40,8 +40,9 @@ enum Color { Red, Green, Blue }
 
 {{c.decl}}
 
-function main(): int {
+function main() {
+
     {{c.use|indent}}
-    return 0;
+    
 }
 {% endfor %}

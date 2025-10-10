@@ -31,9 +31,10 @@ class Clazz {
     anotherCircle: AnotherShapes.Circle = new AnotherShapes.Circle;
 }
 
-function main(): int {
+function main() {
+
     let q = new Shapes.Square;
     let a = new AnotherShapes.Square;
     let c = new Clazz;
-    return 0;
+    
 }

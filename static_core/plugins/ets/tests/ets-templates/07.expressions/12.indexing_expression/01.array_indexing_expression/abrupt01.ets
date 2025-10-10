@@ -19,6 +19,7 @@ desc: >-
     than or equal to the array's length, then ArrayIndexOutOfBoundsError is thrown.
 ---*/
 
+
 let arr: number[] = [1, 2, 3]
 
 function arrRef(exc: boolean): number[] {
@@ -28,12 +29,14 @@ function arrRef(exc: boolean): number[] {
     return arr
 }
 
-function main(): int {
-    let indexingExpressionEvaluated: boolean = false
-    try {
-        arktest.assertTrue( arrRef(true)[(():int => { indexingExpressionEvaluated = true; return 2 })()] == 3 )
-    } catch (e) {
-        return (indexingExpressionEvaluated ? 1 : 0)
-    }
-    return 1
+
+function foo(indexingExpressionEvaluated: boolean): void {
+	arktest.assertTrue( arrRef(true)[(():int => { indexingExpressionEvaluated = true; return 2 })()] == 3 )
+}
+
+function main() {
+	let indexingExpressionEvaluated: boolean = false
+	let checkException = (e: Error): boolean => { return e instanceof Error }
+	arktest.expectThrow(() => { arktest.assertTrue( arrRef(true)[(():int => { indexingExpressionEvaluated = true; return 2 })()] == 3 )}, checkException)
+	arktest.assertFalse(indexingExpressionEvaluated)
 }

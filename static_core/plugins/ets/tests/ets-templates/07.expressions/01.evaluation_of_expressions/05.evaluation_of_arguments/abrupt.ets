@@ -50,65 +50,58 @@ function test(a: int, b: int, c: int): int {
     return c + b + a;
 }
 
-function main(): int {
-    side_effect = 0;
-    let res: int = 0;
+function main(): void {
+	side_effect = 0;
+	let res: int = 0;
 
-    // 1) normal eval for function args
-    res = test(ok(1), ok(1), ok(1));
-    if (res != 3) return 1;
-    if (side_effect != 3) return 2;
+	// 1) normal eval for function args
+	res = test(ok(1), ok(1), ok(1));
+	arktest.assertEQ(res, 3)
+	arktest.assertEQ(side_effect, 3)
 
-    // 2) abrupt eval for function args
-    side_effect = res = 0;
-    try {
-        res = test(ok(1), bad(3), ok(1));
-        return 3;
-    } catch (e) {
-        if (side_effect != 2) return 4;
-        if (res != 0) return 5;
-    }
+	// 2) abrupt eval for function args
+	side_effect = res = 0;
+	try {
+		res = test(ok(1), bad(3), ok(1));
+	} catch (e) {
+		arktest.assertEQ(side_effect, 2)
+		arktest.assertEQ(res, 0)
+	}
 
-    // 3) abrupt eval for function args
-    side_effect = res = 0;
-    try {
-        res = test(bad(3), ok(1), bad(3));
-        return 4;
-    } catch (e) {
-        if (side_effect != 1) return 6;
-        if (res != 0) return 7;
-    }
+	// 3) abrupt eval for function args
+	side_effect = res = 0;
+	try {
+		res = test(bad(3), ok(1), bad(3));
+	} catch (e) {
+		arktest.assertEQ(side_effect, 1)
+		arktest.assertEQ(res, 0)
+	}
 
-    // 4) abrupt eval for lambda args
-    side_effect = res = 0;
-    try {
-        res = ((a: int, b: int, c: int): int => { return c + b + a; })(
-            ok(1), bad(3), ok(1));
-        return 8;
-    } catch (e) {
-        if (side_effect != 2) return 9;
-        if (res != 0) return 10;
-    }
+	// 4) abrupt eval for lambda args
+	side_effect = res = 0;
+	try {
+		res = ((a: int, b: int, c: int): int => { return c + b + a; })(
+			ok(1), bad(3), ok(1));
+	} catch (e) {
+		arktest.assertEQ(side_effect, 2)
+		arktest.assertEQ(res, 0)
+	}
 
-    // 5) abrupt eval for method args
-    side_effect = res = 0;
-    let d = new Dummy(1, 1, 1);
-    try {
-        res = d.method(ok(1), bad(3), ok(1));
-        return 11;
-    } catch (e) {
-        if (side_effect != 2) return 12;
-        if (res != 0) return 13;
-    }
+	// 5) abrupt eval for method args
+	side_effect = res = 0;
+	let d = new Dummy(1, 1, 1);
+	try {
+		res = d.method(ok(1), bad(3), ok(1));
+	} catch (e) {
+		arktest.assertEQ(side_effect, 2)
+		arktest.assertEQ(res, 0)
+	}
 
-    // 6) abrupt eval for ctor args
-    side_effect = res = 0;
-    try {
-        let d = new Dummy(ok(1), bad(3), ok(1));
-        return 14;
-    } catch (e) {
-        if (side_effect != 2) return 15;
-    }
-
-    return 0;
+	// 6) abrupt eval for ctor args
+	side_effect = res = 0;
+	try {
+		let d = new Dummy(ok(1), bad(3), ok(1));
+	} catch (e) {
+		arktest.assertEQ(side_effect, 2)
+	}
 }

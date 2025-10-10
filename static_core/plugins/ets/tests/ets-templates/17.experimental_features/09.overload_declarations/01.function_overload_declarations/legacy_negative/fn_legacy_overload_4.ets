@@ -30,6 +30,6 @@ function foo(a: boolean, ...p: int[]): int {
   return 3;
 }
 
-function main(): int {
-  foo(1);
+function main(): void {
+  arktest.assertNE(foo(1), 0);
 }

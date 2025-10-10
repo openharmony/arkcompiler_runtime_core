@@ -27,14 +27,13 @@ interface K {}
 class A implements I {}
 class B extends A implements J {}
 
-function main(): int {
+function main(): void  {
     {{t.init}};
     try {
         {{t.expr}};
-        return {{t.fail}};
+        arktest.assertFalse(!x)
     } catch (e) {
-      if (! e instanceof ClassCastError) return 1;
-      return 1 - {{t.fail}};
+      arktest.assertTrue(e instanceof ClassCastError)
     }
 }
 {% endfor %}

@@ -19,7 +19,7 @@ cases:
           }
       use: |-
           let x = C()
-          if (x != 42.0) return 1
+          arktest.assertEQ(x, 42.0)
 
     - decl: |-
           // no parameters
@@ -27,7 +27,7 @@ cases:
               static $_invoke(): number { return 42.0 }
           }
       use: |-
-          if (C.$_invoke() != 42.0) return 1
+          arktest.assertEQ(C.$_invoke(), 42.0)
 
     - decl: |-
           // no parameters, use type alias
@@ -37,7 +37,7 @@ cases:
           }
       use: |-
           let x = A()
-          if (x != 42.0) return 1
+          arktest.assertEQ(x, 42.0)
 
     - decl: |-
           // no parameters, use type alias
@@ -47,7 +47,7 @@ cases:
           }
       use: |-
           let x = A.$_invoke()
-          if (x != 42.0) return 1
+          arktest.assertEQ(x, 42.0)
 
     - decl: |-
           // void return, implicit type
@@ -58,7 +58,7 @@ cases:
       use: |-
           C.res = 0
           C()
-          if (C.res != 1) return 1
+          arktest.assertEQ(C.res, 1)
 
     - decl: |-
           // void return, explicit type
@@ -69,7 +69,7 @@ cases:
       use: |-
           C.res = 0
           C()
-          if (C.res != 1) return 1
+          arktest.assertEQ(C.res, 1)
 
     - decl: |-
           // singleton
@@ -83,7 +83,9 @@ cases:
               }
           }
       use: |-
-          if (C() != C() || C.$_invoke() != C.$_invoke() || C.$_invoke() != C()) return 1
+          arktest.assertEQ(C(), C())
+          arktest.assertEQ(C.$_invoke(), C.$_invoke())
+          arktest.assertEQ(C.$_invoke(), C())
 
     - decl: |-
           // with parameters
@@ -101,9 +103,9 @@ cases:
           }
       use: |-
           let x = Div(Mul(Add(1.0, 2.0), 3.0), 2.0)
-          if (x != (1.0 + 2.0) * 3.0 / 2.0) return 1
+          arktest.assertEQ(x, (1.0 + 2.0) * 3.0 / 2.0)
           let y = Div.$_invoke(Mul.$_invoke(Add.$_invoke(1.0, 2.0), 3.0), 2.0)
-          if (y != x) return 1
+          arktest.assertEQ(y, x)
 
     - decl: |-
           // arbitrary number of parameters
@@ -115,13 +117,13 @@ cases:
               }
           }
       use: |-
-          if (Sum() != 0.0) return 1
-          if (Sum(11.0) != 11.0) return 1
-          if (Sum(12, 13, 14, 15, 16, 17, 18, 19, -1, -2, -3) != 118.0) return 1
+          arktest.assertEQ(Sum(), 0.0)
+          arktest.assertEQ(Sum(11.0), 11.0)
+          arktest.assertEQ(Sum(12, 13, 14, 15, 16, 17, 18, 19, -1, -2, -3), 118.0)
 
-          if (Sum.$_invoke() != 0.0) return 1
-          if (Sum.$_invoke(11.0) != 11.0) return 1
-          if (Sum.$_invoke(12, 13, 14, 15, 16, 17, 18, 19, -1, -2, -3) != 118.0) return 1
+          arktest.assertEQ(Sum.$_invoke(), 0.0)
+          arktest.assertEQ(Sum.$_invoke(11.0), 11.0)
+          arktest.assertEQ(Sum.$_invoke(12, 13, 14, 15, 16, 17, 18, 19, -1, -2, -3), 118.0)
 
     - decl: |-
           // shadowed invoke
@@ -135,9 +137,9 @@ cases:
               static $_invoke(): string { return 'C' }
           }
       use: |-
-          if (C() != 'C') return 1
-          if (B() != 'B') return 1
-          if (A() != 'A') return 1
+          arktest.assertEQ(C(), 'C')
+          arktest.assertEQ(B(), 'B')
+          arktest.assertEQ(A(), 'A')
 
     - decl: |-
           // overloaded invoke
@@ -150,12 +152,12 @@ cases:
               static $_invoke(p: string, q: boolean): string { return p + q }
           }
       use: |-
-          if (C(33.0) != 66.0) return 1
-          if (C('abc') != 'abcabc') return 1
-          if (C('abc', false) != 'abcfalse') return 1
+          arktest.assertEQ(C(33.0), 66.0)
+          arktest.assertEQ(C('abc'), 'abcabc')
+          arktest.assertEQ(C('abc', false), 'abcfalse')
 
-          if (B(42.0) != 84.0) return 1
-          if (B('abc') != 'abc') return 1
+          arktest.assertEQ(B(42.0), 84.0)
+          arktest.assertEQ(B('abc'), 'abc')
 
     - decl: |-
           // overloaded invoke
@@ -168,12 +170,12 @@ cases:
               static $_invoke(p: string, q: boolean): string { return p + q }
           }
       use: |-
-          if (C(33.0) != 66.0) return 1
-          if (C('abc') != 'abcabc') return 1
-          if (C('abc', false) != 'abcfalse') return 1
+          arktest.assertEQ(C(33.0), 66.0)
+          arktest.assertEQ(C('abc'), 'abcabc')
+          arktest.assertEQ(C('abc', false), 'abcfalse')
 
-          if (B(42.0) != 84.0) return 1
-          if (B('abc') != 'abc') return 1
+          arktest.assertEQ(B(42.0), 84.0)
+          arktest.assertEQ(B('abc'), 'abc')
 
     - decl: |-
           // mix of static and instance invoke
@@ -187,12 +189,12 @@ cases:
               $_invoke(): string { return 'C' }
           }
       use: |-
-          if (C() != 'A') return 1
-          if (B() != 'A') return 1
-          if (A() != 'A') return 1
+          arktest.assertEQ(C(), 'A')
+          arktest.assertEQ(B(), 'A')
+          arktest.assertEQ(A(), 'A')
 
-          if (new C().$_invoke() != 'C') return 1
-          if (new B().$_invoke() != 'B') return 1
+          arktest.assertEQ(new C().$_invoke(), 'C')
+          arktest.assertEQ(new B().$_invoke(), 'B')
 
     - decl: |-
           // mix of static and instance invoke
@@ -204,9 +206,9 @@ cases:
               static $_invoke(): C { return new C() }
           }
       use: |-
-          if (C().$_invoke() != 'b') return 1
-          if (B.$_invoke() != 'B') return 1
-          if (new B().$_invoke() != 'b') return 1
+          arktest.assertEQ(C().$_invoke(), 'b')
+          arktest.assertEQ(B.$_invoke(), 'B')
+          arktest.assertEQ(new B().$_invoke(), 'b')
 
     - decl: |-
           // error propagation from invoke
@@ -225,13 +227,10 @@ cases:
               return C(p)
           }
       use: |-
-          let x: string
-          try {
-              x = foo(true)
-              return 1
-          } catch (e) {
-              if (e instanceof Error && e.message != 'invoke error') return 1
-          }
+          let checkException = (e: Error): boolean => { return e instanceof Error }  
+          arktest.expectThrow(() => {
+              foo(true)
+          }, checkException)
 
     - decl: |-
           // call chain of invoke
@@ -245,7 +244,7 @@ cases:
               static $_invoke() { return B() }
           }
       use: |-
-          if (C() != 42.0) return 1
+          arktest.assertEQ(C(), 42.0)
 
     - decl: |-
           // invoke calls another invoke
@@ -254,7 +253,7 @@ cases:
               static $_invoke(p: string) { return p }
           }
       use: |-
-          if (C() != 'abc') return 1
+          arktest.assertEQ(C(), 'abc')
 
     - decl: |-
           // invoke returns array
@@ -264,10 +263,8 @@ cases:
               }
           }
       use: |-
-          if (C().length != 0) return 1
-
-          if (C(1.0)[0] != 1.0) return 1
-          if (C(1.0, 2.0, 3.0)[2] != 3.0) return 1
-
-          if (C.$_invoke(1.0)[0] != 1.0) return 1
-          if (C.$_invoke(1.0, 2.0, 3.0)[1] != 2.0) return 1
+          arktest.assertEQ(C().length, 0)
+          arktest.assertEQ(C(1.0)[0], 1.0)
+          arktest.assertEQ(C(1.0, 2.0, 3.0)[2], 3.0)
+          arktest.assertEQ(C.$_invoke(1.0)[0], 1.0)
+          arktest.assertEQ(C.$_invoke(1.0, 2.0, 3.0)[1], 2.0)

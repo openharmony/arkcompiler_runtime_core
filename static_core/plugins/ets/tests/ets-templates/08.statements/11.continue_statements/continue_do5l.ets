@@ -20,7 +20,7 @@ desc: >-
   function or method otherwise compile-time error is raised by the compiler.
 ---*/
 
-function main(): int {
+function main(): void {
     let sum: int, y: int
     loop1: do {
         let x = 0
@@ -35,6 +35,5 @@ function main(): int {
         } while (x++ < 100)
     } while (y++ < 3)
 
-    if (sum == 100) return 0;
-    return 1;
+    arktest.assertEQ(sum, 100)
 }

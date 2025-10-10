@@ -29,9 +29,10 @@ function foo(i: int, func: Inc): long {
     return func(i);
 }
 
-function main(): int {
+function main() {
+
     let i: long = foo(12, inc);
 
-    if (i != 13) return 1;
-    return 0;
+    arktest.assertEQ(i, 13)
+    
 }

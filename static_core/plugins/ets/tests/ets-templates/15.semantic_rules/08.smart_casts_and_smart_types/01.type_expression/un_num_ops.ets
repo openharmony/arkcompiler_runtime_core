@@ -27,9 +27,9 @@ tags: [{{c.tags}}]
 
 let res: boolean = false
 
-function main(): int {
+function main(): void {
     res = false
     {{c.code|indent}}
-    return (res ? 0 : 1)
+    arktest.assertTrue(res)
 }
 {%- endfor %}

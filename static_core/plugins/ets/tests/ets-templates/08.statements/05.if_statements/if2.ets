@@ -38,10 +38,15 @@ function retcode(s: string): int {
     }
 }
 
-function main(): int {
+function foo(i: number, j: number): number {
+    {{c.use|indent}}
+}
+
+function main(): void {
     res = ""; // reset global res variable because of JIT testing
     let i = 1;
     let j = 1;
-    {{c.use|indent}}
+    arktest.assertEQ(foo(i, j), 0)
+    
 }
 {% endfor %}

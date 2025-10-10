@@ -28,8 +28,9 @@ class Clazz {
 
 class Shapes {}
 
-function main(): int {
+function main() {
+
   let clazz = new Clazz;
   let s = new Shapes;
-  return 0;
+  
 }

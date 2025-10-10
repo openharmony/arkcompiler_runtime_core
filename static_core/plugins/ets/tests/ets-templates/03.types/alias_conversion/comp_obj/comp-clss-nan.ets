@@ -23,13 +23,10 @@ class A{{loop.index}} { fld: {{c.to_type}} = {{c.init_value}} }
 let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}};
 {%- endfor %}
 
-function main(): int {
+function main(): void {
 {%- for t in c['values'] %}
     let d{{loop.index}}: A{{loop.index}} = { fld: s{{loop.index}} }
-    if (! {{c.to_type}}.isNaN(d{{loop.index}}.fld.unboxed())) {
-        return 1
-    }
+	arktest.assertTrue({{c.to_type}}.isNaN(d{{loop.index}}.fld.unboxed()))
 {%- endfor %}
-    return 0
 }
 {%- endfor %}

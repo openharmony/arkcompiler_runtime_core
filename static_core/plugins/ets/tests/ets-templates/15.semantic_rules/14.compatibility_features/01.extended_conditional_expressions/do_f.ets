@@ -23,7 +23,7 @@ desc: >-
 
 let res: int
 
-function main(): int {
+function main(): void {
     let v: {{c.type}} = {{c.val}}  // falsy
     res = 0
 
@@ -33,6 +33,6 @@ function main(): int {
         }
     } while (v)
 
-    return (res == 1 ? 0 : 1)
+    arktest.assertEQ(res, 1)
 }
 {%- endfor %}

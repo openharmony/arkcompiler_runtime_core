@@ -18,7 +18,7 @@ desc: nullable Cast T | null -> T. null value
 tags: [compile-only, negative]
 ---*/
 
-function main(): int {
+function main(): void {
   let a: Int | null = null;
   let b: Int = a as Int;
 }

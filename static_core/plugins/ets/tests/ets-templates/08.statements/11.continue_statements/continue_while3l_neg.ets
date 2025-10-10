@@ -21,7 +21,7 @@ desc: >-
 tags: [compile-only, negative]
 ---*/
 
-function main(): int {
+function main(): void {
     let sum: int, y: int
     while (y++ < 100) {
         let x = 0
@@ -32,6 +32,5 @@ function main(): int {
             continue loop1; // misplaced label
         }
     }
-    if (sum == 505000) return 0;
-    return 1;
+    arktest.assertEQ(sum, 505000)
 }

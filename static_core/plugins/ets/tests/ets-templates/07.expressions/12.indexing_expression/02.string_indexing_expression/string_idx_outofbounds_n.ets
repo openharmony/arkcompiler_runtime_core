@@ -22,13 +22,13 @@ desc: >-
 
 let str: string = "abcdefg"
 
-function main(): int {
-  try {
-    let val = str[{{c.index}}]
-  } catch (error) {
-      arktest.assertTrue(error instanceof RangeError);
-      return 0;
-  }
-  return 1
+function foo(): void {
+	let val = str[{{c.index}}]
+}
+
+let checkException = (e: Error): boolean => { return e instanceof RangeError }
+
+function main() {
+    arktest.expectThrow(() => foo(), checkException)
 }
 {% endfor %}

@@ -36,8 +36,8 @@ function bar(): int {
     return q + q;
 }
 
-function main(): int {
+function main() {
     q = 1;
-    if (bar() == 20 && q == 100) return 0;
-    return 1;
+    arktest.assertEQ(bar(), 20);
+    arktest.assertEQ(q, 100);
 }

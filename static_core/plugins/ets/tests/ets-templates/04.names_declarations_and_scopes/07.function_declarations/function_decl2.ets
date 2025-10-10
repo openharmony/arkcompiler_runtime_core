@@ -22,9 +22,8 @@ desc: >-
 
 {{fd.decl}}
 
-function main(): int {
+function main(): void {
     {{fd.call|indent}}
-    return 1;
 }
 
 {% endfor %}

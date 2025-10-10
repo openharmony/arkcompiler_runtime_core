@@ -22,7 +22,8 @@ class MyEx extends Error {}
 
 native function foo<T extends Error>(a: T): T; // parameterized native
 
-function main(): int {
+function main() {
+
     let ex: Error = foo<MyEx>(new MyEx());
-    return 0;
+    
 }

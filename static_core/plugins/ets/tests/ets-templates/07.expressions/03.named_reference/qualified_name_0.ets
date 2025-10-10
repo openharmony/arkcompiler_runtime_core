@@ -38,10 +38,11 @@ class SomeShape implements ShapeInterfaces.Calculable {
   }
 }
 
-function main(): int {
+function main() {
+
   let circle = new Shapes.Circle;
   let clazz = new Clazz;
   let more = new Quadrupole;
   let shape = new SomeShape;
-  return 0;
+  
 }

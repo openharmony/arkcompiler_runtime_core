@@ -21,13 +21,10 @@ params: from {{c.from_type}} to {{c.to_type}}
 
 function foo(p: {{c.to_type}}): {{c.to_type}} { return p }
 
-function main(): int {
+function main() {
 {%- for t in c['values'] %}
     let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
-    if (foo(s{{loop.index}}).unboxed() != {{t.val}}) {
-        return 1
-    }
+    arktest.assertEQ(foo(s{{loop.index}}).unboxed(), {{t.val}})
 {%- endfor %}
-    return 0
 }
 {%- endfor %}

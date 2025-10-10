@@ -43,7 +43,8 @@ class/**/C/**/{/***/public/****/foo/*****/
     {return/***/p/***/*/***/2;}
 }
 
-function main(): int {
+function main() {
+
     /*1*/let/*let;*/x/*x*/:/*colon :*/int/***int type*/
     /*2*/let /***********************************************
                          ::: let statement :::
@@ -77,5 +78,5 @@ function main(): int {
     arktest.assertTrue( y[0] == 44/*1*/ && y[1] == 55 /*2*/ && x == 0/*3*/ )
     arktest.assertTrue( new C().foo(2) == 4 /*4*/ )
 
-    /* // */ return 0;
+    /* // */ 
 }

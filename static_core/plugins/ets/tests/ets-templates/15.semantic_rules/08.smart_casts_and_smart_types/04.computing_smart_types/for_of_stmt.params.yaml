@@ -18,7 +18,7 @@ cases:
           for (v of 'a') {
               res = v
           }
-          return res == 'a' ? 0 : 1
+          arktest.assertEQ(res, 'a')
 
     - code: |-
           let v: number|undefined
@@ -27,4 +27,4 @@ cases:
           for (v of arr) {
               res += v
           }
-          return res == 6.0 ? 0 : 1
+          arktest.assertEQ(res, 6.0)
