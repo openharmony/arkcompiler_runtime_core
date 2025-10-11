@@ -208,3 +208,5 @@ escompat/ArrayTest6.ets
 spec/16.Support_for_GUI_Programming/struct-type/anno/test-builder-func_0.ets
 spec/16.Support_for_GUI_Programming/struct-type/anno/test-struct-builder-param.ets
 spec/16.Support_for_GUI_Programming/struct-type/builder/test-struct-call-function-in-build_2.ets
+std/core/ReflectTypeTest.ets
+std/core/ReflectMethodTest.ets

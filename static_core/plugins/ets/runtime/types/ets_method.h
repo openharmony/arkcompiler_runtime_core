@@ -66,6 +66,8 @@ public:
 
     uint32_t GetNumMandatoryArgs();
 
+    std::optional<uint32_t> TryGetMinArgCount();
+
     EtsType GetArgType(size_t idx) const
     {
         EtsType etsType = ConvertPandaTypeToEtsType(GetPandaMethod()->GetArgType(idx));
@@ -136,14 +138,7 @@ public:
 
     PANDA_PUBLIC_API EtsClass *ResolveArgType(uint32_t idx);
 
-    EtsClass *ResolveReturnType()
-    {
-        Method::Proto proto = GetPandaMethod()->GetProto();
-        const char *descriptor = proto.GetReturnTypeDescriptor().data();
-        Runtime::GetCurrent()->GetClassLinker();
-        return EtsClass::FromRuntimeClass(Runtime::GetCurrent()->GetClassLinker()->GetClass(
-            utf::CStringAsMutf8(descriptor), false, GetClass()->GetLoadContext()));
-    }
+    EtsClass *ResolveReturnType();
 
     size_t GetVTableID() const
     {
@@ -168,6 +163,16 @@ public:
     bool IsNative() const
     {
         return GetPandaMethod()->IsNative();
+    }
+
+    bool HasRestParam() const
+    {
+        return (this->GetAccessFlags() & ACC_VARARGS) != 0;
+    }
+
+    bool IsFinal() const
+    {
+        return GetPandaMethod()->IsFinal();
     }
 
     bool IsFastNative() const
@@ -322,9 +327,6 @@ public:
 
     NO_COPY_SEMANTIC(EtsMethod);
     NO_MOVE_SEMANTIC(EtsMethod);
-
-private:
-    std::optional<uint32_t> TryGetMinArgCount();
 };
 
 }  // namespace ark::ets

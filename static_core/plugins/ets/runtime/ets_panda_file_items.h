@@ -55,6 +55,11 @@ static constexpr std::string_view STRING_BUILDER                       = "Lstd/c
 
 // TypeAPI classes
 static constexpr std::string_view CLASS_TYPE                           = "Lstd/core/ClassType;";
+static constexpr std::string_view REFLECT_INSTANCE_FIELD               = "Lstd/core/reflect/InstanceField;";
+static constexpr std::string_view REFLECT_INSTANCE_METHOD              = "Lstd/core/reflect/InstanceMethod;";
+static constexpr std::string_view REFLECT_STATIC_FIELD                 = "Lstd/core/reflect/StaticField;";
+static constexpr std::string_view REFLECT_STATIC_METHOD                = "Lstd/core/reflect/StaticMethod;";
+static constexpr std::string_view REFLECT_CONSTRUCTOR                  = "Lstd/core/reflect/Constructor;";
 
 // Runtime classes
 static constexpr std::string_view STACK_TRACE_ELEMENT                  = "Lstd/core/StackTraceElement;";

@@ -16,8 +16,14 @@
 #include <cstdlib>
 #include "dtoa_helper.h"
 #include "ets_intrinsics_helpers.h"
+#include "ets_exceptions.h"
+#include "ets_platform_types.h"
+#include "include/class.h"
+#include "include/class_root.h"
 #include "include/mem/panda_string.h"
+#include "include/panda_vm.h"
 #include "types/ets_field.h"
+#include "types/ets_primitives.h"
 #include "types/ets_string.h"
 
 namespace ark::ets::intrinsics::helpers {
@@ -643,6 +649,125 @@ Span<char> FpToStringDecimalRadixMainCase(FpType number, bool negative, Span<cha
     return {bufferStart, bufferEnd};
 }
 // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+
+bool CheckPrimitiveReciever(EtsCoroutine *coro, EtsObject *arg, EtsClass *argClass, EtsClass *paramClass,
+                            Value *argValue)
+{
+    if (!argClass->IsBoxed()) {
+        ThrowEtsInvalidType(coro, argClass->GetDescriptor());
+        return false;
+    }
+
+    bool checked = false;
+    auto *linkExt = coro->GetPandaVM()->GetEtsClassLinkerExtension();
+
+    switch (argClass->GetBoxedType()) {
+        case EtsClass::BoxedType::BOOLEAN:
+            checked = CheckAndUnpackBoxedType<EtsBoolean>(linkExt, arg, paramClass, argValue, ClassRoot::U1);
+            break;
+        case EtsClass::BoxedType::BYTE:
+            checked = CheckAndUnpackBoxedType<EtsByte>(linkExt, arg, paramClass, argValue, ClassRoot::I8);
+            break;
+        case EtsClass::BoxedType::CHAR:
+            checked = CheckAndUnpackBoxedType<EtsChar>(linkExt, arg, paramClass, argValue, ClassRoot::U16);
+            break;
+        case EtsClass::BoxedType::DOUBLE:
+            checked = CheckAndUnpackBoxedType<EtsDouble>(linkExt, arg, paramClass, argValue, ClassRoot::F64);
+            break;
+        case EtsClass::BoxedType::FLOAT:
+            checked = CheckAndUnpackBoxedType<EtsFloat>(linkExt, arg, paramClass, argValue, ClassRoot::F32);
+            break;
+        case EtsClass::BoxedType::INT:
+            checked = CheckAndUnpackBoxedType<EtsInt>(linkExt, arg, paramClass, argValue, ClassRoot::I32);
+            break;
+        case EtsClass::BoxedType::LONG:
+            checked = CheckAndUnpackBoxedType<EtsLong>(linkExt, arg, paramClass, argValue, ClassRoot::I64);
+            break;
+        case EtsClass::BoxedType::SHORT:
+            checked = CheckAndUnpackBoxedType<EtsShort>(linkExt, arg, paramClass, argValue, ClassRoot::I16);
+            break;
+        default:
+            ThrowEtsInvalidType(coro, argClass->GetDescriptor());
+            return false;
+    }
+
+    if (!checked) {
+        ThrowEtsInvalidType(coro, argClass->GetDescriptor());
+        return false;
+    }
+
+    return true;
+}
+
+bool CheckReceiverType(EtsCoroutine *coro, EtsObject *arg, EtsClass *paramClass, Value *argValue)
+{
+    if (arg == nullptr) {
+        *argValue = Value(nullptr);
+        return true;
+    }
+
+    EtsClass *argClass = arg->GetClass();
+
+    if (paramClass->IsAssignableFrom(argClass)) {
+        *argValue = Value(arg->GetCoreType());
+        return true;
+    }
+
+    if (paramClass->IsPrimitive()) {
+        return CheckPrimitiveReciever(coro, arg, argClass, paramClass, argValue);
+    }
+
+    ThrowEtsInvalidType(coro, argClass->GetDescriptor());
+    return false;
+}
+
+EtsObject *InvokeAndResolveReturnValue(EtsMethod *method, EtsCoroutine *coro, Value *args)
+{
+    Value result = method->GetPandaMethod()->Invoke(coro, args);
+
+    if (coro->HasPendingException()) {
+        return nullptr;
+    }
+
+    // Value is already in args[0]
+    if (method->IsInstanceConstructor()) {
+        return nullptr;
+    }
+
+    EtsClass *resolvedType = method->ResolveReturnType();
+    if (resolvedType->IsPrimitive() && !resolvedType->IsVoid()) {
+        return GetBoxedValue(coro, result, method->GetReturnValueType());
+    }
+
+    // If the expected return value is not a
+    //  primitive - handle result as an object
+    return EtsObject::FromCoreType((result.GetAs<ObjectHeader *>()));
+}
+
+EtsMethod *ValidateAndResolveInstanceMethod(EtsCoroutine *coro, EtsObject *thisObj, EtsMethod *method)
+{
+    // For instance methods, thisObj validation is required
+    if (thisObj == nullptr) {
+        ThrowEtsException(coro, panda_file_items::class_descriptors::NULL_POINTER_ERROR,
+                          "Instance method invocation requires non-null 'thisObj'");
+        return nullptr;
+    }
+
+    // Validate that thisObj is subtype of method owner
+    if (!method->GetClass()->IsAssignableFrom(thisObj->GetClass())) {
+        ThrowEtsException(coro, panda_file_items::class_descriptors::TYPE_ERROR,
+                          "Object type is not compatible with method owner type");
+        return nullptr;
+    }
+
+    // Resolve virtual method - this is instance-method specific
+    EtsMethod *resolved = thisObj->GetClass()->ResolveVirtualMethod(method);
+    if (resolved == nullptr) {
+        ThrowEtsException(coro, panda_file_items::class_descriptors::TYPE_ERROR, "Virtual method resolution failed");
+        return nullptr;
+    }
+    return resolved;
+}
 
 template char *SmallFpToString<double>(double number, bool negative, char *buffer);
 template char *SmallFpToString<float>(float number, bool negative, char *buffer);

@@ -239,6 +239,12 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     findType(&EtsPlatformTypes::coreParameter, PARAMETER);
     findType(&EtsPlatformTypes::coreClassType, CLASS_TYPE);
 
+    findType(&EtsPlatformTypes::reflectInstanceField, REFLECT_INSTANCE_FIELD);
+    findType(&EtsPlatformTypes::reflectInstanceMethod, REFLECT_INSTANCE_METHOD);
+    findType(&EtsPlatformTypes::reflectStaticField, REFLECT_STATIC_FIELD);
+    findType(&EtsPlatformTypes::reflectStaticMethod, REFLECT_STATIC_METHOD);
+    findType(&EtsPlatformTypes::reflectConstructor, REFLECT_CONSTRUCTOR);
+
     findType(&EtsPlatformTypes::escompatProcess, PROCESS);
     findMethod(&EtsPlatformTypes::escompatProcessListUnhandledJobs, escompatProcess, "listUnhandledJobs",
                "Lescompat/Array;:V", true);

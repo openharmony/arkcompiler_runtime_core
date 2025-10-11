@@ -46,6 +46,8 @@ class EtsErrorOptions;
 class EtsTypeAPIField;
 class EtsTypeAPIMethod;
 class EtsTypeAPIParameter;
+class EtsReflectMethod;
+class EtsReflectField;
 
 enum class EtsType;
 
@@ -233,6 +235,11 @@ public:
         return GetRuntimeClass()->IsPrimitive();
     }
 
+    bool IsVoid() const
+    {
+        return GetRuntimeClass()->IsVoid();
+    }
+
     bool IsAbstract()
     {
         return GetRuntimeClass()->IsAbstract();
@@ -329,8 +336,12 @@ public:
 
     EtsMethod *ResolveVirtualMethod(const EtsMethod *method) const;
 
+    EtsClass *ResolvePublicClass();
+
+    PANDA_PUBLIC_API EtsClass *ResolveStringClass();
+
     template <class Callback>
-    void EnumerateMethods(const Callback &callback)
+    void EnumerateDirectMethods(const Callback &callback) const
     {
         for (auto &method : GetRuntimeClass()->GetMethods()) {
             bool finished = callback(reinterpret_cast<EtsMethod *>(&method));
@@ -341,7 +352,19 @@ public:
     }
 
     template <class Callback>
-    void EnumerateDirectInterfaces(const Callback &callback)
+    void EnumerateVtable(Callback cb)
+    {
+        auto vtable = GetRuntimeClass()->GetVTable();
+        for (auto *method : vtable) {
+            bool res = cb(method);
+            if (res) {
+                break;
+            }
+        }
+    }
+
+    template <class Callback>
+    void EnumerateDirectInterfaces(const Callback &callback) const
     {
         for (Class *runtimeInterface : GetRuntimeClass()->GetInterfaces()) {
             EtsClass *interface = EtsClass::FromRuntimeClass(runtimeInterface);

@@ -17,11 +17,14 @@
 
 #include "libpandabase/macros.h"
 #include "libpandabase/utils/utf.h"
+#include "libpandafile/param_annotations_data_accessor.h"
 #include "plugins/ets/runtime/ani/ani_checkers.h"
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"
+#include "plugins/ets/runtime/ets_annotation.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 #include "plugins/ets/runtime/types/ets_type.h"
+#include "plugins/ets/runtime/ets_utils.h"
 
 namespace ark::ets {
 
@@ -135,24 +138,14 @@ inline std::optional<uint32_t> TryGetMinArgCountFromAnnotation(const panda_file:
 
 std::optional<uint32_t> EtsMethod::TryGetMinArgCount()
 {
-    std::optional<uint32_t> resOpt = std::nullopt;
-
     panda_file::MethodDataAccessor mda(*(GetPandaMethod()->GetPandaFile()), GetPandaMethod()->GetFileId());
-    mda.EnumerateAnnotations([&](panda_file::File::EntityId annotationId) {
-        panda_file::AnnotationDataAccessor accessor(mda.GetPandaFile(), annotationId);
-        auto annotationName = mda.GetPandaFile().GetStringData(accessor.GetClassId()).data;
-        auto expectedAnnotationName =
-            utf::CStringAsMutf8(panda_file_items::class_descriptors::OPTIONAL_PARAMETERS_ANNOTATION.data());
-        // check if annotation is optional parameters
-        if (utf::IsEqual(annotationName, expectedAnnotationName)) {
-            std::optional<uint32_t> minArgCountOpt = TryGetMinArgCountFromAnnotation(accessor, mda.GetPandaFile());
-
-            if (minArgCountOpt.has_value()) {
-                resOpt = minArgCountOpt;
-            }
-        }
-    });
-    return resOpt;
+    auto annotationId = EtsAnnotation::OptionalParameters(GetPandaMethod());
+    if (!annotationId.IsValid()) {
+        return std::nullopt;
+    }
+    panda_file::AnnotationDataAccessor accessor(mda.GetPandaFile(), annotationId);
+    std::optional<uint32_t> minArgCountOpt = TryGetMinArgCountFromAnnotation(accessor, mda.GetPandaFile());
+    return minArgCountOpt.has_value() ? minArgCountOpt : std::nullopt;
 }
 
 uint32_t EtsMethod::GetNumMandatoryArgs()
@@ -160,8 +153,7 @@ uint32_t EtsMethod::GetNumMandatoryArgs()
     // NOTE(MockMockBlack, #IC787J): support default parameters and optional parameters for lambda functon
     size_t numMandatoryArgs = 0;
 
-    bool hasRestParam = ((this->GetAccessFlags() & ACC_VARARGS) != 0);
-    if (hasRestParam) {
+    if (this->HasRestParam()) {
         // rest param is not mandatory
         numMandatoryArgs = this->GetParametersNum() - 1;
     } else {
@@ -174,6 +166,33 @@ uint32_t EtsMethod::GetNumMandatoryArgs()
     }
 
     return numMandatoryArgs;
+}
+
+static EtsClass *ResolveTypePrimitive(panda_file::Type type, EtsClassLinker *classLinker)
+{
+    switch (type.GetId()) {
+        case panda_file::Type::TypeId::U1:
+            return classLinker->GetClassRoot(EtsClassRoot::BOOLEAN);
+        case panda_file::Type::TypeId::I8:
+            return classLinker->GetClassRoot(EtsClassRoot::BYTE);
+        case panda_file::Type::TypeId::I16:
+            return classLinker->GetClassRoot(EtsClassRoot::SHORT);
+        case panda_file::Type::TypeId::U16:
+            return classLinker->GetClassRoot(EtsClassRoot::CHAR);
+        case panda_file::Type::TypeId::I32:
+            return classLinker->GetClassRoot(EtsClassRoot::INT);
+        case panda_file::Type::TypeId::I64:
+            return classLinker->GetClassRoot(EtsClassRoot::LONG);
+        case panda_file::Type::TypeId::F32:
+            return classLinker->GetClassRoot(EtsClassRoot::FLOAT);
+        case panda_file::Type::TypeId::F64:
+            return classLinker->GetClassRoot(EtsClassRoot::DOUBLE);
+        case panda_file::Type::TypeId::VOID:
+            return classLinker->GetClassRoot(EtsClassRoot::VOID);
+        default:
+            LOG(FATAL, RUNTIME) << "ResolveArgType: not a valid ets type for " << type;
+            return nullptr;
+    };
 }
 
 EtsClass *EtsMethod::ResolveArgType(uint32_t idx)
@@ -197,31 +216,25 @@ EtsClass *EtsMethod::ResolveArgType(uint32_t idx)
             }
         }
         ASSERT(refIdx <= proto.GetRefTypes().size());
-        return classLinker->GetClass(proto.GetRefTypes()[refIdx].data(), false, GetClass()->GetLoadContext());
+        auto *resCls = classLinker->GetClass(proto.GetRefTypes()[refIdx].data(), false, GetClass()->GetLoadContext());
+        return resCls->ResolvePublicClass();
     }
 
     // get primitive type
-    switch (type.GetId()) {
-        case panda_file::Type::TypeId::U1:
-            return classLinker->GetClassRoot(EtsClassRoot::BOOLEAN);
-        case panda_file::Type::TypeId::I8:
-            return classLinker->GetClassRoot(EtsClassRoot::BYTE);
-        case panda_file::Type::TypeId::I16:
-            return classLinker->GetClassRoot(EtsClassRoot::SHORT);
-        case panda_file::Type::TypeId::U16:
-            return classLinker->GetClassRoot(EtsClassRoot::CHAR);
-        case panda_file::Type::TypeId::I32:
-            return classLinker->GetClassRoot(EtsClassRoot::INT);
-        case panda_file::Type::TypeId::I64:
-            return classLinker->GetClassRoot(EtsClassRoot::LONG);
-        case panda_file::Type::TypeId::F32:
-            return classLinker->GetClassRoot(EtsClassRoot::FLOAT);
-        case panda_file::Type::TypeId::F64:
-            return classLinker->GetClassRoot(EtsClassRoot::DOUBLE);
-        default:
-            LOG(FATAL, RUNTIME) << "ResolveArgType: not a valid ets type for " << type;
-            return nullptr;
-    };
+    return ResolveTypePrimitive(type, classLinker);
+}
+
+EtsClass *EtsMethod::ResolveReturnType()
+{
+    panda_file::Type retType = GetPandaMethod()->GetReturnType();
+    auto *classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
+    if (!retType.IsPrimitive()) {
+        auto proto = GetPandaMethod()->GetProto();
+        const char *descriptor = proto.GetReturnTypeDescriptor().data();
+        auto *resCls = classLinker->GetClass(descriptor, false, GetClass()->GetLoadContext());
+        return resCls->ResolvePublicClass();
+    }
+    return ResolveTypePrimitive(retType, classLinker);
 }
 
 PandaString EtsMethod::GetMethodSignature(bool includeReturnType) const

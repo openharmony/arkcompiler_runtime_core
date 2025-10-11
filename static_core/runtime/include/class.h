@@ -502,6 +502,11 @@ public:
         return type_.IsPrimitive();
     }
 
+    bool IsVoid() const
+    {
+        return type_.IsVoid();
+    }
+
     bool IsAbstract() const
     {
         return (accessFlags_ & ACC_ABSTRACT) != 0;

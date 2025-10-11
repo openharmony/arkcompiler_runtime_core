@@ -48,8 +48,23 @@ coretypes:
 - managed_class: std.core.Field
   mirror_class: ark::ets::EtsTypeAPIField
 
+- managed_class: std.core.reflect.InstanceField
+  mirror_class: ark::ets::EtsReflectField
+
+- managed_class: std.core.reflect.StaticField
+  mirror_class: ark::ets::EtsReflectField
+
 - managed_class: std.core.Method
   mirror_class: ark::ets::EtsTypeAPIMethod
+
+- managed_class: std.core.reflect.InstanceMethod
+  mirror_class: ark::ets::EtsReflectMethod
+
+- managed_class: std.core.reflect.StaticMethod
+  mirror_class: ark::ets::EtsReflectMethod
+
+- managed_class: std.core.reflect.Constructor
+  mirror_class: ark::ets::EtsReflectMethod
 
 - managed_class: std.core.Parameter
   mirror_class: ark::ets::EtsTypeAPIParameter
@@ -5984,6 +5999,95 @@ intrinsics:
     impl: ark::ets::intrinsics::StdCoreRuntimeAllocSameTypeArray
     clear_flags: [ ]
 
+###########################
+# std.core.reflect.Method #
+###########################
+  - name: StdCoreReflectMethodGetReturnTypeImpl
+    space: ets
+    class_name: std.core.reflect.Method
+    method_name: getReturnTypeImpl
+    static: true
+    signature:
+      ret: std.core.Class
+      args: [ i64 ]
+    impl: ark::ets::intrinsics::ReflectMethodGetReturnTypeImpl
+
+  - name: StdCoreReflectMethodGetParameterTypeByIdxImpl
+    space: ets
+    class_name: std.core.reflect.Method
+    method_name: getParameterTypeByIdxImpl
+    static: true
+    signature:
+      ret: std.core.Class
+      args: [ i64, i32 ]
+    impl: ark::ets::intrinsics::ReflectMethodGetParameterTypeByIdxImpl
+
+  - name: StdCoreReflectMethodGetParametersTypesImpl
+    space: ets
+    class_name: std.core.reflect.Method
+    method_name: getParametersTypesImpl
+    static: true
+    signature:
+      ret: std.core.Class[]
+      args: [ i64 ]
+    impl: ark::ets::intrinsics::ReflectMethodGetParametersTypesImpl
+
+  - name: StdCoreReflectMethodGetParametersNumImpl
+    space: ets
+    class_name: std.core.reflect.Method
+    method_name: getParametersNumImpl
+    static: true
+    signature:
+      ret: i32
+      args: [ i64 ]
+    impl: ark::ets::intrinsics::ReflectMethodGetParametersNumImpl
+
+  - name: StdCoreReflectMethodGetNameInternal
+    space: ets
+    class_name: std.core.reflect.Method
+    method_name: getNameInternal
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ i64 ]
+    impl: ark::ets::intrinsics::ReflectMethodGetNameInternal
+
+  - name: StdCoreReflectMethodInvokeInternal
+    space: ets
+    class_name: std.core.reflect.Method
+    method_name: invokeInternal
+    static: false
+    signature:
+      ret: std.core.Object
+      args:
+        - std.core.Object
+        - std.core.Object[]
+    impl: ark::ets::intrinsics::ReflectMethodInvokeInternal
+
+  - name: StdCoreReflectMethodCreateInstanceInternal
+    space: ets
+    class_name: std.core.reflect.Constructor
+    method_name: createInstanceInternal
+    static: false
+    signature:
+      ret: std.core.Object
+      args:
+        - std.core.Object[]
+    impl: ark::ets::intrinsics::ReflectMethodCreateInstanceInternal
+
+##########################
+# std.core.reflect.Field #
+##########################
+  - name: StdCoreReflectFieldGetNameInternal
+    space: ets
+    class_name: std.core.reflect.Field
+    method_name: getNameInternal
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ i64 ]
+    impl: ark::ets::intrinsics::ReflectFieldGetNameInternal
+
 ##################
 # std.core.Class #
 ##################
@@ -5996,6 +6100,26 @@ intrinsics:
       ret: std.core.String
       args: [ ]
     impl: ark::ets::intrinsics::StdCoreClassGetNameInternal
+
+  - name: StdCoreClassIsNamespace
+    space: ets
+    class_name: std.core.Class
+    method_name: isNamespace
+    static: false
+    signature:
+      ret: u1
+      args: [ ]
+    impl: ark::ets::intrinsics::StdCoreClassIsNamespace
+
+  - name: StdCoreClassGetFixedArrayComponentType
+    space: ets
+    class_name: std.core.Class
+    method_name: getFixedArrayComponentType
+    static: false
+    signature:
+      ret: std.core.Class
+      args: [ ]
+    impl: ark::ets::intrinsics::StdCoreClassGetFixedArrayComponentType
 
   - name: StdCoreClassGetLinker
     space: ets
@@ -6010,12 +6134,22 @@ intrinsics:
   - name: StdCoreClassOf
     space: ets
     class_name: std.core.Class
-    method_name: of
+    method_name: ofObject
     static: true
     signature:
       ret: std.core.Class
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::StdCoreClassOf
+
+  - name: StdCoreClassOfNull
+    space: ets
+    class_name: std.core.Class
+    method_name: ofNull
+    static: true
+    signature:
+      ret: std.core.Class
+      args: []
+    impl: ark::ets::intrinsics::StdCoreClassOfNull
 
   - name: StdCoreClassCurrent
     space: ets
@@ -6066,6 +6200,189 @@ intrinsics:
       ret: std.core.String
       args: [ ]
     impl: ark::ets::intrinsics::StdCoreClassGetDescriptor
+
+  - name: StdCoreClassGetInstanceMethodsInternal
+    space: ets
+    class_name: std.core.Class
+    method_name: getInstanceMethodsInternal
+    static: false
+    signature:
+      ret: std.core.reflect.InstanceMethod[]
+      args: [ u1 ]
+    impl: ark::ets::intrinsics::StdCoreClassGetInstanceMethodsInternal
+
+  - name: StdCoreClassGetInstanceMethodByNameInternal
+    space: ets
+    class_name: std.core.Class
+    method_name: getInstanceMethodByNameInternal
+    static: false
+    signature:
+      ret: std.core.reflect.InstanceMethod
+      args: [ std.core.String, u1 ]
+    impl: ark::ets::intrinsics::StdCoreClassGetInstanceMethodByNameInternal
+
+  - name: StdCoreClassGetInstanceFieldByNameInternal
+    space: ets
+    class_name: std.core.Class
+    method_name: getInstanceFieldByNameInternal
+    static: false
+    signature:
+      ret: std.core.reflect.InstanceField
+      args: [ std.core.String, u1 ]
+    impl: ark::ets::intrinsics::StdCoreClassGetInstanceFieldByNameInternal
+
+  - name: StdCoreClassGetStaticFieldByNameInternal
+    space: ets
+    class_name: std.core.Class
+    method_name: getStaticFieldByNameInternal
+    static: false
+    signature:
+      ret: std.core.reflect.StaticField
+      args: [ std.core.String, u1 ]
+    impl: ark::ets::intrinsics::StdCoreClassGetStaticFieldByNameInternal
+
+  - name: StdCoreClassGetDirectStaticMethodByNameInternal
+    space: ets
+    class_name: std.core.Class
+    method_name: getDirectStaticMethodByNameInternal
+    static: false
+    signature:
+      ret: std.core.reflect.StaticMethod
+      args:
+        - std.core.String
+        - std.core.Class[]
+        - u1
+    impl: ark::ets::intrinsics::StdCoreClassGetDirectStaticMethodByNameInternal
+
+  - name: StdCoreClassGetStaticMethodsInternal
+    space: ets
+    class_name: std.core.Class
+    method_name: getStaticMethodsInternal
+    static: false
+    signature:
+      ret: std.core.reflect.StaticMethod[]
+      args: [ u1 ]
+    impl: ark::ets::intrinsics::StdCoreClassGetStaticMethodsInternal
+
+  - name: StdCoreClassGetConstructorsInternal
+    space: ets
+    class_name: std.core.Class
+    method_name: getConstructorsInternal
+    static: false
+    signature:
+      ret: std.core.reflect.Constructor[]
+      args: [ u1 ]
+    impl: ark::ets::intrinsics::StdCoreClassGetConstructorsInternal
+
+  - name: StdCoreClassGetInstanceFieldsInternal
+    space: ets
+    class_name: std.core.Class
+    method_name: getInstanceFieldsInternal
+    static: false
+    signature:
+      ret: std.core.reflect.InstanceField[]
+      args: [ u1 ]
+    impl: ark::ets::intrinsics::StdCoreClassGetInstanceFieldsInternal
+
+  - name: StdCoreClassGetStaticFieldsInternal
+    space: ets
+    class_name: std.core.Class
+    method_name: getStaticFieldsInternal
+    static: false
+    signature:
+      ret: std.core.reflect.StaticField[]
+      args: [ u1 ]
+    impl: ark::ets::intrinsics::StdCoreClassGetStaticFieldsInternal
+
+  - name: StdCoreClassGetInterfaces
+    space: ets
+    class_name: std.core.Class
+    method_name: getInterfaces
+    static: false
+    signature:
+      ret: std.core.Class[]
+      args: [ ]
+    impl: ark::ets::intrinsics::StdCoreClassGetInterfaces
+
+  - name: StdCoreClassIsEnum
+    space: ets
+    class_name: std.core.Class
+    method_name: isEnum
+    static: false
+    signature:
+      ret: u1
+      args: [ ]
+    impl: ark::ets::intrinsics::StdCoreClassIsEnum
+
+  - name: StdCoreClassIsInterface
+    space: ets
+    class_name: std.core.Class
+    method_name: isInterface
+    static: false
+    signature:
+      ret: u1
+      args: [ ]
+    impl: ark::ets::intrinsics::StdCoreClassIsInterface
+
+  - name: StdCoreClassIsFixedArray
+    space: ets
+    class_name: std.core.Class
+    method_name: isFixedArray
+    static: false
+    signature:
+      ret: u1
+      args: [ ]
+    impl: ark::ets::intrinsics::StdCoreClassIsFixedArray
+
+  - name: StdCoreClassIsSubtypeOf
+    space: ets
+    class_name: std.core.Class
+    method_name: isSubtypeOf
+    static: false
+    signature:
+      ret: u1
+      args: [ std.core.Class ]
+    impl: ark::ets::intrinsics::StdCoreClassIsSubtypeOf
+
+  - name: StdCoreClassIsUnion
+    space: ets
+    class_name: std.core.Class
+    method_name: isUnion
+    static: false
+    signature:
+      ret: u1
+      args: [ ]
+    impl: ark::ets::intrinsics::StdCoreClassIsUnion
+
+  - name: StdCoreClassGetUnionConstituentTypesInternal
+    space: ets
+    class_name: std.core.Class
+    method_name: getUnionConstituentTypesInternal
+    static: false
+    signature:
+      ret: std.core.Class[]
+      args: [ ]
+    impl: ark::ets::intrinsics::StdCoreClassGetUnionConstituentTypesInternal
+
+  - name: StdCoreClassIsFinal
+    space: ets
+    class_name: std.core.Class
+    method_name: isFinal
+    static: false
+    signature:
+      ret: u1
+      args: [ ]
+    impl: ark::ets::intrinsics::StdCoreClassIsFinal
+
+  - name: StdCoreClassIsAbstract
+    space: ets
+    class_name: std.core.Class
+    method_name: isAbstract
+    static: false
+    signature:
+      ret: u1
+      args: [ ]
+    impl: ark::ets::intrinsics::StdCoreClassIsAbstract
 
 ##########################
 # std.core.RuntimeLinker #
@@ -6335,7 +6652,7 @@ intrinsics:
     static: true
     signature:
       ret: std.core.Field
-      args: [ std.core.Class, i64, std.core.Type, std.core.Type ]
+      args: [ i64, std.core.Type, std.core.Type ]
     impl: ark::ets::intrinsics::TypeAPIGetField
 
   - name: TypeAPIGetMethodsNum
@@ -6365,7 +6682,7 @@ intrinsics:
     static: true
     signature:
       ret: std.core.Method
-      args: [ std.core.Class, std.core.MethodType ]
+      args: [ std.core.MethodType, std.core.Type]
     impl: ark::ets::intrinsics::TypeAPIGetMethod
 
   - name: TypeAPIGetConstructorsNum
@@ -6448,6 +6765,18 @@ intrinsics:
       ret: i32
       args: [ std.core.String ]
     impl: ark::ets::intrinsics::TypeAPIGetFunctionAttributes
+
+  - name: TypeAPIGetDeclaringClassImpl
+    space: ets
+    class_name: std.core.TypeAPI
+    method_name: getDeclaringClassImpl
+    static: true
+    signature:
+      ret: std.core.Class
+      args:
+        - U{std.core.LambdaType,std.core.MethodType}
+      impl_args: [ std.core.Type ]
+    impl: ark::ets::intrinsics::TypeAPIGetDeclaringClassImpl
 
   - name: TypeAPIGetStaticFieldValue
     space: ets
@@ -6559,19 +6888,6 @@ intrinsics:
       ret: std.core.String
       args: [ ]
     impl: ark::ets::intrinsics::TypeAPIGetReceiverTypeDescriptor
-
-#######################
-# std.core.LambdaType #
-#######################
-  - name: TypeAPIGetDeclaringClass
-    space: ets
-    class_name: std.core.LambdaType
-    method_name: getDeclaringClass
-    static: false
-    signature:
-      ret: std.core.Class
-      args: [ ]
-    impl: ark::ets::intrinsics::TypeAPIGetDeclaringClass
 
 #################
 # std.core.Char #

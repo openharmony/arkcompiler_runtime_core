@@ -20,6 +20,7 @@
 #include "macros.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
+#include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_field.h"
@@ -730,7 +731,8 @@ void EtsClass::Initialize(EtsClass *superClass, uint16_t accessFlags, bool isPri
 {
     ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
     SetName(nullptr);
-    SetSuperClass(superClass);
+    // Class of interface extends Object, but we should not expose this information to user.
+    IsInterface() ? SetSuperClass(nullptr) : SetSuperClass(superClass);
 
     uint32_t flags = accessFlags;
     if (isPrimitiveType) {
@@ -884,9 +886,6 @@ EtsField *EtsClass::GetStaticFieldIDByOffset(uint32_t fieldOffset)
 
 EtsClass *EtsClass::GetBase()
 {
-    if (IsInterface()) {
-        return nullptr;
-    }
     auto *base = GetRuntimeClass()->GetBase();
     if (base == nullptr) {
         return nullptr;
@@ -972,6 +971,63 @@ EtsObject *EtsClass::CreateInstance()
         return nullptr;
     }
     return objHandle.GetPtr();
+}
+
+EtsClass *EtsClass::ResolveStringClass()
+{
+    ASSERT(IsStringClass());
+    auto *coreClass = GetRuntimeClass();
+    if (coreClass->IsLineStringClass() || coreClass->IsSlicedStringClass() || coreClass->IsTreeStringClass()) {
+        EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
+        ASSERT(coroutine != nullptr);
+        const EtsPlatformTypes *ptypes = PlatformTypes(coroutine);
+        return ptypes->coreString;
+    }
+    return this;
+}
+
+static EtsClass *ResolvePrimitivePublicClass(panda_file::Type type)
+{
+    EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
+    ASSERT(coroutine != nullptr);
+    const EtsPlatformTypes *ptypes = PlatformTypes(coroutine);
+    switch (type.GetId()) {
+        case panda_file::Type::TypeId::U1:
+            return ptypes->coreBoolean;
+        case panda_file::Type::TypeId::I8:
+            return ptypes->coreByte;
+        case panda_file::Type::TypeId::I16:
+            return ptypes->coreShort;
+        case panda_file::Type::TypeId::U16:
+            return ptypes->coreChar;
+        case panda_file::Type::TypeId::I32:
+            return ptypes->coreInt;
+        case panda_file::Type::TypeId::I64:
+            return ptypes->coreLong;
+        case panda_file::Type::TypeId::F32:
+            return ptypes->coreFloat;
+        case panda_file::Type::TypeId::F64:
+            return ptypes->coreDouble;
+        case panda_file::Type::TypeId::VOID:
+            return coroutine->GetPandaVM()->GetClassLinker()->GetClassRoot(EtsClassRoot::VOID);
+        default:
+            LOG(FATAL, RUNTIME) << "ResolveArgType: not a valid ets type for " << type;
+            return nullptr;
+    };
+}
+
+EtsClass *EtsClass::ResolvePublicClass()
+{
+    if (!IsStringClass() && !IsPrimitive()) {
+        return this;
+    }
+    if (IsStringClass()) {
+        return ResolveStringClass();
+    }
+
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    auto type = panda_file::Type::GetTypeIdBySignature(GetDescriptor()[0]);
+    return ResolvePrimitivePublicClass(type);
 }
 
 }  // namespace ark::ets

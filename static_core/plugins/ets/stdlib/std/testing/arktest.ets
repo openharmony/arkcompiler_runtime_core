@@ -265,7 +265,7 @@ export namespace arktest {
             cb()
         } catch (e) {
             e = (e instanceof Error) ? e as Error
-                : failingAssertion("An arbitrary object instance was caught!") 
+                : failingAssertion("An arbitrary object instance was caught!")
             let res = test?.(e)
             if (res != undefined && res != true) {
                 failingAssertion((typeof res == "string") ? res as string : ("Unexpected value thrown: " + e))
@@ -314,17 +314,17 @@ export namespace arktest {
     export function expectError(fn: () => void, expect?: string | Error): void {
         expectThrow(fn, (e) => {
             if (!(e instanceof Error)) {
-                return "Expected an instance of Error, got " + Type.of(e).getName()
+                return "Expected an instance of Error, got " + Class.of(e).getName()
             }
-            if (expect == undefined) {
+            if (expect === undefined) {
                 return true
             } else if (typeof expect == "string") {
                 return e.message == expect
             } else {
                 const expectedError = expect as Error // broken smartcast
-                const eType = Type.of(e)
-                const expectType = Type.of(expectedError)
-                if (!eType.equals(expectType)) {
+                const eType = Class.of(e)
+                const expectType = Class.of(expectedError)
+                if (eType !== expectType) {
                     return "Expected " + expectType.getName() + ", got " + eType.getName()
                 }
                 if (e.message != expectedError.message) {
@@ -445,7 +445,7 @@ export namespace arktest {
 
         /**
         * Create a testsuite instance
-        * @param name name of testsuite 
+        * @param name name of testsuite
         */
         constructor(name: string) {
             this.name = name;

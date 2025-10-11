@@ -80,6 +80,13 @@ public:
         ASSERT(ptr != nullptr);
         return ptr;
     }
+
+    const T *operator->() const
+    {
+        T *ptr = GetPtr();
+        ASSERT(ptr != nullptr);
+        return ptr;
+    }
 };
 
 template <typename T>

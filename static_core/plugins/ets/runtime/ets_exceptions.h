@@ -67,7 +67,7 @@ inline void ThrowEtsInvalidKey(EtsCoroutine *coroutine, const char *classSignatu
 
 inline void ThrowEtsInvalidType(EtsCoroutine *coroutine, const char *classSignature)
 {
-    PandaString message = "Invalid oprand type: " + PandaString(classSignature);
+    PandaString message = "Invalid operand type: " + PandaString(classSignature);
     ThrowEtsException(coroutine, panda_file_items::class_descriptors::TYPE_ERROR, message.c_str());
 }
 

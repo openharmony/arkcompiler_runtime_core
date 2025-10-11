@@ -284,6 +284,7 @@ bool EtsClassLinkerExtension::InitializeArrayClass(Class *arrayClass, Class *com
 
     auto *objectClass = GetClassRoot(ClassRoot::OBJECT);
     arrayClass->SetBase(objectClass);
+    EtsClass::FromRuntimeClass(arrayClass)->SetSuperClass(EtsClass::FromRuntimeClass(objectClass));
     arrayClass->SetComponentType(componentClass);
 
     auto accessFlags = componentClass->GetAccessFlags() & ACC_FILE_MASK;
@@ -312,6 +313,7 @@ bool EtsClassLinkerExtension::InitializeUnionClass(Class *unionClass, Span<Class
     ASSERT(unionClass->GetConstituentTypes().begin() == nullptr);
 
     unionClass->SetBase(nullptr);
+    EtsClass::FromRuntimeClass(unionClass)->SetSuperClass(nullptr);
     unionClass->SetConstituentTypes(constituentClasses);
     unionClass->SetState(Class::State::INITIALIZED);
 
@@ -577,6 +579,7 @@ Class *EtsClassLinkerExtension::CreateClassRoot(const uint8_t *descriptor, Class
 
     ASSERT(klass != nullptr);
     klass->SetBase(GetClassRoot(ClassRoot::OBJECT));
+    EtsClass::FromRuntimeClass(klass)->SetSuperClass(EtsClass::FromRuntimeClass(GetClassRoot(ClassRoot::OBJECT)));
     klass->SetState(Class::State::LOADED);
     klass->SetLoadContext(GetBootContext());
     GetClassLinker()->AddClassRoot(root, klass);
