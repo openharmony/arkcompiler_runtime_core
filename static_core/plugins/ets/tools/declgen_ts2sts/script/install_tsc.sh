@@ -20,7 +20,7 @@ set -e
 ROOT_DIR="${1:-$(pwd)}"
 
 # Clone the repository and checkout the current Git branch
-TYPESCRIPT_REPO="https://gitee.com/openharmony/third_party_typescript.git"  # Replace with your correct Typescript repository URL
+TYPESCRIPT_REPO="https://gitcode.com/openharmony/third_party_typescript.git"  # Replace with your correct Typescript repository URL
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref @{u} | sed 's/^openharmony\///')
 
 # Define the third_party directory
