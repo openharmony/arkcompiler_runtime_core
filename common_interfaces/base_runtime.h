@@ -30,10 +30,13 @@
 #include <mutex>
 
 #include "base/runtime_param.h"
+#include "heap/heap_visitor.h"
 namespace common {
 class BaseStringTableImpl;
 template <typename Impl>
 class BaseStringTableInterface;
+using StringTableCleanUpCallback = std::function<void(void)>;
+using StringTableProcessCallback = std::function<void(const WeakRefFieldVisitor&)>;
 class BaseObject;
 class HeapManager;
 class Mutator;
@@ -194,6 +197,31 @@ public:
     {
         return *stringTable_;
     }
+
+    void StringTableCleanUp()
+    {
+        if (stringTableCleanUpCallback_) {
+            stringTableCleanUpCallback_();
+        }
+    }
+
+    void SetStringTableCleanUpCallback(StringTableCleanUpCallback callback)
+    {
+        stringTableCleanUpCallback_ = callback;
+    }
+
+    void ProcessStringTable(const WeakRefFieldVisitor &visitor)
+    {
+        if (stringTableProcessCallback_) {
+            stringTableProcessCallback_(visitor);
+        }
+    }
+
+    void SetStringTableProcessCallback(StringTableProcessCallback callback)
+    {
+        stringTableProcessCallback_ = callback;
+    }
+
 private:
     RuntimeParam param_ {};
 
@@ -202,6 +230,8 @@ private:
     ThreadHolderManager* threadHolderManager_  = nullptr;
     BaseClassRoots* baseClassRoots_ = nullptr;
     BaseStringTableInterface<BaseStringTableImpl>* stringTable_ = nullptr;
+    StringTableCleanUpCallback stringTableCleanUpCallback_ {};
+    StringTableProcessCallback stringTableProcessCallback_ {};
     static std::mutex vmCreationLock_;
     static BaseRuntime *baseRuntimeInstance_;
     static bool initialized_;

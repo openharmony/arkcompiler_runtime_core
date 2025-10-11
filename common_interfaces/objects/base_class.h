@@ -82,7 +82,7 @@ public:
         return GetObjectType() == ObjectType::TREE_STRING;
     }
 
-private:
+protected:
     // header_ is a padding field in base class, it will be used to store the root class in ets_runtime.
     FIELD_UNUSED_CC HeaderType header_;
     // bitfield will be initialized as the bitfield_ and bitfield1_ of js_hclass.
