@@ -14,7 +14,7 @@
  */
 //NOTE(andreypetukhov) enable after fixibng #12808
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/implement_interfaces/arkts_class')
+let module = ESValue.load('arkts_test_class')
 let arkTestClass = module.getProperty('ArkTestClass');
 
 function arktsClassGetProperty(): boolean {

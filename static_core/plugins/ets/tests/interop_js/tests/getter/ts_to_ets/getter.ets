@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/getter/ts_to_ets/getter');
+let module = ESValue.load('dynamic_import');
 
 let tsString = module.getProperty('tsString');
 let tsNumber = module.getProperty('tsNumber');

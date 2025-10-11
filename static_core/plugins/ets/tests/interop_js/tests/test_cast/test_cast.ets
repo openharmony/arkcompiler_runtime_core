@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/test_cast/pure')
+let module = ESValue.load('js_code')
 let funcArgType = module.getProperty('funcArgType');
 
 function TestFuncCallArg_Pos(): boolean {

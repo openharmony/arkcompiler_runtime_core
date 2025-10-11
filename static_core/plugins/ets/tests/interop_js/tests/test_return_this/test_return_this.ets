@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/test_return_this/test_return_this');
+let module = ESValue.load('js_code');
 let TestClass = module.getProperty('TestClass');
 let testFuncReturnStr = module.getProperty('testFuncReturnStr');
 let getThis = module.getProperty('getThis');

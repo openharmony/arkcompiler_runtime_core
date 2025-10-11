@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/generic_static/ts_to_sts/main');
+let module = ESValue.load('main_js')
 let SubsetByValueStatic = module.getProperty('SubsetByValueStatic');
 let genericSubsetByValueStaticCallFromTs = module.getProperty('genericSubsetByValueStaticCallFromTs');
 let BaseObj = module.getProperty('BaseObj');

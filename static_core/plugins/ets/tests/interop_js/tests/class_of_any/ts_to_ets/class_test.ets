@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/object/ts_to_ets/test_object')
+let module = ESValue.load('test_object')
 let str_val = module.getProperty('str_val');
  
 function ClassOfModule(): boolean {

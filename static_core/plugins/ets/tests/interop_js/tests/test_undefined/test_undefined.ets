@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/test_undefined/index')
+let module = ESValue.load('js_code')
 let etsUndefinedProduce = module.getProperty('etsUndefinedProduce');
 let etsUndefinedConsume = module.getProperty('etsUndefinedConsume');
 let etsNullProduce = module.getProperty('etsNullProduce');

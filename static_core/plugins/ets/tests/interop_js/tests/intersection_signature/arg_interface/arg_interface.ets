@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/intersection_signature/main');
+let module = ESValue.load('main_js');
 let tsNumber = module.getProperty('tsNumber').toNumber();
 let tsString = module.getProperty('tsString').toString();
 let AgeNameInterfaceClass = module.getProperty('AgeNameInterfaceClass');

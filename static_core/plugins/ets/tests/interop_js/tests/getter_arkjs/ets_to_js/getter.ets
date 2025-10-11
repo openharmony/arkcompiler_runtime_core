@@ -16,7 +16,7 @@
 package getter.test;
 
 class ModuleLoader {
-    static _module: ESValue = ESValue.load('../../plugins/ets/tests/interop_js/tests/getter_arkjs/ets_to_js/constant');
+    static _module: ESValue = ESValue.load('constant_js');
 
     public static getProp(propertyName: string): ESValue {
         return ModuleLoader._module.getProperty(propertyName);

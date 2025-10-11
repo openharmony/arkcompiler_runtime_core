@@ -22,7 +22,7 @@ import {
     createError,
 } from "dynamic_import_with_decl"
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/instanceof/js/instanceof_with_decl')
+let module = ESValue.load('js')
 let AValue = module.getProperty('AValue');
 let CValue = module.getProperty('CValue');
 let jsAvalue = module.getProperty('jsAvalue');

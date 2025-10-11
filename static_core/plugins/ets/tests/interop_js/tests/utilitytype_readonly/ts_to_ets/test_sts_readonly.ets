@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/utilitytype_readonly/ts_to_ets/ts_readonly');
+let module = ESValue.load('ts_readonly');
 let testInEts = module.getProperty('Test');
 let readonlyTestInTs = module.getProperty('readonlyTestInTs');
 let writableTestInTs = module.getProperty('writableTestInTs');

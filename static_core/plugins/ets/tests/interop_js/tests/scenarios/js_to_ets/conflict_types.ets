@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/scenarios/js_to_ets/js_suites/conflict_types');
+let module = ESValue.load('pure_js_conflict');
 let functionArgTypeConflictArray = module.getProperty('functionArgTypeConflictArray');
 let functionArgTypeConflictArrayBuffer = module.getProperty('functionArgTypeConflictArrayBuffer');
 let functionArgTypeConflictBoolean = module.getProperty('functionArgTypeConflictBoolean');

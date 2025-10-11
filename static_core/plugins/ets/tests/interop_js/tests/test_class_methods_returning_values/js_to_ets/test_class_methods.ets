@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/test_class_methods_returning_values/js_to_ets/test_class_methods');
+let module = ESValue.load('js_code');
 let TestClass = module.getProperty('TestClass');
 
 let returnIntegerAsAny = module.getProperty('returnIntegerAsAny');

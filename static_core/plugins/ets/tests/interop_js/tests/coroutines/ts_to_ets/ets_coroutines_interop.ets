@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/coroutines/ts_to_ets/main');
+let module = ESValue.load('main_js');
 let Foo = module.getProperty('Foo');
 let createFooClassFromTs = module.getProperty('createFooClassFromTs');
 

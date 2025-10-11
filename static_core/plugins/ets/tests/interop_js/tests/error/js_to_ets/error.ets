@@ -13,7 +13,7 @@
 * limitations under the License.
 */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/error/js_to_ets/error')
+let module = ESValue.load('error_js')
 let throwNum = module.getProperty('throwNum');
 let throwStr = module.getProperty('throwStr');
 let throwObj = module.getProperty('throwObj');

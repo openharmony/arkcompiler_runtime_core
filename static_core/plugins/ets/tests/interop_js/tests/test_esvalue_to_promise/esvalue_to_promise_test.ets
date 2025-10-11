@@ -15,7 +15,7 @@
 package esvalue_to_promise_test;
 
 async function checkToPromise(): Promise<void> {
-    let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/test_esvalue_to_promise/esvalue_to_promise_test');
+    let module = ESValue.load('esvalue_to_promise_test');
     let sleepRetNumber = module.getProperty('sleepRetNumber');
     let p = sleepRetNumber.invoke(ESValue.wrapNumber(5000)).toPromise();
     let res = await p;
@@ -24,7 +24,7 @@ async function checkToPromise(): Promise<void> {
 }
 
 async function checkToNumber(): Promise<void> {
-    let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/test_esvalue_to_promise/esvalue_to_promise_test');
+    let module = ESValue.load('esvalue_to_promise_test');
     let getPromiseNumber = module.getProperty('getPromiseNumber');
     let p = getPromiseNumber.invoke().toPromise();
     let res = false;
@@ -37,7 +37,7 @@ async function checkToNumber(): Promise<void> {
 }
 
 async function checkToString(): Promise<void> {
-    let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/test_esvalue_to_promise/esvalue_to_promise_test');
+    let module = ESValue.load('esvalue_to_promise_test');
     let getPromiseString = module.getProperty('getPromiseString');
     let p = getPromiseString.invoke().toPromise();
     let res = false;
@@ -50,7 +50,7 @@ async function checkToString(): Promise<void> {
 }
 
 async function checkToBoolean(): Promise<void> {
-    let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/test_esvalue_to_promise/esvalue_to_promise_test');
+    let module = ESValue.load('esvalue_to_promise_test');
     let getPromiseBoolean = module.getProperty('getPromiseBoolean');
     let p = getPromiseBoolean.invoke().toPromise();
     let res = false;
@@ -63,7 +63,7 @@ async function checkToBoolean(): Promise<void> {
 }
 
 async function checkToBigInt(): Promise<void> {
-    let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/test_esvalue_to_promise/esvalue_to_promise_test');
+    let module = ESValue.load('esvalue_to_promise_test');
     let getPromiseBigInt = module.getProperty('getPromiseBigInt');
     let p = getPromiseBigInt.invoke().toPromise();
     let res = false;

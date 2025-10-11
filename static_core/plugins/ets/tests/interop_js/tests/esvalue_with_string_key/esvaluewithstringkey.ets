@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/esvalue_with_string_key/esvaluewithstringkey')
+let module = ESValue.load('esvaluewithstringkey_js')
 let etsA = module.getProperty('A');
 
 function checkFieldAccessByDot(): int {

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
  
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/exceptions/js_to_sts/dynamic_function_exception')
+let module = ESValue.load('dynamic_function_exception')
 let dynamicFunctionWithUserException = module.getProperty('dynamicFunctionWithUserException');
 let dynamicFunctionWithCustomObject = module.getProperty('dynamicFunctionWithCustomObject');
 let dynamicFunctionWithBuiltinException = module.getProperty('dynamicFunctionWithBuiltinException');

@@ -13,13 +13,13 @@
  * limitations under the License.
  */
  
-let module1 = ESValue.load('../../plugins/ets/tests/interop_js/tests/exceptions/js_to_sts/static_function_exception')
+let module1 = ESValue.load('static_function_exception')
 let staticFunctionWithCustomException = module1.getProperty('staticFunctionWithCustomException');
 let staticFunctionWithBuiltinException = module1.getProperty('staticFunctionWithBuiltinException');
 let CustomError = module1.getProperty('CustomError');
 let createError = module1.getProperty('createError');
 
-let module2 = ESValue.load('../../plugins/ets/tests/interop_js/tests/exceptions/js_to_sts/ts_custom_exception')
+let module2 = ESValue.load('ts_custom_exception')
 let CustomErrorTypeA = module2.getProperty('CustomErrorTypeA');
 let createCustomErrorA = module2.getProperty('createCustomErrorA');
 

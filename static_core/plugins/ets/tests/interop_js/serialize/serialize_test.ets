@@ -40,7 +40,8 @@ export function checkAsync(ptr: bigint) {
     let w = new EAWorker(true);
     w.start();
     let cb = (): int => {
-        let module = ESValue.load('./serialize_interop_tests_helpers_js');
+        let ohmurlPath = './serialize_interop_tests_helpers_js';
+        let module = ESValue.load(ohmurlPath);
         let method = module.getProperty('checkResult');
         try {
             method.invoke(ESValue.wrap(ptr));

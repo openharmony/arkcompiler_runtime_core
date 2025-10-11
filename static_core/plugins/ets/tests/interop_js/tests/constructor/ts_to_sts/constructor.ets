@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/constructor/ts_to_sts/constructor');
+let module = ESValue.load('main_js');
 let tsInt = module.getProperty('tsInt');
 let NamedClass = module.getProperty('NamedClass');
 let createNamedClassFromTs = module.getProperty('createNamedClassFromTs');

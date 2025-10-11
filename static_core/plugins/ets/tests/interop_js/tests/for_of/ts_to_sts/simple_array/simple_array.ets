@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/for_of/ts_to_sts/static_function_exception')
+let module = ESValue.load('simple_array_js')
 let emptyArray = module.getProperty('emptyArray');
 let numberArray = module.getProperty('numberArray');
 let stringArray = module.getProperty('stringArray');

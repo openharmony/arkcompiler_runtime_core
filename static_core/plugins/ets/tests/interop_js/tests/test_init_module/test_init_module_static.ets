@@ -15,7 +15,7 @@
 
 // this will be compiled to <cctor>
 // and be executed when the module is initing
-let module = ESValue.load(`../../plugins/ets/tests/interop_js/tests/test_init_module/test_init_module_dynamic`);
+let module = ESValue.load('js_code');
 let initModuleTest = module.getProperty(`initModuleTest`);
 
 let magicToSet = initModuleTest.getProperty(`initMagic`).toString();

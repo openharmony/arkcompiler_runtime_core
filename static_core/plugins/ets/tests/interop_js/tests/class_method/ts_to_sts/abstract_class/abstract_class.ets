@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/class_method/ts_to_sts/main');
+let module = ESValue.load('main_js');
 let ChildAbstractClass = module.getProperty('ChildAbstractClass');
 let createChildAbstractClassFromTs = module.getProperty('createChildAbstractClassFromTs');
 let instanceChildAbstractClass = module.getProperty('instanceChildAbstractClass');

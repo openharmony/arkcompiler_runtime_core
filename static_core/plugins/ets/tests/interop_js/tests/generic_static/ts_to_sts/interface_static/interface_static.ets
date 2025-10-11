@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/generic_static/ts_to_sts/main');
+let module = ESValue.load('main_js')
 let InterfaceStatic = module.getProperty('InterfaceStatic');
 let userInterfaceFromTs = module.getProperty('userInterfaceFromTs');
 let user = module.getProperty('user');

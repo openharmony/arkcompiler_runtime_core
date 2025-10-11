@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/dynamic_with_lambda/index')
+let module = ESValue.load('js_code')
 let etsA = module.getProperty('A');
 
 function TestArgs0(): int {

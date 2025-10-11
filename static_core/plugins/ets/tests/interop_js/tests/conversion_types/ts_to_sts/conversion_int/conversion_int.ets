@@ -15,7 +15,7 @@
 
 let global = ESValue.getGlobal();
 let gtestEnv = global.getProperty("gtest_env");
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/conversion_types/ts_to_sts/main');
+let module = ESValue.load('main_js');
 
 let tsInt = module.getProperty('tsInt');
 

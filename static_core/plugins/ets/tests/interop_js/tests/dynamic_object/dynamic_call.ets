@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/dynamic_object/index')
+let module = ESValue.load('js_code')
 let etsRegularFunc = module.getProperty('RegularFunc');
 let etsFoo = module.getProperty('Foo');
 let etsMultipleCall = module.getProperty('MultipleCall');

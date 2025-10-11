@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/function_overload/ts_to_ets/function_overload');
+let module = ESValue.load('function_overload');
 let processInputDy = module.getProperty('processInput');
 let createArrayDy = module.getProperty('createArray');
 let getUserDy = module.getProperty('getUser');

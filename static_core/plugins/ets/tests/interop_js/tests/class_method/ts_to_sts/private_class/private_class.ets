@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/class_method/ts_to_sts/main');
+let module = ESValue.load('main_js');
 let PrivateClass = module.getProperty('PrivateClass');
 let createPrivateClassFromTs = module.getProperty('createPrivateClassFromTs');
 let instancePrivateClass = module.getProperty('instancePrivateClass');
