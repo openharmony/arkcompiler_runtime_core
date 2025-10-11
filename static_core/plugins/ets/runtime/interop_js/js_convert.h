@@ -160,12 +160,16 @@ JSCONVERT_UNWRAP(U16)
 JSCONVERT_DEFINE_TYPE(String, EtsString *);
 JSCONVERT_WRAP(String)
 {
+    PandaVector<uint8_t> tree8Buf;
+    PandaVector<uint16_t> tree16Buf;
     napi_value jsVal;
     if (UNLIKELY(etsVal->IsUtf16())) {
-        auto str = reinterpret_cast<char16_t *>(etsVal->GetDataUtf16());
+        auto str = reinterpret_cast<char16_t *>(etsVal->IsTreeString() ? etsVal->GetTreeStringDataUtf16(tree16Buf)
+                                                                       : etsVal->GetDataUtf16());
         NAPI_CHECK_FATAL(napi_create_string_utf16(env, str, etsVal->GetUtf16Length(), &jsVal));
     } else {
-        auto str = utf::Mutf8AsCString(etsVal->GetDataMUtf8());
+        auto str = utf::Mutf8AsCString(etsVal->IsTreeString() ? etsVal->GetTreeStringDataMUtf8(tree8Buf)
+                                                              : etsVal->GetDataMUtf8());
         // -1 for NULL terminated Mutf8 string!!!
         NAPI_CHECK_FATAL(napi_create_string_utf8(env, str, etsVal->GetMUtf8Length() - 1, &jsVal));
     }

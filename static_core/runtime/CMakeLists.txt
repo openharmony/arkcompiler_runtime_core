@@ -52,6 +52,7 @@ set(SOURCES
     intrinsics.cpp
     coretypes/line_string.cpp
     coretypes/string.cpp
+    coretypes/string_flatten.cpp
     coretypes/array.cpp
     class.cpp
     class_helper.cpp

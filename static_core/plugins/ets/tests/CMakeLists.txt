@@ -181,7 +181,6 @@ function(run_int_ets_code TARGET WORK_DIR)
         --compiler-enable-jit=false
         --interpreter-type=cpp
         --profilesaver-enabled=true
-        --use-all-strings=true
         ${ARG_RUNTIME_EXTRA_OPTIONS}
     )
     run_ets_code_impl(${TARGET}-cpp ${WORK_DIR} "${ARG_SOURCES}"
@@ -198,7 +197,6 @@ function(run_int_ets_code TARGET WORK_DIR)
         --compiler-enable-jit=false
         --interpreter-type=irtoc
         --profilesaver-enabled=true
-        --use-all-strings=true
         ${ARG_RUNTIME_EXTRA_OPTIONS}
     )
     run_ets_code_impl(${TARGET}-irtoc ${WORK_DIR} "${ARG_SOURCES}"
@@ -216,7 +214,6 @@ function(run_int_ets_code TARGET WORK_DIR)
             --compiler-enable-jit=false
             --interpreter-type=llvm
             --profilesaver-enabled=true
-            --use-all-strings=true
             ${ARG_RUNTIME_EXTRA_OPTIONS}
         )
         run_ets_code_impl(${TARGET}-llvmirtoc ${WORK_DIR} "${ARG_SOURCES}"
@@ -244,7 +241,6 @@ function(run_jit_ets_code ETS_SRC WORK_DIR TARGET)
         --no-async-jit=true
         --compiler-hotness-threshold=0
         --compiler-ignore-failures=false
-        --use-all-strings=true
         ${ARG_RUNTIME_EXTRA_OPTIONS}
     )
     run_ets_code_impl(${TARGET} ${WORK_DIR} ${ETS_SRC}
@@ -331,7 +327,6 @@ function(run_aot_ets_code PAOC_MODE ETS_SRC WORK_DIR TARGET)
     set(RUNTIME_ARGUMENTS
         --boot-panda-files=${BOOT_PANDA_FILES}
         --load-runtimes=ets
-        --use-all-strings=true
         --aot-file=${OUTPUT_AN}
         ${ARG_RUNTIME_EXTRA_OPTIONS}
         ${OUTPUT_ABC}

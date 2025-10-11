@@ -325,13 +325,19 @@ EtsString *EtsString::Trim()
 
 std::string_view EtsString::ConvertToStringView([[maybe_unused]] PandaVector<uint8_t> *buf)
 {
-    if (IsUtf16()) {
-        size_t len = utf::Utf16ToUtf8Size(GetDataUtf16(), GetUtf16Length(), false) - 1;
-        buf->reserve(len);
-        utf::ConvertRegionUtf16ToUtf8(GetDataUtf16(), buf->data(), GetUtf16Length(), len, 0, false);
-        return {utf::Mutf8AsCString(buf->data()), len};
+    if (IsUtf8()) {
+        return {utf::Mutf8AsCString(IsTreeString() ? GetTreeStringDataMUtf8(*buf) : GetDataMUtf8()),
+                static_cast<size_t>(GetLength())};
     }
-    return {utf::Mutf8AsCString(GetDataMUtf8()), static_cast<size_t>(GetLength())};
+
+    PandaVector<uint16_t> tree16Buf;
+    size_t len = utf::Utf16ToUtf8Size(IsTreeString() ? GetTreeStringDataUtf16(tree16Buf) : GetDataUtf16(),
+                                      GetUtf16Length(), false) -
+                 1;
+    buf->reserve(len);
+    utf::ConvertRegionUtf16ToUtf8(IsTreeString() ? tree16Buf.data() : GetDataUtf16(), buf->data(), GetUtf16Length(),
+                                  len, 0, false);
+    return {utf::Mutf8AsCString(buf->data()), len};
 }
 
 /* static */

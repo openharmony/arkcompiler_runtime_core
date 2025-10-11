@@ -61,12 +61,13 @@ ObjectHeader *StdCoreRuntimeFailedTypeCastException(EtsObject *source, EtsString
                                                     EtsBoolean isUndefinedInTarget)
 {
     auto coro = EtsCoroutine::GetCurrent();
-
+    PandaVector<uint8_t> tree8Buf;
     ASSERT(coro != nullptr);
 
     auto message = PandaString(ReferenceTypeString(source)) + " cannot be cast to ";
     if (isUndefinedInTarget != 0U) {
-        if (!ClassHelper::IsUnionDescriptor(target->GetDataMUtf8())) {
+        if (!ClassHelper::IsUnionDescriptor(target->IsTreeString() ? target->GetTreeStringDataMUtf8(tree8Buf)
+                                                                   : target->GetDataMUtf8())) {
             message += "{U" + target->GetMutf8();
             message += EtsString::FastSubString(target, 0, target->GetLength() - 1)->GetMutf8();
         } else {
@@ -83,9 +84,7 @@ ObjectHeader *StdCoreRuntimeFailedTypeCastException(EtsObject *source, EtsString
     if (LIKELY(exc != nullptr)) {
         return exc->GetCoreType();
     }
-
     ASSERT(coro->HasPendingException());
-
     return nullptr;
 }
 

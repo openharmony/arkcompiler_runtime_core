@@ -22,7 +22,7 @@ add_custom_target(ets_tests COMMENT "Running ets test suites")
 set(DEFAULT_TEST_GROUP ets_tests)
 
 function(compile_ets_code ETS_SRC OUTPUT_ABC TARGET)
-    set(oneValueArgs ARKTS_CONFIG ETSPATH OPT_LEVEL)
+    set(oneValueArgs ARKTS_CONFIG ETSPATH OPT_LEVEL ETS_STRINGS_CONCAT)
     set(multiValueArgs COMPILER_EXTRA_OPTIONS)
     cmake_parse_arguments(ARG "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -43,6 +43,10 @@ function(compile_ets_code ETS_SRC OUTPUT_ABC TARGET)
     endif()
     if (DEFINED ARG_ETSPATH)
         list(APPEND ES2PANDA_ARGUMENTS "--ets-path=${ARG_ETSPATH}")
+    endif()
+
+    if(DEFINED ARG_ETS_STRINGS_CONCAT)
+       list(APPEND ES2PANDA_ARGUMENTS "--ets-strings-concat=${ARG_ETS_STRINGS_CONCAT}")
     endif()
 
     set(COMPILE_DEPENDENCIES

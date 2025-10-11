@@ -534,7 +534,7 @@ coretypes::String *PandaEtsVM::CreateString(Method *ctor, ObjectHeader *obj)
     } else {
         LOG(FATAL, ETS) << "Must be 1 or 2 ctor args";
     }
-    return str->GetCoreType();
+    return str == nullptr ? nullptr : str->GetCoreType();
 }
 
 Expected<int, Runtime::Error> PandaEtsVM::InvokeEntrypointImpl(Method *entrypoint, const std::vector<std::string> &args)

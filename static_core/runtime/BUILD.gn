@@ -172,6 +172,7 @@ _libarkruntime_calculated_sources = [
   "coretypes/array.cpp",
   "coretypes/line_string.cpp",
   "coretypes/string.cpp",
+  "coretypes/string_flatten.cpp",
   "coroutines/coroutine.cpp",
   "coroutines/coroutine_events.cpp",
   "coroutines/coroutine_manager.cpp",

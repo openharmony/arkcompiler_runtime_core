@@ -25,6 +25,7 @@
 #include "runtime/include/exceptions.h"
 #include "runtime/include/object_accessor.h"
 #include "runtime/include/coretypes/line_string.h"
+#include "runtime/include/mem/panda_containers.h"
 
 namespace ark::coretypes {
 class String : public ObjectHeader {
@@ -121,13 +122,22 @@ public:
                                     const LanguageContext &ctx, PandaVM *vm, bool movable = true, bool pinned = false);
 
     /**
-     * @brief Concat two Strings
+     * @brief Concat two compressed Strings
      * @param [in]str1Handle : the first string to be concated
      * @param [in]str2Handle : the second string to be concated
      * @return The concated string
      */
-    PANDA_PUBLIC_API static String *ConcatLineString(VMHandle<String> &str1Handle, VMHandle<String> &str2Handle,
-                                                     const LanguageContext &ctx, PandaVM *vm);
+    static String *ConcatLineStringCompressed(VMHandle<String> &str1Handle, VMHandle<String> &str2Handle,
+                                              const LanguageContext &ctx, PandaVM *vm);
+
+    /**
+     * @brief Concat two uncompressed Strings
+     * @param [in]str1Handle : the first string to be concated
+     * @param [in]str2Handle : the second string to be concated
+     * @return The concated string
+     */
+    static String *ConcatLineStringUnCompressed(VMHandle<String> &str1Handle, VMHandle<String> &str2Handle,
+                                                const LanguageContext &ctx, PandaVM *vm);
 
     static String *Concat(String *str1, String *str2, const LanguageContext &ctx, PandaVM *vm);
 
@@ -327,7 +337,7 @@ public:
 
     static size_t ComputeSizeMUtf8(uint32_t mutf8Length)
     {
-        return sizeof(String) + mutf8Length;
+        return LineString::ComputeSizeMUtf8(mutf8Length);
     }
 
     static size_t ComputeDataSizeUtf16(uint32_t length)
@@ -337,7 +347,7 @@ public:
 
     static size_t ComputeSizeUtf16(uint32_t utf16Length)
     {
-        return sizeof(String) + ComputeDataSizeUtf16(utf16Length);
+        return LineString::ComputeSizeUtf16(utf16Length);
     }
 
     bool IsEmpty() const
@@ -479,19 +489,55 @@ public:
     uint16_t *GetDataUtf16()
     {
         ASSERT_PRINT(IsUtf16(), "String: Read data as utf16 for mutf8 string");
-        return ToLineString()->GetDataUtf16Writable();
+        auto readBarrier = [](void *obj, size_t offset) {
+            return reinterpret_cast<common::BaseString *>(ObjectAccessor::GetObject(obj, offset));
+        };
+        std::vector<uint16_t> tmpBuf;
+        return const_cast<uint16_t *>(
+            common::BaseString::GetUtf16DataFlat(std::move(readBarrier), ToStringConst(), tmpBuf));
+    }
+
+    uint16_t *GetTreeStringDataUtf16(PandaVector<uint16_t> &buf)
+    {
+        ASSERT_PRINT(IsTreeString(), "TreeString: only treeString can use utf16 interface");
+        ASSERT_PRINT(IsUtf16(), "String: Read data as utf16 for mutf8 string");
+        auto readBarrier = [](void *obj, size_t offset) {
+            return reinterpret_cast<common::BaseString *>(ObjectAccessor::GetObject(obj, offset));
+        };
+        return const_cast<uint16_t *>(
+            common::BaseString::GetUtf16DataFlat(std::move(readBarrier), ToStringConst(), buf));
     }
 
     uint8_t *GetDataUtf8()
     {
         ASSERT_PRINT(IsUtf8(), "String: Read data as utf8 for utf16 string");
-        return ToLineString()->GetDataUtf8Writable();
+        auto readBarrier = [](void *obj, size_t offset) {
+            return reinterpret_cast<common::BaseString *>(ObjectAccessor::GetObject(obj, offset));
+        };
+        std::vector<uint8_t> tmpBuf;
+        return const_cast<uint8_t *>(
+            common::BaseString::GetUtf8DataFlat(std::move(readBarrier), ToStringConst(), tmpBuf));
+    }
+
+    uint8_t *GetTreeStringDataUtf8(PandaVector<uint8_t> &buf)
+    {
+        ASSERT_PRINT(IsTreeString(), "TreeString: only treeString can use utf8 interface");
+        ASSERT_PRINT(IsUtf8(), "String: Read data as utf8 for utf16 string");
+        auto readBarrier = [](void *obj, size_t offset) {
+            return reinterpret_cast<common::BaseString *>(ObjectAccessor::GetObject(obj, offset));
+        };
+        return const_cast<uint8_t *>(common::BaseString::GetUtf8DataFlat(std::move(readBarrier), ToStringConst(), buf));
     }
 
     uint8_t *GetDataMUtf8()
     {
         ASSERT_PRINT(IsUtf8(), "String: Read data as mutf8 for utf16 string");
         return GetDataUtf8();
+    }
+
+    uint8_t *GetTreeStringDataMUtf8(PandaVector<uint8_t> &buf)
+    {
+        return GetTreeStringDataUtf8(buf);
     }
 
     inline uint8_t *GetDataUtf8Writable()
@@ -602,123 +648,6 @@ private:
     // In last second bit of length_ we store if this string is intern or not.
     FIELD_UNUSED uint32_t length_;
     FIELD_UNUSED uint32_t hashcode_;
-};
-
-class FlatStringInfo {
-public:
-    /**
-     * @brief flow flatten string to line string
-     * @param [in] str : string to be flatten
-     * @return the flattened string
-     */
-    static String *SlowFlatten(VMHandle<String> &str, const LanguageContext &ctx);
-
-    /**
-     * @brief flatten tree string to line string
-     * @param [in] treeStr : tree string to be flatten
-     * @return the flattened string
-     */
-    static FlatStringInfo FlattenTreeString(VMHandle<String> &treeStr, const LanguageContext &ctx);
-
-    /**
-     * @brief flatten sliced string to line string
-     * @param [in] slicedStr : sliced string to be flatten
-     * @return the flattened string
-     */
-    static FlatStringInfo FlattenSlicedString(VMHandle<String> &slicedStr);
-
-    /**
-     * @brief flatten str to line string , in order to use it comfortably
-     *        LineString --> LineString
-     *        SlicedString --> LineString
-     *        TreeString --> flatten every node in the tree to a LineString
-     * @param [in] str : str to be flatten
-     * @return the flattened string
-     */
-    static FlatStringInfo FlattenAllString(VMHandle<String> &str, const LanguageContext &ctx);
-
-    FlatStringInfo(String *string, uint32_t startIndex, uint32_t length)
-        : string_(string), startIndex_(startIndex), length_(length)
-    {
-    }
-
-    bool IsUtf8() const
-    {
-        return string_->IsMUtf8();
-    }
-
-    bool IsUtf16() const
-    {
-        return string_->IsUtf16();
-    }
-
-    String *GetString() const
-    {
-        return string_;
-    }
-
-    void SetString(String *string)
-    {
-        string_ = string;
-    }
-
-    uint32_t GetStartIndex() const
-    {
-        return startIndex_;
-    }
-
-    void SetStartIndex(uint32_t index)
-    {
-        startIndex_ = index;
-    }
-
-    uint32_t GetLength() const
-    {
-        return length_;
-    }
-
-    const uint8_t *GetDataUtf8() const
-    {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        return string_->GetDataUtf8() + startIndex_;
-    }
-
-    const uint16_t *GetDataUtf16() const
-    {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic, clang-analyzer-core.CallAndMessage)
-        return string_->GetDataUtf16() + startIndex_;  // NOLINT(clang-analyzer-core.NullDereference)
-    }
-
-    uint8_t *GetDataUtf8Writable() const
-    {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        return string_->GetDataUtf8Writable() + startIndex_;
-    }
-
-    uint16_t *GetDataUtf16Writable() const
-    {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        return string_->GetDataUtf16Writable() + startIndex_;
-    }
-
-    std::u16string ToU16String(uint32_t len = 0)
-    {
-        uint32_t length = len > 0 ? len : GetLength();
-        std::u16string result;
-        if (IsUtf16()) {
-            const uint16_t *data = this->GetDataUtf16();
-            result = common::Utf16ToU16String(data, length);
-        } else {
-            const uint8_t *data = this->GetDataUtf8();
-            result = common::Utf8ToU16String(data, length);
-        }
-        return result;
-    }
-
-private:
-    String *string_ {nullptr};
-    uint32_t startIndex_ {0};
-    uint32_t length_ {0};
 };
 
 constexpr uint32_t STRING_LENGTH_OFFSET = sizeof(ObjectHeader);
