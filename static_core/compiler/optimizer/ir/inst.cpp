@@ -570,13 +570,11 @@ Inst *FixedInputsInst<N>::Clone(const Graph *targetGraph) const
     return clone;
 }
 
-#if PANDA_TARGET_MACOS
 template class FixedInputsInst<0>;
 template class FixedInputsInst<1>;
 template class FixedInputsInst<2U>;
 template class FixedInputsInst<3U>;
 template class FixedInputsInst<4U>;
-#endif
 
 Inst *CallInst::Clone(const Graph *targetGraph) const
 {
