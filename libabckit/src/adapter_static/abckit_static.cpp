@@ -21,7 +21,6 @@
 #include "libabckit/c/metadata_core.h"
 #include "libabckit/src/adapter_static/helpers_static.h"
 #include "libabckit/src/statuses_impl.h"
-#include "libabckit/src/metadata_inspect_impl.h"
 #include "libabckit/src/adapter_static/runtime_adapter_static.h"
 #include "libabckit/src/logger.h"
 #include "src/adapter_static/metadata_modify_static.h"
@@ -75,6 +74,11 @@ struct Container {
     std::unordered_map<std::string, AbckitCoreEnum *> nameToEnum;
     std::unordered_map<std::string, AbckitCoreAnnotationInterface *> nameToAnnotationInterface;
 };
+
+static void DestroyContainer(void *data)
+{
+    delete static_cast<Container *>(data);
+}
 
 static bool IsModuleName(const std::string &name)
 {
@@ -332,6 +336,24 @@ static std::unique_ptr<AbckitCoreTypeField> CreateField(AbckitFile *file, Abckit
         }
     }
     return field;
+}
+
+std::unique_ptr<AbckitCoreEnumField> EnumCreateField(AbckitFile *file, AbckitCoreEnum *owner,
+                                                     ark::pandasm::Field &recordField)
+{
+    return CreateField<AbckitCoreEnum, AbckitCoreEnumField>(file, owner, recordField);
+}
+
+std::unique_ptr<AbckitCoreClassField> ClassCreateField(AbckitFile *file, AbckitCoreClass *owner,
+                                                       ark::pandasm::Field &recordField)
+{
+    return CreateField<AbckitCoreClass, AbckitCoreClassField>(file, owner, recordField);
+}
+
+std::unique_ptr<AbckitCoreModuleField> ModuleCreateField(AbckitFile *file, AbckitCoreModule *owner,
+                                                         ark::pandasm::Field &recordField)
+{
+    return CreateField<AbckitCoreModule, AbckitCoreModuleField>(file, owner, recordField);
 }
 
 static void CreateModule(AbckitFile *file, const std::string &moduleName, pandasm::Record &record)
@@ -1029,13 +1051,24 @@ static void CollectAllInstances(AbckitFile *file, pandasm::Program *prog)
     CollectAllInstanceFields(file);
 }
 
+static void CollectAllStrings(pandasm::Program *prog, AbckitFile *file)
+{
+    for (auto &sImpl : prog->strings) {
+        auto s = std::make_unique<AbckitString>();
+        s->impl = sImpl;
+        file->strings.insert({sImpl, std::move(s)});
+    }
+}
+
 static void CreateWrappers(pandasm::Program *prog, AbckitFile *file)
 {
     LIBABCKIT_LOG_FUNC;
 
     file->program = prog;
-    Container container;
-    file->data = &container;
+    auto container = std::make_unique<Container>();
+    Container *containerPtr = container.get();
+    file->data = container.release();
+    file->destoryData = &DestroyContainer;
     // Collect modules and namespaces
     for (auto &[recordName, record] : prog->recordTable) {
         if (record.metadata->IsForeign()) {
@@ -1049,8 +1082,8 @@ static void CreateWrappers(pandasm::Program *prog, AbckitFile *file)
         }
 
         if (IsNamespace(className, record)) {
-            container.namespaces.emplace_back(CreateNamespace(record, className));
-            container.nameToNamespace.emplace(recordName, container.namespaces.back().get());
+            containerPtr->namespaces.emplace_back(CreateNamespace(record, className));
+            containerPtr->nameToNamespace.emplace(recordName, containerPtr->namespaces.back().get());
         }
     }
     CollectExternalModules(prog, file);
@@ -1067,21 +1100,21 @@ static void CreateWrappers(pandasm::Program *prog, AbckitFile *file)
     AssignAsyncFunction(file);
     AssignArrayEnum(file);
     AssignAnnotationInterfaceToAnnotation(file);
-    AssignSuperClass(container.nameToClass, container.nameToInterface, container.classes);
-    AssignSuperInerface(container.nameToInterface, container.interfaces);
-    AssignObjectLiteral(container.objectLiterals, container.nameToClass, container.nameToInterface);
-    AssignInstance(container.nameToModule, container.nameToNamespace, container.classes);
-    AssignInstance(container.nameToModule, container.nameToNamespace, container.interfaces);
-    AssignInstance(container.nameToModule, container.nameToNamespace, container.annotationInterfaces);
-    AssignInstance(container.nameToModule, container.nameToNamespace, container.enums);
-    AssignInstance(container.nameToModule, container.nameToNamespace, container.namespaces);
-    AssignFunctions(container.nameToModule, container.nameToNamespace, container.nameToObjectLiteral,
-                    container.functions);
+    AssignSuperClass(containerPtr->nameToClass, containerPtr->nameToInterface, containerPtr->classes);
+    AssignSuperInerface(containerPtr->nameToInterface, containerPtr->interfaces);
+    AssignObjectLiteral(containerPtr->objectLiterals, containerPtr->nameToClass, containerPtr->nameToInterface);
+    AssignInstance(containerPtr->nameToModule, containerPtr->nameToNamespace, containerPtr->classes);
+    AssignInstance(containerPtr->nameToModule, containerPtr->nameToNamespace, containerPtr->interfaces);
+    AssignInstance(containerPtr->nameToModule, containerPtr->nameToNamespace, containerPtr->annotationInterfaces);
+    AssignInstance(containerPtr->nameToModule, containerPtr->nameToNamespace, containerPtr->enums);
+    AssignInstance(containerPtr->nameToModule, containerPtr->nameToNamespace, containerPtr->namespaces);
+    AssignFunctions(containerPtr->nameToModule, containerPtr->nameToNamespace, containerPtr->nameToObjectLiteral,
+                    containerPtr->functions);
 
     // NOTE: AbckitCoreExportDescriptor
     // NOTE: AbckitModulePayload
 
-    for (auto &[moduleName, module] : container.nameToModule) {
+    for (auto &[moduleName, module] : containerPtr->nameToModule) {
         if (module->isExternal) {
             file->externalModules.emplace(moduleName, std::move(module));
         } else {
@@ -1092,11 +1125,7 @@ static void CreateWrappers(pandasm::Program *prog, AbckitFile *file)
     DumpHierarchy(file);
 
     // Strings
-    for (auto &sImpl : prog->strings) {
-        auto s = std::make_unique<AbckitString>();
-        s->impl = sImpl;
-        file->strings.insert({sImpl, std::move(s)});
-    }
+    CollectAllStrings(prog, file);
 }
 
 struct CtxIInternal {
@@ -1142,6 +1171,10 @@ void CloseFileStatic(AbckitFile *file)
 {
     LIBABCKIT_LOG_FUNC;
 
+    if ((file->destoryData != nullptr) && (file->data != nullptr)) {
+        file->destoryData(file->data);
+    }
+    file->data = nullptr;
     auto *ctxIInternal = reinterpret_cast<struct CtxIInternal *>(file->internal);
     delete ctxIInternal->driver;
     delete ctxIInternal;

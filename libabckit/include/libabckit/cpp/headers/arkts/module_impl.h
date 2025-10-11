@@ -22,6 +22,8 @@
 #include "annotation_interface.h"
 #include "../core/annotation_interface.h"
 
+#include "field.h"
+
 // NOLINTBEGIN(performance-unnecessary-value-param)
 namespace abckit::arkts {
 
@@ -94,6 +96,32 @@ inline arkts::AnnotationInterface Module::AddAnnotationInterface(std::string_vie
     auto coreAi = GetApiConfig()->cArktsIapi_->arktsAnnotationInterfaceToCoreAnnotationInterface(arktsAi);
     CheckError(GetApiConfig());
     return AnnotationInterface(core::AnnotationInterface(coreAi, GetApiConfig(), GetResource()));
+}
+
+inline arkts::ModuleField Module::AddField(const std::string_view name, const Type &type, const Value &value,
+                                           AbckitArktsFieldVisibility fieldVisibility)
+{
+    const struct AbckitArktsFieldCreateParams params {
+        name.data(), type.GetView(), value.GetView(), true, fieldVisibility
+    };
+    auto *arkModuleField = GetApiConfig()->cArktsMapi_->moduleAddField(TargetCast(), &params);
+    CheckError(GetApiConfig());
+    auto *coreModuleField = GetApiConfig()->cArktsIapi_->arktsModuleFieldToCoreModuleField(arkModuleField);
+    CheckError(GetApiConfig());
+    return arkts::ModuleField(core::ModuleField(coreModuleField, GetApiConfig(), GetResource()));
+}
+
+inline arkts::ModuleField Module::AddField(const std::string_view name, const Type &type,
+                                           AbckitArktsFieldVisibility fieldVisibility)
+{
+    const struct AbckitArktsFieldCreateParams params {
+        name.data(), type.GetView(), nullptr, true, fieldVisibility
+    };
+    auto *arkModuleField = GetApiConfig()->cArktsMapi_->moduleAddField(TargetCast(), &params);
+    CheckError(GetApiConfig());
+    auto *coreModuleField = GetApiConfig()->cArktsIapi_->arktsModuleFieldToCoreModuleField(arkModuleField);
+    CheckError(GetApiConfig());
+    return arkts::ModuleField(core::ModuleField(coreModuleField, GetApiConfig(), GetResource()));
 }
 
 }  // namespace abckit::arkts

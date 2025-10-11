@@ -188,6 +188,13 @@ TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, moduleAddAnnotationInterface)
     helpers_nullptr::TestNullptr(g_arktsModifyApiImp->moduleAddAnnotationInterface);
 }
 
+// Test: test-kind=api, api=ArktsModifyApiImpl::moduleAddField,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, moduleAddField)
+{
+    helpers_nullptr::TestNullptr(g_arktsModifyApiImp->moduleAddField);
+}
+
 // Test: test-kind=api, api=ArktsModifyApiImpl::moduleFieldSetName,
 // abc-kind=NoABC, category=negative-nullptr, extension=c
 TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, moduleFieldSetName)
@@ -361,5 +368,12 @@ TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, interfaceFieldSetType)
 TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, enumFieldSetName)
 {
     helpers_nullptr::TestNullptr(g_arktsModifyApiImp->enumFieldSetName);
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::enumAddField,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, enumAddField)
+{
+    helpers_nullptr::TestNullptr(g_arktsModifyApiImp->enumAddField);
 }
 }  // namespace libabckit::test

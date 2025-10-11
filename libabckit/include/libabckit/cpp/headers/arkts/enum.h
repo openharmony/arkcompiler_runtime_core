@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,6 +81,37 @@ public:
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     bool SetName(const std::string &name) const;
+
+    /**
+     * @brief Add field to the enum.
+     * @return Newly Add EnumField.
+     * @param [ in ] name - Name to be set.
+     * @param [ in ] type - Type to be set.
+     * @param [ in ] value - Value to be set.
+     * @param [ in ] fieldVisibility - fieldVisibility to be set.
+     * @note Allocates
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `type` is false.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if Enum doesn't have `ABCKIT_TARGET_ARK_TS_V1` target.
+     */
+    arkts::EnumField AddField(const std::string_view name, const Type &type, const Value &value,
+                              AbckitArktsFieldVisibility fieldVisibility = AbckitArktsFieldVisibility::PUBLIC);
+
+    /**
+     * @brief Add field to the enum.
+     * @return Newly Add EnumField.
+     * @param [ in ] name - Name to be set.
+     * @param [ in ] type - Type to be set.
+     * @param [ in ] fieldVisibility - fieldVisibility to be set.
+     * @note Allocates
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `type` is false.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if Enum doesn't have `ABCKIT_TARGET_ARK_TS_V1` target.
+     */
+    arkts::EnumField AddField(const std::string_view name, const Type &type,
+                              AbckitArktsFieldVisibility fieldVisibility = AbckitArktsFieldVisibility::PUBLIC);
 
 private:
     /**

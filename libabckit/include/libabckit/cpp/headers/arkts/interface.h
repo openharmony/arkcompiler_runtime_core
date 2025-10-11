@@ -103,12 +103,20 @@ public:
     static Interface CreateInterface(Module m, const std::string &name);
 
     /**
-     * @brief add field for interface
-     * @return `true` on success.
-     * @param [ in ] field - Field to be add.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @brief Add field to the interface.
+     * @return Newly Add InterfaceField.
+     * @param [ in ] name - Name to be set.
+     * @param [ in ] type - Type to be set.
+     * @param [ in ] isReadOnly - isReadOnly to be set.
+     * @param [ in ] fieldVisibility - fieldVisibility to be set.
+     * @note Allocates
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `type` is false.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if Interface doesn't have `ABCKIT_TARGET_ARK_TS_V1` target.
      */
-    bool AddField(arkts::InterfaceField field);
+    arkts::InterfaceField AddField(const std::string_view name, const Type &type, bool isReadOnly = false,
+                                   AbckitArktsFieldVisibility fieldVisibility = AbckitArktsFieldVisibility::PUBLIC);
 
     /**
      * @brief add function for interface

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -113,4 +113,27 @@ TEST_F(LibAbcKitCppMockArktsTestModule, Module_AddAnnotationInterface)
     ASSERT_TRUE(CheckMockedStackEmpty());
 }
 
+// Test: test-kind=mock, api=Module::AddField, abc-kind=ArkTS2, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockArktsTestModule, Module_AddField)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File f(DEFAULT_PATH);
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        abckit::mock::helpers::GetMockArktsModule(f).AddField(DEFAULT_CONST_CHAR, abckit::mock::helpers::GetMockType(f),
+                                                              abckit::mock::helpers::GetMockValueDouble(f));
+        ASSERT_TRUE(CheckMockedApi("CoreModuleFieldToArktsModuleField"));
+        ASSERT_TRUE(CheckMockedApi("ArktsModuleFieldToCoreModuleField"));
+        ASSERT_TRUE(CheckMockedApi("ModuleAddField"));
+        ASSERT_TRUE(CheckMockedApi("CoreModuleToArktsModule"));
+        abckit::mock::helpers::GetMockArktsModule(f).AddField(DEFAULT_CONST_CHAR,
+                                                              abckit::mock::helpers::GetMockType(f));
+        ASSERT_TRUE(CheckMockedApi("CoreModuleFieldToArktsModuleField"));
+        ASSERT_TRUE(CheckMockedApi("ArktsModuleFieldToCoreModuleField"));
+        ASSERT_TRUE(CheckMockedApi("ModuleAddField"));
+        ASSERT_TRUE(CheckMockedApi("CoreModuleToArktsModule"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
 }  // namespace libabckit::cpp_test

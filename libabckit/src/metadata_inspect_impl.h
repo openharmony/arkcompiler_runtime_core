@@ -958,6 +958,11 @@ struct AbckitFile {
      * To store some data for build all objects
      */
     void *data = nullptr;
+
+    /**
+     * Function point to delete data
+     */
+    void (*destoryData)(void *) = nullptr;
 };
 
 struct AbckitDynamicImportDescriptorPayload {

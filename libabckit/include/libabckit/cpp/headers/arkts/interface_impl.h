@@ -59,11 +59,17 @@ inline Interface Interface::CreateInterface(Module m, const std::string &name)
     return Interface(coreIface);
 }
 
-inline bool Interface::AddField(arkts::InterfaceField field)
+inline arkts::InterfaceField Interface::AddField(const std::string_view name, const Type &type, bool isReadOnly,
+                                                 AbckitArktsFieldVisibility fieldVisibility)
 {
-    const auto ret = GetApiConfig()->cArktsMapi_->interfaceAddField(TargetCast(), field.TargetCast());
+    const struct AbckitArktsInterfaceFieldCreateParams params {
+        name.data(), type.GetView(), isReadOnly, fieldVisibility
+    };
+    auto *arkInterfaceField = GetApiConfig()->cArktsMapi_->interfaceAddField(TargetCast(), &params);
     CheckError(GetApiConfig());
-    return ret;
+    auto *coreInterfaceField = GetApiConfig()->cArktsIapi_->arktsInterfaceFieldToCoreInterfaceField(arkInterfaceField);
+    CheckError(GetApiConfig());
+    return arkts::InterfaceField(core::InterfaceField(coreInterfaceField, GetApiConfig(), GetResource()));
 }
 
 inline bool Interface::AddMethod(arkts::Function function)

@@ -83,13 +83,37 @@ public:
     bool SetName(const std::string &name) const;
 
     /**
-     * @brief Add field to the class.
-     * @return `true` on success.
-     * @param [ in ] field - Field to be added.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if field is false.
+     * @brief Add field to the class declaration.
+     * @return Newly Add ClassField.
+     * @param [ in ] name - Name to be set.
+     * @param [ in ] type - Type to be set.
+     * @param [ in ] value - Value to be set.
+     * @param [ in ] isStatic - isStatic to be set.
+     * @param [ in ] fieldVisibility - fieldVisibility to be set.
+     * @note Allocates
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `type` is false.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if Class doesn't have `ABCKIT_TARGET_ARK_TS_V1` target.
      */
-    bool AddField(const ClassField &field) const;
+    arkts::ClassField AddField(const std::string_view name, const Type &type, const Value &value, bool isStatic = false,
+                               AbckitArktsFieldVisibility fieldVisibility = AbckitArktsFieldVisibility::PUBLIC);
+
+    /**
+     * @brief Add field to the class declaration.
+     * @return Newly Add ClassField.
+     * @param [ in ] name - Name to be set.
+     * @param [ in ] type - Type to be set.
+     * @param [ in ] isStatic - isStatic to be set.
+     * @param [ in ] fieldVisibility - fieldVisibility to be set.
+     * @note Allocates
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `type` is false.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if Class doesn't have `ABCKIT_TARGET_ARK_TS_V1` target.
+     */
+    arkts::ClassField AddField(const std::string_view name, const Type &type, bool isStatic = false,
+                               AbckitArktsFieldVisibility fieldVisibility = AbckitArktsFieldVisibility::PUBLIC);
 
     /**
      * @brief Sets owning module for class.

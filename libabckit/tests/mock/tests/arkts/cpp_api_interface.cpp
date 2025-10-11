@@ -73,17 +73,18 @@ TEST_F(LibAbcKitCppMockArktsTestInterface, Interface_SetName)
     ASSERT_TRUE(CheckMockedStackEmpty());
 }
 
-// Test: test-kind=mock, api=Interface::AddField, abc-kind=ArkTS1, category=internal, extension=cpp
+// Test: test-kind=mock, api=Interface::AddField, abc-kind=ArkTS2, category=internal, extension=cpp
 TEST_F(LibAbcKitCppMockArktsTestInterface, Interface_AddField)
 {
     ASSERT_TRUE(CheckMockedStackEmpty());
     {
         abckit::File f(DEFAULT_PATH);
         ASSERT_TRUE(CheckMockedApi("OpenAbc"));
-        auto ae = abckit::mock::helpers::GetMockArktsInterfaceField(f);
-        abckit::mock::helpers::GetMockArktsInterface(f).AddField(ae);
-        ASSERT_TRUE(CheckMockedApi("InterfaceAddField"));
+        abckit::mock::helpers::GetMockArktsInterface(f).AddField(DEFAULT_CONST_CHAR,
+                                                                 abckit::mock::helpers::GetMockType(f));
         ASSERT_TRUE(CheckMockedApi("CoreInterfaceFieldToArktsInterfaceField"));
+        ASSERT_TRUE(CheckMockedApi("ArktsInterfaceFieldToCoreInterfaceField"));
+        ASSERT_TRUE(CheckMockedApi("InterfaceAddField"));
         ASSERT_TRUE(CheckMockedApi("CoreInterfaceToArktsInterface"));
     }
     ASSERT_TRUE(CheckMockedApi("CloseFile"));
