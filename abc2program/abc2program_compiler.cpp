@@ -84,6 +84,11 @@ void Abc2ProgramCompiler::CompileAbcClass(const panda_file::File::EntityId &reco
     if (!modify_pkg_name_.empty()) {
         entity_container.SetModifyPkgName(modify_pkg_name_);
     }
+    if (!origin_version_.empty() && !target_version_.empty() && !package_name_.empty()) {
+        entity_container.SetPackageName(package_name_);
+        entity_container.SetOriginVersion(origin_version_);
+        entity_container.SetTargetVersion(target_version_);
+    }
     record_name = entity_container.GetFullRecordNameById(record_id);
     panda::Timer::timerStart(EVENT_COMPILE_ABC_FILE_RECORD, record_name);
     AbcClassProcessor class_processor(record_id, entity_container);
