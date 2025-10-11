@@ -20,12 +20,18 @@
 #include <memory>
 #include <string>
 #include <dlfcn.h>
-#include "libpandabase/macros.h"
+
+#ifndef PANDA_TARGET_WINDOWS
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define PANDA_DEBUGGER_PUBLIC_API __attribute__((visibility("default")))
+#else
+#define PANDA_DEBUGGER_PUBLIC_API __declspec(dllexport)
+#endif
 
 using DebuggerPostTask = std::function<void(std::function<void()> &&)>;
 
 namespace ark {
-class PANDA_PUBLIC_API ArkDebugNativeAPI final {
+class PANDA_DEBUGGER_PUBLIC_API ArkDebugNativeAPI final {
 public:
     using DebuggerPostTask = std::function<void(std::function<void()> &&)>;
     static bool StartDebuggerForSocketPair(int tid, int socketfd = -1);
@@ -40,8 +46,10 @@ public:
     ArkDebugNativeAPI() = delete;
     ~ArkDebugNativeAPI() = delete;
 
-    NO_COPY_SEMANTIC(ArkDebugNativeAPI);
-    NO_MOVE_SEMANTIC(ArkDebugNativeAPI);
+    ArkDebugNativeAPI(const ArkDebugNativeAPI &) = delete;
+    void operator=(const ArkDebugNativeAPI &) = delete;
+    ArkDebugNativeAPI(ArkDebugNativeAPI &&) = delete;
+    ArkDebugNativeAPI &operator=(ArkDebugNativeAPI &&) = delete;
 
 private:
     static void *gHybridDebuggerHandle_;
