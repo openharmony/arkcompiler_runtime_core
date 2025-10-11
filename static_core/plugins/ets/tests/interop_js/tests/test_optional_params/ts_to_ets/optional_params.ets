@@ -14,7 +14,7 @@
  */
 
 function testOptionalParams(): void {
-    let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/test_optional_params/ts_to_ets/test_optional_params_ts_to_ets');
+    let module = ESValue.load('js_code');
     module.getProperty('foo1').invoke(ESValue.wrap(1), ESValue.wrap('str'));
     module.getProperty('foo2').invoke(ESValue.wrap(1), ESValue.wrap('str'), ESValue.wrap(true));
     module.getProperty('foo3').invoke(ESValue.wrap(1), ESValue.wrap('str'), ESValue.wrap(true), ESValue.wrap(2));

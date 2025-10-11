@@ -18,6 +18,7 @@ panda_ets_interop_js_gtest(ets_interop_js_test__dynamic_object
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/dynamic_object.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/dynamic_object.ets
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/index.js
+    ETS_CONFIG ${ETS_CONFIG}
 )
 
 panda_ets_interop_js_gtest(ets_interop_js_test_dynamic_call

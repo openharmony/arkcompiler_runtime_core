@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/perf/code');
+let module = ESValue.load('js_code');
 let getObject = module.getProperty('getObject')
 let getNumber = module.getProperty('GetNumber')
 let getString = module.getProperty('getString')

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/invalid_op_esvalue/ts_to_ets/test_invalid_op_esvalue');
+let module = ESValue.load('js_code');
 
 function checkUndefinedGetProperty(): boolean {
     let res: boolean = false;
