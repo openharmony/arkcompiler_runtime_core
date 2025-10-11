@@ -37,14 +37,6 @@ void CoroutineWorker::OnCoroBecameActive(Coroutine *co)
     TriggerSchedulerExternally(co);
 }
 
-void CoroutineWorker::DestroyCallbackPoster()
-{
-    os::memory::LockHolder l(posterLock_);
-    if (extSchedulingPoster_ != nullptr) {
-        extSchedulingPoster_.reset(nullptr);
-    }
-}
-
 void CoroutineWorker::InitializeManagedStructures()
 {
     ASSERT(!GetRuntime()->IsInitialized());

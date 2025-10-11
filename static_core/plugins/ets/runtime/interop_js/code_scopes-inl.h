@@ -45,6 +45,7 @@ inline bool CloseInteropCodeScope(EtsCoroutine *coro)
 
     auto *ctx = InteropCtx::Current(coro);
     if constexpr (ETS_TO_JS) {
+        coro->GetWorker()->TriggerSchedulerExternally(coro);
         ctx->UpdateInteropStackInfoIfNeeded();
     }
     ctx->GetOrCreateCallStack().PopRecord();
