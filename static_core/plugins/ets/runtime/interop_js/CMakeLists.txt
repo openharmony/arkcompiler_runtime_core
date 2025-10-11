@@ -64,6 +64,13 @@ panda_target_sources(arkruntime_obj PRIVATE
         ${ETS_EXT_SOURCES}/interop_js/ets_proxy/shared_reference_storage_verifier.cpp
         ${ETS_EXT_SOURCES}/interop_js/ets_proxy/ets_proxy.cpp
         ${ETS_EXT_SOURCES}/interop_js/event_loop_module.cpp
+        ${ETS_EXT_SOURCES}/interop_js/st_value/ets_vm_STValue.cpp
+        ${ETS_EXT_SOURCES}/interop_js/st_value/ets_vm_STValue_check.cpp
+        ${ETS_EXT_SOURCES}/interop_js/st_value/ets_vm_STValue_instance.cpp
+        ${ETS_EXT_SOURCES}/interop_js/st_value/ets_vm_STValue_invoke.cpp
+        ${ETS_EXT_SOURCES}/interop_js/st_value/ets_vm_STValue_accessor.cpp
+        ${ETS_EXT_SOURCES}/interop_js/st_value/ets_vm_STValue_unwrap.cpp
+        ${ETS_EXT_SOURCES}/interop_js/st_value/ets_vm_STValue_wrap.cpp
         ${ETS_EXT_SOURCES}/interop_js/js_value.cpp
         ${ETS_EXT_SOURCES}/interop_js/js_refconvert.cpp
         ${ETS_EXT_SOURCES}/interop_js/js_refconvert_builtin.cpp

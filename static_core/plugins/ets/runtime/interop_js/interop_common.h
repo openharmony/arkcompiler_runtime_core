@@ -328,6 +328,13 @@ inline std::string GetString(napi_env env, napi_value jsVal)
     return value;
 }
 
+inline uint32_t GetUint32(napi_env env, napi_value jsVal)
+{
+    uint32_t data;
+    NAPI_CHECK_FATAL(napi_get_value_uint32(env, jsVal, &data));
+    return data;
+}
+
 inline bool NapiIsExceptionPending(napi_env env)
 {
     bool pending;

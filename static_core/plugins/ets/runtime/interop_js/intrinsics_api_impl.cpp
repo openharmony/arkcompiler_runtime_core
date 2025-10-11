@@ -1712,6 +1712,19 @@ void SetInteropRuntimeLinker(EtsRuntimeLinker *linker)
     ctx->SetDefaultLinkerContext(linker);
 }
 
+EtsRuntimeLinker *GetInteropRuntimeLinker()
+{
+    auto coro = EtsCoroutine::GetCurrent();
+    auto ctx = InteropCtx::Current(coro);
+    if (ctx == nullptr) {
+        ThrowNoInteropContextException();
+        return nullptr;
+    }
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
+
+    return ctx->GetDefaultInteropLinker();
+}
+
 EtsBoolean IsJSInteropRef(EtsObject *value)
 {
     bool res = false;

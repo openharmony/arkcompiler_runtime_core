@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,4 @@
  * limitations under the License.
  */
 
-package std.interop;
 
-export class InteropContext {
-    static setDefaultInteropLinker(linker: RuntimeLinker): void {
-        // Note: This interface should only be called from system component
-        InteropContext.setInteropRuntimeLinker(linker);
-    }
-
-    private static native getInteropRuntimeLinker(): RuntimeLinker;
-    
-    private static native setInteropRuntimeLinker(linker: RuntimeLinker): void;
-}
