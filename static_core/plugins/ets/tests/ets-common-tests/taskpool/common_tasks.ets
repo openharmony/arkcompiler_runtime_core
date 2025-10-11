@@ -538,6 +538,36 @@ async function isCancelTest() {
     arktest.expectError(() => { await p }, new Error('taskpool:: task has been canceled'));
 }
 
+async function isCancelPromiseTest() {
+    arktest.assertEQ(taskpool.Task.isCanceled(), false);
+    let t = new taskpool.Task(returnAbc);
+    let res = await taskpool.execute(t);
+    arktest.assertEQ(res, 'abc');
+    arktest.assertEQ(taskpool.Task.isCanceled(), false);
+    // Check canceling of exeuting Promise task
+    // CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN); 
+    let isCanceled = new Event();
+    let isRunning = new Event();
+    let waitForCancel = new Event();
+    let funcForPromiseTask = async (): Promise<boolean> => {
+        isRunning.fire();
+        waitForCancel.wait();
+        // Set isCanceled value from taskpool
+        isCanceled.fire(taskpool.Task.isCanceled());
+        return true;
+    };
+    let task = new taskpool.Task(funcForPromiseTask);
+    let p = taskpool.execute(task);
+    isRunning.wait();
+    arktest.assertEQ(task.isDone(), false);
+    taskpool.cancel(task);
+    waitForCancel.fire();
+    let wasCanceled = isCanceled.wait();
+    // Check isCanceled from taskpool
+    arktest.assertEQ(wasCanceled, true);
+    arktest.expectError(() => { await p }, new Error('taskpool:: task has been canceled'));
+}
+
 async function cancelNonExecutingTaskTest() {
     let expectedError = new Error('taskpool:: task is not executed or has been executed');
     arktest.expectError(() => {
@@ -1199,6 +1229,7 @@ function main(): int {
     commonTaskSuite.addAsyncTest('OneTaskExecutionTest', oneTaskExecutionTest);
     commonTaskSuite.addAsyncTest('CallbackTest', callbackTest);
     commonTaskSuite.addAsyncTest('IsCancelTest', isCancelTest);
+    commonTaskSuite.addAsyncTest('IsCancelPromiseTest', isCancelPromiseTest);
     commonTaskSuite.addAsyncTest('CancelNonExecutingTaskTest', cancelNonExecutingTaskTest);
     commonTaskSuite.addAsyncTest('CancelExecutingTaskTest', cancelExecutingTaskTest);
     commonTaskSuite.addAsyncTest('CheckIsDoneAndCancelTaskTest', checkIsDoneAndCancelTaskTest);
