@@ -96,6 +96,7 @@ export class EAWorker {
     private loopStarted: AtomicFlag = new AtomicFlag(false);
     private readonly isMain: boolean;
     private isStarted: AtomicFlag = new AtomicFlag(false);
+    private isQuitted: AtomicFlag = new AtomicFlag(false);
     private initialTask: Task | undefined = undefined;
     private static mainWorker: EAWorker | undefined = undefined;
     private priority: WorkerPriority = WorkerPriority.PRIORITY_DEFAULT;
@@ -259,6 +260,7 @@ export class EAWorker {
         if (!this.isStarted.get()) {
             throw new Error("Cannot stop worker before start");
         }
+        this.isQuitted.set(true);
         this.worker.quit();
     }
 
@@ -273,6 +275,7 @@ export class EAWorker {
         if (!this.isStarted.get()) {
             throw new Error("Cannot stop worker before start");
         }
+        this.isQuitted.set(true);
         this.worker.join();
     }
 
@@ -439,6 +442,9 @@ export class EAWorker {
         }
         if (!this.loopStarted.get()) {
             throw new Error("Can not run task when worker is not started");
+        }
+        if (this.isQuitted.get()) {
+            throw new Error("Can not run task when worker is quitted");
         }
         return this.worker.run<R>(task, ...args);
     }
