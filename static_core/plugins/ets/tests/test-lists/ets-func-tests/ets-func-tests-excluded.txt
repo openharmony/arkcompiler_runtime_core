@@ -20,7 +20,7 @@ escompat/JsonStringifyTest.ets
 # extended
 escompat/ArrayProxyTest.ets
 escompat/ArrayTest7.ets
-escompat/IteratorArrayTest.ets
+std/core/IteratorArrayTest.ets
 escompat/escompat_Array_modifications_Test_escompat_Array_modifications.ets
 escompat/escompat_Array_modifications_Test_escompat_Array_modifications_001.ets
 escompat/escompat_Array_modifications_Test_escompat_Array_modifications_002.ets
