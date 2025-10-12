@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+/*---
+ark_options: ['--compiler-inlining=false']
+---*/
+// NOTE(mgroshev): remove ark_options after #29029
 function jsonStringifyArrayBoolean() {
     let arr = Array.of<boolean>(false, true, false);
     let expect = '[false,true,false]';

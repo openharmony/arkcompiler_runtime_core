@@ -134,7 +134,7 @@ function(run_sts_app_mode TARGET WORK_DIR APP_MAIN_ABILITY_CLASS APP_ABC_FILES)
     cmake_parse_arguments(ARG "" "${oneValueArgs}" "" ${ARGN})
     set(RUNTIME_EXTRA_OPTIONS
         "--load-runtimes=ets"
-        "--verification-mode=on-the-fly"
+        "--verification-mode=ahead-of-time"
         "--gc-type=g1-gc"
     )
     run_sts_app_mode_with_special_option(${TARGET} ${WORK_DIR} ${APP_MAIN_ABILITY_CLASS} "${ABC_FILES}"

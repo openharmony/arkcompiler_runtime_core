@@ -17,7 +17,9 @@
 
 /*---
 desc: {{c.desc}}
+ark_options: ['--compiler-inlining=false']
 ---*/
+// NOTE(mgroshev): remove ark_options after #29029
 
 interface GenericInterface<T> {
   process(data: T): T;
