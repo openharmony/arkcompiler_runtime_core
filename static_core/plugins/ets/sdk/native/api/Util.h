@@ -29,6 +29,8 @@ ANI_EXPORT ani_string ETSApiUtilHelperGenerateRandomUUID(ani_env *env, [[maybe_u
 ANI_EXPORT ani_object ETSApiUtilHelperGenerateRandomBinaryUUID(ani_env *env, [[maybe_unused]] ani_class klass,
                                                                ani_boolean entropyCache);
 
+ANI_EXPORT ani_string ETSApiUtilHelperGetErrorString(ani_env *env, [[maybe_unused]] ani_class klass, ani_int err);
+
 ANI_EXPORT void ThrowNewError(ani_env *env, std::string_view classDescriptor, std::string_view msg,
                               const char *ctorSignature = nullptr);
 

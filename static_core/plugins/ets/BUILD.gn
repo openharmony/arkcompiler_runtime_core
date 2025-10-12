@@ -160,6 +160,7 @@ if (!(ark_standalone_build ||
       "c_utils:utils",
       "ets_utils:console",
       "hilog:libhilog",
+      "libuv:uv",
       "openssl:libcrypto_shared",
       icuuc_dep,
     ]

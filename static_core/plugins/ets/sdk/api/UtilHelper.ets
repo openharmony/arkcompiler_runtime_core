@@ -27,5 +27,7 @@ class UtilHelper {
 
     public static native generateRandomBinaryUUID(entropyCache: boolean): Uint8Array
 
+    public static native getErrorString(err: int): string
+
 }  // class UtilHelper
 } // namespace util

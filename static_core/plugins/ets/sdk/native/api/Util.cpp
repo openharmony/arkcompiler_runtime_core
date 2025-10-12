@@ -20,6 +20,9 @@
 #include <securec.h>
 #include <sys/types.h>
 #include <random>
+#ifdef PANDA_TARGET_OHOS
+#include <uv.h>
+#endif
 
 #include "stdlib/native/core/stdlib_ani_helpers.h"
 #include "tools/format_logger.h"
@@ -41,6 +44,15 @@ constexpr uint8_t UUID_LOW_FOUR_BITS_MASK = 0x0F;
 constexpr uint8_t UUID_VERSION4_MARK = 0x40;
 constexpr uint8_t UUID_LOW_SIX_BITS_MASK = 0x3F;
 constexpr uint8_t UUID_RESERVED_MARK = 0x80;
+
+#ifndef PANDA_TARGET_OHOS
+extern "C" {
+__attribute__((weak)) const char *uv_strerror([[maybe_unused]] int err)
+{
+    return "unknown error";
+}
+}
+#endif
 
 template <typename S>
 S GenRandUint()
@@ -160,6 +172,12 @@ ANI_EXPORT ani_object ETSApiUtilHelperGenerateRandomBinaryUUID(ani_env *env, [[m
     }
 
     return arr;
+}
+
+ANI_EXPORT ani_string ETSApiUtilHelperGetErrorString(ani_env *env, [[maybe_unused]] ani_class klass, ani_int err)
+{
+    std::string errInfo = uv_strerror(err);
+    return stdlib::CreateUtf8String(env, errInfo.c_str(), errInfo.size());
 }
 }  // extern "C"
 
