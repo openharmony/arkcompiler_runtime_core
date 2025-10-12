@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,103 +36,103 @@ namespace ark::arch {
 // LABEL_TYPEID_INVALID before LABEL_TYPEID_REFERENCE refers to tagged type (types.yaml) and does not handles here
 // CC-OFFNXT(C_RULE_ID_DEFINE_LENGTH_LIMIT) solid logic
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ARCH_COPY_METHOD_ARGS(METHOD, ARG_READER, ARG_WRITER)                                                        \
-    do {                                                                                                             \
-        [[maybe_unused]] static constexpr size_t SHORTY_ELEM_MAX = 0xF;                                              \
-        static constexpr std::array dispatch_table = {                                                               \
-            static_cast<const void *>(&&LABEL_TYPEID_END),       static_cast<const void *>(&&LABEL_TYPEID_VOID),     \
-            static_cast<const void *>(&&LABEL_TYPEID_U8),        static_cast<const void *>(&&LABEL_TYPEID_I8),       \
-            static_cast<const void *>(&&LABEL_TYPEID_U8),        static_cast<const void *>(&&LABEL_TYPEID_I16),      \
-            static_cast<const void *>(&&LABEL_TYPEID_U16),       static_cast<const void *>(&&LABEL_TYPEID_I32),      \
-            static_cast<const void *>(&&LABEL_TYPEID_U32),       static_cast<const void *>(&&LABEL_TYPEID_F32),      \
-            static_cast<const void *>(&&LABEL_TYPEID_F64),       static_cast<const void *>(&&LABEL_TYPEID_I64),      \
-            static_cast<const void *>(&&LABEL_TYPEID_U64),       static_cast<const void *>(&&LABEL_TYPEID_INVALID),  \
-            static_cast<const void *>(&&LABEL_TYPEID_REFERENCE), static_cast<const void *>(&&LABEL_TYPEID_INVALID)}; \
-                                                                                                                     \
-        static_assert(dispatch_table.size() - 1 == SHORTY_ELEM_MAX);                                                 \
-        ASSERT(dispatch_table[static_cast<uint8_t>((*panda_file::ShortyIterator()).GetId())] == &&LABEL_TYPEID_END); \
-        ASSERT(dispatch_table[static_cast<uint8_t>(TypeId::U1)] == &&LABEL_TYPEID_U8);                               \
-        ASSERT(dispatch_table[static_cast<uint8_t>(TypeId::I8)] == &&LABEL_TYPEID_I8);                               \
-        ASSERT(dispatch_table[static_cast<uint8_t>(TypeId::U8)] == &&LABEL_TYPEID_U8);                               \
-        ASSERT(dispatch_table[static_cast<uint8_t>(TypeId::I16)] == &&LABEL_TYPEID_I16);                             \
-        ASSERT(dispatch_table[static_cast<uint8_t>(TypeId::U16)] == &&LABEL_TYPEID_U16);                             \
-        ASSERT(dispatch_table[static_cast<uint8_t>(TypeId::I32)] == &&LABEL_TYPEID_I32);                             \
-        ASSERT(dispatch_table[static_cast<uint8_t>(TypeId::U32)] == &&LABEL_TYPEID_U32);                             \
-        ASSERT(dispatch_table[static_cast<uint8_t>(TypeId::F32)] == &&LABEL_TYPEID_F32);                             \
-        ASSERT(dispatch_table[static_cast<uint8_t>(TypeId::F64)] == &&LABEL_TYPEID_F64);                             \
-        ASSERT(dispatch_table[static_cast<uint8_t>(TypeId::I64)] == &&LABEL_TYPEID_I64);                             \
-        ASSERT(dispatch_table[static_cast<uint8_t>(TypeId::U64)] == &&LABEL_TYPEID_U64);                             \
-        ASSERT(dispatch_table[static_cast<uint8_t>(TypeId::REFERENCE)] == &&LABEL_TYPEID_REFERENCE);                 \
-                                                                                                                     \
-        uint8_t encoding = 0;                                                                                        \
-        panda_file::ShortyIterator it((METHOD)->GetShorty());                                                        \
-        /* Skip the return value */                                                                                  \
-        ARCH_COPY_METHOD_ARGS_DISPATCH                                                                               \
-                                                                                                                     \
-    LABEL_TYPEID_VOID : {                                                                                            \
-        LOG(FATAL, RUNTIME) << "Void argument is impossible";                                                        \
-        UNREACHABLE();                                                                                               \
-    }                                                                                                                \
-    LABEL_TYPEID_I8 : {                                                                                              \
-        auto v = (ARG_READER).template Read<int8_t>();                                                               \
-        (ARG_WRITER).template Write<int8_t>(v);                                                                      \
-        ARCH_COPY_METHOD_ARGS_DISPATCH                                                                               \
-    }                                                                                                                \
-    LABEL_TYPEID_U8 : {                                                                                              \
-        auto v = (ARG_READER).template Read<uint8_t>();                                                              \
-        (ARG_WRITER).template Write<uint8_t>(v);                                                                     \
-        ARCH_COPY_METHOD_ARGS_DISPATCH                                                                               \
-    }                                                                                                                \
-    LABEL_TYPEID_I16 : {                                                                                             \
-        auto v = (ARG_READER).template Read<int16_t>();                                                              \
-        (ARG_WRITER).template Write<int16_t>(v);                                                                     \
-        ARCH_COPY_METHOD_ARGS_DISPATCH                                                                               \
-    }                                                                                                                \
-    LABEL_TYPEID_U16 : {                                                                                             \
-        auto v = (ARG_READER).template Read<uint16_t>();                                                             \
-        (ARG_WRITER).template Write<uint16_t>(v);                                                                    \
-        ARCH_COPY_METHOD_ARGS_DISPATCH                                                                               \
-    }                                                                                                                \
-    LABEL_TYPEID_I32 : {                                                                                             \
-        auto v = (ARG_READER).template Read<int32_t>();                                                              \
-        (ARG_WRITER).template Write<int32_t>(v);                                                                     \
-        ARCH_COPY_METHOD_ARGS_DISPATCH                                                                               \
-    }                                                                                                                \
-    LABEL_TYPEID_U32 : {                                                                                             \
-        auto v = (ARG_READER).template Read<uint32_t>();                                                             \
-        (ARG_WRITER).template Write<uint32_t>(v);                                                                    \
-        ARCH_COPY_METHOD_ARGS_DISPATCH                                                                               \
-    }                                                                                                                \
-    LABEL_TYPEID_F32 : {                                                                                             \
-        auto v = (ARG_READER).template Read<float>();                                                                \
-        (ARG_WRITER).template Write<float>(v);                                                                       \
-        ARCH_COPY_METHOD_ARGS_DISPATCH                                                                               \
-    }                                                                                                                \
-    LABEL_TYPEID_F64 : {                                                                                             \
-        auto v = (ARG_READER).template Read<double>();                                                               \
-        (ARG_WRITER).template Write<double>(v);                                                                      \
-        ARCH_COPY_METHOD_ARGS_DISPATCH                                                                               \
-    }                                                                                                                \
-    LABEL_TYPEID_I64 : {                                                                                             \
-        auto v = (ARG_READER).template Read<int64_t>();                                                              \
-        (ARG_WRITER).template Write<int64_t>(v);                                                                     \
-        ARCH_COPY_METHOD_ARGS_DISPATCH                                                                               \
-    }                                                                                                                \
-    LABEL_TYPEID_U64 : {                                                                                             \
-        auto v = (ARG_READER).template Read<uint64_t>();                                                             \
-        (ARG_WRITER).template Write<uint64_t>(v);                                                                    \
-        ARCH_COPY_METHOD_ARGS_DISPATCH                                                                               \
-    }                                                                                                                \
-    LABEL_TYPEID_REFERENCE : {                                                                                       \
-        auto v = const_cast<ObjectHeader **>((ARG_READER).template ReadPtr<ObjectHeader *>());                       \
-        (ARG_WRITER).template Write<ObjectHeader **>(v);                                                             \
-        ARCH_COPY_METHOD_ARGS_DISPATCH                                                                               \
-    }                                                                                                                \
-    LABEL_TYPEID_INVALID : {                                                                                         \
-        LOG(FATAL, RUNTIME) << "Invalid method's shorty, unreachable type ID";                                       \
-        UNREACHABLE();                                                                                               \
-    }                                                                                                                \
-    LABEL_TYPEID_END:;                                                                                               \
+#define ARCH_COPY_METHOD_ARGS(METHOD, ARG_READER, ARG_WRITER)                                                          \
+    do {                                                                                                               \
+        [[maybe_unused]] static constexpr size_t SHORTY_ELEM_MAX = 0xF;                                                \
+        static constexpr std::array dispatch_table = {                                                                 \
+            static_cast<const void *>(&&LABEL_TYPEID_END),       static_cast<const void *>(&&LABEL_TYPEID_VOID),       \
+            static_cast<const void *>(&&LABEL_TYPEID_U8),        static_cast<const void *>(&&LABEL_TYPEID_I8),         \
+            static_cast<const void *>(&&LABEL_TYPEID_U8),        static_cast<const void *>(&&LABEL_TYPEID_I16),        \
+            static_cast<const void *>(&&LABEL_TYPEID_U16),       static_cast<const void *>(&&LABEL_TYPEID_I32),        \
+            static_cast<const void *>(&&LABEL_TYPEID_U32),       static_cast<const void *>(&&LABEL_TYPEID_F32),        \
+            static_cast<const void *>(&&LABEL_TYPEID_F64),       static_cast<const void *>(&&LABEL_TYPEID_I64),        \
+            static_cast<const void *>(&&LABEL_TYPEID_U64),       static_cast<const void *>(&&LABEL_TYPEID_INVALID),    \
+            static_cast<const void *>(&&LABEL_TYPEID_REFERENCE), static_cast<const void *>(&&LABEL_TYPEID_INVALID)};   \
+                                                                                                                       \
+        static_assert(dispatch_table.size() - 1 == SHORTY_ELEM_MAX);                                                   \
+        ASSERT(dispatch_table[static_cast<uint8_t>((*panda_file::ShortyIterator()).GetId())] == &&LABEL_TYPEID_END);   \
+        ASSERT(dispatch_table[static_cast<uint8_t>(panda_file::Type::TypeId::U1)] == &&LABEL_TYPEID_U8);               \
+        ASSERT(dispatch_table[static_cast<uint8_t>(panda_file::Type::TypeId::I8)] == &&LABEL_TYPEID_I8);               \
+        ASSERT(dispatch_table[static_cast<uint8_t>(panda_file::Type::TypeId::U8)] == &&LABEL_TYPEID_U8);               \
+        ASSERT(dispatch_table[static_cast<uint8_t>(panda_file::Type::TypeId::I16)] == &&LABEL_TYPEID_I16);             \
+        ASSERT(dispatch_table[static_cast<uint8_t>(panda_file::Type::TypeId::U16)] == &&LABEL_TYPEID_U16);             \
+        ASSERT(dispatch_table[static_cast<uint8_t>(panda_file::Type::TypeId::I32)] == &&LABEL_TYPEID_I32);             \
+        ASSERT(dispatch_table[static_cast<uint8_t>(panda_file::Type::TypeId::U32)] == &&LABEL_TYPEID_U32);             \
+        ASSERT(dispatch_table[static_cast<uint8_t>(panda_file::Type::TypeId::F32)] == &&LABEL_TYPEID_F32);             \
+        ASSERT(dispatch_table[static_cast<uint8_t>(panda_file::Type::TypeId::F64)] == &&LABEL_TYPEID_F64);             \
+        ASSERT(dispatch_table[static_cast<uint8_t>(panda_file::Type::TypeId::I64)] == &&LABEL_TYPEID_I64);             \
+        ASSERT(dispatch_table[static_cast<uint8_t>(panda_file::Type::TypeId::U64)] == &&LABEL_TYPEID_U64);             \
+        ASSERT(dispatch_table[static_cast<uint8_t>(panda_file::Type::TypeId::REFERENCE)] == &&LABEL_TYPEID_REFERENCE); \
+                                                                                                                       \
+        uint8_t encoding = 0;                                                                                          \
+        panda_file::ShortyIterator it((METHOD)->GetShorty());                                                          \
+        /* Skip the return value */                                                                                    \
+        ARCH_COPY_METHOD_ARGS_DISPATCH                                                                                 \
+                                                                                                                       \
+    LABEL_TYPEID_VOID : {                                                                                              \
+        LOG(FATAL, RUNTIME) << "Void argument is impossible";                                                          \
+        UNREACHABLE();                                                                                                 \
+    }                                                                                                                  \
+    LABEL_TYPEID_I8 : {                                                                                                \
+        auto v = (ARG_READER).template Read<int8_t>();                                                                 \
+        (ARG_WRITER).template Write<int8_t>(v);                                                                        \
+        ARCH_COPY_METHOD_ARGS_DISPATCH                                                                                 \
+    }                                                                                                                  \
+    LABEL_TYPEID_U8 : {                                                                                                \
+        auto v = (ARG_READER).template Read<uint8_t>();                                                                \
+        (ARG_WRITER).template Write<uint8_t>(v);                                                                       \
+        ARCH_COPY_METHOD_ARGS_DISPATCH                                                                                 \
+    }                                                                                                                  \
+    LABEL_TYPEID_I16 : {                                                                                               \
+        auto v = (ARG_READER).template Read<int16_t>();                                                                \
+        (ARG_WRITER).template Write<int16_t>(v);                                                                       \
+        ARCH_COPY_METHOD_ARGS_DISPATCH                                                                                 \
+    }                                                                                                                  \
+    LABEL_TYPEID_U16 : {                                                                                               \
+        auto v = (ARG_READER).template Read<uint16_t>();                                                               \
+        (ARG_WRITER).template Write<uint16_t>(v);                                                                      \
+        ARCH_COPY_METHOD_ARGS_DISPATCH                                                                                 \
+    }                                                                                                                  \
+    LABEL_TYPEID_I32 : {                                                                                               \
+        auto v = (ARG_READER).template Read<int32_t>();                                                                \
+        (ARG_WRITER).template Write<int32_t>(v);                                                                       \
+        ARCH_COPY_METHOD_ARGS_DISPATCH                                                                                 \
+    }                                                                                                                  \
+    LABEL_TYPEID_U32 : {                                                                                               \
+        auto v = (ARG_READER).template Read<uint32_t>();                                                               \
+        (ARG_WRITER).template Write<uint32_t>(v);                                                                      \
+        ARCH_COPY_METHOD_ARGS_DISPATCH                                                                                 \
+    }                                                                                                                  \
+    LABEL_TYPEID_F32 : {                                                                                               \
+        auto v = (ARG_READER).template Read<float>();                                                                  \
+        (ARG_WRITER).template Write<float>(v);                                                                         \
+        ARCH_COPY_METHOD_ARGS_DISPATCH                                                                                 \
+    }                                                                                                                  \
+    LABEL_TYPEID_F64 : {                                                                                               \
+        auto v = (ARG_READER).template Read<double>();                                                                 \
+        (ARG_WRITER).template Write<double>(v);                                                                        \
+        ARCH_COPY_METHOD_ARGS_DISPATCH                                                                                 \
+    }                                                                                                                  \
+    LABEL_TYPEID_I64 : {                                                                                               \
+        auto v = (ARG_READER).template Read<int64_t>();                                                                \
+        (ARG_WRITER).template Write<int64_t>(v);                                                                       \
+        ARCH_COPY_METHOD_ARGS_DISPATCH                                                                                 \
+    }                                                                                                                  \
+    LABEL_TYPEID_U64 : {                                                                                               \
+        auto v = (ARG_READER).template Read<uint64_t>();                                                               \
+        (ARG_WRITER).template Write<uint64_t>(v);                                                                      \
+        ARCH_COPY_METHOD_ARGS_DISPATCH                                                                                 \
+    }                                                                                                                  \
+    LABEL_TYPEID_REFERENCE : {                                                                                         \
+        auto v = const_cast<ObjectHeader **>((ARG_READER).template ReadPtr<ObjectHeader *>());                         \
+        (ARG_WRITER).template Write<ObjectHeader **>(v);                                                               \
+        ARCH_COPY_METHOD_ARGS_DISPATCH                                                                                 \
+    }                                                                                                                  \
+    LABEL_TYPEID_INVALID : {                                                                                           \
+        LOG(FATAL, RUNTIME) << "Invalid method's shorty, unreachable type ID";                                         \
+        UNREACHABLE();                                                                                                 \
+    }                                                                                                                  \
+    LABEL_TYPEID_END:;                                                                                                 \
     } while (false)
 
 template <Arch A>

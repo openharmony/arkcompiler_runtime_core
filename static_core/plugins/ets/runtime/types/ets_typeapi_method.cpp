@@ -17,6 +17,7 @@
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_vm.h"
+#include "plugins/ets/runtime/types/ets_method.h"
 
 namespace ark::ets {
 
@@ -25,6 +26,12 @@ EtsTypeAPIMethod *EtsTypeAPIMethod::Create(EtsCoroutine *etsCoroutine)
     EtsClass *klass = PlatformTypes(etsCoroutine)->coreMethod;
     EtsObject *etsObject = EtsObject::Create(etsCoroutine, klass);
     return reinterpret_cast<EtsTypeAPIMethod *>(etsObject);
+}
+
+EtsMethod *EtsTypeAPIMethod::GetEtsMethod()
+{
+    return EtsMethod::FromTypeDescriptor(methodType_->GetRuntimeTypeDescriptor()->GetMutf8(),
+                                         methodType_->GetContextLinker());
 }
 
 }  // namespace ark::ets

@@ -245,6 +245,13 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     findType(&EtsPlatformTypes::reflectStaticMethod, REFLECT_STATIC_METHOD);
     findType(&EtsPlatformTypes::reflectConstructor, REFLECT_CONSTRUCTOR);
 
+    findType(&EtsPlatformTypes::coreReflectProxy, PROXY);
+    findMethod(&EtsPlatformTypes::coreReflectProxyConstructor, coreReflectProxy, "<ctor>",
+               "Lstd/core/reflect/InvocationHandler;:V", false);
+    findMethod(&EtsPlatformTypes::coreReflectProxyInvoke, coreReflectProxy, "invoke", nullptr, true);
+    findMethod(&EtsPlatformTypes::coreReflectProxyInvokeSet, coreReflectProxy, "invokeSet", nullptr, true);
+    findMethod(&EtsPlatformTypes::coreReflectProxyInvokeGet, coreReflectProxy, "invokeGet", nullptr, true);
+
     findType(&EtsPlatformTypes::escompatProcess, PROCESS);
     findMethod(&EtsPlatformTypes::escompatProcessListUnhandledJobs, escompatProcess, "listUnhandledJobs",
                "Lescompat/Array;:V", true);

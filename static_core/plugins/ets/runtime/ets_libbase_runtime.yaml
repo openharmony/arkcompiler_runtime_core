@@ -8953,3 +8953,20 @@ intrinsics:
     codegen_arch: [arm64, amd64]
     codegen_func: CreateSetDelete
     llvm_codegen_func: EmitSetDelete
+
+#####################
+# std.reflect.Proxy #
+#####################
+  - name: ReflectProxyGenerateProxy
+    space: ets
+    class_name: std.core.reflect.Proxy
+    method_name: generateProxy
+    static: true
+    signature:
+      ret: std.core.Class
+      args:
+        - std.core.RuntimeLinker
+        - std.core.String
+        - std.core.Class[]
+        - escompat.Array
+    impl: ark::ets::intrinsics::ReflectProxyGenerateProxy

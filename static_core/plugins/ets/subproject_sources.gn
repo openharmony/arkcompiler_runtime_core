@@ -163,6 +163,7 @@ srcs_runtime = [
   "runtime/intrinsics/std_core_StringBuilder.cpp",
   "runtime/intrinsics/std_core_Type.cpp",
   "runtime/intrinsics/std_core_TypeCreator.cpp",
+  "runtime/intrinsics/reflect_Proxy.cpp",
   "runtime/intrinsics/std_core_Method.cpp",
   "runtime/intrinsics/std_core_reflect_Method.cpp",
   "runtime/intrinsics/std_core_reflect_Field.cpp",
@@ -202,6 +203,7 @@ srcs_runtime = [
   "runtime/ets_utils.cpp",
   "runtime/static_object_accessor.cpp",
   "runtime/static_type_converter.cpp",
+  "runtime/entrypoints/ets_proxy_entrypoints.cpp",
   "stdlib/native/init_native_methods.cpp",
   "stdlib/native/escompat/Process.cpp",
   "stdlib/native/escompat/RegExp.cpp",
@@ -318,16 +320,19 @@ if (current_cpu == "amd64" || current_cpu == "x64" || current_cpu == "x86_64") {
   srcs_runtime += [
     "runtime/ani/arch/amd64/ets_napi_entry_point_amd64.S",
     "runtime/ani/arch/amd64/ets_async_entry_point_amd64.S",
+    "runtime/entrypoints/arch/amd64/ets_proxy_entry_point_amd64.S",
   ]
 } else if (current_cpu == "arm64") {
   srcs_runtime += [
     "runtime/ani/arch/arm64/ets_napi_entry_point_aarch64.S",
     "runtime/ani/arch/arm64/ets_async_entry_point_aarch64.S",
+    "runtime/entrypoints/arch/arm64/ets_proxy_entry_point_aarch64.S",
   ]
 } else if (current_cpu == "arm") {
   srcs_runtime += [
     "runtime/ani/arch/arm32/ets_napi_entry_point_arm32.S",
     "runtime/ani/arch/arm32/ets_async_entry_point_arm32.S",
+    "runtime/entrypoints/arch/arm32/ets_proxy_entry_point_arm32.S",
   ]
 }
 # TODO(nsizov): Support 32-bit ARM
