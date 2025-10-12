@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,8 @@
 #ifndef CPP_ABCKIT_JS_MODULE_H
 #define CPP_ABCKIT_JS_MODULE_H
 
-#include "libabckit/cpp/headers/core/module.h"
-#include "libabckit/cpp/headers/base_concepts.h"
+#include "../core/module.h"
+#include "../base_concepts.h"
 #include "import_descriptor.h"
 #include "export_descriptor.h"
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -65,6 +65,17 @@ AbckitString *CreateStringDynamic(AbckitFile *file, const char *value, size_t le
 }
 
 void FunctionSetGraphDynamic(AbckitCoreFunction *function, AbckitGraph *graph)
+{
+    if (function->owningModule->file->needOptimize) {
+        std::unordered_map<AbckitCoreFunction *, FunctionStatus *> &functionsMap =
+            function->owningModule->file->functionsMap;
+        functionsMap[function]->writeBack = true;
+    } else {
+        FunctionSetGraphDynamicSync(function, graph);
+    }
+}
+
+void FunctionSetGraphDynamicSync(AbckitCoreFunction *function, AbckitGraph *graph)
 {
     LIBABCKIT_LOG_FUNC;
 
@@ -740,6 +751,12 @@ AbckitValue *FindOrCreateValueU1Dynamic(AbckitFile *file, bool value)
     return FindOrCreateValueU1DynamicImpl(file, value);
 }
 
+AbckitValue *FindOrCreateValueIntDynamic(AbckitFile *file, int value)
+{
+    LIBABCKIT_LOG_FUNC;
+    return FindOrCreateValueIntDynamicImpl(file, value);
+}
+
 AbckitValue *FindOrCreateValueDoubleDynamic(AbckitFile *file, double value)
 {
     LIBABCKIT_LOG_FUNC;
@@ -946,10 +963,10 @@ void AnnotationRemoveAnnotationElementDynamic(AbckitCoreAnnotation *anno, Abckit
     annotationElements.erase(iter);
 }
 
-std::string TypeToName(AbckitType *type)
+static std::string TypeToName(AbckitType *type)
 {
     if (type->id == ABCKIT_TYPE_ID_REFERENCE) {
-        auto str = ClassGetNameDynamic(type->klass);
+        auto str = ClassGetNameDynamic(type->GetClass());
         if (str == nullptr) {
             return "";
         }
@@ -963,7 +980,7 @@ std::string TypeToName(AbckitType *type)
         case ABCKIT_TYPE_ID_U8:
             return "u8";
         case ABCKIT_TYPE_ID_I8:
-            return "u8";
+            return "i8";
         case ABCKIT_TYPE_ID_U16:
             return "u16";
         case ABCKIT_TYPE_ID_I16:

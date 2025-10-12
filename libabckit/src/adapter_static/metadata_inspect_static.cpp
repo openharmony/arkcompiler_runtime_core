@@ -27,8 +27,8 @@
 
 #include "libabckit/src/wrappers/graph_wrapper/graph_wrapper.h"
 
-#include "mem/arena_allocator.h"
-#include "modifiers.h"
+#include "libpandabase/mem/arena_allocator.h"
+#include "libpandafile/modifiers.h"
 #include "src/logger.h"
 #include "static_core/assembler/assembly-program.h"
 #include "static_core/assembler/mangling.h"
@@ -83,6 +83,12 @@ AbckitString *NamespaceGetNameStatic(AbckitCoreNamespace *ns)
     return CreateStringStatic(ns->owningModule->file, namespaceName.data(), namespaceName.size());
 }
 
+bool NamespaceIsExternalStatic(AbckitCoreNamespace *ns)
+{
+    LIBABCKIT_LOG_FUNC;
+    return ns->GetArkTSImpl()->impl.GetStaticClass()->metadata->IsForeign();
+}
+
 // ========================================
 // Class
 // ========================================
@@ -94,6 +100,24 @@ AbckitString *ClassGetNameStatic(AbckitCoreClass *klass)
     auto [moduleName, className] = ClassGetNames(record->name);
 
     return CreateStringStatic(klass->owningModule->file, className.data(), className.size());
+}
+
+bool ClassIsExternalStatic(AbckitCoreClass *klass)
+{
+    LIBABCKIT_LOG_FUNC;
+    return klass->GetArkTSImpl()->impl.GetStaticClass()->metadata->IsForeign();
+}
+
+bool ClassIsFinalStatic(AbckitCoreClass *klass)
+{
+    LIBABCKIT_LOG_FUNC;
+    return (klass->GetArkTSImpl()->impl.GetStaticClass()->metadata->GetAccessFlags() & ACC_FINAL) != 0x0;
+}
+
+bool ClassIsAbstractStatic(AbckitCoreClass *klass)
+{
+    LIBABCKIT_LOG_FUNC;
+    return (klass->GetArkTSImpl()->impl.GetStaticClass()->metadata->GetAccessFlags() & ACC_ABSTRACT) != 0x0;
 }
 
 // ========================================
@@ -109,6 +133,12 @@ AbckitString *InterfaceGetNameStatic(AbckitCoreInterface *iface)
     return CreateStringStatic(iface->owningModule->file, interfaceName.data(), interfaceName.size());
 }
 
+bool InterfaceIsExternalStatic(AbckitCoreInterface *iface)
+{
+    LIBABCKIT_LOG_FUNC;
+    return iface->GetArkTSImpl()->impl.GetStaticClass()->metadata->IsForeign();
+}
+
 // ========================================
 // Enum
 // ========================================
@@ -122,9 +152,43 @@ AbckitString *EnumGetNameStatic(AbckitCoreEnum *enm)
     return CreateStringStatic(enm->owningModule->file, enumName.data(), enumName.size());
 }
 
+bool EnumIsExternalStatic(AbckitCoreEnum *enm)
+{
+    LIBABCKIT_LOG_FUNC;
+    return enm->GetArkTSImpl()->impl.GetStaticClass()->metadata->IsForeign();
+}
+
 // ========================================
 // Field
 // ========================================
+
+AbckitString *ModuleFieldGetNameStatic(AbckitCoreModuleField *field)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto fieldName = field->GetArkTSImpl()->GetStaticImpl()->name;
+    return CreateStringStatic(field->owner->file, fieldName.data(), fieldName.size());
+}
+
+AbckitString *NamespaceFieldGetNameStatic(AbckitCoreNamespaceField *field)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto fieldName = field->GetArkTSImpl()->GetStaticImpl()->name;
+    return CreateStringStatic(field->owner->owningModule->file, fieldName.data(), fieldName.size());
+}
+
+AbckitString *ClassFieldGetNameStatic(AbckitCoreClassField *field)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto fieldName = field->GetArkTSImpl()->GetStaticImpl()->name;
+    return CreateStringStatic(field->owner->owningModule->file, fieldName.data(), fieldName.size());
+}
+
+AbckitString *EnumFieldGetNameStatic(AbckitCoreEnumField *field)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto fieldName = field->GetArkTSImpl()->GetStaticImpl()->name;
+    return CreateStringStatic(field->owner->owningModule->file, fieldName.data(), fieldName.size());
+}
 
 bool ClassFieldIsPublicStatic(AbckitCoreClassField *field)
 {
@@ -142,6 +206,13 @@ bool ClassFieldIsPrivateStatic(AbckitCoreClassField *field)
 {
     LIBABCKIT_LOG_FUNC;
     return (field->GetArkTSImpl()->GetStaticImpl()->metadata->GetAccessFlags() & ACC_PRIVATE) != 0x0;
+}
+
+bool ClassFieldIsInternalStatic(AbckitCoreClassField *field)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto flag = field->GetArkTSImpl()->GetStaticImpl()->metadata->GetAccessFlags();
+    return (flag & ACC_PUBLIC) == 0x0 && (flag & ACC_PROTECTED) == 0x0 && (flag & ACC_PRIVATE) == 0x0;
 }
 
 bool ClassFieldIsStaticStatic(AbckitCoreClassField *field)
@@ -245,18 +316,44 @@ AbckitGraph *CreateGraphFromFunctionStatic(AbckitCoreFunction *function)
     LIBABCKIT_LOG_DUMP(func->DebugDump(), DEBUG);
     LIBABCKIT_LOG(DEBUG) << func->name << '\n';
 
+    auto *file = function->owningModule->file;
     auto program = function->owningModule->file->GetStaticProgram();
 
-    auto maps = std::make_unique<pandasm::AsmEmitter::PandaFileToPandaAsmMaps>();
-    auto pf = pandasm::AsmEmitter::Emit(*program, maps.get()).release();
+    pandasm::AsmEmitter::PandaFileToPandaAsmMaps *maps;
+    panda_file::File *pf = nullptr;
+    if (function->owningModule->file->needOptimize && file->generateStatus.generated) {
+        maps = static_cast<pandasm::AsmEmitter::PandaFileToPandaAsmMaps *>(file->generateStatus.maps);
+        pf = static_cast<panda_file::File *>(file->generateStatus.pf);
+    } else {
+        if (file->generateStatus.pf != nullptr) {
+            delete static_cast<panda_file::File *>(file->generateStatus.pf);
+        }
+        if (file->generateStatus.maps != nullptr) {
+            delete static_cast<pandasm::AsmEmitter::PandaFileToPandaAsmMaps *>(file->generateStatus.maps);
+        }
+
+        maps = new pandasm::AsmEmitter::PandaFileToPandaAsmMaps();
+        pf = const_cast<panda_file::File *>(pandasm::AsmEmitter::Emit(*program, maps).release());
+    }
+
     if (pf == nullptr) {
         LIBABCKIT_LOG(DEBUG) << "FAILURE: " << pandasm::AsmEmitter::GetLastError() << '\n';
         statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        if (!function->owningModule->file->needOptimize) {
+            delete maps;
+        }
         return nullptr;
     }
 
+    if (function->owningModule->file->needOptimize) {
+        file->generateStatus = {true, pf, maps};
+    }
+
     uint32_t methodOffset = 0;
-    if (!GetMethodOffset(func, maps.get(), &methodOffset)) {
+    if (!GetMethodOffset(func, maps, &methodOffset)) {
+        if (!function->owningModule->file->needOptimize) {
+            delete maps;
+        }
         return nullptr;
     }
 
@@ -274,6 +371,9 @@ AbckitGraph *CreateGraphFromFunctionStatic(AbckitCoreFunction *function)
     if (graphImpl == nullptr) {
         DeleteGraphArgs(allocator, localAllocator, adapter, irInterface);
         statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_MEMORY_ALLOCATION);
+        if (!function->owningModule->file->needOptimize) {
+            delete maps;
+        }
         return nullptr;
     }
     graphImpl->SetLanguage(SourceLanguage::ETS);
@@ -286,6 +386,9 @@ AbckitGraph *CreateGraphFromFunctionStatic(AbckitCoreFunction *function)
     if (!irBuilderRes) {
         DeleteGraphArgs(allocator, localAllocator, adapter, irInterface);
         statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        if (!function->owningModule->file->needOptimize) {
+            delete maps;
+        }
         return nullptr;
     }
 
@@ -294,7 +397,11 @@ AbckitGraph *CreateGraphFromFunctionStatic(AbckitCoreFunction *function)
     GraphInvalidateAnalyses(graphImpl);
     CheckInvalidOpcodes(graphImpl, false);
 
-    return CreateGraph(function, irInterface, graphImpl, adapter);
+    AbckitGraph *graph = CreateGraph(function, irInterface, graphImpl, adapter);
+    if (!function->owningModule->file->needOptimize) {
+        delete maps;
+    }
+    return graph;
 }
 
 bool FunctionIsStaticStatic(AbckitCoreFunction *function)
@@ -307,11 +414,13 @@ bool FunctionIsStaticStatic(AbckitCoreFunction *function)
 bool FunctionIsCtorStatic(AbckitCoreFunction *function)
 {
     LIBABCKIT_LOG_FUNC;
-    auto *func = function->GetArkTSImpl()->GetStaticImpl();
-    size_t pos = func->name.rfind('.');
-    ASSERT(pos != std::string::npos);
-    std::string name = func->name.substr(pos + 1);
-    return name == "_ctor_";  // NOTE(ivagin)
+    return function->GetArkTSImpl()->GetStaticImpl()->metadata->IsCtor();
+}
+
+bool FunctionIsCctorStatic(AbckitCoreFunction *function)
+{
+    LIBABCKIT_LOG_FUNC;
+    return function->GetArkTSImpl()->GetStaticImpl()->metadata->IsCctor();
 }
 
 bool FunctionIsAnonymousStatic(AbckitCoreFunction *function)
@@ -331,9 +440,85 @@ bool FunctionIsNativeStatic(AbckitCoreFunction *function)
     return (func->metadata->GetAccessFlags() & ACC_NATIVE) != 0x0;
 }
 
+bool FunctionIsPublicStatic(AbckitCoreFunction *function)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto *func = function->GetArkTSImpl()->GetStaticImpl();
+    return (func->metadata->GetAccessFlags() & ACC_PUBLIC) != 0x0;
+}
+
+bool FunctionIsProtectedStatic(AbckitCoreFunction *function)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto *func = function->GetArkTSImpl()->GetStaticImpl();
+    return (func->metadata->GetAccessFlags() & ACC_PROTECTED) != 0x0;
+}
+
+bool FunctionIsPrivateStatic(AbckitCoreFunction *function)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto *func = function->GetArkTSImpl()->GetStaticImpl();
+    return (func->metadata->GetAccessFlags() & ACC_PRIVATE) != 0x0;
+}
+
+bool FunctionIsInternalStatic(AbckitCoreFunction *function)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto flag = function->GetArkTSImpl()->GetStaticImpl()->metadata->GetAccessFlags();
+    return (flag & ACC_PUBLIC) == 0x0 && (flag & ACC_PROTECTED) == 0x0 && (flag & ACC_PRIVATE) == 0x0;
+}
+
+bool FunctionIsExternalStatic(AbckitCoreFunction *function)
+{
+    LIBABCKIT_LOG_FUNC;
+    return function->GetArkTSImpl()->GetStaticImpl()->metadata->IsForeign();
+}
+
+bool FunctionIsAbstractStatic(AbckitCoreFunction *function)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto *func = function->GetArkTSImpl()->GetStaticImpl();
+    return (func->metadata->GetAccessFlags() & ACC_ABSTRACT) != 0x0;
+}
+
+bool FunctionIsFinalStatic(AbckitCoreFunction *function)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto *func = function->GetArkTSImpl()->GetStaticImpl();
+    return (func->metadata->GetAccessFlags() & ACC_FINAL) != 0x0;
+}
+
+bool FunctionIsAsyncStatic(AbckitCoreFunction *function)
+{
+    LIBABCKIT_LOG_FUNC;
+    return function->asyncImpl != nullptr;
+}
+
+AbckitType *FunctionGetReturnTypeStatic(AbckitCoreFunction *function)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto *func = function->GetArkTSImpl()->GetStaticImpl();
+    auto returnType = func->returnType;
+    auto file = function->owningModule->file;
+    auto typeName = CreateStringStatic(file, returnType.GetName().data(), returnType.GetName().size());
+    return GetOrCreateType(file, ArkPandasmTypeToAbckitTypeId(returnType), returnType.GetRank(), nullptr, typeName);
+}
+
 // ========================================
 // Annotation
 // ========================================
+
+// ========================================
+// AnnotationInterface
+// ========================================
+
+AbckitString *AnnotationInterfaceGetNameStatic(AbckitCoreAnnotationInterface *ai)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto *record = ai->GetArkTSImpl()->GetStaticImpl();
+    auto [_, annotationInterfaceName] = ClassGetNames(record->name);
+    return CreateStringStatic(ai->owningModule->file, annotationInterfaceName.data(), annotationInterfaceName.size());
+}
 
 // ========================================
 // ImportDescriptor
@@ -503,6 +688,27 @@ AbckitLiteralTag LiteralGetTagStatic(AbckitLiteral *lit)
 }
 
 // ========================================
+// Type
+// ========================================
+
+bool TypeIsUnionStatic(AbckitType *type)
+{
+    LIBABCKIT_LOG_FUNC;
+    return !type->types.empty();
+}
+
+bool TypeEnumerateUnionTypesStatic(AbckitType *type, void *data, bool (*cb)(AbckitType *type, void *data))
+{
+    LIBABCKIT_LOG_FUNC;
+    for (auto &t : type->types) {
+        if (!cb(t, data)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// ========================================
 // Value
 // ========================================
 
@@ -524,6 +730,9 @@ AbckitType *ValueGetTypeStatic(AbckitValue *value)
         case pandasm::Value::Type::U32:
             id = ABCKIT_TYPE_ID_U32;
             break;
+        case pandasm::Value::Type::I32:
+            id = ABCKIT_TYPE_ID_I32;
+            break;
         case pandasm::Value::Type::U64:
             id = ABCKIT_TYPE_ID_U64;
             break;
@@ -537,7 +746,7 @@ AbckitType *ValueGetTypeStatic(AbckitValue *value)
             LIBABCKIT_UNIMPLEMENTED;
     }
     // NOTE implement logic for classes
-    return GetOrCreateType(value->file, id, 0, nullptr);
+    return GetOrCreateType(value->file, id, 0, nullptr, nullptr);
 }
 
 bool ValueGetU1Static(AbckitValue *value)
@@ -550,6 +759,18 @@ bool ValueGetU1Static(AbckitValue *value)
 
     auto *pVal = reinterpret_cast<pandasm::ScalarValue *>(value->val.get());
     return pVal->GetValue<bool>();
+}
+
+int ValueGetIntStatic(AbckitValue *value)
+{
+    LIBABCKIT_LOG_FUNC;
+    if (ValueGetTypeStatic(value)->id != ABCKIT_TYPE_ID_I32) {
+        statuses::SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return 0;
+    }
+
+    auto *pVal = reinterpret_cast<pandasm::ScalarValue *>(value->val.get());
+    return pVal->GetValue<int>();
 }
 
 double ValueGetDoubleStatic(AbckitValue *value)

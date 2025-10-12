@@ -347,4 +347,19 @@ TEST_F(LibAbcKitCppTest, CppTest12)
     ASSERT_FALSE(inst);
 }
 
+// Test: test-kind=api, api=Module::GetModule, abc-kind=ArkTS1, category=positive, extension=cpp
+TEST_F(LibAbcKitCppTest, CppTest13)
+{
+    abckit::File file(ABCKIT_ABC_DIR "cpp/tests/cpp_test_dynamic.abc");
+
+    std::vector<core::Module> count;
+
+    for (auto &mdl : file.GetModules()) {
+        for (auto &ns : mdl.GetNamespaces()) {
+            count.push_back(ns.GetModule());
+        }
+    }
+
+    ASSERT_TRUE(count.size() == 1);
+}
 }  // namespace libabckit::test

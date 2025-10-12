@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,7 +37,7 @@
 #include "static_core/compiler/optimizer/optimizations/move_constants.h"
 #include "static_core/compiler/optimizer/optimizations/cleanup.h"
 #include "static_core/compiler/optimizer/optimizations/try_catch_resolving.h"
-#include "static_core/libpandabase/utils/arch.h"
+#include "libpandabase/utils/arch.h"
 
 #include <cstdint>
 #include <iostream>
@@ -235,8 +235,11 @@ void GraphWrapper::DestroyGraphDynamic(AbckitGraph *graph)
     auto *ctxGInternal = reinterpret_cast<CtxGInternalDynamic *>(graph->internal);
     // dirty hack to obtain FileWrapper pointer
     // NOTE(mshimenkov): refactor it
-    auto *fileWrapper = reinterpret_cast<FileWrapper *>(ctxGInternal->runtimeAdapter->GetBinaryFileForMethod(nullptr));
-    delete fileWrapper;
+    if (!graph->file->needOptimize) {
+        auto *fileWrapper =
+            reinterpret_cast<FileWrapper *>(ctxGInternal->runtimeAdapter->GetBinaryFileForMethod(nullptr));
+        delete fileWrapper;
+    }
     delete ctxGInternal->runtimeAdapter;
     delete ctxGInternal->irInterface;
     delete ctxGInternal->localAllocator;

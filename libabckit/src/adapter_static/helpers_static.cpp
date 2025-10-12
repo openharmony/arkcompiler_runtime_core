@@ -15,6 +15,7 @@
  */
 
 #include "libabckit/src/adapter_static/helpers_static.h"
+#include "libabckit/src/adapter_static/string_util.h"
 #include "libabckit/src/helpers_common.h"
 #include "libabckit/src/macros.h"
 #include "libabckit/src/logger.h"
@@ -35,6 +36,7 @@
 #include "static_core/compiler/optimizer/analysis/rpo.h"
 
 #include "abckit_intrinsics_opcodes.inc"
+#include "name_util.h"
 
 static constexpr uint32_t IC_SLOT_VALUE = 0xF;
 
@@ -545,6 +547,50 @@ uint32_t GetMethodOffset(AbckitGraph *graph, AbckitCoreFunction *function)
     return methodOffset;
 }
 
+uint32_t GetFieldOffset(AbckitGraph *graph, AbckitCoreClassField *field)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    if (graph == nullptr || field == nullptr) {
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return 0;
+    }
+
+    auto *arktsField = field->GetArkTSImpl();
+    if (arktsField == nullptr) {
+        LIBABCKIT_LOG(DEBUG) << "GetArkTSImpl returned nullptr\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return 0;
+    }
+
+    auto *pandasmField = arktsField->GetStaticImpl();
+    if (pandasmField == nullptr) {
+        LIBABCKIT_LOG(DEBUG) << "GetStaticImpl returned nullptr\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return 0;
+    }
+
+    std::string ownerClassName = field->owner->GetArkTSImpl()->impl.GetStaticClass()->name;
+    std::string fullFieldName = ownerClassName + "." + pandasmField->name;
+
+    LIBABCKIT_LOG(DEBUG) << "full field name: " << fullFieldName << '\n';
+
+    uint32_t fieldOffset = 0;
+    for (auto &[id, s] : graph->irInterface->fields) {
+        if (s == fullFieldName) {
+            fieldOffset = id;
+            break;
+        }
+    }
+
+    if (fieldOffset == 0) {
+        LIBABCKIT_LOG(DEBUG) << "fieldOffset == 0\n";
+        LIBABCKIT_UNREACHABLE;
+    }
+
+    return fieldOffset;
+}
+
 uint32_t GetStringOffset(AbckitGraph *graph, AbckitString *string)
 {
     uint32_t stringOffset = 0;
@@ -568,6 +614,31 @@ uint32_t GetStringOffset(AbckitGraph *graph, AbckitString *string)
 
     LIBABCKIT_LOG(DEBUG) << "stringOffset: " << stringOffset << "\n";
     return stringOffset;
+}
+
+uint32_t GetFieldOffset(AbckitGraph *graph, AbckitString *string)
+{
+    uint32_t fieldOffset = 0;
+    for (auto &[id, s] : graph->irInterface->fields) {
+        if (s == string->impl) {
+            fieldOffset = id;
+        }
+    }
+
+    if (fieldOffset == 0) {
+        // Newly created string
+        // NOLINTNEXTLINE(cert-msc51-cpp)
+        do {
+            LIBABCKIT_LOG(DEBUG) << "generating new fieldOffset\n";
+            // NOLINTNEXTLINE(cert-msc50-cpp)
+            fieldOffset++;
+        } while (graph->irInterface->fields.find(fieldOffset) != graph->irInterface->fields.end());
+        // insert new string id
+        graph->irInterface->fields.insert({fieldOffset, string->impl.data()});
+    }
+
+    LIBABCKIT_LOG(DEBUG) << "fieldOffset: " << fieldOffset << "\n";
+    return fieldOffset;
 }
 
 uint32_t GetLiteralArrayOffset(AbckitGraph *graph, AbckitLiteralArray *arr)
@@ -1001,6 +1072,22 @@ AbckitValue *FindOrCreateValueDoubleStaticImpl(AbckitFile *file, double value)
     return FindOrCreateScalarValue<double, ark::pandasm::Value::Type::F64>(file, file->values.doubleVals, value);
 }
 
+AbckitValue *FindOrCreateValueIntStaticImpl(AbckitFile *file, int value)
+{
+    return FindOrCreateScalarValue<int, ark::pandasm::Value::Type::I32>(file, file->values.intVals, value);
+}
+
+AbckitValue *FindOrCreateValueLongStaticImpl(AbckitFile *file, int64_t value)
+{
+    return FindOrCreateScalarValue<int64_t, ark::pandasm::Value::Type::I64>(file, file->values.longVals, value);
+}
+
+AbckitValue *FindOrCreateValueStringNullptrStaticImpl(AbckitFile *file, int32_t value)
+{
+    return FindOrCreateScalarValue<int32_t, ark::pandasm::Value::Type::STRING_NULLPTR>(
+        file, file->values.stringNullptrVals, value);
+}
+
 AbckitValue *FindOrCreateValueStringStaticImpl(AbckitFile *file, const std::string &value)
 {
     return FindOrCreateScalarValue<std::string, ark::pandasm::Value::Type::STRING>(file, file->values.stringVals,
@@ -1013,31 +1100,83 @@ AbckitValue *FindOrCreateLiteralArrayValueStaticImpl(AbckitFile *file, const std
                                                                                          value);
 }
 
+AbckitValue *FindOrCreateRecordValueStaticImpl(AbckitFile *file, const ark::pandasm::Type &value)
+{
+    std::string key = value.GetName();
+    if (file->values.recordVals.count(key) == 1) {
+        return file->values.recordVals[key].get();
+    }
+
+    auto valueDeleter = [](pandasm_Value *val) -> void { delete reinterpret_cast<ark::pandasm::ScalarValue *>(val); };
+
+    auto *pval =
+        new ark::pandasm::ScalarValue(ark::pandasm::ScalarValue::Create<ark::pandasm::Value::Type::RECORD>(value));
+    auto abcVal =
+        std::make_unique<AbckitValue>(file, AbckitValueImplT(reinterpret_cast<pandasm_Value *>(pval), valueDeleter));
+    file->values.recordVals.insert({key, std::move(abcVal)});
+    return file->values.recordVals[key].get();
+}
+
+AbckitValue *FindOrCreateValueMethodStaticImpl(AbckitFile *file, const std::string &value)
+{
+    return FindOrCreateScalarValue<std::string, ark::pandasm::Value::Type::METHOD>(file, file->values.methodVals,
+                                                                                   value);
+}
+
+AbckitValue *FindOrCreateValueEnumStaticImpl(AbckitFile *file, const std::string &value)
+{
+    return FindOrCreateScalarValue<std::string, ark::pandasm::Value::Type::ENUM>(file, file->values.enumVals, value);
+}
+
+AbckitValue *FindOrCreateAnnotationValueStaticImpl(AbckitFile *file, const ark::pandasm::AnnotationData &value)
+{
+    const std::string key = value.GetName();
+    if (file->values.annotationVals.find(key) != file->values.annotationVals.end()) {
+        return file->values.annotationVals[key].get();
+    }
+
+    auto valueDeleter = [](pandasm_Value *val) -> void { delete reinterpret_cast<ark::pandasm::ScalarValue *>(val); };
+    auto *pval =
+        new ark::pandasm::ScalarValue(ark::pandasm::ScalarValue::Create<ark::pandasm::Value::Type::ANNOTATION>(value));
+    auto abcVal =
+        std::make_unique<AbckitValue>(file, AbckitValueImplT(reinterpret_cast<pandasm_Value *>(pval), valueDeleter));
+    file->values.annotationVals.insert({key, std::move(abcVal)});
+    return file->values.annotationVals[key].get();
+}
+
 AbckitValue *FindOrCreateValueStatic(AbckitFile *file, const ark::pandasm::Value &value)
 {
     switch (value.GetType()) {
         case ark::pandasm::Value::Type::U1:
             return FindOrCreateValueU1StaticImpl(file, value.GetAsScalar()->GetValue<bool>());
-        case ark::pandasm::Value::Type::F64:
-            return FindOrCreateValueDoubleStaticImpl(file, value.GetAsScalar()->GetValue<double>());
-        case ark::pandasm::Value::Type::STRING:
-            return FindOrCreateValueStringStaticImpl(file, value.GetAsScalar()->GetValue<std::string>());
-        case ark::pandasm::Value::Type::LITERALARRAY:
-            return FindOrCreateLiteralArrayValueStaticImpl(file, value.GetAsScalar()->GetValue<std::string>());
         case ark::pandasm::Value::Type::I8:
         case ark::pandasm::Value::Type::U8:
         case ark::pandasm::Value::Type::I16:
         case ark::pandasm::Value::Type::U16:
         case ark::pandasm::Value::Type::I32:
         case ark::pandasm::Value::Type::U32:
+            return FindOrCreateValueIntStaticImpl(file, value.GetAsScalar()->GetValue<int32_t>());
         case ark::pandasm::Value::Type::I64:
         case ark::pandasm::Value::Type::U64:
+            return FindOrCreateValueLongStaticImpl(file, value.GetAsScalar()->GetValue<int64_t>());
         case ark::pandasm::Value::Type::F32:
-        case ark::pandasm::Value::Type::STRING_NULLPTR:
-        case ark::pandasm::Value::Type::RECORD:
+        case ark::pandasm::Value::Type::F64:
+            return FindOrCreateValueDoubleStaticImpl(file, value.GetAsScalar()->GetValue<double>());
+        case ark::pandasm::Value::Type::STRING:
+            return FindOrCreateValueStringStaticImpl(file, value.GetAsScalar()->GetValue<std::string>());
         case ark::pandasm::Value::Type::METHOD:
+            return FindOrCreateValueMethodStaticImpl(file, value.GetAsScalar()->GetValue<std::string>());
         case ark::pandasm::Value::Type::ENUM:
+            return FindOrCreateValueEnumStaticImpl(file, value.GetAsScalar()->GetValue<std::string>());
+        case ark::pandasm::Value::Type::STRING_NULLPTR:
+            return FindOrCreateValueStringNullptrStaticImpl(file, value.GetAsScalar()->GetValue<int32_t>());
+        case ark::pandasm::Value::Type::LITERALARRAY:
+            return FindOrCreateLiteralArrayValueStaticImpl(file, value.GetAsScalar()->GetValue<std::string>());
+        case ark::pandasm::Value::Type::RECORD:
+            return FindOrCreateRecordValueStaticImpl(file, value.GetAsScalar()->GetValue<ark::pandasm::Type>());
         case ark::pandasm::Value::Type::ANNOTATION:
+            return FindOrCreateAnnotationValueStaticImpl(file,
+                                                         value.GetAsScalar()->GetValue<ark::pandasm::AnnotationData>());
         case ark::pandasm::Value::Type::ARRAY:
         case ark::pandasm::Value::Type::VOID:
         case ark::pandasm::Value::Type::METHOD_HANDLE:
@@ -1129,6 +1268,111 @@ bool GraphDominatorsTreeAnalysisIsValid(ark::compiler::Graph *graph)
         }
     }
     return true;
+}
+
+std::string TypeToNameStatic(AbckitType *type)
+{
+    if (type->id == ABCKIT_TYPE_ID_REFERENCE) {
+        if (!type->types.empty()) {
+            return libabckit::StringUtil::GetTypeNameStr(type);
+        }
+        if (type->GetClass() == nullptr) {
+            return "";
+        }
+        return libabckit::NameUtil::GetFullName(type->GetClass());
+    }
+    switch (type->id) {
+        case ABCKIT_TYPE_ID_VOID:
+            return "void";
+        case ABCKIT_TYPE_ID_U1:
+            return "u1";
+        case ABCKIT_TYPE_ID_U8:
+            return "u8";
+        case ABCKIT_TYPE_ID_I8:
+            return "u8";
+        case ABCKIT_TYPE_ID_U16:
+            return "u16";
+        case ABCKIT_TYPE_ID_I16:
+            return "i16";
+        case ABCKIT_TYPE_ID_U32:
+            return "u32";
+        case ABCKIT_TYPE_ID_I32:
+            return "i32";
+        case ABCKIT_TYPE_ID_U64:
+            return "u64";
+        case ABCKIT_TYPE_ID_I64:
+            return "i64";
+        case ABCKIT_TYPE_ID_F32:
+            return "f32";
+        case ABCKIT_TYPE_ID_F64:
+            return "f64";
+        case ABCKIT_TYPE_ID_ANY:
+            return "any";
+        case ABCKIT_TYPE_ID_STRING:
+            return "std.core.String";
+        default:
+            return "invalid";
+    }
+}
+
+AbckitTypeId ArkPandasmTypeToAbckitTypeId(const ark::pandasm::Type &type)
+{
+    switch (type.GetId()) {
+        case ark::panda_file::Type::TypeId::VOID:
+            return ABCKIT_TYPE_ID_VOID;
+        case ark::panda_file::Type::TypeId::U1:
+            return ABCKIT_TYPE_ID_U1;
+        case ark::panda_file::Type::TypeId::I8:
+            return ABCKIT_TYPE_ID_I8;
+        case ark::panda_file::Type::TypeId::U8:
+            return ABCKIT_TYPE_ID_U8;
+        case ark::panda_file::Type::TypeId::I16:
+            return ABCKIT_TYPE_ID_I16;
+        case ark::panda_file::Type::TypeId::U16:
+            return ABCKIT_TYPE_ID_U16;
+        case ark::panda_file::Type::TypeId::F32:
+            return ABCKIT_TYPE_ID_F32;
+        case ark::panda_file::Type::TypeId::I32:
+            return ABCKIT_TYPE_ID_I32;
+        case ark::panda_file::Type::TypeId::U32:
+            return ABCKIT_TYPE_ID_U32;
+        case ark::panda_file::Type::TypeId::F64:
+            return ABCKIT_TYPE_ID_F64;
+        case ark::panda_file::Type::TypeId::I64:
+            return ABCKIT_TYPE_ID_I64;
+        case ark::panda_file::Type::TypeId::U64:
+            return ABCKIT_TYPE_ID_U64;
+        case ark::panda_file::Type::TypeId::REFERENCE:
+            if (type.IsArray()) {
+                return ArkPandasmTypeToAbckitTypeId(type.GetComponentType());
+            } else if (type.GetName() == "std.core.String") {
+                return ABCKIT_TYPE_ID_STRING;
+            }
+            return ABCKIT_TYPE_ID_REFERENCE;
+        default:
+            return ABCKIT_TYPE_ID_INVALID;
+    }
+}
+
+ark::pandasm::Record *GetStaticImplRecord(
+    const std::variant<AbckitCoreModule *, AbckitCoreNamespace *, AbckitCoreClass *, AbckitCoreInterface *,
+                       AbckitCoreEnum *, AbckitCoreAnnotationInterface *> &coreObject)
+{
+    return std::visit(
+        [](auto *obj) -> ark::pandasm::Record * {
+            if constexpr (std::is_same_v<decltype(obj), AbckitCoreModule *>) {
+                return obj->GetArkTSImpl()->impl.GetStatModule().record;
+            } else if constexpr (std::is_same_v<decltype(obj), AbckitCoreAnnotationInterface *>) {
+                return obj->GetArkTSImpl()->GetStaticImpl();
+            } else if constexpr (std::is_same_v<decltype(obj), AbckitCoreNamespace *> ||
+                                 std::is_same_v<decltype(obj), AbckitCoreClass *> ||
+                                 std::is_same_v<decltype(obj), AbckitCoreInterface *> ||
+                                 std::is_same_v<decltype(obj), AbckitCoreEnum *>) {
+                return obj->GetArkTSImpl()->impl.GetStaticClass();
+            }
+            return nullptr;
+        },
+        coreObject);
 }
 
 }  // namespace libabckit

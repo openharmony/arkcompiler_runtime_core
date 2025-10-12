@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,13 @@ inline Type Value::GetType() const
 inline bool Value::GetU1() const
 {
     bool ret = GetApiConfig()->cIapi_->valueGetU1(GetView());
+    CheckError(GetApiConfig());
+    return ret;
+}
+
+inline int Value::GetInt() const
+{
+    int ret = GetApiConfig()->cIapi_->valueGetInt(GetView());
     CheckError(GetApiConfig());
     return ret;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,8 +18,8 @@
 
 #include "annotation_interface.h"
 #include "annotation_interface_field.h"
-#include "libabckit/cpp/headers/core/annotation_interface.h"
-#include "libabckit/cpp/headers/core/annotation_interface_field.h"
+#include "../core/annotation_interface.h"
+#include "../core/annotation_interface_field.h"
 
 // NOLINTBEGIN(performance-unnecessary-value-param)
 namespace abckit::arkts {
@@ -34,6 +34,13 @@ inline AbckitArktsAnnotationInterface *AnnotationInterface::TargetCast() const
 inline AnnotationInterface::AnnotationInterface(const core::AnnotationInterface &coreOther)
     : core::AnnotationInterface(coreOther), targetChecker_(this)
 {
+}
+
+inline bool AnnotationInterface::SetName(const std::string &name) const
+{
+    const auto ret = GetApiConfig()->cArktsMapi_->annotationInterfaceSetName(TargetCast(), name.c_str());
+    CheckError(GetApiConfig());
+    return ret;
 }
 
 inline arkts::AnnotationInterfaceField AnnotationInterface::AddField(std::string_view name, Type type, Value value)

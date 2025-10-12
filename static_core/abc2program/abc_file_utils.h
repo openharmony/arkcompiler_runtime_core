@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,10 +44,13 @@ constexpr std::string_view DUMP_CONTENT_PANDA_ASSEMBLY = "PandaAssembly";
 constexpr std::string_view DUMP_CONTENT_SINGLE_ENDL = "\n";
 constexpr std::string_view DUMP_CONTENT_DOUBLE_ENDL = "\n\n";
 
+enum class EntityType { CLASS, METHOD, FIELD, STRING, EXTERNAL, UNKNOWN };
+
 class AbcFileUtils {
 public:
     static bool IsSystemTypeName(const std::string &typeName);
     static std::string GetFileNameByAbsolutePath(const std::string &absolutePath);
+    static EntityType GetEntityType(const panda_file::File &file, panda_file::File::EntityId entityId);
 };  // class AbcFileUtils
 
 }  // namespace ark::abc2program

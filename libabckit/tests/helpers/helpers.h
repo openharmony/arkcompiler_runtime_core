@@ -194,6 +194,8 @@ void TransformMethod(const std::string &inputPath, const std::string &outputPath
 void TransformMethod(const std::string &inputPath, const std::string &outputPath, const std::string &methodSignature,
                      const std::function<void(AbckitFile *, AbckitCoreFunction *, AbckitGraph *)> &userTransformer,
                      const std::function<void(AbckitGraph *)> &validateResult);
+void TransformMethod(AbckitCoreFunction *method,
+                     const std::function<void(AbckitFile *, AbckitCoreFunction *, AbckitGraph *)> &userTransformer);
 
 void InspectMethod(AbckitFile *file, const std::string &methodSignature,
                    const std::function<void(AbckitFile *, AbckitCoreFunction *, AbckitGraph *)> &userInspector);
@@ -235,6 +237,11 @@ struct ClassByNameContext {
     const char *name;
 };
 
+struct EnumByNameContext {
+    AbckitCoreEnum *enm;
+    const char *name;
+};
+
 struct MethodByNameContext {
     AbckitCoreFunction *method = nullptr;
     const char *name = "";
@@ -251,8 +258,47 @@ struct AnnotationInterfaceByNameContext {
     const char *name;
 };
 
+struct AnnotationInterfaceFieldByNameContext {
+    AbckitCoreAnnotationInterfaceField *aif;
+    const char *name;
+};
+
 struct AnnotationByNameContext {
     AbckitCoreAnnotation *anno;
+    const char *name;
+};
+
+struct InterfaceByNameContext {
+    AbckitCoreInterface *iface;
+    const char *name;
+};
+
+struct FieldByNameContext {
+    AbckitCoreInterfaceField *field;
+    const char *name;
+};
+struct CoreClassField {
+    AbckitCoreClassField *filed;
+    const char *name;
+};
+
+struct ModuleFieldByNameContext {
+    AbckitCoreModuleField *cmf;
+    const char *name;
+};
+
+struct InterfaceFieldByNameContext {
+    AbckitCoreInterfaceField *cif;
+    const char *name;
+};
+
+struct EnumFieldByNameContext {
+    AbckitCoreEnumField *cef;
+    const char *name;
+};
+
+struct ClassFieldByNameContext {
+    AbckitCoreClassField *ccf;
     const char *name;
 };
 
@@ -262,6 +308,8 @@ bool ModuleByNameFinder(AbckitCoreModule *module, void *data);
 bool ImportByAliasFinder(AbckitCoreImportDescriptor *id, void *data);
 bool ExportByAliasFinder(AbckitCoreExportDescriptor *ed, void *data);
 bool ClassByNameFinder(AbckitCoreClass *klass, void *data);
+bool EnumByNameFinder(AbckitCoreEnum *enm, void *data);
+bool InterfaceByNameFinder(AbckitCoreInterface *iface, void *data);
 bool NamespaceByNameFinder(AbckitCoreNamespace *n, void *data);
 bool MethodByNameFinder(AbckitCoreFunction *method, void *data);
 bool AnnotationInterfaceByNameFinder(AbckitCoreAnnotationInterface *ai, void *data);
@@ -269,18 +317,36 @@ bool AnnotationByNameFinder(AbckitCoreAnnotation *anno, void *data);
 bool NameToModuleCollector(AbckitCoreModule *module, void *data);
 bool ModuleImportsCollector(AbckitCoreImportDescriptor *id, void *data);
 bool ModuleExportsCollector(AbckitCoreExportDescriptor *ed, void *data);
+bool ModuleFieldByNameFinder(AbckitCoreModuleField *mf, void *data);
+bool InterfaceFieldByNameFinder(AbckitCoreInterfaceField *cif, void *data);
+bool EnumByNameFinder(AbckitCoreEnum *ce, void *data);
+bool EnumFieldByNameFinder(AbckitCoreEnumField *cef, void *data);
+bool ClassFieldByNameFinder(AbckitCoreClassField *ccf, void *data);
+bool AnnotationInterfaceFieldByNameFinder(AbckitCoreAnnotationInterfaceField *aif, void *data);
 
 void AssertModuleVisitor(AbckitCoreModule *module, void *data);
 void AssertImportVisitor(AbckitCoreImportDescriptor *id, void *data);
 void AssertExportVisitor(AbckitCoreExportDescriptor *ed, void *data);
 void AssertClassVisitor(AbckitCoreClass *klass, void *data);
+void AssertEnumVisitor(AbckitCoreEnum *enm, void *data);
 void AssertMethodVisitor(AbckitCoreFunction *method, void *data);
 void AssertOpenAbc(const char *fname, AbckitFile **file);
+void AssertModuleFieldVisitor(AbckitCoreModuleField *cmf, void *data);
+void AssertInterfaceVisitor(AbckitCoreInterface *ci, void *data);
+void AssertInterfaceFieldVisitor(AbckitCoreInterfaceField *cif, void *data);
+void AssertEnumFieldVisitor(AbckitCoreEnumField *cef, void *data);
+void AssertClassFieldVisitor(AbckitCoreClassField *ccf, void *data);
 std::string_view AbckitStringToString(AbckitString *str);
 std::string GetCropFuncName(const std::string &fullSig);
 std::optional<abckit::core::Class> GetClassByName(const abckit::core::Module &module, const std::string &name);
 std::optional<abckit::core::Interface> GetInterfaceByName(const abckit::core::Module &module, const std::string &name);
+std::optional<abckit::core::Enum> GetEnumByName(const abckit::core::Module &module, const std::string &name);
+std::optional<abckit::core::Namespace> GetNamespaceByName(const abckit::core::Module &module, const std::string &name);
+std::optional<abckit::core::Function> GetFunctionByName(const abckit::core::Module &module, const std::string &name);
 
+bool InterfaceByNameFinder(AbckitCoreInterface *iface, void *data);
+bool FieldByNameFinder(AbckitCoreInterfaceField *field, void *data);
+bool ClassFieldFinder(AbckitCoreClassField *field, void *data);
 }  // namespace libabckit::test::helpers
 
 #endif  // LIBABCKIT_TESTS_HELPERS

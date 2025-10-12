@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,29 @@ inline core::Module Namespace::GetModule() const
     AbckitCoreModule *mod = GetApiConfig()->cIapi_->namespaceGetModule(GetView());
     CheckError(GetApiConfig());
     return Module(mod, GetApiConfig(), GetResource());
+}
+
+inline std::string Namespace::GetName() const
+{
+    AbckitString *abcName = GetApiConfig()->cIapi_->namespaceGetName(GetView());
+    CheckError(GetApiConfig());
+    std::string name = GetApiConfig()->cIapi_->abckitStringToString(abcName);
+    CheckError(GetApiConfig());
+    return name;
+}
+
+inline bool Namespace::IsExternal() const
+{
+    auto mod = GetApiConfig()->cIapi_->namespaceIsExternal(GetView());
+    CheckError(GetApiConfig());
+    return mod;
+}
+
+inline Namespace Namespace::GetParentNamespace() const
+{
+    AbckitCoreNamespace *parent = GetApiConfig()->cIapi_->namespaceGetParentNamespace(GetView());
+    CheckError(GetApiConfig());
+    return Namespace(parent, GetApiConfig(), GetResource());
 }
 
 inline std::vector<core::Class> Namespace::GetClasses() const
@@ -80,6 +103,23 @@ inline std::vector<core::Enum> Namespace::GetEnums() const
     CheckError(GetApiConfig());
 
     return enums;
+}
+
+inline std::vector<core::AnnotationInterface> Namespace::GetAnnotationInterfaces() const
+{
+    std::vector<core::AnnotationInterface> ifaces;
+    Payload<std::vector<core::AnnotationInterface> *> payload {&ifaces, GetApiConfig(), GetResource()};
+
+    GetApiConfig()->cIapi_->namespaceEnumerateAnnotationInterfaces(
+        GetView(), &payload, [](AbckitCoreAnnotationInterface *func, void *data) {
+            const auto &payload = *static_cast<Payload<std::vector<core::AnnotationInterface> *> *>(data);
+            payload.data->push_back(core::AnnotationInterface(func, payload.config, payload.resource));
+            return true;
+        });
+
+    CheckError(GetApiConfig());
+
+    return ifaces;
 }
 
 inline std::vector<core::Function> Namespace::GetTopLevelFunctions() const

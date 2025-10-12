@@ -249,4 +249,22 @@ std::string AnnotationElement::TypeToString(Value::Type type)
     }
 }
 
+void AnnotationData::DeleteAnnotationElementByName(const std::string_view &annotation_elem_name)
+{
+    auto annotation_elem_iter =
+        std::find_if(elements_.begin(), elements_.end(), [&](pandasm::AnnotationElement &annotation_element) -> bool {
+            return annotation_element.GetName() == annotation_elem_name;
+        });
+    if (annotation_elem_iter != elements_.end()) {
+        (void)elements_.erase(annotation_elem_iter);
+    }
+}
+
+void AnnotationData::EnumerateAnnotationElements(const std::function<void(AnnotationElement &)> &callback)
+{
+    for (auto &element : elements_) {
+        callback(element);
+    }
+}
+
 }  // namespace ark::pandasm

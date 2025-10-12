@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@ namespace libabckit {
 
 AbckitString *CreateStringDynamic(AbckitFile *file, const char *value, size_t len);
 void FunctionSetGraphDynamic(AbckitCoreFunction *function, AbckitGraph *graph);
+void FunctionSetGraphDynamicSync(AbckitCoreFunction *function, AbckitGraph *graph);
 AbckitJsModule *FileAddExternalJsModule(AbckitFile *file, const struct AbckitJsExternalModuleCreateParams *params);
 AbckitArktsModule *FileAddExternalArkTsV1Module(AbckitFile *file,
                                                 const struct AbckitArktsV1ExternalModuleCreateParams *params);
@@ -54,6 +55,7 @@ AbckitLiteral *FindOrCreateLiteralLiteralArrayDynamic(AbckitFile *file, AbckitLi
 AbckitLiteralArray *CreateLiteralArrayDynamic(AbckitFile *file, AbckitLiteral **value, size_t size);
 
 AbckitValue *FindOrCreateValueU1Dynamic(AbckitFile *file, bool value);
+AbckitValue *FindOrCreateValueIntDynamic(AbckitFile *file, int value);
 AbckitValue *FindOrCreateValueDoubleDynamic(AbckitFile *file, double value);
 AbckitValue *FindOrCreateValueStringDynamic(AbckitFile *file, const char *value, size_t len);
 AbckitValue *FindOrCreateLiteralArrayValueDynamic(AbckitFile *file, AbckitValue **value, size_t size);

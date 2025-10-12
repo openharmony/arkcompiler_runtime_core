@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,6 +29,8 @@ class ModuleField : public ViewInResource<AbckitCoreModuleField *, const File *>
     /// @brief to access private constructor
     friend class core::Module;
     /// @brief to access private constructor
+    friend class arkts::Module;
+    /// @brief to access private constructor
     friend class core::Namespace;
     /// @brief abckit::DefaultHash<ModuleField>
     friend class abckit::DefaultHash<ModuleField>;
@@ -42,7 +44,7 @@ public:
      * @brief Construct a new ModuleField object
      * @param other
      */
-    ModuleField(const ModuleField &other) = default;
+    ModuleField(const ModuleField &other) = default;  // CC-OFF(G.CLS.07): design decision, detail: base_concepts.h
 
     /**
      * @brief Constructor
@@ -55,7 +57,7 @@ public:
      * @brief Construct a new ModuleField object
      * @param other
      */
-    ModuleField(ModuleField &&other) = default;
+    ModuleField(ModuleField &&other) = default;  // CC-OFF(G.CLS.07): design decision, detail: base_concepts.h
 
     /**
      * @brief Constructor
@@ -82,6 +84,20 @@ public:
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     std::string GetName() const;
+
+    /**
+     * @brief Returns type.
+     * @return abckit::Type
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    Type GetType() const;
+
+    /**
+     * @brief Returns value.
+     * @return abckit::Value
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    Value GetValue() const;
 
     /**
      * @brief Tell if field is Public.
@@ -176,6 +192,13 @@ public:
      */
     std::string GetName() const;
 
+    /**
+     * @brief Returns type.
+     * @return abckit::Type
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    Type GetType() const;
+
 private:
     NamespaceField(AbckitCoreNamespaceField *field, const ApiConfig *conf, const File *file)
         : ViewInResource(field), conf_(conf)
@@ -202,6 +225,8 @@ class ClassField : public ViewInResource<AbckitCoreClassField *, const File *> {
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
     /// @brief to access private constructor
     friend class core::Class;
+    /// @brief to access private constructor
+    friend class arkts::Class;
     /// @brief abckit::DefaultHash<ClassField>
     friend class abckit::DefaultHash<ClassField>;
 
@@ -214,7 +239,7 @@ public:
      * @brief Construct a new ClassField object
      * @param other
      */
-    ClassField(const ClassField &other) = default;
+    ClassField(const ClassField &other) = default;  // CC-OFF(G.CLS.07): design decision, detail: base_concepts.h
 
     /**
      * @brief Constructor
@@ -227,7 +252,7 @@ public:
      * @brief Construct a new Field object
      * @param other
      */
-    ClassField(ClassField &&other) = default;
+    ClassField(ClassField &&other) = default;  // CC-OFF(G.CLS.07): design decision, detail: base_concepts.h
 
     /**
      * @brief Constructor
@@ -256,6 +281,20 @@ public:
     std::string GetName() const;
 
     /**
+     * @brief Returns type.
+     * @return abckit::Type
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    Type GetType() const;
+
+    /**
+     * @brief Returns value.
+     * @return abckit::Value
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    Value GetValue() const;
+
+    /**
      * @brief Tell if field is Public.
      * @return Return `true` if field is Public otherwise false
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
@@ -277,11 +316,39 @@ public:
     bool IsPrivate() const;
 
     /**
+     * @brief Tell if field is Internal.
+     * @return Return `true` if field is Internal otherwise false
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool IsInternal() const;
+
+    /**
      * @brief Tell if field is Static.
      * @return Return `true` if field is Static otherwise false
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     bool IsStatic() const;
+
+    /**
+     * @brief Tell if field is Readonly.
+     * @return Return `true` if field is Readonly otherwise false
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool IsReadonly() const;
+
+    /**
+     * @brief Tell if field is Override.
+     * @return Return `true` if field is Override otherwise false
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool IsOverride() const;
+
+    /**
+     * @brief Get vector with all Annotations
+     * @return std::vector<core::Annotation>
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    std::vector<core::Annotation> GetAnnotations() const;
 
 private:
     ClassField(AbckitCoreClassField *field, const ApiConfig *conf, const File *file)
@@ -309,6 +376,8 @@ class InterfaceField : public ViewInResource<AbckitCoreInterfaceField *, const F
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
     /// @brief to access private constructor
     friend class core::Interface;
+    /// @brief to access private constructor
+    friend class arkts::Interface;
     /// @brief abckit::DefaultHash<InterfaceField>
     friend class abckit::DefaultHash<InterfaceField>;
 
@@ -321,7 +390,8 @@ public:
      * @brief Construct a new InterfaceField object
      * @param other
      */
-    InterfaceField(const InterfaceField &other) = default;
+    InterfaceField(const InterfaceField &other) =
+        default;  // CC-OFF(G.CLS.07): design decision, detail: base_concepts.h
 
     /**
      * @brief Constructor
@@ -334,7 +404,7 @@ public:
      * @brief Construct a new InterfaceField object
      * @param other
      */
-    InterfaceField(InterfaceField &&other) = default;
+    InterfaceField(InterfaceField &&other) = default;  // CC-OFF(G.CLS.07): design decision, detail: base_concepts.h
 
     /**
      * @brief Constructor
@@ -363,11 +433,32 @@ public:
     std::string GetName() const;
 
     /**
+     * @brief Returns type.
+     * @return abckit::Type
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    Type GetType() const;
+
+    /**
+     * @brief Tell if field is Private.
+     * @return Return `true` if field is Private otherwise false
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool IsPrivate() const;
+
+    /**
      * @brief Tell if field is Readonly.
      * @return Return `true` if field is Readonly otherwise false
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     bool IsReadonly() const;
+
+    /**
+     * @brief Get vector with all Annotations
+     * @return std::vector<core::Annotation>
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    std::vector<core::Annotation> GetAnnotations() const;
 
 private:
     InterfaceField(AbckitCoreInterfaceField *field, const ApiConfig *conf, const File *file)
@@ -395,6 +486,8 @@ class EnumField : public ViewInResource<AbckitCoreEnumField *, const File *> {
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
     /// @brief to access private constructor
     friend class core::Enum;
+    /// @brief to access private constructor
+    friend class arkts::Enum;
     /// @brief abckit::DefaultHash<EnumField>
     friend class abckit::DefaultHash<EnumField>;
 
@@ -407,7 +500,7 @@ public:
      * @brief Construct a new EnumField object
      * @param other
      */
-    EnumField(const EnumField &other) = default;
+    EnumField(const EnumField &other) = default;  // CC-OFF(G.CLS.07): design decision, detail: base_concepts.h
 
     /**
      * @brief Constructor
@@ -420,7 +513,7 @@ public:
      * @brief Construct a new EnumField object
      * @param other
      */
-    EnumField(EnumField &&other) = default;
+    EnumField(EnumField &&other) = default;  // CC-OFF(G.CLS.07): design decision, detail: base_concepts.h
 
     /**
      * @brief Constructor
@@ -447,6 +540,13 @@ public:
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     std::string GetName() const;
+
+    /**
+     * @brief Returns type.
+     * @return abckit::Type
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    Type GetType() const;
 
 private:
     EnumField(AbckitCoreEnumField *field, const ApiConfig *conf, const File *file) : ViewInResource(field), conf_(conf)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,9 +18,17 @@
 
 #include "module.h"
 #include "import_descriptor.h"
-#include "libabckit/cpp/headers/core/import_descriptor.h"
+#include "export_descriptor.h"
+#include "../core/import_descriptor.h"
+#include "../core/export_descriptor.h"
 #include "annotation_interface.h"
-#include "libabckit/cpp/headers/core/annotation_interface.h"
+#include "../core/annotation_interface.h"
+#include "class.h"
+#include "function.h"
+#include <vector>
+#include <string_view>
+
+#include "field.h"
 
 // NOLINTBEGIN(performance-unnecessary-value-param)
 namespace abckit::arkts {
@@ -34,6 +42,13 @@ inline AbckitArktsModule *Module::TargetCast() const
 
 inline Module::Module(const core::Module &coreOther) : core::Module(coreOther), targetChecker_(this) {}
 
+inline bool Module::SetName(const std::string &name) const
+{
+    const auto ret = GetApiConfig()->cArktsMapi_->moduleSetName(TargetCast(), name.c_str());
+    CheckError(GetApiConfig());
+    return ret;
+}
+
 inline arkts::ImportDescriptor Module::AddImportFromArktsV1ToArktsV1(Module imported, std::string_view name,
                                                                      std::string_view alias) const
 {
@@ -45,6 +60,42 @@ inline arkts::ImportDescriptor Module::AddImportFromArktsV1ToArktsV1(Module impo
         GetApiConfig()->cArktsIapi_->arktsImportDescriptorToCoreImportDescriptor(arktsid);
     CheckError(GetApiConfig());
     return arkts::ImportDescriptor(core::ImportDescriptor(coreid, GetApiConfig(), GetResource()));
+}
+
+inline arkts::Class Module::ImportClassFromArktsV2ToArktsV2(arkts::Module exported, std::string_view name) const
+{
+    auto arktsClass =
+        GetApiConfig()->cArktsMapi_->moduleImportClassFromArktsV2toArktsV2(exported.TargetCast(), name.data());
+    CheckError(GetApiConfig());
+    auto coreClass = GetApiConfig()->cArktsIapi_->arktsClassToCoreClass(arktsClass);
+    CheckError(GetApiConfig());
+    return arkts::Class(core::Class(coreClass, GetApiConfig(), GetResource()));
+}
+
+inline arkts::Function Module::ImportStaticFunctionFromArktsV2ToArktsV2(arkts::Module exported,
+                                                                        std::string_view functionName,
+                                                                        std::string_view returnType,
+                                                                        const std::vector<const char *> &params) const
+{
+    auto arktsFunction = GetApiConfig()->cArktsMapi_->moduleImportStaticFunctionFromArktsV2ToArktsV2(
+        exported.TargetCast(), functionName.data(), returnType.data(), params.data(), params.size());
+    CheckError(GetApiConfig());
+    auto coreFunction = GetApiConfig()->cArktsIapi_->arktsFunctionToCoreFunction(arktsFunction);
+    CheckError(GetApiConfig());
+    return arkts::Function(core::Function(coreFunction, GetApiConfig(), GetResource()));
+}
+
+inline arkts::Function Module::ImportClassMethodFromArktsV2ToArktsV2(arkts::Module exported, std::string_view className,
+                                                                     std::string_view methodName,
+                                                                     std::string_view returnType,
+                                                                     const std::vector<const char *> &params) const
+{
+    auto arktsFunction = GetApiConfig()->cArktsMapi_->moduleImportClassMethodFromArktsV2ToArktsV2(
+        exported.TargetCast(), className.data(), methodName.data(), returnType.data(), params.data(), params.size());
+    CheckError(GetApiConfig());
+    auto coreFunction = GetApiConfig()->cArktsIapi_->arktsFunctionToCoreFunction(arktsFunction);
+    CheckError(GetApiConfig());
+    return arkts::Function(core::Function(coreFunction, GetApiConfig(), GetResource()));
 }
 
 inline arkts::ExportDescriptor Module::AddExportFromArktsV1ToArktsV1(arkts::Module exported, std::string_view name,
@@ -87,6 +138,32 @@ inline arkts::AnnotationInterface Module::AddAnnotationInterface(std::string_vie
     auto coreAi = GetApiConfig()->cArktsIapi_->arktsAnnotationInterfaceToCoreAnnotationInterface(arktsAi);
     CheckError(GetApiConfig());
     return AnnotationInterface(core::AnnotationInterface(coreAi, GetApiConfig(), GetResource()));
+}
+
+inline arkts::ModuleField Module::AddField(const std::string_view name, const Type &type, const Value &value,
+                                           AbckitArktsFieldVisibility fieldVisibility)
+{
+    const struct AbckitArktsFieldCreateParams params {
+        name.data(), type.GetView(), value.GetView(), true, fieldVisibility
+    };
+    auto *arkModuleField = GetApiConfig()->cArktsMapi_->moduleAddField(TargetCast(), &params);
+    CheckError(GetApiConfig());
+    auto *coreModuleField = GetApiConfig()->cArktsIapi_->arktsModuleFieldToCoreModuleField(arkModuleField);
+    CheckError(GetApiConfig());
+    return arkts::ModuleField(core::ModuleField(coreModuleField, GetApiConfig(), GetResource()));
+}
+
+inline arkts::ModuleField Module::AddField(const std::string_view name, const Type &type,
+                                           AbckitArktsFieldVisibility fieldVisibility)
+{
+    const struct AbckitArktsFieldCreateParams params {
+        name.data(), type.GetView(), nullptr, true, fieldVisibility
+    };
+    auto *arkModuleField = GetApiConfig()->cArktsMapi_->moduleAddField(TargetCast(), &params);
+    CheckError(GetApiConfig());
+    auto *coreModuleField = GetApiConfig()->cArktsIapi_->arktsModuleFieldToCoreModuleField(arkModuleField);
+    CheckError(GetApiConfig());
+    return arkts::ModuleField(core::ModuleField(coreModuleField, GetApiConfig(), GetResource()));
 }
 
 }  // namespace abckit::arkts

@@ -15,6 +15,7 @@
 
 #include "abc_method_processor.h"
 #include "abc_code_processor.h"
+#include "abc_annotation_processor.h"
 #include "assembly-function.h"
 #include "mangling.h"
 #include "source_lang_enum.h"
@@ -58,6 +59,10 @@ void AbcMethodProcessor::GetMethodName()
 
     GetParams(methodDataAccessor_->GetProtoId());
     GetMetaData();
+    methodDataAccessor_->EnumerateAnnotations([&](panda_file::File::EntityId annotationId) {
+        AbcAnnotationProcessor annotationProcessor(annotationId, keyData_, function_);
+        annotationProcessor.FillProgramData();
+    });
 }
 
 void AbcMethodProcessor::GetMethodCode()
@@ -94,8 +99,7 @@ void AbcMethodProcessor::GetMetaData()
         LOG(DEBUG, ABC2PROGRAM) << "method (raw: \'" << methodNameRaw
                                 << "\') is not static. emplacing self-argument of type " << thisType.GetName();
 
-        function_.params.insert(function_.params.begin(),
-                                pandasm::Function::Parameter(thisType, keyData_.GetFileLanguage()));
+        function_.params.emplace(function_.params.begin(), thisType, keyData_.GetFileLanguage());
     }
     SetEntityAttribute(
         function_, [this]() { return methodDataAccessor_->IsStatic(); }, "static");

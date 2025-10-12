@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,7 +57,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, StaticModuleEnumerateClasses)
         g_implI->moduleEnumerateClasses(m, &gotNumClasses, ClassCountrer);
         EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-        constexpr std::size_t EXPECTED_NUM_CLASSES = 3;
+        constexpr std::size_t EXPECTED_NUM_CLASSES = 4;
         EXPECT_EQ(gotNumClasses, EXPECTED_NUM_CLASSES);
 
         return true;
@@ -251,7 +251,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, ClassGetName)
         g_implI->moduleEnumerateClasses(m, &gotNames, ClassNameCollector);
         EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-        std::set<std::string> expectedNames = {"C1", "C2", "C3"};
+        std::set<std::string> expectedNames = {"C1", "C2", "C3", "C4"};
         EXPECT_EQ(expectedNames.size(), gotNames.size());
         for (auto &expectedName : expectedNames) {
             EXPECT_NE(gotNames.find(expectedName), gotNames.end());

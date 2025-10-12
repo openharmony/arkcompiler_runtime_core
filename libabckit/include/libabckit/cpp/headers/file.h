@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -121,6 +121,13 @@ public:
      */
     abckit::Value CreateValueU1(bool val) const;
 
+    /**
+     * @brief Creates value item containing the given int value `value`.
+     * @param val
+     * @return `Value`
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if current File is false.
+     */
+    abckit::Value CreateValueInt(int val) const;
     /**
      * @brief Creates value item containing the given double value `value`.
      * @param val
@@ -321,6 +328,16 @@ public:
      * @note Allocates
      */
     arkts::Module AddExternalModuleArktsV1(std::string_view name) const;
+
+    /**
+     * @brief Creates an external Arkts module with target `ABCKIT_TARGET_ARK_TS_V2` and adds it to the File.
+     * @return Newly created Module.
+     * @param [ in ] name - Data that is used to create the external module.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     * @note Allocates
+     */
+    arkts::Module AddExternalModuleArktsV2(std::string_view name) const;
 
     /**
      * @brief Creates an external Js module and adds it to the file `file`.

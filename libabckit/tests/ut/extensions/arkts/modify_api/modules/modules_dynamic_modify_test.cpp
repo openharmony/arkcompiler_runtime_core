@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -597,9 +597,8 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleRemoveWrongImport)
 }
 
 // Test: test-kind=api, api=ArktsModifyApiImpl::moduleRemoveImport, abc-kind=ArkTS1, category=negative, extension=c
-TEST_F(LibAbcKitArkTSModifyApiModulesTest, DISABLED_DynamicModuleRemoveImport_WrongTargets)
+TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleRemoveImport_WrongTargets)
 {
-    // Test is disabled
     // importDescriptorGetAlias has no ArkTS_V2 support, aliases for imports are not implemented
 
     AbckitFile *file = nullptr;
@@ -629,6 +628,10 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, DISABLED_DynamicModuleRemoveImport_Wr
     auto importName = "regularImportFunc1FromModule1";
     for (auto &gotImport : gotImports) {
         auto impName = g_implI->importDescriptorGetAlias(gotImport);
+        if (impName == nullptr) {
+            // importDescriptorGetAlias may return null for ArkTS_V2, skip null aliases
+            continue;
+        }
         auto strName = helpers::AbckitStringToString(impName);
         if (strName == importName) {
             g_implArkM->moduleRemoveImport(g_implArkI->coreModuleToArktsModule(module),
@@ -713,9 +716,8 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleRemoveWrongExport)
 }
 
 // Test: test-kind=api, api=ArktsModifyApiImpl::moduleRemoveExport, abc-kind=ArkTS1, category=negative
-TEST_F(LibAbcKitArkTSModifyApiModulesTest, DISABLED_DynamicModuleRemoveExport_WrongTargets)
+TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleRemoveExport_WrongTargets)
 {
-    // Test is disabled
     // exportDescriptorGetAlias has no ArkTS_V2 support, aliases for exports are not implemented
 
     AbckitFile *file = nullptr;
@@ -744,6 +746,10 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, DISABLED_DynamicModuleRemoveExport_Wr
     auto exportName = "regularDefaultImportFunc1FromModule3";
     for (auto &gotExport : gotExports) {
         auto expName = g_implI->exportDescriptorGetAlias(gotExport);
+        if (expName == nullptr) {
+            // exportDescriptorGetAlias has no ArkTS_V2 support, skip null aliases
+            continue;
+        }
         auto strName = helpers::AbckitStringToString(expName);
         if (strName == exportName) {
             g_implArkM->moduleRemoveExport(g_implArkI->coreModuleToArktsModule(module),

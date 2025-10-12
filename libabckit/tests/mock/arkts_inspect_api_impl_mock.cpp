@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -178,11 +178,12 @@ AbckitArktsModuleField *CoreModuleFieldToArktsModuleField(AbckitCoreModuleField 
     return DEFAULT_ARKTS_MODULE_FIELD;
 }
 
-bool ArktsModuleFieldIsReadonly(AbckitArktsModuleField *field)
+AbckitArktsNamespaceField *CoreNamespaceFieldToArktsNamespaceField(AbckitCoreNamespaceField *field)
 {
     g_calledFuncs.push(__func__);
-    EXPECT_TRUE(field == DEFAULT_ARKTS_MODULE_FIELD);
-    return DEFAULT_BOOL;
+
+    EXPECT_TRUE(field == DEFAULT_CORE_NAMESPACE_FIELD);
+    return DEFAULT_ARKTS_NAMESPACE_FIELD;
 }
 
 AbckitCoreClassField *ArktsClassFieldToCoreClassField(AbckitArktsClassField *field)
@@ -199,13 +200,6 @@ AbckitArktsClassField *CoreClassFieldToArktsClassField(AbckitCoreClassField *fie
 
     EXPECT_TRUE(field == DEFAULT_CORE_CLASS_FIELD);
     return DEFAULT_ARKTS_CLASS_FIELD;
-}
-
-bool ArktsClassFieldIsReadonly(AbckitArktsClassField *field)
-{
-    g_calledFuncs.push(__func__);
-    EXPECT_TRUE(field == DEFAULT_ARKTS_CLASS_FIELD);
-    return DEFAULT_BOOL;
 }
 
 AbckitCoreInterfaceField *ArktsInterfaceFieldToCoreInterfaceField(AbckitArktsInterfaceField *field)
@@ -413,13 +407,19 @@ AbckitArktsInspectApi g_arktsInspectApiImpl = {
     // Module Field
     // ========================================
 
-    ArktsModuleFieldToCoreModuleField, CoreModuleFieldToArktsModuleField, ArktsModuleFieldIsReadonly,
+    ArktsModuleFieldToCoreModuleField, CoreModuleFieldToArktsModuleField,
+
+    // ========================================
+    // Namespace Field
+    // ========================================
+
+    CoreNamespaceFieldToArktsNamespaceField,
 
     // ========================================
     // Class Field
     // ========================================
 
-    ArktsClassFieldToCoreClassField, CoreClassFieldToArktsClassField, ArktsClassFieldIsReadonly,
+    ArktsClassFieldToCoreClassField, CoreClassFieldToArktsClassField,
 
     // ========================================
     // Interface Field

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -360,6 +360,22 @@ TEST_F(LibAbcKitCppMockTestFile, File_AddExternalModuleArktsV1)
         ASSERT_TRUE(CheckMockedApi("CoreModuleToArktsModule"));
         ASSERT_TRUE(CheckMockedApi("ArktsModuleToCoreModule"));
         ASSERT_TRUE(CheckMockedApi("FileAddExternalModuleArktsV1"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
+
+// Test: test-kind=mock, api=File::AddExternalModuleArktsV2, abc-kind=ArkTS1, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockTestFile, File_AddExternalModuleArktsV2)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File f(DEFAULT_PATH);
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        f.AddExternalModuleArktsV2(DEFAULT_CONST_CHAR);
+        ASSERT_TRUE(CheckMockedApi("CoreModuleToArktsModule"));
+        ASSERT_TRUE(CheckMockedApi("ArktsModuleToCoreModule"));
+        ASSERT_TRUE(CheckMockedApi("FileAddExternalModuleArktsV2"));
     }
     ASSERT_TRUE(CheckMockedApi("CloseFile"));
     ASSERT_TRUE(CheckMockedStackEmpty());

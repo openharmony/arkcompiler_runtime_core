@@ -366,12 +366,6 @@ void GinsertTryCatchStatic(AbckitBasicBlock *tryFirstBB, AbckitBasicBlock *tryLa
 
     AbckitGraph *graph = tryFirstBB->graph;
 
-    // NOTE(nsizov): implement for static mode as well
-    if (!IsDynamic(graph->function->owningModule->target)) {
-        libabckit::statuses::SetLastError(ABCKIT_STATUS_WRONG_TARGET);
-        return;
-    }
-
     if ((graph != tryLastBB->graph) || (graph != catchBeginBB->graph) || (graph != catchEndBB->graph)) {
         SetLastError(ABCKIT_STATUS_WRONG_CTX);
         return;
@@ -1408,7 +1402,7 @@ void IappendInputStatic(AbckitInst *inst, AbckitInst *input)
 
 static AbckitType *CreateGeneralType(AbckitFile *file, AbckitTypeId typeId, AbckitCoreClass *klass)
 {
-    return GetOrCreateType(file, typeId, 0, klass);
+    return GetOrCreateType(file, typeId, 0, klass, nullptr);
 }
 
 AbckitType *IgetTypeStatic(AbckitInst *inst)
@@ -1516,11 +1510,17 @@ AbckitCoreFunction *IgetFunctionStatic(AbckitInst *inst)
     auto &nameToFunction = reinterpret_cast<CtxGInternal *>(graph->internal)->runtimeAdapter->IsMethodStatic(methodPtr)
                                ? graph->file->nameToFunctionStatic
                                : graph->file->nameToFunctionInstance;
-    if (nameToFunction.count(it->second) == 0) {
-        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
-        return nullptr;
+
+    if (nameToFunction.count(it->second) != 0) {
+        return nameToFunction[it->second];
     }
-    return nameToFunction[it->second];
+
+    if (graph->file->nameToExternalFunction.count(it->second) != 0) {
+        return graph->file->nameToExternalFunction[it->second];
+    }
+
+    statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+    return nullptr;
 }
 
 void IsetFunctionStatic(AbckitInst *inst, AbckitCoreFunction *function)

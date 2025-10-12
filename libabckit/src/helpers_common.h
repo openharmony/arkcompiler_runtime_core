@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,6 +42,8 @@ bool NamespaceEnumerateTopLevelFunctionsHelper(AbckitCoreNamespace *n, void *dat
                                                bool (*cb)(AbckitCoreFunction *function, void *data));
 bool NamespaceEnumerateFieldsHelper(AbckitCoreNamespace *n, void *data,
                                     bool (*cb)(AbckitCoreNamespaceField *field, void *data));
+bool NamespaceEnumerateAnnotationInterfacesHelper(AbckitCoreNamespace *n, void *data,
+                                                  bool (*cb)(AbckitCoreAnnotationInterface *ai, void *data));
 
 bool ClassEnumerateMethodsHelper(AbckitCoreClass *klass, void *data,
                                  bool (*cb)(AbckitCoreFunction *method, void *data));
@@ -62,13 +64,34 @@ bool InterfaceEnumerateSubInterfacesHelper(AbckitCoreInterface *iface, void *dat
                                            bool (*cb)(AbckitCoreInterface *subInterface, void *data));
 bool InterfaceEnumerateClassesHelper(AbckitCoreInterface *iface, void *data,
                                      bool (*cb)(AbckitCoreClass *klass, void *data));
+bool InterfaceEnumerateAnnotationsHelper(AbckitCoreInterface *iface, void *data,
+                                         bool (*cb)(AbckitCoreAnnotation *anno, void *data));
 
 bool EnumEnumerateMethodsHelper(AbckitCoreEnum *enm, void *data, bool (*cb)(AbckitCoreFunction *method, void *data));
 bool EnumEnumerateFieldsHelper(AbckitCoreEnum *enm, void *data, bool (*cb)(AbckitCoreEnumField *field, void *data));
 
+bool ClassFieldEnumerateAnnotationsHelper(AbckitCoreClassField *field, void *data,
+                                          bool (*cb)(AbckitCoreAnnotation *anno, void *data));
+bool InterfaceFieldEnumerateAnnotationsHelper(AbckitCoreInterfaceField *field, void *data,
+                                              bool (*cb)(AbckitCoreAnnotation *anno, void *data));
+
 bool IsDynamic(AbckitTarget target);
 
-AbckitType *GetOrCreateType(AbckitFile *file, AbckitTypeId id, size_t rank, AbckitCoreClass *klass);
+AbckitType *GetOrCreateType(
+    AbckitFile *file, AbckitTypeId id, size_t rank,
+    std::variant<AbckitCoreClass *, AbckitCoreInterface *, AbckitCoreEnum *, std::nullptr_t> reference,
+    AbckitString *name);
+
+void TypeSetNameHelper(AbckitType *type, const char *name, size_t len);
+
+void TypeSetRankHelper(AbckitType *type, size_t rank);
+
+void AddFunctionUserToAbckitType(AbckitType *abckitType, AbckitCoreFunction *function);
+
+void AddFieldUserToAbckitType(AbckitType *abckitType,
+                              std::variant<AbckitCoreModuleField *, AbckitCoreNamespaceField *, AbckitCoreClassField *,
+                                           AbckitCoreEnumField *, AbckitCoreAnnotationInterfaceField *>
+                                  field);
 
 }  // namespace libabckit
 

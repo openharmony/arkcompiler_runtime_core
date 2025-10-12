@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "libabckit/src/adapter_dynamic/metadata_modify_dynamic.h"
+#include "libabckit/src/adapter_static/metadata_modify_static.h"
 #include "libabckit/src/helpers_common.h"
 #include "libabckit/src/macros.h"
 
@@ -102,7 +104,7 @@ bool ModuleEnumerateAnnotationInterfacesHelper(AbckitCoreModule *m, void *data,
     LIBABCKIT_BAD_ARGUMENT(m, false)
     LIBABCKIT_BAD_ARGUMENT(cb, false)
     for (auto &[atName, at] : m->at) {
-        if (at.get() != nullptr && !cb(at.get(), data)) {
+        if (!cb(at.get(), data)) {
             return false;
         }
     }
@@ -185,6 +187,20 @@ bool NamespaceEnumerateFieldsHelper(AbckitCoreNamespace *n, void *data,
     LIBABCKIT_BAD_ARGUMENT(cb, false)
     for (auto &field : n->fields) {
         if (!cb(field.get(), data)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool NamespaceEnumerateAnnotationInterfacesHelper(AbckitCoreNamespace *n, void *data,
+                                                  bool (*cb)(AbckitCoreAnnotationInterface *ai, void *data))
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_BAD_ARGUMENT(n, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+    for (auto &[atName, at] : n->at) {
+        if (!cb(at.get(), data)) {
             return false;
         }
     }
@@ -313,6 +329,20 @@ bool InterfaceEnumerateClassesHelper(AbckitCoreInterface *iface, void *data,
     return true;
 }
 
+bool InterfaceEnumerateAnnotationsHelper(AbckitCoreInterface *iface, void *data,
+                                         bool (*cb)(AbckitCoreAnnotation *anno, void *data))
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_BAD_ARGUMENT(iface, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+    for (auto &[_, anno] : iface->annotationTable) {
+        if (!cb(anno.get(), data)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool EnumEnumerateMethodsHelper(AbckitCoreEnum *enm, void *data, bool (*cb)(AbckitCoreFunction *method, void *data))
 {
     LIBABCKIT_LOG_FUNC;
@@ -339,6 +369,34 @@ bool EnumEnumerateFieldsHelper(AbckitCoreEnum *enm, void *data, bool (*cb)(Abcki
     return true;
 }
 
+bool ClassFieldEnumerateAnnotationsHelper(AbckitCoreClassField *field, void *data,
+                                          bool (*cb)(AbckitCoreAnnotation *anno, void *data))
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_BAD_ARGUMENT(field, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+    for (auto &[_, anno] : field->annotationTable) {
+        if (!cb(anno.get(), data)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool InterfaceFieldEnumerateAnnotationsHelper(AbckitCoreInterfaceField *field, void *data,
+                                              bool (*cb)(AbckitCoreAnnotation *anno, void *data))
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_BAD_ARGUMENT(field, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+    for (auto &anno : field->annotations) {
+        if (!cb(anno.get(), data)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool IsDynamic(AbckitTarget target)
 {
     return target == ABCKIT_TARGET_JS || target == ABCKIT_TARGET_ARK_TS_V1;
@@ -358,12 +416,17 @@ static size_t HashCombine(size_t seed, size_t value)
     return seed;
 }
 
-AbckitType *GetOrCreateType(AbckitFile *file, AbckitTypeId id, size_t rank, AbckitCoreClass *klass)
+AbckitType *GetOrCreateType(
+    AbckitFile *file, AbckitTypeId id, size_t rank,
+    std::variant<AbckitCoreClass *, AbckitCoreInterface *, AbckitCoreEnum *, std::nullptr_t> reference,
+    AbckitString *name)
 {
     size_t hash = 0;
     hash = HashCombine(hash, (size_t)id);
     hash = HashCombine(hash, rank);
-    hash = HashCombine(hash, reinterpret_cast<size_t>(klass));
+    hash =
+        HashCombine(hash, std::visit([](const auto &object) { return reinterpret_cast<size_t>(object); }, reference));
+    hash = HashCombine(hash, reinterpret_cast<size_t>(name));
 
     auto &cache = file->types;
     if (cache.count(hash) == 1) {
@@ -373,9 +436,120 @@ AbckitType *GetOrCreateType(AbckitFile *file, AbckitTypeId id, size_t rank, Abck
     auto type = std::make_unique<AbckitType>();
     type->id = id;
     type->rank = rank;
-    type->klass = klass;
+    type->name = name;
+    type->reference = reference;
+    type->file = file;
+
+    if (const auto klass = std::get_if<AbckitCoreClass *>(&reference)) {
+        if (*klass) {
+            (*klass)->typeUsers.emplace_back(type.get());
+        }
+    }
+
+    if (const auto iface = std::get_if<AbckitCoreInterface *>(&reference)) {
+        if (*iface) {
+            (*iface)->typeUsers.emplace_back(type.get());
+        }
+    }
+
+    if (const auto enm = std::get_if<AbckitCoreEnum *>(&reference)) {
+        if (*enm) {
+            (*enm)->typeUsers.emplace_back(type.get());
+        }
+    }
+
     cache.insert({hash, std::move(type)});
     return cache[hash].get();
 }
 
+void TypeSetNameHelper(AbckitType *type, const char *name, size_t len)
+{
+    auto &cache = type->file->types;
+
+    size_t oldHash = 0;
+    oldHash = HashCombine(oldHash, (size_t)type->id);
+    oldHash = HashCombine(oldHash, type->rank);
+    oldHash = HashCombine(
+        oldHash, std::visit([](const auto &object) { return reinterpret_cast<size_t>(object); }, type->reference));
+    oldHash = HashCombine(oldHash, reinterpret_cast<size_t>(type->name));
+
+    std::unique_ptr<AbckitType> existingTypePtr;
+    if (cache.count(oldHash) == 1) {
+        existingTypePtr = std::move(cache[oldHash]);
+        cache.erase(oldHash);
+    }
+
+    if (type->file->frontend == Mode::DYNAMIC) {
+        type->name = CreateStringDynamic(type->file, name, len);
+    } else {
+        type->name = CreateStringStatic(type->file, name, len);
+    }
+
+    size_t newHash = 0;
+    newHash = HashCombine(newHash, (size_t)type->id);
+    newHash = HashCombine(newHash, type->rank);
+    newHash = HashCombine(
+        newHash, std::visit([](const auto &object) { return reinterpret_cast<size_t>(object); }, type->reference));
+    newHash = HashCombine(newHash, reinterpret_cast<size_t>(type->name));
+
+    if (existingTypePtr) {
+        cache.insert({newHash, std::move(existingTypePtr)});
+    }
+}
+
+void TypeSetRankHelper(AbckitType *type, size_t rank)
+{
+    auto &cache = type->file->types;
+
+    size_t oldHash = 0;
+    oldHash = HashCombine(oldHash, (size_t)type->id);
+    oldHash = HashCombine(oldHash, type->rank);
+    oldHash = HashCombine(
+        oldHash, std::visit([](const auto &object) { return reinterpret_cast<size_t>(object); }, type->reference));
+    oldHash = HashCombine(oldHash, reinterpret_cast<size_t>(type->name));
+
+    std::unique_ptr<AbckitType> existingTypePtr;
+    if (cache.count(oldHash) == 1) {
+        existingTypePtr = std::move(cache[oldHash]);
+        cache.erase(oldHash);
+    }
+
+    type->rank = rank;
+
+    size_t newHash = 0;
+    newHash = HashCombine(newHash, (size_t)type->id);
+    newHash = HashCombine(newHash, type->rank);
+    newHash = HashCombine(
+        newHash, std::visit([](const auto &object) { return reinterpret_cast<size_t>(object); }, type->reference));
+    newHash = HashCombine(newHash, reinterpret_cast<size_t>(type->name));
+
+    if (existingTypePtr) {
+        cache.insert({newHash, std::move(existingTypePtr)});
+    }
+}
+
+void AddFunctionUserToAbckitType(AbckitType *abckitType, AbckitCoreFunction *function)
+{
+    if (abckitType->types.empty()) {
+        abckitType->functionUsers.emplace(function);
+    } else {
+        for (auto &type : abckitType->types) {
+            type->functionUsers.emplace(function);
+        }
+    }
+}
+
+void AddFieldUserToAbckitType(AbckitType *abckitType,
+                              std::variant<AbckitCoreModuleField *, AbckitCoreNamespaceField *, AbckitCoreClassField *,
+                                           AbckitCoreEnumField *, AbckitCoreAnnotationInterfaceField *>
+                                  field)
+{
+    if (abckitType->types.empty()) {
+        abckitType->fieldTypeUsers.emplace(field);
+    } else {
+        for (auto &type : abckitType->types) {
+            type->fieldTypeUsers.emplace(field);
+        }
+    }
+}
 }  // namespace libabckit

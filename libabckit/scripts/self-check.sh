@@ -65,7 +65,7 @@ build_standalone() {
     set -e
     rm -rf out/$TARGET
 
-    ./ark.py $TARGET abckit_packages --gn-args="is_standard_system=true abckit_with_sanitizers=$SANITIZERS enable_notice_collection=false abckit_with_coverage=$COVERAGE ohos_components_checktype=3 abckit_enable=true"
+    ./ark.py $TARGET abckit_packages --gn-args="is_standard_system=true abckit_with_sanitizers=$SANITIZERS enable_notice_collection=false abckit_with_coverage=$COVERAGE ohos_components_checktype=3 abckit_enable=true abckit_enable_tests=true enable_cmc_gc=false"
 
     set +e
 }
@@ -133,7 +133,7 @@ build_and_run_tests() {
             ./arkcompiler/runtime_core/libabckit.so
 
         ../../prebuilts/clang/ohos/linux-x86_64/llvm/bin/llvm-cov report \
-            --ignore-filename-regex='(.*third_party/.*|.*/runtime_core/static_core/.*|.*/runtime_core/libpandabase/.*|.*/arkcompiler/ets_frontend/|.*/runtime_core/abc2program/.*|.*/runtime_core/libpandafile/.*|.*/runtime_core/assembler/.*|.*/runtime_core/platforms/.*)' \
+            --ignore-filename-regex='(.*third_party/.*|.*/runtime_core/static_core/.*|.*/runtime_core/libpandabase/.*|.*/arkcompiler/ets_frontend/|.*/runtime_core/abc2program/.*|.*/runtime_core/libpandafile/.*|.*/runtime_core/assembler/.*|.*/runtime_core/platforms/.*|.*out/x64.debug/gen/arkcompiler/runtime_core/libabckit/src/adapter_static/generated/get_intrinsic_id_static.inc|.*out/x64.debug/gen/arkcompiler/runtime_core/libabckit/src/codegen/generated/codegen_intrinsics_static.cpp|.*out/x64.debug/gen/arkcompiler/runtime_core/libabckit/src/codegen/generated/generate_ecma.inl|.*out/x64.debug/gen/arkcompiler/runtime_core/libabckit/src/codegen/generated/insn_info.h|.*out/x64.debug/gen/arkcompiler/runtime_core/libabckit/src/codegen/generated/insn_selection_static.cpp)' \
             --instr-profile=./abckit.profdata ./arkcompiler/runtime_core/libabckit.so |
             sed 's|\([^ ]\) \([^ ]\)|\1_\2|g' |
             tr -s ' ' |
@@ -142,7 +142,7 @@ build_and_run_tests() {
             sed 's| |,|g' >abckit_coverage.csv
 
         ../../prebuilts/clang/ohos/linux-x86_64/llvm/bin/llvm-cov report \
-            --ignore-filename-regex='(.*third_party/.*|.*/runtime_core/libabckit/src/adapter_static/.*|.*/runtime_core/static_core/.*|.*/runtime_core/abc2program/.*|.*/runtime_core/libpandabase/.*|.*/arkcompiler/ets_frontend/|.*/runtime_core/libpandafile/.*|.*/runtime_core/assembler/.*|.*/runtime_core/platforms/.*|.*/runtime_core/libabckit/src/codegen/generated/insn_selection_static.cpp|.*/runtime_core/libabckit/src/codegen/codegen_static.cpp|.*/runtime_core/libabckit/src/codegen/generated/codegen_intrinsics_static.cpp|.*/runtime_core/libabckit/src/isa_static_impl.cpp|.*/runtime_core/libabckit/src/codegen/codegen_static.h|.*/runtime_core/libabckit/src/codegen/generated/codegen_visitors_static.inc|.*/runtime_core/libabckit/src/codegen/generated/codegen_call_intrinsics_static.inc)' \
+            --ignore-filename-regex='(.*third_party/.*|.*/runtime_core/libabckit/src/adapter_static/.*|.*/runtime_core/static_core/.*|.*/runtime_core/abc2program/.*|.*/runtime_core/libpandabase/.*|.*/arkcompiler/ets_frontend/|.*/runtime_core/libpandafile/.*|.*/runtime_core/assembler/.*|.*/runtime_core/platforms/.*|.*/runtime_core/libabckit/src/codegen/generated/insn_selection_static.cpp|.*/runtime_core/libabckit/src/codegen/codegen_static.cpp|.*/runtime_core/libabckit/src/codegen/generated/codegen_intrinsics_static.cpp|.*/runtime_core/libabckit/src/isa_static_impl.cpp|.*/runtime_core/libabckit/src/codegen/codegen_static.h|.*/runtime_core/libabckit/src/codegen/generated/codegen_visitors_static.inc|.*/runtime_core/libabckit/src/codegen/generated/codegen_call_intrinsics_static.inc|.*out/x64.debug/gen/arkcompiler/runtime_core/libabckit/src/adapter_static/generated/get_intrinsic_id_static.inc|.*out/x64.debug/gen/arkcompiler/runtime_core/libabckit/src/codegen/generated/codegen_intrinsics_static.cpp|.*out/x64.debug/gen/arkcompiler/runtime_core/libabckit/src/codegen/generated/generate_ecma.inl|.*out/x64.debug/gen/arkcompiler/runtime_core/libabckit/src/codegen/generated/insn_info.h|.*out/x64.debug/gen/arkcompiler/runtime_core/libabckit/src/codegen/generated/insn_selection_static.cpp)' \
             --instr-profile=./abckit.profdata ./arkcompiler/runtime_core/libabckit.so |
             sed 's|\([^ ]\) \([^ ]\)|\1_\2|g' |
             tr -s ' ' |

@@ -22,3 +22,9 @@ enum EnumA {
 }
 
 namespace Ns1 {}
+
+function main()
+{
+    let add = (a: int, b: int): int => a + b;
+    console.log(add(1, 2));
+}

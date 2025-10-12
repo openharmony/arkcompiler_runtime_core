@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -95,6 +95,7 @@ AbckitLiteral *FindOrCreateLiteralMethodDynamicImpl(AbckitFile *file, const std:
 AbckitLiteral *FindOrCreateLiteralDynamic(AbckitFile *file, const panda::pandasm::LiteralArray::Literal &value);
 
 AbckitValue *FindOrCreateValueU1DynamicImpl(AbckitFile *file, bool value);
+AbckitValue *FindOrCreateValueIntDynamicImpl(AbckitFile *file, int value);
 AbckitValue *FindOrCreateValueDoubleDynamicImpl(AbckitFile *file, double value);
 AbckitValue *FindOrCreateValueStringDynamicImpl(AbckitFile *file, const std::string &value);
 AbckitValue *FindOrCreateLiteralArrayValueDynamicImpl(AbckitFile *file, const std::string &value);

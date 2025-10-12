@@ -24,3 +24,7 @@ class A {
         return a;
     }
 }
+
+function bar(arr: string[]) {
+
+}

@@ -102,6 +102,13 @@ inline abckit::Value File::CreateValueU1(bool val) const
     return abckit::Value(value, GetApiConfig(), this);
 }
 
+inline abckit::Value File::CreateValueInt(int val) const
+{
+    AbckitValue *value = GetApiConfig()->cMapi_->createValueInt(GetResource(), val);
+    CheckError(GetApiConfig());
+    return abckit::Value(value, GetApiConfig(), this);
+}
+
 inline abckit::Value File::CreateValueDouble(double val) const
 {
     AbckitValue *value = GetApiConfig()->cMapi_->createValueDouble(GetResource(), val);
@@ -210,6 +217,15 @@ inline arkts::Module File::AddExternalModuleArktsV1(std::string_view name) const
         name.data()
     };
     auto mod = GetApiConfig()->cArktsMapi_->fileAddExternalModuleArktsV1(GetResource(), &params);
+    CheckError(GetApiConfig());
+    auto coreMod = GetApiConfig()->cArktsIapi_->arktsModuleToCoreModule(mod);
+    CheckError(GetApiConfig());
+    return arkts::Module(core::Module(coreMod, GetApiConfig(), this));
+}
+
+inline arkts::Module File::AddExternalModuleArktsV2(std::string_view name) const
+{
+    auto mod = GetApiConfig()->cArktsMapi_->fileAddExternalModuleArktsV2(GetResource(), name.data());
     CheckError(GetApiConfig());
     auto coreMod = GetApiConfig()->cArktsIapi_->arktsModuleToCoreModule(mod);
     CheckError(GetApiConfig());

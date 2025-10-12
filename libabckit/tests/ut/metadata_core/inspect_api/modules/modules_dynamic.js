@@ -15,17 +15,17 @@
 // Regular
 import {
     regularImportFunc1FromModule1
-} from './modules/module1';
+} from 'modules/module1';
 import {
     regularImportFunc1FromModule2 as MF1M2
-} from './modules/module2';
-import regularDefaultImportFunc1FromModule3 from './modules/module3';
+} from 'modules/module2';
+import regularDefaultImportFunc1FromModule3 from 'modules/module3';
 import {
     default as regularDefaultImportFunc2FromModule2
-} from './modules/module2';
+} from 'modules/module2';
 
 // Namespace
-import * as NS from './modules/module1';
+import * as NS from 'modules/module1';
 
 // Local export
 export function LocalExportFunc() {}
@@ -38,16 +38,16 @@ export default class LocalDefaultExportClass {}
 export {
     indirectExportFunc1FromModule1
 }
-from './modules/module1';
+from 'modules/module1';
 export {
     indirectExportFunc2FromModule1 as MF2M1
 }
-from './modules/module1';
+from 'modules/module1';
 
 // Star export
-export * as StarExport from './modules/module1';
-export * as StarExport2 from './modules/module2';
-export * from './modules/module2';
+export * as StarExport from 'modules/module1';
+export * as StarExport2 from 'modules/module2';
+export * from 'modules/module2';
 
 regularImportFunc1FromModule1();
 MF1M2();

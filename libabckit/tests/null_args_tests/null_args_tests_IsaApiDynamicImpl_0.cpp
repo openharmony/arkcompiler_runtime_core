@@ -734,4 +734,10 @@ TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateLdthisbyname)
     helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateLdthisbyname);
 }
 
+// Test: test-kind=api, api=IsaApiDynamicImpl::AbckitGetIsaApiDynamicImpl,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, AbckitGetIsaApiDynamicImpl)
+{
+    helpers_nullptr::TestNullptr(AbckitGetIsaApiDynamicImpl);
+}
 }  // namespace libabckit::test

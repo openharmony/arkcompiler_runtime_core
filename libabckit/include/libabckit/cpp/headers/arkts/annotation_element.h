@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,8 @@
 #ifndef CPP_ABCKIT_ARKTS_ANNOTATION_ELEMENT_H
 #define CPP_ABCKIT_ARKTS_ANNOTATION_ELEMENT_H
 
-#include "libabckit/cpp/headers/core/annotation_element.h"
-#include "libabckit/cpp/headers/base_concepts.h"
+#include "../core/annotation_element.h"
+#include "../base_concepts.h"
 
 namespace abckit::arkts {
 

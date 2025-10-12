@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,6 +60,15 @@ static void TransformMethodImpl(AbckitFile *file, AbckitCoreFunction *method, vo
 
     g_implM->functionSetGraph(method, graph);
     g_impl->destroyGraph(graph);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+void TransformMethod(AbckitCoreFunction *method,
+                     const std::function<void(AbckitFile *, AbckitCoreFunction *, AbckitGraph *)> &userTransformer)
+{
+    UserTransformerData utd({method, userTransformer});
+
+    TransformMethodImpl(g_implI->functionGetFile(method), method, &utd);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
@@ -405,6 +414,21 @@ void AssertModuleVisitor([[maybe_unused]] AbckitCoreModule *module, [[maybe_unus
     EXPECT_TRUE(data != nullptr);
 }
 
+void AssertInterfaceVisitor([[maybe_unused]] AbckitCoreInterface *iface, [[maybe_unused]] void *data)
+{
+    EXPECT_TRUE(iface != nullptr);
+    EXPECT_TRUE(iface->owningModule != nullptr);
+    EXPECT_TRUE(iface->owningModule->file != nullptr);
+    EXPECT_TRUE(data != nullptr);
+}
+
+void AssertFieldVisitor([[maybe_unused]] AbckitCoreInterfaceField *field, [[maybe_unused]] void *data)
+{
+    EXPECT_TRUE(field != nullptr);
+    EXPECT_TRUE(field->owner != nullptr);
+    EXPECT_TRUE(data != nullptr);
+}
+
 void AssertImportVisitor([[maybe_unused]] AbckitCoreImportDescriptor *id, [[maybe_unused]] void *data)
 {
     EXPECT_TRUE(id != nullptr);
@@ -421,10 +445,27 @@ void AssertExportVisitor([[maybe_unused]] AbckitCoreExportDescriptor *ed, [[mayb
     EXPECT_TRUE(data != nullptr);
 }
 
+void AssertFieldVisitor(AbckitCoreClassField *field, void *data)
+{
+    EXPECT_TRUE(field != nullptr);
+    EXPECT_TRUE(field->owner != nullptr);
+    EXPECT_TRUE(field->owner->owningModule != nullptr);
+    EXPECT_TRUE(field->owner->owningModule->file != nullptr);
+    EXPECT_TRUE(data != nullptr);
+}
+
 void AssertClassVisitor([[maybe_unused]] AbckitCoreClass *klass, [[maybe_unused]] void *data)
 {
     EXPECT_TRUE(klass != nullptr);
     [[maybe_unused]] AbckitFile *file = g_implI->classGetFile(klass);
+    EXPECT_TRUE(file != nullptr);
+    EXPECT_TRUE(data != nullptr);
+}
+
+void AssertEnumVisitor([[maybe_unused]] AbckitCoreEnum *enm, [[maybe_unused]] void *data)
+{
+    EXPECT_TRUE(enm != nullptr);
+    [[maybe_unused]] AbckitFile *file = g_implI->enumGetFile(enm);
     EXPECT_TRUE(file != nullptr);
     EXPECT_TRUE(data != nullptr);
 }
@@ -449,12 +490,42 @@ void AssertAnnotationInterfaceVisitor(AbckitCoreAnnotationInterface *ai, void *d
     ASSERT_TRUE(data != nullptr);
 }
 
+void AssertAnnotationInterfaceFieldVisitor(AbckitCoreAnnotationInterfaceField *aif, void *data)
+{
+    ASSERT_TRUE(aif != nullptr);
+    ASSERT_TRUE(data != nullptr);
+}
+
 void AssertAnnotationVisitor(AbckitCoreAnnotation *anno, void *data)
 {
     ASSERT_NE(anno, nullptr);
     auto ai = g_implI->annotationGetInterface(anno);
     ASSERT_NE(ai, nullptr);
     ASSERT_NE(data, nullptr);
+}
+
+void AssertModuleFieldVisitor(AbckitCoreModuleField *mf, void *data)
+{
+    ASSERT_TRUE(mf != nullptr);
+    ASSERT_TRUE(data != nullptr);
+}
+
+void AssertInterfaceFieldVisitor(AbckitCoreInterfaceField *cif, void *data)
+{
+    ASSERT_TRUE(cif != nullptr);
+    ASSERT_TRUE(data != nullptr);
+}
+
+void AssertEnumFieldVisitor(AbckitCoreEnumField *cef, void *data)
+{
+    ASSERT_TRUE(cef != nullptr);
+    ASSERT_TRUE(data != nullptr);
+}
+
+void AssertClassFieldVisitor(AbckitCoreClassField *ccf, void *data)
+{
+    ASSERT_TRUE(ccf != nullptr);
+    ASSERT_TRUE(data != nullptr);
 }
 
 void AssertOpenAbc(const char *fname, AbckitFile **file)
@@ -480,6 +551,33 @@ bool ClassByNameFinder(AbckitCoreClass *klass, void *data)
     return true;
 }
 
+bool EnumByNameFinder(AbckitCoreEnum *enm, void *data)
+{
+    AssertEnumVisitor(enm, data);
+
+    auto ctxFinder = reinterpret_cast<EnumByNameContext *>(data);
+    auto name = helpers::AbckitStringToString(g_implI->enumGetName(enm));
+    if (name == ctxFinder->name) {
+        ctxFinder->enm = enm;
+        return false;
+    }
+
+    return true;
+}
+
+bool ClassFieldFinder(AbckitCoreClassField *field, void *data)
+{
+    AssertFieldVisitor(field, data);
+
+    auto ctxFinder = reinterpret_cast<CoreClassField *>(data);
+    auto name = helpers::AbckitStringToString(g_implI->classFieldGetName(field));
+    if (name == ctxFinder->name) {
+        ctxFinder->filed = field;
+        return false;
+    }
+    return true;
+}
+
 bool NamespaceByNameFinder(AbckitCoreNamespace *n, void *data)
 {
     AssertNamespaceVisitor(n, data);
@@ -501,6 +599,34 @@ bool ModuleByNameFinder(AbckitCoreModule *module, void *data)
     auto name = helpers::AbckitStringToString(g_implI->moduleGetName(module));
     if (name == ctxFinder->name) {
         ctxFinder->module = module;
+        return false;
+    }
+
+    return true;
+}
+
+bool InterfaceByNameFinder(AbckitCoreInterface *iface, void *data)
+{
+    AssertInterfaceVisitor(iface, data);
+
+    auto ctxFinder = reinterpret_cast<InterfaceByNameContext *>(data);
+    auto name = helpers::AbckitStringToString(g_implI->interfaceGetName(iface));
+    if (name == ctxFinder->name) {
+        ctxFinder->iface = iface;
+        return false;
+    }
+
+    return true;
+}
+
+bool FieldByNameFinder(AbckitCoreInterfaceField *field, void *data)
+{
+    AssertFieldVisitor(field, data);
+
+    auto ctxFinder = reinterpret_cast<FieldByNameContext *>(data);
+    auto name = helpers::AbckitStringToString(g_implI->interfaceFieldGetName(field));
+    if (name == ctxFinder->name) {
+        ctxFinder->field = field;
         return false;
     }
 
@@ -544,6 +670,80 @@ bool AnnotationInterfaceByNameFinder(AbckitCoreAnnotationInterface *ai, void *da
     auto name = helpers::AbckitStringToString(str);
     if (name == ctxFinder->name) {
         ctxFinder->ai = ai;
+        return false;
+    }
+
+    return true;
+}
+
+bool AnnotationInterfaceFieldByNameFinder(AbckitCoreAnnotationInterfaceField *aif, void *data)
+{
+    AssertAnnotationInterfaceFieldVisitor(aif, data);
+
+    auto ctxFinder = reinterpret_cast<AnnotationInterfaceFieldByNameContext *>(data);
+    auto str = g_implI->annotationInterfaceFieldGetName(aif);
+    auto name = helpers::AbckitStringToString(str);
+    if (name == ctxFinder->name) {
+        ctxFinder->aif = aif;
+        return false;
+    }
+    return true;
+}
+
+bool ModuleFieldByNameFinder(AbckitCoreModuleField *cmf, void *data)
+{
+    AssertModuleFieldVisitor(cmf, data);
+
+    auto ctxFinder = reinterpret_cast<ModuleFieldByNameContext *>(data);
+    auto str = g_implI->moduleFieldGetName(cmf);
+    auto name = helpers::AbckitStringToString(str);
+    if (name == ctxFinder->name) {
+        ctxFinder->cmf = cmf;
+        return false;
+    }
+
+    return true;
+}
+
+bool InterfaceFieldByNameFinder(AbckitCoreInterfaceField *cif, void *data)
+{
+    AssertInterfaceFieldVisitor(cif, data);
+
+    auto ctxFinder = reinterpret_cast<InterfaceFieldByNameContext *>(data);
+    auto str = g_implI->interfaceFieldGetName(cif);
+    auto name = helpers::AbckitStringToString(str);
+    if (name == ctxFinder->name) {
+        ctxFinder->cif = cif;
+        return false;
+    }
+
+    return true;
+}
+
+bool EnumFieldByNameFinder(AbckitCoreEnumField *cef, void *data)
+{
+    AssertEnumFieldVisitor(cef, data);
+
+    auto ctxFinder = reinterpret_cast<EnumFieldByNameContext *>(data);
+    auto str = g_implI->enumFieldGetName(cef);
+    auto name = helpers::AbckitStringToString(str);
+    if (name == ctxFinder->name) {
+        ctxFinder->cef = cef;
+        return false;
+    }
+
+    return true;
+}
+
+bool ClassFieldByNameFinder(AbckitCoreClassField *ccf, void *data)
+{
+    AssertClassFieldVisitor(ccf, data);
+
+    auto ctxFinder = reinterpret_cast<ClassFieldByNameContext *>(data);
+    auto str = g_implI->classFieldGetName(ccf);
+    auto name = helpers::AbckitStringToString(str);
+    if (name == ctxFinder->name) {
+        ctxFinder->ccf = ccf;
         return false;
     }
 
@@ -815,6 +1015,39 @@ std::optional<abckit::core::Interface> GetInterfaceByName(const abckit::core::Mo
         }
     }
     LIBABCKIT_LOG_TEST(DEBUG) << "Interface Not Found: " << name << std::endl;
+    return std::nullopt;
+}
+
+std::optional<abckit::core::Enum> GetEnumByName(const abckit::core::Module &module, const std::string &name)
+{
+    for (const auto &enm : module.GetEnums()) {
+        if (enm.GetName() == name) {
+            return enm;
+        }
+    }
+    LIBABCKIT_LOG_TEST(DEBUG) << "Enum Not Found: " << name << std::endl;
+    return std::nullopt;
+}
+
+std::optional<abckit::core::Namespace> GetNamespaceByName(const abckit::core::Module &module, const std::string &name)
+{
+    for (const auto &ns : module.GetNamespaces()) {
+        if (ns.GetName() == name) {
+            return ns;
+        }
+    }
+    LIBABCKIT_LOG_TEST(DEBUG) << "Namespace Not Found: " << name << std::endl;
+    return std::nullopt;
+}
+
+std::optional<abckit::core::Function> GetFunctionByName(const abckit::core::Module &module, const std::string &name)
+{
+    for (const auto &func : module.GetTopLevelFunctions()) {
+        if (func.GetName() == name) {
+            return func;
+        }
+    }
+    LIBABCKIT_LOG_TEST(DEBUG) << "Function Not Found: " << name << std::endl;
     return std::nullopt;
 }
 

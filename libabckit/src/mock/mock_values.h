@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -99,6 +99,8 @@ extern const size_t DEFAULT_SIZE_T;
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFAULT_TYPE (reinterpret_cast<AbckitType *>(0xdead0021))
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define DEFAULT_TYPE_PTR (reinterpret_cast<AbckitType **>(0xdead0025))
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFAULT_FILE_VERSION (reinterpret_cast<AbckitFileVersion>(0xdead0022))
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFAULT_BB (reinterpret_cast<AbckitBasicBlock *>(0xdead0023))
@@ -174,6 +176,8 @@ extern const size_t DEFAULT_SIZE_T;
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFAULT_CORE_NAMESPACE_FIELD (reinterpret_cast<AbckitCoreNamespaceField *>(0xdead0056))
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define DEFAULT_ARKTS_NAMESPACE_FIELD (reinterpret_cast<AbckitArktsNamespaceField *>(0xdead0057))
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFAULT_CORE_CLASS_FIELD (reinterpret_cast<AbckitCoreClassField *>(0xdead0048))
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFAULT_ARKTS_CLASS_FIELD (reinterpret_cast<AbckitArktsClassField *>(0xdead0049))
@@ -191,6 +195,11 @@ extern const size_t DEFAULT_SIZE_T;
 #define DEFAULT_ARKTS_FUNCTION_PARAM (reinterpret_cast<AbckitArktsFunctionParam *>(0xdead0055))
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage, cppcoreguidelines-pro-type-cstyle-cast)
 #define DEFAULT_ENUM_BITSIZE AbckitBitImmSize::BITSIZE_0
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define DEFAULT_ARKTS_FUNCTION_CREATE_PARAMS \
+    (reinterpret_cast<const struct AbckitArktsFunctionCreateParams *>(0xdead0058))
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define DEFAULT_ARKTS_METHOD_CREATE_PARAMS (reinterpret_cast<const struct ArktsMethodCreateParams *>(0xdead0059))
 
 // CC-OFFNXT(G.PRE.02) code readability
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)

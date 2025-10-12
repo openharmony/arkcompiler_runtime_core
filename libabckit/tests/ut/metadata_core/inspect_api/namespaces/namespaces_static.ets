@@ -17,7 +17,7 @@
 namespace N1 {
     function m1() {}
 
-    const F1: string = 'Hello';
+    const f1: string = 'Hello';
 
     class C1 {}
 
@@ -29,13 +29,15 @@ namespace N1 {
 
     namespace N2 {
         class C2 {
-            M2(){}
+            public m2(){}
         }
 
-        const F2: number = 1;
+        const f2: number = 1;
     }
+
+    @interface Anno{}
 }
 
-const F0:string = 'World';
+const f0:string = 'World';
 
 class C0 {}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,8 @@
 #ifndef CPP_ABCKIT_ARKTS_ANNOTATION_INTERFACE_H
 #define CPP_ABCKIT_ARKTS_ANNOTATION_INTERFACE_H
 
-#include "libabckit/cpp/headers/core/annotation_interface.h"
-#include "libabckit/cpp/headers/base_concepts.h"
-#include "libabckit/cpp/headers/type.h"
+#include "../core/annotation_interface.h"
+#include "../base_concepts.h"
 
 namespace abckit::arkts {
 
@@ -30,7 +29,13 @@ class AnnotationInterface : public core::AnnotationInterface {
     /// @brief to access private constructor
     friend class arkts::Class;
     /// @brief to access private constructor
+    friend class arkts::ClassField;
+    /// @brief to access private constructor
     friend class arkts::Function;
+    /// @brief to access private constructor
+    friend class arkts::InterfaceField;
+    /// @brief to access private constructor
+    friend class arkts::ModuleField;
     /// @brief abckit::DefaultHash<AnnotationInterface>
     friend class abckit::DefaultHash<AnnotationInterface>;
     /// @brief to access private TargetCast
@@ -73,6 +78,14 @@ public:
      * @brief Destroy the Annotation Interface object
      */
     ~AnnotationInterface() override = default;
+
+    /**
+     * @brief Sets name for annotation interface
+     * @return `true` on success.
+     * @param [ in ] name - Name to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool SetName(const std::string &name) const;
 
     /**
      * @brief Add new field to the annotation interface.

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,6 +71,37 @@ TEST_F(LibAbcKitModifyApiTypesTest, TypeGetTypeIdStatic)
     g_impl->closeFile(file);
 }
 
+// Test: test-kind=api, api=InspectApiImpl::typeGetName, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitModifyApiTypesTest, TypeGetNameStatic)
+{
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/types/types_static.abc", &file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    helpers::InspectMethod(file, "foo", [](AbckitFile *, AbckitCoreFunction *function, AbckitGraph *) {
+        AbckitType *type = g_implI->functionGetReturnType(function);
+        ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+        AbckitString *name = g_implI->typeGetName(type);
+        ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+        ASSERT_STREQ(g_implI->abckitStringToString(name), "i32");
+        ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    });
+    g_impl->closeFile(file);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::typeGetRank, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitModifyApiTypesTest, TypeGetRankStatic)
+{
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/types/types_static.abc", &file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    helpers::InspectMethod(file, "bar", [](AbckitFile *file, AbckitCoreFunction *, AbckitGraph *) {
+        AbckitType *type = g_implM->createType(file, ABCKIT_TYPE_ID_I32);
+        g_implM->typeSetRank(type, 1);
+        ASSERT_EQ(g_implI->typeGetRank(type), 1);
+    });
+    g_impl->closeFile(file);
+}
+
 // Test: test-kind=api, api=InspectApiImpl::typeGetReferenceClass, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitModifyApiTypesTest, TypeGetReferenceClassStatic)
 {
@@ -92,6 +123,46 @@ TEST_F(LibAbcKitModifyApiTypesTest, TypeGetReferenceClassStatic)
         AbckitCoreClass *klass = g_implI->typeGetReferenceClass(type);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         ASSERT_EQ(klass, nullptr);  // Fix to get valid AbckitCoreClass *, not nullptr
+    });
+    g_impl->closeFile(file);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::typeIsUnion, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitModifyApiTypesTest, TypeIsUnionStatic)
+{
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/types/union_types_static.abc", &file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    helpers::InspectMethod(file, "foo", [](AbckitFile *, AbckitCoreFunction *function, AbckitGraph *) {
+        AbckitType *type = g_implI->functionGetReturnType(function);
+        auto name = g_implI->typeGetName(type);
+        std::string nameStr = g_implI->abckitStringToString(name);
+        std::cout << "nameStr: " << nameStr << std::endl;
+        ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+        ASSERT_TRUE(g_implI->typeIsUnion(type));
+    });
+    g_impl->closeFile(file);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::typeEnumerateUnionTypes, abc-kind=ArkTS2, category=negative
+TEST_F(LibAbcKitModifyApiTypesTest, TypeEnumerateUnionTypesStatic)
+{
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/types/union_types_static.abc", &file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    helpers::InspectMethod(file, "foo", [](AbckitFile *, AbckitCoreFunction *function, AbckitGraph *) {
+        AbckitType *type = g_implI->functionGetReturnType(function);
+        ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+        std::vector<std::string> unionTypes;
+        std::vector<std::string> expectedUnionTypes = {"std.core.Int", "std.core.String"};
+        g_implI->typeEnumerateUnionTypes(type, &unionTypes, [](AbckitType *type, void *data) {
+            auto unionTypes = (std::vector<std::string> *)data;
+            auto typeName = g_implI->typeGetName(type);
+            unionTypes->push_back(g_implI->abckitStringToString(typeName));
+            return true;
+        });
+        ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+        ASSERT_EQ(unionTypes, expectedUnionTypes);
     });
     g_impl->closeFile(file);
 }

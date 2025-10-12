@@ -213,6 +213,46 @@ struct CAPI_EXPORT AbckitInspectApi {
      */
     AbckitCoreClass *(*typeGetReferenceClass)(AbckitType *t);
 
+    /**
+     * @brief Returns type name for the given value of type `AbckitType`.
+     * @return Type name of the `t` argument.
+     * @param [ in ] t - Type to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `t` is NULL.
+     */
+    AbckitString *(*typeGetName)(AbckitType *t);
+
+    /**
+     * @brief Returns rank of the given type `t`.
+     * @return Rank of the `t` argument.
+     * @param [ in ] t - Type to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `t` is NULL.
+     */
+    size_t (*typeGetRank)(AbckitType *t);
+
+    /**
+     * @brief Returns boolean value that tells if the given type `t` is a union.
+     * @return Boolean value that tells if the given type `t` is a union.
+     * @param [ in ] t - Type to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `t` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for dynamic type.
+     */
+    bool (*typeIsUnion)(AbckitType *t);
+
+    /**
+     * @brief Enumerates union types of the given type `t`, invoking callback `cb` for each of it's
+     * union types.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] t - Type to be inspected.
+     * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
+     * it is invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `t` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for dynamic type.
+     */
+    bool (*typeEnumerateUnionTypes)(AbckitType *t, void *data, bool (*cb)(AbckitType *type, void *data));
+
     /* ========================================
      * Value
      * ======================================== */
@@ -241,6 +281,15 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `value` type id differs from `ABCKIT_TYPE_ID_U1`.
      */
     bool (*valueGetU1)(AbckitValue *value);
+
+    /**
+     * @brief Returns int value that given `value` holds.
+     * @return Int value that is stored in the `value`.
+     * @param [ in ] value - Value item to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `value` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `value` type id differs from `ABCKIT_TYPE_ID_INT`.
+     */
+    int (*valueGetInt)(AbckitValue *value);
 
     /**
      * @brief Returns double value that given `value` holds.
@@ -615,6 +664,14 @@ struct CAPI_EXPORT AbckitInspectApi {
     AbckitString *(*namespaceGetName)(AbckitCoreNamespace *n);
 
     /**
+     * @brief Tells if namespace is defined in the same binary or externally in another binary.
+     * @return Returns `true` if given namespace `ns` is defined in another binary and `false` if defined locally.
+     * @param [ in ] ns - Namespace to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `ns` is NULL.
+     */
+    bool (*namespaceIsExternal)(AbckitCoreNamespace *ns);
+
+    /**
      * @brief Returns parent namespace for namespace `n`.
      * @return Pointer to the `AbckitCoreNamespace` or NULL if `n` has no parent namespace.
      * @param [ in ] n - Namespace to be inspected.
@@ -706,6 +763,21 @@ struct CAPI_EXPORT AbckitInspectApi {
     bool (*namespaceEnumerateTopLevelFunctions)(AbckitCoreNamespace *n, void *data,
                                                 bool (*cb)(AbckitCoreFunction *function, void *data));
 
+    /**
+     * @brief Enumerates annotation interfaces of the namespace `n`, invoking callback `cb` for each annotation
+     * interface.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] n - Namespace to be inspected.
+     * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
+     * it is invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `n` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     */
+    bool (*namespaceEnumerateAnnotationInterfaces)(AbckitCoreNamespace *n, void *data,
+                                                   bool (*cb)(AbckitCoreAnnotationInterface *ai, void *data));
+
     /* ========================================
      * ImportDescriptor
      * ======================================== */
@@ -763,7 +835,7 @@ struct CAPI_EXPORT AbckitInspectApi {
     /**
      * @brief Returns binary file that the given export descriptor `e` is a part of.
      * @return Pointer to the `AbckitFile` that the export `e` is a part of.
-     * @param [ in ] e- Export descriptor to be inspected.
+     * @param [ in ] e - Export descriptor to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `e` is NULL.
      */
     AbckitFile *(*exportDescriptorGetFile)(AbckitCoreExportDescriptor *e);
@@ -771,7 +843,7 @@ struct CAPI_EXPORT AbckitInspectApi {
     /**
      * @brief Returns exporting module for export descriptor `e`.
      * @return Pointer to the `AbckitCoreModule` that holds the module that the export `e` is a part of.
-     * @param [ in ] e- Export descriptor to be inspected.
+     * @param [ in ] e - Export descriptor to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `e` is NULL.
      */
     AbckitCoreModule *(*exportDescriptorGetExportingModule)(AbckitCoreExportDescriptor *e);
@@ -780,7 +852,7 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @brief Returns exporting module for export descriptor `e`.
      * @return Pointer to the `AbckitCoreModule` that holds the module that the export `e` exports from. For local
      * entity export equals to the exporting module. For re-exports may be different.
-     * @param [ in ] e- Export descriptor to be inspected.
+     * @param [ in ] e - Export descriptor to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `e` is NULL.
      */
     AbckitCoreModule *(*exportDescriptorGetExportedModule)(AbckitCoreExportDescriptor *e);
@@ -788,7 +860,7 @@ struct CAPI_EXPORT AbckitInspectApi {
     /**
      * @brief Returns name for export descriptor `e`.
      * @return Pointer to the `AbckitString` that holds the name of the exported entity.
-     * @param [ in ] e- Export descriptor to be inspected.
+     * @param [ in ] e - Export descriptor to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `e` is NULL.
      * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for export descriptor `i` emitted not for target
      * `ABCKIT_TARGET_ARK_TS_V1` or `ABCKIT_TARGET_JS`.
@@ -799,7 +871,7 @@ struct CAPI_EXPORT AbckitInspectApi {
     /**
      * @brief Returns alias for export descriptor `e`.
      * @return Pointer to the `AbckitString` that holds the alias of the exported entity.
-     * @param [ in ] e- Export descriptor to be inspected.
+     * @param [ in ] e - Export descriptor to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `e` is NULL.
      * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for export descriptor `i` emitted not for target
      * `ABCKIT_TARGET_ARK_TS_V1` or `ABCKIT_TARGET_JS`.
@@ -835,6 +907,30 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @note Allocates
      */
     AbckitString *(*classGetName)(AbckitCoreClass *klass);
+
+    /**
+     * @brief Tells if class is defined in the same binary or externally in another binary.
+     * @return Returns `true` if given class `klass` is defined in another binary and `false` if defined locally.
+     * @param [ in ] klass - Class to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
+     */
+    bool (*classIsExternal)(AbckitCoreClass *klass);
+
+    /**
+     * @brief Tells if class `klass` is final.
+     * @return Returns `true` if given class `klass` is final and `false` otherwise.
+     * @param [ in ] klass - Class to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
+     */
+    bool (*classIsFinal)(AbckitCoreClass *klass);
+
+    /**
+     * @brief Tells if class `klass` is abstract.
+     * @return Returns `true` if given class `klass` is abstract and `false` otherwise.
+     * @param [ in ] klass - Class to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
+     */
+    bool (*classIsAbstract)(AbckitCoreClass *klass);
 
     /**
      * @brief Returns parent function for class `klass`.
@@ -960,6 +1056,14 @@ struct CAPI_EXPORT AbckitInspectApi {
     AbckitString *(*interfaceGetName)(AbckitCoreInterface *iface);
 
     /**
+     * @brief Tells if interface is defined in the same binary or externally in another binary.
+     * @return Returns `true` if given interface `iface` is defined in another binary and `false` if defined locally.
+     * @param [ in ] iface - Interface to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
+     */
+    bool (*interfaceIsExternal)(AbckitCoreInterface *iface);
+
+    /**
      * @brief Returns parent namespace for interface `iface`.
      * @return Pointer to the `AbckitCoreNamespace`.
      * @param [ in ] iface - Interface to be inspected.
@@ -1081,6 +1185,22 @@ struct CAPI_EXPORT AbckitInspectApi {
     AbckitString *(*enumGetName)(AbckitCoreEnum *enm);
 
     /**
+     * @brief Tells if enum is defined in the same binary or externally in another binary.
+     * @return Returns `true` if given class `enm` is defined in another binary and `false` if defined locally.
+     * @param [ in ] enm - Enum to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `enm` is NULL.
+     */
+    bool (*enumIsExternal)(AbckitCoreEnum *enm);
+
+    /**
+     * @brief Returns parent namespace for interface `iface`.
+     * @return Pointer to the `AbckitCoreNamespace`.
+     * @param [ in ] iface - Interface to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
+     */
+    AbckitCoreNamespace *(*enumGetParentNamespace)(AbckitCoreEnum *iface);
+
+    /**
      * @brief Enumerates methods of enum `enm`, invoking callback `cb` for each method.
      * @return `false` if was early exited. Otherwise - `true`.
      * @param [ in ] enm - Enum to be inspected.
@@ -1142,36 +1262,6 @@ struct CAPI_EXPORT AbckitInspectApi {
      */
     AbckitValue *(*moduleFieldGetValue)(AbckitCoreModuleField *field);
 
-    /**
-     * @brief Returns whether module field `field` is public.
-     * @return `true` if field `field` is public.
-     * @param [ in ] field - Field to be inspected.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
-     */
-    bool (*moduleFieldIsPublic)(AbckitCoreModuleField *field);
-
-    /**
-     * @brief Returns whether module field `field` is private.
-     * @return `true` if field `field` is private.
-     * @param [ in ] field - Field to be inspected.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
-     */
-    bool (*moduleFieldIsPrivate)(AbckitCoreModuleField *field);
-
-    /**
-     * @brief Enumerates annotations of module field `field`, invoking callback `cb` for each annotation.
-     * @return `false` if was early exited. Otherwise - `true`.
-     * @param [ in ] field - Field to be inspected.
-     * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
-     * it is invoked.
-     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
-     * should continue.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
-     */
-    bool (*moduleFieldEnumerateAnnotations)(AbckitCoreModuleField *field, void *data,
-                                            bool (*cb)(AbckitCoreAnnotation *anno, void *data));
-
     /* ========================================
      * Namespace Field
      * ======================================== */
@@ -1191,6 +1281,14 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
      */
     AbckitString *(*namespaceFieldGetName)(AbckitCoreNamespaceField *field);
+
+    /**
+     * @brief Returns type for namespace field `field`.
+     * @return Pointer to the `AbckitType`.
+     * @param [ in ] field - Field to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     */
+    AbckitType *(*namespaceFieldGetType)(AbckitCoreNamespaceField *field);
 
     /* ========================================
      * Class Field
@@ -1251,6 +1349,14 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
      */
     bool (*classFieldIsPrivate)(AbckitCoreClassField *field);
+
+    /**
+     * @brief Returns whether class field `field` is internal.
+     * @return `true` if field `field` is internal.
+     * @param [ in ] field - Field to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     */
+    bool (*classFieldIsInternal)(AbckitCoreClassField *field);
 
     /**
      * @brief Returns whether class field `field` is static.
@@ -1481,6 +1587,14 @@ struct CAPI_EXPORT AbckitInspectApi {
     bool (*functionIsCtor)(AbckitCoreFunction *function);
 
     /**
+     * @brief Tells if function `function` is static constructor.
+     * @return Returns `true` if given function `function` is static constructor and `false` otherwise.
+     * @param [ in ] function - Function to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is NULL.
+     */
+    bool (*functionIsCctor)(AbckitCoreFunction *function);
+
+    /**
      * @brief Tells if function `function` is anonymous.
      * @return Returns `true` if given function `function` is anonymous and `false` otherwise.
      * @param [ in ] function - Function to be inspected.
@@ -1513,6 +1627,22 @@ struct CAPI_EXPORT AbckitInspectApi {
     bool (*functionIsPrivate)(AbckitCoreFunction *function);
 
     /**
+     * @brief Tells if function `function` is internal.
+     * @return Returns `true` if given function `function` is internal and `false` otherwise.
+     * @param [ in ] function - Function to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is NULL.
+     */
+    bool (*functionIsInternal)(AbckitCoreFunction *function);
+
+    /**
+     * @brief Tells if function `function` is external.
+     * @return Returns `true` if given function `function` is external and `false` otherwise.
+     * @param [ in ] function - Function to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is NULL.
+     */
+    bool (*functionIsExternal)(AbckitCoreFunction *function);
+
+    /**
      * @brief Enumerates parameters of function `func`, invoking callback `cb` for each parameter.
      * @return `false` if was early exited. Otherwise - `true`.
      * @param [ in ] func - Function to be inspected.
@@ -1535,6 +1665,18 @@ struct CAPI_EXPORT AbckitInspectApi {
     AbckitType *(*functionGetReturnType)(AbckitCoreFunction *func);
 
     /* ========================================
+     * FunctionParam
+     * ======================================== */
+
+    /**
+     * @brief Returns  type for function param `param`.
+     * @return Pointer to the `AbckitType`.
+     * @param [ in ] param - AbckitCoreFunctionParam to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `param` is NULL.
+     */
+    AbckitType *(*functionParamGetType)(AbckitCoreFunctionParam *param);
+
+    /* ========================================
      * Annotation
      * ======================================== */
 
@@ -1547,12 +1689,29 @@ struct CAPI_EXPORT AbckitInspectApi {
     AbckitFile *(*annotationGetFile)(AbckitCoreAnnotation *anno);
 
     /**
+     * @brief Returns name for Annotation `anno`.
+     * @return Pointer to the `AbckitString`.
+     * @param [ in ] anno - Annotation to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is NULL.
+     * @note Allocates
+     */
+    AbckitString *(*annotationGetName)(AbckitCoreAnnotation *anno);
+
+    /**
      * @brief Returns interface for annotation `anno`.
      * @return Pointer to the `AbckitCoreAnnotationInterface`.
      * @param [ in ] anno - Annotation to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is NULL.
      */
     AbckitCoreAnnotationInterface *(*annotationGetInterface)(AbckitCoreAnnotation *anno);
+
+    /**
+     * @brief Tell if annotation `anno` is external.
+     * @return Return true if anno is external otherwise false.
+     * @param [ in ] anno - Annotation to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is NULL.
+     */
+    bool (*annotationIsExternal)(AbckitCoreAnnotation *anno);
 
     /**
      * @brief Enumerates elements of the annotation `anno`, invoking the callback for each element.
@@ -1624,6 +1783,14 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `ai` is NULL.
      */
     AbckitCoreModule *(*annotationInterfaceGetModule)(AbckitCoreAnnotationInterface *ai);
+
+    /**
+     * @brief Returns parent namespace for AnnotationInterface `ai`.
+     * @return Pointer to the `AbckitCoreNamespace`.
+     * @param [ in ] ai - AnnotationInterface to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `ai` is NULL.
+     */
+    AbckitCoreNamespace *(*annotationInterfaceGetParentNamespace)(AbckitCoreAnnotationInterface *ai);
 
     /**
      * @brief Returns name for annotation interface `ai`.
@@ -1732,7 +1899,7 @@ struct CAPI_EXPORT AbckitModifyApi {
      * @brief Creates type according to type id `id`.
      * @return Pointer to the `AbckitType`.
      * @param [ in ] file - Binary file to be modified.
-     * @param [ in ]  `id` - Type id corresponding to the type being created.
+     * @param [ in ]  id - Type id corresponding to the type being created.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `file` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `id` is `ABCKIT_TYPE_ID_INVALID`.
      * @note Allocates
@@ -1750,6 +1917,41 @@ struct CAPI_EXPORT AbckitModifyApi {
      */
     AbckitType *(*createReferenceType)(AbckitFile *file, AbckitCoreClass *klass);
 
+    /**
+     * @brief Sets name for type `type`.
+     * @return None.
+     * @param [ in ] type - Type to be modified.
+     * @param [ in ] name - Name to be set.
+     * @param [ in ] len - Length of the name.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `type` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for dynamic type.
+     */
+    void (*typeSetName)(AbckitType *type, const char *name, size_t len);
+
+    /**
+     * @brief Sets rank for type `type`.
+     * @return None.
+     * @param [ in ] type - Type to be modified.
+     * @param [ in ] rank - Rank to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `type` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for dynamic type.
+     */
+    void (*typeSetRank)(AbckitType *type, size_t rank);
+
+    /**
+     * @brief Creates union type according to the given types `types`.
+     * @return Pointer to the `AbckitType`.
+     * @param [ in ] file - Binary file to be modified.
+     * @param [ in ] types - Types from which the union type is created.
+     * @param [ in ] size - Size of the union type to be created.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `file` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `types` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `size` is less than 2.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for dynamic type.
+     */
+    AbckitType *(*createUnionType)(AbckitFile *file, AbckitType **types, size_t size);
+
     /* ========================================
      * Value
      * ======================================== */
@@ -1763,6 +1965,16 @@ struct CAPI_EXPORT AbckitModifyApi {
      * @note Allocates
      */
     AbckitValue *(*createValueU1)(AbckitFile *file, bool value);
+
+    /**
+     * @brief Creates value item containing the given int value `value`.
+     * @return Pointer to the `AbckitValue`.
+     * @param [ in ] file - Binary file to be modified.
+     * @param [ in ] value - Int value from which value item is created.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `file` is NULL.
+     * @note Allocates
+     */
+    AbckitValue *(*createValueInt)(AbckitFile *file, int value);
 
     /**
      * @brief Creates value item containing the given double value `value`.

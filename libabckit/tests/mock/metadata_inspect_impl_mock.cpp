@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this File except in compliance with the License.
  * You may obtain a copy of the License at
@@ -175,6 +175,13 @@ AbckitString *NamespaceGetName(AbckitCoreNamespace *n)
     return DEFAULT_STRING;
 }
 
+bool NamespaceIsExternal(AbckitCoreNamespace *n)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(n == DEFAULT_CORE_NAMESPACE);
+    return true;
+}
+
 AbckitCoreNamespace *NamespaceGetParentNamespace(AbckitCoreNamespace *n)
 {
     g_calledFuncs.push(__func__);
@@ -226,6 +233,14 @@ bool NamespaceEnumerateTopLevelFunctions(AbckitCoreNamespace *n, void *data,
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(n == DEFAULT_CORE_NAMESPACE);
     return cb(DEFAULT_CORE_FUNCTION, data);
+}
+
+bool NamespaceEnumerateAnnotationInterfaces(AbckitCoreNamespace *m, void *data,
+                                            bool (*cb)(AbckitCoreAnnotationInterface *ai, void *data))
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(m == DEFAULT_CORE_NAMESPACE);
+    return cb(DEFAULT_CORE_ANNOTATION_INTERFACE, data);
 }
 
 // ========================================
@@ -331,6 +346,27 @@ AbckitString *ClassGetName(AbckitCoreClass *klass)
     return DEFAULT_STRING;
 }
 
+bool ClassIsExternal(AbckitCoreClass *klass)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(klass == DEFAULT_CORE_CLASS);
+    return true;
+}
+
+bool ClassIsFinal(AbckitCoreClass *klass)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(klass == DEFAULT_CORE_CLASS);
+    return true;
+}
+
+bool ClassIsAbstract(AbckitCoreClass *klass)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(klass == DEFAULT_CORE_CLASS);
+    return true;
+}
+
 AbckitCoreFunction *ClassGetParentFunction(AbckitCoreClass *klass)
 {
     g_calledFuncs.push(__func__);
@@ -412,6 +448,13 @@ AbckitString *InterfaceGetName(AbckitCoreInterface *iface)
     return DEFAULT_STRING;
 }
 
+bool InterfaceIsExternal(AbckitCoreInterface *iface)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(iface == DEFAULT_CORE_INTERFACE);
+    return true;
+}
+
 AbckitCoreNamespace *InterfaceGetParentNamespace(AbckitCoreInterface *iface)
 {
     g_calledFuncs.push(__func__);
@@ -491,6 +534,20 @@ AbckitString *EnumGetName(AbckitCoreEnum *enm)
     return DEFAULT_STRING;
 }
 
+bool EnumIsExternal(AbckitCoreEnum *enm)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(enm == DEFAULT_CORE_ENUM);
+    return true;
+}
+
+AbckitCoreNamespace *EnumGetParentNamespace(AbckitCoreEnum *enm)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(enm == DEFAULT_CORE_ENUM);
+    return DEFAULT_CORE_NAMESPACE;
+}
+
 bool EnumEnumerateMethods(AbckitCoreEnum *enm, void *data, bool (*cb)(AbckitCoreFunction *function, void *data))
 {
     g_calledFuncs.push(__func__);
@@ -537,28 +594,6 @@ AbckitValue *ModuleFieldGetValue(AbckitCoreModuleField *field)
     return DEFAULT_VALUE;
 }
 
-bool ModuleFieldIsPublic(AbckitCoreModuleField *field)
-{
-    g_calledFuncs.push(__func__);
-    EXPECT_TRUE(field == DEFAULT_CORE_MODULE_FIELD);
-    return DEFAULT_BOOL;
-}
-
-bool ModuleFieldIsPrivate(AbckitCoreModuleField *field)
-{
-    g_calledFuncs.push(__func__);
-    EXPECT_TRUE(field == DEFAULT_CORE_MODULE_FIELD);
-    return DEFAULT_BOOL;
-}
-
-bool ModuleFieldEnumerateAnnotations(AbckitCoreModuleField *field, void *data,
-                                     bool (*cb)(AbckitCoreAnnotation *anno, void *data))
-{
-    g_calledFuncs.push(__func__);
-    EXPECT_TRUE(field == DEFAULT_CORE_MODULE_FIELD);
-    return cb(DEFAULT_CORE_ANNOTATION, data);
-}
-
 // ========================================
 // Namespace Field
 // ========================================
@@ -575,6 +610,13 @@ AbckitString *NamespaceFieldGetName(AbckitCoreNamespaceField *field)
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(field == DEFAULT_CORE_NAMESPACE_FIELD);
     return DEFAULT_STRING;
+}
+
+AbckitType *NamespaceFieldGetType(AbckitCoreNamespaceField *field)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_CORE_NAMESPACE_FIELD);
+    return DEFAULT_TYPE;
 }
 
 // ========================================
@@ -624,6 +666,13 @@ bool ClassFieldIsProtected(AbckitCoreClassField *field)
 }
 
 bool ClassFieldIsPrivate(AbckitCoreClassField *field)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_CORE_CLASS_FIELD);
+    return DEFAULT_BOOL;
+}
+
+bool ClassFieldIsInternal(AbckitCoreClassField *field)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(field == DEFAULT_CORE_CLASS_FIELD);
@@ -733,6 +782,13 @@ AbckitCoreModule *AnnotationInterfaceGetModule(AbckitCoreAnnotationInterface *an
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(anno == DEFAULT_CORE_ANNOTATION_INTERFACE);
     return DEFAULT_CORE_MODULE;
+}
+
+AbckitCoreNamespace *AnnotationInterfaceGetParentNamespace(AbckitCoreAnnotationInterface *anno)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(anno == DEFAULT_CORE_ANNOTATION_INTERFACE);
+    return DEFAULT_CORE_NAMESPACE;
 }
 
 AbckitString *AnnotationInterfaceGetName(AbckitCoreAnnotationInterface *ai)
@@ -880,6 +936,13 @@ bool FunctionIsCtor(AbckitCoreFunction *function)
     return DEFAULT_BOOL;
 }
 
+bool FunctionIsCctor(AbckitCoreFunction *function)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(function == DEFAULT_CORE_FUNCTION);
+    return DEFAULT_BOOL;
+}
+
 bool FunctionIsAnonymous(AbckitCoreFunction *function)
 {
     g_calledFuncs.push(__func__);
@@ -908,6 +971,20 @@ bool FunctionIsPrivate(AbckitCoreFunction *function)
     return DEFAULT_BOOL;
 }
 
+bool FunctionIsInternal(AbckitCoreFunction *function)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(function == DEFAULT_CORE_FUNCTION);
+    return DEFAULT_BOOL;
+}
+
+bool FunctionIsExternal(AbckitCoreFunction *function)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(function == DEFAULT_CORE_FUNCTION);
+    return DEFAULT_BOOL;
+}
+
 bool FunctionEnumerateParameters(AbckitCoreFunction *function, void *data,
                                  bool (*cb)(AbckitCoreFunctionParam *param, void *data))
 {
@@ -924,6 +1001,17 @@ AbckitType *FunctionGetReturnType(AbckitCoreFunction *function)
 }
 
 // ========================================
+// Function Param
+// ========================================
+
+AbckitType *FunctionParamGetType(AbckitCoreFunctionParam *param)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(param == DEFAULT_CORE_FUNCTION_PARAM);
+    return DEFAULT_TYPE;
+}
+
+// ========================================
 // Annotation
 // ========================================
 
@@ -933,11 +1021,26 @@ AbckitFile *AnnotationGetFile(AbckitCoreAnnotation *anno)
     EXPECT_TRUE(anno == DEFAULT_CORE_ANNOTATION);
     return DEFAULT_FILE;
 }
+
+AbckitString *AnnotationGetName(AbckitCoreAnnotation *anno)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(anno == DEFAULT_CORE_ANNOTATION);
+    return DEFAULT_STRING;
+}
+
 AbckitCoreAnnotationInterface *AnnotationGetInterface(AbckitCoreAnnotation *anno)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(anno == DEFAULT_CORE_ANNOTATION);
     return DEFAULT_CORE_ANNOTATION_INTERFACE;
+}
+
+bool AnnotationIsExternal(AbckitCoreAnnotation *anno)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(anno == DEFAULT_CORE_ANNOTATION);
+    return DEFAULT_BOOL;
 }
 
 bool AnnotationEnumerateElements(AbckitCoreAnnotation *anno, void *data,
@@ -998,6 +1101,34 @@ AbckitCoreClass *TypeGetReferenceClass(AbckitType *type)
     return DEFAULT_CORE_CLASS;
 }
 
+AbckitString *TypeGetName(AbckitType *type)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(type == DEFAULT_TYPE);
+    return DEFAULT_STRING;
+}
+
+size_t TypeGetRank(AbckitType *type)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(type == DEFAULT_TYPE);
+    return DEFAULT_SIZE_T;
+}
+
+bool TypeIsUnion(AbckitType *type)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(type == DEFAULT_TYPE);
+    return DEFAULT_BOOL;
+}
+
+bool TypeEnumerateUnionTypes(AbckitType *type, void *data, bool (*cb)(AbckitType *unionType, void *data))
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(type == DEFAULT_TYPE);
+    return cb(DEFAULT_TYPE, data);
+}
+
 // ========================================
 // Value
 // ========================================
@@ -1021,6 +1152,13 @@ bool ValueGetU1(AbckitValue *value)
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(value == DEFAULT_VALUE);
     return DEFAULT_BOOL;
+}
+
+int ValueGetInt(AbckitValue *value)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(value == DEFAULT_VALUE);
+    return DEFAULT_I32;
 }
 
 double ValueGetDouble(AbckitValue *value)
@@ -1183,6 +1321,10 @@ static AbckitInspectApi g_inspectApiImpl = {
 
     TypeGetTypeId,
     TypeGetReferenceClass,
+    TypeGetName,
+    TypeGetRank,
+    TypeIsUnion,
+    TypeEnumerateUnionTypes,
 
     // ========================================
     // Value
@@ -1191,6 +1333,7 @@ static AbckitInspectApi g_inspectApiImpl = {
     ValueGetFile,
     ValueGetType,
     ValueGetU1,
+    ValueGetInt,
     ValueGetDouble,
     ValueGetString,
     ArrayValueGetLiteralArray,
@@ -1243,6 +1386,7 @@ static AbckitInspectApi g_inspectApiImpl = {
     // ========================================
     NamespaceGetModule,
     NamespaceGetName,
+    NamespaceIsExternal,
     NamespaceGetParentNamespace,
     NamespaceEnumerateNamespaces,
     NamespaceEnumerateClasses,
@@ -1250,6 +1394,7 @@ static AbckitInspectApi g_inspectApiImpl = {
     NamespaceEnumerateEnums,
     NamespaceEnumerateFields,
     NamespaceEnumerateTopLevelFunctions,
+    NamespaceEnumerateAnnotationInterfaces,
 
     // ========================================
     // ImportDescriptor
@@ -1278,6 +1423,9 @@ static AbckitInspectApi g_inspectApiImpl = {
     ClassGetFile,
     ClassGetModule,
     ClassGetName,
+    ClassIsExternal,
+    ClassIsFinal,
+    ClassIsAbstract,
     ClassGetParentFunction,
     ClassGetParentNamespace,
     ClassGetSuperClass,
@@ -1294,6 +1442,7 @@ static AbckitInspectApi g_inspectApiImpl = {
     InterfaceGetFile,
     InterfaceGetModule,
     InterfaceGetName,
+    InterfaceIsExternal,
     InterfaceGetParentNamespace,
     InterfaceEnumerateSuperInterfaces,
     InterfaceEnumerateSubInterfaces,
@@ -1309,6 +1458,8 @@ static AbckitInspectApi g_inspectApiImpl = {
     EnumGetFile,
     EnumGetModule,
     EnumGetName,
+    EnumIsExternal,
+    EnumGetParentNamespace,
     EnumEnumerateMethods,
     EnumEnumerateFields,
 
@@ -1320,9 +1471,6 @@ static AbckitInspectApi g_inspectApiImpl = {
     ModuleFieldGetName,
     ModuleFieldGetType,
     ModuleFieldGetValue,
-    ModuleFieldIsPublic,
-    ModuleFieldIsPrivate,
-    ModuleFieldEnumerateAnnotations,
 
     // ========================================
     // Namespace Field
@@ -1330,6 +1478,7 @@ static AbckitInspectApi g_inspectApiImpl = {
 
     NamespaceFieldGetNamespace,
     NamespaceFieldGetName,
+    NamespaceFieldGetType,
 
     // ========================================
     // Class Field
@@ -1342,6 +1491,7 @@ static AbckitInspectApi g_inspectApiImpl = {
     ClassFieldIsPublic,
     ClassFieldIsProtected,
     ClassFieldIsPrivate,
+    ClassFieldIsInternal,
     ClassFieldIsStatic,
     ClassFieldEnumerateAnnotations,
 
@@ -1380,19 +1530,30 @@ static AbckitInspectApi g_inspectApiImpl = {
     CreateGraphFromFunction,
     FunctionIsStatic,
     FunctionIsCtor,
+    FunctionIsCctor,
     FunctionIsAnonymous,
     FunctionIsPublic,
     FunctionIsProtected,
     FunctionIsPrivate,
+    FunctionIsInternal,
+    FunctionIsExternal,
     FunctionEnumerateParameters,
     FunctionGetReturnType,
+
+    // ========================================
+    // Function Param
+    // ========================================
+
+    FunctionParamGetType,
 
     // ========================================
     // Annotation
     // ========================================
 
     AnnotationGetFile,
+    AnnotationGetName,
     AnnotationGetInterface,
+    AnnotationIsExternal,
     AnnotationEnumerateElements,
     AnnotationElementGetFile,
     AnnotationElementGetAnnotation,
@@ -1405,6 +1566,7 @@ static AbckitInspectApi g_inspectApiImpl = {
 
     AnnotationInterfaceGetFile,
     AnnotationInterfaceGetModule,
+    AnnotationInterfaceGetParentNamespace,
     AnnotationInterfaceGetName,
     AnnotationInterfaceEnumerateFields,
 

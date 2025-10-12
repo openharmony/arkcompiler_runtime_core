@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,6 +55,8 @@ bool ArkTSNamespaceEnumerateFields(AbckitCoreNamespace *n, void *data,
                                    bool (*cb)(AbckitCoreNamespaceField *field, void *data));
 bool ArkTSNamespaceEnumerateTopLevelFunctions(AbckitCoreNamespace *n, void *data,
                                               bool (*cb)(AbckitCoreFunction *func, void *data));
+bool ArkTSNamespaceEnumerateAnnotationInterfaces(AbckitCoreNamespace *n, void *data,
+                                                 bool (*cb)(AbckitCoreAnnotationInterface *ai, void *data));
 
 // ========================================
 // Class
@@ -83,6 +85,8 @@ bool ArkTSInterfaceEnumerateSubInterfaces(AbckitCoreInterface *iface, void *data
                                           bool (*cb)(AbckitCoreInterface *subInterface, void *data));
 bool ArkTSInterfaceEnumerateClasses(AbckitCoreInterface *iface, void *data,
                                     bool (*cb)(AbckitCoreClass *klass, void *data));
+bool ArkTSInterfaceEnumerateAnnotations(AbckitCoreInterface *iface, void *data,
+                                        bool (*cb)(AbckitCoreAnnotation *anno, void *data));
 
 // ========================================
 // Enum
@@ -90,6 +94,15 @@ bool ArkTSInterfaceEnumerateClasses(AbckitCoreInterface *iface, void *data,
 
 bool ArkTSEnumEnumerateMethods(AbckitCoreEnum *enm, void *data, bool (*cb)(AbckitCoreFunction *method, void *data));
 bool ArkTSEnumEnumerateFields(AbckitCoreEnum *enm, void *data, bool (*cb)(AbckitCoreEnumField *field, void *data));
+
+// ========================================
+// Field
+// ========================================
+
+bool ArkTSClassFieldEnumerateAnnotations(AbckitCoreClassField *field, void *data,
+                                         bool (*cb)(AbckitCoreAnnotation *anno, void *data));
+bool ArkTSInterfaceFieldEnumerateAnnotations(AbckitCoreInterfaceField *field, void *data,
+                                             bool (*cb)(AbckitCoreAnnotation *anno, void *data));
 
 // ========================================
 // Function
@@ -101,6 +114,8 @@ bool ArkTSFunctionEnumerateNestedClasses(AbckitCoreFunction *function, void *dat
                                          bool (*cb)(AbckitCoreClass *nestedClass, void *data));
 bool ArkTSFunctionEnumerateAnnotations(AbckitCoreFunction *function, void *data,
                                        bool (*cb)(AbckitCoreAnnotation *anno, void *data));
+bool ArkTSFunctionEnumerateParameters(AbckitCoreFunction *function, void *data,
+                                      bool (*cb)(AbckitCoreFunctionParam *param, void *data));
 
 // ========================================
 // Annotation

@@ -18,3 +18,9 @@ enum EnumA {
     TWO,
     THREE,
 }
+
+namespace Ns1 {
+    enum EnumB {
+        RED,
+    }
+}

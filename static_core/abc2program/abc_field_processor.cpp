@@ -15,6 +15,7 @@
 
 #include "abc_field_processor.h"
 #include "abc2program_log.h"
+#include "abc_annotation_processor.h"
 
 namespace ark::abc2program {
 
@@ -51,6 +52,10 @@ void AbcFieldProcessor::FillFieldData(pandasm::Field &field)
     FillFieldName(field);
     FillFieldType(field);
     FillFieldMetaData(field);
+    fieldDataAccessor_->EnumerateAnnotations([&](panda_file::File::EntityId annotationId) {
+        AbcAnnotationProcessor annotationProcessor(annotationId, keyData_, field);
+        annotationProcessor.FillProgramData();
+    });
 }
 
 void AbcFieldProcessor::FillFieldName(pandasm::Field &field)
@@ -96,6 +101,43 @@ void AbcFieldProcessor::FillFieldMetaData(pandasm::Field &field)
             std::string_view val {reinterpret_cast<const char *>(
                 file_->GetStringData(panda_file::File::EntityId(stringOffsetVal.value())).data)};
             field.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::STRING>(val));
+        }
+    }  else if (field.type.GetId() == panda_file::Type::TypeId::I32) {
+        std::optional<uint32_t> intVal = fieldAccessor.GetValue<uint32_t>();
+        if (intVal.has_value()) {
+            field.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::I32>(intVal.value()));
+        }
+    } else if (field.type.GetId() == panda_file::Type::TypeId::U32) {
+        std::optional<uint32_t> uintVal = fieldAccessor.GetValue<uint32_t>();
+        if (uintVal.has_value()) {
+            field.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::U32>(uintVal.value()));
+        }
+    } else if (field.type.GetId() == panda_file::Type::TypeId::I64) {
+        std::optional<uint64_t> longVal = fieldAccessor.GetValue<uint64_t>();
+        if (longVal.has_value()) {
+            field.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::I64>(longVal.value()));
+        }
+    } else if (field.type.GetId() == panda_file::Type::TypeId::U64) {
+        std::optional<uint64_t> ulongVal = fieldAccessor.GetValue<uint64_t>();
+        if (ulongVal.has_value()) {
+            field.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::U64>(ulongVal.value()));
+        }
+    } else if (field.type.GetId() == panda_file::Type::TypeId::U1) {
+        std::optional<uint32_t> boolVal = fieldAccessor.GetValue<uint32_t>();
+        if (boolVal.has_value()) {
+            field.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::U1>(boolVal.value() != 0));
+        }
+    } else if (field.type.GetId() == panda_file::Type::TypeId::F32) {
+        std::optional<uint32_t> floatVal = fieldAccessor.GetValue<uint32_t>();
+        if (floatVal.has_value()) {
+            float val = *reinterpret_cast<float *>(&floatVal.value());
+            field.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::F32>(val));
+        }
+    } else if (field.type.GetId() == panda_file::Type::TypeId::F64) {
+        std::optional<uint64_t> doubleVal = fieldAccessor.GetValue<uint64_t>();
+        if (doubleVal.has_value()) {
+            double val = *reinterpret_cast<double *>(&doubleVal.value());
+            field.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::F64>(val));
         }
     }
 }

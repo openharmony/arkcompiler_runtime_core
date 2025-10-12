@@ -22,15 +22,178 @@
 
 namespace libabckit::test {
 
-class LibAbcKitInspectApiModuleFieldsTest : public ::testing::Test {};
+class LibAbcKitInspectApiFieldsTest : public ::testing::Test {};
+
+// Test: test-kind=api, api=InspectApiImpl::moduleFieldGetType, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitInspectApiFieldsTest, ModuleFieldGetTypeStatic)
+{
+    abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/fields/fields_static.abc");
+
+    std::set<std::string> gotTypeNames;
+    std::set<std::string> expectTypeNames = {"std.core.String"};
+
+    for (const auto &module : file.GetModules()) {
+        if (module.IsExternal()) {
+            continue;
+        }
+        for (const auto &field : module.GetFields()) {
+            gotTypeNames.emplace(field.GetType().GetName());
+        }
+    }
+
+    ASSERT_EQ(gotTypeNames, expectTypeNames);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::moduleFieldGetValue, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitInspectApiFieldsTest, ModuleFieldGetValueStatic)
+{
+    abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/fields/fields_static.abc");
+
+    using FieldVal = std::variant<bool, int, double, std::string>;
+    std::vector<FieldVal> gotFieldValues;
+    std::vector<FieldVal> expectFieldValues = {std::string("Hello")};
+    for (const auto &module : file.GetModules()) {
+        if (module.IsExternal()) {
+            continue;
+        }
+        for (const auto &field : module.GetFields()) {
+            auto value = field.GetValue();
+            auto typeId = value.GetType().GetTypeId();
+            static const std::map<AbckitTypeId, std::function<void()>> valueHandlers = {
+                {ABCKIT_TYPE_ID_U1,
+                 [&]() {
+                     bool val = value.GetU1();
+                     gotFieldValues.push_back(val);
+                 }},
+                {ABCKIT_TYPE_ID_I32,
+                 [&]() {
+                     int val = value.GetInt();
+                     gotFieldValues.push_back(val);
+                 }},
+                {ABCKIT_TYPE_ID_F64,
+                 [&]() {
+                     double val = value.GetDouble();
+                     gotFieldValues.push_back(val);
+                 }},
+                {ABCKIT_TYPE_ID_STRING, [&]() {
+                     std::string val = value.GetString();
+                     gotFieldValues.push_back(val);
+                 }}};
+            auto handler = valueHandlers.find(typeId);
+            if (handler != valueHandlers.end()) {
+                handler->second();
+            }
+        }
+    }
+
+    ASSERT_EQ(gotFieldValues, expectFieldValues);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::namespaceFieldGetType, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitInspectApiFieldsTest, NamespaceFieldGetTypeStatic)
+{
+    abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/fields/fields_static.abc");
+
+    std::set<std::string> gotTypeNames;
+    std::set<std::string> expectTypeNames = {"escompat.Array"};
+
+    for (const auto &module : file.GetModules()) {
+        if (module.IsExternal()) {
+            continue;
+        }
+        for (const auto &ns : module.GetNamespaces()) {
+            for (const auto &field : ns.GetFields()) {
+                gotTypeNames.emplace(field.GetType().GetName());
+            }
+        }
+    }
+
+    ASSERT_EQ(gotTypeNames, expectTypeNames);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::classFieldGetType, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitInspectApiFieldsTest, ClassFieldGetTypeStatic)
+{
+    abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/fields/fields_static.abc");
+
+    std::set<std::string> gotTypeNames;
+    std::set<std::string> expectTypeNames = {"std.core.String", "i32"};
+
+    for (const auto &module : file.GetModules()) {
+        if (module.IsExternal()) {
+            continue;
+        }
+        for (const auto &klass : module.GetClasses()) {
+            for (const auto &field : klass.GetFields()) {
+                gotTypeNames.emplace(field.GetType().GetName());
+            }
+        }
+    }
+
+    ASSERT_EQ(gotTypeNames, expectTypeNames);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::classFieldGetValue, abc-kind=ArkTS2, category=positive, extension=c
+
+TEST_F(LibAbcKitInspectApiFieldsTest, ClassFieldGetValueStatic)
+{
+    abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/fields/fields_static.abc");
+    using FieldVal = std::variant<bool, int, double, std::string>;
+    std::vector<FieldVal> gotClassFieldValues;
+    std::vector<FieldVal> expectClassFieldValues = {
+        std::string("public"), std::string("protected"), std::string("private"), std::string("static"), 1, 2};
+    for (const auto &module : file.GetModules()) {
+        if (module.IsExternal()) {
+            continue;
+        }
+        auto result = helpers::GetClassByName(module, "C1");
+        ASSERT_NE(result, std::nullopt);
+        const auto &klass = result.value();
+        for (const auto &field : klass.GetFields()) {
+            auto value = field.GetValue();
+            auto type = field.GetType();
+            auto typeId = value.GetType().GetTypeId();
+            static const std::map<AbckitTypeId, std::function<void()>> valueHandlers = {
+                {ABCKIT_TYPE_ID_U1,
+                 [&]() {
+                     bool val = value.GetU1();
+                     gotClassFieldValues.push_back(val);
+                 }},
+                {ABCKIT_TYPE_ID_F64,
+                 [&]() {
+                     double val = value.GetDouble();
+                     gotClassFieldValues.push_back(val);
+                 }},
+                {ABCKIT_TYPE_ID_STRING,
+                 [&]() {
+                     std::string val = value.GetString();
+                     gotClassFieldValues.push_back(val);
+                 }},
+                {ABCKIT_TYPE_ID_I32, [&]() {
+                     int val = value.GetInt();
+                     gotClassFieldValues.push_back(val);
+                 }}};
+
+            auto handler = valueHandlers.find(typeId);
+            if (handler != valueHandlers.end()) {
+                handler->second();
+            } else {
+                std::string val = "[unsupported type " + std::to_string(static_cast<int>(typeId)) + "]";
+                gotClassFieldValues.push_back(val);
+            }
+        }
+    }
+
+    ASSERT_EQ(gotClassFieldValues, expectClassFieldValues);
+}
 
 // Test: test-kind=api, api=InspectApiImpl::classFieldIsPublic, abc-kind=ArkTS2, category=positive, extension=c
-TEST_F(LibAbcKitInspectApiModuleFieldsTest, ClassFieldIsPublicStatic)
+TEST_F(LibAbcKitInspectApiFieldsTest, ClassFieldIsPublicStatic)
 {
     abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/fields/fields_static.abc");
 
     std::set<std::string> gotFieldNames;
-    std::set<std::string> expectFieldNames = {"C1F1", "C1F4"};
+    std::set<std::string> expectFieldNames = {"c1F1", "c1F4", "c1F6"};
 
     for (const auto &module : file.GetModules()) {
         if (module.IsExternal()) {
@@ -50,12 +213,12 @@ TEST_F(LibAbcKitInspectApiModuleFieldsTest, ClassFieldIsPublicStatic)
 }
 
 // Test: test-kind=api, api=InspectApiImpl::classFieldIsProtected, abc-kind=ArkTS2, category=positive, extension=c
-TEST_F(LibAbcKitInspectApiModuleFieldsTest, ClassFieldIsProtectedStatic)
+TEST_F(LibAbcKitInspectApiFieldsTest, ClassFieldIsProtectedStatic)
 {
     abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/fields/fields_static.abc");
 
     std::set<std::string> gotFieldNames;
-    std::set<std::string> expectFieldNames = {"C1F2"};
+    std::set<std::string> expectFieldNames = {"c1F2"};
 
     for (const auto &module : file.GetModules()) {
         if (module.IsExternal()) {
@@ -75,12 +238,12 @@ TEST_F(LibAbcKitInspectApiModuleFieldsTest, ClassFieldIsProtectedStatic)
 }
 
 // Test: test-kind=api, api=InspectApiImpl::classFieldIsPrivate, abc-kind=ArkTS2, category=positive, extension=c
-TEST_F(LibAbcKitInspectApiModuleFieldsTest, ClassFieldIsPrivateStatic)
+TEST_F(LibAbcKitInspectApiFieldsTest, ClassFieldIsPrivateStatic)
 {
     abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/fields/fields_static.abc");
 
     std::set<std::string> gotFieldNames;
-    std::set<std::string> expectFieldNames = {"C1F3"};
+    std::set<std::string> expectFieldNames = {"c1F3"};
 
     for (const auto &module : file.GetModules()) {
         if (module.IsExternal()) {
@@ -99,13 +262,38 @@ TEST_F(LibAbcKitInspectApiModuleFieldsTest, ClassFieldIsPrivateStatic)
     ASSERT_EQ(gotFieldNames, expectFieldNames);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classFieldIsStatic, abc-kind=ArkTS2, category=positive, extension=c
-TEST_F(LibAbcKitInspectApiModuleFieldsTest, ClassFieldIsStaticStatic)
+// Test: test-kind=api, api=InspectApiImpl::classFieldIsInternal, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitInspectApiFieldsTest, ClassFieldIsInternalStatic)
 {
     abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/fields/fields_static.abc");
 
     std::set<std::string> gotFieldNames;
-    std::set<std::string> expectFieldNames = {"C1F4"};
+    std::set<std::string> expectFieldNames = {"c1F5"};
+
+    for (const auto &module : file.GetModules()) {
+        if (module.IsExternal()) {
+            continue;
+        }
+        auto result = helpers::GetClassByName(module, "C1");
+        ASSERT_NE(result, std::nullopt);
+        const auto &klass = result.value();
+        for (const auto &field : klass.GetFields()) {
+            if (field.IsInternal()) {
+                gotFieldNames.emplace(field.GetName());
+            }
+        }
+    }
+
+    ASSERT_EQ(gotFieldNames, expectFieldNames);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::classFieldIsStatic, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitInspectApiFieldsTest, ClassFieldIsStaticStatic)
+{
+    abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/fields/fields_static.abc");
+
+    std::set<std::string> gotFieldNames;
+    std::set<std::string> expectFieldNames = {"c1F4"};
 
     for (const auto &module : file.GetModules()) {
         if (module.IsExternal()) {
@@ -124,13 +312,61 @@ TEST_F(LibAbcKitInspectApiModuleFieldsTest, ClassFieldIsStaticStatic)
     ASSERT_EQ(gotFieldNames, expectFieldNames);
 }
 
+// Test: test-kind=api, api=InspectApiImpl::classFieldEnumerateAnnotations, abc-kind=ArkTS2, category=positive,
+// extension=c
+TEST_F(LibAbcKitInspectApiFieldsTest, ClassFieldGetAnnotationsStatic)
+{
+    abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/fields/fields_static.abc");
+
+    std::set<std::string> gotAnnotationNames;
+    std::set<std::string> expectAnnotationNames = {"AI1"};
+
+    for (const auto &module : file.GetModules()) {
+        if (module.IsExternal()) {
+            continue;
+        }
+        auto result = helpers::GetClassByName(module, "C1");
+        ASSERT_NE(result, std::nullopt);
+        const auto &klass = result.value();
+        for (const auto &field : klass.GetFields()) {
+            for (const auto &annotation : field.GetAnnotations()) {
+                gotAnnotationNames.emplace(annotation.GetName());
+            }
+        }
+    }
+
+    ASSERT_EQ(gotAnnotationNames, expectAnnotationNames);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::interfaceFieldGetType, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitInspectApiFieldsTest, InterfaceFieldGetTypeStatic)
+{
+    abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/fields/fields_static.abc");
+
+    std::set<std::string> gotTypeNames;
+    std::set<std::string> expectTypeNames = {"f64", "std.core.String"};
+
+    for (const auto &module : file.GetModules()) {
+        if (module.IsExternal()) {
+            continue;
+        }
+        for (const auto &iface : module.GetInterfaces()) {
+            for (const auto &field : iface.GetFields()) {
+                gotTypeNames.emplace(field.GetType().GetName());
+            }
+        }
+    }
+
+    ASSERT_EQ(gotTypeNames, expectTypeNames);
+}
+
 // Test: test-kind=api, api=InspectApiImpl::interfaceFieldIsReadonly, abc-kind=ArkTS2, category=positive, extension=c
-TEST_F(LibAbcKitInspectApiModuleFieldsTest, InterfaceFieldIsReadonlyStatic)
+TEST_F(LibAbcKitInspectApiFieldsTest, InterfaceFieldIsReadonlyStatic)
 {
     abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/fields/fields_static.abc");
 
     std::set<std::string> gotFieldNames;
-    std::set<std::string> expectFieldNames = {"I1F2"};
+    std::set<std::string> expectFieldNames = {"<property>i1F2"};
 
     for (const auto &module : file.GetModules()) {
         if (module.IsExternal()) {
@@ -147,6 +383,57 @@ TEST_F(LibAbcKitInspectApiModuleFieldsTest, InterfaceFieldIsReadonlyStatic)
     }
 
     ASSERT_EQ(gotFieldNames, expectFieldNames);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::interfaceFieldEnumerateAnnotations, abc-kind=ArkTS2, category=positive,
+// extension=c
+TEST_F(LibAbcKitInspectApiFieldsTest, InterfaceFieldGetAnnotationsStatic)
+{
+    abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/fields/fields_static.abc");
+
+    std::set<std::string> gotAnnotationNames;
+    std::set<std::string> expectAnnotationNames = {"AI3"};
+
+    for (const auto &module : file.GetModules()) {
+        if (module.IsExternal()) {
+            continue;
+        }
+        auto result = helpers::GetInterfaceByName(module, "I1");
+        ASSERT_NE(result, std::nullopt);
+        const auto &iface = result.value();
+        for (const auto &field : iface.GetFields()) {
+            for (const auto &annotation : field.GetAnnotations()) {
+                gotAnnotationNames.emplace(annotation.GetName());
+            }
+        }
+    }
+
+    ASSERT_EQ(gotAnnotationNames, expectAnnotationNames);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::enumFieldGetType, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitInspectApiFieldsTest, EnumFieldGetTypeStatic)
+{
+    abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/fields/fields_static.abc");
+
+    std::set<std::string> gotTypeNames;
+    std::set<std::string> expectTypeNames = {"fields_static.E1"};
+
+    for (const auto &module : file.GetModules()) {
+        if (module.IsExternal()) {
+            continue;
+        }
+        auto result = helpers::GetEnumByName(module, "E1");
+        ASSERT_NE(result, std::nullopt);
+        const auto &enm = result.value();
+        for (const auto &field : enm.GetFields()) {
+            if (field.GetName() == "ONE") {
+                gotTypeNames.emplace(field.GetType().GetName());
+            }
+        }
+    }
+
+    ASSERT_EQ(gotTypeNames, expectTypeNames);
 }
 
 }  // namespace libabckit::test

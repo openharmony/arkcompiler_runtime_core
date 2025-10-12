@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,51 @@ TEST_F(LibAbcKitCppMockTestType, Type_GetTypeId)
         auto t = abckit::mock::helpers::GetMockType(f);
         ASSERT_TRUE(t.GetTypeId() == DEFAULT_TYPE_ID);
         ASSERT_TRUE(CheckMockedApi("TypeGetTypeId"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
+
+// Test: test-kind=mock, api=Type::GetRank, abc-kind=ArkTS1, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockTestType, Type_GetRank)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File f(DEFAULT_PATH);
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        auto t = abckit::mock::helpers::GetMockType(f);
+        ASSERT_TRUE(t.GetRank() == DEFAULT_SIZE_T);
+        ASSERT_TRUE(CheckMockedApi("TypeGetRank"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
+
+// Test: test-kind=mock, api=Type::SetName, abc-kind=ArkTS1, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockTestType, Type_SetName)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File f(DEFAULT_PATH);
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        auto t = abckit::mock::helpers::GetMockType(f);
+        t.SetName(DEFAULT_STRING);
+        ASSERT_TRUE(CheckMockedApi("TypeSetName"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
+
+// Test: test-kind=mock, api=Type::SetRank, abc-kind=ArkTS1, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockTestType, Type_SetRank)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File f(DEFAULT_PATH);
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        auto t = abckit::mock::helpers::GetMockType(f);
+        t.SetRank(DEFAULT_SIZE_T);
+        ASSERT_TRUE(CheckMockedApi("TypeSetRank"));
     }
     ASSERT_TRUE(CheckMockedApi("CloseFile"));
     ASSERT_TRUE(CheckMockedStackEmpty());

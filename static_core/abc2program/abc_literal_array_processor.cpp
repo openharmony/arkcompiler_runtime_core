@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -110,6 +110,8 @@ void AbcLiteralArrayProcessor::GetLiteralArray(pandasm::LiteralArray *litArray, 
     literalDataAccessor_->EnumerateLiteralVals(
         index, [this, litArray](const panda_file::LiteralDataAccessor::LiteralValue &value,
                                 const panda_file::LiteralTag &tag) {
+            litArray->literals.emplace_back(
+                pandasm::LiteralArray::Literal {panda_file::LiteralTag::TAGVALUE, static_cast<uint8_t>(tag)});
             switch (tag) {
                 case panda_file::LiteralTag::ARRAY_U1: {
                     FillLiteralArrayData<bool>(litArray, tag, value);

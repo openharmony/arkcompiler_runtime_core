@@ -14,14 +14,38 @@
  */
 
 #include "abc_annotation_processor.h"
+#include "abc_file_utils.h"
 #include "abc_literal_array_processor.h"
-#include "file-inl.h"
+#include "abc_method_processor.h"
+#include "libpandafile/file-inl.h"
+#include "libpandafile/class_data_accessor.h"
+#include "libpandafile/method_data_accessor.h"
 
 namespace ark::abc2program {
 
 AbcAnnotationProcessor::AbcAnnotationProcessor(panda_file::File::EntityId entityId, Abc2ProgramKeyData &keyData,
                                                pandasm::Record &record)
-    : AbcFileEntityProcessor(entityId, keyData), record_(record)
+    : AbcFileEntityProcessor(entityId, keyData), target_(&record)
+{
+    annotationDataAccessor_ = std::make_unique<panda_file::AnnotationDataAccessor>(*file_, entityId);
+    std::string stringId = keyData.GetAbcStringTable().GetStringById(annotationDataAccessor_->GetClassId());
+    annotationName_ = pandasm::Type::FromDescriptor(stringId).GetName();
+    std::replace(annotationName_.begin(), annotationName_.end(), '/', '.');
+}
+
+AbcAnnotationProcessor::AbcAnnotationProcessor(panda_file::File::EntityId entityId, Abc2ProgramKeyData &keyData,
+                                               pandasm::Function &function)
+    : AbcFileEntityProcessor(entityId, keyData), target_(&function)
+{
+    annotationDataAccessor_ = std::make_unique<panda_file::AnnotationDataAccessor>(*file_, entityId);
+    std::string stringId = keyData.GetAbcStringTable().GetStringById(annotationDataAccessor_->GetClassId());
+    annotationName_ = pandasm::Type::FromDescriptor(stringId).GetName();
+    std::replace(annotationName_.begin(), annotationName_.end(), '/', '.');
+}
+
+AbcAnnotationProcessor::AbcAnnotationProcessor(panda_file::File::EntityId entityId, Abc2ProgramKeyData &keyData,
+                                               pandasm::Field &field)
+    : AbcFileEntityProcessor(entityId, keyData), target_(&field)
 {
     annotationDataAccessor_ = std::make_unique<panda_file::AnnotationDataAccessor>(*file_, entityId);
     std::string stringId = keyData.GetAbcStringTable().GetStringById(annotationDataAccessor_->GetClassId());
@@ -44,7 +68,16 @@ void AbcAnnotationProcessor::FillAnnotation()
     pandasm::AnnotationData annotationData(annotationName_, elements);
     std::vector<pandasm::AnnotationData> annotations;
     annotations.emplace_back(std::move(annotationData));
-    record_.metadata->AddAnnotations(annotations);
+    if (std::holds_alternative<pandasm::Record *>(target_)) {
+        auto *record = std::get<pandasm::Record *>(target_);
+        record->metadata->AddAnnotations(annotations);
+    } else if (std::holds_alternative<pandasm::Function *>(target_)) {
+        auto *function = std::get<pandasm::Function *>(target_);
+        function->metadata->AddAnnotations(annotations);
+    } else if (std::holds_alternative<pandasm::Field *>(target_)) {
+        auto *field = std::get<pandasm::Field *>(target_);
+        field->metadata->AddAnnotations(annotations);
+    }
 }
 
 void AbcAnnotationProcessor::FillLiteralArrayAnnotation(std::vector<pandasm::AnnotationElement> &elements,
@@ -75,9 +108,41 @@ std::optional<pandasm::AnnotationElement> AbcAnnotationProcessor::CreateAnnotati
             auto value = static_cast<uint8_t>(annotationDataAccessorElem.GetScalarValue().Get<bool>());
             return CreateAnnoElem<pandasm::Value::Type::U1, uint8_t>(annotationElemName, value);
         }
+        case pandasm::Value::Type::U8: {
+            auto value = annotationDataAccessorElem.GetScalarValue().Get<uint8_t>();
+            return CreateAnnoElem<pandasm::Value::Type::U8, uint8_t>(annotationElemName, value);
+        }
+        case pandasm::Value::Type::U16: {
+            auto value = annotationDataAccessorElem.GetScalarValue().Get<uint16_t>();
+            return CreateAnnoElem<pandasm::Value::Type::U16, uint16_t>(annotationElemName, value);
+        }
         case pandasm::Value::Type::U32: {
             auto value = annotationDataAccessorElem.GetScalarValue().Get<uint32_t>();
             return CreateAnnoElem<pandasm::Value::Type::U32, uint32_t>(annotationElemName, value);
+        }
+        case pandasm::Value::Type::U64: {
+            auto value = annotationDataAccessorElem.GetScalarValue().Get<uint64_t>();
+            return CreateAnnoElem<pandasm::Value::Type::U64, uint64_t>(annotationElemName, value);
+        }
+        case pandasm::Value::Type::I8: {
+            auto value = annotationDataAccessorElem.GetScalarValue().Get<int8_t>();
+            return CreateAnnoElem<pandasm::Value::Type::I8, int8_t>(annotationElemName, value);
+        }
+        case pandasm::Value::Type::I16: {
+            auto value = annotationDataAccessorElem.GetScalarValue().Get<int16_t>();
+            return CreateAnnoElem<pandasm::Value::Type::I16, int16_t>(annotationElemName, value);
+        }
+        case pandasm::Value::Type::I32: {
+            auto value = annotationDataAccessorElem.GetScalarValue().Get<int32_t>();
+            return CreateAnnoElem<pandasm::Value::Type::I32, int32_t>(annotationElemName, value);
+        }
+        case pandasm::Value::Type::I64: {
+            auto value = annotationDataAccessorElem.GetScalarValue().Get<int64_t>();
+            return CreateAnnoElem<pandasm::Value::Type::I64, int64_t>(annotationElemName, value);
+        }
+        case pandasm::Value::Type::F32: {
+            auto value = annotationDataAccessorElem.GetScalarValue().Get<float>();
+            return CreateAnnoElem<pandasm::Value::Type::F32, float>(annotationElemName, value);
         }
         case pandasm::Value::Type::F64: {
             auto value = annotationDataAccessorElem.GetScalarValue().Get<double>();
@@ -97,12 +162,49 @@ std::optional<pandasm::AnnotationElement> AbcAnnotationProcessor::CreateAnnotati
             return CreateAnnoElem<pandasm::Value::Type::LITERALARRAY, std::string>(annotationElemName, name);
         }
         case pandasm::Value::Type::RECORD: {
-            // NOTE: Annotations are not fully supported #25313
-            return std::nullopt;
+            // NOTE: Annotations are not fully supported #20663
+            auto value = annotationDataAccessorElem.GetScalarValue().Get<uint32_t>();
+            panda_file::File::EntityId entityId(value);
+
+            // Check the entity type
+            EntityType entityType = AbcFileUtils::GetEntityType(*file_, entityId);
+            // Try to get class information if it's a class
+            if (entityType == EntityType::CLASS) {
+                panda_file::ClassDataAccessor cda(*file_, entityId);
+                auto nameData = file_->GetStringData(cda.GetClassId());
+                std::string className = keyData_.GetAbcStringTable().StringDataToString(nameData);
+                std::replace(className.begin(), className.end(), '/', '.');
+
+                auto recordType = pandasm::Type::FromDescriptor(className);
+                return CreateAnnoElem<pandasm::Value::Type::RECORD, pandasm::Type>(annotationElemName, recordType);
+            }
+
+            return std::nullopt;  // NOTE: Annotations are not fully supported #20663
+        }
+        case pandasm::Value::Type::METHOD: {
+            auto value = annotationDataAccessorElem.GetScalarValue().Get<uint32_t>();
+            panda_file::File::EntityId entityId(value);
+
+            // Check the entity type
+            EntityType entityType = AbcFileUtils::GetEntityType(*file_, entityId);
+            // Try to get method information if it's a method
+            if (entityType == EntityType::METHOD) {
+                AbcMethodProcessor methodProcessor(entityId, keyData_);
+                std::string methodSignature = methodProcessor.GetMethodSignature();
+                return CreateAnnoElem<pandasm::Value::Type::METHOD, std::string>(annotationElemName, methodSignature);
+            }
+
+            return std::nullopt;  // NOTE: Annotations are not fully supported #20663
         }
         case pandasm::Value::Type::ARRAY: {
-            // NOTE: Annotations are not fully supported #25313
-            return std::nullopt;
+            pandasm::Value::Type cType = pandasm::Value::Type::VOID;
+            auto arrayValue = annotationDataAccessorElem.GetArrayValue();
+            if (arrayValue.GetCount() != 0) {
+                // NOTE: Annotations are not fully supported #20663
+                UNREACHABLE();
+            }
+            std::vector<pandasm::ScalarValue> values;
+            return pandasm::AnnotationElement(annotationElemName, std::make_unique<pandasm::ArrayValue>(cType, values));
         }
         default:
             UNREACHABLE();

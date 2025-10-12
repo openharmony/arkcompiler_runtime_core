@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,11 +23,11 @@
 #include <array>
 #include "libabckit/src/macros.h"
 
-#include "static_core/libpandabase/utils/bit_helpers.h"
-#include "static_core/libpandabase/os/mem.h"
-#include "static_core/libpandabase/os/filesystem.h"
-#include "static_core/libpandabase/utils/span.h"
-#include "static_core/libpandabase/utils/utf.h"
+#include "libpandabase/utils/bit_helpers.h"
+#include "libpandabase/os/mem.h"
+#include "libpandabase/os/filesystem.h"
+#include "libpandabase/utils/span.h"
+#include "libpandabase/utils/utf.h"
 
 #include <iostream>
 

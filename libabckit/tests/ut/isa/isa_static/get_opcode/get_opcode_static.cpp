@@ -55,6 +55,7 @@ void InspectIr(AbckitGraph *graph)
     inst = CheckInstAndGetNext(inst, ABCKIT_ISA_API_STATIC_OPCODE_NEWARRAY);
     inst = CheckInstAndGetNext(inst, ABCKIT_ISA_API_STATIC_OPCODE_STOREARRAY);
     inst = CheckInstAndGetNext(inst, ABCKIT_ISA_API_STATIC_OPCODE_INITOBJECT);
+    inst = CheckInstAndGetNext(inst, ABCKIT_ISA_API_STATIC_OPCODE_STOREOBJECT);
     inst = CheckInstAndGetNext(inst, ABCKIT_ISA_API_STATIC_OPCODE_STOREARRAY);
     inst = CheckInstAndGetNext(inst, ABCKIT_ISA_API_STATIC_OPCODE_LOADARRAY);
     inst = CheckInstAndGetNext(inst, ABCKIT_ISA_API_STATIC_OPCODE_LOADOBJECT);

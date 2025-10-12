@@ -898,6 +898,68 @@ extern "C" AbckitInst *IcreateIsUndefined(AbckitGraph *graph, AbckitInst *inputO
     return IcreateIsUndefinedStatic(graph, inputObj);
 }
 
+extern "C" AbckitInst *IcreateNullCheck(AbckitGraph *graph, AbckitInst *inputObj)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(inputObj, nullptr);
+
+    LIBABCKIT_WRONG_CTX(graph, inputObj->graph, nullptr);
+    LIBABCKIT_WRONG_MODE(graph, Mode::STATIC, nullptr);
+    return IcreateNullCheckStatic(graph, inputObj);
+}
+
+extern "C" AbckitInst *IcreateLoadObject(AbckitGraph *graph, AbckitInst *inputObj, AbckitCoreClassField *field)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(inputObj, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(field, nullptr);
+
+    LIBABCKIT_WRONG_CTX(graph, inputObj->graph, nullptr);
+    LIBABCKIT_WRONG_MODE(graph, Mode::STATIC, nullptr);
+    return IcreateLoadObjectStatic(graph, inputObj, field);
+}
+
+extern "C" AbckitInst *IcreateStobjObj(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1,
+                                       AbckitString *keyString)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(input0, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(input1, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(keyString, nullptr);
+
+    LIBABCKIT_WRONG_CTX(graph, input0->graph, nullptr);
+    LIBABCKIT_WRONG_CTX(graph, input1->graph, nullptr);
+    LIBABCKIT_WRONG_MODE(graph, Mode::STATIC, nullptr);
+    return IcreateStobjObjStatic(graph, input0, input1, keyString);
+}
+
+extern "C" AbckitInst *IcreateLdobjObj(AbckitGraph *graph, AbckitInst *input0, AbckitString *keyString)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(input0, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(keyString, nullptr);
+
+    LIBABCKIT_WRONG_CTX(graph, input0->graph, nullptr);
+    LIBABCKIT_WRONG_MODE(graph, Mode::STATIC, nullptr);
+    return IcreateLdobjObjStatic(graph, input0, keyString);
+}
+
 AbckitIsaApiStatic g_isaApiStaticImpl = {
 
     IgetClass,
@@ -956,6 +1018,10 @@ AbckitIsaApiStatic g_isaApiStaticImpl = {
     IcreateXorI,
     IcreateThrow,
     IcreateIsUndefined,
+    IcreateNullCheck,
+    IcreateLoadObject,
+    IcreateStobjObj,
+    IcreateLdobjObj,
 };
 
 }  // namespace libabckit

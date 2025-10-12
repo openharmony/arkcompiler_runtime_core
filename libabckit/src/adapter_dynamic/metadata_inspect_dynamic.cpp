@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -130,10 +130,29 @@ AbckitGraph *CreateGraphFromFunctionDynamic(AbckitCoreFunction *function)
     auto *file = function->owningModule->file;
     auto program = function->owningModule->file->GetDynamicProgram();
 
-    auto maps = std::make_unique<pandasm::AsmEmitter::PandaFileToPandaAsmMaps>();
-    auto pf = EmitDynamicProgram(file, program, maps.get(), true);
+    pandasm::AsmEmitter::PandaFileToPandaAsmMaps *maps;
+    panda_file::File *pf = nullptr;
+    if (function->owningModule->file->needOptimize && file->generateStatus.generated) {
+        maps = static_cast<pandasm::AsmEmitter::PandaFileToPandaAsmMaps *>(file->generateStatus.maps);
+        pf = static_cast<panda_file::File *>(file->generateStatus.pf);
+    } else {
+        if (file->generateStatus.pf != nullptr) {
+            delete static_cast<panda_file::File *>(file->generateStatus.pf);
+        }
+        if (file->generateStatus.maps != nullptr) {
+            delete static_cast<pandasm::AsmEmitter::PandaFileToPandaAsmMaps *>(file->generateStatus.maps);
+        }
+
+        maps = new pandasm::AsmEmitter::PandaFileToPandaAsmMaps();
+        pf = const_cast<panda_file::File *>(EmitDynamicProgram(file, program, maps, true));
+    }
+
     if (pf == nullptr) {
         return nullptr;
+    }
+
+    if (function->owningModule->file->needOptimize) {
+        file->generateStatus = {true, pf, maps};
     }
 
     uint32_t functionOffset = 0;
@@ -142,9 +161,13 @@ AbckitGraph *CreateGraphFromFunctionDynamic(AbckitCoreFunction *function)
             functionOffset = id;
         }
     }
+
     if (functionOffset == 0) {
         LIBABCKIT_LOG(DEBUG) << "functionOffset == 0\n";
         statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        if (!function->owningModule->file->needOptimize) {
+            delete maps;
+        }
         return nullptr;
     }
 
@@ -153,8 +176,8 @@ AbckitGraph *CreateGraphFromFunctionDynamic(AbckitCoreFunction *function)
 
     auto *wpf = new FileWrapper(reinterpret_cast<const void *>(pf));
     auto graph = GraphWrapper::BuildGraphDynamic(wpf, irInterface, file, functionOffset);
-    if (graph == nullptr) {
-        return nullptr;
+    if (!function->owningModule->file->needOptimize) {
+        delete maps;
     }
     if (statuses::GetLastError() != AbckitStatus::ABCKIT_STATUS_NO_ERROR) {
         return nullptr;
@@ -547,7 +570,7 @@ AbckitType *ValueGetTypeDynamic(AbckitValue *value)
             LIBABCKIT_UNIMPLEMENTED;
     }
     // NOTE implement logic for classes
-    return GetOrCreateType(value->file, id, 0, nullptr);
+    return GetOrCreateType(value->file, id, 0, nullptr, nullptr);
 }
 
 bool ValueGetU1Dynamic(AbckitValue *value)

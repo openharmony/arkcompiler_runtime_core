@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -110,7 +110,7 @@ TEST_F(LibAbcKitCreateDynamicImport, IcreateDynamicimport_2)
                   {4, ABCKIT_ISA_API_DYNAMIC_OPCODE_DEFINEFUNC, {}},
                   {5, ABCKIT_ISA_API_DYNAMIC_OPCODE_LOADSTRING, {}},
                   {6, ABCKIT_ISA_API_DYNAMIC_OPCODE_DYNAMICIMPORT, {5}},
-                  {7, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}}}},
+                  {17, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}}}},
                 {{1}, {}, {}}};
             helpers::VerifyGraph(graph, bbSchemas);
         });

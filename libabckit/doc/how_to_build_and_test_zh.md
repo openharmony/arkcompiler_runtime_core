@@ -20,21 +20,30 @@ repo forall -c 'git lfs pull'
 
 # 如何构建和测试
 
-## 构建 Linux 平台的 AbcKit
+## 构建 Linux 平台的 AbcKit,
 
 ```sh
 # debug模式
-./ark.py x64.debug abckit_packages --gn-args="is_standard_system=true abckit_enable=true"
+./ark.py x64.debug abckit_packages --gn-args="is_standard_system=true abckit_enable=true enable_cmc_gc=false"
 # release模式
-./ark.py x64.release abckit_packages --gn-args="is_standard_system=true abckit_enable=true"
+./ark.py x64.release abckit_packages --gn-args="is_standard_system=true abckit_enable=true enable_cmc_gc=false"
 ```
 
 ## 构建 Windows 平台的 AbcKit
 ```sh
 # debug模式
-./ark.py mingw_x86_64.debug abckit_packages --gn-args="is_standard_system=true abckit_enable=true"
+./ark.py mingw_x86_64.debug abckit_packages --gn-args="is_standard_system=true abckit_enable=true enable_cmc_gc=false"
 # release模式
-./ark.py mingw_x86_64.release abckit_packages --gn-args="is_standard_system=true abckit_enable=true"
+./ark.py mingw_x86_64.release abckit_packages --gn-args="is_standard_system=true abckit_enable=true enable_cmc_gc=false"
+```
+
+## 构建 macos 平台的 AbcKit （适用于ARM64架构）
+
+```sh
+# debug模式
+./ark.py mac_arm64.debug abckit_packages --gn-args="is_standard_system=true abckit_enable=true enable_cmc_gc=false"
+# release模式
+./ark.py mac_arm64.release abckit_packages --gn-args="is_standard_system=true abckit_enable=true abckit_enable_tests=true enable_cmc_gc=false"
 ```
 
 ## 构建产物的位置
@@ -53,18 +62,18 @@ repo forall -c 'git lfs pull'
 
 ```sh
 # debug模式
-./ark.py x64.debug abckit_tests --gn-args="is_standard_system=true abckit_enable=true"
+./ark.py x64.debug abckit_tests --gn-args="is_standard_system=true abckit_enable=true abckit_enable_tests=true enable_cmc_gc=false"
 # release模式
-./ark.py x64.release abckit_tests --gn-args="is_standard_system=true abckit_enable=true"
+./ark.py x64.release abckit_tests --gn-args="is_standard_system=true abckit_enable=true abckit_enable_tests=true enable_cmc_gc=false"
 ```
 
 ## 使用 Sanitizer 运行单元测试
 
 ```sh
 # debug模式
-./ark.py x64.debug abckit_tests --gn-args="is_standard_system=true abckit_enable=true libabckit_with_sanitizers=true"
+./ark.py x64.debug abckit_tests --gn-args="is_standard_system=true abckit_enable=true abckit_with_sanitizers=true abckit_enable_tests=true enable_cmc_gc=false"
 # release模式
-./ark.py x64.release abckit_tests --gn-args="is_standard_system=true abckit_enable=true libabckit_with_sanitizers=true"
+./ark.py x64.release abckit_tests --gn-args="is_standard_system=true abckit_enable=true abckit_with_sanitizers=true abckit_enable_tests=true enable_cmc_gc=false"
 ```
 
 # 如何使用 AbcKit
@@ -119,3 +128,4 @@ extern "C" int Entry(AbckitFile *file)
 ```sh
 ./arkcompiler/runtime_core/libabckit/scripts/self-check.sh --dir=/path/to/standalone/root --coverage
 ```
+
