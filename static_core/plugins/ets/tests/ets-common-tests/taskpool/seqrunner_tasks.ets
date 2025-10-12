@@ -218,8 +218,8 @@ function addDependencyExecutedTaskTest() {
     let task2 = new taskpool.Task(returnAbc);
     let runner = new taskpool.SequenceRunner();
     runner.execute(task2);
-    arktest.expectError(() => { task1.addDependency(task2) }, new Error('taskpool:: seqRunnerTask or executedTask cannot be relied on'));
-    arktest.expectError(() => { task2.addDependency(task1) }, new Error('taskpool:: seqRunnerTask or executedTask cannot addDependency'));
+    arktest.expectError(() => { task1.addDependency(task2) }, new Error('taskpool:: asyncRunnerTask or seqRunnerTask or executedTask cannot be relied on'));
+    arktest.expectError(() => { task2.addDependency(task1) }, new Error('taskpool:: asyncRunnerTask or seqRunnerTask or executedTask cannot addDependency'));
 }
 
 async function taskWithDifferentParamsTest() {

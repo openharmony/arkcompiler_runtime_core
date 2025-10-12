@@ -25,6 +25,7 @@ namespace ark::ets::intrinsics::taskpool {
 static std::atomic<EtsInt> g_taskId = 1;
 static std::atomic<EtsInt> g_taskGroupId = 1;
 static std::atomic<EtsInt> g_seqRunnerId = 1;
+static std::atomic<EtsInt> g_asyncRunnerId = 1;
 
 extern "C" EtsInt GenerateTaskId()
 {
@@ -39,6 +40,11 @@ extern "C" EtsInt GenerateGroupId()
 extern "C" EtsInt GenerateSeqRunnerId()
 {
     return g_seqRunnerId++;
+}
+
+extern "C" EtsInt GenerateAsyncRunnerId()
+{
+    return g_asyncRunnerId++;
 }
 
 extern "C" EtsBoolean IsUsingLaunchMode()
