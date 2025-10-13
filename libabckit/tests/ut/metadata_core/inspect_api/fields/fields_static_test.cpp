@@ -51,7 +51,7 @@ TEST_F(LibAbcKitInspectApiFieldsTest, ModuleFieldGetValueStatic)
 
     using FieldVal = std::variant<bool, int, double, std::string>;
     std::vector<FieldVal> gotFieldValues;
-    std::vector<FieldVal> expectFieldValues = {"Hello"};
+    std::vector<FieldVal> expectFieldValues = {std::string("Hello")};
     for (const auto &module : file.GetModules()) {
         if (module.IsExternal()) {
             continue;
@@ -140,7 +140,8 @@ TEST_F(LibAbcKitInspectApiFieldsTest, ClassFieldGetValueStatic)
     abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/fields/fields_static.abc");
     using FieldVal = std::variant<bool, int, double, std::string>;
     std::vector<FieldVal> gotClassFieldValues;
-    std::vector<FieldVal> expectClassFieldValues = {"public", "protected", "private", "static", 1, 2};
+    std::vector<FieldVal> expectClassFieldValues = {
+        std::string("public"), std::string("protected"), std::string("private"), std::string("static"), 1, 2};
     for (const auto &module : file.GetModules()) {
         if (module.IsExternal()) {
             continue;

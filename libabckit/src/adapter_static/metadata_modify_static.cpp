@@ -235,6 +235,20 @@ bool EnumFieldSetNameStatic(AbckitCoreEnumField *field, const char *newName)
     return true;
 }
 
+bool FunctionSetNameStatic(AbckitCoreFunction *function, const char *name)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    if (!ModifyNameHelper::FunctionRefreshName(function, name)) {
+        return false;
+    }
+
+    InstModifier modifier(function->owningModule->file);
+    modifier.Modify();
+
+    return true;
+}
+
 void FunctionSetGraphStatic(AbckitCoreFunction *function, AbckitGraph *graph)
 {
     LIBABCKIT_LOG_FUNC;
@@ -619,10 +633,7 @@ bool ClassFieldRemoveAnnotationStatic(AbckitArktsClassField *field, AbckitArktsA
     }
     annotations.erase(iter);
 
-    std::string annotationName(field->core->owner->owningModule->moduleName->impl.data());
-    annotationName += ".";
-    annotationName += name;
-    auto it = field->core->annotationTable.find(annotationName);
+    auto it = field->core->annotationTable.find(std::string(name));
     if (it == field->core->annotationTable.end()) {
         LIBABCKIT_LOG(ERROR) << "Can not find the annotation in annotationTable to delete\n";
         statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
@@ -1001,33 +1012,6 @@ bool InterfaceFieldRemoveAnnotationStatic(AbckitArktsInterfaceField *field, Abck
 // ========================================
 // Function
 // ========================================
-bool FunctionSetNameStatic(AbckitArktsFunction *function, const char *name)
-{
-    LIBABCKIT_LOG_FUNC;
-
-    AbckitCoreFunction *coreFunc = function->core;
-    auto *funcImpl = function->GetStaticImpl();
-    LIBABCKIT_INTERNAL_ERROR(funcImpl, false);
-
-    auto *prog = coreFunc->owningModule->file->GetStaticProgram();
-    LIBABCKIT_INTERNAL_ERROR(prog, false);
-
-    std::string oldMangleName = abckit::util::GenerateFunctionMangleName(funcImpl->name, *funcImpl);
-    std::string oldfuncNamewithModule = funcImpl->name;
-    std::string newfuncNamewithModule = abckit::util::ReplaceFunctionModuleName(oldfuncNamewithModule, name);
-    funcImpl->name = newfuncNamewithModule;
-
-    std::string newMangleName = abckit::util::GenerateFunctionMangleName(newfuncNamewithModule, *funcImpl);
-    if (!abckit::util::UpdateFunctionTableKey(prog, funcImpl, newfuncNamewithModule, oldMangleName, newMangleName)) {
-        LIBABCKIT_LOG(ERROR) << "[FunctionSetName] Failed to update function table key" << std::endl;
-        return false;
-    }
-
-    abckit::util::ReplaceInstructionIds(prog, funcImpl, oldMangleName, newMangleName);
-    abckit::util::UpdateFileMap(coreFunc->owningModule->file, oldMangleName, newMangleName);
-
-    return true;
-}
 
 bool FunctionAddParameterStatic(AbckitArktsFunction *func, AbckitArktsFunctionParam *param)
 {

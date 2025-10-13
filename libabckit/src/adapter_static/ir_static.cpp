@@ -1406,21 +1406,23 @@ void IappendInputStatic(AbckitInst *inst, AbckitInst *input)
 
 // Type helpers
 
-static AbckitType *CreateGeneralType(AbckitFile *file, AbckitTypeId typeId, AbckitCoreClass *klass)
+static AbckitType *CreateGeneralType(
+    AbckitFile *file, AbckitTypeId typeId,
+    std::variant<AbckitCoreClass *, AbckitCoreInterface *, AbckitCoreEnum *, std::nullptr_t> reference)
 {
-    return GetOrCreateType(file, typeId, 0, klass, nullptr);
+    return GetOrCreateType(file, typeId, 0, reference, nullptr);
 }
 
 AbckitType *IgetTypeStatic(AbckitInst *inst)
 {
     LIBABCKIT_LOG_FUNC;
     AbckitTypeId typeId = TypeToTypeId(inst->impl->GetType());
-    AbckitCoreClass *klass = nullptr;
+    std::variant<AbckitCoreClass *, AbckitCoreInterface *, AbckitCoreEnum *, std::nullptr_t> reference = nullptr;
     if (typeId != ABCKIT_TYPE_ID_REFERENCE) {
-        return CreateGeneralType(inst->graph->file, typeId, klass);
+        return CreateGeneralType(inst->graph->file, typeId, reference);
     }
     // Add get of ABCKIT_TYPE_ID_REFERENCE NOTE(ymolokanov)
-    return CreateGeneralType(inst->graph->file, typeId, klass);
+    return CreateGeneralType(inst->graph->file, typeId, reference);
 }
 
 AbckitTypeId IgetTargetTypeStatic(AbckitInst *inst)

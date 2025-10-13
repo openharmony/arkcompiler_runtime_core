@@ -42,35 +42,29 @@ private:
     static bool ModuleRefreshClasses(AbckitCoreModule *m);
     static bool ModuleRefreshInterfaces(AbckitCoreModule *m);
     static bool ModuleRefreshEnums(AbckitCoreModule *m);
+    static bool ModuleRefreshAnnotationInterfaces(AbckitCoreModule *m);
 
     static bool NamespaceRefreshNamespaces(AbckitCoreNamespace *ns);
     static bool NamespaceRefreshFunctions(AbckitCoreNamespace *ns);
     static bool NamespaceRefreshClasses(AbckitCoreNamespace *ns);
     static bool NamespaceRefreshInterfaces(AbckitCoreNamespace *ns);
     static bool NamespaceRefreshEnums(AbckitCoreNamespace *ns);
+    static bool NamespaceRefreshAnnotationInterfaces(AbckitCoreNamespace *ns);
 
     static bool FunctionRefreshParams(AbckitCoreFunction *function);
     static bool FunctionRefreshReturnType(AbckitCoreFunction *function);
-    static bool FunctionRefreshAnnotations(AbckitCoreFunction *function);
 
     static bool ClassRefreshMethods(AbckitCoreClass *klass);
     static bool ClassRefreshObjectLiteral(AbckitCoreClass *klass);
-    static bool ClassRefreshSubClasses(AbckitCoreClass *klass);
-    static bool ClassRefreshAnnotations(AbckitCoreClass *klass);
 
     static bool EnumRefreshMethods(AbckitCoreEnum *enm);
     static bool EnumRefreshFieldsType(AbckitCoreEnum *enm);
 
     static bool InterfaceRefreshMethods(AbckitCoreInterface *iface);
     static bool InterfaceRefreshObjectLiteral(AbckitCoreInterface *iface);
-    static bool InterfaceRefreshClasses(AbckitCoreInterface *iface);
-    static bool InterfaceRefreshAnnotations(AbckitCoreInterface *iface);
-    static bool InterfaceRefreshSubInterfaces(AbckitCoreInterface *iface);
 
-    static bool AnnotationInterfaceRefreshAnnotation(AbckitCoreAnnotationInterface *ai);
     static bool ObjectLiteralRefreshName(AbckitCoreClass *objectLiteral, const std::string &newName = "");
 
-    static bool ClassFieldRefreshAnnotations(AbckitCoreClassField *classField);
     static bool GetSetMethodRefreshName(const std::variant<AbckitCoreClass *, AbckitCoreInterface *> &object,
                                         const std::string &oldName, const std::string &newName);
     static bool InterfaceRefreshObjectLiteralField(AbckitCoreInterface *iface, const std::string &oldName,

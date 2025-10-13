@@ -29,7 +29,8 @@ public:
 
     static std::string GetFullName(
         const std::variant<AbckitCoreNamespace *, AbckitCoreClass *, AbckitCoreClassField *, AbckitCoreEnum *,
-                           AbckitCoreInterface *, AbckitCoreAnnotationInterface *, AbckitCoreFunction *> &object,
+                           AbckitCoreInterface *, AbckitCoreAnnotationInterface *, AbckitCoreFunction *,
+                           AbckitCoreAnnotation *> &object,
         const std::string &newName = "", bool isObjectLiteral = false);
 
     static std::string GetFieldFullName(const ark::pandasm::Record *owner, const ark::pandasm::Field *field);
@@ -53,6 +54,8 @@ private:
                                                       const std::string &newName = "");
 
     static std::string FunctionGetFullName(AbckitCoreFunction *function);
+
+    static std::string AnnotationGetFullName(AbckitCoreAnnotation *anno);
 
     static std::string ObjectLiteralGetFullName(const AbckitCoreClass *objectLiteral, const std::string &newName = "");
 };

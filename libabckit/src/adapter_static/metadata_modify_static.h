@@ -46,6 +46,7 @@ bool InterfaceFieldSetNameStatic(AbckitCoreInterfaceField *field, const char *ne
 bool EnumSetNameStatic(AbckitCoreEnum *enm, const char *newName);
 bool EnumFieldSetNameStatic(AbckitCoreEnumField *field, const char *newName);
 
+bool FunctionSetNameStatic(AbckitCoreFunction *function, const char *name);
 void FunctionSetGraphStatic(AbckitCoreFunction *function, AbckitGraph *graph);
 
 AbckitLiteral *FindOrCreateLiteralBoolStatic(AbckitFile *file, bool value);
@@ -110,7 +111,6 @@ bool InterfaceFieldRemoveAnnotationStatic(AbckitArktsInterfaceField *field, Abck
 // ========================================
 // Function
 // ========================================
-bool FunctionSetNameStatic(AbckitArktsFunction *function, const char *name);
 bool FunctionAddParameterStatic(AbckitArktsFunction *func, AbckitArktsFunctionParam *param);
 bool FunctionSetReturnTypeStatic(AbckitArktsFunction *func, AbckitType *type);
 bool FunctionRemoveParameterStatic(AbckitArktsFunction *func, size_t index);
