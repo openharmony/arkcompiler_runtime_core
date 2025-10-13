@@ -19,46 +19,55 @@ import {launch, CoroutineId, WorkerId} from "std/concurrency"
 import { InteropSerializeHelper } from "std/interop";
 
 export namespace taskpool {
-    const TASKPOOL_ERROR_NOT_IN_TASKPOOL: number = 10200022;
-    const TASKPOOL_ERROR_CALLBACK_NOT_REGISTERED: number = 10200024;
-    const TASKPOOL_ERROR_CIRCULAR_DEPENDENCY: number = 10200026;
-    const TASKPOOL_ERROR_DEPENDENCY_NOT_EXIST: number = 10200027;
-    const TASKPOOL_ERROR_DELAY_TIME_NEGATIVE: number = 10200028;
-    const TASKPOOL_ERROR_LISTENER_REGISTRATION: number = 10200034;
-    const TASKPOOL_ERROR_EXECUTED_TASK_ADD_DEPENDENCY: number = 10200070;
-    const TASKPOOL_ERROR_EXECUTED_TASK_REMOVE_DEPENDENCY: number = 10200071;
-    const TASKPOOL_ERROR_EXECUTED_TASK_DEPENDENCY_EXECUTE: number = 10200072;
-    const TASKPOOL_ERROR_GROUP_TASK_ADD_DEPENDENCY: number = 10200073;
-    const TASKPOOL_ERROR_GROUP_TASK_RELIED_ON: number = 10200074;
-    const TASKPOOL_ERROR_GROUP_TASK_EXECUTE_OUTSIDE: number = 10200075;
-    const TASKPOOL_ERROR_GROUP_TASK_EXECUTE_DELAYED: number = 10200076;
-    const TASKPOOL_ERROR_GROUP_TASK_ADD_GROUP: number = 10200077;
-    const TASKPOOL_ERROR_SEQ_RUNNER_EXECUTE_EXECUTED: number = 10200078;
-    const TASKPOOL_ERROR_SEQ_RUNNER_TASK_RELIED_ON: number = 10200079;
-    const TASKPOOL_ERROR_SEQ_RUNNER_TASK_EXECUTE_OUTSIDE: number = 10200080;
-    const TASKPOOL_ERROR_SEQ_RUNNER_TASK_EXECUTE_DELAYED: number = 10200081;
-    const TASKPOOL_ERROR_SEQ_RUNNER_TASK_EXECUTED: number = 10200082;
-    const TASKPOOL_ERROR_LONG_TASK_MULTIPLE_EXECUTIONS: number = 10200083;
-    const TASKPOOL_ERROR_LONG_TASK_NOT_SUPPORTED: number = 10200084;
-    const TASKPOOL_ERROR_TASK_ALREADY_EXECUTED_BASIC: number = 10200085;
-    const TASKPOOL_ERROR_TASK_ALREADY_EXECUTED_PERIODIC: number = 10200086;
-    const TASKPOOL_ERROR_TASK_ALREADY_EXECUTED_LONG: number = 10200087;
-    const TASKPOOL_ERROR_TASK_NOT_EXECUTED_TASK: number = 10200088;
-    const TASKPOOL_ERROR_TASK_NOT_EXECUTED_GROUP: number = 10200089;
-    const TASKPOOL_ERROR_DEPENDENT_TASK_EXECUTE_PERIODIC: number = 10200090;
-    const TASKPOOL_ERROR_DEPENDENT_TASK_NOT_ALLOWED: number = 10200091;
-    const TASKPOOL_ERROR_PERIODIC_TASK_EXECUTE_DELAYED: number = 10200092;
-    const TASKPOOL_ERROR_PERIODIC_TASK_EXECUTE_AGAIN: number = 10200093;
-    const TASKPOOL_ERROR_PERIODIC_TASK_NOT_SUPPORTED: number = 10200094;
-    const TASKPOOL_ERROR_PERIODIC_TASK_SEQUENCE_RUNNER: number = 10200095;
-    const TASKPOOL_ERROR_PERIOD_NEGATIVE: number = 10200096;
-    const TASKPOOL_ERROR_NO_DEPENDENCY: number = 10200097;
-    const TASKPOOL_ERROR_TASK_CANCELED: number = 10200098;
-    const TASKPOOL_ERROR_GROUP_CANCELED: number = 10200099;
-    const TASKPOOL_ERROR_SEQ_RUNNER_CANCELED: number = 10200100;
-    const TASKPOOL_ERROR_NO_PARAMS: number = 10200101;
-    const TASKPOOL_ERROR_SEQ_RUNNER_EXECUTE_GROUP: number = 10200102;
-    const TASKPOOL_ERROR_GROUP_TASK_ADD_SEQ_RUNNER: number = 10200103;
+    const TASKPOOL_ERROR_NOT_IN_TASKPOOL: int = 10200022;
+    const TASKPOOL_ERROR_CALLBACK_NOT_REGISTERED: int = 10200024;
+    const TASKPOOL_ERROR_CIRCULAR_DEPENDENCY: int = 10200026;
+    const TASKPOOL_ERROR_DEPENDENCY_NOT_EXIST: int = 10200027;
+    const TASKPOOL_ERROR_DELAY_TIME_NEGATIVE: int = 10200028;
+    const TASKPOOL_ERROR_LISTENER_REGISTRATION: int = 10200034;
+    const TASKPOOL_ERROR_EXECUTED_TASK_ADD_DEPENDENCY: int = 10200070;
+    const TASKPOOL_ERROR_EXECUTED_TASK_REMOVE_DEPENDENCY: int = 10200071;
+    const TASKPOOL_ERROR_EXECUTED_TASK_DEPENDENCY_EXECUTE: int = 10200072;
+    const TASKPOOL_ERROR_GROUP_TASK_ADD_DEPENDENCY: int = 10200073;
+    const TASKPOOL_ERROR_GROUP_TASK_RELIED_ON: int = 10200074;
+    const TASKPOOL_ERROR_GROUP_TASK_EXECUTE_OUTSIDE: int = 10200075;
+    const TASKPOOL_ERROR_GROUP_TASK_EXECUTE_DELAYED: int = 10200076;
+    const TASKPOOL_ERROR_GROUP_TASK_ADD_GROUP: int = 10200077;
+    const TASKPOOL_ERROR_SEQ_RUNNER_EXECUTE_EXECUTED: int = 10200078;
+    const TASKPOOL_ERROR_SEQ_RUNNER_OR_ASYNC_RUNNER_TASK_RELIED_ON: int = 10200079;
+    const TASKPOOL_ERROR_SEQ_RUNNER_TASK_EXECUTE_OUTSIDE: int = 10200080;
+    const TASKPOOL_ERROR_SEQ_RUNNER_TASK_EXECUTE_DELAYED: int = 10200081;
+    const TASKPOOL_ERROR_SEQ_RUNNER_TASK_EXECUTED: int = 10200082;
+    const TASKPOOL_ERROR_LONG_TASK_MULTIPLE_EXECUTIONS: int = 10200083;
+    const TASKPOOL_ERROR_LONG_TASK_NOT_SUPPORTED: int = 10200084;
+    const TASKPOOL_ERROR_TASK_ALREADY_EXECUTED_BASIC: int = 10200085;
+    const TASKPOOL_ERROR_TASK_ALREADY_EXECUTED_PERIODIC: int = 10200086;
+    const TASKPOOL_ERROR_TASK_ALREADY_EXECUTED_LONG: int = 10200087;
+    const TASKPOOL_ERROR_TASK_NOT_EXECUTED_TASK: int = 10200088;
+    const TASKPOOL_ERROR_TASK_NOT_EXECUTED_GROUP: int = 10200089;
+    const TASKPOOL_ERROR_DEPENDENT_TASK_EXECUTE_PERIODIC: int = 10200090;
+    const TASKPOOL_ERROR_DEPENDENT_TASK_NOT_ALLOWED: int = 10200091;
+    const TASKPOOL_ERROR_PERIODIC_TASK_EXECUTE_DELAYED: int = 10200092;
+    const TASKPOOL_ERROR_PERIODIC_TASK_EXECUTE_AGAIN: int = 10200093;
+    const TASKPOOL_ERROR_PERIODIC_TASK_NOT_SUPPORTED: int = 10200094;
+    const TASKPOOL_ERROR_PERIODIC_TASK_SEQUENCE_RUNNER: int = 10200095;
+    const TASKPOOL_ERROR_PERIOD_NEGATIVE: int = 10200096;
+    const TASKPOOL_ERROR_NO_DEPENDENCY: int = 10200097;
+    const TASKPOOL_ERROR_TASK_CANCELED: int = 10200098;
+    const TASKPOOL_ERROR_GROUP_CANCELED: int = 10200099;
+    const TASKPOOL_ERROR_SEQ_RUNNER_CANCELED: int = 10200100;
+    const TASKPOOL_ERROR_NO_PARAMS: int = 10200101;
+    const TASKPOOL_ERROR_SEQ_RUNNER_EXECUTE_GROUP: int = 10200102;
+    const TASKPOOL_ERROR_GROUP_TASK_ADD_SEQ_RUNNER: int = 10200103;
+    const TASKPOOL_ERROR_ASYNC_RUNNER_EXECUTE_GROUP: int = 10200104;
+    const TASKPOOL_ERROR_ASYNC_RUNNER_EXECUTE_EXECUTED: int = 10200105;
+    const TASKPOOL_ERROR_ASYNC_RUNNER_EXECUTE_SQUENCE: int = 10200106;
+    const TASKPOOL_ERROR_PERIODIC_TASK_ASYNC_RUNNER: int = 10200107;
+    const TASKPOOL_ERROR_ASYNC_RUNNER_PARAM: int = 10200108;
+    const TASKPOOL_ERROR_ASYNC_RUNNER_WAITING_QUEUE_DROPPED: int = 10200109;
+    const TASKPOOL_ERROR_ASYNC_RUNNER_CANCELED: int = 10200110;
+    const TASKPOOL_ERROR_ASYNC_RUNNER_TASK_EXECUTED: int = 10200111;
+    const TASKPOOL_ERROR_ASYNC_RUNNER_TASK_EXECUTE_DELAYED: int = 10200112;
 
     class TaskPoolWorker extends EAWorker {
         constructor(supportInterop: boolean = false) {
@@ -108,7 +117,7 @@ export namespace taskpool {
         }
 
         private notifyTaskFinished(task: Task): void {
-            // When the task is a sequenceRunner task.
+            // When the task is a sequenceRunner task or asyncRunner task.
             InternalTask.of(task).tryTriggerRunner();
 
             if (getTaskNum()) {
@@ -314,6 +323,9 @@ export namespace taskpool {
             if (this.seqId != 0) {
                 throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_TASK_EXECUTE_DELAYED, "taskpool:: seqRunnerTask cannot executeDelayed outside");
             }
+            if (this.asyncId != 0) {
+                throw new Error(TASKPOOL_ERROR_ASYNC_RUNNER_TASK_EXECUTE_DELAYED, "taskpool:: asyncRunnerTask cannot executeDelayed outside");
+            }
             if (this.isSubmitted && (this.isDependent || this.dependentTasks.size != 0)) {
                 throw new Error(TASKPOOL_ERROR_EXECUTED_TASK_DEPENDENCY_EXECUTE, "taskpool:: executedTask with dependency cannot execute again");
             }
@@ -432,6 +444,9 @@ export namespace taskpool {
             if (this.seqId != 0) {
                 throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_CANCELED, "taskpool:: sequenceRunner task has been canceled");
             }
+            if (this.asyncId != 0) {
+                throw new Error(TASKPOOL_ERROR_ASYNC_RUNNER_CANCELED, "taskpool:: asyncRunner task has been canceled");
+            }
             throw new Error(TASKPOOL_ERROR_TASK_CANCELED, "taskpool:: task has been canceled");
         }
 
@@ -458,6 +473,7 @@ export namespace taskpool {
         /**
          * @see taskpool.execute
          * @see taskpool.SequenceRunner.execute
+         * @see taskpool.AsyncRunner.execute
          */
         getOnReceivePromise(p: Promise<NullishType>): Promise<NullishType> {
             if (this.onReceiveCallback === undefined) {
@@ -485,6 +501,7 @@ export namespace taskpool {
 
         /// trigger next runner task to execute
         tryTriggerRunner(): void {
+            // handle sequenceRunner
             if (this.seqId != 0) {
                 if (this.runner.tasks.length == 0) {
                     this.runner.isRunning = false;
@@ -493,12 +510,22 @@ export namespace taskpool {
                     InternalTask.of(nextTask!).enqueue(this.runner.priority);
                 }
             }
+
+            // handle asyncRunner
+            if (this.asyncId != 0) {
+                const asyncRunner = AsyncRunnerImpl.getAsyncRunnerById(this.asyncId);
+                if (asyncRunner) {
+                    AsyncRunnerImpl.of(asyncRunner).handleTaskCompletionFromTryTriggerRunner();
+                }
+            }
         }
 
         /// id of group which contains the task, 0 means the task is not part of any group
         groupId: int = 0;
         /// id of sequence runner which ran the task, 0 means task was not ran via any sequence runner
         seqId: int = 0;
+        /// id of async runner which ran the task, 0 means task was not ran via any async runner
+        asyncId: int = 0;
         /// the task has been submitted into taskpool
         isSubmitted: boolean = false;
         /// the task depends on another task
@@ -528,6 +555,7 @@ export namespace taskpool {
         priority: Priority;
 
         private runner: SequenceRunner;
+        private runnerAsync: AsyncRunner;
 
         private onReceiveCallback?: Function;
         private dataMutex: Object = ConcurrencyHelpers.mutexCreate();
@@ -649,15 +677,15 @@ export namespace taskpool {
             if (tasks.length == 0) {
                 throw new Error(TASKPOOL_ERROR_NO_PARAMS, "taskpool:: addDependency has no params.");
             }
-            if (InternalTask.of(this).isSubmitted || InternalTask.of(this).seqId != 0) {
-                throw new Error(TASKPOOL_ERROR_EXECUTED_TASK_ADD_DEPENDENCY, "taskpool:: seqRunnerTask or executedTask cannot addDependency");
+            if (InternalTask.of(this).isSubmitted || InternalTask.of(this).seqId != 0 || InternalTask.of(this).asyncId != 0) {
+                throw new Error(TASKPOOL_ERROR_EXECUTED_TASK_ADD_DEPENDENCY, "taskpool:: asyncRunnerTask or seqRunnerTask or executedTask cannot addDependency");
             }
             if (InternalTask.of(this).groupId != 0) {
                 throw new Error(TASKPOOL_ERROR_GROUP_TASK_ADD_DEPENDENCY, "taskpool:: groupTask cannot addDependency");
             }
             for (const task: Task of tasks) {
-                if (InternalTask.of(task).isSubmitted || InternalTask.of(task).seqId != 0) {
-                    throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_TASK_RELIED_ON, "taskpool:: seqRunnerTask or executedTask cannot be relied on");
+                if (InternalTask.of(task).isSubmitted || InternalTask.of(task).seqId != 0 || InternalTask.of(this).asyncId != 0) {
+                    throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_OR_ASYNC_RUNNER_TASK_RELIED_ON, "taskpool:: asyncRunnerTask or seqRunnerTask or executedTask cannot be relied on");
                 }
                 if (InternalTask.of(task).groupId != 0) {
                     throw new Error(TASKPOOL_ERROR_GROUP_TASK_RELIED_ON, "taskpool:: groupTask cannot be relied on");
@@ -1014,6 +1042,202 @@ export namespace taskpool {
         static mutex: Object = ConcurrencyHelpers.mutexCreate();
     }
 
+    class AsyncRunnerImpl {
+        constructor(id: int, runningCapacity: int, waitingCapacity: int) {
+            this.id = id;
+            this.runningCapacity = runningCapacity;
+            this.waitingCapacity = waitingCapacity;
+            this.runningCount = 0;
+            this.waitingQueue = new Array<Task>();
+            this.implInnerMutex = ConcurrencyHelpers.mutexCreate();
+        }
+
+        static of(runner: AsyncRunner) {
+            return (runner.impl as AsyncRunnerImpl);
+        }
+
+        static getAsyncRunnerById(id: int): AsyncRunner | undefined {
+            ConcurrencyHelpers.mutexLock(AsyncRunnerImpl.implMutex);
+            let r = AsyncRunnerImpl.asyncRunners.get(id);
+            ConcurrencyHelpers.mutexUnlock(AsyncRunnerImpl.implMutex);
+            return r;
+        }
+
+        /**decrement runningCount and poll tasks from the waiting queue
+         * @see Internal.tryTriggerRunner()
+         */
+        handleTaskCompletionFromTryTriggerRunner(): void {
+            let toEnqueue: Array<Task> = new Array<Task>();
+            ConcurrencyHelpers.mutexLock(this.implInnerMutex);
+            try {
+
+                if (this.runningCount > 0) {
+                    this.runningCount--;
+                }
+                // poll tasks from the waiting queue if available
+                while (this.waitingQueue.length > 0 && this.runningCount < this.runningCapacity) {
+                    let nextTask = this.waitingQueue.shift();
+                    if (nextTask == undefined) break;
+                    this.runningCount++;
+                    toEnqueue.push(nextTask);
+                }
+            } finally {
+                ConcurrencyHelpers.mutexUnlock(this.implInnerMutex);
+            }
+
+            for (let t of toEnqueue) {
+                InternalTask.of(t).enqueue(InternalTask.of(t).priority);
+            }
+            if (toEnqueue.length > 0) {
+                notifyExecuteTask();
+            }
+        }
+
+        readonly id: int;
+        readonly runningCapacity: int;
+        readonly waitingCapacity: int;
+
+        private runner: AsyncRunner;
+
+        runningCount: int;
+        waitingQueue: Array<Task>;
+        implInnerMutex: Object;
+        static implMutex: Object = ConcurrencyHelpers.mutexCreate();
+        // Find the corresponding asyncRunner by task.asyncID
+        static asyncRunners: Map<number, AsyncRunner> = new Map<number, AsyncRunner>();
+    }
+
+    /**
+     * @class The AsyncRunner class provides an interface to create an Asyncrunner.
+     */
+    export class AsyncRunner {
+        /**
+         * Create a AsyncRunner instance.
+         * @param runningCapacity The maximum task execution capacity.
+         * @param waitingCapacity The waiting task capacity, 0 is default, means no limit on waiting task capacity.
+         */
+        constructor(runningCapacity: int, waitingCapacity?: int) {
+            this(AsyncRunner.ANONYMOUS_NAME, runningCapacity, waitingCapacity);
+        }
+
+        /**
+         * Create or get a AsyncRunner instance by name.
+         * @param name AsyncRunner's name, if name is the same, will return the same AsyncRunner.
+         * @param runningCapacity The maximum task execution capacity.
+         * @param waitingCapacity The waiting task capacity, 0 is default, means no limit on waiting task capacity.
+         */
+        constructor(name: string | undefined, runningCapacity: int, waitingCapacity?: int) {
+            const rcap: int = runningCapacity;
+            if (runningCapacity == undefined || runningCapacity <= 0) {
+                throw new Error(TASKPOOL_ERROR_ASYNC_RUNNER_PARAM, "taskpool:: runningCapacity must be a positive number");
+            }
+            const wcap: int = waitingCapacity == undefined ? 0 : waitingCapacity;
+            if (waitingCapacity != undefined && wcap < 0) {
+                throw new Error(TASKPOOL_ERROR_ASYNC_RUNNER_PARAM, "taskpool:: watingCapacity must be a non-negative number");
+            }
+
+            this.impl = AsyncRunner.getOrCreateAsyncRunnerImpl(name, rcap, wcap);
+            this.priority = Priority.MEDIUM;
+
+            ConcurrencyHelpers.lockGuard(AsyncRunner.mutex, () => {
+                AsyncRunnerImpl.asyncRunners.set(this.impl.id, this);
+            });
+        }
+
+        /**
+         * Execute a concurrent function.
+         * @param task The task to be executed
+         * @param priority Task execution priority, MEDIUM is default.
+         * @returns 
+         */
+        execute(task: Task, priority?: Priority): Promise<Any> {
+            initWorkerPool();
+            this.checkExecution(task);
+            
+            InternalTask.of(task).runnerAsync = this;
+            InternalTask.of(task).asyncId = this.impl.id; 
+            taskSubmitted(task);
+            InternalTask.of(task).isSubmitted = true;
+
+            const promise = new Promise<Any>((resolve, reject) => {
+                InternalTask.of(task).resolve = resolve;
+                InternalTask.of(task).reject = reject;
+            });
+
+            ConcurrencyHelpers.mutexLock(this.impl.implInnerMutex);
+            try {
+                if (this.impl.runningCount < this.impl.runningCapacity) {
+                    this.impl.runningCount = this.impl.runningCount + 1;
+                    InternalTask.of(task).enqueue(priority == undefined ? this.priority : priority);
+                    notifyExecuteTask();
+                } else {
+                    // If waitingCapacity == 0, treat it's waitingQueue's length as unlimited. Task is added to tail.
+                    if (this.impl.waitingCapacity == 0) {
+                        this.impl.waitingQueue.push(task);
+                    } else {
+                        if (this.impl.waitingCapacity > 0 && this.impl.waitingQueue.length >= this.impl.waitingCapacity) {
+                            // the waiting queue exceeds capacity, discard the head task.
+                            const head = this.impl.waitingQueue.shift();
+                            if (head != undefined) {
+                                if (InternalTask.of(head).reject) {
+                                    InternalTask.of(head).reject(new Error(TASKPOOL_ERROR_ASYNC_RUNNER_WAITING_QUEUE_DROPPED, "taskpool:: waiting queue dropped head"));
+                                }
+                                InternalTask.of(head).isSubmitted = false;
+                            }
+                        }
+                        this.impl.waitingQueue.push(task);
+                    }
+                }
+            } finally {
+                ConcurrencyHelpers.mutexUnlock(this.impl.implInnerMutex);
+            }
+
+            return InternalTask.of(task).getOnReceivePromise(promise);
+        }
+
+        private static native generateAsyncRunnerId(): int;
+ 
+        private static getOrCreateAsyncRunnerImpl(name: string | undefined, runningCapacity: int, waitingCapacity: int): AsyncRunnerImpl {
+            if (name == AsyncRunner.ANONYMOUS_NAME) {
+                return new AsyncRunnerImpl(AsyncRunner.generateAsyncRunnerId(), runningCapacity, waitingCapacity);
+            }
+            ConcurrencyHelpers.mutexLock(AsyncRunner.mutex);
+            let impl: AsyncRunnerImpl | undefined = AsyncRunner.namedRunners.get(name);
+            if (impl === undefined) {
+                // No asyncRunner with passed name, so create instance and set to named runners map.
+                impl = new AsyncRunnerImpl(AsyncRunner.generateAsyncRunnerId(), runningCapacity, waitingCapacity);
+                AsyncRunner.namedRunners.set(name, impl);
+            }
+            ConcurrencyHelpers.mutexUnlock(AsyncRunner.mutex);
+            return impl!;
+        }
+
+        private checkExecution(task: Task) {
+            if (InternalTask.of(task).groupId != 0) {
+                throw new Error(TASKPOOL_ERROR_ASYNC_RUNNER_EXECUTE_GROUP, "taskpool:: asyncRunner cannot execute groupTask");
+            } else if (InternalTask.of(task).isSubmitted || InternalTask.of(task).asyncId != 0) {
+                throw new Error(TASKPOOL_ERROR_ASYNC_RUNNER_EXECUTE_EXECUTED, "taskpool:: asyncRunner cannot execute executedTask");
+            } else if (InternalTask.of(task).isDependent || InternalTask.of(task).dependentTasks.size != 0) {
+                throw new Error(TASKPOOL_ERROR_DEPENDENT_TASK_NOT_ALLOWED, "taskpool:: asyncRunner dependent task not allowed.");
+            } else if (InternalTask.of(task).isPeriodicTask) {
+                throw new Error(TASKPOOL_ERROR_PERIODIC_TASK_ASYNC_RUNNER, "taskpool:: asyncRunner cannot execute the periodicTask");
+            } else if (InternalTask.of(task).isSubmitted) {
+                throw new Error(TASKPOOL_ERROR_TASK_ALREADY_EXECUTED_BASIC, "taskpool:: task has been executed");
+            } else if (InternalTask.of(task).seqId != 0) {
+                throw new Error(TASKPOOL_ERROR_ASYNC_RUNNER_EXECUTE_SQUENCE, "taskpool:: asyncRunner cannot execute seqenceRunnerTask");
+            }
+        }
+
+
+        private impl: AsyncRunnerImpl;
+        private priority: Priority;
+        private static readonly ANONYMOUS_NAME: string | undefined = undefined;
+
+        // Reuse AsyncRunner instance by a specified name
+        private static namedRunners: Map<string | undefined, AsyncRunnerImpl> = new Map<string | undefined, AsyncRunnerImpl>();
+        private static mutex: Object = ConcurrencyHelpers.mutexCreate();
+    }
+
     /**
      * @class represents internal information about task in taskpool
      */
@@ -1242,6 +1466,8 @@ export namespace taskpool {
             }
             if (InternalTask.of(task).seqId != 0) {
                 throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_TASK_EXECUTED, "taskpool:: sequenceRunner task has been executed");
+            } else if (InternalTask.of(task).asyncId != 0) {
+                throw new Error(TASKPOOL_ERROR_ASYNC_RUNNER_TASK_EXECUTED, "taskpool:: asyncRunner task has been executed")
             } else {
                 throw new Error(TASKPOOL_ERROR_TASK_NOT_EXECUTED_TASK, "taskpool:: task is not executed or has been executed");
             }
@@ -1375,6 +1601,7 @@ export namespace taskpool {
      * @brief Submit task to the taskpool on the execute method
      * @see taskpool.execute
      * @see taskpool.SequenceRunner.execute
+     * @see taskpool.AsyncRunner.execute
      * @param task submitting task
      */
     function taskSubmitted(task: Task): void {
@@ -1623,6 +1850,7 @@ export namespace taskpool {
      * @see taskpool.Task.constructor
      * @see taskpool.TaskGroup.constructor
      * @see taskpool.SequenceRunner.constructor
+     * @see taskpool.AsyncRunner.constructor
      */
     function initWorkerPool(): void {
         if (isWorkersInitialized.get() || isTaskPoolUseLaunch) {
