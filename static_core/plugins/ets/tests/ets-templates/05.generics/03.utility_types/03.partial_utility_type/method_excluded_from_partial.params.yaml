@@ -21,6 +21,7 @@ cases:
     check: |-
       let a: Partial<AC> = { i: 1.1 }
       a.foo()
+    tags: compile-only,negative
 
   - decl: |-
       class C {
@@ -30,6 +31,7 @@ cases:
     check: |-
       let a: Partial<C> = { i: 1.1 }
       a.foo()
+    tags: compile-only,negative
 
   - decl: |-
       interface I {
@@ -39,6 +41,7 @@ cases:
     check: |-
       let a: Partial<I> = { i: 1.1 }
       a.foo()
+    tags: compile-only,negative
 
   - decl: |-
       interface I {
@@ -53,6 +56,7 @@ cases:
     check: |-
       let a: Partial<A> = { i: 1.1 }
       a.foo()
+    tags: compile-only,negative
 
   - decl: |-
       interface I {
@@ -67,6 +71,7 @@ cases:
     check: |-
       let a: Partial<C> = { i: 1.1 }
       a.bar()
+    tags: compile-only,negative
 
   - decl: |-
       abstract class AC {
@@ -80,6 +85,7 @@ cases:
     check: |-
       let a: Partial<C> = { i: 1.1, j: "str2" }
       a.bar()
+    tags: compile-only,negative
 
   - decl: |-
       abstract class AC {
@@ -93,6 +99,7 @@ cases:
     check: |-
       let a: Partial<C> = { i: 1.1, j: "str2" }
       a.foo()
+    tags: compile-only,negative
 
   - decl: |-
       class A {
@@ -106,6 +113,7 @@ cases:
     check: |-
       let a: Partial<B> = { i: 1.1, j: "str2" }
       a.foo()
+    tags: compile-only,negative
 
   - decl: |-
       class A {
@@ -119,43 +127,28 @@ cases:
     check: |-
       let a: Partial<B> = { i: 1.1, j: "str2" }
       a.bar()
+    tags: compile-only,negative
 
   - decl: |-
       class C {
         _i: number|undefined
-        set i(i: number|undefined) { this._i = i; }
+        set i(i: number|undefined) { this._i = 1; }
         get i(): number|undefined { return this._i; }
       }
     check: |-
-      let a: Partial<C> = {_i: 1.9}
+      let a: Partial<C> = {i: 1.9}
       arktest.assertEQ( a.i , 1.9 )
-
-  - decl: |-
-      class C {
-        _i: number|undefined
-        set i(i: number|undefined) { this._i = i; }
-        get i(): number|undefined { return this._i; }
-      }
-    check: |-
-      let a: Partial<C> = {_i: 1.9}
-      a.i = 1.9
+      a.i = 2.1
+      arktest.assertEQ( a.i , 2.1 )
 
   - decl: |-
       abstract class C {
         _i: number|undefined
-        set i(i: number|undefined) { this._i = i; }
+        set i(i: number|undefined) { this._i = 1; }
         get i(): number|undefined { return this._i; }
       }
     check: |-
-      let a: Partial<C> = {_i: 1.9}
+      let a: Partial<C> = {i: 1.9}
       arktest.assertEQ( a.i , 1.9 )
-
-  - decl: |-
-      abstract class C {
-        _i: number|undefined
-        set i(i: number|undefined) { this._i = i; }
-        get i(): number|undefined { return this._i; }
-      }
-    check: |-
-      let a: Partial<C> = {_i: 1.9}
-      a.i = 1.9
+      a.i = 2.1
+      arktest.assertEQ( a.i , 2.1 )
