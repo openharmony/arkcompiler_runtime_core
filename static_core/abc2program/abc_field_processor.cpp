@@ -102,7 +102,7 @@ void AbcFieldProcessor::FillFieldMetaData(pandasm::Field &field)
                 file_->GetStringData(panda_file::File::EntityId(stringOffsetVal.value())).data)};
             field.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::STRING>(val));
         }
-    }  else if (field.type.GetId() == panda_file::Type::TypeId::I32) {
+    } else if (field.type.GetId() == panda_file::Type::TypeId::I32) {
         std::optional<uint32_t> intVal = fieldAccessor.GetValue<uint32_t>();
         if (intVal.has_value()) {
             field.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::I32>(intVal.value()));
