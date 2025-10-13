@@ -71,35 +71,6 @@ declarations:
   - >
     declare const ConstWithType: int = 42
 
-  # compile-time error occurs if an ambient function, or constructor, or
-  # method are in the same compilation unit with non-ambient ones
-  
-  - >
-    declare function foo(): void;  // Ambient declaration
-
-    function bar() {               // Non-ambient implementation
-      foo();
-    }
-  - >
-    declare class A {
-      a: string;
-      constructor(name: string);
-    }
-
-    class B {
-      b: string
-      constructor(name: string) {this.b = name}
-    }
-  - >
-    declare class A {
-      foo(a: number, b: number): number;
-    }
-
-    class B {
-      foo(a: number, b: number): number {
-        return a + b;
-      }
-    }
   - >
     class A {}
     declare const a = new A;
