@@ -1,5 +1,8 @@
 #30109
 ets-common-tests/atomics/concurrent_wait_store_notify.ets
 
+# 28957
+ets-common-tests/intrinsics/string_compare_to.ets
+
 #30702
 ets-common-tests/intrinsics/copyTo.ets
