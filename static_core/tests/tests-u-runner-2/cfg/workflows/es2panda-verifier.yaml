@@ -29,7 +29,7 @@ parameters:
         - "--opt-level=${parameters.opt-level}"
         - "--output=${parameters.output-file}"
     es2panda-timeout: 30
-    extension: sts
+    extension: ets
     load-runtimes: ets
     opt-level: 2
     output-file: "${parameters.work-dir}/intermediate/${test-id}.abc"

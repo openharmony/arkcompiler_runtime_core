@@ -383,9 +383,9 @@ class TestStandardFlow(Test):
         self.reproduce += test_runner.reproduce
         return passed, report, fail_kind
 
-    def __expand_last_call_macros(self, step: Step) -> list[str]:
+    def __expand_last_call_in_args(self, args: list[str]) -> list[str]:
         flags: list[str] = []
-        for arg in self.__fix_entry_point(step.args):
+        for arg in self.__fix_entry_point(args):
             flag = utils.replace_macro(str(arg), "test-id", self.test_id)
             if utils.has_macro(flag):
                 flag_expanded: str | list[str] = ""
@@ -399,6 +399,12 @@ class TestStandardFlow(Test):
                     flags.extend(flag_expanded.split())
             else:
                 flags.extend(flag.split())
+        return flags
+
+    def __expand_last_call_macros(self, step: Step) -> list[str]:
+        flags = step.args[:]
+        while utils.list_has_macros(flags):
+            flags = self.__expand_last_call_in_args(flags)
         if step.step_kind == StepKind.COMPILER and self.metadata.es2panda_options:
             if 'dynamic-ast' in self.metadata.es2panda_options:
                 index = flags.index("--dump-ast")
