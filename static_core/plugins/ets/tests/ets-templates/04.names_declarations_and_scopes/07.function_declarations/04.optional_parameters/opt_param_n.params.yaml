@@ -92,10 +92,5 @@ cases:
       call: let test = new OMO
             test.foo()
 
-    - decl: |-
-        
-        class OMO {
-
-        }
-      call: let test = new OMO
-        test.foo()
+    - decl: // If type annotation is omited and type can't be inferred, then a compile-time error occurs
+      call: 'function foo (p = {f: 1}) {}'

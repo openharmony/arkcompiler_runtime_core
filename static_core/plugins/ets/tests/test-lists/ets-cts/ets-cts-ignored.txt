@@ -88,6 +88,13 @@
 #29318
 04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/generic_array_type_as_rest.ets
 
+#30757
+04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/lambda_declaration_0.ets
+
+#30760
+04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/pointer_types_copied_0.ets
+04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/pointer_types_copied_1.ets
+
 #24448
 05.generics/01.type_parameters/03.type_parameter_variance/generic_classes/wrong_type_parameter_variance_4.ets
 
