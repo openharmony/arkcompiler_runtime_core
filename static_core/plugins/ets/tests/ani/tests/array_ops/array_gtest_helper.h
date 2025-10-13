@@ -32,8 +32,8 @@ public:
         env_->Class_FindMethod(intClass, "<ctor>", "i:", &intCtor);
         ASSERT(booleanCtor != nullptr);
         ASSERT(intCtor != nullptr);
-        env_->Class_FindMethod(booleanClass, "unboxed", ":z", &booleanUnbox);
-        env_->Class_FindMethod(intClass, "unboxed", ":i", &intUnbox);
+        env_->Class_FindMethod(booleanClass, "toBoolean", ":z", &booleanUnbox);
+        env_->Class_FindMethod(intClass, "toInt", ":i", &intUnbox);
         ASSERT(booleanUnbox != nullptr);
         ASSERT(intUnbox != nullptr);
     }

@@ -62,9 +62,9 @@ void ThrowBusinessError(ani_env *env, int code, const std::string &message);
 
 // CC-OFFNXT(G.PRE.09) function defination~, no effects.
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DEF_UNBOX_METHOD(aniType, typeName, _signature) aniType UnboxTo##typeName(ani_env *env, ani_object value);
-BOX_VALUE_LIST(DEF_UNBOX_METHOD)
-#undef DEF_UNBOX_METHOD
+#define DEF_TOTYPE_METHOD(aniType, typeName, _signature) aniType To##typeName(ani_env *env, ani_object value);
+BOX_VALUE_LIST(DEF_TOTYPE_METHOD)
+#undef DEF_TOTYPE_METHOD
 }  // namespace ark::ets::sdk::util
 
 #endif  //  PANDA_PLUGINS_ETS_SDK_NATIVE_CORE_UTIL_H

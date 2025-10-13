@@ -103,12 +103,12 @@ cases:
 
     - use: |-
           // array of primitives (int) with implicit boxing
-          for (const v: Int of [9, 8, 7, 6, 5]) res += v.unboxed()
+          for (const v: Int of [9, 8, 7, 6, 5]) res += v
           arktest.assertEQ(res, "98765")
 
     - use: |-
           // array of primitives (boolean) with implicit boxing
-          for (const v: Boolean of [false, true, true, false]) res += v.unboxed()
+          for (const v: Boolean of [false, true, true, false]) res += v
           arktest.assertEQ(res, "falsetruetruefalse")
 
     - decl: |-

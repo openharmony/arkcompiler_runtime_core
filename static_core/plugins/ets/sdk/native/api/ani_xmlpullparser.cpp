@@ -237,7 +237,7 @@ bool XmlPullParser::ParseTag(ani_env *env) const
     std::vector<ani_ref> argv {key, value};
     ani_ref returnVal {};
     env->FunctionalObject_Call(tagFunc_, argv.size(), argv.data(), &returnVal);
-    return static_cast<bool>(UnboxToBoolean(env, static_cast<ani_object>(returnVal)));
+    return static_cast<bool>(ToBoolean(env, static_cast<ani_object>(returnVal)));
 }
 
 bool XmlPullParser::ParseToken(ani_env *env) const
@@ -263,7 +263,7 @@ bool XmlPullParser::ParseToken(ani_env *env) const
     std::vector<ani_ref> argv {eTypeItem, info};
     ani_ref returnVal {};
     env->FunctionalObject_Call(tokenFunc_, argv.size(), argv.data(), &returnVal);
-    return static_cast<bool>(UnboxToBoolean(env, static_cast<ani_object>(returnVal)));
+    return static_cast<bool>(ToBoolean(env, static_cast<ani_object>(returnVal)));
 }
 
 bool XmlPullParser::ParseAttr(ani_env *env) const
@@ -274,7 +274,7 @@ bool XmlPullParser::ParseAttr(ani_env *env) const
         std::vector<ani_ref> argv {key, value};
         ani_ref returnVal {};
         env->FunctionalObject_Call(attrFunc_, argv.size(), argv.data(), &returnVal);
-        if (!static_cast<bool>(UnboxToBoolean(env, static_cast<ani_object>(returnVal)))) {
+        if (!static_cast<bool>(ToBoolean(env, static_cast<ani_object>(returnVal)))) {
             return false;
         }
     }

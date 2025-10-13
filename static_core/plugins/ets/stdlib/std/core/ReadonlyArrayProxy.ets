@@ -153,7 +153,7 @@ class ReadonlyArrayProxy<T> implements ReadonlyArray<T> {
     get length(): int {
     	const length = this.handler.get(this.target, "length")
     	if (length instanceof Int) {
-    		return length.unboxed()
+    		return length
     	}
 
         throw new TypeError("unexpected ReadonlyArray.length value type: " + Type.of(length))

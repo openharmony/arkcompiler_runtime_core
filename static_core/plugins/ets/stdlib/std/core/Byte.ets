@@ -38,15 +38,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
     }
 
     /**
-     * Returns value of this instance as a primitive
-     *
-     * @returns value of this instance
-     */
-    public unboxed(): byte {
-        return this.value;
-    }
-
-    /**
      * Returns boxed representation of the primitive
      *
      * @param value value to box

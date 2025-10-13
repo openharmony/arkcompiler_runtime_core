@@ -32,17 +32,17 @@ function testNull(): int {
 
 function testBoolean(): int {
     let booleanType = Type.of(new Boolean() as Object)
-    return test((JSON.parse<Object>("true", booleanType) as Boolean).unboxed() == true, "Boolean(true)") +
-          test((JSON.parse<Object>("false", booleanType) as Boolean).unboxed() == false, "Boolean(false)")
+    return test((JSON.parse<Object>("true", booleanType) as Boolean) == true, "Boolean(true)") +
+          test((JSON.parse<Object>("false", booleanType) as Boolean) == false, "Boolean(false)")
 }
 
 function testDouble(): int {
     let doubleType = Type.of(new Double() as Object)
-    return test((JSON.parse<Object>("0", doubleType) as Double).unboxed() == 0, "Double(0)") +
-        test((JSON.parse<Object>("1", doubleType) as Double).unboxed() == 1, "Double(1)") +
-        test((JSON.parse<Object>("-1", doubleType) as Double).unboxed() == -1, "Double(-1)") +
-        test((JSON.parse<Object>("2.72182", doubleType) as Double).unboxed() == 2.72182, "Double(2.72182)") +
-        test((JSON.parse<Object>("-2.72182", doubleType) as Double).unboxed() == -2.72182, "Double(-2.72182)")
+    return test((JSON.parse<Object>("0", doubleType) as Double) == 0, "Double(0)") +
+        test((JSON.parse<Object>("1", doubleType) as Double) == 1, "Double(1)") +
+        test((JSON.parse<Object>("-1", doubleType) as Double) == -1, "Double(-1)") +
+        test((JSON.parse<Object>("2.72182", doubleType) as Double) == 2.72182, "Double(2.72182)") +
+        test((JSON.parse<Object>("-2.72182", doubleType) as Double) == -2.72182, "Double(-2.72182)")
 }
 
 function testStringWithEscape01(): int {

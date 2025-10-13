@@ -32,7 +32,7 @@ cases:
           a = "another str"
           arktest.assertEQ( a, "another str" )
           a = new Number(3)
-          arktest.assertEQ( a.unboxed(), 3 )
+          arktest.assertEQ( a, 3 )
           a = "str"
           arktest.assertEQ( a, "str" )
           a = true
@@ -49,7 +49,7 @@ cases:
           a = "another str"
           arktest.assertEQ( a, "another str" )
           a = new Number(3)
-          arktest.assertEQ( a.unboxed(), 3 )
+          arktest.assertEQ( a, 3 )
           a = "str"
           arktest.assertEQ( a, "str" )
           a = true

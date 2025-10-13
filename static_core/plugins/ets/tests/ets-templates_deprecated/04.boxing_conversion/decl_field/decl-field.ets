@@ -29,7 +29,7 @@ class A{{loop.index}} {
 function main(): int {
 {%- for t in c['values'] %}
     let a{{loop.index}}: A{{loop.index}} = new A{{loop.index}}()
-    if (a{{loop.index}}.d.unboxed() != {{t.val}}) {
+    if (a{{loop.index}}.d != {{t.val}}) {
         return 1
     }
 {%- endfor %}

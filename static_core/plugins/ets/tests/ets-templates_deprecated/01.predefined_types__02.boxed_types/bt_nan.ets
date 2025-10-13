@@ -28,7 +28,7 @@ function main() {
     let prim{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
     boxed = new {{c.to_type}}(prim{{loop.index}})
     arktest.assertTrue( boxed.isNaN() )
-    arktest.assertTrue( {{c.to_type}}.isNaN(boxed.unboxed()) )
+    arktest.assertTrue( {{c.to_type}}.isNaN(boxed) )
 {%- endfor %}
 }
 {%- endfor %}

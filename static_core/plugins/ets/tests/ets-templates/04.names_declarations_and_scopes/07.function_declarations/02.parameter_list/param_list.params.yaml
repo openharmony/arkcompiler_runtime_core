@@ -114,4 +114,4 @@ function_decls:
           }
       call: |-
           let v: Byte = foo<Byte>(1 as byte, null, Long.MIN_VALUE, new Byte(1 as byte), new Byte(2 as byte))
-          arktest.assertTrue( v instanceof Byte && v.unboxed() == 1 )
+          arktest.assertTrue( v instanceof Byte && v == 1 )

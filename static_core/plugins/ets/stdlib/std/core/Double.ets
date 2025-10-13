@@ -83,16 +83,6 @@ export final class Double extends Floating implements Comparable<Double> {
     }
 
     /**
-     * Returns value of this instance as a primitive
-     *
-     * @returns value of this instance
-     * @tag arkts
-     */
-    public unboxed(): double {
-        return this.value;
-    }
-
-    /**
      * Returns boxed representation of the primitive
      *
      * @param value value to box

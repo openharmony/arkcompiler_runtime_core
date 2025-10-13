@@ -29,7 +29,7 @@ cases:
       assert: '[0] == Color.Red'
 
     # reference types
-    - { type: 'Byte[]', vals: '[new Byte(127 as byte), new Byte(2 as byte), new Byte(1 as byte)]', assert: '[0].unboxed() == 127' }
+    - { type: 'Byte[]', vals: '[new Byte(127 as byte), new Byte(2 as byte), new Byte(1 as byte)]', assert: '[0] == 127' }
     - { type: 'Error[]', vals: '[new Error("A"), new Error("B"), new Error("C")]', assert: '[0].message == "A"' }
     - { type: 'string[][]', vals: 'new string[2][2]; arr[1][1] = "ABC"', assert: '[1][1] == "ABC"' }
     - decl: |-

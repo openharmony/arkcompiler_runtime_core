@@ -47,15 +47,6 @@ export final class Float extends Floating implements Comparable<Float> {
     }
 
     /**
-     * Returns value of this instance as a primitive
-     *
-     * @returns value of this instance
-     */
-    public unboxed(): float {
-        return this.value;
-    }
-
-    /**
      * Returns boxed representation of the primitive
      *
      * @param value value to box
@@ -312,7 +303,7 @@ export final class Float extends Floating implements Comparable<Float> {
      * @returns result of the comparison
      */
     public override compareTo(other: Float): int {
-        return (this.value - other.unboxed()).toInt();
+        return (this.value - other).toInt();
     }
 
     /**

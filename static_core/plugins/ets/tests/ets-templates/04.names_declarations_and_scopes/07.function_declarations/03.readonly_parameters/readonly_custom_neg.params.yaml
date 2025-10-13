@@ -159,7 +159,7 @@ cases:
     
     - decl: |-
         function foo(array?: readonly [string, Number]) {
-            arktest.assertTrue(array[1].unboxed() == 2.2)
+            arktest.assertTrue(array[1] == 2.2)
         }
         foo(["str", new Number(2.2)])
 

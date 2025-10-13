@@ -23,7 +23,7 @@ function main(): void {
 {%- for t in c['values'] %}
 	let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
 	const d{{loop.index}}: {{c.to_type}} = s{{loop.index}}
-	arktest.assertTrue({{c.to_type}}.isNaN(d{{loop.index}}.unboxed()))
+	arktest.assertTrue({{c.to_type}}.isNaN(d{{loop.index}}))
 {%- endfor %}
 }
 {%- endfor %}

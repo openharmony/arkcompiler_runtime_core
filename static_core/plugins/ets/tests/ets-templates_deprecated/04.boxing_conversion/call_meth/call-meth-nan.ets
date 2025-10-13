@@ -27,7 +27,7 @@ function main(): int {
     let a: A = new A()
 {%- for t in c['values'] %}
     let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
-    if (! {{c.to_type}}.isNaN(a.meth(s{{loop.index}}).unboxed())) {
+    if (! {{c.to_type}}.isNaN(a.meth(s{{loop.index}}))) {
         return 1
     }
 {%- endfor %}

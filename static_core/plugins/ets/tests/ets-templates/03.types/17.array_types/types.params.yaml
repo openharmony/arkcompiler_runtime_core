@@ -30,7 +30,7 @@ cases:
       assert: 'arr[0] == Color.Green'
 
     # reference types
-    - { type: 'Byte[]', vals: '[new Byte((127).toByte()), new Byte((2).toByte()), new Byte((1).toByte())]', val: new Byte((42).toByte()), assert: 'arr[0].unboxed() == 42' }
+    - { type: 'Byte[]', vals: '[new Byte(127), new Byte(2), new Byte(1)]', val: new Byte(42), assert: 'arr[0] == 42' }
     - { type: 'Error[]', vals: '[new Error("A"), new Error("B"), new Error("C")]', val: new Error("D"), assert: 'arr[0].message == "D"' }
 
     # type aliases
@@ -39,7 +39,7 @@ cases:
       type: A[]
       vals: 'new A[2]'
       val: 'new Boolean(true)'
-      assert: 'arr[0] instanceof Boolean && (arr[0] as Boolean).unboxed()'
+      assert: 'arr[0] instanceof Boolean && (arr[0] as Boolean)'
 
     - decl: |-
         type A = (Object|null)[]

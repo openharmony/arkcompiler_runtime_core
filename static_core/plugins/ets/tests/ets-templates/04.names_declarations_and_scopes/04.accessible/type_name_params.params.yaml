@@ -88,70 +88,6 @@ cases:
 
   # Boxed
   - decl: |-
-      type T = Byte
-    check: |-
-      function main() {
-          let a: T = new Byte(0x7F.toByte());
-          arktest.assertEQ(foo(a).unboxed(), 0x7F.toByte());
-      }
-
-  - decl: |-
-      type T = Short
-    check: |-
-      function main() {
-          let a: T = new Short(2);
-          arktest.assertEQ(foo(a).unboxed(), new Short(2));
-      }
-
-  - decl: |-
-      type T = Int
-    check: |-
-      function main() {
-          let a: T = new Int(3);
-          arktest.assertEQ(foo(a).unboxed(), new Int(3));
-      }
-
-  - decl: |-
-      type T = Long
-    check: |-
-      function main() {
-          let a: T = new Long(4);
-          arktest.assertEQ(foo(a).unboxed(), new Long(4));
-      }
-
-  - decl: |-
-      type T = Float
-    check: |-
-      function main() {
-          let a: T = new Float(0.1);
-          arktest.assertEQ(foo(a).unboxed(), new Float(0.1));
-      }
-
-  - decl: |-
-      type T = Double
-    check: |-
-      function main() {
-          let a: T = new Double(0.1);
-          arktest.assertEQ(foo(a).unboxed(), new Double(0.1)); // Double is an alias to Number
-      }
-
-  - decl: |-
-      type T = Number
-    check: |-
-      function main() {
-          let a: T = new Number(0.1 as number);
-          arktest.assertEQ(foo(a).unboxed(), 0.1 as number);
-      }
-
-  - decl: |-
-      type T = Char
-    check: |-
-      function main() {
-          let a: T = new Char(c'b');
-          arktest.assertEQ(foo(a).unboxed(), c'b');
-      }
-
-  - decl: |-
       type T = string
     check: |-
       function main() {
@@ -165,14 +101,6 @@ cases:
       function main() {
           let a: T = new String("some string");
           arktest.assertEQ(foo(a), "some string");
-      }
-
-  - decl: |-
-      type T = Boolean
-    check: |-
-      function main() {
-          let a: T = new Boolean(false);
-          arktest.assertEQ(foo(a).unboxed(), false);
       }
 
     # Custom
@@ -196,8 +124,8 @@ cases:
           arktest.assertEQ(a.length, b.length);
           arktest.assertEQ(a[0].length, b[0].length);
           arktest.assertEQ(a[1].length, b[1].length);
-          arktest.assertEQ(a[0][0].unboxed(), b[0][0].unboxed());
-          arktest.assertEQ(a[1][0].unboxed(), b[1][0].unboxed());
+          arktest.assertEQ(a[0][0], b[0][0]);
+          arktest.assertEQ(a[1][0], b[1][0]);
       }
 
   - decl: |-

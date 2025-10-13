@@ -1580,7 +1580,7 @@ export final class String extends Object implements Comparable<String>, Iterable
         let result = ''
         let arrayMatchPositions = matchPositions.toArray()
         for (let i = 0; i < arrayMatchPositions.length; ++i) {
-            let p = arrayMatchPositions[i].unboxed()
+            let p = arrayMatchPositions[i]
             let preserved = this.substring(endOfLastMatch, p)
             let replacement = String.getSubstitution(searchValue, this, p, new String[0], undefined, replaceValue)
             result = result + preserved + replacement
@@ -1632,7 +1632,7 @@ export final class String extends Object implements Comparable<String>, Iterable
         let result = ''
         let arrayMatchPositions = matchPositions.toArray()
         for (let i = 0; i < arrayMatchPositions.length; ++i) {
-            let p = arrayMatchPositions[i].unboxed()
+            let p = arrayMatchPositions[i]
             let preserved = this.substring(endOfLastMatch, p)
             let args = new containers.UndefinableObjectArray(2)
             args.pushBack(Double.valueOf(p))

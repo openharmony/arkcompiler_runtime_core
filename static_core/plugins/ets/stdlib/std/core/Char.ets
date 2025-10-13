@@ -40,15 +40,6 @@ export final class Char extends Object implements Comparable<Char> {
     }
 
     /**
-     * unboxed() returns an underlying primitive char.
-     *
-     * @returns the underlying primitive char.
-     */
-    public unboxed(): char {
-        return this.value;
-    }
-
-    /**
      * valueOf(char) creates a Char object from a primitive char.
      * This method is preferred over {@link <constructor(char)>} since this method can use a cached Char object,
      * i.e. this method might be more efficient.
@@ -104,7 +95,7 @@ export final class Char extends Object implements Comparable<Char> {
      * @returns comparison result of the underlying chars.
      */
     public static compare(lhs: Char, rhs: Char): boolean {
-        return (lhs.unboxed() == rhs.unboxed());
+        return (lhs == rhs);
     }
 
     /**

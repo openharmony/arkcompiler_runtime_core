@@ -189,6 +189,41 @@ std::pair<pandasm::Record &, bool> TypeCreatorCtx::AddPandasmRecord(pandasm::Rec
     return {iter->second, inserted};
 }
 
+void AssignTypeName(const std::string &primTypeName, std::string &objectTypeName, std::string &rawTypeName)
+{
+    if (primTypeName == "u1") {
+        objectTypeName += "Boolean";
+        rawTypeName = "Boolean";
+    } else if (primTypeName == "i8") {
+        objectTypeName += "Byte";
+        rawTypeName = "Byte";
+    } else if (primTypeName == "i16") {
+        objectTypeName += "Short";
+        rawTypeName = "Short";
+    } else if (primTypeName == "i32") {
+        objectTypeName += "Int";
+        rawTypeName = "Int";
+    } else if (primTypeName == "i64") {
+        objectTypeName += "Long";
+        rawTypeName = "Long";
+    } else if (primTypeName == "u16") {
+        objectTypeName += "Char";
+        rawTypeName = "Char";
+    } else if (primTypeName == "void") {
+        objectTypeName += "Void";
+        rawTypeName = "Void";
+    } else if (primTypeName == "f32") {
+        objectTypeName += "Float";
+        rawTypeName = "Float";
+    } else if (primTypeName == "f64") {
+        objectTypeName += "Double";
+        rawTypeName = "Double";
+    } else {
+        UNREACHABLE();
+    }
+    return;
+}
+
 const std::pair<std::string, std::string> &TypeCreatorCtx::DeclarePrimitive(const std::string &primTypeName)
 {
     if (auto found = primitiveTypesCtorDtor_.find(primTypeName); found != primitiveTypesCtorDtor_.end()) {
@@ -198,27 +233,9 @@ const std::pair<std::string, std::string> &TypeCreatorCtx::DeclarePrimitive(cons
     auto primType = pandasm::Type {primTypeName, 0};
 
     std::string objectTypeName {typeapi_create_consts::TYPE_BOXED_PREFIX};
-    if (primTypeName == "u1") {
-        objectTypeName += "Boolean";
-    } else if (primTypeName == "i8") {
-        objectTypeName += "Byte";
-    } else if (primTypeName == "i16") {
-        objectTypeName += "Short";
-    } else if (primTypeName == "i32") {
-        objectTypeName += "Int";
-    } else if (primTypeName == "i64") {
-        objectTypeName += "Long";
-    } else if (primTypeName == "u16") {
-        objectTypeName += "Char";
-    } else if (primTypeName == "void") {
-        objectTypeName += "Void";
-    } else if (primTypeName == "f32") {
-        objectTypeName += "Float";
-    } else if (primTypeName == "f64") {
-        objectTypeName += "Double";
-    } else {
-        UNREACHABLE();
-    }
+    std::string rawTypeName {};
+    AssignTypeName(primTypeName, objectTypeName, rawTypeName);
+
     AddRefTypeAsExternal(objectTypeName);
     auto objectType = pandasm::Type {objectTypeName, 0};
 
@@ -229,14 +246,14 @@ const std::pair<std::string, std::string> &TypeCreatorCtx::DeclarePrimitive(cons
     ctor.GetFn().metadata->SetAttribute(typeapi_create_consts::ATTR_CTOR);
     ctor.Create();
 
-    PandasmMethodCreator unboxed {objectTypeName + ".unboxed", this};
-    unboxed.AddParameter(objectType);
-    unboxed.AddResult(primType);
-    unboxed.GetFn().metadata->SetAttribute(typeapi_create_consts::ATTR_EXTERNAL);
-    unboxed.Create();
+    PandasmMethodCreator toType {objectTypeName + ".to" + rawTypeName, this};
+    toType.AddParameter(objectType);
+    toType.AddResult(primType);
+    toType.GetFn().metadata->SetAttribute(typeapi_create_consts::ATTR_EXTERNAL);
+    toType.Create();
 
     return primitiveTypesCtorDtor_
-        .emplace(primTypeName, std::make_pair(ctor.GetFunctionName(), unboxed.GetFunctionName()))
+        .emplace(primTypeName, std::make_pair(ctor.GetFunctionName(), toType.GetFunctionName()))
         .first->second;
 }
 

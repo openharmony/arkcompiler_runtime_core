@@ -18,6 +18,4 @@ package std.core;
 export final class Void {
     static readonly void_instance = new Void();
     private constructor() { }
-
-    public unboxed(): void {}
 }
