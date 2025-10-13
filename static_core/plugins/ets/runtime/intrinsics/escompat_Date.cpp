@@ -24,7 +24,7 @@ namespace ark::ets::intrinsics {
 
 constexpr const int32_t MS_IN_MINUTES = 60000;
 
-extern "C" double EscompatDateNow()
+extern "C" int64_t EscompatDateNow()
 {
     auto now = std::chrono::system_clock::now();
     auto nowMs = std::chrono::time_point_cast<std::chrono::milliseconds>(now);

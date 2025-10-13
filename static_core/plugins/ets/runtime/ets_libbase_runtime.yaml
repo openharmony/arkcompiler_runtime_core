@@ -1496,7 +1496,7 @@ intrinsics:
     method_name: now
     static: true
     signature:
-      ret: f64
+      ret: i64
       args: []
     impl: ark::ets::intrinsics::EscompatDateNow
 

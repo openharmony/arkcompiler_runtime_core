@@ -568,7 +568,7 @@ export final class Console {
             this.warn("⚠️ Warning: Label 'default' already exists for console.time()")
             return
         }
-        const start = Date.now().toLong()
+        const start = Date.now()
         this.timers.set(key, start)
     }
 
@@ -593,7 +593,7 @@ export final class Console {
             result += " ";
             result += arguments[i].toString();
         }
-        const end = Date.now().toLong()
+        const end = Date.now()
         const duration = end - startTime
         this.log(`${key}: ${duration}ms ${result}`)
     }

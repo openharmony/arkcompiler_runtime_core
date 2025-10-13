@@ -260,11 +260,11 @@ private:
     void RegisterDate()
     {
         static const ets_proxy::EtsClassWrapper::OverloadsMap W_DATE_OVERLOADS = {
-            {utf::CStringAsMutf8("setDate"), {"D:D", 2, "setDate"}},
-            {utf::CStringAsMutf8("setUTCDate"), {"D:D", 2, "setUTCDate"}},
-            {utf::CStringAsMutf8("setMilliseconds"), {"D:D", 2, "setMilliseconds"}},
-            {utf::CStringAsMutf8("setUTCMilliseconds"), {"D:D", 2, "setUTCMilliseconds"}},
-            {utf::CStringAsMutf8("setTime"), {"J:V", 2, "setTime"}},
+            {utf::CStringAsMutf8("setDate"), {"I:J", 2, "setDate"}},
+            {utf::CStringAsMutf8("setUTCDate"), {"I:J", 2, "setUTCDate"}},
+            {utf::CStringAsMutf8("setMilliseconds"), {"I:J", 2, "setMilliseconds"}},
+            {utf::CStringAsMutf8("setUTCMilliseconds"), {"I:J", 2, "setUTCMilliseconds"}},
+            {utf::CStringAsMutf8("setTime"), {"J:J", 2, "setTime"}},
         };
         wDate_ = RegisterClassWithLeafMatcher(descriptors::DATE, "Date", &W_DATE_OVERLOADS);
     }
