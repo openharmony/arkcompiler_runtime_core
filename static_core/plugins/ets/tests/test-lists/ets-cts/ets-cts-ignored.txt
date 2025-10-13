@@ -66,6 +66,10 @@
 #29681 union causes TypeError with literal type
 03.types/16.literal_types/infer_from_union2.ets
 
+#30677
+03.types/19.function_types/01.type_function/optional_type_params_0.ets
+03.types/19.function_types/01.type_function/optional_type_params_2.ets
+
 #24649
 04.names_declarations_and_scopes/03.scopes/type_param_class_neg_3.ets
 

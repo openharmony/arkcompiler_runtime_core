@@ -668,6 +668,10 @@
 03.types/19.function_types/incorrect_function_name_71.ets
 03.types/19.function_types/incorrect_function_name_8.ets
 03.types/19.function_types/incorrect_function_name_9.ets
+03.types/19.function_types/optional_parameters/optional_neg_8.ets
+03.types/19.function_types/optional_parameters/optional_neg_9.ets
+03.types/19.function_types/optional_parameters/optional_neg_10.ets
+03.types/19.function_types/optional_parameters/optional_neg_11.ets
 03.types/20.union_types/01.union_types_normalization/norm_38.ets
 03.types/20.union_types/01.union_types_normalization/norm_39.ets
 03.types/20.union_types/01.union_types_normalization/norm_41.ets
