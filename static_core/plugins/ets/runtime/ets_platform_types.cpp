@@ -255,12 +255,12 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     findMethod(&EtsPlatformTypes::coreReflectProxyInvokeSet, coreReflectProxy, "invokeSet", nullptr, true);
     findMethod(&EtsPlatformTypes::coreReflectProxyInvokeGet, coreReflectProxy, "invokeGet", nullptr, true);
 
-    findType(&EtsPlatformTypes::escompatProcess, PROCESS);
-    findMethod(&EtsPlatformTypes::escompatProcessListUnhandledJobs, escompatProcess, "listUnhandledJobs",
+    findType(&EtsPlatformTypes::coreProcess, PROCESS);
+    findMethod(&EtsPlatformTypes::coreProcessListUnhandledJobs, coreProcess, "listUnhandledJobs", "Lescompat/Array;:V",
+               true);
+    findMethod(&EtsPlatformTypes::coreProcessListUnhandledPromises, coreProcess, "listUnhandledPromises",
                "Lescompat/Array;:V", true);
-    findMethod(&EtsPlatformTypes::escompatProcessListUnhandledPromises, escompatProcess, "listUnhandledPromises",
-               "Lescompat/Array;:V", true);
-    findMethod(&EtsPlatformTypes::escompatProcessHandleUncaughtError, escompatProcess, "HandleUncaughtError",
+    findMethod(&EtsPlatformTypes::coreProcessHandleUncaughtError, coreProcess, "HandleUncaughtError",
                "Lstd/core/Object;:V", true);
 
     findType(&EtsPlatformTypes::stdcoreRegExpExecArray, REG_EXP_EXEC_ARRAY);

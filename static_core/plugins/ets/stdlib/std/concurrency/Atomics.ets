@@ -12,9 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package escompat;
-
-import { launch } from "std/concurrency"
+package std.concurrency;
 
 class Waiter {
     public static okStatus: string = "ok";
@@ -76,9 +74,9 @@ class Waiter {
 }
 
 /**
- * This class implements basic atomic operations
+ * Basic atomic operations
  */
-export class Atomics {
+export namespace Atomics {
 
     /**
      * Checks if atomics implementation uses hardware atomic instructions instead of locks
@@ -90,7 +88,7 @@ export class Atomics {
      * @returns { boolean } true if Atomic operations for typed arrays where "BYTER_PER_ELEMENT == byteSize"
      *     use hardware atomics instructions instead of locks.
      */
-    public static isLockFree(byteSize: int): boolean {
+    export function isLockFree(byteSize: int): boolean {
         return byteSize == 1 || byteSize == 2 || byteSize == 4 || byteSize == 8
     }
 
@@ -102,7 +100,7 @@ export class Atomics {
      * @param { number } value value to add to current value
      * @returns { number } current value before the operation
      */
-    public static add(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: number, value: number): number {
+    export function add(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: number, value: number): number {
         let buffer = typedArray.buffer
         let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt();
@@ -131,7 +129,7 @@ export class Atomics {
      * @param { bigint } value value to add to current value
      * @returns { bigint } current value before the operation
      */
-    public static add(typedArray: BigInt64Array | BigUint64Array, index: number, value: bigint): bigint {
+    export function add(typedArray: BigInt64Array | BigUint64Array, index: number, value: bigint): bigint {
         let buffer = typedArray.buffer
         let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
@@ -152,7 +150,7 @@ export class Atomics {
      * @param { number } value value to perform bitwise AND with current value
      * @returns { number } current value before the operation
      */
-    public static and(typedArray: Int8Array | Int16Array | Int32Array| Uint8Array | Uint16Array | Uint32Array, index: number, value: number): number {
+    export function and(typedArray: Int8Array | Int16Array | Int32Array| Uint8Array | Uint16Array | Uint32Array, index: number, value: number): number {
         let buffer = typedArray.buffer
         let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
@@ -181,7 +179,7 @@ export class Atomics {
      * @param { bigint } value value to perform bitwise AND with current value
      * @returns { bigint } current value before the operation
      */
-    public static and(typedArray: BigInt64Array | BigUint64Array, index: number, value: bigint): bigint {
+    export function and(typedArray: BigInt64Array | BigUint64Array, index: number, value: bigint): bigint {
         let buffer = typedArray.buffer
         let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
@@ -205,7 +203,7 @@ export class Atomics {
      * @param { number } replacementValue value to replace current value with in case of success
      * @returns { number } current value before the operation
      */
-    public static compareExchange(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: number, expectedValue: number, replacementValue: number): number {
+    export function compareExchange(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: number, expectedValue: number, replacementValue: number): number {
         let buffer = typedArray.buffer
         let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
@@ -237,7 +235,7 @@ export class Atomics {
      * @param { bigint } replacementValue value to replace current value with in case of success
      * @returns { bigint } current value before the operation
      */
-    public static compareExchange(typedArray: BigInt64Array | BigUint64Array, index: number, expectedValue: bigint, replacementValue: bigint): bigint {
+    export function compareExchange(typedArray: BigInt64Array | BigUint64Array, index: number, expectedValue: bigint, replacementValue: bigint): bigint {
         let buffer = typedArray.buffer
         let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
@@ -260,7 +258,7 @@ export class Atomics {
      * @param { number } value value to replace current value with
      * @returns { number } current value before the operation
      */
-    public static exchange(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: number, value: number): number {
+    export function exchange(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: number, value: number): number {
         let buffer = typedArray.buffer
         let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
@@ -290,7 +288,7 @@ export class Atomics {
      * @param { bigint } value value to replace current value with
      * @returns { bigint } current value before the operation
      */
-    public static exchange(typedArray: BigInt64Array | BigUint64Array, index: number, value: bigint): bigint {
+    export function exchange(typedArray: BigInt64Array | BigUint64Array, index: number, value: bigint): bigint {
         let buffer = typedArray.buffer
         let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
@@ -310,7 +308,7 @@ export class Atomics {
      * @param  { number } index index of current value in the typedArray
      * @returns { number } current value
      */
-    public static load(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: number): number {
+    export function load(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: number): number {
         let buffer = typedArray.buffer
         let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
@@ -338,7 +336,7 @@ export class Atomics {
      * @param  { number } index index of current value in the typedArray
      * @returns { bigint } current value
      */
-    public static load(typedArray: BigInt64Array, index: number): bigint {
+    export function load(typedArray: BigInt64Array, index: number): bigint {
         let buffer = typedArray.buffer
         let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
@@ -352,7 +350,7 @@ export class Atomics {
      * @param  { number } index index of current value in the typedArray
      * @returns { bigint } current value
      */
-    public static load(typedArray: BigUint64Array, index: number): bigint {
+    export function load(typedArray: BigUint64Array, index: number): bigint {
         let buffer = typedArray.buffer
         let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
@@ -367,7 +365,7 @@ export class Atomics {
      * @param { number } value value to perform bitwise OR with current value
      * @returns { number } current value before the operation
      */
-    public static or(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: number, value: number): number {
+    export function or(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: number, value: number): number {
         let buffer = typedArray.buffer
         let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
@@ -396,7 +394,7 @@ export class Atomics {
      * @param { bigint } value value to perform bitwise OR with current value
      * @returns { bigint } current value before the operation
      */
-    public static or(typedArray: BigInt64Array | BigUint64Array, index: number, value: bigint): bigint {
+    export function or(typedArray: BigInt64Array | BigUint64Array, index: number, value: bigint): bigint {
         let buffer = typedArray.buffer
         let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
@@ -417,7 +415,7 @@ export class Atomics {
      * @param { number } value new value
      * @returns { number } new value
      */
-    public static store(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: number, value: number): number {
+    export function store(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: number, value: number): number {
         let buffer = typedArray.buffer
         let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
@@ -446,7 +444,7 @@ export class Atomics {
      * @param { bigint } value new value
      * @returns { bigint } new value
      */
-    public static store(typedArray: BigInt64Array | BigUint64Array, index: number, value: bigint): bigint {
+    export function store(typedArray: BigInt64Array | BigUint64Array, index: number, value: bigint): bigint {
         let buffer = typedArray.buffer
         let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
@@ -467,7 +465,7 @@ export class Atomics {
      * @param { number } value value to subtract from current value
      * @returns { number } current value before the operation
      */
-    public static sub(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: number, value: number): number {
+    export function sub(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: number, value: number): number {
         let buffer = typedArray.buffer
         let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
@@ -496,7 +494,7 @@ export class Atomics {
      * @param { bigint } value value to subtract from current value
      * @returns { bigint } current value before the operation
      */
-    public static sub(typedArray: BigInt64Array | BigUint64Array, index: number, value: bigint): bigint {
+    export function sub(typedArray: BigInt64Array | BigUint64Array, index: number, value: bigint): bigint {
         let buffer = typedArray.buffer
         let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
@@ -517,7 +515,7 @@ export class Atomics {
      * @param { number } value value to perform bitwise XOR with current value
      * @returns { number } current value before the operation
      */
-    public static xor(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: number, value: number): number {
+    export function xor(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: number, value: number): number {
         let buffer = typedArray.buffer
         let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
@@ -546,7 +544,7 @@ export class Atomics {
      * @param { bigint } value value to perform bitwise XOR with current value
      * @returns { bigint } current value before the operation
      */
-    public static xor(typedArray: BigInt64Array | BigUint64Array, index: number, value: bigint): bigint {
+    export function xor(typedArray: BigInt64Array | BigUint64Array, index: number, value: bigint): bigint {
         let buffer = typedArray.buffer
         let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
@@ -569,8 +567,8 @@ export class Atomics {
      * @param { number } value value to compare current value with
      * @returns { string } status "ok", "not-equal" or "timed-out"
      */
-    public static wait(typedArray: Int32Array, index: number, value: number): string {
-        return Atomics.waitImpl(typedArray, index, value.toLong());
+    export function wait(typedArray: Int32Array, index: number, value: number): string {
+        return waitImpl(typedArray, index, value.toLong());
     }
 
     /**
@@ -585,8 +583,8 @@ export class Atomics {
      * @param { number } timeout timeout in ms
      * @returns { string } status "ok", "not-equal" or "timed-out"
      */
-    public static wait(typedArray: Int32Array, index: number, value: number, timeout: number): string {
-        return Atomics.waitImpl(typedArray, index, value.toLong(), timeout);
+    export function wait(typedArray: Int32Array, index: number, value: number, timeout: number): string {
+        return waitImpl(typedArray, index, value.toLong(), timeout);
     }
 
     /**
@@ -599,8 +597,8 @@ export class Atomics {
      * @param { bigint } value value to compare current value with
      * @returns { string } status "ok", "not-equal" or "timed-out"
      */
-    public static wait(typedArray: BigInt64Array, index: number, value: bigint): string {
-        return Atomics.waitImpl(typedArray, index, value.getLong());
+    export function wait(typedArray: BigInt64Array, index: number, value: bigint): string {
+        return waitImpl(typedArray, index, value.getLong());
     }
 
     /**
@@ -615,8 +613,8 @@ export class Atomics {
      * @param { number } timeout timeout in ms
      * @returns { string } status "ok", "not-equal" or "timed-out"
      */
-    public static wait(typedArray: BigInt64Array, index: number, value: bigint, timeout: number): string {
-        return Atomics.waitImpl(typedArray, index, value.getLong(), timeout);
+    export function wait(typedArray: BigInt64Array, index: number, value: bigint, timeout: number): string {
+        return waitImpl(typedArray, index, value.getLong(), timeout);
     }
 
     /**
@@ -630,8 +628,8 @@ export class Atomics {
      * @returns { Promise<string> } that will be resolved after the coroutine get notified
      *    or rejected if exception were thrown
      */
-    public async static waitAsync(typedArray: Int32Array | BigInt64Array, index: number, value: bigint): Promise<string> {
-        return Atomics.asyncWaitImpl(typedArray, index, value.getLong()) as Promise<string>;
+    export async function waitAsync(typedArray: Int32Array | BigInt64Array, index: number, value: bigint): Promise<string> {
+        return asyncWaitImpl(typedArray, index, value.getLong()) as Promise<string>;
     }
 
     /**
@@ -647,8 +645,8 @@ export class Atomics {
      * @returns { Promise<string> } that will be resolved after the coroutine get notified
      *    or rejected if exception were thrown
      */
-    public async static waitAsync(typedArray: Int32Array | BigInt64Array, index: number, value: bigint, timeout: number): Promise<string> {
-        return Atomics.asyncWaitImpl(typedArray, index, value.getLong(), timeout) as Promise<string>;
+    export async function waitAsync(typedArray: Int32Array | BigInt64Array, index: number, value: bigint, timeout: number): Promise<string> {
+        return asyncWaitImpl(typedArray, index, value.getLong(), timeout) as Promise<string>;
     }
 
     /**
@@ -659,8 +657,8 @@ export class Atomics {
      * @param { number } index index in the typed array to read current value from
      * @returns { number } number of notified threads
      */
-    public static notify(typedArray: Int32Array | BigInt64Array, index: number): number {
-        return Atomics.notifyImpl(typedArray, index)
+    export function notify(typedArray: Int32Array | BigInt64Array, index: number): number {
+        return notifyImpl(typedArray, index)
     }
 
     /**
@@ -671,26 +669,26 @@ export class Atomics {
      * @param { number } count maximum number of threads to notify
      * @returns { number } number of notified threads
      */
-    public static notify(typedArray: Int32Array | BigInt64Array, index: number, count: number): number {
-        return Atomics.notifyImpl(typedArray, index, count)
+    export function notify(typedArray: Int32Array | BigInt64Array, index: number, count: number): number {
+        return notifyImpl(typedArray, index, count)
     }
 
-    public static waitImpl(typedArray: Int32Array | BigInt64Array, index: number, value: long, timeout?: number): string {
+    function waitImpl(typedArray: Int32Array | BigInt64Array, index: number, value: long, timeout?: number): string {
         // Getting correct waiter
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof Int32Array) {
-            let offset = Atomics.index2byteOffset(byteOffset, Int32Array.BYTES_PER_ELEMENT.toInt(), typedArray.length.toInt(), index)
-            let waiter = Atomics.getWaiter(buffer, offset);
+            let offset = index2byteOffset(byteOffset, Int32Array.BYTES_PER_ELEMENT.toInt(), typedArray.length.toInt(), index)
+            let waiter = getWaiter(buffer, offset);
             return waiter!.wait(value, () => { return buffer.atomicLoadI32(index.toInt(), typedArray.byteOffset.toInt()).toLong(); }, timeout)
         } else {
-            let offset = Atomics.index2byteOffset(byteOffset, BigInt64Array.BYTES_PER_ELEMENT.toInt(), typedArray.length.toInt(), index)
-            let waiter = Atomics.getWaiter(buffer, offset);
+            let offset = index2byteOffset(byteOffset, BigInt64Array.BYTES_PER_ELEMENT.toInt(), typedArray.length.toInt(), index)
+            let waiter = getWaiter(buffer, offset);
             return waiter!.wait(value, () => { return buffer.atomicLoadI64(index.toInt(), typedArray.byteOffset.toInt()).toLong(); }, timeout)
         }
     }
 
-    private static asyncWaitImpl(typedArray: Int32Array | BigInt64Array, index: number, value: long, timeout?: number): Promise<string> {
+    function asyncWaitImpl(typedArray: Int32Array | BigInt64Array, index: number, value: long, timeout?: number): Promise<string> {
         let resolver: (((v: String) => void) | undefined) = undefined;
         let rejecter: (((error: Error) => void) | undefined) = undefined;
         let p = new Promise<String>((res, rej) => {
@@ -699,7 +697,7 @@ export class Atomics {
         })
         let cb = () => {
             try {
-                let v = Atomics.waitImpl(typedArray, index, value, timeout)
+                let v = waitImpl(typedArray, index, value, timeout)
                 resolver!(v)
             } catch (e) {
                 // NOTE(csaba.osztrogonac): remove as cast once e has Error type
@@ -710,16 +708,16 @@ export class Atomics {
         return p;
     }
 
-    private static notifyImpl(typedArray: Int32Array | BigInt64Array, index: number, count?: number): int {
+    function notifyImpl(typedArray: Int32Array | BigInt64Array, index: number, count?: number): int {
         let buffer = typedArray.buffer
         let offset = 0;
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof Int32Array) {
-            offset = Atomics.index2byteOffset(byteOffset, Int32Array.BYTES_PER_ELEMENT.toInt(), typedArray.length.toInt(), index)
+            offset = index2byteOffset(byteOffset, Int32Array.BYTES_PER_ELEMENT.toInt(), typedArray.length.toInt(), index)
         } else {
-            offset = Atomics.index2byteOffset(byteOffset, BigInt64Array.BYTES_PER_ELEMENT.toInt(), typedArray.length.toInt(), index)
+            offset = index2byteOffset(byteOffset, BigInt64Array.BYTES_PER_ELEMENT.toInt(), typedArray.length.toInt(), index)
         }
-        let waiter = Atomics.getWaiter(buffer, offset);
+        let waiter = getWaiter(buffer, offset);
         let notified = 0;
         if (count == undefined) {
             notified = waiter!.notifyAll(Waiter.okStatus);
@@ -733,36 +731,36 @@ export class Atomics {
         return notified;
     }
 
-    private static globalWaitingTable: containers.ConcurrentHashMap<ArrayBuffer, containers.ConcurrentHashMap<int, Waiter>> = new containers.ConcurrentHashMap<ArrayBuffer, containers.ConcurrentHashMap<int, Waiter>>();
-    private static globalWaitingTableMutex = ConcurrencyHelpers.mutexCreate();
+    let globalWaitingTable: containers.ConcurrentHashMap<ArrayBuffer, containers.ConcurrentHashMap<int, Waiter>> = new containers.ConcurrentHashMap<ArrayBuffer, containers.ConcurrentHashMap<int, Waiter>>();
+    let globalWaitingTableMutex = ConcurrencyHelpers.mutexCreate();
 
-    private static getWaiter(buffer: ArrayBuffer, byteOffset: int): Waiter {
-        let waiterTable = Atomics.globalWaitingTable.get(buffer);
+    function getWaiter(buffer: ArrayBuffer, byteOffset: int): Waiter {
+        let waiterTable = globalWaitingTable.get(buffer);
         if (waiterTable instanceof undefined) {
-            ConcurrencyHelpers.mutexLock(Atomics.globalWaitingTableMutex)
-            waiterTable = Atomics.globalWaitingTable.get(buffer)
+            ConcurrencyHelpers.mutexLock(globalWaitingTableMutex)
+            waiterTable = globalWaitingTable.get(buffer)
             if (waiterTable instanceof undefined) {
                 waiterTable = new containers.ConcurrentHashMap<int, Waiter>()
-                Atomics.globalWaitingTable.set(buffer, waiterTable!)
+                globalWaitingTable.set(buffer, waiterTable!)
             }
-            ConcurrencyHelpers.mutexUnlock(Atomics.globalWaitingTableMutex)
+            ConcurrencyHelpers.mutexUnlock(globalWaitingTableMutex)
         }
 
         let waiter = waiterTable!.get(byteOffset)
         if (waiter instanceof undefined) {
-            ConcurrencyHelpers.mutexLock(Atomics.globalWaitingTableMutex)
+            ConcurrencyHelpers.mutexLock(globalWaitingTableMutex)
             waiter = waiterTable!.get(byteOffset)
             if (waiter instanceof undefined) {
                 waiter = new Waiter()
                 waiterTable!.set(byteOffset, waiter!)
             }
-            ConcurrencyHelpers.mutexUnlock(Atomics.globalWaitingTableMutex)
+            ConcurrencyHelpers.mutexUnlock(globalWaitingTableMutex)
         }
         return waiter as Waiter;
     }
 
     // https://tc39.es/ecma262/multipage/structured-data.html#sec-validateatomicaccess
-    private static index2byteOffset(startByteOffset: int, elementSize: int, length: int, index: number): int {
+    function index2byteOffset(startByteOffset: int, elementSize: int, length: int, index: number): int {
         if (index < 0 || index >= length) {
             throw new RangeError("Index out of bounds")
         }

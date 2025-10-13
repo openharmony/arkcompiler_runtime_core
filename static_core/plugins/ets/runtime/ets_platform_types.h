@@ -142,11 +142,11 @@ public:
     EtsMethod *coreReflectProxyInvokeSet {};
     EtsMethod *coreReflectProxyInvokeGet {};
 
-    /* escompat.Process */
-    EtsClass *escompatProcess {};
-    EtsMethod *escompatProcessListUnhandledJobs {};
-    EtsMethod *escompatProcessListUnhandledPromises {};
-    EtsMethod *escompatProcessHandleUncaughtError {};
+    /* std.core.Process */
+    EtsClass *coreProcess {};
+    EtsMethod *coreProcessListUnhandledJobs {};
+    EtsMethod *coreProcessListUnhandledPromises {};
+    EtsMethod *coreProcessHandleUncaughtError {};
 
     EtsClass *stdcoreRegExpExecArray {};
     EtsClass *escompatJsonReplacer {};

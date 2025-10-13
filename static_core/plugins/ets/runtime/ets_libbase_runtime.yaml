@@ -4322,11 +4322,11 @@ intrinsics:
     impl: ark::ets::intrinsics::EtsEscompatUint8ClampedArrayToUint8Clamped
 
 ########################
-# escompat.taskpool #
+# std.concurrency.taskpool #
 ########################
   - name: TaskpoolGenerateId
     space: ets
-    class_name: escompat.taskpool.Task
+    class_name: std.concurrency.taskpool.Task
     method_name: generateId
     static: true
     signature:
@@ -4336,7 +4336,7 @@ intrinsics:
 
   - name: TaskpoolGenerateGroupId
     space: ets
-    class_name: escompat.taskpool.GroupState
+    class_name: std.concurrency.taskpool.GroupState
     method_name: generateGroupId
     static: true
     signature:
@@ -4346,7 +4346,7 @@ intrinsics:
 
   - name: TaskpoolIsUsingLaunch
     space: ets
-    class_name: escompat.taskpool
+    class_name: std.concurrency.taskpool
     method_name: isUsingLaunch
     static: true
     signature:
@@ -4356,7 +4356,7 @@ intrinsics:
 
   - name: TaskpoolIsSupportInterop
     space: ets
-    class_name: escompat.taskpool
+    class_name: std.concurrency.taskpool
     method_name: isSupportingInterop
     static: true
     signature:
@@ -4366,7 +4366,7 @@ intrinsics:
 
   - name: TaskpoolGenerateSequenceRunnerId
     space: ets
-    class_name: escompat.taskpool.SequenceRunner
+    class_name: std.concurrency.taskpool.SequenceRunner
     method_name: generateSeqRunnerId
     static: true
     signature:
@@ -4376,7 +4376,7 @@ intrinsics:
 
   - name: TaskpoolGenerateAsyncRunnerId
     space: ets
-    class_name: escompat.taskpool.AsyncRunner
+    class_name: std.concurrency.taskpool.AsyncRunner
     method_name: generateAsyncRunnerId
     static: true
     signature:
@@ -4386,7 +4386,7 @@ intrinsics:
 
   - name: TaskpoolGetTaskPoolWorkersLimit
     space: ets
-    class_name: escompat.taskpool
+    class_name: std.concurrency.taskpool
     method_name: getTaskPoolWorkersLimit
     static: true
     signature:
@@ -9205,46 +9205,6 @@ intrinsics:
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::EtsEventFire
 
-  - name: escompatConcurrencyHelpersCondVarCreate
-    space: ets
-    class_name: escompat.ConcurrencyHelpers
-    method_name: condVarCreate
-    static: true
-    signature:
-      ret: std.core.Object
-      args: []
-    impl: ark::ets::intrinsics::EtsCondVarCreate
-
-  - name: escompatConcurrencyHelpersCondVarWait
-    space: ets
-    class_name: escompat.ConcurrencyHelpers
-    method_name: condVarWait
-    static: true
-    signature:
-      ret: void
-      args: [ std.core.Object, std.core.Object ]
-    impl: ark::ets::intrinsics::EtsCondVarWait
-
-  - name: escompatConcurrencyHelpersCondVarNotifyOne
-    space: ets
-    class_name: escompat.ConcurrencyHelpers
-    method_name: condVarNotifyOne
-    static: true
-    signature:
-      ret: void
-      args: [ std.core.Object, std.core.Object ]
-    impl: ark::ets::intrinsics::EtsCondVarNotifyOne
-
-  - name: escompatConcurrencyHelpersCondVarNotifyAll
-    space: ets
-    class_name: escompat.ConcurrencyHelpers
-    method_name: condVarNotifyAll
-    static: true
-    signature:
-      ret: void
-      args: [ std.core.Object, std.core.Object ]
-    impl: ark::ets::intrinsics::EtsCondVarNotifyAll
-
 ##############################
 #      std.core.Reflect      #
 ##############################
@@ -9343,6 +9303,46 @@ intrinsics:
       args: [ std.core.Object, std.core.Object ]
     impl: ark::ets::intrinsics::EtsQueueSpinlockGuard
 
+  - name: stdConcurrencyConcurrencyHelpersCondVarCreate
+    space: ets
+    class_name: std.concurrency.ConcurrencyHelpers
+    method_name: condVarCreate
+    static: true
+    signature:
+      ret: std.core.Object
+      args: []
+    impl: ark::ets::intrinsics::EtsCondVarCreate
+
+  - name: escompatConcurrencyHelpersCondVarWait
+    space: ets
+    class_name: std.concurrency.ConcurrencyHelpers
+    method_name: condVarWait
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object, std.core.Object ]
+    impl: ark::ets::intrinsics::EtsCondVarWait
+
+  - name: stdConcurrencyConcurrencyHelpersCondVarNotifyOne
+    space: ets
+    class_name: std.concurrency.ConcurrencyHelpers
+    method_name: condVarNotifyOne
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object, std.core.Object ]
+    impl: ark::ets::intrinsics::EtsCondVarNotifyOne
+
+  - name: stdConcurrencyConcurrencyHelpersCondVarNotifyAll
+    space: ets
+    class_name: std.concurrency.ConcurrencyHelpers
+    method_name: condVarNotifyAll
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object, std.core.Object ]
+    impl: ark::ets::intrinsics::EtsCondVarNotifyAll
+
 #########################################
 # std.concurrency.NativeAsyncWorkHelper #
 #########################################
@@ -9382,6 +9382,40 @@ intrinsics:
         - i32
         - escompat.Array
     impl: ark::ets::intrinsics::WorkerGroupGenerateGroupIdImpl
+
+###############################
+# std.core.ConcurrencyHelpers #
+###############################
+
+  - name: stdCoreConcurrencyHelpersMutexCreate
+    space: ets
+    class_name: std.core.ConcurrencyHelpers
+    method_name: mutexCreate
+    static: true
+    signature:
+      ret: std.core.Object
+      args: []
+    impl: ark::ets::intrinsics::EtsMutexCreate
+
+  - name: stdCoreConcurrencyHelpersMutexLock
+    space: ets
+    class_name: std.core.ConcurrencyHelpers
+    method_name: mutexLock
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsMutexLock
+
+  - name: stdCoreConcurrencyHelpersMutexUnlock
+    space: ets
+    class_name: std.core.ConcurrencyHelpers
+    method_name: mutexUnlock
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsMutexUnlock
 
 ###############################
 # std.core.ExclusiveLauncher #

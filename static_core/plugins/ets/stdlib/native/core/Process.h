@@ -13,19 +13,13 @@
  * limitations under the License.
  */
 
-#include "plugins/ets/stdlib/native/init_native_methods.h"
-#include "plugins/ets/stdlib/native/core/Process.h"
-#include "plugins/ets/stdlib/native/core/regexp/RegExp.h"
-#include "plugins/ets/stdlib/native/core/Intl.h"
-#include "plugins/ets/stdlib/native/core/stdlib_ani_helpers.h"
+#ifndef PANDA_PLUGINS_ETS_STDLIB_NATIVE_STD_CORE_PROCESS_H
+#define PANDA_PLUGINS_ETS_STDLIB_NATIVE_STD_CORE_PROCESS_H
+
+#include <ani.h>
 
 namespace ark::ets::stdlib {
-void InitNativeMethods(ani_env *env)
-{
-    RegisterProcessNativeMethods(env);
-    RegisterRegExpNativeMethods(env);
-    // NOTE (ikorobkov): EtsNapiOnLoad needs to implement issue #18135
-    ANI_FATAL_IF_ERROR(intl::InitCoreIntl(env));
-}
-
+void RegisterProcessNativeMethods(ani_env *env);
 }  // namespace ark::ets::stdlib
+
+#endif  //  PANDA_PLUGINS_ETS_STDLIB_NATIVE_STD_CORE_PROCESS_H

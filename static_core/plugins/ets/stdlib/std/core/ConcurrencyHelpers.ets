@@ -13,13 +13,25 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_STDLIB_NATIVE_ESCOMPAT_PROCESS_H
-#define PANDA_PLUGINS_ETS_STDLIB_NATIVE_ESCOMPAT_PROCESS_H
+package std.core;
 
-#include <ani.h>
+import { launch } from "std/concurrency"
 
-namespace ark::ets::stdlib {
-void RegisterProcessNativeMethods(ani_env *env);
-}  // namespace ark::ets::stdlib
+/// This class provides api for sync primitives (see SyncPrimitives.ets)
+final class ConcurrencyHelpers {
+    // Mutex api
+    public static native mutexCreate(): Object;
+    public static native mutexLock(mutex: Object): void;
+    public static native mutexUnlock(mutex: Object): void;
 
-#endif  //  PANDA_PLUGINS_ETS_STDLIB_NATIVE_ESCOMPAT_PROCESS_H
+    public static lockGuard(mutex: Object, callback: () => void): void {
+        ConcurrencyHelpers.mutexLock(mutex);
+        try {
+            callback();
+        } finally {
+            ConcurrencyHelpers.mutexUnlock(mutex);
+        }
+    }
+
+}
+

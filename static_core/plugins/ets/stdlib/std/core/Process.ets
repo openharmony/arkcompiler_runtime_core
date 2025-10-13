@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package escompat;
+package std.core;
 
 export namespace StdProcess {
     const SIGNAL_MAP: Map<string, int> = {

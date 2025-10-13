@@ -35,7 +35,7 @@ void AniNamespaceFindFunctionFuzzTest(const char *data, size_t size)
     ani_env *env {};
     engine->GetAniEnv(&env);
     ani_namespace ns {};
-    env->FindNamespace("escompat.taskpool", &ns);
+    env->FindNamespace("std.concurrency.taskpool", &ns);
     ani_function fn {};
     std::string input(data, size);
     env->Namespace_FindFunction(ns, input.c_str(), nullptr, &fn);

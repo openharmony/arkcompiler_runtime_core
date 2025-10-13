@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package escompat;
+package std.core;
 
 type RejectedObjectListener = StdProcess.RejectedObjectListener;
 

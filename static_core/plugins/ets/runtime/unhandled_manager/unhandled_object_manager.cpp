@@ -142,10 +142,10 @@ static void ListObjectsFromEtsArray(EtsClassLinker *etsClassLinker, EtsCoroutine
     auto *platformTypes = etsClassLinker->GetEtsClassLinkerExtension()->GetPlatformTypes();
     Method *method {};
     if constexpr (std::is_same_v<T, EtsJob>) {
-        method = platformTypes->escompatProcessListUnhandledJobs->GetPandaMethod();
+        method = platformTypes->coreProcessListUnhandledJobs->GetPandaMethod();
         LOG(DEBUG, COROUTINES) << "List unhandled failed jobs";
     } else if (std::is_same_v<T, EtsPromise>) {
-        method = platformTypes->escompatProcessListUnhandledPromises->GetPandaMethod();
+        method = platformTypes->coreProcessListUnhandledPromises->GetPandaMethod();
         LOG(DEBUG, COROUTINES) << "List unhandled rejected promises";
     }
     ASSERT(method != nullptr);
@@ -290,7 +290,7 @@ bool UnhandledObjectManager::HasRejectedPromiseObjects(EtsCoroutine *coro, bool 
     }
     coro->ClearException();
     auto *platformTypes = etsClassLinker->GetEtsClassLinkerExtension()->GetPlatformTypes();
-    auto *method = platformTypes->escompatProcessHandleUncaughtError->GetPandaMethod();
+    auto *method = platformTypes->coreProcessHandleUncaughtError->GetPandaMethod();
     ASSERT(method != nullptr);
     std::array args = {Value(exception->GetCoreType())};
     LOG(DEBUG, COROUTINES) << "Invoking error handler";

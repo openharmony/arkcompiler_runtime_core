@@ -35,7 +35,7 @@ void AniNamespaceFindEnumFuzzTest(const char *data, size_t size)
     ani_env *env {};
     engine->GetAniEnv(&env);
     ani_enum e {};
-    std::string enumName = "escompat.taskpool." + std::string(data, size);
+    std::string enumName = "std.concurrency.taskpool." + std::string(data, size);
     env->FindEnum(enumName.c_str(), &e);
 }
 }  // namespace OHOS
