@@ -16,12 +16,13 @@ ets-common-tests/annotation_import_export_test/AmbientImportAl.ets
 #30136
 ets-common-tests/atomics/base_operation_xor.ets
 
-#29378
+#30502
 ets-common-tests/atomics/base_operation_load.ets
 ets-common-tests/atomics/base_operation_compare_exchange.ets
 ets-common-tests/taskpool/group_tasks.ets
 ets-common-tests/taskpool/long_task.ets
 ets-common-tests/taskpool/seqrunner_tasks.ets
+ets-common-tests/taskpool/func_tasks.ets
 
 # 24986
 ets-common-tests/generics/generics_methods.ets
@@ -49,7 +50,7 @@ ets-common-tests/stubs/typeof.ets
 # 28060
 ets-common-tests/taskpool/common_tasks.ets 
 
-#28278
+#29592
 ets-common-tests/atomics/base_operation_exchange.ets
 
 #28171
