@@ -67,7 +67,7 @@ function testField(): void {
 
     arktest.assertEQ(xf.getName(), "x")
     arktest.assertEQ(xf.getOwner(), Class.of(new Point()))
-    arktest.assertEQ(xf.getType(), Class.of(1.0))
+    arktest.assertEQ(xf.getType(), Class.PRIMITIVE_DOUBLE)
     arktest.assertFalse(xf.isReadonly())
     arktest.assertTrue(xf.isPublic())
     arktest.assertFalse(xf.isProtected())
@@ -76,7 +76,7 @@ function testField(): void {
     arktest.assertFalse(isOverrided(xf, typePoint3D))
     arktest.assertEQ(yf.getName(), "y")
     arktest.assertEQ(yf.getOwner(), typePoint3D)
-    arktest.assertEQ(yf.getType(), Class.of(1.0))
+    arktest.assertEQ(yf.getType(), Class.PRIMITIVE_DOUBLE)
     arktest.assertFalse(yf.isReadonly())
     arktest.assertTrue(yf.isPublic())
     arktest.assertFalse(yf.isProtected())
@@ -85,7 +85,7 @@ function testField(): void {
     arktest.assertTrue(isOverrided(yf, typePoint3D))
     arktest.assertEQ(sf.getName(), "state")
     arktest.assertEQ(sf.getOwner(), typePoint3D)
-    arktest.assertEQ(sf.getType(), Class.of(1))
+    arktest.assertEQ(sf.getType(), Class.PRIMITIVE_INT)
     arktest.assertFalse(sf.isReadonly())
     arktest.assertTrue(sf.isPublic())
     arktest.assertFalse(sf.isProtected())
@@ -94,7 +94,7 @@ function testField(): void {
     arktest.assertFalse(isOverrided(sf, typePoint3D))
     arktest.assertEQ(rf.getName(), "r")
     arktest.assertEQ(rf.getOwner(), typePoint3D)
-    arktest.assertEQ(rf.getType(), Class.of(1))
+    arktest.assertEQ(rf.getType(), Class.PRIMITIVE_INT)
     arktest.assertTrue(rf.isReadonly())
     arktest.assertTrue(rf.isPublic())
     arktest.assertFalse(rf.isProtected())
@@ -137,13 +137,13 @@ function testInstanceField(): void {
     const parentCls = Class.of(new Parent)
     const parentIdFld = parentCls.getInstanceFieldByName('id')!
 
-    arktest.assertEQ(parentIdFld.getType(), Class.of(new Number(0)))
+    arktest.assertEQ(parentIdFld.getType(), Class.PRIMITIVE_NUMBER)
     arktest.assertEQ(parentIdFld.getOwner(), parentCls)
 
     const childCls = Class.of(new Child)
     const childIdFld = childCls.getInstanceFieldByName('id')!
 
-    arktest.assertEQ(childIdFld.getType(), Class.of(new Number(0)))
+    arktest.assertEQ(childIdFld.getType(), Class.PRIMITIVE_NUMBER)
     arktest.assertEQ(childIdFld.getOwner(), childCls)
     arktest.assertEQ(childIdFld.getType(), parentIdFld.getType())
 
@@ -172,21 +172,21 @@ function testStaticField(): void {
     const parentCls = Class.of(new Parent)
     const parentIdFld = parentCls.getStaticFieldByName('ID')!
 
-    arktest.assertEQ(parentIdFld.getType(), Class.of(new Number(0)))
+    arktest.assertEQ(parentIdFld.getType(), Class.PRIMITIVE_NUMBER)
     arktest.assertEQ(parentIdFld.getOwner(), parentCls)
     arktest.assertEQ(parentCls.getStaticFieldByName('EOL'), undefined)
 
     const childCls = Class.of(new Child)
     const childIdFld = childCls.getStaticFieldByName('ID')!
 
-    arktest.assertEQ(childIdFld.getType(), Class.of(new Number(0)))
+    arktest.assertEQ(childIdFld.getType(), Class.PRIMITIVE_NUMBER)
     arktest.assertEQ(childIdFld.getOwner(), childCls)
     arktest.assertNE(childCls.getStaticFieldByName('EMPTY'), undefined)
 
     const parentFld = parentCls.getStaticFieldByName('EMPTY')!
     const childFld = childCls.getStaticFieldByName('EMPTY')!
     arktest.assertEQ(parentFld.getType(), childFld.getType())
-    arktest.assertEQ(childCls.getStaticFieldByName('EOL')!.getType(), Class.of(new Char(c'\n')))
+    arktest.assertEQ(childCls.getStaticFieldByName('EOL')!.getType(), Class.PRIMITIVE_CHAR)
     arktest.assertTrue(parentFld.equals(childFld))
     arktest.assertFalse(parentIdFld.equals(childIdFld))
 

@@ -672,45 +672,12 @@ EtsBoolean StdCoreClassIsSubtypeOf(EtsClass *cls, EtsClass *other)
     return static_cast<EtsBoolean>(other->IsAssignableFrom(cls));
 }
 
-namespace {
-EtsClass *ConvertPandaTypeIdToEtsClass(panda_file::Type::TypeId typeId)
-{
-    switch (typeId) {
-        case ark::panda_file::Type::TypeId::I32:
-            return PlatformTypes()->coreInt;
-        case ark::panda_file::Type::TypeId::I64:
-            return PlatformTypes()->coreLong;
-        case ark::panda_file::Type::TypeId::F64:
-            return PlatformTypes()->coreDouble;
-        case ark::panda_file::Type::TypeId::F32:
-            return PlatformTypes()->coreFloat;
-        case ark::panda_file::Type::TypeId::I8:
-            return PlatformTypes()->coreByte;
-        case ark::panda_file::Type::TypeId::I16:
-            return PlatformTypes()->coreShort;
-        case ark::panda_file::Type::TypeId::U16:
-            return PlatformTypes()->coreChar;
-        case ark::panda_file::Type::TypeId::U1:
-            return PlatformTypes()->coreBoolean;
-        default:
-            UNREACHABLE();
-    }
-}
-}  // namespace
-
 EtsClass *StdCoreClassGetFixedArrayComponentType(EtsClass *cls)
 {
     if (!cls->IsArrayClass()) {
         return nullptr;
     }
-
-    EtsClass *compCls = cls->GetComponentType();
-    if (compCls->IsPrimitive()) {
-        auto *rtCls = compCls->GetRuntimeClass();
-        return ConvertPandaTypeIdToEtsClass(rtCls->GetType().GetId());
-    }
-
-    return compCls;
+    return cls->GetComponentType();
 }
 
 EtsBoolean StdCoreClassIsUnion(EtsClass *cls)
@@ -752,6 +719,12 @@ EtsBoolean StdCoreClassIsAbstract(EtsClass *cls)
 {
     ASSERT(cls != nullptr);
     return cls->IsAbstract();
+}
+
+EtsBoolean StdCoreClassIsPrimitive(EtsClass *cls)
+{
+    ASSERT(cls != nullptr);
+    return cls->IsPrimitive();
 }
 
 }  // namespace ark::ets::intrinsics

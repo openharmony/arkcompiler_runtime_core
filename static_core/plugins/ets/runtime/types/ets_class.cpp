@@ -1008,48 +1008,12 @@ EtsClass *EtsClass::ResolveStringClass()
     return this;
 }
 
-static EtsClass *ResolvePrimitivePublicClass(panda_file::Type type)
-{
-    EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
-    ASSERT(coroutine != nullptr);
-    const EtsPlatformTypes *ptypes = PlatformTypes(coroutine);
-    switch (type.GetId()) {
-        case panda_file::Type::TypeId::U1:
-            return ptypes->coreBoolean;
-        case panda_file::Type::TypeId::I8:
-            return ptypes->coreByte;
-        case panda_file::Type::TypeId::I16:
-            return ptypes->coreShort;
-        case panda_file::Type::TypeId::U16:
-            return ptypes->coreChar;
-        case panda_file::Type::TypeId::I32:
-            return ptypes->coreInt;
-        case panda_file::Type::TypeId::I64:
-            return ptypes->coreLong;
-        case panda_file::Type::TypeId::F32:
-            return ptypes->coreFloat;
-        case panda_file::Type::TypeId::F64:
-            return ptypes->coreDouble;
-        case panda_file::Type::TypeId::VOID:
-            return coroutine->GetPandaVM()->GetClassLinker()->GetClassRoot(EtsClassRoot::VOID);
-        default:
-            LOG(FATAL, RUNTIME) << "ResolveArgType: not a valid ets type for " << type;
-            return nullptr;
-    };
-}
-
 EtsClass *EtsClass::ResolvePublicClass()
 {
-    if (!IsStringClass() && !IsPrimitive()) {
-        return this;
-    }
     if (IsStringClass()) {
         return ResolveStringClass();
     }
-
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    auto type = panda_file::Type::GetTypeIdBySignature(GetDescriptor()[0]);
-    return ResolvePrimitivePublicClass(type);
+    return this;
 }
 
 }  // namespace ark::ets

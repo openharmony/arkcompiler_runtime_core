@@ -30,7 +30,7 @@ public:
     {
         RuntimeOptions options;
         options.SetShouldLoadBootPandaFiles(true);
-        options.SetShouldInitializeIntrinsics(false);
+        options.SetShouldInitializeIntrinsics(true);
         options.SetCompilerEnableJit(false);
         options.SetGcType("epsilon");
         options.SetLoadRuntimes({"ets"});

@@ -680,10 +680,10 @@ function testReflectMethod(): void {
     arktest.assertEQ(addMethod.getReturnType(), typePoint)
     arktest.assertEQ(addMethod.getOwner(), typePoint)
     arktest.assertEQ(getter.getParametersNum(), 0)
-    arktest.assertEQ(getter.getReturnType(), Class.of(1))
+    arktest.assertEQ(getter.getReturnType(), Class.PRIMITIVE_INT)
     arktest.assertEQ(getter.getOwner(), typeHWriter)
     arktest.assertEQ(setter.getParametersNum(), 1)
-    arktest.assertEQ(setter.getParameterType(0)!, Class.of(1))
+    arktest.assertEQ(setter.getParameterType(0)!, Class.PRIMITIVE_INT)
     arktest.assertEQ(setter.getReturnType().getName(), "void")
     arktest.assertEQ(setter.getOwner(), typeHWriter)
 }
@@ -879,11 +879,37 @@ function testConstructorEquals(): void {
     arktest.assertTrue(ctor1.equals(ctor2))
 }
 
+function testReturn() {
+    let typePoint = Class.of(new Point())
+    let typeHWriter = Class.of(new HTMLWriter(10))
+    let typeWriter = typeHWriter.getSuper()!
+
+    let getterMethod = typeHWriter.getInstanceMethodByName("<get>state")!
+    let setterMethod = typeHWriter.getInstanceMethodByName("<set>state")!
+    let abstractWriteMethod = typeWriter.getInstanceMethodByName("write")!
+    let overrideWriteMethod = typeHWriter.getInstanceMethodByName("write")!
+    let closeMethod = typeHWriter.getInstanceMethodByName("close")!
+    let finalMethod = typeHWriter.getInstanceMethodByName("finalMethod")!
+    let nativeMethod = typeHWriter.getInstanceMethodByName("nativeMethod")!
+    let constructors = typeHWriter.getConstructors()
+    let constructorOfClass = constructors[0]
+
+    arktest.assertEQ(getterMethod.getReturnType(), Class.PRIMITIVE_INT)
+    arktest.assertEQ(setterMethod.getReturnType(), Class.PRIMITIVE_VOID)
+    arktest.assertEQ(abstractWriteMethod.getReturnType(), Class.PRIMITIVE_INT)
+    arktest.assertEQ(overrideWriteMethod.getReturnType(), Class.PRIMITIVE_INT)
+    arktest.assertEQ(closeMethod.getReturnType(), Class.PRIMITIVE_VOID)
+    arktest.assertEQ(finalMethod.getReturnType(), Class.PRIMITIVE_VOID)
+    arktest.assertEQ(nativeMethod.getReturnType(), Class.PRIMITIVE_BOOLEAN)
+    arktest.assertEQ(constructorOfClass.getReturnType(), Class.PRIMITIVE_VOID)
+}
+
 function main() {
     const suite = new arktest.ArkTestsuite('Reflect Method tests')
     suite.addTest('Test Reflect Method base APIs', testReflectMethod)
     suite.addTest('Test Reflect Method attributes APIs', testMethodAttributes)
     suite.addTest('Test Reflect Method Parameters APIs', testParameters)
+    suite.addTest('Test Reflect Method Return APIs', testReturn)
     suite.addTest('Test Reflect InstanceMethod.equals()', testInstanceMethodEquals)
     suite.addTest('Test Reflect Constructor.equals()', testConstructorEquals)
     suite.addTest('Test Reflect overridden InstanceMethod.equals()', testOverriddenInstanceMethodEquals)
