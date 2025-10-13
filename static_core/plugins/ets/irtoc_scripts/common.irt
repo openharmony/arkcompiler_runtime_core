@@ -73,21 +73,14 @@ macro(:get_object_pointer) do |base, offset|
 end
 
 ###
-# Load an address value (as `ref_uint`) from the EtsPlatformTypes storage. The deserved address must be stored
-# in the platform types by offset `offset`.
+# Load an address value (either as `ref` or `ref_uint`) from the EtsPlatformTypes storage. The deserved address must
+# be stored in the platform types by offset `offset`.
 #
-macro(:get_platform_type_ref_uint) do |offset|
-  ptypes := LoadI(%tr).Imm(EtsConstants::CORO_LOCAL_STORAGE_OFFSET).ptr
-  LoadI(ptypes).Imm(offset).ref_uint
-end
-
-###
-# Load a reference from the EtsPlatformTypes storage. The deserved reference must be stored
-# in the platform types by offset `offset`.
-#
-macro(:get_platform_type_ref) do |offset|
-  ptypes := LoadI(%tr).Imm(EtsConstants::CORO_LOCAL_STORAGE_OFFSET).ptr
-  LoadI(ptypes).Imm(offset).ref
+["ref", "ref_uint"].each do |ret_type|
+  macro("get_platform_type_#{ret_type}".to_sym) do |offset|
+    ptypes := LoadI(%tr).Imm(EtsConstants::CORO_LOCAL_STORAGE_OFFSET).ptr
+    LoadI(ptypes).Imm(offset).send(ret_type)
+  end # get_platform_type_#{ret_type}
 end
 
 scoped_macro(:post_inter_region_barrier) do |data, size|

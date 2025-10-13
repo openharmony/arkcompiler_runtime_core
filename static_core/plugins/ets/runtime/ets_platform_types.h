@@ -160,13 +160,13 @@ public:
     /* Internal Caches */
     void CreateAndInitializeCaches();
     void VisitRoots(const GCRootVisitor &visitor) const;
-    void UpdateCachesVmRefs(const GCRootUpdater &updater) const;
     EtsTypedObjectArray<EtsString> *GetAsciiCacheTable() const
     {
         return asciiCharCache_;
     }
     Entry const *GetTypeEntry(const uint8_t *descriptor) const;
 
+    // Managed object caches:
     static constexpr uint32_t GetAsciiCharCacheSize()
     {
         return ASCII_CHAR_TABLE_SIZE;
@@ -175,6 +175,8 @@ public:
     {
         return MEMBER_OFFSET(EtsPlatformTypes, asciiCharCache_);
     }
+
+    // Class entry offsets:
     static constexpr size_t GetEscompatArrayClassOffset()
     {
         return MEMBER_OFFSET(EtsPlatformTypes, escompatArray);
@@ -183,7 +185,9 @@ public:
 private:
     friend class EtsClassLinkerExtension;
     friend class mem::Allocator;
-    mutable EtsTypedObjectArray<EtsString> *asciiCharCache_ {nullptr};
+    // asciiCharCache_ must be allocated in a non-movable heap region; therefore, we should need to handle
+    // this pointer in `ark::ets::PandaEtsVM::UpdateVmRefs`.
+    EtsTypedObjectArray<EtsString> *asciiCharCache_ {nullptr};
     void PreloadType(EtsClassLinker *linker, EtsClass **slot, std::string_view descriptor);
     PandaUnorderedMap<const uint8_t *, Entry, utf::Mutf8Hash, utf::Mutf8Equal> entryTable_;
 

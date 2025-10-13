@@ -767,6 +767,82 @@ bool Peepholes::PeepholeNullcheck([[maybe_unused]] GraphVisitor *v, IntrinsicIns
     return false;
 }
 
+bool Peepholes::PeepholeStringFromCharCodeSingle([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
+{
+    // Implements the following optimization for the Intrinsic.StdCoreStringFromCharCodeSingle intrinsic:
+    //
+    // before:
+    //   7.f64  Cast i32                   v0 -> (...,8)
+    //   9.     SaveState                  v7(ACC), inlining_depth=0 -> (...,8)
+    //   8.ref  Intrinsic.StdCoreStringFromCharCodeSingle v7, v9 -> (v10)
+    //
+    // after JIT:
+    //    7.f64  Cast i32                   v0 -> (v11, v9)
+    //    9.     SaveState                  v7(ACC), inlining_depth=0 -> (v13)
+    //   12.ref  LoadImmediate(<the pointer to the cache of short (one-byte length) strings>) (v13)
+    //   11.u64  Bitcast                    v7 -> (v13)
+    //   13.ref  Intrinsic.CompilerEtsStringFromCharCodeSingle[NoCache] [v12,] v11, v9 -> (v10)
+    //
+    // after AOT:
+    //    7.f64  Cast i32                   v0 -> (v11, v9)
+    //    9.     SaveState                  v7(ACC), inlining_depth=0 -> (v15)
+    //   12.ptr  LoadImmediate(<TlsOffset: to the cache of short (one-byte length) strings>) (v14)
+    //   14.ref  Load 1                     v12, v13 -> (v15)
+    //   11.u64  Bitcast                    v7 -> (v15)
+    //   15.ref  Intrinsic.CompilerEtsStringFromCharCodeSingle[NoCache] [v14,] v11, v9 -> (v10)
+    //
+    // (the using of the `NoCache` suffix and the first input (the cache) depends on whether the ark/ark_aot
+    // is run with the --use-string-caches=true argument.)
+
+    ASSERT(intrinsic->GetInputsCount() == 2U);
+    ASSERT(intrinsic->GetInput(1U).GetInst()->IsSaveState());
+    auto graph = intrinsic->GetBasicBlock()->GetGraph();
+    if (graph->IsBytecodeOptimizer() || graph->GetArch() == Arch::AARCH32) {
+        return false;
+    }
+
+    auto pc = intrinsic->GetPc();
+    auto *charCode = intrinsic->GetInput(0).GetInst();
+    auto charCodeInt = graph->CreateInstBitcast(DataType::UINT64, pc, charCode);
+    IntrinsicInst *createStringInst = nullptr;
+    if (graph->GetRuntime()->IsStringCachesUsed()) {
+        Inst *cache = nullptr;
+        void *cachePtr = nullptr;
+        if (!graph->IsAotMode() && (cachePtr = graph->GetRuntime()->GetAsciiCharCache()) != nullptr) {
+            cache = graph->CreateInstLoadImmediate(DataType::REFERENCE, pc, cachePtr,
+                                                   LoadImmediateInst::ObjectType::OBJECT);
+        } else {
+            auto ls = graph->CreateInstLoadImmediate(DataType::POINTER, pc,
+                                                     cross_values::GetEtsCoroutineLocalStorageOffset(graph->GetArch()),
+                                                     LoadImmediateInst::ObjectType::TLS_OFFSET);
+            intrinsic->InsertBefore(ls);
+            cache = graph->CreateInstLoad(
+                DataType::REFERENCE, pc, ls,
+                graph->FindOrCreateConstant(cross_values::GetPlatformTypesAsciiCharCacheOffset(graph->GetArch())));
+            // GraphChecker hack
+            cache->ClearFlag(inst_flags::LOW_LEVEL);
+        }
+        intrinsic->InsertBefore(cache);
+        createStringInst = graph->CreateInstIntrinsic(
+            DataType::REFERENCE, pc,
+            RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_STRING_FROM_CHAR_CODE_SINGLE);
+        createStringInst->SetInputs(graph->GetAllocator(), {{cache, DataType::REFERENCE},
+                                                            {charCodeInt, DataType::UINT64},
+                                                            {intrinsic->GetSaveState(), DataType::NO_TYPE}});
+    } else {
+        createStringInst = graph->CreateInstIntrinsic(
+            DataType::REFERENCE, pc,
+            RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_STRING_FROM_CHAR_CODE_SINGLE_NO_CACHE);
+        createStringInst->SetInputs(graph->GetAllocator(),
+                                    {{charCodeInt, DataType::UINT64}, {intrinsic->GetSaveState(), DataType::NO_TYPE}});
+    }
+    intrinsic->InsertBefore(charCodeInt);
+    intrinsic->ReplaceUsers(createStringInst);
+    intrinsic->RemoveInputs();
+    intrinsic->GetBasicBlock()->ReplaceInst(intrinsic, createStringInst);
+    return true;
+}
+
 #ifdef PANDA_ETS_INTEROP_JS
 
 bool Peepholes::TryFuseGetPropertyAndCast(IntrinsicInst *intrinsic, RuntimeInterface::IntrinsicId newId)

@@ -783,12 +783,6 @@ void PandaEtsVM::UpdateVmRefs(const GCRootUpdater &gcRootUpdater)
         }
     }
     GetUnhandledObjectManager()->UpdateObjects(gcRootUpdater);
-    if (LIKELY(Runtime::GetOptions().IsUseStringCaches())) {
-        auto *asciiCache = PlatformTypes(this)->GetAsciiCacheTable();
-        if (asciiCache != nullptr) {
-            PlatformTypes(this)->UpdateCachesVmRefs(gcRootUpdater);
-        }
-    }
 }
 
 EtsFinalizableWeakRef *PandaEtsVM::RegisterFinalizerForObject(EtsCoroutine *coro, const EtsHandle<EtsObject> &object,

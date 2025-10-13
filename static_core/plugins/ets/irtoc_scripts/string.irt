@@ -29,7 +29,6 @@ module Constants
   U16_SIZE = "2"
   WRONG_CHAR_FLAG_MASK = "0x10000UL"
   ASCII_CHAR_CACHE_SIZE = "cross_values::GetPlatformTypesAsciiCharCacheSize(GetArch())"
-  ASCII_CHAR_CACHE_OFFSET = "cross_values::GetPlatformTypesAsciiCharCacheOffset(graph->GetArch())"
 end
 
 # It is assumed that _begin_index and _end_index are safe and does not check/normalize them.
@@ -1045,15 +1044,11 @@ Label(:LoopDone)
 end
 
 ###
-# Reads a string formed from a one-byte char 'char' from the cache.
-# Because the `EtsPlatformType::asciiCharCache_`, the cache of the string of one-byte length symbols,
-# is movable (see `ark::ets::EtsPlatformTypes::UpdateCachesVmRefs`), we cannot load its address with
-# the single `LoadImmediate` instruction just like we do in `ark::compiler::Peepholes::PeepholeDoubleToString`.
-# We must always read the actual address again and again immediately prior to use.
-scoped_macro(:read_from_cache) do |char|
-  _cache := get_platform_type_ref(Constants::ASCII_CHAR_CACHE_OFFSET)
+# Reads a string formed from a one-byte char 'char' from the cache 'cache'
+#
+scoped_macro(:read_from_cache) do |cache, char|
   _string_offset := AddI(ShlI(Cast(char).u64).Imm(EtsConstants::OBJ_PTR_LOG2_SIZE).u64).Imm(Constants::ARRAY_DATA_OFFSET).u64
-  get_object_pointer(_cache, _string_offset)
+  get_object_pointer(cache, _string_offset)
 end # read_from_cache
 
 function(:CreateStringFromCharCodeTlab,
@@ -1121,10 +1116,13 @@ Label(:SlowPathEntrypoint)
 
 def GenerateCreateStringFromCharCodeSingleTlab(cache_flag)
   nocache = (cache_flag ? "" : "NoCache")
+  param_tuple = (cache_flag ? {cache: 'ref', char_code: 'u64', string_klass: 'ref'}
+                            : {char_code: 'u64', string_klass: 'ref'})
+  available_regs = $panda_mask
   function("CreateStringFromCharCodeSingle#{nocache}Tlab".to_sym,
-            params: {char_code: 'u64', string_klass: 'ref'},
+            params: param_tuple,
             regmap: $full_regmap,
-            regalloc_set: $panda_mask,
+            regalloc_set: available_regs,
             mode: [:FastPath]) {
 
     if Options.arch == :arm32
@@ -1149,7 +1147,7 @@ def GenerateCreateStringFromCharCodeSingleTlab(cache_flag)
     # Try to read from the one-byte char cache
     if cache_flag
       IfImm(Compare(char, Constants::ASCII_CHAR_CACHE_SIZE).B.b).Imm(0).NE.b {
-        Return(read_from_cache(char)).ptr
+        Return(read_from_cache(cache, char)).ptr
       }
     end
 
@@ -1183,7 +1181,7 @@ def GenerateCreateStringFromCharCodeSingleTlab(cache_flag)
 
   Label(:SlowPathEntrypoint)
     entrypoint = get_entrypoint_offset("CREATE_STRING_FROM_CHAR_CODE_SINGLE_NO_CACHE_SLOW_PATH")
-    Intrinsic(:SLOW_PATH_ENTRY, char_code).AddImm(entrypoint).MethodAsImm("CreateStringFromCharCodeSingleNoCache2ArgBridge").Terminator.ptr
+    Intrinsic(:SLOW_PATH_ENTRY, char_code).AddImm(entrypoint).MethodAsImm("CreateStringFromCharCodeSingleNoCache#{param_tuple.size}ArgBridge").Terminator.ptr
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
   }
 end # def GenerateCreateStringFromCharCodeSingleTlab
