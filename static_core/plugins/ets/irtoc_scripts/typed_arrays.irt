@@ -175,7 +175,7 @@ macro(:allocate_object_tlab) do |klass, klass_size, data_size|
       call_runtime_save_all(Constants::ANNOTATE_SANITIZERS_NO_BRIDGE, _start, _size).void
     end
     # Store class of the object
-    StoreI(_start, klass).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+    store_class(_start, klass)
     # Update the TLAB state
     StoreI(Add(_tlab, Constants::TLAB_CUR_FREE_POSITION_OFFSET).ptr, Add(_start, _size).ptr).Imm(0).Volatile.ptr
     # Return a pointer to the newly allocated string
@@ -188,7 +188,7 @@ end
 #
 scoped_macro(:validate_number) do |data, offset, type_mask_value|
   _boxed_ptr := get_object_pointer(data, offset)
-  _klass := LoadI(_boxed_ptr).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+  _klass := load_class(_boxed_ptr)
   _flags := LoadI(_klass).Imm(EtsConstants::ETS_CLASS_FLAGS_FROM_RUNTIME_CLASS_OFFSET).u32
   If(getBoxedType(_flags), type_mask_value).EQ.Likely {
     _valid1 := Cast(1).b
@@ -253,7 +253,7 @@ end # load_big_int
 #
 scoped_macro(:validate_big_int) do |data, offset|
   _object := load_big_int(data, offset)
-  _klass := LoadI(_object).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+  _klass := load_class(_object)
   _flags := LoadI(_klass).Imm(EtsConstants::ETS_CLASS_FLAGS_FROM_RUNTIME_CLASS_OFFSET).u32
   isBigIntType(_flags)
 end # validate_big_int
