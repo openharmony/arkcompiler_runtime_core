@@ -28,6 +28,8 @@ function main(): int {
     suite.addAsyncTest("DoWrite not called", testWritableDoWriteNotCalled);
     suite.addAsyncTest("Write data failed", testWritableWriteDataFailed);
     suite.addTest("Error on write", testWritableErrorOnWrite);
+    suite.addTest("Write on Error Sequence without end", testWritableOnErrorSequence);
+    suite.addTest("Write on Error Sequence with end", testWritableOnErrorSequenceWithEnd);
 
     return suite.run();
 }
@@ -224,3 +226,37 @@ function testWritableErrorOnWrite() {
     }
     arktest.assertEQ(num, 0);
 }
+
+class ErrorEventWritable extends stream.Writable {
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
+      if (chunk.toString() === 'C') {
+        callback.unsafeCall(new Error('error'));
+      } else {
+        callback.unsafeCall();
+      }
+    }
+}
+
+// Test cases ported from ArkTS 1.0:testStreamWritableProperties015
+function testWritableOnErrorSequence()
+{
+    let writableStream = new ErrorEventWritable();
+    let chunks = 'C';
+    writableStream.write(chunks);
+    writableStream.on('error', (error: Error) => {
+        arktest.assertEQ(error.message, 'error');
+    });
+}
+
+// Test cases ported from ArkTS 1.0:testStreamWritableProperties016
+function testWritableOnErrorSequenceWithEnd()
+{
+    let writableStream = new ErrorEventWritable();
+    let chunks = 'C';
+    writableStream.write(chunks);
+    writableStream.on('error', (error: Error) => {
+        arktest.assertEQ(error.message, 'error');
+    });
+    writableStream.end();
+}
+
