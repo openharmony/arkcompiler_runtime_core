@@ -32,6 +32,7 @@
 #include "runtime/mem/region_space.h"
 #include "runtime/mem/object_helpers.h"
 #include "runtime/mem/gc/g1/g1-gc.h"
+#include "runtime/mem/gc/gc_barrier_set.h"
 
 #include "test_utils.h"
 
@@ -273,6 +274,68 @@ TEST_F(G1GCTest, Humongous2YoungRef)
     ASSERT_NE(prevYoungAddr, ToUintPtr(youngObj));
     // Check the young object is accessible
     ASSERT_NE(nullptr, youngObj->ClassAddr<Class>());
+}
+
+TEST_F(G1GCTest, CheckRemsetAfterPostBarrier)
+{
+    Runtime *runtime = Runtime::GetCurrent();
+    MTManagedThread *thread = MTManagedThread::GetCurrent();
+    GC *gc = runtime->GetPandaVM()->GetGC();
+    ScopedManagedCodeThread s(thread);
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+    auto ctx = runtime->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto arrayClass = runtime->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::ARRAY_STRING);
+    size_t elemSize = arrayClass->GetComponentSize();
+    size_t arraySize = CardTable::GetCardSize();
+    // NOLINTNEXTLINE(clang-analyzer-core.DivideZero)
+    size_t arrayLength = arraySize / elemSize + 1;
+    // objectNum needs to be large enough to ensure that the thread's g1PostBarrierRingBuffer is fully filled
+    constexpr size_t objectNum = 1024 * 12 + 1;
+    std::vector<VMHandle<coretypes::Array>> arrays;
+    for (size_t i = 0; i < objectNum; i++) {
+        arrays.emplace_back(thread, ObjectAllocator::AllocArray(arrayLength, ClassRoot::ARRAY_STRING, false));
+    }
+
+    {
+        ScopedNativeCodeThread sn(thread);
+        GCTask task(GCTaskCause::YOUNG_GC_CAUSE);
+        task.Run(*gc);
+    }
+
+    for (auto &array : arrays) {
+        ASSERT_TRUE(ObjectToRegion(array.GetPtr())->HasFlag(IS_OLD));
+    }
+
+    std::vector<VMHandle<coretypes::String>> strings;
+    std::vector<void *> stringOrigPtrs;
+    for (auto &array : arrays) {
+        auto str = ObjectAllocator::AllocString(10);
+        strings.emplace_back(thread, str);
+        stringOrigPtrs.push_back(str);
+        array->Set(0, str);  // create dirty card
+    }
+
+    // With high probability update_remset_worker could not process all dirty cards before GC
+    // so GC drains them from update_remset_worker and handles separately
+    {
+        ScopedNativeCodeThread sn(thread);
+        GCTask task(GCTaskCause::YOUNG_GC_CAUSE);
+        task.Run(*gc);
+    }
+
+    // dirty cards corresponding to dirty_regions_objects should be reenqueued
+    ProcessDirtyCards(static_cast<G1GC<PandaAssemblyLanguageConfig> *>(gc));
+    for (size_t i = 0; i < objectNum; i++) {
+        auto &array = arrays[i];
+        auto &str = strings[i];
+        bool found = false;
+        ObjectToRegion(str.GetPtr())->GetRemSet()->IterateOverObjects([&found, &array](ObjectHeader *obj) {
+            if (obj == array.GetPtr()) {
+                found = true;
+            }
+        });
+        ASSERT_TRUE(found);
+    }
 }
 
 TEST_F(G1GCTest, TestCollectTenured)

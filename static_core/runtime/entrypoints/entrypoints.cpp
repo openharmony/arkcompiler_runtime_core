@@ -2073,4 +2073,11 @@ extern "C" int32_t CoreStringCompareTo(coretypes::String *str1, coretypes::Strin
     return str1->Compare(str2, Runtime::GetCurrent()->GetPandaVM()->GetLanguageContext());
 }
 
+extern "C" void G1GCPostBarrierPushCardToQueue(mem::CardTable::CardPtr card)
+{
+    auto *barrierSet = ManagedThread::GetCurrent()->GetBarrierSet();
+    auto *g1BarrierSet = reinterpret_cast<mem::GCG1BarrierSet *>(barrierSet);
+    g1BarrierSet->PostCardToQueue(card);
+}
+
 }  // namespace ark

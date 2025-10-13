@@ -195,9 +195,17 @@ scoped_macro(:push_dirty_card_to_buffer) do |cards, min_addr, mem|
     tail_offset := ShlI(tail_index).Imm(Constants::POINTER_LOG_SIZE).word
     next_tail_index := AndI(AddI(tail_index).Imm(1).word).Imm(Constants::G1_LOCK_BUFFER_SIZE_MASK).word
 
+    attempt := 0
+
     Label(:TryPushLoop)
+    attempt := Phi(attempt, attempt_next).i32
     head_index := LoadI(buffer).Imm(Constants::G1_LOCK_BUFFER_HEAD_OFFSET).Volatile.word
     If(next_tail_index, head_index).EQ {
+        If(attempt, 2).GE.Unlikely {
+            Call(card).Method("G1GCPostBarrierPushCardToQueue").void
+            Goto(:Done)
+        }
+        attempt_next := Add(attempt, 1).i32
         Goto(:TryPushLoop)
     }
 
