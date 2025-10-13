@@ -70,6 +70,7 @@ irtoc_scripts = [
   "irtoc_scripts/typed_arrays.irt",
   "irtoc_scripts/map.irt",
   "irtoc_scripts/set.irt",
+  "irtoc_scripts/map_set_common.irt",
 ]
 
 irtoc_plugins = [
@@ -80,6 +81,7 @@ irtoc_plugins = [
   "irtoc_scripts/typed_arrays.irt",
   "irtoc_scripts/map.irt",
   "irtoc_scripts/set.irt",
+  "irtoc_scripts/map_set_common.irt",
 ]
 
 arkbytecodeopt_deps =

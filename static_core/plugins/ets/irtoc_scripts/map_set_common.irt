@@ -252,7 +252,7 @@ Label(:Loop)
   entry := Load(buck_data, ofs).ref
   object := LoadI(entry).Imm(MapConstants::ENTRY_KEY_OFFSET).ref
 
-  obj_klass := LoadI(object).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+  obj_klass := load_class(object)
   If(isString(obj_klass), 0).EQ.b {
     Goto(:Continue)
   }
@@ -309,7 +309,7 @@ Label(:findKeyByValLoop)
   entry := Load(buck_data, ofs).ref
   object := LoadI(entry).Imm(MapConstants::ENTRY_KEY_OFFSET).ref
 
-  obj_klass := LoadI(object).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+  obj_klass := load_class(object)
   obj_type := LoadI(obj_klass).Imm(Constants::BASE_CLASS_MANAGED_OBJECT_OFFSET).ref
 
   If(obj_type, type).NE.Unlikely.b {
@@ -382,7 +382,7 @@ macro(:findOffset) do |map, key, ret_none_expr|
 
     offset_undef := findKeyByRef(buck_data_undef, buck_len_undef, key)
   } Else {
-    klass := LoadI(key).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+    klass := load_class(key)
     type := LoadI(klass).Imm(Constants::BASE_CLASS_MANAGED_OBJECT_OFFSET).ref
     flags := LoadI(klass).Imm(EtsConstants::ETS_CLASS_FLAGS_FROM_RUNTIME_CLASS_OFFSET).u32
     is_string := isString(klass)
