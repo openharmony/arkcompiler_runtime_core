@@ -115,7 +115,7 @@ private:
     struct ObjectCache {
         const ObjectHeader *heapObject;
         const ObjectHeader *referent;
-        const size_t offset;
+        const size_t offset;  // NOLINT(readability-identifier-naming)
     };
 
     size_t CheckHeap(const PandaUnorderedSet<const ObjectHeader *> &heapObjects,
