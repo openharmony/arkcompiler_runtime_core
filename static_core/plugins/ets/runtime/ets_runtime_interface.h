@@ -38,6 +38,7 @@ public:
     char *GetFuncPropName(MethodPtr methodPtr, uint32_t strId) const override;
     uint64_t GetFuncPropNameOffset(MethodPtr methodPtr, uint32_t strId) const override;
     bool IsMethodStringConcat(MethodPtr method) const override;
+    bool IsMethodStringGetLength(MethodPtr method) const override;
     Field *GetFieldPtrByName(ClassPtr klass, std::string_view name) const override;
     bool IsMethodStringBuilderConstructorWithStringArg(MethodPtr method) const override;
     bool IsMethodStringBuilderConstructorWithCharArrayArg(MethodPtr method) const override;
@@ -79,6 +80,7 @@ public:
     FieldPtr GetFieldStringBuilderIndex(ClassPtr klass) const override;
     FieldPtr GetFieldStringBuilderLength(ClassPtr klass) const override;
     FieldPtr GetFieldStringBuilderCompress(ClassPtr klass) const override;
+    MethodPtr GetGetterStringBuilderStringLength(ClassPtr klass) const override;
     FieldPtr GetEscompatArrayBuffer(ClassPtr klass) const override;
     FieldPtr GetEscompatArrayActualLength(ClassPtr klass) const override;
     FieldPtr GetEscompatTypedArrayBuffer(ClassPtr klass) const override;

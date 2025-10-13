@@ -73,6 +73,15 @@ export final class StringBuilder {
     }
 
     /**
+     * Length of string accumulated so far
+     *
+     * @returns length of string accumulated so far
+     */
+    public get stringLength(): int {
+        return this.length;
+    }
+
+    /**
      * Concatenates two strings and return a result as a new string
      *
      * @param lhs left string (prefix)

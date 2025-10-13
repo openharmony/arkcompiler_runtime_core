@@ -15,6 +15,7 @@
 
 //! CHECKER       AOT IR Builder, check StringBuilder::toString replacement
 //! SKIP_IF       @architecture == "arm32"
+//! RUN_BCO       output: "#{@options.test_file}", options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
 //! RUN_PAOC      options: "--compiler-regex='.*toString[0-9]+.*' --compiler-inlining=false"
 //!
 //! METHOD        "ets_stringbuilder.ETSGLOBAL::toString0"
@@ -162,6 +163,7 @@
 //! RUN           entry: "ets_stringbuilder.ETSGLOBAL::main"
 
 //! CHECKER       JIT IR Builder, check StringBuilder::toString replacement
+//! SKIP_IF       @architecture == "arm32"
 //! RUN           force_jit: true, options: "--compiler-regex='.*toString[0-9]+.*' --compiler-inlining=false", entry: "ets_stringbuilder.ETSGLOBAL::main"
 //!
 //! METHOD        "ets_stringbuilder.ETSGLOBAL::toString0"
@@ -478,3 +480,136 @@ function encodePercentEncoding(str: string) {
     }
     return outVal;
 }
+
+//! CHECKER       BCO, check StringBuilder::toString replacement
+//! SKIP_IF       @architecture == "arm32"
+//! RUN_BCO       output: "#{@options.test_file}", options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=true"
+//!
+//! METHOD        "ets_stringbuilder.ETSGLOBAL::toString0"
+//! PASS_AFTER    "BranchElimination"
+//! INST          /StringBuilder::<ctor>/
+//! INST_NEXT     /SaveState/
+//! INST_NEXT     /StringBuilder::toString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_NOT      /StringBuilder::<ctor>/
+//! INST_NOT      /StringBuilder::toString/
+//!
+//! METHOD        "ets_stringbuilder.ETSGLOBAL::toString1"
+//! PASS_AFTER    "BranchElimination"
+//! INST          /StringBuilder::<ctor>/
+//! INST_NEXT     /SaveState/
+//! INST_NEXT     /StringBuilder::toString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_NOT      /StringBuilder::<ctor>/
+//! INST_NOT      /StringBuilder::toString/
+//!
+//! METHOD        "ets_stringbuilder.ETSGLOBAL::toString2"
+//! PASS_AFTER    "BranchElimination"
+//! INST          /StringBuilder::<ctor>/
+//! INST_NEXT     /SaveState/
+//! INST_NEXT     /StringBuilder::toString/
+//! INST_NEXT     /SaveState/
+//! INST_NEXT     /StringBuilder::toString/
+//! INST_NEXT     /SaveState/
+//! INST_NEXT     /StringBuilder::toString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST          /StringBuilder::<ctor>/
+//! INST_NEXT     /SaveState/
+//! INST_NEXT     /StringBuilder::toString/
+//! INST_NEXT_NOT /SaveState/
+//! INST_NEXT_NOT /StringBuilder::toString/
+//!
+//! METHOD        "ets_stringbuilder.ETSGLOBAL::toString3"
+//! PASS_AFTER    "BranchElimination"
+//! INST          /StringBuilder::<ctor>/
+//! INST_NEXT     /SaveState/
+//! INST_NEXT     /StringBuilder::toString/
+//! INST_NEXT     /SaveState/
+//! INST_NEXT     /StringBuilder::toString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_NOT      /StringBuilder::<ctor>/
+//! INST_NOT /StringBuilder::toString/
+//!
+//! METHOD        "ets_stringbuilder.ETSGLOBAL::toString4"
+//! PASS_AFTER    "BranchElimination"
+//! INST          /StringBuilder::<ctor>/
+//! INST_NEXT     /SaveState/
+//! INST_NEXT     /StringBuilder::toString/
+//! INST_NEXT     /SaveState/
+//! INST_NEXT     /StringBuilder::toString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST          /StringBuilder::<ctor>/
+//! INST_NEXT     /SaveState/
+//! INST_NEXT     /StringBuilder::toString/
+//! INST_NEXT_NOT /SaveState/
+//! INST_NEXT_NOT /StringBuilder::toString/
+//!
+//! METHOD        "ets_stringbuilder.ETSGLOBAL::toString5"
+//! PASS_AFTER    "BranchElimination"
+//! INST          /StringBuilder::<ctor>/
+//! INST_NEXT     /SaveState/
+//! INST_NEXT     /StringBuilder::toString/
+//! INST_NEXT     /SaveState/
+//! INST_NEXT     /StringBuilder::toString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST          /StringBuilder::<ctor>/
+//! INST_NEXT     /SaveState/
+//! INST_NEXT     /StringBuilder::toString/
+//! INST_NEXT_NOT /SaveState/
+//! INST_NEXT_NOT /StringBuilder::toString/
+//!
+//! METHOD        "ets_stringbuilder.ETSGLOBAL::toString6"
+//! PASS_AFTER    "BranchElimination"
+//! INST          /StringBuilder::<ctor>/
+//! INST_NEXT     /SaveState/
+//! INST_NEXT     /StringBuilder::toString/
+//! INST_NEXT     /SaveState/
+//! INST_NEXT     /StringBuilder::toString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST          /StringBuilder::<ctor>/
+//! INST_NEXT     /SaveState/
+//! INST_NEXT     /StringBuilder::toString/
+//! INST_NEXT_NOT /SaveState/
+//! INST_NEXT_NOT /StringBuilder::toString/
+//!
+//! METHOD        "ets_stringbuilder.ETSGLOBAL::toString7"
+//! PASS_AFTER    "BranchElimination"
+//! INST          /StringBuilder::<ctor>/
+//! INST_NEXT     /SaveState/
+//! INST_NEXT     /StringBuilder::toString/
+//! INST_NEXT     /SaveState/
+//! INST_NEXT     /StringBuilder::toString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST          /StringBuilder::<ctor>/
+//! INST_NEXT     /SaveState/
+//! INST_NEXT     /StringBuilder::toString/
+//! INST_NEXT     /SaveState/
+//! INST_NEXT     /StringBuilder::toString/
+//!
+//! METHOD        "ets_stringbuilder.ETSGLOBAL::toString8"
+//! PASS_AFTER    "BranchElimination"
+//! INST          /StringBuilder::<ctor>/
+//! INST_NEXT     /SaveState/
+//! INST_NEXT     /StringBuilder::toString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST          /StringBuilder::<ctor>/
+//! INST_NEXT     /SaveState/
+//! INST_NEXT     /StringBuilder::append/
+//! INST_NEXT     /SaveState/
+//! INST_NEXT     /StringBuilder::toString/
+//!
+//! METHOD        "ets_stringbuilder.ETSGLOBAL::toString10"
+//! PASS_AFTER    "BranchElimination"
+//! INST          /StringBuilder::<ctor>/
+//! INST_COUNT    /StringBuilder::toString/,3
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST          /StringBuilder::<ctor>/
+//! INST_COUNT    /StringBuilder::toString/,1
+
+//! CHECKER       INTERP-IRTOC, check StringBuilder::toString replacement
+//! SKIP_IF       @architecture == "arm32"
+//! RUN           options: "--compiler-enable-jit=false --interpreter-type=irtoc --compiler-enable-events --compiler-events-path=./events.csv", entry: "ets_stringbuilder.ETSGLOBAL::main"
+
+//! CHECKER       INTERP-CPP, check StringBuilder::toString replacement
+//! SKIP_IF       @architecture == "arm32"
+//! RUN           options: "--compiler-enable-jit=false --interpreter-type=cpp --compiler-enable-events --compiler-events-path=./events.csv", entry: "ets_stringbuilder.ETSGLOBAL::main"

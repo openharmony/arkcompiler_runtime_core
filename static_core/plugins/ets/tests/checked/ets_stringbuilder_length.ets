@@ -15,6 +15,7 @@
 
 //! CHECKER     StringBuilder length field access AOT unoptimized
 //! SKIP_IF     @architecture == "arm32"
+//! RUN_BCO       output: "#{@options.test_file}", options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
 //! RUN_PAOC    options: "--compiler-regex='.*StringCalculation00' --compiler-optimize-string-concat=true --compiler-inlining=false --compiler-check-final=false --compiler-simplify-string-builder=false"
 //!
 //! METHOD      "ets_stringbuilder_length.ETSGLOBAL::StringCalculation00"
@@ -180,3 +181,40 @@ function reuse_concat_loop1(a: String, n: int): String {
 function StringCalculation03() {
     arktest.assertEQ(reuse_concat_loop1("a", 4), "0a2a4a6a", "Wrong result at reuse_concat_loop1");
 }
+
+//! CHECKER     BCO, StringBuilder length field access BCO optimized
+//! SKIP_IF     @architecture == "arm32"
+//! RUN_BCO       output: "#{@options.test_file}", options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=true --bco-compiler --compiler-optimize-string-concat=true"
+//!
+//! METHOD      "ets_stringbuilder_length.ETSGLOBAL::StringCalculation00"
+//! PASS_AFTER  "BranchElimination"
+//! INST_COUNT  /StringBuilder::<ctor>/,3
+//! INST_COUNT  /StringBuilder::append/,6
+//! INST_COUNT  /StringBuilder::toString/,3
+//! INST_COUNT  /std.core.String::<get>length/,4
+//! INST_NOT    /std.core.StringBuilder::<get>stringLength/
+//! PASS_AFTER  "SimplifyStringBuilder"
+//! INST_COUNT  /StringBuilder::<ctor>/,1
+//! INST_COUNT  /StringBuilder::append/,4
+//! INST_COUNT  /StringBuilder::toString/,1
+//! INST_COUNT  /std.core.String::<get>length/,2
+//! INST_COUNT  /std.core.StringBuilder::<get>stringLength/,2
+//! PASS_AFTER  "SimplifyStringBuilder"
+//! IN_BLOCK    /loop 1, depth 1, bc: 0x000000a8/
+//! INST_NOT    /StringBuilder::<ctor>/
+//! INST_COUNT  /StringBuilder::append/,2
+//! INST_NOT    /StringBuilder::toString/
+//! PASS_AFTER  "SimplifyStringBuilder"
+//! IN_BLOCK    /bc:/
+//! INST_NOT    /StringBuilder::<ctor>/
+//! INST_NOT    /StringBuilder::append/
+//! INST_COUNT  /StringBuilder::toString/,1
+//! INST_COUNT  /std.core.String::<get>length/,2
+
+//! CHECKER       INTERP-IRTOC, StringBuilder length field access BCO optimized
+//! SKIP_IF       @architecture == "arm32"
+//! RUN           options: "--compiler-enable-jit=false --interpreter-type=irtoc --compiler-enable-events --compiler-events-path=./events.csv", entry: "ets_stringbuilder_length.ETSGLOBAL::StringCalculation00", result: 0
+
+//! CHECKER       INTERP-CPP, StringBuilder length field access BCO optimized
+//! SKIP_IF       @architecture == "arm32"
+//! RUN           options: "--compiler-enable-jit=false --interpreter-type=cpp --compiler-enable-events --compiler-events-path=./events.csv", entry: "ets_stringbuilder_length.ETSGLOBAL::StringCalculation00", result: 0

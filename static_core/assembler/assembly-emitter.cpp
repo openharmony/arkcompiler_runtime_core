@@ -825,6 +825,7 @@ static void AddBytecodeIndexDependencies(MethodItem *method, const Ins &insn,
                 AddBytecodeIndexDependencies(method, insn, entities.staticMethodItems, entities);
                 return;
             }
+            UNREACHABLE();
         }
         ASSERT_PRINT(it != items.cend(), "Symbol '" << id << "' not found");
 
@@ -1442,7 +1443,36 @@ bool AsmEmitter::MakeFunctionItems(
         return false;
     }
 
+    AddFakeIndexDependenciesForUnusedItems(entities);
+
     return true;
+}
+
+/// NOTE: (mivanov) Method below will be removed after #30937 implemented
+/*static*/
+void AsmEmitter::AddFakeIndexDependenciesForUnusedItems(AsmEmitter::AsmEntityCollections &entities)
+{
+    static std::vector<std::pair<std::string, std::vector<std::string>>> UNUSED_ITEM_KEYS_TO_EMIT = {
+        {
+            "std.core.String.<get>length:i32;",
+            {"std.core.StringBuilder.<get>stringLength:i32;"},
+        },
+    };
+
+    for (auto &[key, values] : UNUSED_ITEM_KEYS_TO_EMIT) {
+        auto dependant = entities.methodItems.find(key);
+        if (dependant == entities.methodItems.end()) {
+            continue;
+        }
+
+        for (auto &value : values) {
+            auto dependency = entities.methodItems.find(value);
+            if (dependency == entities.methodItems.end()) {
+                continue;
+            }
+            dependant->second->AddIndexDependency(dependency->second);
+        }
+    }
 }
 
 /* static */

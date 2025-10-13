@@ -38,6 +38,11 @@ function(panda_add_checked_test_ets)
         set(TEST_NAME "${ARG_NAME}.checked")
     endif()
     set(CHECKER "${PANDA_ROOT}/tests/checked/checker.rb")
+    if (CMAKE_VERBOSE_MAKEFILE)
+        set(CHECKER_VERBOSE "-v")
+    else()
+        set(CHECKER_VERBOSE "")
+    endif()
     set(TEST_DIR "${CMAKE_CURRENT_BINARY_DIR}/${TEST_NAME}")
     set(BINARY_FILE "${TEST_DIR}/test.abc")
     set(BUILD_LOG   "${TEST_DIR}/build.log")
@@ -139,6 +144,7 @@ function(panda_add_checked_test_ets)
                                          --build-config ${CHECKER_BUILD_CONFIG}
                                          ${RELEASE_OPT}
                                          ${WITH_LLVM}
+                                         ${CHECKER_VERBOSE}
                       WORKING_DIRECTORY ${TEST_DIR}
                       COMMENT "Running ${TEST_NAME} checked test"
                       DEPENDS ${BINARY_FILE} ${EXT_FILES})

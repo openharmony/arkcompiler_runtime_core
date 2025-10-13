@@ -91,7 +91,7 @@ OptionParser.new do |opts|
   opts.on('--interop', 'Do interop-specific actions')
     options.interop = true
 end.parse!(into: options)
-
+options.verbose = true
 $LOG_LEVEL = options.verbose ? Logger::DEBUG : Logger::ERROR
 $curr_cmd = nil
 
@@ -127,9 +127,11 @@ end
 class SearchScope
 
   attr_reader :lines
+  attr_reader :init_lines
   attr_reader :current_index
 
   def initialize(lines, name)
+    @init_lines = lines
     @lines = lines
     @name = name
     @current_index = 0
@@ -146,15 +148,29 @@ class SearchScope
     @current_index = 0
   end
 
-  def find_block(match)
-    @lines = @lines.drop(@current_index)
+  def find_block(match, nth = 1)
+    @lines = @init_lines
     @current_index = 0
-    find(match)
-    @lines = @lines.drop(@current_index - 1)
-    @current_index = 0
-    find(/succs:/)
-    @lines = @lines.slice(0, @current_index)
-    @current_index = 0
+    i = nth
+    begin
+      while i > 0 do
+        find(match)
+        i -= 1
+        @current_index = @current_index - 1 if i == 0
+        @lines = @lines.drop(@current_index)
+        @current_index = 0
+        if i == 0
+#          log.debug "Block found: #{@lines[@current_index]}, #{@lines[@current_index + 1]}"
+          find(/succs:/)
+          @lines = @lines.slice(0, @current_index)
+          @current_index = 0
+#        elsif
+#          log.debug "Block found by regexp: #{match_str(match)}, #{i} matches to find"
+        end
+      end
+    rescue RuntimeError
+      raise_error "Block not found by regexp: #{match_str(match)} , #{i} matches to find"
+    end
   end
 
   def self.from_file(fname, name)
@@ -468,15 +484,16 @@ class Checker
     inputs = @options.test_file
     output = "#{@cwd}/#{File.basename(@options.test_file, '.*')}.abc"
     @args = ''
-
+    # handles evaluation of expressions in arguments such as #{@options.test_file}
+    # specifically to use them in ets test annotations
     args.each do |name, value|
       case name
       when :options
-        @args << value
+        @args << eval("\"" + value + "\"")
       when :inputs
-        inputs = value
+        inputs = eval("\"" + value + "\"")
       when :output
-        output = value
+        output = eval("\"" + value + "\"")
       when :method
         @args << "--bco-optimizer --method-regex=#{value}:.*"
       end
@@ -606,10 +623,10 @@ class Checker
     raise_error "IR_COUNT mismatch for #{match}: expected=#{count}, real=#{real_count}" unless real_count == count
   end
 
-  def IN_BLOCK(match)
+  def IN_BLOCK(match, nth = 1)
     return if @options.release
 
-    @ir_scope.find_block(/prop: #{match}/)
+    @ir_scope.find_block(/prop: #{match}/, nth)
   end
 
   def LLVM_METHOD(match)
