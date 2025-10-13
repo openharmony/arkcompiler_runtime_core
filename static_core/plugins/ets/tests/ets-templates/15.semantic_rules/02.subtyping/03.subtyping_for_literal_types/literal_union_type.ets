@@ -20,8 +20,12 @@ desc: Subtype relation among union literal, union string and string
 type UnionWide = String | String
 type UnionNarrow = "some_string" | "some_other_string"
 
+function foo(): UnionNarrow {
+  return "some_other_string"
+}
+
 function main(): void {
-  let a: UnionNarrow = "some_other_string"
+  let a: UnionNarrow = foo()
   let b: UnionWide = a
   arktest.assertEQ(b, "some_other_string")
   let c: String = b
