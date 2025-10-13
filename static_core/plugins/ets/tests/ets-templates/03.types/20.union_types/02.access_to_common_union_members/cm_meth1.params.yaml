@@ -13,23 +13,16 @@
 
 ---
 cases:
-    # Common methods
     - decl: |-
           // classes, methods of any type
           class A {
               meth(): Object|null|undefined {
                   return undefined
               }
-              meth(p: string): Object|null|undefined {
-                  return new Object()
-              }
           }
           class B {
               meth(): Object|null|undefined {
                   return null
-              }
-              meth(p: string): Object|null|undefined {
-                  return new Object()
               }
           }
           let u1: A|B = new A
@@ -37,7 +30,6 @@ cases:
       use: |-
           arktest.assertTrue(u1.meth() === undefined)
           arktest.assertTrue(u2.meth() === null)
-      tags: "compile-only, negative"
 
     - decl: |-
           // classes, methods of number type
@@ -309,45 +301,118 @@ cases:
           arktest.assertEQ(u1.meth(), 1)  // CTE: different signatures
 
     - decl: |-
-          // overload signatures
-          class A {
-              meth(p: Object): number {
-                  return 1
-              }
-              meth(p: number): number {
-                  return 1
+          // interface one - classes, methods of any type
+          interface I { meth(): Object|null|undefined }
+          class A implements I {
+              meth(): Object|null|undefined {
+                  return undefined
               }
           }
           class B {
-              meth(p: Object): number {
-                  return 2
+              meth(): Object|null|undefined {
+                  return null
               }
           }
           let u1: A|B = new A
-      tags: compile-only, negative
+          let u2: A|B = new B
       use: |-
-          arktest.assertEQ(u1.meth(new Object()), 1)  // CTE: method with overload signature
+          arktest.assertTrue(u1.meth() === undefined)
+          arktest.assertTrue(u2.meth() === null)
 
     - decl: |-
-          // overload alias
-          class A {
-              overload meth { meth1, meth2 }
-              meth1(p: Object): number {
-                  return 1
-              }
-              meth2(p: number): number {
-                  return 1
+          // interface both - classes, methods of any type
+          interface I { meth(): Object|null|undefined }
+          interface J { meth(): Object|null|undefined }
+          class A implements I {
+              meth(): Object|null|undefined {
+                  return undefined
               }
           }
-          class B {
-              meth(p: Object): number {
-                  return 2
-              }
-              meth1(p: number): number {
-                  return 2
+          class B implements J {
+              meth(): Object|null|undefined {
+                  return null
               }
           }
           let u1: A|B = new A
-      tags: compile-only, negative
+          let u2: A|B = new B
       use: |-
-          arktest.assertEQ(u1.meth(), 1)  // CTE: method with overload signature
+          arktest.assertTrue(u1.meth() === undefined)
+          arktest.assertTrue(u2.meth() === null)
+
+    - decl: |-
+          // interface one - classes, methods of any type, union with interface
+          interface I { meth(): Object|null|undefined }
+          class A implements I {
+              meth(): Object|null|undefined {
+                  return undefined
+              }
+          }
+          class B {
+              meth(): Object|null|undefined {
+                  return null
+              }
+          }
+          let u1: I|B = new A
+          let u2: I|B = new B
+      use: |-
+          arktest.assertTrue(u1.meth() === undefined)
+          arktest.assertTrue(u2.meth() === null)
+
+    - decl: |-
+          // interface both - classes, methods of any type, union with interface
+          interface I { meth(): Object|null|undefined }
+          interface J { meth(): Object|null|undefined }
+          class A implements I {
+              meth(): Object|null|undefined {
+                  return undefined
+              }
+          }
+          class B implements J {
+              meth(): Object|null|undefined {
+                  return null
+              }
+          }
+          let u1: I|J = new A
+          let u2: I|J = new B
+      use: |-
+          arktest.assertTrue(u1.meth() === undefined)
+          arktest.assertTrue(u2.meth() === null)
+
+    - decl: |-
+          // classes, methods of any type, one extends
+          class A {
+              meth(): Object|null|undefined {
+                  return undefined
+              }
+          }
+          class B {
+              meth(): Object|null|undefined {
+                  return null
+              }
+          }
+          class C extends A {}
+          let u1: A|B = new C
+          let u2: A|B = new B
+      use: |-
+          arktest.assertTrue(u1.meth() === undefined)
+          arktest.assertTrue(u2.meth() === null)
+
+    - decl: |-
+          // classes, methods of any type, both extend
+          class A {
+              meth(): Object|null|undefined {
+                  return undefined
+              }
+          }
+          class B {
+              meth(): Object|null|undefined {
+                  return null
+              }
+          }
+          class C extends A {}
+          class D extends B {}
+          let u1: A|B = new C
+          let u2: A|B = new D
+      use: |-
+          arktest.assertTrue(u1.meth() === undefined)
+          arktest.assertTrue(u2.meth() === null)
