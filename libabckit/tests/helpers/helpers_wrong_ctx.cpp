@@ -495,6 +495,16 @@ void TestWrongCtx(AbckitInst *(*apiToCheck)(AbckitGraph *graph, AbckitInst *inpu
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_CTX);
 }
 
+void TestWrongCtx(AbckitInst *(*apiToCheck)(AbckitGraph *graph, AbckitInst *input0, AbckitString *field,
+                                            AbckitTypeId returnTypeId))
+{
+    g_dummyInsT1->graph = g_dummyGrapH1;
+
+    auto *instr = apiToCheck(g_dummyGrapH2, g_dummyInsT1, g_dummyString, ABCKIT_TYPE_ID_I32);
+    ASSERT_EQ(instr, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_CTX);
+}
+
 void TestWrongCtx(AbckitInst *(*apiToCheck)(AbckitGraph *graph, AbckitInst *input0, AbckitCoreExportDescriptor *e))
 {
     g_dummyInsT2->graph = g_dummyGrapH2;
@@ -630,6 +640,19 @@ void TestWrongCtx(AbckitInst *(*apiToCheck)(AbckitGraph *graph, AbckitInst *inpu
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_CTX);
 
     instr = apiToCheck(g_dummyGrapH1, g_dummyInsT2, g_dummyMethoD1, 0x0);
+    ASSERT_EQ(instr, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_CTX);
+}
+
+void TestWrongCtx(AbckitInst *(*apiToCheck)(AbckitGraph *graph, AbckitInst *inputObj, AbckitString *fieldId,
+                                            AbckitInst *value, AbckitTypeId typeId))
+{
+    g_dummyInsT1->graph = g_dummyGrapH1;
+    auto *instr = apiToCheck(g_dummyGrapH1, g_dummyInsT2, g_dummyString, g_dummyInsT1, ABCKIT_TYPE_ID_INVALID);
+    ASSERT_EQ(instr, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_CTX);
+
+    instr = apiToCheck(g_dummyGrapH1, g_dummyInsT1, g_dummyString, g_dummyInsT2, ABCKIT_TYPE_ID_INVALID);
     ASSERT_EQ(instr, nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_CTX);
 }

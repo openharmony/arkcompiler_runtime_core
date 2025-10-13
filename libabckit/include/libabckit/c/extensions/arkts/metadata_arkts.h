@@ -78,6 +78,8 @@ struct CAPI_EXPORT AbckitArktsInspectApi {
      * @return Pointer to the language-independent representation of the `m`.
      * @param [ in ] m - Module to convert.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `m` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `m` is does not have `ABCKIT_TARGET_ARK_TS_V1` or
+     * `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     AbckitCoreModule *(*arktsModuleToCoreModule)(AbckitArktsModule *m);
 
@@ -102,6 +104,8 @@ struct CAPI_EXPORT AbckitArktsInspectApi {
      * @return Pointer to the language-independent representation of the `ns`.
      * @param [ in ] ns - Namespace to convert.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `ns` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `ns` is does not have `ABCKIT_TARGET_ARK_TS_V1` or
+     * `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     AbckitCoreNamespace *(*arktsNamespaceToCoreNamespace)(AbckitArktsNamespace *ns);
 
@@ -135,6 +139,7 @@ struct CAPI_EXPORT AbckitArktsInspectApi {
      * @return Pointer to the language-independent representation of the `id`.
      * @param [ in ] id - Import descriptor to convert.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `id` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `id` is does not have `ABCKIT_TARGET_ARK_TS_V1` target.
      */
     AbckitCoreImportDescriptor *(*arktsImportDescriptorToCoreImportDescriptor)(AbckitArktsImportDescriptor *id);
 
@@ -144,8 +149,7 @@ struct CAPI_EXPORT AbckitArktsInspectApi {
      * @return Pointer to the language-dependent representation of the `id`.
      * @param [ in ] id - Import descriptor to convert.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `id` is NULL.
-     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `id` is does not have `ABCKIT_TARGET_ARK_TS_V1` or
-     * `ABCKIT_TARGET_ARK_TS_V2` target.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `id` is does not have `ABCKIT_TARGET_ARK_TS_V1` target.
      */
     AbckitArktsImportDescriptor *(*coreImportDescriptorToArktsImportDescriptor)(AbckitCoreImportDescriptor *id);
 
@@ -159,6 +163,7 @@ struct CAPI_EXPORT AbckitArktsInspectApi {
      * @return Pointer to the language-independent representation of the `ed`.
      * @param [ in ] ed - Export descriptor to convert.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `ed` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `ed` is does not have `ABCKIT_TARGET_ARK_TS_V1` target.
      */
     AbckitCoreExportDescriptor *(*arktsExportDescriptorToCoreExportDescriptor)(AbckitArktsExportDescriptor *ed);
 
@@ -168,8 +173,7 @@ struct CAPI_EXPORT AbckitArktsInspectApi {
      * @return Pointer to the language-dependent representation of the `ed`.
      * @param [ in ] ed - Export descriptor to convert.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `ed` is NULL.
-     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `ed` is does not have `ABCKIT_TARGET_ARK_TS_V1` or
-     * `ABCKIT_TARGET_ARK_TS_V2` target.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `ed` is does not have `ABCKIT_TARGET_ARK_TS_V1` target.
      */
     AbckitArktsExportDescriptor *(*coreExportDescriptorToArktsExportDescriptor)(AbckitCoreExportDescriptor *ed);
 
@@ -183,6 +187,8 @@ struct CAPI_EXPORT AbckitArktsInspectApi {
      * @return Pointer to the language-independent representation of the `klass`.
      * @param [ in ] klass - Class to convert.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `klass` is does not have `ABCKIT_TARGET_ARK_TS_V1` or
+     * `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     AbckitCoreClass *(*arktsClassToCoreClass)(AbckitArktsClass *klass);
 
@@ -202,6 +208,7 @@ struct CAPI_EXPORT AbckitArktsInspectApi {
      * @return `true` if class `klass` is final.
      * @param [ in ] klass - Class to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `klass` is does not have `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     bool (*arktsClassIsFinal)(AbckitArktsClass *klass);
 
@@ -210,6 +217,7 @@ struct CAPI_EXPORT AbckitArktsInspectApi {
      * @return `true` if class `klass` is abstract.
      * @param [ in ] klass - Class to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `klass` is does not have `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     bool (*arktsClassIsAbstract)(AbckitArktsClass *klass);
 
@@ -223,6 +231,8 @@ struct CAPI_EXPORT AbckitArktsInspectApi {
      * @return Pointer to the language-independent representation of the `iface`.
      * @param [ in ] iface - Interface to convert.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `iface` is does not have `ABCKIT_TARGET_ARK_TS_V1` or
+     * `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     AbckitCoreInterface *(*arktsInterfaceToCoreInterface)(AbckitArktsInterface *iface);
 
@@ -247,6 +257,7 @@ struct CAPI_EXPORT AbckitArktsInspectApi {
      * @return Pointer to the language-independent representation of the `enm`.
      * @param [ in ] enm - Enum to convert.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `enm` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `enm` is does not have `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     AbckitCoreEnum *(*arktsEnumToCoreEnum)(AbckitArktsEnum *enm);
 
@@ -256,8 +267,7 @@ struct CAPI_EXPORT AbckitArktsInspectApi {
      * @return Pointer to the language-dependent representation of the `enm`.
      * @param [ in ] enm - Enum to convert.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `enm` is NULL.
-     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `enm` is does not have `ABCKIT_TARGET_ARK_TS_V1` or
-     * `ABCKIT_TARGET_ARK_TS_V2` target.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `enm` is does not have `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     AbckitArktsEnum *(*coreEnumToArktsEnum)(AbckitCoreEnum *enm);
 
@@ -271,6 +281,7 @@ struct CAPI_EXPORT AbckitArktsInspectApi {
      * @return Pointer to the language-independent representation of the `field`.
      * @param [ in ] field - Module field to convert.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `field` is does not have `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     AbckitCoreModuleField *(*arktsModuleFieldToCoreModuleField)(AbckitArktsModuleField *field);
 
@@ -280,8 +291,7 @@ struct CAPI_EXPORT AbckitArktsInspectApi {
      * @return Pointer to the language-dependent representation of the `field`.
      * @param [ in ] field - Module field to convert.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
-     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `field` is does not have `ABCKIT_TARGET_ARK_TS_V1` or
-     * `ABCKIT_TARGET_ARK_TS_V2` target.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `field` is does not have `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     AbckitArktsModuleField *(*coreModuleFieldToArktsModuleField)(AbckitCoreModuleField *field);
 
@@ -295,8 +305,7 @@ struct CAPI_EXPORT AbckitArktsInspectApi {
      * @return Pointer to the language-dependent representation of the `field`.
      * @param [ in ] field - Namespace field to convert.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
-     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `field` is does not have `ABCKIT_TARGET_ARK_TS_V1` or
-     * `ABCKIT_TARGET_ARK_TS_V2` target.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `field` is does not have `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     AbckitArktsNamespaceField *(*coreNamespaceFieldToArktsNamespaceField)(AbckitCoreNamespaceField *field);
 
@@ -310,6 +319,7 @@ struct CAPI_EXPORT AbckitArktsInspectApi {
      * @return Pointer to the language-independent representation of the `field`.
      * @param [ in ] field - Class field to convert.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `field` is does not have `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     AbckitCoreClassField *(*arktsClassFieldToCoreClassField)(AbckitArktsClassField *field);
 
@@ -319,8 +329,7 @@ struct CAPI_EXPORT AbckitArktsInspectApi {
      * @return Pointer to the language-dependent representation of the `field`.
      * @param [ in ] field - Class field to convert.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
-     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `field` is does not have `ABCKIT_TARGET_ARK_TS_V1` or
-     * `ABCKIT_TARGET_ARK_TS_V2` target.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `field` is does not have `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     AbckitArktsClassField *(*coreClassFieldToArktsClassField)(AbckitCoreClassField *field);
 
@@ -334,6 +343,7 @@ struct CAPI_EXPORT AbckitArktsInspectApi {
      * @return Pointer to the language-independent representation of the `field`.
      * @param [ in ] field - Interface field to convert.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `field` is does not have`ABCKIT_TARGET_ARK_TS_V2` target.
      */
     AbckitCoreInterfaceField *(*arktsInterfaceFieldToCoreInterfaceField)(AbckitArktsInterfaceField *field);
 
@@ -343,8 +353,7 @@ struct CAPI_EXPORT AbckitArktsInspectApi {
      * @return Pointer to the language-dependent representation of the `field`.
      * @param [ in ] field - Interface field to convert.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
-     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `field` is does not have `ABCKIT_TARGET_ARK_TS_V1` or
-     * `ABCKIT_TARGET_ARK_TS_V2` target.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `field` is does not have `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     AbckitArktsInterfaceField *(*coreInterfaceFieldToArktsInterfaceField)(AbckitCoreInterfaceField *field);
 
@@ -353,6 +362,7 @@ struct CAPI_EXPORT AbckitArktsInspectApi {
      * @return `true` if field `field` is readonly.
      * @param [ in ] field - Field to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `field` is does not have `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     bool (*arktsInterfaceFieldIsReadonly)(AbckitArktsInterfaceField *field);
 
@@ -366,6 +376,7 @@ struct CAPI_EXPORT AbckitArktsInspectApi {
      * @return Pointer to the language-independent representation of the `field`.
      * @param [ in ] field - Enum field to convert.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `field` is does not have `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     AbckitCoreEnumField *(*arktsEnumFieldToCoreEnumField)(AbckitArktsEnumField *field);
 
@@ -375,8 +386,7 @@ struct CAPI_EXPORT AbckitArktsInspectApi {
      * @return Pointer to the language-dependent representation of the `field`.
      * @param [ in ] field - Enum field to convert.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
-     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `field` is does not have `ABCKIT_TARGET_ARK_TS_V1` or
-     * `ABCKIT_TARGET_ARK_TS_V2` target.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `field` is does not have `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     AbckitArktsEnumField *(*coreEnumFieldToArktsEnumField)(AbckitCoreEnumField *field);
 
@@ -390,6 +400,8 @@ struct CAPI_EXPORT AbckitArktsInspectApi {
      * @return Pointer to the language-independent representation of the `function`.
      * @param [ in ] function - Function to convert.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `function` is does not have `ABCKIT_TARGET_ARK_TS_V1` or
+     * `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     AbckitCoreFunction *(*arktsFunctionToCoreFunction)(AbckitArktsFunction *function);
 
@@ -409,6 +421,8 @@ struct CAPI_EXPORT AbckitArktsInspectApi {
      * @return `true` if `function` is native, `false` otherwise.
      * @param [ in ] function - Function to inspect.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `function` is does not have `ABCKIT_TARGET_ARK_TS_V1` or
+     * `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     bool (*functionIsNative)(AbckitArktsFunction *function);
 
@@ -417,6 +431,7 @@ struct CAPI_EXPORT AbckitArktsInspectApi {
      * @return `true` if `function` is async, `false` otherwise.
      * @param [ in ] function - Function to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `function` is does not have `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     bool (*functionIsAsync)(AbckitArktsFunction *function);
 
@@ -425,6 +440,7 @@ struct CAPI_EXPORT AbckitArktsInspectApi {
      * @return `true` if `function` is final, `false` otherwise.
      * @param [ in ] function - Function to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `function` is does not have `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     bool (*functionIsFinal)(AbckitArktsFunction *function);
 
@@ -433,6 +449,7 @@ struct CAPI_EXPORT AbckitArktsInspectApi {
      * @return `true` if `function` is abstract, `false` otherwise.
      * @param [ in ] function - Function to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `function` is does not have `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     bool (*functionIsAbstract)(AbckitArktsFunction *function);
 
@@ -446,6 +463,8 @@ struct CAPI_EXPORT AbckitArktsInspectApi {
      * @return Pointer to the language-independent representation of the `anno`.
      * @param [ in ] anno - Annotation to convert.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `anno` is does not have `ABCKIT_TARGET_ARK_TS_V1` or
+     * `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     AbckitCoreAnnotation *(*arktsAnnotationToCoreAnnotation)(AbckitArktsAnnotation *anno);
 
@@ -470,6 +489,8 @@ struct CAPI_EXPORT AbckitArktsInspectApi {
      * @return Pointer to the language-independent representation of the `annoElem`.
      * @param [ in ] annoElem - Annotation element to convert.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `annoElem` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `annoElem` is does not have `ABCKIT_TARGET_ARK_TS_V1` or
+     * `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     AbckitCoreAnnotationElement *(*arktsAnnotationElementToCoreAnnotationElement)(
         AbckitArktsAnnotationElement *annoElem);
@@ -496,6 +517,8 @@ struct CAPI_EXPORT AbckitArktsInspectApi {
      * @return Pointer to the language-independent representation of the `annoInterface`.
      * @param [ in ] annoInterface - Annotataion interface to convert.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `annoInterface` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `annoInterface` is does not have `ABCKIT_TARGET_ARK_TS_V1` or
+     * `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     AbckitCoreAnnotationInterface *(*arktsAnnotationInterfaceToCoreAnnotationInterface)(
         AbckitArktsAnnotationInterface *annoInterface);
@@ -522,6 +545,8 @@ struct CAPI_EXPORT AbckitArktsInspectApi {
      * @return Pointer to the language-independent representation of the `annoInterfaceField`.
      * @param [ in ] annoInterfaceField - Annotation inteface field to convert.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `annoInterfaceField` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `annoInterfaceField` is does not have `ABCKIT_TARGET_ARK_TS_V1`
+     * or `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     AbckitCoreAnnotationInterfaceField *(*arktsAnnotationInterfaceFieldToCoreAnnotationInterfaceField)(
         AbckitArktsAnnotationInterfaceField *annoInterfaceField);
@@ -764,6 +789,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] params - Data that is used to create the external module.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `file` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `params` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `params` is does not have `ABCKIT_TARGET_ARK_TS_V1` target.
      * @note Allocates
      */
     AbckitArktsModule *(*fileAddExternalModuleArktsV1)(AbckitFile *file,
@@ -776,6 +802,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] moduleName - The name of the external module.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `file` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `moduleName` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `file` is does not have `ABCKIT_TARGET_ARK_TS_V2` target.
      * @note Allocates
      */
     AbckitArktsModule *(*fileAddExternalModuleArktsV2)(AbckitFile *file, const char *moduleName);
@@ -791,6 +818,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] name - Name to be set.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `m` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `m` is does not have `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     bool (*moduleSetName)(AbckitArktsModule *m, const char *name);
 
@@ -803,6 +831,8 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `importing` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `imported` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `params` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `importing` is does not have `ABCKIT_TARGET_ARK_TS_V1` target.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `imported` is does not have `ABCKIT_TARGET_ARK_TS_V1` target.
      * @note Allocates
      */
     AbckitArktsImportDescriptor *(*moduleAddImportFromArktsV1ToArktsV1)(
@@ -815,6 +845,8 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] className - The name of the class to import.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `externalModule` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `className` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `externalModule` is does not have `ABCKIT_TARGET_ARK_TS_V2`
+     * target.
      * @note Allocates
      */
     AbckitArktsClass *(*moduleImportClassFromArktsV2toArktsV2)(AbckitArktsModule *externalModule,
@@ -829,6 +861,8 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] params - Array of parameter type strings.
      * @param [ in ] paramCount - Number of parameters in the params array.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if any parameter is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `externalModule` is does not have `ABCKIT_TARGET_ARK_TS_V2`
+     * target.
      * @note Allocates
      */
     AbckitArktsFunction *(*moduleImportStaticFunctionFromArktsV2ToArktsV2)(AbckitArktsModule *externalModule,
@@ -848,6 +882,8 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] params - Array of parameter type strings (excluding 'this' parameter).
      * @param [ in ] paramCount - Number of parameters in the params array.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if any parameter is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `externalModule` is does not have `ABCKIT_TARGET_ARK_TS_V2`
+     * target.
      * @note Allocates
      */
     AbckitArktsFunction *(*moduleImportClassMethodFromArktsV2ToArktsV2)(AbckitArktsModule *externalModule,
@@ -862,7 +898,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `m` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `id` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if module `m` does not have the import descriptor `id`.
-     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if module `m` doesn;t have `ABCKIT_TARGET_ARK_TS_V1` target.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if module `m` does not have `ABCKIT_TARGET_ARK_TS_V1` target.
      */
     void (*moduleRemoveImport)(AbckitArktsModule *m, AbckitArktsImportDescriptor *id);
 
@@ -902,7 +938,8 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] params - Data that is used to create the annotation interface.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `m` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `params` is NULL.
-     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if module `m` doesn't have `ABCKIT_TARGET_ARK_TS_V1` target.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if module `m` doesn't have `ABCKIT_TARGET_ARK_TS_V1` or
+     * `ABCKIT_TARGET_ARK_TS_V2` target.
      * @note Allocates
      */
     AbckitArktsAnnotationInterface *(*moduleAddAnnotationInterface)(
@@ -916,6 +953,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `module` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `params` is NULL.
      * @note Only modified the module record.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `m` is does not have `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     AbckitArktsModuleField *(*moduleAddField)(AbckitArktsModule *m, const struct AbckitArktsFieldCreateParams *params);
 
@@ -930,6 +968,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] name - Name to be set.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `ns` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `ns` is does not have `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     bool (*namespaceSetName)(AbckitArktsNamespace *ns, const char *name);
 
@@ -944,7 +983,8 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] params - Data that is used to create the annotation.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `params` is NULL.
-     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if class `klass` doesn't have `ABCKIT_TARGET_ARK_TS_V1` target.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if class `klass` doesn't have `ABCKIT_TARGET_ARK_TS_V1` or
+     * `ABCKIT_TARGET_ARK_TS_V2` target.
      * @note Allocates
      */
     AbckitArktsAnnotation *(*classAddAnnotation)(AbckitArktsClass *klass,
@@ -957,7 +997,8 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] anno - Annotation to remove.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is NULL.
-     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if class `klass` doesn't have `ABCKIT_TARGET_ARK_TS_V1` target.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if class `klass` doesn't have `ABCKIT_TARGET_ARK_TS_V1` or
+     * `ABCKIT_TARGET_ARK_TS_V2` target.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if class `klass` doesn't have the annotation `anno`.
      */
     void (*classRemoveAnnotation)(AbckitArktsClass *klass, AbckitArktsAnnotation *anno);
@@ -969,6 +1010,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] iface - Interface to be added.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `klass` is does not have `ABCKIT_TARGET_ARK_TS_V2` target
      */
     bool (*classAddInterface)(AbckitArktsClass *klass, AbckitArktsInterface *iface);
 
@@ -980,6 +1022,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is not an interface of class `klass`.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `klass` is does not have `ABCKIT_TARGET_ARK_TS_V2` target
      */
     bool (*classRemoveInterface)(AbckitArktsClass *klass, AbckitArktsInterface *iface);
 
@@ -990,6 +1033,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] superClass - Super class to be set.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `superClass` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `klass` is does not have `ABCKIT_TARGET_ARK_TS_V2` target
      */
     bool (*classSetSuperClass)(AbckitArktsClass *klass, AbckitArktsClass *superClass);
 
@@ -1000,6 +1044,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] name - Name to be set.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `klass` is does not have `ABCKIT_TARGET_ARK_TS_V2` target
      */
     bool (*classSetName)(AbckitArktsClass *klass, const char *name);
 
@@ -1011,6 +1056,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `params` is NULL.
      * @note Only modified the class record.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `klass` is does not have `ABCKIT_TARGET_ARK_TS_V2` target
      */
     AbckitArktsClassField *(*classAddField)(AbckitArktsClass *klass, const struct AbckitArktsFieldCreateParams *params);
 
@@ -1022,6 +1068,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is not a field of class `klass`.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `klass` is does not have `ABCKIT_TARGET_ARK_TS_V2` target
      */
     bool (*classRemoveField)(AbckitArktsClass *klass, AbckitArktsClassField *field);
 
@@ -1033,6 +1080,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `method` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `method` is not a method of class `klass`.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `klass` is does not have `ABCKIT_TARGET_ARK_TS_V2` target
      */
     bool (*classRemoveMethod)(AbckitArktsClass *klass, AbckitArktsFunction *method);
 
@@ -1041,6 +1089,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @return Pointer to the created class.
      * @param [ in ] name - Name of the class to be created.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `m` is does not have `ABCKIT_TARGET_ARK_TS_V2` target
      */
     AbckitArktsClass *(*createClass)(AbckitArktsModule *m, const char *name);
 
@@ -1051,6 +1100,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] module - Module to be set.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `module` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `klass` is does not have `ABCKIT_TARGET_ARK_TS_V2` target
      */
     bool (*classSetOwningModule)(AbckitArktsClass *klass, AbckitArktsModule *module);
 
@@ -1065,6 +1115,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] superInterface - Super interface to be added.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `superInterface` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `iface` is does not have `ABCKIT_TARGET_ARK_TS_V2` target
      */
     bool (*interfaceAddSuperInterface)(AbckitArktsInterface *iface, AbckitArktsInterface *superInterface);
 
@@ -1076,6 +1127,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `superInterface` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `superInterface` is not a super interface of `iface`.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `iface` is does not have `ABCKIT_TARGET_ARK_TS_V2` target
      */
     bool (*interfaceRemoveSuperInterface)(AbckitArktsInterface *iface, AbckitArktsInterface *superInterface);
 
@@ -1086,6 +1138,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] name - Name to be set.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `iface` is does not have `ABCKIT_TARGET_ARK_TS_V2` target
      */
     bool (*interfaceSetName)(AbckitArktsInterface *iface, const char *name);
 
@@ -1096,6 +1149,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] params - param of field to be added.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `params` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `iface` is does not have `ABCKIT_TARGET_ARK_TS_V2` target
      */
     AbckitArktsInterfaceField *(*interfaceAddField)(AbckitArktsInterface *iface,
                                                     const struct AbckitArktsInterfaceFieldCreateParams *params);
@@ -1107,6 +1161,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is not a field of interface `iface`.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `iface` is does not have `ABCKIT_TARGET_ARK_TS_V2` target
      */
     bool (*interfaceRemoveField)(AbckitArktsInterface *iface, AbckitArktsInterfaceField *field);
 
@@ -1117,6 +1172,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] method - Method to be added.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `method` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `iface` is does not have `ABCKIT_TARGET_ARK_TS_V2` target
      */
     bool (*interfaceAddMethod)(AbckitArktsInterface *iface, AbckitArktsFunction *method);
 
@@ -1128,6 +1184,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `method` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `method` is not a method of interface `iface`.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `iface` is does not have `ABCKIT_TARGET_ARK_TS_V2` target
      */
     bool (*interfaceRemoveMethod)(AbckitArktsInterface *iface, AbckitArktsFunction *method);
 
@@ -1138,6 +1195,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] module - Module to be set.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `module` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `iface` is does not have `ABCKIT_TARGET_ARK_TS_V2` target
      */
     bool (*interfaceSetOwningModule)(AbckitArktsInterface *iface, AbckitArktsModule *module);
 
@@ -1146,6 +1204,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @return Pointer to the created interface.
      * @param [ in ] name - Name of the interface to be created.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `m` is does not have `ABCKIT_TARGET_ARK_TS_V2` target
      */
     AbckitArktsInterface *(*createInterface)(AbckitArktsModule *m, const char *name);
 
@@ -1160,6 +1219,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] name - Name to be set.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `enm` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `enm` is does not have `ABCKIT_TARGET_ARK_TS_V2` target
      */
     bool (*enumSetName)(AbckitArktsEnum *enm, const char *name);
 
@@ -1171,6 +1231,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `enm` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `params` is NULL.
      * @note Only modified the enum record.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `enm` is does not have `ABCKIT_TARGET_ARK_TS_V2` target
      */
     AbckitArktsEnumField *(*enumAddField)(AbckitArktsEnum *enm, const struct AbckitArktsFieldCreateParams *params);
 
@@ -1179,34 +1240,13 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * ======================================== */
 
     /**
-     * @brief Adds annotation `anno` to the list of annotations for module field `field`.
-     * @return `true` on success.
-     * @param [ in ] field - Field to be inspected.
-     * @param [ in ] params - Data that is used to create the annotation.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `params` is NULL.
-     */
-    bool (*moduleFieldAddAnnotation)(AbckitArktsModuleField *field,
-                                     const struct AbckitArktsAnnotationCreateParams *params);
-
-    /**
-     * @brief Removes annotation `anno` from the list of annotations for module field `field`.
-     * @return `true` on success.
-     * @param [ in ] field - Field to be inspected.
-     * @param [ in ] anno - Annotation to be removed.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is NULL.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is not an annotation of field `field`.
-     */
-    bool (*moduleFieldRemoveAnnotation)(AbckitArktsModuleField *field, AbckitArktsAnnotation *anno);
-
-    /**
      * @brief Sets name for module field `field`.
      * @return `true` on success.
      * @param [ in ] field - Field to be inspected.
      * @param [ in ] name - Name to be set.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `field` is does not have `ABCKIT_TARGET_ARK_TS_V2` target
      */
     bool (*moduleFieldSetName)(AbckitArktsModuleField *field, const char *name);
 
@@ -1217,6 +1257,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] type - Type to be set.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `type` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `field` is does not have `ABCKIT_TARGET_ARK_TS_V2` target
      */
     bool (*moduleFieldSetType)(AbckitArktsModuleField *field, AbckitType *type);
 
@@ -1227,6 +1268,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] value - Value to be set.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `value` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `field` is does not have `ABCKIT_TARGET_ARK_TS_V2` target
      */
     bool (*moduleFieldSetValue)(AbckitArktsModuleField *field, AbckitValue *value);
 
@@ -1241,6 +1283,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] name - Name to be set.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `field` is does not have `ABCKIT_TARGET_ARK_TS_V2` target
      */
     bool (*namespaceFieldSetName)(AbckitArktsNamespaceField *field, const char *name);
 
@@ -1255,6 +1298,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] params - Data that is used to create the annotation.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `params` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `field` is does not have `ABCKIT_TARGET_ARK_TS_V2` target
      */
     bool (*classFieldAddAnnotation)(AbckitArktsClassField *field,
                                     const struct AbckitArktsAnnotationCreateParams *params);
@@ -1267,6 +1311,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is not an annotation of field `field`.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `field` is does not have `ABCKIT_TARGET_ARK_TS_V2` target
      */
     bool (*classFieldRemoveAnnotation)(AbckitArktsClassField *field, AbckitArktsAnnotation *anno);
 
@@ -1277,6 +1322,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] name - Name to be set.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `field` is does not have `ABCKIT_TARGET_ARK_TS_V2` target
      */
     bool (*classFieldSetName)(AbckitArktsClassField *field, const char *name);
 
@@ -1287,6 +1333,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] type - Type to be set.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `type` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `field` is does not have `ABCKIT_TARGET_ARK_TS_V2` target
      */
     bool (*classFieldSetType)(AbckitArktsClassField *field, AbckitType *type);
 
@@ -1297,6 +1344,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] value - Value to be set.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `value` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `field` is does not have `ABCKIT_TARGET_ARK_TS_V2` target
      */
     bool (*classFieldSetValue)(AbckitArktsClassField *field, AbckitValue *value);
 
@@ -1311,6 +1359,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] params - Data that is used to create the annotation.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `params` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `field` is does not have `ABCKIT_TARGET_ARK_TS_V2` target
      */
     bool (*interfaceFieldAddAnnotation)(AbckitArktsInterfaceField *field,
                                         const struct AbckitArktsAnnotationCreateParams *params);
@@ -1323,6 +1372,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is not an annotation of field `field`.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `field` is does not have `ABCKIT_TARGET_ARK_TS_V2` target
      */
     bool (*interfaceFieldRemoveAnnotation)(AbckitArktsInterfaceField *field, AbckitArktsAnnotation *anno);
 
@@ -1333,6 +1383,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] name - Name to be set.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `field` is does not have `ABCKIT_TARGET_ARK_TS_V2` target
      */
     bool (*interfaceFieldSetName)(AbckitArktsInterfaceField *field, const char *name);
 
@@ -1343,6 +1394,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] type - Type to be set.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `type` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `field` is does not have `ABCKIT_TARGET_ARK_TS_V2` target
      */
     bool (*interfaceFieldSetType)(AbckitArktsInterfaceField *field, AbckitType *type);
 
@@ -1357,28 +1409,9 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] name - Name to be set.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `field` is does not have `ABCKIT_TARGET_ARK_TS_V2` target
      */
     bool (*enumFieldSetName)(AbckitArktsEnumField *field, const char *name);
-
-    /**
-     * @brief Sets type for enum field `field`.
-     * @return `true` on success.
-     * @param [ in ] field - Field to be inspected.
-     * @param [ in ] type - Type to be set.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `type` is NULL.
-     */
-    bool (*enumFieldSetType)(AbckitArktsEnumField *field, AbckitType *type);
-
-    /**
-     * @brief Sets value for enum field `field`.
-     * @return `true` on success.
-     * @param [ in ] field - Field to be inspected.
-     * @param [ in ] value - Value to be set.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `value` is NULL.
-     */
-    bool (*enumFieldSetValue)(AbckitArktsEnumField *field, AbckitValue *value);
 
     /* ========================================
      * AnnotationInterface
@@ -1391,6 +1424,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] name - Name to be set.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `ai` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `ai` is does not have `ABCKIT_TARGET_ARK_TS_V2` target
      */
     bool (*annotationInterfaceSetName)(AbckitArktsAnnotationInterface *ai, const char *name);
 
@@ -1402,7 +1436,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `ai` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `params` is NULL.
      * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if annotation interface `ai` doesn't have `ABCKIT_TARGET_ARK_TS_V1`
-     * target.
+     * or `ABCKIT_TARGET_ARK_TS_V2` target.
      * @note Allocates
      */
     AbckitArktsAnnotationInterfaceField *(*annotationInterfaceAddField)(
@@ -1416,7 +1450,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `ai` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
      * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if annotation interface `ai` doesn't have `ABCKIT_TARGET_ARK_TS_V1`
-     * target.
+     * or `ABCKIT_TARGET_ARK_TS_V2` target.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if annotation interface `ai` does not have the field `field`.
      */
     void (*annotationInterfaceRemoveField)(AbckitArktsAnnotationInterface *ai,
@@ -1433,7 +1467,8 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] params -  Data that is used to create the annotation.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `params` is NULL.
-     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if function `function` doesn't have `ABCKIT_TARGET_ARK_TS_V1` target.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if annotation interface `ai` doesn't have `ABCKIT_TARGET_ARK_TS_V1`
+     * or `ABCKIT_TARGET_ARK_TS_V2` target.
      * @note Allocates
      */
     AbckitArktsAnnotation *(*functionAddAnnotation)(AbckitArktsFunction *function,
@@ -1446,7 +1481,8 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] anno - Annotation to remove from the function `function`.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is NULL.
-     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if function `function` doesn't have `ABCKIT_TARGET_ARK_TS_V1` target.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if function `function` doesn't have `ABCKIT_TARGET_ARK_TS_V1` or
+     * `ABCKIT_TARGET_ARK_TS_V2` target.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if function `function` doesn't have the annotation `anno`.
      */
     void (*functionRemoveAnnotation)(AbckitArktsFunction *function, AbckitArktsAnnotation *anno);
@@ -1458,6 +1494,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] name - Name to be set.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `function` is does not have `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     bool (*functionSetName)(AbckitArktsFunction *function, const char *name);
 
@@ -1468,6 +1505,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] param - Parameter to be added.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `func` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `param` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `func` is does not have `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     bool (*functionAddParameter)(AbckitArktsFunction *func, AbckitArktsFunctionParam *param);
 
@@ -1479,6 +1517,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `func` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `param` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `param` is not a parameter of function `func`.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `func` is does not have `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     bool (*functionRemoveParameter)(AbckitArktsFunction *func, size_t index);
 
@@ -1489,6 +1528,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] type - Type to be set.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `func` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `type` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `func` is does not have `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     bool (*functionSetReturnType)(AbckitArktsFunction *func, AbckitType *type);
 
@@ -1499,6 +1539,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] type - Type to be set.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `func` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `type` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `module` is does not have `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     AbckitArktsFunction *(*moduleAddFunction)(AbckitArktsModule *module,
                                               struct AbckitArktsFunctionCreateParams *params);
@@ -1511,6 +1552,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] params - Data that is used to create the method.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `params` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `klass` is does not have `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     AbckitArktsFunction *(*classAddMethod)(AbckitArktsClass *klass, struct ArktsMethodCreateParams *params);
 
@@ -1525,6 +1567,7 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] name - Name to be set.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `anno` is does not have `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     bool (*annotationSetName)(AbckitArktsAnnotation *anno, const char *name);
 
@@ -1535,7 +1578,8 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] params -  Data that is used to create the annotation element.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `params` is NULL.
-     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if annotation `anno` doesn't have `ABCKIT_TARGET_ARK_TS_V1` target.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if annotation `anno` doesn't have `ABCKIT_TARGET_ARK_TS_V1` or
+     * `ABCKIT_TARGET_ARK_TS_V2` target.
      * @note Allocates
      */
     AbckitArktsAnnotationElement *(*annotationAddAnnotationElement)(
@@ -1548,7 +1592,8 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @param [ in ] elem - Annotation element to remove from the annotation `anno`.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `elem` is NULL.
-     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if annotation `anno` doesn't have `ABCKIT_TARGET_ARK_TS_V1` target.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if annotation `anno` doesn't have `ABCKIT_TARGET_ARK_TS_V1` or
+     * `ABCKIT_TARGET_ARK_TS_V2` target.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if annotation `anno` doesn't have the annotation element `elem`.
      */
     void (*annotationRemoveAnnotationElement)(AbckitArktsAnnotation *anno, AbckitArktsAnnotationElement *elem);

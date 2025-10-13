@@ -963,22 +963,6 @@ extern "C" AbckitArktsEnumField *EnumAddField(AbckitArktsEnum *enm, const struct
 // Module Field
 // ========================================
 
-extern "C" bool ModuleFieldAddAnnotation(AbckitArktsModuleField *field, const AbckitArktsAnnotationCreateParams *params)
-{
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    (void)params;
-    return false;
-}
-
-extern "C" bool ModuleFieldRemoveAnnotation(AbckitArktsModuleField *field, AbckitArktsAnnotation *anno)
-{
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    (void)anno;
-    return false;
-}
-
 extern "C" bool ModuleFieldSetName(AbckitArktsModuleField *field, const char *name)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
@@ -1323,22 +1307,6 @@ extern "C" bool EnumFieldSetName(AbckitArktsEnumField *field, const char *name)
     }
 
     return EnumFieldSetNameStatic(field->core, name);
-}
-
-extern "C" bool EnumFieldSetType(AbckitArktsEnumField *field, AbckitType *type)
-{
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    (void)type;
-    return false;
-}
-
-extern "C" bool EnumFieldSetValue(AbckitArktsEnumField *field, AbckitValue *value)
-{
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    (void)value;
-    return false;
 }
 
 // ========================================
@@ -1703,7 +1671,7 @@ AbckitArktsModifyApi g_arktsModifyApiImpl = {
     // Module Field
     // ========================================
 
-    ModuleFieldAddAnnotation, ModuleFieldRemoveAnnotation, ModuleFieldSetName, ModuleFieldSetType, ModuleFieldSetValue,
+    ModuleFieldSetName, ModuleFieldSetType, ModuleFieldSetValue,
 
     // ========================================
     // Namespace Field
@@ -1727,7 +1695,7 @@ AbckitArktsModifyApi g_arktsModifyApiImpl = {
     // Enum Field
     // ========================================
 
-    EnumFieldSetName, EnumFieldSetType, EnumFieldSetValue,
+    EnumFieldSetName,
 
     // ========================================
     // AnnotationInterface

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -65,6 +65,8 @@ void TestWrongCtx(AbckitInst *(*apiToCheck)(AbckitGraph *graph, AbckitInst *arra
                                             AbckitInst *value, AbckitTypeId valueTypeId));
 void TestWrongCtx(AbckitInst *(*apiToCheck)(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1,
                                             AbckitTypeId typeId));
+void TestWrongCtx(AbckitInst *(*apiToCheck)(AbckitGraph *graph, AbckitInst *input0, AbckitString *field,
+                                            AbckitTypeId returnTypeId));
 void TestWrongCtx(AbckitInst *(*apiToCheck)(AbckitGraph *graph, AbckitInst *input0, AbckitCoreExportDescriptor *e));
 void TestWrongCtx(AbckitInst *(*apiToCheck)(AbckitGraph *graph, AbckitCoreClass *klass));
 void TestWrongCtx(void (*apiToCheck)(AbckitInst *inst, AbckitInst *next));
@@ -76,6 +78,8 @@ void TestWrongCtx(void (*apiToCheck)(AbckitInst *input0, AbckitCoreFunction *met
 void TestWrongCtx(AbckitInst *(*apiToCheck)(AbckitGraph *graph, AbckitInst *input0, AbckitType *type));
 void TestWrongCtx(AbckitInst *(*apiToCheck)(AbckitGraph *graph, AbckitInst *input0, AbckitCoreFunction *method,
                                             size_t argCount, ...));
+void TestWrongCtx(AbckitInst *(*apiToCheck)(AbckitGraph *graph, AbckitInst *inputObj, AbckitString *fieldId,
+                                            AbckitInst *value, AbckitTypeId typeId));
 
 }  // namespace libabckit::test::helpers_wrong_ctx
 

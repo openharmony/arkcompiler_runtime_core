@@ -102,40 +102,6 @@ TEST_F(LibAbcKitCppMockArktsTestField, ClassField_SetValue)
     ASSERT_TRUE(CheckMockedStackEmpty());
 }
 
-// Test: test-kind=mock, api=ModuleField::RemoveAnnotation, abc-kind=ArkTS2, category=internal, extension=cpp
-TEST_F(LibAbcKitCppMockArktsTestField, ModuleField_RemoveAnnotation)
-{
-    ASSERT_TRUE(CheckMockedStackEmpty());
-    {
-        abckit::File f(DEFAULT_PATH);
-        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
-        abckit::mock::helpers::GetMockArktsModuleField(f).RemoveAnnotation(
-            abckit::mock::helpers::GetMockArktsAnnotation(f));
-        ASSERT_TRUE(CheckMockedApi("ModuleFieldRemoveAnnotation"));
-        ASSERT_TRUE(CheckMockedApi("CoreAnnotationToArktsAnnotation"));
-        ASSERT_TRUE(CheckMockedApi("CoreModuleFieldToArktsModuleField"));
-    }
-    ASSERT_TRUE(CheckMockedApi("CloseFile"));
-    ASSERT_TRUE(CheckMockedStackEmpty());
-}
-
-// Test: test-kind=mock, api=ModuleField::AddAnnotation, abc-kind=ArkTS2, category=internal, extension=cpp
-TEST_F(LibAbcKitCppMockArktsTestField, ModuleField_AddAnnotation)
-{
-    ASSERT_TRUE(CheckMockedStackEmpty());
-    {
-        abckit::File f(DEFAULT_PATH);
-        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
-        abckit::mock::helpers::GetMockArktsModuleField(f).AddAnnotation(
-            abckit::mock::helpers::GetMockArktsAnnotationInterface(f));
-        ASSERT_TRUE(CheckMockedApi("ModuleFieldAddAnnotation"));
-        ASSERT_TRUE(CheckMockedApi("CoreModuleFieldToArktsModuleField"));
-        ASSERT_TRUE(CheckMockedApi("CoreAnnotationInterfaceToArktsAnnotationInterface"));
-    }
-    ASSERT_TRUE(CheckMockedApi("CloseFile"));
-    ASSERT_TRUE(CheckMockedStackEmpty());
-}
-
 // Test: test-kind=mock, api=ModuleField::SetName, abc-kind=ArkTS2, category=internal, extension=cpp
 TEST_F(LibAbcKitCppMockArktsTestField, ModuleField_SetName)
 {

@@ -19,6 +19,7 @@
 
 #include "helpers/helpers_runtime.h"
 #include "helpers/helpers.h"
+#include "libabckit/src/ir_impl.h"
 #include "libabckit/src/logger.h"
 #include <gtest/gtest.h>
 
@@ -40,6 +41,15 @@ struct TransformStoreArrayByIdxArgs {
     enum AbckitStatus expectedStatus = ABCKIT_STATUS_BAD_ARGUMENT;
     AbckitInst *idx = nullptr;
     AbckitInst *newValue = nullptr;
+    enum AbckitTypeId valueTypeId = ABCKIT_TYPE_ID_INVALID;
+};
+
+struct CreateArrayValueArgs {
+    AbckitGraph *graph = nullptr;
+    AbckitInst *arr = nullptr;
+    AbckitInst *idx = nullptr;
+    AbckitInst *load = nullptr;
+    AbckitInst *store = nullptr;
     enum AbckitTypeId valueTypeId = ABCKIT_TYPE_ID_INVALID;
 };
 
@@ -68,6 +78,46 @@ void TransformStoreArrayByIdx(TransformStoreArrayByIdxArgs &args,
     ASSERT_NE(ret, nullptr);
 
     g_implG->iInsertBefore(store, ret);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+template <typename T>
+void CreateArrayValue(CreateArrayValueArgs &args, int index, T value)
+{
+    args.idx = g_implG->gFindOrCreateConstantI32(args.graph, index);
+    ASSERT_NE(args.idx, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+    if constexpr (std::is_same_v<T, int>) {
+        args.load = g_implG->gFindOrCreateConstantI32(args.graph, value);
+        ASSERT_NE(args.load, nullptr);
+        ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    } else if constexpr (std::is_same_v<T, std::string>) {
+        AbckitString *str = g_implM->createString(args.graph->file, value.c_str(), value.length());
+        ASSERT_NE(str, nullptr);
+        ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+        args.load = g_statG->iCreateLoadString(args.graph, str);
+        ASSERT_NE(args.load, nullptr);
+        ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    } else if constexpr (std::is_same_v<T, AbckitCoreClass *>) {
+        helpers::ModuleByNameContext ctxFinder = {nullptr, "new_array"};
+        g_implI->fileEnumerateModules(args.graph->file, &ctxFinder, helpers::ModuleByNameFinder);
+        ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+        ASSERT_NE(ctxFinder.module, nullptr);
+
+        helpers::ClassByNameContext ctxClassFinder = {nullptr, "MyClass"};
+        g_implI->moduleEnumerateClasses(ctxFinder.module, &ctxClassFinder, helpers::ClassByNameFinder);
+        ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+        ASSERT_NE(ctxClassFinder.klass, nullptr);
+
+        args.load = g_statG->iCreateNewObject(args.graph, ctxClassFinder.klass);
+        ASSERT_NE(args.load, nullptr);
+        ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    }
+
+    args.store = g_statG->iCreateStoreArray(args.graph, args.arr, args.idx, args.load, args.valueTypeId);
+    ASSERT_NE(args.store, nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 }  // namespace
@@ -334,5 +384,171 @@ TEST_F(LibAbcKitArrayStaticTest, LibAbcKitTestLoadConstArray)
     EXPECT_TRUE(helpers::Match(output, "4\n"));
 }
 
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateNewArray, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitArrayStaticTest, LibAbcKitTestNewArrayTest0)
+{
+    auto output =
+        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/new_array.abc", "new_array", "main");
+    EXPECT_TRUE(helpers::Match(output, "0\nTEST\n0\n"));
+    helpers::TransformMethod(
+        ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/new_array.abc",
+        ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/new_array_modified.abc", "get_element",
+        [](AbckitFile *file, AbckitCoreFunction *method, AbckitGraph *graph) {
+            AbckitInst *ret = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_RETURN);
+            ASSERT_NE(ret, nullptr);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+            auto it = file->nameToClass.find("i32[]");
+            ASSERT_NE(it, file->nameToClass.end());
+            AbckitCoreClass *arrayClass = std::get<AbckitCoreClass *>(it->second);
+            ASSERT_NE(arrayClass, nullptr);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+            AbckitInst *size = g_implG->gFindOrCreateConstantI32(graph, 3);
+            ASSERT_NE(size, nullptr);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+            AbckitInst *newArray = g_statG->iCreateNewArray(graph, arrayClass, size);
+            ASSERT_NE(newArray, nullptr);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+            CreateArrayValueArgs args[3];
+            args[0] = {graph, newArray, nullptr, nullptr, nullptr, ABCKIT_TYPE_ID_I32};
+            args[1] = {graph, newArray, nullptr, nullptr, nullptr, ABCKIT_TYPE_ID_I32};
+            args[2] = {graph, newArray, nullptr, nullptr, nullptr, ABCKIT_TYPE_ID_I32};
+            CreateArrayValue(args[0], 0, 1);
+            CreateArrayValue(args[1], 1, 2);
+            CreateArrayValue(args[2], 2, 3);
+
+            AbckitInst *loadArray = g_statG->iCreateLoadArray(graph, newArray, args[0].idx, ABCKIT_TYPE_ID_I32);
+            ASSERT_NE(loadArray, nullptr);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+            g_implG->iInsertBefore(newArray, ret);
+            g_implG->iInsertBefore(args[0].store, ret);
+            g_implG->iInsertBefore(args[1].store, ret);
+            g_implG->iInsertBefore(args[2].store, ret);
+            g_implG->iInsertBefore(loadArray, ret);
+
+            g_implG->iSetInput(ret, loadArray, 0);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+        },
+        []([[maybe_unused]] AbckitGraph *graph) {});
+    output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/new_array_modified.abc", "new_array",
+                                       "main");
+    EXPECT_TRUE(helpers::Match(output, "1\nTEST\n0\n"));
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateNewArray, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitArrayStaticTest, LibAbcKitTestNewArrayTest1)
+{
+    auto output =
+        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/new_array.abc", "new_array", "main");
+    EXPECT_TRUE(helpers::Match(output, "0\nTEST\n0\n"));
+    helpers::TransformMethod(
+        ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/new_array.abc",
+        ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/new_array_modified.abc", "get_string",
+        [](AbckitFile *file, AbckitCoreFunction *method, AbckitGraph *graph) {
+            AbckitInst *ret = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_RETURN);
+            ASSERT_NE(ret, nullptr);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+            auto it = file->nameToClass.find("std.core.String[]");
+            ASSERT_NE(it, file->nameToClass.end());
+            AbckitCoreClass *arrayClass = std::get<AbckitCoreClass *>(it->second);
+            ASSERT_NE(arrayClass, nullptr);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+            AbckitInst *size = g_implG->gFindOrCreateConstantI32(graph, 2);
+            ASSERT_NE(size, nullptr);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+            AbckitInst *newArray = g_statG->iCreateNewArray(graph, arrayClass, size);
+            ASSERT_NE(newArray, nullptr);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+            CreateArrayValueArgs args[2];
+            args[0] = {graph, newArray, nullptr, nullptr, nullptr, ABCKIT_TYPE_ID_REFERENCE};
+            args[1] = {graph, newArray, nullptr, nullptr, nullptr, ABCKIT_TYPE_ID_REFERENCE};
+            CreateArrayValue(args[0], 0, std::string("TEST1"));
+            CreateArrayValue(args[1], 1, std::string("TEST2"));
+
+            AbckitInst *loadArray = g_statG->iCreateLoadArray(graph, newArray, args[1].idx, ABCKIT_TYPE_ID_REFERENCE);
+            ASSERT_NE(loadArray, nullptr);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+            g_implG->iInsertBefore(newArray, ret);
+            g_implG->iInsertBefore(args[0].load, ret);
+            g_implG->iInsertBefore(args[0].store, ret);
+            g_implG->iInsertBefore(args[1].load, ret);
+            g_implG->iInsertBefore(args[1].store, ret);
+            g_implG->iInsertBefore(loadArray, ret);
+
+            g_implG->iSetInput(ret, loadArray, 0);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+        },
+        []([[maybe_unused]] AbckitGraph *graph) {});
+    output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/new_array_modified.abc", "new_array",
+                                       "main");
+    EXPECT_TRUE(helpers::Match(output, "0\nTEST2\n0\n"));
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateNewArray, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitArrayStaticTest, LibAbcKitTestNewArrayTest2)
+{
+    auto output =
+        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/new_array.abc", "new_array", "main");
+    EXPECT_TRUE(helpers::Match(output, "0\nTEST\n0\n"));
+    helpers::TransformMethod(
+        ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/new_array.abc",
+        ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/new_array_modified.abc", "get_class_array_size",
+        [](AbckitFile *file, AbckitCoreFunction *method, AbckitGraph *graph) {
+            AbckitInst *ret = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_RETURN);
+            ASSERT_NE(ret, nullptr);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+            auto it = file->nameToClass.find("new_array.MyClass[]");
+            ASSERT_NE(it, file->nameToClass.end());
+            AbckitCoreClass *arrayClass = std::get<AbckitCoreClass *>(it->second);
+            ASSERT_NE(arrayClass, nullptr);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+            AbckitInst *size = g_implG->gFindOrCreateConstantI32(graph, 3);
+            ASSERT_NE(size, nullptr);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+            AbckitInst *newArray = g_statG->iCreateNewArray(graph, arrayClass, size);
+            ASSERT_NE(newArray, nullptr);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+            CreateArrayValueArgs args[3];
+            args[0] = {graph, newArray, nullptr, nullptr, nullptr, ABCKIT_TYPE_ID_REFERENCE};
+            args[1] = {graph, newArray, nullptr, nullptr, nullptr, ABCKIT_TYPE_ID_REFERENCE};
+            args[2] = {graph, newArray, nullptr, nullptr, nullptr, ABCKIT_TYPE_ID_REFERENCE};
+            CreateArrayValue(args[0], 0, static_cast<AbckitCoreClass *>(nullptr));
+            CreateArrayValue(args[1], 1, static_cast<AbckitCoreClass *>(nullptr));
+            CreateArrayValue(args[2], 2, static_cast<AbckitCoreClass *>(nullptr));
+
+            AbckitInst *len = g_statG->iCreateLenArray(graph, newArray);
+            ASSERT_NE(len, nullptr);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+            g_implG->iInsertBefore(newArray, ret);
+            g_implG->iInsertBefore(args[0].load, ret);
+            g_implG->iInsertBefore(args[0].store, ret);
+            g_implG->iInsertBefore(args[1].load, ret);
+            g_implG->iInsertBefore(args[1].store, ret);
+            g_implG->iInsertBefore(args[2].load, ret);
+            g_implG->iInsertBefore(args[2].store, ret);
+            g_implG->iInsertBefore(len, ret);
+
+            g_implG->iSetInput(ret, len, 0);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+        },
+        []([[maybe_unused]] AbckitGraph *graph) {});
+    output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/new_array_modified.abc", "new_array",
+                                       "main");
+    EXPECT_TRUE(helpers::Match(output, "0\nTEST\n3\n"));
+}
 }  // namespace libabckit::test
 // NOLINTEND(readability-magic-numbers)

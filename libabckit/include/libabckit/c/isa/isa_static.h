@@ -453,7 +453,14 @@ struct CAPI_EXPORT AbckitIsaApiStatic {
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitCoreClass *inputClass .
      * @param [ in ] AbckitInst *inputSize .
-     * @note UNSUPPORTED
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitCoreClass *inputClass  is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *inputSize  is NULL.
+     * @note Set `ABCKIT_STATUS_INTERNAL_ERROR` error if inputClass->owningModule  is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph>file->frontend` and `Mode::STATIC` are not the same.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `graph` and `inputSize->graph` are not the same.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `graph->file` and `inputClass->owningModule->file`
+     * @note are not the same.
      */
     AbckitInst *(*iCreateNewArray)(AbckitGraph *graph /* in */, AbckitCoreClass *inputClass /* in */,
                                    AbckitInst *inputSize /* in */);
@@ -486,6 +493,41 @@ struct CAPI_EXPORT AbckitIsaApiStatic {
      */
     AbckitInst *(*iCreateInitObject)(AbckitGraph *graph /* in */, AbckitCoreFunction *function /* in */,
                                      size_t argCount /* in */, ... /* function params */);
+
+    /**
+     * @brief Creates `iCreateLoadObject` inst.
+     * @return AbckitInst *.
+     * @param [ in ] AbckitGraph *graph.
+     * @param [ in ] AbckitInst *inputObj .
+     * @param [ in ] AbckitString *filed .
+     * @param [ in ] returnTypeId *returnType .
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *inputObj  is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitType *field  is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `graph` and `inputObj->graph`
+     * @note are not the same.
+     */
+    AbckitInst *(*iCreateLoadObject)(AbckitGraph *graph /* in */, AbckitInst *inputObj /* in */,
+                                     AbckitString *field /* in */, enum AbckitTypeId returnTypeId /* in */);
+
+    /**
+     * @brief Creates `StoreObject` inst.
+     * @return AbckitInst *.
+     * @param [ in ] AbckitGraph *graph .
+     * @param [ in ]  AbckitInst *inputObj .
+     * @param [ in ]  AbckitString *fieldId .
+     * @param [ in ]  AbckitInst *value .
+     * @param [ in ]  AbckitTypeId *typeId .
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *inputObj  is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitString *fieldId  is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *value  is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `graph`, `inputObj->graph`
+     * @note are not the same.
+     */
+    AbckitInst *(*iCreateStoreObject)(AbckitGraph *graph /* in */, AbckitInst *inputObj /* in */,
+                                      AbckitString *fieldId /* in */, AbckitInst *value /* in */,
+                                      AbckitTypeId typeId /* in */);
 
     /**
      * @brief Creates `LoadArray` inst.
@@ -849,49 +891,6 @@ struct CAPI_EXPORT AbckitIsaApiStatic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input0  is NULL.
      */
     AbckitInst *(*iCreateNullCheck)(AbckitGraph *graph /* in */, AbckitInst *inputObj /* in */);
-
-    /**
-     * @brief Creates `iCreateLoadObject` inst for loading 32-bit basic type fields.
-     * @return AbckitInst *.
-     * @param [ in ] AbckitGraph *graph.
-     * @param [ in ] AbckitInst *inputObj - Object instance (this).
-     * @param [ in ] AbckitCoreClassField *field - Field to load.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if any parameter is NULL.
-     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `graph` and `inputObj->graph` are not the same.
-     */
-    AbckitInst *(*iCreateLoadObject)(AbckitGraph *graph, AbckitInst *inputObj, AbckitCoreClassField *field);
-
-    /**
-     * @brief Creates instruction with opcode INTRINSIC_ABCKIT_STORE_OBJECT_OBJECT.
-     * @return Pointer to created `AbckitInst`.
-     * @param [ in ] graph - Graph where instruction will be inserted.
-     * @param [ in ] input0 - Value to store.
-     * @param [ in ] input1 - Destonation object.
-     * @param [ in ] keyString - Destonation string.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `graph` is NULL.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `input0` is NULL.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `input1` is NULL.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `keyString` is NULL.
-     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning one of `AbckitInst` and `graph` differs.
-     * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not STATIC.
-     * @note Allocates
-     */
-    AbckitInst *(*iCreateStobjObj)(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1, AbckitString *keyString);
-
-    /**
-     * @brief Creates instruction with opcode INTRINSIC_ABCKIT_LOAD_OBJECT_OBJECT.
-     * @return Pointer to created `AbckitInst`.
-     * @param [ in ] graph - Graph where instruction will be inserted.
-     * @param [ in ] input0 - Key.
-     * @param [ in ] keyString - Destonation string.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `graph` is NULL.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `input0` is NULL.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `keyString` is NULL.
-     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning one of `AbckitInst` and `graph` differs.
-     * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not STATIC.
-     * @note Allocates
-     */
-    AbckitInst *(*iCreateLdobjObj)(AbckitGraph *graph, AbckitInst *input0, AbckitString *keyString);
 };
 
 /**

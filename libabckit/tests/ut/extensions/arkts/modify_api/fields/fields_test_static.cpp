@@ -60,6 +60,28 @@ static AbckitCoreModuleField *GetAbckitCoreModuleField(AbckitFile *file, std::st
     return mfFinder.cmf;
 }
 
+static AbckitCoreNamespaceField *GetAbckitCoreNamespaceField(AbckitFile *file, std::string &moduleName,
+                                                             std::string &nsName, std::string &nsFieldName)
+{
+    helpers::ModuleByNameContext mdlFinder = {nullptr, moduleName.c_str()};
+    g_implI->fileEnumerateModules(file, &mdlFinder, helpers::ModuleByNameFinder);
+    EXPECT_TRUE(g_impl->getLastError() == ABCKIT_STATUS_NO_ERROR);
+    EXPECT_TRUE(mdlFinder.module != nullptr);
+    auto *module = mdlFinder.module;
+
+    helpers::NamespaceByNameContext nsFinder = {nullptr, nsName.c_str()};
+    g_implI->moduleEnumerateNamespaces(module, &nsFinder, helpers::NamespaceByNameFinder);
+    EXPECT_TRUE(g_impl->getLastError() == ABCKIT_STATUS_NO_ERROR);
+    EXPECT_TRUE(nsFinder.n != nullptr);
+    auto ns = nsFinder.n;
+
+    helpers::NamespaceFieldByNameContext nfFinder = {nullptr, nsFieldName.c_str()};
+    g_implI->namespaceEnumerateFields(ns, &nfFinder, helpers::NamespaceFieldByNameFinder);
+    EXPECT_TRUE(g_impl->getLastError() == ABCKIT_STATUS_NO_ERROR);
+
+    return nfFinder.cnf;
+}
+
 static AbckitCoreClassField *GetAbckitCoreClassField(AbckitFile *file, std::string &moduleName, std::string &className,
                                                      std::string &classFieldName)
 {
@@ -374,7 +396,7 @@ static void TransformMethodClassFieldSetType(AbckitFile *file, AbckitCoreFunctio
     AbckitString *newKeyString = g_implM->createString(file, fieldFullName.c_str(), fieldFullName.size());
     callOp = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_PARAMETER);
 
-    AbckitInst *newStOwn = g_statG->iCreateStobjObj(graph, loadStr, callOp, newKeyString);
+    auto *newStOwn = g_statG->iCreateStoreObject(graph, callOp, newKeyString, loadStr, ABCKIT_TYPE_ID_REFERENCE);
     g_implG->iInsertBefore(newStOwn, originalRet);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_implG->iInsertBefore(loadStr, newStOwn);
@@ -522,7 +544,7 @@ static void TransformMethodClassFieldCtorModify(AbckitFile *file, AbckitCoreFunc
     AbckitString *newKeyString = g_implM->createString(file, fieldFullName.c_str(), fieldFullName.size());
     callOp = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_PARAMETER);
 
-    AbckitInst *newStOwn = g_statG->iCreateStobjObj(graph, loadStr, callOp, newKeyString);
+    auto *newStOwn = g_statG->iCreateStoreObject(graph, callOp, newKeyString, loadStr, ABCKIT_TYPE_ID_REFERENCE);
     g_implG->iInsertBefore(newStOwn, originalRet);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_implG->iInsertBefore(loadStr, newStOwn);
@@ -542,7 +564,7 @@ static void TransformMethodClassFieldGetModify(AbckitFile *file, AbckitCoreFunct
     std::string paramName("<property>i2F1");
     std::string fieldFullName = moduleName + "." + className + "." + paramName;
     AbckitString *newKeyString = g_implM->createString(file, fieldFullName.c_str(), fieldFullName.size());
-    AbckitInst *newLdOwn = g_statG->iCreateLdobjObj(graph, param, newKeyString);
+    auto *newLdOwn = g_statG->iCreateLoadObject(graph, param, newKeyString, ABCKIT_TYPE_ID_F64);
     helpers::ReplaceInst(callOp, newLdOwn);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
@@ -578,7 +600,7 @@ static void TransformMethodClassFieldSetModify(AbckitFile *file, AbckitCoreFunct
     std::string fieldFullName = moduleName + "." + className + "." + paramName;
     AbckitString *newKeyString = g_implM->createString(file, fieldFullName.c_str(), fieldFullName.size());
 
-    AbckitInst *newStOwn = g_statG->iCreateStobjObj(graph, loadStr, param1, newKeyString);
+    auto *newStOwn = g_statG->iCreateStoreObject(graph, param1, newKeyString, loadStr, ABCKIT_TYPE_ID_REFERENCE);
     g_implG->iInsertBefore(newStOwn, originalRet);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_implG->iInsertBefore(loadStr, newStOwn);
@@ -846,4 +868,49 @@ TEST_F(LibAbcKitModifyApiFieldsStaticTests, ClassFieldSetName)
     output = helpers::ExecuteStaticAbc(MODIFY_TEST_ABC_PATH, "fields_static", "classFieldSetName");
     EXPECT_TRUE(helpers::Match(output, "fields_static\\.c1 \\{newParam: Anno1, c1F2: 999\\}\n"));
 }
+
+/**
+ * @tc.name: NamespaceFieldSetName
+ * @tc.desc: test-kind=api, api=ArktsModifyApiImpl::NamespaceFieldSetName, abc-kind=ArkTS2, category=positive,
+ *           extension=c
+ * @tc.type: FUNC
+ */
+TEST_F(LibAbcKitModifyApiFieldsStaticTests, NamespaceFieldSetName)
+{
+    auto output = helpers::ExecuteStaticAbc(TEST_ABC_PATH, "fields_static", "namespaceFieldSetName");
+    EXPECT_TRUE(helpers::Match(output, "NamespaceFieldOne\n"));
+
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(TEST_ABC_PATH.c_str(), &file);
+
+    std::string moduleName = "fields_static";
+    std::string nsName("NS1");
+    std::string nsFieldName("nS1F1");
+    auto coreNsField = GetAbckitCoreNamespaceField(file, moduleName, nsName, nsFieldName);
+    ASSERT_NE(coreNsField, nullptr);
+
+    std::string newNsFieldName("newField");
+    auto arkNsField = g_implArkI->coreNamespaceFieldToArktsNamespaceField(coreNsField);
+    bool ret = g_implArkM->namespaceFieldSetName(arkNsField, newNsFieldName.c_str());
+    ASSERT_EQ(ret, true);
+    ASSERT_EQ(helpers::AbckitStringToString(g_implI->namespaceFieldGetName(coreNsField)), newNsFieldName.c_str());
+
+    std::string outputPath = MODIFY_TEST_ABC_PATH;
+    // Write output
+    g_impl->writeAbc(file, outputPath.c_str(), outputPath.size());
+    g_impl->closeFile(file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    helpers::AssertOpenAbc(outputPath.c_str(), &file);
+    auto nsFieldModify = GetAbckitCoreNamespaceField(file, moduleName, nsName, newNsFieldName);
+    ASSERT_NE(nsFieldModify, nullptr);
+    ASSERT_STREQ(g_implI->abckitStringToString(g_implI->namespaceFieldGetName(nsFieldModify)), newNsFieldName.c_str());
+
+    auto nsFieldModifyFindOldName = GetAbckitCoreNamespaceField(file, moduleName, nsName, nsFieldName);
+    ASSERT_EQ(nsFieldModifyFindOldName, nullptr);
+    g_impl->closeFile(file);
+
+    output = helpers::ExecuteStaticAbc(MODIFY_TEST_ABC_PATH, "fields_static", "namespaceFieldSetName");
+    EXPECT_TRUE(helpers::Match(output, "NamespaceFieldOne\n"));
+}
+
 }  // namespace libabckit::test

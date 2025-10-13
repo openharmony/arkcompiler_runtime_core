@@ -66,7 +66,6 @@ uint32_t GetMethodOffset(AbckitGraph *graph, AbckitCoreFunction *function);
 uint32_t GetStringOffset(AbckitGraph *graph, AbckitString *string);
 uint32_t GetFieldOffset(AbckitGraph *graph, AbckitString *string);
 uint32_t GetLiteralArrayOffset(AbckitGraph *graph, AbckitLiteralArray *arr);
-uint32_t GetFieldOffset(AbckitGraph *graph, AbckitCoreClassField *field);
 AbckitInst *CreateInstFromImpl(AbckitGraph *graph, ark::compiler::Inst *impl);
 AbckitInst *FindOrCreateInstFromImpl(AbckitGraph *graph, ark::compiler::Inst *impl);
 
@@ -75,6 +74,8 @@ AbckitInst *CreateDynInst(AbckitGraph *graph, ark::compiler::IntrinsicInst::Intr
 AbckitInst *CreateDynInst(AbckitGraph *graph, AbckitInst *input0, ark::compiler::IntrinsicInst::IntrinsicId intrinsicId,
                           bool hasIC = true);
 AbckitInst *CreateDynInst(AbckitGraph *graph, uint64_t imm0, ark::compiler::DataType::Type retType,
+                          ark::compiler::IntrinsicInst::IntrinsicId intrinsicId, bool hasIC = true);
+AbckitInst *CreateDynInst(AbckitGraph *graph, uint64_t imm0, AbckitInst *inputSize,
                           ark::compiler::IntrinsicInst::IntrinsicId intrinsicId, bool hasIC = true);
 AbckitInst *CreateDynInst(AbckitGraph *graph, uint64_t imm0, ark::compiler::IntrinsicInst::IntrinsicId intrinsicId,
                           bool hasIC = true);

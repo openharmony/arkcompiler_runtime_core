@@ -12,36 +12,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@interface AI1 {
-  a1F1: string
+
+class TestClass {
+    e: number;
+    f: string;
+
+    constructor(e: number, f: string) {
+        this.e = e;
+        this.f = f;
+    }
 }
 
-@interface AI3 {
-  a3F1: string
+class MyClass {
+    a: int;
+    b: number;
+    c: string;
+    d: TestClass = new TestClass(1, "test class");
+
+    constructor(a: int, b: number, c: string) {
+        this.a = a;
+        this.b = b;
+        this.c = c;
+    }
 }
 
-const f1: string = 'Hello';
-
-class C1 {
-  @AI1({a1F1: 'C1F1'})
-  public c1F1: string = 'public';
-  protected c1F2: string = 'protected';
-  private c1F3: string = 'private';
-  public static c1F4: string = 'static';
-  internal c1F5: int = 1;
-  public readonly c1F6: int = 2;
+function store_object() {
+    let c = new MyClass(0, 2, "test")
+    return c
 }
 
-interface I1 {
-  @AI3({a3F1: 'interface annotation'})
-  i1F1: number;
-  readonly i1F2: string;
-}
-
-enum E1 {
-  ONE = 0
-}
-
-namespace NS1 {
-  const nS1F1: string[] = ['namespace'];
+function main() {
+    let store = store_object()
+    console.log(store.a)
+    console.log(store.b)
+    console.log(store.c)
+    console.log(store.d.e)
+    console.log(store.d.f)
 }

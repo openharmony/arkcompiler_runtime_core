@@ -165,6 +165,13 @@ TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateStoreArray)
     helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateStoreArray);
 }
 
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateLoadObject,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateLoadObject)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateLoadObject);
+}
+
 // Test: test-kind=api, api=IsaApiStaticImpl::iCreateAddI,
 // abc-kind=NoABC, category=negative-file
 TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateAddI)
@@ -338,6 +345,13 @@ TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateStoreArrayWide)
 TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateShl)
 {
     helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateShl);
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateStoreObject,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateStoreObject)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateStoreObject);
 }
 
 }  // namespace libabckit::test

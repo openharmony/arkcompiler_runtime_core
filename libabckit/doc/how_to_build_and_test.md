@@ -88,37 +88,102 @@ AbcKit provides C API and C++ API to inspect and modify abc file.
 
 Users can use AbcKit API to implement abckit plugins.
 
-There are two ways to use abckit: executable binary and dynamic library.
+There are two ways to use abckit: by loading the abckit plugin through the abckit executable, or by loading it within DevEco Studio.
 
-(1) executable binary
+(1) By using the abckit executable to load an abckit plugin.
 
-Implement the following function:
+1. DownLoad and build the abckit.
 
-```cpp
-extern "C" int Entry(AbckitFile *file)
-{
-    // Users can use AbcKit API here.
-    return 0;
-}
-```
+2. Modify bytecode files by invoking the abckit APIs directly in your source code.
 
-Compile the code to a dynamic library (e.g. transformer.so) as an abckit plugin.
+    transform.cpp
+    ```
+    /**
+    * @brief Entry point for modifying a bytecode file.
+    * @param file The AbckitFile corresponding to the parsed bytecode file to be modified.
+    */
+    extern "C" int Entry(AbckitFile *file)
+    {
+        // Use the AbcKit API here.
+        return 0;
+    }
+    ```
+3. Compile the source code into a dynamic library (for example, transformer.so) to be used as an abckit plugin.
 
-Run the following command to execute the abckit plugin:
+    ```
+    # Linux platform
+    g++ --shared -o transform.so transform.cpp
 
-```sh
-./abckit --plugin-path transformer.so --input-file /path/to/input.abc --output-file /path/to/output.abc
-```
+    # Windows platform
+    g++ --shared -o transform.dll transform.cpp
 
-(2) dynamic library
+    # macOS platform
+    g++ --shared -o transform.so transform.cpp
 
-Users can load libabckit.so/libabckit.dll then use AbcKit API.
+    ```
+4. Run the following command to execute the abckit plugin.
+Here, the --plugin-path parameter specifies the path to the dynamic library,
+the --input-file parameter specifies the path to the bytecode file to be modified,
+and the --output-file parameter specifies the path to the modified bytecode file.
+
+    ```sh
+    ./abckit --plugin-path transformer.so --input-file /path/to/input.abc --output-file /path/to/output.abc
+    ```
+
+(2) By loading the abckit plugin directly within DevEco Studio.
+
+The ArkTS build toolchain provides the capability to [customize Ark bytecode at compile time](https://developer.huawei.com/consumer/en/doc/harmonyos-guides/customize-bytecode-during-compilation)
+; users can load an abckit plugin during the compilation process to modify the bytecode. The procedure is as follows:
+
+1. Write the source code that modifies the bytecode file. 
+
+    transform.cpp
+    ```c++
+    /**
+    * @brief Entry function for modifying a bytecode file.
+    * @param abc_path The path to the bytecode file to be modified.
+    */
+    extern "C" int Transform(const char *abc_path)
+    {
+        // Load libabckit.so here, then use the abckit APIs to open and modify the bytecode file.
+        return 0;
+    }
+    ```
+
+2. Compile the dynamic library
+
+    ```
+    # Linux platform
+    g++ --shared -o transform.so transform.cpp
+
+    # Windows platform
+    g++ --shared -o transform.dll transform.cpp
+
+    # macOS platform
+    g++ --shared -o transform.so transform.cpp
+
+    ```
+
+3. Configure the compilation option *transformLib* in the project build configuration file *build-profile.json5*. The path specified for this option should point to the dynamic library file generated in Step 2. For example, if the generated file is transform.dll and it is located in the module directory at ./lib/transform.dll, the configuration would be as follows:
+
+    ```json
+    {
+        "buildOption": {
+            "arkOptions": {
+                "transformLib" : "./lib/transform.dll"
+            }
+        }
+    }
+    ```
+4. Rebuild the project to complete the customized modification of the Ark bytecode file.
+
 
 # Full tests (`self-check.sh`)
 
 Remove out, build AbcKit, execute format, tidy, unit-tests and stress tests in debug and release modes:
 
 ```sh
+# The /path/to/standalone/root refers to the directory where the project was initialized using repo init.
 ./arkcompiler/runtime_core/libabckit/scripts/self-check.sh --dir=/path/to/standalone/root
 ```
 
@@ -127,5 +192,6 @@ Remove out, build AbcKit, execute format, tidy, unit-tests and stress tests in d
 Remove out, build AbcKit, execute unit-tests and stress tests in debug mode and collect code coverage:
 
 ```sh
+# The /path/to/standalone/root refers to the directory where the project was initialized using repo init.
 ./arkcompiler/runtime_core/libabckit/scripts/self-check.sh --dir=/path/to/standalone/root --coverage
 ```

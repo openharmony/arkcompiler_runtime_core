@@ -12,8 +12,6 @@ Documentation:
 
 ## How to download and build
 
-AbcKit should be built on Linux.
-
 ### Install dependencies:
 
 Ensure the following components are installed:
@@ -38,11 +36,11 @@ repo forall -c 'git lfs pull'
 
 ```sh
 # Linux Version (build on Linux)
-./ark.py x64.release abckit_packages --gn-args="is_standard_system=true abckit_enable=true"
+./ark.py x64.release abckit_packages --gn-args="is_standard_system=true abckit_enable=true enable_cmc_gc=false"
 # Windows Version (build on Linux)
-./ark.py mingw_x86_64.release abckit_packages --gn-args="is_standard_system=true abckit_enable=true"
+./ark.py mingw_x86_64.release abckit_packages --gn-args="is_standard_system=true abckit_enable=true enable_cmc_gc=false"
 # macOS Version (build on macOS)
-./ark.py mac_arm64.release abckit_packages --gn-args="is_standard_system=true abckit_enable=true"
+./ark.py mac_arm64.release abckit_packages --gn-args="is_standard_system=true abckit_enable=true enable_cmc_gc=false"
 ```
 
 ### API documentation generation

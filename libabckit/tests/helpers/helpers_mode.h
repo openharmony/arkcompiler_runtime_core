@@ -100,6 +100,12 @@ void TestMode(AbckitInst *(*apiToCheck)(AbckitGraph *graph, AbckitInst *arrayRef
               bool isDynamic);
 void TestMode(AbckitInst *(*apiToCheck)(AbckitGraph *graph, AbckitInst *inputObj, AbckitType *targetType),
               bool isDynamic);
+void TestMode(AbckitInst *(*apiToCheck)(AbckitGraph *graph, AbckitInst *inputObj, AbckitString *field,
+                                        AbckitTypeId returnTypeId),
+              bool isDynamic);
+void TestMode(AbckitInst *(*apiToCheck)(AbckitGraph *graph, AbckitInst *inputObj, AbckitString *fieldId,
+                                        AbckitInst *value, AbckitTypeId typeId),
+              bool isDynamic);
 }  // namespace libabckit::test::helpers_mode
 
 #endif /*LIBABCKIT_TESTS_INVALID_HELPERS */

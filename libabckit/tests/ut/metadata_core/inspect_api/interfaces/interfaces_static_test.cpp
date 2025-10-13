@@ -283,7 +283,7 @@ TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceGetParentNamespace)
     helpers::ModuleByNameContext ctx = {nullptr, "interface_test"};
     g_implI->fileEnumerateModules(file, &ctx, helpers::ModuleByNameFinder);
 
-    helpers::NamepsaceByNameContext nameSapceCtx = {nullptr, "MyNamespace"};
+    helpers::NamespaceByNameContext nameSapceCtx = {nullptr, "MyNamespace"};
     g_implI->moduleEnumerateNamespaces(ctx.module, &nameSapceCtx, helpers::NamespaceByNameFinder);
 
     helpers::InterfaceByNameContext ifaceCtxFinder = {nullptr, "MyInterface"};
@@ -488,7 +488,7 @@ TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceGetParentNamespace02)
     helpers::ModuleByNameContext ctx = {nullptr, "interface_test"};
     g_implI->fileEnumerateModules(file, &ctx, helpers::ModuleByNameFinder);
 
-    helpers::NamepsaceByNameContext nameSapceCtx = {nullptr, "MyNamespace"};
+    helpers::NamespaceByNameContext nameSapceCtx = {nullptr, "MyNamespace"};
     g_implI->moduleEnumerateNamespaces(ctx.module, &nameSapceCtx, helpers::NamespaceByNameFinder);
 
     helpers::InterfaceByNameContext ifaceCtxFinder = {nullptr, ""};

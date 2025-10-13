@@ -263,6 +263,7 @@ TEST_F(LibAbcKitModifyApiFunctionsTest, StaticFunctionSetReturnType1)
     g_impl->closeFile(file);
     EXPECT_TRUE(helpers::Match(modifiedOutput, "123\nclass prop\n1\nhello\nfoo\n"));
 }
+
 // Test: test-kind=api, api=FunctionSetReturnTypeStatic, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitModifyApiFunctionsTest, StaticFunctionSetReturnType2)
 {
@@ -402,6 +403,7 @@ TEST_F(LibAbcKitModifyApiFunctionsTest, StaticFunctionSetReturnType5)
     ASSERT_TRUE(g_implI->typeIsUnion(retType));
     auto typeName = std::string(g_implI->abckitStringToString(g_implI->typeGetName(retType)));
     auto expectedTypeName = std::string("{Ustd.core.Int,std.core.String}");
+
     ASSERT_EQ(typeName, expectedTypeName);
     std::vector<std::string> unionTypes;
     g_implI->typeEnumerateUnionTypes(retType, &unionTypes, [](AbckitType *type, void *data) {

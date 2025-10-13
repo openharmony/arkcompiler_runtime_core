@@ -12,8 +12,6 @@
 
 ## 如何下载与构建
 
-AbcKit 需要在 Linux 环境下构建。
-
 ### 安装依赖项:
 
 请确保已安装以下组件：
@@ -39,9 +37,11 @@ repo forall -c 'git lfs pull'
 
 ```sh
 # Linux 平台构建
-./ark.py x64.release abckit_packages --gn-args="is_standard_system=true abckit_enable=true"
+./ark.py x64.release abckit_packages --gn-args="is_standard_system=true abckit_enable=true enable_cmc_gc=false"
 # Windows 平台构建
-./ark.py mingw_x86_64.release abckit_packages --gn-args="is_standard_system=true abckit_enable=true"
+./ark.py mingw_x86_64.release abckit_packages --gn-args="is_standard_system=true abckit_enable=true enable_cmc_gc=false"
+# Mac 平台构建
+./ark.py mac_arm64.release abckit_packages --gn-args="is_standard_system=true abckit_enable=true enable_cmc_gc=false"
 ```
 
 ### 生成 Doxygen 文档:

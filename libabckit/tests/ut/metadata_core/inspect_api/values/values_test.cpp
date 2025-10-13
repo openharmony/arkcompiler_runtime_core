@@ -51,6 +51,22 @@ TEST_F(LibAbcKitInspectApiValuesTest, ValueGetU1_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
+// Test: test-kind=api, api=InspectApiImpl::valueGetInt, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitInspectApiValuesTest, ValueGetInt)
+{
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/values/values_static.abc", &file);
+    auto *res = g_implM->createValueInt(file, 1);
+    auto val = g_implI->valueGetInt(res);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_EQ(val, 1);
+    // Write output file
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    g_impl->closeFile(file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
 // Test: test-kind=api, api=InspectApiImpl::valueGetFile, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiValuesTest, ValueGetFile_1)
 {

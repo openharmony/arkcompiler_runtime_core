@@ -262,6 +262,14 @@ inline Type EnumField::GetType() const
     return Type(type, conf, GetResource());
 }
 
+inline Value EnumField::GetValue() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    AbckitValue *value = conf->cIapi_->enumFieldGetValue(GetView());
+    CheckError(conf);
+    return Value(value, conf, GetResource());
+}
+
 }  // namespace abckit::core
 
 #endif  // LIBABCKIT_CORE_FIELD_IMPL_H

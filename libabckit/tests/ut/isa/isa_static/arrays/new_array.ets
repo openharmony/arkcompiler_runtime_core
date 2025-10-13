@@ -14,23 +14,60 @@
  */
 // Before AOP:
 
+let arr : int[] = [0];
 function get_element() {
+    return 0;
+}
+
+let str_arr : string[] = [""];
+function get_string() {
+    return "TEST";
+}
+
+class MyClass {}
+let class_arr : MyClass[] = [new MyClass()];
+function get_class_array_size() {
     return 0;
 }
 
 function main() {
     let elem : int = get_element();
     console.log(elem);
+    let str : string = get_string();
+    console.log(str);
+    let size : int = get_class_array_size();
+    console.log(size);
 }
 
 // After AOP:
 
+// let arr : int[] = [0];
 // function get_element() {
 //     let a : int[] = [1, 2, 3];
 //     return a[0];
 // }
 
+// let str_arr : string[] = [""];
+// function get_string() {
+//     let s : string[] = ["TEST1", "TEST2"];
+//     return s[1];
+// }
+
+// class MyClass {}
+// let class_arr : MyClass[] = [new MyClass()];
+// function get_class_array_size() {
+//     let c : MyClass[] = new MyClass[3];
+//     c[0] = new MyClass();
+//     c[1] = new MyClass();
+//     c[2] = new MyClass();
+//     return c.length;
+// }
+
 // function main() {
 //     let elem : int = get_element();
 //     console.log(elem);
+//     let str : string = get_string();
+//     console.log(str);
+//     let size : int = get_class_array_size();
+//     console.log(size);
 // }

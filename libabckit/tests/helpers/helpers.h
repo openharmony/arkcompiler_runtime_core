@@ -248,8 +248,13 @@ struct MethodByNameContext {
     bool fullSign = false;
 };
 
-struct NamepsaceByNameContext {
+struct NamespaceByNameContext {
     AbckitCoreNamespace *n;
+    const char *name;
+};
+
+struct NamespaceFieldByNameContext {
+    AbckitCoreNamespaceField *cnf;
     const char *name;
 };
 
@@ -319,6 +324,7 @@ bool ModuleImportsCollector(AbckitCoreImportDescriptor *id, void *data);
 bool ModuleExportsCollector(AbckitCoreExportDescriptor *ed, void *data);
 bool ModuleFieldByNameFinder(AbckitCoreModuleField *mf, void *data);
 bool InterfaceFieldByNameFinder(AbckitCoreInterfaceField *cif, void *data);
+bool NamespaceFieldByNameFinder(AbckitCoreNamespaceField *cnf, void *data);
 bool EnumByNameFinder(AbckitCoreEnum *ce, void *data);
 bool EnumFieldByNameFinder(AbckitCoreEnumField *cef, void *data);
 bool ClassFieldByNameFinder(AbckitCoreClassField *ccf, void *data);
@@ -344,7 +350,6 @@ std::optional<abckit::core::Enum> GetEnumByName(const abckit::core::Module &modu
 std::optional<abckit::core::Namespace> GetNamespaceByName(const abckit::core::Module &module, const std::string &name);
 std::optional<abckit::core::Function> GetFunctionByName(const abckit::core::Module &module, const std::string &name);
 
-bool InterfaceByNameFinder(AbckitCoreInterface *iface, void *data);
 bool FieldByNameFinder(AbckitCoreInterfaceField *field, void *data);
 bool ClassFieldFinder(AbckitCoreClassField *field, void *data);
 }  // namespace libabckit::test::helpers
