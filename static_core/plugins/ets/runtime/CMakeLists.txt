@@ -228,8 +228,7 @@ if(NOT (CMAKE_CROSSCOMPILING OR PANDA_TARGET_OHOS))
                               ${IRTOC_ETS_SCRIPTS}/to_string_cache.irt
                               ${IRTOC_ETS_SCRIPTS}/typed_arrays.irt
                               ${IRTOC_ETS_SCRIPTS}/arrays.irt
-                              ${IRTOC_ETS_SCRIPTS}/map.irt
-                              ${IRTOC_ETS_SCRIPTS}/set.irt
+                              ${IRTOC_ETS_SCRIPTS}/runtime.irt
                   TARGET_VARIABLE IRTOC_ETS_FASTPATH_OBJ
                   TARGET_VARIABLE_LLVM IRTOC_ETS_FASTPATH_LLVM_OBJ)
 
