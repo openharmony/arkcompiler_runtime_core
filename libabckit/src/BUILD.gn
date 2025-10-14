@@ -132,7 +132,7 @@ ohos_shared_library("libabckit") {
   }
 
   if (enable_hilog) {
-    public_external_deps = [ "hilog:libhilog" ]
+    external_deps = [ "hilog:libhilog" ]
   }
 
   part_name = "runtime_core"
@@ -172,7 +172,13 @@ ohos_static_library("libabckit_static") {
   configs = [ "$abckit_root:abckit_config" ]
 
   if (enable_hilog) {
-    public_external_deps = [ "hilog:libhilog" ]
+    external_deps = [ "hilog:libhilog" ]
+  }
+
+  if (is_mingw || is_win) {
+    output_extension = "lib"
+  } else {
+    output_extension = "a"
   }
 
   complete_static_lib = true
