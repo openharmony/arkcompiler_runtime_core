@@ -620,7 +620,9 @@ ohos_shared_library("libarkruntime") {
 
 ohos_shared_library("libarkruntime_host") {
   public_configs = [ ":ark_runtime_public_config" ]
-  deps = [ ":libarkruntime_set_static_host" ]
+  if (current_toolchain == host_toolchain) {
+    deps = [ ":libarkruntime_set_static_host" ]
+  }
 
   if (ark_hybrid) {
     external_deps = [ "ets_runtime:libark_jsruntime" ]
