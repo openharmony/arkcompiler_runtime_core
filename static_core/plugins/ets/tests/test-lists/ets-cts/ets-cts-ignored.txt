@@ -876,15 +876,6 @@
 07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_call_28.ets
 07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_call_30.ets
 
-#29499
-07.expressions/04.array_literal/01.type_inference_from_context/arr4_inf_call_40.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr4_inf_call_45.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr4_inf_call_47.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr4_inf_call_49.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr4_inf_call_60.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr4_inf_call_61.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr4_inf_decl_41.ets
-
 #23363 No CTE when array type cannot be determined
 07.expressions/04.array_literal/arr_n_2.ets
 07.expressions/04.array_literal/arr_n_3.ets
