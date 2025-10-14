@@ -37,6 +37,8 @@ panda_ets_add_gtest(
         mock_stdlib
 )
 
+# Issue 30254
+if (NOT PANDA_ENABLE_THREAD_SANITIZER)
 panda_ets_add_gtest(
     NO_CORES
     NAME ets_internal_objects_tests
@@ -78,6 +80,7 @@ panda_ets_add_gtest(
     DEPS_TARGETS
         etsstdlib
 )
+endif()
 
 add_dependencies(ets_tests_runtime_gtests
     ets_internal_objects_mock_tests_gtests)
