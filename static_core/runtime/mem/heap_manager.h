@@ -199,6 +199,15 @@ public:
         return GetObjectAllocator().AsObjectAllocator()->IsObjectInNonMovableSpace(obj);
     }
 
+    /**
+     * Check GC will never move the object.
+     * Object may be in non-movable space or it may be a homoungous object in case of G1.
+     */
+    ALWAYS_INLINE bool IsNonMovable(const ObjectHeader *obj)
+    {
+        return GetObjectAllocator().AsObjectAllocator()->IsNonMovable(obj);
+    }
+
     ALWAYS_INLINE bool IsLiveObject(const ObjectHeader *obj)
     {
         return GetObjectAllocator().AsObjectAllocator()->IsLive(obj);
