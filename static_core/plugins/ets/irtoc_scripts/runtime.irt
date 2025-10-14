@@ -225,7 +225,7 @@ def GenerateGetHashCodeByValue(cgmode)
       next
     end
 
-    klass := LoadI(obj).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+    klass := load_class(obj)
     If(isString(klass), 0).NE {
       str := try_use_cached_flat_str(obj)
       hash := fetchHashCodeString(str)

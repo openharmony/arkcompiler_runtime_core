@@ -31,7 +31,7 @@ function(:EscompatArrayIsPlatformArrayFast,
   end
 
   arrayClass := get_platform_type_ref_uint(ArrayConstants::PLATFORM_TYPES_ESCOMPAT_ARRAY_CLASS_OFFSET)
-  klass := LoadI(obj).Imm(Constants::OBJECT_CLASS_OFFSET).ref_uint
+  klass := load_class(obj).ref_uint
   etsKlass := SubI(klass).Imm(EtsConstants::ETS_CLASS_RUNTIME_CLASS_OFFSET).ref_uint
   If(arrayClass, etsKlass).EQ.Likely {
     result1 := 1
