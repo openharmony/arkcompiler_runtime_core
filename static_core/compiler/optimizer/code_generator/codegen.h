@@ -130,11 +130,6 @@ public:
         return callconv_;
     }
 
-    GraphVisitor *GetGraphVisitor() const
-    {
-        return visitor_;
-    }
-
     LabelHolder::LabelId GetLabelEntry() const
     {
         return labelEntry_;
@@ -459,8 +454,6 @@ private:
     // Target architecture calling convention model
     CallingConvention *callconv_;
     // Current execution model implementation
-    // Visitor for instructions
-    GraphVisitor *visitor_ {};
     CodeInfoBuilder *codeBuilder_ {nullptr};
 
     ArenaVector<SlowPathBase *> slowPaths_;
