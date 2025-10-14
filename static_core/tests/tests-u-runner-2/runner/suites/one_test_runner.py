@@ -20,6 +20,7 @@ from collections.abc import Callable
 from copy import deepcopy
 from pathlib import Path
 
+from runner.enum_types.fail_kind import FailureReturnCode
 from runner.enum_types.params import BinaryParams, TestEnv, TestReport
 from runner.logger import Log
 
@@ -41,6 +42,22 @@ class OneTestRunner:
         return f"{name.upper()}_FAIL"
 
     @staticmethod
+    def __fail_kind_neg_fail(name: str) -> str:
+        return f"{name.upper()}_NEG_FAIL"
+
+    @staticmethod
+    def __fail_kind_segfault(name: str) -> str:
+        return f"{name.upper()}_SEGFAULT_FAIL"
+
+    @staticmethod
+    def __fail_kind_abort_fail(name: str) -> str:
+        return f"{name.upper()}_ABORT_FAIL"
+
+    @staticmethod
+    def __fail_kind_irtoc_assert_fail(name: str) -> str:
+        return f"{name.upper()}_IRTOC_ASSERT_FAIL"
+
+    @staticmethod
     def __fail_kind_other(name: str) -> str:
         return f"{name.upper()}_OTHER"
 
@@ -51,6 +68,10 @@ class OneTestRunner:
     @staticmethod
     def __fail_kind_timeout(name: str) -> str:
         return f"{name.upper()}_TIMEOUT"
+
+    @staticmethod
+    def __fail_kind_passed(name: str) -> str:
+        return f"{name.upper()}_PASSED"
 
     def run_with_coverage(self, name: str, params: BinaryParams, result_validator: ResultValidator,
                           return_code_interpreter: ReturnCodeInterpreter = lambda _, _2, rtc: rtc) \
@@ -93,7 +114,8 @@ class OneTestRunner:
             return_code = -1
         self.__log_cmd(f"{name}: Actual error: {error.strip()}")
         self.__log_cmd(f"{name}: Actual return code: {return_code}\n")
-        fail_kind = fail_kind if fail_kind is not None and not passed else self.__fail_kind_other(name)
+        if fail_kind is None:
+            fail_kind = self.__fail_kind_passed(name) if passed else self.__fail_kind_other(name)
 
         report = TestReport(
             output=output,
@@ -131,7 +153,11 @@ class OneTestRunner:
                 passed = result_validator(output, error, return_code)
                 self.__log_cmd(f"{name}: Actual output: {output.strip()}")
                 if not passed:
-                    fail_kind = self.__fail_kind_fail(name)
+                    if return_code == 0:
+                        fail_kind = self.__fail_kind_neg_fail(name)
+                    else:
+                        fail_kind = self._detect_fail_kind(name, return_code)
+
             except subprocess.TimeoutExpired:
                 self.__log_cmd(f"{name}: Failed by timeout after {params.timeout} sec")
                 fail_kind = self.__fail_kind_timeout(name)
@@ -160,3 +186,12 @@ class OneTestRunner:
         params.env['LLVM_PROFILE_FILE'] = str(profraw_file)
 
         return profraw_file, profdata_file, params
+
+    def _detect_fail_kind(self, name: str, return_code: int) -> str:
+        if return_code in FailureReturnCode.SEGFAULT_RETURN_CODE.value:
+            return self.__fail_kind_segfault(name)
+        if return_code in FailureReturnCode.ABORT_RETURN_CODE.value:
+            return self.__fail_kind_abort_fail(name)
+        if return_code in FailureReturnCode.IRTOC_ASSERT_RETURN_CODE.value:
+            return self.__fail_kind_irtoc_assert_fail(name)
+        return self.__fail_kind_fail(name)

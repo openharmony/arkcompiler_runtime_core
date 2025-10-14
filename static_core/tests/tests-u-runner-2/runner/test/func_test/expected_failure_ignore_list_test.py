@@ -58,7 +58,8 @@ class FailuresFromIgnoreTest(TestCase):
         test2 = ExpectedTest("test2.ets", False, "")
         test3 = ExpectedTest("test3.ets", True, "test failed.*?error")
         test4 = ExpectedTest("test4.ets", True, "")
-        expected_tests = [test1, test2, test3, test4]
+        test5 = ExpectedTest("test5_compile_only_neg.ets", False, "")
+        expected_tests = [test1, test2, test3, test4, test5]
 
         config = self.get_config()
         runner = RunnerStandardFlow(config)
@@ -80,8 +81,9 @@ class FailuresFromIgnoreTest(TestCase):
         test_output = "test failure"
         test_output_test3 = "test failed failure failed blabala3 hbs[dsfds.ets]fail error"
         err_output = ""
-        expected_result = {("test1.ets", True), ("test2.ets", True), ("test3.ets", True), ("test4.ets", True)}
-        expected_stat = {"passed": 0, "ignored": 3, "failed": 1, "excluded": 0}
+        expected_result = {("test1.ets", True), ("test2.ets", True), ("test3.ets", True), ("test4.ets", True),
+                           ("test5_compile_only_neg.ets", True)}
+        expected_stat = {"passed": 0, "ignored": 3, "failed": 2, "excluded": 0}
 
         config = self.get_config()
         runner = RunnerStandardFlow(config)
@@ -103,8 +105,11 @@ class FailuresFromIgnoreTest(TestCase):
                        "failed": runner.failed, "excluded": runner.excluded}
 
         self.assertEqual({(t.test_id, t.last_failure_check_passed) for t in actual_tests}, expected_result)
-        self.assertEqual(failed, 1)
+        self.assertEqual(failed, 2)
         test_utils.compare_dicts(self, expected_stat, actual_stat)
+
+        work_dir = Path(os.environ["WORK_DIR"])
+        shutil.rmtree(work_dir, ignore_errors=True)
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
@@ -115,8 +120,9 @@ class FailuresFromIgnoreTest(TestCase):
     def test_results_with_expected_failure_fail(self) -> None:
         test_output = "test unexpected failure"
         err_output = ""
-        expected_result = {("test1.ets", False), ("test2.ets", True), ("test3.ets", False), ("test4.ets", True)}
-        expected_stat = {"passed": 0, "ignored": 1, "failed": 3, "excluded": 0}
+        expected_result = {("test1.ets", False), ("test2.ets", True), ("test3.ets", False), ("test4.ets", True),
+                           ("test5_compile_only_neg.ets", True)}
+        expected_stat = {"passed": 0, "ignored": 1, "failed": 4, "excluded": 0}
         config = self.get_config()
         runner = RunnerStandardFlow(config)
         actual_tests = list(runner.tests)
@@ -132,5 +138,8 @@ class FailuresFromIgnoreTest(TestCase):
                        "failed": runner.failed, "excluded": runner.excluded}
 
         self.assertEqual({(t.test_id, t.last_failure_check_passed) for t in actual_tests}, expected_result)
-        self.assertEqual(failed, 3)
+        self.assertEqual(failed, 4)
         test_utils.compare_dicts(self, expected_stat, actual_stat)
+
+        work_dir = Path(os.environ["WORK_DIR"])
+        shutil.rmtree(work_dir, ignore_errors=True)

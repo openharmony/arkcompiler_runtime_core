@@ -13,5 +13,5 @@
  * limitations under the License.
  */
  /*---
-    tags: [compile-only]
+    tags: [compile-only, negative]
 ---*/
