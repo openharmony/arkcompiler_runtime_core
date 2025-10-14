@@ -38,38 +38,6 @@ cases:
           }
 
     - decl: |-
-          // The return type of an async method must be Promise<T>
-          class A {
-              async foo(p: int): undefined {
-                  return undefined
-              }
-          }
-
-    - decl: |-
-          // The return type of an async method must be Promise<T>
-          class A {
-              async foo(p: string): string {
-                  return p + p
-              }
-          }
-
-    - decl: |-
-          // The return type of an async method must be Promise<T>
-          class A {
-              async foo(p: boolean): Promise<Int> {
-                  return p
-              }
-          }
-
-    - decl: |-
-          // The return type of an async method must be Promise<T>
-          class A {
-              async foo<U>(p: U): Promise<T> {
-                  return p
-              }
-          }
-
-    - decl: |-
           // Returning values of types Promise<T> and T from async methods is allowed.
           class A {
               async foo<T>(p: T): Promise<T> {

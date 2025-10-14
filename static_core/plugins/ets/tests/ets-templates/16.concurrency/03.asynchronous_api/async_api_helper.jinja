@@ -15,20 +15,20 @@
 
 {% macro generate_async_function(params) -%}
 async function {{params.name}}{{params.type_parameter}}({{params.args | default('')}}){{params.return_type}}{
-    {{- params.body -}}
+    {{ params.body }}
 }
 {%- endmacro -%}
 
 {% macro generate_async_lambda(params) -%}
 const {{params.name}} = async ({{params.args | default('')}}){{params.return_type}} => {
-    {{- params.body -}}
+    {{ params.body }}
 }
 {%- endmacro -%}
 
 {%- macro generate_async_method(params) -%}
 class {{params.class_name}} {
     async {{params.name}}{{params.type_parameter}}({{params.args | default('')}}){{params.return_type}} {
-        {{- params.body -}}
+        {{ params.body }}
     }
 }
 {%- endmacro -%}
@@ -48,7 +48,7 @@ class {{params.class_name}} {
 {%- endmacro %}
 
 {% macro call_async_function(params) -%}
-{{ params.name + ('' if not params.call_type_parameter else '<' + params.call_type_parameter + '>') + '()' }}
+{{ params.name + ('' if not params.call_type_parameter else '<' + params.call_type_parameter + '>') + '(' + params.arg_values | d('') + ')' }}
 {%- endmacro %}
 
 {% macro call_async_method(params) -%}

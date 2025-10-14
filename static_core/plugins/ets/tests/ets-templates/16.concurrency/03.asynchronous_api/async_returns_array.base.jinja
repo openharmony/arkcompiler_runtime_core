@@ -36,6 +36,9 @@
 desc: The return type of an async {{declaration_type}} must be Promise<{{type_name}}>.
 ---*/
 
+{{ c.type_declaration }}
+
+{% set assert = 'instanceof ' + c.type if c.type_declaration else '=== ' + c.value %}
 {% set params = {
     'name': 'noParams',
     'body': async_body,
@@ -50,7 +53,7 @@ async function startTest(){
     arktest.assertTrue(result instanceof Promise)
     let awaited_result = await result
     arktest.assertTrue(Array.isArray(awaited_result))
-    arktest.assertEQ(awaited_result[0], {{c.value}})
+    arktest.assertTrue(awaited_result[0] {{assert}})
     {%- if array_type == 'FixedArray' -%}
     arktest.assertTrue(awaited_result instanceof FixedArray)
     {% endif %}
@@ -63,3 +66,5 @@ function main(){
 {% endfor %}
 {% endfor %}
 {% endmacro %}
+
+
