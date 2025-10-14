@@ -160,17 +160,13 @@ class TypeCppInfo(AbstractAnalysis[NonVoidType], ABC):
     def _create(cls, am: AnalysisManager, t: NonVoidType) -> "TypeCppInfo":
         return t.accept(TypeCppInfoDispatcher(am))
 
-    def return_from_abi(self, val):
-        return f"::taihe::from_abi<{self.as_owner}>({val})"
 
-    def return_into_abi(self, val):
-        return f"::taihe::into_abi<{self.as_owner}>({val})"
+def into_abi(ty: str, val: str) -> str:
+    return f"::taihe::into_abi<{ty}>({val})"
 
-    def pass_from_abi(self, val):
-        return f"::taihe::from_abi<{self.as_param}>({val})"
 
-    def pass_into_abi(self, val):
-        return f"::taihe::into_abi<{self.as_param}>({val})"
+def from_abi(ty: str, val: str) -> str:
+    return f"::taihe::from_abi<{ty}>({val})"
 
 
 class EnumTypeCppInfo(TypeCppInfo):
@@ -462,11 +458,37 @@ class PackageCppImplInfo(AbstractAnalysis[PackageDecl]):
         return PackageCppImplInfo(am, p)
 
 
+class IfaceCppImplInfo(AbstractAnalysis[IfaceDecl]):
+    def __init__(self, am: AnalysisManager, d: IfaceDecl) -> None:
+        self.header = f"{d.parent_pkg.name}.{d.name}.default.hpp"
+        self.source = f"{d.parent_pkg.name}.{d.name}.default.cpp"
+        self.template_header = f"{d.parent_pkg.name}.{d.name}.template.hpp"
+        self.template_source = f"{d.parent_pkg.name}.{d.name}.template.cpp"
+        self.template_class = f"{d.name}Impl"
+
+    @classmethod
+    @override
+    def _create(cls, am: AnalysisManager, d: IfaceDecl) -> "IfaceCppImplInfo":
+        return IfaceCppImplInfo(am, d)
+
+
 class GlobFuncCppImplInfo(AbstractAnalysis[GlobFuncDecl]):
     def __init__(self, am: AnalysisManager, f: GlobFuncDecl) -> None:
         self.macro = f"TH_EXPORT_CPP_API_{f.name}"
+        self.function = f.name
 
     @classmethod
     @override
     def _create(cls, am: AnalysisManager, f: GlobFuncDecl) -> "GlobFuncCppImplInfo":
         return GlobFuncCppImplInfo(am, f)
+
+
+class IfaceMethodCppImplInfo(AbstractAnalysis[IfaceMethodDecl]):
+    def __init__(self, am: AnalysisManager, f: IfaceMethodDecl) -> None:
+        self.macro = f"TH_EXPORT_DEFAULT_CPP_API_{f.name}"
+        self.function = f.name
+
+    @classmethod
+    @override
+    def _create(cls, am: AnalysisManager, f: IfaceMethodDecl) -> "IfaceMethodCppImplInfo":  # fmt: skip
+        return IfaceMethodCppImplInfo(am, f)

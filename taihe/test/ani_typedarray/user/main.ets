@@ -256,7 +256,8 @@ function test_bar_with_createAndPrintFloat32Array() {
     typedArrInfo.createFloat32Array(arr);
     let res = typedArrInfo.printFloat32Array(arr);
     let arraysAreEqual = arr.length === res.length &&
-        arr.every((value, index) => Math.abs(value - res[index.toInt()]) < 1e-6);
+        arr.every(
+            (value, index) => Math.abs(value - res[index.toInt()]) < 1e-6);
     arktest.assertEQ(arraysAreEqual, true);
 }
 
@@ -265,7 +266,8 @@ function test_bar_with_setAndgetFloat32Array() {
     let res = typedArrInfo.Float32Array;
     let arr = new Float32Array([1.0, 2.0, 3.0, 4.0, 5.0]);
     let arraysAreEqual = arr.length === res.length &&
-        arr.every((value, index) => Math.abs(value - res[index.toInt()]) < 1e-6);
+        arr.every(
+            (value, index) => Math.abs(value - res[index.toInt()]) < 1e-6);
     arktest.assertEQ(arraysAreEqual, true);
 }
 
@@ -274,7 +276,8 @@ function test_bar_with_createAndPrintFloat64Array() {
     typedArrInfo.createFloat64Array(arr);
     let res = typedArrInfo.printFloat64Array(arr);
     let arraysAreEqual = arr.length === res.length &&
-        arr.every((value, index) => Math.abs(value - res[index.toInt()]) < 1e-15);
+        arr.every(
+            (value, index) => Math.abs(value - res[index.toInt()]) < 1e-15);
     arktest.assertEQ(arraysAreEqual, true);
 }
 
@@ -283,7 +286,8 @@ function test_bar_with_setAndgetFloat64Array() {
     let res = typedArrInfo.Float64Array;
     let arr = new Float64Array([1.0, 2.0, 3.0, 4.0, 5.0]);
     let arraysAreEqual = arr.length === res.length &&
-        arr.every((value, index) => Math.abs(value - res[index.toInt()]) < 1e-15);
+        arr.every(
+            (value, index) => Math.abs(value - res[index.toInt()]) < 1e-15);
     arktest.assertEQ(arraysAreEqual, true);
 }
 
@@ -315,7 +319,9 @@ function test_bar_with_convertToFloat64Array() {
     let exceptArr: Float64Array =
         new Float64Array([1112.0, -2216.0, 3336.0, -4432.0, 5560.0]);
     let arraysAreEqual = res.length === exceptArr.length &&
-        res.every((value, index) => Math.abs(value - exceptArr[index.toInt()]) < 1e-6);
+        res.every(
+            (value, index) =>
+                Math.abs(value - exceptArr[index.toInt()]) < 1e-6);
     arktest.assertEQ(arraysAreEqual, true);
 }
 

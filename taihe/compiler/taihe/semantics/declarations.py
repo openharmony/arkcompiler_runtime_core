@@ -891,8 +891,8 @@ class TypeDecl(PackageLevelDecl, ABC):
 
 
 class EnumDecl(TypeDecl):
-    _item_dict: dict[str, EnumItemDecl]
     ty_ref: ExplicitTypeRefDecl
+    _item_dict: dict[str, EnumItemDecl]
 
     def __init__(
         self,
@@ -901,9 +901,9 @@ class EnumDecl(TypeDecl):
         ty_ref: ExplicitTypeRefDecl,
     ):
         super().__init__(loc, name)
-        self._item_dict = {}
         self.ty_ref = ty_ref
         self.ty_ref.set_parent(self)
+        self._item_dict = {}
 
     @property
     @override

@@ -149,14 +149,14 @@ class ReadOnlyAttr(TypedAttribute[StructFieldDecl]):
     TARGETS = (StructFieldDecl,)
 
 
-NULL_UNDEFINED_GROUP = AttributeGroupTag()
+UNIT_ATTRIBUTE_GROUP = AttributeGroupTag()
 
 
 @dataclass
 class NullAttr(TypedAttribute[UnionFieldDecl | StructFieldDecl | TypeRefDecl]):
     NAME = "null"
     TARGETS = (UnionFieldDecl, StructFieldDecl, TypeRefDecl)
-    ATTRIBUTE_GROUP_TAGS = frozenset({NULL_UNDEFINED_GROUP})
+    ATTRIBUTE_GROUP_TAGS = frozenset({UNIT_ATTRIBUTE_GROUP})
 
     @override
     def check_typed_context(
@@ -189,7 +189,7 @@ class NullAttr(TypedAttribute[UnionFieldDecl | StructFieldDecl | TypeRefDecl]):
 class UndefinedAttr(TypedAttribute[UnionFieldDecl | StructFieldDecl | TypeRefDecl]):
     NAME = "undefined"
     TARGETS = (UnionFieldDecl, StructFieldDecl, TypeRefDecl)
-    ATTRIBUTE_GROUP_TAGS = frozenset({NULL_UNDEFINED_GROUP})
+    ATTRIBUTE_GROUP_TAGS = frozenset({UNIT_ATTRIBUTE_GROUP})
 
     @override
     def check_typed_context(
@@ -211,6 +211,27 @@ class UndefinedAttr(TypedAttribute[UnionFieldDecl | StructFieldDecl | TypeRefDec
             dm.emit(
                 AdhocError(
                     f"Attribute '{self.NAME}' can only be attached to fields with unit type.",
+                    loc=self.loc,
+                )
+            )
+
+        super().check_typed_context(parent, dm)
+
+
+@dataclass
+class LiteralAttr(TypedAttribute[TypeRefDecl]):
+    NAME = "literal"
+    TARGETS = (TypeRefDecl,)
+    ATTRIBUTE_GROUP_TAGS = frozenset({UNIT_ATTRIBUTE_GROUP})
+
+    value: str
+
+    @override
+    def check_typed_context(self, parent: TypeRefDecl, dm: DiagnosticsManager) -> None:
+        if not isinstance(parent.resolved_ty, UnitType):
+            dm.emit(
+                AdhocError(
+                    f"Attribute '{self.NAME}' can only be attached to unit types.",
                     loc=self.loc,
                 )
             )
@@ -676,7 +697,7 @@ class OnOffAttr(TypedAttribute[GlobFuncDecl | IfaceMethodDecl]):
                     len(parent.name) > len(self.name)
                     and parent.name[: len(self.name)].lower() == self.name.lower()
                 ):
-                    self.func_suffix = parent.name[len(self.name):]
+                    self.func_suffix = parent.name[len(self.name) :]
                 else:
                     dm.emit(
                         AdhocError(
@@ -716,6 +737,7 @@ all_attr_types: list[CheckedAttrT] = [
     ReadOnlyAttr,
     NullAttr,
     UndefinedAttr,
+    LiteralAttr,
     OptionalAttr,
     StsThisAttr,
     StsLastAttr,

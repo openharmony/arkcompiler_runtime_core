@@ -23,6 +23,8 @@ from taihe.codegen.cpp.analyses import (
     PackageCppInfo,
     PackageCppUserInfo,
     TypeCppInfo,
+    from_abi,
+    into_abi,
 )
 from taihe.semantics.declarations import (
     GlobFuncDecl,
@@ -78,14 +80,14 @@ class CppUserHeadersGenerator:
         for param in func.params:
             param_ty_cpp_info = TypeCppInfo.get(self.am, param.ty)
             params_cpp.append(f"{param_ty_cpp_info.as_param} {param.name}")
-            args_abi.append(param_ty_cpp_info.pass_into_abi(param.name))
+            args_abi.append(into_abi(param_ty_cpp_info.as_param, param.name))
         params_cpp_str = ", ".join(params_cpp)
         args_abi_str = ", ".join(args_abi)
-        result_abi = f"{func_abi_info.mangled_name}({args_abi_str})"
+        result_abi = f"{func_abi_info.impl_name}({args_abi_str})"
         if isinstance(return_ty := func.return_ty, NonVoidType):
             return_ty_cpp_info = TypeCppInfo.get(self.am, return_ty)
             return_ty_cpp_name = return_ty_cpp_info.as_owner
-            result_cpp = return_ty_cpp_info.return_from_abi(result_abi)
+            result_cpp = from_abi(return_ty_cpp_info.as_owner, result_abi)
         else:
             return_ty_cpp_name = "void"
             result_cpp = result_abi

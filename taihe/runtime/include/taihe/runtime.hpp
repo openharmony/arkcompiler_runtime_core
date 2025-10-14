@@ -50,7 +50,7 @@ inline ani_env *get_env()
 }
 
 class env_guard {
-    ani_env *env;
+    ani_env *env = nullptr;
     bool is_temporary;
 
 public:

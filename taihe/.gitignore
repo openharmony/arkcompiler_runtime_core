@@ -13,6 +13,8 @@
 
 # Binaries
 build/
+build_bin/
+taihe_bin/
 *.exe
 out
 /dist
