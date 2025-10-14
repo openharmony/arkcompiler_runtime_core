@@ -43,6 +43,7 @@ panda_ets_add_gtest(
     NO_CORES
     NAME ets_internal_objects_tests
     SOURCES
+        get_test_class.cpp
         ets_promise_test.cpp
         ets_job_test.cpp
         ets_class_test.cpp

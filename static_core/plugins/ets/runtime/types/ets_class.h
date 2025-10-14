@@ -16,6 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_CLASS_H_
 #define PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_CLASS_H_
 
+#include <atomic>
 #include <cstdint>
 #include "include/mem/panda_containers.h"
 #include "include/mem/panda_string.h"
@@ -819,6 +820,8 @@ private:
     FIELD_UNUSED uint32_t flags_;
     FIELD_UNUSED EtsLong typeMetaData_;
     FIELD_UNUSED EtsLong overloadMap_;
+    // NOTE(zhushihao8, #20712) remove this field after removal of `GetMethodsNum`
+    std::atomic_uint32_t methodsNum_ {0};
     // ets.Class fields END
 
     ark::Class klass_;

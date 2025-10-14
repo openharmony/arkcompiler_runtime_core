@@ -25,6 +25,7 @@ export final class Class {
     private flags: int
     private typeMetaData: long
     private overloadMap: long
+    private methodsNum: int
 
     /**
      * Stores Class of boolean primitive type
