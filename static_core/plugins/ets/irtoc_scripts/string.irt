@@ -222,6 +222,10 @@ function(:CharIsWhiteSpace,
 }
 
 
+GenerateStringEquals(lang='Ets', dynamic=false, :FastPath)
+GenerateStringEquals(lang='Ets', dynamic=false, :NativePlus)
+
+
 function(:StringEmpty,
           params: {str: 'ref'},
           regmap: $full_regmap,

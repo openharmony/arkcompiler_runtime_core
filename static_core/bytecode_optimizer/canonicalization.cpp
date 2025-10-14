@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -95,7 +95,9 @@ bool Canonicalization::TrySwapReverseInput(Inst *inst)
 void Canonicalization::VisitCommutative(Inst *inst)
 {
     ASSERT(inst->IsCommutative());
-    ASSERT(inst->GetInputsCount() == 2U);  // 2 is COMMUTATIVE_INPUT_COUNT
+    // Exactly 2 data inputs expected for commutative operations (COMMUTATIVE_INPUT_COUNT)
+    ASSERT((inst->GetInputsCount() == 2U && !inst->RequireState()) ||
+           (inst->GetInputsCount() == 3U && inst->RequireState()));
     if (g_options.GetOptLevel() > 1) {
         result_ = TrySwapReverseInput(inst);
     }
@@ -103,7 +105,7 @@ void Canonicalization::VisitCommutative(Inst *inst)
 }
 
 // It is not allowed to move a constant input1 with a single user (it's processed Compare instruction).
-// This is necessary for further merging of the constant and the If instrution in the Lowering pass
+// This is necessary for further merging of the constant and the If instruction in the Lowering pass
 bool AllowSwap(const compiler::Inst *inst)
 {
     auto input1 = inst->GetInput(1U).GetInst();

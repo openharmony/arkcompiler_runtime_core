@@ -485,6 +485,8 @@ extern "C" uintptr_t NO_ADDRESS_SANITIZE ResolveCallByNameEntrypoint(const Metho
 
 extern "C" coretypes::String *CreateStringFromCharCodeSingleNoCacheEntrypoint(uint64_t charCode)
 {
+    // We could use `ark::ets::intrinsics::StdCoreStringFromCharCodeSingle` as the entrypoint, it works, but
+    // that function lookups the char code in the cache while we are sure the char code is not cached.
     return EtsString::CreateNewStringFromCharCode(bit_cast<double>(charCode))->GetCoreType();
 }
 
@@ -523,6 +525,15 @@ extern "C" bool SameValueZeroEntrypoint(ObjectHeader *o1, ObjectHeader *o2)
 {
     return ark::ets::intrinsics::helpers::SameValueZero(EtsCoroutine::GetCurrent(), EtsObject::FromCoreType(o1),
                                                         EtsObject::FromCoreType(o2));
+}
+
+extern "C" uint8_t EtsStringEqualsEntrypoint(coretypes::String *str1, coretypes::String *str2)
+{
+    // We could use `ark::ets::intrinsics::StdCoreStringEquals` as the entrypoint, it works, but
+    // `ark::ets::intrinsics::StdCoreStringEquals` repeats the checks that the irtoc implementation
+    // of the intrinsic has already performed: whether both pointers contain the same memory address
+    // as well as for whether the pointees are actually strings.
+    return ToEtsBoolean(EtsString::FromCoreType(str1)->Compare(EtsString::FromCoreType(str2)) == 0);
 }
 
 }  // namespace ark::ets

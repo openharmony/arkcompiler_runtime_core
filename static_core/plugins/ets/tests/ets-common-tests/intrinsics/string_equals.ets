@@ -15,35 +15,120 @@
 
 const NULL_STR: String | null = null;
 let str = 'abc';
+let longStr = 'abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijkl';
+
 function testLineStringEquals() {
     arktest.assertNE(str, NULL_STR, 'String must not be equal to null');
     arktest.assertNE(NULL_STR, str, 'Null string must not be equal to non-null one');
     arktest.assertEQ(NULL_STR, NULL_STR, 'Null values of type String must be equal');
     arktest.assertEQ(str, str, 'String must be equal to itself');
     arktest.assertEQ(str, 'abc', "String must be equal to 'abc'");
+    arktest.assertTrue(str.equals(str), 'String must be equal to itself');
+    arktest.assertTrue(str.equals('abc'), 'String must be equal to \'abc\'');
+
+    let longCompareStr = 'abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijkl';
+    arktest.assertEQ(longStr.length, 64, 'Long string must be of length 64');
+    arktest.assertEQ(longStr, longCompareStr, "long string must be == to its copy");
+    arktest.assertTrue(longStr.equals(longCompareStr), 'Long string must be equal to its copy');
 }
 
 function testTreeStringEquals() {
     let treeStr = str.concat('defghijklmnopqrstuvwxyz');
-    arktest.assertNE(treeStr, NULL_STR, 'TreeString must not be equal to null');
-    arktest.assertNE(NULL_STR, treeStr, 'Null string must not be equal to non-null one');
-    arktest.assertEQ(treeStr, treeStr, 'TreeString must be equal to itself');
-    arktest.assertEQ(treeStr, 'abcdefghijklmnopqrstuvwxyz', "TreeString must be equal to 'abcdefghijklmnopqrstuvwxyz'");
+    arktest.assertTrue(treeStr.equals(treeStr), 'TreeString must be equal to itself');
+    arktest.assertTrue(treeStr.equals('abcdefghijklmnopqrstuvwxyz'),
+        'TreeString must be equal to \'abcdefghijklmnopqrstuvwxyz\'');
+
+    let treeStr2 = str.concat('defghijklmnopqrstuvwxy1');
+    arktest.assertNE(treeStr2, NULL_STR, 'TreeString must not be equal to null');
+    arktest.assertNE(NULL_STR, treeStr2, 'Null string must not be equal to non-null one');
+    arktest.assertEQ(treeStr2, treeStr2, 'TreeString must be equal to itself');
+    arktest.assertEQ(treeStr2, 'abcdefghijklmnopqrstuvwxy1', "TreeString must be equal to 'abcdefghijklmnopqrstuvwxy1'");
+}
+
+function __noinline__stringEquals(str1: string, str2: string): boolean {
+    // A separated function to not allow the JIT to eliminate the call to Intrinsic.StdCoreStringEquals,
+    // the intrinsic may be eliminated because it is marked as safe_intrinsic in ets_libbase_runtime.yaml.
+    return str1.equals(str2);
+}
+
+function testCachedTreeStringEquals() {
+    let treeStr = str.concat('defghijklmnopqrstuvwxyz');
+    let counter: boolean = __noinline__stringEquals(treeStr, 'abcdefghijklmnopqrstuvwxyz'); // To heat the cache.
+    arktest.assertTrue(treeStr.equals('abcdefghijklmnopqrstuvwxyz'),
+        'TreeString (cached) must be equal to \'abcdefghijklmnopqrstuvwxyz\'');
+    arktest.assertTrue(counter);
+}
+
+function testLongTreeStringEquals() {
+    arktest.assertEQ(longStr.length, 64, 'Long string must be of length 64');
+    let longTreeStr = longStr.concat('defghijklmnopqrstuvwxy1');
+    let longTreeCompareStr = longStr.concat('defghijklmnopqrstuvwxy1');
+    arktest.assertTrue(longTreeStr.equals(longTreeStr), 'Long TreeString must be equal to itself');
+    arktest.assertTrue(longTreeStr.equals(longTreeCompareStr), 'Long TreeString must be equal to its copy');
+}
+
+function testLongCachedTreeStringEquals() {
+    arktest.assertEQ(longStr.length, 64, 'Long string must be of length 64');
+    let longTreeStr = longStr.concat('defghijklmnopqrstuvwxy1');
+    let longTreeCompareStr = longStr.concat('defghijklmnopqrstuvwxy1');
+    let counter: boolean = __noinline__stringEquals(longTreeStr, longTreeCompareStr); // To heat the cache.
+    arktest.assertTrue(longTreeStr.equals(longTreeCompareStr), 'Long TreeString (cached) must be equal to its copy');
+    arktest.assertTrue(counter);
 }
 
 function testSlicedStringEquals() {
     let treeStr = str.concat('defghijklmnopqrstuvwxyz');
     let slicedStr = treeStr.substring(1, 17);  // "bcdefghijklmnopq"
-    arktest.assertNE(slicedStr, NULL_STR, 'SlicedString must not be equal to null');
-    arktest.assertNE(NULL_STR, slicedStr, 'Null string must not be equal to non-null one');
-    arktest.assertEQ(slicedStr, slicedStr, 'SlicedString must be equal to itself');
-    arktest.assertEQ(slicedStr, 'bcdefghijklmnopq', "SlicedString must be equal to 'bcde'");
+    arktest.assertTrue(slicedStr.equals(slicedStr), 'SlicedString must be equal to itself');
+    arktest.assertTrue(slicedStr.equals('bcdefghijklmnopq'), 'SlicedString must be equal to \'bcde\'');
+
+    let treeStr2 = str.concat('1efghijklmnopqrstuvwxyz');
+    let slicedStr2 = treeStr2.substring(1, 17);  // "bc1efghijklmnopq"
+    arktest.assertNE(slicedStr2, NULL_STR, 'SlicedString must not be equal to null');
+    arktest.assertNE(NULL_STR, slicedStr2, 'Null string must not be equal to non-null one');
+    arktest.assertEQ(slicedStr2, slicedStr2, 'SlicedString must be equal to itself');
+    arktest.assertEQ(slicedStr2, 'bc1efghijklmnopq', "SlicedString must be equal to 'bc1e'");
+}
+
+function testCachedSlicedStringEquals() {
+    let treeStr = str.concat('def1hijklmnopqrstuvwxyz');
+    let slicedStr = treeStr.substring(1, 17);  // "bcdefghijklmnopq"
+    let counter: boolean = __noinline__stringEquals(slicedStr, 'bcdef1hijklmnopq'); // To heat the cache.
+    arktest.assertTrue(slicedStr.equals('bcdef1hijklmnopq'), 'SlicedString (cached) must be equal to \'bcde\'');
+    arktest.assertTrue(counter);
+}
+
+function testLongSlicedStringEquals() {
+    arktest.assertEQ(longStr.length, 64, 'Long string must be of length 64');
+    let longTreeStr = longStr.concat('defghijklmnopqrstuvwxyz');
+    let longTreeCompareStr = longStr.concat('defghijklmnopqrstuvwxyz');
+    let longSlicedStr = longTreeStr.substring(1, 66);  // "bcdefghijklmnopq..."
+    let longSlicedCompareStr = longTreeCompareStr.substring(1, 66);  // "bcdefghijklmnopq..."
+    arktest.assertTrue(longSlicedStr.equals(longSlicedStr), 'Long SlicedString must be equal to itself');
+    arktest.assertTrue(longSlicedStr.equals(longSlicedCompareStr), 'Long SlicedString must be equal to its copy');
+}
+
+function testLongCachedSlicedStringEquals() {
+    arktest.assertEQ(longStr.length, 64, 'Long string must be of length 64');
+    let longTreeStr = longStr.concat('1efghijklmnopqrstuvwxyz');
+    let longTreeCompareStr = longStr.concat('1efghijklmnopqrstuvwxyz');
+    let longSlicedStr = longTreeStr.substring(1, 66);  // "bc1efghijklmnopq..."
+    let longSlicedCompareStr = longTreeCompareStr.substring(1, 66);  // "bc1efghijklmnopq..."
+    let counter: boolean = __noinline__stringEquals(longSlicedStr, longSlicedCompareStr); // To heat the cache.
+    arktest.assertTrue(longSlicedStr.equals(longSlicedCompareStr), 'Long SlicedString (cached) must be equal to its copy');
+    arktest.assertTrue(counter);
 }
 
 function main(): int {
     let suite = new arktest.ArkTestsuite('StringEquals');
     suite.addTest('testLineStringEquals', testLineStringEquals);
     suite.addTest('testTreeStringEquals', testTreeStringEquals);
+    suite.addTest('testCachedTreeStringEquals', testCachedTreeStringEquals);
+    suite.addTest('testLongTreeStringEquals', testLongTreeStringEquals);
+    suite.addTest('testLongCachedTreeStringEquals', testLongCachedTreeStringEquals);
     suite.addTest('testSlicedStringEquals', testSlicedStringEquals);
+    suite.addTest('testCachedSlicedStringEquals', testCachedSlicedStringEquals);
+    suite.addTest('testLongSlicedStringEquals', testLongSlicedStringEquals);
+    suite.addTest('testLongCachedSlicedStringEquals', testLongCachedSlicedStringEquals);
     return suite.run();
 }

@@ -206,7 +206,7 @@ bool IrBuilderInliningAnalysis::IsSuitableForInline(const BytecodeInstruction* i
     switch(inst->GetOpcode()) {
 % runtime_insts = [/^(div|mod)u?[2i]?/, /^call/, /(ld|st|len|new)(arr|obj)/, /throw/, /^initobj/, /^checkcast/, /^ldstatic/, /^ststatic/, /^lda.type/, /^lda.str/, /^lda.const/, /^isinstance/, /^builtin/,
 %                  /^monitor/,
-%                  /^ets.typeof/, /^ets.call.name/, /^ets.nullcheck/
+%                  /^ets.typeof/, /^ets.call.name/, /^ets.nullcheck/, /^ets.equals/, /^ets.strictequals/
 %                 ]
 % Panda::instructions.each do |inst|
     // NOLINTNEXTLINE(bugprone-branch-clone)

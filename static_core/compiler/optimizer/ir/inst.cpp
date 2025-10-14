@@ -362,11 +362,12 @@ void Inst::AppendOpcodeAndTypeToVnObject(VnObject *vnObj) const
 void Inst::AppendInputsToVnObject(VnObject *vnObj) const
 {
     if (IsCommutative() && !DataType::IsFloatType(GetType())) {
-        ASSERT(GetInputsCount() == 2);  // 2 : Exactly 2 inputs expected for commutative operations
+        // 2 : Exactly 2 data inputs expected for commutative operations
+        ASSERT((GetInputsCount() == 2U && !RequireState()) || (GetInputsCount() == 3U && RequireState()));
         auto input0 = GetDataFlowInput(GetInput(0).GetInst());
         auto input1 = GetDataFlowInput(GetInput(1).GetInst());
         ASSERT(!input0->IsSaveState() && !input1->IsSaveState() &&
-               "SaveState is unexpected as inputs of commutative operations");
+               "SaveState is unexpected as the first or second input of commutative operations");
         ASSERT(input0->GetVN() != INVALID_VN && "VN of inputs must be known before current inst");
         ASSERT(input1->GetVN() != INVALID_VN && "VN of inputs must be known before current inst");
         if (input0->GetId() > input1->GetId()) {

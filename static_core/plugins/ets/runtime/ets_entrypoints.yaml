@@ -830,6 +830,33 @@
     - uint32_t            # string data size
     - uint16_t            # char to look up
 
+- name: EtsStringEquals
+  entrypoint: EtsStringEquals
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - uint8_t
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: EtsStringEqualsUsual
+  entrypoint: EtsStringEqualsEntrypoint
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - uint8_t
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: EtsStringEqualsSlowPath
+  entrypoint: EtsStringEqualsEntrypoint
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - uint8_t
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
 - name: CreateStringFromCharCodeTlab
   entrypoint: CreateStringFromCharCodeTlab
   bridge: none
