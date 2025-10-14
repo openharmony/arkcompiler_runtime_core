@@ -446,7 +446,6 @@ void Codegen::GenerateEpilogue()
 bool Codegen::VisitGraph()
 {
     EncodeVisitor visitor(this);
-    visitor_ = &visitor;
 
     const auto &blocks = GetGraph()->GetBlocksLinearOrder();
 
@@ -487,7 +486,6 @@ bool Codegen::VisitGraph()
     }
 
     EmitSlowPaths();
-    visitor_ = nullptr;
 
     return true;
 }
