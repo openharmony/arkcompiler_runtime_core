@@ -17,7 +17,7 @@ function testModifyErrorCode() {
     let err = new Error();
     arktest.assertEQ(err.code, 0);
 
-    err.code = 10 as number;
+    err.code = 10;
     arktest.assertEQ(err.code, 10);
 }
 
@@ -50,7 +50,7 @@ function testConstructor01() {
 }
 
 function testConstructor02() {
-    let code: number = 10
+    let code: int = 10
     let message = 'message'
     let cause = 'cause'
     try {
@@ -115,7 +115,7 @@ function testConstructor03() {
 }
 
 function testConstructor04() {
-    let code: number = 10
+    let code: int = 10
     let message = 'message'
     let cause = 'cause'
     try {
