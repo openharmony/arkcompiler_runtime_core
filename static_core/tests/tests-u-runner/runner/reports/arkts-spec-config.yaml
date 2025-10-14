@@ -255,21 +255,6 @@
 4.7.7:
     title: Return Type
     status: Completed
-'4.8':
-    title: Declarations with Overload Signatures
-    status: Completed
-4.8.1:
-    title: Function with Overload Signatures
-    status: Completed
-4.8.2:
-    title: Class Method with Overload Signatures
-    status: Completed
-4.8.3:
-    title: Constructor with Overload Signatures
-    status: Completed
-4.8.4:
-    title: Overload Signatures Implementation Body
-    status: Completed
 '5':
     title: Generics
     status: No testable assertions
@@ -338,6 +323,9 @@
     status: Completed
 '6.3':
     title: Numeric Operator Contexts
+    status: Completed
+6.3.1:
+    title: Numeric Conversions for Relational and Equality Operands
     status: Completed
 '6.4':
     title: Implicit Conversions
@@ -544,18 +532,15 @@
     title: Relational Expressions
     status: Completed
 7.24.1:
-    title: Numeric Conversions for Operands
-    status: Completed
-7.24.2:
     title: Numeric Relational Operators
     status: Completed
-7.24.3:
+7.24.2:
     title: String Relational Operators
     status: Completed
-7.24.4:
+7.24.3:
     title: Boolean Relational Operators
     status: Completed
-7.24.5:
+7.24.4:
     title: Enumeration Relational Operators
     status: Completed
 '7.25':
@@ -598,7 +583,7 @@
     title: Left-Hand-Side Expressions
     status: Needs Update
 '7.30':
-    title: Conditional Expressions
+    title: Ternary Conditional Expressions
     status: Completed
 '7.31':
     title: String Interpolation Expressions
@@ -810,9 +795,6 @@
 '10.5':
     title: Interface Method Declarations
     status: Completed
-10.5.1:
-    title: Interface Method Overload Signatures
-    status: Completed
 '10.6':
     title: Interface Inheritance
     status: Completed
@@ -835,66 +817,60 @@
     title: Errors
     status: Completed
 '13':
-    title: Compilation Units
+    title: Modules and Namespaces
     status: No testable assertions
 '13.1':
-    title: Modules
-    status: Completed
-'13.2':
     title: Import Directives
     status: Completed
-13.2.1:
+13.1.1:
     title: Bind All with Qualified Access
     status: Completed
-13.2.2:
+13.1.2:
     title: Default Import Binding
     status: Completed
-13.2.3:
+13.1.3:
     title: Selective Binding
     status: Completed
-13.2.4:
+13.1.4:
     title: Import Type Directive
     status: Completed
-13.2.5:
+13.1.5:
     title: Import Path
     status: Completed
-13.2.6:
+13.1.6:
     title: Several Bindings for One Import Path
     status: Completed
-'13.3':
+'13.2':
     title: Standard Library Usage
     status: Completed
-'13.4':
-    title: Declaration Modules
-    status: Completed
-'13.5':
+'13.3':
     title: Top-Level Declarations
     status: Completed
-13.5.1:
+13.3.1:
     title: Exported Declarations
     status: Completed
-'13.6':
+'13.4':
     title: Namespace Declarations
     status: Completed
-'13.7':
+'13.5':
     title: Export Directives
     status: No testable assertions
-13.7.1:
+13.5.1:
     title: Selective Export Directive
     status: Completed
-13.7.2:
+13.5.2:
     title: Single Export Directive
     status: Completed
-13.7.3:
+13.5.3:
     title: Export Type Directive
     status: Completed
-13.7.4:
+13.5.4:
     title: Re-Export Directive
     status: Completed
-'13.8':
+'13.6':
     title: Top-Level Statements
-    status: Needs Update
-'13.9':
+    status: Completed
+'13.7':
     title: Program Entry Point
     status: Completed
 '14':
@@ -967,32 +943,35 @@
     title: Subtyping
     status: Completed
 15.2.1:
-    title: Subtyping for Classes and Interfaces
+    title: Subtyping for Non-Generic Classes and Interfaces
     status: Completed
 15.2.2:
-    title: Subtyping for Literal Types
+    title: Subtyping for Generic Classes and Interfaces
     status: Completed
 15.2.3:
-    title: Subtyping for Union Types
+    title: Subtyping for Literal Types
     status: Completed
 15.2.4:
-    title: Subtyping for Function Types
+    title: Subtyping for Union Types
     status: Completed
 15.2.5:
-    title: Subtyping for Fixed-Size Array Types
+    title: Subtyping for Function Types
     status: Completed
 15.2.6:
-    title: Subtyping for Intersection Types
+    title: Subtyping for Fixed-Size Array Types
     status: New
 15.2.7:
+    title: Subtyping for Intersection Types
+    status: New
+15.2.8:
     title: Subtyping for Difference Types
     status: New
 '15.3':
     title: Type Identity
-    status: Needs Update
+    status: Completed
 '15.4':
     title: Assignability
-    status: Needs Update
+    status: Completed
 '15.5':
     title: Invariance, Covariance and Contravariance
     status: Completed
@@ -1001,10 +980,10 @@
     status: Needs Update
 '15.7':
     title: Type Inference
-    status: Needs Update
+    status: No testable assertions
 15.7.1:
-    title: Type Inference for Numeric Constant Expressions
-    status: Completed
+    title: Type Inference for Numeric Literals
+    status: Needs Update
 15.7.2:
     title: Return Type Inference
     status: Completed
@@ -1039,22 +1018,16 @@
     title: Overriding in Classes
     status: Completed
 15.9.2:
-    title: Overriding and Overload Signatures in Interfaces
+    title: Overriding and Overloading in Interfaces
     status: Completed
 15.9.3:
     title: Override-Compatible Signatures
-    status: Completed
-15.9.4:
-    title: Overriding and Implementing Methods with Overload Signatures
     status: Completed
 '15.10':
     title: Overloading
     status: Completed
 15.10.1:
-    title: Signature Resolution for Overload Signatures
-    status: Completed
-15.10.2:
-    title: Overload Resolution for Overload Declarations
+    title: Overload Resolution
     status: Completed
 '15.11':
     title: Type Erasure
@@ -1103,7 +1076,7 @@
     status: Needs Update
 16.3.5:
     title: Promise
-    status: In Progress
+    status: Completed
 16.3.6:
     title: Unhandled Rejected Promises
     status: In Progress
@@ -1142,7 +1115,7 @@
     status: Completed
 17.4.2:
     title: Enumeration Methods
-    status: Need Update
+    status: Completed
 '17.5':
     title: Indexable Types
     status: Needs Update
@@ -1239,9 +1212,6 @@
 '17.15':
     title: Accessor Declarations
     status: New
-'17.16':
-    title: Libraries
-    status: No testable assertions
 '18':
     title: Annotations
     status: No testable assertions
@@ -1253,13 +1223,13 @@
     status: Completed
 '18.2':
     title: Using Annotations
-    status: Needs Update
+    status: Completed
 18.2.1:
     title: Using Single Field Annotations
     status: Completed
 '18.3':
     title: Exporting and Importing Annotations
-    status: Needs Update
+    status: Completed
 '18.4':
     title: Ambient Annotations
     status: Completed
@@ -1283,10 +1253,10 @@
     status: No testable assertions
 '20.1':
     title: Import Path Lookup
-    status: Needs Update
+    status: Completed
 '20.2':
-    title: Compilation Units in Host System
-    status: Needs Update
+    title: Modules in Host System
+    status: Completed
 '20.3':
     title: Getting Type Via Reflection
     status: Blocked by Spec

@@ -136,23 +136,23 @@
 08.statements/09.for_of_statements/for_of_15.ets
 
 #30101 Tests shouldn't rely on default arktsconfig contents.:
-13.compilation_units/02.import_directives/05.import_path/file/import_baseURL_path_file.ets
+13.modules_and_namespaces/01.import_directives/05.import_path/file/import_baseURL_path_file.ets
 
-13.compilation_units/07.export_directives/02.single_export_directive/single_export_0.ets
-13.compilation_units/07.export_directives/02.single_export_directive/single_export_1.ets
-13.compilation_units/07.export_directives/02.single_export_directive/single_export_10.ets
-13.compilation_units/07.export_directives/02.single_export_directive/single_export_11.ets
-13.compilation_units/07.export_directives/02.single_export_directive/single_export_12.ets
-13.compilation_units/07.export_directives/02.single_export_directive/single_export_13.ets
-13.compilation_units/07.export_directives/02.single_export_directive/single_export_14.ets
-13.compilation_units/07.export_directives/02.single_export_directive/single_export_2.ets
-13.compilation_units/07.export_directives/02.single_export_directive/single_export_3.ets
-13.compilation_units/07.export_directives/02.single_export_directive/single_export_4.ets
-13.compilation_units/07.export_directives/02.single_export_directive/single_export_5.ets
-13.compilation_units/07.export_directives/02.single_export_directive/single_export_6.ets
-13.compilation_units/07.export_directives/02.single_export_directive/single_export_7.ets
-13.compilation_units/07.export_directives/02.single_export_directive/single_export_8.ets
-13.compilation_units/07.export_directives/02.single_export_directive/single_export_9.ets
+13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_0.ets
+13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_1.ets
+13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_10.ets
+13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_11.ets
+13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_12.ets
+13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_13.ets
+13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_14.ets
+13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_2.ets
+13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_3.ets
+13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_4.ets
+13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_5.ets
+13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_6.ets
+13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_7.ets
+13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_8.ets
+13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_9.ets
 15.semantic_rules/02.subtyping/subtyping_among_primitive_types/primitive_types_cast_3.ets
 15.semantic_rules/06.compatibility_call_args/single_params_20.ets
 15.semantic_rules/06.compatibility_call_args/single_params_21.ets

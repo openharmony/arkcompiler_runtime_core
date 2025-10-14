@@ -331,19 +331,19 @@ std/core/std_core_typedarrays_bignum__BigInt64Array.ets
 std/core/std_core_typedarrays_bignum__BigUint64Array.ets
 
 ### Negative tests (Import-export)
-spec/import_export/07.export_directives/02.export_type_directives/to_export_negative.ets
+spec/import_export/05.export_directives/02.export_type_directives/to_export_negative.ets
 
 ### Not-a-test (Import-export)
 spec/import_export/03.import_directives/to_export.ets
 spec/import_export/03.import_directives/05.default_import_binding_additional/default_to_export.ets
 spec/import_export/03.import_directives/06.import_path/to_export.ets
 spec/import_export/06.top-level_declarations/01.exported_declarations/to_export.ets
-spec/import_export/07.export_directives/01.selective_export_directive/to_export.ets
-spec/import_export/07.export_directives/03.re-export_directives/re-export_all.ets
-spec/import_export/07.export_directives/03.re-export_directives/re-export_not_all.ets
-spec/import_export/07.export_directives/03.re-export_directives/to_export.ets
-spec/import_export/07.export_directives/03.re-export_directives/to_export_2.ets
-spec/import_export/07.export_directives/02.export_type_directives/to_export_for_import_type_alias_with_qualified_access.ets
+spec/import_export/05.export_directives/01.selective_export_directive/to_export.ets
+spec/import_export/05.export_directives/03.re-export_directives/re-export_all.ets
+spec/import_export/05.export_directives/03.re-export_directives/re-export_not_all.ets
+spec/import_export/05.export_directives/03.re-export_directives/to_export.ets
+spec/import_export/05.export_directives/03.re-export_directives/to_export_2.ets
+spec/import_export/05.export_directives/02.export_type_directives/to_export_for_import_type_alias_with_qualified_access.ets
 
 #10874
 std/math/std_math_clz64_long.ets
