@@ -1259,9 +1259,6 @@
 08.statements/04.local_declarations/post_declaration_func_n_1.ets
 08.statements/04.local_declarations/post_declaration_n_1.ets
 
-#25042 Ast verifier failure for for-of with labelled statement
-08.statements/11.continue_statements/continue_for_of5l.ets
-
 #30145
 08.statements/14.throw_statements/throw_7.ets
 
