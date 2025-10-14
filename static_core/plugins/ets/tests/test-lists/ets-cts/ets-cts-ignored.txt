@@ -1017,6 +1017,12 @@
 10.interfaces/06.interface_inheritance/multiple_interface/child_specifies_parent_use_case/child_specifies_parent_use_case_18.ets
 10.interfaces/06.interface_inheritance/multi_layer_interface/type_system/type_system_23.ets
 
+#30565 no CTE on getter override
+10.interfaces/06.interface_inheritance/multi_layer_interface/complex_inheritance/complex_inheritance_37_n.ets
+10.interfaces/06.interface_inheritance/multi_layer_interface/complex_inheritance/complex_inheritance_38_n.ets
+10.interfaces/06.interface_inheritance/multi_layer_interface/complex_inheritance/complex_inheritance_39_n.ets
+10.interfaces/06.interface_inheritance/multi_layer_interface/complex_inheritance/complex_inheritance_40_n.ets
+
 #28994
 11.enumerations/01.enumeration_integer_values/enum_long_20.ets
 11.enumerations/01.enumeration_integer_values/enum_long_21.ets
@@ -2399,10 +2405,6 @@
 15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/narrowing_neg_21.ets
 15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/narrowing_neg_22.ets
 15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/narrowing_neg_23.ets
-
-#29727
-10.interfaces/06.interface_inheritance/multi_layer_interface/complex_inheritance/complex_inheritance_12.ets
-10.interfaces/06.interface_inheritance/multi_layer_interface/complex_inheritance/complex_inheritance_22.ets
 
 #29866
 09.classes/07.method_declarations/method_declaration_with_existed_name_3.ets
