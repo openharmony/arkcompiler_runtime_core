@@ -46,5 +46,5 @@ function main() {
     initFuncName('123', new MyClass());
     console.log(add1(1, 2));
     console.log(add3(1, 2));
-    classA.foo("foo");
+    classA.foo('foo');
 }
