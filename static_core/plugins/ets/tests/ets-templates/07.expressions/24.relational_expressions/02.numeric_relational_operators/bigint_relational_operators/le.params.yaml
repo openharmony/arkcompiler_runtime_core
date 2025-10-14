@@ -22,8 +22,8 @@ cases:
         - new BigInt(-(new BigInt(0)))
     - values:
         - +1n
-        - new BigInt(new Byte(+1))
-        - new BigInt(new Short(+1))
+        - new BigInt(new Byte(1))
+        - new BigInt(new Short(1))
         - new BigInt(+1.0)
         - new BigInt(+1n)
     - values:
