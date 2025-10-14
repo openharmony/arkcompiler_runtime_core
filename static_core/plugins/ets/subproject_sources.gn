@@ -209,7 +209,7 @@ srcs_runtime = [
   "runtime/entrypoints/ets_proxy_entrypoints.cpp",
   "stdlib/native/init_native_methods.cpp",
   "stdlib/native/core/regexp/RegExp.cpp",
-  "stdlib/native/core/regexp/regexp.cpp",
+  "stdlib/native/core/regexp/regexp_executor.cpp",
   "stdlib/native/core/regexp/regexp_16.cpp",
   "stdlib/native/core/regexp/regexp_8.cpp",
   "stdlib/native/core/Intl.cpp",
