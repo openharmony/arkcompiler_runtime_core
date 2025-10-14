@@ -17,6 +17,7 @@ from pathlib import Path
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
+from runner.enum_types.validation_result import ValidatorFailKind
 from runner.extensions.validators.parser.parser_validator import ParserValidator
 from runner.suites.test_standard_flow import TestStandardFlow
 
@@ -60,7 +61,8 @@ class ParserValidatorTest(TestCase):
             actual_output=actual_output,
             _2=actual_error,
             return_code=actual_return_code)
-        self.assertFalse(actual)
+        self.assertFalse(actual.passed)
+        self.assertEqual(actual.kind, ValidatorFailKind.NONE)
 
     @patch('runner.suites.test_standard_flow.TestStandardFlow', spec=TestStandardFlow)
     def test_passed_with_output(self, mock_test: MagicMock) -> None:
@@ -79,7 +81,8 @@ class ParserValidatorTest(TestCase):
             actual_output=actual_output,
             _2=actual_error,
             return_code=actual_return_code)
-        self.assertTrue(actual)
+        self.assertTrue(actual.passed)
+        self.assertEqual(actual.kind, ValidatorFailKind.NONE)
 
     @patch('runner.suites.test_standard_flow.TestStandardFlow', spec=TestStandardFlow)
     def test_failed_not_matched_output(self, mock_test: MagicMock) -> None:
@@ -98,7 +101,8 @@ class ParserValidatorTest(TestCase):
             actual_output=actual_output,
             _2=actual_error,
             return_code=actual_return_code)
-        self.assertFalse(actual)
+        self.assertFalse(actual.passed)
+        self.assertEqual(actual.kind, ValidatorFailKind.COMPARE_OUTPUT)
 
     @patch('runner.suites.test_standard_flow.TestStandardFlow', spec=TestStandardFlow)
     def test_passed_with_output_rt1(self, mock_test: MagicMock) -> None:
@@ -136,4 +140,4 @@ class ParserValidatorTest(TestCase):
             actual_output=actual_output,
             _2=actual_error,
             return_code=actual_return_code)
-        self.assertFalse(actual)
+        self.assertFalse(actual.passed)

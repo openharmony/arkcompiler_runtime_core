@@ -17,6 +17,7 @@
 import re
 from typing import TYPE_CHECKING
 
+from runner.enum_types.validation_result import ValidationResult, ValidatorFailKind
 from runner.extensions.validators.ivalidator import IValidator
 from runner.logger import Log
 from runner.options.step import StepKind
@@ -35,11 +36,12 @@ class BaseValidator(IValidator):
 
     @staticmethod
     def check_return_code_0(test: "TestStandardFlow", step_value: str, output: str,
-                            error_output: str, return_code: int) -> bool:
+                            error_output: str, return_code: int) -> ValidationResult:
+
         if error_output.strip():
             _LOGGER.all(f"Step validator {step_value}: get error output '{error_output}'")
         if output.find('[Fail]Device not founded or connected') > -1:
-            return False
+            return ValidationResult(False, ValidatorFailKind.DEVICE_NOT_FOUND, "Device not founded or connected")
 
         if test.ignored and test.last_failure:
             test.last_failure_check_passed = BaseValidator._check_last_failure_for_ignored_test(test.last_failure,
@@ -48,23 +50,26 @@ class BaseValidator(IValidator):
         if BaseValidator._step_passed(test, return_code, step_value):
             # the step has passed
 
-            if (test.has_expected or test.has_expected_err) and (output or error_output):
+            if test.has_expected or test.has_expected_err:
                 comparison_res = test.compare_output_with_expected(output, error_output)
 
                 if comparison_res:
-                    return True
+                    test.reproduce += "Comparison with .expected or .expected.err file has passed\n"
+                    return ValidationResult(True, ValidatorFailKind.NONE, "")
 
-                test.reproduce += "Comparison with .expected or .expected.err file failed\n"
-                return False
+                test.reproduce += "Comparison with .expected or .expected.err file has failed\n"
+                test.log_comparison_difference(output, error_output)
+                return ValidationResult(False, ValidatorFailKind.COMPARE_OUTPUT, "Comparison with .expected "
+                                                                                 "or .expected.err file has failed")
 
             if not error_output:
-                return True
+                return ValidationResult(True, ValidatorFailKind.NONE, "")
 
             test.reproduce += ("\nThe test has passed, but stderr is not empty. "
                                "There is no .expected.err file to compare with\n")
-            return False
+            return ValidationResult(False, ValidatorFailKind.STDERR_NOT_EMPTY, "stderr is not empty")
 
-        return False
+        return ValidationResult(False, ValidatorFailKind.STEP_FAILED, "")
 
     @staticmethod
     def _step_passed(test: "TestStandardFlow", return_code: int, step: str) -> bool:

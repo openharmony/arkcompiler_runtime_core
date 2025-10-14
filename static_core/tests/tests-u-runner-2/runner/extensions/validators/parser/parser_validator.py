@@ -16,6 +16,7 @@
 #
 from typing import TYPE_CHECKING
 
+from runner.enum_types.validation_result import ValidationResult, ValidatorFailKind
 from runner.extensions.validators.base_validator import BaseValidator
 from runner.logger import Log
 from runner.options.step import StepKind
@@ -34,14 +35,17 @@ class ParserValidator(BaseValidator):
 
     @staticmethod
     def es2panda_result_validator(test: "TestStandardFlow", _: str, actual_output: str, _2: str,
-                                  return_code: int) -> bool:
+                                  return_code: int) -> ValidationResult:
+        fail_kind = ValidatorFailKind.NONE
         try:
             expected_name = f"{test.path.stem}-expected"
             expected_path = test.path.with_stem(expected_name).with_suffix(".txt")
             with open(expected_path, encoding="utf-8") as file_pointer:
                 expected = file_pointer.read()
             passed = expected == actual_output and return_code in [0, 1]
+            if not passed:
+                fail_kind = ValidatorFailKind.COMPARE_OUTPUT
         except OSError:
             passed = False
 
-        return passed
+        return ValidationResult(passed, fail_kind, "")

@@ -22,11 +22,12 @@ from pathlib import Path
 
 from runner.enum_types.fail_kind import FailureReturnCode
 from runner.enum_types.params import BinaryParams, TestEnv, TestReport
+from runner.enum_types.validation_result import ValidationResult, ValidatorFailKind
 from runner.logger import Log
 
 _LOGGER = Log.get_logger(__file__)
 
-ResultValidator = Callable[[str, str, int], bool]
+ResultValidator = Callable[[str, str, int], ValidationResult]
 ReturnCodeInterpreter = Callable[[str, str, int], int]
 
 
@@ -68,6 +69,10 @@ class OneTestRunner:
     @staticmethod
     def __fail_kind_timeout(name: str) -> str:
         return f"{name.upper()}_TIMEOUT"
+
+    @staticmethod
+    def __failed_kind_special(name: str, kind: str) -> str:
+        return f"{name.upper()}_{kind.upper()}"
 
     @staticmethod
     def __fail_kind_passed(name: str) -> str:
@@ -137,23 +142,27 @@ class OneTestRunner:
         self.__log_cmd(f"{name}: {' '.join(cmd)}")
         _LOGGER.all(f"Run {name}: {' '.join(cmd)}")
 
-        with subprocess.Popen(
+        with (subprocess.Popen(
                 cmd,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 env=params.env,
                 encoding='utf-8',
                 errors='ignore',
-        ) as process:
+        ) as process):
             fail_kind: str | None = None
             try:
                 output, error = process.communicate(timeout=params.timeout)
                 return_code = return_code_interpreter(output, error, process.returncode)
-                passed = result_validator(output, error, return_code)
+                validation_result = result_validator(output, error, return_code)
+                passed = validation_result.passed
                 self.__log_cmd(f"{name}: Actual output: {output.strip()}")
                 if not passed:
-                    if return_code == 0:
-                        fail_kind = self.__fail_kind_neg_fail(name)
+                    if validation_result.kind in [ValidatorFailKind.COMPARE_OUTPUT,
+                                                    ValidatorFailKind.STDERR_NOT_EMPTY]:
+                        kind = validation_result.kind.value
+                        fail_kind = self.__failed_kind_special(name, kind)
+
                     else:
                         fail_kind = self._detect_fail_kind(name, return_code)
 
@@ -193,4 +202,6 @@ class OneTestRunner:
             return self.__fail_kind_abort_fail(name)
         if return_code in FailureReturnCode.IRTOC_ASSERT_RETURN_CODE.value:
             return self.__fail_kind_irtoc_assert_fail(name)
+        if return_code == 0:
+            return self.__fail_kind_neg_fail(name)
         return self.__fail_kind_fail(name)

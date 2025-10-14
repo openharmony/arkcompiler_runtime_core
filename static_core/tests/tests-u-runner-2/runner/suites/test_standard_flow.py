@@ -24,6 +24,7 @@ from pathlib import Path
 from runner import utils
 from runner.common_exceptions import InvalidConfiguration
 from runner.enum_types.params import BinaryParams, TestEnv, TestReport
+from runner.enum_types.validation_result import ValidationResult, ValidatorFailKind
 from runner.extensions.validators.base_validator import BaseValidator
 from runner.extensions.validators.ivalidator import IValidator
 from runner.logger import Log
@@ -168,6 +169,19 @@ class TestStandardFlow(Test):
         return self.metadata.tags.invalid_tags
 
     @staticmethod
+    def compare(expected: str, actual: str) -> bool:
+        expected_lines = set(filter(None, expected.splitlines()))
+        actual_lines = set(filter(None, actual.splitlines()))
+
+        if not actual_lines and not expected_lines:
+            return True
+
+        if not expected_lines or not actual_lines:
+            return False
+
+        return expected_lines.issubset(actual_lines)
+
+    @staticmethod
     def __add_options(options: list[str]) -> list[str]:
         for index, option in enumerate(options):
             if not option.startswith("--"):
@@ -208,6 +222,17 @@ class TestStandardFlow(Test):
             return_code_from_device = int(match.group(1))
             return return_code_from_device
         return actual_return_code
+
+    @staticmethod
+    def _remove_main_decl(lines: str) -> str:
+        expected = lines.split("\n")
+        index_to_delete = len(expected)
+        for i, item in enumerate(expected):
+            if '.main' in item or ':main' in item:
+                index_to_delete = i
+                break
+
+        return '\n'.join(expected[:index_to_delete])
 
     def log_invalid_tags(self) -> None:
         if len(self.invalid_tags) > 0:
@@ -304,7 +329,7 @@ class TestStandardFlow(Test):
 
         return new_step
 
-    def compare_output_with_expected(self, output: str | None, error_output: str | None) -> bool | None:
+    def compare_output_with_expected(self, output: str, error_output: str) -> bool:
         """Compares test output with expected"""
 
         try:
@@ -316,6 +341,103 @@ class TestStandardFlow(Test):
             passed = False
 
         return passed
+
+    def log_comparison_difference(self, output: str | None, error_output: str | None) -> None:
+        def find_difference(expected: str, actual: str) -> set[str]:
+            expected_lines = set(filter(None, expected.splitlines()))
+            actual_lines = set(filter(None, actual.splitlines()))
+            return expected_lines ^ actual_lines
+
+        differences = []
+        if output and self.expected:
+            dif_exp_output = find_difference(self.expected, output)
+            differences.append(f"The difference between expected file and stdout: \n{dif_exp_output}\n")
+
+        elif error_output and self.expected_err:
+            diff_exp_error = find_difference(self.expected_err, error_output)
+            differences.append(f"The difference in expected.err file and stderr: \n{diff_exp_error}\n")
+
+        if differences:
+            self.reproduce += "\n".join(differences)
+
+    def _step_validator(self, step: Step, output: str, error: str, return_code: int) -> ValidationResult:
+        validator_name = step.name if step.name in self.validator.validators else step.step_kind.value
+        validator = self.validator.get_validator(validator_name)
+        if validator is not None:
+            return validator(self, step.step_kind.value, output, error, return_code)
+        return ValidationResult(True, ValidatorFailKind.NONE, "")
+
+    def _read_expected_file(self) -> None:
+        if self.has_expected:
+            self.expected = utils.read_expected_file(self.path_to_expected)
+        if self.has_expected_err:
+            self.expected_err = utils.read_expected_file(self.path_to_expected_err)
+
+    def _refactor_expected_str_for_jit(self) -> None:
+        if self.expected:
+            self.expected = TestStandardFlow._remove_main_decl(self.expected)
+
+        if self.expected_err:
+            self.expected_err = TestStandardFlow._remove_main_decl(self.expected_err)
+
+    def _determine_test_status(self, output: str | None, error: str | None) -> bool:
+        passed = True
+
+        def compare_line_sets(expected: str, actual: str, expected_path: Path) -> bool:
+            expected_lines = set(filter(None, expected.splitlines()))
+            actual_lines = set(filter(None, actual.splitlines()))
+
+            if not actual_lines and not expected_lines:
+                return True
+
+            if not expected_lines:
+                _LOGGER.all(f"{expected_path} is empty after normalization")
+                return False
+            if not actual_lines:
+                _LOGGER.all(f"{expected_path} is not empty, but actual output is")
+                return False
+
+            is_subset = expected_lines.issubset(actual_lines)
+            if not is_subset:
+                _LOGGER.all(f"{expected_path} is not a subset of actual, the missing lines (after normalization) are:")
+                for line in expected_lines.difference(actual_lines):
+                    _LOGGER.all(line)
+                _LOGGER.all("(end of missing lines)")
+            return is_subset
+
+        def normalize_output_lines(output: str) -> str:
+            return ''.join(normalize_line(line) + '\n' for line in output.splitlines())
+
+        def normalize_line(line: str) -> str:
+            return self._remove_file_info_from_error(self._normalize_error_report(line))
+
+        # to cover case: there is no expected_err file, but stderr is not empty
+        if not self.has_expected_err and error:
+            passed = False
+
+        if self.expected and not self.expected_err and output:
+            # Compare with output from std.OUT
+            output_normalized_info = normalize_output_lines(output)
+            expected_normalized_info = normalize_output_lines(self.expected)
+            passed = compare_line_sets(expected_normalized_info, output_normalized_info,
+                                       self.path_to_expected) and not error
+        elif not self.expected and self.expected_err and error:
+            # Compare with output from std.ERR
+            report_error = normalize_output_lines(error)
+            expected_error = normalize_output_lines(self.expected_err)
+            passed = compare_line_sets(expected_error, report_error, self.path_to_expected_err)
+        elif self.expected and self.expected_err and output and error:
+            # Compare .expected with std.Output and .expected.err with std.Error
+            output_normalized_info = normalize_output_lines(output)
+            expected_normalized_info = normalize_output_lines(self.expected)
+            passed_output = compare_line_sets(expected_normalized_info, output_normalized_info, self.path_to_expected)
+
+            report_error = normalize_output_lines(error)
+            expected_error = normalize_output_lines(self.expected_err)
+            passed_error = compare_line_sets(expected_error, report_error, self.path_to_expected_err)
+            passed = passed_output and passed_error
+
+        return bool(passed)
 
     def __do_run_one_step(self, step: Step) -> tuple[bool, TestReport | None, str | None]:
         if not step.enabled:
@@ -445,91 +567,3 @@ class TestStandardFlow(Test):
             return f'{opt_name}={":".join(self.dependent_abc_files)}'
 
         return f'{opt_name}={self.test_abc!s}'
-
-    def _step_validator(self, step: Step, output: str, error: str, return_code: int) -> bool:
-        validator = (self.validator.get_validator(step.name)
-                     if step.name in self.validator.validators
-                     else self.validator.get_validator(step.step_kind.value))
-        if validator is not None:
-            return validator(self, step.step_kind.value, output, error, return_code)
-        return True
-
-    def _read_expected_file(self) -> None:
-        if self.has_expected:
-            self.expected = utils.read_expected_file(self.path_to_expected)
-        if self.has_expected_err:
-            self.expected_err = utils.read_expected_file(self.path_to_expected_err)
-
-    def _refactor_expected_str_for_jit(self) -> None:
-        if self.expected:
-            index_to_delete = len(self.expected.split("\n"))
-            expected = self.expected.split("\n")
-            for i, item in enumerate(expected):
-                if '.main' in item or ':main' in item:
-                    index_to_delete = i
-                    break
-            self.expected = '\n'.join(expected[:index_to_delete])
-
-        if self.expected_err:
-            index_to_delete = len(self.expected_err.split("\n"))
-            expected_err = self.expected_err.split("\n")
-            for i, item in enumerate(expected_err):
-                if '.main' in item or ':main' in item:
-                    index_to_delete = i
-                    break
-            self.expected_err = '\n'.join(expected_err[:index_to_delete])
-
-    def _determine_test_status(self, output: str | None, error: str | None) -> bool:
-        passed = True
-
-        def compare_line_sets(expected: str, actual: str, expected_path: Path) -> bool:
-            expected_lines = set(filter(None, expected.splitlines()))
-            actual_lines = set(filter(None, actual.splitlines()))
-
-            if not actual_lines and not expected_lines:
-                return True
-
-            if not expected_lines:
-                _LOGGER.all(f"{expected_path} is empty after normalization")
-                return False
-            if not actual_lines:
-                _LOGGER.all(f"{expected_path} is not empty, but actual output is")
-                return False
-
-            is_subset = expected_lines.issubset(actual_lines)
-            if not is_subset:
-                _LOGGER.all(f"{expected_path} is not a subset of actual, the missing lines (after normalization) are:")
-                for line in expected_lines.difference(actual_lines):
-                    _LOGGER.all(line)
-                _LOGGER.all("(end of missing lines)")
-            return is_subset
-
-        def normalize_output_lines(output: str) -> str:
-            return ''.join(normalize_line(line) + '\n' for line in output.splitlines())
-
-        def normalize_line(line: str) -> str:
-            return self._remove_file_info_from_error(self._normalize_error_report(line))
-
-        if self.expected and not self.expected_err and output:
-            # Compare with output from std.OUT
-            output_normalized_info = normalize_output_lines(output)
-            expected_normalized_info = normalize_output_lines(self.expected)
-            passed = compare_line_sets(expected_normalized_info, output_normalized_info,
-                                       self.path_to_expected) and not error
-        elif not self.expected and self.expected_err and error:
-            # Compare with output from std.ERR
-            report_error = normalize_output_lines(error)
-            expected_error = normalize_output_lines(self.expected_err)
-            passed = compare_line_sets(expected_error, report_error, self.path_to_expected_err)
-        elif self.expected and self.expected_err and output and error:
-            # Compare .expected with std.Output and .expected.err with std.Error
-            output_normalized_info = normalize_output_lines(output)
-            expected_normalized_info = normalize_output_lines(self.expected)
-            passed_output = compare_line_sets(expected_normalized_info, output_normalized_info, self.path_to_expected)
-
-            report_error = normalize_output_lines(error)
-            expected_error = normalize_output_lines(self.expected_err)
-            passed_error = compare_line_sets(expected_error, report_error, self.path_to_expected_err)
-            passed = passed_output and passed_error
-
-        return bool(passed)
