@@ -80,5 +80,10 @@ panda_ets_add_gtest(
 )
 
 add_dependencies(ets_tests_runtime_gtests
-    ets_internal_objects_tests_gtests
     ets_internal_objects_mock_tests_gtests)
+
+# Issue 30254
+if (NOT PANDA_ENABLE_THREAD_SANITIZER)
+add_dependencies(ets_tests_runtime_gtests
+    ets_internal_objects_tests_gtests)
+endif()
