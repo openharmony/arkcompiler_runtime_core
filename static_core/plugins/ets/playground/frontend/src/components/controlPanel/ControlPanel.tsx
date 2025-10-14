@@ -86,7 +86,7 @@ const ControlPanel = (): JSX.Element => {
                             : <div className={styles.icon}><Icon icon="play" size={20}/></div>}
                         className={styles.btn}
                         onClick={handleRun}
-                        disabled={isRunLoading}
+                        disabled={isRunLoading || isCompileLoading}
                         data-testid="run-btn"
                     />
                 </Tooltip>
@@ -97,7 +97,7 @@ const ControlPanel = (): JSX.Element => {
                             : <div className={styles.icon}><Icon icon="code-block" size={14}/></div>}
                         className={styles.btn}
                         onClick={handleCompile}
-                        disabled={isCompileLoading}
+                        disabled={isCompileLoading || isRunLoading}
                         data-testid="compile-btn"
                     />
                 </Tooltip>

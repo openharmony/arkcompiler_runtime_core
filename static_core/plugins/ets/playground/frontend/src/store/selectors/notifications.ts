@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,6 @@
  * limitations under the License.
  */
 
-import { IServiceResponse } from './types';
-import { fetchGetEntity } from './common';
-import { IFeatures, IFeaturesRaw } from '../models/features';
+import { RootState } from '../index';
 
-export const featuresService = {
-  fetchFeatures: async (): Promise<IServiceResponse<IFeatures>> => {
-    // @ts-ignore
-    return fetchGetEntity('/features', null, (d: IFeaturesRaw) => {
-      return {astMode: d.ast_mode}
-    });
-  },
-};
+export const selectMessages = (state: RootState) => state.notifications.messages;

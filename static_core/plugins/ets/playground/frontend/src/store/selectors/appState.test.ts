@@ -64,7 +64,8 @@ export const mockAllState: RootState = {
         isAstLoading: false,
         astRes: null
     },
-    features: { astMode: 'manual' }
+    features: { astMode: 'manual' },
+    notifications: { messages: []}
 };
 describe('Redux Selectors', () => {
     let mockState: RootState;
