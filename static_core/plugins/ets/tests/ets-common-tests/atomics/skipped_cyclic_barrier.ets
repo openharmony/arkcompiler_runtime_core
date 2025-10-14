@@ -34,7 +34,7 @@ function testMain() {
 }
 
 function task(): Int {
-    let c = new Console() // workaround, issue: #12996 
+    let c = Console.getInstance() // workaround, issue: #12996 
 
     heavyComputation()
     c.println("task completed, waiting")

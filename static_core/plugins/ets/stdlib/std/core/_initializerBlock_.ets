@@ -20,6 +20,6 @@ static {
     TypeKindMask = ((1 << 6) - 1).toByte();
     
     ObjectType = Type.of(new Object()) as ClassType;
-    console = new Console();
+    console = Console.getInstance();
     coroutine = new Coroutine();
 }

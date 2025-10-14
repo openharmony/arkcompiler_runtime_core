@@ -70,8 +70,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
 
     public override native $_get(idx: int): T;
 
-    //NOTE(ekaterinazaytseva): unable to replace internal - using from friend class ArrayValuesIterator_T provide accsess problems
-    internal final native $_get_unsafe(idx: int): T
+    private final native $_get_unsafe(idx: int): T
 
     public native $_set(idx: int, val: T): void;
 
@@ -94,9 +93,8 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         this.actualLength = buf.length
     }
 
-    //NOTE(ekaterinazaytseva): unable to replace internal - using default c-tor from non-inherited classes provide accsess problems
-    internal constructor() {
-        this.buffer = new NullishType[4]
+    public constructor() {
+        this.buffer = new Any[4]
         this.actualLength = 0
     }
 
@@ -912,6 +910,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
 % ctx.override = 'override'
 % ctx.override_expected_here = '' # hide 'override' when it cannot be implemented
 % ctx.get_unsafe = Proc.new { |t, i| "#{t}.$_get_unsafe(#{i})" }
+% ctx.get = Proc.new { |t, i| "#{t}[#{i}]" }
 % ctx.set_unsafe = Proc.new { |t, i, v| "#{t}.$_set_unsafe(#{i}, #{v})" }
 % ctx.el_type = 'T'
 % ctx.el_type_boxed = 'T'

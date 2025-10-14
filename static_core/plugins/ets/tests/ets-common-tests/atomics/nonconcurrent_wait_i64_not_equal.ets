@@ -18,7 +18,7 @@ function test(byteToChange: int) {
     let arr = new Int32Array(buf, 0, 1);
     let bytearr = new Int8Array(buf, 0, 4);
 
-    (new Console()).println('Testing for byte: ' + byteToChange)
+    (Console.getInstance()).println('Testing for byte: ' + byteToChange)
     Atomics.store(bytearr, byteToChange, 1);
     let x = Atomics.wait(arr, 0, 0)
     arktest.assertEQ(x, 'not-equal')

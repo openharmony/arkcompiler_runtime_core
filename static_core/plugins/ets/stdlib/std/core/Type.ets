@@ -220,8 +220,7 @@ export abstract class Type extends Object {
      *
      * @returns instance of appropriate type or undefined if resolving is failed
      */
-    // NOTE(ekaterinazaytseva): unable to replace internal - used in TypeCreator.ets as public
-    internal static resolve(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker): Type | undefined {
+    public static resolve(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker): Type | undefined {
         let kind = (TypeAPI.getTypeKind(td, contextLinker) & TypeKindMask).toByte()
         switch (kind) {
             case TypeKind.NONE:
@@ -502,7 +501,7 @@ export abstract class Type extends Object {
         this.contextLinker = contextLinker
     }
 
-    internal getTypeDesc(): RuntimeTypeDescriptor {
+    public getTypeDesc(): RuntimeTypeDescriptor {
         return this.td
     }
 
@@ -538,7 +537,7 @@ export abstract class Type extends Object {
         return false
     }
 
-    internal abstract convertObject(obj: NullishType): NullishType;
+    public abstract convertObject(obj: Any): Any;
 
     private isNumericType(): boolean {
         return (this) instanceof ByteType
@@ -675,7 +674,7 @@ export final class NullType extends Type {
         return other instanceof NullType
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    public override convertObject(obj: Any): Any {
         if (obj != null) {
             throw new Error("invalid conversion")
         }
@@ -746,7 +745,7 @@ export final class UndefinedType extends Type {
         return other instanceof UndefinedType
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    public override convertObject(obj: Any): Any {
         throw new Error("todo(kprokopenko): add when undefined becomes available")
     }
 }
@@ -821,7 +820,7 @@ export final class VoidType extends Type {
         return other instanceof VoidType
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    public override convertObject(obj: Any): Any {
         if (!this.assignableFrom(Type.of(obj))) {
             throw new Error("invalid conversion")
         }
@@ -905,7 +904,7 @@ export final class CharType extends Type {
         return other instanceof CharType
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    public override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
         if (!this.equals(objType)) {
             throw new Error("invalid type for conversion")
@@ -989,7 +988,7 @@ export final class BooleanType extends Type {
         return other instanceof BooleanType
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    public override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
         if (!this.equals(objType)) {
             throw new Error("invalid type for conversion")
@@ -1073,7 +1072,7 @@ export final class ByteType extends Type {
         return other instanceof ByteType
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    public override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
         if (this.equals(objType)) {
             return obj
@@ -1168,7 +1167,7 @@ export final class ShortType extends Type {
         return other instanceof ShortType
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    public override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
         if (this.equals(objType)) {
             return obj
@@ -1263,7 +1262,7 @@ export final class IntType extends Type {
         return other instanceof IntType
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    public override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
         if (this.equals(objType)) {
             return obj
@@ -1358,7 +1357,7 @@ export final class LongType extends Type {
         return other instanceof LongType
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    public override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
         if (this.equals(objType)) {
             return obj
@@ -1453,7 +1452,7 @@ export final class FloatType extends Type {
         return other instanceof FloatType
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    public override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
         if (this.equals(objType)) {
             return obj
@@ -1548,7 +1547,7 @@ export final class DoubleType extends Type {
         return other instanceof DoubleType
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    public override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
         if (this.equals(objType)) {
             return obj
@@ -1567,7 +1566,7 @@ export final class ClassType extends Type {
     private readonly cls: Class
     private readonly attrs: int
 
-    internal constructor(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker) {
+    public constructor(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker) {
         super(td, contextLinker)
         this.cls = TypeAPI.getClass(td, contextLinker)!
         this.attrs = TypeAPI.getClassAttributes(this.cls)
@@ -1984,7 +1983,7 @@ export final class ClassType extends Type {
         return false
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    public override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
         if (!this.assignableFrom(objType)) {
             throw new Error("invalid conversion")
@@ -1999,7 +1998,7 @@ export final class ClassType extends Type {
 export final class InterfaceType extends Type {
     private cls: Class
 
-    internal constructor(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker) {
+    public constructor(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker) {
         super(td, contextLinker)
         this.cls = TypeAPI.getClass(td, contextLinker)!
     }
@@ -2168,14 +2167,14 @@ export final class InterfaceType extends Type {
         throw new Error("Not implemented")
     }
 
-    internal hasSuperInterface(expected: InterfaceType): boolean {
+    public hasSuperInterface(expected: InterfaceType): boolean {
         if (this.equals(expected)) {
             return true
         }
         return TypeAPI.isInheritedFrom(this.cls, expected.cls)
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    public override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
         if (!this.assignableFrom(objType)) {
             throw new Error("invalid conversion")
@@ -2219,12 +2218,12 @@ export final class ArrayType extends Type {
         return other instanceof ArrayType && (other as ArrayType).getElementType().subTypeOf(this.getElementType())
     }
 
-    internal static getInstance(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker): ArrayType {
+    public static getInstance(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker): ArrayType {
         const arrayClass = TypeAPI.getClass(td, contextLinker)!
         return ArrayType.getInstance(arrayClass)
     }
 
-    internal static getInstance(arrayClass: Class, elemTD?: RuntimeTypeDescriptor): ArrayType {
+    public static getInstance(arrayClass: Class, elemTD?: RuntimeTypeDescriptor): ArrayType {
         elemTD = elemTD ?? TypeAPI.getArrayElementType(arrayClass)
         const contextLinker = arrayClass.getLinker()
         let ek = (TypeAPI.getTypeKind(elemTD, contextLinker) & TypeKindMask).toByte()
@@ -2341,7 +2340,7 @@ export final class ArrayType extends Type {
         return TypeAPI.makeArrayInstance(this.elemTD, this.getContextLinker(), length)
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    public override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
         if (this.equals(objType)) {
             return obj
@@ -2354,7 +2353,7 @@ export final class ArrayType extends Type {
 }
 
 export final class TupleType extends Type {
-    internal constructor(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker) {
+    public constructor(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker) {
         super(td, contextLinker)
     }
 
@@ -2382,7 +2381,7 @@ export final class TupleType extends Type {
         throw new Error("Not implemented")
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    public override convertObject(obj: Any): Any {
         throw new Error("todo(kprokopenko): add when tuple becomes available")
     }
 }
@@ -2518,7 +2517,7 @@ export abstract class FunctionType extends Type {
 
 
 export final class LambdaType extends FunctionType {
-    internal constructor(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker) {
+    public constructor(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker) {
         super(td, contextLinker)
     }
 
@@ -2588,7 +2587,7 @@ export final class LambdaType extends FunctionType {
         }
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    public override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
         if (this.equals(objType)) {
             return obj
@@ -2601,7 +2600,7 @@ export final class LambdaType extends FunctionType {
 }
 
 export final class MethodType extends FunctionType {
-    internal constructor(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker) {
+    public constructor(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker) {
         super(td, contextLinker)
     }
 
@@ -2649,7 +2648,7 @@ export final class MethodType extends FunctionType {
         return this.getReceiverTypeDescriptor() !== undefined
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    public override convertObject(obj: Any): Any {
         throw new Error("Only LambdaType can be converted")
     }
 
@@ -2662,7 +2661,7 @@ export final class MethodType extends FunctionType {
 export final class StringType extends Type {
     public static readonly REF: StringType = new StringType()
 
-    internal constructor() {
+    public constructor() {
         super(TypeAPI.convertTypeDescriptor("std.core.String"), getBootRuntimeLinker())
     }
 
@@ -2724,7 +2723,7 @@ export final class StringType extends Type {
         return other instanceof StringType
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    public override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
         if (!this.equals(objType)) {
             throw new Error("invalid conversion")
@@ -2737,7 +2736,7 @@ export final class StringType extends Type {
  * Represents enum type
  */
 export final class EnumType extends Type {
-    internal constructor(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker) {
+    public constructor(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker) {
         super(td, contextLinker)
     }
 
@@ -2836,7 +2835,7 @@ export final class EnumType extends Type {
         throw new Error("not implemented")
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    public override convertObject(obj: Any): Any {
         throw new Error("todo(kprokopenko): enum conversion")
     }
 }
@@ -2845,7 +2844,7 @@ export final class EnumType extends Type {
  * Represents union type
  */
 export final class UnionType extends Type {
-    internal constructor(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker) {
+    public constructor(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker) {
         super(td, contextLinker)
     }
 
@@ -2952,7 +2951,7 @@ export final class UnionType extends Type {
         throw new Error("not implemented")
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    public override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
         if (this.equals(objType)) {
             return obj

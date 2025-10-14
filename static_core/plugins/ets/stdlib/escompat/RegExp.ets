@@ -103,7 +103,8 @@ export class RegExpResultArray /*extends Array<String>*/ {
         this.updateIndicesAndResult(hasIndices)
         RegExp.input_ = input
         RegExp.leftContext_ = input.substring(0, index)
-        RegExp.rightContext_ = input.substring(index + res.result[0].length)
+        RegExp.rightContext_ = input.substring(index + res.result[0]!.length)
+        this.wasProcessed = true
     }
 
     /**
@@ -1206,8 +1207,7 @@ export class RegExp extends Object {
 
     private native matchImpl(pattern: String, flags: String, str: String, patternLength: int, strLength: int, lastIndex: int, hasSlashU: boolean): RegExpMatchArray;
 
-    // NOTE(ekaterinazaytseva): unable to replace internal - used as public
-    internal exec(str: String, index: number): RegExpExecArray | null {
+    public exec(str: String, index: int): RegExpExecArray | null {
         const hasSlashU = str.contains("\\u", 0) || this.pattern_.contains("\\u", 0)
         const res = this.execImpl(this.pattern_, this.flags_, str, this.pattern_.length, str.length, index.toInt(), hasSlashU)
         if (res.isCorrect) {
@@ -1234,8 +1234,7 @@ export class RegExp extends Object {
         return this.exec(str, this.lastIndex)
     }
 
-    // NOTE(ekaterinazaytseva): unable to replace internal - used as public
-    internal matchInternal(str: String, index: int): RegExpMatchArray | null {
+    private matchInternal(str: String, index: int): RegExpMatchArray | null {
         const hasSlashU = str.contains("\\u", 0) || this.pattern_.contains("\\u", 0)
         const res = this.matchImpl(this.pattern_, this.flags_, str, this.pattern_.length, str.length, index, hasSlashU)
         if (res.isCorrect) {
@@ -1247,8 +1246,7 @@ export class RegExp extends Object {
         }
     }
 
-    // NOTE(ekaterinazaytseva): unable to replace internal - used in friend class
-    internal matchInternal(str: String): RegExpMatchArray | null {
+    public matchInternal(str: String): RegExpMatchArray | null {
         return this.matchInternal(str, this.lastIndex)
     }
 
