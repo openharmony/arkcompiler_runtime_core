@@ -56,6 +56,16 @@ public:
         value_ = value;
     }
 
+    const EtsObject *AsObject() const
+    {
+        return reinterpret_cast<const EtsObject *>(this);
+    }
+
+    EtsObject *AsObject()
+    {
+        return reinterpret_cast<EtsObject *>(this);
+    }
+
     NO_COPY_SEMANTIC(EtsBoxPrimitive);
     NO_MOVE_SEMANTIC(EtsBoxPrimitive);
 

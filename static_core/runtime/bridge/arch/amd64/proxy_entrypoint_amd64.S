@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -76,7 +76,11 @@
     PUSH_GENERAL_REGS
     // %rsp % 16 == 0
 
+    // Since PUSH_GENERAL_REGS has been called, then rsi will points to array of pushed arguments.
+    // rsi is the second argument of calling function.
     movq %rsp, %rsi
+    // rbp + 24 points to the stack arguments that has been pushed to the stack by i2c bridge before calling proxy bridge.
+    // rdx is the third argument of calling function.
     leaq 24(%rbp), %rdx
     callq \entry
 
@@ -170,9 +174,8 @@
 
 1:
     jmp ThrowNativeExceptionBridge
-    
+
 4:
     retq
     CFI_ENDPROC
 .endm
-

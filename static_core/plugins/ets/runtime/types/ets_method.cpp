@@ -25,6 +25,7 @@
 #include "plugins/ets/runtime/types/ets_primitives.h"
 #include "plugins/ets/runtime/types/ets_type.h"
 #include "plugins/ets/runtime/ets_utils.h"
+#include "plugins/ets/runtime/ets_vtable_builder.h"
 
 namespace ark::ets {
 
@@ -282,6 +283,47 @@ PandaString EtsMethod::GetDescriptor() const
                reinterpret_cast<uint64_t>(GetPandaMethod()->GetPandaFile()),
                static_cast<uint64_t>(GetPandaMethod()->GetFileId().GetOffset()));
     return {actualTd.data()};
+}
+
+EtsMethod *EtsMethod::GetOverriddenMethod()
+{
+    if (IsStatic()) {
+        return nullptr;
+    }
+
+    EtsClass *klass = GetClass();
+    EtsClass *base = klass->GetBase();
+    if (base == nullptr) {
+        ASSERT(klass->IsEtsObject());
+        return nullptr;
+    }
+
+    auto loadCtx = GetClass()->GetLoadContext();
+    auto thisMethodName = GetPandaMethod()->GetFullName();
+    auto thisMethodProtoId = GetPandaMethod()->GetProtoId();
+
+    auto baseVtable = base->GetRuntimeClass()->GetVTable();
+    auto methodVtableIdx = GetVTableID();
+    if (!baseVtable.Empty() && methodVtableIdx < baseVtable.Size()) {
+        return EtsMethod::FromRuntimeMethod(baseVtable[methodVtableIdx]);
+    }
+
+    // Method doesn't override base class method, search overriden interface method
+    if (IsProxy()) {
+        return GetInterfaceMethodIfProxy();
+    }
+    auto itable = klass->GetRuntimeClass()->GetITable();
+    for (auto &entry : itable.Get()) {
+        for (auto &method : entry.GetInterface()->GetVirtualMethods()) {
+            ASSERT(loadCtx == method.GetClass()->GetLoadContext());
+            if (method.GetFullName() == thisMethodName &&
+                ETSProtoIsOverriddenBy(loadCtx, method.GetProtoId(), thisMethodProtoId)) {
+                return EtsMethod::FromRuntimeMethod(&method);
+            }
+        }
+    }
+
+    return nullptr;
 }
 
 }  // namespace ark::ets

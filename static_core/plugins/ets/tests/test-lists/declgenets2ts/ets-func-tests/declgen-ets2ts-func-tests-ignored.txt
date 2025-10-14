@@ -210,3 +210,9 @@ spec/16.Support_for_GUI_Programming/struct-type/anno/test-struct-builder-param.e
 spec/16.Support_for_GUI_Programming/struct-type/builder/test-struct-call-function-in-build_2.ets
 std/core/ReflectTypeTest.ets
 std/core/ReflectMethodTest.ets
+std/core/Proxy.ets
+std/core/ProxyUiTest.ets
+std/core/ProxyExtraTest1.ets
+std/core/ProxyExtraTest2.ets
+std/core/ProxyExtraTest3.ets
+std/core/ProxyBasicTests.ets

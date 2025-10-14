@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,6 @@
  * limitations under the License.
  */
 
-{%- for c in cases %}
+#include "bridge/arch/arm/proxy_entrypoint_armhf.S"
 
-/*---
-desc: {{c.desc}}
-tags: [compile-only, negative]
-ark_options: ['--compiler-inlining=false']
----*/
-// NOTE(mgroshev): remove ark_options after #29029
-
-{{c.class}}
-{{c.function}}
-
-function main(): void {
-  type MyArray = {{c.type}};
-  let arr: MyArray[] = [{{c.value}}];
-}
-{%- endfor %}
+PROXY_ENTRYPOINT EtsProxyEntryPoint EtsProxyMethodInvoke

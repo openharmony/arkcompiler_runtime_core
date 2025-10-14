@@ -216,6 +216,7 @@ Status Verify(Service *service, ark::Method *method, VerificationMode mode)
 
     // class verification can be called concurrently
     if ((method->GetClass()->GetState() < Class::State::VERIFIED) && !VerifyClass(method->GetClass())) {
+        service->verifierService->ReleaseProcessor(processor);
         return Status::FAILED;
     }
     Job job {service, method, verifMethodOptions};

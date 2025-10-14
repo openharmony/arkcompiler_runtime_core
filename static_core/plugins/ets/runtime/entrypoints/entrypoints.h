@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,13 @@
  * limitations under the License.
  */
 
-{%- for c in cases %}
+#ifndef PLUGINS_ETS_RUNTIME_ENTRYPOINTS_ENTRYPOINTS_H
+#define PLUGINS_ETS_RUNTIME_ENTRYPOINTS_ENTRYPOINTS_H
 
-/*---
-desc: {{c.desc}}
-tags: [compile-only, negative]
-ark_options: ['--compiler-inlining=false']
----*/
-// NOTE(mgroshev): remove ark_options after #29029
+namespace ark::ets::entrypoints {
 
-{{c.class}}
-{{c.function}}
+const void *GetEtsProxyEntryPoint();
 
-function main(): void {
-  type MyArray = {{c.type}};
-  let arr: MyArray[] = [{{c.value}}];
-}
-{%- endfor %}
+}  // namespace ark::ets::entrypoints
+
+#endif  // PLUGINS_ETS_RUNTIME_ENTRYPOINTS_ENTRYPOINTS_H

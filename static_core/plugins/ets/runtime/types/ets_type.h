@@ -18,6 +18,7 @@
 #include "plugins/ets/runtime/types/ets_primitives.h"
 #include "libpandafile/file.h"
 #include "libpandafile/file_items.h"
+#include "runtime/include/mem/panda_string.h"
 
 namespace ark::ets {
 
@@ -107,6 +108,36 @@ inline panda_file::Type ConvertEtsTypeToPandaType(const EtsType type)
         default:
             return panda_file::Type(panda_file::Type::TypeId::INVALID);
     }
+}
+
+// CC-OFFNXT(G.FUD.06) switch-case, ODR
+inline PandaString EtsTypeToString(const EtsType type)
+{
+    switch (type) {
+        case EtsType::VOID:
+            return "void";
+        case EtsType::BOOLEAN:
+            return "boolean";
+        case EtsType::BYTE:
+            return "byte";
+        case EtsType::CHAR:
+            return "char";
+        case EtsType::SHORT:
+            return "short";
+        case EtsType::INT:
+            return "int";
+        case EtsType::LONG:
+            return "long";
+        case EtsType::FLOAT:
+            return "float";
+        case EtsType::DOUBLE:
+            return "double";
+        case EtsType::OBJECT:
+            return "object";
+        default:
+            return "invalid";
+    }
+    UNREACHABLE();
 }
 
 template <typename T>

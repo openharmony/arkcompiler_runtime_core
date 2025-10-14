@@ -81,23 +81,23 @@ function mainCatchLinkerBadSupertypeError() {
 }
 
 function mainMisatchedExtendsFinal() {
-    abilityExpectVerificationError("@mismatched.extends_final.ExtendsFinal")
+    abilityExpectVerificationError("L@mismatched/extends_final/ExtendsFinal;")
 }
 
 function mainMisatchedOverrideFinal() {
-    abilityExpectVerificationError("@app.module5.MainAbility::invoke")
+    abilityExpectVerificationError("L@app/module5/MainAbility;")
 }
 
 function mainCircularityExtends() {
-    abilityExpectVerificationError("@app.module6.MainAbility::invoke")
+    abilityExpectVerificationError("L@app/module6/MainAbility;")
 }
 
 function mainMultipleOverrideBase() {
-    abilityExpectVerificationError("@app.module.MainAbility::invoke");
+    abilityExpectVerificationError("L@app/module/MainAbility;");
 }
 
 function mainMultipleOverrideBase1() {
-    abilityExpectVerificationError("@app.module1.MainAbility::invoke");
+    abilityExpectVerificationError("L@app/module1/MainAbility;");
 }
 
 function mainVerificationModeOnTheFly() {
@@ -109,9 +109,9 @@ function mainVerificationModeAheadOfTime() {
 }
 
 function mainMultipleImplement() {
-    abilityExpectVerificationError("@app.module.MainAbility::invoke");
+    abilityExpectVerificationError("L@app/module/MainAbility;");
 }
 
 function mainMultipleImplement1() {
-    abilityExpectVerificationError("@app.module1.MainAbility::invoke");
+    abilityExpectVerificationError("L@app/module1/MainAbility;");
 }

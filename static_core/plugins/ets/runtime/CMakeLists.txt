@@ -75,6 +75,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/std_core_StackTrace.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Type.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_TypeCreator.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/reflect_Proxy.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Method.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_reflect_Method.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_reflect_Field.cpp
@@ -123,6 +124,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/ets_object_state_table.cpp
     ${ETS_EXT_SOURCES}/static_object_accessor.cpp
     ${ETS_EXT_SOURCES}/static_type_converter.cpp
+    ${ETS_EXT_SOURCES}/entrypoints/ets_proxy_entrypoints.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/init_native_methods.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/escompat/Process.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/escompat/RegExp.cpp
@@ -155,19 +157,27 @@ get_directory_property(CURRENT_DEFS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} COMPIL
 if (PANDA_TARGET_ARM32_ABI_SOFT OR PANDA_TARGET_ARM32_ABI_SOFTFP)
     list (APPEND ETS_RUNTIME_SOURCES
         ${ETS_EXT_SOURCES}/ani/arch/arm32/ets_async_entry_point_arm32.S
-        ${ETS_EXT_SOURCES}/ani/arch/arm32/ets_napi_entry_point_arm32.S)
+        ${ETS_EXT_SOURCES}/ani/arch/arm32/ets_napi_entry_point_arm32.S
+        ${ETS_EXT_SOURCES}/entrypoints/arch/arm32/ets_proxy_entry_point_arm32.S
+    )
 elseif(PANDA_TARGET_ARM32_ABI_HARD)
     list (APPEND ETS_RUNTIME_SOURCES
         ${ETS_EXT_SOURCES}/ani/arch/arm32/ets_async_entry_point_arm32hf.S
-        ${ETS_EXT_SOURCES}/ani/arch/arm32/ets_napi_entry_point_arm32hf.S)
+        ${ETS_EXT_SOURCES}/ani/arch/arm32/ets_napi_entry_point_arm32hf.S
+        ${ETS_EXT_SOURCES}/entrypoints/arch/arm32/ets_proxy_entry_point_arm32hf.S
+    )
 elseif(PANDA_TARGET_ARM64)
     list (APPEND ETS_RUNTIME_SOURCES
         ${ETS_EXT_SOURCES}/ani/arch/arm64/ets_async_entry_point_aarch64.S
-        ${ETS_EXT_SOURCES}/ani/arch/arm64/ets_napi_entry_point_aarch64.S)
+        ${ETS_EXT_SOURCES}/ani/arch/arm64/ets_napi_entry_point_aarch64.S
+        ${ETS_EXT_SOURCES}/entrypoints/arch/arm64/ets_proxy_entry_point_aarch64.S
+    )
 elseif (PANDA_TARGET_AMD64)
     list (APPEND ETS_RUNTIME_SOURCES
         ${ETS_EXT_SOURCES}/ani/arch/amd64/ets_async_entry_point_amd64.S
-        ${ETS_EXT_SOURCES}/ani/arch/amd64/ets_napi_entry_point_amd64.S)
+        ${ETS_EXT_SOURCES}/ani/arch/amd64/ets_napi_entry_point_amd64.S
+        ${ETS_EXT_SOURCES}/entrypoints/arch/amd64/ets_proxy_entry_point_amd64.S
+    )
 endif()
 
 if (PANDA_TARGET_OHOS)
