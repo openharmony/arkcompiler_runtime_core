@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "include/mem/panda_string.h"
 #include "objects/base_type.h"
 #include "objects/dynamic_object_accessor_util.h"
 #include "plugins/ets/runtime/ets_stubs.h"
@@ -79,16 +80,18 @@ using common::TaggedType;
     napi_status status;
     {
         status = napi_load_module_with_module_request(env, moduleName.c_str(), &result);
-        if (status == napi_pending_exception) {
-            napi_value exp;
-            NAPI_CHECK_FATAL(napi_get_and_clear_last_exception(env, &exp));
-            NAPI_CHECK_FATAL(napi_fatal_exception(env, exp));
-            INTEROP_LOG(FATAL) << "Unable to load module due to exception";
-            UNREACHABLE();
+        if (status != napi_ok) {
+            INTEROP_LOG(ERROR) << "Unable to load module " << moduleName.c_str() << " due to Forward Exception";
+            ctx->ForwardJSException(coro);
+            return nullptr;
         }
     }
-    INTEROP_FATAL_IF(status != napi_ok);
-    INTEROP_FATAL_IF(IsUndefined(env, result));
+    if (IsUndefined(env, result) || !result) {
+        PandaString exp = PandaString("Unable to load module ") + moduleName.c_str() + " due to Undefined result";
+        INTEROP_LOG(ERROR) << exp;
+        InteropCtx::ThrowETSError(coro, exp.c_str());
+        return nullptr;
+    }
     ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
     ets_proxy::SharedReference *sharedRef = storage->GetReference(env, result);
     if (sharedRef != nullptr) {
@@ -517,23 +520,23 @@ JSValue *JSRuntimeLoadModule(EtsString *module)
         NAPI_CHECK_FATAL(napi_get_named_property(env, GetGlobal(env), func.data(), &requireFn));
 
         INTEROP_FATAL_IF(GetValueType(env, requireFn) != napi_function);
-        {
-            napi_value jsName;
-            NAPI_CHECK_FATAL(napi_create_string_utf8(env, mod.data(), NAPI_AUTO_LENGTH, &jsName));
-            std::array<napi_value, 1> args = {jsName};
-            napi_value recv;
-            NAPI_CHECK_FATAL(napi_get_undefined(env, &recv));
-            auto status = (napi_call_function(env, recv, requireFn, args.size(), args.data(), &modObj));
-            if (status == napi_pending_exception) {
-                napi_value exp;
-                NAPI_CHECK_FATAL(napi_get_and_clear_last_exception(env, &exp));
-                NAPI_CHECK_FATAL(napi_fatal_exception(env, exp));
-                INTEROP_LOG(FATAL) << "Unable to load module due to exception";
-                UNREACHABLE();
-            }
-            INTEROP_FATAL_IF(status != napi_ok);
+        napi_value jsName;
+        NAPI_CHECK_FATAL(napi_create_string_utf8(env, mod.data(), NAPI_AUTO_LENGTH, &jsName));
+        std::array<napi_value, 1> args = {jsName};
+        napi_value recv;
+        NAPI_CHECK_FATAL(napi_get_undefined(env, &recv));
+        auto status = napi_call_function(env, recv, requireFn, args.size(), args.data(), &modObj);
+        if (status != napi_ok) {
+            INTEROP_LOG(ERROR) << "Unable to load module " << moduleName.c_str() << " due to Forward Exception";
+            ctx->ForwardJSException(coro);
+            return nullptr;
         }
-        INTEROP_FATAL_IF(IsNull(env, modObj));
+        if (IsUndefined(env, modObj)) {
+            PandaString exp = PandaString("Unable to load module ") + moduleName.c_str() + " due to null result";
+            INTEROP_LOG(ERROR) << exp;
+            InteropCtx::ThrowETSError(coro, exp.c_str());
+            return nullptr;
+        }
     }
 
     ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
