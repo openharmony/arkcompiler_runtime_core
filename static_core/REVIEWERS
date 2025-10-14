@@ -189,6 +189,8 @@ static_core/plugins/ets/tests/interop_js/xgc/                                 @i
 static_core/plugins/ets/tests/native/promise/                                 @konstanting
 static_core/plugins/ets/tests/runtime/tooling/                                @slynkodenis
 static_core/plugins/ets/tests/runtime/types/ets_promise_test.cpp              @konstanting ^udav
+static_core/plugins/ets/tests/test-lists/ets-func-tests/                      ^amate ^sergeyandreev @Prof @kuchkovairina @Nojpg @anton-sysoev
+static_core/plugins/ets/tests/test-lists/ets-sdk/                             ^amate ^sergeyandreev @Prof @kuchkovairina @Nojpg @anton-sysoev 
 static_core/plugins/ets/stdlib/std/debug/concurrency/                         @konstanting ^tanglu10 ^zhuangkudecha
 static_core/plugins/ets/tests/ets_ts_subset/std/core/Promise*                 ^anton-sysoev @magikarp777 ^ivan-tyulyandin ^dmitriitr @konstanting ^udav ^Nojpg
 static_core/plugins/ets/tests/interop_js/tests/checked/                       ^igelhaus @nazarovkonstantin @ignatenkooleg ^rokashevichsvetlana @Prof ^kurnevichstanislav @dingding5
