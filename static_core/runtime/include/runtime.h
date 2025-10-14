@@ -178,9 +178,7 @@ public:
     static bool GetLiteralTagAndValue(const panda_file::File &pf, uint32_t id, panda_file::LiteralTag *tag,
                                       panda_file::LiteralDataAccessor::LiteralValue *value);
 
-#ifdef PANDA_GET_PARAMETER
     static void SetDebuggerOptions(RuntimeOptions &options);
-#endif
 
     uintptr_t GetPointerToConstArrayData(const panda_file::File &pf, uint32_t id) const;
 

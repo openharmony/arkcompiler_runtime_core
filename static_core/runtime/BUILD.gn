@@ -514,7 +514,7 @@ if (is_ohos && is_standard_system) {
   ]
   if (!(ark_standalone_build || ark_static_standalone_build)) {
     _libarkruntime_calculated_defines += [
-      "PANDA_GET_PARAMETER",
+      "OHOS_PANDA_DEBUG_MODE_ENABLE",
     ]
     _libarkruntime_calculated_external_deps += [
       "init:libbegetutil",
