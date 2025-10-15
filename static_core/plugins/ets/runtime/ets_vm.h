@@ -361,12 +361,12 @@ public:
     }
 
     /// @brief Method creates CallBackPoster using factory.
-    PandaUniquePtr<CallbackPoster> CreateCallbackPoster(CallbackPoster::DestroyCallback onDestroy = nullptr)
+    PandaUniquePtr<CallbackPoster> CreateCallbackPoster()
     {
         if (callbackPosterFactory_ == nullptr) {
             return nullptr;
         }
-        return callbackPosterFactory_->CreatePoster(std::move(onDestroy));
+        return callbackPosterFactory_->CreatePoster();
     }
 
     using RunEventLoopFunction = std::function<bool(ark::EventLoopRunMode)>;

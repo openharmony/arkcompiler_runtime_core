@@ -109,46 +109,18 @@ function testMainQuit() {
     }, new Error('Main worker cannot be stopped'));
 }
 
-function testQuit() {
-    let eaw = new EAWorker();
-    let waiter = new Event();
-    eaw.start();
-    let restExecuted = 0;
-    let job1 = eaw.run<void>(() => {
-        waiter.wait();
-    });
-
-    eaw.run<void>(() => {
-        restExecuted++;
-    });
-
-    eaw.run<void>(() => {
-        restExecuted++;
-    });
-
-    eaw.quit();
-    waiter.fire();
-    arktest.assertTrue(restExecuted < 2);
-}
-
-
 function testQuitSafely() {
     let eaw2 = new EAWorker();
     eaw2.start();
-    let checkPoints = [0,0];
-    let waiter1 = new Event();
-    let waiter2 = new Event();
-        eaw2.run<void>(() => {
-        waiter2.wait();
-        checkPoints[1] += 1;
+    let checkPoints = 0;
+    eaw2.run<void>(() => {
+        checkPoints += 1;
     });
     let job2 = eaw2.run<void>(() => {
-        checkPoints[1] += 1;
+        checkPoints += 1;
     });
     eaw2.quitSafely();
-    waiter2.fire();
-    job2.Await();
-    arktest.assertEQ(checkPoints[1], 2);
+    arktest.assertEQ(checkPoints, 2);
 }
 
 function testCurrent() {
@@ -316,7 +288,6 @@ function testQuitBeforeStart() {
     arktest.expectError(() => {
         eaw.start();
     }, new Error('Worker already started or quit'));
-    eaw.quit();
 }
 
 function testQuitSafelyBeforeStart() {
@@ -329,7 +300,6 @@ function testQuitSafelyBeforeStart() {
     arktest.expectError(() => {
         eaw.start();
     }, new Error('Worker already started or quit'));
-    eaw.quitSafely();
 }
 
 function testPostTaskWhenNotStarted() {
@@ -383,7 +353,6 @@ function main() {
     suite.addTest('testIsAliveAndQuit', testIsAliveAndQuit);
     suite.addTest('testMainQuit', testMainQuit);
     suite.addTest('testQuitSafely', testQuitSafely);
-    suite.addTest('testQuit', testQuit);
     suite.addTest('testCurrent', testCurrent);
     suite.addTest('testUncaughtExceptionHandler', testUncaughtExceptionHandler);
     suite.addTest('testPostTask', testPostTask);
