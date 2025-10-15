@@ -83,7 +83,7 @@ final class HTMLWriter extends Writer {
     }
 }
 
-function findMethodsByName(type: ClassType, names: Array<string>): Array<Method | null> {
+function findMethodsByNameArray(type: ClassType, names: Array<string>): Array<Method | null> {
     const methods = new Array<Method | null>()
     const namesLength = names.length.toInt()
 
@@ -110,7 +110,7 @@ function findMethodsByName(type: ClassType, names: Array<string>): Array<Method 
 function findMethodsByName(type: ClassType, ...names: Array<string>): Array<Method | null> {
     const methodNames = new Array<string>()
     methodNames.push(...names)
-    return findMethodsByName(type, methodNames)
+    return findMethodsByNameArray(type, methodNames)
 }
 
 function testFields(ct: ClassType): int {
@@ -203,7 +203,7 @@ function testClassExtendsObject(ct: ClassType): int {
         objectMethodNames.push(objectMethodName)
     }
 
-    const methods = findMethodsByName(ct, objectMethodNames)
+    const methods = findMethodsByNameArray(ct, objectMethodNames)
     for (let i = 0; i < objectMethodsNum; ++i) {
         const objectMethodName = objectMethodNames[i]
         failures += test(methods[i] != null,  "       " + objectMethodName + " method")

@@ -3032,9 +3032,6 @@
 17.experimental_features/09.overload_declarations/04.constructor_overload_declarations/co2_over_9.ets
 17.experimental_features/09.overload_declarations/04.constructor_overload_declarations/co3_over_1.ets
 
-#24840
-17.experimental_features/09.overload_declarations/04.constructor_overload_declarations/co3_over_3.ets
-
 #24121
 17.experimental_features/09.overload_declarations/04.constructor_overload_declarations/co1_over_6.ets
 
