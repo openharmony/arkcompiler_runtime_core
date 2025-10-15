@@ -57,17 +57,20 @@
 // CC-OFFNXT(C_RULE_ID_DEFINE_LENGTH_LIMIT) solid logic
 // CC-OFFNXT(G.PRE.02) code readability
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define POINTER_FIELD(name, offset, endOffset)                                                       \
-    static constexpr size_t endOffset = (offset) + COMMON_POINTER_SIZE;                              \
-    template <typename PointerType, typename WriteBarrier,                                           \
-              objects_traits::enable_if_is_write_barrier<std::decay_t<WriteBarrier>> = 0>            \
-    inline void Set##name(WriteBarrier &&writeBarrier, PointerType value)                            \
-    {                                                                                                \
-        /* CC-OFFNXT(G.PRE.02) code readability */                                                   \
-        void *obj = static_cast<void *>(this);                                                       \
-        std::invoke(std::forward<WriteBarrier>(writeBarrier), obj, offset, value);                   \
-    }                                                                                                \
-                                                                                                     \
+#define SET_POINTER_FIELD(name, offset)                                                   \
+    template <typename PointerType, typename WriteBarrier,                                \
+              objects_traits::enable_if_is_write_barrier<std::decay_t<WriteBarrier>> = 0> \
+    inline void Set##name(WriteBarrier &&writeBarrier, PointerType value)                 \
+    {                                                                                     \
+        /* CC-OFFNXT(G.PRE.02) code readability */                                        \
+        void *obj = static_cast<void *>(this);                                            \
+        std::invoke(std::forward<WriteBarrier>(writeBarrier), obj, offset, value);        \
+    }
+
+// CC-OFFNXT(C_RULE_ID_DEFINE_LENGTH_LIMIT) solid logic
+// CC-OFFNXT(G.PRE.02) code readability
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define GET_POINTER_FIELD(name, offset)                                                              \
     template <typename PointerType, typename ReadBarrier,                                            \
               objects_traits::enable_if_is_read_barrier<std::decay_t<ReadBarrier>, PointerType> = 0> \
     inline PointerType Get##name(ReadBarrier &&readBarrier) const                                    \

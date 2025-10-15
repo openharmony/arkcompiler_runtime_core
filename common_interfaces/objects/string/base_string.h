@@ -35,10 +35,6 @@
 #include <type_traits>
 #include <vector>
 namespace common {
-class LineString;
-class TreeString;
-class SlicedString;
-
 /*
  +-----------------------------+ <-- offset 0
  |      BaseObject fields      |
@@ -100,7 +96,7 @@ public:
         INVALID_STRING_ADD,
     };
 
-    using CompressedStatusBit = common::BitField<CompressedStatus, 0>;       // 1
+    using CompressedStatusBit = common::BitField<CompressedStatus, 0>;            // 1
     using IsInternBit = CompressedStatusBit::NextFlag;                            // 1
     using LengthBits = IsInternBit::NextField<uint32_t, STRING_LENGTH_BITS_NUM>;  // 30
     static_assert(LengthBits::START_BIT + LengthBits::SIZE == sizeof(uint32_t) * common::BITS_PER_BYTE,
@@ -650,7 +646,7 @@ public:
      * @param maxLength Maximum number of characters to write.
      */
     template <typename Char, typename ReadBarrier>
-    static void WriteToFlat(ReadBarrier &&readBarrier, const BaseString* src, Char *buf, uint32_t maxLength);
+    static void WriteToFlat(ReadBarrier &&readBarrier, const BaseString *src, Char *buf, uint32_t maxLength);
 
     /**
      * @brief Write characters from a BaseString into a buffer at a given offset.
@@ -720,6 +716,7 @@ public:
      */
     template <typename ReadBarrier>
     static const uint16_t *GetNonTreeUtf16Data(ReadBarrier &&readBarrier, const BaseString *src);
+
 private:
     static constexpr bool IsStringType(ObjectType type);
 };
@@ -795,7 +792,7 @@ uint32_t BaseString::GetHashcode(ReadBarrier &&readBarrier)
     }
     return hashcode;
 }
-}  // namespace panda
+}  // namespace common
 #endif  // COMMON_INTERFACES_OBJECTS_STRING_BASE_STRING_DECLARE_H
 // NOLINTEND(readability-identifier-naming, cppcoreguidelines-macro-usage,
 //           cppcoreguidelines-special-member-functions, modernize-deprecated-headers,

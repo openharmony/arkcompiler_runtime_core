@@ -44,19 +44,25 @@ namespace common {
  * TreeString keeps references to both left-hand and right-hand BaseStrings and calculates
  * character data on demand.
  */
-class TreeString : public BaseString {
+template <size_t POINTER_SIZE>
+class TreeStringTemplate : public BaseString {
 public:
-    BASE_CAST_CHECK(TreeString, IsTreeString);
+    BASE_CAST_CHECK(TreeStringTemplate<POINTER_SIZE>, IsTreeString);
 
-    NO_MOVE_SEMANTIC_CC(TreeString);
-    NO_COPY_SEMANTIC_CC(TreeString);
+    NO_MOVE_SEMANTIC_CC(TreeStringTemplate<POINTER_SIZE>);
+    NO_COPY_SEMANTIC_CC(TreeStringTemplate<POINTER_SIZE>);
     // Minimum length for a tree string
     static constexpr uint32_t MIN_TREE_STRING_LENGTH = 13;
     static constexpr size_t LEFT_OFFSET = BaseString::SIZE;
     static constexpr uint32_t REF_FIELDS_COUNT = 2;
 
-    POINTER_FIELD(LeftSubString, LEFT_OFFSET, RIGHT_OFFSET)
-    POINTER_FIELD(RightSubString, RIGHT_OFFSET, SIZE)
+    static constexpr size_t RIGHT_OFFSET = LEFT_OFFSET + POINTER_SIZE;
+    SET_POINTER_FIELD(LeftSubString, LEFT_OFFSET)
+    GET_POINTER_FIELD(LeftSubString, LEFT_OFFSET)
+
+    static constexpr size_t SIZE = RIGHT_OFFSET + POINTER_SIZE;
+    SET_POINTER_FIELD(RightSubString, RIGHT_OFFSET)
+    GET_POINTER_FIELD(RightSubString, RIGHT_OFFSET)
 
     /**
      * @brief Create a TreeString by joining two substrings.
@@ -73,8 +79,9 @@ public:
     template <typename Allocator, typename WriteBarrier,
               objects_traits::enable_if_is_allocate<Allocator, BaseObject *> = 0,
               objects_traits::enable_if_is_write_barrier<WriteBarrier> = 0>
-    static TreeString *Create(Allocator &&allocator, WriteBarrier &&writeBarrier, ReadOnlyHandle<BaseString> left,
-                              ReadOnlyHandle<BaseString> right, uint32_t length, bool compressed);
+    static TreeStringTemplate<POINTER_SIZE> *Create(Allocator &&allocator, WriteBarrier &&writeBarrier,
+                                                    ReadOnlyHandle<BaseString> left, ReadOnlyHandle<BaseString> right,
+                                                    uint32_t length, bool compressed);
 
     /**
      * @brief Check if the TreeString can be flattened to a single buffer.
