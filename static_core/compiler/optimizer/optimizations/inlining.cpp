@@ -1733,14 +1733,12 @@ void Inlining::InsertChaGuard(CallInst *callInst, InlineContext *ctx)
 
 bool Inlining::IsManualDevirtualize(CallInst *callInst, RuntimeInterface *runtime)
 {
-    auto calleeMethod = GetGraph()->GetMethod();
+    auto callerMethod = GetGraph()->GetMethod();
+    auto callerClass = runtime->GetClass(callerMethod);
+    auto calleeMethod = callInst->GetCallMethod();
     auto calleeClass = runtime->GetClass(calleeMethod);
-    auto method = callInst->GetCallMethod();
-    auto methodClass = runtime->GetClass(method);
-    // Replace CallVirtual instruction for Array methods inside Map methods. Disable inlining for Map constructors since
-    // they can take an array parameter.
-    return runtime->IsClassEscompatMap(calleeClass) && runtime->IsClassEscompatArray(methodClass) &&
-           !runtime->IsMethodEscompatMapCtor(calleeMethod);
+    // Replace CallVirtual instruction for Map methods inside Set methods
+    return runtime->IsClassEscompatSet(callerClass) && runtime->IsClassEscompatMap(calleeClass);
 }
 
 bool Inlining::SkipBlock(const BasicBlock *block) const

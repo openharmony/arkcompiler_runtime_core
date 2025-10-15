@@ -467,11 +467,6 @@ public:
         return false;
     }
 
-    virtual bool IsMethodEscompatMapCtor([[maybe_unused]] MethodPtr method) const
-    {
-        return false;
-    }
-
     virtual bool IsClassEscompatArray([[maybe_unused]] ClassPtr klass) const
     {
         return false;
@@ -483,6 +478,11 @@ public:
     }
 
     virtual bool IsClassEscompatMap([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsClassEscompatSet([[maybe_unused]] ClassPtr klass) const
     {
         return false;
     }
