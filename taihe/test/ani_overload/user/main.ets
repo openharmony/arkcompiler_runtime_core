@@ -155,7 +155,7 @@ function test_5param2() {
 function test_5param3() {
     let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
-    instance.overloadFunc(1f, (1).toDouble(), true, "hello", (1).toByte());
+    instance.overloadFunc(1.0f, (1).toDouble(), true, "hello", (1).toByte());
 }
 function test_5param4() {
     let instance: test_overload.OverloadInterface =

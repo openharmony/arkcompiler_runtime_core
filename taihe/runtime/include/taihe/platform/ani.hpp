@@ -16,6 +16,8 @@
 #define RUNTIME_INCLUDE_TAIHE_PLATFORM_ANI_HPP_
 // NOLINTBEGIN
 
+#include <future>
+
 #include <taihe/object.hpp>
 #include <taihe/runtime.hpp>
 
@@ -42,7 +44,7 @@ namespace taihe {
 
 class sref_guard {
 protected:
-    ani_ref ref;
+    ani_ref ref = nullptr;
 
 public:
     sref_guard(ani_env *env, ani_ref val)

@@ -197,7 +197,6 @@ public:
 
 public:
     static constexpr struct typeinfo_t {
-        uint64_t version = 0;
         free_func_t *free_fptr = &free_data_ptr<Impl>;
         hash_func_t *hash_fptr = &hash_data_ptr<Impl>;
         same_func_t *same_fptr = &same_data_ptr<Impl>;

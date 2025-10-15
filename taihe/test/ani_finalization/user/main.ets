@@ -34,16 +34,11 @@ function test_finalization() {
         console.log("Bye!");
     })
 
-    console.log("Doing full GC before setting foo to null...");
-    doFullGC()
-    Coroutine.Schedule()
-
     foo.addCallback(() => {
         flag = 42;
     })
 
     foo = null;
-
     console.log("Doing full GC after setting foo to null...");
     doFullGC()
     Coroutine.Schedule()

@@ -17,6 +17,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from dataclasses import dataclass
 from dataclasses import field as datafield
+from json import dumps
 from typing import ClassVar
 
 from typing_extensions import override
@@ -36,7 +37,9 @@ from taihe.codegen.ani.attributes import (
     GenAsyncAttr,
     GenPromiseAttr,
     GetAttr,
+    LiteralAttr,
     NamespaceAttr,
+    NullAttr,
     OnOffAttr,
     OptionalAttr,
     OverloadAttr,
@@ -781,6 +784,18 @@ class IfaceMethodAniInfo(AbstractAnalysis[IfaceMethodDecl]):
         return upper_args_sts
 
 
+class NamedFunctionLikeAniInfo:
+    @staticmethod
+    def get(
+        am: AnalysisManager,
+        f: GlobFuncDecl | IfaceMethodDecl,
+    ) -> GlobFuncAniInfo | IfaceMethodAniInfo:
+        if isinstance(f, GlobFuncDecl):
+            return GlobFuncAniInfo.get(am, f)
+        if isinstance(f, IfaceMethodDecl):
+            return IfaceMethodAniInfo.get(am, f)
+
+
 class EnumAniInfo(AbstractAnalysis[EnumDecl]):
     def __init__(self, am: AnalysisManager, d: EnumDecl) -> None:
         self.parent_ns = PackageAniInfo.get(am, d.parent_pkg).ns
@@ -971,6 +986,21 @@ class TypeAniInfo(AbstractAnalysis[NonVoidType], ABC):
         ani_after: str,
     ):
         pass
+
+    def check_type(
+        self,
+        target: CSourceWriter,
+        env: str,
+        is_field_ani: str,
+    ):
+        if self.type_desc == "U":
+            target.writelns(
+                f"env->Reference_IsUndefined(ani_value, &{is_field_ani});",
+            )
+        else:
+            target.writelns(
+                f'env->Object_InstanceOf(static_cast<ani_object>(ani_value), TH_ANI_FIND_CLASS(env, "{self.type_desc}"), &{is_field_ani});',
+            )
 
     def into_ani_boxed(
         self,
@@ -1383,6 +1413,66 @@ class UndefinedTypeAniInfo(TypeAniInfo):
         )
 
 
+class StringLiteralTypeAniInfo(TypeAniInfo):
+    def __init__(self, am: AnalysisManager, t: UnitType, literal_attr: LiteralAttr):
+        super().__init__(am, t)
+        self.ani_type = ANI_STRING
+        self.sig_type = AniRuntimeClassType("std.core.String")
+        self.value = literal_attr.value
+
+    @override
+    def sts_type_in(self, target: StsWriter) -> str:
+        return dumps(self.value)
+
+    @override
+    def from_ani(
+        self,
+        target: CSourceWriter,
+        env: str,
+        ani_value: str,
+        cpp_after: str,
+    ):
+        target.writelns(
+            f"{self.cpp_info.as_owner} {cpp_after} = {{}};",
+        )
+
+    @override
+    def into_ani(
+        self,
+        target: CSourceWriter,
+        env: str,
+        cpp_value: str,
+        ani_after: str,
+    ):
+        cpp_strv = f"{ani_after}_cpp_strv"
+        target.writelns(
+            f"std::string_view {cpp_strv} = {dumps(self.value)};",
+            f"ani_string {ani_after} = {{}};",
+            f"{env}->String_NewUTF8({cpp_strv}.data(), {cpp_strv}.size(), &{ani_after});",
+        )
+
+    @override
+    def check_type(
+        self,
+        target: CSourceWriter,
+        env: str,
+        is_field_ani: str,
+    ):
+        super().check_type(target, env, is_field_ani)
+        cpp_strv = f"{is_field_ani}_cpp_strv"
+        ani_size = f"{is_field_ani}_size"
+        cpp_buff = f"{is_field_ani}_buff"
+        target.writelns(
+            f"std::string_view {cpp_strv} = {dumps(self.value)};",
+            f"ani_size {ani_size} = {{}};",
+            f"{env}->String_GetUTF8Size(static_cast<ani_string>(ani_value), &{ani_size});",
+            f"char {cpp_buff}[{ani_size} + 1];",
+            f"{env}->String_GetUTF8(static_cast<ani_string>(ani_value), {cpp_buff}, {ani_size} + 1, &{ani_size});",
+            f"{cpp_buff}[{ani_size}] = '\\0';",
+            f"{is_field_ani} &= {cpp_strv} == {cpp_buff};",
+        )
+
+
 class ScalarTypeAniInfo(TypeAniInfo):
     def __init__(self, am: AnalysisManager, t: ScalarType):
         super().__init__(am, t)
@@ -1435,47 +1525,6 @@ class ScalarTypeAniInfo(TypeAniInfo):
         )
 
 
-class OpaqueTypeAniInfo(TypeAniInfo):
-    def __init__(self, am: AnalysisManager, t: OpaqueType) -> None:
-        super().__init__(am, t)
-        self.am = am
-        self.t = t
-        self.ani_type = ANI_OBJECT
-        if sts_type_attr := StsTypeAttr.get(self.t.ref):
-            self.sts_type = sts_type_attr.type_name
-        else:
-            self.sts_type = "Object"
-        self.sig_type = AniRuntimeClassType("std.core.Object")
-
-    @override
-    def sts_type_in(self, target: StsWriter) -> str:
-        return self.sts_type
-
-    @override
-    def from_ani(
-        self,
-        target: CSourceWriter,
-        env: str,
-        ani_value: str,
-        cpp_after: str,
-    ):
-        target.writelns(
-            f"{self.cpp_info.as_owner} {cpp_after} = reinterpret_cast<{self.cpp_info.as_owner}>({ani_value});",
-        )
-
-    @override
-    def into_ani(
-        self,
-        target: CSourceWriter,
-        env: str,
-        cpp_value: str,
-        ani_after: str,
-    ):
-        target.writelns(
-            f"{self.ani_type} {ani_after} = reinterpret_cast<{self.ani_type}>({cpp_value});",
-        )
-
-
 class StringTypeAniInfo(TypeAniInfo):
     def __init__(self, am: AnalysisManager, t: StringType):
         super().__init__(am, t)
@@ -1519,6 +1568,47 @@ class StringTypeAniInfo(TypeAniInfo):
         target.writelns(
             f"ani_string {ani_after} = {{}};",
             f"{env}->String_NewUTF8({cpp_value}.c_str(), {cpp_value}.size(), &{ani_after});",
+        )
+
+
+class OpaqueTypeAniInfo(TypeAniInfo):
+    def __init__(self, am: AnalysisManager, t: OpaqueType) -> None:
+        super().__init__(am, t)
+        self.am = am
+        self.t = t
+        self.ani_type = ANI_OBJECT
+        if sts_type_attr := StsTypeAttr.get(self.t.ref):
+            self.sts_type = sts_type_attr.type_name
+        else:
+            self.sts_type = "Object"
+        self.sig_type = AniRuntimeClassType("std.core.Object")
+
+    @override
+    def sts_type_in(self, target: StsWriter) -> str:
+        return self.sts_type
+
+    @override
+    def from_ani(
+        self,
+        target: CSourceWriter,
+        env: str,
+        ani_value: str,
+        cpp_after: str,
+    ):
+        target.writelns(
+            f"{self.cpp_info.as_owner} {cpp_after} = reinterpret_cast<{self.cpp_info.as_owner}>({ani_value});",
+        )
+
+    @override
+    def into_ani(
+        self,
+        target: CSourceWriter,
+        env: str,
+        cpp_value: str,
+        ani_after: str,
+    ):
+        target.writelns(
+            f"{self.ani_type} {ani_after} = reinterpret_cast<{self.ani_type}>({cpp_value});",
         )
 
 
@@ -2285,11 +2375,18 @@ class TypeAniInfoDispatcher(NonVoidTypeVisitor[TypeAniInfo]):
 
     @override
     def visit_unit_type(self, t: UnitType) -> TypeAniInfo:
-        if UndefinedAttr.get(t.ref) or (
-            isinstance(t.ref.parent_type_holder, StructFieldDecl | UnionFieldDecl)
-            and UndefinedAttr.get(t.ref.parent_type_holder)
-        ):
+        if literal_attr := LiteralAttr.get(t.ref):
+            return StringLiteralTypeAniInfo(self.am, t, literal_attr)
+        if UndefinedAttr.get(t.ref):
             return UndefinedTypeAniInfo(self.am, t)
+        if NullAttr.get(t.ref):
+            return NullTypeAniInfo(self.am, t)
+        # TODO: compatible with older version, to be removed in future
+        if isinstance(t.ref.parent_type_holder, StructFieldDecl | UnionFieldDecl):
+            if UndefinedAttr.get(t.ref.parent_type_holder):
+                return UndefinedTypeAniInfo(self.am, t)
+            if NullAttr.get(t.ref.parent_type_holder):
+                return NullTypeAniInfo(self.am, t)
         return NullTypeAniInfo(self.am, t)
 
     @override
