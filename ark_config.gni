@@ -143,6 +143,9 @@ template("concat_yamls") {
 
     # rerun action when data file or template file update
     inputs = [ invoker.default_file ]
+    if (defined(invoker.add_yamls)) {
+      inputs += invoker.add_yamls
+    }
 
     args = [
       rebase_path(invoker.output_file, root_build_dir),
@@ -166,6 +169,8 @@ template("merge_yamls") {
     extra_dependencies += invoker.extra_dependencies
   }
 
+  # rerun action when data file or template file update
+  inputs = invoker.add_yamls
   outputs = [ invoker.output_file ]
 
   action("$target_name") {
