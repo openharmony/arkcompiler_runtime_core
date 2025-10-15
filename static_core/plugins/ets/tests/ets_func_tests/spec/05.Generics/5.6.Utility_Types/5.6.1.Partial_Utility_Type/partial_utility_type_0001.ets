@@ -31,13 +31,13 @@ function foo (bar: Partial<I>) {
 }
 
 function main(): void {
-  let a: I = {var_one: "initial_var_one", var_two: "initial_var_two_a"}
-  foo(a.var_one)
+  let a: Partial<I> = {var_one: "initial_var_one", var_two: "initial_var_two_a"}
+  foo(a)
   arktest.assertEQ( a.var_one, "inside_foo")
   arktest.assertEQ( a.var_two, "initial_var_two_a")
 
-  let b: I = {var_two: "initial_var_two_b"}
-  foo(b.var_one)
+  let b: Partial<I> = {var_two: "initial_var_two_b"}
+  foo(b)
   arktest.assertEQ( b.var_one, undefined)
   arktest.assertEQ( b.var_two, "initial_var_two_b")
 }
