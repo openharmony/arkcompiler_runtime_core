@@ -49,3 +49,7 @@ cases:
     use: new Object()
   - type: String
     use: "'abc'"
+  - type: Array<number>
+    use: [1, 2]
+  - type: [number, string]
+    use: [1, "2"]
