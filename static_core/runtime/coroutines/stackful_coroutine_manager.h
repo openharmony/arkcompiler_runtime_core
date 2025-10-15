@@ -23,6 +23,8 @@
 
 #include "runtime/coroutines/stackful_coroutine_state_info.h"
 
+#include "runtime/coroutines/native_stack_allocator/native_stack_allocator.h"
+
 namespace ark {
 
 /**
@@ -316,6 +318,8 @@ private:  // data members
 
     CoroutineWorkerGroup::Id generalWorkerGroup_ = CoroutineWorkerGroup::Empty();
     CoroutineWorkerGroup::Id eaWorkerGroup_ = CoroutineWorkerGroup::Empty();
+
+    NativeStackAllocator nativeStackAllocator_;
 };
 
 }  // namespace ark
