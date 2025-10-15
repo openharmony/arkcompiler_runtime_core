@@ -131,3 +131,11 @@ cases:
       for (let i = 0; i < 30; i++) {
         arktest.assertEQ((a[i] as C).n, 5)
       }
+
+  - desc:  |-
+      Create FixedArray. T must be concrete type
+      tags:
+        - negative
+        - compile-only
+    logic: |-
+      let a: FixedArray<T> = [1,2,3]

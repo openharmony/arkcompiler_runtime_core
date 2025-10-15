@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,18 +14,13 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Non-static field initialization.
-assert: >-
-    If there is an initializer in a non-static field declaration, then the initializer has the semantics
-    of an assignment to the declared variable.
+desc: Method call by his name.
+assert: Declare method as receiver
+tags: [compile-only, negative]
 ---*/
 
 class A {
-  public x: int = 5;
+    foo(this: A) {}
 }
 
-function main(): void {
-    let instance: A = new A();
-
-    arktest.assertEQ(instance.x, 5);
-}
+function main() {}

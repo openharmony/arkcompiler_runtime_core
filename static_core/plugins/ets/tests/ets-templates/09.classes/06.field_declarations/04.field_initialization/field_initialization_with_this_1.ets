@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,14 +14,21 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Non-static field initialization.
+desc: Non-static field initialization with keyword 'this'.
 assert: >-
-    If there is an initializer in a non-static field declaration, then the initializer has the semantics
-    of an assignment to the declared variable.
+    The instance field initializer expression cannot use
+    this or super directly in any form.
+tags: [compile-only, negative]
 ---*/
 
 class A {
-  public x: int = 5;
+
+  public x: int = this.bar().y;
+  public y: int = 5;
+
+  public bar(): this {
+    return this;
+  }
 }
 
 function main(): void {
