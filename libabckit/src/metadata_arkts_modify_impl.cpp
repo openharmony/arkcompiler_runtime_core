@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
 
 #include <cassert>
 #include <cstdint>
+#include <cstring>
 #include "libabckit/c/abckit.h"
 #include "libabckit/c/extensions/arkts/metadata_arkts.h"
 
@@ -23,6 +24,7 @@
 #include "libabckit/src/metadata_inspect_impl.h"
 #include "libabckit/src/adapter_dynamic/metadata_modify_dynamic.h"
 #include "libabckit/src/adapter_static/metadata_modify_static.h"
+#include "libabckit/src/adapter_static/abckit_static.h"
 
 #include "helpers_common.h"
 
@@ -420,7 +422,7 @@ extern "C" void ClassRemoveAnnotation(AbckitArktsClass *klass, AbckitArktsAnnota
     LIBABCKIT_INTERNAL_ERROR_VOID(anno->core);
 
     auto kt = klass->core->owningModule->target;
-    auto at = anno->core->ai->owningModule->target;
+    auto at = GetAnnotationOwningModule(anno->core)->target;
 
     LIBABCKIT_CHECK_SAME_TARGET_VOID(kt, at);
 
@@ -1455,6 +1457,22 @@ extern "C" bool FunctionSetName(AbckitArktsFunction *function, const char *name)
     return FunctionSetNameStatic(function->core, name);
 }
 
+extern "C" AbckitArktsFunctionParam *CreateFunctionParameter(AbckitFile *file,
+                                                             const AbckitArktsFunctionParamCreatedParams *params)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(file, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(params, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(params->name, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(params->type, nullptr);
+
+    // Delegate to static implementation
+    return CreateFunctionParameterStatic(file, params);
+}
+
 extern "C" bool FunctionAddParameter(AbckitArktsFunction *func, AbckitArktsFunctionParam *param)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
@@ -1572,7 +1590,7 @@ extern "C" AbckitArktsAnnotationElement *AnnotationAddAnnotationElement(
     LIBABCKIT_BAD_ARGUMENT(params->value, nullptr);
 
     LIBABCKIT_INTERNAL_ERROR(anno->core, nullptr);
-    AbckitCoreModule *module = anno->core->ai->owningModule;
+    AbckitCoreModule *module = GetAnnotationOwningModule(anno->core);
 
     LIBABCKIT_INTERNAL_ERROR(module, nullptr);
     LIBABCKIT_INTERNAL_ERROR(module->file, nullptr);
@@ -1596,10 +1614,7 @@ extern "C" void AnnotationRemoveAnnotationElement(AbckitArktsAnnotation *anno, A
     LIBABCKIT_BAD_ARGUMENT_VOID(anno);
     LIBABCKIT_BAD_ARGUMENT_VOID(elem);
 
-    LIBABCKIT_INTERNAL_ERROR_VOID(anno->core->ai);
-
-    AbckitCoreModule *module = anno->core->ai->owningModule;
-
+    AbckitCoreModule *module = GetAnnotationOwningModule(anno->core);
     LIBABCKIT_INTERNAL_ERROR_VOID(module);
     LIBABCKIT_INTERNAL_ERROR_VOID(module->file);
 
@@ -1711,8 +1726,8 @@ AbckitArktsModifyApi g_arktsModifyApiImpl = {
     // Function
     // ========================================
 
-    FunctionAddAnnotation, FunctionRemoveAnnotation, FunctionSetName, FunctionAddParameter, FunctionRemoveParameter,
-    FunctionSetReturnType, ModuleAddFunction, ClassAddMethod,
+    FunctionAddAnnotation, FunctionRemoveAnnotation, FunctionSetName, CreateFunctionParameter, FunctionAddParameter,
+    FunctionRemoveParameter, FunctionSetReturnType, ModuleAddFunction, ClassAddMethod,
 
     // ========================================
     // Annotation

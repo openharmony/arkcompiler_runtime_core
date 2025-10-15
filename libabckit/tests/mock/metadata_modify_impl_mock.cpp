@@ -135,6 +135,22 @@ AbckitValue *CreateValueString(AbckitFile *file, const char *value, size_t len)
     return DEFAULT_VALUE;
 }
 
+AbckitValue *CreateValueMethod(AbckitFile *file, AbckitCoreFunction *method)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(file == DEFAULT_FILE);
+    EXPECT_TRUE(method == DEFAULT_CORE_FUNCTION);
+    return DEFAULT_VALUE;
+}
+
+AbckitValue *CreateValueRecord(AbckitFile *file, AbckitCoreClass *klass)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(file == DEFAULT_FILE);
+    EXPECT_TRUE(klass == DEFAULT_CORE_CLASS);
+    return DEFAULT_VALUE;
+}
+
 AbckitValue *CreateLiteralArrayValue(AbckitFile *file, [[maybe_unused]] AbckitValue **value, size_t size)
 {
     g_calledFuncs.push(__func__);
@@ -354,6 +370,8 @@ static AbckitModifyApi g_modifyApiImpl = {
     CreateValueInt,
     CreateValueDouble,
     CreateValueString,
+    CreateValueMethod,
+    CreateValueRecord,
     CreateLiteralArrayValue,
 
     // ========================================

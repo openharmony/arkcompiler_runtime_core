@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,6 +40,8 @@ public:
 
 private:
     void BuildNullcheck(const BytecodeInstruction *bcInst) override;
+    void BuildIstrue(const BytecodeInstruction *bcInst) override;
+    void BuildTypeof(const BytecodeInstruction *bcInst) override;
     void BuildIsNullValue(const BytecodeInstruction *bcInst) override;
     void BuildLoadStatic(const BytecodeInstruction *bcInst, DataType::Type type) override;
     void BuildStoreStatic(const BytecodeInstruction *bcInst, DataType::Type type) override;

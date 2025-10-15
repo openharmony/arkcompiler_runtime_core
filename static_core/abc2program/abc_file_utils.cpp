@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,11 @@
  */
 
 #include "abc_file_utils.h"
+
 #include "libarkbase/os/file.h"
+#include "libarkfile/method_data_accessor.h"
+#include "libarkfile/method_data_accessor-inl.h"
+#include "libarkfile/class_data_accessor.h"
 
 namespace ark::abc2program {
 
@@ -61,19 +65,28 @@ EntityType AbcFileUtils::GetEntityType(const panda_file::File &file, panda_file:
         }
     }
 
-    // Check if it's a method
     auto methodIndex = file.GetMethodIndex(regionHeader);
     for (const auto &methodId : methodIndex) {
         if (methodId == entityId) {
             return EntityType::METHOD;
         }
     }
-
     // Check if it's a field
     auto fieldIndex = file.GetFieldIndex(regionHeader);
     for (const auto &fieldId : fieldIndex) {
         if (fieldId == entityId) {
             return EntityType::FIELD;
+        }
+    }
+
+    if (entityId.GetOffset() < file.GetHeader()->fileSize) {
+        panda_file::MethodDataAccessor mda(file, entityId);
+        if (mda.GetSize() > 0 && mda.GetSize() < file.GetHeader()->fileSize) {
+            auto methodNameId = mda.GetNameId();
+            if (methodNameId.IsValid() && methodNameId.GetOffset() < file.GetHeader()->fileSize) {
+                LOG(DEBUG, ABC2PROGRAM) << "EntityId " << entityId.GetOffset() << " confirmed as METHOD";
+                return EntityType::METHOD;
+            }
         }
     }
 

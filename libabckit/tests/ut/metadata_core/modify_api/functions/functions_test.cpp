@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,6 +29,7 @@ static auto g_impl = AbckitGetApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 static auto g_implI = AbckitGetInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 static auto g_implM = AbckitGetModifyApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 static auto g_arktsModifyApiImpl = AbckitGetArktsModifyApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
+static auto g_arktsInspectApiImpl = AbckitGetArktsInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 static auto g_statG = AbckitGetIsaApiStaticImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 static auto g_implG = AbckitGetGraphApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 }  // namespace
@@ -45,14 +46,17 @@ TEST_F(LibAbcKitModifyApiFunctionsTest, StaticFunctionSetName)
     auto output = helpers::ExecuteStaticAbc(INITIAL_STATIC, "functions_static", "main");
     EXPECT_TRUE(helpers::Match(output, "123\nclass prop\n1\n123\nfoo\n"));
     const char *newName = "RenamedFunc";
-    helpers::TransformMethod(
-        INITIAL_STATIC, MODIFIED_STATIC, "initFuncName",
-        [&](AbckitFile *file, AbckitCoreFunction *method, AbckitGraph *graph) {
-            AbckitArktsFunction *arktsFunc = method->GetArkTSImpl();
-            bool res = g_arktsModifyApiImpl->functionSetName(arktsFunc, newName);
-            ASSERT_TRUE(res);
-        },
-        [](AbckitGraph *) {});
+    AbckitFile *file = g_impl->openAbc(INITIAL_STATIC, strlen(INITIAL_STATIC));
+    ASSERT_NE(file, nullptr);
+    auto *method = helpers::FindMethodByName(file, "initFuncName");
+    ASSERT_NE(method, nullptr);
+    auto *arktsFunc = g_arktsInspectApiImpl->coreFunctionToArktsFunction(method);
+    bool res = g_arktsModifyApiImpl->functionSetName(arktsFunc, newName);
+    ASSERT_TRUE(res);
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    g_impl->closeFile(file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     AbckitFile *modifiedFile = g_impl->openAbc(MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -78,14 +82,17 @@ TEST_F(LibAbcKitModifyApiFunctionsTest, InstanceFunctionSetName)
     auto output = helpers::ExecuteStaticAbc(INITIAL_STATIC, "functions_static", "main");
     EXPECT_TRUE(helpers::Match(output, "123\nclass prop\n1\n123\nfoo\n"));
     const char *newName = "RenamedFunc";
-    helpers::TransformMethod(
-        INITIAL_STATIC, MODIFIED_STATIC, "foo",
-        [&](AbckitFile *file, AbckitCoreFunction *method, AbckitGraph *graph) {
-            AbckitArktsFunction *arktsFunc = method->GetArkTSImpl();
-            bool res = g_arktsModifyApiImpl->functionSetName(arktsFunc, newName);
-            ASSERT_TRUE(res);
-        },
-        [](AbckitGraph *) {});
+    auto *file = g_impl->openAbc(INITIAL_STATIC, strlen(INITIAL_STATIC));
+    ASSERT_NE(file, nullptr);
+    auto method = helpers::FindMethodByName(file, "foo");
+    ASSERT_NE(method, nullptr);
+    auto *arktsFunc = g_arktsInspectApiImpl->coreFunctionToArktsFunction(method);
+    bool res = g_arktsModifyApiImpl->functionSetName(arktsFunc, newName);
+    ASSERT_TRUE(res);
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    g_impl->closeFile(file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     AbckitFile *modifiedFile = g_impl->openAbc(MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(modifiedFile, nullptr);
@@ -510,21 +517,14 @@ TEST_F(LibAbcKitModifyApiFunctionsTest, InstanceFunctionAddParameter)
         auto *type = g_implM->createType(file, ABCKIT_TYPE_ID_I32);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         ASSERT_NE(type, nullptr);
-
-        auto param = std::make_unique<AbckitCoreFunctionParam>();
-        param->function = method;
-
-        auto paramNameStr = std::make_unique<AbckitString>();
-        paramNameStr->impl = "newIntParam";
-        param->name = paramNameStr.get();
-        param->type = type;
-
-        auto arktsParam = std::make_unique<AbckitArktsFunctionParam>();
-        arktsParam->core = param.get();
-        param->impl = std::move(arktsParam);
+        auto params = std::make_unique<AbckitArktsFunctionParamCreatedParams>();
+        params->name = "newIntParam";
+        params->type = type;
+        auto param = g_arktsModifyApiImpl->createFunctionParameter(file, params.get());
+        ASSERT_NE(param, nullptr);
 
         auto *arktsFunc = method->GetArkTSImpl();
-        bool success = g_arktsModifyApiImpl->functionAddParameter(arktsFunc, param->GetArkTSImpl());
+        bool success = g_arktsModifyApiImpl->functionAddParameter(arktsFunc, param);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         ASSERT_TRUE(success) << "Failed to add int parameter to function";
     });
@@ -566,30 +566,19 @@ TEST_F(LibAbcKitModifyApiFunctionsTest, StaticFunctionAddParamString)
 
     file = g_impl->openAbc(MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    helpers::TransformMethod(
-        file, "initFuncName", [](AbckitFile *file, AbckitCoreFunction *method, AbckitGraph *graph) {
-            AbckitArktsFunction *arktsFunc = method->GetArkTSImpl();
+    helpers::TransformMethod(file, "initFuncName",
+                             [](AbckitFile *file, AbckitCoreFunction *method, AbckitGraph *graph) {
+                                 AbckitArktsFunction *arktsFunc = method->GetArkTSImpl();
+                                 auto params = std::make_unique<AbckitArktsFunctionParamCreatedParams>();
+                                 params->name = "newParam";
+                                 params->type = g_implM->createType(file, ABCKIT_TYPE_ID_STRING);
+                                 ASSERT_NE(params->type, nullptr);
+                                 auto param = g_arktsModifyApiImpl->createFunctionParameter(file, params.get());
+                                 ASSERT_NE(param, nullptr);
 
-            auto param = std::make_unique<AbckitCoreFunctionParam>();
-            param->function = method;
-
-            auto paramNameStr = std::make_unique<AbckitString>();
-            paramNameStr->impl = "newParam";
-            param->name = paramNameStr.get();
-
-            auto paramTypeObj = std::make_unique<AbckitType>();
-            paramTypeObj->id = ABCKIT_TYPE_ID_STRING;
-            paramTypeObj->rank = 0;
-            paramTypeObj->reference = nullptr;
-            param->type = paramTypeObj.get();
-
-            auto arktsParam = std::make_unique<AbckitArktsFunctionParam>();
-            arktsParam->core = param.get();
-            param->impl = std::move(arktsParam);
-
-            bool success = g_arktsModifyApiImpl->functionAddParameter(arktsFunc, param->GetArkTSImpl());
-            ASSERT_TRUE(success) << "Failed to add parameter to function";
-        });
+                                 bool success = g_arktsModifyApiImpl->functionAddParameter(arktsFunc, param);
+                                 ASSERT_TRUE(success) << "Failed to add parameter to function";
+                             });
     g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     g_impl->closeFile(file);
 
@@ -633,38 +622,31 @@ TEST_F(LibAbcKitModifyApiFunctionsTest, StaticFunctionAddParamReferenceType)
 
     file = g_impl->openAbc(MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    helpers::TransformMethod(
-        file, "initFuncName", [](AbckitFile *file, AbckitCoreFunction *method, AbckitGraph *graph) {
-            auto *meth = helpers::FindMethodByName(file, "foo");
-            ASSERT_NE(meth, nullptr);
+    helpers::TransformMethod(file, "initFuncName",
+                             [](AbckitFile *file, AbckitCoreFunction *method, AbckitGraph *graph) {
+                                 auto *meth = helpers::FindMethodByName(file, "foo");
+                                 ASSERT_NE(meth, nullptr);
 
-            auto *cls = g_implI->functionGetParentClass(meth);
-            ASSERT_NE(cls, nullptr);
+                                 auto *cls = g_implI->functionGetParentClass(meth);
+                                 ASSERT_NE(cls, nullptr);
 
-            auto *type = g_implM->createReferenceType(file, cls);
-            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-            ASSERT_NE(type, nullptr);
-            ASSERT_EQ(g_implI->typeGetTypeId(type), ABCKIT_TYPE_ID_REFERENCE);
-            ASSERT_EQ(g_implI->typeGetReferenceClass(type), cls);
+                                 auto *type = g_implM->createReferenceType(file, cls);
+                                 ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+                                 ASSERT_NE(type, nullptr);
+                                 ASSERT_EQ(g_implI->typeGetTypeId(type), ABCKIT_TYPE_ID_REFERENCE);
+                                 ASSERT_EQ(g_implI->typeGetReferenceClass(type), cls);
 
-            auto param = std::make_unique<AbckitCoreFunctionParam>();
-            param->function = method;
+                                 auto params = std::make_unique<AbckitArktsFunctionParamCreatedParams>();
+                                 params->name = "newRefParam";
+                                 params->type = type;
+                                 auto param = g_arktsModifyApiImpl->createFunctionParameter(file, params.get());
+                                 ASSERT_NE(param, nullptr);
 
-            auto paramNameStr = std::make_unique<AbckitString>();
-            paramNameStr->impl = "newRefParam";
-            param->name = paramNameStr.get();
-
-            param->type = type;
-
-            auto arktsParam = std::make_unique<AbckitArktsFunctionParam>();
-            arktsParam->core = param.get();
-            param->impl = std::move(arktsParam);
-
-            auto *arktsFunc = method->GetArkTSImpl();
-            bool success = g_arktsModifyApiImpl->functionAddParameter(arktsFunc, param->GetArkTSImpl());
-            ASSERT_TRUE(success) << "Failed to add reference type parameter to function";
-            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-        });
+                                 auto *arktsFunc = method->GetArkTSImpl();
+                                 bool success = g_arktsModifyApiImpl->functionAddParameter(arktsFunc, param);
+                                 ASSERT_TRUE(success) << "Failed to add reference type parameter to function";
+                                 ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+                             });
     g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     g_impl->closeFile(file);
 
@@ -706,29 +688,22 @@ TEST_F(LibAbcKitModifyApiFunctionsTest, StaticFunctionAddIntParam)
 
     file = g_impl->openAbc(MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    helpers::TransformMethod(
-        file, "initFuncName", [](AbckitFile *file, AbckitCoreFunction *method, AbckitGraph *graph) {
-            auto *type = g_implM->createType(file, ABCKIT_TYPE_ID_I32);
-            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-            ASSERT_NE(type, nullptr);
+    helpers::TransformMethod(file, "initFuncName",
+                             [](AbckitFile *file, AbckitCoreFunction *method, AbckitGraph *graph) {
+                                 auto *type = g_implM->createType(file, ABCKIT_TYPE_ID_I32);
+                                 ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+                                 ASSERT_NE(type, nullptr);
+                                 auto params = std::make_unique<AbckitArktsFunctionParamCreatedParams>();
+                                 params->name = "newIntParam";
+                                 params->type = type;
+                                 auto param = g_arktsModifyApiImpl->createFunctionParameter(file, params.get());
+                                 ASSERT_NE(param, nullptr);
 
-            auto param = std::make_unique<AbckitCoreFunctionParam>();
-            param->function = method;
-
-            auto paramNameStr = std::make_unique<AbckitString>();
-            paramNameStr->impl = "newIntParam";
-            param->name = paramNameStr.get();
-            param->type = type;
-
-            auto arktsParam = std::make_unique<AbckitArktsFunctionParam>();
-            arktsParam->core = param.get();
-            param->impl = std::move(arktsParam);
-
-            auto *arktsFunc = method->GetArkTSImpl();
-            bool success = g_arktsModifyApiImpl->functionAddParameter(arktsFunc, param->GetArkTSImpl());
-            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-            ASSERT_TRUE(success) << "Failed to add int parameter to function";
-        });
+                                 auto *arktsFunc = method->GetArkTSImpl();
+                                 bool success = g_arktsModifyApiImpl->functionAddParameter(arktsFunc, param);
+                                 ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+                                 ASSERT_TRUE(success) << "Failed to add int parameter to function";
+                             });
     g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     g_impl->closeFile(file);
 
@@ -795,6 +770,42 @@ TEST_F(LibAbcKitModifyApiFunctionsTest, StaticFunctionRemoveParamNonExist)
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
         },
         [](AbckitGraph *) {});
+}
+
+// Test: test-kind=api, api=FunctionSetName, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitModifyApiFunctionsTest, AsyncFunctionSetName)
+{
+    auto output = helpers::ExecuteStaticAbc(INITIAL_STATIC, "functions_static", "main");
+    EXPECT_TRUE(helpers::Match(output, "123\nclass prop\n1\n123\nfoo\n"));
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(INITIAL_STATIC, &file);
+    auto *method = helpers::FindMethodByName(file, "foo2");
+    ASSERT_NE(method, nullptr);
+    auto *arktsFunc = g_arktsInspectApiImpl->coreFunctionToArktsFunction(method);
+    bool success = g_arktsModifyApiImpl->functionSetName(arktsFunc, "new");
+    ASSERT_TRUE(success) << "Failed to set name to function";
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    g_impl->closeFile(file);
+    output = helpers::ExecuteStaticAbc(MODIFIED_STATIC, "functions_static", "main");
+    EXPECT_TRUE(helpers::Match(output, "123\nclass prop\n1\n123\nfoo\n"));
+}
+
+TEST_F(LibAbcKitModifyApiFunctionsTest, ttt)
+{
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(INITIAL_STATIC, &file);
+    auto *method = helpers::FindMethodByName(file, "main");
+    ASSERT_NE(method, nullptr);
+    auto *graph = g_implI->createGraphFromFunction(method);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    g_implG->gDump(graph, 1);
+    g_impl->destroyGraph(graph);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    g_impl->closeFile(file);
 }
 
 }  // namespace libabckit::test

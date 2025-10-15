@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,39 +43,7 @@ static auto g_staticG = AbckitGetIsaApiStaticImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
 class LibAbcKitModifyApiIfaceNameTests : public ::testing::Test {};
 
-TEST_F(LibAbcKitModifyApiIfaceNameTests, InterfaceSetNameTest0)
-{
-    std::string input = ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/interfaces/static_interface_set_name.abc";
-    std::string output = ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/interfaces/static_interface_set_name_out.abc";
-
-    AbckitFile *file = nullptr;
-    helpers::AssertOpenAbc(input.c_str(), &file);
-
-    helpers::ModuleByNameContext ctxFinder = {nullptr, "static_interface_set_name"};
-    g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);
-    helpers::InterfaceByNameContext ifaceCtxFinder = {nullptr, "User"};
-    g_implI->moduleEnumerateInterfaces(ctxFinder.module, &ifaceCtxFinder, helpers::InterfaceByNameFinder);
-
-    auto arktsIntrface = g_implArkI->coreInterfaceToArktsInterface(ifaceCtxFinder.iface);
-    g_implArkM->interfaceSetName(arktsIntrface, "abc");
-
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    g_impl->writeAbc(file, output.c_str(), output.length());
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    g_impl->closeFile(file);
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-
-    helpers::AssertOpenAbc(output.c_str(), &file);
-    ctxFinder = {nullptr, "static_interface_set_name"};
-    g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);
-
-    ifaceCtxFinder = {nullptr, "abc"};
-    g_implI->moduleEnumerateInterfaces(ctxFinder.module, &ifaceCtxFinder, helpers::InterfaceByNameFinder);
-    ASSERT_NE(ifaceCtxFinder.iface, nullptr);
-    g_impl->closeFile(file);
-}
-
-TEST_F(LibAbcKitModifyApiIfaceNameTests, InterfaceSetNameTest1)
+TEST_F(LibAbcKitModifyApiIfaceNameTests, InterfaceSetNameTest)
 {
     std::string input = ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/interfaces/static_interface_set_name.abc";
     std::string output = ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/interfaces/static_interface_set_name_out.abc";
@@ -99,6 +67,14 @@ TEST_F(LibAbcKitModifyApiIfaceNameTests, InterfaceSetNameTest1)
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
+    helpers::AssertOpenAbc(output.c_str(), &file);
+    ctxFinder = {nullptr, "static_interface_set_name"};
+    g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);
+
+    ifaceCtxFinder = {nullptr, "abc"};
+    g_implI->moduleEnumerateInterfaces(ctxFinder.module, &ifaceCtxFinder, helpers::InterfaceByNameFinder);
+    ASSERT_NE(ifaceCtxFinder.iface, nullptr);
+    g_impl->closeFile(file);
     outputRst = helpers::ExecuteStaticAbc(output, "static_interface_set_name", "main");
     EXPECT_TRUE(helpers::Match(outputRst, "b\n"));
 }

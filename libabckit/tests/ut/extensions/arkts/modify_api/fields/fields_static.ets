@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,36 +13,36 @@
  * limitations under the License.
  */
 
-const moduleField1: string = 'ModuleFieldOne';
-const moduleField2: string = 'ModuleFieldTwo';
-const moduleField3: number = 5.5;
+export const moduleField1: string = 'ModuleFieldOne';
+export const moduleField2: string = 'ModuleFieldTwo';
+export const moduleField3: number = 5.5;
 
-namespace NS1 {
+export namespace NS1 {
     export const nS1F1: string[] = ['NamespaceFieldOne'];
 }
 
-class C1 {
-    public c1F1: string = 'Anno1';
-    public c1F2: number = 999;
+export class C1 {
+    c1F1: string = 'Anno1';
+    c1F2: number = 999;
 }
 
-class C2 {
-    public c2F1: string = 'Anno1';
+export class C2 {
+    c2F1: string = 'Anno1';
 }
 
-class C3 {
-    public c3F1: number = 999;
+export class C3 {
+    c3F1: number = 999;
 }
 
-interface I1 {
+export interface I1 {
     i1F1: string;
 }
 
-interface I2 {
+export interface I2 {
     i2F1: number;
 }
 
-class C4 implements I1 {
+export class C4 implements I1 {
     public i1F1: string = 'ABC';
 
     toString(): string {
@@ -63,7 +63,7 @@ class C4 implements I1 {
     }
 }
 
-class C5 implements I2 {
+export class C5 implements I2 {
     public i2F1: number = 3;
 
     toString(): string {
@@ -77,7 +77,7 @@ class C5 implements I2 {
     }
 }
 
-enum E1 {
+export enum E1 {
     ONE = 'AAAA',
     TWO = 'BBBB'
 }

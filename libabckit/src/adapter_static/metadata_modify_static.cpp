@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include "libabckit/c/extensions/arkts/metadata_arkts.h"
 #include "inst.h"
 #include "libabckit/src/adapter_static/abckit_static.h"
+#include "libabckit/src/adapter_static/metadata_inspect_static.h"
 #include "libabckit/src/metadata_inspect_impl.h"
 #include "libabckit/src/ir_impl.h"
 #include "libabckit/src/logger.h"
@@ -63,6 +64,19 @@ static auto g_implArkI = AbckitGetArktsInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0
 // CC-OFFNXT(WordsTool.95) sensitive word conflict
 // NOLINTNEXTLINE(google-build-using-namespace)
 namespace libabckit {
+
+static bool g_enableInstModifierOptimization = true;
+
+void SetInstModifierOptimization(bool enable)
+{
+    g_enableInstModifierOptimization = enable;
+}
+
+bool GetInstModifierOptimization()
+{
+    return g_enableInstModifierOptimization;
+}
+
 // ========================================
 // File
 // ========================================
@@ -299,9 +313,12 @@ bool ModuleSetNameStatic(AbckitCoreModule *m, const char *newName)
     if (!ModifyNameHelper::ModuleRefreshName(m, newName)) {
         return false;
     }
-
-    InstModifier modifier(m->file);
-    modifier.Modify();
+    if (g_enableInstModifierOptimization) {
+        m->file->needRefreshInsts = true;
+    } else {
+        InstModifier modifier(m->file);
+        modifier.Modify();
+    }
 
     return true;
 }
@@ -352,9 +369,12 @@ bool ModuleFieldSetNameStatic(AbckitCoreModuleField *field, const char *newName)
     if (!ModifyNameHelper::FieldRefreshName(field, newName)) {
         return false;
     }
-
-    InstModifier modifier(field->owner->file);
-    modifier.Modify();
+    if (g_enableInstModifierOptimization) {
+        field->owner->file->needRefreshInsts = true;
+    } else {
+        InstModifier modifier(field->owner->file);
+        modifier.Modify();
+    }
 
     return true;
 }
@@ -366,9 +386,12 @@ bool NamespaceSetNameStatic(AbckitCoreNamespace *ns, const char *newName)
     if (!ModifyNameHelper::NamespaceRefreshName(ns, newName)) {
         return false;
     }
-
-    InstModifier modifier(ns->owningModule->file);
-    modifier.Modify();
+    if (g_enableInstModifierOptimization) {
+        ns->owningModule->file->needRefreshInsts = true;
+    } else {
+        InstModifier modifier(ns->owningModule->file);
+        modifier.Modify();
+    }
 
     return true;
 }
@@ -380,9 +403,12 @@ bool NamespaceFieldSetNameStatic(AbckitCoreNamespaceField *field, const char *ne
     if (!ModifyNameHelper::FieldRefreshName(field, newName)) {
         return false;
     }
-
-    InstModifier modifier(field->owner->owningModule->file);
-    modifier.Modify();
+    if (g_enableInstModifierOptimization) {
+        field->owner->owningModule->file->needRefreshInsts = true;
+    } else {
+        InstModifier modifier(field->owner->owningModule->file);
+        modifier.Modify();
+    }
 
     return true;
 }
@@ -408,9 +434,12 @@ bool ClassSetNameStatic(AbckitCoreClass *klass, const char *newName)
     if (!ModifyNameHelper::ClassRefreshName(klass, newName)) {
         return false;
     }
-
-    InstModifier modifier(klass->owningModule->file);
-    modifier.Modify();
+    if (g_enableInstModifierOptimization) {
+        klass->owningModule->file->needRefreshInsts = true;
+    } else {
+        InstModifier modifier(klass->owningModule->file);
+        modifier.Modify();
+    }
 
     return true;
 }
@@ -422,9 +451,12 @@ bool ClassFieldSetNameStatic(AbckitCoreClassField *field, const char *newName)
     if (!ModifyNameHelper::FieldRefreshName(field, newName)) {
         return false;
     }
-
-    InstModifier modifier(field->owner->owningModule->file);
-    modifier.Modify();
+    if (g_enableInstModifierOptimization) {
+        field->owner->owningModule->file->needRefreshInsts = true;
+    } else {
+        InstModifier modifier(field->owner->owningModule->file);
+        modifier.Modify();
+    }
 
     return true;
 }
@@ -436,9 +468,12 @@ bool InterfaceSetNameStatic(AbckitCoreInterface *iface, const char *newName)
     if (!ModifyNameHelper::InterfaceRefreshName(iface, newName)) {
         return false;
     }
-
-    InstModifier modifier(iface->owningModule->file);
-    modifier.Modify();
+    if (g_enableInstModifierOptimization) {
+        iface->owningModule->file->needRefreshInsts = true;
+    } else {
+        InstModifier modifier(iface->owningModule->file);
+        modifier.Modify();
+    }
 
     return true;
 }
@@ -450,9 +485,12 @@ bool InterfaceFieldSetNameStatic(AbckitCoreInterfaceField *field, const char *ne
     if (!ModifyNameHelper::InterfaceFieldRefreshName(field, newName)) {
         return false;
     }
-
-    InstModifier modifier(field->owner->owningModule->file);
-    modifier.Modify();
+    if (g_enableInstModifierOptimization) {
+        field->owner->owningModule->file->needRefreshInsts = true;
+    } else {
+        InstModifier modifier(field->owner->owningModule->file);
+        modifier.Modify();
+    }
 
     return true;
 }
@@ -464,9 +502,12 @@ bool EnumSetNameStatic(AbckitCoreEnum *enm, const char *newName)
     if (!ModifyNameHelper::EnumRefreshName(enm, newName)) {
         return false;
     }
-
-    InstModifier modifier(enm->owningModule->file);
-    modifier.Modify();
+    if (g_enableInstModifierOptimization) {
+        enm->owningModule->file->needRefreshInsts = true;
+    } else {
+        InstModifier modifier(enm->owningModule->file);
+        modifier.Modify();
+    }
 
     return true;
 }
@@ -478,9 +519,12 @@ bool EnumFieldSetNameStatic(AbckitCoreEnumField *field, const char *newName)
     if (!ModifyNameHelper::FieldRefreshName(field, newName)) {
         return false;
     }
-
-    InstModifier modifier(field->owner->owningModule->file);
-    modifier.Modify();
+    if (g_enableInstModifierOptimization) {
+        field->owner->owningModule->file->needRefreshInsts = true;
+    } else {
+        InstModifier modifier(field->owner->owningModule->file);
+        modifier.Modify();
+    }
 
     return true;
 }
@@ -492,9 +536,12 @@ bool FunctionSetNameStatic(AbckitCoreFunction *function, const char *name)
     if (!ModifyNameHelper::FunctionRefreshName(function, name)) {
         return false;
     }
-
-    InstModifier modifier(function->owningModule->file);
-    modifier.Modify();
+    if (g_enableInstModifierOptimization) {
+        function->owningModule->file->needRefreshInsts = true;
+    } else {
+        InstModifier modifier(function->owningModule->file);
+        modifier.Modify();
+    }
 
     return true;
 }
@@ -723,6 +770,40 @@ AbckitValue *FindOrCreateValueStringStatic(AbckitFile *file, const char *value, 
 {
     LIBABCKIT_LOG_FUNC;
     return FindOrCreateValueStringStaticImpl(file, std::string(value, len));
+}
+
+AbckitValue *FindOrCreateValueMethodStatic(AbckitFile *file, AbckitCoreFunction *method)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    auto *funcImpl = method->GetArkTSImpl()->GetStaticImpl();
+    if (!funcImpl) {
+        statuses::SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
+
+    std::string methodSignature = abckit::util::GenerateFunctionMangleName(funcImpl->name, *funcImpl);
+    LIBABCKIT_LOG(DEBUG) << "methodSignature: " << methodSignature;
+
+    bool isStatic = (funcImpl->metadata->GetAccessFlags() & ACC_STATIC) != 0;
+    LIBABCKIT_LOG(DEBUG) << "isStatic: " << (isStatic ? "true" : "false");
+
+    return FindOrCreateValueMethodStaticImpl(file, methodSignature, isStatic);
+}
+
+AbckitValue *FindOrCreateRecordValueStatic(AbckitFile *file, AbckitCoreClass *klass)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto *recordImpl = klass->GetArkTSImpl()->impl.GetStaticClass();
+    if (!recordImpl) {
+        statuses::SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
+
+    std::string recordName = recordImpl->name;
+    ark::pandasm::Type recordType(recordName, 0);
+
+    return FindOrCreateRecordValueStaticImpl(file, recordType);
 }
 
 static std::unique_ptr<AbckitCoreAnnotation> CreateAnnotation(
@@ -1081,19 +1162,23 @@ static bool InterfaceFieldSetTypeModifyFuncSig(AbckitCoreFunction *func, std::st
             return false;
         }
     } else if (methodName.compare(0, setMethodName.length(), setMethodName) == 0) {
-        auto newParam = std::make_unique<AbckitCoreFunctionParam>();
-        newParam->function = func;
-        newParam->type = type;
-        AddFunctionUserToAbckitType(type, func);
-        newParam->impl = std::make_unique<AbckitArktsFunctionParam>();
-        newParam->GetArkTSImpl()->core = newParam.get();
+        // Create parameter using the standard API
+        struct AbckitArktsFunctionParamCreatedParams paramCreateParams {};
+        paramCreateParams.type = type;
+        paramCreateParams.name = "value";  // Standard parameter name for setter
+
+        auto *newParam = CreateFunctionParameterStatic(func->owningModule->file, &paramCreateParams);
+        if (newParam == nullptr) {
+            LIBABCKIT_LOG(DEBUG) << "Create function parameter error\n";
+            return false;
+        }
 
         if (!FunctionRemoveParameterStatic(func->GetArkTSImpl(), 1)) {
             LIBABCKIT_LOG(DEBUG) << "Modify set function Signature error, remove parameter error\n";
             return false;
         }
 
-        if (!FunctionAddParameterStatic(func->GetArkTSImpl(), newParam->GetArkTSImpl())) {
+        if (!FunctionAddParameterStatic(func->GetArkTSImpl(), newParam)) {
             LIBABCKIT_LOG(DEBUG) << "Modify set function Signature error, add parameter error\n";
             return false;
         }
@@ -1280,6 +1365,36 @@ bool InterfaceFieldRemoveAnnotationStatic(AbckitArktsInterfaceField *field, Abck
 // Function
 // ========================================
 
+AbckitArktsFunctionParam *CreateFunctionParameterStatic(AbckitFile *file,
+                                                        const struct AbckitArktsFunctionParamCreatedParams *createParam)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    LIBABCKIT_BAD_ARGUMENT(file, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(createParam, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(createParam->name, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(createParam->type, nullptr);
+
+    auto param = std::make_unique<AbckitCoreFunctionParam>();
+    param->function = nullptr;
+
+    param->name = CreateStringStatic(file, createParam->name, strlen(createParam->name));
+    if (!param->name) {
+        LIBABCKIT_LOG(DEBUG) << "Failed to create parameter name string\n";
+        return nullptr;
+    }
+
+    param->type = createParam->type;
+    param->defaultValue = createParam->defaultValue;
+
+    auto arktsParam = std::make_unique<AbckitArktsFunctionParam>();
+    arktsParam->core = param.get();
+    param->impl = std::move(arktsParam);
+
+    auto *coreParam = param.release();
+    return coreParam->GetArkTSImpl();
+}
+
 bool FunctionAddParameterStatic(AbckitArktsFunction *func, AbckitArktsFunctionParam *param)
 {
     LIBABCKIT_LOG_FUNC;
@@ -1296,17 +1411,19 @@ bool FunctionAddParameterStatic(AbckitArktsFunction *func, AbckitArktsFunctionPa
     const auto *paramCore = param->core;
     const auto *paramType = paramCore->type;
 
-    std::string componentName = abckit::util::GetTypeName(coreFunc, paramType, false);
+    std::string componentName = abckit::util::GetTypeName(paramType, false);
     abckit::util::AddFunctionParameterImpl(coreFunc, funcImpl, paramCore, componentName);
 
     std::string newMangleName = abckit::util::GenerateFunctionMangleName(funcImpl->name, *funcImpl);
-    if (!abckit::util::UpdateFunctionTableKey(prog, funcImpl, funcImpl->name, oldMangleName, newMangleName)) {
+    if (!abckit::util::UpdateFunctionTableKey(prog, funcImpl, funcImpl->name, oldMangleName, newMangleName, func)) {
         LIBABCKIT_LOG(ERROR) << "[FunctionAddParameter] Failed to update function table key" << std::endl;
         return false;
     }
 
     abckit::util::ReplaceInstructionIds(prog, funcImpl, oldMangleName, newMangleName);
     abckit::util::UpdateFileMap(coreFunc->owningModule->file, oldMangleName, newMangleName);
+
+    delete paramCore;
 
     return true;
 }
@@ -1329,7 +1446,7 @@ bool FunctionRemoveParameterStatic(AbckitArktsFunction *func, size_t index)
         return false;
     }
     std::string newMangleName = abckit::util::GenerateFunctionMangleName(funcImpl->name, *funcImpl);
-    if (!abckit::util::UpdateFunctionTableKey(prog, funcImpl, funcImpl->name, oldMangleName, newMangleName)) {
+    if (!abckit::util::UpdateFunctionTableKey(prog, funcImpl, funcImpl->name, oldMangleName, newMangleName, func)) {
         LIBABCKIT_LOG(ERROR) << "[FunctionRemoveParameter] Failed to update function table key" << std::endl;
         return false;
     }
@@ -1351,14 +1468,15 @@ bool FunctionSetReturnTypeStatic(AbckitArktsFunction *func, AbckitType *abckitTy
     LIBABCKIT_INTERNAL_ERROR(prog, false);
 
     std::string oldMangleName = abckit::util::GenerateFunctionMangleName(funcImpl->name, *funcImpl);
-    auto typeDescriptor = abckit::util::GetTypeName(coreFunc, abckitType, false);
+    auto typeDescriptor = abckit::util::GetTypeName(abckitType, false);
     for (size_t i = 0; i < abckitType->rank; i++) {
         typeDescriptor += "[]";
     }
     ark::pandasm::Type type = ark::pandasm::Type::FromName(typeDescriptor);
     funcImpl->returnType = type;
+    coreFunc->returnType = abckitType;
     std::string newMangleName = abckit::util::GenerateFunctionMangleName(funcImpl->name, *funcImpl);
-    if (!abckit::util::UpdateFunctionTableKey(prog, funcImpl, funcImpl->name, oldMangleName, newMangleName)) {
+    if (!abckit::util::UpdateFunctionTableKey(prog, funcImpl, funcImpl->name, oldMangleName, newMangleName, func)) {
         LIBABCKIT_LOG(ERROR) << "[FunctionSetReturnType] Failed to update function table key" << std::endl;
         return false;
     }
@@ -2448,7 +2566,9 @@ AbckitArktsFunction *ModuleImportClassMethodStatic(AbckitArktsModule *externalMo
 
     ark::pandasm::Function f(methodName, prog->lang);
     f.name = fullMethodName;
-
+    if (strcmp(methodName, "_ctor_") == 0) {
+        f.metadata->SetAttribute("ctor");
+    }
     // make sure the return type is in recordTable
     std::string returnTypeStr(returnType);
     if (returnTypeStr.find('.') != std::string::npos) {
@@ -2605,32 +2725,131 @@ AbckitArktsAnnotationElement *AnnotationAddAnnotationElementStatic(AbckitCoreAnn
                                                                    AbckitArktsAnnotationElementCreateParams *params)
 {
     auto valuePtr = params->value;
-    auto name = params->name;
+    // Properly copy ScalarValue to avoid object slicing
+    auto *originalValue = reinterpret_cast<pandasm::Value *>(valuePtr->val.get());
+    std::unique_ptr<pandasm::Value> progAnnoElemValue;
 
-    auto progAnnoElemValue = std::make_unique<pandasm::Value>(*reinterpret_cast<pandasm::Value *>(valuePtr->val.get()));
+    if (originalValue->GetType() == pandasm::Value::Type::METHOD) {
+        // For METHOD type, we need to copy the ScalarValue properly
+        auto *scalarValue = originalValue->GetAsScalar();
+        auto copiedScalarValue =
+            std::make_unique<pandasm::ScalarValue>(pandasm::ScalarValue::Create<pandasm::Value::Type::METHOD>(
+                scalarValue->GetValue<std::string>(), scalarValue->IsStatic()));
+        progAnnoElemValue = std::move(copiedScalarValue);
+    } else if (originalValue->GetType() == pandasm::Value::Type::RECORD) {
+        // For RECORD type, we also need to copy the ScalarValue properly
+        auto *scalarValue = originalValue->GetAsScalar();
+        auto copiedScalarValue = std::make_unique<pandasm::ScalarValue>(
+            pandasm::ScalarValue::Create<pandasm::Value::Type::RECORD>(scalarValue->GetValue<pandasm::Type>()));
+        progAnnoElemValue = std::move(copiedScalarValue);
+    } else {
+        // For other scalar types, we still need to properly copy ScalarValue to avoid slicing
+        auto *scalarValue = originalValue->GetAsScalar();
+        if (scalarValue != nullptr) {
+            // Create a proper copy based on the actual type
+            auto valueType = originalValue->GetType();
+            switch (valueType) {
+                case pandasm::Value::Type::STRING:
+                    progAnnoElemValue = std::make_unique<pandasm::ScalarValue>(
+                        pandasm::ScalarValue::Create<pandasm::Value::Type::STRING>(
+                            scalarValue->GetValue<std::string>()));
+                    break;
+                case pandasm::Value::Type::U1:
+                    progAnnoElemValue =
+                        std::make_unique<pandasm::ScalarValue>(pandasm::ScalarValue::Create<pandasm::Value::Type::U1>(
+                            static_cast<uint8_t>(scalarValue->GetValue<uint64_t>())));
+                    break;
+                case pandasm::Value::Type::I8:
+                    progAnnoElemValue =
+                        std::make_unique<pandasm::ScalarValue>(pandasm::ScalarValue::Create<pandasm::Value::Type::I8>(
+                            static_cast<int8_t>(scalarValue->GetValue<uint64_t>())));
+                    break;
+                case pandasm::Value::Type::U8:
+                    progAnnoElemValue =
+                        std::make_unique<pandasm::ScalarValue>(pandasm::ScalarValue::Create<pandasm::Value::Type::U8>(
+                            static_cast<uint8_t>(scalarValue->GetValue<uint64_t>())));
+                    break;
+                case pandasm::Value::Type::I16:
+                    progAnnoElemValue =
+                        std::make_unique<pandasm::ScalarValue>(pandasm::ScalarValue::Create<pandasm::Value::Type::I16>(
+                            static_cast<int16_t>(scalarValue->GetValue<uint64_t>())));
+                    break;
+                case pandasm::Value::Type::U16:
+                    progAnnoElemValue =
+                        std::make_unique<pandasm::ScalarValue>(pandasm::ScalarValue::Create<pandasm::Value::Type::U16>(
+                            static_cast<uint16_t>(scalarValue->GetValue<uint64_t>())));
+                    break;
+                case pandasm::Value::Type::I32:
+                    progAnnoElemValue =
+                        std::make_unique<pandasm::ScalarValue>(pandasm::ScalarValue::Create<pandasm::Value::Type::I32>(
+                            static_cast<int32_t>(scalarValue->GetValue<uint64_t>())));
+                    break;
+                case pandasm::Value::Type::U32:
+                    progAnnoElemValue =
+                        std::make_unique<pandasm::ScalarValue>(pandasm::ScalarValue::Create<pandasm::Value::Type::U32>(
+                            static_cast<uint32_t>(scalarValue->GetValue<uint64_t>())));
+                    break;
+                case pandasm::Value::Type::I64:
+                    progAnnoElemValue =
+                        std::make_unique<pandasm::ScalarValue>(pandasm::ScalarValue::Create<pandasm::Value::Type::I64>(
+                            static_cast<int64_t>(scalarValue->GetValue<uint64_t>())));
+                    break;
+                case pandasm::Value::Type::U64:
+                    progAnnoElemValue = std::make_unique<pandasm::ScalarValue>(
+                        pandasm::ScalarValue::Create<pandasm::Value::Type::U64>(scalarValue->GetValue<uint64_t>()));
+                    break;
+                case pandasm::Value::Type::F32:
+                    progAnnoElemValue = std::make_unique<pandasm::ScalarValue>(
+                        pandasm::ScalarValue::Create<pandasm::Value::Type::F32>(scalarValue->GetValue<float>()));
+                    break;
+                case pandasm::Value::Type::F64:
+                    progAnnoElemValue = std::make_unique<pandasm::ScalarValue>(
+                        pandasm::ScalarValue::Create<pandasm::Value::Type::F64>(scalarValue->GetValue<double>()));
+                    break;
+                default:
+                    // Fallback for unknown types
+                    progAnnoElemValue = std::make_unique<pandasm::Value>(*originalValue);
+                    break;
+            }
+        } else {
+            // Fallback if not a scalar value
+            progAnnoElemValue = std::make_unique<pandasm::Value>(*originalValue);
+        }
+    }
     pandasm::AnnotationElement progAnnoElem(params->name, std::move(progAnnoElemValue));
 
     auto annoElem = std::make_unique<AbckitCoreAnnotationElement>();
     annoElem->ann = anno;
     auto annoElemName = progAnnoElem.GetName();
-    annoElem->name = CreateStringStatic(anno->ai->owningModule->file, annoElemName.data(), annoElemName.size());
+
+    // Get file from annotation owner instead of annotation interface
+    AbckitFile *file = GetAnnotationOwningModule(anno)->file;
+    annoElem->name = CreateStringStatic(file, annoElemName.data(), annoElemName.size());
     annoElem->value = valuePtr;
+
+    // Get full annotation name (e.g. "ets.annotation.FunctionalReference" instead of just "FunctionalReference")
+    std::string fullAnnotationName;
+    if (anno->ai) {
+        auto *aiName = AnnotationInterfaceGetNameStatic(anno->ai);
+        fullAnnotationName = aiName->impl;
+    } else {
+        fullAnnotationName = anno->name->impl;
+    }
 
     if (std::holds_alternative<AbckitCoreFunction *>(anno->owner)) {
         auto *func = std::get<AbckitCoreFunction *>(anno->owner);
         auto progOwner = func->GetArkTSImpl()->GetStaticImpl();
-        progOwner->metadata->AddAnnotationElementByName(name, std::move(progAnnoElem));
+        progOwner->metadata->AddAnnotationElementByName(fullAnnotationName, std::move(progAnnoElem));
         annoElem->value->file = func->owningModule->file;
     } else if (std::holds_alternative<AbckitCoreClass *>(anno->owner)) {
         auto *klass = std::get<AbckitCoreClass *>(anno->owner);
         auto progOwner = klass->GetArkTSImpl()->impl.GetStaticClass();
-        progOwner->metadata->AddAnnotationElementByName(name, std::move(progAnnoElem));
+        progOwner->metadata->AddAnnotationElementByName(fullAnnotationName, std::move(progAnnoElem));
         annoElem->value->file = klass->owningModule->file;
     }
 
     annoElem->impl = std::make_unique<AbckitArktsAnnotationElement>();
     annoElem->GetArkTSImpl()->core = annoElem.get();
-
     return anno->elements.emplace_back(std::move(annoElem))->GetArkTSImpl();
 }
 

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -670,7 +670,23 @@ struct AbckitArktsInterfaceFieldCreateParams {
      */
     enum AbckitArktsFieldVisibility fieldVisibility;
 };
-
+/**
+ * @brief Struct that is used to create new function parameters.
+ */
+struct AbckitArktsFunctionParamCreatedParams {
+    /**
+     * @brief Name of the created function parameter.
+     */
+    const char *name;
+    /**
+     * @brief Type of the created function parameter.
+     */
+    AbckitType *type;
+    /**
+     * @brief Default value of the created function parameter. Leave as NULL for no default value.
+     */
+    AbckitValue *defaultValue;
+};
 /**
  * @brief Struct that is used to create new imports.
  */
@@ -1497,6 +1513,20 @@ struct CAPI_EXPORT AbckitArktsModifyApi {
      * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `function` is does not have `ABCKIT_TARGET_ARK_TS_V2` target.
      */
     bool (*functionSetName)(AbckitArktsFunction *function, const char *name);
+
+    /**
+     * @brief Creates a new function parameter with the specified parameters.
+     * @return Pointer to the newly created function parameter.
+     * @param [ in ] file - Binary file context for string creation.
+     * @param [ in ] params - Data that is used to create the function parameter.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `file` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `params` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `params->name` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `params->type` is NULL.
+     * @note Allocates
+     */
+    AbckitArktsFunctionParam *(*createFunctionParameter)(AbckitFile *file,
+                                                         const struct AbckitArktsFunctionParamCreatedParams *params);
 
     /**
      * @brief Adds parameter `param` to the list of parameters for function `func`.

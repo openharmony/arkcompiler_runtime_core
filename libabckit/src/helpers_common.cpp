@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,8 @@
 #include "libabckit/src/adapter_static/metadata_modify_static.h"
 #include "libabckit/src/helpers_common.h"
 #include "libabckit/src/macros.h"
+#include <variant>
+#include <type_traits>
 
 namespace libabckit {
 
@@ -430,10 +432,10 @@ AbckitType *GetOrCreateType(
 
     auto &cache = file->types;
     if (cache.count(hash) == 1) {
-        return cache[hash].get();
+        return cache[hash];
     }
 
-    auto type = std::make_unique<AbckitType>();
+    auto type = new AbckitType();
     type->id = id;
     type->rank = rank;
     type->name = name;
@@ -442,24 +444,24 @@ AbckitType *GetOrCreateType(
 
     if (const auto klass = std::get_if<AbckitCoreClass *>(&reference)) {
         if (*klass) {
-            (*klass)->typeUsers.emplace_back(type.get());
+            (*klass)->typeUsers.emplace_back(type);
         }
     }
 
     if (const auto iface = std::get_if<AbckitCoreInterface *>(&reference)) {
         if (*iface) {
-            (*iface)->typeUsers.emplace_back(type.get());
+            (*iface)->typeUsers.emplace_back(type);
         }
     }
 
     if (const auto enm = std::get_if<AbckitCoreEnum *>(&reference)) {
         if (*enm) {
-            (*enm)->typeUsers.emplace_back(type.get());
+            (*enm)->typeUsers.emplace_back(type);
         }
     }
 
-    cache.insert({hash, std::move(type)});
-    return cache[hash].get();
+    cache.insert({hash, type});
+    return type;
 }
 
 void TypeSetNameHelper(AbckitType *type, const char *name, size_t len)
@@ -473,28 +475,36 @@ void TypeSetNameHelper(AbckitType *type, const char *name, size_t len)
         oldHash, std::visit([](const auto &object) { return reinterpret_cast<size_t>(object); }, type->reference));
     oldHash = HashCombine(oldHash, reinterpret_cast<size_t>(type->name));
 
-    std::unique_ptr<AbckitType> existingTypePtr;
-    if (cache.count(oldHash) == 1) {
-        existingTypePtr = std::move(cache[oldHash]);
-        cache.erase(oldHash);
+    if (cache.count(oldHash) == 0) {
+        return;
     }
 
-    if (type->file->frontend == Mode::DYNAMIC) {
-        type->name = CreateStringDynamic(type->file, name, len);
+    auto oldType = cache[oldHash];
+
+    if (oldType->file->frontend == Mode::DYNAMIC) {
+        oldType->name = CreateStringDynamic(oldType->file, name, len);
     } else {
-        type->name = CreateStringStatic(type->file, name, len);
+        oldType->name = CreateStringStatic(oldType->file, name, len);
     }
 
     size_t newHash = 0;
-    newHash = HashCombine(newHash, (size_t)type->id);
-    newHash = HashCombine(newHash, type->rank);
+    newHash = HashCombine(newHash, (size_t)oldType->id);
+    newHash = HashCombine(newHash, oldType->rank);
     newHash = HashCombine(
-        newHash, std::visit([](const auto &object) { return reinterpret_cast<size_t>(object); }, type->reference));
-    newHash = HashCombine(newHash, reinterpret_cast<size_t>(type->name));
-
-    if (existingTypePtr) {
-        cache.insert({newHash, std::move(existingTypePtr)});
+        newHash, std::visit([](const auto &object) { return reinterpret_cast<size_t>(object); }, oldType->reference));
+    newHash = HashCombine(newHash, reinterpret_cast<size_t>(oldType->name));
+    // Check if the new hash already exists in cache
+    if (cache.count(newHash) > 0 && oldHash != newHash) {
+        // The new hash conflicts with an existing entry
+        // Delete the existing type from cache and replace it with the current type
+        auto existingType = cache[newHash];
+        cache.erase(newHash);
+        delete existingType;
     }
+
+    auto newType = cache.extract(oldHash);
+    newType.key() = newHash;
+    cache.insert(std::move(newType));
 }
 
 void TypeSetRankHelper(AbckitType *type, size_t rank)
@@ -507,25 +517,32 @@ void TypeSetRankHelper(AbckitType *type, size_t rank)
     oldHash = HashCombine(
         oldHash, std::visit([](const auto &object) { return reinterpret_cast<size_t>(object); }, type->reference));
     oldHash = HashCombine(oldHash, reinterpret_cast<size_t>(type->name));
-
-    std::unique_ptr<AbckitType> existingTypePtr;
-    if (cache.count(oldHash) == 1) {
-        existingTypePtr = std::move(cache[oldHash]);
-        cache.erase(oldHash);
+    if (cache.count(oldHash) == 0) {
+        return;
     }
 
-    type->rank = rank;
+    auto oldType = cache[oldHash];
+
+    oldType->rank = rank;
 
     size_t newHash = 0;
-    newHash = HashCombine(newHash, (size_t)type->id);
-    newHash = HashCombine(newHash, type->rank);
+    newHash = HashCombine(newHash, (size_t)oldType->id);
+    newHash = HashCombine(newHash, oldType->rank);
     newHash = HashCombine(
-        newHash, std::visit([](const auto &object) { return reinterpret_cast<size_t>(object); }, type->reference));
-    newHash = HashCombine(newHash, reinterpret_cast<size_t>(type->name));
-
-    if (existingTypePtr) {
-        cache.insert({newHash, std::move(existingTypePtr)});
+        newHash, std::visit([](const auto &object) { return reinterpret_cast<size_t>(object); }, oldType->reference));
+    newHash = HashCombine(newHash, reinterpret_cast<size_t>(oldType->name));
+    // Check if the new hash already exists in cache
+    if (cache.count(newHash) > 0 && oldHash != newHash) {
+        // The new hash conflicts with an existing entry
+        // Delete the existing type from cache and replace it with the current type
+        auto existingType = cache[newHash];
+        cache.erase(newHash);
+        delete existingType;
     }
+
+    auto newType = cache.extract(oldHash);
+    newType.key() = newHash;
+    cache.insert(std::move(newType));
 }
 
 void AddFunctionUserToAbckitType(AbckitType *abckitType, AbckitCoreFunction *function)
@@ -552,4 +569,46 @@ void AddFieldUserToAbckitType(AbckitType *abckitType,
         }
     }
 }
+
+AbckitCoreModule *GetAnnotationOwningModule(const AbckitCoreAnnotation *annotation)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    if (annotation == nullptr) {
+        LIBABCKIT_LOG(ERROR) << "annotation is nullptr";
+        return nullptr;
+    }
+
+    // If annotation has ai (annotation interface), use its owningModule
+    if (annotation->ai != nullptr) {
+        return annotation->ai->owningModule;
+    }
+
+    // For compiler-generated annotations without ai, extract module from owner
+    return std::visit(
+        [](auto owner) -> AbckitCoreModule * {
+            if (owner == nullptr) {
+                return nullptr;
+            }
+
+            using OwnerType = std::decay_t<decltype(owner)>;
+
+            if constexpr (std::is_same_v<OwnerType, AbckitCoreClass *>) {
+                return owner->owningModule;
+            } else if constexpr (std::is_same_v<OwnerType, AbckitCoreFunction *>) {
+                return owner->owningModule;
+            } else if constexpr (std::is_same_v<OwnerType, AbckitCoreClassField *>) {
+                return owner->owner != nullptr ? owner->owner->owningModule : nullptr;
+            } else if constexpr (std::is_same_v<OwnerType, AbckitCoreInterface *>) {
+                return owner->owningModule;
+            } else if constexpr (std::is_same_v<OwnerType, AbckitCoreInterfaceField *>) {
+                return owner->owner != nullptr ? owner->owner->owningModule : nullptr;
+            } else {
+                LIBABCKIT_LOG(ERROR) << "Unsupported owner type in annotation";
+                return nullptr;
+            }
+        },
+        annotation->owner);
+}
+
 }  // namespace libabckit

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,7 +44,7 @@
 @interface Anno12 {}
 
 @interface Anno13 {
-    a: string = "a"
+    a: string = 'a'
     b: number = 1
 }
 
@@ -55,13 +55,13 @@
 
 @Anno1()
 @Anno2()
-class Class1 {
+export class Class1 {
     @Anno3()
     @Anno4({
-        a: "field2"
+        a: 'field2'
     })
+    @Anno1()
     public field1 = 1;
-    
     foo() {}
 }
 
@@ -90,3 +90,13 @@ function bar4() {}
 
 @Anno14
 function bar5() {}
+
+function testFunc(n: number): number {
+  return n * 2;
+}
+
+function bar6(f: (x: number) => number): number {
+  return f(5);
+}
+
+let result = bar6(testFunc);

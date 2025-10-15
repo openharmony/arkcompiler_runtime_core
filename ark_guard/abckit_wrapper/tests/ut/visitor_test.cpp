@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -206,28 +206,28 @@ class TestFieldVisitor final : public BaseTestVisitor, public abckit_wrapper::Fi
 public:
     void InitTargetObjectNames() override
     {
-        AddTargetObjectName("module_static.Color1._StringValuesArray");
-        AddTargetObjectName("module_static.Color1._ValuesArray");
+        AddTargetObjectName("module_static.Color1.#StringValuesArray");
+        AddTargetObjectName("module_static.Color1.#ValuesArray");
         AddTargetObjectName("module_static.Color1.RED");
         AddTargetObjectName("module_static.Ns1.Color2.YELLOW");
-        AddTargetObjectName("module_static.Color1._NamesArray");
+        AddTargetObjectName("module_static.Color1.#NamesArray");
         AddTargetObjectName("module_static.Ns1.m2");
-        AddTargetObjectName("module_static.Ns1.Color2._ordinal");
-        AddTargetObjectName("module_static.Ns1.Color2._StringValuesArray");
+        AddTargetObjectName("module_static.Ns1.Color2.#ordinal");
+        AddTargetObjectName("module_static.Ns1.Color2.#StringValuesArray");
         AddTargetObjectName("module_static.Ns1.ClassB.sField2");
         AddTargetObjectName("module_static.Ns1.ClassB.%%property-iField2");
         AddTargetObjectName("module_static.Interface1.%%property-iField1");
-        AddTargetObjectName("module_static.Color1._ordinal");
-        AddTargetObjectName("module_static.Ns1.Color2._NamesArray");
+        AddTargetObjectName("module_static.Color1.#ordinal");
+        AddTargetObjectName("module_static.Ns1.Color2.#NamesArray");
         AddTargetObjectName("module_static.Ns1.ClassB.field2");
-        AddTargetObjectName("module_static.Ns1.Color2._ItemsArray");
-        AddTargetObjectName("module_static.Color1._ItemsArray");
+        AddTargetObjectName("module_static.Ns1.Color2.#ItemsArray");
+        AddTargetObjectName("module_static.Color1.#ItemsArray");
         AddTargetObjectName("module_static.m1");
         AddTargetObjectName("module_static.ClassA.field1");
         AddTargetObjectName("module_static.ClassA.%%property-iField1");
         AddTargetObjectName("module_static.Ns1.Interface2.%%property-iField2");
         AddTargetObjectName("module_static.ClassA.sField1");
-        AddTargetObjectName("module_static.Ns1.Color2._ValuesArray");
+        AddTargetObjectName("module_static.Ns1.Color2.#ValuesArray");
     }
 
     bool Visit(abckit_wrapper::Module *module) override

@@ -256,6 +256,43 @@ extern "C" AbckitValue *CreateValueString(AbckitFile *file, const char *value, s
     }
 }
 
+extern "C" AbckitValue *CreateValueMethod(AbckitFile *file, AbckitCoreFunction *method)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(file, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(method, nullptr);
+
+    switch (file->frontend) {
+        case Mode::DYNAMIC:
+            LIBABCKIT_UNIMPLEMENTED;
+        case Mode::STATIC:
+            return FindOrCreateValueMethodStatic(file, method);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
+}
+
+extern "C" AbckitValue *CreateValueRecord(AbckitFile *file, AbckitCoreClass *klass)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(file, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(klass, nullptr);
+    switch (file->frontend) {
+        case Mode::DYNAMIC:
+            LIBABCKIT_UNIMPLEMENTED;
+        case Mode::STATIC:
+            return FindOrCreateRecordValueStatic(file, klass);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
+}
+
 extern "C" AbckitValue *CreateLiteralArrayValue(AbckitFile *file, AbckitValue **value, size_t size)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
@@ -595,6 +632,8 @@ AbckitModifyApi g_modifyApiImpl = {
     CreateValueInt,
     CreateValueDouble,
     CreateValueString,
+    CreateValueMethod,
+    CreateValueRecord,
     CreateLiteralArrayValue,
 
     // ========================================

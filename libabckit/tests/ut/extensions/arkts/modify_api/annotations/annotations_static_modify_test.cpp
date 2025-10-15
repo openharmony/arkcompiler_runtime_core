@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,8 @@ static auto g_implI = AbckitGetInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 static auto g_implArkI = AbckitGetArktsInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 static auto g_implM = AbckitGetModifyApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 static auto g_implArkM = AbckitGetArktsModifyApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
+static auto g_implG = AbckitGetGraphApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
+static auto g_statG = AbckitGetIsaApiStaticImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
 class LibAbcKitArkTSModifyApiAnnotationsTest : public ::testing::Test {};
 
@@ -619,7 +621,7 @@ TEST_F(LibAbcKitArkTSModifyApiAnnotationsTest, ClassFieldAnnotationSetNameStatic
     abckit::File file(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/annotations/annotations_static_modify.abc");
 
     std::set<std::string> gotAnnotationNames;
-    std::set<std::string> expectAnnotationNames = {"New", "Anno4"};
+    std::set<std::string> expectAnnotationNames = {"New", "Anno4", "Anno1"};
 
     for (const auto &module : file.GetModules()) {
         if (module.IsExternal()) {
@@ -758,5 +760,122 @@ TEST_F(LibAbcKitArkTSModifyApiAnnotationsTest, AnnotationInterfaceSetNameStatic)
     ASSERT_EQ(classGotAnnotationNames, expectAnnotationNames);
     ASSERT_EQ(helpers::ExecuteStaticAbc(INPUT_PATH, "annotations_static_modify", "main"),
               helpers::ExecuteStaticAbc(OUTPUT_PATH, "annotations_static_modify", "main"));
+}
+
+[[maybe_unused]] void ModifyAnnotationElementFromRecord(AbckitFile *file, const std::string &moduleName,
+                                                        const std::string &recordName,
+                                                        const std::string &annotationName,
+                                                        const std::string &elementName)
+{
+    helpers::ModuleByNameContext moduleCtx = {nullptr, moduleName.c_str()};
+    g_implI->fileEnumerateModules(file, &moduleCtx, helpers::ModuleByNameFinder);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(moduleCtx.module, nullptr);
+    auto *module = moduleCtx.module;
+
+    helpers::ClassByNameContext classCtx = {nullptr, recordName.c_str()};
+    g_implI->moduleEnumerateClasses(module, &classCtx, helpers::ClassByNameFinder);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(classCtx.klass, nullptr);
+    auto *klass = classCtx.klass;
+
+    AnnoFind annoFind;
+    annoFind.name = annotationName;
+    annoFind.anno = nullptr;
+    g_implI->classEnumerateAnnotations(klass, &annoFind, [](AbckitCoreAnnotation *anno, void *data) {
+        auto annoFindCtx = reinterpret_cast<AnnoFind *>(data);
+        auto annoName = g_implI->annotationGetName(anno);
+        EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+        auto name = helpers::AbckitStringToString(annoName);
+        if (name == annoFindCtx->name) {
+            annoFindCtx->anno = anno;
+        }
+        return true;
+    });
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(annoFind.anno, nullptr);
+
+    AnnoElemFind elemFind;
+    elemFind.name = elementName;
+    elemFind.annoElem = nullptr;
+    g_implI->annotationEnumerateElements(annoFind.anno, &elemFind,
+                                         [](AbckitCoreAnnotationElement *annoElem, void *data) {
+                                             auto elemFindCtx = reinterpret_cast<AnnoElemFind *>(data);
+                                             auto str = g_implI->annotationElementGetName(annoElem);
+                                             EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+                                             auto name = helpers::AbckitStringToString(str);
+                                             if (name == elemFindCtx->name) {
+                                                 elemFindCtx->annoElem = annoElem;
+                                             }
+                                             return true;
+                                         });
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(elemFind.annoElem, nullptr);
+
+    g_implArkM->annotationRemoveAnnotationElement(
+        g_implArkI->coreAnnotationToArktsAnnotation(annoFind.anno),
+        g_implArkI->coreAnnotationElementToArktsAnnotationElement(elemFind.annoElem));
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+    // Create method value using the new API
+    auto *targetMethod = helpers::FindMethodByName(file, "testFunc");
+    ASSERT_NE(targetMethod, nullptr);
+
+    struct AbckitArktsAnnotationElementCreateParams annoElementCreateParams {};
+    auto value = g_implM->createValueMethod(file, targetMethod);
+    ASSERT_NE(value, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+    annoElementCreateParams.value = value;
+    annoElementCreateParams.name = "value";
+
+    auto annoElem = g_implArkM->annotationAddAnnotationElement(
+        g_implArkI->coreAnnotationToArktsAnnotation(annoFind.anno), &annoElementCreateParams);
+    ASSERT_NE(annoElem, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+// Test: test-kind=api, api=ArktsModifyApiImpl::annotationInterfaceSetName, abc-kind=ArkTS2, category=positive,
+// extension=c
+TEST_F(LibAbcKitArkTSModifyApiAnnotationsTest, TestAsyncFunctionSetReturnType)
+{
+    AbckitFile *file = nullptr;
+    // openabc and find method
+    helpers::AssertOpenAbc(INPUT_PATH, &file);
+    auto *method = helpers::FindMethodByName(file, "testFunc");
+    ASSERT_NE(method, nullptr);
+    auto *graph = g_implI->createGraphFromFunction(method);
+    ASSERT_NE(graph, nullptr);
+    auto *originalRet = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_RETURN);
+    auto *res = g_implM->createValueString(file, "test", strlen("test"));
+    auto *type = g_implI->valueGetType(res);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(type, nullptr);
+    // set testFunc return type from number to string
+    auto *arktsFunc = g_implArkI->coreFunctionToArktsFunction(method);
+    bool success = g_implArkM->functionSetReturnType(arktsFunc, type);
+    ASSERT_TRUE(success) << "Failed to set return type to function";
+    // modify graph of testFunc
+    auto *str = g_implM->createString(file, "hello", strlen("hello"));
+    ASSERT_NE(str, nullptr);
+    auto *loadStr = g_statG->iCreateLoadString(graph, str);
+    ASSERT_NE(loadStr, nullptr);
+    g_implG->iInsertBefore(loadStr, originalRet);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    auto *newReturnInst = g_statG->iCreateReturn(graph, loadStr);
+    ASSERT_NE(newReturnInst, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    helpers::ReplaceInst(originalRet, newReturnInst);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    g_implG->gDump(graph, 1);
+    g_implM->functionSetGraph(method, graph);
+    g_impl->destroyGraph(graph);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    g_impl->writeAbc(file, OUTPUT_PATH, strlen(OUTPUT_PATH));
+    g_impl->closeFile(file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+    helpers::AssertOpenAbc(OUTPUT_PATH, &file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    g_impl->closeFile(file);
 }
 }  // namespace libabckit::test

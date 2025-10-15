@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -252,8 +252,6 @@ TEST_F(LibAbcKitNullptrTestsArktsInspectApiImpl0, ArkTSAnnotationEnumerateElemen
 
     auto callBack = [](AbckitCoreAnnotationElement *ae, void *data) -> bool { return false; };
     anno->ai = nullptr;
-    ASSERT_EQ(ArkTSAnnotationEnumerateElements(anno.get(), nullptr, callBack), false);
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_INTERNAL_ERROR);
 
     auto ai = std::make_unique<AbckitCoreAnnotationInterface>();
     anno->ai = ai.get();

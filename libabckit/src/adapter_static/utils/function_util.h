@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,13 +26,12 @@ namespace abckit::util {
 
 std::string ReplaceFunctionModuleName(const std::string &oldModuleName, const std::string &newName);
 bool UpdateFunctionTableKey(ark::pandasm::Program *prog, ark::pandasm::Function *impl, const std::string &newName,
-                            std::string &oldMangleName, std::string &newMangleName);
+                            std::string &oldMangleName, std::string &newMangleName, AbckitArktsFunction *arktsFunc);
 bool UpdateFileMap(AbckitFile *file, const std::string &oldMangleName, const std::string &newMangleName);
 void ReplaceInstructionIds(ark::pandasm::Program *prog, ark::pandasm::Function *impl, const std::string &oldId,
                            const std::string &newId);
 std::string GenerateFunctionMangleName(const std::string &moduleName, const ark::pandasm::Function &func);
-std::string GetTypeName([[maybe_unused]] AbckitCoreFunction *coreFunc, const AbckitType *type,
-                        bool useComponentFormat = false);
+std::string GetTypeName(const AbckitType *type, bool useComponentFormat = false);
 void AddFunctionParameterImpl(AbckitCoreFunction *coreFunc, ark::pandasm::Function *impl,
                               const AbckitCoreFunctionParam *paramCore, const std::string &componentName);
 

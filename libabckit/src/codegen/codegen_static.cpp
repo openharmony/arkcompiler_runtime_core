@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1493,6 +1493,18 @@ void CodeGenStatic::VisitLoadStaticIntrinsic(GraphVisitor *v, Inst *instBase)
             std::cerr << "CodeGen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed\n";
             enc->success_ = false;
     }
+}
+
+void CodeGenStatic::VisitLoadTypeIntrinsic(GraphVisitor *v, Inst *instBase)
+{
+    auto enc = static_cast<CodeGenStatic *>(v);
+    auto inst = instBase->CastToIntrinsic();
+
+    compiler::Register vd = inst->GetDstReg();
+    std::string id = enc->irInterface_->GetTypeIdByOffset(inst->GetImm(0));
+
+    enc->result_.emplace_back(pandasm::Create_LDA_TYPE(id));
+    DoStaObj(vd, enc->result_);
 }
 
 void CodeGenStatic::VisitCatchPhi(GraphVisitor *v, Inst *inst)

@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -543,6 +543,22 @@ def call_me_from_template
     plain('ets.nullcheck')
   end
 
+  visit('EtsIstrueIntrinsic') do
+    plain('ets.istrue', r(0))
+  end
+
+  visit('EtsTypeofIntrinsic') do
+    plain('ets.typeof', r(0))
+  end
+
+  visit('EtsLdObjByNameIntrinsic') do
+    field_id_from_imm = 'enc->irInterface_->GetFieldIdByOffset(static_cast<uint32_t>(inst->GetImms()[0]))'
+    switch(type,
+      [case_(b32_types, 'ets.ldobj.name', r(0), field_id_from_imm),
+       case_(b64_types, 'ets.ldobj.name.64', r(0), field_id_from_imm),
+       case_(['REFERENCE'], 'ets.ldobj.name.obj', r(0), field_id_from_imm)]
+    )
+  end
   # Empty visitors for IR instructions we want to ignore
   # (Add missing IRs on demand)
   %w[NullCheck BoundsCheck ZeroCheck NegativeCheck SafePoint

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,13 +17,14 @@
 
 #include <regex>
 
+#include "helpers_static.h"
 #include "metadata_inspect_static.h"
 #include "static_core/assembler/assembly-program.h"
 #include "static_core/assembler/mangling.h"
 
 namespace {
 constexpr std::string_view OBJECT_LITERAL_SUFFIX = "$ObjectLiteral";
-constexpr std::string_view PARTIAL_SUFFIX = "$partial";
+constexpr std::string_view PARTIAL_PREFIX = "%%partial-";
 constexpr std::string_view NAME_DELIMITER = ".";
 constexpr std::string_view GLOBAL_CLASS = "ETSGLOBAL";
 }  // namespace
@@ -46,6 +47,10 @@ std::string libabckit::NameUtil::GetName(
 
     if (const auto coreEnum = std::get_if<AbckitCoreEnum *>(&object)) {
         return EnumGetNameStatic(*coreEnum)->impl.data();
+    }
+
+    if (const auto coreInterface = std::get_if<AbckitCoreInterface *>(&object)) {
+        return InterfaceGetNameStatic(*coreInterface)->impl.data();
     }
 
     ASSERT(false);
@@ -128,7 +133,8 @@ std::string libabckit::NameUtil::ObjectLiteralGetFullName(const AbckitCoreClass 
 
 std::string libabckit::NameUtil::PartialGetFullName(const std::string &newName)
 {
-    return newName + std::string(PARTIAL_SUFFIX);
+    auto [moduleName, className] = ClassGetNames(newName);
+    return moduleName + NAME_DELIMITER.data() + std::string(PARTIAL_PREFIX) + className;
 }
 
 std::string libabckit::NameUtil::NamespaceGetPackageName(AbckitCoreNamespace *ns)

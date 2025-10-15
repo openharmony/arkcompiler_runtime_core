@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -144,7 +144,10 @@ AbckitValue *FindOrCreateValueU1StaticImpl(AbckitFile *file, bool value);
 AbckitValue *FindOrCreateValueIntStaticImpl(AbckitFile *file, int value);
 AbckitValue *FindOrCreateValueDoubleStaticImpl(AbckitFile *file, double value);
 AbckitValue *FindOrCreateValueStringStaticImpl(AbckitFile *file, const std::string &value);
+AbckitValue *FindOrCreateValueMethodStaticImpl(AbckitFile *file, const std::string &value, bool isStatic);
+AbckitValue *FindOrCreateRecordValueStaticImpl(AbckitFile *file, const ark::pandasm::Type &value);
 AbckitValue *FindOrCreateLiteralArrayValueStaticImpl(AbckitFile *file, const std::string &value);
+AbckitValue *FindOrCreateArrayValueStaticImpl(AbckitFile *file, const ark::pandasm::ArrayValue &value);
 AbckitValue *FindOrCreateValueStatic(AbckitFile *file, const ark::pandasm::Value &value);
 
 void GraphInvalidateAnalyses(ark::compiler::Graph *graph);

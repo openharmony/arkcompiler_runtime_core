@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -68,7 +68,7 @@ void AbcStringTable::DumpStringById(std::ostream &os, uint32_t stringId) const
 std::string AbcStringTable::StringDataToString(panda_file::File::StringData sd) const
 {
     std::string str = std::string(utf::Mutf8AsCString(sd.data));
-    std::replace(str.begin(), str.end(), '#', '_');
+
     size_t symPos = 0;
     while (symPos = str.find_first_of("\a\b\f\n\r\t\v\'\\\"", symPos), symPos != std::string::npos) {
         std::string sym;

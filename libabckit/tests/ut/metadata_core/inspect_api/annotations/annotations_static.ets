@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,9 @@
 class C1 {
   @AI2()
   public c1F2: int;
+  async test() {
+      console.log("123");
+  }
 }
 
 @AI3()
@@ -50,3 +53,10 @@ namespace Ns1 {
   @AI2()
   function foo(){}
 }
+
+
+function main(){
+  let c=new C1();
+  c.test();
+}
+
