@@ -77,26 +77,26 @@ const BUCKET_END: int = -1
 const CLEAR_FLAG_IDX: int = 0  // If table has been cleared, there are no numbers of deleted elements - check this flag.
 
 function getKeyAt<K>(data: FixedArray<Any>, at: int): K {
-    return data[at * 2 - 2] as K
+    return data[at - 2] as K
 }
 
 function getValueAt<V>(data: FixedArray<Any>, at: int): V {
-    return data[at * 2 - 1] as V
+    return data[at - 1] as V
 }
 
 function isDeletedAt(buckets: FixedArray<int>, at: int): boolean {
-    return buckets[at * 2 - 1] === DELETED_ENTRY
+    return buckets[at - 1] === DELETED_ENTRY
 }
 
 function isEmptyAt(buckets: FixedArray<int>, at: int): boolean {
-    return buckets[at * 2 - 1] === EMPTY_ENTRY
+    return buckets[at - 1] === EMPTY_ENTRY
 }
 
 function getNumOfDeleted(buckets: FixedArray<int>, at: int) { // Call only when clear or rehash occured.
     if (buckets[CLEAR_FLAG_IDX]) {
-        return at
+        return at / 2
     }
-    return at > 0 ? buckets[at * 2 - 1] : 0
+    return at > 0 ? buckets[at - 1] : 0
 }
 
 final class MapEntry<K, V> {
@@ -137,16 +137,17 @@ export final class MapIterator<K, V, R> implements IterableIterator<R> {
     constructor(data: FixedArray<Any>, mapper: (k: K, v: V) => R) {
         this.data = data
         this.buckets = data[data.length - 2] as FixedArray<int>
-        this.curIndex = 1
+        this.curIndex = 2
         this.mapper = mapper
+        ++this.buckets![this.buckets!.length - 1]
     }
 
     override next(): IteratorResult<R> {
         let data = this.data
         let buckets = this.buckets
         while (data !== undefined && data[data.length - 1] !== undefined) {
-            if (this.curIndex > 1) {
-                this.curIndex -= getNumOfDeleted(buckets!, this.curIndex - 1)
+            if (this.curIndex > 2) {
+                this.curIndex -= 2 * getNumOfDeleted(buckets!, this.curIndex - 2)
             }            
             data = data[data.length - 1] as (FixedArray<Any> | undefined)
             if (data !== undefined) {
@@ -159,17 +160,18 @@ export final class MapIterator<K, V, R> implements IterableIterator<R> {
         }
         this.buckets = buckets
         
-        for (; this.curIndex <= this.buckets!.length / 2; this.curIndex++) {
+        for (; this.curIndex <= this.buckets!.length - 1; this.curIndex += 2) {
             if (isEmptyAt(this.buckets!, this.curIndex)) {
                 break
             }
             if (!isDeletedAt(this.buckets!, this.curIndex)) {
                 const res = new IteratorResult<R>(this.mapper(getKeyAt<K>(this.data!, this.curIndex), getValueAt<V>(this.data!, this.curIndex)))
-                this.curIndex++
+                this.curIndex += 2
                 return res
             }
         }
         this.data = undefined
+        --this.buckets![this.buckets!.length - 1]
         return new IteratorResult<R>()
     }
 
@@ -205,15 +207,6 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
         return (capacity >= Map.MIN_CAPACITY) ? capacity : Map.MIN_CAPACITY
     }
 
-    private static computeCapacityForShrink(capacity: int, size: int): int {
-        if (size >= capacity / Map.MIN_CAPACITY) {
-            return 0
-        }
-
-        // quarter filled, shrink
-        const newCapacity = capacity / 2
-        return (newCapacity >= Map.MIN_SHRINK_CAPACITY) ? newCapacity : 0 
-    }
 
     private static computeCapacityForGrow(capacity: int, size: int, numEntries: int): int {
         const deleted = numEntries - size
@@ -227,27 +220,27 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
     }
 
     private static getNextInBucketAt(buckets: FixedArray<int>, at: int): int {
-        return buckets[at * 2 - 1]
+        return buckets[at - 1]
     }
 
     private static getBucket(buckets: FixedArray<int>, hash: int): int {
-        return buckets[hash * 2]
+        return buckets[hash]
     }
 
     private static setKey<K>(data: FixedArray<Any>, at: int, v: K) {
-        data[at * 2] = v
+        data[at] = v
     }
 
     private static setValue<V>(data: FixedArray<Any>, at: int, v: V) {
-        data[at * 2 + 1] = v
+        data[at + 1] = v
     }
 
     private static setNextInBucketAt(buckets: FixedArray<int>, at: int, next: int) {
-        buckets[at * 2 - 1] = next
+        buckets[at - 1] = next
     }
 
     private static setBucket(buckets: FixedArray<int>, at: int, next: int) {
-        buckets[at * 2] = next
+        buckets[at] = next
     }
 
     private static deleteAt(buckets: FixedArray<int>, at: int) {
@@ -260,13 +253,13 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
             return 0
         }
         if (k === undefined) {
-            return 1
+            return 2
         }
 
         const keyHash: int = Runtime.getHashCodeByValue(k! as object).toInt() // #26217
         const t = keyHash >> 31
 
-        return ((keyHash ^ t) - t) & (this.cap - 1)
+        return 2 * (((keyHash ^ t) - t) & (this.cap - 1))
     }
 
     /**
@@ -276,14 +269,14 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
     constructor(entries?: Iterable<[K, V]> | readonly ((readonly [K, V]) | null | undefined)[] | null) {
         if (entries == null) {
             this.data = new Any[Map.MIN_CAPACITY * 2 + 2]
-            this.buckets = new int[Map.MIN_CAPACITY * 2]
+            this.buckets = new int[Map.MIN_CAPACITY * 2 + 1]
             this.data[this.data.length - 2] = this.buckets
             this.cap = Map.MIN_CAPACITY
         } else if (entries instanceof Array) {
             const array = entries as Array<(readonly [K, V]) | null | undefined>
             const capacity = Map.computeCapacity(array.length.toInt())
             this.data = new Any[capacity * 2 + 2]
-            this.buckets = new int[capacity * 2]
+            this.buckets = new int[capacity * 2 + 1]
             this.data[this.data.length - 2] = this.buckets
             this.cap = capacity
             for (let i = 0; i < array.length; ++i) {
@@ -304,7 +297,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
             }
             const capacity = Map.computeCapacity(entriesBuf.length)
             this.data = new Any[capacity * 2 + 2]
-            this.buckets = new int[capacity * 2]
+            this.buckets = new int[capacity * 2 + 1]
             this.data[this.data.length - 2] = this.buckets
             this.cap = capacity
 
@@ -321,7 +314,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
     constructor(map: Map<K, V>) {
         const capacity = Map.computeCapacity(map.sizeVal)
         this.data = new Any[capacity * 2 + 2]
-        this.buckets = new int[capacity * 2]
+        this.buckets = new int[capacity * 2 + 1]
         this.data[this.data.length - 2] = this.buckets
         this.cap = capacity
 
@@ -337,7 +330,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
     constructor(entries: Array<[K, V]>) {
         const capacity = Map.computeCapacity(entries.length)
         this.data = new Any[capacity * 2 + 2]
-        this.buckets = new int[capacity * 2]
+        this.buckets = new int[capacity * 2 + 1]
         this.data[this.data.length - 2] = this.buckets
         this.cap = capacity
 
@@ -352,7 +345,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
     constructor(values: FixedArray<[K, V]>) {
         const capacity = Map.computeCapacity(values.length)
         this.data = new Any[capacity * 2 + 2]
-        this.buckets = new int[capacity * 2]
+        this.buckets = new int[capacity * 2 + 1]
         this.data[this.data.length - 2] = this.buckets
         this.cap = capacity
         for (let i = 0; i < values.length; ++i) {
@@ -367,7 +360,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
     // NOTE: This API may be removed someday due #28030 internal issue
     constructor(initialCapacity: int) {
         this.data = new Any[initialCapacity * 2 + 2]
-        this.buckets = new int[initialCapacity * 2]
+        this.buckets = new int[initialCapacity * 2 + 1]
         this.data[this.data.length - 2] = this.buckets
         this.cap = initialCapacity
     }
@@ -392,20 +385,12 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
         return strBuf.toString()
     }
 
-    private insertEntry(key: K, val: V, bucketIdx: int, bucket: int) {
-        this.sizeVal++
-        const idx = this.numEntries++
-        Map.setKey(this.data, idx, key)
-        Map.setValue(this.data, idx, val)
-        this.buckets[idx * 2 + 1] = bucket
-        this.buckets[bucketIdx * 2] = idx + 1
-    }
-
     private rehash(newCapacity: int) {
         let curDeletedElements: int = 0
+        const itersCounter = this.buckets[this.buckets.length - 1]        
 
         const newData: FixedArray<Any> = new Any[newCapacity * 2 + 2]
-        const newBuckets: FixedArray<int> = new int[newCapacity * 2]
+        const newBuckets: FixedArray<int> = new int[newCapacity * 2 + 1]
         newData[newData.length - 2] = newBuckets
 
         const oldNumEntries = this.numEntries
@@ -415,64 +400,49 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
         this.sizeVal = 0
         let sizeVal: int = 0
 
-        for (let i: int = 0; i < oldNumEntries; i++) {
-            if (oldBuckets[i * 2 + 1] === DELETED_ENTRY) {
-                oldBuckets[i * 2 + 1] = ++curDeletedElements
-                continue
-            }
-            oldBuckets[i * 2 + 1] = curDeletedElements
-
-            const key = oldData[i * 2]
-            const val = oldData[i * 2 + 1]
-            let bucketIdx = 0
-            if (key !== null) {
-                if (key === undefined) {
-                    bucketIdx = 1
-                } else {
-                    const keyHash: int = Runtime.getHashCodeByValue(key as object).toInt()
-                    const t = keyHash >> 31
-                    bucketIdx = ((keyHash ^ t) - t) & (newCapacity - 1)
+        for (let i: int = 0; i < 2 * oldNumEntries; i +=2) {
+            if (itersCounter) {
+                if (oldBuckets[i + 1] === DELETED_ENTRY) {
+                    oldBuckets[i + 1] = ++curDeletedElements
+                    continue
+                }
+                oldBuckets[i + 1] = curDeletedElements
+            } else {
+                if (oldBuckets[i + 1] === DELETED_ENTRY) {
+                    continue
                 }
             }
 
-            const bucket = newBuckets[bucketIdx * 2]
-            const idx = sizeVal++
+            const key = oldData[i]
+            const val = oldData[i + 1]
+            let bucketIdx = 0
+            if (key !== null) {
+                if (key === undefined) {
+                    bucketIdx = 2
+                } else {
+                    const keyHash: int = Runtime.getHashCodeByValue(key as object).toInt()
+                    const t = keyHash >> 31
+                    bucketIdx = 2 * (((keyHash ^ t) - t) & (newCapacity - 1))
+                }
+            }
+
+            const bucket = newBuckets[bucketIdx]
+            const idx = 2 * sizeVal++
             Map.setKey(newData, idx, key)
             Map.setValue(newData, idx, val)
-            newBuckets[idx * 2 + 1] = bucket > 0 ? bucket : BUCKET_END
-            newBuckets[bucketIdx * 2] = idx + 1
+            newBuckets[idx + 1] = bucket > 0 ? bucket : BUCKET_END
+            newBuckets[bucketIdx] = idx + 2
         }
-        oldBuckets[CLEAR_FLAG_IDX] = 0  // means false
 
         this.numEntries = this.sizeVal = sizeVal
-        this.data[this.data.length - 1] = newData
+        if (itersCounter) {
+            oldBuckets[CLEAR_FLAG_IDX] = 0  // means false
+            newBuckets[newBuckets.length - 1] = itersCounter
+            this.data[this.data.length - 1] = newData
+        }
         this.data = newData
         this.buckets = newBuckets
         this.cap = newCapacity
-    }
-
-    private searchBucket(bucket: int, key: K): SearchTuple {
-        let prevEntryIdx: int = 0
-        let entryIdx: int = bucket
-        while (entryIdx > 0) {
-            if (Runtime.sameValueZero(getKeyAt<K>(this.data, entryIdx), key)) {
-                return new SearchTuple(entryIdx, prevEntryIdx)
-            }
-            prevEntryIdx = entryIdx
-            entryIdx = Map.getNextInBucketAt(this.buckets, entryIdx)
-        }
-        return new SearchTuple(entryIdx, prevEntryIdx)
-    }
-
-    private searchBucketIndex(bucket: int, key: K): int {
-        let entryIdx: int = bucket
-        while (entryIdx > 0) {
-            if (Runtime.sameValueZero(getKeyAt<K>(this.data, entryIdx), key)) {
-                break
-            }
-            entryIdx = Map.getNextInBucketAt(this.buckets, entryIdx)
-        }
-        return entryIdx
     }
 
     /**
@@ -493,36 +463,36 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
         let bucketIdx = 0
         if (key !== null) {
             if (key === undefined) {
-                bucketIdx = 1
+                bucketIdx = 2
             } else {
                 const keyHash: int = Runtime.getHashCodeByValue(key as object).toInt()
                 const t = keyHash >> 31
-                bucketIdx = ((keyHash ^ t) - t) & (capacity - 1)
+                bucketIdx = 2 * (((keyHash ^ t) - t) & (capacity - 1))
             }
         }
         const buckets = this.buckets
         const data = this.data
-        let bucket = buckets[bucketIdx * 2]
+        let bucket = buckets[bucketIdx]
         if (bucket > 0) {
-            let foundIdx: int = bucket - 1
+            let foundIdx: int = bucket - 2
             do {
-                if (Runtime.sameValueZero(data[foundIdx * 2], key)) {
+                if (Runtime.sameValueZero(data[foundIdx], key)) {
                     // found
                     Map.setValue(data, foundIdx, val)
                     return this
                 }
-                foundIdx = buckets[foundIdx * 2 + 1] - 1
+                foundIdx = buckets[foundIdx + 1] - 2
             } while (foundIdx >= 0);
         } else {
             bucket = BUCKET_END
         }
 
         // insert
-        const idx = this.numEntries++
+        const idx = 2 * this.numEntries++
         Map.setKey(data, idx, key)
         Map.setValue(data, idx, val)
-        buckets[idx * 2 + 1] = bucket
-        buckets[bucketIdx * 2] = idx + 1
+        buckets[idx + 1] = bucket
+        buckets[bucketIdx] = idx + 2
         this.sizeVal++
         return this
     }
@@ -537,7 +507,16 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
     override has(key: K): boolean {
         const bucketIdx = this.getBucketIndex(key)
         const bucket = Map.getBucket(this.buckets, bucketIdx)
-        return this.searchBucketIndex(bucket, key) > 0
+
+        let entryIdx: int = bucket
+        while (entryIdx > 0) {
+            if (Runtime.sameValueZero(getKeyAt<K>(this.data, entryIdx), key)) {
+                return true
+            }
+            entryIdx = Map.getNextInBucketAt(this.buckets, entryIdx)
+        }
+
+        return false
     }
 
     /**
@@ -550,10 +529,16 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
     }
 
     private shrink() {
-        const newCapacity = Map.computeCapacityForShrink(this.cap, this.sizeVal)
-        if (newCapacity !== 0) {
-            this.rehash(newCapacity)
+        const cap = this.cap
+        if (cap <= Map.MIN_SHRINK_CAPACITY) {  // too small
+            return
         }
+        if (this.sizeVal >= cap / Map.MIN_CAPACITY) {  // filled enough
+            return
+        }
+
+        // quarter filled, shrink
+        this.rehash(cap / 2)
     }
 
     /**
@@ -564,22 +549,26 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
     delete(key: K): boolean {
         const bucketIdx = this.getBucketIndex(key)
         const bucket = Map.getBucket(this.buckets, bucketIdx)
-        const found = this.searchBucket(bucket, key)
-        const foundIdx = found.first
-        if (foundIdx <= 0) {
-            return false
+
+        let prevEntryIdx: int = 0
+        let entryIdx: int = bucket
+        while (entryIdx > 0) {
+            if (Runtime.sameValueZero(getKeyAt<K>(this.data, entryIdx), key)) {
+                if (prevEntryIdx > 0) {
+                    Map.setNextInBucketAt(this.buckets, prevEntryIdx, Map.getNextInBucketAt(this.buckets, entryIdx))
+                } else {
+                    Map.setBucket(this.buckets, bucketIdx, Map.getNextInBucketAt(this.buckets, entryIdx))
+                }
+                Map.deleteAt(this.buckets, entryIdx)
+                this.sizeVal--
+                this.shrink()
+                return true
+            }
+            prevEntryIdx = entryIdx
+            entryIdx = Map.getNextInBucketAt(this.buckets, entryIdx)
         }
 
-        const prevIdx = found.second
-        if (prevIdx > 0) {
-            Map.setNextInBucketAt(this.buckets, prevIdx, Map.getNextInBucketAt(this.buckets, foundIdx))
-        } else {
-            Map.setBucket(this.buckets, bucketIdx, Map.getNextInBucketAt(this.buckets, foundIdx))
-        }
-        Map.deleteAt(this.buckets, foundIdx)
-        this.sizeVal--
-        this.shrink()
-        return true
+        return false
     }
 
     /**
@@ -592,9 +581,16 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
 
         const oldData = this.data
         this.data = new Any[Map.MIN_CAPACITY * 2 + 2]
-        oldData[oldData.length - 1] = this.data
-        this.buckets[CLEAR_FLAG_IDX] = 1  // means true
-        this.buckets = new int[Map.MIN_CAPACITY * 2]
+
+        const oldBuckets = this.buckets
+        const itersCounter = oldBuckets[oldBuckets.length - 1]
+        this.buckets = new int[Map.MIN_CAPACITY * 2 + 1]
+        if (itersCounter) {
+            this.buckets[this.buckets.length - 1] = itersCounter
+            oldData[oldData.length - 1] = this.data
+            oldBuckets[CLEAR_FLAG_IDX] = 1  // means true
+        }
+
         this.data[this.data.length - 2] = this.buckets
         this.cap = Map.MIN_CAPACITY
         this.sizeVal = 0
@@ -611,10 +607,15 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
     override get(key: K): V | undefined {
         const bucketIdx = this.getBucketIndex(key)
         const bucket = Map.getBucket(this.buckets, bucketIdx)
-        const foundIdx = this.searchBucketIndex(bucket, key)
-        if (foundIdx > 0) {
-            return getValueAt<V>(this.data, foundIdx)
+
+        let entryIdx: int = bucket
+        while (entryIdx > 0) {
+            if (Runtime.sameValueZero(getKeyAt<K>(this.data, entryIdx), key)) {
+                return getValueAt<V>(this.data, entryIdx)
+            }
+            entryIdx = Map.getNextInBucketAt(this.buckets, entryIdx)
         }
+
         return undefined
     }
 
@@ -678,18 +679,20 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
     override forEach(callbackfn: (v: V, k: K, map: Map<K, V>) => void): void {
         let curData = this.data
 
-        for (let curAt = 1; curAt <= this.numEntries; curAt++) {
+        ++this.buckets[this.buckets.length - 1]        
+        for (let curAt = 2; curAt <= 2 * this.numEntries; curAt += 2) {
             if (isDeletedAt(this.buckets, curAt))
                 continue
                 
             callbackfn(getValueAt<V>(this.data, curAt), getKeyAt<K>(this.data, curAt), this)
 
-            while (curData[curData.length - 1] !== undefined) {
+            while (!Runtime.isSameReference(curData, this.data)) {
                 let curBuckets = curData[curData.length - 2] as FixedArray<int>
-                curAt -= getNumOfDeleted(curBuckets!, curAt)
+                curAt -= 2 * getNumOfDeleted(curBuckets!, curAt)
                 curData = curData[curData.length - 1] as FixedArray<Any>
             }
         }
+        --this.buckets[this.buckets.length - 1]        
     }
 }
 
