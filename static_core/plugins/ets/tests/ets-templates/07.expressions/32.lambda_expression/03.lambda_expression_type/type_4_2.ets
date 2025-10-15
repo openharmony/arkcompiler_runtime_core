@@ -27,8 +27,6 @@ function main() {
     let R = F2('Whale', 5)
 
     arktest.assertTrue(F2 instanceof Function2)
-    arktest.assertTrue(R instanceof Tuple)
-    arktest.assertTrue(R instanceof Pair)
     arktest.assertEQ('Whale', R[0])
     arktest.assertEQ(5, R[1])
 

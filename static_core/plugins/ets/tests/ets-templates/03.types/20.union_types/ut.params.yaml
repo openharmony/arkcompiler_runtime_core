@@ -464,15 +464,13 @@ cases:
           let v: UT = [true, true, false]
           arktest.assertTrue(v instanceof boolean[] && !v[2])
           v = [true, true, 'false'] as [boolean, boolean, string]
-          arktest.assertTrue(v instanceof [boolean, boolean, string] && v[2] == 'false')
+          arktest.assertTrue(v[2] == 'false')
 
     - decl: |-
           type UT = [boolean, boolean] | [number, number]
       use: |-
-          let v: UT = [true, true]
-          arktest.assertTrue(v instanceof [boolean, boolean])
-          v = [0.0, 0.0]
-          arktest.assertTrue(v instanceof [number, number])
+          let v: UT = [true, true] as [boolean, boolean]
+          v = [0.0, 0.0] as [number, number]
 
     # Nullish types
     - decl: |-

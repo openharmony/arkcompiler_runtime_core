@@ -115,8 +115,6 @@ cases:
     call: |-
         let a: TPL = [new Number(), new String()];
         let b: RTPL = [new Number(), new String()];
-        arktest.assertTrue(a instanceof RTPL);
-        arktest.assertTrue(b instanceof TPL);
 
   - import: |-
         import {NoArg} from "./modules/declarations.ets"  // Function without arguments

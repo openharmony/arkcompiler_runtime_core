@@ -33,8 +33,7 @@ type ETSTupleType = [ string, int, boolean ];
 function TestReturnTuple(): boolean {
     const actTuple = returnTuple.invoke();
 
-    return (actTuple.unwrap() instanceof ETSTupleType &&
-        isTTupleTS.invoke(actTuple).toBoolean() &&
+    return (isTTupleTS.invoke(actTuple).toBoolean() &&
         actTuple.getProperty(0).toString() == TEST_STRING &&
         actTuple.getProperty(1).toNumber().toInt() == TEST_INT &&
         actTuple.getProperty(2).toBoolean() == TEST_BOOLEAN
@@ -60,7 +59,7 @@ function TestReturnNumArray(): boolean {
 }
 
 function TestReturnRecord(): boolean {
-    const actRecord = returnRecord.invoke(); 
+    const actRecord = returnRecord.invoke();
     return (
         actRecord.getProperty('one').toNumber().toInt() == 1 &&
         actRecord.getProperty('two').toNumber().toInt() == 2 &&
@@ -71,11 +70,11 @@ function TestReturnRecord(): boolean {
 interface Shape {
     width: int
 }
-   
+
 interface TwoDimensioned extends Shape {
     length: int
 }
-   
+
 interface ThreeDimensioned extends Shape {
     length: int
     height: int

@@ -15,33 +15,21 @@
 cases:
   # literal and literal
   - decl: '"one" : "two"'
-    expected_let: 'string'
-    expected_const: 'string'
+    expected_let: '"one" | "two"'
+    expected_const: '"one" | "two"'
 
   - decl: '"one" : undefined'
-    expected_let: 'string | undefined'
-    expected_const: 'string | undefined'
+    expected_let: '"one" | undefined'
+    expected_const: '"one" | undefined'
 
   - decl: '"one" : null'
-    expected_let: 'string | null'
-    expected_const: 'string | null'
-
-  - decl: 'undefined : null'
-    expected_let: 'undefined | null'
-    expected_const: 'undefined | null'
+    expected_let: '"one" | null'
+    expected_const: '"one" | null'
 
   # literal and non-literal
   - decl: '1 : "two"'
-    expected_let: 'int | string'
-    expected_const: 'int | string'
-
-  - decl: '1 : undefined'
-    expected_let: 'int | undefined'
-    expected_const: 'int | undefined'
-
-  - decl: '1 : null'
-    expected_let: 'int | null'
-    expected_const: 'int | null'
+    expected_let: 'int | "two"'
+    expected_const: 'int | "two"'
 
 # whether to use const to initialise
 const_to_initialise:

@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025 Huawei Device Co., Ltd.
+Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,28 +13,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for union_type in union_with_type %}
-{% for c in cases %}
+{% for v in values %}
 /*---
 desc: >-
     Literal types are aligned with some ArkTS literals (see Literals).
     Their names are same as the names of their values, i.e., literals.
     Only three literal types are supported - string, null and undefined.
+tags: [negative, compile-only]
 ---*/
 
-type number_tuple = [int, double]
-
-class SomeClass {}
-
-type fooType = () => int
-
-{{c.decl}}
-
 function main(): void {
-    let {{c.test_type}} | {{union_type.def}} = {{c.rh_value}}
-    arktest.assertTrue({{c.retrieve}} instanceof string)
-    arktest.assertEQ({{c.retrieve}}, {{c.literal}})
+    let a: {{v.value}} = {{v.value}}
+    arktest.assertTrue( a instanceof {{v.value}} )
+    arktest.assertTrue( a instanceof {{v.assert}} )
+    arktest.assertEQ( a, {{v.value}} )
 }
 
-{% endfor %}
 {% endfor %}

@@ -108,7 +108,7 @@ function TestReturnSetAsAny(): boolean {
     const set = TestFunc.invoke().unwrap() as Set<Any>;
     return (
         set.size as int > 0
-        && !(set.has(SAMPLE_STRING) as boolean) 
+        && !(set.has(SAMPLE_STRING) as boolean)
         && set.has(SAMPLE_STRING.toLowerCase()) as boolean
     );
 }
@@ -146,14 +146,14 @@ function TestReturnSet(): boolean {
     const set = returnSet.invoke().unwrap() as Set<Any>;
     return (
         set.size as int > 0
-        && !(set.has(SAMPLE_STRING) as boolean) 
+        && !(set.has(SAMPLE_STRING) as boolean)
         && set.has(SAMPLE_STRING.toLowerCase()) as boolean
     );
 }
 
 function TestReturnTuple(): boolean {
     const expectedTuple: Any = returnTuple.invoke().unwrap() as ETSTupleType;
-    return (expectedTuple instanceof ETSTupleType && isTTupleTS.invoke(expectedTuple).toBoolean());
+    return (isTTupleTS.invoke(expectedTuple).toBoolean());
 }
 
 function TestReturnStringSubsetByRef(): boolean {
@@ -175,7 +175,7 @@ function TestReturnMapSubsetByRef(): boolean {
     changedMap.set('2', 'Test');
     const finalInitialMapSize: number = initialMap.size;
     const finalChangedMapSize: number = changedMap.size;
-    
+
     return (
         initialInitialMapSize === 1
         && initialChangedMapSize === 1

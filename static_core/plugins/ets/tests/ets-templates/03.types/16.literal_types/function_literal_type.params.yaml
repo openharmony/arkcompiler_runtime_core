@@ -80,7 +80,6 @@ cases:
       use: |-
         let a: "some str" = "some str"
         arktest.assertEQ( foo_s(a), "some str" )
-        arktest.assertTrue( foo_s(a) instanceof "some str" )
         arktest.assertEQ( foo_u(undefined), undefined )
         arktest.assertEQ( foo_n(null), null )
 
@@ -99,7 +98,6 @@ cases:
       use: |-
         let a: "some str" = "some str"
         arktest.assertEQ( foo_s(a), "some str" )
-        arktest.assertTrue( foo_s(a) instanceof "some str" )
         arktest.assertEQ( foo_u(undefined), undefined )
         arktest.assertEQ( foo_n(null), null )
 
@@ -120,7 +118,6 @@ cases:
           type LITERAL = "some str"
           function foo(i: LITERAL ) {
               arktest.assertEQ( i, "some str" )
-              arktest.assertTrue( i instanceof LITERAL )
           }
       use: |-
           foo("some str")
@@ -206,12 +203,12 @@ cases:
           function fooL(i: int, ...j: "some str"[]) {
               arktest.assertEQ(i, j.length)
               for (let m of j) {
-                  arktest.assertTrue( m instanceof "some str")
+                  arktest.assertEQ(m, "some str")
               }
           }
           function fooS(...j: string[]) {
               for (let m of j) {
-                  arktest.assertTrue( m instanceof "some str")
+                  arktest.assertEQ(m, "some str")
               }
           }
       use: |-

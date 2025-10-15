@@ -255,11 +255,9 @@ cases:
       }
     check: |-
       function main() {
-          arktest.assertTrue(A.sfoo instanceof S);
           arktest.assertEQ(A.sfoo[0], 4.1);
           arktest.assertEQ(A.sfoo[1], "rts");
           let a: A = new A();
-          arktest.assertTrue(a.foo instanceof T);
           arktest.assertEQ(a.foo[0], "str");
           arktest.assertEQ(a.foo[1], 1.4);
           arktest.assertEQ(a.bar2(A.sfoo)[0], 4.1);

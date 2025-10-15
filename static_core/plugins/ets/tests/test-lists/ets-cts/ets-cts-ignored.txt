@@ -57,9 +57,6 @@
 03.types/20.union_types/02.access_to_common_union_members/cm_meth1_0.ets
 03.types/20.union_types/02.access_to_common_union_members/cm_meth1_16.ets
 
-#24420
-03.types/20.union_types/ut_34.ets
-
 #26102 Readonly array assignment does not throw CTE
 03.types/16.literal_types/function_literal_type_7.ets
 
@@ -359,9 +356,6 @@
 07.expressions/12.indexing_expression/03.record_indexing_expression/record_field_set_1.ets
 07.expressions/12.indexing_expression/03.record_indexing_expression/record_field_set_2.ets
 
-#29202 CTE expected in `instanceof T`
-07.expressions/15.instanceof_expression/instanceof-cte_0.ets
-
 #29203 Warning: Type parameter is erased from type 'type' when used in instanceof expression.
 07.expressions/15.instanceof_expression/instanceof-cte_1.ets
 07.expressions/15.instanceof_expression/instanceof-cte_2.ets
@@ -387,12 +381,6 @@
 07.expressions/15.instanceof_expression/instanceof_194.ets
 07.expressions/15.instanceof_expression/instanceof_195.ets
 07.expressions/15.instanceof_expression/instanceof_205.ets
-
-#30094 tuple must be erased
-07.expressions/15.instanceof_expression/instanceof_190.ets
-
-#30092 string literal must be erased
-07.expressions/15.instanceof_expression/instanceof_65.ets
 
 #28907 Specifying type for too large integer number with as doesn't produce CTE
 07.expressions/16.cast_expressions/01.type_inference_in_cast_expression/type_inference_negative_0.ets
@@ -1136,7 +1124,7 @@
 13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_11.ets
 13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_12.ets
 
-#28972 CTE on string[] type parameter 
+#28972 CTE on string[] type parameter
 13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_13.ets
 13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_14.ets
 13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_15.ets
@@ -1516,21 +1504,6 @@
 15.semantic_rules/10.overloading/overload_method_negative_10.ets
 15.semantic_rules/10.overloading/overload_method_negative_11.ets
 
-#29202 CTE expected in `instanceof T`
-15.semantic_rules/11.type_erasure/instanceof_gen_0.ets
-15.semantic_rules/11.type_erasure/instanceof_gen_12.ets
-15.semantic_rules/11.type_erasure/instanceof_gen_15.ets
-15.semantic_rules/11.type_erasure/instanceof_gen_18.ets
-15.semantic_rules/11.type_erasure/instanceof_gen_21.ets
-15.semantic_rules/11.type_erasure/instanceof_gen_24.ets
-15.semantic_rules/11.type_erasure/instanceof_gen_25.ets
-15.semantic_rules/11.type_erasure/instanceof_gen_26.ets
-15.semantic_rules/11.type_erasure/instanceof_gen_27.ets
-15.semantic_rules/11.type_erasure/instanceof_gen_3.ets
-15.semantic_rules/11.type_erasure/instanceof_gen_31.ets
-15.semantic_rules/11.type_erasure/instanceof_gen_6.ets
-15.semantic_rules/11.type_erasure/instanceof_gen_9.ets
-
 #29203 Warning: Type parameter is erased from type 'type' when used in instanceof expression.
 15.semantic_rules/11.type_erasure/instanceof_0.ets
 15.semantic_rules/11.type_erasure/instanceof_1.ets
@@ -1561,10 +1534,6 @@
 15.semantic_rules/11.type_erasure/instanceof_gen_5.ets
 15.semantic_rules/11.type_erasure/instanceof_gen_7.ets
 15.semantic_rules/11.type_erasure/instanceof_gen_8.ets
-
-#30092 instanceof string-literal should produce CTE
-15.semantic_rules/11.type_erasure/instanceof_20.ets
-15.semantic_rules/11.type_erasure/instanceof_22.ets
 
 # 30153 no CTE for chars in extended semantics
 15.semantic_rules/14.compatibility_features/01.extended_conditional_expressions/char_negative_0.ets
