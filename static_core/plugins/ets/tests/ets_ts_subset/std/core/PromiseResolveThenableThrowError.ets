@@ -17,7 +17,7 @@ let error = new Error('error');
 
 class Thenable implements PromiseLike<string> {
     then<U, E>(onFulfilled?: (value: string) => U | PromiseLike<U>, onRejected?:
-            (error: Error) => E | PromiseLike<E>): PromiseLike<U | E> {
+            (error: Error) => E | PromiseLike<E>): PromiseLike<Awaited<U|E>> {
         throw error;
     }
 };
@@ -29,12 +29,12 @@ let promise = new Promise<string>((_resolve) =>{
 });
 
 promise.then(() : void => {
-    console.log('Test failed. The promise shouldn`t be fulfilled.');
+    console.error('Test failed. The promise shouldn`t be fulfilled.');
 }, (val: Error) :void => {
     if(val == error) {
         console.log('Test passed.');
     } else {
-        console.log('Test failed. The promise should be rejected with the provided value.');
+        console.error('Test failed. The promise should be rejected with the provided value.');
     }
 })
 

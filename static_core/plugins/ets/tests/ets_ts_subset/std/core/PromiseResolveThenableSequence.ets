@@ -15,12 +15,12 @@
 
 function checkSequence(actual: Array<number>, expectedLength: number): void {
     if (actual.length != expectedLength) {
-        console.log('Test failed. Expected sequence length ' + expectedLength + ', but got ' + actual.length);
+        console.error('Test failed. Expected sequence length ' + expectedLength + ', but got ' + actual.length);
         throw new Error('Test failed.');
     }
     for (let i = 0; i < expectedLength; ++i) {
         if (actual[i] != i + 1) {
-            console.log('Test failed. Expected element at ' + i + ' to be ' + i + ', but got ' + actual[i]);
+            console.error('Test failed. Expected element at ' + i + ' to be ' + i + ', but got ' + actual[i]);
             throw new Error('Test failed.');
         }
     }
@@ -29,9 +29,9 @@ function checkSequence(actual: Array<number>, expectedLength: number): void {
 let sequence = new Array<number>();
 class Thenable implements PromiseLike<string> {
     then<U, E>(onFulfilled?: (value: string) => U | PromiseLike<U>, onRejected?:
-            (error: Error) => E | PromiseLike<E>): PromiseLike<U | E> {
+            (error: Error) => E | PromiseLike<E>): PromiseLike<Awaited<U|E>> {
         sequence.push(3);
-        return Promise.resolve(onFulfilled!('resolved')) as PromiseLike<U | E>;
+        return Promise.resolve(onFulfilled!('resolved')) as PromiseLike<Awaited<U|E>>;
     }
 };
 sequence.push(1);
@@ -46,5 +46,5 @@ p.then<void, void>((v:Object): void => {
     checkSequence(sequence, 4)
     console.log('Test passed.');
 }, (e: Error): void => {
-    console.log('Test failed. The promise should not be rejected.');
+    console.error('Test failed. The promise should not be rejected.');
 })
