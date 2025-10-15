@@ -44,7 +44,6 @@
   "plugins/ets/isa/CMakeLists.txt": {"bc-40001": "*"},
   "plugins/ets/playground/backend/src/arkts_playground/routers/__init__.py": "*",
   "plugins/ets/playground/backend/tests/fixtures/__init__.py": "*",
-  "plugins/ets/playground/frontend/src/models/": "*",
   "plugins/ets/plugin.gn": "*",
   "plugins/ets/README.md": "*",
   "plugins/ets/RegisterPlugin.cmake": "*",
