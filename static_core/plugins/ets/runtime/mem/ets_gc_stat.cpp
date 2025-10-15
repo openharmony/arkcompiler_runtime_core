@@ -14,6 +14,8 @@
  */
 
 #include "ets_gc_stat.h"
+#include "runtime/include/runtime.h"
+#include "libarkbase/os/time.h"
 
 namespace ark::ets {
 
@@ -26,8 +28,10 @@ void FullGCLongTimeListener::GCFinished([[maybe_unused]] const ark::GCTask &task
                                         [[maybe_unused]] size_t heapSizeBeforeGc, [[maybe_unused]] size_t heapSize)
 {
     auto duration = time::GetCurrentTimeInNanos() - startTime_;
-    if (task.collectionType == GCCollectionType::FULL && duration > LONG_GC_THRESHOLD_NS) {
-        LOG(INFO, GC) << "Full GC running time exceed 40 ms, used " << duration << " ns.";
+    auto fullGcThresholdDuration = Runtime::GetOptions().GetLongGcThresholdNs();
+    if (task.collectionType == GCCollectionType::FULL && duration > fullGcThresholdDuration) {
+        LOG(INFO, GC) << "Full GC running time exceed " << (fullGcThresholdDuration / ark::os::time::MILLIS_TO_NANO)
+                      << " ms, used " << duration << " ns.";
         ++fullGCLongTimeCounter_;
     }
 }
