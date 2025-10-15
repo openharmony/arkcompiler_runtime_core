@@ -18,6 +18,7 @@ parameters:
     work-dir: ${parameters.work-dir}
     # adds --paoc-panda-files option to ark_aot with all dependent and the current abc files
     is-panda: True
+    opt-level: 0
 steps:
     echo-compiler:
         executable-path: /usr/bin/echo

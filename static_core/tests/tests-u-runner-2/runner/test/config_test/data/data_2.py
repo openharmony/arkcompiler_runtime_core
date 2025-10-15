@@ -69,6 +69,7 @@ args = {
     'test_suite1.parameters.repeats': 1,
     'test_suite1.parameters.repeats-by-time': 0,
     'test_suite1.parameters.exclude-ignored-tests': False,
+    'test_suite1.parameters.exclude-ignored-test-lists': None,
     'test_suite1.parameters.skip-compile-only-neg': False,
     'test_suite1.parameters.with-js': False,
     'test_suite1.parameters.test-list': None,

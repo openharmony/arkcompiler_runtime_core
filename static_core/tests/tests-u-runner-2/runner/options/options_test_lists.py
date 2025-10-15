@@ -27,6 +27,7 @@ TEST_LIST = "test-list"
 TEST_FILE = "test-file"
 SKIP_TEST_LISTS = "skip-test-lists"
 EXCLUDE_IGNORED_TESTS = "exclude-ignored-tests"
+EXCLUDE_IGNORED_TEST_LISTS = "exclude-ignored-test-lists"
 UPDATE_EXCLUDED = "update-excluded"
 UPDATE_EXPECTED = "update-expected"
 TEST_LIST_ARCH = "test-list-arch"
@@ -68,10 +69,14 @@ class TestListsOptions(IOptions):
             f'--{SKIP_TEST_LISTS}', action='store_true', default=False,
             dest=f"{dest}{SKIP_TEST_LISTS}",
             help='do not use ignored or excluded lists, run all available tests, report all found failures')
-        parser.add_argument(
+        ignore_lists_group = parser.add_mutually_exclusive_group()
+        ignore_lists_group.add_argument(
             f'--{EXCLUDE_IGNORED_TESTS}', action='store_true', default=False,
             dest=f"{dest}{EXCLUDE_IGNORED_TESTS}",
-            help='consider ignored tests as excluded one, run all available tests, report all found failures')
+            help='Consider all ignored test lists as excluded ones')
+        ignore_lists_group.add_argument(f'--{EXCLUDE_IGNORED_TEST_LISTS}', action='append', default=None,
+                                        type=str, dest=f'{dest}{EXCLUDE_IGNORED_TEST_LISTS}',
+                                        help='Consider certain ignored test lists as excluded ones')
         parser.add_argument(
             f'--{UPDATE_EXCLUDED}', action='store_true', default=False,
             dest=f"{dest}{UPDATE_EXCLUDED}",
@@ -146,8 +151,12 @@ class TestListsOptions(IOptions):
         return cast(bool, self.__parameters[SKIP_TEST_LISTS])
 
     @cached_property
-    def exclude_ignored_tests(self) -> bool:
-        return cast(bool, self.__parameters[EXCLUDE_IGNORED_TESTS])
+    def exclude_ignored_tests(self) -> str | set[str] | None:
+        return cast(str | set[str] | None, self.__parameters[EXCLUDE_IGNORED_TESTS])
+
+    @cached_property
+    def exclude_ignored_test_lists(self) -> set[str] | None:
+        return cast(set[str] | None, self.__parameters[EXCLUDE_IGNORED_TEST_LISTS])
 
     @cached_property
     def update_excluded(self) -> bool:
