@@ -125,10 +125,6 @@
 05.generics/03.utility_types/incorrect_utility_type_usage_3_6.ets
 
 #24167 no methods should be inherited using readonly utility type
-05.generics/03.utility_types/03.partial_utility_type/method_excluded_from_partial_10.ets
-05.generics/03.utility_types/03.partial_utility_type/method_excluded_from_partial_11.ets
-05.generics/03.utility_types/03.partial_utility_type/method_excluded_from_partial_12.ets
-05.generics/03.utility_types/03.partial_utility_type/method_excluded_from_partial_9.ets
 05.generics/03.utility_types/05.readonly_utility_type/method_excluded_from_readonly_0.ets
 
 #24168
