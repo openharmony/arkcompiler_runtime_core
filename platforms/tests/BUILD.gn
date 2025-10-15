@@ -20,7 +20,7 @@ host_unittest_action("PlatformsTest") {
   sources = [ "file_test.cpp" ]
 
   include_dirs = [
-    "$ark_root/libpandabase",
+    "$ark_root/libpandabase/include/libpandabase",
     "$ark_root/platforms",
   ]
 

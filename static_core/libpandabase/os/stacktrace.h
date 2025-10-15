@@ -19,7 +19,7 @@
 #include <vector>
 #include <iostream>
 
-#include "../../../libpandabase/os/stacktrace.h"
+#include "../../../libpandabase/include/libpandabase/os/stacktrace.h"
 
 namespace ark {
 

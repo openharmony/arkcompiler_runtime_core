@@ -19,6 +19,6 @@
 #include "os/stacktrace.h"
 #include "utils/debug.h"
 
-#include "../../libpandabase/macros.h"
+#include "../../libpandabase/include/libpandabase/macros.h"
 
 #endif  // PANDA_LIBPANDABASE_PBASE_MACROS_H

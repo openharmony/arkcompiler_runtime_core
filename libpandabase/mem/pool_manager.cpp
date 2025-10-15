@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#include "pool_manager.h"
+#include "mem/pool_manager.h"
 
-#include "malloc_mem_pool-inl.h"
-#include "mmap_mem_pool-inl.h"
+#include "mem/malloc_mem_pool-inl.h"
+#include "mem/mmap_mem_pool-inl.h"
 
 namespace panda {
 
