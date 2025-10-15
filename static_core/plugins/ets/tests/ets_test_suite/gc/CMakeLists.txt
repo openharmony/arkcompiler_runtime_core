@@ -34,6 +34,9 @@ function(add_ets_gc_test)
     string(TOLOWER "${ARG_MODE}" run_mode)
     set(target ets_test_suite_gc_${TEST_NAME}-ets-${run_mode})
 
+    # NOTE(26403) Profilesaver is turned off beause of data race
+    list(APPEND ARG_OPTIONS "--profilesaver-enabled=false" "--incremental-profilesaver-enabled=false")
+
     if ("${ARG_MODE}" STREQUAL "INT")
         run_int_ets_code(${target} ${test_out_dir} SOURCES "${test_in}" RUNTIME_EXTRA_OPTIONS ${ARG_OPTIONS})
     elseif ("${ARG_MODE}" STREQUAL "AOT")
