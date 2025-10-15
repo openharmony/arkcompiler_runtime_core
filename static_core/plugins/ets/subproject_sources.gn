@@ -182,6 +182,7 @@ srcs_runtime = [
   "runtime/intrinsics/helpers/array_buffer_helper.cpp",
   "runtime/intrinsics/helpers/ets_intrinsics_helpers.cpp",
   "runtime/intrinsics/helpers/ets_to_string_cache.cpp",
+  "runtime/intrinsics/helpers/json_helper.cpp",
   "runtime/mem/ets_gc_stat.cpp",
   "runtime/mem/ets_reference_processor.cpp",
   "runtime/ani/ani_helpers.cpp",
