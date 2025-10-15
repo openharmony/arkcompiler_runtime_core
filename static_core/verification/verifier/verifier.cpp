@@ -366,6 +366,7 @@ static int Run(Options &cliOptions, RuntimeOptions &runtimeOptions, logger::Opti
     if (!mainFileName.empty()) {
         if (pandaFiles.empty()) {
             bootPandaFiles.push_back(mainFileName);
+            runtimeOptions.SetLoadInBoot(true);
         } else {
             auto foundIter = std::find_if(pandaFiles.begin(), pandaFiles.end(),
                                           [&mainFileName](auto &fileName) { return mainFileName == fileName; });
