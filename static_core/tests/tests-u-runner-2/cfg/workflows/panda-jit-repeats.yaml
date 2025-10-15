@@ -13,7 +13,7 @@
 
 runner-api-level: 0.0.0.1
 type: workflow
-workflow-name: panda-jit
+workflow-name: panda-jit-repeats
 parameters:
     # common
     build: ${PANDA_BUILD}
@@ -32,10 +32,14 @@ parameters:
     full-gc-bombing-frequency: 0
     heap-verifier: fail_on_verification
     compiler-enable-jit: "true"
+    compiler-ignore-failures: "false"
+    num-repeats: 30
+    compiler-hotness-threshold: 20
     ark-args: [ ]
     ark-workflow-args:
         - "--compiler-check-final=true"
-        - "--compiler-ignore-failures=false"
+        - "--compiler-ignore-failures=${parameters.compiler-ignore-failures}"
+        - "--compiler-hotness-threshold=${parameters.compiler-hotness-threshold}"
         - "--no-async-jit=true"
         - ${parameters.ark-args}
     # adds --boot-panda-files option to verifier with all dependent and the current abc files
@@ -54,7 +58,7 @@ steps:
         enable-verifier: ${parameters.enable-verifier}
         es2panda-timeout: ${parameters.es2panda-timeout}
         verifier-timeout: ${parameters.verifier-timeout}
-    ark-with-jit:
+    ark-with-jit-repeats:
         from: ark
         ark-timeout: ${parameters.ark-timeout}
         build: ${parameters.build}

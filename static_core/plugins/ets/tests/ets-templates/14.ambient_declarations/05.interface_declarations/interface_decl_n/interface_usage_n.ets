@@ -24,8 +24,12 @@ import { {{c.import}} } from './interface_declarations.d'
 
 {{c.decl}}
 
-function main() {
+function usage() {
   {{c.use|indent}}
+}
+
+function main() {
+  usage()
 }
 
 {% endfor %}

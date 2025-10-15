@@ -22,8 +22,12 @@ tags: [negative]
 
 {{c.decl}}
 
+function usage() {
+  {{c.use|indent}}
+}
+
 function main() {
-    {{c.use|indent}}
+  usage()
 }
 
 {% endfor %}

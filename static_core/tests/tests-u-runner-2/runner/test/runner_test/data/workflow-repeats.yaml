@@ -10,11 +10,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-E/verifier: Cannot link class: Cannot find method 'bar (Lstd/core/String;)D' in class 'declarations_n.ETSGLOBAL'
-E/verifier: Verifier error 54: Cache miss for method at offset
-E/verifier: Verifier error 62: Cannot resolve method id
-E/verifier: Method verification failed: void import_declarations_n_0.ETSGLOBAL::usage()
-E/verifier: Class verification failed: 'import_declarations_n_0.ETSGLOBAL' method: void import_declarations_n_0.ETSGLOBAL::usage()
-E/runtime: Cannot initialize class 'import_declarations_n_0.ETSGLOBAL'
-Unhandled exception: std.core.LinkerVerificationError
+
+type: workflow
+workflow-name: workflow
+parameters:
+    build: ${PANDA_BUILD}
+    work-dir: ${parameters.work-dir}
+    compiler-enable-jit: true
+    num-repeats: 40
+    # adds --paoc-panda-files option to ark_aot with all dependent and the current abc files
+    is-panda: True
+steps:
+    echo-compiler:
+        executable-path: /usr/bin/echo
+        step-type: compiler
+        args:
+            - ${test-id}
