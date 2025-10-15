@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,19 @@
  * limitations under the License.
  */
 
-{% for lc in logical_complement %}
+{% for expr in expressions %}
+
 /*---
-desc: Logical complement operator
-params: "{{lc.origin}} => {{lc.dest}}"
+desc: Unary operator expressions.
+assertion: Unary operators except postfix increment and postfix decrement group right-to-left.
+params: {{expr.expression}} = {{expr.result}}
 ---*/
 
 function main(): void {
-  let a = {{lc.origin}};
-  arktest.assertEQ(!a, {{lc.dest}});
-  arktest.assertTrue(
-    !a instanceof boolean,
-    "Type of logical complement should be boolean"
+  arktest.assertEQ(
+    {{expr.expression}}, 
+    {{expr.result}}, 
+    "Result of " + "{{expr.expression}}" + " isn't " + "{{expr.result}}"
   );
 }
-
 {% endfor %}

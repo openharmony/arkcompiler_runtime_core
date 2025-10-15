@@ -15,6 +15,7 @@
 
 /*---
 desc: Unary plus operator
+assertion: Numeric widening occurs on the expression before a unary plus operator is applied.
 ---*/
 
 function main(): void {
@@ -31,35 +32,42 @@ function main(): void {
     let b: byte = +127
     arktest.assertEQ(+b, b)
     arktest.assertEQ(+b, 127)
+    arktest.assertTrue(+b instanceof int)
 
     let s: short = +32767
     arktest.assertEQ(+s, s)
     arktest.assertEQ(+s, 32767)
+    arktest.assertTrue(+s instanceof int)
 
     let i: int = +-2147483648
     arktest.assertEQ(+i, i)
     arktest.assertEQ(+i, -2147483648)
+    arktest.assertTrue(+i instanceof int)
 
     let l: long = +-9223372036854775808
     arktest.assertEQ(+l, l);
     arktest.assertEQ(+l, -9223372036854775808);
+    arktest.assertTrue(+l instanceof long)
 
     let bi: bigint = +42n
     arktest.assertEQ(+bi, bi);
     arktest.assertEQ(+bi, 42n);
     arktest.assertEQ(+(new BigInt(13)), 13n);
+    arktest.assertTrue(+bi instanceof bigint)
 
     let n: number = -3.14;
     arktest.assertEQ(+n, n);
     arktest.assertEQ(+n, -3.14);
     arktest.assertEQ(n + +n, -6.28);
+    arktest.assertTrue(+n instanceof double)
 
     let d: double = 3.14;
     arktest.assertEQ(+d, d);
     arktest.assertEQ(+d, 3.14);
+    arktest.assertTrue(+d instanceof double)
 
     let f: float = 3.14f;
     arktest.assertEQ(+f, f);
     arktest.assertEQ(+f, 3.14f);
-
+    arktest.assertTrue(+f instanceof float)
 }

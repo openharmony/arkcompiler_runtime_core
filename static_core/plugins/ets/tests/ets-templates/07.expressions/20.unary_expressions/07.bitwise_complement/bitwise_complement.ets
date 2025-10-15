@@ -18,11 +18,32 @@
 /*---
 desc: Bitwise complement operator
 params: {{bw.type}} {{bw.origin}} => {{bw.dest}}
+assertion: If the type of the operand is double or float, then it is truncated first to long or int, respectively. 
+           If the type of the operand is byte or short, then the operand is widened to int. 
+           If the type of the operand is bigint, then no conversion is required.
 ---*/
 
 function main(): void {
   let a: {{bw.type}} = {{bw.origin}};
   arktest.assertEQ(~a, {{bw.dest}});
+  {% if bw.type == 'long' or bw.type == 'double' %}
+  arktest.assertTrue(
+    ~a instanceof long, 
+    "Type of bitwise complement on {{bw.type}} should be long"
+  );
+  {% endif %}  
+  {% if bw.type == 'byte' or bw.type == 'short' or bw.type == 'int' or bw.type == 'float' %}
+  arktest.assertTrue(
+    ~a instanceof int,
+    "Type of bitwise complement on {{bw.type}} should be int"
+  );
+  {% endif %}  
+  {% if bw.type == 'bigint' %}
+  arktest.assertTrue(
+    ~a instanceof bigint,
+    "Type of bitwise complement on bigint should be bigint"
+  );
+  {% endif %}  
 }
 
 {% endfor %}
