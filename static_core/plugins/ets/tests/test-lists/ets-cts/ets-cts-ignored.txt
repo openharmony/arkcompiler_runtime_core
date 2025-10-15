@@ -53,9 +53,8 @@
 03.types/20.union_types/united_switch_ext_9.ets
 03.types/20.union_types/united_switch_ext_10.ets
 
-#26229 Implement overload
-03.types/20.union_types/02.access_to_common_union_members/cm_meth1_0.ets
-03.types/20.union_types/02.access_to_common_union_members/cm_meth1_16.ets
+#30239 first match overload
+03.types/20.union_types/02.access_to_common_union_members/overload/overload_6.ets
 
 #26102 Readonly array assignment does not throw CTE
 03.types/16.literal_types/function_literal_type_7.ets
