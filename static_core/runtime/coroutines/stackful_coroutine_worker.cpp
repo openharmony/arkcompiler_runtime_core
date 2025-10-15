@@ -506,6 +506,8 @@ void StackfulCoroutineWorker::UpdateLoadFactor()
 void StackfulCoroutineWorker::EnsureCoroutineSwitchEnabled()
 {
     if (IsCoroutineSwitchDisabled()) {
+        auto coro = Coroutine::GetCurrent();
+        coro->PrintCallStack();
         LOG(FATAL, COROUTINES) << "ERROR ERROR ERROR >>> Trying to switch coroutines on " << GetName()
                                << " when coroutine switch is DISABLED!!! <<< ERROR ERROR ERROR";
         UNREACHABLE();
