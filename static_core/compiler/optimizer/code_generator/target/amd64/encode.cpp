@@ -2656,6 +2656,46 @@ void Amd64Encoder::EncodeRoundToPInfReturnFloat(Reg dst, Reg src)
     constexpr int64_t HALF = 0x3FE0000000000000;  // double precision representation of 0.5
     // CC-OFFNXT(G.NAM.03-CPP) project code style
     constexpr int64_t ONE = 0x3FF0000000000000;  // double precision representation of 1.0
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr int64_t NEG_HALF = 0xBFE0000000000000;  // double precision representation of -0.5
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr int64_t ZERO = 0x0000000000000000;  // double precision representation of 0.0
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr int64_t NEG_ZERO = 0x8000000000000000;  // double precision representation of -0.0
+
+    auto skipZero = GetMasm()->newLabel();
+    auto negZeroCase = GetMasm()->newLabel();
+    auto end = GetMasm()->newLabel();
+    {
+        ScopedTmpRegF64 constReg(this);
+        ScopedTmpRegU64 tmpReg(this);
+
+        GetMasm()->mov(ArchReg(tmpReg), asmjit::imm(HALF));
+        GetMasm()->movq(ArchVReg(constReg), ArchReg(tmpReg));
+        GetMasm()->comisd(ArchVReg(src), ArchVReg(constReg));
+        GetMasm()->jae(skipZero);
+
+        GetMasm()->mov(ArchReg(tmpReg), asmjit::imm(NEG_HALF));
+        GetMasm()->movq(ArchVReg(constReg), ArchReg(tmpReg));
+        GetMasm()->comisd(ArchVReg(src), ArchVReg(constReg));
+        GetMasm()->jb(skipZero);
+
+        GetMasm()->mov(ArchReg(tmpReg), asmjit::imm(ZERO));
+        GetMasm()->movq(ArchVReg(constReg), ArchReg(tmpReg));
+        GetMasm()->comisd(ArchVReg(src), ArchVReg(constReg));
+        GetMasm()->jb(negZeroCase);
+
+        GetMasm()->xorpd(ArchVReg(dst), ArchVReg(dst));
+        GetMasm()->jmp(end);
+    }
+    GetMasm()->bind(negZeroCase);
+    {
+        ScopedTmpRegU64 tmpReg(this);
+        GetMasm()->mov(ArchReg(tmpReg), asmjit::imm(NEG_ZERO));
+        GetMasm()->movq(ArchVReg(dst), ArchReg(tmpReg));
+        GetMasm()->jmp(end);
+    }
+    GetMasm()->bind(skipZero);
 
     ScopedTmpRegF64 ceil(this);
     GetMasm()->roundsd(ArchVReg(ceil), ArchVReg(src), asmjit::imm(0b10));
@@ -2685,6 +2725,7 @@ void Amd64Encoder::EncodeRoundToPInfReturnFloat(Reg dst, Reg src)
 
     // move result to destination register
     GetMasm()->movapd(ArchVReg(dst), ArchVReg(ceil));
+    GetMasm()->bind(end);
 }
 
 template <typename T>

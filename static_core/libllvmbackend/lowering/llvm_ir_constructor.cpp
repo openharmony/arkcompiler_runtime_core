@@ -1059,7 +1059,13 @@ bool LLVMIrConstructor::EmitRoundToPInf(Inst *inst)
     // CC-OFFNXT(G.NAM.03-CPP) project code style
     constexpr double HALF = 0.5;
     // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr double NEG_HALF = -0.5;
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
     constexpr double ONE = 1.0;
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr double ZERO = 0.0;
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr double NEG_ZERO = -0.0;
 
     auto input = GetInputValue(inst, 0);
     ASSERT_TYPE(input, builder_.getDoubleTy());
@@ -1070,7 +1076,21 @@ bool LLVMIrConstructor::EmitRoundToPInf(Inst *inst)
     auto cmp = builder_.CreateFCmpOGT(diff, roundBias);
     auto compensation = llvm::ConstantFP::get(builder_.getDoubleTy(), ONE);
     auto adjusted = builder_.CreateFSub(ceil, compensation);
-    auto result = builder_.CreateSelect(cmp, adjusted, ceil);
+    auto roundRes = builder_.CreateSelect(cmp, adjusted, ceil);
+
+    auto negHalfConst = llvm::ConstantFP::get(builder_.getDoubleTy(), NEG_HALF);
+    auto zeroConst = llvm::ConstantFP::get(builder_.getDoubleTy(), ZERO);
+    auto negZeroConst = llvm::ConstantFP::get(builder_.getDoubleTy(), NEG_ZERO);
+
+    auto cmpLow = builder_.CreateFCmpOGE(input, negHalfConst);
+    auto cmpHigh = builder_.CreateFCmpOLT(input, roundBias);
+    auto inRange = builder_.CreateAnd(cmpLow, cmpHigh);
+
+    auto cmpNeg = builder_.CreateFCmpOLT(input, zeroConst);
+    auto zeroSel = builder_.CreateSelect(cmpNeg, negZeroConst, zeroConst);
+
+    auto result = builder_.CreateSelect(inRange, zeroSel, roundRes);
+
     ValueMapAdd(inst, result);
     return true;
 }
