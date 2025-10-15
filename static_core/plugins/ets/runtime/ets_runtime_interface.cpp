@@ -611,6 +611,11 @@ bool EtsRuntimeInterface::IsStringCachesUsed() const
     return Runtime::GetOptions().IsUseStringCaches();
 }
 
+bool EtsRuntimeInterface::IsUseAllStrings() const
+{
+    return Runtime::GetCurrent()->GetOptions().IsUseAllStrings();
+}
+
 bool EtsRuntimeInterface::IsNativeMethodOptimizationEnabled() const
 {
     return true;

@@ -100,6 +100,7 @@ public:
     void *GetDoubleToStringCache() const override;
     void *GetAsciiCharCache() const override;
     bool IsStringCachesUsed() const override;
+    bool IsUseAllStrings() const override;
     bool IsNativeMethodOptimizationEnabled() const override;
     uint32_t GetRuntimeClassOffset(Arch arch) const override;
     bool IsBoxedClass(ClassPtr klass) const override;

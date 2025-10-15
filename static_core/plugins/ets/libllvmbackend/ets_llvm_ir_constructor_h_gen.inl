@@ -151,3 +151,7 @@ bool EmitSameValueZero(Inst *inst)
 {
     return EmitFastPath(inst, RuntimeInterface::EntrypointId::SAME_VALUE_ZERO_FAST_PATH, 2U);
 }
+
+bool EmitStringConcat2(Inst *inst);
+bool EmitStringConcat3(Inst *inst);
+bool EmitStringConcat4(Inst *inst);

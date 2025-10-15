@@ -406,35 +406,27 @@ void Codegen::CreateStringBuilderAppendStrings(IntrinsicInst *inst, Reg dst, SRC
 void Codegen::CreateStringConcat([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
     ASSERT(IsCompressedStringsEnabled());
-    switch (inst->GetIntrinsicId()) {
-        case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_CONCAT2: {
-            auto str1 = src[FIRST_OPERAND];
-            auto str2 = src[SECOND_OPERAND];
-            CallFastPath(inst, EntrypointId::STRING_CONCAT2_TLAB, dst, {}, str1, str2);
-            break;
-        }
+    auto allStrings = GetGraph()->GetRuntime()->IsUseAllStrings();
+    auto str1 = src[FIRST_OPERAND];
+    auto str2 = src[SECOND_OPERAND];
 
-        case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_CONCAT3: {
-            auto str1 = src[FIRST_OPERAND];
-            auto str2 = src[SECOND_OPERAND];
-            auto str3 = src[THIRD_OPERAND];
-            CallFastPath(inst, EntrypointId::STRING_CONCAT3_TLAB, dst, {}, str1, str2, str3);
-            break;
-        }
-
-        case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_CONCAT4: {
-            auto str1 = src[FIRST_OPERAND];
-            auto str2 = src[SECOND_OPERAND];
-            auto str3 = src[THIRD_OPERAND];
-            auto str4 = src[FOURTH_OPERAND];
-            CallFastPath(inst, EntrypointId::STRING_CONCAT4_TLAB, dst, {}, str1, str2, str3, str4);
-            break;
-        }
-
-        default:
-            UNREACHABLE();
-            break;
+    if (inst->GetIntrinsicId() == RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_CONCAT2) {
+        auto ep = allStrings ? EntrypointId::STRING_CONCAT2_TLAB_ALL_STRINGS : EntrypointId::STRING_CONCAT2_TLAB;
+        CallFastPath(inst, ep, dst, {}, str1, str2);
+        return;
     }
+    if (inst->GetIntrinsicId() == RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_CONCAT3) {
+        auto str3 = src[THIRD_OPERAND];
+        CallFastPath(inst, EntrypointId::STRING_CONCAT3_TLAB, dst, {}, str1, str2, str3);
+        return;
+    }
+    if (inst->GetIntrinsicId() == RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_CONCAT4) {
+        auto str3 = src[THIRD_OPERAND];
+        auto str4 = src[FOURTH_OPERAND];
+        CallFastPath(inst, EntrypointId::STRING_CONCAT4_TLAB, dst, {}, str1, str2, str3, str4);
+        return;
+    }
+    UNREACHABLE();
 }
 
 void Codegen::CreateStringBuilderToString(IntrinsicInst *inst, Reg dst, SRCREGS src)

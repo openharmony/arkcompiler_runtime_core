@@ -81,7 +81,11 @@ export final class StringBuilder {
      *
      * @returns result of concatenation
      */
-    public static native concatStrings(lhs: String, rhs: String): String;
+    public static concatStrings(lhs: String, rhs: String): String
+    {
+        return lhs.concat(rhs);
+    }
+
 
     /**
      * Appends an object representation as string to the builder's internal buffer

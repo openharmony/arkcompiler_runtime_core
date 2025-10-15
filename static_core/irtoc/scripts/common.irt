@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -206,19 +206,33 @@ module Constants
     STRING_CLASS_SIZE_WITH_ALIGNMENT = "sizeof(coretypes::String) + TLAB_ALIGNMENT - 1"
     STRING_MUTF8_1B_MAX = "0x7f"
     STRING_MUTF8_1B_MIN = "0x01"
-    STRING_LENGTH_OFFSET = "ark::coretypes::STRING_LENGTH_OFFSET"
-    STRING_LENGTH_SHIFT = "ark::coretypes::String::STRING_LENGTH_SHIFT"
-    STRING_HASHCODE_OFFSET = "ark::coretypes::STRING_HASHCODE_OFFSET"
+    STRING_LENGTH_OFFSET = "common::BaseString::LENGTH_AND_FLAGS_OFFSET"
+    STRING_LENGTH_SHIFT = "common::BaseString::LengthBits::START_BIT"
+    STRING_HASHCODE_OFFSET = "common::BaseString::RAW_HASHCODE_OFFSET"
     STRING_DATA_OFFSET = "ark::coretypes::STRING_DATA_OFFSET"
     STRING_TYPE_OFFSET = "cross_values::GetBaseClassStringTypeOffset(GetArch())"
     STRING_TYPE_LINE = "ark::coretypes::STRING_TYPE_LINE"
     STRING_TYPE_SLICE = "ark::coretypes::STRING_TYPE_SLICE"
     STRING_TYPE_TREE = "ark::coretypes::STRING_TYPE_TREE"
+    LINE_STRING_CLASS_OFFSET = "cross_values::GetPlatformTypesCoreLineStringClassOffset(graph->GetArch())"
+    SLICED_STRING_CLASS_OFFSET = "cross_values::GetPlatformTypesCoreSlicedStringClassOffset(graph->GetArch())"
+    TREE_STRING_CLASS_OFFSET = "cross_values::GetPlatformTypesCoreTreeStringClassOffset(graph->GetArch())"
+    TREE_STRING_LEFT_OFFSET = "common::TreeString::LEFT_OFFSET"
+    TREE_STRING_RIGHT_OFFSET = "common::TreeString::RIGHT_OFFSET"
+    TREE_STRING_ALIGNED_OBJ_SIZE = "common::TreeString::SIZE + TLAB_ALIGNMENT - 1"
+    TREE_STRING_MIN_LENGTH = "common::TreeString::MIN_TREE_STRING_LENGTH"
+
     ALIGNMENT_MASK = "~(TLAB_ALIGNMENT - 1)"
 
     # shift one bit less to keep ACC_INTRINSIC bit
     INTRINSIC_MASK_SHIFT = "INTRINSIC_SHIFT - VERIFICATION_STATUS_WIDTH - 1"
     VERIFIED_OK = "static_cast<uint64_t>(Method::VerificationStage::VERIFIED_OK)"
+
+    # StringBuilder
+    SB_BUFFER_OFFSET = "RuntimeInterface::GetSbBufferOffset()"
+    SB_INDEX_OFFSET = "RuntimeInterface::GetSbIndexOffset()"
+    SB_LENGTH_OFFSET = "RuntimeInterface::GetSbLengthOffset()"
+    SB_COMPRESS_OFFSET = "RuntimeInterface::GetSbCompressOffset()"
   end
 
 macro(:call_runtime) { |e, *args|

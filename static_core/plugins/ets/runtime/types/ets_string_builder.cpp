@@ -18,6 +18,7 @@
 #include "libarkbase/utils/utf.h"
 #include "runtime/arch/memory_helpers.h"
 #include "runtime/include/runtime.h"
+#include "compiler/optimizer/ir/runtime_interface.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
@@ -34,10 +35,14 @@
 namespace ark::ets {
 
 /// StringBuilder fields offsets
-static constexpr uint32_t SB_BUFFER_OFFSET = ark::ObjectHeader::ObjectHeaderSize();
-static constexpr uint32_t SB_INDEX_OFFSET = SB_BUFFER_OFFSET + ark::OBJECT_POINTER_SIZE;
-static constexpr uint32_t SB_LENGTH_OFFSET = SB_INDEX_OFFSET + sizeof(int32_t);
-static constexpr uint32_t SB_COMPRESS_OFFSET = SB_LENGTH_OFFSET + sizeof(int32_t);
+static_assert(compiler::RuntimeInterface::GetSbBufferOffset() == EtsStringBuilder::GetBufOffset());
+static_assert(compiler::RuntimeInterface::GetSbIndexOffset() == EtsStringBuilder::GetIndexOffset());
+static_assert(compiler::RuntimeInterface::GetSbLengthOffset() == EtsStringBuilder::GetLengthOffset());
+static_assert(compiler::RuntimeInterface::GetSbCompressOffset() == EtsStringBuilder::GetCompressOffset());
+static constexpr uint32_t SB_BUFFER_OFFSET = EtsStringBuilder::GetBufOffset();
+static constexpr uint32_t SB_INDEX_OFFSET = EtsStringBuilder::GetIndexOffset();
+static constexpr uint32_t SB_LENGTH_OFFSET = EtsStringBuilder::GetLengthOffset();
+static constexpr uint32_t SB_COMPRESS_OFFSET = EtsStringBuilder::GetCompressOffset();
 
 /// "null", "true" and "false" packed to integral types
 static constexpr uint64_t TRUE_CODE = 0x0065007500720074;

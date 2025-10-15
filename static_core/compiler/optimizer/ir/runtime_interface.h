@@ -1028,8 +1028,8 @@ public:
         return cross_values::GetManagedThreadStringClassPtrOffset(arch);
     }
 
-    // StringBuilder offsets.
-    // cross_values are not used here as StringBuilder doesn't have a corresponding c++ representative.
+    // StringBuilder offsets: cross_values are not used as the core part
+    // does not contain corresponding StringBuilder C++ representative.
     static constexpr uint32_t GetSbBufferOffset()
     {
         return ObjectHeader::ObjectHeaderSize();
@@ -1795,6 +1795,11 @@ public:
     }
 
     virtual bool IsStringCachesUsed() const
+    {
+        return false;
+    }
+
+    virtual bool IsUseAllStrings() const
     {
         return false;
     }

@@ -1168,15 +1168,6 @@ intrinsics:
 ##########################
 # std.core.StringBuilder #
 ##########################
-  - name: StdCoreStringBuilderConcatStrings
-    space: ets
-    class_name: std.core.StringBuilder
-    method_name: concatStrings
-    static: true
-    signature:
-      ret: std.core.String
-      args: [ std.core.String, std.core.String ]
-    impl: ark::ets::intrinsics::StdCoreStringBuilderConcatStrings
 
   - name: StdCoreToStringBoolean
     space: ets
