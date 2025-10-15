@@ -305,6 +305,7 @@ class RunMeta(Jsonable):
     mr_change_id: str = ''
     panda_commit_hash: str = ''
     panda_commit_msg: str = ''
+    branch: str = ''
 
 
 @dataclass
