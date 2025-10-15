@@ -93,7 +93,7 @@ const collectHighlights = (str?: string): HighlightItem[] => {
 
     const out: HighlightItem[] = [];
 
-    const pushPlainSegments = (text: string) => {
+    const pushPlainSegments = (text: string): void => {
         const parts = text.match(/(?:[\s\S]*?\n|[^\n]+$)/g) ?? [];
         for (const p of parts) {
             if (p === '') {
