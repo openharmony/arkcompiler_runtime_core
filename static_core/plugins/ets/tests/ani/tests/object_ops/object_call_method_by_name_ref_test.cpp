@@ -55,7 +55,7 @@ public:
         va_start(args, value);
         ASSERT_EQ(
             env_->Object_CallMethodByName_Ref_V(obj, "method", "C{std/core/String}:C{std.core.String}", value, args),
-            ANI_NOT_FOUND);
+            ANI_INVALID_DESCRIPTOR);
         va_end(args);
     }
 };
@@ -687,8 +687,9 @@ TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_013)
 
     for (const auto &methodName : invalidMethodNames) {
         ASSERT_EQ(env_->Object_CallMethodByName_Ref(object, "getName", methodName.data(), &res, VAL1, VAL2),
-                  ANI_NOT_FOUND);
-        ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(object, "getName", methodName.data(), &res, args), ANI_NOT_FOUND);
+                  ANI_INVALID_DESCRIPTOR);
+        ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(object, "getName", methodName.data(), &res, args),
+                  ANI_INVALID_DESCRIPTOR);
     }
 }
 
@@ -715,14 +716,14 @@ TEST_F(CallObjectMethodByNameRefTest, check_wrong_signature)
               ANI_OK);
     ASSERT_EQ(env_->c_api->Object_CallMethodByName_Ref(env_, obj, "method", "C{std/core/String}:C{std.core.String}",
                                                        &res, str),
-              ANI_NOT_FOUND);
+              ANI_INVALID_DESCRIPTOR);
 
     ani_value arg;
     arg.r = str;
     ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(obj, "method", "C{std.core.String}:C{std.core.String}", &res, &arg),
               ANI_OK);
     ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(obj, "method", "C{std/core/String}:C{std.core.String}", &res, &arg),
-              ANI_NOT_FOUND);
+              ANI_INVALID_DESCRIPTOR);
 
     TestFuncVCorrectSignature(obj, &res, str);
     TestFuncVWrongSignature(obj, &res, str);

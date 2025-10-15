@@ -111,7 +111,7 @@ TEST_F(NamespaceFindFunctionTest, find_function05)
 
     ASSERT_EQ(env_->Namespace_FindFunction(ns, "b", nullptr, &fn), ANI_OK);
 
-    ASSERT_EQ(env_->Namespace_FindFunction(ns, "b", "", &fn), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Namespace_FindFunction(ns, "b", "", &fn), ANI_INVALID_DESCRIPTOR);
 
     ASSERT_EQ(env_->Namespace_FindFunction(ns, "b", "d:ii", &fn), ANI_NOT_FOUND);
 
@@ -146,7 +146,8 @@ TEST_F(NamespaceFindFunctionTest, wrong_signature)
     ASSERT_NE(ns, nullptr);
 
     ani_function fn2 {};
-    ASSERT_EQ(env_->Namespace_FindFunction(ns, "getInitialStringValue", ":C{std/core/String}", &fn2), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Namespace_FindFunction(ns, "getInitialStringValue", ":C{std/core/String}", &fn2),
+              ANI_INVALID_DESCRIPTOR);
 }
 
 }  // namespace ark::ets::ani::testing

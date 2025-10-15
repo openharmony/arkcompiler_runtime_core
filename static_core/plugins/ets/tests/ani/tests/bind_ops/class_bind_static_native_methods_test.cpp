@@ -149,7 +149,8 @@ TEST_F(ClassBindStaticNativeMethodsTest, method_bind_bad_signature)
     std::array m = {
         ani_native_function {"method", "C{std/core/String}:", reinterpret_cast<void *>(CheckSignature)},
     };
-    ASSERT_EQ(env_->c_api->Class_BindStaticNativeMethods(env_, checkSignCls_, m.data(), m.size()), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->c_api->Class_BindStaticNativeMethods(env_, checkSignCls_, m.data(), m.size()),
+              ANI_INVALID_DESCRIPTOR);
 
     m = {
         ani_native_function {"method", "C{std.core.String}:", reinterpret_cast<void *>(CheckSignature)},

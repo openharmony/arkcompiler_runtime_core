@@ -102,7 +102,7 @@ void EtsRegExp::SetUnicodeFlag(const char &chr)
 
 void EtsRegExp::ThrowBadFlagsException(ani_env *env)
 {
-    ThrowNewError(env, "Lstd/core/RuntimeError;", "invalid regular expression flags");
+    ThrowNewError(env, "std.core.RuntimeError", "invalid regular expression flags");
 }
 
 void EtsRegExp::SetIfNotSet(bool &flag)

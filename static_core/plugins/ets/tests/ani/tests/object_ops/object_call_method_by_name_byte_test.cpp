@@ -51,7 +51,7 @@ public:
         va_list args {};
         va_start(args, value);
         ASSERT_EQ(env_->Object_CallMethodByName_Byte_V(obj, "method", "C{std/core/String}:b", value, args),
-                  ANI_NOT_FOUND);
+                  ANI_INVALID_DESCRIPTOR);
         va_end(args);
     }
 };
@@ -97,7 +97,8 @@ TEST_F(CallObjectMethodByteByNameTest, object_call_method_byte_v_abnormal)
     GetMethodData(&object);
 
     ani_byte res {};
-    ASSERT_EQ(env_->Object_CallMethodByName_Byte(object, "byteByNameMethod", "bb:x", &res, VAL1, VAL2), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_CallMethodByName_Byte(object, "byteByNameMethod", "bb:x", &res, VAL1, VAL2),
+              ANI_INVALID_DESCRIPTOR);
     ASSERT_EQ(env_->Object_CallMethodByName_Byte(object, "unknown_function", "bb:b", &res, VAL1, VAL2), ANI_NOT_FOUND);
 }
 
@@ -478,9 +479,9 @@ TEST_F(CallObjectMethodByteByNameTest, object_call_method_by_name_byte_013)
     ani_byte res = 0U;
     for (const auto &methodName : invalidMethodNames) {
         ASSERT_EQ(env_->Object_CallMethodByName_Byte(object, "byteByNameMethod", methodName.data(), &res, VAL1, VAL2),
-                  ANI_NOT_FOUND);
+                  ANI_INVALID_DESCRIPTOR);
         ASSERT_EQ(env_->Object_CallMethodByName_Byte_A(object, "byteByNameMethod", methodName.data(), &res, args),
-                  ANI_NOT_FOUND);
+                  ANI_INVALID_DESCRIPTOR);
     }
 }
 
@@ -505,12 +506,13 @@ TEST_F(CallObjectMethodByteByNameTest, check_wrong_signature)
     ASSERT_EQ(env_->c_api->Object_CallMethodByName_Byte(env_, obj, "method", "C{std.core.String}:b", &res, str),
               ANI_OK);
     ASSERT_EQ(env_->c_api->Object_CallMethodByName_Byte(env_, obj, "method", "C{std/core/String}:b", &res, str),
-              ANI_NOT_FOUND);
+              ANI_INVALID_DESCRIPTOR);
 
     ani_value arg;
     arg.r = str;
     ASSERT_EQ(env_->Object_CallMethodByName_Byte_A(obj, "method", "C{std.core.String}:b", &res, &arg), ANI_OK);
-    ASSERT_EQ(env_->Object_CallMethodByName_Byte_A(obj, "method", "C{std/core/String}:b", &res, &arg), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_CallMethodByName_Byte_A(obj, "method", "C{std/core/String}:b", &res, &arg),
+              ANI_INVALID_DESCRIPTOR);
 
     TestFuncVCorrectSignature(obj, &res, str);
     TestFuncVWrongSignature(obj, &res, str);

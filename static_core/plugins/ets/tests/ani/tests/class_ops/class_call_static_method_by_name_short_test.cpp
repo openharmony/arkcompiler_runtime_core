@@ -51,7 +51,7 @@ public:
         va_list args {};
         va_start(args, value);
         ASSERT_EQ(env_->Class_CallStaticMethodByName_Short_V(cls, "method", "C{std/core/String}:s", value, args),
-                  ANI_NOT_FOUND);
+                  ANI_INVALID_DESCRIPTOR);
         va_end(args);
     }
 
@@ -487,13 +487,13 @@ TEST_F(ClassCallStaticMethodByNameShortTest, check_wrong_signature)
     ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_Short(env_, cls, "method", "C{std.core.String}:s", &value, str),
               ANI_OK);
     ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_Short(env_, cls, "method", "C{std/core/String}:s", &value, str),
-              ANI_NOT_FOUND);
+              ANI_INVALID_DESCRIPTOR);
 
     ani_value arg;
     arg.r = str;
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Short_A(cls, "method", "C{std.core.String}:s", &value, &arg), ANI_OK);
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Short_A(cls, "method", "C{std/core/String}:s", &value, &arg),
-              ANI_NOT_FOUND);
+              ANI_INVALID_DESCRIPTOR);
 
     TestFuncVCorrectSignature(cls, &value, str);
     TestFuncVWrongSignature(cls, &value, str);

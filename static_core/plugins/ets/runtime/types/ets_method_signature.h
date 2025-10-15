@@ -29,10 +29,9 @@ namespace ark::ets {
  */
 class EtsMethodSignature {
 public:
-    explicit EtsMethodSignature(const std::string_view sign, bool isANIFormat = false)
+    explicit EtsMethodSignature(const std::string_view sign)
     {
-        const PandaString signature = isANIFormat ? ani::Mangle::ConvertSignature(sign) : PandaString(sign);
-
+        auto signature = PandaString(sign);
         size_t dots = signature.find(':');
         // Return if ':' wasn't founded or was founded at the end
         if (dots == PandaString::npos || dots == signature.size() - 1) {

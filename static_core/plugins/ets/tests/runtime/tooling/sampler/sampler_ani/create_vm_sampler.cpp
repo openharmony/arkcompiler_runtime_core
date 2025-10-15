@@ -47,11 +47,11 @@ public:
         ASSERT_TRUE(aniVersion == ANI_VERSION_1) << "Incorrect ani version";
 
         ani_module module {};
-        ASSERT_EQ(env->FindModule("Lcreate_vm_sampler;", &module), ANI_OK) << "Cannot find module create_vm_sampler";
+        ASSERT_EQ(env->FindModule("create_vm_sampler", &module), ANI_OK) << "Cannot find module create_vm_sampler";
         ASSERT_NE(module, nullptr);
 
         ani_function fn {};
-        ASSERT_EQ(env->Module_FindFunction(module, "main", ":I", &fn), ANI_OK);
+        ASSERT_EQ(env->Module_FindFunction(module, "main", ":i", &fn), ANI_OK);
         ASSERT_NE(fn, nullptr);
         ani_int res {};
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)

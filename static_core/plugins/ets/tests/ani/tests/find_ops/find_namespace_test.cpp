@@ -43,7 +43,7 @@ TEST_F(FindNamespaceTest, invalid_arguments)
     ASSERT_EQ(env_->FindNamespace(nullptr, &ns), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->FindNamespace("find_namespace_test.geometry", nullptr), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->c_api->FindNamespace(nullptr, "geometry", &ns), ANI_INVALID_ARGS);
-    ASSERT_EQ(env_->FindNamespace("", &ns), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->FindNamespace("", &ns), ANI_INVALID_DESCRIPTOR);
     ASSERT_EQ(env_->FindNamespace("\t", &ns), ANI_NOT_FOUND);
 }
 
@@ -100,7 +100,7 @@ TEST_F(FindNamespaceTest, check_initialization)
 TEST_F(FindNamespaceTest, bad_descriptor)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("find_namespace_test/geometry", &ns), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->FindNamespace("find_namespace_test/geometry", &ns), ANI_INVALID_DESCRIPTOR);
 }
 
 }  // namespace ark::ets::ani::testing

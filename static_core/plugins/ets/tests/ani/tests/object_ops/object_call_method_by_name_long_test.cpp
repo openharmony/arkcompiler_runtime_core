@@ -52,7 +52,7 @@ public:
         va_list args {};
         va_start(args, value);
         ASSERT_EQ(env_->Object_CallMethodByName_Long_V(obj, "method", "C{std/core/String}:l", value, args),
-                  ANI_NOT_FOUND);
+                  ANI_INVALID_DESCRIPTOR);
         va_end(args);
     }
 };
@@ -548,9 +548,9 @@ TEST_F(CallObjectMethodByNamelongTest, object_call_method_by_name_long_014)
 
     for (const auto &methodName : invalidMethodNames) {
         ASSERT_EQ(env_->Object_CallMethodByName_Long(object, "longMethod", methodName.data(), &res, VAL1, VAL2),
-                  ANI_NOT_FOUND);
+                  ANI_INVALID_DESCRIPTOR);
         ASSERT_EQ(env_->Object_CallMethodByName_Long_A(object, "longMethod", methodName.data(), &res, args),
-                  ANI_NOT_FOUND);
+                  ANI_INVALID_DESCRIPTOR);
     }
 }
 
@@ -575,12 +575,13 @@ TEST_F(CallObjectMethodByNamelongTest, check_wrong_signature)
     ASSERT_EQ(env_->c_api->Object_CallMethodByName_Long(env_, obj, "method", "C{std.core.String}:l", &res, str),
               ANI_OK);
     ASSERT_EQ(env_->c_api->Object_CallMethodByName_Long(env_, obj, "method", "C{std/core/String}:l", &res, str),
-              ANI_NOT_FOUND);
+              ANI_INVALID_DESCRIPTOR);
 
     ani_value arg;
     arg.r = str;
     ASSERT_EQ(env_->Object_CallMethodByName_Long_A(obj, "method", "C{std.core.String}:l", &res, &arg), ANI_OK);
-    ASSERT_EQ(env_->Object_CallMethodByName_Long_A(obj, "method", "C{std/core/String}:l", &res, &arg), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_CallMethodByName_Long_A(obj, "method", "C{std/core/String}:l", &res, &arg),
+              ANI_INVALID_DESCRIPTOR);
 
     TestFuncVCorrectSignature(obj, &res, str);
     TestFuncVWrongSignature(obj, &res, str);

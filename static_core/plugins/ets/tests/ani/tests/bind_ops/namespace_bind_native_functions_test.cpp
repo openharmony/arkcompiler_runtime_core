@@ -246,7 +246,7 @@ TEST_F(NamespaceBindNativeFunctionsTest, namespace_bind_native_functions_006)
     ASSERT_EQ(env_->FindNamespace(nsName.c_str(), &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
-    ASSERT_EQ(env_->Namespace_BindNativeFunctions(ns, &NATIVE_FUNC_CONCAT_WRONG, 1), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Namespace_BindNativeFunctions(ns, &NATIVE_FUNC_CONCAT_WRONG, 1), ANI_INVALID_DESCRIPTOR);
 }
 
 }  // namespace ark::ets::ani::testing

@@ -57,20 +57,20 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_ERROR;
     }
 
-    static const char *moduleName = "LSamplerAsmTest;";
+    static constexpr std::string_view MODULE_NAME = "SamplerAsmTest";
     ani_module md;
-    if (ANI_OK != env->FindModule(moduleName, &md)) {
-        auto msg = std::string("Cannot find \"") + moduleName + std::string("\" module!");
-        ark::ets::stdlib::ThrowNewError(env, "Lstd/core/RuntimeException;", msg.data(), "Lstd/core/String;:V");
+    if (ANI_OK != env->FindModule(MODULE_NAME.data(), &md)) {
+        std::string msg = "Cannot find \"" + std::string(MODULE_NAME) + "\" module!";
+        ark::ets::stdlib::ThrowNewError(env, "std.core.RuntimeException", msg.c_str(), "C{std.core.String}:");
         return ANI_ERROR;
     }
 
     const auto functions = std::array {
-        ani_native_function {"NativeSumEightElements", ":I", reinterpret_cast<void *>(NativeSumEightElements)}};
+        ani_native_function {"NativeSumEightElements", ":i", reinterpret_cast<void *>(NativeSumEightElements)}};
 
     if (ANI_OK != env->Module_BindNativeFunctions(md, functions.data(), functions.size())) {
-        auto msg = std::string("Cannot bind native functions to '") + moduleName + std::string("'");
-        ark::ets::stdlib::ThrowNewError(env, "Lstd/core/RuntimeException;", msg.data(), "Lstd/core/String;:V");
+        std::string msg = "Cannot bind native functions to '" + std::string(MODULE_NAME) + "'";
+        ark::ets::stdlib::ThrowNewError(env, "std.core.RuntimeException", msg.c_str(), "C{std.core.String}:");
         return ANI_ERROR;
     };
 

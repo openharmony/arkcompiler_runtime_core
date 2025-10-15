@@ -51,7 +51,7 @@ public:
         va_list args {};
         va_start(args, value);
         ASSERT_EQ(env_->Object_CallMethodByName_Boolean_V(obj, "method", "C{std/core/String}:z", value, args),
-                  ANI_NOT_FOUND);
+                  ANI_INVALID_DESCRIPTOR);
         va_end(args);
     }
 };
@@ -87,7 +87,7 @@ TEST_F(CallObjectMethodBooleanByNameTest, object_call_method_boolean_v_abnormal)
 
     ani_boolean res = ANI_FALSE;
     ASSERT_EQ(env_->Object_CallMethodByName_Boolean(object, "booleanByNameMethod", "ii:x", &res, VAL1, VAL2),
-              ANI_NOT_FOUND);
+              ANI_INVALID_DESCRIPTOR);
     ASSERT_EQ(env_->Object_CallMethodByName_Boolean(object, "unknown_function", "ii:z", &res, VAL1, VAL2),
               ANI_NOT_FOUND);
 }
@@ -490,9 +490,9 @@ TEST_F(CallObjectMethodBooleanByNameTest, object_call_method_by_name_boolean_013
     for (const auto &methodName : invalidMethodNames) {
         ASSERT_EQ(
             env_->Object_CallMethodByName_Boolean(object, "booleanByNameMethod", methodName.data(), &res, VAL1, VAL2),
-            ANI_NOT_FOUND);
+            ANI_INVALID_DESCRIPTOR);
         ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(object, "booleanByNameMethod", methodName.data(), &res, args),
-                  ANI_NOT_FOUND);
+                  ANI_INVALID_DESCRIPTOR);
     }
 }
 
@@ -517,13 +517,13 @@ TEST_F(CallObjectMethodBooleanByNameTest, check_wrong_signature)
     ASSERT_EQ(env_->c_api->Object_CallMethodByName_Boolean(env_, obj, "method", "C{std.core.String}:z", &res, str),
               ANI_OK);
     ASSERT_EQ(env_->c_api->Object_CallMethodByName_Boolean(env_, obj, "method", "C{std/core/String}:z", &res, str),
-              ANI_NOT_FOUND);
+              ANI_INVALID_DESCRIPTOR);
 
     ani_value arg;
     arg.r = str;
     ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(obj, "method", "C{std.core.String}:z", &res, &arg), ANI_OK);
     ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(obj, "method", "C{std/core/String}:z", &res, &arg),
-              ANI_NOT_FOUND);
+              ANI_INVALID_DESCRIPTOR);
 
     TestFuncVCorrectSignature(obj, &res, str);
     TestFuncVWrongSignature(obj, &res, str);

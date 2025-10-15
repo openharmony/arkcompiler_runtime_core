@@ -19,11 +19,11 @@
 #include <optional>
 #include <ostream>
 #include <string_view>
-#include <regex>
 
 #include "ani.h"
 #include "libarkbase/macros.h"
 #include "libarkbase/utils/logger.h"
+#include "libarkbase/utils/utils.h"
 #include "plugins/ets/runtime/ani/ani_checkers.h"
 #include "plugins/ets/runtime/ani/ani_converters.h"
 #include "plugins/ets/runtime/ani/ani_interaction_api.h"
@@ -458,94 +458,6 @@ static bool CheckUniqueMethod(EtsClass *klass, const char *name)
     return true;
 }
 
-static bool CheckPrimitiveEncoding(char primitiveEncoding)
-{
-    // Switch-case is more optimal when compiled for arm
-    switch (primitiveEncoding) {
-        case 'Z':
-            [[fallthrough]];
-        case 'B':
-            [[fallthrough]];
-        case 'S':
-            [[fallthrough]];
-        case 'C':
-            [[fallthrough]];
-        case 'I':
-            [[fallthrough]];
-        case 'J':
-            [[fallthrough]];
-        case 'F':
-            [[fallthrough]];
-        case 'D':
-            return true;
-        default:
-            return false;
-    }
-    UNREACHABLE();
-}
-
-static std::optional<std::string> ReplaceArrayInSignature(const char *signature)
-{
-    static constexpr std::string_view ESCOMPAT_ARRAY = "Lescompat/Array;";
-
-    ASSERT(signature != nullptr);
-    std::string_view signatureView(signature);
-    auto pos = signatureView.find('[');
-    if (pos == std::string_view::npos) {
-        // Arrays are not used in signature
-        return std::string(signature);
-    }
-
-    std::stringstream ss;
-    std::string_view::size_type prevPos = 0;
-    for (; pos != std::string_view::npos; pos = signatureView.find('[', prevPos)) {
-        ss << signatureView.substr(prevPos, pos - prevPos);
-
-        prevPos = signatureView.find_first_not_of('[', pos);
-        if (UNLIKELY(prevPos == std::string_view::npos)) {
-            // Invalid signature, incorrect array encoding (trailing '[')
-            return std::nullopt;
-        }
-
-        auto elementTypeEncoding = signatureView[prevPos];
-        if (elementTypeEncoding == 'L') {
-            auto tmpPrevPos = signatureView.find(';', prevPos);
-            if (UNLIKELY(tmpPrevPos == std::string_view::npos || (tmpPrevPos - prevPos) == 1)) {
-                // Invalid signature, incorrectly encoded reference type
-                return std::nullopt;
-            }
-            prevPos = tmpPrevPos + 1;
-        } else {
-            // Primitive array, check its encoding
-            if (UNLIKELY(!CheckPrimitiveEncoding(elementTypeEncoding))) {
-                return std::nullopt;
-            }
-            ++prevPos;
-        }
-        // Add escompat.Array as replacement. This is required to support compatibility with existing user code.
-        // In order to use signatures with FixedArray, use new mangling rules, which are supported as part of #IBZ7ML
-        ss << ESCOMPAT_ARRAY;
-    }
-    // Append final part of signature
-    if (prevPos < signatureView.size()) {
-        ss << signatureView.substr(prevPos);
-    }
-
-    return ss.str();
-}
-
-// NOTE(@srokashevich, #25051): This function is used only for warnings about old mangling, remove it after issue
-// resolution
-static void CheckSignatureMangling(const char *str)
-{
-    static std::regex rgx1(":[ZCBSIJFDV]$");
-    static std::regex rgx2(".*L.*;.*");
-    static std::regex rgx3(".*\\[.*");
-    if (std::regex_match(str, rgx1) || std::regex_match(str, rgx2) || std::regex_match(str, rgx3)) {
-        LOG(ERROR, ANI) << "Use new mangling rules for signature \"" << str << "\"";
-    }
-}
-
 template <bool IS_STATIC_METHOD>
 static ani_status DoGetClassMethod(EtsClass *klass, const char *name, const char *signature, EtsMethod **result)
 {
@@ -556,18 +468,19 @@ static ani_status DoGetClassMethod(EtsClass *klass, const char *name, const char
     if (signature == nullptr && !CheckUniqueMethod<IS_STATIC_METHOD>(klass, name)) {
         return ANI_AMBIGUOUS;
     }
-    std::optional<std::string> replacedSignature;
+    std::optional<PandaString> oldSignature;
     if (signature != nullptr) {
-        CheckSignatureMangling(signature);
-        replacedSignature = ReplaceArrayInSignature(signature);
-        signature = replacedSignature.has_value() ? replacedSignature->c_str() : signature;
+        oldSignature = Mangle::ConvertSignature(signature);
+        ANI_CHECK_RETURN_IF_EQ(oldSignature.has_value(), false, ANI_INVALID_DESCRIPTOR);
+        signature = oldSignature.value().c_str();
     }
+
     // CC-OFFNXT(G.FMT.14-CPP) project code style
     auto *method = [klass, name, signature]() -> EtsMethod * {
         if constexpr (IS_STATIC_METHOD) {
-            return klass->GetStaticMethod(name, signature, true);
+            return klass->GetStaticMethod(name, signature);
         } else {
-            return klass->GetInstanceMethod(name, signature, true);
+            return klass->GetInstanceMethod(name, signature);
         }
     }();
 
@@ -577,9 +490,9 @@ static ani_status DoGetClassMethod(EtsClass *klass, const char *name, const char
     }
     PandaVector<EtsMethod *> methodVec;
     if constexpr (IS_STATIC_METHOD) {
-        methodVec = klass->GetStaticMethodOverload(name, signature, true);
+        methodVec = klass->GetStaticMethodOverload(name, signature);
     } else {
-        methodVec = klass->GetInstanceMethodOverload(name, signature, true);
+        methodVec = klass->GetInstanceMethodOverload(name, signature);
     }
     if (methodVec.empty()) {
         return ANI_NOT_FOUND;
@@ -658,30 +571,6 @@ static ani_status ClassCallMethodByName(ani_env *env, ani_class cls, const char 
     ani_static_method staticMethod = ToAniStaticMethod(method);
     CheckStaticMethodReturnType(staticMethod, EXPECT_TYPE);
     return GeneralMethodCall<ReturnType>(env, nullptr, staticMethod, result, args);
-}
-
-template <bool IS_MODULE, typename T>
-static ani_status FindInModule(ani_env *env, ani_module module, const char *targetDescriptor, T *result)
-{
-    CHECK_ENV(env);
-    CHECK_PTR_ARG(module);
-    CHECK_PTR_ARG(targetDescriptor);
-    CHECK_PTR_ARG(result);
-
-    PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env);
-    ScopedManagedCodeFix s(pandaEnv);
-    EtsModule *etsModule = EtsModule::FromClass(s.ToInternalType(module)->AsClass());
-
-    PandaString descriptor;
-    ANI_CHECK_RETURN_IF_NE(etsModule->GetModulePrefix(descriptor), ANI_OK, ANI_INVALID_DESCRIPTOR);
-    PandaString className = Mangle::ConvertDescriptor(targetDescriptor);
-    ANI_CHECK_RETURN_IF_LE(className.length(), 2U, ANI_INVALID_ARGS);
-    ANI_CHECK_RETURN_IF_NE(className[0], 'L', ANI_INVALID_ARGS);
-
-    className[0] = '/';
-    descriptor += className;
-
-    return DoFind<IS_MODULE>(pandaEnv, descriptor.c_str(), s, result);
 }
 
 NO_UB_SANITIZE static ani_status GetVersion(ani_env *env, uint32_t *result)
@@ -837,11 +726,19 @@ NO_UB_SANITIZE static ani_status FindModule(ani_env *env, const char *moduleDesc
     CHECK_PTR_ARG(moduleDescriptor);
     CHECK_PTR_ARG(result);
 
-    PandaString desc = Mangle::ConvertDescriptor(moduleDescriptor);
-    ANI_CHECK_RETURN_IF_LE(desc.size(), 2U, ANI_INVALID_DESCRIPTOR);
-    ANI_CHECK_RETURN_IF_NE(desc.back(), ';', ANI_INVALID_DESCRIPTOR);
-    PandaString descriptor(desc.data(), desc.size() - 1);
-    descriptor += "/ETSGLOBAL;";
+    // NOTE(dslynko, #20951): Remove this prefix when ETSGLOBAL will be removed from FE
+    static constexpr std::string_view ETSGLOBAL_NAME = "/ETSGLOBAL;";
+
+    std::optional<PandaString> desc = Mangle::ConvertDescriptor(moduleDescriptor);
+    ANI_CHECK_RETURN_IF_EQ(desc.has_value(), false, ANI_INVALID_DESCRIPTOR);
+
+    auto &convertedDescriptor = desc.value();
+    // `convertedDescriptor` contains redundant trailing `;`, hence need to substract 1
+    PandaString descriptor(convertedDescriptor.size() + ETSGLOBAL_NAME.size() - 1, 0);
+    auto copiedChars = convertedDescriptor.copy(descriptor.data(), convertedDescriptor.size() - 1);
+    ASSERT(copiedChars == convertedDescriptor.size() - 1);
+    copiedChars += ETSGLOBAL_NAME.copy(descriptor.data() + copiedChars, ETSGLOBAL_NAME.size());
+    ASSERT(copiedChars == descriptor.size());
 
     // NOTE: Check that results is namespace, #22400
     return DoFind<true>(env, descriptor.c_str(), result);
@@ -854,9 +751,11 @@ NO_UB_SANITIZE static ani_status FindNamespace(ani_env *env, const char *namespa
     CHECK_PTR_ARG(namespaceDescriptor);
     CHECK_PTR_ARG(result);
 
-    PandaString desc = Mangle::ConvertDescriptor(namespaceDescriptor);
+    std::optional<PandaString> desc = Mangle::ConvertDescriptor(namespaceDescriptor);
+    ANI_CHECK_RETURN_IF_EQ(desc.has_value(), false, ANI_INVALID_DESCRIPTOR);
+
     // NOTE: Check that results is namespace, #22400
-    return DoFind<true>(env, desc.c_str(), result);
+    return DoFind<true>(env, desc.value().c_str(), result);
 }
 
 NO_UB_SANITIZE static ani_status FindClass(ani_env *env, const char *classDescriptor, ani_class *result)
@@ -865,10 +764,11 @@ NO_UB_SANITIZE static ani_status FindClass(ani_env *env, const char *classDescri
     CHECK_ENV(env);
     CHECK_PTR_ARG(classDescriptor);
     CHECK_PTR_ARG(result);
-    PandaString desc = Mangle::ConvertDescriptor(classDescriptor, true);
+    std::optional<PandaString> desc = Mangle::ConvertDescriptor(classDescriptor, true);
+    ANI_CHECK_RETURN_IF_EQ(desc.has_value(), false, ANI_INVALID_DESCRIPTOR);
 
     // NOTE: Check that results is class, #22400
-    return DoFind<false>(env, desc.c_str(), result);
+    return DoFind<false>(env, desc.value().c_str(), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -978,78 +878,35 @@ static ani_status GetArrayRegion(EtsCoroutine *coro, EtsEscompatArray *objectArr
     return ANI_OK;
 }
 
-template <typename T, typename ArrayType>
-static ani_status GetPrimitiveTypeArrayRegion(ani_env *env, ArrayType array, ani_size start, ani_size len, T *buf)
+template <typename T>
+static ani_status GetPrimitiveTypeArrayRegion(ani_env *env, ani_fixedarray array, ani_size start, ani_size len, T *buf)
 {
     ASSERT(array != nullptr);
     ANI_CHECK_RETURN_IF_EQ(len != 0 && buf == nullptr, true, ANI_INVALID_ARGS);
 
     ScopedManagedCodeFix s(env);
-    EtsObject *objArray = s.ToInternalType(static_cast<ani_object>(array));
-    if (!objArray->IsArrayClass()) {
-        EtsEscompatArray *escompatArray = EtsEscompatArray::FromEtsObject(objArray);
-        auto length = escompatArray->GetActualLength();
-        if (UNLIKELY(start > length || len > (length - start))) {
-            return ANI_OUT_OF_RANGE;
-        }
-        return GetArrayRegion<T>(s.GetCoroutine(), escompatArray, start, len, buf);
-    }
+    EtsArray *internalArray = s.ToInternalType(array);
+    ANI_CHECK_RETURN_IF_EQ(internalArray->AsObject()->IsArrayClass(), false, ANI_INVALID_TYPE);
 
-    EtsArray *internalArray = EtsArray::FromEtsObject(objArray);
     auto length = internalArray->GetLength();
     if (UNLIKELY(start > length || len > (length - start))) {
         return ANI_OUT_OF_RANGE;
     }
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    auto res = memcpy_s(buf, len * sizeof(T), internalArray->GetData<T>() + start, len * sizeof(T));
-    if (res != 0) {
-        UNREACHABLE();
-    }
+    MemcpyUnsafe(buf, internalArray->GetData<T>() + start, len * sizeof(T));
     return ANI_OK;
 }
 
 template <typename T>
-static ani_status SetArrayRegion(ScopedManagedCodeFix &s, EtsEscompatArray *objectArray, size_t start, size_t offset,
-                                 T *buff)
-{
-    ASSERT(buff != nullptr);
-
-    ANI_CHECK_RETURN_IF_GT(offset, std::numeric_limits<size_t>::max() - start, ANI_OUT_OF_RANGE);
-    size_t end = start + offset;
-    ANI_CHECK_RETURN_IF_GT(end, objectArray->GetActualLength(), ANI_OUT_OF_RANGE);
-
-    EtsCoroutine *coroutine = s.GetCoroutine();
-    EtsHandleScope scope(coroutine);
-    EtsHandle objectArrayHandle(coroutine, objectArray);
-    ASSERT(objectArrayHandle.GetPtr() != nullptr);
-    for (size_t posArr = start, posBuff = 0; posArr < end; ++posArr, ++posBuff) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        T value = buff[posBuff];
-        auto boxedValue = EtsBoxPrimitive<std::remove_const_t<T>>::Create(coroutine, value);
-        ANI_CHECK_RETURN_IF_EQ(boxedValue, nullptr, ANI_OUT_OF_MEMORY);
-        [[maybe_unused]] auto setRes = objectArrayHandle->SetRef(posArr, boxedValue);
-        ASSERT(setRes);
-    }
-    return ANI_OK;
-}
-
-template <typename T, typename ArrayType>
-static ani_status SetPrimitiveTypeArrayRegion(ani_env *env, ArrayType array, ani_size start, ani_size len, T *buf)
+static ani_status SetPrimitiveTypeArrayRegion(ani_env *env, ani_fixedarray array, ani_size start, ani_size len, T *buf)
 {
     ASSERT(array != nullptr);
     ANI_CHECK_RETURN_IF_EQ(len != 0 && buf == nullptr, true, ANI_INVALID_ARGS);
-    ScopedManagedCodeFix s(env);
-    EtsObject *objArray = s.ToInternalType(static_cast<ani_object>(array));
-    if (!objArray->IsArrayClass()) {
-        EtsEscompatArray *escompatArray = EtsEscompatArray::FromEtsObject(objArray);
-        auto length = escompatArray->GetActualLength();
-        if (UNLIKELY(start > length || len > (length - start))) {
-            return ANI_OUT_OF_RANGE;
-        }
-        return SetArrayRegion(s, escompatArray, start, len, buf);
-    }
 
-    EtsArray *internalArray = EtsArray::FromEtsObject(objArray);
+    ScopedManagedCodeFix s(env);
+    EtsArray *internalArray = s.ToInternalType(array);
+    ANI_CHECK_RETURN_IF_EQ(internalArray->AsObject()->IsArrayClass(), false, ANI_INVALID_TYPE);
+
     auto length = internalArray->GetLength();
     if (UNLIKELY(start > length || len > (length - start))) {
         return ANI_OUT_OF_RANGE;
@@ -1057,12 +914,10 @@ static ani_status SetPrimitiveTypeArrayRegion(ani_env *env, ArrayType array, ani
     auto data = internalArray->GetData<std::remove_const_t<T>>();
     auto dataLen = len * sizeof(T);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    auto res = memcpy_s(data + start, dataLen, buf, dataLen);
-    if (res != 0) {
-        UNREACHABLE();
-    }
+    MemcpyUnsafe(data + start, buf, dataLen);
     return ANI_OK;
 }
+
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Array_GetLength(ani_env *env, ani_array array, ani_size *result)
 {
@@ -1413,19 +1268,20 @@ static ani_status DoBindNativeFunctions(ani_env *env, ani_namespace ns, const an
     for (const auto &fn : Span(functions, nrFunctions)) {
         const char *name = fn.name;
         const char *signature = fn.signature;
-        std::optional<std::string> replacedSignature;
+        std::optional<PandaString> oldSignature;
         if (signature != nullptr) {
-            CheckSignatureMangling(signature);
-            replacedSignature = ReplaceArrayInSignature(signature);
-            signature = replacedSignature.has_value() ? replacedSignature->c_str() : signature;
+            oldSignature = Mangle::ConvertSignature(signature);
+            ANI_CHECK_RETURN_IF_EQ(oldSignature.has_value(), false, ANI_INVALID_DESCRIPTOR);
+            signature = oldSignature.value().c_str();
         }
+
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        EtsMethod *method = etsNs->GetFunction(name, signature, true);
+        EtsMethod *method = etsNs->GetFunction(name, signature);
         if (method != nullptr) {
             etsMethods.push_back(method);
             continue;
         }
-        PandaVector<EtsMethod *> methodVec = etsNs->GetFunctionOverload(name, signature, true);
+        PandaVector<EtsMethod *> methodVec = etsNs->GetFunctionOverload(name, signature);
         if (methodVec.size() == 1U) {
             etsMethods.push_back(methodVec[0]);
             continue;
@@ -1611,7 +1467,7 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Byte(ani_env *env, ani_fix
 
 static ani_status GetDirectMethodOverload(EtsClass *klass, const char *name, const char *signature, EtsMethod **result)
 {
-    PandaVector<EtsMethod *> methodVec = klass->GetDirectMethodOverload(name, signature, true);
+    PandaVector<EtsMethod *> methodVec = klass->GetDirectMethodOverload(name, signature);
     if (!methodVec.empty()) {
         ANI_CHECK_RETURN_IF_GT(methodVec.size(), 1U, ANI_AMBIGUOUS);
         ASSERT(methodVec.size() == 1U);
@@ -1658,12 +1514,13 @@ static ani_status BindNativeMethods(ani_env *env, ani_class cls, const ani_nativ
     for (const ani_native_function &m : Span(methods, nrMethods)) {
         const char *name = m.name;
         const char *signature = m.signature;
-        std::optional<std::string> replacedSignature;
+        std::optional<PandaString> oldSignature;
         if (signature != nullptr) {
-            CheckSignatureMangling(signature);
-            replacedSignature = ReplaceArrayInSignature(signature);
-            signature = replacedSignature.has_value() ? replacedSignature->c_str() : signature;
+            oldSignature = Mangle::ConvertSignature(signature);
+            ANI_CHECK_RETURN_IF_EQ(oldSignature.has_value(), false, ANI_INVALID_DESCRIPTOR);
+            signature = oldSignature.value().c_str();
         }
+
         EtsMethod *method = nullptr;
         if (signature == nullptr) {
             bool isUnique = false;
@@ -1672,6 +1529,7 @@ static ani_status BindNativeMethods(ani_env *env, ani_class cls, const ani_nativ
         } else {
             method = klass->GetDirectMethod(isStatic, name, signature);
         }
+
         if (method == nullptr && !isStatic) {
             ani_status status = GetDirectMethodOverload(klass, name, signature, &method);
             ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
@@ -5986,9 +5844,11 @@ NO_UB_SANITIZE static ani_status FindEnum(ani_env *env, const char *enumDescript
     CHECK_PTR_ARG(enumDescriptor);
     CHECK_PTR_ARG(result);
 
-    PandaString enumDesc = Mangle::ConvertDescriptor(enumDescriptor);
+    std::optional<PandaString> enumDesc = Mangle::ConvertDescriptor(enumDescriptor);
+    ANI_CHECK_RETURN_IF_EQ(enumDesc.has_value(), false, ANI_INVALID_DESCRIPTOR);
+
     // NOTE: Check that result is enum, #22400
-    return DoFind<false>(env, enumDesc.c_str(), result);
+    return DoFind<false>(env, enumDesc.value().c_str(), result);
 }
 
 static ani_status GetArrayFromEnum(ScopedManagedCodeFix &s, ani_enum enm, const char *name, EtsObjectArray **result)

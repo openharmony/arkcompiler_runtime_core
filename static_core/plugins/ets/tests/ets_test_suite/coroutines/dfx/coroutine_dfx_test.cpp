@@ -34,7 +34,7 @@ public:
     static ani_function ResolveFunction(ani_env *env, std::string_view methodName, std::string_view signature)
     {
         ani_module md;
-        [[maybe_unused]] auto status = env->FindModule("Lcoroutine_dfx_test;", &md);
+        [[maybe_unused]] auto status = env->FindModule("coroutine_dfx_test", &md);
         ASSERT(status == ANI_OK);
         ani_function func;
         status = env->Module_FindFunction(md, methodName.data(), signature.data(), &func);

@@ -22,24 +22,24 @@ namespace ark::ets::ani {
 static size_t ParseArrayBody(const std::string_view data, PandaStringStream &ss);
 
 /*static*/
-PandaString Mangle::ConvertDescriptor(const std::string_view descriptor, bool allowArray)
+std::optional<PandaString> Mangle::ConvertDescriptor(const std::string_view descriptor, bool allowArray)
 {
+    // NOTE(dslynko, #30175): Move security checks in a more optimized converter
     if (descriptor.empty() || descriptor.back() == ';' || descriptor.find('/') != std::string::npos) {
-        // The 'descriptor' does not have a new format, so no conversion is required.
-        if (!descriptor.empty()) {
-            LOG(ERROR, ANI) << "Use new mangling rules for descriptor \"" << descriptor << "\"";
-        }
-        return PandaString(descriptor);
+        // The 'descriptor' has incorrect format, report error to user
+        LOG(WARNING, ANI) << "Incorrect mangling: " << descriptor;
+        return std::nullopt;
     }
 
     PandaStringStream ss;
     if (allowArray) {
         // NOLINTNEXTLINE(readability-magic-numbers)
-        if (descriptor.size() >= 2U && descriptor[0] == 'A' && descriptor[1] == '{') {
+        if (descriptor.size() >= 3U && descriptor[0] == 'A' && descriptor[1] == '{') {
             auto bodySize = ParseArrayBody(descriptor.substr(1), ss);
             if (bodySize == std::string_view::npos) {
                 // The 'descriptor' has wrong format, so can't be convert
-                return PandaString("");
+                LOG(WARNING, ANI) << "Incorrect mangling: " << descriptor;
+                return std::nullopt;
             }
             return ss.str();
         }
@@ -112,6 +112,7 @@ static size_t ParseArrayBody(const std::string_view data, PandaStringStream &ss)
 static size_t ParseBody(char type, const std::string_view data, PandaStringStream &ss)
 {
     ASSERT(type != 'A');
+    ASSERT(type != 'X');
 
     if (data.size() < MIN_BODY_SIZE || data[0] != '{') {
         return std::string_view::npos;
@@ -121,7 +122,7 @@ static size_t ParseBody(char type, const std::string_view data, PandaStringStrea
             continue;
         }
         PandaString oldName(data.substr(1, pos - 1));
-        if (oldName.find('/') != std::string::npos) {
+        if (oldName.find('/') != std::string::npos || oldName.find(':') != std::string::npos) {
             // The new format 'descriptor' can't contain '/'
             return std::string_view::npos;
         }
@@ -168,7 +169,7 @@ static size_t ParseType(char type, const std::string_view data, PandaStringStrea
 }
 
 /*static*/
-PandaString Mangle::ConvertSignature(const std::string_view descriptor)
+std::optional<PandaString> Mangle::ConvertSignature(const std::string_view descriptor)
 {
     PandaStringStream ss;
     int nr = -1;
@@ -184,14 +185,16 @@ PandaString Mangle::ConvertSignature(const std::string_view descriptor)
         size_t sz = ParseType(type, descriptor.substr(i), ss);
         if (sz == std::string_view::npos) {
             // The 'descriptor' does not have a new format, so no conversion is required.
-            return PandaString(descriptor);
+            LOG(WARNING, ANI) << "Incorrect mangling: " << descriptor;
+            return std::nullopt;
         }
         i += sz - 1;
         nr += k;
     }
     if (k == -1) {
         // The 'descriptor' does not have a ':' symbol
-        return PandaString(descriptor);
+        LOG(WARNING, ANI) << "Incorrect mangling: " << descriptor;
+        return std::nullopt;
     }
     if (nr == 0) {
         ss << 'V';

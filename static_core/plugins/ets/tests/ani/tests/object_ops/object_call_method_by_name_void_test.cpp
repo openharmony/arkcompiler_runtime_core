@@ -49,7 +49,8 @@ public:
     {
         va_list args {};
         va_start(args, obj);
-        ASSERT_EQ(env_->Object_CallMethodByName_Void_V(obj, "method", "C{std/core/String}:", args), ANI_NOT_FOUND);
+        ASSERT_EQ(env_->Object_CallMethodByName_Void_V(obj, "method", "C{std/core/String}:", args),
+                  ANI_INVALID_DESCRIPTOR);
         va_end(args);
     }
 };
@@ -547,8 +548,9 @@ TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_013)
     const std::array<std::string_view, 4U> invalidMethodNames = {{"", "测试emoji🙂🙂", "\n\r\t", "\x01\x02\x03"}};
 
     for (const auto &methodName : invalidMethodNames) {
-        ASSERT_EQ(env_->Object_CallMethodByName_Void(object, methodName.data(), "", VAL1, VAL2), ANI_NOT_FOUND);
-        ASSERT_EQ(env_->Object_CallMethodByName_Void_A(object, methodName.data(), "", args), ANI_NOT_FOUND);
+        ASSERT_EQ(env_->Object_CallMethodByName_Void(object, methodName.data(), "", VAL1, VAL2),
+                  ANI_INVALID_DESCRIPTOR);
+        ASSERT_EQ(env_->Object_CallMethodByName_Void_A(object, methodName.data(), "", args), ANI_INVALID_DESCRIPTOR);
     }
 }
 
@@ -571,12 +573,12 @@ TEST_F(CallObjectMethodByNameVoidTest, check_wrong_signature)
 
     ASSERT_EQ(env_->c_api->Object_CallMethodByName_Void(env_, obj, "method", "C{std.core.String}:", str), ANI_OK);
     ASSERT_EQ(env_->c_api->Object_CallMethodByName_Void(env_, obj, "method", "C{std/core/String}:", str),
-              ANI_NOT_FOUND);
+              ANI_INVALID_DESCRIPTOR);
 
     ani_value arg;
     arg.r = str;
     ASSERT_EQ(env_->Object_CallMethodByName_Void_A(obj, "method", "C{std.core.String}:", &arg), ANI_OK);
-    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(obj, "method", "C{std/core/String}:", &arg), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(obj, "method", "C{std/core/String}:", &arg), ANI_INVALID_DESCRIPTOR);
 
     TestFuncVCorrectSignature(obj, str);
     TestFuncVWrongSignature(obj, str);

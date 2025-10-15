@@ -102,7 +102,7 @@ WorkStatus QueueAsyncWork(ani_env *env, AsyncWork *work)
     }
 
     ani_class cls = nullptr;
-    env->FindClass("Lstd/concurrency/NativeAsyncWorkHelper;", &cls);
+    env->FindClass("std.concurrency.NativeAsyncWorkHelper", &cls);
     ani_static_method queueMethod;
     env->Class_FindStaticMethod(cls, "queue", nullptr, &queueMethod);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

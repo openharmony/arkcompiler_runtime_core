@@ -339,10 +339,10 @@ EtsField *EtsClass::GetOwnFieldByIndex(uint32_t i)
     return EtsField::FromRuntimeField(&GetRuntimeClass()->GetFields()[i]);
 }
 
-EtsMethod *EtsClass::GetDirectMethod(const char *name, const char *signature, bool isANIFormat)
+EtsMethod *EtsClass::GetDirectMethod(const char *name, const char *signature)
 {
     auto coreName = reinterpret_cast<const uint8_t *>(name);
-    return GetDirectMethod(coreName, signature, isANIFormat);
+    return GetDirectMethod(coreName, signature);
 }
 
 EtsMethod *EtsClass::GetDirectMethod(const char *name)
@@ -352,9 +352,9 @@ EtsMethod *EtsClass::GetDirectMethod(const char *name)
     return EtsMethod::FromRuntimeMethod(rtMethod);
 }
 
-EtsMethod *EtsClass::GetDirectMethod(const uint8_t *name, const char *signature, bool isANIFormat)
+EtsMethod *EtsClass::GetDirectMethod(const uint8_t *name, const char *signature)
 {
-    EtsMethodSignature methodSignature(signature, isANIFormat);
+    EtsMethodSignature methodSignature(signature);
     if (!methodSignature.IsValid()) {
         LOG(ERROR, RUNTIME) << "Wrong method signature: " << signature;
         return nullptr;
@@ -380,7 +380,7 @@ EtsMethod *EtsClass::GetDirectMethod(bool isStatic, const char *name, const char
     panda_file::File::StringData key = {static_cast<uint32_t>(ark::utf::MUtf8ToUtf16Size(mutf8Name)), mutf8Name};
     auto it = std::lower_bound(methods.begin(), methods.end(), key, comp);
 
-    EtsMethodSignature methodSignature(signature, true);
+    EtsMethodSignature methodSignature(signature);
     if (!methodSignature.IsValid()) {
         LOG(ERROR, ANI) << "Wrong method signature: " << signature;
         return nullptr;

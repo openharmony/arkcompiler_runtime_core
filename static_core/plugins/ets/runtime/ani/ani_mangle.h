@@ -22,8 +22,8 @@ namespace ark::ets::ani {
 
 class Mangle {
 public:
-    static PandaString ConvertDescriptor(const std::string_view descriptor, bool allowArray = false);
-    static PandaString ConvertSignature(const std::string_view descriptor);
+    static std::optional<PandaString> ConvertDescriptor(const std::string_view descriptor, bool allowArray = false);
+    static std::optional<PandaString> ConvertSignature(const std::string_view descriptor);
 };
 
 }  // namespace ark::ets::ani

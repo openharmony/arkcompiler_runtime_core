@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <ani.h>
 #include "ani_gtest.h"
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
@@ -57,7 +58,7 @@ private:
     }
 
 public:
-    template <bool HAS_METHOD>
+    template <bool HAS_METHOD, bool INVALID_DESCRIPTOR = false>
     void CheckClassFindMethod(const char *clsDescriptor, const char *methodName, const char *methodSignature,
                               const ani_value *args = nullptr, ani_int expectedResult = TEST_EXPECTED_VALUE1)
     {
@@ -70,7 +71,11 @@ public:
         auto status = env_->Class_FindMethod(cls, methodName, methodSignature, &method);
 
         if constexpr (!HAS_METHOD) {
-            ASSERT_EQ(status, ANI_NOT_FOUND);
+            if constexpr (INVALID_DESCRIPTOR) {
+                ASSERT_EQ(status, ANI_INVALID_DESCRIPTOR);
+            } else {
+                ASSERT_EQ(status, ANI_NOT_FOUND);
+            }
             return;
         }
 
@@ -439,7 +444,7 @@ TEST_F(ClassFindMethodTest, find_intrinsics)
 TEST_F(ClassFindMethodTest, method_not_found)
 {
     CheckClassFindMethod<false>("A", "bla_bla_bla", nullptr);
-    CheckClassFindMethod<false>("A", "int_method", "bla_bla_bla");
+    CheckClassFindMethod<false, true>("A", "int_method", "bla_bla_bla");
     CheckClassFindMethod<false>("Overload", "method", "dd:i");
     CheckClassFindMethod<false>("Overload", "method", "iC{std.core.String}:i");
 }
@@ -473,8 +478,8 @@ TEST_F(ClassFindMethodTest, invalid_arguments)
     ASSERT_EQ(env_->Class_FindMethod(cls, "", "ii:i", &method), ANI_NOT_FOUND);
     ASSERT_EQ(env_->Class_FindMethod(cls, "\t", "ii:i", &method), ANI_NOT_FOUND);
 
-    ASSERT_EQ(env_->Class_FindMethod(cls, "int_method", "", &method), ANI_NOT_FOUND);
-    ASSERT_EQ(env_->Class_FindMethod(cls, "int_method", "\t", &method), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "int_method", "", &method), ANI_INVALID_DESCRIPTOR);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "int_method", "\t", &method), ANI_INVALID_DESCRIPTOR);
 }
 
 TEST_F(ClassFindMethodTest, has_static_method_1)
@@ -516,7 +521,7 @@ TEST_F(ClassFindMethodTest, static_method_not_found_2)
     ASSERT_NE(cls, nullptr);
 
     ani_static_method method {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "get_button_names", "bla_bla_bla", &method), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "get_button_names", "bla_bla_bla", &method), ANI_INVALID_DESCRIPTOR);
 }
 
 TEST_F(ClassFindMethodTest, static_method_invalid_argument_name)
@@ -548,8 +553,8 @@ TEST_F(ClassFindMethodTest, static_method_invalid_arguments)
               ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Class_FindStaticMethod(cls, "", ":A{C{std.core.String}}", &method), ANI_NOT_FOUND);
     ASSERT_EQ(env_->Class_FindStaticMethod(cls, "\t", ":A{C{std.core.String}}", &method), ANI_NOT_FOUND);
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "get_button_names", "", &method), ANI_NOT_FOUND);
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "get_button_names", "\t", &method), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "get_button_names", "", &method), ANI_INVALID_DESCRIPTOR);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "get_button_names", "\t", &method), ANI_INVALID_DESCRIPTOR);
 }
 
 TEST_F(ClassFindMethodTest, static_method_find_static_method_001)
@@ -1154,12 +1159,12 @@ TEST_F(ClassFindMethodTest, wrong_signature)
     ani_class cls {};
     ani_method m {};
     ASSERT_EQ(env_->FindClass("test.C", &cls), ANI_OK);
-    ASSERT_EQ(env_->Class_FindMethod(cls, "imethod", "C{std/core/String}:i", &m), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "imethod", "C{std/core/String}:i", &m), ANI_INVALID_DESCRIPTOR);
     ASSERT_EQ(env_->Class_FindMethod(cls, "imethod", "C{std.core.String}:i", &m), ANI_OK);
 
     ani_static_method sm {};
     ASSERT_EQ(env_->FindClass("test.CheckWrongSignature", &cls), ANI_OK);
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "method", "C{std/core/String}:", &sm), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "method", "C{std/core/String}:", &sm), ANI_INVALID_DESCRIPTOR);
     ASSERT_EQ(env_->Class_FindStaticMethod(cls, "method", "C{std.core.String}:", &sm), ANI_OK);
 }
 
