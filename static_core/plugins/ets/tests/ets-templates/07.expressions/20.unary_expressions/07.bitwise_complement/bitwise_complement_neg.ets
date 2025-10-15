@@ -13,15 +13,16 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
 desc: Bitwise complement operator
+assertion: Bitwise complement operator is applied to an operand of a numeric type or type bigint.
 tags: [negative, compile-only]
 ---*/
 
-function main(): void {
-  let a: double = 9223372036854775808;
-  arktest.assertEQ(~a, -9223372036854775808);
+{{c.decl}}
 
-  let b: double = 9223372036854775809;
-  arktest.assertEQ(~b, -9223372036854775808);
+function main(): void {
+    {{c.use|indent}}
 }
+{% endfor %}

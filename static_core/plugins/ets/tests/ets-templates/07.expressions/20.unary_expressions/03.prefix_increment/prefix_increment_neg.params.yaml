@@ -24,3 +24,10 @@ cases:
     - use: |-
         let x = -5;
         ++(++x)  // Invalid left-hand side operator
+    - decl: |-
+        class C {
+            f: number
+        }
+      use: |-
+        let c = new C();
+        ++(c?.f)  // Invalid left-hand side operator

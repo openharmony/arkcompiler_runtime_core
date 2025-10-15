@@ -16,7 +16,7 @@
 {% for onb in unary_minus_onbound %}
 
 /*---
-desc: Unary minus operator (onbound) (these are special cases for numeric overflow behavior. Special attention wanted).
+desc: Unary minus operator (outbound) (these are special cases for numeric overflow behavior. Special attention wanted).
 params: {{onb.type}} {{onb.origin}}
 tags: [negative, compile-only]
 ---*/
@@ -24,7 +24,6 @@ tags: [negative, compile-only]
 function main(): void {
   let a: {{onb.type}} = {{onb.origin}};
   let b: {{onb.type}} = -a
-  arktest.assertEQ(b, -a);
 }
 
 {% endfor %}

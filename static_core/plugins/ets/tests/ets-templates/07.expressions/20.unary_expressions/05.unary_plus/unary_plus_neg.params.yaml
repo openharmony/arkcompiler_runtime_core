@@ -15,25 +15,20 @@
 cases:
     - use: |-
         let c = "text"
-        arktest.assertEQ(+c, "text")
+        let d = +c
     - use: |-
         let a: int[] = [1]
-        arktest.assertEQ((+a)[0], 1)
+        let b = +a
     - use: |-
         let f = (): int => { return 13 }
-        arktest.assertEQ(+f, f);
+        let g = +f
     - decl: |-
         class C { f(): int { return 13 } }
       use: |-
         let c = new C
-        arktest.assertEQ(+c, c);
+        let d = +c
     - decl: |-
         class C { f(): int { return 13 } }
       use: |-
         let c = new C
-        arktest.assertEQ(+c.f, c.f);
-
-
-
-
-
+        let d = +c
