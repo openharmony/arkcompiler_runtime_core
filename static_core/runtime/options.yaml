@@ -967,3 +967,8 @@ options:
   type: uint32_t
   default: 500
   description: The minimum amount of time in microseconds to be recorded between safepoints
+
+- name: use-boot-class-filter
+  type: bool
+  default: true
+  description: Whether to use boot class bloom filter to speedup app class lookup.

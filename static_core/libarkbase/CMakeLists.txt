@@ -355,6 +355,7 @@ set(ARKBASE_TESTS_SOURCES
     tests/bit_table_test.cpp
     tests/bit_utils_test.cpp
     tests/bit_vector_test.cpp
+    tests/bloom_filter_test.cpp
     tests/string_helpers_test.cpp
     tests/type_converter_tests.cpp
     tests/dfx_test.cpp
