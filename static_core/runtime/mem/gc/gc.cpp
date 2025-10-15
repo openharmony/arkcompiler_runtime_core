@@ -637,8 +637,8 @@ void GC::PreStartup()
 {
     // Add a delay GCTask.
     if ((!Runtime::GetCurrent()->IsZygote()) && (!gcSettings_.RunGCInPlace())) {
-        // divide 2 to temporarily set target footprint to a high value to disable GC during App startup.
-        size_t startupLimit = Runtime::GetOptions().GetHeapSizeLimit() / 2;
+        // divide 4 to temporarily set target footprint to a high value to disable GC during App startup.
+        size_t startupLimit = Runtime::GetOptions().GetHeapSizeLimit() / 4;
         GetPandaVm()->GetGCTrigger()->SetMinTargetFootprint(startupLimit);
         PreStartupImp();
         size_t originSize = AdujustStartupLimit(startupLimit);
