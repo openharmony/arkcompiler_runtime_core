@@ -19,6 +19,7 @@ cases:
     call: |-
         let n: never
         let a: t = n
+    tags: compile-only,negative
 
   - import: |-
         import {B} from "./module.ets"
