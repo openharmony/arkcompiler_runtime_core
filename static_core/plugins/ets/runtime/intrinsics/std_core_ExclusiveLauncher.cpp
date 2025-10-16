@@ -123,6 +123,19 @@ bool HasPendingError(bool limitIsReached, bool jsEnvEmpty)
     return false;
 }
 
+void DestroyExclusiveWorker(PandaEtsVM *etsVM, bool supportInterop)
+{
+    auto *coroMan = etsVM->GetCoroutineManager();
+    if (supportInterop) {
+        auto *ifaceTable = EtsCoroutine::CastFromThread(coroMan->GetMainThread())->GetExternalIfaceTable();
+        auto *jsEnv = ifaceTable->GetJSEnv();
+        coroMan->DestroyExclusiveWorker();
+        ifaceTable->CleanUpJSEnv(jsEnv);
+    } else {
+        coroMan->DestroyExclusiveWorker();
+    }
+}
+
 EtsInt ExclusiveLaunch(EtsObject *task, uint8_t needInterop, EtsString *name)
 {
     auto *coro = EtsCoroutine::GetCurrent();
@@ -162,7 +175,7 @@ EtsInt ExclusiveLaunch(EtsObject *task, uint8_t needInterop, EtsString *name)
             workerId = eaCoro->GetWorker()->GetId();
             event.Fire();
             RunTaskOnEACoroutine(etsVM, supportInterop, taskRef);
-            etsVM->GetCoroutineManager()->DestroyExclusiveWorker();
+            DestroyExclusiveWorker(etsVM, supportInterop);
         });
         os::thread::SetThreadName(t.native_handle(), nameStr.c_str());
         event.Wait();

@@ -44,6 +44,7 @@
 // NOLINTBEGIN(readability-identifier-naming, readability-redundant-declaration)
 // CC-OFFNXT(G.FMT.10-CPP) project code style
 napi_status __attribute__((weak)) napi_create_runtime(napi_env env, napi_env *resultEnv);
+napi_status __attribute__((weak)) napi_destroy_runtime(napi_env env);
 napi_status __attribute__((weak)) napi_throw_jsvalue(napi_env env, napi_value error);
 napi_status __attribute__((weak)) napi_setup_hybrid_environment(napi_env env);
 // NOLINTEND(readability-identifier-naming, readability-redundant-declaration)
@@ -439,6 +440,21 @@ void InteropCtx::InitExternalInterfaces()
 #endif
         return resultJsEnv;
     });
+
+    interfaceTable_.SetGetJSEnvFunction([]() -> ExternalIfaceTable::JSEnv {
+        auto *ctx = InteropCtx::Current();
+        if (ctx == nullptr) {
+            return nullptr;
+        }
+        return ctx->GetJSEnv();
+    });
+
+    interfaceTable_.SetCleanUpJSEnvFunction([](ExternalIfaceTable::JSEnv jsEnv) -> void {
+        auto env = static_cast<napi_env>(jsEnv);
+        [[maybe_unused]] auto status = napi_destroy_runtime(env);
+        ASSERT(status == napi_ok);
+    });
+
 #endif
     interfaceTable_.SetCreateInteropCtxFunction([](Coroutine *coro, ExternalIfaceTable::JSEnv jsEnv) {
         auto env = static_cast<napi_env>(jsEnv);

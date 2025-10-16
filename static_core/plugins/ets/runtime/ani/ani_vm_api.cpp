@@ -211,7 +211,13 @@ static ani_status DetachCurrentThread(ani_vm *vm)
 
     auto *etsVM = PandaEtsVM::FromAniVM(vm);
     auto *coroMan = etsVM->GetCoroutineManager();
+
+    auto *ifaceTable = EtsCoroutine::CastFromThread(coroMan->GetMainThread())->GetExternalIfaceTable();
+    auto *jsEnv = ifaceTable->GetJSEnv();
     auto result = coroMan->DestroyExclusiveWorker();
+    if (jsEnv != nullptr) {
+        ifaceTable->CleanUpJSEnv(jsEnv);
+    }
     if (!result) {
         LOG(ERROR, ANI) << "Cannot DetachThread, thread was not attached";
         return ANI_ERROR;
