@@ -608,7 +608,11 @@ export class JSON {
         } else if (typ instanceof ClassType) {
             let ct = typ as ClassType
             ok &= ct.hasEmptyConstructor()
-            for (let f = 0; f < ct.getFieldsNum(); f++) {
+            let field_num = ct.getFieldsNum()
+            for (let f = 0; f < field_num; f++) {
+                if (JSONAPI.getJSONParseIgnoreFromAnnotation(ct.cls, f)) {
+                    continue
+                }
                 ok &= JSON.checkType(ct.getField(f).getType(), used)
             }
         } else if (typ instanceof ArrayType) {
