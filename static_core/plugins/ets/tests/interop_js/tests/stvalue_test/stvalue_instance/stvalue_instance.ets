@@ -21,34 +21,8 @@ export class Student {
     constructor() { }
     constructor(age: int) { this.age = age; }
     constructor(age: int, name: string) {
-        console.log('  ets log, Student Ctor--age:', this.age, '  name:', this.name);
         this.age = age;
         this.name = name;
-    }
-
-    checkFixPrimitiveArray(arr: FixedArray<boolean>): boolean {
-        if (arr.length != 5) {
-            return false;
-        }
-        for (let i = 0; i < 5; i++) {
-            if (arr[i] != false) {
-                return false;
-            }
-        }
-        return true;
-    }
-    checkFixReferenceArray(arr: FixedArray<Int>): boolean {
-        console.log('checkFixReferenceArray:', arr)
-        if (arr.length != 3) {
-            return false;
-        }
-        for (let i = 0; i < 3; i++) {
-            console.log('log res:', arr[i] == 5, (arr[i] instanceof Int), arr[i], arr[i].unboxed(), arr)
-            if (!(arr[i] instanceof Int)) {
-                return false;
-            }
-        }
-        return true;
     }
 }
 
@@ -56,4 +30,155 @@ export class SubStudent extends Student {
     constructor() { super() }
     constructor(age: int) { super(age) }
     constructor(age: int, name: string) { super(age, name) }
+}
+
+function checkPrimitiveArray<T>(arr: FixedArray<T>, value: T): boolean {
+    if (arr.length != 5) {
+        return false;
+    }
+    for (let i = 0; i < 5; i++) {
+        if (arr[i] != value) {
+            return false;
+        }
+    }
+    return true;
+}
+
+export function checkFixPrimitiveBooleanArray(arr: FixedArray<boolean>): boolean {
+    if (arr.length != 5) {
+        return false;
+    }
+    for (let i = 0; i < 5; i++) {
+        console.log(arr[i])
+        if (arr[i] != false) {
+            return false;
+        }
+    }
+    return true;
+}
+
+export function checkFixPrimitiveByteArray(arr: FixedArray<byte>): boolean {
+    if (arr.length != 5) {
+        return false;
+    }
+    for (let i = 0; i < 5; i++) {
+        console.log(arr[i])
+        if (arr[i] != 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+export function checkFixPrimitiveCharArray(arr: FixedArray<char>): boolean {
+    if (arr.length != 5) {
+        return false;
+    }
+    console.log('----------------')
+    for (let i = 0; i < 5; i++) {
+        if (arr[i] != c'\0') {
+            return false;
+        }
+    }
+    return true;
+}
+
+export function checkFixPrimitiveShortArray(arr: FixedArray<short>): boolean {
+    if (arr.length != 5) {
+        return false;
+    }
+    for (let i = 0; i < 5; i++) {
+        console.log(arr[i])
+        if (arr[i] != 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+export function checkFixPrimitiveIntArray(arr: FixedArray<int>): boolean {
+    if (arr.length != 5) {
+        return false;
+    }
+    for (let i = 0; i < 5; i++) {
+        console.log(arr[i])
+        if (arr[i] != 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+export function checkFixPrimitiveLongArray(arr: FixedArray<long>): boolean {
+    if (arr.length != 5) {
+        return false;
+    }
+    for (let i = 0; i < 5; i++) {
+        console.log(arr[i])
+        if (arr[i] != 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+export function checkFixPrimitiveFloatArray(arr: FixedArray<float>): boolean {
+    if (arr.length != 5) {
+        return false;
+    }
+    for (let i = 0; i < 5; i++) {
+        console.log(arr[i])
+        if (arr[i] != 0.0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+export function checkFixPrimitiveDoubleArray(arr: FixedArray<double>): boolean {
+    if (arr.length != 5) {
+        return false;
+    }
+    for (let i = 0; i < 5; i++) {
+        console.log(arr[i])
+        if (arr[i] != 0.0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+
+function checkFixReferenceObjectArray(arr: FixedArray<Object>): boolean {
+    if (arr.length != 3) {
+        return false;
+    }
+    for (let i = 0; i < 3; i++) {
+        if (!(arr[i] instanceof Int)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+export function checkFixReferenceStringArray(arr: FixedArray<String>): boolean {
+    console.log('checkFixReferenceBooleanArray:', arr)
+    if (arr.length != 3) {
+        return false;
+    }
+    for (let i = 0; i < 3; i++) {
+        console.log('log res:', (arr[i] instanceof String), arr[i], arr);
+
+        if (!(arr[i] instanceof String)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+export function checkFixReferenceUndefinedArray(arr: FixedArray<Object>): boolean {
+    if (arr.length != 3) {
+        return false;
+    }
+    return true;
 }

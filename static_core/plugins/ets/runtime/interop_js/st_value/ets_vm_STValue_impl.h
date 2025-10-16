@@ -72,6 +72,7 @@ napi_value FixedArrayGetLengthImpl(napi_env env, napi_callback_info info);
 napi_value EnumGetIndexByNameImpl(napi_env env, napi_callback_info info);
 napi_value EnumGetNameByIndexImpl(napi_env env, napi_callback_info info);
 napi_value EnumGetValueByNameImpl(napi_env env, napi_callback_info info);
+napi_value EnumGetValueByIndexImpl(napi_env env, napi_callback_info info);
 napi_value ClassGetStaticFieldImpl(napi_env env, napi_callback_info info);
 napi_value ClassSetStaticFieldImpl(napi_env env, napi_callback_info info);
 napi_value ObjectGetPropertyImpl(napi_env env, napi_callback_info info);

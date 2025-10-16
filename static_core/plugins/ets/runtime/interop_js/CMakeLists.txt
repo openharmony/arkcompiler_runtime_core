@@ -71,6 +71,7 @@ panda_target_sources(arkruntime_obj PRIVATE
         ${ETS_EXT_SOURCES}/interop_js/st_value/ets_vm_STValue_accessor.cpp
         ${ETS_EXT_SOURCES}/interop_js/st_value/ets_vm_STValue_unwrap.cpp
         ${ETS_EXT_SOURCES}/interop_js/st_value/ets_vm_STValue_wrap.cpp
+        ${ETS_EXT_SOURCES}/interop_js/st_value/ets_vm_STValue_param_getter.cpp
         ${ETS_EXT_SOURCES}/interop_js/js_value.cpp
         ${ETS_EXT_SOURCES}/interop_js/js_refconvert.cpp
         ${ETS_EXT_SOURCES}/interop_js/js_refconvert_builtin.cpp

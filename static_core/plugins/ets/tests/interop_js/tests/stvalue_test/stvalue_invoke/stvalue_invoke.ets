@@ -19,21 +19,23 @@ export class Student {
     private name: string = '';
 
     constructor() { }
-    constructor(age: int) { this.age = age; age = age + 2; }
+    constructor(age: int) { this.age = age; }
     constructor(age: int, name: string) {
-        console.log('  ets log, Student Ctor--age:', this.age, '  name:', this.name);
         this.age = age;
         this.name = name;
     }
 
     getStudentAge(): int {
-        console.log('  ets log, age:', this.age);
         return this.age;
     }
 
     setStudentAge(newAge: int): void {
         this.age = newAge;
-        console.log('  ets log, age:', this.age);
+    }
+
+    setStudentAge(newAge: double): void {
+        console.log("ets log, setDouble value, newAge:", newAge)
+        this.age = newAge.toInt();
     }
 
     getStudentName(): string {
@@ -43,6 +45,7 @@ export class Student {
     static getStudentId(): int {
         return Student.id;
     }
+
     static setStudentId(newId: int): void {
         Student.id = newId;
     }
@@ -50,156 +53,247 @@ export class Student {
 }
 
 export class SubStudent extends Student {
+    uName: string = '';
+    uAge: int = 0;
+    static uID: int = 0;
     constructor() { super() }
     constructor(age: int) { super(age) }
-    constructor(age: int, name: string) { super(age, name) }
+    constructor(age: int, name: string) {
+        super(age, name);
+        this.uAge = age;
+        this.uName = this.uName;
+    }
+
+    static setUId(newId: int): void {
+        SubStudent.uID = newId;
+    }
+    static setUId(newId: double): void {
+        SubStudent.uID = newId.toInt();
+    }
+    static getUId(): int {
+        return SubStudent.uID;
+    }
 }
 
 export let getNumberFn = () => { return 123; }
 
+export let getSumFn = (n1: number, n2: number) => { return n1 + n2; }
+
 // boolean type
-export function BooleanInvoke(b1 : Boolean, b2 : Boolean) : Boolean
-{
-    return b1 & b2;
+export function BooleanInvoke(b1: Boolean, b2: Boolean): Boolean {
+    return b1 && b2;
+}
+
+export function BooleanEmptyInvoke(): Boolean {
+    return true;
 }
 
 // char type
-export function CharInvoke(c : char) : char
-{
+export function CharInvoke(c: char): char {
     return c;
 }
 
+export function CharEmptyInvoke(): char {
+    return c'c';
+}
+
 // byte type
-export function ByteInvoke(b : byte) : byte
-{
+export function ByteInvoke(b: byte): byte {
     return b;
 }
 
+export function ByteEmptyInvoke(): byte {
+    return 112;
+}
+
 // short type
-export function ShortInvoke(s : short) : short
-{
+export function ShortInvoke(s: short): short {
     return s;
 }
 
+export function ShortEmptyInvoke(): short {
+    return 3456;
+}
+
 // int type
-export function IntInvoke(a : int, b : int) : int
-{
+export function IntInvoke(a: int, b: int): int {
     return a + b;
 }
 
+export function IntEmptyInvoke(): int {
+    return 468;
+}
+
 // long type
-export function LongInvoke(l1 : long, l2 : long) : long
-{
+export function LongInvoke(l1: long, l2: long): long {
     return l1 + l2;
 }
 
+export function LongEmptyInvoke(): long {
+    return 468;
+}
+
 // float type
-export function FloatInvoke(f1 : float, f2 : float) : float
-{
+export function FloatInvoke(f1: float, f2: float): float {
     return f1 + f2;
 }
 
+export function FloatEmptyInvoke(): float {
+    return 1.23f;
+}
+
 // double type
-export function DoubleInvoke(d1 : double, d2 : double) : double
-{
+export function DoubleInvoke(d1: double, d2: double): double {
     return d1 + d2;
 }
 
+export function DoubleEmptyInvoke(): double {
+    return 1.23;
+}
+
 // number type
-export function NumberInvoke(n1 : number, n2 : number) : number
-{
+export function NumberInvoke(n1: number, n2: number): number {
     return n1 + n2;
 }
 
+export function NumberEmptyInvoke(): number {
+    return 1;
+}
+
 // reference string type
-export function StringInvoke(str1 : String, str2 : String) : String
-{
+export function StringInvoke(str1: String, str2: String): String {
     return str1 + str2;
 }
 
+export function StringEmptyInvoke(): String {
+    return 'string';
+}
+
 // reference BigInt type
-export function BigIntInvoke(b1 : BigInt, b2 : BigInt) : BigInt
-{
+export function BigIntInvoke(b1: BigInt, b2: BigInt): BigInt {
     return b1 + b2;
 }
 
+export function BigIntEmptyInvoke(): BigInt {
+    return BigInt('1234');
+}
+
 // void
-export function VoidInvoke(str1 : String, str2 : String)
-{
+export function VoidInvoke(str1: String, str2: String) {
     console.log(str1 + str2);
+}
+
+export function VoidEmptyInvoke() {
+    console.log('string');
 }
 
 export namespace Invoke {
 
-// boolean type
-export function BooleanInvoke(b1 : Boolean, b2 : Boolean) : Boolean
-{
-    return b1 & b2;
-}
+    // boolean type
+    export function BooleanInvoke(b1: Boolean, b2: Boolean): Boolean {
+        return b1 && b2;
+    }
 
-// char type
-export function CharInvoke(c : char) : char
-{
-    return c;
-}
+    export function BooleanEmptyInvoke(): Boolean {
+        return true;
+    }
 
-// byte type
-export function ByteInvoke(b : byte) : byte
-{
-    return b;
-}
+    // char type
+    export function CharInvoke(c: char): char {
+        return c;
+    }
 
-// short type
-export function ShortInvoke(s : short) : short
-{
-    return s;
-}
+    export function CharEmptyInvoke(): char {
+        return c'c';
+    }
 
-// int type
-export function IntInvoke(a : int, b : int) : int
-{
-    return a + b;
-}
+    // byte type
+    export function ByteInvoke(b: byte): byte {
+        return b;
+    }
 
-// long type
-export function LongInvoke(l1 : long, l2 : long) : long
-{
-    return l1 + l2;
-}
+    export function ByteEmptyInvoke(): byte {
+        return 112;
+    }
 
-// float type
-export function FloatInvoke(f1 : float, f2 : float) : float
-{
-    return f1 + f2;
-}
+    // short type
+    export function ShortInvoke(s: short): short {
+        return s;
+    }
 
-// double type
-export function DoubleInvoke(d1 : double, d2 : double) : double
-{
-    return d1 + d2;
-}
+    export function ShortEmptyInvoke(): short {
+        return 3456;
+    }
 
-// number type
-export function NumberInvoke(n1 : number, n2 : number) : number
-{
-    return n1 + n2;
-}
+    // int type
+    export function IntInvoke(a: int, b: int): int {
+        return a + b;
+    }
 
-// reference string type
-export function StringInvoke(str1 : String, str2 : String) : String
-{
-    return str1 + str2;
-}
+    export function IntEmptyInvoke(): int {
+        return 468;
+    }
 
-// reference BigInt type
-export function BigIntInvoke(b1 : BigInt, b2 : BigInt) : BigInt
-{
-    return b1 + b2;
-}
+    // long type
+    export function LongInvoke(l1: long, l2: long): long {
+        return l1 + l2;
+    }
 
-// void
-export function VoidInvoke(str1 : String, str2 : String)
-{
-    console.log(str1 + str2);
-}
+    export function LongEmptyInvoke(): long {
+        return 468;
+    }
+
+    // float type
+    export function FloatInvoke(f1: float, f2: float): float {
+        return f1 + f2;
+    }
+
+    export function FloatEmptyInvoke(): float {
+        return 1.23f;
+    }
+
+    // double type
+    export function DoubleInvoke(d1: double, d2: double): double {
+        return d1 + d2;
+    }
+
+    export function DoubleEmptyInvoke(): double {
+        return 1.23;
+    }
+
+    // number type
+    export function NumberInvoke(n1: number, n2: number): number {
+        return n1 + n2;
+    }
+
+    export function NumberEmptyInvoke(): number {
+        return 1;
+    }
+
+    // reference string type
+    export function StringInvoke(str1: String, str2: String): String {
+        return str1 + str2;
+    }
+
+    export function StringEmptyInvoke(): String {
+        return 'string';
+    }
+
+    // reference BigInt type
+    export function BigIntInvoke(b1: BigInt, b2: BigInt): BigInt {
+        return b1 + b2;
+    }
+
+    export function BigIntEmptyInvoke(): BigInt {
+        return new BigInt('1234');
+    }
+
+    // void
+    export function VoidInvoke(str1: String, str2: String) {
+        console.log(str1 + str2);
+    }
+
+    export function VoidEmptyInvoke() {
+        console.log('string');
+    }
 }  // namespace Invoke
