@@ -5350,26 +5350,6 @@ intrinsics:
     impl: ark::intrinsics::SystemExit
     clear_flags: [require_state, runtime_call, can_throw]
 
-  - name: StdCoreRegisterTimer
-    space: ets
-    class_name: escompat.ETSGLOBAL
-    method_name: registerTimer
-    static: true
-    signature:
-      ret: i32
-      args: [std.core.Object, i32, u1]
-    impl: ark::ets::intrinsics::StdCoreRegisterTimer
-
-  - name: StdCoreClearTimer
-    space: ets
-    class_name: escompat.ETSGLOBAL
-    method_name: clearTimer
-    static: true
-    signature:
-      ret: void
-      args: [i32]
-    impl: ark::ets::intrinsics::StdCoreClearTimer
-
 ######################
 # std.core.GC #
 ######################
@@ -9471,34 +9451,99 @@ intrinsics:
     static: true
     signature:
       ret: i32
-      args: [std.core.Object, u1, std.core.String]
+      args: [std.core.Object, u1, std.core.String, i32]
     impl: ark::ets::intrinsics::ExclusiveLaunch
 
 ###################
 # std.core.EAWorker #
 ###################
 
+  - name: EtsEAWorkerPostToMain
+    space: ets
+    class_name: std.core.EAWorker
+    method_name: postTaskToMain
+    static: true
+    signature:
+      ret: std.core.Job
+      args:
+        - std.core.Object
+        - std.core.Object[]
+        - u1
+    impl: ark::ets::intrinsics::PostToMainThread
+
+  - name: EtsEAWorkerCalculateEAWorkerCount
+    space: ets
+    class_name: std.core.EAWorker
+    method_name: calculateEAWorkerCount
+    static: true
+    signature:
+      ret: i32
+      args: []
+    impl: ark::ets::intrinsics::CalculateEAworkerCount
+
+  - name: EtsEAWorkerGetEAWorkerCount
+    space: ets
+    class_name: std.core.EAWorker
+    method_name: getEAWorkerNumFromThread
+    static: true
+    signature:
+      ret: i32
+      args: []
+    impl: ark::ets::intrinsics::GetEAWorkerNumFromThread
+
+  - name: EtsEAWorkerCreateMainWorker
+    space: ets
+    class_name: std.core.EAWorker
+    method_name: createMainWorker
+    static: true
+    signature:
+      ret: std.core.Object
+      args: []
+    impl: ark::ets::intrinsics::CreateMainWorker
+
+
   - name: EtsEAWorkerSetPriority
     space: ets
-    class_name: std.core.InternalWorker
+    class_name: std.core.EAWorker
     method_name: setCurrentWorkerPriority
     static: true
     signature:
       ret: void
       args: [i32]
     impl: ark::ets::intrinsics::SetCurrentWorkerPriority
+###############################
+# std.core.TaskPoster #
+###############################
 
-  - name: EtsEAWorkerJoin
+  - name: StdTaskPosterCreate
     space: ets
-    class_name: std.core.InternalWorker
-    method_name: join
+    class_name: std.core.TaskPoster
+    method_name: create
+    static: true
+    signature:
+      ret: i64
+      args: []
+    impl: ark::ets::intrinsics::TaskPosterCreate
+
+  - name: StdTaskPosterDestroy
+    space: ets
+    class_name: std.core.TaskPoster
+    method_name: destroy
     static: true
     signature:
       ret: void
-      args:
-        - i32
-        - std.core.Object
-    impl: ark::ets::intrinsics::JoinExclusiveWorker
+      args: [i64]
+    impl: ark::ets::intrinsics::TaskPosterDestroy
+
+  - name: StdTaskPosterPost
+    space: ets
+    class_name: std.core.TaskPoster
+    method_name: post
+    static: true
+    signature:
+      ret: void
+      args: [i64, std.core.Object]
+    impl: ark::ets::intrinsics::TaskPosterPost
 
 ###################
 # std.concurrency #

@@ -378,11 +378,6 @@ public:
         return config_;
     }
 
-    uint64_t GetCurrentTime() const
-    {
-        return os::time::GetClockTimeInMilli();
-    }
-
 protected:
     using EntrypointInfo = Coroutine::EntrypointInfo;
     /// Create native coroutine context instance (implementation dependent)

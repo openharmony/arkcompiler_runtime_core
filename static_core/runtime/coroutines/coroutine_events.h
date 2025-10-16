@@ -20,8 +20,6 @@
 
 namespace ark {
 
-using EventId = int32_t;
-
 class CoroutineManager;
 
 /**
@@ -35,13 +33,14 @@ public:
     NO_COPY_SEMANTIC(CoroutineEvent);
     NO_MOVE_SEMANTIC(CoroutineEvent);
 
-    enum class Type { NONE, GENERIC, COMPLETION, CHANNEL, IO, TIMER };
+    enum class Type { NONE, GENERIC, COMPLETION, CHANNEL, IO };
 
     virtual ~CoroutineEvent()
     {
         if (IsLocked()) {
             Unlock();
         }
+        Runtime::GetCurrent()->GetInternalAllocator()->Delete(mutex_);
     };
 
     Type GetType()
@@ -66,27 +65,20 @@ public:
 
     void Lock() ACQUIRE()
     {
-        mutex_.Lock();
+        mutex_->Lock();
         locked_ = true;
     }
 
     void Unlock() RELEASE()
     {
         locked_ = false;
-        mutex_.Unlock();
-    }
-
-    EventId GetId() const
-    {
-        return eventId_;
+        mutex_->Unlock();
     }
 
 protected:
-    static constexpr EventId DEFAULT_EVENT_ID = 0;
-
-    explicit CoroutineEvent(Type t, CoroutineManager *coroManager, EventId id = DEFAULT_EVENT_ID)
-        : type_(t), coroManager_(coroManager), eventId_(id)
+    explicit CoroutineEvent(Type t, CoroutineManager *coroManager) : type_(t), coroManager_(coroManager)
     {
+        mutex_ = Runtime::GetCurrent()->GetInternalAllocator()->New<os::memory::Mutex>();
     }
 
     bool IsLocked()
@@ -106,9 +98,8 @@ private:
     bool happened_ GUARDED_BY(this) = false;
     bool locked_ = false;
     CoroutineManager *coroManager_ = nullptr;
-    EventId eventId_;
 
-    os::memory::Mutex mutex_;
+    os::memory::Mutex *mutex_;
 };
 
 /**
@@ -156,43 +147,6 @@ public:
 
 private:
     mem::Reference *returnValueObject_ = nullptr;
-};
-
-class TimerEvent : public CoroutineEvent {
-public:
-    explicit TimerEvent(CoroutineManager *coroManager, EventId id) : CoroutineEvent(Type::TIMER, coroManager, id) {}
-
-    NO_COPY_SEMANTIC(TimerEvent);
-    NO_MOVE_SEMANTIC(TimerEvent);
-
-    bool IsExpired() const
-    {
-        return expirationTime_ < currentTime_;
-    }
-
-    void SetExpired()
-    {
-        currentTime_ = std::numeric_limits<uint64_t>::max();
-    }
-
-    void SetExpirationTime(uint64_t expirationTime)
-    {
-        expirationTime_ = expirationTime;
-    }
-
-    void SetCurrentTime(uint64_t currentTime)
-    {
-        currentTime_ = currentTime;
-    }
-
-    uint64_t GetDelay() const
-    {
-        return expirationTime_ - currentTime_;
-    }
-
-private:
-    std::atomic<uint64_t> currentTime_ = 0;
-    uint64_t expirationTime_ = 0;
 };
 
 }  // namespace ark

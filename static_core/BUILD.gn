@@ -174,11 +174,6 @@ config("ark_common_config") {
     defines += [ "PANDA_TARGET_OHOS" ]
   }
 
-  # panda build in full ohos tree
-  if (!ark_static_standalone_build && !ark_standalone_build) {
-    defines += [ "PANDA_BUILD_IN_OHOS_TREE" ]
-  }
-
   cflags_cc = []
 
   if (is_linux) {

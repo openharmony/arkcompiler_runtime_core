@@ -137,8 +137,6 @@ bool ThreadedCoroutineManager::TerminateCoroutine(Coroutine *co)
     co->NativeCodeEnd();
     co->UpdateStatus(ThreadStatus::TERMINATING);
 
-    ProcessTimerEvents();
-
     os::memory::LockHolder l(coroSwitchLock_);
     if (co->HasManagedEntrypoint()) {
         // entrypointless coros should be destroyed manually
@@ -257,8 +255,6 @@ void ThreadedCoroutineManager::Await(CoroutineEvent *awaitee)
     ASSERT(awaitee != nullptr);
     ASSERT_NATIVE_CODE();
     LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::Await started";
-
-    ProcessTimerEvents();
 
     auto *waiter = Coroutine::GetCurrent();
     ASSERT(waiter != nullptr);
@@ -407,8 +403,6 @@ void ThreadedCoroutineManager::ScheduleImpl()
     ASSERT(currentCo != nullptr);
     auto *currentCtx = currentCo->GetContext<ThreadedCoroutineContext>();
 
-    ProcessTimerEvents();
-
     coroSwitchLock_.Lock();
     if (RunnableCoroutinesExist()) {
         currentCo->RequestSuspend(false);
@@ -501,26 +495,5 @@ void ThreadedCoroutineManager::MainCoroutineCompleted()
 }
 
 void ThreadedCoroutineManager::Finalize() {}
-
-void ThreadedCoroutineManager::ProcessTimerEvents()
-{
-    PandaVector<TimerEvent *> timerEvents;
-    {
-        os::memory::LockHolder lh(waitersLock_);
-        auto curTime = GetCurrentTime();
-        for (auto &[evt, _] : waiters_) {
-            if (evt->GetType() == CoroutineEvent::Type::TIMER) {
-                auto *timerEvent = static_cast<TimerEvent *>(evt);
-                timerEvent->SetCurrentTime(curTime);
-                timerEvents.push_back(timerEvent);
-            }
-        }
-    }
-    for (auto *evt : timerEvents) {
-        if (evt->IsExpired()) {
-            evt->Happen();
-        }
-    }
-}
 
 }  // namespace ark

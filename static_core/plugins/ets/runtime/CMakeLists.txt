@@ -89,7 +89,6 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Value.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Arrays.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Job.cpp
-    ${ETS_EXT_SOURCES}/intrinsics/std_core_Timers.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_concurrency_Launch.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_concurrency_Atomics.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_math.cpp

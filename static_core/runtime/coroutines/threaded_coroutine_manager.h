@@ -122,8 +122,6 @@ private:
     void ScheduleNextCoroutine();
     void MainCoroutineCompleted();
 
-    void ProcessTimerEvents();
-
     os::memory::Mutex coroSwitchLock_;
     os::memory::Mutex waitersLock_;
     mutable os::memory::Mutex coroListLock_;
