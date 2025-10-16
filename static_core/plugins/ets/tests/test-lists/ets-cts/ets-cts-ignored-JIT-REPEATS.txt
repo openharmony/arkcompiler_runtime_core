@@ -4,6 +4,9 @@
 #26038
 10.interfaces/06.interface_inheritance/multiple_interface/abstract_method_same_name/abstract_method_15.ets
 
+#30775
+07.expressions/29.assignment/01.simple_assignment_operator/array_assignment_6.ets
+
 #28746
 09.classes/02.class_extension_clause/class_superclass_non_private/class_no_pri30.ets
 16.concurrency/03.asynchronous_api/01.async_functions/async_functions0.ets
