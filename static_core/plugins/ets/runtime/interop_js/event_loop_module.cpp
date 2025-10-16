@@ -32,26 +32,7 @@ napi_get_uv_event_loop([[maybe_unused]] napi_env env, [[maybe_unused]] struct uv
 
 namespace ark::ets::interop::js {
 
-thread_local uint32_t EventLoop::eventCount_ {0};
-
-/* static */
-void EventLoop::IncrementEventCount()
-{
-    eventCount_++;
-}
-
-/* static */
-void EventLoop::DecrementEventCount()
-{
-    eventCount_--;
-}
-
-/* static */
-void EventLoop::DefaultHandleDeleter(uv_handle_t *handle)
-{
-    delete handle;
-    DecrementEventCount();
-}
+std::atomic_uint32_t EventLoop::eventCount_ {0};
 
 /*static*/
 uv_loop_t *EventLoop::GetEventLoop()
@@ -68,11 +49,11 @@ uv_loop_t *EventLoop::GetEventLoop()
 
 bool EventLoop::RunEventLoop(EventLoopRunMode mode)
 {
-    if (InteropCtx::Current() == nullptr) {
+    if (ark::ets::interop::js::InteropCtx::Current() == nullptr) {
         return false;
     }
 
-    InteropCtx::Current(EtsCoroutine::GetCurrent())->UpdateInteropStackInfoIfNeeded();
+    ark::ets::interop::js::InteropCtx::Current(EtsCoroutine::GetCurrent())->UpdateInteropStackInfoIfNeeded();
     auto *loop = GetEventLoop();
     switch (mode) {
         case EventLoopRunMode::RUN_DEFAULT:
@@ -82,7 +63,8 @@ bool EventLoop::RunEventLoop(EventLoopRunMode mode)
             uv_run(loop, UV_RUN_ONCE);
             break;
         case EventLoopRunMode::RUN_NOWAIT:
-            if (eventCount_ == 0) {
+            // Atomic with acquire order reason: to allow event loop processing code see the latest value
+            if (eventCount_.load(std::memory_order_acquire) == 0) {
                 return false;
             }
             uv_run(loop, UV_RUN_NOWAIT);
@@ -114,46 +96,22 @@ void EventLoop::WalkEventLoop(WalkEventLoopCallback &callback, void *args)
 uv_timer_t *EventLoop::CreateTimer()
 {
     auto *timer = new uv_timer_t();
-    IncrementEventCount();
+    // Atomic with release order reason: to allow event loop processing code see the latest value
+    eventCount_.fetch_add(1, std::memory_order_release);
     return timer;
 }
 
 void EventLoop::CloseTimer(uv_timer_t *timer)
 {
     uv_timer_stop(timer);
-    uv_close(reinterpret_cast<uv_handle_t *>(timer), DefaultHandleDeleter);
-}
-
-uv_async_t *EventLoop::CreateAsyncWork()
-{
-    auto async = new uv_async_t();
-    IncrementEventCount();
-    return async;
-}
-
-void EventLoop::DeleteAsyncWork(uv_async_t *async)
-{
-    uv_close(reinterpret_cast<uv_handle_t *>(async), DefaultHandleDeleter);
-}
-
-void EventLoop::DeleteAsyncWork(uv_async_t *async, AsyncWorkDeleter deleter)
-{
-    using PackedData = std::pair<void *, AsyncWorkDeleter>;
-
-    auto *packedData = new PackedData();
-    packedData->first = std::exchange(async->data, packedData);
-    packedData->second = deleter;
-    uv_close(reinterpret_cast<uv_handle_t *>(async), [](uv_handle_t *handle) {
-        auto *packedData = static_cast<PackedData *>(handle->data);
-        auto [data, asyncDeleter] = *packedData;
-        delete packedData;
-        handle->data = data;
-        asyncDeleter(handle);
-        DecrementEventCount();
+    uv_close(reinterpret_cast<uv_handle_t *>(timer), [](uv_handle_t *handle) {
+        delete handle;
+        // Atomic with release order reason: to allow event loop processing code see the latest value
+        eventCount_.fetch_sub(1, std::memory_order_release);
     });
 }
 
-EventLoopCallbackPoster::EventLoopCallbackPoster()
+EventLoopCallbackPoster::EventLoopCallbackPoster(DestroyCallback onDestroy) : onDestroy_(std::move(onDestroy))
 {
     Init();
 }
@@ -163,7 +121,7 @@ void EventLoopCallbackPoster::Init()
     auto loop = EventLoop::GetEventLoop();
     // These resources will be deleted in the event loop callback after Runtime destruction,
     // so we need to use a standard allocator
-    async_ = EventLoop::CreateAsyncWork();
+    async_ = new uv_async_t();
     callbackQueue_ = new ThreadSafeCallbackQueue();
     [[maybe_unused]] auto uvstatus = uv_async_init(loop, async_, AsyncEventToExecuteCallbacks);
     ASSERT(uvstatus == 0);
@@ -173,12 +131,16 @@ void EventLoopCallbackPoster::Init()
 EventLoopCallbackPoster::~EventLoopCallbackPoster()
 {
     ASSERT(async_ != nullptr);
-    auto destroyCb = [async = this->async_]() {
-        EventLoop::DeleteAsyncWork(async, [](uv_handle_t *handle) {
+    auto destroyCb = [async = this->async_, onDestroy = this->onDestroy_]() {
+        auto deleter = [](uv_handle_t *handle) {
             auto *poster = reinterpret_cast<ThreadSafeCallbackQueue *>(handle->data);
             delete poster;
             delete handle;
-        });
+        };
+        uv_close(reinterpret_cast<uv_handle_t *>(async), deleter);
+        if (onDestroy) {
+            onDestroy();
+        }
     };
     if (NeedDestroyInPlace()) {
         destroyCb();
@@ -212,7 +174,9 @@ void EventLoopCallbackPoster::AsyncEventToExecuteCallbacks(uv_async_t *async)
 SingleEventPoster::SingleEventPoster(WrappedCallback &&callback) : callback_(std::move(callback))
 {
     auto loop = EventLoop::GetEventLoop();
-    async_ = EventLoop::CreateAsyncWork();
+    // These resources will be deleted in the event loop callback after Runtime destruction,
+    // so we need to use a standard allocator
+    async_ = new uv_async_t();
     [[maybe_unused]] auto uvstatus = uv_async_init(loop, async_, CallbackExecutor);
     ASSERT(uvstatus == 0);
     async_->data = this;
@@ -222,7 +186,7 @@ SingleEventPoster::~SingleEventPoster()
 {
     ASSERT(async_ != nullptr);
     if (NeedDestroyInPlace()) {
-        EventLoop::DeleteAsyncWork(async_);
+        uv_close(reinterpret_cast<uv_handle_t *>(async_), [](auto *handle) { delete handle; });
         return;
     }
     async_->data = nullptr;
@@ -234,7 +198,7 @@ void SingleEventPoster::CallbackExecutor(uv_async_t *async)
 {
     auto *eventPoster = static_cast<SingleEventPoster *>(async->data);
     if (eventPoster == nullptr) {
-        EventLoop::DeleteAsyncWork(async);
+        uv_close(reinterpret_cast<uv_handle_t *>(async), [](auto *handle) { delete handle; });
         return;
     }
     eventPoster->callback_();
@@ -278,11 +242,13 @@ bool EventLoopCallbackPoster::ThreadSafeCallbackQueue::IsEmpty()
     return callbackQueue_.empty();
 }
 
-PandaUniquePtr<CallbackPoster> EventLoopCallbackPosterFactoryImpl::CreatePoster()
+// NOLINTNEXTLINE(google-default-arguments)
+PandaUniquePtr<CallbackPoster> EventLoopCallbackPosterFactoryImpl::CreatePoster(
+    CallbackPoster::DestroyCallback onDestroy)
 {
     [[maybe_unused]] auto *w = Coroutine::GetCurrent()->GetContext<StackfulCoroutineContext>()->GetWorker();
     ASSERT(w->IsMainWorker() || w->InExclusiveMode());
-    auto poster = MakePandaUnique<EventLoopCallbackPoster>();
+    auto poster = MakePandaUnique<EventLoopCallbackPoster>(onDestroy);
     ASSERT(poster != nullptr);
     return poster;
 }

@@ -17,6 +17,16 @@ package std.concurrency;
 type TimerId = int;
 type Callback = () => void;
 
+export function registerTimer(callback: Callback, delay: int, repeat: boolean): TimerId {
+    let timer = EventLoop.createTimer(callback, delay, repeat);
+    EventLoop.getOrCreate().registerTimer(timer);
+    return timer.getId();
+}
+
+export function clearTimer(id: TimerId) {
+    EventLoop.clearTimer(id);
+}
+
 // NOTE(panferovi): fix signature after #25420
 native function launchSameWorker(callback: Object): void;
 

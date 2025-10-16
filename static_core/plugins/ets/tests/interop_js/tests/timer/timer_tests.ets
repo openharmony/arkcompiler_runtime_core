@@ -129,26 +129,22 @@ function testSetInterval(isExternalTimer: boolean): void {
 }
 
 function testSetTimeoutExecuteOrder(isExternalTimer: boolean) : void {
-    if (isExternalTimer) {
-        globalTest = new Test(0);
-        globalTest!.setPassed();
-        return;
-    }
-
     globalTest = new Test(6);
     globalTest!.checkpoint(0);
     setTimeout((): void => {
-        globalTest!.checkpoint(5);
-        globalTest!.setPassed();
-    }, 1);
-    setTimeout((): void => {
         globalTest!.checkpoint(2);
-    }, 0);
+    }, 1);
+    let now = Date.now();
+    while(Date.now() - now < 2) {}
     setTimeout((): void => {
         globalTest!.checkpoint(3);
     }, 0);
     setTimeout((): void => {
         globalTest!.checkpoint(4);
+    }, 0);
+    setTimeout((): void => {
+        globalTest!.checkpoint(5);
+        globalTest!.setPassed();
     }, 0);
     globalTest!.checkpoint(1);
 }
@@ -366,12 +362,6 @@ function testSetIntervalWithString(isExternalTimer: boolean): void {
 function testClearTimerCrossWorker(isExternalTimer: boolean)
 {
     globalTest = new Test(0);
-
-    if (isExternalTimer) {
-        globalTest!.setPassed();
-        return;
-    }
-
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
     let delay = 100;
 

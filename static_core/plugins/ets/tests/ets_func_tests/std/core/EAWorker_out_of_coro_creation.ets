@@ -18,34 +18,27 @@ function out_of_coro_test() {
     const coro_to_create = 2000;
     let arr = new Int32Array(new ArrayBuffer(1024))
 
-    let jobs = new Array<Job<void>>();
-
     arktest.expectError(() => {
         let wait_func = (arr: Int32Array) => {Atomics.wait(arr, 0, 0);}
         let mainWaitJob = launch<void, (arr: Int32Array) => void> (wait_func, arr);
         let awaitIt = ()=>{ mainWaitJob.Await(); }
 
         for (let i = 1; i < coro_to_create; ++ i) {
-            jobs.push(launch<void, () => void> (awaitIt));
+            launch<void, () => void> (awaitIt);
         }
     }, new CoroutinesLimitExceedError('Unable to create a new coroutine: reached the limit for the number of existing coroutines.'));
 
     let eaw1 = new EAWorker();
     eaw1.start();
+    eaw1.join();
 
     let eaw2 = new EAWorker();
     eaw2.start();
+    eaw2.run<void>(()=>{});
+    eaw2.join();
 
     Atomics.store(arr, 0, 1);
     Atomics.notify(arr, 0);
-
-    for (let j of jobs) {
-        j.Await();
-    }
-
-    eaw1.quitSafely();
-    eaw2.run<void>(()=>{});
-    eaw2.quitSafely();
 }
 
 function main() {

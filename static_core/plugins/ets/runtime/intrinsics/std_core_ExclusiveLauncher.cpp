@@ -31,7 +31,23 @@
 
 namespace ark::ets::intrinsics {
 
+enum TaskPosterState : uint64_t { NOT_DESTROYED, DESTROYED };
+
+thread_local static TaskPosterState g_posterState = NOT_DESTROYED;
+
+static thread_local EtsInt g_currentEAWorkerNum = 0;
+static std::atomic<EtsInt> g_eaworkerCount = 1;
 static constexpr EtsInt INVALID_WORKER_ID = -1;
+
+EtsInt GetEAWorkerNumFromThread()
+{
+    return g_currentEAWorkerNum;
+}
+
+EtsInt CalculateEAworkerCount()
+{
+    return g_eaworkerCount++;
+}
 
 EtsObject *CreateMainWorker()
 {
@@ -92,22 +108,23 @@ Coroutine *TryCreateEACoroutine(PandaEtsVM *etsVM, bool needInterop, bool &limit
     return exclusiveCoro;
 }
 
-static constexpr uint64_t ASYNC_WORK_WAITING_TIME = 10;
-
 void RunTaskOnEACoroutine(PandaEtsVM *etsVM, bool needInterop, mem::Reference *taskRef)
 {
-    RunExclusiveTask(taskRef, etsVM->GetGlobalObjectStorage());
+    auto *refStorage = etsVM->GetGlobalObjectStorage();
+    auto *coroMan = etsVM->GetCoroutineManager();
+
     if (needInterop) {
-        auto *w = Coroutine::GetCurrent()->GetWorker();
-        while (w->IsExternalSchedulingEnabled()) {
-            w->ProcessAsyncWork();
-            auto *coroMan = Coroutine::GetCurrent()->GetManager();
-            TimerEvent timerEvt(coroMan, 0);
-            timerEvt.Lock();
-            timerEvt.SetExpirationTime(coroMan->GetCurrentTime() + ASYNC_WORK_WAITING_TIME);
-            coroMan->Await(&timerEvt);
+        auto poster = etsVM->CreateCallbackPoster();
+        ASSERT(poster != nullptr);
+        poster->Post(RunExclusiveTask, taskRef, refStorage);
+
+        while (g_posterState != TaskPosterState::DESTROYED) {
+            etsVM->RunEventLoop(ark::EventLoopRunMode::RUN_ONCE);
         }
+    } else {
+        RunExclusiveTask(taskRef, refStorage);
     }
+    coroMan->DestroyExclusiveWorker();
 }
 
 bool HasPendingError(bool limitIsReached, bool jsEnvEmpty)
@@ -123,7 +140,7 @@ bool HasPendingError(bool limitIsReached, bool jsEnvEmpty)
     return false;
 }
 
-EtsInt ExclusiveLaunch(EtsObject *task, uint8_t needInterop, EtsString *name)
+EtsInt ExclusiveLaunch(EtsObject *task, uint8_t needInterop, EtsString *name, EtsInt eaworkerNum)
 {
     auto *coro = EtsCoroutine::GetCurrent();
     ASSERT(coro != nullptr);
@@ -152,18 +169,19 @@ EtsInt ExclusiveLaunch(EtsObject *task, uint8_t needInterop, EtsString *name)
         PandaString nameStr(nameHandle->ConvertToStringView(&nameBuf));
         ScopedNativeCodeThread nativeScope(coro);
         auto event = os::memory::Event();
-        auto t = std::thread([&jsEnvEmpty, &limitIsReached, &event, &workerId, etsVM, taskRef, supportInterop]() {
-            auto *eaCoro = TryCreateEACoroutine(etsVM, supportInterop, limitIsReached, jsEnvEmpty);
-            if (eaCoro == nullptr) {
-                LOG(ERROR, COROUTINES) << "Cannot create EAWorker";
+        auto t = std::thread(
+            [&jsEnvEmpty, &limitIsReached, &event, &workerId, etsVM, taskRef, supportInterop, eaworkerNum]() {
+                auto *eaCoro = TryCreateEACoroutine(etsVM, supportInterop, limitIsReached, jsEnvEmpty);
+                if (eaCoro == nullptr) {
+                    LOG(ERROR, COROUTINES) << "Cannot create EAWorker";
+                    event.Fire();
+                    return;
+                }
+                g_currentEAWorkerNum = eaworkerNum;
+                workerId = eaCoro->GetWorker()->GetId();
                 event.Fire();
-                return;
-            }
-            workerId = eaCoro->GetWorker()->GetId();
-            event.Fire();
-            RunTaskOnEACoroutine(etsVM, supportInterop, taskRef);
-            etsVM->GetCoroutineManager()->DestroyExclusiveWorker();
-        });
+                RunTaskOnEACoroutine(etsVM, supportInterop, taskRef);
+            });
         os::thread::SetThreadName(t.native_handle(), nameStr.c_str());
         event.Wait();
         t.detach();
@@ -174,20 +192,35 @@ EtsInt ExclusiveLaunch(EtsObject *task, uint8_t needInterop, EtsString *name)
     return workerId;
 }
 
-void JoinExclusiveWorker(EtsInt workerId, EtsObject *finalTask)
+int64_t TaskPosterCreate()
 {
-    auto *coro = Coroutine::GetCurrent();
-    auto *coroMan = coro->GetManager();
-    auto *taskRef =
-        coro->GetVM()->GetGlobalObjectStorage()->Add(finalTask->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
-    auto eaGroup = CoroutineWorkerGroup::GenerateExactWorkerId(workerId);
-    auto joiningFunc = [](void *param) {
-        auto *ref = static_cast<mem::Reference *>(param);
-        auto *eaCoro = EtsCoroutine::GetCurrent();
-        RunExclusiveTask(ref, eaCoro->GetVM()->GetGlobalObjectStorage());
-        eaCoro->GetWorker()->DestroyCallbackPoster();
-    };
-    coroMan->LaunchNative(joiningFunc, taskRef, "joining ea-coro", eaGroup, CoroutinePriority::DEFAULT_PRIORITY, true);
+    auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+
+    std::function onDestroy = []() { g_posterState = DESTROYED; };
+
+    auto poster = coro->GetPandaVM()->CreateCallbackPoster(onDestroy);
+    ASSERT(poster != nullptr);
+    return reinterpret_cast<int64_t>(poster.release());
+}
+
+void TaskPosterDestroy(int64_t poster)
+{
+    auto *taskPoster = reinterpret_cast<CallbackPoster *>(poster);
+    ASSERT(taskPoster != nullptr);
+    Runtime::GetCurrent()->GetInternalAllocator()->Delete(taskPoster);
+}
+
+void TaskPosterPost(int64_t poster, EtsObject *task)
+{
+    auto *taskPoster = reinterpret_cast<CallbackPoster *>(poster);
+    ASSERT(taskPoster != nullptr);
+
+    auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+    auto *refStorage = coro->GetPandaVM()->GetGlobalObjectStorage();
+    auto *taskRef = refStorage->Add(task->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
+    taskPoster->Post(RunExclusiveTask, taskRef, refStorage);
 }
 
 }  // namespace ark::ets::intrinsics

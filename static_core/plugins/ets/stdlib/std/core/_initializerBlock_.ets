@@ -22,7 +22,6 @@ static {
     ObjectType = Type.of(new Object()) as ClassType;
     console = Console.getInstance();
     coroutine = new Coroutine();
-    mainEAWorker = new MainEAWorker();
 
     MAX_REGULAR_INTEGER = new BigInt(Number.MAX_SAFE_INTEGER)
     FAST_TO_STRING_HANDLER_MAP = () => {

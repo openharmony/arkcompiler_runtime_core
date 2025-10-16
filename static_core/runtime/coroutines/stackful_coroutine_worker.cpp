@@ -27,7 +27,7 @@ StackfulCoroutineWorker::StackfulCoroutineWorker(Runtime *runtime, PandaVM *vm, 
     : CoroutineWorker(runtime, vm, name, id, isMainWorker),
       coroManager_(coroManager),
       threadId_(os::thread::GetCurrentThreadId()),
-      hasRunnableCoroEvent_(coroManager),
+      workerCompletionEvent_(coroManager),
       stats_(std::move(name))
 {
     LOG(DEBUG, COROUTINES) << "Created a coroutine worker instance: id=" << GetId() << " name=" << GetName();
@@ -92,8 +92,6 @@ void StackfulCoroutineWorker::WaitForEvent(CoroutineEvent *awaitee)
     ASSERT(!awaitee->Happened());
     ASSERT(waiter->IsInNativeCode());
 
-    ProcessTimerEvents();
-
     waitersLock_.Lock();
     awaitee->Unlock();
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineWorker::AddWaitingCoroutine: " << waiter->GetName() << " AWAITS";
@@ -139,9 +137,10 @@ void StackfulCoroutineWorker::UnblockWaiters(CoroutineEvent *blocker)
     }
     if (canMigrateAwait) {
         coroManager_->MigrateAwakenedCoro(unblockedCoro);
-        return;
     }
-    hasRunnableCoroEvent_.Happen();
+    if (IsDisabledForCrossWorkersLaunch()) {
+        workerCompletionEvent_.Happen();
+    }
 }
 
 void StackfulCoroutineWorker::RequestFinalization(Coroutine *finalizee)
@@ -149,8 +148,6 @@ void StackfulCoroutineWorker::RequestFinalization(Coroutine *finalizee)
     // precondition: current coro and finalizee belong to the current worker
     ASSERT(finalizee->GetWorker() == this);
     ASSERT(GetCurrentContext()->GetWorker() == this);
-
-    ProcessTimerEvents();
 
 #ifdef ARK_HYBRID
     finalizee->UnbindMutator();
@@ -183,42 +180,33 @@ void StackfulCoroutineWorker::FinalizeFiberScheduleLoop()
 
 void StackfulCoroutineWorker::CompleteAllAffinedCoroutines()
 {
-    ASSERT(IsDisabledForCrossWorkersLaunch());
-
-    while (ProcessAsyncWork()) {
-    }
-}
-
-bool StackfulCoroutineWorker::ProcessAsyncWork()
-{
     ASSERT_NATIVE_CODE();
     ASSERT(GetCurrentContext()->GetWorker() == this);
+    ASSERT(IsDisabledForCrossWorkersLaunch());
 
-    bool asyncWorkExists = false;
     // CC-OFFNXT(G.FMT.04-CPP): project code style
     auto lock = [](auto &&...locks) { ([&]() NO_THREAD_SAFETY_ANALYSIS { locks.Lock(); }(), ...); };
     // CC-OFFNXT(G.FMT.04-CPP): project code style
     auto unlock = [](auto &&...locks) { ([&]() NO_THREAD_SAFETY_ANALYSIS { locks.Unlock(); }(), ...); };
-    {
-        lock(waitersLock_, runnablesLock_);
-        if (runnables_.Size() > 1) {
-            unlock(waitersLock_, runnablesLock_);
-            coroManager_->Schedule();
-            asyncWorkExists = true;
-        } else if (!waiters_.empty()) {
-            hasRunnableCoroEvent_.SetNotHappened();
-            hasRunnableCoroEvent_.Lock();
-            unlock(waitersLock_, runnablesLock_);
-            coroManager_->Await(&hasRunnableCoroEvent_);
-            asyncWorkExists = true;
-        } else {
-            unlock(waitersLock_, runnablesLock_);
+
+    do {
+        // CC-OFFNXT(G.CTL.03): false positive
+        while (true) {
+            lock(waitersLock_, runnablesLock_);
+            if (runnables_.Size() > 1) {
+                unlock(waitersLock_, runnablesLock_);
+                coroManager_->Schedule();
+            } else if (!waiters_.empty()) {
+                workerCompletionEvent_.SetNotHappened();
+                workerCompletionEvent_.Lock();
+                unlock(waitersLock_, runnablesLock_);
+                coroManager_->Await(&workerCompletionEvent_);
+            } else {
+                unlock(waitersLock_, runnablesLock_);
+                break;
+            }
         }
-    }
-
-    asyncWorkExists |= GetPandaVM()->RunEventLoop(ark::EventLoopRunMode::RUN_NOWAIT);
-
-    return asyncWorkExists;
+    } while (GetPandaVM()->RunEventLoop(ark::EventLoopRunMode::RUN_NOWAIT));
 }
 
 void StackfulCoroutineWorker::DisableCoroutineSwitch()
@@ -329,28 +317,20 @@ bool StackfulCoroutineWorker::RunnableCoroutinesExist() const
     return !runnables_.Empty();
 }
 
-void StackfulCoroutineWorker::WaitForRunnables(bool needTimedWait, uint64_t waitingTime)
+void StackfulCoroutineWorker::WaitForRunnables()
 {
     // NOTE(konstanting): in case of work stealing, use timed wait and try periodically to steal some runnables
     while (!RunnableCoroutinesExist() && IsActive()) {
         // profiling: no need to profile the SLEEPING state, closing the interval
         stats_.FinishInterval(CoroutineTimeStats::SCH_ALL);
-        if (needTimedWait) {
-            runnablesCv_.TimedWait(&runnablesLock_, waitingTime);
-        } else {
-            runnablesCv_.Wait(&runnablesLock_);
-        }
-
+        runnablesCv_.Wait(
+            &runnablesLock_);  // or timed wait? we may miss the signal in some cases (e.g. IsActive() change)...
         // profiling: reopening the interval after the sleep
         stats_.StartInterval(CoroutineTimeStats::SCH_ALL);
         if (!RunnableCoroutinesExist() && IsActive()) {
             LOG(DEBUG, COROUTINES) << "StackfulCoroutineWorker::WaitForRunnables: spurious wakeup!";
         } else {
             LOG(DEBUG, COROUTINES) << "StackfulCoroutineWorker::WaitForRunnables: wakeup!";
-        }
-
-        if (needTimedWait) {
-            break;
         }
     }
 }
@@ -365,23 +345,20 @@ void StackfulCoroutineWorker::RegisterIncomingActiveCoroutine(Coroutine *newCoro
 
 void StackfulCoroutineWorker::RequestScheduleImpl()
 {
-    ProcessTimerEvents();
-
     // precondition: called within the current worker, no cross-worker calls allowed
     ASSERT(GetCurrentContext()->GetWorker() == this);
     ASSERT_NATIVE_CODE();
+    runnablesLock_.Lock();
 
     // NOTE(konstanting): implement coro migration, work stealing, etc.
     if (RunnableCoroutinesExist()) {
-        runnablesLock_.Lock();
         SuspendCurrentCoroAndScheduleNext();
         ASSERT(!IsCrossWorkerCall() || (Coroutine::GetCurrent()->GetType() == Coroutine::Type::MUTATOR));
     } else {
-        auto [needTimedWait, waitingTime] = CalculateShortestTimerDelay();
-        os::memory::LockHolder lh(runnablesLock_);
         coroManager_->TriggerMigration();
         LOG(DEBUG, COROUTINES) << "StackfulCoroutineWorker::RequestSchedule: No runnables, starting to wait...";
-        WaitForRunnables(needTimedWait, waitingTime);
+        WaitForRunnables();
+        runnablesLock_.Unlock();
     }
 }
 
@@ -660,49 +637,6 @@ void StackfulCoroutineWorker::GetFullWorkerStateInfo(StackfulCoroutineWorkerStat
             info->AddCoroutine(pair.second);
         });
     }
-}
-
-void StackfulCoroutineWorker::ProcessTimerEvents()
-{
-    PandaVector<TimerEvent *> timerEvents;
-    {
-        os::memory::LockHolder lh(waitersLock_);
-        auto curTime = coroManager_->GetCurrentTime();
-        for (auto &[evt, _] : waiters_) {
-            if (evt->GetType() == CoroutineEvent::Type::TIMER) {
-                auto *timerEvent = static_cast<TimerEvent *>(evt);
-                timerEvent->SetCurrentTime(curTime);
-                timerEvents.push_back(timerEvent);
-            }
-        }
-    }
-    std::sort(timerEvents.begin(), timerEvents.end(),
-              [](const TimerEvent *evt1, const TimerEvent *evt2) { return evt1->GetId() < evt2->GetId(); });
-    for (auto *evt : timerEvents) {
-        if (evt->IsExpired()) {
-            evt->Happen();
-        }
-    }
-}
-
-std::pair<bool, uint64_t> StackfulCoroutineWorker::CalculateShortestTimerDelay()
-{
-    auto hasTimerEvents = false;
-    uint64_t minTimerDelay = std::numeric_limits<uint64_t>::max();
-
-    os::memory::LockHolder lh(waitersLock_);
-    for (auto &[evt, _] : waiters_) {
-        if (evt->GetType() == CoroutineEvent::Type::TIMER) {
-            auto *timerEvent = static_cast<TimerEvent *>(evt);
-            auto delay = timerEvent->GetDelay();
-            if (timerEvent->IsExpired()) {
-                return {true, 0};
-            }
-            hasTimerEvents = true;
-            minTimerDelay = std::min(delay, minTimerDelay);
-        }
-    }
-    return {hasTimerEvents, minTimerDelay};
 }
 
 }  // namespace ark

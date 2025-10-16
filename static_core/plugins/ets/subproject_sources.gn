@@ -166,7 +166,6 @@ srcs_runtime = [
   "runtime/intrinsics/std_core_SyncPrimitives.cpp",
   "runtime/intrinsics/std_core_String.cpp",
   "runtime/intrinsics/std_core_StringBuilder.cpp",
-  "runtime/intrinsics/std_core_Timers.cpp",
   "runtime/intrinsics/std_core_Type.cpp",
   "runtime/intrinsics/std_core_TypeCreator.cpp",
   "runtime/intrinsics/reflect_Proxy.cpp",

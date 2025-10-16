@@ -29,6 +29,9 @@ class Coroutine;
 class CallbackPoster {
 public:
     CallbackPoster() = default;
+    // NOLINTNEXTLINE(performance-unnecessary-value-param)
+    using DestroyCallback = std::function<void()>;
+    explicit CallbackPoster([[maybe_unused]] const DestroyCallback &onDestroy) {};
     virtual ~CallbackPoster() = default;
     NO_COPY_SEMANTIC(CallbackPoster);
     NO_MOVE_SEMANTIC(CallbackPoster);
@@ -78,7 +81,7 @@ public:
     NO_COPY_SEMANTIC(CallbackPosterFactoryIface);
     NO_MOVE_SEMANTIC(CallbackPosterFactoryIface);
 
-    virtual PandaUniquePtr<CallbackPoster> CreatePoster() = 0;
+    virtual PandaUniquePtr<CallbackPoster> CreatePoster(CallbackPoster::DestroyCallback onDestroy) = 0;
 };
 
 }  // namespace ark
