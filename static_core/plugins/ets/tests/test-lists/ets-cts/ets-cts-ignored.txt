@@ -393,6 +393,12 @@
 07.expressions/17.typeof_expression/comptime_8.ets
 07.expressions/17.typeof_expression/comptime_9.ets
 
+#30583
+07.expressions/19.nullish-coalescing_expression/resulting_type_crash.ets
+
+#30691
+07.expressions/19.nullish-coalescing_expression/nullish_coalescing_expression_record_3.ets
+
 #30486
 07.expressions/21.multiplicative_expressions/04.exponentiation/inf_16.ets
 07.expressions/21.multiplicative_expressions/04.exponentiation/inf_17.ets

@@ -13,30 +13,24 @@
  * limitations under the License.
  */
 
-{%- for c in cases %}
-
 /*---
-desc: |-
-    The type of a nullish-coalescing expression is a normalized union type (see Union Types) formed from the following:
-    • Non-nullish variant of the type of the left-hand-side expression; and
-    • Type of the right-hand-side expression.
+desc: The type of a nullish-coalescing expression is a normalized union type (see
+  Union Types) formed from the following:\n\u2022 Non-nullish variant of the type
+  of the left-hand-side expression; and\n\u2022 Type of the right-hand-side expression.
+  #30583 - crash, not CTE
 ---*/
 
 type int_nullish = int | null | undefined
 
-{{c.decl}}
-
-function setValueOfType(x: {{c.type}}): {{c.type}} {
-    return x
-}
+enum Enum { A = 1.2, B = 0.0}
 
 function main(): void {
-  let lhs: {{c.type}} = setValueOfType({{c.value}});
+  let lhs: Array<Enum> = [Enum.A, Enum.B];
   let rhs: string = "aa";
 
-  let x = lhs{{c.access}} ?? rhs;
-  // check that x is exactly of expected type, without extra unions
-  let y: {{c.expected_type}} = x
+  let x = lhs[1] ?? rhs;
+  arktest.assertTrue(x instanceof double|string)
+  // Type double|string leads to crash (not CTE type error, see #30583). Please keep this as separate case
+  // With Enum|string it works fine and added to normal tests
+  let y: double|string = x
 }
-
-{%- endfor %}

@@ -34,4 +34,7 @@ function main(): void {
   let b: CBBB = new CBBB();
   let c = a ?? b;
   arktest.assertTrue( c instanceof ACB )
+  arktest.assertFalse( c instanceof ACA )
+  //verify exact type
+  let d: CAAA | CBBB = c
 }

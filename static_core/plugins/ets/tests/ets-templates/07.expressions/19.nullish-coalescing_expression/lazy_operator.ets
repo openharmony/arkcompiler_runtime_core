@@ -12,19 +12,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+{%- for c in cases %}
 /*---
-desc: null safety -> Null-Coalescing Operator.
-assert: This operator is lazy, meaning that if the evaluation of the left-hand-side expression is not equal to null, the right-hand-side expression is not evaluated.
+desc: |-
+    null safety -> Null-Coalescing Operator.
+    assert: This operator is lazy, meaning that if the evaluation of the left-hand-side expression is not equal to null, the right-hand-side expression is not evaluated.
+    {{c.description}}
 ---*/
 
-function foo(): int {
-  arktest.assertTrue( false )
+let a: Any
+
+function non_eval(): int {
+  arktest.assertTrue(false);
   return 0;
 }
 
-function main(): void {
-  let a: Int = 4;
+class C {}
 
-  let x = a ?? foo();
+function main(): void {
+    {{c.main|indent}}
 }
+{%- endfor %}
