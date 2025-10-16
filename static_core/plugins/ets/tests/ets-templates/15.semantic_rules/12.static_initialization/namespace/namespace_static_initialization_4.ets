@@ -15,10 +15,22 @@
 
 /*---
 desc: >-
-    Among all package modules there can be one to contain a code that performs initialization actions (e.g., setting
-    initial values for variables across all package modules) as described in detail in Compilation Unit Initialization
-    and in Initializer Block
-tags: [negative, compile-only]
+      For namespaces, the code in a static block is executed only when namespace members are used in the program
+      (an example is provided in Namespace Declarations).
+      Use interface field of the namespace
+tags: [no-warmup]
 ---*/
 
-import {var1, pi} from "./packageP3"
+namespace ns {
+  export interface I {
+    i: string
+  }
+  export let v: I
+  static {
+    v = { i: "some str" }
+  }
+}
+
+function main() {
+  arktest.assertEQ(ns.v.i, "some str")
+}

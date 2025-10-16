@@ -15,16 +15,18 @@
 
 /*---
 desc: >-
-    A compile-time error occurs if an initializer block contains a return <expression> statement
-tags: [compile-only, negative]
+    Static initialization must be performed or started before the first execution of one of the following operations:
+    - invocation of a function of the module
+    - access to a variable of the module
+tags: [no-warmup]
+files:
+- ./modules/init_module.ets
 ---*/
 
-package p5
-
-static {
-    return 0;
-}
+import {seqstr} from "./modules/init_module"
+import {seq} from "./modules/init_module"
 
 function main() {
-
+  seq("A")
+  arktest.assertEQ(seqstr, "MOD:A")
 }

@@ -13,10 +13,16 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
+
 /*---
-desc: Static block cannot be used out of the class or namespace
-tags: [compile-only, negative]
+desc: >-
+      Static initialization execution involves the execution of the following
+      - Initializers of variables or static fields;
+      - Top-level statements for modules and namespaces;
+      - Code inside a static block for classes.
+tags: [no-warmup]
 ---*/
 
-static {
-}
+{{c.decl}}
+{% endfor %}

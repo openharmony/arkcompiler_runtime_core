@@ -14,9 +14,33 @@
  */
 
 /*---
-desc: Static block cannot be used out of the class or namespace
-tags: [compile-only, negative]
+desc: >-
+      Static initializers from multiple namespaces work independently
 ---*/
 
-static {
+namespace ns1 {
+  export let i: string
+  static {
+    i = "ns1 initialized"
+  }
+}
+
+namespace ns2 {
+  export let i: string
+  static {
+    i = "ns2 initialized"
+  }
+}
+
+namespace ns3 {
+  export let i: int
+  static {
+    i = 2
+  }
+}
+
+function main() {
+  arktest.assertEQ(ns1.i, "ns1 initialized")
+  arktest.assertEQ(ns2.i, "ns2 initialized")
+  arktest.assertEQ(ns3.i, 2)
 }

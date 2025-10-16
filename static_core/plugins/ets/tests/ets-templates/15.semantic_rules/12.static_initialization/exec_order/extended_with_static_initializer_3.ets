@@ -15,19 +15,30 @@
 
 /*---
 desc: >-
-    Among all package modules there can be one to contain a code that performs initialization actions (e.g., setting
-    initial values for variables across all package modules) as described in detail in Compilation Unit Initialization
-    and in Initializer Block
-tags: []
+      Static initialization is performed before the first execution of one of the following operations
+      - Static initialization of a direct subclass of an entity that is a class.
+tags: [no-warmup]
 ---*/
 
-package p1
+let seqstr = ""
+function seq(i: string) {
+  seqstr += ":" + i
+}
 
-let var1:int;
-static {
-    var1 = 5
+abstract class A {
+  static {
+    seq("init A")
+  }
+}
+
+class B extends A {
+  static {
+    seq("init B")
+  }
 }
 
 function main() {
-    arktest.assertEQ(var1, 5)
+  arktest.assertEQ(seqstr, "")
+  new B()
+  arktest.assertEQ(seqstr, ":init A:init B")
 }

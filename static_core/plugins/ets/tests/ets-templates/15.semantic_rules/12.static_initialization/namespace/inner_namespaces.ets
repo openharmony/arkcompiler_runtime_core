@@ -14,9 +14,33 @@
  */
 
 /*---
-desc: Static block cannot be used out of the class or namespace
-tags: [compile-only, negative]
+desc: >-
+      For namespaces, the code in a static block is executed only when namespace members are used in the program
+tags: [no-warmup]
 ---*/
 
-static {
+let seqstr = ""
+function seq(i: string) {
+  seqstr += ":" + i
+}
+
+namespace ns1 {
+  export let d: number = 1
+  static {
+    seq("A")
+  }
+  export namespace ns2 {
+    export let i: number = 2
+    static {
+      seq("B")
+    }
+  }
+}
+
+function main() {
+  arktest.assertEQ(seqstr, "")
+  ns1.d
+  arktest.assertEQ(seqstr, ":A")
+  ns1.ns2.i
+  arktest.assertEQ(seqstr, ":A:B")
 }

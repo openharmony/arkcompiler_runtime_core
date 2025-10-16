@@ -14,9 +14,23 @@
  */
 
 /*---
-desc: Static block cannot be used out of the class or namespace
-tags: [compile-only, negative]
+desc: >-
+      Static initialization may initialize multiple fields in one go
 ---*/
 
-static {
+class C {
+  {% for i in range(100) %}
+  static var{{i}}: int = 0
+  {% endfor %}
+  static {
+    {% for i in range(100) %}
+    C.var{{i}} = {{i}}
+    {% endfor %}
+  }
+}
+
+function main() {
+  {% for i in range(100) %}
+  arktest.assertEQ(C.var{{i}}, {{i}})
+  {% endfor %}
 }

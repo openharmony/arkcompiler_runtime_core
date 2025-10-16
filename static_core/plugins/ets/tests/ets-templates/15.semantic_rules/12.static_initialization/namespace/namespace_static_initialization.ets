@@ -15,16 +15,32 @@
 
 /*---
 desc: >-
-    Among all package modules there can be one to contain a code that performs initialization actions (e.g., setting
-    initial values for variables across all package modules) as described in detail in Compilation Unit Initialization
-    and in Initializer Block
-tags: [compile-only]
+      For namespaces, the code in a static block is executed only when namespace members are used in the program
+      (an example is provided in Namespace Declarations).
+      Use static initializer of namespace
+tags: [no-warmup]
 ---*/
 
-package p3
+namespace ns {
+  export class A {
+    static f: int
+  }
+  export class C {
+    static s: int = 1
+    static {
+      A.f = 3
+    }
+  }
+  static {
+    A.f = 2
+  }
+  export let i: string = ""
+}
 
-export let pi: Float;
-static {
-    let pid: Double = 3.14159
-    pi = pid.toFloat()
+function main() {
+  arktest.assertEQ(ns.A.f, 0)
+  arktest.assertEQ(ns.C.s, 1)
+  arktest.assertEQ(ns.A.f, 3)
+  ns.i = "str"
+  arktest.assertEQ(ns.A.f, 2)
 }

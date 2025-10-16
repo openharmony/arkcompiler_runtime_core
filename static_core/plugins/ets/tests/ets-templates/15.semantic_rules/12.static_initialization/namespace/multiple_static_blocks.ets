@@ -14,9 +14,18 @@
  */
 
 /*---
-desc: Static block cannot be used out of the class or namespace
+desc: >-
+      Only one static block is allowed in a single namespace
 tags: [compile-only, negative]
 ---*/
 
-static {
+namespace ns1 {
+  export let i: string
+  static {
+    i = "ns1 initialized"
+  }
+  export let j: int
+  static {
+    j = 2
+  }
 }

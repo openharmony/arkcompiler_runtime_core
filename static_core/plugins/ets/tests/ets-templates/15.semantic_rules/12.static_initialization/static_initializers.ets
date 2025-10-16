@@ -13,10 +13,18 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
+
 /*---
-desc: Static block cannot be used out of the class or namespace
-tags: [compile-only, negative]
+desc: >-
+      Static initialization is a routine performed once for each class (see Classes),
+      namespace (see Namespace Declarations), or module (see Modules).
+tags: [{{c.tags}}]
 ---*/
 
-static {
+{{c.decl}}
+
+function main() {
+{{c.check}}
 }
+{% endfor %}

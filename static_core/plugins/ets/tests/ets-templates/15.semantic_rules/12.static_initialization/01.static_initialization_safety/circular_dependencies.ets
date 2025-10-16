@@ -13,18 +13,23 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
-desc: >-
-    If code of an initializer block contains unhandled throw statement (see throw Statements) then the program terminates
-tags: [negative, compile-only]
+desc: Object is used before being initialized
+tags: [no-warmup]
 ---*/
 
-package p6
+{{c.decl}}
 
-static {
-    throw new Error
-}
+let res: boolean = false
 
 function main() {
-
+  try {
+    A.a
+  } catch(e) {
+    arktest.assertTrue(e instanceof NullPointerError)
+    res = true
+  }
+  arktest.assertTrue(res)
 }
+{% endfor %}

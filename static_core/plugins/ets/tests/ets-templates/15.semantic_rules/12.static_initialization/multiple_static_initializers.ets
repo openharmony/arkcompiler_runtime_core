@@ -13,20 +13,20 @@
  * limitations under the License.
  */
 
+{% for c in [2, 10] %}
+
 /*---
 desc: >-
-    Among all package modules there can be one to contain a code that performs initialization actions (e.g., setting
-    initial values for variables across all package modules) as described in detail in Compilation Unit Initialization
-    and in Initializer Block
-files: [init3_2.ets]
-tags: [compile-only]
+      Only single static initializer is available per class
+tags: [compile-only, negative]
 ---*/
 
-package p3
-
-export let var1:int;
-static {
-    var1 = 5
+class C {
+{% for i in range(c) %}
+  static v{{i}}: int = 0
+  static {
+    C.v{{i}} += 1
+  }
+{% endfor %}
 }
-
-function foo() {}
+{% endfor %}

@@ -14,9 +14,33 @@
  */
 
 /*---
-desc: Static block cannot be used out of the class or namespace
-tags: [compile-only, negative]
+desc: >-
+      Static initialization is performed before the first execution of one of the following operations
+      - Static initialization of a direct subclass of an entity that is a class.
+tags: [no-warmup]
 ---*/
 
-static {
+let seqstr = ""
+function seq(i: string) {
+  seqstr += ":" + i
+}
+
+class A {
+  static {
+    seq("init A")
+  }
+}
+
+class B extends A { }
+
+class C extends B {
+  static {
+    seq("init C")
+  }
+}
+
+function main() {
+  arktest.assertEQ(seqstr, "")
+  new C()
+  arktest.assertEQ(seqstr, ":init A:init C")
 }

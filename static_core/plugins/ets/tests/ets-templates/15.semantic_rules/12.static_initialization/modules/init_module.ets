@@ -14,19 +14,11 @@
  */
 
 /*---
-desc: >-
-    Among all package modules there can be one to contain a code that performs initialization actions (e.g., setting
-    initial values for variables across all package modules) as described in detail in Compilation Unit Initialization
-    and in Initializer Block
-files: [init4_2.ets]
-tags: [compile-only]
+desc: Module contains variable to verify the initialization order
+tags: [compile-only, not-a-test]
 ---*/
 
-package p4
-
-let var1:int;
-static {
-    var1 = 5
+export function seq(i: string) {
+  seqstr += ":" + i
 }
-
-function foo() {}
+export let seqstr: string = "MOD"
