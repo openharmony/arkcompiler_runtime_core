@@ -20,7 +20,7 @@ parameters:
     enable-es2panda: True
     enable-verifier: True
     es2panda-args: []  # for specifying in CLI
-    es2panda-suite-args: []  # for specifying in test-suite config
+    es2panda-test-suite-args: []  # for specifying in test-suite config
     es2panda-workflow-args:
         - "--arktsconfig=${parameters.arktsconfig}"
         - "--gen-stdlib=false"
