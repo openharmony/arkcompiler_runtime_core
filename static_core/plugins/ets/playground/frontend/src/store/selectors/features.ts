@@ -14,6 +14,6 @@
  */
 
 import { RootState } from '..';
-import { AstMode, IFeatures } from '../../models/features';
+import { AstMode } from '../../models/features';
 
 export const selectAstMode = (state: RootState): AstMode => state.features.astMode;

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,4 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-pytest_plugins = ["tests.fixtures.app", "tests.fixtures.runner"]
+import pytest
+from src.arkts_playground.deps.runner import Runner
+
+
+@pytest.fixture
+def fake_saved_stsfile(monkeypatch) -> str:
+    async def _fake_save_code(_tempdir, _code):
+        return "/tmp/fixed_ast"
+
+    monkeypatch.setattr(Runner, "_save_code", staticmethod(_fake_save_code))
+    return "/tmp/fixed_ast"

@@ -152,9 +152,10 @@ class Runner:
         """Parse ETS code and return AST dump strictly from stdout."""
         opts = list(options) if options else []
         async with aiofiles.tempfile.TemporaryDirectory(prefix="arkts_playground") as tempdir:
-            stsfile_name = await self._save_code(tempdir, code)
-            cmd = ["--dump-ast", "--extension=ets", stsfile_name]
-            stdout, stderr, retcode = await self._execute_cmd(self.binary.es2panda, *(opts + cmd))
+            stsfile_path = await self._save_code(tempdir, code)
+            base = ["--dump-ast", "--extension=ets", f"--output={stsfile_path}.abc"]
+            args = base + opts + [stsfile_path]
+            stdout, stderr, retcode = await self._execute_cmd(self.binary.es2panda, *args)
 
             if retcode == -11:
                 stderr += "ast: Segmentation fault"

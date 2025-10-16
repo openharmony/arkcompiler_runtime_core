@@ -38,7 +38,7 @@ const getIcon = (type: TNotificationType): JSX.Element => {
             );
         default:
             console.error('ERROR: unknown notification type - ', type);
-            return null;
+            return <></>;
     }
 };
 

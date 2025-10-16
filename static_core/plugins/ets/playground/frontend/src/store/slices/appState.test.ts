@@ -22,7 +22,7 @@ describe('appStateSlice reducer', () => {
         disasm: false,
         verifier: true,
         astView: false,
-        runtimeVerify: false,
+        runtimeVerify: true,
         primaryColor: '#e32b49',
         versions: {
             arktsVersion: '',
