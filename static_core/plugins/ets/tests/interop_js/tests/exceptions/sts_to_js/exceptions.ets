@@ -26,8 +26,7 @@ function throwErrorWithCauseFromSts(): void {
 }
 
 class CustomError extends Error {
-    code: number;
-    constructor(message: string, code: number) {
+    constructor(message: string, code: int) {
         super(message);
         this.name = "CustomError";
         this.code = code;

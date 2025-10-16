@@ -214,7 +214,7 @@ ani_error CreateBusinessError(ani_env *env, int code, const std::string &message
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     ANI_FATAL_IF_ERROR(env->Object_New(cls, ctor, &errObj));
     if (code != 0) {
-        ANI_FATAL_IF_ERROR(env->Object_SetFieldByName_Int(errObj, "code", static_cast<ani_int>(code)));
+        ANI_FATAL_IF_ERROR(env->Object_SetPropertyByName_Int(errObj, "code", static_cast<ani_int>(code)));
     }
     ANI_FATAL_IF_ERROR(
         env->Object_SetPropertyByName_Ref(errObj, "message", static_cast<ani_ref>(CreateStringUtf8(env, message))));
