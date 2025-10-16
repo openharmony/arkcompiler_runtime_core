@@ -170,7 +170,6 @@ set(SOURCES
     coroutines/stackful_coroutine_manager.cpp
     coroutines/stackful_coroutine_worker.cpp
     coroutines/stackful_coroutine_state_info.cpp
-    coroutines/native_stack_allocator/native_stack_allocator.cpp
     coroutines/coroutine_events.cpp
     coroutines/coroutine_stats.cpp
     coroutines/priority_queue.cpp
@@ -852,11 +851,6 @@ add_gtests(
 add_gtests(
     arkruntime_memory_mem_leak_test
     tests/mem_leak_test.cpp
-)
-
-add_gtests(
-    arkruntime_native_stack_allocator_test
-    tests/native_stack_allocator_test.cpp
 )
 
 add_gtests(

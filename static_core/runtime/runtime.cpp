@@ -75,7 +75,6 @@
 #include "libarkbase/trace/trace.h"
 #include "runtime/tests/intrusive-tests/intrusive_test_option.h"
 #include "runtime/jit/profiling_saver.h"
-#include "runtime/coroutines/native_stack_allocator/native_stack_allocator.h"
 #ifdef ARK_HYBRID
 #include "base_runtime.h"
 #endif
