@@ -423,7 +423,14 @@ EtsMethod *EtsClass::GetDirectMethod(bool isStatic, const char *name, bool *outI
 
 uint32_t EtsClass::GetMethodsNum()
 {
-    return GetMethods().size();
+    // Atomic with relaxed order reason: get the latest value
+    uint32_t currentNum = methodsNum_.load(std::memory_order_relaxed);
+    if (currentNum == 0) {
+        uint32_t newNum = GetMethods().size();
+        methodsNum_.compare_exchange_strong(currentNum, newNum);
+        return newNum;
+    }
+    return currentNum;
 }
 
 EtsMethod *EtsClass::GetMethodByIndex(uint32_t ind)
