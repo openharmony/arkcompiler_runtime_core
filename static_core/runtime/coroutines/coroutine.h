@@ -73,12 +73,8 @@ public:
     /// the type of work that a coroutine performs
     enum class Type { MUTATOR, SCHEDULER, FINALIZER };
 
-    /**
-     * Needed for object locking
-     * Now 10,000 coroutines is the maximum number of coroutines that can exist at the moment.
-     * So MAX_COROUTINE_ID is the value of the smallest power of two that is greater than 10,000.
-     */
-    static constexpr ThreadId MAX_COROUTINE_ID = 1U << 14U;
+    /// Needed for object locking
+    static constexpr ThreadId MAX_COROUTINE_ID = MarkWord::LIGHT_LOCK_THREADID_MAX_COUNT;
 
     /// A helper struct that aggregates all EP related data for a coroutine with a managed EP
     struct ManagedEntrypointInfo {

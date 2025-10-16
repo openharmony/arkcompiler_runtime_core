@@ -33,13 +33,15 @@ namespace ark {
 
 uint8_t *StackfulCoroutineManager::AllocCoroutineStack()
 {
-    return nativeStackAllocator_.AcquireStack();
+    Pool stackPool = PoolManager::GetMmapMemPool()->AllocPool<OSPagesAllocPolicy::NO_POLICY>(
+        coroStackSizeBytes_, SpaceType::SPACE_TYPE_NATIVE_STACKS, AllocatorType::NATIVE_STACKS_ALLOCATOR);
+    return static_cast<uint8_t *>(stackPool.GetMem());
 }
 
 void StackfulCoroutineManager::FreeCoroutineStack(uint8_t *stack)
 {
     if (stack != nullptr) {
-        nativeStackAllocator_.ReleaseStack(stack);
+        PoolManager::GetMmapMemPool()->FreePool(stack, coroStackSizeBytes_);
     }
 }
 
@@ -270,7 +272,6 @@ void StackfulCoroutineManager::InitializeScheduler(Runtime *runtime, PandaVM *vm
     CalculateUserCoroutinesLimits(userCoroutineCountLimit_,
                                   Runtime::GetCurrent()->GetOptions().GetCoroutinesUserLimit());
 
-    nativeStackAllocator_.Initialize(coroStackSizeBytes_);
     ASSERT(commonWorkersCount_ + exclusiveWorkersLimit_ <= AffinityMask::MAX_WORKERS_COUNT);
     InitializeWorkerIdAllocator();
     {
@@ -296,7 +297,6 @@ void StackfulCoroutineManager::Finalize()
         CoroutineManager::DestroyEntrypointfulCoroutine(co);
     }
     coroutinePool_.clear();
-    nativeStackAllocator_.Finalize();
 }
 
 void StackfulCoroutineManager::AddToRegistry(Coroutine *co)

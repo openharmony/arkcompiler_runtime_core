@@ -181,7 +181,6 @@ _libarkruntime_calculated_sources = [
   "coroutines/coroutine_stats.cpp",
   "coroutines/coroutine_worker.cpp",
   "coroutines/coroutine_worker_group.cpp",
-  "coroutines/native_stack_allocator/native_stack_allocator.cpp",
   "coroutines/priority_queue.cpp",
   "coroutines/stackful_coroutine.cpp",
   "coroutines/stackful_coroutine_manager.cpp",

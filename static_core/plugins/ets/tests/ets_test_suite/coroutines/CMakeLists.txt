@@ -247,25 +247,12 @@ if (NOT PANDA_TARGET_ARM32)
                             MODE "INT" "JIT"
     )
 
-
-    # limit with 10'000 coroutine can be faced only on 64bit arch
-    if (NOT PANDA_ENABLE_THREAD_SANITIZER AND NOT PANDA_ENABLE_ADDRESS_SANITIZER)
-        add_ets_coroutines_test(FILE launch_10000.ets
-                                SKIP_ARM32_COMPILER
-                                LIST_UNHANDLED
-                                IMPL "STACKFUL"
-                                OPTION_SETS_STACKFUL "DEFAULT"
-                                WORKERS "AUTO" "ONE"
-                                MODE "INT" "JIT" "AOT"
-        )
-    endif()
-
     # NOTE(26403) Profilesaver is turned off because of data race
     # NOTE(30627) Temporarily disabled due failures under TSan
     if (NOT PANDA_ENABLE_THREAD_SANITIZER)
         add_ets_coroutines_test(FILE launch_oom.ets
                                 SKIP_ARM32_COMPILER
-                                OPTIONS "--gc-type=epsilon" "--profilesaver-enabled=false" "--incremental-profilesaver-enabled=false" "--coroutines-stack-mem-limit=268435456"
+                                OPTIONS "--gc-type=epsilon" "--profilesaver-enabled=false" "--incremental-profilesaver-enabled=false"
                                 IMPL "STACKFUL"
                                 OPTION_SETS_STACKFUL "POOL"
                                 WORKERS "ONE"
@@ -276,7 +263,7 @@ if (NOT PANDA_TARGET_ARM32)
     # NOTE(26403) Profilesaver is turned off because of data race
     add_ets_coroutines_test(FILE launch_oom.ets
                             SKIP_ARM32_COMPILER
-                            OPTIONS "--gc-type=epsilon" "--profilesaver-enabled=false" "--incremental-profilesaver-enabled=false" "--coroutines-stack-mem-limit=268435456"
+                            OPTIONS "--gc-type=epsilon" "--profilesaver-enabled=false" "--incremental-profilesaver-enabled=false"
                             IMPL "STACKFUL"
                             OPTION_SETS_STACKFUL "DEFAULT"
                             WORKERS "ONE"

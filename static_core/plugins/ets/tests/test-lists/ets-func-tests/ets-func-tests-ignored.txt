@@ -438,6 +438,3 @@ escompat/JsonReplacerTest.ets
 std/core/regexp/JsonStringifyRegExpExecArrayTest.ets
 std/core/std_core_typeduarrays_methods__BigUint64Array.ets
 regression/15278_0.ets
-
-#30585
-std/core/EAWorker_out_of_coro_creation.ets

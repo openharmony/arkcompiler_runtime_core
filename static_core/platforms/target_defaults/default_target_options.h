@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,10 +24,6 @@ namespace ark::default_target_options {
 uint32_t GetGcWorkersCount(const std::map<std::string, uint32_t> &modelMap);
 
 uint32_t GetTaskmanagerWorkersCount(const std::map<std::string, uint32_t> &modelMap);
-
-uint64_t GetInternalMemorySizeLimit(const std::map<std::string, uint64_t> &modelMap);
-
-uint64_t GetCoroutinesStackMemLimit(const std::map<std::string, uint64_t> &modelMap);
 
 }  // namespace ark::default_target_options
 

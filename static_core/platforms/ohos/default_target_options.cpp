@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,14 +21,9 @@
 
 namespace ark::default_target_options {
 
-template <class ModelMap>
-static typename ModelMap::mapped_type GetHardwareSpecificValue(const ModelMap &modelMap)
+static uint32_t GetHardawareSpecificIntValue(const std::map<std::string, uint32_t> &modelMap)
 {
-#ifdef PANDA_TARGET_ARM32
-    std::string model = "arm32";
-#else
     std::string model = ark::ohos_device::GetHardwareModelString();
-#endif
     if (modelMap.count(model) == 0) {
         return modelMap.at("default");
     }
@@ -37,22 +32,11 @@ static typename ModelMap::mapped_type GetHardwareSpecificValue(const ModelMap &m
 
 uint32_t GetGcWorkersCount(const std::map<std::string, uint32_t> &modelMap)
 {
-    return GetHardwareSpecificValue(modelMap);
+    return GetHardawareSpecificIntValue(modelMap);
 }
 
 uint32_t GetTaskmanagerWorkersCount(const std::map<std::string, uint32_t> &modelMap)
 {
-    return GetHardwareSpecificValue(modelMap);
+    return GetHardawareSpecificIntValue(modelMap);
 }
-
-uint64_t GetInternalMemorySizeLimit(const std::map<std::string, uint64_t> &modelMap)
-{
-    return GetHardwareSpecificValue(modelMap);
-}
-
-uint64_t GetCoroutinesStackMemLimit(const std::map<std::string, uint64_t> &modelMap)
-{
-    return GetHardwareSpecificValue(modelMap);
-}
-
 }  // namespace ark::default_target_options
