@@ -85,47 +85,84 @@
 // CC-OFFNXT(C_RULE_ID_DEFINE_LENGTH_LIMIT) solid logic
 // CC-OFFNXT(G.PRE.02) code readability
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define BASE_CAST_CHECK(CAST_TYPE, CHECK_METHOD)                       \
-    static inline CAST_TYPE *Cast(BaseObject *object)                  \
-    {                                                                  \
-        /* CC-OFFNXT(G.PRE.02) code readability */                     \
-        if (!object->GetBaseClass()->CHECK_METHOD()) {                 \
-            std::abort();                                              \
-        }                                                              \
-        /* CC-OFFNXT(G.PRE.05) C_RULE_ID_KEYWORD_IN_DEFINE */          \
-        /* CC-OFFNXT(G.PRE.02) code readability */                     \
-        return static_cast<CAST_TYPE *>(object);                       \
-    }                                                                  \
-    static inline const CAST_TYPE *ConstCast(const BaseObject *object) \
-    {                                                                  \
-        /* CC-OFFNXT(G.PRE.02) code readability */                     \
-        if (!object->GetBaseClass()->CHECK_METHOD()) {                 \
-            std::abort();                                              \
-        }                                                              \
-        /* CC-OFFNXT(G.PRE.05) C_RULE_ID_KEYWORD_IN_DEFINE */          \
-        /* CC-OFFNXT(G.PRE.02) code readability */                     \
-        return static_cast<const CAST_TYPE *>(object);                 \
+#define BASE_CAST_CHECK(CAST_TYPE, CHECK_METHOD)                                         \
+    static inline CAST_TYPE *Cast(BaseObject *object)                                    \
+    {                                                                                    \
+        /* CC-OFFNXT(G.PRE.02) code readability */                                       \
+        if (!object->GetBaseClass()->CHECK_METHOD()) {                                   \
+            std::abort();                                                                \
+        }                                                                                \
+        /* CC-OFFNXT(G.PRE.05) C_RULE_ID_KEYWORD_IN_DEFINE */                            \
+        /* CC-OFFNXT(G.PRE.02) code readability */                                       \
+        return static_cast<CAST_TYPE *>(object);                                         \
+    }                                                                                    \
+    /* CC-OFFNXT(G.PRE.02) code readability */                                           \
+    static inline CAST_TYPE *Cast(BaseObject *object, BaseClass *klass)                  \
+    {                                                                                    \
+        /* CC-OFFNXT(G.PRE.02) code readability */                                       \
+        if (!klass->CHECK_METHOD()) {                                                    \
+            std::abort();                                                                \
+        }                                                                                \
+        /* CC-OFFNXT(G.PRE.05) C_RULE_ID_KEYWORD_IN_DEFINE */                            \
+        /* CC-OFFNXT(G.PRE.02) code readability */                                       \
+        return static_cast<CAST_TYPE *>(object);                                         \
+    }                                                                                    \
+    static inline const CAST_TYPE *ConstCast(const BaseObject *object)                   \
+    {                                                                                    \
+        /* CC-OFFNXT(G.PRE.02) code readability */                                       \
+        if (!object->GetBaseClass()->CHECK_METHOD()) {                                   \
+            std::abort();                                                                \
+        }                                                                                \
+        /* CC-OFFNXT(G.PRE.05) C_RULE_ID_KEYWORD_IN_DEFINE */                            \
+        /* CC-OFFNXT(G.PRE.02) code readability */                                       \
+        return static_cast<const CAST_TYPE *>(object);                                   \
+    }                                                                                    \
+    static inline const CAST_TYPE *ConstCast(const BaseObject *object, BaseClass *klass) \
+    {                                                                                    \
+        /* CC-OFFNXT(G.PRE.02) code readability */                                       \
+        if (!klass->CHECK_METHOD()) {                                                    \
+            std::abort();                                                                \
+        }                                                                                \
+        /* CC-OFFNXT(G.PRE.05) C_RULE_ID_KEYWORD_IN_DEFINE */                            \
+        /* CC-OFFNXT(G.PRE.02) code readability */                                       \
+        return static_cast<const CAST_TYPE *>(object);                                   \
     }
 #else
 // CC-OFFNXT(C_RULE_ID_DEFINE_LENGTH_LIMIT) solid logic
 // CC-OFFNXT(G.PRE.02) code readability
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define BASE_CAST_CHECK(CAST_TYPE, CHECK_METHOD)                       \
-    static inline CAST_TYPE *Cast(BaseObject *object)                  \
-    {                                                                  \
-        /* CC-OFFNXT(G.PRE.02) code readability */                     \
-        DCHECK_CC(object->CHECK_METHOD());                             \
-        /* CC-OFFNXT(G.PRE.05) C_RULE_ID_KEYWORD_IN_DEFINE */          \
-        /* CC-OFFNXT(G.PRE.02) code readability */                     \
-        return static_cast<CAST_TYPE *>(object);                       \
-    }                                                                  \
-    static const inline CAST_TYPE *ConstCast(const BaseObject *object) \
-    {                                                                  \
-        /* CC-OFFNXT(G.PRE.02) code readability */                     \
-        DCHECK_CC(object->CHECK_METHOD());                             \
-        /* CC-OFFNXT(G.PRE.05) C_RULE_ID_KEYWORD_IN_DEFINE */          \
-        /* CC-OFFNXT(G.PRE.02) code readability */                     \
-        return static_cast<const CAST_TYPE *>(object);                 \
+#define BASE_CAST_CHECK(CAST_TYPE, CHECK_METHOD)                                                          \
+    static inline CAST_TYPE *Cast(BaseObject *object)                                                     \
+    {                                                                                                     \
+        /* CC-OFFNXT(G.PRE.02) code readability */                                                        \
+        DCHECK_CC(object->CHECK_METHOD());                                                                \
+        /* CC-OFFNXT(G.PRE.05) C_RULE_ID_KEYWORD_IN_DEFINE */                                             \
+        /* CC-OFFNXT(G.PRE.02) code readability */                                                        \
+        return static_cast<CAST_TYPE *>(object);                                                          \
+    }                                                                                                     \
+    static const inline CAST_TYPE *ConstCast(const BaseObject *object)                                    \
+    {                                                                                                     \
+        /* CC-OFFNXT(G.PRE.02) code readability */                                                        \
+        DCHECK_CC(object->CHECK_METHOD());                                                                \
+        /* CC-OFFNXT(G.PRE.05) C_RULE_ID_KEYWORD_IN_DEFINE */                                             \
+        /* CC-OFFNXT(G.PRE.02) code readability */                                                        \
+        return static_cast<const CAST_TYPE *>(object);                                                    \
+    }                                                                                                     \
+    static inline CAST_TYPE *Cast(BaseObject *object, [[maybe_unused]] BaseClass *klass)                  \
+    {                                                                                                     \
+        /* CC-OFFNXT(G.PRE.02) code readability */                                                        \
+        DCHECK_CC(klass->CHECK_METHOD());                                                                 \
+        /* CC-OFFNXT(G.PRE.05) C_RULE_ID_KEYWORD_IN_DEFINE */                                             \
+        /* CC-OFFNXT(G.PRE.02) code readability */                                                        \
+        return static_cast<CAST_TYPE *>(object);                                                          \
+    }                                                                                                     \
+    static const inline CAST_TYPE *ConstCast(const BaseObject *object, [[maybe_unused]] BaseClass *klass) \
+    {                                                                                                     \
+        /* CC-OFFNXT(G.PRE.02) code readability */                                                        \
+        DCHECK_CC(klass->CHECK_METHOD());                                                                 \
+        /* CC-OFFNXT(G.PRE.05) C_RULE_ID_KEYWORD_IN_DEFINE */                                             \
+        /* CC-OFFNXT(G.PRE.02) code readability */                                                        \
+        return static_cast<const CAST_TYPE *>(object);                                                    \
     }
 #endif
 #endif  // COMMON_INTERFACES_OBJECTS_UTILS_FIELD_MACRO_H
