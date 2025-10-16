@@ -222,6 +222,7 @@ static constexpr std::string_view ARRAY                                = "Lescom
 static constexpr std::string_view ARRAY_AS_LIST_INT                    = "Lstd/containers/containers/ArrayAsListInt;";
 static constexpr std::string_view REG_EXP_EXEC_ARRAY                   = "Lstd/core/RegExpExecArray;";
 static constexpr std::string_view JSON_REPLACER                        = "Lescompat/JsonReplacer;";
+static constexpr std::string_view JSON_ELEMENT_SERIALIZABLE            = "Lstd/core/jsonx/JsonElementSerializable;";
 
 // ANI annotation classes
 static constexpr std::string_view ANI_UNSAFE_QUICK                     = "Lstd/annotations/ani/unsafe/Quick;";

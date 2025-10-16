@@ -52,23 +52,6 @@ void JSONStringifier::AppendJSONPrimitive(const PandaString &value, bool hasCont
     }
 }
 
-void JSONStringifier::AppendJSONPointPrimitive(const PandaString &value, bool hasContent)
-{
-    if (hasContent) {
-        buffer_ += ",";
-    }
-
-    buffer_ += "\"";
-    buffer_ += key_;
-    buffer_ += "\":";
-
-    if ((value == "NaN") || (value == "Infinity") || (value == "-Infinity")) {
-        buffer_ += "null";
-    } else {
-        buffer_ += value;
-    }
-}
-
 bool JSONStringifier::SerializeFields(EtsHandle<EtsObject> &value)
 {
     ASSERT(value.GetPtr() != nullptr);
@@ -492,13 +475,6 @@ PandaString JSONStringifier::ResolveDisplayName(const EtsField *field)
     auto fieldNameData = field->GetCoreType()->GetName();
     auto fieldNameLength = fieldNameData.utf16Length;
     std::string_view fieldName(utf::Mutf8AsCString(fieldNameData.data), fieldNameLength);
-    if (fieldName.rfind(PROPERTY, 0) == 0) {
-        ASSERT(fieldNameLength > PROPERTY_PREFIX_LENGTH);
-        return PandaString(reinterpret_cast<const char *>(
-                               fieldNameData.data +  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                               PROPERTY_PREFIX_LENGTH),
-                           fieldNameLength - PROPERTY_PREFIX_LENGTH);
-    }
     return PandaString(reinterpret_cast<const char *>(fieldNameData.data), fieldNameLength);
 }
 
@@ -527,7 +503,9 @@ bool JSONStringifier::SerializeObject(EtsHandle<EtsObject> &value)
     auto platformTypes = PlatformTypes(coro);
     bool isSuccessful = false;
 
-    auto desc = value->GetClass()->GetDescriptor();
+    auto *valueCls = value->GetClass();
+    auto *valueRtCls = valueCls->GetRuntimeClass();
+    auto desc = valueCls->GetDescriptor();
     if (desc == panda_file_items::class_descriptors::BOX_BOOLEAN) {
         buffer_ += HandleNumeric<EtsBoolean>(value);
         isSuccessful = true;
@@ -585,13 +563,13 @@ bool JSONStringifier::SerializeObject(EtsHandle<EtsObject> &value)
             coro->ManagedCodeEnd();
             {
                 ScopedManagedCodeThread v(coro);
-                auto result = EtsHandle<EtsObject>(coro, value->GetFieldObject(value->GetClass()->GetFieldByIndex(1)));
+                auto result = EtsHandle<EtsObject>(coro, value->GetFieldObject(valueCls->GetFieldByIndex(1)));
                 isSuccessful = SerializeJSONObjectArray(result);
             }
             coro->ManagedCodeBegin();
         } else if (value->IsInstanceOf(platformTypes->escompatJsonReplacer)) {
             PandaVector<Value> args {Value(value->GetCoreType())};
-            auto jsonReplacerMethod = value->GetClass()->GetInstanceMethod("jsonReplacer", nullptr)->GetPandaMethod();
+            auto jsonReplacerMethod = valueCls->GetInstanceMethod("jsonReplacer", nullptr)->GetPandaMethod();
             auto ret = jsonReplacerMethod->Invoke(coro, args.data());
             if (UNLIKELY(coro->HasPendingException())) {
                 return false;
@@ -603,11 +581,15 @@ bool JSONStringifier::SerializeObject(EtsHandle<EtsObject> &value)
                 isSuccessful = SerializeJSONRecord(retobj);
             }
             coro->ManagedCodeBegin();
-        } else if (value->GetClass()->IsFunction()) {
+        } else if (valueCls->IsFunction()) {
             buffer_ += "undefined";
         } else if (value->IsInstanceOf(platformTypes->coreTuple)) {
             isSuccessful = false;
-        } else if (value->GetClass()->IsClass()) {
+        } else if (value->IsInstanceOf(platformTypes->coreBigint)) {
+            isSuccessful = false;
+        } else if (valueRtCls->Implements(platformTypes->coreJsonElementSerializable->GetRuntimeClass())) {
+            isSuccessful = false;
+        } else if (valueCls->IsClass()) {
             coro->ManagedCodeEnd();
             {
                 ScopedManagedCodeThread v(coro);
@@ -615,7 +597,7 @@ bool JSONStringifier::SerializeObject(EtsHandle<EtsObject> &value)
             }
             coro->ManagedCodeBegin();
         } else {
-            LOG(ERROR, ETS) << "Unsupported type: " << value->GetClass()->GetDescriptor();
+            LOG(ERROR, ETS) << "Unsupported type: " << valueCls->GetDescriptor();
             return false;
         }
     }
@@ -626,7 +608,7 @@ bool JSONStringifier::SerializeObject(EtsHandle<EtsObject> &value)
 bool JSONStringifier::HandleField(EtsHandle<EtsObject> &obj, EtsField *etsField, bool &hasContent,
                                   PandaUnorderedSet<PandaString> &keys)
 {
-    if (etsField->IsStatic()) {
+    if (!etsField->IsPublic() || etsField->IsStatic()) {
         return true;
     }
 
